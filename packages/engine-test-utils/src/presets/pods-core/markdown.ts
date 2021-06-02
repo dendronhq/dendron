@@ -1,10 +1,12 @@
 import { DPod } from "@dendronhq/common-all";
 import { tmpDir, vault2Path } from "@dendronhq/common-server";
-import { FileTestUtils } from "../../fileUtils";
-import { TestPresetEntryV4 } from "../../utilsv2";
+import {
+  TestPresetEntryV4,
+  FileTestUtils,
+  AssertUtils,
+} from "@dendronhq/common-test-utils";
 import fs from "fs-extra";
 import path from "path";
-import { AssertUtils } from "../../utils";
 
 const IMPORT = {
   ROOT_WITH_MULT_FOLDERS: new TestPresetEntryV4(

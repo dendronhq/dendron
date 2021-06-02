@@ -1,10 +1,10 @@
 import { DVault } from "@dendronhq/common-all";
 import { DirResult, tmpDir, vault2Path } from "@dendronhq/common-server";
 import {
-  ENGINE_HOOKS,
   NodeTestPresetsV2,
   NoteTestUtilsV4,
 } from "@dendronhq/common-test-utils";
+import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import { describe } from "mocha";
 import path from "path";
 import * as vscode from "vscode";

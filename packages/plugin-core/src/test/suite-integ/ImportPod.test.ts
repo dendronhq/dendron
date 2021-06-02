@@ -1,6 +1,6 @@
 import { DPod } from "@dendronhq/common-all";
 import { writeYAML } from "@dendronhq/common-server";
-import { PODS_CORE } from "@dendronhq/common-test-utils";
+import { PODS_CORE } from "@dendronhq/engine-test-utils";
 import {
   JSONImportPod,
   podClassEntryToPodItemV4,

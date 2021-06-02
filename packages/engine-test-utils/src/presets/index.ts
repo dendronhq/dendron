@@ -1,6 +1,9 @@
 import { DVault, VaultUtils } from "@dendronhq/common-all";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
-import { WorkspaceOpts } from "./engine";
+import { WorkspaceOpts } from "../engine";
+
+export * from "./engine-server";
+export * from "./pods-core";
 
 export enum SETUP_HOOK_KEYS {
   /**
@@ -61,17 +64,4 @@ export async function callSetupHook(
   } else {
     throw Error("not supported key");
   }
-
-  // if (isMultiVault) {
-  //   // replicate all notes in all vaults if multi-vault
-  //   await Promise.all(notes.map(n => {
-  //     return Promise.all(cVaults.map(v => {
-  //       return NoteTestUtilsV4.createNote({
-  //         wsRoot,
-  //         ...n,
-  //         vault: v
-  //       });
-  //     }));
-  //   }))
-  // }
 }

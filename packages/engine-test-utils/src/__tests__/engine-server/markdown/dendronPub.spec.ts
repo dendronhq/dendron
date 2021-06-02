@@ -1,9 +1,6 @@
 import { DEngineClient } from "@dendronhq/common-all";
-import {
-  AssertUtils,
-  ENGINE_HOOKS,
-  NoteTestUtilsV4,
-} from "@dendronhq/common-test-utils";
+import { AssertUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
+import { ENGINE_HOOKS } from "../../../presets";
 import {
   DConfig,
   DendronASTData,

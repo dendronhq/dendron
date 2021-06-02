@@ -1,8 +1,5 @@
-import {
-  AssertUtils,
-  ENGINE_HOOKS,
-  TestPresetEntryV4,
-} from "@dendronhq/common-test-utils";
+import { AssertUtils, TestPresetEntryV4 } from "@dendronhq/common-test-utils";
+import { ENGINE_HOOKS } from "../../../presets";
 import {
   DendronASTData,
   DendronASTDest,

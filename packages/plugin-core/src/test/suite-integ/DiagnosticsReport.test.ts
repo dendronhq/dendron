@@ -1,5 +1,6 @@
 import { env } from "@dendronhq/common-all";
-import { AssertUtils, ENGINE_HOOKS } from "@dendronhq/common-test-utils";
+import { AssertUtils } from "@dendronhq/common-test-utils";
+import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
 import path from "path";
 import * as vscode from "vscode";

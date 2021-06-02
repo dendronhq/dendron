@@ -1,8 +1,10 @@
 import { vault2Path } from "@dendronhq/common-server";
-import { FileTestUtils } from "../..";
-import { NoteTestUtilsV4 } from "../../noteUtils";
-import { AssertUtils } from "../../utils";
-import { TestPresetEntryV4 } from "../../utilsv2";
+import {
+  TestPresetEntryV4,
+  AssertUtils,
+  FileTestUtils,
+  NoteTestUtilsV4,
+} from "@dendronhq/common-test-utils";
 
 const WILDCARD_LINK_V4 = new TestPresetEntryV4(
   async ({}) => {

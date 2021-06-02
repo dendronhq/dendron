@@ -1,6 +1,6 @@
 import { NoteUtils, VaultUtils } from "@dendronhq/common-all";
 import { tmpDir, vault2Path } from "@dendronhq/common-server";
-import { ENGINE_HOOKS, FileTestUtils } from "@dendronhq/common-test-utils";
+import { FileTestUtils } from "@dendronhq/common-test-utils";
 import {
   MarkdownExportPod,
   MarkdownImportPod,
@@ -10,6 +10,7 @@ import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { runEngineTestV5 } from "../../engine";
+import { ENGINE_HOOKS } from "../../presets";
 import { checkNotInString, checkString } from "../../utils";
 
 describe("markdown publish pod", () => {

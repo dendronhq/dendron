@@ -5,13 +5,16 @@ import {
   SchemaUtils,
 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
+import {
+  FileTestUtils,
+  NoteTestUtilsV4,
+  NOTE_PRESETS_V4,
+  SCHEMA_PRESETS_V4,
+  TestPresetEntryV4,
+} from "@dendronhq/common-test-utils";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { FileTestUtils, NOTE_PRESETS_V4 } from "../..";
-import { NoteTestUtilsV4 } from "../../noteUtils";
-import { TestPresetEntryV4 } from "../../utilsv2";
-import { SCHEMA_PRESETS_V4 } from "../schemas";
 import { setupBasic } from "./utils";
 
 const SCHEMAS = {
@@ -48,13 +51,12 @@ const SCHEMAS = {
   ADD_NEW_MODULE_NO_CHILD: new TestPresetEntryV4(
     async ({ wsRoot, vaults, engine }) => {
       const vault = vaults[0];
-      const schemaModNew = await SCHEMA_PRESETS_V4.SCHEMA_SIMPLE_OTHER_NO_CHILD.create(
-        {
+      const schemaModNew =
+        await SCHEMA_PRESETS_V4.SCHEMA_SIMPLE_OTHER_NO_CHILD.create({
           vault,
           wsRoot,
           noWrite: true,
-        }
-      );
+        });
       await engine.writeSchema(schemaModNew);
 
       return [

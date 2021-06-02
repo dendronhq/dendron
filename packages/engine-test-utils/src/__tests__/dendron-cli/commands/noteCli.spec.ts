@@ -1,5 +1,5 @@
 import { NoteUtils, VaultUtils } from "@dendronhq/common-all";
-import { ENGINE_HOOKS, ENGINE_HOOKS_MULTI } from "@dendronhq/common-test-utils";
+import { ENGINE_HOOKS, ENGINE_HOOKS_MULTI } from "../../../presets";
 import {
   NoteCLICommand,
   NoteCLICommandOpts,

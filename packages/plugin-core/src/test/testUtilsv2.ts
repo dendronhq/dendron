@@ -15,13 +15,13 @@ import {
   EngineOpt,
   EngineTestUtilsV2,
   EngineTestUtilsV3,
-  ENGINE_HOOKS,
   NotePresetsUtils,
   PreSetupHookFunction,
   SetupHookFunction,
   SetupWSOpts,
 } from "@dendronhq/common-test-utils";
 import { DConfig } from "@dendronhq/engine-server";
+import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import assert from "assert";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -223,10 +223,8 @@ export async function setupCodeWorkspaceV2(opts: SetupCodeWorkspaceV2) {
     postSetupHook: async () => {},
   });
   const { preSetupHook, postSetupHook } = copts;
-  const {
-    wsRoot,
-    vaults: vaultsWithFullPaths,
-  } = await EngineTestUtilsV2.setupWS(opts);
+  const { wsRoot, vaults: vaultsWithFullPaths } =
+    await EngineTestUtilsV2.setupWS(opts);
   let setupWsOverride = copts.setupWsOverride as Partial<SetupWorkspaceOpts>;
   setupCodeConfiguration(opts);
   if (opts.vaultDir) {

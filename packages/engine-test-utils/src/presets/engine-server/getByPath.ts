@@ -1,6 +1,8 @@
 import { NoteUtils } from "@dendronhq/common-all";
-import { TestPresetEntryV4 } from "../../utilsv2";
-import { NOTE_PRESETS_V4 } from "../notes";
+import {
+  TestPresetEntryV4,
+  NOTE_PRESETS_V4,
+} from "@dendronhq/common-test-utils";
 
 const SCHEMAS = {};
 const NOTES = {

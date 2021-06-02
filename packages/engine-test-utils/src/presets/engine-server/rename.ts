@@ -1,12 +1,16 @@
 import { NoteChangeEntry, NoteUtils } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
+import {
+  TestPresetEntryV4,
+  FileTestUtils,
+  NOTE_PRESETS_V4,
+  NOTE_BODY_PRESETS_V4,
+  NoteTestUtilsV4,
+  AssertUtils,
+} from "@dendronhq/common-test-utils";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { AssertUtils, NoteTestUtilsV4 } from "../..";
-import { FileTestUtils } from "../../fileUtils";
-import { TestPresetEntryV4 } from "../../utilsv2";
-import { NOTE_BODY_PRESETS_V4, NOTE_PRESETS_V4 } from "../notes";
 
 const findCreated = (changed: NoteChangeEntry[]) => {
   const created = _.find(changed, { status: "create" });

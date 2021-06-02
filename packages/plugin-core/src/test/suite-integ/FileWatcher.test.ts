@@ -1,9 +1,6 @@
 import { NoteUtils } from "@dendronhq/common-all";
-import {
-  AssertUtils,
-  ENGINE_HOOKS_MULTI,
-  NoteTestUtilsV4,
-} from "@dendronhq/common-test-utils";
+import { AssertUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
+import { ENGINE_HOOKS_MULTI } from "@dendronhq/engine-test-utils";
 import { describe } from "mocha";
 import path from "path";
 import * as vscode from "vscode";

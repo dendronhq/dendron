@@ -1,5 +1,5 @@
 import { vault2Path } from "@dendronhq/common-server";
-import { ENGINE_HOOKS } from "@dendronhq/common-test-utils";
+import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -32,7 +32,9 @@ suite("ReloadIndex", function () {
         ];
         rootFiles.map((ent) => fs.removeSync(ent));
         await new ReloadIndexCommand().run();
-        expect(_.every(rootFiles.map((ent) => fs.existsSync(ent)))).toBeTruthy();
+        expect(
+          _.every(rootFiles.map((ent) => fs.existsSync(ent)))
+        ).toBeTruthy();
         done();
       },
     });
@@ -53,9 +55,11 @@ suite("ReloadIndex", function () {
         fs.appendFileSync(rootFiles[0], "bond", { encoding: "utf8" });
         fs.appendFileSync(rootFiles[1], "# bond", { encoding: "utf8" });
         await new ReloadIndexCommand().run();
-        expect(_.every(
-          rootFiles.map((ent) => fs.readFileSync(ent).indexOf("bond") >= 0)
-        )).toBeTruthy();
+        expect(
+          _.every(
+            rootFiles.map((ent) => fs.readFileSync(ent).indexOf("bond") >= 0)
+          )
+        ).toBeTruthy();
         done();
       },
     });

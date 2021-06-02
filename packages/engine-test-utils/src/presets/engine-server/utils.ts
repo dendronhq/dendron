@@ -1,9 +1,11 @@
 import { SchemaUtils } from "@dendronhq/common-all";
+import {
+  PreSetupHookFunction,
+  NOTE_PRESETS_V4,
+  SCHEMA_PRESETS_V4,
+  NoteTestUtilsV4,
+} from "@dendronhq/common-test-utils";
 import _ from "lodash";
-import { NoteTestUtilsV4 } from "../../noteUtils";
-import { PreSetupHookFunction } from "../../types";
-import { NOTE_PRESETS_V4 } from "../notes";
-import { SCHEMA_PRESETS_V4 } from "../schemas";
 
 /**
  * Notes created:
@@ -181,88 +183,85 @@ export const setupSchemaPreseet: PreSetupHookFunction = async (opts) => {
   });
 };
 
-export const setupSchemaPresetWithNamespaceTemplateBase: PreSetupHookFunction = async (
-  opts
-) => {
-  await setupBasic(opts);
-  const { wsRoot, vaults } = opts;
-  const vault1 = vaults[0];
-  const vault2 = vaults[1];
-  NoteTestUtilsV4.createSchema({
-    fname: "journal",
-    wsRoot,
-    vault: vault1,
-    modifier: (schema) => {
-      const schemas = [
-        SchemaUtils.create({
-          id: "daily",
-          parent: "root",
-          children: ["journal"],
-          vault: vault1,
-        }),
-        SchemaUtils.create({
-          id: "journal",
-          children: ["year"],
-          vault: vault1,
-        }),
-        SchemaUtils.create({
-          id: "year",
-          pattern: "[0-2][0-9][0-9][0-9]",
-          children: ["month"],
-          vault: vault1,
-        }),
-        SchemaUtils.create({
-          id: "month",
-          pattern: "[0-9][0-9]",
-          children: ["day"],
-          vault: vault1,
-        }),
-        SchemaUtils.create({
-          id: "day",
-          pattern: "[0-9][0-9]",
-          namespace: true,
-          template: {
-            id: "journal.template",
-            type: "note",
-          },
-          vault: vault2,
-        }),
-      ];
-      schemas.map((s) => {
-        schema.schemas[s.id] = s;
-      });
-      return schema;
-    },
-  });
-  await NoteTestUtilsV4.createNote({
-    wsRoot,
-    body: "Journal",
-    fname: "daily",
-    vault: vault2,
-  });
-  await NoteTestUtilsV4.createNote({
-    wsRoot,
-    body: "Template text",
-    fname: "journal.template",
-    vault: vault2,
-  });
-};
+export const setupSchemaPresetWithNamespaceTemplateBase: PreSetupHookFunction =
+  async (opts) => {
+    await setupBasic(opts);
+    const { wsRoot, vaults } = opts;
+    const vault1 = vaults[0];
+    const vault2 = vaults[1];
+    NoteTestUtilsV4.createSchema({
+      fname: "journal",
+      wsRoot,
+      vault: vault1,
+      modifier: (schema) => {
+        const schemas = [
+          SchemaUtils.create({
+            id: "daily",
+            parent: "root",
+            children: ["journal"],
+            vault: vault1,
+          }),
+          SchemaUtils.create({
+            id: "journal",
+            children: ["year"],
+            vault: vault1,
+          }),
+          SchemaUtils.create({
+            id: "year",
+            pattern: "[0-2][0-9][0-9][0-9]",
+            children: ["month"],
+            vault: vault1,
+          }),
+          SchemaUtils.create({
+            id: "month",
+            pattern: "[0-9][0-9]",
+            children: ["day"],
+            vault: vault1,
+          }),
+          SchemaUtils.create({
+            id: "day",
+            pattern: "[0-9][0-9]",
+            namespace: true,
+            template: {
+              id: "journal.template",
+              type: "note",
+            },
+            vault: vault2,
+          }),
+        ];
+        schemas.map((s) => {
+          schema.schemas[s.id] = s;
+        });
+        return schema;
+      },
+    });
+    await NoteTestUtilsV4.createNote({
+      wsRoot,
+      body: "Journal",
+      fname: "daily",
+      vault: vault2,
+    });
+    await NoteTestUtilsV4.createNote({
+      wsRoot,
+      body: "Template text",
+      fname: "journal.template",
+      vault: vault2,
+    });
+  };
 
-export const setupSchemaPresetWithNamespaceTemplateMulti: PreSetupHookFunction = async (
-  opts
-) => {
-  return setupSchemaPresetWithNamespaceTemplateBase(opts);
-};
+export const setupSchemaPresetWithNamespaceTemplateMulti: PreSetupHookFunction =
+  async (opts) => {
+    return setupSchemaPresetWithNamespaceTemplateBase(opts);
+  };
 
-export const setupSchemaPresetWithNamespaceTemplate: PreSetupHookFunction = async (
-  opts
-) => {
-  const vault = opts.vaults[0];
-  return setupSchemaPresetWithNamespaceTemplateBase({
-    ...opts,
-    vaults: [vault, vault],
-  });
-};
+export const setupSchemaPresetWithNamespaceTemplate: PreSetupHookFunction =
+  async (opts) => {
+    const vault = opts.vaults[0];
+    return setupSchemaPresetWithNamespaceTemplateBase({
+      ...opts,
+      vaults: [vault, vault],
+    });
+  };
 
 export const setupEmpty: PreSetupHookFunction = async ({ vaults, wsRoot }) => {
   const vault = vaults[0];

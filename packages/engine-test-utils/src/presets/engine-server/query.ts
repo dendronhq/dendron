@@ -1,8 +1,10 @@
 import { DNodeUtils, NoteUtils, SchemaUtils } from "@dendronhq/common-all";
+import {
+  TestPresetEntryV4,
+  SCHEMA_PRESETS_V4,
+  NOTE_PRESETS_V4,
+} from "@dendronhq/common-test-utils";
 import _ from "lodash";
-import { TestPresetEntryV4 } from "../../utilsv2";
-import { NOTE_PRESETS_V4 } from "../notes";
-import { SCHEMA_PRESETS_V4 } from "../schemas";
 import { setupBasic } from "./utils";
 
 const SCHEMAS = {

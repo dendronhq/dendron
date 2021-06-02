@@ -1,9 +1,9 @@
 import { NoteUtils } from "@dendronhq/common-all";
 import {
-  ENGINE_HOOKS_MULTI,
   NOTE_PRESETS_V4,
   runJestHarnessV2,
 } from "@dendronhq/common-test-utils";
+import { ENGINE_HOOKS_MULTI } from "@dendronhq/engine-test-utils";
 import _ from "lodash";
 import { describe } from "mocha";
 import * as vscode from "vscode";

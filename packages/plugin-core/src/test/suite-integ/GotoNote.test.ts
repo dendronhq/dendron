@@ -1,10 +1,5 @@
 import { NoteProps, NoteUtils } from "@dendronhq/common-all";
-import {
-  ENGINE_HOOKS,
-  ENGINE_HOOKS_MULTI,
-  NoteTestUtilsV4,
-  NOTE_PRESETS_V4,
-} from "@dendronhq/common-test-utils";
+import { NoteTestUtilsV4, NOTE_PRESETS_V4 } from "@dendronhq/common-test-utils";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -21,6 +16,7 @@ import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 import { describe } from "mocha";
 import { PickerUtilsV2 } from "../../components/lookup/utils";
 import sinon from "sinon";
+import { ENGINE_HOOKS, ENGINE_HOOKS_MULTI } from "@dendronhq/engine-test-utils";
 
 const { ANCHOR_WITH_SPECIAL_CHARS, ANCHOR } = GOTO_NOTE_PRESETS;
 suite("GotoNote", function () {
@@ -112,7 +108,8 @@ suite("GotoNote", function () {
             vault,
           });
           expect(getActiveEditorBasename()).toEqual("bar.ch1.md");
-          const content = VSCodeUtils.getActiveTextEditor()?.document.getText() as string;
+          const content =
+            VSCodeUtils.getActiveTextEditor()?.document.getText() as string;
           expect(content.indexOf("ch1 template") >= 0).toBeTruthy();
           done();
         },
@@ -151,12 +148,11 @@ suite("GotoNote", function () {
       runSingleVaultTest({
         ctx,
         initDirCb: async (vaultDir) => {
-          ({
-            specialCharsHeader,
-          } = await ANCHOR_WITH_SPECIAL_CHARS.preSetupHook({
-            wsRoot: "",
-            vaults: [{ fsPath: vaultDir }],
-          }));
+          ({ specialCharsHeader } =
+            await ANCHOR_WITH_SPECIAL_CHARS.preSetupHook({
+              wsRoot: "",
+              vaults: [{ fsPath: vaultDir }],
+            }));
         },
         onInit: async ({ vault }) => {
           await new GotoNoteCommand().run({

@@ -1,6 +1,8 @@
+import {
+  TestPresetEntryV4,
+  NOTE_PRESETS_V4,
+} from "@dendronhq/common-test-utils";
 import _ from "lodash";
-import { TestPresetEntryV4 } from "../../utilsv2";
-import { NOTE_PRESETS_V4 } from "../notes";
 
 const NOTES = {
   BASIC: new TestPresetEntryV4(

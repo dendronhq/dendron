@@ -1,5 +1,5 @@
 import { vault2Path } from "@dendronhq/common-server";
-import { ENGINE_HOOKS } from "@dendronhq/common-test-utils";
+import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
 import path from "path";
 import * as vscode from "vscode";

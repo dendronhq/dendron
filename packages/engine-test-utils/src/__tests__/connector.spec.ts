@@ -1,7 +1,7 @@
-import { ENGINE_HOOKS } from "@dendronhq/common-test-utils";
 import { EngineConnector } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { createEngineFromServer, runEngineTestV5 } from "../engine";
+import { ENGINE_HOOKS } from "../presets";
 
 describe.skip("connector", () => {
   test("basic: direct init", async () => {

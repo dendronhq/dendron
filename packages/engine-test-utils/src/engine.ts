@@ -11,7 +11,6 @@ import {
   vault2Path,
 } from "@dendronhq/common-server";
 import {
-  ENGINE_HOOKS,
   RunEngineTestFunctionOpts,
   RunEngineTestFunctionV4,
   runJestHarnessV2,
@@ -28,6 +27,7 @@ import _ from "lodash";
 import { GitTestUtils } from "./utils";
 import fs from "fs-extra";
 import path from "path";
+import { ENGINE_HOOKS } from "./presets";
 
 export type AsyncCreateEngineFunction = (
   opts: WorkspaceOpts
@@ -47,7 +47,8 @@ export { DEngineClient as DEngineClient, DVault, WorkspaceOpts };
  * @param opts
  * @returns
  */
-export async function createServer(opts: WorkspaceOpts) {
+// @ts-ignore
+export async function createServer(opts: WorkspaceOpts): any {
   return await new LaunchEngineServerCommand().enrichArgs({
     wsRoot: opts.wsRoot,
   });
@@ -56,7 +57,9 @@ export async function createServer(opts: WorkspaceOpts) {
 /**
  * Create an {@link DendronEngineClient}
  */
-export async function createEngineFromServer(opts: WorkspaceOpts) {
+export async function createEngineFromServer(
+  opts: WorkspaceOpts
+): Promise<any> {
   const { engine } = await createServer(opts);
   await engine.init();
   return engine;

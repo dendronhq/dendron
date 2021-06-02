@@ -1,14 +1,15 @@
-import { ENGINE_HOOKS, FileTestUtils } from "@dendronhq/common-test-utils";
-import { expect } from "../testUtilsv2";
+import { ERROR_STATUS } from "@dendronhq/common-all";
+import { vault2Path } from "@dendronhq/common-server";
+import { FileTestUtils } from "@dendronhq/common-test-utils";
+import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
+import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
 import { PasteFileCommand } from "../../commands/PasteFile";
 import { clipboard, VSCodeUtils } from "../../utils";
+import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
-import { vault2Path } from "@dendronhq/common-server";
-import { ERROR_STATUS } from "@dendronhq/common-all";
-import _ from "lodash";
 
 suite("PasteFile", function () {
   let ctx: vscode.ExtensionContext;
@@ -59,7 +60,7 @@ suite("PasteFile", function () {
         expect(editor.document.getText(new vscode.Range(pos1, pos2))).toEqual(
           `[apples.pdf](${path.join("assets", "apples.pdf")})`
         );
-        done()
+        done();
       },
     });
   });
@@ -84,7 +85,7 @@ suite("PasteFile", function () {
         const dstPath = path.join(
           vault2Path({ vault: note.vault, wsRoot }),
           "assets",
-          cleanFileName,
+          cleanFileName
         );
         expect(fs.existsSync(dstPath)).toBeTruthy();
         expect(fs.readFileSync(dstPath, { encoding: "utf8" })).toEqual("data");

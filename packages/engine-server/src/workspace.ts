@@ -87,15 +87,49 @@ export class WorkspaceService {
 
   async addWorkspace({ workspace }: { workspace: DWorkspace }) {
     const allWorkspaces = this.config.workspaces || {};
-    allWorkspaces[workspace.name] = _.omit(workspace, "name");
+    allWorkspaces[workspace.name] = _.omit(workspace, ["name", "vaults"]);
     const config = this.config;
-
     config.workspaces = allWorkspaces;
+    Promise.all(
+      workspace.vaults.map(async (vault) => {
+        this.addVault({ vault, writeConfig: false });
+      })
+    );
     this.setConfig(config);
+  }
+
+  async addVault({
+    vault,
+    writeConfig,
+  }: {
+    vault: DVault;
+    writeConfig?: boolean;
+  }) {
+    const config = this.config;
+    writeConfig = writeConfig || true;
+    config.vaults.unshift(vault);
+    // update dup note behavior
+    if (!config.site.duplicateNoteBehavior) {
+      config.site.duplicateNoteBehavior = {
+        action: DuplicateNoteAction.USE_VAULT,
+        payload: config.vaults.map((v) => VaultUtils.getName(v)),
+      };
+    } else if (_.isArray(config.site.duplicateNoteBehavior.payload)) {
+      config.site.duplicateNoteBehavior.payload.push(VaultUtils.getName(vault));
+    }
+    if (writeConfig) {
+      await this.setConfig(config);
+    }
   }
 
   /**
    * Create vault files if it does not exist
+   * @returns void
+   *
+   * Effects:
+   *   - updates `dendron.yml` if `noAddToConfig` is not set
+   *   - create directory
+   *   - create root note and root schema
    */
   async createVault({
     vault,
@@ -125,20 +159,7 @@ export class WorkspaceService {
     }
 
     if (!noAddToConfig) {
-      const config = this.config;
-      config.vaults.unshift(vault);
-      // update dup note behavior
-      if (!config.site.duplicateNoteBehavior) {
-        config.site.duplicateNoteBehavior = {
-          action: DuplicateNoteAction.USE_VAULT,
-          payload: config.vaults.map((v) => VaultUtils.getName(v)),
-        };
-      } else if (_.isArray(config.site.duplicateNoteBehavior.payload)) {
-        config.site.duplicateNoteBehavior.payload.push(
-          VaultUtils.getName(vault)
-        );
-      }
-      await this.setConfig(config);
+      await this.addVault({ vault });
     }
     return;
   }

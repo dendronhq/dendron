@@ -163,7 +163,7 @@ describe("engine, notes/multi/", () => {
         })
       )("%p", async (_key, TestCase) => {
         const { testFunc, ...opts } = TestCase;
-        await runEngineTestV4(testFunc, { ...opts, createEngine, expect });
+        await runEngineTestV5(testFunc, { ...opts, createEngine, expect });
       });
     });
   });

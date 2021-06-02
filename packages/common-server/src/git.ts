@@ -165,6 +165,7 @@ export class GitUtils {
       return {
         workspace: {
           name: workspace,
+          vaults,
           remote: {
             type: "git",
             url: repoUrl,

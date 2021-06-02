@@ -70,7 +70,8 @@
             "**/node_modules": true,
             "**/bower_components": true,
             "**/*.code-search": true,
-            "CHANGELOG.md": true
+            "CHANGELOG.md": true,
+            "*.d.ts": true,
         },
         "files.watcherExclude": {
             "**/.git/objects/**": true,

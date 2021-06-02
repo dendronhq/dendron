@@ -165,16 +165,22 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
         progress.report({
           message: "adding vault",
         });
-        await _.reduce(
-          vaults,
-          async (resp: any, vault: DVault) => {
-            await resp;
-            return this.addVaultToWorkspace(vault);
-          },
-          Promise.resolve()
-        );
+        const wsRoot = DendronWorkspace.wsRoot();
+        const wsService = new WorkspaceService({ wsRoot });
+
         if (workspace) {
+          await wsService.addWorkspace({ workspace });
           await this.addWorkspaceToWorkspace(workspace);
+        } else {
+          await _.reduce(
+            vaults,
+            async (resp: any, vault: DVault) => {
+              await resp;
+              await wsService.createVault({ vault });
+              return this.addVaultToWorkspace(vault);
+            },
+            Promise.resolve()
+          );
         }
         return { vaults, workspace };
       }
@@ -185,8 +191,17 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
   async addWorkspaceToWorkspace(workspace: DWorkspace) {
     const wsRoot = DendronWorkspace.wsRoot();
     const wsService = new WorkspaceService({ wsRoot });
-    await wsService.addWorkspace({ workspace });
+    const vaults = workspace.vaults;
 
+    await _.reduce(
+      vaults,
+      async (resp: any, vault: DVault) => {
+        await resp;
+        await wsService.createVault({ vault });
+        return this.addVaultToWorkspace(vault);
+      },
+      Promise.resolve()
+    );
     // add to gitignore
     const gitIgnore = path.join(wsRoot, ".gitignore");
     if (fs.existsSync(gitIgnore)) {
@@ -198,8 +213,8 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
 
   async addVaultToWorkspace(vault: DVault) {
     const wsRoot = DendronWorkspace.wsRoot();
-    const wsService = new WorkspaceService({ wsRoot });
-    await wsService.createVault({ vault });
+    // const wsService = new WorkspaceService({ wsRoot });
+    // await wsService.createVault({ vault });
 
     // workspace file
     const wsPath = DendronWorkspace.workspaceFile().fsPath;
@@ -244,6 +259,8 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
       if (opts.name) {
         vault.name = opts.name;
       }
+      const wsService = new WorkspaceService({ wsRoot });
+      await wsService.createVault({ vault });
       await this.addVaultToWorkspace(vault);
       vaults = [vault];
     }

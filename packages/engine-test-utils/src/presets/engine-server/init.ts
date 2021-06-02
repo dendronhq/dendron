@@ -1,16 +1,16 @@
 import {
-  ERROR_STATUS,
   ERROR_SEVERITY,
+  ERROR_STATUS,
   NoteProps,
   NoteUtils,
 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import {
-  TestPresetEntryV4,
-  SCHEMA_PRESETS_V4,
-  NoteTestUtilsV4,
   FileTestUtils,
+  NoteTestUtilsV4,
   NOTE_PRESETS_V4,
+  SCHEMA_PRESETS_V4,
+  TestPresetEntryV4,
 } from "@dendronhq/common-test-utils";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -55,6 +55,71 @@ const SCHEMAS = {
   ),
 };
 const NOTES = {
+  // VAULT_WORKSPACE: new TestPresetEntryV5(
+  //   async ({ engine }) => {
+  //     return [
+  //       {
+  //         actual: _.omit(engine.notes["one"], ["body", "parent"]),
+  //         expected: {
+  //           children: [],
+  //           created: 1,
+  //           custom: {},
+  //           data: {},
+  //           desc: "",
+  //           fname: "one",
+  //           id: "one",
+  //           links: [],
+  //           anchors: {},
+  //           title: "One",
+  //           type: "note",
+  //           updated: 1,
+  //           vault: {
+  //             fsPath: "vault1",
+  //             name: undefined,
+  //           },
+  //         },
+  //       },
+  //       {
+  //         actual: _.omit(engine.notes["three"], ["body", "parent"]),
+  //         expected: {
+  //           children: [],
+  //           created: 1,
+  //           custom: {},
+  //           data: {},
+  //           desc: "",
+  //           fname: "three",
+  //           id: "three",
+  //           links: [],
+  //           anchors: {},
+  //           title: "Three",
+  //           type: "note",
+  //           updated: 1,
+  //           vault: {
+  //             fsPath: "vault3",
+  //             name: "vaultThree",
+  //           },
+  //         },
+  //       },
+  //     ];
+  //   },
+  //   {
+  //     preSetupHook: async ({ wsRoot, vaults }) => {
+  //       const vault1 = vaults[0];
+  //       const vault3 = vaults[2];
+  //       await NoteTestUtilsV4.createNote({
+  //         fname: "one",
+  //         vault: vault1,
+  //         wsRoot,
+  //       });
+  //       await NoteTestUtilsV4.createNote({
+  //         fname: "three",
+  //         vault: vault3,
+  //         wsRoot,
+  //       });
+  //     },
+  //     vaults: [],
+  //   }
+  // ),
   BASIC: new TestPresetEntryV4(
     async ({ engine }) => {
       return [

@@ -40,7 +40,8 @@
   },
   "scripts": {
     "release": "standard-version",
-    "format": "prettier --ignore-path='.prettierignore' --write 'packages/**/*'",
+    "format": "lerna exec --parallel --ignore @dendronhq/dendron-11ty -- yarn format",
+    "format:pkg": "prettier --write",
     "lerna:typecheck": "lerna exec --parallel --ignore @dendronhq/dendron-next-server --ignore @dendronhq/dendron-11ty -- tsc -p tsconfig.build.json --noEmit",
     "bootstrap:bootstrap": "npx lerna bootstrap --use-workspaces && yarn gen:meta",
     "bootstrap:build": "yarn bootstrap:build:common-all && yarn bootstrap:build:common-server &&  yarn bootstrap:build:engine-server &&  yarn bootstrap:build:pods-core && yarn bootstrap:build:common-test-utils && yarn bootstrap:build:api-server && yarn bootstrap:build:dendron-cli && yarn bootstrap:build:engine-test-utils && yarn bootstrap:build:common-frontend && yarn bootstrap:build:dendron-next-server && yarn bootstrap:build:plugin-core",
@@ -75,11 +76,11 @@
   "useWorkspaces": false,
   "husky": {
     "hooks": {
-      "pre-commit": "lint-staged && yarn hooks:pre-commit"
+      "pre-commit": "lint-staged -v -d && yarn hooks:pre-commit"
     }
   },
   "lint-staged": {
-    "*.{ts,css,md}": "prettier --write"
+    "*.{ts,tsx}": "prettier --config prettier.config.js --loglevel debug --write"
   },
   "dependencies": {
     "@dendronhq/conventional-changelog-dendron": "^5.0.11",

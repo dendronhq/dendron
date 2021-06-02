@@ -9325,6 +9325,11 @@ format@^0.2.0:
   resolved "https://registry.npmjs.org/format/-/format-0.2.2.tgz#d6170107e9efdc4ed30c9dc39016df942b5cb58b"
   integrity sha1-1hcBB+nv3E7TDJ3DkBbflCtctYs=
 
+formik-antd@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.npmjs.org/formik-antd/-/formik-antd-2.0.1.tgz#0f50ee1141c299187132fd7641e3467a2261e58d"
+  integrity sha512-KyDRqzPUchYvKLLku5/yphzIDkAFDT8ViKo6+9wXYJf0duwcuCmsNZlgQiEdlCrm1IWN3XMLUCPV/MUm0iLKww==
+
 formik@^2.2.5:
   version "2.2.6"
   resolved "https://registry.npmjs.org/formik/-/formik-2.2.6.tgz#378a4bafe4b95caf6acf6db01f81f3fe5147559d"
@@ -15222,12 +15227,7 @@ prettier@2.0.5:
   resolved "https://registry.npmjs.org/prettier/-/prettier-2.0.5.tgz#d6d56282455243f2f92cc1716692c08aa31522d4"
   integrity sha512-7PtVymN48hGcO4fGjybyBSIWDsLU4H4XlvOHfq91pz9kkGlonzwTfYkaIEwiRg/dAJF9YlbsduBAgtYLi+8cFg==
 
-prettier@^1.14.3:
-  version "1.19.1"
-  resolved "https://registry.npmjs.org/prettier/-/prettier-1.19.1.tgz#f7d7f5ff8a9cd872a7be4ca142095956a60797cb"
-  integrity sha512-s7PoyDv/II1ObgQunCbB9PdLmUcBZcnWOcxDh7O0N/UwDEsHyqkW+Qh28jW+mVuCdx7gLB0BotYI1Y6uI9iyew==
-
-prettier@^2.0.4:
+prettier@2.3.0, prettier@^2.0.4:
   version "2.3.0"
   resolved "https://registry.npmjs.org/prettier/-/prettier-2.3.0.tgz#b6a5bf1284026ae640f17f7ff5658a7567fc0d18"
   integrity sha512-kXtO4s0Lz/DW/IJ9QdWhAf7/NmPWQXkFr/r/WkR3vyI+0v8amTDxiaQSLzs8NBlytfLWX/7uQUMIW677yLKl4w==

@@ -84,6 +84,9 @@
         "workbench.editor.showTabs": true,
         "editor.snippetSuggestions": "none",
         "editor.defaultFormatter": "esbenp.prettier-vscode",
-        "liveFrame.url": "http://localhost:3000/proto"
+        "liveFrame.url": "http://localhost:3000/proto",
+        "[typescript]": {
+            "editor.defaultFormatter": "esbenp.prettier-vscode"
+        }
     }
 }

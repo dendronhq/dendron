@@ -213,7 +213,6 @@ export async function runEngineTestV5(
     createEngine,
     initGit,
     workspaces,
-    addVSWorkspace,
   } = _.defaults(opts, {
     preSetupHook: async ({}) => {},
     postSetupHook: async ({}) => {},
@@ -225,7 +224,6 @@ export async function runEngineTestV5(
       { fsPath: "vault2" },
       { fsPath: "vault3", name: "vaultThree" },
     ],
-    addVSWorkspace: false,
   });
   const { wsRoot, vaults } = await setupWS({ vaults: vaultsInit, workspaces });
   if ((opts.initHooks, vaults)) {

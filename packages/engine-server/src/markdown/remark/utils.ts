@@ -274,6 +274,11 @@ export class AnchorUtils {
       return {};
     }
   }
+
+  static isBlockAnchor(anchor?: string): boolean {
+    // not undefined, not an empty string, and the first character is ^
+    return !!anchor && anchor[0] === "^";
+  }
 }
 
 function walk(node: Node, fn: any) {
@@ -305,19 +310,6 @@ export class RemarkUtils {
     headings.forEach(function (h) {
       h.depth += diff;
     });
-  }
-
-  static findHeaders(content: string): Heading[] {
-    const remark = MDUtilsV4.remark();
-    let out = remark.parse(content);
-    let out2: Heading[] = selectAll(DendronASTTypes.HEADING, out) as Heading[];
-    return out2;
-  }
-
-  static findBlockAnchors(content: string): BlockAnchor[] {
-    const parser = MDUtilsV4.remark().use(blockAnchors);
-    const parsed = parser.parse(content);
-    return selectAll(DendronASTTypes.BLOCK_ANCHOR, parsed) as BlockAnchor[];
   }
 
   static findAnchors(content: string): Anchor[] {

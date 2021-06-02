@@ -5,27 +5,60 @@ import {
   MDUtilsV4,
   RemarkUtils,
   LinkUtils,
+  DendronASTTypes,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { DVault, runEngineTestV5, testWithEngine } from "../../../engine";
 import { checkString } from "../../../utils";
 
-describe("utils", () => {
-  describe("findHeaders", async () => {
+describe("RemarkUtils and LinkUtils", () => {
+  describe("findAnchors", async () => {
     test("one header", async () => {
       await runEngineTestV5(
         async ({ engine }) => {
           const body = engine.notes["foo"].body;
-          const out = RemarkUtils.findHeaders(body);
-          expect(out).toMatchSnapshot("bond");
+          const out = RemarkUtils.findAnchors(body);
+          expect(out).toMatchSnapshot();
           expect(_.size(out)).toEqual(1);
           expect(out[0].depth).toEqual(1);
+          expect(out[0].type).toEqual(DendronASTTypes.HEADING);
         },
         {
           preSetupHook: async ({ vaults, wsRoot }) => {
             await NoteTestUtilsV4.createNote({
               fname: "foo",
-              body: "# h1",
+              body: [
+                "# h1",
+                "",
+                "Repellendus possimus voluptates tempora quia.",
+              ].join("\n"),
+              vault: vaults[0],
+              wsRoot,
+            });
+          },
+          expect,
+        }
+      );
+    });
+    test("one block anchor", async () => {
+      await runEngineTestV5(
+        async ({ engine }) => {
+          const body = engine.notes["foo"].body;
+          const out = RemarkUtils.findAnchors(body);
+          expect(out).toMatchSnapshot();
+          expect(_.size(out)).toEqual(1);
+          expect(out[0].type).toEqual(DendronASTTypes.BLOCK_ANCHOR);
+        },
+        {
+          preSetupHook: async ({ vaults, wsRoot }) => {
+            await NoteTestUtilsV4.createNote({
+              fname: "foo",
+              body: [
+                "Repellendus possimus voluptates tempora quia.",
+                "Eum deleniti sit delectus officia rem. ^block-anchor",
+                "",
+                "Consectetur blanditiis facilis nulla mollitia.",
+              ].join("\n"),
               vault: vaults[0],
               wsRoot,
             });
@@ -42,7 +75,7 @@ describe("utils", () => {
       async ({ engine }) => {
         const note = engine.notes["foo"];
         const links = LinkUtils.findLinks({ note, engine });
-        expect(links).toMatchSnapshot("bond");
+        expect(links).toMatchSnapshot();
         expect(links[0].to?.fname).toEqual("bar");
       },
       {

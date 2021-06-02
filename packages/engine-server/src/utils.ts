@@ -216,11 +216,13 @@ export function parseFileLink(ref: string): DNoteRefLink {
   return { from: { fname }, data: clean, type: "ref" };
 }
 
+/** .from.fname in the return may be an empty string if the link is a same-file reference to a header or block (e.g `[[#header]]`) */
 export function parseNoteRefV2(ref: string): DNoteRefLink {
+  const optWikiFileName = /([^\]:#]*)/.source;
   const wikiFileName = /([^\]:#]+)/.source;
   const reLink = new RegExp(
     "" +
-      `(?<name>${wikiFileName})` +
+      `(?<name>${optWikiFileName})` +
       `(${
         new RegExp(
           // anchor start

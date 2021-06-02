@@ -1,25 +1,18 @@
+import { AnchorUtils, LinkUtils } from "./utils";
 import {
   CONSTANTS,
-  DendronConfig,
-  DendronError,
   DNodeUtils,
   DNoteLoc,
   DNoteRefLink,
   DUtils,
-  getSlugger,
+  DendronConfig,
+  DendronError,
   NoteProps,
   NoteUtils,
   RespV2,
   VaultUtils,
+  getSlugger,
 } from "@dendronhq/common-all";
-import { file2Note } from "@dendronhq/common-server";
-import _ from "lodash";
-import { html, paragraph, root } from "mdast-builder";
-import { Eat } from "remark-parse";
-import Unified, { Plugin } from "unified";
-import { Node, Parent } from "unist";
-import { SiteUtils } from "../../topics/site";
-import { parseNoteRefV2 } from "../../utils";
 import {
   DendronASTDest,
   DendronASTNode,
@@ -27,9 +20,17 @@ import {
   NoteRefNoteV4,
   NoteRefNoteV4_LEGACY,
 } from "../types";
-import { MDUtilsV4, renderFromNoteProps } from "../utils";
-import { LinkUtils } from "./utils";
+import { file2Note } from "@dendronhq/common-server";
+import { MDUtilsV4, ParentWithIndex, renderFromNoteProps } from "../utils";
+import { Node, Parent } from "unist";
+import Unified, { Plugin } from "unified";
+import { html, paragraph, root } from "mdast-builder";
+
+import { Eat } from "remark-parse";
+import { SiteUtils } from "../../topics/site";
 import { WikiLinksOpts } from "./wikiLinks";
+import _ from "lodash";
+import { parseNoteRefV2 } from "../../utils";
 
 const LINK_REGEX = /^\!\[\[(.+?)\]\]/;
 
@@ -68,6 +69,9 @@ function attachParser(proc: Unified.Processor) {
     if (match) {
       const linkMatch = match[1].trim();
       const link = parseNoteRefV2(linkMatch);
+      // If the link is same file [[#header]], it's implicitly to the same file it's located in
+      if (link.from.fname === "")
+        link.from.fname = MDUtilsV4.getDendronData(proc).fname;
       const { value } = LinkUtils.parseLink(linkMatch);
 
       let refNote: NoteRefNoteV4 = {
@@ -241,7 +245,6 @@ function convertNoteRef(opts: ConvertNoteRefOpts): {
         return data;
       }
     } catch (err) {
-      debugger;
       const msg = `error reading file, ${npath}`;
       errors.push(new DendronError({ message: msg }));
       return msg;
@@ -365,7 +368,6 @@ export function convertNoteRefASTV2(
         return paragraph(data);
       }
     } catch (err) {
-      debugger;
       const msg = `error reading file, ${npath}`;
       errors.push(new DendronError({ message: msg }));
       throw Error(msg);
@@ -375,11 +377,149 @@ export function convertNoteRefASTV2(
   return { error, data: out };
 }
 
+/** For any List in `nodes`, removes the children before or after the index of the following ListItem in `nodes`. */
+function removeListItems({
+  nodes,
+  remove,
+}: {
+  nodes: ParentWithIndex[];
+  remove: "before-index" | "after-index";
+}): void {
+  for (let i = 0; i < nodes.length; i++) {
+    const list = nodes[i];
+    const listItem = nodes[i + 1];
+    if (list.ancestor.type !== DendronASTTypes.LIST) continue;
+    if (_.isUndefined(listItem)) {
+      console.error(
+        "Found a list that has a list anchor in it, but no list items"
+      );
+      continue; // Should never happen, but let's try to render at least the whole list if it does
+    }
+    if (remove === "after-index") {
+      list.ancestor.children = list.ancestor.children.slice(
+        undefined,
+        listItem.index + 1
+      );
+    } else {
+      // keep === after-index
+      list.ancestor.children = list.ancestor.children.slice(
+        listItem.index,
+        undefined
+      );
+    }
+  }
+}
+
+/** If there are nested lists with a single item in them, replaces the outer single-item lists with the first multi-item list. */
+function removeSingleItemNestedLists(nodes: ParentWithIndex[]): void {
+  let outermost: ParentWithIndex | undefined;
+  for (let i = 0; i < nodes.length; i++) {
+    const list = nodes[i];
+    if (list.ancestor.type !== DendronASTTypes.LIST) continue;
+    // Find the outermost list
+    if (_.isUndefined(outermost)) {
+      outermost = list;
+      // If the outermost list has multiple children, we have nothing to do
+      if (outermost.ancestor.children.length > 1) return;
+      continue;
+    } else {
+      // Found the nested list which will replace the outermost one
+      outermost.ancestor.children = list.ancestor.children;
+      // The nested list is the new outermost now
+      outermost = list;
+      // If we found a list with multiple children, stop because we want to keep it
+      if (outermost.ancestor.children.length > 1) return;
+    }
+  }
+}
+
+function prepareNoteRefIndices<T>({
+  anchorStart,
+  anchorEnd,
+  bodyAST,
+  makeErrorData,
+}: {
+  anchorStart?: string;
+  anchorEnd?: string;
+  bodyAST: DendronASTNode;
+  makeErrorData: (anchorName: string, anchorType: "Start" | "End") => T;
+}): {
+  start: FindAnchorResult;
+  end: FindAnchorResult;
+  data: T | null;
+  error: any;
+} {
+  // TODO: can i just strip frontmatter when reading?
+  let start: FindAnchorResult = {
+    type: "header",
+    index: bodyAST.children[0].type === "yaml" ? 1 : 0,
+  };
+  let end: FindAnchorResult = null;
+
+  if (anchorStart) {
+    start = findAnchor({
+      nodes: bodyAST.children,
+      match: anchorStart,
+    });
+    if (_.isNull(start)) {
+      return {
+        data: makeErrorData(anchorStart, "Start"),
+        start: null,
+        end: null,
+        error: null,
+      };
+    }
+  }
+
+  if (anchorEnd) {
+    end = findAnchor({
+      nodes: bodyAST.children.slice(start.index),
+      match: anchorEnd,
+    });
+    if (_.isNull(end)) {
+      return {
+        data: makeErrorData(anchorEnd, "End"),
+        start: null,
+        end: null,
+        error: null,
+      };
+    }
+    end.index += start.index;
+  } else if (start.type === "block") {
+    // If no end is specified and the start is a block anchor referencing a block, the end is implicitly the end of the referenced block.
+    end = { type: "block", index: start.index };
+  } else if (start.type === "list") {
+    // If no end is specified and the start is a block anchor in a list, the end is the list element referenced by the start.
+    end = { ...start };
+  }
+
+  // Handle anchors inside lists. Lists need to slice out sibling list items, and extract out nested lists.
+  // We need to remove elements before the start or after the end.
+  // We do end first and start second in case they refer to the same list, so that the indices don't shift.
+  if (end && end.type === "list") {
+    removeListItems({ nodes: end.ancestors, remove: "after-index" });
+  }
+  if (start && start.type === "list") {
+    removeListItems({ nodes: start.ancestors, remove: "before-index" });
+  }
+  // If removing items left single-item nested lists at the start of the ancestors, we trim these out.
+  if (end && end.type === "list") {
+    removeSingleItemNestedLists(end.ancestors);
+  }
+  if (start && start.type === "list") {
+    removeSingleItemNestedLists(start.ancestors);
+  }
+
+  return { start, end, data: null, error: null };
+}
+
 function convertNoteRefHelperAST(
   opts: ConvertNoteRefHelperOpts & { procOpts: any }
 ): Required<RespV2<Parent>> {
   const { proc, refLvl, link, note } = opts;
   const noteRefProc = proc();
+  // proc is the parser that was parsing the note the reference was in, so need to update fname to reflect that we are parsing the referred note
+  MDUtilsV4.setDendronData(noteRefProc, { fname: link.from.fname });
   const engine = MDUtilsV4.getEngineFromProc(noteRefProc);
   MDUtilsV4.setNoteRefLvl(noteRefProc, refLvl);
   const procOpts = MDUtilsV4.getProcOpts(noteRefProc);
@@ -399,41 +539,22 @@ function convertNoteRefHelperAST(
     anchorStartOffset: 0,
   });
 
-  // TODO: can i just strip frontmatter when reading?
-  let anchorStartIndex = bodyAST.children[0].type === "yaml" ? 1 : 0;
-  let anchorEndIndex = bodyAST.children.length;
-  const slugger = getSlugger();
+  let { start, end, data, error } = prepareNoteRefIndices({
+    anchorStart,
+    anchorEnd,
+    bodyAST,
+    makeErrorData: (anchorName, anchorType) => {
+      return MDUtilsV4.genMDMsg(`${anchorType} anchor ${anchorName} not found`);
+    },
+  });
+  if (data) return { data, error };
 
-  if (anchorStart) {
-    anchorStartIndex = findHeader({
-      nodes: bodyAST.children,
-      match: anchorStart,
-      slugger,
-    });
-    if (anchorStartIndex < 0) {
-      const data = MDUtilsV4.genMDMsg(`Start anchor ${anchorStart} not found`);
-      return { data, error: null };
-    }
-  }
-
-  if (anchorEnd) {
-    anchorEndIndex = findHeader({
-      nodes: bodyAST.children.slice(anchorStartIndex + 1),
-      match: anchorEnd,
-      slugger,
-    });
-    if (anchorEndIndex < 0) {
-      const data = MDUtilsV4.genMDMsg(`end anchor ${anchorEnd} not found`);
-      return { data, error: null };
-    }
-    anchorEndIndex += anchorStartIndex + 1;
-  }
   // slice of interested range
   try {
     let out = root(
       bodyAST.children.slice(
-        anchorStartIndex + anchorStartOffset,
-        anchorEndIndex
+        (start ? start.index : 0) + anchorStartOffset,
+        end ? end.index + 1 : undefined
       )
     );
     let tmpProc = MDUtilsV4.procFull({ ...procOpts });
@@ -450,7 +571,6 @@ function convertNoteRefHelperAST(
       return { error: null, data: out };
     }
   } catch (err) {
-    debugger;
     console.log("ERROR WITH RE in AST");
     console.log(JSON.stringify(err));
     return {
@@ -468,40 +588,25 @@ function convertNoteRefHelper(
 ): Required<RespV2<string>> {
   const { body, proc, refLvl, link } = opts;
   const noteRefProc = proc();
+  // proc is the parser that was parsing the note the reference was in, so need to update fname to reflect that we are parsing the referred note
+  MDUtilsV4.setDendronData(noteRefProc, { fname: link.from.fname });
   MDUtilsV4.setNoteRefLvl(noteRefProc, refLvl);
   const bodyAST = noteRefProc.parse(body) as DendronASTNode;
   const { anchorStart, anchorEnd, anchorStartOffset } = link.data;
 
-  // TODO: can i just strip frontmatter when reading?
-  let anchorStartIndex = bodyAST.children[0].type === "yaml" ? 1 : 0;
-  let anchorEndIndex = bodyAST.children.length;
-  const slugger = getSlugger();
+  let { start, end, data, error } = prepareNoteRefIndices({
+    anchorStart,
+    anchorEnd,
+    bodyAST,
+    makeErrorData: (anchorName, anchorType) => {
+      return `${anchorType} anchor ${anchorName} not found`;
+    },
+  });
+  if (data) return { data, error };
 
-  if (anchorStart) {
-    anchorStartIndex = findHeader({
-      nodes: bodyAST.children,
-      match: anchorStart,
-      slugger,
-    });
-    if (anchorStartIndex < 0) {
-      return { data: `Start anchor ${anchorStart} not found`, error: null };
-    }
-  }
-
-  if (anchorEnd) {
-    anchorEndIndex = findHeader({
-      nodes: bodyAST.children.slice(anchorStartIndex + 1),
-      match: anchorEnd,
-      slugger,
-    });
-    if (anchorEndIndex < 0) {
-      return { data: `end anchor ${anchorEnd} not found`, error: null };
-    }
-    anchorEndIndex += anchorStartIndex + 1;
-  }
   // slice of interested range
   try {
-    bodyAST.children = bodyAST.children.slice(anchorStartIndex, anchorEndIndex);
+    bodyAST.children = bodyAST.children.slice(start?.index, end?.index);
     let out = noteRefProc
       .processSync(noteRefProc.stringify(bodyAST))
       .toString();
@@ -522,6 +627,39 @@ function convertNoteRefHelper(
   }
 }
 
+type FindAnchorResult =
+  | {
+      type: "header" | "block";
+      index: number;
+    }
+  | {
+      type: "list";
+      index: number;
+      ancestors: ParentWithIndex[];
+    }
+  | null;
+
+/** Searches for anchors, then returns the index for the top-level ancestor.
+ *
+ * @param nodes The list of nodes to search through.
+ * @param match The block anchor string, like "header-anchor" or "^block-anchor"
+ * @returns The index of the top-level ancestor node in the list where the anchor was found, or -1 if not found.
+ */
+function findAnchor({
+  nodes,
+  match,
+}: {
+  nodes: DendronASTNode["children"];
+  match: string;
+}): FindAnchorResult {
+  if (AnchorUtils.isBlockAnchor(match)) {
+    const anchorId = match.slice(1);
+    return findBlockAnchor({ nodes, match: anchorId });
+  } else {
+    return findHeader({ nodes, match, slugger: getSlugger() });
+  }
+}
+
 function findHeader({
   nodes,
   match,
@@ -530,11 +668,57 @@ function findHeader({
   nodes: DendronASTNode["children"];
   match: string;
   slugger: ReturnType<typeof getSlugger>;
-}) {
+}): FindAnchorResult {
   const foundIndex = MDUtilsV4.findIndex(nodes, function (node: Node) {
     return MDUtilsV4.matchHeading(node, match, { slugger });
   });
-  return foundIndex;
+  if (foundIndex < 0) return null;
+  return { type: "header", index: foundIndex };
+}
+
+/** Searches for block anchors, then returns the index for the top-level ancestor.
+ *
+ * @param nodes The list of nodes to search through.
+ * @param match The block anchor string, like "header-anchor" or "^block-anchor"
+ * @returns The index of the top-level ancestor node in the list where the anchor was found, or -1 if not found.
+ */
+function findBlockAnchor({
+  nodes,
+  match,
+}: {
+  nodes: Node[];
+  match: string;
+}): FindAnchorResult {
+  // Find the anchor in the nodes
+  let foundIndex: number | undefined;
+  let foundAncestors: ParentWithIndex[] = [];
+  MDUtilsV4.visitParentsIndices({
+    nodes,
+    test: DendronASTTypes.BLOCK_ANCHOR,
+    visitor: ({ node, index, ancestors }) => {
+      if (node.id === match) {
+        // found anchor!
+        foundIndex = ancestors.length > 0 ? ancestors[0].index : index;
+        foundAncestors = ancestors;
+        return false; // stop traversal
+      }
+      return true; // continue traversal
+    },
+  });
+
+  if (_.isUndefined(foundIndex)) return null;
+  if (!_.isEmpty(foundAncestors)) {
+    if (foundAncestors[0].ancestor.children.length === 1) {
+      // If located by itself after a block, then the block anchor refers to the previous block
+      return { type: "block", index: foundIndex - 1 };
+    }
+    if (foundAncestors[0].ancestor.type === DendronASTTypes.LIST) {
+      // The block anchor is in a list, which will need special handling to slice the list elements
+      return { type: "list", index: foundIndex, ancestors: foundAncestors };
+    }
+  }
+  // Otherwise, it's an anchor inside some regular block. The anchor refers to the block it's inside of.
+  return { type: "block", index: foundIndex };
 }
 
 function renderPretty(opts: { content: string; title: string; link: string }) {

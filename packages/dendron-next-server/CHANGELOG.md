@@ -3,6 +3,28 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.44.1-alpha.1](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.44.1-alpha.1) (2021-06-02)
+
+
+### Bug Fixes
+
+* next server error ([e3c5848](https://github.com/dendronhq/dendron/commit/e3c5848651e4fbf69599af661aa288a1e8c4d24b))
+
+
+
+
+
+## [0.44.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.44.1-alpha.0) (2021-06-02)
+
+
+### Bug Fixes
+
+* next server error ([e3c5848](https://github.com/dendronhq/dendron/commit/e3c5848651e4fbf69599af661aa288a1e8c4d24b))
+
+
+
+
+
 # [0.44.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.44.0) (2021-05-31)
 
 **Note:** Version bump only for package @dendronhq/dendron-next-server

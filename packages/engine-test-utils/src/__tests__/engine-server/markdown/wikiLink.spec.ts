@@ -164,6 +164,73 @@ describe("wikiLinks", () => {
       preSetupHook: ENGINE_HOOKS.setupBasic,
     });
 
+    const linkWithBlockAnchor = "[[foo#^block]]";
+    const WITH_BLOCK_ANCHOR = createProcTests({
+      name: "WITH_BLOCK_ANCHOR",
+      setupFunc: async ({ engine, vaults, extra }) => {
+        const proc2 = createProcForTest({
+          engine,
+          dest: extra.dest,
+          vault: vaults[0],
+        });
+        const resp = await proc2.process(linkWithBlockAnchor);
+        debugger;
+        return { resp, proc };
+      },
+      verifyFuncDict: {
+        [DendronASTDest.MD_DENDRON]: async ({ extra }) => {
+          const { resp } = extra;
+          await checkVFile(resp, linkWithBlockAnchor);
+        },
+        [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
+          const { resp } = extra;
+          await checkVFile(resp, "[Foo](foo)");
+        },
+        [DendronASTDest.HTML]: async ({ extra }) => {
+          const { resp } = extra;
+          await checkVFile(resp, '<a href="foo.html#^block">Foo</a>');
+        },
+        [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
+          const { resp } = extra;
+          await checkVFile(resp, "[Foo](foo.md)");
+        },
+      },
+      preSetupHook: ENGINE_HOOKS.setupBasic,
+    });
+
+    const WITH_SAME_FILE_BLOCK_ANCHOR = createProcTests({
+      name: "WITH_SAME_FILE_BLOCK_ANCHOR",
+      setupFunc: async ({ engine, vaults, extra }) => {
+        const proc2 = createProcForTest({
+          engine,
+          dest: extra.dest,
+          vault: vaults[0],
+        });
+        const resp = await proc2.process("[[#^block]]");
+        debugger;
+        return { resp, proc };
+      },
+      verifyFuncDict: {
+        [DendronASTDest.MD_DENDRON]: async ({ extra }) => {
+          const { resp } = extra;
+          await checkVFile(resp, "[[root#^block]]");
+        },
+        [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
+          const { resp } = extra;
+          await checkVFile(resp, "[Root](root)");
+        },
+        [DendronASTDest.HTML]: async ({ extra }) => {
+          const { resp } = extra;
+          await checkVFile(resp, '<a href="root.html#^block">Root</a>');
+        },
+        [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
+          const { resp } = extra;
+          await checkVFile(resp, "[Root](root.md)");
+        },
+      },
+      preSetupHook: ENGINE_HOOKS.setupBasic,
+    });
+
     const linkWithExtension = "[[foo.md]]";
     const WITH_EXTENSION = createProcTests({
       name: "WITH_EXTENSION",
@@ -404,6 +471,8 @@ describe("wikiLinks", () => {
     const ALL_TEST_CASES = [
       ...REGULAR_CASE,
       ...WITH_ANCHOR,
+      ...WITH_BLOCK_ANCHOR,
+      ...WITH_SAME_FILE_BLOCK_ANCHOR,
       ...WITH_EXTENSION,
       ...WITH_ALIAS,
       ...WITH_ID_AS_LINK,

@@ -34,6 +34,23 @@ VFile {
 }
 `;
 
+exports[`wikiLinks compile "HTML: WITH_BLOCK_ANCHOR" 1`] = `
+VFile {
+  "contents": "<h1 id=\\"root\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#root\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Root</h1>
+<p><a href=\\"foo.html#^block\\">Foo</a></p>
+<hr>
+<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<ol>
+<li><a href=\\"bar.html\\">Bar</a></li>
+<li><a href=\\"foo.html\\">Foo</a></li>
+</ol>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
 exports[`wikiLinks compile "HTML: WITH_EXTENSION" 1`] = `
 VFile {
   "contents": "<h1 id=\\"root\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#root\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Root</h1>
@@ -59,6 +76,23 @@ VFile {
 <h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
 <ol>
 <li><a href=\\"foo-id.html\\">Foo</a></li>
+</ol>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`wikiLinks compile "HTML: WITH_SAME_FILE_BLOCK_ANCHOR" 1`] = `
+VFile {
+  "contents": "<h1 id=\\"root\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#root\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Root</h1>
+<p><a href=\\"root.html#^block\\">Root</a></p>
+<hr>
+<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<ol>
+<li><a href=\\"bar.html\\">Bar</a></li>
+<li><a href=\\"foo.html\\">Foo</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -153,6 +187,18 @@ VFile {
 }
 `;
 
+exports[`wikiLinks compile "MD_DENDRON: WITH_BLOCK_ANCHOR" 1`] = `
+VFile {
+  "contents": "[[foo#^block]]
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
 exports[`wikiLinks compile "MD_DENDRON: WITH_EXTENSION" 1`] = `
 VFile {
   "contents": "[[foo]]
@@ -168,6 +214,18 @@ VFile {
 exports[`wikiLinks compile "MD_DENDRON: WITH_ID_AS_LINK" 1`] = `
 VFile {
   "contents": "[[foo]]
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`wikiLinks compile "MD_DENDRON: WITH_SAME_FILE_BLOCK_ANCHOR" 1`] = `
+VFile {
+  "contents": "[[root#^block]]
 
 ",
   "cwd": "<PROJECT_ROOT>",
@@ -265,11 +323,39 @@ VFile {
 }
 `;
 
+exports[`wikiLinks compile "MD_ENHANCED_PREVIEW: WITH_BLOCK_ANCHOR" 1`] = `
+VFile {
+  "contents": "# Root
+
+[Foo](foo.md)
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
 exports[`wikiLinks compile "MD_ENHANCED_PREVIEW: WITH_EXTENSION" 1`] = `
 VFile {
   "contents": "# Root
 
 [Foo](foo.md)
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`wikiLinks compile "MD_ENHANCED_PREVIEW: WITH_SAME_FILE_BLOCK_ANCHOR" 1`] = `
+VFile {
+  "contents": "# Root
+
+[Root](root.md)
 
 ",
   "cwd": "<PROJECT_ROOT>",
@@ -377,11 +463,39 @@ VFile {
 }
 `;
 
+exports[`wikiLinks compile "MD_REGULAR: WITH_BLOCK_ANCHOR" 1`] = `
+VFile {
+  "contents": "# Root
+
+[Foo](foo)
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
 exports[`wikiLinks compile "MD_REGULAR: WITH_EXTENSION" 1`] = `
 VFile {
   "contents": "# Root
 
 [Foo](foo)
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`wikiLinks compile "MD_REGULAR: WITH_SAME_FILE_BLOCK_ANCHOR" 1`] = `
+VFile {
+  "contents": "# Root
+
+[Root](root)
 
 ",
   "cwd": "<PROJECT_ROOT>",

@@ -4,7 +4,7 @@ import {
   ideHooks,
   postVSCodeMessage,
 } from "@dendronhq/common-frontend";
-import { DMessageSource } from "@dendronhq/common-all";
+import { DMessageSource, CalendarViewMessageType } from "@dendronhq/common-all";
 import _ from "lodash";
 import { DendronProps } from "../../lib/types";
 
@@ -12,9 +12,13 @@ function CalendarView({ engine }: DendronProps) {
   const notes = engine.notes;
   const logger = createLogger("CalendarView");
 
+  const dailyNotes = _.values(notes).filter(
+    (note) => note.fname.startsWith("daily.") && note.children.length === 0
+  );
+
   return (
     <ul>
-      {_.values(notes).map((note) => (
+      {dailyNotes.map((note) => (
         <li>
           <a
             id={note.id}
@@ -22,7 +26,7 @@ function CalendarView({ engine }: DendronProps) {
             key={note.id}
             onClick={() => {
               postVSCodeMessage({
-                type: "onClick",
+                type: CalendarViewMessageType.onSelect,
                 data: { id: note.id },
                 source: DMessageSource.webClient,
               });

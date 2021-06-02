@@ -56,7 +56,7 @@ export class SchemaWatcher {
     const content = document.getText();
 
     try {
-      const maybeSchema = string2Schema({
+      const maybeSchema = await string2Schema({
         vault,
         content,
         fname,

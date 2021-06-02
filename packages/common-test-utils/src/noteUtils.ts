@@ -53,15 +53,8 @@ export class NoteTestUtilsV4 {
   };
 
   static createNote = async (opts: CreateNoteOptsV4) => {
-    const {
-      fname,
-      vault,
-      props,
-      body,
-      genRandomId,
-      noWrite,
-      wsRoot,
-    } = _.defaults(opts, { noWrite: false });
+    const { fname, vault, props, body, genRandomId, noWrite, wsRoot } =
+      _.defaults(opts, { noWrite: false });
     /**
      * Make sure snapshots stay consistent
      */
@@ -102,7 +95,7 @@ export class NoteTestUtilsV4 {
     const { fname, vault, wsRoot } = opts;
     const vpath = vault2Path({ vault, wsRoot });
     const npath = path.join(vpath, fname + ".schema.yml");
-    const schema = file2Schema(npath, wsRoot);
+    const schema = await file2Schema(npath, wsRoot);
     const newSchema = cb(schema);
     return await schemaModuleProps2File(newSchema, vpath, fname);
   }

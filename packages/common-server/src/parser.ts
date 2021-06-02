@@ -35,20 +35,20 @@ export class ParserBaseV2 {
 }
 
 export class SchemaParserV2 extends ParserBaseV2 {
-  static parseRaw(
+  static async parseRaw(
     schemaOpts: SchemaModuleOpts,
     opts: { root: DVault; fname: string; wsRoot: string }
-  ): SchemaModuleProps {
+  ): Promise<SchemaModuleProps> {
     const version = _.isArray(schemaOpts) ? 0 : 1;
     if (version > 0) {
-      return SchemaParserV2.parseSchemaModuleOpts(
+      return await SchemaParserV2.parseSchemaModuleOpts(
         schemaOpts as SchemaModuleOpts,
         opts
       );
     } else {
       // TODO: legacy
       const schemaDict: SchemaPropsDict = {};
-      ((schemaOpts as unknown) as SchemaOpts[]).map((ent) => {
+      (schemaOpts as unknown as SchemaOpts[]).map((ent) => {
         const schema = SchemaUtils.create(ent);
         schemaDict[schema.id] = schema;
       });
@@ -65,18 +65,21 @@ export class SchemaParserV2 extends ParserBaseV2 {
     }
   }
 
-  static parseSchemaModuleOpts(
+  static async parseSchemaModuleOpts(
     schemaModuleProps: SchemaModuleOpts,
     opts: { fname: string; root: DVault; wsRoot: string }
-  ): SchemaModuleProps {
+  ): Promise<SchemaModuleProps> {
     const { imports, schemas, version } = schemaModuleProps;
     const { fname, root, wsRoot } = opts;
     getLogger().info({ ctx: "parseSchemaModuleOpts", fname, root, imports });
     const vpath = vault2Path({ vault: root, wsRoot });
-    let schemaModulesFromImport = _.flatMap(imports, (ent) => {
-      const fpath = path.join(vpath, ent + ".schema.yml");
-      return file2Schema(fpath, wsRoot);
-    });
+    let schemaModulesFromImport: SchemaModuleProps[] = [];
+    await Promise.all(
+      _.map(imports, async (ent) => {
+        const fpath = path.join(vpath, ent + ".schema.yml");
+        schemaModulesFromImport.push(await file2Schema(fpath, wsRoot));
+      })
+    );
     const schemaPropsFromImport = schemaModulesFromImport.flatMap((mod) => {
       const domain = mod.fname;
       return _.values(mod.schemas).map((ent) => {

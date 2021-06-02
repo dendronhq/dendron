@@ -15,14 +15,14 @@ import YAML from "yamljs";
 import { ParserBase } from "./parseBase";
 
 export class SchemaParser extends ParserBase {
-  parseFile(fpath: string, root: DVault): SchemaModuleProps {
+  async parseFile(fpath: string, root: DVault): Promise<SchemaModuleProps> {
     const fname = path.basename(fpath, ".schema.yml");
     const wsRoot = this.opts.store.wsRoot;
     const vpath = vault2Path({ vault: root, wsRoot });
     const schemaOpts: any = YAML.parse(
       fs.readFileSync(path.join(vpath, fpath), "utf8")
     );
-    return cSchemaParserV2.parseRaw(schemaOpts, { root, fname, wsRoot });
+    return await cSchemaParserV2.parseRaw(schemaOpts, { root, fname, wsRoot });
   }
 
   async parse(
@@ -36,9 +36,9 @@ export class SchemaParser extends ParserBase {
     this.logger.info({ ctx, msg: "enter", fpaths, vault });
 
     const out = await Promise.all(
-      fpaths.flatMap((fpath) => {
+      fpaths.flatMap(async (fpath) => {
         try {
-          return this.parseFile(fpath, vault);
+          return await this.parseFile(fpath, vault);
         } catch (err) {
           return new DendronError({
             message: ERROR_STATUS.BAD_PARSE_FOR_SCHEMA,

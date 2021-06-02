@@ -537,4 +537,5 @@ export enum DendronTreeViewKey {
   TREE_VIEW = "dendron.treeView",
   TREE_VIEW_V2 = "dendron.tree-view",
   BACKLINKS = "dendron.backlinks",
+  CALENDAR_VIEW = "dendron.calendar-view",
 }

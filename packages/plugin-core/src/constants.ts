@@ -19,6 +19,13 @@ export const DENDRON_VIEWS = [
     type: "webview",
   },
   {
+    id: DendronTreeViewKey.CALENDAR_VIEW,
+    name: "Calendar View",
+    when: DendronContext.DEV_MODE,
+    where: "explorer",
+    type: "webview",
+  },
+  {
     id: DendronTreeViewKey.TREE_VIEW,
     name: "Tree View",
     when: `${DendronContext.PLUGIN_ACTIVE} && !${DendronContext.WEB_UI_ENABLED}`,

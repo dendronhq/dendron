@@ -89,23 +89,26 @@ async function _createFileWatcher(
   });
 }
 
-export function file2Schema(fpath: string, wsRoot: string): SchemaModuleProps {
+export async function file2Schema(
+  fpath: string,
+  wsRoot: string
+): Promise<SchemaModuleProps> {
   const root = { fsPath: path.dirname(fpath) };
   const fname = path.basename(fpath, ".schema.yml");
   const schemaOpts = YAML.safeLoad(
-    fs.readFileSync(fpath, { encoding: "utf8" }),
+    await fs.readFile(fpath, { encoding: "utf8" }),
     {
       schema: YAML.JSON_SCHEMA,
     }
   ) as SchemaModuleOpts;
-  return SchemaParserV2.parseRaw(schemaOpts, { root, fname, wsRoot });
+  return await SchemaParserV2.parseRaw(schemaOpts, { root, fname, wsRoot });
 }
 
 export function genHash(contents: any) {
   return SparkMD5.hash(contents); // OR raw hash (binary string)
 }
 
-export function string2Schema({
+export async function string2Schema({
   vault,
   content,
   fname,
@@ -119,7 +122,11 @@ export function string2Schema({
   const schemaOpts = YAML.safeLoad(content, {
     schema: YAML.JSON_SCHEMA,
   }) as SchemaModuleOpts;
-  return SchemaParserV2.parseRaw(schemaOpts, { root: vault, fname, wsRoot });
+  return await SchemaParserV2.parseRaw(schemaOpts, {
+    root: vault,
+    fname,
+    wsRoot,
+  });
 }
 
 export function string2Note({

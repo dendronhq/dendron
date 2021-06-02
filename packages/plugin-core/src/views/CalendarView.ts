@@ -1,7 +1,7 @@
 import { DendronTreeViewKey, DMessage } from "@dendronhq/common-all";
 import * as vscode from "vscode";
 import { getWS } from "../workspace";
-// import { WebViewUtils } from "./utils";
+import { WebViewUtils } from "./utils";
 
 export class CalendarView implements vscode.WebviewViewProvider {
   public static readonly viewType = DendronTreeViewKey.CALENDAR_VIEW;
@@ -29,32 +29,9 @@ export class CalendarView implements vscode.WebviewViewProvider {
   }
 
   private _getHtmlForWebview(_webview: vscode.Webview) {
-    // return WebViewUtils.genHTMLForTreeView({
-    //   title: "Calendar View",
-    //   view: DendronTreeViewKey.CALENDAR_VIEW,
-    // });
-
-    return `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Calendar View</title>
-  <style>
-    html, body, iframe { 
-      margin: 0; 
-      padding: 0; 
-      border: 0; 
-      height: 100vh; 
-      width: 100vw; 
-      overflow: hidden;
-    }
-  </style>
-</head>
-<body>
-  This is the body of calendar view
-</body>
-
-</html>`;
+    return WebViewUtils.genHTMLForTreeView({
+      title: "Calendar View",
+      view: DendronTreeViewKey.CALENDAR_VIEW,
+    });
   }
 }

@@ -77,7 +77,12 @@ export function createSiteConfig(
   };
 }
 
-export async function setupWS(opts: { vaults: DVault[] }) {
+/**
+ *
+ * @param opts.asRemote: add git repo
+ * @returns
+ */
+export async function setupWS(opts: { vaults: DVault[]; asRemote?: boolean }) {
   const wsRoot = tmpDir().name;
   const ws = new WorkspaceService({ wsRoot });
   const vaults = await Promise.all(
@@ -86,6 +91,9 @@ export async function setupWS(opts: { vaults: DVault[] }) {
       return vault;
     })
   );
+  if (opts.asRemote) {
+    await GitTestUtils.createRepoWithReadme(wsRoot);
+  }
   return { wsRoot, vaults };
 }
 

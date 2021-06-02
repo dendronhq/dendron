@@ -1,7 +1,6 @@
 import {
   DendronConfig,
   DVault,
-  DWorkspace,
   NoteUtils,
   SchemaUtils,
   VaultUtils,
@@ -15,7 +14,7 @@ import {
 } from "@dendronhq/common-server";
 import { FileTestUtils, sinon } from "@dendronhq/common-test-utils";
 import { DConfig, WorkspaceService } from "@dendronhq/engine-server";
-import { GitTestUtils } from "@dendronhq/engine-test-utils";
+import { GitTestUtils, setupWS } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
 import _ from "lodash";
 import { describe } from "mocha";
@@ -120,14 +119,10 @@ suite("VaultAddCommand", function () {
       runLegacySingleWorkspaceTest({
         ctx,
         onInit: async ({ wsRoot, vaults }) => {
-          // create remote repo
-          const remoteDir = tmpDir().name;
-          const vaultsRemote: DVault[] = [{ fsPath: "vault1" }];
-          await WorkspaceService.createWorkspace({
-            wsRoot: remoteDir,
-            vaults: vaultsRemote,
+          const { wsRoot: remoteDir } = await setupWS({
+            vaults: [{ fsPath: "vault1" }],
+            asRemote: true,
           });
-          await GitTestUtils.createRepoWithReadme(remoteDir);
 
           // stub
           const gitIgnore = path.join(wsRoot, ".gitignore");

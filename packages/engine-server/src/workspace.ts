@@ -185,8 +185,21 @@ export class WorkspaceService {
    */
   async removeVault({ vault }: { vault: DVault }) {
     const config = this.config;
-    config.vaults = _.reject(config.vaults, { fsPath: vault.fsPath });
-
+    config.vaults = _.reject(config.vaults, (ent) => {
+      const checks = [ent.fsPath === vault.fsPath];
+      if (vault.workspace) {
+        checks.push(ent.workspace === vault.workspace);
+      }
+      return _.every(checks);
+    });
+    if (vault.workspace && config.workspaces) {
+      const vaultWorkspace = _.find(config.vaults, {
+        workspace: vault.workspace,
+      });
+      if (_.isUndefined(vaultWorkspace)) {
+        delete config.workspaces[vault.workspace];
+      }
+    }
     if (
       config.site.duplicateNoteBehavior &&
       _.isArray(config.site.duplicateNoteBehavior.payload)

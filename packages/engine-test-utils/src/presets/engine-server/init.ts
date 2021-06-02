@@ -11,6 +11,7 @@ import {
   NOTE_PRESETS_V4,
   SCHEMA_PRESETS_V4,
   TestPresetEntryV4,
+  TestResult,
 } from "@dendronhq/common-test-utils";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -54,72 +55,90 @@ const SCHEMAS = {
     }
   ),
 };
+
 const NOTES = {
-  // VAULT_WORKSPACE: new TestPresetEntryV5(
-  //   async ({ engine }) => {
-  //     return [
-  //       {
-  //         actual: _.omit(engine.notes["one"], ["body", "parent"]),
-  //         expected: {
-  //           children: [],
-  //           created: 1,
-  //           custom: {},
-  //           data: {},
-  //           desc: "",
-  //           fname: "one",
-  //           id: "one",
-  //           links: [],
-  //           anchors: {},
-  //           title: "One",
-  //           type: "note",
-  //           updated: 1,
-  //           vault: {
-  //             fsPath: "vault1",
-  //             name: undefined,
-  //           },
-  //         },
-  //       },
-  //       {
-  //         actual: _.omit(engine.notes["three"], ["body", "parent"]),
-  //         expected: {
-  //           children: [],
-  //           created: 1,
-  //           custom: {},
-  //           data: {},
-  //           desc: "",
-  //           fname: "three",
-  //           id: "three",
-  //           links: [],
-  //           anchors: {},
-  //           title: "Three",
-  //           type: "note",
-  //           updated: 1,
-  //           vault: {
-  //             fsPath: "vault3",
-  //             name: "vaultThree",
-  //           },
-  //         },
-  //       },
-  //     ];
-  //   },
-  //   {
-  //     preSetupHook: async ({ wsRoot, vaults }) => {
-  //       const vault1 = vaults[0];
-  //       const vault3 = vaults[2];
-  //       await NoteTestUtilsV4.createNote({
-  //         fname: "one",
-  //         vault: vault1,
-  //         wsRoot,
-  //       });
-  //       await NoteTestUtilsV4.createNote({
-  //         fname: "three",
-  //         vault: vault3,
-  //         wsRoot,
-  //       });
-  //     },
-  //     vaults: [],
-  //   }
-  // ),
+  VAULT_WORKSPACE: new TestPresetEntryV4(
+    async ({ wsRoot }) => {
+      return [
+        {
+          actual: fs.existsSync(path.join(wsRoot, "vault1", "regnote.md")),
+          expected: true,
+          msg: "regular note exist",
+        },
+        {
+          actual: fs.existsSync(
+            path.join(wsRoot, "workspace", "vault", "wsnote.md")
+          ),
+          expected: true,
+          msg: "wsnote exists",
+        },
+      ] as TestResult[];
+    },
+    {
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        const normalVault = vaults[0];
+        const wsVault = vaults[1];
+        await NoteTestUtilsV4.createNote({
+          fname: "regnote",
+          vault: normalVault,
+          wsRoot,
+        });
+        await NoteTestUtilsV4.createNote({
+          fname: "wsnote",
+          vault: wsVault,
+          wsRoot,
+        });
+      },
+      vaults: [{ fsPath: "vault1" }],
+      workspaces: [
+        {
+          name: "workspace",
+          vaults: [{ fsPath: "vault" }],
+        },
+      ],
+    }
+  ),
+  VAULT_WORKSPACE_W_SAME_VAULT_NAME: new TestPresetEntryV4(
+    async ({ wsRoot }) => {
+      return [
+        {
+          actual: fs.existsSync(path.join(wsRoot, "vault1", "regnote.md")),
+          expected: true,
+          msg: "regular note exist",
+        },
+        {
+          actual: fs.existsSync(
+            path.join(wsRoot, "workspace", "vault1", "wsnote.md")
+          ),
+          expected: true,
+          msg: "wsnote exists",
+        },
+      ] as TestResult[];
+    },
+    {
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        const normalVault = vaults[0];
+        const wsVault = vaults[1];
+        await NoteTestUtilsV4.createNote({
+          fname: "regnote",
+          vault: normalVault,
+          wsRoot,
+        });
+        await NoteTestUtilsV4.createNote({
+          fname: "wsnote",
+          vault: wsVault,
+          wsRoot,
+        });
+      },
+      vaults: [{ fsPath: "vault1" }],
+      workspaces: [
+        {
+          name: "workspace",
+          vaults: [{ fsPath: "vault1" }],
+        },
+      ],
+    }
+  ),
   BASIC: new TestPresetEntryV4(
     async ({ engine }) => {
       return [

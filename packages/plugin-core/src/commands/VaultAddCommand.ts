@@ -190,14 +190,12 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
 
   async addWorkspaceToWorkspace(workspace: DWorkspace) {
     const wsRoot = DendronWorkspace.wsRoot();
-    const wsService = new WorkspaceService({ wsRoot });
     const vaults = workspace.vaults;
 
     await _.reduce(
       vaults,
       async (resp: any, vault: DVault) => {
         await resp;
-        await wsService.createVault({ vault });
         return this.addVaultToWorkspace(vault);
       },
       Promise.resolve()

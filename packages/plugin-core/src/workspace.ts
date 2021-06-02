@@ -383,12 +383,7 @@ export class DendronWorkspace {
    */
   get vaultsv4(): DVault[] {
     const vaults = DendronWorkspace.instance().config.vaults;
-    return vaults.map((ent) => ({
-      ...ent,
-      fsPath: path.isAbsolute(ent.fsPath)
-        ? path.relative(DendronWorkspace.wsRoot(), ent.fsPath)
-        : ent.fsPath,
-    }));
+    return vaults;
   }
 
   getTreeView(key: DendronTreeViewKey) {

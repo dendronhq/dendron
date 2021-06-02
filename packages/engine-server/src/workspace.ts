@@ -85,28 +85,36 @@ export class WorkspaceService {
     return DConfig.writeConfig({ wsRoot, config });
   }
 
+  /**
+   *
+   * @param param0
+   * @returns `{vaults}` that have been added
+   */
   async addWorkspace({ workspace }: { workspace: DWorkspace }) {
     const allWorkspaces = this.config.workspaces || {};
     allWorkspaces[workspace.name] = _.omit(workspace, ["name", "vaults"]);
+    // update vault
+    const newVaults = await _.reduce(
+      workspace.vaults,
+      async (acc, vault) => {
+        const out = await acc;
+        out.push(
+          await this.addVault({
+            vault: { ...vault, workspace: workspace.name },
+          })
+        );
+        return out;
+      },
+      Promise.resolve([] as DVault[])
+    );
     const config = this.config;
     config.workspaces = allWorkspaces;
-    Promise.all(
-      workspace.vaults.map(async (vault) => {
-        this.addVault({ vault, writeConfig: false });
-      })
-    );
     this.setConfig(config);
+    return { vaults: newVaults };
   }
 
-  async addVault({
-    vault,
-    writeConfig,
-  }: {
-    vault: DVault;
-    writeConfig?: boolean;
-  }) {
+  async addVault({ vault }: { vault: DVault }) {
     const config = this.config;
-    writeConfig = writeConfig || true;
     config.vaults.unshift(vault);
     // update dup note behavior
     if (!config.site.duplicateNoteBehavior) {
@@ -117,9 +125,8 @@ export class WorkspaceService {
     } else if (_.isArray(config.site.duplicateNoteBehavior.payload)) {
       config.site.duplicateNoteBehavior.payload.push(VaultUtils.getName(vault));
     }
-    if (writeConfig) {
-      await this.setConfig(config);
-    }
+    await this.setConfig(config);
+    return vault;
   }
 
   /**

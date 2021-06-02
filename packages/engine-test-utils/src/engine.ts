@@ -97,21 +97,26 @@ export async function setupWS(opts: {
 }) {
   const wsRoot = tmpDir().name;
   const ws = new WorkspaceService({ wsRoot });
-  const vaults = await Promise.all(
+  let vaults = await Promise.all(
     opts.vaults.map(async (vault) => {
       await ws.createVault({ vault });
       return vault;
     })
   );
   if (opts.workspaces) {
-    await _.reduce(
+    const vaultsFromWs = await _.reduce(
       opts.workspaces,
       async (resp, ent) => {
         await resp;
+        await WorkspaceService.createWorkspace({
+          wsRoot: path.join(wsRoot, ent.name),
+          vaults: ent.vaults,
+        });
         return ws.addWorkspace({ workspace: ent });
       },
-      Promise.resolve({} as any)
+      Promise.resolve({ vaults: [] } as { vaults: DVault[] })
     );
+    vaults = vaults.concat(vaultsFromWs.vaults);
   }
   if (opts.asRemote) {
     await GitTestUtils.createRepoWithReadme(wsRoot);
@@ -198,21 +203,27 @@ export async function runEngineTestV5(
   func: RunEngineTestFunctionV5,
   opts: RunEngineTestV5Opts
 ): Promise<any> {
-  const { preSetupHook, extra, vaults, createEngine, initGit, workspaces } =
-    _.defaults(opts, {
-      preSetupHook: async ({}) => {},
-      postSetupHook: async ({}) => {},
-      createEngine: createEngineFromEngine,
-      extra: {},
-      // third vault has diff name
-      vaults: [
-        { fsPath: "vault1" },
-        { fsPath: "vault2" },
-        { fsPath: "vault3", name: "vaultThree" },
-      ],
-    });
-  const { wsRoot } = await setupWS({ vaults, workspaces });
-  if (opts.initHooks) {
+  const {
+    preSetupHook,
+    extra,
+    vaults: vaultsInit,
+    createEngine,
+    initGit,
+    workspaces,
+  } = _.defaults(opts, {
+    preSetupHook: async ({}) => {},
+    postSetupHook: async ({}) => {},
+    createEngine: createEngineFromEngine,
+    extra: {},
+    // third vault has diff name
+    vaults: [
+      { fsPath: "vault1" },
+      { fsPath: "vault2" },
+      { fsPath: "vault3", name: "vaultThree" },
+    ],
+  });
+  const { wsRoot, vaults } = await setupWS({ vaults: vaultsInit, workspaces });
+  if ((opts.initHooks, vaults)) {
     fs.mkdirSync(path.join(wsRoot, CONSTANTS.DENDRON_HOOKS_BASE));
   }
   await preSetupHook({ wsRoot, vaults });

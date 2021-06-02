@@ -140,8 +140,8 @@ export class VaultUtils {
    */
   static normVaultPath = (opts: { vault: DVault; wsRoot: string }) => {
     return path.isAbsolute(opts.vault.fsPath)
-      ? path.relative(opts.wsRoot, opts.vault.fsPath)
-      : opts.vault.fsPath;
+      ? path.relative(opts.wsRoot, VaultUtils.getRelPath(opts.vault))
+      : VaultUtils.getRelPath(opts.vault);
   };
 
   /**

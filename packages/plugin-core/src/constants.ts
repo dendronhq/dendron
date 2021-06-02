@@ -1,4 +1,7 @@
-import { DendronTreeViewKey } from "@dendronhq/common-all";
+import {
+  DendronTreeViewKey,
+  DendronCalendarViewKey,
+} from "@dendronhq/common-all";
 import { CodeConfigKeys } from "./types";
 
 export const extensionQualifiedId = `dendron.dendron`;
@@ -19,7 +22,7 @@ export const DENDRON_VIEWS = [
     type: "webview",
   },
   {
-    id: DendronTreeViewKey.CALENDAR_VIEW,
+    id: DendronCalendarViewKey.CALENDAR_VIEW,
     name: "Calendar View",
     when: DendronContext.DEV_MODE,
     where: "explorer",

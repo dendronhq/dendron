@@ -1,15 +1,17 @@
-import { DendronTreeViewKey, DMessage } from "@dendronhq/common-all";
+import {
+  DendronCalendarViewKey,
+  CalendarViewMessage,
+  CalendarViewMessageType,
+  DMessage,
+} from "@dendronhq/common-all";
 import * as vscode from "vscode";
-import { getWS } from "../workspace";
 import { WebViewUtils } from "./utils";
+import { getEngine } from "../workspace";
+import { GotoNoteCommand } from "../commands/GotoNote";
 
 export class CalendarView implements vscode.WebviewViewProvider {
-  public static readonly viewType = DendronTreeViewKey.CALENDAR_VIEW;
+  public static readonly viewType = DendronCalendarViewKey.CALENDAR_VIEW;
   private _view?: vscode.WebviewView;
-
-  constructor() {
-    getWS().setTreeView(DendronTreeViewKey.SAMPLE_VIEW, this);
-  }
 
   public postMessage(msg: DMessage) {
     this._view?.webview.postMessage(msg);
@@ -26,12 +28,29 @@ export class CalendarView implements vscode.WebviewViewProvider {
       localResourceRoots: [],
     };
     webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
+    webviewView.webview.onDidReceiveMessage(
+      async (msg: CalendarViewMessage) => {
+        switch (msg.type) {
+          case CalendarViewMessageType.onSelect: {
+            const note = getEngine().notes[msg.data.id];
+            await new GotoNoteCommand().execute({
+              qs: note.fname,
+              vault: note.vault,
+            });
+            break;
+          }
+          default:
+            console.log("got data", msg);
+            break;
+        }
+      }
+    );
   }
 
   private _getHtmlForWebview(_webview: vscode.Webview) {
-    return WebViewUtils.genHTMLForTreeView({
+    return WebViewUtils.genHTMLForView({
       title: "Calendar View",
-      view: DendronTreeViewKey.CALENDAR_VIEW,
+      view: DendronCalendarViewKey.CALENDAR_VIEW,
     });
   }
 }

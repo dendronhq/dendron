@@ -13,12 +13,26 @@ function CalendarView({ engine }: DendronProps) {
   const logger = createLogger("CalendarView");
 
   return (
-    <div>
-      Notes:{" "}
-      {_.values(notes)
-        .map((n) => n.fname)
-        .join(", ")}
-    </div>
+    <ul>
+      {_.values(notes).map((note) => (
+        <li>
+          <a
+            id={note.id}
+            href="#"
+            key={note.id}
+            onClick={() => {
+              postVSCodeMessage({
+                type: "onClick",
+                data: { id: note.id },
+                source: DMessageSource.webClient,
+              });
+            }}
+          >
+            {note.fname}
+          </a>
+        </li>
+      ))}
+    </ul>
   );
 }
 

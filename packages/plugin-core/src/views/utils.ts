@@ -1,6 +1,7 @@
 import {
   DendronTreeViewKey,
   DendronWebViewKey,
+  DendronCalendarViewKey,
   DUtils,
 } from "@dendronhq/common-all";
 import { Logger } from "../logger";
@@ -12,7 +13,7 @@ export class WebViewUtils {
     view,
   }: {
     title: string;
-    view: DendronTreeViewKey | DendronWebViewKey;
+    view: DendronTreeViewKey | DendronWebViewKey | DendronCalendarViewKey;
   }) => {
     const ws = getWS();
     const qs = DUtils.querystring.stringify({

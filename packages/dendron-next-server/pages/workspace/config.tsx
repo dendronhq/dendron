@@ -237,29 +237,28 @@ export default function ConfigSamplePage() {
                       >
                         <Stack direction="row" align="center">
                           <Field name="site.usePrettyRefs">
-                            {
+                            {({
                               // @ts-ignore
-                              ({
-                                form: { setFieldValue },
-                                field: { name },
-                              }) => (
-                                <>
-                                  <FormLabel htmlFor={name} margin={0}>
-                                    Use pretty refs?
-                                  </FormLabel>
+                              form: { setFieldValue },
+                              // @ts-ignore
+                              field: { name },
+                            }) => (
+                              <>
+                                <FormLabel htmlFor={name} margin={0}>
+                                  Use pretty refs?
+                                </FormLabel>
 
-                                  <Switch
-                                    id={name}
-                                    name={name}
-                                    isChecked={values?.site?.usePrettyRefs}
-                                    onChange={(e) =>
-                                      setFieldValue(name, e.target.checked)
-                                    }
-                                    colorScheme="positive"
-                                  />
-                                </>
-                              )
-                            }
+                                <Switch
+                                  id={name}
+                                  name={name}
+                                  isChecked={values?.site?.usePrettyRefs}
+                                  onChange={(e) =>
+                                    setFieldValue(name, e.target.checked)
+                                  }
+                                  colorScheme="positive"
+                                />
+                              </>
+                            )}
                           </Field>
                         </Stack>
 
@@ -278,30 +277,29 @@ export default function ConfigSamplePage() {
                       >
                         <Stack direction="row" align="center">
                           <Field name="site.copyAssets">
-                            {
+                            {({
                               // @ts-ignore
-                              ({
-                                form: { setFieldValue },
-                                field: { name, value },
-                              }) => (
-                                <>
-                                  <FormLabel htmlFor={name} margin={0}>
-                                    Copy assets?
-                                  </FormLabel>
+                              form: { setFieldValue },
+                              // @ts-ignore
+                              field: { name, value },
+                            }) => (
+                              <>
+                                <FormLabel htmlFor={name} margin={0}>
+                                  Copy assets?
+                                </FormLabel>
 
-                                  <Switch
-                                    id={name}
-                                    name={name}
-                                    value={value}
-                                    isChecked={values?.site?.copyAssets}
-                                    onChange={(e) =>
-                                      setFieldValue(name, e.target.checked)
-                                    }
-                                    colorScheme="positive"
-                                  />
-                                </>
-                              )
-                            }
+                                <Switch
+                                  id={name}
+                                  name={name}
+                                  value={value}
+                                  isChecked={values?.site?.copyAssets}
+                                  onChange={(e) =>
+                                    setFieldValue(name, e.target.checked)
+                                  }
+                                  colorScheme="positive"
+                                />
+                              </>
+                            )}
                           </Field>
                         </Stack>
 

@@ -53,15 +53,8 @@ export class NoteTestUtilsV4 {
   };
 
   static createNote = async (opts: CreateNoteOptsV4) => {
-    const {
-      fname,
-      vault,
-      props,
-      body,
-      genRandomId,
-      noWrite,
-      wsRoot,
-    } = _.defaults(opts, { noWrite: false });
+    const { fname, vault, props, body, genRandomId, noWrite, wsRoot } =
+      _.defaults(opts, { noWrite: false });
     /**
      * Make sure snapshots stay consistent
      */

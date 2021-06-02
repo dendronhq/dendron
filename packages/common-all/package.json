@@ -23,7 +23,7 @@
   "types": "lib/index.d.ts",
   "scripts": {
     "clean": "rimraf lib && rimraf coverage",
-    "format": "prettier --ignore-path='../../.prettierignore' --write .",
+    "format": "cd ../.. && yarn format:pkg $npm_package_repository_directory",
     "lint": "echo stub",
     "prepublishOnly": "yarn build",
     "prebuild": "yarn clean && yarn format && yarn lint && echo Using TypeScript && tsc --version",
@@ -69,7 +69,6 @@
     "coveralls": "^3.0.2",
     "jest": "^23.6.0",
     "jest-serializer-path": "^0.1.15",
-    "prettier": "2.0.5",
     "rimraf": "^2.6.2",
     "ts-jest": "^23.10.3",
     "ts-node": "^8.10.2",

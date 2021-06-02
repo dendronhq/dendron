@@ -20,7 +20,8 @@
     "analyze": "size-limit --why",
     "storybook": "start-storybook -s ./public -p 6006",
     "build-storybook": "build-storybook -s ./public",
-    "deploy-storybook": "yarn build && yarn build-storybook"
+    "deploy-storybook": "yarn build && yarn build-storybook",
+    "format": "cd ../.. && yarn format:pkg $npm_package_repository_directory"
   },
   "peerDependencies": {
     "react": ">=16"
@@ -80,5 +81,10 @@
     "@fontsource/montserrat": "^4.2.2",
     "@fontsource/roboto": "^4.2.2",
     "framer-motion": "^4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/dendronhq/dendron.git",
+    "directory": "packages/dendron-design-system"
   }
 }

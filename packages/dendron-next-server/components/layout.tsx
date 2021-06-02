@@ -40,8 +40,7 @@ export default function Layout({ children }: Props) {
             boxSize={12}
           />
 
-
-            {/*
+          {/*
           <Box marginLeft="auto">
             <Link
               target="_blank"

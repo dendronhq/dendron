@@ -151,13 +151,15 @@ export class SetupWorkspaceCommand extends BasicCommand<
   async execute(opts: CommandOpts): Promise<DVault[]> {
     const ctx = "SetupWorkspaceCommand extends BaseCommand";
     const ws = DendronWorkspace.instance();
-    const { rootDirRaw: rootDir, skipOpenWs, emptyWs, initType } = _.defaults(
-      opts,
-      {
-        skipOpenWs: false,
-        emptyWs: false,
-      }
-    );
+    const {
+      rootDirRaw: rootDir,
+      skipOpenWs,
+      emptyWs,
+      initType,
+    } = _.defaults(opts, {
+      skipOpenWs: false,
+      emptyWs: false,
+    });
     ws.L.info({ ctx, rootDir, skipOpenWs });
 
     if (

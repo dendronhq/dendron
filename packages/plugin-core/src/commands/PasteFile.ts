@@ -20,12 +20,12 @@ type CommandOpts = CommandInput;
 /**
  * fpath: full path to copied file
  */
-type CommandOutput = { error?: DendronError, fpath?: string };
+type CommandOutput = { error?: DendronError; fpath?: string };
 
 const cleanFname = (basename: string) => {
-  const {name, ext} = path.parse(basename)
-  return _.kebabCase(name) +  ext;
-}
+  const { name, ext } = path.parse(basename);
+  return _.kebabCase(name) + ext;
+};
 
 export class PasteFileCommand extends BasicCommand<CommandOpts, CommandOutput> {
   static key = DENDRON_COMMANDS.PASTE_FILE.key;
@@ -102,7 +102,7 @@ export class PasteFileCommand extends BasicCommand<CommandOpts, CommandOutput> {
       builder.replace(selection, txt);
     });
     return {
-      fpath: dstPath
+      fpath: dstPath,
     };
   }
 }

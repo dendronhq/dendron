@@ -21,7 +21,7 @@
   "types": "lib/index.d.ts",
   "scripts": {
     "clean": "rimraf lib && rimraf coverage",
-    "format": "prettier --ignore-path='../../.prettierignore' --write .",
+    "format": "cd ../.. && yarn format:pkg $npm_package_repository_directory",
     "lint": "echo stub",
     "prepublishOnly": "yarn build",
     "prebuild": "yarn clean && yarn format && yarn lint && echo Using TypeScript && tsc --version",
@@ -45,7 +45,6 @@
     "@types/lodash": "^4.14.161",
     "@types/morgan": "^1.9.1",
     "@types/node": "13.11.0",
-    "prettier": "2.0.5",
     "rimraf": "^2.6.2",
     "ts-node": "^8.10.2"
   },

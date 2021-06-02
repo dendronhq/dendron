@@ -25,9 +25,11 @@ suite("GoUpCommand", function () {
       const notePath = path.join(vaultPath, "foo.md");
       await VSCodeUtils.openFileInEditor(vscode.Uri.file(notePath));
       await new GoUpCommand().run();
-      expect(VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath.endsWith(
-        "root.md"
-      )).toBeTruthy();
+      expect(
+        VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath.endsWith(
+          "root.md"
+        )
+      ).toBeTruthy();
       done();
     });
     setupDendronWorkspace(root.name, ctx, {
@@ -44,9 +46,11 @@ suite("GoUpCommand", function () {
       const notePath = path.join(vaultPath, "foo.ch1.md");
       await VSCodeUtils.openFileInEditor(vscode.Uri.file(notePath));
       await new GoUpCommand().run();
-      expect(VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath.endsWith(
-        "root.md"
-      )).toBeTruthy();
+      expect(
+        VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath.endsWith(
+          "root.md"
+        )
+      ).toBeTruthy();
       done();
     });
     setupDendronWorkspace(root.name, ctx, {

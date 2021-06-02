@@ -17,7 +17,8 @@ const workspaceCache: WorkspaceCache = {
 };
 
 const markdownExtRegex = /\.md$/i;
-export const REGEX_FENCED_CODE_BLOCK = /^( {0,3}|\t)```[^`\r\n]*$[\w\W]+?^( {0,3}|\t)``` *$/gm;
+export const REGEX_FENCED_CODE_BLOCK =
+  /^( {0,3}|\t)```[^`\r\n]*$[\w\W]+?^( {0,3}|\t)``` *$/gm;
 
 export const containsMarkdownExt = (pathParam: string): boolean =>
   !!markdownExtRegex.exec(path.parse(pathParam).ext);

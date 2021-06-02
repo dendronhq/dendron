@@ -1,10 +1,10 @@
 const _ = require("lodash");
-const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer')
+const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer");
 
 module.exports = (phase) => {
   const env = {
     STAGE: process.env.STAGE || "dev",
-    LOCAL: JSON.stringify(process.env["LOCAL"] === 'true')
+    LOCAL: JSON.stringify(process.env["LOCAL"] === "true"),
   };
   console.log("build env:", env);
   return {
@@ -13,29 +13,29 @@ module.exports = (phase) => {
     async headers() {
       return [
         {
-          source: '/(.*)?',
+          source: "/(.*)?",
           headers: [
             {
-              key: 'Access-Control-Allow-Origin',
-              value: '*'
+              key: "Access-Control-Allow-Origin",
+              value: "*",
             },
             {
-              key: 'Access-Control-Allow-Methods',
-              value: 'GET,HEAD,PUT,PATCH,POST,DELETE'
+              key: "Access-Control-Allow-Methods",
+              value: "GET,HEAD,PUT,PATCH,POST,DELETE",
             },
-          ]
-        }
-      ]
+          ],
+        },
+      ];
     },
     webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
       config.plugins.push(new webpack.IgnorePlugin(/\/__tests__\//));
-      if (env.STAGE === 'dev') {
+      if (env.STAGE === "dev") {
         config.optimization.minimize = false;
       }
       config.node = {
         ...config.node,
         fs: "empty",
-        tls: 'empty',
+        tls: "empty",
         net: "empty",
         "cross-spawn": "empty",
         child_process: "empty",
@@ -43,12 +43,12 @@ module.exports = (phase) => {
       if (process.env.ANALYZE) {
         config.plugins.push(
           new BundleAnalyzerPlugin({
-            analyzerMode: 'server',
+            analyzerMode: "server",
             analyzerPort: isServer ? 8888 : 8889,
             openAnalyzer: true,
           })
-        )
-       }
+        );
+      }
       // Important: return the modified config
       return config;
     },

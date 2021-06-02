@@ -123,10 +123,8 @@ export class GraphvizExportPod extends ExportPod<GraphvizExportConfig> {
   async plant(opts: ExportPodPlantOpts) {
     const { dest, notes, wsRoot, config } = opts;
 
-    const {
-      showGraphByHierarchy = true,
-      showGraphByEdges = false,
-    } = config as GraphvizExportConfig;
+    const { showGraphByHierarchy = true, showGraphByEdges = false } =
+      config as GraphvizExportConfig;
 
     // verify dest exist
     const podDstPath = dest.fsPath;

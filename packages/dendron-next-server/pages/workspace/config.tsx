@@ -58,31 +58,32 @@ function InputControl({
       {
         // @ts-ignore
         ({ form: { errors, touched } }) => (
-        <FormControl
-          isRequired={required}
-          isDisabled={disabled}
-          isInvalid={
-            /**
-             * If field has errors AND they've interacted with this field, mark
-             * control as invalid. */
-            !!(get(errors, name) && get(touched, name))
-          }
-        >
-          {!!label && <FormLabel htmlFor={name}>{label}</FormLabel>}
+          <FormControl
+            isRequired={required}
+            isDisabled={disabled}
+            isInvalid={
+              /**
+               * If field has errors AND they've interacted with this field, mark
+               * control as invalid. */
+              !!(get(errors, name) && get(touched, name))
+            }
+          >
+            {!!label && <FormLabel htmlFor={name}>{label}</FormLabel>}
 
-          <Field
-            //
-            as={Input}
-            name={name}
-            placeholder={placeholder}
-            id={name}
-          />
+            <Field
+              //
+              as={Input}
+              name={name}
+              placeholder={placeholder}
+              id={name}
+            />
 
-          <FormErrorMessage>{errors.site?.siteRootDir}</FormErrorMessage>
+            <FormErrorMessage>{errors.site?.siteRootDir}</FormErrorMessage>
 
-          <FormHelperText>{help}</FormHelperText>
-        </FormControl>
-      )}
+            <FormHelperText>{help}</FormHelperText>
+          </FormControl>
+        )
+      }
     </Field>
   );
 }
@@ -237,24 +238,28 @@ export default function ConfigSamplePage() {
                         <Stack direction="row" align="center">
                           <Field name="site.usePrettyRefs">
                             {
-                            // @ts-ignore
-                            ({ form: { setFieldValue }, field: { name } }) => (
-                              <>
-                                <FormLabel htmlFor={name} margin={0}>
-                                  Use pretty refs?
-                                </FormLabel>
+                              // @ts-ignore
+                              ({
+                                form: { setFieldValue },
+                                field: { name },
+                              }) => (
+                                <>
+                                  <FormLabel htmlFor={name} margin={0}>
+                                    Use pretty refs?
+                                  </FormLabel>
 
-                                <Switch
-                                  id={name}
-                                  name={name}
-                                  isChecked={values?.site?.usePrettyRefs}
-                                  onChange={(e) =>
-                                    setFieldValue(name, e.target.checked)
-                                  }
-                                  colorScheme="positive"
-                                />
-                              </>
-                            )}
+                                  <Switch
+                                    id={name}
+                                    name={name}
+                                    isChecked={values?.site?.usePrettyRefs}
+                                    onChange={(e) =>
+                                      setFieldValue(name, e.target.checked)
+                                    }
+                                    colorScheme="positive"
+                                  />
+                                </>
+                              )
+                            }
                           </Field>
                         </Stack>
 
@@ -274,26 +279,29 @@ export default function ConfigSamplePage() {
                         <Stack direction="row" align="center">
                           <Field name="site.copyAssets">
                             {
-                            // @ts-ignore
-                            ({ form: { setFieldValue }, field: { name, value },
-                            }) => (
-                              <>
-                                <FormLabel htmlFor={name} margin={0}>
-                                  Copy assets?
-                                </FormLabel>
+                              // @ts-ignore
+                              ({
+                                form: { setFieldValue },
+                                field: { name, value },
+                              }) => (
+                                <>
+                                  <FormLabel htmlFor={name} margin={0}>
+                                    Copy assets?
+                                  </FormLabel>
 
-                                <Switch
-                                  id={name}
-                                  name={name}
-                                  value={value}
-                                  isChecked={values?.site?.copyAssets}
-                                  onChange={(e) =>
-                                    setFieldValue(name, e.target.checked)
-                                  }
-                                  colorScheme="positive"
-                                />
-                              </>
-                            )}
+                                  <Switch
+                                    id={name}
+                                    name={name}
+                                    value={value}
+                                    isChecked={values?.site?.copyAssets}
+                                    onChange={(e) =>
+                                      setFieldValue(name, e.target.checked)
+                                    }
+                                    colorScheme="positive"
+                                  />
+                                </>
+                              )
+                            }
                           </Field>
                         </Stack>
 

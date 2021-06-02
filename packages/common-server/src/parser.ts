@@ -48,7 +48,7 @@ export class SchemaParserV2 extends ParserBaseV2 {
     } else {
       // TODO: legacy
       const schemaDict: SchemaPropsDict = {};
-      ((schemaOpts as unknown) as SchemaOpts[]).map((ent) => {
+      (schemaOpts as unknown as SchemaOpts[]).map((ent) => {
         const schema = SchemaUtils.create(ent);
         schemaDict[schema.id] = schema;
       });

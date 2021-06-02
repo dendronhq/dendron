@@ -6,7 +6,7 @@ import {
   Heading,
   Link,
   Text,
-  VStack
+  VStack,
 } from "@chakra-ui/react";
 import _ from "lodash";
 import Head from "next/head";

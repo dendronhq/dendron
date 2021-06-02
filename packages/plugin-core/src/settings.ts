@@ -222,8 +222,7 @@ export class Snippets {
     time: {
       prefix: "time",
       scope: "markdown,yaml",
-      body:
-        "$CURRENT_YEAR-$CURRENT_MONTH-$CURRENT_DATE $CURRENT_HOUR:$CURRENT_MINUTE",
+      body: "$CURRENT_YEAR-$CURRENT_MONTH-$CURRENT_DATE $CURRENT_HOUR:$CURRENT_MINUTE",
       description: "time",
     },
   };

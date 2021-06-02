@@ -27,7 +27,7 @@ const config = {
       "pino-pretty": "pino-pretty",
     },
     /(@dendronhq|packages)\/dendron-11ty$/,
-    /\.\/webpack-require-hack/
+    /\.\/webpack-require-hack/,
   ],
   resolve: {
     // support reading TypeScript and JavaScript files, 📖 -> https://github.com/TypeStrong/ts-loader
@@ -38,7 +38,7 @@ const config = {
       patterns: [{ from: path.join("assets", "static"), to: "static" }],
     }),
     new IgnorePlugin({
-      resourceRegExp: /fsevents/
+      resourceRegExp: /fsevents/,
     }),
     // @ts-ignore
     new CopyPlugin({
@@ -46,7 +46,9 @@ const config = {
     }),
     // @ts-ignore
     new CopyPlugin({
-      patterns: [{ from: "webpack-require-hack.js", to: "webpack-require-hack.js" }],
+      patterns: [
+        { from: "webpack-require-hack.js", to: "webpack-require-hack.js" },
+      ],
     }),
   ],
   module: {

@@ -33,8 +33,9 @@ export const useVSCodeMessage = (setMsgHook: (msg: VSCodeMessage) => void) => {
             shiftKey: e.shiftKey,
           }),
           "*"
-        )};
-    
+        );
+      };
+
       if (!window.hasOwnProperty("keyhookInstalled")) {
         (window as any).keyhookInstalled = true;
         window.addEventListener("keydown", keyListener);
@@ -43,7 +44,7 @@ export const useVSCodeMessage = (setMsgHook: (msg: VSCodeMessage) => void) => {
     return () => {
       // @ts-ignore
       window.removeEventListener("message", listener);
-      delete (window as any)["keyhookInstalled"]
+      delete (window as any)["keyhookInstalled"];
     };
   }, []);
 };

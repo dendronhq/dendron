@@ -2,7 +2,8 @@ import { NoteUtils } from "@dendronhq/common-all";
 import vscode from "vscode";
 
 export default class FrontmatterFoldingRangeProvider
-  implements vscode.FoldingRangeProvider {
+  implements vscode.FoldingRangeProvider
+{
   /**
    * Returns the folding range of the frontmatter section of a markdown note.
    * @param document The document we want to find the folding range.

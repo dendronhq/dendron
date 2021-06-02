@@ -1,13 +1,21 @@
-import { DMessageSource, OnDidChangeActiveTextEditorMsg, ThemeMessageType, DMessageType } from "@dendronhq/common-all";
-import { Spin } from 'antd';
 import {
-  combinedStore, createLogger,
+  DMessageSource,
+  OnDidChangeActiveTextEditorMsg,
+  ThemeMessageType,
+  DMessageType,
+} from "@dendronhq/common-all";
+import { Spin } from "antd";
+import {
+  combinedStore,
+  createLogger,
   engineHooks,
   engineSlice,
-  ideHooks, ideSlice,
+  ideHooks,
+  ideSlice,
   postVSCodeMessage,
-  querystring, setLogLevel,
-  useVSCodeMessage
+  querystring,
+  setLogLevel,
+  useVSCodeMessage,
 } from "@dendronhq/common-frontend";
 import { useRouter } from "next/router";
 import React, { useEffect } from "react";
@@ -22,9 +30,7 @@ const themes = {
 
 const { useEngineAppSelector, useEngine } = engineHooks;
 
-
 function AppVSCode({ Component, pageProps }: any) {
-
   // --- init
   const router = useRouter();
   const { query, isReady } = router;
@@ -39,7 +45,7 @@ function AppVSCode({ Component, pageProps }: any) {
       type: DMessageType.init,
       data: {},
       source: DMessageSource.webClient,
-    })
+    });
   }, []);
   useEngine({ engineState: engine, opts: query });
   const logger = createLogger("AppVSCode");
@@ -51,47 +57,52 @@ function AppVSCode({ Component, pageProps }: any) {
     const ctx = "useVSCodeMsg";
     const { query } = router;
     // when we get a msg from vscode, update our msg state
-    logger.info({ ctx, msg, query});
+    logger.info({ ctx, msg, query });
 
     if (msg.type === "onDidChangeActiveTextEditor") {
       let cmsg = msg as OnDidChangeActiveTextEditorMsg;
-      const {sync, note} = cmsg.data;
+      const { sync, note } = cmsg.data;
       if (sync) {
         // skip the initial ?
-        const {port, ws} = querystring.parse(window.location.search.slice(1)) as {port: string, ws: string}
+        const { port, ws } = querystring.parse(
+          window.location.search.slice(1)
+        ) as { port: string; ws: string };
         logger.info({
           ctx,
           msg: "syncEngine:pre",
-          port, ws
-        })
-        await ideDispatch(engineSlice.initNotes({ port: parseInt(port as string), ws}));
+          port,
+          ws,
+        });
+        await ideDispatch(
+          engineSlice.initNotes({ port: parseInt(port as string), ws })
+        );
       }
-      logger.info({ ctx, msg: "syncEngine:post"});
+      logger.info({ ctx, msg: "syncEngine:post" });
       ideDispatch(ideSlice.actions.setNoteActive(note));
-      logger.info({ ctx, msg: "setNote:post"});
+      logger.info({ ctx, msg: "setNote:post" });
     } else if (msg.type === ThemeMessageType.onThemeChange) {
-      let cmsg = msg; 
-      const {theme} = cmsg.data;
-      logger.info({ ctx, theme, msg: "theme"});
-      ideDispatch(ideSlice.actions.setTheme(theme))
+      let cmsg = msg;
+      const { theme } = cmsg.data;
+      logger.info({ ctx, theme, msg: "theme" });
+      ideDispatch(ideSlice.actions.setTheme(theme));
     } else {
-      logger.error({ctx, msg: "unknown message"});
+      logger.error({ ctx, msg: "unknown message" });
     }
   });
 
   // --- render
   if (!isReady) {
-    logger.info({ ctx: "exit", state: "router:notInitialized"});
-    return <Spin/>
+    logger.info({ ctx: "exit", state: "router:notInitialized" });
+    return <Spin />;
   }
-  logger.info({ ctx: "exit", state: "render:child", engine, ide});
+  logger.info({ ctx: "exit", state: "render:child", engine, ide });
   let defaultTheme = "light";
   if (ide.theme !== "unknown") {
     defaultTheme = ide.theme;
   }
   return (
-    <ThemeSwitcherProvider themeMap={themes} defaultTheme={defaultTheme} >
-        <Component engine={engine} ide={ide} {...pageProps} />
+    <ThemeSwitcherProvider themeMap={themes} defaultTheme={defaultTheme}>
+      <Component engine={engine} ide={ide} {...pageProps} />
     </ThemeSwitcherProvider>
   );
 }
@@ -101,9 +112,9 @@ function App({ Component, pageProps }: any) {
   const router = useRouter();
   if (router.pathname.startsWith("/vscode")) {
     return (
-        <Provider store={combinedStore}>
-          <AppVSCode Component={Component} pageProps={pageProps} />
-        </Provider>
+      <Provider store={combinedStore}>
+        <AppVSCode Component={Component} pageProps={pageProps} />
+      </Provider>
     );
   }
   return (

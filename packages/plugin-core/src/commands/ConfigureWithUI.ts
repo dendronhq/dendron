@@ -75,7 +75,7 @@ export class ConfigureWithUICommand extends BasicCommand<
     if (getStage() === "dev") {
       resp = WebViewUtils.genHTMLForWebView({
         title: "Dendron Config",
-        view: DendronWebViewKey.CONFIGURE
+        view: DendronWebViewKey.CONFIGURE,
       });
     } else {
       resp = await getWebviewContent2({ title });

@@ -2,7 +2,7 @@ import { vault2Path } from "@dendronhq/common-server";
 import {
   AssertUtils,
   FileTestUtils,
-  NoteTestUtilsV4
+  NoteTestUtilsV4,
 } from "@dendronhq/common-test-utils";
 import fs from "fs-extra";
 import path from "path";

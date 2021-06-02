@@ -19,12 +19,12 @@ class Backlink extends vscode.TreeItem {
 }
 
 export default class BacklinksTreeDataProvider
-  implements vscode.TreeDataProvider<Backlink> {
-  private _onDidChangeTreeData: vscode.EventEmitter<
-    Backlink | undefined
-  > = new vscode.EventEmitter<Backlink | undefined>();
-  readonly onDidChangeTreeData: vscode.Event<Backlink | undefined> = this
-    ._onDidChangeTreeData.event;
+  implements vscode.TreeDataProvider<Backlink>
+{
+  private _onDidChangeTreeData: vscode.EventEmitter<Backlink | undefined> =
+    new vscode.EventEmitter<Backlink | undefined>();
+  readonly onDidChangeTreeData: vscode.Event<Backlink | undefined> =
+    this._onDidChangeTreeData.event;
 
   refresh(): void {
     this._onDidChangeTreeData.fire(undefined);

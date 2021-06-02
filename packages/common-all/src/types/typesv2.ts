@@ -489,7 +489,7 @@ export type TreeViewMessage = DMessage<TreeViewMessageType, { id: string }>;
 // --- Views
 
 export enum DendronWebViewKey {
-  CONFIGURE = "dendron.configure"
+  CONFIGURE = "dendron.configure",
 }
 
 export enum DendronTreeViewKey {
@@ -497,4 +497,4 @@ export enum DendronTreeViewKey {
   TREE_VIEW = "dendron.treeView",
   TREE_VIEW_V2 = "dendron.tree-view",
   BACKLINKS = "dendron.backlinks",
-} 
+}

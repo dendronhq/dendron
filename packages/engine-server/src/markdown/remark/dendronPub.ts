@@ -32,14 +32,8 @@ type PluginOpts = NoteRefsOpts & {
 
 function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
   const proc = this;
-  let {
-    dest,
-    vault,
-    fname,
-    config,
-    overrides,
-    insideNoteRef,
-  } = MDUtilsV4.getDendronData(proc);
+  let { dest, vault, fname, config, overrides, insideNoteRef } =
+    MDUtilsV4.getDendronData(proc);
   function transformer(tree: Node, _file: VFile) {
     let root = tree as Root;
     const { error, engine } = MDUtilsV4.getEngineFromProc(proc);

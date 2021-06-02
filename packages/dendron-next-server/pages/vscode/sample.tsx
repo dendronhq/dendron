@@ -28,7 +28,9 @@ export default function Sample({
   return (
     <>
       <h4>Current theme: {currentTheme}</h4>
-      <Button type="primary" onClick={toggleDarkMode}>Toggle Theme</Button>
+      <Button type="primary" onClick={toggleDarkMode}>
+        Toggle Theme
+      </Button>
       <br />
       Notes:{" "}
       {_.values(notes)

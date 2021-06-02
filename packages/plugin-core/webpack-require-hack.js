@@ -1,5 +1,5 @@
 const webpackRequire = (importPath) => {
-    const module = require(importPath);
-    return module;
+  const module = require(importPath);
+  return module;
 };
 module.exports = webpackRequire;

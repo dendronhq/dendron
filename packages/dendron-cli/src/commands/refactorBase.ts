@@ -18,7 +18,7 @@ export type RefactorCommandOpts = {
 
 export type RefactorRule = {
   name?: string;
-  operation: "add" | "remove"| "title2time";
+  operation: "add" | "remove" | "title2time";
   data: any;
 };
 
@@ -36,7 +36,7 @@ export abstract class RefactorBaseCommand<
       include: ["*.md"],
       exclude: [],
       dryRun: false,
-      limit: 9999
+      limit: 9999,
     });
   }
 
@@ -45,7 +45,7 @@ export abstract class RefactorBaseCommand<
   ) {
     const allFiles = getAllFiles({
       ...opts,
-      withFileTypes: true
+      withFileTypes: true,
     }) as Dirent[];
     return allFiles;
   }
@@ -62,12 +62,12 @@ export abstract class RefactorBaseCommand<
     this.props = this.cleanOpts(opts);
     this.L.info({ ctx, props: this.props, msg: "enter" });
     const stats = {
-      numChanged: 0
+      numChanged: 0,
     };
     const { limit, root, rule } = this.props;
     const allFiles = this.getFiles({ ...this.props });
     // return Promise.all(
-    return allFiles.map(dirent => {
+    return allFiles.map((dirent) => {
       const { name: fname } = dirent;
       if (stats.numChanged > limit) {
         this.L.info(`reached limit of ${limit} changes`);

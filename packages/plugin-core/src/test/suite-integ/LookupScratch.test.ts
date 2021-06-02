@@ -72,10 +72,8 @@ suite("Scratch Notes", function () {
         },
         onInit: async ({ vaults }) => {
           const vault = vaults[0];
-          const {
-            fname,
-            selection,
-          } = NOTE_PRESETS_V4.NOTE_DOMAIN_NAMESPACE_CHILD;
+          const { fname, selection } =
+            NOTE_PRESETS_V4.NOTE_DOMAIN_NAMESPACE_CHILD;
           const editor = await getNoteFromFname({ fname, vault });
           editor.selection = new vscode.Selection(...selection);
           await new LookupCommand().execute({
@@ -142,10 +140,8 @@ suite("Scratch Notes", function () {
         },
         onInit: async ({ vaults }) => {
           const vault = vaults[1];
-          const {
-            fname,
-            selection,
-          } = NOTE_PRESETS_V4.NOTE_DOMAIN_NAMESPACE_CHILD;
+          const { fname, selection } =
+            NOTE_PRESETS_V4.NOTE_DOMAIN_NAMESPACE_CHILD;
           const editor = await getNoteFromFname({ fname, vault });
           editor.selection = new vscode.Selection(...selection);
           await new LookupCommand().execute({

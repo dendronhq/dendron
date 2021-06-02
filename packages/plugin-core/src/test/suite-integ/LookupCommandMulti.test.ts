@@ -83,10 +83,8 @@ suite.skip("Lookup notes, multi", function () {
   }) => {
     const { onInitCb } = opts;
     onInitForUpdateItems({ onInitCb });
-    const {
-      wsRoot: _wsRoot,
-      vaults: _vaults,
-    } = await setupCodeWorkspaceMultiVaultV2({ ctx });
+    const { wsRoot: _wsRoot, vaults: _vaults } =
+      await setupCodeWorkspaceMultiVaultV2({ ctx });
     wsRoot = _wsRoot;
     vaults = _vaults;
     await VSCodeUtils.closeAllEditors();

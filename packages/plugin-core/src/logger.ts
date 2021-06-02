@@ -1,8 +1,4 @@
-import {
-  DendronError,
-  error2PlainObject,
-  setEnv
-} from "@dendronhq/common-all";
+import { DendronError, error2PlainObject, setEnv } from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import path from "path";

@@ -79,8 +79,10 @@ function attachCompiler(proc: Unified.Processor, _opts?: PluginOpts) {
       switch (dest) {
         case DendronASTDest.MD_DENDRON:
         case DendronASTDest.MD_REGULAR:
-        case DendronASTDest.MD_ENHANCED_PREVIEW:
           return `^${node.id}`;
+        case DendronASTDest.MD_ENHANCED_PREVIEW:
+          const procOpts = MDUtilsV4.getProcOpts(proc);
+          return blockAnchor2htmlRaw(node, procOpts.blockAnchorsOpts);
         default:
           throw new DendronError({ message: "Unable to render block anchor" });
       }
@@ -88,15 +90,17 @@ function attachCompiler(proc: Unified.Processor, _opts?: PluginOpts) {
   }
 }
 
-export function blockAnchor2html(node: BlockAnchor, opts?: PluginOpts) {
+export function blockAnchor2htmlRaw(node: BlockAnchor, opts?: PluginOpts) {
   const fullId = `^${node.id}`;
   const style =
     opts && opts.hideBlockAnchors
       ? "visibility: hidden; width: 0; height: 0;"
       : "font-size: 0.8em; opacity: 75%;";
-  return html(
-    `<a id="${fullId}" href="#${fullId}" style="${style}">${fullId}</a>`
-  );
+  return `<a id="${fullId}" href="#${fullId}" style="${style}">${fullId}</a>`;
+}
+
+export function blockAnchor2html(node: BlockAnchor, opts?: PluginOpts) {
+  return html(blockAnchor2htmlRaw(node, opts));
 }
 
 export { plugin as blockAnchors };

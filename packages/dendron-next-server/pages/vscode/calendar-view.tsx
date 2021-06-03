@@ -4,39 +4,89 @@ import {
   ideHooks,
   postVSCodeMessage,
 } from "@dendronhq/common-frontend";
-import { DMessageSource, CalendarViewMessageType } from "@dendronhq/common-all";
+import {
+  DMessageSource,
+  CalendarViewMessageType,
+  DNodeUtils,
+  NoteUtils,
+  NoteProps,
+} from "@dendronhq/common-all";
+import type { Moment } from "moment";
+import { Calendar } from "antd";
+import type { CalendarProps } from "antd";
 import _ from "lodash";
+import React, { useState } from "react";
 import { DendronProps } from "../../lib/types";
 
-function CalendarView({ engine }: DendronProps) {
-  const notes = engine.notes;
-  const logger = createLogger("CalendarView");
+type AntdCalendarProps = CalendarProps<Moment>;
 
-  const dailyNotes = _.values(notes).filter(
-    (note) => note.fname.startsWith("daily.") && note.children.length === 0
+function toLookup(notes: NoteProps[]): Record<string, NoteProps> {
+  const notesLookup = Object.fromEntries(
+    notes.map((note) => {
+      const dateKey = NoteUtils.genJournalNoteTitle({
+        fname: note.fname,
+        journalName: "journal",
+      });
+      return [dateKey, note];
+    })
+  );
+  return notesLookup;
+}
+
+function CalendarView({ engine }: DendronProps) {
+  // --- init
+  const ctx = CalendarView;
+  const logger = createLogger("calendarView");
+
+  logger.info({
+    ctx,
+    state: "enter",
+    engine,
+  });
+
+  const [currentMode, setCurrentMode] =
+    useState<AntdCalendarProps["mode"]>("month");
+
+  const notes = engine.notes;
+  const vaults = engine.vaults;
+  const currentVault = 0;
+
+  const vaultNotes = _.values(notes).filter(
+    (notes) => notes.vault.fsPath === vaults?.[currentVault].fsPath
   );
 
+  const dailyNotes = vaultNotes.filter((note) =>
+    note.fname.startsWith("daily.")
+  );
+
+  const groupedDailyNotes = toLookup(dailyNotes);
+
+  const onSelect: AntdCalendarProps["onSelect"] = (date) => {
+    logger.info({ ctx: "onSelect", date });
+    const dateKey = date.format(
+      currentMode === "month" ? "YYYY-MM-DD" : "YYYY-MM"
+    );
+    const selectedNote = groupedDailyNotes[dateKey];
+    if (selectedNote) {
+      postVSCodeMessage({
+        type: CalendarViewMessageType.onSelect,
+        data: { id: selectedNote.id },
+        source: DMessageSource.webClient,
+      });
+    }
+  };
+
+  const onPanelChange: AntdCalendarProps["onPanelChange"] = (date, mode) => {
+    logger.info({ ctx: "onPanelChange", date, mode });
+    setCurrentMode(mode);
+  };
+
   return (
-    <ul>
-      {dailyNotes.map((note) => (
-        <li>
-          <a
-            id={note.id}
-            href="#"
-            key={note.id}
-            onClick={() => {
-              postVSCodeMessage({
-                type: CalendarViewMessageType.onSelect,
-                data: { id: note.id },
-                source: DMessageSource.webClient,
-              });
-            }}
-          >
-            {note.fname}
-          </a>
-        </li>
-      ))}
-    </ul>
+    <Calendar
+      mode={currentMode}
+      onSelect={onSelect}
+      onPanelChange={onPanelChange}
+    />
   );
 }
 

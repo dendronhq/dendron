@@ -35,7 +35,7 @@ function toLookup(notes: NoteProps[]): Record<string, NoteProps> {
 
 function CalendarView({ engine }: DendronProps) {
   // --- init
-  const ctx = CalendarView;
+  const ctx = "CalendarView";
   const logger = createLogger("calendarView");
 
   logger.info({
@@ -49,7 +49,7 @@ function CalendarView({ engine }: DendronProps) {
 
   const notes = engine.notes;
   const vaults = engine.vaults;
-  const currentVault = 0;
+  const currentVault = 0; // TODO selected correct vault
 
   const vaultNotes = _.values(notes).filter(
     (notes) => notes.vault.fsPath === vaults?.[currentVault].fsPath
@@ -59,7 +59,7 @@ function CalendarView({ engine }: DendronProps) {
     note.fname.startsWith("daily.")
   );
 
-  const groupedDailyNotes = toLookup(dailyNotes);
+  const groupedDailyNotes = toLookup(dailyNotes); // create lookup table for faster search
 
   const onSelect: AntdCalendarProps["onSelect"] = (date) => {
     logger.info({ ctx: "onSelect", date });

@@ -118,8 +118,17 @@ export class WorkspaceService {
     return { vaults: newVaults };
   }
 
-  async addVault({ vault }: { vault: DVault }) {
-    const config = this.config;
+  async addVault(opts: {
+    vault: DVault;
+    config?: DendronConfig;
+    writeConfig?: boolean;
+    addToWorkspace?: boolean;
+  }) {
+    const { vault, config, writeConfig, addToWorkspace } = _.defaults(opts, {
+      config: this.config,
+      writeConfig: true,
+      addToWorkspace: false,
+    });
     config.vaults.unshift(vault);
     // update dup note behavior
     if (!config.site.duplicateNoteBehavior) {
@@ -130,7 +139,21 @@ export class WorkspaceService {
     } else if (_.isArray(config.site.duplicateNoteBehavior.payload)) {
       config.site.duplicateNoteBehavior.payload.push(VaultUtils.getName(vault));
     }
-    await this.setConfig(config);
+    if (writeConfig) {
+      await this.setConfig(config);
+    }
+    if (addToWorkspace) {
+      const wsPath = path.join(this.wsRoot, DENDRON_WS_NAME);
+      let out = (await readJSONWithComments(wsPath)) as WorkspaceSettings;
+      if (
+        !_.find(out.folders, (ent) => ent.path === VaultUtils.getRelPath(vault))
+      ) {
+        const vault2Folder = VaultUtils.toWorkspaceFolder(vault);
+        const folders = [vault2Folder].concat(out.folders);
+        out = assignJSONWithComment({ folders }, out);
+        writeJSONWithComments(wsPath, out);
+      }
+    }
     return vault;
   }
 

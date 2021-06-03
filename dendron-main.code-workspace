@@ -29,9 +29,6 @@
             "path": "packages/pods-core"
         },
         {
-            "path": "packages/dendron-cli"
-        },
-        {
             "path": "packages/api-server"
         },
         {
@@ -50,14 +47,11 @@
             "path": "bootstrap"
         },
         {
-            "path": "fixtures"
-        },
-        {
             "path": "test-workspace"
         },
         {
             "path": "docs"
-        },
+        }
     ],
     "settings": {
         "files.exclude": {

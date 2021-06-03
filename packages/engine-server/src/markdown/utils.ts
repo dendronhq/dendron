@@ -328,6 +328,7 @@ export class MDUtilsV4 {
     const errors: DendronError[] = [];
     let _proc = remark()
       .use(remarkParse, { gfm: true })
+      .use(frontmatterPlugin, ["yaml"])
       .use(wikiLinks)
       .use(blockAnchors)
       .data("errors", errors);

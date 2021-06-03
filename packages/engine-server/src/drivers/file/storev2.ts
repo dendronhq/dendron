@@ -395,10 +395,16 @@ export class FileStorage implements DStore {
             note: n,
             engine: this.engine,
           });
-          const anchors = await AnchorUtils.findAnchors({
-            note: n,
-            wsRoot: wsRoot,
-          });
+          const anchors = await AnchorUtils.findAnchors(
+            {
+              note: n,
+              wsRoot: wsRoot,
+            },
+            {
+              engine: this.engine,
+              fname: n.fname,
+            }
+          );
           cacheUpdates[n.fname].data.links = links;
           cacheUpdates[n.fname].data.anchors = anchors;
           n.links = links;

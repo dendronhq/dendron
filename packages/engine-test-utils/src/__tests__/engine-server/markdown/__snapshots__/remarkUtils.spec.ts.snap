@@ -1,5 +1,11 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`RemarkUtils and LinkUtils doesn't find block anchor within code block 1`] = `Array []`;
+
+exports[`RemarkUtils and LinkUtils doesn't find block anchor within inline code 1`] = `Array []`;
+
+exports[`RemarkUtils and LinkUtils findAnchors doesn't find block anchor within wikilink 1`] = `Array []`;
+
 exports[`RemarkUtils and LinkUtils findAnchors one block anchor 1`] = `
 Array [
   Object {

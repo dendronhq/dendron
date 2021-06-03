@@ -58,7 +58,6 @@
     "minimatch": "^3.0.4",
     "pino": "^6.3.2",
     "pino-pretty": "^4.3.0",
-    "request-promise": "^4.2.6",
     "simple-git": "^2.24.0",
     "tmp": "^0.2.1",
     "vscode-uri": "^2.1.2"

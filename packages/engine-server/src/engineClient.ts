@@ -36,13 +36,9 @@ import {
   SchemaUtils,
   VaultUtils,
   WriteNoteResp,
-} from "@dendronhq/common-all";
-import {
-  createLogger,
   DendronAPI,
-  DLogger,
-  readYAML,
-} from "@dendronhq/common-server";
+} from "@dendronhq/common-all";
+import { createLogger, DLogger, readYAML } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import { DConfig } from "./config";

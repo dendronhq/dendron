@@ -26,9 +26,13 @@ import {
   WriteNoteResp,
 } from ".";
 import { DendronError } from "./error";
-import { DEngineInitPayload } from "./types";
+import { DEngineInitPayload, RenderNoteOpts, RenderNotePayload } from "./types";
 
 // === Types
+
+export type APIRequest<T> = {
+  ws: string;
+} & T;
 
 export function createNoOpLogger() {
   const logMethod = (_msg: any) => {};
@@ -256,7 +260,7 @@ abstract class API {
 
 // === DendronAPI
 
-class DendronAPI extends API {
+export class DendronAPI extends API {
   static instance: DendronAPI;
 
   async configGet(
@@ -382,6 +386,18 @@ class DendronAPI extends API {
       path: "note/query",
       method: "get",
       qs: req,
+    });
+    return resp;
+  }
+
+  async noteRender(req: APIRequest<RenderNoteOpts>) {
+    const resp = await this._makeRequest<{
+      data: RenderNotePayload;
+      error: null | DendronError;
+    }>({
+      path: "note/render",
+      method: "post",
+      body: req,
     });
     return resp;
   }

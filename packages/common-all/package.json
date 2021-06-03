@@ -55,8 +55,6 @@
     "lodash": "^4.17.15",
     "luxon": "^1.25.0",
     "minimatch": "^3.0.4",
-    "request": "^2.88.2",
-    "request-promise": "^4.2.6",
     "semver": "^7.3.2",
     "title": "^3.4.2",
     "uuid": "^8.1.0",
@@ -65,7 +63,6 @@
   },
   "devDependencies": {
     "@types/js-yaml": "^3.12.5",
-    "@types/request-promise": "^4.1.46",
     "coveralls": "^3.0.2",
     "jest": "^23.6.0",
     "jest-serializer-path": "^0.1.15",

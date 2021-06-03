@@ -225,7 +225,6 @@ export type RenameNoteOpts = {
 
 export type RenderNoteOpts = {
   id: string;
-  format: "markdown";
 };
 
 export type ConfigWriteOpts = {

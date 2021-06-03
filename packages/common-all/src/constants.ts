@@ -3,6 +3,7 @@ const ROOT_PATH = "/doc/root";
 export const CONSTANTS = {
   ROOT_PATH,
   ALL_QUERY: "**/*",
+  DENDRON_WS_NAME: "dendron.code-workspace",
   DENDRON_SERVER_PORT: ".dendron.port",
   DENDRON_WS_META: ".dendron.ws",
   DENDRON_CONFIG_FILE: "dendron.yml",

@@ -4,7 +4,6 @@ import {
   NoteUtils,
   SchemaUtils,
   VaultUtils,
-  WorkspaceOpts,
 } from "@dendronhq/common-all";
 import {
   note2File,
@@ -14,44 +13,22 @@ import {
 } from "@dendronhq/common-server";
 import { FileTestUtils, sinon } from "@dendronhq/common-test-utils";
 import { DConfig, WorkspaceService } from "@dendronhq/engine-server";
-import { GitTestUtils, setupWS } from "@dendronhq/engine-test-utils";
+import {
+  checkVaults,
+  GitTestUtils,
+  setupWS,
+} from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
-import _ from "lodash";
 import { describe } from "mocha";
 import path from "path";
 import * as vscode from "vscode";
 import { VaultAddCommand } from "../../commands/VaultAddCommand";
-import { WorkspaceFolderRaw, WorkspaceSettings } from "../../types";
-import { DendronWorkspace } from "../../workspace";
 import { expect, runSingleVaultTest } from "../testUtilsv2";
 import {
-  getConfig,
   runLegacySingleWorkspaceTest,
   setupBeforeAfter,
   stubVaultInput,
 } from "../testUtilsV3";
-
-const getWorkspaceFolders = () => {
-  const wsPath = DendronWorkspace.workspaceFile().fsPath;
-  const settings = fs.readJSONSync(wsPath) as WorkspaceSettings;
-  return _.toArray(settings.folders);
-};
-
-function checkVaults(opts: WorkspaceOpts) {
-  const { wsRoot, vaults } = opts;
-  const config = getConfig({ wsRoot });
-  expect(config.vaults).toEqual(vaults);
-  const wsFolders = getWorkspaceFolders();
-  expect(wsFolders).toEqual(
-    vaults.map((ent) => {
-      const out: WorkspaceFolderRaw = { path: VaultUtils.getRelPath(ent) };
-      if (ent.name) {
-        out.name = ent.name;
-      }
-      return out;
-    })
-  );
-}
 
 suite("VaultAddCommand", function () {
   let ctx: vscode.ExtensionContext;
@@ -90,20 +67,23 @@ suite("VaultAddCommand", function () {
           const resp = await cmd.run();
           const newVault = resp!.vaults[0];
 
-          checkVaults({
-            wsRoot,
-            vaults: [
-              {
-                fsPath: newVault.fsPath,
-                name: "dendron",
-                remote: {
-                  type: "git" as const,
-                  url: remote,
+          checkVaults(
+            {
+              wsRoot,
+              vaults: [
+                {
+                  fsPath: newVault.fsPath,
+                  name: "dendron",
+                  remote: {
+                    type: "git" as const,
+                    url: remote,
+                  },
                 },
-              },
-              vaults[0],
-            ],
-          });
+                vaults[0],
+              ],
+            },
+            expect
+          );
           expect(
             FileTestUtils.assertInFile({
               fpath: gitIgnore,
@@ -145,17 +125,20 @@ suite("VaultAddCommand", function () {
               },
             },
           });
-          checkVaults({
-            wsRoot,
-            vaults: [
-              {
-                fsPath: "vault1",
-                workspace: wsName,
-                name: "dendron",
-              },
-              vaults[0],
-            ],
-          });
+          checkVaults(
+            {
+              wsRoot,
+              vaults: [
+                {
+                  fsPath: "vault1",
+                  workspace: wsName,
+                  name: "dendron",
+                },
+                vaults[0],
+              ],
+            },
+            expect
+          );
           expect(
             FileTestUtils.assertInFile({
               fpath: gitIgnore,
@@ -202,17 +185,20 @@ suite("VaultAddCommand", function () {
               },
             },
           });
-          checkVaults({
-            wsRoot,
-            vaults: [
-              {
-                fsPath: vaultPath,
-                workspace: wsName,
-                name: "dendron",
-              },
-              vaults[0],
-            ],
-          });
+          checkVaults(
+            {
+              wsRoot,
+              vaults: [
+                {
+                  fsPath: vaultPath,
+                  workspace: wsName,
+                  name: "dendron",
+                },
+                vaults[0],
+              ],
+            },
+            expect
+          );
           expect(
             FileTestUtils.assertInFile({
               fpath: gitIgnore,
@@ -249,15 +235,18 @@ suite("VaultAddCommand", function () {
           await new VaultAddCommand().run();
           expect(fs.readdirSync(vpath)).toEqual(["root.md", "root.schema.yml"]);
 
-          checkVaults({
-            wsRoot,
-            vaults: [
-              {
-                fsPath: "vault2",
-              },
-              vault,
-            ],
-          });
+          checkVaults(
+            {
+              wsRoot,
+              vaults: [
+                {
+                  fsPath: "vault2",
+                },
+                vault,
+              ],
+            },
+            expect
+          );
 
           // new file added to newline
           expect(
@@ -296,15 +285,18 @@ suite("VaultAddCommand", function () {
           stubVaultInput({ sourceType: "local", sourcePath: vpath });
           await new VaultAddCommand().run();
           expect(fs.readdirSync(vpath)).toEqual(["root.md", "root.schema.yml"]);
-          checkVaults({
-            wsRoot,
-            vaults: [
-              {
-                fsPath: "vault2",
-              },
-              vault,
-            ],
-          });
+          checkVaults(
+            {
+              wsRoot,
+              vaults: [
+                {
+                  fsPath: "vault2",
+                },
+                vault,
+              ],
+            },
+            expect
+          );
           done();
         },
       });
@@ -319,15 +311,18 @@ suite("VaultAddCommand", function () {
           await new VaultAddCommand().run();
           const vpath = path.join(wsRoot, sourcePath);
           expect(fs.readdirSync(vpath)).toEqual(["root.md", "root.schema.yml"]);
-          checkVaults({
-            wsRoot,
-            vaults: [
-              {
-                fsPath: "vault2",
-              },
-              vault,
-            ],
-          });
+          checkVaults(
+            {
+              wsRoot,
+              vaults: [
+                {
+                  fsPath: "vault2",
+                },
+                vault,
+              ],
+            },
+            expect
+          );
           done();
         },
       });
@@ -343,15 +338,18 @@ suite("VaultAddCommand", function () {
           await new VaultAddCommand().run();
           expect(fs.readdirSync(vpath)).toEqual(["root.md", "root.schema.yml"]);
 
-          checkVaults({
-            wsRoot,
-            vaults: [
-              {
-                fsPath: vaultRelPath,
-              },
-              vault,
-            ],
-          });
+          checkVaults(
+            {
+              wsRoot,
+              vaults: [
+                {
+                  fsPath: vaultRelPath,
+                },
+                vault,
+              ],
+            },
+            expect
+          );
 
           done();
         },

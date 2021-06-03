@@ -222,7 +222,6 @@ describe("engine", async () => {
           },
           engine,
         }));
-        debugger;
         await expectNote({ note, match: ["daily body hello"] });
       },
       {

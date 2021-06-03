@@ -6,20 +6,24 @@ import {
   DUser,
   DUtils,
   DVault,
-  DVaultVisibility,
   DWorkspace,
+  DWorkspaceEntry,
   NoteUtils,
   SchemaUtils,
   Time,
   VaultUtils,
+  WorkspaceSettings,
 } from "@dendronhq/common-all";
 import {
+  assignJSONWithComment,
   createLogger,
   GitUtils,
   note2File,
+  readJSONWithComments,
   schemaModuleOpts2File,
   simpleGit,
   vault2Path,
+  writeJSONWithComments,
 } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -27,6 +31,7 @@ import path from "path";
 import { DConfig } from "./config";
 import { Git } from "./topics/git";
 import { getPortFilePath, getWSMetaFilePath, writeWSMetaFile } from "./utils";
+const DENDRON_WS_NAME = CONSTANTS.DENDRON_WS_NAME;
 
 const logger = createLogger();
 export type PathExistBehavior = "delete" | "abort" | "continue";
@@ -113,8 +118,17 @@ export class WorkspaceService {
     return { vaults: newVaults };
   }
 
-  async addVault({ vault }: { vault: DVault }) {
-    const config = this.config;
+  async addVault(opts: {
+    vault: DVault;
+    config?: DendronConfig;
+    writeConfig?: boolean;
+    addToWorkspace?: boolean;
+  }) {
+    const { vault, config, writeConfig, addToWorkspace } = _.defaults(opts, {
+      config: this.config,
+      writeConfig: true,
+      addToWorkspace: false,
+    });
     config.vaults.unshift(vault);
     // update dup note behavior
     if (!config.site.duplicateNoteBehavior) {
@@ -125,7 +139,21 @@ export class WorkspaceService {
     } else if (_.isArray(config.site.duplicateNoteBehavior.payload)) {
       config.site.duplicateNoteBehavior.payload.push(VaultUtils.getName(vault));
     }
-    await this.setConfig(config);
+    if (writeConfig) {
+      await this.setConfig(config);
+    }
+    if (addToWorkspace) {
+      const wsPath = path.join(this.wsRoot, DENDRON_WS_NAME);
+      let out = (await readJSONWithComments(wsPath)) as WorkspaceSettings;
+      if (
+        !_.find(out.folders, (ent) => ent.path === VaultUtils.getRelPath(vault))
+      ) {
+        const vault2Folder = VaultUtils.toWorkspaceFolder(vault);
+        const folders = [vault2Folder].concat(out.folders);
+        out = assignJSONWithComment({ folders }, out);
+        writeJSONWithComments(wsPath, out);
+      }
+    }
     return vault;
   }
 
@@ -188,7 +216,7 @@ export class WorkspaceService {
   }
 
   /**
-   * Return if vaults have been cloned
+   * Iintiaizlie all remote vaults
    * @param opts
    * @returns
    */
@@ -327,6 +355,21 @@ export class WorkspaceService {
     return repoPath;
   }
 
+  async cloneWorkspace(opts: {
+    wsName: string;
+    workspace: DWorkspaceEntry;
+    wsRoot: string;
+    urlTransformer?: UrlTransformerFunc;
+  }) {
+    const { wsRoot, urlTransformer, workspace, wsName } = _.defaults(opts, {
+      urlTransformer: _.identity,
+    });
+    const repoPath = path.join(wsRoot, wsName);
+    const git = simpleGit({ baseDir: wsRoot });
+    await git.clone(urlTransformer(workspace.remote.url), wsName);
+    return repoPath;
+  }
+
   async getAllRepos() {
     const vaults = this.config.vaults;
     const wsRoot = this.wsRoot;
@@ -438,23 +481,57 @@ export class WorkspaceService {
     skipPrivate?: boolean;
   }) {
     const ctx = "syncVaults";
-    const {
-      config,
-      progressIndicator,
-      urlTransformer,
-      fetchAndPull,
-      skipPrivate,
-    } = _.defaults(opts, { fetchAndPull: false, skipPrivate: false });
+    const { config, progressIndicator, urlTransformer, fetchAndPull } =
+      _.defaults(opts, { fetchAndPull: false, skipPrivate: false });
     const { wsRoot } = this;
+
+    // check workspaces
+    const workspacePaths: { wsPath: string; wsUrl: string }[] = (
+      await Promise.all(
+        _.map(config.workspaces, async (wsEntry, wsName) => {
+          const wsPath = path.join(wsRoot, wsName);
+          if (!fs.existsSync(wsPath)) {
+            return {
+              wsPath: await this.cloneWorkspace({
+                wsName,
+                workspace: wsEntry!,
+                wsRoot,
+              }),
+              wsUrl: wsEntry!.remote.url,
+            };
+          }
+          return;
+        })
+      )
+    ).filter((ent) => !_.isUndefined(ent)) as {
+      wsPath: string;
+      wsUrl: string;
+    }[];
+    // const wsVaults: DVault[] = workspacePaths.flatMap(({ wsPath, wsUrl }) => {
+    //   const { vaults } = GitUtils.getVaultsFromRepo({
+    //     repoPath: wsPath,
+    //     wsRoot,
+    //     repoUrl: wsUrl,
+    //   });
+    //   return vaults;
+    // });
+    // add wsvaults
+    // await Promise.all(wsVaults.map((vault) => {
+    //   return this.addVault({ config, vault, writeConfig: false, addToWorkspace: true });
+    // }));
 
     // clone all missing vaults
     const emptyRemoteVaults = config.vaults.filter(
       (vault) =>
         !_.isUndefined(vault.remote) &&
-        !fs.existsSync(vault2Path({ vault, wsRoot })) &&
-        (skipPrivate ? vault.visibility !== DVaultVisibility.PRIVATE : true)
+        !fs.existsSync(vault2Path({ vault, wsRoot }))
     );
-    const didClone = !_.isEmpty(emptyRemoteVaults);
+    const didClone =
+      !_.isEmpty(emptyRemoteVaults) || !_.isEmpty(workspacePaths);
+    // if we added a workspace, we also add new vaults
+    if (!_.isEmpty(workspacePaths)) {
+      this.setConfig(config);
+    }
     if (progressIndicator && didClone) {
       progressIndicator();
     }
@@ -465,11 +542,7 @@ export class WorkspaceService {
     );
     if (fetchAndPull) {
       const vaultsToFetch = _.difference(
-        config.vaults.filter(
-          (vault) =>
-            !_.isUndefined(vault.remote) &&
-            (skipPrivate ? vault.visibility !== DVaultVisibility.PRIVATE : true)
-        ),
+        config.vaults.filter((vault) => !_.isUndefined(vault.remote)),
         emptyRemoteVaults
       );
       logger.info({ ctx, msg: "fetching vaults", vaultsToFetch });

@@ -94,6 +94,10 @@ const NOTES = {
         {
           name: "workspace",
           vaults: [{ fsPath: "vault" }],
+          remote: {
+            type: "git",
+            url: "dummy",
+          },
         },
       ],
     }
@@ -135,6 +139,10 @@ const NOTES = {
         {
           name: "workspace",
           vaults: [{ fsPath: "vault1" }],
+          remote: {
+            type: "git",
+            url: "dummy",
+          },
         },
       ],
     }

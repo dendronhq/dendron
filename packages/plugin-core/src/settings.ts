@@ -1,4 +1,8 @@
-import { DVault } from "@dendronhq/common-all";
+import {
+  DVault,
+  WorkspaceExtensionSetting,
+  WorkspaceSettings,
+} from "@dendronhq/common-all";
 import {
   assignJSONWithComment,
   readJSONWithComments,
@@ -15,7 +19,6 @@ import {
 } from "vscode";
 import { CONFIG } from "./constants";
 import { Logger } from "./logger";
-import { WorkspaceExtensionSetting, WorkspaceSettings } from "./types";
 import { DendronWorkspace } from "./workspace";
 
 export type CodeConfigChanges = {

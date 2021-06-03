@@ -2,6 +2,7 @@ import {
   DendronConfig,
   DendronError,
   WorkspaceOpts,
+  WorkspaceSettings,
 } from "@dendronhq/common-all";
 import {
   assignJSONWithComment,
@@ -11,7 +12,6 @@ import { DConfig } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
 import { Logger } from "./logger";
-import { WorkspaceSettings } from "./types";
 import { DendronWorkspace } from "./workspace";
 
 export async function migrateSettings({

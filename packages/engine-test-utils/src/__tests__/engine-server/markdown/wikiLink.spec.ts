@@ -174,7 +174,6 @@ describe("wikiLinks", () => {
           vault: vaults[0],
         });
         const resp = await proc2.process(linkWithBlockAnchor);
-        debugger;
         return { resp, proc };
       },
       verifyFuncDict: {
@@ -207,7 +206,6 @@ describe("wikiLinks", () => {
           vault: vaults[0],
         });
         const resp = await proc2.process("[[#^block]]");
-        debugger;
         return { resp, proc };
       },
       verifyFuncDict: {

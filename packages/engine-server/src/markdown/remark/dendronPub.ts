@@ -81,7 +81,6 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
           vaultMissingBehavior: VaultMissingBehavior.FALLBACK_TO_ORIGINAL_VAULT,
         });
         if (error) {
-          debugger;
           addError(proc, error);
         }
 

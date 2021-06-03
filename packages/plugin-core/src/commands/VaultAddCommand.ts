@@ -1,4 +1,9 @@
-import { DVault, DWorkspace, VaultUtils } from "@dendronhq/common-all";
+import {
+  DVault,
+  DWorkspace,
+  VaultUtils,
+  WorkspaceSettings,
+} from "@dendronhq/common-all";
 import {
   assignJSONWithComment,
   GitUtils,
@@ -15,7 +20,6 @@ import { commands, ProgressLocation, QuickPickItem, window } from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS, DENDRON_REMOTE_VAULTS } from "../constants";
 import { Logger } from "../logger";
-import { WorkspaceSettings } from "../types";
 import { VSCodeUtils } from "../utils";
 import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
@@ -211,8 +215,6 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
 
   async addVaultToWorkspace(vault: DVault) {
     const wsRoot = DendronWorkspace.wsRoot();
-    // const wsService = new WorkspaceService({ wsRoot });
-    // await wsService.createVault({ vault });
 
     // workspace file
     const wsPath = DendronWorkspace.workspaceFile().fsPath;

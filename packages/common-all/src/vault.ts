@@ -2,7 +2,7 @@ import _ from "lodash";
 import path from "path";
 import { CONSTANTS } from "./constants";
 import { DendronError } from "./error";
-import { DVault } from "./types";
+import { DVault, WorkspaceFolderRaw } from "./types";
 
 export class VaultUtils {
   static getName(vault: DVault): string {
@@ -164,7 +164,3 @@ export class VaultUtils {
     };
   }
 }
-export type WorkspaceFolderRaw = {
-  path: string;
-  name?: string;
-};

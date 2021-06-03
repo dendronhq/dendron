@@ -1,11 +1,11 @@
-import { DendronError, DVault } from "@dendronhq/common-all";
+import { CONSTANTS, DendronError, DVault } from "@dendronhq/common-all";
 import { resolveTilde, vault2Path } from "@dendronhq/common-server";
 import { WorkspaceService } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import vscode from "vscode";
-import { DENDRON_COMMANDS, DENDRON_WS_NAME } from "../constants";
+import { DENDRON_COMMANDS } from "../constants";
 import { Snippets, WorkspaceConfig } from "../settings";
 import { VSCodeUtils } from "../utils";
 import { DendronWorkspace } from "../workspace";
@@ -203,7 +203,7 @@ export class SetupWorkspaceCommand extends BasicCommand<
     if (!opts.skipOpenWs) {
       vscode.window.showInformationMessage("opening dendron workspace");
       VSCodeUtils.openWS(
-        vscode.Uri.file(path.join(rootDir, DENDRON_WS_NAME)).fsPath
+        vscode.Uri.file(path.join(rootDir, CONSTANTS.DENDRON_WS_NAME)).fsPath
       );
       return vaults;
     }

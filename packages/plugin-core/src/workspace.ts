@@ -7,6 +7,7 @@ import {
   ERROR_STATUS,
   getStage,
   ResponseCode,
+  WorkspaceSettings,
 } from "@dendronhq/common-all";
 import {
   NodeJSUtils,
@@ -44,7 +45,7 @@ import ReferenceHoverProvider from "./features/ReferenceHoverProvider";
 import ReferenceProvider from "./features/ReferenceProvider";
 import { VaultWatcher } from "./fileWatcher";
 import { Logger } from "./logger";
-import { CodeConfigKeys, WorkspaceSettings } from "./types";
+import { CodeConfigKeys } from "./types";
 import { DisposableStore, resolvePath, VSCodeUtils } from "./utils";
 import { DendronTreeView } from "./views/DendronTreeView";
 import { DendronTreeViewV2 } from "./views/DendronTreeViewV2";

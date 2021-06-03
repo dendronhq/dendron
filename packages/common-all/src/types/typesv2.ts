@@ -289,6 +289,25 @@ export type DEngineDeleteSchemaResp = DEngineInitResp;
 export type EngineInfoResp = {
   version: string;
 };
+
+// --- VSCOde
+
+export type WorkspaceSettings = {
+  folders: WorkspaceFolderRaw[];
+  settings: any;
+  extensions: WorkspaceExtensionSetting;
+};
+
+export type WorkspaceFolderRaw = {
+  path: string;
+  name?: string;
+};
+
+export type WorkspaceExtensionSetting = {
+  recommendations: string[];
+  unwantedRecommendations: string[];
+};
+
 // --- KLUDGE END
 
 export type EngineDeleteNoteResp = Required<RespV2<EngineDeleteNotePayload>>;

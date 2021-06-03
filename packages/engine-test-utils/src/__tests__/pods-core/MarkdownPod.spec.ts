@@ -41,7 +41,6 @@ describe("markdown publish pod", () => {
       async ({ engine, vaults, wsRoot }) => {
         const pod = new MarkdownPublishPod();
         const vaultName = VaultUtils.getName(vaults[0]);
-        debugger;
         const resp = await pod.execute({
           engine,
           vaults,

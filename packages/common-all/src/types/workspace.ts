@@ -36,7 +36,7 @@ export type DVault = {
 export type DWorkspace = {
   name: string;
   vaults: DVault[];
-  remote?: RemoteEndpoint;
+  remote: RemoteEndpoint;
 };
 
 export type DWorkspaceEntry = Omit<DWorkspace, "name" | "vaults">;

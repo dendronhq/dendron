@@ -188,7 +188,6 @@ describe("hierarchies", () => {
         const resp = await proc.process(BASIC_TEXT);
         return { resp };
       } else {
-        debugger;
         const proc = MDUtilsV4.procDendronForPublish({
           engine,
           fname: "daily",

@@ -1,7 +1,6 @@
 import { DendronTreeViewKey } from "@dendronhq/common-all";
 import { CodeConfigKeys } from "./types";
 
-export const DENDRON_WS_NAME = "dendron.code-workspace";
 export const extensionQualifiedId = `dendron.dendron`;
 export const DEFAULT_LEGACY_VAULT_NAME = "vault";
 

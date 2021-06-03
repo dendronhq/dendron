@@ -3,6 +3,7 @@ import {
   getStage,
   VaultUtils,
   VSCodeEvents,
+  WorkspaceSettings,
 } from "@dendronhq/common-all";
 import {
   getDurationMilliseconds,
@@ -30,7 +31,6 @@ import {
 import { Logger } from "./logger";
 import { migrateConfig, migrateSettings } from "./migration";
 import { Extensions } from "./settings";
-import { WorkspaceSettings } from "./types";
 import { VSCodeUtils, WSUtils } from "./utils";
 import { AnalyticsUtils } from "./utils/analytics";
 import { MarkdownUtils } from "./utils/md";

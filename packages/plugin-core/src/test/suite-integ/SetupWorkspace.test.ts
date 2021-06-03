@@ -1,4 +1,9 @@
-import { CONSTANTS, DendronConfig, Time } from "@dendronhq/common-all";
+import {
+  CONSTANTS,
+  DendronConfig,
+  Time,
+  WorkspaceSettings,
+} from "@dendronhq/common-all";
 import {
   assignJSONWithComment,
   readJSONWithComments,
@@ -20,7 +25,6 @@ import path from "path";
 import { ExtensionContext } from "vscode";
 import { ResetConfigCommand } from "../../commands/ResetConfig";
 import { DEFAULT_LEGACY_VAULT_NAME } from "../../constants";
-import { WorkspaceSettings } from "../../types";
 import { DendronWorkspace, resolveRelToWSRoot } from "../../workspace";
 import {
   expect,

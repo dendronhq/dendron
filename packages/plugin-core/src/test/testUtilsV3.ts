@@ -2,6 +2,8 @@ import {
   DendronConfig,
   DEngineClient,
   WorkspaceOpts,
+  WorkspaceFolderRaw,
+  WorkspaceSettings,
 } from "@dendronhq/common-all";
 import {
   assignJSONWithComment,
@@ -36,7 +38,6 @@ import {
 } from "../commands/VaultAddCommand";
 import { Logger } from "../logger";
 import { WorkspaceConfig } from "../settings";
-import { WorkspaceFolderRaw, WorkspaceSettings } from "../types";
 import { VSCodeUtils } from "../utils";
 import { DendronWorkspace, getWS } from "../workspace";
 import { _activate } from "../_extension";

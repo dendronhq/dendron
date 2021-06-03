@@ -4,7 +4,9 @@ import {
   DEngineClient,
   DVault,
   DWorkspace,
+  WorkspaceFolderRaw,
   WorkspaceOpts,
+  WorkspaceSettings,
 } from "@dendronhq/common-all";
 import {
   getDurationMilliseconds,
@@ -134,6 +136,7 @@ export type RunEngineTestV5Opts = {
   setupOnly?: boolean;
   initGit?: boolean;
   initHooks?: boolean;
+  addVSWorkspace?: boolean;
 };
 
 export type RunEngineTestFunctionV5<T = any> = (
@@ -210,6 +213,7 @@ export async function runEngineTestV5(
     createEngine,
     initGit,
     workspaces,
+    addVSWorkspace,
   } = _.defaults(opts, {
     preSetupHook: async ({}) => {},
     postSetupHook: async ({}) => {},
@@ -221,6 +225,7 @@ export async function runEngineTestV5(
       { fsPath: "vault2" },
       { fsPath: "vault3", name: "vaultThree" },
     ],
+    addVSWorkspace: false,
   });
   const { wsRoot, vaults } = await setupWS({ vaults: vaultsInit, workspaces });
   if ((opts.initHooks, vaults)) {
@@ -230,6 +235,20 @@ export async function runEngineTestV5(
   const engine: DEngineClient = await createEngine({ wsRoot, vaults });
   const start = process.hrtime();
   const initResp = await engine.init();
+  if (addVSWorkspace) {
+    fs.writeJSONSync(
+      path.join(wsRoot, CONSTANTS.DENDRON_WS_NAME),
+      {
+        folders: vaults.map((ent) => ({
+          path: ent.fsPath,
+          name: ent.name,
+        })) as WorkspaceFolderRaw[],
+        settings: {},
+        extensions: {},
+      } as WorkspaceSettings,
+      { spaces: 4 }
+    );
+  }
   const engineInitDuration = getDurationMilliseconds(start);
   const testOpts = {
     wsRoot,

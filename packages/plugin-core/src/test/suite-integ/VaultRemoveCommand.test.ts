@@ -1,4 +1,8 @@
-import { DendronConfig, DVault } from "@dendronhq/common-all";
+import {
+  DendronConfig,
+  DVault,
+  WorkspaceSettings,
+} from "@dendronhq/common-all";
 import { readYAML } from "@dendronhq/common-server";
 import { FileTestUtils } from "@dendronhq/common-test-utils";
 import { DConfig } from "@dendronhq/engine-server";
@@ -11,7 +15,6 @@ import sinon from "sinon";
 import * as vscode from "vscode";
 import { VaultAddCommand } from "../../commands/VaultAddCommand";
 import { VaultRemoveCommand } from "../../commands/VaultRemoveCommand";
-import { WorkspaceSettings } from "../../types";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
 import { expect, runMultiVaultTest, runSingleVaultTest } from "../testUtilsv2";

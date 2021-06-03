@@ -199,11 +199,26 @@ export class WorkspaceService {
     return;
   }
 
+  shouldWorkspaceVaultSync(
+    command: "commit" | "push" | "pull",
+    vaultRoot: string
+  ): boolean {
+    if (!WorkspaceService.isWorkspaceVault(vaultRoot)) return true;
+    let config = this.config.workspaceVaultSync;
+    if (_.isUndefined(config)) config = "noPush"; // default
+    if (config === "skip") return false;
+    if (config === "sync") return true;
+    if (config === "noCommit" && command === "commit") return false;
+    if (config === "noPush" && command === "push") return false;
+    return true;
+  }
+
   async commidAndAddAll(): Promise<string[]> {
     const allRepos = await this.getAllRepos();
     const out = await Promise.all(
       allRepos.map(async (root) => {
         const git = new Git({ localUrl: root });
+        if (!this.shouldWorkspaceVaultSync("commit", root)) return undefined;
         if (await git.hasChanges()) {
           await git.addAll();
           await git.commit({ msg: "update" });
@@ -370,17 +385,20 @@ export class WorkspaceService {
     return repoPath;
   }
 
+  async getVaultRepo(vault: DVault) {
+    const vpath = vault2Path({ vault, wsRoot: this.wsRoot });
+    return await GitUtils.getGitRoot(vpath);
+  }
+
   async getAllRepos() {
     const vaults = this.config.vaults;
-    const wsRoot = this.wsRoot;
     return _.uniq(
       await Promise.all(
         vaults.map(async (vault) => {
-          const vpath = vault2Path({ vault, wsRoot });
-          return GitUtils.getGitRoot(vpath);
+          return await this.getVaultRepo(vault);
         })
       )
-    );
+    ).filter((repo) => repo !== ""); // vaults that are not in repos will have this empty
   }
 
   getVaultForPath(fpath: string) {
@@ -425,11 +443,22 @@ export class WorkspaceService {
     const out = await Promise.all(
       allRepos.map(async (root) => {
         const git = new Git({ localUrl: root });
-        if (await git.hasRemote()) {
+        // It's impossible to pull if there is no remote, or if there are tracked files that have changes
+        if (
+          !(await git.hasRemote()) ||
+          (await git.hasChanges({ untrackedFiles: "no" }))
+        )
+          return undefined;
+        if (!this.shouldWorkspaceVaultSync("pull", root)) return undefined;
+        try {
           await git.pull();
-          return root;
+        } catch (err) {
+          throw new DendronError({
+            message: "error pulling vault",
+            payload: { err, repoPath: root },
+          });
         }
-        return undefined;
+        return root;
       })
     );
     return _.filter(out, (ent) => !_.isUndefined(ent)) as string[];
@@ -437,21 +466,15 @@ export class WorkspaceService {
 
   /** Returns the list of vaults that were attempted to be pushed, even if there was nothing to push. */
   async pushVaults(): Promise<string[]> {
-    const allRepos = await this.getAllRepos();
     const vaults = this.config.vaults;
-    const wsRoot = this.wsRoot;
     const out = await Promise.all(
-      allRepos.map(async (root) => {
+      vaults.map(async (vault) => {
+        const root = await this.getVaultRepo(vault);
+        if (root === "") return undefined; // The vault is not in a repository
         const git = new Git({ localUrl: root });
-        if (WorkspaceService.isWorkspaceVault(root)) {
-          return undefined;
-        }
-        const vault = VaultUtils.getVaultByDirPath({
-          vaults,
-          wsRoot,
-          fsPath: root,
-        });
-        if ((await git.hasRemote()) && this.user.canPushVault(vault)) {
+        if (!(await git.hasRemote())) return undefined;
+        if (!this.shouldWorkspaceVaultSync("push", root)) return undefined;
+        if (this.user.canPushVault(vault)) {
           try {
             await git.push();
             return root;

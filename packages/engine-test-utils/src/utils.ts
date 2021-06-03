@@ -41,7 +41,9 @@ export function checkVaults(opts: WorkspaceOpts, expect: any) {
   const { wsRoot, vaults } = opts;
   const configPath = DConfig.configPath(opts.wsRoot);
   const config = readYAML(configPath) as DendronConfig;
-  expect(_.sortBy(config.vaults, ["fsPath", "workspace"])).toEqual(vaults);
+  expect(_.sortBy(config.vaults, ["fsPath", "workspace"])).toEqual(
+    _.sortBy(vaults, ["fsPath", "workspace"])
+  );
   const wsFolders = getWorkspaceFolders(wsRoot);
   expect(wsFolders).toEqual(
     vaults.map((ent) => {

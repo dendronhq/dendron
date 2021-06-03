@@ -10,6 +10,8 @@ import {
   blockAnchors,
   BlockAnchorOpts,
   DendronASTNode,
+  wikiLinks,
+  DendronASTTypes,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { runEngineTestV5 } from "../../../engine";
@@ -22,6 +24,7 @@ function proc(
 ) {
   return MDUtilsV4.proc({ engine })
     .data("dendron", dendron)
+    .use(wikiLinks)
     .use(blockAnchors, opts);
 }
 
@@ -78,7 +81,7 @@ describe("blockAnchors", () => {
       const resp = proc(engine, genDendronData(dendronData)).parse(
         "^block-0-id"
       );
-      expect(getBlockAnchor(resp).type).toEqual("blockAnchor");
+      expect(getBlockAnchor(resp).type).toEqual(DendronASTTypes.BLOCK_ANCHOR);
       expect(getBlockAnchor(resp).id).toEqual("block-0-id");
     });
 
@@ -89,8 +92,24 @@ describe("blockAnchors", () => {
       expect(getBlockAnchor(resp).type).toEqual("inlineCode");
     });
 
-    test("doesn't parse code block not at the end of the line", () => {
-      const resp = proc(engine, genDendronData(dendronData)).parse(
+    test("doesn't parse block anchor inside a link", async () => {
+      const resp = proc(await engine, genDendronData(dendronData)).parse(
+        "[[#^block-id]]"
+      );
+      expect(getBlockAnchor(resp).type).toEqual(DendronASTTypes.WIKI_LINK);
+    });
+
+    test("parses a block anchor in the middle of a paragraph", async () => {
+      const resp = proc(await engine, genDendronData(dendronData)).parse(
+        ["Lorem ipsum ^block-id", "dolor amet."].join("\n")
+      );
+      expect(getDescendantNode(resp, 0, 1).type).toEqual(
+        DendronASTTypes.BLOCK_ANCHOR
+      );
+    });
+
+    test("doesn't parse code block not at the end of the line", async () => {
+      const resp = proc(await engine, genDendronData(dendronData)).parse(
         "^block-id Lorem ipsum"
       );
       expect(getDescendantNode(resp, 0, 0).type).toEqual("text");
@@ -104,7 +123,7 @@ describe("blockAnchors", () => {
       const text = getDescendantNode(resp, 0, 0);
       expect(text.type).toEqual("text");
       const anchor = getDescendantNode<BlockAnchor>(resp, 0, 1);
-      expect(anchor.type).toEqual("blockAnchor");
+      expect(anchor.type).toEqual(DendronASTTypes.BLOCK_ANCHOR);
       expect(anchor.id).toEqual("block-id");
     });
   });

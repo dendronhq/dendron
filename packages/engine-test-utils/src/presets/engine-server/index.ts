@@ -8,6 +8,7 @@ import { ENGINE_QUERY_PRESETS } from "./query";
 import { ENGINE_RENAME_PRESETS } from "./rename";
 import { ENGINE_UPDATE_PRESETS } from "./update";
 import { ENGINE_BULK_ADD_NOTES_PRESETS } from "./bulkAddNotes";
+import { ENGINE_RENDER_PRESETS } from "./render";
 import { ENGINE_WRITE_PRESETS, ENGINE_WRITE_PRESETS_MULTI } from "./write";
 import _ from "lodash";
 export { ENGINE_HOOKS, ENGINE_HOOKS_BASE, ENGINE_HOOKS_MULTI } from "./utils";
@@ -27,6 +28,7 @@ export const ENGINE_SERVER = {
   ENGINE_RENAME_PRESETS,
   ENGINE_QUERY_PRESETS,
   ENGINE_BULK_ADD_NOTES_PRESETS,
+  ENGINE_RENDER_PRESETS,
 };
 
 /**
@@ -70,6 +72,7 @@ export const ENGINE_PRESETS = [
   { name: "getByPath", presets: ENGINE_SERVER.ENGINE_GET_NOTE_BY_PATH_PRESETS },
   { name: "info", presets: ENGINE_SERVER.ENGINE_INFO_PRESETS },
   { name: "query", presets: ENGINE_SERVER.ENGINE_QUERY_PRESETS },
+  { name: "render", presets: ENGINE_SERVER.ENGINE_RENDER_PRESETS },
   { name: "rename", presets: ENGINE_SERVER.ENGINE_RENAME_PRESETS },
   { name: "update", presets: ENGINE_SERVER.ENGINE_UPDATE_PRESETS },
   { name: "write", presets: ENGINE_SERVER.ENGINE_WRITE_PRESETS },

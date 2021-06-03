@@ -1,5 +1,7 @@
 import {
   DendronError,
+  error2PlainObject,
+  RenderNoteOpts,
   stringifyError,
   WriteNoteResp,
 } from "@dendronhq/common-all";
@@ -46,6 +48,17 @@ router.post("/rename", async (req: Request, res: Response) => {
   );
   if (resp.error) {
     res.status(400).json({ error: resp.error });
+  } else {
+    res.json(resp);
+  }
+});
+
+router.post("/render", async (req: Request, res: Response) => {
+  const resp = await NoteController.instance().render(
+    req.body as RenderNoteOpts & { ws: string }
+  );
+  if (resp.error) {
+    res.status(400).json({ error: error2PlainObject(resp.error) });
   } else {
     res.json(resp);
   }

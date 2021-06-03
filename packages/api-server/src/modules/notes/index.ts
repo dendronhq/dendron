@@ -2,7 +2,10 @@ import {
   DendronError,
   EngineInfoResp,
   EngineQueryNoteResp,
+  RenderNoteOpts,
+  RenderNotePayload,
   RespRequired,
+  RespV2,
 } from "@dendronhq/common-all";
 import {
   EngineDeletePayload,
@@ -61,6 +64,15 @@ export class NoteController {
         data: undefined,
       };
     }
+  }
+
+  async render({
+    ws,
+    ...opts
+  }: RenderNoteOpts & { ws: string }): Promise<RespV2<RenderNotePayload>> {
+    const engine = await getWS({ ws });
+    const data = await engine.renderNote(opts);
+    return data;
   }
 
   async query({ ws, ...opts }: NoteQueryRequest): Promise<EngineQueryNoteResp> {

@@ -21,6 +21,8 @@ import {
   NoteProps,
   RenameNoteOpts,
   RenameNotePayload,
+  RenderNoteOpts,
+  RenderNotePayload,
   RespRequired,
   RespV2,
   SchemaModuleProps,
@@ -162,6 +164,10 @@ export type EngineInfoRequest = WorkspaceRequest;
 export type NoteQueryRequest = {
   qs: string;
 } & Partial<WorkspaceRequest>;
+
+export type APIRequest<T> = {
+  ws: string;
+} & T;
 
 export type SchemaDeleteRequest = {
   id: string;
@@ -460,6 +466,18 @@ export class DendronAPI extends API {
       path: "note/query",
       method: "get",
       qs: req,
+    });
+    return resp;
+  }
+
+  async noteRender(req: APIRequest<RenderNoteOpts>) {
+    const resp = await this._makeRequest<{
+      data: RenderNotePayload;
+      error: null | DendronError;
+    }>({
+      path: "note/render",
+      method: "post",
+      body: req,
     });
     return resp;
   }

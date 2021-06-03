@@ -223,6 +223,11 @@ export type RenameNoteOpts = {
   newLoc: DNoteLoc;
 };
 
+export type RenderNoteOpts = {
+  id: string;
+  format: "markdown";
+};
+
 export type ConfigWriteOpts = {
   config: DendronConfig;
 };
@@ -316,6 +321,7 @@ export type NoteQueryResp = Required<RespV2<NoteProps[]>>;
 export type SchemaQueryResp = Required<RespV2<SchemaModuleProps[]>>;
 export type StoreDeleteNoteResp = EngineDeleteNotePayload;
 export type RenameNotePayload = NoteChangeEntry[];
+export type RenderNotePayload = string | undefined;
 
 export type GetNotePayload = {
   note: NoteProps | undefined;
@@ -361,6 +367,7 @@ export type DEngine = DCommonProps &
     queryNotes: (opts: QueryNotesOpts) => Promise<NoteQueryResp>;
     queryNotesSync({ qs }: { qs: string; vault?: DVault }): NoteQueryResp;
     renameNote: (opts: RenameNoteOpts) => Promise<RespV2<RenameNotePayload>>;
+    renderNote: (opts: RenderNoteOpts) => Promise<RespV2<RenderNotePayload>>;
 
     // config
     writeConfig: (opts: ConfigWriteOpts) => Promise<RespV2<void>>;

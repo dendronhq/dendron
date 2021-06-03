@@ -29,6 +29,8 @@ import {
   QueryNotesOpts,
   RenameNoteOpts,
   RenameNotePayload,
+  RenderNoteOpts,
+  RenderNotePayload,
   RespV2,
   SchemaModuleDict,
   SchemaModuleProps,
@@ -48,7 +50,7 @@ import _ from "lodash";
 import { DConfig } from "./config";
 import { FileStorage } from "./drivers/file/storev2";
 import { FuseEngine } from "./fuseEngine";
-import { LinkUtils } from "./markdown";
+import { LinkUtils, MDUtilsV4 } from "./markdown";
 import { AnchorUtils } from "./markdown/remark/utils";
 import { HookUtils } from "./topics/hooks";
 
@@ -408,6 +410,27 @@ export class DendronEngineV2 implements DEngine {
     return {
       error: null,
       data: notes,
+    };
+  }
+
+  async renderNote({ id }: RenderNoteOpts): Promise<RespV2<RenderNotePayload>> {
+    const note = this.notes[id];
+    if (!note) {
+      return {
+        error: DendronError.createFromStatus({
+          status: ERROR_STATUS.INVALID_STATE,
+          message: `${id} does not exist`,
+        }),
+        data: undefined,
+      };
+    }
+    const proc = MDUtilsV4.remark();
+    const payload: string = await MDUtilsV4.procRehype({ proc })
+      .processSync(NoteUtils.serialize(note))
+      .toString();
+    return {
+      error: null,
+      data: payload,
     };
   }
 

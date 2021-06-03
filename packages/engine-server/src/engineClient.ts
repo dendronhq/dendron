@@ -27,6 +27,7 @@ import {
   QueryNotesOpts,
   RenameNoteOpts,
   RenameNotePayload,
+  RenderNoteOpts,
   RespRequired,
   RespV2,
   SchemaModuleDict,
@@ -267,6 +268,10 @@ export class DendronEngineClient implements DEngineClient {
       error: null,
       data: items.map((ent) => this.notes[ent.id]),
     };
+  }
+
+  async renderNote(opts: RenderNoteOpts) {
+    return this.api.noteRender({ ...opts, ws: this.ws });
   }
 
   async refreshNotes(notes: NoteProps[]) {

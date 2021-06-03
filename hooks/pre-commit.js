@@ -45,6 +45,7 @@ function main() {
   return checkToken({
     forbiddenTokens: {
       ".only": { rgx: /(describe|it|test)\.only/, fileRgx: /\.spec\.ts$/ },
+      "debugger;": { rgx: /(^|\s)debugger;/, fileRgx: /\.ts$/ },
       ".localhost": { rgx: /localhost:/, fileRgx: /\.lock$/ },
     }
   });

@@ -9,7 +9,8 @@ import { html } from "mdast-builder";
 
 // Letters, digits, dashes, and underscores.
 // The underscores are an extension over Obsidian.
-export const BLOCK_LINK_REGEX = /^\^([\w-]+)$/;
+// Another extension is that it allows whitespace after the anchor.
+export const BLOCK_LINK_REGEX = /^\^([\w-]+)\w*(\n|$)/;
 export const BLOCK_LINK_REGEX_LOOSE = /\^([\w-]+)/;
 
 /**

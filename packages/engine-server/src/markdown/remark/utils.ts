@@ -31,7 +31,6 @@ import {
 import { MDUtilsV4 } from "../utils";
 const toString = require("mdast-util-to-string");
 import * as mdastBuilder from "mdast-builder";
-import { blockAnchors } from "./blockAnchors";
 import { DNoteAnchorPositioned } from "@dendronhq/common-all";
 import { createLogger, file2String } from "@dendronhq/common-server";
 export { mdastBuilder };
@@ -225,14 +224,17 @@ export class LinkUtils {
 }
 
 export class AnchorUtils {
-  static async findAnchors(opts: {
-    note: NoteProps;
-    wsRoot: string;
-  }): Promise<{ [index: string]: DNoteAnchorPositioned }> {
+  static async findAnchors(
+    opts: {
+      note: NoteProps;
+      wsRoot: string;
+    },
+    parseOpts: Parameters<typeof RemarkUtils.findAnchors>[1]
+  ): Promise<{ [index: string]: DNoteAnchorPositioned }> {
     if (opts.note.stub) return {};
     try {
       const noteContents = await file2String(opts);
-      const noteAnchors = RemarkUtils.findAnchors(noteContents);
+      const noteAnchors = RemarkUtils.findAnchors(noteContents, parseOpts);
       const anchors: [string, DNoteAnchorPositioned][] = [];
       noteAnchors.forEach((anchor) => {
         if (_.isUndefined(anchor.position)) return;
@@ -312,8 +314,14 @@ export class RemarkUtils {
     });
   }
 
-  static findAnchors(content: string): Anchor[] {
-    const parser = MDUtilsV4.remark().use(blockAnchors);
+  static findAnchors(
+    content: string,
+    opts: Omit<Parameters<typeof MDUtilsV4.procParse>[0], "dest">
+  ): Anchor[] {
+    const parser = MDUtilsV4.procParse({
+      dest: DendronASTDest.MD_DENDRON,
+      ...opts,
+    });
     const parsed = parser.parse(content);
     return [
       ...(selectAll(DendronASTTypes.HEADING, parsed) as Heading[]),
@@ -366,7 +374,6 @@ export class RemarkUtils {
           root
         ) as WikiLinkNoteV4[];
         wikiLinks.forEach((linkNode) => {
-          debugger;
           if (linkNode.value.indexOf("/") >= 0) {
             const newValue = _.replace(linkNode.value, /\//g, ".");
             if (linkNode.data.alias === linkNode.value) {

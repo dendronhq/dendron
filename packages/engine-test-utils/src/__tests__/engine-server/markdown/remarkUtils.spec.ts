@@ -16,8 +16,12 @@ describe("RemarkUtils and LinkUtils", () => {
     test("one header", async () => {
       await runEngineTestV5(
         async ({ engine }) => {
-          const body = engine.notes["foo"].body;
-          const out = RemarkUtils.findAnchors(body);
+          const note = engine.notes["foo"];
+          const body = note.body;
+          const out = RemarkUtils.findAnchors(body, {
+            engine,
+            fname: note.fname,
+          });
           expect(out).toMatchSnapshot();
           expect(_.size(out)).toEqual(1);
           expect(out[0].depth).toEqual(1);
@@ -43,8 +47,12 @@ describe("RemarkUtils and LinkUtils", () => {
     test("one block anchor", async () => {
       await runEngineTestV5(
         async ({ engine }) => {
-          const body = engine.notes["foo"].body;
-          const out = RemarkUtils.findAnchors(body);
+          const note = engine.notes["foo"];
+          const body = note.body;
+          const out = RemarkUtils.findAnchors(body, {
+            engine,
+            fname: note.fname,
+          });
           expect(out).toMatchSnapshot();
           expect(_.size(out)).toEqual(1);
           expect(out[0].type).toEqual(DendronASTTypes.BLOCK_ANCHOR);
@@ -67,6 +75,102 @@ describe("RemarkUtils and LinkUtils", () => {
         }
       );
     });
+    test("doesn't find block anchor within wikilink", async () => {
+      await runEngineTestV5(
+        async ({ engine }) => {
+          const note = engine.notes["foo"];
+          const body = note.body;
+          const out = RemarkUtils.findAnchors(body, {
+            engine,
+            fname: note.fname,
+          });
+          expect(out).toMatchSnapshot();
+          expect(_.size(out)).toEqual(0);
+        },
+        {
+          preSetupHook: async ({ vaults, wsRoot }) => {
+            await NoteTestUtilsV4.createNote({
+              fname: "foo",
+              body: [
+                "Repellendus possimus voluptates tempora quia.",
+                "Eum deleniti sit delectus officia rem.",
+                "",
+                "[[bar#^block-anchor]]",
+                "",
+                "Consectetur blanditiis facilis nulla mollitia.",
+              ].join("\n"),
+              vault: vaults[0],
+              wsRoot,
+            });
+          },
+          expect,
+        }
+      );
+    });
+  });
+  test("doesn't find block anchor within inline code", async () => {
+    await runEngineTestV5(
+      async ({ engine }) => {
+        const note = engine.notes["foo"];
+        const body = note.body;
+        const out = RemarkUtils.findAnchors(body, {
+          engine,
+          fname: note.fname,
+        });
+        expect(out).toMatchSnapshot();
+        expect(_.size(out)).toEqual(0);
+      },
+      {
+        preSetupHook: async ({ vaults, wsRoot }) => {
+          await NoteTestUtilsV4.createNote({
+            fname: "foo",
+            body: [
+              "Repellendus possimus voluptates tempora quia.",
+              "Eum deleniti sit delectus officia rem. `^block-anchor`",
+              "",
+              "Consectetur blanditiis facilis nulla mollitia.",
+            ].join("\n"),
+            vault: vaults[0],
+            wsRoot,
+          });
+        },
+        expect,
+      }
+    );
+  });
+  test("doesn't find block anchor within code block", async () => {
+    await runEngineTestV5(
+      async ({ engine }) => {
+        const note = engine.notes["foo"];
+        const body = note.body;
+        const out = RemarkUtils.findAnchors(body, {
+          engine,
+          fname: note.fname,
+        });
+        expect(out).toMatchSnapshot();
+        expect(_.size(out)).toEqual(0);
+      },
+      {
+        preSetupHook: async ({ vaults, wsRoot }) => {
+          await NoteTestUtilsV4.createNote({
+            fname: "foo",
+            body: [
+              "Repellendus possimus voluptates tempora quia.",
+              "Eum deleniti sit delectus officia rem.",
+              "",
+              "```",
+              "^block-anchor",
+              "```",
+              "",
+              "Consectetur blanditiis facilis nulla mollitia.",
+            ].join("\n"),
+            vault: vaults[0],
+            wsRoot,
+          });
+        },
+        expect,
+      }
+    );
   });
 
   describe("findLinks", async () => {

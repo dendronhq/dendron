@@ -175,10 +175,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
           };
         }
       }
-      if (
-        node.type === DendronASTTypes.REF_LINK_V2 &&
-        dest !== DendronASTDest.MD_ENHANCED_PREVIEW
-      ) {
+      if (node.type === DendronASTTypes.REF_LINK_V2) {
         // we have custom compiler for markdown to handle note ref
         const ndata = node.data as NoteRefDataV4;
         const copts: NoteRefsOpts = {

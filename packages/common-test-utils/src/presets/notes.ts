@@ -54,6 +54,7 @@ const CreateNoteFactory = (opts: CreateNoteFactoryOpts) => {
     create: func,
     fname: opts.fname,
     selection: opts.selection || SIMPLE_SELECTION,
+    body: opts.body,
   };
 };
 

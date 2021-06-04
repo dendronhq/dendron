@@ -39,7 +39,7 @@ import * as mdastBuilder from "mdast-builder";
 import { DNoteAnchorPositioned } from "@dendronhq/common-all";
 import { createLogger, file2String } from "@dendronhq/common-server";
 import path from "path";
-import { MDUtilsV5, ProcMode } from "@dendronhq/engine-server";
+import { MDUtilsV5, ProcMode } from "../utilsv5";
 export { mdastBuilder };
 
 export const ALIAS_DIVIDER = "|";

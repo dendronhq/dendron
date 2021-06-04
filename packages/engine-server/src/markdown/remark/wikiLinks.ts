@@ -5,7 +5,6 @@ import {
   VaultUtils,
 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
-import { ProcMode } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
 import { Eat } from "remark-parse";
@@ -17,7 +16,7 @@ import {
   DendronASTTypes,
 } from "../types";
 import { MDUtilsV4 } from "../utils";
-import { MDUtilsV5 } from "../utilsv5";
+import { MDUtilsV5, ProcMode } from "../utilsv5";
 import { addError, getNoteOrError, LinkUtils } from "./utils";
 
 export const LINK_REGEX = /^\[\[(.+?)\]\]/;

@@ -57,8 +57,9 @@ export default function Graph({
 
   useEffect(() => {
     if (graphRef.current && elements) {
-      // Naive check to prevent full graph re-renders when selecting a node
-      if (cy && cy.elements("*").length > 5) return;
+      // If the graph already has rendered elements, don't re-render
+      // Otherwise, the graph re-renders when elements are selected
+      if (cy && cy.elements("*").length > 1) return;
 
       const isLargeGraph = elements.nodes.length + elements.edges.length > 1000;
 

@@ -33,7 +33,7 @@ function toLookup(notes: NoteProps[]): Record<string, NoteProps> {
   return notesLookup;
 }
 
-function CalendarView({ engine }: DendronProps) {
+function CalendarView({ engine, ide }: DendronProps) {
   // --- init
   const ctx = "CalendarView";
   const logger = createLogger("calendarView");
@@ -42,13 +42,15 @@ function CalendarView({ engine }: DendronProps) {
     ctx,
     state: "enter",
     engine,
+    ide,
   });
 
   const [currentMode, setCurrentMode] =
     useState<AntdCalendarProps["mode"]>("month");
 
-  const notes = engine.notes;
-  const vaults = engine.vaults;
+  const { notes } = engine;
+  const { vaults } = engine;
+  const { noteActive } = ide;
   const currentVault = 0; // TODO selected correct vault
 
   const vaultNotes = _.values(notes).filter(
@@ -61,12 +63,22 @@ function CalendarView({ engine }: DendronProps) {
 
   const groupedDailyNotes = toLookup(dailyNotes); // create lookup table for faster search
 
+  if (noteActive) {
+    const xxx = NoteUtils.genJournalNoteTitle({
+      fname: noteActive.fname,
+      journalName: "journal",
+    });
+
+    console.log("Active NOTE: ", noteActive, groupedDailyNotes[xxx]);
+  }
+
   const onSelect: AntdCalendarProps["onSelect"] = (date) => {
     logger.info({ ctx: "onSelect", date });
     const dateKey = date.format(
       currentMode === "month" ? "YYYY-MM-DD" : "YYYY-MM"
     );
     const selectedNote = groupedDailyNotes[dateKey];
+
     if (selectedNote) {
       postVSCodeMessage({
         type: CalendarViewMessageType.onSelect,

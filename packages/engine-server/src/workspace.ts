@@ -220,9 +220,17 @@ export class WorkspaceService {
         const git = new Git({ localUrl: root });
         if (!this.shouldWorkspaceVaultSync("commit", root)) return undefined;
         if (await git.hasChanges()) {
-          await git.addAll();
-          await git.commit({ msg: "update" });
-          return root;
+          try {
+            await git.addAll();
+            await git.commit({ msg: "update" });
+            return root;
+          } catch (err) {
+            const stderr = err.stderr ? `: ${err.stderr}` : "";
+            throw new DendronError({
+              message: `error adding and committing vault${stderr}`,
+              payload: { err, repoPath: root },
+            });
+          }
         }
         return undefined;
       })
@@ -453,8 +461,9 @@ export class WorkspaceService {
         try {
           await git.pull();
         } catch (err) {
+          const stderr = err.stderr ? `: ${err.stderr}` : "";
           throw new DendronError({
-            message: "error pulling vault",
+            message: `error pulling vault${stderr}`,
             payload: { err, repoPath: root },
           });
         }
@@ -479,8 +488,9 @@ export class WorkspaceService {
             await git.push();
             return root;
           } catch (err) {
+            const stderr = err.stderr ? `: ${err.stderr}` : "";
             throw new DendronError({
-              message: "error pushing vault",
+              message: `error pushing vault${stderr}`,
               payload: { err, repoPath: root },
             });
           }

@@ -16,10 +16,10 @@ suite("workspace sync command", function () {
   ctx = setupBeforeAfter(this, {});
 
   describe("no repo", () => {
-    test("commit", (done) => {
+    test("do nothing", (done) => {
       runLegacyMultiWorkspaceTest({
         onInit: async ({}) => {
-          const out = await new SyncCommand().run();
+          const out = await new SyncCommand().execute();
           expect(out).toBeTruthy();
           const { committed, pulled, pushed } = out as any;
           // Nothin should have happened since there is no repository
@@ -45,7 +45,7 @@ suite("workspace sync command", function () {
             vault: vaults[0],
           });
 
-          const out = await new SyncCommand().run();
+          const out = await new SyncCommand().execute();
           expect(out).toBeTruthy();
           const { committed, pulled, pushed } = out as any;
           // The note created above should get committed
@@ -73,7 +73,7 @@ suite("workspace sync command", function () {
             vault: vaults[0],
           });
 
-          const out = await new SyncCommand().run();
+          const out = await new SyncCommand().execute();
           expect(out).toBeTruthy();
           const { committed, pulled, pushed } = out as any;
           // The files that default wsRoot created should get committed
@@ -105,7 +105,7 @@ suite("workspace sync command", function () {
             vault: vaults[0],
           });
 
-          const out = await new SyncCommand().run();
+          const out = await new SyncCommand().execute();
           const { committed, pulled, pushed } = out as any;
           // Nothing should get committed since "noCommit" is used
           expect(committed.length).toEqual(0);
@@ -132,7 +132,7 @@ suite("workspace sync command", function () {
             vault: vaults[0],
           });
 
-          const out = await new SyncCommand().run();
+          const out = await new SyncCommand().execute();
           const { committed, pulled, pushed } = out as any;
           // The note added should get committed
           expect(committed.length).toEqual(1);
@@ -160,7 +160,7 @@ suite("workspace sync command", function () {
             vault: vaults[0],
           });
 
-          const out = await new SyncCommand().run();
+          const out = await new SyncCommand().execute();
           const { committed, pulled, pushed } = out as any;
           // Nothing should be done since "skip" is used
           expect(committed.length).toEqual(0);
@@ -186,7 +186,7 @@ suite("workspace sync command", function () {
             vault: vaults[0],
           });
 
-          const out = await new SyncCommand().run();
+          const out = await new SyncCommand().execute();
           const { committed, pulled, pushed } = out as any;
           // Should try doing everything since the config requires so
           expect(committed.length).toEqual(1);

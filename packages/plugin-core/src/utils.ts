@@ -42,8 +42,11 @@ export class DisposableStore {
     this._toDispose.add(dis);
   }
 
-  // TODO
-  public dispose() {}
+  public dispose() {
+    for (const disposable of this._toDispose) {
+      disposable.dispose();
+    }
+  }
 }
 
 // === File FUtils

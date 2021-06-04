@@ -476,6 +476,7 @@ export class WorkspaceService {
   /** Returns the list of vaults that were attempted to be pushed, even if there was nothing to push. */
   async pushVaults(): Promise<string[]> {
     const vaults = this.config.vaults;
+    const vaultsPushed = new Set<string>();
     const out = await Promise.all(
       vaults.map(async (vault) => {
         const root = await this.getVaultRepo(vault);
@@ -483,6 +484,8 @@ export class WorkspaceService {
         const git = new Git({ localUrl: root });
         if (!(await git.hasRemote())) return undefined;
         if (!this.shouldWorkspaceVaultSync("push", root)) return undefined;
+        if (vaultsPushed.has(root)) return undefined; // The vault already has been pushed
+        vaultsPushed.add(root);
         if (this.user.canPushVault(vault)) {
           try {
             await git.push();

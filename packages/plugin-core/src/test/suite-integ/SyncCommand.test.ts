@@ -111,7 +111,7 @@ suite("workspace sync command", function () {
           expect(committed.length).toEqual(0);
           // Should pull and push since configuration allows it
           expect(pulled.length).toEqual(1);
-          expect(pushed.length).toEqual(3);
+          expect(pushed.length).toEqual(1);
           done();
         },
       });
@@ -191,7 +191,7 @@ suite("workspace sync command", function () {
           // Should try doing everything since the config requires so
           expect(committed.length).toEqual(1);
           expect(pulled.length).toEqual(1);
-          expect(pushed.length).toEqual(3);
+          expect(pushed.length).toEqual(1);
           done();
         },
       });

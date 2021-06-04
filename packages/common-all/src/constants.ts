@@ -12,6 +12,7 @@ export const CONSTANTS = {
   DENDRON_CACHE_FILE: ".dendron.cache.json",
   DENDRON_ID: ".dendron.uuid",
   DENDRON_NO_TELEMETRY: ".dendron.no-telemetry",
+  DENDRON_FORCE_TELEMETRY: ".dendron.force-telemetry",
   DENDRON_HOOKS_BASE: "hooks",
   DENDRON_LOCAL_SITE_PORT: 8080,
 };

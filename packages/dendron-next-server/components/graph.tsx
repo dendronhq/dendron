@@ -96,7 +96,7 @@ export default function Graph({
           movementThreshold: 1,
           timeStep: 20,
           refresh: 10,
-          animate: false, //!isLargeGraph,
+          animate: !isLargeGraph,
           animationDuration: undefined,
           animationEasing: undefined,
           maxIterations: 1000,

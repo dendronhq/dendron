@@ -48,7 +48,7 @@ export class ShowSchemaGraphCommand extends BasicCommand<
       {
         enableScripts: true,
         retainContextWhenHidden: true,
-      } // Webview options. More on these later.
+      }
     );
 
     const resp: string = WebViewUtils.genHTMLForWebView({

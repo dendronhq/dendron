@@ -13,7 +13,7 @@ import {
 } from "@dendronhq/common-all";
 import Graph from "../../components/graph";
 
-export default function FullGraph({
+export default function FullNoteGraph({
   engine,
 }: {
   engine: engineSlice.EngineState;
@@ -77,7 +77,7 @@ export default function FullGraph({
       .flat();
 
     setElements({ nodes, edges });
-  }, [engine]);
+  }, [notes]);
 
   const onSelect: EventHandler = (e) => {
     const { id, source } = e.target[0]._private.data;

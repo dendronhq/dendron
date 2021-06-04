@@ -640,6 +640,18 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docLink: "dendron.topic.commands.md",
     docPreview: `![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/workbench.help.gif)`,
   },
+  SHOW_NOTE_GRAPH: {
+    key: "dendron.showNoteGraph",
+    title: `${CMD_PREFIX} Show Note Graph`,
+    group: "workspace",
+    desc: "Display the notes in this workspace as a graph",
+  },
+  SHOW_SCHEMA_GRAPH: {
+    key: "dendron.showSchemaGraph",
+    title: `${CMD_PREFIX} Show Schema Graph`,
+    group: "workspace",
+    desc: "Display the schemas in this workspace as a graph",
+  },
   SHOW_PREVIEW: {
     key: "dendron.showPreview",
     title: `${CMD_PREFIX} Show Preview`,

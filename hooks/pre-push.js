@@ -3,7 +3,13 @@ const {exec} = require("./exec");
 
 function main() {
   // Where we would push if we ran `git push`
-  const upstream = exec("git rev-parse --abbrev-ref @{push}").stdout.trim();
+  let upstream;
+  try {
+    upstream = exec("git rev-parse --abbrev-ref @{push}").stdout.trim();
+  } catch {
+    // Fallback to first origin if none are set
+    upstream = exec("git remote").stdout.trim().split("\n")[0];
+  }
   // The files that would get pushed
   const filesToPush = exec(`git diff --name-only ${upstream}`).stdout.split('\n');
 

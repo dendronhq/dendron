@@ -254,7 +254,12 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
       notes
         .filter((n) => !n.stub)
         .map(async (n) => {
-          const cBody = await MDUtilsV5.procRemarkParse()
+          const cBody = await MDUtilsV5.procRemarkFull({
+            fname: n.fname,
+            engine,
+            dest: DendronASTDest.MD_DENDRON,
+            vault: n.vault,
+          })
             .use(RemarkUtils.convertObsidianLinks(n, []))
             .process(n.body);
           n.body = cBody.toString();

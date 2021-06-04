@@ -60,6 +60,10 @@ const CreateNoteFactory = (opts: CreateNoteFactoryOpts) => {
 
 export const NOTE_PRESETS_V4 = {
   NOTE_EMPTY: CreateNoteFactory({ fname: "empty", body: "" }),
+  /**
+   * fname: foo
+   * body: foo body
+   */
   NOTE_SIMPLE: CreateNoteFactory({ fname: "foo", body: "foo body" }),
   NOTE_SIMPLE_OTHER: CreateNoteFactory({ fname: "bar", body: "bar body" }),
   NOTE_SIMPLE_CHILD: CreateNoteFactory({

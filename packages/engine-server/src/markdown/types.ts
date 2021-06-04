@@ -1,6 +1,7 @@
 import {
   DendronConfig,
   DNoteRefLink,
+  DNoteRefLinkRaw,
   DVault,
   NoteProps,
 } from "@dendronhq/common-all";
@@ -99,8 +100,19 @@ export type NoteRefNoteV4 = Omit<DendronASTNode, "children"> & {
   data: NoteRefDataV4;
 };
 
+export type NoteRefNoteRawV4 = Omit<DendronASTNode, "children"> & {
+  type: DendronASTTypes.REF_LINK_V2;
+  value: string;
+  data: NoteRefDataRawV4;
+};
+
 export type NoteRefDataV4 = {
   link: DNoteRefLink;
+  vaultName?: string;
+};
+
+export type NoteRefDataRawV4 = {
+  link: DNoteRefLinkRaw;
   vaultName?: string;
 };
 

@@ -5,6 +5,7 @@ import {
   VaultUtils,
 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
+import { ProcMode } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
 import { Eat } from "remark-parse";
@@ -82,7 +83,7 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
       const data = node.data;
       let value = node.value;
 
-      if (pOpts.useRaw) {
+      if (pOpts.mode === ProcMode.NO_DATA) {
         const { alias, anchorHeader } = data;
         let link = value;
         let calias = alias !== value ? `${alias}|` : "";
@@ -184,11 +185,11 @@ function attachParser(proc: Unified.Processor) {
     if (_.isNull(out)) {
       throw new DendronError({ message: `link is null: ${linkMatch}` });
     }
-    if (pOpts.useRaw) {
+    if (pOpts.mode === ProcMode.NO_DATA) {
       return out;
     }
 
-    let { config, vault, dest, fname } = MDUtilsV4.getDendronData(proc);
+    let { config, vault, dest, fname } = MDUtilsV5.getProcData(proc);
     const { engine } = MDUtilsV4.getEngineFromProc(proc);
     if (out.vaultName) {
       const maybeVault = VaultUtils.getVaultByName({
@@ -210,6 +211,7 @@ function attachParser(proc: Unified.Processor) {
       // default to current note
     }
     if (!out.value) {
+      debugger;
       // same file block reference, value is implicitly current file
       out.value = _.trim(NoteUtils.normalizeFname(fname)); // recreate what value (and alias) would have been parsed
       if (!out.alias) out.alias = out.value;

@@ -4,6 +4,10 @@ import {
   DendronError,
   DEngineClient,
   DLink,
+  DNoteLoc,
+  DNoteRefData,
+  DNoteRefLink,
+  DNoteRefLinkRaw,
   ERROR_STATUS,
   getSlugger,
   NoteChangeEntry,
@@ -22,6 +26,7 @@ import {
   Anchor,
   BlockAnchor,
   DendronASTDest,
+  DendronASTNode,
   DendronASTRoot,
   DendronASTTypes,
   NoteRefNoteV4_LEGACY,
@@ -33,6 +38,8 @@ const toString = require("mdast-util-to-string");
 import * as mdastBuilder from "mdast-builder";
 import { DNoteAnchorPositioned } from "@dendronhq/common-all";
 import { createLogger, file2String } from "@dendronhq/common-server";
+import path from "path";
+import { MDUtilsV5, ProcMode } from "@dendronhq/engine-server";
 export { mdastBuilder };
 
 export const ALIAS_DIVIDER = "|";
@@ -69,7 +76,72 @@ export function getNoteOrError(
   return { error, note };
 }
 
+type LinkFilter = {
+  type?: DendronASTTypes.REF_LINK_V2 | DendronASTTypes.WIKI_LINK;
+  oldLoc?: Partial<DNoteLoc>;
+};
+type LinkFilterTypeRequired = {
+  type: DendronASTTypes.REF_LINK_V2 | DendronASTTypes.WIKI_LINK;
+  oldLoc?: Partial<DNoteLoc>;
+};
+
+const getLinks = ({
+  ast,
+  note,
+  engine,
+  filter,
+}: {
+  ast: DendronASTNode;
+  note: NoteProps;
+  engine: DEngineClient;
+  filter: LinkFilterTypeRequired;
+}) => {
+  let out2: WikiLinkNoteV4[] = selectAll(filter.type, ast) as WikiLinkNoteV4[];
+  let dlinks = out2.map(
+    (m: WikiLinkNoteV4) =>
+      ({
+        type: LinkUtils.astType2DLinkType(filter.type),
+        from: NoteUtils.toNoteLoc(note),
+        original: m.value,
+        value: m.value,
+        alias: m.data.alias,
+        pos: {
+          start: m.position?.start.offset,
+          end: m.position?.end.offset,
+        },
+        // TODO: error if vault not found
+        to: {
+          fname: m.value,
+          anchorHeader: m.data.anchorHeader,
+          vault: m.data.vaultName
+            ? VaultUtils.getVaultByName({
+                vaults: engine.vaults,
+                vname: m.data.vaultName,
+              })
+            : undefined,
+        },
+      } as DLink)
+  );
+  if (filter?.oldLoc) {
+    // TODO: add additional filters besides fname
+    dlinks = dlinks.filter((ent) => {
+      return ent.from.fname === filter?.oldLoc?.fname;
+    });
+  }
+  return dlinks;
+};
+
 export class LinkUtils {
+  static astType2DLinkType(type: DendronASTTypes): DLink["type"] {
+    switch (type) {
+      case DendronASTTypes.WIKI_LINK:
+        return "wiki";
+      case DendronASTTypes.REF_LINK_V2:
+        return "ref";
+      default:
+        throw new DendronError({ message: `invalid type conversion: ${type}` });
+    }
+  }
   /**
    * Get all links from the note body
    * Currently, just look for wiki links
@@ -78,47 +150,45 @@ export class LinkUtils {
   static findLinks({
     note,
     engine,
+    filter,
   }: {
     note: NoteProps;
     engine: DEngineClient;
+    filter?: LinkFilter;
   }): DLink[] {
     const content = note.body;
-    let remark = MDUtilsV4.procParse({
-      dest: DendronASTDest.MD_DENDRON,
-      engine,
-      fname: note.fname,
-    });
-    let out = remark.parse(content);
-    let out2: WikiLinkNoteV4[] = selectAll(
-      DendronASTTypes.WIKI_LINK,
-      out
-    ) as WikiLinkNoteV4[];
-    const dlinks = out2.map(
-      (m: WikiLinkNoteV4) =>
-        ({
-          type: "wiki",
-          from: NoteUtils.toNoteLoc(note),
-          original: m.value,
-          value: m.value,
-          alias: m.data.alias,
-          pos: {
-            start: m.position?.start.offset,
-            end: m.position?.end.offset,
-          },
-          // TODO: error if vault not found
-          to: {
-            fname: m.value,
-            anchorHeader: m.data.anchorHeader,
-            vault: m.data.vaultName
-              ? VaultUtils.getVaultByName({
-                  vaults: engine.vaults,
-                  vname: m.data.vaultName,
-                })
-              : undefined,
-          },
-        } as DLink)
+    let remark = MDUtilsV5.procRemarkParse(
+      { mode: ProcMode.FULL },
+      {
+        engine,
+        fname: note.fname,
+        vault: note.vault,
+        dest: DendronASTDest.MD_DENDRON,
+      }
     );
-    return dlinks as DLink[];
+    let out = remark.parse(content) as DendronASTNode;
+    let links: DLink[] = [];
+    if (filter?.type !== DendronASTTypes.WIKI_LINK) {
+      links = links.concat(
+        getLinks({
+          ast: out,
+          engine,
+          filter: { type: DendronASTTypes.WIKI_LINK, oldLoc: filter?.oldLoc },
+          note,
+        })
+      );
+    }
+    if (filter?.type !== DendronASTTypes.REF_LINK_V2) {
+      links = links.concat(
+        getLinks({
+          ast: out,
+          engine,
+          filter: { type: DendronASTTypes.REF_LINK_V2, oldLoc: filter?.oldLoc },
+          note,
+        })
+      );
+    }
+    return links;
   }
   static isAlias(link: string) {
     return link.indexOf("|") !== -1;
@@ -220,6 +290,65 @@ export class LinkUtils {
       }
     }
     return out;
+  }
+
+  static parseNoteRefRaw(ref: string): DNoteRefLinkRaw {
+    const optWikiFileName = /([^\]:#]*)/.source;
+    const wikiFileName = /([^\]:#]+)/.source;
+    const reLink = new RegExp(
+      "" +
+        `(?<name>${optWikiFileName})` +
+        `(${
+          new RegExp(
+            // anchor start
+            "" +
+              /#?/.source +
+              `(?<anchorStart>${wikiFileName})` +
+              // anchor stop
+              `(:#(?<anchorEnd>${wikiFileName}))?`
+          ).source
+        })?`,
+      "i"
+    );
+    let vaultName: string | undefined = undefined;
+    ({ vaultName, link: ref } = LinkUtils.parseDendronURI(ref));
+    const groups = reLink.exec(ref)?.groups;
+    const clean: DNoteRefData = {
+      type: "file",
+    };
+    let fname: string | undefined;
+    _.each<Partial<DNoteRefData>>(groups, (v, k) => {
+      if (_.isUndefined(v)) {
+        return;
+      }
+      if (k === "name") {
+        fname = path.basename(v as string, ".md");
+      } else {
+        // @ts-ignore
+        clean[k] = v;
+      }
+    });
+    if (_.isUndefined(fname)) {
+      throw new DendronError({ message: `fname for ${ref} is undefined` });
+    }
+    if (clean.anchorStart && clean.anchorStart.indexOf(",") >= 0) {
+      const [anchorStart, offset] = clean.anchorStart.split(",");
+      clean.anchorStart = anchorStart;
+      clean.anchorStartOffset = parseInt(offset);
+    }
+    if (vaultName) {
+      clean.vaultName = vaultName;
+    }
+    return { from: { fname }, data: clean, type: "ref" };
+  }
+
+  static parseNoteRef(ref: string): DNoteRefLink {
+    const noteRef = LinkUtils.parseNoteRefRaw(ref);
+    if (_.isUndefined(noteRef.from) || _.isUndefined(noteRef.from.fname)) {
+      throw new DendronError({ message: `fname for ${ref} is undefined` });
+    }
+    // @ts-ignore
+    return noteRef;
   }
 }
 

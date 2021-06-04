@@ -63,10 +63,16 @@ export type DNoteLink<TData = any> = {
     start: number;
     end: number;
   };
+  // if parsing in raw mode, from field won't be available
   from: DNoteLoc;
   to?: DNoteLoc;
   data: TData;
 };
+
+export type DNoteLinkRaw<TData = any> = Omit<DNoteLink<TData>, "from"> & {
+  from?: DNoteLoc;
+};
+
 export type DNoteRefData = {
   anchorStart?: string;
   anchorEnd?: string;
@@ -79,6 +85,7 @@ export type DNoteRefData = {
   type: "file" | "id";
 };
 export type DNoteRefLink = DNoteLink<DNoteRefData>;
+export type DNoteRefLinkRaw = DNoteLinkRaw<DNoteRefData>;
 
 /**
  * Opts are arguments used when creating a node

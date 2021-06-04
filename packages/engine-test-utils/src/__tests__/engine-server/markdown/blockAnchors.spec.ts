@@ -14,6 +14,7 @@ import {
   Text,
   Node,
   Parent,
+  MDUtilsV5,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { runEngineTestV5 } from "../../../engine";
@@ -24,6 +25,7 @@ function proc(
   dendron: DendronASTData,
   opts?: BlockAnchorOpts
 ) {
+  MDUtilsV5.procRemarkParse({});
   return MDUtilsV4.proc({ engine })
     .data("dendron", dendron)
     .use(wikiLinks)

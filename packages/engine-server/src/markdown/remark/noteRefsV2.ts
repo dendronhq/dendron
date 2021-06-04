@@ -1,36 +1,36 @@
-import { AnchorUtils, LinkUtils } from "./utils";
 import {
   CONSTANTS,
+  DendronConfig,
+  DendronError,
   DNodeUtils,
   DNoteLoc,
   DNoteRefLink,
   DUtils,
-  DendronConfig,
-  DendronError,
+  getSlugger,
   NoteProps,
   NoteUtils,
   RespV2,
   VaultUtils,
-  getSlugger,
 } from "@dendronhq/common-all";
+import { file2Note } from "@dendronhq/common-server";
+import _ from "lodash";
+import { html, paragraph, root } from "mdast-builder";
+import { Eat } from "remark-parse";
+import Unified, { Plugin } from "unified";
+import { Node, Parent } from "unist";
+import { SiteUtils } from "../../topics/site";
 import {
   DendronASTDest,
   DendronASTNode,
   DendronASTTypes,
+  NoteRefNoteRawV4,
   NoteRefNoteV4,
   NoteRefNoteV4_LEGACY,
 } from "../types";
-import { file2Note } from "@dendronhq/common-server";
 import { MDUtilsV4, ParentWithIndex, renderFromNoteProps } from "../utils";
-import { Node, Parent } from "unist";
-import Unified, { Plugin } from "unified";
-import { html, paragraph, root } from "mdast-builder";
-
-import { Eat } from "remark-parse";
-import { SiteUtils } from "../../topics/site";
+import { MDUtilsV5, ProcMode } from "../utilsv5";
+import { AnchorUtils, LinkUtils } from "./utils";
 import { WikiLinksOpts } from "./wikiLinks";
-import _ from "lodash";
-import { parseNoteRefV2 } from "../../utils";
 
 const LINK_REGEX = /^\!\[\[(.+?)\]\]/;
 
@@ -53,8 +53,10 @@ type ConvertNoteRefHelperOpts = ConvertNoteRefOpts & {
 };
 
 const plugin: Plugin = function (this: Unified.Processor, opts?: PluginOpts) {
+  const procOptsV5 = MDUtilsV5.getProcOpts(this);
+
   attachParser(this);
-  if (this.Compiler != null) {
+  if (this.Compiler != null && !procOptsV5.parseOnly) {
     attachCompiler(this, opts);
   }
 };
@@ -68,7 +70,7 @@ function attachParser(proc: Unified.Processor) {
     const match = LINK_REGEX.exec(value);
     if (match) {
       const linkMatch = match[1].trim();
-      const link = parseNoteRefV2(linkMatch);
+      const link = LinkUtils.parseNoteRef(linkMatch);
       // If the link is same file [[#header]], it's implicitly to the same file it's located in
       if (link.from.fname === "")
         link.from.fname = MDUtilsV4.getDendronData(proc).fname;
@@ -87,13 +89,54 @@ function attachParser(proc: Unified.Processor) {
     return;
   }
 
+  function inlineTokenizerV5(eat: Eat, value: string) {
+    const procOpts = MDUtilsV5.getProcOpts(proc);
+    const match = LINK_REGEX.exec(value);
+    if (match) {
+      const linkMatch = match[1].trim();
+      if (procOpts?.mode === ProcMode.NO_DATA) {
+        const link = LinkUtils.parseNoteRefRaw(linkMatch);
+        const { value } = LinkUtils.parseLink(linkMatch);
+        let refNote: NoteRefNoteRawV4 = {
+          type: DendronASTTypes.REF_LINK_V2,
+          data: {
+            link,
+          },
+          value,
+        };
+        return eat(match[0])(refNote);
+      } else {
+        const link = LinkUtils.parseNoteRef(linkMatch);
+        // If the link is same file [[#header]], it's implicitly to the same file it's located in
+        if (link.from?.fname === "")
+          link.from.fname = MDUtilsV4.getDendronData(proc).fname;
+        const { value } = LinkUtils.parseLink(linkMatch);
+        let refNote: NoteRefNoteV4 = {
+          type: DendronASTTypes.REF_LINK_V2,
+          data: {
+            link,
+          },
+          value,
+        };
+        return eat(match[0])(refNote);
+      }
+    }
+    return;
+  }
   inlineTokenizer.locator = locator;
+  inlineTokenizerV5.locator = locator;
 
   const Parser = proc.Parser;
   const inlineTokenizers = Parser.prototype.inlineTokenizers;
   const inlineMethods = Parser.prototype.inlineMethods;
-  inlineTokenizers.refLinkV2 = inlineTokenizer;
-  inlineMethods.splice(inlineMethods.indexOf("link"), 0, "refLinkV2");
+
+  if (MDUtilsV5.isV5Active(proc)) {
+    inlineTokenizers.refLinkV2 = inlineTokenizerV5;
+    inlineMethods.splice(inlineMethods.indexOf("link"), 0, "refLinkV2");
+  } else {
+    inlineTokenizers.refLinkV2 = inlineTokenizer;
+    inlineMethods.splice(inlineMethods.indexOf("link"), 0, "refLinkV2");
+  }
   return Parser;
 }
 

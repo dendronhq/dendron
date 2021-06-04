@@ -718,9 +718,15 @@ function findHeader({
   match: string;
   slugger: ReturnType<typeof getSlugger>;
 }): FindAnchorResult {
-  const foundIndex = MDUtilsV4.findIndex(nodes, function (node: Node) {
-    return MDUtilsV4.matchHeading(node, match, { slugger });
-  });
+  const foundIndex = MDUtilsV4.findIndex(
+    nodes,
+    function (node: Node, idx: number) {
+      if (idx === 0 && match === "*") {
+        return false;
+      }
+      return MDUtilsV4.matchHeading(node, match, { slugger });
+    }
+  );
   if (foundIndex < 0) return null;
   return { type: "header", index: foundIndex, anchorType: "header" };
 }

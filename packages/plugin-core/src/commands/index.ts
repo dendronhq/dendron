@@ -38,6 +38,8 @@ import { ResetConfigCommand } from "./ResetConfig";
 import { RestoreVaultCommand } from "./RestoreVault";
 import { SetupWorkspaceCommand } from "./SetupWorkspace";
 import { ShowHelpCommand } from "./ShowHelp";
+import { ShowNoteGraphCommand } from "./ShowNoteGraph";
+import { ShowSchemaGraphCommand } from "./ShowSchemaGraph";
 import { ShowPreviewCommand } from "./ShowPreview";
 import { SignInCommand } from "./SignIn";
 import { SignUpCommand } from "./SignUp";
@@ -88,6 +90,8 @@ const ALL_COMMANDS = [
   RestoreVaultCommand,
   SetupWorkspaceCommand,
   ShowHelpCommand,
+  ShowNoteGraphCommand,
+  ShowSchemaGraphCommand,
   ShowPreviewCommand,
   SignInCommand,
   SignUpCommand,

@@ -9,9 +9,11 @@ import {
   BlockAnchor,
   blockAnchors,
   BlockAnchorOpts,
-  DendronASTNode,
   wikiLinks,
   DendronASTTypes,
+  Text,
+  Node,
+  Parent,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { runEngineTestV5 } from "../../../engine";
@@ -52,7 +54,7 @@ function runAllTests(opts: { name: string; testCases: ProcTests[] }) {
  * @param indices Left-to-right indexes for children, e.g. first index is for the root, second is for the child of the root...
  * @returns Requested child. Note that this function has no way of checking types, so the child you get might not be of the right type.
  */
-function getDescendantNode<Child extends DendronASTNode>(
+function getDescendantNode<Child extends Node>(
   node: UnistNode,
   ...indices: number[]
 ): Child {
@@ -113,7 +115,7 @@ describe("blockAnchors", () => {
         "^block-id Lorem ipsum"
       );
       expect(getDescendantNode(resp, 0, 0).type).toEqual("text");
-      expect(getDescendantNode(resp, 0).children.length).toEqual(1); // text only, nothing else
+      expect(getDescendantNode<Parent>(resp, 0).children.length).toEqual(1); // text only, nothing else
     });
 
     test("parses anchors at the end of the line", () => {
@@ -122,6 +124,17 @@ describe("blockAnchors", () => {
       );
       const text = getDescendantNode(resp, 0, 0);
       expect(text.type).toEqual("text");
+      const anchor = getDescendantNode<BlockAnchor>(resp, 0, 1);
+      expect(anchor.type).toEqual(DendronASTTypes.BLOCK_ANCHOR);
+      expect(anchor.id).toEqual("block-id");
+    });
+
+    test("parses anchors at the end of headers", () => {
+      const resp = proc(engine, genDendronData(dendronData)).parse(
+        "# Lorem ipsum ^block-id"
+      );
+      const header = getDescendantNode<Text>(resp, 0, 0);
+      expect(header.value.trim()).toEqual("Lorem ipsum");
       const anchor = getDescendantNode<BlockAnchor>(resp, 0, 1);
       expect(anchor.type).toEqual(DendronASTTypes.BLOCK_ANCHOR);
       expect(anchor.id).toEqual("block-id");

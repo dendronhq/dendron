@@ -1,4 +1,4 @@
-import { TestPresetEntryV4 } from "@dendronhq/common-test-utils";
+import { AssertUtils, TestPresetEntryV4 } from "@dendronhq/common-test-utils";
 import { ENGINE_HOOKS } from "./utils";
 
 const NOTES = {
@@ -6,9 +6,17 @@ const NOTES = {
     async ({ engine }) => {
       const { data } = await engine.renderNote({
         id: "foo",
-        format: "markdown",
       });
-      return [{ actual: data, expected: "<p>foo body</p>", msg: "foo" }];
+      return [
+        {
+          actual: true,
+          expected: await AssertUtils.assertInString({
+            body: data!,
+            match: ["<p>foo body</p>"],
+          }),
+          msg: "foo",
+        },
+      ];
     },
     {
       preSetupHook: async (opts) => {

@@ -1,5 +1,4 @@
-import { ConfigWriteOpts } from "@dendronhq/common-all";
-import { WorkspaceRequest } from "@dendronhq/common-server";
+import { ConfigWriteOpts, WorkspaceRequest } from "@dendronhq/common-all";
 import { Request, Response, Router } from "express";
 import { getLogger } from "../core";
 import { ConfigController } from "../modules/config";

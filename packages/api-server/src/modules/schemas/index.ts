@@ -1,5 +1,5 @@
-import { DendronError } from "@dendronhq/common-all";
 import {
+  DendronError,
   SchemaDeletePayload,
   SchemaDeleteRequest,
   SchemaQueryPayload,
@@ -8,7 +8,7 @@ import {
   SchemaUpdateRequest,
   SchemaWritePayload,
   SchemaWriteRequest,
-} from "@dendronhq/common-server";
+} from "@dendronhq/common-all";
 import { getWS } from "../../utils";
 
 export class SchemaController {

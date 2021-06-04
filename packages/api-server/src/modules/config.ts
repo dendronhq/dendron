@@ -3,8 +3,8 @@ import {
   ConfigWriteOpts,
   DendronError,
   RespV2,
+  WorkspaceRequest,
 } from "@dendronhq/common-all";
-import { WorkspaceRequest } from "@dendronhq/common-server";
 import { MemoryStore } from "../store/memoryStore";
 import { getWS } from "../utils";
 

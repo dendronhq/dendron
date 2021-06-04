@@ -37,6 +37,30 @@ export const initNotes = createAsyncThunk(
   }
 );
 
+export const renderNote = createAsyncThunk(
+  "engine/render",
+  async (
+    { port, ws, id }: { port: number; ws: string; id: string },
+    { dispatch }
+  ) => {
+    const endpoint = `http://localhost:${port}`;
+    const logger = createLogger("renderNoteThunk");
+    const api = new DendronApiV2({
+      endpoint,
+      apiPath: "api",
+      logger,
+    });
+    const resp = await api.noteRender({ id, ws });
+    if (resp.error) {
+      dispatch(setError(stringifyError(resp.error)));
+      return resp;
+    }
+    const data = resp.data!;
+    dispatch(setRenderNote({ id, body: data }));
+    return resp;
+  }
+);
+
 export type InitNoteOpts = Parameters<typeof initNotes>[0];
 
 type InitialState = InitializedState;
@@ -44,6 +68,7 @@ type InitializedState = {
   error: any;
   loading: "idle" | "pending" | "fulfilled";
   currentRequestId: string | undefined;
+  notesRendered: { [key: string]: string | undefined };
 } & Partial<DEngineInitPayload>;
 
 export type EngineState = InitializedState;
@@ -53,6 +78,7 @@ export const engineSlice = createSlice({
     loading: "idle" as const,
     notes: {},
     schemas: {},
+    notesRendered: {},
     error: null,
   } as InitialState,
   reducers: {
@@ -69,6 +95,13 @@ export const engineSlice = createSlice({
     },
     setError: (state, action: PayloadAction<any>) => {
       state.error = action.payload;
+    },
+    setRenderNote: (
+      state,
+      action: PayloadAction<{ id: string; body: string }>
+    ) => {
+      const { id, body } = action.payload;
+      state.notesRendered[id] = body;
     },
   },
   extraReducers: (builder) => {
@@ -104,5 +137,6 @@ export class EngineSliceUtils {
     );
   }
 }
-export const { setNotes, setError, setFromInit } = engineSlice.actions;
+export const { setNotes, setError, setFromInit, setRenderNote } =
+  engineSlice.actions;
 export const reducer = engineSlice.reducer;

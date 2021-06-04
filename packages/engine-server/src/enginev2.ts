@@ -424,13 +424,18 @@ export class DendronEngineV2 implements DEngine {
         data: undefined,
       };
     }
-    const proc = MDUtilsV4.remark();
-    const payload: string = await MDUtilsV4.procRehype({ proc })
-      .processSync(NoteUtils.serialize(note))
-      .toString();
+    const proc = MDUtilsV4.procHTML({
+      engine: this,
+      vault: note.vault,
+      fname: note.fname,
+      config: this.config,
+      noteIndex: {} as any,
+      useLinks: false,
+    });
+    const payload = await proc.process(NoteUtils.serialize(note));
     return {
       error: null,
-      data: payload,
+      data: payload.toString(),
     };
   }
 

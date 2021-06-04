@@ -3,13 +3,11 @@ import {
   ERROR_SEVERITY,
   NotePropsDict,
   SchemaModuleDict,
-} from "@dendronhq/common-all";
-import {
   InitializePayload,
   WorkspaceInitRequest,
   WorkspaceSyncPayload,
   WorkspaceSyncRequest,
-} from "@dendronhq/common-server";
+} from "@dendronhq/common-all";
 import { DendronEngineV2 } from "@dendronhq/engine-server";
 import { getLogger } from "../../core";
 import { getWS, putWS } from "../../utils";

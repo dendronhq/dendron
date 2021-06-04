@@ -116,10 +116,6 @@ export default function Graph({
     }
   }, [graphRef, elements]);
 
-  if (cy) {
-    logger.log("Graph style:", cy.style().json());
-  }
-
   return (
     <>
       <Head>

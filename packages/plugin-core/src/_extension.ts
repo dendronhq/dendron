@@ -188,6 +188,45 @@ function subscribeToPortChange() {
   );
 }
 
+function isVSCodeTelemetryEnabled(): boolean | undefined {
+  // `isTelemetryEnabled` only seems to be available on VSCode 1.55 and above.
+  // Our dependencies are currently set up for 1.54, so typescript does not understand that it exists.
+  try {
+    return (vscode.env as any).isTelemetryEnabled;
+  } catch (err) {
+    Logger.error({ msg: "Error when trying to access telemetry preference" });
+    return undefined;
+  }
+}
+
+/** Creates a SegmentClient for telemetry, if enabled, and listens for vscode telemetry settings to disable it when requested. */
+function setupSegmentClient(ws: DendronWorkspace) {
+  function instantiateSegmentClient() {
+    SegmentClient.instance({
+      optOut: ws.config.noTelemetry || !isVSCodeTelemetryEnabled(),
+      forceNew: true,
+    });
+  }
+
+  // `onDidChangeTelemetryEnabled` only seems to be available on VSCode 1.55 and above.
+  // Our dependencies are currently set up for 1.54, so typescript does not understand that it exists.
+  try {
+    const onDidChangeTelemetryEnabled: vscode.Event<Boolean> | undefined = (
+      vscode.env as any
+    ).onDidChangeTelemetryEnabled;
+    if (!_.isUndefined(onDidChangeTelemetryEnabled)) {
+      const disposable = onDidChangeTelemetryEnabled(() =>
+        instantiateSegmentClient()
+      );
+      ws.addDisposable(disposable);
+    }
+  } catch (err) {
+    Logger.error({
+      msg: "Error when trying to listen to the telemetry preference change event",
+    });
+  }
+}
+
 export async function _activate(
   context: vscode.ExtensionContext
 ): Promise<boolean> {
@@ -220,7 +259,7 @@ export async function _activate(
     let start = process.hrtime();
     const config = ws.config;
     // initialize client
-    SegmentClient.instance({ optOut: ws.config.noTelemetry, forceNew: true });
+    setupSegmentClient(ws);
     const wsRoot = DendronWorkspace.wsRoot() as string;
     const wsService = new WorkspaceService({ wsRoot });
     const didClone = await wsService.initialize({

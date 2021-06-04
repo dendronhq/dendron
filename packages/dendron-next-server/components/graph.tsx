@@ -8,34 +8,35 @@ import { useRouter } from "next/router";
 import { useThemeSwitcher } from "react-css-theme-switcher";
 import { Space, Typography } from "antd";
 import Head from "next/head";
+import AntThemes from "../styles/theme-antd";
 
-const getCytoscapeStyle = (themes: any, theme: string | undefined) => `
-      node {
-        width: 5;
-        height: 5;
-        background-color: ${theme === themes.dark ? "#807B7B" : "#999393"};
-        border-color: ${theme === themes.dark ? "#807B7B" : "#999393"};
-        color: ${theme === themes.dark ? "#fff" : "#2F3438"};
-        label: data(label);
-        border-width: 1;
-        font-size: 10;
-        min-zoomed-font-size: 10;
-        font-weight: 400;
-      }
-    
-      edge {
-        width: 0.25;
-        line-color: ${theme === themes.dark ? "#807B7B" : "#999393"};
-        target-arrow-shape: none;
-        curve-style: haystack;
-      }
-    
-      :selected, .open {
-        background-color: ${theme === themes.dark ? "#36B73B" : "#27AC2C"};
-        border-color: ${theme === themes.dark ? "#36B73B" : "#27AC2C"};
-        color: ${theme === themes.dark ? "#36B73B" : "#27AC2C"};
-      }
-    `;
+const getCytoscapeStyle = (themes: any, theme: string | undefined) => {
+  if (_.isUndefined(theme)) return "";
+  return `
+  node {
+    width: ${AntThemes[theme].graph.node.size};
+    height: ${AntThemes[theme].graph.node.size};
+    background-color: ${AntThemes[theme].graph.node.color};
+    color: ${AntThemes[theme].graph.node.label.color};
+    label: data(label);
+    font-size: ${AntThemes[theme].graph.node.label.fontSize};
+    min-zoomed-font-size: ${AntThemes[theme].graph.node.label.minZoomedFontSize};
+    font-weight: ${AntThemes[theme].graph.node.label.fontWeight};
+  }
+
+  edge {
+    width: ${AntThemes[theme].graph.edge.width};
+    line-color: ${AntThemes[theme].graph.edge.color};
+    target-arrow-shape: none;
+    curve-style: haystack;
+  }
+
+  :selected, .open {
+    background-color: ${AntThemes[theme].graph.node._selected.color};
+    color: ${AntThemes[theme].graph.node._selected.color};
+  }
+`;
+};
 
 export default function Graph({
   elements,
@@ -114,6 +115,10 @@ export default function Graph({
       setCy(network);
     }
   }, [graphRef, elements]);
+
+  if (cy) {
+    logger.log("Graph style:", cy.style().json());
+  }
 
   return (
     <>

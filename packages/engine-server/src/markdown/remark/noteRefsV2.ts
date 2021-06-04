@@ -549,6 +549,10 @@ function prepareNoteRefIndices<T>({
   if (end && end.type === "list") {
     removeSingleItemNestedLists(end.ancestors);
   }
+  if (end && end.type === "header" && end.anchorType === "header") {
+    // TODO: check if this does right thing with header
+    end.index -= 1;
+  }
   if (start && start.type === "list") {
     removeSingleItemNestedLists(start.ancestors);
   }
@@ -674,11 +678,13 @@ type FindAnchorResult =
   | {
       type: "header" | "block";
       index: number;
+      anchorType?: "block" | "header";
     }
   | {
       type: "list";
       index: number;
       ancestors: ParentWithIndex[];
+      anchorType?: "block";
     }
   | null;
 
@@ -716,7 +722,7 @@ function findHeader({
     return MDUtilsV4.matchHeading(node, match, { slugger });
   });
   if (foundIndex < 0) return null;
-  return { type: "header", index: foundIndex };
+  return { type: "header", index: foundIndex, anchorType: "header" };
 }
 
 /** Searches for block anchors, then returns the index for the top-level ancestor.
@@ -757,11 +763,16 @@ function findBlockAnchor({
     }
     if (foundAncestors[0].ancestor.type === DendronASTTypes.LIST) {
       // The block anchor is in a list, which will need special handling to slice the list elements
-      return { type: "list", index: foundIndex, ancestors: foundAncestors };
+      return {
+        type: "list",
+        index: foundIndex,
+        ancestors: foundAncestors,
+        anchorType: "block",
+      };
     }
   }
   // Otherwise, it's an anchor inside some regular block. The anchor refers to the block it's inside of.
-  return { type: "block", index: foundIndex };
+  return { type: "block", index: foundIndex, anchorType: "block" };
 }
 
 function renderPretty(opts: { content: string; title: string; link: string }) {

@@ -17,9 +17,14 @@ import {
   ProcTests,
 } from "./utils";
 
-function runAllTests(opts: { name: string; testCases: ProcTests[] }) {
+function runAllTests(opts: {
+  name: string;
+  testCases: ProcTests[];
+  only?: boolean;
+}) {
   const { name, testCases } = opts;
-  describe(name, () => {
+  const _describe = opts.only ? describe.only : describe;
+  _describe(name, () => {
     test.each(
       testCases.map((ent) => [`${ent.dest}: ${ent.name}`, ent.testCase])
     )("%p", async (_key, testCase: TestPresetEntryV4) => {
@@ -502,6 +507,70 @@ describe("noteRefV2", () => {
     },
   });
 
+  const WITH_START_AND_END_ANCHOR = createProcTests({
+    name: "WITH_START_AND_END_ANCHOR",
+    setupFunc: async (opts) => {
+      const { engine, vaults } = opts;
+      return processTextV2({
+        text: "# header\n![[target#head-1:#head-2]]",
+        dest: opts.extra.dest,
+        engine,
+        vault: vaults[0],
+        fname: "foo",
+      });
+    },
+    preSetupHook: async ({ wsRoot, vaults }) => {
+      const vault = vaults[0];
+      await NoteTestUtilsV4.createNote({
+        fname: "target",
+        vault,
+        wsRoot,
+        body: [
+          "## head 1",
+          "",
+          "content 1",
+          "### head 1.1",
+          "",
+          "content 1.1",
+          "## head 2",
+          "",
+          "content 2",
+        ].join("\n"),
+      });
+      await NoteTestUtilsV4.createNote({
+        fname: "foo",
+        vault,
+        wsRoot,
+      });
+    },
+    verifyFuncDict: {
+      [DendronASTDest.MD_DENDRON]: async ({ extra }) => {
+        const { resp } = extra;
+        expect(
+          await AssertUtils.assertInString({
+            body: resp.toString(),
+            match: ["# header", "![[target#head-1:#head-2]]"],
+          })
+        ).toBeTruthy();
+      },
+      [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
+        const { resp } = extra;
+        debugger;
+        expect(
+          await AssertUtils.assertInString({
+            body: resp.toString(),
+            match: ["content 1.1"],
+            nomatch: ["head 2"],
+          })
+        ).toBeTruthy();
+      },
+      ...generateVerifyFunction({
+        target: DendronASTDest.MD_REGULAR,
+        exclude: [DendronASTDest.MD_DENDRON],
+      }),
+    },
+  });
+
   const RECURSIVE_TEST_CASES = createProcTests({
     name: "recursive",
     setupFunc: async ({ engine, extra, vaults }) => {
@@ -730,10 +799,10 @@ describe("noteRefV2", () => {
   });
 
   const ALL_TEST_CASES = [
-    // ...RECURSIVE_TOO_DEEP_TEST_CASES,
+    ...WITH_START_AND_END_ANCHOR,
+    ...WILDCARD_CASE,
     ...REGULAR_CASE,
     ...RECURSIVE_TEST_CASES,
-    ...WILDCARD_CASE,
     ...WITH_ANCHOR,
     ...WITH_FM_TITLE,
     ...WITH_ANCHOR_WITH_SPACE,
@@ -749,7 +818,10 @@ describe("noteRefV2", () => {
   //     ...WITH_ANCHOR
   // ];
 
-  runAllTests({ name: "compile", testCases: ALL_TEST_CASES });
+  runAllTests({
+    name: "compile",
+    testCases: ALL_TEST_CASES,
+  });
 
   describe("with block anchors", () => {
     const IN_PARAGRAPH = createProcTests({
@@ -1574,7 +1646,6 @@ describe("noteRefV2", () => {
           const { resp } = extra;
           await checkVFile(
             resp,
-            "end",
             "Sapiente sed accusamus eum.",
             "Sint minus fuga omnis non."
           );

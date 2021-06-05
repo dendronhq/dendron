@@ -83,6 +83,7 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     button.pressed = !button.pressed;
     button.type = button.type == "workspace" ? "file" : "workspace";
     quickpick.buttons = [button];
+    quickpick.title = `Doctor (${button.type})`;
   };
 
   async gatherInputs(): Promise<CommandOpts | undefined> {
@@ -90,12 +91,15 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
       const values = _.map(DoctorActions, (ent) => {
         return { label: ent };
       });
+      const changeScopeButton = ChangeScopeBtn.create(false);
       const quickPick = this.createQuickPick({
         title: "Doctor",
-        placeholder: "doctor action",
+        placeholder: "Select a Doctor Action.",
         items: values,
-        buttons: [ChangeScopeBtn.create(false)],
+        buttons: [changeScopeButton],
       });
+      const scope = (quickPick.buttons[0] as IDoctorQuickInputButton).type;
+      quickPick.title = `Doctor (${scope})`;
       quickPick.onDidAccept(async () => {
         quickPick.hide();
         const doctorAction = quickPick.selectedItems[0].label;

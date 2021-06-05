@@ -72,8 +72,8 @@ export class ChangeScopeBtn extends DoctorBtn {
   static create(pressed?: boolean) {
     return new ChangeScopeBtn({
       title: "Change Scope",
-      iconOff: "root-folder-opened",
-      iconOn: "symbol-file",
+      iconOff: "symbol-file",
+      iconOn: "root-folder-opened",
       type: "workspace" as DoctorScopeType,
       pressed,
     });

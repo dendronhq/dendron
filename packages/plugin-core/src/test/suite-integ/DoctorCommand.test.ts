@@ -39,6 +39,8 @@ suite("DoctorCommandTest", function () {
     onWSInit(async () => {
       const testFile = path.join(root.name, "vault", "bond2.md");
       fs.writeFileSync(testFile, "bond", { encoding: "utf8" });
+      const testFile2 = path.join(root.name, "vault", "bond3.md");
+      fs.writeFileSync(testFile2, "bond3", { encoding: "utf8" });
       await new ReloadIndexCommand().run();
       const cmd = new DoctorCommand();
       sinon.stub(cmd, "gatherInputs").returns(
@@ -53,6 +55,48 @@ suite("DoctorCommandTest", function () {
       expect(NoteUtils.RE_FM.exec(resp)).toBeTruthy();
       expect(NoteUtils.RE_FM_UPDATED.exec(resp)).toBeTruthy();
       expect(NoteUtils.RE_FM_CREATED.exec(resp)).toBeTruthy();
+
+      const resp2 = fs.readFileSync(testFile2, { encoding: "utf8" });
+      expect(NoteUtils.RE_FM.exec(resp2)).toBeTruthy();
+      expect(NoteUtils.RE_FM_UPDATED.exec(resp2)).toBeTruthy();
+      expect(NoteUtils.RE_FM_CREATED.exec(resp2)).toBeTruthy();
+      done();
+    });
+    setupDendronWorkspace(root.name, ctx, {
+      lsp: true,
+      useCb: async (vaultDir) => {
+        await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
+      },
+    });
+  });
+
+  test("basic file scoped", (done) => {
+    onWSInit(async () => {
+      const testFile = path.join(root.name, "vault", "bond2.md");
+      fs.writeFileSync(testFile, "bond", { encoding: "utf8" });
+      const testFile2 = path.join(root.name, "vault", "bond3.md");
+      fs.writeFileSync(testFile2, "bond3", { encoding: "utf8" });
+      await new ReloadIndexCommand().run();
+      const testFileUri = vscode.Uri.file(testFile);
+      await VSCodeUtils.openFileInEditor(testFileUri);
+      const cmd = new DoctorCommand();
+      sinon.stub(cmd, "gatherInputs").returns(
+        Promise.resolve({
+          action: DoctorActions.FIX_FRONTMATTER,
+          scope: "file",
+        })
+      );
+      await cmd.run();
+      // check that frontmatter is added
+      const resp = fs.readFileSync(testFile, { encoding: "utf8" });
+      expect(NoteUtils.RE_FM.exec(resp)).toBeTruthy();
+      expect(NoteUtils.RE_FM_UPDATED.exec(resp)).toBeTruthy();
+      expect(NoteUtils.RE_FM_CREATED.exec(resp)).toBeTruthy();
+
+      const resp2 = fs.readFileSync(testFile2, { encoding: "utf8" });
+      expect(NoteUtils.RE_FM.exec(resp2)).toBeFalsy();
+      expect(NoteUtils.RE_FM_UPDATED.exec(resp2)).toBeFalsy();
+      expect(NoteUtils.RE_FM_CREATED.exec(resp2)).toBeFalsy();
       done();
     });
     setupDendronWorkspace(root.name, ctx, {
@@ -286,7 +330,7 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
     },
   });
 
-  test("basic proceed with file scope", (done) => {
+  test("basic proceed, file scoped", (done) => {
     runLegacySingleWorkspaceTest({
       ctx,
       postSetupHook: ENGINE_HOOKS.setupBasic,
@@ -295,6 +339,12 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
         const file = await NoteTestUtilsV4.createNote({
           fname: "real",
           body: "[[real.fake]]\n",
+          vault: vault,
+          wsRoot,
+        });
+        await NoteTestUtilsV4.createNote({
+          fname: "real2",
+          body: "[[real.fake2]]\n",
           vault: vault,
           wsRoot,
         });
@@ -314,17 +364,19 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
           );
         await cmd.run();
         const vaultPath = vault2Path({ vault, wsRoot });
-        const containsNew = _.includes(
+        const created = _.includes(fs.readdirSync(vaultPath), "real.fake.md");
+        expect(created).toBeTruthy();
+        const didNotCreate = !_.includes(
           fs.readdirSync(vaultPath),
-          "real.fake.md"
+          "real.fake2.md"
         );
-        expect(containsNew).toBeTruthy();
+        expect(didNotCreate).toBeTruthy();
         done();
       },
     });
   });
 
-  test("basic cancelled with file scope", (done) => {
+  test("basic cancelled", (done) => {
     runLegacySingleWorkspaceTest({
       ctx,
       postSetupHook: ENGINE_HOOKS.setupBasic,
@@ -362,7 +414,7 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
     });
   });
 
-  test("wild link with alias with file scope", (done) => {
+  test("wild link with alias", (done) => {
     runLegacySingleWorkspaceTest({
       ctx,
       postSetupHook: ENGINE_HOOKS.setupBasic,
@@ -403,7 +455,7 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
     });
   });
 
-  test("xvault wild links with file scope", (done) => {
+  test("xvault wild links", (done) => {
     runLegacyMultiWorkspaceTest({
       ctx,
       preSetupHook: async (opts) => {
@@ -451,7 +503,7 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
     });
   });
 
-  test("workspace scope disabled", (done) => {
+  test("workspace scope should do nothing", (done) => {
     runLegacyMultiWorkspaceTest({
       ctx,
       preSetupHook: async (opts) => {

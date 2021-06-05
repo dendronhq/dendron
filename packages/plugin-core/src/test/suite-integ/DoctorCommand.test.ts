@@ -44,6 +44,7 @@ suite("DoctorCommandTest", function () {
       sinon.stub(cmd, "gatherInputs").returns(
         Promise.resolve({
           action: DoctorActions.FIX_FRONTMATTER,
+          scope: "workspace",
         })
       );
       await cmd.run();
@@ -301,6 +302,7 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
         sinon.stub(cmd, "gatherInputs").returns(
           Promise.resolve({
             action: DoctorActions.CREATE_MISSING_LINKED_NOTES,
+            scope: "workspace",
           })
         );
         const quickPickStub = sinon.stub(VSCodeUtils, "showQuickPick");
@@ -337,6 +339,7 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
         sinon.stub(cmd, "gatherInputs").returns(
           Promise.resolve({
             action: DoctorActions.CREATE_MISSING_LINKED_NOTES,
+            scope: "workspace",
           })
         );
         const quickPickStub = sinon.stub(VSCodeUtils, "showQuickPick");
@@ -376,6 +379,7 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
         sinon.stub(cmd, "gatherInputs").returns(
           Promise.resolve({
             action: DoctorActions.CREATE_MISSING_LINKED_NOTES,
+            scope: "workspace",
           })
         );
         const quickPickStub = sinon.stub(VSCodeUtils, "showQuickPick");
@@ -429,6 +433,7 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
         sinon.stub(cmd, "gatherInputs").returns(
           Promise.resolve({
             action: DoctorActions.CREATE_MISSING_LINKED_NOTES,
+            scope: "workspace",
           })
         );
         const quickPickStub = sinon.stub(VSCodeUtils, "showQuickPick");
@@ -488,6 +493,7 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
         sinon.stub(cmd, "gatherInputs").returns(
           Promise.resolve({
             action: DoctorActions.CREATE_MISSING_LINKED_NOTES,
+            scope: "workspace",
           })
         );
         const quickPickStub = sinon.stub(VSCodeUtils, "showQuickPick");

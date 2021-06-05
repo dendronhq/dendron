@@ -171,7 +171,6 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           note.body = newBody.toString();
           if (!_.isEmpty(changes)) {
             await engineWrite(note, { updateExisting: true });
-            console.log(`doctor changing ${note.fname}`);
             this.L.info({ msg: `changes ${note.fname}`, changes });
             numChanges += 1;
             return;
@@ -196,7 +195,6 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           note.body = newBody.toString();
           if (!_.isEmpty(changes)) {
             await engineWrite(note, { updateExisting: true });
-            console.log(`doctor changing ${note.fname}`);
             this.L.info({ msg: `changes ${note.fname}`, changes });
             numChanges += 1;
             return;
@@ -218,7 +216,7 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           if (!_.isEmpty(changes)) {
             await engineDelete(note);
             const vname = VaultUtils.getName(note.vault);
-            console.log(
+            this.L.info(
               `doctor ${DoctorActions.REMOVE_STUBS} ${note.fname} ${vname}`
             );
             numChanges += 1;
@@ -244,7 +242,6 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           note.body = newBody.toString();
           if (!_.isEmpty(changes)) {
             await engineWrite(note, { updateExisting: true });
-            console.log(`doctor changing ${note.fname}`);
             this.L.info({ msg: `changes ${note.fname}`, changes });
             numChanges += 1;
             return;

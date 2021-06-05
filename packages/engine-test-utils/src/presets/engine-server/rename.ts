@@ -147,8 +147,6 @@ const NOTES = {
         match: ["gamma.md"],
         nomatch: [`${alpha}.md`],
       });
-      console.log(JSON.stringify(changed.data));
-
       return [
         {
           actual: changed.data?.length,

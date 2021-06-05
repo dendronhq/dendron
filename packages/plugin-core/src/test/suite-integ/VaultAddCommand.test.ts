@@ -56,7 +56,6 @@ suite("VaultAddCommand", function () {
           const gitIgnore = path.join(wsRoot, ".gitignore");
 
           const cmd = new VaultAddCommand();
-          const remote = remoteDir;
           stubVaultInput({
             cmd,
             sourceType: "remote",
@@ -64,20 +63,16 @@ suite("VaultAddCommand", function () {
             sourcePathRemote: remoteDir,
             sourceName: "dendron",
           });
-          const resp = await cmd.run();
-          const newVault = resp!.vaults[0];
+          await cmd.run();
 
           checkVaults(
             {
               wsRoot,
               vaults: [
                 {
-                  fsPath: newVault.fsPath,
+                  fsPath: "vault",
                   name: "dendron",
-                  remote: {
-                    type: "git" as const,
-                    url: remote,
-                  },
+                  workspace: "vaultRemote",
                 },
                 vaults[0],
               ],

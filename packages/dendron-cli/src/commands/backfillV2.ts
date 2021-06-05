@@ -1,8 +1,16 @@
-import { DEngineClient, NoteUtils } from "@dendronhq/common-all";
+import {
+  DEngineClient,
+  NoteProps,
+  NotePropsDict,
+  NoteUtils,
+} from "@dendronhq/common-all";
 import _ from "lodash";
 import { BaseCommand } from "./base";
 
-type CommandOpts = { engine: DEngineClient } & CommonOpts;
+type CommandOpts = {
+  engine: DEngineClient;
+  note?: NoteProps;
+} & CommonOpts;
 
 type CommonOpts = {
   overwriteFields?: string[];
@@ -12,11 +20,14 @@ type CommandOutput = void;
 
 export class BackfillV2Command extends BaseCommand<CommandOpts, CommandOutput> {
   async execute(opts: CommandOpts) {
-    const { engine, overwriteFields } = _.defaults(opts, {
+    const { engine, note, overwriteFields } = _.defaults(opts, {
       overwriteFields: [],
     });
+    const candidates: NotePropsDict = _.isUndefined(note)
+      ? engine.notes
+      : { [note.id]: note };
     const notes = await Promise.all(
-      _.values(engine.notes)
+      _.values(candidates)
         .filter((n) => !n.stub)
         .map(async (n) => {
           overwriteFields.forEach((f) => {

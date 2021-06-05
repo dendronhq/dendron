@@ -8,12 +8,18 @@ import fs from "fs-extra";
 import _ from "lodash";
 import _md from "markdown-it";
 import path from "path";
-import { window, ViewColumn } from "vscode";
+import { window, ViewColumn, QuickPick } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../utils";
 import { DendronWorkspace, getWS } from "../workspace";
 import { BasicCommand } from "./base";
 import { ReloadIndexCommand } from "./ReloadIndex";
+import {
+  DoctorBtn,
+  ChangeScopeBtn,
+  IDoctorQuickInputButton,
+} from "../components/doctor/buttons";
+import { DoctorScopeType } from "../components/doctor/types";
 
 const md = _md();
 
@@ -21,26 +27,89 @@ type Finding = {
   issue: string;
   fix?: string;
 };
+
 type CommandOpts = {
   action: DoctorActions;
+  scope: DoctorScopeType;
 };
 
 type CommandOutput = {
   data: Finding[];
 };
 
+type CreateQuickPickOpts = {
+  title: string;
+  placeholder: string;
+  items: DoctorQuickInput[];
+  /**
+   * QuickPick.ignoreFocusOut prop
+   */
+  ignoreFocusOut?: boolean;
+  nonInteractive?: boolean;
+  buttons?: DoctorBtn[];
+};
+
+type DoctorQuickInput = {
+  label: string;
+  detail?: string;
+  alwaysShow?: boolean;
+};
+
+type DoctorQuickPickItem = QuickPick<DoctorQuickInput>;
+
 export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
   static key = DENDRON_COMMANDS.DOCTOR.key;
 
-  async gatherInputs(): Promise<CommandOpts | undefined> {
-    const values = _.map(DoctorActions, (ent) => {
-      return { label: ent };
+  createQuickPick(opts: CreateQuickPickOpts) {
+    const { title, placeholder, ignoreFocusOut, items } = _.defaults(opts, {
+      ignoreFocusOut: true,
     });
-    const doctorAction = await VSCodeUtils.showQuickPick(values);
-    if (doctorAction?.label) {
-      return { action: doctorAction.label };
+    const quickPick =
+      VSCodeUtils.createQuickPick<DoctorQuickInput>() as DoctorQuickPickItem;
+    quickPick.title = title;
+    quickPick.placeholder = placeholder;
+    quickPick.ignoreFocusOut = ignoreFocusOut;
+    quickPick.items = items;
+    quickPick.buttons = opts.buttons!;
+
+    return quickPick;
+  }
+
+  onTriggerButton = async (quickpick: DoctorQuickPickItem) => {
+    if (!quickpick) {
+      return;
     }
-    return;
+    const button = quickpick.buttons[0] as IDoctorQuickInputButton;
+    button.pressed = !button.pressed;
+    button.type = button.type == "workspace" ? "file" : "workspace";
+    quickpick.buttons = [button];
+  };
+
+  async gatherInputs(): Promise<CommandOpts | undefined> {
+    const out = new Promise<CommandOpts | undefined>(async (resolve) => {
+      const values = _.map(DoctorActions, (ent) => {
+        return { label: ent };
+      });
+      const quickPick = this.createQuickPick({
+        title: "Doctor",
+        placeholder: "doctor action",
+        items: values,
+        buttons: [ChangeScopeBtn.create(false)],
+      });
+      quickPick.onDidAccept(async () => {
+        quickPick.hide();
+        const doctorAction = quickPick.selectedItems[0].label;
+        const doctorScope = (quickPick.buttons[0] as IDoctorQuickInputButton)
+          .type;
+        return resolve({
+          action: doctorAction as DoctorActions,
+          scope: doctorScope,
+        });
+      });
+      quickPick.onDidTriggerButton(() => this.onTriggerButton(quickPick));
+      quickPick.show();
+    });
+    return out;
   }
 
   async showMissingNotePreview(candidates: NoteProps[]) {
@@ -86,17 +155,40 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     const engine: DEngineClient =
       (await new ReloadIndexCommand().execute()) as DEngineClient;
 
+    let note;
+    if (opts.scope === "file") {
+      console.log("scoped for active file");
+      const document = VSCodeUtils.getActiveTextEditor()?.document;
+      if (_.isUndefined(document)) {
+        throw Error("No note open");
+      }
+      note = VSCodeUtils.getNoteFromDocument(document);
+    }
+
     switch (opts.action) {
       case DoctorActions.FIX_FRONTMATTER: {
         await new BackfillV2Command().execute({
           engine: engine,
+          note: note,
         });
         break;
       }
       case DoctorActions.CREATE_MISSING_LINKED_NOTES: {
+        if (opts.scope === "workspace") {
+          window.showInformationMessage(
+            "This action is currently not supported in workspace scope."
+          );
+          break;
+        }
         const cmd = new DoctorCLICommand();
-        let notes = _.values(engine.notes);
-        notes = notes.filter((note) => !note.stub);
+        let notes;
+        if (_.isUndefined(note)) {
+          notes = _.values(engine.notes);
+          notes = notes.filter((note) => !note.stub);
+        } else {
+          notes = [note];
+        }
+
         const uniqueCandidates = cmd.getWildLinkDestinations(
           notes,
           engine.wsRoot
@@ -119,6 +211,7 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
           }
           await cmd.execute({
             action: opts.action,
+            candidates: notes,
             engine,
             wsRoot,
             server: {},
@@ -134,8 +227,12 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
       }
       default: {
         const cmd = new DoctorCLICommand();
+        const candidates: NoteProps[] | undefined = _.isUndefined(note)
+          ? undefined
+          : [note];
         await cmd.execute({
           action: opts.action,
+          candidates: candidates,
           engine,
           wsRoot,
           server: {},

@@ -37,10 +37,10 @@ suite("DoctorCommandTest", function () {
 
   test("basic", (done) => {
     onWSInit(async () => {
-      const testFile = path.join(root.name, "vault", "bond2.md");
-      fs.writeFileSync(testFile, "bond", { encoding: "utf8" });
-      const testFile2 = path.join(root.name, "vault", "bond3.md");
-      fs.writeFileSync(testFile2, "bond3", { encoding: "utf8" });
+      const testFile = path.join(root.name, "vault", "bar.md");
+      fs.writeFileSync(testFile, "bar", { encoding: "utf8" });
+      const testFile2 = path.join(root.name, "vault", "baz.md");
+      fs.writeFileSync(testFile2, "baz", { encoding: "utf8" });
       await new ReloadIndexCommand().run();
       const cmd = new DoctorCommand();
       sinon.stub(cmd, "gatherInputs").returns(
@@ -72,10 +72,10 @@ suite("DoctorCommandTest", function () {
 
   test("basic file scoped", (done) => {
     onWSInit(async () => {
-      const testFile = path.join(root.name, "vault", "bond2.md");
-      fs.writeFileSync(testFile, "bond", { encoding: "utf8" });
-      const testFile2 = path.join(root.name, "vault", "bond3.md");
-      fs.writeFileSync(testFile2, "bond3", { encoding: "utf8" });
+      const testFile = path.join(root.name, "vault", "bar.md");
+      fs.writeFileSync(testFile, "bar", { encoding: "utf8" });
+      const testFile2 = path.join(root.name, "vault", "baz.md");
+      fs.writeFileSync(testFile2, "baz", { encoding: "utf8" });
       await new ReloadIndexCommand().run();
       const testFileUri = vscode.Uri.file(testFile);
       await VSCodeUtils.openFileInEditor(testFileUri);

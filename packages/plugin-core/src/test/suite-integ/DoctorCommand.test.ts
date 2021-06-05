@@ -277,7 +277,7 @@ suite("DoctorCommandTest", function () {
 //     });
 //   });
 
-suite("CREATE_MISSING_LINKED_NOTES", function () {
+suite.skip("CREATE_MISSING_LINKED_NOTES", function () {
   let ctx: vscode.ExtensionContext;
 
   ctx = setupBeforeAfter(this, {
@@ -302,7 +302,7 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
         sinon.stub(cmd, "gatherInputs").returns(
           Promise.resolve({
             action: DoctorActions.CREATE_MISSING_LINKED_NOTES,
-            scope: "workspace",
+            scope: "file",
           })
         );
         const quickPickStub = sinon.stub(VSCodeUtils, "showQuickPick");
@@ -339,7 +339,7 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
         sinon.stub(cmd, "gatherInputs").returns(
           Promise.resolve({
             action: DoctorActions.CREATE_MISSING_LINKED_NOTES,
-            scope: "workspace",
+            scope: "file",
           })
         );
         const quickPickStub = sinon.stub(VSCodeUtils, "showQuickPick");
@@ -379,7 +379,7 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
         sinon.stub(cmd, "gatherInputs").returns(
           Promise.resolve({
             action: DoctorActions.CREATE_MISSING_LINKED_NOTES,
-            scope: "workspace",
+            scope: "file",
           })
         );
         const quickPickStub = sinon.stub(VSCodeUtils, "showQuickPick");
@@ -433,7 +433,7 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
         sinon.stub(cmd, "gatherInputs").returns(
           Promise.resolve({
             action: DoctorActions.CREATE_MISSING_LINKED_NOTES,
-            scope: "workspace",
+            scope: "file",
           })
         );
         const quickPickStub = sinon.stub(VSCodeUtils, "showQuickPick");
@@ -493,7 +493,7 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
         sinon.stub(cmd, "gatherInputs").returns(
           Promise.resolve({
             action: DoctorActions.CREATE_MISSING_LINKED_NOTES,
-            scope: "workspace",
+            scope: "file",
           })
         );
         const quickPickStub = sinon.stub(VSCodeUtils, "showQuickPick");

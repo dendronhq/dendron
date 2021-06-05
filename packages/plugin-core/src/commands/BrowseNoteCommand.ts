@@ -27,7 +27,7 @@ export class BrowseNoteCommand extends BasicCommand<
       if (!folder) {
         return;
       }
-      const root = await GitUtils.getGitRoot(folder.uri.fsPath);
+      const root = (await GitUtils.getGitRoot(folder.uri.fsPath)) || "";
       const file = editor.document.fileName.substring(root.length);
       const startLine = editor.selection.start.line;
       const endLine = editor.selection.end.line;

@@ -189,13 +189,13 @@ export class GitUtils {
     return fs.existsSync(src) && fs.existsSync(path.join(src, ".git"));
   }
 
-  static async getGitRoot(uri: string): Promise<string> {
+  static async getGitRoot(uri: string): Promise<string | undefined> {
     try {
       const response = await this.execute("git rev-parse --show-toplevel", uri);
       return response.stdout.trim();
     } catch (err) {
       // Not in a git repository
-      if (err.failed) return "";
+      if (err.failed) return undefined;
       throw err;
     }
   }

@@ -651,6 +651,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX} Show Schema Graph V2`,
     group: "workspace",
     desc: "Display the schemas in this workspace as a graph",
+    when: DendronContext.DEV_MODE,
   },
   SHOW_PREVIEW: {
     key: "dendron.showPreview",

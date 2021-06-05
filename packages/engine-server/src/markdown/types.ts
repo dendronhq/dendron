@@ -19,15 +19,10 @@ export type DendronASTRoot = Root & {
   children: DendronASTNode;
 };
 
-export type LinkFilter = {
-  name: string;
-};
-
 export type WikiLinkProps = {
   alias: string;
   value: string;
   anchorHeader?: string;
-  filters?: LinkFilter[];
 };
 
 export type DendronASTNode = Parent & {
@@ -85,7 +80,6 @@ export type WikiLinkDataV4 = {
   anchorHeader?: string;
   prefix?: string;
   vaultName?: string;
-  filters?: LinkFilter[];
 };
 
 export type NoteRefNoteV4_LEGACY = DendronASTNode & {

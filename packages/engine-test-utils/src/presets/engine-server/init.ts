@@ -255,19 +255,24 @@ const NOTES = {
               from: {
                 fname: "alpha",
                 id: "alpha",
-                vault: {
-                  fsPath: "vault1",
-                },
+                vaultName: "vault1",
               },
               original: "beta",
-              pos: {
-                end: 8,
-                start: 0,
+              position: {
+                end: {
+                  column: 9,
+                  line: 1,
+                  offset: 8,
+                },
+                indent: [],
+                start: {
+                  column: 1,
+                  line: 1,
+                  offset: 0,
+                },
               },
               to: {
-                anchorHeader: undefined,
                 fname: "beta",
-                vault: undefined,
               },
               type: "wiki",
               value: "beta",
@@ -275,14 +280,21 @@ const NOTES = {
             {
               from: {
                 fname: "beta",
-                vault: {
-                  fsPath: "vault1",
-                },
+                vaultName: "vault1",
               },
               original: "alpha",
-              pos: {
-                end: 12,
-                start: 0,
+              position: {
+                end: {
+                  column: 13,
+                  line: 1,
+                  offset: 12,
+                },
+                indent: [],
+                start: {
+                  column: 1,
+                  line: 1,
+                  offset: 0,
+                },
               },
               type: "backlink",
               value: "alpha",

@@ -11,9 +11,9 @@ import { Eat } from "remark-parse";
 import Unified, { Plugin } from "unified";
 import {
   DendronASTDest,
+  DendronASTTypes,
   WikiLinkDataV4,
   WikiLinkNoteV4,
-  DendronASTTypes,
 } from "../types";
 import { MDUtilsV4 } from "../utils";
 import { MDUtilsV5, ProcMode } from "../utilsv5";
@@ -97,14 +97,20 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
       const vault = MDUtilsV4.getVault(proc, data.vaultName);
       // if converting back to dendron md, no further processing
       if (dest === DendronASTDest.MD_DENDRON) {
-        const { alias, anchorHeader } = data;
-        let link = value;
-        let calias = alias !== value ? `${alias}|` : "";
-        let anchor = anchorHeader ? `#${anchorHeader}` : "";
-        let vaultPrefix = data.vaultName
-          ? `${CONSTANTS.DENDRON_DELIMETER}${data.vaultName}/`
-          : "";
-        return `[[${calias}${vaultPrefix}${link}${anchor}]]`;
+        return LinkUtils.renderNoteLink({
+          link: {
+            from: {
+              fname: value,
+              alias: data.alias,
+              anchorHeader: data.anchorHeader,
+              vaultName: data.vaultName,
+            },
+            data,
+            type: LinkUtils.astType2DLinkType(DendronASTTypes.WIKI_LINK),
+            position: node.position!,
+          },
+          dest,
+        });
       }
 
       const { error, engine } = MDUtilsV4.getEngineFromProc(proc);
@@ -210,7 +216,6 @@ function attachParser(proc: Unified.Processor) {
       // default to current note
     }
     if (!out.value) {
-      debugger;
       // same file block reference, value is implicitly current file
       out.value = _.trim(NoteUtils.normalizeFname(fname)); // recreate what value (and alias) would have been parsed
       if (!out.alias) out.alias = out.value;

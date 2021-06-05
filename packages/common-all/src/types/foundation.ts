@@ -2,10 +2,44 @@ import { DNoteAnchorPositioned } from "./typesv2";
 import { URI } from "vscode-uri";
 import { DVault } from "./workspace";
 
+export interface Point {
+  /**
+   * Line in a source file (1-indexed integer).
+   */
+  line: number;
+
+  /**
+   * Column in a source file (1-indexed integer).
+   */
+  column: number;
+  /**
+   * Character in a source file (0-indexed integer).
+   */
+  offset?: number;
+}
+
+export interface Position {
+  /**
+   * Place of the first character of the parsed source region.
+   */
+  start: Point;
+
+  /**
+   * Place of the first character after the parsed source region.
+   */
+  end: Point;
+
+  /**
+   * Start column at each index (plus start line) in the source region,
+   * for elements that span multiple lines.
+   */
+  indent?: number[];
+}
+
 export type DLoc = {
   fname?: string;
   id?: string;
-  vault?: DVault;
+  vaultName?: string;
   uri?: URI;
   anchorHeader?: string;
 };
@@ -15,10 +49,7 @@ export type DLink = {
   original: string;
   value: string;
   alias?: string;
-  pos: {
-    start: number;
-    end: number;
-  };
+  position: Position;
   from: DLoc;
   to?: DLoc;
 };

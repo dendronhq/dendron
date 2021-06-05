@@ -139,7 +139,7 @@ export const error2PlainObject = (err: IDendronError): DendronErrorPlainObj => {
  *
  * @param x
  */
-export function assertUnreachable(_never: never): never {
+export function assertUnreachable(_never?: never): never {
   throw new DendronError({
     message:
       "This error should never occur! Please report a bug if you have encountered this.",

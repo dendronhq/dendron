@@ -443,7 +443,10 @@ export class FileStorage implements DStore {
     const { oldLoc, newLoc } = opts;
     const { wsRoot } = this;
     this.logger.info({ ctx, msg: "enter", opts });
-    const oldVault = oldLoc.vault;
+    const oldVault = VaultUtils.getVaultByName({
+      vaults: this.engine.vaults,
+      vname: oldLoc.vaultName!,
+    });
     if (!oldVault) {
       throw new DendronError({ message: "vault not set for loation" });
     }
@@ -485,7 +488,10 @@ export class FileStorage implements DStore {
     const newNote: NoteProps = {
       ...oldNote,
       fname: newLoc.fname,
-      vault: newLoc.vault!,
+      vault: VaultUtils.getVaultByName({
+        vaults: this.vaults,
+        vname: newLoc.vaultName!,
+      })!,
       title: NoteUtils.isDefaultTitle(oldNote)
         ? NoteUtils.genTitle(newLoc.fname)
         : oldNote.title,

@@ -1,4 +1,4 @@
-import { NoteChangeEntry, NoteUtils } from "@dendronhq/common-all";
+import { NoteChangeEntry, NoteUtils, VaultUtils } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import {
   TestPresetEntryV4,
@@ -39,8 +39,8 @@ const NOTES = {
       const vault = vaults[0];
 
       const changed = await engine.renameNote({
-        oldLoc: { fname: "foo", vault },
-        newLoc: { fname: "baz", vault },
+        oldLoc: { fname: "foo", vaultName: VaultUtils.getName(vault) },
+        newLoc: { fname: "baz", vaultName: VaultUtils.getName(vault) },
       });
 
       const checkVault = await FileTestUtils.assertInVault({
@@ -137,8 +137,8 @@ const NOTES = {
       const vault = vaults[0];
       const alpha = NOTE_PRESETS_V4.NOTE_WITH_LINK.fname;
       const changed = await engine.renameNote({
-        oldLoc: { fname: alpha, vault },
-        newLoc: { fname: "gamma", vault },
+        oldLoc: { fname: alpha, vaultName: VaultUtils.getName(vault) },
+        newLoc: { fname: "gamma", vaultName: VaultUtils.getName(vault) },
       });
 
       const checkVault = await FileTestUtils.assertInVault({
@@ -182,8 +182,8 @@ const NOTES = {
       const alpha = "scratch.2020.02.03.0123";
       //const alpha = NOTE_PRESETS_V4.NOTE_WITH_LINK.fname;
       const changed = await engine.renameNote({
-        oldLoc: { fname: alpha, vault },
-        newLoc: { fname: "gamma", vault },
+        oldLoc: { fname: alpha, vaultName: VaultUtils.getName(vault) },
+        newLoc: { fname: "gamma", vaultName: VaultUtils.getName(vault) },
       });
       const checkVault = await FileTestUtils.assertInVault({
         wsRoot,
@@ -224,8 +224,8 @@ const NOTES = {
       const vault = vaults[0];
       const fnameOld = NOTE_PRESETS_V4.NOTE_WITH_TARGET.fname;
       const changed = await engine.renameNote({
-        oldLoc: { fname: fnameOld, vault },
-        newLoc: { fname: "gamma", vault },
+        oldLoc: { fname: fnameOld, vaultName: VaultUtils.getName(vault) },
+        newLoc: { fname: "gamma", vaultName: VaultUtils.getName(vault) },
       });
 
       const createdChange = findCreated(changed.data as NoteChangeEntry[]);
@@ -270,8 +270,8 @@ const NOTES = {
       const vault = vaults[0];
       const fnameOld = NOTE_PRESETS_V4.NOTE_WITH_TARGET.fname;
       const changed = await engine.renameNote({
-        oldLoc: { fname: fnameOld, vault },
-        newLoc: { fname: "gamma", vault },
+        oldLoc: { fname: fnameOld, vaultName: VaultUtils.getName(vault) },
+        newLoc: { fname: "gamma", vaultName: VaultUtils.getName(vault) },
       });
 
       const checkVault = await FileTestUtils.assertInVault({
@@ -323,8 +323,11 @@ const NOTES = {
       const fnameNew = "gamma";
       const fnameLink = NOTE_PRESETS_V4.NOTE_WITH_LINK.fname;
       const resp = await engine.renameNote({
-        oldLoc: { fname: fnameTarget, vault: vaults[0] },
-        newLoc: { fname: fnameNew, vault: vaults[0] },
+        oldLoc: {
+          fname: fnameTarget,
+          vaultName: VaultUtils.getName(vaults[0]),
+        },
+        newLoc: { fname: fnameNew, vaultName: VaultUtils.getName(vaults[0]) },
       });
       const changed = resp.data;
       const updated = _.map(changed, (ent) => ({
@@ -383,8 +386,11 @@ const NOTES = {
       const fnameNew = "gamma";
       const fnameLink = NOTE_PRESETS_V4.NOTE_WITH_LINK.fname;
       const resp = await engine.renameNote({
-        oldLoc: { fname: fnameTarget, vault: vaults[1] },
-        newLoc: { fname: fnameNew, vault: vaults[1] },
+        oldLoc: {
+          fname: fnameTarget,
+          vaultName: VaultUtils.getName(vaults[1]),
+        },
+        newLoc: { fname: fnameNew, vaultName: VaultUtils.getName(vaults[1]) },
       });
       const changed = resp.data;
       const updated = _.map(changed, (ent) => ({
@@ -441,8 +447,11 @@ const NOTES = {
       const fnameNew = "gamma";
       const fnameLink = NOTE_PRESETS_V4.NOTE_WITH_LINK.fname;
       const resp = await engine.renameNote({
-        oldLoc: { fname: fnameTarget, vault: vaults[1] },
-        newLoc: { fname: fnameNew, vault: vaults[1] },
+        oldLoc: {
+          fname: fnameTarget,
+          vaultName: VaultUtils.getName(vaults[1]),
+        },
+        newLoc: { fname: fnameNew, vaultName: VaultUtils.getName(vaults[1]) },
       });
       const changed = resp.data;
       const updated = _.map(changed, (ent) => ({

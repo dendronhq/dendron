@@ -4,6 +4,7 @@ import {
   DNodeProps,
   DNodeType,
   NoteProps,
+  Position,
   SchemaData,
   SchemaProps,
 } from "./foundation";
@@ -38,7 +39,7 @@ export type DNoteLoc = {
   fname: string;
   alias?: string;
   id?: string;
-  vault?: DVault;
+  vaultName?: string;
   anchorHeader?: string;
 };
 
@@ -58,11 +59,8 @@ export type DNoteAnchorPositioned = DNoteAnchor & {
 export type DLinkType = "wiki" | "refv2";
 
 export type DNoteLink<TData = any> = {
-  type: "ref" | "wiki" | "md";
-  pos?: {
-    start: number;
-    end: number;
-  };
+  type: "ref" | "wiki" | "md" | "backlink";
+  position?: Position;
   // if parsing in raw mode, from field won't be available
   from: DNoteLoc;
   to?: DNoteLoc;

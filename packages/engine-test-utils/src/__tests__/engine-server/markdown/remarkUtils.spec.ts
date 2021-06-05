@@ -225,15 +225,11 @@ describe("RemarkUtils and LinkUtils", () => {
         expect(links[0].from).toEqual({
           fname: "foo",
           id: "foo",
-          vault: {
-            fsPath: "vault1",
-          },
+          vaultName: "vault1",
         });
         expect(links[0].to).toEqual({
           fname: "bar",
-          vault: {
-            fsPath: "vault2",
-          },
+          vaultName: "vault2",
         });
       },
       {
@@ -284,9 +280,7 @@ describe("RemarkUtils and LinkUtils", () => {
               from: {
                 fname: "foo.one",
                 id: "foo.one-id",
-                vault: {
-                  fsPath: "vault1",
-                },
+                vaultName: "vault1",
               },
               type: "wiki",
             },
@@ -297,9 +291,7 @@ describe("RemarkUtils and LinkUtils", () => {
               from: {
                 fname: "foo.one",
                 id: "foo.one-id",
-                vault: {
-                  fsPath: "vault1",
-                },
+                vaultName: "vault1",
               },
               type: "ref",
             },

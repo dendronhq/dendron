@@ -3,6 +3,7 @@ import {
   DVault,
   NoteProps,
   NoteUtils,
+  VaultUtils,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
@@ -40,7 +41,10 @@ const createEngine = createEngineFactory({
     }) => {
       const cmd = new MoveNoteCommand();
       const vpathOld = vault2Path({
-        vault: oldLoc.vault as DVault,
+        vault: VaultUtils.getVaultByName({
+          vaults: opts.vaults,
+          vname: oldLoc.vaultName!,
+        })!,
         wsRoot: opts.wsRoot,
       });
       await VSCodeUtils.openFileInEditor(
@@ -51,11 +55,11 @@ const createEngine = createEngineFactory({
           {
             oldLoc: {
               fname: oldLoc.fname,
-              vault: oldLoc.vault,
+              vaultName: oldLoc.vaultName,
             },
             newLoc: {
               fname: newLoc.fname,
-              vault: newLoc.vault,
+              vaultName: newLoc.vaultName,
             },
           },
         ],
@@ -137,11 +141,11 @@ suite("MoveNoteCommand", function () {
               {
                 oldLoc: {
                   fname: "foo",
-                  vault: vaultFrom,
+                  vaultName: VaultUtils.getName(vaultFrom),
                 },
                 newLoc: {
                   fname: "foobar",
-                  vault: vaultTo,
+                  vaultName: VaultUtils.getName(vaultTo),
                 },
               },
             ],
@@ -181,11 +185,11 @@ suite("MoveNoteCommand", function () {
             {
               oldLoc: {
                 fname: "foo",
-                vault: vaultFrom,
+                vaultName: VaultUtils.getName(vaultFrom),
               },
               newLoc: {
                 fname: "bar",
-                vault: vaultTo,
+                vaultName: VaultUtils.getName(vaultTo),
               },
             },
           ],
@@ -294,11 +298,11 @@ suite("MoveNoteCommand", function () {
             {
               oldLoc: {
                 fname,
-                vault: vault1,
+                vaultName: VaultUtils.getName(vault1),
               },
               newLoc: {
                 fname: "bar",
-                vault: vault2,
+                vaultName: VaultUtils.getName(vault2),
               },
             },
           ],
@@ -342,11 +346,11 @@ suite("MoveNoteCommand", function () {
             {
               oldLoc: {
                 fname: "foo",
-                vault: vault1,
+                vaultName: VaultUtils.getName(vault1),
               },
               newLoc: {
                 fname: "foo",
-                vault: vault2,
+                vaultName: VaultUtils.getName(vault2),
               },
             },
           ],

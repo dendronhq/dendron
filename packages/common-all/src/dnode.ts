@@ -333,10 +333,10 @@ export class NoteUtils {
     link: DLink;
   }) {
     to.links.push({
-      from: { fname: from.fname, vault: from.vault },
+      from: { fname: from.fname, vaultName: VaultUtils.getName(from.vault) },
       type: "backlink",
       original: link.original,
-      pos: link.pos,
+      position: link.position,
       value: link.value,
     });
     // }
@@ -476,6 +476,11 @@ export class NoteUtils {
     return stubNodes;
   }
 
+  /**
+   * Create a wiki link to the given note
+   * @param opts
+   * @returns
+   */
   static createWikiLink(opts: {
     note: NoteProps;
     header?: string;
@@ -816,7 +821,7 @@ export class NoteUtils {
     return {
       fname,
       id,
-      vault,
+      vaultName: VaultUtils.getName(vault),
     };
   }
 

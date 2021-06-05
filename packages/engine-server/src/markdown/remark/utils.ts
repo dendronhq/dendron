@@ -4,6 +4,8 @@ import {
   DendronError,
   DEngineClient,
   DLink,
+  DNoteAnchorPositioned,
+  DNoteLink,
   DNoteLoc,
   DNoteRefData,
   DNoteRefLink,
@@ -15,8 +17,11 @@ import {
   NoteUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
+import { createLogger, note2String } from "@dendronhq/common-server";
 import _ from "lodash";
 import { Heading, Root } from "mdast";
+import * as mdastBuilder from "mdast-builder";
+import path from "path";
 import { Processor } from "unified";
 import { Node } from "unist";
 import { selectAll } from "unist-util-select";
@@ -34,12 +39,8 @@ import {
   WikiLinkProps,
 } from "../types";
 import { MDUtilsV4 } from "../utils";
-const toString = require("mdast-util-to-string");
-import * as mdastBuilder from "mdast-builder";
-import { DNoteAnchorPositioned } from "@dendronhq/common-all";
-import { createLogger, file2String } from "@dendronhq/common-server";
-import path from "path";
 import { MDUtilsV5, ProcMode } from "../utilsv5";
+const toString = require("mdast-util-to-string");
 export { mdastBuilder };
 
 export const ALIAS_DIVIDER = "|";
@@ -88,12 +89,10 @@ type LinkFilterTypeRequired = {
 const getLinks = ({
   ast,
   note,
-  engine,
   filter,
 }: {
   ast: DendronASTNode;
   note: NoteProps;
-  engine: DEngineClient;
   filter: LinkFilterTypeRequired;
 }) => {
   let out2: WikiLinkNoteV4[] = selectAll(filter.type, ast) as WikiLinkNoteV4[];
@@ -105,20 +104,12 @@ const getLinks = ({
         original: m.value,
         value: m.value,
         alias: m.data.alias,
-        pos: {
-          start: m.position?.start.offset,
-          end: m.position?.end.offset,
-        },
+        position: m.position,
         // TODO: error if vault not found
         to: {
           fname: m.value,
           anchorHeader: m.data.anchorHeader,
-          vault: m.data.vaultName
-            ? VaultUtils.getVaultByName({
-                vaults: engine.vaults,
-                vname: m.data.vaultName,
-              })
-            : undefined,
+          vaultName: m.data.vaultName,
         },
       } as DLink)
   );
@@ -172,7 +163,6 @@ export class LinkUtils {
       links = links.concat(
         getLinks({
           ast: out,
-          engine,
           filter: { type: DendronASTTypes.WIKI_LINK, oldLoc: filter?.oldLoc },
           note,
         })
@@ -182,7 +172,6 @@ export class LinkUtils {
       links = links.concat(
         getLinks({
           ast: out,
-          engine,
           filter: { type: DendronASTTypes.REF_LINK_V2, oldLoc: filter?.oldLoc },
           note,
         })
@@ -339,6 +328,8 @@ export class LinkUtils {
     if (vaultName) {
       clean.vaultName = vaultName;
     }
+    // TODO
+    // @ts-ignore
     return { from: { fname }, data: clean, type: "ref" };
   }
 
@@ -349,6 +340,48 @@ export class LinkUtils {
     }
     // @ts-ignore
     return noteRef;
+  }
+
+  static renderNoteLink({
+    link,
+    dest,
+  }: {
+    link: DNoteLink;
+    dest: DendronASTDest;
+  }): string | never {
+    switch (dest) {
+      case DendronASTDest.MD_DENDRON: {
+        const vaultPrefix = link.from.vaultName
+          ? `${CONSTANTS.DENDRON_DELIMETER}${link.from.vaultName}/`
+          : "";
+        const value = link.from.fname;
+        const alias =
+          !_.isUndefined(link.from.alias) && link.from.alias !== value
+            ? link.from.alias + "|"
+            : undefined;
+        const anchor = link.from.anchorHeader
+          ? `#${link.from.anchorHeader}`
+          : "";
+        // TODO: take into account piping direction
+        return [`[[`, alias, vaultPrefix, value, anchor, `]]`].join("");
+      }
+      default:
+        return assertUnreachable();
+    }
+  }
+
+  static updateLink({
+    body,
+    oldLink,
+    newLink,
+  }: {
+    body: string;
+    oldLink: DNoteLink;
+    newLink: DNoteLink;
+  }) {
+    // const { start, end } = oldLink.position;
+    // const startOffset = start.offset!;
+    // const endOffset = end.offset!;
   }
 }
 
@@ -362,7 +395,7 @@ export class AnchorUtils {
   ): Promise<{ [index: string]: DNoteAnchorPositioned }> {
     if (opts.note.stub) return {};
     try {
-      const noteContents = await file2String(opts);
+      const noteContents = await note2String(opts);
       const noteAnchors = RemarkUtils.findAnchors(noteContents, parseOpts);
       const anchors: [string, DNoteAnchorPositioned][] = [];
       noteAnchors.forEach((anchor) => {

@@ -1,4 +1,4 @@
-import { DendronAPI } from "@dendronhq/common-server";
+import { DendronAPI } from "@dendronhq/common-all";
 import _ from "lodash";
 import { createServer, runEngineTestV5 } from "../../engine";
 

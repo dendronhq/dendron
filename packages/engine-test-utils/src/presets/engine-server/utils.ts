@@ -88,16 +88,26 @@ export const setupBasicMulti: PreSetupHookFunction = async ({
 };
 
 /**
- * Raw:
- * ![[foo.one]]
  *
- * End Format:
+ * - foo
+ * ```
+ * ![[foo.one]]
+ * ```
+ *
+ * - foo.one
+ * ```
  * # Foo.One
- * <noteRef>
+ * ![[foo.two]]
+ * Regular wikilink: [[foo.two]]
+ * ```
+ *
+ * - foo.two
+ * ```
  * # Foo.Two
  * blah
- * </noteRef>
- * Regular wikilink: [[foo.two]]
+ * ```
+ *
+ *
  */
 export const setupNoteRefRecursive: PreSetupHookFunction = async ({
   vaults,

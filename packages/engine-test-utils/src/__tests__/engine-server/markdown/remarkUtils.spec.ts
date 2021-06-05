@@ -1,14 +1,16 @@
+import { DLink } from "@dendronhq/common-all";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import {
   DendronASTDest,
+  DendronASTTypes,
   DEngineClient,
+  LinkUtils,
   MDUtilsV4,
   RemarkUtils,
-  LinkUtils,
-  DendronASTTypes,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { DVault, runEngineTestV5, testWithEngine } from "../../../engine";
+import { ENGINE_HOOKS } from "../../../presets";
 import { checkString } from "../../../utils";
 
 describe("RemarkUtils and LinkUtils", () => {
@@ -245,6 +247,73 @@ describe("RemarkUtils and LinkUtils", () => {
         },
       }
     );
+
+    test("note ref", async () => {
+      const checkLink = ({
+        src,
+        target,
+      }: {
+        src: Partial<DLink>;
+        target: DLink;
+      }) => {
+        const allTrue = _.every([
+          _.isUndefined(src.from) ? true : _.isEqual(src.from, target.from),
+          _.isUndefined(src.type) ? true : _.isEqual(src.type, target.type),
+        ]);
+        if (!allTrue) {
+          throw Error(
+            `diff between ${JSON.stringify(src, null, 4)} and ${JSON.stringify(
+              target,
+              null,
+              4
+            )}`
+          );
+        }
+        expect(true).toBeTruthy();
+      };
+
+      await runEngineTestV5(
+        async ({ engine, wsRoot }) => {
+          const note = engine.notes["foo.one-id"];
+          console.log(wsRoot);
+          debugger;
+          const links = LinkUtils.findLinks({ note, engine });
+          expect(links).toMatchSnapshot();
+          checkLink({
+            src: {
+              from: {
+                fname: "foo.one",
+                id: "foo.one-id",
+                vault: {
+                  fsPath: "vault1",
+                },
+              },
+              type: "wiki",
+            },
+            target: links[0],
+          });
+          checkLink({
+            src: {
+              from: {
+                fname: "foo.one",
+                id: "foo.one-id",
+                vault: {
+                  fsPath: "vault1",
+                },
+              },
+              type: "ref",
+            },
+            target: links[1],
+          });
+        },
+        {
+          expect,
+          preSetupHook: async (opts) => {
+            await ENGINE_HOOKS.setupNoteRefRecursive(opts);
+          },
+        }
+      );
+    });
   });
 });
 

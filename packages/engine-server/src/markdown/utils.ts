@@ -451,8 +451,12 @@ export class MDUtilsV4 {
     proc?: Processor;
     mdPlugins?: Processor[];
     mathjax?: boolean;
+    useLinks?: boolean;
   }) {
-    const { proc, mdPlugins } = _.defaults(opts, { mdPlugins: [] });
+    const { proc, mdPlugins, useLinks } = _.defaults(opts, {
+      mdPlugins: [],
+      useLinks: true,
+    });
     let _proc = proc || unified().use(remarkParse, { gfm: true });
     mdPlugins.forEach((p) => {
       _proc = _proc.use(p);
@@ -461,8 +465,9 @@ export class MDUtilsV4 {
       .use(remark2rehype, { allowDangerousHtml: true })
       .use(rehypePrism, { ignoreMissing: true })
       .use(raw)
-      .use(slug)
-      .use(link, {
+      .use(slug);
+    if (useLinks) {
+      _proc = _proc.use(link, {
         properties: {
           "aria-hidden": "true",
           class: "anchor-heading",
@@ -485,6 +490,7 @@ export class MDUtilsV4 {
           ],
         },
       });
+    }
     if (opts.mathjax) {
       _proc = _proc.use(katex);
     }
@@ -506,7 +512,10 @@ export class MDUtilsV4 {
   }
 
   static procHTML(
-    procOpts: Omit<ProcOptsFull, "dest"> & { noteIndex: NoteProps }
+    procOpts: Omit<ProcOptsFull, "dest"> & {
+      noteIndex: NoteProps;
+      useLinks?: boolean;
+    }
   ) {
     const { engine, vault, fname, noteIndex } = procOpts;
     const config = procOpts.config || engine.config;
@@ -536,7 +545,11 @@ export class MDUtilsV4 {
     if (config.site.useContainers) {
       proc = proc.use(containers);
     }
-    return MDUtilsV4.procRehype({ proc, mathjax: true });
+    return MDUtilsV4.procRehype({
+      proc,
+      mathjax: true,
+      useLinks: procOpts.useLinks,
+    });
   }
 
   /**

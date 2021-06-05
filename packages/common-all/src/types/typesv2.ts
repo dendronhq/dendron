@@ -63,10 +63,16 @@ export type DNoteLink<TData = any> = {
     start: number;
     end: number;
   };
+  // if parsing in raw mode, from field won't be available
   from: DNoteLoc;
   to?: DNoteLoc;
   data: TData;
 };
+
+export type DNoteLinkRaw<TData = any> = Omit<DNoteLink<TData>, "from"> & {
+  from?: DNoteLoc;
+};
+
 export type DNoteRefData = {
   anchorStart?: string;
   anchorEnd?: string;
@@ -79,6 +85,7 @@ export type DNoteRefData = {
   type: "file" | "id";
 };
 export type DNoteRefLink = DNoteLink<DNoteRefData>;
+export type DNoteRefLinkRaw = DNoteLinkRaw<DNoteRefData>;
 
 /**
  * Opts are arguments used when creating a node
@@ -223,6 +230,10 @@ export type RenameNoteOpts = {
   newLoc: DNoteLoc;
 };
 
+export type RenderNoteOpts = {
+  id: string;
+};
+
 export type ConfigWriteOpts = {
   config: DendronConfig;
 };
@@ -316,6 +327,7 @@ export type NoteQueryResp = Required<RespV2<NoteProps[]>>;
 export type SchemaQueryResp = Required<RespV2<SchemaModuleProps[]>>;
 export type StoreDeleteNoteResp = EngineDeleteNotePayload;
 export type RenameNotePayload = NoteChangeEntry[];
+export type RenderNotePayload = string | undefined;
 
 export type GetNotePayload = {
   note: NoteProps | undefined;
@@ -361,6 +373,7 @@ export type DEngine = DCommonProps &
     queryNotes: (opts: QueryNotesOpts) => Promise<NoteQueryResp>;
     queryNotesSync({ qs }: { qs: string; vault?: DVault }): NoteQueryResp;
     renameNote: (opts: RenameNoteOpts) => Promise<RespV2<RenameNotePayload>>;
+    renderNote: (opts: RenderNoteOpts) => Promise<RespV2<RenderNotePayload>>;
 
     // config
     writeConfig: (opts: ConfigWriteOpts) => Promise<RespV2<void>>;

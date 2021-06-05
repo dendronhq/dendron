@@ -27,6 +27,7 @@ import {
   QueryNotesOpts,
   RenameNoteOpts,
   RenameNotePayload,
+  RenderNoteOpts,
   RespRequired,
   RespV2,
   SchemaModuleDict,
@@ -35,13 +36,9 @@ import {
   SchemaUtils,
   VaultUtils,
   WriteNoteResp,
-} from "@dendronhq/common-all";
-import {
-  createLogger,
   DendronAPI,
-  DLogger,
-  readYAML,
-} from "@dendronhq/common-server";
+} from "@dendronhq/common-all";
+import { createLogger, DLogger, readYAML } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import { DConfig } from "./config";
@@ -267,6 +264,10 @@ export class DendronEngineClient implements DEngineClient {
       error: null,
       data: items.map((ent) => this.notes[ent.id]),
     };
+  }
+
+  async renderNote(opts: RenderNoteOpts) {
+    return this.api.noteRender({ ...opts, ws: this.ws });
   }
 
   async refreshNotes(notes: NoteProps[]) {

@@ -3,7 +3,7 @@ import {
   SchemaQueryRequest,
   SchemaUpdateRequest,
   SchemaWriteRequest,
-} from "@dendronhq/common-server";
+} from "@dendronhq/common-all";
 import { Request, Response, Router } from "express";
 import { SchemaController } from "../modules/schemas";
 

@@ -257,7 +257,6 @@ const NOTES = {
                 id: "alpha",
                 vaultName: "vault1",
               },
-              original: "beta",
               position: {
                 end: {
                   column: 9,
@@ -282,7 +281,6 @@ const NOTES = {
                 fname: "beta",
                 vaultName: "vault1",
               },
-              original: "alpha",
               position: {
                 end: {
                   column: 13,

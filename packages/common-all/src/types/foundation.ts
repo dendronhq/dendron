@@ -46,7 +46,6 @@ export type DLoc = {
 
 export type DLink = {
   type: "ref" | "wiki" | "md" | "backlink";
-  original: string;
   value: string;
   alias?: string;
   position: Position;

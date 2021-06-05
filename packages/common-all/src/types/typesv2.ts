@@ -61,7 +61,6 @@ export type DLinkType = "wiki" | "refv2";
 export type DNoteLink<TData = any> = {
   type: "ref" | "wiki" | "md" | "backlink";
   position?: Position;
-  // if parsing in raw mode, from field won't be available
   from: DNoteLoc;
   to?: DNoteLoc;
   data: TData;

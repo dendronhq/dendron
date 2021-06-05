@@ -101,7 +101,6 @@ const getLinks = ({
       ({
         type: LinkUtils.astType2DLinkType(filter.type),
         from: NoteUtils.toNoteLoc(note),
-        original: m.value,
         value: m.value,
         alias: m.data.alias,
         position: m.position,

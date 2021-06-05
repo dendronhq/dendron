@@ -15,7 +15,7 @@ export class AddAndCommit extends BasicCommand<CommandOpts, void> {
   async execute(opts?: CommandOpts) {
     const ctx = "execute";
     L.info({ ctx, opts });
-    const resp = await getWS().workspaceService!.commidAndAddAll();
+    const resp = await getWS().workspaceService!.commitAndAddAll();
     if (_.isEmpty(resp)) {
       window.showInformationMessage(`no files to add or commit`);
       return;

@@ -1,7 +1,11 @@
 import { DVault, NoteProps } from "@dendronhq/common-all";
 import { tmpDir } from "@dendronhq/common-server";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
-import { DConfig, WorkspaceService } from "@dendronhq/engine-server";
+import {
+  DConfig,
+  SyncActionStatus,
+  WorkspaceService,
+} from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import path from "path";
 import { TestConfigUtils } from "../../config";
@@ -187,8 +191,11 @@ describe("WorkspaceService", () => {
       });
       const resp = await new WorkspaceService({
         wsRoot,
-      }).commidAndAddAll();
-      expect(resp.length).toEqual(2);
+      }).commitAndAddAll();
+      expect(resp.length).toEqual(3);
+      expect(
+        resp.filter((r) => r.status === SyncActionStatus.DONE).length
+      ).toEqual(2);
     },
     { initGit: true }
   );

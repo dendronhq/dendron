@@ -500,6 +500,11 @@ export enum TreeViewMessageType {
    */
   "onReady" = "onReady",
 }
+export enum GraphViewMessageType {
+  "onSelect" = "onSelect",
+  "onGetActiveEditor" = "onGetActiveEditor",
+  "onReady" = "onReady",
+}
 export enum ThemeMessageType {
   "onThemeChange" = "onThemeChange",
   "getTheme" = "getTheme",
@@ -517,11 +522,14 @@ export type OnDidChangeActiveTextEditorMsg = DMessage<
 >;
 
 export type TreeViewMessage = DMessage<TreeViewMessageType, { id: string }>;
+export type GraphViewMessage = DMessage<GraphViewMessageType, { id: string }>;
 
 // --- Views
 
 export enum DendronWebViewKey {
   CONFIGURE = "dendron.configure",
+  NOTE_GRAPH = "dendron.graph-note",
+  SCHEMA_GRAPH = "dendron.graph-schema",
 }
 
 export enum DendronTreeViewKey {

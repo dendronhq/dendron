@@ -76,13 +76,13 @@ export function getNoteOrError(
   return { error, note };
 }
 
-type LinkFilter = {
+export type LinkFilter = {
   type?: DendronASTTypes.REF_LINK_V2 | DendronASTTypes.WIKI_LINK;
-  oldLoc?: Partial<DNoteLoc>;
+  loc?: Partial<DNoteLoc>;
 };
 type LinkFilterTypeRequired = {
   type: DendronASTTypes.REF_LINK_V2 | DendronASTTypes.WIKI_LINK;
-  oldLoc?: Partial<DNoteLoc>;
+  loc?: Partial<DNoteLoc>;
 };
 
 const getLinks = ({
@@ -111,10 +111,10 @@ const getLinks = ({
         },
       } as DLink)
   );
-  if (filter?.oldLoc) {
+  if (filter?.loc) {
     // TODO: add additional filters besides fname
     dlinks = dlinks.filter((ent) => {
-      return ent.from.fname === filter?.oldLoc?.fname;
+      return ent.from.fname === filter?.loc?.fname;
     });
   }
   return dlinks;
@@ -147,7 +147,10 @@ export class LinkUtils {
   /**
    * Get all links from the note body
    * Currently, just look for wiki links
-   * @param param0
+   * @param opts.filter - {type, loc
+   *
+   * - type: filter by {@link DendronASTTypes}
+   * - loc: filter by {@link DLoc}
    */
   static findLinks({
     note,
@@ -170,20 +173,26 @@ export class LinkUtils {
     );
     let out = remark.parse(content) as DendronASTNode;
     let links: DLink[] = [];
-    if (filter?.type !== DendronASTTypes.WIKI_LINK) {
+    if (
+      _.isUndefined(filter?.type) ||
+      filter?.type === DendronASTTypes.WIKI_LINK
+    ) {
       links = links.concat(
         getLinks({
           ast: out,
-          filter: { type: DendronASTTypes.WIKI_LINK, oldLoc: filter?.oldLoc },
+          filter: { type: DendronASTTypes.WIKI_LINK, loc: filter?.loc },
           note,
         })
       );
     }
-    if (filter?.type !== DendronASTTypes.REF_LINK_V2) {
+    if (
+      _.isUndefined(filter?.type) ||
+      filter?.type === DendronASTTypes.REF_LINK_V2
+    ) {
       links = links.concat(
         getLinks({
           ast: out,
-          filter: { type: DendronASTTypes.REF_LINK_V2, oldLoc: filter?.oldLoc },
+          filter: { type: DendronASTTypes.REF_LINK_V2, loc: filter?.loc },
           note,
         })
       );

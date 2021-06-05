@@ -4,6 +4,7 @@ import {
   DendronASTDest,
   DendronASTTypes,
   DEngineClient,
+  LinkFilter,
   LinkUtils,
   MDUtilsV4,
   RemarkUtils,
@@ -12,6 +13,23 @@ import _ from "lodash";
 import { DVault, runEngineTestV5, testWithEngine } from "../../../engine";
 import { ENGINE_HOOKS } from "../../../presets";
 import { checkString } from "../../../utils";
+
+const checkLink = ({ src, target }: { src: Partial<DLink>; target: DLink }) => {
+  const allTrue = _.every([
+    _.isUndefined(src.from) ? true : _.isEqual(src.from, target.from),
+    _.isUndefined(src.type) ? true : _.isEqual(src.type, target.type),
+  ]);
+  if (!allTrue) {
+    throw Error(
+      `diff between ${JSON.stringify(src, null, 4)} and ${JSON.stringify(
+        target,
+        null,
+        4
+      )}`
+    );
+  }
+  expect(true).toBeTruthy();
+};
 
 describe("RemarkUtils and LinkUtils", () => {
   describe("findAnchors", async () => {
@@ -245,29 +263,6 @@ describe("RemarkUtils and LinkUtils", () => {
     );
 
     test("note ref", async () => {
-      const checkLink = ({
-        src,
-        target,
-      }: {
-        src: Partial<DLink>;
-        target: DLink;
-      }) => {
-        const allTrue = _.every([
-          _.isUndefined(src.from) ? true : _.isEqual(src.from, target.from),
-          _.isUndefined(src.type) ? true : _.isEqual(src.type, target.type),
-        ]);
-        if (!allTrue) {
-          throw Error(
-            `diff between ${JSON.stringify(src, null, 4)} and ${JSON.stringify(
-              target,
-              null,
-              4
-            )}`
-          );
-        }
-        expect(true).toBeTruthy();
-      };
-
       await runEngineTestV5(
         async ({ engine, wsRoot }) => {
           const note = engine.notes["foo.one-id"];
@@ -305,6 +300,93 @@ describe("RemarkUtils and LinkUtils", () => {
           },
         }
       );
+    });
+
+    describe("filter", async () => {
+      const preSetupHook = async ({ wsRoot, vaults }: WorkspaceOpts) => {
+        await NoteTestUtilsV4.createNote({
+          fname: "foo",
+          wsRoot,
+          vault: vaults[0],
+          body: ["[[foo]]"].join("\n"),
+        });
+      };
+
+      const getLinks = (engine: DEngineClient, filter: LinkFilter) => {
+        const note = engine.notes["foo"];
+        const links = LinkUtils.findLinks({
+          note,
+          engine,
+          filter,
+        });
+        expect(links).toMatchSnapshot();
+        return links;
+      };
+
+      test("link type", async () => {
+        await runEngineTestV5(
+          async ({ engine }) => {
+            const links = getLinks(engine, { type: DendronASTTypes.WIKI_LINK });
+            checkLink({
+              src: {
+                type: "wiki",
+                from: {
+                  fname: "foo",
+                  id: "foo",
+                  vaultName: "vault1",
+                },
+              },
+              target: links[0],
+            });
+          },
+          {
+            expect,
+            preSetupHook,
+          }
+        );
+      });
+
+      test("link type and loc match", async () => {
+        await runEngineTestV5(
+          async ({ engine }) => {
+            const links = getLinks(engine, {
+              type: DendronASTTypes.WIKI_LINK,
+              loc: { fname: "foo" },
+            });
+            checkLink({
+              src: {
+                type: "wiki",
+                from: {
+                  fname: "foo",
+                  id: "foo",
+                  vaultName: "vault1",
+                },
+              },
+              target: links[0],
+            });
+          },
+          {
+            expect,
+            preSetupHook,
+          }
+        );
+      });
+
+      test("link type and loc no match", async () => {
+        await runEngineTestV5(
+          async ({ engine }) => {
+            const links = getLinks(engine, {
+              type: DendronASTTypes.WIKI_LINK,
+              loc: { fname: "bar" },
+            });
+            expect(_.isEmpty(links)).toBeTruthy();
+          },
+          {
+            expect,
+            preSetupHook,
+          }
+        );
+      });
     });
   });
 

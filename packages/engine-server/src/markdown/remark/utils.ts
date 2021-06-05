@@ -15,7 +15,6 @@ import {
   NoteChangeEntry,
   NoteProps,
   NoteUtils,
-  VaultUtils,
 } from "@dendronhq/common-all";
 import { createLogger, note2String } from "@dendronhq/common-server";
 import _ from "lodash";
@@ -131,6 +130,19 @@ export class LinkUtils {
       default:
         throw new DendronError({ message: `invalid type conversion: ${type}` });
     }
+  }
+  static dlink2DNoteLink(link: DLink): DNoteLink {
+    return {
+      data: {},
+      from: {
+        fname: link.value,
+        alias: link.alias,
+        anchorHeader: link.from.anchorHeader,
+        vaultName: link.from.vaultName,
+      },
+      type: link.type,
+      position: link.position,
+    };
   }
   /**
    * Get all links from the note body
@@ -370,17 +382,28 @@ export class LinkUtils {
   }
 
   static updateLink({
-    body,
+    note,
     oldLink,
     newLink,
   }: {
-    body: string;
+    note: NoteProps;
     oldLink: DNoteLink;
     newLink: DNoteLink;
   }) {
-    // const { start, end } = oldLink.position;
-    // const startOffset = start.offset!;
-    // const endOffset = end.offset!;
+    const { start, end } = oldLink.position!;
+    const startOffset = start.offset!;
+    const endOffset = end.offset!;
+    const body = note.body;
+    debugger;
+    const newBody = [
+      body.slice(0, startOffset),
+      LinkUtils.renderNoteLink({
+        link: newLink,
+        dest: DendronASTDest.MD_DENDRON,
+      }),
+      body.slice(endOffset),
+    ].join("");
+    return newBody;
   }
 }
 

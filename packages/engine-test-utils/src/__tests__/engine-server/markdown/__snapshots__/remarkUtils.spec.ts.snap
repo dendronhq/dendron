@@ -81,7 +81,6 @@ Array [
       "id": "foo.one-id",
       "vaultName": "vault1",
     },
-    "original": "foo.two",
     "position": Position {
       "end": Object {
         "column": 30,
@@ -110,7 +109,6 @@ Array [
       "id": "foo.one-id",
       "vaultName": "vault1",
     },
-    "original": "foo.two",
     "position": Position {
       "end": Object {
         "column": 13,
@@ -144,7 +142,6 @@ Array [
       "id": "foo",
       "vaultName": "vault1",
     },
-    "original": "bar",
     "position": Position {
       "end": Object {
         "column": 8,
@@ -178,7 +175,6 @@ Array [
       "id": "foo",
       "vaultName": "vault1",
     },
-    "original": "bar",
     "position": Position {
       "end": Object {
         "column": 25,
@@ -201,4 +197,32 @@ Array [
     "value": "bar",
   },
 ]
+`;
+
+exports[`RemarkUtils and LinkUtils updateLink basic 1`] = `
+"# Foo.One
+![[foo.two]]
+Regular wikilink: [[foo.bar]]
+"
+`;
+
+exports[`RemarkUtils and LinkUtils updateLink multiple links present link no space 1`] = `
+"[[foo]]
+nospace[[bar]]
+onespace [[foo]]
+"
+`;
+
+exports[`RemarkUtils and LinkUtils updateLink multiple links present link onespace 1`] = `
+"[[foo]]
+nospace[[foo]]
+onespace [[bar]]
+"
+`;
+
+exports[`RemarkUtils and LinkUtils updateLink multiple links present only link 1`] = `
+"[[bar]]
+nospace[[foo]]
+onespace [[foo]]
+"
 `;

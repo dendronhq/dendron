@@ -1,4 +1,4 @@
-import { DLink } from "@dendronhq/common-all";
+import { DLink, WorkspaceOpts } from "@dendronhq/common-all";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import {
   DendronASTDest,
@@ -305,6 +305,133 @@ describe("RemarkUtils and LinkUtils", () => {
           },
         }
       );
+    });
+  });
+
+  describe("updateLink", async () => {
+    test("basic", async () => {
+      await runEngineTestV5(
+        async ({ engine }) => {
+          const note = engine.notes["foo.one-id"];
+          const links = LinkUtils.findLinks({ note, engine });
+          const link = LinkUtils.dlink2DNoteLink(links[0]);
+          const newBody = LinkUtils.updateLink({
+            note,
+            oldLink: link,
+            newLink: {
+              ...link,
+              from: {
+                fname: "foo.bar",
+              },
+            },
+          });
+          expect(newBody).toMatchSnapshot();
+          await checkString(newBody, "Regular wikilink: [[foo.bar]]");
+        },
+        {
+          preSetupHook: async (opts) => {
+            await ENGINE_HOOKS.setupNoteRefRecursive(opts);
+          },
+          expect,
+        }
+      );
+    });
+
+    describe("multiple links present", async () => {
+      const preSetupHook = async ({ wsRoot, vaults }: WorkspaceOpts) => {
+        const vault = vaults[0];
+        await NoteTestUtilsV4.createNote({
+          fname: "foo",
+          wsRoot,
+          vault,
+          body: ["[[foo]]", "nospace[[foo]]", "onespace [[foo]]"].join("\n"),
+        });
+      };
+
+      test("only link", async () => {
+        await runEngineTestV5(
+          async ({ engine }) => {
+            const note = engine.notes["foo"];
+            const links = LinkUtils.findLinks({ note, engine });
+            const link = LinkUtils.dlink2DNoteLink(links[0]);
+            const newLink = {
+              ...link,
+              from: {
+                fname: "bar",
+              },
+            };
+            const newBody = LinkUtils.updateLink({
+              note,
+              oldLink: link,
+              newLink,
+            });
+            expect(newBody).toMatchSnapshot();
+            await checkString(newBody.split("\n")[0], "[[bar]]");
+          },
+          {
+            preSetupHook,
+            expect,
+          }
+        );
+      });
+
+      test("link no space", async () => {
+        await runEngineTestV5(
+          async ({ engine }) => {
+            const idx = 1;
+            const newLine = "nospace[[bar]]";
+            const note = engine.notes["foo"];
+            const links = LinkUtils.findLinks({ note, engine });
+            const link = LinkUtils.dlink2DNoteLink(links[idx]);
+            const newLink = {
+              ...link,
+              from: {
+                fname: "bar",
+              },
+            };
+            const newBody = LinkUtils.updateLink({
+              note,
+              oldLink: link,
+              newLink,
+            });
+            expect(newBody).toMatchSnapshot();
+            await checkString(newBody.split("\n")[idx], newLine);
+          },
+          {
+            preSetupHook,
+            expect,
+          }
+        );
+      });
+
+      test("link onespace", async () => {
+        await runEngineTestV5(
+          async ({ engine }) => {
+            const idx = 2;
+            const newLine = "onespace [[bar]]";
+            const note = engine.notes["foo"];
+            const links = LinkUtils.findLinks({ note, engine });
+            const link = LinkUtils.dlink2DNoteLink(links[idx]);
+            const newLink = {
+              ...link,
+              from: {
+                fname: "bar",
+              },
+            };
+            const newBody = LinkUtils.updateLink({
+              note,
+              oldLink: link,
+              newLink,
+            });
+            expect(newBody).toMatchSnapshot();
+            await checkString(newBody.split("\n")[idx], newLine);
+          },
+          {
+            preSetupHook,
+            expect,
+          }
+        );
+      });
     });
   });
 });

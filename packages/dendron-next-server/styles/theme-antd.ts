@@ -47,7 +47,7 @@ const baseTheme: RecursivePartial<Theme> = {
   },
 };
 
-const darkTheme: RecursivePartial<Theme> = _.merge(baseTheme, {
+const darkTheme: RecursivePartial<Theme> = _.merge(_.cloneDeep(baseTheme), {
   graph: {
     node: {
       color: "#807B7B",
@@ -64,7 +64,7 @@ const darkTheme: RecursivePartial<Theme> = _.merge(baseTheme, {
   },
 });
 
-const lightTheme: RecursivePartial<Theme> = _.merge(baseTheme, {
+const lightTheme: RecursivePartial<Theme> = _.merge(_.cloneDeep(baseTheme), {
   graph: {
     node: {
       color: "#999393",

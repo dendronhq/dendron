@@ -143,6 +143,52 @@ describe(DoctorActions.HI_TO_H2, () => {
     );
   });
 
+  test("basic pass candidates opt", async () => {
+    await runEngineTestV5(
+      async ({ engine, wsRoot, vaults }) => {
+        const vault = vaults[0];
+        const resp = await engine.getNoteByPath({
+          npath: "foo",
+          createIfNew: false,
+          vault,
+        });
+        const fooFile = resp.data!.note;
+        await runDoctor({
+          candidates: [fooFile!],
+          wsRoot,
+          engine,
+          action,
+        });
+
+        const fpathFoo = path.join(wsRoot, vault.fsPath, "foo.md");
+        const noteFoo = file2Note(fpathFoo, vault);
+        expect(noteFoo).toMatchSnapshot();
+        expect(
+          await AssertUtils.assertInString({
+            body: noteFoo.body,
+            match: [`## Foo Header`],
+          })
+        ).toBeTruthy();
+
+        // bar.md should be untouched.
+        const fpathBar = path.join(wsRoot, vault.fsPath, "bar.md");
+        const note = file2Note(fpathBar, vault);
+        expect(note).toMatchSnapshot();
+        expect(
+          await AssertUtils.assertInString({
+            body: note.body,
+            match: [`# Bar Header`],
+          })
+        ).toBeTruthy();
+      },
+      {
+        createEngine: createEngineFromServer,
+        expect,
+        preSetupHook: setupBasic,
+      }
+    );
+  });
+
   test("dry run", async () => {
     await runEngineTestV5(
       async ({ engine, wsRoot, vaults }) => {
@@ -213,11 +259,46 @@ describe("H1_TO_TITLE", () => {
       }
     );
   });
+
+  test("basic pass candidates opts", async () => {
+    await runEngineTestV5(
+      async ({ engine, wsRoot, vaults }) => {
+        const vault = vaults[0];
+        const resp = await engine.getNoteByPath({
+          npath: "foo",
+          createIfNew: false,
+          vault,
+        });
+        const fooFile = resp.data!.note;
+        await runDoctor({
+          candidates: [fooFile!],
+          wsRoot,
+          engine,
+          action,
+        });
+        const fpathFoo = path.join(wsRoot, vault.fsPath, "foo.md");
+        const noteFoo = file2Note(fpathFoo, vault);
+        expect(noteFoo).toMatchSnapshot();
+        expect(noteFoo.title).toEqual("Foo Header");
+
+        const fpathBar = path.join(wsRoot, vault.fsPath, "bar.md");
+        const noteBar = file2Note(fpathBar, vault);
+        expect(noteBar).toMatchSnapshot();
+        expect(noteBar.title).toEqual("Bar");
+      },
+      {
+        createEngine: createEngineFromServer,
+        expect,
+        preSetupHook: setupBasic,
+      }
+    );
+  });
 });
 
 describe("CREATE_MISSING_LINKED_NOTES", () => {
   const action = DoctorActions.CREATE_MISSING_LINKED_NOTES;
-  test("basic", async () => {
+  // skip this until we enable workspace scope
+  test.skip("basic", async () => {
     await runEngineTestV5(
       async ({ engine, wsRoot, vaults }) => {
         const vault = vaults[0];
@@ -239,7 +320,60 @@ describe("CREATE_MISSING_LINKED_NOTES", () => {
     );
   });
 
-  test("dry run", async () => {
+  test("basic workspace scope should do nothing", async () => {
+    await runEngineTestV5(
+      async ({ engine, wsRoot, vaults }) => {
+        const vault = vaults[0];
+        await runDoctor({
+          wsRoot,
+          engine,
+          action,
+        });
+        const fileExists = await fs.pathExists(
+          path.join(wsRoot, vault.fsPath, "fake.link.md")
+        );
+        expect(fileExists).toBeFalsy();
+      },
+      {
+        createEngine: createEngineFromServer,
+        expect,
+        preSetupHook: setupWithWikilink,
+      }
+    );
+  });
+
+  test("basic pass candidates opts", async () => {
+    await runEngineTestV5(
+      async ({ engine, wsRoot, vaults }) => {
+        const vault = vaults[0];
+        const resp = await engine.getNoteByPath({
+          npath: "foo",
+          createIfNew: false,
+          vault,
+        });
+        const fooFile = resp.data!.note;
+        await runDoctor({
+          candidates: [fooFile!],
+          wsRoot,
+          engine,
+          action,
+        });
+        engine;
+        const fileExists = await fs.pathExists(
+          path.join(wsRoot, vault.fsPath, "fake.link.md")
+        );
+        expect(fileExists).toBeFalsy();
+      },
+      {
+        createEngine: createEngineFromServer,
+        expect,
+        preSetupHook: setupWithWikilink,
+      }
+    );
+  });
+
+  // skip this until we enable workspace scope
+  test.skip("dry run", async () => {
     await runEngineTestV5(
       async ({ engine, wsRoot, vaults }) => {
         const vault = vaults[0];
@@ -262,7 +396,38 @@ describe("CREATE_MISSING_LINKED_NOTES", () => {
     );
   });
 
-  test("wild link with alias", async () => {
+  test("dry run", async () => {
+    await runEngineTestV5(
+      async ({ engine, wsRoot, vaults }) => {
+        const vault = vaults[0];
+        const resp = await engine.getNoteByPath({
+          npath: "foo",
+          createIfNew: false,
+          vault,
+        });
+        const fooFile = resp.data!.note;
+        await runDoctor({
+          candidates: [fooFile!],
+          wsRoot,
+          engine,
+          action,
+          dryRun: true,
+        });
+        const fileExists = await fs.pathExists(
+          path.join(wsRoot, vault.fsPath, "fake.link.md")
+        );
+        expect(fileExists).toBeFalsy();
+      },
+      {
+        createEngine: createEngineFromServer,
+        expect,
+        preSetupHook: setupWithWikilink,
+      }
+    );
+  });
+
+  // skip this until we enable workspace scope
+  test.skip("wild link with alias", async () => {
     await runEngineTestV5(
       async ({ engine, wsRoot, vaults }) => {
         const vault = vaults[0];
@@ -287,7 +452,41 @@ describe("CREATE_MISSING_LINKED_NOTES", () => {
     );
   });
 
-  test("missing notes in multiple vaults", async () => {
+  test("wild link with alias pass candidates opts", async () => {
+    await runEngineTestV5(
+      async ({ engine, wsRoot, vaults }) => {
+        const vault = vaults[0];
+        const resp = await engine.getNoteByPath({
+          npath: "foo",
+          createIfNew: false,
+          vault,
+        });
+        const fooFile = resp.data!.note;
+        await runDoctor({
+          candidates: [fooFile!],
+          wsRoot,
+          engine,
+          action,
+        });
+        const fileExists = await fs.pathExists(
+          path.join(wsRoot, vault.fsPath, "foo.bar.md")
+        );
+        expect(fileExists).toBeTruthy();
+        const fileDoesntExist = await fs.pathExists(
+          path.join(wsRoot, vault.fsPath, "foo.baz.md")
+        );
+        expect(fileDoesntExist).toBeTruthy();
+      },
+      {
+        createEngine: createEngineFromServer,
+        expect,
+        preSetupHook: setupWithAliasedWikilink,
+      }
+    );
+  });
+
+  // skipping this until we enable workspace scope.
+  test.skip("missing notes in multiple vaults", async () => {
     await runEngineTestV5(
       async ({ engine, wsRoot, vaults }) => {
         const vault1 = vaults[0];
@@ -314,7 +513,8 @@ describe("CREATE_MISSING_LINKED_NOTES", () => {
     );
   });
 
-  test("xvaults wild links", async () => {
+  // skipping this until we enable workspace scope.
+  test.skip("xvaults wild links", async () => {
     await runEngineTestV5(
       async ({ engine, wsRoot, vaults }) => {
         const vault1 = vaults[0];
@@ -334,6 +534,60 @@ describe("CREATE_MISSING_LINKED_NOTES", () => {
             path.join(wsRoot, vault2.fsPath, fileName)
           );
           expect(fileExistsVault2).toBeTruthy();
+        });
+      },
+      {
+        createEngine: createEngineFromServer,
+        expect,
+        preSetupHook: setupWithXVaultWikilink,
+      }
+    );
+  });
+
+  test("xvaults wild links pass candidates opts", async () => {
+    await runEngineTestV5(
+      async ({ engine, wsRoot, vaults }) => {
+        const vault1 = vaults[0];
+        const vault2 = vaults[1];
+        await NoteTestUtilsV4.createNote({
+          wsRoot,
+          vault: vault1,
+          fname: "foo2",
+          body: [
+            "[[dendron://vault2/bar2]]",
+            "[[baz|dendron://vault2/baz2]]",
+            "[[qaaaz note|dendron://vault2/qaaaz2]]",
+          ].join("\n"),
+        });
+        const resp = await engine.getNoteByPath({
+          npath: "foo",
+          createIfNew: false,
+          vault: vault1,
+        });
+        const fooFile = resp.data!.note;
+        await runDoctor({
+          candidates: [fooFile!],
+          wsRoot,
+          engine,
+          action,
+        });
+        const fileExistsVault1 = await fs.pathExists(
+          path.join(wsRoot, vault1.fsPath, "bar.md")
+        );
+        expect(fileExistsVault1).toBeFalsy();
+        const fileNames = ["bar.md", "baz.md", "qaaaz.md"];
+        _.forEach(fileNames, async (fileName) => {
+          const fileExistsVault2 = await fs.pathExists(
+            path.join(wsRoot, vault2.fsPath, fileName)
+          );
+          expect(fileExistsVault2).toBeTruthy();
+        });
+        const fileNames2 = ["bar2.md", "baz2.md", "qaaaz2.md"];
+        _.forEach(fileNames2, async (fileName) => {
+          const fileExistsVault2 = await fs.pathExists(
+            path.join(wsRoot, vault2.fsPath, fileName)
+          );
+          expect(fileExistsVault2).toBeFalsy();
         });
       },
       {

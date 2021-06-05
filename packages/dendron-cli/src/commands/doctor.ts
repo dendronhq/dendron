@@ -25,6 +25,11 @@ import {
 type CommandCLIOpts = {
   action: DoctorActions;
   query?: string;
+  /**
+   * pass in note candidates directly to
+   * limit what notes should be used in the command.
+   */
+  candidates?: NoteProps[];
   limit?: number;
   dryRun?: boolean;
   /**
@@ -122,13 +127,20 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
   }
 
   async execute(opts: CommandOpts) {
-    const { action, engine, query, limit, dryRun, exit } = _.defaults(opts, {
-      limit: 99999,
-      exit: true,
-    });
-    let notes = query
-      ? engine.queryNotesSync({ qs: query }).data
-      : _.values(engine.notes);
+    const { action, engine, query, candidates, limit, dryRun, exit } =
+      _.defaults(opts, {
+        limit: 99999,
+        exit: true,
+      });
+    let notes: NoteProps[];
+    if (_.isUndefined(candidates)) {
+      notes = query
+        ? engine.queryNotesSync({ qs: query }).data
+        : _.values(engine.notes);
+    } else {
+      console.log(`${candidates.length} candidate(s) were passed`);
+      notes = candidates;
+    }
     notes = notes.filter((n) => !n.stub);
     this.L.info({ msg: "prep doctor", numResults: notes.length });
     let numChanges = 0;

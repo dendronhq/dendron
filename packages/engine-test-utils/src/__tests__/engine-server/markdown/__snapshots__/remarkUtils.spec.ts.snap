@@ -101,6 +101,7 @@ Array [
     },
     "type": "wiki",
     "value": "foo",
+    "xvault": false,
   },
 ]
 `;
@@ -134,6 +135,7 @@ Array [
     },
     "type": "wiki",
     "value": "foo",
+    "xvault": false,
   },
 ]
 `;
@@ -169,6 +171,7 @@ Array [
     },
     "type": "wiki",
     "value": "foo.two",
+    "xvault": false,
   },
   Object {
     "alias": undefined,
@@ -197,6 +200,7 @@ Array [
     },
     "type": "ref",
     "value": "foo.two",
+    "xvault": false,
   },
 ]
 `;
@@ -230,6 +234,7 @@ Array [
     },
     "type": "wiki",
     "value": "bar",
+    "xvault": false,
   },
 ]
 `;
@@ -263,6 +268,7 @@ Array [
     },
     "type": "wiki",
     "value": "bar",
+    "xvault": true,
   },
 ]
 `;

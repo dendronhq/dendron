@@ -20,6 +20,7 @@ import {
   ENGINE_HOOKS,
   ENGINE_PRESETS,
   ENGINE_PRESETS_MULTI,
+  getPreset,
 } from "../../presets";
 
 const createEngine = ({ wsRoot }: WorkspaceOpts) => {

@@ -1,12 +1,19 @@
-import { NoteChangeEntry, NoteUtils, VaultUtils } from "@dendronhq/common-all";
+import {
+  DEngineClient,
+  DVault,
+  NoteChangeEntry,
+  NoteUtils,
+  VaultUtils,
+} from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import {
-  TestPresetEntryV4,
-  FileTestUtils,
-  NOTE_PRESETS_V4,
-  NOTE_BODY_PRESETS_V4,
-  NoteTestUtilsV4,
   AssertUtils,
+  FileTestUtils,
+  NoteTestUtilsV4,
+  NOTE_BODY_PRESETS_V4,
+  NOTE_PRESETS_V4,
+  TestPresetEntryV4,
+  TestResult,
 } from "@dendronhq/common-test-utils";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -28,43 +35,135 @@ const findByName = (
   return created;
 };
 
-// const findUpdated = (changed: NoteChangeEntry[]) => {
-//   const note = _.find(changed, { status: "update" });
-//   return note;
-// };
+const runRename = async ({
+  engine,
+  vault,
+  wsRoot,
+  cb,
+}: {
+  engine: DEngineClient;
+  vault: DVault;
+  wsRoot: string;
+  cb: (opts: {
+    barChange: NoteChangeEntry;
+    allChanged: NoteChangeEntry[];
+  }) => TestResult[];
+}) => {
+  const changed = await engine.renameNote({
+    oldLoc: { fname: "foo", vaultName: VaultUtils.getName(vault) },
+    newLoc: { fname: "baz", vaultName: VaultUtils.getName(vault) },
+  });
+  const checkVault = await FileTestUtils.assertInVault({
+    wsRoot,
+    vault,
+    match: ["baz.md"],
+    nomatch: ["foo.md"],
+  });
+  const barChange = _.find(changed.data, (ent) => ent.note.fname === "bar")!;
+  const out = cb({ barChange, allChanged: changed.data! });
+  return out.concat([
+    {
+      actual: checkVault,
+      expected: true,
+    },
+  ]);
+};
 
 const NOTES = {
+  XVAULT_LINK: new TestPresetEntryV4(
+    async ({ wsRoot, vaults, engine }) => {
+      return runRename({
+        wsRoot,
+        vault: vaults[0],
+        engine,
+        cb: ({ barChange, allChanged }) => {
+          return [
+            {
+              actual: allChanged.length,
+              expected: 4,
+            },
+            {
+              actual: _.trim(barChange?.note.body),
+              expected: "[[dendron://vault1/baz#head1]]",
+            },
+          ];
+        },
+      });
+    },
+    {
+      preSetupHook: async ({ vaults, wsRoot }) => {
+        const vault = vaults[0];
+        const vname = VaultUtils.getName(vault);
+        await NOTE_PRESETS_V4.NOTE_SIMPLE.create({
+          vault,
+          wsRoot,
+          body: `[[bar#head1]]`,
+        });
+        await NOTE_PRESETS_V4.NOTE_SIMPLE_OTHER.create({
+          vault,
+          wsRoot,
+          body: `[[dendron://${vname}/foo#head1]]`,
+        });
+      },
+    }
+  ),
+  RELATIVE_LINK: new TestPresetEntryV4(
+    async ({ wsRoot, vaults, engine }) => {
+      return runRename({
+        wsRoot,
+        vault: vaults[0],
+        engine,
+        cb: ({ barChange, allChanged }) => {
+          return [
+            {
+              actual: allChanged.length,
+              expected: 4,
+            },
+            {
+              actual: _.trim(barChange?.note.body),
+              expected: "[[baz#head1]]",
+            },
+          ];
+        },
+      });
+    },
+    {
+      preSetupHook: async ({ vaults, wsRoot }) => {
+        const vault = vaults[0];
+        await NOTE_PRESETS_V4.NOTE_SIMPLE.create({
+          vault,
+          wsRoot,
+          body: `[[bar#head1]]`,
+        });
+        await NOTE_PRESETS_V4.NOTE_SIMPLE_OTHER.create({
+          vault,
+          wsRoot,
+          body: `[[foo#head1]]`,
+        });
+      },
+    }
+  ),
+  // TODO: this hsould test renaming a note ref instead of checking that note ref text is still the same
   NOTE_REF: new TestPresetEntryV4(
     async ({ wsRoot, vaults, engine }) => {
-      const vault = vaults[0];
-
-      const changed = await engine.renameNote({
-        oldLoc: { fname: "foo", vaultName: VaultUtils.getName(vault) },
-        newLoc: { fname: "baz", vaultName: VaultUtils.getName(vault) },
-      });
-
-      const checkVault = await FileTestUtils.assertInVault({
+      return runRename({
         wsRoot,
-        vault,
-        match: ["baz.md"],
-        nomatch: ["foo.md"],
+        vault: vaults[0],
+        engine,
+        cb: ({ barChange, allChanged }) => {
+          return [
+            {
+              actual: allChanged.length,
+              expected: 4,
+            },
+            {
+              actual: _.trim(barChange?.note.body),
+              expected:
+                "[[baz]]\n![[dendron.pro.dendron-next-server#quickstart,1:#*]]",
+            },
+          ];
+        },
       });
-      const barChange = _.find(changed.data, (ent) => ent.note.fname === "bar");
-      return [
-        {
-          actual: changed.data?.length,
-          expected: 4,
-        },
-        {
-          actual: _.trim(barChange?.note.body),
-          expected:
-            "[[baz]]\n![[dendron.pro.dendron-next-server#quickstart,1:#*]]",
-        },
-        {
-          actual: checkVault,
-          expected: true,
-        },
-      ];
     },
     {
       preSetupHook: async ({ vaults, wsRoot }) => {

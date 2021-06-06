@@ -105,7 +105,9 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
               anchorHeader: data.anchorHeader,
               vaultName: data.vaultName,
             },
-            data,
+            data: {
+              xvault: !_.isUndefined(data.vaultName),
+            },
             type: LinkUtils.astType2DLinkType(DendronASTTypes.WIKI_LINK),
             position: node.position!,
           },

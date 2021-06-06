@@ -58,7 +58,11 @@ export type DNoteAnchorPositioned = DNoteAnchor & {
 
 export type DLinkType = "wiki" | "refv2";
 
-export type DNoteLink<TData = any> = {
+export type DNoteLinkData = {
+  // TODO: should be backfilled to be mandatory
+  xvault?: boolean;
+};
+export type DNoteLink<TData extends DNoteLinkData = DNoteLinkData> = {
   type: "ref" | "wiki" | "md" | "backlink";
   position?: Position;
   from: DNoteLoc;
@@ -80,7 +84,7 @@ export type DNoteRefData = {
    * Id link: TBD (eg. ^1234)
    */
   type: "file" | "id";
-};
+} & DNoteLinkData;
 export type DNoteRefLink = DNoteLink<DNoteRefData>;
 export type DNoteRefLinkRaw = DNoteLinkRaw<DNoteRefData>;
 

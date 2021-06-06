@@ -103,6 +103,7 @@ const getLinks = ({
         value: m.value,
         alias: m.data.alias,
         position: m.position,
+        xvault: !_.isUndefined(m.data.vaultName),
         // TODO: error if vault not found
         to: {
           fname: m.value,
@@ -114,7 +115,7 @@ const getLinks = ({
   if (filter?.loc) {
     // TODO: add additional filters besides fname
     dlinks = dlinks.filter((ent) => {
-      return ent.from.fname === filter?.loc?.fname;
+      return ent.value === filter?.loc?.fname;
     });
   }
   return dlinks;
@@ -133,11 +134,13 @@ export class LinkUtils {
   }
   static dlink2DNoteLink(link: DLink): DNoteLink {
     return {
-      data: {},
+      data: {
+        xvault: link.xvault,
+      },
       from: {
         fname: link.value,
         alias: link.alias,
-        anchorHeader: link.from.anchorHeader,
+        anchorHeader: link.to?.anchorHeader,
         vaultName: link.from.vaultName,
       },
       type: link.type,
@@ -371,9 +374,10 @@ export class LinkUtils {
   }): string | never {
     switch (dest) {
       case DendronASTDest.MD_DENDRON: {
-        const vaultPrefix = link.from.vaultName
-          ? `${CONSTANTS.DENDRON_DELIMETER}${link.from.vaultName}/`
-          : "";
+        const vaultPrefix =
+          link.from.vaultName && link.data.xvault
+            ? `${CONSTANTS.DENDRON_DELIMETER}${link.from.vaultName}/`
+            : "";
         const value = link.from.fname;
         const alias =
           !_.isUndefined(link.from.alias) && link.from.alias !== value
@@ -403,7 +407,6 @@ export class LinkUtils {
     const startOffset = start.offset!;
     const endOffset = end.offset!;
     const body = note.body;
-    debugger;
     const newBody = [
       body.slice(0, startOffset),
       LinkUtils.renderNoteLink({

@@ -44,6 +44,9 @@ export type DLoc = {
   anchorHeader?: string;
 };
 
+/**
+ @deprecated use {@link DNoteLink}
+ */
 export type DLink = {
   type: "ref" | "wiki" | "md" | "backlink";
   value: string;
@@ -51,6 +54,7 @@ export type DLink = {
   position: Position;
   from: DLoc;
   to?: DLoc;
+  xvault?: boolean;
 };
 
 export type DNodeType = "note" | "schema";

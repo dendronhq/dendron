@@ -1,4 +1,3 @@
-import { DNoteAnchorPositioned } from "@dendronhq/common-all";
 import {
   assert,
   BulkAddNoteOpts,
@@ -10,13 +9,14 @@ import {
   DEngineInitSchemaResp,
   DHookEntry,
   DLink,
+  DNoteAnchorPositioned,
   DStore,
   DVault,
   EngineDeleteOptsV2,
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
-  ERROR_STATUS,
   ERROR_SEVERITY,
+  ERROR_STATUS,
   NoteChangeEntry,
   NoteProps,
   NotePropsDict,
@@ -30,9 +30,9 @@ import {
   SchemaModuleProps,
   SchemaUtils,
   StoreDeleteNoteResp,
+  stringifyError,
   VaultUtils,
   WriteNoteResp,
-  stringifyError,
 } from "@dendronhq/common-all";
 import {
   DLogger,
@@ -45,7 +45,7 @@ import {
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { MDUtilsV4 } from "../../markdown";
+import { DendronASTTypes } from "../../markdown";
 import { AnchorUtils, LinkUtils } from "../../markdown/remark/utils";
 import { HookUtils, RequireHookResp } from "../../topics/hooks";
 import { readNotesFromCache, writeNotesToCache } from "../../utils";
@@ -474,11 +474,36 @@ export class FileStorage implements DStore {
         const vaultPath = vault2Path({ vault, wsRoot });
         // read note in case its changed
         const _n = file2Note(path.join(vaultPath, n.fname + ".md"), vault);
-        const resp = await MDUtilsV4.procTransform(
-          { engine: this.engine, fname: n.fname, vault: n.vault },
-          { from: oldLoc, to: newLoc }
-        ).process(_n.body);
-        n.body = resp.contents as string;
+        // TODO; currently wikilinks only
+        const allLinks = LinkUtils.findLinks({
+          note: _n,
+          engine: this.engine,
+          filter: { type: DendronASTTypes.WIKI_LINK, loc: oldLoc },
+        });
+        const noteMod = _.reduce(
+          allLinks,
+          (note: NoteProps, link: DLink) => {
+            const oldLink = LinkUtils.dlink2DNoteLink(link);
+            debugger;
+            // loc doesn't have header info
+            const newBody = LinkUtils.updateLink({
+              note,
+              oldLink,
+              newLink: {
+                ...oldLink,
+                from: { ...newLoc, anchorHeader: oldLink.from.anchorHeader },
+              },
+            });
+            _n.body = newBody;
+            return _n;
+          },
+          _n
+        );
+        // const resp = await MDUtilsV4.procTransform(
+        //   { engine: this.engine, fname: n.fname, vault: n.vault },
+        //   { from: oldLoc, to: newLoc }
+        // ).process(_n.body);
+        n.body = noteMod.body;
         return n;
       })
     ).catch((err) => {

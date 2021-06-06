@@ -275,6 +275,7 @@ const NOTES = {
               },
               type: "wiki",
               value: "beta",
+              xvault: false,
             },
             {
               from: {

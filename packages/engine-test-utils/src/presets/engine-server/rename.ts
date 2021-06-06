@@ -4,13 +4,13 @@ import {
   NoteChangeEntry,
   NoteUtils,
   VaultUtils,
+  WorkspaceOpts,
 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import {
   AssertUtils,
   FileTestUtils,
   NoteTestUtilsV4,
-  NOTE_BODY_PRESETS_V4,
   NOTE_PRESETS_V4,
   TestPresetEntryV4,
   TestResult,
@@ -37,18 +37,21 @@ const findByName = (
 
 const runRename = async ({
   engine,
-  vault,
+  vaults,
   wsRoot,
+  numChanges,
   cb,
 }: {
   engine: DEngineClient;
-  vault: DVault;
+  vaults: DVault[];
   wsRoot: string;
+  numChanges?: number;
   cb: (opts: {
     barChange: NoteChangeEntry;
     allChanged: NoteChangeEntry[];
   }) => TestResult[];
 }) => {
+  const vault = vaults[0];
   const changed = await engine.renameNote({
     oldLoc: { fname: "foo", vaultName: VaultUtils.getName(vault) },
     newLoc: { fname: "baz", vaultName: VaultUtils.getName(vault) },
@@ -63,25 +66,104 @@ const runRename = async ({
   const out = cb({ barChange, allChanged: changed.data! });
   return out.concat([
     {
+      actual: changed.data!.length,
+      expected: numChanges || 4,
+    },
+    {
       actual: checkVault,
       expected: true,
     },
   ]);
 };
 
+const preSetupHook = async (
+  { vaults, wsRoot }: WorkspaceOpts,
+  { fooBody, barBody }: { fooBody?: string; barBody: string }
+) => {
+  const vault = vaults[0];
+  await NOTE_PRESETS_V4.NOTE_SIMPLE.create({
+    vault,
+    wsRoot,
+    body: fooBody ? fooBody : "",
+  });
+  await NOTE_PRESETS_V4.NOTE_SIMPLE_OTHER.create({
+    vault,
+    wsRoot,
+    body: barBody,
+  });
+};
+
 const NOTES = {
+  WITH_INLINE_CODE: new TestPresetEntryV4(
+    async ({ wsRoot, vaults, engine }) => {
+      return runRename({
+        wsRoot,
+        vaults,
+        engine,
+        numChanges: 3,
+        cb: ({ barChange }) => {
+          return [
+            {
+              actual: barChange,
+              expected: undefined,
+            },
+          ];
+        },
+      });
+    },
+    {
+      preSetupHook: (opts) => preSetupHook(opts, { barBody: "`[[foo]]`" }),
+    }
+  ),
+  WITH_ALIAS: new TestPresetEntryV4(
+    async ({ wsRoot, vaults, engine }) => {
+      return runRename({
+        wsRoot,
+        vaults,
+        engine,
+        cb: ({ barChange }) => {
+          return [
+            {
+              actual: _.trim(barChange?.note.body),
+              expected: "[[secret|baz]]",
+            },
+          ];
+        },
+      });
+    },
+    {
+      preSetupHook: (opts) => preSetupHook(opts, { barBody: `[[secret|foo]]` }),
+    }
+  ),
+  MULTIPLE_LINKS: new TestPresetEntryV4(
+    async ({ wsRoot, vaults, engine }) => {
+      return runRename({
+        wsRoot,
+        vaults,
+        engine,
+        cb: ({ barChange }) => {
+          return [
+            {
+              actual: _.trim(barChange?.note.body),
+              expected: "[[baz]] [[baz]]",
+            },
+          ];
+        },
+      });
+    },
+    {
+      preSetupHook: (opts) =>
+        preSetupHook(opts, { barBody: `[[foo]] [[foo]]` }),
+    }
+  ),
   XVAULT_LINK: new TestPresetEntryV4(
     async ({ wsRoot, vaults, engine }) => {
       return runRename({
         wsRoot,
-        vault: vaults[0],
+        vaults,
         engine,
-        cb: ({ barChange, allChanged }) => {
+        cb: ({ barChange }) => {
           return [
-            {
-              actual: allChanged.length,
-              expected: 4,
-            },
             {
               actual: _.trim(barChange?.note.body),
               expected: "[[dendron://vault1/baz#head1]]",
@@ -91,34 +173,18 @@ const NOTES = {
       });
     },
     {
-      preSetupHook: async ({ vaults, wsRoot }) => {
-        const vault = vaults[0];
-        const vname = VaultUtils.getName(vault);
-        await NOTE_PRESETS_V4.NOTE_SIMPLE.create({
-          vault,
-          wsRoot,
-          body: `[[bar#head1]]`,
-        });
-        await NOTE_PRESETS_V4.NOTE_SIMPLE_OTHER.create({
-          vault,
-          wsRoot,
-          body: `[[dendron://${vname}/foo#head1]]`,
-        });
-      },
+      preSetupHook: (opts) =>
+        preSetupHook(opts, { barBody: `[[dendron://vault1/foo#head1]]` }),
     }
   ),
   RELATIVE_LINK: new TestPresetEntryV4(
     async ({ wsRoot, vaults, engine }) => {
       return runRename({
         wsRoot,
-        vault: vaults[0],
+        vaults,
         engine,
-        cb: ({ barChange, allChanged }) => {
+        cb: ({ barChange }) => {
           return [
-            {
-              actual: allChanged.length,
-              expected: 4,
-            },
             {
               actual: _.trim(barChange?.note.body),
               expected: "[[baz#head1]]",
@@ -128,59 +194,30 @@ const NOTES = {
       });
     },
     {
-      preSetupHook: async ({ vaults, wsRoot }) => {
-        const vault = vaults[0];
-        await NOTE_PRESETS_V4.NOTE_SIMPLE.create({
-          vault,
-          wsRoot,
-          body: `[[bar#head1]]`,
-        });
-        await NOTE_PRESETS_V4.NOTE_SIMPLE_OTHER.create({
-          vault,
-          wsRoot,
-          body: `[[foo#head1]]`,
-        });
-      },
+      preSetupHook: (opts) => preSetupHook(opts, { barBody: `[[foo#head1]]` }),
     }
   ),
-  // TODO: this hsould test renaming a note ref instead of checking that note ref text is still the same
-  NOTE_REF: new TestPresetEntryV4(
-    async ({ wsRoot, vaults, engine }) => {
-      return runRename({
-        wsRoot,
-        vault: vaults[0],
-        engine,
-        cb: ({ barChange, allChanged }) => {
-          return [
-            {
-              actual: allChanged.length,
-              expected: 4,
-            },
-            {
-              actual: _.trim(barChange?.note.body),
-              expected:
-                "[[baz]]\n![[dendron.pro.dendron-next-server#quickstart,1:#*]]",
-            },
-          ];
-        },
-      });
-    },
-    {
-      preSetupHook: async ({ vaults, wsRoot }) => {
-        const vault = vaults[0];
-        await NOTE_PRESETS_V4.NOTE_SIMPLE.create({
-          vault,
-          wsRoot,
-        });
-        await NOTE_PRESETS_V4.NOTE_SIMPLE.create({
-          vault,
-          wsRoot,
-          fname: "bar",
-          body: `[[foo]]\n${NOTE_BODY_PRESETS_V4.NOTE_REF}`,
-        });
-      },
-    }
-  ),
+  // NOTE_REF: new TestPresetEntryV4(
+  //   async ({ wsRoot, vaults, engine }) => {
+  //     return runRename({
+  //       wsRoot,
+  //       vaults,
+  //       engine,
+  //       cb: ({ barChange, allChanged }) => {
+  //         return [
+  //           {
+  //             actual: _.trim(barChange?.note.body),
+  //             expected:
+  //               "![[baz]]",
+  //           },
+  //         ];
+  //       },
+  //     });
+  //   },
+  //   {
+  //     preSetupHook: (opts) => preSetupHook(opts, { barBody: `![[foo]]` }),
+  //   }
+  // ),
   // TODO: doesn't work in extension test wright now
   // no way to stub diff vault
   // SAME_NAME_DIFF_VAULT: new TestPresetEntryV4(

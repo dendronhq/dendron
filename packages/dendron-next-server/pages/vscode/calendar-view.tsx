@@ -69,7 +69,7 @@ function CalendarView({ engine, ide }: DendronProps) {
   const maybeDatePortion = noteActive
     ? NoteUtils.genJournalNoteTitle({
         fname: noteActive.fname,
-        journalName: "journal", // TODO use config value `DEFAULT_JOURNAL_NAME`
+        journalName: "journal", // TODO use config value `dendron.defaultJournalName`
       })
     : undefined;
 
@@ -82,7 +82,7 @@ function CalendarView({ engine, ide }: DendronProps) {
   const onSelect: AntdCalendarProps["onSelect"] = (date) => {
     logger.info({ ctx: "onSelect", date });
     const dateKey = date.format(
-      currentMode === "month" ? "YYYY-MM-DD" : "YYYY-MM"
+      currentMode === "month" ? "YYYY-MM-DD" : "YYYY-MM" // TODO use config value `dendron.defaultJournalDateFormat`
     );
     const selectedNote: NoteProps | undefined = groupedDailyNotes[dateKey];
 

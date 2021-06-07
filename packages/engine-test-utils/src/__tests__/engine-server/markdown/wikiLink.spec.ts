@@ -295,6 +295,39 @@ describe("wikiLinks", () => {
       preSetupHook: ENGINE_HOOKS.setupBasic,
     });
 
+    const linkWithAliasHash = `[[#bar|foo]]`;
+    const WITH_ALIAS_HASH = createProcTests({
+      name: "WITH_ALIAS_HASH",
+      setupFunc: async ({ engine, vaults, extra }) => {
+        const proc = createProcForTest({
+          engine,
+          dest: extra.dest,
+          vault: vaults[0],
+        });
+        const resp = await proc.process(linkWithAliasHash);
+        return { resp, proc };
+      },
+      verifyFuncDict: {
+        [DendronASTDest.MD_DENDRON]: async ({ extra }) => {
+          const { resp } = extra;
+          await checkVFile(resp, linkWithAliasHash);
+        },
+        [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
+          const { resp } = extra;
+          await checkVFile(resp, "[#bar](foo)");
+        },
+        [DendronASTDest.HTML]: async ({ extra }) => {
+          const { resp } = extra;
+          await checkVFile(resp, '<a href="foo.html">#bar</a>');
+        },
+        [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
+          const { resp } = extra;
+          await checkVFile(resp, "[#bar](foo.md)");
+        },
+      },
+      preSetupHook: ENGINE_HOOKS.setupBasic,
+    });
+
     const WITH_ID_AS_LINK = createProcTests({
       name: "WITH_ID_AS_LINK",
       setupFunc: async ({ engine, vaults, extra }) => {
@@ -473,6 +506,7 @@ describe("wikiLinks", () => {
       ...WITH_SAME_FILE_BLOCK_ANCHOR,
       ...WITH_EXTENSION,
       ...WITH_ALIAS,
+      ...WITH_ALIAS_HASH,
       ...WITH_ID_AS_LINK,
       ...WITH_SPACE_AND_ALIAS,
       ...WITH_XVAULT_LINK_TO_SAME_VAULT,

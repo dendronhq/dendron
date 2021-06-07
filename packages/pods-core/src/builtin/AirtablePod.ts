@@ -60,32 +60,42 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
     ]);
   }
 
-  manipulateData(notes: NoteProps[]) {
-    const data: any[] = notes.map((note) => ({
-      fields: {
-        Title: `${note.title}`,
-        "Created On": `${note.created}`,
-        Notes: `${note.body}`,
-      },
-    }));
+  notesToSrcFieldMap(notes: NoteProps[], srcFieldMapping: any) {
+    const data: any[] = notes.map((note) => {
+      let fields = {};
+      for (const [key, value] of Object.entries(srcFieldMapping)) {
+        fields = {
+          ...fields,
+          [key]: _.get(note, `${value}`).toString(),
+        };
+      }
+      return { fields };
+    });
     return { records: data };
   }
 
   async processNote(opts: AirtableExportPodProcessProps) {
-    const { filteredNotes, apiKey, baseId, tableName, checkpoint } = opts;
+    const {
+      filteredNotes,
+      apiKey,
+      baseId,
+      tableName,
+      checkpoint,
+      srcFieldMapping,
+    } = opts;
     const headers = {
       Authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json",
     };
 
-    const data = this.manipulateData(filteredNotes);
-    const d = JSON.stringify(data);
-    fs.writeFileSync(checkpoint, d, { encoding: "utf8" });
+    const records = JSON.stringify(
+      this.notesToSrcFieldMap(filteredNotes, srcFieldMapping)
+    );
 
     try {
       const result = await axios.post(
         `https://api.airtable.com/v0/${baseId}/${tableName}`,
-        d,
+        records,
         { headers: headers }
       );
       if (result.status === 200) {
@@ -100,7 +110,7 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
     }
   }
 
-  fileCheck(dest: URI) {
+  verifyDir(dest: URI) {
     const basePath = path.dirname(dest.fsPath);
     const checkpoint = path.join(
       basePath,
@@ -113,7 +123,7 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
     return checkpoint;
   }
 
-  selectedNotes(notes: NoteProps[], srcHierarchy: string) {
+  filterNotes(notes: NoteProps[], srcHierarchy: string) {
     return notes.filter((note) => note.fname.includes(srcHierarchy));
   }
 
@@ -121,14 +131,13 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
     const { notes, config, dest } = opts;
     const { apiKey, baseId, tableName, srcFieldMapping, srcHierarchy } =
       config as AirtableExportConfig;
-    const checkpoint: string = this.fileCheck(dest);
+    const checkpoint: string = this.verifyDir(dest);
 
     if (_.isUndefined(srcHierarchy) || _.isEmpty(srcHierarchy)) {
       throw Error("srcHierarchy cannot be empty");
     }
-    console.log("srcHierarchy", srcHierarchy);
     let filteredNotes: NoteProps[] =
-      srcHierarchy === "root" ? notes : this.selectedNotes(notes, srcHierarchy);
+      srcHierarchy === "root" ? notes : this.filterNotes(notes, srcHierarchy);
 
     if (fs.existsSync(checkpoint)) {
       const lastUpdatedTimestamp: number = Number(

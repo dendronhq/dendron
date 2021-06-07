@@ -78,6 +78,7 @@ function CalendarView({ engine, ide }: DendronProps) {
       ? moment(maybeDatePortion)
       : undefined;
 
+  // TODO use `useCallback` to preserve identities across renders (immutable props)
   const onSelect: AntdCalendarProps["onSelect"] = (date) => {
     logger.info({ ctx: "onSelect", date });
     const dateKey = date.format(

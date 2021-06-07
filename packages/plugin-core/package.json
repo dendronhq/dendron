@@ -4,7 +4,7 @@
     "displayName": "dendron",
     "description": "Dendron is a hierarchal note taking tool that grows as you do. ",
     "publisher": "dendron",
-    "version": "0.44.1",
+    "version": "0.45.0",
     "engines": {
         "vscode": "^1.54.0"
     },
@@ -698,7 +698,7 @@
         "format": "cd ../.. && yarn format:pkg $npm_package_repository_directory"
     },
     "devDependencies": {
-        "@dendronhq/common-test-utils": "^0.44.1",
+        "@dendronhq/common-test-utils": "^0.45.0",
         "@types/execa": "^2.0.0",
         "@types/fs-extra": "^9.0.1",
         "@types/glob": "^7.1.1",
@@ -723,14 +723,14 @@
         "webpack-cli": "^3.3.12"
     },
     "dependencies": {
-        "@dendronhq/api-server": "^0.44.1",
-        "@dendronhq/common-all": "^0.44.1",
-        "@dendronhq/common-server": "^0.44.1",
-        "@dendronhq/dendron-cli": "^0.44.1",
-        "@dendronhq/engine-server": "^0.44.1",
-        "@dendronhq/engine-test-utils": "^0.44.1",
+        "@dendronhq/api-server": "^0.45.0",
+        "@dendronhq/common-all": "^0.45.0",
+        "@dendronhq/common-server": "^0.45.0",
+        "@dendronhq/dendron-cli": "^0.45.0",
+        "@dendronhq/engine-server": "^0.45.0",
+        "@dendronhq/engine-test-utils": "^0.45.0",
         "@dendronhq/lsp-server": "^0.28.7-alpha.0",
-        "@dendronhq/pods-core": "^0.44.1",
+        "@dendronhq/pods-core": "^0.45.0",
         "@types/vscode": "1.54",
         "cross-path-sort": "^1.0.0",
         "execa": "^4.0.2",

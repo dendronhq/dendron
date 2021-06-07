@@ -427,6 +427,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "ElliotPsyIT",
+      "name": "elliotfielstein",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1060159?v=4",
+      "profile": "https://github.com/ElliotPsyIT",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

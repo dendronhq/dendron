@@ -24,11 +24,11 @@ type AntdCalendarProps = CalendarProps<Moment>;
 function toLookup(notes: NoteProps[]): Record<string, NoteProps> {
   const notesLookup = Object.fromEntries(
     notes.map((note) => {
-      const dateKey = NoteUtils.genJournalNoteTitle({
+      const maybeDatePortion = NoteUtils.genJournalNoteTitle({
         fname: note.fname,
         journalName: "journal",
       });
-      return [dateKey, note];
+      return [maybeDatePortion, note];
     })
   );
   return notesLookup;
@@ -49,8 +49,7 @@ function CalendarView({ engine, ide }: DendronProps) {
   const [currentMode, setCurrentMode] =
     useState<AntdCalendarProps["mode"]>("month");
 
-  const { notes } = engine;
-  const { vaults } = engine;
+  const { notes, vaults, config } = engine;
   const { noteActive } = ide;
   const currentVault = 0; // TODO selected correct vault
 
@@ -65,10 +64,12 @@ function CalendarView({ engine, ide }: DendronProps) {
   // create lookup table for faster search
   const groupedDailyNotes = toLookup(dailyNotes); // TODO memoize
 
+  logger.info(groupedDailyNotes);
+
   const maybeDatePortion = noteActive
     ? NoteUtils.genJournalNoteTitle({
         fname: noteActive.fname,
-        journalName: "journal",
+        journalName: "journal", // TODO use config value `DEFAULT_JOURNAL_NAME`
       })
     : undefined;
 
@@ -82,15 +83,16 @@ function CalendarView({ engine, ide }: DendronProps) {
     const dateKey = date.format(
       currentMode === "month" ? "YYYY-MM-DD" : "YYYY-MM"
     );
-    const selectedNote = groupedDailyNotes[dateKey];
+    const selectedNote: NoteProps | undefined = groupedDailyNotes[dateKey];
 
-    if (selectedNote) {
-      postVSCodeMessage({
-        type: CalendarViewMessageType.onSelect,
-        data: { id: selectedNote.id },
-        source: DMessageSource.webClient,
-      });
-    }
+    postVSCodeMessage({
+      type: CalendarViewMessageType.onSelect,
+      data: {
+        id: selectedNote?.id,
+        fname: `daily.journal.${date.format("YYYY.MM.DD")}`,
+      },
+      source: DMessageSource.webClient,
+    });
   };
 
   const onPanelChange: AntdCalendarProps["onPanelChange"] = (date, mode) => {

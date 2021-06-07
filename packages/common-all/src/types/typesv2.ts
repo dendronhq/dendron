@@ -531,7 +531,7 @@ export type GraphViewMessage = DMessage<GraphViewMessageType, { id: string }>;
 
 export type CalendarViewMessage = DMessage<
   CalendarViewMessageType,
-  { id: string }
+  { id?: string; fname?: string }
 >;
 
 // --- Views

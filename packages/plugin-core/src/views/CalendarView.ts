@@ -13,6 +13,7 @@ import { WebViewUtils } from "./utils";
 import { VSCodeUtils } from "../utils";
 import { DendronWorkspace, getEngine, getWS } from "../workspace";
 import { GotoNoteCommand } from "../commands/GotoNote";
+import { CreateDailyJournalCommand } from "../commands/CreateDailyJournal";
 import { Logger } from "../logger";
 
 export class CalendarView implements vscode.WebviewViewProvider {
@@ -69,11 +70,18 @@ export class CalendarView implements vscode.WebviewViewProvider {
         Logger.info({ ctx: "onDidReceiveMessage", data: msg });
         switch (msg.type) {
           case CalendarViewMessageType.onSelect: {
-            const note = getEngine().notes[msg.data.id];
-            await new GotoNoteCommand().execute({
-              qs: note.fname,
-              vault: note.vault,
-            });
+            console.log("onDidReceiveMessage:onSelect:data", msg.data);
+            if (msg.data.id) {
+              const note = getEngine().notes[msg.data.id];
+              await new GotoNoteCommand().execute({
+                qs: note.fname,
+                vault: note.vault,
+              });
+            } else if (msg.data.fname) {
+              await new CreateDailyJournalCommand().execute({
+                fname: msg.data.fname,
+              });
+            }
             break;
           }
           default:

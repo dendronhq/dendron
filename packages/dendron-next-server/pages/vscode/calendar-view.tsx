@@ -57,8 +57,8 @@ function CalendarView({ engine, ide }: DendronProps) {
     (notes) => notes.vault.fsPath === vaults?.[currentVault].fsPath
   );
 
-  const dailyNotes = vaultNotes.filter((note) =>
-    note.fname.startsWith("daily.")
+  const dailyNotes = vaultNotes.filter(
+    (note) => note.fname.startsWith("daily.") // TODO replace "daily." with value from `dendron.dailyJournalDomain`
   );
 
   const groupedDailyNotes = toLookup(dailyNotes); // create lookup table for faster search

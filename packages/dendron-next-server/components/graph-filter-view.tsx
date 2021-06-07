@@ -41,7 +41,9 @@ const GraphFilterView = ({ type, config, setField }: FilterProps) => {
                 .filter(([key]) => key.includes(section))
                 .map(([key, entry]) => {
                   const keyArray = key.split(".");
-                  const label = _.capitalize(keyArray[keyArray.length - 1]);
+                  const label =
+                    entry?.label ||
+                    `${_.capitalize(keyArray[keyArray.length - 1])}`;
 
                   return (
                     <Space
@@ -86,24 +88,6 @@ const GraphFilterView = ({ type, config, setField }: FilterProps) => {
             </Space>
           </Panel>
         ))}
-        {/* {type === 'note' && (
-          <Panel header="Display" key="1">
-            <Space direction="vertical">
-              <Space direction="horizontal">
-                <Switch checked={config.display.hierarchy} onChange={(v) => setField('display.hierarchy', v)} />
-                <Typography>Hierarchy</Typography>
-              </Space>
-              <Space direction="horizontal" >
-                <Switch checked={config.display.links} onChange={(v) => setField('display.links', v)} />
-                <Typography>Links</Typography>
-              </Space>
-            </Space>
-          </Panel>
-        )}
-        <Panel header="Information" key="2">
-          <Typography>Nodes: {config['information.nodes']}</Typography>
-          <Typography>Edges: {config['information.edges']}</Typography>
-        </Panel> */}
       </Collapse>
     </div>
   );

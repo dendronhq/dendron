@@ -42,6 +42,7 @@ const getCytoscapeStyle = (themes: any, theme: string | undefined) => {
 type GraphConfigItem<T> = {
   value: T;
   mutable: boolean;
+  label?: string;
 };
 
 type CoreGraphConfig = {
@@ -58,6 +59,10 @@ type SchemaGraphConfig = {};
 export type GraphConfig = CoreGraphConfig & NoteGraphConfig & SchemaGraphConfig;
 
 const coreGraphConfig: CoreGraphConfig = {
+  "filter.regex": {
+    value: "",
+    mutable: true,
+  },
   "information.nodes": {
     value: 0,
     mutable: false,
@@ -65,10 +70,6 @@ const coreGraphConfig: CoreGraphConfig = {
   "information.edges": {
     value: 0,
     mutable: false,
-  },
-  "filter.regex": {
-    value: "",
-    mutable: true,
   },
 };
 

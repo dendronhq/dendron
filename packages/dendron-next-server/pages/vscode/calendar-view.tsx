@@ -12,6 +12,7 @@ import {
   NoteProps,
 } from "@dendronhq/common-all";
 import type { Moment } from "moment";
+import moment from "moment";
 import { Calendar } from "antd";
 import type { CalendarProps } from "antd";
 import _ from "lodash";
@@ -61,16 +62,20 @@ function CalendarView({ engine, ide }: DendronProps) {
     (note) => note.fname.startsWith("daily.") // TODO replace "daily." with value from `dendron.dailyJournalDomain`
   );
 
-  const groupedDailyNotes = toLookup(dailyNotes); // create lookup table for faster search
+  // create lookup table for faster search
+  const groupedDailyNotes = toLookup(dailyNotes); // TODO memoize
 
-  if (noteActive) {
-    const xxx = NoteUtils.genJournalNoteTitle({
-      fname: noteActive.fname,
-      journalName: "journal",
-    });
+  const maybeDatePortion = noteActive
+    ? NoteUtils.genJournalNoteTitle({
+        fname: noteActive.fname,
+        journalName: "journal",
+      })
+    : undefined;
 
-    console.log("Active NOTE: ", noteActive, groupedDailyNotes[xxx]);
-  }
+  const activeDate =
+    maybeDatePortion && groupedDailyNotes[maybeDatePortion]
+      ? moment(maybeDatePortion)
+      : undefined;
 
   const onSelect: AntdCalendarProps["onSelect"] = (date) => {
     logger.info({ ctx: "onSelect", date });
@@ -98,6 +103,7 @@ function CalendarView({ engine, ide }: DendronProps) {
       mode={currentMode}
       onSelect={onSelect}
       onPanelChange={onPanelChange}
+      value={activeDate}
     />
   );
 }

@@ -9,6 +9,7 @@ import { useThemeSwitcher } from "react-css-theme-switcher";
 import { Space, Typography } from "antd";
 import Head from "next/head";
 import AntThemes from "../styles/theme-antd";
+import GraphFilterView from "./graph-filter-view";
 
 const getCytoscapeStyle = (themes: any, theme: string | undefined) => {
   if (_.isUndefined(theme)) return "";
@@ -38,6 +39,52 @@ const getCytoscapeStyle = (themes: any, theme: string | undefined) => {
 `;
 };
 
+type GraphConfigItem<T> = {
+  value: T;
+  mutable: boolean;
+};
+
+type CoreGraphConfig = {
+  "information.nodes": GraphConfigItem<number>;
+  "information.edges": GraphConfigItem<number>;
+  "filter.regex": GraphConfigItem<string>;
+};
+type NoteGraphConfig = {
+  "display.hierarchy"?: GraphConfigItem<boolean>;
+  "display.links"?: GraphConfigItem<boolean>;
+};
+type SchemaGraphConfig = {};
+
+export type GraphConfig = CoreGraphConfig & NoteGraphConfig & SchemaGraphConfig;
+
+const coreGraphConfig: CoreGraphConfig = {
+  "information.nodes": {
+    value: 0,
+    mutable: false,
+  },
+  "information.edges": {
+    value: 0,
+    mutable: false,
+  },
+  "filter.regex": {
+    value: "",
+    mutable: true,
+  },
+};
+
+const noteGraphConfig: NoteGraphConfig = {
+  "display.hierarchy": {
+    value: true,
+    mutable: true,
+  },
+  "display.links": {
+    value: false,
+    mutable: true,
+  },
+};
+
+const schemaGraphConfig: SchemaGraphConfig = {};
+
 export default function Graph({
   elements,
   type = "note",
@@ -47,13 +94,33 @@ export default function Graph({
   onSelect: EventHandler;
   type?: "note" | "schema";
 }) {
-  const router = useRouter();
-
   const logger = createLogger("Graph");
   const graphRef = useRef<HTMLDivElement>(null);
-  const { switcher, themes, currentTheme, status } = useThemeSwitcher();
+  const { themes, currentTheme } = useThemeSwitcher();
 
   const [cy, setCy] = useState<Core>();
+
+  const [config, setConfig] = useState<GraphConfig>({
+    ...(type === "note" ? noteGraphConfig : schemaGraphConfig),
+    ...coreGraphConfig,
+  });
+
+  const handleUpdateConfig = (
+    key: string,
+    value: string | number | boolean
+  ) => {
+    logger.log(key, value);
+    setConfig({
+      ...config,
+      [key]: {
+        // @ts-ignore
+        ...config[key],
+        value,
+      },
+    });
+  };
+
+  logger.log(config);
 
   useEffect(() => {
     if (graphRef.current && elements) {
@@ -117,6 +184,22 @@ export default function Graph({
     }
   }, [graphRef, elements]);
 
+  useEffect(() => {
+    if (elements) {
+      setConfig((c) => ({
+        ...c,
+        "information.nodes": {
+          value: elements.nodes.length,
+          mutable: false,
+        },
+        "information.edges": {
+          value: elements.edges.length,
+          mutable: false,
+        },
+      }));
+    }
+  }, [elements]);
+
   return (
     <>
       <Head>
@@ -130,6 +213,11 @@ export default function Graph({
           position: "relative",
         }}
       >
+        <GraphFilterView
+          type={type}
+          config={config}
+          setField={handleUpdateConfig}
+        />
         <div
           ref={graphRef}
           style={{
@@ -137,21 +225,7 @@ export default function Graph({
             height: "100%",
             zIndex: 1,
           }}
-        ></div>
-        {elements && (
-          <Space
-            style={{
-              position: "absolute",
-              bottom: 8,
-              right: 8,
-              zIndex: 2,
-            }}
-            direction="vertical"
-          >
-            <Typography.Text>Nodes: {elements.nodes.length}</Typography.Text>
-            <Typography.Text>Edges: {elements.edges.length}</Typography.Text>
-          </Space>
-        )}
+        />
       </div>
     </>
   );

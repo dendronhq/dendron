@@ -1,12 +1,12 @@
 import fs from "fs-extra";
 import _ from "lodash";
-import axios from "axios";
 import { ExportPod, ExportPodPlantOpts } from "../basev3";
 import { ExportPodConfig } from "../basev3";
 import { Time } from "@dendronhq/common-all";
 import { NoteProps } from "packages/common-all/src/types";
 import path from "path";
 import { URI } from "vscode-uri";
+import Airtable from "airtable";
 
 const ID = "dendron.airtable";
 
@@ -71,7 +71,7 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
       }
       return { fields };
     });
-    return { records: data };
+    return data;
   }
 
   async processNote(opts: AirtableExportPodProcessProps) {
@@ -83,29 +83,19 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
       checkpoint,
       srcFieldMapping,
     } = opts;
-    const headers = {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    };
 
-    const records = JSON.stringify(
-      this.notesToSrcFieldMap(filteredNotes, srcFieldMapping)
-    );
+    const records = this.notesToSrcFieldMap(filteredNotes, srcFieldMapping);
+    const base = new Airtable({ apiKey }).base(baseId);
 
     try {
-      const result = await axios.post(
-        `https://api.airtable.com/v0/${baseId}/${tableName}`,
-        records,
-        { headers: headers }
-      );
-      if (result.status === 200) {
+      const result = await base(tableName).create(records);
+      if (result) {
         const timestamp = Time.now().toMillis();
         fs.writeFileSync(checkpoint, timestamp.toString(), {
           encoding: "utf8",
         });
       }
     } catch (error) {
-      console.log(error);
       throw Error(error);
     }
   }

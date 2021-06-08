@@ -1,5 +1,6 @@
 import { Typography, Collapse, Switch, Space, InputNumber, Input } from "antd";
 import _, { values } from "lodash";
+import { useThemeSwitcher } from "react-css-theme-switcher";
 import { GraphConfig } from "../lib/graph";
 const { Panel } = Collapse;
 
@@ -33,7 +34,6 @@ const GraphFilterView = ({ config, setConfig }: FilterProps) => {
         position: "absolute",
         top: "1rem",
         left: "1rem",
-        background: "#F5F6F8",
         borderRadius: 4,
         zIndex: 10,
         minWidth: "12rem",

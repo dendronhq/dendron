@@ -67,9 +67,11 @@ function CalendarView({ engine, ide }: DendronProps) {
   const { notes, vaults } = engine;
   const { noteActive } = ide;
 
+  // TODO build `groupedDailyNotes` to contain multi-vault daily notes so that it does not get recalculated after changes in `noteActive.vault`
+  // this will fix non-visible worddots when opening workspace without active note.
   const groupedDailyNotes = useMemo(() => {
     if (noteActive && engineInitialized) {
-      const currentVault = noteActive?.vault; // TODO build `groupedDailyNotes` to contain multi-vault daily notes
+      const currentVault = noteActive?.vault;
 
       const vaultNotes = _.values(notes).filter(
         (notes) => notes.vault.fsPath === currentVault?.fsPath

@@ -22,17 +22,18 @@ import { DendronProps } from "../../lib/types";
 
 type AntdCalendarProps = CalendarProps<Moment>;
 
+function getMaybeDatePortion({ fname }: NoteProps, journalName: string) {
+  const journalIndex = fname.indexOf(journalName);
+  return fname.slice(journalIndex + journalName.length + 1);
+}
+
 function toLookup(
   notes: NoteProps[],
   journalName: string
 ): Record<string, NoteProps> {
   const notesLookup = Object.fromEntries(
     notes.map((note) => {
-      const { fname } = note;
-      const journalIndex = fname.indexOf(journalName);
-      const maybeDatePortion = fname.slice(
-        journalIndex + journalName.length + 1
-      );
+      const maybeDatePortion = getMaybeDatePortion(note, journalName);
       return [maybeDatePortion, note];
     })
   );
@@ -53,7 +54,8 @@ function CalendarView({ engine, ide }: DendronProps) {
     ide,
   });
 
-  const wordsPerDot: number = 250; // TODO make configurable
+  const maxDots: number = 5;
+  const wordsPerDot: number = 250;
   const dailyJournalDomain = "daily"; // TODO replace "daily." with value from `dendron.dailyJournalDomain`
   const defaultJournalName = "journal"; // TODO use config value `dendron.defaultJournalName`
   const defaultJournalDateFormat = "y.MM.DD"; // TODO use config value `dendron.defaultJournalDateFormat`
@@ -65,9 +67,9 @@ function CalendarView({ engine, ide }: DendronProps) {
   const { notes, vaults } = engine;
   const { noteActive } = ide;
 
-  const [activeDate, groupedDailyNotes] = useMemo(() => {
+  const groupedDailyNotes = useMemo(() => {
     if (noteActive && engineInitialized) {
-      const currentVault = noteActive?.vault;
+      const currentVault = noteActive?.vault; // TODO build `groupedDailyNotes` to contain multi-vault daily notes
 
       const vaultNotes = _.values(notes).filter(
         (notes) => notes.vault.fsPath === currentVault?.fsPath
@@ -77,27 +79,23 @@ function CalendarView({ engine, ide }: DendronProps) {
         note.fname.startsWith(`${dailyJournalDomain}.`)
       );
 
-      // create lookup table for faster search
-      const groupedDailyNotes = toLookup(dailyNotes, defaultJournalName);
-
-      logger.info(groupedDailyNotes);
-
-      const maybeDatePortion = noteActive
-        ? NoteUtils.genJournalNoteTitle({
-            fname: noteActive.fname,
-            journalName: defaultJournalName,
-          })
-        : undefined;
-
-      const activeDate =
-        maybeDatePortion && groupedDailyNotes[maybeDatePortion]
-          ? moment(maybeDatePortion)
-          : undefined;
-
-      return [activeDate, groupedDailyNotes];
+      return toLookup(dailyNotes, defaultJournalName);
     }
-    return [undefined, {}];
-  }, [engineInitialized, noteActive, notes, vaults]);
+    return {};
+  }, [noteActive]);
+
+  const activeDate = useMemo(() => {
+    if (noteActive) {
+      const maybeDatePortion = getMaybeDatePortion(
+        noteActive,
+        defaultJournalName
+      );
+
+      return maybeDatePortion && groupedDailyNotes[maybeDatePortion]
+        ? moment(maybeDatePortion)
+        : undefined;
+    }
+  }, [noteActive, groupedDailyNotes]);
 
   const getDateKey = useCallback(
     (date: Moment) => {
@@ -142,33 +140,27 @@ function CalendarView({ engine, ide }: DendronProps) {
     (date) => {
       const dateKey = getDateKey(date);
       const selectedNote: NoteProps | undefined = groupedDailyNotes[dateKey];
-      if (selectedNote) {
-        return (
-          <Space size={0} wrap>
-            {_.times(
-              _.clamp(
-                !!wordsPerDot
-                  ? Math.floor(
-                      selectedNote.body.split(" ").length / wordsPerDot
-                    )
-                  : 0,
-                0,
-                5
-              ),
-              () => (
-                <Badge
-                  dot
-                  color={
-                    "#00adb5" /* color copied from packages/dendron-next-server/assets/themes/dark-theme.less */
-                  }
-                />
-              )
-            )}
-          </Space>
-        );
-      }
-
-      return null;
+      return (
+        <Space size={0} wrap>
+          {_.times(
+            _.clamp(
+              !!wordsPerDot
+                ? Math.floor(selectedNote?.body.split(" ").length / wordsPerDot)
+                : 0,
+              0,
+              maxDots
+            ),
+            () => (
+              <Badge
+                dot
+                color={
+                  "#00adb5" /* color copied from packages/dendron-next-server/assets/themes/dark-theme.less */
+                }
+              />
+            )
+          )}
+        </Space>
+      );
     },
     [groupedDailyNotes, wordsPerDot]
   );

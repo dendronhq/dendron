@@ -21,35 +21,47 @@ export class CalendarView implements vscode.WebviewViewProvider {
   private _view?: vscode.WebviewView;
 
   constructor() {
-    DendronWorkspace.instance().addDisposable(
+    const dendronWorkspace = DendronWorkspace.instance();
+    dendronWorkspace.addDisposable(
       vscode.window.onDidChangeActiveTextEditor(
         this.handleActiveTextEditorChange,
         this
       )
     );
+    dendronWorkspace.addDisposable(
+      vscode.workspace.onDidSaveTextDocument(this.handleSaveTextDocument, this)
+    );
+  }
+
+  openTextDocument(document: vscode.TextDocument) {
+    const ctx = "CalendarView:openTextDocument";
+    if (!getWS().workspaceService?.isPathInWorkspace(document.uri.fsPath)) {
+      Logger.info({
+        ctx,
+        uri: document.uri.fsPath,
+        msg: "not in workspace",
+      });
+      return;
+    }
+    const note = VSCodeUtils.getNoteFromDocument(document);
+    if (note) {
+      Logger.info({
+        ctx,
+        msg: "refresh note",
+        note: NoteUtils.toLogObj(note),
+      });
+      this.refresh(note);
+    }
+  }
+
+  async handleSaveTextDocument(document: vscode.TextDocument) {
+    this.openTextDocument(document); // TODO optimize for only daily notes
   }
 
   async handleActiveTextEditorChange() {
-    const ctx = "CalendarView:handleActiveTextEditorChange";
     const document = VSCodeUtils.getActiveTextEditor()?.document;
     if (document) {
-      if (!getWS().workspaceService?.isPathInWorkspace(document.uri.fsPath)) {
-        Logger.info({
-          ctx,
-          uri: document.uri.fsPath,
-          msg: "not in workspace",
-        });
-        return;
-      }
-      const note = VSCodeUtils.getNoteFromDocument(document);
-      if (note) {
-        Logger.info({
-          ctx,
-          msg: "refresh note",
-          note: NoteUtils.toLogObj(note),
-        });
-        this.refresh(note);
-      }
+      this.openTextDocument(document);
     }
   }
 

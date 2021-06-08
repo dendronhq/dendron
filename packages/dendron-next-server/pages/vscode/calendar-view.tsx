@@ -22,13 +22,17 @@ import { DendronProps } from "../../lib/types";
 
 type AntdCalendarProps = CalendarProps<Moment>;
 
-function toLookup(notes: NoteProps[]): Record<string, NoteProps> {
+function toLookup(
+  notes: NoteProps[],
+  journalName: string
+): Record<string, NoteProps> {
   const notesLookup = Object.fromEntries(
     notes.map((note) => {
-      const maybeDatePortion = NoteUtils.genJournalNoteTitle({
-        fname: note.fname,
-        journalName: "journal",
-      });
+      const { fname } = note;
+      const journalIndex = fname.indexOf(journalName);
+      const maybeDatePortion = fname.slice(
+        journalIndex + journalName.length + 1
+      );
       return [maybeDatePortion, note];
     })
   );
@@ -50,6 +54,9 @@ function CalendarView({ engine, ide }: DendronProps) {
   });
 
   const wordsPerDot: number = 250; // TODO make configurable
+  const dailyJournalDomain = "daily"; // TODO replace "daily." with value from `dendron.dailyJournalDomain`
+  const defaultJournalName = "journal"; // TODO use config value `dendron.defaultJournalName`
+  const defaultJournalDateFormat = "y.MM.DD"; // TODO use config value `dendron.defaultJournalDateFormat`
 
   const [currentMode, setCurrentMode] =
     useState<AntdCalendarProps["mode"]>("month");
@@ -66,19 +73,19 @@ function CalendarView({ engine, ide }: DendronProps) {
         (notes) => notes.vault.fsPath === currentVault?.fsPath
       );
 
-      const dailyNotes = vaultNotes.filter(
-        (note) => note.fname.startsWith("daily.") // TODO replace "daily." with value from `dendron.dailyJournalDomain`
+      const dailyNotes = vaultNotes.filter((note) =>
+        note.fname.startsWith(`${dailyJournalDomain}.`)
       );
 
       // create lookup table for faster search
-      const groupedDailyNotes = toLookup(dailyNotes);
+      const groupedDailyNotes = toLookup(dailyNotes, defaultJournalName);
 
       logger.info(groupedDailyNotes);
 
       const maybeDatePortion = noteActive
         ? NoteUtils.genJournalNoteTitle({
             fname: noteActive.fname,
-            journalName: "journal", // TODO use config value `dendron.defaultJournalName`
+            journalName: defaultJournalName,
           })
         : undefined;
 
@@ -92,11 +99,14 @@ function CalendarView({ engine, ide }: DendronProps) {
     return [undefined, {}];
   }, [engineInitialized, noteActive, notes, vaults]);
 
-  const getDateKey = (date: Moment) => {
-    return date.format(
-      currentMode === "month" ? "YYYY-MM-DD" : "YYYY-MM" // TODO use config value `dendron.defaultJournalDateFormat`
-    );
-  };
+  const getDateKey = useCallback(
+    (date: Moment) => {
+      return date.format(
+        currentMode === "month" ? defaultJournalDateFormat : "y.MM" // TODO compute format for currentMode="year"
+      );
+    },
+    [currentMode, defaultJournalDateFormat]
+  );
 
   const onSelect = useCallback<
     Exclude<AntdCalendarProps["onSelect"], undefined>
@@ -110,7 +120,7 @@ function CalendarView({ engine, ide }: DendronProps) {
         type: CalendarViewMessageType.onSelect,
         data: {
           id: selectedNote?.id,
-          fname: `daily.journal.${date.format("YYYY.MM.DD")}`,
+          fname: `daily.journal.${dateKey}`,
         },
         source: DMessageSource.webClient,
       });

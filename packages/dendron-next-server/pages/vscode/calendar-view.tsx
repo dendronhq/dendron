@@ -51,10 +51,10 @@ function CalendarView({ engine, ide }: DendronProps) {
 
   const { notes, vaults, config } = engine;
   const { noteActive } = ide;
-  const currentVault = 0; // TODO selected correct vault
+  const currentVault = noteActive?.vault;
 
   const vaultNotes = _.values(notes).filter(
-    (notes) => notes.vault.fsPath === vaults?.[currentVault].fsPath
+    (notes) => notes.vault.fsPath === currentVault?.fsPath
   );
 
   const dailyNotes = vaultNotes.filter(

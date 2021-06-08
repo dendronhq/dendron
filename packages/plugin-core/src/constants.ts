@@ -227,6 +227,13 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     group: "notes",
     desc: "Insert note link",
   },
+  COPY_BLOCK_REFERENCE: {
+    key: "dendron.copyBlockReference",
+    title: `${CMD_PREFIX} Copy Block Reference`,
+    group: "notes",
+    desc: "Insert a block anchor to the end of the selected line, or around the selected block. Then copy the link to it.",
+    when: `editorHasSelection && ${DendronContext.PLUGIN_ACTIVE}`,
+  },
   MOVE_NOTE: {
     key: "dendron.moveNote",
     title: `${CMD_PREFIX} Move Note`,

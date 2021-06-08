@@ -51,6 +51,7 @@ import { UpgradeSettingsCommand } from "./UpgradeSettings";
 import { VaultAddCommand } from "./VaultAddCommand";
 import { VaultRemoveCommand } from "./VaultRemoveCommand";
 import { RandomNoteCommand } from "./RandomNote";
+import { CopyBlockReferenceCommand } from "./CopyBlockReferenceCommand";
 
 const ALL_COMMANDS = [
   AddAndCommit,
@@ -63,6 +64,7 @@ const ALL_COMMANDS = [
   CopyNoteLinkCommand,
   CopyNoteRefCommand,
   CopyNoteURLCommand,
+  CopyBlockReferenceCommand,
   CreateDailyJournalCommand,
   CreateHookCommand,
   DeleteHookCommand,

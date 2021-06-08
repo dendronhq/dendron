@@ -507,6 +507,14 @@ export class DendronClientUtilsV2 {
     }
     return smod;
   };
+
+  static useVaultPrefix(engine: DEngineClient) {
+    const noXVaultLink = engine.config.noXVaultWikiLink;
+    const useVaultPrefix =
+      _.size(engine.vaults) > 1 &&
+      (_.isBoolean(noXVaultLink) ? !noXVaultLink : true);
+    return useVaultPrefix;
+  }
 }
 
 export const clipboard = vscode.env.clipboard;

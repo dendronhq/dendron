@@ -476,22 +476,33 @@ export class NoteUtils {
     return stubNodes;
   }
 
+  /**
+   *
+   * @param headerRaw If true, use the header without transforming it. Otherwise, the header will be slugged.
+   * @returns
+   */
   static createWikiLink(opts: {
     note: NoteProps;
     header?: string;
+    headerRaw?: boolean;
     useVaultPrefix?: boolean;
     useTitle?: boolean;
   }): string {
-    const { note, header, useVaultPrefix, useTitle } = _.defaults(opts, {
-      useTitle: true,
-    });
+    const { note, header, headerRaw, useVaultPrefix, useTitle } = _.defaults(
+      opts,
+      {
+        useTitle: true,
+      }
+    );
     let { title, fname, vault } = note;
     let suffix = "";
     const slugger = getSlugger();
-    if (header) {
+    if (header && !headerRaw) {
       suffix = "#" + slugger.slug(header);
+    } else if (header) {
+      suffix = `#${header}`;
     }
-    if (header) {
+    if (header && !headerRaw) {
       title = header;
     }
     const vaultPrefix = useVaultPrefix

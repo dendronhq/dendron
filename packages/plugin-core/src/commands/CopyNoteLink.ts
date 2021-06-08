@@ -3,7 +3,7 @@ import _ from "lodash";
 import { TextEditor, window } from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
-import { clipboard, VSCodeUtils } from "../utils";
+import { clipboard, DendronClientUtilsV2, VSCodeUtils } from "../utils";
 import { getHeaderFromSelection } from "../utils/editor";
 import { DendronWorkspace, getEngine } from "../workspace";
 import { BasicCommand } from "./base";
@@ -44,11 +44,11 @@ export class CopyNoteLinkCommand extends BasicCommand<
       throw Error(`${fname} not found in engine`);
     }
     const { header } = getHeaderFromSelection({ clean: true });
-    const noXVaultLink = getEngine().config.noXVaultWikiLink;
-    const useVaultPrefix =
-      _.size(getEngine().vaults) > 1 &&
-      (_.isBoolean(noXVaultLink) ? !noXVaultLink : true);
-    const link = NoteUtils.createWikiLink({ note, header, useVaultPrefix });
+    const link = NoteUtils.createWikiLink({
+      note,
+      header,
+      useVaultPrefix: DendronClientUtilsV2.useVaultPrefix(getEngine()),
+    });
     try {
       clipboard.writeText(link);
     } catch (err) {

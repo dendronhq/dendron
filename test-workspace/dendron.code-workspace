@@ -1,0 +1,41 @@
+{
+    "folders": [
+        {
+            "path": "vault2",
+            "visibility": "private"
+        },
+        {
+            "path": "vault"
+        }
+    ],
+    "settings": {
+        "dendron.rootDir": ".",
+        "files.autoSave": "onFocusChange",
+        "pasteImage.path": "${currentFileDir}/assets/images",
+        "pasteImage.prefix": "/",
+        "markdown-preview-enhanced.enableWikiLinkSyntax": true,
+        "markdown-preview-enhanced.wikiLinkFileExtension": ".md",
+        "editor.snippetSuggestions": "inline",
+        "editor.suggest.snippetsPreventQuickSuggestions": false,
+        "editor.suggest.showSnippets": true,
+        "editor.tabCompletion": "on",
+        "dendron.logLevel": "debug",
+        "gitdoc.enabled": false
+    },
+    "extensions": {
+        "recommendations": [
+            "dendron.dendron-paste-image",
+            "equinusocio.vsc-material-theme",
+            "dendron.dendron-markdown-shortcuts",
+            "dendron.dendron-markdown-preview-enhanced",
+            "dendron.dendron-markdown-links",
+            "github.github-vscode-theme"
+        ],
+        "unwantedRecommendations": [
+            "dendron.dendron-markdown-notes",
+            "shd101wyy.markdown-preview-enhanced",
+            "kortina.vscode-markdown-notes",
+            "mushan.vscode-paste-image"
+        ]
+    }
+}

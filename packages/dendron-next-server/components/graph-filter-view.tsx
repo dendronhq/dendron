@@ -1,12 +1,4 @@
-import {
-  Typography,
-  Collapse,
-  Switch,
-  Space,
-  InputNumber,
-  Divider,
-  Input,
-} from "antd";
+import { Typography, Collapse, Switch, Space, InputNumber, Input } from "antd";
 import _, { values } from "lodash";
 import { GraphConfig } from "./graph";
 const { Panel } = Collapse;

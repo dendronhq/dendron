@@ -10,14 +10,17 @@ import {
   DMessageSource,
   GraphViewMessage,
   GraphViewMessageType,
+  NoteUtils,
 } from "@dendronhq/common-all";
 import Graph from "../../components/graph";
+import { useRouter } from "next/router";
 
 export default function FullNoteGraph({
   engine,
 }: {
   engine: engineSlice.EngineState;
 }) {
+  const router = useRouter();
   const notes = engine ? engine.notes || {} : {};
 
   const logger = createLogger("Graph");
@@ -50,27 +53,27 @@ export default function FullNoteGraph({
         const linkConnections: EdgeDefinition[] = [];
 
         // Find and add linked notes
-        // note.links.forEach((link) => {
-        //   if (link.to && note.id) {
-        //     const to = NoteUtils.getNoteByFnameV5({
-        //       fname: link.to!.fname as string,
-        //       vault: note.vault,
-        //       notes: notes,
-        //       wsRoot: router.query.ws as string,
-        //     });
+        note.links.forEach((link) => {
+          if (link.to && note.id) {
+            const to = NoteUtils.getNoteByFnameV5({
+              fname: link.to!.fname as string,
+              vault: note.vault,
+              notes: notes,
+              wsRoot: router.query.ws as string,
+            });
 
-        //     if (!to) return;
-        //     linkConnections.push({
-        //       data: {
-        //         group: 'edges',
-        //         id: `${note.id}_${to.id}`,
-        //         source: note.id,
-        //         target: to.id,
-        //       },
-        //       classes: 'link'
-        //     });
-        //   }
-        // });
+            if (!to) return;
+            linkConnections.push({
+              data: {
+                group: "edges",
+                id: `${note.id}_${to.id}`,
+                source: note.id,
+                target: to.id,
+              },
+              classes: "link",
+            });
+          }
+        });
 
         return [...childConnections, ...linkConnections];
       })

@@ -36,8 +36,37 @@ const getCytoscapeStyle = (themes: any, theme: string | undefined) => {
     background-color: ${AntThemes[theme].graph.node._selected.color};
     color: ${AntThemes[theme].graph.node._selected.color};
   }
+
+  .link {
+    line-style: dashed;
+  }
 `;
 };
+
+const getEulerConfig = (isLargeGraph: boolean) => ({
+  name: "euler",
+  // @ts-ignore
+  springLength: () => 80,
+  springCoeff: () => 0.0008,
+  mass: () => 4,
+  gravity: -1.2,
+  pull: 0.0001,
+  theta: 0.666,
+  dragCoeff: 0.02,
+  movementThreshold: 1,
+  timeStep: 20,
+  refresh: 10,
+  animate: !isLargeGraph,
+  animationDuration: undefined,
+  animationEasing: undefined,
+  maxIterations: 1000,
+  maxSimulationTime: 2000,
+  ungrabifyWhileSimulating: false,
+  fit: true,
+  padding: 30,
+  boundingBox: undefined,
+  randomize: false,
+});
 
 type GraphConfigItem<T> = {
   value: T;
@@ -111,24 +140,23 @@ export default function Graph({
     value: string | number | boolean
   ) => {
     logger.log(key, value);
-    setConfig({
-      ...config,
-      [key]: {
-        // @ts-ignore
-        ...config[key],
-        value,
-      },
+    setConfig((c) => {
+      const newConfig = {
+        ...c,
+        [key]: {
+          // @ts-ignore
+          ...c[key],
+          value,
+        },
+      };
+      renderGraph(newConfig);
+      return newConfig;
     });
   };
 
-  logger.log(config);
-
-  useEffect(() => {
+  const renderGraph = (graphConfig?: GraphConfig) => {
+    graphConfig = graphConfig || config;
     if (graphRef.current && elements) {
-      // If the graph already has rendered elements, don't re-render
-      // Otherwise, the graph re-renders when elements are selected
-      if (cy && cy.elements("*").length > 1) return;
-
       const isLargeGraph = elements.nodes.length + elements.edges.length > 1000;
 
       logger.log("Rendering graph...");
@@ -138,7 +166,7 @@ export default function Graph({
 
       const network = cytoscape({
         container: graphRef.current,
-        elements,
+        elements: parseElements(elements, graphConfig),
         style: getCytoscapeStyle(themes, currentTheme) as any,
 
         // Zoom levels
@@ -151,38 +179,40 @@ export default function Graph({
         hideLabelsOnViewport: isLargeGraph,
       });
 
-      // Layout graph nodes
-      network
-        .layout({
-          name: "euler",
-          // @ts-ignore
-          springLength: () => 80,
-          springCoeff: () => 0.0008,
-          mass: () => 4,
-          gravity: -1.2,
-          pull: 0.0001,
-          theta: 0.666,
-          dragCoeff: 0.02,
-          movementThreshold: 1,
-          timeStep: 20,
-          refresh: 10,
-          animate: !isLargeGraph,
-          animationDuration: undefined,
-          animationEasing: undefined,
-          maxIterations: 1000,
-          maxSimulationTime: 4000,
-          ungrabifyWhileSimulating: false,
-          fit: true,
-          padding: 30,
-          boundingBox: undefined,
-          randomize: false,
-        })
-        .run();
+      network.layout(getEulerConfig(isLargeGraph)).run();
 
       network.on("select", (e) => onSelect(e));
 
       setCy(network);
     }
+  };
+
+  const parseElements = (
+    elements: cytoscape.ElementsDefinition,
+    config: GraphConfig
+  ) => {
+    if (type === "note") {
+      if (!config["display.hierarchy"]?.value) {
+        elements.nodes = elements.nodes.filter(
+          (n) => !n.classes?.includes(".hierarchy")
+        );
+      }
+      if (!config["display.links"]?.value) {
+        elements.nodes = elements.nodes.filter(
+          (n) => !n.classes?.includes(".link")
+        );
+      }
+    }
+
+    logger.log(elements);
+    return elements;
+  };
+
+  useEffect(() => {
+    // If the graph already has rendered elements, don't re-render
+    // Otherwise, the graph re-renders when elements are selected
+    if (cy && cy.elements("*").length > 1) return;
+    renderGraph();
   }, [graphRef, elements]);
 
   useEffect(() => {

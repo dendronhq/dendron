@@ -49,7 +49,7 @@ function CalendarView({ engine, ide }: DendronProps) {
     ide,
   });
 
-  const wordsPerDot = 250; // TODO make configurable
+  const wordsPerDot: number = 250; // TODO make configurable
 
   const [currentMode, setCurrentMode] =
     useState<AntdCalendarProps["mode"]>("month");
@@ -131,7 +131,11 @@ function CalendarView({ engine, ide }: DendronProps) {
           <Space size={0} wrap>
             {_.times(
               _.clamp(
-                Math.floor(selectedNote.body.split(" ").length / wordsPerDot),
+                !!wordsPerDot
+                  ? Math.floor(
+                      selectedNote.body.split(" ").length / wordsPerDot
+                    )
+                  : 0,
                 0,
                 5
               ),

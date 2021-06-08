@@ -14,6 +14,8 @@ const GraphFilterView = ({ config, setConfig }: FilterProps) => {
   const sections = new Set(Object.keys(config).map((key) => key.split(".")[0]));
   const configEntries = Object.entries(config);
 
+  const { themes, currentTheme } = useThemeSwitcher();
+
   const updateConfigField = (key: string, value: string | number | boolean) => {
     setConfig((c) => {
       const newConfig = {
@@ -34,6 +36,7 @@ const GraphFilterView = ({ config, setConfig }: FilterProps) => {
         position: "absolute",
         top: "1rem",
         left: "1rem",
+        background: currentTheme === "light" ? "#F5F6F8" : "#303030",
         borderRadius: 4,
         zIndex: 10,
         minWidth: "12rem",

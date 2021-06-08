@@ -92,12 +92,18 @@ function CalendarView({ engine, ide }: DendronProps) {
     return [undefined, {}];
   }, [engineInitialized, noteActive, notes, vaults]);
 
-  const onSelect: AntdCalendarProps["onSelect"] = useCallback(
+  const getDateKey = (date: Moment) => {
+    return date.format(
+      currentMode === "month" ? "YYYY-MM-DD" : "YYYY-MM" // TODO use config value `dendron.defaultJournalDateFormat`
+    );
+  };
+
+  const onSelect = useCallback<
+    Exclude<AntdCalendarProps["onSelect"], undefined>
+  >(
     (date) => {
       logger.info({ ctx: "onSelect", date });
-      const dateKey = date.format(
-        currentMode === "month" ? "YYYY-MM-DD" : "YYYY-MM" // TODO use config value `dendron.defaultJournalDateFormat`
-      );
+      const dateKey = getDateKey(date);
       const selectedNote: NoteProps | undefined = groupedDailyNotes[dateKey];
 
       postVSCodeMessage({
@@ -112,7 +118,9 @@ function CalendarView({ engine, ide }: DendronProps) {
     [currentMode, groupedDailyNotes]
   );
 
-  const onPanelChange: AntdCalendarProps["onPanelChange"] = useCallback(
+  const onPanelChange = useCallback<
+    Exclude<AntdCalendarProps["onPanelChange"], undefined>
+  >(
     (date, mode) => {
       logger.info({ ctx: "onPanelChange", date, mode });
       setCurrentMode(mode);
@@ -122,9 +130,7 @@ function CalendarView({ engine, ide }: DendronProps) {
 
   const dateCellRender: AntdCalendarProps["dateCellRender"] = useCallback(
     (date) => {
-      const dateKey = date.format(
-        currentMode === "month" ? "YYYY-MM-DD" : "YYYY-MM" // TODO use config value `dendron.defaultJournalDateFormat`
-      );
+      const dateKey = getDateKey(date);
       const selectedNote: NoteProps | undefined = groupedDailyNotes[dateKey];
       if (selectedNote) {
         return (

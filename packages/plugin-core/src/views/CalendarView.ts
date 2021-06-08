@@ -5,9 +5,9 @@ import {
   CalendarViewMessageType,
   OnDidChangeActiveTextEditorMsg,
   DMessage,
+  NoteUtils,
 } from "@dendronhq/common-all";
 import _ from "lodash";
-import path from "path";
 import * as vscode from "vscode";
 import { WebViewUtils } from "./utils";
 import { VSCodeUtils } from "../utils";
@@ -22,26 +22,32 @@ export class CalendarView implements vscode.WebviewViewProvider {
 
   constructor() {
     DendronWorkspace.instance().addDisposable(
-      vscode.window.onDidChangeActiveTextEditor(this.onOpenTextDocument, this)
+      vscode.window.onDidChangeActiveTextEditor(
+        this.handleActiveTextEditorChange,
+        this
+      )
     );
   }
 
-  async onOpenTextDocument(editor: vscode.TextEditor | undefined) {
-    if (_.isUndefined(editor) || _.isUndefined(this._view)) {
-      return;
-    }
-    if (!this._view.visible) {
-      return;
-    }
-    const uri = editor.document.uri;
-    const basename = path.basename(uri.fsPath);
-    const ws = getWS();
-    if (!ws.workspaceService?.isPathInWorkspace(uri.fsPath)) {
-      return;
-    }
-    if (basename.endsWith(".md")) {
-      const note = VSCodeUtils.getNoteFromDocument(editor.document);
+  async handleActiveTextEditorChange() {
+    const ctx = "CalendarView:handleActiveTextEditorChange";
+    const document = VSCodeUtils.getActiveTextEditor()?.document;
+    if (document) {
+      if (!getWS().workspaceService?.isPathInWorkspace(document.uri.fsPath)) {
+        Logger.info({
+          ctx,
+          uri: document.uri.fsPath,
+          msg: "not in workspace",
+        });
+        return;
+      }
+      const note = VSCodeUtils.getNoteFromDocument(document);
       if (note) {
+        Logger.info({
+          ctx,
+          msg: "refresh note",
+          note: NoteUtils.toLogObj(note),
+        });
         this.refresh(note);
       }
     }
@@ -82,6 +88,10 @@ export class CalendarView implements vscode.WebviewViewProvider {
                 fname: msg.data.fname,
               });
             }
+            break;
+          }
+          case CalendarViewMessageType.onGetActiveEditor: {
+            this.handleActiveTextEditorChange();
             break;
           }
           default:

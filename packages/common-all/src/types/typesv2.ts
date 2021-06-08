@@ -508,6 +508,7 @@ export enum GraphViewMessageType {
 
 export enum CalendarViewMessageType {
   "onSelect" = "onSelect",
+  "onGetActiveEditor" = "onGetActiveEditor",
 }
 
 export enum ThemeMessageType {

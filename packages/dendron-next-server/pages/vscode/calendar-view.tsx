@@ -16,7 +16,7 @@ import moment from "moment";
 import { Calendar } from "antd";
 import type { CalendarProps } from "antd";
 import _ from "lodash";
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { DendronProps } from "../../lib/types";
 
 type AntdCalendarProps = CalendarProps<Moment>;
@@ -34,6 +34,8 @@ function toLookup(notes: NoteProps[]): Record<string, NoteProps> {
   return notesLookup;
 }
 
+const { EngineSliceUtils } = engineSlice;
+
 function CalendarView({ engine, ide }: DendronProps) {
   // --- init
   const ctx = "CalendarView";
@@ -49,34 +51,43 @@ function CalendarView({ engine, ide }: DendronProps) {
   const [currentMode, setCurrentMode] =
     useState<AntdCalendarProps["mode"]>("month");
 
-  const { notes, vaults, config } = engine;
+  const engineInitialized = EngineSliceUtils.hasInitialized(engine);
+  const { notes, vaults } = engine;
   const { noteActive } = ide;
-  const currentVault = noteActive?.vault;
 
-  const vaultNotes = _.values(notes).filter(
-    (notes) => notes.vault.fsPath === currentVault?.fsPath
-  );
+  const [activeDate, groupedDailyNotes] = useMemo(() => {
+    if (noteActive && engineInitialized) {
+      const currentVault = noteActive?.vault;
 
-  const dailyNotes = vaultNotes.filter(
-    (note) => note.fname.startsWith("daily.") // TODO replace "daily." with value from `dendron.dailyJournalDomain`
-  );
+      const vaultNotes = _.values(notes).filter(
+        (notes) => notes.vault.fsPath === currentVault?.fsPath
+      );
 
-  // create lookup table for faster search
-  const groupedDailyNotes = toLookup(dailyNotes); // TODO memoize
+      const dailyNotes = vaultNotes.filter(
+        (note) => note.fname.startsWith("daily.") // TODO replace "daily." with value from `dendron.dailyJournalDomain`
+      );
 
-  logger.info(groupedDailyNotes);
+      // create lookup table for faster search
+      const groupedDailyNotes = toLookup(dailyNotes);
 
-  const maybeDatePortion = noteActive
-    ? NoteUtils.genJournalNoteTitle({
-        fname: noteActive.fname,
-        journalName: "journal", // TODO use config value `dendron.defaultJournalName`
-      })
-    : undefined;
+      logger.info(groupedDailyNotes);
 
-  const activeDate =
-    maybeDatePortion && groupedDailyNotes[maybeDatePortion]
-      ? moment(maybeDatePortion)
-      : undefined;
+      const maybeDatePortion = noteActive
+        ? NoteUtils.genJournalNoteTitle({
+            fname: noteActive.fname,
+            journalName: "journal", // TODO use config value `dendron.defaultJournalName`
+          })
+        : undefined;
+
+      const activeDate =
+        maybeDatePortion && groupedDailyNotes[maybeDatePortion]
+          ? moment(maybeDatePortion)
+          : undefined;
+
+      return [activeDate, groupedDailyNotes];
+    }
+    return [undefined, {}];
+  }, [engineInitialized, noteActive, notes, vaults]);
 
   // TODO use `useCallback` to preserve identities across renders (immutable props)
   const onSelect: AntdCalendarProps["onSelect"] = (date) => {

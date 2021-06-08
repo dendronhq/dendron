@@ -17,11 +17,23 @@ import _ from "lodash";
 import { MDUtilsV4 } from "./utils";
 import { DendronASTDest } from "./types";
 
+/**
+ * What mode a processor should run in
+ */
 export enum ProcMode {
+  /**
+   * Expect no properties from {@link ProcDataFullV5} when running the processor
+   */
   NO_DATA = "NO_DATA",
+  /**
+   * Expect all properties from {@link ProcDataFullV5} when running the processor
+   */
   FULL = "all data",
 }
 
+/**
+ * Options for how processor should function
+ */
 export type ProcOptsV5 = {
   mode: ProcMode;
   /**
@@ -30,6 +42,9 @@ export type ProcOptsV5 = {
   parseOnly?: boolean;
 };
 
+/**
+ * Data to pass in to a processor
+ */
 export type ProcDataFullV5 = {
   engine: DEngineClient;
   vault: DVault;
@@ -74,9 +89,7 @@ export class MDUtilsV5 {
   }
 
   /**
-   * Used for parsing a note.
-   * Does not have engine properties
-   * @returns
+   * Used for processing a Dendron markdown note
    */
   static _procRemark(opts: ProcOptsV5, data?: Partial<ProcDataFullOptsV5>) {
     const errors: DendronError[] = [];
@@ -127,6 +140,12 @@ export class MDUtilsV5 {
     return this._procRemark({ mode: ProcMode.FULL }, data);
   }
 
+  /**
+   * Parse Dendron Markdown Note. No compiler is attached.
+   * @param opts
+   * @param data
+   * @returns
+   */
   static procRemarkParse(opts: ProcOptsV5, data?: Partial<ProcDataFullOptsV5>) {
     return this._procRemark({ ...opts, parseOnly: true }, data);
   }

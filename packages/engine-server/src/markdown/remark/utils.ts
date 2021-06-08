@@ -94,6 +94,7 @@ const getLinks = ({
   note: NoteProps;
   filter: LinkFilterTypeRequired;
 }) => {
+  // TODO: this could be wikis or references
   let out2: WikiLinkNoteV4[] = selectAll(filter.type, ast) as WikiLinkNoteV4[];
   let dlinks = out2.map(
     (m: WikiLinkNoteV4) =>

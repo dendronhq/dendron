@@ -1,752 +1,752 @@
 {
-    "name": "@dendronhq/plugin-core",
-    "private": true,
-    "displayName": "dendron",
-    "description": "Dendron is a hierarchal note taking tool that grows as you do. ",
-    "publisher": "dendron",
-    "version": "0.45.0",
-    "engines": {
-        "vscode": "^1.54.0"
-    },
-    "categories": [
-        "Other"
-    ],
-    "installConfig": {
-        "hoistingLimits": "none"
-    },
-    "keywords": [
-        "second brain",
-        "markdown",
-        "roam",
-        "notes",
-        "schema"
-    ],
-    "activationEvents": [
-        "*"
-    ],
-    "main": "./out/src/extension.js",
-    "extensionPack": [
-        "dendron.dendron-markdown-preview-enhanced",
-        "dendron.dendron-snippet-maker"
-    ],
-    "contributes": {
-        "languages": [
-            {
-                "id": "markdown",
-                "extensions": [
-                    ".md"
-                ],
-                "aliases": [
-                    "markdown"
-                ],
-                "configuration": "./language-configuration.json"
-            }
+  "name": "@dendronhq/plugin-core",
+  "private": true,
+  "displayName": "dendron",
+  "description": "Dendron is a hierarchal note taking tool that grows as you do. ",
+  "publisher": "dendron",
+  "version": "0.45.0",
+  "engines": {
+    "vscode": "^1.54.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "installConfig": {
+    "hoistingLimits": "none"
+  },
+  "keywords": [
+    "second brain",
+    "markdown",
+    "roam",
+    "notes",
+    "schema"
+  ],
+  "activationEvents": [
+    "*"
+  ],
+  "main": "./out/src/extension.js",
+  "extensionPack": [
+    "dendron.dendron-markdown-preview-enhanced",
+    "dendron.dendron-snippet-maker"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "markdown",
+        "extensions": [
+          ".md"
         ],
-        "views": {
-            "explorer": [
-                {
-                    "id": "dendron.sample",
-                    "name": "Sample View",
-                    "when": "dendron:devMode",
-                    "type": "webview"
-                },
-                {
-                    "id": "dendron.treeView",
-                    "name": "Tree View",
-                    "when": "dendron:pluginActive && !dendron:webUIEnabled"
-                },
-                {
-                    "id": "dendron.tree-view",
-                    "name": "Tree View V2",
-                    "when": "dendron:webUIEnabled",
-                    "type": "webview"
-                },
-                {
-                    "id": "dendron.backlinks",
-                    "name": "Backlinks",
-                    "when": "dendron:pluginActive"
-                }
-            ]
+        "aliases": [
+          "markdown"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "views": {
+      "explorer": [
+        {
+          "id": "dendron.sample",
+          "name": "Sample View",
+          "when": "dendron:devMode",
+          "type": "webview"
         },
-        "configuration": {
-            "title": "Dendron",
-            "properties": {
-                "dendron.dailyJournalDomain": {
-                    "type": "string",
-                    "default": "daily",
-                    "description": "domain where daily journals are kept"
-                },
-                "dendron.defaultJournalName": {
-                    "type": "string",
-                    "default": "journal",
-                    "description": "name used for journal notes"
-                },
-                "dendron.defaultJournalDateFormat": {
-                    "type": "string",
-                    "default": "y.MM.dd",
-                    "description": "date format used for journal notes"
-                },
-                "dendron.defaultJournalAddBehavior": {
-                    "default": "childOfDomain",
-                    "type": "string",
-                    "description": "strategy for adding new journal notes",
-                    "enum": [
-                        "childOfDomain",
-                        "childOfDomainNamespace",
-                        "childOfCurrent",
-                        "asOwnDomain"
-                    ]
-                },
-                "dendron.defaultScratchName": {
-                    "type": "string",
-                    "default": "scratch",
-                    "description": "name used for scratch notes"
-                },
-                "dendron.defaultScratchDateFormat": {
-                    "type": "string",
-                    "default": "y.MM.dd.HHmmss",
-                    "description": "date format used for scratch notes"
-                },
-                "dendron.defaultScratchAddBehavior": {
-                    "default": "asOwnDomain",
-                    "type": "string",
-                    "description": "strategy for adding new scratch notes",
-                    "enum": [
-                        "childOfDomain",
-                        "childOfDomainNamespace",
-                        "childOfCurrent",
-                        "asOwnDomain"
-                    ]
-                },
-                "dendron.copyNoteUrlRoot": {
-                    "type": "string",
-                    "description": "override root url when getting note url"
-                },
-                "dendron.linkSelectAutoTitleBehavior": {
-                    "type": "string",
-                    "description": "Control title behavior when using selection2link with lookup",
-                    "enum": [
-                        "none",
-                        "slug"
-                    ],
-                    "default": "slug"
-                },
-                "dendron.defaultLookupCreateBehavior": {
-                    "default": "selectionExtract",
-                    "type": "string",
-                    "description": "when creating a new note with selected text, define behavior for selected text",
-                    "enum": [
-                        "selection2link",
-                        "selectionExtract"
-                    ]
-                },
-                "dendron.defaultTimestampDecorationFormat": {
-                    "default": "DATETIME_MED",
-                    "type": "string",
-                    "description": "Decide how human readable timestamp decoration is displayed",
-                    "enum": [
-                        "DATETIME_FULL",
-                        "DATETIME_FULL_WITH_SECONDS",
-                        "DATETIME_HUGE",
-                        "DATETIME_HUGE_WITH_SECONDS",
-                        "DATETIME_MED",
-                        "DATETIME_MED_WITH_SECONDS",
-                        "DATETIME_SHORT",
-                        "DATETIME_SHORT_WITH_SECONDS",
-                        "DATE_FULL",
-                        "DATE_HUGE",
-                        "DATE_MED",
-                        "DATE_MED_WITH_WEEKDAY",
-                        "DATE_SHORT",
-                        "TIME_24_SIMPLE",
-                        "TIME_24_WITH_LONG_OFFSET",
-                        "TIME_24_WITH_SECONDS",
-                        "TIME_24_WITH_SHORT_OFFSET",
-                        "TIME_SIMPLE",
-                        "TIME_WITH_LONG_OFFSET",
-                        "TIME_WITH_SECONDS",
-                        "TIME_WITH_SHORT_OFFSET"
-                    ]
-                },
-                "dendron.rootDir": {
-                    "type": "string",
-                    "default": "",
-                    "description": "location of dendron workspace"
-                },
-                "dendron.dendronDir": {
-                    "type": "string",
-                    "default": "",
-                    "description": "location of dendron configuration"
-                },
-                "dendron.logLevel": {
-                    "type": "string",
-                    "default": "info",
-                    "description": "control verbosity of dendron logs",
-                    "enum": [
-                        "debug",
-                        "info",
-                        "error"
-                    ]
-                },
-                "dendron.trace.server": {
-                    "enum": [
-                        "off",
-                        "messages",
-                        "verbose"
-                    ],
-                    "type": "string",
-                    "default": "messages",
-                    "description": "LSP log level"
-                },
-                "dendron.serverPort": {
-                    "type": "number",
-                    "description": "port for server. If not set, will be randomly generated at startup."
-                }
-            }
+        {
+          "id": "dendron.treeView",
+          "name": "Tree View",
+          "when": "dendron:pluginActive && !dendron:webUIEnabled"
         },
-        "commands": [
-            {
-                "command": "dendron.browseNote",
-                "title": "Dendron: Browse Note",
-                "desc": "Browse note on github"
-            },
-            {
-                "command": "dendron.contributeToCause",
-                "title": "Dendron: Contribute",
-                "desc": "Become an environmentalist and keep Dendron sustainable",
-                "docs": "This command takes you to Dendron's [Environmentalist](https://accounts.dendron.so/account/subscribe) plans.\nEnvironmentalists are users that can support Dendron financially through a monthly contribution. Environmentalist get access to insider builds, priority support, and access to exclusive dev channels."
-            },
-            {
-                "command": "dendron.gotoNote",
-                "title": "Dendron: Goto Note",
-                "desc": "Go to a note"
-            },
-            {
-                "command": "dendron.createDailyJournalNote",
-                "title": "Dendron: Create Daily Journal Note",
-                "desc": "Create a global journal note",
-                "docLink": "dendron.topic.special-notes.md",
-                "docPreview": "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/notes.daily.gif)"
-            },
-            {
-                "command": "dendron.copyNoteLink",
-                "title": "Dendron: Copy Note Link",
-                "desc": "Copy wiki link to note",
-                "docLink": "dendron.topic.commands.md",
-                "docPreview": "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/command.copy-link.gif)"
-            },
-            {
-                "command": "dendron.copyNoteRef",
-                "title": "Dendron: Copy Note Ref",
-                "desc": "Copies a reference to the current open document",
-                "docLink": "dendron.topic.commands.md",
-                "docs": "Lets you quickly create a [[note reference| dendron.topic.refs]] to the current note.\n![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/ref-note.gif)\n\nIf you have a header selected while running this command, it will copy the note ref with the selected header to the next note ref\n![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/refs.copy-selection.gif)",
-                "docPreview": ""
-            },
-            {
-                "command": "dendron.deleteNode",
-                "title": "Dendron: Delete Node",
-                "desc": "Delete a note or schema",
-                "docLink": "dendron.topic.lookup.md",
-                "docPreview": ""
-            },
-            {
-                "command": "dendron.insertNote",
-                "title": "Dendron: Insert Note",
-                "desc": "Insert note contents"
-            },
-            {
-                "command": "dendron.insertNoteLink",
-                "title": "Dendron: Insert Note Link",
-                "desc": "Insert note link"
-            },
-            {
-                "command": "dendron.moveNote",
-                "title": "Dendron: Move Note",
-                "desc": "Move a note"
-            },
-            {
-                "command": "dendron.renameNote",
-                "title": "Dendron: Rename Note",
-                "desc": "Rename a note and all backlinks",
-                "docLink": "dendron.topic.commands.md",
-                "docPreview": "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/command-rename.gif)"
-            },
-            {
-                "command": "dendron.lookup",
-                "title": "Dendron: Lookup",
-                "desc": "Initiate note lookup",
-                "docLink": "dendron.topic.lookup.md",
-                "docPreview": "",
-                "when": "dendron:pluginActive"
-            },
-            {
-                "command": "dendron.lookupNote",
-                "title": "Dendron: Lookup Note",
-                "desc": "Initiate note lookup",
-                "when": "dendron:pluginActive"
-            },
-            {
-                "command": "dendron.lookupSchema",
-                "title": "Dendron: Lookup Schema",
-                "desc": "Initiate schema lookup",
-                "docLink": "dendron.topic.lookup.md",
-                "docPreview": "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/schema-lookup.gif)"
-            },
-            {
-                "command": "dendron.reloadIndex",
-                "title": "Dendron: Reload Index",
-                "desc": "Reload the index. Necessary for Dendron to pick up on schema changes.",
-                "docLink": "dendron.topic.commands.md",
-                "docPreview": ""
-            },
-            {
-                "command": "dendron.archiveHierarchy",
-                "title": "Dendron: Archive Hierarchy",
-                "desc": "Move current note and all children under the `archive` hierarchy",
-                "docs": "This is a convenience method around `Refactor Hierarchy` for the case of archiving hierarchies you are no longer using. For example, if you were currently at `pro.foo`, running `Archive Hierarchy` would be equivalent to running `Refactor Hierarchy` with the following arguments:\n- matcher: `pro.foo`\n- replacement:  `archive.pro.foo`",
-                "docLink": "dendron.topic.commands.md",
-                "docPreview": "<a href=\"https://www.loom.com/share/9698d5a4451b49d8b107f3ff67d97877\">  <img style=\"\" src=\"https://cdn.loom.com/sessions/thumbnails/9698d5a4451b49d8b107f3ff67d97877-with-play.gif\"> </a>"
-            },
-            {
-                "command": "dendron.refactorHierarchy",
-                "title": "Dendron: Refactor Hierarchy",
-                "desc": "Update hierarchy using regex",
-                "docs": "Like `Rename Note` but works on an entire hierarchy of notes. This command takes two arguments: \n- matcher: regex that matches text you want to capture for replacement\n- replacer: regex that represents text you want to use as replacement\n\nAfter running the command, you will be taken to a preview that shows all files that will be affected. You will be given an option in a dropdown to either proceed with the refactor or cancel the operation. \n\n- NOTE: Dendron will warn you if refactoring will overwrite existing files. You will need to either change your `replacer` or move the affected files before Dendron will perform a refactor\n\nRefactor Hierarchy is \nhttps://discordapp.com/channels/717965437182410783/743194856788328497/743195382795993291",
-                "docLink": "dendron.topic.commands.md",
-                "docPreview": "<a href=\"https://www.loom.com/share/11d90a86fd1348a5a504406b52d79f85\"> <img style=\"\" src=\"https://cdn.loom.com/sessions/thumbnails/11d90a86fd1348a5a504406b52d79f85-with-play.gif\"> </a>"
-            },
-            {
-                "command": "dendron.goUpHierarchy",
-                "title": "Dendron: Go Up",
-                "desc": "Go to closet non-stub parent of the currently open note",
-                "docLink": "dendron.topic.commands.md",
-                "docPreview": "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/hierarchy.go-up.gif)"
-            },
-            {
-                "command": "dendron.goNextHierarchy",
-                "title": "Dendron: Go Next Sibling",
-                "desc": "Go to the next sibling",
-                "docLink": "dendron.topic.commands.md",
-                "docPreview": "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/hierarchy.go-sibling.gif)"
-            },
-            {
-                "command": "dendron.goPrevHierarchy",
-                "title": "Dendron: Go Previous Sibling",
-                "desc": "Go to the previous sibling",
-                "docLink": "dendron.topic.commands.md",
-                "docPreview": "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/hierarchy.go-sibling.gif)"
-            },
-            {
-                "command": "dendron.goDownHierarchy",
-                "title": "Dendron: Go Down",
-                "desc": "Go down the hierarchy",
-                "docLink": "dendron.topic.commands.md",
-                "docPreview": "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/hierarchy.go-down.gif)"
-            },
-            {
-                "command": "dendron.addAndCommit",
-                "title": "Dendron: Workspace: Add and Commit",
-                "desc": "add and commit all files"
-            },
-            {
-                "command": "dendron.sync",
-                "title": "Dendron: Workspace: Sync",
-                "desc": "Sync all files",
-                "docPreview": "Sync all files in your workspace, across all vaults.\nThis will add and commit all changes, then pull and push to sync all changes."
-            },
-            {
-                "command": "dendron.vaultAdd",
-                "title": "Dendron: Vault Add",
-                "desc": "Add a new vault",
-                "docPreview": "<div style=\"position: relative; padding-bottom: 62.5%; height: 0;\"><iframe src=\"https://www.loom.com/embed/b4171372f9794dd7be609c043f343fa3\" frameborder=\"0\" webkitallowfullscreen mozallowfullscreen allowfullscreen style=\"position: absolute; top: 0; left: 0; width: 100%; height: 100%;\"></iframe></div>",
-                "docs": "When you add a vault, you can choose between adding a local vault or a remote vault.",
-                "docLink": ""
-            },
-            {
-                "command": "dendron.vaultRemove",
-                "title": "Dendron: Vault Remove",
-                "desc": "Remove a vault",
-                "docLink": "",
-                "docPreview": "Remove a vault from your workspace. Note that the underlying files wil **not** be deleted - the vault will lose its association with your workspace.\n<div style=\"position: relative; padding-bottom: 62.5%; height: 0;\"><iframe src=\"https://www.loom.com/embed/307effc22b8d4c59a32933529a8393e1\" frameborder=\"0\" webkitallowfullscreen mozallowfullscreen allowfullscreen style=\"position: absolute; top: 0; left: 0; width: 100%; height: 100%;\"></iframe></div>"
-            },
-            {
-                "command": "dendron.initWS",
-                "title": "Dendron: Initialize Workspace",
-                "desc": "Create a new workspace",
-                "docLink": "dendron.topic.commands.md",
-                "docPreview": "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/workspace-init.gif)"
-            },
-            {
-                "command": "dendron.changeWS",
-                "title": "Dendron: Change Workspace",
-                "desc": "Change into existing workspace",
-                "docLink": "dendron.topic.commands.md",
-                "docPreview": ""
-            },
-            {
-                "command": "dendron.upgradeSettings",
-                "title": "Dendron: Upgrade Settings",
-                "desc": "Upgrade to the latest Dendron settings. You shouldn't need to run this manually. Its run everytime you get a Dendron update.",
-                "docLink": "dendron.topic.commands.md",
-                "docPreview": ""
-            },
-            {
-                "command": "dendron.configurePod",
-                "title": "Dendron: Configure Pod",
-                "desc": "Update your pod configuration",
-                "docLink": "dendron.topic.pod.md",
-                "docPreview": "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/pods.configure.gif)"
-            },
-            {
-                "command": "dendron.importPod",
-                "title": "Dendron: Import Pod",
-                "desc": "Import notes from an external data source. Currently, only the local file system is supported",
-                "docLink": "dendron.topic.pod.md",
-                "docPreview": ""
-            },
-            {
-                "command": "dendron.exportPod",
-                "title": "Dendron: Export Pod",
-                "desc": "Export notes to an external data source. Currently only JSON is supported. ",
-                "docLink": "dendron.topic.pod.md",
-                "docPreview": "<a href=\"https://www.loom.com/share/d49e5f4155af485cadc9cd810b6cab28\"> <img src=\"https://cdn.loom.com/sessions/thumbnails/d49e5f4155af485cadc9cd810b6cab28-with-play.gif\"> </a>"
-            },
-            {
-                "command": "dendron.publishPod",
-                "title": "Dendron: Publish Pod",
-                "desc": "Publish your note to a different format/location",
-                "docLink": "dendron.topic.pod.md",
-                "docPreview": ""
-            },
-            {
-                "command": "dendron.snapshotVault",
-                "title": "Dendron: Snapshot Vault",
-                "desc": "Create a snapshot of your vault",
-                "docs": "Takes a snapshot of your entire vault, including assets. This command will ignore version control folders like .git when making a snapshot.\nSnapshots are saved under {workspace}/snapshots/{timestamp}",
-                "docLink": "",
-                "docPreview": ""
-            },
-            {
-                "command": "dendron.restoreVault",
-                "title": "Dendron: Restore Vault",
-                "desc": "Restore your vault from a snapshot",
-                "docs": "Restores your vault based on a snapshot. When restoring, it will over-write any notes that have the same name as notes in the snapshot. It will ignore version control directories like .git when restoring your vault",
-                "docLink": "",
-                "docPreview": ""
-            },
-            {
-                "command": "dendron.copyNoteURL",
-                "title": "Dendron: Copy Note URL",
-                "desc": "Get URL of current note from published site",
-                "docs": "If you highlight a header, will copy the url with the header set as the anchor",
-                "docLink": "",
-                "docPreview": "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/notes.copy-url.gif)"
-            },
-            {
-                "command": "dendron.createHook",
-                "title": "Dendron: Hook Create",
-                "desc": "Create a hook",
-                "when": "dendron:pluginActive"
-            },
-            {
-                "command": "dendron.deleteHook",
-                "title": "Dendron: Hook Delete",
-                "desc": "Delete a hook",
-                "when": "dendron:pluginActive"
-            },
-            {
-                "command": "dendron.siteBuild",
-                "title": "Dendron: Site Build",
-                "desc": "Build your notes using publishing v2",
-                "docs": "This command works by running `dendron-cli` in the background.",
-                "docLink": "",
-                "docPreview": ""
-            },
-            {
-                "command": "dendron.sitePreview",
-                "title": "Dendron: Site Preview",
-                "desc": "Preview your notes on localhost using publishing v2",
-                "docs": "This command works by running `dendron-cli` in the background.",
-                "docLink": "",
-                "docPreview": ""
-            },
-            {
-                "command": "dendron.signUp",
-                "title": "Dendron: Sign Up",
-                "desc": "sign up for a Dendron account"
-            },
-            {
-                "command": "dendron.signIn",
-                "title": "Dendron: Sign In",
-                "desc": "sign in to a Dendron account"
-            },
-            {
-                "command": "dendron.enableTelemetry",
-                "title": "Dendron: Enable Telemetry",
-                "desc": "Enable telemetry"
-            },
-            {
-                "command": "dendron.disableTelemetry",
-                "title": "Dendron: Disable Telemetry",
-                "desc": "Disable telemetry"
-            },
-            {
-                "command": "dendron.openLink",
-                "title": "Dendron: Open Link",
-                "desc": "Open link to external file (eg. pdf, .mov, etc) use system default",
-                "docLink": "dendron.topic.links.md",
-                "docPreview": "<a href=\"https://www.loom.com/share/01250485e20a4cdca2a053dd6047ac68\"><img src=\"https://cdn.loom.com/sessions/thumbnails/01250485e20a4cdca2a053dd6047ac68-with-play.gif\"> </a>"
-            },
-            {
-                "command": "dendron.pasteLink",
-                "title": "Dendron: Paste Link",
-                "desc": "Fetch metadata for a web link and format as markdown"
-            },
-            {
-                "command": "dendron.showHelp",
-                "title": "Dendron: Show Help",
-                "desc": "Dendron will open your current browser to the [[cheatsheet|dendron.cheatsheet]] page. ",
-                "docLink": "dendron.topic.commands.md",
-                "docPreview": "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/workbench.help.gif)"
-            },
-            {
-                "command": "dendron.showNoteGraphV2",
-                "title": "Dendron: Show Note Graph V2",
-                "desc": "Display the notes in this workspace as a graph"
-            },
-            {
-                "command": "dendron.showSchemaGraphV2",
-                "title": "Dendron: Show Schema Graph V2",
-                "desc": "Display the schemas in this workspace as a graph",
-                "when": "dendron:devMode"
-            },
-            {
-                "command": "dendron.showPreview",
-                "title": "Dendron: Show Preview",
-                "desc": "Show Markdown Preview",
-                "docLink": "dendron.topic.commands.md",
-                "docPreview": ""
-            },
-            {
-                "command": "dendron.pasteFile",
-                "title": "Dendron: Paste File",
-                "desc": "Paste file"
-            },
-            {
-                "command": "dendron.configureRaw",
-                "title": "Dendron: Configure (yaml)",
-                "desc": "Modify Dendron Config as raw YAML",
-                "docs": "",
-                "docLink": "",
-                "docPreview": ""
-            },
-            {
-                "command": "dendron.configureUI",
-                "title": "Dendron: Configure",
-                "desc": "Modify Dendron Config using Dendron UI",
-                "docs": "<div style=\"position: relative; padding-bottom: 62.5%; height: 0;\"><iframe src=\"https://www.loom.com/embed/5b6689eb76344fbb814a3d4405ef62b8\" frameborder=\"0\" webkitallowfullscreen mozallowfullscreen allowfullscreen style=\"position: absolute; top: 0; left: 0; width: 100%; height: 100%;\"></iframe></div>",
-                "docLink": "",
-                "docPreview": ""
-            },
-            {
-                "command": "dendron.dev.doctor",
-                "title": "Dendron: Doctor",
-                "desc": "Auto fix issues with frontmatter",
-                "docs": "This makes sure your workspace is up to date. It will execute the following actions:\n- add ids and titles to the frontmatter of all notes that are missing it\n- setup a `docs` folder if it doesn't exist. Required if you want to [[publish | dendron.topic.publishing]] your notes",
-                "docLink": "dendron.topic.commands.md",
-                "docPreview": "<a href=\"https://www.loom.com/share/bd045f708f8e474193de8e3de0dc820f\"> <img style=\"\" src=\"https://cdn.loom.com/sessions/thumbnails/bd045f708f8e474193de8e3de0dc820f-with-play.gif\"> </a>"
-            },
-            {
-                "command": "dendron.dev.dumpState",
-                "title": "Dendron: Dump State",
-                "desc": "Dump internal state of Dendron inside logs",
-                "docs": "This is useful when diagnosing issues in Dendron"
-            },
-            {
-                "command": "dendron.dev.resetConfig",
-                "title": "Dendron:Dev: Reset Config",
-                "desc": "Reset the config"
-            },
-            {
-                "command": "dendron.dev.openLogs",
-                "title": "Dendron:Dev: Open Logs",
-                "desc": "Open Dendron logs for current session",
-                "docLink": "dendron.topic.commands.md",
-                "docPreview": ""
-            },
-            {
-                "command": "dendron.diagnosticsReport",
-                "title": "Dendron:Dev: Diagnostics Report",
-                "desc": "Generate diagnostics report",
-                "docLink": "dendron.topic.commands.md",
-                "docPreview": ""
-            }
-        ],
-        "keybindings": [
-            {
-                "command": "dendron.gotoNote",
-                "key": "ctrl+enter",
-                "when": "editorFocus"
-            },
-            {
-                "command": "dendron.createDailyJournalNote",
-                "key": "ctrl+shift+i",
-                "mac": "cmd+shift+i",
-                "when": "dendron:pluginActive"
-            },
-            {
-                "command": "dendron.copyNoteLink",
-                "key": "ctrl+shift+c",
-                "mac": "cmd+shift+c",
-                "when": "editorFocus && dendron:pluginActive"
-            },
-            {
-                "command": "dendron.copyNoteRef",
-                "key": "ctrl+shift+r",
-                "mac": "cmd+shift+r",
-                "when": "editorFocus && dendron:pluginActive"
-            },
-            {
-                "command": "dendron.deleteNode",
-                "key": "ctrl+shift+d",
-                "mac": "cmd+shift+d",
-                "when": "dendron:pluginActive"
-            },
-            {
-                "command": "dendron.lookup",
-                "mac": "cmd+L",
-                "key": "ctrl+l",
-                "when": "dendron:pluginActive"
-            },
-            {
-                "command": "dendron.lookup",
-                "key": "ctrl+shift+j",
-                "mac": "cmd+shift+j",
-                "args": {
-                    "noteType": "journal"
-                },
-                "when": "dendron:pluginActive"
-            },
-            {
-                "command": "dendron.lookup",
-                "key": "ctrl+shift+s",
-                "mac": "cmd+shift+s",
-                "args": {
-                    "noteType": "scratch",
-                    "selectionType": "selection2link"
-                },
-                "when": "dendron:pluginActive"
-            },
-            {
-                "command": "dendron.lookupSchema",
-                "mac": "cmd+shift+L",
-                "key": "ctrl+shift+l",
-                "when": "dendron:pluginActive"
-            },
-            {
-                "command": "dendron.goUpHierarchy",
-                "mac": "cmd+shift+up",
-                "key": "ctrl+shift+up",
-                "when": "editorFocus && dendron:pluginActive"
-            },
-            {
-                "command": "dendron.goNextHierarchy",
-                "key": "ctrl+shift+]",
-                "when": "editorFocus && dendron:pluginActive"
-            },
-            {
-                "command": "dendron.goPrevHierarchy",
-                "key": "ctrl+shift+[",
-                "when": "editorFocus && dendron:pluginActive"
-            },
-            {
-                "command": "dendron.goDownHierarchy",
-                "mac": "cmd+shift+down",
-                "key": "ctrl+shift+down",
-                "when": "editorFocus && dendron:pluginActive"
-            },
-            {
-                "command": "dendron.copyNoteURL",
-                "mac": "cmd+shift+u",
-                "windows": "ctrl+shift+u",
-                "when": "editorFocus && dendron:pluginActive"
-            },
-            {
-                "command": "dendron.showPreview",
-                "windows": "windows+ctrl+p",
-                "mac": "cmd+ctrl+p"
-            }
-        ],
-        "markdown.previewStyles": [
-            "./media/fontello/css/fontello.css",
-            "./media/markdown.css"
-        ]
+        {
+          "id": "dendron.tree-view",
+          "name": "Tree View V2",
+          "when": "dendron:webUIEnabled",
+          "type": "webview"
+        },
+        {
+          "id": "dendron.backlinks",
+          "name": "Backlinks",
+          "when": "dendron:pluginActive"
+        }
+      ]
     },
-    "icon": "assets/images/logo.png",
-    "scripts": {
-        "vscode:prepublish": "yarn webpack:prod",
-        "webpack": "webpack --mode development",
-        "webpack:prod": "webpack --mode production",
-        "webpack:dev:watch": "webpack --mode development --watch",
-        "lint": "eslint src --ext ts",
-        "watch": "yarn compile --watch",
-        "build": "yarn compile",
-        "compile": "tsc -p tsconfig.build.json",
-        "pretest": "yarn compile",
-        "test": "node ./out/src/test/runTestInteg.js",
-        "format": "cd ../.. && yarn format:pkg $npm_package_repository_directory"
+    "configuration": {
+      "title": "Dendron",
+      "properties": {
+        "dendron.dailyJournalDomain": {
+          "type": "string",
+          "default": "daily",
+          "description": "domain where daily journals are kept"
+        },
+        "dendron.defaultJournalName": {
+          "type": "string",
+          "default": "journal",
+          "description": "name used for journal notes"
+        },
+        "dendron.defaultJournalDateFormat": {
+          "type": "string",
+          "default": "y.MM.dd",
+          "description": "date format used for journal notes"
+        },
+        "dendron.defaultJournalAddBehavior": {
+          "default": "childOfDomain",
+          "type": "string",
+          "description": "strategy for adding new journal notes",
+          "enum": [
+            "childOfDomain",
+            "childOfDomainNamespace",
+            "childOfCurrent",
+            "asOwnDomain"
+          ]
+        },
+        "dendron.defaultScratchName": {
+          "type": "string",
+          "default": "scratch",
+          "description": "name used for scratch notes"
+        },
+        "dendron.defaultScratchDateFormat": {
+          "type": "string",
+          "default": "y.MM.dd.HHmmss",
+          "description": "date format used for scratch notes"
+        },
+        "dendron.defaultScratchAddBehavior": {
+          "default": "asOwnDomain",
+          "type": "string",
+          "description": "strategy for adding new scratch notes",
+          "enum": [
+            "childOfDomain",
+            "childOfDomainNamespace",
+            "childOfCurrent",
+            "asOwnDomain"
+          ]
+        },
+        "dendron.copyNoteUrlRoot": {
+          "type": "string",
+          "description": "override root url when getting note url"
+        },
+        "dendron.linkSelectAutoTitleBehavior": {
+          "type": "string",
+          "description": "Control title behavior when using selection2link with lookup",
+          "enum": [
+            "none",
+            "slug"
+          ],
+          "default": "slug"
+        },
+        "dendron.defaultLookupCreateBehavior": {
+          "default": "selectionExtract",
+          "type": "string",
+          "description": "when creating a new note with selected text, define behavior for selected text",
+          "enum": [
+            "selection2link",
+            "selectionExtract"
+          ]
+        },
+        "dendron.defaultTimestampDecorationFormat": {
+          "default": "DATETIME_MED",
+          "type": "string",
+          "description": "Decide how human readable timestamp decoration is displayed",
+          "enum": [
+            "DATETIME_FULL",
+            "DATETIME_FULL_WITH_SECONDS",
+            "DATETIME_HUGE",
+            "DATETIME_HUGE_WITH_SECONDS",
+            "DATETIME_MED",
+            "DATETIME_MED_WITH_SECONDS",
+            "DATETIME_SHORT",
+            "DATETIME_SHORT_WITH_SECONDS",
+            "DATE_FULL",
+            "DATE_HUGE",
+            "DATE_MED",
+            "DATE_MED_WITH_WEEKDAY",
+            "DATE_SHORT",
+            "TIME_24_SIMPLE",
+            "TIME_24_WITH_LONG_OFFSET",
+            "TIME_24_WITH_SECONDS",
+            "TIME_24_WITH_SHORT_OFFSET",
+            "TIME_SIMPLE",
+            "TIME_WITH_LONG_OFFSET",
+            "TIME_WITH_SECONDS",
+            "TIME_WITH_SHORT_OFFSET"
+          ]
+        },
+        "dendron.rootDir": {
+          "type": "string",
+          "default": "",
+          "description": "location of dendron workspace"
+        },
+        "dendron.dendronDir": {
+          "type": "string",
+          "default": "",
+          "description": "location of dendron configuration"
+        },
+        "dendron.logLevel": {
+          "type": "string",
+          "default": "info",
+          "description": "control verbosity of dendron logs",
+          "enum": [
+            "debug",
+            "info",
+            "error"
+          ]
+        },
+        "dendron.trace.server": {
+          "enum": [
+            "off",
+            "messages",
+            "verbose"
+          ],
+          "type": "string",
+          "default": "messages",
+          "description": "LSP log level"
+        },
+        "dendron.serverPort": {
+          "type": "number",
+          "description": "port for server. If not set, will be randomly generated at startup."
+        }
+      }
     },
-    "devDependencies": {
-        "@dendronhq/common-test-utils": "^0.45.0",
-        "@types/execa": "^2.0.0",
-        "@types/fs-extra": "^9.0.1",
-        "@types/glob": "^7.1.1",
-        "@types/lodash": "^4.14.155",
-        "@types/luxon": "^1.25.0",
-        "@types/markdown-it": "^10.0.2",
-        "@types/mocha": "^7.0.2",
-        "@types/node": "^13.11.0",
-        "@types/open": "^6.2.1",
-        "@types/open-graph-scraper": "^4.7.0",
-        "@types/semver": "^7.3.1",
-        "@typescript-eslint/eslint-plugin": "^2.30.0",
-        "@typescript-eslint/parser": "^2.30.0",
-        "copy-webpack-plugin": "^6.0.4",
-        "eslint": "^6.8.0",
-        "glob": "^7.1.6",
-        "mocha": "^7.1.2",
-        "ts-loader": "^8.0.0",
-        "ts-node": "^8.10.2",
-        "vscode-test": "^1.3.0",
-        "webpack": "^4.43.0",
-        "webpack-cli": "^3.3.12"
-    },
-    "dependencies": {
-        "@dendronhq/api-server": "^0.45.0",
-        "@dendronhq/common-all": "^0.45.0",
-        "@dendronhq/common-server": "^0.45.0",
-        "@dendronhq/dendron-cli": "^0.45.0",
-        "@dendronhq/engine-server": "^0.45.0",
-        "@dendronhq/engine-test-utils": "^0.45.0",
-        "@dendronhq/lsp-server": "^0.28.7-alpha.0",
-        "@dendronhq/pods-core": "^0.45.0",
-        "@types/vscode": "1.54",
-        "cross-path-sort": "^1.0.0",
-        "execa": "^4.0.2",
-        "fs-extra": "^9.0.1",
-        "lodash": "^4.17.15",
-        "luxon": "^1.25.0",
-        "markdown-it": "^11.0.0",
-        "markdown-it-regex": "^0.2.0",
-        "open": "^7.0.4",
-        "open-graph-scraper": "^4.7.1",
-        "semver": "^7.3.2",
-        "vscode-languageclient": "^6.1.3"
-    },
-    "repository": {
-        "type": "git",
-        "url": "ssh://git@github.com/dendronhq/dendron.git",
-        "directory": "packages/plugin-core"
-    }
+    "commands": [
+      {
+        "command": "dendron.browseNote",
+        "title": "Dendron: Browse Note",
+        "desc": "Browse note on github"
+      },
+      {
+        "command": "dendron.contributeToCause",
+        "title": "Dendron: Contribute",
+        "desc": "Become an environmentalist and keep Dendron sustainable",
+        "docs": "This command takes you to Dendron's [Environmentalist](https://accounts.dendron.so/account/subscribe) plans.\nEnvironmentalists are users that can support Dendron financially through a monthly contribution. Environmentalist get access to insider builds, priority support, and access to exclusive dev channels."
+      },
+      {
+        "command": "dendron.gotoNote",
+        "title": "Dendron: Goto Note",
+        "desc": "Go to a note"
+      },
+      {
+        "command": "dendron.createDailyJournalNote",
+        "title": "Dendron: Create Daily Journal Note",
+        "desc": "Create a global journal note",
+        "docLink": "dendron.topic.special-notes.md",
+        "docPreview": "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/notes.daily.gif)"
+      },
+      {
+        "command": "dendron.copyNoteLink",
+        "title": "Dendron: Copy Note Link",
+        "desc": "Copy wiki link to note",
+        "docLink": "dendron.topic.commands.md",
+        "docPreview": "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/command.copy-link.gif)"
+      },
+      {
+        "command": "dendron.copyNoteRef",
+        "title": "Dendron: Copy Note Ref",
+        "desc": "Copies a reference to the current open document",
+        "docLink": "dendron.topic.commands.md",
+        "docs": "Lets you quickly create a [[note reference| dendron.topic.refs]] to the current note.\n![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/ref-note.gif)\n\nIf you have a header selected while running this command, it will copy the note ref with the selected header to the next note ref\n![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/refs.copy-selection.gif)",
+        "docPreview": ""
+      },
+      {
+        "command": "dendron.deleteNode",
+        "title": "Dendron: Delete Node",
+        "desc": "Delete a note or schema",
+        "docLink": "dendron.topic.lookup.md",
+        "docPreview": ""
+      },
+      {
+        "command": "dendron.insertNote",
+        "title": "Dendron: Insert Note",
+        "desc": "Insert note contents"
+      },
+      {
+        "command": "dendron.insertNoteLink",
+        "title": "Dendron: Insert Note Link",
+        "desc": "Insert note link"
+      },
+      {
+        "command": "dendron.moveNote",
+        "title": "Dendron: Move Note",
+        "desc": "Move a note"
+      },
+      {
+        "command": "dendron.renameNote",
+        "title": "Dendron: Rename Note",
+        "desc": "Rename a note and all backlinks",
+        "docLink": "dendron.topic.commands.md",
+        "docPreview": "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/command-rename.gif)"
+      },
+      {
+        "command": "dendron.lookup",
+        "title": "Dendron: Lookup",
+        "desc": "Initiate note lookup",
+        "docLink": "dendron.topic.lookup.md",
+        "docPreview": "",
+        "when": "dendron:pluginActive"
+      },
+      {
+        "command": "dendron.lookupNote",
+        "title": "Dendron: Lookup Note",
+        "desc": "Initiate note lookup",
+        "when": "dendron:pluginActive"
+      },
+      {
+        "command": "dendron.lookupSchema",
+        "title": "Dendron: Lookup Schema",
+        "desc": "Initiate schema lookup",
+        "docLink": "dendron.topic.lookup.md",
+        "docPreview": "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/schema-lookup.gif)"
+      },
+      {
+        "command": "dendron.reloadIndex",
+        "title": "Dendron: Reload Index",
+        "desc": "Reload the index. Necessary for Dendron to pick up on schema changes.",
+        "docLink": "dendron.topic.commands.md",
+        "docPreview": ""
+      },
+      {
+        "command": "dendron.archiveHierarchy",
+        "title": "Dendron: Archive Hierarchy",
+        "desc": "Move current note and all children under the `archive` hierarchy",
+        "docs": "This is a convenience method around `Refactor Hierarchy` for the case of archiving hierarchies you are no longer using. For example, if you were currently at `pro.foo`, running `Archive Hierarchy` would be equivalent to running `Refactor Hierarchy` with the following arguments:\n- matcher: `pro.foo`\n- replacement:  `archive.pro.foo`",
+        "docLink": "dendron.topic.commands.md",
+        "docPreview": "<a href=\"https://www.loom.com/share/9698d5a4451b49d8b107f3ff67d97877\">  <img style=\"\" src=\"https://cdn.loom.com/sessions/thumbnails/9698d5a4451b49d8b107f3ff67d97877-with-play.gif\"> </a>"
+      },
+      {
+        "command": "dendron.refactorHierarchy",
+        "title": "Dendron: Refactor Hierarchy",
+        "desc": "Update hierarchy using regex",
+        "docs": "Like `Rename Note` but works on an entire hierarchy of notes. This command takes two arguments: \n- matcher: regex that matches text you want to capture for replacement\n- replacer: regex that represents text you want to use as replacement\n\nAfter running the command, you will be taken to a preview that shows all files that will be affected. You will be given an option in a dropdown to either proceed with the refactor or cancel the operation. \n\n- NOTE: Dendron will warn you if refactoring will overwrite existing files. You will need to either change your `replacer` or move the affected files before Dendron will perform a refactor\n\nRefactor Hierarchy is \nhttps://discordapp.com/channels/717965437182410783/743194856788328497/743195382795993291",
+        "docLink": "dendron.topic.commands.md",
+        "docPreview": "<a href=\"https://www.loom.com/share/11d90a86fd1348a5a504406b52d79f85\"> <img style=\"\" src=\"https://cdn.loom.com/sessions/thumbnails/11d90a86fd1348a5a504406b52d79f85-with-play.gif\"> </a>"
+      },
+      {
+        "command": "dendron.goUpHierarchy",
+        "title": "Dendron: Go Up",
+        "desc": "Go to closet non-stub parent of the currently open note",
+        "docLink": "dendron.topic.commands.md",
+        "docPreview": "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/hierarchy.go-up.gif)"
+      },
+      {
+        "command": "dendron.goNextHierarchy",
+        "title": "Dendron: Go Next Sibling",
+        "desc": "Go to the next sibling",
+        "docLink": "dendron.topic.commands.md",
+        "docPreview": "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/hierarchy.go-sibling.gif)"
+      },
+      {
+        "command": "dendron.goPrevHierarchy",
+        "title": "Dendron: Go Previous Sibling",
+        "desc": "Go to the previous sibling",
+        "docLink": "dendron.topic.commands.md",
+        "docPreview": "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/hierarchy.go-sibling.gif)"
+      },
+      {
+        "command": "dendron.goDownHierarchy",
+        "title": "Dendron: Go Down",
+        "desc": "Go down the hierarchy",
+        "docLink": "dendron.topic.commands.md",
+        "docPreview": "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/hierarchy.go-down.gif)"
+      },
+      {
+        "command": "dendron.addAndCommit",
+        "title": "Dendron: Workspace: Add and Commit",
+        "desc": "add and commit all files"
+      },
+      {
+        "command": "dendron.sync",
+        "title": "Dendron: Workspace: Sync",
+        "desc": "Sync all files",
+        "docPreview": "Sync all files in your workspace, across all vaults.\nThis will add and commit all changes, then pull and push to sync all changes."
+      },
+      {
+        "command": "dendron.vaultAdd",
+        "title": "Dendron: Vault Add",
+        "desc": "Add a new vault",
+        "docPreview": "<div style=\"position: relative; padding-bottom: 62.5%; height: 0;\"><iframe src=\"https://www.loom.com/embed/b4171372f9794dd7be609c043f343fa3\" frameborder=\"0\" webkitallowfullscreen mozallowfullscreen allowfullscreen style=\"position: absolute; top: 0; left: 0; width: 100%; height: 100%;\"></iframe></div>",
+        "docs": "When you add a vault, you can choose between adding a local vault or a remote vault.",
+        "docLink": ""
+      },
+      {
+        "command": "dendron.vaultRemove",
+        "title": "Dendron: Vault Remove",
+        "desc": "Remove a vault",
+        "docLink": "",
+        "docPreview": "Remove a vault from your workspace. Note that the underlying files wil **not** be deleted - the vault will lose its association with your workspace.\n<div style=\"position: relative; padding-bottom: 62.5%; height: 0;\"><iframe src=\"https://www.loom.com/embed/307effc22b8d4c59a32933529a8393e1\" frameborder=\"0\" webkitallowfullscreen mozallowfullscreen allowfullscreen style=\"position: absolute; top: 0; left: 0; width: 100%; height: 100%;\"></iframe></div>"
+      },
+      {
+        "command": "dendron.initWS",
+        "title": "Dendron: Initialize Workspace",
+        "desc": "Create a new workspace",
+        "docLink": "dendron.topic.commands.md",
+        "docPreview": "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/workspace-init.gif)"
+      },
+      {
+        "command": "dendron.changeWS",
+        "title": "Dendron: Change Workspace",
+        "desc": "Change into existing workspace",
+        "docLink": "dendron.topic.commands.md",
+        "docPreview": ""
+      },
+      {
+        "command": "dendron.upgradeSettings",
+        "title": "Dendron: Upgrade Settings",
+        "desc": "Upgrade to the latest Dendron settings. You shouldn't need to run this manually. Its run everytime you get a Dendron update.",
+        "docLink": "dendron.topic.commands.md",
+        "docPreview": ""
+      },
+      {
+        "command": "dendron.configurePod",
+        "title": "Dendron: Configure Pod",
+        "desc": "Update your pod configuration",
+        "docLink": "dendron.topic.pod.md",
+        "docPreview": "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/pods.configure.gif)"
+      },
+      {
+        "command": "dendron.importPod",
+        "title": "Dendron: Import Pod",
+        "desc": "Import notes from an external data source. Currently, only the local file system is supported",
+        "docLink": "dendron.topic.pod.md",
+        "docPreview": ""
+      },
+      {
+        "command": "dendron.exportPod",
+        "title": "Dendron: Export Pod",
+        "desc": "Export notes to an external data source. Currently only JSON is supported. ",
+        "docLink": "dendron.topic.pod.md",
+        "docPreview": "<a href=\"https://www.loom.com/share/d49e5f4155af485cadc9cd810b6cab28\"> <img src=\"https://cdn.loom.com/sessions/thumbnails/d49e5f4155af485cadc9cd810b6cab28-with-play.gif\"> </a>"
+      },
+      {
+        "command": "dendron.publishPod",
+        "title": "Dendron: Publish Pod",
+        "desc": "Publish your note to a different format/location",
+        "docLink": "dendron.topic.pod.md",
+        "docPreview": ""
+      },
+      {
+        "command": "dendron.snapshotVault",
+        "title": "Dendron: Snapshot Vault",
+        "desc": "Create a snapshot of your vault",
+        "docs": "Takes a snapshot of your entire vault, including assets. This command will ignore version control folders like .git when making a snapshot.\nSnapshots are saved under {workspace}/snapshots/{timestamp}",
+        "docLink": "",
+        "docPreview": ""
+      },
+      {
+        "command": "dendron.restoreVault",
+        "title": "Dendron: Restore Vault",
+        "desc": "Restore your vault from a snapshot",
+        "docs": "Restores your vault based on a snapshot. When restoring, it will over-write any notes that have the same name as notes in the snapshot. It will ignore version control directories like .git when restoring your vault",
+        "docLink": "",
+        "docPreview": ""
+      },
+      {
+        "command": "dendron.copyNoteURL",
+        "title": "Dendron: Copy Note URL",
+        "desc": "Get URL of current note from published site",
+        "docs": "If you highlight a header, will copy the url with the header set as the anchor",
+        "docLink": "",
+        "docPreview": "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/notes.copy-url.gif)"
+      },
+      {
+        "command": "dendron.createHook",
+        "title": "Dendron: Hook Create",
+        "desc": "Create a hook",
+        "when": "dendron:pluginActive"
+      },
+      {
+        "command": "dendron.deleteHook",
+        "title": "Dendron: Hook Delete",
+        "desc": "Delete a hook",
+        "when": "dendron:pluginActive"
+      },
+      {
+        "command": "dendron.siteBuild",
+        "title": "Dendron: Site Build",
+        "desc": "Build your notes using publishing v2",
+        "docs": "This command works by running `dendron-cli` in the background.",
+        "docLink": "",
+        "docPreview": ""
+      },
+      {
+        "command": "dendron.sitePreview",
+        "title": "Dendron: Site Preview",
+        "desc": "Preview your notes on localhost using publishing v2",
+        "docs": "This command works by running `dendron-cli` in the background.",
+        "docLink": "",
+        "docPreview": ""
+      },
+      {
+        "command": "dendron.signUp",
+        "title": "Dendron: Sign Up",
+        "desc": "sign up for a Dendron account"
+      },
+      {
+        "command": "dendron.signIn",
+        "title": "Dendron: Sign In",
+        "desc": "sign in to a Dendron account"
+      },
+      {
+        "command": "dendron.enableTelemetry",
+        "title": "Dendron: Enable Telemetry",
+        "desc": "Enable telemetry"
+      },
+      {
+        "command": "dendron.disableTelemetry",
+        "title": "Dendron: Disable Telemetry",
+        "desc": "Disable telemetry"
+      },
+      {
+        "command": "dendron.openLink",
+        "title": "Dendron: Open Link",
+        "desc": "Open link to external file (eg. pdf, .mov, etc) use system default",
+        "docLink": "dendron.topic.links.md",
+        "docPreview": "<a href=\"https://www.loom.com/share/01250485e20a4cdca2a053dd6047ac68\"><img src=\"https://cdn.loom.com/sessions/thumbnails/01250485e20a4cdca2a053dd6047ac68-with-play.gif\"> </a>"
+      },
+      {
+        "command": "dendron.pasteLink",
+        "title": "Dendron: Paste Link",
+        "desc": "Fetch metadata for a web link and format as markdown"
+      },
+      {
+        "command": "dendron.showHelp",
+        "title": "Dendron: Show Help",
+        "desc": "Dendron will open your current browser to the [[cheatsheet|dendron.cheatsheet]] page. ",
+        "docLink": "dendron.topic.commands.md",
+        "docPreview": "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/workbench.help.gif)"
+      },
+      {
+        "command": "dendron.showNoteGraphV2",
+        "title": "Dendron: Show Note Graph V2",
+        "desc": "Display the notes in this workspace as a graph"
+      },
+      {
+        "command": "dendron.showSchemaGraphV2",
+        "title": "Dendron: Show Schema Graph V2",
+        "desc": "Display the schemas in this workspace as a graph",
+        "when": "dendron:devMode"
+      },
+      {
+        "command": "dendron.showPreview",
+        "title": "Dendron: Show Preview",
+        "desc": "Show Markdown Preview",
+        "docLink": "dendron.topic.commands.md",
+        "docPreview": ""
+      },
+      {
+        "command": "dendron.pasteFile",
+        "title": "Dendron: Paste File",
+        "desc": "Paste file"
+      },
+      {
+        "command": "dendron.configureRaw",
+        "title": "Dendron: Configure (yaml)",
+        "desc": "Modify Dendron Config as raw YAML",
+        "docs": "",
+        "docLink": "",
+        "docPreview": ""
+      },
+      {
+        "command": "dendron.configureUI",
+        "title": "Dendron: Configure",
+        "desc": "Modify Dendron Config using Dendron UI",
+        "docs": "<div style=\"position: relative; padding-bottom: 62.5%; height: 0;\"><iframe src=\"https://www.loom.com/embed/5b6689eb76344fbb814a3d4405ef62b8\" frameborder=\"0\" webkitallowfullscreen mozallowfullscreen allowfullscreen style=\"position: absolute; top: 0; left: 0; width: 100%; height: 100%;\"></iframe></div>",
+        "docLink": "",
+        "docPreview": ""
+      },
+      {
+        "command": "dendron.dev.doctor",
+        "title": "Dendron: Doctor",
+        "desc": "Auto fix issues with frontmatter",
+        "docs": "This makes sure your workspace is up to date. It will execute the following actions:\n- add ids and titles to the frontmatter of all notes that are missing it\n- setup a `docs` folder if it doesn't exist. Required if you want to [[publish | dendron.topic.publishing]] your notes",
+        "docLink": "dendron.topic.commands.md",
+        "docPreview": "<a href=\"https://www.loom.com/share/bd045f708f8e474193de8e3de0dc820f\"> <img style=\"\" src=\"https://cdn.loom.com/sessions/thumbnails/bd045f708f8e474193de8e3de0dc820f-with-play.gif\"> </a>"
+      },
+      {
+        "command": "dendron.dev.dumpState",
+        "title": "Dendron: Dump State",
+        "desc": "Dump internal state of Dendron inside logs",
+        "docs": "This is useful when diagnosing issues in Dendron"
+      },
+      {
+        "command": "dendron.dev.resetConfig",
+        "title": "Dendron:Dev: Reset Config",
+        "desc": "Reset the config"
+      },
+      {
+        "command": "dendron.dev.openLogs",
+        "title": "Dendron:Dev: Open Logs",
+        "desc": "Open Dendron logs for current session",
+        "docLink": "dendron.topic.commands.md",
+        "docPreview": ""
+      },
+      {
+        "command": "dendron.diagnosticsReport",
+        "title": "Dendron:Dev: Diagnostics Report",
+        "desc": "Generate diagnostics report",
+        "docLink": "dendron.topic.commands.md",
+        "docPreview": ""
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "dendron.gotoNote",
+        "key": "ctrl+enter",
+        "when": "editorFocus"
+      },
+      {
+        "command": "dendron.createDailyJournalNote",
+        "key": "ctrl+shift+i",
+        "mac": "cmd+shift+i",
+        "when": "dendron:pluginActive"
+      },
+      {
+        "command": "dendron.copyNoteLink",
+        "key": "ctrl+shift+c",
+        "mac": "cmd+shift+c",
+        "when": "editorFocus && dendron:pluginActive"
+      },
+      {
+        "command": "dendron.copyNoteRef",
+        "key": "ctrl+shift+r",
+        "mac": "cmd+shift+r",
+        "when": "editorFocus && dendron:pluginActive"
+      },
+      {
+        "command": "dendron.deleteNode",
+        "key": "ctrl+shift+d",
+        "mac": "cmd+shift+d",
+        "when": "dendron:pluginActive"
+      },
+      {
+        "command": "dendron.lookup",
+        "mac": "cmd+L",
+        "key": "ctrl+l",
+        "when": "dendron:pluginActive"
+      },
+      {
+        "command": "dendron.lookup",
+        "key": "ctrl+shift+j",
+        "mac": "cmd+shift+j",
+        "args": {
+          "noteType": "journal"
+        },
+        "when": "dendron:pluginActive"
+      },
+      {
+        "command": "dendron.lookup",
+        "key": "ctrl+shift+s",
+        "mac": "cmd+shift+s",
+        "args": {
+          "noteType": "scratch",
+          "selectionType": "selection2link"
+        },
+        "when": "dendron:pluginActive"
+      },
+      {
+        "command": "dendron.lookupSchema",
+        "mac": "cmd+shift+L",
+        "key": "ctrl+shift+l",
+        "when": "dendron:pluginActive"
+      },
+      {
+        "command": "dendron.goUpHierarchy",
+        "mac": "cmd+shift+up",
+        "key": "ctrl+shift+up",
+        "when": "editorFocus && dendron:pluginActive"
+      },
+      {
+        "command": "dendron.goNextHierarchy",
+        "key": "ctrl+shift+]",
+        "when": "editorFocus && dendron:pluginActive"
+      },
+      {
+        "command": "dendron.goPrevHierarchy",
+        "key": "ctrl+shift+[",
+        "when": "editorFocus && dendron:pluginActive"
+      },
+      {
+        "command": "dendron.goDownHierarchy",
+        "mac": "cmd+shift+down",
+        "key": "ctrl+shift+down",
+        "when": "editorFocus && dendron:pluginActive"
+      },
+      {
+        "command": "dendron.copyNoteURL",
+        "mac": "cmd+shift+u",
+        "windows": "ctrl+shift+u",
+        "when": "editorFocus && dendron:pluginActive"
+      },
+      {
+        "command": "dendron.showPreview",
+        "windows": "windows+ctrl+p",
+        "mac": "cmd+ctrl+p"
+      }
+    ],
+    "markdown.previewStyles": [
+      "./media/fontello/css/fontello.css",
+      "./media/markdown.css"
+    ]
+  },
+  "icon": "assets/images/logo.png",
+  "scripts": {
+    "vscode:prepublish": "yarn webpack:prod",
+    "webpack": "webpack --mode development",
+    "webpack:prod": "webpack --mode production",
+    "webpack:dev:watch": "webpack --mode development --watch",
+    "lint": "eslint src --ext ts",
+    "watch": "yarn compile --watch",
+    "build": "yarn compile",
+    "compile": "tsc -p tsconfig.build.json",
+    "pretest": "yarn compile",
+    "test": "node ./out/src/test/runTestInteg.js",
+    "format": "echo nop"
+  },
+  "devDependencies": {
+    "@dendronhq/common-test-utils": "^0.45.0",
+    "@types/execa": "^2.0.0",
+    "@types/fs-extra": "^9.0.1",
+    "@types/glob": "^7.1.1",
+    "@types/lodash": "^4.14.155",
+    "@types/luxon": "^1.25.0",
+    "@types/markdown-it": "^10.0.2",
+    "@types/mocha": "^7.0.2",
+    "@types/node": "^13.11.0",
+    "@types/open": "^6.2.1",
+    "@types/open-graph-scraper": "^4.7.0",
+    "@types/semver": "^7.3.1",
+    "@typescript-eslint/eslint-plugin": "^2.30.0",
+    "@typescript-eslint/parser": "^2.30.0",
+    "copy-webpack-plugin": "^6.0.4",
+    "eslint": "^6.8.0",
+    "glob": "^7.1.6",
+    "mocha": "^7.1.2",
+    "ts-loader": "^8.0.0",
+    "ts-node": "^8.10.2",
+    "vscode-test": "^1.3.0",
+    "webpack": "^4.43.0",
+    "webpack-cli": "^3.3.12"
+  },
+  "dependencies": {
+    "@dendronhq/api-server": "^0.45.0",
+    "@dendronhq/common-all": "^0.45.0",
+    "@dendronhq/common-server": "^0.45.0",
+    "@dendronhq/dendron-cli": "^0.45.0",
+    "@dendronhq/engine-server": "^0.45.0",
+    "@dendronhq/engine-test-utils": "^0.45.0",
+    "@dendronhq/lsp-server": "^0.28.7-alpha.0",
+    "@dendronhq/pods-core": "^0.45.0",
+    "@types/vscode": "1.54",
+    "cross-path-sort": "^1.0.0",
+    "execa": "^4.0.2",
+    "fs-extra": "^9.0.1",
+    "lodash": "^4.17.15",
+    "luxon": "^1.25.0",
+    "markdown-it": "^11.0.0",
+    "markdown-it-regex": "^0.2.0",
+    "open": "^7.0.4",
+    "open-graph-scraper": "^4.7.1",
+    "semver": "^7.3.2",
+    "vscode-languageclient": "^6.1.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/dendronhq/dendron.git",
+    "directory": "packages/plugin-core"
+  }
 }

@@ -29,7 +29,7 @@
   "scripts": {
     "clean": "rimraf lib && rimraf coverage",
     "format:old": "prettier --ignore-path='../../.prettierignore' --write .",
-    "format": "cd ../.. && yarn format:pkg $npm_package_repository_directory",
+    "format": "echo nop",
     "lint": "echo stub",
     "prepublishOnly": "yarn build",
     "prebuild": "yarn clean && yarn format && yarn lint && echo Using TypeScript && tsc --version",

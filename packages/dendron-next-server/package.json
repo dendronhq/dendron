@@ -22,7 +22,7 @@
     "deploy:dev": "env STAGE=dev amplify publish",
     "deploy:prod": "env STAGE=prod amplify publish",
     "gen:theme": "gulp less",
-    "format": "cd ../.. && yarn format:pkg $npm_package_repository_directory"
+    "format": "echo nop"
   },
   "nohoist": [
     "**/common-all",

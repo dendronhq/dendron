@@ -13,7 +13,8 @@ import {
 } from "@dendronhq/common-all";
 import type { Moment } from "moment";
 import moment from "moment";
-import { Calendar } from "antd";
+import { Calendar, Badge, Space } from "antd";
+import { blue } from "@ant-design/colors";
 import type { CalendarProps } from "antd";
 import _ from "lodash";
 import React, { useState, useMemo, useCallback } from "react";
@@ -47,6 +48,8 @@ function CalendarView({ engine, ide }: DendronProps) {
     engine,
     ide,
   });
+
+  const wordsPerDot = 250; // TODO make configurable
 
   const [currentMode, setCurrentMode] =
     useState<AntdCalendarProps["mode"]>("month");
@@ -117,12 +120,46 @@ function CalendarView({ engine, ide }: DendronProps) {
     [setCurrentMode]
   );
 
+  const dateCellRender: AntdCalendarProps["dateCellRender"] = useCallback(
+    (date) => {
+      const dateKey = date.format(
+        currentMode === "month" ? "YYYY-MM-DD" : "YYYY-MM" // TODO use config value `dendron.defaultJournalDateFormat`
+      );
+      const selectedNote: NoteProps | undefined = groupedDailyNotes[dateKey];
+      if (selectedNote) {
+        return (
+          <Space size={0} wrap>
+            {_.times(
+              _.clamp(
+                Math.floor(selectedNote.body.split(" ").length / wordsPerDot),
+                0,
+                5
+              ),
+              () => (
+                <Badge
+                  dot
+                  color={
+                    "#00adb5" /* color copied from packages/dendron-next-server/assets/themes/dark-theme.less */
+                  }
+                />
+              )
+            )}
+          </Space>
+        );
+      }
+
+      return null;
+    },
+    [groupedDailyNotes, wordsPerDot]
+  );
+
   return (
     <Calendar
       mode={currentMode}
       onSelect={onSelect}
       onPanelChange={onPanelChange}
       value={activeDate}
+      dateCellRender={dateCellRender}
     />
   );
 }

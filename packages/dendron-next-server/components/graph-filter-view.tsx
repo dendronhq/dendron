@@ -1,17 +1,31 @@
 import { Typography, Collapse, Switch, Space, InputNumber, Input } from "antd";
 import _, { values } from "lodash";
-import { GraphConfig } from "./graph";
+import { GraphConfig } from "../lib/graph";
 const { Panel } = Collapse;
 
 type FilterProps = {
   type: "note" | "schema";
   config: GraphConfig;
-  setField: (key: string, value: any) => void;
+  setConfig: React.Dispatch<React.SetStateAction<GraphConfig>>;
 };
 
-const GraphFilterView = ({ type, config, setField }: FilterProps) => {
+const GraphFilterView = ({ config, setConfig }: FilterProps) => {
   const sections = new Set(Object.keys(config).map((key) => key.split(".")[0]));
   const configEntries = Object.entries(config);
+
+  const updateConfigField = (key: string, value: string | number | boolean) => {
+    setConfig((c) => {
+      const newConfig = {
+        ...c,
+        [key]: {
+          // @ts-ignore
+          ...c[key],
+          value,
+        },
+      };
+      return newConfig;
+    });
+  };
 
   return (
     <div
@@ -35,7 +49,10 @@ const GraphFilterView = ({ type, config, setField }: FilterProps) => {
                   const keyArray = key.split(".");
                   const label =
                     entry?.label ||
-                    `${_.capitalize(keyArray[keyArray.length - 1])}`;
+                    `${keyArray[keyArray.length - 1]
+                      .split("-")
+                      .map((k) => _.capitalize(k))
+                      .join(" ")}`;
 
                   return (
                     <Space
@@ -47,7 +64,9 @@ const GraphFilterView = ({ type, config, setField }: FilterProps) => {
                           <Typography>{label}</Typography>
                           <Switch
                             checked={entry?.value}
-                            onChange={(newValue) => setField(key, newValue)}
+                            onChange={(newValue) =>
+                              updateConfigField(key, newValue)
+                            }
                             disabled={!entry?.mutable}
                           />
                         </>
@@ -57,7 +76,9 @@ const GraphFilterView = ({ type, config, setField }: FilterProps) => {
                           <Typography>{label}</Typography>
                           <InputNumber
                             defaultValue={entry?.value}
-                            onChange={(newValue) => setField(key, newValue)}
+                            onChange={(newValue) =>
+                              updateConfigField(key, newValue)
+                            }
                             disabled={!entry?.mutable}
                           />
                         </>
@@ -68,7 +89,7 @@ const GraphFilterView = ({ type, config, setField }: FilterProps) => {
                           <Input
                             defaultValue={entry?.value}
                             onChange={(newValue) =>
-                              setField(key, newValue.target.value)
+                              updateConfigField(key, newValue.target.value)
                             }
                             disabled={!entry?.mutable}
                           />

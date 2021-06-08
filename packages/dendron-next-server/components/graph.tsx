@@ -1,7 +1,12 @@
 import { createLogger } from "@dendronhq/common-frontend";
 import _ from "lodash";
 import React, { useEffect, useRef, useState } from "react";
-import cytoscape, { Core, ElementsDefinition, EventHandler } from "cytoscape";
+import cytoscape, {
+  Core,
+  EdgeDefinition,
+  ElementsDefinition,
+  EventHandler,
+} from "cytoscape";
 // @ts-ignore
 import euler from "cytoscape-euler";
 import { useRouter } from "next/router";
@@ -10,6 +15,12 @@ import { Space, Typography } from "antd";
 import Head from "next/head";
 import AntThemes from "../styles/theme-antd";
 import GraphFilterView from "./graph-filter-view";
+import {
+  GraphConfig,
+  GraphEdges,
+  GraphElements,
+  GraphNodes,
+} from "../lib/graph";
 
 const getCytoscapeStyle = (themes: any, theme: string | undefined) => {
   if (_.isUndefined(theme)) return "";
@@ -37,7 +48,7 @@ const getCytoscapeStyle = (themes: any, theme: string | undefined) => {
     color: ${AntThemes[theme].graph.node._selected.color};
   }
 
-  .link {
+  .links {
     line-style: dashed;
   }
 `;
@@ -60,7 +71,7 @@ const getEulerConfig = (isLargeGraph: boolean) => ({
   animationDuration: undefined,
   animationEasing: undefined,
   maxIterations: 1000,
-  maxSimulationTime: 2000,
+  maxSimulationTime: 1000,
   ungrabifyWhileSimulating: false,
   fit: true,
   padding: 30,
@@ -68,105 +79,92 @@ const getEulerConfig = (isLargeGraph: boolean) => ({
   randomize: false,
 });
 
-type GraphConfigItem<T> = {
-  value: T;
-  mutable: boolean;
-  label?: string;
-};
-
-type CoreGraphConfig = {
-  "information.nodes": GraphConfigItem<number>;
-  "information.edges": GraphConfigItem<number>;
-  "filter.regex": GraphConfigItem<string>;
-};
-type NoteGraphConfig = {
-  "display.hierarchy"?: GraphConfigItem<boolean>;
-  "display.links"?: GraphConfigItem<boolean>;
-};
-type SchemaGraphConfig = {};
-
-export type GraphConfig = CoreGraphConfig & NoteGraphConfig & SchemaGraphConfig;
-
-const coreGraphConfig: CoreGraphConfig = {
-  "filter.regex": {
-    value: "",
-    mutable: true,
-  },
-  "information.nodes": {
-    value: 0,
-    mutable: false,
-  },
-  "information.edges": {
-    value: 0,
-    mutable: false,
-  },
-};
-
-const noteGraphConfig: NoteGraphConfig = {
-  "display.hierarchy": {
-    value: true,
-    mutable: true,
-  },
-  "display.links": {
-    value: false,
-    mutable: true,
-  },
-};
-
-const schemaGraphConfig: SchemaGraphConfig = {};
-
 export default function Graph({
   elements,
   type = "note",
   onSelect,
+  config,
+  setConfig,
 }: {
-  elements: ElementsDefinition | undefined;
+  elements: GraphElements;
   onSelect: EventHandler;
+  config: GraphConfig;
+  setConfig: React.Dispatch<React.SetStateAction<GraphConfig>>;
   type?: "note" | "schema";
 }) {
   const logger = createLogger("Graph");
   const graphRef = useRef<HTMLDivElement>(null);
   const { themes, currentTheme } = useThemeSwitcher();
-
   const [cy, setCy] = useState<Core>();
 
-  const [config, setConfig] = useState<GraphConfig>({
-    ...(type === "note" ? noteGraphConfig : schemaGraphConfig),
-    ...coreGraphConfig,
-  });
+  const { nodes, edges } = elements;
 
-  const handleUpdateConfig = (
-    key: string,
-    value: string | number | boolean
-  ) => {
-    logger.log(key, value);
-    setConfig((c) => {
-      const newConfig = {
-        ...c,
-        [key]: {
-          // @ts-ignore
-          ...c[key],
-          value,
-        },
-      };
-      renderGraph(newConfig);
-      return newConfig;
-    });
+  const isLargeGraph = nodes.length + Object.values(edges).flat().length > 1000;
+
+  const applyConfig = () => {
+    if (!cy || !graphRef.current) return;
+
+    // "display" rules
+    Object.entries(config)
+      .filter(([k, v]) => k.includes("connections"))
+      .forEach(([k, v]) => {
+        const keyArray = k.split(".");
+        const edgeType = keyArray[keyArray.length - 1];
+
+        const includedEdges = cy.$(`.${edgeType}`);
+        const edgeCount = includedEdges.length;
+        logger.log(`${edgeType}:`, edgeCount);
+
+        // If edges should be included
+        if (v?.value) {
+          // If these edges aren't rendered, add them
+          if (edgeCount === 0) {
+            cy.add(edges[edgeType]);
+          }
+        }
+
+        // If edges should not be included
+        else {
+          // If these edges are rendered, remove them
+          if (edgeCount > 0) {
+            includedEdges.remove();
+          }
+        }
+      });
+
+    // Only re-layout graph if it will be performant to do so
+    if (!isLargeGraph) {
+      cy.layout(getEulerConfig(isLargeGraph)).run();
+    }
   };
 
-  const renderGraph = (graphConfig?: GraphConfig) => {
-    graphConfig = graphConfig || config;
-    if (graphRef.current && elements) {
-      const isLargeGraph = elements.nodes.length + elements.edges.length > 1000;
-
+  const renderGraph = () => {
+    if (graphRef.current && nodes && edges) {
       logger.log("Rendering graph...");
+
+      let parsedEdges: EdgeDefinition[] = [];
+
+      // Filter elements using config
+      Object.entries(config)
+        .filter(([k, v]) => k.includes("connections"))
+        .forEach(([k, v]) => {
+          if (v?.value) {
+            const keyArray = k.split(".");
+            const edgeType = keyArray[keyArray.length - 1];
+            const edgesToAdd = edges[edgeType];
+            if (edgesToAdd) parsedEdges.push(...edgesToAdd);
+          }
+        });
 
       // Add layout middleware
       cytoscape.use(euler);
 
       const network = cytoscape({
         container: graphRef.current,
-        elements: parseElements(elements, graphConfig),
+        elements: {
+          nodes,
+          edges: parsedEdges,
+        },
         style: getCytoscapeStyle(themes, currentTheme) as any,
 
         // Zoom levels
@@ -187,49 +185,37 @@ export default function Graph({
     }
   };
 
-  const parseElements = (
-    elements: cytoscape.ElementsDefinition,
-    config: GraphConfig
-  ) => {
-    if (type === "note") {
-      if (!config["display.hierarchy"]?.value) {
-        elements.nodes = elements.nodes.filter(
-          (n) => !n.classes?.includes(".hierarchy")
-        );
-      }
-      if (!config["display.links"]?.value) {
-        elements.nodes = elements.nodes.filter(
-          (n) => !n.classes?.includes(".link")
-        );
-      }
-    }
+  // const parseElements = (
+  //   elements: cytoscape.ElementsDefinition,
+  //   config: GraphConfig
+  // ) => {
+  //   if (type === "note") {
+  //     if (!config["display.hierarchy"]?.value) {
+  //       elements.nodes = elements.nodes.filter(
+  //         (n) => !n.classes?.includes(".hierarchy")
+  //       );
+  //     }
+  //     if (!config["display.links"]?.value) {
+  //       elements.nodes = elements.nodes.filter(
+  //         (n) => !n.classes?.includes(".link")
+  //       );
+  //     }
+  //   }
 
-    logger.log(elements);
-    return elements;
-  };
+  //   logger.log(elements);
+  //   return elements;
+  // };
 
   useEffect(() => {
     // If the graph already has rendered elements, don't re-render
     // Otherwise, the graph re-renders when elements are selected
     if (cy && cy.elements("*").length > 1) return;
     renderGraph();
-  }, [graphRef, elements]);
+  }, [graphRef, nodes, edges]);
 
   useEffect(() => {
-    if (elements) {
-      setConfig((c) => ({
-        ...c,
-        "information.nodes": {
-          value: elements.nodes.length,
-          mutable: false,
-        },
-        "information.edges": {
-          value: elements.edges.length,
-          mutable: false,
-        },
-      }));
-    }
-  }, [elements]);
+    applyConfig();
+  }, [config]);
 
   return (
     <>
@@ -244,11 +230,7 @@ export default function Graph({
           position: "relative",
         }}
       >
-        <GraphFilterView
-          type={type}
-          config={config}
-          setField={handleUpdateConfig}
-        />
+        <GraphFilterView type={type} config={config} setConfig={setConfig} />
         <div
           ref={graphRef}
           style={{

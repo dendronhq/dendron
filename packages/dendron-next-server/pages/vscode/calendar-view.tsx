@@ -16,7 +16,7 @@ import moment from "moment";
 import { Calendar } from "antd";
 import type { CalendarProps } from "antd";
 import _ from "lodash";
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import { DendronProps } from "../../lib/types";
 
 type AntdCalendarProps = CalendarProps<Moment>;
@@ -89,28 +89,33 @@ function CalendarView({ engine, ide }: DendronProps) {
     return [undefined, {}];
   }, [engineInitialized, noteActive, notes, vaults]);
 
-  // TODO use `useCallback` to preserve identities across renders (immutable props)
-  const onSelect: AntdCalendarProps["onSelect"] = (date) => {
-    logger.info({ ctx: "onSelect", date });
-    const dateKey = date.format(
-      currentMode === "month" ? "YYYY-MM-DD" : "YYYY-MM" // TODO use config value `dendron.defaultJournalDateFormat`
-    );
-    const selectedNote: NoteProps | undefined = groupedDailyNotes[dateKey];
+  const onSelect: AntdCalendarProps["onSelect"] = useCallback(
+    (date) => {
+      logger.info({ ctx: "onSelect", date });
+      const dateKey = date.format(
+        currentMode === "month" ? "YYYY-MM-DD" : "YYYY-MM" // TODO use config value `dendron.defaultJournalDateFormat`
+      );
+      const selectedNote: NoteProps | undefined = groupedDailyNotes[dateKey];
 
-    postVSCodeMessage({
-      type: CalendarViewMessageType.onSelect,
-      data: {
-        id: selectedNote?.id,
-        fname: `daily.journal.${date.format("YYYY.MM.DD")}`,
-      },
-      source: DMessageSource.webClient,
-    });
-  };
+      postVSCodeMessage({
+        type: CalendarViewMessageType.onSelect,
+        data: {
+          id: selectedNote?.id,
+          fname: `daily.journal.${date.format("YYYY.MM.DD")}`,
+        },
+        source: DMessageSource.webClient,
+      });
+    },
+    [currentMode, groupedDailyNotes]
+  );
 
-  const onPanelChange: AntdCalendarProps["onPanelChange"] = (date, mode) => {
-    logger.info({ ctx: "onPanelChange", date, mode });
-    setCurrentMode(mode);
-  };
+  const onPanelChange: AntdCalendarProps["onPanelChange"] = useCallback(
+    (date, mode) => {
+      logger.info({ ctx: "onPanelChange", date, mode });
+      setCurrentMode(mode);
+    },
+    [setCurrentMode]
+  );
 
   return (
     <Calendar

@@ -24,7 +24,9 @@ export class CalendarView implements vscode.WebviewViewProvider {
     const dendronWorkspace = DendronWorkspace.instance();
     dendronWorkspace.addDisposable(
       vscode.window.onDidChangeActiveTextEditor(
-        this.handleActiveTextEditorChange,
+        // An `ChangeActiveTextEditor` event might be immediately followed by a new one (e.g. switch TextDocument).
+        // This would result in the first call to unset `noteActive` and the seconde one to set it again. This might create flashing UI changes that disturb the eye.
+        _.debounce(this.handleActiveTextEditorChange, 100),
         this
       )
     );
@@ -63,7 +65,7 @@ export class CalendarView implements vscode.WebviewViewProvider {
     if (document) {
       this.openTextDocument(document);
     } else {
-      this.refresh(); // call refresh without not so that `noteActive` gets unset.
+      this.refresh(); // call refresh without note so that `noteActive` gets unset.
     }
   }
 
@@ -105,7 +107,7 @@ export class CalendarView implements vscode.WebviewViewProvider {
             break;
           }
           case CalendarViewMessageType.onGetActiveEditor: {
-            this.handleActiveTextEditorChange();
+            this.handleActiveTextEditorChange(); // initial call
             break;
           }
           default:

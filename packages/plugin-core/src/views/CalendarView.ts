@@ -62,6 +62,8 @@ export class CalendarView implements vscode.WebviewViewProvider {
     const document = VSCodeUtils.getActiveTextEditor()?.document;
     if (document) {
       this.openTextDocument(document);
+    } else {
+      this.refresh(); // call refresh without not so that `noteActive` gets unset.
     }
   }
 
@@ -114,7 +116,7 @@ export class CalendarView implements vscode.WebviewViewProvider {
     );
   }
 
-  public refresh(note: NoteProps) {
+  public refresh(note?: NoteProps) {
     if (this._view) {
       this._view.show?.(true); // `show` is not implemented in 1.49 but is for 1.50 insiders
       this._view.webview.postMessage({

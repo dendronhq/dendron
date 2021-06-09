@@ -32,8 +32,6 @@ export type NoteGraphConfig = {
 
 export type SchemaGraphConfig = {
   "connections.schemas"?: GraphConfigItem<boolean>;
-
-  "information.edges"?: GraphConfigItem<number>;
 };
 
 export type GraphConfig = CoreGraphConfig & NoteGraphConfig & SchemaGraphConfig;
@@ -70,10 +68,6 @@ const noteGraphConfig: NoteGraphConfig = {
 };
 
 const schemaGraphConfig: SchemaGraphConfig = {
-  "information.edges": {
-    value: 0,
-    mutable: false,
-  },
 };
 
 export const graphConfig = {

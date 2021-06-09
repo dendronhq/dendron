@@ -3,13 +3,14 @@ import {
   DendronWebViewKey,
   GraphViewMessage,
   GraphViewMessageType,
+  DNodeUtils,
 } from "@dendronhq/common-all";
-import { ViewColumn, window } from "vscode";
+import { Uri, ViewColumn, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { WebViewUtils } from "../views/utils";
 import { BasicCommand } from "./base";
 import { getEngine, getWS } from "../workspace";
-import { GotoNoteCommand } from "./GotoNote";
+import { VSCodeUtils } from "../utils";
 
 type CommandOpts = {};
 
@@ -62,11 +63,26 @@ export class ShowSchemaGraphCommand extends BasicCommand<
     panel.webview.onDidReceiveMessage(async (msg: GraphViewMessage) => {
       switch (msg.type) {
         case GraphViewMessageType.onSelect: {
-          const schema = getEngine().schemas[msg.data.id];
-          await new GotoNoteCommand().execute({
-            qs: schema.fname,
-            vault: schema.vault,
-          });
+          const engine = getEngine();
+          const schema = engine.schemas[msg.data.id];
+
+          console.log(msg.data.id, engine.schemas);
+
+          if (schema) {
+            const fname = schema.fname;
+            const vault = schema.vault;
+
+            console.log(vault);
+
+            const path = DNodeUtils.getFullPath({
+              wsRoot: ws.rootWorkspace.uri.path,
+              vault,
+              basename: `${fname}.md`,
+            });
+
+            const uri = Uri.file(path);
+            await VSCodeUtils.openFileInEditor(uri);
+          }
           break;
         }
         // case GraphViewMessageType.onGetActiveEditor: {

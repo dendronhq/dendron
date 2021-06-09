@@ -1,4 +1,8 @@
-import { createLogger, engineSlice } from "@dendronhq/common-frontend";
+import {
+  createLogger,
+  engineSlice,
+  postVSCodeMessage,
+} from "@dendronhq/common-frontend";
 import _ from "lodash";
 import React, { useEffect, useState } from "react";
 import { ElementsDefinition, EventHandler } from "cytoscape";
@@ -6,6 +10,11 @@ import Graph from "../../components/graph";
 import useGraphElements from "../../hooks/useGraphElements";
 import { GraphConfig, graphConfig } from "../../lib/graph";
 import GraphFilterView from "../../components/graph-filter-view";
+import {
+  DMessageSource,
+  GraphViewMessage,
+  GraphViewMessageType,
+} from "@dendronhq/common-all";
 
 export default function FullSchemaGraph({
   engine,
@@ -18,16 +27,36 @@ export default function FullSchemaGraph({
   const onSelect: EventHandler = (e) => {
     const { id, source } = e.target[0]._private.data;
 
+    const idSections = id.split("_");
+    const rootID = idSections[idSections.length - 1];
+
     const isNode = !source;
     if (!isNode) return;
 
-    // TODO: Implement schema opening
-    //   postVSCodeMessage({
-    //     type: GraphViewMessageType.onSelect,
-    //     data: { id },
-    //     source: DMessageSource.webClient,
-    //   } as GraphViewMessage);
+    postVSCodeMessage({
+      type: GraphViewMessageType.onSelect,
+      data: { id: rootID },
+      source: DMessageSource.webClient,
+    } as GraphViewMessage);
   };
+
+  // Update config
+  useEffect(() => {
+    if (!_.isUndefined(elements)) {
+      setConfig((c) => ({
+        ...c,
+        "information.nodes": {
+          value: elements.nodes.length,
+          mutable: false,
+        },
+        "information.edges-hierarchy": {
+          value: elements.edges.hierarchy ? elements.edges.hierarchy.length : 0,
+          mutable: false,
+          label: "Hierarchical Edges",
+        },
+      }));
+    }
+  }, [elements]);
 
   return (
     <Graph

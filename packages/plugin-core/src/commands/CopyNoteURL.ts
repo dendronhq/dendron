@@ -5,7 +5,7 @@ import { Selection, window } from "vscode";
 import { CONFIG, DENDRON_COMMANDS } from "../constants";
 import { clipboard, VSCodeUtils } from "../utils";
 import { getAnchorAt } from "../utils/editor";
-import { DendronWorkspace, getWS } from "../workspace";
+import { DendronWorkspace, getWS, getEngine } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandOpts = {};
@@ -52,7 +52,8 @@ export class CopyNoteURLCommand extends BasicCommand<
     const fname = path.basename(maybeTextEditor.document.uri.fsPath, ".md");
 
     let note: NoteProps | undefined;
-    note = _.find(DendronWorkspace.instance().getEngine().notes, { fname });
+    const engine = getEngine();
+    note = _.find(engine.notes, { fname });
     if (!note) {
       throw Error(`${fname} not found in engine`);
     }
@@ -65,6 +66,7 @@ export class CopyNoteURLCommand extends BasicCommand<
       const anchor = getAnchorAt({
         editor: editor!,
         position: selection.start,
+        engine,
       });
       if (anchor) link += `#${anchor}`;
     }

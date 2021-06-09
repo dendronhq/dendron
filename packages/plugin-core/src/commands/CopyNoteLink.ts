@@ -47,21 +47,20 @@ export class CopyNoteLinkCommand extends BasicCommand<
     }
 
     const { selection } = VSCodeUtils.getSelection();
-    const { startAnchor, endAnchor } = await getSelectionAnchors({
+    const { startAnchor: anchor } = await getSelectionAnchors({
       editor,
       selection,
+      engine: getEngine(),
+      doEndAnchor: false,
     });
 
     const link = NoteUtils.createWikiLink({
       note,
-      anchor: _.isUndefined(startAnchor)
+      anchor: _.isUndefined(anchor)
         ? undefined
         : {
-            start: startAnchor,
-            startType: isBlockAnchor(startAnchor) ? "blockAnchor" : "header",
-            end: endAnchor,
-            endType:
-              endAnchor && isBlockAnchor(endAnchor) ? "blockAnchor" : "header",
+            value: anchor,
+            type: isBlockAnchor(anchor) ? "blockAnchor" : "header",
           },
       useVaultPrefix: DendronClientUtilsV2.useVaultPrefix(getEngine()),
     });

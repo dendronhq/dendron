@@ -484,10 +484,8 @@ export class NoteUtils {
   static createWikiLink(opts: {
     note: NoteProps;
     anchor?: {
-      start: string;
-      startType: "header" | "blockAnchor";
-      end?: string;
-      endType?: "header" | "blockAnchor";
+      value: string;
+      type: "header" | "blockAnchor";
     };
     useVaultPrefix?: boolean;
     useTitle?: boolean;
@@ -497,19 +495,16 @@ export class NoteUtils {
     });
     let { title, fname, vault } = note;
     let suffix = "";
-    const slugger = getSlugger();
     if (anchor) {
-      const { start, startType, end, endType } = anchor;
-      const startStr = startType === "header" ? slugger.slug(start) : start;
-      const endStr = end && endType === "header" ? slugger.slug(end) : end;
-      if (_.isUndefined(endStr)) {
-        suffix = `#${startStr}`;
+      const { value: id, type } = anchor;
+      let idStr;
+      if (type === "header") {
+        title = id;
+        idStr = getSlugger().slug(id);
       } else {
-        suffix = `#${startStr}:#${endStr}`;
+        idStr = id;
       }
-    }
-    if (anchor && anchor.startType === "header") {
-      title = anchor.start;
+      suffix = `#${idStr}`;
     }
     const vaultPrefix = useVaultPrefix
       ? `${CONSTANTS.DENDRON_DELIMETER}${VaultUtils.getName(vault)}/`

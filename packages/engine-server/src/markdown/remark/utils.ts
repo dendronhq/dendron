@@ -41,6 +41,7 @@ import { createLogger, file2String } from "@dendronhq/common-server";
 import path from "path";
 import { MDUtilsV5, ProcMode } from "../utilsv5";
 export { mdastBuilder };
+export { select, selectAll } from "unist-util-select";
 
 export const ALIAS_DIVIDER = "|";
 

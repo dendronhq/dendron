@@ -57,6 +57,7 @@ export class CopyNoteRefCommand extends BasicCommand<
       const { startAnchor, endAnchor } = await getSelectionAnchors({
         editor,
         selection,
+        engine: getEngine(),
       });
       linkData.anchorStart = startAnchor;
       linkData.anchorEnd = endAnchor;

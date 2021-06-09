@@ -60,6 +60,42 @@ suite("CopyBlockReferenceCommand", function () {
         },
       });
     });
+
+    test("existing anchor", function (done) {
+      let note: NoteProps;
+
+      runSingleVaultTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          note = await NOTE_PRESETS_V4.NOTE_WITH_BLOCK_ANCHOR_TARGET.create({
+            wsRoot,
+            vault: vaults[0],
+          });
+        },
+        onInit: async () => {
+          const editor = await VSCodeUtils.openNote(note);
+          const cmd = new CopyBlockReferenceCommand();
+          editor.selection = new vscode.Selection(
+            LocationTestUtils.getPresetWikiLinkPosition({ line: 10 }),
+            LocationTestUtils.getPresetWikiLinkPosition({ line: 10, char: 10 })
+          );
+          const link = await cmd.execute();
+          const body = editor.document.getText();
+
+          // check that the link looks like what we expect
+          expect(link).toEqual("[[Anchor Target|anchor-target#^block-id]]");
+
+          // should not have inserted any more anchors into the note
+          AssertUtils.assertTimesInString({
+            body,
+            match: [[1, "^"]],
+          });
+
+          done();
+        },
+      });
+    });
+
     test("multi vault", function (done) {
       let note: NoteProps;
 

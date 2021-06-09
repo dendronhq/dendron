@@ -7,6 +7,7 @@ import { BasicCommand } from "./base";
 import { clipboard, DendronClientUtilsV2, VSCodeUtils } from "../utils";
 import { window, Position, TextEditor, TextEditorEdit } from "vscode";
 import { getEngine } from "../workspace";
+import { BLOCK_LINK_REGEX_LOOSE } from "@dendronhq/engine-server";
 const L = Logger;
 
 type CommandOpts = {};
@@ -20,13 +21,15 @@ export class CopyBlockReferenceCommand extends BasicCommand<
 
   /** Add a block anchor at the end of the specified line. The anchor is randomly generated if not supplied.
    *
+   * If there is already an anchor at the end of this line, then this function doesn't actually insert an anchor but returns that anchor instead.
+   *
    * @param editBuilder parameter of the callback in `editor.edit`
    * @param editor the editor that the editBuilder belongs to
    * @param position the line where the anchor will be inserted
-   * @param anchor anchor id to insert, randomly generated if undefined
-   * @returns the anchor id that has been added
+   * @param anchor anchor id to insert (without ^), randomly generated if undefined
+   * @returns the anchor that has been added (with ^)
    */
-  static addAnchorAt({
+  static addOrGetAnchorAt({
     editBuilder,
     editor,
     position,
@@ -37,8 +40,10 @@ export class CopyBlockReferenceCommand extends BasicCommand<
     position: Position;
     anchor?: string;
   }) {
-    if (_.isUndefined(anchor)) anchor = genUUID().slice(0, 8);
     const line = editor.document.lineAt(position.line);
+    const existingAnchor = line.text.match(BLOCK_LINK_REGEX_LOOSE.source + "$");
+    if (!_.isNull(existingAnchor)) return existingAnchor[0];
+    if (_.isUndefined(anchor)) anchor = genUUID().slice(0, 8);
     editBuilder.insert(line.range.end, ` ^${anchor}`);
     return `^${anchor}`;
   }
@@ -63,7 +68,7 @@ export class CopyBlockReferenceCommand extends BasicCommand<
 
     // insert the anchors into this note
     await editor.edit((editBuilder) => {
-      const anchor = CopyBlockReferenceCommand.addAnchorAt({
+      const anchor = CopyBlockReferenceCommand.addOrGetAnchorAt({
         editBuilder,
         editor,
         position: selection.start,
@@ -71,7 +76,7 @@ export class CopyBlockReferenceCommand extends BasicCommand<
       anchorsInserted.push(anchor);
       if (!selection.isSingleLine) {
         // if the selection spans multiple lines, add start and end anchors
-        const anchor = CopyBlockReferenceCommand.addAnchorAt({
+        const anchor = CopyBlockReferenceCommand.addOrGetAnchorAt({
           editBuilder,
           editor,
           position: selection.end,

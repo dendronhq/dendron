@@ -8,4 +8,5 @@ export {
   blockAnchors,
   BlockAnchorOpts,
   matchBlockAnchor,
+  BLOCK_LINK_REGEX_LOOSE,
 } from "./blockAnchors";

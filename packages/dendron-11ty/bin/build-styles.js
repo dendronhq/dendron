@@ -27,6 +27,12 @@ const buildSass = async function () {
     console.log("build style...", outputFile);
     await fs.ensureFile(outputFile);
     await fs.writeFile(outputFile, css);
+    const inputBase = path.join(getSiteOutputPath(), "raw-assets", "css");
+    const outputBase = path.join(getSiteOutputPath(), "assets", "css");
+    ["jquery.feedback_me", "jquery.thumbs"].forEach( ent => {
+      console.log("copy ", ent);
+      fs.copyFileSync(path.join(inputBase, `${ent}.css.txt`), path.join(outputBase, `${ent}.css`));
+    });
   } catch (error) {
     console.error(`Error writing generated CSS: ${error}`);
   }

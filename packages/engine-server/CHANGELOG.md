@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.45.1](https://github.com/dendronhq/dendron/compare/v0.45.0...v0.45.1) (2021-06-09)
+
+
+### Bug Fixes
+
+* format issue ([232926d](https://github.com/dendronhq/dendron/commit/232926d88c633aaa052711e9380a9da4a1ecc5d7))
+* incorrect parsing of aliases starting with `#` ([#804](https://github.com/dendronhq/dendron/issues/804)) ([a3e0099](https://github.com/dendronhq/dendron/commit/a3e0099acb816f31066779844d951bb6cc0bda5d)), closes [#790](https://github.com/dendronhq/dendron/issues/790)
+
+
+
+
+
 # [0.45.0](https://github.com/dendronhq/dendron/compare/v0.44.1...v0.45.0) (2021-06-07)
 
 **Note:** Version bump only for package @dendronhq/engine-server

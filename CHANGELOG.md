@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.45.1](https://github.com/dendronhq/dendron/compare/v0.45.0...v0.45.1) (2021-06-09)
+
+
+### Bug Fixes
+
+* 11ty failure on windows ([71ca310](https://github.com/dendronhq/dendron/commit/71ca3106b7f23219ecb46817647032341f1193bc))
+* assets respect vault visibility ([c16e900](https://github.com/dendronhq/dendron/commit/c16e9008553024d1526b2b004cd1b5efc69cdbc6))
+* format issue ([232926d](https://github.com/dendronhq/dendron/commit/232926d88c633aaa052711e9380a9da4a1ecc5d7))
+* incorrect parsing of aliases starting with `#` ([#804](https://github.com/dendronhq/dendron/issues/804)) ([a3e0099](https://github.com/dendronhq/dendron/commit/a3e0099acb816f31066779844d951bb6cc0bda5d)), closes [#790](https://github.com/dendronhq/dendron/issues/790)
+
+
+
+
+
 # [0.45.0](https://github.com/dendronhq/dendron/compare/v0.44.1...v0.45.0) (2021-06-07)
 
 

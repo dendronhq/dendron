@@ -43,7 +43,7 @@ export class CopyBlockReferenceCommand extends BasicCommand<
     const line = editor.document.lineAt(position.line);
     const existingAnchor = line.text.match(BLOCK_LINK_REGEX_LOOSE.source + "$");
     if (!_.isNull(existingAnchor)) return existingAnchor[0];
-    if (_.isUndefined(anchor)) anchor = genUUID().slice(0, 8);
+    if (_.isUndefined(anchor)) anchor = genUUID(8);
     editBuilder.insert(line.range.end, ` ^${anchor}`);
     return `^${anchor}`;
   }

@@ -127,26 +127,35 @@ function CalendarView({ engine, ide }: DendronProps) {
   const dateCellRender: AntdCalendarProps["dateCellRender"] = useCallback(
     (date) => {
       const dateKey = getDateKey(date);
-      const selectedNoteBody = _.first(groupedDailyNotes[dateKey])?.body ?? "";
+      const dailyNotes = groupedDailyNotes[dateKey] ?? [];
       return (
-        <Space size={0} wrap>
-          {_.times(
-            _.clamp(
-              !!wordsPerDot
-                ? Math.floor(selectedNoteBody.split(" ").length / wordsPerDot)
-                : 0,
-              0,
-              maxDots
-            ),
-            () => (
-              <Badge
-                dot
-                color={
-                  "#00adb5" /* color copied from packages/dendron-next-server/assets/themes/dark-theme.less */
-                }
-              />
-            )
-          )}
+        <Space size={0} direction="vertical">
+          {
+            // multiple daily notes can exist for that day in a mulit-vault setup
+            // will only show up when `noteActive` is `undefined`. this happens when opening vscode with no document open
+            dailyNotes.map((note) => {
+              const amount = _.clamp(
+                !!wordsPerDot
+                  ? Math.floor(note.body.split(" ").length / wordsPerDot)
+                  : 0,
+                0,
+                maxDots
+              );
+              return (
+                <Space size={0} direction="horizontal" wrap>
+                  {_.times(amount, (index) => (
+                    <Badge
+                      className={`${note.fname}`}
+                      dot
+                      color={
+                        "#00adb5" /* color copied from packages/dendron-next-server/assets/themes/dark-theme.less */
+                      }
+                    />
+                  ))}
+                </Space>
+              );
+            })
+          }
         </Space>
       );
     },

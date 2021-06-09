@@ -142,9 +142,10 @@ function CalendarView({ engine, ide }: DendronProps) {
                 maxDots
               );
               return (
-                <Space size={0} direction="horizontal" wrap>
+                <Space key={note.id} size={0} direction="horizontal" wrap>
                   {_.times(amount, (index) => (
                     <Badge
+                      key={index}
                       className={`${note.fname}`}
                       dot
                       color={

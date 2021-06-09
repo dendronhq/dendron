@@ -42,8 +42,6 @@ const MARKDOWN_WORD_PATTERN = new RegExp("([\\w\\.\\#]+)");
 // this method is called when your extension is activated
 export function activate(context: vscode.ExtensionContext) {
   const stage = getStage();
-  console.log("process.env", process.env);
-  console.log("stage", stage);
   DendronTreeView.register(context);
   // override default word pattern
   vscode.languages.setLanguageConfiguration("markdown", {
@@ -191,6 +189,7 @@ function subscribeToPortChange() {
 export async function _activate(
   context: vscode.ExtensionContext
 ): Promise<boolean> {
+  const startActivate = process.hrtime();
   const isDebug = VSCodeUtils.isDevMode();
   const ctx = "_activate";
   const stage = getStage();
@@ -384,10 +383,11 @@ export async function _activate(
     toggleViews(false);
   }
 
-  return showWelcomeOrWhatsNew(
-    DendronWorkspace.version(),
-    migratedGlobalVersion
-  ).then(() => {
+  return showWelcomeOrWhatsNew({
+    version: DendronWorkspace.version(),
+    previousVersion: migratedGlobalVersion,
+    start: startActivate,
+  }).then(() => {
     if (DendronWorkspace.isActive()) {
       HistoryService.instance().add({
         source: "extension",
@@ -414,10 +414,15 @@ export function deactivate() {
   toggleViews(false);
 }
 
-async function showWelcomeOrWhatsNew(
-  version: string,
-  previousVersion: string | undefined
-) {
+async function showWelcomeOrWhatsNew({
+  version,
+  previousVersion,
+  start,
+}: {
+  version: string;
+  previousVersion: string | undefined;
+  start: [number, number];
+}) {
   const ctx = "showWelcomeOrWhatsNew";
   Logger.info({ ctx, version, previousVersion });
   const ws = DendronWorkspace.instance();
@@ -431,7 +436,9 @@ async function showWelcomeOrWhatsNew(
       "vault",
       "welcome.html"
     );
-    AnalyticsUtils.track(VSCodeEvents.Install);
+    AnalyticsUtils.track(VSCodeEvents.Install, {
+      duration: getDurationMilliseconds(start),
+    });
     await ws.context.globalState.update(GLOBAL_STATE.VERSION, version);
     await ws.context.globalState.update(GLOBAL_STATE.VERSION_PREV, "0.0.0");
     vscode.window
@@ -464,6 +471,7 @@ async function showWelcomeOrWhatsNew(
       );
       AnalyticsUtils.track(VSCodeEvents.Upgrade, {
         previousVersion,
+        duration: getDurationMilliseconds(start),
       });
       vscode.window
         .showInformationMessage(

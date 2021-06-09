@@ -27,19 +27,6 @@ function getMaybeDatePortion({ fname }: NoteProps, journalName: string) {
   return fname.slice(journalIndex + journalName.length + 1);
 }
 
-function toLookup(
-  notes: NoteProps[],
-  journalName: string
-): Record<string, NoteProps> {
-  const notesLookup = Object.fromEntries(
-    notes.map((note) => {
-      const maybeDatePortion = getMaybeDatePortion(note, journalName);
-      return [maybeDatePortion, note];
-    })
-  );
-  return notesLookup;
-}
-
 const { EngineSliceUtils } = engineSlice;
 
 function CalendarView({ engine, ide }: DendronProps) {
@@ -66,25 +53,24 @@ function CalendarView({ engine, ide }: DendronProps) {
   const engineInitialized = EngineSliceUtils.hasInitialized(engine);
   const { notes, vaults } = engine;
   const { noteActive } = ide;
+  const currentVault = noteActive?.vault;
 
-  // TODO build `groupedDailyNotes` to contain multi-vault daily notes so that it does not get recalculated after changes in `noteActive.vault`
-  // this will fix non-visible worddots when opening workspace without active note.
   const groupedDailyNotes = useMemo(() => {
-    if (noteActive && engineInitialized) {
-      const currentVault = noteActive?.vault;
+    const vaultNotes = _.values(notes).filter((notes) => {
+      if (currentVault) {
+        return notes.vault.fsPath === currentVault?.fsPath;
+      }
+      return true;
+    });
 
-      const vaultNotes = _.values(notes).filter(
-        (notes) => notes.vault.fsPath === currentVault?.fsPath
-      );
-
-      const dailyNotes = vaultNotes.filter((note) =>
-        note.fname.startsWith(`${dailyJournalDomain}.`)
-      );
-
-      return toLookup(dailyNotes, defaultJournalName);
-    }
-    return {};
-  }, [noteActive]);
+    const dailyNotes = vaultNotes.filter((note) =>
+      note.fname.startsWith(`${dailyJournalDomain}.`)
+    );
+    const result = _.groupBy(dailyNotes, (note) => {
+      return getMaybeDatePortion(note, defaultJournalName);
+    });
+    return result;
+  }, [notes, defaultJournalName, currentVault?.fsPath]);
 
   const activeDate = useMemo(() => {
     if (noteActive) {
@@ -93,7 +79,7 @@ function CalendarView({ engine, ide }: DendronProps) {
         defaultJournalName
       );
 
-      return maybeDatePortion && groupedDailyNotes[maybeDatePortion]
+      return maybeDatePortion && _.first(groupedDailyNotes[maybeDatePortion])
         ? moment(maybeDatePortion)
         : undefined;
     }
@@ -114,7 +100,7 @@ function CalendarView({ engine, ide }: DendronProps) {
     (date) => {
       logger.info({ ctx: "onSelect", date });
       const dateKey = getDateKey(date);
-      const selectedNote: NoteProps | undefined = groupedDailyNotes[dateKey];
+      const selectedNote = _.first(groupedDailyNotes[dateKey]);
 
       postVSCodeMessage({
         type: CalendarViewMessageType.onSelect,
@@ -141,13 +127,13 @@ function CalendarView({ engine, ide }: DendronProps) {
   const dateCellRender: AntdCalendarProps["dateCellRender"] = useCallback(
     (date) => {
       const dateKey = getDateKey(date);
-      const selectedNote: NoteProps | undefined = groupedDailyNotes[dateKey];
+      const selectedNoteBody = _.first(groupedDailyNotes[dateKey])?.body ?? "";
       return (
         <Space size={0} wrap>
           {_.times(
             _.clamp(
               !!wordsPerDot
-                ? Math.floor(selectedNote?.body.split(" ").length / wordsPerDot)
+                ? Math.floor(selectedNoteBody.split(" ").length / wordsPerDot)
                 : 0,
               0,
               maxDots

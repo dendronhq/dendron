@@ -6,11 +6,11 @@ import {
 } from "@dendronhq/common-all";
 import { refLink2Stringv2 } from "@dendronhq/engine-server";
 import _ from "lodash";
-import { Position, Range, Selection, TextEditor, window } from "vscode";
+import { TextEditor, window } from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { clipboard, VSCodeUtils } from "../utils";
-import { getHeaderFromSelection } from "../utils/editor";
+import { getSelectionAnchors } from "../utils/editor";
 import { DendronWorkspace, getEngine } from "../workspace";
 import { BasicCommand } from "./base";
 
@@ -33,22 +33,12 @@ export class CopyNoteRefCommand extends BasicCommand<
     window.showInformationMessage(`${link} copied`);
   }
 
-  hasNextHeader(opts: { selection: Selection }) {
-    const { selection } = opts;
-    const lineEndForSelection = selection.end.line;
-    const editor = VSCodeUtils.getActiveTextEditor() as TextEditor;
-    const lineEndForDoc = editor.document.lineCount;
-    const text = editor.document.getText(
-      new Range(
-        new Position(lineEndForSelection + 1, 0),
-        new Position(lineEndForDoc, 0)
-      )
-    );
-    return !_.isNull(text.match(/^#+\s/m));
-  }
-
-  async buildLink(opts: { note: NoteProps; useVaultPrefix?: boolean }) {
-    const { note, useVaultPrefix } = opts;
+  async buildLink(opts: {
+    note: NoteProps;
+    useVaultPrefix?: boolean;
+    editor: TextEditor;
+  }) {
+    const { note, useVaultPrefix, editor } = opts;
     const { fname, vault } = note;
     const linkData: DNoteRefData = {
       type: "file",
@@ -62,14 +52,14 @@ export class CopyNoteRefCommand extends BasicCommand<
       },
     };
     let refLinkString: string = refLink2Stringv2({ link, useVaultPrefix });
-    const { header, selection } = getHeaderFromSelection();
-    if (header && selection) {
-      linkData.anchorStart = header;
-      if (this.hasNextHeader({ selection })) {
-        linkData.anchorEnd = "*";
-      }
-      linkData.anchorStartOffset = 1;
-      refLinkString = refLink2Stringv2({ link, useVaultPrefix });
+    const { selection } = VSCodeUtils.getSelection();
+    if (selection) {
+      const { startAnchor, endAnchor } = await getSelectionAnchors({
+        editor,
+        selection,
+      });
+      linkData.anchorStart = startAnchor;
+      linkData.anchorEnd = endAnchor;
     }
     return refLinkString;
   }
@@ -86,7 +76,7 @@ export class CopyNoteRefCommand extends BasicCommand<
       vault,
     });
     const useVaultPrefix = _.size(getEngine().vaults) > 1;
-    const link = await this.buildLink({ note, useVaultPrefix });
+    const link = await this.buildLink({ note, useVaultPrefix, editor });
     try {
       clipboard.writeText(link);
     } catch (err) {

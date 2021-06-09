@@ -407,11 +407,6 @@ export class AnchorUtils {
       return {};
     }
   }
-
-  static isBlockAnchor(anchor?: string): boolean {
-    // not undefined, not an empty string, and the first character is ^
-    return !!anchor && anchor[0] === "^";
-  }
 }
 
 function walk(node: Node, fn: any) {

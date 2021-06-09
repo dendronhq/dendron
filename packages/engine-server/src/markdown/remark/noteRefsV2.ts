@@ -7,6 +7,7 @@ import {
   DNoteRefLink,
   DUtils,
   getSlugger,
+  isBlockAnchor,
   NoteProps,
   NoteUtils,
   RespV2,
@@ -701,7 +702,7 @@ function findAnchor({
   nodes: DendronASTNode["children"];
   match: string;
 }): FindAnchorResult {
-  if (AnchorUtils.isBlockAnchor(match)) {
+  if (isBlockAnchor(match)) {
     const anchorId = match.slice(1);
     return findBlockAnchor({ nodes, match: anchorId });
   } else {

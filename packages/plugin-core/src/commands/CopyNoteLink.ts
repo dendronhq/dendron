@@ -1,10 +1,10 @@
-import { NoteProps, NoteUtils } from "@dendronhq/common-all";
+import { isBlockAnchor, NoteProps, NoteUtils } from "@dendronhq/common-all";
 import _ from "lodash";
 import { TextEditor, window } from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { clipboard, DendronClientUtilsV2, VSCodeUtils } from "../utils";
-import { getHeaderFromSelection } from "../utils/editor";
+import { getSelectionAnchors } from "../utils/editor";
 import { DendronWorkspace, getEngine } from "../workspace";
 import { BasicCommand } from "./base";
 
@@ -41,12 +41,28 @@ export class CopyNoteLinkCommand extends BasicCommand<
       wsRoot: DendronWorkspace.wsRoot(),
     }) as NoteProps;
     if (!note) {
-      throw Error(`${fname} not found in engine`);
+      throw Error(
+        `${fname} not found in engine! Try saving this file and running "Dendron: Reload Index"`
+      );
     }
-    const { header } = getHeaderFromSelection({ clean: true });
+
+    const { selection } = VSCodeUtils.getSelection();
+    const { startAnchor, endAnchor } = await getSelectionAnchors({
+      editor,
+      selection,
+    });
+
     const link = NoteUtils.createWikiLink({
       note,
-      header,
+      anchor: _.isUndefined(startAnchor)
+        ? undefined
+        : {
+            start: startAnchor,
+            startType: isBlockAnchor(startAnchor) ? "blockAnchor" : "header",
+            end: endAnchor,
+            endType:
+              endAnchor && isBlockAnchor(endAnchor) ? "blockAnchor" : "header",
+          },
       useVaultPrefix: DendronClientUtilsV2.useVaultPrefix(getEngine()),
     });
     try {

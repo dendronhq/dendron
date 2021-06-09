@@ -1,9 +1,10 @@
-import { getSlugger, NoteProps } from "@dendronhq/common-all";
+import { NoteProps } from "@dendronhq/common-all";
 import _ from "lodash";
 import path from "path";
 import { Selection, window } from "vscode";
 import { CONFIG, DENDRON_COMMANDS } from "../constants";
 import { clipboard, VSCodeUtils } from "../utils";
+import { getAnchorAt } from "../utils/editor";
 import { DendronWorkspace, getWS } from "../workspace";
 import { BasicCommand } from "./base";
 
@@ -57,16 +58,17 @@ export class CopyNoteURLCommand extends BasicCommand<
     }
 
     let link = [root, notePrefix, note.id + ".html"].join("/");
-    // check if selection is present
-    const { text, selection } = VSCodeUtils.getSelection();
-    if (!_.isUndefined(text) && !_.isEmpty(text)) {
-      if (this.isHeader(text, selection as Selection)) {
-        const slugger = getSlugger();
-        const headerText = _.trim(text, " #");
-        const slug = slugger.slug(headerText);
-        link += `#${slug}`;
-      }
+
+    // add the anchor if one is selected and exists
+    const { selection, editor } = VSCodeUtils.getSelection();
+    if (selection) {
+      const anchor = getAnchorAt({
+        editor: editor!,
+        position: selection.start,
+      });
+      if (anchor) link += `#${anchor}`;
     }
+
     this.showFeedback(link);
     clipboard.writeText(link);
     return link;

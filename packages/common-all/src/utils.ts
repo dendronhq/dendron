@@ -22,3 +22,8 @@ export const getSlugger = () => {
 export const isNumeric = (n: any) => {
   return !isNaN(parseInt(n)) && isFinite(n);
 };
+
+export function isBlockAnchor(anchor?: string): boolean {
+  // not undefined, not an empty string, and the first character is ^
+  return !!anchor && anchor[0] === "^";
+}

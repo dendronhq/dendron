@@ -483,27 +483,33 @@ export class NoteUtils {
    */
   static createWikiLink(opts: {
     note: NoteProps;
-    header?: string;
-    headerRaw?: boolean;
+    anchor?: {
+      start: string;
+      startType: "header" | "blockAnchor";
+      end?: string;
+      endType?: "header" | "blockAnchor";
+    };
     useVaultPrefix?: boolean;
     useTitle?: boolean;
   }): string {
-    const { note, header, headerRaw, useVaultPrefix, useTitle } = _.defaults(
-      opts,
-      {
-        useTitle: true,
-      }
-    );
+    const { note, anchor, useVaultPrefix, useTitle } = _.defaults(opts, {
+      useTitle: true,
+    });
     let { title, fname, vault } = note;
     let suffix = "";
     const slugger = getSlugger();
-    if (header && !headerRaw) {
-      suffix = "#" + slugger.slug(header);
-    } else if (header) {
-      suffix = `#${header}`;
+    if (anchor) {
+      const { start, startType, end, endType } = anchor;
+      const startStr = startType === "header" ? slugger.slug(start) : start;
+      const endStr = end && endType === "header" ? slugger.slug(end) : end;
+      if (_.isUndefined(endStr)) {
+        suffix = `#${startStr}`;
+      } else {
+        suffix = `#${startStr}:#${endStr}`;
+      }
     }
-    if (header && !headerRaw) {
-      title = header;
+    if (anchor && anchor.startType === "header") {
+      title = anchor.start;
     }
     const vaultPrefix = useVaultPrefix
       ? `${CONSTANTS.DENDRON_DELIMETER}${VaultUtils.getName(vault)}/`

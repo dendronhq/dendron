@@ -124,12 +124,6 @@
                 "desc": "Insert note link"
             },
             {
-                "command": "dendron.copyBlockReference",
-                "title": "Dendron: Copy Block Reference",
-                "desc": "Insert a block anchor to the end of the selected line, or around the selected block. Then copy the link to it.",
-                "when": "editorHasSelection && dendron:pluginActive"
-            },
-            {
                 "command": "dendron.moveNote",
                 "title": "Dendron: Move Note",
                 "desc": "Move a note"

@@ -68,7 +68,7 @@ suite("CopyNoteLink", function () {
             LocationTestUtils.getPresetWikiLinkPosition({ line: 8, char: 12 })
           );
           const link2 = await new CopyNoteLinkCommand().run();
-          expect(link2).toEqual(`[[H2 ^8a|${noteWithTarget.fname}#h2-8a]]`);
+          expect(link2).toEqual(`[[H2 ^8a|${noteWithTarget.fname}#h2]]`);
           done();
         },
       });

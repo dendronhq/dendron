@@ -3,7 +3,7 @@ import _ from "lodash";
 import { ExportPod, ExportPodPlantOpts } from "../basev3";
 import { ExportPodConfig } from "../basev3";
 import { Time } from "@dendronhq/common-all";
-import { NoteProps } from "packages/common-all/src/types";
+import { NoteProps } from "@dendronhq/common-all";
 import path from "path";
 import { URI } from "vscode-uri";
 import Airtable from "airtable";
@@ -36,26 +36,31 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
         key: "tableName",
         description: "Name of the airtable",
         type: "string",
+        required: true,
       },
       {
         key: "srcHierarchy",
         description: "The src .md file from where to start the sync",
         type: "string",
+        required: true,
       },
       {
         key: "apiKey",
         description: "Api key for airtable",
         type: "string",
+        required: true,
       },
       {
         key: "baseId",
         description: " base Id of airtable base",
         type: "string",
+        required: true,
       },
       {
         key: "srcFieldMapping",
         description: "mapping of airtable fields with the note",
         type: "object",
+        required: true,
       },
     ]);
   }
@@ -85,17 +90,22 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
     } = opts;
 
     const records = this.notesToSrcFieldMap(filteredNotes, srcFieldMapping);
+    const chunks = _.chunk(records, 10);
+
     const base = new Airtable({ apiKey }).base(baseId);
 
     try {
-      const result = await base(tableName).create(records);
-      if (result) {
-        const timestamp = Time.now().toMillis();
-        fs.writeFileSync(checkpoint, timestamp.toString(), {
-          encoding: "utf8",
-        });
-      }
+      chunks.forEach(async (record) => {
+        const result = await base(tableName).create(record);
+        if (result) {
+          const timestamp = Time.now().toMillis();
+          fs.writeFileSync(checkpoint, timestamp.toString(), {
+            encoding: "utf8",
+          });
+        }
+      });
     } catch (error) {
+      console.log("failed to export. Error: ", error);
       throw Error(error);
     }
   }
@@ -123,9 +133,6 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
       config as AirtableExportConfig;
     const checkpoint: string = this.verifyDir(dest);
 
-    if (_.isUndefined(srcHierarchy) || _.isEmpty(srcHierarchy)) {
-      throw Error("srcHierarchy cannot be empty");
-    }
     let filteredNotes: NoteProps[] =
       srcHierarchy === "root" ? notes : this.filterNotes(notes, srcHierarchy);
 
@@ -133,6 +140,7 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
       const lastUpdatedTimestamp: number = Number(
         fs.readFileSync(checkpoint, { encoding: "utf8" })
       );
+      filteredNotes = _.orderBy(filteredNotes, ["created"], ["asc"]);
       filteredNotes = filteredNotes.filter(
         (note) => note.created > lastUpdatedTimestamp
       );

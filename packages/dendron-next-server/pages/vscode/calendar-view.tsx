@@ -90,7 +90,7 @@ function CalendarView({ engine, ide }: DendronProps) {
       );
 
       return maybeDatePortion && _.first(groupedDailyNotes[maybeDatePortion])
-        ? moment(maybeDatePortion)
+        ? moment(maybeDatePortion, defaultJournalDateFormat)
         : undefined;
     }
   }, [noteActive, groupedDailyNotes]);

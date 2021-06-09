@@ -18,6 +18,14 @@ export class CopyBlockReferenceCommand extends BasicCommand<
 > {
   static key = DENDRON_COMMANDS.COPY_BLOCK_REFERENCE.key;
 
+  /** Add a block anchor at the end of the specified line. The anchor is randomly generated if not supplied.
+   *
+   * @param editBuilder parameter of the callback in `editor.edit`
+   * @param editor the editor that the editBuilder belongs to
+   * @param position the line where the anchor will be inserted
+   * @param anchor anchor id to insert, randomly generated if undefined
+   * @returns the anchor id that has been added
+   */
   static addAnchorAt({
     editBuilder,
     editor,
@@ -54,7 +62,7 @@ export class CopyBlockReferenceCommand extends BasicCommand<
     const anchorsInserted: string[] = [];
 
     // insert the anchors into this note
-    editor.edit((editBuilder) => {
+    await editor.edit((editBuilder) => {
       const anchor = CopyBlockReferenceCommand.addAnchorAt({
         editBuilder,
         editor,
@@ -89,7 +97,7 @@ export class CopyBlockReferenceCommand extends BasicCommand<
     });
 
     try {
-      clipboard.writeText(link);
+      await clipboard.writeText(link);
     } catch (err) {
       this.L.error({ err, link });
       throw err;

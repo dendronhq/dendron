@@ -17,7 +17,7 @@ import { Calendar, Badge, Space } from "antd";
 import { blue } from "@ant-design/colors";
 import type { CalendarProps } from "antd";
 import _ from "lodash";
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { DendronProps } from "../../lib/types";
 
 type AntdCalendarProps = CalendarProps<Moment>;
@@ -46,6 +46,8 @@ function CalendarView({ engine, ide }: DendronProps) {
   const dailyJournalDomain = "daily"; // TODO replace "daily." with value from `dendron.dailyJournalDomain`
   const defaultJournalName = "journal"; // TODO use config value `dendron.defaultJournalName`
   const defaultJournalDateFormat = "y.MM.DD"; // TODO use config value `dendron.defaultJournalDateFormat`
+  const dayOfWeek = 1; // TODO make configurable
+  const locale = "en-us";
 
   const [currentMode, setCurrentMode] =
     useState<AntdCalendarProps["mode"]>("month");
@@ -54,6 +56,14 @@ function CalendarView({ engine, ide }: DendronProps) {
   const { notes, vaults } = engine;
   const { noteActive } = ide;
   const currentVault = noteActive?.vault;
+
+  useEffect(() => {
+    moment.updateLocale(locale, {
+      week: {
+        dow: dayOfWeek,
+      },
+    });
+  }, [dayOfWeek, locale]);
 
   const groupedDailyNotes = useMemo(() => {
     const vaultNotes = _.values(notes).filter((notes) => {

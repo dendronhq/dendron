@@ -11,7 +11,7 @@ describe("SegmentClient", () => {
   test("enabled", (done) => {
     mockHome();
     SegmentClient.enable();
-    const instance = SegmentClient.instance({ forceNew: true });
+    const instance = SegmentClient.instance({ forceNew: true, optOut: false });
     expect(instance._hasOptedOut).toEqual(false);
 
     sinon.restore();
@@ -21,7 +21,7 @@ describe("SegmentClient", () => {
   test("disabled by user", (done) => {
     mockHome();
     SegmentClient.disable();
-    const instance = SegmentClient.instance({ forceNew: true });
+    const instance = SegmentClient.instance({ forceNew: true, optOut: false });
     expect(instance._hasOptedOut).toEqual(true);
 
     sinon.restore();
@@ -30,7 +30,6 @@ describe("SegmentClient", () => {
 
   test("disabled by config", (done) => {
     mockHome();
-    SegmentClient.enable();
     const instance = SegmentClient.instance({ forceNew: true, optOut: true });
     expect(instance._hasOptedOut).toEqual(true);
 
@@ -38,9 +37,9 @@ describe("SegmentClient", () => {
     done();
   });
 
-  test("force enabled by user", (done) => {
+  test("enabled by user", (done) => {
     mockHome();
-    SegmentClient.forceEnable();
+    SegmentClient.enable();
     const instance = SegmentClient.instance({ forceNew: true, optOut: true });
     expect(instance._hasOptedOut).toEqual(false);
 

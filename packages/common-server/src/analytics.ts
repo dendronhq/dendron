@@ -87,46 +87,56 @@ export class SegmentClient {
   }
 
   /** If exists, Dendron telemetry has been disabled. */
-  static getConfigPath() {
+  static getDisableConfigPath() {
     return path.join(os.homedir(), CONSTANTS.DENDRON_NO_TELEMETRY);
   }
 
   /** If exists, Dendron telemetry is enabled even if VSCode telemetry settings are off. */
-  static getForceConfigPath() {
-    return path.join(os.homedir(), CONSTANTS.DENDRON_FORCE_TELEMETRY);
+  static getEnableConfigPath() {
+    return path.join(os.homedir(), CONSTANTS.DENDRON_YES_TELEMETRY);
   }
 
+  /** If true, Dendron telemetry has been disabled. */
   static isDisabled() {
-    return fs.existsSync(this.getConfigPath());
+    return fs.existsSync(this.getDisableConfigPath());
   }
 
-  static isForceEnabled() {
-    return fs.existsSync(this.getForceConfigPath());
+  /** If true, Dendron telemetry is enabled even if VSCode telemetry settings are off. */
+  static isEnabled() {
+    return fs.existsSync(this.getEnableConfigPath());
   }
 
   static disable() {
-    fs.removeSync(this.getForceConfigPath());
-    fs.writeFileSync(this.getConfigPath(), "");
+    fs.removeSync(this.getEnableConfigPath());
+    fs.writeFileSync(this.getDisableConfigPath(), "");
   }
 
   static enable() {
-    fs.removeSync(this.getConfigPath());
-  }
-
-  static forceEnable() {
-    fs.writeFileSync(this.getForceConfigPath(), "");
+    fs.removeSync(this.getDisableConfigPath());
+    fs.writeFileSync(this.getEnableConfigPath(), "");
   }
 
   constructor(opts?: SegmentClientOpts) {
     const key = env("SEGMENT_VSCODE_KEY");
     this.logger = createLogger("SegmentClient");
     this._segmentInstance = new Analytics(key);
-    const forceEnabled = SegmentClient.isForceEnabled();
-    if (forceEnabled) this.logger.info({ msg: "user force enabled telemetry" });
+    const enabled = SegmentClient.isEnabled();
+    if (enabled)
+      this.logger.info({
+        msg: "user enabled telemetry with Enable Telemetry command",
+      });
     this._hasOptedOut =
-      !forceEnabled && (opts?.optOut || SegmentClient.isDisabled() || false);
+      !enabled && (opts?.optOut || SegmentClient.isDisabled() || false);
     if (this._hasOptedOut) {
-      this.logger.info({ msg: "user opted out of telemetry" });
+      if (opts?.optOut)
+        this.logger.info({
+          msg: "user opted out of telemetry with workspace or VSCode configuration",
+        });
+      else if (SegmentClient.isDisabled())
+        this.logger.info({
+          msg: "user opted out of telemetry with Disable Telemetry command",
+        });
+      else this.logger.info({ msg: "user opted out of telemetry" });
       this._anonymousId = "";
       return;
     }

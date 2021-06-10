@@ -182,27 +182,6 @@ export default function Graph({
     }
   };
 
-  // const parseElements = (
-  //   elements: cytoscape.ElementsDefinition,
-  //   config: GraphConfig
-  // ) => {
-  //   if (type === "note") {
-  //     if (!config["display.hierarchy"]?.value) {
-  //       elements.nodes = elements.nodes.filter(
-  //         (n) => !n.classes?.includes(".hierarchy")
-  //       );
-  //     }
-  //     if (!config["display.links"]?.value) {
-  //       elements.nodes = elements.nodes.filter(
-  //         (n) => !n.classes?.includes(".link")
-  //       );
-  //     }
-  //   }
-
-  //   logger.log(elements);
-  //   return elements;
-  // };
-
   useEffect(() => {
     // If the graph already has rendered elements, don't re-render
     // Otherwise, the graph re-renders when elements are selected

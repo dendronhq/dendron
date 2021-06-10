@@ -3,6 +3,7 @@ import {
   NotePropsDict,
   NoteUtils,
   SchemaModuleDict,
+  VaultUtils,
 } from "@dendronhq/common-all";
 import { engineSlice } from "@dendronhq/common-frontend";
 import { EdgeDefinition, NodeDefinition } from "cytoscape";
@@ -87,21 +88,24 @@ const getSchemaGraphElements = (
   if (_.isUndefined(vaults)) return { nodes, edges };
 
   vaults.map((vault) => {
-    const VAULT_ID = `${vault.name}`;
+    const vaultName = VaultUtils.getName(vault);
+    const VAULT_ID = `${vaultName}`;
 
     nodes.push({
       data: {
         id: VAULT_ID,
-        label: vault.name,
+        label: vaultName,
         group: "nodes",
         selectable: false,
       },
     });
 
     schemaArray
-      .filter((schema) => schema.vault.name === vault.name)
+      .filter((schema) => {
+        VaultUtils.getName(schema.vault) === vaultName;
+      })
       .forEach((schema) => {
-        const SCHEMA_ID = `${vault.name}_${schema.fname}`;
+        const SCHEMA_ID = `${vaultName}_${schema.fname}`;
 
         // Base schema node
         nodes.push({
@@ -121,7 +125,7 @@ const getSchemaGraphElements = (
 
         // Children schemas
         Object.values(schema.schemas).forEach((subschema) => {
-          const SUBSCHEMA_ID = `${vault.name}_${subschema.id}`;
+          const SUBSCHEMA_ID = `${vaultName}_${subschema.id}`;
 
           // Subschema node
           nodes.push({

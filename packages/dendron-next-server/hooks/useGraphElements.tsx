@@ -1,10 +1,12 @@
 import {
+  DVault,
   NotePropsDict,
   NoteUtils,
   SchemaModuleDict,
 } from "@dendronhq/common-all";
 import { engineSlice } from "@dendronhq/common-frontend";
 import { EdgeDefinition, NodeDefinition } from "cytoscape";
+import _ from "lodash";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { GraphEdges, GraphElements, GraphNodes } from "../lib/graph";
@@ -71,55 +73,69 @@ const getNoteGraphElements = (
   };
 };
 
-const getSchemaGraphElements = (schemas: SchemaModuleDict): GraphElements => {
+const getSchemaGraphElements = (
+  schemas: SchemaModuleDict,
+  vaults: DVault[] | undefined
+): GraphElements => {
   const schemaArray = Object.values(schemas);
 
-  const ROOT_NODE: NodeDefinition = {
-    data: { id: "graph_root", label: "Schemas", group: "nodes" },
-    selectable: false,
-  };
-  const nodes: any[] = [ROOT_NODE];
+  const nodes: any[] = [];
   const edges: GraphEdges = {
     hierarchy: [],
   };
 
-  schemaArray.forEach((schema) => {
-    const SCHEMA_ID = `${schema.vault.name}_${schema.fname}`;
+  if (_.isUndefined(vaults)) return { nodes, edges };
 
-    // Base schema node
+  vaults.map((vault) => {
+    const VAULT_ID = `${vault.name}`;
+
     nodes.push({
-      data: { id: SCHEMA_ID, label: schema.fname, group: "nodes" },
-    });
-
-    // Schema node -> root connection
-    edges.hierarchy.push({
       data: {
-        group: "edges",
-        id: `${ROOT_NODE.data.id}_${SCHEMA_ID}`,
-        source: ROOT_NODE.data.id as string,
-        target: SCHEMA_ID,
+        id: VAULT_ID,
+        label: vault.name,
+        group: "nodes",
+        selectable: false,
       },
-      classes: "hierarchy",
     });
 
-    // Children schemas
-    Object.values(schema.schemas).forEach((subschema) => {
-      const SUBSCHEMA_ID = `${schema.vault.name}_${subschema.id}`;
+    schemaArray.forEach((schema) => {
+      const SCHEMA_ID = `${vault.name}_${schema.fname}`;
 
-      // Subschema node
+      // Base schema node
       nodes.push({
-        data: { id: SUBSCHEMA_ID, label: subschema.title, group: "nodes" },
+        data: { id: SCHEMA_ID, label: schema.fname, group: "nodes" },
       });
 
-      // Schema -> subschema connection
+      // Schema node -> root connection
       edges.hierarchy.push({
         data: {
           group: "edges",
-          id: `${SCHEMA_ID}_${SUBSCHEMA_ID}`,
-          source: SCHEMA_ID,
-          target: SUBSCHEMA_ID,
+          id: `${VAULT_ID}_${SCHEMA_ID}`,
+          source: VAULT_ID,
+          target: SCHEMA_ID,
         },
         classes: "hierarchy",
+      });
+
+      // Children schemas
+      Object.values(schema.schemas).forEach((subschema) => {
+        const SUBSCHEMA_ID = `${vault.name}_${subschema.id}`;
+
+        // Subschema node
+        nodes.push({
+          data: { id: SUBSCHEMA_ID, label: subschema.title, group: "nodes" },
+        });
+
+        // Schema -> subschema connection
+        edges.hierarchy.push({
+          data: {
+            group: "edges",
+            id: `${SCHEMA_ID}_${SUBSCHEMA_ID}`,
+            source: SCHEMA_ID,
+            target: SUBSCHEMA_ID,
+          },
+          classes: "hierarchy",
+        });
       });
     });
   });
@@ -153,7 +169,7 @@ const useGraphElements = ({
 
   useEffect(() => {
     if (type === "schema" && engine.schemas) {
-      setElements(getSchemaGraphElements(engine.schemas));
+      setElements(getSchemaGraphElements(engine.schemas, engine.vaults));
     }
   }, [engine.schemas]);
 

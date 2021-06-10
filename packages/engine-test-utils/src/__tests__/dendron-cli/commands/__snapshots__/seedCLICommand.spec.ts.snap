@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`info basic 1`] = `
+Object {
+  "description": "Dendron site docs",
+  "license": "Creative Commons",
+  "name": "dendron-site",
+  "publisher": "dendron",
+  "root": "vault",
+}
+`;

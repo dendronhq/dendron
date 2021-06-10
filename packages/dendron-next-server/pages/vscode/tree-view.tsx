@@ -108,7 +108,6 @@ function TreeViewParent({ engine, ide }: DendronProps) {
   logger.info({
     ctx,
     state: "enter",
-    engine,
     ide,
   });
   const onExpand: OnExpandFunc = (expandedKeys, { node, expanded }) => {

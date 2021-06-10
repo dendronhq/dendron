@@ -1,5 +1,5 @@
 import {
-  DendronCalendarViewKey,
+  DendronTreeViewKey,
   CalendarViewMessage,
   NoteProps,
   CalendarViewMessageType,
@@ -17,7 +17,7 @@ import { CreateDailyJournalCommand } from "../commands/CreateDailyJournal";
 import { Logger } from "../logger";
 
 export class CalendarView implements vscode.WebviewViewProvider {
-  public static readonly viewType = DendronCalendarViewKey.CALENDAR_VIEW;
+  public static readonly viewType = DendronTreeViewKey.CALENDAR_VIEW;
   private _view?: vscode.WebviewView;
 
   constructor() {
@@ -135,7 +135,7 @@ export class CalendarView implements vscode.WebviewViewProvider {
   private _getHtmlForWebview(_webview: vscode.Webview) {
     return WebViewUtils.genHTMLForView({
       title: "Calendar View",
-      view: DendronCalendarViewKey.CALENDAR_VIEW,
+      view: DendronTreeViewKey.CALENDAR_VIEW,
     });
   }
 }

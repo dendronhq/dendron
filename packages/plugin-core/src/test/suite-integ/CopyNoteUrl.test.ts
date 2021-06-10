@@ -94,4 +94,32 @@ suite("CopyNoteUrl", function () {
       },
     });
   });
+
+  test("with block anchor selection and override", (done) => {
+    runLegacyMultiWorkspaceTest({
+      ctx,
+      preSetupHook: async (opts) => {
+        const { vaults, wsRoot } = opts;
+        const vault = vaults[0];
+        await ENGINE_HOOKS.setupBasic(opts),
+          await NOTE_PRESETS_V4.NOTE_WITH_BLOCK_ANCHOR_TARGET.create({
+            wsRoot,
+            vault,
+          });
+      },
+      onInit: async ({ vaults }) => {
+        const vault = vaults[0];
+        const fname = NOTE_PRESETS_V4.NOTE_WITH_BLOCK_ANCHOR_TARGET.fname;
+        const editor = await VSCodeUtils.openNoteByPath({ vault, fname });
+        editor.selection = new vscode.Selection(10, 0, 10, 5);
+        const link = await new CopyNoteURLCommand().execute();
+        const url = path.join(rootUrl, "notes", `${fname}.html#^block-id`);
+        expect(url).toEqual(link);
+        done();
+      },
+      configOverride: {
+        [CONFIG.COPY_NOTE_URL_ROOT.key]: rootUrl,
+      },
+    });
+  });
 });

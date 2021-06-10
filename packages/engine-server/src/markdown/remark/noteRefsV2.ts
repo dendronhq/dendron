@@ -30,7 +30,7 @@ import {
 } from "../types";
 import { MDUtilsV4, ParentWithIndex, renderFromNoteProps } from "../utils";
 import { MDUtilsV5, ProcMode } from "../utilsv5";
-import { AnchorUtils, LinkUtils } from "./utils";
+import { LinkUtils } from "./utils";
 import { WikiLinksOpts } from "./wikiLinks";
 
 const LINK_REGEX = /^\!\[\[(.+?)\]\]/;

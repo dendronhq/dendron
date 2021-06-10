@@ -1,12 +1,14 @@
 import {
   DNoteRefData,
   DNoteRefLink,
+  getSlugger,
+  isBlockAnchor,
   NoteProps,
   NoteUtils,
 } from "@dendronhq/common-all";
 import { refLink2Stringv2 } from "@dendronhq/engine-server";
 import _ from "lodash";
-import { TextEditor, window } from "vscode";
+import { TextEditor, window, Selection, Range, Position } from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { clipboard, VSCodeUtils } from "../utils";
@@ -33,6 +35,20 @@ export class CopyNoteRefCommand extends BasicCommand<
     window.showInformationMessage(`${link} copied`);
   }
 
+  hasNextHeader(opts: { selection: Selection }) {
+    const { selection } = opts;
+    const lineEndForSelection = selection.end.line;
+    const editor = VSCodeUtils.getActiveTextEditor() as TextEditor;
+    const lineEndForDoc = editor.document.lineCount;
+    const text = editor.document.getText(
+      new Range(
+        new Position(lineEndForSelection + 1, 0),
+        new Position(lineEndForDoc, 0)
+      )
+    );
+    return !_.isNull(text.match(/^#+\s/m));
+  }
+
   async buildLink(opts: {
     note: NoteProps;
     useVaultPrefix?: boolean;
@@ -43,15 +59,7 @@ export class CopyNoteRefCommand extends BasicCommand<
     const linkData: DNoteRefData = {
       type: "file",
     };
-    const link: DNoteRefLink = {
-      data: linkData,
-      type: "ref",
-      from: {
-        fname,
-        vault,
-      },
-    };
-    let refLinkString: string = refLink2Stringv2({ link, useVaultPrefix });
+    const slugger = getSlugger();
     const { selection } = VSCodeUtils.getSelection();
     if (selection) {
       const { startAnchor, endAnchor } = await getSelectionAnchors({
@@ -60,8 +68,37 @@ export class CopyNoteRefCommand extends BasicCommand<
         engine: getEngine(),
       });
       linkData.anchorStart = startAnchor;
+      if (!_.isUndefined(startAnchor) && !isBlockAnchor(startAnchor)) {
+        // if a header is selected, skip the header itself
+        linkData.anchorStart = slugger.slug(startAnchor);
+        linkData.anchorStartOffset = 1;
+      }
       linkData.anchorEnd = endAnchor;
+      if (!_.isUndefined(endAnchor) && !isBlockAnchor(endAnchor)) {
+        linkData.anchorEnd = slugger.slug(endAnchor);
+      }
+      if (
+        _.isUndefined(endAnchor) &&
+        !_.isUndefined(startAnchor) &&
+        this.hasNextHeader({ selection })
+      ) {
+        // if a header is selected for the start, and nothing for the end, and there's a next anchor, then use the wildcard
+        linkData.anchorEnd = "*";
+      }
     }
+    const link: DNoteRefLink = {
+      data: linkData,
+      type: "ref",
+      from: {
+        fname,
+        vault,
+      },
+    };
+    let refLinkString: string = refLink2Stringv2({
+      link,
+      useVaultPrefix,
+      rawAnchors: true,
+    });
     return refLinkString;
   }
 

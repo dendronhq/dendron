@@ -1,4 +1,4 @@
-import { NoteProps } from "@dendronhq/common-all";
+import { getSlugger, isBlockAnchor, NoteProps } from "@dendronhq/common-all";
 import _ from "lodash";
 import path from "path";
 import { Selection, window } from "vscode";
@@ -68,7 +68,13 @@ export class CopyNoteURLCommand extends BasicCommand<
         position: selection.start,
         engine,
       });
-      if (anchor) link += `#${anchor}`;
+      if (anchor) {
+        if (!isBlockAnchor(anchor)) {
+          link += `#${getSlugger().slug(anchor)}`;
+        } else {
+          link += `#${anchor}`;
+        }
+      }
     }
 
     this.showFeedback(link);

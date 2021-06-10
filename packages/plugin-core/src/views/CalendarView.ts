@@ -69,6 +69,38 @@ export class CalendarView implements vscode.WebviewViewProvider {
     }
   }
 
+  async handleReceiveMessage(msg: CalendarViewMessage) {
+    const ctx = "onDidReceiveMessage";
+    Logger.info({ ctx, data: msg });
+    switch (msg.type) {
+      case CalendarViewMessageType.onSelect: {
+        Logger.info({
+          ctx: `${ctx}:onSelect`,
+          data: msg.data,
+        });
+        if (msg.data.id) {
+          const note = getEngine().notes[msg.data.id];
+          await new GotoNoteCommand().execute({
+            qs: note.fname,
+            vault: note.vault,
+          });
+        } else if (msg.data.fname) {
+          await new CreateDailyJournalCommand().execute({
+            fname: msg.data.fname,
+          });
+        }
+        break;
+      }
+      case CalendarViewMessageType.onGetActiveEditor: {
+        this.handleActiveTextEditorChange(); // initial call
+        break;
+      }
+      default:
+        console.log("got data", msg);
+        break;
+    }
+  }
+
   public postMessage(msg: DMessage) {
     this._view?.webview.postMessage(msg);
   }
@@ -87,38 +119,7 @@ export class CalendarView implements vscode.WebviewViewProvider {
       localResourceRoots: [],
     };
     webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
-    webviewView.webview.onDidReceiveMessage(
-      async (msg: CalendarViewMessage) => {
-        Logger.info({ ctx: "onDidReceiveMessage", data: msg });
-        switch (msg.type) {
-          case CalendarViewMessageType.onSelect: {
-            Logger.info({
-              ctx: "onDidReceiveMessage:onSelect",
-              data: msg.data,
-            });
-            if (msg.data.id) {
-              const note = getEngine().notes[msg.data.id];
-              await new GotoNoteCommand().execute({
-                qs: note.fname,
-                vault: note.vault,
-              });
-            } else if (msg.data.fname) {
-              await new CreateDailyJournalCommand().execute({
-                fname: msg.data.fname,
-              });
-            }
-            break;
-          }
-          case CalendarViewMessageType.onGetActiveEditor: {
-            this.handleActiveTextEditorChange(); // initial call
-            break;
-          }
-          default:
-            console.log("got data", msg);
-            break;
-        }
-      }
-    );
+    webviewView.webview.onDidReceiveMessage(this.handleReceiveMessage);
   }
 
   public refresh(note?: NoteProps) {

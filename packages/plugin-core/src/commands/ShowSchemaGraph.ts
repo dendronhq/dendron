@@ -8,7 +8,7 @@ import { Uri, ViewColumn, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { WebViewUtils } from "../views/utils";
 import { BasicCommand } from "./base";
-import { getEngine, getWS } from "../workspace";
+import { getWS } from "../workspace";
 import { VSCodeUtils } from "../utils";
 import path from "path";
 

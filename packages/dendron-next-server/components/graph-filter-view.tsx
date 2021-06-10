@@ -2,6 +2,7 @@ import { Typography, Collapse, Switch, Space, InputNumber, Input } from "antd";
 import _, { values } from "lodash";
 import { useThemeSwitcher } from "react-css-theme-switcher";
 import { GraphConfig } from "../lib/graph";
+import AntThemes from "../styles/theme-antd";
 const { Panel } = Collapse;
 
 type FilterProps = {
@@ -30,16 +31,18 @@ const GraphFilterView = ({ config, setConfig }: FilterProps) => {
     });
   };
 
+  if (!currentTheme) return <></>;
+
   return (
     <div
       style={{
-        position: "absolute",
-        top: "1rem",
-        left: "1rem",
-        background: currentTheme === "light" ? "#F5F6F8" : "#303030",
-        borderRadius: 4,
         zIndex: 10,
-        minWidth: "12rem",
+        position: "absolute",
+        top: AntThemes[currentTheme].graph.filterView.margin,
+        left: AntThemes[currentTheme].graph.filterView.margin,
+        background: AntThemes[currentTheme].graph.filterView.background,
+        borderRadius: AntThemes[currentTheme].graph.filterView.borderRadius,
+        minWidth: AntThemes[currentTheme].graph.filterView.minWidth,
       }}
     >
       <Collapse>

@@ -3,7 +3,6 @@ import {
   DendronWebViewKey,
   GraphViewMessage,
   GraphViewMessageType,
-  DNodeUtils,
 } from "@dendronhq/common-all";
 import { Uri, ViewColumn, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
@@ -11,6 +10,7 @@ import { WebViewUtils } from "../views/utils";
 import { BasicCommand } from "./base";
 import { getEngine, getWS } from "../workspace";
 import { VSCodeUtils } from "../utils";
+import path from "path";
 
 type CommandOpts = {};
 
@@ -70,17 +70,14 @@ export class ShowSchemaGraphCommand extends BasicCommand<
 
           if (schema) {
             const fname = schema.fname;
-            const vault = schema.vault;
+            // const vault = schema.vault;
 
-            console.log(vault);
+            const schemaPath = path.join(
+              ws.rootWorkspace.uri.fsPath,
+              `${fname}.schema.yml`
+            );
+            const uri = Uri.file(schemaPath);
 
-            const path = DNodeUtils.getFullPath({
-              wsRoot: ws.rootWorkspace.uri.path,
-              vault,
-              basename: `${fname}.md`,
-            });
-
-            const uri = Uri.file(path);
             await VSCodeUtils.openFileInEditor(uri);
           }
           break;

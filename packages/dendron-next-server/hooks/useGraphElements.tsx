@@ -98,46 +98,48 @@ const getSchemaGraphElements = (
       },
     });
 
-    schemaArray.forEach((schema) => {
-      const SCHEMA_ID = `${vault.name}_${schema.fname}`;
+    schemaArray
+      .filter((schema) => schema.vault.name === vault.name)
+      .forEach((schema) => {
+        const SCHEMA_ID = `${vault.name}_${schema.fname}`;
 
-      // Base schema node
-      nodes.push({
-        data: { id: SCHEMA_ID, label: schema.fname, group: "nodes" },
-      });
-
-      // Schema node -> root connection
-      edges.hierarchy.push({
-        data: {
-          group: "edges",
-          id: `${VAULT_ID}_${SCHEMA_ID}`,
-          source: VAULT_ID,
-          target: SCHEMA_ID,
-        },
-        classes: "hierarchy",
-      });
-
-      // Children schemas
-      Object.values(schema.schemas).forEach((subschema) => {
-        const SUBSCHEMA_ID = `${vault.name}_${subschema.id}`;
-
-        // Subschema node
+        // Base schema node
         nodes.push({
-          data: { id: SUBSCHEMA_ID, label: subschema.title, group: "nodes" },
+          data: { id: SCHEMA_ID, label: schema.fname, group: "nodes" },
         });
 
-        // Schema -> subschema connection
+        // Schema node -> root connection
         edges.hierarchy.push({
           data: {
             group: "edges",
-            id: `${SCHEMA_ID}_${SUBSCHEMA_ID}`,
-            source: SCHEMA_ID,
-            target: SUBSCHEMA_ID,
+            id: `${VAULT_ID}_${SCHEMA_ID}`,
+            source: VAULT_ID,
+            target: SCHEMA_ID,
           },
           classes: "hierarchy",
         });
+
+        // Children schemas
+        Object.values(schema.schemas).forEach((subschema) => {
+          const SUBSCHEMA_ID = `${vault.name}_${subschema.id}`;
+
+          // Subschema node
+          nodes.push({
+            data: { id: SUBSCHEMA_ID, label: subschema.title, group: "nodes" },
+          });
+
+          // Schema -> subschema connection
+          edges.hierarchy.push({
+            data: {
+              group: "edges",
+              id: `${SCHEMA_ID}_${SUBSCHEMA_ID}`,
+              source: SCHEMA_ID,
+              target: SUBSCHEMA_ID,
+            },
+            classes: "hierarchy",
+          });
+        });
       });
-    });
   });
 
   return {

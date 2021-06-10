@@ -132,10 +132,7 @@ export default function Graph({
         }
       });
 
-    // Only re-layout graph if it will be performant to do so
-    if (!isLargeGraph) {
-      cy.layout(getEulerConfig(isLargeGraph)).run();
-    }
+    cy.layout(getEulerConfig(isLargeGraph)).run();
   };
 
   const renderGraph = () => {

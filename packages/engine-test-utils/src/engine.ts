@@ -99,6 +99,7 @@ export async function setupWS(opts: {
 }) {
   const wsRoot = tmpDir().name;
   const ws = new WorkspaceService({ wsRoot });
+  ws.createConfig();
   let vaults = await Promise.all(
     opts.vaults.map(async (vault) => {
       await ws.createVault({ vault });
@@ -197,6 +198,7 @@ export class TestPresetEntryV5 {
 
 /**
  *
+ * To create empty workspace, initilizae with `vaults = []`
  * @param func
  * @param opts.vaults: By default, initiate 3 vaults {vault1, vault2, (vault3, "vaultThree")}
  * @param opts.preSetupHook: By default, initiate empty

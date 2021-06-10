@@ -27,9 +27,13 @@ export class VaultUtils {
   }
 
   static getRelPath(vault: DVault) {
-    return vault.workspace
-      ? path.join(vault.workspace, vault.fsPath)
-      : vault.fsPath;
+    if (vault.workspace) {
+      return path.join(vault.workspace, vault.fsPath);
+    }
+    if (vault.seed) {
+      return path.join("seeds", vault.seed, vault.fsPath);
+    }
+    return vault.fsPath;
   }
 
   static getVaultByName({

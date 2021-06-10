@@ -52,6 +52,10 @@ export type DVault = {
    * Defaults to `sync`.
    */
   sync?: DVaultSync;
+  /**
+   * Id of a seed this vault belongs to
+   */
+  seed?: string;
 };
 
 export type DWorkspace = {
@@ -61,6 +65,7 @@ export type DWorkspace = {
 };
 
 export type DWorkspaceEntry = Omit<DWorkspace, "name" | "vaults">;
+export type SeedEntry = {};
 
 export type DendronConfig = {
   /**
@@ -84,6 +89,7 @@ export type DendronConfig = {
    * Workspaces
    */
   workspaces?: { [key: string]: DWorkspaceEntry | undefined };
+  seeds?: { [key: string]: SeedEntry | undefined };
   /**
    * Dendron vaults in workspace.
    * Setup by plugin.

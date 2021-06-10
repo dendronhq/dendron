@@ -1,8 +1,8 @@
 import {
   DendronConfig,
   DEngineClient,
-  WorkspaceOpts,
   WorkspaceFolderRaw,
+  WorkspaceOpts,
   WorkspaceSettings,
 } from "@dendronhq/common-all";
 import {
@@ -190,7 +190,10 @@ export async function setupLegacyWorkspaceMulti(
   const workspaceFolders = DendronWorkspace.workspaceFolders();
 
   // setup
-  WorkspaceConfig.write(wsRoot, { overrides: wsSettingsOverride, vaults });
+  WorkspaceConfig.write(wsRoot, vaults, {
+    overrides: wsSettingsOverride,
+    vaults,
+  });
   await preSetupHook({
     wsRoot,
     vaults,

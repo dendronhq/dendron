@@ -1,11 +1,208 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`info basic 1`] = `
+exports[`add does not exist 1`] = `
 Object {
-  "description": "Dendron site docs",
-  "license": "Creative Commons",
-  "name": "dendron-site",
-  "publisher": "dendron",
-  "root": "vault",
+  "error": [Error: seed dendron.no-exist does not exist],
 }
+`;
+
+exports[`add exists exist 1`] = `
+Object {
+  "data": Object {
+    "spath": "<TEMP_DIR>/tmp-29682-45zdGxm4fogr/seeds/dendron.dendron-site",
+  },
+}
+`;
+
+exports[`add exists exist 2`] = `"<TEMP_DIR>/tmp-29682-45zdGxm4fogr"`;
+
+exports[`init basic 1`] = `
+Array [
+  ".gitignore",
+  "dendron.code-workspace",
+  "dendron.yml",
+  "hooks",
+  "seed.yml",
+]
+`;
+
+exports[`init basic 2`] = `
+"version: 1
+vaults:
+    -
+        fsPath: vault
+        seed: dendron.foo
+useFMTitle: true
+useNoteTitleForLink: true
+noAutoCreateOnDefinition: true
+noLegacyNoteRef: true
+lookupConfirmVaultOnCreate: false
+site:
+    copyAssets: true
+    siteHierarchies:
+        - root
+    siteRootDir: docs
+    usePrettyRefs: true
+    title: Dendron
+    description: Personal knowledge space
+    duplicateNoteBehavior:
+        action: useVault
+        payload:
+            - vault
+initializeRemoteVaults: true
+seeds:
+    dendron.foo: {}
+"
+`;
+
+exports[`init basic 3`] = `
+"{
+    \\"folders\\": [
+        {
+            \\"path\\": \\"seeds/dendron.foo/vault\\"
+        }
+    ],
+    \\"settings\\": {
+        \\"dendron.rootDir\\": \\".\\",
+        \\"files.autoSave\\": \\"onFocusChange\\",
+        \\"pasteImage.path\\": \\"\${currentFileDir}/assets/images\\",
+        \\"pasteImage.prefix\\": \\"/\\",
+        \\"markdown-preview-enhanced.enableWikiLinkSyntax\\": true,
+        \\"markdown-preview-enhanced.wikiLinkFileExtension\\": \\".md\\",
+        \\"editor.snippetSuggestions\\": \\"inline\\",
+        \\"editor.suggest.snippetsPreventQuickSuggestions\\": false,
+        \\"editor.suggest.showSnippets\\": true,
+        \\"editor.tabCompletion\\": \\"on\\"
+    },
+    \\"extensions\\": {
+        \\"recommendations\\": [
+            \\"dendron.dendron-paste-image\\",
+            \\"dendron.dendron-markdown-shortcuts\\",
+            \\"dendron.dendron-markdown-preview-enhanced\\",
+            \\"dendron.dendron-markdown-links\\",
+            \\"github.github-vscode-theme\\"
+        ],
+        \\"unwantedRecommendations\\": [
+            \\"dendron.dendron-markdown-notes\\",
+            \\"shd101wyy.markdown-preview-enhanced\\",
+            \\"kortina.vscode-markdown-notes\\",
+            \\"mushan.vscode-paste-image\\"
+        ]
+    }
+}"
+`;
+
+exports[`init convert_workspace error: no vaults 1`] = `"dendron.yml hooks vault1 vault2 vault3"`;
+
+exports[`init convert_workspace error: no vaults 2`] = `
+"version: 1
+vaults:
+    -
+        fsPath: vault3
+        name: vaultThree
+    -
+        fsPath: vault1
+    -
+        fsPath: vault2
+useFMTitle: true
+useNoteTitleForLink: true
+noAutoCreateOnDefinition: true
+noLegacyNoteRef: true
+lookupConfirmVaultOnCreate: false
+site:
+    copyAssets: true
+    siteHierarchies:
+        - root
+    siteRootDir: docs
+    usePrettyRefs: true
+    title: Dendron
+    description: Personal knowledge space
+    duplicateNoteBehavior:
+        action: useVault
+        payload:
+            - vault2
+            - vault1
+            - vaultThree
+initializeRemoteVaults: true
+"
+`;
+
+exports[`init convert_workspace ok: diff root name 1`] = `"dendron.yml fooVault hooks seed.yml"`;
+
+exports[`init convert_workspace ok: diff root name 2`] = `
+"version: 1
+vaults:
+    -
+        fsPath: fooVault
+useFMTitle: true
+useNoteTitleForLink: true
+noAutoCreateOnDefinition: true
+noLegacyNoteRef: true
+lookupConfirmVaultOnCreate: false
+site:
+    copyAssets: true
+    siteHierarchies:
+        - root
+    siteRootDir: docs
+    usePrettyRefs: true
+    title: Dendron
+    description: Personal knowledge space
+    duplicateNoteBehavior:
+        action: useVault
+        payload:
+            - fooVault
+initializeRemoteVaults: true
+"
+`;
+
+exports[`init convert_workspace ok: diff root name 3`] = `
+"name: foo
+publisher: dendron
+description: some foo
+license: CC
+root: fooVault
+repository:
+    type: git
+    url: ''
+"
+`;
+
+exports[`init create_workspace basic 1`] = `".gitignore dendron.code-workspace dendron.yml hooks seed.yml vault"`;
+
+exports[`init create_workspace basic 2`] = `
+"version: 1
+vaults:
+    -
+        fsPath: vault
+useFMTitle: true
+useNoteTitleForLink: true
+noAutoCreateOnDefinition: true
+noLegacyNoteRef: true
+lookupConfirmVaultOnCreate: false
+site:
+    copyAssets: true
+    siteHierarchies:
+        - root
+    siteRootDir: docs
+    usePrettyRefs: true
+    title: Dendron
+    description: Personal knowledge space
+    duplicateNoteBehavior:
+        action: useVault
+        payload:
+            - vault
+initializeRemoteVaults: true
+"
+`;
+
+exports[`init create_workspace basic 3`] = `
+"name: foo
+publisher: dendron
+description: some foo
+license: CC
+root: vault
+repository:
+    type: git
+    url: ''
+"
 `;

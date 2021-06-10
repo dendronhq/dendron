@@ -233,6 +233,12 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     group: "notes",
     desc: "Move a note",
   },
+  RANDOM_NOTE: {
+    key: "dendron.randomNote",
+    title: `${CMD_PREFIX} Random Note`,
+    group: "notes",
+    desc: "Open a random note within a configured hierarchy set",
+  },
   RENAME_NOTE: {
     key: "dendron.renameNote",
     title: `${CMD_PREFIX} Rename Note`,

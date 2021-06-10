@@ -50,6 +50,7 @@ import { SyncCommand } from "./Sync";
 import { UpgradeSettingsCommand } from "./UpgradeSettings";
 import { VaultAddCommand } from "./VaultAddCommand";
 import { VaultRemoveCommand } from "./VaultRemoveCommand";
+import { RandomNoteCommand } from "./RandomNote";
 
 const ALL_COMMANDS = [
   AddAndCommit,
@@ -86,6 +87,7 @@ const ALL_COMMANDS = [
   PublishPodCommand,
   MoveNoteCommand,
   RefactorHierarchyCommandV2,
+  RandomNoteCommand,
   ResetConfigCommand,
   RestoreVaultCommand,
   SetupWorkspaceCommand,

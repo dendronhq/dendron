@@ -1,4 +1,7 @@
 import { DendronError, ERROR_STATUS, SeedConfig } from "@dendronhq/common-all";
+import { readYAML } from "@dendronhq/common-server";
+import { WorkspaceService } from "../workspace";
+import { SeedService } from "./service";
 import { SeedUtils } from "./utils";
 
 type SeedRegistryEntry = {} & SeedConfig;
@@ -26,8 +29,12 @@ type SeedCommandOpts = {
 export class SeedRegistry {
   public registry: SeedRegistryDict;
 
-  static create() {
-    return new SeedRegistry(SEED_REGISTRY);
+  static create(opts?: { registryFile?: string }) {
+    let registry = SEED_REGISTRY;
+    if (opts?.registryFile) {
+      registry = readYAML(opts.registryFile) as SeedRegistryDict;
+    }
+    return new SeedRegistry(registry);
   }
 
   constructor(registry: SeedRegistryDict) {
@@ -46,6 +53,11 @@ export class SeedRegistry {
       };
     }
     const spath = await SeedUtils.clone({ wsRoot, config: maybeSeed });
+    const seedService = new SeedService(wsRoot);
+    const wsService = new WorkspaceService({ wsRoot });
+    const config = await seedService.addSeed({ seed: maybeSeed, wsRoot });
+    await wsService.setConfig(config);
+    debugger;
     return { data: { spath } };
   }
 

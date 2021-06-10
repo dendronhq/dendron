@@ -1,15 +1,23 @@
 import {
   DendronError,
   DEngineClient,
+  DVault,
   ERROR_STATUS,
   SeedCommands,
   SeedConfig,
 } from "@dendronhq/common-all";
+import { tmpDir } from "@dendronhq/common-server";
 import { SeedCLICommand, SeedCLICommandOpts } from "@dendronhq/dendron-cli";
 import { DConfig, SeedInitMode } from "@dendronhq/engine-server";
 import path from "path";
 import { runEngineTestV5 } from "../../../engine";
-import { checkDir, checkFile, checkVaults } from "../../../utils";
+import {
+  checkDir,
+  checkFile,
+  checkNotInDir,
+  checkVaults,
+} from "../../../utils";
+import { TestSeedUtils } from "../../../utils/seed";
 
 const runSeedCmd = ({
   cmd,
@@ -20,9 +28,10 @@ const runSeedCmd = ({
   return cli.execute({ cmd, id, ...opts, server: {} as any });
 };
 
-describe(SeedCommands.ADD, () => {
+describe("add", () => {
   const cmd = SeedCommands.ADD;
-  test("does not exist", async () => {
+
+  test("error: does not exist", async () => {
     await runEngineTestV5(
       async ({ engine, wsRoot }) => {
         const id = "dendron.no-exist";
@@ -32,6 +41,7 @@ describe(SeedCommands.ADD, () => {
           engine,
           wsRoot,
         })) as { error: DendronError };
+
         expect(resp).toMatchSnapshot();
         expect(resp.error.status).toEqual(ERROR_STATUS.DOES_NOT_EXIST);
       },
@@ -41,28 +51,67 @@ describe(SeedCommands.ADD, () => {
     );
   });
 
-  test("exists exist", async () => {
+  test("ok: exists", async () => {
     await runEngineTestV5(
-      async ({ engine, wsRoot }) => {
-        const id = "dendron.dendron-site";
-        const resp = (await runSeedCmd({
+      async ({ engine, wsRoot, vaults }) => {
+        const tmp = tmpDir().name;
+        const { registryFile } = await TestSeedUtils.createSeedRegistry({
+          engine,
+          wsRoot: tmp,
+        });
+        const id = "dendron.foo";
+        (await runSeedCmd({
           cmd,
           id,
           engine,
           wsRoot,
+          registryFile,
         })) as { error: DendronError };
-        expect(resp).toMatchSnapshot();
-        expect(wsRoot).toMatchSnapshot();
-        expect(resp.error.status).toEqual(ERROR_STATUS.DOES_NOT_EXIST);
+        // seed should be added
+        await checkDir(
+          { fpath: path.join(wsRoot, "seeds", id), snapshot: true },
+          "dendron.yml",
+          "seed.yml",
+          "vault"
+        );
+        // seed.yml should not be present in the workspace
+        await checkNotInDir(
+          {
+            fpath: wsRoot,
+            snapshot: true,
+          },
+          "seed.yml"
+        );
+        await checkFile({
+          fpath: path.join(wsRoot, "dendron.yml"),
+          snapshot: true,
+        });
+        await checkFile(
+          {
+            fpath: path.join(wsRoot, "dendron.code-workspace"),
+            snapshot: true,
+          },
+          `${id}/vault`
+        );
+        checkVaults(
+          {
+            wsRoot,
+            vaults: [{ fsPath: "vault", seed: id, name: id } as DVault].concat(
+              vaults
+            ),
+          },
+          expect
+        );
       },
       {
         expect,
+        addVSWorkspace: true,
       }
     );
   });
 });
 
-describe.only(SeedCommands.INIT, () => {
+describe("init", () => {
   const cmd = SeedCommands.INIT;
   const seed: SeedConfig = {
     name: "foo",
@@ -75,7 +124,7 @@ describe.only(SeedCommands.INIT, () => {
       url: "",
     },
   };
-  describe(SeedInitMode.CREATE_WORKSPACE, async () => {
+  describe("create workspace", async () => {
     const mode = SeedInitMode.CREATE_WORKSPACE;
     test(`basic`, async () => {
       await runEngineTestV5(
@@ -127,7 +176,7 @@ describe.only(SeedCommands.INIT, () => {
     });
   });
 
-  describe(SeedInitMode.CONVERT_WORKSPACE, async () => {
+  describe("convert workspace", async () => {
     const mode = SeedInitMode.CONVERT_WORKSPACE;
 
     const runInit = async (opts: { engine: DEngineClient; wsRoot: string }) => {
@@ -218,27 +267,5 @@ describe.only(SeedCommands.INIT, () => {
         }
       );
     });
-  });
-});
-
-describe.skip(SeedCommands.INIT, () => {
-  const cmd = SeedCommands.INIT;
-  test("basic", async () => {
-    await runEngineTestV5(
-      async ({ engine, wsRoot }) => {
-        const id = "dendron.dendron-site";
-        const { data: resp } = (await runSeedCmd({
-          cmd,
-          id,
-          engine,
-          wsRoot,
-        })) as { data: SeedConfig };
-        expect(resp).toMatchSnapshot();
-        expect(resp.name).toEqual("dendron-site");
-      },
-      {
-        expect,
-      }
-    );
   });
 });

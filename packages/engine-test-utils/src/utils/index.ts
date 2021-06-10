@@ -34,6 +34,17 @@ export async function checkDir(
   return checkString(body, ...match);
 }
 
+export async function checkNotInDir(
+  { fpath, snapshot }: { fpath: string; snapshot?: boolean },
+  ...match: string[]
+) {
+  const body = fs.readdirSync(fpath).join(" ");
+  if (snapshot) {
+    expect(body).toMatchSnapshot();
+  }
+  return checkNotInString(body, ...match);
+}
+
 export async function checkFile(
   { fpath, snapshot }: { fpath: string; snapshot?: boolean },
   ...match: string[]

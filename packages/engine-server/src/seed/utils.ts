@@ -1,5 +1,6 @@
 import { DendronError, ERROR_STATUS, SeedConfig } from "@dendronhq/common-all";
 import { simpleGit } from "@dendronhq/common-server";
+import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { WorkspaceService } from "../workspace";
@@ -32,6 +33,7 @@ export class SeedUtils {
   }) {
     const id = this.getSeedId(config);
     const spath = this.seed2Path({ wsRoot, id });
+    fs.ensureDirSync(path.dirname(spath));
     const git = simpleGit({ baseDir: wsRoot });
     await git.clone(config.repository.url, spath);
     return spath;

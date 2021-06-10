@@ -107,6 +107,12 @@ export async function setupWS(opts: {
       return vault;
     })
   );
+  config.vaults = _.sortBy(config.vaults, "fsPath");
+  if (config.site.duplicateNoteBehavior) {
+    config.site.duplicateNoteBehavior.payload = (
+      config.site.duplicateNoteBehavior.payload as string[]
+    ).sort();
+  }
   ws.setConfig(config);
   if (opts.workspaces) {
     const vaultsFromWs = await _.reduce(

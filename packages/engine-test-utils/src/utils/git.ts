@@ -41,6 +41,18 @@ export class GitTestUtils {
     await this.remoteAdd(wsRoot, remoteDir);
   }
 
+  /**
+   * Convert existing workspace into a remote workspace
+   * @param wsRoot Directory where the workspace will be stored.
+   * @param remoteDir Directory where the remote will be stored. The workspace will pull and push to this remote.
+   */
+  static async addRepoToWorkspace(wsRoot: string) {
+    const git = new Git({ localUrl: wsRoot });
+    await git.init();
+    await git.addAll();
+    await git.commit({ msg: "init" });
+  }
+
   static async createRepoWithReadme(root: string) {
     const git = new Git({ localUrl: root });
     await git.init();

@@ -30,6 +30,7 @@ type CommandCLIOpts = {
   // INIT
   mode?: SeedInitMode;
   config?: SeedConfig;
+  registryFile?: string;
 };
 
 type CommandOpts = CommandCLIOpts & SetupEngineOpts & {};
@@ -60,6 +61,10 @@ export class SeedCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       type: "string",
       choices: Object.values(SeedInitMode),
     });
+    args.option("registryFile", {
+      describe: "yml file used by registry file",
+      type: "string",
+    });
   }
 
   async enrichArgs(args: CommandCLIOpts): Promise<CommandOpts> {
@@ -69,8 +74,8 @@ export class SeedCLICommand extends CLICommand<CommandOpts, CommandOutput> {
   }
 
   async execute(opts: CommandOpts) {
-    const { cmd, id, wsRoot, config, mode } = opts;
-    const registry = SeedRegistry.create();
+    const { cmd, id, wsRoot, config, mode, registryFile } = opts;
+    const registry = SeedRegistry.create({ registryFile });
     const seedService = new SeedService(wsRoot);
     const ctx = "execute";
     this.L.info({ ctx, id });

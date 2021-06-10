@@ -1,7 +1,6 @@
 import {
   assertUnreachable,
   CONSTANTS,
-  DendronConfig,
   SeedConfig,
   VaultUtils,
 } from "@dendronhq/common-all";
@@ -18,12 +17,24 @@ export enum SeedInitMode {
 export class SeedService {
   constructor(public wsRoot: string) {}
 
-  addSeed({ config, seed }: { config: DendronConfig; seed: SeedConfig }) {
+  async addSeed({ seed, wsRoot }: { seed: SeedConfig; wsRoot: string }) {
+    const ws = new WorkspaceService({ wsRoot });
+    const config = ws.config;
     const id = SeedUtils.getSeedId({ ...seed });
     if (!config.seeds) {
       config.seeds = {};
     }
     config.seeds[id] = {};
+    await ws.addVault({
+      vault: {
+        fsPath: seed.root,
+        seed: id,
+        name: id,
+      },
+      addToWorkspace: true,
+      config,
+      writeConfig: false,
+    });
     return config;
   }
 

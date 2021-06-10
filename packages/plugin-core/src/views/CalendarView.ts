@@ -6,6 +6,7 @@ import {
   OnDidChangeActiveTextEditorMsg,
   DMessage,
   NoteUtils,
+  assertUnreachable,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import * as vscode from "vscode";
@@ -96,7 +97,7 @@ export class CalendarView implements vscode.WebviewViewProvider {
         break;
       }
       default:
-        console.log("got data", msg);
+        assertUnreachable(msg.type);
         break;
     }
   }

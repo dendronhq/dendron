@@ -2,13 +2,16 @@ import fs from "fs-extra";
 import _ from "lodash";
 import { ExportPod, ExportPodPlantOpts } from "../basev3";
 import { ExportPodConfig } from "../basev3";
-import { Time } from "@dendronhq/common-all";
 import { NoteProps } from "@dendronhq/common-all";
 import path from "path";
 import { URI } from "vscode-uri";
 import Airtable from "airtable";
+import { RateLimiter } from "limiter";
 
 const ID = "dendron.airtable";
+
+// Allow 5 req/sec. Also understands 'hour', 'minute', 'day', or a no. of ms
+const limiter = new RateLimiter({ tokensPerInterval: 5, interval: "second" });
 
 type AirtableExportPodCustomOpts = {
   tableName: string;
@@ -65,6 +68,7 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
     ]);
   }
 
+  //filters the note's property as per srcFieldMapping provided
   notesToSrcFieldMap(notes: NoteProps[], srcFieldMapping: any) {
     const data: any[] = notes.map((note) => {
       let fields = {};
@@ -94,20 +98,24 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
 
     const base = new Airtable({ apiKey }).base(baseId);
 
-    try {
-      chunks.forEach(async (record) => {
-        const result = await base(tableName).create(record);
-        if (result) {
-          const timestamp = Time.now().toMillis();
-          fs.writeFileSync(checkpoint, timestamp.toString(), {
-            encoding: "utf8",
-          });
-        }
-      });
-    } catch (error) {
-      console.log("failed to export. Error: ", error);
-      throw Error(error);
-    }
+    // rate limiter method
+    const sendRequest = async () => {
+      try {
+        const timestamp = filteredNotes[filteredNotes.length - 1].created;
+        chunks.forEach(async (record) => {
+          await limiter.removeTokens(1);
+          await base(tableName).create(record);
+        });
+
+        fs.writeFileSync(checkpoint, timestamp.toString(), {
+          encoding: "utf8",
+        });
+      } catch (error) {
+        console.log("failed to export all the notes. Error: ", error);
+        throw Error(error);
+      }
+    };
+    sendRequest();
   }
 
   verifyDir(dest: URI) {
@@ -123,6 +131,7 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
     return checkpoint;
   }
 
+  //filters the notes of src hierarchy given from all the notes
   filterNotes(notes: NoteProps[], srcHierarchy: string) {
     return notes.filter((note) => note.fname.includes(srcHierarchy));
   }
@@ -135,12 +144,11 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
 
     let filteredNotes: NoteProps[] =
       srcHierarchy === "root" ? notes : this.filterNotes(notes, srcHierarchy);
-
+    filteredNotes = _.orderBy(filteredNotes, ["created"], ["asc"]);
     if (fs.existsSync(checkpoint)) {
       const lastUpdatedTimestamp: number = Number(
         fs.readFileSync(checkpoint, { encoding: "utf8" })
       );
-      filteredNotes = _.orderBy(filteredNotes, ["created"], ["asc"]);
       filteredNotes = filteredNotes.filter(
         (note) => note.created > lastUpdatedTimestamp
       );

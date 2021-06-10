@@ -37,7 +37,6 @@ function CalendarView({ engine, ide }: DendronProps) {
   logger.info({
     ctx,
     state: "enter",
-    ide,
   });
 
   const maxDots: number = 5;

@@ -322,39 +322,14 @@ describe("RemarkUtils and LinkUtils", () => {
         return links;
       };
 
-      test("link type", async () => {
-        await runEngineTestV5(
-          async ({ engine }) => {
-            const links = getLinks(engine, { type: DendronASTTypes.WIKI_LINK });
-            checkLink({
-              src: {
-                type: "wiki",
-                from: {
-                  fname: "foo",
-                  id: "foo",
-                  vaultName: "vault1",
-                },
-              },
-              target: links[0],
-            });
-          },
-          {
-            expect,
-            preSetupHook,
-          }
-        );
-      });
-
-      test("link type and loc match", async () => {
+      test("loc match", async () => {
         await runEngineTestV5(
           async ({ engine }) => {
             const links = getLinks(engine, {
-              type: DendronASTTypes.WIKI_LINK,
               loc: { fname: "foo" },
             });
             checkLink({
               src: {
-                type: "wiki",
                 from: {
                   fname: "foo",
                   id: "foo",
@@ -371,11 +346,10 @@ describe("RemarkUtils and LinkUtils", () => {
         );
       });
 
-      test("link type and loc no match", async () => {
+      test("loc no match", async () => {
         await runEngineTestV5(
           async ({ engine }) => {
             const links = getLinks(engine, {
-              type: DendronASTTypes.WIKI_LINK,
               loc: { fname: "bar" },
             });
             expect(_.isEmpty(links)).toBeTruthy();

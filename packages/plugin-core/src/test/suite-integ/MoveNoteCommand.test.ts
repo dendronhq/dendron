@@ -1,6 +1,5 @@
 import {
   DNodeUtils,
-  DVault,
   NoteProps,
   NoteUtils,
   VaultUtils,

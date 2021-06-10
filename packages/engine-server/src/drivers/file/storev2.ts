@@ -45,7 +45,6 @@ import {
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { DendronASTTypes } from "../../markdown";
 import { AnchorUtils, LinkUtils } from "../../markdown/remark/utils";
 import { HookUtils, RequireHookResp } from "../../topics/hooks";
 import { readNotesFromCache, writeNotesToCache } from "../../utils";
@@ -478,7 +477,7 @@ export class FileStorage implements DStore {
         const allLinks = LinkUtils.findLinks({
           note: _n,
           engine: this.engine,
-          filter: { type: DendronASTTypes.WIKI_LINK, loc: oldLoc },
+          filter: { loc: oldLoc },
         });
         const noteMod = _.reduce(
           allLinks,

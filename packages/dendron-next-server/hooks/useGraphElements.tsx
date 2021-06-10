@@ -96,14 +96,12 @@ const getSchemaGraphElements = (
         id: VAULT_ID,
         label: vaultName,
         group: "nodes",
-        selectable: false,
       },
+      selectable: false,
     });
 
     schemaArray
-      .filter((schema) => {
-        VaultUtils.getName(schema.vault) === vaultName;
-      })
+      .filter((schema) => VaultUtils.getName(schema.vault) === vaultName)
       .forEach((schema) => {
         const SCHEMA_ID = `${vaultName}_${schema.fname}`;
 

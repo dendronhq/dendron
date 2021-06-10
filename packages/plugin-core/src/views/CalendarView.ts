@@ -92,7 +92,10 @@ export class CalendarView implements vscode.WebviewViewProvider {
         Logger.info({ ctx: "onDidReceiveMessage", data: msg });
         switch (msg.type) {
           case CalendarViewMessageType.onSelect: {
-            console.log("onDidReceiveMessage:onSelect:data", msg.data);
+            Logger.info({
+              ctx: "onDidReceiveMessage:onSelect",
+              data: msg.data,
+            });
             if (msg.data.id) {
               const note = getEngine().notes[msg.data.id];
               await new GotoNoteCommand().execute({

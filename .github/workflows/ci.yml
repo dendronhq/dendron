@@ -7,6 +7,7 @@ on:
       - master
       - integ-publish
       - dev-kevin
+      - feat.*
   pull_request:
     branches:
       - master

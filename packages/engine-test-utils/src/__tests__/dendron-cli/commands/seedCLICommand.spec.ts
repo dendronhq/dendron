@@ -162,6 +162,7 @@ describe.only(SeedCommands.INIT, () => {
         },
         {
           expect,
+          vaults: [],
         }
       );
     });

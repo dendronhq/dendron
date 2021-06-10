@@ -92,18 +92,11 @@ exports[`init basic 3`] = `
 }"
 `;
 
-exports[`init convert_workspace error: no vaults 1`] = `"dendron.yml hooks vault1 vault2 vault3"`;
+exports[`init convert_workspace error: no vaults 1`] = `"dendron.yml hooks"`;
 
 exports[`init convert_workspace error: no vaults 2`] = `
 "version: 1
-vaults:
-    -
-        fsPath: vault3
-        name: vaultThree
-    -
-        fsPath: vault1
-    -
-        fsPath: vault2
+vaults: []
 useFMTitle: true
 useNoteTitleForLink: true
 noAutoCreateOnDefinition: true
@@ -117,12 +110,6 @@ site:
     usePrettyRefs: true
     title: Dendron
     description: Personal knowledge space
-    duplicateNoteBehavior:
-        action: useVault
-        payload:
-            - vault2
-            - vault1
-            - vaultThree
 initializeRemoteVaults: true
 "
 `;

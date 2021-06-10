@@ -100,12 +100,14 @@ export async function setupWS(opts: {
   const wsRoot = tmpDir().name;
   const ws = new WorkspaceService({ wsRoot });
   ws.createConfig();
+  const config = ws.config;
   let vaults = await Promise.all(
     opts.vaults.map(async (vault) => {
-      await ws.createVault({ vault });
+      await ws.createVault({ vault, config, writeConfig: false });
       return vault;
     })
   );
+  ws.setConfig(config);
   if (opts.workspaces) {
     const vaultsFromWs = await _.reduce(
       opts.workspaces,

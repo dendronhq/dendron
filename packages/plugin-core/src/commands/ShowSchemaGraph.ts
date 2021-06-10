@@ -63,17 +63,21 @@ export class ShowSchemaGraphCommand extends BasicCommand<
     panel.webview.onDidReceiveMessage(async (msg: GraphViewMessage) => {
       switch (msg.type) {
         case GraphViewMessageType.onSelect: {
-          const engine = getEngine();
+          const engine = getWS().getEngine();
           const schema = engine.schemas[msg.data.id];
 
-          console.log(msg.data.id, engine.schemas);
+          console.log(msg.data.id, schema);
+          console.log(ws._enginev2?.wsRoot);
 
-          if (schema) {
+          const wsRoot = ws._enginev2?.wsRoot;
+
+          if (schema && wsRoot) {
             const fname = schema.fname;
             // const vault = schema.vault;
 
             const schemaPath = path.join(
-              ws.rootWorkspace.uri.fsPath,
+              wsRoot,
+              schema.vault.fsPath,
               `${fname}.schema.yml`
             );
             const uri = Uri.file(schemaPath);

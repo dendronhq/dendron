@@ -125,7 +125,12 @@ const getSchemaGraphElements = (
 
           // Subschema node
           nodes.push({
-            data: { id: SUBSCHEMA_ID, label: subschema.title, group: "nodes" },
+            data: {
+              id: SUBSCHEMA_ID,
+              label: subschema.title,
+              group: "nodes",
+              fname: schema.fname,
+            },
           });
 
           // Schema -> subschema connection

@@ -30,12 +30,15 @@ export default function FullSchemaGraph({
     const idSections = id.split("_");
     const rootID = idSections[idSections.length - 1];
 
+    // Exists if the node is a subschema
+    const fname = e.target[0]._private.data.fname || rootID;
+
     const isNode = !source;
     if (!isNode) return;
 
     postVSCodeMessage({
       type: GraphViewMessageType.onSelect,
-      data: { id: rootID },
+      data: { id: fname },
       source: DMessageSource.webClient,
     } as GraphViewMessage);
   };

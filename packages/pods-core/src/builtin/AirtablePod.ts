@@ -61,7 +61,8 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
       },
       {
         key: "srcFieldMapping",
-        description: "mapping of airtable fields with the note",
+        description:
+          "mapping of airtable fields with the note eg: {Created On: created, Notes: body}",
         type: "object",
         required: true,
       },
@@ -100,20 +101,23 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
 
     // rate limiter method
     const sendRequest = async () => {
-      try {
-        const timestamp = filteredNotes[filteredNotes.length - 1].created;
-        chunks.forEach(async (record) => {
-          await limiter.removeTokens(1);
-          await base(tableName).create(record);
-        });
-
-        fs.writeFileSync(checkpoint, timestamp.toString(), {
-          encoding: "utf8",
-        });
-      } catch (error) {
-        console.log("failed to export all the notes. Error: ", error);
-        throw Error(error);
-      }
+      let total: number = 0;
+      chunks.forEach(async (record) => {
+        await limiter.removeTokens(1);
+        try {
+          const result = await base(tableName).create(record);
+          total = total + result.length;
+          if (total === filteredNotes.length) {
+            const timestamp = filteredNotes[filteredNotes.length - 1].created;
+            fs.writeFileSync(checkpoint, timestamp.toString(), {
+              encoding: "utf8",
+            });
+          }
+        } catch (error) {
+          console.log("failed to export all the notes. Error: ", error);
+          throw Error("error");
+        }
+      });
     };
     sendRequest();
   }

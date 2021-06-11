@@ -1,7 +1,11 @@
 import { NoteUtils } from "@dendronhq/common-all";
-import { DirResult, tmpDir } from "@dendronhq/common-server";
-import { NodeTestPresetsV2 } from "@dendronhq/common-test-utils";
+import { DirResult, tmpDir, vault2Path } from "@dendronhq/common-server";
+import {
+  NodeTestPresetsV2,
+  NoteTestUtilsV4,
+} from "@dendronhq/common-test-utils";
 import { DoctorActions } from "@dendronhq/dendron-cli";
+import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -9,11 +13,16 @@ import sinon from "sinon";
 import * as vscode from "vscode";
 import { DoctorCommand } from "../../commands/Doctor";
 import { ReloadIndexCommand } from "../../commands/ReloadIndex";
+import { VSCodeUtils } from "../../utils";
 import { onWSInit, setupDendronWorkspace } from "../testUtils";
 import { expect } from "../testUtilsv2";
-import { setupBeforeAfter } from "../testUtilsV3";
+import {
+  runLegacyMultiWorkspaceTest,
+  runLegacySingleWorkspaceTest,
+  setupBeforeAfter,
+} from "../testUtilsV3";
 
-suite("notes", function () {
+suite("DoctorCommandTest", function () {
   let root: DirResult;
   let ctx: vscode.ExtensionContext;
 
@@ -28,13 +37,16 @@ suite("notes", function () {
 
   test("basic", (done) => {
     onWSInit(async () => {
-      const testFile = path.join(root.name, "vault", "bond2.md");
-      fs.writeFileSync(testFile, "bond", { encoding: "utf8" });
+      const testFile = path.join(root.name, "vault", "bar.md");
+      fs.writeFileSync(testFile, "bar", { encoding: "utf8" });
+      const testFile2 = path.join(root.name, "vault", "baz.md");
+      fs.writeFileSync(testFile2, "baz", { encoding: "utf8" });
       await new ReloadIndexCommand().run();
       const cmd = new DoctorCommand();
       sinon.stub(cmd, "gatherInputs").returns(
         Promise.resolve({
           action: DoctorActions.FIX_FRONTMATTER,
+          scope: "workspace",
         })
       );
       await cmd.run();
@@ -43,6 +55,48 @@ suite("notes", function () {
       expect(NoteUtils.RE_FM.exec(resp)).toBeTruthy();
       expect(NoteUtils.RE_FM_UPDATED.exec(resp)).toBeTruthy();
       expect(NoteUtils.RE_FM_CREATED.exec(resp)).toBeTruthy();
+
+      const resp2 = fs.readFileSync(testFile2, { encoding: "utf8" });
+      expect(NoteUtils.RE_FM.exec(resp2)).toBeTruthy();
+      expect(NoteUtils.RE_FM_UPDATED.exec(resp2)).toBeTruthy();
+      expect(NoteUtils.RE_FM_CREATED.exec(resp2)).toBeTruthy();
+      done();
+    });
+    setupDendronWorkspace(root.name, ctx, {
+      lsp: true,
+      useCb: async (vaultDir) => {
+        await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
+      },
+    });
+  });
+
+  test("basic file scoped", (done) => {
+    onWSInit(async () => {
+      const testFile = path.join(root.name, "vault", "bar.md");
+      fs.writeFileSync(testFile, "bar", { encoding: "utf8" });
+      const testFile2 = path.join(root.name, "vault", "baz.md");
+      fs.writeFileSync(testFile2, "baz", { encoding: "utf8" });
+      await new ReloadIndexCommand().run();
+      const testFileUri = vscode.Uri.file(testFile);
+      await VSCodeUtils.openFileInEditor(testFileUri);
+      const cmd = new DoctorCommand();
+      sinon.stub(cmd, "gatherInputs").returns(
+        Promise.resolve({
+          action: DoctorActions.FIX_FRONTMATTER,
+          scope: "file",
+        })
+      );
+      await cmd.run();
+      // check that frontmatter is added
+      const resp = fs.readFileSync(testFile, { encoding: "utf8" });
+      expect(NoteUtils.RE_FM.exec(resp)).toBeTruthy();
+      expect(NoteUtils.RE_FM_UPDATED.exec(resp)).toBeTruthy();
+      expect(NoteUtils.RE_FM_CREATED.exec(resp)).toBeTruthy();
+
+      const resp2 = fs.readFileSync(testFile2, { encoding: "utf8" });
+      expect(NoteUtils.RE_FM.exec(resp2)).toBeFalsy();
+      expect(NoteUtils.RE_FM_UPDATED.exec(resp2)).toBeFalsy();
+      expect(NoteUtils.RE_FM_CREATED.exec(resp2)).toBeFalsy();
       done();
     });
     setupDendronWorkspace(root.name, ctx, {
@@ -266,3 +320,327 @@ suite("notes", function () {
 //       setupDendronWorkspace(root.name, ctx);
 //     });
 //   });
+
+suite("CREATE_MISSING_LINKED_NOTES", function () {
+  let ctx: vscode.ExtensionContext;
+
+  ctx = setupBeforeAfter(this, {
+    afterHook: () => {
+      sinon.restore();
+    },
+  });
+
+  test("basic proceed, file scoped", (done) => {
+    runLegacySingleWorkspaceTest({
+      ctx,
+      postSetupHook: ENGINE_HOOKS.setupBasic,
+      onInit: async ({ wsRoot, vaults }) => {
+        const vault = vaults[0];
+        const file = await NoteTestUtilsV4.createNote({
+          fname: "real",
+          body: "[[real.fake]]\n",
+          vault: vault,
+          wsRoot,
+        });
+        await NoteTestUtilsV4.createNote({
+          fname: "real2",
+          body: "[[real.fake2]]\n",
+          vault: vault,
+          wsRoot,
+        });
+        await VSCodeUtils.openNote(file);
+        const cmd = new DoctorCommand();
+        sinon.stub(cmd, "gatherInputs").returns(
+          Promise.resolve({
+            action: DoctorActions.CREATE_MISSING_LINKED_NOTES,
+            scope: "file",
+          })
+        );
+        const quickPickStub = sinon.stub(VSCodeUtils, "showQuickPick");
+        quickPickStub
+          .onCall(0)
+          .returns(
+            Promise.resolve("proceed") as Thenable<vscode.QuickPickItem>
+          );
+        await cmd.run();
+        const vaultPath = vault2Path({ vault, wsRoot });
+        const created = _.includes(fs.readdirSync(vaultPath), "real.fake.md");
+        expect(created).toBeTruthy();
+        const didNotCreate = !_.includes(
+          fs.readdirSync(vaultPath),
+          "real.fake2.md"
+        );
+        expect(didNotCreate).toBeTruthy();
+        done();
+      },
+    });
+  });
+
+  test("basic cancelled", (done) => {
+    runLegacySingleWorkspaceTest({
+      ctx,
+      postSetupHook: ENGINE_HOOKS.setupBasic,
+      onInit: async ({ wsRoot, vaults }) => {
+        const vault = vaults[0];
+        const file = await NoteTestUtilsV4.createNote({
+          fname: "real",
+          body: "[[real.fake]]\n",
+          vault: vault,
+          wsRoot,
+        });
+        await VSCodeUtils.openNote(file);
+        const cmd = new DoctorCommand();
+        sinon.stub(cmd, "gatherInputs").returns(
+          Promise.resolve({
+            action: DoctorActions.CREATE_MISSING_LINKED_NOTES,
+            scope: "file",
+          })
+        );
+        const quickPickStub = sinon.stub(VSCodeUtils, "showQuickPick");
+        quickPickStub
+          .onCall(0)
+          .returns(
+            Promise.resolve("cancelled") as Thenable<vscode.QuickPickItem>
+          );
+        await cmd.run();
+        const vaultPath = vault2Path({ vault, wsRoot });
+        const containsNew = _.includes(
+          fs.readdirSync(vaultPath),
+          "real.fake.md"
+        );
+        expect(containsNew).toBeFalsy();
+        done();
+      },
+    });
+  });
+
+  test("wild link with alias", (done) => {
+    runLegacySingleWorkspaceTest({
+      ctx,
+      postSetupHook: ENGINE_HOOKS.setupBasic,
+      onInit: async ({ wsRoot, vaults }) => {
+        const vault = vaults[0];
+        const file = await NoteTestUtilsV4.createNote({
+          fname: "real",
+          body: [
+            "[[something|real.fake]]",
+            "[[something something|real.something]]",
+          ].join("\n"),
+          vault: vault,
+          wsRoot,
+        });
+        await VSCodeUtils.openNote(file);
+        const cmd = new DoctorCommand();
+        sinon.stub(cmd, "gatherInputs").returns(
+          Promise.resolve({
+            action: DoctorActions.CREATE_MISSING_LINKED_NOTES,
+            scope: "file",
+          })
+        );
+        const quickPickStub = sinon.stub(VSCodeUtils, "showQuickPick");
+        quickPickStub
+          .onCall(0)
+          .returns(
+            Promise.resolve("proceed") as Thenable<vscode.QuickPickItem>
+          );
+        await cmd.run();
+        const vaultPath = vault2Path({ vault, wsRoot });
+        const fileNames = ["real.fake.md", "real.something.md"];
+        _.forEach(fileNames, (fileName) => {
+          const containsNew = _.includes(fs.readdirSync(vaultPath), fileName);
+          expect(containsNew).toBeTruthy();
+        });
+        done();
+      },
+    });
+  });
+
+  test("xvault wild links", (done) => {
+    runLegacyMultiWorkspaceTest({
+      ctx,
+      preSetupHook: async (opts) => {
+        await ENGINE_HOOKS.setupBasic(opts);
+      },
+      onInit: async ({ wsRoot, vaults }) => {
+        const vault1 = vaults[0];
+        const vault2 = vaults[1];
+        const file = await NoteTestUtilsV4.createNote({
+          fname: "first",
+          body: [
+            "[[dendron://vault2/second]]",
+            "[[somenote|dendron://vault2/somenote]]",
+            "[[some note|dendron://vault2/something]]",
+          ].join("\n"),
+          vault: vault1,
+          wsRoot,
+        });
+        await VSCodeUtils.openNote(file);
+        const cmd = new DoctorCommand();
+        sinon.stub(cmd, "gatherInputs").returns(
+          Promise.resolve({
+            action: DoctorActions.CREATE_MISSING_LINKED_NOTES,
+            scope: "file",
+          })
+        );
+        const quickPickStub = sinon.stub(VSCodeUtils, "showQuickPick");
+        quickPickStub
+          .onCall(0)
+          .returns(
+            Promise.resolve("proceed") as Thenable<vscode.QuickPickItem>
+          );
+        await cmd.run();
+        const sVaultPath = vault2Path({ vault: vault1, wsRoot });
+        const xVaultPath = vault2Path({ vault: vault2, wsRoot });
+        const fileNames = ["second.md", "somenote.md", "something.md"];
+        _.forEach(fileNames, (fileName) => {
+          const inSVault = _.includes(fs.readdirSync(sVaultPath), fileName);
+          const inXVault = _.includes(fs.readdirSync(xVaultPath), fileName);
+          expect(inSVault).toBeFalsy();
+          expect(inXVault).toBeTruthy();
+        });
+        done();
+      },
+    });
+  });
+
+  test("workspace scope should do nothing", (done) => {
+    runLegacyMultiWorkspaceTest({
+      ctx,
+      preSetupHook: async (opts) => {
+        await ENGINE_HOOKS.setupBasic(opts);
+      },
+      onInit: async ({ wsRoot, vaults }) => {
+        const vault1 = vaults[0];
+        const vault2 = vaults[1];
+        await NoteTestUtilsV4.createNote({
+          fname: "first",
+          body: [
+            "[[wild]]",
+            "[[somenote|somenote]]",
+            "[[some note|something]]",
+          ].join("\n"),
+          vault: vault1,
+          wsRoot,
+        });
+        await NoteTestUtilsV4.createNote({
+          fname: "second",
+          body: [
+            "[[wild2]]",
+            "[[somenote|somenote2]]",
+            "[[some note|something2]]",
+          ].join("\n"),
+          vault: vault2,
+          wsRoot,
+        });
+        const cmd = new DoctorCommand();
+        sinon.stub(cmd, "gatherInputs").returns(
+          Promise.resolve({
+            action: DoctorActions.CREATE_MISSING_LINKED_NOTES,
+            scope: "workspace",
+          })
+        );
+        const quickPickStub = sinon.stub(VSCodeUtils, "showQuickPick");
+        quickPickStub
+          .onCall(0)
+          .returns(
+            Promise.resolve("proceed") as Thenable<vscode.QuickPickItem>
+          );
+        await cmd.run();
+        const firstVaultPath = vault2Path({ vault: vault1, wsRoot });
+        const firstVaultFileNames = ["wild.md", "somenote.md", "something.md"];
+        _.forEach(firstVaultFileNames, (fileName) => {
+          const containsNew = _.includes(
+            fs.readdirSync(firstVaultPath),
+            fileName
+          );
+          expect(containsNew).toBeFalsy();
+        });
+        const secondVaultPath = vault2Path({ vault: vault2, wsRoot });
+        const secondVaultFileNames = [
+          "wild2.md",
+          "somenote2.md",
+          "something2.md",
+        ];
+        _.forEach(secondVaultFileNames, (fileName) => {
+          const containsNew = _.includes(
+            fs.readdirSync(secondVaultPath),
+            fileName
+          );
+          expect(containsNew).toBeFalsy();
+        });
+        done();
+      },
+    });
+  });
+
+  // TODO: enable this once we enable workspace scope for CREATE_MISSING_LINKED_NOTES
+  test.skip("wild links in multiple vaults with workspace scope", (done) => {
+    runLegacyMultiWorkspaceTest({
+      ctx,
+      preSetupHook: async (opts) => {
+        await ENGINE_HOOKS.setupBasic(opts);
+      },
+      onInit: async ({ wsRoot, vaults }) => {
+        const vault1 = vaults[0];
+        const vault2 = vaults[1];
+        await NoteTestUtilsV4.createNote({
+          fname: "first",
+          body: [
+            "[[wild]]",
+            "[[somenote|somenote]]",
+            "[[some note|something]]",
+          ].join("\n"),
+          vault: vault1,
+          wsRoot,
+        });
+        await NoteTestUtilsV4.createNote({
+          fname: "second",
+          body: [
+            "[[wild2]]",
+            "[[somenote|somenote2]]",
+            "[[some note|something2]]",
+          ].join("\n"),
+          vault: vault2,
+          wsRoot,
+        });
+        const cmd = new DoctorCommand();
+        sinon.stub(cmd, "gatherInputs").returns(
+          Promise.resolve({
+            action: DoctorActions.CREATE_MISSING_LINKED_NOTES,
+            scope: "workspace",
+          })
+        );
+        const quickPickStub = sinon.stub(VSCodeUtils, "showQuickPick");
+        quickPickStub
+          .onCall(0)
+          .returns(
+            Promise.resolve("proceed") as Thenable<vscode.QuickPickItem>
+          );
+        await cmd.run();
+        const firstVaultPath = vault2Path({ vault: vault1, wsRoot });
+        const firstVaultFileNames = ["wild.md", "somenote.md", "something.md"];
+        _.forEach(firstVaultFileNames, (fileName) => {
+          const containsNew = _.includes(
+            fs.readdirSync(firstVaultPath),
+            fileName
+          );
+          expect(containsNew).toBeTruthy();
+        });
+        const secondVaultPath = vault2Path({ vault: vault2, wsRoot });
+        const secondVaultFileNames = [
+          "wild2.md",
+          "somenote2.md",
+          "something2.md",
+        ];
+        _.forEach(secondVaultFileNames, (fileName) => {
+          const containsNew = _.includes(
+            fs.readdirSync(secondVaultPath),
+            fileName
+          );
+          expect(containsNew).toBeTruthy();
+        });
+        done();
+      },
+    });
+  });
+});

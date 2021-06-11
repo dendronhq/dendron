@@ -5,9 +5,9 @@ import {
   NoteQuickInput,
   NoteUtils,
 } from "@dendronhq/common-all";
-import { HistoryService } from "@dendronhq/engine-server";
+import { DConfig, HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
-import { Uri, window } from "vscode";
+import { Uri } from "vscode";
 import {
   DirectChildFilterBtn,
   MultiSelectBtn,
@@ -25,8 +25,9 @@ import {
   OldNewLocation,
   PickerUtilsV2,
 } from "../components/lookup/utils";
+import { DENDRON_COMMANDS } from "../constants";
 import { Logger } from "../logger";
-import { DendronWorkspace, getEngine } from "../workspace";
+import { DendronWorkspace, getEngine, getWS } from "../workspace";
 import { BaseCommand } from "./base";
 import { LookupFilterType } from "./LookupCommand";
 
@@ -79,6 +80,7 @@ export class NoteLookupCommand extends BaseCommand<
   CommandGatherOutput,
   CommandRunOpts
 > {
+  static key = DENDRON_COMMANDS.LOOKUP_NOTE.key;
   protected _controller: LookupControllerV3 | undefined;
   protected _provider: ILookupProviderV3 | undefined;
 
@@ -106,15 +108,25 @@ export class NoteLookupCommand extends BaseCommand<
     return this._provider;
   }
 
-  async gatherInputs(opts: CommandRunOpts): Promise<CommandGatherOutput> {
+  async gatherInputs(opts?: CommandRunOpts): Promise<CommandGatherOutput> {
+    const copts: CommandRunOpts = _.defaults(opts || {}, {
+      multiSelect: false,
+      filterMiddleware: [],
+      initialValue: NotePickerUtils.getInitialValueFromOpenEditor(),
+    } as CommandRunOpts);
     const ctx = "LookupCommand:execute";
+    const ws = getWS();
     Logger.info({ ctx, opts, msg: "enter" });
     // initialize controller and provider
     this._controller = LookupControllerV3.create({
+      disableVaultSelection: !DConfig.getProp(
+        ws.config,
+        "lookupConfirmVaultOnCreate"
+      ),
       extraButtons: [
-        MultiSelectBtn.create(opts.multiSelect),
+        MultiSelectBtn.create(copts.multiSelect),
         DirectChildFilterBtn.create(
-          opts.filterMiddleware?.includes("directChildOnly")
+          copts.filterMiddleware?.includes("directChildOnly")
         ),
       ],
     });
@@ -123,24 +135,24 @@ export class NoteLookupCommand extends BaseCommand<
       noHidePickerOnAccept: true,
     });
     const lc = this.controller;
-    if (opts.fuzzThreshold) {
-      lc.fuzzThreshold = opts.fuzzThreshold;
+    if (copts.fuzzThreshold) {
+      lc.fuzzThreshold = copts.fuzzThreshold;
     }
     const { quickpick } = await lc.prepareQuickPick({
       title: "Lookup",
       placeholder: "a seed",
       provider: this.provider,
-      initialValue:
-        opts.initialValue || NotePickerUtils.getInitialValueFromOpenEditor(),
-      nonInteractive: opts.noConfirm,
+      initialValue: copts.initialValue,
+      nonInteractive: copts.noConfirm,
+      alwaysShow: true,
     });
 
     return {
       controller: this.controller,
       provider: this.provider,
       quickpick,
-      noConfirm: opts.noConfirm,
-      fuzzThreshold: opts.fuzzThreshold,
+      noConfirm: copts.noConfirm,
+      fuzzThreshold: copts.fuzzThreshold,
     };
   }
 
@@ -152,13 +164,8 @@ export class NoteLookupCommand extends BaseCommand<
         id: "lookup",
         listener: async (event) => {
           if (event.action === "done") {
-            HistoryService.instance().remove(
-              this.provider.id,
-              "lookupProvider"
-            );
-            const data = event.data as NoteLookupProviderSuccessResp<
-              OldNewLocation
-            >;
+            const data =
+              event.data as NoteLookupProviderSuccessResp<OldNewLocation>;
             if (data.cancel) {
               resolve(undefined);
             }
@@ -169,11 +176,16 @@ export class NoteLookupCommand extends BaseCommand<
             resolve(_opts);
           } else if (event.action === "error") {
             const error = event.data.error as DendronError;
-            window.showErrorMessage(error.message);
+            this.L.error({ error });
             resolve(undefined);
           } else {
-            throw new DendronError({ message: `unexpected event: ${event}` });
+            const error = new DendronError({
+              message: `unexpected event: ${event}`,
+            });
+            this.L.error({ error });
           }
+
+          HistoryService.instance().remove("lookup", "lookupProvider");
         },
       });
 
@@ -188,27 +200,31 @@ export class NoteLookupCommand extends BaseCommand<
   }
 
   async execute(opts: CommandOpts) {
-    const { quickpick } = opts;
-    const selected = quickpick.canSelectMany
-      ? quickpick.selectedItems
-      : quickpick.selectedItems.slice(0, 1);
-    // if not selecting many, we want to check for a perfect match
-    const out = await Promise.all(
-      selected.map((item) => {
-        return this.acceptItem(item);
-      })
-    );
-    const outClean = out.filter(
-      (ent) => !_.isUndefined(ent)
-    ) as OnDidAcceptReturn[];
-    await _.reduce(
-      outClean,
-      async (acc, item) => {
-        await acc;
-        return quickpick.showNote!(item.uri);
-      },
-      Promise.resolve({})
-    );
+    try {
+      const { quickpick } = opts;
+      const selected = quickpick.canSelectMany
+        ? quickpick.selectedItems
+        : quickpick.selectedItems.slice(0, 1);
+      // if not selecting many, we want to check for a perfect match
+      const out = await Promise.all(
+        selected.map((item) => {
+          return this.acceptItem(item);
+        })
+      );
+      const outClean = out.filter(
+        (ent) => !_.isUndefined(ent)
+      ) as OnDidAcceptReturn[];
+      await _.reduce(
+        outClean,
+        async (acc, item) => {
+          await acc;
+          return quickpick.showNote!(item.uri);
+        },
+        Promise.resolve({})
+      );
+    } finally {
+      opts.controller.onHide();
+    }
     return opts;
   }
 

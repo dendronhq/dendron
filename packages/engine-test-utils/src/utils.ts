@@ -1,6 +1,16 @@
+import {
+  CONSTANTS,
+  DendronConfig,
+  VaultUtils,
+  WorkspaceFolderRaw,
+  WorkspaceOpts,
+  WorkspaceSettings,
+} from "@dendronhq/common-all";
+import { readYAML } from "@dendronhq/common-server";
 import { AssertUtils } from "@dendronhq/common-test-utils";
-import { Git } from "@dendronhq/engine-server";
+import { DConfig, Git } from "@dendronhq/engine-server";
 import fs from "fs-extra";
+import _ from "lodash";
 import path from "path";
 
 export async function checkString(body: string, ...match: string[]) {
@@ -19,6 +29,31 @@ export async function checkNotInString(body: string, ...nomatch: string[]) {
       nomatch,
     })
   ).toBeTruthy();
+}
+
+const getWorkspaceFolders = (wsRoot: string) => {
+  const wsPath = path.join(wsRoot, CONSTANTS.DENDRON_WS_NAME);
+  const settings = fs.readJSONSync(wsPath) as WorkspaceSettings;
+  return _.toArray(settings.folders);
+};
+
+export function checkVaults(opts: WorkspaceOpts, expect: any) {
+  const { wsRoot, vaults } = opts;
+  const configPath = DConfig.configPath(opts.wsRoot);
+  const config = readYAML(configPath) as DendronConfig;
+  expect(_.sortBy(config.vaults, ["fsPath", "workspace"])).toEqual(
+    _.sortBy(vaults, ["fsPath", "workspace"])
+  );
+  const wsFolders = getWorkspaceFolders(wsRoot);
+  expect(wsFolders).toEqual(
+    vaults.map((ent) => {
+      const out: WorkspaceFolderRaw = { path: VaultUtils.getRelPath(ent) };
+      if (ent.name) {
+        out.name = ent.name;
+      }
+      return out;
+    })
+  );
 }
 
 export class GitTestUtils {
@@ -46,7 +81,7 @@ export class GitTestUtils {
     const git = new Git({ localUrl: wsRoot, remoteUrl: remoteDir });
     await git.remoteAdd();
     // Need to push to be able to set up remote tracking branch
-    git.push({ remote: "origin", branch: await git.getCurrentBranch() });
+    await git.push({ remote: "origin", branch: await git.getCurrentBranch() });
   }
 
   /** Set up a workspace with a remote, intended to be used when testing pull or push functionality.

@@ -1,3 +1,4 @@
+import { DNoteAnchorPositioned } from "@dendronhq/common-all";
 import {
   assert,
   BulkAddNoteOpts,
@@ -45,7 +46,7 @@ import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { MDUtilsV4 } from "../../markdown";
-import { LinkUtils } from "../../markdown/remark/utils";
+import { AnchorUtils, LinkUtils } from "../../markdown/remark/utils";
 import { HookUtils, RequireHookResp } from "../../topics/hooks";
 import { readNotesFromCache, writeNotesToCache } from "../../utils";
 import { NoteParser } from "./noteParser";
@@ -79,6 +80,7 @@ export class FileStorage implements DStore {
   public notesCache: NotesCache;
   public logger: DLogger;
   public links: DLink[];
+  public anchors: DNoteAnchorPositioned[];
   public wsRoot: string;
   public configRoot: string;
   public config: DendronConfig;
@@ -97,6 +99,7 @@ export class FileStorage implements DStore {
       notes: {},
     };
     this.links = [];
+    this.anchors = [];
     this.logger = logger;
     const ctx = "FileStorageV2";
     this.logger.info({ ctx, wsRoot, vaults, level: this.logger.level });
@@ -314,7 +317,7 @@ export class FileStorage implements DStore {
         });
         const newCache: NotesCache = {
           version: cache.version,
-          notes: _.merge(cache.notes, cacheUpdates),
+          notes: _.defaults(cacheUpdates, cache.notes),
         };
         const vpath = vault2Path({ vault, wsRoot: this.wsRoot });
         // OPT:make async and don't wait for return
@@ -392,8 +395,20 @@ export class FileStorage implements DStore {
             note: n,
             engine: this.engine,
           });
+          const anchors = await AnchorUtils.findAnchors(
+            {
+              note: n,
+              wsRoot: wsRoot,
+            },
+            {
+              engine: this.engine,
+              fname: n.fname,
+            }
+          );
           cacheUpdates[n.fname].data.links = links;
+          cacheUpdates[n.fname].data.anchors = anchors;
           n.links = links;
+          n.anchors = anchors;
         } else {
           n.links = cache.notes[n.fname].data.links;
         }

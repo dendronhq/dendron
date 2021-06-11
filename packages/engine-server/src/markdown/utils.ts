@@ -50,8 +50,13 @@ import { noteRefsV2 } from "./remark/noteRefsV2";
 import { publishSite } from "./remark/publishSite";
 import { transformLinks } from "./remark/transformLinks";
 import { wikiLinks, WikiLinksOpts } from "./remark/wikiLinks";
-import { blockAnchors } from "./remark/blockAnchors";
-import { DendronASTData, DendronASTDest, VaultMissingBehavior } from "./types";
+import { BlockAnchorOpts, blockAnchors } from "./remark/blockAnchors";
+import {
+  DendronASTData,
+  DendronASTDest,
+  VaultMissingBehavior,
+  DendronASTTypes,
+} from "./types";
 
 const toString = require("mdast-util-to-string");
 export { nunjucks };
@@ -81,6 +86,7 @@ type ProcOptsFull = ProcOpts & {
   wikiLinksOpts?: WikiLinksOpts;
   noteRefOpts?: NoteRefsOpts;
   publishOpts?: DendronPubOpts;
+  blockAnchorsOpts?: BlockAnchorOpts;
 };
 
 type ProcDendron = ProcOpts & {
@@ -123,14 +129,78 @@ export const renderFromNoteWithCustomBody = (opts: {
   const contents = nunjucks.renderString(body, { fm: note.custom });
   return contents;
 };
+
+export type ParentWithIndex = {
+  ancestor: Parent;
+  index: number;
+};
+
+type VisitorParentsIndices = ({
+  node,
+  index,
+  ancestors,
+}: {
+  node: Node;
+  index: number;
+  ancestors: ParentWithIndex[];
+}) => boolean | undefined | "skip";
+
 export class MDUtilsV4 {
-  static findIndex(array: Node[], fn: any) {
+  /** Find the index of the list element for which the predicate `fn` returns true.
+   *
+   * @returns The index where the element was found, -1 otherwise.
+   */
+  static findIndex<T>(array: T[], fn: (node: T, index: number) => boolean) {
     for (var i = 0; i < array.length; i++) {
       if (fn(array[i], i)) {
         return i;
       }
     }
     return -1;
+  }
+
+  /** A simplified and adapted version of visitParents from unist-utils-visit-parents, that also keeps track of indices of the ancestors as well.
+   *
+   * The limitations are:
+   * * `test`, if used, can only be a string representing the type of the node that you want to visit
+   * * Adding or removing siblings is undefined behavior
+   * Please modify this function to add support for these if needed.
+   */
+  static visitParentsIndices({
+    nodes,
+    test,
+    visitor,
+  }: {
+    nodes: Node[];
+    test?: string;
+    visitor: VisitorParentsIndices;
+  }) {
+    function recursiveTraversal(
+      nodes: Node[],
+      ancestors: ParentWithIndex[]
+    ): boolean | undefined {
+      for (let i = 0; i < nodes.length; i++) {
+        // visit the current node
+        const node = nodes[i];
+        let action: boolean | undefined | "skip" = undefined;
+        if (_.isUndefined(test) || node.type === test) {
+          action = visitor({ node, index: i, ancestors });
+        }
+        if (action === "skip") return; // don't traverse the children of this node
+        if (action === false) return false; // stop traversing completely
+
+        // visit the children of this node, if any
+        if (node.children) {
+          const parent = node as Parent;
+          const newAncestors = [...ancestors, { ancestor: parent, index: i }];
+          const action = recursiveTraversal(parent.children, newAncestors);
+          if (action === false) return; // stopping traversal
+        }
+      }
+      return true; // continue traversal if needed
+    }
+    // Start recursion with no ancestors (everything is top level)
+    recursiveTraversal(nodes, []);
   }
 
   static genMDMsg(msg: string): Parent {
@@ -219,7 +289,7 @@ export class MDUtilsV4 {
     opts: { depth?: number; slugger: ReturnType<typeof getSlugger> }
   ) {
     const { depth, slugger } = opts;
-    if (node.type !== "heading") {
+    if (node.type !== DendronASTTypes.HEADING) {
       return false;
     }
 
@@ -258,7 +328,9 @@ export class MDUtilsV4 {
     const errors: DendronError[] = [];
     let _proc = remark()
       .use(remarkParse, { gfm: true })
+      .use(frontmatterPlugin, ["yaml"])
       .use(wikiLinks)
+      .use(blockAnchors)
       .data("errors", errors);
     this.setDendronData(_proc, { dest: opts.dest, fname: opts.fname });
     this.setEngine(_proc, opts.engine);
@@ -323,7 +395,13 @@ export class MDUtilsV4 {
         hierarchyDisplay: config.hierarchyDisplay,
       })
       .use(backlinks)
-      .use(blockAnchors)
+      .use(
+        blockAnchors,
+        _.merge(
+          { hideBlockAnchors: config.site.hideBlockAnchors },
+          opts.blockAnchorsOpts
+        )
+      )
       .use(noteRefsV2, {
         ...opts.noteRefOpts,
         wikiLinkOpts: opts.wikiLinksOpts,
@@ -373,8 +451,12 @@ export class MDUtilsV4 {
     proc?: Processor;
     mdPlugins?: Processor[];
     mathjax?: boolean;
+    useLinks?: boolean;
   }) {
-    const { proc, mdPlugins } = _.defaults(opts, { mdPlugins: [] });
+    const { proc, mdPlugins, useLinks } = _.defaults(opts, {
+      mdPlugins: [],
+      useLinks: true,
+    });
     let _proc = proc || unified().use(remarkParse, { gfm: true });
     mdPlugins.forEach((p) => {
       _proc = _proc.use(p);
@@ -383,8 +465,9 @@ export class MDUtilsV4 {
       .use(remark2rehype, { allowDangerousHtml: true })
       .use(rehypePrism, { ignoreMissing: true })
       .use(raw)
-      .use(slug)
-      .use(link, {
+      .use(slug);
+    if (useLinks) {
+      _proc = _proc.use(link, {
         properties: {
           "aria-hidden": "true",
           class: "anchor-heading",
@@ -407,6 +490,7 @@ export class MDUtilsV4 {
           ],
         },
       });
+    }
     if (opts.mathjax) {
       _proc = _proc.use(katex);
     }
@@ -428,7 +512,10 @@ export class MDUtilsV4 {
   }
 
   static procHTML(
-    procOpts: Omit<ProcOptsFull, "dest"> & { noteIndex: NoteProps }
+    procOpts: Omit<ProcOptsFull, "dest"> & {
+      noteIndex: NoteProps;
+      useLinks?: boolean;
+    }
   ) {
     const { engine, vault, fname, noteIndex } = procOpts;
     const config = procOpts.config || engine.config;
@@ -458,7 +545,11 @@ export class MDUtilsV4 {
     if (config.site.useContainers) {
       proc = proc.use(containers);
     }
-    return MDUtilsV4.procRehype({ proc, mathjax: true });
+    return MDUtilsV4.procRehype({
+      proc,
+      mathjax: true,
+      useLinks: procOpts.useLinks,
+    });
   }
 
   /**

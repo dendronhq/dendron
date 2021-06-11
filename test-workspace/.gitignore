@@ -1,0 +1,5 @@
+build
+docs/*
+!docs/index.*
+.dendron.*
+docs

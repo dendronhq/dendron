@@ -2,9 +2,12 @@ import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { window } from "vscode";
-import { DENDRON_COMMANDS, DENDRON_WS_NAME } from "../constants";
+import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../utils";
 import { BasicCommand } from "./base";
+import { CONSTANTS } from "@dendronhq/common-all";
+
+const DENDRON_WS_NAME = CONSTANTS.DENDRON_WS_NAME;
 
 type ChangeWorkspaceCommandOpts = {
   rootDirRaw: string;

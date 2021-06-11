@@ -115,3 +115,33 @@ export const error2PlainObject = (err: IDendronError): DendronErrorPlainObj => {
   });
   return out as DendronErrorPlainObj;
 };
+
+/** Statically ensure that a code path is unreachable using a variable that has been exhaustively used.
+ *
+ * The use case for this function is that when using a switch or a chain of if/else if statements,
+ * this function allows you to ensure that after all possibilities have been already checked, no further
+ * possibilities remain. Importantly, this is done statically (i.e. during compilation), so if anyone
+ * revises the code in a way that adds expands the possibilities, a compiler error will warn them that
+ * they must revise this part of the code as well.
+ *
+ * An example of how this function may be used is below:
+ *
+ *     type Names = "bar" | "baz";
+ *
+ *     function foo(name: Names) {
+ *       if (name === "bar") { ... }
+ *       else if (name === "baz") { ... }
+ *       else assertUnreachable(name);
+ *     }
+ *
+ * Let's say someone changes the type Names to `type Names = "bar" | "baz" | "ham";`. Thanks to this
+ * assertion, the compiler will warn them that this branch is now reachable, and something is wrong.
+ *
+ * @param x
+ */
+export function assertUnreachable(_never: never): never {
+  throw new DendronError({
+    message:
+      "This error should never occur! Please report a bug if you have encountered this.",
+  });
+}

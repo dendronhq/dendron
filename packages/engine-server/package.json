@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/engine-server",
-  "version": "0.42.0",
+  "version": "0.45.1",
   "description": "dendron-engine",
   "license": "GPLv3",
   "repository": {
@@ -24,7 +24,7 @@
   "types": "lib/index.d.ts",
   "scripts": {
     "clean": "rimraf lib && rimraf coverage",
-    "format": "prettier --ignore-path='../../.prettierignore' --write .",
+    "format": "echo nop",
     "lint": "echo stub",
     "prepublishOnly": "yarn build",
     "prebuild": "yarn clean && yarn format && yarn lint && echo Using TypeScript && tsc --version",
@@ -38,8 +38,8 @@
     "test:unit:debug": "echo nop"
   },
   "dependencies": {
-    "@dendronhq/common-all": "^0.42.0",
-    "@dendronhq/common-server": "^0.42.0",
+    "@dendronhq/common-all": "^0.45.1",
+    "@dendronhq/common-server": "^0.45.1",
     "@dendronhq/remark-mermaid": "^0.2.0",
     "@mapbox/rehype-prism": "^0.5.0",
     "@types/fs-extra": "^9.0.1",
@@ -63,6 +63,7 @@
     "gray-matter": "^4.0.2",
     "klaw": "^3.0.0",
     "lodash": "^4.17.15",
+    "mdast": "^3.0.0",
     "mdast-builder": "^1.1.1",
     "mdast-util-compact": "^2.0.1",
     "mdast-util-inject": "^1.1.0",
@@ -101,7 +102,6 @@
     "cross-env": "^7.0.2",
     "jest": "^23.6.0",
     "jest-serializer-path": "^0.1.15",
-    "prettier": "2.0.5",
     "rimraf": "^2.6.2",
     "ts-jest": "^23.10.3",
     "ts-node": "^8.10.2",

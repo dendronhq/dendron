@@ -56,7 +56,7 @@ export class Git {
     return localUrl;
   }
 
-  /** Adds the `remoteUrl` set in the constructor as a remote, and sets it as the upstream for the main/master branch. */
+  /** Adds the `remoteUrl` set in the constructor as a remote. */
   async remoteAdd() {
     const { remoteUrl } = this.opts;
     await this._execute(`git remote add origin ${remoteUrl}`);
@@ -111,14 +111,23 @@ export class Git {
 
   async getCurrentBranch() {
     const { localUrl: cwd } = this.opts;
-    const { stdout } = await execa("git", [`branch`, `--show-current`], {
-      cwd,
-    });
+    const { stdout } = await execa(
+      "git",
+      [`rev-parse`, `--abbrev-ref`, `HEAD`],
+      {
+        cwd,
+      }
+    );
     return stdout.trim();
   }
 
-  async hasChanges() {
-    const { stdout } = await this._execute("git status --short");
+  async hasChanges(opts?: { untrackedFiles?: "all" | "no" | "normal" }) {
+    let untrackedFilesArg = "";
+    if (opts && opts.untrackedFiles)
+      untrackedFilesArg = ` --untracked-files=${opts.untrackedFiles}`;
+    const { stdout } = await this._execute(
+      `git status --porcelain${untrackedFilesArg}`
+    );
     return !_.isEmpty(stdout);
   }
 

@@ -51,7 +51,7 @@ export class VaultRemoveCommand extends BasicCommand<
       updateCb: (settings) => {
         const folders = _.reject(
           settings.folders,
-          (ent) => ent.path === vault.fsPath
+          (ent) => ent.path === VaultUtils.getRelPath(vault)
         );
         settings = assignJSONWithComment({ folders }, settings);
         return settings;

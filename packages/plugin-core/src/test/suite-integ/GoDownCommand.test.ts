@@ -24,7 +24,8 @@ suite("notes", function () {
     onWSInit(async () => {
       const notePath = path.join(vaultPath, "foo.md");
       await VSCodeUtils.openFileInEditor(vscode.Uri.file(notePath));
-      const quickpick = (await new GoDownCommand().run()) as DendronQuickPickerV2;
+      const quickpick =
+        (await new GoDownCommand().run()) as DendronQuickPickerV2;
       quickpick.onDidChangeValue(() => {});
       quickpick.onDidChangeSelection(() => {});
       quickpick.onDidChangeActive(() => {

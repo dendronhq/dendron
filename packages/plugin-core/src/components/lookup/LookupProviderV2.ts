@@ -525,7 +525,6 @@ export class LookupProviderV2 {
         nodes = resp.data;
         Logger.info({ ctx, msg: "post:queryNotes" });
       } catch (err) {
-        debugger;
         throw err;
       }
     } else {

@@ -1,44 +1,38 @@
+import { DendronTreeViewKey } from "@dendronhq/common-all";
 import { CodeConfigKeys } from "./types";
 
-export const DENDRON_WS_NAME = "dendron.code-workspace";
 export const extensionQualifiedId = `dendron.dendron`;
 export const DEFAULT_LEGACY_VAULT_NAME = "vault";
 
 export enum DendronContext {
   PLUGIN_ACTIVE = "dendron:pluginActive",
+  WEB_UI_ENABLED = "dendron:webUIEnabled",
   DEV_MODE = "dendron:devMode",
-}
-
-export enum DendronViewKey {
-  SAMPLE_VIEW = "dendron.sample",
-  TREE_VIEW = "dendron.treeView",
-  TREE_VIEW_V2 = "dendron.treeViewV2",
-  BACKLINKS = "dendron.backlinks",
 }
 
 export const DENDRON_VIEWS = [
   {
-    id: DendronViewKey.SAMPLE_VIEW,
+    id: DendronTreeViewKey.SAMPLE_VIEW,
     name: "Sample View",
     when: DendronContext.DEV_MODE,
     where: "explorer",
     type: "webview",
   },
   {
-    id: DendronViewKey.TREE_VIEW,
+    id: DendronTreeViewKey.TREE_VIEW,
     name: "Tree View",
-    when: DendronContext.PLUGIN_ACTIVE,
+    when: `${DendronContext.PLUGIN_ACTIVE} && !${DendronContext.WEB_UI_ENABLED}`,
     where: "explorer",
   },
   {
-    id: DendronViewKey.TREE_VIEW_V2,
+    id: DendronTreeViewKey.TREE_VIEW_V2,
     name: "Tree View V2",
-    when: DendronContext.DEV_MODE,
+    when: DendronContext.WEB_UI_ENABLED,
     where: "explorer",
     type: "webview",
   },
   {
-    id: DendronViewKey.BACKLINKS,
+    id: DendronTreeViewKey.BACKLINKS,
     name: "Backlinks",
     when: DendronContext.PLUGIN_ACTIVE,
     where: "explorer",
@@ -82,6 +76,7 @@ type CommandEntry = {
     | "dev"
     | "hierarchies"
     | "navigation"
+    | "misc"
     | "publishing";
   /**
    * Skip doc generation
@@ -226,11 +221,23 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     group: "notes",
     desc: "Insert note contents",
   },
+  INSERT_NOTE_LINK: {
+    key: "dendron.insertNoteLink",
+    title: `${CMD_PREFIX} Insert Note Link`,
+    group: "notes",
+    desc: "Insert note link",
+  },
   MOVE_NOTE: {
     key: "dendron.moveNote",
     title: `${CMD_PREFIX} Move Note`,
     group: "notes",
     desc: "Move a note",
+  },
+  RANDOM_NOTE: {
+    key: "dendron.randomNote",
+    title: `${CMD_PREFIX} Random Note`,
+    group: "notes",
+    desc: "Open a random note within a configured hierarchy set",
   },
   RENAME_NOTE: {
     key: "dendron.renameNote",
@@ -256,6 +263,13 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docPreview: "",
     when: DendronContext.PLUGIN_ACTIVE,
   },
+  LOOKUP_NOTE: {
+    key: "dendron.lookupNote",
+    title: `${CMD_PREFIX} Lookup Note`,
+    group: "navigation",
+    desc: "Initiate note lookup",
+    when: DendronContext.PLUGIN_ACTIVE,
+  },
   LOOKUP_JOURNAL: {
     key: "dendron.lookup",
     shortcut: true,
@@ -273,24 +287,6 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docLink: "dendron.topic.lookup.md",
     docPreview: "",
   },
-  // LOOKUP_JOURNAL_GLOBAL: {
-  //   key: "dendron.lookup",
-  //   shortcut: true,
-  //   title: `${CMD_PREFIX} Lookup (Daily Journal Note)`,
-  //   group: "navigation",
-  //   keybindings: {
-  //     key: "ctrl+shift+i",
-  //     mac: "cmd+shift+i",
-  //     args: {
-  //       noteType: "journal",
-  //       noConfirm: true,
-  //     },
-  //   },
-  //   desc: "Create daily journal note",
-  //   docLink: "dendron.topic.special-notes.md",
-  //   docPreview:
-  //     "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/notes.daily.gif)",
-  // },
   LOOKUP_SCRATCH: {
     key: "dendron.lookup",
     shortcut: true,
@@ -650,6 +646,19 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docLink: "dendron.topic.commands.md",
     docPreview: `![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/workbench.help.gif)`,
   },
+  SHOW_NOTE_GRAPH_V2: {
+    key: "dendron.showNoteGraphV2",
+    title: `${CMD_PREFIX} Show Note Graph V2`,
+    group: "workspace",
+    desc: "Display the notes in this workspace as a graph",
+  },
+  SHOW_SCHEMA_GRAPH_V2: {
+    key: "dendron.showSchemaGraphV2",
+    title: `${CMD_PREFIX} Show Schema Graph V2`,
+    group: "workspace",
+    desc: "Display the schemas in this workspace as a graph",
+    when: DendronContext.DEV_MODE,
+  },
   SHOW_PREVIEW: {
     key: "dendron.showPreview",
     title: `${CMD_PREFIX} Show Preview`,
@@ -661,6 +670,13 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     desc: "Show Markdown Preview",
     docLink: "dendron.topic.commands.md",
     docPreview: "",
+  },
+  PASTE_FILE: {
+    key: "dendron.pasteFile",
+    title: `${CMD_PREFIX} Paste File`,
+    group: "misc",
+    keybindings: {},
+    desc: "Paste file",
   },
   // -- Workbench
   CONFIGURE_RAW: {

@@ -1,9 +1,9 @@
 import {
   DendronConfig,
+  DVault,
   NoteUtils,
   SchemaUtils,
   VaultUtils,
-  WorkspaceOpts,
 } from "@dendronhq/common-all";
 import {
   note2File,
@@ -12,49 +12,29 @@ import {
   tmpDir,
 } from "@dendronhq/common-server";
 import { FileTestUtils, sinon } from "@dendronhq/common-test-utils";
+import { DConfig, WorkspaceService } from "@dendronhq/engine-server";
+import {
+  checkVaults,
+  GitTestUtils,
+  setupWS,
+} from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
-import _ from "lodash";
 import { describe } from "mocha";
 import path from "path";
 import * as vscode from "vscode";
 import { VaultAddCommand } from "../../commands/VaultAddCommand";
-import { WorkspaceFolderRaw, WorkspaceSettings } from "../../types";
-import { DendronWorkspace } from "../../workspace";
 import { expect, runSingleVaultTest } from "../testUtilsv2";
 import {
-  DENDRON_REMOTE,
-  getConfig,
   runLegacySingleWorkspaceTest,
   setupBeforeAfter,
   stubVaultInput,
 } from "../testUtilsV3";
 
-const getWorkspaceFolders = () => {
-  const wsPath = DendronWorkspace.workspaceFile().fsPath;
-  const settings = fs.readJSONSync(wsPath) as WorkspaceSettings;
-  return _.toArray(settings.folders);
-};
-
-function checkVaults(opts: WorkspaceOpts) {
-  const { wsRoot, vaults } = opts;
-  const config = getConfig({ wsRoot });
-  expect(config.vaults).toEqual(vaults);
-  const wsFolders = getWorkspaceFolders();
-  expect(wsFolders).toEqual(
-    vaults.map((ent) => {
-      const out: WorkspaceFolderRaw = { path: ent.fsPath };
-      if (ent.name) {
-        out.name = ent.name;
-      }
-      return out;
-    })
-  );
-}
-
 suite("VaultAddCommand", function () {
   let ctx: vscode.ExtensionContext;
   ctx = setupBeforeAfter(this, {
     beforeHook: () => {
+      // prevents a ReloadWorkspace
       sinon
         .stub(vscode.commands, "executeCommand")
         .returns(Promise.resolve({}));
@@ -65,46 +45,159 @@ suite("VaultAddCommand", function () {
   });
 
   // TODO: need to stub git clone with side effects
-  describe.skip("remote", function () {
-    test("basic, gitignore", (done) => {
+  describe("remote", function () {
+    test("basic", (done) => {
       runLegacySingleWorkspaceTest({
         ctx,
         onInit: async ({ wsRoot, vaults }) => {
+          const remoteDir = tmpDir().name;
+
+          await GitTestUtils.createRepoForRemoteWorkspace(wsRoot, remoteDir);
           const gitIgnore = path.join(wsRoot, ".gitignore");
-          fs.writeFileSync(gitIgnore, "foo\n");
-          const vault = vaults[0];
+
           const cmd = new VaultAddCommand();
-          const remote = DENDRON_REMOTE;
           stubVaultInput({
             cmd,
             sourceType: "remote",
             sourcePath: "vaultRemote",
-            sourcePathRemote: remote,
+            sourcePathRemote: remoteDir,
             sourceName: "dendron",
           });
-          const resp = await cmd.run();
-          const newVault = resp!.vaults[0];
+          await cmd.run();
 
-          checkVaults({
-            wsRoot,
-            vaults: [
-              {
-                fsPath: newVault.fsPath,
-                name: "dendron",
-                remote: {
-                  type: "git",
-                  url: remote,
+          checkVaults(
+            {
+              wsRoot,
+              vaults: [
+                {
+                  fsPath: "vault",
+                  name: "dendron",
+                  workspace: "vaultRemote",
                 },
-              },
-              vault,
-            ],
-          });
-          expect(fs.existsSync(gitIgnore)).toBeTruthy();
-
+                vaults[0],
+              ],
+            },
+            expect
+          );
           expect(
             FileTestUtils.assertInFile({
               fpath: gitIgnore,
               match: ["vaultRemote"],
+            })
+          ).toBeTruthy();
+          done();
+        },
+      });
+    });
+
+    test("add vault inside workspace", (done) => {
+      runLegacySingleWorkspaceTest({
+        ctx,
+        onInit: async ({ wsRoot, vaults }) => {
+          const { wsRoot: remoteDir } = await setupWS({
+            vaults: [{ fsPath: "vault1" }],
+            asRemote: true,
+          });
+
+          // stub
+          const gitIgnore = path.join(wsRoot, ".gitignore");
+          const cmd = new VaultAddCommand();
+          const wsName = "wsRemote";
+          stubVaultInput({
+            cmd,
+            sourceType: "remote",
+            sourcePath: wsName,
+            sourcePathRemote: remoteDir,
+            sourceName: "dendron",
+          });
+          await cmd.run();
+
+          expect(DConfig.getOrCreate(wsRoot).workspaces).toEqual({
+            [wsName]: {
+              remote: {
+                type: "git",
+                url: remoteDir,
+              },
+            },
+          });
+          checkVaults(
+            {
+              wsRoot,
+              vaults: [
+                {
+                  fsPath: "vault1",
+                  workspace: wsName,
+                  name: "dendron",
+                },
+                vaults[0],
+              ],
+            },
+            expect
+          );
+          expect(
+            FileTestUtils.assertInFile({
+              fpath: gitIgnore,
+              match: [wsName],
+            })
+          ).toBeTruthy();
+          done();
+        },
+      });
+    });
+
+    test("add workspace vault with same name as existing vault", (done) => {
+      runLegacySingleWorkspaceTest({
+        ctx,
+        onInit: async ({ wsRoot, vaults }) => {
+          // create remote repo
+          const remoteDir = tmpDir().name;
+          const vaultPath = "vault";
+          const vaultsRemote: DVault[] = [{ fsPath: vaultPath }];
+          await WorkspaceService.createWorkspace({
+            wsRoot: remoteDir,
+            vaults: vaultsRemote,
+          });
+          await GitTestUtils.createRepoWithReadme(remoteDir);
+
+          // stub
+          const gitIgnore = path.join(wsRoot, ".gitignore");
+          const cmd = new VaultAddCommand();
+          const wsName = "wsRemote";
+          stubVaultInput({
+            cmd,
+            sourceType: "remote",
+            sourcePath: wsName,
+            sourcePathRemote: remoteDir,
+            sourceName: "dendron",
+          });
+          await cmd.run();
+
+          expect(DConfig.getOrCreate(wsRoot).workspaces).toEqual({
+            [wsName]: {
+              remote: {
+                type: "git",
+                url: remoteDir,
+              },
+            },
+          });
+          checkVaults(
+            {
+              wsRoot,
+              vaults: [
+                {
+                  fsPath: vaultPath,
+                  workspace: wsName,
+                  name: "dendron",
+                },
+                vaults[0],
+              ],
+            },
+            expect
+          );
+          expect(
+            FileTestUtils.assertInFile({
+              fpath: gitIgnore,
+              match: [wsName],
             })
           ).toBeTruthy();
           done();
@@ -137,15 +230,18 @@ suite("VaultAddCommand", function () {
           await new VaultAddCommand().run();
           expect(fs.readdirSync(vpath)).toEqual(["root.md", "root.schema.yml"]);
 
-          checkVaults({
-            wsRoot,
-            vaults: [
-              {
-                fsPath: "vault2",
-              },
-              vault,
-            ],
-          });
+          checkVaults(
+            {
+              wsRoot,
+              vaults: [
+                {
+                  fsPath: "vault2",
+                },
+                vault,
+              ],
+            },
+            expect
+          );
 
           // new file added to newline
           expect(
@@ -155,7 +251,7 @@ suite("VaultAddCommand", function () {
             })
           ).toBeTruthy();
 
-          // cehck config
+          // check config
           const config = readYAML(
             path.join(wsRoot, "dendron.yml")
           ) as DendronConfig;
@@ -184,15 +280,18 @@ suite("VaultAddCommand", function () {
           stubVaultInput({ sourceType: "local", sourcePath: vpath });
           await new VaultAddCommand().run();
           expect(fs.readdirSync(vpath)).toEqual(["root.md", "root.schema.yml"]);
-          checkVaults({
-            wsRoot,
-            vaults: [
-              {
-                fsPath: "vault2",
-              },
-              vault,
-            ],
-          });
+          checkVaults(
+            {
+              wsRoot,
+              vaults: [
+                {
+                  fsPath: "vault2",
+                },
+                vault,
+              ],
+            },
+            expect
+          );
           done();
         },
       });
@@ -207,15 +306,18 @@ suite("VaultAddCommand", function () {
           await new VaultAddCommand().run();
           const vpath = path.join(wsRoot, sourcePath);
           expect(fs.readdirSync(vpath)).toEqual(["root.md", "root.schema.yml"]);
-          checkVaults({
-            wsRoot,
-            vaults: [
-              {
-                fsPath: "vault2",
-              },
-              vault,
-            ],
-          });
+          checkVaults(
+            {
+              wsRoot,
+              vaults: [
+                {
+                  fsPath: "vault2",
+                },
+                vault,
+              ],
+            },
+            expect
+          );
           done();
         },
       });
@@ -231,15 +333,18 @@ suite("VaultAddCommand", function () {
           await new VaultAddCommand().run();
           expect(fs.readdirSync(vpath)).toEqual(["root.md", "root.schema.yml"]);
 
-          checkVaults({
-            wsRoot,
-            vaults: [
-              {
-                fsPath: vaultRelPath,
-              },
-              vault,
-            ],
-          });
+          checkVaults(
+            {
+              wsRoot,
+              vaults: [
+                {
+                  fsPath: vaultRelPath,
+                },
+                vault,
+              ],
+            },
+            expect
+          );
 
           done();
         },

@@ -37,7 +37,8 @@ const markdownExtRegex = /\.md$/i;
 export const refPattern = "(\\[\\[)([^\\[\\]]+?)(\\]\\])";
 export const mdImageLinkPattern = "(\\[)([^\\[\\]]*)(\\]\\()([^\\[\\]]+?)(\\))";
 const partialRefPattern = "(\\[\\[)([^\\[\\]]+)";
-export const REGEX_FENCED_CODE_BLOCK = /^( {0,3}|\t)```[^`\r\n]*$[\w\W]+?^( {0,3}|\t)``` *$/gm;
+export const REGEX_FENCED_CODE_BLOCK =
+  /^( {0,3}|\t)```[^`\r\n]*$[\w\W]+?^( {0,3}|\t)``` *$/gm;
 export { sortPaths };
 const REGEX_CODE_SPAN = /`[^`]*?`/gm;
 // export const RE_WIKI_LINK_ALIAS = "([^\\[\\]]+?\\|)?";

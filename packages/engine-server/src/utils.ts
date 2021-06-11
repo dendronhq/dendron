@@ -16,7 +16,6 @@ import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { DendronEngineClient } from "./engineClient";
-import { LinkUtils } from "./markdown/remark/utils";
 import { WSMeta } from "./types";
 
 function normalize(text: string) {
@@ -212,55 +211,6 @@ export function parseFileLink(ref: string): DNoteRefLink {
     const [anchorStart, offset] = clean.anchorStart.split(",");
     clean.anchorStart = anchorStart;
     clean.anchorStartOffset = parseInt(offset);
-  }
-  return { from: { fname }, data: clean, type: "ref" };
-}
-
-export function parseNoteRefV2(ref: string): DNoteRefLink {
-  const wikiFileName = /([^\]:#]+)/.source;
-  const reLink = new RegExp(
-    "" +
-      `(?<name>${wikiFileName})` +
-      `(${
-        new RegExp(
-          // anchor start
-          "" +
-            /#?/.source +
-            `(?<anchorStart>${wikiFileName})` +
-            // anchor stop
-            `(:#(?<anchorEnd>${wikiFileName}))?`
-        ).source
-      })?`,
-    "i"
-  );
-  let vaultName: string | undefined = undefined;
-  ({ vaultName, link: ref } = LinkUtils.parseDendronURI(ref));
-  const groups = reLink.exec(ref)?.groups;
-  const clean: DNoteRefData = {
-    type: "file",
-  };
-  let fname: string | undefined;
-  _.each<Partial<DNoteRefData>>(groups, (v, k) => {
-    if (_.isUndefined(v)) {
-      return;
-    }
-    if (k === "name") {
-      fname = path.basename(v as string, ".md");
-    } else {
-      // @ts-ignore
-      clean[k] = v;
-    }
-  });
-  if (_.isUndefined(fname)) {
-    throw new DendronError({ message: `fname for ${ref} is undefined` });
-  }
-  if (clean.anchorStart && clean.anchorStart.indexOf(",") >= 0) {
-    const [anchorStart, offset] = clean.anchorStart.split(",");
-    clean.anchorStart = anchorStart;
-    clean.anchorStartOffset = parseInt(offset);
-  }
-  if (vaultName) {
-    clean.vaultName = vaultName;
   }
   return { from: { fname }, data: clean, type: "ref" };
 }

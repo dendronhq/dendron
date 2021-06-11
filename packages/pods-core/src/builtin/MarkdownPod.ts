@@ -8,7 +8,12 @@ import {
   VaultUtils,
 } from "@dendronhq/common-all";
 import { cleanFileName, readMD, vault2Path } from "@dendronhq/common-server";
-import { DendronASTDest, MDUtilsV4 } from "@dendronhq/engine-server";
+import {
+  DendronASTDest,
+  MDUtilsV4,
+  MDUtilsV5,
+  RemarkUtils,
+} from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import klaw, { Item } from "klaw";
 import _ from "lodash";
@@ -249,12 +254,14 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
       notes
         .filter((n) => !n.stub)
         .map(async (n) => {
-          const cBody = MDUtilsV4.procFull({
-            engine,
+          const cBody = await MDUtilsV5.procRemarkFull({
             fname: n.fname,
+            engine,
+            dest: DendronASTDest.MD_DENDRON,
             vault: n.vault,
-            dest: DendronASTDest.MD_REGULAR,
-          }).process(n.body);
+          })
+            .use(RemarkUtils.convertObsidianLinks(n, []))
+            .process(n.body);
           n.body = cBody.toString();
           if (config.frontmatter) {
             n.custom = _.merge(n.custom, config.frontmatter);

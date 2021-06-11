@@ -1,5 +1,4 @@
 import { NoteProps, VaultUtils } from "@dendronhq/common-all";
-import { ENGINE_HOOKS, PODS_CORE } from "@dendronhq/common-test-utils";
 import {
   JSONExportPod,
   JSONImportPod,
@@ -7,6 +6,7 @@ import {
 } from "@dendronhq/pods-core";
 import _ from "lodash";
 import { runEngineTestV5 } from "../../engine";
+import { ENGINE_HOOKS, PODS_CORE } from "../../presets";
 
 const podsDict = {
   IMPORT: () => new JSONImportPod(),

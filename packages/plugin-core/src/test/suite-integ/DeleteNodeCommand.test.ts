@@ -1,12 +1,8 @@
-import { NoteChangeEntry } from "@dendronhq/common-all";
-import {
-  DirResult,
-  EngineDeletePayload,
-  tmpDir
-} from "@dendronhq/common-server";
+import { NoteChangeEntry, EngineDeletePayload } from "@dendronhq/common-all";
+import { DirResult, tmpDir } from "@dendronhq/common-server";
 import {
   NodeTestPresetsV2,
-  NoteTestPresetsV2
+  NoteTestPresetsV2,
 } from "@dendronhq/common-test-utils";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -123,7 +119,7 @@ suite("schemas", function () {
       const vaultFiles = fs.readdirSync(vaultPath);
       const noteFiles = vaultFiles.filter((ent) => ent.endsWith(".schema.yml"));
       expect(
-        DendronWorkspace.instance().getEngine().notes["foo"].schema,
+        DendronWorkspace.instance().getEngine().notes["foo"].schema
       ).toEqual(undefined);
       expect(noteFiles.length).toEqual(1);
       expect(noteFiles.sort()).toEqual(["root.schema.yml"]);

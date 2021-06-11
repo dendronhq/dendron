@@ -1,11 +1,5 @@
 {
   "typescript.tsdk": "node_modules/typescript/lib/",
-  "spellright.language": [
-    "en"
-  ],
-  "spellright.documentTypes": [
-    "markdown",
-    "latex",
-    "plaintext"
-  ]
+  "spellright.language": ["en"],
+  "spellright.documentTypes": ["markdown", "latex", "plaintext"]
 }

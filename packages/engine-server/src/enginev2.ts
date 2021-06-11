@@ -29,6 +29,8 @@ import {
   QueryNotesOpts,
   RenameNoteOpts,
   RenameNotePayload,
+  RenderNoteOpts,
+  RenderNotePayload,
   RespV2,
   SchemaModuleDict,
   SchemaModuleProps,
@@ -48,7 +50,8 @@ import _ from "lodash";
 import { DConfig } from "./config";
 import { FileStorage } from "./drivers/file/storev2";
 import { FuseEngine } from "./fuseEngine";
-import { LinkUtils } from "./markdown";
+import { LinkUtils, MDUtilsV4 } from "./markdown";
+import { AnchorUtils } from "./markdown/remark/utils";
 import { HookUtils } from "./topics/hooks";
 
 type CreateStoreFunc = (engine: DEngineClient) => DStore;
@@ -410,29 +413,68 @@ export class DendronEngineV2 implements DEngine {
     };
   }
 
+  async renderNote({ id }: RenderNoteOpts): Promise<RespV2<RenderNotePayload>> {
+    const note = this.notes[id];
+    if (!note) {
+      return {
+        error: DendronError.createFromStatus({
+          status: ERROR_STATUS.INVALID_STATE,
+          message: `${id} does not exist`,
+        }),
+        data: undefined,
+      };
+    }
+    const proc = MDUtilsV4.procHTML({
+      engine: this,
+      vault: note.vault,
+      fname: note.fname,
+      config: this.config,
+      noteIndex: {} as any,
+      useLinks: false,
+    });
+    const payload = await proc.process(NoteUtils.serialize(note));
+    return {
+      error: null,
+      data: payload.toString(),
+    };
+  }
+
   async sync() {
     throw Error("sync not implemented");
     return {} as any;
   }
 
   async refreshNotesV2(notes: NoteChangeEntry[]) {
-    notes.forEach((ent: NoteChangeEntry) => {
-      const { id } = ent.note;
-      //const uri = NoteUtils.getURI({ note: ent.note, wsRoot: this.wsRoot });
-      if (ent.status === "delete") {
-        delete this.notes[id];
-        // this.history &&
-        //   this.history.add({ source: "engine", action: "delete", uri });
-      } else {
-        if (ent.status === "create") {
+    await Promise.all(
+      notes.map(async (ent: NoteChangeEntry) => {
+        const { id } = ent.note;
+        //const uri = NoteUtils.getURI({ note: ent.note, wsRoot: this.wsRoot });
+        if (ent.status === "delete") {
+          delete this.notes[id];
           // this.history &&
-          //   this.history.add({ source: "engine", action: "create", uri });
+          //   this.history.add({ source: "engine", action: "delete", uri });
+        } else {
+          if (ent.status === "create") {
+            // this.history &&
+            //   this.history.add({ source: "engine", action: "create", uri });
+          }
+          const links = LinkUtils.findLinks({ note: ent.note, engine: this });
+          const anchors = await AnchorUtils.findAnchors(
+            {
+              note: ent.note,
+              wsRoot: this.wsRoot,
+            },
+            {
+              engine: this,
+              fname: ent.note.fname,
+            }
+          );
+          ent.note.links = links;
+          ent.note.anchors = anchors;
+          this.notes[id] = ent.note;
         }
-        const links = LinkUtils.findLinks({ note: ent.note, engine: this });
-        ent.note.links = links;
-        this.notes[id] = ent.note;
-      }
-    });
+      })
+    );
     this.fuseEngine.updateNotesIndex(this.notes);
   }
 

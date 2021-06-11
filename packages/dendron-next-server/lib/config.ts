@@ -1,6 +1,6 @@
 import { DEngineClient } from "@dendronhq/common-all";
 import { getEnv } from "./env";
-import { CONFIG_KEY, StageEnv } from "./types";
+import { CONFIG_KEY } from "./types";
 
 
 
@@ -25,7 +25,6 @@ export function api(key: keyof DEngineClient): string {
 }
 
 export function apiRemote(key: API_REMOTE_KEY): string {
-  const port = process.env.ENGINE_ENDPOINT_PORT;
   const url = getEnv(CONFIG_KEY.REMOTE_API_ENDPOINT);
   const suffix = url;
   return suffix + API_REMOTE_PATH_MAP[key]

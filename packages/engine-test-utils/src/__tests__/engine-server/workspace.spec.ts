@@ -1,11 +1,17 @@
-import { NoteProps } from "@dendronhq/common-all";
+import { DVault, NoteProps } from "@dendronhq/common-all";
 import { tmpDir } from "@dendronhq/common-server";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
-import { DConfig, WorkspaceService } from "@dendronhq/engine-server";
+import {
+  DConfig,
+  SyncActionStatus,
+  WorkspaceService,
+} from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import path from "path";
-import { testWithEngine } from "../../engine";
-import { GitTestUtils } from "../../utils";
+import { TestConfigUtils } from "../../config";
+import { runEngineTestV5, setupWS, testWithEngine } from "../../engine";
+import { ENGINE_HOOKS } from "../../presets";
+import { checkVaults, GitTestUtils } from "../../utils";
 
 describe("WorkspaceService", () => {
   describe("create", () => {
@@ -17,6 +23,13 @@ describe("WorkspaceService", () => {
       expect(
         fs.readFileSync(gitignore, { encoding: "utf8" })
       ).toMatchSnapshot();
+    });
+
+    test("workspace Vault", async () => {
+      const wsRoot = tmpDir().name;
+      const vaults: DVault[] = [{ fsPath: "vault1", workspace: "foo" }];
+      await WorkspaceService.createWorkspace({ wsRoot, vaults });
+      expect(fs.existsSync(path.join(wsRoot, "foo", "vault1"))).toBeTruthy();
     });
   });
 
@@ -43,6 +56,64 @@ describe("WorkspaceService", () => {
       expect(
         fs.existsSync(path.join(wsRoot, "remoteVault", "README.md"))
       ).toBeTruthy();
+    });
+
+    test("remote workspace present", async () => {
+      await runEngineTestV5(
+        async ({ wsRoot, vaults }) => {
+          const { wsRoot: remoteDir } = await setupWS({
+            vaults: [{ fsPath: "vault1" }],
+            asRemote: true,
+          });
+          TestConfigUtils.withConfig(
+            (config) => {
+              config.workspaces = {
+                remoteVault: {
+                  remote: {
+                    type: "git",
+                    url: remoteDir,
+                  },
+                },
+              };
+              return config;
+            },
+            { wsRoot }
+          );
+          await new WorkspaceService({ wsRoot }).addVault({
+            vault: { fsPath: "vault1", workspace: "remoteVault" },
+            addToWorkspace: true,
+            writeConfig: true,
+          });
+          const ws = new WorkspaceService({ wsRoot });
+          const didClone = await ws.initialize({
+            onSyncVaultsProgress: () => {},
+            onSyncVaultsEnd: () => {},
+          });
+          expect(didClone).toEqual(true);
+          expect(
+            fs.existsSync(path.join(wsRoot, "remoteVault", "vault1", "root.md"))
+          ).toBeTruthy();
+          checkVaults(
+            {
+              wsRoot,
+              vaults: [
+                {
+                  fsPath: "vault1",
+                  workspace: "remoteVault",
+                } as DVault,
+              ].concat(vaults),
+            },
+            expect
+          );
+        },
+        {
+          expect,
+          preSetupHook: async (opts) => {
+            await ENGINE_HOOKS.setupBasic(opts);
+          },
+          addVSWorkspace: true,
+        }
+      );
     });
 
     // testWithEngine(
@@ -118,8 +189,13 @@ describe("WorkspaceService", () => {
         vault: vaults[1],
         wsRoot,
       });
-      const resp = await new WorkspaceService({ wsRoot }).commidAndAddAll();
-      expect(resp.length).toEqual(2);
+      const resp = await new WorkspaceService({
+        wsRoot,
+      }).commitAndAddAll();
+      expect(resp.length).toEqual(3);
+      expect(
+        resp.filter((r) => r.status === SyncActionStatus.DONE).length
+      ).toEqual(2);
     },
     { initGit: true }
   );

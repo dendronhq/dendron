@@ -1,11 +1,12 @@
-import { Logger } from "@aws-amplify/core";
 import {
   DendronApiV2,
   DEngineInitPayload,
   NotePropsDict,
+  stringifyError,
 } from "@dendronhq/common-all";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import _ from "lodash";
+import { createLogger } from "../../utils";
 
 /**
  * Equivalent to engine.init
@@ -13,24 +14,49 @@ import _ from "lodash";
 export const initNotes = createAsyncThunk(
   "engine/init",
   async ({ port, ws }: { port: number; ws: string }, { dispatch }) => {
-    const logger = new Logger("initNotesThunk");
-    logger.info({ state: "enter" });
+    const logger = createLogger("initNotesThunk");
+    const endpoint = `http://localhost:${port}`;
+    logger.info({ state: "enter", endpoint, port, ws });
     const api = new DendronApiV2({
-      endpoint: `http://localhost:${port}`,
+      endpoint,
       apiPath: "api",
       logger,
     });
     logger.info({ state: "pre:workspaceSync" });
     const resp = await api.workspaceSync({ ws });
     logger.info({ state: "post:workspaceSync" });
-    const data = resp.data;
-    if (resp.error || _.isUndefined(data)) {
-      dispatch(setError(resp.error));
+    if (resp.error) {
+      dispatch(setError(stringifyError(resp.error)));
       return resp;
     }
+    const data = resp.data!;
     logger.info({ state: "pre:setNotes" });
     dispatch(setFromInit(data));
     logger.info({ state: "post:setNotes" });
+    return resp;
+  }
+);
+
+export const renderNote = createAsyncThunk(
+  "engine/render",
+  async (
+    { port, ws, id }: { port: number; ws: string; id: string },
+    { dispatch }
+  ) => {
+    const endpoint = `http://localhost:${port}`;
+    const logger = createLogger("renderNoteThunk");
+    const api = new DendronApiV2({
+      endpoint,
+      apiPath: "api",
+      logger,
+    });
+    const resp = await api.noteRender({ id, ws });
+    if (resp.error) {
+      dispatch(setError(stringifyError(resp.error)));
+      return resp;
+    }
+    const data = resp.data!;
+    dispatch(setRenderNote({ id, body: data }));
     return resp;
   }
 );
@@ -42,6 +68,7 @@ type InitializedState = {
   error: any;
   loading: "idle" | "pending" | "fulfilled";
   currentRequestId: string | undefined;
+  notesRendered: { [key: string]: string | undefined };
 } & Partial<DEngineInitPayload>;
 
 export type EngineState = InitializedState;
@@ -51,6 +78,7 @@ export const engineSlice = createSlice({
     loading: "idle" as const,
     notes: {},
     schemas: {},
+    notesRendered: {},
     error: null,
   } as InitialState,
   reducers: {
@@ -68,9 +96,16 @@ export const engineSlice = createSlice({
     setError: (state, action: PayloadAction<any>) => {
       state.error = action.payload;
     },
+    setRenderNote: (
+      state,
+      action: PayloadAction<{ id: string; body: string }>
+    ) => {
+      const { id, body } = action.payload;
+      state.notesRendered[id] = body;
+    },
   },
   extraReducers: (builder) => {
-    const logger = new Logger("engineSlice");
+    const logger = createLogger("engineSlice");
     builder.addCase(initNotes.pending, (state, { meta }) => {
       logger.info({ state: "start:initNotes", requestId: meta.requestId });
       if (state.loading === "idle") {
@@ -102,5 +137,6 @@ export class EngineSliceUtils {
     );
   }
 }
-export const { setNotes, setError, setFromInit } = engineSlice.actions;
+export const { setNotes, setError, setFromInit, setRenderNote } =
+  engineSlice.actions;
 export const reducer = engineSlice.reducer;

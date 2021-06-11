@@ -2,6 +2,7 @@
 
 exports[`H1_TO_TITLE basic 1`] = `
 Object {
+  "anchors": Object {},
   "body": "## Foo Content
 
 ",
@@ -25,6 +26,7 @@ Object {
 
 exports[`H1_TO_TITLE basic 2`] = `
 Object {
+  "anchors": Object {},
   "body": "## Bar Content
 
 ",
@@ -46,8 +48,57 @@ Object {
 }
 `;
 
+exports[`H1_TO_TITLE basic pass candidates opts 1`] = `
+Object {
+  "anchors": Object {},
+  "body": "## Foo Content
+
+",
+  "children": Array [],
+  "created": 1,
+  "custom": Object {},
+  "data": Object {},
+  "desc": "",
+  "fname": "foo",
+  "id": "foo",
+  "links": Array [],
+  "parent": null,
+  "title": "Foo Header",
+  "type": "note",
+  "updated": 1,
+  "vault": Object {
+    "fsPath": "vault1",
+  },
+}
+`;
+
+exports[`H1_TO_TITLE basic pass candidates opts 2`] = `
+Object {
+  "anchors": Object {},
+  "body": "# Bar Header
+## Bar Content
+",
+  "children": Array [],
+  "created": 1,
+  "custom": Object {},
+  "data": Object {},
+  "desc": "",
+  "fname": "bar",
+  "id": "bar",
+  "links": Array [],
+  "parent": null,
+  "title": "Bar",
+  "type": "note",
+  "updated": 1,
+  "vault": Object {
+    "fsPath": "vault1",
+  },
+}
+`;
+
 exports[`h1ToH2 basic 1`] = `
 Object {
+  "anchors": Object {},
   "body": "## Foo Header
 
 ## Foo Content
@@ -73,6 +124,7 @@ Object {
 
 exports[`h1ToH2 basic 2`] = `
 Object {
+  "anchors": Object {},
   "body": "## Bar Header
 
 ## Bar Content
@@ -96,8 +148,59 @@ Object {
 }
 `;
 
+exports[`h1ToH2 basic pass candidates opt 1`] = `
+Object {
+  "anchors": Object {},
+  "body": "## Foo Header
+
+## Foo Content
+
+",
+  "children": Array [],
+  "created": 1,
+  "custom": Object {},
+  "data": Object {},
+  "desc": "",
+  "fname": "foo",
+  "id": "foo",
+  "links": Array [],
+  "parent": null,
+  "title": "Foo",
+  "type": "note",
+  "updated": 1,
+  "vault": Object {
+    "fsPath": "vault1",
+  },
+}
+`;
+
+exports[`h1ToH2 basic pass candidates opt 2`] = `
+Object {
+  "anchors": Object {},
+  "body": "# Bar Header
+## Bar Content
+",
+  "children": Array [],
+  "created": 1,
+  "custom": Object {},
+  "data": Object {},
+  "desc": "",
+  "fname": "bar",
+  "id": "bar",
+  "links": Array [],
+  "parent": null,
+  "title": "Bar",
+  "type": "note",
+  "updated": 1,
+  "vault": Object {
+    "fsPath": "vault1",
+  },
+}
+`;
+
 exports[`h1ToH2 dry run 1`] = `
 Object {
+  "anchors": Object {},
   "body": "# Foo Header
 ## Foo Content
 ",
@@ -121,6 +224,7 @@ Object {
 
 exports[`h1ToH2 dry run 2`] = `
 Object {
+  "anchors": Object {},
   "body": "# Bar Header
 ## Bar Content
 ",

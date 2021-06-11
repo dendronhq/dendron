@@ -1,7 +1,10 @@
 import { DendronUserSpecial, DVault } from "./types";
 
 export class DUser {
-  constructor(public username: string) {}
+  public username: string;
+  constructor(username: string) {
+    this.username = username;
+  }
 
   static createAnonymous() {
     return new DUser(DendronUserSpecial.anonymous);

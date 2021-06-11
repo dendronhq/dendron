@@ -1,18 +1,25 @@
+
+# compiled 
+.next
 vendor/**/*
 lib
 node_modules
 out
 dist
 assets
+raw-assets
+# generated
+launch.json
+package.json
+settings.json
+public 
+# config
 *.lock
-.*
+# tests
 __snapshots__
+# text
 LICENSE
+*.md
+# scripts
 *.sh
 *.j2
-# build
-# docs
-# fixtures
-# packages
-# playbooks
-# templates

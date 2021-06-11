@@ -3,6 +3,212 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.45.1](https://github.com/dendronhq/dendron/compare/v0.45.0...v0.45.1) (2021-06-09)
+
+
+### Bug Fixes
+
+* format issue ([232926d](https://github.com/dendronhq/dendron/commit/232926d88c633aaa052711e9380a9da4a1ecc5d7))
+
+
+
+
+
+# [0.45.0](https://github.com/dendronhq/dendron/compare/v0.44.1...v0.45.0) (2021-06-07)
+
+
+### Features Dendron
+
+* Create redesigned note and schema graphs ([#793](https://github.com/dendronhq/dendron/issues/793)) ([57494e4](https://github.com/dendronhq/dendron/commit/57494e4da8f996e20718515e8c14ef5fc04ece66))
+
+
+
+
+
+## [0.44.2-alpha.1](https://github.com/dendronhq/dendron/compare/v0.44.1...v0.44.2-alpha.1) (2021-06-06)
+
+
+### Features Dendron
+
+* Create redesigned note and schema graphs ([#793](https://github.com/dendronhq/dendron/issues/793)) ([57494e4](https://github.com/dendronhq/dendron/commit/57494e4da8f996e20718515e8c14ef5fc04ece66))
+
+
+
+
+
+## [0.44.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.44.1...v0.44.2-alpha.0) (2021-06-06)
+
+
+### Features Dendron
+
+* Create redesigned note and schema graphs ([#793](https://github.com/dendronhq/dendron/issues/793)) ([57494e4](https://github.com/dendronhq/dendron/commit/57494e4da8f996e20718515e8c14ef5fc04ece66))
+
+
+
+
+
+## [0.44.1](https://github.com/dendronhq/dendron/compare/v0.44.1-alpha.5...v0.44.1) (2021-06-04)
+
+**Note:** Version bump only for package @dendronhq/dendron-next-server
+
+
+
+
+
+## [0.44.1-alpha.7](https://github.com/dendronhq/dendron/compare/v0.44.1-alpha.5...v0.44.1-alpha.7) (2021-06-04)
+
+**Note:** Version bump only for package @dendronhq/dendron-next-server
+
+
+
+
+
+## [0.44.1-alpha.6](https://github.com/dendronhq/dendron/compare/v0.44.1-alpha.5...v0.44.1-alpha.6) (2021-06-04)
+
+**Note:** Version bump only for package @dendronhq/dendron-next-server
+
+
+
+
+
+## [0.44.1-alpha.5](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.44.1-alpha.5) (2021-06-04)
+
+
+### Bug Fixes
+
+* next server error ([e3c5848](https://github.com/dendronhq/dendron/commit/e3c5848651e4fbf69599af661aa288a1e8c4d24b))
+
+
+
+
+
+## [0.44.1-alpha.4](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.44.1-alpha.4) (2021-06-04)
+
+
+### Bug Fixes
+
+* next server error ([e3c5848](https://github.com/dendronhq/dendron/commit/e3c5848651e4fbf69599af661aa288a1e8c4d24b))
+
+
+
+
+
+## [0.44.1-alpha.3](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.44.1-alpha.3) (2021-06-03)
+
+
+### Bug Fixes
+
+* next server error ([e3c5848](https://github.com/dendronhq/dendron/commit/e3c5848651e4fbf69599af661aa288a1e8c4d24b))
+
+
+
+
+
+## [0.44.1-alpha.2](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.44.1-alpha.2) (2021-06-03)
+
+
+### Bug Fixes
+
+* next server error ([e3c5848](https://github.com/dendronhq/dendron/commit/e3c5848651e4fbf69599af661aa288a1e8c4d24b))
+
+
+
+
+
+## [0.44.1-alpha.1](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.44.1-alpha.1) (2021-06-02)
+
+
+### Bug Fixes
+
+* next server error ([e3c5848](https://github.com/dendronhq/dendron/commit/e3c5848651e4fbf69599af661aa288a1e8c4d24b))
+
+
+
+
+
+## [0.44.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.44.1-alpha.0) (2021-06-02)
+
+
+### Bug Fixes
+
+* next server error ([e3c5848](https://github.com/dendronhq/dendron/commit/e3c5848651e4fbf69599af661aa288a1e8c4d24b))
+
+
+
+
+
+# [0.44.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.44.0) (2021-05-31)
+
+**Note:** Version bump only for package @dendronhq/dendron-next-server
+
+## [0.43.5-alpha.2](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.43.5-alpha.2) (2021-05-29)
+
+**Note:** Version bump only for package @dendronhq/dendron-next-server
+
+## [0.43.5-alpha.1](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.43.5-alpha.1) (2021-05-29)
+
+**Note:** Version bump only for package @dendronhq/dendron-next-server
+
+## [0.43.5-alpha.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.43.5-alpha.0) (2021-05-28)
+
+**Note:** Version bump only for package @dendronhq/dendron-next-server
+
+## [0.43.4-alpha.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.43.4-alpha.0) (2021-05-28)
+
+**Note:** Version bump only for package @dendronhq/dendron-next-server
+
+## [0.43.3-alpha.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.43.3-alpha.0) (2021-05-28)
+
+**Note:** Version bump only for package @dendronhq/dendron-next-server
+
+## [0.43.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.43.2-alpha.0) (2021-05-27)
+
+**Note:** Version bump only for package @dendronhq/dendron-next-server
+
+## [0.43.1](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.43.1) (2021-05-26)
+
+**Note:** Version bump only for package @dendronhq/dendron-next-server
+
+## [0.43.3-alpha.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.43.3-alpha.0) (2021-05-26)
+
+**Note:** Version bump only for package @dendronhq/dendron-next-server
+
+## [0.43.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.43.2-alpha.0) (2021-05-25)
+
+**Note:** Version bump only for package @dendronhq/dendron-next-server
+
+## [0.43.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.43.1-alpha.0) (2021-05-24)
+
+**Note:** Version bump only for package @dendronhq/dendron-next-server
+
+# [0.43.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.43.0) (2021-05-24)
+
+**Note:** Version bump only for package @dendronhq/dendron-next-server
+
+## [0.42.6-alpha.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.42.6-alpha.0) (2021-05-24)
+
+**Note:** Version bump only for package @dendronhq/dendron-next-server
+
+## [0.42.5-alpha.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.42.5-alpha.0) (2021-05-24)
+
+**Note:** Version bump only for package @dendronhq/dendron-next-server
+
+## [0.42.4-alpha.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.42.4-alpha.0) (2021-05-24)
+
+**Note:** Version bump only for package @dendronhq/dendron-next-server
+
+## [0.42.3-alpha.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.42.3-alpha.0) (2021-05-24)
+
+**Note:** Version bump only for package @dendronhq/dendron-next-server
+
+## [0.42.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.42.2-alpha.0) (2021-05-22)
+
+**Note:** Version bump only for package @dendronhq/dendron-next-server
+
+## [0.42.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.42.1-alpha.0) (2021-05-20)
+
+**Note:** Version bump only for package @dendronhq/dendron-next-server
+
 # [0.42.0](https://github.com/dendronhq/dendron/compare/v0.41.0...v0.42.0) (2021-05-17)
 
 **Note:** Version bump only for package @dendronhq/dendron-next-server

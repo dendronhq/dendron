@@ -6,12 +6,19 @@ export type DPermission = {
   write: string[];
 };
 // === Vaults
-export type VaultRemote = {
+export type RemoteEndpoint = {
   type: "git";
   url: string;
 };
 export enum DVaultVisibility {
   PRIVATE = "private",
+}
+
+export enum DVaultSync {
+  SKIP = "skip",
+  NO_PUSH = "noPush",
+  NO_COMMIT = "noCommit",
+  SYNC = "sync",
 }
 
 export type DVault = {
@@ -20,17 +27,40 @@ export type DVault = {
   visibility?: DVaultVisibility;
   /** Filesystem path to fault */
   fsPath: string;
-  // /**
-  //  * Uri which is relative from root
-  //  */
-  // uri: string;
-  remote?: VaultRemote;
+  /**
+   * Indicate the workspace that this vault is part of
+   */
+  workspace?: string;
+  remote?: RemoteEndpoint;
+  // TODO
   userPermission?: DPermission;
   /**
    * If this is enabled, don't apply workspace push commands
    */
   noAutoPush?: boolean;
+  /**
+   * How the vault should be handled when using "add and commit" and "sync" commands.
+   *
+   * Options are:
+   * * skip: Skip them entirely. You must manage the repository manually.
+   * * noPush: Commit any changes and pull updates, but don't push. You can watch the repository and make local changes without sharing them back.
+   * * noCommit: Pull and push updates if the workspace is clean, but don't commit. You manually commit your local changes, but automatically share them once you committed.
+   * * sync: Commit changes, and pull and push updates. Treats workspace vaults like regular vaults.
+   *
+   * This setting overrides the `workspaceVaultSync` setting for the vault, even if the vault is a workspace vault.
+   *
+   * Defaults to `sync`.
+   */
+  sync?: DVaultSync;
 };
+
+export type DWorkspace = {
+  name: string;
+  vaults: DVault[];
+  remote: RemoteEndpoint;
+};
+
+export type DWorkspaceEntry = Omit<DWorkspace, "name" | "vaults">;
 
 export type DendronConfig = {
   /**
@@ -49,6 +79,11 @@ export type DendronConfig = {
    * Configuration related to publishing notes
    */
   site: DendronSiteConfig;
+
+  /**
+   * Workspaces
+   */
+  workspaces?: { [key: string]: DWorkspaceEntry | undefined };
   /**
    * Dendron vaults in workspace.
    * Setup by plugin.
@@ -142,6 +177,36 @@ export type DendronConfig = {
    * Development related options
    */
   dev?: DendronDevConfig;
+
+  /**
+   * How workspace vaults should be handled when using workspace "add and commit" and "sync" commands.
+   *
+   * Options are:
+   * * skip: Skip them entirely. You must manage the repository manually.
+   * * noPush: Commit any changes and pull updates, but don't push. You can watch the repository and make local changes without sharing them back.
+   * * noCommit: Pull and push updates if the workspace is clean, but don't commit. You manually commit your local changes, but automatically share them once you committed.
+   * * sync: Commit changes, and pull and push updates. Treats workspace vaults like regular vaults.
+   *
+   * Defaults to `noCommit`.
+   */
+  workspaceVaultSync?: DVaultSync;
+
+  /**
+   * Configuration for Random Note Lookup Command
+   */
+  randomNote?: RandomNoteConfig;
+};
+
+export type RandomNoteConfig = {
+  /**
+   * Hiearchies to include
+   */
+  include?: string[];
+
+  /**
+   * Hiearchies to exclude
+   */
+  exclude?: string[];
 };
 
 export type DendronDevConfig = {
@@ -153,7 +218,15 @@ export type DendronDevConfig = {
    * Static assets for next
    */
   nextStaticRoot?: string;
-}
+  /**
+   * What port to use for engine server. Default behavior is to create at startup
+   */
+  engineServerPort?: number;
+  /**
+   * Enable experimental web ui. Default is false
+   */
+  enableWebUI?: boolean;
+};
 
 export type DendronSiteConfig = {
   /**
@@ -247,6 +320,13 @@ export type DendronSiteConfig = {
    * elsewhere and provide links back to the source
    */
   usePrettyRefs?: boolean;
+
+  /**
+   * By default, block anchors are displayed in the generated website as
+   * clickable links. Setting this option to `true` hides them so they are not
+   * visible, but they will continue to function when linked to.
+   */
+  hideBlockAnchors?: boolean;
 
   /**
    * Control publication on a per hierarchy basis

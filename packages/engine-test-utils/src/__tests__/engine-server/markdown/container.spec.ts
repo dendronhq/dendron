@@ -1,4 +1,5 @@
-import { ENGINE_HOOKS, TestPresetEntryV4 } from "@dendronhq/common-test-utils";
+import { TestPresetEntryV4 } from "@dendronhq/common-test-utils";
+import { ENGINE_HOOKS } from "../../../presets";
 import { DendronASTDest, MDUtilsV4 } from "@dendronhq/engine-server";
 import { runEngineTestV5 } from "../../../engine";
 import { checkNotInVFile, checkVFile, createProcTests } from "./utils";

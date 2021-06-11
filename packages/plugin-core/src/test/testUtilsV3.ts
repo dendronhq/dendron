@@ -2,6 +2,8 @@ import {
   DendronConfig,
   DEngineClient,
   WorkspaceOpts,
+  WorkspaceFolderRaw,
+  WorkspaceSettings,
 } from "@dendronhq/common-all";
 import {
   assignJSONWithComment,
@@ -34,8 +36,8 @@ import {
   VaultAddCommand,
   VaultRemoteSource,
 } from "../commands/VaultAddCommand";
+import { Logger } from "../logger";
 import { WorkspaceConfig } from "../settings";
-import { WorkspaceFolderRaw, WorkspaceSettings } from "../types";
 import { VSCodeUtils } from "../utils";
 import { DendronWorkspace, getWS } from "../workspace";
 import { _activate } from "../_extension";
@@ -268,11 +270,13 @@ export function setupBeforeAfter(
   opts?: { beforeHook?: any; afterHook?: any }
 ) {
   let ctx: ExtensionContext;
+  // allows for debugging
   _this.timeout(TIMEOUT);
   ctx = VSCodeUtils.getOrCreateMockContext();
   beforeEach(async function () {
     DendronWorkspace.getOrCreate(ctx);
     opts?.beforeHook && (await opts.beforeHook());
+    Logger.configure(ctx, "info");
   });
   afterEach(async function () {
     HistoryService.instance().clearSubscriptions();

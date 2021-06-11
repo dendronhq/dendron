@@ -4,7 +4,7 @@
     "rootDir": "src",
     "module": "commonjs",
     "target": "ES2019",
-    "lib": ["es2019"],
+    "lib": ["es2019", "dom"],
     "sourceMap": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,

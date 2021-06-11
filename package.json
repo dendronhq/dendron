@@ -36,13 +36,18 @@
     "lint-staged": ">=10",
     "lodash": "^4.17.15",
     "prettier": "^2.0.4",
-    "standard-version": "^8.0.0"
+    "standard-version": "^8.0.0",
+    "execa": "^5.0.0",
+    "chalk": "^4.1.1"
   },
   "scripts": {
+    "init": "yarn && yarn bootstrap:bootstrap && yarn bootstrap:build ",
+    "cleanup": "./bootstrap/scripts/cleanup.sh",
     "release": "standard-version",
-    "format": "prettier --ignore-path='.prettierignore' --write 'packages/**/*'",
+    "format": "lerna exec --parallel --ignore @dendronhq/dendron-11ty -- yarn format",
+    "format:pkg": "prettier --write",
     "lerna:typecheck": "lerna exec --parallel --ignore @dendronhq/dendron-next-server --ignore @dendronhq/dendron-11ty -- tsc -p tsconfig.build.json --noEmit",
-    "bootstrap:bootstrap": "npx lerna bootstrap --use-workspaces",
+    "bootstrap:bootstrap": "npx lerna bootstrap --use-workspaces && yarn gen:meta",
     "bootstrap:build": "yarn bootstrap:build:common-all && yarn bootstrap:build:common-server &&  yarn bootstrap:build:engine-server &&  yarn bootstrap:build:pods-core && yarn bootstrap:build:common-test-utils && yarn bootstrap:build:api-server && yarn bootstrap:build:dendron-cli && yarn bootstrap:build:engine-test-utils && yarn bootstrap:build:common-frontend && yarn bootstrap:build:dendron-next-server && yarn bootstrap:build:plugin-core",
     "bootstrap:build:fast": "yarn bootstrap:build:common-all && yarn bootstrap:build:common-server && yarn bootstrap:build:common-test-utils && yarn bootstrap:build:engine-server &&  yarn bootstrap:build:api-server && yarn bootstrap:build:engine-test-utils && yarn bootstrap:build:dendron-cli && yarn bootstrap:build:plugin-core",
     "bootstrap:build:": "npx lerna run build --scope",
@@ -62,7 +67,12 @@
     "ci:init": "yarn bootstrap:bootstrap && yarn bootstrap:build",
     "ci:test:cli": "npx lerna run test --ignore @dendronhq/plugin-core --parallel --stream -- -- --forceExit",
     "ci:test:plugin": "npx lerna run test --scope @dendronhq/plugin-core --stream",
-    "watch": "npx lerna exec --scope $pkg -- tsc -p tsconfig.build.json --watch"
+    "watch": "npx lerna exec --scope $pkg -- tsc -p tsconfig.build.json --watch",
+    "hooks:pre-commit": "node ./hooks/pre-commit.js",
+    "hooks:pre-push": "node ./hooks/pre-push.js",
+    "gen:meta": "node ./bootstrap/scripts/genMeta.js",
+    "gen:links": "node ./bootstrap/scripts/linkAll.js",
+    "backend:updateDendronDeps": "node bootstrap/backend/updateDendronhqDeps.js"
   },
   "packages": [
     "packages/*",
@@ -71,15 +81,17 @@
   "useWorkspaces": false,
   "husky": {
     "hooks": {
-      "pre-commit": "lint-staged"
+      "pre-commit": "lint-staged && yarn hooks:pre-commit"
     }
   },
   "lint-staged": {
-    "*.{ts,css,md}": "prettier --write"
+    "*.{ts,tsx}": "prettier --config prettier.config.js --loglevel debug --write"
   },
   "dependencies": {
     "@dendronhq/conventional-changelog-dendron": "^5.0.11",
     "@types/jest": "^23.3.6",
+    "chalk": "^4.1.1",
+    "execa": "^5.0.0",
     "github-slugger": "^1.3.0",
     "typescript": "^4.1.5"
   }

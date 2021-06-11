@@ -1,31 +1,106 @@
+import { DLink } from "@dendronhq/common-all";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import {
   DendronASTDest,
+  DendronASTTypes,
   DEngineClient,
+  LinkUtils,
   MDUtilsV4,
   RemarkUtils,
-  LinkUtils,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { DVault, runEngineTestV5, testWithEngine } from "../../../engine";
+import { ENGINE_HOOKS } from "../../../presets";
 import { checkString } from "../../../utils";
 
-describe("utils", () => {
-  describe("findHeaders", async () => {
+describe("RemarkUtils and LinkUtils", () => {
+  describe("findAnchors", async () => {
     test("one header", async () => {
       await runEngineTestV5(
         async ({ engine }) => {
-          const body = engine.notes["foo"].body;
-          const out = RemarkUtils.findHeaders(body);
-          expect(out).toMatchSnapshot("bond");
+          const note = engine.notes["foo"];
+          const body = note.body;
+          const out = RemarkUtils.findAnchors(body, {
+            engine,
+            fname: note.fname,
+          });
+          expect(out).toMatchSnapshot();
           expect(_.size(out)).toEqual(1);
           expect(out[0].depth).toEqual(1);
+          expect(out[0].type).toEqual(DendronASTTypes.HEADING);
         },
         {
           preSetupHook: async ({ vaults, wsRoot }) => {
             await NoteTestUtilsV4.createNote({
               fname: "foo",
-              body: "# h1",
+              body: [
+                "# h1",
+                "",
+                "Repellendus possimus voluptates tempora quia.",
+              ].join("\n"),
+              vault: vaults[0],
+              wsRoot,
+            });
+          },
+          expect,
+        }
+      );
+    });
+    test("one block anchor", async () => {
+      await runEngineTestV5(
+        async ({ engine }) => {
+          const note = engine.notes["foo"];
+          const body = note.body;
+          const out = RemarkUtils.findAnchors(body, {
+            engine,
+            fname: note.fname,
+          });
+          expect(out).toMatchSnapshot();
+          expect(_.size(out)).toEqual(1);
+          expect(out[0].type).toEqual(DendronASTTypes.BLOCK_ANCHOR);
+        },
+        {
+          preSetupHook: async ({ vaults, wsRoot }) => {
+            await NoteTestUtilsV4.createNote({
+              fname: "foo",
+              body: [
+                "Repellendus possimus voluptates tempora quia.",
+                "Eum deleniti sit delectus officia rem. ^block-anchor",
+                "",
+                "Consectetur blanditiis facilis nulla mollitia.",
+              ].join("\n"),
+              vault: vaults[0],
+              wsRoot,
+            });
+          },
+          expect,
+        }
+      );
+    });
+    test("doesn't find block anchor within wikilink", async () => {
+      await runEngineTestV5(
+        async ({ engine }) => {
+          const note = engine.notes["foo"];
+          const body = note.body;
+          const out = RemarkUtils.findAnchors(body, {
+            engine,
+            fname: note.fname,
+          });
+          expect(out).toMatchSnapshot();
+          expect(_.size(out)).toEqual(0);
+        },
+        {
+          preSetupHook: async ({ vaults, wsRoot }) => {
+            await NoteTestUtilsV4.createNote({
+              fname: "foo",
+              body: [
+                "Repellendus possimus voluptates tempora quia.",
+                "Eum deleniti sit delectus officia rem.",
+                "",
+                "[[bar#^block-anchor]]",
+                "",
+                "Consectetur blanditiis facilis nulla mollitia.",
+              ].join("\n"),
               vault: vaults[0],
               wsRoot,
             });
@@ -35,6 +110,70 @@ describe("utils", () => {
       );
     });
   });
+  test("doesn't find block anchor within inline code", async () => {
+    await runEngineTestV5(
+      async ({ engine }) => {
+        const note = engine.notes["foo"];
+        const body = note.body;
+        const out = RemarkUtils.findAnchors(body, {
+          engine,
+          fname: note.fname,
+        });
+        expect(out).toMatchSnapshot();
+        expect(_.size(out)).toEqual(0);
+      },
+      {
+        preSetupHook: async ({ vaults, wsRoot }) => {
+          await NoteTestUtilsV4.createNote({
+            fname: "foo",
+            body: [
+              "Repellendus possimus voluptates tempora quia.",
+              "Eum deleniti sit delectus officia rem. `^block-anchor`",
+              "",
+              "Consectetur blanditiis facilis nulla mollitia.",
+            ].join("\n"),
+            vault: vaults[0],
+            wsRoot,
+          });
+        },
+        expect,
+      }
+    );
+  });
+  test("doesn't find block anchor within code block", async () => {
+    await runEngineTestV5(
+      async ({ engine }) => {
+        const note = engine.notes["foo"];
+        const body = note.body;
+        const out = RemarkUtils.findAnchors(body, {
+          engine,
+          fname: note.fname,
+        });
+        expect(out).toMatchSnapshot();
+        expect(_.size(out)).toEqual(0);
+      },
+      {
+        preSetupHook: async ({ vaults, wsRoot }) => {
+          await NoteTestUtilsV4.createNote({
+            fname: "foo",
+            body: [
+              "Repellendus possimus voluptates tempora quia.",
+              "Eum deleniti sit delectus officia rem.",
+              "",
+              "```",
+              "^block-anchor",
+              "```",
+              "",
+              "Consectetur blanditiis facilis nulla mollitia.",
+            ].join("\n"),
+            vault: vaults[0],
+            wsRoot,
+          });
+        },
+        expect,
+      }
+    );
+  });
 
   describe("findLinks", async () => {
     testWithEngine(
@@ -42,7 +181,7 @@ describe("utils", () => {
       async ({ engine }) => {
         const note = engine.notes["foo"];
         const links = LinkUtils.findLinks({ note, engine });
-        expect(links).toMatchSnapshot("bond");
+        expect(links).toMatchSnapshot();
         expect(links[0].to?.fname).toEqual("bar");
       },
       {
@@ -108,6 +247,73 @@ describe("utils", () => {
         },
       }
     );
+
+    test("note ref", async () => {
+      const checkLink = ({
+        src,
+        target,
+      }: {
+        src: Partial<DLink>;
+        target: DLink;
+      }) => {
+        const allTrue = _.every([
+          _.isUndefined(src.from) ? true : _.isEqual(src.from, target.from),
+          _.isUndefined(src.type) ? true : _.isEqual(src.type, target.type),
+        ]);
+        if (!allTrue) {
+          throw Error(
+            `diff between ${JSON.stringify(src, null, 4)} and ${JSON.stringify(
+              target,
+              null,
+              4
+            )}`
+          );
+        }
+        expect(true).toBeTruthy();
+      };
+
+      await runEngineTestV5(
+        async ({ engine, wsRoot }) => {
+          const note = engine.notes["foo.one-id"];
+          console.log(wsRoot);
+          debugger;
+          const links = LinkUtils.findLinks({ note, engine });
+          expect(links).toMatchSnapshot();
+          checkLink({
+            src: {
+              from: {
+                fname: "foo.one",
+                id: "foo.one-id",
+                vault: {
+                  fsPath: "vault1",
+                },
+              },
+              type: "wiki",
+            },
+            target: links[0],
+          });
+          checkLink({
+            src: {
+              from: {
+                fname: "foo.one",
+                id: "foo.one-id",
+                vault: {
+                  fsPath: "vault1",
+                },
+              },
+              type: "ref",
+            },
+            target: links[1],
+          });
+        },
+        {
+          expect,
+          preSetupHook: async (opts) => {
+            await ENGINE_HOOKS.setupNoteRefRecursive(opts);
+          },
+        }
+      );
+    });
   });
 });
 

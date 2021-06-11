@@ -6,10 +6,6 @@ import {
 } from "@dendronhq/common-all";
 import { createLogger, vault2Path } from "@dendronhq/common-server";
 import {
-  ENGINE_CONFIG_PRESETS,
-  ENGINE_HOOKS,
-  ENGINE_PRESETS,
-  ENGINE_PRESETS_MULTI,
   FileTestUtils,
   getLogFilePath,
   NoteTestUtilsV4,
@@ -19,6 +15,12 @@ import { DendronEngineV2, readNotesFromCache } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import { runEngineTestV5 } from "../../engine";
+import {
+  ENGINE_CONFIG_PRESETS,
+  ENGINE_HOOKS,
+  ENGINE_PRESETS,
+  ENGINE_PRESETS_MULTI,
+} from "../../presets";
 
 const createEngine = ({ wsRoot }: WorkspaceOpts) => {
   const logger = createLogger("testLogger", getLogFilePath("engine-server"));
@@ -143,7 +145,7 @@ describe("engine, notes/", () => {
         })
       )("%p", async (_key, TestCase) => {
         const { testFunc, ...opts } = TestCase;
-        await runEngineTestV4(testFunc, { ...opts, createEngine, expect });
+        await runEngineTestV5(testFunc, { ...opts, createEngine, expect });
       });
     });
   });
@@ -161,7 +163,7 @@ describe("engine, notes/multi/", () => {
         })
       )("%p", async (_key, TestCase) => {
         const { testFunc, ...opts } = TestCase;
-        await runEngineTestV4(testFunc, { ...opts, createEngine, expect });
+        await runEngineTestV5(testFunc, { ...opts, createEngine, expect });
       });
     });
   });

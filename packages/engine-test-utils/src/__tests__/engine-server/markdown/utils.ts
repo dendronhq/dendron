@@ -3,7 +3,6 @@ import {
   DEngineClient,
   DuplicateNoteAction,
   DVault,
-  WorkspaceOpts,
 } from "@dendronhq/common-all";
 import { AssertUtils, TestPresetEntryV4 } from "@dendronhq/common-test-utils";
 import {
@@ -42,6 +41,7 @@ export const createProcForTest = (opts: {
   dest: DendronASTDest;
   vault: DVault;
   useIdAsLink?: boolean;
+  hideBlockAnchors?: boolean;
 }) => {
   const { engine, dest, vault } = opts;
   const proc2 = MDUtilsV4.procFull({
@@ -51,6 +51,9 @@ export const createProcForTest = (opts: {
     vault,
     wikiLinksOpts: {
       useId: opts.useIdAsLink,
+    },
+    blockAnchorsOpts: {
+      hideBlockAnchors: opts.hideBlockAnchors,
     },
     publishOpts: {
       wikiLinkOpts: {
@@ -168,14 +171,16 @@ export const processText = (opts: { text: string; proc: Processor }) => {
   return { proc, respParse, respProcess, respRehype };
 };
 
-export const processTextV2 = async (opts: {
+type ProcessTextV2Opts = {
   text: string;
   dest: DendronASTDest.HTML;
   engine: DEngineClient;
   fname: string;
   vault: DVault;
   configOverride?: DendronConfig;
-}) => {
+};
+
+export const processTextV2 = async (opts: ProcessTextV2Opts) => {
   const { engine, text, fname, vault, configOverride } = opts;
   if (opts.dest !== DendronASTDest.HTML) {
     const proc = MDUtilsV4.procDendron({
@@ -200,13 +205,9 @@ export const processTextV2 = async (opts: {
   }
 };
 
-export const processNote = (opts: {
-  fname: string;
-  proc: Processor;
-  wopts: WorkspaceOpts;
-}) => {
-  const { fname, wopts, proc } = opts;
-  const npath = path.join(wopts.wsRoot, wopts.vaults[0].fsPath, fname + ".md");
-  const text = fs.readFileSync(npath, { encoding: "utf8" });
-  return processText({ text, proc });
+export const processNote = async (opts: Omit<ProcessTextV2Opts, "text">) => {
+  const { fname, engine, vault } = opts;
+  const npath = path.join(engine.wsRoot, vault.fsPath, fname + ".md");
+  const text = await fs.readFile(npath, { encoding: "utf8" });
+  return await processTextV2({ text, ...opts });
 };

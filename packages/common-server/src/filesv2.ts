@@ -8,6 +8,7 @@ import {
   SchemaModuleOpts,
   SchemaModuleProps,
   SchemaUtils,
+  VaultUtils,
 } from "@dendronhq/common-all";
 import { assign, parse, stringify } from "comment-json";
 import { FSWatcher } from "fs";
@@ -88,23 +89,26 @@ async function _createFileWatcher(
   });
 }
 
-export function file2Schema(fpath: string, wsRoot: string): SchemaModuleProps {
+export async function file2Schema(
+  fpath: string,
+  wsRoot: string
+): Promise<SchemaModuleProps> {
   const root = { fsPath: path.dirname(fpath) };
   const fname = path.basename(fpath, ".schema.yml");
   const schemaOpts = YAML.safeLoad(
-    fs.readFileSync(fpath, { encoding: "utf8" }),
+    await fs.readFile(fpath, { encoding: "utf8" }),
     {
       schema: YAML.JSON_SCHEMA,
     }
   ) as SchemaModuleOpts;
-  return SchemaParserV2.parseRaw(schemaOpts, { root, fname, wsRoot });
+  return await SchemaParserV2.parseRaw(schemaOpts, { root, fname, wsRoot });
 }
 
 export function genHash(contents: any) {
   return SparkMD5.hash(contents); // OR raw hash (binary string)
 }
 
-export function string2Schema({
+export async function string2Schema({
   vault,
   content,
   fname,
@@ -118,7 +122,11 @@ export function string2Schema({
   const schemaOpts = YAML.safeLoad(content, {
     schema: YAML.JSON_SCHEMA,
   }) as SchemaModuleOpts;
-  return SchemaParserV2.parseRaw(schemaOpts, { root: vault, fname, wsRoot });
+  return await SchemaParserV2.parseRaw(schemaOpts, {
+    root: vault,
+    fname,
+    wsRoot,
+  });
 }
 
 export function string2Note({
@@ -192,6 +200,14 @@ export function file2NoteWithCache({
   }
   note = string2Note({ content, fname, vault });
   return { note, matchHash, noteHash: sig };
+}
+
+export function file2String(opts: {
+  note: NoteProps;
+  wsRoot: string;
+}): Promise<string> {
+  const notePath = NoteUtils.getFullPath(opts);
+  return fs.readFile(notePath, { encoding: "utf8" });
 }
 
 /**
@@ -281,7 +297,7 @@ export const vault2Path = ({
   vault: DVault;
   wsRoot: string;
 }) => {
-  return resolvePath(vault.fsPath, wsRoot);
+  return resolvePath(VaultUtils.getRelPath(vault), wsRoot);
 };
 
 export function writeJSONWithComments(fpath: string, data: any) {

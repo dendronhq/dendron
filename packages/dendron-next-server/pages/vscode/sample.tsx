@@ -11,7 +11,6 @@ export default function Sample({
 }) {
   const notes = engine.notes;
   const logger = createLogger("Sample");
-  logger.info({ ctx: "Sample", notes });
   const { switcher, themes, currentTheme, status } = useThemeSwitcher();
   const [_isDarkMode, setIsDarkMode] = React.useState(false);
 
@@ -29,7 +28,9 @@ export default function Sample({
   return (
     <>
       <h4>Current theme: {currentTheme}</h4>
-      <Button type="primary" onClick={toggleDarkMode}>Toggle Theme</Button>
+      <Button type="primary" onClick={toggleDarkMode}>
+        Toggle Theme
+      </Button>
       <br />
       Notes:{" "}
       {_.values(notes)

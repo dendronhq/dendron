@@ -1,11 +1,9 @@
+import { Box, Heading } from "@chakra-ui/react";
+import _ from "lodash";
 import dynamic from "next/dynamic";
-import { SchemaProps } from "@dendronhq/common-all";
-import { Box, Button, Heading } from "@chakra-ui/react";
 import Head from "next/head";
 import React, { useState } from "react";
-import { ReactD3TreeItem } from "react-d3-tree";
 import { useWindowSize } from "../../components/hooks";
-import _ from "lodash";
 
 const Tree = dynamic(
   () => {
@@ -13,9 +11,6 @@ const Tree = dynamic(
   },
   { ssr: false }
 );
-
-type SchemaTreeItem = ReactD3TreeItem &
-  Omit<Partial<SchemaProps>, "children">;
 
 const myTreeData = [
   {
@@ -49,7 +44,6 @@ type TreeViewState = {
 
 export default function Edit() {
   const size = useWindowSize();
-  const [treeData, setTreeData] = useState<SchemaTreeItem[]>(myTreeData);
   const [window, setWindow] = useState(undefined);
   const [treeViewState, setTreeViewState] = useState<TreeViewState>({
     translate: { x: 0, y: 0 },
@@ -58,24 +52,16 @@ export default function Edit() {
     return null;
   }
   if (!_.isEqual(window, size)) {
+    // @ts-ignore
     setWindow(size);
     setTreeViewState({
       translate: {
+        // @ts-ignore
         x: size.width / 2,
         y: size.height / 5,
       },
     });
   }
-
-  const generateNodeProps = () => {
-    return {
-      buttons: [
-        <Button variant="outline" borderRadius="full" size="sm">
-          -
-        </Button>,
-      ],
-    };
-  };
 
   return (
     <>

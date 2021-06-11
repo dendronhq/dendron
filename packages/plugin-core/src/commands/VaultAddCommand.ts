@@ -1,4 +1,9 @@
-import { DVault, VaultUtils } from "@dendronhq/common-all";
+import {
+  DVault,
+  DWorkspace,
+  VaultUtils,
+  WorkspaceSettings,
+} from "@dendronhq/common-all";
 import {
   assignJSONWithComment,
   GitUtils,
@@ -15,7 +20,6 @@ import { commands, ProgressLocation, QuickPickItem, window } from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS, DENDRON_REMOTE_VAULTS } from "../constants";
 import { Logger } from "../logger";
-import { WorkspaceSettings } from "../types";
 import { VSCodeUtils } from "../utils";
 import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
@@ -46,11 +50,11 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
   }
 
   generateRemoteEntries = (): SourceQuickPickEntry[] => {
-    return (DENDRON_REMOTE_VAULTS.map(
-      ({ name: label, description, data: src }) => {
+    return (
+      DENDRON_REMOTE_VAULTS.map(({ name: label, description, data: src }) => {
         return { label, description, src };
-      }
-    ) as SourceQuickPickEntry[]).concat([
+      }) as SourceQuickPickEntry[]
+    ).concat([
       {
         label: "custom",
         description: "custom endpoint",
@@ -83,7 +87,7 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
           const value = qp.value;
           const selected = qp.selectedItems[0];
           if (selected.label === "custom") {
-            if (PickerUtilsV2.isStringInputEmpty(value)) {
+            if (PickerUtilsV2.isInputEmpty(value)) {
               return window.showInformationMessage("please enter an endpoint");
             }
             selected.src = qp.value;
@@ -100,7 +104,7 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
             placeHolder: localVaultPathPlaceholder,
             value: path2Vault,
           });
-          if (PickerUtilsV2.isStringInputEmpty(out)) {
+          if (PickerUtilsV2.isInputEmpty(out)) {
             resolve(undefined);
           }
           sourcePath = out!;
@@ -125,7 +129,7 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
         prompt: "Path to your new vault (relative to your workspace root)",
         placeHolder: localVaultPathPlaceholder,
       });
-      if (PickerUtilsV2.isStringInputEmpty(out)) return;
+      if (PickerUtilsV2.isInputEmpty(out)) return;
       sourcePath = out!;
     }
     sourceName = await VSCodeUtils.showInputBox({
@@ -138,9 +142,11 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
     };
   }
 
-  async handleRemoteRepo(opts: CommandOpts) {
+  async handleRemoteRepo(
+    opts: CommandOpts
+  ): Promise<{ vaults: DVault[]; workspace?: DWorkspace }> {
     const baseDir = DendronWorkspace.wsRoot();
-    const vaults = await window.withProgress(
+    const { vaults, workspace } = await window.withProgress(
       {
         location: ProgressLocation.Notification,
         title: "Adding remote vault",
@@ -151,7 +157,7 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
           message: "cloning repo",
         });
         await this.git.clone(opts.pathRemote!, opts.path);
-        const { vaults } = GitUtils.getVaultsFromRepo({
+        const { vaults, workspace } = GitUtils.getVaultsFromRepo({
           repoPath: path.join(baseDir, opts.path),
           wsRoot: DendronWorkspace.wsRoot(),
           repoUrl: opts.pathRemote!,
@@ -163,29 +169,59 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
         progress.report({
           message: "adding vault",
         });
-        await _.reduce(
-          vaults,
-          async (resp: any, vault: DVault) => {
-            await resp;
-            return this.addVaultToWorkspace(vault);
-          },
-          Promise.resolve()
-        );
-        return vaults;
+        const wsRoot = DendronWorkspace.wsRoot();
+        const wsService = new WorkspaceService({ wsRoot });
+
+        if (workspace) {
+          await wsService.addWorkspace({ workspace });
+          await this.addWorkspaceToWorkspace(workspace);
+        } else {
+          await _.reduce(
+            vaults,
+            async (resp: any, vault: DVault) => {
+              await resp;
+              await wsService.createVault({ vault });
+              return this.addVaultToWorkspace(vault);
+            },
+            Promise.resolve()
+          );
+        }
+        return { vaults, workspace };
       }
     );
-    return vaults;
+    return { vaults, workspace };
+  }
+
+  async addWorkspaceToWorkspace(workspace: DWorkspace) {
+    const wsRoot = DendronWorkspace.wsRoot();
+    const vaults = workspace.vaults;
+
+    await _.reduce(
+      vaults,
+      async (resp: any, vault: DVault) => {
+        await resp;
+        return this.addVaultToWorkspace(vault);
+      },
+      Promise.resolve()
+    );
+    // add to gitignore
+    const gitIgnore = path.join(wsRoot, ".gitignore");
+    if (fs.existsSync(gitIgnore)) {
+      fs.appendFileSync(gitIgnore, "\n" + workspace.name + "\n", {
+        encoding: "utf8",
+      });
+    }
   }
 
   async addVaultToWorkspace(vault: DVault) {
     const wsRoot = DendronWorkspace.wsRoot();
-    const wsService = new WorkspaceService({ wsRoot });
-    await wsService.createVault({ vault });
 
     // workspace file
     const wsPath = DendronWorkspace.workspaceFile().fsPath;
     let out = (await readJSONWithComments(wsPath)) as WorkspaceSettings;
-    if (!_.find(out.folders, (ent) => ent.path === vault.fsPath)) {
+    if (
+      !_.find(out.folders, (ent) => ent.path === VaultUtils.getRelPath(vault))
+    ) {
       const vault2Folder = VaultUtils.toWorkspaceFolder(vault);
       const folders = [vault2Folder].concat(out.folders);
       out = assignJSONWithComment({ folders }, out);
@@ -202,12 +238,17 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
     return;
   }
 
+  /**
+   * Returns all vaults added
+   * @param opts
+   * @returns
+   */
   async execute(opts: CommandOpts) {
     const ctx = "VaultAdd";
     let vaults: DVault[] = [];
     Logger.info({ ctx, msg: "enter", opts });
     if (opts.type === "remote") {
-      vaults = await this.handleRemoteRepo(opts);
+      ({ vaults } = await this.handleRemoteRepo(opts));
     } else {
       const wsRoot = DendronWorkspace.wsRoot();
       const fsPath = VaultUtils.normVaultPath({
@@ -218,6 +259,8 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
       if (opts.name) {
         vault.name = opts.name;
       }
+      const wsService = new WorkspaceService({ wsRoot });
+      await wsService.createVault({ vault });
       await this.addVaultToWorkspace(vault);
       vaults = [vault];
     }

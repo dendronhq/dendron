@@ -54,9 +54,10 @@ suite("GoToSibling", function () {
               expected: { msg: "ok" },
             },
             {
-              actual: VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath.endsWith(
-                "foo.journal.2020.08.31.md"
-              ),
+              actual:
+                VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath.endsWith(
+                  "foo.journal.2020.08.31.md"
+                ),
               expected: true,
             },
           ],
@@ -98,9 +99,10 @@ suite("GoToSibling", function () {
               expected: { msg: "ok" },
             },
             {
-              actual: VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath.endsWith(
-                "foo.journal.2020.09.md"
-              ),
+              actual:
+                VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath.endsWith(
+                  "foo.journal.2020.09.md"
+                ),
               expected: true,
             },
           ],
@@ -287,9 +289,10 @@ suite("GoToSibling", function () {
               expected: { msg: "no_siblings" },
             },
             {
-              actual: VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath.endsWith(
-                "foo.journal.2020.08.29.md"
-              ),
+              actual:
+                VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath.endsWith(
+                  "foo.journal.2020.08.29.md"
+                ),
               expected: true,
             },
           ],
@@ -353,9 +356,10 @@ suite("GoToSibling", function () {
               expected: { msg: "ok" },
             },
             {
-              actual: VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath.endsWith(
-                "gamma.md"
-              ),
+              actual:
+                VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath.endsWith(
+                  "gamma.md"
+                ),
               expected: true,
             },
           ],
@@ -390,9 +394,10 @@ suite("GoToSibling", function () {
                   expected: { msg: "ok" },
                 },
                 {
-                  actual: VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath.endsWith(
-                    `${path.basename(vault.fsPath)}/foo.journal.2020.08.31.md`
-                  ),
+                  actual:
+                    VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath.endsWith(
+                      `${path.basename(vault.fsPath)}/foo.journal.2020.08.31.md`
+                    ),
                   expected: true,
                 },
               ],

@@ -27,6 +27,7 @@ import { PickerUtilsV2 } from "./components/lookup/utils";
 import {
   CONFIG,
   ConfigKey,
+  DendronContext,
   GLOBAL_STATE,
   _noteAddBehaviorEnum,
 } from "./constants";
@@ -212,7 +213,7 @@ export class VSCodeUtils {
     const txtPath = document.uri.fsPath;
     const wsRoot = DendronWorkspace.wsRoot();
     const fname = path.basename(txtPath, ".md");
-    const vault = VaultUtils.getVaultByNotePathV4({
+    const vault = VaultUtils.getVaultByNotePath({
       wsRoot,
       vaults: getWS().getEngine().vaults,
       fsPath: txtPath,
@@ -361,6 +362,10 @@ export class VSCodeUtils {
   static isDevMode(): boolean {
     // HACK: vscode does not save env variables btw workspaces
     return process.env.VSCODE_DEBUGGING_EXTENSION ? true : false;
+  }
+
+  static setContext(key: DendronContext, status: boolean) {
+    vscode.commands.executeCommand("setContext", key, status);
   }
 
   static showInputBox = vscode.window.showInputBox;

@@ -44,7 +44,7 @@ export class GoToSiblingCommand extends BasicCommand<
 
     const client = DendronWorkspace.instance().getEngine();
     if (value === "root") {
-      const vault = VaultUtils.getVaultByNotePathV4({
+      const vault = VaultUtils.getVaultByNotePath({
         vaults: client.vaults,
         wsRoot: DendronWorkspace.wsRoot(),
         fsPath: maybeTextEditor.document.uri.fsPath,

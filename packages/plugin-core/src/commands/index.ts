@@ -25,8 +25,12 @@ import { GotoNoteCommand } from "./GotoNote";
 import { GoUpCommand } from "./GoUpCommand";
 import { ImportPodCommand } from "./ImportPod";
 import { InsertNoteCommand } from "./InsertNoteCommand";
+import { InsertNoteLinkCommand } from "./InsertNoteLink";
 import { MoveNoteCommand } from "./MoveNoteCommand";
+import { NoteLookupCommand } from "./NoteLookupCommand";
+import { OpenLinkCommand } from "./OpenLink";
 import { OpenLogsCommand } from "./OpenLogs";
+import { PasteFileCommand } from "./PasteFile";
 import { PasteLinkCommand } from "./PasteLink";
 import { PublishPodCommand } from "./PublishPod";
 import { RefactorHierarchyCommandV2 } from "./RefactorHierarchyV2";
@@ -34,6 +38,8 @@ import { ResetConfigCommand } from "./ResetConfig";
 import { RestoreVaultCommand } from "./RestoreVault";
 import { SetupWorkspaceCommand } from "./SetupWorkspace";
 import { ShowHelpCommand } from "./ShowHelp";
+import { ShowNoteGraphCommand } from "./ShowNoteGraph";
+import { ShowSchemaGraphCommand } from "./ShowSchemaGraph";
 import { ShowPreviewCommand } from "./ShowPreview";
 import { SignInCommand } from "./SignIn";
 import { SignUpCommand } from "./SignUp";
@@ -44,6 +50,7 @@ import { SyncCommand } from "./Sync";
 import { UpgradeSettingsCommand } from "./UpgradeSettings";
 import { VaultAddCommand } from "./VaultAddCommand";
 import { VaultRemoveCommand } from "./VaultRemoveCommand";
+import { RandomNoteCommand } from "./RandomNote";
 
 const ALL_COMMANDS = [
   AddAndCommit,
@@ -67,22 +74,26 @@ const ALL_COMMANDS = [
   DumpStateCommand,
   ExportPodCommand,
   GoDownCommand,
-  //   GoToSiblingCommand,
   GoUpCommand,
   GotoNoteCommand,
   ImportPodCommand,
   InsertNoteCommand,
-  //   LookupCommand,
+  InsertNoteLinkCommand,
+  NoteLookupCommand,
+  OpenLinkCommand,
   OpenLogsCommand,
+  PasteFileCommand,
   PasteLinkCommand,
   PublishPodCommand,
   MoveNoteCommand,
   RefactorHierarchyCommandV2,
-  // ReloadIndexCommand,
+  RandomNoteCommand,
   ResetConfigCommand,
   RestoreVaultCommand,
   SetupWorkspaceCommand,
   ShowHelpCommand,
+  ShowNoteGraphCommand,
+  ShowSchemaGraphCommand,
   ShowPreviewCommand,
   SignInCommand,
   SignUpCommand,

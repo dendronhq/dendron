@@ -1,11 +1,11 @@
 import { DendronConfig, NoteProps } from "@dendronhq/common-all";
 import {
-  ENGINE_HOOKS,
   NoteTestUtilsV4,
   TestPresetEntryV4,
 } from "@dendronhq/common-test-utils";
 import { DendronASTDest, MDUtilsV4 } from "@dendronhq/engine-server";
 import { runEngineTestV5 } from "../../../engine";
+import { ENGINE_HOOKS } from "../../../presets";
 import { checkNotInVFile, checkVFile, createProcTests } from "./utils";
 
 describe("hierarchies", () => {
@@ -188,7 +188,6 @@ describe("hierarchies", () => {
         const resp = await proc.process(BASIC_TEXT);
         return { resp };
       } else {
-        debugger;
         const proc = MDUtilsV4.procDendronForPublish({
           engine,
           fname: "daily",

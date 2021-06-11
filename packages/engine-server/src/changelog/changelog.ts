@@ -87,13 +87,11 @@ function getLastChangelogCommit(engine: DEngineClient): undefined | string {
  * Gets list of notes that were changed + commit hash and save it to file in build/ dir.
  */
 export async function generateChangelog(engine: DEngineClient) {
-  const { wsRoot, vaults: vaults } = engine;
+  const { wsRoot } = engine;
   const changesPath = ChangelogGenerator.getChangelogDataPath(wsRoot);
   // const lastCommit = getLastChangelogCommit(engine);
   //const commits = await getCommitUpTo(wsRoot, lastCommit);
   const commits = [await getLastCommit(wsRoot)];
-  console.log(wsRoot, vaults, commits);
-
   const changes: CommitEntry[] = await Promise.all(
     commits.slice(0, 3).flatMap((commitHash) => {
       return getChanges({

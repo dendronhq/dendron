@@ -1,12 +1,16 @@
 import _ from "lodash";
+import { DendronError } from "@dendronhq/common-all";
 import { Eat } from "remark-parse";
 import Unified, { Plugin } from "unified";
 import { BlockAnchor, DendronASTDest } from "../types";
 import { MDUtilsV4 } from "../utils";
+import { Element } from "hast";
+import { html } from "mdast-builder";
 
 // Letters, digits, dashes, and underscores.
 // The underscores are an extension over Obsidian.
-export const BLOCK_LINK_REGEX = /^\^([\w-]+)$/;
+// Another extension is that it allows whitespace after the anchor.
+export const BLOCK_LINK_REGEX = /^\^([\w-]+)\w*(\n|$)/;
 export const BLOCK_LINK_REGEX_LOOSE = /\^([\w-]+)/;
 
 /**
@@ -26,11 +30,11 @@ export const matchBlockAnchor = (
   return undefined;
 };
 
-type PluginOpts = {};
+type PluginOpts = {
+  hideBlockAnchors?: boolean;
+};
 
-type CompilerOpts = {};
-
-const plugin: Plugin<[CompilerOpts?]> = function (
+const plugin: Plugin<[PluginOpts?]> = function (
   this: Unified.Processor,
   opts?: PluginOpts
 ) {
@@ -65,27 +69,38 @@ function attachParser(proc: Unified.Processor) {
   inlineMethods.splice(inlineMethods.indexOf("link"), 0, "blockAnchor");
 }
 
-function attachCompiler(proc: Unified.Processor, _opts?: CompilerOpts) {
+function attachCompiler(proc: Unified.Processor, _opts?: PluginOpts) {
   const Compiler = proc.Compiler;
   const visitors = Compiler.prototype.visitors;
 
   if (visitors) {
-    visitors.blockAnchor = function (node: BlockAnchor) {
+    visitors.blockAnchor = function (node: BlockAnchor): string | Element {
       const { dest } = MDUtilsV4.getDendronData(proc);
       switch (dest) {
         case DendronASTDest.MD_DENDRON:
         case DendronASTDest.MD_REGULAR:
+          return `^${node.id}`;
         case DendronASTDest.MD_ENHANCED_PREVIEW:
-        case DendronASTDest.HTML: {
-          // Anything more to do here? Can we embed HTML into the preview?
-          // Prints ^{\^block-id} so that it gets rendered small.
-          return `^\{\\^${node.id}\}`;
-        }
+          const procOpts = MDUtilsV4.getProcOpts(proc);
+          return blockAnchor2htmlRaw(node, procOpts.blockAnchorsOpts);
         default:
-          return `unhandled case: ${dest}`;
+          throw new DendronError({ message: "Unable to render block anchor" });
       }
     };
   }
+}
+
+export function blockAnchor2htmlRaw(node: BlockAnchor, opts?: PluginOpts) {
+  const fullId = `^${node.id}`;
+  const style =
+    opts && opts.hideBlockAnchors
+      ? "visibility: hidden; width: 0; height: 0;"
+      : "font-size: 0.8em; opacity: 75%;";
+  return `<a id="${fullId}" href="#${fullId}" style="${style}">${fullId}</a>`;
+}
+
+export function blockAnchor2html(node: BlockAnchor, opts?: PluginOpts) {
+  return html(blockAnchor2htmlRaw(node, opts));
 }
 
 export { plugin as blockAnchors };

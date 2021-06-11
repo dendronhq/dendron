@@ -1,9 +1,9 @@
 import {
   DendronError,
   getStage,
-  setStageIfUndefined,
   VaultUtils,
   VSCodeEvents,
+  WorkspaceSettings,
 } from "@dendronhq/common-all";
 import {
   getDurationMilliseconds,
@@ -31,7 +31,6 @@ import {
 import { Logger } from "./logger";
 import { migrateConfig, migrateSettings } from "./migration";
 import { Extensions } from "./settings";
-import { WorkspaceSettings } from "./types";
 import { VSCodeUtils, WSUtils } from "./utils";
 import { AnalyticsUtils } from "./utils/analytics";
 import { MarkdownUtils } from "./utils/md";
@@ -43,13 +42,14 @@ const MARKDOWN_WORD_PATTERN = new RegExp("([\\w\\.\\#]+)");
 // this method is called when your extension is activated
 export function activate(context: vscode.ExtensionContext) {
   const stage = getStage();
+  console.log("process.env", process.env);
+  console.log("stage", stage);
   DendronTreeView.register(context);
   // override default word pattern
   vscode.languages.setLanguageConfiguration("markdown", {
     wordPattern: MARKDOWN_WORD_PATTERN,
   });
   if (stage !== "test") {
-    setStageIfUndefined("prod");
     _activate(context);
   }
   return;
@@ -151,12 +151,14 @@ function isFirstInstall(context: vscode.ExtensionContext): boolean {
 
 async function startServer() {
   const ctx = "startServer";
-  const maybePort = DendronWorkspace.configuration().get<number | undefined>(
-    CONFIG.SERVER_PORT.key
-  );
+  const { nextServerUrl, nextStaticRoot, engineServerPort } =
+    getWS().config.dev || {};
+  const maybePort =
+    DendronWorkspace.configuration().get<number | undefined>(
+      CONFIG.SERVER_PORT.key
+    ) || engineServerPort;
   const logPath = DendronWorkspace.instance().context.logPath;
-  Logger.info({ ctx: ctx, logLevel: process.env["LOG_LEVEL"] });
-  const { nextServerUrl, nextStaticRoot } = getWS().config.dev || {};
+  Logger.info({ ctx: ctx, logLevel: process.env["LOG_LEVEL"], maybePort });
   if (!maybePort) {
     const { launchv2 } = require("@dendronhq/api-server");
     return await launchv2({
@@ -166,7 +168,7 @@ async function startServer() {
       nextStaticRoot,
     });
   }
-  return maybePort;
+  return { port: maybePort };
 }
 
 // @ts-ignore
@@ -186,7 +188,9 @@ function subscribeToPortChange() {
   );
 }
 
-export async function _activate(context: vscode.ExtensionContext) {
+export async function _activate(
+  context: vscode.ExtensionContext
+): Promise<boolean> {
   const isDebug = VSCodeUtils.isDevMode();
   const ctx = "_activate";
   const stage = getStage();
@@ -233,7 +237,7 @@ export async function _activate(context: vscode.ExtensionContext) {
       },
     });
     if (didClone) {
-      return;
+      return false;
     }
 
     ws.workspaceService = wsService;
@@ -261,7 +265,7 @@ export async function _activate(context: vscode.ExtensionContext) {
             );
           }
         });
-      return;
+      return false;
     }
 
     // migrate legacy settings
@@ -347,7 +351,7 @@ export async function _activate(context: vscode.ExtensionContext) {
         source: "extension",
         action: "not_initialized",
       });
-      return;
+      return false;
     }
 
     if (VSCodeUtils.isDevMode()) {
@@ -377,31 +381,27 @@ export async function _activate(context: vscode.ExtensionContext) {
   } else {
     // ws not active
     Logger.info({ ctx: "dendron not active" });
-
     toggleViews(false);
-
-    return false;
   }
 
-  showWelcomeOrWhatsNew(DendronWorkspace.version(), migratedGlobalVersion).then(
-    () => {
+  return showWelcomeOrWhatsNew(
+    DendronWorkspace.version(),
+    migratedGlobalVersion
+  ).then(() => {
+    if (DendronWorkspace.isActive()) {
       HistoryService.instance().add({
         source: "extension",
         action: "activate",
       });
     }
-  );
-  return true;
+    return false;
+  });
 }
 
 function toggleViews(enabled: boolean) {
   const ctx = "toggleViews";
   Logger.info({ ctx, msg: `views enabled: ${enabled}` });
-  vscode.commands.executeCommand(
-    "setContext",
-    DendronContext.PLUGIN_ACTIVE,
-    enabled
-  );
+  VSCodeUtils.setContext(DendronContext.PLUGIN_ACTIVE, enabled);
 }
 
 // this method is called when your extension is deactivated

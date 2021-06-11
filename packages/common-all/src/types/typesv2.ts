@@ -50,6 +50,11 @@ export type DNoteAnchor = {
   value: string;
 };
 
+export type DNoteAnchorPositioned = DNoteAnchor & {
+  line: number;
+  column: number;
+};
+
 export type DLinkType = "wiki" | "refv2";
 
 export type DNoteLink<TData = any> = {
@@ -58,10 +63,16 @@ export type DNoteLink<TData = any> = {
     start: number;
     end: number;
   };
+  // if parsing in raw mode, from field won't be available
   from: DNoteLoc;
   to?: DNoteLoc;
   data: TData;
 };
+
+export type DNoteLinkRaw<TData = any> = Omit<DNoteLink<TData>, "from"> & {
+  from?: DNoteLoc;
+};
+
 export type DNoteRefData = {
   anchorStart?: string;
   anchorEnd?: string;
@@ -74,6 +85,7 @@ export type DNoteRefData = {
   type: "file" | "id";
 };
 export type DNoteRefLink = DNoteLink<DNoteRefData>;
+export type DNoteRefLinkRaw = DNoteLinkRaw<DNoteRefData>;
 
 /**
  * Opts are arguments used when creating a node
@@ -218,6 +230,10 @@ export type RenameNoteOpts = {
   newLoc: DNoteLoc;
 };
 
+export type RenderNoteOpts = {
+  id: string;
+};
+
 export type ConfigWriteOpts = {
   config: DendronConfig;
 };
@@ -284,6 +300,25 @@ export type DEngineDeleteSchemaResp = DEngineInitResp;
 export type EngineInfoResp = {
   version: string;
 };
+
+// --- VSCOde
+
+export type WorkspaceSettings = {
+  folders: WorkspaceFolderRaw[];
+  settings: any;
+  extensions: WorkspaceExtensionSetting;
+};
+
+export type WorkspaceFolderRaw = {
+  path: string;
+  name?: string;
+};
+
+export type WorkspaceExtensionSetting = {
+  recommendations: string[];
+  unwantedRecommendations: string[];
+};
+
 // --- KLUDGE END
 
 export type EngineDeleteNoteResp = Required<RespV2<EngineDeleteNotePayload>>;
@@ -292,6 +327,7 @@ export type NoteQueryResp = Required<RespV2<NoteProps[]>>;
 export type SchemaQueryResp = Required<RespV2<SchemaModuleProps[]>>;
 export type StoreDeleteNoteResp = EngineDeleteNotePayload;
 export type RenameNotePayload = NoteChangeEntry[];
+export type RenderNotePayload = string | undefined;
 
 export type GetNotePayload = {
   note: NoteProps | undefined;
@@ -337,6 +373,7 @@ export type DEngine = DCommonProps &
     queryNotes: (opts: QueryNotesOpts) => Promise<NoteQueryResp>;
     queryNotesSync({ qs }: { qs: string; vault?: DVault }): NoteQueryResp;
     renameNote: (opts: RenameNoteOpts) => Promise<RespV2<RenameNotePayload>>;
+    renderNote: (opts: RenderNoteOpts) => Promise<RespV2<RenderNotePayload>>;
 
     // config
     writeConfig: (opts: ConfigWriteOpts) => Promise<RespV2<void>>;
@@ -439,7 +476,7 @@ export type BasePodExecuteOpts<TConfig> = {
 
 // --- Messages
 
-export type DMessage<TType = string, TData = any, TSource = string> = {
+export type DMessage<TType = string, TData = any, TSource = DMessageSource> = {
   type: TType; // "onDidChangeActiveTextEditor"
   data: TData;
   source: TSource;
@@ -450,11 +487,54 @@ export enum DMessageSource {
   webClient = "webClient",
 }
 
+export enum DMessageType {
+  init = "init",
+}
+
 export enum TreeViewMessageType {
   "onSelect" = "onSelect",
   "onExpand" = "onExpand",
+  "onGetActiveEditor" = "onGetActiveEditor",
+  /**
+   * View is ready
+   */
+  "onReady" = "onReady",
+}
+export enum GraphViewMessageType {
+  "onSelect" = "onSelect",
+  "onGetActiveEditor" = "onGetActiveEditor",
+  "onReady" = "onReady",
+}
+export enum ThemeMessageType {
+  "onThemeChange" = "onThemeChange",
+  "getTheme" = "getTheme",
 }
 
+export type OnDidChangeActiveTextEditorData = {
+  note: NoteProps;
+  sync?: boolean;
+};
+
 export type VSCodeMessage = DMessage;
+export type OnDidChangeActiveTextEditorMsg = DMessage<
+  "onDidChangeActiveTextEditor",
+  OnDidChangeActiveTextEditorData
+>;
 
 export type TreeViewMessage = DMessage<TreeViewMessageType, { id: string }>;
+export type GraphViewMessage = DMessage<GraphViewMessageType, { id: string }>;
+
+// --- Views
+
+export enum DendronWebViewKey {
+  CONFIGURE = "dendron.configure",
+  NOTE_GRAPH = "dendron.graph-note",
+  SCHEMA_GRAPH = "dendron.graph-schema",
+}
+
+export enum DendronTreeViewKey {
+  SAMPLE_VIEW = "dendron.sample",
+  TREE_VIEW = "dendron.treeView",
+  TREE_VIEW_V2 = "dendron.tree-view",
+  BACKLINKS = "dendron.backlinks",
+}

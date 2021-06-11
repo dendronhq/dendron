@@ -87,7 +87,6 @@ export class GitPunchCardExportPod extends ExportPod {
 
     const csvDest = path.join(podDstPath, "commits.csv");
     const htmlDest = path.join(podDstPath, "index.html");
-    debugger;
     await writeCSV({
       dest: csvDest,
       data,

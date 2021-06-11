@@ -1,15 +1,14 @@
-import { DMessage } from "@dendronhq/common-all";
+import { DendronTreeViewKey, DMessage } from "@dendronhq/common-all";
 import * as vscode from "vscode";
-import { DendronViewKey } from "../constants";
 import { getWS } from "../workspace";
 import { WebViewUtils } from "./utils";
 
 export class SampleView implements vscode.WebviewViewProvider {
-  public static readonly viewType = DendronViewKey.SAMPLE_VIEW;
+  public static readonly viewType = DendronTreeViewKey.SAMPLE_VIEW;
   private _view?: vscode.WebviewView;
 
   constructor() {
-    getWS().setWebView(DendronViewKey.SAMPLE_VIEW, this);
+    getWS().setTreeView(DendronTreeViewKey.SAMPLE_VIEW, this);
   }
 
   public postMessage(msg: DMessage) {
@@ -30,9 +29,9 @@ export class SampleView implements vscode.WebviewViewProvider {
   }
 
   private _getHtmlForWebview(_webview: vscode.Webview) {
-    return WebViewUtils.genHTML({
+    return WebViewUtils.genHTMLForTreeView({
       title: "SamplePage",
-      view: DendronViewKey.SAMPLE_VIEW,
+      view: DendronTreeViewKey.SAMPLE_VIEW,
     });
   }
 }

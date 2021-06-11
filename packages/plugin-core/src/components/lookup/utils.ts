@@ -114,6 +114,10 @@ export type CreateQuickPickOpts = {
    */
   initialValue?: string;
   nonInteractive?: boolean;
+  /**
+   * See {@link DendronQuickPickerV2["alwaysShow"]}
+   */
+  alwaysShow?: boolean;
 };
 
 export type PrepareQuickPickOpts = CreateQuickPickOpts & {
@@ -225,6 +229,7 @@ export class PickerUtilsV2 {
     quickPick.canSelectMany = false;
     quickPick.matchOnDescription = false;
     quickPick.matchOnDetail = false;
+    quickPick.sortByLabel = false;
     quickPick.showNote = async (uri) => window.showTextDocument(uri);
     if (initialValue) {
       quickPick.value = initialValue;
@@ -320,7 +325,7 @@ export class PickerUtilsV2 {
       getWS().workspaceService?.isPathInWorkspace(activeDocument.uri.fsPath)
     ) {
       Logger.info({ ctx, activeDocument: activeDocument.fileName });
-      vault = VaultUtils.getVaultByNotePathV4({
+      vault = VaultUtils.getVaultByNotePath({
         vaults,
         wsRoot: DendronWorkspace.wsRoot(),
         fsPath: activeDocument.uri.fsPath,
@@ -360,7 +365,7 @@ export class PickerUtilsV2 {
     }
   }
 
-  static isStringInputEmpty(value?: string) {
+  static isInputEmpty(value?: string): value is undefined {
     if (_.isUndefined(value)) {
       return true;
     }
@@ -492,11 +497,12 @@ export class NotePickerUtils {
     }
     const updatedItems = await Promise.all(
       nodes.map(async (ent) =>
-        DNodeUtils.enhancePropForQuickInput({
+        DNodeUtils.enhancePropForQuickInputV3({
           wsRoot: DendronWorkspace.wsRoot(),
           props: ent,
           schemas: engine.schemas,
           vaults: DendronWorkspace.instance().vaultsv4,
+          alwaysShow: picker.alwaysShowAll,
         })
       )
     );

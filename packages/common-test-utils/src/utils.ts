@@ -38,6 +38,60 @@ export class AssertUtils {
     );
     return true;
   }
+
+  /** Asserts that the gives strings appear the expected number of times in this string.
+   *
+   * parameters `match`, `fewerThan`, and `moreThan` should look like:
+   *     [ [2, "Lorem ipsum"], [1, "foo bar"] ]
+   *
+   * @param match Must appear exactly this many times.
+   * @param fewerThan Must appear fewer than this many times.
+   * @param moreThan Must appear more than this many times.
+   */
+  static async assertTimesInString({
+    body,
+    match,
+    fewerThan,
+    moreThan,
+  }: {
+    body: string;
+    match?: [number, string][];
+    fewerThan?: [number, string][];
+    moreThan?: [number, string][];
+  }): Promise<boolean> {
+    function countMatches(match: string) {
+      const matches = body.match(new RegExp(match, "g")) || [];
+      return matches.length;
+    }
+    await Promise.all(
+      (match || []).map(([count, match]) => {
+        const foundCount = countMatches(match);
+        if (foundCount != count) {
+          throw `${match} found ${foundCount} times, expected equal to ${count} in ${body}`;
+        }
+        return true;
+      })
+    );
+    await Promise.all(
+      (fewerThan || []).map(([count, match]) => {
+        const foundCount = countMatches(match);
+        if (foundCount >= count) {
+          throw `${match} found ${foundCount} times, expected fewer than ${count} in ${body}`;
+        }
+        return true;
+      })
+    );
+    await Promise.all(
+      (moreThan || []).map(([count, match]) => {
+        const foundCount = countMatches(match);
+        if (foundCount <= count) {
+          throw `${match} found ${foundCount} times, expected more than ${count} in ${body}`;
+        }
+        return true;
+      })
+    );
+    return true;
+  }
 }
 
 export abstract class EngineTest<TPreSetupOut = any, TPostSetupOut = any> {

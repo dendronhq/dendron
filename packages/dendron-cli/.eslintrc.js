@@ -1,4 +1,4 @@
-const root = require("../../.eslintrc");
-module.exports = {
-  ...root,
-};
+// const root = require("../../.eslintrc");
+// module.exports = {
+//   ...root,
+// };

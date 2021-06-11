@@ -152,9 +152,8 @@ export class LookupControllerV2 {
     const { document, range } = cleanOpts;
     Logger.info({ ctx, msg: "enter", cleanOpts });
     // create quick pick
-    const quickPick = vscode.window.createQuickPick<
-      DNodePropsQuickInputV2
-    >() as DendronQuickPickerV2;
+    const quickPick =
+      vscode.window.createQuickPick<DNodePropsQuickInputV2>() as DendronQuickPickerV2;
     let title = [`Lookup (${this.opts.flavor})`];
     title.push(`- version: ${DendronWorkspace.version()}`);
     quickPick.title = title.join(" ");
@@ -325,14 +324,8 @@ export class LookupControllerV2 {
   }) {
     const ctx = "updatePickerBehavior";
     const ws = getWS();
-    const {
-      document,
-      range,
-      quickPick,
-      quickPickValue,
-      provider,
-      changed,
-    } = opts;
+    const { document, range, quickPick, quickPickValue, provider, changed } =
+      opts;
     const buttons = this.state.buttons;
     // get all pressed buttons
     const resp = _.filter(buttons, { pressed: true });

@@ -1,8 +1,6 @@
 import { NoteProps, NoteUtils, WorkspaceOpts } from "@dendronhq/common-all";
 import {
   AssertUtils,
-  ENGINE_HOOKS,
-  ENGINE_HOOKS_MULTI,
   NoteTestUtilsV4,
   TestPresetEntryV4,
 } from "@dendronhq/common-test-utils";
@@ -17,6 +15,7 @@ import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { runEngineTestV5 } from "../../../engine";
+import { ENGINE_HOOKS, ENGINE_HOOKS_MULTI } from "../../../presets";
 import {
   checkVFile,
   createProcTests,

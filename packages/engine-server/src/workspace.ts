@@ -1,3 +1,4 @@
+import { DVaultSync } from "@dendronhq/common-all";
 import {
   CONSTANTS,
   DendronConfig,
@@ -6,19 +7,24 @@ import {
   DUser,
   DUtils,
   DVault,
-  DVaultVisibility,
+  DWorkspace,
+  DWorkspaceEntry,
   NoteUtils,
   SchemaUtils,
   Time,
   VaultUtils,
+  WorkspaceSettings,
 } from "@dendronhq/common-all";
 import {
+  assignJSONWithComment,
   createLogger,
   GitUtils,
   note2File,
+  readJSONWithComments,
   schemaModuleOpts2File,
   simpleGit,
   vault2Path,
+  writeJSONWithComments,
 } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -26,6 +32,7 @@ import path from "path";
 import { DConfig } from "./config";
 import { Git } from "./topics/git";
 import { getPortFilePath, getWSMetaFilePath, writeWSMetaFile } from "./utils";
+const DENDRON_WS_NAME = CONSTANTS.DENDRON_WS_NAME;
 
 const logger = createLogger();
 export type PathExistBehavior = "delete" | "abort" | "continue";
@@ -41,6 +48,21 @@ export type WorkspaceServiceOpts = {
 
 type UrlTransformerFunc = (url: string) => string;
 
+export enum SyncActionStatus {
+  DONE = "",
+  NO_CHANGES = "it has no changes",
+  UNCOMMITTED_CHANGES = "it has uncommitted changes",
+  NO_REMOTE = "it has no remote",
+  SKIP_CONFIG = "it is configured so",
+  NOT_PERMITTED = "user is not permitted to push to one or more vaults",
+}
+
+export type SyncActionResult = {
+  repo: string;
+  vaults: DVault[];
+  status: SyncActionStatus;
+};
+
 export class WorkspaceService {
   static isNewVersionGreater({
     oldVersion,
@@ -52,8 +74,8 @@ export class WorkspaceService {
     return DUtils.semver.lt(oldVersion, newVersion);
   }
 
-  static isWorkspaceVault(fpath: string) {
-    return fs.existsSync(path.join(fpath, CONSTANTS.DENDRON_CONFIG_FILE));
+  static async isWorkspaceVault(fpath: string) {
+    return await fs.pathExists(path.join(fpath, CONSTANTS.DENDRON_CONFIG_FILE));
   }
 
   public wsRoot: string;
@@ -85,7 +107,80 @@ export class WorkspaceService {
   }
 
   /**
+   *
+   * @param param0
+   * @returns `{vaults}` that have been added
+   */
+  async addWorkspace({ workspace }: { workspace: DWorkspace }) {
+    const allWorkspaces = this.config.workspaces || {};
+    allWorkspaces[workspace.name] = _.omit(workspace, ["name", "vaults"]);
+    // update vault
+    const newVaults = await _.reduce(
+      workspace.vaults,
+      async (acc, vault) => {
+        const out = await acc;
+        out.push(
+          await this.addVault({
+            vault: { ...vault, workspace: workspace.name },
+          })
+        );
+        return out;
+      },
+      Promise.resolve([] as DVault[])
+    );
+    const config = this.config;
+    config.workspaces = allWorkspaces;
+    this.setConfig(config);
+    return { vaults: newVaults };
+  }
+
+  async addVault(opts: {
+    vault: DVault;
+    config?: DendronConfig;
+    writeConfig?: boolean;
+    addToWorkspace?: boolean;
+  }) {
+    const { vault, config, writeConfig, addToWorkspace } = _.defaults(opts, {
+      config: this.config,
+      writeConfig: true,
+      addToWorkspace: false,
+    });
+    config.vaults.unshift(vault);
+    // update dup note behavior
+    if (!config.site.duplicateNoteBehavior) {
+      config.site.duplicateNoteBehavior = {
+        action: DuplicateNoteAction.USE_VAULT,
+        payload: config.vaults.map((v) => VaultUtils.getName(v)),
+      };
+    } else if (_.isArray(config.site.duplicateNoteBehavior.payload)) {
+      config.site.duplicateNoteBehavior.payload.push(VaultUtils.getName(vault));
+    }
+    if (writeConfig) {
+      await this.setConfig(config);
+    }
+    if (addToWorkspace) {
+      const wsPath = path.join(this.wsRoot, DENDRON_WS_NAME);
+      let out = (await readJSONWithComments(wsPath)) as WorkspaceSettings;
+      if (
+        !_.find(out.folders, (ent) => ent.path === VaultUtils.getRelPath(vault))
+      ) {
+        const vault2Folder = VaultUtils.toWorkspaceFolder(vault);
+        const folders = [vault2Folder].concat(out.folders);
+        out = assignJSONWithComment({ folders }, out);
+        writeJSONWithComments(wsPath, out);
+      }
+    }
+    return vault;
+  }
+
+  /**
    * Create vault files if it does not exist
+   * @returns void
+   *
+   * Effects:
+   *   - updates `dendron.yml` if `noAddToConfig` is not set
+   *   - create directory
+   *   - create root note and root schema
    */
   async createVault({
     vault,
@@ -110,49 +205,96 @@ export class WorkspaceService {
     if (!fs.existsSync(NoteUtils.getFullPath({ note, wsRoot: this.wsRoot }))) {
       await note2File({ note, vault, wsRoot: this.wsRoot });
     }
-    if (
-      !fs.existsSync(SchemaUtils.getPath({ root: this.wsRoot, fname: "root" }))
-    ) {
+    if (!fs.existsSync(SchemaUtils.getPath({ root: vpath, fname: "root" }))) {
       await schemaModuleOpts2File(schema, vpath, "root");
     }
 
     if (!noAddToConfig) {
-      const config = this.config;
-      config.vaults.unshift(vault);
-      // update dup note behavior
-      if (!config.site.duplicateNoteBehavior) {
-        config.site.duplicateNoteBehavior = {
-          action: DuplicateNoteAction.USE_VAULT,
-          payload: config.vaults.map((v) => VaultUtils.getName(v)),
-        };
-      } else if (_.isArray(config.site.duplicateNoteBehavior.payload)) {
-        config.site.duplicateNoteBehavior.payload.push(
-          VaultUtils.getName(vault)
-        );
-      }
-      await this.setConfig(config);
+      await this.addVault({ vault });
     }
     return;
   }
 
-  async commidAndAddAll(): Promise<string[]> {
-    const allRepos = await this.getAllRepos();
+  /** For vaults in the same repository, ensure that their sync configurations do not conflict. Returns the coordinated sync config. */
+  verifyVaultSyncConfigs(vaults: DVault[]): DVaultSync | undefined {
+    let prevVault: DVault | undefined;
+    for (const vault of vaults) {
+      if (_.isUndefined(vault.sync)) continue;
+      if (_.isUndefined(prevVault)) {
+        prevVault = vault;
+        continue;
+      }
+      if (prevVault.sync === vault.sync) continue;
+
+      const prevVaultName = prevVault.name || prevVault.fsPath;
+      const vaultName = vault.name || vault.fsPath;
+      throw new DendronError({
+        message: `Vaults ${prevVaultName} and ${vaultName} are in the same repository, but have conflicting configurations ${prevVault.sync} and ${vault.sync} set. Please remove conflicting configuration, or move vault to a different repository.`,
+      });
+    }
+    return prevVault?.sync;
+  }
+
+  /** Checks if a given git command should be used on the vault based on user configuration.
+   *
+   * @param command The git command that we want to perform.
+   * @param repo The location of the repository containing the vaults.
+   * @param vaults The vaults on which the operation is being performed on.
+   * @returns true if the command can be performed, false otherwise.
+   */
+  async shouldVaultsSync(
+    command: "commit" | "push" | "pull",
+    [root, vaults]: [string, DVault[]]
+  ): Promise<boolean> {
+    let config = this.verifyVaultSyncConfigs(vaults);
+    if (_.isUndefined(config)) {
+      if (await WorkspaceService.isWorkspaceVault(root)) {
+        config = this.config.workspaceVaultSync;
+        // default for workspace vaults
+        if (_.isUndefined(config)) config = DVaultSync.NO_COMMIT;
+      }
+      // default for regular vaults
+      else config = DVaultSync.SYNC;
+    }
+
+    if (config === DVaultSync.SKIP) return false;
+    if (config === DVaultSync.SYNC) return true;
+    if (config === DVaultSync.NO_COMMIT && command === "commit") return false;
+    if (config === DVaultSync.NO_PUSH && command === "push") return false;
+    return true;
+  }
+
+  async commitAndAddAll(): Promise<SyncActionResult[]> {
+    const allReposVaults = await this.getAllReposVaults();
     const out = await Promise.all(
-      allRepos.map(async (root) => {
-        const git = new Git({ localUrl: root });
-        if (await git.hasChanges()) {
-          await git.addAll();
-          await git.commit({ msg: "update" });
-          return root;
+      _.map(
+        [...allReposVaults.entries()],
+        async (rootVaults: [string, DVault[]]): Promise<SyncActionResult> => {
+          const [repo, vaults] = rootVaults;
+          const git = new Git({ localUrl: repo });
+          if (!(await this.shouldVaultsSync("commit", rootVaults)))
+            return { repo, vaults, status: SyncActionStatus.SKIP_CONFIG };
+          if (!(await git.hasChanges()))
+            return { repo, vaults, status: SyncActionStatus.NO_CHANGES };
+          try {
+            await git.addAll();
+            await git.commit({ msg: "update" });
+            return { repo, vaults, status: SyncActionStatus.DONE };
+          } catch (err) {
+            const stderr = err.stderr ? `: ${err.stderr}` : "";
+            throw new DendronError({
+              message: `error adding and committing vault${stderr}`,
+              payload: { err, repoPath: repo },
+            });
+          }
         }
-        return undefined;
-      })
+      )
     );
-    return _.filter(out, (ent) => !_.isUndefined(ent)) as string[];
+    return out;
   }
 
   /**
-   * Return if vaults have been cloned
+   * Initialize all remote vaults
    * @param opts
    * @returns
    */
@@ -177,8 +319,21 @@ export class WorkspaceService {
    */
   async removeVault({ vault }: { vault: DVault }) {
     const config = this.config;
-    config.vaults = _.reject(config.vaults, { fsPath: vault.fsPath });
-
+    config.vaults = _.reject(config.vaults, (ent) => {
+      const checks = [ent.fsPath === vault.fsPath];
+      if (vault.workspace) {
+        checks.push(ent.workspace === vault.workspace);
+      }
+      return _.every(checks);
+    });
+    if (vault.workspace && config.workspaces) {
+      const vaultWorkspace = _.find(config.vaults, {
+        workspace: vault.workspace,
+      });
+      if (_.isUndefined(vaultWorkspace)) {
+        delete config.workspaces[vault.workspace];
+      }
+    }
     if (
       config.site.duplicateNoteBehavior &&
       _.isArray(config.site.duplicateNoteBehavior.payload)
@@ -278,17 +433,50 @@ export class WorkspaceService {
     return repoPath;
   }
 
-  async getAllRepos() {
-    const vaults = this.config.vaults;
-    const wsRoot = this.wsRoot;
-    return _.uniq(
-      await Promise.all(
-        vaults.map(async (vault) => {
-          const vpath = vault2Path({ vault, wsRoot });
-          return GitUtils.getGitRoot(vpath);
-        })
-      )
+  async cloneWorkspace(opts: {
+    wsName: string;
+    workspace: DWorkspaceEntry;
+    wsRoot: string;
+    urlTransformer?: UrlTransformerFunc;
+  }) {
+    const { wsRoot, urlTransformer, workspace, wsName } = _.defaults(opts, {
+      urlTransformer: _.identity,
+    });
+    const repoPath = path.join(wsRoot, wsName);
+    const git = simpleGit({ baseDir: wsRoot });
+    await git.clone(urlTransformer(workspace.remote.url), wsName);
+    return repoPath;
+  }
+
+  async getVaultRepo(vault: DVault) {
+    const vpath = vault2Path({ vault, wsRoot: this.wsRoot });
+    return await GitUtils.getGitRoot(vpath);
+  }
+
+  async getAllReposVaults(): Promise<Map<string, DVault[]>> {
+    const reposVaults = new Map<string, DVault[]>();
+    await Promise.all(
+      this.config.vaults.map(async (vault) => {
+        const repo = await this.getVaultRepo(vault);
+        if (_.isUndefined(repo)) return;
+        const vaultsForRepo = reposVaults.get(repo) || [];
+        vaultsForRepo.push(vault);
+        reposVaults.set(repo, vaultsForRepo);
+      })
     );
+    return reposVaults;
+  }
+
+  async getAllRepos() {
+    return [...(await this.getAllReposVaults()).keys()];
+  }
+
+  getVaultForPath(fpath: string) {
+    return VaultUtils.getVaultByNotePath({
+      vaults: this.config.vaults,
+      wsRoot: this.wsRoot,
+      fsPath: fpath,
+    });
   }
 
   /**
@@ -296,12 +484,8 @@ export class WorkspaceService {
    */
   isPathInWorkspace(fpath: string) {
     try {
-      // check if selection comes from known vault
-      VaultUtils.getVaultByNotePathV4({
-        vaults: this.config.vaults,
-        wsRoot: this.wsRoot,
-        fsPath: fpath,
-      });
+      // if not error, then okay
+      this.getVaultForPath(fpath);
       return true;
     } catch {
       return false;
@@ -324,52 +508,71 @@ export class WorkspaceService {
   }
 
   /** Returns the list of vaults that were attempted to be pulled, even if there was nothing to pull. */
-  async pullVaults(): Promise<string[]> {
-    const allRepos = await this.getAllRepos();
+  async pullVaults(): Promise<SyncActionResult[]> {
+    const allReposVaults = await this.getAllReposVaults();
     const out = await Promise.all(
-      allRepos.map(async (root) => {
-        const git = new Git({ localUrl: root });
-        if (await git.hasRemote()) {
-          await git.pull();
-          return root;
-        }
-        return undefined;
-      })
-    );
-    return _.filter(out, (ent) => !_.isUndefined(ent)) as string[];
-  }
+      _.map(
+        [...allReposVaults.entries()],
+        async (rootVaults: [string, DVault[]]): Promise<SyncActionResult> => {
+          const [repo, vaults] = rootVaults;
 
-  /** Returns the list of vaults that were attempted to be pushed, even if there was nothing to push. */
-  async pushVaults(): Promise<string[]> {
-    const allRepos = await this.getAllRepos();
-    const vaults = this.config.vaults;
-    const wsRoot = this.wsRoot;
-    const out = await Promise.all(
-      allRepos.map(async (root) => {
-        const git = new Git({ localUrl: root });
-        if (WorkspaceService.isWorkspaceVault(root)) {
-          return undefined;
-        }
-        const vault = VaultUtils.getVaultByPath({
-          vaults,
-          wsRoot,
-          fsPath: root,
-        });
-        if ((await git.hasRemote()) && this.user.canPushVault(vault)) {
+          const git = new Git({ localUrl: repo });
+          // It's impossible to pull if there is no remote, or if there are tracked files that have changes
+          if (!(await git.hasRemote()))
+            return { repo, vaults, status: SyncActionStatus.NO_REMOTE };
+          if (!(await this.shouldVaultsSync("pull", rootVaults)))
+            return { repo, vaults, status: SyncActionStatus.SKIP_CONFIG };
+          if (await git.hasChanges({ untrackedFiles: "no" }))
+            return {
+              repo,
+              vaults,
+              status: SyncActionStatus.UNCOMMITTED_CHANGES,
+            };
           try {
-            await git.push();
-            return root;
+            await git.pull();
+            return { repo, vaults, status: SyncActionStatus.DONE };
           } catch (err) {
+            const stderr = err.stderr ? `: ${err.stderr}` : "";
             throw new DendronError({
-              message: "error pushing vault",
-              payload: { err, repoPath: root },
+              message: `error pulling vault${stderr}`,
+              payload: { err, repoPath: repo },
             });
           }
         }
-        return undefined;
-      })
+      )
     );
-    return _.filter(out, (ent) => !_.isUndefined(ent)) as string[];
+    return out;
+  }
+
+  /** Returns the list of vaults that were attempted to be pushed, even if there was nothing to push. */
+  async pushVaults(): Promise<SyncActionResult[]> {
+    const allReposVaults = await this.getAllReposVaults();
+    const out = await Promise.all(
+      _.map(
+        [...allReposVaults.entries()],
+        async (rootVaults: [string, DVault[]]): Promise<SyncActionResult> => {
+          const [repo, vaults] = rootVaults;
+          const git = new Git({ localUrl: repo });
+          if (!(await git.hasRemote()))
+            return { repo, vaults, status: SyncActionStatus.NO_REMOTE };
+          if (!(await this.shouldVaultsSync("push", rootVaults)))
+            return { repo, vaults, status: SyncActionStatus.SKIP_CONFIG };
+          if (!_.every(_.map(vaults, this.user.canPushVault)))
+            return { repo, vaults, status: SyncActionStatus.NOT_PERMITTED };
+          try {
+            await git.push();
+            return { repo, vaults, status: SyncActionStatus.DONE };
+          } catch (err) {
+            const stderr = err.stderr ? `: ${err.stderr}` : "";
+            throw new DendronError({
+              message: `error pushing vault${stderr}`,
+              payload: { err, repoPath: repo },
+            });
+          }
+        }
+      )
+    );
+    return out;
   }
 
   /**
@@ -385,23 +588,57 @@ export class WorkspaceService {
     skipPrivate?: boolean;
   }) {
     const ctx = "syncVaults";
-    const {
-      config,
-      progressIndicator,
-      urlTransformer,
-      fetchAndPull,
-      skipPrivate,
-    } = _.defaults(opts, { fetchAndPull: false, skipPrivate: false });
+    const { config, progressIndicator, urlTransformer, fetchAndPull } =
+      _.defaults(opts, { fetchAndPull: false, skipPrivate: false });
     const { wsRoot } = this;
+
+    // check workspaces
+    const workspacePaths: { wsPath: string; wsUrl: string }[] = (
+      await Promise.all(
+        _.map(config.workspaces, async (wsEntry, wsName) => {
+          const wsPath = path.join(wsRoot, wsName);
+          if (!fs.existsSync(wsPath)) {
+            return {
+              wsPath: await this.cloneWorkspace({
+                wsName,
+                workspace: wsEntry!,
+                wsRoot,
+              }),
+              wsUrl: wsEntry!.remote.url,
+            };
+          }
+          return;
+        })
+      )
+    ).filter((ent) => !_.isUndefined(ent)) as {
+      wsPath: string;
+      wsUrl: string;
+    }[];
+    // const wsVaults: DVault[] = workspacePaths.flatMap(({ wsPath, wsUrl }) => {
+    //   const { vaults } = GitUtils.getVaultsFromRepo({
+    //     repoPath: wsPath,
+    //     wsRoot,
+    //     repoUrl: wsUrl,
+    //   });
+    //   return vaults;
+    // });
+    // add wsvaults
+    // await Promise.all(wsVaults.map((vault) => {
+    //   return this.addVault({ config, vault, writeConfig: false, addToWorkspace: true });
+    // }));
 
     // clone all missing vaults
     const emptyRemoteVaults = config.vaults.filter(
       (vault) =>
         !_.isUndefined(vault.remote) &&
-        !fs.existsSync(vault2Path({ vault, wsRoot })) &&
-        (skipPrivate ? vault.visibility !== DVaultVisibility.PRIVATE : true)
+        !fs.existsSync(vault2Path({ vault, wsRoot }))
     );
-    const didClone = !_.isEmpty(emptyRemoteVaults);
+    const didClone =
+      !_.isEmpty(emptyRemoteVaults) || !_.isEmpty(workspacePaths);
+    // if we added a workspace, we also add new vaults
+    if (!_.isEmpty(workspacePaths)) {
+      this.setConfig(config);
+    }
     if (progressIndicator && didClone) {
       progressIndicator();
     }
@@ -412,11 +649,7 @@ export class WorkspaceService {
     );
     if (fetchAndPull) {
       const vaultsToFetch = _.difference(
-        config.vaults.filter(
-          (vault) =>
-            !_.isUndefined(vault.remote) &&
-            (skipPrivate ? vault.visibility !== DVaultVisibility.PRIVATE : true)
-        ),
+        config.vaults.filter((vault) => !_.isUndefined(vault.remote)),
         emptyRemoteVaults
       );
       logger.info({ ctx, msg: "fetching vaults", vaultsToFetch });

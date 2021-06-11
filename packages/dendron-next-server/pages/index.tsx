@@ -14,7 +14,7 @@ import React from "react";
 import { useDendronGardens } from "../lib/hooks";
 
 export default function Home() {
-  const { isError, isLoading, gardens, error } = useDendronGardens();
+  const { isError, gardens, error } = useDendronGardens();
   if (isError) return <div>failed to load: {JSON.stringify(error)}</div>;
   let extra: any;
   // if (_.isEmpty(gardens)) {

@@ -1,4 +1,5 @@
-import { ENGINE_HOOKS, NOTE_PRESETS_V4 } from "@dendronhq/common-test-utils";
+import { NOTE_PRESETS_V4 } from "@dendronhq/common-test-utils";
+import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
@@ -12,7 +13,7 @@ import {
   withConfig,
 } from "../testUtilsV3";
 
-suite("notes", function () {
+suite("CopyNoteUrl", function () {
   let ctx: vscode.ExtensionContext;
   let rootUrl = "dendron.so";
 

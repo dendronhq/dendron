@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export OVSX_PAT=`cat /Users/kevinlin/projects/dendronv2/dendron-playbooks/secrets/OVSX_PAT`
+export OVSX_PAT=`cat $HOME/.ovsx`
 
 # echo "upgrade version..."
 # yarn version --patch

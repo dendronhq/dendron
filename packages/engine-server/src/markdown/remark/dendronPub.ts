@@ -1,6 +1,7 @@
 import { DendronError, NoteUtils } from "@dendronhq/common-all";
 import _ from "lodash";
 import { Image, Root } from "mdast";
+import { BlockAnchor, DendronASTTypes } from "../types";
 import Unified, { Transformer } from "unified";
 import { Node } from "unist";
 import u from "unist-builder";
@@ -18,6 +19,7 @@ import { NoteRefsOpts } from "./noteRefs";
 import { convertNoteRefASTV2 } from "./noteRefsV2";
 import { RemarkUtils } from "./utils";
 import { addError, getNoteOrError } from "./utils";
+import { blockAnchor2html } from "./blockAnchors";
 
 type PluginOpts = NoteRefsOpts & {
   assetsPrefix?: string;
@@ -30,14 +32,8 @@ type PluginOpts = NoteRefsOpts & {
 
 function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
   const proc = this;
-  let {
-    dest,
-    vault,
-    fname,
-    config,
-    overrides,
-    insideNoteRef,
-  } = MDUtilsV4.getDendronData(proc);
+  let { dest, vault, fname, config, overrides, insideNoteRef } =
+    MDUtilsV4.getDendronData(proc);
   function transformer(tree: Node, _file: VFile) {
     let root = tree as Root;
     const { error, engine } = MDUtilsV4.getEngineFromProc(proc);
@@ -67,12 +63,12 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
       root.children.splice(
         idx,
         0,
-        u("heading", { depth: 1 }, [u("text", note.title)])
+        u(DendronASTTypes.HEADING, { depth: 1 }, [u("text", note.title)])
       );
     }
-    visit(tree, (node, _idx, parent) => {
+    visit(tree, (node, index, parent) => {
       if (
-        node.type === "wikiLink" &&
+        node.type === DendronASTTypes.WIKI_LINK &&
         dest !== DendronASTDest.MD_ENHANCED_PREVIEW
       ) {
         let _node = node as WikiLinkNoteV4;
@@ -85,7 +81,6 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
           vaultMissingBehavior: VaultMissingBehavior.FALLBACK_TO_ORIGINAL_VAULT,
         });
         if (error) {
-          debugger;
           addError(proc, error);
         }
 
@@ -180,17 +175,14 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
           };
         }
       }
-      if (
-        node.type === "refLinkV2" &&
-        dest !== DendronASTDest.MD_ENHANCED_PREVIEW
-      ) {
+      if (node.type === DendronASTTypes.REF_LINK_V2) {
         // we have custom compiler for markdown to handle note ref
         const ndata = node.data as NoteRefDataV4;
         const copts: NoteRefsOpts = {
           wikiLinkOpts: opts?.wikiLinkOpts,
           prettyRefs: opts?.prettyRefs,
         };
-        const procOpts = proc.data("procOpts") as any;
+        const procOpts = MDUtilsV4.getProcOpts(proc);
         const { data } = convertNoteRefASTV2({
           link: ndata.link,
           proc,
@@ -212,6 +204,13 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
             parent!.children = data;
           }
         }
+      }
+      if (node.type === DendronASTTypes.BLOCK_ANCHOR) {
+        const procOpts = MDUtilsV4.getProcOpts(proc);
+        parent!.children[index] = blockAnchor2html(
+          node as BlockAnchor,
+          procOpts.blockAnchorsOpts
+        );
       }
       if (node.type === "image" && dest === DendronASTDest.HTML) {
         let imageNode = node as Image;

@@ -49,6 +49,7 @@ export class DNodeUtils {
       type,
       desc,
       links,
+      anchors,
       fname,
       updated,
       created,
@@ -63,6 +64,7 @@ export class DNodeUtils {
       id: genUUID(),
       desc: "",
       links: [],
+      anchors: {},
       children: [],
       parent: null,
       body: "",
@@ -77,6 +79,7 @@ export class DNodeUtils {
       type,
       desc,
       links,
+      anchors,
       fname,
       updated,
       created,
@@ -156,6 +159,17 @@ export class DNodeUtils {
       const out = { ...props, label, detail, description: vaultSuffix };
       return out;
     }
+  }
+
+  static enhancePropForQuickInputV3(opts: {
+    props: DNodeProps;
+    schemas: SchemaModuleDict;
+    vaults: DVault[];
+    wsRoot: string;
+    alwaysShow?: boolean;
+  }): DNodePropsQuickInputV2 {
+    const { alwaysShow } = _.defaults(opts, { alwaysShow: false });
+    return { ...this.enhancePropForQuickInput(opts), alwaysShow };
   }
 
   static findClosestParent(
@@ -247,8 +261,8 @@ export class DNodeUtils {
     basename: string;
   }) {
     const root = path.isAbsolute(opts.vault.fsPath)
-      ? opts.vault.fsPath
-      : path.join(opts.wsRoot, opts.vault.fsPath);
+      ? VaultUtils.getRelPath(opts.vault)
+      : path.join(opts.wsRoot, VaultUtils.getRelPath(opts.vault));
     return path.join(root, opts.basename);
   }
 
@@ -462,15 +476,15 @@ export class NoteUtils {
     return stubNodes;
   }
 
-  static createWikiLink({
-    note,
-    header,
-    useVaultPrefix,
-  }: {
+  static createWikiLink(opts: {
     note: NoteProps;
     header?: string;
     useVaultPrefix?: boolean;
+    useTitle?: boolean;
   }): string {
+    const { note, header, useVaultPrefix, useTitle } = _.defaults(opts, {
+      useTitle: true,
+    });
     let { title, fname, vault } = note;
     let suffix = "";
     const slugger = getSlugger();
@@ -483,7 +497,8 @@ export class NoteUtils {
     const vaultPrefix = useVaultPrefix
       ? `${CONSTANTS.DENDRON_DELIMETER}${VaultUtils.getName(vault)}/`
       : "";
-    const link = `[[${title}|${vaultPrefix}${fname}${suffix}]]`;
+    const titlePrefix = useTitle ? title + "|" : "";
+    const link = `[[${titlePrefix}${vaultPrefix}${fname}${suffix}]]`;
     return link;
   }
 
@@ -991,6 +1006,13 @@ export class SchemaUtils {
     return maybeRoot as SchemaProps;
   }
 
+  /**
+   * If no pattern field, get the id.
+   * If pattern field, check if namespace and translate into glob pattern
+   * @param schema
+   * @param opts
+   * @returns
+   */
   static getPattern = (
     schema: SchemaProps,
     opts?: { isNotNamespace?: boolean }
@@ -1003,6 +1025,12 @@ export class SchemaUtils {
     return part;
   };
 
+  /**
+   * Get full pattern starting from the root
+   * @param schema
+   * @param schemas
+   * @returns
+   */
   static getPatternRecursive = (
     schema: SchemaProps,
     schemas: SchemaPropsDict

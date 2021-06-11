@@ -3,7 +3,7 @@ import { NodeTestPresetsV2 } from "@dendronhq/common-test-utils";
 import {
   JSONExportPod,
   podClassEntryToPodItemV4,
-  PodUtils
+  PodUtils,
 } from "@dendronhq/pods-core";
 import { ensureDirSync } from "fs-extra";
 import path from "path";
@@ -38,7 +38,9 @@ suite("ConfigurePod", function () {
       };
       await cmd.run();
       const activePath = VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath;
-      expect(activePath?.endsWith("pods/dendron.json/config.export.yml")).toBeTruthy();
+      expect(
+        activePath?.endsWith("pods/dendron.json/config.export.yml")
+      ).toBeTruthy();
       done();
     });
 
@@ -73,7 +75,9 @@ suite("ConfigurePod", function () {
       writeYAML(configPath, { dest: exportDest });
       await cmd.run();
       const activePath = VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath;
-      expect(activePath?.endsWith("pods/dendron.json/config.export.yml")).toBeTruthy();
+      expect(
+        activePath?.endsWith("pods/dendron.json/config.export.yml")
+      ).toBeTruthy();
       done();
     });
 

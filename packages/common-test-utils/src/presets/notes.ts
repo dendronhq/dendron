@@ -54,11 +54,16 @@ const CreateNoteFactory = (opts: CreateNoteFactoryOpts) => {
     create: func,
     fname: opts.fname,
     selection: opts.selection || SIMPLE_SELECTION,
+    body: opts.body,
   };
 };
 
 export const NOTE_PRESETS_V4 = {
   NOTE_EMPTY: CreateNoteFactory({ fname: "empty", body: "" }),
+  /**
+   * fname: foo
+   * body: foo body
+   */
   NOTE_SIMPLE: CreateNoteFactory({ fname: "foo", body: "foo body" }),
   NOTE_SIMPLE_OTHER: CreateNoteFactory({ fname: "bar", body: "bar body" }),
   NOTE_SIMPLE_CHILD: CreateNoteFactory({

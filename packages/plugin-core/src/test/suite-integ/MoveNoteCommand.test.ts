@@ -9,13 +9,15 @@ import { vault2Path } from "@dendronhq/common-server";
 import {
   AssertUtils,
   EngineTestUtilsV4,
-  ENGINE_HOOKS,
-  ENGINE_RENAME_PRESETS,
   NoteTestUtilsV4,
   runJestHarnessV2,
   TestPresetEntryV4,
 } from "@dendronhq/common-test-utils";
 import { DendronEngineV2, HistoryService } from "@dendronhq/engine-server";
+import {
+  ENGINE_HOOKS,
+  ENGINE_RENAME_PRESETS,
+} from "@dendronhq/engine-test-utils";
 import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";

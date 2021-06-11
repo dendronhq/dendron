@@ -1,6 +1,7 @@
 import { NoteProps } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
-import { ENGINE_HOOKS, NOTE_PRESETS_V4 } from "@dendronhq/common-test-utils";
+import { NOTE_PRESETS_V4 } from "@dendronhq/common-test-utils";
+import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import { describe } from "mocha";
 import path from "path";
 import * as vscode from "vscode";

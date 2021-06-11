@@ -18,7 +18,7 @@ function plugin(this: Unified.Processor, opts: PluginOpts): Transformer {
   const proc = this;
   function transformer(tree: Node, _file: VFile) {
     visit(tree, (node, _idx, _parent) => {
-      if (node.type === "wikiLink") {
+      if (node.type === DendronASTTypes.WIKI_LINK) {
         let cnode = node as WikiLinkNoteV4;
         if (cnode.value === opts.from.fname) {
           cnode.value = opts.to.fname;

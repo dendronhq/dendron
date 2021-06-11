@@ -1,4 +1,10 @@
-import { NoteChangeEntry, NoteProps, VaultUtils } from "@dendronhq/common-all";
+import {
+  NoteChangeEntry,
+  NoteProps,
+  VaultUtils,
+  DLink,
+  NoteUtils,
+} from "@dendronhq/common-all";
 import {
   DendronASTDest,
   MDUtilsV4,
@@ -19,8 +25,20 @@ import {
 type CommandCLIOpts = {
   action: DoctorActions;
   query?: string;
+  /**
+   * pass in note candidates directly to
+   * limit what notes should be used in the command.
+   */
+  candidates?: NoteProps[];
   limit?: number;
   dryRun?: boolean;
+  /**
+   * When set to true, calls process.exit when command is done.
+   *
+   * This is done for CLI commands to keep the server from running
+   * forever. when run from the plugin, we re-use the existing server
+   * so we don't want it to exit.
+   */
   exit?: boolean;
 } & SetupEngineCLIOpts;
 
@@ -33,6 +51,7 @@ export enum DoctorActions {
   HI_TO_H2 = "h1ToH2",
   REMOVE_STUBS = "removeStubs",
   OLD_NOTE_REF_TO_NEW = "oldNoteRefToNew",
+  CREATE_MISSING_LINKED_NOTES = "createMissingLinkedNotes",
 }
 
 export { CommandOpts as DoctorCLICommandOpts };
@@ -65,19 +84,63 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     });
   }
 
+  getWildLinkDestinations(notes: NoteProps[], wsRoot: string) {
+    let wildWikiLinks: DLink[] = [];
+    _.forEach(notes, (note) => {
+      const links = note.links;
+      if (_.isEmpty(links)) {
+        return;
+      }
+      wildWikiLinks = wildWikiLinks.concat(
+        _.filter(links, (link) => {
+          if (link.type !== "wiki") {
+            return false;
+          }
+          const destVault = link.to!.vault ? link.to!.vault : note.vault;
+          const noteExists = NoteUtils.getNoteByFnameV5({
+            fname: link.to!.fname as string,
+            vault: destVault,
+            notes: notes,
+            wsRoot: wsRoot,
+          });
+          return !noteExists;
+        })
+      );
+      return true;
+    });
+    const uniqueCandidates: NoteProps[] = _.map(
+      _.uniqBy(wildWikiLinks, "to.fname"),
+      (link) => {
+        const destVault = link.to!.vault ? link.to!.vault : link.from.vault;
+        return NoteUtils.create({
+          fname: link.to!.fname!,
+          vault: destVault!,
+        });
+      }
+    );
+    return uniqueCandidates;
+  }
+
   async enrichArgs(args: CommandCLIOpts): Promise<CommandOpts> {
     const engineArgs = await setupEngine(args);
     return { ...args, ...engineArgs };
   }
 
   async execute(opts: CommandOpts) {
-    const { action, engine, query, limit, dryRun, exit } = _.defaults(opts, {
-      limit: 99999,
-      exit: true,
-    });
-    let notes = query
-      ? engine.queryNotesSync({ qs: query }).data
-      : _.values(engine.notes);
+    const { action, engine, query, candidates, limit, dryRun, exit } =
+      _.defaults(opts, {
+        limit: 99999,
+        exit: true,
+      });
+    let notes: NoteProps[];
+    if (_.isUndefined(candidates)) {
+      notes = query
+        ? engine.queryNotesSync({ qs: query }).data
+        : _.values(engine.notes);
+    } else {
+      console.log(`${candidates.length} candidate(s) were passed`);
+      notes = candidates;
+    }
     notes = notes.filter((n) => !n.stub);
     this.L.info({ msg: "prep doctor", numResults: notes.length });
     let numChanges = 0;
@@ -89,6 +152,11 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     let engineDelete = dryRun
       ? () => {}
       : throttle(_.bind(engine.deleteNote, engine), 300, {
+          leading: true,
+        });
+    let engineGetNoteByPath = dryRun
+      ? () => {}
+      : throttle(_.bind(engine.getNoteByPath, engine), 300, {
           leading: true,
         });
 
@@ -115,7 +183,6 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           note.body = newBody.toString();
           if (!_.isEmpty(changes)) {
             await engineWrite(note, { updateExisting: true });
-            console.log(`doctor changing ${note.fname}`);
             this.L.info({ msg: `changes ${note.fname}`, changes });
             numChanges += 1;
             return;
@@ -140,7 +207,6 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           note.body = newBody.toString();
           if (!_.isEmpty(changes)) {
             await engineWrite(note, { updateExisting: true });
-            console.log(`doctor changing ${note.fname}`);
             this.L.info({ msg: `changes ${note.fname}`, changes });
             numChanges += 1;
             return;
@@ -162,7 +228,7 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           if (!_.isEmpty(changes)) {
             await engineDelete(note);
             const vname = VaultUtils.getName(note.vault);
-            console.log(
+            this.L.info(
               `doctor ${DoctorActions.REMOVE_STUBS} ${note.fname} ${vname}`
             );
             numChanges += 1;
@@ -188,13 +254,35 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           note.body = newBody.toString();
           if (!_.isEmpty(changes)) {
             await engineWrite(note, { updateExisting: true });
-            console.log(`doctor changing ${note.fname}`);
             this.L.info({ msg: `changes ${note.fname}`, changes });
             numChanges += 1;
             return;
           } else {
             return;
           }
+        };
+        break;
+      }
+      case DoctorActions.CREATE_MISSING_LINKED_NOTES: {
+        // this action is disabled for workspace scope for now.
+        if (_.isUndefined(candidates)) {
+          console.log(
+            `doctor ${DoctorActions.CREATE_MISSING_LINKED_NOTES} requires explicitly passing one candidate note.`
+          );
+          return;
+        }
+        notes = this.getWildLinkDestinations(notes, engine.wsRoot);
+        doctorAction = async (note: NoteProps) => {
+          const vname = VaultUtils.getName(note.vault);
+          await engineGetNoteByPath({
+            npath: note.fname,
+            createIfNew: true,
+            vault: note.vault,
+          });
+          console.log(
+            `doctor ${DoctorActions.CREATE_MISSING_LINKED_NOTES} ${note.fname} ${vname}`
+          );
+          numChanges += 1;
         };
         break;
       }

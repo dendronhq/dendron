@@ -1,5 +1,4 @@
 import { NoteUtils, VaultUtils } from "@dendronhq/common-all";
-import fs from "fs-extra";
 import _ from "lodash";
 import vscode, { Location, Position, Uri } from "vscode";
 import { findAnchorPos, GotoNoteCommand } from "../commands/GotoNote";
@@ -45,10 +44,9 @@ export default class DefinitionProvider implements vscode.DefinitionProvider {
     } else if (out.length === 1) {
       const loc = out[0];
       if (refAtPos.anchor) {
-        const text = fs.readFileSync(loc.uri.fsPath, { encoding: "utf8" });
         const pos = findAnchorPos({
           anchor: refAtPos.anchor,
-          text,
+          note: notes[0],
         });
         return new Location(loc.uri, pos);
       }

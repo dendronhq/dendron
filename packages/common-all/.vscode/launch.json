@@ -13,15 +13,8 @@
         "LOG_DST": "stdout",
         "LOG_LEVEL": "info"
       },
-      "args": [
-        "--findRelatedTests",
-        "--runInBand",
-        "${relativeFile}",
-        "-u"
-      ],
-      "outFiles": [
-        "${workspaceFolder:common-all}/lib/**/*.js"
-      ]
+      "args": ["--findRelatedTests", "--runInBand", "${relativeFile}", "-u"],
+      "outFiles": ["${workspaceFolder:common-all}/lib/**/*.js"]
     }
   ]
 }

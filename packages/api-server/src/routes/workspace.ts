@@ -1,9 +1,10 @@
-import { DendronError, ERROR_STATUS } from "@dendronhq/common-all";
 import {
+  DendronError,
   WorkspaceInitRequest,
   WorkspaceListPayload,
   WorkspaceSyncRequest,
-} from "@dendronhq/common-server";
+  ERROR_STATUS,
+} from "@dendronhq/common-all";
 import { Request, Response, Router } from "express";
 import _ from "lodash";
 import { WorkspaceController } from "../modules/workspace";

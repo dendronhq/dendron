@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/common-test-utils",
-  "version": "0.42.0",
+  "version": "0.45.1",
   "description": "",
   "license": "GPLv3",
   "repository": {
@@ -21,7 +21,7 @@
   "types": "lib/index.d.ts",
   "scripts": {
     "clean": "rimraf lib && rimraf coverage",
-    "format": "prettier --ignore-path='../../.prettierignore' --write .",
+    "format": "echo nop",
     "lint": "echo stub",
     "prepublishOnly": "yarn build",
     "prebuild": "yarn clean && yarn format && yarn lint && echo Using TypeScript && tsc --version",
@@ -40,7 +40,6 @@
     "@types/node": "13.11.0",
     "jest": "^23.6.0",
     "jest-serializer-path": "^0.1.15",
-    "prettier": "2.0.5",
     "rimraf": "^2.6.2",
     "ts-jest": "^23.10.3",
     "ts-node": "^8.10.2"
@@ -55,9 +54,9 @@
     "preset": "ts-jest"
   },
   "dependencies": {
-    "@dendronhq/common-all": "^0.42.0",
-    "@dendronhq/common-server": "^0.42.0",
-    "@dendronhq/pods-core": "^0.42.0",
+    "@dendronhq/common-all": "^0.45.1",
+    "@dendronhq/common-server": "^0.45.1",
+    "@dendronhq/pods-core": "^0.45.1",
     "@types/sinon": "^9.0.9",
     "fs-extra": "^9.0.1",
     "lodash": "^4.17.20",

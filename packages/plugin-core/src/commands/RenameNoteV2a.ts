@@ -122,7 +122,7 @@ export class RenameNoteV2aCommand extends BaseCommand<
       }
       const engine = ws.getEngine();
       const oldFname = DNodeUtils.fname(oldUri.fsPath);
-      const vault = VaultUtils.getVaultByNotePathV4({
+      const vault = VaultUtils.getVaultByNotePath({
         fsPath: oldUri.fsPath,
         wsRoot: DendronWorkspace.wsRoot(),
         vaults: engine.vaults,

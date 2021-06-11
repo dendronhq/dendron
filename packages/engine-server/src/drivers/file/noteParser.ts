@@ -54,15 +54,15 @@ export class NoteParser extends ParserBase {
   }
 
   async parseFile(
-    fpath: string[],
+    allPaths: string[],
     vault: DVault
   ): Promise<{ notes: NoteProps[]; cacheUpdates: NotesCacheEntryMap }> {
     const ctx = "parseFile";
-    const fileMetaDict: FileMetaDict = getFileMeta(fpath);
+    const fileMetaDict: FileMetaDict = getFileMeta(allPaths);
     const maxLvl = _.max(_.keys(fileMetaDict).map((e) => _.toInteger(e))) || 2;
     const notesByFname: NotePropsDict = {};
     const notesById: NotePropsDict = {};
-    this.logger.info({ ctx, msg: "enter", fpath });
+    this.logger.info({ ctx, msg: "enter", vault });
     const cacheUpdates: { [key: string]: NotesCacheEntry } = {};
 
     // get root note
@@ -203,7 +203,11 @@ export class NoteParser extends ParserBase {
     // get note props
     try {
       // noteProps = file2Note(path.join(vpath, fileMeta.fpath), vault);
-      ({ note: noteProps, noteHash, matchHash } = file2NoteWithCache({
+      ({
+        note: noteProps,
+        noteHash,
+        matchHash,
+      } = file2NoteWithCache({
         fpath: path.join(vpath, fileMeta.fpath),
         vault,
         cache: this.cache,

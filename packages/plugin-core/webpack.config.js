@@ -4,8 +4,7 @@
 
 const path = require("path");
 const CopyPlugin = require("copy-webpack-plugin");
-const { IgnorePlugin } = require("webpack");
-
+const { IgnorePlugin, DefinePlugin } = require("webpack");
 /**@type {import('webpack').Configuration}*/
 const config = {
   target: "node", // vscode extensions run in a Node.js-context 📖 -> https://webpack.js.org/configuration/node/
@@ -28,18 +27,18 @@ const config = {
       "pino-pretty": "pino-pretty",
     },
     /(@dendronhq|packages)\/dendron-11ty$/,
-    /\.\/webpack-require-hack/
+    /\.\/webpack-require-hack/,
   ],
   resolve: {
     // support reading TypeScript and JavaScript files, 📖 -> https://github.com/TypeStrong/ts-loader
     extensions: [".ts", ".js"],
   },
   plugins: [
-    // new CopyPlugin({
-    //   patterns: [{ from: path.join("assets", "static"), to: "static" }],
-    // }),
+    new CopyPlugin({
+      patterns: [{ from: path.join("assets", "static"), to: "static" }],
+    }),
     new IgnorePlugin({
-      resourceRegExp: /fsevents/
+      resourceRegExp: /fsevents/,
     }),
     // @ts-ignore
     new CopyPlugin({
@@ -47,7 +46,9 @@ const config = {
     }),
     // @ts-ignore
     new CopyPlugin({
-      patterns: [{ from: "webpack-require-hack.js", to: "webpack-require-hack.js" }],
+      patterns: [
+        { from: "webpack-require-hack.js", to: "webpack-require-hack.js" },
+      ],
     }),
   ],
   module: {

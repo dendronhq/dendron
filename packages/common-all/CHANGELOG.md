@@ -3,6 +3,413 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.45.1](https://github.com/dendronhq/dendron/compare/v0.45.0...v0.45.1) (2021-06-09)
+
+
+### Bug Fixes
+
+* format issue ([232926d](https://github.com/dendronhq/dendron/commit/232926d88c633aaa052711e9380a9da4a1ecc5d7))
+
+
+
+
+
+# [0.45.0](https://github.com/dendronhq/dendron/compare/v0.44.1...v0.45.0) (2021-06-07)
+
+
+### Features Dendron
+
+* Create redesigned note and schema graphs ([#793](https://github.com/dendronhq/dendron/issues/793)) ([57494e4](https://github.com/dendronhq/dendron/commit/57494e4da8f996e20718515e8c14ef5fc04ece66))
+
+
+
+
+
+## [0.44.2-alpha.1](https://github.com/dendronhq/dendron/compare/v0.44.1...v0.44.2-alpha.1) (2021-06-06)
+
+
+### Features Dendron
+
+* Create redesigned note and schema graphs ([#793](https://github.com/dendronhq/dendron/issues/793)) ([57494e4](https://github.com/dendronhq/dendron/commit/57494e4da8f996e20718515e8c14ef5fc04ece66))
+
+
+
+
+
+## [0.44.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.44.1...v0.44.2-alpha.0) (2021-06-06)
+
+
+### Features Dendron
+
+* Create redesigned note and schema graphs ([#793](https://github.com/dendronhq/dendron/issues/793)) ([57494e4](https://github.com/dendronhq/dendron/commit/57494e4da8f996e20718515e8c14ef5fc04ece66))
+
+
+
+
+
+## [0.44.1](https://github.com/dendronhq/dendron/compare/v0.44.1-alpha.5...v0.44.1) (2021-06-04)
+
+**Note:** Version bump only for package @dendronhq/common-all
+
+
+
+
+
+## [0.44.1-alpha.7](https://github.com/dendronhq/dendron/compare/v0.44.1-alpha.5...v0.44.1-alpha.7) (2021-06-04)
+
+**Note:** Version bump only for package @dendronhq/common-all
+
+
+
+
+
+## [0.44.1-alpha.6](https://github.com/dendronhq/dendron/compare/v0.44.1-alpha.5...v0.44.1-alpha.6) (2021-06-04)
+
+**Note:** Version bump only for package @dendronhq/common-all
+
+
+
+
+
+## [0.44.1-alpha.5](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.44.1-alpha.5) (2021-06-04)
+
+
+### Bug Fixes
+
+* bad import ([9f04493](https://github.com/dendronhq/dendron/commit/9f04493388e921ac1eab687f9f79c438836cba1e))
+* don't enable alwaysShow behavior for lookup commands ([83cbda3](https://github.com/dendronhq/dendron/commit/83cbda3a17650e3a01d7c67924913e13a503f232))
+* import markdown pod has bad body ([7649309](https://github.com/dendronhq/dendron/commit/7649309f6e953826e9a3f8e7c0c9ce53d6e869a4))
+* move file note method into common-server ([29b4ad7](https://github.com/dendronhq/dendron/commit/29b4ad73b0e9501ea76ce3e9ae5b0487e196e7cd))
+* remove fs from common ([dadbb96](https://github.com/dendronhq/dendron/commit/dadbb965c802a1a104be1d3779c866d1b25a15df))
+* support lookups with workspace vaults ([404fb89](https://github.com/dendronhq/dendron/commit/404fb8922d3f20fa1c4f87ce742a29c1af03b8a6))
+
+
+### Features Dendron
+
+* Add block anchor HTML generation ([#766](https://github.com/dendronhq/dendron/issues/766)) ([bb0ff8e](https://github.com/dendronhq/dendron/commit/bb0ff8ee53a50768f1908bbabd625c1c2434df39))
+* Basic block reference link functionality ([#742](https://github.com/dendronhq/dendron/issues/742)) ([416e382](https://github.com/dendronhq/dendron/commit/416e3825254b57625f7dc2b6063f1e8bc731bf3b))
+* insert note link cmd ([cc8a02b](https://github.com/dendronhq/dendron/commit/cc8a02b4e50d98d406ad9ea684f4e11e93e4ad36))
+* support initializing remote workspace vault ([6f401d7](https://github.com/dendronhq/dendron/commit/6f401d75f21122c84efd03f4307531fde719e37d))
+
+
+
+
+
+## [0.44.1-alpha.4](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.44.1-alpha.4) (2021-06-04)
+
+
+### Bug Fixes
+
+* bad import ([9f04493](https://github.com/dendronhq/dendron/commit/9f04493388e921ac1eab687f9f79c438836cba1e))
+* don't enable alwaysShow behavior for lookup commands ([83cbda3](https://github.com/dendronhq/dendron/commit/83cbda3a17650e3a01d7c67924913e13a503f232))
+* import markdown pod has bad body ([7649309](https://github.com/dendronhq/dendron/commit/7649309f6e953826e9a3f8e7c0c9ce53d6e869a4))
+* move file note method into common-server ([29b4ad7](https://github.com/dendronhq/dendron/commit/29b4ad73b0e9501ea76ce3e9ae5b0487e196e7cd))
+* remove fs from common ([dadbb96](https://github.com/dendronhq/dendron/commit/dadbb965c802a1a104be1d3779c866d1b25a15df))
+* support lookups with workspace vaults ([404fb89](https://github.com/dendronhq/dendron/commit/404fb8922d3f20fa1c4f87ce742a29c1af03b8a6))
+
+
+### Features Dendron
+
+* Add block anchor HTML generation ([#766](https://github.com/dendronhq/dendron/issues/766)) ([bb0ff8e](https://github.com/dendronhq/dendron/commit/bb0ff8ee53a50768f1908bbabd625c1c2434df39))
+* Basic block reference link functionality ([#742](https://github.com/dendronhq/dendron/issues/742)) ([416e382](https://github.com/dendronhq/dendron/commit/416e3825254b57625f7dc2b6063f1e8bc731bf3b))
+* insert note link cmd ([cc8a02b](https://github.com/dendronhq/dendron/commit/cc8a02b4e50d98d406ad9ea684f4e11e93e4ad36))
+* support initializing remote workspace vault ([6f401d7](https://github.com/dendronhq/dendron/commit/6f401d75f21122c84efd03f4307531fde719e37d))
+
+
+
+
+
+## [0.44.1-alpha.3](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.44.1-alpha.3) (2021-06-03)
+
+
+### Bug Fixes
+
+* bad import ([9f04493](https://github.com/dendronhq/dendron/commit/9f04493388e921ac1eab687f9f79c438836cba1e))
+* don't enable alwaysShow behavior for lookup commands ([83cbda3](https://github.com/dendronhq/dendron/commit/83cbda3a17650e3a01d7c67924913e13a503f232))
+* import markdown pod has bad body ([7649309](https://github.com/dendronhq/dendron/commit/7649309f6e953826e9a3f8e7c0c9ce53d6e869a4))
+* move file note method into common-server ([29b4ad7](https://github.com/dendronhq/dendron/commit/29b4ad73b0e9501ea76ce3e9ae5b0487e196e7cd))
+* remove fs from common ([dadbb96](https://github.com/dendronhq/dendron/commit/dadbb965c802a1a104be1d3779c866d1b25a15df))
+* support lookups with workspace vaults ([7653a84](https://github.com/dendronhq/dendron/commit/7653a84177b0c5a4c80fa6f48ed784ad9e3ae3d8))
+
+
+### Features Dendron
+
+* Add block anchor HTML generation ([#766](https://github.com/dendronhq/dendron/issues/766)) ([bb0ff8e](https://github.com/dendronhq/dendron/commit/bb0ff8ee53a50768f1908bbabd625c1c2434df39))
+* Basic block reference link functionality ([#742](https://github.com/dendronhq/dendron/issues/742)) ([416e382](https://github.com/dendronhq/dendron/commit/416e3825254b57625f7dc2b6063f1e8bc731bf3b))
+* insert note link cmd ([cc8a02b](https://github.com/dendronhq/dendron/commit/cc8a02b4e50d98d406ad9ea684f4e11e93e4ad36))
+* support initializing remote workspace vault ([cd59456](https://github.com/dendronhq/dendron/commit/cd594566a4e992dd6a1252c72c2df7a8ebd0eb3d))
+
+
+
+
+
+## [0.44.1-alpha.2](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.44.1-alpha.2) (2021-06-03)
+
+
+### Bug Fixes
+
+* bad import ([9f04493](https://github.com/dendronhq/dendron/commit/9f04493388e921ac1eab687f9f79c438836cba1e))
+* don't enable alwaysShow behavior for lookup commands ([83cbda3](https://github.com/dendronhq/dendron/commit/83cbda3a17650e3a01d7c67924913e13a503f232))
+* import markdown pod has bad body ([7649309](https://github.com/dendronhq/dendron/commit/7649309f6e953826e9a3f8e7c0c9ce53d6e869a4))
+* move file note method into common-server ([29b4ad7](https://github.com/dendronhq/dendron/commit/29b4ad73b0e9501ea76ce3e9ae5b0487e196e7cd))
+* remove fs from common ([dadbb96](https://github.com/dendronhq/dendron/commit/dadbb965c802a1a104be1d3779c866d1b25a15df))
+* support lookups with workspace vaults ([7653a84](https://github.com/dendronhq/dendron/commit/7653a84177b0c5a4c80fa6f48ed784ad9e3ae3d8))
+
+
+### Features Dendron
+
+* Add block anchor HTML generation ([#766](https://github.com/dendronhq/dendron/issues/766)) ([bb0ff8e](https://github.com/dendronhq/dendron/commit/bb0ff8ee53a50768f1908bbabd625c1c2434df39))
+* Basic block reference link functionality ([#742](https://github.com/dendronhq/dendron/issues/742)) ([416e382](https://github.com/dendronhq/dendron/commit/416e3825254b57625f7dc2b6063f1e8bc731bf3b))
+* insert note link cmd ([cc8a02b](https://github.com/dendronhq/dendron/commit/cc8a02b4e50d98d406ad9ea684f4e11e93e4ad36))
+* support initializing remote workspace vault ([cd59456](https://github.com/dendronhq/dendron/commit/cd594566a4e992dd6a1252c72c2df7a8ebd0eb3d))
+
+
+
+
+
+## [0.44.1-alpha.1](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.44.1-alpha.1) (2021-06-02)
+
+
+### Bug Fixes
+
+* bad import ([9f04493](https://github.com/dendronhq/dendron/commit/9f04493388e921ac1eab687f9f79c438836cba1e))
+* don't enable alwaysShow behavior for lookup commands ([83cbda3](https://github.com/dendronhq/dendron/commit/83cbda3a17650e3a01d7c67924913e13a503f232))
+* import markdown pod has bad body ([7649309](https://github.com/dendronhq/dendron/commit/7649309f6e953826e9a3f8e7c0c9ce53d6e869a4))
+* move file note method into common-server ([29b4ad7](https://github.com/dendronhq/dendron/commit/29b4ad73b0e9501ea76ce3e9ae5b0487e196e7cd))
+* remove fs from common ([dadbb96](https://github.com/dendronhq/dendron/commit/dadbb965c802a1a104be1d3779c866d1b25a15df))
+* support lookups with workspace vaults ([7653a84](https://github.com/dendronhq/dendron/commit/7653a84177b0c5a4c80fa6f48ed784ad9e3ae3d8))
+
+
+### Features Dendron
+
+* Add block anchor HTML generation ([#766](https://github.com/dendronhq/dendron/issues/766)) ([bb0ff8e](https://github.com/dendronhq/dendron/commit/bb0ff8ee53a50768f1908bbabd625c1c2434df39))
+* Basic block reference link functionality ([#742](https://github.com/dendronhq/dendron/issues/742)) ([416e382](https://github.com/dendronhq/dendron/commit/416e3825254b57625f7dc2b6063f1e8bc731bf3b))
+* insert note link cmd ([cc8a02b](https://github.com/dendronhq/dendron/commit/cc8a02b4e50d98d406ad9ea684f4e11e93e4ad36))
+
+
+
+
+
+## [0.44.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.44.1-alpha.0) (2021-06-02)
+
+
+### Bug Fixes
+
+* bad import ([9f04493](https://github.com/dendronhq/dendron/commit/9f04493388e921ac1eab687f9f79c438836cba1e))
+* don't enable alwaysShow behavior for lookup commands ([83cbda3](https://github.com/dendronhq/dendron/commit/83cbda3a17650e3a01d7c67924913e13a503f232))
+* import markdown pod has bad body ([7649309](https://github.com/dendronhq/dendron/commit/7649309f6e953826e9a3f8e7c0c9ce53d6e869a4))
+* move file note method into common-server ([29b4ad7](https://github.com/dendronhq/dendron/commit/29b4ad73b0e9501ea76ce3e9ae5b0487e196e7cd))
+* remove fs from common ([dadbb96](https://github.com/dendronhq/dendron/commit/dadbb965c802a1a104be1d3779c866d1b25a15df))
+* support lookups with workspace vaults ([7653a84](https://github.com/dendronhq/dendron/commit/7653a84177b0c5a4c80fa6f48ed784ad9e3ae3d8))
+
+
+### Features Dendron
+
+* Add block anchor HTML generation ([#766](https://github.com/dendronhq/dendron/issues/766)) ([bb0ff8e](https://github.com/dendronhq/dendron/commit/bb0ff8ee53a50768f1908bbabd625c1c2434df39))
+* Basic block reference link functionality ([#742](https://github.com/dendronhq/dendron/issues/742)) ([416e382](https://github.com/dendronhq/dendron/commit/416e3825254b57625f7dc2b6063f1e8bc731bf3b))
+* insert note link cmd ([cc8a02b](https://github.com/dendronhq/dendron/commit/cc8a02b4e50d98d406ad9ea684f4e11e93e4ad36))
+
+
+
+
+
+# [0.44.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.44.0) (2021-05-31)
+
+### Bug Fixes
+
+- bad import ([9f04493](https://github.com/dendronhq/dendron/commit/9f04493388e921ac1eab687f9f79c438836cba1e))
+- don't enable alwaysShow behavior for lookup commands ([83cbda3](https://github.com/dendronhq/dendron/commit/83cbda3a17650e3a01d7c67924913e13a503f232))
+- import markdown pod has bad body ([7649309](https://github.com/dendronhq/dendron/commit/7649309f6e953826e9a3f8e7c0c9ce53d6e869a4))
+
+### Features Dendron
+
+- Add block anchor HTML generation ([#766](https://github.com/dendronhq/dendron/issues/766)) ([bb0ff8e](https://github.com/dendronhq/dendron/commit/bb0ff8ee53a50768f1908bbabd625c1c2434df39))
+- Basic block reference link functionality ([#742](https://github.com/dendronhq/dendron/issues/742)) ([416e382](https://github.com/dendronhq/dendron/commit/416e3825254b57625f7dc2b6063f1e8bc731bf3b))
+- insert note link cmd ([cc8a02b](https://github.com/dendronhq/dendron/commit/cc8a02b4e50d98d406ad9ea684f4e11e93e4ad36))
+
+## [0.43.5-alpha.2](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.43.5-alpha.2) (2021-05-29)
+
+### Bug Fixes
+
+- bad import ([9f04493](https://github.com/dendronhq/dendron/commit/9f04493388e921ac1eab687f9f79c438836cba1e))
+- import markdown pod has bad body ([7649309](https://github.com/dendronhq/dendron/commit/7649309f6e953826e9a3f8e7c0c9ce53d6e869a4))
+
+### Features Dendron
+
+- Add block anchor HTML generation ([#766](https://github.com/dendronhq/dendron/issues/766)) ([bb0ff8e](https://github.com/dendronhq/dendron/commit/bb0ff8ee53a50768f1908bbabd625c1c2434df39))
+- Basic block reference link functionality ([#742](https://github.com/dendronhq/dendron/issues/742)) ([416e382](https://github.com/dendronhq/dendron/commit/416e3825254b57625f7dc2b6063f1e8bc731bf3b))
+
+## [0.43.5-alpha.1](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.43.5-alpha.1) (2021-05-29)
+
+### Bug Fixes
+
+- bad import ([9f04493](https://github.com/dendronhq/dendron/commit/9f04493388e921ac1eab687f9f79c438836cba1e))
+- import markdown pod has bad body ([7649309](https://github.com/dendronhq/dendron/commit/7649309f6e953826e9a3f8e7c0c9ce53d6e869a4))
+
+### Features Dendron
+
+- Add block anchor HTML generation ([#766](https://github.com/dendronhq/dendron/issues/766)) ([bb0ff8e](https://github.com/dendronhq/dendron/commit/bb0ff8ee53a50768f1908bbabd625c1c2434df39))
+- Basic block reference link functionality ([#742](https://github.com/dendronhq/dendron/issues/742)) ([416e382](https://github.com/dendronhq/dendron/commit/416e3825254b57625f7dc2b6063f1e8bc731bf3b))
+
+## [0.43.5-alpha.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.43.5-alpha.0) (2021-05-28)
+
+### Bug Fixes
+
+- bad import ([9f04493](https://github.com/dendronhq/dendron/commit/9f04493388e921ac1eab687f9f79c438836cba1e))
+- import markdown pod has bad body ([7649309](https://github.com/dendronhq/dendron/commit/7649309f6e953826e9a3f8e7c0c9ce53d6e869a4))
+
+### Features Dendron
+
+- Add block anchor HTML generation ([#766](https://github.com/dendronhq/dendron/issues/766)) ([bb0ff8e](https://github.com/dendronhq/dendron/commit/bb0ff8ee53a50768f1908bbabd625c1c2434df39))
+- Basic block reference link functionality ([#742](https://github.com/dendronhq/dendron/issues/742)) ([416e382](https://github.com/dendronhq/dendron/commit/416e3825254b57625f7dc2b6063f1e8bc731bf3b))
+
+## [0.43.4-alpha.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.43.4-alpha.0) (2021-05-28)
+
+### Bug Fixes
+
+- bad import ([9f04493](https://github.com/dendronhq/dendron/commit/9f04493388e921ac1eab687f9f79c438836cba1e))
+- import markdown pod has bad body ([7649309](https://github.com/dendronhq/dendron/commit/7649309f6e953826e9a3f8e7c0c9ce53d6e869a4))
+
+### Features Dendron
+
+- Add block anchor HTML generation ([#766](https://github.com/dendronhq/dendron/issues/766)) ([bb0ff8e](https://github.com/dendronhq/dendron/commit/bb0ff8ee53a50768f1908bbabd625c1c2434df39))
+- Basic block reference link functionality ([#742](https://github.com/dendronhq/dendron/issues/742)) ([416e382](https://github.com/dendronhq/dendron/commit/416e3825254b57625f7dc2b6063f1e8bc731bf3b))
+
+## [0.43.3-alpha.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.43.3-alpha.0) (2021-05-28)
+
+### Bug Fixes
+
+- bad import ([9f04493](https://github.com/dendronhq/dendron/commit/9f04493388e921ac1eab687f9f79c438836cba1e))
+- import markdown pod has bad body ([7649309](https://github.com/dendronhq/dendron/commit/7649309f6e953826e9a3f8e7c0c9ce53d6e869a4))
+
+### Features Dendron
+
+- Add block anchor HTML generation ([#766](https://github.com/dendronhq/dendron/issues/766)) ([bb0ff8e](https://github.com/dendronhq/dendron/commit/bb0ff8ee53a50768f1908bbabd625c1c2434df39))
+- Basic block reference link functionality ([#742](https://github.com/dendronhq/dendron/issues/742)) ([416e382](https://github.com/dendronhq/dendron/commit/416e3825254b57625f7dc2b6063f1e8bc731bf3b))
+
+## [0.43.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.43.2-alpha.0) (2021-05-27)
+
+### Bug Fixes
+
+- bad import ([9f04493](https://github.com/dendronhq/dendron/commit/9f04493388e921ac1eab687f9f79c438836cba1e))
+- import markdown pod has bad body ([3038dd3](https://github.com/dendronhq/dendron/commit/3038dd340ed0f7ac56e34e8b8716962284f586e0))
+
+### Features Dendron
+
+- Basic block reference link functionality ([#742](https://github.com/dendronhq/dendron/issues/742)) ([416e382](https://github.com/dendronhq/dendron/commit/416e3825254b57625f7dc2b6063f1e8bc731bf3b))
+
+## [0.43.1](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.43.1) (2021-05-26)
+
+### Bug Fixes
+
+- bad import ([9f04493](https://github.com/dendronhq/dendron/commit/9f04493388e921ac1eab687f9f79c438836cba1e))
+- import markdown pod has bad body ([3038dd3](https://github.com/dendronhq/dendron/commit/3038dd340ed0f7ac56e34e8b8716962284f586e0))
+
+### Features Dendron
+
+- Basic block reference link functionality ([#742](https://github.com/dendronhq/dendron/issues/742)) ([416e382](https://github.com/dendronhq/dendron/commit/416e3825254b57625f7dc2b6063f1e8bc731bf3b))
+
+## [0.43.3-alpha.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.43.3-alpha.0) (2021-05-26)
+
+### Bug Fixes
+
+- bad import ([9f04493](https://github.com/dendronhq/dendron/commit/9f04493388e921ac1eab687f9f79c438836cba1e))
+- import markdown pod has bad body ([3038dd3](https://github.com/dendronhq/dendron/commit/3038dd340ed0f7ac56e34e8b8716962284f586e0))
+
+### Features Dendron
+
+- Basic block reference link functionality ([#742](https://github.com/dendronhq/dendron/issues/742)) ([416e382](https://github.com/dendronhq/dendron/commit/416e3825254b57625f7dc2b6063f1e8bc731bf3b))
+
+## [0.43.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.43.2-alpha.0) (2021-05-25)
+
+### Bug Fixes
+
+- bad import ([9f04493](https://github.com/dendronhq/dendron/commit/9f04493388e921ac1eab687f9f79c438836cba1e))
+
+### Features Dendron
+
+- Basic block reference link functionality ([#742](https://github.com/dendronhq/dendron/issues/742)) ([416e382](https://github.com/dendronhq/dendron/commit/416e3825254b57625f7dc2b6063f1e8bc731bf3b))
+
+## [0.43.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.43.1-alpha.0) (2021-05-24)
+
+### Bug Fixes
+
+- bad import ([9f04493](https://github.com/dendronhq/dendron/commit/9f04493388e921ac1eab687f9f79c438836cba1e))
+
+### Features Dendron
+
+- Basic block reference link functionality ([#742](https://github.com/dendronhq/dendron/issues/742)) ([416e382](https://github.com/dendronhq/dendron/commit/416e3825254b57625f7dc2b6063f1e8bc731bf3b))
+
+# [0.43.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.43.0) (2021-05-24)
+
+### Bug Fixes
+
+- bad import ([9f04493](https://github.com/dendronhq/dendron/commit/9f04493388e921ac1eab687f9f79c438836cba1e))
+
+### Features Dendron
+
+- Basic block reference link functionality ([#742](https://github.com/dendronhq/dendron/issues/742)) ([416e382](https://github.com/dendronhq/dendron/commit/416e3825254b57625f7dc2b6063f1e8bc731bf3b))
+
+## [0.42.6-alpha.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.42.6-alpha.0) (2021-05-24)
+
+### Bug Fixes
+
+- bad import ([9f04493](https://github.com/dendronhq/dendron/commit/9f04493388e921ac1eab687f9f79c438836cba1e))
+
+### Features Dendron
+
+- Basic block reference link functionality ([#742](https://github.com/dendronhq/dendron/issues/742)) ([416e382](https://github.com/dendronhq/dendron/commit/416e3825254b57625f7dc2b6063f1e8bc731bf3b))
+
+## [0.42.5-alpha.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.42.5-alpha.0) (2021-05-24)
+
+### Bug Fixes
+
+- bad import ([9f04493](https://github.com/dendronhq/dendron/commit/9f04493388e921ac1eab687f9f79c438836cba1e))
+
+### Features Dendron
+
+- Basic block reference link functionality ([#742](https://github.com/dendronhq/dendron/issues/742)) ([416e382](https://github.com/dendronhq/dendron/commit/416e3825254b57625f7dc2b6063f1e8bc731bf3b))
+
+## [0.42.4-alpha.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.42.4-alpha.0) (2021-05-24)
+
+### Bug Fixes
+
+- bad import ([9f04493](https://github.com/dendronhq/dendron/commit/9f04493388e921ac1eab687f9f79c438836cba1e))
+
+### Features Dendron
+
+- Basic block reference link functionality ([#742](https://github.com/dendronhq/dendron/issues/742)) ([416e382](https://github.com/dendronhq/dendron/commit/416e3825254b57625f7dc2b6063f1e8bc731bf3b))
+
+## [0.42.3-alpha.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.42.3-alpha.0) (2021-05-24)
+
+### Bug Fixes
+
+- bad import ([9f04493](https://github.com/dendronhq/dendron/commit/9f04493388e921ac1eab687f9f79c438836cba1e))
+
+### Features Dendron
+
+- Basic block reference link functionality ([#742](https://github.com/dendronhq/dendron/issues/742)) ([416e382](https://github.com/dendronhq/dendron/commit/416e3825254b57625f7dc2b6063f1e8bc731bf3b))
+
+## [0.42.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.42.2-alpha.0) (2021-05-22)
+
+### Bug Fixes
+
+- bad import ([9f04493](https://github.com/dendronhq/dendron/commit/9f04493388e921ac1eab687f9f79c438836cba1e))
+
+### Features Dendron
+
+- Basic block reference link functionality ([#742](https://github.com/dendronhq/dendron/issues/742)) ([416e382](https://github.com/dendronhq/dendron/commit/416e3825254b57625f7dc2b6063f1e8bc731bf3b))
+
+## [0.42.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.42.1-alpha.0) (2021-05-20)
+
+### Bug Fixes
+
+- bad import ([9f04493](https://github.com/dendronhq/dendron/commit/9f04493388e921ac1eab687f9f79c438836cba1e))
+
+### Features Dendron
+
+- Basic block reference link functionality ([#742](https://github.com/dendronhq/dendron/issues/742)) ([416e382](https://github.com/dendronhq/dendron/commit/416e3825254b57625f7dc2b6063f1e8bc731bf3b))
+
 # [0.42.0](https://github.com/dendronhq/dendron/compare/v0.41.0...v0.42.0) (2021-05-17)
 
 **Note:** Version bump only for package @dendronhq/common-all

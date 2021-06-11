@@ -1,5 +1,4 @@
-import { Box, Link, Icon, Image, Flex, ChakraProvider } from "@chakra-ui/react";
-import { GoLinkExternal } from "react-icons/go";
+import { Box, ChakraProvider, Flex, Image } from "@chakra-ui/react";
 import Head from "next/head";
 import React, { PropsWithChildren } from "react";
 import { theme } from "../styles/theme";
@@ -41,8 +40,7 @@ export default function Layout({ children }: Props) {
             boxSize={12}
           />
 
-
-            {/*
+          {/*
           <Box marginLeft="auto">
             <Link
               target="_blank"

@@ -3,7 +3,8 @@ import fs from "fs-extra";
 import { HookUtils } from "@dendronhq/engine-server";
 
 export class TestHookUtils {
-  static genBadJsHookPayload = () => `module.exports = async function({note, execa}) {
+  static genBadJsHookPayload =
+    () => `module.exports = async function({note, execa}) {
     note.body = note.body + " hello";
     return note;
 };

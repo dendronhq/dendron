@@ -42,6 +42,7 @@ export class DConfig {
       useNoteTitleForLink: true,
       noAutoCreateOnDefinition: true,
       noLegacyNoteRef: true,
+      lookupConfirmVaultOnCreate: false,
       site: {
         copyAssets: true,
         siteHierarchies: ["root"],
@@ -66,6 +67,21 @@ export class DConfig {
       config = readYAML(configPath) as DendronConfig;
     }
     return config;
+  }
+
+  /**
+   * Get config value with consideration for defaults
+   * @param config
+   */
+  static getProp<K extends keyof DendronConfig>(
+    config: DendronConfig,
+    key: K
+  ): DendronConfig[K] {
+    const cConfig = _.defaults(
+      config,
+      this.genDefaultConfig()
+    ) as Required<DendronConfig>;
+    return cConfig[key];
   }
 
   static getSiteIndex(sconfig: DendronSiteConfig) {

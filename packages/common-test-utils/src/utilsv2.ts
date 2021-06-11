@@ -3,6 +3,8 @@ import {
   DendronConfig,
   DendronSiteConfig,
   DEngineClient,
+  DVault,
+  DWorkspace,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
 import { readYAML, writeYAML } from "@dendronhq/common-server";
@@ -61,6 +63,8 @@ export class TestPresetEntryV4 {
   public extraOpts: any;
   public setupTest?: SetupTestFunctionV4;
   public genTestResults?: GenTestResults;
+  public vaults: DVault[];
+  public workspaces: DWorkspace[];
 
   constructor(
     func: RunEngineTestFunctionV4,
@@ -70,6 +74,8 @@ export class TestPresetEntryV4 {
       extraOpts?: any;
       setupTest?: SetupTestFunctionV4;
       genTestResults?: GenTestResults;
+      vaults?: DVault[];
+      workspaces?: DWorkspace[];
     }
   ) {
     let { preSetupHook, postSetupHook, extraOpts, setupTest, genTestResults } =
@@ -83,7 +89,15 @@ export class TestPresetEntryV4 {
       genTestResults ? genTestResults : async () => [],
       this
     );
-    //_.bindAll(this, ['genTestResults'])
+    this.workspaces = opts?.workspaces || [];
+    this.vaults = opts?.vaults || [
+      { fsPath: "vault1" },
+      { fsPath: "vault2" },
+      {
+        name: "vaultThree",
+        fsPath: "vault3",
+      },
+    ];
   }
 }
 

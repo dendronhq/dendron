@@ -3,6 +3,186 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.45.1](https://github.com/dendronhq/dendron/compare/v0.45.0...v0.45.1) (2021-06-09)
+
+
+### Bug Fixes
+
+* 11ty failure on windows ([71ca310](https://github.com/dendronhq/dendron/commit/71ca3106b7f23219ecb46817647032341f1193bc))
+* assets respect vault visibility ([c16e900](https://github.com/dendronhq/dendron/commit/c16e9008553024d1526b2b004cd1b5efc69cdbc6))
+
+
+
+
+
+# [0.45.0](https://github.com/dendronhq/dendron/compare/v0.44.1...v0.45.0) (2021-06-07)
+
+**Note:** Version bump only for package @dendronhq/dendron-11ty
+
+
+
+
+
+## [0.44.2-alpha.1](https://github.com/dendronhq/dendron/compare/v0.44.1...v0.44.2-alpha.1) (2021-06-06)
+
+**Note:** Version bump only for package @dendronhq/dendron-11ty
+
+
+
+
+
+## [0.44.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.44.1...v0.44.2-alpha.0) (2021-06-06)
+
+**Note:** Version bump only for package @dendronhq/dendron-11ty
+
+
+
+
+
+## [0.44.1](https://github.com/dendronhq/dendron/compare/v0.44.1-alpha.5...v0.44.1) (2021-06-04)
+
+**Note:** Version bump only for package @dendronhq/dendron-11ty
+
+
+
+
+
+## [0.44.1-alpha.7](https://github.com/dendronhq/dendron/compare/v0.44.1-alpha.5...v0.44.1-alpha.7) (2021-06-04)
+
+**Note:** Version bump only for package @dendronhq/dendron-11ty
+
+
+
+
+
+## [0.44.1-alpha.6](https://github.com/dendronhq/dendron/compare/v0.44.1-alpha.5...v0.44.1-alpha.6) (2021-06-04)
+
+**Note:** Version bump only for package @dendronhq/dendron-11ty
+
+
+
+
+
+## [0.44.1-alpha.5](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.44.1-alpha.5) (2021-06-04)
+
+**Note:** Version bump only for package @dendronhq/dendron-11ty
+
+
+
+
+
+## [0.44.1-alpha.4](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.44.1-alpha.4) (2021-06-04)
+
+**Note:** Version bump only for package @dendronhq/dendron-11ty
+
+
+
+
+
+## [0.44.1-alpha.3](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.44.1-alpha.3) (2021-06-03)
+
+**Note:** Version bump only for package @dendronhq/dendron-11ty
+
+
+
+
+
+## [0.44.1-alpha.2](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.44.1-alpha.2) (2021-06-03)
+
+**Note:** Version bump only for package @dendronhq/dendron-11ty
+
+
+
+
+
+## [0.44.1-alpha.1](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.44.1-alpha.1) (2021-06-02)
+
+**Note:** Version bump only for package @dendronhq/dendron-11ty
+
+
+
+
+
+## [0.44.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.44.1-alpha.0) (2021-06-02)
+
+**Note:** Version bump only for package @dendronhq/dendron-11ty
+
+
+
+
+
+# [0.44.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.44.0) (2021-05-31)
+
+**Note:** Version bump only for package @dendronhq/dendron-11ty
+
+## [0.43.5-alpha.2](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.43.5-alpha.2) (2021-05-29)
+
+**Note:** Version bump only for package @dendronhq/dendron-11ty
+
+## [0.43.5-alpha.1](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.43.5-alpha.1) (2021-05-29)
+
+**Note:** Version bump only for package @dendronhq/dendron-11ty
+
+## [0.43.5-alpha.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.43.5-alpha.0) (2021-05-28)
+
+**Note:** Version bump only for package @dendronhq/dendron-11ty
+
+## [0.43.4-alpha.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.43.4-alpha.0) (2021-05-28)
+
+**Note:** Version bump only for package @dendronhq/dendron-11ty
+
+## [0.43.3-alpha.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.43.3-alpha.0) (2021-05-28)
+
+**Note:** Version bump only for package @dendronhq/dendron-11ty
+
+## [0.43.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.43.2-alpha.0) (2021-05-27)
+
+**Note:** Version bump only for package @dendronhq/dendron-11ty
+
+## [0.43.1](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.43.1) (2021-05-26)
+
+**Note:** Version bump only for package @dendronhq/dendron-11ty
+
+## [0.43.3-alpha.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.43.3-alpha.0) (2021-05-26)
+
+**Note:** Version bump only for package @dendronhq/dendron-11ty
+
+## [0.43.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.43.2-alpha.0) (2021-05-25)
+
+**Note:** Version bump only for package @dendronhq/dendron-11ty
+
+## [0.43.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.43.1-alpha.0) (2021-05-24)
+
+**Note:** Version bump only for package @dendronhq/dendron-11ty
+
+# [0.43.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.43.0) (2021-05-24)
+
+**Note:** Version bump only for package @dendronhq/dendron-11ty
+
+## [0.42.6-alpha.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.42.6-alpha.0) (2021-05-24)
+
+**Note:** Version bump only for package @dendronhq/dendron-11ty
+
+## [0.42.5-alpha.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.42.5-alpha.0) (2021-05-24)
+
+**Note:** Version bump only for package @dendronhq/dendron-11ty
+
+## [0.42.4-alpha.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.42.4-alpha.0) (2021-05-24)
+
+**Note:** Version bump only for package @dendronhq/dendron-11ty
+
+## [0.42.3-alpha.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.42.3-alpha.0) (2021-05-24)
+
+**Note:** Version bump only for package @dendronhq/dendron-11ty
+
+## [0.42.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.42.2-alpha.0) (2021-05-22)
+
+**Note:** Version bump only for package @dendronhq/dendron-11ty
+
+## [0.42.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.42.1-alpha.0) (2021-05-20)
+
+**Note:** Version bump only for package @dendronhq/dendron-11ty
+
 # [0.42.0](https://github.com/dendronhq/dendron/compare/v0.41.0...v0.42.0) (2021-05-17)
 
 **Note:** Version bump only for package @dendronhq/dendron-11ty

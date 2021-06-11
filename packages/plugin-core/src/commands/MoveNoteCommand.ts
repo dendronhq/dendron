@@ -98,9 +98,8 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
         listener: async (event) => {
           if (event.action === "done") {
             HistoryService.instance().remove("move", "lookupProvider");
-            const data = event.data as NoteLookupProviderSuccessResp<
-              OldNewLocation
-            >;
+            const data =
+              event.data as NoteLookupProviderSuccessResp<OldNewLocation>;
             if (data.cancel) {
               resolve(undefined);
             }

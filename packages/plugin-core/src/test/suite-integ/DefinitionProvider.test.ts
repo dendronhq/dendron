@@ -1,10 +1,10 @@
 import { getSlugger, NoteProps, NoteUtils } from "@dendronhq/common-all";
+import { NoteTestUtilsV4, NOTE_PRESETS_V4 } from "@dendronhq/common-test-utils";
 import {
+  callSetupHook,
   ENGINE_HOOKS_MULTI,
-  NoteTestUtilsV4,
-  NOTE_PRESETS_V4,
-} from "@dendronhq/common-test-utils";
-import { callSetupHook, SETUP_HOOK_KEYS } from "@dendronhq/engine-test-utils";
+  SETUP_HOOK_KEYS,
+} from "@dendronhq/engine-test-utils";
 import { describe } from "mocha";
 import path from "path";
 import * as vscode from "vscode";
@@ -155,12 +155,11 @@ suite("DefinitionProvider", function () {
         ctx,
         preSetupHook: async ({ wsRoot, vaults }) => {
           const vault = vaults[0];
-          ({
-            specialCharsHeader,
-          } = await ANCHOR_WITH_SPECIAL_CHARS.preSetupHook({
-            wsRoot,
-            vaults: [vault],
-          }));
+          ({ specialCharsHeader } =
+            await ANCHOR_WITH_SPECIAL_CHARS.preSetupHook({
+              wsRoot,
+              vaults: [vault],
+            }));
           await NoteTestUtilsV4.createNote({
             fname: "beta",
             vault,

@@ -1,9 +1,7 @@
 import { SchemaUtils, VaultUtils } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
-import {
-  ENGINE_HOOKS_MULTI,
-  NoteTestUtilsV4,
-} from "@dendronhq/common-test-utils";
+import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
+import { ENGINE_HOOKS_MULTI } from "@dendronhq/engine-test-utils";
 import { describe } from "mocha";
 import * as vscode from "vscode";
 import { SchemaWatcher } from "../../watchers/schemaWatcher";

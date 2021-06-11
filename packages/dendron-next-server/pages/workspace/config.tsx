@@ -36,34 +36,6 @@ const genDefaultConfig = (): DendronConfig => ({
   version: 0,
 });
 
-const getConfigData = (): { data: DendronConfig } => {
-  return {
-    data: {
-      vaults: [
-        {
-          fsPath: "vault",
-          name: "",
-        },
-      ],
-      site: {
-        assetsPrefix: "",
-        copyAssets: true,
-        siteHierarchies: ["dendron"],
-        siteNotesDir: "",
-        siteRepoDir: "",
-        siteRootDir: "docs",
-        usePrettyRefs: true,
-      },
-      version: 0,
-    },
-  };
-};
-
-// const saveConfigData = (data: DendronConfig) => {
-//   console.log("data saved");
-//   console.log(JSON.stringify(data, null, 2));
-// };
-
 type InputControlProps = {
   name: string;
   label?: string;
@@ -83,32 +55,35 @@ function InputControl({
 }: InputControlProps) {
   return (
     <Field name={name}>
-      {({ form: { errors, touched } }) => (
-        <FormControl
-          isRequired={required}
-          isDisabled={disabled}
-          isInvalid={
-            /**
-             * If field has errors AND they've interacted with this field, mark
-             * control as invalid. */
-            !!(get(errors, name) && get(touched, name))
-          }
-        >
-          {!!label && <FormLabel htmlFor={name}>{label}</FormLabel>}
+      {
+        // @ts-ignore
+        ({ form: { errors, touched } }) => (
+          <FormControl
+            isRequired={required}
+            isDisabled={disabled}
+            isInvalid={
+              /**
+               * If field has errors AND they've interacted with this field, mark
+               * control as invalid. */
+              !!(get(errors, name) && get(touched, name))
+            }
+          >
+            {!!label && <FormLabel htmlFor={name}>{label}</FormLabel>}
 
-          <Field
-            //
-            as={Input}
-            name={name}
-            placeholder={placeholder}
-            id={name}
-          />
+            <Field
+              //
+              as={Input}
+              name={name}
+              placeholder={placeholder}
+              id={name}
+            />
 
-          <FormErrorMessage>{errors.site?.siteRootDir}</FormErrorMessage>
+            <FormErrorMessage>{errors.site?.siteRootDir}</FormErrorMessage>
 
-          <FormHelperText>{help}</FormHelperText>
-        </FormControl>
-      )}
+            <FormHelperText>{help}</FormHelperText>
+          </FormControl>
+        )
+      }
     </Field>
   );
 }
@@ -121,15 +96,16 @@ const saveConfigData = async (config: DendronConfig) => {
   // empty string is different from undefined
   _.forEach(config.site, (v, k) => {
     if (_.isEmpty(v) && _.isString(v)) {
+      // @ts-ignore
       delete config.site[k];
     }
   });
-  const resp = await configWrite(config);
+  await configWrite(config);
 };
 
 export default function ConfigSamplePage() {
   const toast = useToast();
-  const { isError, isLoading, config: configData, error } = useDendronConfig();
+  const { isError, config: configData, error } = useDendronConfig();
   if (isError) return <div>failed to load: {JSON.stringify(error)}</div>;
   if (!configData) return <div>loading...</div>;
 
@@ -191,7 +167,7 @@ export default function ConfigSamplePage() {
                           name="site.siteHierarchies"
                           render={(arrayHelpers) => (
                             <OrderedList>
-                              {values.site.siteHierarchies.map((ent, idx) => (
+                              {values.site.siteHierarchies.map((_ent, idx) => (
                                 <ListItem>
                                   <Field
                                     as={Input}
@@ -227,21 +203,21 @@ export default function ConfigSamplePage() {
                       <InputControl
                         label="Site notes directory"
                         name="site.siteNotesDir"
-                        placeholder={genDefaultConfig().site.siteNotesDir}
+                        placeholder={genDefaultConfig().site.siteNotesDir!}
                         help={`Folder where your notes will be kept. By default, "notes"`}
                       />
 
                       <InputControl
                         label="Assets prefix"
                         name="site.assetsPrefix"
-                        placeholder={genDefaultConfig().site.assetsPrefix}
+                        placeholder={genDefaultConfig().site.assetsPrefix!}
                         help="If set, add prefix to all asset links"
                       />
 
                       <InputControl
                         label="Site repo directory"
                         name="site.siteRepoDir"
-                        placeholder={genDefaultConfig().site.siteRepoDir}
+                        placeholder={genDefaultConfig().site.siteRepoDir!}
                         help={
                           <>
                             Location of the github repo where your site notes
@@ -261,7 +237,12 @@ export default function ConfigSamplePage() {
                       >
                         <Stack direction="row" align="center">
                           <Field name="site.usePrettyRefs">
-                            {({ form: { setFieldValue }, field: { name } }) => (
+                            {({
+                              // @ts-ignore
+                              form: { setFieldValue },
+                              // @ts-ignore
+                              field: { name },
+                            }) => (
                               <>
                                 <FormLabel htmlFor={name} margin={0}>
                                   Use pretty refs?
@@ -297,7 +278,9 @@ export default function ConfigSamplePage() {
                         <Stack direction="row" align="center">
                           <Field name="site.copyAssets">
                             {({
+                              // @ts-ignore
                               form: { setFieldValue },
+                              // @ts-ignore
                               field: { name, value },
                             }) => (
                               <>

@@ -1,4 +1,4 @@
-import { ENGINE_HOOKS } from "../../../../common-test-utils/lib";
+import { ENGINE_HOOKS } from "@dendronhq/common-test-utils";
 import { tmpDir } from "@dendronhq/common-server";
 import { AirtableExportPod } from "@dendronhq/pods-core";
 import { runEngineTestV5 } from "../../engine";

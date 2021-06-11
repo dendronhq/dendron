@@ -62,8 +62,6 @@
     "@dendronhq/common-all": "^0.45.1",
     "@dendronhq/common-server": "^0.45.1",
     "@dendronhq/engine-server": "^0.45.1",
-    "@types/airtable": "^0.10.1",
-    "airtable": "^0.11.1",
     "csv-writer": "^1.6.0",
     "emailjs": "^3.4.0",
     "fs-extra": "^9.0.1",
@@ -71,7 +69,9 @@
     "limiter": "^2.1.0",
     "lodash": "^4.17.20",
     "through2": "^4.0.2",
-    "vscode-uri": "^2.1.2"
+    "vscode-uri": "^2.1.2",
+    "@types/airtable": "^0.10.1",
+    "airtable": "^0.11.1"
   },
   "gitHead": "d2e0e1c5ada1ac4a507e2da387cf761316de76de"
 }

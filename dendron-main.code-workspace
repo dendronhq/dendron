@@ -89,5 +89,10 @@
             "editor.defaultFormatter": "esbenp.prettier-vscode"
         },
         "editor.tabSize": 2
+    },
+    "extensions": {
+        "recommendations": [
+            "esbenp.prettier-vscode"
+        ]
     }
 }

@@ -19,6 +19,12 @@ export type Theme = {
       width: number;
       color: string;
     };
+    filterView: {
+      margin: string; // likely rem units
+      background: string;
+      minWidth: string;
+      borderRadius: number;
+    };
   };
 };
 
@@ -44,6 +50,11 @@ const baseTheme: RecursivePartial<Theme> = {
     edge: {
       width: 0.25,
     },
+    filterView: {
+      margin: "1rem",
+      minWidth: "12rem",
+      borderRadius: 4,
+    },
   },
 };
 
@@ -61,6 +72,9 @@ const darkTheme: RecursivePartial<Theme> = _.merge(_.cloneDeep(baseTheme), {
     edge: {
       color: "#807B7B",
     },
+    filterView: {
+      background: "#303030",
+    },
   },
 });
 
@@ -77,6 +91,9 @@ const lightTheme: RecursivePartial<Theme> = _.merge(_.cloneDeep(baseTheme), {
     },
     edge: {
       color: "#999393",
+    },
+    filterView: {
+      background: "#F5F6F8",
     },
   },
 });

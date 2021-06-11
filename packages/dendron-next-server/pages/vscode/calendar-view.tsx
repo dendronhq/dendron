@@ -13,7 +13,7 @@ import {
 } from "@dendronhq/common-all";
 import type { Moment } from "moment";
 import moment from "moment";
-import { Calendar, Badge, Space } from "antd";
+import { Calendar, Badge } from "antd";
 import { blue } from "@ant-design/colors";
 import type { CalendarProps } from "antd";
 import _ from "lodash";
@@ -137,7 +137,12 @@ function CalendarView({ engine, ide }: DendronProps) {
       const dateKey = getDateKey(date);
       const dailyNotes = groupedDailyNotes[dateKey] ?? [];
       return (
-        <Space size={0} direction="vertical">
+        <div
+          style={{
+            position: "relative",
+            top: -6, // space between the day and dots boxes
+          }}
+        >
           {
             // multiple daily notes can exist for that day in a mulit-vault setup
             // will only show up when `noteActive` is `undefined`. this happens when opening vscode with no document open
@@ -149,23 +154,26 @@ function CalendarView({ engine, ide }: DendronProps) {
                 0,
                 maxDots
               );
-              return (
-                <Space key={note.id} size={0} direction="horizontal" wrap>
-                  {_.times(amount, (index) => (
-                    <Badge
-                      key={index}
-                      className={`${note.fname}`}
-                      dot
-                      color={
-                        "#00adb5" /* color copied from packages/dendron-next-server/assets/themes/dark-theme.less */
-                      }
-                    />
-                  ))}
-                </Space>
-              );
+              return _.times(amount, (index) => (
+                <div
+                  style={{
+                    position: "absolute",
+                    left: `${index * 7}px`, // 7 resutls in a nice visible space between the dots
+                  }}
+                >
+                  <Badge
+                    key={index}
+                    className={`${note.fname}`}
+                    dot
+                    color={
+                      "#00adb5" /* color copied from packages/dendron-next-server/assets/themes/dark-theme.less */
+                    }
+                  />
+                </div>
+              ));
             })
           }
-        </Space>
+        </div>
       );
     },
     [groupedDailyNotes, wordsPerDot]
@@ -178,6 +186,7 @@ function CalendarView({ engine, ide }: DendronProps) {
       onPanelChange={onPanelChange}
       value={activeDate}
       dateCellRender={dateCellRender}
+      fullscreen={false}
     />
   );
 }

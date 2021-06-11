@@ -137,28 +137,30 @@ function CalendarView({ engine, ide }: DendronProps) {
       const dateKey = getDateKey(date);
       const dailyNotes = groupedDailyNotes[dateKey] ?? [];
       return (
-        <div
-          style={{
-            position: "relative",
-            top: -6, // space between the day and dots boxes
-          }}
-        >
-          {
-            // multiple daily notes can exist for that day in a mulit-vault setup
-            // will only show up when `noteActive` is `undefined`. this happens when opening vscode with no document open
-            dailyNotes.map((note) => {
-              const amount = _.clamp(
-                !!wordsPerDot
-                  ? Math.floor(note.body.split(" ").length / wordsPerDot)
-                  : 0,
-                0,
-                maxDots
-              );
-              return _.times(amount, (index) => (
+        // multiple daily notes can exist for that day in a mulit-vault setup
+        // will only show up when `noteActive` is `undefined`. this happens when opening vscode with no document open
+        dailyNotes.map((note, index) => {
+          const amount = _.clamp(
+            !!wordsPerDot
+              ? Math.floor(note.body.split(" ").length / wordsPerDot)
+              : 0,
+            0,
+            maxDots
+          );
+
+          return (
+            <div
+              style={{
+                position: "relative",
+                top: index * 2 - 6, // space between the day and dots boxes
+                // left: index * 1,
+              }}
+            >
+              {_.times(amount, (index) => (
                 <div
                   style={{
                     position: "absolute",
-                    left: `${index * 7}px`, // 7 resutls in a nice visible space between the dots
+                    left: index * 7, // 7 resutls in a nice visible space between the dots
                   }}
                 >
                   <Badge
@@ -170,10 +172,10 @@ function CalendarView({ engine, ide }: DendronProps) {
                     }
                   />
                 </div>
-              ));
-            })
-          }
-        </div>
+              ))}
+            </div>
+          );
+        })
       );
     },
     [groupedDailyNotes, wordsPerDot]

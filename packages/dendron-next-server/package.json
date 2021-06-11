@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/dendron-next-server",
-  "version": "0.44.1",
+  "version": "0.45.1",
   "license": "GPLv3",
   "repository": {
     "type": "git",
@@ -22,7 +22,7 @@
     "deploy:dev": "env STAGE=dev amplify publish",
     "deploy:prod": "env STAGE=prod amplify publish",
     "gen:theme": "gulp less",
-    "format": "cd ../.. && yarn format:pkg $npm_package_repository_directory"
+    "format": "echo nop"
   },
   "nohoist": [
     "**/common-all",
@@ -30,9 +30,9 @@
   ],
   "dependencies": {
     "@chakra-ui/react": "^1.0.0",
-    "@dendronhq/common-all": "^0.44.1",
-    "@dendronhq/common-frontend": "^0.44.1",
-    "@dendronhq/engine-server": "^0.44.1",
+    "@dendronhq/common-all": "^0.45.1",
+    "@dendronhq/common-frontend": "^0.45.1",
+    "@dendronhq/engine-server": "^0.45.1",
     "@emotion/react": "^11.1.1",
     "@emotion/styled": "^11.0.0",
     "@reduxjs/toolkit": "^1.5.1",

@@ -4,8 +4,7 @@ git branch -D integ-publish
 git checkout -b integ-publish
 
 version=prerelease
-lerna version $version --no-git-tag-version 
-lerna version $version --no-git-tag-version 
+lerna version $version --no-git-tag-version --no-push
 
 git add .
 git commit -m "integ: publish $version"

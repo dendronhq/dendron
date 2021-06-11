@@ -21,7 +21,7 @@
     "storybook": "start-storybook -s ./public -p 6006",
     "build-storybook": "build-storybook -s ./public",
     "deploy-storybook": "yarn build && yarn build-storybook",
-    "format": "cd ../.. && yarn format:pkg $npm_package_repository_directory"
+    "format": "echo nop"
   },
   "peerDependencies": {
     "react": ">=16"

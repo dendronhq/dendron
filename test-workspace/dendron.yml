@@ -2,6 +2,7 @@ version: 1
 vaults:
     -
         fsPath: vault2
+        visibility: private
     -
         fsPath: vault
 useFMTitle: true

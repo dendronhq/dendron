@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/dendron-cli",
-  "version": "0.44.1",
+  "version": "0.45.1",
   "description": "dendron-cli",
   "license": "GPLv3",
   "repository": {
@@ -29,7 +29,7 @@
   "scripts": {
     "clean": "rimraf lib && rimraf coverage",
     "format:old": "prettier --ignore-path='../../.prettierignore' --write .",
-    "format": "cd ../.. && yarn format:pkg $npm_package_repository_directory",
+    "format": "echo nop",
     "lint": "echo stub",
     "prepublishOnly": "yarn build",
     "prebuild": "yarn clean && yarn format && yarn lint && echo Using TypeScript && tsc --version",
@@ -43,12 +43,12 @@
     "test:unit:debug": "NODE_ENV=test  node --inspect node_modules/.bin/jest --runInBand"
   },
   "dependencies": {
-    "@dendronhq/api-server": "^0.44.1",
-    "@dendronhq/common-all": "^0.44.1",
-    "@dendronhq/common-server": "^0.44.1",
-    "@dendronhq/dendron-11ty": "^0.44.1",
-    "@dendronhq/engine-server": "^0.44.1",
-    "@dendronhq/pods-core": "^0.44.1",
+    "@dendronhq/api-server": "^0.45.1",
+    "@dendronhq/common-all": "^0.45.1",
+    "@dendronhq/common-server": "^0.45.1",
+    "@dendronhq/dendron-11ty": "^0.45.1",
+    "@dendronhq/engine-server": "^0.45.1",
+    "@dendronhq/pods-core": "^0.45.1",
     "@jcoreio/async-throttle": "^1.3.2",
     "fs-extra": "^9.0.1",
     "gray-matter": "^4.0.2",

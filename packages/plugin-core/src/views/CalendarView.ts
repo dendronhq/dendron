@@ -120,7 +120,7 @@ export class CalendarView implements vscode.WebviewViewProvider {
       localResourceRoots: [],
     };
     webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
-    webviewView.webview.onDidReceiveMessage(this.handleReceiveMessage);
+    webviewView.webview.onDidReceiveMessage(this.handleReceiveMessage, this);
   }
 
   public refresh(note?: NoteProps) {

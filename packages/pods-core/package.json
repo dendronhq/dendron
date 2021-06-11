@@ -59,9 +59,9 @@
     "preset": "ts-jest"
   },
   "dependencies": {
-    "@dendronhq/common-all": "^0.42.0",
-    "@dendronhq/common-server": "^0.42.0",
-    "@dendronhq/engine-server": "^0.42.0",
+    "@dendronhq/common-all": "^0.45.1",
+    "@dendronhq/common-server": "^0.45.1",
+    "@dendronhq/engine-server": "^0.45.1",
     "@types/airtable": "^0.10.1",
     "airtable": "^0.11.1",
     "csv-writer": "^1.6.0",

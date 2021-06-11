@@ -5,8 +5,8 @@ import { ExportPodConfig } from "../basev3";
 import { NoteProps } from "@dendronhq/common-all";
 import path from "path";
 import { URI } from "vscode-uri";
-import Airtable from "airtable";
 import { RateLimiter } from "limiter";
+import axios from "axios";
 
 const ID = "dendron.airtable";
 
@@ -94,19 +94,27 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
       srcFieldMapping,
     } = opts;
 
+    const headers = {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    };
+
     const records = this.notesToSrcFieldMap(filteredNotes, srcFieldMapping);
     const chunks = _.chunk(records, 10);
-
-    const base = new Airtable({ apiKey }).base(baseId);
 
     // rate limiter method
     const sendRequest = async () => {
       let total: number = 0;
       chunks.forEach(async (record) => {
         await limiter.removeTokens(1);
+        const data = JSON.stringify({ records: record });
         try {
-          const result = await base(tableName).create(record);
-          total = total + result.length;
+          const result = await axios.post(
+            `https://api.airtable.com/v0/${baseId}/${tableName}`,
+            data,
+            { headers: headers }
+          );
+          total = total + result.data.records.length;
           if (total === filteredNotes.length) {
             const timestamp = filteredNotes[filteredNotes.length - 1].created;
             fs.writeFileSync(checkpoint, timestamp.toString(), {

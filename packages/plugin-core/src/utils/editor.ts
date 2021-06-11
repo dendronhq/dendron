@@ -133,36 +133,52 @@ export async function getSelectionAnchors(opts: {
   engine: DEngineClient;
 }): Promise<{ startAnchor?: string; endAnchor?: string }> {
   const { editor, selection, doStartAnchor, doEndAnchor, engine } = _.defaults(
-    { doStartAnchor: true, doEndAnchor: true },
-    opts
+    opts,
+    { doStartAnchor: true, doEndAnchor: true }
   );
   if (_.isUndefined(selection)) return {};
-  let startAnchor = doStartAnchor
-    ? getAnchorAt({ editor, position: selection.start, engine })
-    : undefined;
-  if (selection.start.line === selection.end.line) return { startAnchor };
-  // multi line
+  const { start, end } = selection;
 
-  let endAnchor = doEndAnchor
-    ? getAnchorAt({ editor, position: selection.end, engine })
+  // first check if there's an existing anchor
+  let startAnchor = doStartAnchor
+    ? getAnchorAt({ editor, position: start, engine })
     : undefined;
+
+  // does the user have only a single
+  const singleLine =
+    // single line selected
+    start.line === end.line ||
+    // the first line selected in full, nothing on second line (default behavior when double clicking on a line)
+    (start.line + 1 === end.line && end.character === 0);
+  // does the user have any amount of text selected?
+  const hasSelectedRegion =
+    start.line !== end.line || start.character !== end.character;
+
+  // first check if there's an existing anchor
+  let endAnchor: string | undefined;
+  if (!singleLine && doEndAnchor)
+    endAnchor = getAnchorAt({ editor, position: end, engine });
+
   // if we found both anchors already, just return them.
   if (!_.isUndefined(startAnchor) && !_.isUndefined(endAnchor))
     return { startAnchor, endAnchor };
+
+  debugger;
   // otherwise, we'll need to edit the document to insert block anchors
   await editor.edit((editBuilder) => {
-    if (_.isUndefined(startAnchor))
+    debugger;
+    if (_.isUndefined(startAnchor) && doStartAnchor && hasSelectedRegion)
       startAnchor = addOrGetAnchorAt({
         editBuilder,
         editor,
-        position: selection.start,
+        position: start,
         engine,
       });
-    if (_.isUndefined(endAnchor))
+    if (_.isUndefined(endAnchor) && doEndAnchor && !singleLine)
       endAnchor = addOrGetAnchorAt({
         editBuilder,
         editor,
-        position: selection.end,
+        position: end,
         engine,
       });
   });

@@ -10,7 +10,7 @@ type CommandOpts = {};
 
 type CommandInput = {};
 
-type CommandOutput = void;
+type CommandOutput = NoteProps | undefined;
 
 export class RandomNoteCommand extends BasicCommand<
   CommandOpts,
@@ -28,9 +28,9 @@ export class RandomNoteCommand extends BasicCommand<
     const config = ws.config.randomNote;
 
     // If no pattern is specified for include, then include all notes for the search set.
-    let includeSet: string[] = config?.include ?? [""];
+    const includeSet: string[] = config?.include ?? [""];
 
-    let searchPredicate = function (note: NoteProps) {
+    const searchPredicate = function (note: NoteProps) {
       if (note.stub == true) {
         return false;
       }
@@ -57,7 +57,7 @@ export class RandomNoteCommand extends BasicCommand<
       return isMatch;
     };
 
-    let noteSet = _.filter(engine.notes, (ent) => searchPredicate(ent));
+    const noteSet = _.filter(engine.notes, (ent) => searchPredicate(ent));
 
     const noteCount = Object.keys(noteSet).length;
     if (noteCount === 0) {
@@ -77,5 +77,7 @@ export class RandomNoteCommand extends BasicCommand<
 
     const uri = Uri.file(npath);
     await VSCodeUtils.openFileInEditor(uri);
+
+    return note;
   }
 }

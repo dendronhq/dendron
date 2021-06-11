@@ -22,7 +22,7 @@ type CreateNoteFactoryOpts = Omit<CreateNoteOptsV4, "vault" | "wsRoot"> & {
 };
 const SIMPLE_SELECTION: [number, number, number, number] = [7, 0, 7, 12];
 
-export const CreateNoteFactory = (opts: CreateNoteFactoryOpts) => {
+const CreateNoteFactory = (opts: CreateNoteFactoryOpts) => {
   const func = ({
     vault,
     wsRoot,

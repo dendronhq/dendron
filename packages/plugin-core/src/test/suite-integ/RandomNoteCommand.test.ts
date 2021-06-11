@@ -1,5 +1,5 @@
 import { RandomNoteConfig } from "@dendronhq/common-all";
-import { CreateNoteFactory } from "@dendronhq/common-test-utils";
+import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { TestEngineUtils } from "@dendronhq/engine-test-utils";
 import * as vscode from "vscode";
 import { RandomNoteCommand } from "../../commands/RandomNote";
@@ -12,21 +12,30 @@ import {
 } from "../testUtilsV3";
 
 // common template function for RandomNoteCommand testing
-function basicTest(
-  ctx: vscode.ExtensionContext,
-  noteNames: string[],
-  validateFn: () => void,
-  done: () => void,
-  includePattern?: string[],
-  excludePattern?: string[]
-) {
+function basicTest({
+  ctx,
+  noteNames,
+  validateFn,
+  done,
+  includePattern,
+  excludePattern,
+}: {
+  ctx: vscode.ExtensionContext;
+  noteNames: string[];
+  validateFn: () => void;
+  done: () => void;
+  includePattern?: string[];
+  excludePattern?: string[];
+}) {
   runLegacyMultiWorkspaceTest({
     ctx,
     preSetupHook: async ({ wsRoot, vaults }) => {
       for (let name of noteNames) {
-        await CreateNoteFactory({ fname: name, body: "" }).create({
-          wsRoot,
+        await NoteTestUtilsV4.createNote({
           vault: TestEngineUtils.vault1(vaults),
+          wsRoot,
+          fname: name,
+          body: "",
         });
       }
     },
@@ -54,7 +63,7 @@ suite(RandomNoteCommand.key, function () {
   ctx = setupBeforeAfter(this, {});
 
   test("include pattern only", function (done) {
-    const validation = function () {
+    const validateFn = function () {
       expect(
         VSCodeUtils.getActiveTextEditor()
           ?.document.uri.path.split("/")
@@ -63,18 +72,18 @@ suite(RandomNoteCommand.key, function () {
       ).toBeTruthy();
     };
 
-    basicTest(
+    basicTest({
       ctx,
-      ["alpha", "alpha.one", "alpha.two.1", "alpha.two.2", "beta"],
-      validation,
+      noteNames: ["alpha", "alpha.one", "alpha.two.1", "alpha.two.2", "beta"],
+      validateFn,
       done,
-      ["alpha"],
-      undefined
-    );
+      includePattern: ["alpha"],
+      excludePattern: undefined,
+    });
   });
 
   test("include pattern with exclude in sub-hierarchy", function (done) {
-    const validationsFn = function () {
+    const validateFn = function () {
       expect(
         VSCodeUtils.getActiveTextEditor()
           ?.document.uri.path.split("/")
@@ -83,18 +92,18 @@ suite(RandomNoteCommand.key, function () {
       ).toBeTruthy();
     };
 
-    basicTest(
+    basicTest({
       ctx,
-      ["alpha.one", "alpha.two.1", "alpha.two.2"],
-      validationsFn,
+      noteNames: ["alpha.one", "alpha.two.1", "alpha.two.2"],
+      validateFn,
       done,
-      ["alpha"],
-      ["alpha.two"]
-    );
+      includePattern: ["alpha"],
+      excludePattern: ["alpha.two"],
+    });
   });
 
   test("multiple include patterns", function (done) {
-    const validationsFn = function () {
+    const validateFn = function () {
       expect(
         VSCodeUtils.getActiveTextEditor()
           ?.document.uri.path.split("/")
@@ -103,19 +112,19 @@ suite(RandomNoteCommand.key, function () {
       ).toBeTruthy();
     };
 
-    basicTest(
+    basicTest({
       ctx,
-      ["alpha.one", "alpha.two"],
-      validationsFn,
+      noteNames: ["alpha.one", "alpha.two"],
+      validateFn,
       done,
-      ["alpha.zero", "alpha.two"],
-      undefined
-    );
+      includePattern: ["alpha.zero", "alpha.two"],
+      excludePattern: undefined,
+    });
   });
 
   // If no include pattern is specified, then the set should include all notes.
   test("no include pattern", function (done) {
-    const validationsFn = function () {
+    const validateFn = function () {
       expect(
         VSCodeUtils.getActiveTextEditor()
           ?.document.uri.path.split("/")
@@ -124,11 +133,18 @@ suite(RandomNoteCommand.key, function () {
       ).toBeTruthy();
     };
 
-    basicTest(ctx, [], validationsFn, done, undefined, undefined);
+    basicTest({
+      ctx,
+      noteNames: [],
+      validateFn,
+      done,
+      includePattern: undefined,
+      excludePattern: undefined,
+    });
   });
 
   test("exclude pattern only", function (done) {
-    const validationsFn = function () {
+    const validateFn = function () {
       const fileName = VSCodeUtils.getActiveTextEditor()
         ?.document.uri.path.split("/")
         .pop()!;
@@ -138,18 +154,18 @@ suite(RandomNoteCommand.key, function () {
       ).toBeTruthy();
     };
 
-    basicTest(
+    basicTest({
       ctx,
-      ["alpha.one", "alpha.two", "beta.one", "beta.two"],
-      validationsFn,
+      noteNames: ["alpha.one", "alpha.two", "beta.one", "beta.two"],
+      validateFn,
       done,
-      undefined,
-      ["alpha"]
-    );
+      includePattern: undefined,
+      excludePattern: ["alpha"],
+    });
   });
 
   test("multi-level include pattern", function (done) {
-    const validationsFn = function () {
+    const validateFn = function () {
       expect(
         VSCodeUtils.getActiveTextEditor()
           ?.document.uri.path.split("/")
@@ -158,27 +174,27 @@ suite(RandomNoteCommand.key, function () {
       ).toBeTruthy();
     };
 
-    basicTest(
+    basicTest({
       ctx,
-      ["alpha.one.1", "alpha.one.2", "alpha.two.1", "alpha.two.one"],
-      validationsFn,
+      noteNames: ["alpha.one.1", "alpha.one.2", "alpha.two.1", "alpha.two.one"],
+      validateFn,
       done,
-      ["alpha.one"],
-      undefined
-    );
+      includePattern: ["alpha.one"],
+      excludePattern: undefined,
+    });
   });
 
   test("include and exclude patterns are the same", function (done) {
     // No explicit validation, just ensure that an exception is not thrown.
-    const validationsFn = function () {};
+    const validateFn = function () {};
 
-    basicTest(
+    basicTest({
       ctx,
-      ["alpha.one.1", "alpha.one.2", "alpha.two.1", "alpha.two.one"],
-      validationsFn,
+      noteNames: ["alpha.one.1", "alpha.one.2", "alpha.two.1", "alpha.two.one"],
+      validateFn,
       done,
-      ["alpha.one"],
-      ["alpha.one"]
-    );
+      includePattern: ["alpha.one"],
+      excludePattern: ["alpha.one"],
+    });
   });
 });

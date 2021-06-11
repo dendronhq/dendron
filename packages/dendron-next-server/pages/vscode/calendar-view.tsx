@@ -143,7 +143,7 @@ function CalendarView({ engine, ide }: DendronProps) {
         dailyNotes.map((note, index) => {
           const amount = _.clamp(
             !!wordsPerDot
-              ? Math.floor(note.body.split(" ").length / wordsPerDot)
+              ? Math.floor(note.body.split(/\n| /).length / wordsPerDot) // TODO create test
               : 0,
             0,
             maxDots

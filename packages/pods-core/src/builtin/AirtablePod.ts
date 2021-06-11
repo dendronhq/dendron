@@ -2,7 +2,7 @@ import fs from "fs-extra";
 import _ from "lodash";
 import { ExportPod, ExportPodPlantOpts } from "../basev3";
 import { ExportPodConfig } from "../basev3";
-import { NoteProps } from "@dendronhq/common-all";
+import { NoteProps, DendronError } from "@dendronhq/common-all";
 import path from "path";
 import { URI } from "vscode-uri";
 import { RateLimiter } from "limiter";
@@ -122,8 +122,11 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
             });
           }
         } catch (error) {
-          console.log("failed to export all the notes. Error: ", error);
-          throw Error("error");
+          this.L.error({
+            msg: "failed to export all the notes.",
+            payload: error,
+          });
+          throw new DendronError({ message: JSON.stringify(error) });
         }
       });
     };
@@ -177,9 +180,10 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
         checkpoint,
       });
     } else {
-      throw Error(
-        "No new Records to sync in selected hierarchy. Create new file and then try"
-      );
+      throw new DendronError({
+        message:
+          "No new Records to sync in selected hierarchy. Create new file and then try",
+      });
     }
 
     return { notes };

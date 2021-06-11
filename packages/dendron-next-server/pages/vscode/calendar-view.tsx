@@ -135,7 +135,8 @@ function CalendarView({ engine, ide }: DendronProps) {
   const dateCellRender: AntdCalendarProps["dateCellRender"] = useCallback(
     (date) => {
       const dateKey = getDateKey(date);
-      const dailyNotes = groupedDailyNotes[dateKey] ?? [];
+      const dailyNote = _.first(groupedDailyNotes[dateKey]);
+      const dailyNotes = dailyNote ? [dailyNote] : []; // keeping for case of showing all dailyNotes of day in multi-vault
       return (
         // multiple daily notes can exist for that day in a mulit-vault setup
         // will only show up when `noteActive` is `undefined`. this happens when opening vscode with no document open

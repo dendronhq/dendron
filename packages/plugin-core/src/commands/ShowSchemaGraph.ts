@@ -3,6 +3,7 @@ import {
   DendronWebViewKey,
   GraphViewMessage,
   GraphViewMessageType,
+  VaultUtils,
 } from "@dendronhq/common-all";
 import { Uri, ViewColumn, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
@@ -66,12 +67,23 @@ export class ShowSchemaGraphCommand extends BasicCommand<
           const engine = getWS().getEngine();
           const schema = engine.schemas[msg.data.id];
 
-          console.log(msg.data.id, schema);
-          console.log(ws._enginev2?.wsRoot);
-
           const wsRoot = ws._enginev2?.wsRoot;
 
-          if (schema && wsRoot) {
+          if (msg.data.vault && wsRoot) {
+            const vaults = engine.vaults.filter(
+              (v) => VaultUtils.getName(v) === msg.data.vault
+            );
+            if (_.isEmpty(vaults)) return;
+
+            const schemaPath = path.join(
+              wsRoot,
+              vaults[0].fsPath,
+              `root.schema.yml`
+            );
+            const uri = Uri.file(schemaPath);
+
+            await VSCodeUtils.openFileInEditor(uri);
+          } else if (schema && wsRoot) {
             const fname = schema.fname;
             // const vault = schema.vault;
 

@@ -25,7 +25,7 @@ export default function FullSchemaGraph({
   const elements = useGraphElements({ type: "schema", engine });
 
   const onSelect: EventHandler = (e) => {
-    const { id, source } = e.target[0]._private.data;
+    const { id, source, vault } = e.target[0]._private.data;
 
     const idSections = id.split("_");
     const rootID = idSections[idSections.length - 1];
@@ -36,11 +36,19 @@ export default function FullSchemaGraph({
     const isNode = !source;
     if (!isNode) return;
 
-    postVSCodeMessage({
-      type: GraphViewMessageType.onSelect,
-      data: { id: fname },
-      source: DMessageSource.webClient,
-    } as GraphViewMessage);
+    if (vault) {
+      postVSCodeMessage({
+        type: GraphViewMessageType.onSelect,
+        data: { id: fname, vault },
+        source: DMessageSource.webClient,
+      } as GraphViewMessage);
+    } else {
+      postVSCodeMessage({
+        type: GraphViewMessageType.onSelect,
+        data: { id: fname },
+        source: DMessageSource.webClient,
+      } as GraphViewMessage);
+    }
   };
 
   // Update config

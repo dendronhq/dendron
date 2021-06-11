@@ -5,7 +5,7 @@ import {
   SchemaModuleDict,
   VaultUtils,
 } from "@dendronhq/common-all";
-import { engineSlice } from "@dendronhq/common-frontend";
+import { createLogger, engineSlice } from "@dendronhq/common-frontend";
 import { EdgeDefinition, NodeDefinition } from "cytoscape";
 import _ from "lodash";
 import { useRouter } from "next/router";
@@ -79,11 +79,16 @@ const getSchemaGraphElements = (
   vaults: DVault[] | undefined
 ): GraphElements => {
   const schemaArray = Object.values(schemas);
+  const filteredSchemas = schemaArray.filter(
+    (schema) => schema.fname !== "root"
+  );
 
   const nodes: any[] = [];
   const edges: GraphEdges = {
     hierarchy: [],
   };
+
+  const logger = createLogger("useGraphElements");
 
   if (_.isUndefined(vaults)) return { nodes, edges };
 
@@ -96,11 +101,11 @@ const getSchemaGraphElements = (
         id: VAULT_ID,
         label: vaultName,
         group: "nodes",
+        vault: vaultName,
       },
-      selectable: false,
     });
 
-    schemaArray
+    filteredSchemas
       .filter((schema) => VaultUtils.getName(schema.vault) === vaultName)
       .forEach((schema) => {
         const SCHEMA_ID = `${vaultName}_${schema.fname}`;

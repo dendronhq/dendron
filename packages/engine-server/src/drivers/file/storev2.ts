@@ -473,12 +473,18 @@ export class FileStorage implements DStore {
         const vaultPath = vault2Path({ vault, wsRoot });
         // read note in case its changed
         const _n = file2Note(path.join(vaultPath, n.fname + ".md"), vault);
-        // TODO; currently wikilinks only
-        const allLinks = LinkUtils.findLinks({
-          note: _n,
-          engine: this.engine,
-          filter: { loc: oldLoc },
-        });
+        const allLinks = _.orderBy(
+          LinkUtils.findLinks({
+            note: _n,
+            engine: this.engine,
+            filter: { loc: oldLoc },
+          }),
+          (link) => {
+            return link.position.start.offset;
+          },
+          "desc"
+        );
+
         const noteMod = _.reduce(
           allLinks,
           (note: NoteProps, link: DLink) => {

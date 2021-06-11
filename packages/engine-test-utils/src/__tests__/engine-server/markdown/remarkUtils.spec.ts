@@ -276,7 +276,6 @@ describe("RemarkUtils and LinkUtils", () => {
         async ({ engine, wsRoot }) => {
           const note = engine.notes["foo.one-id"];
           console.log(wsRoot);
-          debugger;
           const links = LinkUtils.findLinks({ note, engine });
           expect(links).toMatchSnapshot();
           checkLink({

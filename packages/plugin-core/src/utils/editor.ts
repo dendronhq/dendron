@@ -163,10 +163,8 @@ export async function getSelectionAnchors(opts: {
   if (!_.isUndefined(startAnchor) && !_.isUndefined(endAnchor))
     return { startAnchor, endAnchor };
 
-  debugger;
   // otherwise, we'll need to edit the document to insert block anchors
   await editor.edit((editBuilder) => {
-    debugger;
     if (_.isUndefined(startAnchor) && doStartAnchor && hasSelectedRegion)
       startAnchor = addOrGetAnchorAt({
         editBuilder,

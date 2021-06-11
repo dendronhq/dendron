@@ -1,4 +1,7 @@
-import { DNoteAnchorPositioned } from "@dendronhq/common-all";
+import {
+  DNoteAnchorPositioned,
+  error2PlainObject,
+} from "@dendronhq/common-all";
 import {
   assert,
   BulkAddNoteOpts,
@@ -341,25 +344,31 @@ export class FileStorage implements DStore {
     allNotesCache: NotesCacheAll;
   }) {
     return _.map(notesWithLinks, async (noteFrom) => {
-      return Promise.all(
-        noteFrom.links.map(async (link) => {
-          const fname = link.to?.fname;
-          if (fname) {
-            const notes = NoteUtils.getNotesByFname({
-              fname,
-              notes: allNotes,
-            });
-            return notes.map((noteTo) => {
-              return NoteUtils.addBacklink({
-                from: noteFrom,
-                to: noteTo,
-                link,
+      try {
+        return Promise.all(
+          noteFrom.links.map(async (link) => {
+            const fname = link.to?.fname;
+            if (fname) {
+              const notes = NoteUtils.getNotesByFname({
+                fname,
+                notes: allNotes,
               });
-            });
-          }
-          return;
-        })
-      );
+              return notes.map((noteTo) => {
+                return NoteUtils.addBacklink({
+                  from: noteFrom,
+                  to: noteTo,
+                  link,
+                });
+              });
+            }
+            return;
+          })
+        );
+      } catch (err) {
+        const error = error2PlainObject(err);
+        this.logger.error({ error, noteFrom, message: "issue with backlinks" });
+        return;
+      }
     });
   }
 

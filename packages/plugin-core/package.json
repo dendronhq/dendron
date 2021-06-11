@@ -266,6 +266,11 @@
         "desc": "Move a note"
       },
       {
+        "command": "dendron.randomNote",
+        "title": "Dendron: Random Note",
+        "desc": "Open a Random Note"
+      },
+      {
         "command": "dendron.renameNote",
         "title": "Dendron: Rename Note",
         "desc": "Rename a note and all backlinks",

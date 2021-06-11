@@ -190,6 +190,23 @@ export type DendronConfig = {
    * Defaults to `noCommit`.
    */
   workspaceVaultSync?: DVaultSync;
+
+  /**
+   * Configuration for Random Note Lookup Command
+   */
+  randomNote?: RandomNoteConfig;
+};
+
+export type RandomNoteConfig = {
+  /**
+   * Hiearchies to include
+   */
+  include?: string[];
+
+  /**
+   * Hiearchies to exclude
+   */
+  exclude?: string[];
 };
 
 export type DendronDevConfig = {

@@ -1,8 +1,10 @@
-import { SegmentClient } from "@dendronhq/common-server";
+import { SegmentClient, TelemetryStatus } from "@dendronhq/common-server";
 import * as vscode from "vscode";
 import { Logger } from "./logger";
 import { DendronWorkspace } from "./workspace";
 import _ from "lodash";
+import { AnalyticsUtils } from "./utils/analytics";
+import { VSCodeEvents } from "@dendronhq/common-all";
 
 export function isVSCodeTelemetryEnabled(): boolean | undefined {
   // `isTelemetryEnabled` only seems to be available on VSCode 1.55 and above.
@@ -18,15 +20,51 @@ export function isVSCodeTelemetryEnabled(): boolean | undefined {
 /** Creates a SegmentClient for telemetry, if enabled, and listens for vscode telemetry settings to disable it when requested. */
 export function setupSegmentClient(ws: DendronWorkspace) {
   function instantiateSegmentClient() {
-    SegmentClient.instance({
-      optOut: ws.config.noTelemetry || !isVSCodeTelemetryEnabled(),
+    // if the current status was set by configuration, and that configuration has changed, we should update it and report the change
+    const status = SegmentClient.getStatus();
+    if (SegmentClient.setByConfig(status)) {
+      if (
+        SegmentClient.isDisabled(status) &&
+        !ws.config.noTelemetry &&
+        isVSCodeTelemetryEnabled()
+      ) {
+        // was disabled, now enabled
+        Logger.info({
+          msg: "The user changed VSCode or workspace settings, so we are now disabling telemetry",
+        });
+        AnalyticsUtils.track(VSCodeEvents.EnableTelemetry);
+        SegmentClient.enable(TelemetryStatus.ENABLED_BY_CONFIG);
+      } else if (SegmentClient.isEnabled(status)) {
+        // was enabled, now disabled
+        if (ws.config.noTelemetry) {
+          Logger.info({
+            msg: "The user change workspace settings, so we are now disabling telemetry",
+          });
+          SegmentClient.disable(TelemetryStatus.DISABLED_BY_WS_CONFIG);
+          AnalyticsUtils.track(VSCodeEvents.DisableTelemetry);
+        } else if (!isVSCodeTelemetryEnabled()) {
+          Logger.info({
+            msg: "The user change VSCode settings, so we are now disabling telemetry",
+          });
+          SegmentClient.disable(TelemetryStatus.DISABLED_BY_VSCODE_CONFIG);
+          AnalyticsUtils.track(VSCodeEvents.DisableTelemetry);
+        }
+      }
+    }
+
+    const segment = SegmentClient.instance({
       forceNew: true,
     });
+    Logger.info({ msg: `Current segment status is ${segment.hasOptedOut}` });
   }
 
-  // `onDidChangeTelemetryEnabled` only seems to be available on VSCode 1.55 and above.
-  // Our dependencies are currently set up for 1.54, so typescript does not understand that it exists.
   try {
+    // instantiate segment client right now
+    instantiateSegmentClient();
+    // watch the config changes to update status if it changes
+
+    // `onDidChangeTelemetryEnabled` only seems to be available on VSCode 1.55 and above.
+    // Our dependencies are currently set up for 1.54, so typescript does not understand that it exists.
     const onDidChangeTelemetryEnabled: vscode.Event<Boolean> | undefined = (
       vscode.env as any
     ).onDidChangeTelemetryEnabled;

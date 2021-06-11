@@ -197,27 +197,132 @@ const NOTES = {
       preSetupHook: (opts) => preSetupHook(opts, { barBody: `[[foo#head1]]` }),
     }
   ),
-  // NOTE_REF: new TestPresetEntryV4(
-  //   async ({ wsRoot, vaults, engine }) => {
-  //     return runRename({
-  //       wsRoot,
-  //       vaults,
-  //       engine,
-  //       cb: ({ barChange, allChanged }) => {
-  //         return [
-  //           {
-  //             actual: _.trim(barChange?.note.body),
-  //             expected:
-  //               "![[baz]]",
-  //           },
-  //         ];
-  //       },
-  //     });
-  //   },
-  //   {
-  //     preSetupHook: (opts) => preSetupHook(opts, { barBody: `![[foo]]` }),
-  //   }
-  // ),
+  NOTE_REF: new TestPresetEntryV4(
+    async ({ wsRoot, vaults, engine }) => {
+      return runRename({
+        wsRoot,
+        vaults,
+        engine,
+        cb: ({ barChange }) => {
+          debugger;
+          return [
+            {
+              actual: _.trim(barChange?.note.body),
+              expected: "![[baz]]",
+            },
+          ];
+        },
+      });
+    },
+    {
+      preSetupHook: (opts) => preSetupHook(opts, { barBody: `![[foo]]` }),
+    }
+  ),
+  NOTE_REF_WITH_HEADER: new TestPresetEntryV4(
+    async ({ wsRoot, vaults, engine }) => {
+      return runRename({
+        wsRoot,
+        vaults,
+        engine,
+        cb: ({ barChange }) => {
+          return [
+            {
+              actual: _.trim(barChange?.note.body),
+              expected: "![[baz#header]]",
+            },
+          ];
+        },
+      });
+    },
+    {
+      preSetupHook: (opts) =>
+        preSetupHook(opts, { barBody: `![[foo#header]]` }),
+    }
+  ),
+  NOTE_REF_WITH_ANCHOR: new TestPresetEntryV4(
+    async ({ wsRoot, vaults, engine }) => {
+      return runRename({
+        wsRoot,
+        vaults,
+        engine,
+        cb: ({ barChange }) => {
+          return [
+            {
+              actual: _.trim(barChange?.note.body),
+              expected: "![[baz#^anchor-0-id-0]]",
+            },
+          ];
+        },
+      });
+    },
+    {
+      preSetupHook: (opts) =>
+        preSetupHook(opts, { barBody: `![[foo#^anchor-0-id-0]]` }),
+    }
+  ),
+  NOTE_REF_WITH_RANGE: new TestPresetEntryV4(
+    async ({ wsRoot, vaults, engine }) => {
+      return runRename({
+        wsRoot,
+        vaults,
+        engine,
+        cb: ({ barChange }) => {
+          return [
+            {
+              actual: _.trim(barChange?.note.body),
+              expected: "![[baz#start:#end]]",
+            },
+          ];
+        },
+      });
+    },
+    {
+      preSetupHook: (opts) =>
+        preSetupHook(opts, { barBody: `![[foo#start:#end]]` }),
+    }
+  ),
+  NOTE_REF_WITH_RANGE_WILDCARD_OFFSET: new TestPresetEntryV4(
+    async ({ wsRoot, vaults, engine }) => {
+      return runRename({
+        wsRoot,
+        vaults,
+        engine,
+        cb: ({ barChange }) => {
+          return [
+            {
+              actual: _.trim(barChange?.note.body),
+              expected: "![[baz#start,1:*]]",
+            },
+          ];
+        },
+      });
+    },
+    {
+      preSetupHook: (opts) =>
+        preSetupHook(opts, { barBody: `![[foo#start,1:*]]` }),
+    }
+  ),
+  NOTE_REF_WITH_RANGE_BLOCK_ANCHOR: new TestPresetEntryV4(
+    async ({ wsRoot, vaults, engine }) => {
+      return runRename({
+        wsRoot,
+        vaults,
+        engine,
+        cb: ({ barChange }) => {
+          return [
+            {
+              actual: _.trim(barChange?.note.body),
+              expected: "![[baz#^start:#^end]]",
+            },
+          ];
+        },
+      });
+    },
+    {
+      preSetupHook: (opts) =>
+        preSetupHook(opts, { barBody: `![[foo#^start:#^end]]` }),
+    }
+  ),
   // TODO: doesn't work in extension test wright now
   // no way to stub diff vault
   // SAME_NAME_DIFF_VAULT: new TestPresetEntryV4(
@@ -512,6 +617,63 @@ const NOTES = {
         await NOTE_PRESETS_V4.NOTE_WITH_LINK.create({
           vault: vaults[1],
           wsRoot,
+        });
+      },
+    }
+  ),
+  XVAULT_REFERENCE: new TestPresetEntryV4(
+    async ({ wsRoot, vaults, engine }) => {
+      const resp = await engine.renameNote({
+        oldLoc: {
+          fname: "foo",
+          vaultName: VaultUtils.getName(vaults[1]),
+        },
+        newLoc: {
+          fname: "baz",
+          vaultName: VaultUtils.getName(vaults[1]),
+        },
+      });
+      const changed = resp.data;
+      const updated = _.map(changed, (ent) => ({
+        status: ent.status,
+        fname: ent.note.fname,
+      })).sort();
+      const checkVault = await FileTestUtils.assertInVault({
+        vault: vaults[1],
+        wsRoot,
+        match: ["baz"],
+        nomatch: ["foo"],
+      });
+
+      return [
+        {
+          actual: updated,
+          expected: [
+            { status: "update", fname: "root" },
+            { status: "delete", fname: "foo" },
+            { status: "update", fname: "bar" },
+            { status: "create", fname: "baz" },
+          ],
+        },
+        {
+          actual: checkVault,
+          expected: true,
+        },
+      ];
+    },
+    {
+      preSetupHook: async ({ vaults, wsRoot }) => {
+        NoteTestUtilsV4.createNote({
+          wsRoot,
+          fname: "bar",
+          vault: vaults[0],
+          body: `![[dendron://${VaultUtils.getName(vaults[1])}/foo]]`,
+        });
+        NoteTestUtilsV4.createNote({
+          wsRoot,
+          fname: "foo",
+          vault: vaults[1],
+          body: "Facilis repellat aliquam quas.",
         });
       },
     }

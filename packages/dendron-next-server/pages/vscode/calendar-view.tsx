@@ -39,21 +39,21 @@ function CalendarView({ engine, ide }: DendronProps) {
     state: "enter",
   });
 
+  const [currentMode, setCurrentMode] =
+    useState<AntdCalendarProps["mode"]>("month");
+
+  const engineInitialized = EngineSliceUtils.hasInitialized(engine);
+  const { notes, vaults, config } = engine;
+  const { noteActive } = ide;
+  const currentVault = noteActive?.vault;
+
   const maxDots: number = 5;
   const wordsPerDot: number = 250;
   const dailyJournalDomain = "daily"; // TODO replace "daily." with value from `dendron.dailyJournalDomain`
   const defaultJournalName = "journal"; // TODO use config value `dendron.defaultJournalName`
   const defaultJournalDateFormat = "y.MM.DD"; // TODO use config value `dendron.defaultJournalDateFormat`
-  const dayOfWeek = 1; // TODO make configurable
+  const dayOfWeek = config?.dayOfWeek ?? 1;
   const locale = "en-us";
-
-  const [currentMode, setCurrentMode] =
-    useState<AntdCalendarProps["mode"]>("month");
-
-  const engineInitialized = EngineSliceUtils.hasInitialized(engine);
-  const { notes, vaults } = engine;
-  const { noteActive } = ide;
-  const currentVault = noteActive?.vault;
 
   useEffect(() => {
     moment.updateLocale(locale, {

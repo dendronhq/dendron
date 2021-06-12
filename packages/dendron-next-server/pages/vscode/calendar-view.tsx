@@ -166,14 +166,15 @@ function CalendarView({ engine, ide }: DendronProps) {
   const prefixCls = getPrefixCls("picker");
   const calendarPrefixCls = `${prefixCls}-calendar`;
 
-  const dateCellRender = useCallback<
-    Exclude<CalendarProps["dateCellRender"], undefined>
+  const dateFullCellRender = useCallback<
+    Exclude<CalendarProps["dateFullCellRender"], undefined>
   >(
     (date) => {
       const dateKey = getDateKey(date);
       const dailyNote = _.first(groupedDailyNotes[dateKey]);
       const dailyNotes = dailyNote ? [dailyNote] : []; // keeping for case of showing all dailyNotes of day in multi-vault
-      return (
+
+      const dateCell =
         // multiple daily notes can exist for that day in a mulit-vault setup
         // will only show up when `noteActive` is `undefined`. this happens when opening vscode with no document open
         dailyNotes.map((note, index) => {
@@ -212,16 +213,8 @@ function CalendarView({ engine, ide }: DendronProps) {
               ))}
             </div>
           );
-        })
-      );
-    },
-    [getDateKey, groupedDailyNotes, wordsPerDot]
-  );
+        });
 
-  const dateFullCellRender = useCallback<
-    Exclude<CalendarProps["dateFullCellRender"], undefined>
-  >(
-    (date) => {
       return (
         <div
           className={classNames(
@@ -235,9 +228,7 @@ function CalendarView({ engine, ide }: DendronProps) {
           <div className={`${calendarPrefixCls}-date-value`}>
             {_.padStart(String(momentGenerateConfig.getDate(date)), 2, "0")}
           </div>
-          <div className={`${calendarPrefixCls}-date-content`}>
-            {dateCellRender && dateCellRender(date)}
-          </div>
+          <div className={`${calendarPrefixCls}-date-content`}>{dateCell}</div>
         </div>
       );
     },

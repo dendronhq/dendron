@@ -8,9 +8,9 @@ import sinon from "sinon";
 import { SegmentClient } from "@dendronhq/common-server";
 import { setupSegmentClient } from "../../telemetry";
 import { FileTestUtils } from "@dendronhq/common-test-utils";
-import { TestConfigUtils } from "@dendronhq/engine-test-utils";
 import { DisableTelemetryCommand } from "../../commands/DisableTelemetry";
 import { EnableTelemetryCommand } from "../../commands/EnableTelemetry";
+import { DConfig } from "@dendronhq/engine-server";
 
 suite("telemetry", function () {
   let ctx: vscode.ExtensionContext;
@@ -23,13 +23,9 @@ suite("telemetry", function () {
 
   function setNoTelemetry(to: boolean) {
     return async ({ wsRoot }: { wsRoot: string }) => {
-      TestConfigUtils.withConfig(
-        (config) => {
-          config.noTelemetry = to;
-          return config;
-        },
-        { wsRoot }
-      );
+      const config = DConfig.genDefaultConfig();
+      config.noTelemetry = to;
+      DConfig.writeConfig({ wsRoot, config });
     };
   }
 

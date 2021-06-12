@@ -43,6 +43,8 @@ export class WindowWatcher {
             return;
           }
           this.triggerUpdateDecorations();
+          this.triggerNoteGraphViewUpdate();
+          this.triggerSchemaGraphViewUpdate();
         }
       },
       null,
@@ -100,7 +102,7 @@ export class WindowWatcher {
     return;
   }
 
-  async triggerGraphViewUpdate() {
+  async triggerNoteGraphViewUpdate() {
     const noteGraphPanel = getWS().getWebView(DendronWebViewKey.NOTE_GRAPH);
     if (!_.isUndefined(noteGraphPanel)) {
       if (noteGraphPanel.visible) {
@@ -114,6 +116,31 @@ export class WindowWatcher {
         const note = VSCodeUtils.getNoteFromDocument(activeEditor.document);
 
         noteGraphPanel.webview.postMessage({
+          type: "onDidChangeActiveTextEditor",
+          data: {
+            note,
+            sync: true,
+          },
+          source: "vscode",
+        } as OnDidChangeActiveTextEditorMsg);
+      }
+    }
+    return;
+  }
+  async triggerSchemaGraphViewUpdate() {
+    const schemaGraphPanel = getWS().getWebView(DendronWebViewKey.SCHEMA_GRAPH);
+    if (!_.isUndefined(schemaGraphPanel)) {
+      if (schemaGraphPanel.visible) {
+        // TODO Logic here + test
+
+        const activeEditor = window.activeTextEditor;
+        if (!activeEditor) {
+          return;
+        }
+
+        const note = VSCodeUtils.getNoteFromDocument(activeEditor.document);
+
+        schemaGraphPanel.webview.postMessage({
           type: "onDidChangeActiveTextEditor",
           data: {
             note,

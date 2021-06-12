@@ -41,6 +41,7 @@ import { createLogger, file2String } from "@dendronhq/common-server";
 import path from "path";
 import { MDUtilsV5, ProcMode } from "../utilsv5";
 export { mdastBuilder };
+export { select, selectAll } from "unist-util-select";
 
 export const ALIAS_DIVIDER = "|";
 
@@ -406,11 +407,6 @@ export class AnchorUtils {
       createLogger("AnchorUtils").error(error);
       return {};
     }
-  }
-
-  static isBlockAnchor(anchor?: string): boolean {
-    // not undefined, not an empty string, and the first character is ^
-    return !!anchor && anchor[0] === "^";
   }
 }
 

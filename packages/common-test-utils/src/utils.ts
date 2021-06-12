@@ -55,11 +55,14 @@ export class AssertUtils {
     moreThan,
   }: {
     body: string;
-    match?: [number, string][];
-    fewerThan?: [number, string][];
-    moreThan?: [number, string][];
+    match?: [number, string | RegExp][];
+    fewerThan?: [number, string | RegExp][];
+    moreThan?: [number, string | RegExp][];
   }): Promise<boolean> {
-    function countMatches(match: string) {
+    function countMatches(match: string | RegExp) {
+      if (typeof match === "string") {
+        match = _.escapeRegExp(match);
+      }
       const matches = body.match(new RegExp(match, "g")) || [];
       return matches.length;
     }
@@ -91,6 +94,30 @@ export class AssertUtils {
       })
     );
     return true;
+  }
+
+  static async assertRegexInString({
+    body,
+    match,
+    nomatch,
+  }: {
+    body: string;
+    match?: (string | RegExp)[];
+    nomatch?: (string | RegExp)[];
+  }): Promise<boolean> {
+    return await this.assertTimesInString({
+      body,
+      moreThan: [
+        ...(match?.map((pattern): [number, string | RegExp] => [1, pattern]) ||
+          []),
+      ],
+      fewerThan: [
+        ...(nomatch?.map((pattern): [number, string | RegExp] => [
+          0,
+          pattern,
+        ]) || []),
+      ],
+    });
   }
 }
 

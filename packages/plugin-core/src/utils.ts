@@ -163,10 +163,14 @@ export class VSCodeUtils {
     return editor.document.uri.fsPath;
   }
 
-  static getSelection() {
+  static getSelection():
+    | { text: undefined; selection: undefined; editor: undefined }
+    | { text: string; selection: vscode.Selection; editor: vscode.TextEditor } {
     const editor = vscode.window.activeTextEditor;
-    const selection = editor?.selection;
-    const text = editor?.document.getText(selection);
+    if (_.isUndefined(editor))
+      return { text: undefined, selection: undefined, editor: undefined };
+    const selection = editor.selection;
+    const text = editor.document.getText(selection);
     return { text, selection, editor };
   }
 
@@ -510,6 +514,14 @@ export class DendronClientUtilsV2 {
     }
     return smod;
   };
+
+  static useVaultPrefix(engine: DEngineClient) {
+    const noXVaultLink = engine.config.noXVaultWikiLink;
+    const useVaultPrefix =
+      _.size(engine.vaults) > 1 &&
+      (_.isBoolean(noXVaultLink) ? !noXVaultLink : true);
+    return useVaultPrefix;
+  }
 }
 
 export const clipboard = vscode.env.clipboard;

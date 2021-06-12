@@ -555,7 +555,6 @@ describe("noteRefV2", () => {
       },
       [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
         const { resp } = extra;
-        debugger;
         expect(
           await AssertUtils.assertInString({
             body: resp.toString(),
@@ -619,7 +618,6 @@ describe("noteRefV2", () => {
       },
       [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
         const { resp } = extra;
-        debugger;
         expect(
           await AssertUtils.assertInString({
             body: resp.toString(),

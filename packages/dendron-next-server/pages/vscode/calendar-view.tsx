@@ -225,7 +225,10 @@ function CalendarView({ engine, ide }: DendronProps) {
             }
           )}
         >
-          <div className={`${calendarPrefixCls}-date-value`}>
+          <div
+            className={`${calendarPrefixCls}-date-value`}
+            style={{ color: !dailyNote ? "gray" : undefined }}
+          >
             {_.padStart(String(momentGenerateConfig.getDate(date)), 2, "0")}
           </div>
           <div className={`${calendarPrefixCls}-date-content`}>{dateCell}</div>

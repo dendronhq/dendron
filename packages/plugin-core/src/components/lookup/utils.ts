@@ -9,6 +9,7 @@ import {
   NoteProps,
   NoteQuickInput,
   NoteUtils,
+  RenameNoteOpts,
   RespV2,
   VaultUtils,
 } from "@dendronhq/common-all";
@@ -180,15 +181,14 @@ export class ProviderAcceptHooks {
         error: new DendronError({ message: errMsg }),
       };
     }
-    const data = {
+    const data: RenameNoteOpts = {
       oldLoc: {
         fname: oldFname,
-        vault: oldVault,
+        vaultName: VaultUtils.getName(oldVault),
       },
       newLoc: {
         fname: quickpick.value,
-        vault: newVault,
-        note: newNote,
+        vaultName: VaultUtils.getName(newVault),
       },
     };
     return { data, error: null };

@@ -11,7 +11,6 @@ import { FileTestUtils } from "@dendronhq/common-test-utils";
 import { TestConfigUtils } from "@dendronhq/engine-test-utils";
 import { DisableTelemetryCommand } from "../../commands/DisableTelemetry";
 import { EnableTelemetryCommand } from "../../commands/EnableTelemetry";
-import { DConfig } from "@dendronhq/engine-server";
 
 suite("telemetry", function () {
   let ctx: vscode.ExtensionContext;
@@ -21,6 +20,18 @@ suite("telemetry", function () {
       FileTestUtils.mockHome();
     },
   });
+
+  function setNoTelemetry(to: boolean) {
+    return async ({ wsRoot }: { wsRoot: string }) => {
+      TestConfigUtils.withConfig(
+        (config) => {
+          config.noTelemetry = to;
+          return config;
+        },
+        { wsRoot }
+      );
+    };
+  }
 
   describe("configuration", () => {
     test("enabled by configuration", (done) => {
@@ -58,11 +69,7 @@ suite("telemetry", function () {
     test("enabled by vscode configuration, but disabled by workspace configuration", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
-        preSetupHook: async ({ wsRoot }) => {
-          const config = DConfig.genDefaultConfig();
-          config.noTelemetry = true;
-          TestConfigUtils.writeConfig({ wsRoot, config });
-        },
+        preSetupHook: setNoTelemetry(true),
         onInit: async ({}) => {
           const ws = getWS();
           sinon.stub(vscode.env as any, "isTelemetryEnabled").value(true);
@@ -79,11 +86,7 @@ suite("telemetry", function () {
     test("enabled by vscode configuration, but disabled by workspace configuration", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
-        preSetupHook: async ({ wsRoot }) => {
-          const config = DConfig.genDefaultConfig();
-          config.noTelemetry = true;
-          TestConfigUtils.writeConfig({ wsRoot, config });
-        },
+        preSetupHook: setNoTelemetry(true),
         onInit: async ({}) => {
           const ws = getWS();
           sinon.stub(vscode.env as any, "isTelemetryEnabled").value(true);
@@ -119,11 +122,7 @@ suite("telemetry", function () {
     test("enabling by command takes precedence", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
-        preSetupHook: async ({ wsRoot }) => {
-          const config = DConfig.genDefaultConfig();
-          config.noTelemetry = true;
-          TestConfigUtils.writeConfig({ wsRoot, config });
-        },
+        preSetupHook: setNoTelemetry(true),
         onInit: async ({}) => {
           const ws = getWS();
           sinon.stub(vscode.env as any, "isTelemetryEnabled").value(false);

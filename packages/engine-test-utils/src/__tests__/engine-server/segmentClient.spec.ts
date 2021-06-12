@@ -93,4 +93,36 @@ describe("SegmentClient", () => {
     stub.restore();
     done();
   });
+
+  test("disabled then enabled with command", (done) => {
+    const { stub, tmpHome: _tmpHome } = FileTestUtils.mockHome();
+    SegmentClient.disable(TelemetryStatus.DISABLED_BY_COMMAND);
+
+    let instance = SegmentClient.instance({ forceNew: true });
+    expect(instance.hasOptedOut).toEqual(true);
+
+    SegmentClient.enable(TelemetryStatus.ENABLED_BY_COMMAND);
+
+    instance = SegmentClient.instance({ forceNew: true });
+    expect(instance.hasOptedOut).toEqual(false);
+
+    stub.restore();
+    done();
+  });
+
+  test("enabled then disabled with command", (done) => {
+    const { stub, tmpHome: _tmpHome } = FileTestUtils.mockHome();
+    SegmentClient.enable(TelemetryStatus.ENABLED_BY_COMMAND);
+
+    let instance = SegmentClient.instance({ forceNew: true });
+    expect(instance.hasOptedOut).toEqual(false);
+
+    SegmentClient.disable(TelemetryStatus.DISABLED_BY_COMMAND);
+
+    instance = SegmentClient.instance({ forceNew: true });
+    expect(instance.hasOptedOut).toEqual(true);
+
+    stub.restore();
+    done();
+  });
 });

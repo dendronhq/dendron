@@ -20,8 +20,9 @@ export class EnableTelemetryCommand extends BasicCommand<
     return {};
   }
   async execute() {
-    SegmentClient.enable(TelemetryStatus.ENABLED_BY_COMMAND);
-    AnalyticsUtils.track(VSCodeEvents.EnableTelemetry);
+    const reason = TelemetryStatus.ENABLED_BY_COMMAND;
+    SegmentClient.enable(reason);
+    AnalyticsUtils.track(VSCodeEvents.EnableTelemetry, { reason });
     window.showInformationMessage("telemetry enabled");
   }
 }

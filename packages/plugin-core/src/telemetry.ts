@@ -32,22 +32,25 @@ export function setupSegmentClient(ws: DendronWorkspace) {
         Logger.info({
           msg: "The user changed VSCode or workspace settings, so we are now disabling telemetry",
         });
-        AnalyticsUtils.track(VSCodeEvents.EnableTelemetry);
-        SegmentClient.enable(TelemetryStatus.ENABLED_BY_CONFIG);
+        const reason = TelemetryStatus.ENABLED_BY_CONFIG;
+        SegmentClient.enable(reason);
+        AnalyticsUtils.track(VSCodeEvents.EnableTelemetry, { reason });
       } else if (SegmentClient.isEnabled(status)) {
         // was enabled, now disabled
         if (ws.config.noTelemetry) {
           Logger.info({
             msg: "The user change workspace settings, so we are now disabling telemetry",
           });
-          SegmentClient.disable(TelemetryStatus.DISABLED_BY_WS_CONFIG);
-          AnalyticsUtils.track(VSCodeEvents.DisableTelemetry);
+          const reason = TelemetryStatus.DISABLED_BY_WS_CONFIG;
+          AnalyticsUtils.track(VSCodeEvents.DisableTelemetry, { reason });
+          SegmentClient.disable(reason);
         } else if (!isVSCodeTelemetryEnabled()) {
           Logger.info({
             msg: "The user change VSCode settings, so we are now disabling telemetry",
           });
-          SegmentClient.disable(TelemetryStatus.DISABLED_BY_VSCODE_CONFIG);
-          AnalyticsUtils.track(VSCodeEvents.DisableTelemetry);
+          const reason = TelemetryStatus.DISABLED_BY_VSCODE_CONFIG;
+          AnalyticsUtils.track(VSCodeEvents.DisableTelemetry, { reason });
+          SegmentClient.disable(reason);
         }
       }
     }

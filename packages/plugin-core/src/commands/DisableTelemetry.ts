@@ -20,8 +20,9 @@ export class DisableTelemetryCommand extends BasicCommand<
     return {};
   }
   async execute() {
-    AnalyticsUtils.track(VSCodeEvents.DisableTelemetry);
-    SegmentClient.disable(TelemetryStatus.DISABLED_BY_COMMAND);
+    const reason = TelemetryStatus.DISABLED_BY_COMMAND;
+    AnalyticsUtils.track(VSCodeEvents.DisableTelemetry, { reason });
+    SegmentClient.disable(reason);
     window.showInformationMessage("telemetry disabled");
   }
 }

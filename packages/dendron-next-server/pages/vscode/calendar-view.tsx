@@ -123,14 +123,11 @@ function CalendarView({ engine, ide }: DendronProps) {
     }
   }, [noteActive, groupedDailyNotes]);
 
-  const getDateKey = useCallback(
-    (date: Moment) => {
-      return date.format(
-        currentMode === "month" ? defaultJournalDateFormat : "y.MM" // TODO compute format for currentMode="year"
-      );
-    },
-    [currentMode, defaultJournalDateFormat]
-  );
+  const getDateKey = (date: Moment) => {
+    return date.format(
+      currentMode === "month" ? defaultJournalDateFormat : "y.MM" // TODO compute format for currentMode="year"
+    );
+  };
 
   const onSelect = useCallback<Exclude<CalendarProps["onSelect"], undefined>>(
     (date) => {

@@ -144,8 +144,14 @@ function CalendarView({ engine, ide }: DendronProps) {
         source: DMessageSource.webClient,
       });
     },
-    [currentMode, groupedDailyNotes]
+    [groupedDailyNotes]
   );
+
+  useEffect(() => {
+    if (activeDate) {
+      onSelect(activeDate); // trigger `onSelect` when switching month<->year views
+    }
+  }, [currentMode]);
 
   const onPanelChange = useCallback<
     Exclude<CalendarProps["onPanelChange"], undefined>

@@ -15,6 +15,7 @@ import {
   NoteChangeEntry,
   NoteProps,
   NoteUtils,
+  Position,
 } from "@dendronhq/common-all";
 import { createLogger, note2String } from "@dendronhq/common-server";
 import _ from "lodash";
@@ -134,14 +135,28 @@ const getLinks = ({
   }
   // the cast is safe because the only difference is whether `data.vaultName` exists, which is already optional
   for (const noteRef of noteRefs as NoteRefNoteV4[]) {
+    const { anchorStart, anchorEnd, anchorStartOffset } =
+      noteRef.data.link.data;
+    const anchorStartText = anchorStart ? anchorStart : "";
+    const anchorStartOffsetText = anchorStartOffset
+      ? `,${anchorStartOffset}`
+      : "";
+    const anchorEndText = anchorEnd ? `:#${anchorEnd}` : "";
+    const anchorHeader = `${anchorStartText}${anchorStartOffsetText}${anchorEndText}`;
+
     dlinks.push({
       type: LinkUtils.astType2DLinkType(noteRef.type),
       from: NoteUtils.toNoteLoc(note),
-      value: noteRef.value,
-      position: noteRef.data.link.position!,
-      xvault: !_.isUndefined(noteRef.data.vaultName),
+      value: noteRef.data.link.from.fname,
+      // not sure why typescript doesn't recognize the position, but I can confirm it exists in the debugger
+      position: noteRef.position as Position,
+      xvault: !_.isUndefined(noteRef.data.link.data.vaultName),
       // TODO: error if vault not found
-      to: noteRef.data.link.to,
+      to: {
+        fname: noteRef.data.link.from.fname, // not sure why, but noteRef's have their targets in `from` field
+        anchorHeader: anchorHeader ? anchorHeader : undefined,
+        vaultName: noteRef.data.link.data.vaultName,
+      },
     });
   }
 
@@ -388,6 +403,7 @@ export class LinkUtils {
   }): string | never {
     switch (dest) {
       case DendronASTDest.MD_DENDRON: {
+        const ref = link.type === "ref" ? "!" : "";
         const vaultPrefix =
           link.from.vaultName && link.data.xvault
             ? `${CONSTANTS.DENDRON_DELIMETER}${link.from.vaultName}/`
@@ -401,7 +417,7 @@ export class LinkUtils {
           ? `#${link.from.anchorHeader}`
           : "";
         // TODO: take into account piping direction
-        return [`[[`, alias, vaultPrefix, value, anchor, `]]`].join("");
+        return [ref, `[[`, alias, vaultPrefix, value, anchor, `]]`].join("");
       }
       default:
         return assertUnreachable();

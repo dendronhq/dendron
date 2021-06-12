@@ -204,7 +204,6 @@ const NOTES = {
         vaults,
         engine,
         cb: ({ barChange }) => {
-          debugger;
           return [
             {
               actual: _.trim(barChange?.note.body),
@@ -291,7 +290,7 @@ const NOTES = {
           return [
             {
               actual: _.trim(barChange?.note.body),
-              expected: "![[baz#start,1:*]]",
+              expected: "![[baz#start,1:#*]]",
             },
           ];
         },
@@ -299,7 +298,7 @@ const NOTES = {
     },
     {
       preSetupHook: (opts) =>
-        preSetupHook(opts, { barBody: `![[foo#start,1:*]]` }),
+        preSetupHook(opts, { barBody: `![[foo#start,1:#*]]` }),
     }
   ),
   NOTE_REF_WITH_RANGE_BLOCK_ANCHOR: new TestPresetEntryV4(
@@ -621,7 +620,7 @@ const NOTES = {
       },
     }
   ),
-  XVAULT_REFERENCE: new TestPresetEntryV4(
+  NOTE_REF_XVAULT: new TestPresetEntryV4(
     async ({ wsRoot, vaults, engine }) => {
       const resp = await engine.renameNote({
         oldLoc: {
@@ -654,6 +653,71 @@ const NOTES = {
             { status: "update", fname: "bar" },
             { status: "create", fname: "baz" },
           ],
+        },
+        {
+          actual: _.trim(changed![2].note.body),
+          expected: `![[dendron://${VaultUtils.getName(vaults[1])}/baz]]`,
+        },
+        {
+          actual: checkVault,
+          expected: true,
+        },
+      ];
+    },
+    {
+      preSetupHook: async ({ vaults, wsRoot }) => {
+        NoteTestUtilsV4.createNote({
+          wsRoot,
+          fname: "bar",
+          vault: vaults[0],
+          body: `![[dendron://${VaultUtils.getName(vaults[1])}/foo]]`,
+        });
+        NoteTestUtilsV4.createNote({
+          wsRoot,
+          fname: "foo",
+          vault: vaults[1],
+          body: "Facilis repellat aliquam quas.",
+        });
+      },
+    }
+  ),
+  NOTE_REF_XVAULT_VAULT_CHANGE: new TestPresetEntryV4(
+    async ({ wsRoot, vaults, engine }) => {
+      const resp = await engine.renameNote({
+        oldLoc: {
+          fname: "foo",
+          vaultName: VaultUtils.getName(vaults[1]),
+        },
+        newLoc: {
+          fname: "baz",
+          vaultName: VaultUtils.getName(vaults[2]),
+        },
+      });
+      const changed = resp.data;
+      const updated = _.map(changed, (ent) => ({
+        status: ent.status,
+        fname: ent.note.fname,
+      })).sort();
+      const checkVault = await FileTestUtils.assertInVault({
+        vault: vaults[2],
+        wsRoot,
+        match: ["baz"],
+        nomatch: ["foo"],
+      });
+
+      return [
+        {
+          actual: updated,
+          expected: [
+            { status: "update", fname: "root" },
+            { status: "delete", fname: "foo" },
+            { status: "update", fname: "bar" },
+            { status: "create", fname: "baz" },
+          ],
+        },
+        {
+          actual: _.trim(changed![2].note.body),
+          expected: `![[dendron://${VaultUtils.getName(vaults[2])}/baz]]`,
         },
         {
           actual: checkVault,
@@ -909,7 +973,7 @@ const NOTES = {
   // ),
 };
 export const ENGINE_RENAME_PRESETS = {
-  // use the below to test a sepcific test
+  // use the below to test a specific test
   //NOTES: {NOTE_REF: NOTES["NOTE_REF"]},
   NOTES,
   SCHEMAS: {},

@@ -397,7 +397,10 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div>## Header2
+<div class=\\"portal-parent-fader-bottom\\"></div>  
+
+
+## Header2
 
 task2
 
@@ -427,7 +430,10 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div>## Header2
+<div class=\\"portal-parent-fader-bottom\\"></div>  
+
+
+## Header2
 
 task2
 
@@ -457,7 +463,10 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div>## Header2
+<div class=\\"portal-parent-fader-bottom\\"></div>  
+
+
+## Header2
 
 task2
 
@@ -487,7 +496,10 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div>## Header2
+<div class=\\"portal-parent-fader-bottom\\"></div>  
+
+
+## Header2
 
 task2
 
@@ -515,7 +527,10 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div>two content
+<div class=\\"portal-parent-fader-bottom\\"></div>  
+
+
+two content
 
 
 </div></div>
@@ -541,7 +556,10 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div>two content
+<div class=\\"portal-parent-fader-bottom\\"></div>  
+
+
+two content
 
 
 </div></div>
@@ -567,7 +585,10 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div><div class=\\"portal-container\\">
+<div class=\\"portal-parent-fader-bottom\\"></div>  
+
+
+<div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\" >
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">One</span></div>
@@ -626,7 +647,10 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div>foo body
+<div class=\\"portal-parent-fader-bottom\\"></div>  
+
+
+foo body
 
 
 </div></div>
@@ -652,7 +676,10 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div>journal1
+<div class=\\"portal-parent-fader-bottom\\"></div>  
+
+
+journal1
 
 
 </div></div><div class=\\"portal-container\\">
@@ -664,7 +691,10 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div>journal2
+<div class=\\"portal-parent-fader-bottom\\"></div>  
+
+
+journal2
 
 
 </div></div><div class=\\"portal-container\\">
@@ -676,7 +706,10 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div>journal3
+<div class=\\"portal-parent-fader-bottom\\"></div>  
+
+
+journal3
 
 
 </div></div>

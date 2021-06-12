@@ -15,7 +15,7 @@ import {
 } from "@dendronhq/common-all";
 import { file2Note } from "@dendronhq/common-server";
 import _ from "lodash";
-import { html, paragraph, root } from "mdast-builder";
+import { brk, html, paragraph, root } from "mdast-builder";
 import { Eat } from "remark-parse";
 import Unified, { Plugin } from "unified";
 import { Node, Parent } from "unist";
@@ -394,6 +394,9 @@ export function convertNoteRefASTV2(
         }
         if (dest === DendronASTDest.MD_ENHANCED_PREVIEW) {
           suffix = ".md";
+          // NOTE: parsing doesn't work properly for first line, not sure why
+          // this HACK fixes it
+          data.children = [brk].concat(data.children);
         }
         let isPublished = true;
         if (dest === DendronASTDest.HTML) {

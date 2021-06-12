@@ -24,7 +24,7 @@ VFile {
 }
 `;
 
-exports[`noteRefV2 compile "HTML: WITH_ANCHOR" 1`] = `
+exports[`noteRefV2 common cases compile "HTML: WITH_ANCHOR" 1`] = `
 VFile {
   "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
 <h1 id=\\"foo-bar\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo-bar\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo Bar</h1>
@@ -52,7 +52,7 @@ VFile {
 }
 `;
 
-exports[`noteRefV2 compile "HTML: WITH_ANCHOR" 2`] = `
+exports[`noteRefV2 common cases compile "HTML: WITH_ANCHOR" 2`] = `
 VFile {
   "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
 <h1 id=\\"foo-bar\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo-bar\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo Bar</h1>
@@ -80,7 +80,7 @@ VFile {
 }
 `;
 
-exports[`noteRefV2 compile "HTML: WITH_NOTE_LINK_TITLE" 1`] = `
+exports[`noteRefV2 common cases compile "HTML: WITH_NOTE_LINK_TITLE" 1`] = `
 VFile {
   "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
 <h1 id=\\"foo-bar\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo-bar\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo Bar</h1>
@@ -108,7 +108,40 @@ VFile {
 }
 `;
 
-exports[`noteRefV2 compile "HTML: XVAULT_CASE" 1`] = `
+exports[`noteRefV2 common cases compile "HTML: WITH_PUBLISHING" 1`] = `
+VFile {
+  "contents": "# Root
+
+<div class=\\"portal-container\\">
+<div class=\\"portal-head\\">
+<div class=\\"portal-backlink\\" >
+<div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Bar</span></div>
+
+</div>
+</div>
+<div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
+<div class=\\"portal-parent-fader-top\\"></div>
+<div class=\\"portal-parent-fader-bottom\\"></div>two content
+
+
+</div></div>
+
+* * *
+
+## Children
+
+1. [Bar](bar.html)
+2. [Foo](foo.html)
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`noteRefV2 common cases compile "HTML: XVAULT_CASE" 1`] = `
 VFile {
   "contents": "# Root
 
@@ -140,7 +173,7 @@ VFile {
 }
 `;
 
-exports[`noteRefV2 compile "HTML: recursive" 1`] = `
+exports[`noteRefV2 common cases compile "HTML: recursive" 1`] = `
 VFile {
   "contents": "# Root
 
@@ -201,7 +234,7 @@ Regular wikilink:
 }
 `;
 
-exports[`noteRefV2 compile "HTML: regular" 1`] = `
+exports[`noteRefV2 common cases compile "HTML: regular" 1`] = `
 VFile {
   "contents": "# Foo
 
@@ -233,7 +266,7 @@ VFile {
 }
 `;
 
-exports[`noteRefV2 compile "HTML: wildcard" 1`] = `
+exports[`noteRefV2 common cases compile "HTML: wildcard" 1`] = `
 VFile {
   "contents": "# Root
 
@@ -289,7 +322,19 @@ VFile {
 }
 `;
 
-exports[`noteRefV2 compile "MD_DENDRON: XVAULT_CASE" 1`] = `
+exports[`noteRefV2 common cases compile "MD_DENDRON: WITH_PUBLISHING" 1`] = `
+VFile {
+  "contents": "![[dendron://vault1/bar]]
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`noteRefV2 common cases compile "MD_DENDRON: XVAULT_CASE" 1`] = `
 VFile {
   "contents": "![[dendron://vault2/two]]
 
@@ -301,7 +346,7 @@ VFile {
 }
 `;
 
-exports[`noteRefV2 compile "MD_DENDRON: recursive" 1`] = `
+exports[`noteRefV2 common cases compile "MD_DENDRON: recursive" 1`] = `
 VFile {
   "contents": "![[foo]]
 
@@ -313,7 +358,7 @@ VFile {
 }
 `;
 
-exports[`noteRefV2 compile "MD_DENDRON: regular" 1`] = `
+exports[`noteRefV2 common cases compile "MD_DENDRON: regular" 1`] = `
 VFile {
   "contents": "![[foo]]
 
@@ -325,7 +370,7 @@ VFile {
 }
 `;
 
-exports[`noteRefV2 compile "MD_DENDRON: wildcard" 1`] = `
+exports[`noteRefV2 common cases compile "MD_DENDRON: wildcard" 1`] = `
 VFile {
   "contents": "![[journal.2020.08.*]]
 
@@ -337,7 +382,7 @@ VFile {
 }
 `;
 
-exports[`noteRefV2 compile "MD_ENHANCED_PREVIEW: WITH_ANCHOR" 1`] = `
+exports[`noteRefV2 common cases compile "MD_ENHANCED_PREVIEW: WITH_ANCHOR" 1`] = `
 VFile {
   "contents": "# Foo
 
@@ -367,7 +412,7 @@ task2
 }
 `;
 
-exports[`noteRefV2 compile "MD_ENHANCED_PREVIEW: WITH_ANCHOR" 2`] = `
+exports[`noteRefV2 common cases compile "MD_ENHANCED_PREVIEW: WITH_ANCHOR" 2`] = `
 VFile {
   "contents": "# Foo
 
@@ -397,7 +442,7 @@ task2
 }
 `;
 
-exports[`noteRefV2 compile "MD_ENHANCED_PREVIEW: WITH_FM_TITLE" 1`] = `
+exports[`noteRefV2 common cases compile "MD_ENHANCED_PREVIEW: WITH_FM_TITLE" 1`] = `
 VFile {
   "contents": "# Foo
 
@@ -427,7 +472,7 @@ task2
 }
 `;
 
-exports[`noteRefV2 compile "MD_ENHANCED_PREVIEW: WITH_NOTE_LINK_TITLE" 1`] = `
+exports[`noteRefV2 common cases compile "MD_ENHANCED_PREVIEW: WITH_NOTE_LINK_TITLE" 1`] = `
 VFile {
   "contents": "# Foo
 
@@ -457,7 +502,33 @@ task2
 }
 `;
 
-exports[`noteRefV2 compile "MD_ENHANCED_PREVIEW: XVAULT_CASE" 1`] = `
+exports[`noteRefV2 common cases compile "MD_ENHANCED_PREVIEW: WITH_PUBLISHING" 1`] = `
+VFile {
+  "contents": "# Root
+
+<div class=\\"portal-container\\">
+<div class=\\"portal-head\\">
+<div class=\\"portal-backlink\\" >
+<div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Bar</span></div>
+<a href=\\"bar.md\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+</div>
+</div>
+<div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
+<div class=\\"portal-parent-fader-top\\"></div>
+<div class=\\"portal-parent-fader-bottom\\"></div>two content
+
+
+</div></div>
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`noteRefV2 common cases compile "MD_ENHANCED_PREVIEW: XVAULT_CASE" 1`] = `
 VFile {
   "contents": "# Root
 
@@ -483,7 +554,7 @@ VFile {
 }
 `;
 
-exports[`noteRefV2 compile "MD_ENHANCED_PREVIEW: recursive" 1`] = `
+exports[`noteRefV2 common cases compile "MD_ENHANCED_PREVIEW: recursive" 1`] = `
 VFile {
   "contents": "# Root
 
@@ -542,7 +613,7 @@ Regular wikilink: [Two](foo.two.md)
 }
 `;
 
-exports[`noteRefV2 compile "MD_ENHANCED_PREVIEW: regular" 1`] = `
+exports[`noteRefV2 common cases compile "MD_ENHANCED_PREVIEW: regular" 1`] = `
 VFile {
   "contents": "# Foo
 
@@ -568,7 +639,7 @@ VFile {
 }
 `;
 
-exports[`noteRefV2 compile "MD_ENHANCED_PREVIEW: wildcard" 1`] = `
+exports[`noteRefV2 common cases compile "MD_ENHANCED_PREVIEW: wildcard" 1`] = `
 VFile {
   "contents": "# Root
 
@@ -618,7 +689,7 @@ VFile {
 }
 `;
 
-exports[`noteRefV2 compile "MD_REGULAR: WITH_ANCHOR" 1`] = `
+exports[`noteRefV2 common cases compile "MD_REGULAR: WITH_ANCHOR" 1`] = `
 VFile {
   "contents": "# Foo
 
@@ -648,7 +719,7 @@ task2
 }
 `;
 
-exports[`noteRefV2 compile "MD_REGULAR: WITH_ANCHOR" 2`] = `
+exports[`noteRefV2 common cases compile "MD_REGULAR: WITH_ANCHOR" 2`] = `
 VFile {
   "contents": "# Foo
 
@@ -678,7 +749,7 @@ task2
 }
 `;
 
-exports[`noteRefV2 compile "MD_REGULAR: XVAULT_CASE" 1`] = `
+exports[`noteRefV2 common cases compile "MD_REGULAR: XVAULT_CASE" 1`] = `
 VFile {
   "contents": "# Root
 
@@ -704,7 +775,7 @@ VFile {
 }
 `;
 
-exports[`noteRefV2 compile "MD_REGULAR: recursive" 1`] = `
+exports[`noteRefV2 common cases compile "MD_REGULAR: recursive" 1`] = `
 VFile {
   "contents": "# Root
 
@@ -763,7 +834,7 @@ Regular wikilink: [Two](foo.two)
 }
 `;
 
-exports[`noteRefV2 compile "MD_REGULAR: regular" 1`] = `
+exports[`noteRefV2 common cases compile "MD_REGULAR: regular" 1`] = `
 VFile {
   "contents": "# Foo
 
@@ -789,7 +860,7 @@ VFile {
 }
 `;
 
-exports[`noteRefV2 compile "MD_REGULAR: wildcard" 1`] = `
+exports[`noteRefV2 common cases compile "MD_REGULAR: wildcard" 1`] = `
 VFile {
   "contents": "# Root
 

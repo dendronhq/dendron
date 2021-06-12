@@ -395,11 +395,14 @@ export function convertNoteRefASTV2(
         if (dest === DendronASTDest.MD_ENHANCED_PREVIEW) {
           suffix = ".md";
         }
-        const isPublished = SiteUtils.isPublished({
-          note,
-          config: config!,
-          engine,
-        });
+        let isPublished = true;
+        if (dest === DendronASTDest.HTML) {
+          isPublished = SiteUtils.isPublished({
+            note,
+            config: config!,
+            engine,
+          });
+        }
         const link = isPublished
           ? `"${wikiLinkOpts?.prefix || ""}${href}${suffix}"`
           : undefined;

@@ -666,13 +666,13 @@ const NOTES = {
     },
     {
       preSetupHook: async ({ vaults, wsRoot }) => {
-        NoteTestUtilsV4.createNote({
+        await NoteTestUtilsV4.createNote({
           wsRoot,
           fname: "bar",
           vault: vaults[0],
           body: `![[dendron://${VaultUtils.getName(vaults[1])}/foo]]`,
         });
-        NoteTestUtilsV4.createNote({
+        await NoteTestUtilsV4.createNote({
           wsRoot,
           fname: "foo",
           vault: vaults[1],
@@ -727,13 +727,13 @@ const NOTES = {
     },
     {
       preSetupHook: async ({ vaults, wsRoot }) => {
-        NoteTestUtilsV4.createNote({
+        await NoteTestUtilsV4.createNote({
           wsRoot,
           fname: "bar",
           vault: vaults[0],
           body: `![[dendron://${VaultUtils.getName(vaults[1])}/foo]]`,
         });
-        NoteTestUtilsV4.createNote({
+        await NoteTestUtilsV4.createNote({
           wsRoot,
           fname: "foo",
           vault: vaults[1],

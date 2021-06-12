@@ -185,6 +185,7 @@ function CalendarView({ engine, ide }: DendronProps) {
 
           return (
             <div
+              key={note.id}
               style={{
                 position: "relative",
                 top: index * 2 - 6, // space between the day and dots boxes
@@ -193,13 +194,13 @@ function CalendarView({ engine, ide }: DendronProps) {
             >
               {_.times(amount, (index) => (
                 <div
+                  key={index}
                   style={{
                     position: "absolute",
                     left: index * 7, // 7 resutls in a nice visible space between the dots
                   }}
                 >
                   <Badge
-                    key={index}
                     className={`${note.fname}`}
                     dot
                     color={

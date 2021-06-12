@@ -30,6 +30,9 @@
     "dendron.dendron-snippet-maker"
   ],
   "contributes": {
+    "untrustedWorkspaces": {
+      "supported": true
+    },
     "languages": [
       {
         "id": "markdown",

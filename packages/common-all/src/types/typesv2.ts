@@ -523,7 +523,10 @@ export type OnDidChangeActiveTextEditorMsg = DMessage<
 >;
 
 export type TreeViewMessage = DMessage<TreeViewMessageType, { id: string }>;
-export type GraphViewMessage = DMessage<GraphViewMessageType, { id: string }>;
+export type GraphViewMessage = DMessage<
+  GraphViewMessageType,
+  { id: string; vault?: string }
+>;
 
 // --- Views
 

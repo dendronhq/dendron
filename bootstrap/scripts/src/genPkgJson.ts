@@ -162,8 +162,7 @@ function updateRepositoryScripts({ pkgJson }: PkgUpdateOpts) {
   if (!pkgJson.scripts) {
     pkgJson.scripts = {};
   }
-  pkgJson.scripts["format"] =
-    "cd ../.. && yarn format:pkg $npm_package_repository_directory";
+  pkgJson.scripts["format"] = "echo nop";
 }
 
 function updateLernaPkgJson({ pkgJson }: PkgUpdateOpts) {

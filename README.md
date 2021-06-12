@@ -1,7 +1,7 @@
 ![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/logo-256.png)
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-44-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-45-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 # Welcome to Dendron!
@@ -118,6 +118,7 @@ Dendron wouldn't be what it is today without help from these wonderful gardeners
   <tr>
     <td align="center"><a href="https://github.com/timDeHof"><img src="https://avatars.githubusercontent.com/u/2568193?v=4?s=100" width="100px;" alt=""/><br /><sub><b>timDeHof</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3AtimDeHof" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/singlebunglemrbungle"><img src="https://avatars.githubusercontent.com/u/84944869?v=4?s=100" width="100px;" alt=""/><br /><sub><b>singlebungle</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Asinglebunglemrbungle" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://github.com/ElliotPsyIT"><img src="https://avatars.githubusercontent.com/u/1060159?v=4?s=100" width="100px;" alt=""/><br /><sub><b>elliotfielstein</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3AElliotPsyIT" title="Bug reports">🐛</a></td>
   </tr>
 </table>
 

@@ -477,26 +477,33 @@ export class NoteUtils {
 
   /**
    * Create a wiki link to the given note
-   * @param opts
+   *
    * @returns
    */
   static createWikiLink(opts: {
     note: NoteProps;
-    header?: string;
+    anchor?: {
+      value: string;
+      type: "header" | "blockAnchor";
+    };
     useVaultPrefix?: boolean;
     useTitle?: boolean;
   }): string {
-    const { note, header, useVaultPrefix, useTitle } = _.defaults(opts, {
+    const { note, anchor, useVaultPrefix, useTitle } = _.defaults(opts, {
       useTitle: true,
     });
     let { title, fname, vault } = note;
     let suffix = "";
-    const slugger = getSlugger();
-    if (header) {
-      suffix = "#" + slugger.slug(header);
-    }
-    if (header) {
-      title = header;
+    if (anchor) {
+      const { value: id, type } = anchor;
+      let idStr;
+      if (type === "header") {
+        title = id;
+        idStr = getSlugger().slug(id);
+      } else {
+        idStr = id;
+      }
+      suffix = `#${idStr}`;
     }
     const vaultPrefix = useVaultPrefix
       ? `${CONSTANTS.DENDRON_DELIMETER}${VaultUtils.getName(vault)}/`

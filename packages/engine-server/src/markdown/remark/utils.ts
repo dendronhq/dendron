@@ -44,6 +44,7 @@ import { MDUtilsV4 } from "../utils";
 import { MDUtilsV5, ProcMode } from "../utilsv5";
 const toString = require("mdast-util-to-string");
 export { mdastBuilder };
+export { select, selectAll } from "unist-util-select";
 
 export const ALIAS_DIVIDER = "|";
 
@@ -278,11 +279,13 @@ export class LinkUtils {
       }
     | null {
     const LINK_NAME = "[^#\\|>]+";
+    // aliases may contain # symbols
+    const ALIAS_NAME = "[^\\|>]+";
     const re = new RegExp(
       "" +
         // alias?
         `(` +
-        `(?<alias>${LINK_NAME}(?=\\|))` +
+        `(?<alias>${ALIAS_NAME}(?=\\|))` +
         "\\|" +
         ")?" +
         // name
@@ -501,11 +504,6 @@ export class AnchorUtils {
       createLogger("AnchorUtils").error(error);
       return {};
     }
-  }
-
-  static isBlockAnchor(anchor?: string): boolean {
-    // not undefined, not an empty string, and the first character is ^
-    return !!anchor && anchor[0] === "^";
   }
 }
 

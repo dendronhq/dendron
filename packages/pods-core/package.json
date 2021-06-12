@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/pods-core",
-  "version": "0.44.1",
+  "version": "0.45.1",
   "description": "pods-core",
   "license": "GPLv3",
   "repository": {
@@ -23,7 +23,7 @@
   "types": "lib/index.d.ts",
   "scripts": {
     "clean": "rimraf lib && rimraf coverage",
-    "format": "cd ../.. && yarn format:pkg $npm_package_repository_directory",
+    "format": "echo nop",
     "lint": "echo stub",
     "prepublishOnly": "yarn build",
     "prebuild": "yarn clean && yarn format && yarn lint && echo Using TypeScript && tsc --version",
@@ -58,9 +58,9 @@
     "preset": "ts-jest"
   },
   "dependencies": {
-    "@dendronhq/common-all": "^0.44.1",
-    "@dendronhq/common-server": "^0.44.1",
-    "@dendronhq/engine-server": "^0.44.1",
+    "@dendronhq/common-all": "^0.45.1",
+    "@dendronhq/common-server": "^0.45.1",
+    "@dendronhq/engine-server": "^0.45.1",
     "csv-writer": "^1.6.0",
     "emailjs": "^3.4.0",
     "fs-extra": "^9.0.1",

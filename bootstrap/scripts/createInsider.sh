@@ -4,7 +4,7 @@ git branch -D integ-publish
 git checkout -b integ-publish
 
 version=patch
-lerna version $version 
+lerna version $version --no-push
 
 git add .
 git commit -m "chore: publish $version"

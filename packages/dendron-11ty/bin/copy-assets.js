@@ -26,6 +26,10 @@ async function copyAssets() {
   await vaults.reduce(async (resp, vault) => {
       let acc = await resp;
       console.log("copying assets from...", vault)
+      if (vault.visibility === "private") {
+        console.log(`skipping copy assets from private vault ${vault.fsPath}`)
+        return;
+      }
       await SiteUtils.copyAssets({ wsRoot, vault, siteAssetsDir, deleteSiteAssetsDir });
       deleteSiteAssetsDir = false;
     }, Promise.resolve({}));

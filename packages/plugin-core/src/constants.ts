@@ -233,6 +233,12 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     group: "notes",
     desc: "Move a note",
   },
+  RANDOM_NOTE: {
+    key: "dendron.randomNote",
+    title: `${CMD_PREFIX} Random Note`,
+    group: "notes",
+    desc: "Open a random note within a configured hierarchy set",
+  },
   RENAME_NOTE: {
     key: "dendron.renameNote",
     title: `${CMD_PREFIX} Rename Note`,
@@ -651,7 +657,6 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX} Show Schema Graph V2`,
     group: "workspace",
     desc: "Display the schemas in this workspace as a graph",
-    when: DendronContext.DEV_MODE,
   },
   SHOW_PREVIEW: {
     key: "dendron.showPreview",

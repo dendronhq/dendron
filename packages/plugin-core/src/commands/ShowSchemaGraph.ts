@@ -3,13 +3,15 @@ import {
   DendronWebViewKey,
   GraphViewMessage,
   GraphViewMessageType,
+  VaultUtils,
 } from "@dendronhq/common-all";
-import { ViewColumn, window } from "vscode";
+import { Uri, ViewColumn, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { WebViewUtils } from "../views/utils";
 import { BasicCommand } from "./base";
-import { getEngine, getWS } from "../workspace";
-import { GotoNoteCommand } from "./GotoNote";
+import { getWS } from "../workspace";
+import { VSCodeUtils } from "../utils";
+import path from "path";
 
 type CommandOpts = {};
 
@@ -62,11 +64,38 @@ export class ShowSchemaGraphCommand extends BasicCommand<
     panel.webview.onDidReceiveMessage(async (msg: GraphViewMessage) => {
       switch (msg.type) {
         case GraphViewMessageType.onSelect: {
-          const schema = getEngine().schemas[msg.data.id];
-          await new GotoNoteCommand().execute({
-            qs: schema.fname,
-            vault: schema.vault,
-          });
+          const engine = getWS().getEngine();
+          const schema = engine.schemas[msg.data.id];
+
+          const wsRoot = ws._enginev2?.wsRoot;
+
+          if (msg.data.vault && wsRoot) {
+            const vaults = engine.vaults.filter(
+              (v) => VaultUtils.getName(v) === msg.data.vault
+            );
+            if (_.isEmpty(vaults)) return;
+
+            const schemaPath = path.join(
+              wsRoot,
+              vaults[0].fsPath,
+              `root.schema.yml`
+            );
+            const uri = Uri.file(schemaPath);
+
+            await VSCodeUtils.openFileInEditor(uri);
+          } else if (schema && wsRoot) {
+            const fname = schema.fname;
+            // const vault = schema.vault;
+
+            const schemaPath = path.join(
+              wsRoot,
+              schema.vault.fsPath,
+              `${fname}.schema.yml`
+            );
+            const uri = Uri.file(schemaPath);
+
+            await VSCodeUtils.openFileInEditor(uri);
+          }
           break;
         }
         // case GraphViewMessageType.onGetActiveEditor: {

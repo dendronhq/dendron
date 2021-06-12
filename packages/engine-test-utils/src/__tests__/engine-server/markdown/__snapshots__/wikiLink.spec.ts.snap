@@ -17,6 +17,23 @@ VFile {
 }
 `;
 
+exports[`wikiLinks compile "HTML: WITH_ALIAS_HASH" 1`] = `
+VFile {
+  "contents": "<h1 id=\\"root\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#root\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Root</h1>
+<p><a href=\\"foo.html\\">#bar</a></p>
+<hr>
+<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<ol>
+<li><a href=\\"bar.html\\">Bar</a></li>
+<li><a href=\\"foo.html\\">Foo</a></li>
+</ol>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
 exports[`wikiLinks compile "HTML: WITH_ANCHOR" 1`] = `
 VFile {
   "contents": "<h1 id=\\"root\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#root\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Root</h1>
@@ -175,6 +192,18 @@ VFile {
 }
 `;
 
+exports[`wikiLinks compile "MD_DENDRON: WITH_ALIAS_HASH" 1`] = `
+VFile {
+  "contents": "[[#bar|foo]]
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
 exports[`wikiLinks compile "MD_DENDRON: WITH_ANCHOR" 1`] = `
 VFile {
   "contents": "[[foo#one]]
@@ -300,6 +329,20 @@ VFile {
   "contents": "# Root
 
 [bar](foo.md)
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`wikiLinks compile "MD_ENHANCED_PREVIEW: WITH_ALIAS_HASH" 1`] = `
+VFile {
+  "contents": "# Root
+
+[#bar](foo.md)
 
 ",
   "cwd": "<PROJECT_ROOT>",
@@ -440,6 +483,20 @@ VFile {
   "contents": "# Root
 
 [bar](foo)
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`wikiLinks compile "MD_REGULAR: WITH_ALIAS_HASH" 1`] = `
+VFile {
+  "contents": "# Root
+
+[#bar](foo)
 
 ",
   "cwd": "<PROJECT_ROOT>",

@@ -69,8 +69,7 @@ function CalendarView({ engine, ide }: DendronProps) {
     state: "enter",
   });
 
-  const [currentMode, setCurrentMode] =
-    useState<CalendarProps["mode"]>("month");
+  const [activeMode, setActiveMode] = useState<CalendarProps["mode"]>("month");
 
   const engineInitialized = EngineSliceUtils.hasInitialized(engine);
   const { notes, vaults, config } = engine;
@@ -125,7 +124,7 @@ function CalendarView({ engine, ide }: DendronProps) {
 
   const getDateKey = (date: Moment) => {
     return date.format(
-      currentMode === "month" ? defaultJournalDateFormat : "y.MM" // TODO compute format for currentMode="year"
+      activeMode === "month" ? defaultJournalDateFormat : "y.MM" // TODO compute format for currentMode="year"
     );
   };
 
@@ -149,18 +148,19 @@ function CalendarView({ engine, ide }: DendronProps) {
 
   useEffect(() => {
     if (activeDate) {
+      console.log("SWITCH MODE: ", activeMode, activeDate);
       onSelect(activeDate); // trigger `onSelect` when switching month<->year views
     }
-  }, [currentMode]);
+  }, [activeMode]);
 
   const onPanelChange = useCallback<
     Exclude<CalendarProps["onPanelChange"], undefined>
   >(
     (date, mode) => {
       logger.info({ ctx: "onPanelChange", date, mode });
-      setCurrentMode(mode);
+      setActiveMode(mode);
     },
-    [setCurrentMode]
+    [setActiveMode]
   );
 
   const { getPrefixCls, direction } = React.useContext(
@@ -244,7 +244,7 @@ function CalendarView({ engine, ide }: DendronProps) {
 
   return (
     <Calendar
-      mode={currentMode}
+      mode={activeMode}
       onSelect={onSelect}
       onPanelChange={onPanelChange}
       value={activeDate}

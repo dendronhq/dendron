@@ -13,21 +13,51 @@ import {
 } from "@dendronhq/common-all";
 import type { Moment } from "moment";
 import moment from "moment";
-import { Calendar, Badge } from "antd";
+import momentGenerateConfig from "rc-picker/lib/generate/moment";
+import { Badge, ConfigProvider } from "antd";
+
+import classNames from "classnames";
+import generateCalendar from "antd/lib/calendar/generateCalendar";
+
 import { blue } from "@ant-design/colors";
-import type { CalendarProps } from "antd";
+import type { CalendarProps as AntdCalendarProps } from "antd";
 import _ from "lodash";
 import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { DendronProps } from "../../lib/types";
 
-type AntdCalendarProps = CalendarProps<Moment>;
+function isSameYear(date1: Moment, date2: Moment) {
+  return (
+    date1 &&
+    date2 &&
+    momentGenerateConfig.getYear(date1) === momentGenerateConfig.getYear(date2)
+  );
+}
+
+function isSameMonth(date1: Moment, date2: Moment) {
+  return (
+    isSameYear(date1, date2) &&
+    momentGenerateConfig.getMonth(date1) ===
+      momentGenerateConfig.getMonth(date2)
+  );
+}
+
+function isSameDate(date1: Moment, date2: Moment) {
+  return (
+    isSameMonth(date1, date2) &&
+    momentGenerateConfig.getDate(date1) === momentGenerateConfig.getDate(date2)
+  );
+}
 
 function getMaybeDatePortion({ fname }: NoteProps, journalName: string) {
   const journalIndex = fname.indexOf(journalName);
   return fname.slice(journalIndex + journalName.length + 1);
 }
 
+const today = momentGenerateConfig.getNow();
+const Calendar = generateCalendar<Moment>(momentGenerateConfig);
 const { EngineSliceUtils } = engineSlice;
+
+type CalendarProps = AntdCalendarProps<Moment>;
 
 function CalendarView({ engine, ide }: DendronProps) {
   // --- init
@@ -40,7 +70,7 @@ function CalendarView({ engine, ide }: DendronProps) {
   });
 
   const [currentMode, setCurrentMode] =
-    useState<AntdCalendarProps["mode"]>("month");
+    useState<CalendarProps["mode"]>("month");
 
   const engineInitialized = EngineSliceUtils.hasInitialized(engine);
   const { notes, vaults, config } = engine;
@@ -102,9 +132,7 @@ function CalendarView({ engine, ide }: DendronProps) {
     [currentMode, defaultJournalDateFormat]
   );
 
-  const onSelect = useCallback<
-    Exclude<AntdCalendarProps["onSelect"], undefined>
-  >(
+  const onSelect = useCallback<Exclude<CalendarProps["onSelect"], undefined>>(
     (date) => {
       logger.info({ ctx: "onSelect", date });
       const dateKey = getDateKey(date);
@@ -123,7 +151,7 @@ function CalendarView({ engine, ide }: DendronProps) {
   );
 
   const onPanelChange = useCallback<
-    Exclude<AntdCalendarProps["onPanelChange"], undefined>
+    Exclude<CalendarProps["onPanelChange"], undefined>
   >(
     (date, mode) => {
       logger.info({ ctx: "onPanelChange", date, mode });
@@ -132,7 +160,15 @@ function CalendarView({ engine, ide }: DendronProps) {
     [setCurrentMode]
   );
 
-  const dateCellRender: AntdCalendarProps["dateCellRender"] = useCallback(
+  const { getPrefixCls, direction } = React.useContext(
+    ConfigProvider.ConfigContext
+  );
+  const prefixCls = getPrefixCls("picker");
+  const calendarPrefixCls = `${prefixCls}-calendar`;
+
+  const dateCellRender = useCallback<
+    Exclude<CalendarProps["dateCellRender"], undefined>
+  >(
     (date) => {
       const dateKey = getDateKey(date);
       const dailyNote = _.first(groupedDailyNotes[dateKey]);
@@ -179,7 +215,33 @@ function CalendarView({ engine, ide }: DendronProps) {
         })
       );
     },
-    [groupedDailyNotes, wordsPerDot]
+    [getDateKey, groupedDailyNotes, wordsPerDot]
+  );
+
+  const dateFullCellRender = useCallback<
+    Exclude<CalendarProps["dateFullCellRender"], undefined>
+  >(
+    (date) => {
+      return (
+        <div
+          className={classNames(
+            `${prefixCls}-cell-inner`,
+            `${calendarPrefixCls}-date`,
+            {
+              [`${calendarPrefixCls}-date-today`]: isSameDate(today, date),
+            }
+          )}
+        >
+          <div className={`${calendarPrefixCls}-date-value`}>
+            {_.padStart(String(momentGenerateConfig.getDate(date)), 2, "0")}
+          </div>
+          <div className={`${calendarPrefixCls}-date-content`}>
+            {dateCellRender && dateCellRender(date)}
+          </div>
+        </div>
+      );
+    },
+    [getDateKey, groupedDailyNotes]
   );
 
   return (
@@ -188,7 +250,7 @@ function CalendarView({ engine, ide }: DendronProps) {
       onSelect={onSelect}
       onPanelChange={onPanelChange}
       value={activeDate}
-      dateCellRender={dateCellRender}
+      dateFullCellRender={dateFullCellRender}
       fullscreen={false}
     />
   );

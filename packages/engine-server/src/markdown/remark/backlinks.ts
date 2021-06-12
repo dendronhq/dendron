@@ -31,7 +31,7 @@ const plugin: Plugin = function (this: Unified.Processor) {
 
     const backlinks = _.uniqBy(
       (note?.links || []).filter((ent) => ent.type === "backlink"),
-      (ent) => ent.from.fname + (ent.from.vault?.fsPath || "")
+      (ent) => ent.from.fname + (ent.from.vaultName || "")
     );
 
     if (!_.isEmpty(backlinks)) {
@@ -54,13 +54,16 @@ const plugin: Plugin = function (this: Unified.Processor) {
                     NoteUtils.getNoteOrThrow({
                       fname: mdLink.from.fname!,
                       notes: engine.notes,
-                      vault: mdLink.from.vault!,
+                      vault: VaultUtils.getVaultByName({
+                        vaults: engine.vaults,
+                        vname: mdLink.from.vaultName!,
+                      })!,
                       wsRoot: engine.wsRoot,
                     }).title +
                     (engine.vaults.length > 1
-                      ? ` (${VaultUtils.getName(mdLink.from.vault!)})`
+                      ? ` (${mdLink.from.vaultName!})`
                       : ""),
-                  vaultName: VaultUtils.getName(mdLink.from.vault!),
+                  vaultName: mdLink.from.vaultName!,
                 },
                 children: [],
               } as WikiLinkNoteV4)

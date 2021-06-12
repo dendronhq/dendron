@@ -1,12 +1,19 @@
-import { NoteChangeEntry, NoteUtils } from "@dendronhq/common-all";
+import {
+  DEngineClient,
+  DVault,
+  NoteChangeEntry,
+  NoteUtils,
+  VaultUtils,
+  WorkspaceOpts,
+} from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import {
-  TestPresetEntryV4,
-  FileTestUtils,
-  NOTE_PRESETS_V4,
-  NOTE_BODY_PRESETS_V4,
-  NoteTestUtilsV4,
   AssertUtils,
+  FileTestUtils,
+  NoteTestUtilsV4,
+  NOTE_PRESETS_V4,
+  TestPresetEntryV4,
+  TestResult,
 } from "@dendronhq/common-test-utils";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -28,58 +35,291 @@ const findByName = (
   return created;
 };
 
-// const findUpdated = (changed: NoteChangeEntry[]) => {
-//   const note = _.find(changed, { status: "update" });
-//   return note;
-// };
-
-const NOTES = {
-  NOTE_REF: new TestPresetEntryV4(
-    async ({ wsRoot, vaults, engine }) => {
-      const vault = vaults[0];
-
-      const changed = await engine.renameNote({
-        oldLoc: { fname: "foo", vault },
-        newLoc: { fname: "baz", vault },
-      });
-
-      const checkVault = await FileTestUtils.assertInVault({
-        wsRoot,
-        vault,
-        match: ["baz.md"],
-        nomatch: ["foo.md"],
-      });
-      const barChange = _.find(changed.data, (ent) => ent.note.fname === "bar");
-      return [
-        {
-          actual: changed.data?.length,
-          expected: 4,
-        },
-        {
-          actual: _.trim(barChange?.note.body),
-          expected:
-            "[[baz]]\n![[dendron.pro.dendron-next-server#quickstart,1:#*]]",
-        },
-        {
-          actual: checkVault,
-          expected: true,
-        },
-      ];
+const runRename = async ({
+  engine,
+  vaults,
+  wsRoot,
+  numChanges,
+  cb,
+}: {
+  engine: DEngineClient;
+  vaults: DVault[];
+  wsRoot: string;
+  numChanges?: number;
+  cb: (opts: {
+    barChange: NoteChangeEntry;
+    allChanged: NoteChangeEntry[];
+  }) => TestResult[];
+}) => {
+  const vault = vaults[0];
+  const changed = await engine.renameNote({
+    oldLoc: { fname: "foo", vaultName: VaultUtils.getName(vault) },
+    newLoc: { fname: "baz", vaultName: VaultUtils.getName(vault) },
+  });
+  const checkVault = await FileTestUtils.assertInVault({
+    wsRoot,
+    vault,
+    match: ["baz.md"],
+    nomatch: ["foo.md"],
+  });
+  const barChange = _.find(changed.data, (ent) => ent.note.fname === "bar")!;
+  const out = cb({ barChange, allChanged: changed.data! });
+  return out.concat([
+    {
+      actual: changed.data!.length,
+      expected: numChanges || 4,
     },
     {
-      preSetupHook: async ({ vaults, wsRoot }) => {
-        const vault = vaults[0];
-        await NOTE_PRESETS_V4.NOTE_SIMPLE.create({
-          vault,
-          wsRoot,
-        });
-        await NOTE_PRESETS_V4.NOTE_SIMPLE.create({
-          vault,
-          wsRoot,
-          fname: "bar",
-          body: `[[foo]]\n${NOTE_BODY_PRESETS_V4.NOTE_REF}`,
-        });
-      },
+      actual: checkVault,
+      expected: true,
+    },
+  ]);
+};
+
+const preSetupHook = async (
+  { vaults, wsRoot }: WorkspaceOpts,
+  { fooBody, barBody }: { fooBody?: string; barBody: string }
+) => {
+  const vault = vaults[0];
+  await NOTE_PRESETS_V4.NOTE_SIMPLE.create({
+    vault,
+    wsRoot,
+    body: fooBody ? fooBody : "",
+  });
+  await NOTE_PRESETS_V4.NOTE_SIMPLE_OTHER.create({
+    vault,
+    wsRoot,
+    body: barBody,
+  });
+};
+
+const NOTES = {
+  WITH_INLINE_CODE: new TestPresetEntryV4(
+    async ({ wsRoot, vaults, engine }) => {
+      return runRename({
+        wsRoot,
+        vaults,
+        engine,
+        numChanges: 3,
+        cb: ({ barChange }) => {
+          return [
+            {
+              actual: barChange,
+              expected: undefined,
+            },
+          ];
+        },
+      });
+    },
+    {
+      preSetupHook: (opts) => preSetupHook(opts, { barBody: "`[[foo]]`" }),
+    }
+  ),
+  WITH_ALIAS: new TestPresetEntryV4(
+    async ({ wsRoot, vaults, engine }) => {
+      return runRename({
+        wsRoot,
+        vaults,
+        engine,
+        cb: ({ barChange }) => {
+          return [
+            {
+              actual: _.trim(barChange?.note.body),
+              expected: "[[secret|baz]]",
+            },
+          ];
+        },
+      });
+    },
+    {
+      preSetupHook: (opts) => preSetupHook(opts, { barBody: `[[secret|foo]]` }),
+    }
+  ),
+  MULTIPLE_LINKS: new TestPresetEntryV4(
+    async ({ wsRoot, vaults, engine }) => {
+      return runRename({
+        wsRoot,
+        vaults,
+        engine,
+        cb: ({ barChange }) => {
+          return [
+            {
+              actual: _.trim(barChange?.note.body),
+              expected: "[[baz]] [[baz]]",
+            },
+          ];
+        },
+      });
+    },
+    {
+      preSetupHook: (opts) =>
+        preSetupHook(opts, { barBody: `[[foo]] [[foo]]` }),
+    }
+  ),
+  XVAULT_LINK: new TestPresetEntryV4(
+    async ({ wsRoot, vaults, engine }) => {
+      return runRename({
+        wsRoot,
+        vaults,
+        engine,
+        cb: ({ barChange }) => {
+          return [
+            {
+              actual: _.trim(barChange?.note.body),
+              expected: "[[dendron://vault1/baz#head1]]",
+            },
+          ];
+        },
+      });
+    },
+    {
+      preSetupHook: (opts) =>
+        preSetupHook(opts, { barBody: `[[dendron://vault1/foo#head1]]` }),
+    }
+  ),
+  RELATIVE_LINK: new TestPresetEntryV4(
+    async ({ wsRoot, vaults, engine }) => {
+      return runRename({
+        wsRoot,
+        vaults,
+        engine,
+        cb: ({ barChange }) => {
+          return [
+            {
+              actual: _.trim(barChange?.note.body),
+              expected: "[[baz#head1]]",
+            },
+          ];
+        },
+      });
+    },
+    {
+      preSetupHook: (opts) => preSetupHook(opts, { barBody: `[[foo#head1]]` }),
+    }
+  ),
+  NOTE_REF: new TestPresetEntryV4(
+    async ({ wsRoot, vaults, engine }) => {
+      return runRename({
+        wsRoot,
+        vaults,
+        engine,
+        cb: ({ barChange }) => {
+          return [
+            {
+              actual: _.trim(barChange?.note.body),
+              expected: "![[baz]]",
+            },
+          ];
+        },
+      });
+    },
+    {
+      preSetupHook: (opts) => preSetupHook(opts, { barBody: `![[foo]]` }),
+    }
+  ),
+  NOTE_REF_WITH_HEADER: new TestPresetEntryV4(
+    async ({ wsRoot, vaults, engine }) => {
+      return runRename({
+        wsRoot,
+        vaults,
+        engine,
+        cb: ({ barChange }) => {
+          return [
+            {
+              actual: _.trim(barChange?.note.body),
+              expected: "![[baz#header]]",
+            },
+          ];
+        },
+      });
+    },
+    {
+      preSetupHook: (opts) =>
+        preSetupHook(opts, { barBody: `![[foo#header]]` }),
+    }
+  ),
+  NOTE_REF_WITH_ANCHOR: new TestPresetEntryV4(
+    async ({ wsRoot, vaults, engine }) => {
+      return runRename({
+        wsRoot,
+        vaults,
+        engine,
+        cb: ({ barChange }) => {
+          return [
+            {
+              actual: _.trim(barChange?.note.body),
+              expected: "![[baz#^anchor-0-id-0]]",
+            },
+          ];
+        },
+      });
+    },
+    {
+      preSetupHook: (opts) =>
+        preSetupHook(opts, { barBody: `![[foo#^anchor-0-id-0]]` }),
+    }
+  ),
+  NOTE_REF_WITH_RANGE: new TestPresetEntryV4(
+    async ({ wsRoot, vaults, engine }) => {
+      return runRename({
+        wsRoot,
+        vaults,
+        engine,
+        cb: ({ barChange }) => {
+          return [
+            {
+              actual: _.trim(barChange?.note.body),
+              expected: "![[baz#start:#end]]",
+            },
+          ];
+        },
+      });
+    },
+    {
+      preSetupHook: (opts) =>
+        preSetupHook(opts, { barBody: `![[foo#start:#end]]` }),
+    }
+  ),
+  NOTE_REF_WITH_RANGE_WILDCARD_OFFSET: new TestPresetEntryV4(
+    async ({ wsRoot, vaults, engine }) => {
+      return runRename({
+        wsRoot,
+        vaults,
+        engine,
+        cb: ({ barChange }) => {
+          return [
+            {
+              actual: _.trim(barChange?.note.body),
+              expected: "![[baz#start,1:#*]]",
+            },
+          ];
+        },
+      });
+    },
+    {
+      preSetupHook: (opts) =>
+        preSetupHook(opts, { barBody: `![[foo#start,1:#*]]` }),
+    }
+  ),
+  NOTE_REF_WITH_RANGE_BLOCK_ANCHOR: new TestPresetEntryV4(
+    async ({ wsRoot, vaults, engine }) => {
+      return runRename({
+        wsRoot,
+        vaults,
+        engine,
+        cb: ({ barChange }) => {
+          return [
+            {
+              actual: _.trim(barChange?.note.body),
+              expected: "![[baz#^start:#^end]]",
+            },
+          ];
+        },
+      });
+    },
+    {
+      preSetupHook: (opts) =>
+        preSetupHook(opts, { barBody: `![[foo#^start:#^end]]` }),
     }
   ),
   // TODO: doesn't work in extension test wright now
@@ -137,8 +377,8 @@ const NOTES = {
       const vault = vaults[0];
       const alpha = NOTE_PRESETS_V4.NOTE_WITH_LINK.fname;
       const changed = await engine.renameNote({
-        oldLoc: { fname: alpha, vault },
-        newLoc: { fname: "gamma", vault },
+        oldLoc: { fname: alpha, vaultName: VaultUtils.getName(vault) },
+        newLoc: { fname: "gamma", vaultName: VaultUtils.getName(vault) },
       });
 
       const checkVault = await FileTestUtils.assertInVault({
@@ -182,8 +422,8 @@ const NOTES = {
       const alpha = "scratch.2020.02.03.0123";
       //const alpha = NOTE_PRESETS_V4.NOTE_WITH_LINK.fname;
       const changed = await engine.renameNote({
-        oldLoc: { fname: alpha, vault },
-        newLoc: { fname: "gamma", vault },
+        oldLoc: { fname: alpha, vaultName: VaultUtils.getName(vault) },
+        newLoc: { fname: "gamma", vaultName: VaultUtils.getName(vault) },
       });
       const checkVault = await FileTestUtils.assertInVault({
         wsRoot,
@@ -224,8 +464,8 @@ const NOTES = {
       const vault = vaults[0];
       const fnameOld = NOTE_PRESETS_V4.NOTE_WITH_TARGET.fname;
       const changed = await engine.renameNote({
-        oldLoc: { fname: fnameOld, vault },
-        newLoc: { fname: "gamma", vault },
+        oldLoc: { fname: fnameOld, vaultName: VaultUtils.getName(vault) },
+        newLoc: { fname: "gamma", vaultName: VaultUtils.getName(vault) },
       });
 
       const createdChange = findCreated(changed.data as NoteChangeEntry[]);
@@ -270,8 +510,8 @@ const NOTES = {
       const vault = vaults[0];
       const fnameOld = NOTE_PRESETS_V4.NOTE_WITH_TARGET.fname;
       const changed = await engine.renameNote({
-        oldLoc: { fname: fnameOld, vault },
-        newLoc: { fname: "gamma", vault },
+        oldLoc: { fname: fnameOld, vaultName: VaultUtils.getName(vault) },
+        newLoc: { fname: "gamma", vaultName: VaultUtils.getName(vault) },
       });
 
       const checkVault = await FileTestUtils.assertInVault({
@@ -323,8 +563,11 @@ const NOTES = {
       const fnameNew = "gamma";
       const fnameLink = NOTE_PRESETS_V4.NOTE_WITH_LINK.fname;
       const resp = await engine.renameNote({
-        oldLoc: { fname: fnameTarget, vault: vaults[0] },
-        newLoc: { fname: fnameNew, vault: vaults[0] },
+        oldLoc: {
+          fname: fnameTarget,
+          vaultName: VaultUtils.getName(vaults[0]),
+        },
+        newLoc: { fname: fnameNew, vaultName: VaultUtils.getName(vaults[0]) },
       });
       const changed = resp.data;
       const updated = _.map(changed, (ent) => ({
@@ -377,14 +620,139 @@ const NOTES = {
       },
     }
   ),
+  NOTE_REF_XVAULT: new TestPresetEntryV4(
+    async ({ wsRoot, vaults, engine }) => {
+      const resp = await engine.renameNote({
+        oldLoc: {
+          fname: "foo",
+          vaultName: VaultUtils.getName(vaults[1]),
+        },
+        newLoc: {
+          fname: "baz",
+          vaultName: VaultUtils.getName(vaults[1]),
+        },
+      });
+      const changed = resp.data;
+      const updated = _.map(changed, (ent) => ({
+        status: ent.status,
+        fname: ent.note.fname,
+      })).sort();
+      const checkVault = await FileTestUtils.assertInVault({
+        vault: vaults[1],
+        wsRoot,
+        match: ["baz"],
+        nomatch: ["foo"],
+      });
+
+      return [
+        {
+          actual: updated,
+          expected: [
+            { status: "update", fname: "root" },
+            { status: "delete", fname: "foo" },
+            { status: "update", fname: "bar" },
+            { status: "create", fname: "baz" },
+          ],
+        },
+        {
+          actual: _.trim(changed![2].note.body),
+          expected: `![[dendron://${VaultUtils.getName(vaults[1])}/baz]]`,
+        },
+        {
+          actual: checkVault,
+          expected: true,
+        },
+      ];
+    },
+    {
+      preSetupHook: async ({ vaults, wsRoot }) => {
+        await NoteTestUtilsV4.createNote({
+          wsRoot,
+          fname: "bar",
+          vault: vaults[0],
+          body: `![[dendron://${VaultUtils.getName(vaults[1])}/foo]]`,
+        });
+        await NoteTestUtilsV4.createNote({
+          wsRoot,
+          fname: "foo",
+          vault: vaults[1],
+          body: "Facilis repellat aliquam quas.",
+        });
+      },
+    }
+  ),
+  NOTE_REF_XVAULT_VAULT_CHANGE: new TestPresetEntryV4(
+    async ({ wsRoot, vaults, engine }) => {
+      const resp = await engine.renameNote({
+        oldLoc: {
+          fname: "foo",
+          vaultName: VaultUtils.getName(vaults[1]),
+        },
+        newLoc: {
+          fname: "baz",
+          vaultName: VaultUtils.getName(vaults[2]),
+        },
+      });
+      const changed = resp.data;
+      const updated = _.map(changed, (ent) => ({
+        status: ent.status,
+        fname: ent.note.fname,
+      })).sort();
+      const checkVault = await FileTestUtils.assertInVault({
+        vault: vaults[2],
+        wsRoot,
+        match: ["baz"],
+        nomatch: ["foo"],
+      });
+
+      return [
+        {
+          actual: updated,
+          expected: [
+            { status: "update", fname: "root" },
+            { status: "delete", fname: "foo" },
+            { status: "update", fname: "bar" },
+            { status: "create", fname: "baz" },
+          ],
+        },
+        {
+          actual: _.trim(changed![2].note.body),
+          expected: `![[dendron://${VaultUtils.getName(vaults[2])}/baz]]`,
+        },
+        {
+          actual: checkVault,
+          expected: true,
+        },
+      ];
+    },
+    {
+      preSetupHook: async ({ vaults, wsRoot }) => {
+        await NoteTestUtilsV4.createNote({
+          wsRoot,
+          fname: "bar",
+          vault: vaults[0],
+          body: `![[dendron://${VaultUtils.getName(vaults[1])}/foo]]`,
+        });
+        await NoteTestUtilsV4.createNote({
+          wsRoot,
+          fname: "foo",
+          vault: vaults[1],
+          body: "Facilis repellat aliquam quas.",
+        });
+      },
+    }
+  ),
   TARGET_IN_VAULT2_AND_LINK_IN_VAULT2: new TestPresetEntryV4(
     async ({ wsRoot, vaults, engine }) => {
       const fnameTarget = NOTE_PRESETS_V4.NOTE_WITH_TARGET.fname;
       const fnameNew = "gamma";
       const fnameLink = NOTE_PRESETS_V4.NOTE_WITH_LINK.fname;
       const resp = await engine.renameNote({
-        oldLoc: { fname: fnameTarget, vault: vaults[1] },
-        newLoc: { fname: fnameNew, vault: vaults[1] },
+        oldLoc: {
+          fname: fnameTarget,
+          vaultName: VaultUtils.getName(vaults[1]),
+        },
+        newLoc: { fname: fnameNew, vaultName: VaultUtils.getName(vaults[1]) },
       });
       const changed = resp.data;
       const updated = _.map(changed, (ent) => ({
@@ -441,8 +809,11 @@ const NOTES = {
       const fnameNew = "gamma";
       const fnameLink = NOTE_PRESETS_V4.NOTE_WITH_LINK.fname;
       const resp = await engine.renameNote({
-        oldLoc: { fname: fnameTarget, vault: vaults[1] },
-        newLoc: { fname: fnameNew, vault: vaults[1] },
+        oldLoc: {
+          fname: fnameTarget,
+          vaultName: VaultUtils.getName(vaults[1]),
+        },
+        newLoc: { fname: fnameNew, vaultName: VaultUtils.getName(vaults[1]) },
       });
       const changed = resp.data;
       const updated = _.map(changed, (ent) => ({
@@ -602,7 +973,7 @@ const NOTES = {
   // ),
 };
 export const ENGINE_RENAME_PRESETS = {
-  // use the below to test a sepcific test
+  // use the below to test a specific test
   //NOTES: {NOTE_REF: NOTES["NOTE_REF"]},
   NOTES,
   SCHEMAS: {},

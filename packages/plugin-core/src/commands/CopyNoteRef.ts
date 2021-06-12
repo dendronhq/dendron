@@ -5,6 +5,7 @@ import {
   isBlockAnchor,
   NoteProps,
   NoteUtils,
+  VaultUtils,
 } from "@dendronhq/common-all";
 import { refLink2Stringv2 } from "@dendronhq/engine-server";
 import _ from "lodash";
@@ -91,7 +92,7 @@ export class CopyNoteRefCommand extends BasicCommand<
       type: "ref",
       from: {
         fname,
-        vault,
+        vaultName: VaultUtils.getName(vault),
       },
     };
     let refLinkString: string = refLink2Stringv2({

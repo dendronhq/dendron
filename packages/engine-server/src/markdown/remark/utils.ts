@@ -4,6 +4,8 @@ import {
   DendronError,
   DEngineClient,
   DLink,
+  DNoteAnchorPositioned,
+  DNoteLink,
   DNoteLoc,
   DNoteRefData,
   DNoteRefLink,
@@ -13,13 +15,17 @@ import {
   NoteChangeEntry,
   NoteProps,
   NoteUtils,
-  VaultUtils,
+  Position,
 } from "@dendronhq/common-all";
+import { createLogger, note2String } from "@dendronhq/common-server";
 import _ from "lodash";
 import { Heading, Root } from "mdast";
+import * as mdastBuilder from "mdast-builder";
+import path from "path";
 import { Processor } from "unified";
 import { Node } from "unist";
 import { selectAll } from "unist-util-select";
+import visit from "unist-util-visit";
 import { VFile } from "vfile";
 import { normalizev2 } from "../../utils";
 import {
@@ -29,17 +35,14 @@ import {
   DendronASTNode,
   DendronASTRoot,
   DendronASTTypes,
+  NoteRefNoteV4,
   NoteRefNoteV4_LEGACY,
   WikiLinkNoteV4,
   WikiLinkProps,
 } from "../types";
 import { MDUtilsV4 } from "../utils";
-const toString = require("mdast-util-to-string");
-import * as mdastBuilder from "mdast-builder";
-import { DNoteAnchorPositioned } from "@dendronhq/common-all";
-import { createLogger, file2String } from "@dendronhq/common-server";
-import path from "path";
 import { MDUtilsV5, ProcMode } from "../utilsv5";
+const toString = require("mdast-util-to-string");
 export { mdastBuilder };
 export { select, selectAll } from "unist-util-select";
 
@@ -77,56 +80,91 @@ export function getNoteOrError(
   return { error, note };
 }
 
-type LinkFilter = {
-  type?: DendronASTTypes.REF_LINK_V2 | DendronASTTypes.WIKI_LINK;
-  oldLoc?: Partial<DNoteLoc>;
-};
-type LinkFilterTypeRequired = {
-  type: DendronASTTypes.REF_LINK_V2 | DendronASTTypes.WIKI_LINK;
-  oldLoc?: Partial<DNoteLoc>;
+export type LinkFilter = {
+  loc?: Partial<DNoteLoc>;
 };
 
 const getLinks = ({
   ast,
   note,
-  engine,
   filter,
 }: {
   ast: DendronASTNode;
   note: NoteProps;
-  engine: DEngineClient;
-  filter: LinkFilterTypeRequired;
+  filter: LinkFilter;
 }) => {
-  let out2: WikiLinkNoteV4[] = selectAll(filter.type, ast) as WikiLinkNoteV4[];
-  let dlinks = out2.map(
-    (m: WikiLinkNoteV4) =>
-      ({
-        type: LinkUtils.astType2DLinkType(filter.type),
-        from: NoteUtils.toNoteLoc(note),
-        original: m.value,
-        value: m.value,
-        alias: m.data.alias,
-        pos: {
-          start: m.position?.start.offset,
-          end: m.position?.end.offset,
-        },
-        // TODO: error if vault not found
-        to: {
-          fname: m.value,
-          anchorHeader: m.data.anchorHeader,
-          vault: m.data.vaultName
-            ? VaultUtils.getVaultByName({
-                vaults: engine.vaults,
-                vname: m.data.vaultName,
-              })
-            : undefined,
-        },
-      } as DLink)
+  const wikiLinks: WikiLinkNoteV4[] = [];
+  const noteRefs: (NoteRefNoteV4 | NoteRefNoteV4_LEGACY)[] = [];
+  visit(
+    ast,
+    [
+      DendronASTTypes.WIKI_LINK,
+      DendronASTTypes.REF_LINK_V2,
+      DendronASTTypes.REF_LINK,
+    ],
+    (node) => {
+      switch (node.type) {
+        case DendronASTTypes.WIKI_LINK:
+          wikiLinks.push(node as WikiLinkNoteV4);
+          break;
+        case DendronASTTypes.REF_LINK_V2:
+          noteRefs.push(node as NoteRefNoteV4);
+          break;
+        case DendronASTTypes.REF_LINK:
+          noteRefs.push(node as NoteRefNoteV4_LEGACY);
+          break;
+      }
+    }
   );
-  if (filter?.oldLoc) {
+
+  const dlinks: DLink[] = [];
+  for (const wikiLink of wikiLinks) {
+    dlinks.push({
+      type: LinkUtils.astType2DLinkType(wikiLink.type),
+      from: NoteUtils.toNoteLoc(note),
+      value: wikiLink.value,
+      alias: wikiLink.data.alias,
+      position: wikiLink.position!,
+      xvault: !_.isUndefined(wikiLink.data.vaultName),
+      // TODO: error if vault not found
+      to: {
+        fname: wikiLink.value,
+        anchorHeader: wikiLink.data.anchorHeader,
+        vaultName: wikiLink.data.vaultName,
+      },
+    });
+  }
+  // the cast is safe because the only difference is whether `data.vaultName` exists, which is already optional
+  for (const noteRef of noteRefs as NoteRefNoteV4[]) {
+    const { anchorStart, anchorEnd, anchorStartOffset } =
+      noteRef.data.link.data;
+    const anchorStartText = anchorStart ? anchorStart : "";
+    const anchorStartOffsetText = anchorStartOffset
+      ? `,${anchorStartOffset}`
+      : "";
+    const anchorEndText = anchorEnd ? `:#${anchorEnd}` : "";
+    const anchorHeader = `${anchorStartText}${anchorStartOffsetText}${anchorEndText}`;
+
+    dlinks.push({
+      type: LinkUtils.astType2DLinkType(noteRef.type),
+      from: NoteUtils.toNoteLoc(note),
+      value: noteRef.data.link.from.fname,
+      // not sure why typescript doesn't recognize the position, but I can confirm it exists in the debugger
+      position: noteRef.position as Position,
+      xvault: !_.isUndefined(noteRef.data.link.data.vaultName),
+      // TODO: error if vault not found
+      to: {
+        fname: noteRef.data.link.from.fname, // not sure why, but noteRef's have their targets in `from` field
+        anchorHeader: anchorHeader ? anchorHeader : undefined,
+        vaultName: noteRef.data.link.data.vaultName,
+      },
+    });
+  }
+
+  if (filter?.loc) {
     // TODO: add additional filters besides fname
-    dlinks = dlinks.filter((ent) => {
-      return ent.from.fname === filter?.oldLoc?.fname;
+    return dlinks.filter((ent) => {
+      return ent.value === filter?.loc?.fname;
     });
   }
   return dlinks;
@@ -137,16 +175,35 @@ export class LinkUtils {
     switch (type) {
       case DendronASTTypes.WIKI_LINK:
         return "wiki";
+      case DendronASTTypes.REF_LINK:
       case DendronASTTypes.REF_LINK_V2:
         return "ref";
       default:
         throw new DendronError({ message: `invalid type conversion: ${type}` });
     }
   }
+  static dlink2DNoteLink(link: DLink): DNoteLink {
+    return {
+      data: {
+        xvault: link.xvault,
+      },
+      from: {
+        fname: link.value,
+        alias: link.alias,
+        anchorHeader: link.to?.anchorHeader,
+        vaultName: link.from.vaultName,
+      },
+      type: link.type,
+      position: link.position,
+    };
+  }
   /**
    * Get all links from the note body
    * Currently, just look for wiki links
-   * @param param0
+   * @param opts.filter - {type, loc
+   *
+   * - type: filter by {@link DendronASTTypes}
+   * - loc: filter by {@link DLoc}
    */
   static findLinks({
     note,
@@ -168,27 +225,11 @@ export class LinkUtils {
       }
     );
     let out = remark.parse(content) as DendronASTNode;
-    let links: DLink[] = [];
-    if (filter?.type !== DendronASTTypes.WIKI_LINK) {
-      links = links.concat(
-        getLinks({
-          ast: out,
-          engine,
-          filter: { type: DendronASTTypes.WIKI_LINK, oldLoc: filter?.oldLoc },
-          note,
-        })
-      );
-    }
-    if (filter?.type !== DendronASTTypes.REF_LINK_V2) {
-      links = links.concat(
-        getLinks({
-          ast: out,
-          engine,
-          filter: { type: DendronASTTypes.REF_LINK_V2, oldLoc: filter?.oldLoc },
-          note,
-        })
-      );
-    }
+    const links: DLink[] = getLinks({
+      ast: out,
+      filter: { loc: filter?.loc },
+      note,
+    });
     return links;
   }
   static isAlias(link: string) {
@@ -342,6 +383,8 @@ export class LinkUtils {
     if (vaultName) {
       clean.vaultName = vaultName;
     }
+    // TODO
+    // @ts-ignore
     return { from: { fname }, data: clean, type: "ref" };
   }
 
@@ -352,6 +395,60 @@ export class LinkUtils {
     }
     // @ts-ignore
     return noteRef;
+  }
+
+  static renderNoteLink({
+    link,
+    dest,
+  }: {
+    link: DNoteLink;
+    dest: DendronASTDest;
+  }): string | never {
+    switch (dest) {
+      case DendronASTDest.MD_DENDRON: {
+        const ref = link.type === "ref" ? "!" : "";
+        const vaultPrefix =
+          link.from.vaultName && link.data.xvault
+            ? `${CONSTANTS.DENDRON_DELIMETER}${link.from.vaultName}/`
+            : "";
+        const value = link.from.fname;
+        const alias =
+          !_.isUndefined(link.from.alias) && link.from.alias !== value
+            ? link.from.alias + "|"
+            : undefined;
+        const anchor = link.from.anchorHeader
+          ? `#${link.from.anchorHeader}`
+          : "";
+        // TODO: take into account piping direction
+        return [ref, `[[`, alias, vaultPrefix, value, anchor, `]]`].join("");
+      }
+      default:
+        return assertUnreachable();
+    }
+  }
+
+  static updateLink({
+    note,
+    oldLink,
+    newLink,
+  }: {
+    note: NoteProps;
+    oldLink: DNoteLink;
+    newLink: DNoteLink;
+  }) {
+    const { start, end } = oldLink.position!;
+    const startOffset = start.offset!;
+    const endOffset = end.offset!;
+    const body = note.body;
+    const newBody = [
+      body.slice(0, startOffset),
+      LinkUtils.renderNoteLink({
+        link: newLink,
+        dest: DendronASTDest.MD_DENDRON,
+      }),
+      body.slice(endOffset),
+    ].join("");
+    return newBody;
   }
 }
 
@@ -365,7 +462,7 @@ export class AnchorUtils {
   ): Promise<{ [index: string]: DNoteAnchorPositioned }> {
     if (opts.note.stub) return {};
     try {
-      const noteContents = await file2String(opts);
+      const noteContents = await note2String(opts);
       const noteAnchors = RemarkUtils.findAnchors(noteContents, parseOpts);
       const anchors: [string, DNoteAnchorPositioned][] = [];
       noteAnchors.forEach((anchor) => {

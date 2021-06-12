@@ -138,8 +138,12 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
       // move notes
       const resp = await engine.renameNote(moveOpts);
       const changed = resp.data as NoteChangeEntry[];
+      const vault = VaultUtils.getVaultByName({
+        vaults: engine.vaults,
+        vname: moveOpts.newLoc.vaultName!,
+      })!;
       if (opts.closeAndOpenFile) {
-        const vpath = vault2Path({ wsRoot, vault: moveOpts.newLoc.vault! });
+        const vpath = vault2Path({ wsRoot, vault });
         const newUri = Uri.file(
           path.join(vpath, moveOpts.newLoc.fname + ".md")
         );

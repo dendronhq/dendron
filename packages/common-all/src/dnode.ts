@@ -333,10 +333,9 @@ export class NoteUtils {
     link: DLink;
   }) {
     to.links.push({
-      from: { fname: from.fname, vault: from.vault },
+      from: { fname: from.fname, vaultName: VaultUtils.getName(from.vault) },
       type: "backlink",
-      original: link.original,
-      pos: link.pos,
+      position: link.position,
       value: link.value,
     });
     // }
@@ -477,8 +476,8 @@ export class NoteUtils {
   }
 
   /**
+   * Create a wiki link to the given note
    *
-   * @param headerRaw If true, use the header without transforming it. Otherwise, the header will be slugged.
    * @returns
    */
   static createWikiLink(opts: {
@@ -828,7 +827,7 @@ export class NoteUtils {
     return {
       fname,
       id,
-      vault,
+      vaultName: VaultUtils.getName(vault),
     };
   }
 

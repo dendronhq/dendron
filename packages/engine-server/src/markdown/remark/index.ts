@@ -8,6 +8,7 @@ export {
   mdastBuilder,
   select,
   selectAll,
+  LinkFilter,
 } from "./utils";
 export { wikiLinks, WikiLinksOpts, matchWikiLink } from "./wikiLinks";
 export {

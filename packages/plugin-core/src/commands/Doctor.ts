@@ -193,10 +193,7 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
           notes = [note];
         }
 
-        const uniqueCandidates = cmd.getWildLinkDestinations(
-          notes,
-          engine.wsRoot
-        );
+        const uniqueCandidates = cmd.getWildLinkDestinations(notes, engine);
         if (uniqueCandidates.length > 0) {
           // show preview before creating
           await this.showMissingNotePreview(uniqueCandidates);

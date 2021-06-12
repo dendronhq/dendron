@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.45.3](https://github.com/dendronhq/dendron/compare/v0.45.2...v0.45.3) (2021-06-12)
+
+
+### Features Dendron
+
+* better rename ([#819](https://github.com/dendronhq/dendron/issues/819)) ([93f6898](https://github.com/dendronhq/dendron/commit/93f689875da9535855a5d73df060fc65eaa8e45d))
+
+
+
+
+
 ## [0.45.2](https://github.com/dendronhq/dendron/compare/v0.45.1...v0.45.2) (2021-06-12)
 
 

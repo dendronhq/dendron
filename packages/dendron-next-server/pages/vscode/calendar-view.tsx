@@ -145,12 +145,11 @@ function CalendarView({ engine, ide }: DendronProps) {
         source: DMessageSource.webClient,
       });
     },
-    [groupedDailyNotes]
+    [groupedDailyNotes, getDateKey]
   );
 
   useEffect(() => {
     if (activeDate) {
-      console.log("SWITCH MODE: ", activeMode, activeDate);
       onSelect(activeDate); // trigger `onSelect` when switching month<->year views
     }
   }, [activeMode]);

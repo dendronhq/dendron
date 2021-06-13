@@ -69,6 +69,8 @@ function CalendarView({ engine, ide }: DendronProps) {
     state: "enter",
   });
 
+  const { getPrefixCls } = React.useContext(ConfigProvider.ConfigContext);
+
   const [activeMode, setActiveMode] = useState<CalendarProps["mode"]>("month");
 
   const engineInitialized = EngineSliceUtils.hasInitialized(engine);
@@ -155,19 +157,10 @@ function CalendarView({ engine, ide }: DendronProps) {
 
   const onPanelChange = useCallback<
     Exclude<CalendarProps["onPanelChange"], undefined>
-  >(
-    (date, mode) => {
-      logger.info({ ctx: "onPanelChange", date, mode });
-      setActiveMode(mode);
-    },
-    [setActiveMode]
-  );
-
-  const { getPrefixCls, direction } = React.useContext(
-    ConfigProvider.ConfigContext
-  );
-  const prefixCls = getPrefixCls("picker");
-  const calendarPrefixCls = `${prefixCls}-calendar`;
+  >((date, mode) => {
+    logger.info({ ctx: "onPanelChange", date, mode });
+    setActiveMode(mode);
+  }, []);
 
   const dateFullCellRender = useCallback<
     Exclude<CalendarProps["dateFullCellRender"], undefined>
@@ -218,6 +211,9 @@ function CalendarView({ engine, ide }: DendronProps) {
             </div>
           );
         });
+
+      const prefixCls = getPrefixCls("picker");
+      const calendarPrefixCls = `${prefixCls}-calendar`;
 
       return (
         <div

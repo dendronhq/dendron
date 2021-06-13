@@ -9,7 +9,6 @@ import {
   getDurationMilliseconds,
   getOS,
   readJSONWithComments,
-  SegmentClient,
 } from "@dendronhq/common-server";
 import {
   HistoryEvent,
@@ -31,6 +30,7 @@ import {
 import { Logger } from "./logger";
 import { migrateConfig, migrateSettings } from "./migration";
 import { Extensions } from "./settings";
+import { setupSegmentClient } from "./telemetry";
 import { VSCodeUtils, WSUtils } from "./utils";
 import { AnalyticsUtils } from "./utils/analytics";
 import { MarkdownUtils } from "./utils/md";
@@ -220,7 +220,7 @@ export async function _activate(
     let start = process.hrtime();
     const config = ws.config;
     // initialize client
-    SegmentClient.instance({ optOut: ws.config.noTelemetry, forceNew: true });
+    setupSegmentClient(ws);
     const wsRoot = DendronWorkspace.wsRoot() as string;
     const wsService = new WorkspaceService({ wsRoot });
     const didClone = await wsService.initialize({

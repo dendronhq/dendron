@@ -1,8 +1,10 @@
 import { DVault } from "@dendronhq/common-all";
 import { DirResult, tmp, vault2Path } from "@dendronhq/common-server";
 import fs from "fs-extra";
+import os from "os";
 import _ from "lodash";
 import path from "path";
+import sinon from "sinon";
 import { AssertUtils } from "./utils";
 export { DirResult };
 
@@ -127,5 +129,11 @@ export class FileTestUtils {
   static tmpDir(): DirResult {
     const dirPath = tmp.dirSync();
     return dirPath;
+  }
+
+  /** Creates a temporary directory, and sets up a sinon stub to make code use it. Must use `sinon.restore` after to restore the home directory. */
+  static mockHome() {
+    const tmpHome = this.tmpDir().name;
+    return { stub: sinon.stub(os, "homedir").returns(tmpHome), tmpHome };
   }
 }

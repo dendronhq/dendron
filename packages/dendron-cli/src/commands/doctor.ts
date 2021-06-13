@@ -4,6 +4,7 @@ import {
   VaultUtils,
   DLink,
   NoteUtils,
+  DEngineClient,
 } from "@dendronhq/common-all";
 import {
   DendronASTDest,
@@ -84,7 +85,8 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     });
   }
 
-  getWildLinkDestinations(notes: NoteProps[], wsRoot: string) {
+  getWildLinkDestinations(notes: NoteProps[], engine: DEngineClient) {
+    const { wsRoot, vaults } = engine;
     let wildWikiLinks: DLink[] = [];
     _.forEach(notes, (note) => {
       const links = note.links;
@@ -96,7 +98,9 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           if (link.type !== "wiki") {
             return false;
           }
-          const destVault = link.to!.vault ? link.to!.vault : note.vault;
+          const destVault = link.to?.vaultName
+            ? VaultUtils.getVaultByName({ vaults, vname: link.to.vaultName })!
+            : note.vault;
           const noteExists = NoteUtils.getNoteByFnameV5({
             fname: link.to!.fname as string,
             vault: destVault,
@@ -111,7 +115,9 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     const uniqueCandidates: NoteProps[] = _.map(
       _.uniqBy(wildWikiLinks, "to.fname"),
       (link) => {
-        const destVault = link.to!.vault ? link.to!.vault : link.from.vault;
+        const destVault = link.to?.vaultName
+          ? VaultUtils.getVaultByName({ vaults, vname: link.to.vaultName })!
+          : VaultUtils.getVaultByName({ vaults, vname: link.from.vaultName! })!;
         return NoteUtils.create({
           fname: link.to!.fname!,
           vault: destVault!,
@@ -271,7 +277,7 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           );
           return;
         }
-        notes = this.getWildLinkDestinations(notes, engine.wsRoot);
+        notes = this.getWildLinkDestinations(notes, engine);
         doctorAction = async (note: NoteProps) => {
           const vname = VaultUtils.getName(note.vault);
           await engineGetNoteByPath({

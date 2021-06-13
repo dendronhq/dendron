@@ -1,10 +1,11 @@
-import { getSlugger, NoteProps } from "@dendronhq/common-all";
+import { getSlugger, isBlockAnchor, NoteProps } from "@dendronhq/common-all";
 import _ from "lodash";
 import path from "path";
 import { Selection, window } from "vscode";
 import { CONFIG, DENDRON_COMMANDS } from "../constants";
 import { clipboard, VSCodeUtils } from "../utils";
-import { DendronWorkspace, getWS } from "../workspace";
+import { getAnchorAt } from "../utils/editor";
+import { DendronWorkspace, getWS, getEngine } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandOpts = {};
@@ -51,22 +52,31 @@ export class CopyNoteURLCommand extends BasicCommand<
     const fname = path.basename(maybeTextEditor.document.uri.fsPath, ".md");
 
     let note: NoteProps | undefined;
-    note = _.find(DendronWorkspace.instance().getEngine().notes, { fname });
+    const engine = getEngine();
+    note = _.find(engine.notes, { fname });
     if (!note) {
       throw Error(`${fname} not found in engine`);
     }
 
     let link = [root, notePrefix, note.id + ".html"].join("/");
-    // check if selection is present
-    const { text, selection } = VSCodeUtils.getSelection();
-    if (!_.isUndefined(text) && !_.isEmpty(text)) {
-      if (this.isHeader(text, selection as Selection)) {
-        const slugger = getSlugger();
-        const headerText = _.trim(text, " #");
-        const slug = slugger.slug(headerText);
-        link += `#${slug}`;
+
+    // add the anchor if one is selected and exists
+    const { selection, editor } = VSCodeUtils.getSelection();
+    if (selection) {
+      const anchor = getAnchorAt({
+        editor: editor!,
+        position: selection.start,
+        engine,
+      });
+      if (anchor) {
+        if (!isBlockAnchor(anchor)) {
+          link += `#${getSlugger().slug(anchor)}`;
+        } else {
+          link += `#${anchor}`;
+        }
       }
     }
+
     this.showFeedback(link);
     clipboard.writeText(link);
     return link;

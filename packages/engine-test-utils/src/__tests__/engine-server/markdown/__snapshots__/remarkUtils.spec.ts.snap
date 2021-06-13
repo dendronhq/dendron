@@ -72,6 +72,42 @@ Array [
 
 exports[`RemarkUtils and LinkUtils findLinks empty link 1`] = `Array []`;
 
+exports[`RemarkUtils and LinkUtils findLinks filter loc match 1`] = `
+Array [
+  Object {
+    "alias": "foo",
+    "from": Object {
+      "fname": "foo",
+      "id": "foo",
+      "vaultName": "vault1",
+    },
+    "position": Position {
+      "end": Object {
+        "column": 8,
+        "line": 1,
+        "offset": 7,
+      },
+      "indent": Array [],
+      "start": Object {
+        "column": 1,
+        "line": 1,
+        "offset": 0,
+      },
+    },
+    "to": Object {
+      "anchorHeader": undefined,
+      "fname": "foo",
+      "vaultName": undefined,
+    },
+    "type": "wiki",
+    "value": "foo",
+    "xvault": false,
+  },
+]
+`;
+
+exports[`RemarkUtils and LinkUtils findLinks filter loc no match 1`] = `Array []`;
+
 exports[`RemarkUtils and LinkUtils findLinks note ref 1`] = `
 Array [
   Object {
@@ -79,44 +115,57 @@ Array [
     "from": Object {
       "fname": "foo.one",
       "id": "foo.one-id",
-      "vault": Object {
-        "fsPath": "vault1",
-      },
+      "vaultName": "vault1",
     },
-    "original": "foo.two",
-    "pos": Object {
-      "end": 52,
-      "start": 41,
+    "position": Position {
+      "end": Object {
+        "column": 30,
+        "line": 3,
+        "offset": 52,
+      },
+      "indent": Array [],
+      "start": Object {
+        "column": 19,
+        "line": 3,
+        "offset": 41,
+      },
     },
     "to": Object {
       "anchorHeader": undefined,
       "fname": "foo.two",
-      "vault": undefined,
+      "vaultName": undefined,
     },
     "type": "wiki",
     "value": "foo.two",
+    "xvault": false,
   },
   Object {
-    "alias": undefined,
     "from": Object {
       "fname": "foo.one",
       "id": "foo.one-id",
-      "vault": Object {
-        "fsPath": "vault1",
-      },
+      "vaultName": "vault1",
     },
-    "original": "foo.two",
-    "pos": Object {
-      "end": 22,
-      "start": 10,
+    "position": Position {
+      "end": Object {
+        "column": 13,
+        "line": 2,
+        "offset": 22,
+      },
+      "indent": Array [],
+      "start": Object {
+        "column": 1,
+        "line": 2,
+        "offset": 10,
+      },
     },
     "to": Object {
       "anchorHeader": undefined,
       "fname": "foo.two",
-      "vault": undefined,
+      "vaultName": undefined,
     },
     "type": "ref",
     "value": "foo.two",
+    "xvault": false,
   },
 ]
 `;
@@ -128,22 +177,29 @@ Array [
     "from": Object {
       "fname": "foo",
       "id": "foo",
-      "vault": Object {
-        "fsPath": "vault1",
-      },
+      "vaultName": "vault1",
     },
-    "original": "bar",
-    "pos": Object {
-      "end": 7,
-      "start": 0,
+    "position": Position {
+      "end": Object {
+        "column": 8,
+        "line": 1,
+        "offset": 7,
+      },
+      "indent": Array [],
+      "start": Object {
+        "column": 1,
+        "line": 1,
+        "offset": 0,
+      },
     },
     "to": Object {
       "anchorHeader": undefined,
       "fname": "bar",
-      "vault": undefined,
+      "vaultName": undefined,
     },
     "type": "wiki",
     "value": "bar",
+    "xvault": false,
   },
 ]
 `;
@@ -155,24 +211,57 @@ Array [
     "from": Object {
       "fname": "foo",
       "id": "foo",
-      "vault": Object {
-        "fsPath": "vault1",
-      },
+      "vaultName": "vault1",
     },
-    "original": "bar",
-    "pos": Object {
-      "end": 24,
-      "start": 0,
+    "position": Position {
+      "end": Object {
+        "column": 25,
+        "line": 1,
+        "offset": 24,
+      },
+      "indent": Array [],
+      "start": Object {
+        "column": 1,
+        "line": 1,
+        "offset": 0,
+      },
     },
     "to": Object {
       "anchorHeader": undefined,
       "fname": "bar",
-      "vault": Object {
-        "fsPath": "vault2",
-      },
+      "vaultName": "vault2",
     },
     "type": "wiki",
     "value": "bar",
+    "xvault": true,
   },
 ]
+`;
+
+exports[`RemarkUtils and LinkUtils updateLink basic 1`] = `
+"# Foo.One
+![[foo.two]]
+Regular wikilink: [[foo.bar]]
+"
+`;
+
+exports[`RemarkUtils and LinkUtils updateLink multiple links present link no space 1`] = `
+"[[foo]]
+nospace[[bar]]
+onespace [[foo]]
+"
+`;
+
+exports[`RemarkUtils and LinkUtils updateLink multiple links present link onespace 1`] = `
+"[[foo]]
+nospace[[foo]]
+onespace [[bar]]
+"
+`;
+
+exports[`RemarkUtils and LinkUtils updateLink multiple links present only link 1`] = `
+"[[bar]]
+nospace[[foo]]
+onespace [[foo]]
+"
 `;

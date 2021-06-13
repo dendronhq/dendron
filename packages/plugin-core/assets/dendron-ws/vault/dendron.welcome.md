@@ -16,6 +16,10 @@ Dendron is a note taking tool that helps **people** organize and make of sense o
 
 ## How do I get started?
 
+Launch the command palette (`Ctrl+Shift+P`) and type `Dendron: Initialize Workspace`. 
+
+## How do I keep going?
+
 We've created a helpful tutorial for newcomers [here](https://wiki.dendron.so/notes/678c77d9-ef2c-4537-97b5-64556d6337f1.html). We also do personal onboardings for new users which you can book [here](https://calendly.com/d/mqtk-rf7q/onboard). 
 
 ## Join the Community

@@ -10,6 +10,7 @@ import {
   DENDRON_COMMANDS,
   GLOBAL_STATE,
 } from "../../constants";
+import { isVSCodeTelemetryEnabled } from "../../telemetry";
 import { getWS } from "../../workspace";
 import { _activate } from "../../_extension";
 import { expect, genEmptyWSFiles, resetCodeWorkspace } from "../testUtilsv2";
@@ -102,5 +103,16 @@ suite("Extension", function () {
     //       });
     //     });
     // });
+  });
+
+  describe("telemetry", () => {
+    test("can get VSCode telemetry settings", (done) => {
+      // Just checking that we get some expected result, and that it doesn't just crash.
+      const result = isVSCodeTelemetryEnabled();
+      expect(
+        result === true || result === false || result === undefined
+      ).toBeTruthy();
+      done();
+    });
   });
 });

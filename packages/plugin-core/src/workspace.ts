@@ -567,9 +567,9 @@ export class DendronWorkspace {
     );
   }
 
-  addDisposable(_disposable: vscode.Disposable) {
-    // TODO
+  addDisposable(disposable: vscode.Disposable) {
     // handle all disposables
+    this.disposableStore.add(disposable);
   }
 
   // === Utils

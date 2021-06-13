@@ -15,6 +15,10 @@
         "--extensionDevelopmentPath=${workspaceFolder}"
       ],
       "outFiles": ["${workspaceFolder:plugin-core}/out/**/*.js"],
+      "skipFiles": [
+        "<node_internals>/**/*.js",
+        "${workspaceFolder}/**/node_modules/mocha/**/*.js",
+      ],
       "env": {
         "STAGE": "dev",
         "VSCODE_DEBUGGING_EXTENSION": "dendron",
@@ -30,6 +34,10 @@
         "--extensionDevelopmentPath=${workspaceFolder}",
       ],
       "outFiles": ["${workspaceFolder:plugin-core}/out/**/*.js"],
+      "skipFiles": [
+        "<node_internals>/**/*.js",
+        "${workspaceFolder}/**/node_modules/mocha/**/*.js",
+      ],
       "env": {
         "STAGE": "dev",
         "VSCODE_DEBUGGING_EXTENSION": "dendron",
@@ -87,6 +95,10 @@
         "TEST_TO_RUN": "",
         "STAGE": "test"
       },
+      "skipFiles": [
+        "<node_internals>/**/*.js",
+        "${workspaceFolder}/**/node_modules/mocha/**/*.js",
+      ],
       "outFiles": ["${workspaceFolder}/out/src/test/**/*.js"]
     },
     {
@@ -102,6 +114,10 @@
         "TEST_TO_RUN": "",
         "STAGE": "test"
       },
+      "skipFiles": [
+        "<node_internals>/**/*.js",
+        "${workspaceFolder}/**/node_modules/mocha/**/*.js",
+      ],
       "outFiles": ["${workspaceFolder}/out/src/test/**/*.js"]
     },
     {
@@ -119,6 +135,10 @@
         "STAGE": "test",
         "TEST_TO_RUN": "${fileBasenameNoExtension}"
       },
+      "skipFiles": [
+        "<node_internals>/**/*.js",
+        "${workspaceFolder}/**/node_modules/mocha/**/*.js",
+      ],
       "outFiles": ["${workspaceFolder}/out/src/test/**/*.js"]
     },
     {
@@ -134,6 +154,10 @@
         "STAGE": "test",
         "TEST_TO_RUN": "${fileBasenameNoExtension}"
       },
+      "skipFiles": [
+        "<node_internals>/**/*.js",
+        "${workspaceFolder}/**/node_modules/mocha/**/*.js",
+      ],
       "outFiles": ["${workspaceFolder}/out/src/test/**/*.js"]
     }
   ],

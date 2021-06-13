@@ -6,9 +6,8 @@ import {
   DNoteRefLink,
   DVault,
   getSlugger,
-  NotePropsDict,
   NoteProps,
-  VaultUtils,
+  NotePropsDict,
   NotesCache,
   NotesCacheEntry,
 } from "@dendronhq/common-all";
@@ -70,8 +69,9 @@ export function refLink2String(
 export function refLink2Stringv2(opts: {
   link: DNoteRefLink;
   useVaultPrefix?: boolean;
+  rawAnchors?: boolean;
 }): string {
-  const { link, useVaultPrefix } = opts;
+  const { link, useVaultPrefix, rawAnchors } = opts;
   const slugger = getSlugger();
   const { anchorStart, anchorStartOffset, anchorEnd } = link.data;
   const { fname: name } = link.from;
@@ -79,17 +79,25 @@ export function refLink2Stringv2(opts: {
 
   const linkParts = [`![[`];
   if (useVaultPrefix) {
-    linkParts.push(VaultUtils.toURIPrefix(link.from.vault!) + "/");
+    linkParts.push(CONSTANTS.DENDRON_DELIMETER + link.from.vaultName! + "/");
   }
   linkParts.push(name);
   if (anchorStart) {
-    linkParts.push(`#${normalizev2(anchorStart, slugger)}`);
+    if (rawAnchors) {
+      linkParts.push(`#${anchorStart}`);
+    } else {
+      linkParts.push(`#${normalizev2(anchorStart, slugger)}`);
+    }
   }
   if (anchorStartOffset) {
     linkParts.push(`,${anchorStartOffset}`);
   }
   if (anchorEnd) {
-    linkParts.push(`:#${normalizev2(anchorEnd, slugger)}`);
+    if (rawAnchors) {
+      linkParts.push(`:#${anchorEnd}`);
+    } else {
+      linkParts.push(`:#${normalizev2(anchorEnd, slugger)}`);
+    }
   }
   linkParts.push("]]");
   return linkParts.join("");

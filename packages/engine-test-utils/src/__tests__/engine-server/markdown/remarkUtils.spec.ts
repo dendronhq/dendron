@@ -1,9 +1,10 @@
-import { DLink } from "@dendronhq/common-all";
+import { DLink, WorkspaceOpts } from "@dendronhq/common-all";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import {
   DendronASTDest,
   DendronASTTypes,
   DEngineClient,
+  LinkFilter,
   LinkUtils,
   MDUtilsV4,
   RemarkUtils,
@@ -12,6 +13,23 @@ import _ from "lodash";
 import { DVault, runEngineTestV5, testWithEngine } from "../../../engine";
 import { ENGINE_HOOKS } from "../../../presets";
 import { checkString } from "../../../utils";
+
+const checkLink = ({ src, target }: { src: Partial<DLink>; target: DLink }) => {
+  const allTrue = _.every([
+    _.isUndefined(src.from) ? true : _.isEqual(src.from, target.from),
+    _.isUndefined(src.type) ? true : _.isEqual(src.type, target.type),
+  ]);
+  if (!allTrue) {
+    throw Error(
+      `diff between ${JSON.stringify(src, null, 4)} and ${JSON.stringify(
+        target,
+        null,
+        4
+      )}`
+    );
+  }
+  expect(true).toBeTruthy();
+};
 
 describe("RemarkUtils and LinkUtils", () => {
   describe("findAnchors", async () => {
@@ -225,15 +243,11 @@ describe("RemarkUtils and LinkUtils", () => {
         expect(links[0].from).toEqual({
           fname: "foo",
           id: "foo",
-          vault: {
-            fsPath: "vault1",
-          },
+          vaultName: "vault1",
         });
         expect(links[0].to).toEqual({
           fname: "bar",
-          vault: {
-            fsPath: "vault2",
-          },
+          vaultName: "vault2",
         });
       },
       {
@@ -249,34 +263,10 @@ describe("RemarkUtils and LinkUtils", () => {
     );
 
     test("note ref", async () => {
-      const checkLink = ({
-        src,
-        target,
-      }: {
-        src: Partial<DLink>;
-        target: DLink;
-      }) => {
-        const allTrue = _.every([
-          _.isUndefined(src.from) ? true : _.isEqual(src.from, target.from),
-          _.isUndefined(src.type) ? true : _.isEqual(src.type, target.type),
-        ]);
-        if (!allTrue) {
-          throw Error(
-            `diff between ${JSON.stringify(src, null, 4)} and ${JSON.stringify(
-              target,
-              null,
-              4
-            )}`
-          );
-        }
-        expect(true).toBeTruthy();
-      };
-
       await runEngineTestV5(
         async ({ engine, wsRoot }) => {
           const note = engine.notes["foo.one-id"];
           console.log(wsRoot);
-          debugger;
           const links = LinkUtils.findLinks({ note, engine });
           expect(links).toMatchSnapshot();
           checkLink({
@@ -284,9 +274,7 @@ describe("RemarkUtils and LinkUtils", () => {
               from: {
                 fname: "foo.one",
                 id: "foo.one-id",
-                vault: {
-                  fsPath: "vault1",
-                },
+                vaultName: "vault1",
               },
               type: "wiki",
             },
@@ -297,9 +285,7 @@ describe("RemarkUtils and LinkUtils", () => {
               from: {
                 fname: "foo.one",
                 id: "foo.one-id",
-                vault: {
-                  fsPath: "vault1",
-                },
+                vaultName: "vault1",
               },
               type: "ref",
             },
@@ -313,6 +299,194 @@ describe("RemarkUtils and LinkUtils", () => {
           },
         }
       );
+    });
+
+    describe("filter", async () => {
+      const preSetupHook = async ({ wsRoot, vaults }: WorkspaceOpts) => {
+        await NoteTestUtilsV4.createNote({
+          fname: "foo",
+          wsRoot,
+          vault: vaults[0],
+          body: ["[[foo]]"].join("\n"),
+        });
+      };
+
+      const getLinks = (engine: DEngineClient, filter: LinkFilter) => {
+        const note = engine.notes["foo"];
+        const links = LinkUtils.findLinks({
+          note,
+          engine,
+          filter,
+        });
+        expect(links).toMatchSnapshot();
+        return links;
+      };
+
+      test("loc match", async () => {
+        await runEngineTestV5(
+          async ({ engine }) => {
+            const links = getLinks(engine, {
+              loc: { fname: "foo" },
+            });
+            checkLink({
+              src: {
+                from: {
+                  fname: "foo",
+                  id: "foo",
+                  vaultName: "vault1",
+                },
+              },
+              target: links[0],
+            });
+          },
+          {
+            expect,
+            preSetupHook,
+          }
+        );
+      });
+
+      test("loc no match", async () => {
+        await runEngineTestV5(
+          async ({ engine }) => {
+            const links = getLinks(engine, {
+              loc: { fname: "bar" },
+            });
+            expect(_.isEmpty(links)).toBeTruthy();
+          },
+          {
+            expect,
+            preSetupHook,
+          }
+        );
+      });
+    });
+  });
+
+  describe("updateLink", async () => {
+    test("basic", async () => {
+      await runEngineTestV5(
+        async ({ engine }) => {
+          const note = engine.notes["foo.one-id"];
+          const links = LinkUtils.findLinks({ note, engine });
+          const link = LinkUtils.dlink2DNoteLink(links[0]);
+          const newBody = LinkUtils.updateLink({
+            note,
+            oldLink: link,
+            newLink: {
+              ...link,
+              from: {
+                fname: "foo.bar",
+              },
+            },
+          });
+          expect(newBody).toMatchSnapshot();
+          await checkString(newBody, "Regular wikilink: [[foo.bar]]");
+        },
+        {
+          preSetupHook: async (opts) => {
+            await ENGINE_HOOKS.setupNoteRefRecursive(opts);
+          },
+          expect,
+        }
+      );
+    });
+
+    describe("multiple links present", async () => {
+      const preSetupHook = async ({ wsRoot, vaults }: WorkspaceOpts) => {
+        const vault = vaults[0];
+        await NoteTestUtilsV4.createNote({
+          fname: "foo",
+          wsRoot,
+          vault,
+          body: ["[[foo]]", "nospace[[foo]]", "onespace [[foo]]"].join("\n"),
+        });
+      };
+
+      test("only link", async () => {
+        await runEngineTestV5(
+          async ({ engine }) => {
+            const note = engine.notes["foo"];
+            const links = LinkUtils.findLinks({ note, engine });
+            const link = LinkUtils.dlink2DNoteLink(links[0]);
+            const newLink = {
+              ...link,
+              from: {
+                fname: "bar",
+              },
+            };
+            const newBody = LinkUtils.updateLink({
+              note,
+              oldLink: link,
+              newLink,
+            });
+            expect(newBody).toMatchSnapshot();
+            await checkString(newBody.split("\n")[0], "[[bar]]");
+          },
+          {
+            preSetupHook,
+            expect,
+          }
+        );
+      });
+
+      test("link no space", async () => {
+        await runEngineTestV5(
+          async ({ engine }) => {
+            const idx = 1;
+            const newLine = "nospace[[bar]]";
+            const note = engine.notes["foo"];
+            const links = LinkUtils.findLinks({ note, engine });
+            const link = LinkUtils.dlink2DNoteLink(links[idx]);
+            const newLink = {
+              ...link,
+              from: {
+                fname: "bar",
+              },
+            };
+            const newBody = LinkUtils.updateLink({
+              note,
+              oldLink: link,
+              newLink,
+            });
+            expect(newBody).toMatchSnapshot();
+            await checkString(newBody.split("\n")[idx], newLine);
+          },
+          {
+            preSetupHook,
+            expect,
+          }
+        );
+      });
+
+      test("link onespace", async () => {
+        await runEngineTestV5(
+          async ({ engine }) => {
+            const idx = 2;
+            const newLine = "onespace [[bar]]";
+            const note = engine.notes["foo"];
+            const links = LinkUtils.findLinks({ note, engine });
+            const link = LinkUtils.dlink2DNoteLink(links[idx]);
+            const newLink = {
+              ...link,
+              from: {
+                fname: "bar",
+              },
+            };
+            const newBody = LinkUtils.updateLink({
+              note,
+              oldLink: link,
+              newLink,
+            });
+            expect(newBody).toMatchSnapshot();
+            await checkString(newBody.split("\n")[idx], newLine);
+          },
+          {
+            preSetupHook,
+            expect,
+          }
+        );
+      });
     });
   });
 });

@@ -79,15 +79,16 @@ export class CalendarView implements vscode.WebviewViewProvider {
           ctx: `${ctx}:onSelect`,
           data: msg.data,
         });
-        if (msg.data.id) {
-          const note = getEngine().notes[msg.data.id];
+        const { id, fname } = msg.data;
+        let note: NoteProps | undefined = undefined;
+        if (id && (note = getEngine().notes[id])) {
           await new GotoNoteCommand().execute({
             qs: note.fname,
             vault: note.vault,
           });
-        } else if (msg.data.fname) {
+        } else if (fname) {
           await new CreateDailyJournalCommand().execute({
-            fname: msg.data.fname,
+            fname: fname,
           });
         }
         break;

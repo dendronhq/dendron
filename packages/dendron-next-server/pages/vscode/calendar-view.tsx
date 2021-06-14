@@ -202,7 +202,7 @@ function CalendarView({ engine, ide }: DendronProps) {
                     className={`${note.fname}`}
                     dot
                     color={
-                      "#00adb5" /* color copied from packages/dendron-next-server/assets/themes/dark-theme.less */
+                      "#00adb5" /* color copied from packages/dendron-next-server/assets/themes/dark-theme.less TODO make dependent on active theme */
                     }
                   />
                 </div>

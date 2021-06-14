@@ -238,9 +238,6 @@ export async function _activate(
     });
     const wsRoot = DendronWorkspace.wsRoot() as string;
 
-    // FIXME: one time migration
-    Logger.info({ ctx, msg: "BOND" });
-
     // check if we need to wipe the cache
     if (installStatus === InstallStatus.UPGRADED && stage !== "test") {
       const cmpVersion = "0.46.0";

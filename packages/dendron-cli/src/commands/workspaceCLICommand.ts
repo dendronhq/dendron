@@ -1,4 +1,6 @@
-import { WorkspaceService } from "@dendronhq/engine-server";
+import { VaultUtils } from "@dendronhq/common-all";
+import { vault2Path } from "@dendronhq/common-server";
+import { removeCache, WorkspaceService } from "@dendronhq/engine-server";
 import _ from "lodash";
 import yargs from "yargs";
 import { CLICommand } from "./base";
@@ -25,6 +27,7 @@ export enum WorkspaceCommands {
   PUSH = "push",
   ADD_AND_COMMIT = "addAndCommit",
   SYNC = "sync",
+  REMOVE_CACHE = "removeCache",
 }
 
 export { CommandOpts as WorkspaceCLICommandOpts };
@@ -71,6 +74,17 @@ export class WorkspaceCLICommand extends CLICommand<
         case WorkspaceCommands.PUSH: {
           const ws = new WorkspaceService({ wsRoot });
           await ws.pushVaults();
+          break;
+        }
+        case WorkspaceCommands.REMOVE_CACHE: {
+          const ws = new WorkspaceService({ wsRoot });
+          await Promise.all(
+            ws.config.vaults.map((vault) => {
+              this.print(`removing cache in ${VaultUtils.getName(vault)}`);
+              return removeCache(vault2Path({ wsRoot, vault }));
+            })
+          );
+          this.print("cache removed");
           break;
         }
         case WorkspaceCommands.SYNC: {

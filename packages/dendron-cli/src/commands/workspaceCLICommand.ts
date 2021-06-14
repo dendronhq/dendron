@@ -1,7 +1,4 @@
-import { VaultUtils } from "@dendronhq/common-all";
-import { vault2Path } from "@dendronhq/common-server";
-import { removeCache, WorkspaceService } from "@dendronhq/engine-server";
-import _ from "lodash";
+import { WorkspaceService } from "@dendronhq/engine-server";
 import yargs from "yargs";
 import { CLICommand } from "./base";
 import {

@@ -274,7 +274,6 @@ export async function _activate(
       DendronWorkspace.workspaceFile().fsPath
     )) as WorkspaceSettings;
     const wsConfigMigrated = migrateSettings({ settings: wsConfig, config });
-    const currentVersion = DendronWorkspace.version();
     Logger.info({ ctx, wsConfig, wsConfigMigrated, msg: "read wsConfig" });
     wsService.writeMeta({ version: DendronWorkspace.version() });
 
@@ -299,13 +298,14 @@ export async function _activate(
     // check if we need to wipe the cache
     const installStatus = VSCodeUtils.getInstallStatus({
       previousVersion: migratedGlobalVersion,
-      currentVersion,
+      currentVersion: installedGlobalVersion,
     });
     if (installStatus === InstallStatus.UPGRADED) {
       const cmpVersion = "0.45.3";
+      // current version greater then threshold and previous version was less then threshold
       if (
-        semver.gte(currentVersion, cmpVersion) &&
-        semver.lt(cmpVersion, previousWsVersion)
+        semver.gte(installedGlobalVersion, cmpVersion) &&
+        semver.lt(previousWsVersion, cmpVersion)
       ) {
         Logger.info({ ctx, msg: "upgrade requires removing cahce" });
         const ws = new WorkspaceService({ wsRoot: DendronWorkspace.wsRoot() });

@@ -9,10 +9,12 @@ import {
   getDurationMilliseconds,
   getOS,
   readJSONWithComments,
+  vault2Path,
 } from "@dendronhq/common-server";
 import {
   HistoryEvent,
   HistoryService,
+  removeCache,
   WorkspaceService,
 } from "@dendronhq/engine-server";
 import fs from "fs-extra";
@@ -31,7 +33,7 @@ import { Logger } from "./logger";
 import { migrateConfig, migrateSettings } from "./migration";
 import { Extensions } from "./settings";
 import { setupSegmentClient } from "./telemetry";
-import { VSCodeUtils, WSUtils } from "./utils";
+import { InstallStatus, VSCodeUtils, WSUtils } from "./utils";
 import { AnalyticsUtils } from "./utils/analytics";
 import { MarkdownUtils } from "./utils/md";
 import { DendronTreeView } from "./views/DendronTreeView";
@@ -267,11 +269,12 @@ export async function _activate(
       return false;
     }
 
-    // migrate legacy settings
+    // --- Possible settings migration from version update
     const wsConfig = (await readJSONWithComments(
       DendronWorkspace.workspaceFile().fsPath
     )) as WorkspaceSettings;
     const wsConfigMigrated = migrateSettings({ settings: wsConfig, config });
+    const currentVersion = DendronWorkspace.version();
     Logger.info({ ctx, wsConfig, wsConfigMigrated, msg: "read wsConfig" });
     wsService.writeMeta({ version: DendronWorkspace.version() });
 
@@ -293,6 +296,27 @@ export async function _activate(
       }
     );
 
+    // check if we need to wipe the cache
+    const installStatus = VSCodeUtils.getInstallStatus({
+      previousVersion: migratedGlobalVersion,
+      currentVersion,
+    });
+    if (installStatus === InstallStatus.UPGRADED) {
+      const cmpVersion = "0.45.3";
+      if (
+        semver.gte(currentVersion, cmpVersion) &&
+        semver.lt(cmpVersion, previousWsVersion)
+      ) {
+        Logger.info({ ctx, msg: "upgrade requires removing cahce" });
+        const ws = new WorkspaceService({ wsRoot: DendronWorkspace.wsRoot() });
+        await Promise.all(
+          ws.config.vaults.map((vault) => {
+            return removeCache(vault2Path({ wsRoot, vault }));
+          })
+        );
+      }
+    }
+
     Logger.info({
       ctx,
       installedGlobalVersion,
@@ -304,6 +328,7 @@ export async function _activate(
       vaults: ws.vaultsv4,
     });
 
+    // --- Start Initializating the Engine
     vscode.window.withProgress(
       {
         location: vscode.ProgressLocation.Notification,

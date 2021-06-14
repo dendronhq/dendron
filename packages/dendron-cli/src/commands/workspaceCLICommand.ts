@@ -78,13 +78,8 @@ export class WorkspaceCLICommand extends CLICommand<
         }
         case WorkspaceCommands.REMOVE_CACHE: {
           const ws = new WorkspaceService({ wsRoot });
-          await Promise.all(
-            ws.config.vaults.map((vault) => {
-              this.print(`removing cache in ${VaultUtils.getName(vault)}`);
-              return removeCache(vault2Path({ wsRoot, vault }));
-            })
-          );
-          this.print("cache removed");
+          await ws.removeVaultCaches();
+          this.print("caches removed");
           break;
         }
         case WorkspaceCommands.SYNC: {

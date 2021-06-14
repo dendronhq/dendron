@@ -1,5 +1,4 @@
 import { WorkspaceService } from "@dendronhq/engine-server";
-import _ from "lodash";
 import yargs from "yargs";
 import { CLICommand } from "./base";
 import {
@@ -25,6 +24,7 @@ export enum WorkspaceCommands {
   PUSH = "push",
   ADD_AND_COMMIT = "addAndCommit",
   SYNC = "sync",
+  REMOVE_CACHE = "removeCache",
 }
 
 export { CommandOpts as WorkspaceCLICommandOpts };
@@ -71,6 +71,12 @@ export class WorkspaceCLICommand extends CLICommand<
         case WorkspaceCommands.PUSH: {
           const ws = new WorkspaceService({ wsRoot });
           await ws.pushVaults();
+          break;
+        }
+        case WorkspaceCommands.REMOVE_CACHE: {
+          const ws = new WorkspaceService({ wsRoot });
+          await ws.removeVaultCaches();
+          this.print("caches removed");
           break;
         }
         case WorkspaceCommands.SYNC: {

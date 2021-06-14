@@ -246,6 +246,11 @@ export function createCacheEntry(opts: {
   };
 }
 
+export const getCachePath = (vpath: string): string => {
+  const cachePath = path.join(vpath, CONSTANTS.DENDRON_CACHE_FILE);
+  return cachePath;
+};
+
 export const readNotesFromCache = (vpath: string): NotesCache => {
   const cachePath = path.join(vpath, CONSTANTS.DENDRON_CACHE_FILE);
   if (fs.existsSync(cachePath)) {
@@ -260,6 +265,14 @@ export const readNotesFromCache = (vpath: string): NotesCache => {
 export const writeNotesToCache = (vpath: string, cache: NotesCache) => {
   const cachePath = path.join(vpath, CONSTANTS.DENDRON_CACHE_FILE);
   return fs.writeJSONSync(cachePath, cache);
+};
+
+export const removeCache = (vpath: string) => {
+  const cachePath = path.join(vpath, CONSTANTS.DENDRON_CACHE_FILE);
+  if (fs.pathExistsSync(cachePath)) {
+    return fs.remove(cachePath);
+  }
+  return;
 };
 
 export function stripLocalOnlyTags(doc: string) {

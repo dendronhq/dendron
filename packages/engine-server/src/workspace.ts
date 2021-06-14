@@ -31,7 +31,12 @@ import _ from "lodash";
 import path from "path";
 import { DConfig } from "./config";
 import { Git } from "./topics/git";
-import { getPortFilePath, getWSMetaFilePath, writeWSMetaFile } from "./utils";
+import {
+  getPortFilePath,
+  getWSMetaFilePath,
+  removeCache,
+  writeWSMetaFile,
+} from "./utils";
 const DENDRON_WS_NAME = CONSTANTS.DENDRON_WS_NAME;
 
 const logger = createLogger();
@@ -573,6 +578,17 @@ export class WorkspaceService {
       )
     );
     return out;
+  }
+
+  /**
+   * Remove all vault caches in workspace
+   */
+  async removeVaultCaches() {
+    await Promise.all(
+      this.config.vaults.map((vault) => {
+        return removeCache(vault2Path({ wsRoot: this.wsRoot, vault }));
+      })
+    );
   }
 
   /**

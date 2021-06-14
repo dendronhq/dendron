@@ -35,6 +35,12 @@ import { FileItem } from "./external/fileutils/FileItem";
 import { EngineAPIService } from "./services/EngineAPIService";
 import { DendronWorkspace, getWS } from "./workspace";
 
+export enum InstallStatus {
+  NO_CHANGE = "NO_CHANGE",
+  INITIAL_INSTALL = "INITIAL_INSTALL",
+  UPGRADED = "UPGRADED",
+}
+
 export class DisposableStore {
   private _toDispose = new Set<vscode.Disposable>();
 
@@ -161,6 +167,22 @@ export class VSCodeUtils {
 
   static getFsPathFromTextEditor(editor: vscode.TextEditor) {
     return editor.document.uri.fsPath;
+  }
+
+  static getInstallStatus({
+    previousVersion,
+    currentVersion,
+  }: {
+    previousVersion?: string;
+    currentVersion: string;
+  }): InstallStatus {
+    if (_.isUndefined(previousVersion)) {
+      return InstallStatus.INITIAL_INSTALL;
+    }
+    if (previousVersion !== currentVersion) {
+      return InstallStatus.UPGRADED;
+    }
+    return InstallStatus.NO_CHANGE;
   }
 
   static getSelection():

@@ -2,6 +2,7 @@ export * from "./hooks";
 export * from "./typesv2";
 export * from "./workspace";
 export * from "./foundation";
+export * from "./seed";
 import { DNodeType, NoteProps } from "./foundation";
 
 export type Stage = "dev" | "prod" | "test";

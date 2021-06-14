@@ -301,13 +301,13 @@ export async function _activate(
       currentVersion: installedGlobalVersion,
     });
     if (installStatus === InstallStatus.UPGRADED) {
-      const cmpVersion = "0.45.3";
+      const cmpVersion = "0.46.0";
       // current version greater then threshold and previous version was less then threshold
       if (
         semver.gte(installedGlobalVersion, cmpVersion) &&
         semver.lt(previousWsVersion, cmpVersion)
       ) {
-        Logger.info({ ctx, msg: "upgrade requires removing cahce" });
+        Logger.info({ ctx, msg: "upgrade requires removing cache" });
         const ws = new WorkspaceService({ wsRoot: DendronWorkspace.wsRoot() });
         await Promise.all(
           ws.config.vaults.map((vault) => {

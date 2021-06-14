@@ -3,12 +3,9 @@ import { useThemeSwitcher } from "react-css-theme-switcher";
 import _ from "lodash";
 import React from "react";
 import { Button } from "antd";
+import { DendronProps } from "../../lib/types";
 
-export default function Sample({
-  engine,
-}: {
-  engine: engineSlice.EngineState;
-}) {
+export default function Sample({ engine }: DendronProps) {
   const notes = engine.notes;
   const logger = createLogger("Sample");
   const { switcher, themes, currentTheme, status } = useThemeSwitcher();

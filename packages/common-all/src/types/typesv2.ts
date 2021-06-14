@@ -506,6 +506,12 @@ export enum GraphViewMessageType {
   "onGetActiveEditor" = "onGetActiveEditor",
   "onReady" = "onReady",
 }
+
+export enum CalendarViewMessageType {
+  "onSelect" = "onSelect",
+  "onGetActiveEditor" = "onGetActiveEditor",
+}
+
 export enum ThemeMessageType {
   "onThemeChange" = "onThemeChange",
   "getTheme" = "getTheme",
@@ -528,6 +534,11 @@ export type GraphViewMessage = DMessage<
   { id: string; vault?: string }
 >;
 
+export type CalendarViewMessage = DMessage<
+  CalendarViewMessageType,
+  { id?: string; fname?: string }
+>;
+
 // --- Views
 
 export enum DendronWebViewKey {
@@ -541,4 +552,5 @@ export enum DendronTreeViewKey {
   TREE_VIEW = "dendron.treeView",
   TREE_VIEW_V2 = "dendron.tree-view",
   BACKLINKS = "dendron.backlinks",
+  CALENDAR_VIEW = "dendron.calendar-view",
 }

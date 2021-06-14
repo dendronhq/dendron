@@ -43,6 +43,7 @@ export class DConfig {
       noAutoCreateOnDefinition: true,
       noLegacyNoteRef: true,
       lookupConfirmVaultOnCreate: false,
+      dayOfWeek: 1,
       site: {
         copyAssets: true,
         siteHierarchies: ["root"],

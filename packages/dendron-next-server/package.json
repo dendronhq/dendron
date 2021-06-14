@@ -42,6 +42,7 @@
     "autoprefixer": "^10.2.5",
     "aws-amplify": "^3.3.23",
     "babel-plugin-import": "^1.13.3",
+    "classnames": "^2.3.1",
     "cytoscape": "^3.19.0",
     "cytoscape-euler": "^1.2.2",
     "formik": "^2.2.5",

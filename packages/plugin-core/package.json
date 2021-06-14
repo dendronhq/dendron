@@ -51,6 +51,12 @@
           "type": "webview"
         },
         {
+          "id": "dendron.calendar-view",
+          "name": "Calendar View",
+          "when": "dendron:devMode",
+          "type": "webview"
+        },
+        {
           "id": "dendron.treeView",
           "name": "Tree View",
           "when": "dendron:pluginActive && !dendron:webUIEnabled"

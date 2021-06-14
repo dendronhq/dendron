@@ -216,7 +216,7 @@ export async function _activate(
   const ws = DendronWorkspace.getOrCreate(context, {
     skipSetup: stage === "test",
   });
-  let migratedGlobalVersion = context.globalState.get<string | undefined>(
+  let previousVersion = context.globalState.get<string | undefined>(
     GLOBAL_STATE.VERSION
   );
 
@@ -227,28 +227,27 @@ export async function _activate(
     const previousGlobalVersion = ws.context.globalState.get<
       string | undefined
     >(GLOBAL_STATE.VERSION_PREV);
-    const previousWsVersion =
-      context.workspaceState.get<string>(WORKSPACE_STATE.WS_VERSION) || "0.0.0";
-    let installedGlobalVersion = DendronWorkspace.version();
+    let currentVersion = DendronWorkspace.version();
 
     // NOTE: to test upgrades, you can uncomment the below
     // migratedGlobalVersion = "0.45.3";
     // installedGlobalVersion = "0.46.0";
     const installStatus = VSCodeUtils.getInstallStatus({
-      previousVersion: migratedGlobalVersion,
-      currentVersion: installedGlobalVersion,
+      previousVersion,
+      currentVersion,
     });
     const wsRoot = DendronWorkspace.wsRoot() as string;
 
     // FIXME: one time migration
+    Logger.info({ ctx, msg: "BOND" });
 
     // check if we need to wipe the cache
     if (installStatus === InstallStatus.UPGRADED && stage !== "test") {
       const cmpVersion = "0.46.0";
       // current version greater then threshold and previous version was less then threshold
       if (
-        semver.gte(installedGlobalVersion, cmpVersion) &&
-        semver.lt(previousWsVersion, cmpVersion)
+        semver.gte(currentVersion, cmpVersion) &&
+        semver.lte(previousVersion || "0.0.0", cmpVersion)
       ) {
         Logger.info({ ctx, msg: "upgrade requires removing cache" });
 
@@ -342,13 +341,13 @@ export async function _activate(
 
     Logger.info({
       ctx,
-      installedGlobalVersion,
-      migratedGlobalVersion,
+      currentVersion,
+      previousVersion,
       previousGlobalVersion,
-      previousWsVersion,
       platform,
       extensions,
       vaults: ws.vaultsv4,
+      installStatus,
     });
 
     // --- Start Initializating the Engine
@@ -433,7 +432,7 @@ export async function _activate(
 
   return showWelcomeOrWhatsNew({
     version: DendronWorkspace.version(),
-    previousVersion: migratedGlobalVersion,
+    previousVersion: previousVersion,
     start: startActivate,
   }).then(() => {
     if (DendronWorkspace.isActive()) {

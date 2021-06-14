@@ -65,6 +65,7 @@
     "emailjs": "^3.4.0",
     "fs-extra": "^9.0.1",
     "klaw": "^3.0.0",
+    "limiter": "^2.1.0",
     "lodash": "^4.17.20",
     "through2": "^4.0.2",
     "vscode-uri": "^2.1.2"

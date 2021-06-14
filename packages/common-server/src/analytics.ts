@@ -81,6 +81,8 @@ export enum TelemetryStatus {
   ENABLED_BY_COMMAND = "enabled by command",
   /** The user allowed telemetry by configuration. */
   ENABLED_BY_CONFIG = "enabled by config",
+  /** The user did not opt out of telemetry prior to 0.46.0 update */
+  ENABLED_BY_MIGRATION = "enabled by migration",
 }
 
 export type TelemetryConfig = {
@@ -153,6 +155,7 @@ export class SegmentClient {
     switch (status) {
       case TelemetryStatus.DISABLED_BY_COMMAND:
       case TelemetryStatus.ENABLED_BY_COMMAND:
+      case TelemetryStatus.ENABLED_BY_MIGRATION:
         return false;
       default:
         return true;
@@ -160,7 +163,10 @@ export class SegmentClient {
   }
 
   static enable(
-    why: TelemetryStatus.ENABLED_BY_COMMAND | TelemetryStatus.ENABLED_BY_CONFIG
+    why:
+      | TelemetryStatus.ENABLED_BY_COMMAND
+      | TelemetryStatus.ENABLED_BY_CONFIG
+      | TelemetryStatus.ENABLED_BY_MIGRATION
   ) {
     // try to remove the legacy disable, if it exists
     try {

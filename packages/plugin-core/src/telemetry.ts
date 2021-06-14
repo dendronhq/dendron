@@ -58,7 +58,7 @@ export function setupSegmentClient(ws: DendronWorkspace) {
     const segment = SegmentClient.instance({
       forceNew: true,
     });
-    Logger.info({ msg: `Current segment status is ${segment.hasOptedOut}` });
+    Logger.info({ msg: `Telemetry is disabled? ${segment.hasOptedOut}` });
   }
 
   try {

@@ -269,7 +269,10 @@ export const writeNotesToCache = (vpath: string, cache: NotesCache) => {
 
 export const removeCache = (vpath: string) => {
   const cachePath = path.join(vpath, CONSTANTS.DENDRON_CACHE_FILE);
-  return fs.remove(cachePath);
+  if (fs.pathExistsSync(cachePath)) {
+    return fs.remove(cachePath);
+  }
+  return;
 };
 
 export function stripLocalOnlyTags(doc: string) {

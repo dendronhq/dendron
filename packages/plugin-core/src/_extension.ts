@@ -9,6 +9,8 @@ import {
   getDurationMilliseconds,
   getOS,
   readJSONWithComments,
+  SegmentClient,
+  TelemetryStatus,
   vault2Path,
 } from "@dendronhq/common-server";
 import {
@@ -210,19 +212,68 @@ export async function _activate(
     workspaceFile,
     workspaceFolders,
   });
-  // needs to be initialized to setup commands
+  //  needs to be initialized to setup commands
   const ws = DendronWorkspace.getOrCreate(context, {
     skipSetup: stage === "test",
   });
-  const migratedGlobalVersion = context.globalState.get<string | undefined>(
+  let migratedGlobalVersion = context.globalState.get<string | undefined>(
     GLOBAL_STATE.VERSION
   );
+
   if (DendronWorkspace.isActive()) {
     let start = process.hrtime();
     const config = ws.config;
+    // --- Get Version State
+    const previousGlobalVersion = ws.context.globalState.get<
+      string | undefined
+    >(GLOBAL_STATE.VERSION_PREV);
+    const previousWsVersion =
+      context.workspaceState.get<string>(WORKSPACE_STATE.WS_VERSION) || "0.0.0";
+    let installedGlobalVersion = DendronWorkspace.version();
+
+    // NOTE: to test upgrades, you can uncomment the below
+    // migratedGlobalVersion = "0.45.3";
+    // installedGlobalVersion = "0.46.0";
+    const installStatus = VSCodeUtils.getInstallStatus({
+      previousVersion: migratedGlobalVersion,
+      currentVersion: installedGlobalVersion,
+    });
+    const wsRoot = DendronWorkspace.wsRoot() as string;
+
+    // FIXME: one time migration
+
+    // check if we need to wipe the cache
+    if (installStatus === InstallStatus.UPGRADED && stage !== "test") {
+      const cmpVersion = "0.46.0";
+      // current version greater then threshold and previous version was less then threshold
+      if (
+        semver.gte(installedGlobalVersion, cmpVersion) &&
+        semver.lt(previousWsVersion, cmpVersion)
+      ) {
+        Logger.info({ ctx, msg: "upgrade requires removing cache" });
+
+        const ws = new WorkspaceService({ wsRoot: DendronWorkspace.wsRoot() });
+        await Promise.all(
+          ws.config.vaults.map((vault) => {
+            return removeCache(vault2Path({ wsRoot, vault }));
+          })
+        );
+        Logger.info({ ctx, msg: "done removing cache" });
+        // update telemetry settings
+        Logger.info({ ctx, msg: "keep existing analytics settings" });
+        const segStatus = SegmentClient.getStatus();
+        // use has not disabled telemetry prior to upgrade
+        if (
+          segStatus !== TelemetryStatus.DISABLED_BY_COMMAND &&
+          !config.noTelemetry
+        ) {
+          SegmentClient.enable(TelemetryStatus.ENABLED_BY_MIGRATION);
+        }
+      }
+    }
+
     // initialize client
     setupSegmentClient(ws);
-    const wsRoot = DendronWorkspace.wsRoot() as string;
     const wsService = new WorkspaceService({ wsRoot });
     const didClone = await wsService.initialize({
       onSyncVaultsProgress: () => {
@@ -277,12 +328,6 @@ export async function _activate(
     Logger.info({ ctx, wsConfig, wsConfigMigrated, msg: "read wsConfig" });
     wsService.writeMeta({ version: DendronWorkspace.version() });
 
-    const installedGlobalVersion = DendronWorkspace.version();
-    const previousGlobalVersion = ws.context.globalState.get<
-      string | undefined
-    >(GLOBAL_STATE.VERSION_PREV);
-    const previousWsVersion =
-      context.workspaceState.get<string>(WORKSPACE_STATE.WS_VERSION) || "0.0.0";
     // stats
     const platform = getOS();
     const extensions = Extensions.getVSCodeExtnsion().map(
@@ -294,28 +339,6 @@ export async function _activate(
         };
       }
     );
-
-    // check if we need to wipe the cache
-    const installStatus = VSCodeUtils.getInstallStatus({
-      previousVersion: migratedGlobalVersion,
-      currentVersion: installedGlobalVersion,
-    });
-    if (installStatus === InstallStatus.UPGRADED) {
-      const cmpVersion = "0.46.0";
-      // current version greater then threshold and previous version was less then threshold
-      if (
-        semver.gte(installedGlobalVersion, cmpVersion) &&
-        semver.lt(previousWsVersion, cmpVersion)
-      ) {
-        Logger.info({ ctx, msg: "upgrade requires removing cache" });
-        const ws = new WorkspaceService({ wsRoot: DendronWorkspace.wsRoot() });
-        await Promise.all(
-          ws.config.vaults.map((vault) => {
-            return removeCache(vault2Path({ wsRoot, vault }));
-          })
-        );
-      }
-    }
 
     Logger.info({
       ctx,

@@ -106,6 +106,7 @@ const getSchemaGraphElements = (
     const vaultName = VaultUtils.getName(vault);
     const VAULT_ID = `${vaultName}`;
 
+    // Vault root schema node
     nodes.push({
       data: {
         id: VAULT_ID,
@@ -124,6 +125,7 @@ const getSchemaGraphElements = (
         // Base schema node
         nodes.push({
           data: { id: SCHEMA_ID, label: schema.fname, group: "nodes" },
+          classes: `vault-${vaultName}`,
         });
 
         // Schema node -> root connection
@@ -149,6 +151,7 @@ const getSchemaGraphElements = (
               group: "nodes",
               fname: schema.fname,
             },
+            classes: `vault-${vaultName}`,
           });
 
           // Schema -> subschema connection

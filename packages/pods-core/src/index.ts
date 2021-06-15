@@ -5,6 +5,7 @@ import {
   JSONPublishPod,
 } from "./builtin";
 import { GraphvizExportPod } from "./builtin/GraphvizPod";
+import { AirtableExportPod } from "./builtin/AirtablePod";
 import { HTMLPublishPod } from "./builtin/HTMLPod";
 import {
   MarkdownImportPod,
@@ -22,6 +23,7 @@ export function getAllExportPods(): PodClassEntryV4[] {
     GitPunchCardExportPod,
     MarkdownExportPod,
     GraphvizExportPod,
+    AirtableExportPod,
   ];
 }
 export function getAllPublishPods(): PodClassEntryV4[] {

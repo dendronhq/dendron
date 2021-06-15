@@ -43,6 +43,9 @@ export const findAnchorPos = (opts: {
   return new Position(found.line, found.column);
 };
 
+/**
+ * Open or create a note. See {@link GotoNoteCommand.execute} for details
+ */
 export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
   static key = DENDRON_COMMANDS.GOTO_NOTE.key;
 
@@ -74,6 +77,13 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     }
     return;
   }
+  /**
+   *
+   * @param opts.qs - query string. should correspond to {@link NoteProps.fname}
+   * @param opts.vault - {@link DVault} for note
+   * @param opts.anchor - a {@link DNoteAnchor} to navigate to
+   * @returns
+   */
   async execute(opts: CommandOpts): Promise<CommandOutput> {
     const ctx = "GotoNoteCommand";
     this.L.info({ ctx, opts, msg: "enter" });

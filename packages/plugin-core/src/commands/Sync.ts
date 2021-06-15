@@ -26,6 +26,17 @@ export class SyncCommand extends BasicCommand<CommandOpts, CommandReturns> {
       .length;
   }
 
+  static filteredReponames(
+    results: SyncActionResult[],
+    status: SyncActionStatus
+  ): string | undefined {
+    const matchingResults = results.filter(
+      (result) => result.status === status
+    );
+    if (matchingResults.length == 0) return undefined;
+    return matchingResults.map((result) => result.repo).join(", ");
+  }
+
   async execute(opts?: CommandOpts) {
     const ctx = "execute";
     L.info({ ctx, opts });
@@ -46,15 +57,24 @@ export class SyncCommand extends BasicCommand<CommandOpts, CommandReturns> {
     L.info(pushed);
 
     const message = ["Finished sync."];
-    const uncommitted = pulled.filter(
-      (result) => result.status === SyncActionStatus.UNCOMMITTED_CHANGES
+
+    // Report anything unusual the user probably should know about
+    const uncommitted = SyncCommand.filteredReponames(
+      committed,
+      SyncActionStatus.UNCOMMITTED_CHANGES
     );
-    if (uncommitted.length > 0) {
-      const uncommittedChanges: string = uncommitted
-        .map((result) => result.repo)
-        .join(", ");
+    if (!_.isUndefined(uncommitted)) {
       message.push(
-        `Skipped pulling repos ${uncommittedChanges} because they had uncommitted changes.`
+        `Skipped pulling repos ${uncommitted} because they had uncommitted changes.`
+      );
+    }
+    const noPushRemote = SyncCommand.filteredReponames(
+      pushed,
+      SyncActionStatus.NO_PUSH_REMOTE
+    );
+    if (!_.isUndefined(noPushRemote)) {
+      message.push(
+        `Skipped pushing repos ${noPushRemote} because they don't have upstream branches configured.`
       );
     }
 

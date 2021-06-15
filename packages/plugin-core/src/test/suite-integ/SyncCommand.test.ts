@@ -80,9 +80,11 @@ suite("workspace sync command", function () {
           // Should not attempt to commit since this is technically a workspace vault, and the default is noCommit
           // (the repo is at the root of the workspace, vault doesn't have it's own repo)
           expect(SyncCommand.countDone(committed)).toEqual(0);
-          // Should attempt to pull and push since the remote is set up
+          // Should attempt to pull since the remote is set up
           expect(SyncCommand.countDone(pulled)).toEqual(1);
-          expect(SyncCommand.countDone(pushed)).toEqual(1);
+          // Should not push since there are no comitted changes
+          // (no commit since createRepo..., unlike other tests where changeConfig creates a commit)
+          expect(SyncCommand.countDone(pushed)).toEqual(0);
           done();
         },
         ctx,

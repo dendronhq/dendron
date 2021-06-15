@@ -58,6 +58,7 @@ export enum SyncActionStatus {
   NO_CHANGES = "it has no changes",
   UNCOMMITTED_CHANGES = "it has uncommitted changes",
   NO_REMOTE = "it has no remote",
+  NO_PUSH_REMOTE = "it has a remote but current branch has no upstream",
   SKIP_CONFIG = "it is configured so",
   NOT_PERMITTED = "user is not permitted to push to one or more vaults",
 }
@@ -558,8 +559,20 @@ export class WorkspaceService {
         async (rootVaults: [string, DVault[]]): Promise<SyncActionResult> => {
           const [repo, vaults] = rootVaults;
           const git = new Git({ localUrl: repo });
+
           if (!(await git.hasRemote()))
             return { repo, vaults, status: SyncActionStatus.NO_REMOTE };
+          const pushRemote = await git.getPushRemote();
+          if (_.isUndefined(pushRemote))
+            return { repo, vaults, status: SyncActionStatus.NO_PUSH_REMOTE };
+          if (
+            (await git.diff({
+              nameOnly: true,
+              oldCommit: pushRemote,
+              newCommit: "HEAD",
+            })) === ""
+          )
+            return { repo, vaults, status: SyncActionStatus.NO_CHANGES };
           if (!(await this.shouldVaultsSync("push", rootVaults)))
             return { repo, vaults, status: SyncActionStatus.SKIP_CONFIG };
           if (!_.every(_.map(vaults, this.user.canPushVault)))

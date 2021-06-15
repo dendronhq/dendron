@@ -88,7 +88,8 @@
         "[typescript]": {
             "editor.defaultFormatter": "esbenp.prettier-vscode"
         },
-        "editor.tabSize": 2
+        "editor.tabSize": 2,
+        "editor.lineNumbers": "relative"
     },
     "extensions": {
         "recommendations": [

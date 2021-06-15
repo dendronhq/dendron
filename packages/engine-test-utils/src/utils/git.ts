@@ -1,60 +1,6 @@
-import {
-  CONSTANTS,
-  DendronConfig,
-  VaultUtils,
-  WorkspaceFolderRaw,
-  WorkspaceOpts,
-  WorkspaceSettings,
-} from "@dendronhq/common-all";
-import { readYAML } from "@dendronhq/common-server";
-import { AssertUtils } from "@dendronhq/common-test-utils";
-import { DConfig, Git } from "@dendronhq/engine-server";
+import { Git } from "@dendronhq/engine-server";
 import fs from "fs-extra";
-import _ from "lodash";
 import path from "path";
-
-export async function checkString(body: string, ...match: string[]) {
-  expect(
-    await AssertUtils.assertInString({
-      body,
-      match,
-    })
-  ).toBeTruthy();
-}
-
-export async function checkNotInString(body: string, ...nomatch: string[]) {
-  expect(
-    await AssertUtils.assertInString({
-      body,
-      nomatch,
-    })
-  ).toBeTruthy();
-}
-
-const getWorkspaceFolders = (wsRoot: string) => {
-  const wsPath = path.join(wsRoot, CONSTANTS.DENDRON_WS_NAME);
-  const settings = fs.readJSONSync(wsPath) as WorkspaceSettings;
-  return _.toArray(settings.folders);
-};
-
-export function checkVaults(opts: WorkspaceOpts, expect: any) {
-  const { wsRoot, vaults } = opts;
-  const configPath = DConfig.configPath(opts.wsRoot);
-  const config = readYAML(configPath) as DendronConfig;
-  expect(_.sortBy(config.vaults, ["fsPath", "workspace"])).toEqual(
-    _.sortBy(vaults, ["fsPath", "workspace"])
-  );
-  const wsFolders = getWorkspaceFolders(wsRoot);
-  expect(wsFolders).toEqual(
-    vaults.map((ent) => {
-      const out: WorkspaceFolderRaw = { path: VaultUtils.getRelPath(ent) };
-      if (ent.name) {
-        out.name = ent.name;
-      }
-      return out;
-    })
-  );
-}
 
 export class GitTestUtils {
   static async createRepoForWorkspace(wsRoot: string) {
@@ -93,6 +39,18 @@ export class GitTestUtils {
     await this.createRepoForWorkspace(wsRoot);
     await this.remoteCreate(remoteDir);
     await this.remoteAdd(wsRoot, remoteDir);
+  }
+
+  /**
+   * Convert existing workspace into a remote workspace
+   * @param wsRoot Directory where the workspace will be stored.
+   * @param remoteDir Directory where the remote will be stored. The workspace will pull and push to this remote.
+   */
+  static async addRepoToWorkspace(wsRoot: string) {
+    const git = new Git({ localUrl: wsRoot });
+    await git.init();
+    await git.addAll();
+    await git.commit({ msg: "init" });
   }
 
   static async createRepoWithReadme(root: string) {

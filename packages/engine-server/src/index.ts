@@ -15,4 +15,5 @@ export * from "./topics/hooks";
 export * from "./types";
 export * from "./utils";
 export * from "./workspace";
+export * from "./seed";
 export { execa };

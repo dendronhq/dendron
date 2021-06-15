@@ -6,6 +6,9 @@ import { DVault, WorkspaceFolderRaw } from "./types";
 
 export class VaultUtils {
   static getName(vault: DVault): string {
+    if (vault.seed) {
+      return vault.seed;
+    }
     return vault.name || path.basename(vault.fsPath);
   }
 
@@ -27,9 +30,13 @@ export class VaultUtils {
   }
 
   static getRelPath(vault: DVault) {
-    return vault.workspace
-      ? path.join(vault.workspace, vault.fsPath)
-      : vault.fsPath;
+    if (vault.workspace) {
+      return path.join(vault.workspace, vault.fsPath);
+    }
+    if (vault.seed) {
+      return path.join("seeds", vault.seed, vault.fsPath);
+    }
+    return vault.fsPath;
   }
 
   static getVaultByName({
@@ -158,9 +165,11 @@ export class VaultUtils {
   }
 
   static toWorkspaceFolder(vault: DVault): WorkspaceFolderRaw {
+    const name = VaultUtils.getName(vault);
+    const _path = VaultUtils.getRelPath(vault);
     return {
-      path: VaultUtils.getRelPath(vault),
-      name: vault.name,
+      path: _path,
+      name: name === _path || path.basename(_path) === name ? undefined : name,
     };
   }
 }

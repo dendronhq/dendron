@@ -56,7 +56,7 @@ const getCytoscapeStyle = (themes: any, theme: string | undefined) => {
 `;
 };
 
-const getEulerConfig = (isLargeGraph: boolean) => ({
+const getEulerConfig = (shouldAnimate: boolean) => ({
   name: "euler",
   // @ts-ignore
   springLength: () => 80,
@@ -69,7 +69,7 @@ const getEulerConfig = (isLargeGraph: boolean) => ({
   movementThreshold: 1,
   timeStep: 20,
   refresh: 10,
-  animate: !isLargeGraph,
+  animate: shouldAnimate,
   animationDuration: undefined,
   animationEasing: undefined,
   maxIterations: 1000,
@@ -178,7 +178,7 @@ export default function Graph({
         }
       });
 
-    cy.layout(getEulerConfig(isLargeGraph)).run();
+    cy.layout(getEulerConfig(!isLargeGraph)).run();
   };
 
   const renderGraph = () => {
@@ -220,7 +220,7 @@ export default function Graph({
         hideLabelsOnViewport: isLargeGraph,
       });
 
-      network.layout(getEulerConfig(isLargeGraph)).run();
+      network.layout(getEulerConfig(!isLargeGraph)).run();
 
       network.on("select", (e) => onSelect(e));
 

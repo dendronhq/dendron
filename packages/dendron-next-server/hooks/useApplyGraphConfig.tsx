@@ -1,6 +1,5 @@
 import cytoscape from "cytoscape";
-import { useEffect, useState } from "react";
-import { createLogger } from "../../common-frontend/lib";
+import { useEffect } from "react";
 import { getEulerConfig } from "../components/graph";
 import { GraphConfig, GraphElements } from "../lib/graph";
 
@@ -13,7 +12,6 @@ const useApplyGraphConfig = ({
   config: GraphConfig;
   elements: GraphElements;
 }) => {
-  const logger = createLogger("Graph: useApplyGraphConfig");
   const { nodes, edges } = elements;
   const isLargeGraph = nodes.length + Object.values(edges).flat().length > 1000;
 

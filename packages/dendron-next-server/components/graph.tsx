@@ -9,20 +9,12 @@ import cytoscape, {
 } from "cytoscape";
 // @ts-ignore
 import euler from "cytoscape-euler";
-import { useRouter } from "next/router";
 import { useThemeSwitcher } from "react-css-theme-switcher";
-import { Space, Typography } from "antd";
 import Head from "next/head";
 import AntThemes from "../styles/theme-antd";
 import GraphFilterView from "./graph-filter-view";
-import {
-  GraphConfig,
-  GraphConfigItem,
-  GraphEdges,
-  GraphElements,
-  GraphNodes,
-} from "../lib/graph";
-import { VaultUtils } from "../../common-all/lib";
+import { GraphConfig, GraphConfigItem, GraphElements } from "../lib/graph";
+import { VaultUtils } from "@dendronhq/common-all";
 import useApplyGraphConfig from "../hooks/useApplyGraphConfig";
 
 const getCytoscapeStyle = (themes: any, theme: string | undefined) => {
@@ -190,8 +182,6 @@ export default function Graph({
           [key]: item,
         };
       }, {});
-
-      console.log(vaultConfigObject);
 
       // Add vault config options to graph config
       setConfig((c) => ({

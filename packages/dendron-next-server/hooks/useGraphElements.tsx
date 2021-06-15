@@ -60,14 +60,25 @@ const getNoteGraphElements = (
       if (link.type === "backlink") return;
       if (link.to && link.to.fname && note.id && vaults) {
         const fnameArray = link.to.fname.split("/");
-        const toVaultName = fnameArray[fnameArray.length - 2];
-        let toVault = VaultUtils.getVaultByName({
+
+        const toFname = link.to.fname.includes("/")
+          ? fnameArray[fnameArray.length - 1]
+          : link.to.fname;
+        const toVaultName =
+          link.to.vaultName ||
+          fnameArray[fnameArray.length - 2] ||
+          VaultUtils.getName(note.vault);
+
+        const toVault = VaultUtils.getVaultByName({
           vname: toVaultName,
           vaults,
         });
 
-        if (!toVault) {
-          toVault = note.vault;
+        if (_.isUndefined(toVault)) {
+          logger.log(
+            `Couldn't find vault of note ${toFname}, aborting link creation`
+          );
+          return;
         }
 
         const to = NoteUtils.getNoteByFnameV5({
@@ -81,7 +92,9 @@ const getNoteGraphElements = (
           logger.log(
             `Failed to link note ${VaultUtils.getName(note.vault)}/${
               note.fname
-            } to ${VaultUtils.getName(toVault)}/${link.to.fname}`
+            } to ${VaultUtils.getName(toVault)}/${
+              link.to.fname
+            }. Most likely, this note does not exist.`
           );
           return;
         }

@@ -19,8 +19,11 @@ const getVaultClass = (vault: DVault) => {
 
 const getNoteGraphElements = (
   notes: NotePropsDict,
-  wsRoot: string
+  wsRoot: string,
+  vaults: DVault[] | undefined
 ): GraphElements => {
+  const logger = createLogger("graph - getNoteGraphElements");
+
   // ADD NODES
   const nodes = Object.values(notes).map((note) => {
     return {
@@ -54,15 +57,35 @@ const getNoteGraphElements = (
 
     // Find and add linked notes
     note.links.forEach((link) => {
-      if (link.to && note.id) {
+      if (link.type === "backlink") return;
+      if (link.to && link.to.fname && note.id && vaults) {
+        const fnameArray = link.to.fname.split("/");
+        const toVaultName = fnameArray[fnameArray.length - 2];
+        let toVault = VaultUtils.getVaultByName({
+          vname: toVaultName,
+          vaults,
+        });
+
+        if (!toVault) {
+          toVault = note.vault;
+        }
+
         const to = NoteUtils.getNoteByFnameV5({
-          fname: link.to!.fname as string,
-          vault: note.vault,
+          fname: fnameArray[fnameArray.length - 1],
+          vault: toVault,
           notes: notes,
           wsRoot,
         });
 
-        if (!to) return;
+        if (!to) {
+          logger.log(
+            `Failed to link note ${VaultUtils.getName(note.vault)}/${
+              note.fname
+            } to ${VaultUtils.getName(toVault)}/${link.to.fname}`
+          );
+          return;
+        }
+
         linkConnections.push({
           data: {
             group: "edges",
@@ -190,7 +213,11 @@ const useGraphElements = ({
   useEffect(() => {
     if (type === "note" && engine.notes) {
       setElements(
-        getNoteGraphElements(engine.notes, router.query.ws as string)
+        getNoteGraphElements(
+          engine.notes,
+          router.query.ws as string,
+          engine.vaults
+        )
       );
     }
   }, [engine.notes]);

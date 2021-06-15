@@ -6,6 +6,10 @@ import path from "path";
 import { GitTestUtils } from "./git";
 
 export class TestSeedUtils {
+  static defaultSeedId = () => {
+    return "dendron.foo";
+  };
+
   static async createSeedRegistry(opts: {
     engine: DEngineClient;
     wsRoot: string;
@@ -14,13 +18,15 @@ export class TestSeedUtils {
     const id = SeedUtils.getSeedId(config);
     const root = tmpDir().name;
     const registryFile = path.join(root, "reg.yml");
-    writeYAML(registryFile, { [id]: config });
-    return { registryFile };
+    const seedDict = { [id]: config };
+    writeYAML(registryFile, seedDict);
+    return { registryFile, seedDict };
   }
+
   static async createSeed(opts: { engine: DEngineClient; wsRoot: string }) {
     const cli = new SeedCLICommand();
     const cmd = SeedCommands.INIT;
-    const id = "dendron.foo";
+    const id = this.defaultSeedId();
     const seed: SeedConfig = {
       description: "",
       license: "",

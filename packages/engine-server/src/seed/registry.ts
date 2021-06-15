@@ -53,11 +53,10 @@ export class SeedRegistry {
       };
     }
     const spath = await SeedUtils.clone({ wsRoot, config: maybeSeed });
-    const seedService = new SeedService(wsRoot);
+    const seedService = new SeedService({ wsRoot, registry: this });
     const wsService = new WorkspaceService({ wsRoot });
     const config = await seedService.addSeed({ seed: maybeSeed, wsRoot });
     await wsService.setConfig(config);
-    debugger;
     return { data: { spath } };
   }
 

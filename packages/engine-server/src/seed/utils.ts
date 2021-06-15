@@ -7,6 +7,11 @@ import { WorkspaceService } from "../workspace";
 import { DEFAULT_SEED_PUBLISHER } from "./constants";
 
 export class SeedUtils {
+  static exists({ id, wsRoot }: { id: string; wsRoot: string }) {
+    const seedPath = this.seed2Path({ id, wsRoot });
+    return fs.pathExists(seedPath);
+  }
+
   static genDefaultConfig(opts: {
     seed?: SeedConfig;
     name: string;
@@ -24,6 +29,11 @@ export class SeedUtils {
     });
   }
 
+  /**
+   * Clone seed locally
+   * @param param0
+   * @returns
+   */
   static async clone({
     wsRoot,
     config,
@@ -43,6 +53,12 @@ export class SeedUtils {
     return `${publisher}.${name}`;
   }
 
+  /**
+   * Path for seed
+   * @param wsRoot - workspace root
+   * @param id - id of seed
+   * @returns
+   */
   static seed2Path({ wsRoot, id }: { wsRoot: string; id: string }) {
     return path.join(wsRoot, "seeds", id);
   }

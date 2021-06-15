@@ -19,7 +19,7 @@ import {
 } from "../../../utils";
 import { TestSeedUtils } from "../../../utils/seed";
 
-const runSeedCmd = ({
+export const runSeedCmd = ({
   cmd,
   id,
   ...opts

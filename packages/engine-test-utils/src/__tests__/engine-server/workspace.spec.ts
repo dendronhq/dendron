@@ -3,6 +3,7 @@ import { tmpDir } from "@dendronhq/common-server";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import {
   DConfig,
+  SeedService,
   SyncActionStatus,
   WorkspaceService,
 } from "@dendronhq/engine-server";
@@ -11,7 +12,14 @@ import path from "path";
 import { TestConfigUtils } from "../../config";
 import { runEngineTestV5, setupWS, testWithEngine } from "../../engine";
 import { ENGINE_HOOKS } from "../../presets";
-import { checkVaults, GitTestUtils } from "../../utils";
+import {
+  checkDir,
+  checkFile,
+  checkNotInDir,
+  checkVaults,
+  GitTestUtils,
+} from "../../utils";
+import { TestSeedUtils } from "../../utils/seed";
 
 describe("WorkspaceService", () => {
   describe("create", () => {
@@ -111,6 +119,69 @@ describe("WorkspaceService", () => {
           preSetupHook: async (opts) => {
             await ENGINE_HOOKS.setupBasic(opts);
           },
+          addVSWorkspace: true,
+        }
+      );
+    });
+
+    test("remote seed present", async () => {
+      await runEngineTestV5(
+        async ({ engine, wsRoot, vaults }) => {
+          const tmp = tmpDir().name;
+          const { registryFile, seedDict } =
+            await TestSeedUtils.createSeedRegistry({
+              engine,
+              wsRoot: tmp,
+            });
+          const id = TestSeedUtils.defaultSeedId();
+          const seedService = new SeedService({ wsRoot, registryFile });
+          const seed = seedDict[TestSeedUtils.defaultSeedId()];
+          await seedService.addSeed({ seed, wsRoot, writeToConfig: true });
+          const wsService = new WorkspaceService({ wsRoot, seedService });
+          const didClone = await wsService.initialize({
+            onSyncVaultsProgress: () => {},
+            onSyncVaultsEnd: () => {},
+          });
+          expect(didClone).toEqual(true);
+
+          // seed should be added
+          await checkDir(
+            { fpath: path.join(wsRoot, "seeds", id), snapshot: true },
+            "dendron.yml",
+            "seed.yml",
+            "vault"
+          );
+          // seed.yml should not be present in the workspace
+          await checkNotInDir(
+            {
+              fpath: wsRoot,
+              snapshot: true,
+            },
+            "seed.yml"
+          );
+          await checkFile({
+            fpath: path.join(wsRoot, "dendron.yml"),
+            snapshot: true,
+          });
+          await checkFile(
+            {
+              fpath: path.join(wsRoot, "dendron.code-workspace"),
+              snapshot: true,
+            },
+            `${id}/vault`
+          );
+          checkVaults(
+            {
+              wsRoot,
+              vaults: [
+                { fsPath: "vault", seed: id, name: id } as DVault,
+              ].concat(vaults),
+            },
+            expect
+          );
+        },
+        {
+          expect,
           addVSWorkspace: true,
         }
       );

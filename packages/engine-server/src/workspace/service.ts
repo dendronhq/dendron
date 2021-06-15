@@ -11,6 +11,7 @@ import {
   DWorkspaceEntry,
   NoteUtils,
   SchemaUtils,
+  SeedEntry,
   Time,
   VaultUtils,
   WorkspaceSettings,
@@ -31,9 +32,14 @@ import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { DConfig } from "../config";
+import { SeedService, SeedUtils } from "../seed";
 import { Git } from "../topics/git";
-import { getPortFilePath, getWSMetaFilePath, writeWSMetaFile } from "../utils";
-import { removeCache } from "../utils";
+import {
+  getPortFilePath,
+  getWSMetaFilePath,
+  removeCache,
+  writeWSMetaFile,
+} from "../utils";
 import { WorkspaceConfig } from "./vscode";
 const DENDRON_WS_NAME = CONSTANTS.DENDRON_WS_NAME;
 
@@ -46,6 +52,8 @@ export enum SyncActionStatus {
   NO_REMOTE = "it has no remote",
   SKIP_CONFIG = "it is configured so",
   NOT_PERMITTED = "user is not permitted to push to one or more vaults",
+  NEW = "newly clond repository",
+  ERROR = "error while syncing",
 }
 
 export type SyncActionResult = {
@@ -65,12 +73,15 @@ export type WorkspaceServiceCreateOpts = {
 
 export type WorkspaceServiceOpts = {
   wsRoot: string;
+  seedService?: SeedService;
 };
 
 type UrlTransformerFunc = (url: string) => string;
 
 export class WorkspaceService {
   public logger: DLogger;
+  protected seedService: SeedService;
+
   static isNewVersionGreater({
     oldVersion,
     newVersion,
@@ -87,9 +98,10 @@ export class WorkspaceService {
 
   public wsRoot: string;
 
-  constructor({ wsRoot }: WorkspaceServiceOpts) {
+  constructor({ wsRoot, seedService }: WorkspaceServiceOpts) {
     this.wsRoot = wsRoot;
     this.logger = createLogger();
+    this.seedService = seedService || new SeedService({ wsRoot });
   }
 
   get user(): DUser {
@@ -659,18 +671,39 @@ export class WorkspaceService {
       wsPath: string;
       wsUrl: string;
     }[];
-    // const wsVaults: DVault[] = workspacePaths.flatMap(({ wsPath, wsUrl }) => {
-    //   const { vaults } = GitUtils.getVaultsFromRepo({
-    //     repoPath: wsPath,
-    //     wsRoot,
-    //     repoUrl: wsUrl,
-    //   });
-    //   return vaults;
-    // });
-    // add wsvaults
-    // await Promise.all(wsVaults.map((vault) => {
-    //   return this.addVault({ config, vault, writeConfig: false, addToWorkspace: true });
-    // }));
+
+    // const seedService = new SeedService({wsRoot});
+    // check seeds
+    const seedResults: { id: string; status: SyncActionStatus; data: any }[] =
+      [];
+    await Promise.all(
+      _.map(config.seeds, async (_entry: SeedEntry, id: string) => {
+        if (!(await SeedUtils.exists({ id, wsRoot }))) {
+          const resp = await this.seedService.info({ id });
+          if (_.isUndefined(resp)) {
+            seedResults.push({
+              id,
+              status: SyncActionStatus.ERROR,
+              data: new DendronError({
+                status: SyncActionStatus.ERROR,
+                message: `seed ${id} does not exist in registry`,
+              }),
+            });
+            return;
+          }
+          const spath = await this.seedService.cloneSeed({
+            seed: resp,
+            wsRoot,
+          });
+          seedResults.push({
+            id,
+            status: SyncActionStatus.NEW,
+            data: { spath },
+          });
+        }
+        return undefined;
+      })
+    );
 
     // clone all missing vaults
     const emptyRemoteVaults = config.vaults.filter(
@@ -679,7 +712,11 @@ export class WorkspaceService {
         !fs.existsSync(vault2Path({ vault, wsRoot }))
     );
     const didClone =
-      !_.isEmpty(emptyRemoteVaults) || !_.isEmpty(workspacePaths);
+      !_.isEmpty(emptyRemoteVaults) ||
+      !_.isEmpty(workspacePaths) ||
+      !_.isUndefined(
+        seedResults.find((ent) => ent.status === SyncActionStatus.NEW)
+      );
     // if we added a workspace, we also add new vaults
     if (!_.isEmpty(workspacePaths)) {
       this.setConfig(config);

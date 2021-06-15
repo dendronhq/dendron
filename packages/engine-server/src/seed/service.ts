@@ -7,6 +7,7 @@ import {
 import { writeYAML } from "@dendronhq/common-server";
 import path from "path";
 import { WorkspaceService } from "../workspace";
+import { SeedRegistry } from "./registry";
 import { SeedUtils } from "./utils";
 
 export enum SeedInitMode {
@@ -15,9 +16,43 @@ export enum SeedInitMode {
 }
 
 export class SeedService {
-  constructor(public wsRoot: string) {}
+  public wsRoot: string;
+  public registryFile?: string;
+  protected registry: SeedRegistry;
 
-  async addSeed({ seed, wsRoot }: { seed: SeedConfig; wsRoot: string }) {
+  /**
+   *
+   * @param wsRoot - root of file
+   * @param registryFile - custom yml file to look for registry
+   */
+  constructor({
+    wsRoot,
+    registryFile,
+    registry,
+  }: {
+    wsRoot: string;
+    registryFile?: string;
+    registry?: SeedRegistry;
+  }) {
+    this.wsRoot = wsRoot;
+    this.registryFile = registryFile;
+    this.registry = registry || SeedRegistry.create({ registryFile });
+  }
+
+  /**
+   * Add seed metadata. Does not write the config
+   * @param
+   * @returns
+   */
+  async addSeed({
+    seed,
+    wsRoot,
+    writeToConfig,
+  }: {
+    seed: SeedConfig;
+    wsRoot: string;
+    writeToConfig?: boolean;
+  }) {
     const ws = new WorkspaceService({ wsRoot });
     const config = ws.config;
     const id = SeedUtils.getSeedId({ ...seed });
@@ -33,9 +68,14 @@ export class SeedService {
       },
       addToWorkspace: true,
       config,
-      writeConfig: false,
+      writeConfig: writeToConfig || false,
     });
     return config;
+  }
+
+  async cloneSeed({ seed, wsRoot }: { seed: SeedConfig; wsRoot: string }) {
+    const spath = await SeedUtils.clone({ wsRoot, config: seed });
+    return spath;
   }
 
   async init(opts: { seed: SeedConfig; wsRoot: string; mode: SeedInitMode }) {
@@ -83,5 +123,10 @@ export class SeedService {
         seed,
       },
     };
+  }
+
+  async info({ id }: { id: string }) {
+    const resp = this.registry.info({ id });
+    return resp;
   }
 }

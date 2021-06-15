@@ -92,11 +92,11 @@ export class VaultWatcher {
     note = NoteUtils.hydrate({ noteRaw: note, noteHydrated });
     const links = LinkUtils.findLinks({ note, engine: eclient });
     note.links = links;
-    const anchors = AnchorUtils.findAnchors(
+    const anchors = await AnchorUtils.findAnchors(
       { note, wsRoot: eclient.wsRoot },
       { fname, engine: eclient }
     );
-    note.anchors = await anchors;
+    note.anchors = anchors;
     this.L.info({ ctx, fname, msg: "exit" });
     return await eclient.updateNote(note);
   }

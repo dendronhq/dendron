@@ -1,4 +1,4 @@
-import { createLogger } from "@dendronhq/common-frontend";
+import { createLogger, engineSlice } from "@dendronhq/common-frontend";
 import _ from "lodash";
 import React, { useEffect, useRef, useState } from "react";
 import cytoscape, {
@@ -9,18 +9,13 @@ import cytoscape, {
 } from "cytoscape";
 // @ts-ignore
 import euler from "cytoscape-euler";
-import { useRouter } from "next/router";
 import { useThemeSwitcher } from "react-css-theme-switcher";
-import { Space, Typography } from "antd";
 import Head from "next/head";
 import AntThemes from "../styles/theme-antd";
 import GraphFilterView from "./graph-filter-view";
-import {
-  GraphConfig,
-  GraphEdges,
-  GraphElements,
-  GraphNodes,
-} from "../lib/graph";
+import { GraphConfig, GraphConfigItem, GraphElements } from "../lib/graph";
+import { VaultUtils } from "@dendronhq/common-all";
+import useApplyGraphConfig from "../hooks/useApplyGraphConfig";
 
 const getCytoscapeStyle = (themes: any, theme: string | undefined) => {
   if (_.isUndefined(theme)) return "";
@@ -51,10 +46,14 @@ const getCytoscapeStyle = (themes: any, theme: string | undefined) => {
   .links {
     line-style: dashed;
   }
+
+  .hidden {
+    display: none;
+  }
 `;
 };
 
-const getEulerConfig = (isLargeGraph: boolean) => ({
+export const getEulerConfig = (shouldAnimate: boolean) => ({
   name: "euler",
   // @ts-ignore
   springLength: () => 80,
@@ -67,7 +66,7 @@ const getEulerConfig = (isLargeGraph: boolean) => ({
   movementThreshold: 1,
   timeStep: 20,
   refresh: 10,
-  animate: !isLargeGraph,
+  animate: shouldAnimate,
   animationDuration: undefined,
   animationEasing: undefined,
   maxIterations: 1000,
@@ -85,11 +84,13 @@ export default function Graph({
   onSelect,
   config,
   setConfig,
+  engine,
 }: {
   elements: GraphElements;
   onSelect: EventHandler;
   config: GraphConfig;
   setConfig: React.Dispatch<React.SetStateAction<GraphConfig>>;
+  engine: engineSlice.EngineState;
   type?: "note" | "schema";
 }) {
   const logger = createLogger("Graph");
@@ -97,43 +98,15 @@ export default function Graph({
   const { themes, currentTheme } = useThemeSwitcher();
   const [cy, setCy] = useState<Core>();
 
+  // On config update, handle graph changes
+  useApplyGraphConfig({
+    graph: cy,
+    config,
+    elements,
+  });
+
   const { nodes, edges } = elements;
-
   const isLargeGraph = nodes.length + Object.values(edges).flat().length > 1000;
-
-  const applyConfig = () => {
-    if (!cy || !graphRef.current) return;
-
-    // "display" rules
-    Object.entries(config)
-      .filter(([k, v]) => k.includes("connections"))
-      .forEach(([k, v]) => {
-        const keyArray = k.split(".");
-        const edgeType = keyArray[keyArray.length - 1];
-
-        const includedEdges = cy.$(`.${edgeType}`);
-        const edgeCount = includedEdges.length;
-        logger.log(`${edgeType}:`, edgeCount);
-
-        // If edges should be included
-        if (v?.value) {
-          // If these edges aren't rendered, add them
-          if (edgeCount === 0) {
-            cy.add(edges[edgeType]);
-          }
-        }
-
-        // If edges should not be included
-        else {
-          // If these edges are rendered, remove them
-          if (edgeCount > 0) {
-            includedEdges.remove();
-          }
-        }
-      });
-
-    cy.layout(getEulerConfig(isLargeGraph)).run();
-  };
 
   const renderGraph = () => {
     if (graphRef.current && nodes && edges) {
@@ -174,7 +147,7 @@ export default function Graph({
         hideLabelsOnViewport: isLargeGraph,
       });
 
-      network.layout(getEulerConfig(isLargeGraph)).run();
+      network.layout(getEulerConfig(!isLargeGraph)).run();
 
       network.on("select", (e) => onSelect(e));
 
@@ -190,8 +163,33 @@ export default function Graph({
   }, [graphRef, nodes, edges]);
 
   useEffect(() => {
-    applyConfig();
-  }, [config]);
+    // If initial vault data received
+    if (engine.vaults && !Object.keys(config).includes("vaults")) {
+      // Get config options for all vaults
+      const vaultConfigObject: {
+        [key: string]: GraphConfigItem<boolean>;
+      } = engine.vaults.reduce((dict, vault) => {
+        const name = VaultUtils.getName(vault);
+        const key = `vaults.${name}`;
+        const item: GraphConfigItem<boolean> = {
+          value: true,
+          mutable: true,
+          label: name,
+        };
+
+        return {
+          ...dict,
+          [key]: item,
+        };
+      }, {});
+
+      // Add vault config options to graph config
+      setConfig((c) => ({
+        ...c,
+        ...vaultConfigObject,
+      }));
+    }
+  }, [engine.vaults]);
 
   return (
     <>

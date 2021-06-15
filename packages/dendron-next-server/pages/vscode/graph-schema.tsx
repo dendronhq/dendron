@@ -76,6 +76,7 @@ export default function FullSchemaGraph({
       type="schema"
       config={config}
       setConfig={setConfig}
+      engine={engine}
     />
   );
 }

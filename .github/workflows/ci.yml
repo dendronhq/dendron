@@ -8,6 +8,7 @@ on:
       - integ-publish
       - dev-kevin
       - dev
+      - feat/*
   pull_request:
     branches:
       - master

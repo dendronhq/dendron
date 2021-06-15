@@ -9,6 +9,7 @@ import {
 import { file2Note, string2Note } from "@dendronhq/common-server";
 import { HistoryService, LinkUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
+import { AnchorUtils } from "@dendronhq/engine-server";
 import path from "path";
 import * as vscode from "vscode";
 import { Logger } from "./logger";
@@ -91,6 +92,11 @@ export class VaultWatcher {
     note = NoteUtils.hydrate({ noteRaw: note, noteHydrated });
     const links = LinkUtils.findLinks({ note, engine: eclient });
     note.links = links;
+    const anchors = AnchorUtils.findAnchors(
+      { note, wsRoot: eclient.wsRoot },
+      { fname, engine: eclient }
+    );
+    note.anchors = await anchors;
     this.L.info({ ctx, fname, msg: "exit" });
     return await eclient.updateNote(note);
   }

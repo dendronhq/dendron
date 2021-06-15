@@ -22,7 +22,7 @@ export type CoreGraphConfig = {
   "information.edges-hierarchy"?: GraphConfigItem<number>;
   "information.nodes": GraphConfigItem<number>;
 
-  // "filter.regex": GraphConfigItem<string>;
+  "filter.regex": GraphConfigItem<string>;
 };
 
 export type NoteGraphConfig = {
@@ -38,10 +38,10 @@ export type SchemaGraphConfig = {
 export type GraphConfig = CoreGraphConfig & NoteGraphConfig & SchemaGraphConfig;
 
 const coreGraphConfig: CoreGraphConfig = {
-  // "filter.regex": {
-  //   value: "",
-  //   mutable: true,
-  // },
+  "filter.regex": {
+    value: "",
+    mutable: true,
+  },
   "connections.hierarchy": {
     value: true,
     mutable: true,

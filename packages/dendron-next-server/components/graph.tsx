@@ -1,27 +1,16 @@
 import { createLogger, engineSlice } from "@dendronhq/common-frontend";
 import _ from "lodash";
 import React, { useEffect, useRef, useState } from "react";
-import cytoscape, {
-  Core,
-  EdgeDefinition,
-  ElementsDefinition,
-  EventHandler,
-} from "cytoscape";
+import cytoscape, { Core, EdgeDefinition, EventHandler } from "cytoscape";
 // @ts-ignore
 import euler from "cytoscape-euler";
 import { useThemeSwitcher } from "react-css-theme-switcher";
 import Head from "next/head";
 import AntThemes from "../styles/theme-antd";
 import GraphFilterView from "./graph-filter-view";
+import { GraphConfig, GraphConfigItem, GraphElements } from "../lib/graph";
 import { VaultUtils } from "@dendronhq/common-all";
 import useApplyGraphConfig from "../hooks/useApplyGraphConfig";
-import {
-  GraphConfig,
-  GraphConfigItem,
-  GraphEdges,
-  GraphElements,
-  GraphNodes,
-} from "../lib/graph";
 
 const getCytoscapeStyle = (themes: any, theme: string | undefined) => {
   if (_.isUndefined(theme)) return "";
@@ -53,7 +42,8 @@ const getCytoscapeStyle = (themes: any, theme: string | undefined) => {
     line-style: dashed;
   }
 
-  .hidden {
+  .hidden--vault,
+  .hidden--regex {
     display: none;
   }
 `;

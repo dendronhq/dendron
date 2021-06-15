@@ -91,13 +91,13 @@ const GraphFilterView = ({ config, setConfig }: FilterProps) => {
                       )}
                       {_.isString(entry?.value) && (
                         <>
-                          <Typography>{label}</Typography>
                           <Input
                             defaultValue={entry?.value}
                             onChange={(newValue) =>
                               updateConfigField(key, newValue.target.value)
                             }
                             disabled={!entry?.mutable}
+                            placeholder={label}
                           />
                         </>
                       )}

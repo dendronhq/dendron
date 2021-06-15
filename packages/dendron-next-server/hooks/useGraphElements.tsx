@@ -7,7 +7,7 @@ import {
 } from "@dendronhq/common-all";
 import { createLogger, engineSlice } from "@dendronhq/common-frontend";
 import { EdgeDefinition, NodeDefinition } from "cytoscape";
-import _ from "lodash";
+import _, { nth } from "lodash";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { GraphEdges, GraphElements, GraphNodes } from "../lib/graph";
@@ -27,7 +27,12 @@ const getNoteGraphElements = (
   // ADD NODES
   const nodes = Object.values(notes).map((note) => {
     return {
-      data: { id: note.id, label: note.title, group: "nodes" },
+      data: {
+        id: note.id,
+        label: note.title,
+        group: "nodes",
+        fname: note.fname,
+      },
       classes: `${getVaultClass(note.vault)}`,
     };
   });
@@ -48,6 +53,7 @@ const getNoteGraphElements = (
           id: `${notes.id}_${child}`,
           source: note.id,
           target: child,
+          fname: note.fname,
         },
         classes: `hierarchy ${noteVaultClass}`,
       }))
@@ -105,6 +111,7 @@ const getNoteGraphElements = (
             id: `${note.id}_${to.id}`,
             source: note.id,
             target: to.id,
+            fname: note.fname,
           },
           classes: `links ${noteVaultClass}`,
         });

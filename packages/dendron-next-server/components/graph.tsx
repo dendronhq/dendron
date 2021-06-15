@@ -183,7 +183,7 @@ export default function Graph({
         }
       });
 
-    cy.layout(getEulerConfig(isLargeGraph)).run();
+    cy.layout(getEulerConfig(!isLargeGraph)).run();
   };
 
   const renderGraph = () => {

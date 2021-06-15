@@ -7,15 +7,9 @@ import { useThemeSwitcher } from "react-css-theme-switcher";
 import Head from "next/head";
 import AntThemes from "../styles/theme-antd";
 import GraphFilterView from "./graph-filter-view";
+import { GraphConfig, GraphConfigItem, GraphElements } from "../lib/graph";
 import { VaultUtils } from "@dendronhq/common-all";
 import useApplyGraphConfig from "../hooks/useApplyGraphConfig";
-import {
-  GraphConfig,
-  GraphConfigItem,
-  GraphEdges,
-  GraphElements,
-  GraphNodes,
-} from "../lib/graph";
 
 const getCytoscapeStyle = (themes: any, theme: string | undefined) => {
   if (_.isUndefined(theme)) return "";

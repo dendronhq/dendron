@@ -13,9 +13,15 @@ import { useThemeSwitcher } from "react-css-theme-switcher";
 import Head from "next/head";
 import AntThemes from "../styles/theme-antd";
 import GraphFilterView from "./graph-filter-view";
-import { GraphConfig, GraphConfigItem, GraphElements } from "../lib/graph";
 import { VaultUtils } from "@dendronhq/common-all";
 import useApplyGraphConfig from "../hooks/useApplyGraphConfig";
+import {
+  GraphConfig,
+  GraphConfigItem,
+  GraphEdges,
+  GraphElements,
+  GraphNodes,
+} from "../lib/graph";
 
 const getCytoscapeStyle = (themes: any, theme: string | undefined) => {
   if (_.isUndefined(theme)) return "";
@@ -108,6 +114,82 @@ export default function Graph({
   const { nodes, edges } = elements;
   const isLargeGraph = nodes.length + Object.values(edges).flat().length > 1000;
 
+  const applyConfig = () => {
+    if (!cy || !graphRef.current || cy.$("*").length === 0) return;
+
+    // "display" rules
+    Object.entries(config)
+      .filter(([k, v]) => k.includes("connections"))
+      .forEach(([k, v]) => {
+        const keyArray = k.split(".");
+        const edgeType = keyArray[keyArray.length - 1];
+
+        const includedEdges = cy.$(`.${edgeType}`);
+        const edgeCount = includedEdges.length;
+
+        // If edges should be included
+        if (v?.value) {
+          // If these edges aren't rendered, add them
+          if (edgeCount === 0) {
+            cy.add(edges[edgeType]);
+          }
+        }
+
+        // If edges should not be included
+        else {
+          // If these edges are rendered, remove them
+          if (edgeCount > 0) {
+            includedEdges.remove();
+          }
+        }
+      });
+
+    // "vault" rules
+    Object.entries(config)
+      .filter(([k, v]) => k.includes("vault"))
+      .forEach(([k, v]) => {
+        const keyArray = k.split(".");
+        const vaultName = keyArray[keyArray.length - 1];
+        const vaultClass = `vault-${vaultName}`;
+
+        const includedElements = cy.$(`.${vaultClass}`);
+        const elementCount = includedElements.length;
+
+        // If edges should be included
+        if (v?.value) {
+          // If these edges aren't rendered, add them
+          if (elementCount === 0) {
+            logger.log("Filtering nodes...");
+            const nodesToAdd = nodes.filter((node) =>
+              node.classes?.includes(vaultClass)
+            );
+            const edgesToAdd = Object.values(edges)
+              .flat()
+              .filter((edge) => edge.classes?.includes(vaultClass));
+
+            logger.log("Adding nodes...");
+            // TODO: Fix this weird memory leak thing
+            cy.add(nodesToAdd);
+
+            logger.log("Adding edges...");
+            cy.add(edgesToAdd);
+
+            logger.log("Nodes added.");
+          }
+        }
+
+        // If edges should not be included
+        else {
+          // If these edges are rendered, remove them
+          if (elementCount > 0) {
+            includedElements.remove();
+          }
+        }
+      });
+
+    cy.layout(getEulerConfig(isLargeGraph)).run();
+  };
+
   const renderGraph = () => {
     if (graphRef.current && nodes && edges) {
       logger.log("Rendering graph...");
@@ -182,6 +264,37 @@ export default function Graph({
           [key]: item,
         };
       }, {});
+
+      // Add vault config options to graph config
+      setConfig((c) => ({
+        ...c,
+        ...vaultConfigObject,
+      }));
+    }
+  }, [engine.vaults]);
+
+  useEffect(() => {
+    // If initial vault data received
+    if (engine.vaults && !Object.keys(config).includes("vaults")) {
+      // Get config options for all vaults
+      const vaultConfigObject: {
+        [key: string]: GraphConfigItem<boolean>;
+      } = engine.vaults.reduce((dict, vault) => {
+        const name = VaultUtils.getName(vault);
+        const key = `vaults.${name}`;
+        const item: GraphConfigItem<boolean> = {
+          value: true,
+          mutable: true,
+          label: name,
+        };
+
+        return {
+          ...dict,
+          [key]: item,
+        };
+      }, {});
+
+      console.log(vaultConfigObject);
 
       // Add vault config options to graph config
       setConfig((c) => ({

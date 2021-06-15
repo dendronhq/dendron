@@ -12,14 +12,22 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { GraphEdges, GraphElements, GraphNodes } from "../lib/graph";
 
+const getVaultClass = (vault: DVault) => {
+  const vaultName = VaultUtils.getName(vault);
+  return `vault-${vaultName}`;
+};
+
 const getNoteGraphElements = (
   notes: NotePropsDict,
   wsRoot: string
 ): GraphElements => {
   // ADD NODES
-  const nodes = Object.values(notes).map((note) => ({
-    data: { id: note.id, label: note.title, group: "nodes" },
-  }));
+  const nodes = Object.values(notes).map((note) => {
+    return {
+      data: { id: note.id, label: note.title, group: "nodes" },
+      classes: `${getVaultClass(note.vault)}`,
+    };
+  });
 
   // ADD EDGES
   const edges: GraphEdges = {
@@ -28,6 +36,8 @@ const getNoteGraphElements = (
   };
 
   Object.values(notes).forEach((note) => {
+    const noteVaultClass = getVaultClass(note.vault);
+
     edges.hierarchy.push(
       ...note.children.map((child) => ({
         data: {
@@ -36,7 +46,7 @@ const getNoteGraphElements = (
           source: note.id,
           target: child,
         },
-        classes: "hierarchy",
+        classes: `hierarchy ${noteVaultClass}`,
       }))
     );
 
@@ -60,7 +70,7 @@ const getNoteGraphElements = (
             source: note.id,
             target: to.id,
           },
-          classes: "links",
+          classes: `links ${noteVaultClass}`,
         });
       }
     });
@@ -103,6 +113,7 @@ const getSchemaGraphElements = (
         group: "nodes",
         vault: vaultName,
       },
+      classes: `vault-${vaultName}`,
     });
 
     filteredSchemas
@@ -123,7 +134,7 @@ const getSchemaGraphElements = (
             source: VAULT_ID,
             target: SCHEMA_ID,
           },
-          classes: "hierarchy",
+          classes: `hierarchy vault-${vaultName}`,
         });
 
         // Children schemas
@@ -148,7 +159,7 @@ const getSchemaGraphElements = (
               source: SCHEMA_ID,
               target: SUBSCHEMA_ID,
             },
-            classes: "hierarchy",
+            classes: `hierarchy vault-${vaultName}`,
           });
         });
       });

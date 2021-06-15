@@ -1,4 +1,4 @@
-import { createLogger } from "@dendronhq/common-frontend";
+import { createLogger, engineSlice } from "@dendronhq/common-frontend";
 import _ from "lodash";
 import React, { useEffect, useRef, useState } from "react";
 import cytoscape, {
@@ -17,10 +17,12 @@ import AntThemes from "../styles/theme-antd";
 import GraphFilterView from "./graph-filter-view";
 import {
   GraphConfig,
+  GraphConfigItem,
   GraphEdges,
   GraphElements,
   GraphNodes,
 } from "../lib/graph";
+import { VaultUtils } from "../../common-all/lib";
 
 const getCytoscapeStyle = (themes: any, theme: string | undefined) => {
   if (_.isUndefined(theme)) return "";
@@ -85,11 +87,13 @@ export default function Graph({
   onSelect,
   config,
   setConfig,
+  engine,
 }: {
   elements: GraphElements;
   onSelect: EventHandler;
   config: GraphConfig;
   setConfig: React.Dispatch<React.SetStateAction<GraphConfig>>;
+  engine: engineSlice.EngineState;
   type?: "note" | "schema";
 }) {
   const logger = createLogger("Graph");
@@ -102,7 +106,7 @@ export default function Graph({
   const isLargeGraph = nodes.length + Object.values(edges).flat().length > 1000;
 
   const applyConfig = () => {
-    if (!cy || !graphRef.current) return;
+    if (!cy || !graphRef.current || cy.$("*").length === 0) return;
 
     // "display" rules
     Object.entries(config)
@@ -113,7 +117,6 @@ export default function Graph({
 
         const includedEdges = cy.$(`.${edgeType}`);
         const edgeCount = includedEdges.length;
-        logger.log(`${edgeType}:`, edgeCount);
 
         // If edges should be included
         if (v?.value) {
@@ -128,6 +131,49 @@ export default function Graph({
           // If these edges are rendered, remove them
           if (edgeCount > 0) {
             includedEdges.remove();
+          }
+        }
+      });
+
+    // "vault" rules
+    Object.entries(config)
+      .filter(([k, v]) => k.includes("vault"))
+      .forEach(([k, v]) => {
+        const keyArray = k.split(".");
+        const vaultName = keyArray[keyArray.length - 1];
+        const vaultClass = `vault-${vaultName}`;
+
+        const includedElements = cy.$(`.${vaultClass}`);
+        const elementCount = includedElements.length;
+
+        // If edges should be included
+        if (v?.value) {
+          // If these edges aren't rendered, add them
+          if (elementCount === 0) {
+            logger.log("Filtering nodes...");
+            const nodesToAdd = nodes.filter((node) =>
+              node.classes?.includes(vaultClass)
+            );
+            const edgesToAdd = Object.values(edges)
+              .flat()
+              .filter((edge) => edge.classes?.includes(vaultClass));
+
+            logger.log("Adding nodes...");
+            // TODO: Fix this weird memory leak thing
+            cy.add(nodesToAdd);
+
+            logger.log("Adding edges...");
+            cy.add(edgesToAdd);
+
+            logger.log("Nodes added.");
+          }
+        }
+
+        // If edges should not be included
+        else {
+          // If these edges are rendered, remove them
+          if (elementCount > 0) {
+            includedElements.remove();
           }
         }
       });
@@ -192,6 +238,37 @@ export default function Graph({
   useEffect(() => {
     applyConfig();
   }, [config]);
+
+  useEffect(() => {
+    // If initial vault data received
+    if (engine.vaults && !Object.keys(config).includes("vaults")) {
+      // Get config options for all vaults
+      const vaultConfigObject: {
+        [key: string]: GraphConfigItem<boolean>;
+      } = engine.vaults.reduce((dict, vault) => {
+        const name = VaultUtils.getName(vault);
+        const key = `vaults.${name}`;
+        const item: GraphConfigItem<boolean> = {
+          value: true,
+          mutable: true,
+          label: name,
+        };
+
+        return {
+          ...dict,
+          [key]: item,
+        };
+      }, {});
+
+      console.log(vaultConfigObject);
+
+      // Add vault config options to graph config
+      setConfig((c) => ({
+        ...c,
+        ...vaultConfigObject,
+      }));
+    }
+  }, [engine.vaults]);
 
   return (
     <>

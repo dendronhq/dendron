@@ -21,6 +21,7 @@ export type CoreGraphConfig = {
 
   "information.edges-hierarchy"?: GraphConfigItem<number>;
   "information.nodes": GraphConfigItem<number>;
+
   // "filter.regex": GraphConfigItem<string>;
 };
 

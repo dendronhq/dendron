@@ -8,7 +8,7 @@ import { tmpDir } from "@dendronhq/common-server";
 import { describe } from "mocha";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { getWS } from "../../workspace";
-import { Git } from "@dendronhq/engine-server";
+import { Git, SyncActionStatus } from "@dendronhq/engine-server";
 import { DendronConfig, DVaultSync } from "@dendronhq/common-all";
 
 suite("workspace sync command", function () {
@@ -281,7 +281,7 @@ suite("workspace sync command", function () {
           });
 
           const out = await new SyncCommand().execute();
-          const { committed, pulled, pushed } = out as any;
+          const { committed, pulled, pushed } = out;
           // Nothing should be done since "skip" is used
           expect(SyncCommand.countDone(committed)).toEqual(0);
           expect(SyncCommand.countDone(pulled)).toEqual(0);
@@ -307,7 +307,7 @@ suite("workspace sync command", function () {
           });
 
           const out = await new SyncCommand().execute();
-          const { committed, pulled, pushed } = out as any;
+          const { committed, pulled, pushed } = out;
           // Should try doing everything since the config requires so
           expect(SyncCommand.countDone(committed)).toEqual(1);
           expect(SyncCommand.countDone(pulled)).toEqual(1);
@@ -317,7 +317,45 @@ suite("workspace sync command", function () {
       });
     });
   });
+
+  describe("edge cases", () => {
+    test("has remote, but branch has no upstream", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        onInit: async ({ wsRoot, vaults }) => {
+          const remoteDir = tmpDir().name;
+          await GitTestUtils.createRepoForRemoteWorkspace(wsRoot, remoteDir);
+          await checkoutNewBranch(wsRoot, "test-branch");
+          await changeConfig(wsRoot, { vaults: [{ sync: DVaultSync.SYNC }] });
+          // Create a new note so there are some changes
+          await NoteTestUtilsV4.createNote({
+            fname: "my-new-note",
+            body: "Lorem ipsum",
+            wsRoot,
+            vault: vaults[0],
+          });
+
+          const out = await new SyncCommand().execute();
+          const { committed, pulled, pushed } = out;
+          // Should try to commit since there are changes
+          expect(SyncCommand.countDone(committed)).toEqual(1);
+          // Won't be able to pull or push because new branch has no upstream.
+          // This should be gracefully handled.
+          expect(SyncCommand.countDone(pulled)).toEqual(0);
+          expect(pulled[0].status === SyncActionStatus.NO_UPSTREAM);
+          expect(SyncCommand.countDone(pushed)).toEqual(0);
+          expect(pushed[0].status === SyncActionStatus.NO_UPSTREAM);
+          done();
+        },
+      });
+    });
+  });
 });
+
+async function checkoutNewBranch(wsRoot: string, branch: string) {
+  const git = new Git({ localUrl: wsRoot });
+  await git._execute(`git checkout -b ${branch} --no-track`);
+}
 
 /** Override the config option in `dendron.yml`, then add commit that change. */
 async function changeConfig(

@@ -137,10 +137,10 @@ export class Git {
   }
 
   /** Gets the upstream the current branch is set up to push to, or `undefined` if it is not set up to push anywhere. */
-  async getPushRemote(): Promise<string | undefined> {
+  async getUpstream(): Promise<string | undefined> {
     try {
       const { stdout } = await this._execute(
-        "git rev-parse --abbrev-ref @{push}"
+        "git rev-parse --abbrev-ref @{upstream}"
       );
       return _.trim(stdout);
     } catch {

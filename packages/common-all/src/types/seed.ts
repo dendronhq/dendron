@@ -11,6 +11,7 @@ export type SeedConfig = {
 export type SeedRepository = {
   type: "git";
   url: string;
+  contact?: SeedContact;
 };
 
 export type SeedContact = {
@@ -21,6 +22,6 @@ export type SeedContact = {
 
 export enum SeedCommands {
   ADD = "add",
-  INFO = "info",
   INIT = "init",
+  INFO = "info",
 }

@@ -1,8 +1,4 @@
 import {
-  DNoteAnchorPositioned,
-  error2PlainObject,
-} from "@dendronhq/common-all";
-import {
   assert,
   BulkAddNoteOpts,
   DendronConfig,
@@ -13,13 +9,15 @@ import {
   DEngineInitSchemaResp,
   DHookEntry,
   DLink,
+  DNoteAnchorPositioned,
   DStore,
   DVault,
   EngineDeleteOptsV2,
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
-  ERROR_STATUS,
+  error2PlainObject,
   ERROR_SEVERITY,
+  ERROR_STATUS,
   NoteChangeEntry,
   NoteProps,
   NotePropsDict,
@@ -33,9 +31,9 @@ import {
   SchemaModuleProps,
   SchemaUtils,
   StoreDeleteNoteResp,
+  stringifyError,
   VaultUtils,
   WriteNoteResp,
-  stringifyError,
 } from "@dendronhq/common-all";
 import {
   DLogger,
@@ -48,7 +46,6 @@ import {
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { MDUtilsV4 } from "../../markdown";
 import { AnchorUtils, LinkUtils } from "../../markdown/remark/utils";
 import { HookUtils, RequireHookResp } from "../../topics/hooks";
 import { readNotesFromCache, writeNotesToCache } from "../../utils";
@@ -452,7 +449,10 @@ export class FileStorage implements DStore {
     const { oldLoc, newLoc } = opts;
     const { wsRoot } = this;
     this.logger.info({ ctx, msg: "enter", opts });
-    const oldVault = oldLoc.vault;
+    const oldVault = VaultUtils.getVaultByName({
+      vaults: this.engine.vaults,
+      vname: oldLoc.vaultName!,
+    });
     if (!oldVault) {
       throw new DendronError({ message: "vault not set for loation" });
     }
@@ -480,11 +480,54 @@ export class FileStorage implements DStore {
         const vaultPath = vault2Path({ vault, wsRoot });
         // read note in case its changed
         const _n = file2Note(path.join(vaultPath, n.fname + ".md"), vault);
-        const resp = await MDUtilsV4.procTransform(
-          { engine: this.engine, fname: n.fname, vault: n.vault },
-          { from: oldLoc, to: newLoc }
-        ).process(_n.body);
-        n.body = resp.contents as string;
+        const foundLinks = LinkUtils.findLinks({
+          note: _n,
+          engine: this.engine,
+          filter: { loc: oldLoc },
+        });
+        const allLinks = _.orderBy(
+          foundLinks,
+          (link) => {
+            return link.position.start.offset;
+          },
+          "desc"
+        );
+
+        const noteMod = _.reduce(
+          allLinks,
+          (note: NoteProps, link: DLink) => {
+            const oldLink = LinkUtils.dlink2DNoteLink(link);
+            // current implementation adds alias for all notes
+            // check if old note has alias thats different from its fname
+            const alias =
+              oldLink.from.alias &&
+              oldLink.from.alias.toLocaleLowerCase() !==
+                oldLink.from.fname.toLocaleLowerCase()
+                ? oldLink.from.alias
+                : undefined;
+            // loc doesn't have header info
+            const newBody = LinkUtils.updateLink({
+              note,
+              oldLink,
+              newLink: {
+                ...oldLink,
+                from: {
+                  ...newLoc,
+                  anchorHeader: oldLink.from.anchorHeader,
+                  alias,
+                },
+              },
+            });
+            _n.body = newBody;
+            return _n;
+          },
+          _n
+        );
+        // const resp = await MDUtilsV4.procTransform(
+        //   { engine: this.engine, fname: n.fname, vault: n.vault },
+        //   { from: oldLoc, to: newLoc }
+        // ).process(_n.body);
+        n.body = noteMod.body;
         return n;
       })
     ).catch((err) => {
@@ -494,7 +537,10 @@ export class FileStorage implements DStore {
     const newNote: NoteProps = {
       ...oldNote,
       fname: newLoc.fname,
-      vault: newLoc.vault!,
+      vault: VaultUtils.getVaultByName({
+        vaults: this.vaults,
+        vname: newLoc.vaultName!,
+      })!,
       title: NoteUtils.isDefaultTitle(oldNote)
         ? NoteUtils.genTitle(newLoc.fname)
         : oldNote.title,

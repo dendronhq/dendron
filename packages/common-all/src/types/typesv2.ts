@@ -4,6 +4,7 @@ import {
   DNodeProps,
   DNodeType,
   NoteProps,
+  Position,
   SchemaData,
   SchemaProps,
 } from "./foundation";
@@ -38,7 +39,7 @@ export type DNoteLoc = {
   fname: string;
   alias?: string;
   id?: string;
-  vault?: DVault;
+  vaultName?: string;
   anchorHeader?: string;
 };
 
@@ -57,13 +58,13 @@ export type DNoteAnchorPositioned = DNoteAnchor & {
 
 export type DLinkType = "wiki" | "refv2";
 
-export type DNoteLink<TData = any> = {
-  type: "ref" | "wiki" | "md";
-  pos?: {
-    start: number;
-    end: number;
-  };
-  // if parsing in raw mode, from field won't be available
+export type DNoteLinkData = {
+  // TODO: should be backfilled to be mandatory
+  xvault?: boolean;
+};
+export type DNoteLink<TData extends DNoteLinkData = DNoteLinkData> = {
+  type: "ref" | "wiki" | "md" | "backlink";
+  position?: Position;
   from: DNoteLoc;
   to?: DNoteLoc;
   data: TData;
@@ -83,7 +84,7 @@ export type DNoteRefData = {
    * Id link: TBD (eg. ^1234)
    */
   type: "file" | "id";
-};
+} & DNoteLinkData;
 export type DNoteRefLink = DNoteLink<DNoteRefData>;
 export type DNoteRefLinkRaw = DNoteLinkRaw<DNoteRefData>;
 
@@ -505,6 +506,12 @@ export enum GraphViewMessageType {
   "onGetActiveEditor" = "onGetActiveEditor",
   "onReady" = "onReady",
 }
+
+export enum CalendarViewMessageType {
+  "onSelect" = "onSelect",
+  "onGetActiveEditor" = "onGetActiveEditor",
+}
+
 export enum ThemeMessageType {
   "onThemeChange" = "onThemeChange",
   "getTheme" = "getTheme",
@@ -522,7 +529,15 @@ export type OnDidChangeActiveTextEditorMsg = DMessage<
 >;
 
 export type TreeViewMessage = DMessage<TreeViewMessageType, { id: string }>;
-export type GraphViewMessage = DMessage<GraphViewMessageType, { id: string }>;
+export type GraphViewMessage = DMessage<
+  GraphViewMessageType,
+  { id: string; vault?: string }
+>;
+
+export type CalendarViewMessage = DMessage<
+  CalendarViewMessageType,
+  { id?: string; fname?: string }
+>;
 
 // --- Views
 
@@ -537,4 +552,5 @@ export enum DendronTreeViewKey {
   TREE_VIEW = "dendron.treeView",
   TREE_VIEW_V2 = "dendron.tree-view",
   BACKLINKS = "dendron.backlinks",
+  CALENDAR_VIEW = "dendron.calendar-view",
 }

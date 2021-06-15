@@ -302,8 +302,8 @@ export const noteLinks2Locations = (note: NoteProps) => {
   const fileContent = fs.readFileSync(fsPath).toString();
   const fmOffset = fileContent.indexOf("\n---") + 4;
   linksMatch.forEach((link) => {
-    const { start } = link.pos;
-    const lines = fileContent.slice(0, fmOffset + start).split("\n");
+    const { start } = link.position;
+    const lines = fileContent.slice(0, fmOffset + start.offset!).split("\n");
     const lineNum = lines.length;
 
     refs.push({
@@ -354,8 +354,8 @@ export const findReferences = async (
     // we are assuming there won't be a `\n---\n` key inside the frontmatter
     const fmOffset = fileContent.indexOf("\n---") + 4;
     linksMatch.forEach((link) => {
-      const { start } = link.pos;
-      const lines = fileContent.slice(0, fmOffset + start).split("\n");
+      const { start } = link.position;
+      const lines = fileContent.slice(0, fmOffset + start.offset!).split("\n");
       const lineNum = lines.length;
 
       refs.push({

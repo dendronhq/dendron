@@ -7,6 +7,7 @@ import {
   DNoteRefLink,
   DUtils,
   getSlugger,
+  isBlockAnchor,
   NoteProps,
   NoteUtils,
   RespV2,
@@ -29,7 +30,7 @@ import {
 } from "../types";
 import { MDUtilsV4, ParentWithIndex, renderFromNoteProps } from "../utils";
 import { MDUtilsV5, ProcMode } from "../utilsv5";
-import { AnchorUtils, LinkUtils } from "./utils";
+import { LinkUtils } from "./utils";
 import { WikiLinksOpts } from "./wikiLinks";
 
 const LINK_REGEX = /^\!\[\[(.+?)\]\]/;
@@ -701,7 +702,7 @@ function findAnchor({
   nodes: DendronASTNode["children"];
   match: string;
 }): FindAnchorResult {
-  if (AnchorUtils.isBlockAnchor(match)) {
+  if (isBlockAnchor(match)) {
     const anchorId = match.slice(1);
     return findBlockAnchor({ nodes, match: anchorId });
   } else {

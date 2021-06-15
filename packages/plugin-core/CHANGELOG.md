@@ -3,6 +3,42 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.46.1](https://github.com/dendronhq/dendron/compare/v0.46.0...v0.46.1) (2021-06-14)
+
+**Note:** Version bump only for package @dendronhq/plugin-core
+
+
+
+
+
+# [0.46.0](https://github.com/dendronhq/dendron/compare/v0.45.2...v0.46.0) (2021-06-14)
+
+
+### Bug Fixes
+
+* version numbers ([1400249](https://github.com/dendronhq/dendron/commit/1400249340635e6503b2913147081b6ac157bf48))
+
+
+### Features Dendron
+
+* better rename ([#819](https://github.com/dendronhq/dendron/issues/819)) ([93f6898](https://github.com/dendronhq/dendron/commit/93f689875da9535855a5d73df060fc65eaa8e45d))
+
+
+
+
+
+## [0.45.2](https://github.com/dendronhq/dendron/compare/v0.45.1...v0.45.2) (2021-06-12)
+
+
+### Features Dendron
+
+* Add initial note filtering, schema graph ([#814](https://github.com/dendronhq/dendron/issues/814)) ([65f2025](https://github.com/dendronhq/dendron/commit/65f20251d42ab9fe630c50025ddebe118d426e28))
+* Copy block reference ([#812](https://github.com/dendronhq/dendron/issues/812)) ([ced5946](https://github.com/dendronhq/dendron/commit/ced59467c1c824eaef1a9a3b59f588b2968d8e48))
+
+
+
+
+
 ## [0.45.1](https://github.com/dendronhq/dendron/compare/v0.45.0...v0.45.1) (2021-06-09)
 
 

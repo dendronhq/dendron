@@ -131,11 +131,11 @@ export class RenameNoteV2aCommand extends BaseCommand<
       const resp = await engine.renameNote({
         oldLoc: {
           fname: oldFname,
-          vault,
+          vaultName: VaultUtils.getName(vault),
         },
         newLoc: {
           fname: DNodeUtils.fname(newUri.fsPath),
-          vault,
+          vaultName: VaultUtils.getName(vault),
         },
       });
       const changed = resp.data as NoteChangeEntry[];

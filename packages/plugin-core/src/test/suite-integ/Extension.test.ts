@@ -1,7 +1,11 @@
+import { WorkspaceOpts } from "@dendronhq/common-all";
 import { readYAML, tmpDir } from "@dendronhq/common-server";
+import { WorkspaceService } from "@dendronhq/engine-server";
 import fs from "fs-extra";
+import _ from "lodash";
 import { describe, it } from "mocha";
 import path from "path";
+import sinon from "sinon";
 import vscode, { ExtensionContext } from "vscode";
 import { ResetConfigCommand } from "../../commands/ResetConfig";
 import { SetupWorkspaceOpts } from "../../commands/SetupWorkspace";
@@ -10,10 +14,36 @@ import {
   DENDRON_COMMANDS,
   GLOBAL_STATE,
 } from "../../constants";
-import { getWS } from "../../workspace";
+import { isVSCodeTelemetryEnabled } from "../../telemetry";
+import { DendronWorkspace, getWS } from "../../workspace";
 import { _activate } from "../../_extension";
-import { expect, genEmptyWSFiles, resetCodeWorkspace } from "../testUtilsv2";
+import {
+  expect,
+  genEmptyWSFiles,
+  resetCodeWorkspace,
+  stubWorkspaceFile,
+} from "../testUtilsv2";
 import { setupBeforeAfter, stubSetupWorkspace } from "../testUtilsV3";
+
+async function initWorkspace(
+  opts: {
+    firstWs: boolean;
+    previousVersion?: string;
+    currentVersion: string;
+  } & WorkspaceOpts,
+  cb: () => Promise<any>
+) {
+  const { firstWs, previousVersion, currentVersion, wsRoot, vaults } =
+    _.defaults(opts);
+  const ws = getWS();
+  await ws.context.globalState.update(GLOBAL_STATE.DENDRON_FIRST_WS, firstWs);
+  await ws.context.globalState.update(GLOBAL_STATE.VERSION, previousVersion);
+  sinon.stub(DendronWorkspace, "version").returns(currentVersion);
+  sinon.stub(DendronWorkspace, "isActive").returns(true);
+  stubWorkspaceFile(wsRoot);
+  await WorkspaceService.createWorkspace({ wsRoot, vaults });
+  await cb();
+}
 
 suite("Extension", function () {
   let ctx: ExtensionContext;
@@ -22,6 +52,9 @@ suite("Extension", function () {
     beforeHook: async () => {
       await resetCodeWorkspace();
       await new ResetConfigCommand().execute({ scope: "all" });
+    },
+    afterHook: async () => {
+      sinon.restore();
     },
   });
 
@@ -56,6 +89,7 @@ suite("Extension", function () {
               ],
               useFMTitle: true,
               useNoteTitleForLink: true,
+              dayOfWeek: 1,
               initializeRemoteVaults: true,
               noAutoCreateOnDefinition: true,
               noLegacyNoteRef: true,
@@ -81,6 +115,26 @@ suite("Extension", function () {
         });
     });
 
+    // TODO: need to stub workspace with workspace file
+    it.skip("active, need to wipe ws cache", function (done) {
+      const wsRoot = tmpDir().name;
+      const vaults = [{ fsPath: "vault1" }];
+      initWorkspace(
+        {
+          firstWs: false,
+          previousVersion: "0.45.3",
+          currentVersion: "0.46.0",
+          wsRoot,
+          vaults,
+        },
+        async () => {
+          _activate(ctx).then(async () => {
+            done();
+          });
+        }
+      );
+    });
+
     // TODO: stub the vauls
     // it("active, remote vaults present", function (done) {
     //   const wsRoot = tmpDir().name;
@@ -102,5 +156,16 @@ suite("Extension", function () {
     //       });
     //     });
     // });
+  });
+
+  describe("telemetry", () => {
+    test("can get VSCode telemetry settings", (done) => {
+      // Just checking that we get some expected result, and that it doesn't just crash.
+      const result = isVSCodeTelemetryEnabled();
+      expect(
+        result === true || result === false || result === undefined
+      ).toBeTruthy();
+      done();
+    });
   });
 });

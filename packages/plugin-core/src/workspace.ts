@@ -51,6 +51,7 @@ import { DisposableStore, resolvePath, VSCodeUtils } from "./utils";
 import { DendronTreeView } from "./views/DendronTreeView";
 import { DendronTreeViewV2 } from "./views/DendronTreeViewV2";
 import { SampleView } from "./views/SampleView";
+import { CalendarView } from "./views/CalendarView";
 import { SchemaWatcher } from "./watchers/schemaWatcher";
 import { WindowWatcher } from "./windowWatcher";
 import { WorkspaceWatcher } from "./WorkspaceWatcher";
@@ -431,6 +432,15 @@ export class DendronWorkspace {
             sampleView
           )
         );
+
+        const calendarView = new CalendarView();
+        context.subscriptions.push(
+          vscode.window.registerWebviewViewProvider(
+            CalendarView.viewType,
+            calendarView
+          )
+        );
+
         if (getWS().config.dev?.enableWebUI) {
           Logger.info({ ctx, msg: "initWebUI" });
           context.subscriptions.push(
@@ -557,9 +567,9 @@ export class DendronWorkspace {
     );
   }
 
-  addDisposable(_disposable: vscode.Disposable) {
-    // TODO
+  addDisposable(disposable: vscode.Disposable) {
     // handle all disposables
+    this.disposableStore.add(disposable);
   }
 
   // === Utils

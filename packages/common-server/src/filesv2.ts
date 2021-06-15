@@ -202,7 +202,7 @@ export function file2NoteWithCache({
   return { note, matchHash, noteHash: sig };
 }
 
-export function file2String(opts: {
+export function note2String(opts: {
   note: NoteProps;
   wsRoot: string;
 }): Promise<string> {

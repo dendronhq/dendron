@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/dendron-next-server",
-  "version": "0.45.1",
+  "version": "0.46.1",
   "license": "GPLv3",
   "repository": {
     "type": "git",
@@ -30,9 +30,9 @@
   ],
   "dependencies": {
     "@chakra-ui/react": "^1.0.0",
-    "@dendronhq/common-all": "^0.45.1",
-    "@dendronhq/common-frontend": "^0.45.1",
-    "@dendronhq/engine-server": "^0.45.1",
+    "@dendronhq/common-all": "^0.46.1",
+    "@dendronhq/common-frontend": "^0.46.1",
+    "@dendronhq/engine-server": "^0.46.1",
     "@emotion/react": "^11.1.1",
     "@emotion/styled": "^11.0.0",
     "@reduxjs/toolkit": "^1.5.1",
@@ -42,6 +42,7 @@
     "autoprefixer": "^10.2.5",
     "aws-amplify": "^3.3.23",
     "babel-plugin-import": "^1.13.3",
+    "classnames": "^2.3.1",
     "cytoscape": "^3.19.0",
     "cytoscape-euler": "^1.2.2",
     "formik": "^2.2.5",

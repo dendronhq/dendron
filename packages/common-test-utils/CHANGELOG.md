@@ -3,6 +3,33 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.46.1](https://github.com/dendronhq/dendron/compare/v0.46.0...v0.46.1) (2021-06-14)
+
+**Note:** Version bump only for package @dendronhq/common-test-utils
+
+
+
+
+
+# [0.46.0](https://github.com/dendronhq/dendron/compare/v0.45.2...v0.46.0) (2021-06-14)
+
+**Note:** Version bump only for package @dendronhq/common-test-utils
+
+
+
+
+
+## [0.45.2](https://github.com/dendronhq/dendron/compare/v0.45.1...v0.45.2) (2021-06-12)
+
+
+### Features Dendron
+
+* Copy block reference ([#812](https://github.com/dendronhq/dendron/issues/812)) ([ced5946](https://github.com/dendronhq/dendron/commit/ced59467c1c824eaef1a9a3b59f588b2968d8e48))
+
+
+
+
+
 ## [0.45.1](https://github.com/dendronhq/dendron/compare/v0.45.0...v0.45.1) (2021-06-09)
 
 

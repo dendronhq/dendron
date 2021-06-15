@@ -16,6 +16,7 @@
         "LOG_DST": "../../logs/api-server.log",
         "LOG_LEVEL": "debug"
       },
+      "cwd": "${workspaceFolder:api-server}/../../test-workspace",
       "args": [
         "${workspaceFolder:api-server}/src/start.ts"
       ]

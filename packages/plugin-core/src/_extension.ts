@@ -10,10 +10,13 @@ import {
   getOS,
   readJSONWithComments,
   SegmentClient,
+  TelemetryStatus,
+  vault2Path,
 } from "@dendronhq/common-server";
 import {
   HistoryEvent,
   HistoryService,
+  removeCache,
   WorkspaceService,
 } from "@dendronhq/engine-server";
 import fs from "fs-extra";
@@ -31,7 +34,8 @@ import {
 import { Logger } from "./logger";
 import { migrateConfig, migrateSettings } from "./migration";
 import { Extensions } from "./settings";
-import { VSCodeUtils, WSUtils } from "./utils";
+import { setupSegmentClient } from "./telemetry";
+import { InstallStatus, VSCodeUtils, WSUtils } from "./utils";
 import { AnalyticsUtils } from "./utils/analytics";
 import { MarkdownUtils } from "./utils/md";
 import { DendronTreeView } from "./views/DendronTreeView";
@@ -208,19 +212,64 @@ export async function _activate(
     workspaceFile,
     workspaceFolders,
   });
-  // needs to be initialized to setup commands
+  //  needs to be initialized to setup commands
   const ws = DendronWorkspace.getOrCreate(context, {
     skipSetup: stage === "test",
   });
-  const migratedGlobalVersion = context.globalState.get<string | undefined>(
+  let previousVersion = context.globalState.get<string | undefined>(
     GLOBAL_STATE.VERSION
   );
+
   if (DendronWorkspace.isActive()) {
     let start = process.hrtime();
     const config = ws.config;
-    // initialize client
-    SegmentClient.instance({ optOut: ws.config.noTelemetry, forceNew: true });
+    // --- Get Version State
+    const previousGlobalVersion = ws.context.globalState.get<
+      string | undefined
+    >(GLOBAL_STATE.VERSION_PREV);
+    let currentVersion = DendronWorkspace.version();
+
+    // NOTE: to test upgrades, you can uncomment the below
+    // migratedGlobalVersion = "0.45.3";
+    // installedGlobalVersion = "0.46.0";
+    const installStatus = VSCodeUtils.getInstallStatus({
+      previousVersion,
+      currentVersion,
+    });
     const wsRoot = DendronWorkspace.wsRoot() as string;
+
+    // check if we need to wipe the cache
+    if (installStatus === InstallStatus.UPGRADED && stage !== "test") {
+      const cmpVersion = "0.46.0";
+      // current version greater then threshold and previous version was less then threshold
+      if (
+        semver.gte(currentVersion, cmpVersion) &&
+        semver.lte(previousVersion || "0.0.0", cmpVersion)
+      ) {
+        Logger.info({ ctx, msg: "upgrade requires removing cache" });
+
+        const ws = new WorkspaceService({ wsRoot: DendronWorkspace.wsRoot() });
+        await Promise.all(
+          ws.config.vaults.map((vault) => {
+            return removeCache(vault2Path({ wsRoot, vault }));
+          })
+        );
+        Logger.info({ ctx, msg: "done removing cache" });
+        // update telemetry settings
+        Logger.info({ ctx, msg: "keep existing analytics settings" });
+        const segStatus = SegmentClient.getStatus();
+        // use has not disabled telemetry prior to upgrade
+        if (
+          segStatus !== TelemetryStatus.DISABLED_BY_COMMAND &&
+          !config.noTelemetry
+        ) {
+          SegmentClient.enable(TelemetryStatus.ENABLED_BY_MIGRATION);
+        }
+      }
+    }
+
+    // initialize client
+    setupSegmentClient(ws);
     const wsService = new WorkspaceService({ wsRoot });
     const didClone = await wsService.initialize({
       onSyncVaultsProgress: () => {
@@ -267,7 +316,7 @@ export async function _activate(
       return false;
     }
 
-    // migrate legacy settings
+    // --- Possible settings migration from version update
     const wsConfig = (await readJSONWithComments(
       DendronWorkspace.workspaceFile().fsPath
     )) as WorkspaceSettings;
@@ -275,12 +324,6 @@ export async function _activate(
     Logger.info({ ctx, wsConfig, wsConfigMigrated, msg: "read wsConfig" });
     wsService.writeMeta({ version: DendronWorkspace.version() });
 
-    const installedGlobalVersion = DendronWorkspace.version();
-    const previousGlobalVersion = ws.context.globalState.get<
-      string | undefined
-    >(GLOBAL_STATE.VERSION_PREV);
-    const previousWsVersion =
-      context.workspaceState.get<string>(WORKSPACE_STATE.WS_VERSION) || "0.0.0";
     // stats
     const platform = getOS();
     const extensions = Extensions.getVSCodeExtnsion().map(
@@ -295,15 +338,16 @@ export async function _activate(
 
     Logger.info({
       ctx,
-      installedGlobalVersion,
-      migratedGlobalVersion,
+      currentVersion,
+      previousVersion,
       previousGlobalVersion,
-      previousWsVersion,
       platform,
       extensions,
       vaults: ws.vaultsv4,
+      installStatus,
     });
 
+    // --- Start Initializating the Engine
     vscode.window.withProgress(
       {
         location: vscode.ProgressLocation.Notification,
@@ -385,7 +429,7 @@ export async function _activate(
 
   return showWelcomeOrWhatsNew({
     version: DendronWorkspace.version(),
-    previousVersion: migratedGlobalVersion,
+    previousVersion: previousVersion,
     start: startActivate,
   }).then(() => {
     if (DendronWorkspace.isActive()) {

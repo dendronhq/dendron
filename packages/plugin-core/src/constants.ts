@@ -19,6 +19,13 @@ export const DENDRON_VIEWS = [
     type: "webview",
   },
   {
+    id: DendronTreeViewKey.CALENDAR_VIEW,
+    name: "Calendar View",
+    when: DendronContext.DEV_MODE,
+    where: "explorer",
+    type: "webview",
+  },
+  {
     id: DendronTreeViewKey.TREE_VIEW,
     name: "Tree View",
     when: `${DendronContext.PLUGIN_ACTIVE} && !${DendronContext.WEB_UI_ENABLED}`,
@@ -232,6 +239,12 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX} Move Note`,
     group: "notes",
     desc: "Move a note",
+  },
+  RANDOM_NOTE: {
+    key: "dendron.randomNote",
+    title: `${CMD_PREFIX} Random Note`,
+    group: "notes",
+    desc: "Open a random note within a configured hierarchy set",
   },
   RENAME_NOTE: {
     key: "dendron.renameNote",
@@ -651,7 +664,6 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX} Show Schema Graph V2`,
     group: "workspace",
     desc: "Display the schemas in this workspace as a graph",
-    when: DendronContext.DEV_MODE,
   },
   SHOW_PREVIEW: {
     key: "dendron.showPreview",

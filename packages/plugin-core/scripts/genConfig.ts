@@ -82,7 +82,7 @@ function main() {
   }
 
   // write to docs
-  fs.writeJSONSync("package.json", pkg, { spaces: 4 });
+  fs.writeJSONSync("package.json", pkg, { spaces: 2 });
   const pathToDocs = path.join("../../../dendron-site");
   if (fs.existsSync(pathToDocs)) {
     const groupBy = _.groupBy(

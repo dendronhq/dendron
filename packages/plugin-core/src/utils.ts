@@ -35,6 +35,12 @@ import { FileItem } from "./external/fileutils/FileItem";
 import { EngineAPIService } from "./services/EngineAPIService";
 import { DendronWorkspace, getWS } from "./workspace";
 
+export enum InstallStatus {
+  NO_CHANGE = "NO_CHANGE",
+  INITIAL_INSTALL = "INITIAL_INSTALL",
+  UPGRADED = "UPGRADED",
+}
+
 export class DisposableStore {
   private _toDispose = new Set<vscode.Disposable>();
 
@@ -42,8 +48,11 @@ export class DisposableStore {
     this._toDispose.add(dis);
   }
 
-  // TODO
-  public dispose() {}
+  public dispose() {
+    for (const disposable of this._toDispose) {
+      disposable.dispose();
+    }
+  }
 }
 
 // === File FUtils
@@ -160,10 +169,30 @@ export class VSCodeUtils {
     return editor.document.uri.fsPath;
   }
 
-  static getSelection() {
+  static getInstallStatus({
+    previousVersion,
+    currentVersion,
+  }: {
+    previousVersion?: string;
+    currentVersion: string;
+  }): InstallStatus {
+    if (_.isUndefined(previousVersion)) {
+      return InstallStatus.INITIAL_INSTALL;
+    }
+    if (previousVersion !== currentVersion) {
+      return InstallStatus.UPGRADED;
+    }
+    return InstallStatus.NO_CHANGE;
+  }
+
+  static getSelection():
+    | { text: undefined; selection: undefined; editor: undefined }
+    | { text: string; selection: vscode.Selection; editor: vscode.TextEditor } {
     const editor = vscode.window.activeTextEditor;
-    const selection = editor?.selection;
-    const text = editor?.document.getText(selection);
+    if (_.isUndefined(editor))
+      return { text: undefined, selection: undefined, editor: undefined };
+    const selection = editor.selection;
+    const text = editor.document.getText(selection);
     return { text, selection, editor };
   }
 
@@ -507,6 +536,14 @@ export class DendronClientUtilsV2 {
     }
     return smod;
   };
+
+  static useVaultPrefix(engine: DEngineClient) {
+    const noXVaultLink = engine.config.noXVaultWikiLink;
+    const useVaultPrefix =
+      _.size(engine.vaults) > 1 &&
+      (_.isBoolean(noXVaultLink) ? !noXVaultLink : true);
+    return useVaultPrefix;
+  }
 }
 
 export const clipboard = vscode.env.clipboard;

@@ -89,6 +89,7 @@ suite("Extension", function () {
               ],
               useFMTitle: true,
               useNoteTitleForLink: true,
+              dayOfWeek: 1,
               initializeRemoteVaults: true,
               noAutoCreateOnDefinition: true,
               noLegacyNoteRef: true,

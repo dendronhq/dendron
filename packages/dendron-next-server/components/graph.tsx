@@ -23,6 +23,7 @@ import {
   GraphNodes,
 } from "../lib/graph";
 import { VaultUtils } from "../../common-all/lib";
+import useApplyGraphConfig from "../hooks/useApplyGraphConfig";
 
 const getCytoscapeStyle = (themes: any, theme: string | undefined) => {
   if (_.isUndefined(theme)) return "";
@@ -53,10 +54,14 @@ const getCytoscapeStyle = (themes: any, theme: string | undefined) => {
   .links {
     line-style: dashed;
   }
+
+  .hidden {
+    display: none;
+  }
 `;
 };
 
-const getEulerConfig = (shouldAnimate: boolean) => ({
+export const getEulerConfig = (shouldAnimate: boolean) => ({
   name: "euler",
   // @ts-ignore
   springLength: () => 80,
@@ -101,85 +106,15 @@ export default function Graph({
   const { themes, currentTheme } = useThemeSwitcher();
   const [cy, setCy] = useState<Core>();
 
+  // On config update, handle graph changes
+  useApplyGraphConfig({
+    graph: cy,
+    config,
+    elements,
+  });
+
   const { nodes, edges } = elements;
-
   const isLargeGraph = nodes.length + Object.values(edges).flat().length > 1000;
-
-  const applyConfig = () => {
-    if (!cy || !graphRef.current || cy.$("*").length === 0) return;
-
-    // "display" rules
-    Object.entries(config)
-      .filter(([k, v]) => k.includes("connections"))
-      .forEach(([k, v]) => {
-        const keyArray = k.split(".");
-        const edgeType = keyArray[keyArray.length - 1];
-
-        const includedEdges = cy.$(`.${edgeType}`);
-        const edgeCount = includedEdges.length;
-
-        // If edges should be included
-        if (v?.value) {
-          // If these edges aren't rendered, add them
-          if (edgeCount === 0) {
-            cy.add(edges[edgeType]);
-          }
-        }
-
-        // If edges should not be included
-        else {
-          // If these edges are rendered, remove them
-          if (edgeCount > 0) {
-            includedEdges.remove();
-          }
-        }
-      });
-
-    // "vault" rules
-    Object.entries(config)
-      .filter(([k, v]) => k.includes("vault"))
-      .forEach(([k, v]) => {
-        const keyArray = k.split(".");
-        const vaultName = keyArray[keyArray.length - 1];
-        const vaultClass = `vault-${vaultName}`;
-
-        const includedElements = cy.$(`.${vaultClass}`);
-        const elementCount = includedElements.length;
-
-        // If edges should be included
-        if (v?.value) {
-          // If these edges aren't rendered, add them
-          if (elementCount === 0) {
-            logger.log("Filtering nodes...");
-            const nodesToAdd = nodes.filter((node) =>
-              node.classes?.includes(vaultClass)
-            );
-            const edgesToAdd = Object.values(edges)
-              .flat()
-              .filter((edge) => edge.classes?.includes(vaultClass));
-
-            logger.log("Adding nodes...");
-            // TODO: Fix this weird memory leak thing
-            cy.add(nodesToAdd);
-
-            logger.log("Adding edges...");
-            cy.add(edgesToAdd);
-
-            logger.log("Nodes added.");
-          }
-        }
-
-        // If edges should not be included
-        else {
-          // If these edges are rendered, remove them
-          if (elementCount > 0) {
-            includedElements.remove();
-          }
-        }
-      });
-
-    cy.layout(getEulerConfig(!isLargeGraph)).run();
-  };
 
   const renderGraph = () => {
     if (graphRef.current && nodes && edges) {
@@ -234,10 +169,6 @@ export default function Graph({
     if (cy && cy.elements("*").length > 1) return;
     renderGraph();
   }, [graphRef, nodes, edges]);
-
-  useEffect(() => {
-    applyConfig();
-  }, [config]);
 
   useEffect(() => {
     // If initial vault data received

@@ -149,9 +149,9 @@ export class Git {
   }
 
   /**
-   *
-   * @param old: The old identifier (e.g. commit, tag, branch) that we are diffing against.
-   * @param new: The new identifier (e.g. commit, tag, branch) that we are diffing from.
+   * @param nameOnly: If true, only return the file names. Otherwise the full diff including contents is returned.
+   * @param oldCommit: The old identifier (e.g. commit, tag, branch) that we are diffing against.
+   * @param newCommit: The new identifier (e.g. commit, tag, branch) that we are diffing from.
    */
   async diff({
     nameOnly,

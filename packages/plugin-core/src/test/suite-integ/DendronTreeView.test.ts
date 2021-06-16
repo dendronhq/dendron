@@ -2,7 +2,7 @@
 // // as well as import your extension to test it
 import * as vscode from "vscode";
 import { DendronTreeView } from "../../views/DendronTreeView";
-import { runMultiVaultTest, runSingleVaultTest } from "../testUtilsv2";
+import { runMultiVaultTest } from "../testUtilsv2";
 import { setupBeforeAfter } from "../testUtilsV3";
 
 suite("TreeView, multi", function () {
@@ -15,24 +15,6 @@ suite("TreeView, multi", function () {
   test("basic", function (done) {
     DendronTreeView.register(ctx);
     runMultiVaultTest({
-      ctx,
-      onInit: async () => {
-        done();
-      },
-    });
-  });
-});
-
-suite("TreeView, single ", function () {
-  let ctx: vscode.ExtensionContext;
-
-  ctx = setupBeforeAfter(this, {
-    beforeHook: () => {},
-  });
-
-  test("basic", function (done) {
-    DendronTreeView.register(ctx);
-    runSingleVaultTest({
       ctx,
       onInit: async () => {
         done();

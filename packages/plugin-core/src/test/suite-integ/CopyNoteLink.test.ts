@@ -1,7 +1,7 @@
 import { NoteProps } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import { AssertUtils, NOTE_PRESETS_V4 } from "@dendronhq/common-test-utils";
-import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
+import { ENGINE_HOOKS, TestConfigUtils } from "@dendronhq/engine-test-utils";
 import { describe } from "mocha";
 import path from "path";
 import * as vscode from "vscode";
@@ -161,6 +161,13 @@ suite("CopyNoteLink", function () {
       runMultiVaultTest({
         ctx,
         onInit: async ({ wsRoot, vaults }) => {
+          TestConfigUtils.withConfig(
+            (config) => {
+              config.noXVaultWikiLink = false;
+              return config;
+            },
+            { wsRoot }
+          );
           const notePath = path.join(
             vault2Path({ vault: vaults[0], wsRoot }),
             "foo.md"
@@ -192,7 +199,15 @@ suite("CopyNoteLink", function () {
             vault: vaults[1],
           });
         },
-        onInit: async () => {
+        onInit: async ({ wsRoot }) => {
+          TestConfigUtils.withConfig(
+            (config) => {
+              config.noXVaultWikiLink = false;
+              return config;
+            },
+            { wsRoot }
+          );
+
           const editor = await VSCodeUtils.openNote(noteWithTarget);
           const pos = LocationTestUtils.getPresetWikiLinkPosition();
           const pos2 = LocationTestUtils.getPresetWikiLinkPosition({
@@ -233,7 +248,14 @@ suite("CopyNoteLink", function () {
             vault: vaults[0],
           });
         },
-        onInit: async () => {
+        onInit: async ({ wsRoot }) => {
+          TestConfigUtils.withConfig(
+            (config) => {
+              config.noXVaultWikiLink = false;
+              return config;
+            },
+            { wsRoot }
+          );
           const editor = await VSCodeUtils.openNote(note);
           const cmd = new CopyNoteLinkCommand();
           editor.selection = new vscode.Selection(
@@ -270,7 +292,14 @@ suite("CopyNoteLink", function () {
             vault: vaults[0],
           });
         },
-        onInit: async () => {
+        onInit: async ({ wsRoot }) => {
+          TestConfigUtils.withConfig(
+            (config) => {
+              config.noXVaultWikiLink = false;
+              return config;
+            },
+            { wsRoot }
+          );
           const editor = await VSCodeUtils.openNote(note);
           const cmd = new CopyNoteLinkCommand();
           editor.selection = new vscode.Selection(

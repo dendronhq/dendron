@@ -28,6 +28,7 @@ useFMTitle: true
 useNoteTitleForLink: true
 noAutoCreateOnDefinition: true
 noLegacyNoteRef: true
+noXVaultWikiLink: true
 lookupConfirmVaultOnCreate: false
 dayOfWeek: 1
 site:
@@ -83,6 +84,7 @@ useFMTitle: true
 useNoteTitleForLink: true
 noAutoCreateOnDefinition: true
 noLegacyNoteRef: true
+noXVaultWikiLink: true
 lookupConfirmVaultOnCreate: false
 dayOfWeek: 1
 site:
@@ -108,6 +110,7 @@ useFMTitle: true
 useNoteTitleForLink: true
 noAutoCreateOnDefinition: true
 noLegacyNoteRef: true
+noXVaultWikiLink: true
 lookupConfirmVaultOnCreate: false
 dayOfWeek: 1
 site:
@@ -149,6 +152,7 @@ useFMTitle: true
 useNoteTitleForLink: true
 noAutoCreateOnDefinition: true
 noLegacyNoteRef: true
+noXVaultWikiLink: true
 lookupConfirmVaultOnCreate: false
 dayOfWeek: 1
 site:
@@ -203,6 +207,7 @@ useFMTitle: true
 useNoteTitleForLink: true
 noAutoCreateOnDefinition: true
 noLegacyNoteRef: true
+noXVaultWikiLink: true
 lookupConfirmVaultOnCreate: false
 dayOfWeek: 1
 site:
@@ -239,6 +244,7 @@ useFMTitle: true
 useNoteTitleForLink: true
 noAutoCreateOnDefinition: true
 noLegacyNoteRef: true
+noXVaultWikiLink: true
 lookupConfirmVaultOnCreate: false
 dayOfWeek: 1
 site:

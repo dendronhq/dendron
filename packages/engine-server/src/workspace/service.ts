@@ -185,8 +185,8 @@ export class WorkspaceService {
   ) {
     const { vault, config, updateConfig, updateWorkspace } = _.defaults(opts, {
       config: this.config,
-      writeConfig: true,
-      addToWorkspace: false,
+      updateConfig: true,
+      updateWorkspace: false,
     });
     config.vaults.unshift(vault);
     // update dup note behavior
@@ -445,10 +445,13 @@ export class WorkspaceService {
     if (opts.createCodeWorkspace) {
       WorkspaceConfig.write(wsRoot, vaults);
     }
-    await Promise.all(
-      vaults.map(async (vault) => {
+    await _.reduce(
+      vaults,
+      async (prev, vault) => {
+        await prev;
         return ws.createVault({ vault });
-      })
+      },
+      Promise.resolve()
     );
     return ws;
   }

@@ -41,6 +41,7 @@ const coreGraphConfig: CoreGraphConfig = {
   "filter.regex": {
     value: "",
     mutable: true,
+    label: 'Enter a filename...'
   },
   "connections.hierarchy": {
     value: true,

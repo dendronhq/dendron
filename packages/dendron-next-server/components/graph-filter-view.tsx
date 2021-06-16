@@ -98,6 +98,9 @@ const GraphFilterView = ({ config, setConfig }: FilterProps) => {
                             }
                             disabled={!entry?.mutable}
                             placeholder={label}
+                            style={{
+                              maxWidth: 200,
+                            }}
                           />
                         </>
                       )}

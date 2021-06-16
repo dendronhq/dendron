@@ -4,6 +4,7 @@ export * from "./noteRefs";
 export * from "./transformLinks";
 export {
   LinkUtils,
+  AnchorUtils,
   RemarkUtils,
   mdastBuilder,
   select,

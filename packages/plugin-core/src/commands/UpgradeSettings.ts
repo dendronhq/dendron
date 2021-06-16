@@ -1,9 +1,10 @@
 import { createLogger } from "@dendronhq/common-server";
+import { CodeConfigChanges } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
 import { Extension, extensions, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
-import { CodeConfigChanges, WorkspaceConfig } from "../settings";
+import { WorkspaceConfig } from "../settings";
 import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 

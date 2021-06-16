@@ -386,9 +386,6 @@ export const findReferences = async (
   return refs;
 };
 
-export const escapeForRegExp = (value: string) =>
-  value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-
 export const containsMarkdownExt = (pathParam: string): boolean =>
   !!markdownExtRegex.exec(path.parse(pathParam).ext);
 

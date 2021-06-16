@@ -1,6 +1,8 @@
 import {
   assertUnreachable,
   CONSTANTS,
+  DendronError,
+  ERROR_STATUS,
   SeedConfig,
   VaultUtils,
 } from "@dendronhq/common-all";
@@ -39,20 +41,45 @@ export class SeedService {
     this.registry = registry || SeedRegistry.create({ registryFile });
   }
 
+  async addSeed({
+    id,
+    wsRoot,
+    metaOnly,
+  }: {
+    id: string;
+    wsRoot: string;
+    metaOnly?: boolean;
+  }) {
+    // clone
+    const maybeSeed = await this.registry.info({ id });
+    if (!maybeSeed) {
+      return {
+        error: DendronError.createFromStatus({
+          status: ERROR_STATUS.DOES_NOT_EXIST,
+          message: `seed ${id} does not exist`,
+        }),
+      };
+    }
+    this.addSeedMetadata({ seed: maybeSeed, wsRoot });
+    let seedPath;
+    if (!metaOnly) {
+      seedPath = await this.cloneSeed({ wsRoot, seed: maybeSeed });
+    }
+    return { data: { seedPath, seed: maybeSeed } };
+  }
+
   /**
-   * Add seed metadata. Does not write the config
-   * @param
+   * Add seed metadata.
    * @returns
    */
-  async addSeed({
+  async addSeedMetadata({
     seed,
     wsRoot,
-    writeToConfig,
   }: {
     seed: SeedConfig;
     wsRoot: string;
-    writeToConfig?: boolean;
   }) {
+    // add metadata
     const ws = new WorkspaceService({ wsRoot });
     const config = ws.config;
     const id = SeedUtils.getSeedId({ ...seed });
@@ -68,9 +95,10 @@ export class SeedService {
       },
       addToWorkspace: true,
       config,
-      writeConfig: writeToConfig || false,
+      writeConfig: true,
     });
-    return config;
+
+    return { seed };
   }
 
   async cloneSeed({ seed, wsRoot }: { seed: SeedConfig; wsRoot: string }) {

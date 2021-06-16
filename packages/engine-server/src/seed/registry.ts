@@ -13,11 +13,22 @@ const SEED_REGISTRY: SeedRegistryDict = {
     name: "dendron-site",
     publisher: "dendron",
     description: "Dendron site docs",
-    license: "Creative Commons",
+    license: "Creative Commons Attribution 4.0 International",
     root: "vault",
     repository: {
       type: "git",
       url: "git@github.com:dendronhq/dendron-site.git",
+    },
+  },
+  "dendron.handbook": {
+    name: "handbook",
+    publisher: "dendron",
+    description: "Dendron Public Handbook",
+    license: "Creative Commons Attribution 4.0 International",
+    root: "handbook",
+    repository: {
+      type: "git",
+      url: "git@github.com:dendronhq/handbook.git",
     },
   },
 };
@@ -39,25 +50,6 @@ export class SeedRegistry {
 
   constructor(registry: SeedRegistryDict) {
     this.registry = registry;
-  }
-
-  async add({ id, wsRoot }: SeedCommandOpts & { wsRoot: string }) {
-    const maybeSeed = this.registry[id];
-    // validation
-    if (!maybeSeed) {
-      return {
-        error: DendronError.createFromStatus({
-          status: ERROR_STATUS.DOES_NOT_EXIST,
-          message: `seed ${id} does not exist`,
-        }),
-      };
-    }
-    const spath = await SeedUtils.clone({ wsRoot, config: maybeSeed });
-    const seedService = new SeedService({ wsRoot, registry: this });
-    const wsService = new WorkspaceService({ wsRoot });
-    const config = await seedService.addSeed({ seed: maybeSeed, wsRoot });
-    await wsService.setConfig(config);
-    return { data: { spath } };
   }
 
   info({ id }: SeedCommandOpts) {

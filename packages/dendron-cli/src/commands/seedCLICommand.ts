@@ -75,7 +75,6 @@ export class SeedCLICommand extends CLICommand<CommandOpts, CommandOutput> {
 
   async execute(opts: CommandOpts) {
     const { cmd, id, wsRoot, config, mode, registryFile } = opts;
-    const registry = SeedRegistry.create({ registryFile });
     const seedService = new SeedService({ wsRoot, registryFile });
     const ctx = "execute";
     this.L.info({ ctx, id });
@@ -85,7 +84,7 @@ export class SeedCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           if (!id) {
             throw new DendronError({ message: "missing arguments" });
           }
-          const { error, data } = await registry.add({ id, wsRoot });
+          const { error, data } = await seedService.addSeed({ id, wsRoot });
           if (error) {
             throw error;
           }

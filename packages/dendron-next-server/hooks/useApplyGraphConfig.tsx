@@ -73,35 +73,76 @@ const useApplyGraphConfig = ({
   const applyFilterRegexConfig = () => {
     if (!graph || graph.$("*").length === 0) return;
 
-    const regexItem = config["filter.regex"];
+    const whitelistItem = config["filter.regex-whitelist"];
+    const blacklistItem = config["filter.regex-blacklist"];
 
-    // Check if element includes regex
-    const matchingElements = graph.$(`[fname *= "${regexItem.value}"]`);
-    const excludedElements = graph.$(`[fname !*= "${regexItem.value}"]`);
+    const regexTypes: ("whitelist" | "blacklist")[] = [
+      "whitelist",
+      "blacklist",
+    ];
 
-    logger.log("Matching elements:", matchingElements.length);
-    logger.log("Excluded elements:", excludedElements.length);
+    // Process the whitelist and blacklist inputs
+    regexTypes.forEach((type) => {
+      const classNameHidden = `hidden--regex-${type}`;
+      const regexItem =
+        config[
+          `filter.regex-${type}` as
+            | "filter.regex-whitelist"
+            | "filter.regex-blacklist"
+        ];
 
-    // graph.$('*').forEach(element => {
-    //   element.data.fname.match(regexItem.value)
-    // })
+      // Accept comma-separated or space-separated lists
+      const regexItemInputs = regexItem.value.split(/(,| )/);
 
-    matchingElements.forEach((element) => {
-      if (element.hasClass("hidden--regex")) {
-        element.removeClass("hidden--regex");
-        // element.edges().removeClass("hidden--regex");
+      // Form cytoscape selectors from input
+      const matchingInput = regexItemInputs.reduce((acc, input, i) => {
+        const prefix = i === 0 ? "" : ", ";
+        const trimmedInput = input.trim();
+        if (trimmedInput === "") return acc;
+
+        return (acc += `${prefix}[fname *= "${trimmedInput}"], [vault *= "${trimmedInput}"], [label *= "${trimmedInput}"]`);
+      }, "");
+
+      const excludedInput = regexItemInputs.reduce((acc, input, i) => {
+        const trimmedInput = input.trim();
+        if (trimmedInput === "") return acc;
+
+        return (acc += `[fname !*= "${trimmedInput}"][vault !*= "${trimmedInput}"][label !*= "${trimmedInput}"]`);
+      }, "");
+
+      const matchingElements = graph.$(matchingInput);
+      const excludedElements = graph.$(excludedInput);
+
+      const hideElement = (element: cytoscape.SingularElementReturnValue) => {
+        if (!element.hasClass(classNameHidden)) {
+          element.addClass(classNameHidden);
+        }
+      };
+      const showElement = (element: cytoscape.SingularElementReturnValue) => {
+        if (element.hasClass(classNameHidden)) {
+          element.removeClass(classNameHidden);
+        }
+      };
+
+      matchingElements.forEach((element) => {
+        if (type === "whitelist") showElement(element);
+        if (type === "blacklist") hideElement(element);
+      });
+
+      // If no input,
+      if (
+        regexItem.value === "" ||
+        (type === "whitelist" && excludedElements.length === 0) ||
+        (type === "blacklist" && matchingElements.length === 0)
+      ) {
+        graph.$("*").removeClass(classNameHidden);
+        return;
       }
-    });
 
-    if (excludedElements.length === 0) {
-      graph.$("*").removeClass("hidden--regex");
-      return;
-    }
-    excludedElements.forEach((element) => {
-      if (!element.hasClass("hidden--regex")) {
-        element.addClass("hidden--regex");
-        // element.edges().addClass("hidden--regex");
-      }
+      excludedElements.forEach((element) => {
+        if (type === "whitelist") hideElement(element);
+        if (type === "blacklist") showElement(element);
+      });
     });
   };
 

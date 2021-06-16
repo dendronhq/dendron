@@ -43,7 +43,8 @@ const getCytoscapeStyle = (themes: any, theme: string | undefined) => {
   }
 
   .hidden--vault,
-  .hidden--regex {
+  .hidden--regex-whitelist,
+  .hidden--regex-blacklist {
     display: none;
   }
 `;

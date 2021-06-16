@@ -1,5 +1,5 @@
 import { Typography, Collapse, Switch, Space, InputNumber, Input } from "antd";
-import _, { values } from "lodash";
+import _ from "lodash";
 import { useThemeSwitcher } from "react-css-theme-switcher";
 import { GraphConfig } from "../lib/graph";
 import AntThemes from "../styles/theme-antd";
@@ -91,15 +91,17 @@ const GraphFilterView = ({ config, setConfig }: FilterProps) => {
                       )}
                       {_.isString(entry?.value) && (
                         <>
+                          <Typography>{label}</Typography>
                           <Input
                             defaultValue={entry?.value}
                             onChange={(newValue) =>
                               updateConfigField(key, newValue.target.value)
                             }
                             disabled={!entry?.mutable}
-                            placeholder={label}
+                            placeholder={entry.placeholder || ""}
                             style={{
-                              maxWidth: 200,
+                              maxWidth: 150,
+                              marginLeft: "1rem",
                             }}
                           />
                         </>

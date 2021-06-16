@@ -14,6 +14,7 @@ export type GraphConfigItem<T> = {
   value: T;
   mutable: boolean;
   label?: string;
+  placeholder?: string;
 };
 
 export type CoreGraphConfig = {
@@ -22,7 +23,8 @@ export type CoreGraphConfig = {
   "information.edges-hierarchy"?: GraphConfigItem<number>;
   "information.nodes": GraphConfigItem<number>;
 
-  "filter.regex": GraphConfigItem<string>;
+  "filter.regex-whitelist": GraphConfigItem<string>;
+  "filter.regex-blacklist": GraphConfigItem<string>;
 };
 
 export type NoteGraphConfig = {
@@ -38,10 +40,17 @@ export type SchemaGraphConfig = {
 export type GraphConfig = CoreGraphConfig & NoteGraphConfig & SchemaGraphConfig;
 
 const coreGraphConfig: CoreGraphConfig = {
-  "filter.regex": {
+  "filter.regex-whitelist": {
     value: "",
     mutable: true,
-    label: 'Enter a filename...'
+    label: 'Whitelist',
+    placeholder: 'Filenames, labels'
+  },
+  "filter.regex-blacklist": {
+    value: "",
+    mutable: true,
+    label: 'Blacklist',
+    placeholder: 'Filenames, labels'
   },
   "connections.hierarchy": {
     value: true,

@@ -187,37 +187,6 @@ export default function Graph({
     }
   }, [engine.vaults]);
 
-  useEffect(() => {
-    // If initial vault data received
-    if (engine.vaults && !Object.keys(config).includes("vaults")) {
-      // Get config options for all vaults
-      const vaultConfigObject: {
-        [key: string]: GraphConfigItem<boolean>;
-      } = engine.vaults.reduce((dict, vault) => {
-        const name = VaultUtils.getName(vault);
-        const key = `vaults.${name}`;
-        const item: GraphConfigItem<boolean> = {
-          value: true,
-          mutable: true,
-          label: name,
-        };
-
-        return {
-          ...dict,
-          [key]: item,
-        };
-      }, {});
-
-      console.log(vaultConfigObject);
-
-      // Add vault config options to graph config
-      setConfig((c) => ({
-        ...c,
-        ...vaultConfigObject,
-      }));
-    }
-  }, [engine.vaults]);
-
   return (
     <>
       <Head>

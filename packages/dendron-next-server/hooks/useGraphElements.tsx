@@ -6,11 +6,11 @@ import {
   VaultUtils,
 } from "@dendronhq/common-all";
 import { createLogger, engineSlice } from "@dendronhq/common-frontend";
-import { EdgeDefinition, NodeDefinition } from "cytoscape";
-import _, { nth } from "lodash";
+import { EdgeDefinition } from "cytoscape";
+import _ from "lodash";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { GraphEdges, GraphElements, GraphNodes } from "../lib/graph";
+import { GraphEdges, GraphElements } from "../lib/graph";
 
 const getVaultClass = (vault: DVault) => {
   const vaultName = VaultUtils.getName(vault);

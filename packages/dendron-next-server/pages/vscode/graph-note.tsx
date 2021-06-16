@@ -18,12 +18,14 @@ import {
   GraphViewMessage,
   GraphViewMessageType,
   NoteUtils,
+  VaultUtils,
 } from "@dendronhq/common-all";
 import Graph from "../../components/graph";
 import { useRouter } from "next/router";
 import {
   graphConfig,
   GraphConfig,
+  GraphConfigItem,
   GraphEdges,
   GraphNodes,
 } from "../../lib/graph";
@@ -84,6 +86,7 @@ export default function FullNoteGraph({
       onSelect={onSelect}
       config={config}
       setConfig={setConfig}
+      engine={engine}
     />
   );
 }

@@ -99,12 +99,21 @@ export async function setupWS(opts: {
 }) {
   const wsRoot = tmpDir().name;
   const ws = new WorkspaceService({ wsRoot });
+  ws.createConfig();
+  const config = ws.config;
   let vaults = await Promise.all(
     opts.vaults.map(async (vault) => {
-      await ws.createVault({ vault });
+      await ws.createVault({ vault, config, writeConfig: false });
       return vault;
     })
   );
+  config.vaults = _.sortBy(config.vaults, "fsPath");
+  if (config.site.duplicateNoteBehavior) {
+    config.site.duplicateNoteBehavior.payload = (
+      config.site.duplicateNoteBehavior.payload as string[]
+    ).sort();
+  }
+  ws.setConfig(config);
   if (opts.workspaces) {
     const vaultsFromWs = await _.reduce(
       opts.workspaces,
@@ -197,6 +206,7 @@ export class TestPresetEntryV5 {
 
 /**
  *
+ * To create empty workspace, initilizae with `vaults = []`
  * @param func
  * @param opts.vaults: By default, initiate 3 vaults {vault1, vault2, (vault3, "vaultThree")}
  * @param opts.preSetupHook: By default, initiate empty

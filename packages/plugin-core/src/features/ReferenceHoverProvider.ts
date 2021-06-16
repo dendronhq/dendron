@@ -1,122 +1,115 @@
-import { DendronError, NoteUtils } from "@dendronhq/common-all";
+import { DVault, NoteUtils } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
-import { MarkdownPublishPod } from "@dendronhq/pods-core";
-import fs from "fs";
+import fs from "fs-extra";
+import {
+  DendronASTDest,
+  MDUtilsV4,
+  AnchorUtils,
+} from "@dendronhq/engine-server";
 import path from "path";
 import vscode, { Uri } from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import {
   containsImageExt,
-  containsOtherKnownExts,
+  containsNonDendronUri,
   getReferenceAtPosition,
   isUncPath,
 } from "../utils/md";
-import { DendronWorkspace, getWS } from "../workspace";
+import { DendronWorkspace, getEngine } from "../workspace";
+import _ from "lodash";
+
+const HOVER_IMAGE_MAX_HEIGHT = Math.max(200, 10);
 
 export default class ReferenceHoverProvider implements vscode.HoverProvider {
+  private async provideHoverNonNote({
+    refAtPos,
+    vault,
+  }: {
+    refAtPos: NonNullable<ReturnType<typeof getReferenceAtPosition>>;
+    vault: DVault;
+  }): Promise<string> {
+    const vpath = vault2Path({ vault, wsRoot: DendronWorkspace.wsRoot() });
+    const fullPath = path.join(vpath, refAtPos.ref);
+    const foundUri = Uri.file(fullPath);
+
+    // Handle URI's like https://example.com or mailto:user@example.com
+    const nonDendronURIMessage = this.handleNonDendronUri(refAtPos.refText);
+    if (!_.isUndefined(nonDendronURIMessage)) return nonDendronURIMessage;
+
+    // Not a URI, and the file doesn't exist
+    if (!(await fs.pathExists(foundUri.fsPath)))
+      return `"file ${foundUri.fsPath} in reference ${refAtPos.ref} is missing`;
+
+    if (isUncPath(foundUri.fsPath))
+      return "UNC paths are not supported for images preview due to VSCode Content Security Policy. Use markdown preview or open image via cmd (ctrl) + click instead.";
+
+    if (containsImageExt(foundUri.fsPath)) {
+      // File exists and is an image type that the preview supports.
+      return `![](${foundUri.toString()}|height=${HOVER_IMAGE_MAX_HEIGHT})`;
+    } else {
+      // File exists, but we can't preview it. Just inform the user.
+      const ext = path.parse(foundUri.fsPath).ext;
+      return `Preview is not supported for "${ext}" file type. [Click to open in the default app](${foundUri.toString()}).`;
+    }
+  }
+
+  /** Returns a message if this is a non-dendron URI. */
+  private handleNonDendronUri(refText: string): string | undefined {
+    const [first, second] = refText.split("|");
+    const maybeUri = second || first;
+    const maybe = containsNonDendronUri(maybeUri);
+    // Not a URI, or is dendron://, so it must be a note (or image) and the rest of the code can handle this.
+    if (_.isUndefined(maybe) || !maybe) return undefined;
+    // Otherwise, this is a URI like http://example.com or mailto:user@example.com
+    return `Preview is not supported for this link. [Click to open in the default app.](${maybeUri}).`;
+  }
+
   public async provideHover(
     document: vscode.TextDocument,
     position: vscode.Position
-  ) {
+  ): Promise<vscode.Hover | null> {
     const refAtPos = getReferenceAtPosition(document, position);
+    if (!refAtPos) return null;
+    const { range } = refAtPos;
+    const hoverRange = new vscode.Range(
+      new vscode.Position(range.start.line, range.start.character + 2),
+      new vscode.Position(range.end.line, range.end.character - 2)
+    );
 
-    if (refAtPos) {
-      const { ref, range } = refAtPos;
-      const hoverRange = new vscode.Range(
-        new vscode.Position(range.start.line, range.start.character + 2),
-        new vscode.Position(range.end.line, range.end.character - 2)
+    const engine = getEngine();
+    const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
+
+    // Check if what's being referenced is a note.
+    const maybeNotes = NoteUtils.getNotesByFname({
+      fname: refAtPos.ref,
+      notes: engine.notes,
+    });
+    // If it isn't, then it might be an image, a URL like https://example.com, or some other file that we can't preview.
+    if (maybeNotes.length === 0)
+      return new vscode.Hover(
+        await this.provideHoverNonNote({ refAtPos, vault }),
+        hoverRange
       );
+    const note = maybeNotes[0];
 
-      let foundUri: Uri;
-      const engine = DendronWorkspace.instance().getEngine();
+    // For notes, let's use the noteRef functionality to render the referenced portion
+    const proc = MDUtilsV4.procFull({
+      dest: DendronASTDest.MD_REGULAR,
+      engine,
+      vault: note.vault,
+      fname: note.fname,
+    });
+    const referenceText = ["![["];
+    if (refAtPos.vaultName)
+      referenceText.push(`dendron://${refAtPos.vaultName}/`);
+    referenceText.push(refAtPos.ref);
+    if (refAtPos.anchorStart)
+      referenceText.push(`#${AnchorUtils.anchor2string(refAtPos.anchorStart)}`);
+    if (refAtPos.anchorEnd)
+      referenceText.push(`:#${AnchorUtils.anchor2string(refAtPos.anchorEnd)}`);
+    referenceText.push("]]");
 
-      if (containsImageExt(refAtPos.ref)) {
-        // check for /assests
-        // if (path.isAbsolute(refAtPos.ref)) {
-        const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
-        const vpath = vault2Path({ vault, wsRoot: DendronWorkspace.wsRoot() });
-        const fullPath = path.join(vpath, refAtPos.ref);
-        // }
-        foundUri = Uri.file(fullPath);
-      } else {
-        const notes = NoteUtils.getNotesByFname({
-          fname: refAtPos.ref,
-          notes: engine.notes,
-        });
-        const uris = notes.map((note) =>
-          Uri.file(
-            NoteUtils.getFullPath({ note, wsRoot: DendronWorkspace.wsRoot() })
-          )
-        );
-        foundUri = uris[0];
-      }
-      // start block
-
-      //   const uris = getWorkspaceCache().allUris;
-      //   const foundUri = findUriByRef(uris, ref);
-
-      //   if (!foundUri && containsUnknownExt(ref)) {
-      //     return new vscode.Hover(
-      //       `Link contains unknown extension: ${
-      //         path.parse(ref).ext
-      //       }. Please use common file extensions ${commonExtsHint} to enable full support.`,
-      //       hoverRange,
-      //     );
-      //   }
-
-      if (foundUri && fs.existsSync(foundUri.fsPath)) {
-        const imageMaxHeight = Math.max(
-          200,
-          //getMemoConfigProperty('links.preview.imageMaxHeight', 200),
-          10
-        );
-        const getContent = async () => {
-          if (containsImageExt(foundUri.fsPath)) {
-            return `![${
-              isUncPath(foundUri.fsPath)
-                ? "UNC paths are not supported for images preview due to VSCode Content Security Policy. Use markdown preview or open image via cmd (ctrl) + click instead."
-                : ""
-            }](${vscode.Uri.file(
-              foundUri.fsPath
-            ).toString()}|height=${imageMaxHeight})`;
-          } else if (containsOtherKnownExts(foundUri.fsPath)) {
-            const ext = path.parse(foundUri.fsPath).ext;
-            return `Preview is not supported for "${ext}" file type. Click to open in the default app.`;
-          }
-
-          const fname = path.basename(foundUri.fsPath, ".md");
-          const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
-          const note = NoteUtils.getNoteByFnameV5({
-            fname,
-            vault,
-            notes: getWS().getEngine().notes,
-            wsRoot: DendronWorkspace.wsRoot(),
-          });
-          if (!note) {
-            throw new DendronError({ message: `note ${fname} not found` });
-          }
-          const out = await new MarkdownPublishPod().plant({
-            note,
-            config: {
-              fname,
-              dest: "stdout",
-              vault: PickerUtilsV2.getOrPromptVaultForOpenEditor(),
-            },
-            engine: getWS().getEngine(),
-            vaults: getWS().vaultsv4,
-            wsRoot: DendronWorkspace.wsRoot(),
-          });
-
-          return out;
-        };
-        const content = await getContent();
-
-        return new vscode.Hover(content, hoverRange);
-      }
-
-      return new vscode.Hover(`"${ref}" is not created yet`, hoverRange);
-    }
-
-    return null;
+    const reference = await proc.process(referenceText.join(""));
+    return new vscode.Hover(reference.toString(), hoverRange);
   }
 }

@@ -1,4 +1,4 @@
-import { DVault, NoteUtils } from "@dendronhq/common-all";
+import { DVault, NoteUtils, VaultUtils } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import {
@@ -83,6 +83,13 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
     const maybeNotes = NoteUtils.getNotesByFname({
       fname: refAtPos.ref,
       notes: engine.notes,
+      // If vault is specified, search only that vault. Otherwise search all vaults.
+      vault: refAtPos.vaultName
+        ? VaultUtils.getVaultByName({
+            vname: refAtPos.vaultName,
+            vaults: engine.vaults,
+          })
+        : undefined,
     });
     // If it isn't, then it might be an image, a URL like https://example.com, or some other file that we can't preview.
     if (maybeNotes.length === 0)
@@ -98,6 +105,7 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
       engine,
       vault: note.vault,
       fname: note.fname,
+      usePrettyRefs: false,
     });
     const referenceText = ["![["];
     if (refAtPos.vaultName)

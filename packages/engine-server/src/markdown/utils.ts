@@ -372,7 +372,9 @@ export class MDUtilsV4 {
       proc = proc.data("fm", fm);
     }
 
-    let usePrettyRefs = opts.usePrettyRefs || ConfigUtils.usePrettyRef(config);
+    let usePrettyRefs = opts.usePrettyRefs;
+    if (_.isUndefined(usePrettyRefs))
+      usePrettyRefs = ConfigUtils.usePrettyRef(config);
     let noLegacyNoteRef = _.isBoolean(config.noLegacyNoteRef)
       ? config.noLegacyNoteRef
       : false;

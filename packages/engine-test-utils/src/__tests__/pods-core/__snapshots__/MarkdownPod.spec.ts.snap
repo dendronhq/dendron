@@ -1,10 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`markdown export pod basic: foo contents 1`] = `
-"# Foo
-
-foo body"
-`;
+exports[`markdown export pod test nested directory output: foo ch1 contents 1`] = `"foo.ch1 body"`;
 
 exports[`markdown publish pod basic 1`] = `
 "# Foo

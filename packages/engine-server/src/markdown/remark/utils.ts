@@ -589,7 +589,7 @@ export class RemarkUtils {
 
   // --- conversion
 
-  static convertObsidianLinks(note: NoteProps, changes: NoteChangeEntry[]) {
+  static convertLinksToDotNotation(note: NoteProps, changes: NoteChangeEntry[]) {
     return function (this: Processor) {
       return (tree: Node, _vfile: VFile) => {
         let root = tree as DendronASTRoot;
@@ -610,6 +610,39 @@ export class RemarkUtils {
             });
           }
         });
+      };
+    };
+  }
+
+  static convertLinksFromDotNotation(note: NoteProps, changes: NoteChangeEntry[]) {
+    return function (this: Processor) {
+      return (tree: Node, _vfile: VFile) => {
+        let root = tree as DendronASTRoot;
+        let wikiLinks: WikiLinkNoteV4[] = selectAll(
+          DendronASTTypes.WIKI_LINK,
+          root
+        ) as WikiLinkNoteV4[];
+
+        let dirty = false;
+
+        wikiLinks.forEach((linkNode) => {
+          if (linkNode.value.indexOf(".") >= 0) {
+            const newValue = _.replace(linkNode.value, /\./g, "/");
+            if (linkNode.data.alias === linkNode.value) {
+              linkNode.data.alias = newValue;
+            }
+            linkNode.value = newValue;
+            dirty = true;
+          }
+        });
+        //TODO: Add support for Ref Notes and Block Links
+
+        if (dirty) {
+          changes.push({
+              note: note,
+              status: "update",
+            });
+        }
       };
     };
   }

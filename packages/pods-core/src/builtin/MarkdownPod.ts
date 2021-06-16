@@ -10,7 +10,6 @@ import {
 import { cleanFileName, readMD, vault2Path } from "@dendronhq/common-server";
 import {
   DendronASTDest,
-  MDUtilsV4,
   MDUtilsV5,
   RemarkUtils,
 } from "@dendronhq/engine-server";
@@ -260,7 +259,7 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
             dest: DendronASTDest.MD_DENDRON,
             vault: n.vault,
           })
-            .use(RemarkUtils.convertObsidianLinks(n, []))
+            .use(RemarkUtils.convertLinksToDotNotation(n, []))
             .process(n.body);
           n.body = cBody.toString();
           if (config.frontmatter) {
@@ -289,7 +288,7 @@ export class MarkdownPublishPod extends PublishPod {
 
   async plant(opts: PublishPodPlantOpts) {
     const { engine, note } = opts;
-    const remark = MDUtilsV4.procFull({
+    const remark = MDUtilsV5.procRemarkFull({
       dest: DendronASTDest.MD_REGULAR,
       config: {
         ...engine.config,
@@ -298,8 +297,7 @@ export class MarkdownPublishPod extends PublishPod {
       engine,
       fname: note.fname,
       vault: note.vault,
-      shouldApplyPublishRules: false,
-    });
+    }).use(RemarkUtils.convertLinksFromDotNotation(note, []));
     const out = remark.processSync(note.body).toString();
     return _.trim(out);
   }
@@ -314,7 +312,7 @@ export class MarkdownExportPod extends ExportPod {
 
   async plant(opts: ExportPodPlantOpts) {
     const ctx = "MarkdownExportPod:plant";
-    const { dest, notes } = opts;
+    const { dest, notes, vaults, wsRoot } = opts;
     // verify dest exist
     const podDstPath = dest.fsPath;
     fs.ensureDirSync(path.dirname(podDstPath));
@@ -324,8 +322,7 @@ export class MarkdownExportPod extends ExportPod {
     await Promise.all(
       notes.map(async (note) => {
         const body = await mdPublishPod.plant({ ...opts, note });
-        const hpath = note.fname + ".md";
-        // const hpath = dot2Slash(note.fname);
+        const hpath = dot2Slash(note.fname) + ".md";
         const vname = VaultUtils.getName(note.vault);
         let fpath = path.join(podDstPath, vname, hpath);
         // fpath = _.isEmpty(note.children)
@@ -336,6 +333,21 @@ export class MarkdownExportPod extends ExportPod {
         return fs.writeFile(fpath, body);
       })
     );
+
+    // Export Assets
+    vaults.forEach(async (vault) => {
+      //TODO: Avoid hardcoding of assets directory, or else extract to global const
+      const destPath = path.join(dest.fsPath, vault.fsPath, "assets");
+      const srcPath = path.join(wsRoot, vault.fsPath, "assets");
+      if (fs.pathExistsSync(srcPath)) {
+        await fs.copy(srcPath, destPath);
+      }
+    });
     return { notes };
   }
+}
+
+function dot2Slash(fname: string) {
+  const hierarchy = fname.split(".");
+  return path.join(...hierarchy);
 }

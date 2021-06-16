@@ -165,4 +165,12 @@ export const NOTE_PRESETS_V4 = {
     fname: "beta",
     body: "![[alpha]]",
   }),
+  NOTE_WITH_WIKILINK_SIMPLE: CreateNoteFactory({
+    fname: "simple-wikilink",
+    body: "[[simple-wikilink.one]]",
+  }),
+  NOTE_WITH_WIKILINK_SIMPLE_TARGET: CreateNoteFactory({
+    fname: "simple-wikilink.one",
+    body: ["# Header ", "body text"].join("\n"),
+  }),
 };

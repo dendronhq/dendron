@@ -156,6 +156,7 @@ const getSchemaGraphElements = (
         label: vaultName,
         group: "nodes",
         vault: vaultName,
+        fname: "root",
       },
       classes: `vault-${vaultName}`,
     });
@@ -167,7 +168,12 @@ const getSchemaGraphElements = (
 
         // Base schema node
         nodes.push({
-          data: { id: SCHEMA_ID, label: schema.fname, group: "nodes" },
+          data: {
+            id: SCHEMA_ID,
+            label: schema.fname,
+            group: "nodes",
+            fname: schema.fname,
+          },
           classes: `vault-${vaultName}`,
         });
 
@@ -178,6 +184,7 @@ const getSchemaGraphElements = (
             id: `${VAULT_ID}_${SCHEMA_ID}`,
             source: VAULT_ID,
             target: SCHEMA_ID,
+            fname: schema.fname,
           },
           classes: `hierarchy vault-${vaultName}`,
         });
@@ -204,6 +211,7 @@ const getSchemaGraphElements = (
               id: `${SCHEMA_ID}_${SUBSCHEMA_ID}`,
               source: SCHEMA_ID,
               target: SUBSCHEMA_ID,
+              fname: schema.fname,
             },
             classes: `hierarchy vault-${vaultName}`,
           });

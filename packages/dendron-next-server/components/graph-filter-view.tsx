@@ -107,7 +107,7 @@ const GraphFilterView = ({ config, setConfig }: FilterProps) => {
                               label={label}
                               entry={entry as GraphConfigItem<string>}
                               updateConfigField={updateConfigField}
-                              nodeCount={config["information.nodes"].value * 2}
+                              nodeCount={config["information.nodes"].value}
                             />
                           </>
                         )}

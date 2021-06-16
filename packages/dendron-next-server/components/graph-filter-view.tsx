@@ -98,7 +98,7 @@ const GraphFilterView = ({ config, setConfig }: FilterProps) => {
                               updateConfigField(key, newValue.target.value)
                             }
                             disabled={!entry?.mutable}
-                            placeholder={entry.placeholder || ""}
+                            placeholder={entry?.placeholder || ""}
                             style={{
                               maxWidth: 150,
                               marginLeft: "1rem",

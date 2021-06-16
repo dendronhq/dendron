@@ -10,7 +10,6 @@ export {
   select,
   selectAll,
   LinkFilter,
-  AnchorUtils,
 } from "./utils";
 export { wikiLinks, WikiLinksOpts, matchWikiLink } from "./wikiLinks";
 export {

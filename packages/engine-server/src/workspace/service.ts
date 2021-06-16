@@ -79,6 +79,17 @@ export type WorkspaceServiceOpts = {
 
 type UrlTransformerFunc = (url: string) => string;
 
+type AddRemoveCommonOpts = {
+  /**
+   * Default: true
+   */
+  updateConfig?: boolean;
+  /**
+   * Default: false
+   */
+  updateWorkspace?: boolean;
+};
+
 export class WorkspaceService {
   public logger: DLogger;
   protected seedService: SeedService;
@@ -135,6 +146,7 @@ export class WorkspaceService {
   async addWorkspace({ workspace }: { workspace: DWorkspace }) {
     const allWorkspaces = this.config.workspaces || {};
     allWorkspaces[workspace.name] = _.omit(workspace, ["name", "vaults"]);
+    const config = this.config;
     // update vault
     const newVaults = await _.reduce(
       workspace.vaults,
@@ -142,14 +154,15 @@ export class WorkspaceService {
         const out = await acc;
         out.push(
           await this.addVault({
+            config,
             vault: { ...vault, workspace: workspace.name },
+            updateConfig: false,
           })
         );
         return out;
       },
       Promise.resolve([] as DVault[])
     );
-    const config = this.config;
     config.workspaces = allWorkspaces;
     this.setConfig(config);
     return { vaults: newVaults };
@@ -164,13 +177,13 @@ export class WorkspaceService {
    * @param opts.addToWorkspace - default: false, add to dendron.code-workspace
    * @returns
    */
-  async addVault(opts: {
-    vault: DVault;
-    config?: DendronConfig;
-    writeConfig?: boolean;
-    addToWorkspace?: boolean;
-  }) {
-    const { vault, config, writeConfig, addToWorkspace } = _.defaults(opts, {
+  async addVault(
+    opts: {
+      vault: DVault;
+      config?: DendronConfig;
+    } & AddRemoveCommonOpts
+  ) {
+    const { vault, config, updateConfig, updateWorkspace } = _.defaults(opts, {
       config: this.config,
       writeConfig: true,
       addToWorkspace: false,
@@ -185,10 +198,10 @@ export class WorkspaceService {
     } else if (_.isArray(config.site.duplicateNoteBehavior.payload)) {
       config.site.duplicateNoteBehavior.payload.push(VaultUtils.getName(vault));
     }
-    if (writeConfig) {
+    if (updateConfig) {
       await this.setConfig(config);
     }
-    if (addToWorkspace) {
+    if (updateWorkspace) {
       const wsPath = path.join(this.wsRoot, DENDRON_WS_NAME);
       let out = (await readJSONWithComments(wsPath)) as WorkspaceSettings;
       if (
@@ -343,13 +356,19 @@ export class WorkspaceService {
   }
 
   /**
-   * Remove vaults. Currently doesn't delete any files
+   * Remove vaults. Currently doesn't delete any files.
    * @param param0
    */
-  async removeVault({ vault }: { vault: DVault }) {
+  async removeVault(opts: { vault: DVault } & AddRemoveCommonOpts) {
     const config = this.config;
+    const { vault, updateConfig, updateWorkspace } = _.defaults(opts, {
+      updateConfig: true,
+      updateWorkspace: false,
+    });
     config.vaults = _.reject(config.vaults, (ent) => {
-      const checks = [ent.fsPath === vault.fsPath];
+      const checks = [
+        VaultUtils.getRelPath(ent) === VaultUtils.getRelPath(vault),
+      ];
       if (vault.workspace) {
         checks.push(ent.workspace === vault.workspace);
       }
@@ -378,7 +397,19 @@ export class WorkspaceService {
         );
       }
     }
-    await this.setConfig(config);
+    if (updateConfig) {
+      await this.setConfig(config);
+    }
+    if (updateWorkspace) {
+      const wsPath = path.join(this.wsRoot, DENDRON_WS_NAME);
+      let settings = (await readJSONWithComments(wsPath)) as WorkspaceSettings;
+      const folders = _.reject(
+        settings.folders,
+        (ent) => ent.path === VaultUtils.getRelPath(vault)
+      );
+      settings = assignJSONWithComment({ folders }, settings);
+      writeJSONWithComments(wsPath, settings);
+    }
   }
 
   createConfig() {
@@ -708,7 +739,6 @@ export class WorkspaceService {
           }
           const spath = await this.seedService.cloneSeed({
             seed: resp,
-            wsRoot,
           });
           seedResults.push({
             id,

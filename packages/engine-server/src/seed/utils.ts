@@ -1,4 +1,9 @@
-import { DendronError, ERROR_STATUS, SeedConfig } from "@dendronhq/common-all";
+import {
+  DendronError,
+  DVault,
+  ERROR_STATUS,
+  SeedConfig,
+} from "@dendronhq/common-all";
 import { simpleGit } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -63,13 +68,24 @@ export class SeedUtils {
     return path.join(wsRoot, "seeds", id);
   }
 
+  static seed2Vault({ seed }: { seed: SeedConfig }): DVault {
+    const id = this.getSeedId(seed);
+    return {
+      fsPath: seed.root,
+      seed: id,
+      name: id,
+    };
+  }
+
   static validateWorkspaceSeedConversion({ wsRoot }: { wsRoot: string }) {
     const ws = new WorkspaceService({ wsRoot });
     if (ws.config.vaults.length !== 1) {
       return {
         error: DendronError.createFromStatus({
           status: ERROR_STATUS.INVALID_STATE,
-          message: "workspace must have exactly one vault",
+          message: `workspace must have exactly one vault. found ${JSON.stringify(
+            ws.config.vaults
+          )}`,
         }),
       };
     }

@@ -178,3 +178,85 @@ repository:
     url: ''
 "
 `;
+
+exports[`remove error: nothing to remove 1`] = `
+Object {
+  "error": [Error: seed with id dendron.no-exist not in dendron.yml],
+}
+`;
+
+exports[`remove ok: remove initialized seed 1`] = `""`;
+
+exports[`remove ok: remove initialized seed 2`] = `"dendron.foo"`;
+
+exports[`remove ok: remove initialized seed 3`] = `
+"version: 1
+vaults:
+    -
+        fsPath: vault1
+    -
+        fsPath: vault2
+    -
+        fsPath: vault3
+        name: vaultThree
+useFMTitle: true
+useNoteTitleForLink: true
+noAutoCreateOnDefinition: true
+noLegacyNoteRef: true
+lookupConfirmVaultOnCreate: false
+dayOfWeek: 1
+site:
+    copyAssets: true
+    siteHierarchies:
+        - root
+    siteRootDir: docs
+    usePrettyRefs: true
+    title: Dendron
+    description: Personal knowledge space
+    duplicateNoteBehavior:
+        action: useVault
+        payload:
+            - vault1
+            - vault2
+            - vaultThree
+            - dendron.foo
+initializeRemoteVaults: true
+seeds: {}
+"
+`;
+
+exports[`remove ok: remove non-initialized seed 1`] = `
+"version: 1
+vaults:
+    -
+        fsPath: vault1
+    -
+        fsPath: vault2
+    -
+        fsPath: vault3
+        name: vaultThree
+useFMTitle: true
+useNoteTitleForLink: true
+noAutoCreateOnDefinition: true
+noLegacyNoteRef: true
+lookupConfirmVaultOnCreate: false
+dayOfWeek: 1
+site:
+    copyAssets: true
+    siteHierarchies:
+        - root
+    siteRootDir: docs
+    usePrettyRefs: true
+    title: Dendron
+    description: Personal knowledge space
+    duplicateNoteBehavior:
+        action: useVault
+        payload:
+            - vault1
+            - vault2
+            - vaultThree
+            - dendron.foo
+initializeRemoteVaults: true
+seeds: {}
+"
+`;

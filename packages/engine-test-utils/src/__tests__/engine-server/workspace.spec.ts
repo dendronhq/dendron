@@ -89,8 +89,8 @@ describe("WorkspaceService", () => {
           );
           await new WorkspaceService({ wsRoot }).addVault({
             vault: { fsPath: "vault1", workspace: "remoteVault" },
-            addToWorkspace: true,
-            writeConfig: true,
+            updateWorkspace: true,
+            updateConfig: true,
           });
           const ws = new WorkspaceService({ wsRoot });
           const didClone = await ws.initialize({

@@ -24,7 +24,7 @@ export async function checkString(body: string, ...match: string[]) {
 }
 
 export async function checkDir(
-  { fpath, snapshot }: { fpath: string; snapshot?: boolean },
+  { fpath, snapshot }: { fpath: string; snapshot?: boolean; msg?: string },
   ...match: string[]
 ) {
   const body = fs.readdirSync(fpath).join(" ");
@@ -35,7 +35,7 @@ export async function checkDir(
 }
 
 export async function checkNotInDir(
-  { fpath, snapshot }: { fpath: string; snapshot?: boolean },
+  { fpath, snapshot }: { fpath: string; snapshot?: boolean; msg?: string },
   ...match: string[]
 ) {
   const body = fs.readdirSync(fpath).join(" ");

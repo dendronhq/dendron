@@ -1,6 +1,5 @@
-import _ from "lodash";
 import fs from "fs-extra";
-import path from "path";
+import _ from "lodash";
 import { CONFIG, DENDRON_COMMANDS, DENDRON_VIEWS } from "../src/constants";
 
 function genEntry(entryDict: any) {
@@ -13,14 +12,17 @@ function genEntry(entryDict: any) {
   return configGenerated;
 }
 
-function updateConfig(configuration: any) {
+function updateConfig() {
+  const configuration = {
+    title: "dendron",
+  } as any;
   console.log("update config...");
   const config = genEntry(CONFIG);
   configuration["properties"] = config;
-  return config;
+  return configuration;
 }
 
-function updateCommands(contributes: any) {
+function updateCommands() {
   console.log("update commands...");
   const commands = _.map(
     _.filter(DENDRON_COMMANDS, (ent) => _.isUndefined(ent.shortcut)),
@@ -38,10 +40,10 @@ function updateCommands(contributes: any) {
       };
     }
   );
-  contributes.commands = commands;
+  return commands;
 }
 
-function updateKeybindings(contributes: any) {
+function updateKeybindings() {
   console.log("update keybindings...");
   const bindings = _.filter(
     DENDRON_COMMANDS,
@@ -54,52 +56,56 @@ function updateKeybindings(contributes: any) {
       ...configProps,
     };
   });
-  contributes.keybindings = bindings;
+  return bindings;
 }
 
-function updateViews(contributes: any) {
+function updateViews() {
   console.log("update views");
   const out = _.groupBy(DENDRON_VIEWS, "where");
-  contributes.views = {};
+  const viewJson = {} as any;
   _.map(out, (views, k) => {
-    contributes.views[k] = _.map(views, (ent) => _.omit(ent, "where"));
+    viewJson[k] = _.map(views, (ent) => _.omit(ent, "where"));
   });
+  return viewJson;
 }
 
 function main() {
   let dryRun = false;
   const pkg = fs.readJSONSync("package.json");
-  const { contributes } = pkg;
-  const { configuration } = contributes;
-  const config = updateConfig(configuration);
-  updateCommands(contributes);
-  updateKeybindings(contributes);
-  updateViews(contributes);
-  const commands = DENDRON_COMMANDS;
+  const configuration = updateConfig();
+  const commands = updateCommands();
+  const keybindings = updateKeybindings();
+  const views = updateViews();
+  const languages = [
+    {
+      id: "markdown",
+      extensions: [".md"],
+      aliases: ["markdown"],
+      configuration: "./language-configuration.json",
+    },
+  ];
+  const previewStyles = [
+    "./media/fontello/css/fontello.css",
+    "./media/markdown.css",
+  ];
+  const categories = ["Other"];
+  const contributes = {
+    languages,
+    views,
+    categories,
+    commands,
+    configuration,
+    keybindings,
+    "markdown.previewStyles": previewStyles,
+  };
   if (dryRun) {
     // console.log(JSON.stringify(pkg, null, 44));
     return;
   }
+  pkg.contributes = contributes;
 
   // write to docs
   fs.writeJSONSync("package.json", pkg, { spaces: 2 });
-  const pathToDocs = path.join("../../../dendron-site");
-  if (fs.existsSync(pathToDocs)) {
-    const groupBy = _.groupBy(
-      _.values(commands).map((c) => _.defaults(c, { skipDocs: false })),
-      "group"
-    );
-    fs.writeJSONSync(
-      path.join(pathToDocs, "data", "dendron-config.json"),
-      groupBy,
-      { spaces: 4 }
-    );
-    fs.writeJSONSync(
-      path.join(pathToDocs, "data", "generated-config.json"),
-      config,
-      { spaces: 4 }
-    );
-  }
 }
 
 main();

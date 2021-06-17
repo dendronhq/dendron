@@ -1,6 +1,18 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`markdown export pod test nested directory output: foo ch1 contents 1`] = `"foo.ch1 body"`;
+exports[`markdown export pod test copying of assets: asset contents 1`] = `"hello world"`;
+
+exports[`markdown export pod test nested directory output: foo ch1 contents 1`] = `
+"# Ch1
+
+foo.ch1 body"
+`;
+
+exports[`markdown export pod test wikilink conversion: note link reference 1`] = `
+"# Simple Wikilink
+
+[One](simple-wikilink/one)"
+`;
 
 exports[`markdown publish pod basic 1`] = `
 "# Foo

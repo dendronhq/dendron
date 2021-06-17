@@ -10,6 +10,7 @@ import {
 import { cleanFileName, readMD, vault2Path } from "@dendronhq/common-server";
 import {
   DendronASTDest,
+  MDUtilsV4,
   MDUtilsV5,
   RemarkUtils,
 } from "@dendronhq/engine-server";
@@ -288,7 +289,7 @@ export class MarkdownPublishPod extends PublishPod {
 
   async plant(opts: PublishPodPlantOpts) {
     const { engine, note } = opts;
-    const remark = MDUtilsV5.procRemarkFull({
+    const remark = MDUtilsV4.procFull({
       dest: DendronASTDest.MD_REGULAR,
       config: {
         ...engine.config,
@@ -297,6 +298,7 @@ export class MarkdownPublishPod extends PublishPod {
       engine,
       fname: note.fname,
       vault: note.vault,
+      shouldApplyPublishRules: false,
     }).use(RemarkUtils.convertLinksFromDotNotation(note, []));
     const out = remark.processSync(note.body).toString();
     return _.trim(out);
@@ -335,14 +337,15 @@ export class MarkdownExportPod extends ExportPod {
     );
 
     // Export Assets
-    vaults.forEach(async (vault) => {
+    await Promise.all(
+      vaults.map(async (vault) => {
       //TODO: Avoid hardcoding of assets directory, or else extract to global const
-      const destPath = path.join(dest.fsPath, vault.fsPath, "assets");
-      const srcPath = path.join(wsRoot, vault.fsPath, "assets");
+      const destPath = path.join(dest.fsPath,  VaultUtils.getRelPath(vault), "assets");
+      const srcPath = path.join(wsRoot, VaultUtils.getRelPath(vault), "assets");
       if (fs.pathExistsSync(srcPath)) {
         await fs.copy(srcPath, destPath);
       }
-    });
+    }));
     return { notes };
   }
 }

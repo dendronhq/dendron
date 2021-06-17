@@ -246,6 +246,11 @@ describe("markdown export pod", () => {
     exportDest = tmpDir().name;
   });
 
+  afterEach(() => {
+    // clean up the export directory after each test.
+    fs.rmdirSync(exportDest, { recursive: true });
+  });
+
   test("test nested directory output", async () => {
     await runEngineTestV5(
       async ({ engine, vaults, wsRoot }) => {
@@ -266,19 +271,19 @@ describe("markdown export pod", () => {
           "vault2",
           "vaultThree",
         ]);
-        expect(expectedFiles).toEqual(actualFiles);
+        expect(actualFiles).toEqual(expectedFiles);
 
         [actualFiles, expectedFiles] = FileTestUtils.cmpFiles(
           path.join(exportDest, "vault1"),
           ["bar.md", "foo.md", "root.md", "foo"] // foo is a directory
         );
-        expect(expectedFiles).toEqual(actualFiles);
+        expect(actualFiles).toEqual(expectedFiles);
 
         [actualFiles, expectedFiles] = FileTestUtils.cmpFiles(
           path.join(exportDest, "vault1", "foo"),
           ["ch1.md"]
         );
-        expect(expectedFiles).toEqual(actualFiles);
+        expect(actualFiles).toEqual(expectedFiles);
 
         // check contents
         const foo = fs.readFileSync(
@@ -312,13 +317,13 @@ describe("markdown export pod", () => {
           path.join(exportDest, "vault1"),
           ["root.md", "assets"]
         );
-        expect(expectedFiles).toEqual(actualFiles);
+        expect(actualFiles).toEqual(expectedFiles);
 
         [actualFiles, expectedFiles] = FileTestUtils.cmpFiles(
           path.join(exportDest, "vault1", "assets/images"),
           ["test.png"]
         );
-        expect(expectedFiles).toEqual(actualFiles);
+        expect(actualFiles).toEqual(expectedFiles);
 
         // check contents
         const foo = fs.readFileSync(
@@ -333,13 +338,13 @@ describe("markdown export pod", () => {
       {
         expect,
         preSetupHook: async ({ wsRoot, vaults }) => {
-          await fs.ensureDir(
-            path.join(wsRoot, vaults[0].fsPath, "assets/images")
+          const rootDir = path.join(
+            wsRoot,
+            VaultUtils.getRelPath(vaults[0]),
+            "assets/images"
           );
-          await fs.writeFile(
-            path.join(wsRoot, vaults[0].fsPath, "assets/images/test.png"),
-            "hello world"
-          );
+          await fs.ensureDir(rootDir);
+          await fs.writeFile(path.join(rootDir, "test.png"), "hello world");
         },
       }
     );
@@ -349,7 +354,6 @@ describe("markdown export pod", () => {
   test("test wikilink conversion", async () => {
     await runEngineTestV5(
       async ({ engine, vaults, wsRoot }) => {
-        debugger;
         const pod = new MarkdownExportPod();
         engine.config.useFMTitle = true;
         await pod.execute({
@@ -365,13 +369,13 @@ describe("markdown export pod", () => {
           path.join(exportDest, "vault1"),
           ["root.md", "simple-wikilink.md", "simple-wikilink"]
         );
-        expect(expectedFiles).toEqual(actualFiles);
+        expect(actualFiles).toEqual(expectedFiles);
 
         [actualFiles, expectedFiles] = FileTestUtils.cmpFiles(
           path.join(exportDest, "vault1", "simple-wikilink"),
           ["one.md"]
         );
-        expect(expectedFiles).toEqual(actualFiles);
+        expect(actualFiles).toEqual(expectedFiles);
 
         // check contents
         const foo = fs.readFileSync(

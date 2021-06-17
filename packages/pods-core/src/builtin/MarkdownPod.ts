@@ -260,7 +260,7 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
             dest: DendronASTDest.MD_DENDRON,
             vault: n.vault,
           })
-            .use(RemarkUtils.convertObsidianLinks(n, []))
+            .use(RemarkUtils.convertLinksToDotNotation(n, []))
             .process(n.body);
           n.body = cBody.toString();
           if (config.frontmatter) {
@@ -299,7 +299,7 @@ export class MarkdownPublishPod extends PublishPod {
       fname: note.fname,
       vault: note.vault,
       shouldApplyPublishRules: false,
-    });
+    }).use(RemarkUtils.convertLinksFromDotNotation(note, []));
     const out = remark.processSync(note.body).toString();
     return _.trim(out);
   }
@@ -314,7 +314,7 @@ export class MarkdownExportPod extends ExportPod {
 
   async plant(opts: ExportPodPlantOpts) {
     const ctx = "MarkdownExportPod:plant";
-    const { dest, notes } = opts;
+    const { dest, notes, vaults, wsRoot } = opts;
     // verify dest exist
     const podDstPath = dest.fsPath;
     fs.ensureDirSync(path.dirname(podDstPath));
@@ -324,8 +324,7 @@ export class MarkdownExportPod extends ExportPod {
     await Promise.all(
       notes.map(async (note) => {
         const body = await mdPublishPod.plant({ ...opts, note });
-        const hpath = note.fname + ".md";
-        // const hpath = dot2Slash(note.fname);
+        const hpath = dot2Slash(note.fname) + ".md";
         const vname = VaultUtils.getName(note.vault);
         let fpath = path.join(podDstPath, vname, hpath);
         // fpath = _.isEmpty(note.children)
@@ -336,6 +335,22 @@ export class MarkdownExportPod extends ExportPod {
         return fs.writeFile(fpath, body);
       })
     );
+
+    // Export Assets
+    await Promise.all(
+      vaults.map(async (vault) => {
+      //TODO: Avoid hardcoding of assets directory, or else extract to global const
+      const destPath = path.join(dest.fsPath,  VaultUtils.getRelPath(vault), "assets");
+      const srcPath = path.join(wsRoot, VaultUtils.getRelPath(vault), "assets");
+      if (fs.pathExistsSync(srcPath)) {
+        await fs.copy(srcPath, destPath);
+      }
+    }));
     return { notes };
   }
+}
+
+function dot2Slash(fname: string) {
+  const hierarchy = fname.split(".");
+  return path.join(...hierarchy);
 }

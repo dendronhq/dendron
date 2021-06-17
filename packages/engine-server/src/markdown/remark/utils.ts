@@ -54,6 +54,15 @@ export function addError(proc: Processor, err: DendronError) {
   proc().data("errors", errors);
 }
 
+export type NoteBlock = {
+  /** The actual text of the block. */
+  text: string;
+  /** The anchor for this block, if one already exists. */
+  anchor?: string;
+  /** The position within the document at which the block is located. */
+  position: Position;
+};
+
 export function getNoteOrError(
   notes: NoteProps[],
   hint: any
@@ -691,5 +700,45 @@ export class RemarkUtils {
         }
       };
     };
+  }
+
+  /** Extract all blocks from the note which could be referenced by a block anchor.
+   *
+   * If those blocks already have anchors (or if they are a header), this will also find that anchor.
+   *
+   * @param note The note from which blocks will be extracted.
+   */
+  static async extractBlocks({
+    note,
+    wsRoot,
+    engine,
+  }: {
+    note: NoteProps;
+    wsRoot: string;
+    engine: DEngineClient;
+  }): Promise<NoteBlock[]> {
+    const proc = MDUtilsV5.procRemarkFull({
+      engine,
+      vault: note.vault,
+      fname: note.fname,
+      dest: DendronASTDest.MD_DENDRON,
+    });
+
+    const noteText = await note2String({ note, wsRoot });
+    const noteAST = proc.parse(noteText);
+
+    const blocks: NoteBlock[] = [];
+    visit(noteAST, (node) => {
+      switch (node.type) {
+        case "paragraph":
+          blocks.push({
+            text: proc.stringify(node),
+            // position can only be undefined for generated nodes, not for parsed ones
+            position: node.position!,
+          });
+          break;
+      }
+    });
+    return blocks;
   }
 }

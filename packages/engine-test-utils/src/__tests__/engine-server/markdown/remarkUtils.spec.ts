@@ -1,4 +1,4 @@
-import { DLink, WorkspaceOpts } from "@dendronhq/common-all";
+import { DLink, NoteProps, WorkspaceOpts } from "@dendronhq/common-all";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import {
   DendronASTDest,
@@ -487,6 +487,42 @@ describe("RemarkUtils and LinkUtils", () => {
           }
         );
       });
+    });
+  });
+
+  describe("extractBlocks", () => {
+    test.only("basic", async () => {
+      let note: NoteProps | undefined;
+      await runEngineTestV5(
+        async ({ wsRoot, engine }) => {
+          expect(note).toBeTruthy();
+          const blocks = await RemarkUtils.extractBlocks({
+            note: note!,
+            wsRoot,
+            engine,
+          });
+          expect(blocks.length).toEqual(3);
+        },
+        {
+          expect,
+          preSetupHook: async ({ wsRoot, vaults }) => {
+            //const txt = `# Hello Heading\nHello Content`;
+            note = await NoteTestUtilsV4.createNote({
+              wsRoot,
+              vault: vaults[0],
+              fname: "foo",
+              body: [
+                "Et et quam culpa.",
+                "",
+                "Cumque molestiae qui deleniti.",
+                "Eius odit commodi harum.",
+                "",
+                "Sequi ut non delectus tempore.",
+              ].join("\n"),
+            });
+          },
+        }
+      );
     });
   });
 });

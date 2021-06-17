@@ -1,11 +1,16 @@
-import { getSlugger, isBlockAnchor, NoteProps } from "@dendronhq/common-all";
+import {
+  DNodeUtils,
+  getSlugger,
+  isBlockAnchor,
+  NoteProps,
+} from "@dendronhq/common-all";
 import _ from "lodash";
 import path from "path";
 import { Selection, window } from "vscode";
 import { CONFIG, DENDRON_COMMANDS } from "../constants";
 import { clipboard, VSCodeUtils } from "../utils";
 import { getAnchorAt } from "../utils/editor";
-import { DendronWorkspace, getWS, getEngine } from "../workspace";
+import { DendronWorkspace, getEngine, getWS } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandOpts = {};
@@ -30,16 +35,35 @@ export class CopyNoteURLCommand extends BasicCommand<
   }
 
   async execute() {
-    const urlRoot =
-      getWS().config?.site?.siteUrl ||
+    const config = getWS().config;
+    let urlRoot =
+      config?.site?.siteUrl ||
       DendronWorkspace.configuration().get<string>(
         CONFIG.COPY_NOTE_URL_ROOT.key
       );
+    /**
+     * set to true if index node, don't append id at the end
+     */
+    let isIndex: boolean = false;
 
     const maybeTextEditor = VSCodeUtils.getActiveTextEditor();
     if (_.isUndefined(maybeTextEditor)) {
       window.showErrorMessage("no active document found");
       return;
+    }
+    // check for url from seed
+    const vault = VSCodeUtils.getVaultFromDocument(maybeTextEditor.document);
+    if (vault.seed) {
+      if (config.seeds && config.seeds[vault.seed]) {
+        const maybeSite = config.seeds[vault.seed]?.site;
+        if (maybeSite) {
+          urlRoot = maybeSite;
+          const maybeNote = VSCodeUtils.getNoteFromDocument(
+            maybeTextEditor.document
+          );
+          isIndex = !_.isUndefined(maybeNote) && DNodeUtils.isRoot(maybeNote);
+        }
+      }
     }
     let root = "";
     if (!_.isUndefined(urlRoot)) {
@@ -48,6 +72,7 @@ export class CopyNoteURLCommand extends BasicCommand<
       // assume github
       throw Error("not implemented");
     }
+
     const notePrefix = "notes";
     const fname = path.basename(maybeTextEditor.document.uri.fsPath, ".md");
 
@@ -58,7 +83,7 @@ export class CopyNoteURLCommand extends BasicCommand<
       throw Error(`${fname} not found in engine`);
     }
 
-    let link = [root, notePrefix, note.id + ".html"].join("/");
+    let link = isIndex ? root : [root, notePrefix, note.id + ".html"].join("/");
 
     // add the anchor if one is selected and exists
     const { selection, editor } = VSCodeUtils.getSelection();

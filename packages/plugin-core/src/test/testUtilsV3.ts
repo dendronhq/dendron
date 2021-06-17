@@ -24,6 +24,7 @@ import {
   DendronEngineV2,
   HistoryService,
 } from "@dendronhq/engine-server";
+import { TestSetupWorkspaceOpts } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
 import _ from "lodash";
 import { afterEach, beforeEach } from "mocha";
@@ -99,7 +100,7 @@ export type SetupLegacyWorkspaceMultiOpts = SetupCodeConfigurationV2 & {
    * Overrid default Dendron settings (https://dendron.so/notes/eea2b078-1acc-4071-a14e-18299fc28f48.html)
    */
   wsSettingsOverride?: Partial<WorkspaceSettings>;
-};
+} & TestSetupWorkspaceOpts;
 
 export class EditorUtils {
   static async getURIForActiveEditor(): Promise<Uri> {

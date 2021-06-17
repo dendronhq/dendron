@@ -1,7 +1,12 @@
 import { DEngineClient, SeedCommands, SeedConfig } from "@dendronhq/common-all";
 import { tmpDir, writeYAML } from "@dendronhq/common-server";
 import { SeedCLICommand } from "@dendronhq/dendron-cli";
-import { SeedInitMode, SeedUtils } from "@dendronhq/engine-server";
+import {
+  SeedInitMode,
+  SeedRegistry,
+  SeedService,
+  SeedUtils,
+} from "@dendronhq/engine-server";
 import path from "path";
 import { GitTestUtils } from "./git";
 
@@ -9,6 +14,25 @@ export class TestSeedUtils {
   static defaultSeedId = () => {
     return "dendron.foo";
   };
+
+  static async addSeed2WS({
+    wsRoot,
+    engine,
+    modifySeed,
+  }: {
+    wsRoot: string;
+    engine: DEngineClient;
+    modifySeed?: (seed: SeedConfig) => SeedConfig;
+  }) {
+    const { registryFile } = await this.createSeedRegistry({
+      engine,
+      wsRoot,
+      modifySeed,
+    });
+    const id = this.defaultSeedId();
+    const seedService = new SeedService({ wsRoot, registryFile });
+    await seedService.addSeed({ id });
+  }
 
   static async createSeedRegistry(opts: {
     engine: DEngineClient;

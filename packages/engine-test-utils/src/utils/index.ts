@@ -13,6 +13,7 @@ import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 export * from "./git";
+export * from "./seed";
 
 export async function checkString(body: string, ...match: string[]) {
   expect(

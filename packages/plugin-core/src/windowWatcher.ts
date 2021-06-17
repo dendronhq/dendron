@@ -45,6 +45,7 @@ export class WindowWatcher {
           this.triggerUpdateDecorations();
           this.triggerNoteGraphViewUpdate();
           this.triggerSchemaGraphViewUpdate();
+          this.triggerNotePreviewUpdate();
         }
       },
       null,
@@ -141,6 +142,30 @@ export class WindowWatcher {
         const note = VSCodeUtils.getNoteFromDocument(activeEditor.document);
 
         schemaGraphPanel.webview.postMessage({
+          type: "onDidChangeActiveTextEditor",
+          data: {
+            note,
+            sync: true,
+          },
+          source: "vscode",
+        } as OnDidChangeActiveTextEditorMsg);
+      }
+    }
+    return;
+  }
+
+  async triggerNotePreviewUpdate() {
+    const notePreviewPanel = getWS().getWebView(DendronWebViewKey.NOTE_PREVIEW);
+    if (!_.isUndefined(notePreviewPanel)) {
+      if (notePreviewPanel.visible) {
+        const activeEditor = window.activeTextEditor;
+        if (!activeEditor) {
+          return;
+        }
+
+        const note = VSCodeUtils.getNoteFromDocument(activeEditor.document);
+
+        notePreviewPanel.webview.postMessage({
           type: "onDidChangeActiveTextEditor",
           data: {
             note,

@@ -3,11 +3,13 @@ import {
   createLogger,
   engineHooks,
   engineSlice,
+  postVSCodeMessage,
 } from "@dendronhq/common-frontend";
+import { DMessageSource, NoteViewMessageType } from "@dendronhq/common-all";
 import { getWsAndPort } from "../../lib/env";
 import { DendronProps } from "../../lib/types";
 
-const logger = createLogger("noteView");
+const logger = createLogger("notePreview");
 
 function Note({ engine, ide }: DendronProps) {
   logger.info({
@@ -17,7 +19,7 @@ function Note({ engine, ide }: DendronProps) {
   const dispatch = engineHooks.useEngineAppDispatch();
 
   const { noteActive } = ide;
-  const noteId = noteActive?.id || "05774b2e-ebf7-4bbc-8171-ad191ba0ae0a";
+  const noteId = noteActive?.id;
   const noteContent = noteId && engine.notesRendered[noteId];
 
   React.useEffect(() => {
@@ -39,7 +41,13 @@ function Note({ engine, ide }: DendronProps) {
         });
         event.preventDefault();
         event.stopPropagation();
-        // postVSCodeMessage(...);
+        postVSCodeMessage({
+          type: NoteViewMessageType.onClick,
+          data: {
+            id: noteId,
+          },
+          source: DMessageSource.webClient,
+        });
       }
     },
     [noteId]
@@ -54,10 +62,10 @@ function Note({ engine, ide }: DendronProps) {
   }, [onClickHandler]);
 
   if (!noteId) {
-    return <>Loading..</>;
+    return <>Loading..(no `noteId`)</>;
   }
   if (!noteContent) {
-    return <>Loading..</>;
+    return <>Loading..(no `noteContent`)</>;
   }
   return (
     <div dangerouslySetInnerHTML={{ __html: engine.notesRendered[noteId]! }} />

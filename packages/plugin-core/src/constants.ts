@@ -677,6 +677,18 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docLink: "dendron.topic.commands.md",
     docPreview: "",
   },
+  SHOW_PREVIEW_V2: {
+    key: "dendron.showPreviewV2",
+    title: `${CMD_PREFIX} Show Preview V2`,
+    group: "notes",
+    keybindings: {
+      windows: "windows+ctrl+p",
+      mac: "cmd+ctrl+p",
+    },
+    desc: "Show Markdown Preview",
+    docLink: "dendron.topic.commands.md",
+    docPreview: "",
+  },
   PASTE_FILE: {
     key: "dendron.pasteFile",
     title: `${CMD_PREFIX} Paste File`,

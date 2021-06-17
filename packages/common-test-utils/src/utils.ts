@@ -108,12 +108,12 @@ export class AssertUtils {
     return await this.assertTimesInString({
       body,
       moreThan: [
-        ...(match?.map((pattern): [number, string | RegExp] => [1, pattern]) ||
+        ...(match?.map((pattern): [number, string | RegExp] => [0, pattern]) ||
           []),
       ],
       fewerThan: [
         ...(nomatch?.map((pattern): [number, string | RegExp] => [
-          0,
+          1,
           pattern,
         ]) || []),
       ],

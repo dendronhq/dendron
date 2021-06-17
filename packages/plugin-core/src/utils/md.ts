@@ -24,7 +24,8 @@ export type RefT = {
   label: string;
   /** If undefined, then the file this reference is located in is the ref */
   ref?: string;
-  anchor?: DNoteAnchor;
+  anchorStart?: DNoteAnchor;
+  anchorEnd?: DNoteAnchor;
   vaultName?: string;
 };
 
@@ -73,6 +74,8 @@ export const otherExts = [
   "flac",
 ];
 
+/** Kind-of parses a URI and extracts the scheme. Not an actual parser and will accept invalid URIs. */
+export const uriRegex = /^(?<scheme>[\w+.-]+):(\/\/)?\S+/;
 export const imageExts = ["png", "jpg", "jpeg", "svg", "gif", "webp"];
 const imageExtsRegex = new RegExp(`.(${imageExts.join("|")})$`, "i");
 export const isUncPath = (path: string): boolean => uncPathRegex.test(path);
@@ -183,9 +186,12 @@ export const getReferenceAtPosition = (
   range: vscode.Range;
   ref: string;
   label: string;
-  anchor?: DNoteAnchor;
+  anchorStart?: DNoteAnchor;
+  anchorEnd?: DNoteAnchor;
   refType?: DLinkType;
   vaultName?: string;
+  /** The full text inside the ref, e.g. for [[alias|foo.bar#anchor]] this is alias|foo.bar#anchor */
+  refText: string;
 } | null => {
   let refType: DLinkType | undefined;
   if (
@@ -221,11 +227,13 @@ export const getReferenceAtPosition = (
   }
 
   const docText = document.getText(range);
+  const refText = docText
+    .replace("![[", "")
+    .replace("[[", "")
+    .replace("]]", "");
 
   // don't incldue surrounding fluff for definition
-  const { ref, label, anchor, vaultName } = parseRef(
-    docText.replace("![[", "").replace("[[", "").replace("]]", "")
-  );
+  const { ref, label, anchorStart, anchorEnd, vaultName } = parseRef(refText);
 
   const startChar = range.start.character;
   // because
@@ -242,21 +250,25 @@ export const getReferenceAtPosition = (
     ref: ref ? ref : NoteUtils.uri2Fname(document.uri),
     label,
     range,
-    anchor,
+    anchorStart,
+    anchorEnd,
     refType,
     vaultName,
+    refText,
   };
 };
 
 export const parseRef = (rawRef: string): RefT => {
-  const parsed = LinkUtils.parseLinkV2(rawRef);
+  const parsed = LinkUtils.parseNoteRef(rawRef);
   if (_.isNull(parsed)) throw new Error(`Unable to parse reference ${rawRef}`);
-  const { alias, value, anchorHeader, vaultName } = parsed;
+  const { fname, alias } = parsed.from;
+  const { anchorStart, anchorEnd, vaultName } = parsed.data;
 
   return {
     label: alias ? alias : "",
-    ref: value,
-    anchor: parseAnchor(anchorHeader),
+    ref: fname,
+    anchorStart: parseAnchor(anchorStart),
+    anchorEnd: parseAnchor(anchorEnd),
     vaultName,
   };
 };
@@ -374,9 +386,6 @@ export const findReferences = async (
   return refs;
 };
 
-export const escapeForRegExp = (value: string) =>
-  value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-
 export const containsMarkdownExt = (pathParam: string): boolean =>
   !!markdownExtRegex.exec(path.parse(pathParam).ext);
 
@@ -413,3 +422,11 @@ export const fsPathToRef = ({
 
 export const containsImageExt = (pathParam: string): boolean =>
   !!imageExtsRegex.exec(path.parse(pathParam).ext);
+
+/** Returns true if this is a non-dendron uri, false if it is dendron://, undefined if it's not a URI */
+export const containsNonDendronUri = (uri: string): boolean | undefined => {
+  const groups = uriRegex.exec(uri)?.groups;
+  if (_.isUndefined(groups) || _.isUndefined(groups.scheme)) return undefined;
+  if (groups.scheme === "dendron") return false;
+  return true;
+};

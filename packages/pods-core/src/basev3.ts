@@ -201,7 +201,7 @@ export abstract class ImportPod<T extends ImportPodConfig = ImportPodConfig> {
 
 export type ExportPodConfig = {
   /**
-   * Where to import from
+   * Where to export to
    */
   dest: string;
   includeBody?: boolean;
@@ -216,6 +216,7 @@ export type ExportPodPlantOpts<T extends ExportPodConfig = ExportPodConfig> =
     dest: URI;
     vaults: DVault[];
     notes: NoteProps[];
+    wsRoot: string;
   };
 
 export abstract class ExportPod<
@@ -264,7 +265,7 @@ export abstract class ExportPod<
    * - if not `includeBody`, then fetch notes without body
    * - if not `includeStubs`, then ignore stub nodes
    */
-  preareNotesForExport({
+  prepareNotesForExport({
     config,
     notes,
   }: {
@@ -290,7 +291,7 @@ export abstract class ExportPod<
     const destURL = URI.file(resolvePath(dest, engine.wsRoot));
 
     // parse notes into NoteProps
-    const notes = this.preareNotesForExport({
+    const notes = this.prepareNotesForExport({
       config,
       notes: _.values(engine.notes),
     });

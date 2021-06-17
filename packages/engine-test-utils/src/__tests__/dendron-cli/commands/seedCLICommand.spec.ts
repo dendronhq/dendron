@@ -173,7 +173,7 @@ describe("add", () => {
           engine,
           wsRoot: tmp,
         });
-        const id = "dendron.foo";
+        const id = TestSeedUtils.defaultSeedId();
         (await runSeedCmd({
           cmd,
           id,
@@ -200,6 +200,72 @@ describe("add", () => {
           fpath: path.join(wsRoot, "dendron.yml"),
           snapshot: true,
         });
+        await checkFile(
+          {
+            fpath: path.join(wsRoot, "dendron.code-workspace"),
+            snapshot: true,
+          },
+          `${id}/vault`
+        );
+        checkVaults(
+          {
+            wsRoot,
+            vaults: [{ fsPath: "vault", seed: id, name: id } as DVault].concat(
+              vaults
+            ),
+          },
+          expect
+        );
+      },
+      {
+        expect,
+        addVSWorkspace: true,
+      }
+    );
+  });
+
+  test("ok: seed with site", async () => {
+    await runEngineTestV5(
+      async ({ engine, wsRoot, vaults }) => {
+        const tmp = tmpDir().name;
+        const { registryFile } = await TestSeedUtils.createSeedRegistry({
+          engine,
+          wsRoot: tmp,
+          modifySeed: (seed) => {
+            seed.site = "https://foo.com";
+            return seed;
+          },
+        });
+        const id = TestSeedUtils.defaultSeedId();
+        (await runSeedCmd({
+          cmd,
+          id,
+          engine,
+          wsRoot,
+          registryFile,
+        })) as { error: DendronError };
+        // seed should be added
+        await checkDir(
+          { fpath: path.join(wsRoot, "seeds", id), snapshot: true },
+          "dendron.yml",
+          "seed.yml",
+          "vault"
+        );
+        // seed.yml should not be present in the workspace
+        await checkNotInDir(
+          {
+            fpath: wsRoot,
+            snapshot: true,
+          },
+          "seed.yml"
+        );
+        await checkFile(
+          {
+            fpath: path.join(wsRoot, "dendron.yml"),
+            snapshot: true,
+          },
+          "site: 'https://foo.com'"
+        );
         await checkFile(
           {
             fpath: path.join(wsRoot, "dendron.code-workspace"),

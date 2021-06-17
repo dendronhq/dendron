@@ -26,6 +26,7 @@ import { Processor } from "unified";
 import { Node } from "unist";
 import { selectAll } from "unist-util-select";
 import visit from "unist-util-visit";
+import visitParents from "unist-util-visit-parents";
 import { VFile } from "vfile";
 import { normalizev2 } from "../../utils";
 import {
@@ -624,7 +625,10 @@ export class RemarkUtils {
 
   // --- conversion
 
-  static convertLinksToDotNotation(note: NoteProps, changes: NoteChangeEntry[]) {
+  static convertLinksToDotNotation(
+    note: NoteProps,
+    changes: NoteChangeEntry[]
+  ) {
     return function (this: Processor) {
       return (tree: Node, _vfile: VFile) => {
         let root = tree as DendronASTRoot;
@@ -649,7 +653,10 @@ export class RemarkUtils {
     };
   }
 
-  static convertLinksFromDotNotation(note: NoteProps, changes: NoteChangeEntry[]) {
+  static convertLinksFromDotNotation(
+    note: NoteProps,
+    changes: NoteChangeEntry[]
+  ) {
     return function (this: Processor) {
       return (tree: Node, _vfile: VFile) => {
         let root = tree as DendronASTRoot;
@@ -674,9 +681,9 @@ export class RemarkUtils {
 
         if (dirty) {
           changes.push({
-              note: note,
-              status: "update",
-            });
+            note: note,
+            status: "update",
+          });
         }
       };
     };
@@ -787,9 +794,27 @@ export class RemarkUtils {
     const noteAST = proc.parse(noteText);
 
     const blocks: NoteBlock[] = [];
-    visit(noteAST, (node) => {
+    visitParents(noteAST, (node, ancestors) => {
       switch (node.type) {
+        case "list":
+          blocks.push({
+            text: proc.stringify(node),
+            position: node.position!,
+          });
+          break;
+        case "listItem":
+          blocks.push({
+            text: proc.stringify(node),
+            position: node.position!,
+          });
+          break;
         case "paragraph":
+          if (
+            !_.isUndefined(
+              _.find(ancestors, (ancestor) => ancestor.type === "list")
+            )
+          )
+            return; // this paragraph is in a list item, but we already extracted the list item itself
           blocks.push({
             text: proc.stringify(node),
             // position can only be undefined for generated nodes, not for parsed ones

@@ -491,7 +491,7 @@ describe("RemarkUtils and LinkUtils", () => {
   });
 
   describe("extractBlocks", () => {
-    test.only("basic", async () => {
+    test("paragraphs", async () => {
       let note: NoteProps | undefined;
       await runEngineTestV5(
         async ({ wsRoot, engine }) => {
@@ -516,6 +516,40 @@ describe("RemarkUtils and LinkUtils", () => {
                 "",
                 "Cumque molestiae qui deleniti.",
                 "Eius odit commodi harum.",
+                "",
+                "Sequi ut non delectus tempore.",
+              ].join("\n"),
+            });
+          },
+        }
+      );
+    });
+
+    test("list", async () => {
+      let note: NoteProps | undefined;
+      await runEngineTestV5(
+        async ({ wsRoot, engine }) => {
+          expect(note).toBeTruthy();
+          const blocks = await RemarkUtils.extractBlocks({
+            note: note!,
+            wsRoot,
+            engine,
+          });
+          expect(blocks.length).toEqual(5);
+        },
+        {
+          expect,
+          preSetupHook: async ({ wsRoot, vaults }) => {
+            //const txt = `# Hello Heading\nHello Content`;
+            note = await NoteTestUtilsV4.createNote({
+              wsRoot,
+              vault: vaults[0],
+              fname: "foo",
+              body: [
+                "Et et quam culpa.",
+                "",
+                "* Cumque molestiae qui deleniti.",
+                "* Eius odit commodi harum.",
                 "",
                 "Sequi ut non delectus tempore.",
               ].join("\n"),

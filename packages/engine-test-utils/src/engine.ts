@@ -36,6 +36,19 @@ import path from "path";
 import { ENGINE_HOOKS } from "./presets";
 import { GitTestUtils } from "./utils";
 
+export type TestSetupWorkspaceOpts = {
+  /**
+   * Vaults to initialize engine with
+   * Defaults to following if not set
+   * [
+   *    { fsPath: "vault1" },
+   *    { fsPath: "vault2" },
+   *    { fsPath: "vault3", name: "vaultThree" },
+   *  ]
+   */
+  vaults?: DVault[];
+};
+
 export type AsyncCreateEngineFunction = (
   opts: WorkspaceOpts
 ) => Promise<DEngineClient>;
@@ -140,13 +153,12 @@ export type RunEngineTestV5Opts = {
   createEngine?: AsyncCreateEngineFunction;
   extra?: any;
   expect: any;
-  vaults?: DVault[];
   workspaces?: DWorkspace[];
   setupOnly?: boolean;
   initGit?: boolean;
   initHooks?: boolean;
   addVSWorkspace?: boolean;
-};
+} & TestSetupWorkspaceOpts;
 
 export type RunEngineTestFunctionV5<T = any> = (
   opts: RunEngineTestFunctionOpts & { extra?: any; engineInitDuration: number }

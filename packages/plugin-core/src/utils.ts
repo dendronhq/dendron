@@ -242,17 +242,24 @@ export class VSCodeUtils {
     const txtPath = document.uri.fsPath;
     const wsRoot = DendronWorkspace.wsRoot();
     const fname = path.basename(txtPath, ".md");
-    const vault = VaultUtils.getVaultByNotePath({
-      wsRoot,
-      vaults: getWS().getEngine().vaults,
-      fsPath: txtPath,
-    });
+    const vault = VSCodeUtils.getVaultFromDocument(document);
     return NoteUtils.getNoteByFnameV5({
       fname,
       vault,
       wsRoot,
       notes: engine.notes,
     });
+  }
+
+  static getVaultFromDocument(document: vscode.TextDocument) {
+    const txtPath = document.uri.fsPath;
+    const wsRoot = DendronWorkspace.wsRoot();
+    const vault = VaultUtils.getVaultByNotePath({
+      wsRoot,
+      vaults: getWS().getEngine().vaults,
+      fsPath: txtPath,
+    });
+    return vault;
   }
 
   static createMockState(settings: any): vscode.WorkspaceConfiguration {

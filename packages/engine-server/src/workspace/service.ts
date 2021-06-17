@@ -40,6 +40,7 @@ import {
   removeCache,
   writeWSMetaFile,
 } from "../utils";
+import { WorkspaceUtils } from "./utils";
 import { WorkspaceConfig } from "./vscode";
 const DENDRON_WS_NAME = CONSTANTS.DENDRON_WS_NAME;
 
@@ -552,25 +553,14 @@ export class WorkspaceService {
     return [...(await this.getAllReposVaults()).keys()];
   }
 
-  getVaultForPath(fpath: string) {
-    return VaultUtils.getVaultByNotePath({
-      vaults: this.config.vaults,
-      wsRoot: this.wsRoot,
-      fsPath: fpath,
-    });
-  }
-
   /**
    * Check if a path belongs to a workspace
+   @deprecated - use {@link WorkspaceUtils.isPathInWorkspace}
    */
   isPathInWorkspace(fpath: string) {
-    try {
-      // if not error, then okay
-      this.getVaultForPath(fpath);
-      return true;
-    } catch {
-      return false;
-    }
+    const { vaults } = this.config;
+    const wsRoot = this.wsRoot;
+    return WorkspaceUtils.isPathInWorkspace({ fpath, vaults, wsRoot });
   }
 
   async pullVault(opts: { vault: DVault }) {

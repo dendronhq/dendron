@@ -22,7 +22,6 @@ import { createLogger, note2String } from "@dendronhq/common-server";
 import _ from "lodash";
 import { Heading, Root } from "mdast";
 import * as mdastBuilder from "mdast-builder";
-import path from "path";
 import { Processor } from "unified";
 import { Node } from "unist";
 import { selectAll } from "unist-util-select";

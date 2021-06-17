@@ -4,7 +4,6 @@ import {
   ERROR_STATUS,
   SeedConfig,
 } from "@dendronhq/common-all";
-import { simpleGit } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -32,26 +31,6 @@ export class SeedUtils {
       },
       root: "vault",
     });
-  }
-
-  /**
-   * Clone seed locally
-   * @param param0
-   * @returns
-   */
-  static async clone({
-    wsRoot,
-    config,
-  }: {
-    config: SeedConfig;
-    wsRoot: string;
-  }) {
-    const id = this.getSeedId(config);
-    const spath = this.seed2Path({ wsRoot, id });
-    fs.ensureDirSync(path.dirname(spath));
-    const git = simpleGit({ baseDir: wsRoot });
-    await git.clone(config.repository.url, spath);
-    return spath;
   }
 
   static getSeedId({ publisher, name }: { publisher: string; name: string }) {

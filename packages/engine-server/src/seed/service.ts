@@ -6,7 +6,7 @@ import {
   SeedConfig,
   VaultUtils,
 } from "@dendronhq/common-all";
-import { writeYAML } from "@dendronhq/common-server";
+import { simpleGit, writeYAML } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -99,8 +99,24 @@ export class SeedService {
     return { seed };
   }
 
-  async cloneSeed({ seed }: { seed: SeedConfig }) {
-    const spath = await SeedUtils.clone({ wsRoot: this.wsRoot, config: seed });
+  /**
+   *
+   * @param branch - optional branch to clone from
+   * @returns
+   */
+  async cloneSeed({ seed, branch }: { seed: SeedConfig; branch?: string }) {
+    const wsRoot = this.wsRoot;
+    const id = SeedUtils.getSeedId(seed);
+    const spath = SeedUtils.seed2Path({ wsRoot, id });
+    fs.ensureDirSync(path.dirname(spath));
+    const git = simpleGit({ baseDir: wsRoot });
+    const options: {
+      "--track"?: string;
+    } = {};
+    if (branch) {
+      options["--track"] = branch;
+    }
+    await git.clone(seed.repository.url, spath, options);
     return spath;
   }
 

@@ -240,9 +240,9 @@ export type DendronDevConfig = {
    */
   engineServerPort?: number;
   /**
-   * Enable experimental web ui. Default is false
+   * Disable dendron Web UI
    */
-  enableWebUI?: boolean;
+  disableWebUI?: boolean;
 };
 
 export type DendronSiteConfig = {

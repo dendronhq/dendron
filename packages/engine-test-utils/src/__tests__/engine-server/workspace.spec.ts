@@ -89,8 +89,8 @@ describe("WorkspaceService", () => {
           );
           await new WorkspaceService({ wsRoot }).addVault({
             vault: { fsPath: "vault1", workspace: "remoteVault" },
-            addToWorkspace: true,
-            writeConfig: true,
+            updateWorkspace: true,
+            updateConfig: true,
           });
           const ws = new WorkspaceService({ wsRoot });
           const didClone = await ws.initialize({
@@ -136,7 +136,7 @@ describe("WorkspaceService", () => {
           const id = TestSeedUtils.defaultSeedId();
           const seedService = new SeedService({ wsRoot, registryFile });
           const seed = seedDict[TestSeedUtils.defaultSeedId()];
-          await seedService.addSeed({ seed, wsRoot, writeToConfig: true });
+          await seedService.addSeedMetadata({ seed, wsRoot });
           const wsService = new WorkspaceService({ wsRoot, seedService });
           const didClone = await wsService.initialize({
             onSyncVaultsProgress: () => {},

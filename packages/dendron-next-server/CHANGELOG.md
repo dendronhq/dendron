@@ -3,6 +3,40 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.46.2-alpha.1](https://github.com/dendronhq/dendron/compare/v0.46.1...v0.46.2-alpha.1) (2021-06-16)
+
+
+### Bug Fixes
+
+* tree view missing nodes ([41cecf9](https://github.com/dendronhq/dendron/commit/41cecf953e616d4e3c8796da77d8c10d6ccf9d02))
+
+
+### Features Dendron
+
+* calendar panel ([#806](https://github.com/dendronhq/dendron/issues/806)) ([65ef926](https://github.com/dendronhq/dendron/commit/65ef926564dbaeaaca305e480ac8607c66bcc4b1)), closes [packages/plugin-core/src/views/utils.ts#88](https://github.com/packages/plugin-core/src/views/utils.ts/issues/88) [/github.com/ant-design/ant-design/blob/832aa81c821b7b5750673b5aacafa39c9978b09c/components/calendar/generateCalendar.tsx#L183-L205](https://github.com//github.com/ant-design/ant-design/blob/832aa81c821b7b5750673b5aacafa39c9978b09c/components/calendar/generateCalendar.tsx/issues/L183-L205)
+* filter note and schema graphs by vault ([#824](https://github.com/dendronhq/dendron/issues/824)) ([864e0f9](https://github.com/dendronhq/dendron/commit/864e0f91fb317af8dc7e7af5d9d8c64ffb3eb3c9))
+
+
+
+
+
+## [0.46.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.46.1...v0.46.2-alpha.0) (2021-06-16)
+
+
+### Bug Fixes
+
+* tree view missing nodes ([36f044c](https://github.com/dendronhq/dendron/commit/36f044cd28dea62cac5e03458042f6f8219b1275))
+
+
+### Features Dendron
+
+* calendar panel ([#806](https://github.com/dendronhq/dendron/issues/806)) ([65ef926](https://github.com/dendronhq/dendron/commit/65ef926564dbaeaaca305e480ac8607c66bcc4b1)), closes [packages/plugin-core/src/views/utils.ts#88](https://github.com/packages/plugin-core/src/views/utils.ts/issues/88) [/github.com/ant-design/ant-design/blob/832aa81c821b7b5750673b5aacafa39c9978b09c/components/calendar/generateCalendar.tsx#L183-L205](https://github.com//github.com/ant-design/ant-design/blob/832aa81c821b7b5750673b5aacafa39c9978b09c/components/calendar/generateCalendar.tsx/issues/L183-L205)
+* filter note and schema graphs by vault ([#824](https://github.com/dendronhq/dendron/issues/824)) ([864e0f9](https://github.com/dendronhq/dendron/commit/864e0f91fb317af8dc7e7af5d9d8c64ffb3eb3c9))
+
+
+
+
+
 ## [0.46.1](https://github.com/dendronhq/dendron/compare/v0.46.0...v0.46.1) (2021-06-14)
 
 **Note:** Version bump only for package @dendronhq/dendron-next-server

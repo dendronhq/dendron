@@ -3,6 +3,31 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.46.2-alpha.1](https://github.com/dendronhq/dendron/compare/v0.46.1...v0.46.2-alpha.1) (2021-06-16)
+
+
+### Features Dendron
+
+* remove seed cmd ([252f297](https://github.com/dendronhq/dendron/commit/252f29741f1cabb915e9e541d80256b21ef594d0))
+* seed add cmd ([a8f245b](https://github.com/dendronhq/dendron/commit/a8f245b1a29f6de0a80839c1bd765a61941ab58f))
+* support init seeds on startup ([ef095a6](https://github.com/dendronhq/dendron/commit/ef095a60d646df510b18971264a1443c13e41653))
+
+
+
+
+
+## [0.46.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.46.1...v0.46.2-alpha.0) (2021-06-16)
+
+
+### Features Dendron
+
+* seed add cmd ([a8f245b](https://github.com/dendronhq/dendron/commit/a8f245b1a29f6de0a80839c1bd765a61941ab58f))
+* support init seeds on startup ([ef095a6](https://github.com/dendronhq/dendron/commit/ef095a60d646df510b18971264a1443c13e41653))
+
+
+
+
+
 ## [0.46.1](https://github.com/dendronhq/dendron/compare/v0.46.0...v0.46.1) (2021-06-14)
 
 **Note:** Version bump only for package @dendronhq/dendron-cli

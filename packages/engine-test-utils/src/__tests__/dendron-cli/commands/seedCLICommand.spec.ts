@@ -8,7 +8,12 @@ import {
 } from "@dendronhq/common-all";
 import { tmpDir } from "@dendronhq/common-server";
 import { SeedCLICommand, SeedCLICommandOpts } from "@dendronhq/dendron-cli";
-import { DConfig, SeedInitMode } from "@dendronhq/engine-server";
+import {
+  DConfig,
+  SeedInitMode,
+  SeedService,
+  SeedUtils,
+} from "@dendronhq/engine-server";
 import path from "path";
 import { runEngineTestV5 } from "../../../engine";
 import {
@@ -27,6 +32,115 @@ export const runSeedCmd = ({
   const cli = new SeedCLICommand();
   return cli.execute({ cmd, id, ...opts, server: {} as any });
 };
+
+const BAD_SEED_ID = () => "dendron.no-exist";
+
+async function createSeed({ engine }: { engine: DEngineClient }) {
+  const tmp = tmpDir().name;
+  const { registryFile, seedDict } = await TestSeedUtils.createSeedRegistry({
+    engine,
+    wsRoot: tmp,
+  });
+  const seedId = TestSeedUtils.defaultSeedId();
+  return { registryFile, seedDict, seedId };
+}
+
+describe("remove", () => {
+  const cmd = SeedCommands.REMOVE;
+  test("error: nothing to remove", async () => {
+    await runEngineTestV5(
+      async ({ engine, wsRoot }) => {
+        const id = BAD_SEED_ID();
+        const resp = (await runSeedCmd({
+          cmd,
+          id,
+          engine,
+          wsRoot,
+        })) as { error: DendronError };
+        expect(resp).toMatchSnapshot();
+        expect(resp.error.status).toEqual(ERROR_STATUS.DOES_NOT_EXIST);
+      },
+      {
+        expect,
+      }
+    );
+  });
+
+  test("ok: remove non-initialized seed", async () => {
+    await runEngineTestV5(
+      async ({ engine, wsRoot, vaults }) => {
+        // create seed
+        const {
+          registryFile,
+          seedDict,
+          seedId: id,
+        } = await createSeed({ engine });
+
+        // add seed to config;
+        const seed = seedDict[id];
+        const seedService = new SeedService({ wsRoot, registryFile });
+        await seedService.addSeedMetadata({ seed, wsRoot });
+
+        // remove seed
+        await seedService.removeSeed({ id });
+
+        await checkFile({
+          fpath: path.join(wsRoot, "dendron.yml"),
+          snapshot: true,
+        });
+        checkVaults(
+          {
+            wsRoot,
+            vaults,
+          },
+          expect
+        );
+      },
+      {
+        expect,
+        addVSWorkspace: true,
+      }
+    );
+  });
+
+  test("ok: remove initialized seed", async () => {
+    await runEngineTestV5(
+      async ({ engine, wsRoot, vaults }) => {
+        // create seed
+        const { registryFile, seedId: id } = await createSeed({ engine });
+
+        // add seed to config;
+        const seedService = new SeedService({ wsRoot, registryFile });
+        await seedService.addSeed({ id });
+
+        // remove seed
+        await seedService.removeSeed({ id });
+
+        const seedPath = SeedUtils.seed2Path({ wsRoot, id });
+        await checkNotInDir(
+          { fpath: path.dirname(seedPath), snapshot: true },
+          id
+        );
+        expect(id).toMatchSnapshot();
+        await checkFile({
+          fpath: path.join(wsRoot, "dendron.yml"),
+          snapshot: true,
+        });
+        checkVaults(
+          {
+            wsRoot,
+            vaults,
+          },
+          expect
+        );
+      },
+      {
+        expect,
+        addVSWorkspace: true,
+      }
+    );
+  });
+});
 
 describe("add", () => {
   const cmd = SeedCommands.ADD;
@@ -186,14 +300,14 @@ describe("init", () => {
         config: seed,
         ...opts,
       });
-      return resp.error as DendronError | undefined;
+      return resp?.error as DendronError | undefined;
     };
 
     test(`error: no vaults`, async () => {
       await runEngineTestV5(
         async ({ engine, wsRoot }) => {
           const error = await runInit({ engine, wsRoot });
-          expect(error?.message).toEqual(
+          expect(error?.message).toContain(
             "workspace must have exactly one vault"
           );
           await checkDir(

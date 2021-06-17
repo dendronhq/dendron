@@ -24,4 +24,5 @@ export enum SeedCommands {
   ADD = "add",
   INIT = "init",
   INFO = "info",
+  REMOVE = "remove",
 }

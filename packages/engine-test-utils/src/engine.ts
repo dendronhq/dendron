@@ -103,7 +103,7 @@ export async function setupWS(opts: {
   const config = ws.config;
   let vaults = await Promise.all(
     opts.vaults.map(async (vault) => {
-      await ws.createVault({ vault, config, writeConfig: false });
+      await ws.createVault({ vault, config, updateConfig: false });
       return vault;
     })
   );

@@ -1,10 +1,14 @@
 import {
   assertUnreachable,
   CONSTANTS,
+  DendronError,
+  ERROR_STATUS,
   SeedConfig,
   VaultUtils,
 } from "@dendronhq/common-all";
 import { writeYAML } from "@dendronhq/common-server";
+import fs from "fs-extra";
+import _ from "lodash";
 import path from "path";
 import { WorkspaceService } from "../workspace";
 import { SeedRegistry } from "./registry";
@@ -39,19 +43,44 @@ export class SeedService {
     this.registry = registry || SeedRegistry.create({ registryFile });
   }
 
+  protected async getSeedOrErrorFromId(
+    id: string
+  ): Promise<SeedConfig | DendronError> {
+    const maybeSeed = await this.registry.info({ id });
+    if (!maybeSeed) {
+      return DendronError.createFromStatus({
+        status: ERROR_STATUS.DOES_NOT_EXIST,
+        message: `seed ${id} does not exist`,
+      });
+    }
+    return maybeSeed;
+  }
+
+  async addSeed({ id, metaOnly }: { id: string; metaOnly?: boolean }) {
+    const seedOrError = await this.getSeedOrErrorFromId(id);
+    if (seedOrError instanceof DendronError) {
+      return {
+        error: seedOrError,
+      };
+    }
+    this.addSeedMetadata({ seed: seedOrError, wsRoot: this.wsRoot });
+    let seedPath;
+    if (!metaOnly) {
+      seedPath = await this.cloneSeed({ seed: seedOrError });
+    }
+    return { data: { seedPath, seed: seedOrError } };
+  }
+
   /**
-   * Add seed metadata. Does not write the config
-   * @param
+   * Add seed metadata.
    * @returns
    */
-  async addSeed({
+  async addSeedMetadata({
     seed,
     wsRoot,
-    writeToConfig,
   }: {
     seed: SeedConfig;
     wsRoot: string;
-    writeToConfig?: boolean;
   }) {
     const ws = new WorkspaceService({ wsRoot });
     const config = ws.config;
@@ -61,20 +90,17 @@ export class SeedService {
     }
     config.seeds[id] = {};
     await ws.addVault({
-      vault: {
-        fsPath: seed.root,
-        seed: id,
-        name: id,
-      },
-      addToWorkspace: true,
+      vault: SeedUtils.seed2Vault({ seed }),
+      updateWorkspace: true,
       config,
-      writeConfig: writeToConfig || false,
+      updateConfig: true,
     });
-    return config;
+
+    return { seed };
   }
 
-  async cloneSeed({ seed, wsRoot }: { seed: SeedConfig; wsRoot: string }) {
-    const spath = await SeedUtils.clone({ wsRoot, config: seed });
+  async cloneSeed({ seed }: { seed: SeedConfig }) {
+    const spath = await SeedUtils.clone({ wsRoot: this.wsRoot, config: seed });
     return spath;
   }
 
@@ -94,9 +120,9 @@ export class SeedService {
         let config = ws.config;
         await ws.createVault({
           vault: { fsPath: "vault" },
-          addToWorkspace: true,
+          updateWorkspace: true,
           config,
-          writeConfig: false,
+          updateConfig: false,
         });
         await ws.setConfig(config);
         break;
@@ -128,5 +154,42 @@ export class SeedService {
   async info({ id }: { id: string }) {
     const resp = this.registry.info({ id });
     return resp;
+  }
+
+  async removeSeed({ id }: { id: string }) {
+    const ws = new WorkspaceService({ wsRoot: this.wsRoot });
+    const config = ws.config;
+    if (!_.has(config.seeds, id)) {
+      return {
+        error: new DendronError({
+          status: ERROR_STATUS.DOES_NOT_EXIST,
+          message: `seed with id ${id} not in dendron.yml`,
+        }),
+      };
+    }
+    const seedOrError = await this.getSeedOrErrorFromId(id);
+    if (seedOrError instanceof DendronError) {
+      return {
+        error: seedOrError,
+      };
+    }
+    await this.removeSeedMetadata({ seed: seedOrError });
+    const spath = SeedUtils.seed2Path({ wsRoot: this.wsRoot, id });
+    if (fs.pathExistsSync(spath)) {
+      fs.removeSync(spath);
+    }
+    return { data: {} };
+  }
+
+  async removeSeedMetadata({ seed }: { seed: SeedConfig }) {
+    const ws = new WorkspaceService({ wsRoot: this.wsRoot });
+    await ws.removeVault({
+      vault: SeedUtils.seed2Vault({ seed }),
+      updateWorkspace: true,
+    });
+    // remove seed entry
+    const config = ws.config;
+    delete (config.seeds || {})[SeedUtils.getSeedId(seed)];
+    ws.setConfig(config);
   }
 }

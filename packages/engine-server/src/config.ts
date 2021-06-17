@@ -42,6 +42,7 @@ export class DConfig {
       useNoteTitleForLink: true,
       noAutoCreateOnDefinition: true,
       noLegacyNoteRef: true,
+      noXVaultWikiLink: true,
       lookupConfirmVaultOnCreate: false,
       dayOfWeek: 1,
       site: {

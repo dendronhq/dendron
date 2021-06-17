@@ -5,12 +5,7 @@ import {
   SeedCommands,
   SeedConfig,
 } from "@dendronhq/common-all";
-import {
-  SeedInitMode,
-  SeedRegistry,
-  SeedService,
-  SeedUtils,
-} from "@dendronhq/engine-server";
+import { SeedInitMode, SeedService, SeedUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
 import yargs from "yargs";
@@ -75,7 +70,6 @@ export class SeedCLICommand extends CLICommand<CommandOpts, CommandOutput> {
 
   async execute(opts: CommandOpts) {
     const { cmd, id, wsRoot, config, mode, registryFile } = opts;
-    const registry = SeedRegistry.create({ registryFile });
     const seedService = new SeedService({ wsRoot, registryFile });
     const ctx = "execute";
     this.L.info({ ctx, id });
@@ -85,7 +79,7 @@ export class SeedCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           if (!id) {
             throw new DendronError({ message: "missing arguments" });
           }
-          const { error, data } = await registry.add({ id, wsRoot });
+          const { error, data } = await seedService.addSeed({ id });
           if (error) {
             throw error;
           }
@@ -124,8 +118,18 @@ export class SeedCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           }
           return { data: resp };
         }
+        case SeedCommands.REMOVE: {
+          if (!id) {
+            throw new DendronError({ message: "missing arguments" });
+          }
+          const { error, data } = await seedService.removeSeed({ id });
+          if (error) {
+            throw error;
+          }
+          return { data };
+        }
         default:
-          assertUnreachable();
+          return assertUnreachable();
       }
     } catch (err) {
       this.L.error(err);

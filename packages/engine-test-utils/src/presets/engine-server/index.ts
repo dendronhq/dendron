@@ -34,7 +34,7 @@ export const ENGINE_SERVER = {
 /**
  * 
  @example
- *  test.only("", async () => {
+ *  test("", async () => {
  *    const TestCase= getPreset({presets: ENGINE_PRESETS, nodeType, presetName: "init", key: 'BAD_SCHEMA'})
  *    const { testFunc, ...opts } = TestCase;;
  *    await runEngineTestV4(testFunc, { ...opts, createEngine, expect });

@@ -41,11 +41,7 @@ import { EngineFlavor, EngineOpts } from "../../types";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace, getWS } from "../../workspace";
 import { createMockQuickPick } from "../testUtils";
-import {
-  expect,
-  getNoteFromTextEditor,
-  runSingleVaultTest,
-} from "../testUtilsv2";
+import { expect, getNoteFromTextEditor } from "../testUtilsv2";
 import {
   createEngineFactory,
   EditorUtils,
@@ -643,8 +639,9 @@ suite("Lookup, notesv2", function () {
     );
 
     test("with override", function (done) {
-      runSingleVaultTest({
+      runLegacyMultiWorkspaceTest({
         ctx,
+        preSetupHook: ENGINE_HOOKS.setupBasic,
         onInit: async () => {
           const cmd = new LookupCommand();
           const note = getWS().getEngine().notes["foo"];

@@ -538,7 +538,7 @@ export class DendronClientUtilsV2 {
   };
 
   static useVaultPrefix(engine: DEngineClient) {
-    const noXVaultLink = engine.config.noXVaultWikiLink;
+    const noXVaultLink = getWS().config.noXVaultWikiLink;
     const useVaultPrefix =
       _.size(engine.vaults) > 1 &&
       (_.isBoolean(noXVaultLink) ? !noXVaultLink : true);

@@ -96,7 +96,7 @@ Object {
 }
 `;
 
-exports[`h1ToH2 basic 1`] = `
+exports[`h1 to h2 basic 1`] = `
 Object {
   "anchors": Object {},
   "body": "## Foo Header
@@ -122,7 +122,7 @@ Object {
 }
 `;
 
-exports[`h1ToH2 basic 2`] = `
+exports[`h1 to h2 basic 2`] = `
 Object {
   "anchors": Object {},
   "body": "## Bar Header
@@ -148,7 +148,7 @@ Object {
 }
 `;
 
-exports[`h1ToH2 basic pass candidates opt 1`] = `
+exports[`h1 to h2 basic pass candidates opt 1`] = `
 Object {
   "anchors": Object {},
   "body": "## Foo Header
@@ -174,7 +174,7 @@ Object {
 }
 `;
 
-exports[`h1ToH2 basic pass candidates opt 2`] = `
+exports[`h1 to h2 basic pass candidates opt 2`] = `
 Object {
   "anchors": Object {},
   "body": "# Bar Header
@@ -198,7 +198,7 @@ Object {
 }
 `;
 
-exports[`h1ToH2 dry run 1`] = `
+exports[`h1 to h2 dry run 1`] = `
 Object {
   "anchors": Object {},
   "body": "# Foo Header
@@ -222,7 +222,7 @@ Object {
 }
 `;
 
-exports[`h1ToH2 dry run 2`] = `
+exports[`h1 to h2 dry run 2`] = `
 Object {
   "anchors": Object {},
   "body": "# Bar Header

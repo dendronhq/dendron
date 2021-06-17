@@ -180,6 +180,10 @@ export async function runWorkspaceTestV3(
   await _activate(ctx);
 }
 
+/**
+ * Setup DendronWorkspace config options
+ * @param opts
+ */
 export function setupCodeConfiguration(opts: SetupCodeConfigurationV2) {
   const copts = _.defaults(opts, {
     configOverride: {},

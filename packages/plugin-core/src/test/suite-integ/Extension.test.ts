@@ -93,6 +93,7 @@ suite("Extension", function () {
               initializeRemoteVaults: true,
               noAutoCreateOnDefinition: true,
               noLegacyNoteRef: true,
+              noXVaultWikiLink: true,
               lookupConfirmVaultOnCreate: false,
               site: {
                 copyAssets: true,

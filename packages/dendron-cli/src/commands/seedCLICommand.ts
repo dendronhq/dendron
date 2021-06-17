@@ -37,6 +37,7 @@ export { CommandOpts as SeedCLICommandOpts };
 export class SeedCLICommand extends CLICommand<CommandOpts, CommandOutput> {
   constructor() {
     super({ name: "seed <cmd> <id>", desc: "seed bank related commands" });
+    this.wsRootOptional = true;
   }
 
   buildArgs(args: yargs.Argv) {
@@ -64,6 +65,12 @@ export class SeedCLICommand extends CLICommand<CommandOpts, CommandOutput> {
 
   async enrichArgs(args: CommandCLIOpts): Promise<CommandOpts> {
     const engineOpts: SetupEngineCLIOpts = { ...args, init: false };
+    if (
+      args.cmd === SeedCommands.INIT &&
+      args.mode === SeedInitMode.CREATE_WORKSPACE
+    ) {
+      engineOpts.wsRoot = process.cwd();
+    }
     const engineArgs = await setupEngine(engineOpts);
     return { ...args, ...engineArgs };
   }

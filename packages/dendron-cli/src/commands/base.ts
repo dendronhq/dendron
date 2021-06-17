@@ -49,9 +49,12 @@ export abstract class CLICommand<TOpts, TOut> extends BaseCommand<TOpts, TOut> {
 
   eval = async (args: any) => {
     this.L.info({ args });
-    if (!args.wsRoot && !this.wsRootOptional) {
+    if (!args.wsRoot) {
       const cwd = process.cwd();
-      if (!fs.existsSync(path.join(cwd, "dendron.yml"))) {
+      if (
+        !fs.existsSync(path.join(cwd, "dendron.yml")) &&
+        !this.wsRootOptional
+      ) {
         console.log("no workspace detecd. --wsRoot must be set");
         process.exit(1);
       } else {

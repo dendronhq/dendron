@@ -65,7 +65,12 @@ export type DWorkspace = {
 };
 
 export type DWorkspaceEntry = Omit<DWorkspace, "name" | "vaults">;
-export type SeedEntry = {};
+export type SeedEntry = {
+  /**
+   * Specific branch to pull from
+   */
+  branch?: string;
+};
 
 export type DendronConfig = {
   /**

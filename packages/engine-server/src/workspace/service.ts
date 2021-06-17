@@ -726,7 +726,7 @@ export class WorkspaceService {
     const seedResults: { id: string; status: SyncActionStatus; data: any }[] =
       [];
     await Promise.all(
-      _.map(config.seeds, async (_entry: SeedEntry, id: string) => {
+      _.map(config.seeds, async (entry: SeedEntry, id: string) => {
         if (!(await SeedUtils.exists({ id, wsRoot }))) {
           const resp = await this.seedService.info({ id });
           if (_.isUndefined(resp)) {
@@ -742,6 +742,7 @@ export class WorkspaceService {
           }
           const spath = await this.seedService.cloneSeed({
             seed: resp,
+            branch: entry.branch,
           });
           seedResults.push({
             id,

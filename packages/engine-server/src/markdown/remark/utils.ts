@@ -768,6 +768,12 @@ export class RemarkUtils {
     };
   }
 
+  private static hasAncestorType(ancestors: Node[], type: string): boolean {
+    return !_.isUndefined(
+      _.find(ancestors, (ancestor) => ancestor.type === type)
+    );
+  }
+
   /** Extract all blocks from the note which could be referenced by a block anchor.
    *
    * If those blocks already have anchors (or if they are a header), this will also find that anchor.
@@ -796,25 +802,15 @@ export class RemarkUtils {
     const blocks: NoteBlock[] = [];
     visitParents(noteAST, (node, ancestors) => {
       switch (node.type) {
-        case "list":
-          blocks.push({
-            text: proc.stringify(node),
-            position: node.position!,
-          });
-          break;
-        case "listItem":
-          blocks.push({
-            text: proc.stringify(node),
-            position: node.position!,
-          });
-          break;
+        case "table":
         case "paragraph":
-          if (
-            !_.isUndefined(
-              _.find(ancestors, (ancestor) => ancestor.type === "list")
-            )
-          )
-            return; // this paragraph is in a list item, but we already extracted the list item itself
+          if (this.hasAncestorType(ancestors, "list")) {
+            // this paragraph is in a list item, but we already extracted the list item itself
+            return;
+          }
+        /* falls through */
+        case "list":
+        case "listItem":
           blocks.push({
             text: proc.stringify(node),
             // position can only be undefined for generated nodes, not for parsed ones

@@ -38,7 +38,15 @@ export class ShowPreviewV2Command extends BasicCommand<
     const ws = getWS();
 
     // If panel already exists
-    // TODO const existingPanel = ws.getWebView(DendronWebViewKey.NOTE_PREVIEW);
+    const existingPanel = ws.getWebView(DendronWebViewKey.NOTE_PREVIEW);
+
+    if (!_.isUndefined(existingPanel)) {
+      try {
+        // If error, panel disposed and needs to be recreated
+        existingPanel.reveal();
+        return;
+      } catch {}
+    }
 
     const panel = window.createWebviewPanel(
       "dendronIframe", // Identifies the type of the webview. Used internally

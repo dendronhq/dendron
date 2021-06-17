@@ -28,6 +28,17 @@ const SEED_REGISTRY: SeedRegistryDict = {
       url: "git@github.com:dendronhq/handbook.git",
     },
   },
+  "dendron.tldr": {
+    name: "tldr",
+    publisher: "dendron",
+    description: "CLI Docs",
+    license: "Creative Commons Attribution 4.0 International",
+    root: "vault",
+    repository: {
+      type: "git",
+      url: "https://github.com/kevinslin/seed-tldr.git",
+    },
+  },
 };
 
 type SeedCommandOpts = {

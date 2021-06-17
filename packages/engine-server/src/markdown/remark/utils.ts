@@ -379,7 +379,8 @@ export class LinkUtils {
         return;
       }
       if (k === "name") {
-        fname = path.basename(v as string, ".md");
+        // remove .md extension if it exists, but keep full path in case this is an image
+        fname = /^(?<name>.*?)(\.md)?$/.exec(_.trim(v as string))?.groups?.name;
       } else {
         // @ts-ignore
         clean[k] = v;

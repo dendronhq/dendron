@@ -83,6 +83,7 @@ export class SeedCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           if (error) {
             throw error;
           }
+          this.print(`success - Planted 1 new seed: ${id}`);
           return { data };
         }
         case SeedCommands.INIT: {
@@ -104,6 +105,7 @@ export class SeedCLICommand extends CLICommand<CommandOpts, CommandOutput> {
             ...initOpts,
           });
           const resp = await seedService.init({ wsRoot, mode, seed });
+          this.print(`success - initialized seed: ${id}`);
           return resp;
         }
         case SeedCommands.INFO: {
@@ -126,6 +128,7 @@ export class SeedCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           if (error) {
             throw error;
           }
+          this.print(`success - remove seed: ${id}`);
           return { data };
         }
         default:

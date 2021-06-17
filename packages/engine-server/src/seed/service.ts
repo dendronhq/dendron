@@ -4,6 +4,7 @@ import {
   DendronError,
   ERROR_STATUS,
   SeedConfig,
+  SeedEntry,
   VaultUtils,
 } from "@dendronhq/common-all";
 import { simpleGit, writeYAML } from "@dendronhq/common-server";
@@ -88,7 +89,11 @@ export class SeedService {
     if (!config.seeds) {
       config.seeds = {};
     }
-    config.seeds[id] = {};
+    const seedEntry: SeedEntry = {};
+    if (seed.site) {
+      seedEntry.site = seed.site;
+    }
+    config.seeds[id] = seedEntry;
     await ws.addVault({
       vault: SeedUtils.seed2Vault({ seed }),
       updateWorkspace: true,

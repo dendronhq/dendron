@@ -13,11 +13,15 @@ export class TestSeedUtils {
   static async createSeedRegistry(opts: {
     engine: DEngineClient;
     wsRoot: string;
+    modifySeed?: (seed: SeedConfig) => SeedConfig;
   }) {
-    const config = await this.createSeed(opts);
+    let config = await this.createSeed(opts);
     const id = SeedUtils.getSeedId(config);
     const root = tmpDir().name;
     const registryFile = path.join(root, "reg.yml");
+    if (opts.modifySeed) {
+      config = opts.modifySeed(config);
+    }
     const seedDict = { [id]: config };
     writeYAML(registryFile, seedDict);
     return { registryFile, seedDict };

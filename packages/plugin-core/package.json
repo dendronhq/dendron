@@ -52,7 +52,6 @@
         {
           "id": "dendron.calendar-view",
           "name": "Calendar View",
-          "when": "dendron:devMode",
           "type": "webview"
         },
         {
@@ -465,22 +464,22 @@
         "dendron.dailyJournalDomain": {
           "type": "string",
           "default": "daily",
-          "description": "domain where daily journals are kept"
+          "description": "DEPRECATED. Use journal settings in dendron.yml"
         },
         "dendron.defaultJournalName": {
           "type": "string",
           "default": "journal",
-          "description": "name used for journal notes"
+          "description": "DEPRECATED. Use journal settings in dendron.yml"
         },
         "dendron.defaultJournalDateFormat": {
           "type": "string",
           "default": "y.MM.dd",
-          "description": "date format used for journal notes"
+          "description": "DEPRECATED. Use journal settings in dendron.yml"
         },
         "dendron.defaultJournalAddBehavior": {
           "default": "childOfDomain",
           "type": "string",
-          "description": "strategy for adding new journal notes",
+          "description": "DEPRECATED. Use journal settings in dendron.yml",
           "enum": [
             "childOfDomain",
             "childOfDomainNamespace",

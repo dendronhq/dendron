@@ -8,6 +8,12 @@ vaults:
 useFMTitle: true
 useNoteTitleForLink: true
 mermaid: true
+journal: 
+    dailyDomain: "daily"
+    name: "journal"
+    dateFormat: "y.MM.dd"
+    addBehavior: childOfDomain
+    firstDayOfWeek: 1
 site:
     copyAssets: true
     siteHierarchies:

@@ -1,0 +1,16 @@
+# auto-assign bot config: https://github.com/organizations/dendronhq/settings/installations/17690272
+addReviewers: true
+addAssignees: true
+
+reviewers: 
+  - kevinslin
+  - jonathanyeung
+  - cerebrarium
+
+# A list of keywords to be skipped the process that add reviewers if pull requests include it 
+skipKeywords:
+  - wip
+
+# A number of reviewers added to the pull request
+# Set 0 to add all the reviewers (default: 0)
+numberOfReviewers: 0

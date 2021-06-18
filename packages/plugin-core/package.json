@@ -26,8 +26,7 @@
   ],
   "main": "./out/src/extension.js",
   "extensionPack": [
-    "dendron.dendron-markdown-preview-enhanced",
-    "dendron.dendron-snippet-maker"
+    "dendron.dendron-markdown-preview-enhanced"
   ],
   "contributes": {
     "languages": [

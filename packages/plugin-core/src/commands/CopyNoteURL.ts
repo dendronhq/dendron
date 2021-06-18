@@ -57,11 +57,16 @@ export class CopyNoteURLCommand extends BasicCommand<
       if (config.seeds && config.seeds[vault.seed]) {
         const maybeSite = config.seeds[vault.seed]?.site;
         if (maybeSite) {
-          urlRoot = maybeSite;
+          urlRoot = maybeSite.url;
           const maybeNote = VSCodeUtils.getNoteFromDocument(
             maybeTextEditor.document
           );
-          isIndex = !_.isUndefined(maybeNote) && DNodeUtils.isRoot(maybeNote);
+          if (!_.isUndefined(maybeNote)) {
+            // if custom index is set, match against that, otherwise `root` is default index
+            isIndex = maybeSite.index
+              ? maybeNote.fname === maybeSite.index
+              : DNodeUtils.isRoot(maybeNote);
+          }
         }
       }
     }

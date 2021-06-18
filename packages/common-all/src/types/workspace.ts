@@ -1,4 +1,5 @@
 import { DHookDict } from "./hooks";
+import { SeedSite } from "./seed";
 
 // === Promitives
 export type DPermission = {
@@ -73,7 +74,7 @@ export type SeedEntry = {
   /**
    * When in this seed, what url to use
    */
-  site?: string;
+  site?: SeedSite;
 };
 
 export type DendronConfig = {

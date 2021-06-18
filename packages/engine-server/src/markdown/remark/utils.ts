@@ -1,3 +1,4 @@
+import { DNoteAnchor } from "@dendronhq/common-all";
 import {
   assertUnreachable,
   CONSTANTS,
@@ -21,7 +22,6 @@ import { createLogger, note2String } from "@dendronhq/common-server";
 import _ from "lodash";
 import { Heading, Root } from "mdast";
 import * as mdastBuilder from "mdast-builder";
-import path from "path";
 import { Processor } from "unified";
 import { Node } from "unist";
 import { selectAll } from "unist-util-select";
@@ -354,8 +354,20 @@ export class LinkUtils {
         })?`,
       "i"
     );
+
+    // pre-parse alias if it exists
+    let alias: string | undefined;
+    const [aliasPartFirst, aliasPartSecond] = ref.split("|");
+    if (_.isUndefined(aliasPartSecond)) ref = aliasPartFirst;
+    else {
+      alias = aliasPartFirst;
+      ref = aliasPartSecond;
+    }
+
+    // pre-parse vault name if it exists
     let vaultName: string | undefined = undefined;
     ({ vaultName, link: ref } = LinkUtils.parseDendronURI(ref));
+
     const groups = reLink.exec(ref)?.groups;
     const clean: DNoteRefData = {
       type: "file",
@@ -366,32 +378,40 @@ export class LinkUtils {
         return;
       }
       if (k === "name") {
-        fname = path.basename(v as string, ".md");
+        // remove .md extension if it exists, but keep full path in case this is an image
+        fname = /^(?<name>.*?)(\.md)?$/.exec(_.trim(v as string))?.groups?.name;
       } else {
         // @ts-ignore
         clean[k] = v;
       }
     });
-    if (_.isUndefined(fname)) {
-      throw new DendronError({ message: `fname for ${ref} is undefined` });
-    }
     if (clean.anchorStart && clean.anchorStart.indexOf(",") >= 0) {
       const [anchorStart, offset] = clean.anchorStart.split(",");
       clean.anchorStart = anchorStart;
       clean.anchorStartOffset = parseInt(offset);
+    }
+    if (_.isUndefined(fname) && _.isUndefined(clean.anchorStart)) {
+      throw new DendronError({
+        message: `both fname and anchorStart for ${ref} is undefined`,
+      });
     }
     if (vaultName) {
       clean.vaultName = vaultName;
     }
     // TODO
     // @ts-ignore
-    return { from: { fname }, data: clean, type: "ref" };
+    return { from: { fname, alias }, data: clean, type: "ref" };
   }
 
   static parseNoteRef(ref: string): DNoteRefLink {
     const noteRef = LinkUtils.parseNoteRefRaw(ref);
-    if (_.isUndefined(noteRef.from) || _.isUndefined(noteRef.from.fname)) {
-      throw new DendronError({ message: `fname for ${ref} is undefined` });
+    if (
+      _.isUndefined(noteRef.from?.fname) &&
+      _.isUndefined(noteRef.data.anchorStart)
+    ) {
+      throw new DendronError({
+        message: `both fname and anchorStart for ${ref} is undefined`,
+      });
     }
     // @ts-ignore
     return noteRef;
@@ -505,6 +525,12 @@ export class AnchorUtils {
       return {};
     }
   }
+
+  static anchor2string(anchor: DNoteAnchor): string {
+    if (anchor.type === "block") return `^${anchor.value}`;
+    if (anchor.type === "header") return anchor.value;
+    assertUnreachable(anchor.type);
+  }
 }
 
 function walk(node: Node, fn: any) {
@@ -589,7 +615,7 @@ export class RemarkUtils {
 
   // --- conversion
 
-  static convertObsidianLinks(note: NoteProps, changes: NoteChangeEntry[]) {
+  static convertLinksToDotNotation(note: NoteProps, changes: NoteChangeEntry[]) {
     return function (this: Processor) {
       return (tree: Node, _vfile: VFile) => {
         let root = tree as DendronASTRoot;
@@ -610,6 +636,39 @@ export class RemarkUtils {
             });
           }
         });
+      };
+    };
+  }
+
+  static convertLinksFromDotNotation(note: NoteProps, changes: NoteChangeEntry[]) {
+    return function (this: Processor) {
+      return (tree: Node, _vfile: VFile) => {
+        let root = tree as DendronASTRoot;
+        let wikiLinks: WikiLinkNoteV4[] = selectAll(
+          DendronASTTypes.WIKI_LINK,
+          root
+        ) as WikiLinkNoteV4[];
+
+        let dirty = false;
+
+        wikiLinks.forEach((linkNode) => {
+          if (linkNode.value.indexOf(".") >= 0) {
+            const newValue = _.replace(linkNode.value, /\./g, "/");
+            if (linkNode.data.alias === linkNode.value) {
+              linkNode.data.alias = newValue;
+            }
+            linkNode.value = newValue;
+            dirty = true;
+          }
+        });
+        //TODO: Add support for Ref Notes and Block Links
+
+        if (dirty) {
+          changes.push({
+              note: note,
+              status: "update",
+            });
+        }
       };
     };
   }

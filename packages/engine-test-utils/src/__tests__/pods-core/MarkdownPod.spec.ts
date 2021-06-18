@@ -1,6 +1,6 @@
 import { NoteUtils, VaultUtils } from "@dendronhq/common-all";
 import { tmpDir, vault2Path } from "@dendronhq/common-server";
-import { FileTestUtils } from "@dendronhq/common-test-utils";
+import { FileTestUtils, NOTE_PRESETS_V4 } from "@dendronhq/common-test-utils";
 import {
   MarkdownExportPod,
   MarkdownImportPod,
@@ -246,7 +246,12 @@ describe("markdown export pod", () => {
     exportDest = tmpDir().name;
   });
 
-  test("basic", async () => {
+  afterEach(() => {
+    // clean up the export directory after each test.
+    fs.rmdirSync(exportDest, { recursive: true });
+  });
+
+  test("test nested directory output", async () => {
     await runEngineTestV5(
       async ({ engine, vaults, wsRoot }) => {
         const pod = new MarkdownExportPod();
@@ -261,35 +266,40 @@ describe("markdown export pod", () => {
         });
 
         // check folder contents
-        let [expectedFiles, actualFiles] = FileTestUtils.cmpFiles(exportDest, [
+        let [actualFiles, expectedFiles] = FileTestUtils.cmpFiles(exportDest, [
           "vault1",
           "vault2",
           "vaultThree",
         ]);
-        expect(expectedFiles).toEqual(actualFiles);
-        [expectedFiles, actualFiles] = FileTestUtils.cmpFiles(
+        expect(actualFiles).toEqual(expectedFiles);
+
+        [actualFiles, expectedFiles] = FileTestUtils.cmpFiles(
           path.join(exportDest, "vault1"),
-          ["bar.md", "foo.ch1.md", "foo.md", "root.md"]
+          ["bar.md", "foo.md", "root.md", "foo"] // foo is a directory
         );
-        expect(expectedFiles).toEqual(actualFiles);
-        // [expectedFiles, actualFiles] = FileTestUtils.cmpFiles(
-        //   path.join(exportDest, "vault1", "foo"),
-        //   ["index.md", "ch1.md"]
-        // );
-        // expect(expectedFiles).toEqual(actualFiles);
+        expect(actualFiles).toEqual(expectedFiles);
+
+        [actualFiles, expectedFiles] = FileTestUtils.cmpFiles(
+          path.join(exportDest, "vault1", "foo"),
+          ["ch1.md"]
+        );
+        expect(actualFiles).toEqual(expectedFiles);
 
         // check contents
-        const foo = fs.readFileSync(path.join(exportDest, "vault1", "foo.md"), {
-          encoding: "utf8",
-        });
-        expect(foo).toMatchSnapshot("foo contents");
-        await checkString(foo, "foo body");
+        const foo = fs.readFileSync(
+          path.join(exportDest, "vault1", "foo", "ch1.md"),
+          {
+            encoding: "utf8",
+          }
+        );
+        expect(foo).toMatchSnapshot("foo ch1 contents");
+        await checkString(foo, "foo.ch1 body");
       },
       { expect, preSetupHook: ENGINE_HOOKS.setupBasic }
     );
   });
 
-  test.skip("using folders", async () => {
+  test("test copying of assets", async () => {
     await runEngineTestV5(
       async ({ engine, vaults, wsRoot }) => {
         const pod = new MarkdownExportPod();
@@ -303,32 +313,94 @@ describe("markdown export pod", () => {
           },
         });
 
-        // check folder contents
-        let [expectedFiles, actualFiles] = FileTestUtils.cmpFiles(exportDest, [
-          "vault1",
-          "vault2",
-        ]);
-        expect(expectedFiles).toEqual(actualFiles);
-        [expectedFiles, actualFiles] = FileTestUtils.cmpFiles(
+        let [actualFiles, expectedFiles] = FileTestUtils.cmpFiles(
           path.join(exportDest, "vault1"),
-          ["bar.md", "foo", "root"]
+          ["root.md", "assets"]
         );
-        expect(expectedFiles).toEqual(actualFiles);
-        [expectedFiles, actualFiles] = FileTestUtils.cmpFiles(
-          path.join(exportDest, "vault1", "foo"),
-          ["index.md", "ch1.md"]
+        expect(actualFiles).toEqual(expectedFiles);
+
+        [actualFiles, expectedFiles] = FileTestUtils.cmpFiles(
+          path.join(exportDest, "vault1", "assets/images"),
+          ["test.png"]
         );
-        expect(expectedFiles).toEqual(actualFiles);
+        expect(actualFiles).toEqual(expectedFiles);
 
         // check contents
         const foo = fs.readFileSync(
-          path.join(exportDest, "vault1", "foo", "index.md"),
-          { encoding: "utf8" }
+          path.join(exportDest, "vault1", "assets/images", "test.png"),
+          {
+            encoding: "utf8",
+          }
         );
-        expect(foo).toMatchSnapshot("foo contents");
-        await checkString(foo, "foo body");
+        expect(foo).toMatchSnapshot("asset contents");
+        await checkString(foo, "hello world");
       },
-      { expect, preSetupHook: ENGINE_HOOKS.setupBasic }
+      {
+        expect,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          const rootDir = path.join(
+            wsRoot,
+            VaultUtils.getRelPath(vaults[0]),
+            "assets/images"
+          );
+          await fs.ensureDir(rootDir);
+          await fs.writeFile(path.join(rootDir, "test.png"), "hello world");
+        },
+      }
+    );
+  });
+
+  // Wikilinks need to have their referenced pages converted from dot notation to folder hierarchies
+  test("test wikilink conversion", async () => {
+    await runEngineTestV5(
+      async ({ engine, vaults, wsRoot }) => {
+        const pod = new MarkdownExportPod();
+        engine.config.useFMTitle = true;
+        await pod.execute({
+          engine,
+          vaults,
+          wsRoot,
+          config: {
+            dest: exportDest,
+          },
+        });
+
+        let [actualFiles, expectedFiles] = FileTestUtils.cmpFiles(
+          path.join(exportDest, "vault1"),
+          ["root.md", "simple-wikilink.md", "simple-wikilink"]
+        );
+        expect(actualFiles).toEqual(expectedFiles);
+
+        [actualFiles, expectedFiles] = FileTestUtils.cmpFiles(
+          path.join(exportDest, "vault1", "simple-wikilink"),
+          ["one.md"]
+        );
+        expect(actualFiles).toEqual(expectedFiles);
+
+        // check contents
+        const foo = fs.readFileSync(
+          path.join(exportDest, "vault1", "simple-wikilink.md"),
+          {
+            encoding: "utf8",
+          }
+        );
+        debugger;
+        expect(foo).toMatchSnapshot("note link reference");
+        await checkString(foo, "[One](simple-wikilink/one)");
+      },
+      {
+        expect,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await NOTE_PRESETS_V4.NOTE_WITH_WIKILINK_SIMPLE.create({
+            wsRoot,
+            vault: vaults[0],
+          });
+          await NOTE_PRESETS_V4.NOTE_WITH_WIKILINK_SIMPLE_TARGET.create({
+            wsRoot,
+            vault: vaults[0],
+          });
+        },
+      }
     );
   });
 });

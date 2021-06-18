@@ -27,9 +27,6 @@ export const refPattern = "(\\[\\[)([^\\[\\]]+?)(\\]\\])";
 
 // === Utils
 
-export const escapeForRegExp = (value: string) =>
-  value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-
 export const findUriByRef = (
   uris: vscode.Uri[],
   ref: string
@@ -271,7 +268,7 @@ export const replaceRefs = ({
   const { updatedOnce, nextContent } = refs.reduce(
     ({ updatedOnce, nextContent }, ref) => {
       //const pattern = `\\[\\[${escapeForRegExp(ref.old)}(\\|.*)?\\]\\]`;
-      const oldRef = escapeForRegExp(ref.old);
+      const oldRef = _.escapeRegExp(ref.old);
       const pattern = `\\[\\[\\s*?(.*\\|)?\\s*${oldRef}\\s*\\]\\]`;
 
       if (new RegExp(pattern, "i").exec(content)) {

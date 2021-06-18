@@ -43,9 +43,9 @@ export default class DefinitionProvider implements vscode.DefinitionProvider {
       return out;
     } else if (out.length === 1) {
       const loc = out[0];
-      if (refAtPos.anchor) {
+      if (refAtPos.anchorStart) {
         const pos = findAnchorPos({
-          anchor: refAtPos.anchor,
+          anchor: refAtPos.anchorStart,
           note: notes[0],
         });
         return new Location(loc.uri, pos);
@@ -57,7 +57,7 @@ export default class DefinitionProvider implements vscode.DefinitionProvider {
       }
       const out = await new GotoNoteCommand().execute({
         qs: refAtPos.ref,
-        anchor: refAtPos.anchor,
+        anchor: refAtPos.anchorStart,
       });
       if (_.isUndefined(out)) {
         return;

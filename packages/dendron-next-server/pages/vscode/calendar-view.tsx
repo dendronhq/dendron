@@ -1,28 +1,22 @@
 import {
-  createLogger,
-  engineSlice,
-  ideHooks,
-  postVSCodeMessage,
-} from "@dendronhq/common-frontend";
-import {
-  DMessageSource,
   CalendarViewMessageType,
-  DNodeUtils,
-  NoteUtils,
+  DMessageSource,
   NoteProps,
 } from "@dendronhq/common-all";
+import {
+  createLogger,
+  engineSlice,
+  postVSCodeMessage,
+} from "@dendronhq/common-frontend";
+import type { CalendarProps as AntdCalendarProps } from "antd";
+import { Badge, ConfigProvider } from "antd";
+import generateCalendar from "antd/lib/calendar/generateCalendar";
+import classNames from "classnames";
+import _ from "lodash";
 import type { Moment } from "moment";
 import moment from "moment";
 import momentGenerateConfig from "rc-picker/lib/generate/moment";
-import { Badge, ConfigProvider } from "antd";
-
-import classNames from "classnames";
-import generateCalendar from "antd/lib/calendar/generateCalendar";
-
-import { blue } from "@ant-design/colors";
-import type { CalendarProps as AntdCalendarProps } from "antd";
-import _ from "lodash";
-import React, { useState, useMemo, useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { DendronProps } from "../../lib/types";
 
 function isSameYear(date1: Moment, date2: Moment) {
@@ -74,22 +68,26 @@ function CalendarView({ engine, ide }: DendronProps) {
   const [activeMode, setActiveMode] = useState<CalendarProps["mode"]>("month");
 
   const engineInitialized = EngineSliceUtils.hasInitialized(engine);
-  const { notes, vaults, config } = engine;
+
+  const { notes, config } = engine;
   const { noteActive } = ide;
   const currentVault = noteActive?.vault;
 
   const maxDots: number = 5;
   const wordsPerDot: number = 250;
-  const dailyJournalDomain = "daily"; // TODO replace "daily." with value from `dendron.dailyJournalDomain`
-  const defaultJournalName = "journal"; // TODO use config value `dendron.defaultJournalName`
-  const defaultJournalDateFormat = "y.MM.DD"; // TODO use config value `dendron.defaultJournalDateFormat`
-  const dayOfWeek = config?.dayOfWeek ?? 1;
+  const dailyJournalDomain = config?.journal.dailyDomain;
+  const defaultJournalName = config?.journal.name;
+  let defaultJournalDateFormat = config?.journal.dateFormat;
+  const dayOfWeek = config?.journal.firstDayOfWeek;
   const locale = "en-us";
+  if (defaultJournalDateFormat) {
+    defaultJournalDateFormat = defaultJournalDateFormat.replace(/dd/, "DD");
+  }
 
   useEffect(() => {
     moment.updateLocale(locale, {
       week: {
-        dow: dayOfWeek,
+        dow: dayOfWeek!,
       },
     });
   }, [dayOfWeek, locale]);
@@ -106,7 +104,7 @@ function CalendarView({ engine, ide }: DendronProps) {
       note.fname.startsWith(`${dailyJournalDomain}.`)
     );
     const result = _.groupBy(dailyNotes, (note) => {
-      return getMaybeDatePortion(note, defaultJournalName);
+      return getMaybeDatePortion(note, defaultJournalName!);
     });
     return result;
   }, [notes, defaultJournalName, currentVault?.fsPath]);
@@ -115,7 +113,7 @@ function CalendarView({ engine, ide }: DendronProps) {
     if (noteActive) {
       const maybeDatePortion = getMaybeDatePortion(
         noteActive,
-        defaultJournalName
+        defaultJournalName!
       );
 
       return maybeDatePortion && _.first(groupedDailyNotes[maybeDatePortion])
@@ -134,6 +132,7 @@ function CalendarView({ engine, ide }: DendronProps) {
     (date) => {
       logger.info({ ctx: "onSelect", date });
       const dateKey = getDateKey(date);
+      debugger;
       const selectedNote = _.first(groupedDailyNotes[dateKey]);
 
       postVSCodeMessage({
@@ -236,6 +235,25 @@ function CalendarView({ engine, ide }: DendronProps) {
     },
     [getDateKey, groupedDailyNotes]
   );
+
+  if (!engineInitialized) {
+    return null;
+  }
+
+  const msg = "Please update your dendron.yml configuration";
+
+  if (engine.config?.journal.dateFormat !== "y.MM.dd") {
+    return `only "journal.dateFormat:"y.MM.dd" is supported currently. ${msg}`;
+  }
+  if (engine.config?.journal.addBehavior !== "childOfDomain") {
+    return `only "journal.addBehavior = "childOfDomain" is supported currently. ${msg}`;
+  }
+  if (engine.config?.journal.dailyDomain !== "daily") {
+    return `only "journal.dailyDomain = "daily" is supported currently. ${msg}`;
+  }
+  if (engine.config?.journal.name !== "journal") {
+    return `only "journal.name = "name" is supported currently. ${msg}`;
+  }
 
   return (
     <Calendar

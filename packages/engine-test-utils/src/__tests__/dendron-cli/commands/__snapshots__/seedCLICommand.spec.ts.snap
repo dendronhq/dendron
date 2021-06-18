@@ -30,12 +30,12 @@ noAutoCreateOnDefinition: true
 noLegacyNoteRef: true
 noXVaultWikiLink: true
 lookupConfirmVaultOnCreate: false
-dayOfWeek: 1
 journal:
     dailyDomain: daily
     name: journal
     dateFormat: y.MM.dd
     addBehavior: childOfDomain
+    firstDayOfWeek: 1
 site:
     copyAssets: true
     siteHierarchies:
@@ -104,12 +104,12 @@ noAutoCreateOnDefinition: true
 noLegacyNoteRef: true
 noXVaultWikiLink: true
 lookupConfirmVaultOnCreate: false
-dayOfWeek: 1
 journal:
     dailyDomain: daily
     name: journal
     dateFormat: y.MM.dd
     addBehavior: childOfDomain
+    firstDayOfWeek: 1
 site:
     copyAssets: true
     siteHierarchies:
@@ -168,12 +168,12 @@ noAutoCreateOnDefinition: true
 noLegacyNoteRef: true
 noXVaultWikiLink: true
 lookupConfirmVaultOnCreate: false
-dayOfWeek: 1
 journal:
     dailyDomain: daily
     name: journal
     dateFormat: y.MM.dd
     addBehavior: childOfDomain
+    firstDayOfWeek: 1
 site:
     copyAssets: true
     siteHierarchies:
@@ -199,12 +199,12 @@ noAutoCreateOnDefinition: true
 noLegacyNoteRef: true
 noXVaultWikiLink: true
 lookupConfirmVaultOnCreate: false
-dayOfWeek: 1
 journal:
     dailyDomain: daily
     name: journal
     dateFormat: y.MM.dd
     addBehavior: childOfDomain
+    firstDayOfWeek: 1
 site:
     copyAssets: true
     siteHierarchies:
@@ -246,12 +246,12 @@ noAutoCreateOnDefinition: true
 noLegacyNoteRef: true
 noXVaultWikiLink: true
 lookupConfirmVaultOnCreate: false
-dayOfWeek: 1
 journal:
     dailyDomain: daily
     name: journal
     dateFormat: y.MM.dd
     addBehavior: childOfDomain
+    firstDayOfWeek: 1
 site:
     copyAssets: true
     siteHierarchies:
@@ -306,12 +306,12 @@ noAutoCreateOnDefinition: true
 noLegacyNoteRef: true
 noXVaultWikiLink: true
 lookupConfirmVaultOnCreate: false
-dayOfWeek: 1
 journal:
     dailyDomain: daily
     name: journal
     dateFormat: y.MM.dd
     addBehavior: childOfDomain
+    firstDayOfWeek: 1
 site:
     copyAssets: true
     siteHierarchies:
@@ -348,12 +348,12 @@ noAutoCreateOnDefinition: true
 noLegacyNoteRef: true
 noXVaultWikiLink: true
 lookupConfirmVaultOnCreate: false
-dayOfWeek: 1
 journal:
     dailyDomain: daily
     name: journal
     dateFormat: y.MM.dd
     addBehavior: childOfDomain
+    firstDayOfWeek: 1
 site:
     copyAssets: true
     siteHierarchies:

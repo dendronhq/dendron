@@ -452,6 +452,8 @@ export class DendronWorkspace {
               }
             )
           );
+
+          // TODO: we currently only support default configuration
           const calendarView = new CalendarView();
           context.subscriptions.push(
             vscode.window.registerWebviewViewProvider(

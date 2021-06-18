@@ -45,12 +45,12 @@ export class DConfig {
       noLegacyNoteRef: true,
       noXVaultWikiLink: true,
       lookupConfirmVaultOnCreate: false,
-      dayOfWeek: 1,
       journal: {
         dailyDomain: "daily",
         name: "journal",
         dateFormat: "y.MM.dd",
         addBehavior: NoteAddBehavior.childOfDomain,
+        firstDayOfWeek: 1,
       },
       site: {
         copyAssets: true,

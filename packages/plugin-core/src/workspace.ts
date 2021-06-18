@@ -350,6 +350,12 @@ export class DendronWorkspace {
     return DConfig.defaults(config);
   }
 
+  async getWorkspaceSettings(): Promise<WorkspaceSettings> {
+    return (await readJSONWithComments(
+      DendronWorkspace.workspaceFile().fsPath
+    )) as WorkspaceSettings;
+  }
+
   get podsDir(): string {
     const rootDir = DendronWorkspace.wsRoot();
     if (!rootDir) {

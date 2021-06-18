@@ -1,6 +1,5 @@
 import * as vscode from "vscode";
 import { CreateDailyJournalCommand } from "../../commands/CreateDailyJournal";
-import { CONFIG } from "../../constants";
 import { getActiveEditorBasename } from "../testUtils";
 import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";

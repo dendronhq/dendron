@@ -91,6 +91,12 @@ suite("Extension", function () {
               useNoteTitleForLink: true,
               dayOfWeek: 1,
               initializeRemoteVaults: true,
+              journal: {
+                addBehavior: "childOfDomain",
+                dailyDomain: "daily",
+                dateFormat: "y.MM.dd",
+                name: "journal",
+              },
               noAutoCreateOnDefinition: true,
               noLegacyNoteRef: true,
               noXVaultWikiLink: true,

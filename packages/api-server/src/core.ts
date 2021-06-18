@@ -29,7 +29,9 @@ export function configureLogger(opts?: { logPath: string; logLvl?: LogLvl }) {
   const { logPath, logLvl } = _.defaults(opts, { logPath: "stdout" });
   if (logPath !== "stdout") {
     if (fs.existsSync(logPath)) {
-      fs.moveSync(logPath, `${logPath}.old`, { overwrite: true });
+      try {
+        fs.moveSync(logPath, `${logPath}.old`, { overwrite: true });
+      } catch (err) {}
     }
     fs.ensureFileSync(logPath);
   }

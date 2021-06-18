@@ -31,6 +31,11 @@ noLegacyNoteRef: true
 noXVaultWikiLink: true
 lookupConfirmVaultOnCreate: false
 dayOfWeek: 1
+journal:
+    dailyDomain: daily
+    name: journal
+    dateFormat: y.MM.dd
+    addBehavior: childOfDomain
 site:
     copyAssets: true
     siteHierarchies:
@@ -100,6 +105,11 @@ noLegacyNoteRef: true
 noXVaultWikiLink: true
 lookupConfirmVaultOnCreate: false
 dayOfWeek: 1
+journal:
+    dailyDomain: daily
+    name: journal
+    dateFormat: y.MM.dd
+    addBehavior: childOfDomain
 site:
     copyAssets: true
     siteHierarchies:
@@ -159,6 +169,11 @@ noLegacyNoteRef: true
 noXVaultWikiLink: true
 lookupConfirmVaultOnCreate: false
 dayOfWeek: 1
+journal:
+    dailyDomain: daily
+    name: journal
+    dateFormat: y.MM.dd
+    addBehavior: childOfDomain
 site:
     copyAssets: true
     siteHierarchies:
@@ -185,6 +200,11 @@ noLegacyNoteRef: true
 noXVaultWikiLink: true
 lookupConfirmVaultOnCreate: false
 dayOfWeek: 1
+journal:
+    dailyDomain: daily
+    name: journal
+    dateFormat: y.MM.dd
+    addBehavior: childOfDomain
 site:
     copyAssets: true
     siteHierarchies:
@@ -227,6 +247,11 @@ noLegacyNoteRef: true
 noXVaultWikiLink: true
 lookupConfirmVaultOnCreate: false
 dayOfWeek: 1
+journal:
+    dailyDomain: daily
+    name: journal
+    dateFormat: y.MM.dd
+    addBehavior: childOfDomain
 site:
     copyAssets: true
     siteHierarchies:
@@ -282,6 +307,11 @@ noLegacyNoteRef: true
 noXVaultWikiLink: true
 lookupConfirmVaultOnCreate: false
 dayOfWeek: 1
+journal:
+    dailyDomain: daily
+    name: journal
+    dateFormat: y.MM.dd
+    addBehavior: childOfDomain
 site:
     copyAssets: true
     siteHierarchies:
@@ -319,6 +349,11 @@ noLegacyNoteRef: true
 noXVaultWikiLink: true
 lookupConfirmVaultOnCreate: false
 dayOfWeek: 1
+journal:
+    dailyDomain: daily
+    name: journal
+    dateFormat: y.MM.dd
+    addBehavior: childOfDomain
 site:
     copyAssets: true
     siteHierarchies:

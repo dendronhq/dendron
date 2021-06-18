@@ -37,7 +37,7 @@ export const ENGINE_SERVER = {
  *  test("", async () => {
  *    const TestCase= getPreset({presets: ENGINE_PRESETS, nodeType, presetName: "init", key: 'BAD_SCHEMA'})
  *    const { testFunc, ...opts } = TestCase;;
- *    await runEngineTestV4(testFunc, { ...opts, createEngine, expect });
+ *    await runEngineTestV5(testFunc, { ...opts, expect });
  *});
  * @param param0 
  * @returns 

@@ -1,19 +1,11 @@
 import { CONSTANTS } from "@dendronhq/common-all";
+import { DConfig } from "@dendronhq/engine-server";
 import { readYAML, writeYAML } from "@dendronhq/common-server";
 import { TestPresetEntryV4 } from "@dendronhq/common-test-utils";
 import path from "path";
 
 function genDefaultConfig() {
-  return {
-    version: 1,
-    vaults: [],
-    site: {
-      copyAssets: true,
-      siteHierarchies: ["root"],
-      siteRootDir: "docs",
-      usePrettyRefs: true,
-    },
-  };
+  return DConfig.genDefaultConfig();
 }
 
 const WRITE = {

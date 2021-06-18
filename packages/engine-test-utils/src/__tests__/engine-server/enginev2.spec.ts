@@ -9,7 +9,6 @@ import {
   FileTestUtils,
   getLogFilePath,
   NoteTestUtilsV4,
-  runEngineTestV4,
 } from "@dendronhq/common-test-utils";
 import { DendronEngineV2, readNotesFromCache } from "@dendronhq/engine-server";
 import fs from "fs-extra";
@@ -40,7 +39,7 @@ describe("engine, schemas/", () => {
         })
       )("%p", async (_key, TestCase) => {
         const { testFunc, ...opts } = TestCase;
-        await runEngineTestV4(testFunc, { ...opts, createEngine, expect });
+        await runEngineTestV5(testFunc, { ...opts, expect });
       });
     });
   });
@@ -185,7 +184,7 @@ describe("engine, config/", () => {
         })
       )("%p", async (_key, TestCase) => {
         const { testFunc, ...opts } = TestCase;
-        await runEngineTestV4(testFunc, { ...opts, createEngine, expect });
+        await runEngineTestV5(testFunc, { ...opts, createEngine, expect });
       });
     });
   });

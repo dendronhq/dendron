@@ -232,7 +232,10 @@ describe("add", () => {
           engine,
           wsRoot: tmp,
           modifySeed: (seed) => {
-            seed.site = "https://foo.com";
+            seed.site = {
+              url: "https://foo.com",
+              index: "foo",
+            };
             return seed;
           },
         });
@@ -264,7 +267,8 @@ describe("add", () => {
             fpath: path.join(wsRoot, "dendron.yml"),
             snapshot: true,
           },
-          "site: 'https://foo.com'"
+          "url: 'https://foo.com'",
+          "index: foo"
         );
         await checkFile(
           {

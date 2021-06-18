@@ -9,7 +9,12 @@ export type SeedConfig = {
   /**
    * Url for seed
    */
-  site?: string;
+  site?: SeedSite;
+};
+
+export type SeedSite = {
+  url: string;
+  index?: string;
 };
 
 export type SeedRepository = {

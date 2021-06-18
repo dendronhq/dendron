@@ -118,7 +118,9 @@ site:
 initializeRemoteVaults: true
 seeds:
     dendron.foo:
-        site: 'https://foo.com'
+        site:
+            url: 'https://foo.com'
+            index: foo
 "
 `;
 

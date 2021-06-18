@@ -75,7 +75,7 @@ suite("CopyNoteUrl", function () {
     });
   });
 
-  test("with seed site override", (done) => {
+  test("with seed site url override", (done) => {
     runLegacyMultiWorkspaceTest({
       ctx,
       preSetupHook: async (opts) => {
@@ -86,7 +86,9 @@ suite("CopyNoteUrl", function () {
           wsRoot,
           engine,
           modifySeed: (seed) => {
-            seed.site = "https://foo.com";
+            seed.site = {
+              url: "https://foo.com",
+            };
             return seed;
           },
         });
@@ -95,15 +97,55 @@ suite("CopyNoteUrl", function () {
         engine.vaults = engine.config.vaults;
         getWS().setEngine(engine);
         // TODO: ugly temporary hack. can be removed when [[Unify Runenginetest and Runworkspacetest|scratch.2021.06.17.164102.unify-runenginetest-and-runworkspacetest]] is implemented
-        sinon
-          .stub(VSCodeUtils, "getNoteFromDocument")
-          .returns(
-            await NoteTestUtilsV4.createNote({
-              fname: "root",
-              vault: vaults[0],
-              wsRoot,
-            })
-          );
+        sinon.stub(VSCodeUtils, "getNoteFromDocument").returns(
+          await NoteTestUtilsV4.createNote({
+            fname: "root",
+            vault: vaults[0],
+            wsRoot,
+          })
+        );
+        const vault = VaultUtils.getVaultByName({
+          vaults: getWS().config.vaults,
+          vname: seedId,
+        })!;
+        await VSCodeUtils.openNoteByPath({ vault, fname: "root" });
+        const link = await new CopyNoteURLCommand().run();
+        expect("https://foo.com").toEqual(link);
+        done();
+      },
+    });
+  });
+
+  test("with seed site url and index override", (done) => {
+    runLegacyMultiWorkspaceTest({
+      ctx,
+      preSetupHook: async (opts) => {
+        await ENGINE_HOOKS.setupBasic(opts);
+      },
+      onInit: async ({ wsRoot, engine, vaults }) => {
+        await TestSeedUtils.addSeed2WS({
+          wsRoot,
+          engine,
+          modifySeed: (seed) => {
+            seed.site = {
+              url: "https://foo.com",
+              index: "foo",
+            };
+            return seed;
+          },
+        });
+        const seedId = TestSeedUtils.defaultSeedId();
+        engine.config = getWS().config;
+        engine.vaults = engine.config.vaults;
+        getWS().setEngine(engine);
+        // TODO: ugly temporary hack. can be removed when [[Unify Runenginetest and Runworkspacetest|scratch.2021.06.17.164102.unify-runenginetest-and-runworkspacetest]] is implemented
+        sinon.stub(VSCodeUtils, "getNoteFromDocument").returns(
+          await NoteTestUtilsV4.createNote({
+            fname: "foo",
+            vault: vaults[0],
+            wsRoot,
+          })
+        );
         const vault = VaultUtils.getVaultByName({
           vaults: getWS().config.vaults,
           vname: seedId,

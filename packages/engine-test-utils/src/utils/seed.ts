@@ -1,12 +1,7 @@
 import { DEngineClient, SeedCommands, SeedConfig } from "@dendronhq/common-all";
 import { tmpDir, writeYAML } from "@dendronhq/common-server";
 import { SeedCLICommand } from "@dendronhq/dendron-cli";
-import {
-  SeedInitMode,
-  SeedRegistry,
-  SeedService,
-  SeedUtils,
-} from "@dendronhq/engine-server";
+import { SeedInitMode, SeedService, SeedUtils } from "@dendronhq/engine-server";
 import path from "path";
 import { GitTestUtils } from "./git";
 

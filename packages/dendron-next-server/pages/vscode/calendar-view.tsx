@@ -8,7 +8,7 @@ import {
   engineSlice,
   postVSCodeMessage,
 } from "@dendronhq/common-frontend";
-import type { CalendarProps as AntdCalendarProps } from "antd";
+import { CalendarProps as AntdCalendarProps, Spin } from "antd";
 import { Badge, ConfigProvider } from "antd";
 import generateCalendar from "antd/lib/calendar/generateCalendar";
 import classNames from "classnames";
@@ -237,22 +237,35 @@ function CalendarView({ engine, ide }: DendronProps) {
   );
 
   if (!engineInitialized) {
-    return null;
+    return <Spin />;
   }
 
-  const msg = "Please update your dendron.yml configuration";
+  const genError = (msg: string) => {
+    const suffix = "Please update your dendron.yml configuration";
+    return (
+      <>
+        `${msg} ${suffix}`
+      </>
+    );
+  };
 
   if (engine.config?.journal.dateFormat !== "y.MM.dd") {
-    return `only "journal.dateFormat:"y.MM.dd" is supported currently. ${msg}`;
+    return genError(
+      `only "journal.dateFormat:"y.MM.dd" is supported currently`
+    );
   }
   if (engine.config?.journal.addBehavior !== "childOfDomain") {
-    return `only "journal.addBehavior = "childOfDomain" is supported currently. ${msg}`;
+    return genError(
+      `only "journal.addBehavior = "childOfDomain" is supported currently`
+    );
   }
   if (engine.config?.journal.dailyDomain !== "daily") {
-    return `only "journal.dailyDomain = "daily" is supported currently. ${msg}`;
+    return genError(
+      `only "journal.dailyDomain = "daily" is supported currently`
+    );
   }
   if (engine.config?.journal.name !== "journal") {
-    return `only "journal.name = "name" is supported currently. ${msg}`;
+    return genError(`only "journal.name = "name" is supported currently`);
   }
 
   return (
@@ -267,4 +280,20 @@ function CalendarView({ engine, ide }: DendronProps) {
   );
 }
 
-export default CalendarView;
+function areEqual(prevProps: DendronProps, nextProps: DendronProps) {
+  const logger = createLogger("treeViewContainer");
+  const isDiff = _.some([
+    // active note changed
+    prevProps.ide.noteActive?.id !== nextProps.ide.noteActive?.id,
+    // engine initialized for first time
+    _.isUndefined(prevProps.engine.notes) ||
+      (_.isEmpty(prevProps.engine.notes) && !_.isEmpty(nextProps.engine.notes)),
+    // engine just went from pending to loading
+    prevProps.engine.loading === "pending" &&
+      nextProps.engine.loading === "idle",
+  ]);
+  logger.info({ state: "areEqual", isDiff, prevProps, nextProps });
+  return !isDiff;
+}
+const CalendarViewContainer = React.memo(CalendarView, areEqual);
+export default CalendarViewContainer;

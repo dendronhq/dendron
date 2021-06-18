@@ -33,6 +33,7 @@ import {
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
+import { DendronConfig } from "../../common-all/lib/types";
 import { ENGINE_HOOKS } from "./presets";
 import { GitTestUtils } from "./utils";
 
@@ -47,6 +48,10 @@ export type TestSetupWorkspaceOpts = {
    *  ]
    */
   vaults?: DVault[];
+  /**
+   * Modify dendron config before initialization
+   */
+  modConfigCb?: (config: DendronConfig) => DendronConfig;
 };
 
 export type AsyncCreateEngineFunction = (

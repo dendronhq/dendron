@@ -1,9 +1,8 @@
 import { NoteUtils } from "@dendronhq/common-all";
 import { cleanName } from "@dendronhq/common-server";
-import { CONFIG, DENDRON_COMMANDS } from "../constants";
-import { CodeConfigKeys } from "../types";
+import { DENDRON_COMMANDS } from "../constants";
 import { DendronClientUtilsV2 } from "../utils";
-import { DendronWorkspace, getConfigValue } from "../workspace";
+import { getWS } from "../workspace";
 import { BaseCommand } from "./base";
 import { GotoNoteCommand } from "./GotoNote";
 
@@ -22,9 +21,7 @@ export class CreateDailyJournalCommand extends BaseCommand<
 > {
   static key = DENDRON_COMMANDS.CREATE_DAILY_JOURNAL_NOTE.key;
   async gatherInputs(): Promise<CommandInput | undefined> {
-    const dailyJournalDomain = DendronWorkspace.configuration().get<string>(
-      CONFIG["DAILY_JOURNAL_DOMAIN"].key
-    );
+    const dailyJournalDomain = getWS().config.journal.dailyDomain;
     let fname: string;
     fname = DendronClientUtilsV2.genNoteName("JOURNAL", {
       overrides: { domain: dailyJournalDomain },
@@ -43,9 +40,7 @@ export class CreateDailyJournalCommand extends BaseCommand<
   async execute(opts: CommandOpts) {
     const { fname } = opts;
     const ctx = "CreateDailyJournal";
-    const journalName = getConfigValue(
-      CodeConfigKeys.DEFAULT_JOURNAL_NAME
-    ) as string;
+    const journalName = getWS().config.journal.name;
     this.L.info({ ctx, journalName, fname });
     const title = NoteUtils.genJournalNoteTitle({
       fname,

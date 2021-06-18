@@ -19,14 +19,9 @@ import _, { DebouncedFunc } from "lodash";
 import { CancellationToken, Uri, window } from "vscode";
 import { LookupNoteTypeEnum } from "../../commands/LookupCommand";
 import { Logger } from "../../logger";
-import { CodeConfigKeys, EngineFlavor, EngineOpts } from "../../types";
+import { EngineFlavor, EngineOpts } from "../../types";
 import { AnalyticsUtils } from "../../utils/analytics";
-import {
-  DendronWorkspace,
-  getConfigValue,
-  getEngine,
-  getWS,
-} from "../../workspace";
+import { DendronWorkspace, getEngine, getWS } from "../../workspace";
 import { MORE_RESULTS_LABEL } from "./constants";
 import { LookupControllerV2 } from "./LookupControllerV2";
 import { DendronQuickPickerV2 } from "./types";
@@ -72,9 +67,7 @@ function checkAndCreateNoteOverrides(opts: {
     const button = titleOverride[0];
     // journal or scratch
     if (button.type === LookupNoteTypeEnum.journal) {
-      const journalName = getConfigValue(
-        CodeConfigKeys.DEFAULT_JOURNAL_NAME
-      ) as string;
+      const journalName = getWS().config.journal.name;
       const journalIndex = pickerValue.indexOf(journalName);
       if (journalIndex < 0) {
         return {};

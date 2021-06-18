@@ -77,6 +77,20 @@ export type SeedEntry = {
   site?: SeedSite;
 };
 
+export enum NoteAddBehavior {
+  "childOfDomain" = "childOfDomain",
+  "childOfDomainNamespace" = "childOfDomainNamespace",
+  "childOfCurrent" = "childOfCurrent",
+  "asOwnDomain" = "asOwnDomain",
+}
+
+export type JournalConfig = {
+  dailyDomain: string;
+  name: string;
+  dateFormat: string;
+  addBehavior: NoteAddBehavior;
+};
+
 export type DendronConfig = {
   /**
    * Disable caching behavior
@@ -94,6 +108,8 @@ export type DendronConfig = {
    * Configuration related to publishing notes
    */
   site: DendronSiteConfig;
+
+  journal: JournalConfig;
 
   /**
    * Workspaces

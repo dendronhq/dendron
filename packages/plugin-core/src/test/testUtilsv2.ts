@@ -4,8 +4,8 @@ import {
   NoteProps,
   NoteUtils,
   VaultUtils,
-  WorkspaceOpts,
   WorkspaceFolderRaw,
+  WorkspaceOpts,
 } from "@dendronhq/common-all";
 import {
   assignJSONWithComment,

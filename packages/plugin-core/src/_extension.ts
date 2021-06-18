@@ -4,14 +4,11 @@ import {
   VaultUtils,
   VSCodeEvents,
 } from "@dendronhq/common-all";
-import {
-  getDurationMilliseconds,
-  getOS,
-  writeJSONWithComments,
-} from "@dendronhq/common-server";
+import { getDurationMilliseconds, getOS } from "@dendronhq/common-server";
 import {
   HistoryEvent,
   HistoryService,
+  MigrationServce,
   WorkspaceService,
 } from "@dendronhq/engine-server";
 import fs from "fs-extra";
@@ -27,7 +24,7 @@ import {
   WORKSPACE_STATE,
 } from "./constants";
 import { Logger } from "./logger";
-import { applyMigrationRules, migrateConfig } from "./migration";
+import { migrateConfig } from "./migration";
 import { Extensions } from "./settings";
 import { setupSegmentClient } from "./telemetry";
 import { InstallStatus, VSCodeUtils, WSUtils } from "./utils";
@@ -237,22 +234,18 @@ export async function _activate(
 
     // check if we need to wipe the cache
     if (installStatus === InstallStatus.UPGRADED && stage !== "test") {
-      const changes = await applyMigrationRules({
+      const changes = await MigrationServce.applyMigrationRules({
         currentVersion,
         previousVersion: previousVersion || "0.0.0",
         dendronConfig,
         wsConfig,
         wsService,
+        logger: Logger,
       });
       // if changes were made, update all settings
       if (!_.isEmpty(changes)) {
         const { data } = _.last(changes)!;
         dendronConfig = data.dendronConfig;
-        wsService.setConfig(data.dendronConfig);
-        writeJSONWithComments(
-          DendronWorkspace.workspaceFile().fsPath,
-          data.wsConfig
-        );
       }
     }
 

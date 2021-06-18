@@ -139,6 +139,13 @@ export class WorkspaceService {
     return DConfig.writeConfig({ wsRoot, config });
   }
 
+  setWorkspaceConfig(config: WorkspaceSettings) {
+    writeJSONWithComments(
+      path.join(this.wsRoot, "dendron.code-workspace"),
+      config
+    );
+  }
+
   /**
    *
    * @param param0

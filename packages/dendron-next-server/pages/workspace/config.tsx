@@ -15,6 +15,7 @@ import {
   Switch,
   useToast,
 } from "@chakra-ui/react";
+import { NoteAddBehavior } from "@dendronhq/common-all";
 import { DendronConfig } from "@dendronhq/common-all";
 import { Field, FieldArray, Form, Formik } from "formik";
 import _, { get } from "lodash";
@@ -26,14 +27,29 @@ import { useDendronConfig } from "../../lib/hooks";
 // TODO Temporarily copied here from engine-server/src/config.ts to use default
 // values for input placeholders.
 const genDefaultConfig = (): DendronConfig => ({
+  version: 1,
   vaults: [],
+  useFMTitle: true,
+  useNoteTitleForLink: true,
+  noAutoCreateOnDefinition: true,
+  noLegacyNoteRef: true,
+  noXVaultWikiLink: true,
+  lookupConfirmVaultOnCreate: false,
+  dayOfWeek: 1,
+  journal: {
+    dailyDomain: "daily",
+    name: "journal",
+    dateFormat: "y.MM.dd",
+    addBehavior: NoteAddBehavior.childOfDomain,
+  },
   site: {
     copyAssets: true,
     siteHierarchies: ["root"],
     siteRootDir: "docs",
     usePrettyRefs: true,
+    title: "Dendron",
+    description: "Personal knowledge space",
   },
-  version: 0,
 });
 
 type InputControlProps = {

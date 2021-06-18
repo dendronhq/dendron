@@ -95,6 +95,7 @@ suite("Extension", function () {
               noLegacyNoteRef: true,
               noXVaultWikiLink: true,
               lookupConfirmVaultOnCreate: false,
+              defaultDailyJournalVault: "vault",
               site: {
                 copyAssets: true,
                 siteHierarchies: ["root"],

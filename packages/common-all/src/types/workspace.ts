@@ -212,6 +212,11 @@ export type DendronConfig = {
    *
    */
   dayOfWeek?: number;
+
+  /**
+   * Configuration for Create Default Daily Journal
+   */
+  defaultDailyJournalVault?: string;
 };
 
 export type RandomNoteConfig = {

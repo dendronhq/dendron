@@ -45,6 +45,7 @@ export class DConfig {
       noXVaultWikiLink: true,
       lookupConfirmVaultOnCreate: false,
       dayOfWeek: 1,
+      defaultDailyJournalVault: "vault",
       site: {
         copyAssets: true,
         siteHierarchies: ["root"],

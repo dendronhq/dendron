@@ -506,7 +506,6 @@ describe("RemarkUtils and LinkUtils", () => {
         {
           expect,
           preSetupHook: async ({ wsRoot, vaults }) => {
-            //const txt = `# Hello Heading\nHello Content`;
             note = await NoteTestUtilsV4.createNote({
               wsRoot,
               vault: vaults[0],
@@ -540,7 +539,6 @@ describe("RemarkUtils and LinkUtils", () => {
         {
           expect,
           preSetupHook: async ({ wsRoot, vaults }) => {
-            //const txt = `# Hello Heading\nHello Content`;
             note = await NoteTestUtilsV4.createNote({
               wsRoot,
               vault: vaults[0],
@@ -559,7 +557,43 @@ describe("RemarkUtils and LinkUtils", () => {
       );
     });
 
-    test.only("table", async () => {
+    test("nested list", async () => {
+      let note: NoteProps | undefined;
+      await runEngineTestV5(
+        async ({ wsRoot, engine }) => {
+          expect(note).toBeTruthy();
+          const blocks = await RemarkUtils.extractBlocks({
+            note: note!,
+            wsRoot,
+            engine,
+          });
+          expect(blocks.length).toEqual(8);
+        },
+        {
+          expect,
+          preSetupHook: async ({ wsRoot, vaults }) => {
+            note = await NoteTestUtilsV4.createNote({
+              wsRoot,
+              vault: vaults[0],
+              fname: "foo",
+              body: [
+                "Et et quam culpa.",
+                "",
+                "* Cumque molestiae qui deleniti.",
+                "* Eius odit commodi harum.",
+                "  * Sequi ut non delectus tempore.",
+                "  * In delectus quam sunt unde.",
+                "* Quasi ex debitis aut sed.",
+                "",
+                "Perferendis officiis ut non.",
+              ].join("\n"),
+            });
+          },
+        }
+      );
+    });
+
+    test("table", async () => {
       let note: NoteProps | undefined;
       await runEngineTestV5(
         async ({ wsRoot, engine }) => {
@@ -586,6 +620,92 @@ describe("RemarkUtils and LinkUtils", () => {
                 "|----------|-----------|",
                 "| Laborum  | libero    |",
                 "| Ullam    | optio     |",
+                "",
+                "Sequi ut non delectus tempore.",
+              ].join("\n"),
+            });
+          },
+        }
+      );
+    });
+
+    test("existing anchors", async () => {
+      let note: NoteProps | undefined;
+      await runEngineTestV5(
+        async ({ wsRoot, engine }) => {
+          expect(note).toBeTruthy();
+          const blocks = await RemarkUtils.extractBlocks({
+            note: note!,
+            wsRoot,
+            engine,
+          });
+          expect(blocks.length).toEqual(7);
+          expect(blocks[0].anchor?.value).toEqual("et-et-quam-culpa");
+          expect(blocks[1].anchor?.value).toEqual("paragraph");
+          expect(blocks[2].anchor?.value).toEqual("item1");
+          expect(blocks[3].anchor?.value).toEqual("item2");
+          expect(blocks[4].anchor?.value).toEqual("item3");
+          expect(blocks[5].anchor?.value).toEqual("list");
+          expect(blocks[6].anchor?.value).toEqual("table");
+        },
+        {
+          expect,
+          preSetupHook: async ({ wsRoot, vaults }) => {
+            //const txt = `# Hello Heading\nHello Content`;
+            note = await NoteTestUtilsV4.createNote({
+              wsRoot,
+              vault: vaults[0],
+              fname: "foo",
+              body: [
+                "# Et et quam culpa. ^header",
+                "",
+                "Ullam vel eius reiciendis. ^paragraph",
+                "",
+                "* Cumque molestiae qui deleniti. ^item1",
+                "* Eius odit commodi harum. ^item2",
+                "  * Sequi ut non delectus tempore. ^item3",
+                "",
+                "^list",
+                "",
+                "| Sapiente | accusamus |",
+                "|----------|-----------|",
+                "| Laborum  | libero    |",
+                "| Ullam    | optio     | ^table",
+              ].join("\n"),
+            });
+          },
+        }
+      );
+    });
+
+    test("header", async () => {
+      let note: NoteProps | undefined;
+      await runEngineTestV5(
+        async ({ wsRoot, engine }) => {
+          expect(note).toBeTruthy();
+          const blocks = await RemarkUtils.extractBlocks({
+            note: note!,
+            wsRoot,
+            engine,
+          });
+          expect(blocks.length).toEqual(4);
+          expect(blocks[0].anchor?.value).toEqual("et-et-quam-culpa");
+          expect(blocks[2].anchor?.value).toEqual("eius-odit-commodi-harum");
+        },
+        {
+          expect,
+          preSetupHook: async ({ wsRoot, vaults }) => {
+            //const txt = `# Hello Heading\nHello Content`;
+            note = await NoteTestUtilsV4.createNote({
+              wsRoot,
+              vault: vaults[0],
+              fname: "foo",
+              body: [
+                "# Et et quam culpa. ^anchor",
+                "",
+                "Cumque molestiae qui deleniti.",
+                "",
+                "# Eius odit commodi harum.",
                 "",
                 "Sequi ut non delectus tempore.",
               ].join("\n"),

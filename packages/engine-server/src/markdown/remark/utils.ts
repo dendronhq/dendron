@@ -1,4 +1,4 @@
-import { DNoteAnchor } from "@dendronhq/common-all";
+import { DNoteAnchor, isNotUndefined } from "@dendronhq/common-all";
 import {
   assertUnreachable,
   CONSTANTS,
@@ -20,13 +20,12 @@ import {
 } from "@dendronhq/common-all";
 import { createLogger, note2String } from "@dendronhq/common-server";
 import _ from "lodash";
-import { Heading, Root } from "mdast";
+import { Heading, ListItem, Paragraph, Root } from "mdast";
 import * as mdastBuilder from "mdast-builder";
 import { Processor } from "unified";
 import { Node } from "unist";
 import { selectAll } from "unist-util-select";
 import visit from "unist-util-visit";
-import visitParents from "unist-util-visit-parents";
 import { VFile } from "vfile";
 import { normalizev2 } from "../../utils";
 import {
@@ -59,7 +58,7 @@ export type NoteBlock = {
   /** The actual text of the block. */
   text: string;
   /** The anchor for this block, if one already exists. */
-  anchor?: string;
+  anchor?: DNoteAnchorPositioned;
   /** The position within the document at which the block is located. */
   position: Position;
 };
@@ -483,6 +482,40 @@ export class LinkUtils {
 }
 
 export class AnchorUtils {
+  /** Given a *parsed* anchor node, returns the anchor id ("header" or "^block" and positioned anchor object for it. */
+  static anchorNode2anchor(
+    node: Anchor,
+    slugger: ReturnType<typeof getSlugger>
+  ): [string, DNoteAnchorPositioned] | undefined {
+    if (_.isUndefined(node.position)) return undefined;
+
+    const { line, column } = node.position.start;
+    if (node.type === DendronASTTypes.HEADING) {
+      const value = slugger.slug(node.children[0].value as string);
+      return [
+        value,
+        {
+          type: "header",
+          value,
+          line: line - 1,
+          column: column - 1,
+        },
+      ];
+    } else if (node.type === DendronASTTypes.BLOCK_ANCHOR) {
+      return [
+        `^${node.id}`,
+        {
+          type: "block",
+          value: node.id,
+          line: line - 1,
+          column: column - 1,
+        },
+      ];
+    } else {
+      assertUnreachable(node);
+    }
+  }
+
   static async findAnchors(
     opts: {
       note: NoteProps;
@@ -494,36 +527,12 @@ export class AnchorUtils {
     try {
       const noteContents = await note2String(opts);
       const noteAnchors = RemarkUtils.findAnchors(noteContents, parseOpts);
-      const anchors: [string, DNoteAnchorPositioned][] = [];
-      noteAnchors.forEach((anchor) => {
-        if (_.isUndefined(anchor.position)) return;
-        const slugger = getSlugger();
-        const { line, column } = anchor.position.start;
-        if (anchor.type === DendronASTTypes.HEADING) {
-          const value = slugger.slug(anchor.children[0].value as string);
-          anchors.push([
-            value,
-            {
-              type: "header",
-              value,
-              line: line - 1,
-              column: column - 1,
-            },
-          ]);
-        } else if (anchor.type === DendronASTTypes.BLOCK_ANCHOR) {
-          anchors.push([
-            `^${anchor.id}`,
-            {
-              type: "block",
-              value: anchor.id,
-              line: line - 1,
-              column: column - 1,
-            },
-          ]);
-        } else {
-          assertUnreachable(anchor);
-        }
-      });
+      const slugger = getSlugger();
+
+      const anchors: [string, DNoteAnchorPositioned][] = noteAnchors
+        .map((anchor) => this.anchorNode2anchor(anchor, slugger))
+        .filter(isNotUndefined);
+
       return Object.fromEntries(anchors);
     } catch (err) {
       const error = DendronError.createFromStatus({
@@ -553,6 +562,15 @@ function walk(node: Node, fn: any) {
 }
 
 const MAX_HEADING_DEPTH = 99999;
+
+const NODE_TYPES_TO_EXTRACT = [
+  DendronASTTypes.BLOCK_ANCHOR,
+  DendronASTTypes.HEADING,
+  DendronASTTypes.LIST,
+  DendronASTTypes.LIST_ITEM,
+  DendronASTTypes.TABLE,
+  DendronASTTypes.PARAGRAPH,
+];
 
 export class RemarkUtils {
   static bumpHeadings(root: Node, baseDepth: number) {
@@ -768,12 +786,6 @@ export class RemarkUtils {
     };
   }
 
-  private static hasAncestorType(ancestors: Node[], type: string): boolean {
-    return !_.isUndefined(
-      _.find(ancestors, (ancestor) => ancestor.type === type)
-    );
-  }
-
   /** Extract all blocks from the note which could be referenced by a block anchor.
    *
    * If those blocks already have anchors (or if they are a header), this will also find that anchor.
@@ -795,30 +807,94 @@ export class RemarkUtils {
       fname: note.fname,
       dest: DendronASTDest.MD_DENDRON,
     });
+    const slugger = getSlugger();
 
+    // Read and parse the note
+    // TODO: It might be better to get the text from the editor
     const noteText = await note2String({ note, wsRoot });
     const noteAST = proc.parse(noteText);
+    if (_.isUndefined(noteAST.children)) return [];
+    const nodesToSearch = _.filter(noteAST.children as Node[], (node) =>
+      _.includes(NODE_TYPES_TO_EXTRACT, node.type)
+    );
 
+    // Extract the blocks
     const blocks: NoteBlock[] = [];
-    visitParents(noteAST, (node, ancestors) => {
-      switch (node.type) {
-        case "table":
-        case "paragraph":
-          if (this.hasAncestorType(ancestors, "list")) {
-            // this paragraph is in a list item, but we already extracted the list item itself
-            return;
+    for (const node of nodesToSearch) {
+      // Block anchors at top level refer to the blocks before them
+      if (node.type === DendronASTTypes.PARAGRAPH) {
+        // These look like a paragraph...
+        const parent = node as Paragraph;
+        if (parent.children.length === 1) {
+          // ... that has only a block anchor in it ...
+          const child = parent.children[0] as Node;
+          if (child.type === DendronASTTypes.BLOCK_ANCHOR) {
+            // ... in which case this block anchor refers to the previous block, if any
+            const previous = _.last(blocks);
+            if (!_.isUndefined(previous))
+              [, previous.anchor] =
+                AnchorUtils.anchorNode2anchor(child as BlockAnchor, slugger) ||
+                [];
+            // Block anchors themselves are not blocks, don't extract them
+            continue;
           }
-        /* falls through */
-        case "list":
-        case "listItem":
-          blocks.push({
-            text: proc.stringify(node),
-            // position can only be undefined for generated nodes, not for parsed ones
-            position: node.position!,
-          });
-          break;
+        }
       }
-    });
+
+      // Extract list items out of lists. We also extract them from nested lists,
+      // because block anchors can't refer to nested lists, only items inside of them
+      if (node.type === DendronASTTypes.LIST) {
+        visit(node, [DendronASTTypes.LIST_ITEM], (listItem: ListItem) => {
+          // The list item might have a block anchor inside of it.
+          let anchor: DNoteAnchorPositioned | undefined;
+          visit(
+            listItem,
+            [DendronASTTypes.BLOCK_ANCHOR, DendronASTTypes.LIST],
+            (inListItem) => {
+              // Except if we hit a nested list, because then the block anchor refers to the item in the nested list
+              if (inListItem.type === DendronASTTypes.LIST) return "skip";
+              [, anchor] =
+                AnchorUtils.anchorNode2anchor(
+                  inListItem as BlockAnchor,
+                  slugger
+                ) || [];
+              return;
+            }
+          );
+
+          blocks.push({
+            text: proc.stringify(listItem),
+            anchor,
+            // position can only be undefined for generated nodes, not for parsed ones
+            position: listItem.position!,
+          });
+        });
+      }
+
+      // extract the anchor for this block, if it exists
+      let anchor: DNoteAnchorPositioned | undefined;
+      if (node.type === DendronASTTypes.HEADING) {
+        // Headings are anchors themselves
+        [, anchor] =
+          AnchorUtils.anchorNode2anchor(node as Heading, slugger) || [];
+      } else if (node.type !== DendronASTTypes.LIST) {
+        // Other nodes might have block anchors inside them
+        // Except lists, because anchors inside lists only refer to specific list items
+        visit(node, [DendronASTTypes.BLOCK_ANCHOR], (child) => {
+          [, anchor] =
+            AnchorUtils.anchorNode2anchor(child as BlockAnchor, slugger) || [];
+        });
+      }
+
+      // extract the block
+      blocks.push({
+        text: proc.stringify(node),
+        anchor,
+        // position can only be undefined for generated nodes, not for parsed ones
+        position: node.position!,
+      });
+    }
+
     return blocks;
   }
 }

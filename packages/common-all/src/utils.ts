@@ -2,6 +2,7 @@ import minimatch from "minimatch";
 import semver from "semver";
 import GithubSlugger from "github-slugger";
 import querystring from "querystring";
+import _ from "lodash";
 
 export class DUtils {
   static minimatch = minimatch;
@@ -26,4 +27,20 @@ export const isNumeric = (n: any) => {
 export function isBlockAnchor(anchor?: string): boolean {
   // not undefined, not an empty string, and the first character is ^
   return !!anchor && anchor[0] === "^";
+}
+
+/** A type guard for things that are not undefined.
+ *
+ * This is equivalent to !_.isUndefined(), except that it provides a type guard
+ * ensuring the parameter is not undefined. This is useful when filtering:
+ *
+ * function foo(list: (string | undefined)[]) {
+ *   const stringsOnly = list.filter(isNotUndefined);
+ * }
+ *
+ * This will give stringsOnly the type string[]. Without the type guard, it would have
+ * received the type (string | undefined)[] despite the fact that we filtered out undefined.
+ */
+export function isNotUndefined<T>(t: T | undefined): t is T {
+  return !_.isUndefined(t);
 }

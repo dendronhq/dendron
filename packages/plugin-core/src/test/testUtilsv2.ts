@@ -96,10 +96,9 @@ export function genDefaultSettings() {
         "dendron.dendron-paste-image",
         "dendron.dendron-markdown-shortcuts",
         "dendron.dendron-markdown-preview-enhanced",
-        "dendron.dendron-markdown-links",
-        "github.github-vscode-theme",
       ],
       unwantedRecommendations: [
+        "dendron.dendron-markdown-links",
         "dendron.dendron-markdown-notes",
         "shd101wyy.markdown-preview-enhanced",
         "kortina.vscode-markdown-notes",

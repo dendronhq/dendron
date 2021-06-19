@@ -7,7 +7,7 @@ import {
   withConfig,
   EditorUtils,
 } from "../testUtilsV3";
-import { DVault } from "@dendronhq/common-all";
+import { DVault, VaultUtils } from "@dendronhq/common-all";
 import { sinon } from "@dendronhq/common-test-utils";
 import _ from "lodash";
 import { PickerUtilsV2 } from "../../components/lookup/utils";
@@ -38,7 +38,11 @@ suite("Daily Journal Suite", function () {
 suite("CreateDailyJournal", function () {
   let ctx: vscode.ExtensionContext;
 
-  ctx = setupBeforeAfter(this, {});
+  ctx = setupBeforeAfter(this, {
+    afterHook: async () => {
+      sinon.restore();
+    },
+  });
 
   test("default journal vault", (done) => {
     runLegacyMultiWorkspaceTest({
@@ -47,12 +51,11 @@ suite("CreateDailyJournal", function () {
         withConfig(
           (config) => {
             config.lookupConfirmVaultOnCreate = false;
-            config.defaultDailyJournalVault = vaults[0].fsPath;
+            config.defaultDailyJournalVault = VaultUtils.getName(vaults[0]);
             return config;
           },
           { wsRoot }
         );
-        stubVaultPick(vaults);
         await new CreateDailyJournalCommand().run();
         expect(
           (await EditorUtils.getURIForActiveEditor()).fsPath.includes(
@@ -71,11 +74,12 @@ suite("CreateDailyJournal", function () {
         withConfig(
           (config) => {
             config.lookupConfirmVaultOnCreate = true;
-            config.defaultDailyJournalVault = vaults[0].fsPath;
+            config.defaultDailyJournalVault = VaultUtils.getName(vaults[0]);
             return config;
           },
           { wsRoot }
         );
+        stubVaultPick(vaults);
         await new CreateDailyJournalCommand().run();
         expect(
           (await EditorUtils.getURIForActiveEditor()).fsPath.includes(

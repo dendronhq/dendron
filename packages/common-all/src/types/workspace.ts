@@ -229,6 +229,22 @@ export type DendronConfig = {
    * Configuration for Random Note Lookup Command
    */
   randomNote?: RandomNoteConfig;
+
+  /**
+   * Used by CalendarView to display first day of the week.
+   * Values are:
+   * 0|7: sunday
+   * 1: monday
+   * 2: tuesday
+   * ...
+   *
+   */
+  dayOfWeek?: number;
+
+  /**
+   * Configuration for Create Default Daily Journal
+   */
+  defaultDailyJournalVault?: string;
 };
 
 export type RandomNoteConfig = {

@@ -3,6 +3,27 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.46.2](https://github.com/dendronhq/dendron/compare/v0.46.1...v0.46.2) (2021-06-19)
+
+
+### Bug Fixes
+
+* **preview:** note refs showing first line as html ([5a025e3](https://github.com/dendronhq/dendron/commit/5a025e3ccd3e2c40ee2975577b831339b272e75d))
+* anchors now update when note is modified ([#823](https://github.com/dendronhq/dendron/issues/823)) ([be91b8d](https://github.com/dendronhq/dendron/commit/be91b8dd45a507e07d742d323323853227f41c6e)), closes [#817](https://github.com/dendronhq/dendron/issues/817)
+* no crash on bad backlink ([abcec76](https://github.com/dendronhq/dendron/commit/abcec76169f31c425336030a6d2ff9246317bca9))
+
+
+### Features Dendron
+
+* calendar panel ([#806](https://github.com/dendronhq/dendron/issues/806)) ([65ef926](https://github.com/dendronhq/dendron/commit/65ef926564dbaeaaca305e480ac8607c66bcc4b1)), closes [packages/plugin-core/src/views/utils.ts#88](https://github.com/packages/plugin-core/src/views/utils.ts/issues/88) [/github.com/ant-design/ant-design/blob/832aa81c821b7b5750673b5aacafa39c9978b09c/components/calendar/generateCalendar.tsx#L183-L205](https://github.com//github.com/ant-design/ant-design/blob/832aa81c821b7b5750673b5aacafa39c9978b09c/components/calendar/generateCalendar.tsx/issues/L183-L205)
+* remove seed cmd ([252f297](https://github.com/dendronhq/dendron/commit/252f29741f1cabb915e9e541d80256b21ef594d0))
+* seed add cmd ([a8f245b](https://github.com/dendronhq/dendron/commit/a8f245b1a29f6de0a80839c1bd765a61941ab58f))
+* support init seeds on startup ([ef095a6](https://github.com/dendronhq/dendron/commit/ef095a60d646df510b18971264a1443c13e41653))
+
+
+
+
+
 ## [0.46.2-alpha.1](https://github.com/dendronhq/dendron/compare/v0.46.1...v0.46.2-alpha.1) (2021-06-16)
 
 

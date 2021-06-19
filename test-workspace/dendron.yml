@@ -47,6 +47,7 @@ site:
             - vault
             - vault2
 dev:
+    enableWebUI: true
     nextServerUrl: 'http://localhost:3000'
     engineServerPort: 3005
 initializeRemoteVaults: true

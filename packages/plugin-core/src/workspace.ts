@@ -439,7 +439,7 @@ export class DendronWorkspace {
           )
         );
 
-        if (!getWS().config.dev?.disableWebUI) {
+        if (getWS().config.dev?.enableWebUI) {
           Logger.info({ ctx, msg: "initWebUI" });
           context.subscriptions.push(
             vscode.window.registerWebviewViewProvider(
@@ -452,8 +452,6 @@ export class DendronWorkspace {
               }
             )
           );
-
-          // TODO: we currently only support default configuration
           const calendarView = new CalendarView();
           context.subscriptions.push(
             vscode.window.registerWebviewViewProvider(
@@ -461,7 +459,6 @@ export class DendronWorkspace {
               calendarView
             )
           );
-
           VSCodeUtils.setContext(DendronContext.WEB_UI_ENABLED, true);
         }
 

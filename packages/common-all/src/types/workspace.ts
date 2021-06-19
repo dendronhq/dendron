@@ -104,8 +104,13 @@ export type DendronConfig = {
   noTelemetry?: boolean;
   /**
    * Dendron version. Setup by plugin
+   @deprecated
    */
   version: number;
+  /**
+   * Dendron version
+   */
+  dendronVersion?: string;
   /**
    * Configuration related to publishing notes
    */

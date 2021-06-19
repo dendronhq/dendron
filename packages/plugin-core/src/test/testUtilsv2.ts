@@ -348,6 +348,7 @@ export async function setupCodeWorkspaceV3(
     postSetupHook: async () => {},
   });
   const wsContainer = tmpDir().name;
+  // .code-workspace dendron settings
   setupCodeConfiguration(opts);
   const wsRoot = path.join(wsContainer, "dendron");
   fs.ensureDirSync(wsRoot);

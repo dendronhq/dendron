@@ -169,6 +169,10 @@ export class VSCodeUtils {
     return editor.document.uri.fsPath;
   }
 
+  /**
+   * Check if we upgraded, initialized for the first time or no change was detected
+   * @returns {@link InstallStatus}
+   */
   static getInstallStatus({
     previousVersion,
     currentVersion,

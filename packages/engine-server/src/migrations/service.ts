@@ -52,6 +52,7 @@ export class MigrationServce {
     const changes = _.flatten(results);
     if (!_.isEmpty(changes)) {
       const { data } = _.last(changes)!;
+      data.dendronConfig.dendronVersion = currentVersion;
       wsService.setConfig(data.dendronConfig);
       wsService.setWorkspaceConfig(data.wsConfig);
     }

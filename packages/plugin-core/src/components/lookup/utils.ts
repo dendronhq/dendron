@@ -343,6 +343,12 @@ export class PickerUtilsV2 {
     return PickerUtilsV2.getVaultForOpenEditor();
   }
 
+  static getQueryUpToLastDot = (query: string) => {
+    return query.lastIndexOf(".") >= 0
+      ? query.slice(0, query.lastIndexOf("."))
+      : "";
+  };
+
   static isCreateNewNotePickForSingle(node: DNodePropsQuickInputV2): boolean {
     if (!node) {
       return true;
@@ -480,13 +486,11 @@ export class NotePickerUtils {
     const start = process.hrtime();
     const { picker, qs } = opts;
     const engine = getWS().getEngine();
-    Logger.info({ ctx, msg: "first query" });
     let nodes: NoteProps[];
     // if we are doing a query, reset pagination options
     PickerUtilsV2.resetPaginationOpts(picker);
     const resp = await engine.queryNotes({ qs });
     nodes = resp.data;
-    Logger.info({ ctx, msg: "post:queryNotes" });
     if (nodes.length > PAGINATE_LIMIT) {
       picker.allResults = nodes;
       picker.offset = PAGINATE_LIMIT;

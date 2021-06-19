@@ -22,6 +22,7 @@ export const DENDRON_VIEWS = [
     id: DendronTreeViewKey.CALENDAR_VIEW,
     name: "Calendar View",
     where: "explorer",
+    when: DendronContext.WEB_UI_ENABLED,
     type: "webview",
   },
   {

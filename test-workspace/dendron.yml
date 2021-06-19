@@ -46,7 +46,7 @@ site:
             - vault2
             - vault
             - vault2
-dev:
+dev: 
     enableWebUI: true
     nextServerUrl: 'http://localhost:3000'
     engineServerPort: 3005

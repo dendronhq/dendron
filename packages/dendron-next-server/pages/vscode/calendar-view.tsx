@@ -244,7 +244,7 @@ function CalendarView({ engine, ide }: DendronProps) {
     const suffix = "Please update your dendron.yml configuration";
     return (
       <>
-        `${msg} ${suffix}`
+        `{msg} {suffix}`
       </>
     );
   };

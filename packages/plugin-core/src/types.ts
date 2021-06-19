@@ -27,7 +27,5 @@ export type DateTimeFormat =
   | "TIME_WITH_SHORT_OFFSET";
 
 export enum CodeConfigKeys {
-  DEFAULT_JOURNAL_NAME = "dendron.defaultJournalName",
-  DEFAULT_JOURNAL_DATE_FORMAT = "dendron.defaultJournalDateFormat",
   DEFAULT_TIMESTAMP_DECORATION_FORMAT = "dendron.defaultTimestampDecorationFormat",
 }

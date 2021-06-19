@@ -6,6 +6,7 @@ import {
   DendronSiteConfig,
   ERROR_STATUS,
   getStage,
+  NoteAddBehavior,
 } from "@dendronhq/common-all";
 import { readYAML, writeYAML } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -44,7 +45,13 @@ export class DConfig {
       noLegacyNoteRef: true,
       noXVaultWikiLink: true,
       lookupConfirmVaultOnCreate: false,
-      dayOfWeek: 1,
+      journal: {
+        dailyDomain: "daily",
+        name: "journal",
+        dateFormat: "y.MM.dd",
+        addBehavior: NoteAddBehavior.childOfDomain,
+        firstDayOfWeek: 1,
+      },
       site: {
         copyAssets: true,
         siteHierarchies: ["root"],

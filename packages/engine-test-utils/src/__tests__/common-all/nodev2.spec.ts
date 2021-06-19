@@ -1,12 +1,11 @@
 import { NoteUtils, SchemaUtils } from "@dendronhq/common-all";
 import {
   NoteTestUtilsV4,
-  runEngineTestV4,
   SetupHookFunction,
 } from "@dendronhq/common-test-utils";
-import { createEngine } from "@dendronhq/engine-server";
 import { tmpdir } from "os";
 import path from "path";
+import { runEngineTestV5 } from "../../engine";
 import { ENGINE_HOOKS } from "../../presets";
 
 const preSetupHook: SetupHookFunction = async ({ vaults, wsRoot }) => {
@@ -50,7 +49,7 @@ describe("NoteUtils", () => {
 
   describe("getNoteByFnameV5", async () => {
     test("basic", async () => {
-      await runEngineTestV4(
+      await runEngineTestV5(
         async ({ vaults, engine, wsRoot }) => {
           const fname = "foo";
           const resp = NoteUtils.getNoteByFnameV5({
@@ -64,14 +63,13 @@ describe("NoteUtils", () => {
         },
         {
           expect,
-          createEngine,
           preSetupHook: ENGINE_HOOKS.setupBasic,
         }
       );
     });
 
     test("full path on input", async () => {
-      await runEngineTestV4(
+      await runEngineTestV5(
         async ({ vaults, engine, wsRoot }) => {
           const fname = "foo";
           const resp = NoteUtils.getNoteByFnameV5({
@@ -85,14 +83,13 @@ describe("NoteUtils", () => {
         },
         {
           expect,
-          createEngine,
           preSetupHook: ENGINE_HOOKS.setupBasic,
         }
       );
     });
 
     test("full path on node", async () => {
-      await runEngineTestV4(
+      await runEngineTestV5(
         async ({ vaults, engine, wsRoot }) => {
           const fname = "foo";
           const resp = NoteUtils.getNoteByFnameV5({
@@ -106,7 +103,6 @@ describe("NoteUtils", () => {
         },
         {
           expect,
-          createEngine,
           preSetupHook: ENGINE_HOOKS.setupBasic,
         }
       );
@@ -208,7 +204,7 @@ describe("NoteUtils", () => {
 
 describe("matchPath", () => {
   it("match path on domain, reg", async () => {
-    await runEngineTestV4(
+    await runEngineTestV5(
       async ({ engine }) => {
         const resp = SchemaUtils.matchPath({
           notePath: "foo",
@@ -217,12 +213,12 @@ describe("matchPath", () => {
         expect(resp?.schema.id).toEqual("foo");
         return [];
       },
-      { createEngine, preSetupHook, expect }
+      { preSetupHook, expect }
     );
   });
 
   it("match path on domain as namespace", async () => {
-    await runEngineTestV4(
+    await runEngineTestV5(
       async ({ engine }) => {
         const resp = SchemaUtils.matchPath({
           notePath: "bond",
@@ -234,7 +230,6 @@ describe("matchPath", () => {
       },
       {
         expect,
-        createEngine,
         preSetupHook: async ({ vaults, wsRoot }) => {
           await NoteTestUtilsV4.createSchema({
             fname: "bond",
@@ -251,7 +246,7 @@ describe("matchPath", () => {
   });
 
   it("match path on domain as namespace, child", async () => {
-    await runEngineTestV4(
+    await runEngineTestV5(
       async ({ engine }) => {
         const resp = SchemaUtils.matchPath({
           notePath: "bond.foo",
@@ -263,7 +258,6 @@ describe("matchPath", () => {
       },
       {
         expect,
-        createEngine,
         preSetupHook: async ({ vaults, wsRoot }) => {
           await NoteTestUtilsV4.createSchema({
             fname: "bond",
@@ -282,7 +276,7 @@ describe("matchPath", () => {
 
 describe("matchDomain", () => {
   it("match path on domain, reg", async () => {
-    await runEngineTestV4(
+    await runEngineTestV5(
       async ({ engine }) => {
         const schema = engine.notes["foo"].schema;
         expect(schema).toEqual({ moduleId: "foo", schemaId: "foo" });
@@ -290,7 +284,6 @@ describe("matchDomain", () => {
       },
       {
         expect,
-        createEngine,
         preSetupHook: async ({ vaults, wsRoot }) => {
           await NoteTestUtilsV4.createNote({
             fname: "foo",
@@ -308,7 +301,7 @@ describe("matchDomain", () => {
   });
 
   it("match path on domain as namespace", async () => {
-    await runEngineTestV4(
+    await runEngineTestV5(
       async ({ engine }) => {
         const schema = engine.notes["bond"].schema;
         expect(schema).toEqual({ moduleId: "bond", schemaId: "bond" });
@@ -316,7 +309,6 @@ describe("matchDomain", () => {
       },
       {
         expect,
-        createEngine,
         preSetupHook: async ({ vaults, wsRoot }) => {
           await NoteTestUtilsV4.createNote({
             fname: "bond",
@@ -338,7 +330,7 @@ describe("matchDomain", () => {
   });
 
   it("match path on domain as namespace", async () => {
-    await runEngineTestV4(
+    await runEngineTestV5(
       async ({ engine }) => {
         const schema = engine.notes["bond.ch1"].schema;
         expect(schema).toEqual({ moduleId: "bond", schemaId: "bond" });
@@ -346,7 +338,6 @@ describe("matchDomain", () => {
       },
       {
         expect,
-        createEngine,
         preSetupHook: async ({ vaults, wsRoot }) => {
           await NoteTestUtilsV4.createNote({
             fname: "bond.ch1",

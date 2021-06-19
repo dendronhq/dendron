@@ -87,4 +87,21 @@ suite("Create Daily Journal Suite", function () {
       },
     });
   });
+
+  test("with config override", (done) => {
+    runLegacyMultiWorkspaceTest({
+      ctx,
+      modConfigCb: (config) => {
+        config.journal.dailyDomain = "bar";
+        return config;
+      },
+      onInit: async ({}) => {
+        await new CreateDailyJournalCommand().run();
+        expect(
+          getActiveEditorBasename().startsWith("bar.journal")
+        ).toBeTruthy();
+        done();
+      },
+    });
+  });
 });

@@ -1,7 +1,7 @@
 import { DEngineClient, SeedCommands, SeedConfig } from "@dendronhq/common-all";
 import { tmpDir, writeYAML } from "@dendronhq/common-server";
 import { SeedCLICommand } from "@dendronhq/dendron-cli";
-import { SeedInitMode, SeedUtils } from "@dendronhq/engine-server";
+import { SeedInitMode, SeedService, SeedUtils } from "@dendronhq/engine-server";
 import path from "path";
 import { GitTestUtils } from "./git";
 
@@ -10,14 +10,37 @@ export class TestSeedUtils {
     return "dendron.foo";
   };
 
+  static async addSeed2WS({
+    wsRoot,
+    engine,
+    modifySeed,
+  }: {
+    wsRoot: string;
+    engine: DEngineClient;
+    modifySeed?: (seed: SeedConfig) => SeedConfig;
+  }) {
+    const { registryFile } = await this.createSeedRegistry({
+      engine,
+      wsRoot,
+      modifySeed,
+    });
+    const id = this.defaultSeedId();
+    const seedService = new SeedService({ wsRoot, registryFile });
+    await seedService.addSeed({ id });
+  }
+
   static async createSeedRegistry(opts: {
     engine: DEngineClient;
     wsRoot: string;
+    modifySeed?: (seed: SeedConfig) => SeedConfig;
   }) {
-    const config = await this.createSeed(opts);
+    let config = await this.createSeed(opts);
     const id = SeedUtils.getSeedId(config);
     const root = tmpDir().name;
     const registryFile = path.join(root, "reg.yml");
+    if (opts.modifySeed) {
+      config = opts.modifySeed(config);
+    }
     const seedDict = { [id]: config };
     writeYAML(registryFile, seedDict);
     return { registryFile, seedDict };

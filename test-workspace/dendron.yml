@@ -8,6 +8,12 @@ vaults:
 useFMTitle: true
 useNoteTitleForLink: true
 mermaid: true
+journal: 
+    dailyDomain: "daily"
+    name: "journal"
+    dateFormat: "y.MM.dd"
+    addBehavior: childOfDomain
+    firstDayOfWeek: 1
 site:
     copyAssets: true
     siteHierarchies:
@@ -40,7 +46,8 @@ site:
             - vault2
             - vault
             - vault2
-dev:
+dev: 
+    enableWebUI: true
     nextServerUrl: 'http://localhost:3000'
     engineServerPort: 3005
 initializeRemoteVaults: true

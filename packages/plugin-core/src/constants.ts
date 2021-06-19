@@ -21,8 +21,8 @@ export const DENDRON_VIEWS = [
   {
     id: DendronTreeViewKey.CALENDAR_VIEW,
     name: "Calendar View",
-    when: DendronContext.DEV_MODE,
     where: "explorer",
+    when: DendronContext.WEB_UI_ENABLED,
     type: "webview",
   },
   {
@@ -812,25 +812,25 @@ export const CONFIG: { [key: string]: ConfigEntry } = {
     key: "dendron.dailyJournalDomain",
     type: "string",
     default: "daily",
-    description: "domain where daily journals are kept",
+    description: "DEPRECATED. Use journal settings in dendron.yml",
   },
   DEFAULT_JOURNAL_NAME: {
-    key: CodeConfigKeys.DEFAULT_JOURNAL_NAME,
+    key: "dendron.defaultJournalName",
     type: "string",
     default: "journal",
-    description: _noteNameDesc("journal"),
+    description: "DEPRECATED. Use journal settings in dendron.yml",
   },
   DEFAULT_JOURNAL_DATE_FORMAT: {
-    key: CodeConfigKeys.DEFAULT_JOURNAL_DATE_FORMAT,
+    key: "dendron.defaultJournalDateFormat",
     type: "string",
     default: "y.MM.dd",
-    description: _noteDateDesc("journal"),
+    description: "DEPRECATED. Use journal settings in dendron.yml",
   },
   DEFAULT_JOURNAL_ADD_BEHAVIOR: {
     key: "dendron.defaultJournalAddBehavior",
     default: "childOfDomain",
     type: "string",
-    description: _noteAddBehaviorDesc("journal"),
+    description: "DEPRECATED. Use journal settings in dendron.yml",
     enum: _noteAddBehaviorEnum,
   },
   DEFAULT_SCRATCH_NAME: {

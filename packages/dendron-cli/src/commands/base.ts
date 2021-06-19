@@ -20,6 +20,8 @@ export abstract class BaseCommand<TOpts, TOut = any> {
 export abstract class CLICommand<TOpts, TOut> extends BaseCommand<TOpts, TOut> {
   public name: string;
   public desc: string;
+  // TODO: hackish
+  protected wsRootOptional?: boolean;
 
   constructor(opts: { name: string; desc: string } & BaseCommandOpts) {
     super(opts.name, opts);
@@ -47,11 +49,13 @@ export abstract class CLICommand<TOpts, TOut> extends BaseCommand<TOpts, TOut> {
 
   eval = async (args: any) => {
     this.L.info({ args });
-    // add wsRoot if not exist
     if (!args.wsRoot) {
       const cwd = process.cwd();
-      if (!fs.existsSync(path.join(cwd, "dendron.yml"))) {
-        console.log("no workspace deted. --wsRoot must be set");
+      if (
+        !fs.existsSync(path.join(cwd, "dendron.yml")) &&
+        !this.wsRootOptional
+      ) {
+        console.log("no workspace detecd. --wsRoot must be set");
         process.exit(1);
       } else {
         args.wsRoot = cwd;

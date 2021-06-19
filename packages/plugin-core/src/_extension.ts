@@ -3,20 +3,12 @@ import {
   getStage,
   VaultUtils,
   VSCodeEvents,
-  WorkspaceSettings,
 } from "@dendronhq/common-all";
-import {
-  getDurationMilliseconds,
-  getOS,
-  readJSONWithComments,
-  SegmentClient,
-  TelemetryStatus,
-  vault2Path,
-} from "@dendronhq/common-server";
+import { getDurationMilliseconds, getOS } from "@dendronhq/common-server";
 import {
   HistoryEvent,
   HistoryService,
-  removeCache,
+  MigrationServce,
   WorkspaceService,
 } from "@dendronhq/engine-server";
 import fs from "fs-extra";
@@ -32,7 +24,7 @@ import {
   WORKSPACE_STATE,
 } from "./constants";
 import { Logger } from "./logger";
-import { migrateConfig, migrateSettings } from "./migration";
+import { migrateConfig } from "./migration";
 import { Extensions } from "./settings";
 import { setupSegmentClient } from "./telemetry";
 import { InstallStatus, VSCodeUtils, WSUtils } from "./utils";
@@ -222,7 +214,8 @@ export async function _activate(
 
   if (DendronWorkspace.isActive()) {
     let start = process.hrtime();
-    const config = ws.config;
+    let dendronConfig = ws.config;
+    let wsConfig = await ws.getWorkspaceSettings();
     // --- Get Version State
     const previousGlobalVersion = ws.context.globalState.get<
       string | undefined
@@ -230,47 +223,34 @@ export async function _activate(
     let currentVersion = DendronWorkspace.version();
 
     // NOTE: to test upgrades, you can uncomment the below
-    // migratedGlobalVersion = "0.45.3";
-    // installedGlobalVersion = "0.46.0";
+    // previousVersion = "0.45.3";
+    // currentVersion = "0.46.0";
     const installStatus = VSCodeUtils.getInstallStatus({
       previousVersion,
       currentVersion,
     });
     const wsRoot = DendronWorkspace.wsRoot() as string;
+    const wsService = new WorkspaceService({ wsRoot });
 
     // check if we need to wipe the cache
     if (installStatus === InstallStatus.UPGRADED && stage !== "test") {
-      const cmpVersion = "0.46.0";
-      // current version greater then threshold and previous version was less then threshold
-      if (
-        semver.gte(currentVersion, cmpVersion) &&
-        semver.lte(previousVersion || "0.0.0", cmpVersion)
-      ) {
-        Logger.info({ ctx, msg: "upgrade requires removing cache" });
-
-        const ws = new WorkspaceService({ wsRoot: DendronWorkspace.wsRoot() });
-        await Promise.all(
-          ws.config.vaults.map((vault) => {
-            return removeCache(vault2Path({ wsRoot, vault }));
-          })
-        );
-        Logger.info({ ctx, msg: "done removing cache" });
-        // update telemetry settings
-        Logger.info({ ctx, msg: "keep existing analytics settings" });
-        const segStatus = SegmentClient.getStatus();
-        // use has not disabled telemetry prior to upgrade
-        if (
-          segStatus !== TelemetryStatus.DISABLED_BY_COMMAND &&
-          !config.noTelemetry
-        ) {
-          SegmentClient.enable(TelemetryStatus.ENABLED_BY_MIGRATION);
-        }
+      const changes = await MigrationServce.applyMigrationRules({
+        currentVersion,
+        previousVersion: previousVersion || "0.0.0",
+        dendronConfig,
+        wsConfig,
+        wsService,
+        logger: Logger,
+      });
+      // if changes were made, update all settings
+      if (!_.isEmpty(changes)) {
+        const { data } = _.last(changes)!;
+        dendronConfig = data.dendronConfig;
       }
     }
 
     // initialize client
     setupSegmentClient(ws);
-    const wsService = new WorkspaceService({ wsRoot });
     const didClone = await wsService.initialize({
       onSyncVaultsProgress: () => {
         vscode.window.showInformationMessage(
@@ -289,14 +269,19 @@ export async function _activate(
     }
 
     ws.workspaceService = wsService;
-    const configMigrated = migrateConfig({ config, wsRoot });
-    Logger.info({ ctx, config, configMigrated, msg: "read dendron config" });
+    const configMigrated = migrateConfig({ config: dendronConfig, wsRoot });
+    Logger.info({
+      ctx,
+      config: dendronConfig,
+      configMigrated,
+      msg: "read dendron config",
+    });
 
     // check for vaults with same name
-    const uniqVaults = _.uniqBy(config.vaults, (vault) =>
+    const uniqVaults = _.uniqBy(dendronConfig.vaults, (vault) =>
       VaultUtils.getName(vault)
     );
-    if (_.size(uniqVaults) < _.size(config.vaults)) {
+    if (_.size(uniqVaults) < _.size(dendronConfig.vaults)) {
       let txt = "Fix it";
       await vscode.window
         .showErrorMessage(
@@ -315,13 +300,6 @@ export async function _activate(
         });
       return false;
     }
-
-    // --- Possible settings migration from version update
-    const wsConfig = (await readJSONWithComments(
-      DendronWorkspace.workspaceFile().fsPath
-    )) as WorkspaceSettings;
-    const wsConfigMigrated = migrateSettings({ settings: wsConfig, config });
-    Logger.info({ ctx, wsConfig, wsConfigMigrated, msg: "read wsConfig" });
     wsService.writeMeta({ version: DendronWorkspace.version() });
 
     // stats
@@ -414,7 +392,7 @@ export async function _activate(
     AnalyticsUtils.identify();
     AnalyticsUtils.track(VSCodeEvents.InitializeWorkspace, {
       duration: durationReloadWorkspace,
-      noCaching: config.noCaching || false,
+      noCaching: dendronConfig.noCaching || false,
       numNotes,
       numVaults: _.size(getEngine().vaults),
     });

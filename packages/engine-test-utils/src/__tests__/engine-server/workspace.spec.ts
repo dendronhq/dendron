@@ -161,7 +161,6 @@ describe("WorkspaceService", () => {
           );
           await checkFile({
             fpath: path.join(wsRoot, "dendron.yml"),
-            snapshot: true,
           });
           await checkFile(
             {

@@ -1,4 +1,5 @@
 import { DHookDict } from "./hooks";
+import { SeedSite } from "./seed";
 
 // === Promitives
 export type DPermission = {
@@ -65,7 +66,32 @@ export type DWorkspace = {
 };
 
 export type DWorkspaceEntry = Omit<DWorkspace, "name" | "vaults">;
-export type SeedEntry = {};
+export type SeedEntry = {
+  /**
+   * Specific branch to pull from
+   */
+  branch?: string;
+  /**
+   * When in this seed, what url to use
+   */
+  site?: SeedSite;
+};
+
+export enum NoteAddBehavior {
+  "childOfDomain" = "childOfDomain",
+  "childOfDomainNamespace" = "childOfDomainNamespace",
+  "childOfCurrent" = "childOfCurrent",
+  "asOwnDomain" = "asOwnDomain",
+}
+
+export type JournalConfig = {
+  dailyDomain: string;
+  name: string;
+  dateFormat: string;
+  addBehavior: NoteAddBehavior;
+  /** 0 is Sunday, 1 is Monday, ... */
+  firstDayOfWeek: number;
+};
 
 export type DendronConfig = {
   /**
@@ -84,6 +110,8 @@ export type DendronConfig = {
    * Configuration related to publishing notes
    */
   site: DendronSiteConfig;
+
+  journal: JournalConfig;
 
   /**
    * Workspaces
@@ -245,9 +273,9 @@ export type DendronDevConfig = {
    */
   engineServerPort?: number;
   /**
-   * Disable dendron Web UI
+   * Enable experimental web ui. Default is false
    */
-  disableWebUI?: boolean;
+  enableWebUI?: boolean;
 };
 
 export type DendronSiteConfig = {

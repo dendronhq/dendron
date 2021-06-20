@@ -5,7 +5,11 @@ import {
   VaultUtils,
   VSCodeEvents,
 } from "@dendronhq/common-all";
-import { getDurationMilliseconds, getOS } from "@dendronhq/common-server";
+import {
+  getDurationMilliseconds,
+  getOS,
+  SegmentClient,
+} from "@dendronhq/common-server";
 import {
   HistoryEvent,
   HistoryService,
@@ -463,24 +467,11 @@ async function showWelcomeOrWhatsNew({
       duration: getDurationMilliseconds(start),
     });
     await StateService.instance().setGlobalVersion(version);
-    vscode.window
-      .showInformationMessage(
-        `Dendron collects limited usage data to help improve the quality of our software`,
-        "See Details",
-        "Opt Out"
-      )
-      .then((resp) => {
-        if (resp === "See Details") {
-          VSCodeUtils.openLink(
-            "https://wiki.dendron.so/notes/84df871b-9442-42fd-b4c3-0024e35b5f3c.html"
-          );
-        }
-        if (resp === "Opt Out") {
-          VSCodeUtils.openLink(
-            "https://wiki.dendron.so/notes/84df871b-9442-42fd-b4c3-0024e35b5f3c.html#how-to-opt-out-of-data-collection"
-          );
-        }
-      });
+
+    // if user hasn't opted out of telemetry, notify them about it
+    if (!SegmentClient.instance().hasOptedOut) {
+      StateService.instance().showTelemetryNotice();
+    }
     await ws.showWelcome(uri, { reuseWindow: true, rawHTML: true });
   } else {
     Logger.info({ ctx, msg: "not first time install" });

@@ -1,6 +1,6 @@
-import { WorkspaceOpts } from "@dendronhq/common-all";
+import { isNotUndefined, WorkspaceOpts } from "@dendronhq/common-all";
 import { readYAML, tmpDir } from "@dendronhq/common-server";
-import { WorkspaceService } from "@dendronhq/engine-server";
+import { MetadataService, WorkspaceService } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import { describe, it } from "mocha";
@@ -62,6 +62,9 @@ suite("Extension", function () {
     it("not active", function (done) {
       _activate(ctx).then((resp) => {
         expect(resp).toBeFalsy();
+        const dendronState = MetadataService.instance().getMeta();
+        expect(isNotUndefined(dendronState.firstInstall)).toBeTruthy();
+        expect(isNotUndefined(dendronState.firstWsInitialize)).toBeFalsy();
         done();
       });
     });
@@ -114,6 +117,9 @@ suite("Extension", function () {
                 },
               },
             });
+            const dendronState = MetadataService.instance().getMeta();
+            expect(isNotUndefined(dendronState.firstInstall)).toBeTruthy();
+            expect(isNotUndefined(dendronState.firstWsInitialize)).toBeTruthy();
             expect(
               fs.readdirSync(path.join(wsRoot, DEFAULT_LEGACY_VAULT_NAME))
             ).toEqual(genEmptyWSFiles());

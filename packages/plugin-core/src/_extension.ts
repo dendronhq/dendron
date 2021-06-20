@@ -11,6 +11,7 @@ import {
   HistoryService,
   MigrationServce,
   WorkspaceService,
+  MetadataService,
 } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -449,6 +450,7 @@ async function showWelcomeOrWhatsNew({
   const ws = DendronWorkspace.instance();
   if (previousVersion === CONSTANTS.DENDRON_INIT_VERSION) {
     Logger.info({ ctx, msg: "first time install" });
+    MetadataService.instance().setInitialInstall();
     // NOTE: this needs to be from extension because no workspace might exist at this point
     const uri = VSCodeUtils.joinPath(
       ws.context.extensionUri,

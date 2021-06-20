@@ -21,7 +21,7 @@ import {
   SetupHookFunction,
   SetupWSOpts,
 } from "@dendronhq/common-test-utils";
-import { DConfig } from "@dendronhq/engine-server";
+import { DConfig, MetadataService } from "@dendronhq/engine-server";
 import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import assert from "assert";
 import fs from "fs-extra";
@@ -214,6 +214,9 @@ export async function resetCodeWorkspace() {
   DendronWorkspace.workspaceFolders = () => {
     return undefined;
   };
+  if (fs.pathExistsSync(MetadataService.metaFilePath())) {
+    fs.removeSync(MetadataService.metaFilePath());
+  }
 }
 
 export async function setupCodeWorkspaceV2(opts: SetupCodeWorkspaceV2) {

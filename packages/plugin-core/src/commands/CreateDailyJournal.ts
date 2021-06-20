@@ -60,10 +60,10 @@ export class CreateDailyJournalCommand extends BaseCommand<
         return;
       }
     } else {
-      vault = config.defaultDailyJournalVault
+      vault = config.journal.dailyVault
         ? VaultUtils.getVaultByName({
             vaults: engine.vaults,
-            vname: config.defaultDailyJournalVault,
+            vname: config.journal.dailyVault,
           })
         : undefined;
     }

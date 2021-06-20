@@ -48,7 +48,7 @@ suite("Create Daily Journal Suite", function () {
         withConfig(
           (config) => {
             config.lookupConfirmVaultOnCreate = false;
-            config.defaultDailyJournalVault = VaultUtils.getName(vaults[0]);
+            config.journal.dailyVault = VaultUtils.getName(vaults[0]);
             return config;
           },
           { wsRoot }
@@ -71,7 +71,7 @@ suite("Create Daily Journal Suite", function () {
         withConfig(
           (config) => {
             config.lookupConfirmVaultOnCreate = true;
-            config.defaultDailyJournalVault = VaultUtils.getName(vaults[0]);
+            config.journal.dailyVault = VaultUtils.getName(vaults[0]);
             return config;
           },
           { wsRoot }

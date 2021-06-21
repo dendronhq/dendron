@@ -251,6 +251,52 @@ describe("engine", async () => {
       }
     );
   });
+
+  test("suppressed hook function", async () => {
+    await runEngineTestV5(
+      async ({ vaults, engine }) => {
+        const vault = _.find(vaults, { fsPath: "vault1" })!;
+        const note = NoteUtils.create({
+          id: "hooked",
+          fname: "hooked",
+          body: "hooked body",
+          vault,
+        });
+        await engine.writeNote(note, { newNode: true, runHooks: false });
+        const ent = engine.notes["hooked"];
+        debugger;
+        expect(
+          await AssertUtils.assertInString({
+            body: ent.body,
+            match: ["hooked body"],
+          })
+        ).toBeTruthy();
+      },
+      {
+        initHooks: true,
+        expect,
+        createEngine: createEngineFromServer,
+        preSetupHook: async ({ wsRoot }) => {
+          writeJSHook({ wsRoot, fname: "hello", canary: "hello" });
+          TestConfigUtils.withConfig(
+            (config) => {
+              config.hooks = {
+                onCreate: [
+                  {
+                    id: "hello",
+                    pattern: "*",
+                    type: "js",
+                  },
+                ],
+              };
+              return config;
+            },
+            { wsRoot }
+          );
+        },
+      }
+    );
+  });
 });
 
 describe("remote engine", async () => {

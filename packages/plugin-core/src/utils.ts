@@ -418,7 +418,11 @@ export class VSCodeUtils {
 export class WSUtils {
   static updateEngineAPI(port: number | string): DEngineClient {
     const ws = DendronWorkspace.instance();
-    ws.setEngine(EngineAPIService.create({ port }));
+    const svc = EngineAPIService.createEngine({
+      port,
+      enableWorkspaceTrust: vscode.workspace.isTrusted,
+    });
+    ws.setEngine(svc);
     ws.port = _.toInteger(port);
     const engine = ws.getEngine();
     return engine;

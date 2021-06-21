@@ -29,8 +29,10 @@ export class MetadataService {
   }
 
   getMeta(): Metadata {
-    if (!fs.pathExistsSync(MetadataService.metaFilePath())) {
-      fs.ensureFileSync(MetadataService.metaFilePath());
+    const metaPath = MetadataService.metaFilePath();
+    if (!fs.pathExistsSync(metaPath)) {
+      fs.ensureFileSync(metaPath);
+      fs.writeJSONSync(metaPath, {});
       return {};
     }
     return fs.readJSONSync(MetadataService.metaFilePath()) as Metadata;

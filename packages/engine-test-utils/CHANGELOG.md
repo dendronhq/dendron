@@ -3,6 +3,26 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.47.0](https://github.com/dendronhq/dendron/compare/v0.46.1...v0.47.0) (2021-06-21)
+
+
+### Bug Fixes
+
+* **preview:** note refs showing first line as html ([5a025e3](https://github.com/dendronhq/dendron/commit/5a025e3ccd3e2c40ee2975577b831339b272e75d))
+* order of vaults for tests ([edec699](https://github.com/dendronhq/dendron/commit/edec6998e7cb3deb659b2da41be02264e7aaaa1f))
+
+
+### Features Dendron
+
+* airtable export pod ([e04dfb4](https://github.com/dendronhq/dendron/commit/e04dfb4d26edecbe02fbdd99adf1a387ef6dfd45))
+* remove seed cmd ([252f297](https://github.com/dendronhq/dendron/commit/252f29741f1cabb915e9e541d80256b21ef594d0))
+* seed add cmd ([a8f245b](https://github.com/dendronhq/dendron/commit/a8f245b1a29f6de0a80839c1bd765a61941ab58f))
+* support init seeds on startup ([ef095a6](https://github.com/dendronhq/dendron/commit/ef095a60d646df510b18971264a1443c13e41653))
+
+
+
+
+
 ## [0.46.3-alpha.0](https://github.com/dendronhq/dendron/compare/v0.46.1...v0.46.3-alpha.0) (2021-06-19)
 
 

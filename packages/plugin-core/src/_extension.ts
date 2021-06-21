@@ -214,29 +214,29 @@ export async function _activate(
   const ws = DendronWorkspace.getOrCreate(context, {
     skipSetup: stage === "test",
   });
+
+  let currentVersion = DendronWorkspace.version();
   const previousWorkspaceVersion = stateService.getWorkspaceVersion();
   const previousGlobalVersion = stateService.getGlobalVersion();
+  const extensionInstallStatus = VSCodeUtils.getInstallStatusForExtension({
+    previousGlobalVersion,
+    currentVersion,
+  });
 
   if (DendronWorkspace.isActive()) {
     let start = process.hrtime();
     let dendronConfig = ws.config;
     let wsConfig = await ws.getWorkspaceSettings();
     // --- Get Version State
-
-    let currentVersion = DendronWorkspace.version();
-
-    // NOTE: to test upgrades, you can uncomment the below
-    // previousVersion = "0.45.3";
-    // currentVersion = "0.46.0";
-    const installStatus = VSCodeUtils.getInstallStatus({
-      previousVersion: previousWorkspaceVersion,
+    const workspaceInstallStatus = VSCodeUtils.getInstallStatusForWorkspace({
+      previousWorkspaceVersion: previousWorkspaceVersion,
       currentVersion,
     });
     const wsRoot = DendronWorkspace.wsRoot() as string;
     const wsService = new WorkspaceService({ wsRoot });
 
     // check if we upgraded
-    if (installStatus === InstallStatus.UPGRADED && stage !== "test") {
+    if (workspaceInstallStatus === InstallStatus.UPGRADED && stage !== "test") {
       // never migrated version numbers before
       const changes = await MigrationServce.applyMigrationRules({
         currentVersion,
@@ -320,7 +320,7 @@ export async function _activate(
 
     Logger.info({
       ctx,
-      installStatus,
+      installStatus: workspaceInstallStatus,
       currentVersion,
       previousWorkspaceVersion,
       previousGlobalVersion,
@@ -410,8 +410,9 @@ export async function _activate(
   }
 
   return showWelcomeOrWhatsNew({
+    extensionInstallStatus,
     version: DendronWorkspace.version(),
-    previousVersion: previousWorkspaceVersion,
+    previousExtensionVersion: previousWorkspaceVersion,
     start: startActivate,
   }).then(() => {
     if (DendronWorkspace.isActive()) {
@@ -441,50 +442,58 @@ export function deactivate() {
 }
 
 async function showWelcomeOrWhatsNew({
+  extensionInstallStatus,
   version,
-  previousVersion,
+  previousExtensionVersion,
   start,
 }: {
+  extensionInstallStatus: InstallStatus;
   version: string;
-  previousVersion: string;
+  previousExtensionVersion: string;
   start: [number, number];
 }) {
   const ctx = "showWelcomeOrWhatsNew";
-  Logger.info({ ctx, version, previousVersion });
+  Logger.info({ ctx, version, previousExtensionVersion });
   const ws = DendronWorkspace.instance();
-  if (previousVersion === CONSTANTS.DENDRON_INIT_VERSION) {
-    Logger.info({ ctx, msg: "first time install" });
-    MetadataService.instance().setInitialInstall();
-    // NOTE: this needs to be from extension because no workspace might exist at this point
-    const uri = VSCodeUtils.joinPath(
-      ws.context.extensionUri,
-      "assets",
-      "dendron-ws",
-      "vault",
-      "welcome.html"
-    );
-    AnalyticsUtils.track(VSCodeEvents.Install, {
-      duration: getDurationMilliseconds(start),
-    });
-    await StateService.instance().setGlobalVersion(version);
+  switch (extensionInstallStatus) {
+    case InstallStatus.INITIAL_INSTALL: {
+      Logger.info({ ctx, msg: "extension, initial install" });
+      MetadataService.instance().setInitialInstall();
+      // NOTE: this needs to be from extension because no workspace might exist at this point
+      const uri = VSCodeUtils.joinPath(
+        ws.context.extensionUri,
+        "assets",
+        "dendron-ws",
+        "vault",
+        "welcome.html"
+      );
+      AnalyticsUtils.track(VSCodeEvents.Install, {
+        duration: getDurationMilliseconds(start),
+      });
+      await StateService.instance().setGlobalVersion(version);
 
-    // if user hasn't opted out of telemetry, notify them about it
-    if (!SegmentClient.instance().hasOptedOut) {
-      StateService.instance().showTelemetryNotice();
+      // if user hasn't opted out of telemetry, notify them about it
+      if (!SegmentClient.instance().hasOptedOut) {
+        StateService.instance().showTelemetryNotice();
+      }
+      await ws.showWelcome(uri, { reuseWindow: true, rawHTML: true });
+      break;
     }
-    await ws.showWelcome(uri, { reuseWindow: true, rawHTML: true });
-  } else {
-    Logger.info({ ctx, msg: "not first time install" });
-    if (version !== previousVersion) {
-      Logger.info({ ctx, msg: "new version", version, previousVersion });
+    case InstallStatus.UPGRADED: {
+      Logger.info({
+        ctx,
+        msg: "extension, new version",
+        version,
+        previousExtensionVersion,
+      });
       await StateService.instance().setGlobalVersion(version);
       AnalyticsUtils.track(VSCodeEvents.Upgrade, {
-        previousVersion,
+        previousVersion: previousExtensionVersion,
         duration: getDurationMilliseconds(start),
       });
       vscode.window
         .showInformationMessage(
-          `Dendron has been upgraded to ${version} from ${previousVersion}`,
+          `Dendron has been upgraded to ${version} from ${previousExtensionVersion}`,
           "See what changed"
         )
         .then((resp) => {
@@ -497,6 +506,10 @@ async function showWelcomeOrWhatsNew({
             );
           }
         });
+      break;
     }
+    default:
+      // no change
+      break;
   }
 }

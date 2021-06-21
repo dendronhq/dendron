@@ -1,4 +1,5 @@
 import {
+  CONSTANTS,
   DendronError,
   DEngineClient,
   DNodeUtils,
@@ -173,17 +174,39 @@ export class VSCodeUtils {
    * Check if we upgraded, initialized for the first time or no change was detected
    * @returns {@link InstallStatus}
    */
-  static getInstallStatus({
-    previousVersion,
+  static getInstallStatusForWorkspace({
+    previousWorkspaceVersion,
     currentVersion,
   }: {
-    previousVersion?: string;
+    previousWorkspaceVersion?: string;
     currentVersion: string;
   }): InstallStatus {
-    if (_.isUndefined(previousVersion)) {
+    if (
+      _.isUndefined(previousWorkspaceVersion) ||
+      previousWorkspaceVersion === CONSTANTS.DENDRON_INIT_VERSION
+    ) {
       return InstallStatus.INITIAL_INSTALL;
     }
-    if (previousVersion !== currentVersion) {
+    if (previousWorkspaceVersion !== currentVersion) {
+      return InstallStatus.UPGRADED;
+    }
+    return InstallStatus.NO_CHANGE;
+  }
+
+  static getInstallStatusForExtension({
+    previousGlobalVersion,
+    currentVersion,
+  }: {
+    previousGlobalVersion?: string;
+    currentVersion: string;
+  }): InstallStatus {
+    if (
+      _.isUndefined(previousGlobalVersion) ||
+      previousGlobalVersion === CONSTANTS.DENDRON_INIT_VERSION
+    ) {
+      return InstallStatus.INITIAL_INSTALL;
+    }
+    if (previousGlobalVersion !== currentVersion) {
       return InstallStatus.UPGRADED;
     }
     return InstallStatus.NO_CHANGE;

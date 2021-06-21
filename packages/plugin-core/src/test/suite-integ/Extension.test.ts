@@ -1,6 +1,7 @@
 import { isNotUndefined } from "@dendronhq/common-all";
 import { readYAML, tmpDir } from "@dendronhq/common-server";
 import { MetadataService } from "@dendronhq/engine-server";
+import { TestEngineUtils } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
 import { describe, it } from "mocha";
 import path from "path";
@@ -46,6 +47,7 @@ suite("Extension", function () {
     beforeHook: async () => {
       await resetCodeWorkspace();
       await new ResetConfigCommand().execute({ scope: "all" });
+      TestEngineUtils.mockHomeDir();
     },
     afterHook: async () => {
       sinon.restore();

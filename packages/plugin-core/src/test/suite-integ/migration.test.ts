@@ -64,7 +64,7 @@ suite("Migration", function () {
           await _activate(ctx);
           expect(
             sinon
-              .spy(VSCodeUtils, "getInstallStatus")
+              .spy(VSCodeUtils, "getInstallStatusForExtension")
               .returned(InstallStatus.UPGRADED)
           );
           done();

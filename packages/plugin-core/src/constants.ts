@@ -754,12 +754,11 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
 export const DENDRON_CHANNEL_NAME = "Dendron";
 
 export const WORKSPACE_STATE = {
-  WS_VERSION: "dendron.wsVersion",
+  VERSION: "dendron.wsVersion",
 };
 
 export enum GLOBAL_STATE {
   VERSION = "dendron.version",
-  VERSION_PREV = "dendron.versionPrev",
   /**
    * Set the first time a dendron workspace is activated
    */
@@ -772,7 +771,6 @@ export enum GLOBAL_STATE {
 }
 // export const GLOBAL_STATE = {
 //   VERSION: "dendron.version",
-//   VERSION_PREV: "dendron.versionPrev",
 //   /**
 //    * Set the first time a dendron workspace is activated
 //    */

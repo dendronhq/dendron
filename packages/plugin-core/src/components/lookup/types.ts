@@ -30,6 +30,7 @@ export type DendronQuickPickerV2 = DendronQuickPickItemV2 & {
   buttons: DendronBtn[];
   nonInteractive?: boolean;
   prev?: { activeItems: any; items: any };
+  prevValue?: string;
   onCreate?: (note: DNodeProps) => Promise<DNodeProps | undefined>;
   /**
    @deprecated, replace with filterResults

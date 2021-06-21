@@ -86,6 +86,10 @@ export enum NoteAddBehavior {
 
 export type JournalConfig = {
   dailyDomain: string;
+  /**
+   * If set, add all daily journals to specified vault
+   */
+  dailyVault?: string;
   name: string;
   dateFormat: string;
   addBehavior: NoteAddBehavior;
@@ -104,8 +108,13 @@ export type DendronConfig = {
   noTelemetry?: boolean;
   /**
    * Dendron version. Setup by plugin
+   @deprecated
    */
   version: number;
+  /**
+   * Dendron version
+   */
+  dendronVersion?: string;
   /**
    * Configuration related to publishing notes
    */
@@ -229,22 +238,6 @@ export type DendronConfig = {
    * Configuration for Random Note Lookup Command
    */
   randomNote?: RandomNoteConfig;
-
-  /**
-   * Used by CalendarView to display first day of the week.
-   * Values are:
-   * 0|7: sunday
-   * 1: monday
-   * 2: tuesday
-   * ...
-   *
-   */
-  dayOfWeek?: number;
-
-  /**
-   * Configuration for Create Default Daily Journal
-   */
-  defaultDailyJournalVault?: string;
 };
 
 export type RandomNoteConfig = {

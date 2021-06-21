@@ -10,7 +10,7 @@ import { Migrations } from "./types";
 
 export const ALL_MIGRATIONS: Migrations[] = [
   {
-    version: "0.46.1",
+    version: "0.47.0",
     changes: [
       {
         name: "migrate journal config",

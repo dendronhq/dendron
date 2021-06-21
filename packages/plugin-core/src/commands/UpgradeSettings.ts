@@ -27,6 +27,8 @@ export class UpgradeSettingsCommand extends BasicCommand<
       path.dirname(DendronWorkspace.workspaceFile().fsPath)
     );
     this.L.info({ ctx, newConfig });
+    // vscode doesn't let us uninstall extensions
+    // tell user to uninstall extensions we no longer want
     const badExtensions: Extension<any>[] =
       (newConfig.extensions.unwantedRecommendations
         ?.map((ext) => {

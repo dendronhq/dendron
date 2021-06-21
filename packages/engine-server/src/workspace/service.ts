@@ -32,6 +32,7 @@ import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { DConfig } from "../config";
+import { MetadataService } from "../metadata";
 import { SeedService, SeedUtils } from "../seed";
 import { Git } from "../topics/git";
 import {
@@ -461,6 +462,10 @@ export class WorkspaceService {
       },
       Promise.resolve()
     );
+    // check if this is the first workspace created
+    if (_.isUndefined(MetadataService.instance().getMeta().firstWsInitialize)) {
+      MetadataService.instance().setFirstWsInitialize();
+    }
     return ws;
   }
 

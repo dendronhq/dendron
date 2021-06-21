@@ -63,6 +63,16 @@ export class DConfig {
     };
   }
 
+  /**
+   * Get without filling in defaults
+   * @param wsRoot
+   */
+  static getRaw(wsRoot: string) {
+    const configPath = DConfig.configPath(wsRoot);
+    const config = readYAML(configPath) as Partial<DendronConfig>;
+    return config;
+  }
+
   static getOrCreate(
     dendronRoot: string,
     defaults?: Partial<DendronConfig>

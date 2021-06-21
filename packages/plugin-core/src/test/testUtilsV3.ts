@@ -42,6 +42,7 @@ import {
   VaultRemoteSource,
 } from "../commands/VaultAddCommand";
 import { Logger } from "../logger";
+import { StateService } from "../services/stateService";
 import { WorkspaceConfig } from "../settings";
 import { VSCodeUtils } from "../utils";
 import { DendronWorkspace, getWS } from "../workspace";
@@ -188,6 +189,7 @@ export async function setupLegacyWorkspaceMulti(
   const { preSetupHook, postSetupHook, wsSettingsOverride } = copts;
 
   const { wsRoot, vaults } = await EngineTestUtilsV4.setupWS();
+  new StateService(opts.ctx);
   setupCodeConfiguration(opts);
   // setup workspace file
   stubWorkspace({ wsRoot, vaults });

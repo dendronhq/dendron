@@ -17,4 +17,5 @@ export * from "./utils";
 export * from "./workspace";
 export * from "./seed";
 export * from "./migrations";
+export * from "./metadata";
 export { execa };

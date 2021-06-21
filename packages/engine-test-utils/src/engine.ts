@@ -22,6 +22,7 @@ import {
   runJestHarnessV2,
   SetupHookFunction,
   SetupTestFunctionV4,
+  sinon,
   TestResult,
 } from "@dendronhq/common-test-utils";
 import { LaunchEngineServerCommand } from "@dendronhq/dendron-cli";
@@ -36,6 +37,7 @@ import path from "path";
 import { DendronConfig } from "../../common-all/lib/types";
 import { ENGINE_HOOKS } from "./presets";
 import { GitTestUtils } from "./utils";
+import os from "os";
 
 export type TestSetupWorkspaceOpts = {
   /**
@@ -254,6 +256,9 @@ export async function runEngineTestV5(
     ],
     addVSWorkspace: false,
   });
+  // make sure tests don't overwrite local homedir contents
+
+  TestEngineUtils.mockHomeDir();
   const { wsRoot, vaults } = await setupWS({ vaults: vaultsInit, workspaces });
   if ((opts.initHooks, vaults)) {
     fs.mkdirSync(path.join(wsRoot, CONSTANTS.DENDRON_HOOKS_BASE));
@@ -299,6 +304,7 @@ export async function runEngineTestV5(
   }
   const results = (await func(testOpts)) || [];
   await runJestHarnessV2(results, expect);
+  sinon.restore();
   return { opts: testOpts, resp: undefined, wsRoot };
 }
 
@@ -327,6 +333,11 @@ export function testWithEngine(
 }
 
 export class TestEngineUtils {
+  static mockHomeDir() {
+    const tmp = tmpDir();
+    sinon.stub(os, "homedir").returns(tmp.name);
+    return tmp.name;
+  }
   static vault1(vaults: DVault[]) {
     return _.find(vaults, { fsPath: "vault1" })!;
   }

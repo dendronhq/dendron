@@ -28,7 +28,7 @@
         }
       },
       "problemMatcher": []
-    }
+    },
     {
       "type": "npm",
       "label": "test:all",

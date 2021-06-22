@@ -5,12 +5,14 @@ import {
   NoteViewMessageType,
   NoteViewMessage,
   assertUnreachable,
+  NoteProps,
 } from "@dendronhq/common-all";
 import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../utils";
 import { WebViewUtils } from "../views/utils";
 import { BasicCommand } from "./base";
-import { getWS } from "../workspace";
+import { getEngine, getWS } from "../workspace";
+import { GotoNoteCommand } from "./GotoNote";
 
 type CommandOpts = {};
 type CommandOutput = any;
@@ -51,9 +53,7 @@ export class ShowPreviewV2Command extends BasicCommand<
       vscode.ViewColumn.Beside, // Editor column to show the new webview panel in.
       {
         enableScripts: true,
-        enableCommandUris: true,
-        // enableFindWidget: true,
-        localResourceRoots: [],
+        retainContextWhenHidden: true,
       }
     );
 
@@ -70,7 +70,16 @@ export class ShowPreviewV2Command extends BasicCommand<
           const { data } = msg;
           if (data.href) {
             if (data.href.includes("localhost")) {
-              console.log("is local file (wikilink)");
+              const { path } = vscode.Uri.parse(data.href);
+              const noteId = path.match(/.*\/(.*).html/)?.[1];
+              console.log("is local file (wikilink)", path);
+              let note: NoteProps | undefined = undefined;
+              if (noteId && (note = getEngine().notes[noteId])) {
+                await new GotoNoteCommand().execute({
+                  qs: note.fname,
+                  vault: note.vault,
+                });
+              }
             } else {
               VSCodeUtils.openLink(data.href);
             }

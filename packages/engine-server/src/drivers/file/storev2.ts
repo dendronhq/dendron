@@ -60,19 +60,6 @@ export type FileMeta = {
 };
 export type FileMetaDict = { [key: string]: FileMeta[] };
 
-// type NoteEntryV2 = {
-//   mtime: number;
-//   size: number;
-//   hash: number;
-// };
-
-// type MetaEntryV2 = {
-//   links: any[];
-//   embeds: any[];
-//   tags: any[];
-//   headings: any[];
-// };
-
 export class FileStorage implements DStore {
   public vaults: DVault[];
   public notes: NotePropsDict;

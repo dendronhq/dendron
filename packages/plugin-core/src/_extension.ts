@@ -210,6 +210,12 @@ export async function _activate(
     workspaceFile,
     workspaceFolders,
   });
+
+  // Setup the workspace trust callback to detect changes from the user's workspace trust settings
+  vscode.workspace.onDidGrantWorkspaceTrust(() => {
+    getEngine().trustedWorkspace = vscode.workspace.isTrusted;
+  });
+
   //  needs to be initialized to setup commands
   const ws = DendronWorkspace.getOrCreate(context, {
     skipSetup: stage === "test",

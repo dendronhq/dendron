@@ -742,8 +742,8 @@
     "@dendronhq/engine-server": "^0.47.0",
     "@dendronhq/engine-test-utils": "^0.47.0",
     "@dendronhq/lsp-server": "^0.28.7-alpha.0",
+    "@types/vscode": "1.57",
     "@dendronhq/pods-core": "^0.47.0",
-    "@types/vscode": "1.54",
     "cross-path-sort": "^1.0.0",
     "execa": "^4.0.2",
     "fs-extra": "^9.0.1",
@@ -760,5 +760,12 @@
     "type": "git",
     "url": "ssh://git@github.com/dendronhq/dendron.git",
     "directory": "packages/plugin-core"
+  },
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": "limited",
+      "description": "All features are enabled except for hooks.",
+      "restrictedConfigurations": []
+    }
   }
 }

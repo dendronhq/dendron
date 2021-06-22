@@ -32,7 +32,7 @@ export type NoteGraphConfig = {
   
   "information.edges-links"?: GraphConfigItem<number>;
 
-  "filter.show-stubs": GraphConfigItem<boolean>;
+  "filter.show-stubs"?: GraphConfigItem<boolean>;
 };
 
 export type SchemaGraphConfig = {

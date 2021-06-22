@@ -8,7 +8,7 @@ function main() {
     upstream = exec("git rev-parse --abbrev-ref @{push}").stdout.trim();
   } catch {
     // Fallback to first origin if none are set
-    upstream = exec("git remote").stdout.trim().split("\n")[0];
+    upstream = `${exec("git remote").stdout.trim().split("\n")[0]}/master`;
   }
   // The files that would get pushed
   const filesToPush = exec(`git diff --name-only ${upstream}`).stdout.split('\n');

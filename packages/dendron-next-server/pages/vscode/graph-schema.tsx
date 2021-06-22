@@ -15,7 +15,6 @@ import {
   GraphViewMessage,
   GraphViewMessageType,
 } from "@dendronhq/common-all";
-import usePropegateKeystrokes from "../../hooks/usePropegateKeystrokes";
 
 export default function FullSchemaGraph({
   engine,
@@ -24,7 +23,6 @@ export default function FullSchemaGraph({
 }) {
   const [config, setConfig] = useState<GraphConfig>(graphConfig.schema);
   const elements = useGraphElements({ type: "schema", engine });
-  usePropegateKeystrokes();
 
   const onSelect: EventHandler = (e) => {
     const { id, source, vault } = e.target[0]._private.data;

@@ -1,13 +1,7 @@
 import { createLogger, engineSlice } from "@dendronhq/common-frontend";
 import _ from "lodash";
 import React, { useEffect, useRef, useState } from "react";
-import cytoscape, {
-  Core,
-  EdgeDefinition,
-  ElementsDefinition,
-  EventHandler,
-} from "cytoscape";
-// @ts-ignore
+import cytoscape, { Core, EdgeDefinition, EventHandler } from "cytoscape";
 import euler from "cytoscape-euler";
 import { useThemeSwitcher } from "react-css-theme-switcher";
 import Head from "next/head";
@@ -47,7 +41,9 @@ const getCytoscapeStyle = (themes: any, theme: string | undefined) => {
     line-style: dashed;
   }
 
-  .hidden {
+  .hidden--vault,
+  .hidden--regex-whitelist,
+  .hidden--regex-blacklist {
     display: none;
   }
 `;

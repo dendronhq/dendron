@@ -309,12 +309,10 @@ export async function runEngineTestV5(
     }
     const results = (await func(testOpts)) || [];
     await runJestHarnessV2(results, expect);
-    sinon.restore();
     return { opts: testOpts, resp: undefined, wsRoot };
-  } catch (err) {
+  } finally {
     // restore sinon so other tests can keep running
     sinon.restore();
-    throw err;
   }
 }
 

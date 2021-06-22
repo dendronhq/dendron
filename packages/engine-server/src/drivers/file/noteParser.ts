@@ -4,6 +4,7 @@ import {
   DStore,
   DVault,
   ERROR_STATUS,
+  isNotUndefined,
   NoteProps,
   NotePropsDict,
   NotesCache,
@@ -56,7 +57,11 @@ export class NoteParser extends ParserBase {
   async parseFile(
     allPaths: string[],
     vault: DVault
-  ): Promise<{ notes: NoteProps[]; cacheUpdates: NotesCacheEntryMap }> {
+  ): Promise<{
+    notes: NoteProps[];
+    cacheUpdates: NotesCacheEntryMap;
+    errors: DendronError[];
+  }> {
     const ctx = "parseFile";
     const fileMetaDict: FileMetaDict = getFileMeta(allPaths);
     const maxLvl = _.max(_.keys(fileMetaDict).map((e) => _.toInteger(e))) || 2;
@@ -64,6 +69,7 @@ export class NoteParser extends ParserBase {
     const notesById: NotePropsDict = {};
     this.logger.info({ ctx, msg: "enter", vault });
     const cacheUpdates: { [key: string]: NotesCacheEntry } = {};
+    const errors: DendronError[] = [];
 
     // get root note
     if (_.isUndefined(fileMetaDict[1])) {
@@ -101,20 +107,32 @@ export class NoteParser extends ParserBase {
       // don't count root node
       .filter((n) => n.fpath !== "root.md")
       .flatMap((ent) => {
-        const out = this.parseNoteProps({
-          fileMeta: ent,
-          addParent: false,
-          vault,
-        });
-        const notes = out.propsList;
-        if (!out.matchHash) {
-          cacheUpdates[notes[0].fname] = createCacheEntry({
-            noteProps: notes[0],
-            hash: out.noteHash,
+        try {
+          const out = this.parseNoteProps({
+            fileMeta: ent,
+            addParent: false,
+            vault,
           });
+          const notes = out.propsList;
+          if (!out.matchHash) {
+            cacheUpdates[notes[0].fname] = createCacheEntry({
+              noteProps: notes[0],
+              hash: out.noteHash,
+            });
+          }
+          return notes;
+        } catch (err) {
+          if (!(err instanceof DendronError)) {
+            err = new DendronError({
+              message: `Failed to read ${ent.fpath} in ${vault.fsPath}`,
+              payload: err,
+            });
+          }
+          errors.push(err);
+          return undefined;
         }
-        return notes;
-      });
+      })
+      .filter(isNotUndefined);
     prevNodes.forEach((ent) => {
       DNodeUtils.addChild(rootNote, ent);
       notesByFname[ent.fname] = ent;
@@ -129,28 +147,40 @@ export class NoteParser extends ParserBase {
           return !globMatch(["root.*"], ent.fpath);
         })
         .flatMap((ent) => {
-          const out = this.parseNoteProps({
-            fileMeta: ent,
-            parents: prevNodes,
-            notesByFname,
-            addParent: true,
-            vault,
-          });
-          const notes = out.propsList;
-          if (!out.matchHash) {
-            cacheUpdates[notes[0].fname] = createCacheEntry({
-              noteProps: notes[0],
-              hash: out.noteHash,
+          try {
+            const out = this.parseNoteProps({
+              fileMeta: ent,
+              parents: prevNodes,
+              notesByFname,
+              addParent: true,
+              vault,
             });
+            const notes = out.propsList;
+            if (!out.matchHash) {
+              cacheUpdates[notes[0].fname] = createCacheEntry({
+                noteProps: notes[0],
+                hash: out.noteHash,
+              });
+            }
+            // need to be inside this loop
+            // deal with `src/__tests__/enginev2.spec.ts`, with stubs/ test case
+            notes.forEach((ent) => {
+              notesByFname[ent.fname] = ent;
+              notesById[ent.id] = ent;
+            });
+            return notes;
+          } catch (err) {
+            if (!(err instanceof DendronError)) {
+              err = new DendronError({
+                message: `Failed to read ${ent.fpath} in ${vault.fsPath}`,
+                payload: err,
+              });
+            }
+            errors.push(err);
+            return undefined;
           }
-          // need to be inside this loop
-          // deal with `src/__tests__/enginev2.spec.ts`, with stubs/ test case
-          notes.forEach((ent) => {
-            notesByFname[ent.fname] = ent;
-            notesById[ent.id] = ent;
-          });
-          return notes;
-        });
+        })
+        .filter(isNotUndefined);
       lvl += 1;
       prevNodes = currNodes;
     }
@@ -168,7 +198,7 @@ export class NoteParser extends ParserBase {
       })
     );
     this.logger.info({ ctx, msg: "post:matchSchemas" });
-    return { notes: out, cacheUpdates };
+    return { notes: out, cacheUpdates, errors };
   }
 
   /**

@@ -7,6 +7,7 @@ import {
 } from "@dendronhq/common-all";
 import { createLogger, tmpDir, vault2Path } from "@dendronhq/common-server";
 import {
+  AssertUtils,
   FileTestUtils,
   getLogFilePath,
   NoteTestUtilsV4,
@@ -137,13 +138,6 @@ describe("engine, cache", () => {
 describe("engine, notes/", () => {
   const nodeType = "NOTES";
 
-  // EXAMPLE of running a single test
-  // test.only("bond", async () => {
-  //   const preset = getPreset({key: "NOTE_REF", nodeType: "NOTES", presetName: "rename", presets: ENGINE_PRESETS})
-  //   const { testFunc, ...opts } = preset;
-  //   await runEngineTestV5(testFunc, { ...opts, createEngine, expect });
-  // });
-
   ENGINE_PRESETS.forEach((pre) => {
     const { name, presets } = pre;
     describe(name, () => {
@@ -221,9 +215,14 @@ describe("engine, init", () => {
     await runEngineTestV5(
       async ({ initResp, wsRoot, vaults }) => {
         // should have initialized without issue
-        expect(initResp.error).toBeFalsy();
         const notes = initResp.data?.notes;
         expect(notes).toBeTruthy();
+        // should have noticed the broken note
+        expect(initResp.error).toBeTruthy();
+        await AssertUtils.assertInString({
+          body: initResp.error!.payload,
+          match: ["broken-note"],
+        });
         // should ignore the broken note
         const note = NoteUtils.getNoteByFnameV5({
           fname,

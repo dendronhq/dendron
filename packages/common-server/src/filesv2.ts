@@ -188,17 +188,22 @@ export function file2NoteWithCache({
   const matchHash = cache.notes[name]?.hash === sig;
   const fname = toLowercase ? name.toLowerCase() : name;
   let note: NoteProps;
+
+  // if hash matches, note hasn't changed
   if (matchHash) {
+    // since we don't store the note body in the cache file, we need to re-parse the body
     let capture = content.match(/^---[\s\S]+?---/);
     if (capture) {
       let offset = capture[0].length;
       let body = content.slice(offset + 1);
       // vault can change without note changing so we need to add this
-      note = { ...cache.notes[name].data, body, vault };
+      // add `contentHash` to this signature because its not saved with note
+      note = { ...cache.notes[name].data, body, vault, contentHash: sig };
       return { note, matchHash, noteHash: sig };
     }
   }
   note = string2Note({ content, fname, vault });
+  note.contentHash = sig;
   return { note, matchHash, noteHash: sig };
 }
 

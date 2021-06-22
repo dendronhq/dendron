@@ -133,6 +133,11 @@ export type DNodeProps<T = any, TCustom = any> = {
    * The vault that a note belongs to
    */
   vault: DVault;
+
+  /**
+   * Hash of note content
+   */
+  contentHash?: string;
 };
 
 export type SchemaData = {

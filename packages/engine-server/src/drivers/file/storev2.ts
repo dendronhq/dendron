@@ -132,7 +132,7 @@ export class FileStorage implements DStore {
       });
 
       const { notes, schemas } = this;
-      let error: IDendronError | undefined = errors[0];
+      let error: IDendronError | null = errors[0] || null;
       if (errors.length > 1) {
         error = new DendronCompositeError(errors);
       }

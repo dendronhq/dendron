@@ -69,6 +69,7 @@ export class ShowPreviewV2Command extends BasicCommand<
         case NoteViewMessageType.onClick: {
           const { data } = msg;
           if (data.href) {
+            // TODO find a better way to differentiate local files from web links
             if (data.href.includes("localhost")) {
               const { path } = vscode.Uri.parse(data.href);
               const noteId = path.match(/.*\/(.*).html/)?.[1];

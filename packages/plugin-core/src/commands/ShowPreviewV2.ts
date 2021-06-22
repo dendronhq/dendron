@@ -88,19 +88,22 @@ export class ShowPreviewV2Command extends BasicCommand<
           break;
         }
         case NoteViewMessageType.onGetActiveEditor: {
-          logger.info({
-            ctx: `${ctx}:onGetActiveEditor`,
-            data: msg.data,
-          });
-          const document = VSCodeUtils.getActiveTextEditor()?.document;
-          const note = document && VSCodeUtils.getNoteFromDocument(document);
+          /**
+           * Here we want to load the last active note.
+           * This `case` happens when `packages/plugin-core/src/views/utils.ts:87` calls `onGetActiveEditor` msg.type on initializing webview.
+           * But after opening the Preview Webview the focus changes and `activeTextEditor` becomes `undefined`.
+           * TODO: find a way to send to the webview an `onDidChangeActiveTextEditor` message with the latest active note.
+           *
+           */
+          const activeTextEditor = VSCodeUtils.getActiveTextEditor();
+          const note =
+            activeTextEditor &&
+            VSCodeUtils.getNoteFromDocument(activeTextEditor.document);
           if (note) {
-            // TODO `note` always `undefined`
             panel.webview.postMessage({
               type: "onDidChangeActiveTextEditor",
               data: {
                 note,
-                foo: "bar",
                 sync: true,
               },
               source: "vscode",

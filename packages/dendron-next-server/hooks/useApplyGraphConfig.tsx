@@ -152,15 +152,11 @@ const useApplyGraphConfig = ({
 
     const configItem = config["filter.show-stubs"];
 
-    logger.log("stubs:", graph.$("node[stub == true]"));
-
     // If should show stubs
     if (configItem.value) {
-      logger.log("Showing stubs");
-      graph.$("node[?stub]").removeClass(".hidden--stub");
+      graph.$("node[?stub]").removeClass("hidden--stub");
     } else {
-      logger.log("Hiding stubs");
-      graph.$("node[?stub]").addClass(".hidden--stub");
+      graph.$("node[?stub]").addClass("hidden--stub");
     }
   };
 

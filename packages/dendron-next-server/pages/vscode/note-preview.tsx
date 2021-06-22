@@ -11,6 +11,10 @@ import { DendronProps } from "../../lib/types";
 
 const logger = createLogger("notePreview");
 
+function isHTMLAnchorElement(element: Element): element is HTMLAnchorElement {
+  return element.nodeName === "A";
+}
+
 function Note({ engine, ide }: DendronProps) {
   logger.info({
     state: "enter",
@@ -34,16 +38,19 @@ function Note({ engine, ide }: DendronProps) {
 
   const onClickHandler = React.useCallback(
     (event: Event) => {
-      if ((event.target as Element).tagName === "A") {
+      const target = event.target as Element;
+      if (isHTMLAnchorElement(target)) {
         logger.info({
-          msg: "click#a",
-          event: (event.target as Element).tagName,
+          ctx: `onClickHandler#${target.nodeName}`,
+          event,
+          target,
         });
         event.preventDefault();
         event.stopPropagation();
         postVSCodeMessage({
           type: NoteViewMessageType.onClick,
           data: {
+            href: target.href,
             id: noteId,
           },
           source: DMessageSource.webClient,

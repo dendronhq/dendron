@@ -546,7 +546,7 @@ export type CalendarViewMessage = DMessage<
 
 export type NoteViewMessage = DMessage<
   NoteViewMessageType,
-  { id?: string; fname?: string }
+  { id?: string; href?: string }
 >;
 
 // --- Views

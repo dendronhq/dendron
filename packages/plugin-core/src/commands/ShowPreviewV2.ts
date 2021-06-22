@@ -1,12 +1,11 @@
 import _ from "lodash";
-import { ViewColumn, window } from "vscode";
+import * as vscode from "vscode";
 import {
   DendronWebViewKey,
   NoteViewMessageType,
   NoteViewMessage,
   assertUnreachable,
 } from "@dendronhq/common-all";
-import { createLogger } from "@dendronhq/common-frontend";
 import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../utils";
 import { WebViewUtils } from "../views/utils";
@@ -15,8 +14,6 @@ import { getWS } from "../workspace";
 
 type CommandOpts = {};
 type CommandOutput = any;
-
-const logger = createLogger("showPreviewV1");
 
 export class ShowPreviewV2Command extends BasicCommand<
   CommandOpts,
@@ -48,10 +45,10 @@ export class ShowPreviewV2Command extends BasicCommand<
       } catch {}
     }
 
-    const panel = window.createWebviewPanel(
+    const panel = vscode.window.createWebviewPanel(
       "dendronIframe", // Identifies the type of the webview. Used internally
       title, // Title of the panel displayed to the user
-      ViewColumn.Beside, // Editor column to show the new webview panel in.
+      vscode.ViewColumn.Beside, // Editor column to show the new webview panel in.
       {
         enableScripts: true,
         enableCommandUris: true,
@@ -64,18 +61,21 @@ export class ShowPreviewV2Command extends BasicCommand<
       title,
       view: DendronWebViewKey.NOTE_PREVIEW,
     });
+
     panel.webview.html = resp;
 
     panel.webview.onDidReceiveMessage(async (msg: NoteViewMessage) => {
-      const ctx = "onDidReceiveMessage";
-      logger.info({ ctx, msg });
-
       switch (msg.type) {
         case NoteViewMessageType.onClick: {
-          logger.info({
-            ctx: `${ctx}:onClick`,
-            data: msg.data,
-          });
+          const { data } = msg;
+          if (data.href) {
+            if (data.href.includes("localhost")) {
+              console.log("is local file (wikilink)");
+            } else {
+              VSCodeUtils.openLink(data.href);
+            }
+          }
+
           break;
         }
         case NoteViewMessageType.onGetActiveEditor: {

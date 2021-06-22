@@ -264,7 +264,6 @@ describe("engine", async () => {
         });
         await engine.writeNote(note, { newNode: true, runHooks: false });
         const ent = engine.notes["hooked"];
-        debugger;
         expect(
           await AssertUtils.assertInString({
             body: ent.body,

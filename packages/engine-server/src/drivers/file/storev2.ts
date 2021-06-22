@@ -710,7 +710,6 @@ export class FileStorage implements DStore {
     });
 
     if (opts?.runHooks === false) {
-      debugger;
       this.logger.info({
         ctx,
         msg: "hooks disabled for write",

@@ -13,48 +13,6 @@ exports[`WorkspaceService initialize remote seed present 1`] = `".git .gitignore
 exports[`WorkspaceService initialize remote seed present 2`] = `"dendron.code-workspace dendron.yml hooks seeds vault1 vault2 vault3"`;
 
 exports[`WorkspaceService initialize remote seed present 3`] = `
-"version: 1
-vaults:
-    -
-        fsPath: vault
-        seed: dendron.foo
-        name: dendron.foo
-    -
-        fsPath: vault1
-    -
-        fsPath: vault2
-    -
-        fsPath: vault3
-        name: vaultThree
-useFMTitle: true
-useNoteTitleForLink: true
-noAutoCreateOnDefinition: true
-noLegacyNoteRef: true
-noXVaultWikiLink: true
-lookupConfirmVaultOnCreate: false
-dayOfWeek: 1
-site:
-    copyAssets: true
-    siteHierarchies:
-        - root
-    siteRootDir: docs
-    usePrettyRefs: true
-    title: Dendron
-    description: Personal knowledge space
-    duplicateNoteBehavior:
-        action: useVault
-        payload:
-            - vault1
-            - vault2
-            - vaultThree
-            - dendron.foo
-initializeRemoteVaults: true
-seeds:
-    dendron.foo: {}
-"
-`;
-
-exports[`WorkspaceService initialize remote seed present 4`] = `
 "{
     \\"folders\\": [
         {

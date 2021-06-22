@@ -34,11 +34,13 @@ export enum DendronASTTypes {
   WIKI_LINK = "wikiLink",
   REF_LINK = "refLink",
   REF_LINK_V2 = "refLinkV2",
-  PARAGRAPH = "paragraph",
   BLOCK_ANCHOR = "blockAnchor",
   // Not dendron-specific, included here for convenience
   HEADING = "heading",
   LIST = "list",
+  LIST_ITEM = "listItem",
+  PARAGRAPH = "paragraph",
+  TABLE = "table",
 }
 
 export enum DendronASTDest {

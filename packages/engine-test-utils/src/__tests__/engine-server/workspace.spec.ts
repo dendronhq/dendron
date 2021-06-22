@@ -1,6 +1,6 @@
 import { DVault, NoteProps } from "@dendronhq/common-all";
 import { tmpDir } from "@dendronhq/common-server";
-import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
+import { NoteTestUtilsV4, sinon } from "@dendronhq/common-test-utils";
 import {
   DConfig,
   SeedService,
@@ -10,7 +10,12 @@ import {
 import fs from "fs-extra";
 import path from "path";
 import { TestConfigUtils } from "../../config";
-import { runEngineTestV5, setupWS, testWithEngine } from "../../engine";
+import {
+  runEngineTestV5,
+  setupWS,
+  TestEngineUtils,
+  testWithEngine,
+} from "../../engine";
 import { ENGINE_HOOKS } from "../../presets";
 import {
   checkDir,
@@ -23,6 +28,12 @@ import { TestSeedUtils } from "../../utils/seed";
 
 describe("WorkspaceService", () => {
   describe("create", () => {
+    beforeEach(() => {
+      TestEngineUtils.mockHomeDir();
+    });
+    afterEach(() => {
+      sinon.restore();
+    });
     test("basic", async () => {
       const wsRoot = tmpDir().name;
       const vaults = [{ fsPath: "vault1" }];
@@ -161,7 +172,6 @@ describe("WorkspaceService", () => {
           );
           await checkFile({
             fpath: path.join(wsRoot, "dendron.yml"),
-            snapshot: true,
           });
           await checkFile(
             {

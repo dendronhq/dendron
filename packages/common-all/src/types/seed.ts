@@ -6,6 +6,15 @@ export type SeedConfig = {
   description: string;
   repository: SeedRepository;
   contact?: SeedContact;
+  /**
+   * Url for seed
+   */
+  site?: SeedSite;
+};
+
+export type SeedSite = {
+  url: string;
+  index?: string;
 };
 
 export type SeedRepository = {

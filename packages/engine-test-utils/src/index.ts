@@ -1,7 +1,7 @@
 export * from "./config";
 export * from "./engine";
 export * from "./topics";
-export { GitTestUtils, checkVaults } from "./utils";
+export { GitTestUtils, checkVaults, TestSeedUtils } from "./utils";
 export * from "./presets";
 import {
   ENGINE_HOOKS,

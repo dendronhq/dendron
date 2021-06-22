@@ -78,6 +78,7 @@ export class Settings extends EngineSettings {
         ]),
         async (entry, key) => {
           const item = src.inspect(key);
+          // if value for key is not defined anywhere, set it to the default
           if (
             _.every(
               [

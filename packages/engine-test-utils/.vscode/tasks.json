@@ -15,6 +15,22 @@
     },
     {
       "type": "npm",
+      "label": "test:updateSnapshots",
+      "script": "test:updateSnapshots",
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "options": {
+        "env": {
+          "LOG_LEVEL": "error",
+          "LOG_DST": "/tmp/engine-test-utils.log"
+        }
+      },
+      "problemMatcher": []
+    },
+    {
+      "type": "npm",
       "label": "test:all",
       "script": "test",
       "group": {

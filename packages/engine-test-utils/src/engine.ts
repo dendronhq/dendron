@@ -22,6 +22,7 @@ import {
   runJestHarnessV2,
   SetupHookFunction,
   SetupTestFunctionV4,
+  sinon,
   TestResult,
 } from "@dendronhq/common-test-utils";
 import { LaunchEngineServerCommand } from "@dendronhq/dendron-cli";
@@ -33,8 +34,27 @@ import {
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
+import { DendronConfig } from "../../common-all/lib/types";
 import { ENGINE_HOOKS } from "./presets";
 import { GitTestUtils } from "./utils";
+import os from "os";
+
+export type TestSetupWorkspaceOpts = {
+  /**
+   * Vaults to initialize engine with
+   * Defaults to following if not set
+   * [
+   *    { fsPath: "vault1" },
+   *    { fsPath: "vault2" },
+   *    { fsPath: "vault3", name: "vaultThree" },
+   *  ]
+   */
+  vaults?: DVault[];
+  /**
+   * Modify dendron config before initialization
+   */
+  modConfigCb?: (config: DendronConfig) => DendronConfig;
+};
 
 export type AsyncCreateEngineFunction = (
   opts: WorkspaceOpts
@@ -140,13 +160,12 @@ export type RunEngineTestV5Opts = {
   createEngine?: AsyncCreateEngineFunction;
   extra?: any;
   expect: any;
-  vaults?: DVault[];
   workspaces?: DWorkspace[];
   setupOnly?: boolean;
   initGit?: boolean;
   initHooks?: boolean;
   addVSWorkspace?: boolean;
-};
+} & TestSetupWorkspaceOpts;
 
 export type RunEngineTestFunctionV5<T = any> = (
   opts: RunEngineTestFunctionOpts & { extra?: any; engineInitDuration: number }
@@ -237,6 +256,9 @@ export async function runEngineTestV5(
     ],
     addVSWorkspace: false,
   });
+  // make sure tests don't overwrite local homedir contents
+
+  TestEngineUtils.mockHomeDir();
   const { wsRoot, vaults } = await setupWS({ vaults: vaultsInit, workspaces });
   if ((opts.initHooks, vaults)) {
     fs.mkdirSync(path.join(wsRoot, CONSTANTS.DENDRON_HOOKS_BASE));
@@ -282,6 +304,7 @@ export async function runEngineTestV5(
   }
   const results = (await func(testOpts)) || [];
   await runJestHarnessV2(results, expect);
+  sinon.restore();
   return { opts: testOpts, resp: undefined, wsRoot };
 }
 
@@ -310,6 +333,11 @@ export function testWithEngine(
 }
 
 export class TestEngineUtils {
+  static mockHomeDir() {
+    const tmp = tmpDir();
+    sinon.stub(os, "homedir").returns(tmp.name);
+    return tmp.name;
+  }
   static vault1(vaults: DVault[]) {
     return _.find(vaults, { fsPath: "vault1" })!;
   }

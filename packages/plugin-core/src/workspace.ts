@@ -349,6 +349,12 @@ export class DendronWorkspace {
     return DConfig.defaults(config);
   }
 
+  async getWorkspaceSettings(): Promise<WorkspaceSettings> {
+    return (await readJSONWithComments(
+      DendronWorkspace.workspaceFile().fsPath
+    )) as WorkspaceSettings;
+  }
+
   get podsDir(): string {
     const rootDir = DendronWorkspace.wsRoot();
     if (!rootDir) {
@@ -432,7 +438,7 @@ export class DendronWorkspace {
           )
         );
 
-        if (!getWS().config.dev?.disableWebUI) {
+        if (getWS().config.dev?.enableWebUI) {
           Logger.info({ ctx, msg: "initWebUI" });
           context.subscriptions.push(
             vscode.window.registerWebviewViewProvider(
@@ -452,7 +458,6 @@ export class DendronWorkspace {
               calendarView
             )
           );
-
           VSCodeUtils.setContext(DendronContext.WEB_UI_ENABLED, true);
         }
 

@@ -16,6 +16,10 @@ export const CONSTANTS = {
   DENDRON_TELEMETRY: ".dendron.telemetry",
   DENDRON_HOOKS_BASE: "hooks",
   DENDRON_LOCAL_SITE_PORT: 8080,
+  /**
+   * Initial version for first installaion
+   */
+  DENDRON_INIT_VERSION: "0.0.0",
 };
 
 export enum ERROR_STATUS {

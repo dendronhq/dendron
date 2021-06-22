@@ -1,4 +1,4 @@
-import { DendronError, ERROR_STATUS } from "@dendronhq/common-all";
+import { DendronError, ERROR_STATUS, VaultUtils } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -67,8 +67,11 @@ export class PasteFileCommand extends BasicCommand<CommandOpts, CommandOutput> {
       Logger.error({ error });
       return { error };
     }
-
-    const vault = ws.workspaceService.getVaultForPath(uri.fsPath);
+    const vault = VaultUtils.getVaultByNotePath({
+      vaults: getWS().getEngine().vaults,
+      wsRoot: DendronWorkspace.wsRoot(),
+      fsPath: uri.fsPath,
+    });
     const vpath = vault2Path({ vault, wsRoot: DendronWorkspace.wsRoot() });
     const suffix = path.join("assets", cleanFname(path.basename(filePath)));
     const dstPath = path.join(vpath, suffix);

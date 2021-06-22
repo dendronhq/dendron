@@ -30,7 +30,12 @@ noAutoCreateOnDefinition: true
 noLegacyNoteRef: true
 noXVaultWikiLink: true
 lookupConfirmVaultOnCreate: false
-dayOfWeek: 1
+journal:
+    dailyDomain: daily
+    name: journal
+    dateFormat: y.MM.dd
+    addBehavior: childOfDomain
+    firstDayOfWeek: 1
 site:
     copyAssets: true
     siteHierarchies:
@@ -75,6 +80,83 @@ exports[`add ok: exists 4`] = `
 }"
 `;
 
+exports[`add ok: seed with site 1`] = `".git .gitignore dendron.code-workspace dendron.yml seed.yml vault"`;
+
+exports[`add ok: seed with site 2`] = `"dendron.code-workspace dendron.yml hooks seeds vault1 vault2 vault3"`;
+
+exports[`add ok: seed with site 3`] = `
+"version: 1
+vaults:
+    -
+        fsPath: vault
+        seed: dendron.foo
+        name: dendron.foo
+    -
+        fsPath: vault1
+    -
+        fsPath: vault2
+    -
+        fsPath: vault3
+        name: vaultThree
+useFMTitle: true
+useNoteTitleForLink: true
+noAutoCreateOnDefinition: true
+noLegacyNoteRef: true
+noXVaultWikiLink: true
+lookupConfirmVaultOnCreate: false
+journal:
+    dailyDomain: daily
+    name: journal
+    dateFormat: y.MM.dd
+    addBehavior: childOfDomain
+    firstDayOfWeek: 1
+site:
+    copyAssets: true
+    siteHierarchies:
+        - root
+    siteRootDir: docs
+    usePrettyRefs: true
+    title: Dendron
+    description: Personal knowledge space
+    duplicateNoteBehavior:
+        action: useVault
+        payload:
+            - vault1
+            - vault2
+            - vaultThree
+            - dendron.foo
+initializeRemoteVaults: true
+seeds:
+    dendron.foo:
+        site:
+            url: 'https://foo.com'
+            index: foo
+"
+`;
+
+exports[`add ok: seed with site 4`] = `
+"{
+    \\"folders\\": [
+        {
+            \\"path\\": \\"seeds/dendron.foo/vault\\",
+            \\"name\\": \\"dendron.foo\\"
+        },
+        {
+            \\"path\\": \\"vault1\\"
+        },
+        {
+            \\"path\\": \\"vault2\\"
+        },
+        {
+            \\"path\\": \\"vault3\\",
+            \\"name\\": \\"vaultThree\\"
+        }
+    ],
+    \\"settings\\": {},
+    \\"extensions\\": {}
+}"
+`;
+
 exports[`init convert workspace error: no vaults 1`] = `"dendron.yml hooks"`;
 
 exports[`init convert workspace error: no vaults 2`] = `
@@ -86,7 +168,12 @@ noAutoCreateOnDefinition: true
 noLegacyNoteRef: true
 noXVaultWikiLink: true
 lookupConfirmVaultOnCreate: false
-dayOfWeek: 1
+journal:
+    dailyDomain: daily
+    name: journal
+    dateFormat: y.MM.dd
+    addBehavior: childOfDomain
+    firstDayOfWeek: 1
 site:
     copyAssets: true
     siteHierarchies:
@@ -112,7 +199,12 @@ noAutoCreateOnDefinition: true
 noLegacyNoteRef: true
 noXVaultWikiLink: true
 lookupConfirmVaultOnCreate: false
-dayOfWeek: 1
+journal:
+    dailyDomain: daily
+    name: journal
+    dateFormat: y.MM.dd
+    addBehavior: childOfDomain
+    firstDayOfWeek: 1
 site:
     copyAssets: true
     siteHierarchies:
@@ -154,7 +246,12 @@ noAutoCreateOnDefinition: true
 noLegacyNoteRef: true
 noXVaultWikiLink: true
 lookupConfirmVaultOnCreate: false
-dayOfWeek: 1
+journal:
+    dailyDomain: daily
+    name: journal
+    dateFormat: y.MM.dd
+    addBehavior: childOfDomain
+    firstDayOfWeek: 1
 site:
     copyAssets: true
     siteHierarchies:
@@ -209,7 +306,12 @@ noAutoCreateOnDefinition: true
 noLegacyNoteRef: true
 noXVaultWikiLink: true
 lookupConfirmVaultOnCreate: false
-dayOfWeek: 1
+journal:
+    dailyDomain: daily
+    name: journal
+    dateFormat: y.MM.dd
+    addBehavior: childOfDomain
+    firstDayOfWeek: 1
 site:
     copyAssets: true
     siteHierarchies:
@@ -246,7 +348,12 @@ noAutoCreateOnDefinition: true
 noLegacyNoteRef: true
 noXVaultWikiLink: true
 lookupConfirmVaultOnCreate: false
-dayOfWeek: 1
+journal:
+    dailyDomain: daily
+    name: journal
+    dateFormat: y.MM.dd
+    addBehavior: childOfDomain
+    firstDayOfWeek: 1
 site:
     copyAssets: true
     siteHierarchies:

@@ -32,6 +32,7 @@ import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { DConfig } from "../config";
+import { MetadataService } from "../metadata";
 import { SeedService, SeedUtils } from "../seed";
 import { Git } from "../topics/git";
 import {
@@ -40,6 +41,7 @@ import {
   removeCache,
   writeWSMetaFile,
 } from "../utils";
+import { WorkspaceUtils } from "./utils";
 import { WorkspaceConfig } from "./vscode";
 const DENDRON_WS_NAME = CONSTANTS.DENDRON_WS_NAME;
 
@@ -136,6 +138,13 @@ export class WorkspaceService {
   async setConfig(config: DendronConfig) {
     const wsRoot = this.wsRoot;
     return DConfig.writeConfig({ wsRoot, config });
+  }
+
+  setWorkspaceConfig(config: WorkspaceSettings) {
+    writeJSONWithComments(
+      path.join(this.wsRoot, "dendron.code-workspace"),
+      config
+    );
   }
 
   /**
@@ -453,6 +462,10 @@ export class WorkspaceService {
       },
       Promise.resolve()
     );
+    // check if this is the first workspace created
+    if (_.isUndefined(MetadataService.instance().getMeta().firstWsInitialize)) {
+      MetadataService.instance().setFirstWsInitialize();
+    }
     return ws;
   }
 
@@ -552,25 +565,14 @@ export class WorkspaceService {
     return [...(await this.getAllReposVaults()).keys()];
   }
 
-  getVaultForPath(fpath: string) {
-    return VaultUtils.getVaultByNotePath({
-      vaults: this.config.vaults,
-      wsRoot: this.wsRoot,
-      fsPath: fpath,
-    });
-  }
-
   /**
    * Check if a path belongs to a workspace
+   @deprecated - use {@link WorkspaceUtils.isPathInWorkspace}
    */
   isPathInWorkspace(fpath: string) {
-    try {
-      // if not error, then okay
-      this.getVaultForPath(fpath);
-      return true;
-    } catch {
-      return false;
-    }
+    const { vaults } = this.config;
+    const wsRoot = this.wsRoot;
+    return WorkspaceUtils.isPathInWorkspace({ fpath, vaults, wsRoot });
   }
 
   async pullVault(opts: { vault: DVault }) {
@@ -726,7 +728,7 @@ export class WorkspaceService {
     const seedResults: { id: string; status: SyncActionStatus; data: any }[] =
       [];
     await Promise.all(
-      _.map(config.seeds, async (_entry: SeedEntry, id: string) => {
+      _.map(config.seeds, async (entry: SeedEntry, id: string) => {
         if (!(await SeedUtils.exists({ id, wsRoot }))) {
           const resp = await this.seedService.info({ id });
           if (_.isUndefined(resp)) {
@@ -742,6 +744,7 @@ export class WorkspaceService {
           }
           const spath = await this.seedService.cloneSeed({
             seed: resp,
+            branch: entry.branch,
           });
           seedResults.push({
             id,

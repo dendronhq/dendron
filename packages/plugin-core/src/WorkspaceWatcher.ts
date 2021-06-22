@@ -1,4 +1,5 @@
 import { NoteProps, NoteUtils, Time, VaultUtils } from "@dendronhq/common-all";
+import { genHash } from "@dendronhq/common-server";
 import { HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
@@ -36,14 +37,16 @@ export class WorkspaceWatcher {
     return;
   }
 
-  async onWillSaveTextDocument(ev: TextDocumentWillSaveEvent) {
+  async onWillSaveTextDocument(
+    ev: TextDocumentWillSaveEvent
+  ): Promise<{ changes: TextEdit[] }> {
     const ctx = "WorkspaceWatcher:onWillSaveTextDocument";
     const uri = ev.document.uri;
     const reason = ev.reason;
     Logger.info({ ctx, url: uri.fsPath, reason, msg: "enter" });
     if (!getWS().workspaceService?.isPathInWorkspace(uri.fsPath)) {
       Logger.debug({ ctx, uri: uri.fsPath, msg: "not in workspace, ignoring" });
-      return;
+      return { changes: [] };
     }
     const eclient = DendronWorkspace.instance().getEngine();
     const fname = path.basename(uri.fsPath, ".md");
@@ -68,7 +71,7 @@ export class WorkspaceWatcher {
         lastUpdated = _.parseInt(lastUpdated);
       }
       if (now - lastUpdated < 1 * 3e3) {
-        return;
+        return { changes: [] };
       }
     }
 
@@ -76,22 +79,25 @@ export class WorkspaceWatcher {
     const matchFM = NoteUtils.RE_FM;
     const matchOuter = content.match(matchFM);
     if (!matchOuter) {
-      return;
+      return { changes: [] };
     }
     const match = NoteUtils.RE_FM_UPDATED.exec(content);
-    if (match) {
+    const noteHash = genHash(content);
+    let changes: TextEdit[] = [];
+    if (match && note.contentHash && note.contentHash !== noteHash) {
       Logger.info({ ctx, match, msg: "update activeText editor" });
       const startPos = ev.document.positionAt(match.index);
       const endPos = ev.document.positionAt(match.index + match[0].length);
+      changes = [
+        TextEdit.replace(new Range(startPos, endPos), `updated: ${now}`),
+      ];
       const p = new Promise(async (resolve) => {
         note.updated = now;
         await eclient.updateNote(note);
-        resolve([
-          TextEdit.replace(new Range(startPos, endPos), `updated: ${now}`),
-        ]);
+        return resolve(changes);
       });
       ev.waitUntil(p);
     }
-    return;
+    return { changes };
   }
 }

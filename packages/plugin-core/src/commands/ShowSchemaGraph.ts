@@ -50,6 +50,7 @@ export class ShowSchemaGraphCommand extends BasicCommand<
       {
         enableScripts: true,
         retainContextWhenHidden: true,
+        enableFindWidget: true,
       }
     );
 

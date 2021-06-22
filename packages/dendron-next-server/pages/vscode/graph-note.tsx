@@ -2,6 +2,7 @@ import {
   createLogger,
   engineSlice,
   postVSCodeMessage,
+  useVSCodeMessage,
 } from "@dendronhq/common-frontend";
 import _ from "lodash";
 import React, { useEffect, useState } from "react";
@@ -31,7 +32,6 @@ import {
 } from "../../lib/graph";
 import GraphFilterView from "../../components/graph-filter-view";
 import useGraphElements from "../../hooks/useGraphElements";
-import usePropegateKeystrokes from "../../hooks/usePropegateKeystrokes";
 
 export default function FullNoteGraph({
   engine,
@@ -41,7 +41,6 @@ export default function FullNoteGraph({
   const [config, setConfig] = useState<GraphConfig>(graphConfig.note);
 
   const elements = useGraphElements({ type: "note", engine });
-  usePropegateKeystrokes();
 
   const logger = createLogger("Graph");
   logger.log("graph elements:", elements);

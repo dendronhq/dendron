@@ -48,6 +48,7 @@ export class ShowNoteGraphCommand extends BasicCommand<
       {
         enableScripts: true,
         retainContextWhenHidden: true,
+        enableFindWidget: true,
       }
     );
 

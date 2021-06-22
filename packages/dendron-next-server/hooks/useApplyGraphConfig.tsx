@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { createLogger } from "@dendronhq/common-frontend";
 import { getEulerConfig } from "../components/graph";
 import { GraphConfig, GraphElements } from "../lib/graph";
+import _ from "lodash";
 
 const useApplyGraphConfig = ({
   graph,
@@ -145,6 +146,23 @@ const useApplyGraphConfig = ({
       });
     });
   };
+  const applyFilterStubsConfig = () => {
+    if (!graph || graph.$("*").length === 0) return;
+    if (_.isUndefined(config["filter.show-stubs"])) return;
+
+    const configItem = config["filter.show-stubs"];
+
+    logger.log("stubs:", graph.$("node[stub == true]"));
+
+    // If should show stubs
+    if (configItem.value) {
+      logger.log("Showing stubs");
+      graph.$("node[?stub]").removeClass(".hidden--stub");
+    } else {
+      logger.log("Hiding stubs");
+      graph.$("node[?stub]").addClass(".hidden--stub");
+    }
+  };
 
   const applyConfig = () => {
     if (!graph || graph.$("*").length === 0) return;
@@ -152,6 +170,7 @@ const useApplyGraphConfig = ({
     applyDisplayConfig();
     applyVaultConfig();
     applyFilterRegexConfig();
+    applyFilterStubsConfig();
 
     logger.log(graph.$(".hidden--regex"));
 

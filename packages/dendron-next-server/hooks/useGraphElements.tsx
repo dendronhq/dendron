@@ -32,6 +32,7 @@ const getNoteGraphElements = (
         label: note.title,
         group: "nodes",
         fname: note.fname,
+        stub: _.isUndefined(note.stub) ? false : note.stub,
       },
       classes: `${getVaultClass(note.vault)}`,
     };

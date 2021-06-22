@@ -2,6 +2,7 @@ import {
   createLogger,
   engineSlice,
   postVSCodeMessage,
+  useVSCodeMessage,
 } from "@dendronhq/common-frontend";
 import _ from "lodash";
 import React, { useEffect, useState } from "react";

@@ -150,9 +150,9 @@ const useApplyGraphConfig = ({
 
     // If should show stubs
     if (configItem.value) {
-      graph.$("node[?stub]").removeClass("hidden--stub");
+      graph.$("[?stub]").removeClass("hidden--stub");
     } else {
-      graph.$("node[?stub]").addClass("hidden--stub");
+      graph.$("[?stub]").addClass("hidden--stub");
     }
   };
 

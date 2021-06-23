@@ -224,7 +224,7 @@ export class VSCodeUtils {
   }
 
   static createWSContext(): vscode.ExtensionContext {
-    const pkgRoot = goUpTo(__dirname);
+    const pkgRoot = goUpTo({ base: __dirname, fname: "package.json" });
     return {
       extensionMode: vscode.ExtensionMode.Development,
       logPath: tmpDir().name,
@@ -244,7 +244,7 @@ export class VSCodeUtils {
 
   static getOrCreateMockContext(): vscode.ExtensionContext {
     if (!_MOCK_CONTEXT) {
-      const pkgRoot = goUpTo(__dirname);
+      const pkgRoot = goUpTo({ base: __dirname, fname: "package.json" });
       _MOCK_CONTEXT = {
         extensionMode: vscode.ExtensionMode.Development,
         logPath: tmpDir().name,

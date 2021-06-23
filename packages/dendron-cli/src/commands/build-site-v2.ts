@@ -85,11 +85,14 @@ export class BuildSiteV2CLICommand extends CLICommand<
     let cwd = opts.cwd;
     if (!cwd) {
       // need to be inside
-      let nmPath = goUpTo(__dirname, "node_modules");
+      let nmPath = goUpTo({ base: __dirname, fname: "node_modules" });
       cwd = path.join(nmPath, "node_modules", "@dendronhq", "dendron-11ty");
       // fix for /home/runner/work/dendron-site/dendron-site/node_modules/@dendronhq/dendron-cli/node_modules/@dendronhq/dendron-11ty'
       if (!fs.existsSync(cwd)) {
-        nmPath = goUpTo(path.join(nmPath, ".."), "node_modules");
+        nmPath = goUpTo({
+          base: path.join(nmPath, ".."),
+          fname: "node_modules",
+        });
         cwd = path.join(nmPath, "node_modules", "@dendronhq", "dendron-11ty");
       }
     }

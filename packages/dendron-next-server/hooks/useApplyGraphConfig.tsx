@@ -1,8 +1,9 @@
 import cytoscape from "cytoscape";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { createLogger } from "@dendronhq/common-frontend";
 import { getEulerConfig } from "../components/graph";
 import { GraphConfig, GraphElements } from "../lib/graph";
+import _ from "lodash";
 
 const useApplyGraphConfig = ({
   graph,
@@ -57,7 +58,6 @@ const useApplyGraphConfig = ({
         const vaultClass = `vault-${vaultName}`;
 
         const includedElements = graph.$(`.${vaultClass}`);
-        const elementCount = includedElements.length;
 
         // If elements should be included
         if (v?.value && includedElements.hasClass("hidden--vault")) {
@@ -72,9 +72,6 @@ const useApplyGraphConfig = ({
   };
   const applyFilterRegexConfig = () => {
     if (!graph || graph.$("*").length === 0) return;
-
-    const whitelistItem = config["filter.regex-whitelist"];
-    const blacklistItem = config["filter.regex-blacklist"];
 
     const regexTypes: ("whitelist" | "blacklist")[] = [
       "whitelist",
@@ -145,6 +142,19 @@ const useApplyGraphConfig = ({
       });
     });
   };
+  const applyFilterStubsConfig = () => {
+    if (!graph || graph.$("*").length === 0) return;
+    if (_.isUndefined(config["filter.show-stubs"])) return;
+
+    const configItem = config["filter.show-stubs"];
+
+    // If should show stubs
+    if (configItem.value) {
+      graph.$("[?stub]").removeClass("hidden--stub");
+    } else {
+      graph.$("[?stub]").addClass("hidden--stub");
+    }
+  };
 
   const applyConfig = () => {
     if (!graph || graph.$("*").length === 0) return;
@@ -152,6 +162,7 @@ const useApplyGraphConfig = ({
     applyDisplayConfig();
     applyVaultConfig();
     applyFilterRegexConfig();
+    applyFilterStubsConfig();
 
     logger.log(graph.$(".hidden--regex"));
 

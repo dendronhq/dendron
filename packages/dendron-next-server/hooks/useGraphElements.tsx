@@ -32,6 +32,7 @@ const getNoteGraphElements = (
         label: note.title,
         group: "nodes",
         fname: note.fname,
+        stub: _.isUndefined(note.stub) ? false : note.stub,
       },
       classes: `${getVaultClass(note.vault)}`,
     };
@@ -50,10 +51,11 @@ const getNoteGraphElements = (
       ...note.children.map((child) => ({
         data: {
           group: "edges",
-          id: `${notes.id}_${child}`,
+          id: `${note.id}_${child}`,
           source: note.id,
           target: child,
           fname: note.fname,
+          stub: _.isUndefined(note.stub) ? false : note.stub,
         },
         classes: `hierarchy ${noteVaultClass}`,
       }))
@@ -112,6 +114,12 @@ const getNoteGraphElements = (
             source: note.id,
             target: to.id,
             fname: note.fname,
+            stub:
+              _.isUndefined(note.stub) && _.isUndefined(to.stub)
+                ? false
+                : note.stub || to.stub
+                ? true
+                : false,
           },
           classes: `links ${noteVaultClass}`,
         });

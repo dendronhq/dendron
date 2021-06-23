@@ -154,7 +154,7 @@ const FilterViewStringInput = ({
   };
 
   return (
-    <Space direction="vertical" style={{ marginBottom: "1rem" }}>
+    <Space direction="vertical" style={{ margin: "0.5rem 0rem" }}>
       <Typography>{label}</Typography>
       <Input
         defaultValue={entry.value}

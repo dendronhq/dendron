@@ -31,6 +31,8 @@ export type NoteGraphConfig = {
   "connections.links"?: GraphConfigItem<boolean>;
   
   "information.edges-links"?: GraphConfigItem<number>;
+
+  "filter.show-stubs"?: GraphConfigItem<boolean>;
 };
 
 export type SchemaGraphConfig = {
@@ -76,6 +78,11 @@ const noteGraphConfig: NoteGraphConfig = {
     value: 0,
     mutable: false,
   },
+  "filter.show-stubs": {
+    value: true,
+    mutable: true,
+  },
+
 };
 
 const schemaGraphConfig: SchemaGraphConfig = {

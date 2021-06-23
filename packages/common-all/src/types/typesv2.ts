@@ -10,6 +10,7 @@ import {
 } from "./foundation";
 import { DHookDict } from "./hooks";
 import { DendronConfig, DVault } from "./workspace";
+import { JSONSchemaType } from "ajv";
 
 export enum ResponseCode {
   OK = 200,
@@ -455,7 +456,7 @@ export type GetNoteOpts = {
 
 // === Pods
 export type DPod<TConfig> = {
-  config: PodConfig[];
+  config: JSONSchemaType<TConfig>;
   execute(opts: BasePodExecuteOpts<TConfig>): Promise<any>;
 };
 

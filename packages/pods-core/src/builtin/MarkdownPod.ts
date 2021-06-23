@@ -4,7 +4,6 @@ import {
   genUUID,
   NoteProps,
   NoteUtils,
-  PodConfig,
   VaultUtils,
 } from "@dendronhq/common-all";
 import { cleanFileName, readMD, vault2Path } from "@dendronhq/common-server";
@@ -28,6 +27,7 @@ import {
   PublishPod,
   PublishPodPlantOpts,
 } from "../basev3";
+import { JSONSchemaType } from "ajv";
 
 const ID = "dendron.markdown";
 
@@ -57,20 +57,30 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
   static id: string = ID;
   static description: string = "import markdown";
 
-  get config(): PodConfig[] {
-    return super.config.concat([
-      {
-        key: "noAddUUID",
-        description: "Don't add uuid to assets",
-        type: "boolean",
+  get config(): JSONSchemaType<ImportPodConfig> {
+    return {
+      type: "object",
+      required: [],
+      $merge: {
+        source: super.config,
+        with: {
+          required: super.config.required,
+          properties: {
+            noAddUUID: {
+              description: "Don't add uuid to assets",
+              type: "boolean",
+              nullable: true,
+            },
+            indexName: {
+              description:
+                "If you have an index file per directory, merge that file with the directory note",
+              type: "string",
+              nullable: true,
+            },
+          },
+        },
       },
-      {
-        key: "indexName",
-        description:
-          "If you have an index file per directory, merge that file with the directory note",
-        type: "string",
-      },
-    ]);
+    };
   }
 
   async _collectItems(root: string): Promise<DItem[]> {
@@ -339,13 +349,22 @@ export class MarkdownExportPod extends ExportPod {
     // Export Assets
     await Promise.all(
       vaults.map(async (vault) => {
-      //TODO: Avoid hardcoding of assets directory, or else extract to global const
-      const destPath = path.join(dest.fsPath,  VaultUtils.getRelPath(vault), "assets");
-      const srcPath = path.join(wsRoot, VaultUtils.getRelPath(vault), "assets");
-      if (fs.pathExistsSync(srcPath)) {
-        await fs.copy(srcPath, destPath);
-      }
-    }));
+        //TODO: Avoid hardcoding of assets directory, or else extract to global const
+        const destPath = path.join(
+          dest.fsPath,
+          VaultUtils.getRelPath(vault),
+          "assets"
+        );
+        const srcPath = path.join(
+          wsRoot,
+          VaultUtils.getRelPath(vault),
+          "assets"
+        );
+        if (fs.pathExistsSync(srcPath)) {
+          await fs.copy(srcPath, destPath);
+        }
+      })
+    );
     return { notes };
   }
 }

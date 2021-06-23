@@ -4,7 +4,6 @@ import {
   DVault,
   NoteProps,
   NoteUtils,
-  PodConfig,
   VaultUtils,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
@@ -12,6 +11,9 @@ import { createLogger, DLogger, resolvePath } from "@dendronhq/common-server";
 import _ from "lodash";
 import { URI } from "vscode-uri";
 import { PodKind } from "./types";
+import Ajv, { JSONSchemaType } from "ajv";
+const ajv = new Ajv();
+require("ajv-merge-patch")(ajv);
 
 export type PodOpts<T> = {
   engine: DEngineClient;
@@ -44,24 +46,25 @@ export type PublishPodConfig = {
 export abstract class PublishPod<T extends PublishPodConfig = any> {
   static kind = "publish" as PodKind;
 
-  get config(): PodConfig[] {
-    return [
-      {
-        key: "fname",
-        description: "name of src file",
-        type: "string" as const,
+  get config(): JSONSchemaType<PublishPodConfig> {
+    return {
+      type: "object",
+      required: ["fname", "vaultName", "dest"],
+      properties: {
+        fname: {
+          description: "name of src file",
+          type: "string",
+        },
+        vaultName: {
+          description: "name of src vault",
+          type: "string",
+        },
+        dest: {
+          description: "where to export to",
+          type: "string",
+        },
       },
-      {
-        key: "vaultName",
-        description: "name of src vault",
-        type: "string" as const,
-      },
-      {
-        key: "dest",
-        description: "where to export to",
-        type: "string" as const,
-      },
-    ];
+    };
   }
 
   async execute(opts: PublishPodExecuteOpts<T>) {
@@ -119,62 +122,58 @@ export type ImportPodPlantOpts<T extends ImportPodConfig = ImportPodConfig> =
 export abstract class ImportPod<T extends ImportPodConfig = ImportPodConfig> {
   public L: DLogger;
   static kind = "import" as PodKind;
-  get config(): PodConfig[] {
-    return [
-      {
-        key: "src",
-        description: "Where to import from",
-        type: "string" as const,
-        required: true,
+  get config(): JSONSchemaType<ImportPodConfig> {
+    return {
+      type: "object",
+      additionalProperties: false,
+      required: ["src", "vaultName"],
+      properties: {
+        src: {
+          description: "Where to import from",
+          type: "string",
+        },
+        vaultName: {
+          description: "name of vault to import into",
+          type: "string",
+        },
+        concatenate: {
+          description: "whether to concatenate everything into one note",
+          type: "boolean",
+          nullable: true,
+        },
+        frontmatter: {
+          description: "frontmatter to add to each note",
+          type: "object",
+          nullable: true,
+        },
+        fnameAsId: {
+          description: "use the file name as the id",
+          type: "boolean",
+          nullable: true,
+        },
+        destName: {
+          description: "If concatenate is set, name of destination path",
+          type: "string",
+          nullable: true,
+        },
+        ignore: {
+          type: "boolean",
+          nullable: true,
+        },
       },
-      {
-        key: "vaultName",
-        description: "name of vault to import into",
-        type: "string" as const,
-        required: true,
-      },
-      {
-        key: "concatenate",
-        description: "whether to concatenate everything into one note",
-        type: "boolean",
-      },
-      {
-        key: "frontmatter",
-        description: "frontmatter to add to each note",
-        type: "object",
-      },
-      {
-        key: "fnameAsId",
-        description: "use the file name as the id",
-        type: "boolean",
-      },
-      {
-        key: "destName",
-        description: "If concatenate is set, name of destination path",
-        type: "string" as const,
-      },
-    ];
+    };
   }
   constructor() {
     this.L = createLogger("ImportPod");
   }
 
   validate(config: Partial<T>) {
-    const { src, vaultName, concatenate } = _.defaults(config, {
-      concatenate: false,
-    });
-    const configJSON = JSON.stringify(config);
-    if (_.isUndefined(src)) {
+    const validateConfig = ajv.compile(this.config);
+    validateConfig(config);
+    if (!validateConfig(config)) {
       throw new DendronError({
-        message: `no src specified. config: ${configJSON}`,
-      });
-    }
-    if (_.isUndefined(vaultName)) {
-      throw new DendronError({ message: "no vaultName specified" });
-    }
-    if (concatenate && _.isUndefined(config?.destName)) {
-      throw new DendronError({
-        message: "destName must be specified if concatenate is enabled",
+        message: "validation errors",
+        payload: "error",
       });
     }
   }
@@ -225,37 +224,40 @@ export abstract class ExportPod<
 > {
   public L: DLogger;
   static kind = "export" as PodKind;
-  get config(): PodConfig[] {
-    return [
-      {
-        key: "dest",
-        description: "Where to export to",
-        type: "string" as const,
-        required: true,
-      },
-      {
-        key: "includeBody",
-        description: "should body be included",
-        default: true,
-        type: "boolean",
-      },
-      {
-        key: "includeStubs",
-        description: "should stubs be included",
-        type: "boolean",
-      },
-    ];
-  }
   constructor() {
     this.L = createLogger("ExportPod");
   }
 
+  get config(): JSONSchemaType<ExportPodConfig> {
+    return {
+      type: "object",
+      additionalProperties: false,
+      required: ["dest"],
+      properties: {
+        dest: { type: "string", description: "Where to export to" },
+        includeBody: {
+          type: "boolean",
+          default: true,
+          description: "should body be included",
+          nullable: true,
+        },
+        includeStubs: {
+          type: "boolean",
+          description: "should stubs be included",
+          nullable: true,
+        },
+        ignore: { type: "array", items: { type: "string" }, nullable: true },
+      },
+    };
+  }
+
   validate(config: Partial<T>) {
-    const { dest } = config;
-    const configJSON = JSON.stringify(config);
-    if (_.isUndefined(dest)) {
+    const validateConfig = ajv.compile(this.config);
+    validateConfig(config);
+    if (!validateConfig(config)) {
       throw new DendronError({
-        message: `no dest specified. config: ${configJSON}`,
+        message: "validation errors",
+        payload: "error",
       });
     }
   }

@@ -9,6 +9,7 @@
     "esModuleInterop": true,
     "strict": true,
     "declaration": true,
+    "strictNullChecks": true,
     // --- checks
     "noUnusedLocals": true,
     "noUnusedParameters": true,

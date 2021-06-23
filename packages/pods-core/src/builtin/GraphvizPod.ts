@@ -4,6 +4,7 @@ import { DLink, NoteProps, NoteUtils } from "@dendronhq/common-all";
 import path from "path";
 import { ExportPod, ExportPodPlantOpts } from "../basev3";
 import { ExportPodConfig } from "../basev3";
+import { JSONSchemaType } from "ajv";
 
 const ID = "dendron.graphviz";
 
@@ -31,23 +32,31 @@ export class GraphvizExportPod extends ExportPod<GraphvizExportConfig> {
   static id: string = ID;
   static description: string = "export notes in Graphviz DOT format";
 
-  get config() {
-    return super.config.concat([
-      {
-        key: "showGraphByHierarchy",
-        description:
-          "Include hierarchical note connections (e.g. parent -> child connections)",
-        default: true,
-        type: "boolean",
+  get config(): JSONSchemaType<ExportPodConfig> {
+    return {
+      type: "object",
+      required: [],
+      $merge: {
+        source: super.config,
+        with: {
+          required: super.config.required,
+          properties: {
+            showGraphByHierarchy: {
+              type: "boolean",
+              description:
+                "Include hierarchical note connections (e.g. parent -> child connections)",
+              default: true,
+            },
+            showGraphByEdges: {
+              type: "boolean",
+              description:
+                "Include linked note relationships, e.g. note with [[link]] -> another note",
+              default: false,
+            },
+          },
+        },
       },
-      {
-        key: "showGraphByEdges",
-        description:
-          "Include linked note relationships, e.g. note with [[link]] -> another note",
-        default: false,
-        type: "boolean",
-      },
-    ]);
+    };
   }
 
   // Dashes are not allowed, so they are removed.

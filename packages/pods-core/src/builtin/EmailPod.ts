@@ -1,6 +1,7 @@
 import { Message, SMTPClient } from "emailjs";
 import _ from "lodash";
 import { PublishPodConfig, PublishPodPlantOpts, PublishPod } from "../basev3";
+import { JSONSchemaType } from "ajv";
 
 const ID = "dendron.email";
 
@@ -15,49 +16,60 @@ export class EmailPublishPod extends PublishPod<EmailPublishConfig> {
   static id: string = ID;
   static description: string = "publish to email";
 
-  get config() {
-    return super.config.concat([
-      {
-        key: "from",
-        description: "from address",
-        type: "boolean",
-        default: false,
-        example: "you <username@outlook.com>",
+  get config(): JSONSchemaType<PublishPodConfig> {
+    let required = [
+      ...super.config.required,
+      "from",
+      "host",
+      "username",
+      "password",
+    ];
+    return {
+      type: "object",
+      required: [],
+      $merge: {
+        source: super.config,
+        with: {
+          properties: {
+            required,
+            from: {
+              description: "from address",
+              type: "boolean",
+              default: false,
+              example: "you <username@outlook.com>",
+            },
+            to: {
+              description: "to address",
+              type: "boolean",
+              default: false,
+              example:
+                "someone <someone@your-email.com>, another <another@your-email.com>",
+            },
+            user: {
+              description: "username",
+              type: "string",
+              default: false,
+              example: "hello@dendron.so",
+            },
+            password: {
+              description: "password",
+              type: "string",
+              default: false,
+              example: "secret123",
+            },
+            host: {
+              description: "host",
+              type: "string",
+              default: "smtp.gmail.com",
+            },
+            subject: {
+              description: "subject",
+              type: "string",
+            },
+          },
+        },
       },
-      {
-        key: "to",
-        description: "to address",
-        type: "boolean",
-        default: false,
-        example:
-          "someone <someone@your-email.com>, another <another@your-email.com>",
-      },
-      {
-        key: "user",
-        description: "username",
-        type: "string",
-        default: false,
-        example: "hello@dendron.so",
-      },
-      {
-        key: "password",
-        description: "password",
-        type: "string",
-        default: false,
-        example: "secret123",
-      },
-      {
-        key: "host",
-        description: "host",
-        type: "string",
-        default: "smtp.gmail.com",
-      },
-      {
-        key: "subject",
-        description: "subject",
-        type: "string",
-      },
-    ]);
+    };
   }
 
   async plant(opts: PublishPodPlantOpts) {

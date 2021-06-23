@@ -71,19 +71,32 @@ export class PodUtils {
     const podConfigPath = PodUtils.getConfigPath({ podsDir, podClass });
     ensureDirSync(path.dirname(podConfigPath));
     const pod = new podClass();
-    const config = pod.config
-      .map((ent) => {
-        ent = _.defaults(ent, { default: "TODO" });
+    let required: string[];
+    let podConfig: any;
+    if (_.has(pod.config, "$merge")) {
+      required = pod.config.$merge.with.required;
+      podConfig = {
+        ...pod.config.$merge.source.properties,
+        ...pod.config.$merge.with.properties,
+      };
+    } else {
+      required = pod.config.required;
+      podConfig = pod.config.properties;
+    }
+
+    const config = Object.keys(podConfig)
+      .map((ent: any) => {
+        podConfig[ent] = _.defaults(podConfig[ent], { default: "TODO" });
         const args = [
-          `# description: ${ent.description}`,
-          `# type: ${ent.type}`,
+          `# description: ${podConfig[ent].description}`,
+          `# type: ${podConfig[ent].type}`,
         ];
         let configPrefix = "# ";
-        if (ent.required) {
+        if (required.includes(`${ent}`)) {
           args.push(`# required: true`);
           configPrefix = "";
         }
-        args.push(`${configPrefix}${ent.key}: ${ent.default}`);
+        args.push(`${configPrefix}${ent}: ${podConfig[ent].default}`);
         return args.join("\n");
       })
       .join("\n\n");

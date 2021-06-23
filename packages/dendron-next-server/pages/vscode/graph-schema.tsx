@@ -1,15 +1,10 @@
-import {
-  createLogger,
-  engineSlice,
-  postVSCodeMessage,
-} from "@dendronhq/common-frontend";
+import { engineSlice, postVSCodeMessage } from "@dendronhq/common-frontend";
 import _ from "lodash";
 import React, { useEffect, useState } from "react";
-import { ElementsDefinition, EventHandler } from "cytoscape";
+import { EventHandler } from "cytoscape";
 import Graph from "../../components/graph";
 import useGraphElements from "../../hooks/useGraphElements";
 import { GraphConfig, graphConfig } from "../../lib/graph";
-import GraphFilterView from "../../components/graph-filter-view";
 import {
   DMessageSource,
   GraphViewMessage,

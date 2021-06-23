@@ -1,5 +1,5 @@
 import cytoscape from "cytoscape";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { createLogger } from "@dendronhq/common-frontend";
 import { getEulerConfig } from "../components/graph";
 import { GraphConfig, GraphElements } from "../lib/graph";
@@ -58,7 +58,6 @@ const useApplyGraphConfig = ({
         const vaultClass = `vault-${vaultName}`;
 
         const includedElements = graph.$(`.${vaultClass}`);
-        const elementCount = includedElements.length;
 
         // If elements should be included
         if (v?.value && includedElements.hasClass("hidden--vault")) {
@@ -73,9 +72,6 @@ const useApplyGraphConfig = ({
   };
   const applyFilterRegexConfig = () => {
     if (!graph || graph.$("*").length === 0) return;
-
-    const whitelistItem = config["filter.regex-whitelist"];
-    const blacklistItem = config["filter.regex-blacklist"];
 
     const regexTypes: ("whitelist" | "blacklist")[] = [
       "whitelist",

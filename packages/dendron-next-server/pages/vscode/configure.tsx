@@ -24,7 +24,11 @@ const renderArray = (arrayEnts: any[], arrayHelpers: any) => {
   const data = arrayEnts
     .map((_ent, idx) => (
       <>
-        <Field key={idx} name={`site.siteHierarchies.${idx}`} />
+        <Field
+          key={idx}
+          name={`site.siteHierarchies.${idx}`}
+          style={{ color: "black" }}
+        />
         <button type="button" onClick={() => arrayHelpers.remove(idx)}>
           -
         </button>

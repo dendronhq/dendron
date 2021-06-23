@@ -61,6 +61,10 @@ export type NotesCacheEntry = {
 export type DendronSiteFM = {
   published?: boolean;
   noindex?: boolean;
+  /**
+   * Specify canonical url for content
+   */
+  canonicalUrl?: string;
   nav_order?: number;
   nav_exclude?: boolean;
   permalink?: string;

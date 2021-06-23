@@ -46,6 +46,9 @@
   {% if nodeCurrent.custom.noindex %}
   <meta name="robots" content="noindex, nofollow" />
   {% endif %} 
+  {% if nodeCurrent.custom.canonicalUrl %}
+  <link rel="canonical" href="{{nodeCurrent.custom.canonicalUrl}}" />
+  {% endif %} 
   {% seo %}
   <meta property="og:title" content="{{ pageTitle }}" />
   <meta name="twitter:title" content="{{ pageTitle }}" />

@@ -217,17 +217,21 @@ export function note2String(opts: {
 
 /**
  * Go to dirname that {fname} is contained in
+ * @param maxLvl? - default: 10
  */
-export function goUpTo(base: string, fname?: string): string {
-  fname = fname || "package.json";
-  let acc = 10;
+export function goUpTo(opts: {
+  base: string;
+  fname: string;
+  maxLvl?: number;
+}): string {
+  let { fname, base, maxLvl } = _.defaults(opts, { maxLvl: 10 });
   const lvls = [];
-  while (acc > 0) {
+  while (maxLvl > 0) {
     const tryPath = path.join(base, ...lvls, fname);
     if (fs.existsSync(tryPath)) {
       return path.dirname(tryPath);
     }
-    acc -= 1;
+    maxLvl -= 1;
     lvls.push("..");
   }
   throw Error(`no root found from ${base}`);

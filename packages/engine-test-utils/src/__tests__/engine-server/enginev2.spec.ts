@@ -1,13 +1,11 @@
 import {
   DVault,
   NotesCacheEntryMap,
-  NoteUtils,
   VaultUtils,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
-import { createLogger, tmpDir, vault2Path } from "@dendronhq/common-server";
+import { createLogger, vault2Path } from "@dendronhq/common-server";
 import {
-  AssertUtils,
   FileTestUtils,
   getLogFilePath,
   NoteTestUtilsV4,
@@ -15,7 +13,6 @@ import {
 import { DendronEngineV2, readNotesFromCache } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
-import path from "path";
 import { runEngineTestV5 } from "../../engine";
 import {
   ENGINE_CONFIG_PRESETS,
@@ -183,67 +180,5 @@ describe("engine, config/", () => {
         await runEngineTestV5(testFunc, { ...opts, createEngine, expect });
       });
     });
-  });
-});
-
-describe("engine, init", () => {
-  test("handles broken frontmatter gracefully", async () => {
-    const dir = tmpDir().name;
-    const fname = "broken-note.md";
-    // Create a workspace with a note that has a broken frontmatter
-    await runEngineTestV5(
-      async ({ wsRoot, vaults }) => {
-        await NoteTestUtilsV4.createNote({
-          fname: "broken-note",
-          vault: vaults[0],
-          wsRoot,
-        });
-        // break the frontmatter
-        const notePath = path.join(wsRoot, vaults[0].fsPath, fname);
-        const note = fs.readFileSync(notePath, { encoding: "utf8" });
-        const contents = note.split("\n");
-        contents[3] = "foo,bar";
-        fs.writeFileSync(notePath, contents.join("\n"), { encoding: "utf8" });
-      },
-      {
-        expect,
-        wsRoot: dir,
-      }
-    );
-
-    // Try to load the engine again
-    await runEngineTestV5(
-      async ({ initResp, wsRoot, vaults }) => {
-        // should have initialized without issue
-        const notes = initResp.data?.notes;
-        expect(notes).toBeTruthy();
-        // should have noticed the broken note
-        expect(initResp.error).toBeTruthy();
-        await AssertUtils.assertInString({
-          body: initResp.error!.payload,
-          match: ["broken-note"],
-        });
-        // should ignore the broken note
-        const note = NoteUtils.getNoteByFnameV5({
-          fname,
-          vault: vaults[0],
-          wsRoot,
-          notes: notes!,
-        });
-        expect(note).toBeUndefined();
-        // other notes should continue to function
-        const root = NoteUtils.getNoteByFnameV5({
-          fname: "root",
-          vault: vaults[0],
-          wsRoot,
-          notes: notes!,
-        });
-        expect(root).toBeDefined();
-      },
-      {
-        expect,
-        wsRoot: dir,
-      }
-    );
   });
 });

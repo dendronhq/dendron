@@ -3,6 +3,7 @@ import {
   DNodeUtils,
   DStore,
   DVault,
+  ERROR_SEVERITY,
   ERROR_STATUS,
   isNotUndefined,
   NoteProps,
@@ -128,6 +129,8 @@ export class NoteParser extends ParserBase {
               payload: err,
             });
           }
+          // A fatal error would kill the initialization
+          err.severity = ERROR_SEVERITY.MINOR;
           errors.push(err);
           return undefined;
         }
@@ -176,6 +179,8 @@ export class NoteParser extends ParserBase {
                 payload: err,
               });
             }
+            // A fatal error would kill the initialization
+            err.severity = ERROR_SEVERITY.MINOR;
             errors.push(err);
             return undefined;
           }
@@ -245,6 +250,7 @@ export class NoteParser extends ParserBase {
     } catch (_err) {
       const err = DendronError.createFromStatus({
         status: ERROR_STATUS.BAD_PARSE_FOR_NOTE,
+        severity: ERROR_SEVERITY.MINOR,
         payload: { fname: fileMeta.fpath, error: stringifyError(_err) },
         message: `${fileMeta.fpath} could not be parsed`,
       });

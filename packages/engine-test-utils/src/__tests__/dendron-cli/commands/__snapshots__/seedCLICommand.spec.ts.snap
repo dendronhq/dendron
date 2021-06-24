@@ -8,7 +8,7 @@ Object {
 
 exports[`add ok: exists 1`] = `".git .gitignore dendron.code-workspace dendron.yml seed.yml vault"`;
 
-exports[`add ok: exists 2`] = `".dendron dendron.code-workspace dendron.yml hooks seeds vault1 vault2 vault3"`;
+exports[`add ok: exists 2`] = `"dendron.code-workspace dendron.yml hooks seeds vault1 vault2 vault3"`;
 
 exports[`add ok: exists 3`] = `
 "version: 1
@@ -82,7 +82,7 @@ exports[`add ok: exists 4`] = `
 
 exports[`add ok: seed with site 1`] = `".git .gitignore dendron.code-workspace dendron.yml seed.yml vault"`;
 
-exports[`add ok: seed with site 2`] = `".dendron dendron.code-workspace dendron.yml hooks seeds vault1 vault2 vault3"`;
+exports[`add ok: seed with site 2`] = `"dendron.code-workspace dendron.yml hooks seeds vault1 vault2 vault3"`;
 
 exports[`add ok: seed with site 3`] = `
 "version: 1
@@ -233,7 +233,7 @@ repository:
 "
 `;
 
-exports[`init create workspace basic 1`] = `".dendron .gitignore dendron.code-workspace dendron.yml hooks seed.yml vault"`;
+exports[`init create workspace basic 1`] = `".gitignore dendron.code-workspace dendron.yml hooks seed.yml vault"`;
 
 exports[`init create workspace basic 2`] = `
 "version: 1

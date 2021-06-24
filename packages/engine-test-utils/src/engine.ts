@@ -116,9 +116,8 @@ export async function setupWS(opts: {
   vaults: DVault[];
   workspaces?: DWorkspace[];
   asRemote?: boolean;
-  wsRoot?: string;
 }) {
-  const wsRoot = opts.wsRoot || tmpDir().name;
+  const wsRoot = tmpDir().name;
   const ws = new WorkspaceService({ wsRoot });
   ws.createConfig();
   const config = ws.config;
@@ -166,7 +165,6 @@ export type RunEngineTestV5Opts = {
   initGit?: boolean;
   initHooks?: boolean;
   addVSWorkspace?: boolean;
-  wsRoot?: string;
 } & TestSetupWorkspaceOpts;
 
 export type RunEngineTestFunctionV5<T = any> = (
@@ -261,11 +259,10 @@ export async function runEngineTestV5(
   });
   try {
     // make sure tests don't overwrite local homedir contents
-    const wsRoot = TestEngineUtils.mockHomeDir(opts.wsRoot);
-    const { vaults } = await setupWS({
+    TestEngineUtils.mockHomeDir();
+    const { wsRoot, vaults } = await setupWS({
       vaults: vaultsInit,
       workspaces,
-      wsRoot,
     });
     if ((opts.initHooks, vaults)) {
       fs.ensureDirSync(path.join(wsRoot, CONSTANTS.DENDRON_HOOKS_BASE));

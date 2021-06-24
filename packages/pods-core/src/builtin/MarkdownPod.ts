@@ -38,7 +38,7 @@ type MarkdownImportPodConfig = ImportPodConfig & {
   indexName?: string;
 };
 
-export type MarkdownImportPodResp = any[];
+export type MarkdownImportPodResp = {importedNotes: NoteProps[]; errors: Item[]}
 
 type DItem = Item & {
   data?: any;
@@ -73,8 +73,10 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
     ]);
   }
 
-  async _collectItems(root: string): Promise<DItem[]> {
+async _collectItems(root: string): Promise<{items: DItem[], errors: DItem[]}> {
+    const ctx = "MarkdownPod._collectItems";
     const items: DItem[] = []; // files, directories, symlinks, etc
+    const errors: DItem[] = []; // import items that resulted in errors
     const mask = root.endsWith(path.sep) ? root.length : root.length + 1;
     const excludeFilter = through2.obj(function (item: Item, _enc, _next) {
       // check if hidden file
@@ -89,17 +91,29 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
         // eslint-disable-next-line prefer-arrow-callback
         .on("data", (item: Item) => {
           const out: DItem = { ...item, entries: [] };
+          let isError = false;
           if (item.path.endsWith(".md")) {
-            const { data, content } = readMD(item.path);
-            out.data = data;
-            out.body = content;
+            try {
+              const { data, content } = readMD(item.path);
+              out.data = data;
+              out.body = content;
+            }
+            catch(err) {
+              this.L.error({ctx, error: err });
+              isError = true;
+            }
           }
-          out.path = out.path.slice(mask);
-          items.push(out);
+          if (!isError) {
+            out.path = out.path.slice(mask);
+            items.push(out);
+          }
+          else {
+            errors.push(out);
+          }
         })
         .on("end", () => {
           this.L.info({ msg: "done collecting items" });
-          resolve(items);
+          resolve({items, errors});
         });
     });
   }
@@ -239,7 +253,7 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
     const { wsRoot, engine, src, vault, config } = opts;
     this.L.info({ ctx, wsRoot, src: src.fsPath, msg: "enter" });
     // get all items
-    const items = await this._collectItems(src.fsPath);
+    const {items, errors} = await this._collectItems(src.fsPath);
     this.L.info({ ctx, wsRoot, numItems: _.size(items), msg: "collectItems" });
     const { engineFileDict } = await this._prepareItems(items);
     const hDict = this._files2HierarichalDict({
@@ -279,7 +293,7 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
       src: src.fsPath,
       msg: `${_.size(notesClean)} notes imported`,
     });
-    return notesClean;
+    return {importedNotes:notesClean, errors};
   }
 }
 

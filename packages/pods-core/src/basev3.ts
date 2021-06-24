@@ -9,6 +9,7 @@ import {
   WorkspaceOpts,
 } from "@dendronhq/common-all";
 import { createLogger, DLogger, resolvePath } from "@dendronhq/common-server";
+import { Item } from "klaw";
 import _ from "lodash";
 import { URI } from "vscode-uri";
 import { PodKind } from "./types";
@@ -194,7 +195,7 @@ export abstract class ImportPod<T extends ImportPodConfig = ImportPodConfig> {
     const srcURL = URI.file(resolvePath(src, engine.wsRoot));
     return await this.plant({ ...opts, src: srcURL, vault });
   }
-  abstract plant(opts: ImportPodPlantOpts<T>): Promise<NoteProps[]>;
+  abstract plant(opts: ImportPodPlantOpts<T>): Promise<{importedNotes:NoteProps[], errors?:Item[]}>;
 }
 
 // === Export Pod

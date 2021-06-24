@@ -157,7 +157,7 @@ export default function Graph({
     // Otherwise, the graph re-renders when elements are selected
     if (cy && cy.elements("*").length > 1) return;
     renderGraph();
-  }, [graphRef, nodes, edges]);
+  }, [graphRef, elements]);
 
   useEffect(() => {
     // If initial vault data received

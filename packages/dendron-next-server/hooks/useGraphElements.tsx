@@ -246,8 +246,16 @@ const useGraphElements = ({
     edges: {},
   });
 
+  const [noteCount, setNoteCount] = useState(0);
+  const [schemaCount, setSchemaCount] = useState(0);
+
   useEffect(() => {
     if (type === "note" && engine.notes) {
+      // Prevent unnecessary parsing if no notes have been added/deleted
+      const newNoteCount = Object.keys(engine.notes).length;
+      if (noteCount === newNoteCount) return;
+      setNoteCount(newNoteCount);
+
       setElements(
         getNoteGraphElements(
           engine.notes,
@@ -260,6 +268,11 @@ const useGraphElements = ({
 
   useEffect(() => {
     if (type === "schema" && engine.schemas) {
+      // Prevent unnecessary parsing if no schemas have been added/deleted
+      const newSchemaCount = Object.keys(engine.schemas).length;
+      if (schemaCount === newSchemaCount) return;
+      setSchemaCount(newSchemaCount);
+
       setElements(getSchemaGraphElements(engine.schemas, engine.vaults));
     }
   }, [engine.schemas]);

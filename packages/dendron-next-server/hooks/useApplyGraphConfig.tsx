@@ -35,6 +35,7 @@ const useApplyGraphConfig = ({
           // If these edges aren't rendered, add them
           if (edgeCount === 0) {
             graph.add(edges[edgeType]);
+            layoutGraph();
           }
         }
 
@@ -43,6 +44,7 @@ const useApplyGraphConfig = ({
           // If these edges are rendered, remove them
           if (edgeCount > 0) {
             includedEdges.remove();
+            layoutGraph();
           }
         }
       });
@@ -62,11 +64,13 @@ const useApplyGraphConfig = ({
         // If elements should be included
         if (v?.value && includedElements.hasClass("hidden--vault")) {
           includedElements.removeClass("hidden--vault");
+          layoutGraph();
         }
 
         // If elements should not be included
         else if (!v?.value && !includedElements.hasClass("hidden--vault")) {
           includedElements.addClass("hidden--vault");
+          layoutGraph();
         }
       });
   };
@@ -110,14 +114,18 @@ const useApplyGraphConfig = ({
       const matchingElements = graph.$(matchingInput);
       const excludedElements = graph.$(excludedInput);
 
+      let updatedConfig = false;
+
       const hideElement = (element: cytoscape.SingularElementReturnValue) => {
         if (!element.hasClass(classNameHidden)) {
           element.addClass(classNameHidden);
+          updatedConfig = true;
         }
       };
       const showElement = (element: cytoscape.SingularElementReturnValue) => {
         if (element.hasClass(classNameHidden)) {
           element.removeClass(classNameHidden);
+          updatedConfig = true;
         }
       };
 
@@ -133,6 +141,7 @@ const useApplyGraphConfig = ({
         (type === "blacklist" && matchingElements.length === 0)
       ) {
         graph.$("*").removeClass(classNameHidden);
+        updatedConfig = true;
         return;
       }
 
@@ -140,6 +149,8 @@ const useApplyGraphConfig = ({
         if (type === "whitelist") hideElement(element);
         if (type === "blacklist") showElement(element);
       });
+
+      if (updatedConfig) layoutGraph();
     });
   };
   const applyFilterStubsConfig = () => {
@@ -148,11 +159,19 @@ const useApplyGraphConfig = ({
 
     const configItem = config["filter.show-stubs"];
 
+    const stubElements = graph.$("[?stub]");
+
     // If should show stubs
     if (configItem.value) {
-      graph.$("[?stub]").removeClass("hidden--stub");
+      if (stubElements.hasClass(".hidden--stub")) {
+        stubElements.removeClass("hidden--stub");
+        layoutGraph();
+      }
     } else {
-      graph.$("[?stub]").addClass("hidden--stub");
+      if (!stubElements.hasClass(".hidden--stub")) {
+        stubElements.addClass("hidden--stub");
+        layoutGraph();
+      }
     }
   };
 
@@ -163,10 +182,10 @@ const useApplyGraphConfig = ({
     applyVaultConfig();
     applyFilterRegexConfig();
     applyFilterStubsConfig();
+  };
 
-    logger.log(graph.$(".hidden--regex"));
-
-    graph.layout(getEulerConfig(!isLargeGraph)).run();
+  const layoutGraph = () => {
+    if (graph) graph.layout(getEulerConfig(!isLargeGraph)).run();
   };
 
   useEffect(() => {

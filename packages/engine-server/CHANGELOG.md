@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.47.2](https://github.com/dendronhq/dendron/compare/v0.47.0...v0.47.2) (2021-06-24)
+
+
+### Bug Fixes
+
+* notes failing parsing shouldn't crash initialization ([#855](https://github.com/dendronhq/dendron/issues/855)) ([8f96c6f](https://github.com/dendronhq/dendron/commit/8f96c6f47fa0f0ba7d05d6dbc939928b8f4b754f))
+
+
+### Features Dendron
+
+* workspace-trust-for-hooks ([#845](https://github.com/dendronhq/dendron/issues/845)) ([9fc3e15](https://github.com/dendronhq/dendron/commit/9fc3e15826f62daf87f5d39a93de0d6c33992413))
+
+
+
+
+
 ## [0.47.1](https://github.com/dendronhq/dendron/compare/v0.47.0...v0.47.1) (2021-06-23)
 
 

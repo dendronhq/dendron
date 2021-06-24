@@ -51,6 +51,34 @@ const SEED_REGISTRY: SeedRegistryDict = {
       index: "cli",
     },
   },
+  "dendron.xkcd": {
+    name: "xkcd",
+    publisher: "dendron",
+    description: "CLI Docs",
+    license: "Creative Commons Attribution-NonCommercial 2.5 License",
+    root: "vault",
+    repository: {
+      type: "git",
+      url: "https://github.com/kevinslin/seed-xkcd.git",
+    },
+    site: {
+      url: "https://xkcd.dendron.so",
+    },
+  },
+  "dendron.aws": {
+    name: "aws",
+    publisher: "dendron",
+    description: "AWS Docs",
+    license: "Multiple",
+    root: "vault",
+    repository: {
+      type: "git",
+      url: "https://github.com/dendronhq/dendron-aws-vault.git",
+    },
+    site: {
+      url: "https://aws.dendron.so",
+    },
+  },
 };
 
 type SeedCommandOpts = {

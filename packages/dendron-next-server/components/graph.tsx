@@ -10,6 +10,8 @@ import GraphFilterView from "./graph-filter-view";
 import { GraphConfig, GraphConfigItem, GraphElements } from "../lib/graph";
 import { VaultUtils } from "@dendronhq/common-all";
 import useApplyGraphConfig from "../hooks/useApplyGraphConfig";
+import { DendronProps } from "../lib/types";
+import useSyncGraphWithIDE from "../hooks/useSyncGraphWithIDE";
 
 const getCytoscapeStyle = (themes: any, theme: string | undefined) => {
   if (_.isUndefined(theme)) return "";
@@ -82,18 +84,24 @@ export default function Graph({
   config,
   setConfig,
   engine,
-}: {
+  ide,
+}: DendronProps & {
   elements: GraphElements;
   onSelect: EventHandler;
   config: GraphConfig;
   setConfig: React.Dispatch<React.SetStateAction<GraphConfig>>;
-  engine: engineSlice.EngineState;
   type?: "note" | "schema";
 }) {
   const logger = createLogger("Graph");
   const graphRef = useRef<HTMLDivElement>(null);
   const { themes, currentTheme } = useThemeSwitcher();
   const [cy, setCy] = useState<Core>();
+
+  useSyncGraphWithIDE({
+    graph: cy,
+    engine,
+    ide,
+  });
 
   // On config update, handle graph changes
   useApplyGraphConfig({

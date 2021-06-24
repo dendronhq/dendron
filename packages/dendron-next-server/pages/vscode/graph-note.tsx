@@ -14,12 +14,9 @@ import {
 import Graph from "../../components/graph";
 import { graphConfig, GraphConfig } from "../../lib/graph";
 import useGraphElements from "../../hooks/useGraphElements";
+import { DendronProps } from "../../lib/types";
 
-export default function FullNoteGraph({
-  engine,
-}: {
-  engine: engineSlice.EngineState;
-}) {
+export default function FullNoteGraph({ engine, ide }: DendronProps) {
   const [config, setConfig] = useState<GraphConfig>(graphConfig.note);
 
   const elements = useGraphElements({ type: "note", engine });
@@ -70,6 +67,7 @@ export default function FullNoteGraph({
       config={config}
       setConfig={setConfig}
       engine={engine}
+      ide={ide}
     />
   );
 }

@@ -6,13 +6,15 @@ import {
   NoteViewMessage,
   assertUnreachable,
   NoteProps,
+  NoteUtils,
 } from "@dendronhq/common-all";
 import { DENDRON_COMMANDS } from "../constants";
-import { VSCodeUtils } from "../utils";
+import { VSCodeUtils, DisposableStore } from "../utils";
 import { WebViewUtils } from "../views/utils";
 import { BasicCommand } from "./base";
 import { getEngine, getWS } from "../workspace";
 import { GotoNoteCommand } from "./GotoNote";
+import { Logger } from "../logger";
 
 type CommandOpts = {};
 type CommandOutput = any;
@@ -21,15 +23,63 @@ export class ShowPreviewV2Command extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
-  public activeTextEditor: vscode.TextEditor;
+  private activeTextEditor: vscode.TextEditor;
+  private disposableStore: DisposableStore;
 
   static key = DENDRON_COMMANDS.SHOW_PREVIEW_V2.key;
 
   constructor(_name?: string) {
     super(_name);
 
-    // this makes sure that the `note` retrieval from `activeTextEditor` works in `NoteViewMessageType.onGetActiveEditor` because there it would be `undefined` since focus changed
+    // save reference to the activeTextEditor when the command was trigger
+    // this makes sure that the `note` retrieval from `activeTextEditor` works in `NoteViewMessageType.onGetActiveEditor` because there it would be `undefined` since focus changed to the preview window
     this.activeTextEditor = VSCodeUtils.getActiveTextEditorOrThrow();
+
+    // debounce calls because there can be multiple a once and we only need to now if(some changed) and now how(what changed)
+    this.updateMarkdown = _.debounce(this.updateMarkdown.bind(this), 100);
+
+    this.disposableStore = new DisposableStore();
+
+    // TODO this might be better placed in WorkspaceWatcher
+    this.disposableStore.add(
+      vscode.workspace.onDidSaveTextDocument((document) => {
+        this.updateMarkdown(document);
+      }, this)
+    );
+  }
+
+  updateMarkdown(document: vscode.TextDocument) {
+    const ctx = "ShowPreviewV2:updateMarkdown";
+
+    if (!getWS().workspaceService?.isPathInWorkspace(document.uri.fsPath)) {
+      Logger.info({
+        ctx,
+        uri: document.uri.fsPath,
+        msg: "not in workspace",
+      });
+      return;
+    }
+    const note = VSCodeUtils.getNoteFromDocument(document);
+    if (note) {
+      Logger.info({
+        ctx,
+        msg: "update markdown",
+        note: NoteUtils.toLogObj(note),
+      });
+
+      const panel = getWS().getWebView(DendronWebViewKey.NOTE_PREVIEW);
+      console.log("update markdown", note, panel);
+      if (panel) {
+        panel.webview.postMessage({
+          type: "onDidChangeActiveTextEditor",
+          data: {
+            note,
+            sync: true,
+          },
+          source: "vscode",
+        });
+      }
+    }
   }
 
   async sanityCheck() {
@@ -121,5 +171,9 @@ export class ShowPreviewV2Command extends BasicCommand<
 
     // Update workspace-wide graph panel
     ws.setWebView(DendronWebViewKey.NOTE_PREVIEW, panel);
+
+    panel.onDidDispose(() => {
+      this.disposableStore.dispose();
+    }, this);
   }
 }

@@ -23,18 +23,20 @@ function Note({ engine, ide }: DendronProps) {
   const dispatch = engineHooks.useEngineAppDispatch();
 
   const { noteActive } = ide;
-  const noteId = noteActive?.id;
-  const noteContent = noteId && engine.notesRendered[noteId];
+  const noteId = noteActive?.id || "apples";
+  const noteTimestamp = noteActive?.updated;
+  const noteContent = engine.notesRendered[noteId];
+  const noteContentTimestamp = engine.notesRenderedTimestamp[noteId];
 
   React.useEffect(() => {
     if (!noteId) {
       logger.info({ msg: "no noteId" });
       return;
     }
-    if (!noteContent) {
+    if (!noteContent || noteContentTimestamp !== noteTimestamp) {
       dispatch(engineSlice.renderNote({ ...getWsAndPort(), id: noteId }));
     }
-  }, [noteId, noteContent]);
+  }, [noteId, noteContent, noteContentTimestamp, noteTimestamp]);
 
   const onClickHandler = React.useCallback(
     (event: Event) => {
@@ -74,9 +76,7 @@ function Note({ engine, ide }: DendronProps) {
   if (!noteContent) {
     return <>Loading..(no `noteContent`)</>;
   }
-  return (
-    <div dangerouslySetInnerHTML={{ __html: engine.notesRendered[noteId]! }} />
-  );
+  return <div dangerouslySetInnerHTML={{ __html: noteContent }} />;
 }
 
 export default Note;

@@ -1,8 +1,10 @@
 import cytoscape from "cytoscape";
 import { useEffect, useState } from "react";
-import { createLogger } from "../../common-frontend/lib";
-import { EngineSliceUtils } from "../../common-frontend/lib/features/engine/slice";
+import { createLogger } from "@dendronhq/common-frontend";
+import { engineSlice } from "@dendronhq/common-frontend";
 import { DendronProps } from "../lib/types";
+
+const EngineSliceUtils = engineSlice.EngineSliceUtils;
 
 type Props = DendronProps & {
   graph: cytoscape.Core | undefined;

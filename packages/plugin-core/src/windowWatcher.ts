@@ -5,11 +5,20 @@ import {
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { DateTime } from "luxon";
-import { DecorationOptions, ExtensionContext, Range, window } from "vscode";
+import {
+  DecorationOptions,
+  ExtensionContext,
+  Range,
+  window,
+  TextEditor,
+  Selection,
+} from "vscode";
 import { Logger } from "./logger";
 import { CodeConfigKeys, DateTimeFormat } from "./types";
 import { VSCodeUtils } from "./utils";
 import { getConfigValue, getWS } from "./workspace";
+import visit from "unist-util-visit";
+import { MDUtilsV5, ProcMode } from "@dendronhq/engine-server";
 
 const tsDecorationType = window.createTextEditorDecorationType({
   //   borderWidth: "1px",
@@ -45,9 +54,15 @@ export class WindowWatcher {
           this.triggerUpdateDecorations();
           this.triggerNoteGraphViewUpdate();
           this.triggerSchemaGraphViewUpdate();
+
+          if (
+            getWS().workspaceWatcher?.getNewlyOpenedDocument(editor.document)
+          ) {
+            this.onFirstOpen(editor);
+          }
         }
       },
-      null,
+      this,
       context.subscriptions
     );
   }
@@ -151,5 +166,27 @@ export class WindowWatcher {
       }
     }
     return;
+  }
+
+  async onFirstOpen(editor: TextEditor) {
+    this.adjustCursorPosition(editor);
+  }
+
+  private adjustCursorPosition(editor: TextEditor) {
+    const proc = MDUtilsV5.procRemarkParse({
+      mode: ProcMode.NO_DATA,
+      parseOnly: true,
+    });
+    const parsed = proc.parse(editor.document.getText());
+    visit(parsed, ["yaml"], (node) => {
+      if (_.isUndefined(node.position)) return false; // Should never happen
+      const position = VSCodeUtils.remarkPoint2VSCodePosition(
+        node.position.end,
+        { line: 1 }
+      );
+      editor.selection = new Selection(position, position);
+      // Found the frontmatter already, stop traversing
+      return false;
+    });
   }
 }

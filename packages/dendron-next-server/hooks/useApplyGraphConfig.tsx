@@ -18,7 +18,7 @@ const useApplyGraphConfig = ({
   const { nodes, edges } = elements;
   const isLargeGraph = nodes.length + Object.values(edges).flat().length > 1000;
 
-  const applyDisplayConfig = () => {
+  const applyDisplayConfig = (allowRelayout: boolean) => {
     if (!graph || graph.$("*").length === 0) return;
 
     Object.entries(config)
@@ -35,7 +35,7 @@ const useApplyGraphConfig = ({
           // If these edges aren't rendered, add them
           if (edgeCount === 0) {
             graph.add(edges[edgeType]);
-            layoutGraph();
+            if (allowRelayout) layoutGraph();
           }
         }
 
@@ -44,12 +44,12 @@ const useApplyGraphConfig = ({
           // If these edges are rendered, remove them
           if (edgeCount > 0) {
             includedEdges.remove();
-            layoutGraph();
+            if (allowRelayout) layoutGraph();
           }
         }
       });
   };
-  const applyVaultConfig = () => {
+  const applyVaultConfig = (allowRelayout: boolean) => {
     if (!graph || graph.$("*").length === 0) return;
 
     Object.entries(config)
@@ -64,17 +64,17 @@ const useApplyGraphConfig = ({
         // If elements should be included
         if (v?.value && includedElements.hasClass("hidden--vault")) {
           includedElements.removeClass("hidden--vault");
-          layoutGraph();
+          if (allowRelayout) layoutGraph();
         }
 
         // If elements should not be included
         else if (!v?.value && !includedElements.hasClass("hidden--vault")) {
           includedElements.addClass("hidden--vault");
-          layoutGraph();
+          if (allowRelayout) layoutGraph();
         }
       });
   };
-  const applyFilterRegexConfig = () => {
+  const applyFilterRegexConfig = (allowRelayout: boolean) => {
     if (!graph || graph.$("*").length === 0) return;
 
     const regexTypes: ("whitelist" | "blacklist")[] = [
@@ -150,10 +150,10 @@ const useApplyGraphConfig = ({
         if (type === "blacklist") showElement(element);
       });
 
-      if (updatedConfig) layoutGraph();
+      if (updatedConfig && allowRelayout) layoutGraph();
     });
   };
-  const applyFilterStubsConfig = () => {
+  const applyFilterStubsConfig = (allowRelayout: boolean) => {
     if (!graph || graph.$("*").length === 0) return;
     if (_.isUndefined(config["filter.show-stubs"])) return;
 
@@ -165,12 +165,12 @@ const useApplyGraphConfig = ({
     if (configItem.value) {
       if (stubElements.hasClass(".hidden--stub")) {
         stubElements.removeClass("hidden--stub");
-        layoutGraph();
+        if (allowRelayout) layoutGraph();
       }
     } else {
       if (!stubElements.hasClass(".hidden--stub")) {
         stubElements.addClass("hidden--stub");
-        layoutGraph();
+        if (allowRelayout) layoutGraph();
       }
     }
   };
@@ -178,10 +178,12 @@ const useApplyGraphConfig = ({
   const applyConfig = () => {
     if (!graph || graph.$("*").length === 0) return;
 
-    applyDisplayConfig();
-    applyVaultConfig();
-    applyFilterRegexConfig();
-    applyFilterStubsConfig();
+    const allowRelayout = config["options.allow-relayout"].value;
+
+    applyDisplayConfig(allowRelayout);
+    applyVaultConfig(allowRelayout);
+    applyFilterRegexConfig(allowRelayout);
+    applyFilterStubsConfig(allowRelayout);
   };
 
   const layoutGraph = () => {

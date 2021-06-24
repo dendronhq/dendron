@@ -21,7 +21,16 @@ export class ShowPreviewV2Command extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
+  public activeTextEditor: vscode.TextEditor;
+
   static key = DENDRON_COMMANDS.SHOW_PREVIEW_V2.key;
+
+  constructor(_name?: string) {
+    super(_name);
+
+    // this makes sure that the `note` retrieval from `activeTextEditor` works in `NoteViewMessageType.onGetActiveEditor` because there it would be `undefined` since focus changed
+    this.activeTextEditor = VSCodeUtils.getActiveTextEditorOrThrow();
+  }
 
   async sanityCheck() {
     if (_.isUndefined(VSCodeUtils.getActiveTextEditor())) {
@@ -73,7 +82,6 @@ export class ShowPreviewV2Command extends BasicCommand<
             if (data.href.includes("localhost")) {
               const { path } = vscode.Uri.parse(data.href);
               const noteId = path.match(/.*\/(.*).html/)?.[1];
-              console.log("is local file (wikilink)", path);
               let note: NoteProps | undefined = undefined;
               if (noteId && (note = getEngine().notes[noteId])) {
                 await new GotoNoteCommand().execute({
@@ -89,17 +97,9 @@ export class ShowPreviewV2Command extends BasicCommand<
           break;
         }
         case NoteViewMessageType.onGetActiveEditor: {
-          /**
-           * Here we want to load the last active note.
-           * This `case` happens when `packages/plugin-core/src/views/utils.ts:87` calls `onGetActiveEditor` msg.type on initializing webview.
-           * But after opening the Preview Webview the focus changes and `activeTextEditor` becomes `undefined`.
-           * TODO: find a way to send to the webview an `onDidChangeActiveTextEditor` message with the latest active note.
-           *
-           */
-          const activeTextEditor = VSCodeUtils.getActiveTextEditor();
           const note =
-            activeTextEditor &&
-            VSCodeUtils.getNoteFromDocument(activeTextEditor.document);
+            this.activeTextEditor &&
+            VSCodeUtils.getNoteFromDocument(this.activeTextEditor.document);
           if (note) {
             panel.webview.postMessage({
               type: "onDidChangeActiveTextEditor",

@@ -25,6 +25,8 @@ export type CoreGraphConfig = {
 
   "filter.regex-whitelist": GraphConfigItem<string>;
   "filter.regex-blacklist": GraphConfigItem<string>;
+
+  "options.allow-relayout": GraphConfigItem<boolean>;
 };
 
 export type NoteGraphConfig = {
@@ -66,6 +68,10 @@ const coreGraphConfig: CoreGraphConfig = {
   "information.nodes": {
     value: 0,
     mutable: false,
+  },
+  "options.allow-relayout": {
+    value: true,
+    mutable: true,
   },
 };
 

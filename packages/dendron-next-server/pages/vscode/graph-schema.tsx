@@ -10,12 +10,9 @@ import {
   GraphViewMessage,
   GraphViewMessageType,
 } from "@dendronhq/common-all";
+import { DendronProps } from "../../lib/types";
 
-export default function FullSchemaGraph({
-  engine,
-}: {
-  engine: engineSlice.EngineState;
-}) {
+export default function FullSchemaGraph({ engine, ide }: DendronProps) {
   const [config, setConfig] = useState<GraphConfig>(graphConfig.schema);
   const elements = useGraphElements({ type: "schema", engine });
 
@@ -72,6 +69,7 @@ export default function FullSchemaGraph({
       config={config}
       setConfig={setConfig}
       engine={engine}
+      ide={ide}
     />
   );
 }

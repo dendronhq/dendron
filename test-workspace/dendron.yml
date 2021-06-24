@@ -51,4 +51,4 @@ dev:
     nextServerUrl: 'http://localhost:3000'
     engineServerPort: 3005
 initializeRemoteVaults: true
-dendronVersion: 0.46.3-alpha.0
+dendronVersion: 0.47.1

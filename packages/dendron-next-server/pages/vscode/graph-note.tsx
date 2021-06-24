@@ -5,31 +5,14 @@ import {
 } from "@dendronhq/common-frontend";
 import _ from "lodash";
 import React, { useEffect, useState } from "react";
-import cytoscape, {
-  EdgeDefinition,
-  ElementsDefinition,
-  EventHandler,
-  Core,
-  NodeDefinition,
-  EdgeDataDefinition,
-} from "cytoscape";
+import { EventHandler } from "cytoscape";
 import {
   DMessageSource,
   GraphViewMessage,
   GraphViewMessageType,
-  NoteUtils,
-  VaultUtils,
 } from "@dendronhq/common-all";
 import Graph from "../../components/graph";
-import { useRouter } from "next/router";
-import {
-  graphConfig,
-  GraphConfig,
-  GraphConfigItem,
-  GraphEdges,
-  GraphNodes,
-} from "../../lib/graph";
-import GraphFilterView from "../../components/graph-filter-view";
+import { graphConfig, GraphConfig } from "../../lib/graph";
 import useGraphElements from "../../hooks/useGraphElements";
 
 export default function FullNoteGraph({

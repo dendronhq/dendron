@@ -16,6 +16,7 @@ import {
   MigrationServce,
   WorkspaceService,
   MetadataService,
+  DConfig,
 } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -241,9 +242,23 @@ export async function _activate(
     const wsRoot = DendronWorkspace.wsRoot() as string;
     const wsService = new WorkspaceService({ wsRoot });
 
-    // check if we upgraded
-    if (workspaceInstallStatus === InstallStatus.UPGRADED && stage !== "test") {
-      // never migrated version numbers before
+    // we changed how we track upgrades. this makes sure everyone has their workspace version set initially
+    let forceUpgrade = false;
+    try {
+      const maybeRaw = DConfig.getRaw(wsRoot);
+      if (
+        _.isUndefined(maybeRaw.journal) &&
+        workspaceInstallStatus === InstallStatus.INITIAL_INSTALL
+      ) {
+        forceUpgrade = true;
+        Logger.info({ ctx, forceUpgrade });
+      }
+    } catch (error) {}
+
+    if (
+      (workspaceInstallStatus === InstallStatus.UPGRADED || forceUpgrade) &&
+      stage !== "test"
+    ) {
       const changes = await MigrationServce.applyMigrationRules({
         currentVersion,
         previousVersion: previousWorkspaceVersion,

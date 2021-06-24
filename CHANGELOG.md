@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.47.1](https://github.com/dendronhq/dendron/compare/v0.47.0...v0.47.1) (2021-06-23)
+
+
+### Bug Fixes
+
+* dendron not applying version migrations ([7c1ca7c](https://github.com/dendronhq/dendron/commit/7c1ca7cadc594ed60320007204e0f90b2fd8ee2c))
+* Ensure `runEngineTestV5` always restores mocks ([#850](https://github.com/dendronhq/dendron/issues/850)) ([a81b249](https://github.com/dendronhq/dendron/commit/a81b24984e90feb40249bb72426e0d84e1df5802))
+
+
+### Features Dendron
+
+* filter graph by string ([#828](https://github.com/dendronhq/dendron/issues/828)) ([114f6a2](https://github.com/dendronhq/dendron/commit/114f6a2b67cbe38a62f76b1459b373b64a6a669c))
+* show/hide stubs in graph view ([#851](https://github.com/dendronhq/dendron/issues/851)) ([40726f2](https://github.com/dendronhq/dendron/commit/40726f29cbafcdd8dfef2e1fe059c3739e3b69f1))
+* workspace-trust-for-hooks ([#845](https://github.com/dendronhq/dendron/issues/845)) ([9fc3e15](https://github.com/dendronhq/dendron/commit/9fc3e15826f62daf87f5d39a93de0d6c33992413))
+
+
+
+
+
 # [0.47.0](https://github.com/dendronhq/dendron/compare/v0.46.1...v0.47.0) (2021-06-21)
 
 

@@ -6,11 +6,11 @@ import {
   VaultUtils,
 } from "@dendronhq/common-all";
 import { createLogger, engineSlice } from "@dendronhq/common-frontend";
-import { EdgeDefinition, NodeDefinition } from "cytoscape";
+import { EdgeDefinition } from "cytoscape";
 import _ from "lodash";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { GraphEdges, GraphElements, GraphNodes } from "../lib/graph";
+import { GraphEdges, GraphElements } from "../lib/graph";
 
 const getVaultClass = (vault: DVault) => {
   const vaultName = VaultUtils.getName(vault);
@@ -27,7 +27,13 @@ const getNoteGraphElements = (
   // ADD NODES
   const nodes = Object.values(notes).map((note) => {
     return {
-      data: { id: note.id, label: note.title, group: "nodes" },
+      data: {
+        id: note.id,
+        label: note.title,
+        group: "nodes",
+        fname: note.fname,
+        stub: _.isUndefined(note.stub) ? false : note.stub,
+      },
       classes: `${getVaultClass(note.vault)}`,
     };
   });
@@ -45,9 +51,11 @@ const getNoteGraphElements = (
       ...note.children.map((child) => ({
         data: {
           group: "edges",
-          id: `${notes.id}_${child}`,
+          id: `${note.id}_${child}`,
           source: note.id,
           target: child,
+          fname: note.fname,
+          stub: _.isUndefined(note.stub) ? false : note.stub,
         },
         classes: `hierarchy ${noteVaultClass}`,
       }))
@@ -105,6 +113,13 @@ const getNoteGraphElements = (
             id: `${note.id}_${to.id}`,
             source: note.id,
             target: to.id,
+            fname: note.fname,
+            stub:
+              _.isUndefined(note.stub) && _.isUndefined(to.stub)
+                ? false
+                : note.stub || to.stub
+                ? true
+                : false,
           },
           classes: `links ${noteVaultClass}`,
         });
@@ -149,6 +164,7 @@ const getSchemaGraphElements = (
         label: vaultName,
         group: "nodes",
         vault: vaultName,
+        fname: "root",
       },
       classes: `vault-${vaultName}`,
     });
@@ -160,7 +176,12 @@ const getSchemaGraphElements = (
 
         // Base schema node
         nodes.push({
-          data: { id: SCHEMA_ID, label: schema.fname, group: "nodes" },
+          data: {
+            id: SCHEMA_ID,
+            label: schema.fname,
+            group: "nodes",
+            fname: schema.fname,
+          },
           classes: `vault-${vaultName}`,
         });
 
@@ -171,6 +192,7 @@ const getSchemaGraphElements = (
             id: `${VAULT_ID}_${SCHEMA_ID}`,
             source: VAULT_ID,
             target: SCHEMA_ID,
+            fname: schema.fname,
           },
           classes: `hierarchy vault-${vaultName}`,
         });
@@ -197,6 +219,7 @@ const getSchemaGraphElements = (
               id: `${SCHEMA_ID}_${SUBSCHEMA_ID}`,
               source: SCHEMA_ID,
               target: SUBSCHEMA_ID,
+              fname: schema.fname,
             },
             classes: `hierarchy vault-${vaultName}`,
           });

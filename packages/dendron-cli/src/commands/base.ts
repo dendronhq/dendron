@@ -1,8 +1,7 @@
 import { createLogger } from "@dendronhq/common-server";
-import yargs from "yargs";
+import { WorkspaceUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
-import fs from "fs-extra";
-import path from "path";
+import yargs from "yargs";
 
 type BaseCommandOpts = { quiet?: boolean };
 
@@ -50,15 +49,12 @@ export abstract class CLICommand<TOpts, TOut> extends BaseCommand<TOpts, TOut> {
   eval = async (args: any) => {
     this.L.info({ args });
     if (!args.wsRoot) {
-      const cwd = process.cwd();
-      if (
-        !fs.existsSync(path.join(cwd, "dendron.yml")) &&
-        !this.wsRootOptional
-      ) {
+      const configPath = WorkspaceUtils.findWSRoot();
+      if (_.isUndefined(configPath) && !this.wsRootOptional) {
         console.log("no workspace detected. --wsRoot must be set");
         process.exit(1);
       } else {
-        args.wsRoot = cwd;
+        args.wsRoot = configPath;
       }
     }
     if (args.quiet) {

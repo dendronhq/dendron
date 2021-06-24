@@ -218,6 +218,7 @@ export function note2String(opts: {
 /**
  * Go to dirname that {fname} is contained in
  * @param maxLvl? - default: 10
+ @deprecated use {@link findUpTo}
  */
 export function goUpTo(opts: {
   base: string;
@@ -235,6 +236,34 @@ export function goUpTo(opts: {
     lvls.push("..");
   }
   throw Error(`no root found from ${base}`);
+}
+
+/**
+ * Go to dirname that {fname} is contained in
+ * @param maxLvl - default: 10
+ * @param returnDirPath - return path to directory, default: false
+ */
+export function findUpTo(opts: {
+  base: string;
+  fname: string;
+  maxLvl?: number;
+  returnDirPath?: boolean;
+}): string | undefined {
+  const { fname, base, maxLvl, returnDirPath } = _.defaults(opts, {
+    maxLvl: 3,
+    returnDirPath: false,
+  });
+  const lvls = [];
+  let acc = 0;
+  while (maxLvl - acc > 0) {
+    const tryPath = path.join(base, ...lvls, fname);
+    if (fs.existsSync(tryPath)) {
+      return returnDirPath ? path.dirname(tryPath) : tryPath;
+    }
+    acc += 1;
+    lvls.push("..");
+  }
+  return undefined;
 }
 
 export function note2File({

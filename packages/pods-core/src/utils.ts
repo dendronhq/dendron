@@ -71,18 +71,8 @@ export class PodUtils {
     const podConfigPath = PodUtils.getConfigPath({ podsDir, podClass });
     ensureDirSync(path.dirname(podConfigPath));
     const pod = new podClass();
-    let required: string[];
-    let podConfig: any;
-    if (_.has(pod.config, "$merge")) {
-      required = pod.config.$merge.with.required;
-      podConfig = {
-        ...pod.config.$merge.source.properties,
-        ...pod.config.$merge.with.properties,
-      };
-    } else {
-      required = pod.config.required;
-      podConfig = pod.config.properties;
-    }
+    const required = pod.config.required;
+    const podConfig = pod.config.properties;
 
     const config = Object.keys(podConfig)
       .map((ent: any) => {

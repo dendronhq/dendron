@@ -32,28 +32,42 @@ export class GraphvizExportPod extends ExportPod<GraphvizExportConfig> {
   static id: string = ID;
   static description: string = "export notes in Graphviz DOT format";
 
-  get config(): JSONSchemaType<ExportPodConfig> {
+  get config(): JSONSchemaType<GraphvizExportConfig> {
     return {
       type: "object",
-      required: [],
-      $merge: {
-        source: super.config,
-        with: {
-          required: super.config.required,
-          properties: {
-            showGraphByHierarchy: {
-              type: "boolean",
-              description:
-                "Include hierarchical note connections (e.g. parent -> child connections)",
-              default: true,
-            },
-            showGraphByEdges: {
-              type: "boolean",
-              description:
-                "Include linked note relationships, e.g. note with [[link]] -> another note",
-              default: false,
-            },
+      additionalProperties: false,
+      required: ["dest"],
+      properties: {
+        dest: { type: "string", description: "Where to export to" },
+        includeBody: {
+          type: "boolean",
+          default: true,
+          description: "should body be included",
+          nullable: true,
+        },
+        includeStubs: {
+          type: "boolean",
+          description: "should stubs be included",
+          nullable: true,
+        },
+        ignore: {
+          type: "array",
+          items: {
+            type: "string",
           },
+          nullable: true,
+        },
+        showGraphByHierarchy: {
+          type: "boolean",
+          description:
+            "Include hierarchical note connections (e.g. parent -> child connections)",
+          default: true,
+        },
+        showGraphByEdges: {
+          type: "boolean",
+          description:
+            "Include linked note relationships, e.g. note with [[link]] -> another note",
+          default: false,
         },
       },
     };

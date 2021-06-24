@@ -122,47 +122,9 @@ export type ImportPodPlantOpts<T extends ImportPodConfig = ImportPodConfig> =
 export abstract class ImportPod<T extends ImportPodConfig = ImportPodConfig> {
   public L: DLogger;
   static kind = "import" as PodKind;
-  get config(): JSONSchemaType<ImportPodConfig> {
-    return {
-      type: "object",
-      additionalProperties: false,
-      required: ["src", "vaultName"],
-      properties: {
-        src: {
-          description: "Where to import from",
-          type: "string",
-        },
-        vaultName: {
-          description: "name of vault to import into",
-          type: "string",
-        },
-        concatenate: {
-          description: "whether to concatenate everything into one note",
-          type: "boolean",
-          nullable: true,
-        },
-        frontmatter: {
-          description: "frontmatter to add to each note",
-          type: "object",
-          nullable: true,
-        },
-        fnameAsId: {
-          description: "use the file name as the id",
-          type: "boolean",
-          nullable: true,
-        },
-        destName: {
-          description: "If concatenate is set, name of destination path",
-          type: "string",
-          nullable: true,
-        },
-        ignore: {
-          type: "boolean",
-          nullable: true,
-        },
-      },
-    };
-  }
+
+  abstract get config(): JSONSchemaType<T>;
+
   constructor() {
     this.L = createLogger("ImportPod");
   }
@@ -228,28 +190,7 @@ export abstract class ExportPod<
     this.L = createLogger("ExportPod");
   }
 
-  get config(): JSONSchemaType<ExportPodConfig> {
-    return {
-      type: "object",
-      additionalProperties: false,
-      required: ["dest"],
-      properties: {
-        dest: { type: "string", description: "Where to export to" },
-        includeBody: {
-          type: "boolean",
-          default: true,
-          description: "should body be included",
-          nullable: true,
-        },
-        includeStubs: {
-          type: "boolean",
-          description: "should stubs be included",
-          nullable: true,
-        },
-        ignore: { type: "array", items: { type: "string" }, nullable: true },
-      },
-    };
-  }
+  abstract get config(): JSONSchemaType<T>;
 
   validate(config: Partial<T>) {
     const validateConfig = ajv.compile(this.config);

@@ -20,6 +20,7 @@ import path from "path";
 import through2 from "through2";
 import {
   ExportPod,
+  ExportPodConfig,
   ExportPodPlantOpts,
   ImportPod,
   ImportPodConfig,
@@ -57,27 +58,54 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
   static id: string = ID;
   static description: string = "import markdown";
 
-  get config(): JSONSchemaType<ImportPodConfig> {
+  get config(): JSONSchemaType<MarkdownImportPodConfig> {
     return {
       type: "object",
-      required: [],
-      $merge: {
-        source: super.config,
-        with: {
-          required: super.config.required,
-          properties: {
-            noAddUUID: {
-              description: "Don't add uuid to assets",
-              type: "boolean",
-              nullable: true,
-            },
-            indexName: {
-              description:
-                "If you have an index file per directory, merge that file with the directory note",
-              type: "string",
-              nullable: true,
-            },
-          },
+      additionalProperties: false,
+      required: ["src", "vaultName"],
+      properties: {
+        src: {
+          description: "Where to import from",
+          type: "string",
+        },
+        vaultName: {
+          description: "name of vault to import into",
+          type: "string",
+        },
+        concatenate: {
+          description: "whether to concatenate everything into one note",
+          type: "boolean",
+          nullable: true,
+        },
+        frontmatter: {
+          description: "frontmatter to add to each note",
+          type: "object",
+          nullable: true,
+        },
+        fnameAsId: {
+          description: "use the file name as the id",
+          type: "boolean",
+          nullable: true,
+        },
+        destName: {
+          description: "If concatenate is set, name of destination path",
+          type: "string",
+          nullable: true,
+        },
+        ignore: {
+          type: "boolean",
+          nullable: true,
+        },
+        noAddUUID: {
+          description: "Don't add uuid to assets",
+          type: "boolean",
+          nullable: true,
+        },
+        indexName: {
+          description:
+            "If you have an index file per directory, merge that file with the directory note",
+          type: "string",
+          nullable: true,
         },
       },
     };
@@ -321,6 +349,29 @@ export class MarkdownPublishPod extends PublishPod {
 export class MarkdownExportPod extends ExportPod {
   static id: string = ID;
   static description: string = "export notes as markdown";
+
+  get config(): JSONSchemaType<ExportPodConfig> {
+    return {
+      type: "object",
+      additionalProperties: false,
+      required: ["dest"],
+      properties: {
+        dest: { type: "string", description: "Where to export to" },
+        includeBody: {
+          type: "boolean",
+          default: true,
+          description: "should body be included",
+          nullable: true,
+        },
+        includeStubs: {
+          type: "boolean",
+          description: "should stubs be included",
+          nullable: true,
+        },
+        ignore: { type: "array", items: { type: "string" }, nullable: true },
+      },
+    };
+  }
 
   async plant(opts: ExportPodPlantOpts) {
     const ctx = "MarkdownExportPod:plant";

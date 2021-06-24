@@ -4,10 +4,13 @@ import _ from "lodash";
 import path from "path";
 import {
   ExportPod,
+  ExportPodConfig,
   ExportPodPlantOpts,
   ImportPod,
+  ImportPodConfig,
   ImportPodPlantOpts,
 } from "../basev3";
+import { JSONSchemaType } from "ajv";
 
 const ID = "dendron.snapshot";
 
@@ -23,6 +26,29 @@ export type SnapshotExportPodPlantOpts = ExportPodPlantOpts;
 export class SnapshotExportPod extends ExportPod {
   static id: string = ID;
   static description: string = "export notes to snapshot";
+
+  get config(): JSONSchemaType<ExportPodConfig> {
+    return {
+      type: "object",
+      additionalProperties: false,
+      required: ["dest"],
+      properties: {
+        dest: { type: "string", description: "Where to export to" },
+        includeBody: {
+          type: "boolean",
+          default: true,
+          description: "should body be included",
+          nullable: true,
+        },
+        includeStubs: {
+          type: "boolean",
+          description: "should stubs be included",
+          nullable: true,
+        },
+        ignore: { type: "array", items: { type: "string" }, nullable: true },
+      },
+    };
+  }
 
   async backupVault({
     vault,
@@ -124,6 +150,48 @@ export type SnapshotImportPodResp = {
 export class SnapshotImportPod extends ImportPod {
   static id: string = ID;
   static description: string = "import snapshot";
+
+  get config(): JSONSchemaType<ImportPodConfig> {
+    return {
+      type: "object",
+      additionalProperties: false,
+      required: ["src", "vaultName"],
+      properties: {
+        src: {
+          description: "Where to import from",
+          type: "string",
+        },
+        vaultName: {
+          description: "name of vault to import into",
+          type: "string",
+        },
+        concatenate: {
+          description: "whether to concatenate everything into one note",
+          type: "boolean",
+          nullable: true,
+        },
+        frontmatter: {
+          description: "frontmatter to add to each note",
+          type: "object",
+          nullable: true,
+        },
+        fnameAsId: {
+          description: "use the file name as the id",
+          type: "boolean",
+          nullable: true,
+        },
+        destName: {
+          description: "If concatenate is set, name of destination path",
+          type: "string",
+          nullable: true,
+        },
+        ignore: {
+          type: "boolean",
+          nullable: true,
+        },
+      },
+    };
+  }
 
   async restoreVault({
     wsRoot,

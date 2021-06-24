@@ -20,7 +20,7 @@ type AirtableExportPodCustomOpts = {
   srcHierarchy: string;
   apiKey: string;
   baseId: string;
-  srcFieldMapping: any;
+  srcFieldMapping: object;
 };
 
 export type AirtableExportConfig = ExportPodConfig &
@@ -35,43 +35,53 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
   static id: string = ID;
   static description: string = "export notes to airtable";
 
-  get config(): JSONSchemaType<ExportPodConfig> {
-    const source = super.config;
-    let required = [
-      ...source.required,
-      "tableName",
-      "srcHierarchy",
-      "baseId",
-      "apiKey",
-      "srcFieldMapping",
-    ];
+  get config(): JSONSchemaType<AirtableExportConfig> {
     return {
       type: "object",
-      required: [],
-      $merge: {
-        source,
-        with: {
-          required,
-          properties: {
-            tableName: { type: "string", description: "Name of the airtable" },
-            srcHierarchy: {
-              type: "string",
-              description: "The src .md file from where to start the sync",
-            },
-            apiKey: {
-              type: "string",
-              description: "Api key for airtable",
-            },
-            baseId: {
-              type: "string",
-              description: " base Id of airtable base",
-            },
-            srcFieldMapping: {
-              type: "object",
-              description:
-                "mapping of airtable fields with the note eg: {Created On: created, Notes: body}",
-            },
-          },
+      additionalProperties: false,
+      required: [
+        "dest",
+        "tableName",
+        "srcHierarchy",
+        "baseId",
+        "apiKey",
+        "srcFieldMapping",
+      ],
+      properties: {
+        dest: {
+          type: "string",
+          description: "Where to export to",
+          default: "Airtable-Workspace",
+        },
+        includeBody: {
+          type: "boolean",
+          default: true,
+          description: "should body be included",
+          nullable: true,
+        },
+        includeStubs: {
+          type: "boolean",
+          description: "should stubs be included",
+          nullable: true,
+        },
+        ignore: { type: "array", items: { type: "string" }, nullable: true },
+        tableName: { type: "string", description: "Name of the airtable" },
+        srcHierarchy: {
+          type: "string",
+          description: "The src .md file from where to start the sync",
+        },
+        apiKey: {
+          type: "string",
+          description: "Api key for airtable",
+        },
+        baseId: {
+          type: "string",
+          description: " base Id of airtable base",
+        },
+        srcFieldMapping: {
+          type: "object",
+          description:
+            "mapping of airtable fields with the note eg: {Created On: created, Notes: body}",
         },
       },
     };
@@ -152,6 +162,7 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
       "checkpoint.txt"
     );
     fs.ensureDirSync(path.dirname(checkpoint));
+    console.log("checkpoint", checkpoint);
     return checkpoint;
   }
 

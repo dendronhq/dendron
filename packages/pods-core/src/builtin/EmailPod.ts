@@ -1,7 +1,6 @@
 import { Message, SMTPClient } from "emailjs";
 import _ from "lodash";
 import { PublishPodConfig, PublishPodPlantOpts, PublishPod } from "../basev3";
-import { JSONSchemaType } from "ajv";
 
 const ID = "dendron.email";
 
@@ -15,62 +14,6 @@ type EmailPublishConfig = PublishPodConfig & {
 export class EmailPublishPod extends PublishPod<EmailPublishConfig> {
   static id: string = ID;
   static description: string = "publish to email";
-
-  get config(): JSONSchemaType<PublishPodConfig> {
-    let required = [
-      ...super.config.required,
-      "from",
-      "host",
-      "username",
-      "password",
-    ];
-    return {
-      type: "object",
-      required: [],
-      $merge: {
-        source: super.config,
-        with: {
-          properties: {
-            required,
-            from: {
-              description: "from address",
-              type: "boolean",
-              default: false,
-              example: "you <username@outlook.com>",
-            },
-            to: {
-              description: "to address",
-              type: "boolean",
-              default: false,
-              example:
-                "someone <someone@your-email.com>, another <another@your-email.com>",
-            },
-            user: {
-              description: "username",
-              type: "string",
-              default: false,
-              example: "hello@dendron.so",
-            },
-            password: {
-              description: "password",
-              type: "string",
-              default: false,
-              example: "secret123",
-            },
-            host: {
-              description: "host",
-              type: "string",
-              default: "smtp.gmail.com",
-            },
-            subject: {
-              description: "subject",
-              type: "string",
-            },
-          },
-        },
-      },
-    };
-  }
 
   async plant(opts: PublishPodPlantOpts) {
     const { note, config } = opts;

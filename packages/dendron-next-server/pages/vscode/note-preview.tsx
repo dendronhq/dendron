@@ -23,20 +23,23 @@ function Note({ engine, ide }: DendronProps) {
   const dispatch = engineHooks.useEngineAppDispatch();
 
   const { noteActive } = ide;
-  const noteId = noteActive?.id || "apples";
-  const noteTimestamp = noteActive?.updated;
-  const noteContent = engine.notesRendered[noteId];
-  const noteContentTimestamp = engine.notesRenderedTimestamp[noteId];
+  const { id: noteId, updated: noteTimestamp } = noteActive || {};
+  const noteContent = engine.notesRendered[noteId || ""];
+
+  // remember note timestamp from last "render to markdown"
+  const noteTimestampRef = React.useRef<number>();
 
   React.useEffect(() => {
     if (!noteId) {
       logger.info({ msg: "no noteId" });
       return;
     }
-    if (!noteContent || noteContentTimestamp !== noteTimestamp) {
+    // if no "render to markdown" has happended or the note body changed
+    if (!noteContent || noteTimestamp !== noteTimestampRef.current) {
+      noteTimestampRef.current = noteTimestamp;
       dispatch(engineSlice.renderNote({ ...getWsAndPort(), id: noteId }));
     }
-  }, [noteId, noteContent, noteContentTimestamp, noteTimestamp]);
+  }, [noteId, noteTimestamp]);
 
   const onClickHandler = React.useCallback(
     (event: Event) => {

@@ -41,7 +41,7 @@ export const renderNote = createAsyncThunk(
   "engine/render",
   async (
     { port, ws, id }: { port: number; ws: string; id: string },
-    { dispatch, getState }
+    { dispatch }
   ) => {
     const endpoint = `http://localhost:${port}`;
     const logger = createLogger("renderNoteThunk");
@@ -56,10 +56,7 @@ export const renderNote = createAsyncThunk(
       return resp;
     }
     const data = resp.data!;
-    const note = ((getState() as any).engine as EngineState).notes?.[id];
-    if (note) {
-      dispatch(setRenderNote({ id, body: data, timestamp: note.updated }));
-    }
+    dispatch(setRenderNote({ id, body: data }));
     return resp;
   }
 );
@@ -72,7 +69,6 @@ type InitializedState = {
   loading: "idle" | "pending" | "fulfilled";
   currentRequestId: string | undefined;
   notesRendered: { [key: string]: string | undefined };
-  notesRenderedTimestamp: { [key: string]: number | undefined };
 } & Partial<DEngineInitPayload>;
 
 export type EngineState = InitializedState;
@@ -83,7 +79,6 @@ export const engineSlice = createSlice({
     notes: {},
     schemas: {},
     notesRendered: {},
-    notesRenderedTimestamp: {},
     error: null,
   } as InitialState,
   reducers: {
@@ -103,11 +98,10 @@ export const engineSlice = createSlice({
     },
     setRenderNote: (
       state,
-      action: PayloadAction<{ id: string; body: string; timestamp: number }>
+      action: PayloadAction<{ id: string; body: string }>
     ) => {
-      const { id, body, timestamp } = action.payload;
+      const { id, body } = action.payload;
       state.notesRendered[id] = body;
-      state.notesRenderedTimestamp[id] = timestamp;
     },
   },
   extraReducers: (builder) => {

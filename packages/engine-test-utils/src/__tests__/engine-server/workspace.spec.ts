@@ -6,6 +6,7 @@ import {
   SeedService,
   SyncActionStatus,
   WorkspaceService,
+  WorkspaceUtils,
 } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import path from "path";
@@ -25,6 +26,55 @@ import {
   GitTestUtils,
 } from "../../utils";
 import { TestSeedUtils } from "../../utils/seed";
+
+describe("WorkspaceUtils", () => {
+  describe("findWSRoot", () => {
+    it("ok: same path", async () => {
+      await runEngineTestV5(
+        async ({ wsRoot }) => {
+          process.chdir(wsRoot);
+          const wsPath = WorkspaceUtils.findWSRoot();
+          // realPathSync necessary because of symlinks created by tmpdir
+          // see https://stackoverflow.com/questions/31843087/unexpectedly-in-private-folder-when-changing-the-working-directory-to-a-temp-f
+          expect(wsPath).toEqual(fs.realpathSync(wsRoot));
+        },
+        {
+          expect,
+        }
+      );
+    });
+
+    it("ok: a few directories down", async () => {
+      await runEngineTestV5(
+        async ({ wsRoot }) => {
+          const cwd = path.join(wsRoot, "one", "two");
+          fs.ensureDirSync(cwd);
+          process.chdir(cwd);
+          const wsPath = WorkspaceUtils.findWSRoot();
+          expect(wsPath).toEqual(fs.realpathSync(wsRoot));
+        },
+        {
+          expect,
+        }
+      );
+    });
+
+    it("fail: exceed 3 directroies down", async () => {
+      await runEngineTestV5(
+        async ({ wsRoot }) => {
+          const cwd = path.join(wsRoot, "one", "two", "three", "four");
+          fs.ensureDirSync(cwd);
+          process.chdir(cwd);
+          const wsPath = WorkspaceUtils.findWSRoot();
+          expect(wsPath).toBeUndefined();
+        },
+        {
+          expect,
+        }
+      );
+    });
+  });
+});
 
 describe("WorkspaceService", () => {
   describe("create", () => {

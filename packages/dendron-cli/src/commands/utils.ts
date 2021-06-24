@@ -1,4 +1,4 @@
-import { createLogger, resolvePath } from "@dendronhq/common-server";
+import { createLogger, findUpTo, resolvePath } from "@dendronhq/common-server";
 import {
   DendronEngineV2,
   DEngineClient,

@@ -1,5 +1,5 @@
 import cytoscape from "cytoscape";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { createLogger } from "../../common-frontend/lib";
 import { EngineSliceUtils } from "../../common-frontend/lib/features/engine/slice";
 import { DendronProps } from "../lib/types";
@@ -9,6 +9,8 @@ type Props = DendronProps & {
 };
 
 const useSyncGraphWithIDE = ({ graph, ide, engine }: Props) => {
+  const [lastSelectedID, setLastSelectedID] = useState("");
+
   const { noteActive } = ide;
   const engineInitialized = EngineSliceUtils.hasInitialized(engine);
 
@@ -16,25 +18,33 @@ const useSyncGraphWithIDE = ({ graph, ide, engine }: Props) => {
 
   useEffect(() => {
     if (noteActive && engineInitialized && graph) {
-      const selected = graph.$(`[id = "${noteActive.id}"], :selected`);
+      const selected = graph.$(`:selected`);
+      const graphActiveNode = graph.$(`[id = "${noteActive.id}"]`);
 
-      logger.log("selected but not active:", selected.length);
+      logger.log("noteActive", noteActive.fname);
 
       if (selected.length > 0) {
         selected.forEach((node) => {
-          // Select active note
-          if (node.data("id") === noteActive.id) {
-            node.select();
-            graph.center(node);
-            graph.zoom({
-              level: 1.5, // the zoom level
-              renderedPosition: node.position(),
-            });
-          }
-
           // Unselect not active notes
-          else node.unselect();
+          if (node.data("id") !== noteActive.id) {
+            node.unselect();
+          }
         });
+      }
+
+      // Select active note
+      if (
+        graphActiveNode.length > 0 &&
+        graphActiveNode.id() !== lastSelectedID
+      ) {
+        graphActiveNode.select();
+        graph.center(graphActiveNode);
+        graph.zoom({
+          level: 1.5, // the zoom level
+          renderedPosition: graphActiveNode.position(),
+        });
+
+        setLastSelectedID(graphActiveNode.id());
       }
     }
   }, [noteActive?.id, engineInitialized]);

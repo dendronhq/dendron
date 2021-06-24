@@ -53,17 +53,30 @@ export class NoteLookupProvider implements ILookupProviderV3 {
 
   async provide(lc: LookupControllerV3) {
     const quickpick = lc.quickpick;
-    quickpick.onDidChangeValue(() => {
-      _.debounce(_.bind(this.onUpdatePickerItems, this), 60, {
+    const onUpdatePickerItems = _.bind(this.onUpdatePickerItems, this);
+    const onUpdateDebounced = _.debounce(
+      () => {
+        onUpdatePickerItems({
+          picker: quickpick,
+          token: lc.createCancelSource().token,
+          fuzzThreshold: lc.fuzzThreshold,
+        } as OnUpdatePickerItemsOpts);
+      },
+      100,
+      {
         leading: true,
-        maxWait: 120,
-      })({
-        picker: quickpick,
-        token: lc.createCancelSource().token,
-        fuzzThreshold: lc.fuzzThreshold,
-      } as OnUpdatePickerItemsOpts);
+        maxWait: 200,
+      }
+    );
+    quickpick.onDidChangeValue(onUpdateDebounced);
+    quickpick.onDidAccept(() => {
+      Logger.info({
+        ctx: "NoteLookupProvider:onDidAccept",
+        quickpick: quickpick.value,
+      });
+      onUpdateDebounced.cancel();
+      this.onDidAccept({ quickpick, lc })();
     });
-    quickpick.onDidAccept(this.onDidAccept({ quickpick, lc }));
     return;
   }
 
@@ -150,53 +163,60 @@ export class NoteLookupProvider implements ILookupProviderV3 {
     // const vault = this.getVault();
     let profile: number;
     const queryEndsWithDot = queryOrig.endsWith(".");
-    // const queryUpToLastDot =
-    //   queryOrig.lastIndexOf(".") >= 0
-    //     ? queryOrig.slice(0, queryOrig.lastIndexOf("."))
-    //     : undefined;
+    const queryUpToLastDot = PickerUtilsV2.getQueryUpToLastDot(queryOrig);
+    const queryDotLevelChanged =
+      _.isUndefined(picker.prevValue) ||
+      queryUpToLastDot !== PickerUtilsV2.getQueryUpToLastDot(picker.prevValue);
 
     const engine = ws.getEngine();
     Logger.info({ ctx, msg: "enter", queryOrig });
     try {
+      // if empty string, show all 1st level results
       if (querystring === "") {
         Logger.debug({ ctx, msg: "empty qs" });
         picker.items = NotePickerUtils.fetchRootResults({ engine });
         return;
       }
 
-      // current items without default items present
+      // initialize with current picker items without default items present
       const items: NoteQuickInput[] = [...picker.items];
       let updatedItems = PickerUtilsV2.filterDefaultItems(items);
       if (token.isCancellationRequested) {
         return;
       }
 
-      updatedItems = await NotePickerUtils.fetchPickerResults({
-        picker,
-        qs: querystring,
-      });
+      // if we entered a different level of hierarchy, re-run search
+      if (queryDotLevelChanged) {
+        updatedItems = await NotePickerUtils.fetchPickerResults({
+          picker,
+          qs: querystring,
+        });
+      }
       if (token.isCancellationRequested) {
         return;
       }
+
+      // check if we have an exact match in the results and keep track for later
       const perfectMatch = _.find(updatedItems, { fname: queryOrig });
 
       // check if single item query, vscode doesn't surface single letter queries
+      // we need this so that suggestions will show up
+      // TODO: this might be buggy since we don't apply filter middleware
       if (picker.activeItems.length === 0 && querystring.length === 1) {
         picker.items = updatedItems;
         picker.activeItems = picker.items;
         return;
       }
 
+      // filter the results through optional middleware
       if (picker.filterMiddleware) {
         updatedItems = picker.filterMiddleware(updatedItems);
       }
 
-      // const perfectMatch = _.find(updatedItems, { fname: queryOrig });
-      // // NOTE: we modify this later so need to track this here
-      // const noUpdatedItems = updatedItems.length === 0;
-      // regular result
-      Logger.debug({ ctx, msg: "active != qs" });
+      // if new notes are allowed and we didn't get a perfect match, append `Create New` option
+      // to picker results
       // NOTE: order matters. we always pick the first item in single select mode
+      Logger.debug({ ctx, msg: "active != qs" });
       updatedItems =
         this.opts.allowNewNote &&
         !queryEndsWithDot &&
@@ -205,7 +225,7 @@ export class NoteLookupProvider implements ILookupProviderV3 {
           ? updatedItems.concat([NotePickerUtils.createNoActiveItem({} as any)])
           : updatedItems;
 
-      // check fuzz threshold
+      // check fuzz threshold. tune fuzzyness. currently hardcoded
       // TODO: in the future this should be done in the engine
       if (opts.fuzzThreshold === 1) {
         updatedItems = updatedItems.filter((ent) => ent.fname === picker.value);
@@ -218,6 +238,7 @@ export class NoteLookupProvider implements ILookupProviderV3 {
       profile = getDurationMilliseconds(start);
       picker.busy = false;
       picker._justActivated = false;
+      picker.prevValue = picker.value;
       Logger.info({
         ctx,
         msg: "exit",

@@ -3,6 +3,82 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.47.1](https://github.com/dendronhq/dendron/compare/v0.47.0...v0.47.1) (2021-06-23)
+
+
+### Bug Fixes
+
+* dendron not applying version migrations ([7c1ca7c](https://github.com/dendronhq/dendron/commit/7c1ca7cadc594ed60320007204e0f90b2fd8ee2c))
+* Ensure `runEngineTestV5` always restores mocks ([#850](https://github.com/dendronhq/dendron/issues/850)) ([a81b249](https://github.com/dendronhq/dendron/commit/a81b24984e90feb40249bb72426e0d84e1df5802))
+
+
+### Features Dendron
+
+* filter graph by string ([#828](https://github.com/dendronhq/dendron/issues/828)) ([114f6a2](https://github.com/dendronhq/dendron/commit/114f6a2b67cbe38a62f76b1459b373b64a6a669c))
+* show/hide stubs in graph view ([#851](https://github.com/dendronhq/dendron/issues/851)) ([40726f2](https://github.com/dendronhq/dendron/commit/40726f29cbafcdd8dfef2e1fe059c3739e3b69f1))
+* workspace-trust-for-hooks ([#845](https://github.com/dendronhq/dendron/issues/845)) ([9fc3e15](https://github.com/dendronhq/dendron/commit/9fc3e15826f62daf87f5d39a93de0d6c33992413))
+
+
+
+
+
+# [0.47.0](https://github.com/dendronhq/dendron/compare/v0.46.1...v0.47.0) (2021-06-21)
+
+
+### Bug Fixes
+
+* calendar view should not pop out when hidden ([d6a9431](https://github.com/dendronhq/dendron/commit/d6a9431023fe7f5743152807dd11092025e82a46))
+* issue with init without wsRoot ([b0c347f](https://github.com/dendronhq/dendron/commit/b0c347f559ba808f9ae87a082c2a5019db981585))
+* issue with welcome screen showing up each time ([4291e3a](https://github.com/dendronhq/dendron/commit/4291e3a03eb11e02734523d34e59cecf3791c3c7))
+* **preview:** note refs showing first line as html ([5a025e3](https://github.com/dendronhq/dendron/commit/5a025e3ccd3e2c40ee2975577b831339b272e75d))
+* order of vaults for tests ([edec699](https://github.com/dendronhq/dendron/commit/edec6998e7cb3deb659b2da41be02264e7aaaa1f))
+* tree view missing nodes ([41cecf9](https://github.com/dendronhq/dendron/commit/41cecf953e616d4e3c8796da77d8c10d6ccf9d02))
+* **plugin:** handle default selection type being undefined ([92b8d2a](https://github.com/dendronhq/dendron/commit/92b8d2a3cc67605c9371e70457e93d2b08e02bce))
+* anchors now update when note is modified ([#823](https://github.com/dendronhq/dendron/issues/823)) ([be91b8d](https://github.com/dendronhq/dendron/commit/be91b8dd45a507e07d742d323323853227f41c6e)), closes [#817](https://github.com/dendronhq/dendron/issues/817)
+* no crash on bad backlink ([abcec76](https://github.com/dendronhq/dendron/commit/abcec76169f31c425336030a6d2ff9246317bca9))
+
+
+### Features Dendron
+
+* airtable export pod ([e04dfb4](https://github.com/dendronhq/dendron/commit/e04dfb4d26edecbe02fbdd99adf1a387ef6dfd45))
+* calendar panel ([#806](https://github.com/dendronhq/dendron/issues/806)) ([65ef926](https://github.com/dendronhq/dendron/commit/65ef926564dbaeaaca305e480ac8607c66bcc4b1)), closes [packages/plugin-core/src/views/utils.ts#88](https://github.com/packages/plugin-core/src/views/utils.ts/issues/88) [/github.com/ant-design/ant-design/blob/832aa81c821b7b5750673b5aacafa39c9978b09c/components/calendar/generateCalendar.tsx#L183-L205](https://github.com//github.com/ant-design/ant-design/blob/832aa81c821b7b5750673b5aacafa39c9978b09c/components/calendar/generateCalendar.tsx/issues/L183-L205)
+* filter note and schema graphs by vault ([#824](https://github.com/dendronhq/dendron/issues/824)) ([864e0f9](https://github.com/dendronhq/dendron/commit/864e0f91fb317af8dc7e7af5d9d8c64ffb3eb3c9))
+* remove seed cmd ([252f297](https://github.com/dendronhq/dendron/commit/252f29741f1cabb915e9e541d80256b21ef594d0))
+* seed add cmd ([a8f245b](https://github.com/dendronhq/dendron/commit/a8f245b1a29f6de0a80839c1bd765a61941ab58f))
+* support init seeds on startup ([ef095a6](https://github.com/dendronhq/dendron/commit/ef095a60d646df510b18971264a1443c13e41653))
+
+
+
+
+
+## [0.46.3-alpha.0](https://github.com/dendronhq/dendron/compare/v0.46.1...v0.46.3-alpha.0) (2021-06-19)
+
+
+### Bug Fixes
+
+* calendar view should not pop out when hidden ([d6a9431](https://github.com/dendronhq/dendron/commit/d6a9431023fe7f5743152807dd11092025e82a46))
+* issue with init without wsRoot ([b0c347f](https://github.com/dendronhq/dendron/commit/b0c347f559ba808f9ae87a082c2a5019db981585))
+* **preview:** note refs showing first line as html ([5a025e3](https://github.com/dendronhq/dendron/commit/5a025e3ccd3e2c40ee2975577b831339b272e75d))
+* tree view missing nodes ([41cecf9](https://github.com/dendronhq/dendron/commit/41cecf953e616d4e3c8796da77d8c10d6ccf9d02))
+* **plugin:** handle default selection type being undefined ([92b8d2a](https://github.com/dendronhq/dendron/commit/92b8d2a3cc67605c9371e70457e93d2b08e02bce))
+* anchors now update when note is modified ([#823](https://github.com/dendronhq/dendron/issues/823)) ([be91b8d](https://github.com/dendronhq/dendron/commit/be91b8dd45a507e07d742d323323853227f41c6e)), closes [#817](https://github.com/dendronhq/dendron/issues/817)
+* no crash on bad backlink ([abcec76](https://github.com/dendronhq/dendron/commit/abcec76169f31c425336030a6d2ff9246317bca9))
+* order of vaults for tests ([edec699](https://github.com/dendronhq/dendron/commit/edec6998e7cb3deb659b2da41be02264e7aaaa1f))
+
+
+### Features Dendron
+
+* airtable export pod ([e04dfb4](https://github.com/dendronhq/dendron/commit/e04dfb4d26edecbe02fbdd99adf1a387ef6dfd45))
+* calendar panel ([#806](https://github.com/dendronhq/dendron/issues/806)) ([65ef926](https://github.com/dendronhq/dendron/commit/65ef926564dbaeaaca305e480ac8607c66bcc4b1)), closes [packages/plugin-core/src/views/utils.ts#88](https://github.com/packages/plugin-core/src/views/utils.ts/issues/88) [/github.com/ant-design/ant-design/blob/832aa81c821b7b5750673b5aacafa39c9978b09c/components/calendar/generateCalendar.tsx#L183-L205](https://github.com//github.com/ant-design/ant-design/blob/832aa81c821b7b5750673b5aacafa39c9978b09c/components/calendar/generateCalendar.tsx/issues/L183-L205)
+* filter note and schema graphs by vault ([#824](https://github.com/dendronhq/dendron/issues/824)) ([864e0f9](https://github.com/dendronhq/dendron/commit/864e0f91fb317af8dc7e7af5d9d8c64ffb3eb3c9))
+* remove seed cmd ([252f297](https://github.com/dendronhq/dendron/commit/252f29741f1cabb915e9e541d80256b21ef594d0))
+* seed add cmd ([a8f245b](https://github.com/dendronhq/dendron/commit/a8f245b1a29f6de0a80839c1bd765a61941ab58f))
+* support init seeds on startup ([ef095a6](https://github.com/dendronhq/dendron/commit/ef095a60d646df510b18971264a1443c13e41653))
+
+
+
+
+
 ## [0.46.2](https://github.com/dendronhq/dendron/compare/v0.46.1...v0.46.2) (2021-06-19)
 
 

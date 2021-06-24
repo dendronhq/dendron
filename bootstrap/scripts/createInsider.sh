@@ -8,7 +8,7 @@ lerna version $version --no-push
 
 git add .
 git commit -m "chore: publish $version"
-git push --set-upstream origin integ-publish --force
+git push --set-upstream origin integ-publish --force --no-verify
 
 lerna publish from-package --ignore-scripts
 node bootstrap/scripts/genMeta.js

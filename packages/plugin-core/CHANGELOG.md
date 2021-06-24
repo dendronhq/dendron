@@ -3,6 +3,62 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.47.1](https://github.com/dendronhq/dendron/compare/v0.47.0...v0.47.1) (2021-06-23)
+
+
+### Bug Fixes
+
+* dendron not applying version migrations ([7c1ca7c](https://github.com/dendronhq/dendron/commit/7c1ca7cadc594ed60320007204e0f90b2fd8ee2c))
+
+
+### Features Dendron
+
+* filter graph by string ([#828](https://github.com/dendronhq/dendron/issues/828)) ([114f6a2](https://github.com/dendronhq/dendron/commit/114f6a2b67cbe38a62f76b1459b373b64a6a669c))
+* workspace-trust-for-hooks ([#845](https://github.com/dendronhq/dendron/issues/845)) ([9fc3e15](https://github.com/dendronhq/dendron/commit/9fc3e15826f62daf87f5d39a93de0d6c33992413))
+
+
+
+
+
+# [0.47.0](https://github.com/dendronhq/dendron/compare/v0.46.1...v0.47.0) (2021-06-21)
+
+
+### Bug Fixes
+
+* anchors now update when note is modified ([#823](https://github.com/dendronhq/dendron/issues/823)) ([be91b8d](https://github.com/dendronhq/dendron/commit/be91b8dd45a507e07d742d323323853227f41c6e)), closes [#817](https://github.com/dendronhq/dendron/issues/817)
+* calendar view should not pop out when hidden ([d6a9431](https://github.com/dendronhq/dendron/commit/d6a9431023fe7f5743152807dd11092025e82a46))
+* issue with welcome screen showing up each time ([4291e3a](https://github.com/dendronhq/dendron/commit/4291e3a03eb11e02734523d34e59cecf3791c3c7))
+* **plugin:** handle default selection type being undefined ([92b8d2a](https://github.com/dendronhq/dendron/commit/92b8d2a3cc67605c9371e70457e93d2b08e02bce))
+
+
+### Features Dendron
+
+* calendar panel ([#806](https://github.com/dendronhq/dendron/issues/806)) ([65ef926](https://github.com/dendronhq/dendron/commit/65ef926564dbaeaaca305e480ac8607c66bcc4b1)), closes [packages/plugin-core/src/views/utils.ts#88](https://github.com/packages/plugin-core/src/views/utils.ts/issues/88) [/github.com/ant-design/ant-design/blob/832aa81c821b7b5750673b5aacafa39c9978b09c/components/calendar/generateCalendar.tsx#L183-L205](https://github.com//github.com/ant-design/ant-design/blob/832aa81c821b7b5750673b5aacafa39c9978b09c/components/calendar/generateCalendar.tsx/issues/L183-L205)
+* remove seed cmd ([252f297](https://github.com/dendronhq/dendron/commit/252f29741f1cabb915e9e541d80256b21ef594d0))
+
+
+
+
+
+## [0.46.3-alpha.0](https://github.com/dendronhq/dendron/compare/v0.46.1...v0.46.3-alpha.0) (2021-06-19)
+
+
+### Bug Fixes
+
+* calendar view should not pop out when hidden ([d6a9431](https://github.com/dendronhq/dendron/commit/d6a9431023fe7f5743152807dd11092025e82a46))
+* **plugin:** handle default selection type being undefined ([92b8d2a](https://github.com/dendronhq/dendron/commit/92b8d2a3cc67605c9371e70457e93d2b08e02bce))
+* anchors now update when note is modified ([#823](https://github.com/dendronhq/dendron/issues/823)) ([be91b8d](https://github.com/dendronhq/dendron/commit/be91b8dd45a507e07d742d323323853227f41c6e)), closes [#817](https://github.com/dendronhq/dendron/issues/817)
+
+
+### Features Dendron
+
+* calendar panel ([#806](https://github.com/dendronhq/dendron/issues/806)) ([65ef926](https://github.com/dendronhq/dendron/commit/65ef926564dbaeaaca305e480ac8607c66bcc4b1)), closes [packages/plugin-core/src/views/utils.ts#88](https://github.com/packages/plugin-core/src/views/utils.ts/issues/88) [/github.com/ant-design/ant-design/blob/832aa81c821b7b5750673b5aacafa39c9978b09c/components/calendar/generateCalendar.tsx#L183-L205](https://github.com//github.com/ant-design/ant-design/blob/832aa81c821b7b5750673b5aacafa39c9978b09c/components/calendar/generateCalendar.tsx/issues/L183-L205)
+* remove seed cmd ([252f297](https://github.com/dendronhq/dendron/commit/252f29741f1cabb915e9e541d80256b21ef594d0))
+
+
+
+
+
 ## [0.46.2](https://github.com/dendronhq/dendron/compare/v0.46.1...v0.46.2) (2021-06-19)
 
 

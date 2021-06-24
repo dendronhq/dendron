@@ -22,6 +22,7 @@ import {
   runJestHarnessV2,
   SetupHookFunction,
   SetupTestFunctionV4,
+  sinon,
   TestResult,
 } from "@dendronhq/common-test-utils";
 import { LaunchEngineServerCommand } from "@dendronhq/dendron-cli";
@@ -36,6 +37,7 @@ import path from "path";
 import { DendronConfig } from "../../common-all/lib/types";
 import { ENGINE_HOOKS } from "./presets";
 import { GitTestUtils } from "./utils";
+import os from "os";
 
 export type TestSetupWorkspaceOpts = {
   /**
@@ -254,52 +256,64 @@ export async function runEngineTestV5(
     ],
     addVSWorkspace: false,
   });
-  const { wsRoot, vaults } = await setupWS({ vaults: vaultsInit, workspaces });
-  if ((opts.initHooks, vaults)) {
-    fs.mkdirSync(path.join(wsRoot, CONSTANTS.DENDRON_HOOKS_BASE));
+  try {
+    // make sure tests don't overwrite local homedir contents
+    TestEngineUtils.mockHomeDir();
+    const { wsRoot, vaults } = await setupWS({
+      vaults: vaultsInit,
+      workspaces,
+    });
+    if ((opts.initHooks, vaults)) {
+      fs.mkdirSync(path.join(wsRoot, CONSTANTS.DENDRON_HOOKS_BASE));
+    }
+    await preSetupHook({ wsRoot, vaults });
+    const engine: DEngineClient = await createEngine({ wsRoot, vaults });
+    const start = process.hrtime();
+    const initResp = await engine.init();
+    if (addVSWorkspace) {
+      fs.writeJSONSync(
+        path.join(wsRoot, CONSTANTS.DENDRON_WS_NAME),
+        {
+          folders: vaults.map((ent) => ({
+            path: ent.fsPath,
+            name: ent.name,
+          })) as WorkspaceFolderRaw[],
+          settings: {},
+          extensions: {},
+        } as WorkspaceSettings,
+        { spaces: 4 }
+      );
+    }
+    const engineInitDuration = getDurationMilliseconds(start);
+    const testOpts = {
+      wsRoot,
+      vaults,
+      engine,
+      initResp,
+      extra,
+      config: engine,
+      engineInitDuration,
+    };
+    if (initGit) {
+      await GitTestUtils.createRepoForWorkspace(wsRoot);
+      await Promise.all(
+        vaults.map((vault) => {
+          return GitTestUtils.createRepoWithReadme(
+            vault2Path({ vault, wsRoot })
+          );
+        })
+      );
+    }
+    if (opts.setupOnly) {
+      return testOpts;
+    }
+    const results = (await func(testOpts)) || [];
+    await runJestHarnessV2(results, expect);
+    return { opts: testOpts, resp: undefined, wsRoot };
+  } finally {
+    // restore sinon so other tests can keep running
+    sinon.restore();
   }
-  await preSetupHook({ wsRoot, vaults });
-  const engine: DEngineClient = await createEngine({ wsRoot, vaults });
-  const start = process.hrtime();
-  const initResp = await engine.init();
-  if (addVSWorkspace) {
-    fs.writeJSONSync(
-      path.join(wsRoot, CONSTANTS.DENDRON_WS_NAME),
-      {
-        folders: vaults.map((ent) => ({
-          path: ent.fsPath,
-          name: ent.name,
-        })) as WorkspaceFolderRaw[],
-        settings: {},
-        extensions: {},
-      } as WorkspaceSettings,
-      { spaces: 4 }
-    );
-  }
-  const engineInitDuration = getDurationMilliseconds(start);
-  const testOpts = {
-    wsRoot,
-    vaults,
-    engine,
-    initResp,
-    extra,
-    config: engine,
-    engineInitDuration,
-  };
-  if (initGit) {
-    await GitTestUtils.createRepoForWorkspace(wsRoot);
-    await Promise.all(
-      vaults.map((vault) => {
-        return GitTestUtils.createRepoWithReadme(vault2Path({ vault, wsRoot }));
-      })
-    );
-  }
-  if (opts.setupOnly) {
-    return testOpts;
-  }
-  const results = (await func(testOpts)) || [];
-  await runJestHarnessV2(results, expect);
-  return { opts: testOpts, resp: undefined, wsRoot };
 }
 
 export function testWithEngine(
@@ -327,6 +341,11 @@ export function testWithEngine(
 }
 
 export class TestEngineUtils {
+  static mockHomeDir() {
+    const tmp = tmpDir();
+    sinon.stub(os, "homedir").returns(tmp.name);
+    return tmp.name;
+  }
   static vault1(vaults: DVault[]) {
     return _.find(vaults, { fsPath: "vault1" })!;
   }

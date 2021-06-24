@@ -2,7 +2,6 @@ import { VaultUtils } from "@dendronhq/common-all";
 import { NoteTestUtilsV4, NOTE_PRESETS_V4 } from "@dendronhq/common-test-utils";
 import { ENGINE_HOOKS, TestSeedUtils } from "@dendronhq/engine-test-utils";
 import _ from "lodash";
-import path from "path";
 import sinon from "sinon";
 import * as vscode from "vscode";
 import { CopyNoteURLCommand } from "../../commands/CopyNoteURL";
@@ -13,7 +12,7 @@ import { expect } from "../testUtilsv2";
 import {
   runLegacyMultiWorkspaceTest,
   setupBeforeAfter,
-  withConfig,
+  withConfig
 } from "../testUtilsV3";
 
 suite("CopyNoteUrl", function () {
@@ -35,8 +34,8 @@ suite("CopyNoteUrl", function () {
         const fname = "foo";
         await VSCodeUtils.openNoteByPath({ vault, fname });
         const link = await new CopyNoteURLCommand().run();
-        const url = path.join(rootUrl, "notes", "foo.html");
-        expect(url).toEqual(link);
+        const url = [rootUrl, "notes", "foo.html"].join("/");
+        expect(link).toEqual(url);
         done();
       },
       configOverride: {
@@ -95,7 +94,6 @@ suite("CopyNoteUrl", function () {
         const seedId = TestSeedUtils.defaultSeedId();
         engine.config = getWS().config;
         engine.vaults = engine.config.vaults;
-        getWS().setEngine(engine);
         // TODO: ugly temporary hack. can be removed when [[Unify Runenginetest and Runworkspacetest|scratch.2021.06.17.164102.unify-runenginetest-and-runworkspacetest]] is implemented
         sinon.stub(VSCodeUtils, "getNoteFromDocument").returns(
           await NoteTestUtilsV4.createNote({
@@ -137,7 +135,6 @@ suite("CopyNoteUrl", function () {
         const seedId = TestSeedUtils.defaultSeedId();
         engine.config = getWS().config;
         engine.vaults = engine.config.vaults;
-        getWS().setEngine(engine);
         // TODO: ugly temporary hack. can be removed when [[Unify Runenginetest and Runworkspacetest|scratch.2021.06.17.164102.unify-runenginetest-and-runworkspacetest]] is implemented
         sinon.stub(VSCodeUtils, "getNoteFromDocument").returns(
           await NoteTestUtilsV4.createNote({
@@ -176,8 +173,8 @@ suite("CopyNoteUrl", function () {
         const editor = await VSCodeUtils.openNoteByPath({ vault, fname });
         editor.selection = new vscode.Selection(7, 0, 7, 12);
         const link = await new CopyNoteURLCommand().run();
-        const url = path.join(rootUrl, "notes", `${fname}.html#h1`);
-        expect(url).toEqual(link);
+        const url = [rootUrl, "notes", `${fname}.html#h1`].join("/");
+        expect(link).toEqual(url);
         done();
       },
       configOverride: {
@@ -204,8 +201,8 @@ suite("CopyNoteUrl", function () {
         const editor = await VSCodeUtils.openNoteByPath({ vault, fname });
         editor.selection = new vscode.Selection(10, 0, 10, 5);
         const link = await new CopyNoteURLCommand().execute();
-        const url = path.join(rootUrl, "notes", `${fname}.html#^block-id`);
-        expect(url).toEqual(link);
+        const url = [rootUrl, "notes", `${fname}.html#^block-id`].join("/");
+        expect(link).toEqual(url);
         done();
       },
       configOverride: {

@@ -81,7 +81,8 @@
   "useWorkspaces": false,
   "husky": {
     "hooks": {
-      "pre-commit": "lint-staged && yarn hooks:pre-commit"
+      "pre-commit": "lint-staged && yarn hooks:pre-commit",
+      "pre-push": "yarn hooks:pre-push"
     }
   },
   "lint-staged": {

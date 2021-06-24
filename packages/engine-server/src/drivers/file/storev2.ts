@@ -709,43 +709,50 @@ export class FileStorage implements DStore {
       msg: "pre:note2File",
     });
 
-    const hooks = _.filter(this.engine.hooks.onCreate, (hook) =>
-      NoteUtils.match({ notePath: note.fname, pattern: hook.pattern })
-    );
-    const resp = await _.reduce<DHookEntry, Promise<RequireHookResp>>(
-      hooks,
-      async (notePromise, hook) => {
-        const { note } = await notePromise;
-        const script = HookUtils.getHookScriptPath({
-          wsRoot: this.wsRoot,
-          basename: hook.id + ".js",
-        });
-        return await HookUtils.requireHook({
-          note,
-          fpath: script,
-          wsRoot: this.wsRoot,
-        });
-      },
-      Promise.resolve({ note })
-    ).catch(
-      (err) =>
-        new DendronError({
-          severity: ERROR_SEVERITY.MINOR,
-          message: "error with hook",
-          payload: stringifyError(err),
-        })
-    );
-    if (resp instanceof DendronError) {
-      error = resp;
-      this.logger.error({ ctx, error: stringifyError(error) });
+    if (opts?.runHooks === false) {
+      this.logger.info({
+        ctx,
+        msg: "hooks disabled for write",
+      });
     } else {
-      const valResp = NoteUtils.validate(resp.note);
-      if (valResp instanceof DendronError) {
-        error = valResp;
+      const hooks = _.filter(this.engine.hooks.onCreate, (hook) =>
+        NoteUtils.match({ notePath: note.fname, pattern: hook.pattern })
+      );
+      const resp = await _.reduce<DHookEntry, Promise<RequireHookResp>>(
+        hooks,
+        async (notePromise, hook) => {
+          const { note } = await notePromise;
+          const script = HookUtils.getHookScriptPath({
+            wsRoot: this.wsRoot,
+            basename: hook.id + ".js",
+          });
+          return await HookUtils.requireHook({
+            note,
+            fpath: script,
+            wsRoot: this.wsRoot,
+          });
+        },
+        Promise.resolve({ note })
+      ).catch(
+        (err) =>
+          new DendronError({
+            severity: ERROR_SEVERITY.MINOR,
+            message: "error with hook",
+            payload: stringifyError(err),
+          })
+      );
+      if (resp instanceof DendronError) {
+        error = resp;
         this.logger.error({ ctx, error: stringifyError(error) });
       } else {
-        note = resp.note;
-        this.logger.info({ ctx, msg: "fin:RunHooks", payload: resp.payload });
+        const valResp = NoteUtils.validate(resp.note);
+        if (valResp instanceof DendronError) {
+          error = valResp;
+          this.logger.error({ ctx, error: stringifyError(error) });
+        } else {
+          note = resp.note;
+          this.logger.info({ ctx, msg: "fin:RunHooks", payload: resp.payload });
+        }
       }
     }
     // order matters - only write file after parents are established @see(_writeNewNote)

@@ -26,7 +26,8 @@
   ],
   "main": "./out/src/extension.js",
   "extensionPack": [
-    "dendron.dendron-markdown-preview-enhanced"
+    "dendron.dendron-markdown-preview-enhanced",
+    "mushan.vscode-paste-image"
   ],
   "contributes": {
     "languages": [

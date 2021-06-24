@@ -229,6 +229,7 @@ export class TestPresetEntryV5 {
  * @param func
  * @param opts.vaults: By default, initiate 3 vaults {vault1, vault2, (vault3, "vaultThree")}
  * @param opts.preSetupHook: By default, initiate empty
+ * @param opts.wsRoot: Override the randomly generated test directory for the wsRoot
  * @returns
  */
 export async function runEngineTestV5(
@@ -264,7 +265,7 @@ export async function runEngineTestV5(
       workspaces,
     });
     if ((opts.initHooks, vaults)) {
-      fs.mkdirSync(path.join(wsRoot, CONSTANTS.DENDRON_HOOKS_BASE));
+      fs.ensureDirSync(path.join(wsRoot, CONSTANTS.DENDRON_HOOKS_BASE));
     }
     await preSetupHook({ wsRoot, vaults });
     const engine: DEngineClient = await createEngine({ wsRoot, vaults });
@@ -341,10 +342,10 @@ export function testWithEngine(
 }
 
 export class TestEngineUtils {
-  static mockHomeDir() {
-    const tmp = tmpDir();
-    sinon.stub(os, "homedir").returns(tmp.name);
-    return tmp.name;
+  static mockHomeDir(dir?: string) {
+    if (_.isUndefined(dir)) dir = tmpDir().name;
+    sinon.stub(os, "homedir").returns(dir);
+    return dir;
   }
   static vault1(vaults: DVault[]) {
     return _.find(vaults, { fsPath: "vault1" })!;

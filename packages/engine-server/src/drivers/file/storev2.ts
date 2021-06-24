@@ -1,6 +1,7 @@
 import {
   assert,
   BulkAddNoteOpts,
+  DendronCompositeError,
   DendronConfig,
   DendronError,
   DEngineClient,
@@ -18,6 +19,7 @@ import {
   error2PlainObject,
   ERROR_SEVERITY,
   ERROR_STATUS,
+  IDendronError,
   NoteChangeEntry,
   NoteProps,
   NotePropsDict,
@@ -108,25 +110,32 @@ export class FileStorage implements DStore {
   }
 
   async init(): Promise<DEngineInitResp> {
+    let errors: DendronError[] = [];
     try {
-      let error: DendronError | null = null;
       const resp = await this.initSchema();
       if (!_.isNull(resp.error)) {
-        error = DendronError.createPlainError({
-          message: "schema malformed",
-          severity: ERROR_SEVERITY.MINOR,
-          payload: { schema: resp.error },
-        });
+        errors.push(
+          new DendronError({
+            message: "schema malformed",
+            severity: ERROR_SEVERITY.MINOR,
+            payload: { schema: resp.error },
+          })
+        );
       }
       resp.data.map((ent) => {
         this.schemas[ent.root.id] = ent;
       });
-      const _notes = await this.initNotes();
+      const { notes: _notes, errors: initErrors } = await this.initNotes();
+      errors = errors.concat(initErrors);
       _notes.map((ent) => {
         this.notes[ent.id] = ent;
       });
 
       const { notes, schemas } = this;
+      let error: IDendronError | null = errors[0] || null;
+      if (errors.length > 1) {
+        error = new DendronCompositeError(errors);
+      }
       return {
         data: {
           notes,
@@ -294,14 +303,21 @@ export class FileStorage implements DStore {
     };
   }
 
-  async initNotes(): Promise<NoteProps[]> {
+  async initNotes(): Promise<{ notes: NoteProps[]; errors: DendronError[] }> {
     const ctx = "initNotes";
     this.logger.info({ ctx, msg: "enter" });
     let notesWithLinks: NoteProps[] = [];
     const allNotesCache: NotesCacheAll = {};
+    let errors: DendronError[] = [];
     const out = await Promise.all(
       (this.vaults as DVault[]).map(async (vault) => {
-        const { notes, cacheUpdates, cache } = await this._initNotes(vault);
+        const {
+          notes,
+          cacheUpdates,
+          cache,
+          errors: initErrors,
+        } = await this._initNotes(vault);
+        errors = errors.concat(initErrors);
         notesWithLinks = notesWithLinks.concat(
           _.filter(notes, (n) => !_.isEmpty(n.links))
         );
@@ -329,7 +345,7 @@ export class FileStorage implements DStore {
     );
     const allNotes = _.flatten(out);
     this._addBacklinks({ notesWithLinks, allNotes, allNotesCache });
-    return allNotes;
+    return { notes: allNotes, errors };
   }
 
   async _addBacklinks({
@@ -373,6 +389,7 @@ export class FileStorage implements DStore {
     notes: NoteProps[];
     cacheUpdates: NotesCacheEntryMap;
     cache: NotesCache;
+    errors: DendronError[];
   }> {
     const ctx = "initNotes";
     this.logger.info({ ctx, msg: "enter" });
@@ -383,45 +400,75 @@ export class FileStorage implements DStore {
       include: ["*.md"],
     }) as string[];
 
+    let errors: DendronError[] = [];
+
     const cache: NotesCache = !this.engine.config.noCaching
       ? readNotesFromCache(vpath)
       : { version: 0, notes: {} };
-    const { notes, cacheUpdates } = await new NoteParser({
+    const {
+      notes,
+      cacheUpdates,
+      errors: parseErrors,
+    } = await new NoteParser({
       store: this,
       cache,
       logger: this.logger,
     }).parseFile(noteFiles, vault);
+    errors = errors.concat(parseErrors);
+
     await Promise.all(
       notes.map(async (n) => {
         if (n.stub) {
           return;
         }
         if (_.has(cacheUpdates, n.fname)) {
-          const links = LinkUtils.findLinks({
-            note: n,
-            engine: this.engine,
-          });
-          const anchors = await AnchorUtils.findAnchors(
-            {
+          try {
+            const links = LinkUtils.findLinks({
               note: n,
-              wsRoot: wsRoot,
-            },
-            {
               engine: this.engine,
-              fname: n.fname,
+            });
+            cacheUpdates[n.fname].data.links = links;
+            n.links = links;
+          } catch (err) {
+            if (!(err instanceof DendronError)) {
+              err = new DendronError({
+                message: `Failed to read links in note ${n.fname}`,
+                payload: err,
+              });
             }
-          );
-          cacheUpdates[n.fname].data.links = links;
-          cacheUpdates[n.fname].data.anchors = anchors;
-          n.links = links;
-          n.anchors = anchors;
+            errors.push(err);
+            return;
+          }
+          try {
+            const anchors = await AnchorUtils.findAnchors(
+              {
+                note: n,
+                wsRoot: wsRoot,
+              },
+              {
+                engine: this.engine,
+                fname: n.fname,
+              }
+            );
+            cacheUpdates[n.fname].data.anchors = anchors;
+            n.anchors = anchors;
+          } catch (err) {
+            if (!(err instanceof DendronError)) {
+              err = new DendronError({
+                message: `Failed to read headers or block anchors in note ${n.fname}`,
+                payload: err,
+              });
+            }
+            errors.push(err);
+            return;
+          }
         } else {
           n.links = cache.notes[n.fname].data.links;
         }
         return;
       })
     );
-    return { notes, cacheUpdates, cache };
+    return { notes, cacheUpdates, cache, errors };
   }
 
   async bulkAddNotes(opts: BulkAddNoteOpts) {

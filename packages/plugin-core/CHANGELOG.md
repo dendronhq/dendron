@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.47.2](https://github.com/dendronhq/dendron/compare/v0.47.0...v0.47.2) (2021-06-24)
+
+
+### Bug Fixes
+
+* dendron not applying version migrations ([7c1ca7c](https://github.com/dendronhq/dendron/commit/7c1ca7cadc594ed60320007204e0f90b2fd8ee2c))
+* updated should only change if note content changes ([7eaf916](https://github.com/dendronhq/dendron/commit/7eaf9166f572a6bd0b1d4772593e70707b8e6be8))
+
+
+### Features Dendron
+
+* filter graph by string ([#828](https://github.com/dendronhq/dendron/issues/828)) ([114f6a2](https://github.com/dendronhq/dendron/commit/114f6a2b67cbe38a62f76b1459b373b64a6a669c))
+* workspace-trust-for-hooks ([#845](https://github.com/dendronhq/dendron/issues/845)) ([9fc3e15](https://github.com/dendronhq/dendron/commit/9fc3e15826f62daf87f5d39a93de0d6c33992413))
+
+
+
+
+
 ## [0.47.1](https://github.com/dendronhq/dendron/compare/v0.47.0...v0.47.1) (2021-06-23)
 
 

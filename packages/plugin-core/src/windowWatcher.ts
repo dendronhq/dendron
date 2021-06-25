@@ -5,11 +5,18 @@ import {
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { DateTime } from "luxon";
-import { DecorationOptions, ExtensionContext, Range, window } from "vscode";
+import {
+  DecorationOptions,
+  ExtensionContext,
+  Range,
+  window,
+  TextEditor,
+} from "vscode";
 import { Logger } from "./logger";
 import { CodeConfigKeys, DateTimeFormat } from "./types";
 import { VSCodeUtils } from "./utils";
 import { getConfigValue, getWS } from "./workspace";
+import { ShowPreviewV2Command } from "./commands/ShowPreviewV2";
 
 const tsDecorationType = window.createTextEditorDecorationType({
   //   borderWidth: "1px",
@@ -45,7 +52,7 @@ export class WindowWatcher {
           this.triggerUpdateDecorations();
           this.triggerNoteGraphViewUpdate();
           this.triggerSchemaGraphViewUpdate();
-          this.triggerNotePreviewUpdate();
+          this.triggerNotePreviewUpdate(editor);
         }
       },
       null,
@@ -154,27 +161,8 @@ export class WindowWatcher {
     return;
   }
 
-  async triggerNotePreviewUpdate() {
-    const notePreviewPanel = getWS().getWebView(DendronWebViewKey.NOTE_PREVIEW);
-    if (!_.isUndefined(notePreviewPanel)) {
-      if (notePreviewPanel.visible) {
-        const activeEditor = window.activeTextEditor;
-        if (!activeEditor) {
-          return;
-        }
-
-        const note = VSCodeUtils.getNoteFromDocument(activeEditor.document);
-
-        notePreviewPanel.webview.postMessage({
-          type: "onDidChangeActiveTextEditor",
-          data: {
-            note,
-            sync: true,
-          },
-          source: "vscode",
-        } as OnDidChangeActiveTextEditorMsg);
-      }
-    }
+  async triggerNotePreviewUpdate({ document }: TextEditor) {
+    ShowPreviewV2Command.updateMarkdown(document);
     return;
   }
 }

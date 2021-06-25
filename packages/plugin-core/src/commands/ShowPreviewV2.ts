@@ -156,6 +156,8 @@ export class ShowPreviewV2Command extends BasicCommand<
       }
     });
 
+    // TODO add onDidDispose to remote webview from workspace?
+
     // Update workspace-wide graph panel
     ws.setWebView(DendronWebViewKey.NOTE_PREVIEW, panel);
   }

@@ -161,6 +161,6 @@ export class SnapshotImportPod extends ImportPod {
         });
       })
     );
-    return [];
+    return {importedNotes:[]};
   }
 }

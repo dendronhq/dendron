@@ -239,7 +239,7 @@ export type DendronConfig = {
    */
   randomNote?: RandomNoteConfig;
 
-  /** Automatically fold frontmatter when opening a new note. */
+  /** Automatically fold frontmatter when opening a new note. False by default. */
   autoFoldFrontmatter?: boolean;
 };
 

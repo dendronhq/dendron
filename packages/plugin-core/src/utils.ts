@@ -455,7 +455,7 @@ export class VSCodeUtils {
    * @param offset When converting the point, shift it by this much.
    * @returns The converted Position, shifted by `offset` if provided.
    */
-  static remarkPoint2VSCodePosition(
+  static point2VSCodePosition(
     point: Point,
     offset?: { line?: number; column?: number }
   ) {
@@ -466,12 +466,15 @@ export class VSCodeUtils {
     );
   }
 
-  /** Fold the foldable region at the given position for the active editor.
+  /** Fold the foldable region at the given line for the active editor.
    *
    * This is equivalent to selecting that point, and using the "Fold" command in the editor.
    */
-  static foldActiveEditorAtPosition(position: vscode.Position) {
-    return vscode.commands.executeCommand("editor.fold", position);
+  static foldActiveEditorAtPosition(opts: { line?: number; levels?: number }) {
+    return vscode.commands.executeCommand("editor.fold", {
+      selectionLines: [opts.line],
+      levels: opts.levels,
+    });
   }
 }
 

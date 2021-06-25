@@ -169,12 +169,14 @@ export class WindowWatcher {
     return;
   }
 
-  async onFirstOpen(editor: TextEditor) {
-    this.adjustCursorPosition(editor);
-    if (getWS().config.autoFoldFrontmatter) this.foldFrontmatter();
+  private async onFirstOpen(editor: TextEditor) {
+    this.moveCursorPastFrontmatter(editor);
+    if (getWS().config.autoFoldFrontmatter) {
+      await this.foldFrontmatter();
+    }
   }
 
-  private adjustCursorPosition(editor: TextEditor) {
+  private moveCursorPastFrontmatter(editor: TextEditor) {
     const proc = MDUtilsV5.procRemarkParse({
       mode: ProcMode.NO_DATA,
       parseOnly: true,
@@ -182,8 +184,10 @@ export class WindowWatcher {
     const parsed = proc.parse(editor.document.getText());
     visit(parsed, ["yaml"], (node) => {
       if (_.isUndefined(node.position)) return false; // Should never happen
-      const position = VSCodeUtils.remarkPoint2VSCodePosition(
+      const position = VSCodeUtils.point2VSCodePosition(
         node.position.end,
+        // Move past frontmatter + one line after the end because otherwise this ends up inside frontmatter when folded.
+        // This also makes sense because the front
         { line: 1 }
       );
       editor.selection = new Selection(position, position);
@@ -192,7 +196,7 @@ export class WindowWatcher {
     });
   }
 
-  private foldFrontmatter() {
-    VSCodeUtils.foldActiveEditorAtPosition(new Position(0, 0));
+  private async foldFrontmatter() {
+    await VSCodeUtils.foldActiveEditorAtPosition({ line: 0 });
   }
 }

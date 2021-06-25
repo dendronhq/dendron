@@ -111,10 +111,7 @@ export class WorkspaceWatcher {
     this._openedDocuments.set(document.uri.fsPath, document);
   }
 
-  /** The documents that have been opened during this session that have not been viewed yet in the editor.
-   *
-   * Had to add undefined because
-   */
+  /** The documents that have been opened during this session that have not been viewed yet in the editor. */
   private _openedDocuments: Map<string, TextDocument> = new Map();
 
   /** Do not use this function, please go to `WindowWatcher.onFirstOpen() instead.`

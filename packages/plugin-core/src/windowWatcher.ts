@@ -12,7 +12,6 @@ import {
   window,
   TextEditor,
   Selection,
-  Position,
 } from "vscode";
 import { Logger } from "./logger";
 import { CodeConfigKeys, DateTimeFormat } from "./types";

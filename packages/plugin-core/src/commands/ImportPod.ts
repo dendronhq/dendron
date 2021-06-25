@@ -47,16 +47,29 @@ export class ImportPodCommand extends BaseCommand<
     const podChoice = inputs.podChoice;
     const podClass = podChoice.podClass;
     const podsDir = DendronWorkspace.instance().podsDir;
-    const maybeConfig = PodUtils.getConfig({ podsDir, podClass });
-    if (!maybeConfig) {
-      const configPath = PodUtils.genConfigFile({ podsDir, podClass });
-      await VSCodeUtils.openFileInEditor(Uri.file(configPath));
-      window.showInformationMessage(
-        "Looks like this is your first time running this pod. Please fill out the configuration and then run this command again. "
-      );
+    try {
+      const maybeConfig = PodUtils.getConfig({ podsDir, podClass });
+
+      if (!maybeConfig) {
+        const configPath = PodUtils.genConfigFile({ podsDir, podClass });
+        await VSCodeUtils.openFileInEditor(Uri.file(configPath));
+        window.showInformationMessage(
+          "Looks like this is your first time running this pod. Please fill out the configuration and then run this command again."
+        );
+        return;
+      }
+      return { podChoice, config: maybeConfig };
+    } catch (e) {
+      // The user's import configuration has YAML syntax errors:
+      if (e.name === "YAMLException")
+        window.showErrorMessage(
+          "The configuration is invalid YAML. Please fix and run this command again."
+        );
+      else {
+        throw e;
+      }
       return;
     }
-    return { podChoice, config: maybeConfig };
   }
 
   async execute(opts: CommandOpts) {
@@ -73,20 +86,36 @@ export class ImportPodCommand extends BaseCommand<
     if (vaultWatcher) {
       vaultWatcher.pause = true;
     }
-    await window.withProgress(
+    let importedNotes = await window.withProgress(
       {
         location: ProgressLocation.Notification,
-        title: "importing",
+        title: "importing notes",
         cancellable: false,
       },
       async () => {
-        await pod.execute({ config: opts.config, engine, wsRoot, vaults });
+        let { importedNotes, errors } = await pod.execute({
+          config: opts.config,
+          engine,
+          wsRoot,
+          vaults,
+        });
+        if (errors && errors.length > 0) {
+          let errorMsg = `Error while importing ${errors.length} notes:\n`;
+          errors.forEach((e) => {
+            errorMsg += e.path + "\n";
+          });
+          window.showErrorMessage(errorMsg);
+        }
+
+        return importedNotes;
       }
     );
     await new ReloadIndexCommand().execute();
     if (vaultWatcher) {
       vaultWatcher.pause = false;
     }
-    window.showInformationMessage(`done importing.`);
+    window.showInformationMessage(
+      `${importedNotes.length} notes imported successfully.`
+    );
   }
 }

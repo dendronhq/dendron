@@ -10,7 +10,9 @@ git add .
 git commit -m "chore: update 11ty"
 
 echo "publish..."
-lerna publish from-package --ignore-scripts 
+pushd packages/dendron-11ty
+npm publish
+popd
 node bootstrap/scripts/genMeta.js
 
 echo "reset..."

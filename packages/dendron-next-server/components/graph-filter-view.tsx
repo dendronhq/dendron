@@ -21,8 +21,14 @@ type FilterProps = {
 };
 
 const GraphFilterView = ({ config, setConfig }: FilterProps) => {
-  const sections = new Set(Object.keys(config).map((key) => key.split(".")[0]));
   const configEntries = Object.entries(config);
+  const sortedSections = [
+    "vaults",
+    "connections",
+    "filter",
+    "options",
+    "information",
+  ];
 
   const { currentTheme } = useThemeSwitcher();
 
@@ -55,7 +61,7 @@ const GraphFilterView = ({ config, setConfig }: FilterProps) => {
       }}
     >
       <Collapse>
-        {Array.from(sections).map((section, i) => (
+        {sortedSections.map((section, i) => (
           <Panel header={_.capitalize(section)} key={i}>
             <Space direction="vertical" style={{ width: "100%" }}>
               {configEntries

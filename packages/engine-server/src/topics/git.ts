@@ -135,4 +135,41 @@ export class Git {
     const { stdout } = await this._execute("git remote");
     return !_.isEmpty(stdout);
   }
+
+  /** Gets the upstream the current branch is set up to push to, or `undefined` if it is not set up to push anywhere. */
+  async getUpstream(): Promise<string | undefined> {
+    try {
+      const { stdout } = await this._execute(
+        "git rev-parse --abbrev-ref @{upstream}"
+      );
+      return _.trim(stdout);
+    } catch {
+      return undefined;
+    }
+  }
+
+  /**
+   * @param nameOnly: If true, only return the file names. Otherwise the full diff including contents is returned.
+   * @param oldCommit: The old identifier (e.g. commit, tag, branch) that we are diffing against.
+   * @param newCommit: The new identifier (e.g. commit, tag, branch) that we are diffing from.
+   */
+  async diff({
+    nameOnly,
+    oldCommit,
+    newCommit,
+  }:
+    | { nameOnly?: boolean; oldCommit: string; newCommit: string }
+    | {
+        nameOnly?: boolean;
+        oldCommit: undefined;
+        newCommit: undefined;
+      }): Promise<string> {
+    const nameOnlyOption = nameOnly ? "--name-only" : "";
+    if (_.isUndefined(oldCommit)) oldCommit = "";
+    if (_.isUndefined(newCommit)) newCommit = "";
+    const { stdout } = await this._execute(
+      `git diff ${nameOnlyOption} ${oldCommit} ${newCommit}`
+    );
+    return _.trim(stdout);
+  }
 }

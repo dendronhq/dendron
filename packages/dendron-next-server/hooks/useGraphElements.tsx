@@ -6,20 +6,37 @@ import {
   VaultUtils,
 } from "@dendronhq/common-all";
 import { createLogger, engineSlice } from "@dendronhq/common-frontend";
-import { EdgeDefinition, NodeDefinition } from "cytoscape";
+import { EdgeDefinition } from "cytoscape";
 import _ from "lodash";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { GraphEdges, GraphElements, GraphNodes } from "../lib/graph";
+import { GraphEdges, GraphElements } from "../lib/graph";
+
+const getVaultClass = (vault: DVault) => {
+  const vaultName = VaultUtils.getName(vault);
+  return `vault-${vaultName}`;
+};
 
 const getNoteGraphElements = (
   notes: NotePropsDict,
-  wsRoot: string
+  wsRoot: string,
+  vaults: DVault[] | undefined
 ): GraphElements => {
+  const logger = createLogger("graph - getNoteGraphElements");
+
   // ADD NODES
-  const nodes = Object.values(notes).map((note) => ({
-    data: { id: note.id, label: note.title, group: "nodes" },
-  }));
+  const nodes = Object.values(notes).map((note) => {
+    return {
+      data: {
+        id: note.id,
+        label: note.title,
+        group: "nodes",
+        fname: note.fname,
+        stub: _.isUndefined(note.stub) ? false : note.stub,
+      },
+      classes: `${getVaultClass(note.vault)}`,
+    };
+  });
 
   // ADD EDGES
   const edges: GraphEdges = {
@@ -28,15 +45,19 @@ const getNoteGraphElements = (
   };
 
   Object.values(notes).forEach((note) => {
+    const noteVaultClass = getVaultClass(note.vault);
+
     edges.hierarchy.push(
       ...note.children.map((child) => ({
         data: {
           group: "edges",
-          id: `${notes.id}_${child}`,
+          id: `${note.id}_${child}`,
           source: note.id,
           target: child,
+          fname: note.fname,
+          stub: _.isUndefined(note.stub) ? false : note.stub,
         },
-        classes: "hierarchy",
+        classes: `hierarchy ${noteVaultClass}`,
       }))
     );
 
@@ -44,23 +65,63 @@ const getNoteGraphElements = (
 
     // Find and add linked notes
     note.links.forEach((link) => {
-      if (link.to && note.id) {
+      if (link.type === "backlink") return;
+      if (link.to && link.to.fname && note.id && vaults) {
+        const fnameArray = link.to.fname.split("/");
+
+        const toFname = link.to.fname.includes("/")
+          ? fnameArray[fnameArray.length - 1]
+          : link.to.fname;
+        const toVaultName =
+          link.to.vaultName ||
+          fnameArray[fnameArray.length - 2] ||
+          VaultUtils.getName(note.vault);
+
+        const toVault = VaultUtils.getVaultByName({
+          vname: toVaultName,
+          vaults,
+        });
+
+        if (_.isUndefined(toVault)) {
+          logger.log(
+            `Couldn't find vault of note ${toFname}, aborting link creation`
+          );
+          return;
+        }
+
         const to = NoteUtils.getNoteByFnameV5({
-          fname: link.to!.fname as string,
-          vault: note.vault,
+          fname: fnameArray[fnameArray.length - 1],
+          vault: toVault,
           notes: notes,
           wsRoot,
         });
 
-        if (!to) return;
+        if (!to) {
+          logger.log(
+            `Failed to link note ${VaultUtils.getName(note.vault)}/${
+              note.fname
+            } to ${VaultUtils.getName(toVault)}/${
+              link.to.fname
+            }. Most likely, this note does not exist.`
+          );
+          return;
+        }
+
         linkConnections.push({
           data: {
             group: "edges",
             id: `${note.id}_${to.id}`,
             source: note.id,
             target: to.id,
+            fname: note.fname,
+            stub:
+              _.isUndefined(note.stub) && _.isUndefined(to.stub)
+                ? false
+                : note.stub || to.stub
+                ? true
+                : false,
           },
-          classes: "links",
+          classes: `links ${noteVaultClass}`,
         });
       }
     });
@@ -96,13 +157,16 @@ const getSchemaGraphElements = (
     const vaultName = VaultUtils.getName(vault);
     const VAULT_ID = `${vaultName}`;
 
+    // Vault root schema node
     nodes.push({
       data: {
         id: VAULT_ID,
         label: vaultName,
         group: "nodes",
         vault: vaultName,
+        fname: "root",
       },
+      classes: `vault-${vaultName}`,
     });
 
     filteredSchemas
@@ -112,7 +176,13 @@ const getSchemaGraphElements = (
 
         // Base schema node
         nodes.push({
-          data: { id: SCHEMA_ID, label: schema.fname, group: "nodes" },
+          data: {
+            id: SCHEMA_ID,
+            label: schema.fname,
+            group: "nodes",
+            fname: schema.fname,
+          },
+          classes: `vault-${vaultName}`,
         });
 
         // Schema node -> root connection
@@ -122,8 +192,9 @@ const getSchemaGraphElements = (
             id: `${VAULT_ID}_${SCHEMA_ID}`,
             source: VAULT_ID,
             target: SCHEMA_ID,
+            fname: schema.fname,
           },
-          classes: "hierarchy",
+          classes: `hierarchy vault-${vaultName}`,
         });
 
         // Children schemas
@@ -138,6 +209,7 @@ const getSchemaGraphElements = (
               group: "nodes",
               fname: schema.fname,
             },
+            classes: `vault-${vaultName}`,
           });
 
           // Schema -> subschema connection
@@ -147,8 +219,9 @@ const getSchemaGraphElements = (
               id: `${SCHEMA_ID}_${SUBSCHEMA_ID}`,
               source: SCHEMA_ID,
               target: SUBSCHEMA_ID,
+              fname: schema.fname,
             },
-            classes: "hierarchy",
+            classes: `hierarchy vault-${vaultName}`,
           });
         });
       });
@@ -173,16 +246,33 @@ const useGraphElements = ({
     edges: {},
   });
 
+  const [noteCount, setNoteCount] = useState(0);
+  const [schemaCount, setSchemaCount] = useState(0);
+
   useEffect(() => {
     if (type === "note" && engine.notes) {
+      // Prevent unnecessary parsing if no notes have been added/deleted
+      const newNoteCount = Object.keys(engine.notes).length;
+      if (noteCount === newNoteCount) return;
+      setNoteCount(newNoteCount);
+
       setElements(
-        getNoteGraphElements(engine.notes, router.query.ws as string)
+        getNoteGraphElements(
+          engine.notes,
+          router.query.ws as string,
+          engine.vaults
+        )
       );
     }
   }, [engine.notes]);
 
   useEffect(() => {
     if (type === "schema" && engine.schemas) {
+      // Prevent unnecessary parsing if no schemas have been added/deleted
+      const newSchemaCount = Object.keys(engine.schemas).length;
+      if (schemaCount === newSchemaCount) return;
+      setSchemaCount(newSchemaCount);
+
       setElements(getSchemaGraphElements(engine.schemas, engine.vaults));
     }
   }, [engine.schemas]);

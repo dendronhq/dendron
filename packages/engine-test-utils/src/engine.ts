@@ -22,6 +22,7 @@ import {
   runJestHarnessV2,
   SetupHookFunction,
   SetupTestFunctionV4,
+  sinon,
   TestResult,
 } from "@dendronhq/common-test-utils";
 import { LaunchEngineServerCommand } from "@dendronhq/dendron-cli";
@@ -33,8 +34,27 @@ import {
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
+import { DendronConfig } from "../../common-all/lib/types";
 import { ENGINE_HOOKS } from "./presets";
 import { GitTestUtils } from "./utils";
+import os from "os";
+
+export type TestSetupWorkspaceOpts = {
+  /**
+   * Vaults to initialize engine with
+   * Defaults to following if not set
+   * [
+   *    { fsPath: "vault1" },
+   *    { fsPath: "vault2" },
+   *    { fsPath: "vault3", name: "vaultThree" },
+   *  ]
+   */
+  vaults?: DVault[];
+  /**
+   * Modify dendron config before initialization
+   */
+  modConfigCb?: (config: DendronConfig) => DendronConfig;
+};
 
 export type AsyncCreateEngineFunction = (
   opts: WorkspaceOpts
@@ -99,12 +119,21 @@ export async function setupWS(opts: {
 }) {
   const wsRoot = tmpDir().name;
   const ws = new WorkspaceService({ wsRoot });
+  ws.createConfig();
+  const config = ws.config;
   let vaults = await Promise.all(
     opts.vaults.map(async (vault) => {
-      await ws.createVault({ vault });
+      await ws.createVault({ vault, config, updateConfig: false });
       return vault;
     })
   );
+  config.vaults = _.sortBy(config.vaults, "fsPath");
+  if (config.site.duplicateNoteBehavior) {
+    config.site.duplicateNoteBehavior.payload = (
+      config.site.duplicateNoteBehavior.payload as string[]
+    ).sort();
+  }
+  ws.setConfig(config);
   if (opts.workspaces) {
     const vaultsFromWs = await _.reduce(
       opts.workspaces,
@@ -131,13 +160,12 @@ export type RunEngineTestV5Opts = {
   createEngine?: AsyncCreateEngineFunction;
   extra?: any;
   expect: any;
-  vaults?: DVault[];
   workspaces?: DWorkspace[];
   setupOnly?: boolean;
   initGit?: boolean;
   initHooks?: boolean;
   addVSWorkspace?: boolean;
-};
+} & TestSetupWorkspaceOpts;
 
 export type RunEngineTestFunctionV5<T = any> = (
   opts: RunEngineTestFunctionOpts & { extra?: any; engineInitDuration: number }
@@ -197,9 +225,11 @@ export class TestPresetEntryV5 {
 
 /**
  *
+ * To create empty workspace, initilizae with `vaults = []`
  * @param func
  * @param opts.vaults: By default, initiate 3 vaults {vault1, vault2, (vault3, "vaultThree")}
  * @param opts.preSetupHook: By default, initiate empty
+ * @param opts.wsRoot: Override the randomly generated test directory for the wsRoot
  * @returns
  */
 export async function runEngineTestV5(
@@ -227,52 +257,64 @@ export async function runEngineTestV5(
     ],
     addVSWorkspace: false,
   });
-  const { wsRoot, vaults } = await setupWS({ vaults: vaultsInit, workspaces });
-  if ((opts.initHooks, vaults)) {
-    fs.mkdirSync(path.join(wsRoot, CONSTANTS.DENDRON_HOOKS_BASE));
+  try {
+    // make sure tests don't overwrite local homedir contents
+    TestEngineUtils.mockHomeDir();
+    const { wsRoot, vaults } = await setupWS({
+      vaults: vaultsInit,
+      workspaces,
+    });
+    if ((opts.initHooks, vaults)) {
+      fs.ensureDirSync(path.join(wsRoot, CONSTANTS.DENDRON_HOOKS_BASE));
+    }
+    await preSetupHook({ wsRoot, vaults });
+    const engine: DEngineClient = await createEngine({ wsRoot, vaults });
+    const start = process.hrtime();
+    const initResp = await engine.init();
+    if (addVSWorkspace) {
+      fs.writeJSONSync(
+        path.join(wsRoot, CONSTANTS.DENDRON_WS_NAME),
+        {
+          folders: vaults.map((ent) => ({
+            path: ent.fsPath,
+            name: ent.name,
+          })) as WorkspaceFolderRaw[],
+          settings: {},
+          extensions: {},
+        } as WorkspaceSettings,
+        { spaces: 4 }
+      );
+    }
+    const engineInitDuration = getDurationMilliseconds(start);
+    const testOpts = {
+      wsRoot,
+      vaults,
+      engine,
+      initResp,
+      extra,
+      config: engine,
+      engineInitDuration,
+    };
+    if (initGit) {
+      await GitTestUtils.createRepoForWorkspace(wsRoot);
+      await Promise.all(
+        vaults.map((vault) => {
+          return GitTestUtils.createRepoWithReadme(
+            vault2Path({ vault, wsRoot })
+          );
+        })
+      );
+    }
+    if (opts.setupOnly) {
+      return testOpts;
+    }
+    const results = (await func(testOpts)) || [];
+    await runJestHarnessV2(results, expect);
+    return { opts: testOpts, resp: undefined, wsRoot };
+  } finally {
+    // restore sinon so other tests can keep running
+    sinon.restore();
   }
-  await preSetupHook({ wsRoot, vaults });
-  const engine: DEngineClient = await createEngine({ wsRoot, vaults });
-  const start = process.hrtime();
-  const initResp = await engine.init();
-  if (addVSWorkspace) {
-    fs.writeJSONSync(
-      path.join(wsRoot, CONSTANTS.DENDRON_WS_NAME),
-      {
-        folders: vaults.map((ent) => ({
-          path: ent.fsPath,
-          name: ent.name,
-        })) as WorkspaceFolderRaw[],
-        settings: {},
-        extensions: {},
-      } as WorkspaceSettings,
-      { spaces: 4 }
-    );
-  }
-  const engineInitDuration = getDurationMilliseconds(start);
-  const testOpts = {
-    wsRoot,
-    vaults,
-    engine,
-    initResp,
-    extra,
-    config: engine,
-    engineInitDuration,
-  };
-  if (initGit) {
-    await GitTestUtils.createRepoForWorkspace(wsRoot);
-    await Promise.all(
-      vaults.map((vault) => {
-        return GitTestUtils.createRepoWithReadme(vault2Path({ vault, wsRoot }));
-      })
-    );
-  }
-  if (opts.setupOnly) {
-    return testOpts;
-  }
-  const results = (await func(testOpts)) || [];
-  await runJestHarnessV2(results, expect);
-  return { opts: testOpts, resp: undefined, wsRoot };
 }
 
 export function testWithEngine(
@@ -300,6 +342,11 @@ export function testWithEngine(
 }
 
 export class TestEngineUtils {
+  static mockHomeDir(dir?: string) {
+    if (_.isUndefined(dir)) dir = tmpDir().name;
+    sinon.stub(os, "homedir").returns(dir);
+    return dir;
+  }
   static vault1(vaults: DVault[]) {
     return _.find(vaults, { fsPath: "vault1" })!;
   }

@@ -1,26 +1,18 @@
-import {
-  createLogger,
-  engineSlice,
-  postVSCodeMessage,
-} from "@dendronhq/common-frontend";
+import { engineSlice, postVSCodeMessage } from "@dendronhq/common-frontend";
 import _ from "lodash";
 import React, { useEffect, useState } from "react";
-import { ElementsDefinition, EventHandler } from "cytoscape";
+import { EventHandler } from "cytoscape";
 import Graph from "../../components/graph";
 import useGraphElements from "../../hooks/useGraphElements";
 import { GraphConfig, graphConfig } from "../../lib/graph";
-import GraphFilterView from "../../components/graph-filter-view";
 import {
   DMessageSource,
   GraphViewMessage,
   GraphViewMessageType,
 } from "@dendronhq/common-all";
+import { DendronProps } from "../../lib/types";
 
-export default function FullSchemaGraph({
-  engine,
-}: {
-  engine: engineSlice.EngineState;
-}) {
+export default function FullSchemaGraph({ engine, ide }: DendronProps) {
   const [config, setConfig] = useState<GraphConfig>(graphConfig.schema);
   const elements = useGraphElements({ type: "schema", engine });
 
@@ -76,6 +68,8 @@ export default function FullSchemaGraph({
       type="schema"
       config={config}
       setConfig={setConfig}
+      engine={engine}
+      ide={ide}
     />
   );
 }

@@ -1,4 +1,5 @@
 import {
+  CONSTANTS,
   DendronError,
   DEngineClient,
   DNodeUtils,
@@ -169,17 +170,43 @@ export class VSCodeUtils {
     return editor.document.uri.fsPath;
   }
 
-  static getInstallStatus({
-    previousVersion,
+  /**
+   * Check if we upgraded, initialized for the first time or no change was detected
+   * @returns {@link InstallStatus}
+   */
+  static getInstallStatusForWorkspace({
+    previousWorkspaceVersion,
     currentVersion,
   }: {
-    previousVersion?: string;
+    previousWorkspaceVersion?: string;
     currentVersion: string;
   }): InstallStatus {
-    if (_.isUndefined(previousVersion)) {
+    if (
+      _.isUndefined(previousWorkspaceVersion) ||
+      previousWorkspaceVersion === CONSTANTS.DENDRON_INIT_VERSION
+    ) {
       return InstallStatus.INITIAL_INSTALL;
     }
-    if (previousVersion !== currentVersion) {
+    if (previousWorkspaceVersion !== currentVersion) {
+      return InstallStatus.UPGRADED;
+    }
+    return InstallStatus.NO_CHANGE;
+  }
+
+  static getInstallStatusForExtension({
+    previousGlobalVersion,
+    currentVersion,
+  }: {
+    previousGlobalVersion?: string;
+    currentVersion: string;
+  }): InstallStatus {
+    if (
+      _.isUndefined(previousGlobalVersion) ||
+      previousGlobalVersion === CONSTANTS.DENDRON_INIT_VERSION
+    ) {
+      return InstallStatus.INITIAL_INSTALL;
+    }
+    if (previousGlobalVersion !== currentVersion) {
       return InstallStatus.UPGRADED;
     }
     return InstallStatus.NO_CHANGE;
@@ -197,7 +224,7 @@ export class VSCodeUtils {
   }
 
   static createWSContext(): vscode.ExtensionContext {
-    const pkgRoot = goUpTo(__dirname);
+    const pkgRoot = goUpTo({ base: __dirname, fname: "package.json" });
     return {
       extensionMode: vscode.ExtensionMode.Development,
       logPath: tmpDir().name,
@@ -217,7 +244,7 @@ export class VSCodeUtils {
 
   static getOrCreateMockContext(): vscode.ExtensionContext {
     if (!_MOCK_CONTEXT) {
-      const pkgRoot = goUpTo(__dirname);
+      const pkgRoot = goUpTo({ base: __dirname, fname: "package.json" });
       _MOCK_CONTEXT = {
         extensionMode: vscode.ExtensionMode.Development,
         logPath: tmpDir().name,
@@ -242,17 +269,24 @@ export class VSCodeUtils {
     const txtPath = document.uri.fsPath;
     const wsRoot = DendronWorkspace.wsRoot();
     const fname = path.basename(txtPath, ".md");
-    const vault = VaultUtils.getVaultByNotePath({
-      wsRoot,
-      vaults: getWS().getEngine().vaults,
-      fsPath: txtPath,
-    });
+    const vault = VSCodeUtils.getVaultFromDocument(document);
     return NoteUtils.getNoteByFnameV5({
       fname,
       vault,
       wsRoot,
       notes: engine.notes,
     });
+  }
+
+  static getVaultFromDocument(document: vscode.TextDocument) {
+    const txtPath = document.uri.fsPath;
+    const wsRoot = DendronWorkspace.wsRoot();
+    const vault = VaultUtils.getVaultByNotePath({
+      wsRoot,
+      vaults: getWS().getEngine().vaults,
+      fsPath: txtPath,
+    });
+    return vault;
   }
 
   static createMockState(settings: any): vscode.WorkspaceConfiguration {
@@ -418,7 +452,11 @@ export class VSCodeUtils {
 export class WSUtils {
   static updateEngineAPI(port: number | string): DEngineClient {
     const ws = DendronWorkspace.instance();
-    ws.setEngine(EngineAPIService.create({ port }));
+    const svc = EngineAPIService.createEngine({
+      port,
+      enableWorkspaceTrust: vscode.workspace.isTrusted,
+    });
+    ws.setEngine(svc);
     ws.port = _.toInteger(port);
     const engine = ws.getEngine();
     return engine;
@@ -538,7 +576,7 @@ export class DendronClientUtilsV2 {
   };
 
   static useVaultPrefix(engine: DEngineClient) {
-    const noXVaultLink = engine.config.noXVaultWikiLink;
+    const noXVaultLink = getWS().config.noXVaultWikiLink;
     const useVaultPrefix =
       _.size(engine.vaults) > 1 &&
       (_.isBoolean(noXVaultLink) ? !noXVaultLink : true);

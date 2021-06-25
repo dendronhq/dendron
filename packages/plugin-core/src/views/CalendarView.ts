@@ -66,6 +66,9 @@ export class CalendarView implements vscode.WebviewViewProvider {
 
   async onActiveTextEditorChangeHandler() {
     const document = VSCodeUtils.getActiveTextEditor()?.document;
+    if (!this._view?.visible) {
+      return;
+    }
     if (document) {
       this.openTextDocument(document);
     } else {

@@ -7,6 +7,7 @@ export const CONSTANTS = {
   DENDRON_SERVER_PORT: ".dendron.port",
   DENDRON_WS_META: ".dendron.ws",
   DENDRON_CONFIG_FILE: "dendron.yml",
+  DENDRON_SEED_CONFIG: "seed.yml",
   DENDRON_DELIMETER: "dendron://",
   DENDRON_USER_FILE: ".dendron.user",
   DENDRON_CACHE_FILE: ".dendron.cache.json",
@@ -15,6 +16,10 @@ export const CONSTANTS = {
   DENDRON_TELEMETRY: ".dendron.telemetry",
   DENDRON_HOOKS_BASE: "hooks",
   DENDRON_LOCAL_SITE_PORT: 8080,
+  /**
+   * Initial version for first installaion
+   */
+  DENDRON_INIT_VERSION: "0.0.0",
 };
 
 export enum ERROR_STATUS {

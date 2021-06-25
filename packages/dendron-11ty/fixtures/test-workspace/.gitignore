@@ -2,4 +2,3 @@ build
 docs/*
 !docs/index.*
 .dendron.*
-vault2

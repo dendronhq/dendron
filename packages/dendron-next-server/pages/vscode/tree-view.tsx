@@ -57,8 +57,11 @@ class TreeViewUtils {
     noteId: string;
     noteDict: NotePropsDict;
     showVaultName?: boolean;
-  }): DataNode {
+  }): DataNode | undefined {
     const note = noteDict[noteId];
+    if (_.isUndefined(note)) {
+      return undefined;
+    }
     const vname = VaultUtils.getName(note.vault);
     let icon = undefined;
     if (note.stub) {
@@ -71,9 +74,11 @@ class TreeViewUtils {
       key: note.id,
       title: note.title + (showVaultName ? ` (${vname})` : ""),
       icon,
-      children: note.children.map((ent) =>
-        TreeViewUtils.note2TreeDatanote({ noteId: ent, noteDict })
-      ),
+      children: note.children
+        .map((ent) =>
+          TreeViewUtils.note2TreeDatanote({ noteId: ent, noteDict })
+        )
+        .filter((ent) => !_.isUndefined(ent)) as DataNode[],
     };
   }
 }
@@ -165,7 +170,7 @@ function TreeViewParent({ engine, ide }: DendronProps) {
         showVaultName: true,
       });
     }
-  );
+  ) as DataNode[];
   // controlled compo: what keys should be expanded
   const expandKeys = _.isEmpty(activeNoteIds) ? [] : activeNoteIds;
   if (!ide.views[DendronTreeViewKey.TREE_VIEW_V2].ready) {

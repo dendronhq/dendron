@@ -38,7 +38,7 @@ type MarkdownImportPodConfig = ImportPodConfig & {
   indexName?: string;
 };
 
-export type MarkdownImportPodResp = any[];
+export type MarkdownImportPodResp = {importedNotes: NoteProps[]; errors: Item[]}
 
 type DItem = Item & {
   data?: any;
@@ -73,8 +73,10 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
     ]);
   }
 
-  async _collectItems(root: string): Promise<DItem[]> {
+async _collectItems(root: string): Promise<{items: DItem[], errors: DItem[]}> {
+    const ctx = "MarkdownPod._collectItems";
     const items: DItem[] = []; // files, directories, symlinks, etc
+    const errors: DItem[] = []; // import items that resulted in errors
     const mask = root.endsWith(path.sep) ? root.length : root.length + 1;
     const excludeFilter = through2.obj(function (item: Item, _enc, _next) {
       // check if hidden file
@@ -89,17 +91,29 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
         // eslint-disable-next-line prefer-arrow-callback
         .on("data", (item: Item) => {
           const out: DItem = { ...item, entries: [] };
+          let isError = false;
           if (item.path.endsWith(".md")) {
-            const { data, content } = readMD(item.path);
-            out.data = data;
-            out.body = content;
+            try {
+              const { data, content } = readMD(item.path);
+              out.data = data;
+              out.body = content;
+            }
+            catch(err) {
+              this.L.error({ctx, error: err });
+              isError = true;
+            }
           }
-          out.path = out.path.slice(mask);
-          items.push(out);
+          if (!isError) {
+            out.path = out.path.slice(mask);
+            items.push(out);
+          }
+          else {
+            errors.push(out);
+          }
         })
         .on("end", () => {
           this.L.info({ msg: "done collecting items" });
-          resolve(items);
+          resolve({items, errors});
         });
     });
   }
@@ -239,7 +253,7 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
     const { wsRoot, engine, src, vault, config } = opts;
     this.L.info({ ctx, wsRoot, src: src.fsPath, msg: "enter" });
     // get all items
-    const items = await this._collectItems(src.fsPath);
+    const {items, errors} = await this._collectItems(src.fsPath);
     this.L.info({ ctx, wsRoot, numItems: _.size(items), msg: "collectItems" });
     const { engineFileDict } = await this._prepareItems(items);
     const hDict = this._files2HierarichalDict({
@@ -260,7 +274,7 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
             dest: DendronASTDest.MD_DENDRON,
             vault: n.vault,
           })
-            .use(RemarkUtils.convertObsidianLinks(n, []))
+            .use(RemarkUtils.convertLinksToDotNotation(n, []))
             .process(n.body);
           n.body = cBody.toString();
           if (config.frontmatter) {
@@ -279,7 +293,7 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
       src: src.fsPath,
       msg: `${_.size(notesClean)} notes imported`,
     });
-    return notesClean;
+    return {importedNotes:notesClean, errors};
   }
 }
 
@@ -299,7 +313,7 @@ export class MarkdownPublishPod extends PublishPod {
       fname: note.fname,
       vault: note.vault,
       shouldApplyPublishRules: false,
-    });
+    }).use(RemarkUtils.convertLinksFromDotNotation(note, []));
     const out = remark.processSync(note.body).toString();
     return _.trim(out);
   }
@@ -314,7 +328,7 @@ export class MarkdownExportPod extends ExportPod {
 
   async plant(opts: ExportPodPlantOpts) {
     const ctx = "MarkdownExportPod:plant";
-    const { dest, notes } = opts;
+    const { dest, notes, vaults, wsRoot } = opts;
     // verify dest exist
     const podDstPath = dest.fsPath;
     fs.ensureDirSync(path.dirname(podDstPath));
@@ -324,8 +338,7 @@ export class MarkdownExportPod extends ExportPod {
     await Promise.all(
       notes.map(async (note) => {
         const body = await mdPublishPod.plant({ ...opts, note });
-        const hpath = note.fname + ".md";
-        // const hpath = dot2Slash(note.fname);
+        const hpath = dot2Slash(note.fname) + ".md";
         const vname = VaultUtils.getName(note.vault);
         let fpath = path.join(podDstPath, vname, hpath);
         // fpath = _.isEmpty(note.children)
@@ -336,6 +349,22 @@ export class MarkdownExportPod extends ExportPod {
         return fs.writeFile(fpath, body);
       })
     );
+
+    // Export Assets
+    await Promise.all(
+      vaults.map(async (vault) => {
+      //TODO: Avoid hardcoding of assets directory, or else extract to global const
+      const destPath = path.join(dest.fsPath,  VaultUtils.getRelPath(vault), "assets");
+      const srcPath = path.join(wsRoot, VaultUtils.getRelPath(vault), "assets");
+      if (fs.pathExistsSync(srcPath)) {
+        await fs.copy(srcPath, destPath);
+      }
+    }));
     return { notes };
   }
+}
+
+function dot2Slash(fname: string) {
+  const hierarchy = fname.split(".");
+  return path.join(...hierarchy);
 }

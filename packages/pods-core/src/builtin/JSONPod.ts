@@ -34,7 +34,7 @@ export class JSONImportPod extends ImportPod {
     await Promise.all(
       _.map(notes, (n) => engine.writeNote(n, { newNode: true }))
     );
-    return notes;
+    return {importedNotes:notes};
   }
 
   async _entries2Notes(

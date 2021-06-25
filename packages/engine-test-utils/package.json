@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/engine-test-utils",
-  "version": "0.46.1",
+  "version": "0.47.2",
   "description": "",
   "license": "GPLv3",
   "repository": {
@@ -31,6 +31,7 @@
     "coverage": "jest --coverage",
     "watch": "yarn compile --watch",
     "test:unit": "jest ",
+    "test:updateSnapshots": "jest -u",
     "test:unit:debug": "NODE_ENV=test node --inspect-brk node_modules/.bin/jest --runInBand",
     "test:watch": "jest --watch"
   },
@@ -54,13 +55,13 @@
     "preset": "ts-jest"
   },
   "dependencies": {
-    "@dendronhq/api-server": "^0.46.1",
-    "@dendronhq/common-all": "^0.46.1",
-    "@dendronhq/common-server": "^0.46.1",
-    "@dendronhq/common-test-utils": "^0.46.1",
-    "@dendronhq/dendron-cli": "^0.46.1",
-    "@dendronhq/engine-server": "^0.46.1",
-    "@dendronhq/pods-core": "^0.46.1",
+    "@dendronhq/api-server": "^0.47.2",
+    "@dendronhq/common-all": "^0.47.2",
+    "@dendronhq/common-server": "^0.47.2",
+    "@dendronhq/common-test-utils": "^0.47.2",
+    "@dendronhq/dendron-cli": "^0.47.2",
+    "@dendronhq/engine-server": "^0.47.2",
+    "@dendronhq/pods-core": "^0.47.2",
     "@types/sinon": "^9.0.9",
     "fs-extra": "^9.0.1",
     "lodash": "^4.17.20",

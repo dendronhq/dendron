@@ -5,7 +5,10 @@ import { goUpTo } from "./filesv2";
 export class NodeJSUtils {
   static getVersionFromPkg(): string {
     const pkgJSON = fs.readJSONSync(
-      path.join(goUpTo(__dirname), "package.json")
+      path.join(
+        goUpTo({ base: __dirname, fname: "package.json" }),
+        "package.json"
+      )
     );
     return `${pkgJSON.version}`;
   }

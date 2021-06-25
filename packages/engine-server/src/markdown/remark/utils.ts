@@ -1,3 +1,4 @@
+import { DNoteAnchor, isNotUndefined } from "@dendronhq/common-all";
 import {
   assertUnreachable,
   CONSTANTS,
@@ -19,9 +20,8 @@ import {
 } from "@dendronhq/common-all";
 import { createLogger, note2String } from "@dendronhq/common-server";
 import _ from "lodash";
-import { Heading, Root } from "mdast";
+import { Heading, ListItem, Paragraph, Root } from "mdast";
 import * as mdastBuilder from "mdast-builder";
-import path from "path";
 import { Processor } from "unified";
 import { Node } from "unist";
 import { selectAll } from "unist-util-select";
@@ -53,6 +53,15 @@ export function addError(proc: Processor, err: DendronError) {
   errors.push(err);
   proc().data("errors", errors);
 }
+
+export type NoteBlock = {
+  /** The actual text of the block. */
+  text: string;
+  /** The anchor for this block, if one already exists. */
+  anchor?: DNoteAnchorPositioned;
+  /** The position within the document at which the block is located. */
+  position: Position;
+};
 
 export function getNoteOrError(
   notes: NoteProps[],
@@ -354,8 +363,20 @@ export class LinkUtils {
         })?`,
       "i"
     );
+
+    // pre-parse alias if it exists
+    let alias: string | undefined;
+    const [aliasPartFirst, aliasPartSecond] = ref.split("|");
+    if (_.isUndefined(aliasPartSecond)) ref = aliasPartFirst;
+    else {
+      alias = aliasPartFirst;
+      ref = aliasPartSecond;
+    }
+
+    // pre-parse vault name if it exists
     let vaultName: string | undefined = undefined;
     ({ vaultName, link: ref } = LinkUtils.parseDendronURI(ref));
+
     const groups = reLink.exec(ref)?.groups;
     const clean: DNoteRefData = {
       type: "file",
@@ -366,32 +387,40 @@ export class LinkUtils {
         return;
       }
       if (k === "name") {
-        fname = path.basename(v as string, ".md");
+        // remove .md extension if it exists, but keep full path in case this is an image
+        fname = /^(?<name>.*?)(\.md)?$/.exec(_.trim(v as string))?.groups?.name;
       } else {
         // @ts-ignore
         clean[k] = v;
       }
     });
-    if (_.isUndefined(fname)) {
-      throw new DendronError({ message: `fname for ${ref} is undefined` });
-    }
     if (clean.anchorStart && clean.anchorStart.indexOf(",") >= 0) {
       const [anchorStart, offset] = clean.anchorStart.split(",");
       clean.anchorStart = anchorStart;
       clean.anchorStartOffset = parseInt(offset);
+    }
+    if (_.isUndefined(fname) && _.isUndefined(clean.anchorStart)) {
+      throw new DendronError({
+        message: `both fname and anchorStart for ${ref} is undefined`,
+      });
     }
     if (vaultName) {
       clean.vaultName = vaultName;
     }
     // TODO
     // @ts-ignore
-    return { from: { fname }, data: clean, type: "ref" };
+    return { from: { fname, alias }, data: clean, type: "ref" };
   }
 
   static parseNoteRef(ref: string): DNoteRefLink {
     const noteRef = LinkUtils.parseNoteRefRaw(ref);
-    if (_.isUndefined(noteRef.from) || _.isUndefined(noteRef.from.fname)) {
-      throw new DendronError({ message: `fname for ${ref} is undefined` });
+    if (
+      _.isUndefined(noteRef.from?.fname) &&
+      _.isUndefined(noteRef.data.anchorStart)
+    ) {
+      throw new DendronError({
+        message: `both fname and anchorStart for ${ref} is undefined`,
+      });
     }
     // @ts-ignore
     return noteRef;
@@ -453,6 +482,40 @@ export class LinkUtils {
 }
 
 export class AnchorUtils {
+  /** Given a *parsed* anchor node, returns the anchor id ("header" or "^block" and positioned anchor object for it. */
+  static anchorNode2anchor(
+    node: Anchor,
+    slugger: ReturnType<typeof getSlugger>
+  ): [string, DNoteAnchorPositioned] | undefined {
+    if (_.isUndefined(node.position)) return undefined;
+
+    const { line, column } = node.position.start;
+    if (node.type === DendronASTTypes.HEADING) {
+      const value = slugger.slug(node.children[0].value as string);
+      return [
+        value,
+        {
+          type: "header",
+          value,
+          line: line - 1,
+          column: column - 1,
+        },
+      ];
+    } else if (node.type === DendronASTTypes.BLOCK_ANCHOR) {
+      return [
+        `^${node.id}`,
+        {
+          type: "block",
+          value: node.id,
+          line: line - 1,
+          column: column - 1,
+        },
+      ];
+    } else {
+      assertUnreachable(node);
+    }
+  }
+
   static async findAnchors(
     opts: {
       note: NoteProps;
@@ -464,36 +527,12 @@ export class AnchorUtils {
     try {
       const noteContents = await note2String(opts);
       const noteAnchors = RemarkUtils.findAnchors(noteContents, parseOpts);
-      const anchors: [string, DNoteAnchorPositioned][] = [];
-      noteAnchors.forEach((anchor) => {
-        if (_.isUndefined(anchor.position)) return;
-        const slugger = getSlugger();
-        const { line, column } = anchor.position.start;
-        if (anchor.type === DendronASTTypes.HEADING) {
-          const value = slugger.slug(anchor.children[0].value as string);
-          anchors.push([
-            value,
-            {
-              type: "header",
-              value,
-              line: line - 1,
-              column: column - 1,
-            },
-          ]);
-        } else if (anchor.type === DendronASTTypes.BLOCK_ANCHOR) {
-          anchors.push([
-            `^${anchor.id}`,
-            {
-              type: "block",
-              value: anchor.id,
-              line: line - 1,
-              column: column - 1,
-            },
-          ]);
-        } else {
-          assertUnreachable(anchor);
-        }
-      });
+      const slugger = getSlugger();
+
+      const anchors: [string, DNoteAnchorPositioned][] = noteAnchors
+        .map((anchor) => this.anchorNode2anchor(anchor, slugger))
+        .filter(isNotUndefined);
+
       return Object.fromEntries(anchors);
     } catch (err) {
       const error = DendronError.createFromStatus({
@@ -504,6 +543,12 @@ export class AnchorUtils {
       createLogger("AnchorUtils").error(error);
       return {};
     }
+  }
+
+  static anchor2string(anchor: DNoteAnchor): string {
+    if (anchor.type === "block") return `^${anchor.value}`;
+    if (anchor.type === "header") return anchor.value;
+    assertUnreachable(anchor.type);
   }
 }
 
@@ -517,6 +562,15 @@ function walk(node: Node, fn: any) {
 }
 
 const MAX_HEADING_DEPTH = 99999;
+
+const NODE_TYPES_TO_EXTRACT = [
+  DendronASTTypes.BLOCK_ANCHOR,
+  DendronASTTypes.HEADING,
+  DendronASTTypes.LIST,
+  DendronASTTypes.LIST_ITEM,
+  DendronASTTypes.TABLE,
+  DendronASTTypes.PARAGRAPH,
+];
 
 export class RemarkUtils {
   static bumpHeadings(root: Node, baseDepth: number) {
@@ -589,7 +643,10 @@ export class RemarkUtils {
 
   // --- conversion
 
-  static convertObsidianLinks(note: NoteProps, changes: NoteChangeEntry[]) {
+  static convertLinksToDotNotation(
+    note: NoteProps,
+    changes: NoteChangeEntry[]
+  ) {
     return function (this: Processor) {
       return (tree: Node, _vfile: VFile) => {
         let root = tree as DendronASTRoot;
@@ -610,6 +667,42 @@ export class RemarkUtils {
             });
           }
         });
+      };
+    };
+  }
+
+  static convertLinksFromDotNotation(
+    note: NoteProps,
+    changes: NoteChangeEntry[]
+  ) {
+    return function (this: Processor) {
+      return (tree: Node, _vfile: VFile) => {
+        let root = tree as DendronASTRoot;
+        let wikiLinks: WikiLinkNoteV4[] = selectAll(
+          DendronASTTypes.WIKI_LINK,
+          root
+        ) as WikiLinkNoteV4[];
+
+        let dirty = false;
+
+        wikiLinks.forEach((linkNode) => {
+          if (linkNode.value.indexOf(".") >= 0) {
+            const newValue = _.replace(linkNode.value, /\./g, "/");
+            if (linkNode.data.alias === linkNode.value) {
+              linkNode.data.alias = newValue;
+            }
+            linkNode.value = newValue;
+            dirty = true;
+          }
+        });
+        //TODO: Add support for Ref Notes and Block Links
+
+        if (dirty) {
+          changes.push({
+            note: note,
+            status: "update",
+          });
+        }
       };
     };
   }
@@ -691,5 +784,117 @@ export class RemarkUtils {
         }
       };
     };
+  }
+
+  /** Extract all blocks from the note which could be referenced by a block anchor.
+   *
+   * If those blocks already have anchors (or if they are a header), this will also find that anchor.
+   *
+   * @param note The note from which blocks will be extracted.
+   */
+  static async extractBlocks({
+    note,
+    wsRoot,
+    engine,
+  }: {
+    note: NoteProps;
+    wsRoot: string;
+    engine: DEngineClient;
+  }): Promise<NoteBlock[]> {
+    const proc = MDUtilsV5.procRemarkFull({
+      engine,
+      vault: note.vault,
+      fname: note.fname,
+      dest: DendronASTDest.MD_DENDRON,
+    });
+    const slugger = getSlugger();
+
+    // Read and parse the note
+    // TODO: It might be better to get the text from the editor
+    const noteText = await note2String({ note, wsRoot });
+    const noteAST = proc.parse(noteText);
+    if (_.isUndefined(noteAST.children)) return [];
+    const nodesToSearch = _.filter(noteAST.children as Node[], (node) =>
+      _.includes(NODE_TYPES_TO_EXTRACT, node.type)
+    );
+
+    // Extract the blocks
+    const blocks: NoteBlock[] = [];
+    for (const node of nodesToSearch) {
+      // Block anchors at top level refer to the blocks before them
+      if (node.type === DendronASTTypes.PARAGRAPH) {
+        // These look like a paragraph...
+        const parent = node as Paragraph;
+        if (parent.children.length === 1) {
+          // ... that has only a block anchor in it ...
+          const child = parent.children[0] as Node;
+          if (child.type === DendronASTTypes.BLOCK_ANCHOR) {
+            // ... in which case this block anchor refers to the previous block, if any
+            const previous = _.last(blocks);
+            if (!_.isUndefined(previous))
+              [, previous.anchor] =
+                AnchorUtils.anchorNode2anchor(child as BlockAnchor, slugger) ||
+                [];
+            // Block anchors themselves are not blocks, don't extract them
+            continue;
+          }
+        }
+      }
+
+      // Extract list items out of lists. We also extract them from nested lists,
+      // because block anchors can't refer to nested lists, only items inside of them
+      if (node.type === DendronASTTypes.LIST) {
+        visit(node, [DendronASTTypes.LIST_ITEM], (listItem: ListItem) => {
+          // The list item might have a block anchor inside of it.
+          let anchor: DNoteAnchorPositioned | undefined;
+          visit(
+            listItem,
+            [DendronASTTypes.BLOCK_ANCHOR, DendronASTTypes.LIST],
+            (inListItem) => {
+              // Except if we hit a nested list, because then the block anchor refers to the item in the nested list
+              if (inListItem.type === DendronASTTypes.LIST) return "skip";
+              [, anchor] =
+                AnchorUtils.anchorNode2anchor(
+                  inListItem as BlockAnchor,
+                  slugger
+                ) || [];
+              return;
+            }
+          );
+
+          blocks.push({
+            text: proc.stringify(listItem),
+            anchor,
+            // position can only be undefined for generated nodes, not for parsed ones
+            position: listItem.position!,
+          });
+        });
+      }
+
+      // extract the anchor for this block, if it exists
+      let anchor: DNoteAnchorPositioned | undefined;
+      if (node.type === DendronASTTypes.HEADING) {
+        // Headings are anchors themselves
+        [, anchor] =
+          AnchorUtils.anchorNode2anchor(node as Heading, slugger) || [];
+      } else if (node.type !== DendronASTTypes.LIST) {
+        // Other nodes might have block anchors inside them
+        // Except lists, because anchors inside lists only refer to specific list items
+        visit(node, [DendronASTTypes.BLOCK_ANCHOR], (child) => {
+          [, anchor] =
+            AnchorUtils.anchorNode2anchor(child as BlockAnchor, slugger) || [];
+        });
+      }
+
+      // extract the block
+      blocks.push({
+        text: proc.stringify(node),
+        anchor,
+        // position can only be undefined for generated nodes, not for parsed ones
+        position: node.position!,
+      });
+    }
+
+    return blocks;
   }
 }

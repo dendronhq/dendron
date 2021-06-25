@@ -217,6 +217,10 @@ export type EngineWriteOptsV2 = {
    * Should update existing note instead of overwriting
    */
   updateExisting?: boolean;
+  /**
+   * Should any configured hooks be run during the write
+   */
+  runHooks?: boolean;
 } & Partial<EngineUpdateNodesOptsV2>;
 
 export type DEngineInitPayload = {
@@ -288,6 +292,7 @@ export type DCommonMethods = {
     note: NoteProps,
     opts?: EngineWriteOptsV2
   ) => Promise<WriteNoteResp>;
+
   writeSchema: (schema: SchemaModuleProps) => Promise<void>;
 };
 

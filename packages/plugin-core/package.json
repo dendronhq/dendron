@@ -4,7 +4,7 @@
   "displayName": "dendron",
   "description": "Dendron is a hierarchal note taking tool that grows as you do. ",
   "publisher": "dendron",
-  "version": "0.46.1",
+  "version": "0.47.2",
   "engines": {
     "vscode": "^1.54.0"
   },
@@ -27,7 +27,7 @@
   "main": "./out/src/extension.js",
   "extensionPack": [
     "dendron.dendron-markdown-preview-enhanced",
-    "dendron.dendron-snippet-maker"
+    "dendron.dendron-paste-image"
   ],
   "contributes": {
     "languages": [
@@ -53,7 +53,7 @@
         {
           "id": "dendron.calendar-view",
           "name": "Calendar View",
-          "when": "dendron:devMode",
+          "when": "dendron:webUIEnabled",
           "type": "webview"
         },
         {
@@ -74,142 +74,9 @@
         }
       ]
     },
-    "configuration": {
-      "title": "Dendron",
-      "properties": {
-        "dendron.dailyJournalDomain": {
-          "type": "string",
-          "default": "daily",
-          "description": "domain where daily journals are kept"
-        },
-        "dendron.defaultJournalName": {
-          "type": "string",
-          "default": "journal",
-          "description": "name used for journal notes"
-        },
-        "dendron.defaultJournalDateFormat": {
-          "type": "string",
-          "default": "y.MM.dd",
-          "description": "date format used for journal notes"
-        },
-        "dendron.defaultJournalAddBehavior": {
-          "default": "childOfDomain",
-          "type": "string",
-          "description": "strategy for adding new journal notes",
-          "enum": [
-            "childOfDomain",
-            "childOfDomainNamespace",
-            "childOfCurrent",
-            "asOwnDomain"
-          ]
-        },
-        "dendron.defaultScratchName": {
-          "type": "string",
-          "default": "scratch",
-          "description": "name used for scratch notes"
-        },
-        "dendron.defaultScratchDateFormat": {
-          "type": "string",
-          "default": "y.MM.dd.HHmmss",
-          "description": "date format used for scratch notes"
-        },
-        "dendron.defaultScratchAddBehavior": {
-          "default": "asOwnDomain",
-          "type": "string",
-          "description": "strategy for adding new scratch notes",
-          "enum": [
-            "childOfDomain",
-            "childOfDomainNamespace",
-            "childOfCurrent",
-            "asOwnDomain"
-          ]
-        },
-        "dendron.copyNoteUrlRoot": {
-          "type": "string",
-          "description": "override root url when getting note url"
-        },
-        "dendron.linkSelectAutoTitleBehavior": {
-          "type": "string",
-          "description": "Control title behavior when using selection2link with lookup",
-          "enum": [
-            "none",
-            "slug"
-          ],
-          "default": "slug"
-        },
-        "dendron.defaultLookupCreateBehavior": {
-          "default": "selectionExtract",
-          "type": "string",
-          "description": "when creating a new note with selected text, define behavior for selected text",
-          "enum": [
-            "selection2link",
-            "selectionExtract"
-          ]
-        },
-        "dendron.defaultTimestampDecorationFormat": {
-          "default": "DATETIME_MED",
-          "type": "string",
-          "description": "Decide how human readable timestamp decoration is displayed",
-          "enum": [
-            "DATETIME_FULL",
-            "DATETIME_FULL_WITH_SECONDS",
-            "DATETIME_HUGE",
-            "DATETIME_HUGE_WITH_SECONDS",
-            "DATETIME_MED",
-            "DATETIME_MED_WITH_SECONDS",
-            "DATETIME_SHORT",
-            "DATETIME_SHORT_WITH_SECONDS",
-            "DATE_FULL",
-            "DATE_HUGE",
-            "DATE_MED",
-            "DATE_MED_WITH_WEEKDAY",
-            "DATE_SHORT",
-            "TIME_24_SIMPLE",
-            "TIME_24_WITH_LONG_OFFSET",
-            "TIME_24_WITH_SECONDS",
-            "TIME_24_WITH_SHORT_OFFSET",
-            "TIME_SIMPLE",
-            "TIME_WITH_LONG_OFFSET",
-            "TIME_WITH_SECONDS",
-            "TIME_WITH_SHORT_OFFSET"
-          ]
-        },
-        "dendron.rootDir": {
-          "type": "string",
-          "default": "",
-          "description": "location of dendron workspace"
-        },
-        "dendron.dendronDir": {
-          "type": "string",
-          "default": "",
-          "description": "location of dendron configuration"
-        },
-        "dendron.logLevel": {
-          "type": "string",
-          "default": "info",
-          "description": "control verbosity of dendron logs",
-          "enum": [
-            "debug",
-            "info",
-            "error"
-          ]
-        },
-        "dendron.trace.server": {
-          "enum": [
-            "off",
-            "messages",
-            "verbose"
-          ],
-          "type": "string",
-          "default": "messages",
-          "description": "LSP log level"
-        },
-        "dendron.serverPort": {
-          "type": "number",
-          "description": "port for server. If not set, will be randomly generated at startup."
-        }
-      }
-    },
+    "categories": [
+      "Other"
+    ],
     "commands": [
       {
         "command": "dendron.browseNote",
@@ -274,7 +141,7 @@
       {
         "command": "dendron.randomNote",
         "title": "Dendron: Random Note",
-        "desc": "Open a Random Note"
+        "desc": "Open a random note within a configured hierarchy set"
       },
       {
         "command": "dendron.renameNote",
@@ -529,8 +396,7 @@
       {
         "command": "dendron.showSchemaGraphV2",
         "title": "Dendron: Show Schema Graph V2",
-        "desc": "Display the schemas in this workspace as a graph",
-        "when": "dendron:devMode"
+        "desc": "Display the schemas in this workspace as a graph"
       },
       {
         "command": "dendron.showPreview",
@@ -601,6 +467,142 @@
         "docPreview": ""
       }
     ],
+    "configuration": {
+      "title": "dendron",
+      "properties": {
+        "dendron.dailyJournalDomain": {
+          "type": "string",
+          "default": "daily",
+          "description": "DEPRECATED. Use journal settings in dendron.yml"
+        },
+        "dendron.defaultJournalName": {
+          "type": "string",
+          "default": "journal",
+          "description": "DEPRECATED. Use journal settings in dendron.yml"
+        },
+        "dendron.defaultJournalDateFormat": {
+          "type": "string",
+          "default": "y.MM.dd",
+          "description": "DEPRECATED. Use journal settings in dendron.yml"
+        },
+        "dendron.defaultJournalAddBehavior": {
+          "default": "childOfDomain",
+          "type": "string",
+          "description": "DEPRECATED. Use journal settings in dendron.yml",
+          "enum": [
+            "childOfDomain",
+            "childOfDomainNamespace",
+            "childOfCurrent",
+            "asOwnDomain"
+          ]
+        },
+        "dendron.defaultScratchName": {
+          "type": "string",
+          "default": "scratch",
+          "description": "name used for scratch notes"
+        },
+        "dendron.defaultScratchDateFormat": {
+          "type": "string",
+          "default": "y.MM.dd.HHmmss",
+          "description": "date format used for scratch notes"
+        },
+        "dendron.defaultScratchAddBehavior": {
+          "default": "asOwnDomain",
+          "type": "string",
+          "description": "strategy for adding new scratch notes",
+          "enum": [
+            "childOfDomain",
+            "childOfDomainNamespace",
+            "childOfCurrent",
+            "asOwnDomain"
+          ]
+        },
+        "dendron.copyNoteUrlRoot": {
+          "type": "string",
+          "description": "override root url when getting note url"
+        },
+        "dendron.linkSelectAutoTitleBehavior": {
+          "type": "string",
+          "description": "Control title behavior when using selection2link with lookup",
+          "enum": [
+            "none",
+            "slug"
+          ],
+          "default": "slug"
+        },
+        "dendron.defaultLookupCreateBehavior": {
+          "default": "selectionExtract",
+          "type": "string",
+          "description": "when creating a new note with selected text, define behavior for selected text",
+          "enum": [
+            "selection2link",
+            "selectionExtract"
+          ]
+        },
+        "dendron.defaultTimestampDecorationFormat": {
+          "default": "DATETIME_MED",
+          "type": "string",
+          "description": "Decide how human readable timestamp decoration is displayed",
+          "enum": [
+            "DATETIME_FULL",
+            "DATETIME_FULL_WITH_SECONDS",
+            "DATETIME_HUGE",
+            "DATETIME_HUGE_WITH_SECONDS",
+            "DATETIME_MED",
+            "DATETIME_MED_WITH_SECONDS",
+            "DATETIME_SHORT",
+            "DATETIME_SHORT_WITH_SECONDS",
+            "DATE_FULL",
+            "DATE_HUGE",
+            "DATE_MED",
+            "DATE_MED_WITH_WEEKDAY",
+            "DATE_SHORT",
+            "TIME_24_SIMPLE",
+            "TIME_24_WITH_LONG_OFFSET",
+            "TIME_24_WITH_SECONDS",
+            "TIME_24_WITH_SHORT_OFFSET",
+            "TIME_SIMPLE",
+            "TIME_WITH_LONG_OFFSET",
+            "TIME_WITH_SECONDS",
+            "TIME_WITH_SHORT_OFFSET"
+          ]
+        },
+        "dendron.rootDir": {
+          "type": "string",
+          "default": "",
+          "description": "location of dendron workspace"
+        },
+        "dendron.dendronDir": {
+          "type": "string",
+          "default": "",
+          "description": "location of dendron configuration"
+        },
+        "dendron.logLevel": {
+          "type": "string",
+          "default": "info",
+          "description": "control verbosity of dendron logs",
+          "enum": [
+            "debug",
+            "info",
+            "error"
+          ]
+        },
+        "dendron.trace.server": {
+          "enum": [
+            "off",
+            "messages",
+            "verbose"
+          ],
+          "type": "string",
+          "default": "messages",
+          "description": "LSP log level"
+        },
+        "dendron.serverPort": {
+          "type": "number",
+          "description": "port for server. If not set, will be randomly generated at startup."
+        }
+      }
+    },
     "keybindings": [
       {
         "command": "dendron.gotoNote",
@@ -716,7 +718,7 @@
     "format": "echo nop"
   },
   "devDependencies": {
-    "@dendronhq/common-test-utils": "^0.46.1",
+    "@dendronhq/common-test-utils": "^0.47.2",
     "@types/execa": "^2.0.0",
     "@types/fs-extra": "^9.0.1",
     "@types/glob": "^7.1.1",
@@ -741,15 +743,15 @@
     "webpack-cli": "^3.3.12"
   },
   "dependencies": {
-    "@dendronhq/api-server": "^0.46.1",
-    "@dendronhq/common-all": "^0.46.1",
-    "@dendronhq/common-server": "^0.46.1",
-    "@dendronhq/dendron-cli": "^0.46.1",
-    "@dendronhq/engine-server": "^0.46.1",
-    "@dendronhq/engine-test-utils": "^0.46.1",
+    "@dendronhq/api-server": "^0.47.2",
+    "@dendronhq/common-all": "^0.47.2",
+    "@dendronhq/common-server": "^0.47.2",
+    "@dendronhq/dendron-cli": "^0.47.2",
+    "@dendronhq/engine-server": "^0.47.2",
+    "@dendronhq/engine-test-utils": "^0.47.2",
     "@dendronhq/lsp-server": "^0.28.7-alpha.0",
-    "@dendronhq/pods-core": "^0.46.1",
-    "@types/vscode": "1.54",
+    "@dendronhq/pods-core": "^0.47.2",
+    "@types/vscode": "1.57",
     "cross-path-sort": "^1.0.0",
     "execa": "^4.0.2",
     "fs-extra": "^9.0.1",
@@ -766,5 +768,12 @@
     "type": "git",
     "url": "ssh://git@github.com/dendronhq/dendron.git",
     "directory": "packages/plugin-core"
+  },
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": "limited",
+      "description": "All features are enabled except for hooks.",
+      "restrictedConfigurations": []
+    }
   }
 }

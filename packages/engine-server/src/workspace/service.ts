@@ -1,4 +1,3 @@
-import { DVaultSync } from "@dendronhq/common-all";
 import {
   CONSTANTS,
   DendronConfig,
@@ -7,10 +6,12 @@ import {
   DUser,
   DUtils,
   DVault,
+  DVaultSync,
   DWorkspace,
   DWorkspaceEntry,
   NoteUtils,
   SchemaUtils,
+  SeedEntry,
   Time,
   VaultUtils,
   WorkspaceSettings,
@@ -18,6 +19,7 @@ import {
 import {
   assignJSONWithComment,
   createLogger,
+  DLogger,
   GitUtils,
   note2File,
   readJSONWithComments,
@@ -29,37 +31,32 @@ import {
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { DConfig } from "./config";
-import { Git } from "./topics/git";
+import { DConfig } from "../config";
+import { MetadataService } from "../metadata";
+import { SeedService, SeedUtils } from "../seed";
+import { Git } from "../topics/git";
 import {
   getPortFilePath,
   getWSMetaFilePath,
   removeCache,
   writeWSMetaFile,
-} from "./utils";
+} from "../utils";
+import { WorkspaceUtils } from "./utils";
+import { WorkspaceConfig } from "./vscode";
 const DENDRON_WS_NAME = CONSTANTS.DENDRON_WS_NAME;
 
-const logger = createLogger();
 export type PathExistBehavior = "delete" | "abort" | "continue";
-
-export type WorkspaceServiceCreateOpts = {
-  wsRoot: string;
-  vaults: DVault[];
-};
-
-export type WorkspaceServiceOpts = {
-  wsRoot: string;
-};
-
-type UrlTransformerFunc = (url: string) => string;
 
 export enum SyncActionStatus {
   DONE = "",
   NO_CHANGES = "it has no changes",
   UNCOMMITTED_CHANGES = "it has uncommitted changes",
   NO_REMOTE = "it has no remote",
+  NO_UPSTREAM = "the current branch has no upstream",
   SKIP_CONFIG = "it is configured so",
   NOT_PERMITTED = "user is not permitted to push to one or more vaults",
+  NEW = "newly clond repository",
+  ERROR = "error while syncing",
 }
 
 export type SyncActionResult = {
@@ -68,7 +65,37 @@ export type SyncActionResult = {
   status: SyncActionStatus;
 };
 
+export type WorkspaceServiceCreateOpts = {
+  wsRoot: string;
+  vaults: DVault[];
+  /**
+   * create dendron.code-workspace file
+   */
+  createCodeWorkspace?: boolean;
+};
+
+export type WorkspaceServiceOpts = {
+  wsRoot: string;
+  seedService?: SeedService;
+};
+
+type UrlTransformerFunc = (url: string) => string;
+
+type AddRemoveCommonOpts = {
+  /**
+   * Default: true
+   */
+  updateConfig?: boolean;
+  /**
+   * Default: false
+   */
+  updateWorkspace?: boolean;
+};
+
 export class WorkspaceService {
+  public logger: DLogger;
+  protected seedService: SeedService;
+
   static isNewVersionGreater({
     oldVersion,
     newVersion,
@@ -85,8 +112,10 @@ export class WorkspaceService {
 
   public wsRoot: string;
 
-  constructor({ wsRoot }: WorkspaceServiceOpts) {
+  constructor({ wsRoot, seedService }: WorkspaceServiceOpts) {
     this.wsRoot = wsRoot;
+    this.logger = createLogger();
+    this.seedService = seedService || new SeedService({ wsRoot });
   }
 
   get user(): DUser {
@@ -111,6 +140,13 @@ export class WorkspaceService {
     return DConfig.writeConfig({ wsRoot, config });
   }
 
+  setWorkspaceConfig(config: WorkspaceSettings) {
+    writeJSONWithComments(
+      path.join(this.wsRoot, "dendron.code-workspace"),
+      config
+    );
+  }
+
   /**
    *
    * @param param0
@@ -119,6 +155,7 @@ export class WorkspaceService {
   async addWorkspace({ workspace }: { workspace: DWorkspace }) {
     const allWorkspaces = this.config.workspaces || {};
     allWorkspaces[workspace.name] = _.omit(workspace, ["name", "vaults"]);
+    const config = this.config;
     // update vault
     const newVaults = await _.reduce(
       workspace.vaults,
@@ -126,29 +163,39 @@ export class WorkspaceService {
         const out = await acc;
         out.push(
           await this.addVault({
+            config,
             vault: { ...vault, workspace: workspace.name },
+            updateConfig: false,
           })
         );
         return out;
       },
       Promise.resolve([] as DVault[])
     );
-    const config = this.config;
     config.workspaces = allWorkspaces;
     this.setConfig(config);
     return { vaults: newVaults };
   }
 
-  async addVault(opts: {
-    vault: DVault;
-    config?: DendronConfig;
-    writeConfig?: boolean;
-    addToWorkspace?: boolean;
-  }) {
-    const { vault, config, writeConfig, addToWorkspace } = _.defaults(opts, {
+  /**
+   *
+   *
+   * @param opts.vault - {@link DVault} to add to workspace
+   * @param opts.config - if passed it, make modifications on passed in config instead of {wsRoot}/dendron.yml
+   * @param opts.writeConfig - default: true, add to dendron.yml
+   * @param opts.addToWorkspace - default: false, add to dendron.code-workspace
+   * @returns
+   */
+  async addVault(
+    opts: {
+      vault: DVault;
+      config?: DendronConfig;
+    } & AddRemoveCommonOpts
+  ) {
+    const { vault, config, updateConfig, updateWorkspace } = _.defaults(opts, {
       config: this.config,
-      writeConfig: true,
-      addToWorkspace: false,
+      updateConfig: true,
+      updateWorkspace: false,
     });
     config.vaults.unshift(vault);
     // update dup note behavior
@@ -160,10 +207,10 @@ export class WorkspaceService {
     } else if (_.isArray(config.site.duplicateNoteBehavior.payload)) {
       config.site.duplicateNoteBehavior.payload.push(VaultUtils.getName(vault));
     }
-    if (writeConfig) {
+    if (updateConfig) {
       await this.setConfig(config);
     }
-    if (addToWorkspace) {
+    if (updateWorkspace) {
       const wsPath = path.join(this.wsRoot, DENDRON_WS_NAME);
       let out = (await readJSONWithComments(wsPath)) as WorkspaceSettings;
       if (
@@ -187,13 +234,12 @@ export class WorkspaceService {
    *   - create directory
    *   - create root note and root schema
    */
-  async createVault({
-    vault,
-    noAddToConfig,
-  }: {
-    vault: DVault;
-    noAddToConfig?: boolean;
-  }) {
+  async createVault(
+    opts: {
+      noAddToConfig?: boolean;
+    } & Parameters<WorkspaceService["addVault"]>[0]
+  ) {
+    const { vault, noAddToConfig } = opts;
     const vpath = vault2Path({ vault, wsRoot: this.wsRoot });
     fs.ensureDirSync(vpath);
 
@@ -215,7 +261,7 @@ export class WorkspaceService {
     }
 
     if (!noAddToConfig) {
-      await this.addVault({ vault });
+      await this.addVault({ ...opts });
     }
     return;
   }
@@ -319,13 +365,19 @@ export class WorkspaceService {
   }
 
   /**
-   * Remove vaults. Currently doesn't delete any files
+   * Remove vaults. Currently doesn't delete any files.
    * @param param0
    */
-  async removeVault({ vault }: { vault: DVault }) {
+  async removeVault(opts: { vault: DVault } & AddRemoveCommonOpts) {
     const config = this.config;
+    const { vault, updateConfig, updateWorkspace } = _.defaults(opts, {
+      updateConfig: true,
+      updateWorkspace: false,
+    });
     config.vaults = _.reject(config.vaults, (ent) => {
-      const checks = [ent.fsPath === vault.fsPath];
+      const checks = [
+        VaultUtils.getRelPath(ent) === VaultUtils.getRelPath(vault),
+      ];
       if (vault.workspace) {
         checks.push(ent.workspace === vault.workspace);
       }
@@ -354,17 +406,44 @@ export class WorkspaceService {
         );
       }
     }
-    await this.setConfig(config);
+    if (updateConfig) {
+      await this.setConfig(config);
+    }
+    if (updateWorkspace) {
+      const wsPath = path.join(this.wsRoot, DENDRON_WS_NAME);
+      let settings = (await readJSONWithComments(wsPath)) as WorkspaceSettings;
+      const folders = _.reject(
+        settings.folders,
+        (ent) => ent.path === VaultUtils.getRelPath(vault)
+      );
+      settings = assignJSONWithComment({ folders }, settings);
+      writeJSONWithComments(wsPath, settings);
+    }
+  }
+
+  createConfig() {
+    this.config;
   }
 
   /**
-   * Iinitialize workspace with root
+   * Initialize workspace with specified vaults
+   * Files and folders created:
+   * wsRoot/
+   * - .gitignore
+   * - dendron.yml
+   * - {vaults}/
+   *   - root.md
+   *   - root.schema.yml
+   *
+   * NOTE: dendron.yml only gets created if you are adding a workspace...
    * @param opts
    */
   static async createWorkspace(opts: WorkspaceServiceCreateOpts) {
     const { wsRoot, vaults } = opts;
     const ws = new WorkspaceService({ wsRoot });
     fs.ensureDirSync(wsRoot);
+    // this creates `dendron.yml`
+    ws.createConfig();
     // add gitignore
     const gitIgnore = path.join(wsRoot, ".gitignore");
     fs.writeFileSync(
@@ -372,11 +451,21 @@ export class WorkspaceService {
       ["node_modules", ".dendron.*", "build", "\n"].join("\n"),
       { encoding: "utf8" }
     );
-    await Promise.all(
-      vaults.map(async (vault) => {
+    if (opts.createCodeWorkspace) {
+      WorkspaceConfig.write(wsRoot, vaults);
+    }
+    await _.reduce(
+      vaults,
+      async (prev, vault) => {
+        await prev;
         return ws.createVault({ vault });
-      })
+      },
+      Promise.resolve()
     );
+    // check if this is the first workspace created
+    if (_.isUndefined(MetadataService.instance().getMeta().firstWsInitialize)) {
+      MetadataService.instance().setFirstWsInitialize();
+    }
     return ws;
   }
 
@@ -403,10 +492,10 @@ export class WorkspaceService {
     let remotePath = vault.remote.url;
     const localPath = vault2Path({ vault, wsRoot: this.wsRoot });
     const git = simpleGit();
-    logger.info({ msg: "cloning", remotePath, localPath });
+    this.logger.info({ msg: "cloning", remotePath, localPath });
     const accessToken = process.env["GITHUB_ACCESS_TOKEN"];
     if (accessToken) {
-      logger.info({ msg: "using access token" });
+      this.logger.info({ msg: "using access token" });
       remotePath = GitUtils.getGithubAccessTokenUrl({
         remotePath,
         accessToken,
@@ -432,7 +521,7 @@ export class WorkspaceService {
       throw new DendronError({ message: "cloning non-git vault" });
     }
     const repoPath = vault2Path({ wsRoot, vault });
-    logger.info({ msg: "cloning", repoPath });
+    this.logger.info({ msg: "cloning", repoPath });
     const git = simpleGit({ baseDir: wsRoot });
     await git.clone(urlTransformer(vault.remote.url), repoPath);
     return repoPath;
@@ -476,25 +565,14 @@ export class WorkspaceService {
     return [...(await this.getAllReposVaults()).keys()];
   }
 
-  getVaultForPath(fpath: string) {
-    return VaultUtils.getVaultByNotePath({
-      vaults: this.config.vaults,
-      wsRoot: this.wsRoot,
-      fsPath: fpath,
-    });
-  }
-
   /**
    * Check if a path belongs to a workspace
+   @deprecated - use {@link WorkspaceUtils.isPathInWorkspace}
    */
   isPathInWorkspace(fpath: string) {
-    try {
-      // if not error, then okay
-      this.getVaultForPath(fpath);
-      return true;
-    } catch {
-      return false;
-    }
+    const { vaults } = this.config;
+    const wsRoot = this.wsRoot;
+    return WorkspaceUtils.isPathInWorkspace({ fpath, vaults, wsRoot });
   }
 
   async pullVault(opts: { vault: DVault }) {
@@ -506,7 +584,7 @@ export class WorkspaceService {
       throw new DendronError({ message: "pulling non-git vault" });
     }
     const repoPath = vault2Path({ wsRoot, vault });
-    logger.info({ msg: "pulling ", repoPath });
+    this.logger.info({ msg: "pulling ", repoPath });
     const git = simpleGit({ baseDir: repoPath });
     await git.pull();
     return repoPath;
@@ -525,6 +603,8 @@ export class WorkspaceService {
           // It's impossible to pull if there is no remote, or if there are tracked files that have changes
           if (!(await git.hasRemote()))
             return { repo, vaults, status: SyncActionStatus.NO_REMOTE };
+          if (_.isUndefined(await git.getUpstream()))
+            return { repo, vaults, status: SyncActionStatus.NO_UPSTREAM };
           if (!(await this.shouldVaultsSync("pull", rootVaults)))
             return { repo, vaults, status: SyncActionStatus.SKIP_CONFIG };
           if (await git.hasChanges({ untrackedFiles: "no" }))
@@ -558,8 +638,20 @@ export class WorkspaceService {
         async (rootVaults: [string, DVault[]]): Promise<SyncActionResult> => {
           const [repo, vaults] = rootVaults;
           const git = new Git({ localUrl: repo });
+
           if (!(await git.hasRemote()))
             return { repo, vaults, status: SyncActionStatus.NO_REMOTE };
+          const upstream = await git.getUpstream();
+          if (_.isUndefined(upstream))
+            return { repo, vaults, status: SyncActionStatus.NO_UPSTREAM };
+          if (
+            (await git.diff({
+              nameOnly: true,
+              oldCommit: upstream,
+              newCommit: "HEAD",
+            })) === ""
+          )
+            return { repo, vaults, status: SyncActionStatus.NO_CHANGES };
           if (!(await this.shouldVaultsSync("push", rootVaults)))
             return { repo, vaults, status: SyncActionStatus.SKIP_CONFIG };
           if (!_.every(_.map(vaults, this.user.canPushVault)))
@@ -630,18 +722,39 @@ export class WorkspaceService {
       wsPath: string;
       wsUrl: string;
     }[];
-    // const wsVaults: DVault[] = workspacePaths.flatMap(({ wsPath, wsUrl }) => {
-    //   const { vaults } = GitUtils.getVaultsFromRepo({
-    //     repoPath: wsPath,
-    //     wsRoot,
-    //     repoUrl: wsUrl,
-    //   });
-    //   return vaults;
-    // });
-    // add wsvaults
-    // await Promise.all(wsVaults.map((vault) => {
-    //   return this.addVault({ config, vault, writeConfig: false, addToWorkspace: true });
-    // }));
+
+    // const seedService = new SeedService({wsRoot});
+    // check seeds
+    const seedResults: { id: string; status: SyncActionStatus; data: any }[] =
+      [];
+    await Promise.all(
+      _.map(config.seeds, async (entry: SeedEntry, id: string) => {
+        if (!(await SeedUtils.exists({ id, wsRoot }))) {
+          const resp = await this.seedService.info({ id });
+          if (_.isUndefined(resp)) {
+            seedResults.push({
+              id,
+              status: SyncActionStatus.ERROR,
+              data: new DendronError({
+                status: SyncActionStatus.ERROR,
+                message: `seed ${id} does not exist in registry`,
+              }),
+            });
+            return;
+          }
+          const spath = await this.seedService.cloneSeed({
+            seed: resp,
+            branch: entry.branch,
+          });
+          seedResults.push({
+            id,
+            status: SyncActionStatus.NEW,
+            data: { spath },
+          });
+        }
+        return undefined;
+      })
+    );
 
     // clone all missing vaults
     const emptyRemoteVaults = config.vaults.filter(
@@ -650,7 +763,11 @@ export class WorkspaceService {
         !fs.existsSync(vault2Path({ vault, wsRoot }))
     );
     const didClone =
-      !_.isEmpty(emptyRemoteVaults) || !_.isEmpty(workspacePaths);
+      !_.isEmpty(emptyRemoteVaults) ||
+      !_.isEmpty(workspacePaths) ||
+      !_.isUndefined(
+        seedResults.find((ent) => ent.status === SyncActionStatus.NEW)
+      );
     // if we added a workspace, we also add new vaults
     if (!_.isEmpty(workspacePaths)) {
       this.setConfig(config);
@@ -668,7 +785,7 @@ export class WorkspaceService {
         config.vaults.filter((vault) => !_.isUndefined(vault.remote)),
         emptyRemoteVaults
       );
-      logger.info({ ctx, msg: "fetching vaults", vaultsToFetch });
+      this.logger.info({ ctx, msg: "fetching vaults", vaultsToFetch });
       await Promise.all(
         vaultsToFetch.map(async (vault) => {
           return this.pullVault({ vault });

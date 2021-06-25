@@ -17,6 +17,10 @@ const SEED_REGISTRY: SeedRegistryDict = {
     description: "Dendron site docs",
     license: "Creative Commons",
     root: "vault",
+    repository: {
+      type: "git",
+      url: "",
+    },
   },
 };
 

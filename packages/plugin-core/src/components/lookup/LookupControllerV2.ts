@@ -50,7 +50,9 @@ export class LookupControllerV2 {
         CONFIG.DEFAULT_LOOKUP_CREATE_BEHAVIOR.key
       ) as ButtonType);
     let noteSelectioType = lookupOpts?.noteType;
-    let initialTypes = [lookupSelectionType];
+    let initialTypes = _.isUndefined(lookupSelectionType)
+      ? []
+      : [lookupSelectionType];
     if (noteSelectioType) {
       initialTypes.push(noteSelectioType);
     }

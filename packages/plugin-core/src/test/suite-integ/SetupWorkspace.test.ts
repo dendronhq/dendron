@@ -1,19 +1,5 @@
+import { CONSTANTS, Time } from "@dendronhq/common-all";
 import {
-  CONSTANTS,
-  DendronConfig,
-  Time,
-  WorkspaceSettings,
-} from "@dendronhq/common-all";
-import {
-  assignJSONWithComment,
-  readJSONWithComments,
-  readYAML,
-  tmpDir,
-  writeJSONWithComments,
-  writeYAML,
-} from "@dendronhq/common-server";
-import {
-  DConfig,
   getPortFilePath,
   getWSMetaFilePath,
   openWSMetaFile,
@@ -24,14 +10,8 @@ import { describe, it } from "mocha";
 import path from "path";
 import { ExtensionContext } from "vscode";
 import { ResetConfigCommand } from "../../commands/ResetConfig";
-import { DEFAULT_LEGACY_VAULT_NAME } from "../../constants";
 import { DendronWorkspace, resolveRelToWSRoot } from "../../workspace";
-import {
-  expect,
-  genDefaultSettings,
-  genEmptyWSFiles,
-  stubWorkspaceFolders,
-} from "../testUtilsv2";
+import { expect, genDefaultSettings, genEmptyWSFiles } from "../testUtilsv2";
 import { runLegacySingleWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
 suite("SetupWorkspace", function () {
@@ -71,78 +51,6 @@ suite("SetupWorkspace", function () {
             [CONSTANTS.DENDRON_CACHE_FILE].concat(genEmptyWSFiles())
           );
           done();
-        },
-      });
-    });
-
-    it("migrate config, empty vaults", function (done) {
-      DendronWorkspace.version = () => "0.0.1";
-      runLegacySingleWorkspaceTest({
-        ctx,
-        onInit: async ({ wsRoot, vaults }) => {
-          // check for config file
-          const config = readYAML(DConfig.configPath(wsRoot)) as DendronConfig;
-          expect(config.vaults).toEqual(vaults);
-          done();
-        },
-        preSetupHook: async ({ wsRoot }) => {
-          const vaults = [
-            { fsPath: path.join(wsRoot, DEFAULT_LEGACY_VAULT_NAME) },
-          ];
-          stubWorkspaceFolders(vaults);
-        },
-        postSetupHook: async ({ wsRoot }) => {
-          fs.removeSync(DConfig.configPath(wsRoot));
-          DConfig.getOrCreate(wsRoot);
-        },
-      });
-    });
-
-    it("migrate config, vaults with full path", function (done) {
-      DendronWorkspace.version = () => "0.0.1";
-      const vaultPath = tmpDir().name;
-
-      runLegacySingleWorkspaceTest({
-        ctx,
-        onInit: async ({ wsRoot, vaults }) => {
-          // check for config file
-          const config = readYAML(DConfig.configPath(wsRoot)) as DendronConfig;
-          expect(config.vaults).toEqual(
-            vaults.concat({ fsPath: path.relative(wsRoot, vaultPath) })
-          );
-          const wsSettings = (await readJSONWithComments(
-            DendronWorkspace.workspaceFile().fsPath
-          )) as WorkspaceSettings;
-          expect(_.toArray(wsSettings.folders.map((ent) => ent.path))).toEqual([
-            "vault",
-            path.relative(wsRoot, vaultPath),
-          ]);
-          done();
-        },
-        preSetupHook: async ({ wsRoot }) => {
-          const vaults = [
-            { fsPath: path.join(wsRoot, DEFAULT_LEGACY_VAULT_NAME) },
-          ];
-          stubWorkspaceFolders(vaults);
-        },
-        postSetupHook: async ({ wsRoot }) => {
-          // vault1, main
-          // vault2, this is somehwere diff
-          const configPath = DConfig.configPath(wsRoot);
-          const config = readYAML(configPath) as DendronConfig;
-          config.vaults.push({ fsPath: vaultPath });
-          let wsSettings = (await readJSONWithComments(
-            DendronWorkspace.workspaceFile().fsPath
-          )) as WorkspaceSettings;
-          wsSettings = await assignJSONWithComment(
-            { folders: [{ path: "vault" }, { path: vaultPath }] },
-            wsSettings
-          );
-          await writeJSONWithComments(
-            DendronWorkspace.workspaceFile().fsPath,
-            wsSettings
-          );
-          writeYAML(configPath, config);
         },
       });
     });

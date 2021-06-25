@@ -8,6 +8,12 @@ vaults:
 useFMTitle: true
 useNoteTitleForLink: true
 mermaid: true
+journal:
+    dailyDomain: daily
+    name: journal
+    dateFormat: y.MM.dd
+    addBehavior: childOfDomain
+    firstDayOfWeek: 1
 site:
     copyAssets: true
     siteHierarchies:
@@ -45,3 +51,4 @@ dev:
     nextServerUrl: 'http://localhost:3000'
     engineServerPort: 3005
 initializeRemoteVaults: true
+dendronVersion: 0.47.1

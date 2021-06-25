@@ -1,5 +1,4 @@
 import { DVault, VaultUtils } from "@dendronhq/common-all";
-import { assignJSONWithComment } from "@dendronhq/common-server";
 import { WorkspaceService } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { commands, window } from "vscode";
@@ -44,19 +43,7 @@ export class VaultRemoveCommand extends BasicCommand<
     const wsRoot = DendronWorkspace.wsRoot() as string;
     const wsService = new WorkspaceService({ wsRoot });
     Logger.info({ ctx, msg: "preRemoveVault", vault });
-    await wsService.removeVault({ vault });
-
-    // workspace file
-    await DendronWorkspace.updateWorkspaceFile({
-      updateCb: (settings) => {
-        const folders = _.reject(
-          settings.folders,
-          (ent) => ent.path === VaultUtils.getRelPath(vault)
-        );
-        settings = assignJSONWithComment({ folders }, settings);
-        return settings;
-      },
-    });
+    await wsService.removeVault({ vault, updateWorkspace: true });
     window.showInformationMessage(
       "finished removing vault (from dendron). you will still need to delete the notes from your disk"
     );

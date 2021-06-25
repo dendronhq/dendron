@@ -1,6 +1,7 @@
 import {
   assert,
   BulkAddNoteOpts,
+  DendronCompositeError,
   DendronConfig,
   DendronError,
   DEngineClient,
@@ -15,8 +16,10 @@ import {
   EngineDeleteOptsV2,
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
+  error2PlainObject,
   ERROR_SEVERITY,
   ERROR_STATUS,
+  IDendronError,
   NoteChangeEntry,
   NoteProps,
   NotePropsDict,
@@ -59,19 +62,6 @@ export type FileMeta = {
 };
 export type FileMetaDict = { [key: string]: FileMeta[] };
 
-// type NoteEntryV2 = {
-//   mtime: number;
-//   size: number;
-//   hash: number;
-// };
-
-// type MetaEntryV2 = {
-//   links: any[];
-//   embeds: any[];
-//   tags: any[];
-//   headings: any[];
-// };
-
 export class FileStorage implements DStore {
   public vaults: DVault[];
   public notes: NotePropsDict;
@@ -107,25 +97,32 @@ export class FileStorage implements DStore {
   }
 
   async init(): Promise<DEngineInitResp> {
+    let errors: DendronError[] = [];
     try {
-      let error: DendronError | null = null;
       const resp = await this.initSchema();
       if (!_.isNull(resp.error)) {
-        error = DendronError.createPlainError({
-          message: "schema malformed",
-          severity: ERROR_SEVERITY.MINOR,
-          payload: { schema: resp.error },
-        });
+        errors.push(
+          new DendronError({
+            message: "schema malformed",
+            severity: ERROR_SEVERITY.MINOR,
+            payload: { schema: resp.error },
+          })
+        );
       }
       resp.data.map((ent) => {
         this.schemas[ent.root.id] = ent;
       });
-      const _notes = await this.initNotes();
+      const { notes: _notes, errors: initErrors } = await this.initNotes();
+      errors = errors.concat(initErrors);
       _notes.map((ent) => {
         this.notes[ent.id] = ent;
       });
 
       const { notes, schemas } = this;
+      let error: IDendronError | null = errors[0] || null;
+      if (errors.length > 1) {
+        error = new DendronCompositeError(errors);
+      }
       return {
         data: {
           notes,
@@ -293,14 +290,21 @@ export class FileStorage implements DStore {
     };
   }
 
-  async initNotes(): Promise<NoteProps[]> {
+  async initNotes(): Promise<{ notes: NoteProps[]; errors: DendronError[] }> {
     const ctx = "initNotes";
     this.logger.info({ ctx, msg: "enter" });
     let notesWithLinks: NoteProps[] = [];
     const allNotesCache: NotesCacheAll = {};
+    let errors: DendronError[] = [];
     const out = await Promise.all(
       (this.vaults as DVault[]).map(async (vault) => {
-        const { notes, cacheUpdates, cache } = await this._initNotes(vault);
+        const {
+          notes,
+          cacheUpdates,
+          cache,
+          errors: initErrors,
+        } = await this._initNotes(vault);
+        errors = errors.concat(initErrors);
         notesWithLinks = notesWithLinks.concat(
           _.filter(notes, (n) => !_.isEmpty(n.links))
         );
@@ -328,7 +332,7 @@ export class FileStorage implements DStore {
     );
     const allNotes = _.flatten(out);
     this._addBacklinks({ notesWithLinks, allNotes, allNotesCache });
-    return allNotes;
+    return { notes: allNotes, errors };
   }
 
   async _addBacklinks({
@@ -340,25 +344,31 @@ export class FileStorage implements DStore {
     allNotesCache: NotesCacheAll;
   }) {
     return _.map(notesWithLinks, async (noteFrom) => {
-      return Promise.all(
-        noteFrom.links.map(async (link) => {
-          const fname = link.to?.fname;
-          if (fname) {
-            const notes = NoteUtils.getNotesByFname({
-              fname,
-              notes: allNotes,
-            });
-            return notes.map((noteTo) => {
-              return NoteUtils.addBacklink({
-                from: noteFrom,
-                to: noteTo,
-                link,
+      try {
+        return Promise.all(
+          noteFrom.links.map(async (link) => {
+            const fname = link.to?.fname;
+            if (fname) {
+              const notes = NoteUtils.getNotesByFname({
+                fname,
+                notes: allNotes,
               });
-            });
-          }
-          return;
-        })
-      );
+              return notes.map((noteTo) => {
+                return NoteUtils.addBacklink({
+                  from: noteFrom,
+                  to: noteTo,
+                  link,
+                });
+              });
+            }
+            return;
+          })
+        );
+      } catch (err) {
+        const error = error2PlainObject(err);
+        this.logger.error({ error, noteFrom, message: "issue with backlinks" });
+        return;
+      }
     });
   }
 
@@ -366,6 +376,7 @@ export class FileStorage implements DStore {
     notes: NoteProps[];
     cacheUpdates: NotesCacheEntryMap;
     cache: NotesCache;
+    errors: DendronError[];
   }> {
     const ctx = "initNotes";
     this.logger.info({ ctx, msg: "enter" });
@@ -376,45 +387,75 @@ export class FileStorage implements DStore {
       include: ["*.md"],
     }) as string[];
 
+    let errors: DendronError[] = [];
+
     const cache: NotesCache = !this.engine.config.noCaching
       ? readNotesFromCache(vpath)
       : { version: 0, notes: {} };
-    const { notes, cacheUpdates } = await new NoteParser({
+    const {
+      notes,
+      cacheUpdates,
+      errors: parseErrors,
+    } = await new NoteParser({
       store: this,
       cache,
       logger: this.logger,
     }).parseFile(noteFiles, vault);
+    errors = errors.concat(parseErrors);
+
     await Promise.all(
       notes.map(async (n) => {
         if (n.stub) {
           return;
         }
         if (_.has(cacheUpdates, n.fname)) {
-          const links = LinkUtils.findLinks({
-            note: n,
-            engine: this.engine,
-          });
-          const anchors = await AnchorUtils.findAnchors(
-            {
+          try {
+            const links = LinkUtils.findLinks({
               note: n,
-              wsRoot: wsRoot,
-            },
-            {
               engine: this.engine,
-              fname: n.fname,
+            });
+            cacheUpdates[n.fname].data.links = links;
+            n.links = links;
+          } catch (err) {
+            if (!(err instanceof DendronError)) {
+              err = new DendronError({
+                message: `Failed to read links in note ${n.fname}`,
+                payload: err,
+              });
             }
-          );
-          cacheUpdates[n.fname].data.links = links;
-          cacheUpdates[n.fname].data.anchors = anchors;
-          n.links = links;
-          n.anchors = anchors;
+            errors.push(err);
+            return;
+          }
+          try {
+            const anchors = await AnchorUtils.findAnchors(
+              {
+                note: n,
+                wsRoot: wsRoot,
+              },
+              {
+                engine: this.engine,
+                fname: n.fname,
+              }
+            );
+            cacheUpdates[n.fname].data.anchors = anchors;
+            n.anchors = anchors;
+          } catch (err) {
+            if (!(err instanceof DendronError)) {
+              err = new DendronError({
+                message: `Failed to read headers or block anchors in note ${n.fname}`,
+                payload: err,
+              });
+            }
+            errors.push(err);
+            return;
+          }
         } else {
           n.links = cache.notes[n.fname].data.links;
         }
         return;
       })
     );
-    return { notes, cacheUpdates, cache };
+    return { notes, cacheUpdates, cache, errors };
   }
 
   async bulkAddNotes(opts: BulkAddNoteOpts) {
@@ -702,43 +743,50 @@ export class FileStorage implements DStore {
       msg: "pre:note2File",
     });
 
-    const hooks = _.filter(this.engine.hooks.onCreate, (hook) =>
-      NoteUtils.match({ notePath: note.fname, pattern: hook.pattern })
-    );
-    const resp = await _.reduce<DHookEntry, Promise<RequireHookResp>>(
-      hooks,
-      async (notePromise, hook) => {
-        const { note } = await notePromise;
-        const script = HookUtils.getHookScriptPath({
-          wsRoot: this.wsRoot,
-          basename: hook.id + ".js",
-        });
-        return await HookUtils.requireHook({
-          note,
-          fpath: script,
-          wsRoot: this.wsRoot,
-        });
-      },
-      Promise.resolve({ note })
-    ).catch(
-      (err) =>
-        new DendronError({
-          severity: ERROR_SEVERITY.MINOR,
-          message: "error with hook",
-          payload: stringifyError(err),
-        })
-    );
-    if (resp instanceof DendronError) {
-      error = resp;
-      this.logger.error({ ctx, error: stringifyError(error) });
+    if (opts?.runHooks === false) {
+      this.logger.info({
+        ctx,
+        msg: "hooks disabled for write",
+      });
     } else {
-      const valResp = NoteUtils.validate(resp.note);
-      if (valResp instanceof DendronError) {
-        error = valResp;
+      const hooks = _.filter(this.engine.hooks.onCreate, (hook) =>
+        NoteUtils.match({ notePath: note.fname, pattern: hook.pattern })
+      );
+      const resp = await _.reduce<DHookEntry, Promise<RequireHookResp>>(
+        hooks,
+        async (notePromise, hook) => {
+          const { note } = await notePromise;
+          const script = HookUtils.getHookScriptPath({
+            wsRoot: this.wsRoot,
+            basename: hook.id + ".js",
+          });
+          return await HookUtils.requireHook({
+            note,
+            fpath: script,
+            wsRoot: this.wsRoot,
+          });
+        },
+        Promise.resolve({ note })
+      ).catch(
+        (err) =>
+          new DendronError({
+            severity: ERROR_SEVERITY.MINOR,
+            message: "error with hook",
+            payload: stringifyError(err),
+          })
+      );
+      if (resp instanceof DendronError) {
+        error = resp;
         this.logger.error({ ctx, error: stringifyError(error) });
       } else {
-        note = resp.note;
-        this.logger.info({ ctx, msg: "fin:RunHooks", payload: resp.payload });
+        const valResp = NoteUtils.validate(resp.note);
+        if (valResp instanceof DendronError) {
+          error = valResp;
+          this.logger.error({ ctx, error: stringifyError(error) });
+        } else {
+          note = resp.note;
+          this.logger.info({ ctx, msg: "fin:RunHooks", payload: resp.payload });
+        }
       }
     }
     // order matters - only write file after parents are established @see(_writeNewNote)

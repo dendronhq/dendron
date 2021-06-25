@@ -9,6 +9,7 @@ import {
   WorkspaceOpts,
 } from "@dendronhq/common-all";
 import { createLogger, DLogger, resolvePath } from "@dendronhq/common-server";
+import { Item } from "klaw";
 import _ from "lodash";
 import { URI } from "vscode-uri";
 import { PodKind } from "./types";
@@ -106,7 +107,6 @@ export type ImportPodConfig = {
   vaultName: string;
   concatenate?: boolean;
   destName?: string;
-  ignore?: boolean;
   frontmatter?: any;
   fnameAsId?: boolean;
 };
@@ -194,14 +194,14 @@ export abstract class ImportPod<T extends ImportPodConfig = ImportPodConfig> {
     const srcURL = URI.file(resolvePath(src, engine.wsRoot));
     return await this.plant({ ...opts, src: srcURL, vault });
   }
-  abstract plant(opts: ImportPodPlantOpts<T>): Promise<NoteProps[]>;
+  abstract plant(opts: ImportPodPlantOpts<T>): Promise<{importedNotes:NoteProps[], errors?:Item[]}>;
 }
 
 // === Export Pod
 
 export type ExportPodConfig = {
   /**
-   * Where to import from
+   * Where to export to
    */
   dest: string;
   includeBody?: boolean;
@@ -216,6 +216,7 @@ export type ExportPodPlantOpts<T extends ExportPodConfig = ExportPodConfig> =
     dest: URI;
     vaults: DVault[];
     notes: NoteProps[];
+    wsRoot: string;
   };
 
 export abstract class ExportPod<
@@ -264,7 +265,7 @@ export abstract class ExportPod<
    * - if not `includeBody`, then fetch notes without body
    * - if not `includeStubs`, then ignore stub nodes
    */
-  preareNotesForExport({
+  prepareNotesForExport({
     config,
     notes,
   }: {
@@ -290,7 +291,7 @@ export abstract class ExportPod<
     const destURL = URI.file(resolvePath(dest, engine.wsRoot));
 
     // parse notes into NoteProps
-    const notes = this.preareNotesForExport({
+    const notes = this.prepareNotesForExport({
       config,
       notes: _.values(engine.notes),
     });

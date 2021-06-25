@@ -20,16 +20,18 @@ describe("goUpTo", () => {
   });
 
   test("basic", () => {
-    expect(goUpTo(cwd, "foo")).toEqual(path.join(root));
+    expect(goUpTo({ base: cwd, fname: "foo" })).toEqual(path.join(root));
   });
 
   // used in dendron-cli/src/commands/build-site-v2.ts
   test("double", () => {
     let cwd2 = path.join(cwd, "foo", "bar");
     fs.ensureDirSync(cwd2);
-    const match1 = goUpTo(cwd2, "foo");
+    const match1 = goUpTo({ base: cwd2, fname: "foo" });
     expect(match1).toEqual(cwd);
-    expect(goUpTo(path.join(match1, ".."), "foo")).toEqual(root);
+    expect(goUpTo({ base: path.join(match1, ".."), fname: "foo" })).toEqual(
+      root
+    );
   });
 });
 

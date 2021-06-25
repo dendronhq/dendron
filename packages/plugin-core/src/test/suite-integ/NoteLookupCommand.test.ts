@@ -33,6 +33,7 @@ suite("NoteLookupCommand", function () {
     },
   });
 
+  // NOTE: think these tests are wrong
   describe("updateItems", function () {
     test("picker has value of opened note by default", function (done) {
       runLegacyMultiWorkspaceTest({

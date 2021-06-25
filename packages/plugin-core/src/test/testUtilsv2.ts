@@ -4,8 +4,8 @@ import {
   NoteProps,
   NoteUtils,
   VaultUtils,
-  WorkspaceOpts,
   WorkspaceFolderRaw,
+  WorkspaceOpts,
 } from "@dendronhq/common-all";
 import {
   assignJSONWithComment,
@@ -21,7 +21,7 @@ import {
   SetupHookFunction,
   SetupWSOpts,
 } from "@dendronhq/common-test-utils";
-import { DConfig } from "@dendronhq/engine-server";
+import { DConfig, MetadataService } from "@dendronhq/engine-server";
 import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import assert from "assert";
 import fs from "fs-extra";
@@ -96,10 +96,9 @@ export function genDefaultSettings() {
         "dendron.dendron-paste-image",
         "dendron.dendron-markdown-shortcuts",
         "dendron.dendron-markdown-preview-enhanced",
-        "dendron.dendron-markdown-links",
-        "github.github-vscode-theme",
       ],
       unwantedRecommendations: [
+        "dendron.dendron-markdown-links",
         "dendron.dendron-markdown-notes",
         "shd101wyy.markdown-preview-enhanced",
         "kortina.vscode-markdown-notes",
@@ -180,6 +179,10 @@ export async function runWorkspaceTestV3(
   await _activate(ctx);
 }
 
+/**
+ * Setup DendronWorkspace config options
+ * @param opts
+ */
 export function setupCodeConfiguration(opts: SetupCodeConfigurationV2) {
   const copts = _.defaults(opts, {
     configOverride: {},
@@ -211,6 +214,9 @@ export async function resetCodeWorkspace() {
   DendronWorkspace.workspaceFolders = () => {
     return undefined;
   };
+  if (fs.pathExistsSync(MetadataService.metaFilePath())) {
+    fs.removeSync(MetadataService.metaFilePath());
+  }
 }
 
 export async function setupCodeWorkspaceV2(opts: SetupCodeWorkspaceV2) {
@@ -345,6 +351,7 @@ export async function setupCodeWorkspaceV3(
     postSetupHook: async () => {},
   });
   const wsContainer = tmpDir().name;
+  // .code-workspace dendron settings
   setupCodeConfiguration(opts);
   const wsRoot = path.join(wsContainer, "dendron");
   fs.ensureDirSync(wsRoot);

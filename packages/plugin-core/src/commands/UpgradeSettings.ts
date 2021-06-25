@@ -1,9 +1,10 @@
 import { createLogger } from "@dendronhq/common-server";
+import { CodeConfigChanges } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
 import { Extension, extensions, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
-import { CodeConfigChanges, WorkspaceConfig } from "../settings";
+import { WorkspaceConfig } from "../settings";
 import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 
@@ -26,6 +27,8 @@ export class UpgradeSettingsCommand extends BasicCommand<
       path.dirname(DendronWorkspace.workspaceFile().fsPath)
     );
     this.L.info({ ctx, newConfig });
+    // vscode doesn't let us uninstall extensions
+    // tell user to uninstall extensions we no longer want
     const badExtensions: Extension<any>[] =
       (newConfig.extensions.unwantedRecommendations
         ?.map((ext) => {

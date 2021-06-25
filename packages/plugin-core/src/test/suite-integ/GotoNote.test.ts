@@ -1,22 +1,23 @@
 import { NoteProps, NoteUtils } from "@dendronhq/common-all";
+import { vault2Path } from "@dendronhq/common-server";
 import { NoteTestUtilsV4, NOTE_PRESETS_V4 } from "@dendronhq/common-test-utils";
+import { ENGINE_HOOKS, ENGINE_HOOKS_MULTI } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
 import _ from "lodash";
+import { describe } from "mocha";
 import path from "path";
+import sinon from "sinon";
 // // You can import and use all API from the 'vscode' module
 // // as well as import your extension to test it
 import * as vscode from "vscode";
 import { GotoNoteCommand } from "../../commands/GotoNote";
+import { PickerUtilsV2 } from "../../components/lookup/utils";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
 import { GOTO_NOTE_PRESETS } from "../presets/GotoNotePreset";
 import { getActiveEditorBasename } from "../testUtils";
-import { expect, LocationTestUtils, runSingleVaultTest } from "../testUtilsv2";
+import { expect, LocationTestUtils } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
-import { describe } from "mocha";
-import { PickerUtilsV2 } from "../../components/lookup/utils";
-import sinon from "sinon";
-import { ENGINE_HOOKS, ENGINE_HOOKS_MULTI } from "@dendronhq/engine-test-utils";
 
 const { ANCHOR_WITH_SPECIAL_CHARS, ANCHOR } = GOTO_NOTE_PRESETS;
 suite("GotoNote", function () {
@@ -28,15 +29,16 @@ suite("GotoNote", function () {
 
   describe("using args", () => {
     test("basic", (done) => {
-      runSingleVaultTest({
+      runLegacyMultiWorkspaceTest({
         ctx,
-        onInit: async ({ vault }) => {
+        preSetupHook: ENGINE_HOOKS.setupBasic,
+        onInit: async ({ vaults }) => {
+          const vault = vaults[0];
           const note = DendronWorkspace.instance().getEngine().notes["foo"];
           const { note: out } = (await new GotoNoteCommand().run({
             qs: "foo",
             vault,
           })) as { note: NoteProps };
-          // PickerUtilsV2.promptVault
           expect(out).toEqual(note);
           expect(getActiveEditorBasename()).toEqual("foo.md");
           done();
@@ -45,13 +47,16 @@ suite("GotoNote", function () {
     });
 
     test("go to a stub ", (done) => {
-      runSingleVaultTest({
+      runLegacyMultiWorkspaceTest({
         ctx,
-        postSetupHook: async ({ vaults }) => {
-          const vaultDir = vaults[0].fsPath;
-          fs.removeSync(path.join(vaultDir, "foo.md"));
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          const vault = vaults[0];
+          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+          const vpath = vault2Path({ vault, wsRoot });
+          fs.removeSync(path.join(vpath, "foo.md"));
         },
-        onInit: async ({ vault }) => {
+        onInit: async ({ vaults }) => {
+          const vault = vaults[0];
           const ws = DendronWorkspace.instance();
           const engine = ws.getEngine();
           let note = NoteUtils.getNoteByFnameV5({
@@ -80,9 +85,11 @@ suite("GotoNote", function () {
     });
 
     test("go to new note", (done) => {
-      runSingleVaultTest({
+      runLegacyMultiWorkspaceTest({
         ctx,
-        onInit: async ({ vault }) => {
+        preSetupHook: ENGINE_HOOKS.setupBasic,
+        onInit: async ({ vaults }) => {
+          const vault = vaults[0];
           const { note: out } = (await new GotoNoteCommand().run({
             qs: "foo.ch2",
             vault,
@@ -97,12 +104,14 @@ suite("GotoNote", function () {
     });
 
     test("go to new note with template", (done) => {
-      runSingleVaultTest({
+      runLegacyMultiWorkspaceTest({
         ctx,
+        preSetupHook: ENGINE_HOOKS.setupBasic,
         postSetupHook: async ({ wsRoot, vaults }) => {
           await ENGINE_HOOKS.setupSchemaPreseet({ wsRoot, vaults });
         },
-        onInit: async ({ vault }) => {
+        onInit: async ({ vaults }) => {
+          const vault = vaults[0];
           await new GotoNoteCommand().run({
             qs: "bar.ch1",
             vault,
@@ -117,15 +126,13 @@ suite("GotoNote", function () {
     });
 
     test("go to note with anchor", (done) => {
-      runSingleVaultTest({
+      runLegacyMultiWorkspaceTest({
         ctx,
-        initDirCb: async (vaultDir) => {
-          await ANCHOR.preSetupHook({
-            wsRoot: "",
-            vaults: [{ fsPath: vaultDir }],
-          });
+        preSetupHook: async (opts) => {
+          await ANCHOR.preSetupHook(opts);
         },
-        onInit: async ({ vault }) => {
+        onInit: async ({ vaults }) => {
+          const vault = vaults[0];
           await new GotoNoteCommand().run({
             qs: "alpha",
             vault,
@@ -145,16 +152,14 @@ suite("GotoNote", function () {
 
     test("anchor with special chars", (done) => {
       let specialCharsHeader: string;
-      runSingleVaultTest({
+      runLegacyMultiWorkspaceTest({
         ctx,
-        initDirCb: async (vaultDir) => {
+        preSetupHook: async (opts) => {
           ({ specialCharsHeader } =
-            await ANCHOR_WITH_SPECIAL_CHARS.preSetupHook({
-              wsRoot: "",
-              vaults: [{ fsPath: vaultDir }],
-            }));
+            await ANCHOR_WITH_SPECIAL_CHARS.preSetupHook(opts));
         },
-        onInit: async ({ vault }) => {
+        onInit: async ({ vaults }) => {
+          const vault = vaults[0];
           await new GotoNoteCommand().run({
             qs: "alpha",
             vault,
@@ -173,7 +178,7 @@ suite("GotoNote", function () {
     });
 
     test("block anchor", (done) => {
-      runSingleVaultTest({
+      runLegacyMultiWorkspaceTest({
         ctx,
         preSetupHook: async ({ wsRoot, vaults }) => {
           await NOTE_PRESETS_V4.NOTE_WITH_BLOCK_ANCHOR_TARGET.create({
@@ -181,7 +186,8 @@ suite("GotoNote", function () {
             vault: vaults[0],
           });
         },
-        onInit: async ({ vault }) => {
+        onInit: async ({ vaults }) => {
+          const vault = vaults[0];
           await new GotoNoteCommand().run({
             qs: "anchor-target",
             vault,

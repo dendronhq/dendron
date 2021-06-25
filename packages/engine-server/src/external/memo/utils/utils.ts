@@ -29,9 +29,6 @@ export const refPattern = "(\\[\\[)([^\\[\\]]+?)(\\]\\])";
 
 // === Utils
 
-export const escapeForRegExp = (value: string) =>
-  value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-
 export const findUriByRef = (uris: URI[], ref: string): URI | undefined => {
   return uris.find((uri) => {
     // const relativeFsPath =

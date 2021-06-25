@@ -2,39 +2,22 @@ import {
   createLogger,
   engineSlice,
   postVSCodeMessage,
+  useVSCodeMessage,
 } from "@dendronhq/common-frontend";
 import _ from "lodash";
 import React, { useEffect, useState } from "react";
-import cytoscape, {
-  EdgeDefinition,
-  ElementsDefinition,
-  EventHandler,
-  Core,
-  NodeDefinition,
-  EdgeDataDefinition,
-} from "cytoscape";
+import { EventHandler } from "cytoscape";
 import {
   DMessageSource,
   GraphViewMessage,
   GraphViewMessageType,
-  NoteUtils,
 } from "@dendronhq/common-all";
 import Graph from "../../components/graph";
-import { useRouter } from "next/router";
-import {
-  graphConfig,
-  GraphConfig,
-  GraphEdges,
-  GraphNodes,
-} from "../../lib/graph";
-import GraphFilterView from "../../components/graph-filter-view";
+import { graphConfig, GraphConfig } from "../../lib/graph";
 import useGraphElements from "../../hooks/useGraphElements";
+import { DendronProps } from "../../lib/types";
 
-export default function FullNoteGraph({
-  engine,
-}: {
-  engine: engineSlice.EngineState;
-}) {
+export default function FullNoteGraph({ engine, ide }: DendronProps) {
   const [config, setConfig] = useState<GraphConfig>(graphConfig.note);
 
   const elements = useGraphElements({ type: "note", engine });
@@ -84,6 +67,8 @@ export default function FullNoteGraph({
       onSelect={onSelect}
       config={config}
       setConfig={setConfig}
+      engine={engine}
+      ide={ide}
     />
   );
 }

@@ -3,6 +3,62 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.47.2](https://github.com/dendronhq/dendron/compare/v0.47.0...v0.47.2) (2021-06-24)
+
+**Note:** Version bump only for package @dendronhq/common-test-utils
+
+
+
+
+
+## [0.47.1](https://github.com/dendronhq/dendron/compare/v0.47.0...v0.47.1) (2021-06-23)
+
+**Note:** Version bump only for package @dendronhq/common-test-utils
+
+
+
+
+
+# [0.47.0](https://github.com/dendronhq/dendron/compare/v0.46.1...v0.47.0) (2021-06-21)
+
+**Note:** Version bump only for package @dendronhq/common-test-utils
+
+
+
+
+
+## [0.46.3-alpha.0](https://github.com/dendronhq/dendron/compare/v0.46.1...v0.46.3-alpha.0) (2021-06-19)
+
+**Note:** Version bump only for package @dendronhq/common-test-utils
+
+
+
+
+
+## [0.46.2](https://github.com/dendronhq/dendron/compare/v0.46.1...v0.46.2) (2021-06-19)
+
+**Note:** Version bump only for package @dendronhq/common-test-utils
+
+
+
+
+
+## [0.46.2-alpha.1](https://github.com/dendronhq/dendron/compare/v0.46.1...v0.46.2-alpha.1) (2021-06-16)
+
+**Note:** Version bump only for package @dendronhq/common-test-utils
+
+
+
+
+
+## [0.46.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.46.1...v0.46.2-alpha.0) (2021-06-16)
+
+**Note:** Version bump only for package @dendronhq/common-test-utils
+
+
+
+
+
 ## [0.46.1](https://github.com/dendronhq/dendron/compare/v0.46.0...v0.46.1) (2021-06-14)
 
 **Note:** Version bump only for package @dendronhq/common-test-utils

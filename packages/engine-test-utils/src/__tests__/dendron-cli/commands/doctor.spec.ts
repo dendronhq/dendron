@@ -104,10 +104,12 @@ const runDoctor = (opts: Omit<DoctorCLICommandOpts, "server">) => {
   });
 };
 
-describe(DoctorActions.HI_TO_H2, () => {
+describe("h1 to h2", () => {
   const action = DoctorActions.HI_TO_H2;
 
   test("basic", async () => {
+    // this test can run a bit long
+    jest.setTimeout(8000);
     await runEngineTestV5(
       async ({ engine, wsRoot, vaults }) => {
         const vault = vaults[0];

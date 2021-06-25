@@ -9,8 +9,8 @@ import sinon from "sinon";
 import * as vscode from "vscode";
 import { InsertNoteCommand } from "../../commands/InsertNoteCommand";
 import { VSCodeUtils } from "../../utils";
-import { expect, runSingleVaultTest } from "../testUtilsv2";
-import { setupBeforeAfter } from "../testUtilsV3";
+import { expect } from "../testUtilsv2";
+import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
 suite("InsertNoteCommand", function () {
   let ctx: vscode.ExtensionContext;
@@ -22,9 +22,10 @@ suite("InsertNoteCommand", function () {
 
   describe("insert note", function () {
     test("basic", (done) => {
-      runSingleVaultTest({
+      runLegacyMultiWorkspaceTest({
         ctx,
-        onInit: async ({ wsRoot, vault }) => {
+        onInit: async ({ wsRoot, vaults }) => {
+          const vault = vaults[0];
           const notePath = path.join(vault2Path({ vault, wsRoot }), "foo.md");
           await VSCodeUtils.openFileInEditor(vscode.Uri.file(notePath));
           const cmd = new InsertNoteCommand();

@@ -6,7 +6,7 @@ import _ from "lodash";
 import path from "path";
 import vscode from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
-import { Snippets, WorkspaceConfig } from "../settings";
+import { Snippets } from "../settings";
 import { VSCodeUtils } from "../utils";
 import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
@@ -178,7 +178,11 @@ export class SetupWorkspaceCommand extends BasicCommand<
     // create vault
     const vaultPath = opts.vault?.fsPath || "vault";
     const vaults = [{ fsPath: vaultPath }];
-    await WorkspaceService.createWorkspace({ vaults, wsRoot: rootDir });
+    await WorkspaceService.createWorkspace({
+      vaults,
+      wsRoot: rootDir,
+      createCodeWorkspace: true,
+    });
     const vpath = vault2Path({ vault: vaults[0], wsRoot: rootDir });
 
     const dendronWSTemplate = VSCodeUtils.joinPath(
@@ -193,8 +197,6 @@ export class SetupWorkspaceCommand extends BasicCommand<
     if (!emptyWs) {
       fs.copySync(path.join(dendronWSTemplate.fsPath, "vault"), vpath);
     }
-    // write workspace defaults
-    WorkspaceConfig.write(rootDir);
 
     // write snippets
     const vscodeDir = path.join(vpath, ".vscode");

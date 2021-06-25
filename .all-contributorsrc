@@ -445,6 +445,33 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "SR--",
+      "name": "SR--",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1008059?v=4",
+      "profile": "https://github.com/SR--",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "gamtiq",
+      "name": "Denis Sikuler",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1177323?v=4",
+      "profile": "https://github.com/gamtiq",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "matchavez",
+      "name": "Mat Chavez",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1787040?v=4",
+      "profile": "https://github.com/matchavez",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

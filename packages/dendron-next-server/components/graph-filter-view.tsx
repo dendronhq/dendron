@@ -1,7 +1,16 @@
-import { Typography, Collapse, Switch, Space, InputNumber, Input } from "antd";
-import _, { values } from "lodash";
+import {
+  Typography,
+  Collapse,
+  Switch,
+  Space,
+  InputNumber,
+  Input,
+  Spin,
+} from "antd";
+import _ from "lodash";
+import { useState } from "react";
 import { useThemeSwitcher } from "react-css-theme-switcher";
-import { GraphConfig } from "../lib/graph";
+import { GraphConfig, GraphConfigItem } from "../lib/graph";
 import AntThemes from "../styles/theme-antd";
 const { Panel } = Collapse;
 
@@ -12,8 +21,14 @@ type FilterProps = {
 };
 
 const GraphFilterView = ({ config, setConfig }: FilterProps) => {
-  const sections = new Set(Object.keys(config).map((key) => key.split(".")[0]));
   const configEntries = Object.entries(config);
+  const sortedSections = [
+    "vaults",
+    "connections",
+    "filter",
+    "options",
+    "information",
+  ];
 
   const { currentTheme } = useThemeSwitcher();
 
@@ -46,7 +61,7 @@ const GraphFilterView = ({ config, setConfig }: FilterProps) => {
       }}
     >
       <Collapse>
-        {Array.from(sections).map((section, i) => (
+        {sortedSections.map((section, i) => (
           <Panel header={_.capitalize(section)} key={i}>
             <Space direction="vertical" style={{ width: "100%" }}>
               {configEntries
@@ -89,18 +104,19 @@ const GraphFilterView = ({ config, setConfig }: FilterProps) => {
                           />
                         </>
                       )}
-                      {_.isString(entry?.value) && (
-                        <>
-                          <Typography>{label}</Typography>
-                          <Input
-                            defaultValue={entry?.value}
-                            onChange={(newValue) =>
-                              updateConfigField(key, newValue.target.value)
-                            }
-                            disabled={!entry?.mutable}
-                          />
-                        </>
-                      )}
+                      {_.isString(entry?.value) &&
+                        !_.isUndefined(entry) &&
+                        !_.isUndefined(key) && (
+                          <>
+                            <FilterViewStringInput
+                              fieldKey={key}
+                              label={label}
+                              entry={entry as GraphConfigItem<string>}
+                              updateConfigField={updateConfigField}
+                              nodeCount={config["information.nodes"].value}
+                            />
+                          </>
+                        )}
                     </Space>
                   );
                 })}
@@ -112,6 +128,59 @@ const GraphFilterView = ({ config, setConfig }: FilterProps) => {
   );
 };
 
-const FilterViewInput = () => {};
+const FilterViewStringInput = ({
+  fieldKey,
+  label,
+  entry,
+  updateConfigField,
+  nodeCount,
+}: {
+  fieldKey: string;
+  label: string;
+  entry: GraphConfigItem<string>;
+  updateConfigField: (key: string, value: string | number | boolean) => void;
+  nodeCount: number;
+}) => {
+  const [updateTimeout, setUpdateTimeout] =
+    useState<NodeJS.Timeout | null>(null);
+
+  // This timeout is designed to maximize filter responsiveness while minimizing hang times
+  const handleChange = (newValue: string) => {
+    const delay = nodeCount < 100 ? 0 : 400;
+
+    if (updateTimeout) clearTimeout(updateTimeout);
+
+    setUpdateTimeout(
+      setTimeout(() => {
+        updateConfigField(fieldKey, newValue);
+
+        setUpdateTimeout(null);
+      }, delay)
+    );
+  };
+
+  return (
+    <Space direction="vertical" style={{ margin: "0.5rem 0rem" }}>
+      <Typography>{label}</Typography>
+      <Input
+        defaultValue={entry.value}
+        onChange={(newValue) => handleChange(newValue.target.value)}
+        disabled={!entry.mutable}
+        placeholder={entry.placeholder || ""}
+        suffix={
+          <Spin
+            size="small"
+            style={{
+              display: !!updateTimeout ? "inline-block" : "none",
+            }}
+          />
+        }
+        style={{
+          maxWidth: 200,
+        }}
+      />
+    </Space>
+  );
+};
 
 export default GraphFilterView;

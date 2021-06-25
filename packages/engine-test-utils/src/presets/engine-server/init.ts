@@ -38,12 +38,15 @@ const SCHEMAS = {
     async ({ engine, initResp }) => {
       const schemas = _.keys(engine.schemas);
       return [
+        // Should have caught the bad schema
         {
           actual: schemas.sort(),
           expected: ["foo", "root"],
           msg: "bad schema not included",
         },
         { actual: initResp.error?.severity, expected: ERROR_SEVERITY.MINOR },
+        // Should have still finished initializing
+        { actual: _.size(initResp.data?.notes), expected: 6 },
       ];
     },
     {
@@ -156,6 +159,7 @@ const NOTES = {
             children: [],
             created: 1,
             custom: {},
+            contentHash: "bfe07d1374685b973379679f442a165c",
             data: {},
             desc: "",
             fname: "one",
@@ -177,6 +181,7 @@ const NOTES = {
             children: [],
             created: 1,
             custom: {},
+            contentHash: "e68fa106a0a73e579c44c25f362f1ae3",
             data: {},
             desc: "",
             fname: "three",
@@ -381,9 +386,15 @@ const NOTES = {
   BAD_PARSE: new TestPresetEntryV4(
     async ({ initResp }) => {
       return [
+        // should have caught the broken note
         {
           actual: initResp.error?.status,
           expected: ERROR_STATUS.BAD_PARSE_FOR_NOTE,
+        },
+        // should have still parsed remaining notes
+        {
+          actual: _.size(initResp.data?.notes),
+          expected: 3,
         },
       ];
     },

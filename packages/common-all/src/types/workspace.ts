@@ -1,4 +1,5 @@
 import { DHookDict } from "./hooks";
+import { SeedSite } from "./seed";
 
 // === Promitives
 export type DPermission = {
@@ -52,6 +53,10 @@ export type DVault = {
    * Defaults to `sync`.
    */
   sync?: DVaultSync;
+  /**
+   * Id of a seed this vault belongs to
+   */
+  seed?: string;
 };
 
 export type DWorkspace = {
@@ -61,6 +66,36 @@ export type DWorkspace = {
 };
 
 export type DWorkspaceEntry = Omit<DWorkspace, "name" | "vaults">;
+export type SeedEntry = {
+  /**
+   * Specific branch to pull from
+   */
+  branch?: string;
+  /**
+   * When in this seed, what url to use
+   */
+  site?: SeedSite;
+};
+
+export enum NoteAddBehavior {
+  "childOfDomain" = "childOfDomain",
+  "childOfDomainNamespace" = "childOfDomainNamespace",
+  "childOfCurrent" = "childOfCurrent",
+  "asOwnDomain" = "asOwnDomain",
+}
+
+export type JournalConfig = {
+  dailyDomain: string;
+  /**
+   * If set, add all daily journals to specified vault
+   */
+  dailyVault?: string;
+  name: string;
+  dateFormat: string;
+  addBehavior: NoteAddBehavior;
+  /** 0 is Sunday, 1 is Monday, ... */
+  firstDayOfWeek: number;
+};
 
 export type DendronConfig = {
   /**
@@ -73,17 +108,25 @@ export type DendronConfig = {
   noTelemetry?: boolean;
   /**
    * Dendron version. Setup by plugin
+   @deprecated
    */
   version: number;
+  /**
+   * Dendron version
+   */
+  dendronVersion?: string;
   /**
    * Configuration related to publishing notes
    */
   site: DendronSiteConfig;
 
+  journal: JournalConfig;
+
   /**
    * Workspaces
    */
   workspaces?: { [key: string]: DWorkspaceEntry | undefined };
+  seeds?: { [key: string]: SeedEntry | undefined };
   /**
    * Dendron vaults in workspace.
    * Setup by plugin.
@@ -195,17 +238,6 @@ export type DendronConfig = {
    * Configuration for Random Note Lookup Command
    */
   randomNote?: RandomNoteConfig;
-
-  /**
-   * Used by CalendarView to display first day of the week.
-   * Values are:
-   * 0|7: sunday
-   * 1: monday
-   * 2: tuesday
-   * ...
-   *
-   */
-  dayOfWeek?: number;
 };
 
 export type RandomNoteConfig = {

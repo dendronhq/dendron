@@ -5,6 +5,7 @@ import {
   TestPresetEntryV4,
 } from "@dendronhq/common-test-utils";
 import { DendronASTDest, MDUtilsV4 } from "@dendronhq/engine-server";
+import { TestConfigUtils } from "../../../config";
 import { runEngineTestV5 } from "../../../engine";
 import { ENGINE_HOOKS, ENGINE_SERVER } from "../../../presets";
 import {
@@ -79,268 +80,103 @@ describe("legacy note ref", () => {
 });
 
 describe("noteRefV2", () => {
-  const linkWithNoExtension = "![[foo]]";
+  describe("common cases", () => {
+    const linkWithNoExtension = "![[foo]]";
 
-  const REGULAR_CASE = createProcTests({
-    name: "regular",
-    setupFunc: async ({ engine, vaults, extra }) => {
-      const proc2 = await MDUtilsV4.procFull({
-        engine,
-        fname: "foo",
-        wikiLinksOpts: { useId: true },
-        dest: extra.dest,
-        vault: vaults[0],
-      });
-      const resp = await proc2.process(linkWithNoExtension);
-      return { resp };
-    },
-    verifyFuncDict: {
-      [DendronASTDest.MD_DENDRON]: async ({ extra }) => {
-        const { resp } = extra;
-        expect(resp).toMatchSnapshot();
-        expect(
-          await AssertUtils.assertInString({
-            body: resp.contents,
-            match: [linkWithNoExtension],
-          })
-        ).toBeTruthy();
+    const REGULAR_CASE = createProcTests({
+      name: "regular",
+      setupFunc: async ({ engine, vaults, extra }) => {
+        const proc2 = await MDUtilsV4.procFull({
+          engine,
+          fname: "foo",
+          wikiLinksOpts: { useId: true },
+          dest: extra.dest,
+          vault: vaults[0],
+        });
+        const resp = await proc2.process(linkWithNoExtension);
+        return { resp };
       },
-      [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
-        const { resp } = extra;
-        expect(resp).toMatchSnapshot();
-        return [
-          {
-            actual: await AssertUtils.assertInString({
-              body: resp.toString(),
-              match: ["foo body"],
-            }),
-            expected: true,
-          },
-        ];
+      verifyFuncDict: {
+        [DendronASTDest.MD_DENDRON]: async ({ extra }) => {
+          const { resp } = extra;
+          expect(resp).toMatchSnapshot();
+          expect(
+            await AssertUtils.assertInString({
+              body: resp.contents,
+              match: [linkWithNoExtension],
+            })
+          ).toBeTruthy();
+        },
+        [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
+          const { resp } = extra;
+          expect(resp).toMatchSnapshot();
+          return [
+            {
+              actual: await AssertUtils.assertInString({
+                body: resp.toString(),
+                match: ["foo body"],
+              }),
+              expected: true,
+            },
+          ];
+        },
+        [DendronASTDest.HTML]: async ({ extra }) => {
+          const { resp } = extra;
+          expect(resp).toMatchSnapshot();
+          return [
+            {
+              actual: await AssertUtils.assertInString({
+                body: resp.toString(),
+                match: ["foo body", "portal"],
+              }),
+              expected: true,
+            },
+          ];
+        },
+        [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
+          const { resp } = extra;
+          expect(resp).toMatchSnapshot();
+          return [
+            {
+              actual: await AssertUtils.assertInString({
+                body: resp.toString(),
+                match: ["foo body", "portal"],
+              }),
+              expected: true,
+            },
+          ];
+        },
       },
-      [DendronASTDest.HTML]: async ({ extra }) => {
-        const { resp } = extra;
-        expect(resp).toMatchSnapshot();
-        return [
-          {
-            actual: await AssertUtils.assertInString({
-              body: resp.toString(),
-              match: ["foo body", "portal"],
-            }),
-            expected: true,
-          },
-        ];
-      },
-      [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
-        const { resp } = extra;
-        expect(resp).toMatchSnapshot();
-        return [
-          {
-            actual: await AssertUtils.assertInString({
-              body: resp.toString(),
-              match: ["foo body", "portal"],
-            }),
-            expected: true,
-          },
-        ];
-      },
-    },
-    preSetupHook: ENGINE_HOOKS.setupBasic,
-  });
-
-  const WITH_ANCHOR_PRE_SETUP = async (opts: WorkspaceOpts) => {
-    await ENGINE_HOOKS.setupBasic(opts);
-    await modifyNote(opts, "foo", (note: NoteProps) => {
-      const txt = [
-        "---",
-        "id: foo",
-        "title: foo",
-        "---",
-        `# Tasks`,
-        "## Header1",
-        "task1",
-        "## Header2",
-        "task2",
-      ];
-      note.body = txt.join("\n");
-      return note;
+      preSetupHook: ENGINE_HOOKS.setupBasic,
     });
-  };
 
-  const ANCHOR_WITH_SPACE_PRE_SETUP = async (opts: WorkspaceOpts) => {
-    await ENGINE_HOOKS.setupBasic(opts);
-    await modifyNote(opts, "foo", (note: NoteProps) => {
-      const txt = [
-        "---",
-        "id: foo",
-        "---",
-        `# Tasks`,
-        "## Header 1",
-        "task1",
-        "## HeadeR 2",
-        "task2",
-      ];
-      note.body = txt.join("\n");
-      return note;
-    });
-  };
-
-  const WITH_ANCHOR = createProcTests({
-    name: "WITH_ANCHOR",
-    setupFunc: async (opts) => {
-      const text = "# Foo Bar\n![[foo#header2]]";
-      return processTextV2({
-        dest: opts.extra.dest,
-        engine: opts.engine,
-        text,
-        fname: "foo",
-        vault: opts.vaults[0],
-      });
-    },
-    preSetupHook: WITH_ANCHOR_PRE_SETUP,
-    verifyFuncDict: {
-      [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
-        const { resp } = extra;
-        await checkVFile(resp, "task2");
-        await checkNotInVFile(resp, "task1");
-      },
-      [DendronASTDest.MD_DENDRON]: async ({ extra }) => {
-        const { resp } = extra;
-        expect(
-          await AssertUtils.assertInString({
-            body: resp.toString(),
-            match: ["![[foo#header2]]"],
-          })
-        ).toBeTruthy();
-      },
-      ...generateVerifyFunction({
-        target: DendronASTDest.MD_REGULAR,
-        exclude: [DendronASTDest.MD_DENDRON],
-      }),
-    },
-  });
-
-  const WITH_FM_TITLE = createProcTests({
-    name: "WITH_FM_TITLE",
-    setupFunc: async (opts) => {
-      const { engine, vaults } = opts;
-      const configOverride: DendronConfig = {
-        ...opts.engine.config,
-        useFMTitle: true,
-      };
-      return processTextV2({
-        text: "# Foo Bar\n![[foo#header2]]",
-        dest: opts.extra.dest,
-        engine,
-        configOverride,
-        vault: vaults[0],
-        fname: "foo",
-      });
-    },
-    preSetupHook: WITH_ANCHOR_PRE_SETUP,
-    verifyFuncDict: {
-      [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
-        const { resp } = extra;
-        expect(resp).toMatchSnapshot();
-        expect(
-          await AssertUtils.assertInString({
-            body: resp.toString(),
-            match: ["task2"],
-            nomatch: ["task1"],
-          })
-        ).toBeTruthy();
-      },
-    },
-  });
-
-  const WITH_NOTE_LINK_TITLE = createProcTests({
-    name: "WITH_NOTE_LINK_TITLE",
-    setupFunc: async (opts) => {
-      const { engine, vaults } = opts;
-      const configOverride: DendronConfig = {
-        ...opts.engine.config,
-        useNoteTitleForLink: true,
-      };
-      return processTextV2({
-        text: "# Foo Bar\n![[foo.ch1#header2]]",
-        dest: opts.extra.dest,
-        engine,
-        configOverride,
-        vault: vaults[0],
-        fname: "foo",
-      });
-    },
-    preSetupHook: async (opts) => {
+    const WITH_ANCHOR_PRE_SETUP = async (opts: WorkspaceOpts) => {
       await ENGINE_HOOKS.setupBasic(opts);
-      await modifyNote(opts, "foo.ch1", (note: NoteProps) => {
-        const txt = [`# Tasks`, "## Header1", "task1", "## Header2", "task2"];
+      await modifyNote(opts, "foo", (note: NoteProps) => {
+        const txt = [
+          "---",
+          "id: foo",
+          "title: foo",
+          "---",
+          `# Tasks`,
+          "## Header1",
+          "task1",
+          "## Header2",
+          "task2",
+        ];
         note.body = txt.join("\n");
         return note;
       });
-    },
-    verifyFuncDict: {
-      [DendronASTDest.HTML]: async ({ extra }) => {
-        const { resp } = extra;
-        await checkVFile(resp, `<span class="portal-text-title">Ch1</span>`);
-      },
-      [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
-        const { resp } = extra;
-        await checkVFile(resp, `<span class="portal-text-title">Ch1</span>`);
-      },
-    },
-  });
+    };
 
-  const WITH_ANCHOR_WITH_SPACE = createProcTests({
-    name: "WITH_ANCHOR_WITH_SPACE",
-    setupFunc: async (opts) => {
-      const { engine, vaults } = opts;
-      return processTextV2({
-        text: "# Foo Bar\n![[foo#header-2]]",
-        dest: opts.extra.dest,
-        engine,
-        vault: vaults[0],
-        fname: "foo",
-      });
-    },
-    preSetupHook: ANCHOR_WITH_SPACE_PRE_SETUP,
-    verifyFuncDict: {
-      [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
-        const { resp } = extra;
-        expect(
-          await AssertUtils.assertInString({
-            body: resp.toString(),
-            match: ["task2"],
-            nomatch: ["task1"],
-          })
-        ).toBeTruthy();
-      },
-      [DendronASTDest.MD_DENDRON]: async ({ extra }) => {
-        const { resp } = extra;
-        expect(
-          await AssertUtils.assertInString({
-            body: resp.toString(),
-            match: ["![[foo#header-2]]"],
-          })
-        ).toBeTruthy();
-      },
-      ...generateVerifyFunction({
-        target: DendronASTDest.MD_REGULAR,
-        exclude: [DendronASTDest.MD_DENDRON],
-      }),
-    },
-  });
-
-  const WITH_ANCHOR_TO_SAME_FILE = createProcTests({
-    name: "WITH_ANCHOR_TO_SAME_FILE",
-    preSetupHook: async (opts) => {
+    const ANCHOR_WITH_SPACE_PRE_SETUP = async (opts: WorkspaceOpts) => {
       await ENGINE_HOOKS.setupBasic(opts);
       await modifyNote(opts, "foo", (note: NoteProps) => {
         const txt = [
           "---",
           "id: foo",
           "---",
-          "![[#header-2]]",
-          "",
+          `# Tasks`,
           "## Header 1",
           "task1",
           "## HeadeR 2",
@@ -349,541 +185,777 @@ describe("noteRefV2", () => {
         note.body = txt.join("\n");
         return note;
       });
-    },
-    setupFunc: async (opts) => {
-      const { engine, vaults } = opts;
-      return await processNote({
-        dest: opts.extra.dest,
-        engine,
-        vault: vaults[0],
-        fname: "foo",
-      });
-    },
-    verifyFuncDict: {
-      [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
-        const { resp } = extra;
-        expect(
-          await AssertUtils.assertTimesInString({
-            body: resp.toString(),
-            match: [
-              [2, "task2"],
-              [1, "task1"],
-            ],
-          })
-        ).toBeTruthy();
-      },
-      [DendronASTDest.HTML]: async ({ extra }) => {
-        const { resp } = extra;
-        expect(
-          await AssertUtils.assertTimesInString({
-            body: resp.toString(),
-            match: [
-              [2, "task2"],
-              [1, "task1"],
-            ],
-          })
-        ).toBeTruthy();
-      },
-    },
-  });
+    };
 
-  const WITH_START_ANCHOR_INVALID = createProcTests({
-    name: "WITH_START_ANCHOR_INVALID",
-    setupFunc: async (opts) => {
-      const { engine, vaults } = opts;
-      return processTextV2({
-        text: "# Foo Bar\n![[foo#badheader]]",
-        dest: opts.extra.dest,
-        engine,
-        vault: vaults[0],
-        fname: "foo",
-      });
-    },
-    preSetupHook: WITH_ANCHOR_PRE_SETUP,
-    verifyFuncDict: {
-      [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
-        const { resp } = extra;
-        expect(
-          await AssertUtils.assertInString({
-            body: resp.toString(),
-            match: ["badheader not found"],
-          })
-        ).toBeTruthy();
-      },
-      [DendronASTDest.MD_DENDRON]: async ({ extra }) => {
-        const { resp } = extra;
-        expect(
-          await AssertUtils.assertInString({
-            body: resp.toString(),
-            match: ["![[foo#badheader]]"],
-          })
-        ).toBeTruthy();
-      },
-      ...generateVerifyFunction({
-        target: DendronASTDest.MD_REGULAR,
-        exclude: [DendronASTDest.MD_DENDRON],
-      }),
-    },
-  });
-
-  const WITH_END_ANCHOR_INVALID = createProcTests({
-    name: "WITH_END_ANCHOR_INVALID",
-    setupFunc: async (opts) => {
-      const { engine, vaults } = opts;
-      return processTextV2({
-        text: "# Foo Bar\n![[foo#header1:#badheader]]",
-        dest: opts.extra.dest,
-        engine,
-        vault: vaults[0],
-        fname: "foo",
-      });
-    },
-    preSetupHook: WITH_ANCHOR_PRE_SETUP,
-    verifyFuncDict: {
-      [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
-        const { resp } = extra;
-        expect(
-          await AssertUtils.assertInString({
-            body: resp.toString(),
-            match: ["badheader not found"],
-          })
-        ).toBeTruthy();
-      },
-      [DendronASTDest.MD_DENDRON]: async ({ extra }) => {
-        const { resp } = extra;
-        expect(
-          await AssertUtils.assertInString({
-            body: resp.toString(),
-            match: ["![[foo#header1:#badheader]]"],
-          })
-        ).toBeTruthy();
-      },
-      ...generateVerifyFunction({
-        target: DendronASTDest.MD_REGULAR,
-        exclude: [DendronASTDest.MD_DENDRON],
-      }),
-    },
-  });
-
-  const WITH_START_ANCHOR_OFFSET = createProcTests({
-    name: "WITH_START_ANCHOR_OFFSET",
-    setupFunc: async (opts) => {
-      // let proc = await createProc(opts, {});
-      // return processText({ proc, text: "# Foo Bar\n![[foo#header2,1]]" });
-      const { engine, vaults } = opts;
-      return processTextV2({
-        text: "# Foo Bar\n![[foo#header2,1]]",
-        dest: opts.extra.dest,
-        engine,
-        vault: vaults[0],
-        fname: "foo",
-      });
-    },
-    preSetupHook: WITH_ANCHOR_PRE_SETUP,
-    verifyFuncDict: {
-      [DendronASTDest.MD_DENDRON]: async ({ extra }) => {
-        const { resp } = extra;
-        expect(
-          await AssertUtils.assertInString({
-            body: resp.toString(),
-            match: ["[[foo#header2,1]]"],
-          })
-        ).toBeTruthy();
-      },
-      [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
-        const { resp } = extra;
-        expect(
-          await AssertUtils.assertInString({
-            body: resp.toString(),
-            match: ["task2"],
-            nomatch: ["Header2", "task1"],
-          })
-        ).toBeTruthy();
-      },
-      ...generateVerifyFunction({
-        target: DendronASTDest.MD_REGULAR,
-        exclude: [DendronASTDest.MD_DENDRON],
-      }),
-    },
-  });
-
-  const WITH_START_AND_END_ANCHOR = createProcTests({
-    name: "WITH_START_AND_END_ANCHOR",
-    setupFunc: async (opts) => {
-      const { engine, vaults } = opts;
-      return processTextV2({
-        text: "# header\n![[target#head-1:#head-2]]",
-        dest: opts.extra.dest,
-        engine,
-        vault: vaults[0],
-        fname: "foo",
-      });
-    },
-    preSetupHook: async ({ wsRoot, vaults }) => {
-      const vault = vaults[0];
-      await NoteTestUtilsV4.createNote({
-        fname: "target",
-        vault,
-        wsRoot,
-        body: [
-          "## head 1",
-          "",
-          "content 1",
-          "### head 1.1",
-          "",
-          "content 1.1",
-          "## head 2",
-          "",
-          "content 2",
-        ].join("\n"),
-      });
-      await NoteTestUtilsV4.createNote({
-        fname: "foo",
-        vault,
-        wsRoot,
-      });
-    },
-    verifyFuncDict: {
-      [DendronASTDest.MD_DENDRON]: async ({ extra }) => {
-        const { resp } = extra;
-        expect(
-          await AssertUtils.assertInString({
-            body: resp.toString(),
-            match: ["# header", "![[target#head-1:#head-2]]"],
-          })
-        ).toBeTruthy();
-      },
-      [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
-        const { resp } = extra;
-        expect(
-          await AssertUtils.assertInString({
-            body: resp.toString(),
-            match: ["content 1.1"],
-            nomatch: ["head 2"],
-          })
-        ).toBeTruthy();
-      },
-      ...generateVerifyFunction({
-        target: DendronASTDest.MD_REGULAR,
-        exclude: [DendronASTDest.MD_DENDRON],
-      }),
-    },
-  });
-
-  const WITH_START_AND_END_WILDCARD_ANCHOR = createProcTests({
-    name: "WITH_START_AND_END_WILDCARD_ANCHOR",
-    setupFunc: async (opts) => {
-      const { engine, vaults } = opts;
-      return processTextV2({
-        text: "# header\n![[target#head-1:#*]]",
-        dest: opts.extra.dest,
-        engine,
-        vault: vaults[0],
-        fname: "foo",
-      });
-    },
-    preSetupHook: async ({ wsRoot, vaults }) => {
-      const vault = vaults[0];
-      await NoteTestUtilsV4.createNote({
-        fname: "target",
-        vault,
-        wsRoot,
-        body: [
-          "## head 1",
-          "",
-          "content 1",
-          "### head 1.1",
-          "",
-          "content 1.1",
-          "## head 2",
-          "",
-          "content 2",
-        ].join("\n"),
-      });
-      await NoteTestUtilsV4.createNote({
-        fname: "foo",
-        vault,
-        wsRoot,
-      });
-    },
-    verifyFuncDict: {
-      [DendronASTDest.MD_DENDRON]: async ({ extra }) => {
-        const { resp } = extra;
-        expect(
-          await AssertUtils.assertInString({
-            body: resp.toString(),
-            match: ["# header", "![[target#head-1:#*]]"],
-          })
-        ).toBeTruthy();
-      },
-      [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
-        const { resp } = extra;
-        expect(
-          await AssertUtils.assertInString({
-            body: resp.toString(),
-            match: ["content 1"],
-            nomatch: ["head 1.1"],
-          })
-        ).toBeTruthy();
-      },
-      ...generateVerifyFunction({
-        target: DendronASTDest.MD_REGULAR,
-        exclude: [DendronASTDest.MD_DENDRON],
-      }),
-    },
-  });
-
-  const RECURSIVE_TEST_CASES = createProcTests({
-    name: "recursive",
-    setupFunc: async ({ engine, extra, vaults }) => {
-      const resp = await MDUtilsV4.procFull({
-        engine,
-        dest: extra.dest,
-        vault: vaults[0],
-        fname: "root",
-      }).process(linkWithNoExtension);
-      return { resp };
-    },
-    verifyFuncDict: {
-      [DendronASTDest.MD_DENDRON]: async ({ extra }) => {
-        const { resp } = extra;
-        expect(resp).toMatchSnapshot();
-        expect(
-          await AssertUtils.assertInString({
-            body: resp.contents,
-            match: [linkWithNoExtension],
-          })
-        ).toBeTruthy();
-      },
-      [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
-        const { resp } = extra;
-        expect(resp).toMatchSnapshot();
-        return [
-          {
-            actual: await AssertUtils.assertInString({
-              body: resp.toString(),
-              match: ["# Foo", "# Foo.One", "# Foo.Two", "Regular wikilink"],
-            }),
-            expected: true,
-          },
-        ];
-      },
-      [DendronASTDest.HTML]: async ({ extra }) => {
-        const { resp } = extra;
-        expect(resp).toMatchSnapshot();
-        return [
-          {
-            actual: await AssertUtils.assertInString({
-              body: resp.toString(),
-              match: [
-                "# Foo",
-                "# Foo.One",
-                "# Foo.Two",
-                "portal",
-                "Regular wikilink",
-              ],
-            }),
-            expected: true,
-          },
-        ];
-      },
-      [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
-        const { resp } = extra;
-        expect(resp).toMatchSnapshot();
-        return [
-          {
-            actual: await AssertUtils.assertInString({
-              body: resp.toString(),
-              match: ["# Foo", "# Foo.One", "# Foo.Two", "portal"],
-            }),
-            expected: true,
-          },
-        ];
-      },
-    },
-    preSetupHook: ENGINE_HOOKS.setupNoteRefRecursive,
-  });
-
-  // const RECURSIVE_TOO_DEEP_TEST_CASES = createProcTests({
-  //   name: "RECURSIVE_TOO_DEEP_TEST_CASES",
-  //   setupFunc: async ({ engine, extra, vaults }) => {
-  //     const resp = await MDUtilsV4.procFull({
-  //       engine,
-  //       dest: extra.dest,
-  //       vault: vaults[0],
-  //     }).process(linkWithNoExtension);
-  //     return { resp };
-  //   },
-  //   verifyFuncDict: {
-  //     [DendronASTDest.HTML]: async ({ extra }) => {
-  //       const { resp } = extra;
-  //       expect(resp).toMatchSnapshot();
-  //       return [
-  //         {
-  //           actual: await AssertUtils.assertInString({
-  //             body: resp.toString(),
-  //             match: [
-  //               "# Foo",
-  //               "# Foo.One",
-  //               "# Foo.Two",
-  //               "portal",
-  //               "Regular wikilink",
-  //             ],
-  //           }),
-  //           expected: true,
-  //         },
-  //       ];
-  //     },
-  //   },
-  //   preSetupHook: async(opts) => {
-  //     const {wsRoot, vaults} = opts;
-  //     const vault = vaults[0];
-  //     await NoteTestUtilsV4.createNote({fname: "foo", wsRoot, vault, body: "# Head1\n![[foo]]"})
-  //   },
-  // });
-
-  const WILDCARD_CASE = createProcTests({
-    name: "wildcard",
-    setupFunc: async ({ engine, extra, vaults }) => {
-      const note = engine.notes["id.journal"];
-      const resp = await MDUtilsV4.procFull({
-        engine,
-        dest: extra.dest,
-        vault: vaults[0],
-        fname: "root",
-      }).process(note.body);
-      return { resp };
-    },
-    verifyFuncDict: {
-      [DendronASTDest.MD_DENDRON]: async ({ extra, engine }) => {
-        const note = engine.notes["id.journal"];
-        const { resp } = extra;
-        expect(resp).toMatchSnapshot();
-        expect(
-          await AssertUtils.assertInString({
-            body: resp.contents,
-            match: [note.body],
-          })
-        ).toBeTruthy();
-      },
-      [DendronASTDest.MD_REGULAR]: async ({ extra, engine }) => {
-        const { resp } = extra;
-        expect(resp).toMatchSnapshot();
-        // @ts-ignore
-        return ENGINE_SERVER.NOTE_REF.WILDCARD_LINK_V4.genTestResults!({
-          engine,
-          extra: { body: resp.toString() },
+    const WITH_ANCHOR = createProcTests({
+      name: "WITH_ANCHOR",
+      setupFunc: async (opts) => {
+        const text = "# Foo Bar\n![[foo#header2]]";
+        return processTextV2({
+          dest: opts.extra.dest,
+          engine: opts.engine,
+          text,
+          fname: "foo",
+          vault: opts.vaults[0],
         });
       },
-      [DendronASTDest.HTML]: async ({ extra }) => {
-        const { resp } = extra;
-        expect(resp).toMatchSnapshot();
+      preSetupHook: WITH_ANCHOR_PRE_SETUP,
+      verifyFuncDict: {
+        [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
+          const { resp } = extra;
+          await checkVFile(resp, "task2");
+          await checkNotInVFile(resp, "task1");
+        },
+        [DendronASTDest.MD_DENDRON]: async ({ extra }) => {
+          const { resp } = extra;
+          expect(
+            await AssertUtils.assertInString({
+              body: resp.toString(),
+              match: ["![[foo#header2]]"],
+            })
+          ).toBeTruthy();
+        },
+        ...generateVerifyFunction({
+          target: DendronASTDest.MD_REGULAR,
+          exclude: [DendronASTDest.MD_DENDRON],
+        }),
       },
-      [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
-        const { resp } = extra;
-        expect(resp).toMatchSnapshot();
+    });
+
+    const WITH_FM_TITLE = createProcTests({
+      name: "WITH_FM_TITLE",
+      setupFunc: async (opts) => {
+        const { engine, vaults } = opts;
+        const configOverride: DendronConfig = {
+          ...opts.engine.config,
+          useFMTitle: true,
+        };
+        return processTextV2({
+          text: "# Foo Bar\n![[foo#header2]]",
+          dest: opts.extra.dest,
+          engine,
+          configOverride,
+          vault: vaults[0],
+          fname: "foo",
+        });
       },
-    },
-    preSetupHook: ENGINE_SERVER.NOTE_REF.WILDCARD_LINK_V4.preSetupHook,
-  });
-  const XVAULT_CASE = createProcTests({
-    name: "XVAULT_CASE",
-    setupFunc: async ({ engine, extra, vaults }) => {
-      const note = engine.notes["one"];
-      const resp = await MDUtilsV4.procFull({
-        engine,
-        dest: extra.dest,
-        vault: vaults[0],
-        fname: "root",
-      }).process(note.body);
-      return { resp };
-    },
-    verifyFuncDict: {
-      [DendronASTDest.MD_DENDRON]: async ({ extra, engine }) => {
+      preSetupHook: WITH_ANCHOR_PRE_SETUP,
+      verifyFuncDict: {
+        [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
+          const { resp } = extra;
+          expect(resp).toMatchSnapshot();
+          expect(
+            await AssertUtils.assertInString({
+              body: resp.toString(),
+              match: ["task2"],
+              nomatch: ["task1"],
+            })
+          ).toBeTruthy();
+        },
+      },
+    });
+
+    const WITH_NOTE_LINK_TITLE = createProcTests({
+      name: "WITH_NOTE_LINK_TITLE",
+      setupFunc: async (opts) => {
+        const { engine, vaults } = opts;
+        const configOverride: DendronConfig = {
+          ...opts.engine.config,
+          useNoteTitleForLink: true,
+        };
+        return processTextV2({
+          text: "# Foo Bar\n![[foo.ch1#header2]]",
+          dest: opts.extra.dest,
+          engine,
+          configOverride,
+          vault: vaults[0],
+          fname: "foo",
+        });
+      },
+      preSetupHook: async (opts) => {
+        await ENGINE_HOOKS.setupBasic(opts);
+        await modifyNote(opts, "foo.ch1", (note: NoteProps) => {
+          const txt = [`# Tasks`, "## Header1", "task1", "## Header2", "task2"];
+          note.body = txt.join("\n");
+          return note;
+        });
+      },
+      verifyFuncDict: {
+        [DendronASTDest.HTML]: async ({ extra }) => {
+          const { resp } = extra;
+          await checkVFile(resp, `<span class="portal-text-title">Ch1</span>`);
+        },
+        [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
+          const { resp } = extra;
+          await checkVFile(resp, `<span class="portal-text-title">Ch1</span>`);
+        },
+      },
+    });
+
+    const WITH_ANCHOR_WITH_SPACE = createProcTests({
+      name: "WITH_ANCHOR_WITH_SPACE",
+      setupFunc: async (opts) => {
+        const { engine, vaults } = opts;
+        return processTextV2({
+          text: "# Foo Bar\n![[foo#header-2]]",
+          dest: opts.extra.dest,
+          engine,
+          vault: vaults[0],
+          fname: "foo",
+        });
+      },
+      preSetupHook: ANCHOR_WITH_SPACE_PRE_SETUP,
+      verifyFuncDict: {
+        [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
+          const { resp } = extra;
+          expect(
+            await AssertUtils.assertInString({
+              body: resp.toString(),
+              match: ["task2"],
+              nomatch: ["task1"],
+            })
+          ).toBeTruthy();
+        },
+        [DendronASTDest.MD_DENDRON]: async ({ extra }) => {
+          const { resp } = extra;
+          expect(
+            await AssertUtils.assertInString({
+              body: resp.toString(),
+              match: ["![[foo#header-2]]"],
+            })
+          ).toBeTruthy();
+        },
+        ...generateVerifyFunction({
+          target: DendronASTDest.MD_REGULAR,
+          exclude: [DendronASTDest.MD_DENDRON],
+        }),
+      },
+    });
+
+    const WITH_ANCHOR_TO_SAME_FILE = createProcTests({
+      name: "WITH_ANCHOR_TO_SAME_FILE",
+      preSetupHook: async (opts) => {
+        await ENGINE_HOOKS.setupBasic(opts);
+        await modifyNote(opts, "foo", (note: NoteProps) => {
+          const txt = [
+            "---",
+            "id: foo",
+            "---",
+            "![[#header-2]]",
+            "",
+            "## Header 1",
+            "task1",
+            "## HeadeR 2",
+            "task2",
+          ];
+          note.body = txt.join("\n");
+          return note;
+        });
+      },
+      setupFunc: async (opts) => {
+        const { engine, vaults } = opts;
+        return await processNote({
+          dest: opts.extra.dest,
+          engine,
+          vault: vaults[0],
+          fname: "foo",
+        });
+      },
+      verifyFuncDict: {
+        [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
+          const { resp } = extra;
+          expect(
+            await AssertUtils.assertTimesInString({
+              body: resp.toString(),
+              match: [
+                [2, "task2"],
+                [1, "task1"],
+              ],
+            })
+          ).toBeTruthy();
+        },
+        [DendronASTDest.HTML]: async ({ extra }) => {
+          const { resp } = extra;
+          expect(
+            await AssertUtils.assertTimesInString({
+              body: resp.toString(),
+              match: [
+                [2, "task2"],
+                [1, "task1"],
+              ],
+            })
+          ).toBeTruthy();
+        },
+      },
+    });
+
+    const WITH_START_ANCHOR_INVALID = createProcTests({
+      name: "WITH_START_ANCHOR_INVALID",
+      setupFunc: async (opts) => {
+        const { engine, vaults } = opts;
+        return processTextV2({
+          text: "# Foo Bar\n![[foo#badheader]]",
+          dest: opts.extra.dest,
+          engine,
+          vault: vaults[0],
+          fname: "foo",
+        });
+      },
+      preSetupHook: WITH_ANCHOR_PRE_SETUP,
+      verifyFuncDict: {
+        [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
+          const { resp } = extra;
+          expect(
+            await AssertUtils.assertInString({
+              body: resp.toString(),
+              match: ["badheader not found"],
+            })
+          ).toBeTruthy();
+        },
+        [DendronASTDest.MD_DENDRON]: async ({ extra }) => {
+          const { resp } = extra;
+          expect(
+            await AssertUtils.assertInString({
+              body: resp.toString(),
+              match: ["![[foo#badheader]]"],
+            })
+          ).toBeTruthy();
+        },
+        ...generateVerifyFunction({
+          target: DendronASTDest.MD_REGULAR,
+          exclude: [DendronASTDest.MD_DENDRON],
+        }),
+      },
+    });
+
+    const WITH_END_ANCHOR_INVALID = createProcTests({
+      name: "WITH_END_ANCHOR_INVALID",
+      setupFunc: async (opts) => {
+        const { engine, vaults } = opts;
+        return processTextV2({
+          text: "# Foo Bar\n![[foo#header1:#badheader]]",
+          dest: opts.extra.dest,
+          engine,
+          vault: vaults[0],
+          fname: "foo",
+        });
+      },
+      preSetupHook: WITH_ANCHOR_PRE_SETUP,
+      verifyFuncDict: {
+        [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
+          const { resp } = extra;
+          expect(
+            await AssertUtils.assertInString({
+              body: resp.toString(),
+              match: ["badheader not found"],
+            })
+          ).toBeTruthy();
+        },
+        [DendronASTDest.MD_DENDRON]: async ({ extra }) => {
+          const { resp } = extra;
+          expect(
+            await AssertUtils.assertInString({
+              body: resp.toString(),
+              match: ["![[foo#header1:#badheader]]"],
+            })
+          ).toBeTruthy();
+        },
+        ...generateVerifyFunction({
+          target: DendronASTDest.MD_REGULAR,
+          exclude: [DendronASTDest.MD_DENDRON],
+        }),
+      },
+    });
+
+    const WITH_START_ANCHOR_OFFSET = createProcTests({
+      name: "WITH_START_ANCHOR_OFFSET",
+      setupFunc: async (opts) => {
+        // let proc = await createProc(opts, {});
+        // return processText({ proc, text: "# Foo Bar\n![[foo#header2,1]]" });
+        const { engine, vaults } = opts;
+        return processTextV2({
+          text: "# Foo Bar\n![[foo#header2,1]]",
+          dest: opts.extra.dest,
+          engine,
+          vault: vaults[0],
+          fname: "foo",
+        });
+      },
+      preSetupHook: WITH_ANCHOR_PRE_SETUP,
+      verifyFuncDict: {
+        [DendronASTDest.MD_DENDRON]: async ({ extra }) => {
+          const { resp } = extra;
+          expect(
+            await AssertUtils.assertInString({
+              body: resp.toString(),
+              match: ["[[foo#header2,1]]"],
+            })
+          ).toBeTruthy();
+        },
+        [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
+          const { resp } = extra;
+          expect(
+            await AssertUtils.assertInString({
+              body: resp.toString(),
+              match: ["task2"],
+              nomatch: ["Header2", "task1"],
+            })
+          ).toBeTruthy();
+        },
+        ...generateVerifyFunction({
+          target: DendronASTDest.MD_REGULAR,
+          exclude: [DendronASTDest.MD_DENDRON],
+        }),
+      },
+    });
+
+    const WITH_START_AND_END_ANCHOR = createProcTests({
+      name: "WITH_START_AND_END_ANCHOR",
+      setupFunc: async (opts) => {
+        const { engine, vaults } = opts;
+        return processTextV2({
+          text: "# header\n![[target#head-1:#head-2]]",
+          dest: opts.extra.dest,
+          engine,
+          vault: vaults[0],
+          fname: "foo",
+        });
+      },
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        const vault = vaults[0];
+        await NoteTestUtilsV4.createNote({
+          fname: "target",
+          vault,
+          wsRoot,
+          body: [
+            "## head 1",
+            "",
+            "content 1",
+            "### head 1.1",
+            "",
+            "content 1.1",
+            "## head 2",
+            "",
+            "content 2",
+          ].join("\n"),
+        });
+        await NoteTestUtilsV4.createNote({
+          fname: "foo",
+          vault,
+          wsRoot,
+        });
+      },
+      verifyFuncDict: {
+        [DendronASTDest.MD_DENDRON]: async ({ extra }) => {
+          const { resp } = extra;
+          expect(
+            await AssertUtils.assertInString({
+              body: resp.toString(),
+              match: ["# header", "![[target#head-1:#head-2]]"],
+            })
+          ).toBeTruthy();
+        },
+        [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
+          const { resp } = extra;
+          expect(
+            await AssertUtils.assertInString({
+              body: resp.toString(),
+              match: ["content 1.1"],
+              nomatch: ["head 2"],
+            })
+          ).toBeTruthy();
+        },
+        ...generateVerifyFunction({
+          target: DendronASTDest.MD_REGULAR,
+          exclude: [DendronASTDest.MD_DENDRON],
+        }),
+      },
+    });
+
+    const WITH_START_AND_END_WILDCARD_ANCHOR = createProcTests({
+      name: "WITH_START_AND_END_WILDCARD_ANCHOR",
+      setupFunc: async (opts) => {
+        const { engine, vaults } = opts;
+        return processTextV2({
+          text: "# header\n![[target#head-1:#*]]",
+          dest: opts.extra.dest,
+          engine,
+          vault: vaults[0],
+          fname: "foo",
+        });
+      },
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        const vault = vaults[0];
+        await NoteTestUtilsV4.createNote({
+          fname: "target",
+          vault,
+          wsRoot,
+          body: [
+            "## head 1",
+            "",
+            "content 1",
+            "### head 1.1",
+            "",
+            "content 1.1",
+            "## head 2",
+            "",
+            "content 2",
+          ].join("\n"),
+        });
+        await NoteTestUtilsV4.createNote({
+          fname: "foo",
+          vault,
+          wsRoot,
+        });
+      },
+      verifyFuncDict: {
+        [DendronASTDest.MD_DENDRON]: async ({ extra }) => {
+          const { resp } = extra;
+          expect(
+            await AssertUtils.assertInString({
+              body: resp.toString(),
+              match: ["# header", "![[target#head-1:#*]]"],
+            })
+          ).toBeTruthy();
+        },
+        [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
+          const { resp } = extra;
+          expect(
+            await AssertUtils.assertInString({
+              body: resp.toString(),
+              match: ["content 1"],
+              nomatch: ["head 1.1"],
+            })
+          ).toBeTruthy();
+        },
+        ...generateVerifyFunction({
+          target: DendronASTDest.MD_REGULAR,
+          exclude: [DendronASTDest.MD_DENDRON],
+        }),
+      },
+    });
+
+    const RECURSIVE_TEST_CASES = createProcTests({
+      name: "recursive",
+      setupFunc: async ({ engine, extra, vaults }) => {
+        const resp = await MDUtilsV4.procFull({
+          engine,
+          dest: extra.dest,
+          vault: vaults[0],
+          fname: "root",
+        }).process(linkWithNoExtension);
+        return { resp };
+      },
+      verifyFuncDict: {
+        [DendronASTDest.MD_DENDRON]: async ({ extra }) => {
+          const { resp } = extra;
+          expect(resp).toMatchSnapshot();
+          expect(
+            await AssertUtils.assertInString({
+              body: resp.contents,
+              match: [linkWithNoExtension],
+            })
+          ).toBeTruthy();
+        },
+        [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
+          const { resp } = extra;
+          expect(resp).toMatchSnapshot();
+          return [
+            {
+              actual: await AssertUtils.assertInString({
+                body: resp.toString(),
+                match: ["# Foo", "# Foo.One", "# Foo.Two", "Regular wikilink"],
+              }),
+              expected: true,
+            },
+          ];
+        },
+        [DendronASTDest.HTML]: async ({ extra }) => {
+          const { resp } = extra;
+          expect(resp).toMatchSnapshot();
+          return [
+            {
+              actual: await AssertUtils.assertInString({
+                body: resp.toString(),
+                match: [
+                  "# Foo",
+                  "# Foo.One",
+                  "# Foo.Two",
+                  "portal",
+                  "Regular wikilink",
+                ],
+              }),
+              expected: true,
+            },
+          ];
+        },
+        [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
+          const { resp } = extra;
+          expect(resp).toMatchSnapshot();
+          return [
+            {
+              actual: await AssertUtils.assertInString({
+                body: resp.toString(),
+                match: ["# Foo", "# Foo.One", "# Foo.Two", "portal"],
+              }),
+              expected: true,
+            },
+          ];
+        },
+      },
+      preSetupHook: ENGINE_HOOKS.setupNoteRefRecursive,
+    });
+
+    // const RECURSIVE_TOO_DEEP_TEST_CASES = createProcTests({
+    //   name: "RECURSIVE_TOO_DEEP_TEST_CASES",
+    //   setupFunc: async ({ engine, extra, vaults }) => {
+    //     const resp = await MDUtilsV4.procFull({
+    //       engine,
+    //       dest: extra.dest,
+    //       vault: vaults[0],
+    //     }).process(linkWithNoExtension);
+    //     return { resp };
+    //   },
+    //   verifyFuncDict: {
+    //     [DendronASTDest.HTML]: async ({ extra }) => {
+    //       const { resp } = extra;
+    //       expect(resp).toMatchSnapshot();
+    //       return [
+    //         {
+    //           actual: await AssertUtils.assertInString({
+    //             body: resp.toString(),
+    //             match: [
+    //               "# Foo",
+    //               "# Foo.One",
+    //               "# Foo.Two",
+    //               "portal",
+    //               "Regular wikilink",
+    //             ],
+    //           }),
+    //           expected: true,
+    //         },
+    //       ];
+    //     },
+    //   },
+    //   preSetupHook: async(opts) => {
+    //     const {wsRoot, vaults} = opts;
+    //     const vault = vaults[0];
+    //     await NoteTestUtilsV4.createNote({fname: "foo", wsRoot, vault, body: "# Head1\n![[foo]]"})
+    //   },
+    // });
+
+    const WILDCARD_CASE = createProcTests({
+      name: "wildcard",
+      setupFunc: async ({ engine, extra, vaults }) => {
+        const note = engine.notes["id.journal"];
+        const resp = await MDUtilsV4.procFull({
+          engine,
+          dest: extra.dest,
+          vault: vaults[0],
+          fname: "root",
+        }).process(note.body);
+        return { resp };
+      },
+      verifyFuncDict: {
+        [DendronASTDest.MD_DENDRON]: async ({ extra, engine }) => {
+          const note = engine.notes["id.journal"];
+          const { resp } = extra;
+          expect(resp).toMatchSnapshot();
+          expect(
+            await AssertUtils.assertInString({
+              body: resp.contents,
+              match: [note.body],
+            })
+          ).toBeTruthy();
+        },
+        [DendronASTDest.MD_REGULAR]: async ({ extra, engine }) => {
+          const { resp } = extra;
+          expect(resp).toMatchSnapshot();
+          // @ts-ignore
+          return ENGINE_SERVER.NOTE_REF.WILDCARD_LINK_V4.genTestResults!({
+            engine,
+            extra: { body: resp.toString() },
+          });
+        },
+        [DendronASTDest.HTML]: async ({ extra }) => {
+          const { resp } = extra;
+          expect(resp).toMatchSnapshot();
+        },
+        [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
+          const { resp } = extra;
+          expect(resp).toMatchSnapshot();
+        },
+      },
+      preSetupHook: ENGINE_SERVER.NOTE_REF.WILDCARD_LINK_V4.preSetupHook,
+    });
+    const XVAULT_CASE = createProcTests({
+      name: "XVAULT_CASE",
+      setupFunc: async ({ engine, extra, vaults }) => {
         const note = engine.notes["one"];
-        const { resp } = extra;
-        expect(resp).toMatchSnapshot();
-        expect(
-          await AssertUtils.assertInString({
-            body: resp.contents,
-            match: [note.body],
-          })
-        ).toBeTruthy();
+        const resp = await MDUtilsV4.procFull({
+          engine,
+          dest: extra.dest,
+          vault: vaults[0],
+          fname: "root",
+        }).process(note.body);
+        return { resp };
       },
-      [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
-        // should have contents
-        const { resp } = extra;
-        expect(resp).toMatchSnapshot();
-        expect(
-          await AssertUtils.assertInString({
-            body: resp.contents,
-            match: ["two content"],
-          })
-        ).toBeTruthy();
+      verifyFuncDict: {
+        [DendronASTDest.MD_DENDRON]: async ({ extra, engine }) => {
+          const note = engine.notes["one"];
+          const { resp } = extra;
+          expect(resp).toMatchSnapshot();
+          expect(
+            await AssertUtils.assertInString({
+              body: resp.contents,
+              match: [note.body],
+            })
+          ).toBeTruthy();
+        },
+        [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
+          // should have contents
+          const { resp } = extra;
+          expect(resp).toMatchSnapshot();
+          expect(
+            await AssertUtils.assertInString({
+              body: resp.contents,
+              match: ["two content"],
+            })
+          ).toBeTruthy();
+        },
+        [DendronASTDest.HTML]: async ({ extra }) => {
+          const { resp } = extra;
+          expect(resp).toMatchSnapshot();
+          expect(
+            await AssertUtils.assertInString({
+              body: resp.contents,
+              match: ["two content"],
+            })
+          ).toBeTruthy();
+        },
+        [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
+          const { resp } = extra;
+          expect(resp).toMatchSnapshot();
+          expect(
+            await AssertUtils.assertInString({
+              body: resp.contents,
+              match: ["two content"],
+            })
+          ).toBeTruthy();
+        },
       },
-      [DendronASTDest.HTML]: async ({ extra }) => {
-        const { resp } = extra;
-        expect(resp).toMatchSnapshot();
-        expect(
-          await AssertUtils.assertInString({
-            body: resp.contents,
-            match: ["two content"],
-          })
-        ).toBeTruthy();
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        const vault1 = vaults[0];
+        const vault2 = vaults[1];
+        await NoteTestUtilsV4.createNote({
+          fname: "one",
+          vault: vault1,
+          wsRoot,
+          body: "![[dendron://vault2/two]]",
+        });
+        await NoteTestUtilsV4.createNote({
+          fname: "two",
+          vault: vault2,
+          wsRoot,
+          body: "two content",
+        });
       },
-      [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
-        const { resp } = extra;
-        expect(resp).toMatchSnapshot();
-        expect(
-          await AssertUtils.assertInString({
-            body: resp.contents,
-            match: ["two content"],
-          })
-        ).toBeTruthy();
-      },
-    },
-    preSetupHook: async ({ wsRoot, vaults }) => {
-      const vault1 = vaults[0];
-      const vault2 = vaults[1];
-      await NoteTestUtilsV4.createNote({
-        fname: "one",
-        vault: vault1,
-        wsRoot,
-        body: "![[dendron://vault2/two]]",
-      });
-      await NoteTestUtilsV4.createNote({
-        fname: "two",
-        vault: vault2,
-        wsRoot,
-        body: "two content",
-      });
-    },
-  });
+    });
 
-  const ALL_TEST_CASES = [
-    ...WITH_START_AND_END_WILDCARD_ANCHOR,
-    ...WITH_START_AND_END_ANCHOR,
-    ...WILDCARD_CASE,
-    ...REGULAR_CASE,
-    ...RECURSIVE_TEST_CASES,
-    ...WITH_ANCHOR,
-    ...WITH_FM_TITLE,
-    ...WITH_ANCHOR_WITH_SPACE,
-    ...WITH_START_ANCHOR_INVALID,
-    ...WITH_END_ANCHOR_INVALID,
-    ...WITH_START_ANCHOR_OFFSET,
-    ...XVAULT_CASE,
-    ...WITH_NOTE_LINK_TITLE,
-    ...WITH_ANCHOR_TO_SAME_FILE,
-  ];
+    const WITH_PUBLISHING = createProcTests({
+      name: "WITH_PUBLISHING",
+      setupFunc: async ({ engine, extra, vaults }) => {
+        const note = engine.notes["foo"];
+        const resp = await MDUtilsV4.procFull({
+          engine,
+          dest: extra.dest,
+          vault: vaults[0],
+          fname: "root",
+        }).process(note.body);
+        return { resp };
+      },
+      verifyFuncDict: {
+        [DendronASTDest.MD_DENDRON]: async ({ extra, engine }) => {
+          const note = engine.notes["foo"];
+          const { resp } = extra;
+          expect(resp).toMatchSnapshot();
+          expect(
+            await AssertUtils.assertInString({
+              body: resp.contents,
+              match: [note.body],
+            })
+          ).toBeTruthy();
+        },
+        [DendronASTDest.HTML]: async ({ extra }) => {
+          // don't show link since we're publishing
+          const { resp } = extra;
+          expect(resp).toMatchSnapshot();
+          expect(
+            await AssertUtils.assertInString({
+              body: resp.contents,
+              nomatch: ['href="bar.md"'],
+            })
+          ).toBeTruthy();
+        },
+        [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
+          // for preview, show links
+          const { resp } = extra;
+          expect(resp).toMatchSnapshot();
+          expect(
+            await AssertUtils.assertInString({
+              body: resp.contents,
+              match: ['href="bar.md"'],
+            })
+          ).toBeTruthy();
+        },
+      },
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        const vault1 = vaults[0];
+        TestConfigUtils.withConfig(
+          (config) => {
+            config.site.siteHierarchies = ["foo"];
+            return config;
+          },
+          { wsRoot }
+        );
+        await NoteTestUtilsV4.createNote({
+          fname: "foo",
+          vault: vault1,
+          wsRoot,
+          body: "![[dendron://vault1/bar]]",
+          genRandomId: false,
+        });
+        await NoteTestUtilsV4.createNote({
+          fname: "bar",
+          vault: vault1,
+          wsRoot,
+          body: "two content",
+        });
+      },
+    });
 
-  // const ALL_TEST_CASES = [
-  //     ...WITH_ANCHOR
-  // ];
+    const ALL_TEST_CASES = [
+      ...WITH_PUBLISHING,
+      ...WITH_START_AND_END_WILDCARD_ANCHOR,
+      ...WITH_START_AND_END_ANCHOR,
+      ...WILDCARD_CASE,
+      ...REGULAR_CASE,
+      ...RECURSIVE_TEST_CASES,
+      ...WITH_ANCHOR,
+      ...WITH_FM_TITLE,
+      ...WITH_ANCHOR_WITH_SPACE,
+      ...WITH_START_ANCHOR_INVALID,
+      ...WITH_END_ANCHOR_INVALID,
+      ...WITH_START_ANCHOR_OFFSET,
+      ...XVAULT_CASE,
+      ...WITH_NOTE_LINK_TITLE,
+      ...WITH_ANCHOR_TO_SAME_FILE,
+    ];
 
-  runAllTests({
-    name: "compile",
-    testCases: ALL_TEST_CASES,
+    runAllTests({
+      name: "compile",
+      testCases: ALL_TEST_CASES,
+    });
   });
 
   describe("with block anchors", () => {

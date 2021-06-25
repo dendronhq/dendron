@@ -6,6 +6,7 @@ import {
   DendronSiteConfig,
   ERROR_STATUS,
   getStage,
+  NoteAddBehavior,
 } from "@dendronhq/common-all";
 import { readYAML, writeYAML } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -42,8 +43,15 @@ export class DConfig {
       useNoteTitleForLink: true,
       noAutoCreateOnDefinition: true,
       noLegacyNoteRef: true,
+      noXVaultWikiLink: true,
       lookupConfirmVaultOnCreate: false,
-      dayOfWeek: 1,
+      journal: {
+        dailyDomain: "daily",
+        name: "journal",
+        dateFormat: "y.MM.dd",
+        addBehavior: NoteAddBehavior.childOfDomain,
+        firstDayOfWeek: 1,
+      },
       site: {
         copyAssets: true,
         siteHierarchies: ["root"],
@@ -53,6 +61,16 @@ export class DConfig {
         description: "Personal knowledge space",
       },
     };
+  }
+
+  /**
+   * Get without filling in defaults
+   * @param wsRoot
+   */
+  static getRaw(wsRoot: string) {
+    const configPath = DConfig.configPath(wsRoot);
+    const config = readYAML(configPath) as Partial<DendronConfig>;
+    return config;
   }
 
   static getOrCreate(

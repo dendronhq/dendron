@@ -2,24 +2,22 @@ import {
   DendronConfig,
   DendronError,
   DendronTreeViewKey,
-  DendronWebViewKey,
-  DEngineClient,
-  DVault,
+  DendronWebViewKey, DVault,
   ERROR_STATUS,
   getStage,
   ResponseCode,
-  WorkspaceSettings,
+  WorkspaceSettings
 } from "@dendronhq/common-all";
 import {
   NodeJSUtils,
   readJSONWithComments,
   readMD,
-  writeJSONWithComments,
+  writeJSONWithComments
 } from "@dendronhq/common-server";
 import {
   DConfig,
   HistoryService,
-  WorkspaceService,
+  WorkspaceService
 } from "@dendronhq/engine-server";
 import { PodUtils } from "@dendronhq/pods-core";
 import fs from "fs-extra";
@@ -36,7 +34,7 @@ import {
   DendronContext,
   DENDRON_COMMANDS,
   extensionQualifiedId,
-  GLOBAL_STATE,
+  GLOBAL_STATE
 } from "./constants";
 import BacklinksTreeDataProvider from "./features/BacklinksTreeDataProvider";
 import { completionProvider } from "./features/completionProvider";
@@ -46,12 +44,13 @@ import ReferenceHoverProvider from "./features/ReferenceHoverProvider";
 import ReferenceProvider from "./features/ReferenceProvider";
 import { VaultWatcher } from "./fileWatcher";
 import { Logger } from "./logger";
+import { EngineAPIService } from "./services/EngineAPIService";
 import { CodeConfigKeys } from "./types";
 import { DisposableStore, resolvePath, VSCodeUtils } from "./utils";
+import { CalendarView } from "./views/CalendarView";
 import { DendronTreeView } from "./views/DendronTreeView";
 import { DendronTreeViewV2 } from "./views/DendronTreeViewV2";
 import { SampleView } from "./views/SampleView";
-import { CalendarView } from "./views/CalendarView";
 import { SchemaWatcher } from "./watchers/schemaWatcher";
 import { WindowWatcher } from "./windowWatcher";
 import { WorkspaceWatcher } from "./WorkspaceWatcher";
@@ -285,7 +284,7 @@ export class DendronWorkspace {
   public serverWatcher?: vscode.FileSystemWatcher;
   public schemaWatcher?: SchemaWatcher;
   public L: typeof Logger;
-  public _enginev2?: DEngineClient;
+  public _enginev2?: EngineAPIService;
   private disposableStore: DisposableStore;
 
   static getOrCreate(
@@ -350,6 +349,12 @@ export class DendronWorkspace {
     return DConfig.defaults(config);
   }
 
+  async getWorkspaceSettings(): Promise<WorkspaceSettings> {
+    return (await readJSONWithComments(
+      DendronWorkspace.workspaceFile().fsPath
+    )) as WorkspaceSettings;
+  }
+
   get podsDir(): string {
     const rootDir = DendronWorkspace.wsRoot();
     if (!rootDir) {
@@ -407,14 +412,14 @@ export class DendronWorkspace {
     this.webViews[key] = view;
   }
 
-  getEngine(): DEngineClient {
+  getEngine(): EngineAPIService {
     if (!this._enginev2) {
       throw Error("engine not set");
     }
     return this._enginev2;
   }
 
-  setEngine(engine: DEngineClient) {
+  setEngine(engine: EngineAPIService) {
     this._enginev2 = engine;
   }
 
@@ -433,14 +438,6 @@ export class DendronWorkspace {
           )
         );
 
-        const calendarView = new CalendarView();
-        context.subscriptions.push(
-          vscode.window.registerWebviewViewProvider(
-            CalendarView.viewType,
-            calendarView
-          )
-        );
-
         if (getWS().config.dev?.enableWebUI) {
           Logger.info({ ctx, msg: "initWebUI" });
           context.subscriptions.push(
@@ -452,6 +449,13 @@ export class DendronWorkspace {
                   retainContextWhenHidden: true,
                 },
               }
+            )
+          );
+          const calendarView = new CalendarView();
+          context.subscriptions.push(
+            vscode.window.registerWebviewViewProvider(
+              CalendarView.viewType,
+              calendarView
             )
           );
           VSCodeUtils.setContext(DendronContext.WEB_UI_ENABLED, true);

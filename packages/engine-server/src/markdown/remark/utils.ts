@@ -40,6 +40,7 @@ import {
   WikiLinkNoteV4,
   WikiLinkProps,
 } from "../types";
+import { NoteBlock } from "@dendronhq/common-all";
 import { MDUtilsV4 } from "../utils";
 import { MDUtilsV5, ProcMode } from "../utilsv5";
 const toString = require("mdast-util-to-string");
@@ -53,15 +54,6 @@ export function addError(proc: Processor, err: DendronError) {
   errors.push(err);
   proc().data("errors", errors);
 }
-
-export type NoteBlock = {
-  /** The actual text of the block. */
-  text: string;
-  /** The anchor for this block, if one already exists. */
-  anchor?: DNoteAnchorPositioned;
-  /** The position within the document at which the block is located. */
-  position: Position;
-};
 
 export function getNoteOrError(
   notes: NoteProps[],

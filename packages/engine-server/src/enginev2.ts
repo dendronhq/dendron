@@ -19,6 +19,8 @@ import {
   EngineWriteOptsV2,
   ERROR_SEVERITY,
   ERROR_STATUS,
+  GetNoteBlocksOpts,
+  GetNoteBlocksPayload,
   GetNoteOptsV2,
   GetNotePayload,
   IDendronError,
@@ -51,7 +53,7 @@ import { DConfig } from "./config";
 import { FileStorage } from "./drivers/file/storev2";
 import { FuseEngine } from "./fuseEngine";
 import { LinkUtils, MDUtilsV4 } from "./markdown";
-import { AnchorUtils } from "./markdown/remark/utils";
+import { AnchorUtils, RemarkUtils } from "./markdown/remark/utils";
 import { HookUtils } from "./topics/hooks";
 
 type CreateStoreFunc = (engine: DEngineClient) => DStore;
@@ -533,6 +535,28 @@ export class DendronEngineV2 implements DEngine {
 
   async writeSchema(schema: SchemaModuleProps) {
     return this.store.writeSchema(schema);
+  }
+
+  async getNoteBlocks(opts: GetNoteBlocksOpts): Promise<GetNoteBlocksPayload> {
+    const note = this.notes[opts.id];
+    try {
+      if (_.isUndefined(note))
+        throw DendronError.createFromStatus({
+          status: ERROR_STATUS.INVALID_STATE,
+          message: `${opts.id} does not exist`,
+        });
+      const blocks = await RemarkUtils.extractBlocks({
+        note,
+        wsRoot: this.wsRoot,
+        engine: this,
+      });
+      return { data: blocks, error: null };
+    } catch (err) {
+      return {
+        error: err,
+        data: undefined,
+      };
+    }
   }
 }
 

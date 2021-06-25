@@ -55,7 +55,6 @@ export class ShowPreviewV2Command extends BasicCommand<
       });
 
       const panel = getWS().getWebView(DendronWebViewKey.NOTE_PREVIEW);
-      console.log("update markdown", note, panel);
       if (panel) {
         panel.webview.postMessage({
           type: "onDidChangeActiveTextEditor",

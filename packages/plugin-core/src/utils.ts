@@ -465,6 +465,14 @@ export class VSCodeUtils {
       point.column - 1 + (offset?.column || 0)
     );
   }
+
+  /** Fold the foldable region at the given position for the active editor.
+   *
+   * This is equivalent to selecting that point, and using the "Fold" command in the editor.
+   */
+  static foldActiveEditorAtPosition(position: vscode.Position) {
+    return vscode.commands.executeCommand("editor.fold", position);
+  }
 }
 
 export class WSUtils {

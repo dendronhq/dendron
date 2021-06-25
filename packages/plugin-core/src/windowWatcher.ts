@@ -12,6 +12,7 @@ import {
   window,
   TextEditor,
   Selection,
+  Position,
 } from "vscode";
 import { Logger } from "./logger";
 import { CodeConfigKeys, DateTimeFormat } from "./types";
@@ -170,6 +171,7 @@ export class WindowWatcher {
 
   async onFirstOpen(editor: TextEditor) {
     this.adjustCursorPosition(editor);
+    if (getWS().config.autoFoldFrontmatter) this.foldFrontmatter();
   }
 
   private adjustCursorPosition(editor: TextEditor) {
@@ -188,5 +190,9 @@ export class WindowWatcher {
       // Found the frontmatter already, stop traversing
       return false;
     });
+  }
+
+  private foldFrontmatter() {
+    VSCodeUtils.foldActiveEditorAtPosition(new Position(0, 0));
   }
 }

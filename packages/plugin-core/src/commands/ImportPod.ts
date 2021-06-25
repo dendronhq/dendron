@@ -65,6 +65,9 @@ export class ImportPodCommand extends BaseCommand<
         window.showErrorMessage(
           "The configuration is invalid YAML. Please fix and run this command again."
         );
+      else {
+        throw e;
+      }
       return;
     }
   }
@@ -90,11 +93,16 @@ export class ImportPodCommand extends BaseCommand<
         cancellable: false,
       },
       async () => {
-        let {importedNotes, errors} = await pod.execute({ config: opts.config, engine, wsRoot, vaults });
+        let { importedNotes, errors } = await pod.execute({
+          config: opts.config,
+          engine,
+          wsRoot,
+          vaults,
+        });
         if (errors && errors.length > 0) {
           let errorMsg = `Error while importing ${errors.length} notes:\n`;
           errors.forEach((e) => {
-            errorMsg += (e.path + "\n");
+            errorMsg += e.path + "\n";
           });
           window.showErrorMessage(errorMsg);
         }
@@ -106,6 +114,8 @@ export class ImportPodCommand extends BaseCommand<
     if (vaultWatcher) {
       vaultWatcher.pause = false;
     }
-    window.showInformationMessage(`${importedNotes.length} notes imported successfully.`);
+    window.showInformationMessage(
+      `${importedNotes.length} notes imported successfully.`
+    );
   }
 }

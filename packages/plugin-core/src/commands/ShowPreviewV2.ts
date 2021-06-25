@@ -9,7 +9,7 @@ import {
   NoteUtils,
 } from "@dendronhq/common-all";
 import { DENDRON_COMMANDS } from "../constants";
-import { VSCodeUtils, DisposableStore } from "../utils";
+import { VSCodeUtils } from "../utils";
 import { WebViewUtils } from "../views/utils";
 import { BasicCommand } from "./base";
 import { getEngine, getWS } from "../workspace";
@@ -24,7 +24,6 @@ export class ShowPreviewV2Command extends BasicCommand<
   CommandOutput
 > {
   private activeTextEditor: vscode.TextEditor;
-  private disposableStore: DisposableStore;
 
   static key = DENDRON_COMMANDS.SHOW_PREVIEW_V2.key;
 
@@ -34,21 +33,9 @@ export class ShowPreviewV2Command extends BasicCommand<
     // save reference to the activeTextEditor when the command was trigger
     // this makes sure that the `note` retrieval from `activeTextEditor` works in `NoteViewMessageType.onGetActiveEditor` because there it would be `undefined` since focus changed to the preview window
     this.activeTextEditor = VSCodeUtils.getActiveTextEditorOrThrow();
-
-    // debounce calls because there can be multiple a once and we only need to now if(some changed) and now how(what changed)
-    this.updateMarkdown = _.debounce(this.updateMarkdown.bind(this), 100);
-
-    this.disposableStore = new DisposableStore();
-
-    // TODO this might be better placed in WorkspaceWatcher
-    this.disposableStore.add(
-      vscode.workspace.onDidSaveTextDocument((document) => {
-        this.updateMarkdown(document);
-      }, this)
-    );
   }
 
-  updateMarkdown(document: vscode.TextDocument) {
+  static updateMarkdown(document: vscode.TextDocument) {
     const ctx = "ShowPreviewV2:updateMarkdown";
 
     if (!getWS().workspaceService?.isPathInWorkspace(document.uri.fsPath)) {
@@ -171,9 +158,5 @@ export class ShowPreviewV2Command extends BasicCommand<
 
     // Update workspace-wide graph panel
     ws.setWebView(DendronWebViewKey.NOTE_PREVIEW, panel);
-
-    panel.onDidDispose(() => {
-      this.disposableStore.dispose();
-    }, this);
   }
 }

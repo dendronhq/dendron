@@ -14,6 +14,7 @@ import {
 } from "vscode";
 import { Logger } from "./logger";
 import { DendronWorkspace, getWS } from "./workspace";
+import { ShowPreviewV2Command } from "./commands/ShowPreviewV2";
 
 export class WorkspaceWatcher {
   activate(context: ExtensionContext) {
@@ -94,6 +95,7 @@ export class WorkspaceWatcher {
       const p = new Promise(async (resolve) => {
         note.updated = now;
         await eclient.updateNote(note);
+        ShowPreviewV2Command.updateMarkdown(ev.document);
         return resolve(changes);
       });
       ev.waitUntil(p);

@@ -5,12 +5,15 @@ import path from "path";
 import {
   ExportPod,
   ExportPodPlantOpts,
+  ExportPodConfig,
   ImportPod,
   ImportPodConfig,
   ImportPodPlantOpts,
   PublishPod,
   PublishPodPlantOpts,
 } from "../basev3";
+import { JSONSchemaType } from "ajv";
+import { PodUtils } from "../utils";
 
 const ID = "dendron.json";
 
@@ -34,7 +37,7 @@ export class JSONImportPod extends ImportPod {
     await Promise.all(
       _.map(notes, (n) => engine.writeNote(n, { newNode: true }))
     );
-    return {importedNotes:notes};
+    return { importedNotes: notes };
   }
 
   async _entries2Notes(
@@ -90,6 +93,13 @@ export class JSONPublishPod extends PublishPod {
 export class JSONExportPod extends ExportPod {
   static id: string = ID;
   static description: string = "export notes as json";
+
+  get config(): JSONSchemaType<ExportPodConfig> {
+    return PodUtils.createExportConfig({
+      required: [],
+      properties: {},
+    }) as JSONSchemaType<ExportPodConfig>;
+  }
 
   async plant(opts: ExportPodPlantOpts) {
     const { dest, notes } = opts;

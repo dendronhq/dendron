@@ -4,7 +4,9 @@ import { createObjectCsvWriter } from "csv-writer";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { ExportPod, ExportPodPlantOpts } from "../basev3";
+import { ExportPod, ExportPodPlantOpts, ExportPodConfig } from "../basev3";
+import { JSONSchemaType } from "ajv";
+import { PodUtils } from "../utils";
 
 const writeCSV = (opts: { dest: string; data: any[]; header: any[] }) => {
   const { dest, data, header } = opts;
@@ -18,6 +20,13 @@ const writeCSV = (opts: { dest: string; data: any[]; header: any[] }) => {
 export class GitPunchCardExportPod extends ExportPod {
   static id: string = "dendron.gitpunchard";
   static description: string = "export notes as json";
+
+  get config(): JSONSchemaType<ExportPodConfig> {
+    return PodUtils.createExportConfig({
+      required: [],
+      properties: {},
+    }) as JSONSchemaType<ExportPodConfig>;
+  }
 
   parseChunk(chunk: string[]) {
     const [p1, p2] = chunk;

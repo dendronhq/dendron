@@ -5,9 +5,12 @@ import path from "path";
 import {
   ExportPod,
   ExportPodPlantOpts,
+  ExportPodConfig,
   ImportPod,
   ImportPodPlantOpts,
 } from "../basev3";
+import { JSONSchemaType } from "ajv";
+import { PodUtils } from "../utils";
 
 const ID = "dendron.snapshot";
 
@@ -23,6 +26,13 @@ export type SnapshotExportPodPlantOpts = ExportPodPlantOpts;
 export class SnapshotExportPod extends ExportPod {
   static id: string = ID;
   static description: string = "export notes to snapshot";
+
+  get config(): JSONSchemaType<ExportPodConfig> {
+    return PodUtils.createExportConfig({
+      required: [],
+      properties: {},
+    }) as JSONSchemaType<ExportPodConfig>;
+  }
 
   async backupVault({
     vault,
@@ -161,6 +171,6 @@ export class SnapshotImportPod extends ImportPod {
         });
       })
     );
-    return {importedNotes:[]};
+    return { importedNotes: [] };
   }
 }

@@ -33,7 +33,7 @@ suite("FrontmatterFoldingRangeProvider", function () {
           vscode.Uri.file(path.join(vaultDir, "foo.md"))
         );
         const foldingRange = (await provide(editor!)) as vscode.FoldingRange[];
-        expect(foldingRange).toEqual([new vscode.FoldingRange(0, 7)]);
+        expect(foldingRange).toEqual([new vscode.FoldingRange(0, 6)]);
         done();
       },
     });

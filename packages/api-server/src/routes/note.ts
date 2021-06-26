@@ -115,7 +115,7 @@ router.post("/bulkAdd", async (req: Request, res: Response<WriteNoteResp>) => {
 router.get(
   "/blocks",
   async (req: Request, res: Response<GetNoteBlocksPayload>) => {
-    const { id, ws } = req.body as GetNoteBlocksRequest;
+    const { id, ws } = req.query as GetNoteBlocksRequest;
     const engine = await getWS({ ws: ws || "" });
     try {
       const out = await engine.getNoteBlocks({ id });

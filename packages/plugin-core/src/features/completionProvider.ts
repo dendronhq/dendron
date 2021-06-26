@@ -1,18 +1,23 @@
-import { NoteUtils } from "@dendronhq/common-all";
+import { ERROR_SEVERITY, genUUID, NoteUtils } from "@dendronhq/common-all";
 import _ from "lodash";
+import { ALIAS_NAME, LINK_NAME } from "@dendronhq/engine-server";
 import {
+  CancellationToken,
   CompletionItem,
   CompletionItemKind,
   ExtensionContext,
   languages,
   Position,
+  Range,
   TextDocument,
+  TextEdit,
   Uri,
   workspace,
 } from "vscode";
 import { Logger } from "../logger";
+import { VSCodeUtils } from "../utils";
 import { fsPathToRef } from "../utils/md";
-import { DendronWorkspace } from "../workspace";
+import { DendronWorkspace, getWS } from "../workspace";
 
 const padWithZero = (n: number): string => (n < 10 ? "0" + n : String(n));
 
@@ -85,7 +90,90 @@ export const provideCompletionItems = (
   return completionItems;
 };
 
-export const activate = (context: ExtensionContext) =>
+// prettier-ignore
+const PARTIAL_WIKILINK_WITH_ANCHOR_REGEX = new RegExp("" +
+  "(?<entireLink>" +
+    // Should have the starting brackets
+    "\\[\\[" +
+    "(" +
+      // Will then either look like [[^ or [[^anchor
+      "\\^[\\w-]*" +
+    "|" + // or like [[alias|note#, or [[alias|note#anchor, or [[#, or [[#anchor
+      // optional alias
+      "(" +
+        `${ALIAS_NAME}(?=\\|)\\|` +
+      ")?" +
+      // optional note
+      `(${LINK_NAME})?` +
+      // anchor
+      `#(${LINK_NAME})?` +
+    ")" +
+    // May have ending brackets
+    "\\]?\\]?" +
+  ")",
+  "g"
+);
+
+export async function provideBlockCompletionItems(
+  document: TextDocument,
+  position: Position,
+  token: CancellationToken
+): Promise<CompletionItem[] | undefined> {
+  let found = false;
+  // This gets triggered when the user types ^, which won't necessarily happen inside a wikilink.
+  // So check that the user is actually in a wikilink before we try.
+  const line = document.lineAt(position.line);
+  // There may be multiple wikilinks in this line
+  const matches = line.text.matchAll(PARTIAL_WIKILINK_WITH_ANCHOR_REGEX);
+  for (const match of matches) {
+    if (_.isUndefined(match.groups) || _.isUndefined(match.index)) continue;
+    const { entireLink } = match.groups;
+    // If the current position is within this link, then we are trying to complete it
+    if (
+      match.index <= position.character &&
+      position.character <= match.index + entireLink.length
+    ) {
+      found = true;
+    }
+  }
+  if (!found || token.isCancellationRequested) return;
+
+  const note = VSCodeUtils.getNoteFromDocument(document);
+  if (_.isUndefined(note) || token.isCancellationRequested) return;
+
+  const blocks = await getWS().getEngine().getNoteBlocks({ id: note.id });
+  if (
+    _.isUndefined(blocks.data) ||
+    blocks.error?.severity === ERROR_SEVERITY.FATAL ||
+    token.isCancellationRequested
+  )
+    return;
+
+  return blocks.data.map((block) => {
+    const hasAnchor = _.isUndefined(block.anchor);
+    const anchor = block.anchor || genUUID();
+    return {
+      label: block.text,
+      insertText: `^${anchor}`,
+      // If the block didn't have an anchor, we need to insert it ourselves
+      additionalTextEdits: hasAnchor
+        ? []
+        : [
+            new TextEdit(
+              new Range(
+                block.position.end.line,
+                block.position.end.column,
+                block.position.end.line,
+                block.position.end.column
+              ),
+              `^${anchor}`
+            ),
+          ],
+    };
+  });
+}
+
+export const activate = (context: ExtensionContext) => {
   context.subscriptions.push(
     languages.registerCompletionItemProvider(
       "markdown",
@@ -95,6 +183,16 @@ export const activate = (context: ExtensionContext) =>
       "["
     )
   );
+  context.subscriptions.push(
+    languages.registerCompletionItemProvider(
+      "markdown",
+      {
+        provideCompletionItems: provideBlockCompletionItems,
+      },
+      "#^"
+    )
+  );
+};
 
 export const completionProvider = {
   activate,

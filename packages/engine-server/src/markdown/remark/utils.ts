@@ -49,6 +49,25 @@ export { select, selectAll } from "unist-util-select";
 
 export const ALIAS_DIVIDER = "|";
 
+/** A regexp fragment that matches a link name (e.g. a note name) */
+export const LINK_NAME = "[^#\\|>]+";
+/** A regexp fragment that matches an alias name */
+export const ALIAS_NAME = "[^\\|>]+"; // aliases may contain # symbols
+/** A regexp fragment that matches the contents of a link (without the brackets) */
+export const LINK_CONTENTS =
+  "" +
+  // alias?
+  `(` +
+  `(?<alias>${ALIAS_NAME}(?=\\|))` +
+  "\\|" +
+  ")?" +
+  // name
+  `(?<value>${LINK_NAME})?` +
+  // anchor?
+  `(#(?<anchor>${LINK_NAME}))?` +
+  // filters?
+  `(>(?<filtersRaw>.*))?`;
+
 export function addError(proc: Processor, err: DendronError) {
   const errors = proc.data("errors") as DendronError[];
   errors.push(err);
@@ -279,24 +298,7 @@ export class LinkUtils {
         vaultName?: string;
       }
     | null {
-    const LINK_NAME = "[^#\\|>]+";
-    // aliases may contain # symbols
-    const ALIAS_NAME = "[^\\|>]+";
-    const re = new RegExp(
-      "" +
-        // alias?
-        `(` +
-        `(?<alias>${ALIAS_NAME}(?=\\|))` +
-        "\\|" +
-        ")?" +
-        // name
-        `(?<value>${LINK_NAME})?` +
-        // anchor?
-        `(#(?<anchor>${LINK_NAME}))?` +
-        // filters?
-        `(>(?<filtersRaw>.*))?`,
-      "i"
-    );
+    const re = new RegExp("i");
     const out = linkString.match(re);
     if (out) {
       let { alias, value, anchor } = out.groups as any;

@@ -418,7 +418,7 @@ export class DendronAPI extends API {
     const resp = await this._makeRequest({
       path: "note/blocks",
       method: "get",
-      body: req,
+      qs: req,
     });
     return resp;
   }

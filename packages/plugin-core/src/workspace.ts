@@ -43,7 +43,7 @@ import DefinitionProvider from "./features/DefinitionProvider";
 import FrontmatterFoldingRangeProvider from "./features/FrontmatterFoldingRangeProvider";
 import ReferenceHoverProvider from "./features/ReferenceHoverProvider";
 import ReferenceProvider from "./features/ReferenceProvider";
-import { VaultWatcher } from "./fileWatcher";
+import { FileWatcher } from "./fileWatcher";
 import { Logger } from "./logger";
 import { EngineAPIService } from "./services/EngineAPIService";
 import { CodeConfigKeys } from "./types";
@@ -131,7 +131,7 @@ export class DendronWorkspace {
 
   public dendronTreeView: DendronTreeView | undefined;
   public dendronTreeViewV2: DendronTreeViewV2 | undefined;
-  public vaultWatcher?: VaultWatcher;
+  public fileWatcher?: FileWatcher;
   public port?: number;
   public workspaceService?: WorkspaceService;
   protected treeViews: { [key: string]: vscode.WebviewViewProvider };
@@ -163,8 +163,8 @@ export class DendronWorkspace {
 
   async pauseWatchers<T = void>(cb: () => Promise<T>) {
     const ctx = "pauseWatchers";
-    if (this.vaultWatcher) {
-      this.vaultWatcher.pause = true;
+    if (this.fileWatcher) {
+      this.fileWatcher.pause = true;
     }
     if (this.dendronTreeView) {
       this.dendronTreeView.pause = true;
@@ -176,8 +176,8 @@ export class DendronWorkspace {
       Logger.error({ ctx, error: err });
       throw err;
     } finally {
-      if (this.vaultWatcher) {
-        this.vaultWatcher.pause = false;
+      if (this.fileWatcher) {
+        this.fileWatcher.pause = false;
       }
       if (this.dendronTreeView) {
         this.dendronTreeView.pause = false;
@@ -622,7 +622,7 @@ export class DendronWorkspace {
     }
     let vaults = wsFolders as vscode.WorkspaceFolder[];
     let realVaults = DendronWorkspace.instance().vaultsv4;
-    const vaultWatcher = new VaultWatcher({
+    const fileWatcher = new FileWatcher({
       wsRoot,
       vaults: realVaults,
     });
@@ -630,8 +630,8 @@ export class DendronWorkspace {
     schemaWatcher.activate(this.context);
     this.schemaWatcher = schemaWatcher;
 
-    vaultWatcher.activate(DendronWorkspace.instance().context);
-    this.vaultWatcher = vaultWatcher;
+    fileWatcher.activate(DendronWorkspace.instance().context);
+    this.fileWatcher = fileWatcher;
   }
 
   async deactivate() {

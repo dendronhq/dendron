@@ -117,8 +117,8 @@ export class RenameNoteV2aCommand extends BaseCommand<
     try {
       const { files } = opts;
       const { newUri, oldUri } = files[0];
-      if (ws.vaultWatcher && !opts.noModifyWatcher) {
-        ws.vaultWatcher.pause = true;
+      if (ws.fileWatcher && !opts.noModifyWatcher) {
+        ws.fileWatcher.pause = true;
       }
       const engine = ws.getEngine();
       const oldFname = DNodeUtils.fname(oldUri.fsPath);
@@ -152,10 +152,10 @@ export class RenameNoteV2aCommand extends BaseCommand<
         changed,
       };
     } finally {
-      if (ws.vaultWatcher && !opts.noModifyWatcher) {
+      if (ws.fileWatcher && !opts.noModifyWatcher) {
         setTimeout(() => {
-          if (ws.vaultWatcher) {
-            ws.vaultWatcher.pause = false;
+          if (ws.fileWatcher) {
+            ws.fileWatcher.pause = false;
           }
           this.L.info({ ctx, msg: "exit" });
         }, 3000);

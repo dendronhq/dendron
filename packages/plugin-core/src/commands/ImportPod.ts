@@ -82,9 +82,9 @@ export class ImportPodCommand extends BaseCommand<
     const engine = DendronWorkspace.instance().getEngine();
     const vaults = DendronWorkspace.instance().vaultsv4;
     const pod = new opts.podChoice.podClass() as ImportPod;
-    const vaultWatcher = getWS().vaultWatcher;
-    if (vaultWatcher) {
-      vaultWatcher.pause = true;
+    const fileWatcher = getWS().fileWatcher;
+    if (fileWatcher) {
+      fileWatcher.pause = true;
     }
     let importedNotes = await window.withProgress(
       {
@@ -111,8 +111,8 @@ export class ImportPodCommand extends BaseCommand<
       }
     );
     await new ReloadIndexCommand().execute();
-    if (vaultWatcher) {
-      vaultWatcher.pause = false;
+    if (fileWatcher) {
+      fileWatcher.pause = false;
     }
     window.showInformationMessage(
       `${importedNotes.length} notes imported successfully.`

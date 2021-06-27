@@ -1,6 +1,5 @@
 import { NoteProps, NoteUtils, Time, VaultUtils } from "@dendronhq/common-all";
-import { genHash } from "@dendronhq/common-server";
-import { HistoryService } from "@dendronhq/engine-server";
+import { HistoryService, WorkspaceUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
 import {
@@ -82,9 +81,9 @@ export class WorkspaceWatcher {
       return { changes: [] };
     }
     const match = NoteUtils.RE_FM_UPDATED.exec(content);
-    const noteHash = genHash(content);
     let changes: TextEdit[] = [];
-    if (match && note.contentHash && note.contentHash !== noteHash) {
+
+    if (match && WorkspaceUtils.noteContentChanged({ content, note })) {
       Logger.info({ ctx, match, msg: "update activeText editor" });
       const startPos = ev.document.positionAt(match.index);
       const endPos = ev.document.positionAt(match.index + match[0].length);

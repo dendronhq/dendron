@@ -7,7 +7,11 @@ import {
   WorkspaceOpts,
 } from "@dendronhq/common-all";
 import { file2Note, string2Note } from "@dendronhq/common-server";
-import { HistoryService, LinkUtils } from "@dendronhq/engine-server";
+import {
+  HistoryService,
+  LinkUtils,
+  WorkspaceUtils,
+} from "@dendronhq/engine-server";
 import _ from "lodash";
 import { AnchorUtils } from "@dendronhq/engine-server";
 import path from "path";
@@ -58,17 +62,16 @@ export class VaultWatcher {
   }
 
   /**
-   * Update note links
-   * @param uri
-   * @returns
+   * Update note on detected changes
+   *
+   * @returns {@link NoteProps} if changed, `undefined` otherwise
    */
   async onDidChange(uri: vscode.Uri) {
     const ctx = "VaultWatcher:onDidChange";
-    this.L.debug({ ctx, uri: uri.fsPath });
     if (this.pause) {
       return;
     }
-    this.L.info({ ctx, uri });
+    this.L.info({ ctx, uri: uri.fsPath });
     const eclient = DendronWorkspace.instance().getEngine();
     const fname = path.basename(uri.fsPath, ".md");
     const doc = await vscode.workspace.openTextDocument(uri);
@@ -82,13 +85,21 @@ export class VaultWatcher {
       wsRoot: DendronWorkspace.wsRoot(),
       fsPath: uri.fsPath,
     });
-    let note = string2Note({ content, fname, vault });
     const noteHydrated = NoteUtils.getNoteByFnameV5({
       fname,
       vault,
       notes: eclient.notes,
       wsRoot: DendronWorkspace.wsRoot(),
     }) as NoteProps;
+    if (!WorkspaceUtils.noteContentChanged({ content, note: noteHydrated })) {
+      this.L.debug({
+        ctx,
+        uri: uri.fsPath,
+        msg: "note content unchanged, ignoring",
+      });
+      return;
+    }
+    let note = string2Note({ content, fname, vault });
     note = NoteUtils.hydrate({ noteRaw: note, noteHydrated });
     const links = LinkUtils.findLinks({ note, engine: eclient });
     note.links = links;

@@ -237,11 +237,12 @@ export abstract class ExportPod<
 
   validate(config: Partial<T>) {
     const validateConfig = ajv.compile(this.config);
-    validateConfig(config);
-    if (!validateConfig(config)) {
+    const valid = validateConfig(config);
+    if (!valid) {
+      const errors = ajv.errorsText(validateConfig.errors);
       throw new DendronError({
-        message: "validation errors",
-        payload: "error",
+        message: `validation errors: ${errors}`,
+        payload: `error: ${errors}`,
       });
     }
   }

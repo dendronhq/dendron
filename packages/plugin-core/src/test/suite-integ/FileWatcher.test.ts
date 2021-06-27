@@ -1,6 +1,7 @@
 import { NoteUtils } from "@dendronhq/common-all";
 import { AssertUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { ENGINE_HOOKS_MULTI } from "@dendronhq/engine-test-utils";
+import _ from "lodash";
 import { describe } from "mocha";
 import path from "path";
 import * as vscode from "vscode";
@@ -50,7 +51,7 @@ suite("FileWatcher", function () {
       });
     });
 
-    test("onDidChange", function (done) {
+    test("onDidChange: change", function (done) {
       runLegacyMultiWorkspaceTest({
         ctx,
         postSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti,
@@ -74,6 +75,25 @@ suite("FileWatcher", function () {
               match: ["Hello"],
             })
           ).toBeTruthy();
+          done();
+        },
+      });
+    });
+
+    test("onDidChange: no change", function (done) {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        postSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti,
+        onInit: async ({ vaults, wsRoot, engine }) => {
+          const foo = engine.notes["foo"];
+          const editor = await VSCodeUtils.openNote(foo);
+          watcher = new VaultWatcher({
+            wsRoot,
+            vaults,
+          });
+          const uri = editor.document.uri;
+          const resp = await watcher.onDidChange(uri);
+          expect(_.isUndefined(resp)).toBeTruthy();
           done();
         },
       });

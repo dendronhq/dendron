@@ -750,9 +750,10 @@ export class NoteUtils {
   }
 
   /**
-   * Add props from @param noteHydrated to @param noteRaw
-   * @param param0
-   * @returns
+   * Add {@link DNodeProps["parent"]} and {@link DNodeProps["children"]} from {@link noteHydrated} to {@link noteRaw}
+   * @param noteRaw - note for other fields
+   * @param noteHydrated - note to get {@link DNodeProps["parent"]} and {@link DNodeProps["children"]}  properties from
+   * @returns Merged Note object
    */
   static hydrate({
     noteRaw,

@@ -67,6 +67,10 @@ export class WindowWatcher {
     );
   }
 
+  /**
+   * Add text decorator to frontmatter
+   * @returns
+   */
   async triggerUpdateDecorations(text?: string) {
     const activeEditor = window.activeTextEditor;
     if (!activeEditor) {

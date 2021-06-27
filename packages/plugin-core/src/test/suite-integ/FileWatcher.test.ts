@@ -5,14 +5,14 @@ import _ from "lodash";
 import { describe } from "mocha";
 import path from "path";
 import * as vscode from "vscode";
-import { VaultWatcher } from "../../fileWatcher";
+import { FileWatcher } from "../../fileWatcher";
 import { VSCodeUtils } from "../../utils";
 import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
 suite("FileWatcher", function () {
   let ctx: vscode.ExtensionContext;
-  let watcher: VaultWatcher;
+  let watcher: FileWatcher;
 
   ctx = setupBeforeAfter(this, {
     beforeHook: () => {},
@@ -30,7 +30,7 @@ suite("FileWatcher", function () {
             vault: vaults[0],
             wsRoot,
           });
-          watcher = new VaultWatcher({
+          watcher = new FileWatcher({
             wsRoot,
             vaults,
           });
@@ -63,7 +63,7 @@ suite("FileWatcher", function () {
             const selection = new vscode.Selection(pos, pos);
             builder.replace(selection, `Hello`);
           });
-          watcher = new VaultWatcher({
+          watcher = new FileWatcher({
             wsRoot,
             vaults,
           });
@@ -87,7 +87,7 @@ suite("FileWatcher", function () {
         onInit: async ({ vaults, wsRoot, engine }) => {
           const foo = engine.notes["foo"];
           const editor = await VSCodeUtils.openNote(foo);
-          watcher = new VaultWatcher({
+          watcher = new FileWatcher({
             wsRoot,
             vaults,
           });

@@ -6,7 +6,7 @@ import _md from "markdown-it";
 import path from "path";
 import { Uri, ViewColumn, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
-import { VaultWatcher } from "../fileWatcher";
+import { FileWatcher } from "../fileWatcher";
 import { VSCodeUtils } from "../utils";
 import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
@@ -173,8 +173,8 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
     }
     try {
       window.showInformationMessage("refactoring...");
-      if (ws.vaultWatcher) {
-        ws.vaultWatcher.pause = true;
+      if (ws.fileWatcher) {
+        ws.fileWatcher.pause = true;
       }
       const renameCmd = new RenameNoteV2aCommand();
       const out = await _.reduce<
@@ -205,11 +205,11 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
       );
       return { changed: _.uniqBy(out.changed, (ent) => ent.note.fname) };
     } finally {
-      if (ws.vaultWatcher) {
+      if (ws.fileWatcher) {
         setTimeout(() => {
-          if (ws.vaultWatcher) {
-            ws.vaultWatcher.pause = false;
-            VaultWatcher.refreshTree();
+          if (ws.fileWatcher) {
+            ws.fileWatcher.pause = false;
+            FileWatcher.refreshTree();
           }
           this.L.info({ ctx, msg: "exit" });
         }, 3000);

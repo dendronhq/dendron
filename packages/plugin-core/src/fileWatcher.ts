@@ -19,7 +19,7 @@ import * as vscode from "vscode";
 import { Logger } from "./logger";
 import { DendronWorkspace, getWS } from "./workspace";
 
-export class VaultWatcher {
+export class FileWatcher {
   public watchers: { vault: DVault; watcher: vscode.FileSystemWatcher }[];
   /**
    * Should watching be paused
@@ -67,7 +67,7 @@ export class VaultWatcher {
    * @returns {@link NoteProps} if changed, `undefined` otherwise
    */
   async onDidChange(uri: vscode.Uri) {
-    const ctx = "VaultWatcher:onDidChange";
+    const ctx = "FileWatcher:onDidChange";
     if (this.pause) {
       return;
     }
@@ -113,7 +113,7 @@ export class VaultWatcher {
   }
 
   async onDidCreate(uri: vscode.Uri): Promise<void> {
-    const ctx = "VaultWatcher:onDidCreate";
+    const ctx = "FileWatcher:onDidCreate";
     if (this.pause) {
       this.L.info({ ctx, uri, msg: "paused" });
       return;
@@ -173,13 +173,13 @@ export class VaultWatcher {
         throw err;
       }
     } finally {
-      VaultWatcher.refreshTree();
+      FileWatcher.refreshTree();
       this.L.debug({ ctx, uri, msg: "refreshTree" });
     }
   }
 
   async onDidDelete(uri: vscode.Uri) {
-    const ctx = "VaultWatcher:onDidDelete";
+    const ctx = "FileWatcher:onDidDelete";
     if (this.pause) {
       return;
     }
@@ -224,7 +224,7 @@ export class VaultWatcher {
         // this.L.error({ ctx, err: JSON.stringify(err) });
       }
     } finally {
-      VaultWatcher.refreshTree();
+      FileWatcher.refreshTree();
     }
   }
 

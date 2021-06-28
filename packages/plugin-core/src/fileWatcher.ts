@@ -99,7 +99,7 @@ export class FileWatcher {
       });
       return;
     }
-    let note = string2Note({ content, fname, vault });
+    let note = string2Note({ content, fname, vault, calculateHash: true });
     note = NoteUtils.hydrate({ noteRaw: note, noteHydrated });
     const links = LinkUtils.findLinks({ note, engine: eclient });
     note.links = links;

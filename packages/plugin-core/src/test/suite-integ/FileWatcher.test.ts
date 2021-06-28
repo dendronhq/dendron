@@ -68,7 +68,8 @@ suite("FileWatcher", function () {
             vaults,
           });
           const uri = editor.document.uri;
-          await watcher.onDidChange(uri);
+          const resp = await watcher.onDidChange(uri);
+          expect(resp?.contentHash).toEqual("465a4f4ebf83fbea836eb7b8e8e040ec");
           expect(
             await AssertUtils.assertInString({
               body: engine.notes["foo"].body,

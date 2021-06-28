@@ -6,7 +6,6 @@ import {
   NoteViewMessage,
   assertUnreachable,
   NoteProps,
-  NoteUtils,
 } from "@dendronhq/common-all";
 import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../utils";
@@ -36,7 +35,7 @@ export class ShowPreviewV2Command extends BasicCommand<
   }
 
   static onDidChangeHandler(document: vscode.TextDocument) {
-    const ctx = "ShowPreviewV2:updateMarkdown";
+    const ctx = "ShowPreviewV2:onDidChangeHandler";
 
     if (!getWS().workspaceService?.isPathInWorkspace(document.uri.fsPath)) {
       Logger.info({
@@ -48,23 +47,21 @@ export class ShowPreviewV2Command extends BasicCommand<
     }
     const note = VSCodeUtils.getNoteFromDocument(document);
     if (note) {
-      Logger.info({
-        ctx,
-        msg: "update markdown",
-        note: NoteUtils.toLogObj(note),
-      });
+      ShowPreviewV2Command.refresh(note);
+    }
+  }
 
-      const panel = getWS().getWebView(DendronWebViewKey.NOTE_PREVIEW);
-      if (panel) {
-        panel.webview.postMessage({
-          type: "onDidChangeActiveTextEditor",
-          data: {
-            note,
-            sync: true,
-          },
-          source: "vscode",
-        });
-      }
+  static refresh(note: NoteProps) {
+    const panel = getWS().getWebView(DendronWebViewKey.NOTE_PREVIEW);
+    if (panel) {
+      panel.webview.postMessage({
+        type: "onDidChangeActiveTextEditor",
+        data: {
+          note,
+          sync: true,
+        },
+        source: "vscode",
+      });
     }
   }
 

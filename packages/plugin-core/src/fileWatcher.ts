@@ -14,6 +14,7 @@ import path from "path";
 import * as vscode from "vscode";
 import { Logger } from "./logger";
 import { DendronWorkspace, getWS } from "./workspace";
+import { ShowPreviewV2Command } from "./commands/ShowPreviewV2";
 
 export class VaultWatcher {
   public watchers: { vault: DVault; watcher: vscode.FileSystemWatcher }[];
@@ -98,7 +99,9 @@ export class VaultWatcher {
     );
     note.anchors = anchors;
     this.L.info({ ctx, fname, msg: "exit" });
-    return await eclient.updateNote(note);
+    const noteClean = await eclient.updateNote(note);
+    ShowPreviewV2Command.refresh(noteClean);
+    return noteClean;
   }
 
   async onDidCreate(uri: vscode.Uri): Promise<void> {

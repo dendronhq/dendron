@@ -122,9 +122,13 @@ export class PodUtils {
         },
         ...opts.properties,
       },
-
-      dependencies: {
-        concatenate: ["destName"],
+      if: {
+        properties: { concatenate: { const: true } },
+      },
+      then: {
+        dependencies: {
+          concatenate: ["destName"],
+        },
       },
     };
   }

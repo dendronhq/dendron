@@ -57,6 +57,7 @@ export class DNodeUtils {
       children,
       body,
       data,
+      contentHash,
       vault,
     } = _.defaults(opts, {
       updated: Time.now().toMillis(),
@@ -87,6 +88,7 @@ export class DNodeUtils {
       children,
       body,
       data,
+      contentHash,
     };
 
     // don't include optional props

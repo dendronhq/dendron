@@ -7,6 +7,7 @@ vaults:
         fsPath: vault
 useFMTitle: true
 useNoteTitleForLink: true
+autoFoldFrontmatter: true
 mermaid: true
 journal:
     dailyDomain: daily

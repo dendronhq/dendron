@@ -45,6 +45,7 @@ export class DConfig {
       noLegacyNoteRef: true,
       noXVaultWikiLink: true,
       lookupConfirmVaultOnCreate: false,
+      autoFoldFrontmatter: true,
       journal: {
         dailyDomain: "daily",
         name: "journal",

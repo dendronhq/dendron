@@ -13,8 +13,8 @@ import { Item } from "klaw";
 import _ from "lodash";
 import { URI } from "vscode-uri";
 import { PodKind } from "./types";
-import Ajv, { JSONSchemaType } from "ajv";
-const ajv = new Ajv();
+import { JSONSchemaType } from "ajv";
+import { PodUtils } from "./utils";
 
 export type PodOpts<T> = {
   engine: DEngineClient;
@@ -121,69 +121,15 @@ export type ImportPodPlantOpts<T extends ImportPodConfig = ImportPodConfig> =
 export abstract class ImportPod<T extends ImportPodConfig = ImportPodConfig> {
   public L: DLogger;
   static kind = "import" as PodKind;
-  get config(): PodConfig[] {
-    return [
-      {
-        key: "src",
-        description: "Where to import from",
-        type: "string" as const,
-        required: true,
-      },
-      {
-        key: "vaultName",
-        description: "name of vault to import into",
-        type: "string" as const,
-        required: true,
-      },
-      {
-        key: "concatenate",
-        description: "whether to concatenate everything into one note",
-        type: "boolean",
-      },
-      {
-        key: "frontmatter",
-        description: "frontmatter to add to each note",
-        type: "object",
-      },
-      {
-        key: "fnameAsId",
-        description: "use the file name as the id",
-        type: "boolean",
-      },
-      {
-        key: "destName",
-        description: "If concatenate is set, name of destination path",
-        type: "string" as const,
-      },
-    ];
-  }
+  abstract get config(): JSONSchemaType<T>;
+
   constructor() {
     this.L = createLogger("ImportPod");
   }
 
-  validate(config: Partial<T>) {
-    const { src, vaultName, concatenate } = _.defaults(config, {
-      concatenate: false,
-    });
-    const configJSON = JSON.stringify(config);
-    if (_.isUndefined(src)) {
-      throw new DendronError({
-        message: `no src specified. config: ${configJSON}`,
-      });
-    }
-    if (_.isUndefined(vaultName)) {
-      throw new DendronError({ message: "no vaultName specified" });
-    }
-    if (concatenate && _.isUndefined(config?.destName)) {
-      throw new DendronError({
-        message: "destName must be specified if concatenate is enabled",
-      });
-    }
-  }
-
   async execute(opts: ImportPodExecuteOpts<T>) {
     const { config, engine } = opts;
-    this.validate(config);
+    PodUtils.validate<T>(config, this.config);
     const { src, vaultName } = _.defaults(config, {
       concatenate: false,
     });
@@ -235,18 +181,6 @@ export abstract class ExportPod<
     this.L = createLogger("ExportPod");
   }
 
-  validate(config: Partial<T>) {
-    const validateConfig = ajv.compile(this.config);
-    const valid = validateConfig(config);
-    if (!valid) {
-      const errors = ajv.errorsText(validateConfig.errors);
-      throw new DendronError({
-        message: `validation errors: ${errors}`,
-        payload: `error: ${errors}`,
-      });
-    }
-  }
-
   /**
    * Checks for some pre-sets
    * - if not `includeBody`, then fetch notes without body
@@ -271,7 +205,7 @@ export abstract class ExportPod<
 
   async execute(opts: ExportPodExecuteOpts<T>) {
     const { config, engine } = opts;
-    this.validate(config);
+    PodUtils.validate<T>(config, this.config);
     const { dest } = config;
 
     // validate config

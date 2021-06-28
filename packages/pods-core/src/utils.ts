@@ -6,6 +6,9 @@ import { PodClassEntryV4, PodItemV4 } from "./types";
 export * from "./builtin";
 export * from "./types";
 export * from "./utils";
+import Ajv, { JSONSchemaType } from "ajv";
+const ajv = new Ajv();
+import { DendronError } from "@dendronhq/common-all";
 
 export const podClassEntryToPodItemV4 = (p: PodClassEntryV4): PodItemV4 => {
   return {
@@ -83,6 +86,49 @@ export class PodUtils {
     };
   }
 
+  static createImportConfig(opts: { required: string[]; properties: any }) {
+    return {
+      type: "object",
+      additionalProperties: false,
+      required: ["src", "vaultName", ...opts.required],
+      properties: {
+        src: {
+          type: "string",
+          description: "Where to import from",
+        },
+        vaultName: {
+          type: "string",
+          description: "name of vault to import into",
+        },
+        concatenate: {
+          type: "boolean",
+          description: "whether to concatenate everything into one note",
+          nullable: true,
+        },
+        frontmatter: {
+          description: "frontmatter to add to each note",
+          type: "object",
+          nullable: true,
+        },
+        fnameAsId: {
+          description: "use the file name as the id",
+          type: "boolean",
+          nullable: true,
+        },
+        destName: {
+          description: "If concatenate is set, name of destination path",
+          type: "string",
+          nullable: true,
+        },
+        ...opts.properties,
+      },
+
+      dependencies: {
+        concatenate: ["destName"],
+      },
+    };
+  }
+
   /**
    * Create config file if it doesn't exist
    */
@@ -99,7 +145,7 @@ export class PodUtils {
     ensureDirSync(path.dirname(podConfigPath));
     const pod = new podClass();
     let config;
-    if (podClass.kind === "export") {
+    if (podClass.kind === "export" || podClass.kind === "import") {
       const required = pod.config.required;
       const podConfig = pod.config.properties;
       config = Object.keys(podConfig)
@@ -141,6 +187,18 @@ export class PodUtils {
       writeFileSync(podConfigPath, config);
     }
     return podConfigPath;
+  }
+
+  static validate<T>(config: Partial<T>, schema: JSONSchemaType<T>) {
+    const validateConfig = ajv.compile(schema);
+    const valid = validateConfig(config);
+    if (!valid) {
+      const errors = ajv.errorsText(validateConfig.errors);
+      throw new DendronError({
+        message: `validation errors: ${errors}`,
+        payload: `error: ${errors}`,
+      });
+    }
   }
 
   static hasRequiredOpts(_pClassEntry: PodClassEntryV4): boolean {

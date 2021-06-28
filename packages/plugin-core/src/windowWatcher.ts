@@ -162,7 +162,7 @@ export class WindowWatcher {
   }
 
   async triggerNotePreviewUpdate({ document }: TextEditor) {
-    ShowPreviewV2Command.updateMarkdown(document);
+    ShowPreviewV2Command.onDidChangeHandler(document);
     return;
   }
 }

@@ -95,7 +95,7 @@ export class WorkspaceWatcher {
       const p = new Promise(async (resolve) => {
         note.updated = now;
         await eclient.updateNote(note);
-        ShowPreviewV2Command.updateMarkdown(ev.document);
+        ShowPreviewV2Command.onDidChangeHandler(ev.document);
         return resolve(changes);
       });
       ev.waitUntil(p);

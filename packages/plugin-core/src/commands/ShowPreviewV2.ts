@@ -35,7 +35,7 @@ export class ShowPreviewV2Command extends BasicCommand<
     this.activeTextEditor = VSCodeUtils.getActiveTextEditorOrThrow();
   }
 
-  static updateMarkdown(document: vscode.TextDocument) {
+  static onDidChangeHandler(document: vscode.TextDocument) {
     const ctx = "ShowPreviewV2:updateMarkdown";
 
     if (!getWS().workspaceService?.isPathInWorkspace(document.uri.fsPath)) {

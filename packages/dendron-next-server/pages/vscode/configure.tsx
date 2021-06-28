@@ -148,14 +148,11 @@ export default function Config({
           ajvErrors?.forEach((error) => {
             const { instancePath } = error;
             let message = "";
-            if (error.keyword === "minLength") {
-              message = `Must have at least ${error.params.limit} characters`;
-            }
             if (instancePath !== "") {
               errors[`${instancePath.substring(1)}`] = message;
             }
           });
-          return errors;
+          return { site: errors };
         }}
         validateOnChange={true}
       >
@@ -234,7 +231,7 @@ export default function Config({
             <Form.Item name="submit" style={{ justifyContent: "center" }}>
               <Button.Group size="large">
                 <ResetButton type="text">Cancel</ResetButton>
-                <SubmitButton type="primary" disabled={!_.isEmpty(errors)}>
+                <SubmitButton type="primary" disabled={!_.isEmpty(errors.site)}>
                   Submit
                 </SubmitButton>
               </Button.Group>

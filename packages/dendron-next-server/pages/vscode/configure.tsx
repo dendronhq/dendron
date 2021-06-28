@@ -137,6 +137,7 @@ export default function Config({
           if (response.error) {
             message.error(response.payload);
           }
+          message.success("Saved!");
           setSubmitting(false);
         }}
         validate={(values) => {
@@ -145,9 +146,13 @@ export default function Config({
           const validate = ajv.current.compile(schema);
           validate(site);
           const { errors: ajvErrors } = validate;
+
+          if (!ajvErrors?.length) {
+            return {};
+          }
+
           ajvErrors?.forEach((error) => {
-            const { instancePath } = error;
-            let message = "";
+            const { instancePath, message } = error;
             if (instancePath !== "") {
               errors[`${instancePath.substring(1)}`] = message;
             }
@@ -156,14 +161,7 @@ export default function Config({
         }}
         validateOnChange={true}
       >
-        {({
-          handleSubmit,
-          handleChange,
-          handleBlur,
-          isSubmitting,
-          values,
-          errors,
-        }) => (
+        {({ values, errors }) => (
           <Form {...formItemLayout}>
             <Typography style={{ textAlign: "center" }}>
               <Title>Dendron Configuration </Title>
@@ -186,7 +184,6 @@ export default function Config({
               required: true,
               helperText:
                 "Where your site will be published, Relative to Dendron workspace.",
-              error: errors.site?.siteRootDir,
             })}
             {createFormItem({
               name: "site.siteNotesDir",
@@ -230,9 +227,9 @@ export default function Config({
             </Form.Item>
             <Form.Item name="submit" style={{ justifyContent: "center" }}>
               <Button.Group size="large">
-                <ResetButton type="text">Cancel</ResetButton>
+                <ResetButton type="text">Clear changes</ResetButton>
                 <SubmitButton type="primary" disabled={!_.isEmpty(errors.site)}>
-                  Submit
+                  Save changes
                 </SubmitButton>
               </Button.Group>
             </Form.Item>

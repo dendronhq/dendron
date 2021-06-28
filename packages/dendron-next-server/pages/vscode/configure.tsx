@@ -129,7 +129,7 @@ export default function Config({
         initialValues={engine.config}
         onSubmit={(data) => {
           dispatch(configWrite({ config: data, ws, port }));
-          return;
+          return true;
         }}
         validate={(values) => {
           let errors: any = {};

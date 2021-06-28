@@ -22,8 +22,10 @@ export async function getWebviewContent(): Promise<string> {
 }
 
 function getWebviewContent2(opts: { title: string }) {
-  const port = DendronWorkspace.instance().port;
-  if (_.isUndefined(port)) {
+  const instance = DendronWorkspace.instance();
+  const port = instance.port;
+  const wsRoot = instance.workspaceService?.wsRoot;
+  if (_.isUndefined(port) || _.isUndefined(wsRoot)) {
     return `<head> Still starting up </head>`;
   }
   return `<!DOCTYPE html>
@@ -43,7 +45,7 @@ function getWebviewContent2(opts: { title: string }) {
     </style>
   </head>
   <body>
-    <iframe width="100%" height="100%" src="http://localhost:${port}/workspace/config.html"></iframe>
+    <iframe width="100%" height="100%" src="http://localhost:${port}/vscode/configure?ws=${wsRoot}&port=${port}"></iframe>
   </body>
   </html>`;
 }

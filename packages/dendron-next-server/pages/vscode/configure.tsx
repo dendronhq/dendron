@@ -1,5 +1,5 @@
 import { createLogger, engineSlice } from "@dendronhq/common-frontend";
-import { List, Typography, Button } from "antd";
+import { List, Typography, Button, message } from "antd";
 import { useRouter } from "next/router";
 import { FieldArray, Formik } from "formik";
 import { Form, Input, Switch, ResetButton, SubmitButton } from "formik-antd";
@@ -9,26 +9,25 @@ import { MinusOutlined } from "@ant-design/icons";
 import _ from "lodash";
 import Ajv, { JSONSchemaType } from "ajv";
 import { useRef } from "react";
-import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import { engineHooks } from "@dendronhq/common-frontend";
 import { configWrite } from "../../lib/effects";
 
 interface MyData {
   siteRootDir: string;
+  assetsPrefix: string;
 }
 
 const schema: JSONSchemaType<MyData> = {
   type: "object",
   properties: {
-    // TODO: this regex only works with unix systems
     siteRootDir: {
       type: "string",
       minLength: 1,
       pattern: "(^/$|(^(?=/)|^.|^..)(/(?=[^/\0])[^/\0]+)*/?$)|()",
     },
-    siteAssetsPrefix: { type: "string", minLength: 5 },
+    assetsPrefix: { type: "string", minLength: 5 },
   },
-  required: ["siteRootDir", "siteAssetsPrefix"],
+  required: ["siteRootDir"],
   additionalProperties: true,
 };
 
@@ -102,7 +101,7 @@ export default function Config({
   const dispatch = engineHooks.useEngineAppDispatch();
   const ajv = useRef(new Ajv({ allErrors: true }));
   const logger = createLogger("Config");
-  if (!engine.config) {
+  if (!engine.config || !ws || !port) {
     return <></>;
   }
 
@@ -127,9 +126,18 @@ export default function Config({
     >
       <Formik
         initialValues={engine.config}
-        onSubmit={(data) => {
-          dispatch(configWrite({ config: data, ws, port }));
-          return true;
+        onSubmit={async (config, { setSubmitting }) => {
+          const response = await dispatch(
+            configWrite({
+              config,
+              ws: ws as string,
+              port: Number(port as string),
+            })
+          );
+          if (response.error) {
+            message.error(response.payload);
+          }
+          setSubmitting(false);
         }}
         validate={(values) => {
           let errors: any = {};
@@ -151,7 +159,14 @@ export default function Config({
         }}
         validateOnChange={true}
       >
-        {({ handleSubmit, handleChange, handleBlur, values, errors }) => (
+        {({
+          handleSubmit,
+          handleChange,
+          handleBlur,
+          isSubmitting,
+          values,
+          errors,
+        }) => (
           <Form {...formItemLayout}>
             <Typography style={{ textAlign: "center" }}>
               <Title>Dendron Configuration </Title>
@@ -160,7 +175,7 @@ export default function Config({
               name="siteHierarchies"
               style={{ justifyContent: "center" }}
             >
-              <Title level={3}>Site Hierarchy</Title>
+              <Title level={3}>Site Config</Title>
               <FieldArray
                 name="site.siteHierarchies"
                 render={(arrayHelpers) =>
@@ -174,7 +189,7 @@ export default function Config({
               required: true,
               helperText:
                 "Where your site will be published, Relative to Dendron workspace.",
-              error: errors.siteRootDir,
+              error: errors.site?.siteRootDir,
             })}
             {createFormItem({
               name: "site.siteNotesDir",
@@ -183,7 +198,7 @@ export default function Config({
                 "Folder where your notes will be kept. By default, `notes`",
             })}
             {createFormItem({
-              name: "site.siteAssetsPrefix",
+              name: "site.assetsPrefix",
               label: "Assets Prefix",
               helperText: "If set, add prefix to all links.",
             })}

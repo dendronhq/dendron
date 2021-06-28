@@ -460,7 +460,7 @@ export type GetNoteOpts = {
 
 // === Pods
 export type DPod<TConfig> = {
-  config: PodConfig[];
+  config: any;
   execute(opts: BasePodExecuteOpts<TConfig>): Promise<any>;
 };
 

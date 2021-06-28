@@ -127,7 +127,7 @@ export default function Config({
       <Formik
         initialValues={engine.config}
         onSubmit={async (config, { setSubmitting }) => {
-          const response = await dispatch(
+          const response: any = await dispatch(
             configWrite({
               config,
               ws: ws as string,

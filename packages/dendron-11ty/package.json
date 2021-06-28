@@ -28,7 +28,7 @@
     "@11ty/eleventy-plugin-syntaxhighlight": "^3.0.4",
     "@dendronhq/common-all": "^0.47.2",
     "@dendronhq/common-server": "^0.47.2",
-    "@dendronhq/eleventy-plugin-seo": "^0.5.1",
+    "@dendronhq/eleventy-plugin-seo": "^0.6.0",
     "@dendronhq/engine-server": "^0.47.2",
     "@fec/eleventy-plugin-remark": "^2.1.0",
     "eleventy-xml-plugin": "^0.1.0",

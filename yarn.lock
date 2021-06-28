@@ -2104,10 +2104,10 @@
     compare-func "^2.0.0"
     q "^1.5.1"
 
-"@dendronhq/eleventy-plugin-seo@^0.5.1":
-  version "0.5.1"
-  resolved "https://registry.npmjs.org/@dendronhq/eleventy-plugin-seo/-/eleventy-plugin-seo-0.5.1.tgz#80cd5587587b0f46e4a8fa8ea45aafbe2cb7cd27"
-  integrity sha512-W+AEX7SYBHRg+ydQ4tK865gklp6C2rISqv6NQdWP01vshUqZWiGwTxEkuxlCn3HeGc07IIFx4qZCboWwqw3znQ==
+"@dendronhq/eleventy-plugin-seo@^0.6.0":
+  version "0.6.0"
+  resolved "https://registry.npmjs.org/@dendronhq/eleventy-plugin-seo/-/eleventy-plugin-seo-0.6.0.tgz#02a7e6d9b7f2396260ecd8442fe363e75603161e"
+  integrity sha512-vd9gePPV198jamkS1qUanJSVxzfi/4CSs8vIzl/Drmwd02mZb/+HII/KZnLlN8S9iVPpSjKcQdrkH71BywBw9w==
   dependencies:
     html-entities "^1.2.1"
     lodash "^4.17.19"

@@ -2,22 +2,23 @@ import {
   DendronConfig,
   DendronError,
   DendronTreeViewKey,
-  DendronWebViewKey, DVault,
+  DendronWebViewKey,
+  DVault,
   ERROR_STATUS,
   getStage,
   ResponseCode,
-  WorkspaceSettings
+  WorkspaceSettings,
 } from "@dendronhq/common-all";
 import {
   NodeJSUtils,
   readJSONWithComments,
   readMD,
-  writeJSONWithComments
+  writeJSONWithComments,
 } from "@dendronhq/common-server";
 import {
   DConfig,
   HistoryService,
-  WorkspaceService
+  WorkspaceService,
 } from "@dendronhq/engine-server";
 import { PodUtils } from "@dendronhq/pods-core";
 import fs from "fs-extra";
@@ -34,7 +35,7 @@ import {
   DendronContext,
   DENDRON_COMMANDS,
   extensionQualifiedId,
-  GLOBAL_STATE
+  GLOBAL_STATE,
 } from "./constants";
 import BacklinksTreeDataProvider from "./features/BacklinksTreeDataProvider";
 import { completionProvider } from "./features/completionProvider";
@@ -280,6 +281,7 @@ export class DendronWorkspace {
 
   public context: vscode.ExtensionContext;
   public windowWatcher?: WindowWatcher;
+  public workspaceWatcher?: WorkspaceWatcher;
   public fsWatcher?: vscode.FileSystemWatcher;
   public serverWatcher?: vscode.FileSystemWatcher;
   public schemaWatcher?: SchemaWatcher;
@@ -608,6 +610,7 @@ export class DendronWorkspace {
     this.windowWatcher = windowWatcher;
     const workspaceWatcher = new WorkspaceWatcher();
     workspaceWatcher.activate(this.context);
+    this.workspaceWatcher = workspaceWatcher;
 
     const wsFolders = DendronWorkspace.workspaceFolders();
     if (_.isUndefined(wsFolders) || _.isEmpty(wsFolders)) {

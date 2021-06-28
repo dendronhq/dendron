@@ -2,7 +2,6 @@ const {checkToken} = require("./common");
 const {exec} = require("./exec");
 
 function main() {
-  console.log("start");
   // Where we would push if we ran `git push`
   let upstream;
   try {
@@ -14,7 +13,6 @@ function main() {
   }
   // The files that would get pushed
   const filesToPush = exec(`git diff --name-only ${upstream}`).stdout.split('\n');
-  console.log("filesToPush", filesToPush)
 
   return checkToken({
     filesToCheck: filesToPush,

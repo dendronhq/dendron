@@ -137,18 +137,12 @@ export class ShowPreviewV2Command extends BasicCommand<
           break;
         }
         case NoteViewMessageType.onGetActiveEditor: {
+          // only entered on "init" in `plugin-core/src/views/utils.ts:87`
           const note =
             this.activeTextEditor &&
             VSCodeUtils.getNoteFromDocument(this.activeTextEditor.document);
           if (note) {
-            panel.webview.postMessage({
-              type: "onDidChangeActiveTextEditor",
-              data: {
-                note,
-                sync: true,
-              },
-              source: "vscode",
-            });
+            ShowPreviewV2Command.refresh(note);
           }
 
           break;

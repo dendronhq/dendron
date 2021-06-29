@@ -3,6 +3,7 @@ import { ENGINE_DELETE_PRESETS } from "./delete";
 import { ENGINE_GET_NOTE_BY_PATH_PRESETS } from "./getByPath";
 import { ENGINE_INFO_PRESETS } from "./info";
 import { ENGINE_INIT_PRESETS } from "./init";
+import { ENGINE_GET_NOTE_BLOCKS_PRESETS } from "./getNoteBlocks";
 import NOTE_REF from "./note-refs";
 import { ENGINE_QUERY_PRESETS } from "./query";
 import { ENGINE_RENAME_PRESETS } from "./rename";
@@ -26,6 +27,7 @@ export const ENGINE_SERVER = {
   ENGINE_INFO_PRESETS,
   ENGINE_GET_NOTE_BY_PATH_PRESETS,
   ENGINE_RENAME_PRESETS,
+  ENGINE_GET_NOTE_BLOCKS_PRESETS,
   ENGINE_QUERY_PRESETS,
   ENGINE_BULK_ADD_NOTES_PRESETS,
   ENGINE_RENDER_PRESETS,
@@ -70,6 +72,10 @@ export const ENGINE_PRESETS = [
   { name: "init", presets: ENGINE_SERVER.ENGINE_INIT_PRESETS },
   { name: "delete", presets: ENGINE_SERVER.ENGINE_DELETE_PRESETS },
   { name: "getByPath", presets: ENGINE_SERVER.ENGINE_GET_NOTE_BY_PATH_PRESETS },
+  {
+    name: "getNoteBlocks",
+    presets: ENGINE_SERVER.ENGINE_GET_NOTE_BLOCKS_PRESETS,
+  },
   { name: "info", presets: ENGINE_SERVER.ENGINE_INFO_PRESETS },
   { name: "query", presets: ENGINE_SERVER.ENGINE_QUERY_PRESETS },
   { name: "render", presets: ENGINE_SERVER.ENGINE_RENDER_PRESETS },

@@ -298,7 +298,7 @@ export class LinkUtils {
         vaultName?: string;
       }
     | null {
-    const re = new RegExp("i");
+    const re = new RegExp(LINK_CONTENTS, "i");
     const out = linkString.match(re);
     if (out) {
       let { alias, value, anchor } = out.groups as any;

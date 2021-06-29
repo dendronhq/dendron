@@ -127,12 +127,20 @@ export class MDUtilsV5 {
     );
   }
 
+  static shouldApplyPublishingRules(proc: Processor): boolean {
+    return (
+      this.getProcData(proc).dest === DendronASTDest.HTML &&
+      this.getProcOpts(proc).publishing !== true
+    );
+  }
+
   /**
    * Used for processing a Dendron markdown note
    */
   static _procRemark(opts: ProcOptsV5, data: Partial<ProcDataFullOptsV5>) {
     const errors: DendronError[] = [];
     let proc = remark()
+      .use(dendronPub)
       .use(remarkParse, { gfm: true })
       .use(frontmatterPlugin, ["yaml"])
       .use(abbrPlugin)

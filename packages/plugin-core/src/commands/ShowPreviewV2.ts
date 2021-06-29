@@ -118,7 +118,7 @@ export class ShowPreviewV2Command extends BasicCommand<
         case NoteViewMessageType.onClick: {
           const { data } = msg;
           if (data.href) {
-            // TODO find a better way to differentiate local files from web links
+            // TODO find a better way to differentiate local files from web links (`data-` attribute)
             if (data.href.includes("localhost")) {
               const { path } = vscode.Uri.parse(data.href);
               const noteId = path.match(/.*\/(.*).html/)?.[1];
@@ -153,7 +153,11 @@ export class ShowPreviewV2Command extends BasicCommand<
       }
     });
 
-    // TODO add onDidDispose to remote webview from workspace?
+    // remove webview from workspace when user closes it
+    // this prevents throwing `Uncaught Error: Webview is disposed` in `ShowPreviewV2Command#refresh`
+    panel.onDidDispose(() => {
+      ws.setWebView(DendronWebViewKey.NOTE_PREVIEW, undefined);
+    });
 
     // Update workspace-wide graph panel
     ws.setWebView(DendronWebViewKey.NOTE_PREVIEW, panel);

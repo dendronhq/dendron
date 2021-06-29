@@ -408,7 +408,7 @@ export class DendronWorkspace {
     return this.webViews[key];
   }
 
-  setWebView(key: DendronWebViewKey, view: vscode.WebviewPanel) {
+  setWebView(key: DendronWebViewKey, view: vscode.WebviewPanel | undefined) {
     this.webViews[key] = view;
   }
 

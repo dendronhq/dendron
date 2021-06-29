@@ -3,6 +3,32 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.48.0](https://github.com/dendronhq/dendron/compare/v0.47.0...v0.48.0) (2021-06-28)
+
+
+### Bug Fixes
+
+* dendron not applying version migrations ([7c1ca7c](https://github.com/dendronhq/dendron/commit/7c1ca7cadc594ed60320007204e0f90b2fd8ee2c))
+* Ensure `runEngineTestV5` always restores mocks ([#850](https://github.com/dendronhq/dendron/issues/850)) ([a81b249](https://github.com/dendronhq/dendron/commit/a81b24984e90feb40249bb72426e0d84e1df5802))
+* import pod YML errors ([#865](https://github.com/dendronhq/dendron/issues/865)) ([d3bfc09](https://github.com/dendronhq/dendron/commit/d3bfc097372bce7830665a9352d9b46fa7991d7e))
+* note contentHash undefined after save ([c0376d0](https://github.com/dendronhq/dendron/commit/c0376d0be84898a89b003cce33430732f1c0b338))
+* notes failing parsing shouldn't crash initialization ([#855](https://github.com/dendronhq/dendron/issues/855)) ([8f96c6f](https://github.com/dendronhq/dendron/commit/8f96c6f47fa0f0ba7d05d6dbc939928b8f4b754f))
+* updated should only change if note content changes ([7eaf916](https://github.com/dendronhq/dendron/commit/7eaf9166f572a6bd0b1d4772593e70707b8e6be8))
+
+
+### Features Dendron
+
+* add canonicalUrl tag ([2334350](https://github.com/dendronhq/dendron/commit/233435094a465731ac1dccb1089563a3da001594))
+* filter graph by string ([#828](https://github.com/dendronhq/dendron/issues/828)) ([305fd29](https://github.com/dendronhq/dendron/commit/305fd29bd4aa9825104b24b0bacd25a2b1d6ec10))
+* filter graph by string ([#828](https://github.com/dendronhq/dendron/issues/828)) ([114f6a2](https://github.com/dendronhq/dendron/commit/114f6a2b67cbe38a62f76b1459b373b64a6a669c))
+* Focus after the frontmatter when opening a note & option to auto-fold frontmatter ([#870](https://github.com/dendronhq/dendron/issues/870)) ([41019d3](https://github.com/dendronhq/dendron/commit/41019d3981cb8bf32b581a679f5476c26df7de39))
+* show/hide stubs in graph view ([#851](https://github.com/dendronhq/dendron/issues/851)) ([40726f2](https://github.com/dendronhq/dendron/commit/40726f29cbafcdd8dfef2e1fe059c3739e3b69f1))
+* workspace-trust-for-hooks ([#845](https://github.com/dendronhq/dendron/issues/845)) ([9fc3e15](https://github.com/dendronhq/dendron/commit/9fc3e15826f62daf87f5d39a93de0d6c33992413))
+
+
+
+
+
 ## [0.47.2](https://github.com/dendronhq/dendron/compare/v0.47.0...v0.47.2) (2021-06-24)
 
 

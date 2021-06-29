@@ -30,6 +30,7 @@ noAutoCreateOnDefinition: true
 noLegacyNoteRef: true
 noXVaultWikiLink: true
 lookupConfirmVaultOnCreate: false
+autoFoldFrontmatter: true
 journal:
     dailyDomain: daily
     name: journal
@@ -104,6 +105,7 @@ noAutoCreateOnDefinition: true
 noLegacyNoteRef: true
 noXVaultWikiLink: true
 lookupConfirmVaultOnCreate: false
+autoFoldFrontmatter: true
 journal:
     dailyDomain: daily
     name: journal
@@ -168,6 +170,7 @@ noAutoCreateOnDefinition: true
 noLegacyNoteRef: true
 noXVaultWikiLink: true
 lookupConfirmVaultOnCreate: false
+autoFoldFrontmatter: true
 journal:
     dailyDomain: daily
     name: journal
@@ -199,6 +202,7 @@ noAutoCreateOnDefinition: true
 noLegacyNoteRef: true
 noXVaultWikiLink: true
 lookupConfirmVaultOnCreate: false
+autoFoldFrontmatter: true
 journal:
     dailyDomain: daily
     name: journal
@@ -246,6 +250,7 @@ noAutoCreateOnDefinition: true
 noLegacyNoteRef: true
 noXVaultWikiLink: true
 lookupConfirmVaultOnCreate: false
+autoFoldFrontmatter: true
 journal:
     dailyDomain: daily
     name: journal
@@ -306,6 +311,7 @@ noAutoCreateOnDefinition: true
 noLegacyNoteRef: true
 noXVaultWikiLink: true
 lookupConfirmVaultOnCreate: false
+autoFoldFrontmatter: true
 journal:
     dailyDomain: daily
     name: journal
@@ -348,6 +354,7 @@ noAutoCreateOnDefinition: true
 noLegacyNoteRef: true
 noXVaultWikiLink: true
 lookupConfirmVaultOnCreate: false
+autoFoldFrontmatter: true
 journal:
     dailyDomain: daily
     name: journal

@@ -238,6 +238,9 @@ export type DendronConfig = {
    * Configuration for Random Note Lookup Command
    */
   randomNote?: RandomNoteConfig;
+
+  /** Automatically fold frontmatter when opening a new note. False by default. */
+  autoFoldFrontmatter?: boolean;
 };
 
 export type RandomNoteConfig = {

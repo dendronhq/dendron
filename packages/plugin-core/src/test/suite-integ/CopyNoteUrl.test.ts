@@ -12,7 +12,7 @@ import { expect } from "../testUtilsv2";
 import {
   runLegacyMultiWorkspaceTest,
   setupBeforeAfter,
-  withConfig
+  withConfig,
 } from "../testUtilsV3";
 
 suite("CopyNoteUrl", function () {
@@ -107,6 +107,8 @@ suite("CopyNoteUrl", function () {
           vname: seedId,
         })!;
         await VSCodeUtils.openNoteByPath({ vault, fname: "root" });
+        VSCodeUtils.getActiveTextEditorOrThrow().selection =
+          new vscode.Selection(0, 0, 0, 0); // Otherwise it has the header selected
         const link = await new CopyNoteURLCommand().run();
         expect("https://foo.com").toEqual(link);
         done();
@@ -148,6 +150,8 @@ suite("CopyNoteUrl", function () {
           vname: seedId,
         })!;
         await VSCodeUtils.openNoteByPath({ vault, fname: "root" });
+        VSCodeUtils.getActiveTextEditorOrThrow().selection =
+          new vscode.Selection(0, 0, 0, 0); // Otherwise it has the header selected
         const link = await new CopyNoteURLCommand().run();
         expect("https://foo.com").toEqual(link);
         done();

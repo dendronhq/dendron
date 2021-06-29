@@ -13,6 +13,8 @@ import { Item } from "klaw";
 import _ from "lodash";
 import { URI } from "vscode-uri";
 import { PodKind } from "./types";
+import Ajv, { JSONSchemaType } from "ajv";
+const ajv = new Ajv();
 
 export type PodOpts<T> = {
   engine: DEngineClient;
@@ -194,7 +196,9 @@ export abstract class ImportPod<T extends ImportPodConfig = ImportPodConfig> {
     const srcURL = URI.file(resolvePath(src, engine.wsRoot));
     return await this.plant({ ...opts, src: srcURL, vault });
   }
-  abstract plant(opts: ImportPodPlantOpts<T>): Promise<{importedNotes:NoteProps[], errors?:Item[]}>;
+  abstract plant(
+    opts: ImportPodPlantOpts<T>
+  ): Promise<{ importedNotes: NoteProps[]; errors?: Item[] }>;
 }
 
 // === Export Pod
@@ -225,37 +229,20 @@ export abstract class ExportPod<
 > {
   public L: DLogger;
   static kind = "export" as PodKind;
-  get config(): PodConfig[] {
-    return [
-      {
-        key: "dest",
-        description: "Where to export to",
-        type: "string" as const,
-        required: true,
-      },
-      {
-        key: "includeBody",
-        description: "should body be included",
-        default: true,
-        type: "boolean",
-      },
-      {
-        key: "includeStubs",
-        description: "should stubs be included",
-        type: "boolean",
-      },
-    ];
-  }
+  abstract get config(): JSONSchemaType<T>;
+
   constructor() {
     this.L = createLogger("ExportPod");
   }
 
   validate(config: Partial<T>) {
-    const { dest } = config;
-    const configJSON = JSON.stringify(config);
-    if (_.isUndefined(dest)) {
+    const validateConfig = ajv.compile(this.config);
+    const valid = validateConfig(config);
+    if (!valid) {
+      const errors = ajv.errorsText(validateConfig.errors);
       throw new DendronError({
-        message: `no dest specified. config: ${configJSON}`,
+        message: `validation errors: ${errors}`,
+        payload: `error: ${errors}`,
       });
     }
   }

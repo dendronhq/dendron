@@ -1,5 +1,11 @@
-import { VaultUtils, WorkspaceOpts } from "@dendronhq/common-all";
-import { findUpTo } from "@dendronhq/common-server";
+import {
+  assertInvalidState,
+  NoteProps,
+  VaultUtils,
+  WorkspaceOpts,
+} from "@dendronhq/common-all";
+import { findUpTo, genHash } from "@dendronhq/common-server";
+import _ from "lodash";
 
 export class WorkspaceUtils {
   /**
@@ -36,5 +42,24 @@ export class WorkspaceUtils {
     } catch {
       return false;
     }
+  }
+
+  /**
+   * Return true if contents of note is different from engine
+   * @param param0
+   * @returns
+   */
+  static noteContentChanged({
+    content,
+    note,
+  }: {
+    content: string;
+    note: NoteProps;
+  }) {
+    const noteHash = genHash(content);
+    if (_.isUndefined(note.contentHash)) {
+      assertInvalidState(`note contentHash is undefined. id: ${note.id}`);
+    }
+    return noteHash !== note.contentHash;
   }
 }

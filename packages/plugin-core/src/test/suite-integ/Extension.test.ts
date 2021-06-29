@@ -100,6 +100,7 @@ suite("Extension", function () {
               noLegacyNoteRef: true,
               noXVaultWikiLink: true,
               lookupConfirmVaultOnCreate: false,
+              autoFoldFrontmatter: true,
               site: {
                 copyAssets: true,
                 siteHierarchies: ["root"],

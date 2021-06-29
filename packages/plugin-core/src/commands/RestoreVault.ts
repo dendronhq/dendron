@@ -60,8 +60,8 @@ export class RestoreVaultCommand extends BaseCommand<
       const engine = DendronWorkspace.instance().getEngine();
       const vault = engine.vaults[0];
       const wsRoot = DendronWorkspace.wsRoot() as string;
-      if (ws.vaultWatcher) {
-        ws.vaultWatcher.pause = true;
+      if (ws.fileWatcher) {
+        ws.fileWatcher.pause = true;
       }
       if (ws.schemaWatcher) {
         ws.schemaWatcher.pause = true;
@@ -76,8 +76,8 @@ export class RestoreVaultCommand extends BaseCommand<
       await ws.reloadWorkspace();
       return;
     } finally {
-      if (ws.vaultWatcher) {
-        ws.vaultWatcher.pause = false;
+      if (ws.fileWatcher) {
+        ws.fileWatcher.pause = false;
       }
       if (ws.schemaWatcher) {
         ws.schemaWatcher.pause = false;

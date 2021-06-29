@@ -20,6 +20,7 @@ export default class FrontmatterFoldingRangeProvider
     const fmContent = fmMatch[0];
     // we know fmContent cannot be null since fmMatch exists.
     const fmContentLength = fmContent.match(/^/gm)!.length;
-    return [new vscode.FoldingRange(0, fmContentLength)];
+    // there is fmContentLength lines, so the index of the last line is fmContentLength - 1
+    return [new vscode.FoldingRange(0, fmContentLength - 1)];
   }
 }

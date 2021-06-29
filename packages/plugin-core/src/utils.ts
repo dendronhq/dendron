@@ -7,6 +7,7 @@ import {
   getStage,
   NoteProps,
   NoteUtils,
+  Point,
   SchemaModuleProps,
   Time,
   VaultUtils,
@@ -447,6 +448,34 @@ export class VSCodeUtils {
     );
     panel.webview.html = rawHTML ? content : _md().render(content);
   };
+
+  /** Convert a `Point` from a parsed remark node to a `vscode.Poisition`
+   *
+   * @param point The point to convert.
+   * @param offset When converting the point, shift it by this much.
+   * @returns The converted Position, shifted by `offset` if provided.
+   */
+  static point2VSCodePosition(
+    point: Point,
+    offset?: { line?: number; column?: number }
+  ) {
+    return new vscode.Position(
+      // remark Point's are 0 indexed
+      point.line - 1 + (offset?.line || 0),
+      point.column - 1 + (offset?.column || 0)
+    );
+  }
+
+  /** Fold the foldable region at the given line for the active editor.
+   *
+   * This is equivalent to selecting that point, and using the "Fold" command in the editor.
+   */
+  static foldActiveEditorAtPosition(opts: { line?: number; levels?: number }) {
+    return vscode.commands.executeCommand("editor.fold", {
+      selectionLines: [opts.line],
+      levels: opts.levels,
+    });
+  }
 }
 
 export class WSUtils {

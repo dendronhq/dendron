@@ -145,3 +145,13 @@ export function assertUnreachable(_never?: never): never {
       "This error should never occur! Please report a bug if you have encountered this.",
   });
 }
+
+/**
+ * Helper function to raise invalid state
+ */
+export function assertInvalidState(msg: string): never {
+  throw new DendronError({
+    status: ERROR_STATUS.INVALID_STATE,
+    message: msg,
+  });
+}

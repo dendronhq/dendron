@@ -128,8 +128,8 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     const wsRoot = DendronWorkspace.wsRoot();
     const engine = ws.getEngine();
 
-    if (ws.vaultWatcher && !opts.noPauseWatcher) {
-      ws.vaultWatcher.pause = true;
+    if (ws.fileWatcher && !opts.noPauseWatcher) {
+      ws.fileWatcher.pause = true;
     }
     try {
       Logger.info({ ctx, opts });
@@ -153,10 +153,10 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
       return { changed };
     } finally {
       DendronWorkspace.instance().dendronTreeView?.treeProvider.refresh();
-      if (ws.vaultWatcher && !opts.noPauseWatcher) {
+      if (ws.fileWatcher && !opts.noPauseWatcher) {
         setTimeout(() => {
-          if (ws.vaultWatcher) {
-            ws.vaultWatcher.pause = false;
+          if (ws.fileWatcher) {
+            ws.fileWatcher.pause = false;
           }
           this.L.info({ ctx, msg: "exit" });
         }, 3000);

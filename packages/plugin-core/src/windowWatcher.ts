@@ -11,12 +11,15 @@ import {
   Range,
   window,
   TextEditor,
+  Selection,
 } from "vscode";
 import { Logger } from "./logger";
 import { CodeConfigKeys, DateTimeFormat } from "./types";
 import { VSCodeUtils } from "./utils";
 import { getConfigValue, getWS } from "./workspace";
 import { ShowPreviewV2Command } from "./commands/ShowPreviewV2";
+import visit from "unist-util-visit";
+import { MDUtilsV5, ProcMode } from "@dendronhq/engine-server";
 
 const tsDecorationType = window.createTextEditorDecorationType({
   //   borderWidth: "1px",
@@ -53,13 +56,23 @@ export class WindowWatcher {
           this.triggerNoteGraphViewUpdate();
           this.triggerSchemaGraphViewUpdate();
           this.triggerNotePreviewUpdate(editor);
+
+          if (
+            getWS().workspaceWatcher?.getNewlyOpenedDocument(editor.document)
+          ) {
+            this.onFirstOpen(editor);
+          }
         }
       },
-      null,
+      this,
       context.subscriptions
     );
   }
 
+  /**
+   * Add text decorator to frontmatter
+   * @returns
+   */
   async triggerUpdateDecorations(text?: string) {
     const activeEditor = window.activeTextEditor;
     if (!activeEditor) {
@@ -164,5 +177,36 @@ export class WindowWatcher {
   async triggerNotePreviewUpdate({ document }: TextEditor) {
     ShowPreviewV2Command.onDidChangeHandler(document);
     return;
+  }
+
+  private async onFirstOpen(editor: TextEditor) {
+    this.moveCursorPastFrontmatter(editor);
+    if (getWS().config.autoFoldFrontmatter) {
+      await this.foldFrontmatter();
+    }
+  }
+
+  private moveCursorPastFrontmatter(editor: TextEditor) {
+    const proc = MDUtilsV5.procRemarkParse({
+      mode: ProcMode.NO_DATA,
+      parseOnly: true,
+    });
+    const parsed = proc.parse(editor.document.getText());
+    visit(parsed, ["yaml"], (node) => {
+      if (_.isUndefined(node.position)) return false; // Should never happen
+      const position = VSCodeUtils.point2VSCodePosition(
+        node.position.end,
+        // Move past frontmatter + one line after the end because otherwise this ends up inside frontmatter when folded.
+        // This also makes sense because the front
+        { line: 1 }
+      );
+      editor.selection = new Selection(position, position);
+      // Found the frontmatter already, stop traversing
+      return false;
+    });
+  }
+
+  private async foldFrontmatter() {
+    await VSCodeUtils.foldActiveEditorAtPosition({ line: 0 });
   }
 }

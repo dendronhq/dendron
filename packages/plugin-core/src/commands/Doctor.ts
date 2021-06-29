@@ -154,7 +154,7 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     }
 
     const siteRoot = path.join(wsRoot, config.site.siteRootDir);
-    ws.vaultWatcher!.pause = true;
+    ws.fileWatcher!.pause = true;
     this.L.info({ ctx, msg: "pre:Reload" });
     const engine: DEngineClient =
       (await new ReloadIndexCommand().execute()) as DEngineClient;
@@ -207,8 +207,8 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
             break;
           }
           window.showInformationMessage("creating missing links...");
-          if (ws.vaultWatcher) {
-            ws.vaultWatcher.pause = true;
+          if (ws.fileWatcher) {
+            ws.fileWatcher.pause = true;
           }
           await cmd.execute({
             action: opts.action,
@@ -221,8 +221,8 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
         } else {
           window.showInformationMessage(`There are no missing links!`);
         }
-        if (ws.vaultWatcher) {
-          ws.vaultWatcher.pause = false;
+        if (ws.fileWatcher) {
+          ws.fileWatcher.pause = false;
         }
         break;
       }
@@ -242,7 +242,7 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
       }
     }
 
-    getWS().vaultWatcher!.pause = false;
+    getWS().fileWatcher!.pause = false;
     await new ReloadIndexCommand().execute();
 
     // create site root, used for publication

@@ -24,16 +24,15 @@ export class ShowPreviewV2Command extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
-  private activeTextEditor: vscode.TextEditor;
+  private activeTextEditor: vscode.TextEditor | undefined;
 
   static key = DENDRON_COMMANDS.SHOW_PREVIEW_V2.key;
 
   constructor(_name?: string) {
     super(_name);
-
     // save reference to the activeTextEditor when the command was trigger
     // this makes sure that the `note` retrieval from `activeTextEditor` works in `NoteViewMessageType.onGetActiveEditor` because there it would be `undefined` since focus changed to the preview window
-    this.activeTextEditor = VSCodeUtils.getActiveTextEditorOrThrow();
+    this.activeTextEditor = VSCodeUtils.getActiveTextEditor();
   }
 
   static onDidChangeHandler(document: vscode.TextDocument) {
@@ -153,13 +152,13 @@ export class ShowPreviewV2Command extends BasicCommand<
       }
     });
 
+    // Update workspace-wide graph panel
+    ws.setWebView(DendronWebViewKey.NOTE_PREVIEW, panel);
+
     // remove webview from workspace when user closes it
     // this prevents throwing `Uncaught Error: Webview is disposed` in `ShowPreviewV2Command#refresh`
     panel.onDidDispose(() => {
       ws.setWebView(DendronWebViewKey.NOTE_PREVIEW, undefined);
     });
-
-    // Update workspace-wide graph panel
-    ws.setWebView(DendronWebViewKey.NOTE_PREVIEW, panel);
   }
 }

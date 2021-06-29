@@ -406,6 +406,13 @@
         "docPreview": ""
       },
       {
+        "command": "dendron.showPreviewV2",
+        "title": "Dendron: Show Preview V2",
+        "desc": "Show Markdown Preview",
+        "docLink": "dendron.topic.commands.md",
+        "docPreview": ""
+      },
+      {
         "command": "dendron.pasteFile",
         "title": "Dendron: Paste File",
         "desc": "Paste file"

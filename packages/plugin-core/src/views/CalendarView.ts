@@ -27,12 +27,15 @@ export class CalendarView implements vscode.WebviewViewProvider {
       vscode.window.onDidChangeActiveTextEditor(
         // An `ChangeActiveTextEditor` event might be immediately followed by a new one (e.g. switch TextDocument).
         // This would result in the first call to unset `noteActive` and the seconde one to set it again. This might create flashing UI changes that disturb the eye.
-        _.debounce(this.handleActiveTextEditorChange, 100),
+        _.debounce(this.onActiveTextEditorChangeHandler, 100),
         this
       )
     );
     dendronWorkspace.addDisposable(
-      vscode.workspace.onDidSaveTextDocument(this.handleSaveTextDocument, this)
+      vscode.workspace.onDidSaveTextDocument(
+        this.onDidSaveTextDocumentHandler,
+        this
+      )
     );
   }
 
@@ -57,11 +60,11 @@ export class CalendarView implements vscode.WebviewViewProvider {
     }
   }
 
-  async handleSaveTextDocument(document: vscode.TextDocument) {
-    this.openTextDocument(document); // TODO optimize for only daily notes
+  async onDidSaveTextDocumentHandler(document: vscode.TextDocument) {
+    this.openTextDocument(document); // TODO optimize so that it only executes on daily notes
   }
 
-  async handleActiveTextEditorChange() {
+  async onActiveTextEditorChangeHandler() {
     const document = VSCodeUtils.getActiveTextEditor()?.document;
     if (!this._view?.visible) {
       return;
@@ -73,7 +76,7 @@ export class CalendarView implements vscode.WebviewViewProvider {
     }
   }
 
-  async handleReceiveMessage(msg: CalendarViewMessage) {
+  async onDidReceiveMessageHandler(msg: CalendarViewMessage) {
     const ctx = "onDidReceiveMessage";
     Logger.info({ ctx, data: msg });
     switch (msg.type) {
@@ -97,7 +100,7 @@ export class CalendarView implements vscode.WebviewViewProvider {
         break;
       }
       case CalendarViewMessageType.onGetActiveEditor: {
-        this.handleActiveTextEditorChange(); // initial call
+        this.onActiveTextEditorChangeHandler(); // initial call
         break;
       }
       default:
@@ -124,7 +127,10 @@ export class CalendarView implements vscode.WebviewViewProvider {
       localResourceRoots: [],
     };
     webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
-    webviewView.webview.onDidReceiveMessage(this.handleReceiveMessage, this);
+    webviewView.webview.onDidReceiveMessage(
+      this.onDidReceiveMessageHandler,
+      this
+    );
   }
 
   public refresh(note?: NoteProps) {

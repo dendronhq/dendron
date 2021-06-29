@@ -17,6 +17,7 @@ import { Logger } from "./logger";
 import { CodeConfigKeys, DateTimeFormat } from "./types";
 import { VSCodeUtils } from "./utils";
 import { getConfigValue, getWS } from "./workspace";
+import { ShowPreviewV2Command } from "./commands/ShowPreviewV2";
 import visit from "unist-util-visit";
 import { MDUtilsV5, ProcMode } from "@dendronhq/engine-server";
 
@@ -54,6 +55,7 @@ export class WindowWatcher {
           this.triggerUpdateDecorations();
           this.triggerNoteGraphViewUpdate();
           this.triggerSchemaGraphViewUpdate();
+          this.triggerNotePreviewUpdate(editor);
 
           if (
             getWS().workspaceWatcher?.getNewlyOpenedDocument(editor.document)
@@ -169,6 +171,11 @@ export class WindowWatcher {
         } as OnDidChangeActiveTextEditorMsg);
       }
     }
+    return;
+  }
+
+  async triggerNotePreviewUpdate({ document }: TextEditor) {
+    ShowPreviewV2Command.onDidChangeHandler(document);
     return;
   }
 

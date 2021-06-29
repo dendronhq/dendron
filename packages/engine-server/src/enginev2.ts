@@ -99,7 +99,11 @@ export class DendronEngineV2 implements DEngine {
   static create({ wsRoot, logger }: { logger?: DLogger; wsRoot: string }) {
     const LOGGER = logger || createLogger();
     const cpath = DConfig.configPath(wsRoot);
-    const config = readYAML(cpath) as DendronConfig;
+    const config = _.defaultsDeep(
+      readYAML(cpath) as DendronConfig,
+      DConfig.genDefaultConfig()
+    );
+
     return new DendronEngineV2({
       wsRoot,
       vaults: config.vaults,
@@ -317,7 +321,11 @@ export class DendronEngineV2 implements DEngine {
 
   async getConfig() {
     const cpath = DConfig.configPath(this.configRoot);
-    const config = readYAML(cpath) as DendronConfig;
+    const config = _.defaultsDeep(
+      readYAML(cpath) as DendronConfig,
+      DConfig.genDefaultConfig()
+    );
+
     return {
       error: null,
       data: config,

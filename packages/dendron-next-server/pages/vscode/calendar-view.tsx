@@ -132,7 +132,6 @@ function CalendarView({ engine, ide }: DendronProps) {
     (date) => {
       logger.info({ ctx: "onSelect", date });
       const dateKey = getDateKey(date);
-      debugger;
       const selectedNote = _.first(groupedDailyNotes[dateKey]);
 
       postVSCodeMessage({

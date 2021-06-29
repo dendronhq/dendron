@@ -144,6 +144,11 @@
         "desc": "Open a random note within a configured hierarchy set"
       },
       {
+        "command": "dendron.launchTutorial",
+        "title": "Dendron: Launch Tutorial",
+        "desc": "Launch the Tutorial"
+      },
+      {
         "command": "dendron.renameNote",
         "title": "Dendron: Rename Note",
         "desc": "Rename a note and all backlinks",

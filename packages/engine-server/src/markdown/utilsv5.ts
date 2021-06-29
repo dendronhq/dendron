@@ -140,7 +140,6 @@ export class MDUtilsV5 {
   static _procRemark(opts: ProcOptsV5, data: Partial<ProcDataFullOptsV5>) {
     const errors: DendronError[] = [];
     let proc = remark()
-      .use(dendronPub)
       .use(remarkParse, { gfm: true })
       .use(frontmatterPlugin, ["yaml"])
       .use(abbrPlugin)
@@ -196,6 +195,7 @@ export class MDUtilsV5 {
       dest: DendronASTDest.HTML,
     });
     let pRehype = pRemarkParse
+      .use(dendronPub)
       .use(remark2rehype, { allowDangerousHtml: true })
       .use(rehypePrism, { ignoreMissing: true })
       .use(raw)

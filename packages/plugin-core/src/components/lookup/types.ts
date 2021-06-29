@@ -13,6 +13,8 @@ export type LookupControllerState = {
 };
 
 type FilterQuickPickFunction = (items: NoteQuickInput[]) => NoteQuickInput[];
+type ModifyPickerValueFunc = (value: string) => string;
+
 export type DendronQuickPickItemV2 = QuickPick<DNodePropsQuickInputV2>;
 export type DendronQuickPickerV2 = DendronQuickPickItemV2 & {
   // --- Private State
@@ -31,6 +33,11 @@ export type DendronQuickPickerV2 = DendronQuickPickItemV2 & {
   nonInteractive?: boolean;
   prev?: { activeItems: any; items: any };
   prevValue?: string;
+
+  /**
+   * Value before being modified
+   */
+  rawValue: string;
   onCreate?: (note: DNodeProps) => Promise<DNodeProps | undefined>;
   /**
    @deprecated, replace with filterResults
@@ -51,7 +58,17 @@ export type DendronQuickPickerV2 = DendronQuickPickItemV2 & {
    */
   vault?: DVault;
   // --- Methods
+  /**
+   * Filter results through filter middleware
+   */
   filterMiddleware?: FilterQuickPickFunction;
+  /**
+   * Modify picker value
+   */
+  modifyPickerValueFunc?: ModifyPickerValueFunc;
+  /**
+   * Should show a subsequent picker?
+   */
   nextPicker?: () => any;
   /**
    * TODO: should be required

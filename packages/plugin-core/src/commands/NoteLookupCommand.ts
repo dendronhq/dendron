@@ -10,6 +10,7 @@ import _ from "lodash";
 import { Uri } from "vscode";
 import {
   DirectChildFilterBtn,
+  JournalBtn,
   MultiSelectBtn,
 } from "../components/lookup/buttons";
 import { LookupControllerV3 } from "../components/lookup/LookupControllerV3";
@@ -29,13 +30,18 @@ import { DENDRON_COMMANDS } from "../constants";
 import { Logger } from "../logger";
 import { DendronWorkspace, getEngine, getWS } from "../workspace";
 import { BaseCommand } from "./base";
-import { LookupFilterType } from "./LookupCommand";
+import {
+  LookupFilterType,
+  LookupNoteType,
+  LookupNoteTypeEnum,
+} from "./LookupCommand";
 
 type CommandRunOpts = {
   initialValue?: string;
   noConfirm?: boolean;
   fuzzThreshold?: number;
   multiSelect?: boolean;
+  noteType?: LookupNoteType;
   /**
    * NOTE: currently, only one filter is supported
    */
@@ -124,6 +130,7 @@ export class NoteLookupCommand extends BaseCommand<
         "lookupConfirmVaultOnCreate"
       ),
       extraButtons: [
+        JournalBtn.create(copts.noteType === LookupNoteTypeEnum.journal),
         MultiSelectBtn.create(copts.multiSelect),
         DirectChildFilterBtn.create(
           copts.filterMiddleware?.includes("directChildOnly")

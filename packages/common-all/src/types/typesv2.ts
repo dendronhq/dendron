@@ -478,7 +478,7 @@ export type GetNoteOpts = {
 
 // === Pods
 export type DPod<TConfig> = {
-  config: PodConfig[];
+  config: any;
   execute(opts: BasePodExecuteOpts<TConfig>): Promise<any>;
 };
 
@@ -535,6 +535,11 @@ export enum CalendarViewMessageType {
   "onGetActiveEditor" = "onGetActiveEditor",
 }
 
+export enum NoteViewMessageType {
+  "onClick" = "onClick",
+  "onGetActiveEditor" = "onGetActiveEditor",
+}
+
 export enum ThemeMessageType {
   "onThemeChange" = "onThemeChange",
   "getTheme" = "getTheme",
@@ -562,12 +567,18 @@ export type CalendarViewMessage = DMessage<
   { id?: string; fname?: string }
 >;
 
+export type NoteViewMessage = DMessage<
+  NoteViewMessageType,
+  { id?: string; href?: string }
+>;
+
 // --- Views
 
 export enum DendronWebViewKey {
   CONFIGURE = "dendron.configure",
   NOTE_GRAPH = "dendron.graph-note",
   SCHEMA_GRAPH = "dendron.graph-schema",
+  NOTE_PREVIEW = "dendron.note-preview",
 }
 
 export enum DendronTreeViewKey {

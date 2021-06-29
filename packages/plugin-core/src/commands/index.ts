@@ -41,6 +41,7 @@ import { ShowHelpCommand } from "./ShowHelp";
 import { ShowNoteGraphCommand } from "./ShowNoteGraph";
 import { ShowSchemaGraphCommand } from "./ShowSchemaGraph";
 import { ShowPreviewCommand } from "./ShowPreview";
+import { ShowPreviewV2Command } from "./ShowPreviewV2";
 import { SignInCommand } from "./SignIn";
 import { SignUpCommand } from "./SignUp";
 import { SiteBuildCommand } from "./SiteBuild";
@@ -95,6 +96,7 @@ const ALL_COMMANDS = [
   ShowNoteGraphCommand,
   ShowSchemaGraphCommand,
   ShowPreviewCommand,
+  ShowPreviewV2Command,
   SignInCommand,
   SignUpCommand,
   SiteBuildCommand,

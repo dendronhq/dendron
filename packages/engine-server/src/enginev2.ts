@@ -495,6 +495,12 @@ export class DendronEngineV2 implements DEngine {
     }
   }
 
+  /**
+   * See {@link FileStorageV2.updateNote}
+   * @param note
+   * @param opts
+   * @returns
+   */
   async updateNote(note: NoteProps, opts?: EngineUpdateNodesOptsV2) {
     const out = this.store.updateNote(note, opts);
     await this.updateIndex("note");

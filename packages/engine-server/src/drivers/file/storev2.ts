@@ -623,6 +623,16 @@ export class FileStorage implements DStore {
     return out;
   }
 
+  /**
+   * Update a note. If note exists, call {@link NoteUtils.hydrate} to populate new note with parent/children properties
+   * of the existing note
+   *
+   * If {@link newNode} is set, set the {@link NoteProps["parent"]} property and create stubs as neccessary
+   *
+   * @param note
+   * @param opts
+   * @returns
+   */
   async updateNote(note: NoteProps, opts?: EngineUpdateNodesOptsV2) {
     const ctx = "updateNote";
     const maybeNote = this.notes[note.id];

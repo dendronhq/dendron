@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.48.0](https://github.com/dendronhq/dendron/compare/v0.47.0...v0.48.0) (2021-06-28)
+
+
+### Features Dendron
+
+* filter graph by string ([#828](https://github.com/dendronhq/dendron/issues/828)) ([305fd29](https://github.com/dendronhq/dendron/commit/305fd29bd4aa9825104b24b0bacd25a2b1d6ec10))
+* filter graph by string ([#828](https://github.com/dendronhq/dendron/issues/828)) ([114f6a2](https://github.com/dendronhq/dendron/commit/114f6a2b67cbe38a62f76b1459b373b64a6a669c))
+* show/hide stubs in graph view ([#851](https://github.com/dendronhq/dendron/issues/851)) ([40726f2](https://github.com/dendronhq/dendron/commit/40726f29cbafcdd8dfef2e1fe059c3739e3b69f1))
+
+
+
+
+
 ## [0.47.2](https://github.com/dendronhq/dendron/compare/v0.47.0...v0.47.2) (2021-06-24)
 
 

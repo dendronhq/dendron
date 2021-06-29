@@ -22,12 +22,15 @@ import through2 from "through2";
 import {
   ExportPod,
   ExportPodPlantOpts,
+  ExportPodConfig,
   ImportPod,
   ImportPodConfig,
   ImportPodPlantOpts,
   PublishPod,
   PublishPodPlantOpts,
 } from "../basev3";
+import { JSONSchemaType } from "ajv";
+import { PodUtils } from "../utils";
 
 const ID = "dendron.markdown";
 
@@ -38,7 +41,10 @@ type MarkdownImportPodConfig = ImportPodConfig & {
   indexName?: string;
 };
 
-export type MarkdownImportPodResp = {importedNotes: NoteProps[]; errors: Item[]}
+export type MarkdownImportPodResp = {
+  importedNotes: NoteProps[];
+  errors: Item[];
+};
 
 type DItem = Item & {
   data?: any;
@@ -73,7 +79,9 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
     ]);
   }
 
-async _collectItems(root: string): Promise<{items: DItem[], errors: DItem[]}> {
+  async _collectItems(
+    root: string
+  ): Promise<{ items: DItem[]; errors: DItem[] }> {
     const ctx = "MarkdownPod._collectItems";
     const items: DItem[] = []; // files, directories, symlinks, etc
     const errors: DItem[] = []; // import items that resulted in errors
@@ -97,23 +105,21 @@ async _collectItems(root: string): Promise<{items: DItem[], errors: DItem[]}> {
               const { data, content } = readMD(item.path);
               out.data = data;
               out.body = content;
-            }
-            catch(err) {
-              this.L.error({ctx, error: err });
+            } catch (err) {
+              this.L.error({ ctx, error: err });
               isError = true;
             }
           }
           if (!isError) {
             out.path = out.path.slice(mask);
             items.push(out);
-          }
-          else {
+          } else {
             errors.push(out);
           }
         })
         .on("end", () => {
           this.L.info({ msg: "done collecting items" });
-          resolve({items, errors});
+          resolve({ items, errors });
         });
     });
   }
@@ -253,7 +259,7 @@ async _collectItems(root: string): Promise<{items: DItem[], errors: DItem[]}> {
     const { wsRoot, engine, src, vault, config } = opts;
     this.L.info({ ctx, wsRoot, src: src.fsPath, msg: "enter" });
     // get all items
-    const {items, errors} = await this._collectItems(src.fsPath);
+    const { items, errors } = await this._collectItems(src.fsPath);
     this.L.info({ ctx, wsRoot, numItems: _.size(items), msg: "collectItems" });
     const { engineFileDict } = await this._prepareItems(items);
     const hDict = this._files2HierarichalDict({
@@ -293,7 +299,7 @@ async _collectItems(root: string): Promise<{items: DItem[], errors: DItem[]}> {
       src: src.fsPath,
       msg: `${_.size(notesClean)} notes imported`,
     });
-    return {importedNotes:notesClean, errors};
+    return { importedNotes: notesClean, errors };
   }
 }
 
@@ -326,6 +332,13 @@ export class MarkdownExportPod extends ExportPod {
   static id: string = ID;
   static description: string = "export notes as markdown";
 
+  get config(): JSONSchemaType<ExportPodConfig> {
+    return PodUtils.createExportConfig({
+      required: [],
+      properties: {},
+    }) as JSONSchemaType<ExportPodConfig>;
+  }
+
   async plant(opts: ExportPodPlantOpts) {
     const ctx = "MarkdownExportPod:plant";
     const { dest, notes, vaults, wsRoot } = opts;
@@ -353,13 +366,22 @@ export class MarkdownExportPod extends ExportPod {
     // Export Assets
     await Promise.all(
       vaults.map(async (vault) => {
-      //TODO: Avoid hardcoding of assets directory, or else extract to global const
-      const destPath = path.join(dest.fsPath,  VaultUtils.getRelPath(vault), "assets");
-      const srcPath = path.join(wsRoot, VaultUtils.getRelPath(vault), "assets");
-      if (fs.pathExistsSync(srcPath)) {
-        await fs.copy(srcPath, destPath);
-      }
-    }));
+        //TODO: Avoid hardcoding of assets directory, or else extract to global const
+        const destPath = path.join(
+          dest.fsPath,
+          VaultUtils.getRelPath(vault),
+          "assets"
+        );
+        const srcPath = path.join(
+          wsRoot,
+          VaultUtils.getRelPath(vault),
+          "assets"
+        );
+        if (fs.pathExistsSync(srcPath)) {
+          await fs.copy(srcPath, destPath);
+        }
+      })
+    );
     return { notes };
   }
 }

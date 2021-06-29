@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.48.0](https://github.com/dendronhq/dendron/compare/v0.47.0...v0.48.0) (2021-06-28)
+
+
+### Bug Fixes
+
+* note contentHash undefined after save ([c0376d0](https://github.com/dendronhq/dendron/commit/c0376d0be84898a89b003cce33430732f1c0b338))
+
+
+
+
+
 ## [0.47.2](https://github.com/dendronhq/dendron/compare/v0.47.0...v0.47.2) (2021-06-24)
 
 **Note:** Version bump only for package @dendronhq/common-server

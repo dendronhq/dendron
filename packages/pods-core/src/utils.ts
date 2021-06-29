@@ -56,6 +56,33 @@ export class PodUtils {
     return podsPath;
   }
 
+  static createExportConfig(opts: { required: string[]; properties: any }) {
+    return {
+      type: "object",
+      additionalProperties: false,
+      required: ["dest", ...opts.required],
+      properties: {
+        dest: {
+          type: "string",
+          description: "Where to export to",
+        },
+        includeBody: {
+          type: "boolean",
+          default: true,
+          description: "should body be included",
+          nullable: true,
+        },
+        includeStubs: {
+          type: "boolean",
+          description: "should stubs be included",
+          nullable: true,
+        },
+        ignore: { type: "array", items: { type: "string" }, nullable: true },
+        ...opts.properties,
+      },
+    };
+  }
+
   /**
    * Create config file if it doesn't exist
    */
@@ -71,22 +98,45 @@ export class PodUtils {
     const podConfigPath = PodUtils.getConfigPath({ podsDir, podClass });
     ensureDirSync(path.dirname(podConfigPath));
     const pod = new podClass();
-    const config = pod.config
-      .map((ent) => {
-        ent = _.defaults(ent, { default: "TODO" });
-        const args = [
-          `# description: ${ent.description}`,
-          `# type: ${ent.type}`,
-        ];
-        let configPrefix = "# ";
-        if (ent.required) {
-          args.push(`# required: true`);
-          configPrefix = "";
-        }
-        args.push(`${configPrefix}${ent.key}: ${ent.default}`);
-        return args.join("\n");
-      })
-      .join("\n\n");
+    let config;
+    if (podClass.kind === "export") {
+      const required = pod.config.required;
+      const podConfig = pod.config.properties;
+      config = Object.keys(podConfig)
+        .map((ent: any) => {
+          podConfig[ent] = _.defaults(podConfig[ent], { default: "TODO" });
+          const args = [
+            `# description: ${podConfig[ent].description}`,
+            `# type: ${podConfig[ent].type}`,
+          ];
+          let configPrefix = "# ";
+          if (required.includes(`${ent}`)) {
+            args.push(`# required: true`);
+            configPrefix = "";
+          }
+          args.push(`${configPrefix}${ent}: ${podConfig[ent].default}`);
+          return args.join("\n");
+        })
+        .join("\n\n");
+    } else {
+      config = pod.config
+        .map((ent: any) => {
+          ent = _.defaults(ent, { default: "TODO" });
+          const args = [
+            `# description: ${ent.description}`,
+            `# type: ${ent.type}`,
+          ];
+          let configPrefix = "# ";
+          if (ent.required) {
+            args.push(`# required: true`);
+            configPrefix = "";
+          }
+          args.push(`${configPrefix}${ent.key}: ${ent.default}`);
+          return args.join("\n");
+        })
+        .join("\n\n");
+    }
+
     if (!fs.existsSync(podConfigPath) || force) {
       writeFileSync(podConfigPath, config);
     }

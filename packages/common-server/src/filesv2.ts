@@ -129,14 +129,22 @@ export async function string2Schema({
   });
 }
 
+/**
+ *
+ * @param calculateHash - when set, add `contentHash` property to the note
+ *  Default: false
+ * @returns
+ */
 export function string2Note({
   content,
   fname,
   vault,
+  calculateHash,
 }: {
   content: string;
   fname: string;
   vault: DVault;
+  calculateHash?: boolean;
 }) {
   const options: any = {
     engines: {
@@ -149,6 +157,8 @@ export function string2Note({
   };
   const { data, content: body } = matter(content, options);
   const custom = DNodeUtils.getCustomProps(data);
+
+  const contentHash = calculateHash ? genHash(content) : undefined;
   const note = DNodeUtils.create({
     ...data,
     custom,
@@ -156,6 +166,7 @@ export function string2Note({
     body,
     type: "note",
     vault,
+    contentHash,
   });
   return note;
 }

@@ -41,7 +41,8 @@
     "chalk": "^4.1.1"
   },
   "scripts": {
-    "setup": "yarn && yarn bootstrap:bootstrap && yarn bootstrap:build ",
+    "setup": "yarn && yarn bootstrap:bootstrap && yarn bootstrap:build && yarn setup:cli",
+    "setup:cli": "./bootstrap/scripts/chmod-cli.js",
     "cleanup": "./bootstrap/scripts/cleanup.sh",
     "release": "standard-version",
     "format": "lerna exec --parallel --ignore @dendronhq/dendron-11ty -- yarn format",

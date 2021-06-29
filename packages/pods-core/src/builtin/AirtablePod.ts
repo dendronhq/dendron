@@ -7,6 +7,8 @@ import path from "path";
 import { URI } from "vscode-uri";
 import { RateLimiter } from "limiter";
 import axios from "axios";
+import { JSONSchemaType } from "ajv";
+import { PodUtils } from "../utils";
 
 const ID = "dendron.airtable";
 
@@ -34,40 +36,36 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
   static id: string = ID;
   static description: string = "export notes to airtable";
 
-  get config() {
-    return super.config.concat([
-      {
-        key: "tableName",
-        description: "Name of the airtable",
-        type: "string",
-        required: true,
+  get config(): JSONSchemaType<AirtableExportConfig> {
+    return PodUtils.createExportConfig({
+      required: [
+        "tableName",
+        "srcHierarchy",
+        "baseId",
+        "apiKey",
+        "srcFieldMapping",
+      ],
+      properties: {
+        tableName: { type: "string", description: "Name of the airtable" },
+        srcHierarchy: {
+          type: "string",
+          description: "The src .md file from where to start the sync",
+        },
+        apiKey: {
+          type: "string",
+          description: "Api key for airtable",
+        },
+        baseId: {
+          type: "string",
+          description: " base Id of airtable base",
+        },
+        srcFieldMapping: {
+          type: "object",
+          description:
+            "mapping of airtable fields with the note eg: {Created On: created, Notes: body}",
+        },
       },
-      {
-        key: "srcHierarchy",
-        description: "The src .md file from where to start the sync",
-        type: "string",
-        required: true,
-      },
-      {
-        key: "apiKey",
-        description: "Api key for airtable",
-        type: "string",
-        required: true,
-      },
-      {
-        key: "baseId",
-        description: " base Id of airtable base",
-        type: "string",
-        required: true,
-      },
-      {
-        key: "srcFieldMapping",
-        description:
-          "mapping of airtable fields with the note eg: {Created On: created, Notes: body}",
-        type: "object",
-        required: true,
-      },
-    ]);
+    }) as JSONSchemaType<AirtableExportConfig>;
   }
 
   //filters the note's property as per srcFieldMapping provided

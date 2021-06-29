@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.48.0](https://github.com/dendronhq/dendron/compare/v0.47.0...v0.48.0) (2021-06-28)
+
+
+### Bug Fixes
+
+* note contentHash undefined after save ([c0376d0](https://github.com/dendronhq/dendron/commit/c0376d0be84898a89b003cce33430732f1c0b338))
+
+
+### Features Dendron
+
+* add canonicalUrl tag ([2334350](https://github.com/dendronhq/dendron/commit/233435094a465731ac1dccb1089563a3da001594))
+* Focus after the frontmatter when opening a note & option to auto-fold frontmatter ([#870](https://github.com/dendronhq/dendron/issues/870)) ([41019d3](https://github.com/dendronhq/dendron/commit/41019d3981cb8bf32b581a679f5476c26df7de39))
+* workspace-trust-for-hooks ([#845](https://github.com/dendronhq/dendron/issues/845)) ([9fc3e15](https://github.com/dendronhq/dendron/commit/9fc3e15826f62daf87f5d39a93de0d6c33992413))
+
+
+
+
+
 ## [0.47.2](https://github.com/dendronhq/dendron/compare/v0.47.0...v0.47.2) (2021-06-24)
 
 

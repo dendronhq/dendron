@@ -147,6 +147,7 @@ export class MDUtilsV5 {
       .use(noteRefsV2)
       .use(wikiLinks)
       .use(blockAnchors)
+      .use(dendronPub)
       .data("errors", errors);
 
     // set options and do validation
@@ -195,7 +196,6 @@ export class MDUtilsV5 {
       dest: DendronASTDest.HTML,
     });
     let pRehype = pRemarkParse
-      .use(dendronPub)
       .use(remark2rehype, { allowDangerousHtml: true })
       .use(rehypePrism, { ignoreMissing: true })
       .use(raw)

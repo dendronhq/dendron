@@ -18,6 +18,8 @@ import { Logger } from "../logger";
 type CommandOpts = {};
 type CommandOutput = any;
 
+const title = "Dendron Preview";
+
 export class ShowPreviewV2Command extends BasicCommand<
   CommandOpts,
   CommandOutput
@@ -54,6 +56,7 @@ export class ShowPreviewV2Command extends BasicCommand<
   static refresh(note: NoteProps) {
     const panel = getWS().getWebView(DendronWebViewKey.NOTE_PREVIEW);
     if (panel) {
+      panel.title = `${title} ${note.fname}`;
       panel.webview.postMessage({
         type: "onDidChangeActiveTextEditor",
         data: {
@@ -73,8 +76,6 @@ export class ShowPreviewV2Command extends BasicCommand<
   }
 
   async execute(_opts: CommandOpts) {
-    const title = "Dendron Markdown Preview";
-
     // Get workspace information
     const ws = getWS();
 

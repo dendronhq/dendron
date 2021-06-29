@@ -82,10 +82,13 @@ export class ShowPreviewV2Command extends BasicCommand<
     // If panel already exists
     const existingPanel = ws.getWebView(DendronWebViewKey.NOTE_PREVIEW);
 
+    const viewColumn = vscode.ViewColumn.Beside; // Editor column to show the new webview panel in.
+    const preserveFocus = true;
+
     if (!_.isUndefined(existingPanel)) {
       try {
         // If error, panel disposed and needs to be recreated
-        existingPanel.reveal();
+        existingPanel.reveal(viewColumn, preserveFocus);
         return;
       } catch {}
     }
@@ -93,7 +96,10 @@ export class ShowPreviewV2Command extends BasicCommand<
     const panel = vscode.window.createWebviewPanel(
       "dendronIframe", // Identifies the type of the webview. Used internally
       title, // Title of the panel displayed to the user
-      vscode.ViewColumn.Beside, // Editor column to show the new webview panel in.
+      {
+        viewColumn,
+        preserveFocus,
+      },
       {
         enableScripts: true,
         retainContextWhenHidden: true,

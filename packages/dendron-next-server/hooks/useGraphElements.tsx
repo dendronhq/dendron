@@ -554,13 +554,11 @@ const useGraphElements = ({
 
   // Get new elements if active note changes
   useEffect(() => {
-    logger.log("get new local note elements");
     const isLocalGraph = config["options.show-local-graph"]
       ? config["options.show-local-graph"].value
       : false;
 
     if (type === "note" && engine.notes && isLocalGraph && noteActive) {
-      logger.log("GETTING LOCAL GRAPH ELEMENTS FOR", noteActive.fname);
       setElements(
         getLocalNoteGraphElements({
           notes: engine.notes,

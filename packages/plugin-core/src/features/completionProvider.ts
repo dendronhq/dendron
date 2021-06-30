@@ -121,7 +121,7 @@ const PARTIAL_WIKILINK_WITH_ANCHOR_REGEX = new RegExp("" +
 export async function provideBlockCompletionItems(
   document: TextDocument,
   position: Position,
-  token: CancellationToken
+  token?: CancellationToken
 ): Promise<CompletionItem[] | undefined> {
   let found: RegExpMatchArray | undefined;
   // This gets triggered when the user types ^, which won't necessarily happen inside a wikilink.
@@ -140,16 +140,16 @@ export async function provideBlockCompletionItems(
       found = match;
     }
   }
-  if (_.isUndefined(found) || token.isCancellationRequested) return;
+  if (_.isUndefined(found) || token?.isCancellationRequested) return;
 
   const note = VSCodeUtils.getNoteFromDocument(document);
-  if (_.isUndefined(note) || token.isCancellationRequested) return;
+  if (_.isUndefined(note) || token?.isCancellationRequested) return;
 
   const blocks = await getWS().getEngine().getNoteBlocks({ id: note.id });
   if (
     _.isUndefined(blocks.data) ||
     blocks.error?.severity === ERROR_SEVERITY.FATAL ||
-    token.isCancellationRequested
+    token?.isCancellationRequested
   )
     return;
 

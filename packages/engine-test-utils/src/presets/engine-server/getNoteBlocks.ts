@@ -229,7 +229,6 @@ const NOTES = {
         wsRoot,
         vaults,
         cb: ({ data }) => {
-          debugger;
           return [
             {
               actual: data?.length,

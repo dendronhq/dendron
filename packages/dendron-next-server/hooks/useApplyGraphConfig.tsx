@@ -163,12 +163,12 @@ const useApplyGraphConfig = ({
 
     // If should show stubs
     if (configItem.value) {
-      if (stubElements.hasClass(".hidden--stub")) {
+      if (stubElements.hasClass("hidden--stub")) {
         stubElements.removeClass("hidden--stub");
         if (allowRelayout) layoutGraph();
       }
     } else {
-      if (!stubElements.hasClass(".hidden--stub")) {
+      if (!stubElements.hasClass("hidden--stub")) {
         stubElements.addClass("hidden--stub");
         if (allowRelayout) layoutGraph();
       }

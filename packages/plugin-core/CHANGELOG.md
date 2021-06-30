@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.48.1](https://github.com/dendronhq/dendron/compare/v0.48.0...v0.48.1) (2021-06-30)
+
+
+### Bug Fixes
+
+* horizontal line folded as frontmatter ([#886](https://github.com/dendronhq/dendron/issues/886)) ([b7f6fab](https://github.com/dendronhq/dendron/commit/b7f6fab109a9f9bb22a6eb769f675e6f1f3a85ad)), closes [#883](https://github.com/dendronhq/dendron/issues/883)
+* lookup missing some results ([60f20fe](https://github.com/dendronhq/dendron/commit/60f20fea1698d47b8063b26778ac8a759686835d))
+
+
+### Features Dendron
+
+* preview v2 mvp ([a9b6d07](https://github.com/dendronhq/dendron/commit/a9b6d071ccca5f182d8a7985c68926424a2a1f2d))
+
+
+
+
+
 # [0.48.0](https://github.com/dendronhq/dendron/compare/v0.47.0...v0.48.0) (2021-06-28)
 
 

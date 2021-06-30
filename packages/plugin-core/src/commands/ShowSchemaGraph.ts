@@ -12,6 +12,7 @@ import { BasicCommand } from "./base";
 import { getWS } from "../workspace";
 import { VSCodeUtils } from "../utils";
 import path from "path";
+import vscode from "vscode";
 
 type CommandOpts = {};
 
@@ -72,6 +73,9 @@ export class ShowSchemaGraphCommand extends BasicCommand<
 
           const wsRoot = ws._enginev2?.wsRoot;
 
+          await vscode.commands.executeCommand(
+            "workbench.action.focusFirstEditorGroup"
+          );
           if (msg.data.vault && wsRoot) {
             const vaults = engine.vaults.filter(
               (v) => VaultUtils.getName(v) === msg.data.vault

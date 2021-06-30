@@ -23,7 +23,9 @@ const getCytoscapeStyle = (themes: any, theme: string | undefined) => {
     color: ${AntThemes[theme].graph.node.label.color};
     label: data(label);
     font-size: ${AntThemes[theme].graph.node.label.fontSize};
-    min-zoomed-font-size: ${AntThemes[theme].graph.node.label.minZoomedFontSize};
+    min-zoomed-font-size: ${
+      AntThemes[theme].graph.node.label.minZoomedFontSize
+    };
     font-weight: ${AntThemes[theme].graph.node.label.fontWeight};
   }
 
@@ -37,6 +39,12 @@ const getCytoscapeStyle = (themes: any, theme: string | undefined) => {
   :selected, .open {
     background-color: ${AntThemes[theme].graph.node._selected.color};
     color: ${AntThemes[theme].graph.node._selected.color};
+  }
+  
+  .parent {
+    shape: diamond;
+    width: ${AntThemes[theme].graph.node.size * 1.25};
+    height: ${AntThemes[theme].graph.node.size * 1.25};
   }
 
   .links {
@@ -106,6 +114,7 @@ export default function Graph({
     graph: cy,
     engine,
     ide,
+    config,
   });
 
   // On config update, handle graph changes
@@ -117,6 +126,9 @@ export default function Graph({
 
   const { nodes, edges } = elements;
   const isLargeGraph = nodes.length + Object.values(edges).flat().length > 1000;
+  const isLocalGraph = config["options.show-local-graph"]
+    ? config["options.show-local-graph"].value
+    : false;
 
   const renderGraph = () => {
     if (graphRef.current && nodes && edges) {
@@ -148,8 +160,8 @@ export default function Graph({
         style: getCytoscapeStyle(themes, currentTheme) as any,
 
         // Zoom levels
-        minZoom: 0.1,
-        maxZoom: 10,
+        minZoom: 0.25,
+        maxZoom: 5,
 
         // Options to improve performance
         textureOnViewport: isLargeGraph,
@@ -157,7 +169,10 @@ export default function Graph({
         hideLabelsOnViewport: isLargeGraph,
       });
 
-      network.layout(getEulerConfig(!isLargeGraph)).run();
+      const shouldAnimate =
+        type === "schema" || (!isLargeGraph && !isLocalGraph);
+
+      network.layout(getEulerConfig(shouldAnimate)).run();
 
       network.on("select", (e) => onSelect(e));
 
@@ -175,9 +190,13 @@ export default function Graph({
   }, [cy, isGraphLoaded]);
 
   useEffect(() => {
+    // If changed from local graph to full graph, re-render graph to show all elements
+    const wasLocalGraph = cy && cy.$("node[localRoot]").length > 0;
+
     // If the graph already has rendered elements, don't re-render
     // Otherwise, the graph re-renders when elements are selected
-    if (cy && cy.elements("*").length > 1) return;
+    if (!isLocalGraph && !wasLocalGraph && cy && cy.elements("*").length > 1)
+      return;
     renderGraph();
   }, [graphRef, elements]);
 

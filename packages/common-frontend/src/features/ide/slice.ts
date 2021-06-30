@@ -1,4 +1,8 @@
-import { DendronTreeViewKey, NoteProps } from "@dendronhq/common-all";
+import {
+  DendronTreeViewKey,
+  DendronWebViewKey,
+  NoteProps,
+} from "@dendronhq/common-all";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 type Theme = "light" | "dark" | "unknown";
@@ -7,7 +11,7 @@ type InitialState = {
   noteActive: NoteProps | undefined;
   theme: Theme;
   views: {
-    [key in DendronTreeViewKey]: {
+    [key in DendronTreeViewKey | DendronWebViewKey]: {
       ready: boolean;
     };
   };

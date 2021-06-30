@@ -34,8 +34,10 @@ export type NoteGraphConfig = {
   "connections.links"?: GraphConfigItem<boolean>;
   
   "information.edges-links"?: GraphConfigItem<number>;
-
+  
   "filter.show-stubs"?: GraphConfigItem<boolean>;
+  
+  "options.show-local-graph"?: GraphConfigItem<boolean>;
 };
 
 export type SchemaGraphConfig = {
@@ -82,7 +84,7 @@ const coreGraphConfig: CoreGraphConfig = {
 
 const noteGraphConfig: NoteGraphConfig = {
   "connections.links": {
-    value: false,
+    value: true,
     mutable: true,
   },
   "information.edges-links": {
@@ -93,7 +95,10 @@ const noteGraphConfig: NoteGraphConfig = {
     value: true,
     mutable: true,
   },
-
+  "options.show-local-graph": {
+    value: true,
+    mutable: true,
+  },
 };
 
 const schemaGraphConfig: SchemaGraphConfig = {

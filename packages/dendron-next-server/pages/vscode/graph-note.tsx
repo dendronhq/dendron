@@ -1,6 +1,8 @@
 import {
   createLogger,
   engineSlice,
+  ideHooks,
+  ideSlice,
   postVSCodeMessage,
   useVSCodeMessage,
 } from "@dendronhq/common-frontend";
@@ -11,19 +13,30 @@ import {
   DMessageSource,
   GraphViewMessage,
   GraphViewMessageType,
+  NoteProps,
 } from "@dendronhq/common-all";
 import Graph from "../../components/graph";
 import { graphConfig, GraphConfig } from "../../lib/graph";
 import useGraphElements from "../../hooks/useGraphElements";
 import { DendronProps } from "../../lib/types";
+import { DendronWebViewKey } from "@dendronhq/common-all";
 
 export default function FullNoteGraph({ engine, ide }: DendronProps) {
   const [config, setConfig] = useState<GraphConfig>(graphConfig.note);
 
-  const elements = useGraphElements({ type: "note", engine });
+  const [activeNote, setActiveNote] = useState<NoteProps>();
+  const [disregardActiveNote, setDisregardActiveNote] = useState(false);
+  const elements = useGraphElements({
+    type: "note",
+    engine,
+    config,
+    noteActive: activeNote,
+  });
 
-  const logger = createLogger("Graph");
-  logger.log("graph elements:", elements);
+  useEffect(() => {
+    if (ide.noteActive && !disregardActiveNote) setActiveNote(ide.noteActive);
+    else if (disregardActiveNote) setDisregardActiveNote(false);
+  }, [ide.noteActive]);
 
   // Update config
   useEffect(() => {
@@ -52,8 +65,14 @@ export default function FullNoteGraph({ engine, ide }: DendronProps) {
     const { id, source } = e.target[0]._private.data;
 
     const isNode = !source;
-    if (!isNode) return;
+    if (!isNode || !engine.notes) return;
 
+    // The ShowNoteGraph command sets the active text editor to the first window when opening a note.
+    // This causes the active note to change unexpectedly, causing a jarring graph render.
+    // This flag allows the note graph to ignore that first unwanted change
+    setDisregardActiveNote(true);
+
+    setActiveNote(engine.notes[id]);
     postVSCodeMessage({
       type: GraphViewMessageType.onSelect,
       data: { id },

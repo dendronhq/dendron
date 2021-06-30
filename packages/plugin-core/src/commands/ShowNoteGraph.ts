@@ -10,6 +10,7 @@ import { WebViewUtils } from "../views/utils";
 import { BasicCommand } from "./base";
 import { getEngine, getWS } from "../workspace";
 import { GotoNoteCommand } from "./GotoNote";
+import vscode from "vscode";
 
 type CommandOpts = {};
 
@@ -66,6 +67,9 @@ export class ShowNoteGraphCommand extends BasicCommand<
       switch (msg.type) {
         case GraphViewMessageType.onSelect: {
           const note = getEngine().notes[msg.data.id];
+          await vscode.commands.executeCommand(
+            "workbench.action.focusFirstEditorGroup"
+          );
           await new GotoNoteCommand().execute({
             qs: note.fname,
             vault: note.vault,

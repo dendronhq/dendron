@@ -1,4 +1,9 @@
-import { NoteProps, VaultUtils, WorkspaceOpts } from "@dendronhq/common-all";
+import {
+  assertInvalidState,
+  NoteProps,
+  VaultUtils,
+  WorkspaceOpts,
+} from "@dendronhq/common-all";
 import { findUpTo, genHash } from "@dendronhq/common-server";
 import _ from "lodash";
 

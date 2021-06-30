@@ -24,6 +24,7 @@ import { Logger } from "../logger";
 import { VSCodeUtils } from "../utils";
 import { fsPathToRef } from "../utils/md";
 import { DendronWorkspace, getWS } from "../workspace";
+import path from "path";
 
 const padWithZero = (n: number): string => (n < 10 ? "0" + n : String(n));
 
@@ -66,13 +67,10 @@ export const provideCompletionItems = (
 
   uris.forEach((uri, index) => {
     const workspaceFolder = workspace.getWorkspaceFolder(uri);
-    if (!workspaceFolder) {
-      return;
-    }
 
     const longRef = fsPathToRef({
       path: uri.fsPath,
-      basePath: workspaceFolder.uri.fsPath,
+      basePath: workspaceFolder?.uri.fsPath || path.dirname(uri.fsPath),
       keepExt: false, //containsImageExt(uri.fsPath) || containsOtherKnownExts(uri.fsPath),
     });
 

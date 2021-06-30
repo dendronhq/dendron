@@ -127,13 +127,6 @@ export class MDUtilsV5 {
     );
   }
 
-  static shouldApplyPublishingRules(proc: Processor): boolean {
-    return (
-      this.getProcData(proc).dest === DendronASTDest.HTML &&
-      this.getProcOpts(proc).publishing !== true
-    );
-  }
-
   /**
    * Used for processing a Dendron markdown note
    */

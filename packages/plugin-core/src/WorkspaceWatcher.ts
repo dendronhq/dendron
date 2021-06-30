@@ -13,6 +13,7 @@ import {
   TextDocument,
 } from "vscode";
 import { Logger } from "./logger";
+import { NoteSyncService } from "./services/NoteSyncService";
 import { DendronWorkspace, getWS } from "./workspace";
 
 export class WorkspaceWatcher {
@@ -29,8 +30,9 @@ export class WorkspaceWatcher {
       this,
       context.subscriptions
     );
+    //   watcher.onDidChange(_.debounce(this.onDidChange, 500), this)
     workspace.onDidChangeTextDocument(
-      this.onDidChangeTextDocument,
+      _.debounce(this.onDidChangeTextDocument, 100),
       this,
       context.subscriptions
     );
@@ -45,6 +47,7 @@ export class WorkspaceWatcher {
     const activeEditor = window.activeTextEditor;
     if (activeEditor && event.document === activeEditor.document) {
       DendronWorkspace.instance().windowWatcher?.triggerUpdateDecorations();
+      NoteSyncService.instance().onDidChange(activeEditor.document.uri);
     }
     return;
   }

@@ -661,8 +661,19 @@ export class DendronWorkspace {
     }
   }
 
-  async showWelcome(uri: vscode.Uri) {
+  async showWelcome() {
     try {
+      const ws = DendronWorkspace.instance();
+
+      // NOTE: this needs to be from extension because no workspace might exist at this point
+      const uri = VSCodeUtils.joinPath(
+        ws.context.extensionUri,
+        "assets",
+        "dendron-ws",
+        "vault",
+        "welcome.html"
+      );
+
       const { content } = readMD(uri.fsPath);
       const title = "Welcome to Dendron";
 
@@ -745,7 +756,7 @@ export class TutorialInitializer implements WorkspaceInitializer {
 
     await ws.updateGlobalState(
       GLOBAL_STATE.WORKSPACE_ACTIVATION_CONTEXT,
-      WORKSPACE_ACTIVATION_CONTEXT.TUTORIAL
+      WORKSPACE_ACTIVATION_CONTEXT.TUTORIAL.toString()
     );
 
     const dendronWSTemplate = VSCodeUtils.joinPath(
@@ -756,6 +767,23 @@ export class TutorialInitializer implements WorkspaceInitializer {
     const vpath = vault2Path({ vault: opts.vaults[0], wsRoot: opts.wsRoot });
 
     fs.copySync(path.join(dendronWSTemplate.fsPath, "tutorial"), vpath);
+
+    // Tailor the tutorial text to the particular OS and for their workspace location.
+    const options = {
+      files: [path.join(vpath, "*.md")],
+
+      from: [/%KEYBINDING%/g, /%WORKSPACE_ROOT%/g],
+      to: [
+        process.platform === "darwin" ? "Cmd" : "Ctrl",
+        path.join(opts.wsRoot, "dendron.code-workspace"),
+      ],
+    };
+
+    const replace = require("replace-in-file");
+
+    replace(options).catch((error: any) => {
+      console.error(error);
+    });
   };
 
   onWorkspaceOpen: (opts: { ws: DendronWorkspace }) => void = async (opts: {

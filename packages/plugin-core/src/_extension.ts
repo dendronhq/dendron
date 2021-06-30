@@ -481,15 +481,7 @@ async function showWelcomeOrWhatsNew({
         StateService.instance().showTelemetryNotice();
       }
 
-      // NOTE: this needs to be from extension because no workspace might exist at this point
-      const uri = VSCodeUtils.joinPath(
-        ws.context.extensionUri,
-        "assets",
-        "dendron-ws",
-        "vault",
-        "welcome.html"
-      );
-      await ws.showWelcome(uri);
+      await ws.showWelcome();
       break;
     }
     case InstallStatus.UPGRADED: {

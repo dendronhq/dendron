@@ -10,7 +10,7 @@ Let's do a brief overview on how to navigate the Dendron UI.
 
 _Quick note on running commands in VS Code:_
 
->If you're unfamiliar with VS Code, the command palette is used to quickly run commands, including the commands for Dendron. To bring up the command palette, use `Ctrl+Shift+P` (windows/linux) or `Cmd+Shift+P` (mac) and start typing the command. Throughout the tutorial, if you see instructions telling you to run a command, remember to bring up the command palette and then type the command name to run it.
+>If you're unfamiliar with VS Code, the command palette is used to quickly run commands, including the commands for Dendron. To bring up the command palette, use `%KEYBINDING%+Shift+P` and start typing the command. Throughout the tutorial, if you see instructions telling you to run a command, remember to bring up the command palette and then type the command name to run it.
 
 ![Basic UI](https://org-dendron-public-assets.s3.amazonaws.com/images/tutorial-layout.png)
 
@@ -20,13 +20,13 @@ This is where you can write and edit your notes. Notes in Dendron are Markdown f
 
 #### 2. Preview Pane
 
-This shows the rendered Markdown of what your currently opened note looks like. If you close this pane, you can always bring it back by opening the command palette (`Ctrl+Shift+P / Cmd+Shift+P`) and running the `Dendron: Show Preview` command.
+This shows the rendered Markdown of what your currently opened note looks like. If you close this pane, you can always bring it back by opening the command palette `%KEYBINDING%+Shift+P` and running the `Dendron: Show Preview` command.
 
 >💡 The preview pane is read-only and cannot be used to edit notes. All editing must be done in the editor pane.
 
 #### 3. Dendron Workspace
 
-This shows the files in your vault. A vault is where Dendron stores your markdown notes, assets, and other files like schema definitions. Clicking on a note here will open it into the editor pane.
+This shows the files in your vault. A vault is where Dendron stores your markdown notes, assets, and some other helper files. Clicking on a note here will open it into the editor pane.
 
 #### 4. Outline
 

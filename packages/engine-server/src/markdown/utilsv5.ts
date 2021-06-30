@@ -147,7 +147,6 @@ export class MDUtilsV5 {
       .use(noteRefsV2)
       .use(wikiLinks)
       .use(blockAnchors)
-      .use(dendronPub)
       .data("errors", errors);
 
     // set options and do validation

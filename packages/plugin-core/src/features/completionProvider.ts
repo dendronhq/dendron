@@ -1,6 +1,12 @@
-import { ERROR_SEVERITY, genUUID, NoteUtils } from "@dendronhq/common-all";
+import {
+  DNoteAnchor,
+  ERROR_SEVERITY,
+  genUUID,
+  isNotUndefined,
+  NoteUtils,
+} from "@dendronhq/common-all";
 import _ from "lodash";
-import { ALIAS_NAME, LINK_NAME } from "@dendronhq/engine-server";
+import { ALIAS_NAME, AnchorUtils, LINK_NAME } from "@dendronhq/engine-server";
 import {
   CancellationToken,
   CompletionItem,
@@ -97,7 +103,7 @@ const PARTIAL_WIKILINK_WITH_ANCHOR_REGEX = new RegExp("" +
     "\\[\\[" +
     "(" +
       // Will then either look like [[^ or [[^anchor
-      "\\^[\\w-]*" +
+      "(?<trigger>\\^\\^?)[\\w-]*" +
     "|" + // or like [[alias|note#, or [[alias|note#anchor, or [[#, or [[#anchor
       // optional alias
       "(" +
@@ -119,7 +125,7 @@ export async function provideBlockCompletionItems(
   position: Position,
   token: CancellationToken
 ): Promise<CompletionItem[] | undefined> {
-  let found = false;
+  let found: RegExpMatchArray | undefined;
   // This gets triggered when the user types ^, which won't necessarily happen inside a wikilink.
   // So check that the user is actually in a wikilink before we try.
   const line = document.lineAt(position.line);
@@ -133,10 +139,10 @@ export async function provideBlockCompletionItems(
       match.index <= position.character &&
       position.character <= match.index + entireLink.length
     ) {
-      found = true;
+      found = match;
     }
   }
-  if (!found || token.isCancellationRequested) return;
+  if (_.isUndefined(found) || token.isCancellationRequested) return;
 
   const note = VSCodeUtils.getNoteFromDocument(document);
   if (_.isUndefined(note) || token.isCancellationRequested) return;
@@ -149,26 +155,44 @@ export async function provideBlockCompletionItems(
   )
     return;
 
+  // If there is [[^ or [[^^ , remove that because it's not a valid wikilink
+  const removeTrigger =
+    isNotUndefined(found.index) && isNotUndefined(found.groups?.trigger)
+      ? new TextEdit(
+          new Range(
+            position.line,
+            found.index + 2,
+            position.line,
+            found.index + 2 + (found.groups?.trigger.length || 0)
+          ),
+          ""
+        )
+      : undefined;
+
   return blocks.data.map((block) => {
-    const hasAnchor = _.isUndefined(block.anchor);
-    const anchor = block.anchor || genUUID();
+    const edits: TextEdit[] = [];
+    if (removeTrigger) edits.push(removeTrigger);
+    let anchor: DNoteAnchor | undefined = block.anchor;
+    if (_.isUndefined(anchor)) {
+      anchor = {
+        type: "block",
+        value: genUUID(),
+      };
+      const blockPosition = VSCodeUtils.point2VSCodePosition(
+        block.position.end
+      );
+      edits.push(
+        new TextEdit(
+          new Range(blockPosition, blockPosition),
+          ` ${AnchorUtils.anchor2string(anchor)}`
+        )
+      );
+    }
     return {
       label: block.text,
-      insertText: `^${anchor}`,
+      insertText: `#${AnchorUtils.anchor2string(anchor)}`,
       // If the block didn't have an anchor, we need to insert it ourselves
-      additionalTextEdits: hasAnchor
-        ? []
-        : [
-            new TextEdit(
-              new Range(
-                block.position.end.line,
-                block.position.end.column,
-                block.position.end.line,
-                block.position.end.column
-              ),
-              `^${anchor}`
-            ),
-          ],
+      additionalTextEdits: edits,
     };
   });
 }
@@ -189,7 +213,7 @@ export const activate = (context: ExtensionContext) => {
       {
         provideCompletionItems: provideBlockCompletionItems,
       },
-      "#^"
+      "^"
     )
   );
 };

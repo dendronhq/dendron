@@ -23,6 +23,13 @@ export class JSONImportPod extends ImportPod {
   static id: string = ID;
   static description: string = "import json";
 
+  get config(): JSONSchemaType<ImportPodConfig> {
+    return PodUtils.createImportConfig({
+      required: [],
+      properties: {},
+    }) as JSONSchemaType<ImportPodConfig>;
+  }
+
   async plant(opts: JSONImportPodPlantOpts) {
     const ctx = "JSONPod";
     this.L.info({ ctx, opts, msg: "enter" });

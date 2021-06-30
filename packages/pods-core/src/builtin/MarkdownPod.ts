@@ -4,7 +4,6 @@ import {
   genUUID,
   NoteProps,
   NoteUtils,
-  PodConfig,
   VaultUtils,
 } from "@dendronhq/common-all";
 import { cleanFileName, readMD, vault2Path } from "@dendronhq/common-server";
@@ -63,20 +62,23 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
   static id: string = ID;
   static description: string = "import markdown";
 
-  get config(): PodConfig[] {
-    return super.config.concat([
-      {
-        key: "noAddUUID",
-        description: "Don't add uuid to assets",
-        type: "boolean",
+  get config(): JSONSchemaType<MarkdownImportPodConfig> {
+    return PodUtils.createImportConfig({
+      required: [],
+      properties: {
+        noAddUUID: {
+          description: "Don't add uuid to assets",
+          type: "boolean",
+          nullable: true,
+        },
+        indexName: {
+          type: "string",
+          description:
+            "If you have an index file per directory, merge that file with the directory note",
+          nullable: true,
+        },
       },
-      {
-        key: "indexName",
-        description:
-          "If you have an index file per directory, merge that file with the directory note",
-        type: "string",
-      },
-    ]);
+    }) as JSONSchemaType<MarkdownImportPodConfig>;
   }
 
   async _collectItems(

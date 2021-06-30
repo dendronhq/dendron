@@ -112,7 +112,7 @@ const PARTIAL_WIKILINK_WITH_ANCHOR_REGEX = new RegExp("" +
       // optional note
       `(${LINK_NAME})?` +
       // anchor
-      `#(${LINK_NAME})?` +
+      `#(?<anchor>\\^)?(${LINK_NAME})?` +
     ")" +
     // May have ending brackets
     "\\]?\\]?" +
@@ -157,19 +157,32 @@ export async function provideBlockCompletionItems(
 
   // If there is [[^ or [[^^ , remove that because it's not a valid wikilink
   const removeTrigger =
-    isNotUndefined(found.index) && isNotUndefined(found.groups?.trigger)
+    isNotUndefined(found.index) &&
+    isNotUndefined(found.groups) &&
+    isNotUndefined(found.groups.trigger)
       ? new TextEdit(
           new Range(
             position.line,
             found.index + 2,
             position.line,
-            found.index + 2 + (found.groups?.trigger.length || 0)
+            found.index + 2 + found.groups.trigger.length
           ),
           ""
         )
       : undefined;
 
-  return blocks.data.map((block) => {
+  // When triggered by [[#^, only show existing block anchors
+  let insertValueOnly = false;
+  let completeableBlocks = blocks.data;
+  if (isNotUndefined(found.groups?.anchor)) {
+    completeableBlocks = completeableBlocks.filter(
+      (block) => block.anchor?.type === "block"
+    );
+    // There is already #^ which we are not removing, so don't duplicate it when inserting the text
+    insertValueOnly = true;
+  }
+
+  return completeableBlocks.map((block) => {
     const edits: TextEdit[] = [];
     if (removeTrigger) edits.push(removeTrigger);
     let anchor: DNoteAnchor | undefined = block.anchor;
@@ -190,7 +203,9 @@ export async function provideBlockCompletionItems(
     }
     return {
       label: block.text,
-      insertText: `#${AnchorUtils.anchor2string(anchor)}`,
+      insertText: insertValueOnly
+        ? anchor.value
+        : `#${AnchorUtils.anchor2string(anchor)}`,
       // If the block didn't have an anchor, we need to insert it ourselves
       additionalTextEdits: edits,
     };
@@ -214,6 +229,15 @@ export const activate = (context: ExtensionContext) => {
         provideCompletionItems: provideBlockCompletionItems,
       },
       "^"
+    )
+  );
+  context.subscriptions.push(
+    languages.registerCompletionItemProvider(
+      "markdown",
+      {
+        provideCompletionItems: provideBlockCompletionItems,
+      },
+      "#"
     )
   );
 };

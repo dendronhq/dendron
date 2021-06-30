@@ -3,6 +3,7 @@ import { DLogger } from "@dendronhq/common-server";
 import _ from "lodash";
 import { window } from "vscode";
 import { Logger } from "../logger";
+import { AnalyticsUtils } from "../utils/analytics";
 
 export type CodeCommandConstructor = {
   key: string;
@@ -56,6 +57,9 @@ export abstract class BaseCommand<
   async run(args?: Partial<TRunOpts>): Promise<TOut | undefined> {
     // @ts-ignore
     const ctx = `${this.__proto__.constructor.name}:run`;
+
+    AnalyticsUtils.track(ctx);
+
     try {
       const out = await this.sanityCheck();
       if (out === "cancel") {

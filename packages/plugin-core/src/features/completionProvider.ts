@@ -108,7 +108,7 @@ const PARTIAL_WIKILINK_WITH_ANCHOR_REGEX = new RegExp("" +
         `${ALIAS_NAME}(?=\\|)\\|` +
       ")?" +
       // optional note
-      `(${LINK_NAME})?` +
+      `(?<note>${LINK_NAME})?` +
       // anchor
       `#(?<anchor>\\^)?(${LINK_NAME})?` +
     ")" +
@@ -141,6 +141,9 @@ export async function provideBlockCompletionItems(
     }
   }
   if (_.isUndefined(found) || token?.isCancellationRequested) return;
+
+  // TODO: Completing headers and anchors of other files not yet supported
+  if (found.groups?.note) return;
 
   const note = VSCodeUtils.getNoteFromDocument(document);
   if (_.isUndefined(note) || token?.isCancellationRequested) return;

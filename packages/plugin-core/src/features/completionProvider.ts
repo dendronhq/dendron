@@ -180,7 +180,7 @@ export async function provideBlockCompletionItems(
     insertValueOnly = true;
   }
 
-  return completeableBlocks.map((block) => {
+  return completeableBlocks.map((block, index) => {
     const edits: TextEdit[] = [];
     if (removeTrigger) edits.push(removeTrigger);
     let anchor: DNoteAnchor | undefined = block.anchor;
@@ -206,6 +206,7 @@ export async function provideBlockCompletionItems(
         : `#${AnchorUtils.anchor2string(anchor)}`,
       // If the block didn't have an anchor, we need to insert it ourselves
       additionalTextEdits: edits,
+      sortText: index.toString(),
     };
   });
 }

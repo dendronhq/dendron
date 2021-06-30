@@ -28,81 +28,96 @@ export type Theme = {
   };
 };
 
-type RecursivePartial<T> = {
-  [P in keyof T]?: T[P] extends (infer U)[]
-    ? RecursivePartial<U>[]
-    : T[P] extends object
-    ? RecursivePartial<T[P]>
-    : T[P];
-};
-
 // Theme-agnostic styles (font sizes, units, etc.)
-const baseTheme: RecursivePartial<Theme> = {
+const baseTheme: Theme = {
   graph: {
     node: {
       size: 5,
+      color: "",
       label: {
         fontSize: 10,
         minZoomedFontSize: 10,
         fontWeight: 400,
+        color: "",
+      },
+      _selected: {
+        color: "",
       },
     },
     edge: {
       width: 0.25,
+      color: "",
     },
     filterView: {
       margin: "1rem",
       minWidth: "12rem",
       borderRadius: 4,
+      background: "",
     },
   },
 };
 
-const darkTheme: RecursivePartial<Theme> = _.merge(_.cloneDeep(baseTheme), {
+const darkTheme: Theme = {
   graph: {
     node: {
-      color: "#807B7B",
+      color: "#B3ABAB",
+      size: baseTheme.graph.node.size,
       label: {
         color: "#ffffff",
+        fontSize: baseTheme.graph.node.label.fontSize,
+        minZoomedFontSize: baseTheme.graph.node.label.minZoomedFontSize,
+        fontWeight: baseTheme.graph.node.label.fontWeight,
       },
       _selected: {
         color: "#36B73B",
       },
     },
     edge: {
-      color: "#807B7B",
+      color: "#B3ABAB",
+      width: baseTheme.graph.edge.width,
     },
     filterView: {
       background: "#303030",
+      margin: baseTheme.graph.filterView.margin,
+      minWidth: baseTheme.graph.filterView.minWidth,
+      borderRadius: baseTheme.graph.filterView.borderRadius,
     },
   },
-});
+};
 
-const lightTheme: RecursivePartial<Theme> = _.merge(_.cloneDeep(baseTheme), {
+const lightTheme: Theme = {
   graph: {
     node: {
-      color: "#999393",
+      color: "#666161",
+      size: baseTheme.graph.node.size,
       label: {
         color: "#2F3438",
+        fontSize: baseTheme.graph.node.label.fontSize,
+        minZoomedFontSize: baseTheme.graph.node.label.minZoomedFontSize,
+        fontWeight: baseTheme.graph.node.label.fontWeight,
       },
       _selected: {
         color: "#27AC2C",
       },
     },
     edge: {
-      color: "#999393",
+      color: "#666161",
+      width: baseTheme.graph.edge.width,
     },
     filterView: {
       background: "#F5F6F8",
+      margin: baseTheme.graph.filterView.margin,
+      minWidth: baseTheme.graph.filterView.minWidth,
+      borderRadius: baseTheme.graph.filterView.borderRadius,
     },
   },
-});
+};
 
 const AntThemes: {
   [theme: string]: Theme;
 } = {
-  dark: darkTheme as Theme,
-  light: lightTheme as Theme,
+  dark: darkTheme,
+  light: lightTheme,
 };
 
 export default AntThemes;

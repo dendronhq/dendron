@@ -22,6 +22,7 @@ import React, { useEffect } from "react";
 import { ThemeSwitcherProvider } from "react-css-theme-switcher";
 import { Provider } from "react-redux";
 import Layout from "../components/layout";
+import "../styles/scss/main.scss";
 
 const themes = {
   dark: `/dark-theme.css`,

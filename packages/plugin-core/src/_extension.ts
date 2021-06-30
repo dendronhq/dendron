@@ -421,8 +421,10 @@ export async function _activate(
       numNotes,
       numVaults: _.size(getEngine().vaults),
     });
-    await ws.activateWatchers();
-    toggleViews(true);
+    if (stage !== "test") {
+      await ws.activateWatchers();
+      toggleViews(true);
+    }
     Logger.info({ ctx, msg: "fin startClient", durationReloadWorkspace });
   } else {
     // ws not active

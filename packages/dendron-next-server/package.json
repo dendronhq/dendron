@@ -64,6 +64,7 @@
     "react-dom": "17.0.1",
     "react-icons": "^3.11.0",
     "react-redux": "^7.2.3",
+    "sass": "^1.35.1",
     "swr": "^0.3.9",
     "webpack-bundle-analyzer": "^4.4.1"
   },

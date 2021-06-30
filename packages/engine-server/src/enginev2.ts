@@ -50,7 +50,7 @@ import _ from "lodash";
 import { DConfig } from "./config";
 import { FileStorage } from "./drivers/file/storev2";
 import { FuseEngine } from "./fuseEngine";
-import { LinkUtils, MDUtilsV4 } from "./markdown";
+import { LinkUtils, MDUtilsV5 } from "./markdown";
 import { AnchorUtils } from "./markdown/remark/utils";
 import { HookUtils } from "./topics/hooks";
 
@@ -432,13 +432,11 @@ export class DendronEngineV2 implements DEngine {
         data: undefined,
       };
     }
-    const proc = MDUtilsV4.procHTML({
+    const proc = MDUtilsV5.procRehypeFull({
       engine: this,
-      vault: note.vault,
       fname: note.fname,
+      vault: note.vault,
       config: this.config,
-      noteIndex: {} as any,
-      useLinks: false,
     });
     const payload = await proc.process(NoteUtils.serialize(note));
     return {

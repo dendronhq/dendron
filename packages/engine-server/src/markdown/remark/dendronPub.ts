@@ -20,6 +20,7 @@ import { convertNoteRefASTV2 } from "./noteRefsV2";
 import { RemarkUtils } from "./utils";
 import { addError, getNoteOrError } from "./utils";
 import { blockAnchor2html } from "./blockAnchors";
+import { MDUtilsV5 } from "../utilsv5";
 
 type PluginOpts = NoteRefsOpts & {
   assetsPrefix?: string;
@@ -114,7 +115,13 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
             }
           }
         }
-        if (copts?.useId && isPublished) {
+
+        let useId = copts?.useId;
+        if (MDUtilsV5.isV5Active(proc) && dest === DendronASTDest.HTML) {
+          useId = true;
+        }
+
+        if (useId && isPublished) {
           const notes = NoteUtils.getNotesByFname({
             fname: valueOrig,
             notes: engine.notes,

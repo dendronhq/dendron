@@ -306,6 +306,11 @@ export function convertNoteRefASTV2(
   const refLvl = MDUtilsV4.getNoteRefLvl(proc());
   let { dest, vault, config, shouldApplyPublishRules } =
     MDUtilsV4.getDendronData(proc);
+
+  if (MDUtilsV5.isV5Active(proc)) {
+    shouldApplyPublishRules = MDUtilsV5.shouldApplyPublishingRules(proc);
+  }
+
   if (link.data.vaultName) {
     vault = VaultUtils.getVaultByNameOrThrow({
       vaults: engine.vaults,
@@ -383,7 +388,11 @@ export function convertNoteRefASTV2(
       }
       if (prettyRefs) {
         let suffix = "";
-        let href = wikiLinkOpts?.useId ? note.id : fname;
+        let useId = wikiLinkOpts?.useId;
+        if (MDUtilsV5.isV5Active(proc) && dest === DendronASTDest.HTML) {
+          useId = true;
+        }
+        let href = useId ? note.id : fname;
         let title = getTitle({ config, note, loc: ref });
         if (dest === DendronASTDest.HTML) {
           suffix = ".html";
@@ -405,6 +414,9 @@ export function convertNoteRefASTV2(
             config: config!,
             engine,
           });
+          if (MDUtilsV5.isV5Active(proc)) {
+            isPublished = MDUtilsV5.shouldApplyPublishingRules(proc);
+          }
         }
         const link = isPublished
           ? `"${wikiLinkOpts?.prefix || ""}${href}${suffix}"`
@@ -576,7 +588,10 @@ function convertNoteRefHelperAST(
   MDUtilsV4.setDendronData(noteRefProc, { fname: link.from.fname });
   const engine = MDUtilsV4.getEngineFromProc(noteRefProc);
   MDUtilsV4.setNoteRefLvl(noteRefProc, refLvl);
-  const procOpts = MDUtilsV4.getProcOpts(noteRefProc);
+  let procOpts = MDUtilsV4.getProcOpts(noteRefProc);
+
+  const isV5Active = MDUtilsV5.isV5Active(proc);
+
   let bodyAST: DendronASTNode;
   if (MDUtilsV4.getProcOpts(proc).config?.useNunjucks) {
     let contentsClean = renderFromNoteProps({
@@ -613,8 +628,12 @@ function convertNoteRefHelperAST(
     );
     let tmpProc = MDUtilsV4.procFull({ ...procOpts });
     tmpProc = MDUtilsV4.setDendronData(tmpProc, { insideNoteRef: true });
+    if (isV5Active) {
+      if (procOpts.dest === DendronASTDest.HTML) {
+        tmpProc = MDUtilsV5.procRemarkFull(MDUtilsV5.getProcData(proc));
+      }
+    }
 
-    // let tmpProc = proc.data("procFull") as Processor;
     const { dest } = MDUtilsV4.getDendronData(tmpProc);
     if (dest === DendronASTDest.HTML) {
       let out3 = tmpProc.runSync(out) as Parent;

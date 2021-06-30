@@ -8,18 +8,18 @@ import fs from "fs-extra";
 import _ from "lodash";
 import _md from "markdown-it";
 import path from "path";
-import { window, ViewColumn, QuickPick } from "vscode";
-import { DENDRON_COMMANDS } from "../constants";
-import { VSCodeUtils } from "../utils";
-import { DendronWorkspace, getWS } from "../workspace";
-import { BasicCommand } from "./base";
-import { ReloadIndexCommand } from "./ReloadIndex";
+import { QuickPick, ViewColumn, window } from "vscode";
 import {
-  DoctorBtn,
   ChangeScopeBtn,
+  DoctorBtn,
   IDoctorQuickInputButton,
 } from "../components/doctor/buttons";
 import { DoctorScopeType } from "../components/doctor/types";
+import { DENDRON_COMMANDS } from "../constants";
+import { VSCodeUtils } from "../utils";
+import { DendronWorkspace } from "../workspace";
+import { BasicCommand } from "./base";
+import { ReloadIndexCommand } from "./ReloadIndex";
 
 const md = _md();
 
@@ -154,7 +154,9 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     }
 
     const siteRoot = path.join(wsRoot, config.site.siteRootDir);
-    ws.fileWatcher!.pause = true;
+    if (ws.fileWatcher) {
+      ws.fileWatcher.pause = true;
+    }
     this.L.info({ ctx, msg: "pre:Reload" });
     const engine: DEngineClient =
       (await new ReloadIndexCommand().execute()) as DEngineClient;
@@ -242,7 +244,9 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
       }
     }
 
-    getWS().fileWatcher!.pause = false;
+    if (ws.fileWatcher) {
+      ws.fileWatcher.pause = false;
+    }
     await new ReloadIndexCommand().execute();
 
     // create site root, used for publication

@@ -126,6 +126,7 @@ export class ShowPreviewV2Command extends BasicCommand<
                 await new GotoNoteCommand().execute({
                   qs: note.fname,
                   vault: note.vault,
+                  column: vscode.ViewColumn.One,
                 });
               }
             } else {

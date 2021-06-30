@@ -9,6 +9,7 @@ import {
   DendronASTData,
   DendronASTDest,
   MDUtilsV4,
+  MDUtilsV5,
   Processor,
   VFile,
 } from "@dendronhq/engine-server";
@@ -114,6 +115,69 @@ export const createProcTests = (opts: {
               const extra = await setupFunc({
                 ...presetOpts,
                 extra: { dest },
+              });
+              return await verifyFunc({ ...presetOpts, extra });
+            },
+            { preSetupHook: opts.preSetupHook }
+          ),
+        };
+      })
+      .filter((ent) => !_.isUndefined(ent)) as ProcTests[];
+  }
+  return allTests;
+};
+
+export const createProcCompileTests = (opts: {
+  name: string;
+  fname?: string;
+  setupFunc: TestPresetEntryV4["testFunc"];
+  verifyFuncDict?: {
+    [key in DendronASTDest]?: TestPresetEntryV4["testFunc"] | DendronASTDest;
+  };
+  preSetupHook?: TestPresetEntryV4["preSetupHook"];
+}): ProcTests[] => {
+  const { name, setupFunc, verifyFuncDict, fname } = _.defaults(opts, {
+    fname: "foo",
+  });
+  let allTests: ProcTests[] = [];
+  if (verifyFuncDict) {
+    allTests = Object.values(DendronASTDest)
+      .map((dest) => {
+        let funcOrKey = verifyFuncDict[dest];
+        let verifyFunc: TestPresetEntryV4["testFunc"];
+        if (_.isUndefined(funcOrKey)) {
+          return;
+        }
+        if (_.isString(funcOrKey)) {
+          verifyFunc = verifyFuncDict[
+            funcOrKey
+          ] as TestPresetEntryV4["testFunc"];
+        } else {
+          verifyFunc = funcOrKey;
+        }
+        return {
+          name,
+          dest,
+          testCase: new TestPresetEntryV4(
+            async (presetOpts) => {
+              const { engine, vaults } = presetOpts;
+              const vault = vaults[0];
+              let proc: Processor;
+              switch (dest) {
+                case DendronASTDest.HTML:
+                  proc = MDUtilsV5.procRehypeFull({ engine, fname, vault });
+                  break;
+                default:
+                  proc = MDUtilsV5.procRemarkFull({
+                    dest,
+                    engine,
+                    fname,
+                    vault,
+                  });
+              }
+              const extra = await setupFunc({
+                ...presetOpts,
+                extra: { dest, proc },
               });
               return await verifyFunc({ ...presetOpts, extra });
             },

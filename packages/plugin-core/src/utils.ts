@@ -354,7 +354,10 @@ export class VSCodeUtils {
   }
 
   static async openFileInEditor(
-    fileItemOrURI: FileItem | vscode.Uri
+    fileItemOrURI: FileItem | vscode.Uri,
+    opts?: Partial<{
+      column: vscode.ViewColumn;
+    }>
   ): Promise<vscode.TextEditor | undefined> {
     let textDocument;
     if (fileItemOrURI instanceof FileItem) {
@@ -373,10 +376,9 @@ export class VSCodeUtils {
       throw new Error("Could not open file!");
     }
 
-    const editor = await vscode.window.showTextDocument(
-      textDocument,
-      vscode.ViewColumn.Active
-    );
+    const col = opts?.column || vscode.ViewColumn.Active;
+
+    const editor = await vscode.window.showTextDocument(textDocument, col);
     if (!editor) {
       throw new Error("Could not show document!");
     }

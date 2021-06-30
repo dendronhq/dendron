@@ -125,6 +125,7 @@ Dendron wouldn't be what it is today without help from these wonderful gardeners
     <td align="center"><a href="https://github.com/matchavez"><img src="https://avatars.githubusercontent.com/u/1787040?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Mat Chavez</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Amatchavez" title="Bug reports">🐛</a></td>
   </tr>
   <tr>
+    <td align="center"><a href="https://github.com/micharris42"><img src="https://avatars.githubusercontent.com/u/76890677?v=4?s=100" width="100px;" alt=""/><br /><sub><b>micharris42</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Amicharris42" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/teauxfu"><img src="https://avatars.githubusercontent.com/u/1144380?v=4?s=100" width="100px;" alt=""/><br /><sub><b>teauxfu</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=teauxfu" title="Documentation">📖</a></td>
   </tr>
 </table>

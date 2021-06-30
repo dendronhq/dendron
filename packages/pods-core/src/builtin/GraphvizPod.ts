@@ -130,7 +130,11 @@ export class GraphvizExportPod extends ExportPod<GraphvizExportConfig> {
 
     // verify dest exist
     const podDstPath = dest.fsPath;
-    fs.ensureDirSync(path.dirname(podDstPath));
+    try {
+      fs.ensureDirSync(podDstPath);
+    } catch {
+      await fs.promises.mkdir(podDstPath, { recursive: true });
+    }
 
     const [connections] = notes.reduce<[string[], ParentDictionary]>(
       ([connections, dictionary], note) => {

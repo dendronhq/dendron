@@ -122,16 +122,18 @@ const PARTIAL_WIKILINK_WITH_ANCHOR_REGEX = new RegExp("" +
     "\\[\\[" +
     "(" +
       // Will then either look like [[^ or [[^anchor
-      "(?<trigger>\\^)[\\w-]*" +
+      "(?<trigger>\\^)(?<afterTrigger>[\\w-]*)" +
     "|" + // or like [[alias|note#, or [[alias|note#anchor, or [[#, or [[#anchor
-      // optional alias
-      "(" +
-        `${ALIAS_NAME}(?=\\|)\\|` +
-      ")?" +
-      // optional note
-      `(?<note>${LINK_NAME})?` +
-      // anchor
-      `(?<hash>#+)(?<anchor>\\^)?(${LINK_NAME})?` +
+      "(?<beforeAnchor>" +
+        // optional alias
+        `(${ALIAS_NAME}(?=\\|)\\|)?` +
+        // optional note
+        `(?<note>${LINK_NAME})?` +
+        // anchor
+        "(?<hash>#+)(?<anchor>\\^)?" +
+      ")" +
+      // the text user typed to select the block
+      `(?<afterAnchor>${LINK_NAME})?` +
     ")" +
     // May have ending brackets
     "\\]?\\]?" +
@@ -162,7 +164,13 @@ export async function provideBlockCompletionItems(
       found = match;
     }
   }
-  if (_.isUndefined(found) || token?.isCancellationRequested) return;
+  if (
+    _.isUndefined(found) ||
+    _.isUndefined(found.index) ||
+    _.isUndefined(found.groups) ||
+    token?.isCancellationRequested
+  )
+    return;
   Logger.debug({ ctx, found });
 
   const engine = getWS().getEngine();
@@ -199,25 +207,28 @@ export async function provideBlockCompletionItems(
   if (
     _.isUndefined(blocks.data) ||
     blocks.error?.severity === ERROR_SEVERITY.FATAL
-  )
+  ) {
+    Logger.error({
+      ctx,
+      error: blocks.error || undefined,
+      msg: `Unable to get blocks for autocomplete`,
+    });
     return;
+  }
   Logger.debug({ ctx, blockCount: blocks.data.length });
 
   // If there is [[^ or [[^^ , remove that because it's not a valid wikilink
-  const removeTrigger =
-    isNotUndefined(found.index) &&
-    isNotUndefined(found.groups) &&
-    isNotUndefined(found.groups.trigger)
-      ? new TextEdit(
-          new Range(
-            position.line,
-            found.index + 2,
-            position.line,
-            found.index + 2 + found.groups.trigger.length
-          ),
-          ""
-        )
-      : undefined;
+  const removeTrigger = isNotUndefined(found.groups.trigger)
+    ? new TextEdit(
+        new Range(
+          position.line,
+          found.index + 2,
+          position.line,
+          found.index + 2 + found.groups.trigger.length
+        ),
+        ""
+      )
+    : undefined;
 
   // When triggered by [[#^, only show existing block anchors
   let insertValueOnly = false;
@@ -234,6 +245,27 @@ export async function provideBlockCompletionItems(
       (block) => block.anchor?.type === "header"
     );
   }
+
+  // Calculate the replacement range. This must contain any text the user has typed for the block, but not the trigger symbols (#, ^, #^)
+  // This is used to determine what the user has typed to narrow the options, and also to pick what will get replaced once the completion is picked.
+  let start = found.index + 2; /* length of [[ */
+  let end = start;
+  if (found.groups.trigger) {
+    // Skip the trigger ^
+    start += found.groups.trigger.length;
+    // Include the text user has typed after trigger
+    end = start;
+    if (found.groups.afterTrigger) end += found.groups.afterTrigger.length;
+  }
+  if (found.groups.beforeAnchor) {
+    // Skip anchor # or #^
+    start += found.groups.beforeAnchor.length;
+    // Include the text user has typed after anchor
+    end = start;
+    if (found.groups.afterAnchor) end += found.groups.afterAnchor.length;
+  }
+  const range = new Range(position.line, start, position.line, end);
+  Logger.debug({ ctx, start: range.start, end: range.end });
 
   const completions = completeableBlocks
     .map((block, index) => {
@@ -264,10 +296,7 @@ export async function provideBlockCompletionItems(
       return {
         label: block.text,
         // The region that will get replaced when inserting the block.
-        range: document.getWordRangeAtPosition(
-          position,
-          /(?<=\^|#\^?)[^\^#\[\]\|\s]*/
-        ),
+        range,
         insertText: insertValueOnly
           ? anchor.value
           : `#${AnchorUtils.anchor2string(anchor)}`,

@@ -50,9 +50,9 @@ export { select, selectAll } from "unist-util-select";
 export const ALIAS_DIVIDER = "|";
 
 /** A regexp fragment that matches a link name (e.g. a note name) */
-export const LINK_NAME = "[^#\\|>]+";
+export const LINK_NAME = "[^#\\|>\\]\\[]+";
 /** A regexp fragment that matches an alias name */
-export const ALIAS_NAME = "[^\\|>]+"; // aliases may contain # symbols
+export const ALIAS_NAME = "[^\\|>\\]\\[]+"; // aliases may contain # symbols
 /** A regexp fragment that matches the contents of a link (without the brackets) */
 export const LINK_CONTENTS =
   "" +

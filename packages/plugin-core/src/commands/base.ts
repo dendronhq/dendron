@@ -1,4 +1,5 @@
 import { DendronError } from "@dendronhq/common-all";
+import { getDurationMilliseconds } from "@dendronhq/common-server";
 import { DLogger } from "@dendronhq/common-server";
 import _ from "lodash";
 import { window } from "vscode";
@@ -57,8 +58,8 @@ export abstract class BaseCommand<
   async run(args?: Partial<TRunOpts>): Promise<TOut | undefined> {
     // @ts-ignore
     const ctx = `${this.__proto__.constructor.name}:run`;
-
-    AnalyticsUtils.track(ctx);
+    const start = process.hrtime();
+    let isError = false;
 
     try {
       const out = await this.sanityCheck();
@@ -96,7 +97,14 @@ export abstract class BaseCommand<
         ctx,
         error: cerror,
       });
+
+      isError = true;
       return;
+    } finally {
+      AnalyticsUtils.track(ctx, {
+        duration: getDurationMilliseconds(start),
+        error: isError,
+      });
     }
   }
 }

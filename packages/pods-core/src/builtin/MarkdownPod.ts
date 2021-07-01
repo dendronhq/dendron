@@ -27,6 +27,7 @@ import {
   ImportPodPlantOpts,
   PublishPod,
   PublishPodPlantOpts,
+  PublishPodConfig,
 } from "../basev3";
 import { JSONSchemaType } from "ajv";
 import { PodUtils } from "../utils";
@@ -308,6 +309,13 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
 export class MarkdownPublishPod extends PublishPod {
   static id: string = ID;
   static description: string = "publish markdown";
+
+  get config(): JSONSchemaType<PublishPodConfig> {
+    return PodUtils.createPublishConfig({
+      required: [],
+      properties: {},
+    }) as JSONSchemaType<PublishPodConfig>;
+  }
 
   async plant(opts: PublishPodPlantOpts) {
     const { engine, note } = opts;

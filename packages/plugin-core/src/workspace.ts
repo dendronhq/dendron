@@ -507,9 +507,11 @@ export class DendronWorkspace {
 
   _setupCommands() {
     ALL_COMMANDS.map((Cmd) => {
+      const cmd = new Cmd();
+
       this.context.subscriptions.push(
-        vscode.commands.registerCommand(Cmd.key, async (args: any) => {
-          await new Cmd().run(args);
+        vscode.commands.registerCommand(cmd.key, async (args: any) => {
+          await cmd.run(args);
         })
       );
     });

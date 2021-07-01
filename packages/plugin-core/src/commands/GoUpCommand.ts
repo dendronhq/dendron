@@ -13,7 +13,7 @@ type CommandOpts = {};
 type CommandOutput = void;
 
 export class GoUpCommand extends BasicCommand<CommandOpts, CommandOutput> {
-  static key = DENDRON_COMMANDS.GO_UP_HIERARCHY.key;
+  key = DENDRON_COMMANDS.GO_UP_HIERARCHY.key;
   async gatherInputs(): Promise<any> {
     return {};
   }

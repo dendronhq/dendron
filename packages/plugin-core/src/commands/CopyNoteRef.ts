@@ -24,7 +24,7 @@ export class CopyNoteRefCommand extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
-  static key = DENDRON_COMMANDS.COPY_NOTE_REF.key;
+  key = DENDRON_COMMANDS.COPY_NOTE_REF.key;
   async sanityCheck() {
     if (_.isUndefined(VSCodeUtils.getActiveTextEditor())) {
       return "No document open";

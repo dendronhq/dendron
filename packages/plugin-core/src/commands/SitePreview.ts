@@ -17,7 +17,7 @@ export class SitePreviewCommand extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
-  static key = DENDRON_COMMANDS.SITE_PREVIEW.key;
+  key = DENDRON_COMMANDS.SITE_PREVIEW.key;
 
   async gatherInputs(): Promise<any> {
     return {};

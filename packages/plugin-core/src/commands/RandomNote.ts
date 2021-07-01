@@ -16,7 +16,7 @@ export class RandomNoteCommand extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
-  static key = DENDRON_COMMANDS.RANDOM_NOTE.key;
+  key = DENDRON_COMMANDS.RANDOM_NOTE.key;
 
   async gatherInputs(): Promise<CommandInput | undefined> {
     return {};

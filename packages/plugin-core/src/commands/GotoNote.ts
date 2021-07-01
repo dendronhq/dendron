@@ -58,7 +58,7 @@ export const findAnchorPos = (opts: {
  * Open or create a note. See {@link GotoNoteCommand.execute} for details
  */
 export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
-  static key = DENDRON_COMMANDS.GOTO_NOTE.key;
+  key = DENDRON_COMMANDS.GOTO_NOTE.key;
 
   getLinkFromSelection() {
     const { selection, editor } = VSCodeUtils.getSelection();

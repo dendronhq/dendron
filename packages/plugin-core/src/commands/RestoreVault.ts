@@ -20,7 +20,7 @@ export class RestoreVaultCommand extends BaseCommand<
   CommandOutput,
   CommandInput
 > {
-  static key = DENDRON_COMMANDS.RESTORE_VAULT.key;
+  key = DENDRON_COMMANDS.RESTORE_VAULT.key;
   async gatherInputs(): Promise<any> {
     const snapshots = path.join(
       DendronWorkspace.wsRoot() as string,

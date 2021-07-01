@@ -19,7 +19,7 @@ type CommandInput = {};
 type CommandOutput = { error?: DendronError; fsPath?: string };
 
 export class OpenLinkCommand extends BasicCommand<CommandOpts, CommandOutput> {
-  static key = DENDRON_COMMANDS.OPEN_LINK.key;
+  key = DENDRON_COMMANDS.OPEN_LINK.key;
   async gatherInputs(): Promise<CommandInput | undefined> {
     return {};
   }

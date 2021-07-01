@@ -26,7 +26,7 @@ export class ImportPodCommand extends BaseCommand<
   CommandInput
 > {
   public pods: PodClassEntryV4[];
-  static key = DENDRON_COMMANDS.IMPORT_POD.key;
+  key = DENDRON_COMMANDS.IMPORT_POD.key;
 
   constructor(_name?: string) {
     super(_name);

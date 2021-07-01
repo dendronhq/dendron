@@ -21,7 +21,7 @@ export class ResetConfigCommand extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
-  static key = DENDRON_COMMANDS.RESET_CONFIG.key;
+  key = DENDRON_COMMANDS.RESET_CONFIG.key;
   async gatherInputs(): Promise<CommandInput | undefined> {
     const scope = await window.showInputBox({
       prompt: "Select scope",

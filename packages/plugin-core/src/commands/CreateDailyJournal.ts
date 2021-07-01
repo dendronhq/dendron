@@ -21,7 +21,7 @@ export class CreateDailyJournalCommand extends BaseCommand<
   any,
   CommandInput
 > {
-  static key = DENDRON_COMMANDS.CREATE_DAILY_JOURNAL_NOTE.key;
+  key = DENDRON_COMMANDS.CREATE_DAILY_JOURNAL_NOTE.key;
   async gatherInputs(): Promise<CommandInput | undefined> {
     const dailyJournalDomain = getWS().config.journal.dailyDomain;
     let fname: string;

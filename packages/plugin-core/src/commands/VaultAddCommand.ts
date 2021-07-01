@@ -39,7 +39,7 @@ export { CommandOpts as VaultAddCommandOpts };
 type SourceQuickPickEntry = QuickPickItem & { src: string };
 
 export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
-  static key = DENDRON_COMMANDS.VAULT_ADD.key;
+  key = DENDRON_COMMANDS.VAULT_ADD.key;
 
   public git: SimpleGit;
 

@@ -11,29 +11,104 @@ import Ajv, { JSONSchemaType } from "ajv";
 import { useRef } from "react";
 import { engineHooks } from "@dendronhq/common-frontend";
 import { configWrite } from "../../lib/effects";
+import { m } from "framer-motion";
 
 interface MyData {
   siteRootDir: string;
   assetsPrefix: string;
+  siteRepoDir: string;
+  copyAssets: boolean;
 }
+
+const siteConfig = [
+  {
+    label: "Site Root Directory",
+    name: "siteRootDir",
+    type: "string",
+    required: true,
+    helperText:
+      "Where your site will be published. Relative to Dendron workspace",
+  },
+  {
+    label: "Asset Prefix",
+    name: "assetPrefix",
+    type: "string",
+    helperText: "If set, add prefix to all asset links",
+  },
+  {
+    label: "Copy Assets",
+    name: "copyAssets",
+    type: "boolean",
+    helperText: "Copy assets from vault to site.",
+  },
+  {
+    label: "Site Repo Directory",
+    name: "siteRepotDir",
+    type: "string",
+    helperText:
+      "Location of the github repo where your site notes are located. By default, this is assumed to be your `workspaceRoot` if not set.",
+  },
+  {
+    label: "Use Pretty Refs?",
+    name: "usePrettyRefs",
+    type: "boolean",
+    helperText:
+      "Pretty refs help you identify when content is embedded from elsewhere and provide links back to the source.",
+  },
+];
+
+const dendronConfig = [
+  {
+    label: "No Caching?",
+    name: "noCaching",
+    type: "boolean",
+    helperText: "Disable caching behavior",
+  },
+  {
+    label: "No telemetry?",
+    name: "noTelemetry",
+    type: "boolean",
+    helperText: "Disable telemetry",
+  },
+  {
+    name: "site",
+    type: "object",
+    data: siteConfig,
+  },
+];
+
+const flatten = (data: any, prefix: string[] = []) => {
+  if (Array.isArray(data)) return data.flatMap((next) => flatten(next, prefix));
+  return data.type !== "object"
+    ? {
+        ...data,
+        name: prefix.concat(data.name).join("."),
+      }
+    : data.data.flatMap((next: any) => flatten(next, prefix.concat(data.name)));
+};
 
 const schema: JSONSchemaType<MyData> = {
   type: "object",
   properties: {
     siteRootDir: {
       type: "string",
-      minLength: 1,
-      pattern: "(^/$|(^(?=/)|^.|^..)(/(?=[^/\0])[^/\0]+)*/?$)|()",
     },
-    assetsPrefix: { type: "string", minLength: 5 },
+    assetsPrefix: {
+      type: "string",
+    },
+    copyAssets: {
+      type: "boolean",
+    },
+    siteRepoDir: { type: "string" },
   },
   required: ["siteRootDir"],
   additionalProperties: true,
 };
 
-const createFormItem = ({
+const FormItem = ({
   name,
   label,
+  type,
   required,
   helperText,
   error,
@@ -41,23 +116,29 @@ const createFormItem = ({
   name: string;
   placeholder?: string;
   label: string;
+  type: string;
   required?: boolean;
   helperText?: string;
   error?: string;
-}) => {
-  return (
-    <Form.Item name={name} style={{ justifyContent: "center" }}>
-      <Title level={3}>
-        {label}
-        {required && <span style={{ color: "red" }}> *</span>}
-      </Title>
-      <Input size="large" name={name} />
-      <Text type="secondary">{helperText}</Text>
-      <br />
-      <Text type="danger">{error}</Text>
-    </Form.Item>
-  );
-};
+}) => (
+  <Form.Item name={name} style={{ justifyContent: "center" }}>
+    <Title level={3}>
+      {console.log(type)}
+      {label}
+      {required && <span style={{ color: "red" }}> *</span>}
+    </Title>
+    {type === "string" && <Input size="large" name={name} />}
+    {type === "boolean" && (
+      <>
+        <Switch name={name} />
+        <br />
+      </>
+    )}
+    <Text type="secondary">{helperText}</Text>
+    <br />
+    <Text type="danger">{error}</Text>
+  </Form.Item>
+);
 
 const renderArray = (arrayEnts: any[], arrayHelpers: any) => {
   const data = arrayEnts
@@ -178,53 +259,9 @@ export default function Config({
                 }
               />
             </Form.Item>
-            {createFormItem({
-              name: "site.siteRootDir",
-              label: "Site root directory",
-              required: true,
-              helperText:
-                "Where your site will be published, Relative to Dendron workspace.",
-            })}
-            {createFormItem({
-              name: "site.siteNotesDir",
-              label: "Site notes directory",
-              helperText:
-                "Folder where your notes will be kept. By default, `notes`",
-            })}
-            {createFormItem({
-              name: "site.assetsPrefix",
-              label: "Assets Prefix",
-              helperText: "If set, add prefix to all links.",
-            })}
-            {createFormItem({
-              name: "site.siteRepoDir",
-              label: "Site repo directory",
-              helperText:
-                "Location of the github repo where your site notes are located. By defualt, this is assumed to be your `workspaceRoot` if not set",
-            })}
-            <Form.Item
-              style={{ justifyContent: "center" }}
-              name="usePrettyRefSwitch"
-            >
-              <Title level={3}>Use Pretty Refs?</Title>
-              <Switch name="site.siteUsePrettyRefs" />
-              <br />
-              <Text type="secondary">
-                Pretty refs help you identify when content is embedded from
-                elsewhere and provide links back to the source.
-              </Text>
-            </Form.Item>
-            <Form.Item
-              style={{ justifyContent: "center" }}
-              name="siteRepoDirCheckedSwitch"
-            >
-              <Title level={3}>Site Repo directory</Title>
-              <Switch name="site.useSiteRepoDir" />
-              <br />
-              <Text type="secondary">
-                If enabled, assets will be copied from the vault to the site
-              </Text>
-            </Form.Item>
+            {flatten(dendronConfig).map(({ name, ...rest }) => (
+              <FormItem key={name} name={name} {...rest} />
+            ))}
             <Form.Item name="submit" style={{ justifyContent: "center" }}>
               <Button.Group size="large">
                 <ResetButton type="text">Clear changes</ResetButton>

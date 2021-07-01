@@ -22,7 +22,7 @@ export class ReloadIndexCommand extends BasicCommand<
   ReloadIndexCommandOpts,
   DEngineClient | undefined
 > {
-  static key = DENDRON_COMMANDS.RELOAD_INDEX.key;
+  key = DENDRON_COMMANDS.RELOAD_INDEX.key;
   /**
    * Update index
    * @param opts

@@ -24,7 +24,7 @@ export class ConfigurePodCommand extends BasicCommand<
   CommandOutput
 > {
   public pods: PodClassEntryV4[];
-  static key = DENDRON_COMMANDS.CONFIGURE_POD.key;
+  key = DENDRON_COMMANDS.CONFIGURE_POD.key;
 
   constructor(_name?: string) {
     super(_name);

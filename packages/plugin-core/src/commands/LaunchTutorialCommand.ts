@@ -12,7 +12,7 @@ export class LaunchTutorialCommand extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
-  static key = DENDRON_COMMANDS.LAUNCH_TUTORIAL.key;
+  key = DENDRON_COMMANDS.LAUNCH_TUTORIAL.key;
 
   async gatherInputs(): Promise<CommandInput | undefined> {
     return {};

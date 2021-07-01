@@ -52,7 +52,7 @@ export class ConfigureWithUICommand extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
-  static key = DENDRON_COMMANDS.CONFIGURE_UI.key;
+  key = DENDRON_COMMANDS.CONFIGURE_UI.key;
   async gatherInputs(): Promise<any> {
     return {};
   }

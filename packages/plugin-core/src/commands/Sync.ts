@@ -19,7 +19,7 @@ type CommandReturns =
   | undefined;
 
 export class SyncCommand extends BasicCommand<CommandOpts, CommandReturns> {
-  static key = DENDRON_COMMANDS.SYNC.key;
+  key = DENDRON_COMMANDS.SYNC.key;
 
   static countDone(results: SyncActionResult[]): number {
     return results.filter((result) => result.status === SyncActionStatus.DONE)

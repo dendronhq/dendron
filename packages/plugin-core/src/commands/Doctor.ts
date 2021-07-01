@@ -58,7 +58,7 @@ type DoctorQuickInput = {
 type DoctorQuickPickItem = QuickPick<DoctorQuickInput>;
 
 export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
-  static key = DENDRON_COMMANDS.DOCTOR.key;
+  key = DENDRON_COMMANDS.DOCTOR.key;
 
   createQuickPick(opts: CreateQuickPickOpts) {
     const { title, placeholder, ignoreFocusOut, items } = _.defaults(opts, {

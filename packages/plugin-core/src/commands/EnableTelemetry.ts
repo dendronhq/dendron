@@ -15,7 +15,7 @@ export class EnableTelemetryCommand extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
-  static key = DENDRON_COMMANDS.ENABLE_TELEMETRY.key;
+  key = DENDRON_COMMANDS.ENABLE_TELEMETRY.key;
   async gatherInputs(): Promise<CommandInput | undefined> {
     return {};
   }

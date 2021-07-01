@@ -20,7 +20,7 @@ export class VaultRemoveCommand extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
-  static key = DENDRON_COMMANDS.VAULT_REMOVE.key;
+  key = DENDRON_COMMANDS.VAULT_REMOVE.key;
   async gatherInputs(): Promise<any> {
     const vaults = DendronWorkspace.instance().config.vaults;
     const vaultQuickPick = await VSCodeUtils.showQuickPick(

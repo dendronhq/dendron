@@ -21,13 +21,13 @@ export class InsertNoteLinkCommand extends BasicCommand<
   CommandOutput,
   CommandInput
 > {
-  static key = DENDRON_COMMANDS.INSERT_NOTE_LINK.key;
+  key = DENDRON_COMMANDS.INSERT_NOTE_LINK.key;
 
   async gatherInputs(): Promise<CommandOpts | undefined> {
     const lc = LookupControllerV3.create({
       disableVaultSelection: true,
     });
-    const provider = new NoteLookupProvider(InsertNoteLinkCommand.key, {
+    const provider = new NoteLookupProvider(this.key, {
       allowNewNote: false,
       noHidePickerOnAccept: false,
     });
@@ -39,11 +39,11 @@ export class InsertNoteLinkCommand extends BasicCommand<
 
     return new Promise((resolve) => {
       HistoryService.instance().subscribev2("lookupProvider", {
-        id: InsertNoteLinkCommand.key,
+        id: this.key,
         listener: async (event) => {
           if (event.action === "done") {
             HistoryService.instance().remove(
-              InsertNoteLinkCommand.key,
+              this.key,
               "lookupProvider"
             );
             const cdata = event.data as NoteLookupProviderSuccessResp;

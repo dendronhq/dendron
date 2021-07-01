@@ -9,7 +9,7 @@ type CommandInput = {};
 type CommandOutput = void;
 
 export class ShowHelpCommand extends BasicCommand<CommandOpts, CommandOutput> {
-  static key = DENDRON_COMMANDS.SHOW_HELP.key;
+  key = DENDRON_COMMANDS.SHOW_HELP.key;
   async gatherInputs(): Promise<CommandInput | undefined> {
     return {};
   }

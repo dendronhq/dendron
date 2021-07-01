@@ -35,7 +35,6 @@ import { ReloadIndexCommand } from "./commands/ReloadIndex";
 import {
   CONFIG,
   DendronContext,
-  DENDRON_COMMANDS,
   extensionQualifiedId,
   GLOBAL_STATE,
   WORKSPACE_ACTIVATION_CONTEXT,
@@ -59,7 +58,7 @@ import { SchemaWatcher } from "./watchers/schemaWatcher";
 import { WindowWatcher } from "./windowWatcher";
 import { WorkspaceWatcher } from "./WorkspaceWatcher";
 import { SetupWorkspaceCommand } from "./commands/SetupWorkspace";
-import { MarkdownUtils } from "./utils/md";
+import { DENDRON_COMMANDS } from "./constants";
 
 let _DendronWorkspace: DendronWorkspace | null;
 
@@ -805,7 +804,10 @@ export class TutorialInitializer implements WorkspaceInitializer {
     if (fs.pathExistsSync(rootUri.fsPath)) {
       // Set the view to have the tutorial page showing with the preview opened to the side.
       await vscode.window.showTextDocument(rootUri);
-      await MarkdownUtils.openPreview({ reuseWindow: false });
+      // await MarkdownUtils.openPreview({ reuseWindow: false });
+      await vscode.commands.executeCommand(
+        DENDRON_COMMANDS.SHOW_PREVIEW_V2.key
+      );
     } else {
       Logger.error({
         ctx,

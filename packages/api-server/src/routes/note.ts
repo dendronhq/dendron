@@ -119,6 +119,8 @@ router.get(
     const engine = await getWS({ ws: ws || "" });
     try {
       const out = await engine.getNoteBlocks({ id });
+      if (out.error instanceof DendronError)
+        out.error = DendronError.createPlainError(out.error);
       res.json(out);
     } catch (err) {
       res.json({

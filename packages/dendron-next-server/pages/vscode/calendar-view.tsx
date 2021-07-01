@@ -8,7 +8,12 @@ import {
   engineSlice,
   postVSCodeMessage,
 } from "@dendronhq/common-frontend";
-import { CalendarProps as AntdCalendarProps, Spin } from "antd";
+import {
+  CalendarProps as AntdCalendarProps,
+  Spin,
+  Button,
+  Divider,
+} from "antd";
 import { Badge, ConfigProvider } from "antd";
 import generateCalendar from "antd/lib/calendar/generateCalendar";
 import classNames from "classnames";
@@ -146,17 +151,15 @@ function CalendarView({ engine, ide }: DendronProps) {
     [groupedDailyNotes, getDateKey]
   );
 
-  useEffect(() => {
-    if (activeDate) {
-      onSelect(activeDate); // trigger `onSelect` when switching month<->year views
-    }
-  }, [activeMode]);
-
   const onPanelChange = useCallback<
     Exclude<CalendarProps["onPanelChange"], undefined>
   >((date, mode) => {
     logger.info({ ctx: "onPanelChange", date, mode });
     setActiveMode(mode);
+  }, []);
+
+  const onClickToday = useCallback(() => {
+    onSelect(moment());
   }, []);
 
   const dateFullCellRender = useCallback<
@@ -268,14 +271,21 @@ function CalendarView({ engine, ide }: DendronProps) {
   }
 
   return (
-    <Calendar
-      mode={activeMode}
-      onSelect={onSelect}
-      onPanelChange={onPanelChange}
-      value={activeDate}
-      dateFullCellRender={dateFullCellRender}
-      fullscreen={false}
-    />
+    <>
+      <Calendar
+        mode={activeMode}
+        onSelect={onSelect}
+        onPanelChange={onPanelChange}
+        value={activeDate}
+        dateFullCellRender={dateFullCellRender}
+        fullscreen={false}
+      />
+      <Divider plain style={{ marginTop: 0 }}>
+        <Button type="primary" onClick={onClickToday}>
+          Today
+        </Button>
+      </Divider>
+    </>
   );
 }
 

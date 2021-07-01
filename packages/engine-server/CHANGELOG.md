@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.48.2](https://github.com/dendronhq/dendron/compare/v0.48.1...v0.48.2) (2021-07-01)
+
+
+### Bug Fixes
+
+* initialize seed from branch ([8407b0b](https://github.com/dendronhq/dendron/commit/8407b0b1f5f7367a3382758f0be4eeaceadaa7f4))
+
+
+### Reverts
+
+* Revert "chore: hide new preview behind dev mode" ([5dd0eb7](https://github.com/dendronhq/dendron/commit/5dd0eb7f0609be87ddf338a2573db63b29efda3a))
+
+
+
+
+
 ## [0.48.1](https://github.com/dendronhq/dendron/compare/v0.48.0...v0.48.1) (2021-06-30)
 
 

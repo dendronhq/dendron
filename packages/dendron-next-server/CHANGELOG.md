@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.48.2](https://github.com/dendronhq/dendron/compare/v0.48.1...v0.48.2) (2021-07-01)
+
+
+### Bug Fixes
+
+* remove today button ([58825c7](https://github.com/dendronhq/dendron/commit/58825c79744e2b65e66e8de1d9acd947a0320ae2))
+
+
+### Features Dendron
+
+* native dendron preview ([f23df1b](https://github.com/dendronhq/dendron/commit/f23df1bd57564c1c4831a44c031952c4e494c8df))
+
+
+
+
+
 ## [0.48.1](https://github.com/dendronhq/dendron/compare/v0.48.0...v0.48.1) (2021-06-30)
 
 

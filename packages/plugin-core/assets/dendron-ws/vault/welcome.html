@@ -7,9 +7,17 @@
     h1 {
       text-align: center;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin-bottom: 0px;
+
     }
     .container{
       text-align: center;
+    }
+    .subtitle {
+      margin-top: 12px;
+    }
+    #btn_container {
+      padding-top: 20px;
     }
     .initialize_btn {
       border-radius: 2px;
@@ -22,7 +30,7 @@
       width: 220px;
       transition: all 0.4s;
       cursor: pointer;
-      margin: 15px;
+      margin: 25px;
     }
     .initialize_btn span {
       cursor: pointer;
@@ -49,6 +57,9 @@
       opacity: 1;
       right: 0;
     }
+    #btn_subtext {
+      margin-top: 20px;
+    }
   </style>
   <head>
     <meta charset="UTF-8" />
@@ -56,13 +67,16 @@
     <title>Dendron</title>
   </head>
   <body>
-    <h1>
-      Notes. Reinvented for Devs.
-    </h1>
-    <br>
     <div class="container">
+    <h1>
+      Knowledge Management. Redefined.
+    </h1>
+    <p class="subtitle">Note, organize, and reference any amount of information.</p>
+  </div>
+    <br>
+    <div id="btn_container" class="container">
       <a class="initialize_btn" id="btn_id" target="_blank" rel="nofollow"><span>Initialize Workspace</a>
-      <p>Select where to store your notes.</p>
+      <p id="btn_subtext">Select where to store your notes.</p>
     </div>
 
     <script>

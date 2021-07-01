@@ -122,7 +122,7 @@ const PARTIAL_WIKILINK_WITH_ANCHOR_REGEX = new RegExp("" +
     "\\[\\[" +
     "(" +
       // Will then either look like [[^ or [[^anchor
-      "(?<trigger>\\^\\^?)[\\w-]*" +
+      "(?<trigger>\\^)[\\w-]*" +
     "|" + // or like [[alias|note#, or [[alias|note#anchor, or [[#, or [[#anchor
       // optional alias
       "(" +
@@ -144,6 +144,7 @@ export async function provideBlockCompletionItems(
   position: Position,
   token?: CancellationToken
 ): Promise<CompletionItem[] | undefined> {
+  const ctx = "provideBlockCompletionItems";
   let found: RegExpMatchArray | undefined;
   // This gets triggered when the user types ^, which won't necessarily happen inside a wikilink.
   // So check that the user is actually in a wikilink before we try.
@@ -162,6 +163,7 @@ export async function provideBlockCompletionItems(
     }
   }
   if (_.isUndefined(found) || token?.isCancellationRequested) return;
+  Logger.debug({ ctx, found });
 
   const engine = getWS().getEngine();
 
@@ -191,6 +193,7 @@ export async function provideBlockCompletionItems(
   }
 
   if (_.isUndefined(note) || token?.isCancellationRequested) return;
+  Logger.debug({ ctx, fname: note.fname });
 
   const blocks = await getWS().getEngine().getNoteBlocks({ id: note.id });
   if (
@@ -198,6 +201,7 @@ export async function provideBlockCompletionItems(
     blocks.error?.severity === ERROR_SEVERITY.FATAL
   )
     return;
+  Logger.debug({ ctx, blockCount: blocks.data.length });
 
   // If there is [[^ or [[^^ , remove that because it's not a valid wikilink
   const removeTrigger =
@@ -259,7 +263,11 @@ export async function provideBlockCompletionItems(
       }
       return {
         label: block.text,
-        //range: new Range(),
+        // The region that will get replaced when inserting the block.
+        range: document.getWordRangeAtPosition(
+          position,
+          /(?<=\^|#\^?)[^\^#\[\]\|\s]*/
+        ),
         insertText: insertValueOnly
           ? anchor.value
           : `#${AnchorUtils.anchor2string(anchor)}`,
@@ -269,6 +277,7 @@ export async function provideBlockCompletionItems(
       };
     })
     .filter(isNotUndefined);
+  Logger.debug({ ctx, completionCount: completions.length });
   return completions;
 }
 

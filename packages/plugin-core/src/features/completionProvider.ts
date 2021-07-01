@@ -3,10 +3,17 @@ import {
   ERROR_SEVERITY,
   genUUIDInsecure,
   isNotUndefined,
+  NoteProps,
   NoteUtils,
+  VaultUtils,
 } from "@dendronhq/common-all";
 import _ from "lodash";
-import { ALIAS_NAME, AnchorUtils, LINK_NAME } from "@dendronhq/engine-server";
+import {
+  ALIAS_NAME,
+  AnchorUtils,
+  LinkUtils,
+  LINK_NAME,
+} from "@dendronhq/engine-server";
 import {
   CancellationToken,
   CompletionItem,
@@ -61,6 +68,16 @@ export const provideCompletionItems = (
       refString = refString.slice(0, endIndex + 1);
     }
   }
+  // If there's a # before the cursor, let the block autocomplete take over
+  if (_.lastIndexOf(linePrefix, "#") > startIndex) {
+    Logger.debug({
+      ctx,
+      msg: "Skipping note autocomplete to let block autocomplete take over",
+      refString,
+      linePrefix,
+    });
+    return undefined;
+  }
   Logger.debug({ ctx, refString });
 
   const completionItems: CompletionItem[] = [];
@@ -114,7 +131,7 @@ const PARTIAL_WIKILINK_WITH_ANCHOR_REGEX = new RegExp("" +
       // optional note
       `(?<note>${LINK_NAME})?` +
       // anchor
-      `#(?<anchor>\\^)?(${LINK_NAME})?` +
+      `(?<hash>#+)(?<anchor>\\^)?(${LINK_NAME})?` +
     ")" +
     // May have ending brackets
     "\\]?\\]?" +
@@ -146,17 +163,39 @@ export async function provideBlockCompletionItems(
   }
   if (_.isUndefined(found) || token?.isCancellationRequested) return;
 
-  // TODO: Completing headers and anchors of other files not yet supported
-  if (found.groups?.note) return;
+  const engine = getWS().getEngine();
 
-  const note = VSCodeUtils.getNoteFromDocument(document);
+  let otherFile = false;
+  let note: NoteProps | undefined;
+  if (found.groups?.note) {
+    // This anchor will be to another note, e.g. [[note#
+    // `groups.note` may have vault name, so let's try to parse that
+    const link = LinkUtils.parseLinkV2(found.groups.note);
+    const vault = link?.vaultName
+      ? VaultUtils.getVaultByName({
+          vaults: engine.vaults,
+          vname: link?.vaultName,
+        })
+      : undefined;
+    // If we couldn't find the linked note, don't do anything
+    if (_.isNull(link) || _.isUndefined(link.value)) return;
+    note = NoteUtils.getNotesByFname({
+      fname: link.value,
+      vault,
+      notes: engine.notes,
+    })[0];
+    otherFile = true;
+  } else {
+    // This anchor is to the same file, e.g. [[#
+    note = VSCodeUtils.getNoteFromDocument(document);
+  }
+
   if (_.isUndefined(note) || token?.isCancellationRequested) return;
 
   const blocks = await getWS().getEngine().getNoteBlocks({ id: note.id });
   if (
     _.isUndefined(blocks.data) ||
-    blocks.error?.severity === ERROR_SEVERITY.FATAL ||
-    token?.isCancellationRequested
+    blocks.error?.severity === ERROR_SEVERITY.FATAL
   )
     return;
 
@@ -185,40 +224,52 @@ export async function provideBlockCompletionItems(
     );
     // There is already #^ which we are not removing, so don't duplicate it when inserting the text
     insertValueOnly = true;
+  } else if (isNotUndefined(found.groups?.hash)) {
+    // When trigger by [[#, only show headers. Without this, it also shows paragraphs that include `#`
+    completeableBlocks = completeableBlocks.filter(
+      (block) => block.anchor?.type === "header"
+    );
   }
 
-  return completeableBlocks.map((block, index) => {
-    const edits: TextEdit[] = [];
-    if (removeTrigger) edits.push(removeTrigger);
-    let anchor: DNoteAnchor | undefined = block.anchor;
-    if (_.isUndefined(anchor)) {
-      anchor = {
-        type: "block",
-        // Using the "insecure" generator avoids blocking for entropy to become available. This slightly increases the
-        // chance of conflicting IDs, but that's okay since we'll only insert one of these completions. (Could also put
-        // the same id for all options, but it's unclear if VSCode might reuse these completions)
-        value: genUUIDInsecure(),
+  const completions = completeableBlocks
+    .map((block, index) => {
+      const edits: TextEdit[] = [];
+      if (removeTrigger) edits.push(removeTrigger);
+      let anchor: DNoteAnchor | undefined = block.anchor;
+      if (_.isUndefined(anchor)) {
+        // We can't insert edits into other files, so we can't suggest blocks without existing anchors
+        if (otherFile) return;
+        anchor = {
+          type: "block",
+          // Using the "insecure" generator avoids blocking for entropy to become available. This slightly increases the
+          // chance of conflicting IDs, but that's okay since we'll only insert one of these completions. (Could also put
+          // the same id for all options, but it's unclear if VSCode might reuse these completions)
+          value: genUUIDInsecure(),
+        };
+        const blockPosition = VSCodeUtils.point2VSCodePosition(
+          block.position.end
+        );
+        // TODO: If choosing a block that's an entire list, we need to insert the anchor 1 line after the list ("\n\n")
+        edits.push(
+          new TextEdit(
+            new Range(blockPosition, blockPosition),
+            ` ${AnchorUtils.anchor2string(anchor)}`
+          )
+        );
+      }
+      return {
+        label: block.text,
+        //range: new Range(),
+        insertText: insertValueOnly
+          ? anchor.value
+          : `#${AnchorUtils.anchor2string(anchor)}`,
+        // If the block didn't have an anchor, we need to insert it ourselves
+        additionalTextEdits: edits,
+        sortText: padWithZero(index),
       };
-      const blockPosition = VSCodeUtils.point2VSCodePosition(
-        block.position.end
-      );
-      edits.push(
-        new TextEdit(
-          new Range(blockPosition, blockPosition),
-          ` ${AnchorUtils.anchor2string(anchor)}`
-        )
-      );
-    }
-    return {
-      label: block.text,
-      insertText: insertValueOnly
-        ? anchor.value
-        : `#${AnchorUtils.anchor2string(anchor)}`,
-      // If the block didn't have an anchor, we need to insert it ourselves
-      additionalTextEdits: edits,
-      sortText: padWithZero(index),
-    };
-  });
+    })
+    .filter(isNotUndefined);
+  return completions;
 }
 
 export const activate = (context: ExtensionContext) => {
@@ -237,16 +288,8 @@ export const activate = (context: ExtensionContext) => {
       {
         provideCompletionItems: provideBlockCompletionItems,
       },
+      "#",
       "^"
-    )
-  );
-  context.subscriptions.push(
-    languages.registerCompletionItemProvider(
-      "markdown",
-      {
-        provideCompletionItems: provideBlockCompletionItems,
-      },
-      "#"
     )
   );
 };

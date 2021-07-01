@@ -13,9 +13,7 @@ import { expect } from "../testUtilsv2";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 
 suite("completionProvider", function () {
-  let ctx = setupBeforeAfter(this, {
-    beforeHook: () => {},
-  });
+  let ctx = setupBeforeAfter(this, {});
 
   describe("wikilink", () => {
     test("basic", (done) => {

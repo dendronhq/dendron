@@ -26,7 +26,11 @@ import { fsPathToRef } from "../utils/md";
 import { DendronWorkspace, getWS } from "../workspace";
 import path from "path";
 
-const padWithZero = (n: number): string => (n < 10 ? "0" + n : String(n));
+function padWithZero(n: number): string {
+  if (n > 99) return String(n);
+  if (n > 9) return `0${n}`;
+  return `00${n}`;
+}
 
 export const provideCompletionItems = (
   document: TextDocument,
@@ -212,7 +216,7 @@ export async function provideBlockCompletionItems(
         : `#${AnchorUtils.anchor2string(anchor)}`,
       // If the block didn't have an anchor, we need to insert it ourselves
       additionalTextEdits: edits,
-      sortText: index.toString(),
+      sortText: padWithZero(index),
     };
   });
 }

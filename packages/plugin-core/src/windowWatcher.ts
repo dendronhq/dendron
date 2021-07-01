@@ -19,7 +19,7 @@ import { VSCodeUtils } from "./utils";
 import { getConfigValue, getWS } from "./workspace";
 import { ShowPreviewV2Command } from "./commands/ShowPreviewV2";
 import visit from "unist-util-visit";
-import { MDUtilsV5, ProcMode } from "@dendronhq/engine-server";
+import { DendronASTDest, MDUtilsV5, ProcMode } from "@dendronhq/engine-server";
 
 const tsDecorationType = window.createTextEditorDecorationType({
   //   borderWidth: "1px",
@@ -38,36 +38,45 @@ const tsDecorationType = window.createTextEditorDecorationType({
 
 export class WindowWatcher {
   activate(context: ExtensionContext) {
+    window.onDidChangeVisibleTextEditors((editors) => {
+      const ctx = "WindowWatcher:onDidChangeVisibleTextEditors";
+      const editorPaths = editors.map((editor) => {
+        return editor.document.uri.fsPath;
+      });
+      Logger.info({ ctx, editorPaths });
+    });
     window.onDidChangeActiveTextEditor(
-      (editor) => {
-        const ctx = "WindowWatcher:onDidChangeActiveTextEditor";
-        if (
-          editor &&
-          editor.document.uri.fsPath ===
-            window.activeTextEditor?.document.uri.fsPath
-        ) {
-          const uri = editor.document.uri;
-          Logger.info({ ctx, msg: "enter", uri: editor?.document.uri });
-          if (!getWS().workspaceService?.isPathInWorkspace(uri.fsPath)) {
-            Logger.info({ ctx, uri: uri.fsPath, msg: "not in workspace" });
-            return;
-          }
-          this.triggerUpdateDecorations();
-          this.triggerNoteGraphViewUpdate();
-          this.triggerSchemaGraphViewUpdate();
-          this.triggerNotePreviewUpdate(editor);
-
-          if (
-            getWS().workspaceWatcher?.getNewlyOpenedDocument(editor.document)
-          ) {
-            this.onFirstOpen(editor);
-          }
-        }
-      },
+      this.onDidChangeActiveTextEditor,
       this,
       context.subscriptions
     );
   }
+
+  onDidChangeActiveTextEditor = (editor: TextEditor | undefined) => {
+    const ctx = "WindowWatcher:onDidChangeActiveTextEditor";
+    if (
+      editor &&
+      editor.document.uri.fsPath ===
+        window.activeTextEditor?.document.uri.fsPath
+    ) {
+      const uri = editor.document.uri;
+      Logger.info({ ctx, editor: uri.fsPath });
+      if (!getWS().workspaceService?.isPathInWorkspace(uri.fsPath)) {
+        Logger.info({ ctx, uri: uri.fsPath, msg: "not in workspace" });
+        return;
+      }
+      this.triggerUpdateDecorations();
+      this.triggerNoteGraphViewUpdate();
+      this.triggerSchemaGraphViewUpdate();
+      this.triggerNotePreviewUpdate(editor);
+
+      if (getWS().workspaceWatcher?.getNewlyOpenedDocument(editor.document)) {
+        this.onFirstOpen(editor);
+      }
+    } else {
+      Logger.info({ ctx, editor: "undefined" });
+    }
+  };
 
   /**
    * Add text decorator to frontmatter
@@ -187,10 +196,13 @@ export class WindowWatcher {
   }
 
   private moveCursorPastFrontmatter(editor: TextEditor) {
-    const proc = MDUtilsV5.procRemarkParse({
-      mode: ProcMode.NO_DATA,
-      parseOnly: true,
-    });
+    const proc = MDUtilsV5.procRemarkParse(
+      {
+        mode: ProcMode.NO_DATA,
+        parseOnly: true,
+      },
+      { dest: DendronASTDest.MD_DENDRON }
+    );
     const parsed = proc.parse(editor.document.getText());
     visit(parsed, ["yaml"], (node) => {
       if (_.isUndefined(node.position)) return false; // Should never happen

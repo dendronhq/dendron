@@ -21,7 +21,7 @@ export class CopyNoteURLCommand extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
-  static key = DENDRON_COMMANDS.COPY_NOTE_URL.key;
+  key = DENDRON_COMMANDS.COPY_NOTE_URL.key;
   async gatherInputs(): Promise<any> {
     return {};
   }

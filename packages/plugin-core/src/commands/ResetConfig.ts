@@ -21,7 +21,7 @@ export class ResetConfigCommand extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
-  static key = DENDRON_COMMANDS.RESET_CONFIG.key;
+  key = DENDRON_COMMANDS.RESET_CONFIG.key;
   async gatherInputs(): Promise<CommandInput | undefined> {
     const scope = await window.showInputBox({
       prompt: "Select scope",
@@ -54,9 +54,9 @@ export class ResetConfigCommand extends BasicCommand<
 
   async resetGlobalState() {
     return Promise.all(
-      _.keys(GLOBAL_STATE).map((k) => {
+      _.values(GLOBAL_STATE).map((k) => {
         return DendronWorkspace.instance().updateGlobalState(
-          k as keyof typeof GLOBAL_STATE,
+          k,
           undefined
         );
       })

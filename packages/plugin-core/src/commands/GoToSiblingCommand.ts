@@ -25,6 +25,8 @@ export class GoToSiblingCommand extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
+  key = "dendron.goToSibling";
+
   async gatherInputs(): Promise<any> {
     return {};
   }

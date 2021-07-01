@@ -52,6 +52,7 @@ import { UpgradeSettingsCommand } from "./UpgradeSettings";
 import { VaultAddCommand } from "./VaultAddCommand";
 import { VaultRemoveCommand } from "./VaultRemoveCommand";
 import { RandomNoteCommand } from "./RandomNote";
+import { LaunchTutorialCommand } from "./LaunchTutorialCommand";
 
 const ALL_COMMANDS = [
   AddAndCommit,
@@ -107,6 +108,7 @@ const ALL_COMMANDS = [
   UpgradeSettingsCommand,
   VaultAddCommand,
   VaultRemoveCommand,
+  LaunchTutorialCommand,
 ] as CodeCommandConstructor[];
 
 // when("betaFeatures", ()=> {

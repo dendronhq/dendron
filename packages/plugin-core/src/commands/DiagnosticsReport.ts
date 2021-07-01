@@ -15,7 +15,7 @@ export class DiagnosticsReportCommand extends BasicCommand<
   DiagnosticsReportCommandOpts,
   void
 > {
-  static key = DENDRON_COMMANDS.DEV_DIAGNOSTICS_REPORT.key;
+  key = DENDRON_COMMANDS.DEV_DIAGNOSTICS_REPORT.key;
   async execute(opts?: DiagnosticsReportCommandOpts) {
     const ctx = "execute";
     L.info({ ctx, opts });

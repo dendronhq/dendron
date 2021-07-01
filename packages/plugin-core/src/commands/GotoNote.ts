@@ -9,7 +9,14 @@ import {
 } from "@dendronhq/common-all";
 import { matchWikiLink } from "@dendronhq/engine-server";
 import _ from "lodash";
-import { TextEditor, Position, Selection, Uri, window } from "vscode";
+import {
+  TextEditor,
+  Position,
+  Selection,
+  Uri,
+  window,
+  ViewColumn,
+} from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../utils";
@@ -22,6 +29,10 @@ type CommandOpts = {
   vault?: DVault;
   anchor?: DNoteAnchor;
   overrides?: Partial<NoteProps>;
+  /**
+   * What {@link vscode.ViewColumn} to open note in
+   */
+  column?: ViewColumn;
 };
 export { CommandOpts as GotoNoteCommandOpts };
 
@@ -47,7 +58,7 @@ export const findAnchorPos = (opts: {
  * Open or create a note. See {@link GotoNoteCommand.execute} for details
  */
 export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
-  static key = DENDRON_COMMANDS.GOTO_NOTE.key;
+  key = DENDRON_COMMANDS.GOTO_NOTE.key;
 
   getLinkFromSelection() {
     const { selection, editor } = VSCodeUtils.getSelection();
@@ -151,7 +162,9 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
           wsRoot: DendronWorkspace.wsRoot(),
         });
         const uri = Uri.file(npath);
-        const editor = await VSCodeUtils.openFileInEditor(uri);
+        const editor = await VSCodeUtils.openFileInEditor(uri, {
+          column: opts.column,
+        });
         this.L.info({ ctx, opts, msg: "exit" });
         if (opts.anchor && editor) {
           const pos = findAnchorPos({ anchor: opts.anchor, note });

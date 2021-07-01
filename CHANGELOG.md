@@ -3,6 +3,28 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.48.1](https://github.com/dendronhq/dendron/compare/v0.48.0...v0.48.1) (2021-06-30)
+
+
+### Bug Fixes
+
+* dendron not indexing links on file change ([532fe65](https://github.com/dendronhq/dendron/commit/532fe65def68a8999c34ce815badb64161f96ed8))
+* edge of stub classification, class check bug ([#897](https://github.com/dendronhq/dendron/issues/897)) ([62e45b2](https://github.com/dendronhq/dendron/commit/62e45b2c12c028a713a76805f43fcdda996e52f5))
+* graph theming stability, more contrast ([#893](https://github.com/dendronhq/dendron/issues/893)) ([9986dff](https://github.com/dendronhq/dendron/commit/9986dfff565571daec82bd9df3bd9f02f6edc52c))
+* graphviz export directory error ([#867](https://github.com/dendronhq/dendron/issues/867)) ([a60de04](https://github.com/dendronhq/dendron/commit/a60de0493e7c5b4fb688b349e0058b1ef5a74de7))
+* horizontal line folded as frontmatter ([#886](https://github.com/dendronhq/dendron/issues/886)) ([b7f6fab](https://github.com/dendronhq/dendron/commit/b7f6fab109a9f9bb22a6eb769f675e6f1f3a85ad)), closes [#883](https://github.com/dendronhq/dendron/issues/883)
+* load config defaults ([#889](https://github.com/dendronhq/dendron/issues/889)) ([0711bc4](https://github.com/dendronhq/dendron/commit/0711bc41f5a25664106bf4630645a8f7ea00c455))
+* lookup missing some results ([60f20fe](https://github.com/dendronhq/dendron/commit/60f20fea1698d47b8063b26778ac8a759686835d))
+
+
+### Features Dendron
+
+* preview v2 mvp ([a9b6d07](https://github.com/dendronhq/dendron/commit/a9b6d071ccca5f182d8a7985c68926424a2a1f2d))
+
+
+
+
+
 # [0.48.0](https://github.com/dendronhq/dendron/compare/v0.47.0...v0.48.0) (2021-06-28)
 
 

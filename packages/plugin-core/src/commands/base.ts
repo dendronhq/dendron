@@ -1,14 +1,16 @@
 import { DendronError } from "@dendronhq/common-all";
+import { getDurationMilliseconds } from "@dendronhq/common-server";
 import { DLogger } from "@dendronhq/common-server";
 import _ from "lodash";
 import { window } from "vscode";
 import { Logger } from "../logger";
+import { AnalyticsUtils } from "../utils/analytics";
 
 export type CodeCommandConstructor = {
-  key: string;
   new (): CodeCommandInstance;
 };
 export type CodeCommandInstance = {
+  key: string;
   run: (opts?: any) => Promise<void>;
 };
 
@@ -33,6 +35,8 @@ export abstract class BaseCommand<
 
   static showInput = window.showInputBox;
 
+  abstract key: string;
+
   async gatherInputs(_opts?: TRunOpts): Promise<TGatherOutput | undefined> {
     return {} as any;
   }
@@ -54,8 +58,10 @@ export abstract class BaseCommand<
   }
 
   async run(args?: Partial<TRunOpts>): Promise<TOut | undefined> {
-    // @ts-ignore
-    const ctx = `${this.__proto__.constructor.name}:run`;
+    const ctx = `${this.key}:run`;
+    const start = process.hrtime();
+    let isError = false;
+
     try {
       const out = await this.sanityCheck();
       if (out === "cancel") {
@@ -92,7 +98,14 @@ export abstract class BaseCommand<
         ctx,
         error: cerror,
       });
+
+      isError = true;
       return;
+    } finally {
+      AnalyticsUtils.track(ctx, {
+        duration: getDurationMilliseconds(start),
+        error: isError,
+      });
     }
   }
 }

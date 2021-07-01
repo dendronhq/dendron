@@ -26,7 +26,7 @@ export class ShowPreviewV2Command extends BasicCommand<
 > {
   private activeTextEditor: vscode.TextEditor | undefined;
 
-  static key = DENDRON_COMMANDS.SHOW_PREVIEW_V2.key;
+  key = DENDRON_COMMANDS.SHOW_PREVIEW_V2.key;
 
   constructor(_name?: string) {
     super(_name);
@@ -126,6 +126,7 @@ export class ShowPreviewV2Command extends BasicCommand<
                 await new GotoNoteCommand().execute({
                   qs: note.fname,
                   vault: note.vault,
+                  column: vscode.ViewColumn.One,
                 });
               }
             } else {

@@ -48,17 +48,26 @@ const getNoteGraphElements = (
     const noteVaultClass = getVaultClass(note.vault);
 
     edges.hierarchy.push(
-      ...note.children.map((child) => ({
-        data: {
-          group: "edges",
-          id: `${note.id}_${child}`,
-          source: note.id,
-          target: child,
-          fname: note.fname,
-          stub: _.isUndefined(note.stub) ? false : note.stub,
-        },
-        classes: `hierarchy ${noteVaultClass}`,
-      }))
+      ...note.children.map((child) => {
+        const childNote = notes[child];
+        const isStub = childNote
+          ? _.isUndefined(note.stub) && _.isUndefined(childNote.stub)
+            ? false
+            : note.stub || childNote.stub
+          : false;
+
+        return {
+          data: {
+            group: "edges",
+            id: `${note.id}_${child}`,
+            source: note.id,
+            target: child,
+            fname: note.fname,
+            stub: isStub,
+          },
+          classes: `hierarchy ${noteVaultClass}`,
+        };
+      })
     );
 
     const linkConnections: EdgeDefinition[] = [];
@@ -107,6 +116,14 @@ const getNoteGraphElements = (
           return;
         }
 
+        logger.log(
+          `Link from ${note.fname} to ${to.fname}: ${
+            _.isUndefined(note.stub) && _.isUndefined(to.stub)
+              ? false
+              : note.stub || to.stub
+          }`
+        );
+
         linkConnections.push({
           data: {
             group: "edges",
@@ -117,9 +134,7 @@ const getNoteGraphElements = (
             stub:
               _.isUndefined(note.stub) && _.isUndefined(to.stub)
                 ? false
-                : note.stub || to.stub
-                ? true
-                : false,
+                : note.stub || to.stub,
           },
           classes: `links ${noteVaultClass}`,
         });

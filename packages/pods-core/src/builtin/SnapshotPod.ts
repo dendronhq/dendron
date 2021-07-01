@@ -7,6 +7,7 @@ import {
   ExportPodPlantOpts,
   ExportPodConfig,
   ImportPod,
+  ImportPodConfig,
   ImportPodPlantOpts,
 } from "../basev3";
 import { JSONSchemaType } from "ajv";
@@ -134,6 +135,13 @@ export type SnapshotImportPodResp = {
 export class SnapshotImportPod extends ImportPod {
   static id: string = ID;
   static description: string = "import snapshot";
+
+  get config(): JSONSchemaType<ImportPodConfig> {
+    return PodUtils.createImportConfig({
+      required: [],
+      properties: {},
+    }) as JSONSchemaType<ImportPodConfig>;
+  }
 
   async restoreVault({
     wsRoot,

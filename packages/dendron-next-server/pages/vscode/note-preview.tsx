@@ -1,11 +1,12 @@
-import * as React from "react";
+import { DMessageSource, NoteViewMessageType } from "@dendronhq/common-all";
 import {
   createLogger,
   engineHooks,
   engineSlice,
   postVSCodeMessage,
 } from "@dendronhq/common-frontend";
-import { DMessageSource, NoteViewMessageType } from "@dendronhq/common-all";
+import { Col, Layout, Row } from "antd";
+import * as React from "react";
 import { getWsAndPort } from "../../lib/env";
 import { DendronProps } from "../../lib/types";
 
@@ -13,6 +14,24 @@ const logger = createLogger("notePreview");
 
 function isHTMLAnchorElement(element: Element): element is HTMLAnchorElement {
   return element.nodeName === "A";
+}
+
+function AntLayout(props: React.PropsWithChildren<any>) {
+  return (
+    <Layout>
+      <br />
+      <br />
+      <Layout>
+        <Row gutter={16}>
+          <Col className="gutter-row" span={2}></Col>
+          <Col className="gutter-row" span={20}>
+            <Layout.Content>{props.children}</Layout.Content>
+          </Col>
+          <Col className="gutter-row" span={2}></Col>
+        </Row>
+      </Layout>
+    </Layout>
+  );
 }
 
 function Note({ engine, ide }: DendronProps) {
@@ -23,7 +42,8 @@ function Note({ engine, ide }: DendronProps) {
   const dispatch = engineHooks.useEngineAppDispatch();
 
   const { noteActive } = ide;
-  const { id: noteId = "cat", contentHash } = noteActive || {};
+  const { id: noteId = "73eb67ea-0291-45e7-8f2f-193fd6f00643", contentHash } =
+    noteActive || {};
   const noteContent = engine.notesRendered[noteId || ""];
 
   // remember note contentHash from last "render to markdown"
@@ -37,7 +57,6 @@ function Note({ engine, ide }: DendronProps) {
     // if no "render to markdown" has happended or the note body changed
     if (!noteContent || contentHash !== renderedNoteContentHash.current) {
       renderedNoteContentHash.current = contentHash;
-      console.log("render Note");
       dispatch(engineSlice.renderNote({ ...getWsAndPort(), id: noteId }));
     }
   }, [noteId, contentHash]);
@@ -75,12 +94,16 @@ function Note({ engine, ide }: DendronProps) {
   }, [onClickHandler]);
 
   if (!noteId) {
-    return <>Loading..(no `noteId`)</>;
+    return null;
   }
   if (!noteContent) {
-    return <>Loading..(no `noteContent`)</>;
+    return null;
   }
-  return <div dangerouslySetInnerHTML={{ __html: noteContent }} />;
+  return (
+    <AntLayout>
+      <div dangerouslySetInnerHTML={{ __html: noteContent }} />
+    </AntLayout>
+  );
 }
 
 export default Note;

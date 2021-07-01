@@ -10,7 +10,7 @@ const L = Logger;
 type CommandOpts = {};
 
 export class AddAndCommit extends BasicCommand<CommandOpts, void> {
-  static key = DENDRON_COMMANDS.ADD_AND_COMMIT.key;
+  key = DENDRON_COMMANDS.ADD_AND_COMMIT.key;
 
   async execute(opts?: CommandOpts) {
     const ctx = "execute";

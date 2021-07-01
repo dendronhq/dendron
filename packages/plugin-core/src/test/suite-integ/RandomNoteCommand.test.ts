@@ -3,12 +3,13 @@ import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { TestEngineUtils } from "@dendronhq/engine-test-utils";
 import * as vscode from "vscode";
 import { RandomNoteCommand } from "../../commands/RandomNote";
+import { DENDRON_COMMANDS } from "../../constants";
 import { VSCodeUtils } from "../../utils";
 import { expect } from "../testUtilsv2";
 import {
   runLegacyMultiWorkspaceTest,
   setupBeforeAfter,
-  withConfig,
+  withConfig
 } from "../testUtilsV3";
 
 // common template function for RandomNoteCommand testing
@@ -58,7 +59,7 @@ function basicTest({
   });
 }
 
-suite(RandomNoteCommand.key, function () {
+suite(DENDRON_COMMANDS.RANDOM_NOTE.key, function () {
   let ctx: vscode.ExtensionContext;
   ctx = setupBeforeAfter(this, {});
 

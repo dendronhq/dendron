@@ -31,7 +31,7 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
-  static key = DENDRON_COMMANDS.REFACTOR_HIERARCHY.key;
+  key = DENDRON_COMMANDS.REFACTOR_HIERARCHY.key;
   async gatherInputs(): Promise<CommandOpts | undefined> {
     let match: string | undefined;
     let replace: string | undefined;

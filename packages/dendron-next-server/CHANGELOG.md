@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.48.1](https://github.com/dendronhq/dendron/compare/v0.48.0...v0.48.1) (2021-06-30)
+
+
+### Bug Fixes
+
+* edge of stub classification, class check bug ([#897](https://github.com/dendronhq/dendron/issues/897)) ([62e45b2](https://github.com/dendronhq/dendron/commit/62e45b2c12c028a713a76805f43fcdda996e52f5))
+* graph theming stability, more contrast ([#893](https://github.com/dendronhq/dendron/issues/893)) ([9986dff](https://github.com/dendronhq/dendron/commit/9986dfff565571daec82bd9df3bd9f02f6edc52c))
+* load config defaults ([#889](https://github.com/dendronhq/dendron/issues/889)) ([0711bc4](https://github.com/dendronhq/dendron/commit/0711bc41f5a25664106bf4630645a8f7ea00c455))
+
+
+### Features Dendron
+
+* preview v2 mvp ([a9b6d07](https://github.com/dendronhq/dendron/commit/a9b6d071ccca5f182d8a7985c68926424a2a1f2d))
+
+
+
+
+
 # [0.48.0](https://github.com/dendronhq/dendron/compare/v0.47.0...v0.48.0) (2021-06-28)
 
 

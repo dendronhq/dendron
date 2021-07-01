@@ -80,7 +80,7 @@ export class NoteLookupCommand extends BaseCommand<
   CommandGatherOutput,
   CommandRunOpts
 > {
-  static key = DENDRON_COMMANDS.LOOKUP_NOTE.key;
+  key = DENDRON_COMMANDS.LOOKUP_NOTE.key;
   protected _controller: LookupControllerV3 | undefined;
   protected _provider: ILookupProviderV3 | undefined;
 

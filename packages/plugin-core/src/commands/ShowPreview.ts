@@ -11,7 +11,7 @@ export class ShowPreviewCommand extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
-  static key = DENDRON_COMMANDS.SHOW_PREVIEW.key;
+  key = DENDRON_COMMANDS.SHOW_PREVIEW.key;
   async sanityCheck() {
     if (_.isUndefined(VSCodeUtils.getActiveTextEditor())) {
       return "No document open";

@@ -52,7 +52,7 @@ import _ from "lodash";
 import { DConfig } from "./config";
 import { FileStorage } from "./drivers/file/storev2";
 import { FuseEngine } from "./fuseEngine";
-import { LinkUtils, MDUtilsV4 } from "./markdown";
+import { LinkUtils, MDUtilsV5 } from "./markdown";
 import { AnchorUtils, RemarkUtils } from "./markdown/remark/utils";
 import { HookUtils } from "./topics/hooks";
 
@@ -101,7 +101,11 @@ export class DendronEngineV2 implements DEngine {
   static create({ wsRoot, logger }: { logger?: DLogger; wsRoot: string }) {
     const LOGGER = logger || createLogger();
     const cpath = DConfig.configPath(wsRoot);
-    const config = readYAML(cpath) as DendronConfig;
+    const config = _.defaultsDeep(
+      readYAML(cpath) as DendronConfig,
+      DConfig.genDefaultConfig()
+    );
+
     return new DendronEngineV2({
       wsRoot,
       vaults: config.vaults,
@@ -319,7 +323,11 @@ export class DendronEngineV2 implements DEngine {
 
   async getConfig() {
     const cpath = DConfig.configPath(this.configRoot);
-    const config = readYAML(cpath) as DendronConfig;
+    const config = _.defaultsDeep(
+      readYAML(cpath) as DendronConfig,
+      DConfig.genDefaultConfig()
+    );
+
     return {
       error: null,
       data: config,
@@ -426,13 +434,11 @@ export class DendronEngineV2 implements DEngine {
         data: undefined,
       };
     }
-    const proc = MDUtilsV4.procHTML({
+    const proc = MDUtilsV5.procRehypeFull({
       engine: this,
-      vault: note.vault,
       fname: note.fname,
+      vault: note.vault,
       config: this.config,
-      noteIndex: {} as any,
-      useLinks: false,
     });
     const payload = await proc.process(NoteUtils.serialize(note));
     return {

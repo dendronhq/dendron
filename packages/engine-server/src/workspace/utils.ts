@@ -1,9 +1,4 @@
-import {
-  assertInvalidState,
-  NoteProps,
-  VaultUtils,
-  WorkspaceOpts,
-} from "@dendronhq/common-all";
+import { NoteProps, VaultUtils, WorkspaceOpts } from "@dendronhq/common-all";
 import { findUpTo, genHash } from "@dendronhq/common-server";
 import _ from "lodash";
 
@@ -58,7 +53,7 @@ export class WorkspaceUtils {
   }) {
     const noteHash = genHash(content);
     if (_.isUndefined(note.contentHash)) {
-      assertInvalidState(`note contentHash is undefined. id: ${note.id}`);
+      return true;
     }
     return noteHash !== note.contentHash;
   }

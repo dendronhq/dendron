@@ -413,7 +413,6 @@
       {
         "command": "dendron.showPreviewV2",
         "title": "Dendron: Show Preview V2",
-        "when": "dendron:devMode",
         "desc": "Show Markdown Preview",
         "docLink": "dendron.topic.commands.md",
         "docPreview": ""
@@ -700,11 +699,6 @@
       },
       {
         "command": "dendron.showPreview",
-        "windows": "windows+ctrl+p",
-        "mac": "cmd+ctrl+p"
-      },
-      {
-        "command": "dendron.showPreviewV2",
         "windows": "windows+ctrl+p",
         "mac": "cmd+ctrl+p"
       }

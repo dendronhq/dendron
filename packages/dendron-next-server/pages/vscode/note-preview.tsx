@@ -1,14 +1,14 @@
-import * as React from "react";
+import { DMessageSource, NoteViewMessageType } from "@dendronhq/common-all";
 import {
   createLogger,
   engineHooks,
   engineSlice,
   postVSCodeMessage,
 } from "@dendronhq/common-frontend";
-import { DMessageSource, NoteViewMessageType } from "@dendronhq/common-all";
+import { Col, Layout, Row } from "antd";
+import * as React from "react";
 import { getWsAndPort } from "../../lib/env";
 import { DendronProps } from "../../lib/types";
-import { Col, Layout, Row, Space } from "antd";
 
 const logger = createLogger("notePreview");
 
@@ -57,7 +57,6 @@ function Note({ engine, ide }: DendronProps) {
     // if no "render to markdown" has happended or the note body changed
     if (!noteContent || contentHash !== renderedNoteContentHash.current) {
       renderedNoteContentHash.current = contentHash;
-      console.log("render Note");
       dispatch(engineSlice.renderNote({ ...getWsAndPort(), id: noteId }));
     }
   }, [noteId, contentHash]);
@@ -95,10 +94,10 @@ function Note({ engine, ide }: DendronProps) {
   }, [onClickHandler]);
 
   if (!noteId) {
-    return <>Loading..(no `noteId`)</>;
+    return null;
   }
   if (!noteContent) {
-    return <>Loading..(no `noteContent`)</>;
+    return null;
   }
   return (
     <AntLayout>

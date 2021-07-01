@@ -681,7 +681,6 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     key: "dendron.showPreviewV2",
     title: `${CMD_PREFIX} Show Preview V2`,
     group: "notes",
-    when: DendronContext.DEV_MODE,
     keybindings: {
       windows: "windows+ctrl+p",
       mac: "cmd+ctrl+p",

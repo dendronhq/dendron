@@ -1,7 +1,7 @@
 import {
   DNoteAnchor,
   ERROR_SEVERITY,
-  genUUID,
+  genUUIDInsecure,
   isNotUndefined,
   NoteUtils,
 } from "@dendronhq/common-all";
@@ -190,7 +190,10 @@ export async function provideBlockCompletionItems(
     if (_.isUndefined(anchor)) {
       anchor = {
         type: "block",
-        value: genUUID(),
+        // Using the "insecure" generator avoids blocking for entropy to become available. This slightly increases the
+        // chance of conflicting IDs, but that's okay since we'll only insert one of these completions. (Could also put
+        // the same id for all options, but it's unclear if VSCode might reuse these completions)
+        value: genUUIDInsecure(),
       };
       const blockPosition = VSCodeUtils.point2VSCodePosition(
         block.position.end

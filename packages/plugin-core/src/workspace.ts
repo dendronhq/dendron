@@ -26,6 +26,7 @@ import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
+import rif from "replace-in-file";
 import { ALL_COMMANDS } from "./commands";
 import { GoToSiblingCommand } from "./commands/GoToSiblingCommand";
 import { LookupCommand } from "./commands/LookupCommand";
@@ -752,6 +753,8 @@ export class WorkspaceInitFactory {
  */
 export class TutorialInitializer implements WorkspaceInitializer {
   onWorkspaceCreation = async (opts: { vaults: DVault[]; wsRoot: string }) => {
+    const ctx = "TutorialInitializer.onWorkspaceCreation";
+
     const ws = DendronWorkspace.instance();
 
     await ws.updateGlobalState(
@@ -779,10 +782,14 @@ export class TutorialInitializer implements WorkspaceInitializer {
       ],
     };
 
-    const replace = require("replace-in-file");
-
-    replace(options).catch((error: any) => {
-      console.error(error);
+    rif.replaceInFile(options).catch((err: Error) => {
+      Logger.error({
+        ctx,
+        error: DendronError.createPlainError({
+          error: err,
+          message: "error replacing tutorial placeholder text",
+        }),
+      });
     });
   };
 

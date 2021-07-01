@@ -30,7 +30,6 @@ export class WorkspaceWatcher {
       this,
       context.subscriptions
     );
-    //   watcher.onDidChange(_.debounce(this.onDidChange, 500), this)
     workspace.onDidChangeTextDocument(
       _.debounce(this.onDidChangeTextDocument, 100),
       this,

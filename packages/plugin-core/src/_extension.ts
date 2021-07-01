@@ -11,24 +11,18 @@ import {
   SegmentClient,
 } from "@dendronhq/common-server";
 import {
+  DConfig,
   HistoryEvent,
   HistoryService,
+  MetadataService,
   MigrationServce,
   WorkspaceService,
-  MetadataService,
-  DConfig,
 } from "@dendronhq/engine-server";
-import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import semver from "semver";
 import * as vscode from "vscode";
-import {
-  CONFIG,
-  DendronContext,
-  DENDRON_COMMANDS,
-  GLOBAL_STATE,
-} from "./constants";
+import { CONFIG, DendronContext, DENDRON_COMMANDS } from "./constants";
 import { Logger } from "./logger";
 import { migrateConfig } from "./migration";
 import { StateService } from "./services/stateService";
@@ -36,9 +30,13 @@ import { Extensions } from "./settings";
 import { setupSegmentClient } from "./telemetry";
 import { InstallStatus, VSCodeUtils, WSUtils } from "./utils";
 import { AnalyticsUtils } from "./utils/analytics";
-import { MarkdownUtils } from "./utils/md";
 import { DendronTreeView } from "./views/DendronTreeView";
-import { DendronWorkspace, getEngine, getWS } from "./workspace";
+import {
+  DendronWorkspace,
+  getEngine,
+  getWS,
+  WorkspaceInitFactory,
+} from "./workspace";
 const MARKDOWN_WORD_PATTERN = new RegExp("([\\w\\.\\#]+)");
 // === Main
 
@@ -64,16 +62,14 @@ async function reloadWorkspace() {
     return maybeEngine;
   }
   Logger.info({ ctx, msg: "post-ws.reloadWorkspace" });
-  // check if first time install workspace, if so, show tutorial
-  if (isFirstInstall(ws.context)) {
-    Logger.info({ ctx, msg: "first dendron ws, show welcome" });
-    const welcomeUri = VSCodeUtils.joinPath(ws.rootWorkspace.uri, "dendron.md");
-    if (getStage() !== "test" && fs.pathExistsSync(welcomeUri.fsPath)) {
-      await vscode.window.showTextDocument(welcomeUri);
-      await MarkdownUtils.openPreview({ reuseWindow: false });
-    }
-    await ws.updateGlobalState("DENDRON_FIRST_WS", "initialized");
+
+  // Run any initialization code necessary for this workspace invocation.
+  let initializer = WorkspaceInitFactory.create(ws);
+
+  if (initializer?.onWorkspaceOpen) {
+    initializer.onWorkspaceOpen({ ws: ws });
   }
+
   vscode.window.showInformationMessage("Dendron is active");
   Logger.info({ ctx, msg: "exit" });
   await postReloadWorkspace();
@@ -137,12 +133,6 @@ async function postReloadWorkspace() {
     }
   }
   Logger.info({ ctx, msg: "exit" });
-}
-
-function isFirstInstall(context: vscode.ExtensionContext): boolean {
-  return _.isUndefined(
-    context.globalState.get<string | undefined>(GLOBAL_STATE.DENDRON_FIRST_WS)
-  );
 }
 
 async function startServer() {
@@ -482,14 +472,7 @@ async function showWelcomeOrWhatsNew({
     case InstallStatus.INITIAL_INSTALL: {
       Logger.info({ ctx, msg: "extension, initial install" });
       MetadataService.instance().setInitialInstall();
-      // NOTE: this needs to be from extension because no workspace might exist at this point
-      const uri = VSCodeUtils.joinPath(
-        ws.context.extensionUri,
-        "assets",
-        "dendron-ws",
-        "vault",
-        "welcome.html"
-      );
+
       AnalyticsUtils.track(VSCodeEvents.Install, {
         duration: getDurationMilliseconds(start),
       });
@@ -499,7 +482,8 @@ async function showWelcomeOrWhatsNew({
       if (!SegmentClient.instance().hasOptedOut) {
         StateService.instance().showTelemetryNotice();
       }
-      await ws.showWelcome(uri, { reuseWindow: true, rawHTML: true });
+
+      await ws.showWelcome();
       break;
     }
     case InstallStatus.UPGRADED: {

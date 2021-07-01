@@ -13,6 +13,7 @@ import {
   DEFAULT_LEGACY_VAULT_NAME,
   DENDRON_COMMANDS,
   GLOBAL_STATE,
+  WORKSPACE_ACTIVATION_CONTEXT,
 } from "../../constants";
 import * as telemetry from "../../telemetry";
 import { getWS } from "../../workspace";
@@ -68,7 +69,7 @@ suite("Extension", function () {
     it("not active, initial create ws", function (done) {
       const wsRoot = tmpDir().name;
       getWS()
-        .context.globalState.update(GLOBAL_STATE.DENDRON_FIRST_WS, true)
+        .updateGlobalState(GLOBAL_STATE.WORKSPACE_ACTIVATION_CONTEXT, WORKSPACE_ACTIVATION_CONTEXT.NORMAL)
         .then(() => {
           _activate(ctx).then(async () => {
             stubSetupWorkspace({

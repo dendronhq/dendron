@@ -54,9 +54,9 @@ export class ResetConfigCommand extends BasicCommand<
 
   async resetGlobalState() {
     return Promise.all(
-      _.keys(GLOBAL_STATE).map((k) => {
+      _.values(GLOBAL_STATE).map((k) => {
         return DendronWorkspace.instance().updateGlobalState(
-          k as keyof typeof GLOBAL_STATE,
+          k,
           undefined
         );
       })

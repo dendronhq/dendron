@@ -8,10 +8,11 @@ import {
   Processor,
   ProcFlavor,
 } from "@dendronhq/engine-server";
+import { vault2Path } from "../../../../../common-server/lib";
 import { runEngineTestV5 } from "../../../engine";
 import { ENGINE_HOOKS } from "../../../presets";
 import { checkString } from "../../../utils";
-import { createProcCompileTests } from "./utils";
+import { cleanVerifyOpts, createProcCompileTests } from "./utils";
 
 let getOpts = (opts: any) => {
   const _copts = opts.extra as { proc: Processor; dest: DendronASTDest };
@@ -28,6 +29,42 @@ const modifyNote = async (
   );
 };
 
+const IMAGE_WITH_LEAD_FORWARD_SLASH = createProcCompileTests({
+  name: "IMAGE_WITH_LEAD_FORWARD_SLASH",
+  setup: async (opts) => {
+    const { proc } = getOpts(opts);
+    const txt = `![foo alt txt](/assets/foo.jpg)`;
+    const resp = await proc.process(txt);
+    return { resp, proc };
+  },
+  verify: {
+    [DendronASTDest.HTML]: {
+      [ProcFlavor.REGULAR]: async (opts) => {
+        const {
+          extra: { resp },
+        } = cleanVerifyOpts(opts);
+        await checkString(
+          resp.contents,
+          `<img src="/assets/foo.jpg" alt="foo alt txt">`
+        );
+      },
+      [ProcFlavor.PREVIEW]: async (opts) => {
+        const {
+          extra: { resp },
+          vaults,
+          wsRoot,
+        } = cleanVerifyOpts(opts);
+        const vpath = vault2Path({ vault: vaults[0], wsRoot });
+        expect(resp).toMatchSnapshot();
+        await checkString(
+          resp.contents,
+          `<img src="${vpath}/assets/foo.jpg" alt="foo alt txt">`
+        );
+      },
+      [ProcFlavor.PUBLISHING]: ProcFlavor.REGULAR,
+    },
+  },
+});
 const NOTE_REF_BASIC_WITH_REHYPE = createProcCompileTests({
   name: "NOTE_REF_WITH_REHYPE",
   setup: async (opts) => {
@@ -60,7 +97,10 @@ const NOTE_REF_BASIC_WITH_REHYPE = createProcCompileTests({
     });
   },
 });
-const ALL_TEST_CASES = [...NOTE_REF_BASIC_WITH_REHYPE];
+const ALL_TEST_CASES = [
+  ...IMAGE_WITH_LEAD_FORWARD_SLASH,
+  ...NOTE_REF_BASIC_WITH_REHYPE,
+];
 
 describe("MDUtils.proc", () => {
   test.each(

@@ -287,7 +287,9 @@ function CalendarView({ engine, ide }: DendronProps) {
         mode={activeMode}
         onSelect={onSelect}
         onPanelChange={onPanelChange}
-        value={activeDate}
+        /*
+        // @ts-ignore -- `null` initializes ant Calendar into a controlled component whereby it does not render an selected/visible date (today) when `activeDate` is `undefined`*/
+        value={activeDate || null}
         dateFullCellRender={dateFullCellRender}
         fullscreen={false}
       />

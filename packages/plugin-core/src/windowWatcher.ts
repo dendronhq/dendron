@@ -189,6 +189,10 @@ export class WindowWatcher {
   }
 
   private async onFirstOpen(editor: TextEditor) {
+    Logger.info({
+      msg: "First open of note",
+      fname: NoteUtils.uri2Fname(editor.document.uri),
+    });
     this.moveCursorPastFrontmatter(editor);
     if (getWS().config.autoFoldFrontmatter) {
       await this.foldFrontmatter();

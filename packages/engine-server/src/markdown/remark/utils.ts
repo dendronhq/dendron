@@ -23,7 +23,7 @@ import _ from "lodash";
 import { Heading, ListItem, Paragraph, Root } from "mdast";
 import * as mdastBuilder from "mdast-builder";
 import { Processor } from "unified";
-import { Node } from "unist";
+import { Node, Parent } from "unist";
 import { selectAll } from "unist-util-select";
 import visit from "unist-util-visit";
 import { VFile } from "vfile";
@@ -616,7 +616,7 @@ export class RemarkUtils {
     return -1;
   }
 
-  static isHeading(node: Node, text: string, depth?: number) {
+  static isHeading(node: Node, text: string, depth?: number): node is Heading {
     if (node.type !== DendronASTTypes.HEADING) {
       return false;
     }
@@ -637,7 +637,11 @@ export class RemarkUtils {
     return true;
   }
 
-  static isNoteRefV2(node: Node) {
+  static isParent(node: Node): node is Parent {
+    return _.isArray(node.children);
+  }
+
+  static isNoteRefV2(node: Node): node is NoteRefNoteV4 {
     return node.type === DendronASTTypes.REF_LINK_V2;
   }
 

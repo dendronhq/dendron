@@ -3,7 +3,7 @@ import _ from "lodash";
 import { Image, Root } from "mdast";
 import { BlockAnchor, DendronASTTypes } from "../types";
 import Unified, { Transformer } from "unified";
-import { Node } from "unist";
+import { Node, Parent } from "unist";
 import u from "unist-builder";
 import visit from "unist-util-visit";
 import { VFile } from "vfile";
@@ -214,10 +214,36 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
       }
       if (node.type === DendronASTTypes.BLOCK_ANCHOR) {
         const procOpts = MDUtilsV4.getProcOpts(proc);
-        parent!.children[index] = blockAnchor2html(
+        const anchorHTML = blockAnchor2html(
           node as BlockAnchor,
           procOpts.blockAnchorsOpts
         );
+        let target: Parent | undefined;
+        if (parent?.type === "root") {
+          // If the block anchor is at the top level, then it references the block before it
+          const previous = parent.children[index - 1];
+          if (!RemarkUtils.isParent(previous)) return;
+          const maybeTarget = previous.children[0];
+          if (!RemarkUtils.isParent(maybeTarget)) return;
+          target = maybeTarget;
+        } else {
+          // Otherwise, it references the block it's inside
+          target = parent;
+        }
+        if (_.isUndefined(target)) return;
+        // Install the block anchor at the target node
+        target.children.splice(0, 0, anchorHTML);
+        // Remove the block anchor itself since we install the anchor at the target
+        parent!.children.splice(index, 1);
+        // We might be adding and removing siblings here. We must return the index of the next sibling to traverse.
+        if (target === parent) {
+          // In this case, we removed block anchor but added a node to the start.
+          // As a result, the indices match and traversal can continue.
+        } else {
+          // Otherwise, we removed the block anchor but didn't add anything.
+          // The next sibling got shifted down by 1 index, it will be at the same index as the block anchor.
+          return index;
+        }
       }
       if (node.type === "image" && dest === DendronASTDest.HTML) {
         let imageNode = node as Image;
@@ -229,6 +255,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
             _.trim(imageNode.url, "/");
         }
       }
+      return; // continue traversal
     });
     return tree;
   }

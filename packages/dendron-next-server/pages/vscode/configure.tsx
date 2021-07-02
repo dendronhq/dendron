@@ -1,17 +1,18 @@
 import { createLogger, engineSlice } from "@dendronhq/common-frontend";
-import { List, Typography, Button, message } from "antd";
+import { List, Typography, Button, Space, message } from "antd";
 import { useRouter } from "next/router";
 import { FieldArray, Formik } from "formik";
 import { Form, Input, Switch, ResetButton, SubmitButton } from "formik-antd";
 import React from "react";
 const { Title, Paragraph, Text, Link } = Typography;
-import { MinusOutlined } from "@ant-design/icons";
+import { MinusCircleOutlined } from "@ant-design/icons";
 import _ from "lodash";
 import Ajv, { JSONSchemaType } from "ajv";
 import { useRef } from "react";
 import { engineHooks } from "@dendronhq/common-frontend";
 import { configWrite } from "../../lib/effects";
 import { m } from "framer-motion";
+import get from "lodash/get";
 
 interface MyData {
   siteRootDir: string;
@@ -20,7 +21,7 @@ interface MyData {
   copyAssets: boolean;
 }
 
-const siteConfig = [
+const siteConfig: ConfigType[] = [
   {
     label: "Site Root Directory",
     name: "siteRootDir",
@@ -57,7 +58,28 @@ const siteConfig = [
   },
 ];
 
-const dendronConfig = [
+const vault: ConfigType[] = [
+  {
+    label: "Filesystem Path",
+    name: "fsPath",
+    type: "string",
+    helperText: "Filesystem path to vault",
+  },
+  {
+    label: "Visibility",
+    name: "visibility",
+    type: "string",
+    helperText: "Visibility of the vault",
+  },
+];
+
+const dendronConfig: ConfigType[] = [
+  {
+    label: "Site Config",
+    name: "site.siteHierarchies",
+    type: "array",
+    helperText: "Site configuration",
+  },
   {
     label: "No Caching?",
     name: "noCaching",
@@ -75,9 +97,27 @@ const dendronConfig = [
     type: "object",
     data: siteConfig,
   },
+  {
+    label: "Vault",
+    name: "vaults",
+    type: "array",
+    data: vault,
+  },
 ];
 
-const flatten = (data: any, prefix: string[] = []) => {
+type ConfigType = {
+  label?: string;
+  name: string;
+  type: string;
+  required?: boolean;
+  helperText?: string;
+  data?: ConfigType[];
+};
+
+const flatten = (
+  data: ConfigType[] | ConfigType,
+  prefix: string[] = []
+): ConfigType[] | ConfigType => {
   if (Array.isArray(data)) return data.flatMap((next) => flatten(next, prefix));
   return data.type !== "object"
     ? {
@@ -109,6 +149,8 @@ const FormItem = ({
   name,
   label,
   type,
+  data,
+  values,
   required,
   helperText,
   error,
@@ -116,43 +158,79 @@ const FormItem = ({
   name: string;
   placeholder?: string;
   label: string;
+  data?: any;
+  values?: any;
   type: string;
   required?: boolean;
   helperText?: string;
   error?: string;
 }) => (
   <Form.Item name={name} style={{ justifyContent: "center" }}>
+    {console.log({ name, values }, "yoooooo")}
     <Title level={3}>
       {console.log(type)}
       {label}
       {required && <span style={{ color: "red" }}> *</span>}
     </Title>
+    <Text type="secondary">{helperText}</Text>
     {type === "string" && <Input size="large" name={name} />}
     {type === "boolean" && (
       <>
+        <br />
         <Switch name={name} />
         <br />
       </>
     )}
-    <Text type="secondary">{helperText}</Text>
+    {type === "array" && (
+      <FieldArray
+        name={name}
+        render={(arrayHelpers) => renderArray(values, data, name, arrayHelpers)}
+      />
+    )}
     <br />
     <Text type="danger">{error}</Text>
   </Form.Item>
 );
 
-const renderArray = (arrayEnts: any[], arrayHelpers: any) => {
+const renderArray = (
+  arrayEnts: any[],
+  dataDefinition: any,
+  name: string,
+  arrayHelpers: any
+) => {
   const data = arrayEnts
-    .map((_ent, idx) => (
+    ?.map((_ent, idx) => (
       <>
-        <Input
-          key={idx}
-          size="large"
-          name={`site.siteHierarchies.${idx}`}
-          addonBefore={idx + 1 + "."}
-          addonAfter={
-            <MinusOutlined onClick={() => arrayHelpers.remove(idx)} />
-          }
-        />
+        {typeof _ent !== "object" ? (
+          <Input
+            key={idx}
+            size="large"
+            name={`${name}.${idx}`}
+            addonBefore={idx + 1 + "."}
+            addonAfter={
+              <MinusCircleOutlined onClick={() => arrayHelpers.remove(idx)} />
+            }
+          />
+        ) : (
+          <Space
+            key={name}
+            style={{ display: "flex", marginBottom: 8 }}
+            align="baseline"
+          >
+            {dataDefinition
+              .map(({ name: itemName, label }) => (
+                <Input
+                  key={`${idx}.${itemName}`}
+                  size="large"
+                  name={`${name}.${idx}.${itemName}`}
+                  placeholder={label}
+                />
+              ))
+              .concat(
+                <MinusCircleOutlined onClick={() => arrayHelpers.remove(idx)} />
+              )}
+          </Space>
+        )}
       </>
     ))
     .concat(
@@ -185,6 +263,8 @@ export default function Config({
   if (!engine.config || !ws || !port) {
     return <></>;
   }
+
+  console.log(engine.config, "yooooo");
 
   const formItemLayout = {
     labelCol: {
@@ -247,20 +327,13 @@ export default function Config({
             <Typography style={{ textAlign: "center" }}>
               <Title>Dendron Configuration </Title>
             </Typography>
-            <Form.Item
-              name="siteHierarchies"
-              style={{ justifyContent: "center" }}
-            >
-              <Title level={3}>Site Config</Title>
-              <FieldArray
-                name="site.siteHierarchies"
-                render={(arrayHelpers) =>
-                  renderArray(values.site.siteHierarchies, arrayHelpers)
-                }
-              />
-            </Form.Item>
             {flatten(dendronConfig).map(({ name, ...rest }) => (
-              <FormItem key={name} name={name} {...rest} />
+              <FormItem
+                key={name}
+                name={name}
+                {...rest}
+                values={get(values, name)}
+              />
             ))}
             <Form.Item name="submit" style={{ justifyContent: "center" }}>
               <Button.Group size="large">

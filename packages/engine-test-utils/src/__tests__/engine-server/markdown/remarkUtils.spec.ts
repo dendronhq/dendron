@@ -724,7 +724,7 @@ describe("RemarkUtils and LinkUtils", () => {
       return unrefLinks;
     };
 
-    test.only("basic", async () => {
+    test("basic", async () => {
       await runEngineTestV5(
         async ({ engine }) => {
           const unrefLinks = await getUnrefLinks(engine);

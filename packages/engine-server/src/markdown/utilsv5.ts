@@ -21,6 +21,7 @@ import remarkParse from "remark-parse";
 import remark2rehype from "remark-rehype";
 import { Processor } from "unified";
 import { blockAnchors } from "./remark/blockAnchors";
+import { dendronPreview } from "./remark/dendronPreview";
 import { dendronPub } from "./remark/dendronPub";
 import { noteRefsV2 } from "./remark/noteRefsV2";
 import { wikiLinks } from "./remark/wikiLinks";
@@ -202,6 +203,11 @@ export class MDUtilsV5 {
       this.setProcData(proc, data as ProcDataFullV5);
       MDUtilsV4.setEngine(proc, data.engine!);
       proc = proc.use(dendronPub);
+
+      // add flavor specific plugins
+      if (opts.flavor === ProcFlavor.PREVIEW) {
+        proc = proc.use(dendronPreview);
+      }
     }
     return proc;
   }

@@ -4,7 +4,11 @@ import {
   DuplicateNoteAction,
   DVault,
 } from "@dendronhq/common-all";
-import { AssertUtils, TestPresetEntryV4 } from "@dendronhq/common-test-utils";
+import {
+  AssertUtils,
+  RunEngineTestFunctionV4,
+  TestPresetEntryV4,
+} from "@dendronhq/common-test-utils";
 import {
   DendronASTData,
   DendronASTDest,
@@ -17,6 +21,20 @@ import {
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
+
+type ProcVerifyOpts = Required<
+  Parameters<
+    RunEngineTestFunctionV4<
+      any,
+      {
+        dest: DendronASTDest;
+        proc: Processor;
+        // vfile contents can be uint8 array, force it to be string
+        resp: VFile & { contents: string };
+      }
+    >
+  >[0]
+>;
 
 export async function checkVFile(resp: VFile, ...match: string[]) {
   expect(resp).toMatchSnapshot();
@@ -75,6 +93,10 @@ export type ProcTests = {
   dest: DendronASTDest;
   flavor: ProcFlavor;
   testCase: TestPresetEntryV4;
+};
+
+export const cleanVerifyOpts = (opts: any): ProcVerifyOpts => {
+  return opts as ProcVerifyOpts;
 };
 
 /**
@@ -155,8 +177,8 @@ export const createProcCompileTests = (opts: {
     allTests = Object.values(DendronASTDest)
       .flatMap((dest) => {
         let verifyFuncsByFlavor = verifyFuncDict[dest] || {};
-        let verifyFunc: TestPresetEntryV4["testFunc"];
         return _.flatMap(verifyFuncsByFlavor, (funcOrFlavor, flavor) => {
+          let verifyFunc: TestPresetEntryV4["testFunc"];
           if (_.isUndefined(funcOrFlavor)) {
             return;
           }

@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`MDUtils.proc "HTML: IMAGE_WITH_LEAD_FORWARD_SLASH: PREVIEW" 1`] = `
+VFile {
+  "contents": "<p><img src=\\"<TEMP_DIR>/tmp-70621-W21lfxo4fYFp/vault1/assets/foo.jpg\\" alt=\\"foo alt txt\\"></p>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;

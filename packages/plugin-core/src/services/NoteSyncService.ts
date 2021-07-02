@@ -74,10 +74,10 @@ export class NoteSyncService {
     note = NoteUtils.hydrate({ noteRaw: note, noteHydrated });
     const links = LinkUtils.findLinks({ note, engine: eclient });
     note.links = links;
-    const anchors = await AnchorUtils.findAnchors(
-      { note, wsRoot: eclient.wsRoot },
-      { fname, engine: eclient }
-    );
+    const anchors = await AnchorUtils.findAnchors({
+      note,
+      wsRoot: eclient.wsRoot,
+    });
     note.anchors = anchors;
     this.L.info({ ctx, fname, msg: "exit" });
     const noteClean = await eclient.updateNote(note);

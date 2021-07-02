@@ -128,9 +128,9 @@ function CalendarView({ engine, ide }: DendronProps) {
   }, [noteActive, groupedDailyNotes]);
 
   const getDateKey = (date: Moment) => {
-    return date.format(
-      activeMode === "month" ? defaultJournalDateFormat : "y.MM" // TODO compute format for currentMode="year"
-    );
+    const format =
+      activeMode === "month" ? defaultJournalDateFormat || "y.MM.dd" : "y.MM"; // TODO compute format for currentMode="year" from config
+    return date.format(format);
   };
 
   const onSelect = useCallback<Exclude<CalendarProps["onSelect"], undefined>>(
@@ -160,7 +160,7 @@ function CalendarView({ engine, ide }: DendronProps) {
 
   const onClickToday = useCallback(() => {
     onSelect(moment());
-  }, []);
+  }, [onSelect]);
 
   const dateFullCellRender = useCallback<
     Exclude<CalendarProps["dateFullCellRender"], undefined>

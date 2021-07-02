@@ -45,6 +45,10 @@ export class WorkspaceWatcher {
   async onDidChangeTextDocument(event: TextDocumentChangeEvent) {
     const activeEditor = window.activeTextEditor;
     if (activeEditor && event.document === activeEditor.document) {
+      const uri = activeEditor.document.uri;
+      if (!getWS().workspaceService?.isPathInWorkspace(uri.fsPath)) {
+        return;
+      }
       DendronWorkspace.instance().windowWatcher?.triggerUpdateDecorations();
       NoteSyncService.instance().onDidChange(activeEditor.document.uri);
     }

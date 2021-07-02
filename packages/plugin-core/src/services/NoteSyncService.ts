@@ -42,7 +42,7 @@ export class NoteSyncService {
    */
   async onDidChange(uri: vscode.Uri) {
     const ctx = "NoteSyncService:onDidChange";
-    this.L.info({ ctx, uri: uri.fsPath });
+
     const eclient = DendronWorkspace.instance().getEngine();
     const fname = path.basename(uri.fsPath, ".md");
     const doc = await vscode.workspace.openTextDocument(uri);
@@ -51,6 +51,7 @@ export class NoteSyncService {
       this.L.debug({ ctx, uri: uri.fsPath, msg: "not in workspace, ignoring" });
       return;
     }
+    this.L.info({ ctx, uri: uri.fsPath });
     const vault = VaultUtils.getVaultByNotePath({
       vaults: eclient.vaults,
       wsRoot: DendronWorkspace.wsRoot(),

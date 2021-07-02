@@ -430,16 +430,10 @@ export class FileStorage implements DStore {
             return;
           }
           try {
-            const anchors = await AnchorUtils.findAnchors(
-              {
-                note: n,
-                wsRoot: wsRoot,
-              },
-              {
-                engine: this.engine,
-                fname: n.fname,
-              }
-            );
+            const anchors = await AnchorUtils.findAnchors({
+              note: n,
+              wsRoot: wsRoot,
+            });
             cacheUpdates[n.fname].data.anchors = anchors;
             n.anchors = anchors;
           } catch (err) {

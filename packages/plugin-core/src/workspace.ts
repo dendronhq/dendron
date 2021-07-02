@@ -742,10 +742,7 @@ export class WorkspaceInitFactory {
     const state = context.globalState.get<string | undefined>(
       GLOBAL_STATE.WORKSPACE_ACTIVATION_CONTEXT
     );
-    return (
-      _.isUndefined(state) ||
-      state === WORKSPACE_ACTIVATION_CONTEXT.TUTORIAL.toString()
-    );
+    return state === WORKSPACE_ACTIVATION_CONTEXT.TUTORIAL.toString();
   }
 }
 

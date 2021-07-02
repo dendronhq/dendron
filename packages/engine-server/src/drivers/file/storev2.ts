@@ -446,6 +446,24 @@ export class FileStorage implements DStore {
             errors.push(err);
             return;
           }
+          try {
+            const unreferencedLinks = await LinkUtils.findUnreferencedLinks({
+              note: n,
+              notes: notes,
+              engine: this.engine,
+            });
+            cacheUpdates[n.fname].data.links = cacheUpdates[n.fname].data.links.concat(unreferencedLinks);
+            n.links = n.links.concat(unreferencedLinks);
+          } catch (err) {
+            if (!(err instanceof DendronError)) {
+              err = new DendronError({
+                message: `Failed to read unreferenced links in note ${n.fname}`,
+                payload: err,
+              });
+            }
+            errors.push(err);
+            return;
+          } 
         } else {
           n.links = cache.notes[n.fname].data.links;
         }

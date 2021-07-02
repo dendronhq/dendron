@@ -694,6 +694,51 @@ describe("RemarkUtils and LinkUtils", () => {
       );
     });
   });
+
+  describe("findUnreferencedLinks", async () => {
+    const preSetupHook = async ({ wsRoot, vaults }: WorkspaceOpts) => {
+      await NoteTestUtilsV4.createNote({
+        fname: "foo",
+        wsRoot,
+        vault: vaults[0],
+        body: ["Lorem ipsum"].join("\n"),
+      });
+
+      await NoteTestUtilsV4.createNote({
+        fname: "bar",
+        wsRoot,
+        vault: vaults[0],
+        body: ["this is a test.", "see foo for more examples."].join("\n"),
+      });
+    };
+
+    const getUnrefLinks = async (engine: DEngineClient) => {
+      const note = engine.notes["bar"];
+      const notes = _.values(engine.notes);
+      const unrefLinks = await LinkUtils.findUnreferencedLinks({
+        note: note,
+        notes: notes,
+        engine,
+      });
+      expect(unrefLinks).toMatchSnapshot();
+      return unrefLinks;
+    };
+
+    test.only("basic", async () => {
+      await runEngineTestV5(
+        async ({ engine }) => {
+          const unrefLinks = await getUnrefLinks(engine);
+          expect(unrefLinks[0].from.fname).toEqual("bar");
+          expect(unrefLinks[0].to!.fname).toEqual("foo");
+          expect(unrefLinks[0].type).toEqual("unreferenced");
+        },
+        {
+          expect,
+          preSetupHook,
+        }
+      );
+    });
+  });
 });
 
 describe("h1ToTitle", () => {

@@ -199,6 +199,47 @@ const getLinks = ({
   return dlinks;
 };
 
+const getUnreferencedLinks = ({
+  ast,
+  note,
+  notes,
+}: {
+  ast: DendronASTNode;
+  note: NoteProps;
+  notes: NoteProps[];
+}) => {
+  const textNodes: Node[] = [];
+  visit(ast, [DendronASTTypes.TEXT], (node) => {
+    switch (node.type) {
+      case DendronASTTypes.TEXT:
+        textNodes.push(node);
+    }
+  });
+  const unreferencedLinks: DLink[] = [];
+
+  _.forEach(notes, (n) => {
+    const fname = n.fname;
+    fname;
+    _.forEach(textNodes, (textNode: Node) => {
+      const value = textNode.value as string;
+      const match = value.indexOf(fname);
+      if (match !== -1) {
+        unreferencedLinks.push({
+          type: "unreferenced",
+          from: NoteUtils.toNoteLoc(note),
+          value: value,
+          position: textNode.position as Position,
+          to: {
+            fname: fname,
+            vaultName: n.vault.fsPath,
+          },
+        });
+      }
+    });
+  });
+  return unreferencedLinks;
+};
+
 export class LinkUtils {
   static astType2DLinkType(type: DendronASTTypes): DLink["type"] {
     switch (type) {
@@ -481,6 +522,34 @@ export class LinkUtils {
       body.slice(endOffset),
     ].join("");
     return newBody;
+  }
+
+  static async findUnreferencedLinks({
+    note,
+    notes,
+    engine,
+  }: {
+    note: NoteProps;
+    notes: NoteProps[];
+    engine: DEngineClient;
+  }) {
+    const content = note.body;
+    let remark = MDUtilsV5.procRemarkParse(
+      { mode: ProcMode.FULL },
+      {
+        engine,
+        fname: note.fname,
+        vault: note.vault,
+        dest: DendronASTDest.MD_DENDRON,
+      }
+    );
+    const tree = remark.parse(content) as DendronASTNode;
+    const unreferencedLinks: DLink[] = getUnreferencedLinks({
+      ast: tree,
+      note,
+      notes,
+    });
+    return unreferencedLinks;
   }
 }
 

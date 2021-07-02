@@ -117,6 +117,10 @@ export class WorkspaceWatcher {
 
   onDidOpenTextDocument(document: TextDocument) {
     this._openedDocuments.set(document.uri.fsPath, document);
+    Logger.debug({
+      msg: "Note opened",
+      fname: NoteUtils.uri2Fname(document.uri),
+    });
   }
 
   /** Do not use this function, please go to `WindowWatcher.onFirstOpen() instead.`
@@ -133,6 +137,10 @@ export class WorkspaceWatcher {
   public getNewlyOpenedDocument(document: TextDocument): boolean {
     const key = document.uri.fsPath;
     if (this._openedDocuments?.has(key)) {
+      Logger.debug({
+        msg: "Marking note as having opened for the first time this session",
+        fname: NoteUtils.uri2Fname(document.uri),
+      });
       this._openedDocuments.delete(key);
       return true;
     }

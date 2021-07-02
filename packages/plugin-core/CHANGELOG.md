@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.48.3](https://github.com/dendronhq/dendron/compare/v0.48.2...v0.48.3) (2021-07-02)
+
+
+### Bug Fixes
+
+* block anchors inside links are parsed as anchors ([#911](https://github.com/dendronhq/dendron/issues/911)) ([80eef6c](https://github.com/dendronhq/dendron/commit/80eef6ca95af447938de2dbcf132ca05ede6956d))
+* sync service trigger perpetually when opening log ([785e0af](https://github.com/dendronhq/dendron/commit/785e0af826da1415ca0fdc873f66bae4d92ca4f6))
+
+
+
+
+
 ## [0.48.2](https://github.com/dendronhq/dendron/compare/v0.48.1...v0.48.2) (2021-07-01)
 
 

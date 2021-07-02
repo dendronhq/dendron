@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.48.3](https://github.com/dendronhq/dendron/compare/v0.48.2...v0.48.3) (2021-07-02)
+
+
+### Reverts
+
+* Revert "fix: remove today button" ([631732c](https://github.com/dendronhq/dendron/commit/631732c50ea07c6021c47a76df51d22259ce8c94))
+
+
+
+
+
 ## [0.48.2](https://github.com/dendronhq/dendron/compare/v0.48.1...v0.48.2) (2021-07-01)
 
 

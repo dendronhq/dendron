@@ -40,7 +40,7 @@ import {
   WikiLinkNoteV4,
   WikiLinkProps,
 } from "../types";
-import { MDUtilsV5, ProcMode } from "../utilsv5";
+import { MDUtilsV5, ProcFlavor, ProcMode } from "../utilsv5";
 const toString = require("mdast-util-to-string");
 export { mdastBuilder };
 export { select, selectAll } from "unist-util-select";
@@ -224,7 +224,7 @@ export class LinkUtils {
   }): DLink[] {
     const content = note.body;
     let remark = MDUtilsV5.procRemarkParse(
-      { mode: ProcMode.FULL },
+      { mode: ProcMode.FULL, flavor: ProcFlavor.REGULAR },
       {
         engine,
         fname: note.fname,

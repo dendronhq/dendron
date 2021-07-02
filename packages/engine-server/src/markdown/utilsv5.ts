@@ -42,6 +42,24 @@ export enum ProcMode {
 }
 
 /**
+ * If processor should run in an alternative flavor
+ */
+export enum ProcFlavor {
+  /**
+   * No special processing
+   */
+  REGULAR = "REGULAR",
+  /**
+   * Apply publishing rules
+   */
+  PUBLISHING = "PUBLISHING",
+  /**
+   * Apply preview rules
+   */
+  PREVIEW = "PREVIEW",
+}
+
+/**
  * Options for how processor should function
  */
 export type ProcOptsV5 = {
@@ -54,9 +72,9 @@ export type ProcOptsV5 = {
    */
   parseOnly?: boolean;
   /**
-   * Check if processor should take into account publishing rules
+   * Are we using specific variant of processor
    */
-  publishing?: boolean;
+  flavor?: ProcFlavor;
 };
 
 /**
@@ -66,6 +84,7 @@ export type ProcDataFullOptsV5 = {
   engine?: DEngineClient;
   vault?: DVault;
   fname?: string;
+  wsRoot?: string;
   dest: DendronASTDest;
 } & { config?: DendronConfig };
 
@@ -76,6 +95,7 @@ export type ProcDataFullV5 = {
   engine: DEngineClient;
   vault: DVault;
   fname: string;
+  wsRoot: string;
   config: DendronConfig;
   dest: DendronASTDest;
   /**
@@ -123,7 +143,7 @@ export class MDUtilsV5 {
   static shouldApplyPublishingRules(proc: Processor): boolean {
     return (
       this.getProcData(proc).dest === DendronASTDest.HTML &&
-      this.getProcOpts(proc).publishing !== true
+      this.getProcOpts(proc).flavor === ProcFlavor.PUBLISHING
     );
   }
 
@@ -132,6 +152,7 @@ export class MDUtilsV5 {
    */
   static _procRemark(opts: ProcOptsV5, data: Partial<ProcDataFullOptsV5>) {
     const errors: DendronError[] = [];
+    opts = _.defaults(opts, { flavor: ProcFlavor.REGULAR });
     let proc = remark()
       .use(remarkParse, { gfm: true })
       .use(frontmatterPlugin, ["yaml"])
@@ -172,6 +193,9 @@ export class MDUtilsV5 {
       if (!data.config) {
         data.config = data.engine!.config;
       }
+      if (!data.wsRoot) {
+        data.wsRoot = data.engine!.wsRoot;
+      }
 
       // backwards compatibility, default to v4 values
       data = _.defaults(MDUtilsV4.getDendronData(proc), data);
@@ -198,7 +222,7 @@ export class MDUtilsV5 {
       pRehype = pRehype.use(katex);
     }
     // apply publishing specific things
-    if (opts.publishing) {
+    if (this.shouldApplyPublishingRules(pRehype)) {
       pRehype = pRehype.use(link, {
         properties: {
           "aria-hidden": "true",
@@ -227,7 +251,10 @@ export class MDUtilsV5 {
   }
 
   static procRemarkFull(data: ProcDataFullOptsV5) {
-    return this._procRemark({ mode: ProcMode.FULL }, data);
+    return this._procRemark(
+      { mode: ProcMode.FULL, flavor: ProcFlavor.REGULAR },
+      data
+    );
   }
 
   /**
@@ -249,10 +276,10 @@ export class MDUtilsV5 {
 
   static procRehypeFull(
     data: Omit<ProcDataFullOptsV5, "dest">,
-    opts?: { publishing?: boolean }
+    opts?: { flavor?: ProcFlavor }
   ) {
     const proc = this._procRehype(
-      { mode: ProcMode.FULL, parseOnly: false, publishing: opts?.publishing },
+      { mode: ProcMode.FULL, parseOnly: false, flavor: opts?.flavor },
       data
     );
     return proc.use(rehypeStringify);

@@ -40,7 +40,6 @@ import {
   WikiLinkNoteV4,
   WikiLinkProps,
 } from "../types";
-import { MDUtilsV4 } from "../utils";
 import { MDUtilsV5, ProcMode } from "../utilsv5";
 const toString = require("mdast-util-to-string");
 export { mdastBuilder };
@@ -516,17 +515,14 @@ export class AnchorUtils {
     }
   }
 
-  static async findAnchors(
-    opts: {
-      note: NoteProps;
-      wsRoot: string;
-    },
-    parseOpts: Parameters<typeof RemarkUtils.findAnchors>[1]
-  ): Promise<{ [index: string]: DNoteAnchorPositioned }> {
+  static async findAnchors(opts: {
+    note: NoteProps;
+    wsRoot: string;
+  }): Promise<{ [index: string]: DNoteAnchorPositioned }> {
     if (opts.note.stub) return {};
     try {
       const noteContents = await note2String(opts);
-      const noteAnchors = RemarkUtils.findAnchors(noteContents, parseOpts);
+      const noteAnchors = RemarkUtils.findAnchors(noteContents);
       const slugger = getSlugger();
 
       const anchors: [string, DNoteAnchorPositioned][] = noteAnchors
@@ -592,13 +588,9 @@ export class RemarkUtils {
     });
   }
 
-  static findAnchors(
-    content: string,
-    opts: Omit<Parameters<typeof MDUtilsV4.procParse>[0], "dest">
-  ): Anchor[] {
-    const parser = MDUtilsV4.procParse({
-      dest: DendronASTDest.MD_DENDRON,
-      ...opts,
+  static findAnchors(content: string): Anchor[] {
+    const parser = MDUtilsV5.procRehypeParse({
+      mode: ProcMode.NO_DATA,
     });
     const parsed = parser.parse(content);
     return [

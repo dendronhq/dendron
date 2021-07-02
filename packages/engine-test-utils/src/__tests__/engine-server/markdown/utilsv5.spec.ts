@@ -3,7 +3,11 @@ import {
   NoteTestUtilsV4,
   TestPresetEntryV4,
 } from "@dendronhq/common-test-utils";
-import { DendronASTDest, Processor } from "@dendronhq/engine-server";
+import {
+  DendronASTDest,
+  Processor,
+  ProcFlavor,
+} from "@dendronhq/engine-server";
 import { runEngineTestV5 } from "../../../engine";
 import { ENGINE_HOOKS } from "../../../presets";
 import { checkString } from "../../../utils";
@@ -26,23 +30,26 @@ const modifyNote = async (
 
 const NOTE_REF_BASIC_WITH_REHYPE = createProcCompileTests({
   name: "NOTE_REF_WITH_REHYPE",
-  setupFunc: async (opts) => {
+  setup: async (opts) => {
     const { proc } = getOpts(opts);
     const txt = `![[foo.md]]`;
     const resp = await proc.process(txt);
     return { resp, proc };
   },
-  verifyFuncDict: {
-    [DendronASTDest.HTML]: async ({ extra }) => {
-      const { resp } = extra;
-      expect(resp).toMatchSnapshot("respRehype");
-      await checkString(
-        resp.contents,
-        // should have id
-        `<a href=\"foo-id.html\"`,
-        // html quoted
-        `<p><a href=\"bar.html\">Bar</a></p>`
-      );
+  verify: {
+    [DendronASTDest.HTML]: {
+      [ProcFlavor.REGULAR]: async ({ extra }) => {
+        const { resp } = extra;
+        await checkString(
+          resp.contents,
+          // should have id
+          `<a href=\"foo-id.html\"`,
+          // html quoted
+          `<p><a href=\"bar.html\">Bar</a></p>`
+        );
+      },
+      [ProcFlavor.PREVIEW]: ProcFlavor.REGULAR,
+      [ProcFlavor.PUBLISHING]: ProcFlavor.REGULAR,
     },
   },
   preSetupHook: async (opts) => {
@@ -53,12 +60,14 @@ const NOTE_REF_BASIC_WITH_REHYPE = createProcCompileTests({
     });
   },
 });
-
 const ALL_TEST_CASES = [...NOTE_REF_BASIC_WITH_REHYPE];
 
 describe("MDUtils.proc", () => {
   test.each(
-    ALL_TEST_CASES.map((ent) => [`${ent.dest}: ${ent.name}`, ent.testCase])
+    ALL_TEST_CASES.map((ent) => [
+      `${ent.dest}: ${ent.name}: ${ent.flavor}`,
+      ent.testCase,
+    ])
   )("%p", async (_key, testCase: TestPresetEntryV4) => {
     await runEngineTestV5(testCase.testFunc, {
       expect,

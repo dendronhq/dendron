@@ -9,12 +9,11 @@ import {
   postVSCodeMessage,
 } from "@dendronhq/common-frontend";
 import {
+  Badge,
   CalendarProps as AntdCalendarProps,
+  ConfigProvider,
   Spin,
-  Button,
-  Divider,
 } from "antd";
-import { Badge, ConfigProvider } from "antd";
 import generateCalendar from "antd/lib/calendar/generateCalendar";
 import classNames from "classnames";
 import _ from "lodash";
@@ -293,11 +292,6 @@ function CalendarView({ engine, ide }: DendronProps) {
         dateFullCellRender={dateFullCellRender}
         fullscreen={false}
       />
-      <Divider plain style={{ marginTop: 0 }}>
-        <Button type="primary" onClick={onClickToday}>
-          Today
-        </Button>
-      </Divider>
     </>
   );
 }

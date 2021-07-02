@@ -115,9 +115,10 @@ export class SeedService {
     const spath = SeedUtils.seed2Path({ wsRoot, id });
     fs.ensureDirSync(path.dirname(spath));
     const git = simpleGit({ baseDir: wsRoot });
-    await git.clone(seed.repository.url, spath);
     if (branch) {
-      await git.checkout(`origin/${branch}`, { "--track": "" });
+      await git.clone(seed.repository.url, spath, { "--branch": "dev" });
+    } else {
+      await git.clone(seed.repository.url, spath);
     }
     return spath;
   }

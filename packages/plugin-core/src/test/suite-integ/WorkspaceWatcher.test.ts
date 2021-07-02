@@ -38,7 +38,7 @@ suite("WorkspaceWatcher", function () {
       });
     });
 
-    test("ok: save when content changed", function (done) {
+    test.skip("ok: save when content changed", function (done) {
       runLegacyMultiWorkspaceTest({
         ctx,
         preSetupHook: ENGINE_HOOKS.setupBasic,

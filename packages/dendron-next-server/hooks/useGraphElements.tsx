@@ -16,6 +16,7 @@ import { EdgeDefinition } from "cytoscape";
 import _ from "lodash";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import { GraphUtils } from "../components/graph";
 import {
   GraphConfig,
   GraphEdges,
@@ -527,10 +528,6 @@ const useGraphElements = ({
   const [schemaCount, setSchemaCount] = useState(0);
 
   useEffect(() => {
-    const isLocalGraph = config["options.show-local-graph"]
-      ? config["options.show-local-graph"].value
-      : false;
-
     if (type === "note" && engine.notes) {
       // Prevent unnecessary parsing if no notes have been added/deleted
       const wasLocalGraph =
@@ -540,7 +537,7 @@ const useGraphElements = ({
       if (!wasLocalGraph && noteCount === newNoteCount) return;
       setNoteCount(newNoteCount);
 
-      if (!isLocalGraph) {
+      if (!GraphUtils.isLocalGraph(config)) {
         setElements(
           getFullNoteGraphElements({
             notes: engine.notes,
@@ -554,11 +551,12 @@ const useGraphElements = ({
 
   // Get new elements if active note changes
   useEffect(() => {
-    const isLocalGraph = config["options.show-local-graph"]
-      ? config["options.show-local-graph"].value
-      : false;
-
-    if (type === "note" && engine.notes && isLocalGraph && noteActive) {
+    if (
+      type === "note" &&
+      engine.notes &&
+      !GraphUtils.isLocalGraph(config) &&
+      noteActive
+    ) {
       setElements(
         getLocalNoteGraphElements({
           notes: engine.notes,

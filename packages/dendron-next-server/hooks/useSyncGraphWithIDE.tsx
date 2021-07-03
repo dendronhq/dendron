@@ -4,6 +4,7 @@ import { createLogger } from "@dendronhq/common-frontend";
 import { engineSlice } from "@dendronhq/common-frontend";
 import { DendronProps } from "../lib/types";
 import { GraphConfig } from "../lib/graph";
+import { GraphUtils } from "../components/graph";
 
 const EngineSliceUtils = engineSlice.EngineSliceUtils;
 
@@ -21,10 +22,12 @@ const useSyncGraphWithIDE = ({ graph, ide, engine, config }: Props) => {
   const logger = createLogger("useSyncGraphWithIDE");
 
   useEffect(() => {
-    const isLocalGraph = config["options.show-local-graph"]
-      ? config["options.show-local-graph"].value
-      : false;
-    if (noteActive && engineInitialized && graph && !isLocalGraph) {
+    if (
+      noteActive &&
+      engineInitialized &&
+      graph &&
+      !GraphUtils.isLocalGraph(config)
+    ) {
       const selected = graph.$(`:selected`);
       const graphActiveNode = graph.$(`[id = "${noteActive.id}"]`);
 

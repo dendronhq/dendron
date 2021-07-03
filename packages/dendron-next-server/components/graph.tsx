@@ -13,6 +13,13 @@ import useApplyGraphConfig from "../hooks/useApplyGraphConfig";
 import { DendronProps } from "../lib/types";
 import useSyncGraphWithIDE from "../hooks/useSyncGraphWithIDE";
 
+export class GraphUtils {
+  static isLocalGraph(config: GraphConfig) {
+    if (_.isUndefined(config["options.show-local-graph"])) return false;
+    return config["options.show-local-graph"].value;
+  }
+}
+
 const getCytoscapeStyle = (themes: any, theme: string | undefined) => {
   if (_.isUndefined(theme)) return "";
 
@@ -131,9 +138,6 @@ export default function Graph({
 
   const { nodes, edges } = elements;
   const isLargeGraph = nodes.length + Object.values(edges).flat().length > 1000;
-  const isLocalGraph = config["options.show-local-graph"]
-    ? config["options.show-local-graph"].value
-    : false;
 
   const renderGraph = () => {
     if (graphRef.current && nodes && edges) {
@@ -175,7 +179,8 @@ export default function Graph({
       });
 
       const shouldAnimate =
-        type === "schema" || (!isLargeGraph && !isLocalGraph);
+        type === "schema" ||
+        (!isLargeGraph && !GraphUtils.isLocalGraph(config));
 
       network.layout(getEulerConfig(shouldAnimate)).run();
 
@@ -200,7 +205,12 @@ export default function Graph({
 
     // If the graph already has rendered elements, don't re-render
     // Otherwise, the graph re-renders when elements are selected
-    if (!isLocalGraph && !wasLocalGraph && cy && cy.elements("*").length > 1)
+    if (
+      !GraphUtils.isLocalGraph(config) &&
+      !wasLocalGraph &&
+      cy &&
+      cy.elements("*").length > 1
+    )
       return;
     renderGraph();
   }, [graphRef, elements]);

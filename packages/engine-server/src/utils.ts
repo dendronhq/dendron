@@ -314,3 +314,15 @@ export class HierarchyUtils {
     return children;
   };
 }
+
+export class EngineUtils {
+  static getEnginePort(opts: { wsRoot: string }) {
+    const portFilePath = getPortFilePath(opts);
+    const port = openPortFile({ fpath: portFilePath });
+    return port;
+  }
+
+  static getLocalEngineUrl({ port }: { port: number }) {
+    return `http://localhost:${port}`;
+  }
+}

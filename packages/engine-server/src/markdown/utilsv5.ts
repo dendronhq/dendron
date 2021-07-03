@@ -8,6 +8,7 @@ import {
 // @ts-ignore
 import rehypePrism from "@mapbox/rehype-prism";
 import _ from "lodash";
+import { config } from "packages/common-all/src/config";
 import link from "rehype-autolink-headings";
 // @ts-ignore
 import katex from "rehype-katex";
@@ -202,7 +203,7 @@ export class MDUtilsV5 {
       data = _.defaults(MDUtilsV4.getDendronData(proc), data);
       this.setProcData(proc, data as ProcDataFullV5);
       MDUtilsV4.setEngine(proc, data.engine!);
-      proc = proc.use(dendronPub);
+      proc = proc.use(dendronPub, { insertTitle: data.config?.useFMTitle });
 
       // add flavor specific plugins
       if (opts.flavor === ProcFlavor.PREVIEW) {

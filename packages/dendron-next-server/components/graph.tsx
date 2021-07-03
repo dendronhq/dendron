@@ -15,6 +15,11 @@ import useSyncGraphWithIDE from "../hooks/useSyncGraphWithIDE";
 
 const getCytoscapeStyle = (themes: any, theme: string | undefined) => {
   if (_.isUndefined(theme)) return "";
+
+  // Cytoscape's "diamond" node is smaller than it's "circle" node, so
+  // this modifier adjusts to make parent and child nodes similarly sized.
+  const PARENT_NODE_SIZE_MODIFIER = 1.25;
+
   return `
   node {
     width: ${AntThemes[theme].graph.node.size};
@@ -43,8 +48,8 @@ const getCytoscapeStyle = (themes: any, theme: string | undefined) => {
   
   .parent {
     shape: diamond;
-    width: ${AntThemes[theme].graph.node.size * 1.25};
-    height: ${AntThemes[theme].graph.node.size * 1.25};
+    width: ${AntThemes[theme].graph.node.size * PARENT_NODE_SIZE_MODIFIER};
+    height: ${AntThemes[theme].graph.node.size * PARENT_NODE_SIZE_MODIFIER};
   }
 
   .links {

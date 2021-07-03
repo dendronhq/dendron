@@ -8,8 +8,7 @@ import {
   Processor,
   ProcFlavor,
 } from "@dendronhq/engine-server";
-import { vault2Path } from "../../../../../common-server/lib";
-import { runEngineTestV5 } from "../../../engine";
+import { createEngineFromServer, runEngineTestV5 } from "../../../engine";
 import { ENGINE_HOOKS } from "../../../presets";
 import { checkString } from "../../../utils";
 import { cleanVerifyOpts, createProcCompileTests } from "./utils";
@@ -51,15 +50,8 @@ const IMAGE_WITH_LEAD_FORWARD_SLASH = createProcCompileTests({
       [ProcFlavor.PREVIEW]: async (opts) => {
         const {
           extra: { resp },
-          vaults,
-          wsRoot,
         } = cleanVerifyOpts(opts);
-        const vpath = vault2Path({ vault: vaults[0], wsRoot });
-        expect(resp).toMatchSnapshot();
-        await checkString(
-          resp.contents,
-          `<img src="${vpath}/assets/foo.jpg" alt="foo alt txt">`
-        );
+        await checkString(resp.contents, `assets%2Ffoo.jpg`, "localhost");
       },
       [ProcFlavor.PUBLISHING]: ProcFlavor.REGULAR,
     },
@@ -112,6 +104,7 @@ describe("MDUtils.proc", () => {
     await runEngineTestV5(testCase.testFunc, {
       expect,
       preSetupHook: testCase.preSetupHook,
+      createEngine: createEngineFromServer,
     });
   });
 });

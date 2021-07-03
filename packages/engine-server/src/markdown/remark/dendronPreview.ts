@@ -1,3 +1,4 @@
+import { APIUtils, AssetGetRequest } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import _ from "lodash";
 import { Image } from "mdast";
@@ -6,6 +7,7 @@ import Unified, { Transformer } from "unified";
 import { Node } from "unist";
 import visit from "unist-util-visit";
 import { VFile } from "vfile";
+import { EngineUtils } from "../../utils";
 import { DendronASTTypes } from "../types";
 import { MDUtilsV5 } from "../utilsv5";
 import { NoteRefsOpts } from "./noteRefs";
@@ -19,8 +21,14 @@ function handleImage(proc: Unified.Processor, node: Image) {
   }
   if (node.url.startsWith("/")) {
     const { wsRoot, vault } = MDUtilsV5.getProcData(proc);
-    node.url = path.join(vault2Path({ vault, wsRoot }), node.url);
-    return;
+    const fpath = path.join(vault2Path({ vault, wsRoot }), node.url);
+    const port = EngineUtils.getEnginePort({ wsRoot });
+    const url = EngineUtils.getLocalEngineUrl({ port }) + "/api/assets";
+    const params: AssetGetRequest = {
+      fpath,
+      ws: wsRoot,
+    };
+    node.url = APIUtils.genUrlWithQS({ url, params });
   }
 }
 

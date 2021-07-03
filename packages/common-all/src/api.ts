@@ -154,6 +154,8 @@ export type SchemaWriteRequest = {
 
 export type SchemaUpdateRequest = SchemaWriteRequest;
 
+export type AssetGetRequest = { fpath: string } & WorkspaceRequest;
+
 // --- Payload
 export type InitializePayload = APIPayload<DEngineInitPayload>;
 
@@ -171,6 +173,13 @@ export type SchemaReadPayload = APIPayload<SchemaModuleProps>;
 export type SchemaQueryPayload = APIPayload<SchemaModuleProps[]>;
 export type SchemaWritePayload = APIPayload<void>;
 export type SchemaUpdatePayload = APIPayload<void>;
+
+export class APIUtils {
+  static genUrlWithQS({ url, params }: { url: string; params: any }) {
+    const str = querystring.stringify(params);
+    return url + `?${str}`;
+  }
+}
 
 // === Base
 
@@ -241,9 +250,9 @@ abstract class API {
 
   async _makeRequest<T extends IAPIPayload>(
     args: IDoRequestArgs,
-    paylaodData?: T["data"]
+    payloadData?: T["data"]
   ): Promise<T> {
-    let payload = this._createPayload(paylaodData) as T;
+    let payload = this._createPayload(payloadData) as T;
     try {
       const resp = await this._doRequest(args);
       payload.data = resp.data.data;
@@ -257,12 +266,33 @@ abstract class API {
     }
     return payload;
   }
+
+  async _makeRequestRaw(args: IDoRequestArgs) {
+    try {
+      const resp = await this._doRequest(args);
+      if (resp.data.error) {
+        return new DendronError({ ...resp.data.error });
+      }
+      return resp.data;
+    } catch (err) {
+      return new DendronError({ ...err.response.data.error });
+    }
+  }
 }
 
 // === DendronAPI
 
 export class DendronAPI extends API {
   static instance: DendronAPI;
+
+  async assetGet(req: AssetGetRequest): Promise<DendronError | Buffer> {
+    const resp = await this._makeRequestRaw({
+      path: "assets/",
+      method: "get",
+      qs: req,
+    });
+    return resp;
+  }
 
   async configGet(
     req: WorkspaceRequest

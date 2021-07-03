@@ -191,7 +191,7 @@ const getLocalNoteGraphElements = ({
       });
 
       if (_.isUndefined(toVault)) {
-        logger.log(
+        logger.error(
           `Couldn't find vault of note ${toFname}, aborting link creation`
         );
         return;
@@ -205,7 +205,7 @@ const getLocalNoteGraphElements = ({
       });
 
       if (!to) {
-        logger.log(
+        logger.warn(
           `Failed to link note ${VaultUtils.getName(activeNote.vault)}/${
             activeNote.fname
           } to ${VaultUtils.getName(toVault)}/${

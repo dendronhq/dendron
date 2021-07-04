@@ -13,9 +13,10 @@ import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../utils";
 import { WebViewUtils } from "../views/utils";
 import { BasicCommand } from "./base";
-import { getEngine, getWS } from "../workspace";
+import { DendronWorkspace, getEngine, getWS } from "../workspace";
 import { GotoNoteCommand } from "./GotoNote";
 import { Logger } from "../logger";
+import { WorkspaceUtils } from "@dendronhq/engine-server";
 
 type CommandOpts = {};
 type CommandOutput = any;
@@ -67,13 +68,7 @@ export class ShowPreviewV2Command extends BasicCommand<
     return;
   }
 
-  async execute(_opts: CommandOpts) {
-    // Get workspace information
-    const ws = getWS();
-
-    // If panel already exists
-    const existingPanel = ws.getWebView(DendronWebViewKey.NOTE_PREVIEW);
-
+  createPanel(opts?: { initNoteId?: string }) {
     const viewColumn = vscode.ViewColumn.Beside; // Editor column to show the new webview panel in.
     const preserveFocus = true;
 
@@ -105,6 +100,9 @@ export class ShowPreviewV2Command extends BasicCommand<
     const resp = WebViewUtils.genHTMLForWebView({
       title,
       view: DendronWebViewKey.NOTE_PREVIEW,
+      qs: {
+        initNoteId: opts?.initNoteId,
+      },
     });
 
     panel.webview.html = resp;
@@ -148,7 +146,6 @@ export class ShowPreviewV2Command extends BasicCommand<
         }
         default:
           assertUnreachable(msg.type);
-          break;
       }
     });
 
@@ -160,5 +157,40 @@ export class ShowPreviewV2Command extends BasicCommand<
     panel.onDidDispose(() => {
       ws.setWebView(DendronWebViewKey.NOTE_PREVIEW, undefined);
     });
+  }
+
+  async execute(_opts: CommandOpts) {
+    // Get workspace information
+    const ws = getWS();
+
+    // If panel already exists
+    const existingPanel = ws.getWebView(DendronWebViewKey.NOTE_PREVIEW);
+
+    const viewColumn = vscode.ViewColumn.Beside; // Editor column to show the new webview panel in.
+    const preserveFocus = true;
+    const activeEditor = vscode.window.activeTextEditor;
+
+    if (!_.isUndefined(existingPanel)) {
+      try {
+        // If error, panel disposed and needs to be recreated
+        existingPanel.reveal(viewColumn, preserveFocus);
+        return;
+      } catch {}
+    } else {
+      let initNoteId = undefined;
+      if (activeEditor?.document.uri.fsPath) {
+        if (
+          WorkspaceUtils.isPathInWorkspace({
+            wsRoot: DendronWorkspace.wsRoot(),
+            vaults: ws.getEngine().vaults,
+            fpath: activeEditor?.document.uri.fsPath,
+          })
+        ) {
+          const note = VSCodeUtils.getNoteFromDocument(activeEditor.document);
+          initNoteId = note?.id;
+        }
+      }
+      this.createPanel({ initNoteId });
+    }
   }
 }

@@ -42,7 +42,7 @@ function Note({ engine, ide }: DendronProps) {
   const dispatch = engineHooks.useEngineAppDispatch();
 
   const { noteActive } = ide;
-  const { id: noteId = "e86ac3ab-dbe1-47a1-bcd7-9df0d0490b40", contentHash } =
+  const { id: noteId = "9eae08fb-5e3f-4a7e-a989-3f206825d490", contentHash } =
     noteActive || {};
   const noteContent = engine.notesRendered[noteId || ""];
 

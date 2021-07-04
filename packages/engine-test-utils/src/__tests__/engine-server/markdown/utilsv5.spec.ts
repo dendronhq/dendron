@@ -56,6 +56,9 @@ const IMAGE_WITH_LEAD_FORWARD_SLASH = createProcCompileTests({
       [ProcFlavor.PUBLISHING]: ProcFlavor.REGULAR,
     },
   },
+  preSetupHook: async (opts) => {
+    await ENGINE_HOOKS.setupBasic(opts);
+  },
 });
 const NOTE_REF_BASIC_WITH_REHYPE = createProcCompileTests({
   name: "NOTE_REF_WITH_REHYPE",

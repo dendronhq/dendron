@@ -23,13 +23,13 @@ export class EmailPublishPod extends PublishPod<EmailPublishConfig> {
       properties: {
         from: {
           description: "from address",
-          type: "boolean",
+          type: "string",
           default: false,
           example: "you <username@outlook.com>",
         },
         to: {
           description: "to address",
-          type: "boolean",
+          type: "string",
           default: false,
           example:
             "someone <someone@your-email.com>, another <another@your-email.com>",

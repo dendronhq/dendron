@@ -7,6 +7,8 @@ import {
 } from "@dendronhq/common-all";
 // @ts-ignore
 import rehypePrism from "@mapbox/rehype-prism";
+// @ts-ignore
+import mermaid from "@dendronhq/remark-mermaid";
 import _ from "lodash";
 import math from "remark-math";
 import link from "rehype-autolink-headings";
@@ -209,7 +211,9 @@ export class MDUtilsV5 {
       if (data.config?.useKatex) {
         proc = proc.use(math);
       }
-
+      if (data.config?.mermaid) {
+        proc = proc.use(mermaid, { simple: true });
+      }
       // add flavor specific plugins
       if (opts.flavor === ProcFlavor.PREVIEW) {
         proc = proc.use(dendronPreview);

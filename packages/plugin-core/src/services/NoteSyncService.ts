@@ -42,7 +42,7 @@ export class NoteSyncService {
    */
   async onDidChange(uri: vscode.Uri) {
     const ctx = "NoteSyncService:onDidChange";
-    this.L.info({ ctx, uri: uri.fsPath });
+
     const eclient = DendronWorkspace.instance().getEngine();
     const fname = path.basename(uri.fsPath, ".md");
     const doc = await vscode.workspace.openTextDocument(uri);
@@ -51,6 +51,7 @@ export class NoteSyncService {
       this.L.debug({ ctx, uri: uri.fsPath, msg: "not in workspace, ignoring" });
       return;
     }
+    this.L.info({ ctx, uri: uri.fsPath });
     const vault = VaultUtils.getVaultByNotePath({
       vaults: eclient.vaults,
       wsRoot: DendronWorkspace.wsRoot(),
@@ -74,10 +75,10 @@ export class NoteSyncService {
     note = NoteUtils.hydrate({ noteRaw: note, noteHydrated });
     const links = LinkUtils.findLinks({ note, engine: eclient });
     note.links = links;
-    const anchors = await AnchorUtils.findAnchors(
-      { note, wsRoot: eclient.wsRoot },
-      { fname, engine: eclient }
-    );
+    const anchors = await AnchorUtils.findAnchors({
+      note,
+      wsRoot: eclient.wsRoot,
+    });
     note.anchors = anchors;
     this.L.info({ ctx, fname, msg: "exit" });
     const noteClean = await eclient.updateNote(note);

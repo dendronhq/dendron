@@ -9,7 +9,7 @@ type CommandInput = {};
 type CommandOutput = void;
 
 export class SignUpCommand extends BasicCommand<CommandOpts, CommandOutput> {
-  static key = DENDRON_COMMANDS.SIGNUP.key;
+  key = DENDRON_COMMANDS.SIGNUP.key;
   async gatherInputs(): Promise<CommandInput | undefined> {
     return {};
   }

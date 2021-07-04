@@ -7,10 +7,10 @@ import { Logger } from "../logger";
 import { AnalyticsUtils } from "../utils/analytics";
 
 export type CodeCommandConstructor = {
-  key: string;
   new (): CodeCommandInstance;
 };
 export type CodeCommandInstance = {
+  key: string;
   run: (opts?: any) => Promise<void>;
 };
 
@@ -35,6 +35,8 @@ export abstract class BaseCommand<
 
   static showInput = window.showInputBox;
 
+  abstract key: string;
+
   async gatherInputs(_opts?: TRunOpts): Promise<TGatherOutput | undefined> {
     return {} as any;
   }
@@ -56,8 +58,7 @@ export abstract class BaseCommand<
   }
 
   async run(args?: Partial<TRunOpts>): Promise<TOut | undefined> {
-    // @ts-ignore
-    const ctx = `${this.__proto__.constructor.name}:run`;
+    const ctx = `${this.key}:run`;
     const start = process.hrtime();
     let isError = false;
 
@@ -101,7 +102,7 @@ export abstract class BaseCommand<
       isError = true;
       return;
     } finally {
-      AnalyticsUtils.track(ctx, {
+      AnalyticsUtils.track(this.key, {
         duration: getDurationMilliseconds(start),
         error: isError,
       });

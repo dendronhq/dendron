@@ -27,7 +27,7 @@ export class PublishPodCommand extends BaseCommand<
   CommandOutput,
   CommandInput
 > {
-  static key = DENDRON_COMMANDS.PUBLISH_POD.key;
+  key = DENDRON_COMMANDS.PUBLISH_POD.key;
   async gatherInputs(): Promise<any> {
     const pods = getAllPublishPods();
     const podItems: PodItemV4[] = pods.map((p) => podClassEntryToPodItemV4(p));

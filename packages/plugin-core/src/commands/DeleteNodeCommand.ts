@@ -21,7 +21,7 @@ export class DeleteNodeCommand extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
-  static key = DENDRON_COMMANDS.DELETE_NODE.key;
+  key = DENDRON_COMMANDS.DELETE_NODE.key;
   async gatherInputs(): Promise<any> {
     return {};
   }

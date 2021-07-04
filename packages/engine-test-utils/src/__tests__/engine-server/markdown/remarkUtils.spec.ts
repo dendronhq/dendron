@@ -38,10 +38,7 @@ describe("RemarkUtils and LinkUtils", () => {
         async ({ engine }) => {
           const note = engine.notes["foo"];
           const body = note.body;
-          const out = RemarkUtils.findAnchors(body, {
-            engine,
-            fname: note.fname,
-          });
+          const out = RemarkUtils.findAnchors(body);
           expect(out).toMatchSnapshot();
           expect(_.size(out)).toEqual(1);
           expect(out[0].depth).toEqual(1);
@@ -69,10 +66,7 @@ describe("RemarkUtils and LinkUtils", () => {
         async ({ engine }) => {
           const note = engine.notes["foo"];
           const body = note.body;
-          const out = RemarkUtils.findAnchors(body, {
-            engine,
-            fname: note.fname,
-          });
+          const out = RemarkUtils.findAnchors(body);
           expect(out).toMatchSnapshot();
           expect(_.size(out)).toEqual(1);
           expect(out[0].type).toEqual(DendronASTTypes.BLOCK_ANCHOR);
@@ -100,10 +94,7 @@ describe("RemarkUtils and LinkUtils", () => {
         async ({ engine }) => {
           const note = engine.notes["foo"];
           const body = note.body;
-          const out = RemarkUtils.findAnchors(body, {
-            engine,
-            fname: note.fname,
-          });
+          const out = RemarkUtils.findAnchors(body);
           expect(out).toMatchSnapshot();
           expect(_.size(out)).toEqual(0);
         },
@@ -133,10 +124,7 @@ describe("RemarkUtils and LinkUtils", () => {
       async ({ engine }) => {
         const note = engine.notes["foo"];
         const body = note.body;
-        const out = RemarkUtils.findAnchors(body, {
-          engine,
-          fname: note.fname,
-        });
+        const out = RemarkUtils.findAnchors(body);
         expect(out).toMatchSnapshot();
         expect(_.size(out)).toEqual(0);
       },
@@ -163,10 +151,7 @@ describe("RemarkUtils and LinkUtils", () => {
       async ({ engine }) => {
         const note = engine.notes["foo"];
         const body = note.body;
-        const out = RemarkUtils.findAnchors(body, {
-          engine,
-          fname: note.fname,
-        });
+        const out = RemarkUtils.findAnchors(body);
         expect(out).toMatchSnapshot();
         expect(_.size(out)).toEqual(0);
       },

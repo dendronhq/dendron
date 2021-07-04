@@ -8,7 +8,6 @@ import {
   assignJSONWithComment,
   GitUtils,
   readJSONWithComments,
-  SimpleGit,
   simpleGit,
   writeJSONWithComments,
 } from "@dendronhq/common-server";
@@ -39,14 +38,10 @@ export { CommandOpts as VaultAddCommandOpts };
 type SourceQuickPickEntry = QuickPickItem & { src: string };
 
 export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
-  static key = DENDRON_COMMANDS.VAULT_ADD.key;
-
-  public git: SimpleGit;
+  key = DENDRON_COMMANDS.VAULT_ADD.key;
 
   constructor() {
     super();
-    const baseDir = DendronWorkspace.wsRoot();
-    this.git = simpleGit({ baseDir });
   }
 
   generateRemoteEntries = (): SourceQuickPickEntry[] => {
@@ -145,7 +140,6 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
   async handleRemoteRepo(
     opts: CommandOpts
   ): Promise<{ vaults: DVault[]; workspace?: DWorkspace }> {
-    const baseDir = DendronWorkspace.wsRoot();
     const { vaults, workspace } = await window.withProgress(
       {
         location: ProgressLocation.Notification,
@@ -156,7 +150,9 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
         progress.report({
           message: "cloning repo",
         });
-        await this.git.clone(opts.pathRemote!, opts.path);
+        const baseDir = DendronWorkspace.wsRoot();
+        const git = simpleGit({ baseDir });
+        await git.clone(opts.pathRemote!, opts.path);
         const { vaults, workspace } = GitUtils.getVaultsFromRepo({
           repoPath: path.join(baseDir, opts.path),
           wsRoot: DendronWorkspace.wsRoot(),

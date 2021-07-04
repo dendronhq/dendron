@@ -40,6 +40,12 @@ export class CalendarView implements vscode.WebviewViewProvider {
   }
 
   openTextDocument(document: vscode.TextDocument) {
+    if (_.isUndefined(document) || _.isUndefined(this._view)) {
+      return;
+    }
+    if (!this._view.visible) {
+      return;
+    }
     const ctx = "CalendarView:openTextDocument";
     if (!getWS().workspaceService?.isPathInWorkspace(document.uri.fsPath)) {
       Logger.info({
@@ -66,9 +72,6 @@ export class CalendarView implements vscode.WebviewViewProvider {
 
   async onActiveTextEditorChangeHandler() {
     const document = VSCodeUtils.getActiveTextEditor()?.document;
-    if (!this._view?.visible) {
-      return;
-    }
     if (document) {
       this.openTextDocument(document);
     } else {

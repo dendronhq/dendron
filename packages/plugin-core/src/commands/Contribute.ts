@@ -12,7 +12,7 @@ export class ContributeCommand extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
-  static key = DENDRON_COMMANDS.CONTRIBUTE.key;
+  key = DENDRON_COMMANDS.CONTRIBUTE.key;
   async gatherInputs(): Promise<CommandInput | undefined> {
     return {};
   }

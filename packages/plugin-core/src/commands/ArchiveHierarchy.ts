@@ -19,7 +19,7 @@ export class ArchiveHierarchyCommand extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
-  static key = DENDRON_COMMANDS.ARCHIVE_HIERARCHY.key;
+  key = DENDRON_COMMANDS.ARCHIVE_HIERARCHY.key;
   private refactorCmd: RefactorHierarchyCommandV2;
 
   constructor(name?: string) {

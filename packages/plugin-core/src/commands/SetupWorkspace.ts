@@ -38,7 +38,7 @@ export class SetupWorkspaceCommand extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
-  static key = DENDRON_COMMANDS.INIT_WS.key;
+  key = DENDRON_COMMANDS.INIT_WS.key;
 
   async gatherInputs(): Promise<CommandInput | undefined> {
     const rootDirRaw = await VSCodeUtils.gatherFolderPath({

@@ -44,7 +44,7 @@ export class RenameNoteV2aCommand extends BaseCommand<
   CommandOutput,
   CommandInput
 > {
-  static key = DENDRON_COMMANDS.RENAME_NOTE.key;
+  key = DENDRON_COMMANDS.RENAME_NOTE.key;
   public silent?: boolean;
 
   async gatherInputs(): Promise<CommandInput> {

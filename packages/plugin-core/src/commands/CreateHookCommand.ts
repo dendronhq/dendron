@@ -30,7 +30,7 @@ export class CreateHookCommand extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
-  static key = DENDRON_COMMANDS.CREATE_HOOK.key;
+  key = DENDRON_COMMANDS.CREATE_HOOK.key;
 
   async gatherInputs() {
     const hookName = await VSCodeUtils.showInputBox({

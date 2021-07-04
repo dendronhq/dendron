@@ -1,10 +1,9 @@
 import {
   DMessageSource,
+  DMessageType,
   OnDidChangeActiveTextEditorMsg,
   ThemeMessageType,
-  DMessageType,
 } from "@dendronhq/common-all";
-import { Spin } from "antd";
 import {
   combinedStore,
   createLogger,
@@ -17,11 +16,14 @@ import {
   setLogLevel,
   useVSCodeMessage,
 } from "@dendronhq/common-frontend";
+import { Spin } from "antd";
 import { useRouter } from "next/router";
 import React, { useEffect } from "react";
 import { ThemeSwitcherProvider } from "react-css-theme-switcher";
 import { Provider } from "react-redux";
 import Layout from "../components/layout";
+import NoOp from "../components/NoOp";
+import PreviewHeader from "../components/PreviewHeader";
 import "../styles/scss/main.scss";
 
 const themes = {
@@ -101,8 +103,12 @@ function AppVSCode({ Component, pageProps }: any) {
   if (ide.theme !== "unknown") {
     defaultTheme = ide.theme;
   }
+  const Header = router.pathname.startsWith("/vscode/note-preview")
+    ? PreviewHeader
+    : NoOp;
   return (
     <ThemeSwitcherProvider themeMap={themes} defaultTheme={defaultTheme}>
+      <Header />
       <Component engine={engine} ide={ide} {...pageProps} />
     </ThemeSwitcherProvider>
   );

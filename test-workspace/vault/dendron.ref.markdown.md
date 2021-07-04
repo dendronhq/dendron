@@ -13,3 +13,13 @@ This is normal text
 > this is a blockquote
 
 This is more normal text
+
+### Math
+
+- Inline $f(x) = 5$
+
+
+- Block
+$$
+f(x) = 5
+$$

@@ -3,21 +3,16 @@ import * as React from "react";
 import { DendronProps } from "../lib/types";
 import { createLogger } from "@dendronhq/common-frontend";
 
-function MermaidHeaders() {
+export function MermaidHeaders() {
   return [
     <script
       key="mermaid-js"
       src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"
     ></script>,
-    <script key="mermaid-init">
-      {" "}
-      (function()&#123; mermaid.initialize(&#123;startOnLoad:true &#125;);
-      &#125;);{" "}
-    </script>,
   ];
 }
 
-function MathJaxHeaders() {
+export function MathJaxHeaders() {
   return [
     <link
       key="math-style"
@@ -59,7 +54,7 @@ function PreviewHeader({ engine, ide }: DendronProps) {
         href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.22.0/themes/prism.min.css"
       />
       {engine?.config?.useKatex && MathJaxHeaders()}
-      {engine?.config?.mermaid && MermaidHeaders()}
+      {engine?.config?.useKatex && MermaidHeaders()}
     </Head>
   );
 }

@@ -39,6 +39,19 @@ function AntLayout(props: React.PropsWithChildren<any>) {
   );
 }
 
+function docReady(fn: () => any) {
+  // see if DOM is already available
+  if (
+    document.readyState === "complete" ||
+    document.readyState === "interactive"
+  ) {
+    // call on next available tick
+    setTimeout(fn, 1);
+  } else {
+    document.addEventListener("DOMContentLoaded", fn);
+  }
+}
+
 function Note({ engine, ide, initNoteId }: NotePreviewProps) {
   logger.info({
     state: "enter",
@@ -69,6 +82,24 @@ function Note({ engine, ide, initNoteId }: NotePreviewProps) {
       renderedNoteContentHash.current = contentHash;
       dispatch(engineSlice.renderNote({ ...getWsAndPort(), id: noteId }));
     }
+
+    console.log("BOND: use effect called");
+    docReady(() => {
+      console.log("BOND2: doc ready");
+      // @ts-ignore
+      if (window.mermaid) {
+        try {
+          console.log("BOND3: mermaid");
+          // @ts-ignore
+          window.mermaid.initialize({ startOnLoad: true });
+          console.log("BOND4: mermaid fin!");
+        } catch (err) {
+          console.log("error", err);
+          debugger;
+        }
+      }
+    });
+    // debugger;
   }, [noteId, contentHash]);
 
   const onClickHandler = React.useCallback(
@@ -95,6 +126,7 @@ function Note({ engine, ide, initNoteId }: NotePreviewProps) {
     [noteId]
   );
 
+  // add effects
   React.useEffect(() => {
     window.addEventListener("click", onClickHandler);
 

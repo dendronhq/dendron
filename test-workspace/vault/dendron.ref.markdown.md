@@ -23,3 +23,14 @@ This is more normal text
 $$
 f(x) = 5
 $$
+
+
+### Mermaid
+
+```mermaid
+graph TD;
+    A-->B;
+    A-->C;
+    B-->D;
+    C-->D;
+```

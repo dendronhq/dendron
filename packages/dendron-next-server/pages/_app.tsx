@@ -108,7 +108,7 @@ function AppVSCode({ Component, pageProps }: any) {
     : NoOp;
   return (
     <ThemeSwitcherProvider themeMap={themes} defaultTheme={defaultTheme}>
-      <Header />
+      <Header engine={engine} ide={ide} {...pageProps} />
       <Component engine={engine} ide={ide} {...pageProps} />
     </ThemeSwitcherProvider>
   );

@@ -14,6 +14,12 @@ This is normal text
 
 This is more normal text
 
+### Code
+
+```js
+console.log("Hello World");
+```
+
 ### Math
 
 - Inline $f(x) = 5$

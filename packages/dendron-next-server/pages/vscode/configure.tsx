@@ -3,7 +3,14 @@ import { createLogger, engineSlice } from "@dendronhq/common-frontend";
 import { List, Typography, Button, Card, message } from "antd";
 import { useRouter } from "next/router";
 import { FieldArray, Formik } from "formik";
-import { Form, Input, Switch, ResetButton, SubmitButton } from "formik-antd";
+import {
+  Form,
+  Input,
+  Switch,
+  Select,
+  ResetButton,
+  SubmitButton,
+} from "formik-antd";
 const { Title, Paragraph, Text, Link } = Typography;
 import { MinusCircleOutlined } from "@ant-design/icons";
 import _ from "lodash";
@@ -54,8 +61,15 @@ const siteConfig: ObjectConfig = {
   },
 };
 
+const vaultSync: EnumConfig = {
+  type: "enum",
+  label: "Sync Options",
+  data: ["skip", "noPush", "noCommit", "sync"],
+};
+
 const vault: ArrayConfig = {
   type: "array",
+  label: "Vaults",
   data: {
     type: "object",
     data: {
@@ -69,6 +83,7 @@ const vault: ArrayConfig = {
         type: "string",
         helperText: "Visibility of the vault",
       },
+      sync: vaultSync,
     },
   },
 };
@@ -78,6 +93,7 @@ const dendronConfig: ObjectConfig = {
   data: {
     "site.siteHierarchies": {
       type: "array",
+      label: "Site Hierarchy",
       data: {
         type: "string",
         label: "Site Config",
@@ -173,6 +189,7 @@ type InputType = {
 type BaseInputType = InputType & { children?: ReactNode };
 type SimpleInputType = InputType & { type: "string" | "number" };
 type ArrayInputType = InputType & { data: Config; values: any };
+type SelectInputType = InputType & { data: EnumConfig };
 
 const BaseInput = ({
   label,
@@ -189,6 +206,7 @@ const BaseInput = ({
   >
     <Title level={3} style={{ textTransform: "capitalize" }}>
       {label}
+      {required && <span style={{ color: "red" }}> *</span>}
     </Title>
     {children}
     <br />
@@ -215,6 +233,27 @@ const SimpleInput = ({
         placeholder={placeholder}
         required={required}
       />
+    </BaseInput>
+  );
+};
+
+const SelectInput = ({
+  name,
+  label,
+  data,
+  required,
+  helperText,
+  errors,
+}: SelectInputType) => {
+  return (
+    <BaseInput {...{ name, label, required, helperText, errors }}>
+      <Select name={name}>
+        {data.data.map((value) => (
+          <Select.Option key={value} value={value}>
+            {value}
+          </Select.Option>
+        ))}
+      </Select>
     </BaseInput>
   );
 };
@@ -301,9 +340,9 @@ const renderArray = (
           </Card>
         ));
 
-  dataSource.concat(
-    <Button type="primary" size="large" onClick={() => arrayHelpers.add()}>
-      +
+  dataSource.push(
+    <Button type="primary" size="large" onClick={() => arrayHelpers.push(null)}>
+      Add
     </Button>
   );
 
@@ -350,12 +389,18 @@ const ConfigInput = ({ data, values, errors, prefix }: ConfigInputType) => {
     return (
       <ArrayInput
         values={get(values, name)}
-        label={prefix[prefix.length - 1].split(".").pop()}
-        {...{ name, data, required, helperText, errors }}
+        {...{ label, name, data, required, helperText, errors }}
       />
     );
   }
-  if (type === "enum") return <></>;
+  if (type === "enum") {
+    return (
+      <SelectInput
+        name={prefix.join(".")}
+        {...{ label, data, values, errors, prefix }}
+      />
+    );
+  }
   if (type === "record") return <></>;
 
   return (

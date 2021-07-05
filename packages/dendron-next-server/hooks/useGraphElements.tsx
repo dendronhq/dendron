@@ -3,6 +3,7 @@ import {
   NotePropsDict,
   NoteUtils,
   SchemaModuleDict,
+  SchemaProps,
   VaultUtils,
 } from "@dendronhq/common-all";
 import { createLogger, engineSlice } from "@dendronhq/common-frontend";
@@ -165,8 +166,11 @@ const getSchemaGraphElements = (
   };
 
   const logger = createLogger("useGraphElements");
+  logger.log(schemas);
 
   if (_.isUndefined(vaults)) return { nodes, edges };
+
+  // const linkChildren => {
 
   vaults.map((vault) => {
     const vaultName = VaultUtils.getName(vault);
@@ -212,7 +216,7 @@ const getSchemaGraphElements = (
           classes: `hierarchy vault-${vaultName}`,
         });
 
-        // Children schemas
+        // Add subschema nodes
         Object.values(schema.schemas).forEach((subschema) => {
           const SUBSCHEMA_ID = `${vaultName}_${subschema.id}`;
 
@@ -226,19 +230,44 @@ const getSchemaGraphElements = (
             },
             classes: `vault-${vaultName}`,
           });
-
-          // Schema -> subschema connection
-          edges.hierarchy.push({
-            data: {
-              group: "edges",
-              id: `${SCHEMA_ID}_${SUBSCHEMA_ID}`,
-              source: SCHEMA_ID,
-              target: SUBSCHEMA_ID,
-              fname: schema.fname,
-            },
-            classes: `hierarchy vault-${vaultName}`,
-          });
         });
+
+        const addChildConnections = (
+          parentSchema: SchemaProps,
+          parentSchemaID: string
+        ) => {
+          parentSchema.children.forEach((child) => {
+            const childSchema = schema.schemas[child];
+            const CHILD_SCHEMA_ID = `${vaultName}_${childSchema.id}`;
+
+            edges.hierarchy.push({
+              data: {
+                group: "edges",
+                id: `${parentSchemaID}_${CHILD_SCHEMA_ID}`,
+                source: parentSchemaID,
+                target: CHILD_SCHEMA_ID,
+                fname: schema.fname,
+              },
+              classes: `hierarchy vault-${vaultName}`,
+            });
+
+            addChildConnections(childSchema, `${vaultName}_${childSchema.id}`);
+          });
+        };
+
+        if (schema.root) addChildConnections(schema.root, SCHEMA_ID);
+
+        // Schema -> subschema connection
+        // edges.hierarchy.push({
+        //   data: {
+        //     group: "edges",
+        //     id: `${SCHEMA_ID}_${SUBSCHEMA_ID}`,
+        //     source: SCHEMA_ID,
+        //     target: SUBSCHEMA_ID,
+        //     fname: schema.fname,
+        //   },
+        //   classes: `hierarchy vault-${vaultName}`,
+        // });
       });
   });
 

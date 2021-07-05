@@ -198,12 +198,12 @@ suite("completionProvider", function () {
           // have the completion provider complete this wikilink
           const items = await provideBlockCompletionItems(
             editor.document,
-            new Position(8, 3)
+            new Position(7, 3)
           );
           expect(items).toBeTruthy();
           expect(items?.length).toEqual(2);
-          expect(items![0].insertText).toEqual("#et-et-quam-culpa");
-          expect(items![1].insertText).toEqual("#quasi-ex-debitis-aut-sed");
+          expect(items![0].insertText).toEqual("et-et-quam-culpa");
+          expect(items![1].insertText).toEqual("quasi-ex-debitis-aut-sed");
           done();
         },
         preSetupHook: async ({ wsRoot, vaults }) => {
@@ -253,13 +253,13 @@ suite("completionProvider", function () {
           // have the completion provider complete this wikilink
           const items = await provideBlockCompletionItems(
             editor.document,
-            new Position(8, 3)
+            new Position(7, 3)
           );
           expect(items).toBeTruthy();
           expect(items?.length).toEqual(3);
-          expect(items![0].insertText).toEqual("#^item-2");
-          expect(items![1].insertText).toEqual("#^item-4");
-          expect(items![2].insertText).toEqual("#^last-paragraph");
+          expect(items![0].insertText).toEqual("item-2");
+          expect(items![1].insertText).toEqual("item-4");
+          expect(items![2].insertText).toEqual("last-paragraph");
           done();
         },
         preSetupHook: async ({ wsRoot, vaults }) => {

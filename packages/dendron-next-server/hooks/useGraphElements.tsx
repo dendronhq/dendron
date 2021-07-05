@@ -527,6 +527,8 @@ const useGraphElements = ({
   const [noteCount, setNoteCount] = useState(0);
   const [schemaCount, setSchemaCount] = useState(0);
 
+  const isLocalGraph = GraphUtils.isLocalGraph(config);
+
   useEffect(() => {
     if (type === "note" && engine.notes) {
       // Prevent unnecessary parsing if no notes have been added/deleted
@@ -537,7 +539,7 @@ const useGraphElements = ({
       if (!wasLocalGraph && noteCount === newNoteCount) return;
       setNoteCount(newNoteCount);
 
-      if (!GraphUtils.isLocalGraph(config)) {
+      if (!isLocalGraph) {
         setElements(
           getFullNoteGraphElements({
             notes: engine.notes,
@@ -547,16 +549,11 @@ const useGraphElements = ({
         );
       }
     }
-  }, [engine.notes, config["options.show-local-graph"]]);
+  }, [engine.notes, isLocalGraph]);
 
   // Get new elements if active note changes
   useEffect(() => {
-    if (
-      type === "note" &&
-      engine.notes &&
-      GraphUtils.isLocalGraph(config) &&
-      noteActive
-    ) {
+    if (type === "note" && engine.notes && isLocalGraph && noteActive) {
       setElements(
         getLocalNoteGraphElements({
           notes: engine.notes,
@@ -566,7 +563,7 @@ const useGraphElements = ({
         })
       );
     }
-  }, [noteActive, config["options.show-local-graph"]]);
+  }, [noteActive, engine.notes, isLocalGraph]);
 
   useEffect(() => {
     if (type === "schema" && engine.schemas) {

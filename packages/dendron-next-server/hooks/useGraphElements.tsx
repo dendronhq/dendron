@@ -166,7 +166,6 @@ const getSchemaGraphElements = (
   };
 
   const logger = createLogger("useGraphElements");
-  logger.log(schemas);
 
   if (_.isUndefined(vaults)) return { nodes, edges };
 

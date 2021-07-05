@@ -554,7 +554,7 @@ const useGraphElements = ({
     if (
       type === "note" &&
       engine.notes &&
-      !GraphUtils.isLocalGraph(config) &&
+      GraphUtils.isLocalGraph(config) &&
       noteActive
     ) {
       setElements(

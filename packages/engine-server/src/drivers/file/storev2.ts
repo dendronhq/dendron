@@ -44,6 +44,7 @@ import {
   note2File,
   schemaModuleProps2File,
   vault2Path,
+  getDurationMilliseconds,
 } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -447,6 +448,10 @@ export class FileStorage implements DStore {
             return;
           }
           try {
+            let ctx = "findUnreferencedLinks";
+            let duration;
+            const start = process.hrtime();
+
             const unreferencedLinks = LinkUtils.findUnreferencedLinks({
               note: n,
               notes: notes,
@@ -455,6 +460,10 @@ export class FileStorage implements DStore {
             cacheUpdates[n.fname].data.links =
               cacheUpdates[n.fname].data.links.concat(unreferencedLinks);
             n.links = n.links.concat(unreferencedLinks);
+
+            duration = getDurationMilliseconds(start);
+            console.log(this.logger);
+            this.logger.info({ ctx, duration });
           } catch (err) {
             if (!(err instanceof DendronError)) {
               err = new DendronError({

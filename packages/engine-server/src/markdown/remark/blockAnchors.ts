@@ -31,6 +31,7 @@ export const matchBlockAnchor = (
 };
 
 type PluginOpts = {
+  /** @deprecated */
   hideBlockAnchors?: boolean;
 };
 
@@ -90,7 +91,7 @@ function attachCompiler(proc: Unified.Processor, _opts?: PluginOpts) {
   }
 }
 
-export function blockAnchor2htmlRaw(node: BlockAnchor, opts?: PluginOpts) {
+export function blockAnchor2htmlRaw(node: BlockAnchor, _opts?: PluginOpts) {
   const fullId = `^${node.id}`;
   return (
     `<a aria-hidden="true" class="block-anchor anchor-heading" id="${fullId}" href="#${fullId}">` +

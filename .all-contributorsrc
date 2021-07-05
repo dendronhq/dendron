@@ -509,6 +509,15 @@
         "code",
         "doc"
       ]
+    },
+    {
+      "login": "apastuszak",
+      "name": "apastuszak",
+      "avatar_url": "https://avatars.githubusercontent.com/u/3401054?v=4",
+      "profile": "https://github.com/apastuszak",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

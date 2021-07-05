@@ -479,7 +479,7 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/76890677?v=4",
       "profile": "https://github.com/micharris42",
       "contributions": [
-        "bug" 
+        "bug"
       ]
     },
     {
@@ -487,6 +487,15 @@
       "name": "teauxfu",
       "avatar_url": "https://avatars.githubusercontent.com/u/1144380?v=4",
       "profile": "https://github.com/teauxfu",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "andrey-jef",
+      "name": "andrey-jef",
+      "avatar_url": "https://avatars.githubusercontent.com/u/81280428?v=4",
+      "profile": "https://github.com/andrey-jef",
       "contributions": [
         "doc"
       ]

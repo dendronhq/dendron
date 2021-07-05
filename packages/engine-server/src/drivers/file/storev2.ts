@@ -447,12 +447,13 @@ export class FileStorage implements DStore {
             return;
           }
           try {
-            const unreferencedLinks = await LinkUtils.findUnreferencedLinks({
+            const unreferencedLinks = LinkUtils.findUnreferencedLinks({
               note: n,
               notes: notes,
               engine: this.engine,
             });
-            cacheUpdates[n.fname].data.links = cacheUpdates[n.fname].data.links.concat(unreferencedLinks);
+            cacheUpdates[n.fname].data.links =
+              cacheUpdates[n.fname].data.links.concat(unreferencedLinks);
             n.links = n.links.concat(unreferencedLinks);
           } catch (err) {
             if (!(err instanceof DendronError)) {
@@ -463,7 +464,7 @@ export class FileStorage implements DStore {
             }
             errors.push(err);
             return;
-          } 
+          }
         } else {
           n.links = cache.notes[n.fname].data.links;
         }

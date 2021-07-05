@@ -527,7 +527,7 @@ export class LinkUtils {
     return newBody;
   }
 
-  static async findUnreferencedLinks({
+  static findUnreferencedLinks({
     note,
     notes,
     engine,

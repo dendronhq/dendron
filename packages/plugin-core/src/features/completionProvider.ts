@@ -245,6 +245,7 @@ export async function provideBlockCompletionItems(
     completeableBlocks = completeableBlocks.filter(
       (block) => block.anchor?.type === "header"
     );
+    insertValueOnly = true;
   }
 
   // Calculate the replacement range. This must contain any text the user has typed for the block, but not the trigger symbols (#, ^, #^)

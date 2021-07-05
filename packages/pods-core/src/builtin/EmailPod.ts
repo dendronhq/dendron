@@ -24,26 +24,22 @@ export class EmailPublishPod extends PublishPod<EmailPublishConfig> {
         from: {
           description: "from address",
           type: "string",
-          default: false,
           example: "you <username@outlook.com>",
         },
         to: {
           description: "to address",
           type: "string",
-          default: false,
           example:
             "someone <someone@your-email.com>, another <another@your-email.com>",
         },
         user: {
           description: "username",
           type: "string",
-          default: false,
           example: "hello@dendron.so",
         },
         password: {
           description: "password",
           type: "string",
-          default: false,
           example: "secret123",
         },
         host: {

@@ -11,6 +11,7 @@ import _ from "lodash";
 import {
   ALIAS_NAME,
   AnchorUtils,
+  DendronASTTypes,
   LinkUtils,
   LINK_NAME,
 } from "@dendronhq/engine-server";
@@ -285,11 +286,14 @@ export async function provideBlockCompletionItems(
         const blockPosition = VSCodeUtils.point2VSCodePosition(
           block.position.end
         );
-        // TODO: If choosing a block that's an entire list, we need to insert the anchor 1 line after the list ("\n\n")
         edits.push(
           new TextEdit(
             new Range(blockPosition, blockPosition),
-            ` ${AnchorUtils.anchor2string(anchor)}`
+            // To represent a whole list, the anchor must be after the list with 1 empty line between
+            block.type === DendronASTTypes.LIST
+              ? `\n\n${AnchorUtils.anchor2string(anchor)}\n`
+              : // To represent any other block, the anchor can be placed at the end of the block
+                ` ${AnchorUtils.anchor2string(anchor)}`
           )
         );
       }

@@ -853,6 +853,7 @@ export class RemarkUtils {
             anchor,
             // position can only be undefined for generated nodes, not for parsed ones
             position: listItem.position!,
+            type: listItem.type,
           });
         });
       }
@@ -878,6 +879,7 @@ export class RemarkUtils {
         anchor,
         // position can only be undefined for generated nodes, not for parsed ones
         position: node.position!,
+        type: node.type,
       });
     }
 

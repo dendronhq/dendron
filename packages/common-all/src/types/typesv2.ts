@@ -275,6 +275,8 @@ export type NoteBlock = {
   anchor?: DNoteAnchorPositioned;
   /** The position within the document at which the block is located. */
   position: Position;
+  /** The type of mdast node from which this block was extracted. Useful since entire lists are a special case. */
+  type: string;
 };
 
 /**

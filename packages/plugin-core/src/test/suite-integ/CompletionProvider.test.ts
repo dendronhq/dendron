@@ -178,6 +178,117 @@ suite("completionProvider", function () {
       });
     });
 
+    test("provides headers for other files", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        onInit: async ({ wsRoot, vaults, engine }) => {
+          // Open a note, add [[test2#]]
+          await VSCodeUtils.openNote(
+            NoteUtils.getNoteOrThrow({
+              fname: "test",
+              vault: vaults[0],
+              wsRoot,
+              notes: engine.notes,
+            })
+          );
+          const editor = VSCodeUtils.getActiveTextEditorOrThrow();
+          await editor.edit((editBuilder) => {
+            editBuilder.insert(new Position(7, 0), "[[test2#]]");
+          });
+          // have the completion provider complete this wikilink
+          const items = await provideBlockCompletionItems(
+            editor.document,
+            new Position(8, 3)
+          );
+          expect(items).toBeTruthy();
+          expect(items?.length).toEqual(2);
+          expect(items![0].insertText).toEqual("#et-et-quam-culpa");
+          expect(items![1].insertText).toEqual("#quasi-ex-debitis-aut-sed");
+          done();
+        },
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          NoteTestUtilsV4.createNote({
+            vault: vaults[0],
+            wsRoot,
+            fname: "test2",
+            body: [
+              "## Et et quam culpa.",
+              "",
+              "* Cumque molestiae qui deleniti.",
+              "* Eius odit commodi harum.",
+              "  * Sequi ut non delectus tempore.",
+              "  * In delectus quam sunt unde.",
+              "",
+              "## Quasi ex debitis aut sed.",
+              "",
+              "Perferendis officiis ut non.",
+            ].join("\n"),
+          });
+          NoteTestUtilsV4.createNote({
+            vault: vaults[0],
+            wsRoot,
+            fname: "test",
+          });
+        },
+      });
+    });
+
+    test("provides block anchors for other files", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        onInit: async ({ wsRoot, vaults, engine }) => {
+          // Open a note, add [[test2#^]]
+          await VSCodeUtils.openNote(
+            NoteUtils.getNoteOrThrow({
+              fname: "test",
+              vault: vaults[0],
+              wsRoot,
+              notes: engine.notes,
+            })
+          );
+          const editor = VSCodeUtils.getActiveTextEditorOrThrow();
+          await editor.edit((editBuilder) => {
+            editBuilder.insert(new Position(7, 0), "[[test2#^]]");
+          });
+          // have the completion provider complete this wikilink
+          const items = await provideBlockCompletionItems(
+            editor.document,
+            new Position(8, 3)
+          );
+          expect(items).toBeTruthy();
+          expect(items?.length).toEqual(3);
+          expect(items![0].insertText).toEqual("#^item-2");
+          expect(items![1].insertText).toEqual("#^item-4");
+          expect(items![2].insertText).toEqual("#^last-paragraph");
+          done();
+        },
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          NoteTestUtilsV4.createNote({
+            vault: vaults[0],
+            wsRoot,
+            fname: "test2",
+            body: [
+              "Et et quam culpa.",
+              "",
+              "* Cumque molestiae qui deleniti.",
+              "* Eius odit commodi harum. ^item-2",
+              "  * Sequi ut non delectus tempore.",
+              "  * In delectus quam sunt unde. ^item-4",
+              "",
+              "Quasi ex debitis aut sed.",
+              "",
+              "Perferendis officiis ut non. ^last-paragraph",
+            ].join("\n"),
+          });
+          NoteTestUtilsV4.createNote({
+            vault: vaults[0],
+            wsRoot,
+            fname: "test",
+          });
+        },
+      });
+    });
+
     function hasNoEditContaining(
       item: CompletionItem,
       newTextSubString: string

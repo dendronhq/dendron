@@ -232,6 +232,7 @@ const getSchemaGraphElements = (
           });
         });
 
+        // Recursively adds schema connections of infinite depth
         const addChildConnections = (
           parentSchema: SchemaProps,
           parentSchemaID: string
@@ -255,19 +256,7 @@ const getSchemaGraphElements = (
           });
         };
 
-        if (schema.root) addChildConnections(schema.root, SCHEMA_ID);
-
-        // Schema -> subschema connection
-        // edges.hierarchy.push({
-        //   data: {
-        //     group: "edges",
-        //     id: `${SCHEMA_ID}_${SUBSCHEMA_ID}`,
-        //     source: SCHEMA_ID,
-        //     target: SUBSCHEMA_ID,
-        //     fname: schema.fname,
-        //   },
-        //   classes: `hierarchy vault-${vaultName}`,
-        // });
+        addChildConnections(schema.root, SCHEMA_ID);
       });
   });
 

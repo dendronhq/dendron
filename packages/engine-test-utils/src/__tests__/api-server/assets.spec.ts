@@ -1,6 +1,6 @@
 import { DendronAPI, DendronError, WorkspaceOpts } from "@dendronhq/common-all";
+import { tmpDir, vault2Path } from "@dendronhq/common-server";
 import path from "path";
-import { tmpDir, vault2Path } from "../../../../common-server/lib";
 import { createServer, runEngineTestV5 } from "../../engine";
 import { ENGINE_HOOKS } from "../../presets";
 import { checkFile, checkString } from "../../utils";
@@ -16,7 +16,7 @@ async function initRemoteWorkspace({
       vaults,
     },
   };
-  let resp = await api.workspaceInit(payload);
+  const resp = await api.workspaceInit(payload);
   return resp;
 }
 

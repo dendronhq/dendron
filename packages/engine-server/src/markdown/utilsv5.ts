@@ -1,4 +1,5 @@
 import {
+  assertUnreachable,
   DendronConfig,
   DendronError,
   DEngineClient,
@@ -274,9 +275,10 @@ export class MDUtilsV5 {
         }
         break;
       }
-
       case ProcMode.NO_DATA:
         break;
+      default:
+        assertUnreachable();
     }
     return proc;
   }

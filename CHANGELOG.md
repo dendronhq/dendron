@@ -3,6 +3,26 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.49.0](https://github.com/dendronhq/dendron/compare/v0.48.3...v0.49.0) (2021-07-05)
+
+
+### Bug Fixes
+
+* schema graph rendering ([28ec8eb](https://github.com/dendronhq/dendron/commit/28ec8eb9bae2df917185316ee943c9bf5704cfd9))
+* **preview:** show current active note when exec ShowPreview command ([1d4898d](https://github.com/dendronhq/dendron/commit/1d4898d6ce45d74a54d697dead43992f35dbebc3))
+* **preview:** support katex rendering ([31a3880](https://github.com/dendronhq/dendron/commit/31a3880b61cff35fd0d5b4daea65288cb1da20f2))
+* respect fmTitle heading ([4e223ef](https://github.com/dendronhq/dendron/commit/4e223efcf88f440594aaafa1716477fec01be94d))
+
+
+### Features Dendron
+
+* **preview:** better block quote support ([02ae6e3](https://github.com/dendronhq/dendron/commit/02ae6e351ea7917d691a1c67eaa4c1c22bd661dc))
+* support rendering images for preview ([b4a109a](https://github.com/dendronhq/dendron/commit/b4a109a16cca846006069db2953baa8a11527117))
+
+
+
+
+
 ## [0.48.3](https://github.com/dendronhq/dendron/compare/v0.48.2...v0.48.3) (2021-07-02)
 
 

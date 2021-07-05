@@ -1,4 +1,4 @@
-import { DNoteAnchor, isNotUndefined } from "@dendronhq/common-all";
+import { DNoteAnchor, isNotUndefined, VaultUtils } from "@dendronhq/common-all";
 import {
   assertUnreachable,
   CONSTANTS,
@@ -30,6 +30,7 @@ import type {
   TableCell,
   TableRow,
   Image,
+  Text,
 } from "mdast";
 import * as mdastBuilder from "mdast-builder";
 import { Processor } from "unified";
@@ -208,33 +209,35 @@ const getUnreferencedLinks = ({
   note: NoteProps;
   notes: NoteProps[];
 }) => {
-  const textNodes: Node[] = [];
-  visit(ast, [DendronASTTypes.TEXT], (node) => {
-    switch (node.type) {
-      case DendronASTTypes.TEXT:
-        textNodes.push(node);
-    }
+  const textNodes: Text[] = [];
+  visit(ast, [DendronASTTypes.TEXT], (node: Text) => {
+    textNodes.push(node);
   });
-  const unreferencedLinks: DLink[] = [];
 
-  _.forEach(notes, (n) => {
-    const fname = n.fname;
-    fname;
-    _.forEach(textNodes, (textNode: Node) => {
-      const value = textNode.value as string;
-      const match = value.indexOf(fname);
-      if (match !== -1) {
+  const fnameNoteMap = new Map<string, NoteProps>();
+  notes.map((n) => {
+    fnameNoteMap.set(n.fname, n);
+  });
+
+  const unreferencedLinks: DLink[] = [];
+  _.map(textNodes, (textNode: Text) => {
+    const value = textNode.value as string;
+    value.split(" ").some((word) => {
+      const maybeNote = fnameNoteMap.get(word);
+      if (maybeNote !== undefined) {
+        console.log(maybeNote);
         unreferencedLinks.push({
           type: "unreferenced",
           from: NoteUtils.toNoteLoc(note),
           value: value,
           position: textNode.position as Position,
           to: {
-            fname: fname,
-            vaultName: n.vault.fsPath,
+            fname: word,
+            vaultName: VaultUtils.getName(maybeNote.vault),
           },
         });
       }
+      return maybeNote !== undefined;
     });
   });
   return unreferencedLinks;

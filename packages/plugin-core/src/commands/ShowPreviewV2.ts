@@ -24,16 +24,7 @@ export class ShowPreviewV2Command extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
-  private activeTextEditor: vscode.TextEditor | undefined;
-
   key = DENDRON_COMMANDS.SHOW_PREVIEW_V2.key;
-
-  constructor(_name?: string) {
-    super(_name);
-    // save reference to the activeTextEditor when the command was trigger
-    // this makes sure that the `note` retrieval from `activeTextEditor` works in `NoteViewMessageType.onGetActiveEditor` because there it would be `undefined` since focus changed to the preview window
-    this.activeTextEditor = VSCodeUtils.getActiveTextEditor();
-  }
 
   static onDidChangeHandler(document: vscode.TextDocument) {
     const ctx = "ShowPreviewV2:onDidChangeHandler";
@@ -140,9 +131,10 @@ export class ShowPreviewV2Command extends BasicCommand<
         }
         case NoteViewMessageType.onGetActiveEditor: {
           // only entered on "init" in `plugin-core/src/views/utils.ts:87`
+          const activeTextEditor = VSCodeUtils.getActiveTextEditor();
           const note =
-            this.activeTextEditor &&
-            VSCodeUtils.getNoteFromDocument(this.activeTextEditor.document);
+            activeTextEditor &&
+            VSCodeUtils.getNoteFromDocument(activeTextEditor.document);
           if (note) {
             ShowPreviewV2Command.refresh(note);
           }

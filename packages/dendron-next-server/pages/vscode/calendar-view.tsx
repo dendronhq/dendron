@@ -127,16 +127,25 @@ function CalendarView({ engine, ide }: DendronProps) {
     }
   }, [noteActive, groupedDailyNotes]);
 
-  const getDateKey = (date: Moment) => {
-    return date.format(
-      activeMode === "month" ? defaultJournalDateFormat : "y.MM" // TODO compute format for currentMode="year"
-    );
-  };
+  const getDateKey = useCallback<
+    (date: Moment, mode?: CalendarProps["mode"]) => string
+  >(
+    (date, mode) => {
+      const format =
+        (mode || activeMode) === "month"
+          ? defaultJournalDateFormat || "y.MM.dd"
+          : "y.MM"; // TODO compute format for currentMode="year" from config
+      return date.format(format);
+    },
+    [activeMode, defaultJournalDateFormat]
+  );
 
-  const onSelect = useCallback<Exclude<CalendarProps["onSelect"], undefined>>(
-    (date) => {
+  const onSelect = useCallback<
+    (date: Moment, mode?: CalendarProps["mode"]) => void
+  >(
+    (date, mode) => {
       logger.info({ ctx: "onSelect", date });
-      const dateKey = getDateKey(date);
+      const dateKey = getDateKey(date, mode);
       const selectedNote = _.first(groupedDailyNotes[dateKey]);
 
       postVSCodeMessage({
@@ -159,8 +168,10 @@ function CalendarView({ engine, ide }: DendronProps) {
   }, []);
 
   const onClickToday = useCallback(() => {
-    onSelect(moment());
-  }, []);
+    const mode = "month";
+    setActiveMode(mode);
+    onSelect(moment(), mode);
+  }, [onSelect]);
 
   const dateFullCellRender = useCallback<
     Exclude<CalendarProps["dateFullCellRender"], undefined>
@@ -276,7 +287,9 @@ function CalendarView({ engine, ide }: DendronProps) {
         mode={activeMode}
         onSelect={onSelect}
         onPanelChange={onPanelChange}
-        value={activeDate}
+        /*
+        // @ts-ignore -- `null` initializes ant Calendar into a controlled component whereby it does not render an selected/visible date (today) when `activeDate` is `undefined`*/
+        value={activeDate || null}
         dateFullCellRender={dateFullCellRender}
         fullscreen={false}
       />

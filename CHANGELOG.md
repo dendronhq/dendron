@@ -3,6 +3,52 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.48.3](https://github.com/dendronhq/dendron/compare/v0.48.2...v0.48.3) (2021-07-02)
+
+
+### Bug Fixes
+
+* block anchors inside links are parsed as anchors ([#911](https://github.com/dendronhq/dendron/issues/911)) ([80eef6c](https://github.com/dendronhq/dendron/commit/80eef6ca95af447938de2dbcf132ca05ede6956d))
+* sync service trigger perpetually when opening log ([785e0af](https://github.com/dendronhq/dendron/commit/785e0af826da1415ca0fdc873f66bae4d92ca4f6))
+
+
+### Reverts
+
+* Revert "fix: remove today button" ([631732c](https://github.com/dendronhq/dendron/commit/631732c50ea07c6021c47a76df51d22259ce8c94))
+
+
+
+
+
+## [0.48.2](https://github.com/dendronhq/dendron/compare/v0.48.1...v0.48.2) (2021-07-01)
+
+
+### Bug Fixes
+
+* correct command name in prod telemetry ([#902](https://github.com/dendronhq/dendron/issues/902)) ([f96701c](https://github.com/dendronhq/dendron/commit/f96701c2093ee82b7f0efd38ca819f141e9e3e47))
+* dont count undefined as tutorial workspace ([453e955](https://github.com/dendronhq/dendron/commit/453e955ca595b6462352816734e4d46defd80fd9))
+* initialize seed from branch ([8407b0b](https://github.com/dendronhq/dendron/commit/8407b0b1f5f7367a3382758f0be4eeaceadaa7f4))
+* make prep.sh executable ([ebebfd8](https://github.com/dendronhq/dendron/commit/ebebfd82c4964dc023639a6badce51f8f4434be2))
+* remove today button ([58825c7](https://github.com/dendronhq/dendron/commit/58825c79744e2b65e66e8de1d9acd947a0320ae2))
+* **calendar-view:** prevent calendar-view from popping up when saving files ([#904](https://github.com/dendronhq/dendron/issues/904)) ([fd371f3](https://github.com/dendronhq/dendron/commit/fd371f325160593132d613515b7f3b115f06f476))
+
+
+### Features Dendron
+
+* anallytics on command invocation ([#896](https://github.com/dendronhq/dendron/issues/896)) ([70c0e3e](https://github.com/dendronhq/dendron/commit/70c0e3eb8f865caa1ce241c6ab5577f263161cd0))
+* native dendron preview ([f23df1b](https://github.com/dendronhq/dendron/commit/f23df1bd57564c1c4831a44c031952c4e494c8df))
+* new onboarding experience ([#859](https://github.com/dendronhq/dendron/issues/859)) ([732a2dc](https://github.com/dendronhq/dendron/commit/732a2dcb13447b3581dff26922c005aecf24a02f))
+
+
+### Reverts
+
+* Revert "chore: using preview v2 for launch tutorial" ([3613a91](https://github.com/dendronhq/dendron/commit/3613a916c07e0601591d90304754c9041bb8bf8f))
+* Revert "chore: hide new preview behind dev mode" ([5dd0eb7](https://github.com/dendronhq/dendron/commit/5dd0eb7f0609be87ddf338a2573db63b29efda3a))
+
+
+
+
+
 ## [0.48.1](https://github.com/dendronhq/dendron/compare/v0.48.0...v0.48.1) (2021-06-30)
 
 

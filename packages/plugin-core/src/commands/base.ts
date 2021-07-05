@@ -102,7 +102,7 @@ export abstract class BaseCommand<
       isError = true;
       return;
     } finally {
-      AnalyticsUtils.track(ctx, {
+      AnalyticsUtils.track(this.key, {
         duration: getDurationMilliseconds(start),
         error: isError,
       });

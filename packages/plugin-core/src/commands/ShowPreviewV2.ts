@@ -102,6 +102,8 @@ export class ShowPreviewV2Command extends BasicCommand<
       {
         enableScripts: true,
         retainContextWhenHidden: true,
+        enableFindWidget: true,
+        enableCommandUris: true,
       }
     );
 

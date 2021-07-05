@@ -20,7 +20,7 @@ import {
 } from "@dendronhq/common-all";
 import { createLogger, note2String } from "@dendronhq/common-server";
 import _ from "lodash";
-import { Heading, ListItem, Paragraph, Root } from "mdast";
+import { Heading, List, ListItem, Paragraph, Root } from "mdast";
 import * as mdastBuilder from "mdast-builder";
 import { Processor } from "unified";
 import { Node, Parent } from "unist";
@@ -629,8 +629,20 @@ export class RemarkUtils {
     return true;
   }
 
+  static isRoot(node: Node): node is Parent {
+    return node.type === DendronASTTypes.ROOT;
+  }
+
   static isParent(node: Node): node is Parent {
     return _.isArray(node.children);
+  }
+
+  static isParagraph(node: Node): node is Paragraph {
+    return node.type === DendronASTTypes.PARAGRAPH;
+  }
+
+  static isList(node: Node): node is List {
+    return node.type === DendronASTTypes.LIST;
   }
 
   static isNoteRefV2(node: Node): node is NoteRefNoteV4 {

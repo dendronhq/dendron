@@ -1,11 +1,11 @@
-import { DendronError, NoteUtils } from "@dendronhq/common-all";
+import { DendronError, isNotUndefined, NoteUtils } from "@dendronhq/common-all";
 import _ from "lodash";
 import { Image, Root } from "mdast";
 import { BlockAnchor, DendronASTTypes } from "../types";
 import Unified, { Transformer } from "unified";
 import { Node, Parent } from "unist";
 import u from "unist-builder";
-import visit from "unist-util-visit";
+import visitParents from "unist-util-visit-parents";
 import { VFile } from "vfile";
 import { SiteUtils } from "../../topics/site";
 import {
@@ -21,6 +21,7 @@ import { RemarkUtils } from "./utils";
 import { addError, getNoteOrError } from "./utils";
 import { blockAnchor2html } from "./blockAnchors";
 import { MDUtilsV5 } from "../utilsv5";
+import { html } from "mdast-builder";
 
 type PluginOpts = NoteRefsOpts & {
   assetsPrefix?: string;
@@ -67,7 +68,9 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         u(DendronASTTypes.HEADING, { depth: 1 }, [u("text", note.title)])
       );
     }
-    visit(tree, (node, index, parent) => {
+    visitParents(tree, (node, ancestors) => {
+      const parent = _.last(ancestors);
+      if (_.isUndefined(parent) || !RemarkUtils.isParent(parent)) return; // root node
       if (
         node.type === DendronASTTypes.WIKI_LINK &&
         dest !== DendronASTDest.MD_ENHANCED_PREVIEW
@@ -219,29 +222,44 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
           procOpts.blockAnchorsOpts
         );
         let target: Parent | undefined;
-        if (parent?.type === "root") {
+        const grandParent = ancestors[ancestors.length - 2];
+        if (
+          RemarkUtils.isParagraph(parent) &&
+          parent.children.length === 1 &&
+          isNotUndefined(grandParent) &&
+          RemarkUtils.isRoot(grandParent)
+        ) {
           // If the block anchor is at the top level, then it references the block before it
-          const previous = parent.children[index - 1];
-          if (!RemarkUtils.isParent(previous)) return;
-          const maybeTarget = previous.children[0];
-          if (!RemarkUtils.isParent(maybeTarget)) return;
-          target = maybeTarget;
+          const parentIndex = _.indexOf(grandParent.children, parent);
+          const previous = grandParent.children[parentIndex - 1];
+          if (_.isUndefined(previous) || !RemarkUtils.isParent(previous))
+            return; // invalid anchor, doesn't represent anything
+          target = previous;
         } else {
           // Otherwise, it references the block it's inside
           target = parent;
         }
         if (_.isUndefined(target)) return;
+        if (RemarkUtils.isList(target)) {
+          // Can't install as a child of the list, has to go into a list item
+          target = target.children[0];
+        }
         // Install the block anchor at the target node
-        target.children.splice(0, 0, anchorHTML);
+        target.children.unshift(anchorHTML);
         // Remove the block anchor itself since we install the anchor at the target
+        const index = _.indexOf(parent.children, node);
         parent!.children.splice(index, 1);
+
         // We might be adding and removing siblings here. We must return the index of the next sibling to traverse.
         if (target === parent) {
           // In this case, we removed block anchor but added a node to the start.
           // As a result, the indices match and traversal can continue.
+          return;
+        } else if (parent.children.length === 0) {
+          // After removing the block anchor, there are no siblings left in the parent to traverse.
+          return -1;
         } else {
-          // Otherwise, we removed the block anchor but didn't add anything.
-          // The next sibling got shifted down by 1 index, it will be at the same index as the block anchor.
+          // Otherwise, the next sibling got shifted down by 1 index, it will be at the same index as the block anchor.
           return index;
         }
       }

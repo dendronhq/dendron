@@ -2,6 +2,7 @@ import { Uri, window, workspace } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { Logger } from "../logger";
 import { BasicCommand } from "./base";
+
 const L = Logger;
 
 type OpenLogsCommandOpts = {};

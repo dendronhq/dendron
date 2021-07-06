@@ -174,8 +174,8 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     switch (opts.action) {
       case DoctorActions.FIX_FRONTMATTER: {
         await new BackfillV2Command().execute({
-          engine: engine,
-          note: note,
+          engine,
+          note,
         });
         break;
       }
@@ -235,7 +235,7 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
           : [note];
         await cmd.execute({
           action: opts.action,
-          candidates: candidates,
+          candidates,
           engine,
           wsRoot,
           server: {},

@@ -286,12 +286,12 @@ export function setupBeforeAfter(
   // allows for debugging
   _this.timeout(TIMEOUT);
   ctx = VSCodeUtils.getOrCreateMockContext();
-  beforeEach(async function () {
+  beforeEach(async () => {
     DendronWorkspace.getOrCreate(ctx);
     opts?.beforeHook && (await opts.beforeHook());
     Logger.configure(ctx, "info");
   });
-  afterEach(async function () {
+  afterEach(async () => {
     HistoryService.instance().clearSubscriptions();
     opts?.afterHook && (await opts.afterHook());
   });

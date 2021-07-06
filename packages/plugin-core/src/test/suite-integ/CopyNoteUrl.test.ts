@@ -17,7 +17,7 @@ import {
 
 suite("CopyNoteUrl", function () {
   let ctx: vscode.ExtensionContext;
-  let rootUrl = "dendron.so";
+  const rootUrl = "dendron.so";
 
   ctx = setupBeforeAfter(this, {
     afterHook: () => {

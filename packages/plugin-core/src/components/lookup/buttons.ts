@@ -268,7 +268,7 @@ export class CopyNoteLinkButton extends DendronBtn {
       } else {
         items = quickPick.activeItems;
       }
-      let links = items
+      const links = items
         .filter((ent) => !PickerUtilsV2.isCreateNewNotePick(ent))
         .map((note) => NoteUtils.createWikiLink({ note }));
       if (_.isEmpty(links)) {

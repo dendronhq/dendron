@@ -21,7 +21,7 @@ suite("ImportPod", function () {
     beforeHook: () => {},
   });
 
-  test("json", function (done) {
+  test("json", (done) => {
     runLegacyMultiWorkspaceTest({
       ctx,
       postSetupHook: async ({ wsRoot, vaults }) => {

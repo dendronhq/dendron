@@ -67,7 +67,7 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
     let sourceType: VaultRemoteSource | undefined;
     let sourcePath: string;
     let sourceName: string | undefined;
-    let localVaultPathPlaceholder = "vault2";
+    const localVaultPathPlaceholder = "vault2";
     if (!vaultRemoteSource) {
       return;
     }
@@ -94,7 +94,7 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
               : selected.label;
           const placeHolder = path2Vault;
 
-          let out = await VSCodeUtils.showInputBox({
+          const out = await VSCodeUtils.showInputBox({
             prompt: "Path to your new vault (relative to your workspace root)",
             placeHolder: localVaultPathPlaceholder,
             value: path2Vault,
@@ -120,7 +120,7 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
       });
       return out;
     } else {
-      let out = await VSCodeUtils.showInputBox({
+      const out = await VSCodeUtils.showInputBox({
         prompt: "Path to your new vault (relative to your workspace root)",
         placeHolder: localVaultPathPlaceholder,
       });

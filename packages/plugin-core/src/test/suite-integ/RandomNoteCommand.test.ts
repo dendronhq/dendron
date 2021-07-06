@@ -9,7 +9,7 @@ import { expect } from "../testUtilsv2";
 import {
   runLegacyMultiWorkspaceTest,
   setupBeforeAfter,
-  withConfig
+  withConfig,
 } from "../testUtilsV3";
 
 // common template function for RandomNoteCommand testing
@@ -31,7 +31,7 @@ function basicTest({
   runLegacyMultiWorkspaceTest({
     ctx,
     preSetupHook: async ({ wsRoot, vaults }) => {
-      for (let name of noteNames) {
+      for (const name of noteNames) {
         await NoteTestUtilsV4.createNote({
           vault: TestEngineUtils.vault1(vaults),
           wsRoot,
@@ -43,7 +43,7 @@ function basicTest({
     onInit: async ({ wsRoot }) => {
       withConfig(
         (config) => {
-          let randomCfg: RandomNoteConfig = {};
+          const randomCfg: RandomNoteConfig = {};
           if (includePattern) randomCfg.include = includePattern;
           if (excludePattern) randomCfg.exclude = excludePattern;
           config.randomNote = randomCfg;
@@ -63,7 +63,7 @@ suite(DENDRON_COMMANDS.RANDOM_NOTE.key, function () {
   let ctx: vscode.ExtensionContext;
   ctx = setupBeforeAfter(this, {});
 
-  test("include pattern only", function (done) {
+  test("include pattern only", (done) => {
     const validateFn = function () {
       expect(
         VSCodeUtils.getActiveTextEditor()
@@ -83,7 +83,7 @@ suite(DENDRON_COMMANDS.RANDOM_NOTE.key, function () {
     });
   });
 
-  test("include pattern with exclude in sub-hierarchy", function (done) {
+  test("include pattern with exclude in sub-hierarchy", (done) => {
     const validateFn = function () {
       expect(
         VSCodeUtils.getActiveTextEditor()
@@ -103,7 +103,7 @@ suite(DENDRON_COMMANDS.RANDOM_NOTE.key, function () {
     });
   });
 
-  test("multiple include patterns", function (done) {
+  test("multiple include patterns", (done) => {
     const validateFn = function () {
       expect(
         VSCodeUtils.getActiveTextEditor()
@@ -124,7 +124,7 @@ suite(DENDRON_COMMANDS.RANDOM_NOTE.key, function () {
   });
 
   // If no include pattern is specified, then the set should include all notes.
-  test("no include pattern", function (done) {
+  test("no include pattern", (done) => {
     const validateFn = function () {
       expect(
         VSCodeUtils.getActiveTextEditor()
@@ -144,7 +144,7 @@ suite(DENDRON_COMMANDS.RANDOM_NOTE.key, function () {
     });
   });
 
-  test("exclude pattern only", function (done) {
+  test("exclude pattern only", (done) => {
     const validateFn = function () {
       const fileName = VSCodeUtils.getActiveTextEditor()
         ?.document.uri.path.split("/")
@@ -165,7 +165,7 @@ suite(DENDRON_COMMANDS.RANDOM_NOTE.key, function () {
     });
   });
 
-  test("multi-level include pattern", function (done) {
+  test("multi-level include pattern", (done) => {
     const validateFn = function () {
       expect(
         VSCodeUtils.getActiveTextEditor()
@@ -185,7 +185,7 @@ suite(DENDRON_COMMANDS.RANDOM_NOTE.key, function () {
     });
   });
 
-  test("include and exclude patterns are the same", function (done) {
+  test("include and exclude patterns are the same", (done) => {
     // No explicit validation, just ensure that an exception is not thrown.
     const validateFn = function () {};
 

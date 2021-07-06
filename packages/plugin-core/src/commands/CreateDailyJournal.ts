@@ -32,7 +32,7 @@ export class CreateDailyJournalCommand extends BaseCommand<
   }
 
   async enrichInputs(inputs: CommandInput) {
-    let { title } = inputs;
+    const { title } = inputs;
     return {
       title,
       fname: `${cleanName(title)}`,
@@ -70,7 +70,7 @@ export class CreateDailyJournalCommand extends BaseCommand<
 
     await new GotoNoteCommand().execute({
       qs: fname,
-      vault: vault,
+      vault,
       overrides: { title },
     });
   }

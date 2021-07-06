@@ -417,7 +417,7 @@ suite("MoveNoteCommand", function () {
         const fooNote = NoteUtils.getNoteByFnameV5({
           fname: "foo",
           notes,
-          vault: vault,
+          vault,
           wsRoot,
         }) as NoteProps;
 

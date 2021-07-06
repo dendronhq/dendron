@@ -89,7 +89,7 @@ export class CalendarView implements vscode.WebviewViewProvider {
           data: msg.data,
         });
         const { id, fname } = msg.data;
-        let note: NoteProps | undefined = undefined;
+        let note: NoteProps | undefined;
         if (id && (note = getEngine().notes[id])) {
           await new GotoNoteCommand().execute({
             qs: note.fname,
@@ -97,7 +97,7 @@ export class CalendarView implements vscode.WebviewViewProvider {
           });
         } else if (fname) {
           await new CreateDailyJournalCommand().execute({
-            fname: fname,
+            fname,
           });
         }
         break;
@@ -123,7 +123,7 @@ export class CalendarView implements vscode.WebviewViewProvider {
   ) {
     const ctx = "CalendarView:resolveWebView";
     this._view = webviewView;
-    let start = process.hrtime();
+    const start = process.hrtime();
     Logger.info({ ctx, msg: "enter", start });
     webviewView.webview.options = {
       enableScripts: true,

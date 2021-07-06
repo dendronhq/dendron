@@ -114,7 +114,7 @@ export class ShowPreviewV2Command extends BasicCommand<
             if (data.href.includes("localhost")) {
               const { path } = vscode.Uri.parse(data.href);
               const noteId = path.match(/.*\/(.*).html/)?.[1];
-              let note: NoteProps | undefined = undefined;
+              let note: NoteProps | undefined;
               if (noteId && (note = getEngine().notes[noteId])) {
                 await new GotoNoteCommand().execute({
                   qs: note.fname,

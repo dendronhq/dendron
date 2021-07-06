@@ -23,8 +23,8 @@ suite("Scratch Notes", function () {
 
   ctx = setupBeforeAfter(this, {});
 
-  describe("multi", function () {
-    test("basic, multi", function (done) {
+  describe("multi", () => {
+    test("basic, multi", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
         postSetupHook: async ({ wsRoot, vaults }) => {
@@ -56,7 +56,7 @@ suite("Scratch Notes", function () {
       });
     });
 
-    test("basic, with template", function (done) {
+    test("basic, with template", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
         postSetupHook: async ({ wsRoot, vaults }) => {

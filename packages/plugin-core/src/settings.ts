@@ -20,6 +20,7 @@ import {
 import { CONFIG } from "./constants";
 import { Logger } from "./logger";
 import { DendronWorkspace } from "./workspace";
+
 export { Snippets };
 
 export class Extensions extends EngineExtension {

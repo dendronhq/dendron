@@ -36,7 +36,7 @@ export class PasteFileCommand extends BasicCommand<CommandOpts, CommandOutput> {
     }
 
     // if not in clipboard, prompt for file
-    let out = await VSCodeUtils.showInputBox({
+    const out = await VSCodeUtils.showInputBox({
       prompt: "Path of file",
       placeHolder: "",
     });

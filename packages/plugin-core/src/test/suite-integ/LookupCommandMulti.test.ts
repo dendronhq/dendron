@@ -163,8 +163,8 @@ suite.skip("Lookup notes, multi", function () {
     });
   };
 
-  describe("updateItems", function () {
-    test("empty qs", function (done) {
+  describe("updateItems", () => {
+    test("empty qs", (done) => {
       runUpdateItemTest({
         onInitCb: async ({ quickpick, lp, lc }) => {
           quickpick.value = "";
@@ -175,7 +175,7 @@ suite.skip("Lookup notes, multi", function () {
       });
     });
 
-    test("opened note", function (done) {
+    test("opened note", (done) => {
       runUpdateItemTest({
         onInitCb: async ({ quickpick, lp, lc }) => {
           await VSCodeUtils.openFileInEditor(
@@ -192,7 +192,7 @@ suite.skip("Lookup notes, multi", function () {
       });
     });
 
-    test("schema suggestion", function (done) {
+    test("schema suggestion", (done) => {
       runUpdateItemTest({
         onInitCb: async ({ quickpick, lp }) => {
           quickpick.value = "foo.";
@@ -221,8 +221,8 @@ suite.skip("Lookup notes, multi", function () {
     });
   });
 
-  describe("accept items", function () {
-    test("exiting item", function (done) {
+  describe("accept items", () => {
+    test("exiting item", (done) => {
       runAcceptItemTest({
         onInitCb: async ({ lp, lc }) => {
           const ws = DendronWorkspace.instance();
@@ -254,7 +254,7 @@ suite.skip("Lookup notes, multi", function () {
       });
     });
 
-    test("new item", function (done) {
+    test("new item", (done) => {
       runAcceptItemTest({
         onInitCb: async ({ lp, lc }) => {
           console.log("onInitCb:enter");
@@ -285,7 +285,7 @@ suite.skip("Lookup notes, multi", function () {
       });
     });
 
-    test("new item in other", function (done) {
+    test("new item in other", (done) => {
       runAcceptItemTest({
         onInitCb: async ({ lp, lc }) => {
           console.log("onInitCb:enter");

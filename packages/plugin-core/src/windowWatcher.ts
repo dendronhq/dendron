@@ -112,7 +112,7 @@ export class WindowWatcher {
     };
     text = text || activeEditor.document.getText();
 
-    let match = NoteUtils.RE_FM.exec(text);
+    const match = NoteUtils.RE_FM.exec(text);
     if (!_.isNull(match)) {
       const decorations = [
         NoteUtils.RE_FM_UPDATED,

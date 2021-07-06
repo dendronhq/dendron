@@ -1,9 +1,13 @@
 import { DVault, NoteUtils } from "@dendronhq/common-all";
-import { ENGINE_HOOKS, ENGINE_HOOKS_MULTI } from "@dendronhq/engine-test-utils";
+import {
+  ENGINE_HOOKS,
+  ENGINE_HOOKS_MULTI,
+  TestEngineUtils,
+} from "@dendronhq/engine-test-utils";
 import { NOTE_PRESETS_V4, sinon } from "@dendronhq/common-test-utils";
 import _ from "lodash";
 import { describe } from "mocha";
-import { TestEngineUtils } from "@dendronhq/engine-test-utils";
+
 // // You can import and use all API from the 'vscode' module
 // // as well as import your extension to test it
 import * as vscode from "vscode";
@@ -34,8 +38,8 @@ suite("NoteLookupCommand", function () {
   });
 
   // NOTE: think these tests are wrong
-  describe("updateItems", function () {
-    test("picker has value of opened note by default", function (done) {
+  describe("updateItems", () => {
+    test("picker has value of opened note by default", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
         preSetupHook: async ({ wsRoot, vaults }) => {
@@ -62,7 +66,7 @@ suite("NoteLookupCommand", function () {
       });
     });
 
-    test("direct child filter", function (done) {
+    test("direct child filter", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
         preSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti,
@@ -79,9 +83,9 @@ suite("NoteLookupCommand", function () {
     });
   });
 
-  describe("onAccept", function () {
+  describe("onAccept", () => {
     // TODO: needs to update so for noConfirm, we pick last value, not first value
-    test.skip("new node", function (done) {
+    test.skip("new node", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
         preSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti,
@@ -106,7 +110,7 @@ suite("NoteLookupCommand", function () {
       });
     });
 
-    test("new node, stub", function (done) {
+    test("new node, stub", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
         preSetupHook: async ({ vaults, wsRoot }) => {
@@ -136,7 +140,7 @@ suite("NoteLookupCommand", function () {
       });
     });
 
-    test("regular multi-select, no pick new", function (done) {
+    test("regular multi-select, no pick new", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
         preSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti,
@@ -160,7 +164,7 @@ suite("NoteLookupCommand", function () {
       });
     });
 
-    test("lookupConfirmVaultOnCreate = true, existing vault", function (done) {
+    test("lookupConfirmVaultOnCreate = true, existing vault", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
         preSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti,

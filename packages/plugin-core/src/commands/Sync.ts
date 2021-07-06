@@ -1,12 +1,13 @@
 import _ from "lodash";
-import { ERROR_SEVERITY } from "@dendronhq/common-all";
-import { DendronError } from "@dendronhq/common-all";
+import { ERROR_SEVERITY, DendronError } from "@dendronhq/common-all";
+
 import { window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { Logger } from "../logger";
 import { getWS } from "../workspace";
 import { BasicCommand } from "./base";
 import { SyncActionResult, SyncActionStatus } from "@dendronhq/engine-server";
+
 const L = Logger;
 
 type CommandOpts = {};

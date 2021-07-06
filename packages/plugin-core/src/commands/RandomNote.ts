@@ -37,7 +37,7 @@ export class RandomNoteCommand extends BasicCommand<
 
       let isMatch = false;
 
-      for (let pattern of includeSet) {
+      for (const pattern of includeSet) {
         if (note.fname.toLowerCase().startsWith(pattern.toLowerCase())) {
           isMatch = true;
           break;
@@ -46,7 +46,7 @@ export class RandomNoteCommand extends BasicCommand<
 
       // Remove Exclude Paths, if specified:
       if (config?.exclude) {
-        for (let pattern of config?.exclude) {
+        for (const pattern of config?.exclude) {
           if (note.fname.toLowerCase().startsWith(pattern.toLowerCase())) {
             isMatch = false;
             break;
@@ -68,7 +68,7 @@ export class RandomNoteCommand extends BasicCommand<
     }
 
     const index = Math.floor(Math.random() * noteCount);
-    let note = Object.values(noteSet)[index];
+    const note = Object.values(noteSet)[index];
 
     const npath = NoteUtils.getFullPath({
       note,

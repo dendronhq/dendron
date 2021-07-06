@@ -97,7 +97,7 @@ export class LookupProviderV2 {
   }
 
   createDefaultItems = ({ picker }: { picker: DendronQuickPickerV2 }) => {
-    let out = [];
+    const out = [];
     if (_.find(picker.buttons, { type: "multiSelect" })?.pressed) {
       return [];
     } else {
@@ -252,7 +252,7 @@ export class LookupProviderV2 {
   }): OnDidAcceptNewNodeReturn {
     const ctx = "onAcceptNewNode";
     Logger.info({ ctx });
-    let vault: DVault = PickerUtilsV2.getVaultForOpenEditor();
+    const vault: DVault = PickerUtilsV2.getVaultForOpenEditor();
 
     if (opts.flavor === "schema") {
       return this._onAcceptNewSchema({ picker, vault });
@@ -448,25 +448,23 @@ export class LookupProviderV2 {
         return;
       }
       uris = [newNode.uri];
+    } else if (opts.flavor === "schema") {
+      const smods = selectedItems.map(
+        (item) => DendronWorkspace.instance().getEngine().schemas[item.id]
+      );
+      uris = smods.map((smod) =>
+        Uri.file(
+          SchemaUtils.getPath({
+            root: vault2Path({
+              vault: smod.vault,
+              wsRoot: DendronWorkspace.wsRoot(),
+            }),
+            fname: smod.fname,
+          })
+        )
+      );
     } else {
-      if (opts.flavor === "schema") {
-        const smods = selectedItems.map(
-          (item) => DendronWorkspace.instance().getEngine().schemas[item.id]
-        );
-        uris = smods.map((smod) =>
-          Uri.file(
-            SchemaUtils.getPath({
-              root: vault2Path({
-                vault: smod.vault,
-                wsRoot: DendronWorkspace.wsRoot(),
-              }),
-              fname: smod.fname,
-            })
-          )
-        );
-      } else {
-        uris = selectedItems.map((item) => node2Uri(item));
-      }
+      uris = selectedItems.map((item) => node2Uri(item));
     }
     await showDocAndHidePicker(uris, picker);
     return;

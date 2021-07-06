@@ -7,12 +7,12 @@ import { VSCodeUtils } from "../../utils";
 import { expect } from "../testUtilsv2";
 import { runLegacySingleWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
-suite("ConfigureCommand", function () {
+suite("ConfigureCommand", () => {
   describe("basic", function () {
     let ctx: vscode.ExtensionContext;
     ctx = setupBeforeAfter(this);
 
-    test("ok", function (done) {
+    test("ok", (done) => {
       runLegacySingleWorkspaceTest({
         ctx,
         onInit: async ({ wsRoot }) => {
@@ -25,7 +25,7 @@ suite("ConfigureCommand", function () {
       });
     });
 
-    test.skip("diff dendronRoot", function (done) {
+    test.skip("diff dendronRoot", (done) => {
       runLegacySingleWorkspaceTest({
         ctx,
         configOverride: {

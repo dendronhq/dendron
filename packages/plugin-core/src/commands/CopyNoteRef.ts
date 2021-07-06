@@ -95,7 +95,7 @@ export class CopyNoteRefCommand extends BasicCommand<
         vaultName: VaultUtils.getName(vault),
       },
     };
-    let refLinkString: string = refLink2Stringv2({
+    const refLinkString: string = refLink2Stringv2({
       link,
       useVaultPrefix,
       rawAnchors: true,
@@ -108,7 +108,7 @@ export class CopyNoteRefCommand extends BasicCommand<
     const fname = NoteUtils.uri2Fname(editor.document.uri);
     const wsRoot = DendronWorkspace.wsRoot();
     const vault = PickerUtilsV2.getVaultForOpenEditor();
-    let note: NoteProps = NoteUtils.getNoteOrThrow({
+    const note: NoteProps = NoteUtils.getNoteOrThrow({
       fname,
       notes: getEngine().notes,
       wsRoot,

@@ -130,10 +130,10 @@ export async function runSingleVaultTest(
     onInit: (opts: { vault: DVault; wsRoot: string }) => Promise<void>;
   }
 ) {
-  let wsRoot = tmpDir().name;
+  const wsRoot = tmpDir().name;
   const vaultDir = tmpDir().name;
   const vaultRel = path.relative(wsRoot, vaultDir);
-  let vault = { fsPath: vaultRel };
+  const vault = { fsPath: vaultRel };
   const { ctx, onInit } = opts;
   await setupCodeWorkspaceV2(
     _.defaults(opts, {
@@ -231,7 +231,7 @@ export async function setupCodeWorkspaceV2(opts: SetupCodeWorkspaceV2) {
   const { preSetupHook, postSetupHook } = copts;
   const { wsRoot, vaults: vaultsWithFullPaths } =
     await EngineTestUtilsV2.setupWS(opts);
-  let setupWsOverride = copts.setupWsOverride as Partial<SetupWorkspaceOpts>;
+  const setupWsOverride = copts.setupWsOverride as Partial<SetupWorkspaceOpts>;
   setupCodeConfiguration(opts);
   if (opts.vaultDir) {
     setupWsOverride.vault = { fsPath: path.relative(wsRoot, opts.vaultDir) };

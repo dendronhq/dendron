@@ -157,7 +157,7 @@ export class FileWatcher {
         await HistoryService.instance().add({
           action: "delete",
           source: "watcher",
-          uri: uri,
+          uri,
         });
       } catch (err) {
         this.L.info({ ctx, uri, err });

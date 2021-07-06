@@ -98,7 +98,7 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
   async execute(opts: CommandOpts): Promise<CommandOutput> {
     const ctx = "GotoNoteCommand";
     this.L.info({ ctx, opts, msg: "enter" });
-    let { overrides } = opts;
+    const { overrides } = opts;
     let qs: string;
     let vault: DVault =
       opts.vault || PickerUtilsV2.getOrPromptVaultForOpenEditor();

@@ -5,6 +5,7 @@ import path from "path";
 import vscode, { TextDocument, workspace } from "vscode";
 import { DendronWorkspace } from "../../../workspace";
 import { RefT, WorkspaceCache } from "../types";
+
 export { sortPaths };
 
 const workspaceCache: WorkspaceCache = {
@@ -307,8 +308,8 @@ export const replaceRefs = ({
       }
 
       return {
-        updatedOnce: updatedOnce,
-        nextContent: nextContent,
+        updatedOnce,
+        nextContent,
       };
     },
     { updatedOnce: false, nextContent: content }

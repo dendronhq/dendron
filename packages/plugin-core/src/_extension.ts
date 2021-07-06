@@ -37,6 +37,7 @@ import {
   getWS,
   WorkspaceInitFactory,
 } from "./workspace";
+
 const MARKDOWN_WORD_PATTERN = new RegExp("([\\w\\.\\#]+)");
 // === Main
 
@@ -64,10 +65,10 @@ async function reloadWorkspace() {
   Logger.info({ ctx, msg: "post-ws.reloadWorkspace" });
 
   // Run any initialization code necessary for this workspace invocation.
-  let initializer = WorkspaceInitFactory.create(ws);
+  const initializer = WorkspaceInitFactory.create(ws);
 
   if (initializer?.onWorkspaceOpen) {
-    initializer.onWorkspaceOpen({ ws: ws });
+    initializer.onWorkspaceOpen({ ws });
   }
 
   vscode.window.showInformationMessage("Dendron is active");
@@ -144,7 +145,7 @@ async function startServer() {
       CONFIG.SERVER_PORT.key
     ) || engineServerPort;
   const logPath = DendronWorkspace.instance().context.logPath;
-  Logger.info({ ctx: ctx, logLevel: process.env["LOG_LEVEL"], maybePort });
+  Logger.info({ ctx, logLevel: process.env["LOG_LEVEL"], maybePort });
   if (!maybePort) {
     const { launchv2 } = require("@dendronhq/api-server");
     return await launchv2({
@@ -212,7 +213,7 @@ export async function _activate(
     skipSetup: stage === "test",
   });
 
-  let currentVersion = DendronWorkspace.version();
+  const currentVersion = DendronWorkspace.version();
   const previousWorkspaceVersion = stateService.getWorkspaceVersion();
   const previousGlobalVersion = stateService.getGlobalVersion();
   const extensionInstallStatus = VSCodeUtils.getInstallStatusForExtension({
@@ -221,12 +222,12 @@ export async function _activate(
   });
 
   if (DendronWorkspace.isActive()) {
-    let start = process.hrtime();
+    const start = process.hrtime();
     let dendronConfig = ws.config;
-    let wsConfig = await ws.getWorkspaceSettings();
+    const wsConfig = await ws.getWorkspaceSettings();
     // --- Get Version State
     const workspaceInstallStatus = VSCodeUtils.getInstallStatusForWorkspace({
-      previousWorkspaceVersion: previousWorkspaceVersion,
+      previousWorkspaceVersion,
       currentVersion,
     });
     const wsRoot = DendronWorkspace.wsRoot() as string;
@@ -297,7 +298,7 @@ export async function _activate(
       VaultUtils.getName(vault)
     );
     if (_.size(uniqVaults) < _.size(dendronConfig.vaults)) {
-      let txt = "Fix it";
+      const txt = "Fix it";
       await vscode.window
         .showErrorMessage(
           "Multiple Vaults with the same name. See https://dendron.so/notes/a6c03f9b-8959-4d67-8394-4d204ab69bfe.html#multiple-vaults-with-the-same-name to fix",

@@ -126,7 +126,7 @@ export const checkPreReq = async () => {
             outOfDate,
             async (prev, opts) => {
               await prev;
-              let { pkg, version } = opts;
+              const { pkg, version } = opts;
               return pkgUpgrade(pkg, version);
             },
             Promise.resolve()

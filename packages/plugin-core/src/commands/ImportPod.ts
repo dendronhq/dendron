@@ -86,14 +86,14 @@ export class ImportPodCommand extends BaseCommand<
     if (fileWatcher) {
       fileWatcher.pause = true;
     }
-    let importedNotes = await window.withProgress(
+    const importedNotes = await window.withProgress(
       {
         location: ProgressLocation.Notification,
         title: "importing notes",
         cancellable: false,
       },
       async () => {
-        let { importedNotes, errors } = await pod.execute({
+        const { importedNotes, errors } = await pod.execute({
           config: opts.config,
           engine,
           wsRoot,

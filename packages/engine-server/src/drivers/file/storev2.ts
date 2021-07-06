@@ -462,7 +462,6 @@ export class FileStorage implements DStore {
             n.links = n.links.concat(unreferencedLinks);
 
             duration = getDurationMilliseconds(start);
-            console.log(this.logger);
             this.logger.info({ ctx, duration });
           } catch (err) {
             if (!(err instanceof DendronError)) {

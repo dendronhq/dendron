@@ -1,4 +1,4 @@
-import React, { useRef, ReactNode } from "react";
+import React, { useRef, ReactNode, useState } from "react";
 import { createLogger, engineSlice } from "@dendronhq/common-frontend";
 import { List, Typography, Button, Card, message } from "antd";
 import { useRouter } from "next/router";
@@ -99,20 +99,19 @@ const vault: ArrayConfig = {
   },
 };
 
-const workspaceEntry: Config = {
-  type: "object",
-  data: {
-    workspaceEntry: {
-      type: "string",
-      label: "Remote Endpoint",
-      helperText: "Remote endpoint for workspaces",
-    },
-  },
-};
-
 const workspacesConfig: RecordConfig = {
   type: "record",
-  data: workspaceEntry,
+  label: "Workspaces",
+  data: {
+    type: "object",
+    data: {
+      workspaceEntry: {
+        type: "string",
+        label: "Remote Endpoint",
+        helperText: "Remote endpoint for workspaces",
+      },
+    },
+  },
 };
 
 const dendronConfig: ObjectConfig = {
@@ -193,7 +192,11 @@ type SimpleInputType = InputType & {
   type: "string" | "number";
   addonAfter?: ReactNode;
 };
-type ArrayInputType = InputType & { data: Config; values: any };
+type ArrayInputType = InputType & {
+  data: Config;
+  values: any;
+  isRecordType?: boolean;
+};
 type SelectInputType = InputType & { data: EnumConfig };
 
 const BaseInput = ({
@@ -286,26 +289,136 @@ const ArrayInput = ({
   required,
   helperText,
   errors,
+  isRecordType = false,
 }: ArrayInputType) => {
   return (
     <BaseInput {...{ name, label, required, helperText, errors }}>
       <FieldArray
         name={name}
         render={(arrayHelpers) =>
-          renderArray(values, data, name, arrayHelpers, errors)
+          isRecordType ? (
+            <RenderRecord
+              {...{
+                values,
+                dataDefinition: data,
+                name,
+                arrayHelpers,
+                errors,
+              }}
+            />
+          ) : (
+            <RenderArray
+              {...{
+                values,
+                dataDefinition: data,
+                name,
+                arrayHelpers,
+                errors,
+              }}
+            />
+          )
         }
       />
     </BaseInput>
   );
 };
 
-const renderArray = (
-  values: any,
-  dataDefinition: Config,
-  name: any,
-  arrayHelpers: any,
-  errors: any
-) => {
+const RenderRecord = ({
+  values = [],
+  dataDefinition,
+  name,
+  arrayHelpers,
+  errors,
+}: {
+  values: any;
+  dataDefinition: Config;
+  name: any;
+  arrayHelpers: any;
+  errors: any;
+}) => {
+  type RecordProps = {
+    id: number;
+    value: string;
+  };
+  const [records, setRecords] = useState<RecordProps[]>(
+    values
+      ? Object.keys(values).map((key, index) => ({ id: index, value: key }))
+      : []
+  );
+  const addRecord = (record: RecordProps) =>
+    setRecords((prev: RecordProps[]) => [...prev, record]);
+  const removeRecord = (record: RecordProps) =>
+    setRecords((prev: RecordProps[]) =>
+      prev.filter((r: RecordProps) => r.id !== record.id)
+    );
+  const handleChange = (record: RecordProps) =>
+    setRecords((prev) =>
+      prev.map((r: RecordProps) => (r.id !== record.id ? r : record))
+    );
+
+  const dataSource = records
+    ?.map((record: RecordProps, index: number) => (
+      <Card
+        key={`${name}.${index}`}
+        size="small"
+        //ts-ignore
+        title={
+          <Input
+            type="text"
+            value={record.value}
+            style={{ width: "85%" }}
+            addonBefore="Key"
+            onChange={(e) => handleChange({ ...record, value: e.target.value })}
+          />
+        }
+        extra={<MinusCircleOutlined onClick={() => removeRecord(record)} />}
+      >
+        {Object.keys(dataDefinition.data.data).map((key) => (
+          <ConfigInput
+            key={`${name}.${record.value}.${key}`}
+            values={values}
+            data={dataDefinition.data.data[key]}
+            errors={errors}
+            prefix={[name, `${record.value}`, key]}
+          />
+        ))}
+      </Card>
+    ))
+    .concat(
+      <Button
+        type="primary"
+        size="large"
+        onClick={() => addRecord({ id: records.length, value: "" })}
+      >
+        Add
+      </Button>
+    );
+
+  return (
+    <List
+      itemLayout="vertical"
+      dataSource={dataSource}
+      bordered={false}
+      renderItem={(item: ReactNode) => (
+        <List.Item style={{ borderBottom: "none" }}>{item}</List.Item>
+      )}
+    />
+  );
+};
+
+const RenderArray = ({
+  values = [],
+  dataDefinition,
+  name,
+  arrayHelpers,
+  errors,
+}: {
+  values: any;
+  dataDefinition: Config;
+  name: any;
+  arrayHelpers: any;
+  errors: any;
+}) => {
   const dataSource =
     dataDefinition.data.type === "object"
       ? values?.map((value: any, index: number) => (
@@ -392,11 +505,12 @@ const ConfigInput = ({
     );
   }
 
-  if (type === "array") {
+  if (type === "array" || type === "record") {
     const name = prefix.join(".");
     return (
       <ArrayInput
         values={get(values, name)}
+        isRecordType={type === "record"}
         {...{ label, name, data, required, helperText, errors }}
       />
     );
@@ -408,10 +522,6 @@ const ConfigInput = ({
         {...{ label, data, values, errors, prefix }}
       />
     );
-  }
-  if (type === "record") {
-    // console.log({ data, prefix, label }, "yoooo");
-    return <></>;
   }
 
   return (
@@ -447,6 +557,7 @@ const generateSchema = (config: Config): any => {
   }
 
   if (config.type === "record") {
+    console.log(config.data, "enum");
     return {};
   }
 
@@ -480,6 +591,8 @@ export default function Config({
   if (!engine.config || !ws || !port) {
     return <></>;
   }
+
+  console.log("config", engine.config);
 
   const generatedSchema = generateSchema(dendronConfig);
   console.log(generatedSchema, "yooooooo");
@@ -524,7 +637,6 @@ export default function Config({
           const validate = ajv.current.compile(schema);
           validate(values);
           const { errors: ajvErrors } = validate;
-          // console.log({ values, ajvErrors }, "arrrr");
 
           if (!ajvErrors?.length) {
             return {};

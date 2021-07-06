@@ -1,4 +1,5 @@
 import {
+  assertUnreachable,
   DendronConfig,
   DendronError,
   DEngineClient,
@@ -7,7 +8,10 @@ import {
 } from "@dendronhq/common-all";
 // @ts-ignore
 import rehypePrism from "@mapbox/rehype-prism";
+// @ts-ignore
+import mermaid from "@dendronhq/remark-mermaid";
 import _ from "lodash";
+import math from "remark-math";
 import link from "rehype-autolink-headings";
 // @ts-ignore
 import katex from "rehype-katex";
@@ -21,6 +25,7 @@ import remarkParse from "remark-parse";
 import remark2rehype from "remark-rehype";
 import { Processor } from "unified";
 import { blockAnchors } from "./remark/blockAnchors";
+import { dendronPreview } from "./remark/dendronPreview";
 import { dendronPub } from "./remark/dendronPub";
 import { noteRefsV2 } from "./remark/noteRefsV2";
 import { wikiLinks } from "./remark/wikiLinks";
@@ -39,6 +44,28 @@ export enum ProcMode {
    * Expect all properties from {@link ProcDataFullV5} when running the processor
    */
   FULL = "all data",
+  /**
+   * Running processor in import mode. notes don't exist
+   */
+  IMPORT = "IMPORT",
+}
+
+/**
+ * If processor should run in an alternative flavor
+ */
+export enum ProcFlavor {
+  /**
+   * No special processing
+   */
+  REGULAR = "REGULAR",
+  /**
+   * Apply publishing rules
+   */
+  PUBLISHING = "PUBLISHING",
+  /**
+   * Apply preview rules
+   */
+  PREVIEW = "PREVIEW",
 }
 
 /**
@@ -54,9 +81,9 @@ export type ProcOptsV5 = {
    */
   parseOnly?: boolean;
   /**
-   * Check if processor should take into account publishing rules
+   * Are we using specific variant of processor
    */
-  publishing?: boolean;
+  flavor?: ProcFlavor;
 };
 
 /**
@@ -66,6 +93,7 @@ export type ProcDataFullOptsV5 = {
   engine?: DEngineClient;
   vault?: DVault;
   fname?: string;
+  wsRoot?: string;
   dest: DendronASTDest;
 } & { config?: DendronConfig };
 
@@ -76,6 +104,7 @@ export type ProcDataFullV5 = {
   engine: DEngineClient;
   vault: DVault;
   fname: string;
+  wsRoot: string;
   config: DendronConfig;
   dest: DendronASTDest;
   /**
@@ -83,6 +112,28 @@ export type ProcDataFullV5 = {
    */
   noteRefLvl: number;
 };
+
+function checkProps({
+  requiredProps,
+  data,
+}: {
+  requiredProps: string[];
+  data: any;
+}): { valid: true } | { valid: false; missing: string[] } {
+  const hasAllProps = _.map(requiredProps, (prop) => {
+    // @ts-ignore
+    return !_.isUndefined(data[prop]);
+  });
+  if (!_.every(hasAllProps)) {
+    // @ts-ignore
+    const missing = _.filter(requiredProps, (prop) =>
+      // @ts-ignore
+      _.isUndefined(data[prop])
+    );
+    return { valid: false, missing };
+  }
+  return { valid: true };
+}
 
 export class MDUtilsV5 {
   static getProcOpts(proc: Processor): ProcOptsV5 {
@@ -123,7 +174,7 @@ export class MDUtilsV5 {
   static shouldApplyPublishingRules(proc: Processor): boolean {
     return (
       this.getProcData(proc).dest === DendronASTDest.HTML &&
-      this.getProcOpts(proc).publishing !== true
+      this.getProcOpts(proc).flavor === ProcFlavor.PUBLISHING
     );
   }
 
@@ -132,6 +183,7 @@ export class MDUtilsV5 {
    */
   static _procRemark(opts: ProcOptsV5, data: Partial<ProcDataFullOptsV5>) {
     const errors: DendronError[] = [];
+    opts = _.defaults(opts, { flavor: ProcFlavor.REGULAR });
     let proc = remark()
       .use(remarkParse, { gfm: true })
       .use(frontmatterPlugin, ["yaml"])
@@ -144,40 +196,89 @@ export class MDUtilsV5 {
 
     // set options and do validation
     proc = this.setProcOpts(proc, opts);
-    if (opts.mode === ProcMode.FULL) {
-      if (_.isUndefined(data)) {
-        throw DendronError.createFromStatus({
-          status: ERROR_STATUS.INVALID_CONFIG,
-          message: `data is required when not using raw proc`,
-        });
-      }
-      const requiredProps = ["vault", "engine", "fname", "dest"];
-      const hasAllProps = _.map(requiredProps, (prop) => {
-        // @ts-ignore
-        return !_.isUndefined(data[prop]);
-      });
-      if (!_.every(hasAllProps)) {
-        // @ts-ignore
-        const missing = _.filter(requiredProps, (prop) =>
-          // @ts-ignore
-          _.isUndefined(data[prop])
-        );
-        throw DendronError.createFromStatus({
-          status: ERROR_STATUS.INVALID_CONFIG,
-          message: `missing required fields in data. ${missing.join(
-            " ,"
-          )} missing`,
-        });
-      }
-      if (!data.config) {
-        data.config = data.engine!.config;
-      }
+    switch (opts.mode) {
+      case ProcMode.FULL:
+        {
+          if (_.isUndefined(data)) {
+            throw DendronError.createFromStatus({
+              status: ERROR_STATUS.INVALID_CONFIG,
+              message: `data is required when not using raw proc`,
+            });
+          }
+          const requiredProps = ["vault", "engine", "fname", "dest"];
+          const resp = checkProps({ requiredProps, data });
+          if (!resp.valid) {
+            throw DendronError.createFromStatus({
+              status: ERROR_STATUS.INVALID_CONFIG,
+              message: `missing required fields in data. ${resp.missing.join(
+                " ,"
+              )} missing`,
+            });
+          }
+          if (!data.config) {
+            data.config = data.engine!.config;
+          }
+          if (!data.wsRoot) {
+            data.wsRoot = data.engine!.wsRoot;
+          }
 
-      // backwards compatibility, default to v4 values
-      data = _.defaults(MDUtilsV4.getDendronData(proc), data);
-      this.setProcData(proc, data as ProcDataFullV5);
-      MDUtilsV4.setEngine(proc, data.engine!);
-      proc = proc.use(dendronPub);
+          // backwards compatibility, default to v4 values
+          data = _.defaults(MDUtilsV4.getDendronData(proc), data);
+          this.setProcData(proc, data as ProcDataFullV5);
+          MDUtilsV4.setEngine(proc, data.engine!);
+
+          // add additional plugins
+          proc = proc.use(dendronPub, {
+            insertTitle: data.config?.useFMTitle,
+          });
+          if (data.config?.useKatex) {
+            proc = proc.use(math);
+          }
+          if (data.config?.mermaid) {
+            proc = proc.use(mermaid, { simple: true });
+          }
+          // add flavor specific plugins
+          if (opts.flavor === ProcFlavor.PREVIEW) {
+            proc = proc.use(dendronPreview);
+          }
+        }
+        break;
+      case ProcMode.IMPORT: {
+        const requiredProps = ["vault", "engine", "dest"];
+        const resp = checkProps({ requiredProps, data });
+        if (!resp.valid) {
+          throw DendronError.createFromStatus({
+            status: ERROR_STATUS.INVALID_CONFIG,
+            message: `missing required fields in data. ${resp.missing.join(
+              " ,"
+            )} missing`,
+          });
+        }
+        if (!data.config) {
+          data.config = data.engine!.config;
+        }
+        if (!data.wsRoot) {
+          data.wsRoot = data.engine!.wsRoot;
+        }
+
+        // backwards compatibility, default to v4 values
+        data = _.defaults(MDUtilsV4.getDendronData(proc), data);
+        this.setProcData(proc, data as ProcDataFullV5);
+        MDUtilsV4.setEngine(proc, data.engine!);
+
+        // add additional plugins
+        if (data.config?.useKatex) {
+          proc = proc.use(math);
+        }
+        if (data.config?.mermaid) {
+          proc = proc.use(mermaid, { simple: true });
+        }
+        break;
+      }
+      case ProcMode.NO_DATA:
+        break;
+      default:
+        assertUnreachable();
     }
     return proc;
   }
@@ -198,7 +299,7 @@ export class MDUtilsV5 {
       pRehype = pRehype.use(katex);
     }
     // apply publishing specific things
-    if (opts.publishing) {
+    if (this.shouldApplyPublishingRules(pRehype)) {
       pRehype = pRehype.use(link, {
         properties: {
           "aria-hidden": "true",
@@ -226,8 +327,11 @@ export class MDUtilsV5 {
     return pRehype;
   }
 
-  static procRemarkFull(data: ProcDataFullOptsV5) {
-    return this._procRemark({ mode: ProcMode.FULL }, data);
+  static procRemarkFull(data: ProcDataFullOptsV5, opts?: { mode?: ProcMode }) {
+    return this._procRemark(
+      { mode: opts?.mode || ProcMode.FULL, flavor: ProcFlavor.REGULAR },
+      data
+    );
   }
 
   /**
@@ -249,10 +353,10 @@ export class MDUtilsV5 {
 
   static procRehypeFull(
     data: Omit<ProcDataFullOptsV5, "dest">,
-    opts?: { publishing?: boolean }
+    opts?: { flavor?: ProcFlavor }
   ) {
     const proc = this._procRehype(
-      { mode: ProcMode.FULL, parseOnly: false, publishing: opts?.publishing },
+      { mode: ProcMode.FULL, parseOnly: false, flavor: opts?.flavor },
       data
     );
     return proc.use(rehypeStringify);

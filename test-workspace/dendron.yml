@@ -9,6 +9,7 @@ useFMTitle: true
 useNoteTitleForLink: true
 autoFoldFrontmatter: true
 mermaid: true
+useKatex: true
 journal:
     dailyDomain: daily
     name: journal

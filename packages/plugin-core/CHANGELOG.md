@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.49.0](https://github.com/dendronhq/dendron/compare/v0.48.3...v0.49.0) (2021-07-05)
+
+
+### Bug Fixes
+
+* **preview:** show current active note when exec ShowPreview command ([1d4898d](https://github.com/dendronhq/dendron/commit/1d4898d6ce45d74a54d697dead43992f35dbebc3))
+
+
+
+
+
 ## [0.48.3](https://github.com/dendronhq/dendron/compare/v0.48.2...v0.48.3) (2021-07-02)
 
 

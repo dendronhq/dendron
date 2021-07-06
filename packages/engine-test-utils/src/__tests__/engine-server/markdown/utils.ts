@@ -4,18 +4,37 @@ import {
   DuplicateNoteAction,
   DVault,
 } from "@dendronhq/common-all";
-import { AssertUtils, TestPresetEntryV4 } from "@dendronhq/common-test-utils";
+import {
+  AssertUtils,
+  RunEngineTestFunctionV4,
+  TestPresetEntryV4,
+} from "@dendronhq/common-test-utils";
 import {
   DendronASTData,
   DendronASTDest,
   MDUtilsV4,
   MDUtilsV5,
   Processor,
+  ProcFlavor,
   VFile,
 } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
+
+type ProcVerifyOpts = Required<
+  Parameters<
+    RunEngineTestFunctionV4<
+      any,
+      {
+        dest: DendronASTDest;
+        proc: Processor;
+        // vfile contents can be uint8 array, force it to be string
+        resp: VFile & { contents: string };
+      }
+    >
+  >[0]
+>;
 
 export async function checkVFile(resp: VFile, ...match: string[]) {
   expect(resp).toMatchSnapshot();
@@ -72,7 +91,12 @@ export const createProcForTest = (opts: {
 export type ProcTests = {
   name: string;
   dest: DendronASTDest;
+  flavor: ProcFlavor;
   testCase: TestPresetEntryV4;
+};
+
+export const cleanVerifyOpts = (opts: any): ProcVerifyOpts => {
+  return opts as ProcVerifyOpts;
 };
 
 /**
@@ -127,63 +151,88 @@ export const createProcTests = (opts: {
   return allTests;
 };
 
+type TestFunc = TestPresetEntryV4["testFunc"];
+
+type FlavorDict = { [key in ProcFlavor]?: TestFunc | ProcFlavor };
+
 export const createProcCompileTests = (opts: {
   name: string;
   fname?: string;
-  setupFunc: TestPresetEntryV4["testFunc"];
-  verifyFuncDict?: {
-    [key in DendronASTDest]?: TestPresetEntryV4["testFunc"] | DendronASTDest;
+  setup: TestPresetEntryV4["testFunc"];
+  verify?: {
+    [key in DendronASTDest]?: FlavorDict;
   };
   preSetupHook?: TestPresetEntryV4["preSetupHook"];
 }): ProcTests[] => {
-  const { name, setupFunc, verifyFuncDict, fname } = _.defaults(opts, {
+  const {
+    name,
+    setup: setupFunc,
+    verify: verifyFuncDict,
+    fname,
+  } = _.defaults(opts, {
     fname: "foo",
   });
   let allTests: ProcTests[] = [];
   if (verifyFuncDict) {
     allTests = Object.values(DendronASTDest)
-      .map((dest) => {
-        let funcOrKey = verifyFuncDict[dest];
-        let verifyFunc: TestPresetEntryV4["testFunc"];
-        if (_.isUndefined(funcOrKey)) {
-          return;
-        }
-        if (_.isString(funcOrKey)) {
-          verifyFunc = verifyFuncDict[
-            funcOrKey
-          ] as TestPresetEntryV4["testFunc"];
-        } else {
-          verifyFunc = funcOrKey;
-        }
-        return {
-          name,
-          dest,
-          testCase: new TestPresetEntryV4(
-            async (presetOpts) => {
-              const { engine, vaults } = presetOpts;
-              const vault = vaults[0];
-              let proc: Processor;
-              switch (dest) {
-                case DendronASTDest.HTML:
-                  proc = MDUtilsV5.procRehypeFull({ engine, fname, vault });
-                  break;
-                default:
-                  proc = MDUtilsV5.procRemarkFull({
-                    dest,
-                    engine,
-                    fname,
-                    vault,
-                  });
-              }
-              const extra = await setupFunc({
-                ...presetOpts,
-                extra: { dest, proc },
-              });
-              return await verifyFunc({ ...presetOpts, extra });
-            },
-            { preSetupHook: opts.preSetupHook }
-          ),
-        };
+      .flatMap((dest) => {
+        let verifyFuncsByFlavor = verifyFuncDict[dest] || {};
+        return _.flatMap(verifyFuncsByFlavor, (funcOrFlavor, flavor) => {
+          let verifyFunc: TestPresetEntryV4["testFunc"];
+          if (_.isUndefined(funcOrFlavor)) {
+            return;
+          }
+
+          if (_.isFunction(funcOrFlavor)) {
+            verifyFunc = funcOrFlavor;
+          } else {
+            const maybeFunc = verifyFuncsByFlavor[funcOrFlavor];
+            if (_.isUndefined(maybeFunc)) {
+              throw new Error(
+                `test ${name} -> ${dest} -> ${flavor} points to ${funcOrFlavor} which is undefined`
+              );
+            }
+            if (_.isString(maybeFunc)) {
+              throw new Error(
+                `test ${name} -> ${dest} -> ${flavor} points to ${funcOrFlavor} which is also a string`
+              );
+            }
+            verifyFunc = maybeFunc;
+          }
+          return {
+            name,
+            dest,
+            flavor,
+            testCase: new TestPresetEntryV4(
+              async (presetOpts) => {
+                const { engine, vaults } = presetOpts;
+                const vault = vaults[0];
+                let proc: Processor;
+                switch (dest) {
+                  case DendronASTDest.HTML:
+                    proc = MDUtilsV5.procRehypeFull(
+                      { engine, fname, vault },
+                      { flavor: flavor as ProcFlavor }
+                    );
+                    break;
+                  default:
+                    proc = MDUtilsV5.procRemarkFull({
+                      dest,
+                      engine,
+                      fname,
+                      vault,
+                    });
+                }
+                const extra = await setupFunc({
+                  ...presetOpts,
+                  extra: { dest, proc },
+                });
+                return await verifyFunc({ ...presetOpts, extra });
+              },
+              { preSetupHook: opts.preSetupHook }
+            ),
+          };
+        });
       })
       .filter((ent) => !_.isUndefined(ent)) as ProcTests[];
   }

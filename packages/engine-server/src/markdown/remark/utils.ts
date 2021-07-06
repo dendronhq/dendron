@@ -225,7 +225,6 @@ const getUnreferencedLinks = ({
     value.split(" ").some((word) => {
       const maybeNote = fnameNoteMap.get(word);
       if (maybeNote !== undefined) {
-        console.log(maybeNote);
         unreferencedLinks.push({
           type: "unreferenced",
           from: NoteUtils.toNoteLoc(note),

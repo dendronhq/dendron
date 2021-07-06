@@ -18,7 +18,7 @@ import {
   NoteUtils,
   Position,
 } from "@dendronhq/common-all";
-import { createLogger, note2String } from "@dendronhq/common-server";
+import { createLogger } from "@dendronhq/common-server";
 import _ from "lodash";
 import { Heading, ListItem, Paragraph, Root } from "mdast";
 import * as mdastBuilder from "mdast-builder";
@@ -515,7 +515,7 @@ export class AnchorUtils {
   }): Promise<{ [index: string]: DNoteAnchorPositioned }> {
     if (opts.note.stub) return {};
     try {
-      const noteContents = await note2String(opts);
+      const noteContents = NoteUtils.serialize(opts.note);
       const noteAnchors = RemarkUtils.findAnchors(noteContents);
       const slugger = getSlugger();
 
@@ -780,11 +780,9 @@ export class RemarkUtils {
    */
   static async extractBlocks({
     note,
-    wsRoot,
     engine,
   }: {
     note: NoteProps;
-    wsRoot: string;
     engine: DEngineClient;
   }): Promise<NoteBlock[]> {
     const proc = MDUtilsV5.procRemarkFull({
@@ -796,8 +794,7 @@ export class RemarkUtils {
     const slugger = getSlugger();
 
     // Read and parse the note
-    // TODO: It might be better to get the text from the editor
-    const noteText = await note2String({ note, wsRoot });
+    const noteText = NoteUtils.serialize(note);
     const noteAST = proc.parse(noteText);
     if (_.isUndefined(noteAST.children)) return [];
     const nodesToSearch = _.filter(noteAST.children as Node[], (node) =>

@@ -556,7 +556,6 @@ export class DendronEngineV2 implements DEngine {
         });
       const blocks = await RemarkUtils.extractBlocks({
         note,
-        wsRoot: this.wsRoot,
         engine: this,
       });
       return { data: blocks, error: null };

@@ -479,11 +479,10 @@ describe("RemarkUtils and LinkUtils", () => {
     test("paragraphs", async () => {
       let note: NoteProps | undefined;
       await runEngineTestV5(
-        async ({ wsRoot, engine }) => {
+        async ({ engine }) => {
           expect(note).toBeTruthy();
           const blocks = await RemarkUtils.extractBlocks({
             note: note!,
-            wsRoot,
             engine,
           });
           expect(blocks.length).toEqual(3);
@@ -512,11 +511,10 @@ describe("RemarkUtils and LinkUtils", () => {
     test("list", async () => {
       let note: NoteProps | undefined;
       await runEngineTestV5(
-        async ({ wsRoot, engine }) => {
+        async ({ engine }) => {
           expect(note).toBeTruthy();
           const blocks = await RemarkUtils.extractBlocks({
             note: note!,
-            wsRoot,
             engine,
           });
           expect(blocks.length).toEqual(5);
@@ -545,11 +543,10 @@ describe("RemarkUtils and LinkUtils", () => {
     test("nested list", async () => {
       let note: NoteProps | undefined;
       await runEngineTestV5(
-        async ({ wsRoot, engine }) => {
+        async ({ engine }) => {
           expect(note).toBeTruthy();
           const blocks = await RemarkUtils.extractBlocks({
             note: note!,
-            wsRoot,
             engine,
           });
           expect(blocks.length).toEqual(8);
@@ -581,11 +578,10 @@ describe("RemarkUtils and LinkUtils", () => {
     test("table", async () => {
       let note: NoteProps | undefined;
       await runEngineTestV5(
-        async ({ wsRoot, engine }) => {
+        async ({ engine }) => {
           expect(note).toBeTruthy();
           const blocks = await RemarkUtils.extractBlocks({
             note: note!,
-            wsRoot,
             engine,
           });
           expect(blocks.length).toEqual(3);
@@ -617,11 +613,10 @@ describe("RemarkUtils and LinkUtils", () => {
     test("existing anchors", async () => {
       let note: NoteProps | undefined;
       await runEngineTestV5(
-        async ({ wsRoot, engine }) => {
+        async ({ engine }) => {
           expect(note).toBeTruthy();
           const blocks = await RemarkUtils.extractBlocks({
             note: note!,
-            wsRoot,
             engine,
           });
           expect(blocks.length).toEqual(7);
@@ -666,11 +661,10 @@ describe("RemarkUtils and LinkUtils", () => {
     test("header", async () => {
       let note: NoteProps | undefined;
       await runEngineTestV5(
-        async ({ wsRoot, engine }) => {
+        async ({ engine }) => {
           expect(note).toBeTruthy();
           const blocks = await RemarkUtils.extractBlocks({
             note: note!,
-            wsRoot,
             engine,
           });
           expect(blocks.length).toEqual(4);

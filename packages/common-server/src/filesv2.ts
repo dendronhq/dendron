@@ -218,6 +218,11 @@ export function file2NoteWithCache({
   return { note, matchHash, noteHash: sig };
 }
 
+/** Read the contents of a note from the filesystem.
+ *
+ * Warning! The note contents may be out of date compared to changes in the editor.
+ * Consider using `NoteUtils.serialize` instead.
+ */
 export function note2String(opts: {
   note: NoteProps;
   wsRoot: string;

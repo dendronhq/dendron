@@ -58,6 +58,16 @@ const siteConfig: ObjectConfig = {
       helperText:
         "Pretty refs help you identify when content is embedded from elsewhere and provide links back to the source.",
     },
+    siteHierarchies: {
+      type: "array",
+      label: "Site Hierarchy",
+      required: true,
+      data: {
+        type: "string",
+        label: "Site Config",
+        helperText: "Site configuration",
+      },
+    },
   },
 };
 
@@ -74,13 +84,14 @@ const vault: ArrayConfig = {
     type: "object",
     data: {
       fsPath: {
-        label: "Filesystem Path",
         type: "string",
+        label: "Filesystem Path",
+        required: true,
         helperText: "Filesystem path to vault",
       },
       visibility: {
-        label: "Visibility",
         type: "string",
+        label: "Visibility",
         helperText: "Visibility of the vault",
       },
       sync: vaultSync,
@@ -88,18 +99,25 @@ const vault: ArrayConfig = {
   },
 };
 
+const workspaceEntry: Config = {
+  type: "object",
+  data: {
+    workspaceEntry: {
+      type: "string",
+      label: "Remote Endpoint",
+      helperText: "Remote endpoint for workspaces",
+    },
+  },
+};
+
+const workspacesConfig: RecordConfig = {
+  type: "record",
+  data: workspaceEntry,
+};
+
 const dendronConfig: ObjectConfig = {
   type: "object",
   data: {
-    "site.siteHierarchies": {
-      type: "array",
-      label: "Site Hierarchy",
-      data: {
-        type: "string",
-        label: "Site Config",
-        helperText: "Site configuration",
-      },
-    },
     noCaching: {
       label: "No Caching?",
       type: "boolean",
@@ -112,26 +130,9 @@ const dendronConfig: ObjectConfig = {
     },
     site: siteConfig,
     vaults: vault,
+    workspaces: workspacesConfig,
   },
 };
-
-type ConfigType = {
-  label?: string;
-  name: string;
-  type: string;
-  required?: boolean;
-  helperText?: string;
-  data?: ConfigType[];
-};
-
-type FieldType =
-  | "string"
-  | "boolean"
-  | "number"
-  | "enum"
-  | "array"
-  | "object"
-  | "record";
 
 type CommonConfig = {
   required?: boolean;
@@ -176,6 +177,7 @@ type ConfigInputType = {
   prefix: string[];
   errors?: any;
   values?: any;
+  addonAfter?: ReactNode;
 };
 
 type InputType = {
@@ -187,7 +189,10 @@ type InputType = {
   helperText?: string;
 };
 type BaseInputType = InputType & { children?: ReactNode };
-type SimpleInputType = InputType & { type: "string" | "number" };
+type SimpleInputType = InputType & {
+  type: "string" | "number";
+  addonAfter?: ReactNode;
+};
 type ArrayInputType = InputType & { data: Config; values: any };
 type SelectInputType = InputType & { data: EnumConfig };
 
@@ -202,7 +207,7 @@ const BaseInput = ({
   <Form.Item
     name={name}
     style={{ justifyContent: "center" }}
-    rules={[{ required: required, message: `This information is required!` }]}
+    required={required}
   >
     <Title level={3} style={{ textTransform: "capitalize" }}>
       {label}
@@ -211,7 +216,6 @@ const BaseInput = ({
     {children}
     <br />
     <Text type="secondary">{helperText}</Text>
-    <br />
     <Text type="danger">{get(errors, name)}</Text>
   </Form.Item>
 );
@@ -224,6 +228,7 @@ const SimpleInput = ({
   required,
   helperText,
   errors,
+  addonAfter,
 }: SimpleInputType) => {
   return (
     <BaseInput {...{ name, label, required, helperText, errors }}>
@@ -232,6 +237,7 @@ const SimpleInput = ({
         name={name}
         placeholder={placeholder}
         required={required}
+        addonAfter={addonAfter}
       />
     </BaseInput>
   );
@@ -302,7 +308,7 @@ const renderArray = (
 ) => {
   const dataSource =
     dataDefinition.data.type === "object"
-      ? values.map((value: any, index: number) => (
+      ? values?.map((value: any, index: number) => (
           <Card
             key={`${name}.${index}`}
             size="small"
@@ -322,25 +328,20 @@ const renderArray = (
             ))}
           </Card>
         ))
-      : values.map((value: any, index: number) => (
-          <Card
+      : values?.map((value: any, index: number) => (
+          <ConfigInput
             key={`${name}.${index}`}
-            size="small"
-            title={index + 1}
-            extra={
+            values={values}
+            data={dataDefinition.data}
+            errors={errors}
+            prefix={[name, `${index}`]}
+            addonAfter={
               <MinusCircleOutlined onClick={() => arrayHelpers.remove(index)} />
             }
-          >
-            <ConfigInput
-              values={values}
-              data={dataDefinition.data}
-              errors={errors}
-              prefix={[name, `${index}`]}
-            />
-          </Card>
+          />
         ));
 
-  dataSource.push(
+  dataSource?.push(
     <Button type="primary" size="large" onClick={() => arrayHelpers.push(null)}>
       Add
     </Button>
@@ -358,7 +359,13 @@ const renderArray = (
   );
 };
 
-const ConfigInput = ({ data, values, errors, prefix }: ConfigInputType) => {
+const ConfigInput = ({
+  data,
+  values,
+  errors,
+  prefix,
+  addonAfter,
+}: ConfigInputType) => {
   const { type, required, helperText, label } = data;
   if (type === "string" || type === "number") {
     return (
@@ -369,6 +376,7 @@ const ConfigInput = ({ data, values, errors, prefix }: ConfigInputType) => {
         required={required}
         helperText={helperText}
         errors={errors}
+        addonAfter={addonAfter}
       />
     );
   }
@@ -401,7 +409,10 @@ const ConfigInput = ({ data, values, errors, prefix }: ConfigInputType) => {
       />
     );
   }
-  if (type === "record") return <></>;
+  if (type === "record") {
+    // console.log({ data, prefix, label }, "yoooo");
+    return <></>;
+  }
 
   return (
     <>
@@ -418,23 +429,43 @@ const ConfigInput = ({ data, values, errors, prefix }: ConfigInputType) => {
   );
 };
 
-const schema: JSONSchemaType<MyData> = {
-  type: "object",
-  properties: {
-    siteRootDir: {
-      type: "string",
-    },
-    assetsPrefix: {
-      type: "string",
-    },
-    copyAssets: {
-      type: "boolean",
-    },
-    siteRepoDir: { type: "string" },
-  },
-  required: ["siteRootDir"],
-  additionalProperties: true,
+const generateSchema = (config: Config): any => {
+  if (
+    config.type === "string" ||
+    config.type === "number" ||
+    config.type === "boolean"
+  ) {
+    return { type: config.type };
+  }
+
+  if (config.type === "enum") {
+    return { enum: config.data };
+  }
+
+  if (config.type === "array") {
+    return { type: config.type, items: generateSchema(config.data) };
+  }
+
+  if (config.type === "record") {
+    return {};
+  }
+
+  const schema: any = {
+    type: "object",
+    properties: Object.fromEntries(
+      Object.keys(config.data).map((key) => [
+        key,
+        generateSchema(config.data[key]),
+      ])
+    ),
+    required: Object.keys(config.data).filter(
+      (key) => config.data[key].required
+    ),
+  };
+  return schema;
 };
+
+const schema: JSONSchemaType<MyData> = generateSchema(dendronConfig);
 
 export default function Config({
   engine,
@@ -449,6 +480,9 @@ export default function Config({
   if (!engine.config || !ws || !port) {
     return <></>;
   }
+
+  const generatedSchema = generateSchema(dendronConfig);
+  console.log(generatedSchema, "yooooooo");
 
   const formItemLayout = {
     labelCol: {
@@ -487,10 +521,10 @@ export default function Config({
         }}
         validate={(values) => {
           let errors: any = {};
-          const { site } = values;
           const validate = ajv.current.compile(schema);
-          validate(site);
+          validate(values);
           const { errors: ajvErrors } = validate;
+          // console.log({ values, ajvErrors }, "arrrr");
 
           if (!ajvErrors?.length) {
             return {};

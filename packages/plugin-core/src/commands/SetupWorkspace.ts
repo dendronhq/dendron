@@ -1,6 +1,4 @@
-import {
-  CONSTANTS, DVault
-} from "@dendronhq/common-all";
+import { CONSTANTS, DVault } from "@dendronhq/common-all";
 import { resolveTilde, vault2Path } from "@dendronhq/common-server";
 import { WorkspaceService } from "@dendronhq/engine-server";
 import fs from "fs-extra";
@@ -10,12 +8,16 @@ import vscode from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { Snippets } from "../settings";
 import { VSCodeUtils } from "../utils";
-import { DendronWorkspace, WorkspaceInitializer } from "../workspace";
+import { DendronWorkspace } from "../workspace";
+import { BlankInitializer } from "../workspace/blankInitializer";
+import { SeedInitializer } from "../workspace/seedInitializer";
+import { TemplateInitializer } from "../workspace/templateInitializer";
+import { TutorialInitializer } from "../workspace/tutorialInitializer";
+import { WorkspaceInitializer } from "../workspace/workspaceInitializer";
 import { BasicCommand } from "./base";
 
 type CommandOpts = {
   rootDirRaw: string;
-  vault?: DVault;
   skipOpenWs?: boolean;
   /**
    * override prompts
@@ -26,8 +28,7 @@ type CommandOpts = {
 
 type CommandInput = {
   rootDirRaw: string;
-  emptyWs: boolean;
-  initializer?: WorkspaceInitializer;
+  workspaceInitializer?: WorkspaceInitializer;
 };
 
 type CommandOutput = DVault[];
@@ -47,7 +48,31 @@ export class SetupWorkspaceCommand extends BasicCommand<
     if (_.isUndefined(rootDirRaw)) {
       return;
     }
-    return { rootDirRaw, emptyWs: true };
+
+    const vaultType = await VSCodeUtils.showQuickPick([
+      {
+        label: "blank",
+        picked: true,
+        detail: "An empty workspce with no notes.",
+      },
+      { label: "tutorial", detail: "Contains the Dendron tutorial notes." },
+      { label: "journal", detail: "Template for a simple journal." },
+    ]);
+
+    if (!vaultType) {
+      return;
+    }
+    switch (vaultType.label) {
+      case "blank":
+        return { rootDirRaw, workspaceInitializer: new BlankInitializer() };
+      case "tutorial":
+        return { rootDirRaw, workspaceInitializer: new TutorialInitializer() };
+      case "journal":
+        return { rootDirRaw, workspaceInitializer: new TemplateInitializer() };
+      // return { rootDirRaw, emptyWs: true, workspaceInitializer: new SeedInitializer()};
+      default:
+        return { rootDirRaw };
+    }
   }
 
   handleExistingRoot = async ({
@@ -110,10 +135,7 @@ export class SetupWorkspaceCommand extends BasicCommand<
   async execute(opts: CommandOpts): Promise<DVault[]> {
     const ctx = "SetupWorkspaceCommand extends BaseCommand";
     const ws = DendronWorkspace.instance();
-    const {
-      rootDirRaw: rootDir,
-      skipOpenWs,
-    } = _.defaults(opts, {
+    const { rootDirRaw: rootDir, skipOpenWs } = _.defaults(opts, {
       skipOpenWs: false,
     });
     ws.L.info({ ctx, rootDir, skipOpenWs });
@@ -127,27 +149,21 @@ export class SetupWorkspaceCommand extends BasicCommand<
       return [];
     }
 
-    // create vault
-    const vaultPath = opts.vault?.fsPath || "vault";
-    const vaults = [{ fsPath: vaultPath }];
+    const vaults = opts.workspaceInitializer ? opts.workspaceInitializer.createVaults() : [];
+
     await WorkspaceService.createWorkspace({
       vaults,
       wsRoot: rootDir,
       createCodeWorkspace: true,
-    }).then(() => {
+    }).then((ws) => {
       if (opts?.workspaceInitializer?.onWorkspaceCreation) {
-        opts.workspaceInitializer.onWorkspaceCreation({ vaults, wsRoot: rootDir });
+        opts.workspaceInitializer.onWorkspaceCreation({
+          vaults,
+          wsRoot: rootDir,
+          svc: ws,
+        });
       }
     });
-    const vpath = vault2Path({ vault: vaults[0], wsRoot: rootDir });
-
-    // copy over jekyll config
-    const dendronJekyll = VSCodeUtils.joinPath(ws.extensionAssetsDir, "jekyll");
-    fs.copySync(path.join(dendronJekyll.fsPath), path.join(rootDir, "docs"));
-
-    // write snippets
-    const vscodeDir = path.join(vpath, ".vscode");
-    Snippets.create(vscodeDir);
 
     if (!opts.skipOpenWs) {
       vscode.window.showInformationMessage("opening dendron workspace");

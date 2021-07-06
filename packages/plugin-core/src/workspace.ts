@@ -13,14 +13,12 @@ import {
 import {
   NodeJSUtils,
   readJSONWithComments,
-  readMD,
-  vault2Path,
-  writeJSONWithComments,
+  readMD, writeJSONWithComments
 } from "@dendronhq/common-server";
 import {
   DConfig,
   HistoryService,
-  WorkspaceService,
+  WorkspaceService
 } from "@dendronhq/engine-server";
 import { PodUtils } from "@dendronhq/pods-core";
 import fs from "fs-extra";
@@ -39,8 +37,7 @@ import {
   DendronContext,
   DENDRON_COMMANDS,
   extensionQualifiedId,
-  GLOBAL_STATE,
-  WORKSPACE_ACTIVATION_CONTEXT,
+  GLOBAL_STATE
 } from "./constants";
 import BacklinksTreeDataProvider from "./features/BacklinksTreeDataProvider";
 import { completionProvider } from "./features/completionProvider";
@@ -61,6 +58,7 @@ import { DendronTreeViewV2 } from "./views/DendronTreeViewV2";
 import { SampleView } from "./views/SampleView";
 import { SchemaWatcher } from "./watchers/schemaWatcher";
 import { WindowWatcher } from "./windowWatcher";
+import { TutorialInitializer } from "./workspace/tutorialInitializer";
 import { WorkspaceWatcher } from "./WorkspaceWatcher";
 
 let _DendronWorkspace: DendronWorkspace | null;

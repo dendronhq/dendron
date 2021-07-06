@@ -432,7 +432,6 @@ const WITH_TITLE_FOR_LINK_X_VAULT = createProcTests({
 });
 
 const ALL_TEST_CASES = [
-  ...WITH_TITLE_FOR_LINK_X_VAULT,
   ...WITH_ABBR,
   ...WITH_VARIABLE,
   // // --- note refs
@@ -446,7 +445,7 @@ const ALL_TEST_CASES = [
   ...WITH_TITLE_FOR_LINK_X_VAULT,
 ];
 
-describe.only("MDUtils.proc", () => {
+describe("MDUtils.proc", () => {
   test.each(
     ALL_TEST_CASES.slice(0, 2).map((ent) => [
       `${ent.dest}: ${ent.name}`,

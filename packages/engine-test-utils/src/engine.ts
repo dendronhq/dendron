@@ -7,6 +7,7 @@ import {
   WorkspaceFolderRaw,
   WorkspaceOpts,
   WorkspaceSettings,
+  DendronConfig,
 } from "@dendronhq/common-all";
 import {
   getDurationMilliseconds,
@@ -34,7 +35,6 @@ import {
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { DendronConfig } from "../../common-all/lib/types";
 import { ENGINE_HOOKS } from "./presets";
 import { GitTestUtils } from "./utils";
 import os from "os";

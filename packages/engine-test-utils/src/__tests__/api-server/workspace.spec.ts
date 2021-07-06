@@ -1,8 +1,8 @@
 import { DendronAPI } from "@dendronhq/common-all";
+import { tmpDir } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { tmpDir } from "../../../../common-server/lib";
 import { createServer, runEngineTestV5 } from "../../engine";
 
 describe("workspace", () => {

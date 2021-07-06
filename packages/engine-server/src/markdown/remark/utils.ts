@@ -20,7 +20,16 @@ import {
 } from "@dendronhq/common-all";
 import { createLogger, note2String } from "@dendronhq/common-server";
 import _ from "lodash";
-import { Heading, List, ListItem, Paragraph, Root } from "mdast";
+import type {
+  Heading,
+  List,
+  ListItem,
+  Paragraph,
+  Root,
+  Table,
+  TableCell,
+  TableRow,
+} from "mdast";
 import * as mdastBuilder from "mdast-builder";
 import { Processor } from "unified";
 import { Node, Parent } from "unist";
@@ -639,6 +648,18 @@ export class RemarkUtils {
 
   static isParagraph(node: Node): node is Paragraph {
     return node.type === DendronASTTypes.PARAGRAPH;
+  }
+
+  static isTable(node: Node): node is Table {
+    return node.type === DendronASTTypes.TABLE;
+  }
+
+  static isTableRow(node: Node): node is TableRow {
+    return node.type === DendronASTTypes.TABLE_ROW;
+  }
+
+  static isTableCell(node: Node): node is TableCell {
+    return node.type === DendronASTTypes.TABLE_CELL;
   }
 
   static isList(node: Node): node is List {

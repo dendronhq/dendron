@@ -174,7 +174,8 @@
     }
   }
 
-  *:hover > .block-anchor svg {
+  *:hover > .block-anchor svg,
+  table:hover .block-anchor svg  {
     visibility: visible;
   }
 

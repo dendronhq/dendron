@@ -21,7 +21,6 @@ import { RemarkUtils } from "./utils";
 import { addError, getNoteOrError } from "./utils";
 import { blockAnchor2html } from "./blockAnchors";
 import { MDUtilsV5 } from "../utilsv5";
-import { html } from "mdast-builder";
 
 type PluginOpts = NoteRefsOpts & {
   assetsPrefix?: string;
@@ -235,6 +234,16 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
           if (_.isUndefined(previous) || !RemarkUtils.isParent(previous))
             return; // invalid anchor, doesn't represent anything
           target = previous;
+        } else if (RemarkUtils.isTableRow(grandParent)) {
+          // An anchor inside a table references the whole table.
+          const greatGrandParent = ancestors[ancestors.length - 3];
+          if (
+            isNotUndefined(greatGrandParent) &&
+            RemarkUtils.isTable(greatGrandParent)
+          ) {
+            // The table HTML generation drops anything not attached to a cell, so we put this in the first cell instead.
+            target = greatGrandParent.children[0]?.children[0];
+          }
         } else {
           // Otherwise, it references the block it's inside
           target = parent;

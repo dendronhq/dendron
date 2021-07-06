@@ -48,6 +48,11 @@ Delectus eligendi nostrum sint ratione voluptatibus ipsum qui. Et voluptatem omn
 
 Eaque ipsa recusandae exercitationem unde illum est. Sed eos vel eos impedit adipisci. Tempore id est soluta voluptates incidunt ipsum reprehenderit soluta. Maiores id adipisci saepe sed quibusdam et. Illo qui non provident qui. Accusamus et blanditiis aut tempore quidem voluptas vero quibusdam.
 
+| Delectus   | exercitationem |
+|------------|----------------|
+| provident  | Accusamus      |
+| tempore    | blanditiis     | ^table2
+
 ## Aliquam repudiandae dolorem id
 
 Cumque voluptatum itaque consectetur in cum eaque. Quidem et iusto ut earum odio fugiat. Aperiam ut qui odit assumenda debitis. Fugiat quia culpa labore earum quaerat similique officia. Omnis assumenda consequatur voluptatem laudantium cumque pariatur minus. Sed rerum velit qui quia alias commodi eaque molestiae.

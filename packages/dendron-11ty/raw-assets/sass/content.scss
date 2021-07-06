@@ -131,9 +131,14 @@
 
   .anchor-heading {
     position: absolute;
+
+    :not(.block-anchor) {
+      // Breaks block anchors, making them extremely tall
+      height: 100%;
+    }
+
     right: -$sp-4;
     width: $sp-5;
-    height: 100%;
     padding-right: $sp-1;
     padding-left: $sp-1;
     overflow: visible;
@@ -152,6 +157,11 @@
     }
   }
 
+  // Otherwise anchor heading rules push these anchors too far left
+  .anchor-heading.block-anchor {
+    left: 0;
+  }
+
   .anchor-heading:hover,
   h1:hover > .anchor-heading,
   h2:hover > .anchor-heading,
@@ -162,6 +172,10 @@
     svg {
       visibility: visible;
     }
+  }
+
+  *:hover > .block-anchor svg {
+    visibility: visible;
   }
 
   summary {

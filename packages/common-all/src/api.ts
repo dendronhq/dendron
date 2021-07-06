@@ -26,7 +26,12 @@ import {
   WriteNoteResp,
 } from ".";
 import { DendronError } from "./error";
-import { DEngineInitPayload, RenderNoteOpts, RenderNotePayload } from "./types";
+import {
+  DEngineInitPayload,
+  GetNoteBlocksPayload,
+  RenderNoteOpts,
+  RenderNotePayload,
+} from "./types";
 
 // === Types
 
@@ -137,6 +142,10 @@ export type EngineInfoRequest = WorkspaceRequest;
 export type NoteQueryRequest = {
   qs: string;
 } & Partial<WorkspaceRequest>;
+
+export type GetNoteBlocksRequest = {
+  id: string;
+} & WorkspaceRequest;
 
 export type SchemaDeleteRequest = {
   id: string;
@@ -429,6 +438,17 @@ export class DendronAPI extends API {
       path: "note/render",
       method: "post",
       body: req,
+    });
+    return resp;
+  }
+
+  async getNoteBlocks(
+    req: GetNoteBlocksRequest
+  ): Promise<GetNoteBlocksPayload> {
+    const resp = await this._makeRequest({
+      path: "note/blocks",
+      method: "get",
+      qs: req,
     });
     return resp;
   }

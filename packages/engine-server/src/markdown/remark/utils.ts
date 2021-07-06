@@ -18,7 +18,7 @@ import {
   NoteUtils,
   Position,
 } from "@dendronhq/common-all";
-import { createLogger, note2String } from "@dendronhq/common-server";
+import { createLogger } from "@dendronhq/common-server";
 import _ from "lodash";
 import { Heading, ListItem, Paragraph, Root } from "mdast";
 import * as mdastBuilder from "mdast-builder";
@@ -40,6 +40,7 @@ import {
   WikiLinkNoteV4,
   WikiLinkProps,
 } from "../types";
+import { NoteBlock } from "@dendronhq/common-all";
 import { MDUtilsV5, ProcFlavor, ProcMode } from "../utilsv5";
 const toString = require("mdast-util-to-string");
 export { mdastBuilder };
@@ -47,20 +48,30 @@ export { select, selectAll } from "unist-util-select";
 
 export const ALIAS_DIVIDER = "|";
 
+/** A regexp fragment that matches a link name (e.g. a note name) */
+export const LINK_NAME = "[^#\\|>\\]\\[]+";
+/** A regexp fragment that matches an alias name */
+export const ALIAS_NAME = "[^\\|>\\]\\[]+"; // aliases may contain # symbols
+/** A regexp fragment that matches the contents of a link (without the brackets) */
+export const LINK_CONTENTS =
+  "" +
+  // alias?
+  `(` +
+  `(?<alias>${ALIAS_NAME}(?=\\|))` +
+  "\\|" +
+  ")?" +
+  // name
+  `(?<value>${LINK_NAME})?` +
+  // anchor?
+  `(#(?<anchor>${LINK_NAME}))?` +
+  // filters?
+  `(>(?<filtersRaw>.*))?`;
+
 export function addError(proc: Processor, err: DendronError) {
   const errors = proc.data("errors") as DendronError[];
   errors.push(err);
   proc().data("errors", errors);
 }
-
-export type NoteBlock = {
-  /** The actual text of the block. */
-  text: string;
-  /** The anchor for this block, if one already exists. */
-  anchor?: DNoteAnchorPositioned;
-  /** The position within the document at which the block is located. */
-  position: Position;
-};
 
 export function getNoteOrError(
   notes: NoteProps[],
@@ -286,24 +297,7 @@ export class LinkUtils {
         vaultName?: string;
       }
     | null {
-    const LINK_NAME = "[^#\\|>]+";
-    // aliases may contain # symbols
-    const ALIAS_NAME = "[^\\|>]+";
-    const re = new RegExp(
-      "" +
-        // alias?
-        `(` +
-        `(?<alias>${ALIAS_NAME}(?=\\|))` +
-        "\\|" +
-        ")?" +
-        // name
-        `(?<value>${LINK_NAME})?` +
-        // anchor?
-        `(#(?<anchor>${LINK_NAME}))?` +
-        // filters?
-        `(>(?<filtersRaw>.*))?`,
-      "i"
-    );
+    const re = new RegExp(LINK_CONTENTS, "i");
     const out = linkString.match(re);
     if (out) {
       let { alias, value, anchor } = out.groups as any;
@@ -521,7 +515,7 @@ export class AnchorUtils {
   }): Promise<{ [index: string]: DNoteAnchorPositioned }> {
     if (opts.note.stub) return {};
     try {
-      const noteContents = await note2String(opts);
+      const noteContents = NoteUtils.serialize(opts.note);
       const noteAnchors = RemarkUtils.findAnchors(noteContents);
       const slugger = getSlugger();
 
@@ -786,11 +780,9 @@ export class RemarkUtils {
    */
   static async extractBlocks({
     note,
-    wsRoot,
     engine,
   }: {
     note: NoteProps;
-    wsRoot: string;
     engine: DEngineClient;
   }): Promise<NoteBlock[]> {
     const proc = MDUtilsV5.procRemarkFull({
@@ -802,8 +794,7 @@ export class RemarkUtils {
     const slugger = getSlugger();
 
     // Read and parse the note
-    // TODO: It might be better to get the text from the editor
-    const noteText = await note2String({ note, wsRoot });
+    const noteText = NoteUtils.serialize(note);
     const noteAST = proc.parse(noteText);
     if (_.isUndefined(noteAST.children)) return [];
     const nodesToSearch = _.filter(noteAST.children as Node[], (node) =>
@@ -859,6 +850,7 @@ export class RemarkUtils {
             anchor,
             // position can only be undefined for generated nodes, not for parsed ones
             position: listItem.position!,
+            type: listItem.type,
           });
         });
       }
@@ -884,6 +876,7 @@ export class RemarkUtils {
         anchor,
         // position can only be undefined for generated nodes, not for parsed ones
         position: node.position!,
+        type: node.type,
       });
     }
 

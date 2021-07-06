@@ -43,7 +43,7 @@ module.exports = {
     // runs into max-len issue
     "operator-linebreak": "off",
     // rest
-    "import/no-extraneous-dependencies": "on",
+    // "import/no-extraneous-dependencies": "on",
     // A temporary hack related to IDE not resolving correct package.json
     "import/no-extraneous-dependencies": "off",
     // copy from packages/web-client/.eslintrc.json

@@ -1,4 +1,4 @@
-import vscode from "vscode";
+import vscode, { ThemeIcon } from "vscode";
 import path from "path";
 import {
   containsMarkdownExt,
@@ -7,6 +7,7 @@ import {
   sortPaths,
 } from "../utils/md";
 import _ from "lodash";
+import { ICONS } from "../constants";
 
 class Backlink extends vscode.TreeItem {
   constructor(
@@ -106,6 +107,9 @@ export default class BacklinksTreeDataProvider
         title: "Open File",
       };
 
+      if (ref.isUnref) {
+        backlink.iconPath = new ThemeIcon(ICONS.UNREFLINK);
+      }
       return backlink;
     });
   }

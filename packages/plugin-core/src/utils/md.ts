@@ -32,6 +32,7 @@ export type RefT = {
 export type FoundRefT = {
   location: Location;
   matchText: string;
+  isUnref?: boolean;
 };
 
 const markdownExtRegex = /\.md$/i;
@@ -370,7 +371,7 @@ export const findReferences = async (
       const lines = fileContent.slice(0, fmOffset + start.offset!).split("\n");
       const lineNum = lines.length;
 
-      refs.push({
+      const foundRef: FoundRefT = {
         location: new vscode.Location(
           vscode.Uri.file(fsPath),
           new vscode.Range(
@@ -379,7 +380,12 @@ export const findReferences = async (
           )
         ),
         matchText: lines.slice(-1)[0],
-      });
+      };
+      if (link.type === "unreferenced") {
+        foundRef.isUnref = true;
+      }
+
+      refs.push(foundRef);
     });
   });
 

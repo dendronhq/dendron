@@ -101,6 +101,7 @@ const CMD_PREFIX = "Dendron:";
 export const ICONS = {
   STUB: "gist-new",
   SCHEMA: "repo",
+  UNREFLINK: "debug-disconnect",
 };
 export const DENDRON_WORKSPACE_FILE = "dendron.code-workspace";
 

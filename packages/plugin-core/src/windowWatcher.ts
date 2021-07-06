@@ -3,6 +3,7 @@ import {
   NoteUtils,
   OnDidChangeActiveTextEditorMsg,
 } from "@dendronhq/common-all";
+import { DendronASTDest, MDUtilsV5 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { ExtensionContext, window, TextEditor, Selection } from "vscode";
 import { Logger } from "./logger";
@@ -145,11 +146,8 @@ export class WindowWatcher {
   }
 
   private moveCursorPastFrontmatter(editor: TextEditor) {
-    const proc = MDUtilsV5.procRemarkParse(
-      {
-        mode: ProcMode.NO_DATA,
-        parseOnly: true,
-      },
+    const proc = MDUtilsV5.procRemarkParseNoData(
+      {},
       { dest: DendronASTDest.MD_DENDRON }
     );
     const parsed = proc.parse(editor.document.getText());

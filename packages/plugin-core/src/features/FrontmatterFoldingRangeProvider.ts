@@ -1,7 +1,7 @@
-import { DendronASTDest, MDUtilsV5, ProcMode } from "@dendronhq/engine-server";
-import vscode, { FoldingRangeKind } from "vscode";
-import visit from "unist-util-visit";
+import { DendronASTDest, MDUtilsV5 } from "@dendronhq/engine-server";
 import _ from "lodash";
+import visit from "unist-util-visit";
+import vscode, { FoldingRangeKind } from "vscode";
 import { VSCodeUtils } from "../utils";
 
 export default class FrontmatterFoldingRangeProvider
@@ -15,11 +15,8 @@ export default class FrontmatterFoldingRangeProvider
   public async provideFoldingRanges(
     document: vscode.TextDocument
   ): Promise<vscode.FoldingRange[]> {
-    const proc = MDUtilsV5.procRemarkParse(
-      {
-        mode: ProcMode.NO_DATA,
-        parseOnly: true,
-      },
+    const proc = MDUtilsV5.procRemarkParseNoData(
+      {},
       { dest: DendronASTDest.MD_DENDRON }
     );
     const parsed = proc.parse(document.getText());

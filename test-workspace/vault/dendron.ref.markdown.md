@@ -13,3 +13,30 @@ This is normal text
 > this is a blockquote
 
 This is more normal text
+
+### Code
+
+```js
+console.log("Hello World");
+```
+
+### Math
+
+- Inline $f(x) = 5$
+
+
+- Block
+$$
+f(x) = 5
+$$
+
+
+### Mermaid
+
+```mermaid
+graph TD;
+    A-->B;
+    A-->C;
+    B-->D;
+    C-->D;
+```

@@ -479,7 +479,7 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/76890677?v=4",
       "profile": "https://github.com/micharris42",
       "contributions": [
-        "bug" 
+        "bug"
       ]
     },
     {
@@ -489,6 +489,34 @@
       "profile": "https://github.com/teauxfu",
       "contributions": [
         "doc"
+      ]
+    },
+    {
+      "login": "andrey-jef",
+      "name": "andrey-jef",
+      "avatar_url": "https://avatars.githubusercontent.com/u/81280428?v=4",
+      "profile": "https://github.com/andrey-jef",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "namjul",
+      "name": "Samuel Hobl",
+      "avatar_url": "https://avatars.githubusercontent.com/u/328836?v=4",
+      "profile": "https://github.com/namjul",
+      "contributions": [
+        "code",
+        "doc"
+      ]
+    },
+    {
+      "login": "apastuszak",
+      "name": "apastuszak",
+      "avatar_url": "https://avatars.githubusercontent.com/u/3401054?v=4",
+      "profile": "https://github.com/apastuszak",
+      "contributions": [
+        "bug"
       ]
     }
   ],

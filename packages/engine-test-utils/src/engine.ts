@@ -110,14 +110,16 @@ export function createSiteConfig(
 /**
  *
  * @param opts.asRemote: add git repo
+ * @param opts.wsRoot: override given wsRoot
  * @returns
  */
 export async function setupWS(opts: {
   vaults: DVault[];
   workspaces?: DWorkspace[];
   asRemote?: boolean;
+  wsRoot?: string;
 }) {
-  const wsRoot = tmpDir().name;
+  const wsRoot = opts.wsRoot || tmpDir().name;
   const ws = new WorkspaceService({ wsRoot });
   ws.createConfig();
   const config = ws.config;
@@ -165,6 +167,10 @@ export type RunEngineTestV5Opts = {
   initGit?: boolean;
   initHooks?: boolean;
   addVSWorkspace?: boolean;
+  /**
+   * Path to preset wsRoot
+   */
+  wsRoot?: string;
 } & TestSetupWorkspaceOpts;
 
 export type RunEngineTestFunctionV5<T = any> = (
@@ -263,6 +269,7 @@ export async function runEngineTestV5(
     const { wsRoot, vaults } = await setupWS({
       vaults: vaultsInit,
       workspaces,
+      wsRoot: opts.wsRoot,
     });
     if ((opts.initHooks, vaults)) {
       fs.ensureDirSync(path.join(wsRoot, CONSTANTS.DENDRON_HOOKS_BASE));

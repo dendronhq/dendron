@@ -128,7 +128,7 @@ const ConfigForm: React.FC<DefaultProps> = ({ engine }) => {
       >
         {({ values, errors }) => (
           <Form {...formItemLayout}>
-            <Typography style={{ textAlign: "center" }}>
+            <Typography style={{ textAlign: "center", padding: "2rem" }}>
               <Title>Dendron Configuration </Title>
             </Typography>
             <ConfigInput

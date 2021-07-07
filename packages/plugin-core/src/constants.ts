@@ -256,6 +256,12 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docPreview:
       "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/command-rename.gif)",
   },
+  CONVERT_LINK: {
+    key: "dendron.convertLink",
+    title: `${CMD_PREFIX} Convert Link`,
+    group: "notes",
+    desc: "Convert unreferenced link into backlink",
+  },
   // --- Lookup
   LOOKUP: {
     key: "dendron.lookup",

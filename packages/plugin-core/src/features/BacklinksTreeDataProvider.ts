@@ -36,15 +36,14 @@ export default class BacklinksTreeDataProvider
   }
 
   public async getChildren(element?: Backlink) {
-    if (!element) {
-      const fsPath = vscode.window.activeTextEditor?.document.uri.fsPath;
+    const fsPath = vscode.window.activeTextEditor?.document.uri.fsPath;
 
+    if (!element) {
       if (!fsPath || (fsPath && !containsMarkdownExt(fsPath))) {
         return [];
       }
 
       const refFromFilename = path.parse(fsPath).name;
-
       const referencesByPath = _.groupBy(
         await findReferences(refFromFilename, [fsPath]),
         ({ location }) => location.uri.fsPath
@@ -108,6 +107,13 @@ export default class BacklinksTreeDataProvider
       };
 
       if (ref.isUnref) {
+        backlink.command = {
+          command: "dendron.convertLink",
+          title: "Convert Link",
+          arguments: [
+            { location: ref.location, text: path.parse(fsPath!).name },
+          ],
+        };
         backlink.iconPath = new ThemeIcon(ICONS.UNREFLINK);
       }
       return backlink;

@@ -1,6 +1,10 @@
 import { DVault, NoteUtils } from "@dendronhq/common-all";
 import { ENGINE_HOOKS, ENGINE_HOOKS_MULTI } from "@dendronhq/engine-test-utils";
-import { NOTE_PRESETS_V4, sinon } from "@dendronhq/common-test-utils";
+import {
+  NoteTestUtilsV4,
+  NOTE_PRESETS_V4,
+  sinon,
+} from "@dendronhq/common-test-utils";
 import _ from "lodash";
 import { describe } from "mocha";
 import { TestEngineUtils } from "@dendronhq/engine-test-utils";
@@ -35,7 +39,7 @@ suite("NoteLookupCommand", function () {
 
   // NOTE: think these tests are wrong
   describe("updateItems", function () {
-    test("picker has value of opened note by default", function (done) {
+    test("direct child filter", function (done) {
       runLegacyMultiWorkspaceTest({
         ctx,
         preSetupHook: async ({ wsRoot, vaults }) => {
@@ -44,8 +48,14 @@ suite("NoteLookupCommand", function () {
             wsRoot,
             vault: TestEngineUtils.vault1(vaults),
           });
+          await NoteTestUtilsV4.createNote({
+            wsRoot,
+            fname: "foo.ch2",
+            vault: vaults[0],
+            props: { stub: true },
+          });
         },
-        onInit: async ({ vaults }) => {
+        onInit: async ({ vaults, engine: _engine }) => {
           const cmd = new NoteLookupCommand();
           stubVaultPick(vaults);
           const opts = (await cmd.run({
@@ -53,8 +63,13 @@ suite("NoteLookupCommand", function () {
             initialValue: "foo.",
             filterMiddleware: ["directChildOnly"],
           }))!;
+          // Doesn't find grandchildren
           expect(
             _.find(opts.quickpick.selectedItems, { fname: "foo.ch1.gch1" })
+          ).toEqual(undefined);
+          // Doesn't find stubs
+          expect(
+            _.find(opts.quickpick.selectedItems, { fname: "foo.ch2" })
           ).toEqual(undefined);
           expect(_.isUndefined(opts.quickpick.filterMiddleware)).toBeFalsy();
           done();
@@ -62,7 +77,7 @@ suite("NoteLookupCommand", function () {
       });
     });
 
-    test("direct child filter", function (done) {
+    test("picker has value of opened note by default", function (done) {
       runLegacyMultiWorkspaceTest({
         ctx,
         preSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti,

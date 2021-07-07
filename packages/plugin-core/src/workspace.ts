@@ -478,12 +478,17 @@ export class DendronWorkspace {
           // eslint-disable-next-line  no-return-await
           async () => await backlinksTreeDataProvider.refresh()
         );
-        context.subscriptions.push(
-          vscode.window.createTreeView(DendronTreeViewKey.BACKLINKS, {
+        const backlinkTreeView = vscode.window.createTreeView(
+          DendronTreeViewKey.BACKLINKS,
+          {
             treeDataProvider: backlinksTreeDataProvider,
             showCollapseAll: true,
-          })
+          }
         );
+        // This persists even if getChildren populates the view.
+        // Removing it for now.
+        // backlinkTreeView.message = "There are no links to this note."
+        context.subscriptions.push(backlinkTreeView);
       }
     });
   }

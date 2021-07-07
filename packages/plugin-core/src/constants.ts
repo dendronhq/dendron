@@ -102,6 +102,7 @@ export const ICONS = {
   STUB: "gist-new",
   SCHEMA: "repo",
   UNREFLINK: "debug-disconnect",
+  WIKILINK: "link",
 };
 export const DENDRON_WORKSPACE_FILE = "dendron.code-workspace";
 

@@ -1,4 +1,4 @@
-import vscode, { ThemeIcon } from "vscode";
+import vscode from "vscode";
 import path from "path";
 import {
   containsMarkdownExt,
@@ -42,7 +42,6 @@ export default class BacklinksTreeDataProvider
       if (!fsPath || (fsPath && !containsMarkdownExt(fsPath))) {
         return [];
       }
-
       const refFromFilename = path.parse(fsPath).name;
       const referencesByPath = _.groupBy(
         await findReferences(refFromFilename, [fsPath]),
@@ -81,42 +80,68 @@ export default class BacklinksTreeDataProvider
         };
         return backlink;
       });
+    } else if (element.label === "links" || element.label === "unreferenced") {
+      const refs = element?.refs;
+      if (!refs) {
+        return [];
+      }
+      return refs.map((ref) => {
+        const lineNum = ref.location.range.start.line;
+        const backlink = new Backlink(
+          ref.matchText,
+          undefined,
+          vscode.TreeItemCollapsibleState.None
+        );
+        backlink.description = `on line ${lineNum}`;
+        backlink.tooltip = ref.matchText;
+        backlink.command = {
+          command: "vscode.open",
+          arguments: [ref.location.uri, { selection: ref.location.range }],
+          title: "Open File",
+        };
+        if (ref.isUnref) {
+          backlink.command = {
+            command: "dendron.convertLink",
+            title: "Convert Link",
+            arguments: [
+              { location: ref.location, text: path.parse(fsPath!).name },
+            ],
+          };
+        }
+        return backlink;
+      });
     }
 
     const refs = element?.refs;
-
     if (!refs) {
       return [];
     }
 
-    return refs.map((ref) => {
-      const backlink = new Backlink(
-        `${ref.location.range.start.line + 1}:${
-          ref.location.range.start.character
-        }`,
-        undefined,
-        vscode.TreeItemCollapsibleState.None
-      );
-
-      backlink.description = ref.matchText;
-      backlink.tooltip = ref.matchText;
-      backlink.command = {
-        command: "vscode.open",
-        arguments: [ref.location.uri, { selection: ref.location.range }],
-        title: "Open File",
-      };
-
-      if (ref.isUnref) {
-        backlink.command = {
-          command: "dendron.convertLink",
-          title: "Convert Link",
-          arguments: [
-            { location: ref.location, text: path.parse(fsPath!).name },
-          ],
-        };
-        backlink.iconPath = new ThemeIcon(ICONS.UNREFLINK);
-      }
-      return backlink;
+    const [wikilinks, unreflinks] = _.partition(refs, (ref) => {
+      return !ref.isUnref;
     });
+
+    const out: Backlink[] = [];
+    const backlinkTreeItem = new Backlink(
+      "links",
+      wikilinks,
+      vscode.TreeItemCollapsibleState.Collapsed
+    );
+    backlinkTreeItem.iconPath = new vscode.ThemeIcon(ICONS.WIKILINK);
+    backlinkTreeItem.description = `${wikilinks.length} link(s).`;
+    out.push(backlinkTreeItem);
+
+    const unrefCount = unreflinks.length;
+    if (unrefCount > 0) {
+      const unrefTreeItem = new Backlink(
+        "unreferenced",
+        unreflinks,
+        vscode.TreeItemCollapsibleState.Collapsed
+      );
+      unrefTreeItem.iconPath = new vscode.ThemeIcon(ICONS.UNREFLINK);
+      unrefTreeItem.description = `${unreflinks.length} unreferenced items.`;
+      out.push(unrefTreeItem);
+    }
+    return out;
   }
 }

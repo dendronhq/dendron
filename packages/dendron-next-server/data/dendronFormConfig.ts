@@ -147,6 +147,11 @@ const dendronConfig: ObjectConfig = {
       type: "boolean",
       helperText: "Disable telemetry",
     },
+    version: {
+      type: "number",
+      label: "Dendron Version",
+      helperText: "Dendron version. Setup by plugin",
+    },
     site: siteConfig,
     vaults: vault,
     workspaces: workspacesConfig,

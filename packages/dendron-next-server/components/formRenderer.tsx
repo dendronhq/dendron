@@ -327,7 +327,7 @@ const ConfigInput = ({
     return (
       <SimpleInput
         name={prefix.join(".")}
-        type={type}
+        type={type === "string" ? "text" : type}
         label={label}
         required={required}
         helperText={helperText}

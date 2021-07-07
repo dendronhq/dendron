@@ -1,5 +1,5 @@
-import React, { useRef, ReactNode, useState } from "react";
-import { createLogger, engineSlice } from "@dendronhq/common-frontend";
+import React, { useRef } from "react";
+import { engineSlice } from "@dendronhq/common-frontend";
 import { Typography, Button, message } from "antd";
 import { useRouter } from "next/router";
 import { Formik } from "formik";
@@ -9,7 +9,7 @@ import _ from "lodash";
 import Ajv, { JSONSchemaType } from "ajv";
 import { engineHooks } from "@dendronhq/common-frontend";
 import { configWrite } from "../../lib/effects";
-import dendronConfig from "../../data/dendronConfig";
+import dendronConfig from "../../data/dendronFormConfig";
 import ConfigInput from "../../components/formRenderer";
 import { Config } from "../../types/formTypes";
 
@@ -56,16 +56,15 @@ const generateSchema = (config: Config): any => {
   return schema;
 };
 
-export default function ConfigForm({
-  engine,
-}: {
+type DefaultProps = {
   engine: engineSlice.EngineState;
-}) {
+};
+
+const ConfigForm: React.FC<DefaultProps> = ({ engine }) => {
   const router = useRouter();
   const { ws, port } = router.query;
   const dispatch = engineHooks.useEngineAppDispatch();
   const ajv = useRef(new Ajv({ allErrors: true }));
-  const logger = createLogger("Config");
   if (!engine.config || !ws || !port) {
     return <></>;
   }
@@ -151,4 +150,6 @@ export default function ConfigForm({
       </Formik>
     </div>
   );
-}
+};
+
+export default ConfigForm;

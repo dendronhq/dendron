@@ -56,7 +56,7 @@ export type InputType = {
 };
 export type BaseInputType = InputType & { children?: ReactNode };
 export type SimpleInputType = InputType & {
-  type: "string" | "number";
+  type: "text" | "number";
   addonAfter?: ReactNode;
 };
 export type ArrayInputType = InputType & {

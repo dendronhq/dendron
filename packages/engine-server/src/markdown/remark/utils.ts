@@ -20,10 +20,19 @@ import {
 } from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-server";
 import _ from "lodash";
-import { Heading, ListItem, Paragraph, Root } from "mdast";
+import type {
+  Heading,
+  List,
+  ListItem,
+  Paragraph,
+  Root,
+  Table,
+  TableCell,
+  TableRow,
+} from "mdast";
 import * as mdastBuilder from "mdast-builder";
 import { Processor } from "unified";
-import { Node } from "unist";
+import { Node, Parent } from "unist";
 import { selectAll } from "unist-util-select";
 import visit from "unist-util-visit";
 import { VFile } from "vfile";
@@ -602,7 +611,7 @@ export class RemarkUtils {
     return -1;
   }
 
-  static isHeading(node: Node, text: string, depth?: number) {
+  static isHeading(node: Node, text: string, depth?: number): node is Heading {
     if (node.type !== DendronASTTypes.HEADING) {
       return false;
     }
@@ -623,7 +632,35 @@ export class RemarkUtils {
     return true;
   }
 
-  static isNoteRefV2(node: Node) {
+  static isRoot(node: Node): node is Parent {
+    return node.type === DendronASTTypes.ROOT;
+  }
+
+  static isParent(node: Node): node is Parent {
+    return _.isArray(node.children);
+  }
+
+  static isParagraph(node: Node): node is Paragraph {
+    return node.type === DendronASTTypes.PARAGRAPH;
+  }
+
+  static isTable(node: Node): node is Table {
+    return node.type === DendronASTTypes.TABLE;
+  }
+
+  static isTableRow(node: Node): node is TableRow {
+    return node.type === DendronASTTypes.TABLE_ROW;
+  }
+
+  static isTableCell(node: Node): node is TableCell {
+    return node.type === DendronASTTypes.TABLE_CELL;
+  }
+
+  static isList(node: Node): node is List {
+    return node.type === DendronASTTypes.LIST;
+  }
+
+  static isNoteRefV2(node: Node): node is NoteRefNoteV4 {
     return node.type === DendronASTTypes.REF_LINK_V2;
   }
 

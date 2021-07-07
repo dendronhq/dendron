@@ -562,8 +562,17 @@ const generateSchema = (config: Config): any => {
   }
 
   if (config.type === "record") {
-    console.log(config.data, "enum");
-    return {};
+    return {
+      type: "object",
+      patternProperties: {
+        "^*$": Object.fromEntries(
+          Object.keys(config.data.data).map((key) => [
+            key,
+            generateSchema(config.data.data[key]),
+          ])
+        ),
+      },
+    };
   }
 
   const schema: any = {

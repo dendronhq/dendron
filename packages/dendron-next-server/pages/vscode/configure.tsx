@@ -488,7 +488,6 @@ const RenderArray = ({
   arrayHelpers: any;
   errors: any;
 }) => {
-  console.log(name, values, dataDefinition);
   const dataSource =
     get(values, name)?.map((value: any, index: number) => (
       <Card
@@ -621,8 +620,7 @@ const generateSchema = (config: Config): any => {
       type: "object",
       patternProperties: {
         "^[sS]+$": {
-          type: "object",
-          properties: generateSchema(config.data),
+          ...generateSchema(config.data),
         },
       },
     };
@@ -696,24 +694,20 @@ export default function Config({
         }}
         validate={(values) => {
           let errors: any = {};
-          // const validate = ajv.current.compile(schema);
-          // validate(values);
-          // console.log(
-          //   { errors: ajv.current.errors, values, validate, schema },
-          //   "yoooo"
-          // );
-          // const { errors: ajvErrors } = validate;
+          const validate = ajv.current.compile(schema);
+          validate(values);
+          const { errors: ajvErrors } = validate;
 
-          // if (!ajvErrors?.length) {
-          //   return {};
-          // }
+          if (!ajvErrors?.length) {
+            return {};
+          }
 
-          // ajvErrors?.forEach((error) => {
-          //   const { instancePath, message } = error;
-          //   if (instancePath !== "") {
-          //     errors[`${instancePath.substring(1)}`] = message;
-          //   }
-          // });
+          ajvErrors?.forEach((error) => {
+            const { instancePath, message } = error;
+            if (instancePath !== "") {
+              errors[`${instancePath.substring(1)}`] = message;
+            }
+          });
           return {};
         }}
         validateOnChange={true}

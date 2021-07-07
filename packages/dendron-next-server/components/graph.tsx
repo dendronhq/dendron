@@ -184,20 +184,26 @@ export default function Graph({
 
       network.layout(getEulerConfig(shouldAnimate)).run();
 
+      // Show UI when layout is finished. As a fallback, show on interaction with graph.
+      network.on("layoutstop viewport", () => {
+        logger.log("GRAPH READY");
+        if (!isGraphLoaded) setIsGraphLoaded(true);
+      });
+
       network.on("select", (e) => onSelect(e));
 
       setCy(network);
     }
   };
 
-  useEffect(() => {
-    if (cy && !isGraphLoaded) {
-      cy.on("layoutstop", () => {
-        logger.log("GRAPH READY");
-        setIsGraphLoaded(true);
-      });
-    }
-  }, [cy, isGraphLoaded]);
+  // useEffect(() => {
+  //   if (cy && !isGraphLoaded) {
+  //     cy.on("ready", () => {
+  //       logger.log("GRAPH READY");
+  //       setIsGraphLoaded(true);
+  //     });
+  //   }
+  // }, [cy, isGraphLoaded]);
 
   useEffect(() => {
     // If changed from local graph to full graph, re-render graph to show all elements

@@ -1,11 +1,20 @@
 import { DendronASTDest, MDUtilsV4 } from "@dendronhq/engine-server";
-import { PublishPodPlantOpts, PublishPod } from "../basev3";
+import { PublishPodPlantOpts, PublishPod, PublishPodConfig } from "../basev3";
+import { JSONSchemaType } from "ajv";
+import { PodUtils } from "../utils";
 
 const ID = "dendron.html";
 
 export class HTMLPublishPod extends PublishPod {
   static id: string = ID;
   static description: string = "publish html";
+
+  get config(): JSONSchemaType<PublishPodConfig> {
+    return PodUtils.createPublishConfig({
+      required: [],
+      properties: {},
+    }) as JSONSchemaType<PublishPodConfig>;
+  }
 
   async plant(opts: PublishPodPlantOpts): Promise<any> {
     const { config, engine, note } = opts;

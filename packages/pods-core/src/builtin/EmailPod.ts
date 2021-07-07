@@ -1,6 +1,8 @@
 import { Message, SMTPClient } from "emailjs";
 import _ from "lodash";
 import { PublishPodConfig, PublishPodPlantOpts, PublishPod } from "../basev3";
+import { JSONSchemaType } from "ajv";
+import { PodUtils } from "../utils";
 
 const ID = "dendron.email";
 
@@ -15,49 +17,42 @@ export class EmailPublishPod extends PublishPod<EmailPublishConfig> {
   static id: string = ID;
   static description: string = "publish to email";
 
-  get config() {
-    return super.config.concat([
-      {
-        key: "from",
-        description: "from address",
-        type: "boolean",
-        default: false,
-        example: "you <username@outlook.com>",
+  get config(): JSONSchemaType<EmailPublishConfig> {
+    return PodUtils.createPublishConfig({
+      required: [],
+      properties: {
+        from: {
+          description: "from address",
+          type: "string",
+          example: "you <username@outlook.com>",
+        },
+        to: {
+          description: "to address",
+          type: "string",
+          example:
+            "someone <someone@your-email.com>, another <another@your-email.com>",
+        },
+        user: {
+          description: "username",
+          type: "string",
+          example: "hello@dendron.so",
+        },
+        password: {
+          description: "password",
+          type: "string",
+          example: "secret123",
+        },
+        host: {
+          description: "host",
+          type: "string",
+          default: "smtp.gmail.com",
+        },
+        subject: {
+          description: "subject",
+          type: "string",
+        },
       },
-      {
-        key: "to",
-        description: "to address",
-        type: "boolean",
-        default: false,
-        example:
-          "someone <someone@your-email.com>, another <another@your-email.com>",
-      },
-      {
-        key: "user",
-        description: "username",
-        type: "string",
-        default: false,
-        example: "hello@dendron.so",
-      },
-      {
-        key: "password",
-        description: "password",
-        type: "string",
-        default: false,
-        example: "secret123",
-      },
-      {
-        key: "host",
-        description: "host",
-        type: "string",
-        default: "smtp.gmail.com",
-      },
-      {
-        key: "subject",
-        description: "subject",
-        type: "string",
-      },
-    ]);
+    }) as JSONSchemaType<EmailPublishConfig>;
   }
 
   async plant(opts: PublishPodPlantOpts) {

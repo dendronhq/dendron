@@ -388,7 +388,12 @@ const RenderRecord = ({
       <Button
         type="primary"
         size="large"
-        onClick={() => addRecord({ id: records.length, value: "" })}
+        onClick={() =>
+          addRecord({
+            id: records.length ? records[records.length - 1].id + 1 : 0,
+            value: "",
+          })
+        }
       >
         Add
       </Button>

@@ -18,9 +18,10 @@ type FilterProps = {
   type: "note" | "schema";
   config: GraphConfig;
   setConfig: React.Dispatch<React.SetStateAction<GraphConfig>>;
+  isVisible: boolean;
 };
 
-const GraphFilterView = ({ config, setConfig }: FilterProps) => {
+const GraphFilterView = ({ config, setConfig, isVisible }: FilterProps) => {
   const configEntries = Object.entries(config);
   const sortedSections = [
     "vaults",
@@ -58,6 +59,8 @@ const GraphFilterView = ({ config, setConfig }: FilterProps) => {
         background: AntThemes[currentTheme].graph.filterView.background,
         borderRadius: AntThemes[currentTheme].graph.filterView.borderRadius,
         minWidth: AntThemes[currentTheme].graph.filterView.minWidth,
+        opacity: isVisible ? 1 : 0,
+        transition: "opacity 0.2s",
       }}
     >
       <Collapse>

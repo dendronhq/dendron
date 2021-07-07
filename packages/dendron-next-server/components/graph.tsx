@@ -96,6 +96,7 @@ export default function Graph({
   const graphRef = useRef<HTMLDivElement>(null);
   const { themes, currentTheme } = useThemeSwitcher();
   const [cy, setCy] = useState<Core>();
+  const [isGraphLoaded, setIsGraphLoaded] = useState(false);
 
   useSyncGraphWithIDE({
     graph: cy,
@@ -161,6 +162,15 @@ export default function Graph({
   };
 
   useEffect(() => {
+    if (cy && !isGraphLoaded) {
+      cy.on("layoutstop", () => {
+        logger.log("GRAPH READY");
+        setIsGraphLoaded(true);
+      });
+    }
+  }, [cy, isGraphLoaded]);
+
+  useEffect(() => {
     // If the graph already has rendered elements, don't re-render
     // Otherwise, the graph re-renders when elements are selected
     if (cy && cy.elements("*").length > 1) return;
@@ -209,7 +219,12 @@ export default function Graph({
           position: "relative",
         }}
       >
-        <GraphFilterView type={type} config={config} setConfig={setConfig} />
+        <GraphFilterView
+          type={type}
+          config={config}
+          setConfig={setConfig}
+          isVisible={isGraphLoaded}
+        />
         <div
           ref={graphRef}
           style={{

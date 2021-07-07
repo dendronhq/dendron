@@ -42,6 +42,7 @@ export enum DendronASTTypes {
   PARAGRAPH = "paragraph",
   TABLE = "table",
   IMAGE = "image",
+  FRONTMATTER = "yaml",
 }
 
 export enum DendronASTDest {

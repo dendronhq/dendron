@@ -174,6 +174,14 @@ const useApplyGraphConfig = ({
       }
     }
   };
+  const applyFilterOptionsConfig = () => {
+    if (_.isUndefined(graph)) return;
+    if (!config["options.show-labels"].value) {
+      graph.$("node").addClass("hidden--labels");
+    } else {
+      graph.$("node").removeClass("hidden--labels");
+    }
+  };
 
   const applyConfig = () => {
     if (!graph || graph.$("*").length === 0) return;
@@ -184,6 +192,7 @@ const useApplyGraphConfig = ({
     applyVaultConfig(allowRelayout);
     applyFilterRegexConfig(allowRelayout);
     applyFilterStubsConfig(allowRelayout);
+    applyFilterOptionsConfig();
   };
 
   const layoutGraph = () => {

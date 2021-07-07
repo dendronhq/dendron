@@ -49,7 +49,10 @@ export class ShowSchemaGraphCommand extends BasicCommand<
     const panel = window.createWebviewPanel(
       "dendronIframe", // Identifies the type of the webview. Used internally
       title, // Title of the panel displayed to the user
-      ViewColumn.Two, // Editor column to show the new webview panel in.
+      {
+        viewColumn: ViewColumn.Beside,
+        preserveFocus: true,
+      }, // Editor column to show the new webview panel in.
       {
         enableScripts: true,
         retainContextWhenHidden: true,

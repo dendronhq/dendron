@@ -1,6 +1,13 @@
 import React, { useRef, ReactNode, useState } from "react";
 import { createLogger, engineSlice } from "@dendronhq/common-frontend";
-import { List, Typography, Button, Card, message } from "antd";
+import {
+  List,
+  Typography,
+  Button,
+  Card,
+  Input as AntInput,
+  message,
+} from "antd";
 import { useRouter } from "next/router";
 import { FieldArray, Formik } from "formik";
 import {
@@ -18,13 +25,6 @@ import Ajv, { JSONSchemaType } from "ajv";
 import { engineHooks } from "@dendronhq/common-frontend";
 import { configWrite } from "../../lib/effects";
 import get from "lodash/get";
-
-interface MyData {
-  siteRootDir: string;
-  assetsPrefix: string;
-  siteRepoDir: string;
-  copyAssets: boolean;
-}
 
 const siteConfig: ObjectConfig = {
   type: "object",
@@ -57,6 +57,43 @@ const siteConfig: ObjectConfig = {
       type: "boolean",
       helperText:
         "Pretty refs help you identify when content is embedded from elsewhere and provide links back to the source.",
+    },
+    config: {
+      type: "record",
+      label: "Hierarchy Config",
+      data: {
+        type: "object",
+        data: {
+          noindexByDefault: {
+            type: "boolean",
+            label: "No index by default?",
+          },
+          customFrontmatter: {
+            type: "array",
+            label: "Custom Frontmatter",
+            data: {
+              type: "object",
+              data: {
+                key: {
+                  type: "string",
+                  label: "Key",
+                },
+                value: {
+                  type: "string",
+                  label: "Value",
+                },
+              },
+            },
+          },
+          publishByDefault: {
+            type: "record",
+            label: "Publish by default?",
+            data: {
+              type: "boolean",
+            },
+          },
+        },
+      },
     },
     siteHierarchies: {
       type: "array",
@@ -300,7 +337,7 @@ const ArrayInput = ({
             <RenderRecord
               {...{
                 values,
-                dataDefinition: data,
+                dataDefinition: data as RecordConfig,
                 name,
                 arrayHelpers,
                 errors,
@@ -310,7 +347,7 @@ const ArrayInput = ({
             <RenderArray
               {...{
                 values,
-                dataDefinition: data,
+                dataDefinition: data as ArrayConfig,
                 name,
                 arrayHelpers,
                 errors,
@@ -323,6 +360,33 @@ const ArrayInput = ({
   );
 };
 
+const makeDefault = (config: Config): any => {
+  const { type } = config;
+  switch (type) {
+    case "array":
+      return [];
+    case "boolean":
+      return false;
+    case "enum":
+      return (config as EnumConfig).data[0];
+    case "number":
+      return 0;
+    case "object":
+      return Object.fromEntries(
+        Object.entries((config as ObjectConfig).data).map(([k, v]) => [
+          k,
+          makeDefault(v),
+        ])
+      );
+    case "string":
+      return "";
+    case "record":
+      return {};
+    default:
+      return null;
+  }
+};
+
 const RenderRecord = ({
   values = [],
   dataDefinition,
@@ -331,7 +395,7 @@ const RenderRecord = ({
   errors,
 }: {
   values: any;
-  dataDefinition: Config;
+  dataDefinition: RecordConfig;
   name: any;
   arrayHelpers: any;
   errors: any;
@@ -341,8 +405,11 @@ const RenderRecord = ({
     value: string;
   };
   const [records, setRecords] = useState<RecordProps[]>(
-    values
-      ? Object.keys(values).map((key, index) => ({ id: index, value: key }))
+    get(values, name)
+      ? Object.keys(get(values, name)).map((key, index) => ({
+          id: index,
+          value: key,
+        }))
       : []
   );
   const addRecord = (record: RecordProps) =>
@@ -361,9 +428,8 @@ const RenderRecord = ({
       <Card
         key={`${name}.${index}`}
         size="small"
-        //ts-ignore
         title={
-          <Input
+          <AntInput
             type="text"
             value={record.value}
             style={{ width: "85%" }}
@@ -373,15 +439,13 @@ const RenderRecord = ({
         }
         extra={<MinusCircleOutlined onClick={() => removeRecord(record)} />}
       >
-        {Object.keys(dataDefinition.data.data).map((key) => (
-          <ConfigInput
-            key={`${name}.${record.value}.${key}`}
-            values={values}
-            data={dataDefinition.data.data[key]}
-            errors={errors}
-            prefix={[name, `${record.value}`, key]}
-          />
-        ))}
+        <ConfigInput
+          key={`${name}.${record.value}`}
+          values={values}
+          data={(dataDefinition as RecordConfig).data}
+          errors={errors}
+          prefix={[name, `${record.value}`]}
+        />
       </Card>
     ))
     .concat(
@@ -419,48 +483,38 @@ const RenderArray = ({
   errors,
 }: {
   values: any;
-  dataDefinition: Config;
+  dataDefinition: ArrayConfig;
   name: any;
   arrayHelpers: any;
   errors: any;
 }) => {
+  console.log(name, values, dataDefinition);
   const dataSource =
-    dataDefinition.data.type === "object"
-      ? values?.map((value: any, index: number) => (
-          <Card
-            key={`${name}.${index}`}
-            size="small"
-            title={index + 1}
-            extra={
-              <MinusCircleOutlined onClick={() => arrayHelpers.remove(index)} />
-            }
-          >
-            {Object.keys(dataDefinition.data.data).map((key) => (
-              <ConfigInput
-                key={`${name}.${index}.${key}`}
-                values={values}
-                data={dataDefinition.data.data[key]}
-                errors={errors}
-                prefix={[name, `${index}`, key]}
-              />
-            ))}
-          </Card>
-        ))
-      : values?.map((value: any, index: number) => (
-          <ConfigInput
-            key={`${name}.${index}`}
-            values={values}
-            data={dataDefinition.data}
-            errors={errors}
-            prefix={[name, `${index}`]}
-            addonAfter={
-              <MinusCircleOutlined onClick={() => arrayHelpers.remove(index)} />
-            }
-          />
-        ));
+    get(values, name)?.map((value: any, index: number) => (
+      <Card
+        key={`${name}.${index}`}
+        size="small"
+        title={index + 1}
+        extra={
+          <MinusCircleOutlined onClick={() => arrayHelpers.remove(index)} />
+        }
+      >
+        <ConfigInput
+          key={`${name}.${index}`}
+          values={values}
+          data={dataDefinition.data}
+          errors={errors}
+          prefix={[name, `${index}`]}
+        />
+      </Card>
+    )) ?? [];
 
   dataSource?.push(
-    <Button type="primary" size="large" onClick={() => arrayHelpers.push(null)}>
+    <Button
+      type="primary"
+      size="large"
+      onClick={() => arrayHelpers.push(makeDefault(dataDefinition.data))}
+    >
       Add
     </Button>
   );
@@ -514,7 +568,7 @@ const ConfigInput = ({
     const name = prefix.join(".");
     return (
       <ArrayInput
-        values={get(values, name)}
+        values={values}
         isRecordType={type === "record"}
         {...{ label, name, data, required, helperText, errors }}
       />
@@ -524,18 +578,19 @@ const ConfigInput = ({
     return (
       <SelectInput
         name={prefix.join(".")}
-        {...{ label, data, values, errors, prefix }}
+        data={data as EnumConfig}
+        {...{ label, values, errors, prefix }}
       />
     );
   }
 
   return (
     <>
-      {Object.keys(data.data).map((key) => (
+      {Object.keys((data as ObjectConfig).data).map((key) => (
         <ConfigInput
           key={prefix.join(".") + "." + key}
           values={values}
-          data={data.data[key]}
+          data={(data as ObjectConfig).data[key]}
           errors={errors}
           prefix={[...prefix, key]}
         />
@@ -565,12 +620,10 @@ const generateSchema = (config: Config): any => {
     return {
       type: "object",
       patternProperties: {
-        "^*$": Object.fromEntries(
-          Object.keys(config.data.data).map((key) => [
-            key,
-            generateSchema(config.data.data[key]),
-          ])
-        ),
+        "^[sS]+$": {
+          type: "object",
+          properties: generateSchema(config.data),
+        },
       },
     };
   }
@@ -590,8 +643,6 @@ const generateSchema = (config: Config): any => {
   return schema;
 };
 
-const schema: JSONSchemaType<MyData> = generateSchema(dendronConfig);
-
 export default function Config({
   engine,
 }: {
@@ -606,10 +657,7 @@ export default function Config({
     return <></>;
   }
 
-  console.log("config", engine.config);
-
-  const generatedSchema = generateSchema(dendronConfig);
-  console.log(generatedSchema, "yooooooo");
+  const schema: JSONSchemaType<any> = generateSchema(dendronConfig);
 
   const formItemLayout = {
     labelCol: {
@@ -648,21 +696,25 @@ export default function Config({
         }}
         validate={(values) => {
           let errors: any = {};
-          const validate = ajv.current.compile(schema);
-          validate(values);
-          const { errors: ajvErrors } = validate;
+          // const validate = ajv.current.compile(schema);
+          // validate(values);
+          // console.log(
+          //   { errors: ajv.current.errors, values, validate, schema },
+          //   "yoooo"
+          // );
+          // const { errors: ajvErrors } = validate;
 
-          if (!ajvErrors?.length) {
-            return {};
-          }
+          // if (!ajvErrors?.length) {
+          //   return {};
+          // }
 
-          ajvErrors?.forEach((error) => {
-            const { instancePath, message } = error;
-            if (instancePath !== "") {
-              errors[`${instancePath.substring(1)}`] = message;
-            }
-          });
-          return { site: errors };
+          // ajvErrors?.forEach((error) => {
+          //   const { instancePath, message } = error;
+          //   if (instancePath !== "") {
+          //     errors[`${instancePath.substring(1)}`] = message;
+          //   }
+          // });
+          return {};
         }}
         validateOnChange={true}
       >

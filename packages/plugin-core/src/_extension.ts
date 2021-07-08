@@ -244,7 +244,9 @@ export async function _activate(
         forceUpgrade = true;
         Logger.info({ ctx, forceUpgrade });
       }
-    } catch (error) {}
+    } catch (error) {
+      console.error(error);
+    }
 
     if (
       (workspaceInstallStatus === InstallStatus.UPGRADED || forceUpgrade) &&

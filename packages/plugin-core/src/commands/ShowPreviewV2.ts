@@ -80,7 +80,9 @@ export class ShowPreviewV2Command extends BasicCommand<
         // If error, panel disposed and needs to be recreated
         existingPanel.reveal(viewColumn, preserveFocus);
         return;
-      } catch {}
+      } catch (error) {
+        console.error(error);
+      }
     }
 
     const panel = vscode.window.createWebviewPanel(

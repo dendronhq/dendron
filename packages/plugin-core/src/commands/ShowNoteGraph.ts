@@ -37,7 +37,9 @@ export class ShowNoteGraphCommand extends BasicCommand<
         // If error, panel disposed and needs to be recreated
         existingPanel.reveal();
         return;
-      } catch {}
+      } catch (error) {
+        console.error(error);
+      }
     }
 
     // If panel does not exist

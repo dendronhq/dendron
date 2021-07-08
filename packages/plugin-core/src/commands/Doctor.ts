@@ -141,7 +141,6 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
   async execute(opts: CommandOpts) {
     const ctx = "DoctorCommand:execute";
     window.showInformationMessage("Calling the doctor.");
-    const {} = _.defaults(opts, {});
     const ws = DendronWorkspace.instance();
     const wsRoot = DendronWorkspace.wsRoot();
     const findings: Finding[] = [];

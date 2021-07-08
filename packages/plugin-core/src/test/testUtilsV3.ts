@@ -138,7 +138,7 @@ export const writeConfig = (opts: {
   return writeYAML(configPath, opts.config);
 };
 
-export async function setupWorkspace() {}
+export async function setupWorkspace() {} // eslint-disable-line no-empty-function
 
 export async function setupLegacyWorkspace(
   opts: SetupLegacyWorkspaceOpts

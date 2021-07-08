@@ -89,8 +89,6 @@ export class EngineNoteProvider implements vscode.TreeDataProvider<string> {
   public tree: { [key: string]: TreeNote } = {};
   public active: string | undefined;
 
-  constructor() {}
-
   refresh(): void {
     this._onDidChangeTreeData.fire();
   }

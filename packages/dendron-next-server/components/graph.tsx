@@ -186,7 +186,6 @@ export default function Graph({
 
       // Show UI when layout is finished. As a fallback, show on interaction with graph.
       network.on("layoutstop viewport", () => {
-        logger.log("GRAPH READY");
         if (!isGraphLoaded) setIsGraphLoaded(true);
       });
 
@@ -195,15 +194,6 @@ export default function Graph({
       setCy(network);
     }
   };
-
-  // useEffect(() => {
-  //   if (cy && !isGraphLoaded) {
-  //     cy.on("ready", () => {
-  //       logger.log("GRAPH READY");
-  //       setIsGraphLoaded(true);
-  //     });
-  //   }
-  // }, [cy, isGraphLoaded]);
 
   useEffect(() => {
     // If changed from local graph to full graph, re-render graph to show all elements

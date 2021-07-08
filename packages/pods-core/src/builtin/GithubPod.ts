@@ -22,6 +22,7 @@ type GithubImportPodCustomOpts = {
   from?: string;
   status: string;
   token: string;
+  fname: string;
 };
 
 type GithubAPIOpts = GithubImportPodCustomOpts & {
@@ -39,7 +40,7 @@ export class GithubImportPod extends ImportPod<GithubImportPodConfig> {
 
   get config(): JSONSchemaType<GithubImportPodConfig> {
     return PodUtils.createImportConfig({
-      required: ["repository", "owner", "status", "token"],
+      required: ["repository", "owner", "status", "token", "fname"],
       properties: {
         owner: {
           type: "string",
@@ -57,22 +58,31 @@ export class GithubImportPod extends ImportPod<GithubImportPodConfig> {
         to: {
           type: "string",
           description: "import issues created before this date: YYYY-MM-DD",
-          default: Time.now(),
+          format: "date",
+          default: Time.now().toISODate(),
           nullable: true,
         },
         from: {
           type: "string",
           description: "import issues created after this date: YYYY-MM-DD",
+          format: "date",
           nullable: true,
         },
         token: {
           type: "string",
           description: "github personal access token",
         },
+        fname: {
+          type: "string",
+          description: "name of hierarchy to import into",
+        },
       },
     }) as JSONSchemaType<GithubImportPodConfig>;
   }
 
+  /*
+   * method to fetch issues from github
+   */
   getDataFromGithub = async (opts: Partial<GithubAPIOpts>) => {
     let result;
     const { owner, repository, status, created, afterCursor, token } = opts;
@@ -123,9 +133,9 @@ export class GithubImportPod extends ImportPod<GithubImportPodConfig> {
     return result;
   };
 
-  async _entries2Notes(
+  async _issues2Notes(
     entries: any,
-    opts: Pick<ImportPodConfig, "concatenate" | "destName"> & {
+    opts: Pick<ImportPodConfig, "concatenate" | "destName" | "fnameAsId"> & {
       vault: DVault;
     }
   ): Promise<NoteProps[]> {
@@ -135,6 +145,9 @@ export class GithubImportPod extends ImportPod<GithubImportPodConfig> {
         throw Error("fname not defined");
       }
       let fname = ent.node.fname;
+      if (opts.fnameAsId) {
+        ent.node.id = ent.node.fname;
+      }
       return NoteUtils.create({ ...ent.node, fname, vault });
     });
     if (opts.concatenate) {
@@ -161,10 +174,12 @@ export class GithubImportPod extends ImportPod<GithubImportPodConfig> {
     }
   }
 
+  /*
+   * method to add fromtmatter to notes: url, status and tags
+   */
   addFrontMatterToData = (
     data: any,
-    owner: string,
-    repository: string,
+    fname: string,
     config: ImportPodConfig
   ) => {
     return data.map((d: any) => {
@@ -179,7 +194,7 @@ export class GithubImportPod extends ImportPod<GithubImportPodConfig> {
       );
       d.node = {
         body: d.node.body,
-        fname: `github.issue.${owner}.${repository}.${d.node.number}-${d.node.title}`,
+        fname: `${fname}.${d.node.number}-${d.node.title}`,
         custom: {
           ...config.frontmatter,
           url: d.node.url,
@@ -189,6 +204,10 @@ export class GithubImportPod extends ImportPod<GithubImportPodConfig> {
       };
     });
   };
+
+  /*
+   * method to check if the note is already present in vault, and if present check if the status is same or not
+   */
 
   checkPresentNotes(
     notes: NoteProps[],
@@ -215,16 +234,19 @@ export class GithubImportPod extends ImportPod<GithubImportPodConfig> {
       owner,
       repository,
       status,
-      to = Time.now(),
+      to = Time.now().toISODate(),
       from,
       token,
       destName,
       concatenate,
+      fname,
+      fnameAsId,
     } = config as GithubImportPodConfig;
     let hasNextPage: boolean = true;
     let afterCursor = null;
     let created: string;
     let data: any[] = [];
+
     if (!_.isUndefined(from)) {
       created = `created:${from}..${to}`;
     } else {
@@ -244,19 +266,22 @@ export class GithubImportPod extends ImportPod<GithubImportPodConfig> {
       hasNextPage = result.search.pageInfo.hasNextPage;
       afterCursor = result.search.pageInfo.endCursor;
     }
+
     if (data.length === 0) {
       throw new DendronError({
         message:
           "No issues present for this filter. Change the config values and try again",
       });
     }
-    this.addFrontMatterToData(data, owner, repository, config);
-    let notes = await this._entries2Notes(data, {
+
+    this.addFrontMatterToData(data, fname, config);
+
+    let notes = await this._issues2Notes(data, {
       vault,
       destName,
       concatenate,
+      fnameAsId,
     });
-
     notes = this.checkPresentNotes(notes, engine, wsRoot, vault);
 
     if (notes.length === 0) {

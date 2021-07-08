@@ -7,7 +7,9 @@ export * from "./builtin";
 export * from "./types";
 export * from "./utils";
 import Ajv, { JSONSchemaType } from "ajv";
+import addFormats from "ajv-formats";
 const ajv = new Ajv();
+addFormats(ajv);
 import { DendronError } from "@dendronhq/common-all";
 
 export const podClassEntryToPodItemV4 = (p: PodClassEntryV4): PodItemV4 => {

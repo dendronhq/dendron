@@ -66,7 +66,7 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
 
   async gatherInputs(opts?: CommandOpts): Promise<CommandInput | undefined> {
     const engine = getWS().getEngine();
-    let vault = opts?.vaultName
+    const vault = opts?.vaultName
       ? VaultUtils.getVaultByName({
           vaults: engine.vaults,
           vname: opts.vaultName,

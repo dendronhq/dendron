@@ -54,7 +54,7 @@ suite("Migration", function () {
     },
   });
 
-  describe.skip("runMigration from activate", function () {
+  describe.skip("runMigration from activate", () => {
     test("global version ahead of workspace version", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
@@ -78,7 +78,7 @@ suite("Migration", function () {
     });
   });
 
-  describe("runMigration only", function () {
+  describe("runMigration only", () => {
     test("migrate to 46.0", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,

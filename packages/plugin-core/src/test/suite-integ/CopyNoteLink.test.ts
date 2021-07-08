@@ -22,7 +22,7 @@ suite("CopyNoteLink", function () {
 
   ctx = setupBeforeAfter(this, {});
 
-  describe("single", function () {
+  describe("single", () => {
     test("basic", (done) => {
       runSingleVaultTest({
         ctx,
@@ -37,7 +37,7 @@ suite("CopyNoteLink", function () {
       });
     });
 
-    test("with anchor", function (done) {
+    test("with anchor", (done) => {
       let noteWithTarget: NoteProps;
 
       runSingleVaultTest({
@@ -74,7 +74,7 @@ suite("CopyNoteLink", function () {
       });
     });
 
-    test("existing block anchor", function (done) {
+    test("existing block anchor", (done) => {
       let note: NoteProps;
 
       runSingleVaultTest({
@@ -109,7 +109,7 @@ suite("CopyNoteLink", function () {
       });
     });
 
-    test("generated block anchor", function (done) {
+    test("generated block anchor", (done) => {
       let note: NoteProps;
 
       runSingleVaultTest({
@@ -156,7 +156,7 @@ suite("CopyNoteLink", function () {
     return anchors![0];
   }
 
-  describe("multi", function () {
+  describe("multi", () => {
     test("basic", (done) => {
       runMultiVaultTest({
         ctx,
@@ -181,7 +181,7 @@ suite("CopyNoteLink", function () {
       });
     });
 
-    test("with anchor", function (done) {
+    test("with anchor", (done) => {
       let noteWithTarget: NoteProps;
       let noteWithAnchor: NoteProps;
 
@@ -237,7 +237,7 @@ suite("CopyNoteLink", function () {
       });
     });
 
-    test("existing block anchor", function (done) {
+    test("existing block anchor", (done) => {
       let note: NoteProps;
 
       runMultiVaultTest({
@@ -281,7 +281,7 @@ suite("CopyNoteLink", function () {
       });
     });
 
-    test("generated block anchor", function (done) {
+    test("generated block anchor", (done) => {
       let note: NoteProps;
 
       runMultiVaultTest({

@@ -18,8 +18,8 @@ suite("WindowWatcher", function () {
     beforeHook: () => {},
   });
 
-  describe("onDidChange", function () {
-    test("basic", function (done) {
+  describe("onDidChange", () => {
+    test("basic", (done) => {
       runSingleVaultTest({
         ctx,
         postSetupHook: async ({ vaults, wsRoot }) => {

@@ -50,8 +50,8 @@ export const provideCompletionItems = (
     .text.substr(0, position.character);
   Logger.debug({ ctx, linePrefix, position, msg: "enter" });
 
-  const isResourceAutocomplete = linePrefix.match(/\!\[\[\w*$/);
-  const isDocsAutocomplete = linePrefix.match(/\[\[[\w\|\.\#]*$/);
+  const isResourceAutocomplete = linePrefix.match(/\!\[\[\w*$/); // eslint-disable-line no-useless-escape
+  const isDocsAutocomplete = linePrefix.match(/\[\[[\w\|\.\#]*$/); // eslint-disable-line no-useless-escape
 
   if (!isDocsAutocomplete && !isResourceAutocomplete) {
     return undefined;

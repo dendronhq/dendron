@@ -12,7 +12,7 @@ import path from "path";
 import vscode, { window } from "vscode";
 
 export type DWorkspaceInitOpts = {
-  onReady: ({}: { ws: DWorkspace }) => Promise<void>;
+  onReady: ({}: { ws: DWorkspace }) => Promise<void>; // eslint-disable-line  no-empty-pattern
   numRetries?: number;
 };
 

@@ -40,10 +40,6 @@ type SourceQuickPickEntry = QuickPickItem & { src: string };
 export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
   key = DENDRON_COMMANDS.VAULT_ADD.key;
 
-  constructor() {
-    super();
-  }
-
   generateRemoteEntries = (): SourceQuickPickEntry[] => {
     return (
       DENDRON_REMOTE_VAULTS.map(({ name: label, description, data: src }) => {
@@ -64,15 +60,15 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
       { label: "local", picked: true },
       { label: "remote" },
     ]);
-    let sourceType: VaultRemoteSource | undefined;
     let sourcePath: string;
     let sourceName: string | undefined;
-    let localVaultPathPlaceholder = "vault2";
+    const localVaultPathPlaceholder = "vault2";
     if (!vaultRemoteSource) {
       return;
     }
-    sourceType = vaultRemoteSource.label as VaultRemoteSource;
+    const sourceType = vaultRemoteSource.label as VaultRemoteSource;
     if (sourceType === "remote") {
+      // eslint-disable-next-line  no-async-promise-executor
       const out = new Promise<CommandOpts | undefined>(async (resolve) => {
         const qp = VSCodeUtils.createQuickPick<SourceQuickPickEntry>();
         qp.ignoreFocusOut = true;
@@ -94,7 +90,7 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
               : selected.label;
           const placeHolder = path2Vault;
 
-          let out = await VSCodeUtils.showInputBox({
+          const out = await VSCodeUtils.showInputBox({
             prompt: "Path to your new vault (relative to your workspace root)",
             placeHolder: localVaultPathPlaceholder,
             value: path2Vault,
@@ -120,7 +116,7 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
       });
       return out;
     } else {
-      let out = await VSCodeUtils.showInputBox({
+      const out = await VSCodeUtils.showInputBox({
         prompt: "Path to your new vault (relative to your workspace root)",
         placeHolder: localVaultPathPlaceholder,
       });

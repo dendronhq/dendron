@@ -42,10 +42,7 @@ export class InsertNoteLinkCommand extends BasicCommand<
         id: this.key,
         listener: async (event) => {
           if (event.action === "done") {
-            HistoryService.instance().remove(
-              this.key,
-              "lookupProvider"
-            );
+            HistoryService.instance().remove(this.key, "lookupProvider");
             const cdata = event.data as NoteLookupProviderSuccessResp;
             resolve({ notes: cdata.selectedItems });
             lc.onHide();
@@ -68,7 +65,7 @@ export class InsertNoteLinkCommand extends BasicCommand<
       return NoteUtils.createWikiLink({ note, useTitle: false });
     });
     const editor = VSCodeUtils.getActiveTextEditor()!;
-    let current = editor.selection;
+    const current = editor.selection;
     await editor.edit((builder) => {
       builder.insert(current.start, links.join("\n"));
     });

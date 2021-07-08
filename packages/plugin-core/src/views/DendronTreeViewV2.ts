@@ -58,7 +58,7 @@ export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
   ) {
     const ctx = "DendronTreeViewV2:resolveWebView";
     this._view = webviewView;
-    let start = process.hrtime();
+    const start = process.hrtime();
     Logger.info({ ctx, msg: "enter", start });
     webviewView.webview.options = {
       enableScripts: true,

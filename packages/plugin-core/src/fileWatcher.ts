@@ -151,13 +151,13 @@ export class FileWatcher {
         this.L.debug({ ctx, uri, msg: "preparing to delete" });
         const nodeToDelete = _.find(this.engine.notes, { fname });
         if (_.isUndefined(nodeToDelete)) {
-          throw `${fname} not found`;
+          throw new Error(`${fname} not found`);
         }
         await this.engine.deleteNote(nodeToDelete.id, { metaOnly: true });
         await HistoryService.instance().add({
           action: "delete",
           source: "watcher",
-          uri: uri,
+          uri,
         });
       } catch (err) {
         this.L.info({ ctx, uri, err });

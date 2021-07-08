@@ -80,7 +80,9 @@ export class ShowPreviewV2Command extends BasicCommand<
         // If error, panel disposed and needs to be recreated
         existingPanel.reveal(viewColumn, preserveFocus);
         return;
-      } catch {}
+      } catch (error) {
+        console.error(error);
+      }
     }
 
     const panel = vscode.window.createWebviewPanel(
@@ -114,7 +116,8 @@ export class ShowPreviewV2Command extends BasicCommand<
             if (data.href.includes("localhost")) {
               const { path } = vscode.Uri.parse(data.href);
               const noteId = path.match(/.*\/(.*).html/)?.[1];
-              let note: NoteProps | undefined = undefined;
+              let note: NoteProps | undefined;
+              // eslint-disable-next-line no-cond-assign
               if (noteId && (note = getEngine().notes[noteId])) {
                 await new GotoNoteCommand().execute({
                   qs: note.fname,

@@ -18,8 +18,8 @@ suite.skip("startup", function () {
   let wsRoot: string;
   let cengine: EngineConnector;
 
-  describe("basic", function () {
-    beforeEach(async function () {
+  describe("basic", () => {
+    beforeEach(async () => {
       ctx = VSCodeUtils.getOrCreateMockContext();
       DendronWorkspace.getOrCreate(ctx);
       wsRoot = FileTestUtils.tmpDir().name;
@@ -31,7 +31,7 @@ suite.skip("startup", function () {
       cengine = new EngineConnector({ wsRoot });
     });
 
-    it("no server file", function (done) {
+    it("no server file", (done) => {
       cengine
         .init({
           onReady: async () => {},
@@ -43,7 +43,7 @@ suite.skip("startup", function () {
         });
     });
 
-    it("server file created after init", function (done) {
+    it("server file created after init", (done) => {
       cengine.init({
         onReady: async () => {
           expect(_.isUndefined(cengine.engine)).toBeFalsy();
@@ -53,11 +53,11 @@ suite.skip("startup", function () {
       _activate(ctx);
     });
 
-    it.skip("server file with wrong port", function (done) {
+    it.skip("server file with wrong port", (done) => {
       done();
     });
 
-    it("server file created before init", function (done) {
+    it("server file created before init", (done) => {
       onExtension({
         action: "activate",
         cb: async () => {

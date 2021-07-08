@@ -1,5 +1,5 @@
-import { ERROR_STATUS } from "@dendronhq/common-all";
-import { DendronError } from "@dendronhq/common-all";
+import { ERROR_STATUS, DendronError } from "@dendronhq/common-all";
+
 import { vault2Path } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";

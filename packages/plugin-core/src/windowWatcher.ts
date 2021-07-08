@@ -14,6 +14,8 @@ import { DendronASTDest, MDUtilsV5, ProcMode } from "@dendronhq/engine-server";
 import { updateDecorations } from "./features/windowDecorations";
 
 export class WindowWatcher {
+  private onDidChangeActiveTextEditorHandlers: ((e: TextEditor | undefined) => void)[] = [];
+
   activate(context: ExtensionContext) {
     window.onDidChangeVisibleTextEditors((editors) => {
       const ctx = "WindowWatcher:onDidChangeVisibleTextEditors";
@@ -29,7 +31,11 @@ export class WindowWatcher {
     );
   }
 
-  onDidChangeActiveTextEditor = (editor: TextEditor | undefined) => {
+  registerActiveTextEditorChangedHandler(handler:(e: TextEditor | undefined) => void) {
+    this.onDidChangeActiveTextEditorHandlers.push(handler);
+  }
+
+  private onDidChangeActiveTextEditor = (editor: TextEditor | undefined) => {
     const ctx = "WindowWatcher:onDidChangeActiveTextEditor";
     if (
       editor &&
@@ -46,6 +52,8 @@ export class WindowWatcher {
       this.triggerNoteGraphViewUpdate();
       this.triggerSchemaGraphViewUpdate();
       this.triggerNotePreviewUpdate(editor);
+
+      this.onDidChangeActiveTextEditorHandlers.forEach(value => value.call(this, editor));
 
       if (getWS().workspaceWatcher?.getNewlyOpenedDocument(editor.document)) {
         this.onFirstOpen(editor);
@@ -65,7 +73,47 @@ export class WindowWatcher {
       return;
     }
 
-    updateDecorations(activeEditor);
+    const createTSDecorator = (tsMatch: RegExpExecArray) => {
+      const startPos = activeEditor.document.positionAt(tsMatch.index);
+      const endPos = activeEditor.document.positionAt(
+        tsMatch.index + tsMatch[0].length
+      );
+      const ts = _.toInteger(_.trim(tsMatch[0].split(":")[1], `'" `));
+
+      const dt = DateTime.fromMillis(ts);
+      const tsConfig = getConfigValue(
+        CodeConfigKeys.DEFAULT_TIMESTAMP_DECORATION_FORMAT
+      ) as DateTimeFormat;
+      const formatOption = DateTime[tsConfig];
+      const decoration: DecorationOptions = {
+        range: new Range(startPos, endPos),
+        renderOptions: {
+          after: {
+            contentText: `  (${dt.toLocaleString(formatOption)})`,
+          },
+        },
+      };
+      return decoration;
+    };
+    text = text || activeEditor.document.getText();
+
+    const match = NoteUtils.RE_FM.exec(text);
+    if (!_.isNull(match)) {
+      const decorations = [
+        NoteUtils.RE_FM_UPDATED,
+        NoteUtils.RE_FM_CREATED,
+      ].map((RE) => {
+        const tsMatch = RE.exec((match as RegExpExecArray)[0]);
+        if (tsMatch) {
+          return createTSDecorator(tsMatch);
+        }
+        return;
+      });
+      activeEditor.setDecorations(
+        tsDecorationType,
+        decorations.filter((ent) => !_.isUndefined(ent)) as DecorationOptions[]
+      );
+    }
     return;
   }
 

@@ -10,6 +10,17 @@ export enum VSCodeEvents {
   EnableTelemetry = "EnableTelemetry",
 }
 
+export enum TutorialEvents {
+  WelcomeShow = "WelcomeShow",
+  Tutorial_0_Show = "Tutorial_0_Show",
+  Tutorial_1_Show = "Tutorial_1_Show",
+  Tutorial_2_Show = "Tutorial_2_Show",
+  Tutorial_3_Show = "Tutorial_3_Show",
+  Tutorial_4_Show = "Tutorial_4_Show",
+  Tutorial_5_Show = "Tutorial_5_Show",
+}
+
 export const DendronEvents = {
   VSCodeEvents,
+  TutorialEvents
 };

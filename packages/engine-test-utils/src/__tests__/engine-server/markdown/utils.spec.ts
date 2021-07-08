@@ -413,10 +413,10 @@ const WITH_TITLE_FOR_LINK_X_VAULT = createProcTests({
     //   const { respProcess } = extra;
     //   await checkVFile(respProcess, "[[dendron://vault2/bar]]");
     // },
-    // [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
-    //   const { respProcess } = extra;
-    //   await checkVFile(respProcess, `[Bar](../vault2/bar.md)`);
-    // },
+    [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
+      const { respProcess } = extra;
+      await checkVFile(respProcess, `[Bar](../vault2/bar.md)`);
+    },
     // [DendronASTDest.HTML]: async ({ extra }) => {
     //   const { respRehype } = extra;
     //   await checkVFile(respRehype, `<p><a href="bar.html">Bar</a></p>`);
@@ -447,7 +447,10 @@ const ALL_TEST_CASES = [
 
 describe("MDUtils.proc", () => {
   test.each(
-    ALL_TEST_CASES.map((ent) => [`${ent.dest}: ${ent.name}`, ent.testCase])
+    ALL_TEST_CASES.slice(0, 2).map((ent) => [
+      `${ent.dest}: ${ent.name}`,
+      ent.testCase,
+    ])
   )("%p", async (_key, testCase: TestPresetEntryV4) => {
     await runEngineTestV5(testCase.testFunc, {
       expect,

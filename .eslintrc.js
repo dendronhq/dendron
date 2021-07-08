@@ -1,10 +1,11 @@
 module.exports = {
+  root: true,
   env: {
     browser: true,
     es6: true,
     jest: true,
   },
-  extends: ["plugin:react/recommended", "airbnb", "prettier"],
+  extends: ["plugin:react/recommended", "airbnb", "airbnb/hooks", "prettier"],
   globals: {
     Atomics: "readonly",
     SharedArrayBuffer: "readonly",
@@ -17,7 +18,7 @@ module.exports = {
     ecmaVersion: 2018,
     sourceType: "module",
   },
-  plugins: ["react", "@typescript-eslint", "jest"],
+  plugins: ["@typescript-eslint", "jest"],
   rules: {
     // don't care
     "comma-dangle": "off",
@@ -43,7 +44,7 @@ module.exports = {
     // runs into max-len issue
     "operator-linebreak": "off",
     // rest
-    "import/no-extraneous-dependencies": "on",
+    // "import/no-extraneous-dependencies": "on",
     // A temporary hack related to IDE not resolving correct package.json
     "import/no-extraneous-dependencies": "off",
     // copy from packages/web-client/.eslintrc.json
@@ -55,6 +56,13 @@ module.exports = {
     "@typescript-eslint/camelcase": "off",
     "@typescript-eslint/interface-name-prefix": "off",
     "@typescript-eslint/no-unused-vars": "off",
+
+    "no-use-before-define": "off",
+    "@typescript-eslint/no-use-before-define": "off", // TODO should be turned on
+
+    "no-shadow": "off",
+    "@typescript-eslint/no-shadow": "off", // TODO should be turned on
+
     "react/no-children-prop": "off",
     "react/prop-types": "off",
     "import/order": "off",

@@ -7,6 +7,7 @@ import {
   ERROR_STATUS,
   getStage,
   ResponseCode,
+  TutorialEvents,
   WorkspaceSettings,
 } from "@dendronhq/common-all";
 import {
@@ -25,13 +26,14 @@ import { PodUtils } from "@dendronhq/pods-core";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import * as vscode from "vscode";
 import rif from "replace-in-file";
+import * as vscode from "vscode";
 import { ALL_COMMANDS } from "./commands";
 import { GoToSiblingCommand } from "./commands/GoToSiblingCommand";
 import { LookupCommand } from "./commands/LookupCommand";
 import { MoveNoteCommand } from "./commands/MoveNoteCommand";
 import { ReloadIndexCommand } from "./commands/ReloadIndex";
+import { SetupWorkspaceCommand } from "./commands/SetupWorkspace";
 import {
   CONFIG,
   DendronContext,
@@ -51,6 +53,8 @@ import { Logger } from "./logger";
 import { EngineAPIService } from "./services/EngineAPIService";
 import { CodeConfigKeys } from "./types";
 import { DisposableStore, resolvePath, VSCodeUtils } from "./utils";
+import { AnalyticsUtils } from "./utils/analytics";
+import { MarkdownUtils } from "./utils/md";
 import { CalendarView } from "./views/CalendarView";
 import { DendronTreeView } from "./views/DendronTreeView";
 import { DendronTreeViewV2 } from "./views/DendronTreeViewV2";
@@ -58,8 +62,6 @@ import { SampleView } from "./views/SampleView";
 import { SchemaWatcher } from "./watchers/schemaWatcher";
 import { WindowWatcher } from "./windowWatcher";
 import { WorkspaceWatcher } from "./WorkspaceWatcher";
-import { SetupWorkspaceCommand } from "./commands/SetupWorkspace";
-import { MarkdownUtils } from "./utils/md";
 
 let _DendronWorkspace: DendronWorkspace | null;
 
@@ -76,7 +78,7 @@ export async function when<T = any>(
 ): Promise<T | ResponseCode> {
   try {
     const out = DendronWorkspace.instance().config[key];
-    if (out === false || _.isUndefined(out) ? false : true) {
+    if (!(out === false || _.isUndefined(out))) {
       return cb();
     }
     return ResponseCode.PRECONDITION_FAILED;
@@ -93,7 +95,7 @@ export function whenGlobalState(key: string, cb?: () => boolean): boolean {
     };
   // @ts-ignore
   const out = DendronWorkspace.instance().getGlobalState(key);
-  if (out === false || _.isUndefined(out) ? false : true) {
+  if (!(out === false || _.isUndefined(out))) {
     return cb();
   }
   return false;
@@ -276,6 +278,7 @@ export class DendronWorkspace {
   }
 
   static async resetConfig(globalState: vscode.Memento) {
+    // eslint-disable-next-line  no-return-await
     return await Promise.all(
       _.keys(GLOBAL_STATE).map((k) => {
         const _key = GLOBAL_STATE[k as keyof typeof GLOBAL_STATE];
@@ -472,6 +475,7 @@ export class DendronWorkspace {
         Logger.info({ ctx, msg: "init:backlinks" });
         const backlinksTreeDataProvider = new BacklinksTreeDataProvider();
         vscode.window.onDidChangeActiveTextEditor(
+          // eslint-disable-next-line  no-return-await
           async () => await backlinksTreeDataProvider.refresh()
         );
         context.subscriptions.push(
@@ -606,7 +610,7 @@ export class DendronWorkspace {
     this.L.info({ ctx, stage, msg: "enter" });
     const wsRoot = DendronWorkspace.wsRoot();
     if (!wsRoot) {
-      throw `rootDir not set when activating Watcher`;
+      throw new Error(`rootDir not set when activating Watcher`);
     }
 
     const windowWatcher = new WindowWatcher();
@@ -625,8 +629,8 @@ export class DendronWorkspace {
       });
       throw Error("no folders set for workspace");
     }
-    let vaults = wsFolders as vscode.WorkspaceFolder[];
-    let realVaults = DendronWorkspace.instance().vaultsv4;
+    const vaults = wsFolders as vscode.WorkspaceFolder[];
+    const realVaults = DendronWorkspace.instance().vaultsv4;
     const fileWatcher = new FileWatcher({
       wsRoot,
       vaults: realVaults,
@@ -693,11 +697,17 @@ export class DendronWorkspace {
       panel.webview.onDidReceiveMessage(
         async (message) => {
           switch (message.command) {
+            case "loaded":
+              AnalyticsUtils.track(TutorialEvents.WelcomeShow);
+              return;
+
             case "initializeWorkspace":
               await new SetupWorkspaceCommand().run({
                 workspaceInitializer: new TutorialInitializer(),
               });
               return;
+            default:
+              break;
           }
         },
         undefined,
@@ -797,7 +807,7 @@ export class TutorialInitializer implements WorkspaceInitializer {
   }) => {
     const ctx = "TutorialInitializer.onWorkspaceOpen";
 
-    let rootUri = VSCodeUtils.joinPath(
+    const rootUri = VSCodeUtils.joinPath(
       opts.ws.rootWorkspace.uri,
       "tutorial.md"
     );
@@ -817,5 +827,32 @@ export class TutorialInitializer implements WorkspaceInitializer {
       GLOBAL_STATE.WORKSPACE_ACTIVATION_CONTEXT,
       WORKSPACE_ACTIVATION_CONTEXT.NORMAL
     );
+
+    // Register a special telemetry handler for the tutorial:
+    if (opts.ws.windowWatcher) {
+      opts.ws.windowWatcher.registerActiveTextEditorChangedHandler((e) => {
+        const fileName = e?.document.uri.fsPath;
+
+        let eventName: TutorialEvents | undefined = undefined;
+
+        if (fileName?.endsWith("tutorial.md")) {
+          eventName = TutorialEvents.Tutorial_0_Show;
+        } else if (fileName?.endsWith("tutorial.1-navigation-basics.md")) {
+          eventName = TutorialEvents.Tutorial_1_Show;
+        } else if (fileName?.endsWith("tutorial.2-taking-notes.md")) {
+          eventName = TutorialEvents.Tutorial_2_Show;
+        } else if (fileName?.endsWith("tutorial.3-linking-your-notes.md")) {
+          eventName = TutorialEvents.Tutorial_3_Show;
+        } else if (fileName?.endsWith("tutorial.4-rich-formatting.md")) {
+          eventName = TutorialEvents.Tutorial_4_Show;
+        } else if (fileName?.endsWith("tutorial.5-conclusion.md")) {
+          eventName = TutorialEvents.Tutorial_5_Show;
+        }
+
+        if (eventName) {
+          AnalyticsUtils.track(eventName);
+        }
+      });
+    }
   };
 }

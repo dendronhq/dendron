@@ -1,11 +1,4 @@
-import {
-  createLogger,
-  engineSlice,
-  ideHooks,
-  ideSlice,
-  postVSCodeMessage,
-  useVSCodeMessage,
-} from "@dendronhq/common-frontend";
+import { postVSCodeMessage } from "@dendronhq/common-frontend";
 import _ from "lodash";
 import React, { useEffect, useState } from "react";
 import { EventHandler } from "cytoscape";
@@ -19,7 +12,6 @@ import Graph from "../../components/graph";
 import { graphConfig, GraphConfig } from "../../lib/graph";
 import useGraphElements from "../../hooks/useGraphElements";
 import { DendronProps } from "../../lib/types";
-import { DendronWebViewKey } from "@dendronhq/common-all";
 
 export default function FullNoteGraph({ engine, ide }: DendronProps) {
   const [config, setConfig] = useState<GraphConfig>(graphConfig.note);

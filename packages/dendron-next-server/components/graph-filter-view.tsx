@@ -8,6 +8,8 @@ import {
   Spin,
 } from "antd";
 import _ from "lodash";
+import { useEffect } from "react";
+import { useReducer } from "react";
 import { useState } from "react";
 import { useThemeSwitcher } from "react-css-theme-switcher";
 import { GraphConfig, GraphConfigItem } from "../lib/graph";
@@ -82,6 +84,7 @@ const GraphFilterView = ({ config, setConfig, isVisible }: FilterProps) => {
                     <Space
                       direction="horizontal"
                       style={{ justifyContent: "space-between", width: "100%" }}
+                      key={key}
                     >
                       {_.isBoolean(entry?.value) && (
                         <>

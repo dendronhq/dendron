@@ -73,47 +73,7 @@ export class WindowWatcher {
       return;
     }
 
-    const createTSDecorator = (tsMatch: RegExpExecArray) => {
-      const startPos = activeEditor.document.positionAt(tsMatch.index);
-      const endPos = activeEditor.document.positionAt(
-        tsMatch.index + tsMatch[0].length
-      );
-      const ts = _.toInteger(_.trim(tsMatch[0].split(":")[1], `'" `));
-
-      const dt = DateTime.fromMillis(ts);
-      const tsConfig = getConfigValue(
-        CodeConfigKeys.DEFAULT_TIMESTAMP_DECORATION_FORMAT
-      ) as DateTimeFormat;
-      const formatOption = DateTime[tsConfig];
-      const decoration: DecorationOptions = {
-        range: new Range(startPos, endPos),
-        renderOptions: {
-          after: {
-            contentText: `  (${dt.toLocaleString(formatOption)})`,
-          },
-        },
-      };
-      return decoration;
-    };
-    text = text || activeEditor.document.getText();
-
-    const match = NoteUtils.RE_FM.exec(text);
-    if (!_.isNull(match)) {
-      const decorations = [
-        NoteUtils.RE_FM_UPDATED,
-        NoteUtils.RE_FM_CREATED,
-      ].map((RE) => {
-        const tsMatch = RE.exec((match as RegExpExecArray)[0]);
-        if (tsMatch) {
-          return createTSDecorator(tsMatch);
-        }
-        return;
-      });
-      activeEditor.setDecorations(
-        tsDecorationType,
-        decorations.filter((ent) => !_.isUndefined(ent)) as DecorationOptions[]
-      );
-    }
+    updateDecorations(activeEditor);
     return;
   }
 

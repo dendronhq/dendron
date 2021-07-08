@@ -276,6 +276,7 @@ export class DendronWorkspace {
   }
 
   static async resetConfig(globalState: vscode.Memento) {
+    // eslint-disable-next-line  no-return-await
     return await Promise.all(
       _.keys(GLOBAL_STATE).map((k) => {
         const _key = GLOBAL_STATE[k as keyof typeof GLOBAL_STATE];
@@ -472,6 +473,7 @@ export class DendronWorkspace {
         Logger.info({ ctx, msg: "init:backlinks" });
         const backlinksTreeDataProvider = new BacklinksTreeDataProvider();
         vscode.window.onDidChangeActiveTextEditor(
+          // eslint-disable-next-line  no-return-await
           async () => await backlinksTreeDataProvider.refresh()
         );
         context.subscriptions.push(

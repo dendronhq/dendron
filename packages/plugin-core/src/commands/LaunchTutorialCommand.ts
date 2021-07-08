@@ -21,6 +21,7 @@ export class LaunchTutorialCommand extends BasicCommand<
   async execute(_opts: CommandOpts): Promise<CommandOutput> {
     const ws = getWS();
 
+    // eslint-disable-next-line  no-return-await
     return await ws.showWelcome();
   }
 }

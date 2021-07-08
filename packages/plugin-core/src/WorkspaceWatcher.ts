@@ -109,6 +109,7 @@ export class WorkspaceWatcher {
       changes = [
         TextEdit.replace(new Range(startPos, endPos), `updated: ${now}`),
       ];
+      // eslint-disable-next-line  no-async-promise-executor
       const p = new Promise(async (resolve) => {
         note.updated = now;
         await eclient.updateNote(note);

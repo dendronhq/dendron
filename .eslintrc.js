@@ -56,6 +56,13 @@ module.exports = {
     "@typescript-eslint/camelcase": "off",
     "@typescript-eslint/interface-name-prefix": "off",
     "@typescript-eslint/no-unused-vars": "off",
+
+    "no-use-before-define": "off",
+    "@typescript-eslint/no-use-before-define": "off", // TODO should be turned on
+
+    "no-shadow": "off",
+    "@typescript-eslint/no-shadow": "off", // TODO should be turned on
+
     "react/no-children-prop": "off",
     "react/prop-types": "off",
     "import/order": "off",

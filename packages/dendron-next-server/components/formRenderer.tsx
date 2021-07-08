@@ -28,20 +28,23 @@ const BaseInput = ({
   required,
   helperText,
   children,
+  setSelectedKeys,
 }: BaseInputType) => (
   <Form.Item
     name={name}
     style={{ justifyContent: "center" }}
     required={required}
   >
-    <Title level={3} style={{ textTransform: "capitalize" }}>
-      {label}
-      {required && <span style={{ color: "red" }}> *</span>}
-    </Title>
-    {children}
-    <br />
-    <Text type="secondary">{helperText}</Text>
-    <Text type="danger">{get(errors, name)}</Text>
+    <div onClick={() => setSelectedKeys && setSelectedKeys([name])}>
+      <Title id={name} level={3} style={{ textTransform: "capitalize" }}>
+        {label}
+        {required && <span style={{ color: "red" }}> *</span>}
+      </Title>
+      {children}
+      <br />
+      <Text type="secondary">{helperText}</Text>
+      <Text type="danger">{get(errors, name)}</Text>
+    </div>
   </Form.Item>
 );
 
@@ -54,9 +57,12 @@ const SimpleInput = ({
   helperText,
   errors,
   addonAfter,
+  setSelectedKeys,
 }: SimpleInputType) => {
   return (
-    <BaseInput {...{ name, label, required, helperText, errors }}>
+    <BaseInput
+      {...{ name, label, required, helperText, errors, setSelectedKeys }}
+    >
       <Input
         type={type}
         name={name}
@@ -75,9 +81,12 @@ const SelectInput = ({
   required,
   helperText,
   errors,
+  setSelectedKeys,
 }: SelectInputType) => {
   return (
-    <BaseInput {...{ name, label, required, helperText, errors }}>
+    <BaseInput
+      {...{ name, label, required, helperText, errors, setSelectedKeys }}
+    >
       <Select name={name}>
         {data.data.map((value) => (
           <Select.Option key={value} value={value}>
@@ -95,9 +104,12 @@ const BooleanInput = ({
   required,
   helperText,
   errors,
+  setSelectedKeys,
 }: InputType) => {
   return (
-    <BaseInput {...{ name, label, required, helperText, errors }}>
+    <BaseInput
+      {...{ name, label, required, helperText, errors, setSelectedKeys }}
+    >
       <Switch name={name} />
     </BaseInput>
   );
@@ -321,6 +333,7 @@ const ConfigInput = ({
   errors,
   prefix,
   addonAfter,
+  setSelectedKeys,
 }: ConfigInputType) => {
   const { type, required, helperText, label } = data;
   if (type === "string" || type === "number") {
@@ -333,6 +346,7 @@ const ConfigInput = ({
         helperText={helperText}
         errors={errors}
         addonAfter={addonAfter}
+        setSelectedKeys={setSelectedKeys}
       />
     );
   }
@@ -344,6 +358,7 @@ const ConfigInput = ({
         required={required}
         helperText={helperText}
         errors={errors}
+        setSelectedKeys={setSelectedKeys}
       />
     );
   }
@@ -354,7 +369,15 @@ const ConfigInput = ({
       <ArrayInput
         values={values}
         isRecordType={type === "record"}
-        {...{ label, name, data, required, helperText, errors }}
+        {...{
+          label,
+          name,
+          data,
+          required,
+          helperText,
+          errors,
+          setSelectedKeys,
+        }}
       />
     );
   }
@@ -363,7 +386,7 @@ const ConfigInput = ({
       <SelectInput
         name={prefix.join(".")}
         data={data as EnumConfig}
-        {...{ label, values, errors, prefix }}
+        {...{ label, values, errors, prefix, setSelectedKeys }}
       />
     );
   }
@@ -377,6 +400,7 @@ const ConfigInput = ({
           data={(data as ObjectConfig).data[key]}
           errors={errors}
           prefix={[...prefix, key]}
+          setSelectedKeys={setSelectedKeys}
         />
       ))}
     </>

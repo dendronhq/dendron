@@ -35,7 +35,7 @@ export class EngineAPIService extends DendronEngineClient {
     });
 
     const newSvc = new EngineAPIService({ api, vaults, ws, history });
-    if (enableWorkspaceTrust != undefined) {
+    if (enableWorkspaceTrust !== undefined) {
       newSvc._trustedWorkspace = enableWorkspaceTrust;
     }
     return newSvc;

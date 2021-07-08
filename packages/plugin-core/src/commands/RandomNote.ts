@@ -31,7 +31,7 @@ export class RandomNoteCommand extends BasicCommand<
     const includeSet: string[] = config?.include ?? [""];
 
     const searchPredicate = function (note: NoteProps) {
-      if (note.stub == true) {
+      if (note.stub === true) {
         return false;
       }
 

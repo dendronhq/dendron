@@ -81,7 +81,7 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     }
     const button = quickpick.buttons[0] as IDoctorQuickInputButton;
     button.pressed = !button.pressed;
-    button.type = button.type == "workspace" ? "file" : "workspace";
+    button.type = button.type === "workspace" ? "file" : "workspace";
     quickpick.buttons = [button];
     quickpick.title = `Doctor (${button.type})`;
   };

@@ -34,7 +34,7 @@ export class SyncCommand extends BasicCommand<CommandOpts, CommandReturns> {
     const matchingResults = results.filter(
       (result) => result.status === status
     );
-    if (matchingResults.length == 0) return [];
+    if (matchingResults.length === 0) return [];
     return matchingResults.map((result) => result.repo);
   }
 
@@ -82,7 +82,7 @@ export class SyncCommand extends BasicCommand<CommandOpts, CommandReturns> {
     const committedDone = SyncCommand.countDone(committed);
     const pulledDone = SyncCommand.countDone(pulled);
     const pushedDone = SyncCommand.countDone(pushed);
-    const repos = (count: number) => (count == 1 ? "repo" : "repos");
+    const repos = (count: number) => (count === 1 ? "repo" : "repos");
     message.push(`Committed ${committedDone} ${repos(committedDone)},`);
     message.push(`tried pulling ${pulledDone}`);
     message.push(`and pushing ${pushedDone} ${repos(pushedDone)}.`);

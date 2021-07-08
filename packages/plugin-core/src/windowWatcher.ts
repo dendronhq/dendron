@@ -37,6 +37,8 @@ const tsDecorationType = window.createTextEditorDecorationType({
 });
 
 export class WindowWatcher {
+  private onDidChangeActiveTextEditorHandlers: ((e: TextEditor | undefined) => void)[] = [];
+
   activate(context: ExtensionContext) {
     window.onDidChangeVisibleTextEditors((editors) => {
       const ctx = "WindowWatcher:onDidChangeVisibleTextEditors";
@@ -52,7 +54,11 @@ export class WindowWatcher {
     );
   }
 
-  onDidChangeActiveTextEditor = (editor: TextEditor | undefined) => {
+  registerActiveTextEditorChangedHandler(handler:(e: TextEditor | undefined) => void) {
+    this.onDidChangeActiveTextEditorHandlers.push(handler);
+  }
+
+  private onDidChangeActiveTextEditor = (editor: TextEditor | undefined) => {
     const ctx = "WindowWatcher:onDidChangeActiveTextEditor";
     if (
       editor &&
@@ -69,6 +75,8 @@ export class WindowWatcher {
       this.triggerNoteGraphViewUpdate();
       this.triggerSchemaGraphViewUpdate();
       this.triggerNotePreviewUpdate(editor);
+
+      this.onDidChangeActiveTextEditorHandlers.forEach(value => value.call(this, editor));
 
       if (getWS().workspaceWatcher?.getNewlyOpenedDocument(editor.document)) {
         this.onFirstOpen(editor);

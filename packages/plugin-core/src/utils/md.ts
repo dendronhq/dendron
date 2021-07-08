@@ -45,7 +45,7 @@ const REGEX_CODE_SPAN = /`[^`]*?`/gm;
 // export const RE_WIKI_LINK_ALIAS = "([^\\[\\]]+?\\|)?";
 // const isResourceAutocomplete = linePrefix.match(/\!\[\[\w*$/);
 //   const isDocsAutocomplete = linePrefix.match(/\[\[\w*$/);
-const uncPathRegex = /^[\\\/]{2,}[^\\\/]+[\\\/]+[^\\\/]+/;
+const uncPathRegex = /^[\\\/]{2,}[^\\\/]+[\\\/]+[^\\\/]+/; // eslint-disable-line no-useless-escape
 export const otherExts = [
   "doc",
   "docx",

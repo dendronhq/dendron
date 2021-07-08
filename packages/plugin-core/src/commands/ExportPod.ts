@@ -65,7 +65,7 @@ export class ExportPodCommand extends BaseCommand<
     if (!wsRoot) {
       throw Error("ws root not defined");
     }
-    const pod = new opts.podChoice.podClass();
+    const pod = new opts.podChoice.podClass(); // eslint-disable-line new-cap
     const engine = DendronWorkspace.instance().getEngine();
     await pod.execute({ config: opts.config, engine, wsRoot, vaults });
     const dest = opts.config.dest;

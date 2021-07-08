@@ -40,10 +40,6 @@ type SourceQuickPickEntry = QuickPickItem & { src: string };
 export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
   key = DENDRON_COMMANDS.VAULT_ADD.key;
 
-  constructor() {
-    super();
-  }
-
   generateRemoteEntries = (): SourceQuickPickEntry[] => {
     return (
       DENDRON_REMOTE_VAULTS.map(({ name: label, description, data: src }) => {
@@ -72,6 +68,7 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
     }
     const sourceType = vaultRemoteSource.label as VaultRemoteSource;
     if (sourceType === "remote") {
+      // eslint-disable-next-line  no-async-promise-executor
       const out = new Promise<CommandOpts | undefined>(async (resolve) => {
         const qp = VSCodeUtils.createQuickPick<SourceQuickPickEntry>();
         qp.ignoreFocusOut = true;

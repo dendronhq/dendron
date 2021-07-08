@@ -105,6 +105,7 @@ export class EngineNoteProvider implements vscode.TreeDataProvider<string> {
     return this.tree[id];
   }
 
+  // eslint-disable-next-line no-undef -- eslint does not recognize `Thenable`
   getChildren(id?: string): Thenable<string[]> {
     const ctx = "TreeView:getChildren";
     Logger.debug({ ctx, id });

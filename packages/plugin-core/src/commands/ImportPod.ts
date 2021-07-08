@@ -81,7 +81,7 @@ export class ImportPodCommand extends BaseCommand<
     }
     const engine = DendronWorkspace.instance().getEngine();
     const vaults = DendronWorkspace.instance().vaultsv4;
-    const pod = new opts.podChoice.podClass() as ImportPod;
+    const pod = new opts.podChoice.podClass() as ImportPod; // eslint-disable-line new-cap
     const fileWatcher = getWS().fileWatcher;
     if (fileWatcher) {
       fileWatcher.pause = true;

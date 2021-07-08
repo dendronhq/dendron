@@ -147,8 +147,8 @@ async function startServer() {
   const logPath = DendronWorkspace.instance().context.logPath;
   Logger.info({ ctx, logLevel: process.env["LOG_LEVEL"], maybePort });
   if (!maybePort) {
-    const { launchv2 } = require("@dendronhq/api-server");
-    return await launchv2({
+    const { launchv2 } = require("@dendronhq/api-server"); // eslint-disable-line global-require
+    return launchv2({
       port: maybePort,
       logPath: path.join(logPath, "dendron.server.log"),
       nextServerUrl,

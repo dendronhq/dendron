@@ -37,6 +37,7 @@ export class RandomNoteCommand extends BasicCommand<
 
       let isMatch = false;
 
+      // eslint-disable-next-line no-restricted-syntax
       for (const pattern of includeSet) {
         if (note.fname.toLowerCase().startsWith(pattern.toLowerCase())) {
           isMatch = true;
@@ -46,6 +47,7 @@ export class RandomNoteCommand extends BasicCommand<
 
       // Remove Exclude Paths, if specified:
       if (config?.exclude) {
+        // eslint-disable-next-line no-restricted-syntax
         for (const pattern of config?.exclude) {
           if (note.fname.toLowerCase().startsWith(pattern.toLowerCase())) {
             isMatch = false;

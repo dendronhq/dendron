@@ -117,6 +117,7 @@ export class ShowPreviewV2Command extends BasicCommand<
               const { path } = vscode.Uri.parse(data.href);
               const noteId = path.match(/.*\/(.*).html/)?.[1];
               let note: NoteProps | undefined;
+              // eslint-disable-next-line no-cond-assign
               if (noteId && (note = getEngine().notes[noteId])) {
                 await new GotoNoteCommand().execute({
                   qs: note.fname,

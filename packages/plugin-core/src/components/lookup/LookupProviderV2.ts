@@ -513,6 +513,7 @@ export class LookupProviderV2 {
     if (opts.flavor === "note") {
       // if we are doing a query, reset pagination options
       PickerUtilsV2.resetPaginationOpts(picker);
+      // eslint-disable-next-line no-useless-catch
       try {
         const resp = await engine.queryNotes({ qs });
         nodes = resp.data;
@@ -759,7 +760,7 @@ export class LookupProviderV2 {
         source,
         flavor: opts.flavor,
       });
-      return picker;
+      return; // eslint-disable-line no-unsafe-finally -- probably can be just removed
     }
   };
 

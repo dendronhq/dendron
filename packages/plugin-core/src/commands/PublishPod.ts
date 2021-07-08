@@ -68,7 +68,7 @@ export class PublishPodCommand extends BaseCommand<
 
     const engine = DendronWorkspace.instance().getEngine();
     const wsRoot = DendronWorkspace.wsRoot() as string;
-    const pod = new podClass() as JSONPublishPod;
+    const pod = new podClass() as JSONPublishPod; // eslint-disable-line new-cap
     const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
     try {
       const link = await pod.execute({

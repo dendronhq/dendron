@@ -189,7 +189,7 @@ export async function setupLegacyWorkspaceMulti(
   const { preSetupHook, postSetupHook, wsSettingsOverride } = copts;
 
   const { wsRoot, vaults } = await EngineTestUtilsV4.setupWS();
-  new StateService(opts.ctx);
+  new StateService(opts.ctx); // eslint-disable-line no-new
   setupCodeConfiguration(opts);
   // setup workspace file
   stubWorkspace({ wsRoot, vaults });

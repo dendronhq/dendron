@@ -51,7 +51,7 @@ export const buildSite = async (opts: BuildSiteV2CLICommandCliOpts) => {
   );
   let importEleventy: any;
   try {
-    importEleventy = require(`./webpack-require-hack.js`);
+    importEleventy = require(`./webpack-require-hack.js`); // eslint-disable-line global-require
   } catch (error) {
     importEleventy = require;
   }

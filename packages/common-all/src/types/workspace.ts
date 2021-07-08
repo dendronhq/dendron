@@ -272,6 +272,10 @@ export type DendronDevConfig = {
    * Enable experimental web ui. Default is false
    */
   enableWebUI?: boolean;
+  /**
+   * Enable displaying and indexing unreferenced links. Default is false
+   */
+  enableUnrefLinks?: boolean;
 };
 
 export type DendronSiteConfig = {

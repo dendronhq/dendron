@@ -72,9 +72,8 @@ describe("GithubPod import pod", () => {
       async ({ engine, vaults, wsRoot }) => {
         const pod = new GithubImportPod();
         const vaultName = VaultUtils.getName(vaults[0]);
-        const mock = jest.fn();
-        mock.mockReturnValue(result);
-        pod.getDataFromGithub = mock;
+
+        pod.getDataFromGithub = jest.fn().mockReturnValue(result);
 
         await pod.execute({
           engine,
@@ -112,9 +111,7 @@ describe("GithubPod import pod", () => {
         const pod = new GithubImportPod();
         const vaultName = VaultUtils.getName(vaults[0]);
 
-        const mock = jest.fn();
-        mock.mockReturnValue(result);
-        pod.getDataFromGithub = mock;
+        pod.getDataFromGithub = jest.fn().mockReturnValue(result);
 
         await pod.execute({
           engine,
@@ -152,9 +149,7 @@ describe("GithubPod import pod", () => {
         const pod = new GithubImportPod();
         const vaultName = VaultUtils.getName(vaults[0]);
 
-        const mock = jest.fn();
-        mock.mockReturnValue(result);
-        pod.getDataFromGithub = mock;
+        pod.getDataFromGithub = jest.fn().mockReturnValue(result);
 
         await pod.execute({
           engine,

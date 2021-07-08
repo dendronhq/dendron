@@ -81,7 +81,7 @@ export class GithubImportPod extends ImportPod<GithubImportPodConfig> {
   }
 
   /*
-   * method to fetch issues from github
+   * method to fetch issues from github graphql api
    */
   getDataFromGithub = async (opts: Partial<GithubAPIOpts>) => {
     let result;
@@ -206,10 +206,10 @@ export class GithubImportPod extends ImportPod<GithubImportPodConfig> {
   };
 
   /*
-   * method to check if the note is already present in vault, and if present check if the status is same or not
+   * method to get notes that are not already present in the vault
    */
 
-  checkPresentNotes(
+  getNewNotes(
     notes: NoteProps[],
     engine: DEngineClient,
     wsRoot: string,
@@ -222,8 +222,34 @@ export class GithubImportPod extends ImportPod<GithubImportPodConfig> {
         vault,
         wsRoot,
       });
-      return _.isUndefined(n) || n.custom.status !== note.custom.status;
+      return _.isUndefined(n);
     });
+  }
+
+  /*
+   * method to update the notes whose status has changed
+   */
+  getUpdatedNotes(
+    notes: NoteProps[],
+    engine: DEngineClient,
+    wsRoot: string,
+    vault: DVault
+  ) {
+    let updatedNotes: NoteProps[] = [];
+    notes.forEach(async (note) => {
+      const n = NoteUtils.getNoteByFnameV5({
+        fname: note.fname,
+        notes: engine.notes,
+        vault,
+        wsRoot,
+      });
+      if (!_.isUndefined(n) && n.custom.status !== note.custom.status) {
+        n.custom.status = note.custom.status;
+        updatedNotes = [...updatedNotes, n];
+        await engine.writeNote(n, { newNode: true });
+      }
+    });
+    return updatedNotes;
   }
 
   async plant(opts: GithubImportPodPlantOpts) {
@@ -282,15 +308,11 @@ export class GithubImportPod extends ImportPod<GithubImportPodConfig> {
       concatenate,
       fnameAsId,
     });
-    notes = this.checkPresentNotes(notes, engine, wsRoot, vault);
+    const newNotes = this.getNewNotes(notes, engine, wsRoot, vault);
+    const updatedNotes = this.getUpdatedNotes(notes, engine, wsRoot, vault);
 
-    if (notes.length === 0) {
-      throw new DendronError({
-        message: "No new issues to sync.",
-      });
-    }
-    await engine.bulkAddNotes({ notes });
+    await engine.bulkAddNotes({ notes: newNotes });
 
-    return { importedNotes: notes };
+    return { importedNotes: [...newNotes, ...updatedNotes] };
   }
 }

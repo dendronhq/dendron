@@ -16,8 +16,8 @@ suite("FileWatcher", function () {
     beforeHook: () => {},
   });
 
-  describe("onDidCreate", function () {
-    test("onDidCreate", function (done) {
+  describe("onDidCreate", () => {
+    test("onDidCreate", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
         postSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti,

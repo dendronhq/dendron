@@ -7,6 +7,7 @@ import { DendronWorkspace, getWS } from "../workspace";
 import { BasicCommand } from "./base";
 import { getPortFilePath } from "@dendronhq/engine-server";
 import { clipboard } from "../utils";
+
 const L = Logger;
 
 type DiagnosticsReportCommandOpts = {};

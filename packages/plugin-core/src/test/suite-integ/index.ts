@@ -12,7 +12,7 @@ export function run(): Promise<void> {
   const testsRoot = path.resolve(__dirname, ".");
 
   return new Promise((c, e) => {
-    let fname = process.env.TEST_TO_RUN;
+    const fname = process.env.TEST_TO_RUN;
     // uncomment to run tests remotely
     // fname = '[UV]*.test'
     let pattern = "**/*.test.js";

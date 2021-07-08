@@ -14,8 +14,8 @@ suite("NoteSyncService", function () {
     beforeHook: () => {},
   });
 
-  describe("onDidChange", function () {
-    test("onDidChange: change", function (done) {
+  describe("onDidChange", () => {
+    test("onDidChange: change", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
         postSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti,
@@ -41,7 +41,7 @@ suite("NoteSyncService", function () {
       });
     });
 
-    test("onDidChange: no change", function (done) {
+    test("onDidChange: no change", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
         postSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti,

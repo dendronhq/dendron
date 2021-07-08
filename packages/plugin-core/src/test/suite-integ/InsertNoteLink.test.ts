@@ -19,8 +19,8 @@ suite("InsertNoteLink", function () {
     },
   });
 
-  describe("basic", function () {
-    test("basic", function (done) {
+  describe("basic", () => {
+    test("basic", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
         preSetupHook: async ({ wsRoot, vaults }) => {

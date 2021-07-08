@@ -5,6 +5,7 @@ import { DENDRON_COMMANDS } from "../constants";
 import { Logger } from "../logger";
 import { getWS } from "../workspace";
 import { BasicCommand } from "./base";
+
 const L = Logger;
 
 type CommandOpts = {};

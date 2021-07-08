@@ -1,6 +1,6 @@
 import { DendronError } from "@dendronhq/common-all";
-import { getDurationMilliseconds } from "@dendronhq/common-server";
-import { DLogger } from "@dendronhq/common-server";
+import { getDurationMilliseconds, DLogger } from "@dendronhq/common-server";
+
 import _ from "lodash";
 import { window } from "vscode";
 import { Logger } from "../logger";
@@ -87,7 +87,7 @@ export abstract class BaseCommand<
       }
       return;
     } catch (error) {
-      let cerror: DendronError =
+      const cerror: DendronError =
         error instanceof DendronError
           ? error
           : new DendronError({

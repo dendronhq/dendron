@@ -14,7 +14,7 @@ import { DendronWorkspace, resolveRelToWSRoot } from "../../workspace";
 import { expect, genDefaultSettings, genEmptyWSFiles } from "../testUtilsv2";
 import { runLegacySingleWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
-suite("SetupWorkspace", function () {
+suite("SetupWorkspace", () => {
   let ctx: ExtensionContext;
 
   describe("workspace", function () {
@@ -26,7 +26,7 @@ suite("SetupWorkspace", function () {
 
     // update test for partial failure
 
-    it("basic", function (done) {
+    it("basic", (done) => {
       DendronWorkspace.version = () => "0.0.1";
       runLegacySingleWorkspaceTest({
         ctx,
@@ -55,7 +55,7 @@ suite("SetupWorkspace", function () {
       });
     });
 
-    it("missing root.schema", function (done) {
+    it("missing root.schema", (done) => {
       DendronWorkspace.version = () => "0.0.1";
       runLegacySingleWorkspaceTest({
         ctx,

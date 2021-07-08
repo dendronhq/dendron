@@ -59,7 +59,7 @@ suite("GotoNote", function () {
           const vault = vaults[0];
           const ws = DendronWorkspace.instance();
           const engine = ws.getEngine();
-          let note = NoteUtils.getNoteByFnameV5({
+          const note = NoteUtils.getNoteByFnameV5({
             fname: "foo",
             notes: engine.notes,
             vault,

@@ -45,7 +45,7 @@ const REGEX_CODE_SPAN = /`[^`]*?`/gm;
 // export const RE_WIKI_LINK_ALIAS = "([^\\[\\]]+?\\|)?";
 // const isResourceAutocomplete = linePrefix.match(/\!\[\[\w*$/);
 //   const isDocsAutocomplete = linePrefix.match(/\[\[\w*$/);
-const uncPathRegex = /^[\\\/]{2,}[^\\\/]+[\\\/]+[^\\\/]+/;
+const uncPathRegex = /^[\\\/]{2,}[^\\\/]+[\\\/]+[^\\\/]+/; // eslint-disable-line no-useless-escape
 export const otherExts = [
   "doc",
   "docx",
@@ -86,10 +86,10 @@ export const containsOtherKnownExts = (pathParam: string): boolean =>
 export class MarkdownUtils {
   static async openPreview(opts?: { reuseWindow?: boolean }) {
     const cleanOpts = _.defaults(opts, { reuseWindow: false });
-    let previewEnhanced = extensions.getExtension(
+    const previewEnhanced = extensions.getExtension(
       "dendron.markdown-preview-enhanced"
     );
-    let previewEnhanced2 = extensions.getExtension(
+    const previewEnhanced2 = extensions.getExtension(
       "dendron.dendron-markdown-preview-enhanced"
     );
     const cmds = {
@@ -247,7 +247,7 @@ export const getReferenceAtPosition = (
 
   return {
     // If ref is missing, it's implicitly the current file
-    ref: ref ? ref : NoteUtils.uri2Fname(document.uri),
+    ref: ref || NoteUtils.uri2Fname(document.uri),
     label,
     range,
     anchorStart,
@@ -265,7 +265,7 @@ export const parseRef = (rawRef: string): RefT => {
   const { anchorStart, anchorEnd, vaultName } = parsed.data;
 
   return {
-    label: alias ? alias : "",
+    label: alias || "",
     ref: fname,
     anchorStart: parseAnchor(anchorStart),
     anchorEnd: parseAnchor(anchorEnd),

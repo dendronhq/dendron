@@ -102,7 +102,8 @@ export function addOrGetAnchorAt(opts: {
   anchor?: string;
   engine: DEngineClient;
 }) {
-  let { editBuilder, editor, position, anchor } = opts;
+  const { editBuilder, editor, position } = opts;
+  let { anchor } = opts;
   const line = editor.document.lineAt(position.line);
   const existingAnchor = getAnchorAt(opts);
   if (!_.isUndefined(existingAnchor)) return existingAnchor;

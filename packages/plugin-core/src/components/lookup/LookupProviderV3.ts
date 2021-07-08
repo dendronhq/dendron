@@ -246,7 +246,7 @@ export class NoteLookupProvider implements ILookupProviderV3 {
         profile,
         cancelled: token.isCancellationRequested,
       });
-      return;
+      return; // eslint-disable-line no-unsafe-finally -- probably can be just removed
     }
   }
 

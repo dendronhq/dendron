@@ -29,7 +29,7 @@ suite("ConfigurePod", function () {
     },
   });
 
-  test("no config", function (done) {
+  test("no config", (done) => {
     onWSInit(async () => {
       const cmd = new ConfigurePodCommand();
       const podChoice = podClassEntryToPodItemV4(JSONExportPod);
@@ -55,7 +55,7 @@ suite("ConfigurePod", function () {
     });
   });
 
-  test("config present", function (done) {
+  test("config present", (done) => {
     onWSInit(async () => {
       const cmd = new ConfigurePodCommand();
       const podChoice = podClassEntryToPodItemV4(JSONExportPod);

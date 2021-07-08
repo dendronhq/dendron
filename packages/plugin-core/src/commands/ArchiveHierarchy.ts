@@ -33,7 +33,7 @@ export class ArchiveHierarchyCommand extends BasicCommand<
     if (editor) {
       value = NoteUtils.uri2Fname(editor.document.uri);
     }
-    let match = await VSCodeUtils.showInputBox({
+    const match = await VSCodeUtils.showInputBox({
       prompt: "Enter hierarchy to archive",
       value,
     });

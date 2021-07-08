@@ -16,8 +16,8 @@ suite("WorkspaceWatcher", function () {
     },
   });
 
-  describe("onWillSave", function () {
-    test("don't save when content the same", function (done) {
+  describe("onWillSave", () => {
+    test("don't save when content the same", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
         preSetupHook: ENGINE_HOOKS.setupBasic,
@@ -38,7 +38,7 @@ suite("WorkspaceWatcher", function () {
       });
     });
 
-    test("ok: save when content changed", function (done) {
+    test("ok: save when content changed", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
         preSetupHook: ENGINE_HOOKS.setupBasic,

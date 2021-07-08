@@ -54,7 +54,7 @@ function getVersion() {
 }
 
 function main() {
-  let args = yargs.option("--no-sync-static", {
+  const args = yargs.option("--no-sync-static", {
     alias: "S",
     description: "don't compile static assets",
   }).argv;

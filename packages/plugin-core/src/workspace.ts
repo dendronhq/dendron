@@ -78,7 +78,7 @@ export async function when<T = any>(
 ): Promise<T | ResponseCode> {
   try {
     const out = DendronWorkspace.instance().config[key];
-    if (out === false || _.isUndefined(out) ? false : true) {
+    if (!(out === false || _.isUndefined(out))) {
       return cb();
     }
     return ResponseCode.PRECONDITION_FAILED;
@@ -95,7 +95,7 @@ export function whenGlobalState(key: string, cb?: () => boolean): boolean {
     };
   // @ts-ignore
   const out = DendronWorkspace.instance().getGlobalState(key);
-  if (out === false || _.isUndefined(out) ? false : true) {
+  if (!(out === false || _.isUndefined(out))) {
     return cb();
   }
   return false;
@@ -278,6 +278,7 @@ export class DendronWorkspace {
   }
 
   static async resetConfig(globalState: vscode.Memento) {
+    // eslint-disable-next-line  no-return-await
     return await Promise.all(
       _.keys(GLOBAL_STATE).map((k) => {
         const _key = GLOBAL_STATE[k as keyof typeof GLOBAL_STATE];
@@ -474,6 +475,7 @@ export class DendronWorkspace {
         Logger.info({ ctx, msg: "init:backlinks" });
         const backlinksTreeDataProvider = new BacklinksTreeDataProvider();
         vscode.window.onDidChangeActiveTextEditor(
+          // eslint-disable-next-line  no-return-await
           async () => await backlinksTreeDataProvider.refresh()
         );
         context.subscriptions.push(
@@ -608,7 +610,7 @@ export class DendronWorkspace {
     this.L.info({ ctx, stage, msg: "enter" });
     const wsRoot = DendronWorkspace.wsRoot();
     if (!wsRoot) {
-      throw `rootDir not set when activating Watcher`;
+      throw new Error(`rootDir not set when activating Watcher`);
     }
 
     const windowWatcher = new WindowWatcher();
@@ -627,8 +629,8 @@ export class DendronWorkspace {
       });
       throw Error("no folders set for workspace");
     }
-    let vaults = wsFolders as vscode.WorkspaceFolder[];
-    let realVaults = DendronWorkspace.instance().vaultsv4;
+    const vaults = wsFolders as vscode.WorkspaceFolder[];
+    const realVaults = DendronWorkspace.instance().vaultsv4;
     const fileWatcher = new FileWatcher({
       wsRoot,
       vaults: realVaults,
@@ -704,6 +706,8 @@ export class DendronWorkspace {
                 workspaceInitializer: new TutorialInitializer(),
               });
               return;
+            default:
+              break;
           }
         },
         undefined,
@@ -803,7 +807,7 @@ export class TutorialInitializer implements WorkspaceInitializer {
   }) => {
     const ctx = "TutorialInitializer.onWorkspaceOpen";
 
-    let rootUri = VSCodeUtils.joinPath(
+    const rootUri = VSCodeUtils.joinPath(
       opts.ws.rootWorkspace.uri,
       "tutorial.md"
     );

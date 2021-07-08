@@ -50,6 +50,7 @@ import {
   setupBeforeAfter,
   withConfig,
 } from "../testUtilsV3";
+
 const { createNoActiveItem } = NotePickerUtils;
 
 const createEngineForSchemaUpdateItems = createEngineFactory({
@@ -143,7 +144,7 @@ const schemaAcceptHelper = async (qs: string) => {
   const engOpts: EngineOpts = { flavor: "schema" };
   const ws = DendronWorkspace.instance();
   const client = ws.getEngine();
-  let schemaModule = client.schemas[qs];
+  const schemaModule = client.schemas[qs];
   const schemaInput = SchemaUtils.enhanceForQuickInput({
     props: schemaModule,
     vaults: DendronWorkspace.instance().config.vaults,
@@ -235,7 +236,7 @@ suite("Lookup, schemas", function () {
   let ctx: vscode.ExtensionContext;
   ctx = setupBeforeAfter(this, {});
 
-  describe("updateItems", function () {
+  describe("updateItems", () => {
     _.map(
       ENGINE_QUERY_PRESETS["SCHEMAS"],
       (TestCase: TestPresetEntryV4, name) => {
@@ -269,7 +270,7 @@ suite("Lookup, schemas", function () {
     );
   });
 
-  describe("onAccept", function () {
+  describe("onAccept", () => {
     _.map(
       _.pick(ENGINE_QUERY_PRESETS["SCHEMAS"], "SIMPLE"),
       (TestCase: TestPresetEntryV4, name) => {
@@ -347,7 +348,7 @@ suite("Lookup, notesv2", function () {
   });
 
   // TODO: flaky test, can run by itself
-  describe.skip("updateItems", function () {
+  describe.skip("updateItems", () => {
     _.forEach(
       ENGINE_QUERY_PRESETS["NOTES"],
       (TestCase: TestPresetEntryV4, name) => {
@@ -427,7 +428,7 @@ suite("Lookup, notesv2", function () {
           const lc = new LookupControllerV2(engOpts);
           const lp = new LookupProviderV2(engOpts);
 
-          let quickpick = await lc.show();
+          const quickpick = await lc.show();
           let note = _.find(quickpick.items, {
             fname: "foo",
           }) as DNodePropsQuickInputV2;
@@ -522,8 +523,8 @@ suite("Lookup, notesv2", function () {
     });
   });
 
-  describe("onAccept with modifiers", function () {
-    test("with lookupPrompt on current vault", function (done) {
+  describe("onAccept with modifiers", () => {
+    test("with lookupPrompt on current vault", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
         onInit: async ({ wsRoot, vaults }) => {
@@ -537,11 +538,11 @@ suite("Lookup, notesv2", function () {
           );
 
           const vault = vaults[0];
-          let { lc, lp, picker } = await lookupHelperForNote();
+          const { lc, lp, picker } = await lookupHelperForNote();
           await lc.updatePickerBehavior({ quickPick: picker, provider: lp });
 
           picker.value = "alpha";
-          sinon.stub(picker, "selectedItems").get(function () {
+          sinon.stub(picker, "selectedItems").get(() => {
             return [createNoActiveItem(vault)];
           });
           sinon
@@ -563,7 +564,7 @@ suite("Lookup, notesv2", function () {
       });
     });
 
-    test("with lookupPrompt on other vault", function (done) {
+    test("with lookupPrompt on other vault", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
         onInit: async ({ wsRoot, vaults }) => {
@@ -577,11 +578,11 @@ suite("Lookup, notesv2", function () {
           );
 
           const vault = vaults[0];
-          let { lc, lp, picker } = await lookupHelperForNote();
+          const { lc, lp, picker } = await lookupHelperForNote();
           await lc.updatePickerBehavior({ quickPick: picker, provider: lp });
 
           picker.value = "alpha";
-          sinon.stub(picker, "selectedItems").get(function () {
+          sinon.stub(picker, "selectedItems").get(() => {
             return [createNoActiveItem(vault)];
           });
           sinon
@@ -605,7 +606,7 @@ suite("Lookup, notesv2", function () {
   });
 
   // TODO: don't skip
-  describe("onAccept", function () {
+  describe("onAccept", () => {
     _.map(
       _.pick(ENGINE_WRITE_PRESETS["NOTES"], "NEW_DOMAIN"),
       (TestCase: TestPresetEntryV4, name) => {
@@ -638,7 +639,7 @@ suite("Lookup, notesv2", function () {
       }
     );
 
-    test("with override", function (done) {
+    test("with override", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
         preSetupHook: ENGINE_HOOKS.setupBasic,
@@ -792,7 +793,7 @@ suite("Lookup, notesv2", function () {
     });
   });
 
-  describe("onAccept:multiple", function () {
+  describe("onAccept:multiple", () => {
     test("existing notes", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
@@ -842,7 +843,7 @@ suite("selectionExtract", function () {
   let ctx: vscode.ExtensionContext;
   ctx = setupBeforeAfter(this, {});
 
-  describe("extraction from file not in known vault", function () {
+  describe("extraction from file not in known vault", () => {
     test("basic", (done) => {
       runLegacySingleWorkspaceTest({
         ctx,
@@ -866,7 +867,7 @@ suite("selectionExtract", function () {
             buttons: createAllButtons(["selectionExtract"]),
           });
 
-          let { lc, lp } = await lookupHelperForNote();
+          const { lc, lp } = await lookupHelperForNote();
 
           await lc.updatePickerBehavior({
             quickPick: picker,

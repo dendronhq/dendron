@@ -3,6 +3,30 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.49.0](https://github.com/dendronhq/dendron/compare/v0.48.3...v0.49.0) (2021-07-05)
+
+**Note:** Version bump only for package @dendronhq/dendron-cli
+
+
+
+
+
+## [0.48.3](https://github.com/dendronhq/dendron/compare/v0.48.2...v0.48.3) (2021-07-02)
+
+**Note:** Version bump only for package @dendronhq/dendron-cli
+
+
+
+
+
+## [0.48.2](https://github.com/dendronhq/dendron/compare/v0.48.1...v0.48.2) (2021-07-01)
+
+**Note:** Version bump only for package @dendronhq/dendron-cli
+
+
+
+
+
 ## [0.48.1](https://github.com/dendronhq/dendron/compare/v0.48.0...v0.48.1) (2021-06-30)
 
 **Note:** Version bump only for package @dendronhq/dendron-cli

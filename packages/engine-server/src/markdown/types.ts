@@ -36,11 +36,15 @@ export enum DendronASTTypes {
   REF_LINK_V2 = "refLinkV2",
   BLOCK_ANCHOR = "blockAnchor",
   // Not dendron-specific, included here for convenience
+  ROOT = "root",
   HEADING = "heading",
   LIST = "list",
   LIST_ITEM = "listItem",
   PARAGRAPH = "paragraph",
   TABLE = "table",
+  TABLE_ROW = "tableRow",
+  TABLE_CELL = "tableCell",
+  IMAGE = "image",
 }
 
 export enum DendronASTDest {

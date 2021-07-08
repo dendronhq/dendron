@@ -11,6 +11,8 @@ import {
   EngineUpdateNoteRequest,
   EngineWriteRequest,
   NoteQueryRequest,
+  GetNoteBlocksRequest,
+  GetNoteBlocksPayload,
 } from "@dendronhq/common-all";
 import { ExpressUtils } from "@dendronhq/common-server";
 import { Request, Response, Router } from "express";
@@ -109,5 +111,24 @@ router.post("/bulkAdd", async (req: Request, res: Response<WriteNoteResp>) => {
     });
   }
 });
+
+router.get(
+  "/blocks",
+  async (req: Request, res: Response<GetNoteBlocksPayload>) => {
+    const { id, ws } = req.query as GetNoteBlocksRequest;
+    const engine = await getWS({ ws: ws || "" });
+    try {
+      const out = await engine.getNoteBlocks({ id });
+      if (out.error instanceof DendronError)
+        out.error = DendronError.createPlainError(out.error);
+      res.json(out);
+    } catch (err) {
+      res.json({
+        error: new DendronError({ message: JSON.stringify(err) }),
+        data: [],
+      });
+    }
+  }
+);
 
 export { router as noteRouter };

@@ -397,13 +397,7 @@ export class MDUtilsV4 {
         hierarchyDisplay: config.hierarchyDisplay,
       })
       .use(backlinks)
-      .use(
-        blockAnchors,
-        _.merge(
-          { hideBlockAnchors: config.site.hideBlockAnchors },
-          opts.blockAnchorsOpts
-        )
-      )
+      .use(blockAnchors, _.merge(opts.blockAnchorsOpts))
       .use(noteRefsV2, {
         ...opts.noteRefOpts,
         wikiLinkOpts: opts.wikiLinksOpts,

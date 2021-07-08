@@ -367,11 +367,7 @@ export type DendronSiteConfig = {
    */
   usePrettyRefs?: boolean;
 
-  /**
-   * By default, block anchors are displayed in the generated website as
-   * clickable links. Setting this option to `true` hides them so they are not
-   * visible, but they will continue to function when linked to.
-   */
+  /** @deprecated anchors are now always "hidden, but reveal on mouseover" in published sites. */
   hideBlockAnchors?: boolean;
 
   /**

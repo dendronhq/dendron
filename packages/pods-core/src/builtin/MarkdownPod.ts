@@ -11,6 +11,7 @@ import {
   DendronASTDest,
   MDUtilsV4,
   MDUtilsV5,
+  ProcMode,
   RemarkUtils,
 } from "@dendronhq/engine-server";
 import fs from "fs-extra";
@@ -27,6 +28,7 @@ import {
   ImportPodPlantOpts,
   PublishPod,
   PublishPodPlantOpts,
+  PublishPodConfig,
 } from "../basev3";
 import { JSONSchemaType } from "ajv";
 import { PodUtils } from "../utils";
@@ -81,6 +83,11 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
     }) as JSONSchemaType<MarkdownImportPodConfig>;
   }
 
+  /**
+   * Reads all files
+   * @param root
+   * @returns dictionary of {@link DItem[]}
+   */
   async _collectItems(
     root: string
   ): Promise<{ items: DItem[]; errors: DItem[] }> {
@@ -126,6 +133,11 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
     });
   }
 
+  /**
+   * Classify {@link DItem} into notes and assets. Turns directories into notes
+   * @param items
+   * @returns
+   */
   async _prepareItems(items: DItem[]) {
     const engineFileDict: { [k: string]: DItem } = {};
     const assetFileDict: { [k: string]: DItem } = {};
@@ -276,12 +288,15 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
       notes
         .filter((n) => !n.stub)
         .map(async (n) => {
-          const cBody = await MDUtilsV5.procRemarkFull({
-            fname: n.fname,
-            engine,
-            dest: DendronASTDest.MD_DENDRON,
-            vault: n.vault,
-          })
+          const cBody = await MDUtilsV5.procRemarkFull(
+            {
+              fname: n.fname,
+              engine,
+              dest: DendronASTDest.MD_DENDRON,
+              vault: n.vault,
+            },
+            { mode: ProcMode.IMPORT }
+          )
             .use(RemarkUtils.convertLinksToDotNotation(n, []))
             .process(n.body);
           n.body = cBody.toString();
@@ -308,6 +323,13 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
 export class MarkdownPublishPod extends PublishPod {
   static id: string = ID;
   static description: string = "publish markdown";
+
+  get config(): JSONSchemaType<PublishPodConfig> {
+    return PodUtils.createPublishConfig({
+      required: [],
+      properties: {},
+    }) as JSONSchemaType<PublishPodConfig>;
+  }
 
   async plant(opts: PublishPodPlantOpts) {
     const { engine, note } = opts;

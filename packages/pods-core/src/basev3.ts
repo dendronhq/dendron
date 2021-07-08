@@ -1,10 +1,8 @@
 import {
-  DendronError,
   DEngineClient,
   DVault,
   NoteProps,
   NoteUtils,
-  PodConfig,
   VaultUtils,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
@@ -44,38 +42,18 @@ export type PublishPodConfig = {
   dest: string | "stdout";
 };
 
-export abstract class PublishPod<T extends PublishPodConfig = any> {
+export abstract class PublishPod<
+  T extends PublishPodConfig = PublishPodConfig
+> {
   static kind = "publish" as PodKind;
 
-  get config(): PodConfig[] {
-    return [
-      {
-        key: "fname",
-        description: "name of src file",
-        type: "string" as const,
-      },
-      {
-        key: "vaultName",
-        description: "name of src vault",
-        type: "string" as const,
-      },
-      {
-        key: "dest",
-        description: "where to export to",
-        type: "string" as const,
-      },
-    ];
-  }
+  abstract get config(): JSONSchemaType<T>;
 
   async execute(opts: PublishPodExecuteOpts<T>) {
     const { config, engine } = opts;
     const { fname, vaultName } = config;
-    if (_.isUndefined(vaultName)) {
-      throw new DendronError({ message: "no vaultName" });
-    }
-    if (_.isUndefined(fname)) {
-      throw new DendronError({ message: "no fname" });
-    }
+
+    PodUtils.validate<T>(config, this.config);
 
     const vault = VaultUtils.getVaultByNameOrThrow({
       vaults: engine.vaults,

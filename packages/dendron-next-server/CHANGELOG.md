@@ -3,6 +3,51 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.49.0](https://github.com/dendronhq/dendron/compare/v0.48.3...v0.49.0) (2021-07-05)
+
+
+### Bug Fixes
+
+* schema graph rendering ([28ec8eb](https://github.com/dendronhq/dendron/commit/28ec8eb9bae2df917185316ee943c9bf5704cfd9))
+* **preview:** support katex rendering ([31a3880](https://github.com/dendronhq/dendron/commit/31a3880b61cff35fd0d5b4daea65288cb1da20f2))
+
+
+### Features Dendron
+
+* **preview:** better block quote support ([02ae6e3](https://github.com/dendronhq/dendron/commit/02ae6e351ea7917d691a1c67eaa4c1c22bd661dc))
+* support rendering images for preview ([b4a109a](https://github.com/dendronhq/dendron/commit/b4a109a16cca846006069db2953baa8a11527117))
+
+
+
+
+
+## [0.48.3](https://github.com/dendronhq/dendron/compare/v0.48.2...v0.48.3) (2021-07-02)
+
+
+### Reverts
+
+* Revert "fix: remove today button" ([631732c](https://github.com/dendronhq/dendron/commit/631732c50ea07c6021c47a76df51d22259ce8c94))
+
+
+
+
+
+## [0.48.2](https://github.com/dendronhq/dendron/compare/v0.48.1...v0.48.2) (2021-07-01)
+
+
+### Bug Fixes
+
+* remove today button ([58825c7](https://github.com/dendronhq/dendron/commit/58825c79744e2b65e66e8de1d9acd947a0320ae2))
+
+
+### Features Dendron
+
+* native dendron preview ([f23df1b](https://github.com/dendronhq/dendron/commit/f23df1bd57564c1c4831a44c031952c4e494c8df))
+
+
+
+
+
 ## [0.48.1](https://github.com/dendronhq/dendron/compare/v0.48.0...v0.48.1) (2021-06-30)
 
 

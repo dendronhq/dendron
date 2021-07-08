@@ -19,6 +19,8 @@ import {
   EngineWriteOptsV2,
   ERROR_SEVERITY,
   ERROR_STATUS,
+  GetNoteBlocksOpts,
+  GetNoteBlocksPayload,
   GetNoteOptsV2,
   GetNotePayload,
   IDendronError,
@@ -50,8 +52,8 @@ import _ from "lodash";
 import { DConfig } from "./config";
 import { FileStorage } from "./drivers/file/storev2";
 import { FuseEngine } from "./fuseEngine";
-import { LinkUtils, MDUtilsV5 } from "./markdown";
-import { AnchorUtils } from "./markdown/remark/utils";
+import { LinkUtils, MDUtilsV5, ProcFlavor } from "./markdown";
+import { AnchorUtils, RemarkUtils } from "./markdown/remark/utils";
 import { HookUtils } from "./topics/hooks";
 
 type CreateStoreFunc = (engine: DEngineClient) => DStore;
@@ -432,12 +434,15 @@ export class DendronEngineV2 implements DEngine {
         data: undefined,
       };
     }
-    const proc = MDUtilsV5.procRehypeFull({
-      engine: this,
-      fname: note.fname,
-      vault: note.vault,
-      config: this.config,
-    });
+    const proc = MDUtilsV5.procRehypeFull(
+      {
+        engine: this,
+        fname: note.fname,
+        vault: note.vault,
+        config: this.config,
+      },
+      { flavor: ProcFlavor.PREVIEW }
+    );
     const payload = await proc.process(NoteUtils.serialize(note));
     return {
       error: null,
@@ -465,16 +470,10 @@ export class DendronEngineV2 implements DEngine {
             //   this.history.add({ source: "engine", action: "create", uri });
           }
           const links = LinkUtils.findLinks({ note: ent.note, engine: this });
-          const anchors = await AnchorUtils.findAnchors(
-            {
-              note: ent.note,
-              wsRoot: this.wsRoot,
-            },
-            {
-              engine: this,
-              fname: ent.note.fname,
-            }
-          );
+          const anchors = await AnchorUtils.findAnchors({
+            note: ent.note,
+            wsRoot: this.wsRoot,
+          });
           ent.note.links = links;
           ent.note.anchors = anchors;
           this.notes[id] = ent.note;
@@ -545,6 +544,27 @@ export class DendronEngineV2 implements DEngine {
 
   async writeSchema(schema: SchemaModuleProps) {
     return this.store.writeSchema(schema);
+  }
+
+  async getNoteBlocks(opts: GetNoteBlocksOpts): Promise<GetNoteBlocksPayload> {
+    const note = this.notes[opts.id];
+    try {
+      if (_.isUndefined(note))
+        throw DendronError.createFromStatus({
+          status: ERROR_STATUS.INVALID_STATE,
+          message: `${opts.id} does not exist`,
+        });
+      const blocks = await RemarkUtils.extractBlocks({
+        note,
+        engine: this,
+      });
+      return { data: blocks, error: null };
+    } catch (err) {
+      return {
+        error: err,
+        data: undefined,
+      };
+    }
   }
 }
 

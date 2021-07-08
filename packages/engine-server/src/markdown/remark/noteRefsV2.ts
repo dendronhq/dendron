@@ -409,13 +409,18 @@ export function convertNoteRefASTV2(
         }
         let isPublished = true;
         if (dest === DendronASTDest.HTML) {
-          isPublished = SiteUtils.isPublished({
-            note,
-            config: config!,
-            engine,
-          });
-          if (MDUtilsV5.isV5Active(proc)) {
-            isPublished = MDUtilsV5.shouldApplyPublishingRules(proc);
+          // check if we need to check publishign rules
+          if (
+            MDUtilsV5.isV5Active(proc) &&
+            !MDUtilsV5.shouldApplyPublishingRules(proc)
+          ) {
+            isPublished = true;
+          } else {
+            isPublished = SiteUtils.isPublished({
+              note,
+              config: config!,
+              engine,
+            });
           }
         }
         const link = isPublished

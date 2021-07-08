@@ -43,6 +43,10 @@ const getCytoscapeStyle = (themes: any, theme: string | undefined) => {
     line-style: dashed;
   }
 
+  .hidden--labels {
+    label: ;
+  }
+
   .hidden--vault,
   .hidden--regex-allowlist,
   .hidden--regex-blocklist,

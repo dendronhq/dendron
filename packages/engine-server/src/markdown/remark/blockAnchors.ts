@@ -31,6 +31,7 @@ export const matchBlockAnchor = (
 };
 
 type PluginOpts = {
+  /** @deprecated */
   hideBlockAnchors?: boolean;
 };
 
@@ -90,13 +91,13 @@ function attachCompiler(proc: Unified.Processor, _opts?: PluginOpts) {
   }
 }
 
-export function blockAnchor2htmlRaw(node: BlockAnchor, opts?: PluginOpts) {
+export function blockAnchor2htmlRaw(node: BlockAnchor, _opts?: PluginOpts) {
   const fullId = `^${node.id}`;
-  const style =
-    opts && opts.hideBlockAnchors
-      ? "visibility: hidden; width: 0; height: 0;"
-      : "font-size: 0.8em; opacity: 75%;";
-  return `<a id="${fullId}" href="#${fullId}" style="${style}">${fullId}</a>`;
+  return (
+    `<a aria-hidden="true" class="block-anchor anchor-heading" id="${fullId}" href="#${fullId}">` +
+    `<svg viewBox="0 0 16 16"><use xlink:href="#svg-link" /></svg>` +
+    "</a>"
+  );
 }
 
 export function blockAnchor2html(node: BlockAnchor, opts?: PluginOpts) {

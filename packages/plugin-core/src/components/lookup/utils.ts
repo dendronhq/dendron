@@ -303,6 +303,15 @@ export class PickerUtilsV2 {
     });
   };
 
+  /** Reject all items that are stubs */
+  static filterNonStubs(
+    items: DNodePropsQuickInputV2[]
+  ): DNodePropsQuickInputV2[] {
+    return _.filter(items, (ent) => {
+      return !ent.stub;
+    });
+  }
+
   static getFnameForOpenEditor(): string | undefined {
     const activeEditor = VSCodeUtils.getActiveTextEditor();
     if (activeEditor) {

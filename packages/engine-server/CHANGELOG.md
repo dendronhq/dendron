@@ -3,6 +3,50 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.49.0](https://github.com/dendronhq/dendron/compare/v0.48.3...v0.49.0) (2021-07-05)
+
+
+### Bug Fixes
+
+* **preview:** support katex rendering ([31a3880](https://github.com/dendronhq/dendron/commit/31a3880b61cff35fd0d5b4daea65288cb1da20f2))
+* respect fmTitle heading ([4e223ef](https://github.com/dendronhq/dendron/commit/4e223efcf88f440594aaafa1716477fec01be94d))
+
+
+### Features Dendron
+
+* support rendering images for preview ([b4a109a](https://github.com/dendronhq/dendron/commit/b4a109a16cca846006069db2953baa8a11527117))
+
+
+
+
+
+## [0.48.3](https://github.com/dendronhq/dendron/compare/v0.48.2...v0.48.3) (2021-07-02)
+
+
+### Bug Fixes
+
+* block anchors inside links are parsed as anchors ([#911](https://github.com/dendronhq/dendron/issues/911)) ([80eef6c](https://github.com/dendronhq/dendron/commit/80eef6ca95af447938de2dbcf132ca05ede6956d))
+
+
+
+
+
+## [0.48.2](https://github.com/dendronhq/dendron/compare/v0.48.1...v0.48.2) (2021-07-01)
+
+
+### Bug Fixes
+
+* initialize seed from branch ([8407b0b](https://github.com/dendronhq/dendron/commit/8407b0b1f5f7367a3382758f0be4eeaceadaa7f4))
+
+
+### Reverts
+
+* Revert "chore: hide new preview behind dev mode" ([5dd0eb7](https://github.com/dendronhq/dendron/commit/5dd0eb7f0609be87ddf338a2573db63b29efda3a))
+
+
+
+
+
 ## [0.48.1](https://github.com/dendronhq/dendron/compare/v0.48.0...v0.48.1) (2021-06-30)
 
 

@@ -698,6 +698,8 @@ export class DendronWorkspace {
                 workspaceInitializer: new TutorialInitializer(),
               });
               return;
+            default:
+              break;
           }
         },
         undefined,

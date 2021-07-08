@@ -11,12 +11,12 @@ import {
   NoteUtils,
   RenameNoteOpts,
   RespV2,
-  VaultUtils,
+  VaultUtils
 } from "@dendronhq/common-all";
 import { getDurationMilliseconds, vault2Path } from "@dendronhq/common-server";
 import _ from "lodash";
 import path from "path";
-import { TextEditor, Uri, ViewColumn, window } from "vscode";
+import { QuickPickItem, TextEditor, Uri, ViewColumn, window } from "vscode";
 import { Logger } from "../../logger";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace, getWS } from "../../workspace";
@@ -24,7 +24,7 @@ import { DendronBtn, getButtonCategory } from "./buttons";
 import {
   CREATE_NEW_DETAIL,
   CREATE_NEW_LABEL,
-  MORE_RESULTS_LABEL,
+  MORE_RESULTS_LABEL
 } from "./constants";
 import { ILookupProviderV3, OnAcceptHook } from "./LookupProviderV3";
 import { DendronQuickPickerV2 } from "./types";
@@ -390,11 +390,17 @@ export class PickerUtilsV2 {
     return false;
   }
 
-  static promptVault(overrides?: DVault[]): Promise<DVault | undefined> {
-    const vaults = overrides || DendronWorkspace.instance().vaultsv4;
+  public static promptVault(overrides?: DVault[]): Promise<DVault | undefined>;
+  public static promptVault(overrides?: VaultPickerItem[]): Promise<DVault | undefined>;
+  public static promptVault(overrides?: VaultPickerItem[] | DVault[]): Promise<DVault | undefined> {
+
+    const pickerOverrides = isDVaultArray(overrides) ? overrides.map(value => { return {vault: value}}) : overrides;
+
+    const vaults:VaultPickerItem[] = pickerOverrides ?? DendronWorkspace.instance().vaultsv4.map(value => {return {vault: value}});
+
     const items = vaults.map((ent) => ({
       ...ent,
-      label: ent.fsPath,
+      label: ent.label ? ent.label : ent.vault.fsPath
     }));
     const resp = VSCodeUtils.showQuickPick(items) as Promise<
       DVault | undefined
@@ -523,4 +529,10 @@ export class NotePickerUtils {
     Logger.info({ ctx, msg: "engine.query", profile });
     return updatedItems;
   }
+}
+
+export type VaultPickerItem = { vault: DVault } & Partial<QuickPickItem>;
+
+function isDVaultArray(overrides?: VaultPickerItem[] | DVault[]): overrides is DVault[] {
+  return _.some(overrides, item => (item as VaultPickerItem).vault === undefined);
 }

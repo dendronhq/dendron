@@ -26,13 +26,13 @@ export function updateDecorations(activeEditor: TextEditor) {
   );
   const tree = proc.parse(text);
   const blockAnchorDecorations: DecorationOptions[] = [];
+  let timestampDecorations: DecorationOptions[] = [];
 
   visit(tree, (node) => {
     switch (node.type) {
       case DendronASTTypes.FRONTMATTER: {
         const decoration = decorateTimestamps(node as FrontmatterContent);
-        if (isNotUndefined(decoration))
-          activeEditor.setDecorations(DECORATION_TYPE_TIMESTAMP, decoration);
+        if (isNotUndefined(decoration)) timestampDecorations = decoration;
         break;
       }
       case DendronASTTypes.BLOCK_ANCHOR: {
@@ -47,6 +47,8 @@ export function updateDecorations(activeEditor: TextEditor) {
     DECORATION_TYPE_BLOCK_ANCHOR,
     blockAnchorDecorations
   );
+  activeEditor.setDecorations(DECORATION_TYPE_TIMESTAMP, timestampDecorations);
+  return { blockAnchorDecorations, timestampDecorations };
 }
 
 const DECORATION_TYPE_TIMESTAMP = window.createTextEditorDecorationType({});

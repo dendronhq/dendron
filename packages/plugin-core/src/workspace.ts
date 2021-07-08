@@ -606,7 +606,7 @@ export class DendronWorkspace {
     this.L.info({ ctx, stage, msg: "enter" });
     const wsRoot = DendronWorkspace.wsRoot();
     if (!wsRoot) {
-      throw `rootDir not set when activating Watcher`;
+      throw new Error(`rootDir not set when activating Watcher`);
     }
 
     const windowWatcher = new WindowWatcher();

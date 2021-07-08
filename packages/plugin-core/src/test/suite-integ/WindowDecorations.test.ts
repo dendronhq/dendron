@@ -9,15 +9,15 @@ import { updateDecorations } from "../../features/windowDecorations";
 import _ from "lodash";
 
 /** Check if the ranges decorated by `decorations` contains `text` */
-function assertTextDecorated(
+function isTextDecorated(
   text: string,
   decorations: vscode.DecorationOptions[],
   document: vscode.TextDocument
 ) {
   for (const decoration of decorations) {
-    if (document.getText(decoration.range) === text) return;
+    if (document.getText(decoration.range) === text) return true;
   }
-  throw `${text} has not been decorated in given decorations`;
+  return false;
 }
 
 suite("windowDecorations", function () {
@@ -68,14 +68,24 @@ suite("windowDecorations", function () {
 
           expect(timestampDecorations.length).toEqual(2);
           // check that the decorations are at the right locations
-          assertTextDecorated(CREATED, timestampDecorations, document);
-          assertTextDecorated(UPDATED, timestampDecorations, document);
+          expect(
+            isTextDecorated(CREATED, timestampDecorations, document)
+          ).toBeTruthy();
+          expect(
+            isTextDecorated(UPDATED, timestampDecorations, document)
+          ).toBeTruthy();
 
           expect(blockAnchorDecorations.length).toEqual(3);
           // check that the decorations are at the right locations
-          assertTextDecorated("^anchor-1", blockAnchorDecorations, document);
-          assertTextDecorated("^anchor-2", blockAnchorDecorations, document);
-          assertTextDecorated("^anchor-3", blockAnchorDecorations, document);
+          expect(
+            isTextDecorated("^anchor-1", blockAnchorDecorations, document)
+          ).toBeTruthy();
+          expect(
+            isTextDecorated("^anchor-2", blockAnchorDecorations, document)
+          ).toBeTruthy();
+          expect(
+            isTextDecorated("^anchor-3", blockAnchorDecorations, document)
+          ).toBeTruthy();
 
           done();
         },

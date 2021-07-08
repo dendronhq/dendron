@@ -1,8 +1,7 @@
 import {
   DNodeUtils,
   getSlugger,
-  isBlockAnchor,
-  NoteProps,
+  isBlockAnchor
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import path from "path";

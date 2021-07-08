@@ -4,7 +4,7 @@ import {
   ENGINE_HOOKS_MULTI,
   TestEngineUtils,
 } from "@dendronhq/engine-test-utils";
-import { NOTE_PRESETS_V4, sinon } from "@dendronhq/common-test-utils";
+import { NoteTestUtilsV4, NOTE_PRESETS_V4, sinon } from "@dendronhq/common-test-utils";
 import _ from "lodash";
 import { describe } from "mocha";
 

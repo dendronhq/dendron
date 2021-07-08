@@ -612,25 +612,11 @@ export class LookupProviderV2 {
       if (token.isCancellationRequested) {
         return;
       }
-
-      // first query, show all results
-      // subsequent query, only show next level children
-      if (
-        true
-        // queryEndsWithDot ||
-        // queryOrig.split(".").length < 2 ||
-        // picker.justActivated ||
-        // opts?.force
-      ) {
-        updatedItems = await this.createPickerItemsFromEngine({
-          picker,
-          flavor: opts.flavor,
-          qs: querystring,
-        });
-      } else {
-        // add create new
-        updatedItems = this.createDefaultItems({ picker }).concat(updatedItems);
-      }
+      updatedItems = await this.createPickerItemsFromEngine({
+        picker,
+        flavor: opts.flavor,
+        qs: querystring,
+      });
 
       if (token.isCancellationRequested) {
         return;
@@ -761,7 +747,8 @@ export class LookupProviderV2 {
         source,
         flavor: opts.flavor,
       });
-      return; // eslint-disable-line no-unsafe-finally -- probably can be just removed
+      // eslint-disable-next-line
+      return picker;
     }
   };
 

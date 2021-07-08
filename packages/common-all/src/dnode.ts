@@ -324,6 +324,8 @@ export class NoteUtils {
   static RE_FM = /^---(.*)^---/ms;
   static RE_FM_UPDATED = /^updated:.*$/m;
   static RE_FM_CREATED = /^created:.*$/m;
+  static RE_FM_UPDATED_OR_CREATED =
+    /^(?<beforeTimestamp>(updated|created): *)(?<timestamp>[0-9]+)$/;
 
   static addBacklink({
     from,

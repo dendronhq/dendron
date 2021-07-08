@@ -5,7 +5,7 @@ module.exports = {
     es6: true,
     jest: true,
   },
-  extends: ["plugin:react/recommended", "airbnb", "prettier"],
+  extends: ["plugin:react/recommended", "airbnb", "airbnb/hooks", "prettier"],
   globals: {
     Atomics: "readonly",
     SharedArrayBuffer: "readonly",
@@ -18,7 +18,7 @@ module.exports = {
     ecmaVersion: 2018,
     sourceType: "module",
   },
-  plugins: ["react", "@typescript-eslint", "jest"],
+  plugins: ["@typescript-eslint", "jest"],
   rules: {
     // don't care
     "comma-dangle": "off",

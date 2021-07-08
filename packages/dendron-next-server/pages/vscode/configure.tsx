@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { engineSlice } from "@dendronhq/common-frontend";
 import { Typography, Button, Layout, message } from "antd";
 import { useRouter } from "next/router";
@@ -66,13 +66,15 @@ type DefaultProps = {
 const ConfigForm: React.FC<DefaultProps> = ({ engine }) => {
   const [openKeys, setOpenKeys] = React.useState<string[]>([]);
   const [selectedKeys, setSelectedKeys] = React.useState<string[]>([]);
+  const [currentValues, setCurrentValues] = useState<any>({});
   const router = useRouter();
   const { ws, port } = router.query;
   const dispatch = engineHooks.useEngineAppDispatch();
   const ajv = useRef(new Ajv({ allErrors: true }));
-  if (!engine.config || !ws || !port) {
-    return <></>;
-  }
+
+  useEffect(() => {
+    setCurrentValues(engine.config);
+  }, [engine]);
 
   const schema: JSONSchemaType<any> = generateSchema(dendronConfig);
 
@@ -87,6 +89,45 @@ const ConfigForm: React.FC<DefaultProps> = ({ engine }) => {
     },
   };
 
+  const onSubmit = async (config: any, { setSubmitting }: any) => {
+    const response: any = await dispatch(
+      configWrite({
+        config,
+        ws: ws as string,
+        port: Number(port as string),
+      })
+    );
+    if (response.error) {
+      message.error(response.payload);
+    }
+    message.success("Saved!");
+    setSubmitting(false);
+  };
+
+  const validate = (values: any) => {
+    setCurrentValues(values);
+    let errors: any = {};
+    const validate = ajv.current.compile(schema);
+    validate(values);
+    const { errors: ajvErrors } = validate;
+
+    if (!ajvErrors?.length) {
+      return {};
+    }
+
+    ajvErrors?.forEach((error) => {
+      const { instancePath, message } = error;
+      if (instancePath !== "") {
+        errors[`${instancePath.substring(1)}`] = message;
+      }
+    });
+    return { errors };
+  };
+
+  if (!engine.config || !ws || !port) {
+    return <></>;
+  }
+
   return (
     <Layout
       style={{
@@ -94,7 +135,15 @@ const ConfigForm: React.FC<DefaultProps> = ({ engine }) => {
         overflowY: "hidden",
       }}
     >
-      <SideMenu {...{ openKeys, setOpenKeys, selectedKeys, setSelectedKeys }} />
+      <SideMenu
+        {...{
+          openKeys,
+          setOpenKeys,
+          selectedKeys,
+          setSelectedKeys,
+          currentValues,
+        }}
+      />
       <Layout className="site-layout">
         <Content
           style={{
@@ -109,38 +158,8 @@ const ConfigForm: React.FC<DefaultProps> = ({ engine }) => {
           </Typography>
           <Formik
             initialValues={engine.config}
-            onSubmit={async (config, { setSubmitting }) => {
-              const response: any = await dispatch(
-                configWrite({
-                  config,
-                  ws: ws as string,
-                  port: Number(port as string),
-                })
-              );
-              if (response.error) {
-                message.error(response.payload);
-              }
-              message.success("Saved!");
-              setSubmitting(false);
-            }}
-            validate={(values) => {
-              let errors: any = {};
-              const validate = ajv.current.compile(schema);
-              validate(values);
-              const { errors: ajvErrors } = validate;
-
-              if (!ajvErrors?.length) {
-                return {};
-              }
-
-              ajvErrors?.forEach((error) => {
-                const { instancePath, message } = error;
-                if (instancePath !== "") {
-                  errors[`${instancePath.substring(1)}`] = message;
-                }
-              });
-              return {};
-            }}
+            onSubmit={onSubmit}
+            validate={validate}
             validateOnChange={true}
           >
             {({ values, errors }) => (

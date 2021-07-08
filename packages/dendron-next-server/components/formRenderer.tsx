@@ -35,7 +35,7 @@ const BaseInput = ({
     style={{ justifyContent: "center" }}
     required={required}
   >
-    <div onClick={() => setSelectedKeys && setSelectedKeys([name])}>
+    <div>
       <Title id={name} level={3} style={{ textTransform: "capitalize" }}>
         {label}
         {required && <span style={{ color: "red" }}> *</span>}
@@ -69,6 +69,10 @@ const SimpleInput = ({
         placeholder={placeholder}
         required={required}
         addonAfter={addonAfter}
+        onClick={() => {
+          setSelectedKeys && setSelectedKeys([name]);
+          console.log("click!!!", name);
+        }}
       />
     </BaseInput>
   );
@@ -110,7 +114,13 @@ const BooleanInput = ({
     <BaseInput
       {...{ name, label, required, helperText, errors, setSelectedKeys }}
     >
-      <Switch name={name} />
+      <Switch
+        name={name}
+        onClick={() => {
+          setSelectedKeys && setSelectedKeys([name]);
+          console.log("click!!!", name);
+        }}
+      />
     </BaseInput>
   );
 };
@@ -124,6 +134,7 @@ const ArrayInput = ({
   helperText,
   errors,
   isRecordType = false,
+  setSelectedKeys,
 }: ArrayInputType) => {
   return (
     <BaseInput {...{ name, label, required, helperText, errors }}>
@@ -138,6 +149,7 @@ const ArrayInput = ({
                 name,
                 arrayHelpers,
                 errors,
+                setSelectedKeys,
               }}
             />
           ) : (
@@ -148,6 +160,7 @@ const ArrayInput = ({
                 name,
                 arrayHelpers,
                 errors,
+                setSelectedKeys,
               }}
             />
           )
@@ -190,12 +203,14 @@ const RenderRecord = ({
   name,
   arrayHelpers,
   errors,
+  setSelectedKeys,
 }: {
   values: any;
   dataDefinition: RecordConfig;
   name: any;
   arrayHelpers: any;
   errors: any;
+  setSelectedKeys?: (value: string[]) => void;
 }) => {
   type RecordProps = {
     id: number;
@@ -242,6 +257,7 @@ const RenderRecord = ({
           data={(dataDefinition as RecordConfig).data}
           errors={errors}
           prefix={[name, `${record.value}`]}
+          setSelectedKeys={setSelectedKeys}
         />
       </Card>
     ))
@@ -278,12 +294,14 @@ const RenderArray = ({
   name,
   arrayHelpers,
   errors,
+  setSelectedKeys,
 }: {
   values: any;
   dataDefinition: ArrayConfig;
   name: any;
   arrayHelpers: any;
   errors: any;
+  setSelectedKeys?: (value: string[]) => void;
 }) => {
   const dataSource =
     get(values, name)?.map((value: any, index: number) => (
@@ -301,6 +319,7 @@ const RenderArray = ({
           data={dataDefinition.data}
           errors={errors}
           prefix={[name, `${index}`]}
+          setSelectedKeys={setSelectedKeys}
         />
       </Card>
     )) ?? [];

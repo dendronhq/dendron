@@ -1,17 +1,20 @@
 import React, { useRef } from "react";
 import { engineSlice } from "@dendronhq/common-frontend";
-import { Typography, Button, message } from "antd";
+import { Typography, Button, Layout, message } from "antd";
 import { useRouter } from "next/router";
 import { Formik } from "formik";
 import { Form, ResetButton, SubmitButton } from "formik-antd";
-const { Title } = Typography;
 import _ from "lodash";
 import Ajv, { JSONSchemaType } from "ajv";
 import { engineHooks } from "@dendronhq/common-frontend";
 import { configWrite } from "../../lib/effects";
 import dendronConfig from "../../data/dendronFormConfig";
 import ConfigInput from "../../components/formRenderer";
+import SideMenu from "../../components/sideMenu";
 import { Config } from "../../types/formTypes";
+
+const { Title } = Typography;
+const { Content } = Layout;
 
 const generateSchema = (config: Config): any => {
   if (
@@ -61,6 +64,8 @@ type DefaultProps = {
 };
 
 const ConfigForm: React.FC<DefaultProps> = ({ engine }) => {
+  const [openKeys, setOpenKeys] = React.useState<string[]>([]);
+  const [selectedKeys, setSelectedKeys] = React.useState<string[]>([]);
   const router = useRouter();
   const { ws, port } = router.query;
   const dispatch = engineHooks.useEngineAppDispatch();
@@ -83,72 +88,87 @@ const ConfigForm: React.FC<DefaultProps> = ({ engine }) => {
   };
 
   return (
-    <div
+    <Layout
       style={{
-        display: "flex",
-        justifyContent: "center",
-        width: "100%",
+        height: "100vh",
+        overflowY: "hidden",
       }}
     >
-      <Formik
-        initialValues={engine.config}
-        onSubmit={async (config, { setSubmitting }) => {
-          const response: any = await dispatch(
-            configWrite({
-              config,
-              ws: ws as string,
-              port: Number(port as string),
-            })
-          );
-          if (response.error) {
-            message.error(response.payload);
-          }
-          message.success("Saved!");
-          setSubmitting(false);
-        }}
-        validate={(values) => {
-          let errors: any = {};
-          const validate = ajv.current.compile(schema);
-          validate(values);
-          const { errors: ajvErrors } = validate;
+      <SideMenu {...{ openKeys, setOpenKeys, selectedKeys, setSelectedKeys }} />
+      <Layout className="site-layout">
+        <Content
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            width: "100%",
+            overflowY: "scroll",
+          }}
+        >
+          <Typography style={{ textAlign: "center", padding: "2rem" }}>
+            <Title>Dendron Configuration</Title>
+          </Typography>
+          <Formik
+            initialValues={engine.config}
+            onSubmit={async (config, { setSubmitting }) => {
+              const response: any = await dispatch(
+                configWrite({
+                  config,
+                  ws: ws as string,
+                  port: Number(port as string),
+                })
+              );
+              if (response.error) {
+                message.error(response.payload);
+              }
+              message.success("Saved!");
+              setSubmitting(false);
+            }}
+            validate={(values) => {
+              let errors: any = {};
+              const validate = ajv.current.compile(schema);
+              validate(values);
+              const { errors: ajvErrors } = validate;
 
-          if (!ajvErrors?.length) {
-            return {};
-          }
+              if (!ajvErrors?.length) {
+                return {};
+              }
 
-          ajvErrors?.forEach((error) => {
-            const { instancePath, message } = error;
-            if (instancePath !== "") {
-              errors[`${instancePath.substring(1)}`] = message;
-            }
-          });
-          return {};
-        }}
-        validateOnChange={true}
-      >
-        {({ values, errors }) => (
-          <Form {...formItemLayout}>
-            <Typography style={{ textAlign: "center", padding: "2rem" }}>
-              <Title>Dendron Configuration </Title>
-            </Typography>
-            <ConfigInput
-              data={dendronConfig}
-              values={values}
-              errors={errors}
-              prefix={[]}
-            />
-            <Form.Item name="submit" style={{ justifyContent: "center" }}>
-              <Button.Group size="large">
-                <ResetButton type="text">Clear changes</ResetButton>
-                <SubmitButton type="primary" disabled={!_.isEmpty(errors.site)}>
-                  Save changes
-                </SubmitButton>
-              </Button.Group>
-            </Form.Item>
-          </Form>
-        )}
-      </Formik>
-    </div>
+              ajvErrors?.forEach((error) => {
+                const { instancePath, message } = error;
+                if (instancePath !== "") {
+                  errors[`${instancePath.substring(1)}`] = message;
+                }
+              });
+              return {};
+            }}
+            validateOnChange={true}
+          >
+            {({ values, errors }) => (
+              <Form {...formItemLayout}>
+                <ConfigInput
+                  data={dendronConfig}
+                  values={values}
+                  errors={errors}
+                  prefix={[]}
+                  setSelectedKeys={setSelectedKeys}
+                />
+                <Form.Item name="submit" style={{ justifyContent: "center" }}>
+                  <Button.Group size="large">
+                    <ResetButton type="text">Clear changes</ResetButton>
+                    <SubmitButton
+                      type="primary"
+                      disabled={!_.isEmpty(errors.site)}
+                    >
+                      Save changes
+                    </SubmitButton>
+                  </Button.Group>
+                </Form.Item>
+              </Form>
+            )}
+          </Formik>
+        </Content>
+      </Layout>
+    </Layout>
   );
 };
 

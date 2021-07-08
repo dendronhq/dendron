@@ -11,6 +11,7 @@ import {
 
 const siteConfig: ObjectConfig = {
   type: "object",
+  label: "Site Config",
   data: {
     siteRootDir: {
       label: "Site Root Directory",

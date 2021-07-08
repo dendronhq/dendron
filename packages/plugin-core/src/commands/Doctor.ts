@@ -8,18 +8,18 @@ import fs from "fs-extra";
 import _ from "lodash";
 import _md from "markdown-it";
 import path from "path";
-import { window, ViewColumn, QuickPick } from "vscode";
-import { DENDRON_COMMANDS } from "../constants";
-import { VSCodeUtils } from "../utils";
-import { DendronWorkspace, getWS } from "../workspace";
-import { BasicCommand } from "./base";
-import { ReloadIndexCommand } from "./ReloadIndex";
+import { QuickPick, ViewColumn, window } from "vscode";
 import {
-  DoctorBtn,
   ChangeScopeBtn,
+  DoctorBtn,
   IDoctorQuickInputButton,
 } from "../components/doctor/buttons";
 import { DoctorScopeType } from "../components/doctor/types";
+import { DENDRON_COMMANDS } from "../constants";
+import { VSCodeUtils } from "../utils";
+import { DendronWorkspace } from "../workspace";
+import { BasicCommand } from "./base";
+import { ReloadIndexCommand } from "./ReloadIndex";
 
 const md = _md();
 
@@ -58,7 +58,7 @@ type DoctorQuickInput = {
 type DoctorQuickPickItem = QuickPick<DoctorQuickInput>;
 
 export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
-  static key = DENDRON_COMMANDS.DOCTOR.key;
+  key = DENDRON_COMMANDS.DOCTOR.key;
 
   createQuickPick(opts: CreateQuickPickOpts) {
     const { title, placeholder, ignoreFocusOut, items } = _.defaults(opts, {
@@ -81,12 +81,13 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     }
     const button = quickpick.buttons[0] as IDoctorQuickInputButton;
     button.pressed = !button.pressed;
-    button.type = button.type == "workspace" ? "file" : "workspace";
+    button.type = button.type === "workspace" ? "file" : "workspace";
     quickpick.buttons = [button];
     quickpick.title = `Doctor (${button.type})`;
   };
 
   async gatherInputs(): Promise<CommandOpts | undefined> {
+    // eslint-disable-next-line no-async-promise-executor
     const out = new Promise<CommandOpts | undefined>(async (resolve) => {
       const values = _.map(DoctorActions, (ent) => {
         return { label: ent };
@@ -141,7 +142,6 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
   async execute(opts: CommandOpts) {
     const ctx = "DoctorCommand:execute";
     window.showInformationMessage("Calling the doctor.");
-    const {} = _.defaults(opts, {});
     const ws = DendronWorkspace.instance();
     const wsRoot = DendronWorkspace.wsRoot();
     const findings: Finding[] = [];
@@ -154,7 +154,9 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     }
 
     const siteRoot = path.join(wsRoot, config.site.siteRootDir);
-    ws.fileWatcher!.pause = true;
+    if (ws.fileWatcher) {
+      ws.fileWatcher.pause = true;
+    }
     this.L.info({ ctx, msg: "pre:Reload" });
     const engine: DEngineClient =
       (await new ReloadIndexCommand().execute()) as DEngineClient;
@@ -172,8 +174,8 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     switch (opts.action) {
       case DoctorActions.FIX_FRONTMATTER: {
         await new BackfillV2Command().execute({
-          engine: engine,
-          note: note,
+          engine,
+          note,
         });
         break;
       }
@@ -233,7 +235,7 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
           : [note];
         await cmd.execute({
           action: opts.action,
-          candidates: candidates,
+          candidates,
           engine,
           wsRoot,
           server: {},
@@ -242,7 +244,9 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
       }
     }
 
-    getWS().fileWatcher!.pause = false;
+    if (ws.fileWatcher) {
+      ws.fileWatcher.pause = false;
+    }
     await new ReloadIndexCommand().execute();
 
     // create site root, used for publication

@@ -677,6 +677,18 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docLink: "dendron.topic.commands.md",
     docPreview: "",
   },
+  SHOW_PREVIEW_V2: {
+    key: "dendron.showPreviewV2",
+    title: `${CMD_PREFIX} Show Preview V2`,
+    group: "notes",
+    keybindings: {
+      windows: "windows+ctrl+p",
+      mac: "cmd+ctrl+p",
+    },
+    desc: "Show Markdown Preview",
+    docLink: "dendron.topic.commands.md",
+    docPreview: "",
+  },
   PASTE_FILE: {
     key: "dendron.pasteFile",
     title: `${CMD_PREFIX} Paste File`,
@@ -749,6 +761,12 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docLink: "dendron.topic.commands.md",
     docPreview: "",
   },
+  LAUNCH_TUTORIAL: {
+    key: "dendron.launchTutorial",
+    title: `${CMD_PREFIX} Launch Tutorial`,
+    group: "dev",
+    desc: "Launch the Tutorial",
+  },
 };
 
 export const DENDRON_CHANNEL_NAME = "Dendron";
@@ -760,15 +778,21 @@ export const WORKSPACE_STATE = {
 export enum GLOBAL_STATE {
   VERSION = "dendron.version",
   /**
-   * Set the first time a dendron workspace is activated
+   * Context that can be used on extension activation to trigger special behavior.
    */
-  DENDRON_FIRST_WS = "dendron.first_ws",
-  DENDRON_FIRST_WS_TUTORIAL_STEP = "dendron.first_ws.tutorial_step",
+  WORKSPACE_ACTIVATION_CONTEXT = "dendron.workspace_activation_context",
   /**
    * Extension is being debugged
    */
   VSCODE_DEBUGGING_EXTENSION = "dendron.vscode_debugging_extension",
 }
+
+export enum WORKSPACE_ACTIVATION_CONTEXT {
+  // UNSET - Indicates this is the first Workspace Launch
+  "NORMAL", // Normal Launch; No Special Behavior
+  "TUTORIAL", // Launch the Tutorial
+}
+
 // export const GLOBAL_STATE = {
 //   VERSION: "dendron.version",
 //   /**

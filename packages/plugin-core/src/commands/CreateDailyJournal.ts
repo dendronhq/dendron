@@ -21,18 +21,17 @@ export class CreateDailyJournalCommand extends BaseCommand<
   any,
   CommandInput
 > {
-  static key = DENDRON_COMMANDS.CREATE_DAILY_JOURNAL_NOTE.key;
+  key = DENDRON_COMMANDS.CREATE_DAILY_JOURNAL_NOTE.key;
   async gatherInputs(): Promise<CommandInput | undefined> {
     const dailyJournalDomain = getWS().config.journal.dailyDomain;
-    let fname: string;
-    fname = DendronClientUtilsV2.genNoteName("JOURNAL", {
+    const fname = DendronClientUtilsV2.genNoteName("JOURNAL", {
       overrides: { domain: dailyJournalDomain },
     });
     return { title: fname };
   }
 
   async enrichInputs(inputs: CommandInput) {
-    let { title } = inputs;
+    const { title } = inputs;
     return {
       title,
       fname: `${cleanName(title)}`,
@@ -70,7 +69,7 @@ export class CreateDailyJournalCommand extends BaseCommand<
 
     await new GotoNoteCommand().execute({
       qs: fname,
-      vault: vault,
+      vault,
       overrides: { title },
     });
   }

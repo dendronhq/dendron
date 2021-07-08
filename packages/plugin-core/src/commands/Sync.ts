@@ -1,12 +1,13 @@
 import _ from "lodash";
-import { ERROR_SEVERITY } from "@dendronhq/common-all";
-import { DendronError } from "@dendronhq/common-all";
+import { ERROR_SEVERITY, DendronError } from "@dendronhq/common-all";
+
 import { window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { Logger } from "../logger";
 import { getWS } from "../workspace";
 import { BasicCommand } from "./base";
 import { SyncActionResult, SyncActionStatus } from "@dendronhq/engine-server";
+
 const L = Logger;
 
 type CommandOpts = {};
@@ -19,7 +20,7 @@ type CommandReturns =
   | undefined;
 
 export class SyncCommand extends BasicCommand<CommandOpts, CommandReturns> {
-  static key = DENDRON_COMMANDS.SYNC.key;
+  key = DENDRON_COMMANDS.SYNC.key;
 
   static countDone(results: SyncActionResult[]): number {
     return results.filter((result) => result.status === SyncActionStatus.DONE)
@@ -33,7 +34,7 @@ export class SyncCommand extends BasicCommand<CommandOpts, CommandReturns> {
     const matchingResults = results.filter(
       (result) => result.status === status
     );
-    if (matchingResults.length == 0) return [];
+    if (matchingResults.length === 0) return [];
     return matchingResults.map((result) => result.repo);
   }
 
@@ -81,7 +82,7 @@ export class SyncCommand extends BasicCommand<CommandOpts, CommandReturns> {
     const committedDone = SyncCommand.countDone(committed);
     const pulledDone = SyncCommand.countDone(pulled);
     const pushedDone = SyncCommand.countDone(pushed);
-    const repos = (count: number) => (count == 1 ? "repo" : "repos");
+    const repos = (count: number) => (count === 1 ? "repo" : "repos");
     message.push(`Committed ${committedDone} ${repos(committedDone)},`);
     message.push(`tried pulling ${pulledDone}`);
     message.push(`and pushing ${pushedDone} ${repos(pushedDone)}.`);

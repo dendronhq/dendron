@@ -27,7 +27,7 @@ export class PublishPodCommand extends BaseCommand<
   CommandOutput,
   CommandInput
 > {
-  static key = DENDRON_COMMANDS.PUBLISH_POD.key;
+  key = DENDRON_COMMANDS.PUBLISH_POD.key;
   async gatherInputs(): Promise<any> {
     const pods = getAllPublishPods();
     const podItems: PodItemV4[] = pods.map((p) => podClassEntryToPodItemV4(p));
@@ -68,7 +68,7 @@ export class PublishPodCommand extends BaseCommand<
 
     const engine = DendronWorkspace.instance().getEngine();
     const wsRoot = DendronWorkspace.wsRoot() as string;
-    const pod = new podClass() as JSONPublishPod;
+    const pod = new podClass() as JSONPublishPod; // eslint-disable-line new-cap
     const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
     try {
       const link = await pod.execute({

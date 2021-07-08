@@ -45,6 +45,10 @@ type CommandOutput = DendronQuickPickerV2;
 export { CommandOpts as LookupCommandOpts };
 
 export class LookupCommand extends BasicCommand<CommandOpts, CommandOutput> {
+
+  // Placeholder for telemetry purposes. More detailed telemetry exists on the lookup command.
+  key = "dendron.Lookup";
+
   async gatherInputs(): Promise<any> {
     return {};
   }

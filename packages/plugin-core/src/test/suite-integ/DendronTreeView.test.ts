@@ -12,7 +12,7 @@ suite("TreeView, multi", function () {
     beforeHook: () => {},
   });
 
-  test("basic", function (done) {
+  test("basic", (done) => {
     DendronTreeView.register(ctx);
     runMultiVaultTest({
       ctx,

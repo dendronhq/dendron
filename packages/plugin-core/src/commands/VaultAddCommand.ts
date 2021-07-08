@@ -8,7 +8,6 @@ import {
   assignJSONWithComment,
   GitUtils,
   readJSONWithComments,
-  SimpleGit,
   simpleGit,
   writeJSONWithComments,
 } from "@dendronhq/common-server";
@@ -39,15 +38,7 @@ export { CommandOpts as VaultAddCommandOpts };
 type SourceQuickPickEntry = QuickPickItem & { src: string };
 
 export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
-  static key = DENDRON_COMMANDS.VAULT_ADD.key;
-
-  public git: SimpleGit;
-
-  constructor() {
-    super();
-    const baseDir = DendronWorkspace.wsRoot();
-    this.git = simpleGit({ baseDir });
-  }
+  key = DENDRON_COMMANDS.VAULT_ADD.key;
 
   generateRemoteEntries = (): SourceQuickPickEntry[] => {
     return (
@@ -69,15 +60,15 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
       { label: "local", picked: true },
       { label: "remote" },
     ]);
-    let sourceType: VaultRemoteSource | undefined;
     let sourcePath: string;
     let sourceName: string | undefined;
-    let localVaultPathPlaceholder = "vault2";
+    const localVaultPathPlaceholder = "vault2";
     if (!vaultRemoteSource) {
       return;
     }
-    sourceType = vaultRemoteSource.label as VaultRemoteSource;
+    const sourceType = vaultRemoteSource.label as VaultRemoteSource;
     if (sourceType === "remote") {
+      // eslint-disable-next-line  no-async-promise-executor
       const out = new Promise<CommandOpts | undefined>(async (resolve) => {
         const qp = VSCodeUtils.createQuickPick<SourceQuickPickEntry>();
         qp.ignoreFocusOut = true;
@@ -99,7 +90,7 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
               : selected.label;
           const placeHolder = path2Vault;
 
-          let out = await VSCodeUtils.showInputBox({
+          const out = await VSCodeUtils.showInputBox({
             prompt: "Path to your new vault (relative to your workspace root)",
             placeHolder: localVaultPathPlaceholder,
             value: path2Vault,
@@ -125,7 +116,7 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
       });
       return out;
     } else {
-      let out = await VSCodeUtils.showInputBox({
+      const out = await VSCodeUtils.showInputBox({
         prompt: "Path to your new vault (relative to your workspace root)",
         placeHolder: localVaultPathPlaceholder,
       });
@@ -145,7 +136,6 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
   async handleRemoteRepo(
     opts: CommandOpts
   ): Promise<{ vaults: DVault[]; workspace?: DWorkspace }> {
-    const baseDir = DendronWorkspace.wsRoot();
     const { vaults, workspace } = await window.withProgress(
       {
         location: ProgressLocation.Notification,
@@ -156,7 +146,9 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
         progress.report({
           message: "cloning repo",
         });
-        await this.git.clone(opts.pathRemote!, opts.path);
+        const baseDir = DendronWorkspace.wsRoot();
+        const git = simpleGit({ baseDir });
+        await git.clone(opts.pathRemote!, opts.path);
         const { vaults, workspace } = GitUtils.getVaultsFromRepo({
           repoPath: path.join(baseDir, opts.path),
           wsRoot: DendronWorkspace.wsRoot(),

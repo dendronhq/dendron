@@ -51,7 +51,7 @@ suite("upgrade", function () {
       },
     });
 
-    it("basic", function (done) {
+    it("basic", (done) => {
       onExtension({
         action: "upgraded",
         cb: async (ev: { data: any }) => {
@@ -73,7 +73,7 @@ suite("upgrade", function () {
       run();
     });
 
-    it("don't override current settings", function (done) {
+    it("don't override current settings", (done) => {
       onExtension({
         action: "upgraded",
         cb: async (ev: { data: any }) => {

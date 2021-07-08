@@ -20,7 +20,7 @@ export class RestoreVaultCommand extends BaseCommand<
   CommandOutput,
   CommandInput
 > {
-  static key = DENDRON_COMMANDS.RESTORE_VAULT.key;
+  key = DENDRON_COMMANDS.RESTORE_VAULT.key;
   async gatherInputs(): Promise<any> {
     const snapshots = path.join(
       DendronWorkspace.wsRoot() as string,
@@ -30,7 +30,7 @@ export class RestoreVaultCommand extends BaseCommand<
     const choices = readdirSync(snapshots)
       .sort()
       .map((ent) => ({
-        label: `${Time.DateTime.fromMillis(parseInt(ent)).toLocaleString(
+        label: `${Time.DateTime.fromMillis(parseInt(ent, 10)).toLocaleString(
           Time.DateTime.DATETIME_FULL
         )} (${ent})`,
         data: ent,

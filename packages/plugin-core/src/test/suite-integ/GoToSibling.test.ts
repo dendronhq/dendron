@@ -11,7 +11,7 @@ import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
 suite("GoToSibling", function () {
   let ctx: vscode.ExtensionContext;
-  let direction = "next" as const;
+  const direction = "next" as const;
 
   ctx = setupBeforeAfter(this, {});
 

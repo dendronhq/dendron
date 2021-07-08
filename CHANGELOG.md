@@ -3,6 +3,94 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.49.0](https://github.com/dendronhq/dendron/compare/v0.48.3...v0.49.0) (2021-07-05)
+
+
+### Bug Fixes
+
+* schema graph rendering ([28ec8eb](https://github.com/dendronhq/dendron/commit/28ec8eb9bae2df917185316ee943c9bf5704cfd9))
+* **preview:** show current active note when exec ShowPreview command ([1d4898d](https://github.com/dendronhq/dendron/commit/1d4898d6ce45d74a54d697dead43992f35dbebc3))
+* **preview:** support katex rendering ([31a3880](https://github.com/dendronhq/dendron/commit/31a3880b61cff35fd0d5b4daea65288cb1da20f2))
+* respect fmTitle heading ([4e223ef](https://github.com/dendronhq/dendron/commit/4e223efcf88f440594aaafa1716477fec01be94d))
+
+
+### Features Dendron
+
+* **preview:** better block quote support ([02ae6e3](https://github.com/dendronhq/dendron/commit/02ae6e351ea7917d691a1c67eaa4c1c22bd661dc))
+* support rendering images for preview ([b4a109a](https://github.com/dendronhq/dendron/commit/b4a109a16cca846006069db2953baa8a11527117))
+
+
+
+
+
+## [0.48.3](https://github.com/dendronhq/dendron/compare/v0.48.2...v0.48.3) (2021-07-02)
+
+
+### Bug Fixes
+
+* block anchors inside links are parsed as anchors ([#911](https://github.com/dendronhq/dendron/issues/911)) ([80eef6c](https://github.com/dendronhq/dendron/commit/80eef6ca95af447938de2dbcf132ca05ede6956d))
+* sync service trigger perpetually when opening log ([785e0af](https://github.com/dendronhq/dendron/commit/785e0af826da1415ca0fdc873f66bae4d92ca4f6))
+
+
+### Reverts
+
+* Revert "fix: remove today button" ([631732c](https://github.com/dendronhq/dendron/commit/631732c50ea07c6021c47a76df51d22259ce8c94))
+
+
+
+
+
+## [0.48.2](https://github.com/dendronhq/dendron/compare/v0.48.1...v0.48.2) (2021-07-01)
+
+
+### Bug Fixes
+
+* correct command name in prod telemetry ([#902](https://github.com/dendronhq/dendron/issues/902)) ([f96701c](https://github.com/dendronhq/dendron/commit/f96701c2093ee82b7f0efd38ca819f141e9e3e47))
+* dont count undefined as tutorial workspace ([453e955](https://github.com/dendronhq/dendron/commit/453e955ca595b6462352816734e4d46defd80fd9))
+* initialize seed from branch ([8407b0b](https://github.com/dendronhq/dendron/commit/8407b0b1f5f7367a3382758f0be4eeaceadaa7f4))
+* make prep.sh executable ([ebebfd8](https://github.com/dendronhq/dendron/commit/ebebfd82c4964dc023639a6badce51f8f4434be2))
+* remove today button ([58825c7](https://github.com/dendronhq/dendron/commit/58825c79744e2b65e66e8de1d9acd947a0320ae2))
+* **calendar-view:** prevent calendar-view from popping up when saving files ([#904](https://github.com/dendronhq/dendron/issues/904)) ([fd371f3](https://github.com/dendronhq/dendron/commit/fd371f325160593132d613515b7f3b115f06f476))
+
+
+### Features Dendron
+
+* anallytics on command invocation ([#896](https://github.com/dendronhq/dendron/issues/896)) ([70c0e3e](https://github.com/dendronhq/dendron/commit/70c0e3eb8f865caa1ce241c6ab5577f263161cd0))
+* native dendron preview ([f23df1b](https://github.com/dendronhq/dendron/commit/f23df1bd57564c1c4831a44c031952c4e494c8df))
+* new onboarding experience ([#859](https://github.com/dendronhq/dendron/issues/859)) ([732a2dc](https://github.com/dendronhq/dendron/commit/732a2dcb13447b3581dff26922c005aecf24a02f))
+
+
+### Reverts
+
+* Revert "chore: using preview v2 for launch tutorial" ([3613a91](https://github.com/dendronhq/dendron/commit/3613a916c07e0601591d90304754c9041bb8bf8f))
+* Revert "chore: hide new preview behind dev mode" ([5dd0eb7](https://github.com/dendronhq/dendron/commit/5dd0eb7f0609be87ddf338a2573db63b29efda3a))
+
+
+
+
+
+## [0.48.1](https://github.com/dendronhq/dendron/compare/v0.48.0...v0.48.1) (2021-06-30)
+
+
+### Bug Fixes
+
+* dendron not indexing links on file change ([532fe65](https://github.com/dendronhq/dendron/commit/532fe65def68a8999c34ce815badb64161f96ed8))
+* edge of stub classification, class check bug ([#897](https://github.com/dendronhq/dendron/issues/897)) ([62e45b2](https://github.com/dendronhq/dendron/commit/62e45b2c12c028a713a76805f43fcdda996e52f5))
+* graph theming stability, more contrast ([#893](https://github.com/dendronhq/dendron/issues/893)) ([9986dff](https://github.com/dendronhq/dendron/commit/9986dfff565571daec82bd9df3bd9f02f6edc52c))
+* graphviz export directory error ([#867](https://github.com/dendronhq/dendron/issues/867)) ([a60de04](https://github.com/dendronhq/dendron/commit/a60de0493e7c5b4fb688b349e0058b1ef5a74de7))
+* horizontal line folded as frontmatter ([#886](https://github.com/dendronhq/dendron/issues/886)) ([b7f6fab](https://github.com/dendronhq/dendron/commit/b7f6fab109a9f9bb22a6eb769f675e6f1f3a85ad)), closes [#883](https://github.com/dendronhq/dendron/issues/883)
+* load config defaults ([#889](https://github.com/dendronhq/dendron/issues/889)) ([0711bc4](https://github.com/dendronhq/dendron/commit/0711bc41f5a25664106bf4630645a8f7ea00c455))
+* lookup missing some results ([60f20fe](https://github.com/dendronhq/dendron/commit/60f20fea1698d47b8063b26778ac8a759686835d))
+
+
+### Features Dendron
+
+* preview v2 mvp ([a9b6d07](https://github.com/dendronhq/dendron/commit/a9b6d071ccca5f182d8a7985c68926424a2a1f2d))
+
+
+
+
+
 # [0.48.0](https://github.com/dendronhq/dendron/compare/v0.47.0...v0.48.0) (2021-06-28)
 
 

@@ -138,7 +138,7 @@ export const writeConfig = (opts: {
   return writeYAML(configPath, opts.config);
 };
 
-export async function setupWorkspace() {}
+export async function setupWorkspace() {} // eslint-disable-line no-empty-function
 
 export async function setupLegacyWorkspace(
   opts: SetupLegacyWorkspaceOpts
@@ -189,7 +189,7 @@ export async function setupLegacyWorkspaceMulti(
   const { preSetupHook, postSetupHook, wsSettingsOverride } = copts;
 
   const { wsRoot, vaults } = await EngineTestUtilsV4.setupWS();
-  new StateService(opts.ctx);
+  new StateService(opts.ctx); // eslint-disable-line no-new
   setupCodeConfiguration(opts);
   // setup workspace file
   stubWorkspace({ wsRoot, vaults });
@@ -286,14 +286,18 @@ export function setupBeforeAfter(
   // allows for debugging
   _this.timeout(TIMEOUT);
   ctx = VSCodeUtils.getOrCreateMockContext();
-  beforeEach(async function () {
+  beforeEach(async () => {
     DendronWorkspace.getOrCreate(ctx);
-    opts?.beforeHook && (await opts.beforeHook());
+    if (opts?.beforeHook) {
+      await opts.beforeHook();
+    }
     Logger.configure(ctx, "info");
   });
-  afterEach(async function () {
+  afterEach(async () => {
     HistoryService.instance().clearSubscriptions();
-    opts?.afterHook && (await opts.afterHook());
+    if (opts?.afterHook) {
+      await opts.afterHook();
+    }
   });
   return ctx;
 }

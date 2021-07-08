@@ -19,7 +19,7 @@ export class SnapshotVaultCommand extends BaseCommand<
   CommandOpts,
   CommandOutput
 > {
-  static key = DENDRON_COMMANDS.SNAPSHOT_VAULT.key;
+  key = DENDRON_COMMANDS.SNAPSHOT_VAULT.key;
   async gatherInputs(): Promise<any> {
     return {};
   }

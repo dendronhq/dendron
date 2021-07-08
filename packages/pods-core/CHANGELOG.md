@@ -3,6 +3,41 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.49.0](https://github.com/dendronhq/dendron/compare/v0.48.3...v0.49.0) (2021-07-05)
+
+**Note:** Version bump only for package @dendronhq/pods-core
+
+
+
+
+
+## [0.48.3](https://github.com/dendronhq/dendron/compare/v0.48.2...v0.48.3) (2021-07-02)
+
+**Note:** Version bump only for package @dendronhq/pods-core
+
+
+
+
+
+## [0.48.2](https://github.com/dendronhq/dendron/compare/v0.48.1...v0.48.2) (2021-07-01)
+
+**Note:** Version bump only for package @dendronhq/pods-core
+
+
+
+
+
+## [0.48.1](https://github.com/dendronhq/dendron/compare/v0.48.0...v0.48.1) (2021-06-30)
+
+
+### Bug Fixes
+
+* graphviz export directory error ([#867](https://github.com/dendronhq/dendron/issues/867)) ([a60de04](https://github.com/dendronhq/dendron/commit/a60de0493e7c5b4fb688b349e0058b1ef5a74de7))
+
+
+
+
+
 # [0.48.0](https://github.com/dendronhq/dendron/compare/v0.47.0...v0.48.0) (2021-06-28)
 
 

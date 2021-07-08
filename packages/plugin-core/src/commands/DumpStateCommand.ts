@@ -10,7 +10,7 @@ type CommandOpts = {};
 type CommandOutput = void;
 
 export class DumpStateCommand extends BasicCommand<CommandOpts, CommandOutput> {
-  static key = DENDRON_COMMANDS.DUMP_STATE.key;
+  key = DENDRON_COMMANDS.DUMP_STATE.key;
   async gatherInputs(): Promise<any> {
     return {};
   }

@@ -22,7 +22,7 @@ export class InsertNoteCommand extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
-  static key = DENDRON_COMMANDS.INSERT_NOTE.key;
+  key = DENDRON_COMMANDS.INSERT_NOTE.key;
 
   async sanityCheck() {
     if (_.isUndefined(VSCodeUtils.getActiveTextEditor())) {

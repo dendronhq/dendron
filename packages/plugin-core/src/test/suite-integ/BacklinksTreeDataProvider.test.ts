@@ -41,7 +41,7 @@ suite("BacklinksTreeDataProvider", function () {
     },
   });
 
-  test("basics", function (done) {
+  test("basics", (done) => {
     let noteWithTarget: NoteProps;
 
     runLegacyMultiWorkspaceTest({
@@ -68,7 +68,7 @@ suite("BacklinksTreeDataProvider", function () {
     });
   });
 
-  test("from cache", function (done) {
+  test("from cache", (done) => {
     let noteWithTarget: NoteProps;
 
     runLegacyMultiWorkspaceTest({
@@ -97,7 +97,7 @@ suite("BacklinksTreeDataProvider", function () {
     });
   });
 
-  test("multi", function (done) {
+  test("multi", (done) => {
     runMultiVaultTest({
       ctx,
       preSetupHook: async ({ wsRoot, vaults }) => {
@@ -127,7 +127,7 @@ suite("BacklinksTreeDataProvider", function () {
     });
   });
 
-  test("xvault link", function (done) {
+  test("xvault link", (done) => {
     runMultiVaultTest({
       ctx,
       preSetupHook: async ({ wsRoot, vaults }) => {
@@ -157,7 +157,7 @@ suite("BacklinksTreeDataProvider", function () {
     });
   });
 
-  test("with anchor", function (done) {
+  test("with anchor", (done) => {
     let noteWithTarget: NoteProps;
     let noteWithLink: NoteProps;
 
@@ -188,7 +188,7 @@ suite("BacklinksTreeDataProvider", function () {
     });
   });
 
-  test("with alias", function (done) {
+  test("with alias", (done) => {
     let noteWithTarget: NoteProps;
     let noteWithLink: NoteProps;
 

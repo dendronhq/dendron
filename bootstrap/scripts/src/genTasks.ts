@@ -1,3 +1,4 @@
+/* eslint-disable  no-template-curly-in-string */
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";

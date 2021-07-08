@@ -11,7 +11,7 @@ export class ShowPreviewCommand extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
-  static key = DENDRON_COMMANDS.SHOW_PREVIEW.key;
+  key = DENDRON_COMMANDS.SHOW_PREVIEW.key;
   async sanityCheck() {
     if (_.isUndefined(VSCodeUtils.getActiveTextEditor())) {
       return "No document open";
@@ -20,6 +20,7 @@ export class ShowPreviewCommand extends BasicCommand<
   }
 
   async execute(_opts: CommandOpts) {
+    // eslint-disable-next-line  no-return-await
     return await MarkdownUtils.openPreview();
   }
 }

@@ -19,7 +19,7 @@ export class UpgradeSettingsCommand extends BasicCommand<
   UpgradeSettingsCommandOpts,
   UpgradeSettingsCommandResp
 > {
-  static key = DENDRON_COMMANDS.UPGRADE_SETTINGS.key;
+  key = DENDRON_COMMANDS.UPGRADE_SETTINGS.key;
   async execute(_opts: UpgradeSettingsCommandOpts) {
     const ctx = "Upgrade:execute";
     L.info({ ctx });

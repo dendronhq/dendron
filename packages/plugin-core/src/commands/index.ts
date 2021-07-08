@@ -41,6 +41,7 @@ import { ShowHelpCommand } from "./ShowHelp";
 import { ShowNoteGraphCommand } from "./ShowNoteGraph";
 import { ShowSchemaGraphCommand } from "./ShowSchemaGraph";
 import { ShowPreviewCommand } from "./ShowPreview";
+import { ShowPreviewV2Command } from "./ShowPreviewV2";
 import { SignInCommand } from "./SignIn";
 import { SignUpCommand } from "./SignUp";
 import { SiteBuildCommand } from "./SiteBuild";
@@ -51,6 +52,7 @@ import { UpgradeSettingsCommand } from "./UpgradeSettings";
 import { VaultAddCommand } from "./VaultAddCommand";
 import { VaultRemoveCommand } from "./VaultRemoveCommand";
 import { RandomNoteCommand } from "./RandomNote";
+import { LaunchTutorialCommand } from "./LaunchTutorialCommand";
 
 const ALL_COMMANDS = [
   AddAndCommit,
@@ -95,6 +97,7 @@ const ALL_COMMANDS = [
   ShowNoteGraphCommand,
   ShowSchemaGraphCommand,
   ShowPreviewCommand,
+  ShowPreviewV2Command,
   SignInCommand,
   SignUpCommand,
   SiteBuildCommand,
@@ -105,6 +108,7 @@ const ALL_COMMANDS = [
   UpgradeSettingsCommand,
   VaultAddCommand,
   VaultRemoveCommand,
+  LaunchTutorialCommand,
 ] as CodeCommandConstructor[];
 
 // when("betaFeatures", ()=> {

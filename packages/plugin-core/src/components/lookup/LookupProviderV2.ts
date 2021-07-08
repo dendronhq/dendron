@@ -97,7 +97,7 @@ export class LookupProviderV2 {
   }
 
   createDefaultItems = ({ picker }: { picker: DendronQuickPickerV2 }) => {
-    let out = [];
+    const out = [];
     if (_.find(picker.buttons, { type: "multiSelect" })?.pressed) {
       return [];
     } else {
@@ -230,11 +230,13 @@ export class LookupProviderV2 {
     const ctx = "onAcceptNewSchema";
     const fname = PickerUtilsV2.getValue(picker);
     Logger.info({ ctx, msg: "createNewPick", value: fname });
-    let smodNew: SchemaModuleProps;
     const ws = DendronWorkspace.instance();
     const engine = ws.getEngine();
     Logger.info({ ctx, msg: "create normal node" });
-    smodNew = SchemaUtils.createModuleProps({ fname, vault });
+    const smodNew: SchemaModuleProps = SchemaUtils.createModuleProps({
+      fname,
+      vault,
+    });
     const vpath = vault2Path({ vault, wsRoot: DendronWorkspace.wsRoot() });
     const uri = Uri.file(SchemaUtils.getPath({ root: vpath, fname }));
     const resp = await engine.writeSchema(smodNew);
@@ -252,7 +254,7 @@ export class LookupProviderV2 {
   }): OnDidAcceptNewNodeReturn {
     const ctx = "onAcceptNewNode";
     Logger.info({ ctx });
-    let vault: DVault = PickerUtilsV2.getVaultForOpenEditor();
+    const vault: DVault = PickerUtilsV2.getVaultForOpenEditor();
 
     if (opts.flavor === "schema") {
       return this._onAcceptNewSchema({ picker, vault });
@@ -448,25 +450,23 @@ export class LookupProviderV2 {
         return;
       }
       uris = [newNode.uri];
+    } else if (opts.flavor === "schema") {
+      const smods = selectedItems.map(
+        (item) => DendronWorkspace.instance().getEngine().schemas[item.id]
+      );
+      uris = smods.map((smod) =>
+        Uri.file(
+          SchemaUtils.getPath({
+            root: vault2Path({
+              vault: smod.vault,
+              wsRoot: DendronWorkspace.wsRoot(),
+            }),
+            fname: smod.fname,
+          })
+        )
+      );
     } else {
-      if (opts.flavor === "schema") {
-        const smods = selectedItems.map(
-          (item) => DendronWorkspace.instance().getEngine().schemas[item.id]
-        );
-        uris = smods.map((smod) =>
-          Uri.file(
-            SchemaUtils.getPath({
-              root: vault2Path({
-                vault: smod.vault,
-                wsRoot: DendronWorkspace.wsRoot(),
-              }),
-              fname: smod.fname,
-            })
-          )
-        );
-      } else {
-        uris = selectedItems.map((item) => node2Uri(item));
-      }
+      uris = selectedItems.map((item) => node2Uri(item));
     }
     await showDocAndHidePicker(uris, picker);
     return;
@@ -513,6 +513,7 @@ export class LookupProviderV2 {
     if (opts.flavor === "note") {
       // if we are doing a query, reset pagination options
       PickerUtilsV2.resetPaginationOpts(picker);
+      // eslint-disable-next-line no-useless-catch
       try {
         const resp = await engine.queryNotes({ qs });
         nodes = resp.data;
@@ -611,25 +612,11 @@ export class LookupProviderV2 {
       if (token.isCancellationRequested) {
         return;
       }
-
-      // first query, show all results
-      // subsequent query, only show next level children
-      if (
-        true
-        // queryEndsWithDot ||
-        // queryOrig.split(".").length < 2 ||
-        // picker.justActivated ||
-        // opts?.force
-      ) {
-        updatedItems = await this.createPickerItemsFromEngine({
-          picker,
-          flavor: opts.flavor,
-          qs: querystring,
-        });
-      } else {
-        // add create new
-        updatedItems = this.createDefaultItems({ picker }).concat(updatedItems);
-      }
+      updatedItems = await this.createPickerItemsFromEngine({
+        picker,
+        flavor: opts.flavor,
+        qs: querystring,
+      });
 
       if (token.isCancellationRequested) {
         return;
@@ -712,6 +699,7 @@ export class LookupProviderV2 {
       }
       if (picker.showDirectChildrenOnly) {
         updatedItems = PickerUtilsV2.filterByDepth(updatedItems, depth);
+        updatedItems = PickerUtilsV2.filterNonStubs(updatedItems);
       }
 
       if (perfectMatch) {
@@ -759,6 +747,7 @@ export class LookupProviderV2 {
         source,
         flavor: opts.flavor,
       });
+      // eslint-disable-next-line
       return picker;
     }
   };

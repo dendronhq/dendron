@@ -402,9 +402,11 @@ export class FileStorage implements DStore {
       logger: this.logger,
     }).parseFile(noteFiles, vault);
     errors = errors.concat(parseErrors);
+    this.logger.info({ ctx, msg: "parseNotes:fin" });
 
     await Promise.all(
       notes.map(async (n) => {
+        this.logger.debug({ ctx, note: NoteUtils.toLogObj(n) });
         if (n.stub) {
           return;
         }
@@ -424,19 +426,14 @@ export class FileStorage implements DStore {
               });
             }
             errors.push(err);
+            this.logger.error({ ctx, error: err, note: NoteUtils.toLogObj(n) });
             return;
           }
           try {
-            const anchors = await AnchorUtils.findAnchors(
-              {
-                note: n,
-                wsRoot: wsRoot,
-              },
-              {
-                engine: this.engine,
-                fname: n.fname,
-              }
-            );
+            const anchors = await AnchorUtils.findAnchors({
+              note: n,
+              wsRoot: wsRoot,
+            });
             cacheUpdates[n.fname].data.anchors = anchors;
             n.anchors = anchors;
           } catch (err) {

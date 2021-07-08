@@ -77,19 +77,19 @@ const useApplyGraphConfig = ({
   const applyFilterRegexConfig = (allowRelayout: boolean) => {
     if (!graph || graph.$("*").length === 0) return;
 
-    const regexTypes: ("whitelist" | "blacklist")[] = [
-      "whitelist",
-      "blacklist",
+    const regexTypes: ("allowlist" | "blocklist")[] = [
+      "allowlist",
+      "blocklist",
     ];
 
-    // Process the whitelist and blacklist inputs
+    // Process the allowlist and blocklist inputs
     regexTypes.forEach((type) => {
       const classNameHidden = `hidden--regex-${type}`;
       const regexItem =
         config[
           `filter.regex-${type}` as
-            | "filter.regex-whitelist"
-            | "filter.regex-blacklist"
+            | "filter.regex-allowlist"
+            | "filter.regex-blocklist"
         ];
 
       // Accept comma-separated or space-separated lists
@@ -130,15 +130,15 @@ const useApplyGraphConfig = ({
       };
 
       matchingElements.forEach((element) => {
-        if (type === "whitelist") showElement(element);
-        if (type === "blacklist") hideElement(element);
+        if (type === "allowlist") showElement(element);
+        if (type === "blocklist") hideElement(element);
       });
 
       // If no input,
       if (
         regexItem.value === "" ||
-        (type === "whitelist" && excludedElements.length === 0) ||
-        (type === "blacklist" && matchingElements.length === 0)
+        (type === "allowlist" && excludedElements.length === 0) ||
+        (type === "blocklist" && matchingElements.length === 0)
       ) {
         graph.$("*").removeClass(classNameHidden);
         updatedConfig = true;
@@ -146,8 +146,8 @@ const useApplyGraphConfig = ({
       }
 
       excludedElements.forEach((element) => {
-        if (type === "whitelist") hideElement(element);
-        if (type === "blacklist") showElement(element);
+        if (type === "allowlist") hideElement(element);
+        if (type === "blocklist") showElement(element);
       });
 
       if (updatedConfig && allowRelayout) layoutGraph();
@@ -163,15 +163,23 @@ const useApplyGraphConfig = ({
 
     // If should show stubs
     if (configItem.value) {
-      if (stubElements.hasClass(".hidden--stub")) {
+      if (stubElements.hasClass("hidden--stub")) {
         stubElements.removeClass("hidden--stub");
         if (allowRelayout) layoutGraph();
       }
     } else {
-      if (!stubElements.hasClass(".hidden--stub")) {
+      if (!stubElements.hasClass("hidden--stub")) {
         stubElements.addClass("hidden--stub");
         if (allowRelayout) layoutGraph();
       }
+    }
+  };
+  const applyFilterOptionsConfig = () => {
+    if (_.isUndefined(graph)) return;
+    if (!config["options.show-labels"].value) {
+      graph.$("node").addClass("hidden--labels");
+    } else {
+      graph.$("node").removeClass("hidden--labels");
     }
   };
 
@@ -184,6 +192,7 @@ const useApplyGraphConfig = ({
     applyVaultConfig(allowRelayout);
     applyFilterRegexConfig(allowRelayout);
     applyFilterStubsConfig(allowRelayout);
+    applyFilterOptionsConfig();
   };
 
   const layoutGraph = () => {

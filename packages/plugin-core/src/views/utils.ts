@@ -35,12 +35,12 @@ export class WebViewUtils {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${title}</title>
   <style>
-    html, body, iframe { 
-      margin: 0; 
-      padding: 0; 
-      border: 0; 
-      height: 100vh; 
-      width: 100vw; 
+    html, body, iframe {
+      margin: 0;
+      padding: 0;
+      border: 0;
+      height: 100vh;
+      width: 100vw;
       overflow: hidden;
     }
   </style>
@@ -51,12 +51,12 @@ export class WebViewUtils {
   <script>
     function main() {
       const vscode = acquireVsCodeApi();
-  
+
       function postMsg(msg) {
         const iframe = document.getElementById('iframeView');
         iframe.contentWindow.postMessage(msg, "*");
       };
-  
+
       function getTheme() {
           // get theme
           let vsTheme = document.body.className;
@@ -68,7 +68,7 @@ export class WebViewUtils {
           }
           return {vsTheme, dendronTheme};
       }
-  
+
       window.addEventListener("message", (e) => {
         console.log("got message", e);
         const message = e.data;

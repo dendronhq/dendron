@@ -16,7 +16,7 @@ const packageJson = {
   main: "index.js",
   license: "MIT",
   dependencies: {
-    "@dendronhq/dendron-11ty": "^1.48.0",
+    "@dendronhq/dendron-11ty": "^1.49.0",
   },
 };
 
@@ -51,7 +51,7 @@ export const buildSite = async (opts: BuildSiteV2CLICommandCliOpts) => {
   );
   let importEleventy: any;
   try {
-    importEleventy = require(`./webpack-require-hack.js`);
+    importEleventy = require(`./webpack-require-hack.js`); // eslint-disable-line global-require
   } catch (error) {
     importEleventy = require;
   }
@@ -126,7 +126,7 @@ export const checkPreReq = async () => {
             outOfDate,
             async (prev, opts) => {
               await prev;
-              let { pkg, version } = opts;
+              const { pkg, version } = opts;
               return pkgUpgrade(pkg, version);
             },
             Promise.resolve()

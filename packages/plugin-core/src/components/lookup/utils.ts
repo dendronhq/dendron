@@ -166,13 +166,13 @@ export class ProviderAcceptHooks {
       : selectedItem.fname;
 
     // get new note
-    let newNote = NoteUtils.getNoteByFnameV5({
+    const newNote = NoteUtils.getNoteByFnameV5({
       fname,
       notes,
       vault: newVault,
       wsRoot,
     });
-    let isStub = newNote?.stub;
+    const isStub = newNote?.stub;
     if (newNote && !isStub) {
       const vaultName = VaultUtils.getName(newVault);
       const errMsg = `${vaultName}/${quickpick.value} exists`;
@@ -203,7 +203,7 @@ export class PickerUtilsV2 {
     picker: DendronQuickPickerV2;
     vault: DVault;
   }) => {
-    let out = [];
+    const out = [];
     if (_.find(picker.buttons, { type: "multiSelect" })?.pressed) {
       return [];
     } else {
@@ -303,6 +303,15 @@ export class PickerUtilsV2 {
     });
   };
 
+  /** Reject all items that are stubs */
+  static filterNonStubs(
+    items: DNodePropsQuickInputV2[]
+  ): DNodePropsQuickInputV2[] {
+    return _.filter(items, (ent) => {
+      return !ent.stub;
+    });
+  }
+
   static getFnameForOpenEditor(): string | undefined {
     const activeEditor = VSCodeUtils.getActiveTextEditor();
     if (activeEditor) {
@@ -382,7 +391,7 @@ export class PickerUtilsV2 {
   }
 
   static promptVault(overrides?: DVault[]): Promise<DVault | undefined> {
-    const vaults = overrides ? overrides : DendronWorkspace.instance().vaultsv4;
+    const vaults = overrides || DendronWorkspace.instance().vaultsv4;
     const items = vaults.map((ent) => ({
       ...ent,
       label: ent.fsPath,

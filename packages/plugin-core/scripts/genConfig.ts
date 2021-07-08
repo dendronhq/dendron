@@ -70,7 +70,7 @@ function updateViews() {
 }
 
 function main() {
-  let dryRun = false;
+  const dryRun = false;
   const pkg = fs.readJSONSync("package.json");
   const configuration = updateConfig();
   const commands = updateCommands();

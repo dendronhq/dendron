@@ -22,8 +22,8 @@ suite("Scratch Notes", function () {
 
   ctx = setupBeforeAfter(this, {});
 
-  describe("single", function () {
-    test("basic", function (done) {
+  describe("single", () => {
+    test("basic", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
         postSetupHook: async ({ wsRoot, vaults }) => {
@@ -58,7 +58,7 @@ suite("Scratch Notes", function () {
       });
     });
 
-    test("domainAsNamespace", function (done) {
+    test("domainAsNamespace", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
         configOverride: {
@@ -90,8 +90,8 @@ suite("Scratch Notes", function () {
     });
   });
 
-  describe("multi", function () {
-    test("basic, multi", function (done) {
+  describe("multi", () => {
+    test("basic, multi", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
         postSetupHook: async ({ wsRoot, vaults }) => {
@@ -126,7 +126,7 @@ suite("Scratch Notes", function () {
       });
     });
 
-    test("domainAsNamespace", function (done) {
+    test("domainAsNamespace", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
         configOverride: {

@@ -339,13 +339,13 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
         const file = await NoteTestUtilsV4.createNote({
           fname: "real",
           body: "[[real.fake]]\n",
-          vault: vault,
+          vault,
           wsRoot,
         });
         await NoteTestUtilsV4.createNote({
           fname: "real2",
           body: "[[real.fake2]]\n",
-          vault: vault,
+          vault,
           wsRoot,
         });
         await VSCodeUtils.openNote(file);
@@ -385,7 +385,7 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
         const file = await NoteTestUtilsV4.createNote({
           fname: "real",
           body: "[[real.fake]]\n",
-          vault: vault,
+          vault,
           wsRoot,
         });
         await VSCodeUtils.openNote(file);
@@ -426,7 +426,7 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
             "[[something|real.fake]]",
             "[[something something|real.something]]",
           ].join("\n"),
-          vault: vault,
+          vault,
           wsRoot,
         });
         await VSCodeUtils.openNote(file);

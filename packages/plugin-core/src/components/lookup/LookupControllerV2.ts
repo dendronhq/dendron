@@ -44,13 +44,13 @@ export class LookupControllerV2 {
     lookupOpts?: Omit<LookupCommandOpts, "flavor">
   ) {
     // selection behaior
-    let lookupSelectionType =
+    const lookupSelectionType =
       lookupOpts?.selectionType ||
       (DendronWorkspace.configuration().get<string>(
         CONFIG.DEFAULT_LOOKUP_CREATE_BEHAVIOR.key
       ) as ButtonType);
-    let noteSelectioType = lookupOpts?.noteType;
-    let initialTypes = _.isUndefined(lookupSelectionType)
+    const noteSelectioType = lookupOpts?.noteType;
+    const initialTypes = _.isUndefined(lookupSelectionType)
       ? []
       : [lookupSelectionType];
     if (noteSelectioType) {
@@ -156,12 +156,12 @@ export class LookupControllerV2 {
     // create quick pick
     const quickPick =
       vscode.window.createQuickPick<DNodePropsQuickInputV2>() as DendronQuickPickerV2;
-    let title = [`Lookup (${this.opts.flavor})`];
+    const title = [`Lookup (${this.opts.flavor})`];
     title.push(`- version: ${DendronWorkspace.version()}`);
     quickPick.title = title.join(" ");
     quickPick.placeholder = "eg. hello.world";
     quickPick.ignoreFocusOut = cleanOpts.ignoreFocusOut;
-    quickPick._justActivated = opts?.noConfirm ? false : true;
+    quickPick._justActivated = !opts?.noConfirm;
     quickPick.canSelectMany = false;
     quickPick.matchOnDescription = false;
     quickPick.matchOnDetail = false;
@@ -278,7 +278,8 @@ export class LookupControllerV2 {
         if (quickPickValue !== undefined) {
           onUpdateValue = quickPickValue;
         } else {
-          let editorPath = vscode.window.activeTextEditor?.document.uri.fsPath;
+          const editorPath =
+            vscode.window.activeTextEditor?.document.uri.fsPath;
           if (editorPath && this.opts.flavor !== "schema") {
             onUpdateValue = path.basename(editorPath, ".md");
           } else {

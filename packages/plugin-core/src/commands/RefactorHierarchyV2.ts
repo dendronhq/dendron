@@ -31,16 +31,15 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
-  static key = DENDRON_COMMANDS.REFACTOR_HIERARCHY.key;
+  key = DENDRON_COMMANDS.REFACTOR_HIERARCHY.key;
   async gatherInputs(): Promise<CommandOpts | undefined> {
-    let match: string | undefined;
     let replace: string | undefined;
     let value: string = "";
     const editor = VSCodeUtils.getActiveTextEditor();
     if (editor) {
       value = NoteUtils.uri2Fname(editor.document.uri);
     }
-    match = await VSCodeUtils.showInputBox({
+    const match = await VSCodeUtils.showInputBox({
       prompt: "Enter match text",
       value,
     });
@@ -129,7 +128,7 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
     const operations = candidates.map((note) => {
       const matchObj = re.exec(note.fname);
       // @ts-ignore
-      let [
+      const [
         src,
         prefix,
         // @ts-ignore
@@ -183,7 +182,7 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
       >(
         operations,
         async (resp, op) => {
-          let acc = await resp;
+          const acc = await resp;
           this.L.info({
             ctx,
             orig: op.oldUri.fsPath,

@@ -93,7 +93,7 @@ export class VaultUtils {
       fsPath,
     });
     const vault = _.find(vaults, (ent) => {
-      return VaultUtils.getRelPath(ent) === normPath;
+      return normPath.startsWith(VaultUtils.getRelPath(ent));
     });
     if (!vault) {
       throw new DendronError({

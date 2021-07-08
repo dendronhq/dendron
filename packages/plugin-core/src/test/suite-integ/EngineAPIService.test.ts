@@ -23,7 +23,7 @@ suite("basic", function () {
   const NOTE_INIT_PRESET =
     NoteTestPresetsV2.presets.OneNoteOneSchemaPreset.init;
 
-  test(NOTE_INIT_PRESET.domainStub.label, function (done) {
+  test(NOTE_INIT_PRESET.domainStub.label, (done) => {
     onWSInit(async () => {
       const client = DendronWorkspace.instance().getEngine();
       await client.init();

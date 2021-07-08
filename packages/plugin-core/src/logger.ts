@@ -28,15 +28,14 @@ export class Logger {
       fs.moveSync(logPath, `${logPath}.old`, { overwrite: true });
     }
     fs.ensureFileSync(logPath);
-    let log_level: string;
     const conf = workspace.getConfiguration();
-    log_level = conf.get<string>(CONFIG.LOG_LEVEL.key) || "info";
+    const logLevel = conf.get<string>(CONFIG.LOG_LEVEL.key) || "info";
     setEnv("LOG_DST", logPath);
-    setEnv("LOG_LEVEL", log_level);
+    setEnv("LOG_LEVEL", logLevel);
     Logger.logPath = logPath;
     this.logger = createLogger("dendron", logPath);
     this.level = level;
-    Logger.info({ ctx, msg: "exit", log_level });
+    Logger.info({ ctx, msg: "exit", logLevel });
   }
   private static _level: TraceLevel = "debug";
 
@@ -83,13 +82,13 @@ export class Logger {
       if (payload.error) {
         payload.error = error2PlainObject(payload.error);
       }
-      let stringMsg = customStringify(payload);
-      Logger.logger && Logger.logger[lvl](payload);
+      const stringMsg = customStringify(payload);
+      Logger.logger?.[lvl](payload);
       Logger.output?.appendLine(lvl + ": " + stringMsg);
       // FIXME: disable for now
       const shouldShow = false; // getStage() === "dev" && cleanOpts.show;
       if (shouldShow || Logger.cmpLevels(lvl, "error")) {
-        let cleanMsg =
+        const cleanMsg =
           (payload.error ? payload.error.message : payload.msg) || stringMsg;
         if (Logger.cmpLevels(lvl, "error")) {
           window.showErrorMessage(cleanMsg);
@@ -103,7 +102,7 @@ export class Logger {
 
 const customStringify = function (v: any) {
   const cache = new Set();
-  return JSON.stringify(v, function (_key, value) {
+  return JSON.stringify(v, (_key, value) => {
     if (typeof value === "object" && value !== null) {
       if (cache.has(value)) {
         // Circular reference found

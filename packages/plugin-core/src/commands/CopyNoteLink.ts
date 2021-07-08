@@ -15,7 +15,7 @@ export class CopyNoteLinkCommand extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
-  static key = DENDRON_COMMANDS.COPY_NOTE_LINK.key;
+  key = DENDRON_COMMANDS.COPY_NOTE_LINK.key;
   async sanityCheck() {
     if (_.isUndefined(VSCodeUtils.getActiveTextEditor())) {
       return "No document open";
@@ -30,11 +30,10 @@ export class CopyNoteLinkCommand extends BasicCommand<
   async execute(_opts: CommandOpts) {
     const editor = VSCodeUtils.getActiveTextEditor() as TextEditor;
     const fname = NoteUtils.uri2Fname(editor.document.uri);
-    let note: NoteProps;
 
     const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
     const notes = getEngine().notes;
-    note = NoteUtils.getNoteByFnameV5({
+    const note = NoteUtils.getNoteByFnameV5({
       fname,
       vault,
       notes,
@@ -62,7 +61,7 @@ export class CopyNoteLinkCommand extends BasicCommand<
             value: anchor,
             type: isBlockAnchor(anchor) ? "blockAnchor" : "header",
           },
-      useVaultPrefix: DendronClientUtilsV2.useVaultPrefix(getEngine()),
+      useVaultPrefix: DendronClientUtilsV2.useVaultPrefix(getEngine()), // eslint-disable-line react-hooks/rules-of-hooks
     });
     try {
       clipboard.writeText(link);

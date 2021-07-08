@@ -8,7 +8,12 @@ import {
   engineSlice,
   postVSCodeMessage,
 } from "@dendronhq/common-frontend";
-import { CalendarProps as AntdCalendarProps, Spin } from "antd";
+import {
+  CalendarProps as AntdCalendarProps,
+  Spin,
+  Button,
+  Divider,
+} from "antd";
 import { Badge, ConfigProvider } from "antd";
 import generateCalendar from "antd/lib/calendar/generateCalendar";
 import classNames from "classnames";
@@ -122,17 +127,25 @@ function CalendarView({ engine, ide }: DendronProps) {
     }
   }, [noteActive, groupedDailyNotes]);
 
-  const getDateKey = (date: Moment) => {
-    return date.format(
-      activeMode === "month" ? defaultJournalDateFormat : "y.MM" // TODO compute format for currentMode="year"
-    );
-  };
+  const getDateKey = useCallback<
+    (date: Moment, mode?: CalendarProps["mode"]) => string
+  >(
+    (date, mode) => {
+      const format =
+        (mode || activeMode) === "month"
+          ? defaultJournalDateFormat || "y.MM.dd"
+          : "y.MM"; // TODO compute format for currentMode="year" from config
+      return date.format(format);
+    },
+    [activeMode, defaultJournalDateFormat]
+  );
 
-  const onSelect = useCallback<Exclude<CalendarProps["onSelect"], undefined>>(
-    (date) => {
+  const onSelect = useCallback<
+    (date: Moment, mode?: CalendarProps["mode"]) => void
+  >(
+    (date, mode) => {
       logger.info({ ctx: "onSelect", date });
-      const dateKey = getDateKey(date);
-      debugger;
+      const dateKey = getDateKey(date, mode);
       const selectedNote = _.first(groupedDailyNotes[dateKey]);
 
       postVSCodeMessage({
@@ -147,18 +160,18 @@ function CalendarView({ engine, ide }: DendronProps) {
     [groupedDailyNotes, getDateKey]
   );
 
-  useEffect(() => {
-    if (activeDate) {
-      onSelect(activeDate); // trigger `onSelect` when switching month<->year views
-    }
-  }, [activeMode]);
-
   const onPanelChange = useCallback<
     Exclude<CalendarProps["onPanelChange"], undefined>
   >((date, mode) => {
     logger.info({ ctx: "onPanelChange", date, mode });
     setActiveMode(mode);
   }, []);
+
+  const onClickToday = useCallback(() => {
+    const mode = "month";
+    setActiveMode(mode);
+    onSelect(moment(), mode);
+  }, [onSelect]);
 
   const dateFullCellRender = useCallback<
     Exclude<CalendarProps["dateFullCellRender"], undefined>
@@ -269,14 +282,23 @@ function CalendarView({ engine, ide }: DendronProps) {
   }
 
   return (
-    <Calendar
-      mode={activeMode}
-      onSelect={onSelect}
-      onPanelChange={onPanelChange}
-      value={activeDate}
-      dateFullCellRender={dateFullCellRender}
-      fullscreen={false}
-    />
+    <>
+      <Calendar
+        mode={activeMode}
+        onSelect={onSelect}
+        onPanelChange={onPanelChange}
+        /*
+        // @ts-ignore -- `null` initializes ant Calendar into a controlled component whereby it does not render an selected/visible date (today) when `activeDate` is `undefined`*/
+        value={activeDate || null}
+        dateFullCellRender={dateFullCellRender}
+        fullscreen={false}
+      />
+      <Divider plain style={{ marginTop: 0 }}>
+        <Button type="primary" onClick={onClickToday}>
+          Today
+        </Button>
+      </Divider>
+    </>
   );
 }
 

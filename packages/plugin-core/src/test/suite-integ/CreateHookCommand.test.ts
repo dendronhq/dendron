@@ -7,11 +7,12 @@ import path from "path";
 import sinon from "sinon";
 import * as vscode from "vscode";
 import { CreateHookCommand } from "../../commands/CreateHookCommand";
+import { DENDRON_COMMANDS } from "../../constants";
 import { VSCodeUtils } from "../../utils";
 import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
-suite(CreateHookCommand.key, function () {
+suite(DENDRON_COMMANDS.CREATE_HOOK.key, function () {
   let ctx: vscode.ExtensionContext;
   ctx = setupBeforeAfter(this, {
     afterHook: () => {

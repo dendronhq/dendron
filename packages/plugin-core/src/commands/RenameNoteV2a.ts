@@ -44,7 +44,7 @@ export class RenameNoteV2aCommand extends BaseCommand<
   CommandOutput,
   CommandInput
 > {
-  static key = DENDRON_COMMANDS.RENAME_NOTE.key;
+  key = DENDRON_COMMANDS.RENAME_NOTE.key;
   public silent?: boolean;
 
   async gatherInputs(): Promise<CommandInput> {
@@ -145,8 +145,9 @@ export class RenameNoteV2aCommand extends BaseCommand<
         if (opts.closeCurrentFile) {
           await VSCodeUtils.closeCurrentFileEditor();
         }
-        opts.openNewFile &&
-          (await VSCodeUtils.openFileInEditor(new FileItem(files[0].newUri)));
+        if (opts.openNewFile) {
+          await VSCodeUtils.openFileInEditor(new FileItem(files[0].newUri));
+        }
       }
       return {
         changed,

@@ -10,7 +10,7 @@ type CommandOutput = string;
 
 // Command based on copying CopyNoteRef.ts
 export class PasteLinkCommand extends BasicCommand<CommandOpts, CommandOutput> {
-  static key = DENDRON_COMMANDS.PASTE_LINK.key;
+  key = DENDRON_COMMANDS.PASTE_LINK.key;
   async sanityCheck() {
     if (_.isUndefined(VSCodeUtils.getActiveTextEditor())) {
       return "No document open";

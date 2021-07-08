@@ -33,7 +33,7 @@ suite("DefinitionProvider", function () {
     beforeHook: () => {},
   });
 
-  describe("same vault", function () {
+  describe("same vault", () => {
     let noteWithLink: NoteProps;
     let noteWithTarget: NoteProps;
     let _wsRoot: string;
@@ -187,7 +187,7 @@ suite("DefinitionProvider", function () {
     });
   });
 
-  describe("multi vault", function () {
+  describe("multi vault", () => {
     test("basic", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
@@ -243,7 +243,7 @@ suite("DefinitionProvider", function () {
       });
     });
 
-    test("with same name", function (done) {
+    test("with same name", (done) => {
       let noteWithLink: NoteProps;
       let noteTarget1: NoteProps;
       let noteTarget2: NoteProps;

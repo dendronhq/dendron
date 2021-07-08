@@ -10,7 +10,7 @@ type CommandOpts = {};
 type CommandOutput = void;
 
 export class ConfigureCommand extends BasicCommand<CommandOpts, CommandOutput> {
-  static key = DENDRON_COMMANDS.CONFIGURE_RAW.key;
+  key = DENDRON_COMMANDS.CONFIGURE_RAW.key;
   async gatherInputs(): Promise<any> {
     return {};
   }

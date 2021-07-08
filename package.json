@@ -21,24 +21,25 @@
     ]
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^3.1.0",
-    "@typescript-eslint/parser": "^3.1.0",
-    "eslint": "^6.8.0",
+    "@typescript-eslint/eslint-plugin": "^4.28.2",
+    "@typescript-eslint/parser": "^4.28.2",
+    "chalk": "^4.1.1",
+    "eslint": "^7.30.0",
     "eslint-config-airbnb": "^18.1.0",
-    "eslint-plugin-import": "^2.20.2",
-    "eslint-plugin-jest": "^23.13.2",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-import": "^2.23.4",
+    "eslint-plugin-jest": "^24.3.6",
     "eslint-plugin-jsx-a11y": "^6.2.3",
     "eslint-plugin-prettier": "^3.1.4",
-    "eslint-plugin-react": "^7.20.0",
-    "eslint-plugin-react-hooks": "^2.5.1",
+    "eslint-plugin-react": "^7.24.0",
+    "eslint-plugin-react-hooks": "^4.2.0",
+    "execa": "^5.0.0",
     "husky": "^4.2.5",
     "lerna": "^3.19.0",
     "lint-staged": ">=10",
     "lodash": "^4.17.15",
     "prettier": "^2.0.4",
-    "standard-version": "^8.0.0",
-    "execa": "^5.0.0",
-    "chalk": "^4.1.1"
+    "standard-version": "^8.0.0"
   },
   "scripts": {
     "setup": "yarn && yarn bootstrap:bootstrap && yarn bootstrap:build && yarn setup:cli",
@@ -47,6 +48,7 @@
     "release": "standard-version",
     "format": "lerna exec --parallel --ignore @dendronhq/dendron-11ty -- yarn format",
     "format:pkg": "prettier --write",
+    "lint": "eslint . --ext ts,tsx",
     "lerna:typecheck": "lerna exec --parallel --ignore @dendronhq/dendron-next-server --ignore @dendronhq/dendron-11ty -- tsc -p tsconfig.build.json --noEmit",
     "bootstrap:bootstrap": "npx yarn --network-timeout 600000 && yarn gen:meta",
     "bootstrap:build": "yarn bootstrap:build:common-all && yarn bootstrap:build:common-server &&  yarn bootstrap:build:engine-server &&  yarn bootstrap:build:pods-core && yarn bootstrap:build:common-test-utils && yarn bootstrap:build:api-server && yarn bootstrap:build:dendron-cli && yarn bootstrap:build:engine-test-utils && yarn bootstrap:build:common-frontend && yarn bootstrap:build:dendron-next-server && yarn bootstrap:build:plugin-core",
@@ -87,7 +89,8 @@
     }
   },
   "lint-staged": {
-    "*.{ts,tsx}": "prettier --config prettier.config.js --loglevel debug --write"
+    "*.{ts,tsx}": "prettier --config prettier.config.js --loglevel debug --write",
+    "*.{ts,tsx}": "eslint"
   },
   "dependencies": {
     "@dendronhq/conventional-changelog-dendron": "^5.0.11",

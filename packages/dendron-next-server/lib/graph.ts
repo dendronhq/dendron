@@ -23,10 +23,11 @@ export type CoreGraphConfig = {
   "information.edges-hierarchy"?: GraphConfigItem<number>;
   "information.nodes": GraphConfigItem<number>;
 
-  "filter.regex-whitelist": GraphConfigItem<string>;
-  "filter.regex-blacklist": GraphConfigItem<string>;
+  "filter.regex-allowlist": GraphConfigItem<string>;
+  "filter.regex-blocklist": GraphConfigItem<string>;
 
   "options.allow-relayout": GraphConfigItem<boolean>;
+  "options.show-labels": GraphConfigItem<boolean>;
 };
 
 export type NoteGraphConfig = {
@@ -44,16 +45,16 @@ export type SchemaGraphConfig = {
 export type GraphConfig = CoreGraphConfig & NoteGraphConfig & SchemaGraphConfig;
 
 const coreGraphConfig: CoreGraphConfig = {
-  "filter.regex-whitelist": {
+  "filter.regex-allowlist": {
     value: "",
     mutable: true,
-    label: 'Whitelist',
+    label: 'Allowlist',
     placeholder: 'Filenames, labels'
   },
-  "filter.regex-blacklist": {
+  "filter.regex-blocklist": {
     value: "",
     mutable: true,
-    label: 'Blacklist',
+    label: 'Blocklist',
     placeholder: 'Filenames, labels'
   },
   "connections.hierarchy": {
@@ -70,6 +71,10 @@ const coreGraphConfig: CoreGraphConfig = {
     mutable: false,
   },
   "options.allow-relayout": {
+    value: true,
+    mutable: true,
+  },
+  "options.show-labels": {
     value: true,
     mutable: true,
   },

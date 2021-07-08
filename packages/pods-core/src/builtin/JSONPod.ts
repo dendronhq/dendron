@@ -11,6 +11,7 @@ import {
   ImportPodPlantOpts,
   PublishPod,
   PublishPodPlantOpts,
+  PublishPodConfig,
 } from "../basev3";
 import { JSONSchemaType } from "ajv";
 import { PodUtils } from "../utils";
@@ -22,6 +23,13 @@ export type JSONImportPodPlantOpts = ImportPodPlantOpts;
 export class JSONImportPod extends ImportPod {
   static id: string = ID;
   static description: string = "import json";
+
+  get config(): JSONSchemaType<ImportPodConfig> {
+    return PodUtils.createImportConfig({
+      required: [],
+      properties: {},
+    }) as JSONSchemaType<ImportPodConfig>;
+  }
 
   async plant(opts: JSONImportPodPlantOpts) {
     const ctx = "JSONPod";
@@ -82,6 +90,13 @@ export class JSONImportPod extends ImportPod {
 export class JSONPublishPod extends PublishPod {
   static id: string = ID;
   static description: string = "publish json";
+
+  get config(): JSONSchemaType<PublishPodConfig> {
+    return PodUtils.createPublishConfig({
+      required: [],
+      properties: {},
+    }) as JSONSchemaType<PublishPodConfig>;
+  }
 
   async plant(opts: PublishPodPlantOpts) {
     const note = opts.note;

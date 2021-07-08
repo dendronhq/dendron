@@ -19,7 +19,7 @@ export class ArchiveHierarchyCommand extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
-  static key = DENDRON_COMMANDS.ARCHIVE_HIERARCHY.key;
+  key = DENDRON_COMMANDS.ARCHIVE_HIERARCHY.key;
   private refactorCmd: RefactorHierarchyCommandV2;
 
   constructor(name?: string) {
@@ -33,7 +33,7 @@ export class ArchiveHierarchyCommand extends BasicCommand<
     if (editor) {
       value = NoteUtils.uri2Fname(editor.document.uri);
     }
-    let match = await VSCodeUtils.showInputBox({
+    const match = await VSCodeUtils.showInputBox({
       prompt: "Enter hierarchy to archive",
       value,
     });

@@ -28,7 +28,7 @@ suite("CopyNoteRef", function () {
     },
   });
 
-  describe("multi", function () {
+  describe("multi", () => {
     test("basic", (done) => {
       runMultiVaultTest({
         ctx,

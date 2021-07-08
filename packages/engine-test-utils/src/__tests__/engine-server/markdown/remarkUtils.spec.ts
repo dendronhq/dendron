@@ -38,10 +38,7 @@ describe("RemarkUtils and LinkUtils", () => {
         async ({ engine }) => {
           const note = engine.notes["foo"];
           const body = note.body;
-          const out = RemarkUtils.findAnchors(body, {
-            engine,
-            fname: note.fname,
-          });
+          const out = RemarkUtils.findAnchors(body);
           expect(out).toMatchSnapshot();
           expect(_.size(out)).toEqual(1);
           expect(out[0].depth).toEqual(1);
@@ -69,10 +66,7 @@ describe("RemarkUtils and LinkUtils", () => {
         async ({ engine }) => {
           const note = engine.notes["foo"];
           const body = note.body;
-          const out = RemarkUtils.findAnchors(body, {
-            engine,
-            fname: note.fname,
-          });
+          const out = RemarkUtils.findAnchors(body);
           expect(out).toMatchSnapshot();
           expect(_.size(out)).toEqual(1);
           expect(out[0].type).toEqual(DendronASTTypes.BLOCK_ANCHOR);
@@ -100,10 +94,7 @@ describe("RemarkUtils and LinkUtils", () => {
         async ({ engine }) => {
           const note = engine.notes["foo"];
           const body = note.body;
-          const out = RemarkUtils.findAnchors(body, {
-            engine,
-            fname: note.fname,
-          });
+          const out = RemarkUtils.findAnchors(body);
           expect(out).toMatchSnapshot();
           expect(_.size(out)).toEqual(0);
         },
@@ -133,10 +124,7 @@ describe("RemarkUtils and LinkUtils", () => {
       async ({ engine }) => {
         const note = engine.notes["foo"];
         const body = note.body;
-        const out = RemarkUtils.findAnchors(body, {
-          engine,
-          fname: note.fname,
-        });
+        const out = RemarkUtils.findAnchors(body);
         expect(out).toMatchSnapshot();
         expect(_.size(out)).toEqual(0);
       },
@@ -163,10 +151,7 @@ describe("RemarkUtils and LinkUtils", () => {
       async ({ engine }) => {
         const note = engine.notes["foo"];
         const body = note.body;
-        const out = RemarkUtils.findAnchors(body, {
-          engine,
-          fname: note.fname,
-        });
+        const out = RemarkUtils.findAnchors(body);
         expect(out).toMatchSnapshot();
         expect(_.size(out)).toEqual(0);
       },
@@ -494,11 +479,10 @@ describe("RemarkUtils and LinkUtils", () => {
     test("paragraphs", async () => {
       let note: NoteProps | undefined;
       await runEngineTestV5(
-        async ({ wsRoot, engine }) => {
+        async ({ engine }) => {
           expect(note).toBeTruthy();
           const blocks = await RemarkUtils.extractBlocks({
             note: note!,
-            wsRoot,
             engine,
           });
           expect(blocks.length).toEqual(3);
@@ -527,11 +511,10 @@ describe("RemarkUtils and LinkUtils", () => {
     test("list", async () => {
       let note: NoteProps | undefined;
       await runEngineTestV5(
-        async ({ wsRoot, engine }) => {
+        async ({ engine }) => {
           expect(note).toBeTruthy();
           const blocks = await RemarkUtils.extractBlocks({
             note: note!,
-            wsRoot,
             engine,
           });
           expect(blocks.length).toEqual(5);
@@ -560,11 +543,10 @@ describe("RemarkUtils and LinkUtils", () => {
     test("nested list", async () => {
       let note: NoteProps | undefined;
       await runEngineTestV5(
-        async ({ wsRoot, engine }) => {
+        async ({ engine }) => {
           expect(note).toBeTruthy();
           const blocks = await RemarkUtils.extractBlocks({
             note: note!,
-            wsRoot,
             engine,
           });
           expect(blocks.length).toEqual(8);
@@ -596,11 +578,10 @@ describe("RemarkUtils and LinkUtils", () => {
     test("table", async () => {
       let note: NoteProps | undefined;
       await runEngineTestV5(
-        async ({ wsRoot, engine }) => {
+        async ({ engine }) => {
           expect(note).toBeTruthy();
           const blocks = await RemarkUtils.extractBlocks({
             note: note!,
-            wsRoot,
             engine,
           });
           expect(blocks.length).toEqual(3);
@@ -632,11 +613,10 @@ describe("RemarkUtils and LinkUtils", () => {
     test("existing anchors", async () => {
       let note: NoteProps | undefined;
       await runEngineTestV5(
-        async ({ wsRoot, engine }) => {
+        async ({ engine }) => {
           expect(note).toBeTruthy();
           const blocks = await RemarkUtils.extractBlocks({
             note: note!,
-            wsRoot,
             engine,
           });
           expect(blocks.length).toEqual(7);
@@ -681,11 +661,10 @@ describe("RemarkUtils and LinkUtils", () => {
     test("header", async () => {
       let note: NoteProps | undefined;
       await runEngineTestV5(
-        async ({ wsRoot, engine }) => {
+        async ({ engine }) => {
           expect(note).toBeTruthy();
           const blocks = await RemarkUtils.extractBlocks({
             note: note!,
-            wsRoot,
             engine,
           });
           expect(blocks.length).toEqual(4);

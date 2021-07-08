@@ -1,8 +1,7 @@
 import {
   DNodeUtils,
   getSlugger,
-  isBlockAnchor,
-  NoteProps,
+  isBlockAnchor
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import path from "path";
@@ -21,7 +20,7 @@ export class CopyNoteURLCommand extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
-  static key = DENDRON_COMMANDS.COPY_NOTE_URL.key;
+  key = DENDRON_COMMANDS.COPY_NOTE_URL.key;
   async gatherInputs(): Promise<any> {
     return {};
   }
@@ -81,9 +80,8 @@ export class CopyNoteURLCommand extends BasicCommand<
     const notePrefix = "notes";
     const fname = path.basename(maybeTextEditor.document.uri.fsPath, ".md");
 
-    let note: NoteProps | undefined;
     const engine = getEngine();
-    note = _.find(engine.notes, { fname });
+    const note = _.find(engine.notes, { fname });
     if (!note) {
       throw Error(`${fname} not found in engine`);
     }

@@ -21,13 +21,13 @@ export class InsertNoteLinkCommand extends BasicCommand<
   CommandOutput,
   CommandInput
 > {
-  static key = DENDRON_COMMANDS.INSERT_NOTE_LINK.key;
+  key = DENDRON_COMMANDS.INSERT_NOTE_LINK.key;
 
   async gatherInputs(): Promise<CommandOpts | undefined> {
     const lc = LookupControllerV3.create({
       disableVaultSelection: true,
     });
-    const provider = new NoteLookupProvider(InsertNoteLinkCommand.key, {
+    const provider = new NoteLookupProvider(this.key, {
       allowNewNote: false,
       noHidePickerOnAccept: false,
     });
@@ -39,13 +39,10 @@ export class InsertNoteLinkCommand extends BasicCommand<
 
     return new Promise((resolve) => {
       HistoryService.instance().subscribev2("lookupProvider", {
-        id: InsertNoteLinkCommand.key,
+        id: this.key,
         listener: async (event) => {
           if (event.action === "done") {
-            HistoryService.instance().remove(
-              InsertNoteLinkCommand.key,
-              "lookupProvider"
-            );
+            HistoryService.instance().remove(this.key, "lookupProvider");
             const cdata = event.data as NoteLookupProviderSuccessResp;
             resolve({ notes: cdata.selectedItems });
             lc.onHide();
@@ -68,7 +65,7 @@ export class InsertNoteLinkCommand extends BasicCommand<
       return NoteUtils.createWikiLink({ note, useTitle: false });
     });
     const editor = VSCodeUtils.getActiveTextEditor()!;
-    let current = editor.selection;
+    const current = editor.selection;
     await editor.edit((builder) => {
       builder.insert(current.start, links.join("\n"));
     });

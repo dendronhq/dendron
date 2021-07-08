@@ -6,18 +6,13 @@ import {
   VaultUtils,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
-import { file2Note, string2Note } from "@dendronhq/common-server";
-import {
-  HistoryService,
-  LinkUtils,
-  WorkspaceUtils,
-} from "@dendronhq/engine-server";
+import { file2Note } from "@dendronhq/common-server";
+import { HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
-import { AnchorUtils } from "@dendronhq/engine-server";
 import path from "path";
 import * as vscode from "vscode";
 import { Logger } from "./logger";
-import { DendronWorkspace, getWS } from "./workspace";
+import { DendronWorkspace } from "./workspace";
 
 export class FileWatcher {
   public watchers: { vault: DVault; watcher: vscode.FileSystemWatcher }[];
@@ -55,61 +50,7 @@ export class FileWatcher {
     this.watchers.forEach(({ watcher }) => {
       context.subscriptions.push(watcher.onDidCreate(this.onDidCreate, this));
       context.subscriptions.push(watcher.onDidDelete(this.onDidDelete, this));
-      context.subscriptions.push(
-        watcher.onDidChange(_.debounce(this.onDidChange, 500), this)
-      );
     });
-  }
-
-  /**
-   * Update note on detected changes
-   *
-   * @returns {@link NoteProps} if changed, `undefined` otherwise
-   */
-  async onDidChange(uri: vscode.Uri) {
-    const ctx = "FileWatcher:onDidChange";
-    if (this.pause) {
-      return;
-    }
-    this.L.info({ ctx, uri: uri.fsPath });
-    const eclient = DendronWorkspace.instance().getEngine();
-    const fname = path.basename(uri.fsPath, ".md");
-    const doc = await vscode.workspace.openTextDocument(uri);
-    const content = doc.getText();
-    if (!getWS().workspaceService?.isPathInWorkspace(uri.fsPath)) {
-      this.L.debug({ ctx, uri: uri.fsPath, msg: "not in workspace, ignoring" });
-      return;
-    }
-    const vault = VaultUtils.getVaultByNotePath({
-      vaults: eclient.vaults,
-      wsRoot: DendronWorkspace.wsRoot(),
-      fsPath: uri.fsPath,
-    });
-    const noteHydrated = NoteUtils.getNoteByFnameV5({
-      fname,
-      vault,
-      notes: eclient.notes,
-      wsRoot: DendronWorkspace.wsRoot(),
-    }) as NoteProps;
-    if (!WorkspaceUtils.noteContentChanged({ content, note: noteHydrated })) {
-      this.L.debug({
-        ctx,
-        uri: uri.fsPath,
-        msg: "note content unchanged, ignoring",
-      });
-      return;
-    }
-    let note = string2Note({ content, fname, vault, calculateHash: true });
-    note = NoteUtils.hydrate({ noteRaw: note, noteHydrated });
-    const links = LinkUtils.findLinks({ note, engine: eclient });
-    note.links = links;
-    const anchors = await AnchorUtils.findAnchors(
-      { note, wsRoot: eclient.wsRoot },
-      { fname, engine: eclient }
-    );
-    note.anchors = anchors;
-    this.L.info({ ctx, fname, msg: "exit" });
-    return await eclient.updateNote(note);
   }
 
   async onDidCreate(uri: vscode.Uri): Promise<void> {
@@ -210,13 +151,13 @@ export class FileWatcher {
         this.L.debug({ ctx, uri, msg: "preparing to delete" });
         const nodeToDelete = _.find(this.engine.notes, { fname });
         if (_.isUndefined(nodeToDelete)) {
-          throw `${fname} not found`;
+          throw new Error(`${fname} not found`);
         }
         await this.engine.deleteNote(nodeToDelete.id, { metaOnly: true });
         await HistoryService.instance().add({
           action: "delete",
           source: "watcher",
-          uri: uri,
+          uri,
         });
       } catch (err) {
         this.L.info({ ctx, uri, err });

@@ -163,10 +163,10 @@ export class NoteLookupProvider implements ILookupProviderV3 {
     // const vault = this.getVault();
     let profile: number;
     const queryEndsWithDot = queryOrig.endsWith(".");
-    const queryUpToLastDot = PickerUtilsV2.getQueryUpToLastDot(queryOrig);
-    const queryDotLevelChanged =
-      _.isUndefined(picker.prevValue) ||
-      queryUpToLastDot !== PickerUtilsV2.getQueryUpToLastDot(picker.prevValue);
+    // const queryUpToLastDot = PickerUtilsV2.getQueryUpToLastDot(queryOrig);
+    // const queryDotLevelChanged =
+    //   _.isUndefined(picker.prevValue) ||
+    //   queryUpToLastDot !== PickerUtilsV2.getQueryUpToLastDot(picker.prevValue);
 
     const engine = ws.getEngine();
     Logger.info({ ctx, msg: "enter", queryOrig });
@@ -186,12 +186,12 @@ export class NoteLookupProvider implements ILookupProviderV3 {
       }
 
       // if we entered a different level of hierarchy, re-run search
-      if (queryDotLevelChanged) {
-        updatedItems = await NotePickerUtils.fetchPickerResults({
-          picker,
-          qs: querystring,
-        });
-      }
+      // if (queryDotLevelChanged) {
+      updatedItems = await NotePickerUtils.fetchPickerResults({
+        picker,
+        qs: querystring,
+      });
+      // }
       if (token.isCancellationRequested) {
         return;
       }
@@ -246,7 +246,7 @@ export class NoteLookupProvider implements ILookupProviderV3 {
         profile,
         cancelled: token.isCancellationRequested,
       });
-      return;
+      return; // eslint-disable-line no-unsafe-finally -- probably can be just removed
     }
   }
 

@@ -1,5 +1,5 @@
-import { ERROR_STATUS } from "@dendronhq/common-all";
-import { DendronError } from "@dendronhq/common-all";
+import { ERROR_STATUS, DendronError } from "@dendronhq/common-all";
+
 import { vault2Path } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -19,7 +19,7 @@ type CommandInput = {};
 type CommandOutput = { error?: DendronError; fsPath?: string };
 
 export class OpenLinkCommand extends BasicCommand<CommandOpts, CommandOutput> {
-  static key = DENDRON_COMMANDS.OPEN_LINK.key;
+  key = DENDRON_COMMANDS.OPEN_LINK.key;
   async gatherInputs(): Promise<CommandInput | undefined> {
     return {};
   }

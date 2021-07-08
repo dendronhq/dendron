@@ -4,7 +4,7 @@
   "displayName": "dendron",
   "description": "Dendron is a hierarchal note taking tool that grows as you do. ",
   "publisher": "dendron",
-  "version": "0.48.0",
+  "version": "0.49.0",
   "engines": {
     "vscode": "^1.54.0"
   },
@@ -142,6 +142,11 @@
         "command": "dendron.randomNote",
         "title": "Dendron: Random Note",
         "desc": "Open a random note within a configured hierarchy set"
+      },
+      {
+        "command": "dendron.launchTutorial",
+        "title": "Dendron: Launch Tutorial",
+        "desc": "Launch the Tutorial"
       },
       {
         "command": "dendron.renameNote",
@@ -401,6 +406,13 @@
       {
         "command": "dendron.showPreview",
         "title": "Dendron: Show Preview",
+        "desc": "Show Markdown Preview",
+        "docLink": "dendron.topic.commands.md",
+        "docPreview": ""
+      },
+      {
+        "command": "dendron.showPreviewV2",
+        "title": "Dendron: Show Preview V2",
         "desc": "Show Markdown Preview",
         "docLink": "dendron.topic.commands.md",
         "docPreview": ""
@@ -702,7 +714,6 @@
     "webpack": "webpack --mode development",
     "webpack:prod": "webpack --mode production",
     "webpack:dev:watch": "webpack --mode development --watch",
-    "lint": "eslint src --ext ts",
     "watch": "yarn compile --watch",
     "build": "yarn compile",
     "compile": "tsc -p tsconfig.build.json",
@@ -711,7 +722,7 @@
     "format": "echo nop"
   },
   "devDependencies": {
-    "@dendronhq/common-test-utils": "^0.48.0",
+    "@dendronhq/common-test-utils": "^0.49.0",
     "@types/execa": "^2.0.0",
     "@types/fs-extra": "^9.0.1",
     "@types/glob": "^7.1.1",
@@ -723,10 +734,7 @@
     "@types/open": "^6.2.1",
     "@types/open-graph-scraper": "^4.7.0",
     "@types/semver": "^7.3.1",
-    "@typescript-eslint/eslint-plugin": "^2.30.0",
-    "@typescript-eslint/parser": "^2.30.0",
     "copy-webpack-plugin": "^6.0.4",
-    "eslint": "^6.8.0",
     "glob": "^7.1.6",
     "mocha": "^7.1.2",
     "ts-loader": "^8.0.0",
@@ -736,14 +744,14 @@
     "webpack-cli": "^3.3.12"
   },
   "dependencies": {
-    "@dendronhq/api-server": "^0.48.0",
-    "@dendronhq/common-all": "^0.48.0",
-    "@dendronhq/common-server": "^0.48.0",
-    "@dendronhq/dendron-cli": "^0.48.0",
-    "@dendronhq/engine-server": "^0.48.0",
-    "@dendronhq/engine-test-utils": "^0.48.0",
+    "@dendronhq/api-server": "^0.49.0",
+    "@dendronhq/common-all": "^0.49.0",
+    "@dendronhq/common-server": "^0.49.0",
+    "@dendronhq/dendron-cli": "^0.49.0",
+    "@dendronhq/engine-server": "^0.49.0",
+    "@dendronhq/engine-test-utils": "^0.49.0",
     "@dendronhq/lsp-server": "^0.28.7-alpha.0",
-    "@dendronhq/pods-core": "^0.48.0",
+    "@dendronhq/pods-core": "^0.49.0",
     "@types/vscode": "1.57",
     "cross-path-sort": "^1.0.0",
     "execa": "^4.0.2",
@@ -754,6 +762,7 @@
     "markdown-it-regex": "^0.2.0",
     "open": "^7.0.4",
     "open-graph-scraper": "^4.7.1",
+    "replace-in-file": "^6.2.0",
     "semver": "^7.3.2",
     "vscode-languageclient": "^6.1.3"
   },

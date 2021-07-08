@@ -1,37 +1,24 @@
 import { AssertUtils, TestPresetEntryV4 } from "@dendronhq/common-test-utils";
 import {
   BlockAnchor,
-  BlockAnchorOpts,
-  blockAnchors,
-  DendronASTData,
   DendronASTDest,
   DendronASTTypes,
-  DEngineClient,
-  MDUtilsV4,
+  MDUtilsV5,
   Node,
   Parent,
+  ProcMode,
   Text,
   UnistNode,
-  wikiLinks,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { runEngineTestV5 } from "../../../engine";
 import { ENGINE_HOOKS } from "../../../presets";
 import { createProcForTest, createProcTests, ProcTests } from "./utils";
 
-function proc(
-  engine: DEngineClient,
-  dendron: DendronASTData,
-  opts?: BlockAnchorOpts
-) {
-  return MDUtilsV4.proc({ engine })
-    .data("dendron", dendron)
-    .use(wikiLinks)
-    .use(blockAnchors, opts);
-}
-
-function genDendronData(opts?: Partial<DendronASTData>): DendronASTData {
-  return { ...opts } as any;
+function proc() {
+  return MDUtilsV5.procRehypeParse({
+    mode: ProcMode.NO_DATA,
+  });
 }
 
 function runAllTests(opts: { name: string; testCases: ProcTests[] }) {
@@ -73,36 +60,24 @@ function getBlockAnchor(node: UnistNode): BlockAnchor {
 
 describe("blockAnchors", () => {
   describe("parse", () => {
-    let engine: any;
-    let dendronData = {
-      fname: "placeholder.md",
-      dest: DendronASTDest.MD_REGULAR,
-    };
-
     test("parses anchor by itself", () => {
-      const resp = proc(engine, genDendronData(dendronData)).parse(
-        "^block-0-id"
-      );
+      const resp = proc().parse("^block-0-id");
       expect(getBlockAnchor(resp).type).toEqual(DendronASTTypes.BLOCK_ANCHOR);
       expect(getBlockAnchor(resp).id).toEqual("block-0-id");
     });
 
     test("doesn't parse inline code block", () => {
-      const resp = proc(engine, genDendronData(dendronData)).parse(
-        "`^block-id`"
-      );
+      const resp = proc().parse("`^block-id`");
       expect(getBlockAnchor(resp).type).toEqual("inlineCode");
     });
 
     test("doesn't parse block anchor inside a link", async () => {
-      const resp = proc(await engine, genDendronData(dendronData)).parse(
-        "[[#^block-id]]"
-      );
+      const resp = proc().parse("[[#^block-id]]");
       expect(getBlockAnchor(resp).type).toEqual(DendronASTTypes.WIKI_LINK);
     });
 
     test("parses a block anchor in the middle of a paragraph", async () => {
-      const resp = proc(await engine, genDendronData(dendronData)).parse(
+      const resp = proc().parse(
         ["Lorem ipsum ^block-id", "dolor amet."].join("\n")
       );
       expect(getDescendantNode(resp, 0, 1).type).toEqual(
@@ -111,17 +86,13 @@ describe("blockAnchors", () => {
     });
 
     test("doesn't parse code block not at the end of the line", async () => {
-      const resp = proc(await engine, genDendronData(dendronData)).parse(
-        "^block-id Lorem ipsum"
-      );
+      const resp = proc().parse("^block-id Lorem ipsum");
       expect(getDescendantNode(resp, 0, 0).type).toEqual("text");
       expect(getDescendantNode<Parent>(resp, 0).children.length).toEqual(1); // text only, nothing else
     });
 
     test("parses anchors at the end of the line", () => {
-      const resp = proc(engine, genDendronData(dendronData)).parse(
-        "Lorem ipsum ^block-id"
-      );
+      const resp = proc().parse("Lorem ipsum ^block-id");
       const text = getDescendantNode(resp, 0, 0);
       expect(text.type).toEqual("text");
       const anchor = getDescendantNode<BlockAnchor>(resp, 0, 1);
@@ -130,9 +101,7 @@ describe("blockAnchors", () => {
     });
 
     test("parses anchors at the end of headers", () => {
-      const resp = proc(engine, genDendronData(dendronData)).parse(
-        "# Lorem ipsum ^block-id"
-      );
+      const resp = proc().parse("# Lorem ipsum ^block-id");
       const header = getDescendantNode<Text>(resp, 0, 0);
       expect(header.value.trim()).toEqual("Lorem ipsum");
       const anchor = getDescendantNode<BlockAnchor>(resp, 0, 1);
@@ -203,43 +172,7 @@ describe("blockAnchors", () => {
       preSetupHook: ENGINE_HOOKS.setupBasic,
     });
 
-    const HIDDEN_ANCHOR = createProcTests({
-      name: "hidden",
-      setupFunc: async ({ engine, vaults, extra }) => {
-        const proc2 = createProcForTest({
-          engine,
-          dest: extra.dest,
-          hideBlockAnchors: true,
-          vault: vaults[0],
-        });
-        const resp = await proc2.process(anchor);
-        return { resp };
-      },
-      verifyFuncDict: {
-        [DendronASTDest.HTML]: async ({ extra }) => {
-          const { resp } = extra;
-          expect(resp).toMatchSnapshot();
-          return [
-            {
-              actual: await AssertUtils.assertInString({
-                body: resp.toString(),
-                match: [
-                  "<a",
-                  `href="#${anchor}"`,
-                  "visibility: hidden",
-                  `id="${anchor}"`,
-                  "</a>",
-                ],
-              }),
-              expected: true,
-            },
-          ];
-        },
-      },
-      preSetupHook: ENGINE_HOOKS.setupBasic,
-    });
-
-    const ALL_TEST_CASES = [...SIMPLE, ...END_OF_PARAGRAPH, ...HIDDEN_ANCHOR];
+    const ALL_TEST_CASES = [...SIMPLE, ...END_OF_PARAGRAPH];
     runAllTests({ name: "compile", testCases: ALL_TEST_CASES });
   });
 });

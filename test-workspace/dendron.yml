@@ -9,6 +9,7 @@ useFMTitle: true
 useNoteTitleForLink: true
 autoFoldFrontmatter: true
 mermaid: true
+useKatex: true
 journal:
     dailyDomain: daily
     name: journal
@@ -52,4 +53,4 @@ dev:
     nextServerUrl: 'http://localhost:3000'
     engineServerPort: 3005
 initializeRemoteVaults: true
-dendronVersion: 0.47.1
+dendronVersion: 0.48.0

@@ -220,8 +220,8 @@ export type RunEngineTestFunction = (
  * Otherwise, use the default assertion library of
  * your current test runner
  */
-export type RunEngineTestFunctionV4<T = any> = (
-  opts: RunEngineTestFunctionOpts & { extra?: any }
+export type RunEngineTestFunctionV4<T = any, TExtra = any> = (
+  opts: RunEngineTestFunctionOpts & { extra?: TExtra }
 ) => Promise<TestResult[] | void | T>;
 
 export type SetupTestFunctionV4 = (

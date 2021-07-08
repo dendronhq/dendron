@@ -51,6 +51,7 @@ export class DisposableStore {
   }
 
   public dispose() {
+    // eslint-disable-next-line no-restricted-syntax
     for (const disposable of this._toDispose) {
       disposable.dispose();
     }
@@ -62,7 +63,7 @@ export class DisposableStore {
 export function resolvePath(filePath: string, wsRoot?: string): string {
   const platform = os.platform();
 
-  const isWin = platform === "win32" ? true : false;
+  const isWin = platform === "win32";
   if (filePath[0] === "~") {
     return resolveTilde(filePath);
   } else if (
@@ -89,7 +90,7 @@ export class FileUtils {
 }
 
 // NOTE: used for tests
-let _MOCK_CONTEXT: undefined | vscode.ExtensionContext = undefined;
+let _MOCK_CONTEXT: undefined | vscode.ExtensionContext;
 
 type CreateFnameOverrides = {
   domain?: string;
@@ -129,17 +130,13 @@ export class VSCodeUtils {
     documentParam?: vscode.TextDocument,
     rangeParam?: vscode.Range
   ) => {
-    const document = documentParam
-      ? documentParam
-      : vscode.window.activeTextEditor?.document;
+    const document = documentParam || vscode.window.activeTextEditor?.document;
 
     if (!document || (document && document.languageId !== "markdown")) {
       return;
     }
 
-    const range = rangeParam
-      ? rangeParam
-      : vscode.window.activeTextEditor?.selection;
+    const range = rangeParam || vscode.window.activeTextEditor?.selection;
 
     if (!range || (range && range.isEmpty)) {
       return;
@@ -354,7 +351,10 @@ export class VSCodeUtils {
   }
 
   static async openFileInEditor(
-    fileItemOrURI: FileItem | vscode.Uri
+    fileItemOrURI: FileItem | vscode.Uri,
+    opts?: Partial<{
+      column: vscode.ViewColumn;
+    }>
   ): Promise<vscode.TextEditor | undefined> {
     let textDocument;
     if (fileItemOrURI instanceof FileItem) {
@@ -373,10 +373,9 @@ export class VSCodeUtils {
       throw new Error("Could not open file!");
     }
 
-    const editor = await vscode.window.showTextDocument(
-      textDocument,
-      vscode.ViewColumn.Active
-    );
+    const col = opts?.column || vscode.ViewColumn.Active;
+
+    const editor = await vscode.window.showTextDocument(textDocument, col);
     if (!editor) {
       throw new Error("Could not show document!");
     }
@@ -425,7 +424,7 @@ export class VSCodeUtils {
 
   static isDevMode(): boolean {
     // HACK: vscode does not save env variables btw workspaces
-    return process.env.VSCODE_DEBUGGING_EXTENSION ? true : false;
+    return !!process.env.VSCODE_DEBUGGING_EXTENSION;
   }
 
   static setContext(key: DendronContext, status: boolean) {

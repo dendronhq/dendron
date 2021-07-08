@@ -28,7 +28,7 @@ const cleanFname = (basename: string) => {
 };
 
 export class PasteFileCommand extends BasicCommand<CommandOpts, CommandOutput> {
-  static key = DENDRON_COMMANDS.PASTE_FILE.key;
+  key = DENDRON_COMMANDS.PASTE_FILE.key;
   async gatherInputs(): Promise<CommandInput | undefined> {
     const maybeFilePath = await clipboard.readText();
     if (!_.isUndefined(maybeFilePath) && fs.existsSync(maybeFilePath)) {
@@ -36,7 +36,7 @@ export class PasteFileCommand extends BasicCommand<CommandOpts, CommandOutput> {
     }
 
     // if not in clipboard, prompt for file
-    let out = await VSCodeUtils.showInputBox({
+    const out = await VSCodeUtils.showInputBox({
       prompt: "Path of file",
       placeHolder: "",
     });

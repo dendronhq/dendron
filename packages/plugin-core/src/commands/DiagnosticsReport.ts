@@ -7,6 +7,7 @@ import { DendronWorkspace, getWS } from "../workspace";
 import { BasicCommand } from "./base";
 import { getPortFilePath } from "@dendronhq/engine-server";
 import { clipboard } from "../utils";
+
 const L = Logger;
 
 type DiagnosticsReportCommandOpts = {};
@@ -15,7 +16,7 @@ export class DiagnosticsReportCommand extends BasicCommand<
   DiagnosticsReportCommandOpts,
   void
 > {
-  static key = DENDRON_COMMANDS.DEV_DIAGNOSTICS_REPORT.key;
+  key = DENDRON_COMMANDS.DEV_DIAGNOSTICS_REPORT.key;
   async execute(opts?: DiagnosticsReportCommandOpts) {
     const ctx = "execute";
     L.info({ ctx, opts });

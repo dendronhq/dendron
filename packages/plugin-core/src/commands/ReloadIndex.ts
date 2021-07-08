@@ -22,7 +22,7 @@ export class ReloadIndexCommand extends BasicCommand<
   ReloadIndexCommandOpts,
   DEngineClient | undefined
 > {
-  static key = DENDRON_COMMANDS.RELOAD_INDEX.key;
+  key = DENDRON_COMMANDS.RELOAD_INDEX.key;
   /**
    * Update index
    * @param opts
@@ -62,7 +62,7 @@ export class ReloadIndexCommand extends BasicCommand<
       return;
     }
     if (error) {
-      let msg = "init error";
+      const msg = "init error";
       this.L.error({ ctx, error, msg });
     }
     this.L.info({ ctx, msg: "exit" });

@@ -27,16 +27,25 @@ export class CalendarView implements vscode.WebviewViewProvider {
       vscode.window.onDidChangeActiveTextEditor(
         // An `ChangeActiveTextEditor` event might be immediately followed by a new one (e.g. switch TextDocument).
         // This would result in the first call to unset `noteActive` and the seconde one to set it again. This might create flashing UI changes that disturb the eye.
-        _.debounce(this.handleActiveTextEditorChange, 100),
+        _.debounce(this.onActiveTextEditorChangeHandler, 100),
         this
       )
     );
     dendronWorkspace.addDisposable(
-      vscode.workspace.onDidSaveTextDocument(this.handleSaveTextDocument, this)
+      vscode.workspace.onDidSaveTextDocument(
+        this.onDidSaveTextDocumentHandler,
+        this
+      )
     );
   }
 
   openTextDocument(document: vscode.TextDocument) {
+    if (_.isUndefined(document) || _.isUndefined(this._view)) {
+      return;
+    }
+    if (!this._view.visible) {
+      return;
+    }
     const ctx = "CalendarView:openTextDocument";
     if (!getWS().workspaceService?.isPathInWorkspace(document.uri.fsPath)) {
       Logger.info({
@@ -57,15 +66,12 @@ export class CalendarView implements vscode.WebviewViewProvider {
     }
   }
 
-  async handleSaveTextDocument(document: vscode.TextDocument) {
-    this.openTextDocument(document); // TODO optimize for only daily notes
+  async onDidSaveTextDocumentHandler(document: vscode.TextDocument) {
+    this.openTextDocument(document); // TODO optimize so that it only executes on daily notes
   }
 
-  async handleActiveTextEditorChange() {
+  async onActiveTextEditorChangeHandler() {
     const document = VSCodeUtils.getActiveTextEditor()?.document;
-    if (!this._view?.visible) {
-      return;
-    }
     if (document) {
       this.openTextDocument(document);
     } else {
@@ -73,7 +79,7 @@ export class CalendarView implements vscode.WebviewViewProvider {
     }
   }
 
-  async handleReceiveMessage(msg: CalendarViewMessage) {
+  async onDidReceiveMessageHandler(msg: CalendarViewMessage) {
     const ctx = "onDidReceiveMessage";
     Logger.info({ ctx, data: msg });
     switch (msg.type) {
@@ -83,7 +89,8 @@ export class CalendarView implements vscode.WebviewViewProvider {
           data: msg.data,
         });
         const { id, fname } = msg.data;
-        let note: NoteProps | undefined = undefined;
+        let note: NoteProps | undefined;
+        // eslint-disable-next-line no-cond-assign
         if (id && (note = getEngine().notes[id])) {
           await new GotoNoteCommand().execute({
             qs: note.fname,
@@ -91,13 +98,13 @@ export class CalendarView implements vscode.WebviewViewProvider {
           });
         } else if (fname) {
           await new CreateDailyJournalCommand().execute({
-            fname: fname,
+            fname,
           });
         }
         break;
       }
       case CalendarViewMessageType.onGetActiveEditor: {
-        this.handleActiveTextEditorChange(); // initial call
+        this.onActiveTextEditorChangeHandler(); // initial call
         break;
       }
       default:
@@ -117,14 +124,17 @@ export class CalendarView implements vscode.WebviewViewProvider {
   ) {
     const ctx = "CalendarView:resolveWebView";
     this._view = webviewView;
-    let start = process.hrtime();
+    const start = process.hrtime();
     Logger.info({ ctx, msg: "enter", start });
     webviewView.webview.options = {
       enableScripts: true,
       localResourceRoots: [],
     };
     webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
-    webviewView.webview.onDidReceiveMessage(this.handleReceiveMessage, this);
+    webviewView.webview.onDidReceiveMessage(
+      this.onDidReceiveMessageHandler,
+      this
+    );
   }
 
   public refresh(note?: NoteProps) {

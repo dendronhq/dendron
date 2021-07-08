@@ -14,8 +14,8 @@ suite("SchemaWatcher", function () {
 
   ctx = setupBeforeAfter(this, {});
 
-  describe("onDidChange", function () {
-    test("basic", function (done) {
+  describe("onDidChange", () => {
+    test("basic", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
         onInit: async ({ vaults, wsRoot }) => {

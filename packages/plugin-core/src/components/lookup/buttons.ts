@@ -217,6 +217,7 @@ export class DirectChildFilterBtn extends DendronBtn {
         PickerUtilsV2.getValue(quickPick)
       ).split(".").length;
       items = PickerUtilsV2.filterByDepth(items, depth);
+      items = PickerUtilsV2.filterNonStubs(items);
       return items;
     };
     return;
@@ -268,7 +269,7 @@ export class CopyNoteLinkButton extends DendronBtn {
       } else {
         items = quickPick.activeItems;
       }
-      let links = items
+      const links = items
         .filter((ent) => !PickerUtilsV2.isCreateNewNotePick(ent))
         .map((note) => NoteUtils.createWikiLink({ note }));
       if (_.isEmpty(links)) {

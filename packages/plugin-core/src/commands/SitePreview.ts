@@ -17,7 +17,7 @@ export class SitePreviewCommand extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
-  static key = DENDRON_COMMANDS.SITE_PREVIEW.key;
+  key = DENDRON_COMMANDS.SITE_PREVIEW.key;
 
   async gatherInputs(): Promise<any> {
     return {};
@@ -43,6 +43,7 @@ export class SitePreviewCommand extends BasicCommand<
         cancellable: true,
       },
       async (progress, token) => {
+        // eslint-disable-next-line  no-async-promise-executor
         return new Promise(async (resolve, reject) => {
           try {
             await buildSite({

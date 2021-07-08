@@ -7,12 +7,14 @@ import {
   ERROR_STATUS,
   getStage,
   ResponseCode,
+  TutorialEvents,
   WorkspaceSettings,
 } from "@dendronhq/common-all";
 import {
   NodeJSUtils,
   readJSONWithComments,
   readMD,
+  vault2Path,
   writeJSONWithComments,
 } from "@dendronhq/common-server";
 import {
@@ -24,18 +26,21 @@ import { PodUtils } from "@dendronhq/pods-core";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
+import rif from "replace-in-file";
 import * as vscode from "vscode";
 import { ALL_COMMANDS } from "./commands";
 import { GoToSiblingCommand } from "./commands/GoToSiblingCommand";
 import { LookupCommand } from "./commands/LookupCommand";
 import { MoveNoteCommand } from "./commands/MoveNoteCommand";
 import { ReloadIndexCommand } from "./commands/ReloadIndex";
+import { SetupWorkspaceCommand } from "./commands/SetupWorkspace";
 import {
   CONFIG,
   DendronContext,
   DENDRON_COMMANDS,
   extensionQualifiedId,
   GLOBAL_STATE,
+  WORKSPACE_ACTIVATION_CONTEXT,
 } from "./constants";
 import BacklinksTreeDataProvider from "./features/BacklinksTreeDataProvider";
 import { completionProvider } from "./features/completionProvider";
@@ -48,6 +53,8 @@ import { Logger } from "./logger";
 import { EngineAPIService } from "./services/EngineAPIService";
 import { CodeConfigKeys } from "./types";
 import { DisposableStore, resolvePath, VSCodeUtils } from "./utils";
+import { AnalyticsUtils } from "./utils/analytics";
+import { MarkdownUtils } from "./utils/md";
 import { CalendarView } from "./views/CalendarView";
 import { DendronTreeView } from "./views/DendronTreeView";
 import { DendronTreeViewV2 } from "./views/DendronTreeViewV2";
@@ -71,7 +78,7 @@ export async function when<T = any>(
 ): Promise<T | ResponseCode> {
   try {
     const out = DendronWorkspace.instance().config[key];
-    if (out === false || _.isUndefined(out) ? false : true) {
+    if (!(out === false || _.isUndefined(out))) {
       return cb();
     }
     return ResponseCode.PRECONDITION_FAILED;
@@ -88,7 +95,7 @@ export function whenGlobalState(key: string, cb?: () => boolean): boolean {
     };
   // @ts-ignore
   const out = DendronWorkspace.instance().getGlobalState(key);
-  if (out === false || _.isUndefined(out) ? false : true) {
+  if (!(out === false || _.isUndefined(out))) {
     return cb();
   }
   return false;
@@ -271,6 +278,7 @@ export class DendronWorkspace {
   }
 
   static async resetConfig(globalState: vscode.Memento) {
+    // eslint-disable-next-line  no-return-await
     return await Promise.all(
       _.keys(GLOBAL_STATE).map((k) => {
         const _key = GLOBAL_STATE[k as keyof typeof GLOBAL_STATE];
@@ -410,7 +418,7 @@ export class DendronWorkspace {
     return this.webViews[key];
   }
 
-  setWebView(key: DendronWebViewKey, view: vscode.WebviewPanel) {
+  setWebView(key: DendronWebViewKey, view: vscode.WebviewPanel | undefined) {
     this.webViews[key] = view;
   }
 
@@ -467,6 +475,7 @@ export class DendronWorkspace {
         Logger.info({ ctx, msg: "init:backlinks" });
         const backlinksTreeDataProvider = new BacklinksTreeDataProvider();
         vscode.window.onDidChangeActiveTextEditor(
+          // eslint-disable-next-line  no-return-await
           async () => await backlinksTreeDataProvider.refresh()
         );
         context.subscriptions.push(
@@ -502,9 +511,11 @@ export class DendronWorkspace {
 
   _setupCommands() {
     ALL_COMMANDS.map((Cmd) => {
+      const cmd = new Cmd();
+
       this.context.subscriptions.push(
-        vscode.commands.registerCommand(Cmd.key, async (args: any) => {
-          await new Cmd().run(args);
+        vscode.commands.registerCommand(cmd.key, async (args: any) => {
+          await cmd.run(args);
         })
       );
     });
@@ -581,13 +592,11 @@ export class DendronWorkspace {
   // === Utils
 
   getGlobalState<T>(key: GLOBAL_STATE) {
-    //const _key = GLOBAL_STATE[key];
     return this.context.globalState.get<T>(key);
   }
 
-  updateGlobalState(key: keyof typeof GLOBAL_STATE, value: any) {
-    const _key = GLOBAL_STATE[key];
-    return this.context.globalState.update(_key, value);
+  updateGlobalState(key: GLOBAL_STATE, value: any) {
+    return this.context.globalState.update(key, value);
   }
 
   // === Workspace
@@ -601,7 +610,7 @@ export class DendronWorkspace {
     this.L.info({ ctx, stage, msg: "enter" });
     const wsRoot = DendronWorkspace.wsRoot();
     if (!wsRoot) {
-      throw `rootDir not set when activating Watcher`;
+      throw new Error(`rootDir not set when activating Watcher`);
     }
 
     const windowWatcher = new WindowWatcher();
@@ -620,8 +629,8 @@ export class DendronWorkspace {
       });
       throw Error("no folders set for workspace");
     }
-    let vaults = wsFolders as vscode.WorkspaceFolder[];
-    let realVaults = DendronWorkspace.instance().vaultsv4;
+    const vaults = wsFolders as vscode.WorkspaceFolder[];
+    const realVaults = DendronWorkspace.instance().vaultsv4;
     const fileWatcher = new FileWatcher({
       wsRoot,
       vaults: realVaults,
@@ -659,21 +668,191 @@ export class DendronWorkspace {
     }
   }
 
-  async showWelcome(
-    welcomeUri: vscode.Uri,
-    opts?: { reuseWindow?: boolean; rawHTML: boolean }
-  ) {
+  async showWelcome() {
     try {
-      const { content } = readMD(welcomeUri.fsPath);
-      if (getStage() !== "test") {
-        VSCodeUtils.showWebView({
-          title: "Welcome",
-          content,
-          rawHTML: opts?.rawHTML,
-        });
-      }
+      const ws = DendronWorkspace.instance();
+
+      // NOTE: this needs to be from extension because no workspace might exist at this point
+      const uri = VSCodeUtils.joinPath(
+        ws.context.extensionUri,
+        "assets",
+        "dendron-ws",
+        "vault",
+        "welcome.html"
+      );
+
+      const { content } = readMD(uri.fsPath);
+      const title = "Welcome to Dendron";
+
+      const panel = vscode.window.createWebviewPanel(
+        _.kebabCase(title),
+        title,
+        vscode.ViewColumn.One,
+        {
+          enableScripts: true,
+        }
+      );
+      panel.webview.html = content;
+
+      panel.webview.onDidReceiveMessage(
+        async (message) => {
+          switch (message.command) {
+            case "loaded":
+              AnalyticsUtils.track(TutorialEvents.WelcomeShow);
+              return;
+
+            case "initializeWorkspace":
+              await new SetupWorkspaceCommand().run({
+                workspaceInitializer: new TutorialInitializer(),
+              });
+              return;
+            default:
+              break;
+          }
+        },
+        undefined,
+        undefined
+      );
     } catch (err) {
       vscode.window.showErrorMessage(JSON.stringify(err));
     }
   }
+}
+
+/**
+ * Type that can execute custom code as part of workspace creation and opening of a workspace.
+ */
+export type WorkspaceInitializer = {
+  /**
+   * Invoked after workspace has been created. Perform operations such as copying over notes.
+   */
+  onWorkspaceCreation?: (opts: { vaults: DVault[]; wsRoot: string }) => void;
+
+  /**
+   * Invoked after the workspace has been opened. Perform any operations such as re-arranging the layout.
+   */
+  onWorkspaceOpen?: (opts: { ws: DendronWorkspace }) => void;
+};
+
+/**
+ * Factory class for creating WorkspaceInitializer types
+ */
+export class WorkspaceInitFactory {
+  static create(ws: DendronWorkspace): WorkspaceInitializer | undefined {
+    if (this.isTutorialWorkspaceLaunch(ws.context)) {
+      return new TutorialInitializer();
+    }
+
+    return;
+  }
+
+  private static isTutorialWorkspaceLaunch(
+    context: vscode.ExtensionContext
+  ): boolean {
+    const state = context.globalState.get<string | undefined>(
+      GLOBAL_STATE.WORKSPACE_ACTIVATION_CONTEXT
+    );
+    return state === WORKSPACE_ACTIVATION_CONTEXT.TUTORIAL.toString();
+  }
+}
+
+/**
+ * Workspace Initializer for the Tutorial Experience. Copies tutorial notes and
+ * launches the user into the tutorial layout after the workspace is opened.
+ */
+export class TutorialInitializer implements WorkspaceInitializer {
+  onWorkspaceCreation = async (opts: { vaults: DVault[]; wsRoot: string }) => {
+    const ctx = "TutorialInitializer.onWorkspaceCreation";
+
+    const ws = DendronWorkspace.instance();
+
+    await ws.updateGlobalState(
+      GLOBAL_STATE.WORKSPACE_ACTIVATION_CONTEXT,
+      WORKSPACE_ACTIVATION_CONTEXT.TUTORIAL.toString()
+    );
+
+    const dendronWSTemplate = VSCodeUtils.joinPath(
+      ws.extensionAssetsDir,
+      "dendron-ws"
+    );
+
+    const vpath = vault2Path({ vault: opts.vaults[0], wsRoot: opts.wsRoot });
+
+    fs.copySync(path.join(dendronWSTemplate.fsPath, "tutorial"), vpath);
+
+    // Tailor the tutorial text to the particular OS and for their workspace location.
+    const options = {
+      files: [path.join(vpath, "*.md")],
+
+      from: [/%KEYBINDING%/g, /%WORKSPACE_ROOT%/g],
+      to: [
+        process.platform === "darwin" ? "Cmd" : "Ctrl",
+        path.join(opts.wsRoot, "dendron.code-workspace"),
+      ],
+    };
+
+    rif.replaceInFile(options).catch((err: Error) => {
+      Logger.error({
+        ctx,
+        error: DendronError.createPlainError({
+          error: err,
+          message: "error replacing tutorial placeholder text",
+        }),
+      });
+    });
+  };
+
+  onWorkspaceOpen: (opts: { ws: DendronWorkspace }) => void = async (opts: {
+    ws: DendronWorkspace;
+  }) => {
+    const ctx = "TutorialInitializer.onWorkspaceOpen";
+
+    const rootUri = VSCodeUtils.joinPath(
+      opts.ws.rootWorkspace.uri,
+      "tutorial.md"
+    );
+
+    if (fs.pathExistsSync(rootUri.fsPath)) {
+      // Set the view to have the tutorial page showing with the preview opened to the side.
+      await vscode.window.showTextDocument(rootUri);
+      await MarkdownUtils.openPreview({ reuseWindow: false });
+    } else {
+      Logger.error({
+        ctx,
+        error: new DendronError({ message: `Unable to find tutorial.md` }),
+      });
+    }
+
+    await opts.ws.updateGlobalState(
+      GLOBAL_STATE.WORKSPACE_ACTIVATION_CONTEXT,
+      WORKSPACE_ACTIVATION_CONTEXT.NORMAL
+    );
+
+    // Register a special telemetry handler for the tutorial:
+    if (opts.ws.windowWatcher) {
+      opts.ws.windowWatcher.registerActiveTextEditorChangedHandler((e) => {
+        const fileName = e?.document.uri.fsPath;
+
+        let eventName: TutorialEvents | undefined = undefined;
+
+        if (fileName?.endsWith("tutorial.md")) {
+          eventName = TutorialEvents.Tutorial_0_Show;
+        } else if (fileName?.endsWith("tutorial.1-navigation-basics.md")) {
+          eventName = TutorialEvents.Tutorial_1_Show;
+        } else if (fileName?.endsWith("tutorial.2-taking-notes.md")) {
+          eventName = TutorialEvents.Tutorial_2_Show;
+        } else if (fileName?.endsWith("tutorial.3-linking-your-notes.md")) {
+          eventName = TutorialEvents.Tutorial_3_Show;
+        } else if (fileName?.endsWith("tutorial.4-rich-formatting.md")) {
+          eventName = TutorialEvents.Tutorial_4_Show;
+        } else if (fileName?.endsWith("tutorial.5-conclusion.md")) {
+          eventName = TutorialEvents.Tutorial_5_Show;
+        }
+
+        if (eventName) {
+          AnalyticsUtils.track(eventName);
+        }
+      });
+    }
+  };
 }

@@ -239,6 +239,10 @@ export type RenderNoteOpts = {
   id: string;
 };
 
+export type GetNoteBlocksOpts = {
+  id: string;
+};
+
 export type ConfigWriteOpts = {
   config: DendronConfig;
 };
@@ -262,6 +266,19 @@ export type NoteChangeEntry = {
   note: NoteProps;
   status: "create" | "update" | "delete";
 };
+
+/** A block within a note that can be referenced using block anchors or headers. */
+export type NoteBlock = {
+  /** The actual text of the block. */
+  text: string;
+  /** The anchor for this block, if one already exists. */
+  anchor?: DNoteAnchorPositioned;
+  /** The position within the document at which the block is located. */
+  position: Position;
+  /** The type of mdast node from which this block was extracted. Useful since entire lists are a special case. */
+  type: string;
+};
+
 /**
  * Returns list of notes that were changed
  */
@@ -334,6 +351,7 @@ export type SchemaQueryResp = Required<RespV2<SchemaModuleProps[]>>;
 export type StoreDeleteNoteResp = EngineDeleteNotePayload;
 export type RenameNotePayload = NoteChangeEntry[];
 export type RenderNotePayload = string | undefined;
+export type GetNoteBlocksPayload = RespV2<NoteBlock[]>;
 
 export type GetNotePayload = {
   note: NoteProps | undefined;
@@ -380,6 +398,7 @@ export type DEngine = DCommonProps &
     queryNotesSync({ qs }: { qs: string; vault?: DVault }): NoteQueryResp;
     renameNote: (opts: RenameNoteOpts) => Promise<RespV2<RenameNotePayload>>;
     renderNote: (opts: RenderNoteOpts) => Promise<RespV2<RenderNotePayload>>;
+    getNoteBlocks: (opts: GetNoteBlocksOpts) => Promise<GetNoteBlocksPayload>;
 
     // config
     writeConfig: (opts: ConfigWriteOpts) => Promise<RespV2<void>>;
@@ -433,6 +452,7 @@ export type DEngineV4Methods = {
   queryNotes: (opts: QueryNotesOpts) => Promise<NoteQueryResp>;
   queryNotesSync({ qs }: { qs: string }): NoteQueryResp;
   renameNote: (opts: RenameNoteOpts) => Promise<RespV2<RenameNotePayload>>;
+  getNoteBlocks: (opts: GetNoteBlocksOpts) => Promise<GetNoteBlocksPayload>;
 
   // config
   writeConfig: (opts: ConfigWriteOpts) => Promise<RespV2<void>>;

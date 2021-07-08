@@ -956,7 +956,7 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div><p>Ullam optio est quia. <a id=\\"^start2\\" href=\\"#^start2\\" style=\\"font-size: 0.8em; opacity: 75%;\\">^start2</a></p>
+<div class=\\"portal-parent-fader-bottom\\"></div><p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^start2\\" href=\\"#^start2\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Ullam optio est quia. </p>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
@@ -966,10 +966,10 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div><p>Aut id architecto quia. <a id=\\"^start1\\" href=\\"#^start1\\" style=\\"font-size: 0.8em; opacity: 75%;\\">^start1</a></p>
-<p>Sapiente sed accusamus eum. <a id=\\"^end1\\" href=\\"#^end1\\" style=\\"font-size: 0.8em; opacity: 75%;\\">^end1</a></p>
+<div class=\\"portal-parent-fader-bottom\\"></div><p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^start1\\" href=\\"#^start1\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Aut id architecto quia. </p>
+<p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^end1\\" href=\\"#^end1\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Sapiente sed accusamus eum. </p>
 </div></div><p></p><p></p>
-<p>Reprehenderit doloribus. <a id=\\"^end2\\" href=\\"#^end2\\" style=\\"font-size: 0.8em; opacity: 75%;\\">^end2</a></p>
+<p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^end2\\" href=\\"#^end2\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Reprehenderit doloribus. </p>
 </div></div><p></p><p></p>
 <hr>
 <h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
@@ -996,7 +996,7 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div><p>Ullam optio est quia. <a id=\\"^start2\\" href=\\"#^start2\\" style=\\"font-size: 0.8em; opacity: 75%;\\">^start2</a></p>
+<div class=\\"portal-parent-fader-bottom\\"></div><p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^start2\\" href=\\"#^start2\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Ullam optio est quia. </p>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
@@ -1006,10 +1006,10 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div><p>Aut id architecto quia. <a id=\\"^start1\\" href=\\"#^start1\\" style=\\"font-size: 0.8em; opacity: 75%;\\">^start1</a></p>
-<p>Sapiente sed accusamus eum. <a id=\\"^end1\\" href=\\"#^end1\\" style=\\"font-size: 0.8em; opacity: 75%;\\">^end1</a></p>
+<div class=\\"portal-parent-fader-bottom\\"></div><p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^start1\\" href=\\"#^start1\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Aut id architecto quia. </p>
+<p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^end1\\" href=\\"#^end1\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Sapiente sed accusamus eum. </p>
 </div></div><p></p><p></p>
-<p>Reprehenderit doloribus. <a id=\\"^end2\\" href=\\"#^end2\\" style=\\"font-size: 0.8em; opacity: 75%;\\">^end2</a></p>
+<p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^end2\\" href=\\"#^end2\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Reprehenderit doloribus. </p>
 </div></div><p></p><p></p>
 <hr>
 <h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
@@ -1036,7 +1036,7 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div><p>Ullam optio est quia. <a id=\\"^start2\\" href=\\"#^start2\\" style=\\"font-size: 0.8em; opacity: 75%;\\">^start2</a></p>
+<div class=\\"portal-parent-fader-bottom\\"></div><p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^start2\\" href=\\"#^start2\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Ullam optio est quia. </p>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
@@ -1046,10 +1046,10 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div><p>Aut id architecto quia. <a id=\\"^start1\\" href=\\"#^start1\\" style=\\"font-size: 0.8em; opacity: 75%;\\">^start1</a></p>
-<p>Sapiente sed accusamus eum. <a id=\\"^end1\\" href=\\"#^end1\\" style=\\"font-size: 0.8em; opacity: 75%;\\">^end1</a></p>
+<div class=\\"portal-parent-fader-bottom\\"></div><p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^start1\\" href=\\"#^start1\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Aut id architecto quia. </p>
+<p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^end1\\" href=\\"#^end1\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Sapiente sed accusamus eum. </p>
 </div></div><p></p><p></p>
-<p>Reprehenderit doloribus. <a id=\\"^end2\\" href=\\"#^end2\\" style=\\"font-size: 0.8em; opacity: 75%;\\">^end2</a></p>
+<p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^end2\\" href=\\"#^end2\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Reprehenderit doloribus. </p>
 </div></div><p></p><p></p>
 <hr>
 <h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
@@ -1076,7 +1076,7 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div><p>Ullam optio est quia. <a id=\\"^start2\\" href=\\"#^start2\\" style=\\"font-size: 0.8em; opacity: 75%;\\">^start2</a></p>
+<div class=\\"portal-parent-fader-bottom\\"></div><p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^start2\\" href=\\"#^start2\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Ullam optio est quia. </p>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
@@ -1086,10 +1086,10 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div><p>Aut id architecto quia. <a id=\\"^start1\\" href=\\"#^start1\\" style=\\"font-size: 0.8em; opacity: 75%;\\">^start1</a></p>
-<p>Sapiente sed accusamus eum. <a id=\\"^end1\\" href=\\"#^end1\\" style=\\"font-size: 0.8em; opacity: 75%;\\">^end1</a></p>
+<div class=\\"portal-parent-fader-bottom\\"></div><p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^start1\\" href=\\"#^start1\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Aut id architecto quia. </p>
+<p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^end1\\" href=\\"#^end1\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Sapiente sed accusamus eum. </p>
 </div></div><p></p><p></p>
-<p>Reprehenderit doloribus. <a id=\\"^end2\\" href=\\"#^end2\\" style=\\"font-size: 0.8em; opacity: 75%;\\">^end2</a></p>
+<p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^end2\\" href=\\"#^end2\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Reprehenderit doloribus. </p>
 </div></div><p></p><p></p>
 <hr>
 <h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
@@ -1408,9 +1408,9 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div><p>Reprehenderit doloribus.
+<div class=\\"portal-parent-fader-bottom\\"></div><p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^block-anchor\\" href=\\"#^block-anchor\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Reprehenderit doloribus.
 Sint minus fuga omnis non.
-<a id=\\"^block-anchor\\" href=\\"#^block-anchor\\" style=\\"font-size: 0.8em; opacity: 75%;\\">^block-anchor</a></p>
+</p>
 </div></div><p></p><p></p>
 <hr>
 <h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
@@ -1437,9 +1437,9 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div><p>Reprehenderit doloribus.
+<div class=\\"portal-parent-fader-bottom\\"></div><p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^block-anchor\\" href=\\"#^block-anchor\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Reprehenderit doloribus.
 Sint minus fuga omnis non.
-<a id=\\"^block-anchor\\" href=\\"#^block-anchor\\" style=\\"font-size: 0.8em; opacity: 75%;\\">^block-anchor</a></p>
+</p>
 </div></div><p></p><p></p>
 <hr>
 <h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
@@ -1467,8 +1467,8 @@ VFile {
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div><ul>
-<li>Sint minus fuga omnis non.
-<a id=\\"^block-anchor\\" href=\\"#^block-anchor\\" style=\\"font-size: 0.8em; opacity: 75%;\\">^block-anchor</a></li>
+<li><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^block-anchor\\" href=\\"#^block-anchor\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Sint minus fuga omnis non.
+</li>
 </ul>
 </div></div><p></p><p></p>
 <hr>
@@ -1497,8 +1497,8 @@ VFile {
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div><ul>
-<li>Sint minus fuga omnis non.
-<a id=\\"^block-anchor\\" href=\\"#^block-anchor\\" style=\\"font-size: 0.8em; opacity: 75%;\\">^block-anchor</a></li>
+<li><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^block-anchor\\" href=\\"#^block-anchor\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Sint minus fuga omnis non.
+</li>
 </ul>
 </div></div><p></p><p></p>
 <hr>
@@ -1526,8 +1526,8 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div><p>Reprehenderit doloribus.
-Sint minus fuga omnis non. <a id=\\"^block-anchor\\" href=\\"#^block-anchor\\" style=\\"font-size: 0.8em; opacity: 75%;\\">^block-anchor</a></p>
+<div class=\\"portal-parent-fader-bottom\\"></div><p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^block-anchor\\" href=\\"#^block-anchor\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Reprehenderit doloribus.
+Sint minus fuga omnis non. </p>
 </div></div><p></p><p></p>
 <hr>
 <h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
@@ -1554,8 +1554,8 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div><p>Reprehenderit doloribus.
-Sint minus fuga omnis non. <a id=\\"^block-anchor\\" href=\\"#^block-anchor\\" style=\\"font-size: 0.8em; opacity: 75%;\\">^block-anchor</a></p>
+<div class=\\"portal-parent-fader-bottom\\"></div><p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^block-anchor\\" href=\\"#^block-anchor\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Reprehenderit doloribus.
+Sint minus fuga omnis non. </p>
 </div></div><p></p><p></p>
 <hr>
 <h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
@@ -1599,7 +1599,7 @@ VFile {
 
 
 
-<table><thead><tr><th>Sapiente</th><th>accusamus</th></tr></thead><tbody><tr><td>Laborum</td><td>libero</td></tr><tr><td>Ullam</td><td>optio</td></tr></tbody></table>
+<table><thead><tr><th><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^block-anchor\\" href=\\"#^block-anchor\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Sapiente</th><th>accusamus</th></tr></thead><tbody><tr><td>Laborum</td><td>libero</td></tr><tr><td>Ullam</td><td>optio</td></tr></tbody></table>
 </div></div><p></p><p></p>
 <hr>
 <h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
@@ -1643,7 +1643,7 @@ VFile {
 
 
 
-<table><thead><tr><th>Sapiente</th><th>accusamus</th></tr></thead><tbody><tr><td>Laborum</td><td>libero</td></tr><tr><td>Ullam</td><td>optio</td></tr></tbody></table>
+<table><thead><tr><th><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^block-anchor\\" href=\\"#^block-anchor\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Sapiente</th><th>accusamus</th></tr></thead><tbody><tr><td>Laborum</td><td>libero</td></tr><tr><td>Ullam</td><td>optio</td></tr></tbody></table>
 </div></div><p></p><p></p>
 <hr>
 <h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
@@ -1671,7 +1671,7 @@ VFile {
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div><ul>
-<li>Reprehenderit doloribus. <a id=\\"^block-anchor\\" href=\\"#^block-anchor\\" style=\\"font-size: 0.8em; opacity: 75%;\\">^block-anchor</a></li>
+<li><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^block-anchor\\" href=\\"#^block-anchor\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Reprehenderit doloribus. </li>
 </ul>
 </div></div><p></p><p></p>
 <hr>
@@ -1700,7 +1700,7 @@ VFile {
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div><ul>
-<li>Reprehenderit doloribus. <a id=\\"^block-anchor\\" href=\\"#^block-anchor\\" style=\\"font-size: 0.8em; opacity: 75%;\\">^block-anchor</a></li>
+<li><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^block-anchor\\" href=\\"#^block-anchor\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Reprehenderit doloribus. </li>
 </ul>
 </div></div><p></p><p></p>
 <hr>
@@ -1729,7 +1729,7 @@ VFile {
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div><ul>
-<li>Reprehenderit doloribus. <a id=\\"^block-anchor\\" href=\\"#^block-anchor\\" style=\\"font-size: 0.8em; opacity: 75%;\\">^block-anchor</a></li>
+<li><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^block-anchor\\" href=\\"#^block-anchor\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Reprehenderit doloribus. </li>
 </ul>
 </div></div><p></p><p></p>
 <hr>
@@ -1758,7 +1758,7 @@ VFile {
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div><ul>
-<li>Reprehenderit doloribus. <a id=\\"^block-anchor\\" href=\\"#^block-anchor\\" style=\\"font-size: 0.8em; opacity: 75%;\\">^block-anchor</a></li>
+<li><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^block-anchor\\" href=\\"#^block-anchor\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Reprehenderit doloribus. </li>
 </ul>
 </div></div><p></p><p></p>
 <hr>
@@ -1787,12 +1787,12 @@ VFile {
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div><ul>
-<li>Ullam optio est quia. <a id=\\"^start\\" href=\\"#^start\\" style=\\"font-size: 0.8em; opacity: 75%;\\">^start</a></li>
+<li><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^start\\" href=\\"#^start\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Ullam optio est quia. </li>
 <li>Reprehenderit doloribus.</li>
 </ul>
 <p>Sapiente sed accusamus eum.</p>
 <ul>
-<li>Sint minus fuga omnis non. <a id=\\"^end\\" href=\\"#^end\\" style=\\"font-size: 0.8em; opacity: 75%;\\">^end</a></li>
+<li><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^end\\" href=\\"#^end\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Sint minus fuga omnis non. </li>
 </ul>
 </div></div><p></p><p></p>
 <hr>
@@ -1821,12 +1821,12 @@ VFile {
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div><ul>
-<li>Ullam optio est quia. <a id=\\"^start\\" href=\\"#^start\\" style=\\"font-size: 0.8em; opacity: 75%;\\">^start</a></li>
+<li><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^start\\" href=\\"#^start\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Ullam optio est quia. </li>
 <li>Reprehenderit doloribus.</li>
 </ul>
 <p>Sapiente sed accusamus eum.</p>
 <ul>
-<li>Sint minus fuga omnis non. <a id=\\"^end\\" href=\\"#^end\\" style=\\"font-size: 0.8em; opacity: 75%;\\">^end</a></li>
+<li><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^end\\" href=\\"#^end\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Sint minus fuga omnis non. </li>
 </ul>
 </div></div><p></p><p></p>
 <hr>
@@ -1854,8 +1854,8 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div><p>Sint minus fuga omnis non.
-Sapiente sed accusamus eum. <a id=\\"^start\\" href=\\"#^start\\" style=\\"font-size: 0.8em; opacity: 75%;\\">^start</a></p>
+<div class=\\"portal-parent-fader-bottom\\"></div><p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^start\\" href=\\"#^start\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Sint minus fuga omnis non.
+Sapiente sed accusamus eum. </p>
 </div></div><p></p><p></p>
 <hr>
 <h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
@@ -1882,8 +1882,8 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div><p>Sint minus fuga omnis non.
-Sapiente sed accusamus eum. <a id=\\"^start\\" href=\\"#^start\\" style=\\"font-size: 0.8em; opacity: 75%;\\">^start</a></p>
+<div class=\\"portal-parent-fader-bottom\\"></div><p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^start\\" href=\\"#^start\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Sint minus fuga omnis non.
+Sapiente sed accusamus eum. </p>
 </div></div><p></p><p></p>
 <hr>
 <h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
@@ -1911,8 +1911,8 @@ VFile {
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div><h1 id=\\"start\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#start\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>start</h1>
-<p>Sint minus fuga omnis non.
-Sapiente sed accusamus eum. <a id=\\"^end\\" href=\\"#^end\\" style=\\"font-size: 0.8em; opacity: 75%;\\">^end</a></p>
+<p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^end\\" href=\\"#^end\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Sint minus fuga omnis non.
+Sapiente sed accusamus eum. </p>
 </div></div><p></p><p></p>
 <hr>
 <h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
@@ -1940,8 +1940,8 @@ VFile {
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div><h1 id=\\"start\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#start\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>start</h1>
-<p>Sint minus fuga omnis non.
-Sapiente sed accusamus eum. <a id=\\"^end\\" href=\\"#^end\\" style=\\"font-size: 0.8em; opacity: 75%;\\">^end</a></p>
+<p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^end\\" href=\\"#^end\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Sint minus fuga omnis non.
+Sapiente sed accusamus eum. </p>
 </div></div><p></p><p></p>
 <hr>
 <h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
@@ -1969,11 +1969,11 @@ VFile {
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div><ul>
-<li>Ullam optio est quia. <a id=\\"^start\\" href=\\"#^start\\" style=\\"font-size: 0.8em; opacity: 75%;\\">^start</a></li>
+<li><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^start\\" href=\\"#^start\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Ullam optio est quia. </li>
 <li>Reprehenderit doloribus.</li>
 </ul>
-<p>Sapiente sed accusamus eum.
-Sint minus fuga omnis non. <a id=\\"^end\\" href=\\"#^end\\" style=\\"font-size: 0.8em; opacity: 75%;\\">^end</a></p>
+<p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^end\\" href=\\"#^end\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Sapiente sed accusamus eum.
+Sint minus fuga omnis non. </p>
 </div></div><p></p><p></p>
 <hr>
 <h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
@@ -2001,11 +2001,11 @@ VFile {
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div><ul>
-<li>Ullam optio est quia. <a id=\\"^start\\" href=\\"#^start\\" style=\\"font-size: 0.8em; opacity: 75%;\\">^start</a></li>
+<li><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^start\\" href=\\"#^start\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Ullam optio est quia. </li>
 <li>Reprehenderit doloribus.</li>
 </ul>
-<p>Sapiente sed accusamus eum.
-Sint minus fuga omnis non. <a id=\\"^end\\" href=\\"#^end\\" style=\\"font-size: 0.8em; opacity: 75%;\\">^end</a></p>
+<p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^end\\" href=\\"#^end\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Sapiente sed accusamus eum.
+Sint minus fuga omnis non. </p>
 </div></div><p></p><p></p>
 <hr>
 <h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
@@ -2032,11 +2032,11 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div><p>Sint minus fuga omnis non.
-Sapiente sed accusamus eum. <a id=\\"^start\\" href=\\"#^start\\" style=\\"font-size: 0.8em; opacity: 75%;\\">^start</a></p>
+<div class=\\"portal-parent-fader-bottom\\"></div><p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^start\\" href=\\"#^start\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Sint minus fuga omnis non.
+Sapiente sed accusamus eum. </p>
 <ul>
 <li>Reprehenderit doloribus.</li>
-<li>Ullam optio est quia. <a id=\\"^end\\" href=\\"#^end\\" style=\\"font-size: 0.8em; opacity: 75%;\\">^end</a></li>
+<li><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^end\\" href=\\"#^end\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Ullam optio est quia. </li>
 </ul>
 </div></div><p></p><p></p>
 <hr>
@@ -2064,11 +2064,11 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div><p>Sint minus fuga omnis non.
-Sapiente sed accusamus eum. <a id=\\"^start\\" href=\\"#^start\\" style=\\"font-size: 0.8em; opacity: 75%;\\">^start</a></p>
+<div class=\\"portal-parent-fader-bottom\\"></div><p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^start\\" href=\\"#^start\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Sint minus fuga omnis non.
+Sapiente sed accusamus eum. </p>
 <ul>
 <li>Reprehenderit doloribus.</li>
-<li>Ullam optio est quia. <a id=\\"^end\\" href=\\"#^end\\" style=\\"font-size: 0.8em; opacity: 75%;\\">^end</a></li>
+<li><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^end\\" href=\\"#^end\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Ullam optio est quia. </li>
 </ul>
 </div></div><p></p><p></p>
 <hr>
@@ -2205,9 +2205,9 @@ VFile {
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div><ul>
-<li>Ullam optio est quia. <a id=\\"^start\\" href=\\"#^start\\" style=\\"font-size: 0.8em; opacity: 75%;\\">^start</a></li>
+<li><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^start\\" href=\\"#^start\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Ullam optio est quia. </li>
 <li>Reprehenderit doloribus.</li>
-<li>Sint minus fuga omnis non. <a id=\\"^end\\" href=\\"#^end\\" style=\\"font-size: 0.8em; opacity: 75%;\\">^end</a></li>
+<li><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^end\\" href=\\"#^end\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Sint minus fuga omnis non. </li>
 </ul>
 </div></div><p></p><p></p>
 <hr>
@@ -2236,9 +2236,9 @@ VFile {
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div><ul>
-<li>Ullam optio est quia. <a id=\\"^start\\" href=\\"#^start\\" style=\\"font-size: 0.8em; opacity: 75%;\\">^start</a></li>
+<li><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^start\\" href=\\"#^start\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Ullam optio est quia. </li>
 <li>Reprehenderit doloribus.</li>
-<li>Sint minus fuga omnis non. <a id=\\"^end\\" href=\\"#^end\\" style=\\"font-size: 0.8em; opacity: 75%;\\">^end</a></li>
+<li><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^end\\" href=\\"#^end\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Sint minus fuga omnis non. </li>
 </ul>
 </div></div><p></p><p></p>
 <hr>
@@ -2269,12 +2269,12 @@ VFile {
 <div class=\\"portal-parent-fader-bottom\\"></div><ul>
 <li>Sapiente sed accusamus eum.
 <ul>
-<li>Ullam optio est quia. <a id=\\"^start\\" href=\\"#^start\\" style=\\"font-size: 0.8em; opacity: 75%;\\">^start</a></li>
+<li><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^start\\" href=\\"#^start\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Ullam optio est quia. </li>
 </ul>
 </li>
 <li>Reprehenderit doloribus.
 <ul>
-<li>Sint minus fuga omnis non. <a id=\\"^end\\" href=\\"#^end\\" style=\\"font-size: 0.8em; opacity: 75%;\\">^end</a></li>
+<li><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^end\\" href=\\"#^end\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Sint minus fuga omnis non. </li>
 </ul>
 </li>
 </ul>
@@ -2307,12 +2307,12 @@ VFile {
 <div class=\\"portal-parent-fader-bottom\\"></div><ul>
 <li>Sapiente sed accusamus eum.
 <ul>
-<li>Ullam optio est quia. <a id=\\"^start\\" href=\\"#^start\\" style=\\"font-size: 0.8em; opacity: 75%;\\">^start</a></li>
+<li><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^start\\" href=\\"#^start\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Ullam optio est quia. </li>
 </ul>
 </li>
 <li>Reprehenderit doloribus.
 <ul>
-<li>Sint minus fuga omnis non. <a id=\\"^end\\" href=\\"#^end\\" style=\\"font-size: 0.8em; opacity: 75%;\\">^end</a></li>
+<li><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^end\\" href=\\"#^end\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Sint minus fuga omnis non. </li>
 </ul>
 </li>
 </ul>

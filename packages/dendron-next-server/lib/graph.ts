@@ -27,6 +27,7 @@ export type CoreGraphConfig = {
   "filter.regex-blocklist": GraphConfigItem<string>;
 
   "options.allow-relayout": GraphConfigItem<boolean>;
+  "options.show-labels": GraphConfigItem<boolean>;
 };
 
 export type NoteGraphConfig = {
@@ -70,6 +71,10 @@ const coreGraphConfig: CoreGraphConfig = {
     mutable: false,
   },
   "options.allow-relayout": {
+    value: true,
+    mutable: true,
+  },
+  "options.show-labels": {
     value: true,
     mutable: true,
   },

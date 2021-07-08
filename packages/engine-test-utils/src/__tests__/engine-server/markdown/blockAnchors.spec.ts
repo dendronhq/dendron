@@ -172,43 +172,7 @@ describe("blockAnchors", () => {
       preSetupHook: ENGINE_HOOKS.setupBasic,
     });
 
-    const HIDDEN_ANCHOR = createProcTests({
-      name: "hidden",
-      setupFunc: async ({ engine, vaults, extra }) => {
-        const proc2 = createProcForTest({
-          engine,
-          dest: extra.dest,
-          hideBlockAnchors: true,
-          vault: vaults[0],
-        });
-        const resp = await proc2.process(anchor);
-        return { resp };
-      },
-      verifyFuncDict: {
-        [DendronASTDest.HTML]: async ({ extra }) => {
-          const { resp } = extra;
-          expect(resp).toMatchSnapshot();
-          return [
-            {
-              actual: await AssertUtils.assertInString({
-                body: resp.toString(),
-                match: [
-                  "<a",
-                  `href="#${anchor}"`,
-                  "visibility: hidden",
-                  `id="${anchor}"`,
-                  "</a>",
-                ],
-              }),
-              expected: true,
-            },
-          ];
-        },
-      },
-      preSetupHook: ENGINE_HOOKS.setupBasic,
-    });
-
-    const ALL_TEST_CASES = [...SIMPLE, ...END_OF_PARAGRAPH, ...HIDDEN_ANCHOR];
+    const ALL_TEST_CASES = [...SIMPLE, ...END_OF_PARAGRAPH];
     runAllTests({ name: "compile", testCases: ALL_TEST_CASES });
   });
 });

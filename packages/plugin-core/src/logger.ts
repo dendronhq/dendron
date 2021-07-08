@@ -28,15 +28,14 @@ export class Logger {
       fs.moveSync(logPath, `${logPath}.old`, { overwrite: true });
     }
     fs.ensureFileSync(logPath);
-    let log_level: string;
     const conf = workspace.getConfiguration();
-    log_level = conf.get<string>(CONFIG.LOG_LEVEL.key) || "info";
+    const logLevel = conf.get<string>(CONFIG.LOG_LEVEL.key) || "info";
     setEnv("LOG_DST", logPath);
-    setEnv("LOG_LEVEL", log_level);
+    setEnv("LOG_LEVEL", logLevel);
     Logger.logPath = logPath;
     this.logger = createLogger("dendron", logPath);
     this.level = level;
-    Logger.info({ ctx, msg: "exit", log_level });
+    Logger.info({ ctx, msg: "exit", logLevel });
   }
   private static _level: TraceLevel = "debug";
 

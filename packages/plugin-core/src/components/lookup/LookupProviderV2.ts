@@ -230,11 +230,13 @@ export class LookupProviderV2 {
     const ctx = "onAcceptNewSchema";
     const fname = PickerUtilsV2.getValue(picker);
     Logger.info({ ctx, msg: "createNewPick", value: fname });
-    let smodNew: SchemaModuleProps;
     const ws = DendronWorkspace.instance();
     const engine = ws.getEngine();
     Logger.info({ ctx, msg: "create normal node" });
-    smodNew = SchemaUtils.createModuleProps({ fname, vault });
+    const smodNew: SchemaModuleProps = SchemaUtils.createModuleProps({
+      fname,
+      vault,
+    });
     const vpath = vault2Path({ vault, wsRoot: DendronWorkspace.wsRoot() });
     const uri = Uri.file(SchemaUtils.getPath({ root: vpath, fname }));
     const resp = await engine.writeSchema(smodNew);

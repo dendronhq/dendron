@@ -64,14 +64,13 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
       { label: "local", picked: true },
       { label: "remote" },
     ]);
-    let sourceType: VaultRemoteSource | undefined;
     let sourcePath: string;
     let sourceName: string | undefined;
     const localVaultPathPlaceholder = "vault2";
     if (!vaultRemoteSource) {
       return;
     }
-    sourceType = vaultRemoteSource.label as VaultRemoteSource;
+    const sourceType = vaultRemoteSource.label as VaultRemoteSource;
     if (sourceType === "remote") {
       const out = new Promise<CommandOpts | undefined>(async (resolve) => {
         const qp = VSCodeUtils.createQuickPick<SourceQuickPickEntry>();

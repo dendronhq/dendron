@@ -43,7 +43,6 @@ export function startClient(opts: { context: ExtensionContext; port: number }) {
   // The debug options for the server
   // --inspect=6009: runs the server in Node's Inspector mode so VS Code can attach to the server for debugging
   const debugOptions = { execArgv: ["--nolazy", "--inspect=6009"] };
-  let client: LanguageClient;
 
   // If the extension is launched in debug mode then the debug server options are used
   // Otherwise the run options are used
@@ -71,7 +70,7 @@ export function startClient(opts: { context: ExtensionContext; port: number }) {
   };
 
   // Create the language client and start the client.
-  client = new LanguageClient(
+  const client = new LanguageClient(
     "dendron.lsp",
     "Dendron LSP",
     serverOptions,

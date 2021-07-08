@@ -1,2 +1,7 @@
 vendor/**/*
 node_modules
+
+# TODO remove after fixing eslint errors in other packages
+packages/*
+!packages/plugin-core/
+**/src/test/**

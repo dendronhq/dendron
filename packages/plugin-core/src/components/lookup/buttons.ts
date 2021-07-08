@@ -217,6 +217,7 @@ export class DirectChildFilterBtn extends DendronBtn {
         PickerUtilsV2.getValue(quickPick)
       ).split(".").length;
       items = PickerUtilsV2.filterByDepth(items, depth);
+      items = PickerUtilsV2.filterNonStubs(items);
       return items;
     };
     return;

@@ -1,11 +1,11 @@
-import { DendronError, NoteUtils } from "@dendronhq/common-all";
+import { DendronError, isNotUndefined, NoteUtils } from "@dendronhq/common-all";
 import _ from "lodash";
 import { Image, Root } from "mdast";
 import { BlockAnchor, DendronASTTypes } from "../types";
 import Unified, { Transformer } from "unified";
-import { Node } from "unist";
+import { Node, Parent } from "unist";
 import u from "unist-builder";
-import visit from "unist-util-visit";
+import visitParents from "unist-util-visit-parents";
 import { VFile } from "vfile";
 import { SiteUtils } from "../../topics/site";
 import {
@@ -67,7 +67,9 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         u(DendronASTTypes.HEADING, { depth: 1 }, [u("text", note.title)])
       );
     }
-    visit(tree, (node, index, parent) => {
+    visitParents(tree, (node, ancestors) => {
+      const parent = _.last(ancestors);
+      if (_.isUndefined(parent) || !RemarkUtils.isParent(parent)) return; // root node
       if (
         node.type === DendronASTTypes.WIKI_LINK &&
         dest !== DendronASTDest.MD_ENHANCED_PREVIEW
@@ -214,10 +216,61 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
       }
       if (node.type === DendronASTTypes.BLOCK_ANCHOR) {
         const procOpts = MDUtilsV4.getProcOpts(proc);
-        parent!.children[index] = blockAnchor2html(
+        const anchorHTML = blockAnchor2html(
           node as BlockAnchor,
           procOpts.blockAnchorsOpts
         );
+        let target: Parent | undefined;
+        const grandParent = ancestors[ancestors.length - 2];
+        if (
+          RemarkUtils.isParagraph(parent) &&
+          parent.children.length === 1 &&
+          isNotUndefined(grandParent) &&
+          RemarkUtils.isRoot(grandParent)
+        ) {
+          // If the block anchor is at the top level, then it references the block before it
+          const parentIndex = _.indexOf(grandParent.children, parent);
+          const previous = grandParent.children[parentIndex - 1];
+          if (_.isUndefined(previous) || !RemarkUtils.isParent(previous))
+            return; // invalid anchor, doesn't represent anything
+          target = previous;
+        } else if (RemarkUtils.isTableRow(grandParent)) {
+          // An anchor inside a table references the whole table.
+          const greatGrandParent = ancestors[ancestors.length - 3];
+          if (
+            isNotUndefined(greatGrandParent) &&
+            RemarkUtils.isTable(greatGrandParent)
+          ) {
+            // The table HTML generation drops anything not attached to a cell, so we put this in the first cell instead.
+            target = greatGrandParent.children[0]?.children[0];
+          }
+        } else {
+          // Otherwise, it references the block it's inside
+          target = parent;
+        }
+        if (_.isUndefined(target)) return;
+        if (RemarkUtils.isList(target)) {
+          // Can't install as a child of the list, has to go into a list item
+          target = target.children[0];
+        }
+        // Install the block anchor at the target node
+        target.children.unshift(anchorHTML);
+        // Remove the block anchor itself since we install the anchor at the target
+        const index = _.indexOf(parent.children, node);
+        parent!.children.splice(index, 1);
+
+        // We might be adding and removing siblings here. We must return the index of the next sibling to traverse.
+        if (target === parent) {
+          // In this case, we removed block anchor but added a node to the start.
+          // As a result, the indices match and traversal can continue.
+          return;
+        } else if (parent.children.length === 0) {
+          // After removing the block anchor, there are no siblings left in the parent to traverse.
+          return -1;
+        } else {
+          // Otherwise, the next sibling got shifted down by 1 index, it will be at the same index as the block anchor.
+          return index;
+        }
       }
       if (node.type === "image" && dest === DendronASTDest.HTML) {
         let imageNode = node as Image;
@@ -229,6 +282,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
             _.trim(imageNode.url, "/");
         }
       }
+      return; // continue traversal
     });
     return tree;
   }

@@ -713,6 +713,7 @@ export class LookupProviderV2 {
       }
       if (picker.showDirectChildrenOnly) {
         updatedItems = PickerUtilsV2.filterByDepth(updatedItems, depth);
+        updatedItems = PickerUtilsV2.filterNonStubs(updatedItems);
       }
 
       if (perfectMatch) {

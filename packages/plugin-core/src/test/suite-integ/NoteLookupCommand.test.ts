@@ -48,8 +48,14 @@ suite("NoteLookupCommand", function () {
             wsRoot,
             vault: TestEngineUtils.vault1(vaults),
           });
+          await NoteTestUtilsV4.createNote({
+            wsRoot,
+            fname: "foo.ch2",
+            vault: vaults[0],
+            props: { stub: true },
+          });
         },
-        onInit: async ({ vaults }) => {
+        onInit: async ({ vaults, engine: _engine }) => {
           const cmd = new NoteLookupCommand();
           stubVaultPick(vaults);
           const opts = (await cmd.run({
@@ -57,8 +63,13 @@ suite("NoteLookupCommand", function () {
             initialValue: "foo.",
             filterMiddleware: ["directChildOnly"],
           }))!;
+          // Doesn't find grandchildren
           expect(
             _.find(opts.quickpick.selectedItems, { fname: "foo.ch1.gch1" })
+          ).toEqual(undefined);
+          // Doesn't find stubs
+          expect(
+            _.find(opts.quickpick.selectedItems, { fname: "foo.ch2" })
           ).toEqual(undefined);
           expect(_.isUndefined(opts.quickpick.filterMiddleware)).toBeFalsy();
           done();

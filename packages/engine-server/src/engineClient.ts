@@ -37,6 +37,8 @@ import {
   VaultUtils,
   WriteNoteResp,
   DendronAPI,
+  GetNoteBlocksOpts,
+  GetNoteBlocksPayload,
 } from "@dendronhq/common-all";
 import { createLogger, DLogger, readYAML } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -403,5 +405,12 @@ export class DendronEngineClient implements DEngineClient {
     await this.api.schemaWrite({ schema, ws: this.ws });
     await this.refreshSchemas([schema]);
     return;
+  }
+
+  async getNoteBlocks({
+    id,
+  }: GetNoteBlocksOpts): Promise<GetNoteBlocksPayload> {
+    const out = await this.api.getNoteBlocks({ id, ws: this.ws });
+    return out;
   }
 }

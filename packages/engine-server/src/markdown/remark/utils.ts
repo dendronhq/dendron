@@ -18,12 +18,21 @@ import {
   NoteUtils,
   Position,
 } from "@dendronhq/common-all";
-import { createLogger, note2String } from "@dendronhq/common-server";
+import { createLogger } from "@dendronhq/common-server";
 import _ from "lodash";
-import { Heading, ListItem, Paragraph, Root } from "mdast";
+import type {
+  Heading,
+  List,
+  ListItem,
+  Paragraph,
+  Root,
+  Table,
+  TableCell,
+  TableRow,
+} from "mdast";
 import * as mdastBuilder from "mdast-builder";
 import { Processor } from "unified";
-import { Node } from "unist";
+import { Node, Parent } from "unist";
 import { selectAll } from "unist-util-select";
 import visit from "unist-util-visit";
 import { VFile } from "vfile";
@@ -40,6 +49,7 @@ import {
   WikiLinkNoteV4,
   WikiLinkProps,
 } from "../types";
+import { NoteBlock } from "@dendronhq/common-all";
 import { MDUtilsV5, ProcFlavor, ProcMode } from "../utilsv5";
 const toString = require("mdast-util-to-string");
 export { mdastBuilder };
@@ -47,20 +57,30 @@ export { select, selectAll } from "unist-util-select";
 
 export const ALIAS_DIVIDER = "|";
 
+/** A regexp fragment that matches a link name (e.g. a note name) */
+export const LINK_NAME = "[^#\\|>\\]\\[]+";
+/** A regexp fragment that matches an alias name */
+export const ALIAS_NAME = "[^\\|>\\]\\[]+"; // aliases may contain # symbols
+/** A regexp fragment that matches the contents of a link (without the brackets) */
+export const LINK_CONTENTS =
+  "" +
+  // alias?
+  `(` +
+  `(?<alias>${ALIAS_NAME}(?=\\|))` +
+  "\\|" +
+  ")?" +
+  // name
+  `(?<value>${LINK_NAME})?` +
+  // anchor?
+  `(#(?<anchor>${LINK_NAME}))?` +
+  // filters?
+  `(>(?<filtersRaw>.*))?`;
+
 export function addError(proc: Processor, err: DendronError) {
   const errors = proc.data("errors") as DendronError[];
   errors.push(err);
   proc().data("errors", errors);
 }
-
-export type NoteBlock = {
-  /** The actual text of the block. */
-  text: string;
-  /** The anchor for this block, if one already exists. */
-  anchor?: DNoteAnchorPositioned;
-  /** The position within the document at which the block is located. */
-  position: Position;
-};
 
 export function getNoteOrError(
   notes: NoteProps[],
@@ -286,24 +306,7 @@ export class LinkUtils {
         vaultName?: string;
       }
     | null {
-    const LINK_NAME = "[^#\\|>]+";
-    // aliases may contain # symbols
-    const ALIAS_NAME = "[^\\|>]+";
-    const re = new RegExp(
-      "" +
-        // alias?
-        `(` +
-        `(?<alias>${ALIAS_NAME}(?=\\|))` +
-        "\\|" +
-        ")?" +
-        // name
-        `(?<value>${LINK_NAME})?` +
-        // anchor?
-        `(#(?<anchor>${LINK_NAME}))?` +
-        // filters?
-        `(>(?<filtersRaw>.*))?`,
-      "i"
-    );
+    const re = new RegExp(LINK_CONTENTS, "i");
     const out = linkString.match(re);
     if (out) {
       let { alias, value, anchor } = out.groups as any;
@@ -521,7 +524,7 @@ export class AnchorUtils {
   }): Promise<{ [index: string]: DNoteAnchorPositioned }> {
     if (opts.note.stub) return {};
     try {
-      const noteContents = await note2String(opts);
+      const noteContents = NoteUtils.serialize(opts.note);
       const noteAnchors = RemarkUtils.findAnchors(noteContents);
       const slugger = getSlugger();
 
@@ -608,7 +611,7 @@ export class RemarkUtils {
     return -1;
   }
 
-  static isHeading(node: Node, text: string, depth?: number) {
+  static isHeading(node: Node, text: string, depth?: number): node is Heading {
     if (node.type !== DendronASTTypes.HEADING) {
       return false;
     }
@@ -629,7 +632,35 @@ export class RemarkUtils {
     return true;
   }
 
-  static isNoteRefV2(node: Node) {
+  static isRoot(node: Node): node is Parent {
+    return node.type === DendronASTTypes.ROOT;
+  }
+
+  static isParent(node: Node): node is Parent {
+    return _.isArray(node.children);
+  }
+
+  static isParagraph(node: Node): node is Paragraph {
+    return node.type === DendronASTTypes.PARAGRAPH;
+  }
+
+  static isTable(node: Node): node is Table {
+    return node.type === DendronASTTypes.TABLE;
+  }
+
+  static isTableRow(node: Node): node is TableRow {
+    return node.type === DendronASTTypes.TABLE_ROW;
+  }
+
+  static isTableCell(node: Node): node is TableCell {
+    return node.type === DendronASTTypes.TABLE_CELL;
+  }
+
+  static isList(node: Node): node is List {
+    return node.type === DendronASTTypes.LIST;
+  }
+
+  static isNoteRefV2(node: Node): node is NoteRefNoteV4 {
     return node.type === DendronASTTypes.REF_LINK_V2;
   }
 
@@ -786,11 +817,9 @@ export class RemarkUtils {
    */
   static async extractBlocks({
     note,
-    wsRoot,
     engine,
   }: {
     note: NoteProps;
-    wsRoot: string;
     engine: DEngineClient;
   }): Promise<NoteBlock[]> {
     const proc = MDUtilsV5.procRemarkFull({
@@ -802,8 +831,7 @@ export class RemarkUtils {
     const slugger = getSlugger();
 
     // Read and parse the note
-    // TODO: It might be better to get the text from the editor
-    const noteText = await note2String({ note, wsRoot });
+    const noteText = NoteUtils.serialize(note);
     const noteAST = proc.parse(noteText);
     if (_.isUndefined(noteAST.children)) return [];
     const nodesToSearch = _.filter(noteAST.children as Node[], (node) =>
@@ -859,6 +887,7 @@ export class RemarkUtils {
             anchor,
             // position can only be undefined for generated nodes, not for parsed ones
             position: listItem.position!,
+            type: listItem.type,
           });
         });
       }
@@ -884,6 +913,7 @@ export class RemarkUtils {
         anchor,
         // position can only be undefined for generated nodes, not for parsed ones
         position: node.position!,
+        type: node.type,
       });
     }
 

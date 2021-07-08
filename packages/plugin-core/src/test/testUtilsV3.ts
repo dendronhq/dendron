@@ -288,12 +288,16 @@ export function setupBeforeAfter(
   ctx = VSCodeUtils.getOrCreateMockContext();
   beforeEach(async () => {
     DendronWorkspace.getOrCreate(ctx);
-    opts?.beforeHook && (await opts.beforeHook());
+    if (opts?.beforeHook) {
+      await opts.beforeHook();
+    }
     Logger.configure(ctx, "info");
   });
   afterEach(async () => {
     HistoryService.instance().clearSubscriptions();
-    opts?.afterHook && (await opts.afterHook());
+    if (opts?.afterHook) {
+      await opts.afterHook();
+    }
   });
   return ctx;
 }

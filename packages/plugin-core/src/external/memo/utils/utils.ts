@@ -292,11 +292,11 @@ export const replaceRefs = ({
             //   return $0;
             // }
 
-            if (!replacedOnce) {
-              onMatch && onMatch();
+            if (!replacedOnce && onMatch) {
+              onMatch();
             }
 
-            onReplace && onReplace();
+            onReplace?.();
 
             replacedOnce = true;
 

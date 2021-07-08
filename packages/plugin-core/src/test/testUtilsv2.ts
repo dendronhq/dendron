@@ -175,7 +175,9 @@ export async function runWorkspaceTestV3(
     const engine = DendronWorkspace.instance().getEngine();
     await opts.onInit({ wsRoot, vaults, engine });
   });
-  opts?.preActivateHook ? await opts.preActivateHook() : null;
+  if (opts?.preActivateHook) {
+    await opts.preActivateHook();
+  }
   await _activate(ctx);
 }
 

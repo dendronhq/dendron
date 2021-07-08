@@ -83,7 +83,7 @@ export class Logger {
         payload.error = error2PlainObject(payload.error);
       }
       const stringMsg = customStringify(payload);
-      Logger.logger && Logger.logger[lvl](payload);
+      Logger.logger?.[lvl](payload);
       Logger.output?.appendLine(lvl + ": " + stringMsg);
       // FIXME: disable for now
       const shouldShow = false; // getStage() === "dev" && cleanOpts.show;

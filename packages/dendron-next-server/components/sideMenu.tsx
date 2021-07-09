@@ -1,7 +1,6 @@
 import React from "react";
 import { Layout, Menu } from "antd";
 import { Config, ObjectConfig } from "../types/formTypes";
-import dendronFormConfig from "../data/dendronFormConfig";
 import get from "lodash/get";
 
 const { Sider } = Layout;
@@ -13,6 +12,7 @@ type DefaultProptypes = {
   selectedKeys: string[];
   setSelectedKeys: (selectedKeys: string[]) => void;
   currentValues: any;
+  dendronFormConfig: Config;
 };
 
 const generateMenu = (
@@ -20,8 +20,8 @@ const generateMenu = (
   prefix: string[] = [],
   currentValues: any
 ): JSX.Element => {
+  if (!dataDefinition) return <></>;
   const name = prefix.join(".");
-  console.log("name: ", name);
   if (
     dataDefinition.type === "string" ||
     dataDefinition.type === "number" ||
@@ -108,6 +108,7 @@ const SideMenu: React.FC<DefaultProptypes> = ({
   selectedKeys,
   setSelectedKeys,
   currentValues,
+  dendronFormConfig: dendronFormConfig,
 }) => {
   const onSelectedChange = ({
     item,

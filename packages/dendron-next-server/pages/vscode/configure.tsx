@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useMemo } from "react";
 import { engineSlice } from "@dendronhq/common-frontend";
 import { Typography, Button, Layout, message } from "antd";
 import { useRouter } from "next/router";
@@ -8,15 +8,25 @@ import _ from "lodash";
 import Ajv, { JSONSchemaType } from "ajv";
 import { engineHooks } from "@dendronhq/common-frontend";
 import { configWrite } from "../../lib/effects";
-import dendronConfig from "../../data/dendronFormConfig";
 import ConfigInput from "../../components/formRenderer";
 import SideMenu from "../../components/sideMenu";
-import { Config } from "../../types/formTypes";
+import {
+  Config,
+  EnumConfig,
+  StringConfig,
+  NumberConfig,
+  BooleanConfig,
+  ArrayConfig,
+  RecordConfig,
+  ObjectConfig,
+} from "../../types/formTypes";
+import dendronValidator from "../../data/dendron-yml.validator.json";
 
 const { Title } = Typography;
 const { Content } = Layout;
 
 const generateSchema = (config: Config): any => {
+  if (!config) return {};
   if (
     config.type === "string" ||
     config.type === "number" ||
@@ -63,6 +73,79 @@ type DefaultProps = {
   engine: engineSlice.EngineState;
 };
 
+const generateRenderableConfig = (
+  properties: any,
+  definitions: any,
+  label: string
+): Config => {
+  // `any` type generates empty config object, so we are assuming
+  // that it's a string so that nothing breaks
+  if (_.isEmpty(properties))
+    return {
+      type: "string",
+      label,
+    } as StringConfig;
+
+  if (properties.type === "string") {
+    return {
+      type: "enum" in properties ? "enum" : "string",
+      label,
+      helperText: properties.description,
+      data: "enum" in properties ? properties.enum : [],
+    } as StringConfig | EnumConfig;
+  }
+
+  if (properties.type === "number" || properties.type === "boolean") {
+    return {
+      type: properties.type,
+      helperText: properties.description,
+      label,
+    } as NumberConfig | BooleanConfig;
+  }
+
+  if (properties.type === "array") {
+    console.log({ properties, label }, "ara ara");
+    return {
+      type: properties.type,
+      label,
+      data: generateRenderableConfig(properties.items, definitions, ""),
+    } as ArrayConfig;
+  }
+
+  if ("anyOf" in properties) {
+    return generateRenderableConfig(properties.anyOf[1], definitions, label);
+  }
+
+  if ("$ref" in properties) {
+    const src = properties.$ref.replace("#/definitions/", "");
+    const data = _.get(definitions, src);
+    return generateRenderableConfig(data, definitions, src);
+  }
+
+  if ("additionalProperties" in properties) {
+    return {
+      type: "record",
+      label,
+      data: generateRenderableConfig(
+        properties.additionalProperties,
+        definitions,
+        ""
+      ),
+    } as RecordConfig;
+  }
+
+  return {
+    type: "object",
+    label,
+    data: Object.fromEntries(
+      Object.keys(properties.properties).map((key) => [
+        key,
+        generateRenderableConfig(properties.properties[key], definitions, key),
+      ])
+    ),
+  } as ObjectConfig;
+};
+
 const ConfigForm: React.FC<DefaultProps> = ({ engine }) => {
   const [openKeys, setOpenKeys] = React.useState<string[]>([]);
   const [selectedKeys, setSelectedKeys] = React.useState<string[]>([]);
@@ -71,12 +154,25 @@ const ConfigForm: React.FC<DefaultProps> = ({ engine }) => {
   const { ws, port } = router.query;
   const dispatch = engineHooks.useEngineAppDispatch();
   const ajv = useRef(new Ajv({ allErrors: true }));
+  const dendronConfig = useMemo(
+    () =>
+      generateRenderableConfig(
+        dendronValidator,
+        dendronValidator.definitions,
+        ""
+      ),
+    []
+  );
+  console.log(dendronConfig, "heeyyy");
 
   useEffect(() => {
     setCurrentValues(engine.config);
   }, [engine]);
 
-  const schema: JSONSchemaType<any> = generateSchema(dendronConfig);
+  const schema: JSONSchemaType<any> = useMemo(
+    () => (dendronConfig ? generateSchema(dendronConfig) : {}),
+    [dendronConfig]
+  );
 
   const formItemLayout = {
     labelCol: {
@@ -142,15 +238,23 @@ const ConfigForm: React.FC<DefaultProps> = ({ engine }) => {
           selectedKeys,
           setSelectedKeys,
           currentValues,
+          dendronFormConfig: dendronConfig,
         }}
       />
-      <Layout className="site-layout">
+      <Layout
+        className="site-layout"
+        style={{
+          overflowY: "scroll",
+          display: "flex",
+          justifyItems: "center",
+          alignItems: "center",
+        }}
+      >
         <Content
           style={{
             display: "flex",
             flexDirection: "column",
-            width: "100%",
-            overflowY: "scroll",
+            maxWidth: "50rem",
           }}
         >
           <Typography style={{ textAlign: "center", padding: "2rem" }}>
@@ -174,10 +278,7 @@ const ConfigForm: React.FC<DefaultProps> = ({ engine }) => {
                 <Form.Item name="submit" style={{ justifyContent: "center" }}>
                   <Button.Group size="large">
                     <ResetButton type="text">Clear changes</ResetButton>
-                    <SubmitButton
-                      type="primary"
-                      disabled={!_.isEmpty(errors.site)}
-                    >
+                    <SubmitButton type="primary" disabled={!_.isEmpty(errors)}>
                       Save changes
                     </SubmitButton>
                   </Button.Group>

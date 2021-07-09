@@ -354,6 +354,7 @@ const ConfigInput = ({
   addonAfter,
   setSelectedKeys,
 }: ConfigInputType) => {
+  if (!data) return <></>;
   const { type, required, helperText, label } = data;
   if (type === "string" || type === "number") {
     return (

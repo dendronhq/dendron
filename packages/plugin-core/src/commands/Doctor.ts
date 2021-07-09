@@ -81,12 +81,13 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     }
     const button = quickpick.buttons[0] as IDoctorQuickInputButton;
     button.pressed = !button.pressed;
-    button.type = button.type == "workspace" ? "file" : "workspace";
+    button.type = button.type === "workspace" ? "file" : "workspace";
     quickpick.buttons = [button];
     quickpick.title = `Doctor (${button.type})`;
   };
 
   async gatherInputs(): Promise<CommandOpts | undefined> {
+    // eslint-disable-next-line no-async-promise-executor
     const out = new Promise<CommandOpts | undefined>(async (resolve) => {
       const values = _.map(DoctorActions, (ent) => {
         return { label: ent };
@@ -141,7 +142,6 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
   async execute(opts: CommandOpts) {
     const ctx = "DoctorCommand:execute";
     window.showInformationMessage("Calling the doctor.");
-    const {} = _.defaults(opts, {});
     const ws = DendronWorkspace.instance();
     const wsRoot = DendronWorkspace.wsRoot();
     const findings: Finding[] = [];
@@ -174,8 +174,8 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     switch (opts.action) {
       case DoctorActions.FIX_FRONTMATTER: {
         await new BackfillV2Command().execute({
-          engine: engine,
-          note: note,
+          engine,
+          note,
         });
         break;
       }
@@ -235,7 +235,7 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
           : [note];
         await cmd.execute({
           action: opts.action,
-          candidates: candidates,
+          candidates,
           engine,
           wsRoot,
           server: {},

@@ -49,7 +49,7 @@ suite("notes", function () {
     });
   });
 
-  test(NOTE_DELETE_PRESET.domainNoChildren.label, function (done) {
+  test(NOTE_DELETE_PRESET.domainNoChildren.label, (done) => {
     onWSInit(async () => {
       const notePath = path.join(vaultPath, "foo.md");
       await VSCodeUtils.openFileInEditor(vscode.Uri.file(notePath));

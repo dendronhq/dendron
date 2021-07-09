@@ -119,7 +119,7 @@ export function genDefaultSettings() {
       "files.autoSave": "onFocusChange",
       "markdown-preview-enhanced.enableWikiLinkSyntax": true,
       "markdown-preview-enhanced.wikiLinkFileExtension": ".md",
-      "pasteImage.path": "${currentFileDir}/assets/images",
+      "pasteImage.path": "${currentFileDir}/assets/images", // eslint-disable-line no-template-curly-in-string
       "pasteImage.prefix": "/",
     },
   };
@@ -130,10 +130,10 @@ export async function runSingleVaultTest(
     onInit: (opts: { vault: DVault; wsRoot: string }) => Promise<void>;
   }
 ) {
-  let wsRoot = tmpDir().name;
+  const wsRoot = tmpDir().name;
   const vaultDir = tmpDir().name;
   const vaultRel = path.relative(wsRoot, vaultDir);
-  let vault = { fsPath: vaultRel };
+  const vault = { fsPath: vaultRel };
   const { ctx, onInit } = opts;
   await setupCodeWorkspaceV2(
     _.defaults(opts, {
@@ -175,7 +175,9 @@ export async function runWorkspaceTestV3(
     const engine = DendronWorkspace.instance().getEngine();
     await opts.onInit({ wsRoot, vaults, engine });
   });
-  opts?.preActivateHook ? await opts.preActivateHook() : null;
+  if (opts?.preActivateHook) {
+    await opts.preActivateHook();
+  }
   await _activate(ctx);
 }
 
@@ -231,7 +233,7 @@ export async function setupCodeWorkspaceV2(opts: SetupCodeWorkspaceV2) {
   const { preSetupHook, postSetupHook } = copts;
   const { wsRoot, vaults: vaultsWithFullPaths } =
     await EngineTestUtilsV2.setupWS(opts);
-  let setupWsOverride = copts.setupWsOverride as Partial<SetupWorkspaceOpts>;
+  const setupWsOverride = copts.setupWsOverride as Partial<SetupWorkspaceOpts>;
   setupCodeConfiguration(opts);
   if (opts.vaultDir) {
     setupWsOverride.vault = { fsPath: path.relative(wsRoot, opts.vaultDir) };

@@ -82,6 +82,9 @@
     <script>
       var btn = document.getElementById("btn_id");
       const vscode = acquireVsCodeApi();
+      vscode.postMessage({
+          command: "loaded",
+        });
 
       btn.addEventListener("click", function () {
         vscode.postMessage({

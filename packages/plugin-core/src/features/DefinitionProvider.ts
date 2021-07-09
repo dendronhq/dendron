@@ -16,7 +16,7 @@ export default class DefinitionProvider implements vscode.DefinitionProvider {
     if (!refAtPos) {
       return;
     }
-    let vault = undefined;
+    let vault;
     const engine = DendronWorkspace.instance().getEngine();
     if (refAtPos.vaultName) {
       try {
@@ -67,7 +67,7 @@ export default class DefinitionProvider implements vscode.DefinitionProvider {
         Uri.file(
           NoteUtils.getFullPath({ note, wsRoot: DendronWorkspace.wsRoot() })
         ),
-        pos ? pos : new Position(0, 0)
+        pos || new Position(0, 0)
       );
     }
   }

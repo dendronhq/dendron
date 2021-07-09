@@ -4,7 +4,7 @@ import _ from "lodash";
 import { MemoryStore } from "./store/memoryStore";
 
 export function getWSKey(uri: string) {
-  return _.trimEnd(uri, "/");
+  return _.trimEnd(uri, "/").toLowerCase();
 }
 
 export async function putWS({

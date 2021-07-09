@@ -8,6 +8,7 @@ import {
   NoteProps,
   NoteUtils,
   Point,
+  Position,
   SchemaModuleProps,
   Time,
   VaultUtils,
@@ -51,6 +52,7 @@ export class DisposableStore {
   }
 
   public dispose() {
+    // eslint-disable-next-line no-restricted-syntax
     for (const disposable of this._toDispose) {
       disposable.dispose();
     }
@@ -62,7 +64,7 @@ export class DisposableStore {
 export function resolvePath(filePath: string, wsRoot?: string): string {
   const platform = os.platform();
 
-  const isWin = platform === "win32" ? true : false;
+  const isWin = platform === "win32";
   if (filePath[0] === "~") {
     return resolveTilde(filePath);
   } else if (
@@ -89,7 +91,7 @@ export class FileUtils {
 }
 
 // NOTE: used for tests
-let _MOCK_CONTEXT: undefined | vscode.ExtensionContext = undefined;
+let _MOCK_CONTEXT: undefined | vscode.ExtensionContext;
 
 type CreateFnameOverrides = {
   domain?: string;
@@ -129,17 +131,13 @@ export class VSCodeUtils {
     documentParam?: vscode.TextDocument,
     rangeParam?: vscode.Range
   ) => {
-    const document = documentParam
-      ? documentParam
-      : vscode.window.activeTextEditor?.document;
+    const document = documentParam || vscode.window.activeTextEditor?.document;
 
     if (!document || (document && document.languageId !== "markdown")) {
       return;
     }
 
-    const range = rangeParam
-      ? rangeParam
-      : vscode.window.activeTextEditor?.selection;
+    const range = rangeParam || vscode.window.activeTextEditor?.selection;
 
     if (!range || (range && range.isEmpty)) {
       return;
@@ -427,7 +425,7 @@ export class VSCodeUtils {
 
   static isDevMode(): boolean {
     // HACK: vscode does not save env variables btw workspaces
-    return process.env.VSCODE_DEBUGGING_EXTENSION ? true : false;
+    return !!process.env.VSCODE_DEBUGGING_EXTENSION;
   }
 
   static setContext(key: DendronContext, status: boolean) {
@@ -465,6 +463,19 @@ export class VSCodeUtils {
       // remark Point's are 0 indexed
       point.line - 1 + (offset?.line || 0),
       point.column - 1 + (offset?.column || 0)
+    );
+  }
+
+  /** Convert a `Position` from a parsed remark node to a `vscode.Range`
+   *
+   * @param position The position to convert.
+   * @returns The converted Range.
+   */
+  static position2VSCodeRange(position: Position) {
+    return new vscode.Range(
+      // remark Point's are 0 indexed
+      this.point2VSCodePosition(position.start),
+      this.point2VSCodePosition(position.end)
     );
   }
 

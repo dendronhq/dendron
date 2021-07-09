@@ -45,7 +45,7 @@ suite("VaultAddCommand", function () {
   });
 
   // TODO: need to stub git clone with side effects
-  describe("remote", function () {
+  describe("remote", () => {
     test("basic", (done) => {
       runLegacySingleWorkspaceTest({
         ctx,
@@ -206,7 +206,7 @@ suite("VaultAddCommand", function () {
     });
   });
 
-  describe("local", function () {
+  describe("local", () => {
     test("add to existing folder", (done) => {
       runSingleVaultTest({
         ctx,

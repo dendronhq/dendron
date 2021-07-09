@@ -243,8 +243,8 @@ export class LinkUtils {
     filter?: LinkFilter;
   }): DLink[] {
     const content = note.body;
-    let remark = MDUtilsV5.procRemarkParse(
-      { mode: ProcMode.FULL, flavor: ProcFlavor.REGULAR },
+    let remark = MDUtilsV5.procRemarkParseFull(
+      { flavor: ProcFlavor.REGULAR },
       {
         engine,
         fname: note.fname,

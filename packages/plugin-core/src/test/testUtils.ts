@@ -78,7 +78,7 @@ export function setupWorkspace(
     const config: any = {
       dendron: {
         rootDir: ".",
-        useExperimentalLSPSupport: opts?.lsp ? true : false,
+        useExperimentalLSPSupport: !!opts?.lsp,
       },
     };
     if (_.isUndefined(opts?.lsp)) {

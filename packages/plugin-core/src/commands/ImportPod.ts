@@ -81,19 +81,19 @@ export class ImportPodCommand extends BaseCommand<
     }
     const engine = DendronWorkspace.instance().getEngine();
     const vaults = DendronWorkspace.instance().vaultsv4;
-    const pod = new opts.podChoice.podClass() as ImportPod;
+    const pod = new opts.podChoice.podClass() as ImportPod; // eslint-disable-line new-cap
     const fileWatcher = getWS().fileWatcher;
     if (fileWatcher) {
       fileWatcher.pause = true;
     }
-    let importedNotes = await window.withProgress(
+    const importedNotes = await window.withProgress(
       {
         location: ProgressLocation.Notification,
         title: "importing notes",
         cancellable: false,
       },
       async () => {
-        let { importedNotes, errors } = await pod.execute({
+        const { importedNotes, errors } = await pod.execute({
           config: opts.config,
           engine,
           wsRoot,

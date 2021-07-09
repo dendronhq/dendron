@@ -20,7 +20,7 @@ suite("InsertNoteCommand", function () {
     },
   });
 
-  describe("insert note", function () {
+  describe("insert note", () => {
     test("basic", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,

@@ -12,7 +12,7 @@ import { ShowPreviewV2Command } from "../commands/ShowPreviewV2";
 import { Logger } from "../logger";
 import { DendronWorkspace, getWS } from "../workspace";
 
-let NOTE_SERVICE: NoteSyncService | undefined = undefined;
+let NOTE_SERVICE: NoteSyncService | undefined;
 
 /**
  * Keep notes on disk in sync with engine

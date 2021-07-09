@@ -3,7 +3,7 @@ import { GLOBAL_STATE, WORKSPACE_STATE } from "../constants";
 import * as vscode from "vscode";
 import { VSCodeUtils } from "../utils";
 
-let _StateService: StateService | undefined = undefined;
+let _StateService: StateService | undefined;
 
 type ExtensionGlobalState = ExtensionContext["globalState"];
 type ExtensionWorkspaceState = ExtensionContext["workspaceState"];

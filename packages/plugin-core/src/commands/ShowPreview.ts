@@ -20,6 +20,7 @@ export class ShowPreviewCommand extends BasicCommand<
   }
 
   async execute(_opts: CommandOpts) {
+    // eslint-disable-next-line  no-return-await
     return await MarkdownUtils.openPreview();
   }
 }

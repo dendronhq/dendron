@@ -21,8 +21,7 @@ import { WorkspaceInitializer } from "./workspaceInitializer";
     return [{ fsPath: "vault" }];
   };
 
-  onWorkspaceCreation = async (opts: { vaults: DVault[]; wsRoot: string }) => {
-    const ctx = "BlankInitializer.onWorkspaceCreation";
+  async onWorkspaceCreation(opts: { vaults: DVault[]; wsRoot: string }): Promise<void> {
     const ws = DendronWorkspace.instance();
 
     const vpath = vault2Path({ vault: opts.vaults[0], wsRoot: opts.wsRoot });
@@ -36,9 +35,7 @@ import { WorkspaceInitializer } from "./workspaceInitializer";
     Snippets.create(vscodeDir);
   };
 
-  onWorkspaceOpen: (opts: { ws: DendronWorkspace }) => void = async (opts: {
-    ws: DendronWorkspace;
-  }) => {
+  async onWorkspaceOpen(opts: { ws: DendronWorkspace }): Promise<void> {
     const ctx = "BlankInitializer.onWorkspaceOpen";
 
     let rootUri = VSCodeUtils.joinPath(

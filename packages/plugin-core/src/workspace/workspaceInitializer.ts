@@ -3,34 +3,32 @@ import { WorkspaceService } from "@dendronhq/engine-server";
 import _ from "lodash";
 import * as vscode from "vscode";
 import { DendronWorkspace } from "../workspace";
-import {
-  GLOBAL_STATE,
-  WORKSPACE_ACTIVATION_CONTEXT
-} from "./../constants";
+import { GLOBAL_STATE, WORKSPACE_ACTIVATION_CONTEXT } from "./../constants";
 import { BlankInitializer } from "./blankInitializer";
-import { SeedInitializer } from "./seedInitializer";
-import { TemplateInitializer } from "./templateInitializer";
 import { TutorialInitializer } from "./tutorialInitializer";
 
 /**
  * Type that can execute custom code as part of workspace creation and opening of a workspace.
  */
- export type WorkspaceInitializer = {
-
+export type WorkspaceInitializer = {
   /**
    * Create the vaults to be added to the workspace being initialized.
    */
-  createVaults: () => DVault[];
+  createVaults(): DVault[];
 
   /**
    * Invoked after workspace has been created. Perform operations such as copying over notes.
    */
-  onWorkspaceCreation?: (opts: { vaults: DVault[]; wsRoot: string; svc?: WorkspaceService }) => void;
+  onWorkspaceCreation?(opts: {
+    vaults: DVault[];
+    wsRoot: string;
+    svc?: WorkspaceService;
+  }): Promise<void>;
 
   /**
    * Invoked after the workspace has been opened. Perform any operations such as re-arranging the layout.
    */
-  onWorkspaceOpen?: (opts: { ws: DendronWorkspace }) => void;
+  onWorkspaceOpen?(opts: { ws: DendronWorkspace }): Promise<void>;
 };
 
 /**
@@ -40,11 +38,6 @@ export class WorkspaceInitFactory {
   static create(ws: DendronWorkspace): WorkspaceInitializer | undefined {
     if (this.isTutorialWorkspaceLaunch(ws.context)) {
       return new TutorialInitializer();
-    }
-
-    else if (isJournalWorkspaceLaunch(ws.context)) {
-      return new TemplateInitializer();
-      // return new SeedInitializer();
     }
 
     return new BlankInitializer();
@@ -61,9 +54,4 @@ export class WorkspaceInitFactory {
       state === WORKSPACE_ACTIVATION_CONTEXT.TUTORIAL.toString()
     );
   }
-}
-
-function isJournalWorkspaceLaunch(context: vscode.ExtensionContext) {
-  // throw new Error("Function not implemented.");
-  return true;
 }

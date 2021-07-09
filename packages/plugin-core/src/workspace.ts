@@ -8,7 +8,7 @@ import {
   getStage,
   ResponseCode,
   TutorialEvents,
-  WorkspaceSettings,
+  WorkspaceSettings
 } from "@dendronhq/common-all";
 import {
   NodeJSUtils,
@@ -24,7 +24,6 @@ import { PodUtils } from "@dendronhq/pods-core";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import rif from "replace-in-file";
 import * as vscode from "vscode";
 import { ALL_COMMANDS } from "./commands";
 import { GoToSiblingCommand } from "./commands/GoToSiblingCommand";
@@ -51,7 +50,6 @@ import { EngineAPIService } from "./services/EngineAPIService";
 import { CodeConfigKeys } from "./types";
 import { DisposableStore, resolvePath, VSCodeUtils } from "./utils";
 import { AnalyticsUtils } from "./utils/analytics";
-import { MarkdownUtils } from "./utils/md";
 import { CalendarView } from "./views/CalendarView";
 import { DendronTreeView } from "./views/DendronTreeView";
 import { DendronTreeViewV2 } from "./views/DendronTreeViewV2";
@@ -730,142 +728,4 @@ export class DendronWorkspace {
       vscode.window.showErrorMessage(JSON.stringify(err));
     }
   }
-}
-
-/**
- * Type that can execute custom code as part of workspace creation and opening of a workspace.
- */
-export type WorkspaceInitializer = {
-  /**
-   * Invoked after workspace has been created. Perform operations such as copying over notes.
-   */
-  onWorkspaceCreation?: (opts: { vaults: DVault[]; wsRoot: string }) => void;
-
-  /**
-   * Invoked after the workspace has been opened. Perform any operations such as re-arranging the layout.
-   */
-  onWorkspaceOpen?: (opts: { ws: DendronWorkspace }) => void;
-};
-
-/**
- * Factory class for creating WorkspaceInitializer types
- */
-export class WorkspaceInitFactory {
-  static create(ws: DendronWorkspace): WorkspaceInitializer | undefined {
-    if (this.isTutorialWorkspaceLaunch(ws.context)) {
-      return new TutorialInitializer();
-    }
-
-    return;
-  }
-
-  private static isTutorialWorkspaceLaunch(
-    context: vscode.ExtensionContext
-  ): boolean {
-    const state = context.globalState.get<string | undefined>(
-      GLOBAL_STATE.WORKSPACE_ACTIVATION_CONTEXT
-    );
-    return state === WORKSPACE_ACTIVATION_CONTEXT.TUTORIAL.toString();
-  }
-}
-
-/**
- * Workspace Initializer for the Tutorial Experience. Copies tutorial notes and
- * launches the user into the tutorial layout after the workspace is opened.
- */
-export class TutorialInitializer implements WorkspaceInitializer {
-  onWorkspaceCreation = async (opts: { vaults: DVault[]; wsRoot: string }) => {
-    const ctx = "TutorialInitializer.onWorkspaceCreation";
-
-    const ws = DendronWorkspace.instance();
-
-    await ws.updateGlobalState(
-      GLOBAL_STATE.WORKSPACE_ACTIVATION_CONTEXT,
-      WORKSPACE_ACTIVATION_CONTEXT.TUTORIAL.toString()
-    );
-
-    const dendronWSTemplate = VSCodeUtils.joinPath(
-      ws.extensionAssetsDir,
-      "dendron-ws"
-    );
-
-    const vpath = vault2Path({ vault: opts.vaults[0], wsRoot: opts.wsRoot });
-
-    fs.copySync(path.join(dendronWSTemplate.fsPath, "tutorial"), vpath);
-
-    // Tailor the tutorial text to the particular OS and for their workspace location.
-    const options = {
-      files: [path.join(vpath, "*.md")],
-
-      from: [/%KEYBINDING%/g, /%WORKSPACE_ROOT%/g],
-      to: [
-        process.platform === "darwin" ? "Cmd" : "Ctrl",
-        path.join(opts.wsRoot, "dendron.code-workspace"),
-      ],
-    };
-
-    rif.replaceInFile(options).catch((err: Error) => {
-      Logger.error({
-        ctx,
-        error: DendronError.createPlainError({
-          error: err,
-          message: "error replacing tutorial placeholder text",
-        }),
-      });
-    });
-  };
-
-  onWorkspaceOpen: (opts: { ws: DendronWorkspace }) => void = async (opts: {
-    ws: DendronWorkspace;
-  }) => {
-    const ctx = "TutorialInitializer.onWorkspaceOpen";
-
-    const rootUri = VSCodeUtils.joinPath(
-      opts.ws.rootWorkspace.uri,
-      "tutorial.md"
-    );
-
-    if (fs.pathExistsSync(rootUri.fsPath)) {
-      // Set the view to have the tutorial page showing with the preview opened to the side.
-      await vscode.window.showTextDocument(rootUri);
-      await MarkdownUtils.openPreview({ reuseWindow: false });
-    } else {
-      Logger.error({
-        ctx,
-        error: new DendronError({ message: `Unable to find tutorial.md` }),
-      });
-    }
-
-    await opts.ws.updateGlobalState(
-      GLOBAL_STATE.WORKSPACE_ACTIVATION_CONTEXT,
-      WORKSPACE_ACTIVATION_CONTEXT.NORMAL
-    );
-
-    // Register a special telemetry handler for the tutorial:
-    if (opts.ws.windowWatcher) {
-      opts.ws.windowWatcher.registerActiveTextEditorChangedHandler((e) => {
-        const fileName = e?.document.uri.fsPath;
-
-        let eventName: TutorialEvents | undefined;
-
-        if (fileName?.endsWith("tutorial.md")) {
-          eventName = TutorialEvents.Tutorial_0_Show;
-        } else if (fileName?.endsWith("tutorial.1-navigation-basics.md")) {
-          eventName = TutorialEvents.Tutorial_1_Show;
-        } else if (fileName?.endsWith("tutorial.2-taking-notes.md")) {
-          eventName = TutorialEvents.Tutorial_2_Show;
-        } else if (fileName?.endsWith("tutorial.3-linking-your-notes.md")) {
-          eventName = TutorialEvents.Tutorial_3_Show;
-        } else if (fileName?.endsWith("tutorial.4-rich-formatting.md")) {
-          eventName = TutorialEvents.Tutorial_4_Show;
-        } else if (fileName?.endsWith("tutorial.5-conclusion.md")) {
-          eventName = TutorialEvents.Tutorial_5_Show;
-        }
-
-        if (eventName) {
-          AnalyticsUtils.track(eventName);
-        }
-      });
-    }
-  };
 }

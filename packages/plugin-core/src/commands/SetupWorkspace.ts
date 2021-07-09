@@ -1,16 +1,14 @@
 import { CONSTANTS, DVault } from "@dendronhq/common-all";
-import { resolveTilde, vault2Path } from "@dendronhq/common-server";
+import { resolveTilde } from "@dendronhq/common-server";
 import { WorkspaceService } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import vscode from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
-import { Snippets } from "../settings";
 import { VSCodeUtils } from "../utils";
 import { DendronWorkspace } from "../workspace";
 import { BlankInitializer } from "../workspace/blankInitializer";
-import { SeedInitializer } from "../workspace/seedInitializer";
 import { TemplateInitializer } from "../workspace/templateInitializer";
 import { TutorialInitializer } from "../workspace/tutorialInitializer";
 import { WorkspaceInitializer } from "../workspace/workspaceInitializer";
@@ -51,25 +49,27 @@ export class SetupWorkspaceCommand extends BasicCommand<
 
     const vaultType = await VSCodeUtils.showQuickPick([
       {
-        label: "blank",
+        label: "default",
         picked: true,
-        detail: "An empty workspce with no notes.",
+        detail: "An empty vault with a template gallery.",
+      },
+      {
+        label: "blank",
+        detail: "A completely empty workspace.",
       },
       { label: "tutorial", detail: "Contains the Dendron tutorial notes." },
-      { label: "journal", detail: "Template for a simple journal." },
     ]);
 
     if (!vaultType) {
       return;
     }
     switch (vaultType.label) {
+      case "default":
+        return { rootDirRaw, workspaceInitializer: new TemplateInitializer() };
       case "blank":
         return { rootDirRaw, workspaceInitializer: new BlankInitializer() };
       case "tutorial":
         return { rootDirRaw, workspaceInitializer: new TutorialInitializer() };
-      case "journal":
-        return { rootDirRaw, workspaceInitializer: new TemplateInitializer() };
-      // return { rootDirRaw, emptyWs: true, workspaceInitializer: new SeedInitializer()};
       default:
         return { rootDirRaw };
     }
@@ -149,15 +149,17 @@ export class SetupWorkspaceCommand extends BasicCommand<
       return [];
     }
 
-    const vaults = opts.workspaceInitializer ? opts.workspaceInitializer.createVaults() : [];
+    const vaults = opts.workspaceInitializer
+      ? opts.workspaceInitializer.createVaults()
+      : [];
 
     await WorkspaceService.createWorkspace({
       vaults,
       wsRoot: rootDir,
       createCodeWorkspace: true,
-    }).then((ws) => {
+    }).then(async (ws) => {
       if (opts?.workspaceInitializer?.onWorkspaceCreation) {
-        opts.workspaceInitializer.onWorkspaceCreation({
+        await opts.workspaceInitializer.onWorkspaceCreation({
           vaults,
           wsRoot: rootDir,
           svc: ws,

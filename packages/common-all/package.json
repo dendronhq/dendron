@@ -55,6 +55,7 @@
     "luxon": "^1.25.0",
     "minimatch": "^3.0.4",
     "nanoid": "^3.1.23",
+    "nanoid-dictionary": "^4.3.0",
     "semver": "^7.3.2",
     "title": "^3.4.2",
     "vscode-uri": "^2.1.2",
@@ -62,6 +63,7 @@
   },
   "devDependencies": {
     "@types/js-yaml": "^3.12.5",
+    "@types/nanoid-dictionary": "^4.2.0",
     "coveralls": "^3.0.2",
     "jest": "^23.6.0",
     "jest-serializer-path": "^0.1.15",

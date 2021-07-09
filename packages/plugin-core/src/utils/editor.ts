@@ -107,7 +107,7 @@ export function addOrGetAnchorAt(opts: {
   const line = editor.document.lineAt(position.line);
   const existingAnchor = getAnchorAt(opts);
   if (!_.isUndefined(existingAnchor)) return existingAnchor;
-  if (_.isUndefined(anchor)) anchor = genUUID(8);
+  if (_.isUndefined(anchor)) anchor = genUUID();
   editBuilder.insert(line.range.end, ` ^${anchor}`);
   return `^${anchor}`;
 }

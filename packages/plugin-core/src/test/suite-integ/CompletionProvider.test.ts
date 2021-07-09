@@ -24,7 +24,7 @@ suite("completionProvider", function () {
           await VSCodeUtils.openNote(
             NoteUtils.getNoteOrThrow({
               fname: "root",
-              vault: vaults[0],
+              vault: vaults[1],
               wsRoot,
               notes: engine.notes,
             })
@@ -40,7 +40,7 @@ suite("completionProvider", function () {
           );
           expect(items).toBeTruthy();
           // Suggested all the notes
-          expect(items!.length).toEqual(6);
+          expect(items!.length).toEqual(7);
           for (const item of items!) {
             // All suggested items exist
             const found = NoteUtils.getNotesByFname({
@@ -49,9 +49,21 @@ suite("completionProvider", function () {
             });
             expect(found.length > 0).toBeTruthy();
           }
+          // check that same vault items are sorted before other items
+          const sortedItems = _.sortBy(items, (item) => item.sortText || item.label);
+          const testIndex = _.findIndex(sortedItems, (item) => item.label === 'test');
+          expect(testIndex != -1 && testIndex < 2).toBeTruthy();
           done();
         },
-        preSetupHook: ENGINE_HOOKS.setupBasic,
+        preSetupHook: async (opts) => {
+          const { wsRoot, vaults } = opts;
+          await NoteTestUtilsV4.createNote({
+            fname: "test",
+            vault: vaults[1],
+            wsRoot,
+          });
+          await ENGINE_HOOKS.setupBasic(opts);
+        },
       });
     });
   });

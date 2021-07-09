@@ -50,8 +50,8 @@ export const provideCompletionItems = (
     .text.substr(0, position.character);
   Logger.debug({ ctx, linePrefix, position, msg: "enter" });
 
-  const isResourceAutocomplete = linePrefix.match(/\!\[\[\w*$/); // eslint-disable-line no-useless-escape
-  const isDocsAutocomplete = linePrefix.match(/\[\[[\w\|\.\#]*$/); // eslint-disable-line no-useless-escape
+  const isResourceAutocomplete = linePrefix.match(/!\[\[\w*$/);
+  const isDocsAutocomplete = linePrefix.match(/\[\[[\w|.#]*$/);
 
   if (!isDocsAutocomplete && !isResourceAutocomplete) {
     return undefined;
@@ -83,11 +83,12 @@ export const provideCompletionItems = (
 
   const completionItems: CompletionItem[] = [];
   const notes = DendronWorkspace.instance().getEngine().notes;
-  const uris: Uri[] = _.values(notes).map((note) =>
-    Uri.file(NoteUtils.getFullPath({ note, wsRoot: DendronWorkspace.wsRoot() }))
-  );
+  const currentVault = VSCodeUtils.getNoteFromDocument(document)?.vault;
+  const wsRoot = getWS().getEngine().wsRoot;
+  
+  _.values(notes).forEach((note, index) => {
+    const uri = Uri.file(NoteUtils.getFullPath({ note, wsRoot: DendronWorkspace.wsRoot() }));
 
-  uris.forEach((uri, index) => {
     const workspaceFolder = workspace.getWorkspaceFolder(uri);
 
     const longRef = fsPathToRef({
@@ -109,6 +110,10 @@ export const provideCompletionItems = (
     item.insertText = longRef; //insertText;
 
     item.sortText = padWithZero(index);
+    // Sort notes from current vault before other vaults
+    if (currentVault && !VaultUtils.isEqual(currentVault, note.vault, wsRoot)) {
+      item.sortText = 'x' + item.sortText;
+    }
 
     completionItems.push(item);
   });

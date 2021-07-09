@@ -217,7 +217,7 @@ export const createProcCompileTests = (opts: {
                       engine,
                       fname,
                       vault,
-                    });
+                    }, {flavor: flavor as ProcFlavor});
                 }
                 const extra = await setupFunc({
                   ...presetOpts,

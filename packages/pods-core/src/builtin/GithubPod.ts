@@ -16,12 +16,39 @@ import {
 const ID = "dendron.github";
 
 type GithubImportPodCustomOpts = {
+  /**
+   * owner of the repository
+   */
   owner: string;
+
+  /**
+   * github repository to import from
+   */
   repository: string;
-  to?: string;
-  from?: string;
+
+  /**
+   * import issues created before this date
+   */
+  endDate?: string;
+
+  /**
+   * import issues created after this date
+   */
+  startDate?: string;
+
+  /**
+   * status of issue open/closed
+   */
   status: string;
+
+  /**
+   * github personal access token
+   */
   token: string;
+
+  /**
+   * name of hierarchy to import into
+   */
   fname: string;
 };
 
@@ -55,14 +82,14 @@ export class GithubImportPod extends ImportPod<GithubImportPodConfig> {
           description: "status of issue open/closed",
           enum: ["open", "closed"],
         },
-        to: {
+        endDate: {
           type: "string",
           description: "import issues created before this date: YYYY-MM-DD",
           format: "date",
           default: Time.now().toISODate(),
           nullable: true,
         },
-        from: {
+        startDate: {
           type: "string",
           description: "import issues created after this date: YYYY-MM-DD",
           format: "date",
@@ -86,10 +113,7 @@ export class GithubImportPod extends ImportPod<GithubImportPodConfig> {
   getDataFromGithub = async (opts: Partial<GithubAPIOpts>) => {
     let result;
     const { owner, repository, status, created, afterCursor, token } = opts;
-    let queryVal = `repo:${owner}/${repository} is:issue is:${status}`;
-    if (!_.isUndefined(created)) {
-      queryVal = queryVal.concat(` ${created}`);
-    }
+    const queryVal = `repo:${owner}/${repository} is:issue is:${status} ${created}`;
 
     const query = `query search($val: String!, $after: String)
     {search(type: ISSUE, first: 100, query: $val, after: $after) {
@@ -260,8 +284,8 @@ export class GithubImportPod extends ImportPod<GithubImportPodConfig> {
       owner,
       repository,
       status,
-      to = Time.now().toISODate(),
-      from,
+      endDate = Time.now().toISODate(),
+      startDate,
       token,
       destName,
       concatenate,
@@ -273,10 +297,10 @@ export class GithubImportPod extends ImportPod<GithubImportPodConfig> {
     let created: string;
     let data: any[] = [];
 
-    if (!_.isUndefined(from)) {
-      created = `created:${from}..${to}`;
+    if (!_.isUndefined(startDate)) {
+      created = `created:${startDate}..${endDate}`;
     } else {
-      created = `created:<${to}`;
+      created = `created:<${endDate}`;
     }
 
     while (hasNextPage) {

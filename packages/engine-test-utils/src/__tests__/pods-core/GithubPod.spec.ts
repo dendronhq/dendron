@@ -36,7 +36,7 @@ describe("GithubPod import pod", () => {
     fname = "github.issues.902-Test Issue";
   });
 
-  test("Bad Credentials", async () => {
+  test.skip("Bad Credentials", async () => {
     await runEngineTestV5(
       async ({ engine, vaults, wsRoot }) => {
         const pod = new GithubImportPod();

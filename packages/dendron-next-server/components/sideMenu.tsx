@@ -2,6 +2,7 @@ import React from "react";
 import { Layout, Menu } from "antd";
 import { Config, ObjectConfig } from "../types/formTypes";
 import get from "lodash/get";
+import isEmpty from "lodash/isEmpty";
 
 const { Sider } = Layout;
 const { SubMenu } = Menu;
@@ -38,7 +39,9 @@ const generateMenu = (
         }}
       >
         <a href={`#${name}`}>
-          {dataDefinition.label ?? prefix[prefix.length - 1]}
+          {isEmpty(dataDefinition.label)
+            ? prefix[prefix.length - 1]
+            : dataDefinition.label}
         </a>
       </Menu.Item>
     );
@@ -76,7 +79,11 @@ const generateMenu = (
     return (
       <SubMenu
         key={name}
-        title={dataDefinition.label ?? prefix[prefix.length - 1]}
+        title={
+          isEmpty(dataDefinition.label)
+            ? prefix[prefix.length - 1]
+            : dataDefinition.label
+        }
       >
         {Object.keys((dataDefinition as ObjectConfig).data).map((key) =>
           generateMenu(
@@ -121,6 +128,8 @@ const SideMenu: React.FC<DefaultProptypes> = ({
     setSelectedKeys(selectedKeys);
   };
 
+  const onOpenChange = (openKeys: any[]) => setOpenKeys(openKeys);
+
   return (
     <Sider theme="light">
       <Menu
@@ -136,6 +145,8 @@ const SideMenu: React.FC<DefaultProptypes> = ({
         mode="inline"
         selectedKeys={selectedKeys}
         onSelect={onSelectedChange}
+        openKeys={openKeys}
+        onOpenChange={onOpenChange}
       >
         {generateMenu(dendronFormConfig, [], currentValues)}
       </Menu>

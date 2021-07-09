@@ -104,7 +104,6 @@ const generateRenderableConfig = (
   }
 
   if (properties.type === "array") {
-    console.log({ properties, label }, "ara ara");
     return {
       type: properties.type,
       label,
@@ -163,7 +162,6 @@ const ConfigForm: React.FC<DefaultProps> = ({ engine }) => {
       ),
     []
   );
-  console.log(dendronConfig, "heeyyy");
 
   useEffect(() => {
     setCurrentValues(engine.config);

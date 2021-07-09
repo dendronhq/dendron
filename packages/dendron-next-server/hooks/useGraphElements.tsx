@@ -7,11 +7,7 @@ import {
   SchemaProps,
   VaultUtils,
 } from "@dendronhq/common-all";
-import {
-  createLogger,
-  engineSlice,
-  ideSlice,
-} from "@dendronhq/common-frontend";
+import { createLogger, engineSlice } from "@dendronhq/common-frontend";
 import { EdgeDefinition } from "cytoscape";
 import _ from "lodash";
 import { useRouter } from "next/router";

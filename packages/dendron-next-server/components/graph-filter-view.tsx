@@ -8,11 +8,8 @@ import {
   Spin,
 } from "antd";
 import _ from "lodash";
-import { useEffect } from "react";
-import { useReducer } from "react";
 import { useState } from "react";
 import { useThemeSwitcher } from "react-css-theme-switcher";
-import { createLogger } from "../../common-frontend/lib";
 import { GraphConfig, GraphConfigItem } from "../lib/graph";
 import AntThemes from "../styles/theme-antd";
 const { Panel } = Collapse;

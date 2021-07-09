@@ -8,6 +8,7 @@ import {
   NoteProps,
   NoteUtils,
   Point,
+  Position,
   SchemaModuleProps,
   Time,
   VaultUtils,
@@ -462,6 +463,19 @@ export class VSCodeUtils {
       // remark Point's are 0 indexed
       point.line - 1 + (offset?.line || 0),
       point.column - 1 + (offset?.column || 0)
+    );
+  }
+
+  /** Convert a `Position` from a parsed remark node to a `vscode.Range`
+   *
+   * @param position The position to convert.
+   * @returns The converted Range.
+   */
+  static position2VSCodeRange(position: Position) {
+    return new vscode.Range(
+      // remark Point's are 0 indexed
+      this.point2VSCodePosition(position.start),
+      this.point2VSCodePosition(position.end)
     );
   }
 

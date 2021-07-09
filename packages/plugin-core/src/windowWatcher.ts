@@ -4,37 +4,14 @@ import {
   OnDidChangeActiveTextEditorMsg,
 } from "@dendronhq/common-all";
 import _ from "lodash";
-import { DateTime } from "luxon";
-import {
-  DecorationOptions,
-  ExtensionContext,
-  Range,
-  window,
-  TextEditor,
-  Selection,
-} from "vscode";
+import { ExtensionContext, window, TextEditor, Selection } from "vscode";
 import { Logger } from "./logger";
-import { CodeConfigKeys, DateTimeFormat } from "./types";
 import { VSCodeUtils } from "./utils";
-import { getConfigValue, getWS } from "./workspace";
+import { getWS } from "./workspace";
 import { ShowPreviewV2Command } from "./commands/ShowPreviewV2";
 import visit from "unist-util-visit";
-import { DendronASTDest, MDUtilsV5, ProcMode } from "@dendronhq/engine-server";
-
-const tsDecorationType = window.createTextEditorDecorationType({
-  //   borderWidth: "1px",
-  //   borderStyle: "solid",
-  //   overviewRulerColor: "blue",
-  //   overviewRulerLane: OverviewRulerLane.Right,
-  //   light: {
-  //     // this color will be used in light color themes
-  //     borderColor: "darkblue",
-  //   },
-  //   dark: {
-  //     // this color will be used in dark color themes
-  //     borderColor: "lightblue",
-  //   },
-});
+import { DendronASTDest, MDUtilsV5 } from "@dendronhq/engine-server";
+import { updateDecorations } from "./features/windowDecorations";
 
 export class WindowWatcher {
   private onDidChangeActiveTextEditorHandlers: ((e: TextEditor | undefined) => void)[] = [];
@@ -90,53 +67,13 @@ export class WindowWatcher {
    * Add text decorator to frontmatter
    * @returns
    */
-  async triggerUpdateDecorations(text?: string) {
+  async triggerUpdateDecorations() {
     const activeEditor = window.activeTextEditor;
     if (!activeEditor) {
       return;
     }
 
-    const createTSDecorator = (tsMatch: RegExpExecArray) => {
-      const startPos = activeEditor.document.positionAt(tsMatch.index);
-      const endPos = activeEditor.document.positionAt(
-        tsMatch.index + tsMatch[0].length
-      );
-      const ts = _.toInteger(_.trim(tsMatch[0].split(":")[1], `'" `));
-
-      const dt = DateTime.fromMillis(ts);
-      const tsConfig = getConfigValue(
-        CodeConfigKeys.DEFAULT_TIMESTAMP_DECORATION_FORMAT
-      ) as DateTimeFormat;
-      const formatOption = DateTime[tsConfig];
-      const decoration: DecorationOptions = {
-        range: new Range(startPos, endPos),
-        renderOptions: {
-          after: {
-            contentText: `  (${dt.toLocaleString(formatOption)})`,
-          },
-        },
-      };
-      return decoration;
-    };
-    text = text || activeEditor.document.getText();
-
-    const match = NoteUtils.RE_FM.exec(text);
-    if (!_.isNull(match)) {
-      const decorations = [
-        NoteUtils.RE_FM_UPDATED,
-        NoteUtils.RE_FM_CREATED,
-      ].map((RE) => {
-        const tsMatch = RE.exec((match as RegExpExecArray)[0]);
-        if (tsMatch) {
-          return createTSDecorator(tsMatch);
-        }
-        return;
-      });
-      activeEditor.setDecorations(
-        tsDecorationType,
-        decorations.filter((ent) => !_.isUndefined(ent)) as DecorationOptions[]
-      );
-    }
+    updateDecorations(activeEditor);
     return;
   }
 
@@ -208,11 +145,8 @@ export class WindowWatcher {
   }
 
   private moveCursorPastFrontmatter(editor: TextEditor) {
-    const proc = MDUtilsV5.procRemarkParse(
-      {
-        mode: ProcMode.NO_DATA,
-        parseOnly: true,
-      },
+    const proc = MDUtilsV5.procRemarkParseNoData(
+      {},
       { dest: DendronASTDest.MD_DENDRON }
     );
     const parsed = proc.parse(editor.document.getText());

@@ -6,6 +6,7 @@ import {
 } from "@dendronhq/common-all";
 import { WorkspaceUtils } from "@dendronhq/engine-server";
 import { getWS } from "../utils";
+import fs from "fs-extra";
 
 export class AssetsController {
   static singleton?: AssetsController;
@@ -27,6 +28,14 @@ export class AssetsController {
           message: `fpath ${fpath} not inside a vault. wsRoot: ${wsRoot}, vaults: ${vaults
             .map((v) => v.fsPath)
             .join(", ")}`,
+        }),
+      };
+    }
+    if (!fs.existsSync(fpath)) {
+      return {
+        error: DendronError.createFromStatus({
+          status: ERROR_STATUS.DOES_NOT_EXIST,
+          message: `fpath ${fpath} does not exist`,
         }),
       };
     }

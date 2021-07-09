@@ -92,14 +92,18 @@ export type ProcOptsV5 = {
 
 /**
  * Data to initialize the processor
+ *
+ * @remark You might have picked up that there is a large overlap between optional properties in `ProcData` and what is available with a `Engine`.
+ * This is because depending on what `ProcMode` the processor is operating on, we might not have (or need) access to an `engine`
+ * instance (eg. when running a doctor command to check for valid markdown syntax )
+ * The additional options are also there as an override - letting us override specific engine props without mutating the engine.
  */
 export type ProcDataFullOptsV5 = {
-  engine?: DEngineClient;
-  vault?: DVault;
-  fname?: string;
-  wsRoot?: string;
+  engine: DEngineClient;
+  vault: DVault;
+  fname: string;
   dest: DendronASTDest;
-} & { config?: DendronConfig };
+} & { config?: DendronConfig; wsRoot?: string };
 
 /**
  * Data from the processor
@@ -347,8 +351,34 @@ export class MDUtilsV5 {
    * @param data
    * @returns
    */
-  static procRemarkParse(opts: ProcOptsV5, data: ProcDataFullOptsV5) {
+  static procRemarkParse(opts: ProcOptsV5, data: Partial<ProcDataFullOptsV5>) {
     return this._procRemark({ ...opts, parseOnly: true }, data);
+  }
+
+  /**
+   * Equivalent to running {@link procRemarkParse({mode: ProcMode.NO_DATA})}
+   */
+  static procRemarkParseNoData(
+    opts: Omit<ProcOptsV5, "mode" | "parseOnly">,
+    data: Partial<ProcDataFullOptsV5> & { dest: DendronASTDest }
+  ) {
+    return this._procRemark(
+      { ...opts, parseOnly: true, mode: ProcMode.NO_DATA },
+      data
+    );
+  }
+
+  /**
+   * Equivalent to running {@link procRemarkParse({mode: ProcMode.FULL})}
+   */
+  static procRemarkParseFull(
+    opts: Omit<ProcOptsV5, "mode" | "parseOnly">,
+    data: ProcDataFullOptsV5
+  ) {
+    return this._procRemark(
+      { ...opts, parseOnly: true, mode: ProcMode.FULL },
+      data
+    );
   }
 
   static procRehypeParse(opts: ProcOptsV5, data?: Partial<ProcDataFullOptsV5>) {

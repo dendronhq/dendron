@@ -12,6 +12,7 @@ import { useEffect } from "react";
 import { useReducer } from "react";
 import { useState } from "react";
 import { useThemeSwitcher } from "react-css-theme-switcher";
+import { createLogger } from "../../common-frontend/lib";
 import { GraphConfig, GraphConfigItem } from "../lib/graph";
 import AntThemes from "../styles/theme-antd";
 const { Panel } = Collapse;
@@ -24,7 +25,6 @@ type FilterProps = {
 };
 
 const GraphFilterView = ({ config, setConfig, isVisible }: FilterProps) => {
-  const configEntries = Object.entries(config);
   const sortedSections = [
     "vaults",
     "connections",
@@ -66,69 +66,41 @@ const GraphFilterView = ({ config, setConfig, isVisible }: FilterProps) => {
       }}
     >
       <Collapse>
-        {sortedSections.map((section, i) => (
-          <Panel header={_.capitalize(section)} key={i}>
-            <Space direction="vertical" style={{ width: "100%" }}>
-              {configEntries
-                .filter(([key]) => key.includes(section))
-                .map(([key, entry]) => {
-                  const keyArray = key.split(".");
-                  const label =
-                    entry?.label ||
-                    `${keyArray[keyArray.length - 1]
-                      .split("-")
-                      .map((k) => _.capitalize(k))
-                      .join(" ")}`;
-
-                  return (
-                    <Space
-                      direction="horizontal"
-                      style={{ justifyContent: "space-between", width: "100%" }}
-                      key={key}
-                    >
-                      {_.isBoolean(entry?.value) && (
-                        <>
-                          <Typography>{label}</Typography>
-                          <Switch
-                            checked={entry?.value}
-                            onChange={(newValue) =>
-                              updateConfigField(key, newValue)
-                            }
-                            disabled={!entry?.mutable}
-                          />
-                        </>
-                      )}
-                      {_.isNumber(entry?.value) && (
-                        <>
-                          <Typography>{label}</Typography>
-                          <InputNumber
-                            defaultValue={entry?.value}
-                            onChange={(newValue) =>
-                              updateConfigField(key, newValue)
-                            }
-                            disabled={!entry?.mutable}
-                          />
-                        </>
-                      )}
-                      {_.isString(entry?.value) &&
-                        !_.isUndefined(entry) &&
-                        !_.isUndefined(key) && (
-                          <>
-                            <FilterViewStringInput
-                              fieldKey={key}
-                              label={label}
-                              entry={entry as GraphConfigItem<string>}
-                              updateConfigField={updateConfigField}
-                              nodeCount={config["information.nodes"].value}
-                            />
-                          </>
-                        )}
-                    </Space>
-                  );
-                })}
-            </Space>
-          </Panel>
-        ))}
+        <Panel header="Vaults" key="vaults">
+          <FilterViewSection
+            section="vaults"
+            config={config}
+            updateConfigField={updateConfigField}
+          />
+        </Panel>
+        <Panel header="Connections" key="connections">
+          <FilterViewSection
+            section="connections"
+            config={config}
+            updateConfigField={updateConfigField}
+          />
+        </Panel>
+        <Panel header="Filter" key="filter">
+          <FilterViewSection
+            section="filter"
+            config={config}
+            updateConfigField={updateConfigField}
+          />
+        </Panel>
+        <Panel header="Options" key="options">
+          <FilterViewSection
+            section="options"
+            config={config}
+            updateConfigField={updateConfigField}
+          />
+        </Panel>
+        <Panel header="Information" key="information">
+          <FilterViewSection
+            section="information"
+            config={config}
+            updateConfigField={updateConfigField}
+          />
+        </Panel>
       </Collapse>
     </div>
   );
@@ -185,6 +157,74 @@ const FilterViewStringInput = ({
           maxWidth: 200,
         }}
       />
+    </Space>
+  );
+};
+
+const FilterViewSection = ({
+  section,
+  config,
+  updateConfigField,
+}: {
+  section: string;
+  config: GraphConfig;
+  updateConfigField: (key: string, value: string | number | boolean) => void;
+}) => {
+  return (
+    <Space direction="vertical" style={{ width: "100%" }}>
+      {Object.entries(config)
+        .filter(([key]) => key.includes(section))
+        .map(([key, entry]) => {
+          const keyArray = key.split(".");
+          const label =
+            entry?.label ||
+            `${keyArray[keyArray.length - 1]
+              .split("-")
+              .map((k) => _.capitalize(k))
+              .join(" ")}`;
+
+          return (
+            <Space
+              direction="horizontal"
+              style={{ justifyContent: "space-between", width: "100%" }}
+              key={key}
+            >
+              {_.isBoolean(entry?.value) && (
+                <>
+                  <Typography>{label}</Typography>
+                  <Switch
+                    checked={entry?.value}
+                    onChange={(newValue) => updateConfigField(key, newValue)}
+                    disabled={!entry?.mutable}
+                  />
+                </>
+              )}
+              {_.isNumber(entry?.value) && (
+                <>
+                  <Typography>{label}</Typography>
+                  <InputNumber
+                    value={entry?.value}
+                    onChange={(newValue) => updateConfigField(key, newValue)}
+                    disabled={!entry?.mutable}
+                  />
+                </>
+              )}
+              {_.isString(entry?.value) &&
+                !_.isUndefined(entry) &&
+                !_.isUndefined(key) && (
+                  <>
+                    <FilterViewStringInput
+                      fieldKey={key}
+                      label={label}
+                      entry={entry as GraphConfigItem<string>}
+                      updateConfigField={updateConfigField}
+                      nodeCount={config["information.nodes"].value}
+                    />
+                  </>
+                )}
+            </Space>
+          );
+        })}
     </Space>
   );
 };

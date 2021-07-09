@@ -259,15 +259,18 @@ const getFullNoteGraphElements = ({
   notes,
   wsRoot,
   vaults,
+  noteActive,
 }: {
   notes: NotePropsDict;
   wsRoot: string;
   vaults: DVault[] | undefined;
+  noteActive: NoteProps | undefined;
 }): GraphElements => {
   const logger = createLogger("graph - getNoteGraphElements");
 
   // ADD NODES
   const nodes = Object.values(notes).map((note) => {
+    const isActive = noteActive && note.id === noteActive.id;
     return {
       data: {
         id: note.id,
@@ -277,6 +280,7 @@ const getFullNoteGraphElements = ({
         stub: _.isUndefined(note.stub) ? false : note.stub,
       },
       classes: `${getVaultClass(note.vault)}`,
+      selected: isActive,
     };
   });
 
@@ -545,6 +549,7 @@ const useGraphElements = ({
             notes: engine.notes,
             wsRoot: router.query.ws as string,
             vaults: engine.vaults,
+            noteActive,
           })
         );
       }

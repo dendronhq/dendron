@@ -113,7 +113,7 @@ const generateRenderableConfig = (
   }
 
   if ("anyOf" in properties) {
-    return generateRenderableConfig(properties.anyOf[1], definitions, label);
+    return generateRenderableConfig(properties.anyOf[0], definitions, label);
   }
 
   if ("$ref" in properties) {

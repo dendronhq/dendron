@@ -107,7 +107,7 @@ suite("DoctorCommandTest", function () {
     });
   });
 
-  test.only("fixes bad note id", (done) => {
+  test("fixes bad note id", (done) => {
     let note: NoteProps;
     runLegacyMultiWorkspaceTest({
       ctx,

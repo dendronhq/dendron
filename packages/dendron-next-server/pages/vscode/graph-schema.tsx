@@ -14,7 +14,7 @@ import { DendronProps } from "../../lib/types";
 
 export default function FullSchemaGraph({ engine, ide }: DendronProps) {
   const [config, setConfig] = useState<GraphConfig>(graphConfig.schema);
-  const elements = useGraphElements({ type: "schema", engine });
+  const elements = useGraphElements({ type: "schema", engine, config });
 
   const onSelect: EventHandler = (e) => {
     const { id, source, vault } = e.target[0]._private.data;

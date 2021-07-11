@@ -3,14 +3,17 @@ import { useEffect, useState } from "react";
 import { createLogger } from "@dendronhq/common-frontend";
 import { engineSlice } from "@dendronhq/common-frontend";
 import { DendronProps } from "../lib/types";
+import { GraphConfig } from "../lib/graph";
+import { GraphUtils } from "../components/graph";
 
 const EngineSliceUtils = engineSlice.EngineSliceUtils;
 
 type Props = DendronProps & {
   graph: cytoscape.Core | undefined;
+  config: GraphConfig;
 };
 
-const useSyncGraphWithIDE = ({ graph, ide, engine }: Props) => {
+const useSyncGraphWithIDE = ({ graph, ide, engine, config }: Props) => {
   const [lastSelectedID, setLastSelectedID] = useState("");
 
   const { noteActive } = ide;
@@ -19,7 +22,12 @@ const useSyncGraphWithIDE = ({ graph, ide, engine }: Props) => {
   const logger = createLogger("useSyncGraphWithIDE");
 
   useEffect(() => {
-    if (noteActive && engineInitialized && graph) {
+    if (
+      noteActive &&
+      engineInitialized &&
+      graph &&
+      !GraphUtils.isLocalGraph(config)
+    ) {
       const selected = graph.$(`:selected`);
       const graphActiveNode = graph.$(`[id = "${noteActive.id}"]`);
 
@@ -49,7 +57,7 @@ const useSyncGraphWithIDE = ({ graph, ide, engine }: Props) => {
         setLastSelectedID(graphActiveNode.id());
       }
     }
-  }, [noteActive?.id, engineInitialized]);
+  }, [noteActive?.id, engineInitialized, config["options.show-local-graph"]]);
 };
 
 export default useSyncGraphWithIDE;

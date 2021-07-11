@@ -13,8 +13,20 @@ import useApplyGraphConfig from "../hooks/useApplyGraphConfig";
 import { DendronProps } from "../lib/types";
 import useSyncGraphWithIDE from "../hooks/useSyncGraphWithIDE";
 
+export class GraphUtils {
+  static isLocalGraph(config: GraphConfig) {
+    if (_.isUndefined(config["options.show-local-graph"])) return false;
+    return config["options.show-local-graph"].value;
+  }
+}
+
 const getCytoscapeStyle = (themes: any, theme: string | undefined) => {
   if (_.isUndefined(theme)) return "";
+
+  // Cytoscape's "diamond" node is smaller than it's "circle" node, so
+  // this modifier adjusts to make parent and child nodes similarly sized.
+  const PARENT_NODE_SIZE_MODIFIER = 1.25;
+
   return `
   node {
     width: ${AntThemes[theme].graph.node.size};
@@ -23,7 +35,9 @@ const getCytoscapeStyle = (themes: any, theme: string | undefined) => {
     color: ${AntThemes[theme].graph.node.label.color};
     label: data(label);
     font-size: ${AntThemes[theme].graph.node.label.fontSize};
-    min-zoomed-font-size: ${AntThemes[theme].graph.node.label.minZoomedFontSize};
+    min-zoomed-font-size: ${
+      AntThemes[theme].graph.node.label.minZoomedFontSize
+    };
     font-weight: ${AntThemes[theme].graph.node.label.fontWeight};
   }
 
@@ -37,6 +51,12 @@ const getCytoscapeStyle = (themes: any, theme: string | undefined) => {
   :selected, .open {
     background-color: ${AntThemes[theme].graph.node._selected.color};
     color: ${AntThemes[theme].graph.node._selected.color};
+  }
+  
+  .parent {
+    shape: diamond;
+    width: ${AntThemes[theme].graph.node.size * PARENT_NODE_SIZE_MODIFIER};
+    height: ${AntThemes[theme].graph.node.size * PARENT_NODE_SIZE_MODIFIER};
   }
 
   .links {
@@ -100,11 +120,13 @@ export default function Graph({
   const graphRef = useRef<HTMLDivElement>(null);
   const { themes, currentTheme } = useThemeSwitcher();
   const [cy, setCy] = useState<Core>();
+  const [isGraphLoaded, setIsGraphLoaded] = useState(false);
 
   useSyncGraphWithIDE({
     graph: cy,
     engine,
     ide,
+    config,
   });
 
   // On config update, handle graph changes
@@ -147,8 +169,8 @@ export default function Graph({
         style: getCytoscapeStyle(themes, currentTheme) as any,
 
         // Zoom levels
-        minZoom: 0.1,
-        maxZoom: 10,
+        minZoom: 0.25,
+        maxZoom: 5,
 
         // Options to improve performance
         textureOnViewport: isLargeGraph,
@@ -156,7 +178,16 @@ export default function Graph({
         hideLabelsOnViewport: isLargeGraph,
       });
 
-      network.layout(getEulerConfig(!isLargeGraph)).run();
+      const shouldAnimate =
+        type === "schema" ||
+        (!isLargeGraph && !GraphUtils.isLocalGraph(config));
+
+      network.layout(getEulerConfig(shouldAnimate)).run();
+
+      // Show UI when layout is finished. As a fallback, show on interaction with graph.
+      network.on("layoutstop viewport", () => {
+        if (!isGraphLoaded) setIsGraphLoaded(true);
+      });
 
       network.on("select", (e) => onSelect(e));
 
@@ -165,9 +196,18 @@ export default function Graph({
   };
 
   useEffect(() => {
+    // If changed from local graph to full graph, re-render graph to show all elements
+    const wasLocalGraph = cy && cy.$("node[localRoot]").length > 0;
+
     // If the graph already has rendered elements, don't re-render
     // Otherwise, the graph re-renders when elements are selected
-    if (cy && cy.elements("*").length > 1) return;
+    if (
+      !GraphUtils.isLocalGraph(config) &&
+      !wasLocalGraph &&
+      cy &&
+      cy.elements("*").length > 1
+    )
+      return;
     renderGraph();
   }, [graphRef, elements]);
 
@@ -213,7 +253,12 @@ export default function Graph({
           position: "relative",
         }}
       >
-        <GraphFilterView type={type} config={config} setConfig={setConfig} />
+        <GraphFilterView
+          type={type}
+          config={config}
+          setConfig={setConfig}
+          isVisible={isGraphLoaded}
+        />
         <div
           ref={graphRef}
           style={{

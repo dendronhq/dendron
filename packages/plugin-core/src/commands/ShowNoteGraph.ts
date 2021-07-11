@@ -3,6 +3,7 @@ import {
   DendronWebViewKey,
   GraphViewMessage,
   GraphViewMessageType,
+  NoteProps,
 } from "@dendronhq/common-all";
 import { ViewColumn, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
@@ -10,6 +11,8 @@ import { WebViewUtils } from "../views/utils";
 import { BasicCommand } from "./base";
 import { getEngine, getWS } from "../workspace";
 import { GotoNoteCommand } from "./GotoNote";
+import vscode from "vscode";
+import { VSCodeUtils } from "../utils";
 
 type CommandOpts = {};
 
@@ -22,6 +25,20 @@ export class ShowNoteGraphCommand extends BasicCommand<
   key = DENDRON_COMMANDS.SHOW_NOTE_GRAPH_V2.key;
   async gatherInputs(): Promise<any> {
     return {};
+  }
+  static refresh(note: NoteProps) {
+    const panel = getWS().getWebView(DendronWebViewKey.NOTE_GRAPH);
+    if (panel) {
+      // panel.title = `${title} ${note.fname}`;
+      panel.webview.postMessage({
+        type: "onDidChangeActiveTextEditor",
+        data: {
+          note,
+          sync: true,
+        },
+        source: "vscode",
+      });
+    }
   }
   async execute() {
     const title = "Note Graph";
@@ -46,7 +63,10 @@ export class ShowNoteGraphCommand extends BasicCommand<
     const panel = window.createWebviewPanel(
       "dendronIframe", // Identifies the type of the webview. Used internally
       title, // Title of the panel displayed to the user
-      ViewColumn.Two, // Editor column to show the new webview panel in.
+      {
+        viewColumn: ViewColumn.Beside,
+        preserveFocus: true,
+      }, // Editor column to show the new webview panel in.
       {
         enableScripts: true,
         retainContextWhenHidden: true,
@@ -66,29 +86,25 @@ export class ShowNoteGraphCommand extends BasicCommand<
       switch (msg.type) {
         case GraphViewMessageType.onSelect: {
           const note = getEngine().notes[msg.data.id];
+          await vscode.commands.executeCommand(
+            "workbench.action.focusFirstEditorGroup"
+          );
           await new GotoNoteCommand().execute({
             qs: note.fname,
             vault: note.vault,
           });
           break;
         }
-        // case GraphViewMessageType.onGetActiveEditor: {
-        //   const document = VSCodeUtils.getActiveTextEditor()?.document;
-        //   if (document) {
-        //     if (
-        //       !getWS().workspaceService?.isPathInWorkspace(document.uri.fsPath)
-        //     ) {
-        //       // not in workspace
-        //       return;
-        //     }
-        //     const note = VSCodeUtils.getNoteFromDocument(document);
-        //     if (note) {
-        //       // refresh note
-        //       this.refresh(note);
-        //     }
-        //   }
-        //   break;
-        // }
+        case GraphViewMessageType.onGetActiveEditor: {
+          const activeTextEditor = VSCodeUtils.getActiveTextEditor();
+          const note =
+            activeTextEditor &&
+            VSCodeUtils.getNoteFromDocument(activeTextEditor.document);
+          if (note) {
+            ShowNoteGraphCommand.refresh(note);
+          }
+          break;
+        }
         // case GraphViewMessageType.onReady: {
         //   const profile = getDurationMilliseconds(start);
         //   Logger.info({ ctx, msg: "treeViewLoaded", profile, start });

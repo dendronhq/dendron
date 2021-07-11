@@ -25,7 +25,7 @@ import remarkParse from "remark-parse";
 import remark2rehype from "remark-rehype";
 import { Processor } from "unified";
 import { blockAnchors } from "./remark/blockAnchors";
-import { dendronPreview } from "./remark/dendronPreview";
+import { dendronPreview, dendronHoverPreview } from "./remark/dendronPreview";
 import { dendronPub } from "./remark/dendronPub";
 import { noteRefsV2 } from "./remark/noteRefsV2";
 import { wikiLinks } from "./remark/wikiLinks";
@@ -66,6 +66,10 @@ export enum ProcFlavor {
    * Apply preview rules
    */
   PREVIEW = "PREVIEW",
+  /**
+   * Apply hover preview rules (used for the preview when hovering over a link)
+   */
+  HOVER_PREVIEW = "HOVER_PREVIEW",
 }
 
 /**
@@ -245,6 +249,9 @@ export class MDUtilsV5 {
           if (opts.flavor === ProcFlavor.PREVIEW) {
             proc = proc.use(dendronPreview);
           }
+          if (opts.flavor === ProcFlavor.HOVER_PREVIEW) {
+            proc = proc.use(dendronHoverPreview)
+          }
         }
         break;
       case ProcMode.IMPORT: {
@@ -331,9 +338,9 @@ export class MDUtilsV5 {
     return pRehype;
   }
 
-  static procRemarkFull(data: ProcDataFullOptsV5, opts?: { mode?: ProcMode }) {
+  static procRemarkFull(data: ProcDataFullOptsV5, opts?: { mode?: ProcMode, flavor?: ProcFlavor }) {
     return this._procRemark(
-      { mode: opts?.mode || ProcMode.FULL, flavor: ProcFlavor.REGULAR },
+      { mode: opts?.mode || ProcMode.FULL, flavor: opts?.flavor || ProcFlavor.REGULAR },
       data
     );
   }

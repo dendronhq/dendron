@@ -29,6 +29,7 @@ import type {
   Table,
   TableCell,
   TableRow,
+  Image,
 } from "mdast";
 import * as mdastBuilder from "mdast-builder";
 import { Processor } from "unified";
@@ -662,6 +663,10 @@ export class RemarkUtils {
 
   static isNoteRefV2(node: Node): node is NoteRefNoteV4 {
     return node.type === DendronASTTypes.REF_LINK_V2;
+  }
+
+  static isImage(node: Node): node is Image {
+    return node.type === DendronASTTypes.IMAGE;
   }
 
   // --- conversion

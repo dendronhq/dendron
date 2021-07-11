@@ -195,6 +195,94 @@ suite("ReferenceProvider", function () {
         });
       });
 
+      test("contains local image", (done) => {
+        runLegacyMultiWorkspaceTest({
+          ctx,
+          preSetupHook: async ({ wsRoot, vaults }) => {
+            await NoteTestUtilsV4.createNote({
+              vault: vaults[0],
+              wsRoot,
+              fname: "target",
+              body: [
+                "Sint quo sunt maxime.",
+                "![](/assets/test/image.png)",
+              ].join("\n"),
+            });
+            await NoteTestUtilsV4.createNote({
+              vault: vaults[0],
+              wsRoot,
+              fname: "source",
+              body: "[[target]]",
+            });
+          },
+          onInit: async ({ wsRoot, vaults }) => {
+            const editor = await VSCodeUtils.openNoteByPath({
+              vault: vaults[0],
+              fname: "source",
+            });
+            const provider = new ReferenceHoverProvider();
+            const hover = await provider.provideHover(
+              editor.document,
+              new vscode.Position(7, 4)
+            );
+            expect(hover).toBeTruthy();
+            // Local images should get full path to image, because hover preview otherwise can't find the image
+            await AssertUtils.assertInString({
+              body: hover!.contents.join(""),
+              match: [
+                "Sint quo sunt maxime.",
+                `![](${path.join(wsRoot, VaultUtils.getRelPath(vaults[0]), 'assets/test/image.png')})`,
+              ],
+            });
+            done();
+          },
+        });
+      });
+
+      test("contains remote image", (done) => {
+        runLegacyMultiWorkspaceTest({
+          ctx,
+          preSetupHook: async ({ wsRoot, vaults }) => {
+            await NoteTestUtilsV4.createNote({
+              vault: vaults[0],
+              wsRoot,
+              fname: "target",
+              body: [
+                "Sint quo sunt maxime.",
+                "![](https://example.com/image.png)",
+              ].join("\n"),
+            });
+            await NoteTestUtilsV4.createNote({
+              vault: vaults[0],
+              wsRoot,
+              fname: "source",
+              body: "[[target]]",
+            });
+          },
+          onInit: async ({ vaults }) => {
+            const editor = await VSCodeUtils.openNoteByPath({
+              vault: vaults[0],
+              fname: "source",
+            });
+            const provider = new ReferenceHoverProvider();
+            const hover = await provider.provideHover(
+              editor.document,
+              new vscode.Position(7, 4)
+            );
+            expect(hover).toBeTruthy();
+            // remote images should be unmodified
+            await AssertUtils.assertInString({
+              body: hover!.contents.join(""),
+              match: [
+                "Sint quo sunt maxime.",
+                "![](https://example.com/image.png)",
+              ],
+            });
+            done();
+          },
+        });
+      });
+
       test("with alias", (done) => {
         runLegacyMultiWorkspaceTest({
           ctx,

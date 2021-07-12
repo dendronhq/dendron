@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.50.0](https://github.com/dendronhq/dendron/compare/v0.49.0...v0.50.0) (2021-07-12)
+
+
+### Bug Fixes
+
+* avoid generating IDs containing dashes and underscores ([#947](https://github.com/dendronhq/dendron/issues/947)) ([147772e](https://github.com/dendronhq/dendron/commit/147772e4b5a9eafa34c08aed902d30b00eeb7cb3)), closes [#945](https://github.com/dendronhq/dendron/issues/945)
+* Improving Tutorial Telemetry ([#942](https://github.com/dendronhq/dendron/issues/942)) ([5c7f0e0](https://github.com/dendronhq/dendron/commit/5c7f0e0fc7bfd5f8befa46f5b714bfd3b61f2f4f))
+
+
+### Features Dendron
+
+* auto completion for anchors and headers ([#894](https://github.com/dendronhq/dendron/issues/894)) ([13e81d4](https://github.com/dendronhq/dendron/commit/13e81d49c1f14ee18457543f8e0818d0e36c17db))
+* de-emphasize block anchors in the editor ([#937](https://github.com/dendronhq/dendron/issues/937)) ([de70ca7](https://github.com/dendronhq/dendron/commit/de70ca78cadd68b43a29d3c37f4853365592c4ab))
+* improved block anchor in publishing ([#933](https://github.com/dendronhq/dendron/issues/933)) ([7b6ab6f](https://github.com/dendronhq/dendron/commit/7b6ab6fbcf22656919ff271382f24011684862a4))
+
+
+
+
+
 # [0.49.0](https://github.com/dendronhq/dendron/compare/v0.48.3...v0.49.0) (2021-07-05)
 
 **Note:** Version bump only for package @dendronhq/common-all

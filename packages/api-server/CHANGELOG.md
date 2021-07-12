@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.50.0](https://github.com/dendronhq/dendron/compare/v0.49.0...v0.50.0) (2021-07-12)
+
+
+### Bug Fixes
+
+* store workspace using case insensitive keys ([#934](https://github.com/dendronhq/dendron/issues/934)) ([4de138b](https://github.com/dendronhq/dendron/commit/4de138be7853f35103ca46533546b6275df4193e))
+
+
+### Features Dendron
+
+* auto completion for anchors and headers ([#894](https://github.com/dendronhq/dendron/issues/894)) ([13e81d4](https://github.com/dendronhq/dendron/commit/13e81d49c1f14ee18457543f8e0818d0e36c17db))
+
+
+
+
+
 # [0.49.0](https://github.com/dendronhq/dendron/compare/v0.48.3...v0.49.0) (2021-07-05)
 
 **Note:** Version bump only for package @dendronhq/api-server

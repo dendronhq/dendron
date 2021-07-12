@@ -447,31 +447,33 @@ export class FileStorage implements DStore {
             errors.push(err);
             return;
           }
-          try {
-            let ctx = "findUnreferencedLinks";
-            let duration;
-            const start = process.hrtime();
+          if (this.engine.config.dev?.enableUnrefLinks) {
+            try {
+              let ctx = "findUnreferencedLinks";
+              let duration;
+              const start = process.hrtime();
 
-            const unreferencedLinks = LinkUtils.findUnreferencedLinks({
-              note: n,
-              notes: notes,
-              engine: this.engine,
-            });
-            cacheUpdates[n.fname].data.links =
-              cacheUpdates[n.fname].data.links.concat(unreferencedLinks);
-            n.links = n.links.concat(unreferencedLinks);
-
-            duration = getDurationMilliseconds(start);
-            this.logger.info({ ctx, duration });
-          } catch (err) {
-            if (!(err instanceof DendronError)) {
-              err = new DendronError({
-                message: `Failed to read unreferenced links in note ${n.fname}`,
-                payload: err,
+              const unreferencedLinks = LinkUtils.findUnreferencedLinks({
+                note: n,
+                notes: notes,
+                engine: this.engine,
               });
+              cacheUpdates[n.fname].data.links =
+                cacheUpdates[n.fname].data.links.concat(unreferencedLinks);
+              n.links = n.links.concat(unreferencedLinks);
+
+              duration = getDurationMilliseconds(start);
+              this.logger.info({ ctx, duration });
+            } catch (err) {
+              if (!(err instanceof DendronError)) {
+                err = new DendronError({
+                  message: `Failed to read unreferenced links in note ${n.fname}`,
+                  payload: err,
+                });
+              }
+              errors.push(err);
+              return;
             }
-            errors.push(err);
-            return;
           }
         } else {
           n.links = cache.notes[n.fname].data.links;

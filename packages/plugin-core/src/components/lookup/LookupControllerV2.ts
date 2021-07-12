@@ -2,7 +2,7 @@ import {
   DendronError,
   DNodePropsQuickInputV2,
   getSlugger,
-  NoteProps,
+  NoteProps
 } from "@dendronhq/common-all";
 import { getDurationMilliseconds } from "@dendronhq/common-server";
 import _ from "lodash";
@@ -12,20 +12,20 @@ import { QuickInputButton } from "vscode";
 import { CancellationTokenSource } from "vscode-languageclient";
 import {
   LookupCommandOpts,
-  LookupNoteExistBehavior,
+  LookupNoteExistBehavior
 } from "../../commands/LookupCommand";
 import { CONFIG } from "../../constants";
 import { Logger } from "../../logger";
 import { EngineOpts } from "../../types";
 import { DendronClientUtilsV2, VSCodeUtils } from "../../utils";
-import { DendronWorkspace, getWS, when } from "../../workspace";
+import { DendronWorkspace, getWS } from "../../workspace";
 import {
   ButtonCategory,
   ButtonType,
   createAllButtons,
   DendronBtn,
   getButtonCategory,
-  IDendronQuickInputButton,
+  IDendronQuickInputButton
 } from "./buttons";
 import { LookupProviderV2 } from "./LookupProviderV2";
 import { DendronQuickPickerV2, LookupControllerState } from "./types";

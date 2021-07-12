@@ -246,16 +246,21 @@ function attachParser(proc: Unified.Processor) {
     const match = LINK_REGEX.exec(value);
     if (match) {
       const linkMatch = match[1].trim();
-      const { value, alias, anchorHeader, vaultName } = parseLink(linkMatch);
-      return eat(match[0])({
-        type: DendronASTTypes.WIKI_LINK,
-        value,
-        data: {
-          alias,
-          anchorHeader,
-          vaultName,
-        } as WikiLinkDataV4,
-      });
+      try {
+        const { value, alias, anchorHeader, vaultName } = parseLink(linkMatch);
+        return eat(match[0])({
+          type: DendronASTTypes.WIKI_LINK,
+          value,
+          data: {
+            alias,
+            anchorHeader,
+            vaultName,
+          } as WikiLinkDataV4,
+        });
+      } catch {
+        // Broken link, just refuse to parse it
+        return;
+      }
     }
     return;
   }

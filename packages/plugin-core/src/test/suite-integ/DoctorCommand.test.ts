@@ -1,4 +1,4 @@
-import { NoteUtils } from "@dendronhq/common-all";
+import { NoteProps, NoteUtils } from "@dendronhq/common-all";
 import { DirResult, tmpDir, vault2Path } from "@dendronhq/common-server";
 import {
   NodeTestPresetsV2,
@@ -104,6 +104,43 @@ suite("DoctorCommandTest", function () {
       useCb: async (vaultDir) => {
         await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
       },
+    });
+  });
+
+  test("fixes bad note id", (done) => {
+    let note: NoteProps;
+    runLegacyMultiWorkspaceTest({
+      ctx,
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        note = await NoteTestUtilsV4.createNote({
+          wsRoot,
+          fname: "test",
+          vault: vaults[0],
+          props: {
+            id: "-bad-id",
+          },
+        });
+      },
+      onInit: async ({ wsRoot, engine, vaults }) => {
+        await VSCodeUtils.openNote(note);
+
+        const cmd = new DoctorCommand();
+        sinon.stub(cmd, "gatherInputs").returns(
+          Promise.resolve({
+            action: DoctorActions.FIX_FRONTMATTER,
+            scope: "file",
+          })
+        );
+        await cmd.run();
+        note = NoteUtils.getNoteByFnameV5({
+          wsRoot,
+          notes: engine.notes,
+          fname: "test",
+          vault: vaults[0],
+        })!;
+        expect(note.id === "-bad-id").toBeFalsy();
+        done();
+      }
     });
   });
 

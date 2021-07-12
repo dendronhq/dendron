@@ -3,8 +3,9 @@ import { vault2Path } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import {
   DendronASTDest,
-  MDUtilsV4,
   AnchorUtils,
+  MDUtilsV5,
+  ProcFlavor,
 } from "@dendronhq/engine-server";
 import path from "path";
 import vscode, { Uri } from "vscode";
@@ -100,12 +101,13 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
     const note = maybeNotes[0];
 
     // For notes, let's use the noteRef functionality to render the referenced portion
-    const proc = MDUtilsV4.procFull({
+    const proc = MDUtilsV5.procRemarkFull({
       dest: DendronASTDest.MD_REGULAR,
       engine,
       vault: note.vault,
       fname: note.fname,
-      usePrettyRefs: false,
+    }, {
+      flavor: ProcFlavor.HOVER_PREVIEW,
     });
     const referenceText = ["![["];
     if (refAtPos.vaultName)

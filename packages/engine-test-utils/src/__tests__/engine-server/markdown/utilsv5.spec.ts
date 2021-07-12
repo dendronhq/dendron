@@ -8,12 +8,13 @@ import {
   Processor,
   ProcFlavor,
 } from "@dendronhq/engine-server";
+import path from "path";
 import { createEngineFromServer, runEngineTestV5 } from "../../../engine";
 import { ENGINE_HOOKS } from "../../../presets";
 import { checkString } from "../../../utils";
 import { cleanVerifyOpts, createProcCompileTests } from "./utils";
 
-let getOpts = (opts: any) => {
+const getOpts = (opts: any) => {
   const _copts = opts.extra as { proc: Processor; dest: DendronASTDest };
   return _copts;
 };
@@ -55,6 +56,16 @@ const IMAGE_WITH_LEAD_FORWARD_SLASH = createProcCompileTests({
       },
       [ProcFlavor.PUBLISHING]: ProcFlavor.REGULAR,
     },
+    [DendronASTDest.MD_REGULAR]: {
+      [ProcFlavor.HOVER_PREVIEW]: async (opts) => {
+        const {
+          extra: { resp },
+        } = cleanVerifyOpts(opts);
+        await checkString(resp.contents,
+          `![foo alt txt](${path.join(opts.wsRoot, opts.vaults[0].fsPath, '/assets/foo.jpg')})`,
+        );
+      },
+    },
   },
   preSetupHook: async (opts) => {
     await ENGINE_HOOKS.setupBasic(opts);
@@ -75,9 +86,9 @@ const NOTE_REF_BASIC_WITH_REHYPE = createProcCompileTests({
         await checkString(
           resp.contents,
           // should have id
-          `<a href=\"foo-id.html\"`,
+          `<a href="foo-id.html"`,
           // html quoted
-          `<p><a href=\"bar.html\">Bar</a></p>`
+          `<p><a href="bar.html">Bar</a></p>`
         );
       },
       [ProcFlavor.PREVIEW]: ProcFlavor.REGULAR,

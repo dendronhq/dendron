@@ -210,11 +210,18 @@ const getUnreferencedLinks = ({
   notes: NoteProps[];
 }) => {
   const textNodes: Text[] = [];
-  visit(ast, [DendronASTTypes.TEXT], (node: Text) => {
-    textNodes.push(node);
-  });
+  visit(
+    ast,
+    [DendronASTTypes.TEXT],
+    (node: Text, _index: number, parent: Parent | undefined) => {
+      if (parent?.type === "paragraph" || parent?.type === "tableCell") {
+        textNodes.push(node);
+      }
+    }
+  );
 
   const fnameNoteMap = new Map<string, NoteProps>();
+  notes = notes.filter((n) => !n.stub);
   notes.map((n) => {
     fnameNoteMap.set(n.fname, n);
   });
@@ -222,7 +229,7 @@ const getUnreferencedLinks = ({
   const unreferencedLinks: DLink[] = [];
   _.map(textNodes, (textNode: Text) => {
     const value = textNode.value as string;
-    value.split(" ").some((word) => {
+    value.split(/\s/).filter((word) => {
       const maybeNote = fnameNoteMap.get(word);
       if (maybeNote !== undefined) {
         unreferencedLinks.push({

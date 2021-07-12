@@ -176,6 +176,8 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
         await new BackfillV2Command().execute({
           engine,
           note,
+          // fix notes with broken ids if necessary
+          overwriteFields: ["id"],
         });
         break;
       }

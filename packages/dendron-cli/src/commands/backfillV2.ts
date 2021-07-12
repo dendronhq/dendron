@@ -1,5 +1,6 @@
 import {
   DEngineClient,
+  genUUID,
   NoteProps,
   NotePropsDict,
   NoteUtils,
@@ -33,6 +34,11 @@ export class BackfillV2Command extends BaseCommand<CommandOpts, CommandOutput> {
           overwriteFields.forEach((f) => {
             if (f === "title") {
               n.title = NoteUtils.genTitle(n.fname);
+            } else if (f === "id") {
+              // ids starting or ending with `-` or `_` break pages in Github publishing
+              if (n.id.match(/^[-_]|[-_]$/)) {
+                n.id = genUUID();
+              }
             } else {
               throw Error(`unknown overwrite field: ${f}`);
             }

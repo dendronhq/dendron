@@ -444,7 +444,7 @@ const ConfigInput = ({
           style={{
             textTransform: "capitalize",
             textAlign: "center",
-            padding: "2rem",
+            padding: "1rem",
           }}
         >
           {prefix[prefix.length - 1]}

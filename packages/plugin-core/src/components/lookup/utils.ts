@@ -12,7 +12,7 @@ import {
   NoteUtils,
   RenameNoteOpts,
   RespV2,
-  VaultUtils
+  VaultUtils,
 } from "@dendronhq/common-all";
 import { getDurationMilliseconds, vault2Path } from "@dendronhq/common-server";
 import _ from "lodash";
@@ -25,7 +25,7 @@ import { DendronBtn, getButtonCategory } from "./buttons";
 import {
   CREATE_NEW_DETAIL,
   CREATE_NEW_LABEL,
-  MORE_RESULTS_LABEL
+  MORE_RESULTS_LABEL,
 } from "./constants";
 import { ILookupProviderV3, OnAcceptHook } from "./LookupProviderV3";
 import { DendronQuickPickerV2 } from "./types";
@@ -42,8 +42,13 @@ export const FULL_MATCH_DETAIL = "hierarchy match and current note context";
 
 export type VaultPickerItem = { vault: DVault } & Partial<QuickPickItem>;
 
-function isDVaultArray(overrides?: VaultPickerItem[] | DVault[]): overrides is DVault[] {
-  return _.some(overrides, item => (item as VaultPickerItem).vault === undefined);
+function isDVaultArray(
+  overrides?: VaultPickerItem[] | DVault[]
+): overrides is DVault[] {
+  return _.some(
+    overrides,
+    (item) => (item as VaultPickerItem).vault === undefined
+  );
 }
 
 export function createNoActiveItem(vault: DVault): DNodePropsQuickInputV2 {
@@ -402,8 +407,20 @@ export class PickerUtilsV2 {
     return false;
   }
 
-  public static async getOrPromptVaultForNewNote(opts:{vault: DVault, fname: string}): Promise<DVault | undefined> {
-    const vaultSuggestions = await PickerUtilsV2.getVaultRecommendations(opts);
+  public static async getOrPromptVaultForNewNote({
+    vault,
+    fname,
+    autoSuggest = true,
+  }: {
+    vault: DVault;
+    fname: string;
+    autoSuggest?: boolean;
+  }): Promise<DVault | undefined> {
+    const vaultSuggestions = await PickerUtilsV2.getVaultRecommendations({
+      vault,
+      fname,
+      autoSuggest,
+    });
 
     if (vaultSuggestions?.length === 1) {
       return vaultSuggestions[0].vault;
@@ -413,28 +430,47 @@ export class PickerUtilsV2 {
   }
 
   public static promptVault(overrides?: DVault[]): Promise<DVault | undefined>;
-  public static promptVault(overrides?: VaultPickerItem[]): Promise<DVault | undefined>;
-  public static async promptVault(overrides?: VaultPickerItem[] | DVault[]): Promise<DVault | undefined> {
+  public static promptVault(
+    overrides?: VaultPickerItem[]
+  ): Promise<DVault | undefined>;
+  public static async promptVault(
+    overrides?: VaultPickerItem[] | DVault[]
+  ): Promise<DVault | undefined> {
+    const pickerOverrides = isDVaultArray(overrides)
+      ? overrides.map((value) => {
+          return { vault: value };
+        })
+      : overrides;
 
-    const pickerOverrides = isDVaultArray(overrides) ? overrides.map(value => { return {vault: value}}) : overrides;
-
-    const vaults:VaultPickerItem[] = pickerOverrides ?? DendronWorkspace.instance().vaultsv4.map(value => {return {vault: value}});
+    const vaults: VaultPickerItem[] =
+      pickerOverrides ??
+      DendronWorkspace.instance().vaultsv4.map((value) => {
+        return { vault: value };
+      });
 
     const items = vaults.map((ent) => ({
       ...ent,
-      label: ent.label ? ent.label : ent.vault.fsPath
+      label: ent.label ? ent.label : ent.vault.fsPath,
     }));
-    const resp = await VSCodeUtils.showQuickPick(items);
+    const resp = await VSCodeUtils.showQuickPick(items, {
+      title: "Select Vault",
+    });
 
     return resp ? resp.vault : undefined;
   }
-  
+
   // Determine which are the most appropriate vault(s) to create this note in.
-  // Vaults determined as better matches appear earlier in the returned array 
-  static async getVaultRecommendations(
-    {vault, fname, autoSuggest = true}:{vault: DVault, fname: string, autoSuggest?: boolean}
-    // opts:{vault: DVault, fname: string}
-  ): Promise<VaultPickerItem[] | undefined> {
+  // Vaults determined as better matches appear earlier in the returned array
+  static async getVaultRecommendations({
+    vault,
+    fname,
+    autoSuggest = true,
+  }: {
+    vault: DVault;
+    fname: string;
+    autoSuggest?: boolean;
+  }):
+  Promise<VaultPickerItem[] | undefined> {
     let vaultSuggestions: VaultPickerItem[] = [];
 
     const engine = getWS().getEngine();
@@ -457,18 +493,17 @@ export class PickerUtilsV2 {
     };
     const allVaults = engine.vaults.sort(sortByPathNameFn);
 
-    const vaultsWithMatchingHierarchy:
-      | VaultPickerItem[]
-      | undefined = queryResponse.data
-      .filter((value) => value.fname === newQs)
-      .map(value => value.vault)
-      .sort(sortByPathNameFn)
-      .map((value) => {
-        return {
-          vault: value,
-          detail: HIERARCHY_MATCH_DETAIL,
-        };
-      });
+    const vaultsWithMatchingHierarchy: VaultPickerItem[] | undefined =
+      queryResponse.data
+        .filter((value) => value.fname === newQs)
+        .map((value) => value.vault)
+        .sort(sortByPathNameFn)
+        .map((value) => {
+          return {
+            vault: value,
+            detail: HIERARCHY_MATCH_DETAIL,
+          };
+        });
 
     if (!vaultsWithMatchingHierarchy) {
       // Suggest current vault context as top suggestion
@@ -489,40 +524,34 @@ export class PickerUtilsV2 {
         (value) => value.vault.fsPath === vault.fsPath
       ) !== undefined
     ) {
-      if (vaultsWithMatchingHierarchy.length === 1) {
-        return Array.of({vault, detail: FULL_MATCH_DETAIL});
-      } else {
-        // Prompt with matching hierarchies & current context, THEN other matching contexts; THEN any other vaults
-        vaultSuggestions.push({
-          vault,
-          detail: FULL_MATCH_DETAIL,
-        });
+      // Prompt with matching hierarchies & current context, THEN other matching contexts; THEN any other vaults
+      vaultSuggestions.push({
+        vault,
+        detail: FULL_MATCH_DETAIL,
+      });
 
-        vaultsWithMatchingHierarchy.forEach((ent) => {
-          if (
-            !vaultSuggestions.find(
-              (suggestion) => suggestion.vault.fsPath === ent.vault.fsPath
-            )
-          ) {
-            vaultSuggestions.push({
-              vault: ent.vault,
-              detail: HIERARCHY_MATCH_DETAIL,
-            });
-          }
-        });
+      vaultsWithMatchingHierarchy.forEach((ent) => {
+        if (
+          !vaultSuggestions.find(
+            (suggestion) => suggestion.vault.fsPath === ent.vault.fsPath
+          )
+        ) {
+          vaultSuggestions.push({
+            vault: ent.vault,
+            detail: HIERARCHY_MATCH_DETAIL,
+          });
+        }
+      });
 
-        allVaults.forEach((wsVault) => {
-          if (
-            !vaultSuggestions.find(
-              (suggestion) => suggestion.vault.fsPath === wsVault.fsPath
-            )
-          ) {
-            vaultSuggestions.push({ vault: wsVault });
-          }
-        });
-
-        return vaultSuggestions;
-      }
+      allVaults.forEach((wsVault) => {
+        if (
+          !vaultSuggestions.find(
+            (suggestion) => suggestion.vault.fsPath === wsVault.fsPath
+          )
+        ) {
+          vaultSuggestions.push({ vault: wsVault });
+        }
+      });
     } else {
       // Suggest vaults with matching hierarchy, THEN current note context, THEN any other vaults
       vaultSuggestions = vaultSuggestions.concat(vaultsWithMatchingHierarchy);
@@ -540,8 +569,15 @@ export class PickerUtilsV2 {
           vaultSuggestions.push({ vault: wsVault });
         }
       });
+    }
 
-      return vaultSuggestions;
+    if (autoSuggest) {
+      if (
+        vaultsWithMatchingHierarchy.length === 1 ||
+        vaultSuggestions[0].detail === FULL_MATCH_DETAIL
+      ) {
+        return vaultSuggestions.slice(0, 1);
+      }
     }
 
     return vaultSuggestions;
@@ -669,4 +705,3 @@ export class NotePickerUtils {
     return updatedItems;
   }
 }
-

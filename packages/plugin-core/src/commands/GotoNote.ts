@@ -143,15 +143,22 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
           return;
         }
         vault = resp;
-      }
-      else {
+      } else {
         // this is a new note:
-        const selectedVault = await PickerUtilsV2.getOrPromptVaultForNewNote({vault, fname: qs});
+        const out =
+          DendronWorkspace.instance().config["lookupConfirmVaultOnCreate"];
+        const autoSuggest = out === false || _.isUndefined(out);
+
+        const selectedVault = await PickerUtilsV2.getOrPromptVaultForNewNote({
+          vault,
+          fname: qs,
+          autoSuggest,
+        });
 
         if (_.isUndefined(selectedVault)) {
           return;
         }
-  
+
         vault = selectedVault;
       }
     } else {

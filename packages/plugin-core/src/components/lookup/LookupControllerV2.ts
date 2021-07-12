@@ -1,7 +1,8 @@
 import {
   DendronError,
-  DNodePropsQuickInputV2, getSlugger,
-  NoteProps
+  DNodePropsQuickInputV2,
+  getSlugger,
+  NoteProps,
 } from "@dendronhq/common-all";
 import { getDurationMilliseconds } from "@dendronhq/common-server";
 import _ from "lodash";
@@ -11,7 +12,7 @@ import { QuickInputButton } from "vscode";
 import { CancellationTokenSource } from "vscode-languageclient";
 import {
   LookupCommandOpts,
-  LookupNoteExistBehavior
+  LookupNoteExistBehavior,
 } from "../../commands/LookupCommand";
 import { CONFIG } from "../../constants";
 import { Logger } from "../../logger";
@@ -24,7 +25,7 @@ import {
   createAllButtons,
   DendronBtn,
   getButtonCategory,
-  IDendronQuickInputButton
+  IDendronQuickInputButton,
 } from "./buttons";
 import { LookupProviderV2 } from "./LookupProviderV2";
 import { DendronQuickPickerV2, LookupControllerState } from "./types";
@@ -48,12 +49,12 @@ export class LookupControllerV2 {
       (DendronWorkspace.configuration().get<string>(
         CONFIG.DEFAULT_LOOKUP_CREATE_BEHAVIOR.key
       ) as ButtonType);
-    const noteSelectioType = lookupOpts?.noteType;
+    const noteSelectionType = lookupOpts?.noteType;
     const initialTypes = _.isUndefined(lookupSelectionType)
       ? []
       : [lookupSelectionType];
-    if (noteSelectioType) {
-      initialTypes.push(noteSelectioType);
+    if (noteSelectionType) {
+      initialTypes.push(noteSelectionType);
     }
     if (lookupOpts?.effectType) {
       initialTypes.push(lookupOpts.effectType);
@@ -363,22 +364,21 @@ export class LookupControllerV2 {
 
     // handle selection resp
     quickPick.onCreate = async (note: NoteProps) => {
-      const resp = await when<undefined | NoteProps>(
-        "lookupConfirmVaultOnCreate",
-        async () => {
-          const maybeVault = await PickerUtilsV2.getOrPromptVaultForNewNote(note);
+      const out =
+        DendronWorkspace.instance().config["lookupConfirmVaultOnCreate"];
+      const autoSuggest = out === false || _.isUndefined(out);
 
-          if (_.isUndefined(maybeVault)) {
-            vscode.window.showInformationMessage("Note creation cancelled");
-            return undefined;
-          }
-          note.vault = maybeVault;
-          return note;
-        }
-      );
-      if (_.isUndefined(resp)) {
+      const vaultSelection = await PickerUtilsV2.getOrPromptVaultForNewNote({
+        vault: note.vault,
+        fname: note.fname,
+        autoSuggest,
+      });
+
+      if (_.isUndefined(vaultSelection)) {
+        vscode.window.showInformationMessage("Note creation cancelled");
         return undefined;
       }
+      note.vault = vaultSelection;
 
       switch (selectionResp?.type) {
         case "selectionExtract": {

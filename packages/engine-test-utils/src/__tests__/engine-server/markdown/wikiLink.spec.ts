@@ -93,6 +93,14 @@ describe("wikiLinks", () => {
         });
         expect(wikiLink.data.anchorHeader).toEqual("^block-id");
       });
+
+      test("avoids parsing broken links", () => {
+        const resp = proc(engine, genDendronData(dendronData)).parse(
+          `[[#]]`
+        );
+        const wikiLink = getWikiLink(resp);
+        expect(wikiLink.type).not.toEqual(DendronASTTypes.WIKI_LINK);
+      });
     });
   });
 

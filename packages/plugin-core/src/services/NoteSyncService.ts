@@ -10,6 +10,7 @@ import path from "path";
 import * as vscode from "vscode";
 import { ShowPreviewV2Command } from "../commands/ShowPreviewV2";
 import { Logger } from "../logger";
+import { VSCodeUtils } from "../utils";
 import { DendronWorkspace, getWS } from "../workspace";
 
 let NOTE_SERVICE: NoteSyncService | undefined;
@@ -45,8 +46,7 @@ export class NoteSyncService {
 
     const eclient = DendronWorkspace.instance().getEngine();
     const fname = path.basename(uri.fsPath, ".md");
-    const doc = await vscode.workspace.openTextDocument(uri);
-    const content = doc.getText();
+
     if (!getWS().workspaceService?.isPathInWorkspace(uri.fsPath)) {
       this.L.debug({ ctx, uri: uri.fsPath, msg: "not in workspace, ignoring" });
       return;
@@ -63,6 +63,11 @@ export class NoteSyncService {
       notes: eclient.notes,
       wsRoot: DendronWorkspace.wsRoot(),
     }) as NoteProps;
+
+    // TODO: only open if note is still active
+    const editor = await VSCodeUtils.openNote(noteHydrated);
+    const doc = editor.document;
+    const content = doc.getText();
     if (!WorkspaceUtils.noteContentChanged({ content, note: noteHydrated })) {
       this.L.debug({
         ctx,
@@ -71,7 +76,36 @@ export class NoteSyncService {
       });
       return;
     }
-    let note = string2Note({ content, fname, vault, calculateHash: true });
+
+    // note is considered dirty, apply any necessary changes here
+    const now = NoteUtils.genUpdateTime();
+
+    // update updated time
+    const matchFM = NoteUtils.RE_FM;
+    const matchOuter = content.match(matchFM);
+    const match = NoteUtils.RE_FM_UPDATED.exec(content);
+    if (matchOuter && match) {
+      const lastUpdated = parseInt(match[1], 10);
+      // only update if last updated tiime is less than a minute
+      if (now - lastUpdated > 1000 * 60) {
+        const startPos = doc.positionAt(match.index);
+        const endPos = doc.positionAt(match.index + match[0].length);
+        await editor.edit((builder) => {
+          builder.replace(
+            new vscode.Range(startPos, endPos),
+            `updated: ${now}`
+          );
+        });
+      }
+    }
+
+    // call `doc.getText` to get latest note
+    let note = string2Note({
+      content: doc.getText(),
+      fname,
+      vault,
+      calculateHash: true,
+    });
     note = NoteUtils.hydrate({ noteRaw: note, noteHydrated });
     const links = LinkUtils.findLinks({ note, engine: eclient });
     note.links = links;
@@ -80,6 +114,8 @@ export class NoteSyncService {
       wsRoot: eclient.wsRoot,
     });
     note.anchors = anchors;
+    note.updated = NoteUtils.genUpdateTime();
+
     this.L.info({ ctx, fname, msg: "exit" });
     const noteClean = await eclient.updateNote(note);
     ShowPreviewV2Command.refresh(noteClean);

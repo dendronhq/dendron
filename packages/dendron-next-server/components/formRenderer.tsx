@@ -44,15 +44,23 @@ const BaseInput = ({
           {required && <span style={{ color: "red" }}> *</span>}
         </Title>
         {children}
-        <br />
-        <Text type="secondary">{helperText}</Text>
-        <br />
-        <Text
-          type="danger"
-          style={{ fontWeight: "bold", textTransform: "capitalize" }}
-        >
-          {error && `Error: ${error}`}
-        </Text>
+        {helperText && (
+          <>
+            <br />
+            <Text type="secondary">{helperText}</Text>
+          </>
+        )}
+        {error && (
+          <>
+            <br />
+            <Text
+              type="danger"
+              style={{ fontWeight: "bold", textTransform: "capitalize" }}
+            >
+              {`Error: ${error}`}
+            </Text>
+          </>
+        )}
       </div>
     </Form.Item>
   );
@@ -268,6 +276,7 @@ const RenderRecord = ({
           errors={errors}
           prefix={[name, `${record.value}`]}
           setSelectedKeys={setSelectedKeys}
+          displayTitle={false}
         />
       </Card>
     ))
@@ -330,6 +339,7 @@ const RenderArray = ({
           errors={errors}
           prefix={[name, `${index}`]}
           setSelectedKeys={setSelectedKeys}
+          displayTitle={false}
         />
       </Card>
     )) ?? [];
@@ -367,7 +377,7 @@ const ConfigInput = ({
 }: ConfigInputType) => {
   if (!data) return <></>;
 
-  const lastName = (prefix.length && prefix[prefix.length - 1]) || "";
+  const lastName = prefix.length ? prefix[prefix.length - 1] : undefined;
   if (!shouldDisplay(lastName)) return <></>;
 
   const { type, required, helperText, label } = data;
@@ -428,7 +438,7 @@ const ConfigInput = ({
 
   return (
     <>
-      {displayTitle && (
+      {displayTitle && prefix.length !== 0 && (
         <Title
           level={2}
           style={{
@@ -437,7 +447,7 @@ const ConfigInput = ({
             padding: "2rem",
           }}
         >
-          {(prefix.length && prefix[prefix.length - 1]) || ""}
+          {prefix[prefix.length - 1]}
         </Title>
       )}
       {Object.keys((data as ObjectConfig).data).map((key) => (

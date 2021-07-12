@@ -1,6 +1,6 @@
 import _ from "lodash";
 
-export const shouldDisplay = (name: string): boolean => {
+export const shouldDisplay = (name?: string): boolean => {
   const fields_to_exclude = [
     "version",
     "dendronVersion",

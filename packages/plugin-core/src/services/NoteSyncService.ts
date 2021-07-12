@@ -87,7 +87,7 @@ export class NoteSyncService {
     if (matchOuter && match) {
       const lastUpdated = parseInt(match[1], 10);
       // only update if last updated tiime is less than a minute
-      if (now - lastUpdated > 1000 * 60) {
+      if (now - lastUpdated > 1000 * 10) {
         const startPos = doc.positionAt(match.index);
         const endPos = doc.positionAt(match.index + match[0].length);
         await editor.edit((builder) => {

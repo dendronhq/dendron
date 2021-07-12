@@ -112,6 +112,7 @@ export const provideCompletionItems = (
     item.sortText = padWithZero(index);
     // Sort notes from current vault before other vaults
     if (currentVault && !VaultUtils.isEqual(currentVault, note.vault, wsRoot)) {
+      // x will get sorted after numbers, so these will appear after notes without x
       item.sortText = 'x' + item.sortText;
     }
 

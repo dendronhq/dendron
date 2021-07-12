@@ -64,7 +64,11 @@ export class NoteSyncService {
       wsRoot: DendronWorkspace.wsRoot(),
     }) as NoteProps;
 
-    // TODO: only open if note is still active
+    // NOTE: it might be worthwile to only do this after checking that the current note is still active
+    // 
+    // we have this logic currently and it doesn't seem to be causing issues
+    // this could lead to thrashing if user makes a change and quickly changes to a dififerent active window
+    // in practice, this has never been reported 
     const editor = await VSCodeUtils.openNote(noteHydrated);
     const doc = editor.document;
     const content = doc.getText();

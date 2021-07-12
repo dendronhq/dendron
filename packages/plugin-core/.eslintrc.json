@@ -1,0 +1,12 @@
+{
+  "extends": "../../.eslintrc.js",
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 6,
+    "sourceType": "module"
+  },
+  "plugins": ["@typescript-eslint"],
+  "env": {
+    "mocha": true
+  }
+}

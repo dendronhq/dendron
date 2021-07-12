@@ -1,19 +1,17 @@
 import {
   DendronError,
-  DNodePropsQuickInputV2,
-  DVault,
-  getSlugger,
-  NoteProps,
+  DNodePropsQuickInputV2, getSlugger,
+  NoteProps
 } from "@dendronhq/common-all";
 import { getDurationMilliseconds } from "@dendronhq/common-server";
 import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
-import { QuickInputButton} from "vscode";
+import { QuickInputButton } from "vscode";
 import { CancellationTokenSource } from "vscode-languageclient";
 import {
   LookupCommandOpts,
-  LookupNoteExistBehavior,
+  LookupNoteExistBehavior
 } from "../../commands/LookupCommand";
 import { CONFIG } from "../../constants";
 import { Logger } from "../../logger";
@@ -26,11 +24,11 @@ import {
   createAllButtons,
   DendronBtn,
   getButtonCategory,
-  IDendronQuickInputButton,
+  IDendronQuickInputButton
 } from "./buttons";
 import { LookupProviderV2 } from "./LookupProviderV2";
 import { DendronQuickPickerV2, LookupControllerState } from "./types";
-import { PickerUtilsV2, UPDATET_SOURCE, VaultPickerItem } from "./utils";
+import { PickerUtilsV2, UPDATET_SOURCE } from "./utils";
 
 export class LookupControllerV2 {
   public quickPick?: DendronQuickPickerV2;
@@ -318,127 +316,6 @@ export class LookupControllerV2 {
     );
   }
 
-  // Determine which are the most appropriate vault(s) to create this note in.
-  // Vaults determined as better matches appear earlier in the returned array 
-  private async getVaultRecommendations(
-    note: NoteProps
-  ): Promise<VaultPickerItem[] | undefined> {
-    let vaultSuggestions: VaultPickerItem[] = [];
-
-    const engine = getWS().getEngine();
-
-    // Only 1 vault, no other options to choose from:
-    if (engine.vaults.length <= 1) {
-      return Array.of({ vault: note.vault });
-    }
-
-    const CONTEXT_DETAIL = "current note context";
-    const HIERARCHY_MATCH_DETAIL = "hierarchy match";
-    const FULL_MATCH_DETAIL = "hierarchy match and current note context";
-
-    const hierarchies = note.fname.split(".").slice(0, -1);
-    const newQs = hierarchies.join(".");
-    const queryResponse = await engine.queryNotes({
-      qs: newQs,
-      createIfNew: false,
-    });
-
-    // Sort Alphabetically by the Path Name
-    const sortByPathNameFn = (a: DVault, b: DVault) => {
-      return a.fsPath <= b.fsPath ? -1 : 1;
-    };
-    const allVaults = engine.vaults.sort(sortByPathNameFn);
-
-    const vaultsWithMatchingHierarchy:
-      | VaultPickerItem[]
-      | undefined = queryResponse.data
-      .filter((value) => value.fname === newQs)
-      .map(value => value.vault)
-      .sort(sortByPathNameFn)
-      .map((value) => {
-        return {
-          vault: value,
-          detail: HIERARCHY_MATCH_DETAIL,
-        };
-      });
-
-    if (!vaultsWithMatchingHierarchy) {
-      // Suggest current vault context as top suggestion
-      vaultSuggestions.push({
-        vault: note.vault,
-        detail: CONTEXT_DETAIL,
-      });
-
-      allVaults.forEach((vault) => {
-        if (vault.fsPath != note.vault.fsPath) {
-          vaultSuggestions.push({ vault });
-        }
-      });
-    }
-    // One of the vaults with a matching hierarchy is also the current note context:
-    else if (
-      vaultsWithMatchingHierarchy.find(
-        (value) => value.vault.fsPath === note.vault.fsPath
-      ) != undefined
-    ) {
-      if (vaultsWithMatchingHierarchy.length == 1) {
-        return Array.of({vault: note.vault});
-      } else {
-        // Prompt with matching hierarchies & current context, THEN other matching contexts; THEN any other vaults
-        vaultSuggestions.push({
-          vault: note.vault,
-          detail: FULL_MATCH_DETAIL,
-        });
-
-        vaultsWithMatchingHierarchy.forEach((ent) => {
-          if (
-            !vaultSuggestions.find(
-              (suggestion) => suggestion.vault.fsPath === ent.vault.fsPath
-            )
-          ) {
-            vaultSuggestions.push({
-              vault: ent.vault,
-              detail: HIERARCHY_MATCH_DETAIL,
-            });
-          }
-        });
-
-        allVaults.forEach((vault) => {
-          if (
-            !vaultSuggestions.find(
-              (suggestion) => suggestion.vault.fsPath === vault.fsPath
-            )
-          ) {
-            vaultSuggestions.push({ vault });
-          }
-        });
-
-        return vaultSuggestions;
-      }
-    } else {
-      // Suggest vaults with matching hierarchy, THEN current note context, THEN any other vaults
-      vaultSuggestions = vaultSuggestions.concat(vaultsWithMatchingHierarchy);
-      vaultSuggestions.push({
-        vault: note.vault,
-        detail: CONTEXT_DETAIL,
-      });
-
-      allVaults.forEach((vault) => {
-        if (
-          !vaultSuggestions.find(
-            (suggestion) => suggestion.vault.fsPath === vault.fsPath
-          )
-        ) {
-          vaultSuggestions.push({ vault });
-        }
-      });
-
-      return vaultSuggestions;
-    }
-
-    return vaultSuggestions;
-  }
-
   async updatePickerBehavior(opts: {
     quickPick: DendronQuickPickerV2;
     document?: vscode.TextDocument;
@@ -489,14 +366,7 @@ export class LookupControllerV2 {
       const resp = await when<undefined | NoteProps>(
         "lookupConfirmVaultOnCreate",
         async () => {
-          let vaultSuggestions = await this.getVaultRecommendations(note);
-
-          if (vaultSuggestions?.length == 1) {
-            note.vault = vaultSuggestions[0].vault;
-            return note;
-          }
-
-          let maybeVault = await PickerUtilsV2.promptVault(vaultSuggestions);
+          const maybeVault = await PickerUtilsV2.getOrPromptVaultForNewNote(note);
 
           if (_.isUndefined(maybeVault)) {
             vscode.window.showInformationMessage("Note creation cancelled");

@@ -144,6 +144,16 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
         }
         vault = resp;
       }
+      else {
+        // this is a new note:
+        const selectedVault = await PickerUtilsV2.getOrPromptVaultForNewNote({vault, fname: qs});
+
+        if (_.isUndefined(selectedVault)) {
+          return;
+        }
+  
+        vault = selectedVault;
+      }
     } else {
       qs = opts.qs;
     }

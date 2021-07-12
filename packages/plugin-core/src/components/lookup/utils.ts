@@ -1,3 +1,4 @@
+/* eslint-disable no-dupe-class-members */
 import {
   DendronError,
   DEngineClient,
@@ -33,6 +34,17 @@ const PAGINATE_LIMIT = 50;
 export const UPDATET_SOURCE = {
   UPDATE_PICKER_FILTER: "UPDATE_PICKER_FILTER",
 };
+
+// Vault Recommendation Detail Descriptions
+export const CONTEXT_DETAIL = "current note context";
+export const HIERARCHY_MATCH_DETAIL = "hierarchy match";
+export const FULL_MATCH_DETAIL = "hierarchy match and current note context";
+
+export type VaultPickerItem = { vault: DVault } & Partial<QuickPickItem>;
+
+function isDVaultArray(overrides?: VaultPickerItem[] | DVault[]): overrides is DVault[] {
+  return _.some(overrides, item => (item as VaultPickerItem).vault === undefined);
+}
 
 export function createNoActiveItem(vault: DVault): DNodePropsQuickInputV2 {
   const props = DNodeUtils.create({
@@ -390,9 +402,19 @@ export class PickerUtilsV2 {
     return false;
   }
 
+  public static async getOrPromptVaultForNewNote(opts:{vault: DVault, fname: string}): Promise<DVault | undefined> {
+    const vaultSuggestions = await PickerUtilsV2.getVaultRecommendations(opts);
+
+    if (vaultSuggestions?.length === 1) {
+      return vaultSuggestions[0].vault;
+    }
+
+    return PickerUtilsV2.promptVault(vaultSuggestions);
+  }
+
   public static promptVault(overrides?: DVault[]): Promise<DVault | undefined>;
   public static promptVault(overrides?: VaultPickerItem[]): Promise<DVault | undefined>;
-  public static promptVault(overrides?: VaultPickerItem[] | DVault[]): Promise<DVault | undefined> {
+  public static async promptVault(overrides?: VaultPickerItem[] | DVault[]): Promise<DVault | undefined> {
 
     const pickerOverrides = isDVaultArray(overrides) ? overrides.map(value => { return {vault: value}}) : overrides;
 
@@ -402,10 +424,127 @@ export class PickerUtilsV2 {
       ...ent,
       label: ent.label ? ent.label : ent.vault.fsPath
     }));
-    const resp = VSCodeUtils.showQuickPick(items) as Promise<
-      DVault | undefined
-    >;
-    return resp;
+    const resp = await VSCodeUtils.showQuickPick(items);
+
+    return resp ? resp.vault : undefined;
+  }
+  
+  // Determine which are the most appropriate vault(s) to create this note in.
+  // Vaults determined as better matches appear earlier in the returned array 
+  static async getVaultRecommendations(
+    {vault, fname, autoSuggest = true}:{vault: DVault, fname: string, autoSuggest?: boolean}
+    // opts:{vault: DVault, fname: string}
+  ): Promise<VaultPickerItem[] | undefined> {
+    let vaultSuggestions: VaultPickerItem[] = [];
+
+    const engine = getWS().getEngine();
+
+    // Only 1 vault, no other options to choose from:
+    if (engine.vaults.length <= 1) {
+      return Array.of({ vault });
+    }
+
+    const hierarchies = fname.split(".").slice(0, -1);
+    const newQs = hierarchies.join(".");
+    const queryResponse = await engine.queryNotes({
+      qs: newQs,
+      createIfNew: false,
+    });
+
+    // Sort Alphabetically by the Path Name
+    const sortByPathNameFn = (a: DVault, b: DVault) => {
+      return a.fsPath <= b.fsPath ? -1 : 1;
+    };
+    const allVaults = engine.vaults.sort(sortByPathNameFn);
+
+    const vaultsWithMatchingHierarchy:
+      | VaultPickerItem[]
+      | undefined = queryResponse.data
+      .filter((value) => value.fname === newQs)
+      .map(value => value.vault)
+      .sort(sortByPathNameFn)
+      .map((value) => {
+        return {
+          vault: value,
+          detail: HIERARCHY_MATCH_DETAIL,
+        };
+      });
+
+    if (!vaultsWithMatchingHierarchy) {
+      // Suggest current vault context as top suggestion
+      vaultSuggestions.push({
+        vault,
+        detail: CONTEXT_DETAIL,
+      });
+
+      allVaults.forEach((cmpVault) => {
+        if (cmpVault.fsPath !== vault.fsPath) {
+          vaultSuggestions.push({ vault: cmpVault });
+        }
+      });
+    }
+    // One of the vaults with a matching hierarchy is also the current note context:
+    else if (
+      vaultsWithMatchingHierarchy.find(
+        (value) => value.vault.fsPath === vault.fsPath
+      ) !== undefined
+    ) {
+      if (vaultsWithMatchingHierarchy.length === 1) {
+        return Array.of({vault, detail: FULL_MATCH_DETAIL});
+      } else {
+        // Prompt with matching hierarchies & current context, THEN other matching contexts; THEN any other vaults
+        vaultSuggestions.push({
+          vault,
+          detail: FULL_MATCH_DETAIL,
+        });
+
+        vaultsWithMatchingHierarchy.forEach((ent) => {
+          if (
+            !vaultSuggestions.find(
+              (suggestion) => suggestion.vault.fsPath === ent.vault.fsPath
+            )
+          ) {
+            vaultSuggestions.push({
+              vault: ent.vault,
+              detail: HIERARCHY_MATCH_DETAIL,
+            });
+          }
+        });
+
+        allVaults.forEach((wsVault) => {
+          if (
+            !vaultSuggestions.find(
+              (suggestion) => suggestion.vault.fsPath === wsVault.fsPath
+            )
+          ) {
+            vaultSuggestions.push({ vault: wsVault });
+          }
+        });
+
+        return vaultSuggestions;
+      }
+    } else {
+      // Suggest vaults with matching hierarchy, THEN current note context, THEN any other vaults
+      vaultSuggestions = vaultSuggestions.concat(vaultsWithMatchingHierarchy);
+      vaultSuggestions.push({
+        vault,
+        detail: CONTEXT_DETAIL,
+      });
+
+      allVaults.forEach((wsVault) => {
+        if (
+          !vaultSuggestions.find(
+            (suggestion) => suggestion.vault.fsPath === wsVault.fsPath
+          )
+        ) {
+          vaultSuggestions.push({ vault: wsVault });
+        }
+      });
+
+      return vaultSuggestions;
+    }
+
+    return vaultSuggestions;
   }
 
   static refreshButtons(opts: {
@@ -531,8 +670,3 @@ export class NotePickerUtils {
   }
 }
 
-export type VaultPickerItem = { vault: DVault } & Partial<QuickPickItem>;
-
-function isDVaultArray(overrides?: VaultPickerItem[] | DVault[]): overrides is DVault[] {
-  return _.some(overrides, item => (item as VaultPickerItem).vault === undefined);
-}

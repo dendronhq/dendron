@@ -470,11 +470,16 @@ export class DendronEngineV2 implements DEngine {
             //   this.history.add({ source: "engine", action: "create", uri });
           }
           const links = LinkUtils.findLinks({ note: ent.note, engine: this });
+          const unrefLinks = LinkUtils.findUnreferencedLinks({
+            note: ent.note,
+            notes: _.values(this.notes),
+            engine: this,
+          });
           const anchors = await AnchorUtils.findAnchors({
             note: ent.note,
             wsRoot: this.wsRoot,
           });
-          ent.note.links = links;
+          ent.note.links = links.concat(unrefLinks);
           ent.note.anchors = anchors;
           this.notes[id] = ent.note;
         }

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.50.0](https://github.com/dendronhq/dendron/compare/v0.49.0...v0.50.0) (2021-07-12)
+
+
+### Features Dendron
+
+* add local note graph ([#899](https://github.com/dendronhq/dendron/issues/899)) ([6e9ed81](https://github.com/dendronhq/dendron/commit/6e9ed81c14897d95280ce5f881c7467589cb89ad))
+
+
+
+
+
 # [0.49.0](https://github.com/dendronhq/dendron/compare/v0.48.3...v0.49.0) (2021-07-05)
 
 **Note:** Version bump only for package @dendronhq/common-frontend

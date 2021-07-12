@@ -3,6 +3,28 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.50.0](https://github.com/dendronhq/dendron/compare/v0.49.0...v0.50.0) (2021-07-12)
+
+
+### Bug Fixes
+
+* avoid generating IDs containing dashes and underscores ([#947](https://github.com/dendronhq/dendron/issues/947)) ([147772e](https://github.com/dendronhq/dendron/commit/147772e4b5a9eafa34c08aed902d30b00eeb7cb3)), closes [#945](https://github.com/dendronhq/dendron/issues/945)
+* Improving Tutorial Telemetry ([#942](https://github.com/dendronhq/dendron/issues/942)) ([5c7f0e0](https://github.com/dendronhq/dendron/commit/5c7f0e0fc7bfd5f8befa46f5b714bfd3b61f2f4f))
+* local images in hover preview are now displayed ([#946](https://github.com/dendronhq/dendron/issues/946)) ([04b8374](https://github.com/dendronhq/dendron/commit/04b8374dff5b062819a3a1c56e79dc74631f4fe0))
+
+
+### Features Dendron
+
+* add local note graph ([#899](https://github.com/dendronhq/dendron/issues/899)) ([6e9ed81](https://github.com/dendronhq/dendron/commit/6e9ed81c14897d95280ce5f881c7467589cb89ad))
+* auto completion for anchors and headers ([#894](https://github.com/dendronhq/dendron/issues/894)) ([13e81d4](https://github.com/dendronhq/dendron/commit/13e81d49c1f14ee18457543f8e0818d0e36c17db))
+* de-emphasize block anchors in the editor ([#937](https://github.com/dendronhq/dendron/issues/937)) ([de70ca7](https://github.com/dendronhq/dendron/commit/de70ca78cadd68b43a29d3c37f4853365592c4ab))
+* Doctor "fix frontmatter" fixes broken note ids ([#950](https://github.com/dendronhq/dendron/issues/950)) ([1298093](https://github.com/dendronhq/dendron/commit/1298093620a8be2070d5e91e40e6a70a115c7756))
+* filter non-stubs in directChildOnly filter ([#940](https://github.com/dendronhq/dendron/issues/940)) ([2cdf8e3](https://github.com/dendronhq/dendron/commit/2cdf8e3de32d6d4a91a7606a85e692695ccbd6e2)), closes [#917](https://github.com/dendronhq/dendron/issues/917)
+
+
+
+
+
 # [0.49.0](https://github.com/dendronhq/dendron/compare/v0.48.3...v0.49.0) (2021-07-05)
 
 

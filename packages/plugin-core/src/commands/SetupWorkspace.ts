@@ -16,6 +16,7 @@ import { BasicCommand } from "./base";
 
 type CommandOpts = {
   rootDirRaw: string;
+  vault?: DVault;
   skipOpenWs?: boolean;
   /**
    * override prompts

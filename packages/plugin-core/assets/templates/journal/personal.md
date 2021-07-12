@@ -1,1 +1,0 @@
-You can put personal notes into this 'personal' hierarchy. For example, you can create new notes named `personal.ideas` or `personal.goals` to put them into this hierarchy.

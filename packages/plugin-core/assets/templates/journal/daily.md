@@ -1,1 +1,0 @@
-This is a daily journal note. On each day, you can run the command `Dendron: Create Daily Journal Note` (default shortcut `Cmd+Shift+I` / `Ctrl+Shift+I`) to create a new journal note for that day.

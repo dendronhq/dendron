@@ -473,37 +473,6 @@ export class WorkspaceService {
     return ws;
   }
 
-  static async createEmptyWorkspace(opts: WorkspaceServiceCreateOpts) {
-    const { wsRoot, vaults } = opts;
-    const ws = new WorkspaceService({ wsRoot });
-    fs.ensureDirSync(wsRoot);
-    // this creates `dendron.yml`
-    ws.createConfig();
-    // add gitignore
-    const gitIgnore = path.join(wsRoot, ".gitignore");
-    fs.writeFileSync(
-      gitIgnore,
-      ["node_modules", ".dendron.*", "build", "\n"].join("\n"),
-      { encoding: "utf8" }
-    );
-    if (opts.createCodeWorkspace) {
-      WorkspaceConfig.write(wsRoot, vaults);
-    }
-    await _.reduce(
-      vaults,
-      async (prev, vault) => {
-        await prev;
-        return ws.createVault({ vault });
-      },
-      Promise.resolve()
-    );
-    // check if this is the first workspace created
-    if (_.isUndefined(MetadataService.instance().getMeta().firstWsInitialize)) {
-      MetadataService.instance().setFirstWsInitialize();
-    }
-    return ws;
-  }
-
   static async createFromConfig(opts: { wsRoot: string }) {
     const { wsRoot } = opts;
     const config = DConfig.getOrCreate(wsRoot);

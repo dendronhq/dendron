@@ -66,9 +66,8 @@ function setupNotesForTest({
 /**
  * Tests the Vault Recommendation For New Notes Functionality in Utils
  */
-suite.only("Lookup Utils Test", function runSuite() {
+suite("Lookup Utils Test", function runSuite() {
   const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {});
-  this.timeout(TIMEOUT);
 
   describe("single", () => {
     test("no hierarchy matches; context only", (done) => {

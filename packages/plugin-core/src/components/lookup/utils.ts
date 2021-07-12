@@ -459,8 +459,12 @@ export class PickerUtilsV2 {
     return resp ? resp.vault : undefined;
   }
 
-  // Determine which are the most appropriate vault(s) to create this note in.
-  // Vaults determined as better matches appear earlier in the returned array
+  /**
+   * Determine which vault(s) are the most appropriate to create this note in.
+   * Vaults determined as better matches appear earlier in the returned array
+   * @param
+   * @returns
+   */
   static async getVaultRecommendations({
     vault,
     fname,
@@ -469,8 +473,7 @@ export class PickerUtilsV2 {
     vault: DVault;
     fname: string;
     autoSuggest?: boolean;
-  }):
-  Promise<VaultPickerItem[] | undefined> {
+  }): Promise<VaultPickerItem[] | undefined> {
     let vaultSuggestions: VaultPickerItem[] = [];
 
     const engine = getWS().getEngine();
@@ -480,8 +483,8 @@ export class PickerUtilsV2 {
       return Array.of({ vault });
     }
 
-    const hierarchies = fname.split(".").slice(0, -1);
-    const newQs = hierarchies.join(".");
+    const domain = fname.split(".").slice(0, -1);
+    const newQs = domain.join(".");
     const queryResponse = await engine.queryNotes({
       qs: newQs,
       createIfNew: false,

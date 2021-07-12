@@ -4,6 +4,8 @@ import { Config, ObjectConfig } from "../types/formTypes";
 import get from "lodash/get";
 import isEmpty from "lodash/isEmpty";
 
+import { shouldDisplay } from "../utils/shouldDisplay";
+
 const { Sider } = Layout;
 const { SubMenu } = Menu;
 
@@ -23,6 +25,9 @@ const generateMenu = (
 ): JSX.Element => {
   if (!dataDefinition) return <></>;
   const name = prefix.join(".");
+  const lastName = (prefix.length && prefix[prefix.length - 1]) || "";
+  if (!shouldDisplay(lastName)) return <></>;
+
   if (
     dataDefinition.type === "string" ||
     dataDefinition.type === "number" ||

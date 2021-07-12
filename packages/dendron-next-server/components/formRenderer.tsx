@@ -20,6 +20,7 @@ import {
   ObjectConfig,
   ConfigInputType,
 } from "../types/formTypes";
+import { shouldDisplay } from "../utils/shouldDisplay";
 
 const BaseInput = ({
   label,
@@ -29,24 +30,33 @@ const BaseInput = ({
   helperText,
   children,
   setSelectedKeys,
-}: BaseInputType) => (
-  <Form.Item
-    name={name}
-    style={{ justifyContent: "center" }}
-    required={required}
-  >
-    <div>
-      <Title id={name} level={3} style={{ textTransform: "capitalize" }}>
-        {label}
-        {required && <span style={{ color: "red" }}> *</span>}
-      </Title>
-      {children}
-      <br />
-      <Text type="secondary">{helperText}</Text>
-      <Text type="danger">{get(errors, name)}</Text>
-    </div>
-  </Form.Item>
-);
+}: BaseInputType) => {
+  const error = React.useMemo(() => get(errors, name), [errors, name]);
+  return (
+    <Form.Item
+      name={name}
+      style={{ justifyContent: "center" }}
+      required={required}
+    >
+      <div>
+        <Title id={name} level={3} style={{ textTransform: "capitalize" }}>
+          {label}
+          {required && <span style={{ color: "red" }}> *</span>}
+        </Title>
+        {children}
+        <br />
+        <Text type="secondary">{helperText}</Text>
+        <br />
+        <Text
+          type="danger"
+          style={{ fontWeight: "bold", textTransform: "capitalize" }}
+        >
+          {error && `Error: ${error}`}
+        </Text>
+      </div>
+    </Form.Item>
+  );
+};
 
 const SimpleInput = ({
   name,
@@ -353,8 +363,13 @@ const ConfigInput = ({
   prefix,
   addonAfter,
   setSelectedKeys,
+  displayTitle = true,
 }: ConfigInputType) => {
   if (!data) return <></>;
+
+  const lastName = (prefix.length && prefix[prefix.length - 1]) || "";
+  if (!shouldDisplay(lastName)) return <></>;
+
   const { type, required, helperText, label } = data;
   if (type === "string" || type === "number") {
     return (
@@ -413,6 +428,18 @@ const ConfigInput = ({
 
   return (
     <>
+      {displayTitle && (
+        <Title
+          level={2}
+          style={{
+            textTransform: "capitalize",
+            textAlign: "center",
+            padding: "2rem",
+          }}
+        >
+          {(prefix.length && prefix[prefix.length - 1]) || ""}
+        </Title>
+      )}
       {Object.keys((data as ObjectConfig).data).map((key) => (
         <ConfigInput
           key={prefix.join(".") + "." + key}

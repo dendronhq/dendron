@@ -184,18 +184,19 @@ const ConfigForm: React.FC<DefaultProps> = ({ engine }) => {
   };
 
   const onSubmit = async (config: any, { setSubmitting }: any) => {
-    const response: any = await dispatch(
+    console.log("SUBMITTING CONFIG", config);
+    dispatch(
       configWrite({
         config,
         ws: ws as string,
         port: Number(port as string),
       })
-    );
-    if (response.error) {
-      message.error(response.payload);
-    }
-    message.success("Saved!");
-    setSubmitting(false);
+    )
+      .then(() => message.success("Saved!"))
+      .catch((err) => message.error(err.message))
+      .finally(() => {
+        setSubmitting(false);
+      });
   };
 
   const validate = (values: any) => {
@@ -212,10 +213,11 @@ const ConfigForm: React.FC<DefaultProps> = ({ engine }) => {
     ajvErrors?.forEach((error) => {
       const { instancePath, message } = error;
       if (instancePath !== "") {
-        errors[`${instancePath.substring(1)}`] = message;
+        errors[`${instancePath.substring(1)}`.replace("/", ".")] = message;
       }
     });
-    return { errors };
+    console.log("VALIDATION ERRORS", errors);
+    return errors;
   };
 
   if (!engine.config || !ws || !port) {

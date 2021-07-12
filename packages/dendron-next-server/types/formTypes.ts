@@ -45,6 +45,7 @@ export type ConfigInputType = {
   values?: any;
   addonAfter?: ReactNode;
   setSelectedKeys?: (keys: string[]) => void;
+  displayTitle?: boolean;
 };
 
 export type InputType = {

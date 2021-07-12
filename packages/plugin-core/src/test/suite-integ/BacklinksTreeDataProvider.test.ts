@@ -13,6 +13,7 @@ import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
 import { expect, runMultiVaultTest } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
+import { TestConfigUtils } from "@dendronhq/engine-test-utils";
 
 const getChildren = async () => {
   const backlinksTreeDataProvider = new BacklinksTreeDataProvider();
@@ -26,7 +27,10 @@ const getChildren = async () => {
     });
   }
 
-  return parentsWithChildren;
+  return {
+    out: parentsWithChildren,
+    provider: backlinksTreeDataProvider,
+  };
 };
 
 suite("BacklinksTreeDataProvider", function () {
@@ -58,7 +62,7 @@ suite("BacklinksTreeDataProvider", function () {
       },
       onInit: async ({ wsRoot, vaults }) => {
         await VSCodeUtils.openNote(noteWithTarget);
-        const out = toPlainObject(await getChildren()) as any;
+        const { out } = toPlainObject(await getChildren()) as any;
         expect(out[0].command.arguments[0].path as string).toEqual(
           path.join(wsRoot, vaults[0].fsPath, "beta.md")
         );
@@ -87,11 +91,58 @@ suite("BacklinksTreeDataProvider", function () {
         // re-initialize engine from cache
         await new ReloadIndexCommand().run();
         await VSCodeUtils.openNote(noteWithTarget);
-        const out = toPlainObject(await getChildren()) as any;
+        const { out } = toPlainObject(await getChildren()) as any;
         expect(out[0].command.arguments[0].path as string).toEqual(
           path.join(wsRoot, vaults[0].fsPath, "beta.md")
         );
         expect(out.length).toEqual(1);
+        done();
+      },
+    });
+  });
+
+  test("with enableUnrefLinks from cache", (done) => {
+    let noteWithTarget: NoteProps;
+
+    runLegacyMultiWorkspaceTest({
+      ctx,
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        noteWithTarget = await NOTE_PRESETS_V4.NOTE_WITH_TARGET.create({
+          wsRoot,
+          vault: vaults[0],
+        });
+      },
+      onInit: async ({ wsRoot, vaults }) => {
+        TestConfigUtils.withConfig(
+          (config) => {
+            config.dev = {
+              enableUnrefLinks: true,
+            };
+            return config;
+          },
+          { wsRoot }
+        );
+        const isUnrefLinkEnabled = TestConfigUtils.getConfig({ wsRoot }).dev
+          ?.enableUnrefLinks;
+        expect(isUnrefLinkEnabled).toBeTruthy();
+
+        // currently unref links are not getting populated on the first engine init for some reason.
+        // FIX: once above problem is fixed, fix this test.
+        await NOTE_PRESETS_V4.NOTE_WITH_UNREF_TARGET.create({
+          wsRoot,
+          vault: vaults[0],
+        });
+        // TEMP: need to re-init.
+        await new ReloadIndexCommand().execute();
+        await VSCodeUtils.openNote(noteWithTarget);
+
+        const { out } = toPlainObject(await getChildren()) as any;
+        expect(out[0].command.arguments[0].path as string).toEqual(
+          path.join(wsRoot, vaults[0].fsPath, "gamma.md")
+        );
+        const ref = out[0].refs[0];
+        expect(ref.isUnref).toBeTruthy();
+        expect(ref.matchText as string).toEqual("alpha");
         done();
       },
     });
@@ -117,11 +168,175 @@ suite("BacklinksTreeDataProvider", function () {
       onInit: async ({ wsRoot, vaults }) => {
         const notePath = path.join(wsRoot, vaults[0].fsPath, "alpha.md");
         await VSCodeUtils.openFileInEditor(Uri.file(notePath));
-        const out = toPlainObject(await getChildren()) as any;
+        const { out } = toPlainObject(await getChildren()) as any;
         expect(out[0].command.arguments[0].path as string).toEqual(
           path.join(wsRoot, vaults[1].fsPath, "beta.md")
         );
         expect(out.length).toEqual(1);
+        done();
+      },
+    });
+  });
+
+  test("unref link should only work within a vault", (done) => {
+    runMultiVaultTest({
+      ctx,
+      onInit: async ({ wsRoot, vaults }) => {
+        TestConfigUtils.withConfig(
+          (config) => {
+            config.dev = {
+              enableUnrefLinks: true,
+            };
+            return config;
+          },
+          { wsRoot }
+        );
+        const alpha = await NoteTestUtilsV4.createNote({
+          fname: "alpha",
+          body: `gamma`,
+          vault: vaults[0],
+          wsRoot,
+        });
+        const gamma = await NOTE_PRESETS_V4.NOTE_WITH_UNREF_TARGET.create({
+          wsRoot,
+          vault: vaults[1],
+        });
+        await new ReloadIndexCommand().execute();
+
+        await VSCodeUtils.openNote(alpha);
+        const alphaOut = (toPlainObject(await getChildren()) as any).out;
+        expect(alphaOut).toEqual([]);
+        expect(alpha.links).toEqual([]);
+
+        await VSCodeUtils.openNote(gamma);
+        const gammaOut = (toPlainObject(await getChildren()) as any).out;
+        expect(gammaOut).toEqual([]);
+        expect(gamma.links).toEqual([]);
+        done();
+      },
+    });
+  });
+
+  test("links and unref links to correct subtree", (done) => {
+    let alpha: NoteProps;
+    runLegacyMultiWorkspaceTest({
+      ctx,
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        alpha = await NoteTestUtilsV4.createNote({
+          fname: "alpha",
+          body: "this note has both links and unrefs to it.",
+          vault: vaults[0],
+          wsRoot,
+        });
+      },
+      onInit: async ({ wsRoot, vaults }) => {
+        TestConfigUtils.withConfig(
+          (config) => {
+            config.dev = {
+              enableUnrefLinks: true,
+            };
+            return config;
+          },
+          { wsRoot }
+        );
+        await NoteTestUtilsV4.createNote({
+          fname: "beta",
+          body: "[[alpha]]\nalpha",
+          vault: vaults[0],
+          wsRoot,
+        });
+        await new ReloadIndexCommand().execute();
+
+        await VSCodeUtils.openNote(alpha);
+        const { out, provider } = await getChildren();
+        const outObj = toPlainObject(out) as any;
+
+        // source should be beta.md
+
+        const sourceTreeItem = outObj[0];
+        expect(sourceTreeItem.label).toEqual("beta.md");
+        // it should have two subtrees
+        expect(sourceTreeItem.children.length).toEqual(2);
+
+        // a subtree for link(s), holding one backlink, "[[alpha]]"
+        const linkSubTreeItem = sourceTreeItem.children[0];
+        expect(linkSubTreeItem.label).toEqual("links");
+        expect(linkSubTreeItem.refs.length).toEqual(1);
+        expect(linkSubTreeItem.refs[0].matchText).toEqual("[[alpha]]");
+
+        // a subtree for unref(s), holding one unref item, "alpha"
+        const unrefSubTreeItem = sourceTreeItem.children[1];
+        expect(unrefSubTreeItem.label).toEqual("unreferenced");
+        expect(unrefSubTreeItem.refs.length).toEqual(1);
+        expect(unrefSubTreeItem.refs[0].matchText).toEqual("alpha");
+
+        // in each subtree, TreeItems that hold actual links should exist.
+        // they are leaf nodes (no children).
+        const link = await provider.getChildren(out[0].children[0]);
+        expect(link[0].label).toEqual("[[alpha]]");
+        expect(link[0].refs).toEqual(undefined);
+
+        const unref = await provider.getChildren(out[0].children[1]);
+        expect(unref[0].label).toEqual("alpha");
+        expect(unref[0].refs).toEqual(undefined);
+
+        done();
+      },
+    });
+  });
+
+  test("mult backlink items display correctly", (done) => {
+    let alpha: NoteProps;
+
+    runLegacyMultiWorkspaceTest({
+      ctx,
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        alpha = await NoteTestUtilsV4.createNote({
+          fname: "alpha",
+          body: "this note has many links and unrefs to it.",
+          vault: vaults[0],
+          wsRoot,
+        });
+      },
+      onInit: async ({ wsRoot, vaults }) => {
+        TestConfigUtils.withConfig(
+          (config) => {
+            config.dev = {
+              enableUnrefLinks: true,
+            };
+            return config;
+          },
+          { wsRoot }
+        );
+        await NoteTestUtilsV4.createNote({
+          fname: "beta",
+          body: "[[alpha]] alpha alpha [[alpha]] [[alpha]] alpha\nalpha\n\nalpha",
+          vault: vaults[0],
+          wsRoot,
+        });
+        await new ReloadIndexCommand().execute();
+
+        await VSCodeUtils.openNote(alpha);
+        const { out } = await getChildren();
+        const outObj = toPlainObject(out) as any;
+
+        // source should be beta.md
+
+        const sourceTreeItem = outObj[0];
+        expect(sourceTreeItem.label).toEqual("beta.md");
+        // it should have two subtrees
+        expect(sourceTreeItem.children.length).toEqual(2);
+
+        // a subtree for link(s), holding three backlink
+        const linkSubTreeItem = sourceTreeItem.children[0];
+        expect(linkSubTreeItem.label).toEqual("links");
+        expect(linkSubTreeItem.refs.length).toEqual(3);
+
+        // a subtree for unref(s), holding five unref item
+        const unrefSubTreeItem = sourceTreeItem.children[1];
+        expect(unrefSubTreeItem.label).toEqual("unreferenced");
+        expect(unrefSubTreeItem.refs.length).toEqual(5);
+
         done();
       },
     });
@@ -147,7 +362,7 @@ suite("BacklinksTreeDataProvider", function () {
       onInit: async ({ wsRoot, vaults }) => {
         const notePath = path.join(wsRoot, vaults[0].fsPath, "alpha.md");
         await VSCodeUtils.openFileInEditor(Uri.file(notePath));
-        const out = toPlainObject(await getChildren()) as any;
+        const { out } = toPlainObject(await getChildren()) as any;
         expect(out[0].command.arguments[0].path as string).toEqual(
           path.join(wsRoot, vaults[1].fsPath, "beta.md")
         );
@@ -175,7 +390,7 @@ suite("BacklinksTreeDataProvider", function () {
       },
       onInit: async () => {
         await VSCodeUtils.openNote(noteWithTarget);
-        const out = toPlainObject(await getChildren()) as any;
+        const { out } = toPlainObject(await getChildren()) as any;
         expect(out[0].command.arguments[0].path as string).toEqual(
           NoteUtils.getFullPath({
             note: noteWithLink,
@@ -206,7 +421,7 @@ suite("BacklinksTreeDataProvider", function () {
       },
       onInit: async ({ wsRoot }) => {
         await VSCodeUtils.openNote(noteWithTarget);
-        const out = toPlainObject(await getChildren()) as any;
+        const { out } = toPlainObject(await getChildren()) as any;
         // assert.strictEqual(
         //   out[0].command.arguments[0].path as string,
         //   NoteUtils.getPathV4({ note: noteWithLink, wsRoot })

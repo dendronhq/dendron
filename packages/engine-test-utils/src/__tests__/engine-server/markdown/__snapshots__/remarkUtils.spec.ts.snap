@@ -238,40 +238,6 @@ Array [
 ]
 `;
 
-exports[`RemarkUtils and LinkUtils findUnreferencedLinks basic 1`] = `
-Array [
-  Object {
-    "from": Object {
-      "fname": "bar",
-      "id": "bar",
-      "vaultName": "vault1",
-    },
-    "position": Position {
-      "end": Object {
-        "column": 27,
-        "line": 2,
-        "offset": 42,
-      },
-      "indent": Array [
-        1,
-      ],
-      "start": Object {
-        "column": 1,
-        "line": 1,
-        "offset": 0,
-      },
-    },
-    "to": Object {
-      "fname": "foo",
-      "vaultName": "vault1",
-    },
-    "type": "unreferenced",
-    "value": "this is a test.
-see foo for more examples.",
-  },
-]
-`;
-
 exports[`RemarkUtils and LinkUtils updateLink basic 1`] = `
 "# Foo.One
 ![[foo.two]]

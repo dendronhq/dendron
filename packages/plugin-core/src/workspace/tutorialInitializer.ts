@@ -1,16 +1,15 @@
 import { DendronError, DVault, TutorialEvents } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import fs from "fs-extra";
-import _ from "lodash";
 import path from "path";
 import rif from "replace-in-file";
 import * as vscode from "vscode";
 import { AnalyticsUtils } from "../utils/analytics";
 import { DendronWorkspace } from "../workspace";
-import { GLOBAL_STATE, WORKSPACE_ACTIVATION_CONTEXT } from "./../constants";
-import { Logger } from "./../logger";
-import { VSCodeUtils } from "./../utils";
-import { MarkdownUtils } from "./../utils/md";
+import { GLOBAL_STATE, WORKSPACE_ACTIVATION_CONTEXT } from "../constants";
+import { Logger } from "../logger";
+import { VSCodeUtils } from "../utils";
+import { MarkdownUtils } from "../utils/md";
 import { BlankInitializer } from "./blankInitializer";
 import { WorkspaceInitializer } from "./workspaceInitializer";
 
@@ -70,7 +69,7 @@ export class TutorialInitializer
   async onWorkspaceOpen(opts: { ws: DendronWorkspace }): Promise<void> {
     const ctx = "TutorialInitializer.onWorkspaceOpen";
 
-    let rootUri = VSCodeUtils.joinPath(
+    const rootUri = VSCodeUtils.joinPath(
       opts.ws.rootWorkspace.uri,
       "tutorial.md"
     );
@@ -96,7 +95,7 @@ export class TutorialInitializer
       opts.ws.windowWatcher.registerActiveTextEditorChangedHandler((e) => {
         const fileName = e?.document.uri.fsPath;
 
-        let eventName: TutorialEvents | undefined = undefined;
+        let eventName: TutorialEvents | undefined;
 
         if (fileName?.endsWith("tutorial.md")) {
           eventName = TutorialEvents.Tutorial_0_Show;

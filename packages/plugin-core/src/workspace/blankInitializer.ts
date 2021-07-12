@@ -7,9 +7,9 @@ import fs from "fs-extra";
 import path from "path";
 import * as vscode from "vscode";
 import { DendronWorkspace } from "../workspace";
-import { Logger } from "./../logger";
-import { VSCodeUtils } from "./../utils";
-import { MarkdownUtils } from "./../utils/md";
+import { Logger } from "../logger";
+import { VSCodeUtils } from "../utils";
+import { MarkdownUtils } from "../utils/md";
 import { WorkspaceInitializer } from "./workspaceInitializer";
 
 
@@ -38,7 +38,7 @@ import { WorkspaceInitializer } from "./workspaceInitializer";
   async onWorkspaceOpen(opts: { ws: DendronWorkspace }): Promise<void> {
     const ctx = "BlankInitializer.onWorkspaceOpen";
 
-    let rootUri = VSCodeUtils.joinPath(
+    const rootUri = VSCodeUtils.joinPath(
       opts.ws.rootWorkspace.uri,
       "root.md"
     );

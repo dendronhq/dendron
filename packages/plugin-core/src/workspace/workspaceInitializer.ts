@@ -3,7 +3,7 @@ import { WorkspaceService } from "@dendronhq/engine-server";
 import _ from "lodash";
 import * as vscode from "vscode";
 import { DendronWorkspace } from "../workspace";
-import { GLOBAL_STATE, WORKSPACE_ACTIVATION_CONTEXT } from "./../constants";
+import { GLOBAL_STATE, WORKSPACE_ACTIVATION_CONTEXT } from "../constants";
 import { BlankInitializer } from "./blankInitializer";
 import { TutorialInitializer } from "./tutorialInitializer";
 

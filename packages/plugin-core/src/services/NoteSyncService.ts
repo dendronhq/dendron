@@ -118,7 +118,7 @@ export class NoteSyncService {
       wsRoot: eclient.wsRoot,
     });
     note.anchors = anchors;
-    note.updated = NoteUtils.genUpdateTime();
+    note.updated = now;
 
     this.L.info({ ctx, fname, msg: "exit" });
     const noteClean = await eclient.updateNote(note);

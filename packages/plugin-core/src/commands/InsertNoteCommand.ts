@@ -1,7 +1,7 @@
 import { DendronError, NoteQuickInput } from "@dendronhq/common-all";
 import { HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
-import { Selection } from "vscode";
+import { Selection, SnippetString } from "vscode";
 import { LookupControllerV3 } from "../components/lookup/LookupControllerV3";
 import { NoteLookupProvider } from "../components/lookup/LookupProviderV3";
 import { DENDRON_COMMANDS } from "../constants";
@@ -72,12 +72,11 @@ export class InsertNoteCommand extends BasicCommand<
       return pick.body;
     });
     const txt = templates.join("\n");
+    const snippet = new SnippetString(txt)
     const editor = VSCodeUtils.getActiveTextEditor()!;
     const pos = editor.selection.active;
-    await editor.edit((builder) => {
-      const selection = new Selection(pos, pos);
-      builder.replace(selection, txt);
-    });
+    const selection = new Selection(pos, pos);
+    await editor.insertSnippet(snippet,selection);
     return txt;
   }
 }

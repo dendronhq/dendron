@@ -513,7 +513,8 @@ export enum DMessageSource {
 }
 
 export enum DMessageType {
-  init = "init",
+  INIT = "init",
+  ON_DID_CHANGE_ACTIVE_TEXT_EDITOR = "onDidChangeActiveTextEditor",
 }
 
 export enum TreeViewMessageType {

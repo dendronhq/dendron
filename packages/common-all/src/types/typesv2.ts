@@ -549,7 +549,14 @@ export enum ThemeMessageType {
 
 export type OnDidChangeActiveTextEditorData = {
   note: NoteProps;
+  /**
+   * Sync all notes
+   */
   sync?: boolean;
+  /**
+   * Sync the changed note
+   */
+  syncChangedNote?: boolean;
 };
 
 export type VSCodeMessage = DMessage;

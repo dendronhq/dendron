@@ -13,6 +13,7 @@ import { BasicCommand } from "./base";
 import { getEngine, getWS } from "../workspace";
 import { GotoNoteCommand } from "./GotoNote";
 import { VSCodeUtils } from "../utils";
+import { MetadataService } from "packages/engine-server/src/metadata";
 
 type CommandOpts = {};
 
@@ -48,6 +49,7 @@ export class ShowNoteGraphCommand extends BasicCommand<
 
     // If panel already exists
     const existingPanel = ws.getWebView(DendronWebViewKey.NOTE_GRAPH);
+
 
     if (!_.isUndefined(existingPanel)) {
       try {
@@ -118,6 +120,9 @@ export class ShowNoteGraphCommand extends BasicCommand<
           break;
       }
     });
+
+    const metadataService = MetadataService.instance();
+    // metadataService.
 
     // Update workspace-wide graph panel
     ws.setWebView(DendronWebViewKey.NOTE_GRAPH, panel);

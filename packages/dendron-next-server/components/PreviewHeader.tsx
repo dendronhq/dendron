@@ -54,7 +54,7 @@ function PreviewHeader({ engine, ide }: DendronProps) {
         href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.22.0/themes/prism.min.css"
       />
       {engine?.config?.useKatex && MathJaxHeaders()}
-      {engine?.config?.useKatex && MermaidHeaders()}
+      {engine?.config?.mermaid && MermaidHeaders()}
     </Head>
   );
 }

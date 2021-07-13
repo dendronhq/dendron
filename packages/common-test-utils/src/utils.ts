@@ -197,10 +197,15 @@ export async function runJestHarness<TOpts>(
 
 export async function runJestHarnessV2(results: any, expect: any) {
   return _.map(await results, (ent) => {
-    if (_.isBoolean(ent.expected) && ent.expected === true) {
-      expect(ent.actual).toBeTruthy();
-    } else {
-      expect(ent.actual).toEqual(ent.expected);
+    try {
+      if (_.isBoolean(ent.expected) && ent.expected === true) {
+        expect(ent.actual).toBeTruthy();
+      } else {
+        expect(ent.actual).toEqual(ent.expected);
+      }
+    } catch (err) {
+      console.log(err);
+      debugger;
     }
   });
 }

@@ -53,7 +53,7 @@ const pathsToBacklinkSourceTreeItems = async (
       referencesByPath[pathParam],
       collapsibleState
     );
-    let backlinkCount = isUnrefEnabled
+    const backlinkCount = isUnrefEnabled
       ? referencesByPath[pathParam].length
       : referencesByPath[pathParam].filter((ref) => !ref.isUnref).length;
 
@@ -87,14 +87,17 @@ const addBacklinkTypeTreeItems = (
   });
 
   const out: Backlink[] = [];
-  const backlinkTreeItem = new Backlink(
-    "links",
-    wikilinks,
-    vscode.TreeItemCollapsibleState.Collapsed
-  );
-  backlinkTreeItem.iconPath = new vscode.ThemeIcon(ICONS.WIKILINK);
-  backlinkTreeItem.description = `${wikilinks.length} link(s).`;
-  out.push(backlinkTreeItem);
+  const wikilinksCount = wikilinks.length;
+  if (wikilinksCount > 0) {
+    const backlinkTreeItem = new Backlink(
+      "links",
+      wikilinks,
+      vscode.TreeItemCollapsibleState.Collapsed
+    );
+    backlinkTreeItem.iconPath = new vscode.ThemeIcon(ICONS.WIKILINK);
+    backlinkTreeItem.description = `${wikilinks.length} link(s).`;
+    out.push(backlinkTreeItem);
+  }
   if (isUnrefEnabled) {
     const unrefCount = unreflinks.length;
     if (unrefCount > 0) {

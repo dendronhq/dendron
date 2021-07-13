@@ -111,6 +111,10 @@ suite("BacklinksTreeDataProvider", function () {
           wsRoot,
           vault: vaults[0],
         });
+        await NOTE_PRESETS_V4.NOTE_WITH_UNREF_TARGET.create({
+          wsRoot,
+          vault: vaults[0],
+        });
       },
       onInit: async ({ wsRoot, vaults }) => {
         TestConfigUtils.withConfig(
@@ -126,13 +130,6 @@ suite("BacklinksTreeDataProvider", function () {
           ?.enableUnrefLinks;
         expect(isUnrefLinkEnabled).toBeTruthy();
 
-        // currently unref links are not getting populated on the first engine init for some reason.
-        // FIX: once above problem is fixed, fix this test.
-        await NOTE_PRESETS_V4.NOTE_WITH_UNREF_TARGET.create({
-          wsRoot,
-          vault: vaults[0],
-        });
-        // TEMP: need to re-init.
         await new ReloadIndexCommand().execute();
         await VSCodeUtils.openNote(noteWithTarget);
 
@@ -179,9 +176,23 @@ suite("BacklinksTreeDataProvider", function () {
   });
 
   test("unref link should only work within a vault", (done) => {
+    let alpha: NoteProps;
+    let gamma: NoteProps;
     runMultiVaultTest({
       ctx,
-      onInit: async ({ wsRoot, vaults }) => {
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        alpha = await NoteTestUtilsV4.createNote({
+          fname: "alpha",
+          body: `gamma`,
+          vault: vaults[0],
+          wsRoot,
+        });
+        gamma = await NOTE_PRESETS_V4.NOTE_WITH_UNREF_TARGET.create({
+          wsRoot,
+          vault: vaults[1],
+        });
+      },
+      onInit: async ({ wsRoot }) => {
         TestConfigUtils.withConfig(
           (config) => {
             config.dev = {
@@ -191,17 +202,6 @@ suite("BacklinksTreeDataProvider", function () {
           },
           { wsRoot }
         );
-        const alpha = await NoteTestUtilsV4.createNote({
-          fname: "alpha",
-          body: `gamma`,
-          vault: vaults[0],
-          wsRoot,
-        });
-        const gamma = await NOTE_PRESETS_V4.NOTE_WITH_UNREF_TARGET.create({
-          wsRoot,
-          vault: vaults[1],
-        });
-        await new ReloadIndexCommand().execute();
 
         await VSCodeUtils.openNote(alpha);
         const alphaOut = (toPlainObject(await getChildren()) as any).out;
@@ -228,8 +228,14 @@ suite("BacklinksTreeDataProvider", function () {
           vault: vaults[0],
           wsRoot,
         });
+        await NoteTestUtilsV4.createNote({
+          fname: "beta",
+          body: "[[alpha]]\nalpha",
+          vault: vaults[0],
+          wsRoot,
+        });
       },
-      onInit: async ({ wsRoot, vaults }) => {
+      onInit: async ({ wsRoot }) => {
         TestConfigUtils.withConfig(
           (config) => {
             config.dev = {
@@ -239,14 +245,8 @@ suite("BacklinksTreeDataProvider", function () {
           },
           { wsRoot }
         );
-        await NoteTestUtilsV4.createNote({
-          fname: "beta",
-          body: "[[alpha]]\nalpha",
-          vault: vaults[0],
-          wsRoot,
-        });
-        await new ReloadIndexCommand().execute();
 
+        await new ReloadIndexCommand().execute();
         await VSCodeUtils.openNote(alpha);
         const { out, provider } = await getChildren();
         const outObj = toPlainObject(out) as any;
@@ -297,8 +297,14 @@ suite("BacklinksTreeDataProvider", function () {
           vault: vaults[0],
           wsRoot,
         });
+        await NoteTestUtilsV4.createNote({
+          fname: "beta",
+          body: "[[alpha]] alpha alpha [[alpha]] [[alpha]] alpha\nalpha\n\nalpha",
+          vault: vaults[0],
+          wsRoot,
+        });
       },
-      onInit: async ({ wsRoot, vaults }) => {
+      onInit: async ({ wsRoot }) => {
         TestConfigUtils.withConfig(
           (config) => {
             config.dev = {
@@ -308,12 +314,8 @@ suite("BacklinksTreeDataProvider", function () {
           },
           { wsRoot }
         );
-        await NoteTestUtilsV4.createNote({
-          fname: "beta",
-          body: "[[alpha]] alpha alpha [[alpha]] [[alpha]] alpha\nalpha\n\nalpha",
-          vault: vaults[0],
-          wsRoot,
-        });
+        
+        // need this until we move it out of the feature flag.
         await new ReloadIndexCommand().execute();
 
         await VSCodeUtils.openNote(alpha);

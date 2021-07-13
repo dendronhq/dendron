@@ -82,10 +82,8 @@ function AppVSCode({ Component, pageProps }: any) {
     const { query } = router;
     // when we get a msg from vscode, update our msg state
     logger.info({ ctx, msg, query });
-    if (_.isUndefined(workspaceOpts)) {
-      return;
-    }
-    const { port, ws, theme } = workspaceOpts;
+    // NOTE: initial message, state might not be set 
+    const { port, ws } = getWorkspaceParamsFromQueryString();
 
     if (msg.type === DMessageType.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR) {
       let cmsg = msg as OnDidChangeActiveTextEditorMsg;

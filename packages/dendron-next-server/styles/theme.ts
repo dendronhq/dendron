@@ -1,5 +1,17 @@
 import { theme as defaultTheme, extendTheme } from "@chakra-ui/react";
 
+export enum ThemeType {
+  LIGHT = "LIGHT",
+  DARK = "DARK",
+}
+
+export const getThemeType = (theme?: string) => {
+  if (theme === "dark") {
+    return ThemeType.DARK;
+  }
+  return ThemeType.LIGHT;
+};
+
 export const theme = extendTheme({
   config: {
     useSystemColorMode: true,

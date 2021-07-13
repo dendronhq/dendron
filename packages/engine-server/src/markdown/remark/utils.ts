@@ -220,6 +220,7 @@ const getUnreferencedLinks = ({
     }
   );
 
+  // OPTIMIZE: map the notes once, and pass it into here as a param.
   const fnameNoteMap = new Map<string, NoteProps>();
   notes = notes.filter((n) => !n.stub);
   notes.map((n) => {
@@ -543,7 +544,7 @@ export class LinkUtils {
     engine: DEngineClient;
   }) {
     const content = note.body;
-    let remark = MDUtilsV5.procRemarkParse(
+    const remark = MDUtilsV5.procRemarkParse(
       { mode: ProcMode.FULL },
       {
         engine,

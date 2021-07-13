@@ -52,7 +52,7 @@ function AppVSCode({ Component, pageProps }: any) {
     setLogLevel("INFO");
     // get variables from vscode parent
     postVSCodeMessage({
-      type: DMessageType.INIT,
+      type: DMessageType.init,
       data: {},
       source: DMessageSource.webClient,
     });

@@ -20,12 +20,6 @@ This is more normal text
 console.log("Hello World");
 ```
 
-### Checkbox
-
-- [ ] todo1
-- [ ] todo2
-- [ ] todo3
-
 ### Math
 
 - Inline $f(x) = 5$

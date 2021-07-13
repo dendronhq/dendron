@@ -101,6 +101,7 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           const destVault = link.to?.vaultName
             ? VaultUtils.getVaultByName({ vaults, vname: link.to.vaultName })!
             : note.vault;
+          if (!destVault) return false;
           const noteExists = NoteUtils.getNoteByFnameV5({
             fname: link.to!.fname as string,
             vault: destVault,
@@ -271,12 +272,12 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       }
       case DoctorActions.CREATE_MISSING_LINKED_NOTES: {
         // this action is disabled for workspace scope for now.
-        if (_.isUndefined(candidates)) {
-          console.log(
-            `doctor ${DoctorActions.CREATE_MISSING_LINKED_NOTES} requires explicitly passing one candidate note.`
-          );
-          return;
-        }
+        // if (_.isUndefined(candidates)) {
+        //   console.log(
+        //     `doctor ${DoctorActions.CREATE_MISSING_LINKED_NOTES} requires explicitly passing one candidate note.`
+        //   );
+        //   return;
+        // }
         notes = this.getWildLinkDestinations(notes, engine);
         doctorAction = async (note: NoteProps) => {
           const vname = VaultUtils.getName(note.vault);
@@ -285,9 +286,6 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
             createIfNew: true,
             vault: note.vault,
           });
-          console.log(
-            `doctor ${DoctorActions.CREATE_MISSING_LINKED_NOTES} ${note.fname} ${vname}`
-          );
           numChanges += 1;
         };
         break;

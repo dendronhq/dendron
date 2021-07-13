@@ -17,6 +17,7 @@ import {
   useVSCodeMessage,
 } from "@dendronhq/common-frontend";
 import { Spin } from "antd";
+import _ from "lodash";
 import { useRouter } from "next/router";
 import React, { useEffect } from "react";
 import { ThemeSwitcherProvider } from "react-css-theme-switcher";
@@ -33,12 +34,18 @@ const themes = {
 
 const { useEngineAppSelector, useEngine } = engineHooks;
 
-const getWorkspaceParamsFromQueryString = () => {
-  const { port, ws } = querystring.parse(
+type DefaultWorkspaceParams = {
+  port: number;
+  ws: string;
+  theme?: string;
+};
+
+const getWorkspaceParamsFromQueryString = (): DefaultWorkspaceParams => {
+  const { port, ws, theme } = querystring.parse(
     window.location.search.slice(1)
-  ) as { port: string; ws: string };
-  return {port: parseInt(port), ws}
-}
+  ) as DefaultWorkspaceParams & { port: string };
+  return { port: parseInt(port), ws, theme };
+};
 
 function AppVSCode({ Component, pageProps }: any) {
   // --- init
@@ -47,7 +54,10 @@ function AppVSCode({ Component, pageProps }: any) {
   const ide = ideHooks.useIDEAppSelector((state) => state.ide);
   const engine = useEngineAppSelector((state) => state.engine);
   const ideDispatch = ideHooks.useIDEAppDispatch();
+  const [workspaceOpts, setWorkspaceOpts] =
+    React.useState<DefaultWorkspaceParams>();
 
+  // run once
   useEffect(() => {
     setLogLevel("INFO");
     // get variables from vscode parent
@@ -56,7 +66,11 @@ function AppVSCode({ Component, pageProps }: any) {
       data: {},
       source: DMessageSource.webClient,
     });
+    // set initial query params
+    const out = getWorkspaceParamsFromQueryString();
+    setWorkspaceOpts(out);
   }, []);
+
   useEngine({ engineState: engine, opts: query });
   const logger = createLogger("AppVSCode");
   logger.info({ state: "enter!", query });
@@ -68,28 +82,24 @@ function AppVSCode({ Component, pageProps }: any) {
     const { query } = router;
     // when we get a msg from vscode, update our msg state
     logger.info({ ctx, msg, query });
+    // NOTE: initial message, state might not be set 
+    const { port, ws } = getWorkspaceParamsFromQueryString();
 
     if (msg.type === DMessageType.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR) {
       let cmsg = msg as OnDidChangeActiveTextEditorMsg;
       const { sync, note, syncChangedNote } = cmsg.data;
       if (sync) {
         // skip the initial ?
-        const {port, ws} = getWorkspaceParamsFromQueryString();
         logger.info({
           ctx,
           msg: "syncEngine:pre",
           port,
           ws,
         });
-        await ideDispatch(
-          engineSlice.initNotes({ port, ws })
-        );
+        await ideDispatch(engineSlice.initNotes({ port, ws }));
       }
       if (syncChangedNote) {
-        const {port, ws} = getWorkspaceParamsFromQueryString();
-        await ideDispatch(
-          engineSlice.syncNote({ port, ws, note })
-        );
+        await ideDispatch(engineSlice.syncNote({ port, ws, note }));
       }
       logger.info({ ctx, msg: "syncEngine:post" });
       ideDispatch(ideSlice.actions.setNoteActive(note));
@@ -110,7 +120,7 @@ function AppVSCode({ Component, pageProps }: any) {
     return <Spin />;
   }
   logger.info({ ctx: "exit", state: "render:child", engine, ide });
-  let defaultTheme = "light";
+  let defaultTheme = workspaceOpts?.theme || "light";
   if (ide.theme !== "unknown") {
     defaultTheme = ide.theme;
   }

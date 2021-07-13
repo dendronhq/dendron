@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+		"jsx": "react",
     "outDir": "lib",
     "rootDir": "src",
     "module": "commonjs",

@@ -345,7 +345,6 @@ export type WorkspaceExtensionSetting = {
 // --- KLUDGE END
 
 export type EngineDeleteNoteResp = Required<RespV2<EngineDeleteNotePayload>>;
-export type EngineQueryNoteResp = Required<RespV2<DNodeProps[]>>;
 export type NoteQueryResp = Required<RespV2<NoteProps[]>>;
 export type SchemaQueryResp = Required<RespV2<SchemaModuleProps[]>>;
 export type StoreDeleteNoteResp = EngineDeleteNotePayload;

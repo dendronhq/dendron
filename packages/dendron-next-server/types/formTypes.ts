@@ -29,6 +29,11 @@ export type ObjectConfig = CommonConfig & {
   data: Record<string, Config>;
 };
 
+export type AnyOfConfig = CommonConfig & {
+  type: "anyOf";
+  data: Config[];
+};
+
 export type Config =
   | ArrayConfig
   | BooleanConfig
@@ -36,7 +41,8 @@ export type Config =
   | StringConfig
   | NumberConfig
   | RecordConfig
-  | ObjectConfig;
+  | ObjectConfig
+  | AnyOfConfig;
 
 export type ConfigInputType = {
   data: Config;
@@ -68,3 +74,4 @@ export type ArrayInputType = InputType & {
   isRecordType?: boolean;
 };
 export type SelectInputType = InputType & { data: EnumConfig };
+export type AnyOfInputType = InputType & { data: AnyOfConfig; values: any };

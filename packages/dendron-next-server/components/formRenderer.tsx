@@ -1,5 +1,13 @@
 import React, { ReactNode, useState } from "react";
-import { List, Typography, Button, Card, Input as AntInput } from "antd";
+import {
+  List,
+  Typography,
+  Button,
+  Card,
+  Input as AntInput,
+  Radio,
+  RadioChangeEvent,
+} from "antd";
 import { FieldArray } from "formik";
 import { Form, Input, Switch, Select } from "formik-antd";
 const { Title, Text } = Typography;
@@ -19,6 +27,8 @@ import {
   RecordConfig,
   ObjectConfig,
   ConfigInputType,
+  AnyOfConfig,
+  AnyOfInputType,
 } from "../types/formTypes";
 import { shouldDisplay } from "../utils/shouldDisplay";
 
@@ -87,10 +97,7 @@ const SimpleInput = ({
         placeholder={placeholder}
         required={required}
         addonAfter={addonAfter}
-        onClick={() => {
-          setSelectedKeys && setSelectedKeys([name]);
-          console.log("click!!!", name);
-        }}
+        onClick={() => setSelectedKeys && setSelectedKeys([name])}
       />
     </BaseInput>
   );
@@ -134,10 +141,42 @@ const BooleanInput = ({
     >
       <Switch
         name={name}
-        onClick={() => {
-          setSelectedKeys && setSelectedKeys([name]);
-          console.log("click!!!", name);
-        }}
+        onClick={() => setSelectedKeys && setSelectedKeys([name])}
+      />
+    </BaseInput>
+  );
+};
+
+const AnyOfInput = ({
+  name,
+  data,
+  values,
+  label,
+  required,
+  helperText,
+  errors,
+  setSelectedKeys,
+}: AnyOfInputType) => {
+  const [value, setValue] = React.useState<string>("basic");
+  const onChange = (e: RadioChangeEvent) => {
+    setValue(e.target.value);
+  };
+  return (
+    <BaseInput
+      {...{ name, label, required, helperText, errors, setSelectedKeys }}
+    >
+      <Radio.Group onChange={onChange} value={value}>
+        <Radio value={"basic"}>Basic</Radio>
+        <Radio value={"advanced"}>Advanced</Radio>
+      </Radio.Group>
+
+      <ConfigInput
+        values={values}
+        data={(data as AnyOfConfig).data[value === "basic" ? 0 : 1]}
+        errors={errors}
+        prefix={[name]}
+        setSelectedKeys={setSelectedKeys}
+        displayTitle={false}
       />
     </BaseInput>
   );
@@ -431,6 +470,16 @@ const ConfigInput = ({
       <SelectInput
         name={prefix.join(".")}
         data={data as EnumConfig}
+        {...{ label, values, errors, prefix, setSelectedKeys }}
+      />
+    );
+  }
+
+  if (type === "anyOf") {
+    return (
+      <AnyOfInput
+        name={prefix.join(".")}
+        data={data as AnyOfConfig}
         {...{ label, values, errors, prefix, setSelectedKeys }}
       />
     );

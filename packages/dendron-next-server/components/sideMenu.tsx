@@ -32,7 +32,8 @@ const generateMenu = (
     dataDefinition.type === "string" ||
     dataDefinition.type === "number" ||
     dataDefinition.type === "boolean" ||
-    dataDefinition.type === "enum"
+    dataDefinition.type === "enum" ||
+    dataDefinition.type === "anyOf"
   ) {
     return (
       <Menu.Item
@@ -129,7 +130,6 @@ const SideMenu: React.FC<DefaultProptypes> = ({
     selectedKeys,
     domEvent,
   }: any) => {
-    console.log("select: ", { key, item, keyPath, selectedKeys });
     setSelectedKeys(selectedKeys);
   };
 

@@ -19,6 +19,7 @@ import {
   ArrayConfig,
   RecordConfig,
   ObjectConfig,
+  AnyOfConfig,
 } from "../../types/formTypes";
 import dendronValidator from "../../data/dendron-yml.validator.json";
 
@@ -43,6 +44,10 @@ const generateSchema = (config: Config): any => {
     return { type: config.type, items: generateSchema(config.data) };
   }
 
+  if (config.type === "anyOf") {
+    return { anyOf: config.data.map(generateSchema) };
+  }
+
   if (config.type === "record") {
     return {
       type: "object",
@@ -59,11 +64,11 @@ const generateSchema = (config: Config): any => {
     properties: Object.fromEntries(
       Object.keys(config.data).map((key) => [
         key,
-        generateSchema(config.data[key]),
+        generateSchema((config as ObjectConfig).data[key]),
       ])
     ),
     required: Object.keys(config.data).filter(
-      (key) => config.data[key].required
+      (key) => (config as ObjectConfig).data[key].required
     ),
   };
   return schema;
@@ -112,7 +117,13 @@ const generateRenderableConfig = (
   }
 
   if ("anyOf" in properties) {
-    return generateRenderableConfig(properties.anyOf[0], definitions, label);
+    return {
+      type: "anyOf",
+      label,
+      data: properties.anyOf.map((schema: any) =>
+        generateRenderableConfig(schema, definitions, "")
+      ),
+    } as AnyOfConfig;
   }
 
   if ("$ref" in properties) {
@@ -184,7 +195,6 @@ const ConfigForm: React.FC<DefaultProps> = ({ engine }) => {
   };
 
   const onSubmit = async (config: any, { setSubmitting }: any) => {
-    console.log("SUBMITTING CONFIG", config);
     dispatch(
       configWrite({
         config,
@@ -216,7 +226,6 @@ const ConfigForm: React.FC<DefaultProps> = ({ engine }) => {
         errors[`${instancePath.substring(1)}`.replace("/", ".")] = message;
       }
     });
-    console.log("VALIDATION ERRORS", errors);
     return errors;
   };
 

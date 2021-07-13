@@ -9,6 +9,7 @@ import { Heading, Parent, Root } from "mdast";
 import { Processor } from "unified";
 import { DendronPubOpts } from "./remark/dendronPub";
 import { WikiLinksOpts } from "./remark/wikiLinks";
+
 export { Node as UnistNode } from "unist";
 export { VFile } from "vfile";
 export { Processor };
@@ -35,6 +36,7 @@ export enum DendronASTTypes {
   REF_LINK = "refLink",
   REF_LINK_V2 = "refLinkV2",
   BLOCK_ANCHOR = "blockAnchor",
+  HASHTAG = "hashtag",
   // Not dendron-specific, included here for convenience
   ROOT = "root",
   HEADING = "heading",
@@ -124,6 +126,11 @@ export type NoteRefDataV4_LEGACY = {
 export type BlockAnchor = DendronASTNode & {
   type: DendronASTTypes.BLOCK_ANCHOR;
   id: string;
+};
+
+export type HashTag = DendronASTNode & {
+  type: DendronASTTypes.HASHTAG;
+  fname: string;
 };
 
 export type Anchor = BlockAnchor | Heading;

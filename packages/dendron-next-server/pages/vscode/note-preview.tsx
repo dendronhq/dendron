@@ -7,7 +7,6 @@ import {
 } from "@dendronhq/common-frontend";
 import { Col, Layout, Row } from "antd";
 import * as React from "react";
-import { useState } from "react";
 import { getWsAndPort } from "../../lib/env";
 import { DendronProps } from "../../lib/types";
 
@@ -16,10 +15,6 @@ const logger = createLogger("notePreview");
 function isHTMLAnchorElement(element: Element): element is HTMLAnchorElement {
   return element.nodeName === "A";
 }
-
-type NotePreviewProps = DendronProps & {
-  initNoteId?: string;
-};
 
 function AntLayout(props: React.PropsWithChildren<any>) {
   return (
@@ -52,16 +47,15 @@ function docReady(fn: () => any) {
   }
 }
 
-function Note({ engine, ide, initNoteId }: NotePreviewProps) {
+function Note({ engine, ide }: DendronProps) {
   logger.info({
     state: "enter",
   });
-  const [isFirstRender, setFirstRender] = useState(true);
 
   const dispatch = engineHooks.useEngineAppDispatch();
 
   const { noteActive } = ide;
-  let { id: noteId = "9eae08fb-5e3f-4a7e-a989-3f206825d490", contentHash } =
+  const { id: noteId = "9eae08fb-5e3f-4a7e-a989-3f206825d490", contentHash } =
     noteActive || {};
   const noteContent = engine.notesRendered[noteId || ""];
 
@@ -69,10 +63,6 @@ function Note({ engine, ide, initNoteId }: NotePreviewProps) {
   const renderedNoteContentHash = React.useRef<string>();
 
   React.useEffect(() => {
-    if (initNoteId && isFirstRender) {
-      noteId = initNoteId;
-      setFirstRender(false);
-    }
     if (!noteId) {
       logger.info({ msg: "no noteId" });
       return;

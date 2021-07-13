@@ -747,7 +747,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   },
   OPEN_LOGS: {
     key: "dendron.dev.openLogs",
-    title: `${CMD_PREFIX}Dev: Open Logs`,
+    title: `${CMD_PREFIX} Dev: Open Logs`,
     group: "dev",
     desc: "Open Dendron logs for current session",
     docLink: "dendron.topic.commands.md",

@@ -6,6 +6,7 @@ import {
   NoteViewMessage,
   assertUnreachable,
   NoteProps,
+  DMessageType,
 } from "@dendronhq/common-all";
 import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../utils";
@@ -48,7 +49,7 @@ export class ShowPreviewV2Command extends BasicCommand<
     if (panel) {
       panel.title = `${title} ${note.fname}`;
       panel.webview.postMessage({
-        type: "onDidChangeActiveTextEditor",
+        type: DMessageType.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR,
         data: {
           note,
           sync: true,

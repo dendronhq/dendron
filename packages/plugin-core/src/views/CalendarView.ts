@@ -7,6 +7,7 @@ import {
   DMessage,
   NoteUtils,
   assertUnreachable,
+  DMessageType,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import * as vscode from "vscode";
@@ -141,7 +142,7 @@ export class CalendarView implements vscode.WebviewViewProvider {
     if (this._view) {
       this._view.show?.(true); // `show` is not implemented in 1.49 but is for 1.50 insiders
       this._view.webview.postMessage({
-        type: "onDidChangeActiveTextEditor",
+        type: DMessageType.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR,
         data: {
           note,
           sync: true,

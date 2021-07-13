@@ -45,7 +45,7 @@ function AppVSCode({ Component, pageProps }: any) {
     setLogLevel("INFO");
     // get variables from vscode parent
     postVSCodeMessage({
-      type: DMessageType.init,
+      type: DMessageType.INIT,
       data: {},
       source: DMessageSource.webClient,
     });
@@ -62,7 +62,7 @@ function AppVSCode({ Component, pageProps }: any) {
     // when we get a msg from vscode, update our msg state
     logger.info({ ctx, msg, query });
 
-    if (msg.type === "onDidChangeActiveTextEditor") {
+    if (msg.type === DMessageType.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR) {
       let cmsg = msg as OnDidChangeActiveTextEditorMsg;
       const { sync, note } = cmsg.data;
       if (sync) {

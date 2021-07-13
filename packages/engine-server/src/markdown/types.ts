@@ -43,6 +43,7 @@ export enum DendronASTTypes {
   LIST = "list",
   LIST_ITEM = "listItem",
   PARAGRAPH = "paragraph",
+  TEXT = "text",
   TABLE = "table",
   TABLE_ROW = "tableRow",
   TABLE_CELL = "tableCell",

@@ -1,10 +1,9 @@
-import { AssertUtils, TestPresetEntryV4 } from "@dendronhq/common-test-utils";
+import { AssertUtils, TestPresetEntryV4, getDescendantNode } from "@dendronhq/common-test-utils";
 import {
   BlockAnchor,
   DendronASTDest,
   DendronASTTypes,
   MDUtilsV5,
-  Node,
   Parent,
   ProcMode,
   Text,
@@ -35,24 +34,6 @@ function runAllTests(opts: { name: string; testCases: ProcTests[] }) {
   });
 }
 
-/** Gets the descendent (child, or child of child...) node of a given node.
- *
- * @param node The root node to start descending from.
- * @param indices Left-to-right indexes for children, e.g. first index is for the root, second is for the child of the root...
- * @returns Requested child. Note that this function has no way of checking types, so the child you get might not be of the right type.
- */
-function getDescendantNode<Child extends Node>(
-  node: UnistNode,
-  ...indices: number[]
-): Child {
-  const index = indices.shift();
-  if (_.isUndefined(index)) return node as Child;
-  expect(node).toHaveProperty("children");
-  expect(node.children).toHaveProperty("length");
-  const children = node.children as UnistNode[];
-  expect(children.length).toBeGreaterThanOrEqual(index);
-  return getDescendantNode<Child>(children[index], ...indices);
-}
 
 function getBlockAnchor(node: UnistNode): BlockAnchor {
   return getDescendantNode<BlockAnchor>(node, 0, 0);

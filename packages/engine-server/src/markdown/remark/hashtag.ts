@@ -6,7 +6,6 @@ import { DendronASTDest, DendronASTTypes, HashTag } from "../types";
 import { MDUtilsV4 } from "../utils";
 import { Element } from "hast";
 import { html } from "mdast-builder";
-import { LINK_NAME } from "./utils";
 
 /** Hashtags have the form #foo, or #foo.bar, or #f123
  *
@@ -16,8 +15,8 @@ import { LINK_NAME } from "./utils";
  * Other then the reservation on the first character, hashtags can contain any
  * character that a note name can.
  */
-export const HASHTAG_REGEX = new RegExp(`^#([^0-9]${LINK_NAME})`);
-export const HASHTAG_REGEX_LOOSE = new RegExp(`^#([^0-9]${LINK_NAME})`);
+export const HASHTAG_REGEX = /^#([^0-9#|>[\]][^#|>[\]]*)/;
+export const HASHTAG_REGEX_LOOSE = /#([^0-9#|>[\]][^#|>[\]]*)/;
 
 /**
  *
@@ -112,5 +111,5 @@ export function hashtag2html(node: HashTag, engine: DEngine, opts?: PluginOpts) 
   return html(hashtag2htmlRaw(node, engine, opts));
 }
 
-export { plugin as blockAnchors };
-export { PluginOpts as BlockAnchorOpts };
+export { plugin as hashtags };
+export { PluginOpts as HashTagOpts };

@@ -57,6 +57,7 @@ import {
   VaultMissingBehavior,
   DendronASTTypes,
 } from "./types";
+import { hashtags } from "./remark/hashtag";
 
 const toString = require("mdast-util-to-string");
 export { nunjucks };
@@ -331,6 +332,7 @@ export class MDUtilsV4 {
       .use(frontmatterPlugin, ["yaml"])
       .use(wikiLinks)
       .use(blockAnchors)
+      .use(hashtags)
       .data("errors", errors);
     this.setDendronData(_proc, { dest: opts.dest, fname: opts.fname });
     this.setEngine(_proc, opts.engine);

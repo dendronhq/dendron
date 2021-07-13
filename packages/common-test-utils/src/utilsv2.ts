@@ -12,6 +12,7 @@ import {
   SetupTestFunctionV4,
 } from ".";
 import { PostSetupHookFunction, PreSetupHookFunction } from "./types";
+import { Node as UnistNode } from "unist";
 
 type EngineOverride = {
   [P in keyof DEngineClient]: (opts: WorkspaceOpts) => DEngineClient[P];
@@ -28,7 +29,7 @@ export const createEngineFactoryFactory = ({
     opts: WorkspaceOpts
   ): DEngineClient => {
     const engine = new EngineClass() as DEngineClient;
-    _.map(overrides || {}, (method, key: keyof DEngineClient) => {
+    _.map(overrides || {}, (method, key: keyof DEngineCliimpoent) => {
       // @ts-ignore
       engine[key] = method(opts);
     });
@@ -38,6 +39,7 @@ export const createEngineFactoryFactory = ({
 };
 
 class MockEngineClass {
+  // eslint-disable-next-line no-empty-function
   async init() {}
 }
 export const createMockEngine = createEngineFactoryFactory({
@@ -66,15 +68,15 @@ export class TestPresetEntryV4 {
       workspaces?: DWorkspace[];
     }
   ) {
-    let { preSetupHook, postSetupHook, extraOpts, setupTest, genTestResults } =
+    const { preSetupHook, postSetupHook, extraOpts, setupTest, genTestResults } =
       opts || {};
-    this.preSetupHook = preSetupHook ? preSetupHook : async () => {};
-    this.postSetupHook = postSetupHook ? postSetupHook : async () => {};
+    this.preSetupHook = preSetupHook || (async () => {});
+    this.postSetupHook = postSetupHook || (async () => {});
     this.testFunc = _.bind(func, this);
     this.extraOpts = extraOpts;
     this.setupTest = setupTest;
     this.genTestResults = _.bind(
-      genTestResults ? genTestResults : async () => [],
+      genTestResults || (async () => []),
       this
     );
     this.workspaces = opts?.workspaces || [];
@@ -87,4 +89,23 @@ export class TestPresetEntryV4 {
       },
     ];
   }
+}
+
+/** Gets the descendent (child, or child of child...) node of a given node.
+ *
+ * @param node The root node to start descending from.
+ * @param indices Left-to-right indexes for children, e.g. first index is for the root, second is for the child of the root...
+ * @returns Requested child. Note that this function has no way of checking types, so the child you get might not be of the right type.
+ */
+export function getDescendantNode<Child extends UnistNode>(
+  node: UnistNode,
+  ...indices: number[]
+): Child {
+  const index = indices.shift();
+  if (_.isUndefined(index)) return node as Child;
+  expect(node).toHaveProperty("children");
+  expect(node.children).toHaveProperty("length");
+  const children = node.children as UnistNode[];
+  expect(children.length).toBeGreaterThanOrEqual(index);
+  return getDescendantNode<Child>(children[index], ...indices);
 }

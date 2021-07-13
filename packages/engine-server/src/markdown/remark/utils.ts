@@ -1,5 +1,6 @@
-import { DNoteAnchor, isNotUndefined } from "@dendronhq/common-all";
 import {
+  DNoteAnchor,
+  isNotUndefined,
   assertUnreachable,
   CONSTANTS,
   DendronError,
@@ -17,6 +18,7 @@ import {
   NoteProps,
   NoteUtils,
   Position,
+  NoteBlock
 } from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-server";
 import _ from "lodash";
@@ -50,9 +52,10 @@ import {
   WikiLinkNoteV4,
   WikiLinkProps,
 } from "../types";
-import { NoteBlock } from "@dendronhq/common-all";
 import { MDUtilsV5, ProcFlavor, ProcMode } from "../utilsv5";
+
 const toString = require("mdast-util-to-string");
+
 export { mdastBuilder };
 export { select, selectAll } from "unist-util-select";
 

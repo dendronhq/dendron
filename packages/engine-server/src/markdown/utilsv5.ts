@@ -31,6 +31,7 @@ import { noteRefsV2 } from "./remark/noteRefsV2";
 import { wikiLinks } from "./remark/wikiLinks";
 import { DendronASTDest } from "./types";
 import { MDUtilsV4 } from "./utils";
+import { hashtags } from "./remark/hashtag";
 
 /**
  * What mode a processor should run in
@@ -200,6 +201,7 @@ export class MDUtilsV5 {
       .use(noteRefsV2)
       .use(wikiLinks)
       .use(blockAnchors)
+      .use(hashtags)
       .data("errors", errors);
 
     // set options and do validation

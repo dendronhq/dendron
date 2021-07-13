@@ -33,6 +33,13 @@ const themes = {
 
 const { useEngineAppSelector, useEngine } = engineHooks;
 
+const getWorkspaceParamsFromQueryString = () => {
+  const { port, ws } = querystring.parse(
+    window.location.search.slice(1)
+  ) as { port: string; ws: string };
+  return {port: parseInt(port), ws}
+}
+
 function AppVSCode({ Component, pageProps }: any) {
   // --- init
   const router = useRouter();
@@ -64,12 +71,10 @@ function AppVSCode({ Component, pageProps }: any) {
 
     if (msg.type === DMessageType.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR) {
       let cmsg = msg as OnDidChangeActiveTextEditorMsg;
-      const { sync, note } = cmsg.data;
+      const { sync, note, syncChangedNote } = cmsg.data;
       if (sync) {
         // skip the initial ?
-        const { port, ws } = querystring.parse(
-          window.location.search.slice(1)
-        ) as { port: string; ws: string };
+        const {port, ws} = getWorkspaceParamsFromQueryString();
         logger.info({
           ctx,
           msg: "syncEngine:pre",
@@ -77,7 +82,13 @@ function AppVSCode({ Component, pageProps }: any) {
           ws,
         });
         await ideDispatch(
-          engineSlice.initNotes({ port: parseInt(port as string), ws })
+          engineSlice.initNotes({ port, ws })
+        );
+      }
+      if (syncChangedNote) {
+        const {port, ws} = getWorkspaceParamsFromQueryString();
+        await ideDispatch(
+          engineSlice.syncNote({ port, ws, note })
         );
       }
       logger.info({ ctx, msg: "syncEngine:post" });

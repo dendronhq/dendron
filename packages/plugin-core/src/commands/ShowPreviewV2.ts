@@ -7,6 +7,7 @@ import {
   assertUnreachable,
   NoteProps,
   DMessageType,
+  OnDidChangeActiveTextEditorMsg,
 } from "@dendronhq/common-all";
 import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../utils";
@@ -52,10 +53,10 @@ export class ShowPreviewV2Command extends BasicCommand<
         type: DMessageType.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR,
         data: {
           note,
-          sync: true,
+          syncChangedNote: true
         },
         source: "vscode",
-      });
+      } as OnDidChangeActiveTextEditorMsg);
     }
   }
 

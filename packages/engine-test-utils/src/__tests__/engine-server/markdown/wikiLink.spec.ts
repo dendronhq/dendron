@@ -37,6 +37,11 @@ function getWikiLink(node: UnistNode): WikiLinkNoteV4 {
   return node.children[0].children[0];
 }
 
+function getNode(node: UnistNode): UnistNode {
+  // @ts-ignore
+  return node.children[0].children[0];
+}
+
 describe("wikiLinks", () => {
   describe("parse", () => {
     let engine: any;
@@ -60,6 +65,14 @@ describe("wikiLinks", () => {
         type: DendronASTTypes.WIKI_LINK,
         value: "foo bar",
       });
+    });
+
+    test("fail: bad format", () => {
+      const resp = proc(engine, genDendronData(dendronData)).parse(
+        `[[[foo bar]]]`
+      );
+      expect(resp).toMatchSnapshot();
+      expect(getNode(resp).type).toEqual("text");
     });
 
     test("doesn't parse inline code block", () => {
@@ -302,6 +315,7 @@ describe("wikiLinks", () => {
       },
       preSetupHook: ENGINE_HOOKS.setupBasic,
     });
+
 
     const linkWithAliasHash = `[[#bar|foo]]`;
     const WITH_ALIAS_HASH = createProcTests({

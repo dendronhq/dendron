@@ -19,7 +19,10 @@ import { MDUtilsV4 } from "../utils";
 import { MDUtilsV5, ProcMode } from "../utilsv5";
 import { addError, getNoteOrError, LinkUtils } from "./utils";
 
-export const LINK_REGEX = /^\[\[(.+?)\]\]/;
+export const LINK_REGEX = /^\[\[([\w\.\-_#\^\ \|:\/]+?)\]\]/;
+/**
+ * Does not require wiki link be the start of the word
+ */
 export const LINK_REGEX_LOOSE = /\[\[(.+?)\]\]/;
 
 const parseWikiLink = (linkMatch: string) => {

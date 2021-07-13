@@ -322,7 +322,7 @@ export class DNodeUtils {
 
 export class NoteUtils {
   static RE_FM = /^---(.*)^---/ms;
-  static RE_FM_UPDATED = /^updated:.*$/m;
+  static RE_FM_UPDATED = /^updated:\s+(\d+)$/m;
   static RE_FM_CREATED = /^created:.*$/m;
   static RE_FM_UPDATED_OR_CREATED =
     /^(?<beforeTimestamp>(updated|created): *)(?<timestamp>[0-9]+)$/;
@@ -591,6 +591,11 @@ export class NoteUtils {
     }
     // if user customized title, return the title as user specified
     return titleFromBasename;
+  }
+
+  static genUpdateTime() {
+    const now = Time.now().toMillis();
+    return now;
   }
 
   static getNotesByFname({

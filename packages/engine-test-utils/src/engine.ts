@@ -57,13 +57,13 @@ export type TestSetupWorkspaceOpts = {
 
 export type AsyncCreateEngineFunction = (
   opts: WorkspaceOpts
-) => Promise<DEngineClient>;
+) => Promise<{engine: DEngineClient, port?: number}>;
 
 /**
  * Create an {@link DendronEngine}
  */
 export async function createEngineFromEngine(opts: WorkspaceOpts) {
-  return engineServerCreateEngine(opts) as DEngineClient;
+  return {engine: engineServerCreateEngine(opts) as DEngineClient, port: undefined};
 }
 
 export { DEngineClient, DVault, WorkspaceOpts };
@@ -74,7 +74,7 @@ export { DEngineClient, DVault, WorkspaceOpts };
  * @returns
  */
 // @ts-ignore
-export async function createServer(opts: WorkspaceOpts): any {
+export async function createServer(opts: WorkspaceOpts) {
   return await new LaunchEngineServerCommand().enrichArgs({
     wsRoot: opts.wsRoot,
   });
@@ -86,9 +86,9 @@ export async function createServer(opts: WorkspaceOpts): any {
 export async function createEngineFromServer(
   opts: WorkspaceOpts
 ): Promise<any> {
-  const { engine } = await createServer(opts);
+  const { engine, port } = await createServer(opts);
   await engine.init();
-  return engine;
+  return {engine, port};
 }
 
 export function createSiteConfig(
@@ -173,7 +173,7 @@ export type RunEngineTestV5Opts = {
 } & TestSetupWorkspaceOpts;
 
 export type RunEngineTestFunctionV5<T = any> = (
-  opts: RunEngineTestFunctionOpts & { extra?: any; engineInitDuration: number }
+  opts: RunEngineTestFunctionOpts & { extra?: any; engineInitDuration: number, port?: number }
 ) => Promise<TestResult[] | void | T>;
 
 export class TestPresetEntryV5 {
@@ -274,7 +274,8 @@ export async function runEngineTestV5(
       fs.ensureDirSync(path.join(wsRoot, CONSTANTS.DENDRON_HOOKS_BASE));
     }
     await preSetupHook({ wsRoot, vaults });
-    const engine: DEngineClient = await createEngine({ wsRoot, vaults });
+    const resp = await createEngine({ wsRoot, vaults });
+    const engine = resp.engine;
     const start = process.hrtime();
     const initResp = await engine.init();
     if (addVSWorkspace) {
@@ -297,6 +298,7 @@ export async function runEngineTestV5(
       vaults,
       engine,
       initResp,
+      port: resp.port,
       extra,
       config: engine,
       engineInitDuration,

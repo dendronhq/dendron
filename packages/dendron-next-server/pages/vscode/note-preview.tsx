@@ -12,9 +12,10 @@ import {
 import { Col, Layout, Row } from "antd";
 import _ from "lodash";
 import * as React from "react";
-import { EngineSliceUtils } from "../../../common-frontend/lib/features/engine/slice";
+import { useThemeSwitcher } from "react-css-theme-switcher";
 import { getWsAndPort } from "../../lib/env";
 import { DendronProps } from "../../lib/types";
+import { getThemeType, ThemeType } from "../../styles/theme";
 
 const logger = createLogger("notePreview");
 
@@ -22,9 +23,15 @@ function isHTMLAnchorElement(element: Element): element is HTMLAnchorElement {
   return element.nodeName === "A";
 }
 
+type MermaidInitialzeParams = {
+  startOnLoad: boolean;
+  cloneCssStyles: boolean;
+  theme: string;
+};
+
 type Mermaid = {
   init: () => undefined;
-  initialize: any;
+  initialize: (opts: Partial<MermaidInitialzeParams>) => {};
 };
 
 function getMermaid(window: Window): Mermaid | undefined {
@@ -67,9 +74,8 @@ function mermaidReady(fn: () => any) {
 
 /**
  * Initialize mermaid if it is enabled
- * @param param0
  */
-const useMermaid = ({ config }: { config?: DendronConfig }) => {
+const useMermaid = ({ config, themeType }: { config?: DendronConfig, themeType: ThemeType }) => {
   React.useEffect(() => {
     if (config?.mermaid) {
       mermaidReady(() => {
@@ -77,6 +83,7 @@ const useMermaid = ({ config }: { config?: DendronConfig }) => {
         mermaid!.initialize({
           startOnLoad: false,
           cloneCssStyles: false,
+          theme: themeType === ThemeType.LIGHT ? "default" : "dark",
         });
       });
     }
@@ -93,7 +100,9 @@ function Note({ engine, ide }: DendronProps) {
 
   // apply initial hooks
   const dispatch = engineHooks.useEngineAppDispatch();
-  useMermaid({ config: engine.config });
+  const { switcher, themes, currentTheme, status } = useThemeSwitcher();
+  const themeType = getThemeType(currentTheme);
+  useMermaid({ config: engine.config, themeType });
 
   const { noteActive } = ide;
   const { id: noteId = "9eae08fb-5e3f-4a7e-a989-3f206825d490", contentHash } =
@@ -173,24 +182,4 @@ function Note({ engine, ide }: DendronProps) {
   );
 }
 
-function areEqual(prevProps: DendronProps, nextProps: DendronProps) {
-  const logger = createLogger("treeViewContainer");
-  const isDiff = _.some([
-    // active note changed
-    prevProps.ide.noteActive?.id !== nextProps.ide.noteActive?.id,
-    // active note content changed
-    prevProps.ide.noteActive?.contentHash !==
-      nextProps.ide.noteActive?.contentHash,
-    // engine initialized for first time
-    _.isUndefined(prevProps.engine.notes) ||
-      (_.isEmpty(prevProps.engine.notes) && !_.isEmpty(nextProps.engine.notes)),
-    // engine just went from pending to loading
-    prevProps.engine.loading === "pending" &&
-      nextProps.engine.loading === "idle",
-  ]);
-  logger.info({ state: "areEqual", isDiff, prevProps, nextProps });
-  return !isDiff;
-}
-
-const NoteContainer = React.memo(Note, areEqual);
 export default Note;

@@ -128,7 +128,7 @@ const refsToBacklinkTreeItems = (refs: FoundRefT[], fsPath: string) => {
       undefined,
       vscode.TreeItemCollapsibleState.None
     );
-    backlink.description = `on line ${lineNum}`;
+    backlink.description = `on line ${lineNum + 1}`;
     backlink.tooltip = ref.matchText;
     backlink.command = {
       command: "vscode.open",

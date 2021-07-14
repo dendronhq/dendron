@@ -86,7 +86,7 @@ describe("assets/theme/get", () => {
         });
         await initRemoteWorkspace({ wsRoot, vaults, api });
         const resp = await api.assetGetTheme({ ws: wsRoot, themeTarget: ThemeTarget.PRISM, themeType: ThemeType.DARK });
-        await checkString(resp as unknown as string, "Dark theme");
+        await checkString(resp as unknown as string, "tomorrow night");
       },
       { expect }
     );

@@ -1,4 +1,4 @@
-import { DendronAPI } from "@dendronhq/common-all";
+import { APIUtils, DendronAPI } from "@dendronhq/common-all";
 import { tmpDir } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -17,7 +17,7 @@ describe("workspace", () => {
           },
         };
         const api = new DendronAPI({
-          endpoint: `http://localhost:${port}`,
+          endpoint: APIUtils.getLocalEndpoint(port),
           apiPath: "api",
         });
         let resp = await api.workspaceInit(payload);
@@ -43,7 +43,7 @@ describe("workspace", () => {
           },
         };
         const api = new DendronAPI({
-          endpoint: `http://localhost:${port}`,
+          endpoint: APIUtils.getLocalEndpoint(port),
           apiPath: "api",
         });
         let resp = await api.workspaceInit(payload);

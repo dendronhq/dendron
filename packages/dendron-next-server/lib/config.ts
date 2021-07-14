@@ -1,4 +1,4 @@
-import { DEngineClient } from "@dendronhq/common-all";
+import { APIUtils, DEngineClient } from "@dendronhq/common-all";
 import { getEnv } from "./env";
 import { CONFIG_KEY } from "./types";
 
@@ -20,7 +20,7 @@ type API_REMOTE_KEY =  keyof typeof API_REMOTE_PATH_MAP;;
 
 export function api(key: keyof DEngineClient): string {
   const port = process.env.ENGINE_ENDPOINT_PORT;
-  const suffix = port ? `http://localhost:${port}`: ``;
+  const suffix = port ? APIUtils.getLocalEndpoint(parseInt(port)): ``;
   return suffix + API_PATH_MAP[key]
 }
 

@@ -1,4 +1,5 @@
 import {
+  APIUtils,
   DendronConfig,
   DendronError,
   DendronTreeViewKey,
@@ -195,7 +196,7 @@ export class DendronWorkspace {
         status: ERROR_STATUS.ENGINE_NOT_SET,
       });
     }
-    return `http://localhost:${port}`;
+    return APIUtils.getLocalEndpoint(port);
   }
 
   /**

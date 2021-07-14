@@ -1,21 +1,26 @@
+import { APIUtils, AssetGetThemeRequest } from "@dendronhq/common-all";
 import {
   DendronConfig,
   DMessageSource,
   NoteViewMessageType,
+  ThemeTarget,
+  ThemeType,
 } from "@dendronhq/common-all";
 import {
   createLogger,
   engineHooks,
   engineSlice,
   postVSCodeMessage,
+  querystring,
 } from "@dendronhq/common-frontend";
 import { Col, Layout, Row } from "antd";
 import _ from "lodash";
+import Head from "next/head";
 import * as React from "react";
 import { useThemeSwitcher } from "react-css-theme-switcher";
 import { getWsAndPort } from "../../lib/env";
-import { DendronProps } from "../../lib/types";
-import { getThemeType, ThemeType } from "../../styles/theme";
+import { DendronProps, WorkspaceProps } from "../../lib/types";
+import { getThemeType } from "../../styles/theme";
 
 const logger = createLogger("notePreview");
 
@@ -32,6 +37,7 @@ type MermaidInitialzeParams = {
 type Mermaid = {
   init: () => undefined;
   initialize: (opts: Partial<MermaidInitialzeParams>) => {};
+  startOnLoad?: boolean;
 };
 
 function getMermaid(window: Window): Mermaid | undefined {
@@ -42,6 +48,16 @@ function getMermaid(window: Window): Mermaid | undefined {
     return window.mermaid as Mermaid;
   }
 }
+
+function genThemeString(opts: {themeTarget: ThemeTarget, themeType: ThemeType, port: number, ws: string}) {
+  const themeRequest = {
+    ...opts
+  } as AssetGetThemeRequest
+  const qs = querystring.stringify(themeRequest)
+  const base = `${APIUtils.getLocalEndpoint(opts.port)}/api/assets/theme?${qs}`
+  return base;
+}
+
 function AntLayout(props: React.PropsWithChildren<any>) {
   return (
     <Layout>
@@ -90,7 +106,8 @@ const useMermaid = ({ config, themeType }: { config?: DendronConfig, themeType: 
   }, [config]);
 };
 
-function Note({ engine, ide }: DendronProps) {
+function Note({ engine, ide, ws, port }: DendronProps & WorkspaceProps) {
+  const ctx = "Note";
   logger.info(
     JSON.stringify({
       msg: "enter",
@@ -100,12 +117,13 @@ function Note({ engine, ide }: DendronProps) {
 
   // apply initial hooks
   const dispatch = engineHooks.useEngineAppDispatch();
-  const { switcher, themes, currentTheme, status } = useThemeSwitcher();
+  const { currentTheme } = useThemeSwitcher();
   const themeType = getThemeType(currentTheme);
+  logger.info({ctx, currentTheme, themeType})
   useMermaid({ config: engine.config, themeType });
 
   const { noteActive } = ide;
-  const { id: noteId = "links.target", contentHash } =
+  const { id: noteId = "9eae08fb-5e3f-4a7e-a989-3f206825d490", contentHash } =
     noteActive || {};
   let noteContent = engine.notesRendered[noteId || ""];
 
@@ -175,8 +193,16 @@ function Note({ engine, ide }: DendronProps) {
   if (!noteContent) {
     return <></>;
   }
+  const prismThemeUrl = genThemeString({themeTarget: ThemeTarget.PRISM, themeType: currentTheme as ThemeType, ws, port});
   return (
     <AntLayout>
+    <Head>
+      <link
+        key="prism"
+        rel="stylesheet"
+        href={prismThemeUrl}
+      />
+    </Head>
       <div dangerouslySetInnerHTML={{ __html: noteContent }} />
     </AntLayout>
   );

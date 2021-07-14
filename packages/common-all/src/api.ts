@@ -192,6 +192,10 @@ export class APIUtils {
     const str = querystring.stringify(params);
     return url + `?${str}`;
   }
+
+  static getLocalEndpoint(port: number) {
+    return `http://localhost:${port}`;
+  }
 }
 
 // === Base

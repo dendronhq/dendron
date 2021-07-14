@@ -72,25 +72,6 @@ export enum ProcFlavor {
    */
   HOVER_PREVIEW = "HOVER_PREVIEW",
 }
-
-/**
- * If processor should run in an alternative flavor
- */
-export enum ProcFlavor {
-  /**
-   * No special processing
-   */
-  REGULAR = "REGULAR",
-  /**
-   * Apply publishing rules
-   */
-  PUBLISHING = "PUBLISHING",
-  /**
-   * Apply preview rules
-   */
-  PREVIEW = "PREVIEW",
-}
-
 /**
  * Options for how processor should function
  */

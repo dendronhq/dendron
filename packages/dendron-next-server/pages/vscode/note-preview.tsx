@@ -1,4 +1,4 @@
-import { AssetGetThemeRequest } from "@dendronhq/common-all";
+import { APIUtils, AssetGetThemeRequest } from "@dendronhq/common-all";
 import {
   DendronConfig,
   DMessageSource,
@@ -54,7 +54,7 @@ function genThemeString(opts: {themeTarget: ThemeTarget, themeType: ThemeType, p
     ...opts
   } as AssetGetThemeRequest
   const qs = querystring.stringify(themeRequest)
-  const base = `http://localhost:${opts.port}/api/assets/theme?${qs}`
+  const base = `${APIUtils.getLocalEndpoint(opts.port)}/api/assets/theme?${qs}`
   return base;
 }
 

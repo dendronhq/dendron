@@ -1,4 +1,4 @@
-import { DendronAPI, DendronError, ThemeTarget, ThemeType, WorkspaceOpts } from "@dendronhq/common-all";
+import { APIUtils, DendronAPI, DendronError, ThemeTarget, ThemeType, WorkspaceOpts } from "@dendronhq/common-all";
 import { tmpDir, vault2Path } from "@dendronhq/common-server";
 import path from "path";
 import { createServer, runEngineTestV5 } from "../../engine";
@@ -26,7 +26,7 @@ describe("assets/get", () => {
       async ({ wsRoot, vaults }) => {
         const { port } = await createServer({ wsRoot, vaults });
         const api = new DendronAPI({
-          endpoint: `http://localhost:${port}`,
+          endpoint: APIUtils.getLocalEndpoint(port),
           apiPath: "api",
         });
         await initRemoteWorkspace({ wsRoot, vaults, api });
@@ -43,7 +43,7 @@ describe("assets/get", () => {
       async ({ wsRoot, vaults }) => {
         const { port } = await createServer({ wsRoot, vaults });
         const api = new DendronAPI({
-          endpoint: `http://localhost:${port}`,
+          endpoint: APIUtils.getLocalEndpoint(port),
           apiPath: "api",
         });
         await initRemoteWorkspace({ wsRoot, vaults, api });
@@ -61,7 +61,7 @@ describe("assets/get", () => {
       async ({ wsRoot, vaults }) => {
         const { port } = await createServer({ wsRoot, vaults });
         const api = new DendronAPI({
-          endpoint: `http://localhost:${port}`,
+          endpoint: APIUtils.getLocalEndpoint(port),
           apiPath: "api",
         });
         await initRemoteWorkspace({ wsRoot, vaults, api });
@@ -81,7 +81,7 @@ describe("assets/theme/get", () => {
       async ({ wsRoot, vaults }) => {
         const { port } = await createServer({ wsRoot, vaults });
         const api = new DendronAPI({
-          endpoint: `http://localhost:${port}`,
+          endpoint: APIUtils.getLocalEndpoint(port),
           apiPath: "api",
         });
         await initRemoteWorkspace({ wsRoot, vaults, api });
@@ -97,7 +97,7 @@ describe("assets/theme/get", () => {
       async ({ wsRoot, vaults }) => {
         const { port } = await createServer({ wsRoot, vaults });
         const api = new DendronAPI({
-          endpoint: `http://localhost:${port}`,
+          endpoint: APIUtils.getLocalEndpoint(port),
           apiPath: "api",
         });
         await initRemoteWorkspace({ wsRoot, vaults, api });
@@ -113,7 +113,7 @@ describe("assets/theme/get", () => {
       async ({ wsRoot, vaults }) => {
         const { port } = await createServer({ wsRoot, vaults });
         const api = new DendronAPI({
-          endpoint: `http://localhost:${port}`,
+          endpoint: APIUtils.getLocalEndpoint(port),
           apiPath: "api",
         });
         await initRemoteWorkspace({ wsRoot, vaults, api });

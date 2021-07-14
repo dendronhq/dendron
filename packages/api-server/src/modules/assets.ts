@@ -49,7 +49,7 @@ export class AssetsController {
     };
   }
 
-  async getTheme({ ws, themeTarget, themeType }: AssetGetThemeRequest): Promise<RespV2<string>> {
+  async getTheme({ themeTarget, themeType }: AssetGetThemeRequest): Promise<RespV2<string>> {
     const stage = getStage();
     let root: string;
     if (stage !== "prod") {

@@ -4,14 +4,15 @@ type Theme = {
 	bodyBackground: string;
 }
 
-const LIGHT = {
+const LIGHT: Theme = {
+	bodyBackground: "#ffffff"
 }
 
-const DARK = {
+const DARK: Theme = {
 	bodyBackground: "#303030"
 }
 
 export const THEMES = {
-	DARK: DARK,
+	DARK,
 	LIGHT,
 }

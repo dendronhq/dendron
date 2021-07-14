@@ -6,17 +6,20 @@ import fs from "fs-extra";
 import { describe, it } from "mocha";
 import path from "path";
 import { SinonStub } from "sinon";
-import vscode, { ExtensionContext } from "vscode";
+import { ExtensionContext } from "vscode";
 import { ResetConfigCommand } from "../../commands/ResetConfig";
-import { SetupWorkspaceOpts } from "../../commands/SetupWorkspace";
 import {
-  DEFAULT_LEGACY_VAULT_NAME,
-  DENDRON_COMMANDS,
-  GLOBAL_STATE,
-  WORKSPACE_ACTIVATION_CONTEXT,
+  SetupWorkspaceCommand,
+  SetupWorkspaceOpts
+} from "../../commands/SetupWorkspace";
+import {
+  DEFAULT_LEGACY_VAULT_NAME, GLOBAL_STATE,
+  WORKSPACE_ACTIVATION_CONTEXT
 } from "../../constants";
 import * as telemetry from "../../telemetry";
 import { getWS } from "../../workspace";
+import { BlankInitializer } from "../../workspace/blankInitializer";
+import { TemplateInitializer } from "../../workspace/templateInitializer";
 import { shouldDisplayLapsedUserMsg, _activate } from "../../_extension";
 import { expect, genEmptyWSFiles, resetCodeWorkspace } from "../testUtilsv2";
 import { setupBeforeAfter, stubSetupWorkspace } from "../testUtilsV3";
@@ -42,7 +45,7 @@ function lapsedMessageTest({
   done();
 }
 
-suite("Extension", function testSuite() {
+suite("Extension", function () {
   let homeDirStub: SinonStub;
 
   const ctx: ExtensionContext = setupBeforeAfter(this, {
@@ -79,10 +82,14 @@ suite("Extension", function testSuite() {
             stubSetupWorkspace({
               wsRoot,
             });
-            await vscode.commands.executeCommand(DENDRON_COMMANDS.INIT_WS.key, {
+            const cmd = new SetupWorkspaceCommand();
+            await cmd.execute({
+              rootDirRaw: wsRoot,
               skipOpenWs: true,
               skipConfirmation: true,
-            } as SetupWorkspaceOpts);
+              workspaceInitializer: new BlankInitializer(),
+            });
+
             const resp = readYAML(path.join(wsRoot, "dendron.yml"));
             expect(resp).toEqual({
               version: 1,
@@ -116,6 +123,82 @@ suite("Extension", function testSuite() {
                 duplicateNoteBehavior: {
                   action: "useVault",
                   payload: ["vault"],
+                },
+              },
+            });
+            const dendronState = MetadataService.instance().getMeta();
+            expect(isNotUndefined(dendronState.firstInstall)).toBeTruthy();
+            expect(isNotUndefined(dendronState.firstWsInitialize)).toBeTruthy();
+            expect(
+              fs.readdirSync(path.join(wsRoot, DEFAULT_LEGACY_VAULT_NAME))
+            ).toEqual(genEmptyWSFiles());
+            done();
+          });
+        });
+    });
+
+    it("setup with template initializer", (done) => {
+      const wsRoot = tmpDir().name;
+      getWS()
+        .updateGlobalState(
+          GLOBAL_STATE.WORKSPACE_ACTIVATION_CONTEXT,
+          WORKSPACE_ACTIVATION_CONTEXT.NORMAL
+        )
+        .then(() => {
+          _activate(ctx).then(async () => {
+            stubSetupWorkspace({
+              wsRoot,
+            });
+
+            const cmd = new SetupWorkspaceCommand();
+            await cmd.execute({
+              rootDirRaw: wsRoot,
+              skipOpenWs: true,
+              skipConfirmation: true,
+              workspaceInitializer: new TemplateInitializer(),
+            } as SetupWorkspaceOpts);
+
+            const resp = readYAML(path.join(wsRoot, "dendron.yml"));
+            expect(resp).toEqual({
+              version: 1,
+              vaults: [
+                {
+                  fsPath: "templates",
+                  name: "dendron.templates",
+                  seed: "dendron.templates",
+                },
+                {
+                  fsPath: "vault",
+                },
+              ],
+              useFMTitle: true,
+              useNoteTitleForLink: true,
+              initializeRemoteVaults: true,
+              journal: {
+                addBehavior: "childOfDomain",
+                dailyDomain: "daily",
+                dateFormat: "y.MM.dd",
+                name: "journal",
+                firstDayOfWeek: 1,
+              },
+              noAutoCreateOnDefinition: true,
+              noLegacyNoteRef: true,
+              noXVaultWikiLink: true,
+              seeds: {
+                "dendron.templates": {},
+              },
+              lookupConfirmVaultOnCreate: false,
+              autoFoldFrontmatter: true,
+              site: {
+                copyAssets: true,
+                siteHierarchies: ["root"],
+                siteRootDir: "docs",
+                usePrettyRefs: true,
+                title: "Dendron",
+                description: "Personal knowledge space",
+                duplicateNoteBehavior: {
+                  action: "useVault",
+                  payload: ["vault", "dendron.templates"],
                 },
               },
             });

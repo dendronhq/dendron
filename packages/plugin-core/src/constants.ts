@@ -696,6 +696,12 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     keybindings: {},
     desc: "Paste file",
   },
+  CAPITALIZE: {
+    key: "dendron.capitalize",
+    title: `${CMD_PREFIX} Capitalize`,
+    group: "misc",
+    desc: "Capitalizes selected text"
+  },
   // -- Workbench
   CONFIGURE_RAW: {
     key: "dendron.configureRaw",

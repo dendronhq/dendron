@@ -423,6 +423,11 @@
         "desc": "Paste file"
       },
       {
+        "command": "dendron.capitalize",
+        "title": "Dendron: Capitalize",
+        "desc": "Capitalizes selected text"
+      },
+      {
         "command": "dendron.configureRaw",
         "title": "Dendron: Configure (yaml)",
         "desc": "Modify Dendron Config as raw YAML",

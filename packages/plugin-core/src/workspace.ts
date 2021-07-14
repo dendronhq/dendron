@@ -1,4 +1,5 @@
 import {
+  APIUtils,
   DendronConfig,
   DendronError,
   DendronTreeViewKey,
@@ -199,7 +200,7 @@ export class DendronWorkspace {
         status: ERROR_STATUS.ENGINE_NOT_SET,
       });
     }
-    return `http://localhost:${port}`;
+    return APIUtils.getLocalEndpoint(port);
   }
 
   /**
@@ -833,7 +834,7 @@ export class TutorialInitializer implements WorkspaceInitializer {
       opts.ws.windowWatcher.registerActiveTextEditorChangedHandler((e) => {
         const fileName = e?.document.uri.fsPath;
 
-        let eventName: TutorialEvents | undefined = undefined;
+        let eventName: TutorialEvents | undefined;
 
         if (fileName?.endsWith("tutorial.md")) {
           eventName = TutorialEvents.Tutorial_0_Show;

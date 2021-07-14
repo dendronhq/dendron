@@ -2,16 +2,13 @@ import {
   DendronApiV2,
   DEngineInitPayload,
   NoteProps,
-  NotePropsDict, stringifyError
+  NotePropsDict, stringifyError,
+  APIUtils
 } from "@dendronhq/common-all";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import _ from "lodash";
 import { createLogger } from "../../utils";
 
-function createAPIEndpont(port: number) {
-  const endpoint = `http://localhost:${port}`;
-  return endpoint;
-}
 
 /**
  * Equivalent to engine.init
@@ -20,7 +17,7 @@ export const initNotes = createAsyncThunk(
   "engine/init",
   async ({ port, ws }: { port: number; ws: string }, { dispatch }) => {
     const logger = createLogger("initNotesThunk");
-    const endpoint = createAPIEndpont(port);
+    const endpoint = APIUtils.getLocalEndpoint(port);
     const api = new DendronApiV2({
       endpoint,
       apiPath: "api",
@@ -45,7 +42,7 @@ export const syncNote = createAsyncThunk(
   "engine/init",
   async ({ port, ws, note }: { port: number; ws: string, note: NoteProps }, { dispatch }) => {
     const logger = createLogger("syncNoteThunk");
-    const endpoint = createAPIEndpont(port);
+    const endpoint = APIUtils.getLocalEndpoint(port);
     const api = new DendronApiV2({
       endpoint,
       apiPath: "api",
@@ -72,7 +69,7 @@ export const renderNote = createAsyncThunk(
     { port, ws, id }: { port: number; ws: string; id: string },
     { dispatch }
   ) => {
-    const endpoint = createAPIEndpont(port);
+    const endpoint = APIUtils.getLocalEndpoint(port);
     const logger = createLogger("renderNoteThunk");
     const api = new DendronApiV2({
       endpoint,

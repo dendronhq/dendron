@@ -7,7 +7,7 @@ export function MermaidHeaders() {
   return [
     <script
       key="mermaid-js"
-      src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"
+      src="/js/mermaid.8-11.min.js"
     ></script>,
   ];
 }

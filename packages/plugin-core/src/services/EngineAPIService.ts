@@ -1,10 +1,12 @@
 import {
+  APIUtils,
   DendronAPI,
   EngineWriteOptsV2,
   NoteProps,
   WriteNoteResp,
 } from "@dendronhq/common-all";
 import { DendronEngineClient, HistoryService } from "@dendronhq/engine-server";
+import _ from "lodash";
 import path from "path";
 import { DendronWorkspace } from "../workspace";
 
@@ -30,7 +32,9 @@ export class EngineAPIService extends DendronEngineClient {
     const history = HistoryService.instance();
 
     const api = new DendronAPI({
-      endpoint: `http://localhost:${port}`,
+      endpoint: APIUtils.getLocalEndpoint(
+        _.isString(port) ? parseInt(port, 10) : port
+      ),
       apiPath: "api",
     });
 

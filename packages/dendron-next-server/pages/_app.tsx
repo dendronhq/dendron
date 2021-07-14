@@ -25,6 +25,7 @@ import { Provider } from "react-redux";
 import Layout from "../components/layout";
 import NoOp from "../components/NoOp";
 import PreviewHeader from "../components/PreviewHeader";
+import { WorkspaceProps } from "../lib/types";
 import "../styles/scss/main.scss";
 
 const themes = {
@@ -34,16 +35,10 @@ const themes = {
 
 const { useEngineAppSelector, useEngine } = engineHooks;
 
-type DefaultWorkspaceParams = {
-  port: number;
-  ws: string;
-  theme?: string;
-};
-
-const getWorkspaceParamsFromQueryString = (): DefaultWorkspaceParams => {
+const getWorkspaceParamsFromQueryString = (): WorkspaceProps => {
   const { port, ws, theme } = querystring.parse(
     window.location.search.slice(1)
-  ) as DefaultWorkspaceParams & { port: string };
+  ) as WorkspaceProps & { port: string };
   return { port: parseInt(port), ws, theme };
 };
 
@@ -55,7 +50,7 @@ function AppVSCode({ Component, pageProps }: any) {
   const engine = useEngineAppSelector((state) => state.engine);
   const ideDispatch = ideHooks.useIDEAppDispatch();
   const [workspaceOpts, setWorkspaceOpts] =
-    React.useState<DefaultWorkspaceParams>();
+    React.useState<WorkspaceProps>();
 
   // run once
   useEffect(() => {
@@ -130,7 +125,7 @@ function AppVSCode({ Component, pageProps }: any) {
   return (
     <ThemeSwitcherProvider themeMap={themes} defaultTheme={defaultTheme}>
       <Header engine={engine} ide={ide} {...pageProps} />
-      <Component engine={engine} ide={ide} {...pageProps} />
+      <Component engine={engine} ide={ide} {...pageProps} {...workspaceOpts} />
     </ThemeSwitcherProvider>
   );
 }

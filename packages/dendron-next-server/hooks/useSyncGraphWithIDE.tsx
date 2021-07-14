@@ -11,7 +11,7 @@ const EngineSliceUtils = engineSlice.EngineSliceUtils;
 type Props = DendronProps & {
   graph: cytoscape.Core | undefined;
   config: GraphConfig;
-};
+} ;
 
 const useSyncGraphWithIDE = ({ graph, ide, engine, config }: Props) => {
   const [lastSelectedID, setLastSelectedID] = useState("");

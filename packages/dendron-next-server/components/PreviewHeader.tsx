@@ -37,7 +37,7 @@ export function MathJaxHeaders() {
 /**
  * Header for {@link Note} componenet
  */
-function PreviewHeader({ engine, ide }: DendronProps) {
+function PreviewHeader({ engine }: DendronProps) {
   const ctx = "PreviewHeader";
   const logger = createLogger("PreviewHeader");
   logger.info({ ctx, config: engine?.config });
@@ -49,10 +49,6 @@ function PreviewHeader({ engine, ide }: DendronProps) {
         integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
         crossOrigin="anonymous"
       ></script>
-      <link
-        rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.22.0/themes/prism.min.css"
-      />
       {engine?.config?.useKatex && MathJaxHeaders()}
       {engine?.config?.mermaid && MermaidHeaders()}
     </Head>

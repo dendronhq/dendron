@@ -1,5 +1,5 @@
 import { APIUtils, AssetGetRequest } from "@dendronhq/common-all";
-import { createLogger, Logger, vault2Path } from "@dendronhq/common-server";
+import { createLogger, vault2Path } from "@dendronhq/common-server";
 import _ from "lodash";
 import { Image } from "mdast";
 import path from "path";

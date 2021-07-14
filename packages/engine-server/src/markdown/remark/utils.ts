@@ -223,19 +223,27 @@ const getUnreferencedLinks = ({
   const unreferencedLinks: DLink[] = [];
   _.map(textNodes, (textNode: Text) => {
     const value = textNode.value as string;
-    value.split(/\s/).filter((word) => {
+    // handling text nodes that start with \n
+    if (textNode.position!.start.line !== textNode.position!.end.line) {
+      textNode.position!.start = {
+        line: textNode.position!.start.line + 1,
+        column: 1
+      } 
+    }
+    value.split(/\s+/).filter((word) => {
       const maybeNote = notesMap.get(word);
       if (maybeNote !== undefined) {
-        unreferencedLinks.push({
+        const unrefLink = {
           type: "unreferenced",
           from: NoteUtils.toNoteLoc(note),
-          value,
+          value: value.trim(),
           position: textNode.position as Position,
           to: {
             fname: word,
             vaultName: VaultUtils.getName(maybeNote.vault),
           },
-        });
+        } as DLink;
+        unreferencedLinks.push(unrefLink);
       }
       return maybeNote !== undefined;
     });
@@ -549,11 +557,6 @@ export class LinkUtils {
       }
     );
     const tree = remark.parse(content) as DendronASTNode;
-    // const notesMap = new Map<string, NoteProps>();
-    // const nonStubNotes = notes.filter((n) => !n.stub);
-    // nonStubNotes.map((n) => {
-    //   notesMap.set(n.fname, n);
-    // });
     const unreferencedLinks: DLink[] = getUnreferencedLinks({
       ast: tree,
       note,

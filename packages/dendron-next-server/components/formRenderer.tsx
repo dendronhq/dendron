@@ -32,6 +32,14 @@ import {
 } from "../types/formTypes";
 import { shouldDisplay } from "../utils/shouldDisplay";
 
+const largeFieldStyles = {
+  paddingLeft: "10px",
+  borderWidth: "0px 0px 0px 2px",
+  borderRadius: 0,
+  borderColor: "var(--antd-wave-shadow-color)",
+  borderStyle: "solid",
+};
+
 const BaseInput = ({
   label,
   name,
@@ -160,14 +168,22 @@ const AnyOfInput = ({
   };
   return (
     <BaseInput
-      {...{ name, label, required, helperText, errors, setSelectedKeys }}
+      {...{
+        name,
+        label,
+        required,
+        helperText,
+        errors,
+        setSelectedKeys,
+        customStyles: largeFieldStyles,
+      }}
     >
       <Radio.Group onChange={onChange} value={value}>
         <Radio value={"basic"}>Basic</Radio>
         <Radio value={"advanced"}>Advanced</Radio>
       </Radio.Group>
 
-      <ConfigInput
+      <FormGenerator
         values={values}
         data={(data as AnyOfConfig).data[value === "basic" ? 0 : 1]}
         errors={errors}
@@ -190,15 +206,17 @@ const ArrayInput = ({
   isRecordType = false,
   setSelectedKeys,
 }: ArrayInputType) => {
-  const customStyles = {
-    paddingLeft: "10px",
-    borderWidth: "0px 0px 0px 2px",
-    borderRadius: 0,
-    borderColor: "var(--antd-wave-shadow-color)",
-    borderStyle: "solid",
-  };
   return (
-    <BaseInput {...{ name, label, required, helperText, errors, customStyles }}>
+    <BaseInput
+      {...{
+        name,
+        label,
+        required,
+        helperText,
+        errors,
+        customStyles: largeFieldStyles,
+      }}
+    >
       <FieldArray
         name={name}
         render={(arrayHelpers) =>
@@ -315,7 +333,7 @@ const RenderRecord = ({
           borderWidth: 0,
         }}
       >
-        <ConfigInput
+        <FormGenerator
           key={`${name}.${record.value}`}
           values={values}
           data={(dataDefinition as RecordConfig).data}
@@ -381,7 +399,7 @@ const RenderArray = ({
           borderWidth: 0,
         }}
       >
-        <ConfigInput
+        <FormGenerator
           key={`${name}.${index}`}
           values={values}
           data={dataDefinition.data}
@@ -415,7 +433,7 @@ const RenderArray = ({
   );
 };
 
-const ConfigInput = ({
+const FormGenerator = ({
   data,
   values,
   errors,
@@ -510,7 +528,7 @@ const ConfigInput = ({
         </Title>
       )}
       {Object.keys((data as ObjectConfig).data).map((key) => (
-        <ConfigInput
+        <FormGenerator
           key={prefix.join(".") + "." + key}
           values={values}
           data={(data as ObjectConfig).data[key]}
@@ -523,4 +541,4 @@ const ConfigInput = ({
   );
 };
 
-export default ConfigInput;
+export default FormGenerator;

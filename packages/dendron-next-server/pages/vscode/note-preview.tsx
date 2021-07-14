@@ -105,7 +105,7 @@ function Note({ engine, ide }: DendronProps) {
   useMermaid({ config: engine.config, themeType });
 
   const { noteActive } = ide;
-  const { id: noteId = "9eae08fb-5e3f-4a7e-a989-3f206825d490", contentHash } =
+  const { id: noteId = "73eb67ea-0291-45e7-8f2f-193fd6f00643", contentHash } =
     noteActive || {};
   let noteContent = engine.notesRendered[noteId || ""];
 

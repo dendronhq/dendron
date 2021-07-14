@@ -7,7 +7,7 @@ export function MermaidHeaders() {
   return [
     <script
       key="mermaid-js"
-      src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"
+      src="/js/mermaid.8-11.min.js"
     ></script>,
   ];
 }
@@ -45,9 +45,8 @@ function PreviewHeader({ engine }: DendronProps) {
   return (
     <Head>
       <script
-        src="https://code.jquery.com/jquery-3.6.0.min.js"
-        integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
-        crossOrigin="anonymous"
+        key="jquery"
+        src="/js/jquery.3-60.min.js"
       ></script>
       {engine?.config?.useKatex && MathJaxHeaders()}
       {engine?.config?.mermaid && MermaidHeaders()}

@@ -47,11 +47,11 @@ function AntLayout(props: React.PropsWithChildren<any>) {
     <Layout>
       <br />
       <br />
-      <Layout>
+      <Layout id="main-content-wrap" className="main-content-wrap">
         <Row gutter={16}>
           <Col className="gutter-row" span={2}></Col>
           <Col className="gutter-row" span={20}>
-            <Layout.Content>{props.children}</Layout.Content>
+            <Layout.Content id="main-content" className="main-content" role="main">{props.children}</Layout.Content>
           </Col>
           <Col className="gutter-row" span={2}></Col>
         </Row>
@@ -105,7 +105,7 @@ function Note({ engine, ide }: DendronProps) {
   useMermaid({ config: engine.config, themeType });
 
   const { noteActive } = ide;
-  const { id: noteId = "73eb67ea-0291-45e7-8f2f-193fd6f00643", contentHash } =
+  const { id: noteId = "links.target", contentHash } =
     noteActive || {};
   let noteContent = engine.notesRendered[noteId || ""];
 

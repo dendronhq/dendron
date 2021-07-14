@@ -1,12 +1,11 @@
-import { NoteProps, WorkspaceOpts } from "@dendronhq/common-all";
 import {
   NoteTestUtilsV4,
-  TestPresetEntryV4,
+  TestPresetEntryV4
 } from "@dendronhq/common-test-utils";
 import {
   DendronASTDest,
   Processor,
-  ProcFlavor,
+  ProcFlavor
 } from "@dendronhq/engine-server";
 import path from "path";
 import { createEngineFromServer, runEngineTestV5 } from "../../../engine";
@@ -17,16 +16,6 @@ import { cleanVerifyOpts, createProcCompileTests } from "./utils";
 const getOpts = (opts: any) => {
   const _copts = opts.extra as { proc: Processor; dest: DendronASTDest };
   return _copts;
-};
-
-const modifyNote = async (
-  opts: WorkspaceOpts,
-  cb: (note: NoteProps) => NoteProps
-) => {
-  await NoteTestUtilsV4.modifyNoteByPath(
-    { wsRoot: opts.wsRoot, vault: opts.vaults[0], fname: "foo" },
-    cb
-  );
 };
 
 const IMAGE_WITH_LEAD_FORWARD_SLASH = createProcCompileTests({
@@ -75,7 +64,7 @@ const NOTE_REF_BASIC_WITH_REHYPE = createProcCompileTests({
   name: "NOTE_REF_WITH_REHYPE",
   setup: async (opts) => {
     const { proc } = getOpts(opts);
-    const txt = `![[foo.md]]`;
+    const txt = `![[alpha.md]]`;
     const resp = await proc.process(txt);
     return { resp, proc };
   },
@@ -83,10 +72,13 @@ const NOTE_REF_BASIC_WITH_REHYPE = createProcCompileTests({
     [DendronASTDest.HTML]: {
       [ProcFlavor.REGULAR]: async ({ extra }) => {
         const { resp } = extra;
+        expect(resp).toMatchSnapshot();
         await checkString(
           resp.contents,
-          // should have id
-          `<a href="foo-id.html"`,
+          // should have id for link
+          `<a href="alpha-id.html"`,
+          // title should be fname,
+          "Alpha</h1>",
           // html quoted
           `<p><a href="bar.html">Bar</a></p>`
         );
@@ -97,10 +89,7 @@ const NOTE_REF_BASIC_WITH_REHYPE = createProcCompileTests({
   },
   preSetupHook: async (opts) => {
     await ENGINE_HOOKS.setupBasic({ ...opts, extra: { idv2: true } });
-    await modifyNote(opts, (note: NoteProps) => {
-      note.body = `[[bar]]`;
-      return note;
-    });
+    await NoteTestUtilsV4.createNote({fname: "alpha", body: "[[bar]]", vault: opts.vaults[0], wsRoot: opts.wsRoot, props: {id: "alpha-id"}});
   },
 });
 const ALL_TEST_CASES = [

@@ -11,6 +11,7 @@ import { configWrite } from "../../lib/effects";
 import FormGenerator from "../../components/formRenderer";
 import SideMenu from "../../components/sideMenu";
 import dendronValidator from "../../data/dendron-yml.validator.json";
+import bucketConfig, { buckets } from "../../data/bucketConfig";
 import {
   generateSchema,
   generateRenderableConfig,
@@ -141,13 +142,24 @@ const ConfigForm: React.FC<DefaultProps> = ({ engine }) => {
           >
             {({ values, errors }) => (
               <Form>
-                <FormGenerator
-                  data={dendronConfig}
-                  values={values}
-                  errors={errors}
-                  prefix={[]}
-                  setSelectedKeys={setSelectedKeys}
-                />
+                {buckets.map((bucket) =>
+                  bucketConfig[bucket].map((property: string) => (
+                    <FormGenerator
+                      data={generateRenderableConfig(
+                        _.get(
+                          dendronValidator,
+                          `definitions.DendronConfig.properties.${property}`
+                        ),
+                        dendronValidator.definitions,
+                        property
+                      )}
+                      values={values}
+                      errors={errors}
+                      prefix={[property]}
+                      setSelectedKeys={setSelectedKeys}
+                    />
+                  ))
+                )}
                 <Form.Item name="submit" style={{ justifyContent: "center" }}>
                   <Button.Group size="large">
                     <ResetButton type="text">Clear changes</ResetButton>

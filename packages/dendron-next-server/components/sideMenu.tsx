@@ -1,10 +1,13 @@
 import React from "react";
 import { Layout, Menu } from "antd";
-import { Config, ObjectConfig } from "../types/formTypes";
 import get from "lodash/get";
 import isEmpty from "lodash/isEmpty";
 
+import { Config, ObjectConfig } from "../types/formTypes";
 import { shouldDisplay } from "../utils/shouldDisplay";
+import dendronValidator from "../data/dendron-yml.validator.json";
+import bucketConfig, { buckets } from "../data/bucketConfig";
+import { generateRenderableConfig } from "../utils/formUtils";
 
 const { Sider } = Layout;
 const { SubMenu } = Menu;
@@ -154,7 +157,24 @@ const SideMenu: React.FC<DefaultProptypes> = ({
         openKeys={openKeys}
         onOpenChange={onOpenChange}
       >
-        {generateMenu(dendronFormConfig, [], currentValues)}
+        {buckets.map((bucket) => (
+          <SubMenu key={bucket} title={bucket}>
+            {bucketConfig[bucket].map((property: string) =>
+              generateMenu(
+                generateRenderableConfig(
+                  get(
+                    dendronValidator,
+                    `definitions.DendronConfig.properties.${property}`
+                  ),
+                  dendronValidator.definitions,
+                  property
+                ),
+                [property],
+                currentValues
+              )
+            )}
+          </SubMenu>
+        ))}
       </Menu>
     </Sider>
   );

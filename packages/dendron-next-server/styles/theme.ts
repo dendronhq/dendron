@@ -1,9 +1,5 @@
 import { theme as defaultTheme, extendTheme } from "@chakra-ui/react";
-
-export enum ThemeType {
-  LIGHT = "LIGHT",
-  DARK = "DARK",
-}
+import { ThemeType } from "@dendronhq/common-all";
 
 export const getThemeType = (theme?: string) => {
   if (theme === "dark") {

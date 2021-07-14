@@ -21,11 +21,11 @@ The tutorial steps take about 10 minutes to complete. Let's get started!
 - [x] Install Dendron
 - [x] Create your first workspace
 - [ ] Complete the Tutorial (%KEYBINDING%+Click on the links to go to each tutorial note)
-  - [ ] 1. [[tutorial.1-navigation-basics]]
-  - [ ] 2. [[tutorial.2-taking-notes]]
-  - [ ] 3. [[tutorial.3-linking-your-notes]]
-  - [ ] 4. [[tutorial.4-rich-formatting]]
-  - [ ] 5. [[tutorial.5-conclusion]]
+  - [ ] One: [[tutorial.1-navigation-basics]]
+	- [ ] Two: [[tutorial.2-taking-notes]]
+	- [ ] Three: [[tutorial.3-linking-your-notes]]
+	- [ ] Four:  [[tutorial.4-rich-formatting]]
+	- [ ] Five:  [[tutorial.5-conclusion]]
 
 #### Getting Help
 

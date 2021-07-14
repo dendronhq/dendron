@@ -247,6 +247,26 @@ describe("RemarkUtils and LinkUtils", () => {
       }
     );
 
+    testWithEngine(
+      "hashtag link",
+      async ({ engine }) => {
+        const note = engine.notes["foo"];
+        const links = LinkUtils.findLinks({ note, engine });
+        expect(links).toMatchSnapshot();
+        expect(links[0].to?.fname).toEqual("tags.bar");
+      },
+      {
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await NoteTestUtilsV4.createNote({
+            fname: "foo",
+            body: "#bar",
+            vault: vaults[0],
+            wsRoot,
+          });
+        },
+      }
+    );
+
     test("note ref", async () => {
       await runEngineTestV5(
         async ({ engine, wsRoot }) => {

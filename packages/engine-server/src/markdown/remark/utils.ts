@@ -47,6 +47,7 @@ import {
   DendronASTNode,
   DendronASTRoot,
   DendronASTTypes,
+  HashTag,
   NoteRefNoteV4,
   NoteRefNoteV4_LEGACY,
   WikiLinkNoteV4,
@@ -133,6 +134,7 @@ const getLinks = ({
       DendronASTTypes.WIKI_LINK,
       DendronASTTypes.REF_LINK_V2,
       DendronASTTypes.REF_LINK,
+      DendronASTTypes.HASHTAG,
     ],
     (node) => {
       switch (node.type) {
@@ -145,6 +147,20 @@ const getLinks = ({
         case DendronASTTypes.REF_LINK:
           noteRefs.push(node as NoteRefNoteV4_LEGACY);
           break;
+        case DendronASTTypes.HASHTAG: {
+          const hashtag = node as HashTag;
+          wikiLinks.push({
+            ...hashtag,
+            type: DendronASTTypes.WIKI_LINK,
+            value: hashtag.fname,
+            data: {
+              alias: hashtag.value,
+            },
+          });
+          break;
+        }
+        default:
+          /* nothing */
       }
     }
   );

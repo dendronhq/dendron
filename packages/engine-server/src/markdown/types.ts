@@ -79,7 +79,7 @@ export type DendronASTData = {
 
 // --- NODES
 
-export type WikiLinkNoteV4 = DendronASTNode & {
+export type WikiLinkNoteV4 = Omit<DendronASTNode, "children"> & {
   type: DendronASTTypes.WIKI_LINK;
   value: string;
   data: WikiLinkDataV4;

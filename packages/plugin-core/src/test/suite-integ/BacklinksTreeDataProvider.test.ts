@@ -220,6 +220,36 @@ suite("BacklinksTreeDataProvider", function () {
       },
     });
   });
+
+  test.only("with hashtag", (done) => {
+    let noteTarget: NoteProps;
+    let noteWithLink: NoteProps;
+    runMultiVaultTest({
+      ctx,
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        noteTarget = await NoteTestUtilsV4.createNote({
+          wsRoot,
+          vault: vaults[0],
+          fname: "tags.my.test-0.tag",
+        });
+        noteWithLink = await NoteTestUtilsV4.createNote({
+          wsRoot,
+          vault: vaults[0],
+          fname: "test",
+          body: "#my.test-0.tag",
+        });
+      },
+      onInit: async ({ wsRoot }) => {
+        await VSCodeUtils.openNote(noteTarget);
+        const out = toPlainObject(await getChildren()) as any;
+        expect(out[0].command.arguments[0].path as string).toEqual(
+          NoteUtils.getFullPath({ note: noteWithLink, wsRoot })
+        );
+        expect(out.length).toEqual(1);
+        done();
+      },
+    })
+  })
 });
 
 // suite('BacklinksTreeDataProvider', () => {

@@ -91,13 +91,37 @@ describe("hashtag", () => {
         return { resp };
       },
       verifyFuncDict: {
-        [DendronASTDest.HTML]: async ({ extra }) => {
+        [DendronASTDest.MD_DENDRON]: async ({ extra }) => {
           const { resp } = extra;
           return [
             {
               actual: await AssertUtils.assertInString({
                 body: resp.toString(),
                 match: [hashtag],
+              }),
+              expected: true,
+            },
+          ];
+        },
+        [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
+          const { resp } = extra;
+          return [
+            {
+              actual: await AssertUtils.assertInString({
+                body: resp.toString(),
+                match: [`[${hashtag}](tags.my-hash.tag0)`],
+              }),
+              expected: true,
+            },
+          ];
+        },
+        [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
+          const { resp } = extra;
+          return [
+            {
+              actual: await AssertUtils.assertInString({
+                body: resp.toString(),
+                match: [`[${hashtag}](tags.my-hash.tag0)`],
               }),
               expected: true,
             },

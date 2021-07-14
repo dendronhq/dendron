@@ -129,9 +129,13 @@ export type BlockAnchor = DendronASTNode & {
   id: string;
 };
 
+/** Hashtag tags, like `#foo.bar`, a shorthand for `[[tags.foo.bar]]` */
 export type HashTag = DendronASTNode & {
   type: DendronASTTypes.HASHTAG;
+  /** The fname that the hashtag actually references, like `tags.foo.bar` */
   fname: string;
+  /** The full test of the hashtag, like `#foo.bar` */
+  value: string;
 };
 
 export type Anchor = BlockAnchor | Heading;

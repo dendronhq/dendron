@@ -1,11 +1,10 @@
 import _ from "lodash";
-import { DendronError, DEngine, DEngineClient, NoteUtils } from "@dendronhq/common-all";
+import { DendronError } from "@dendronhq/common-all";
 import { Eat } from "remark-parse";
 import Unified, { Plugin } from "unified";
 import { DendronASTDest, DendronASTTypes, HashTag } from "../types";
 import { MDUtilsV4 } from "../utils";
 import { Element } from "hast";
-import { html } from "mdast-builder";
 
 /** Hashtags have the form #foo, or #foo.bar, or #f123
  *
@@ -15,14 +14,14 @@ import { html } from "mdast-builder";
  * Other then the reservation on the first character, hashtags can contain any
  * character that a note name can.
  */
-export const HASHTAG_REGEX = /^#([^0-9#|>[\]][^#|>[\]]*)/;
-export const HASHTAG_REGEX_LOOSE = /#([^0-9#|>[\]][^#|>[\]]*)/;
+export const HASHTAG_REGEX = /^#([^0-9#|>[\]\s][^#|>[\]\s]*)/;
+export const HASHTAG_REGEX_LOOSE = /#([^0-9#|>[\]\s][^#|>[\]\s]*)/;
 
 /**
  *
- * @param text The text to check if it matches an block anchor.
- * @param matchLoose If true, a block anchor anywhere in the string will match. Otherwise the string must contain only the anchor.
- * @returns The identifier for the match block anchor, or undefined if it did not match.
+ * @param text The text to check if it matches an hashtag.
+ * @param matchLoose If true, a hashtag anywhere in the string will match. Otherwise the string must contain only the anchor.
+ * @returns The identifier for the matched hashtag, or undefined if it did not match.
  */
 export const matchHashtag = (
   text: string,
@@ -69,7 +68,7 @@ function attachParser(proc: Unified.Processor) {
   const Parser = proc.Parser;
   const inlineTokenizers = Parser.prototype.inlineTokenizers;
   const inlineMethods = Parser.prototype.inlineMethods;
-  inlineTokenizers.blockAnchor = inlineTokenizer;
+  inlineTokenizers.hashtag = inlineTokenizer;
   inlineMethods.splice(inlineMethods.indexOf("link"), 0, "hashtag");
 }
 
@@ -78,37 +77,20 @@ function attachCompiler(proc: Unified.Processor, _opts?: PluginOpts) {
   const visitors = Compiler.prototype.visitors;
 
   if (visitors) {
-    visitors.blockAnchor = (node: HashTag): string | Element => {
+    visitors.hashtag = (node: HashTag): string | Element => {
       const { dest } = MDUtilsV4.getDendronData(proc);
+      const prefix = MDUtilsV4.getProcOpts(proc).wikiLinksOpts?.prefix || "";
       switch (dest) {
         case DendronASTDest.MD_DENDRON:
+          return node.value;
         case DendronASTDest.MD_REGULAR:
-          return `#${node.fname}`;
-        case DendronASTDest.MD_ENHANCED_PREVIEW: {
-          const procOpts = MDUtilsV4.getProcOpts(proc);
-          return hashtag2htmlRaw(node, procOpts.engine);
-        }
+        case DendronASTDest.MD_ENHANCED_PREVIEW:
+          return `[${node.value}](${prefix}${node.fname})`;
         default:
-          throw new DendronError({ message: "Unable to render block anchor" });
+          throw new DendronError({ message: "Unable to render hashtag" });
       }
     };
   }
-}
-
-export function hashtag2htmlRaw(node: HashTag, engine: DEngineClient, _opts?: PluginOpts) {
-  // TODO: What if we can't find the note?
-  const note = NoteUtils.getNotesByFname({fname: node.fname, notes: engine.notes})[0];
-  
-  return (
-    // TODO: This is not correct. Figure out how to generate the correct link.
-    `<a aria-hidden="true" class="block-anchor anchor-heading" href="/notes/${note.id}.html">` +
-    node.fname +
-    "</a>"
-  );
-}
-
-export function hashtag2html(node: HashTag, engine: DEngine, opts?: PluginOpts) {
-  return html(hashtag2htmlRaw(node, engine, opts));
 }
 
 export { plugin as hashtags };

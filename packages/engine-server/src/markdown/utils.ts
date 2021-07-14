@@ -400,6 +400,7 @@ export class MDUtilsV4 {
       })
       .use(backlinks)
       .use(blockAnchors, _.merge(opts.blockAnchorsOpts))
+      .use(hashtags)
       .use(noteRefsV2, {
         ...opts.noteRefOpts,
         wikiLinkOpts: opts.wikiLinksOpts,

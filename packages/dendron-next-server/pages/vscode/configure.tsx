@@ -142,24 +142,34 @@ const ConfigForm: React.FC<DefaultProps> = ({ engine }) => {
           >
             {({ values, errors }) => (
               <Form>
-                {buckets.map((bucket) =>
-                  bucketConfig[bucket].map((property: string) => (
-                    <FormGenerator
-                      data={generateRenderableConfig(
-                        _.get(
-                          dendronValidator,
-                          `definitions.DendronConfig.properties.${property}`
-                        ),
-                        dendronValidator.definitions,
-                        property
-                      )}
-                      values={values}
-                      errors={errors}
-                      prefix={[property]}
-                      setSelectedKeys={setSelectedKeys}
-                    />
-                  ))
-                )}
+                {buckets.map((bucket) => {
+                  return (
+                    <React.Fragment key={bucket}>
+                      <Typography
+                        style={{ textAlign: "center", padding: "2rem" }}
+                      >
+                        <Title level={2}>{bucket}</Title>
+                      </Typography>
+                      {bucketConfig[bucket].map((property: string) => (
+                        <FormGenerator
+                          key={property}
+                          data={generateRenderableConfig(
+                            _.get(
+                              dendronValidator,
+                              `definitions.DendronConfig.properties.${property}`
+                            ),
+                            dendronValidator.definitions,
+                            property
+                          )}
+                          values={values}
+                          errors={errors}
+                          prefix={[property]}
+                          setSelectedKeys={setSelectedKeys}
+                        />
+                      ))}
+                    </React.Fragment>
+                  );
+                })}
                 <Form.Item name="submit" style={{ justifyContent: "center" }}>
                   <Button.Group size="large">
                     <ResetButton type="text">Clear changes</ResetButton>

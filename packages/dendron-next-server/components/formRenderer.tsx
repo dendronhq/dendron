@@ -40,26 +40,23 @@ const BaseInput = ({
   helperText,
   children,
   setSelectedKeys,
+  customStyles,
 }: BaseInputType) => {
   const error = React.useMemo(() => get(errors, name), [errors, name]);
   return (
-    <Form.Item
-      name={name}
-      style={{ justifyContent: "center" }}
-      required={required}
-    >
-      <div>
-        <Title id={name} level={3} style={{ textTransform: "capitalize" }}>
+    <Form.Item name={name} required={required}>
+      <div style={{ ...customStyles }}>
+        <Title id={name} level={3} style={{ fontFamily: "monospace" }}>
           {label}
           {required && <span style={{ color: "red" }}> *</span>}
         </Title>
-        {children}
         {helperText && (
           <>
-            <br />
             <Text type="secondary">{helperText}</Text>
+            <br />
           </>
         )}
+        {children}
         {error && (
           <>
             <br />
@@ -193,8 +190,15 @@ const ArrayInput = ({
   isRecordType = false,
   setSelectedKeys,
 }: ArrayInputType) => {
+  const customStyles = {
+    paddingLeft: "10px",
+    borderWidth: "0px 0px 0px 2px",
+    borderRadius: 0,
+    borderColor: "var(--antd-wave-shadow-color)",
+    borderStyle: "solid",
+  };
   return (
-    <BaseInput {...{ name, label, required, helperText, errors }}>
+    <BaseInput {...{ name, label, required, helperText, errors, customStyles }}>
       <FieldArray
         name={name}
         render={(arrayHelpers) =>
@@ -307,6 +311,9 @@ const RenderRecord = ({
           />
         }
         extra={<MinusCircleOutlined onClick={() => removeRecord(record)} />}
+        style={{
+          borderWidth: 0,
+        }}
       >
         <ConfigInput
           key={`${name}.${record.value}`}
@@ -370,6 +377,9 @@ const RenderArray = ({
         extra={
           <MinusCircleOutlined onClick={() => arrayHelpers.remove(index)} />
         }
+        style={{
+          borderWidth: 0,
+        }}
       >
         <ConfigInput
           key={`${name}.${index}`}
@@ -492,8 +502,8 @@ const ConfigInput = ({
           level={2}
           style={{
             textTransform: "capitalize",
-            textAlign: "center",
-            padding: "1rem",
+            // textAlign: "center",
+            padding: "1rem 1rem 1rem 0rem",
           }}
         >
           {prefix[prefix.length - 1]}

@@ -225,17 +225,6 @@ const ConfigForm: React.FC<DefaultProps> = ({ engine }) => {
     [dendronConfig]
   );
 
-  const formItemLayout = {
-    labelCol: {
-      xs: { span: 24 },
-      sm: { span: 8 },
-    },
-    wrapperCol: {
-      xs: { span: 24 },
-      sm: { span: 16 },
-    },
-  };
-
   const onSubmit = async (config: any, { setSubmitting }: any) => {
     dispatch(
       configWrite({
@@ -309,8 +298,8 @@ const ConfigForm: React.FC<DefaultProps> = ({ engine }) => {
           style={{
             display: "flex",
             flexDirection: "column",
-            width: "100%",
-            maxWidth: "60rem",
+            width: "max-content",
+            maxWidth: "35rem",
           }}
         >
           <Typography style={{ textAlign: "center", padding: "2rem" }}>
@@ -323,7 +312,7 @@ const ConfigForm: React.FC<DefaultProps> = ({ engine }) => {
             validateOnChange={true}
           >
             {({ values, errors }) => (
-              <Form {...formItemLayout}>
+              <Form>
                 <ConfigInput
                   data={dendronConfig}
                   values={values}

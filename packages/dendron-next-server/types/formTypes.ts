@@ -63,7 +63,10 @@ export type InputType = {
   helperText?: string;
   setSelectedKeys?: (keys: string[]) => void;
 };
-export type BaseInputType = InputType & { children?: ReactNode };
+export type BaseInputType = InputType & {
+  children?: ReactNode;
+  customStyles?: {};
+};
 export type SimpleInputType = InputType & {
   type: "text" | "number";
   addonAfter?: ReactNode;

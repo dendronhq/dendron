@@ -39,7 +39,6 @@ const generateMenu = (
       <Menu.Item
         key={name}
         style={{
-          fontSize: "1rem",
           lineHeight: "1.5rem",
           height: "1.5rem",
         }}
@@ -145,6 +144,8 @@ const SideMenu: React.FC<DefaultProptypes> = ({
           height: "100vh",
           minWidth: "100%",
           width: "max-content",
+          fontSize: "0.9rem",
+          fontFamily: "monospace",
         }}
         inlineIndent={10}
         mode="inline"

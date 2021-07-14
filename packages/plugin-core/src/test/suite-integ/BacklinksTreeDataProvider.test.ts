@@ -260,13 +260,13 @@ suite("BacklinksTreeDataProvider", function () {
 
         // a subtree for link(s), holding one backlink, "[[alpha]]"
         const linkSubTreeItem = sourceTreeItem.children[0];
-        expect(linkSubTreeItem.label).toEqual("links");
+        expect(linkSubTreeItem.label).toEqual("Linked");
         expect(linkSubTreeItem.refs.length).toEqual(1);
         expect(linkSubTreeItem.refs[0].matchText).toEqual("[[alpha]]");
 
         // a subtree for unref(s), holding one unref item, "alpha"
         const unrefSubTreeItem = sourceTreeItem.children[1];
-        expect(unrefSubTreeItem.label).toEqual("unreferenced");
+        expect(unrefSubTreeItem.label).toEqual("Candidates");
         expect(unrefSubTreeItem.refs.length).toEqual(1);
         expect(unrefSubTreeItem.refs[0].matchText).toEqual("alpha");
 
@@ -331,12 +331,12 @@ suite("BacklinksTreeDataProvider", function () {
 
         // a subtree for link(s), holding three backlink
         const linkSubTreeItem = sourceTreeItem.children[0];
-        expect(linkSubTreeItem.label).toEqual("links");
+        expect(linkSubTreeItem.label).toEqual("Linked");
         expect(linkSubTreeItem.refs.length).toEqual(3);
 
         // a subtree for unref(s), holding five unref item
         const unrefSubTreeItem = sourceTreeItem.children[1];
-        expect(unrefSubTreeItem.label).toEqual("unreferenced");
+        expect(unrefSubTreeItem.label).toEqual("Candidates");
         expect(unrefSubTreeItem.refs.length).toEqual(5);
 
         done();

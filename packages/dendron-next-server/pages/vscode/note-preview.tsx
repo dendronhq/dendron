@@ -1,20 +1,20 @@
-import { APIUtils, AssetGetThemeRequest } from "@dendronhq/common-all";
 import {
+  APIUtils,
+  AssetGetThemeRequest,
   DendronConfig,
   DMessageSource,
   NoteViewMessageType,
   ThemeTarget,
-  ThemeType,
+  ThemeType
 } from "@dendronhq/common-all";
 import {
   createLogger,
   engineHooks,
   engineSlice,
   postVSCodeMessage,
-  querystring,
+  querystring
 } from "@dendronhq/common-frontend";
 import { Col, Layout, Row } from "antd";
-import _ from "lodash";
 import Head from "next/head";
 import * as React from "react";
 import { useThemeSwitcher } from "react-css-theme-switcher";
@@ -37,7 +37,13 @@ type MermaidInitialzeParams = {
 type Mermaid = {
   init: () => undefined;
   initialize: (opts: Partial<MermaidInitialzeParams>) => {};
+  parse: (content: string) => undefined;
   startOnLoad?: boolean;
+  render: (
+    svgId: string,
+    code: string,
+    cb: (svgCode: string) => void
+  ) => undefined;
 };
 
 function getMermaid(window: Window): Mermaid | undefined {
@@ -49,12 +55,17 @@ function getMermaid(window: Window): Mermaid | undefined {
   }
 }
 
-function genThemeString(opts: {themeTarget: ThemeTarget, themeType: ThemeType, port: number, ws: string}) {
+function genThemeString(opts: {
+  themeTarget: ThemeTarget;
+  themeType: ThemeType;
+  port: number;
+  ws: string;
+}) {
   const themeRequest = {
-    ...opts
-  } as AssetGetThemeRequest
-  const qs = querystring.stringify(themeRequest)
-  const base = `${APIUtils.getLocalEndpoint(opts.port)}/api/assets/theme?${qs}`
+    ...opts,
+  } as AssetGetThemeRequest;
+  const qs = querystring.stringify(themeRequest);
+  const base = `${APIUtils.getLocalEndpoint(opts.port)}/api/assets/theme?${qs}`;
   return base;
 }
 
@@ -67,7 +78,13 @@ function AntLayout(props: React.PropsWithChildren<any>) {
         <Row gutter={16}>
           <Col className="gutter-row" span={2}></Col>
           <Col className="gutter-row" span={20}>
-            <Layout.Content id="main-content" className="main-content" role="main">{props.children}</Layout.Content>
+            <Layout.Content
+              id="main-content"
+              className="main-content"
+              role="main"
+            >
+              {props.children}
+            </Layout.Content>
           </Col>
           <Col className="gutter-row" span={2}></Col>
         </Row>
@@ -76,31 +93,53 @@ function AntLayout(props: React.PropsWithChildren<any>) {
   );
 }
 
-function mermaidReady(fn: () => any) {
+/**
+ *
+ * @param fn
+ * @param opts.initiialized - check if mermaid has already been initialized
+ */
+function mermaidReady(
+  fn: () => any,
+  opts?: { checkInit?: boolean;},
+) {
   // see if DOM is already available
-  if (getMermaid(window)) {
+  if (
+    getMermaid(window) &&
+    // @ts-ignore
+    (opts?.checkInit ? window.MERMAID_INITIALIZED : true) 
+  ) {
     // call on next available tick
     setTimeout(fn, 1);
   } else {
     setTimeout(() => {
-      mermaidReady(fn);
-    }, 1000);
+      mermaidReady(fn, opts);
+    }, 100);
   }
 }
 
 /**
  * Initialize mermaid if it is enabled
  */
-const useMermaid = ({ config, themeType }: { config?: DendronConfig, themeType: ThemeType }) => {
+const useMermaid = ({
+  config,
+  themeType,
+}: {
+  config?: DendronConfig;
+  themeType: ThemeType;
+}) => {
   React.useEffect(() => {
     if (config?.mermaid) {
       mermaidReady(() => {
         const mermaid = getMermaid(window);
+        logger.info("init mermaid global:begin");
         mermaid!.initialize({
           startOnLoad: false,
           cloneCssStyles: false,
-          theme: themeType === ThemeType.LIGHT ? "default" : "dark",
+          theme: themeType === ThemeType.LIGHT ? "forest" : "dark",
         });
+        logger.info("init mermaid global:end");
+        // @ts-ignore
+        window.MERMAID_INITIALIZED = true;
       });
     }
   }, [config]);
@@ -119,7 +158,7 @@ function Note({ engine, ide, ws, port }: DendronProps & WorkspaceProps) {
   const dispatch = engineHooks.useEngineAppDispatch();
   const { currentTheme } = useThemeSwitcher();
   const themeType = getThemeType(currentTheme);
-  logger.info({ctx, currentTheme, themeType})
+  logger.info({ ctx, currentTheme, themeType });
   useMermaid({ config: engine.config, themeType });
 
   const { noteActive } = ide;
@@ -180,10 +219,14 @@ function Note({ engine, ide, ws, port }: DendronProps & WorkspaceProps) {
   // hook: apply mermaid
   React.useEffect(() => {
     if (engine?.config?.mermaid) {
-      mermaidReady(() => {
-        const mermaid = getMermaid(window);
-        mermaid!.init();
-      });
+      mermaidReady(
+        () => {
+          logger.info("init mermaid elements:begin");
+          getMermaid(window)!.init();
+          logger.info("init mermaid elements:end");
+        },
+        { checkInit: true },
+      );
     }
   }, [noteContent, engine.config]);
 
@@ -193,16 +236,17 @@ function Note({ engine, ide, ws, port }: DendronProps & WorkspaceProps) {
   if (!noteContent) {
     return <></>;
   }
-  const prismThemeUrl = genThemeString({themeTarget: ThemeTarget.PRISM, themeType: currentTheme as ThemeType, ws, port});
+  const prismThemeUrl = genThemeString({
+    themeTarget: ThemeTarget.PRISM,
+    themeType: currentTheme as ThemeType,
+    ws,
+    port,
+  });
   return (
     <AntLayout>
-    <Head>
-      <link
-        key="prism"
-        rel="stylesheet"
-        href={prismThemeUrl}
-      />
-    </Head>
+      <Head>
+        <link key="prism" rel="stylesheet" href={prismThemeUrl} />
+      </Head>
       <div dangerouslySetInnerHTML={{ __html: noteContent }} />
     </AntLayout>
   );

@@ -18,6 +18,7 @@ import { getDurationMilliseconds, vault2Path } from "@dendronhq/common-server";
 import _ from "lodash";
 import path from "path";
 import { QuickPickItem, TextEditor, Uri, ViewColumn, window } from "vscode";
+import { VaultSelectionMode } from "../../commands/LookupCommand";
 import { Logger } from "../../logger";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace, getWS } from "../../workspace";
@@ -410,20 +411,30 @@ export class PickerUtilsV2 {
   public static async getOrPromptVaultForNewNote({
     vault,
     fname,
-    autoSuggest = true,
+    vaultSelectionMode = VaultSelectionMode.smart,
   }: {
     vault: DVault;
     fname: string;
-    autoSuggest?: boolean;
+    vaultSelectionMode?: VaultSelectionMode;
   }): Promise<DVault | undefined> {
     const vaultSuggestions = await PickerUtilsV2.getVaultRecommendations({
       vault,
-      fname,
-      autoSuggest,
+      fname
     });
 
-    if (vaultSuggestions?.length === 1) {
+    if (vaultSuggestions?.length === 1 || vaultSelectionMode === VaultSelectionMode.auto) {
       return vaultSuggestions[0].vault;
+    }
+
+    // Auto select for the user if either the hierarchy pattern matches in the
+    // current vault context, or if there are no hierarchy matches
+    if (vaultSelectionMode === VaultSelectionMode.smart) {
+      if (
+        vaultSuggestions[0].detail === FULL_MATCH_DETAIL ||
+        vaultSuggestions[0].detail === CONTEXT_DETAIL
+      ) {
+        return vaultSuggestions[0].vault;
+      }
     }
 
     return PickerUtilsV2.promptVault(vaultSuggestions);
@@ -467,13 +478,11 @@ export class PickerUtilsV2 {
    */
   static async getVaultRecommendations({
     vault,
-    fname,
-    autoSuggest = true,
+    fname
   }: {
     vault: DVault;
     fname: string;
-    autoSuggest?: boolean;
-  }): Promise<VaultPickerItem[] | undefined> {
+  }): Promise<VaultPickerItem[]> {
     let vaultSuggestions: VaultPickerItem[] = [];
 
     const engine = getWS().getEngine();
@@ -572,15 +581,6 @@ export class PickerUtilsV2 {
           vaultSuggestions.push({ vault: wsVault });
         }
       });
-    }
-
-    if (autoSuggest) {
-      if (
-        vaultsWithMatchingHierarchy.length === 1 ||
-        vaultSuggestions[0].detail === FULL_MATCH_DETAIL
-      ) {
-        return vaultSuggestions.slice(0, 1);
-      }
     }
 
     return vaultSuggestions;

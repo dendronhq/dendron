@@ -2,7 +2,7 @@ import {
   DendronError,
   DNodePropsQuickInputV2,
   getSlugger,
-  NoteProps
+  NoteProps,
 } from "@dendronhq/common-all";
 import { getDurationMilliseconds } from "@dendronhq/common-server";
 import _ from "lodash";
@@ -12,7 +12,8 @@ import { QuickInputButton } from "vscode";
 import { CancellationTokenSource } from "vscode-languageclient";
 import {
   LookupCommandOpts,
-  LookupNoteExistBehavior
+  LookupNoteExistBehavior,
+  VaultSelectionMode,
 } from "../../commands/LookupCommand";
 import { CONFIG } from "../../constants";
 import { Logger } from "../../logger";
@@ -25,7 +26,7 @@ import {
   createAllButtons,
   DendronBtn,
   getButtonCategory,
-  IDendronQuickInputButton
+  IDendronQuickInputButton,
 } from "./buttons";
 import { LookupProviderV2 } from "./LookupProviderV2";
 import { DendronQuickPickerV2, LookupControllerState } from "./types";
@@ -38,6 +39,7 @@ export class LookupControllerV2 {
   protected opts: EngineOpts;
   protected _onDidHide?: () => void;
   protected _cancelTokenSource?: CancellationTokenSource;
+  private vaultSelectionMode?: VaultSelectionMode;
 
   constructor(
     opts: EngineOpts,
@@ -67,6 +69,8 @@ export class LookupControllerV2 {
     };
     this.opts = opts;
     this.createCancelSource();
+
+    this.vaultSelectionMode = lookupOpts?.vaultSelectionMode;
   }
 
   get cancelToken() {
@@ -127,6 +131,7 @@ export class LookupControllerV2 {
       range,
       provider,
       changed: btnTriggered,
+      vaultSelectionMode: this.vaultSelectionMode
     });
   };
 
@@ -183,6 +188,7 @@ export class LookupControllerV2 {
       range,
       quickPickValue: cleanOpts.value,
       provider,
+      vaultSelectionMode: this.vaultSelectionMode
     });
     Logger.info({ ctx, profile, msg: "post:updatePickerBehavior" });
     quickPick.onDidTriggerButton(this.onTriggerButton);
@@ -324,6 +330,7 @@ export class LookupControllerV2 {
     quickPickValue?: string;
     provider: LookupProviderV2;
     changed?: DendronBtn;
+    vaultSelectionMode?: VaultSelectionMode;
   }) {
     const ctx = "updatePickerBehavior";
     const ws = getWS();
@@ -364,14 +371,10 @@ export class LookupControllerV2 {
 
     // handle selection resp
     quickPick.onCreate = async (note: NoteProps) => {
-      const out =
-        DendronWorkspace.instance().config["lookupConfirmVaultOnCreate"];
-      const autoSuggest = out === false || _.isUndefined(out);
-
       const vaultSelection = await PickerUtilsV2.getOrPromptVaultForNewNote({
         vault: note.vault,
         fname: note.fname,
-        autoSuggest,
+        vaultSelectionMode: opts.vaultSelectionMode,
       });
 
       if (_.isUndefined(vaultSelection)) {

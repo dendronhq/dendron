@@ -470,7 +470,7 @@ const ConfigInput = ({
       <SelectInput
         name={prefix.join(".")}
         data={data as EnumConfig}
-        {...{ label, values, errors, prefix, setSelectedKeys }}
+        {...{ label, values, helperText, errors, prefix, setSelectedKeys }}
       />
     );
   }

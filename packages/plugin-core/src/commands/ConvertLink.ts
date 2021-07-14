@@ -24,13 +24,12 @@ export class ConvertLinkCommand extends BasicCommand<
 
   async execute(_opts: CommandOpts) {
     const ctx = "ConvertLinkCommand";
-    ctx;
     const { location, text } = _opts;
     await commands.executeCommand("vscode.open", location.uri);
     const editor = VSCodeUtils.getActiveTextEditor()!;
     const selection = editor.document.getText(location.range);
     const preConversionOffset = selection.indexOf(text);
-    const convertedSelection = selection.replace(text, `\[\[${text}\]\]`);
+    const convertedSelection = selection.replace(text, `[[${text}]]`);
     await editor.edit((editBuilder) => {
       editBuilder.replace(location.range, convertedSelection);
     });

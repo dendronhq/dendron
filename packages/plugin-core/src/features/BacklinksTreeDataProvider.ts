@@ -82,7 +82,7 @@ const addBacklinkTypeTreeItems = (
   refs: FoundRefT[],
   isUnrefEnabled: boolean | undefined
 ) => {
-  const [wikilinks, unreflinks] = _.partition(refs, (ref) => {
+  const [wikilinks, unrefCandidates] = _.partition(refs, (ref) => {
     return !ref.isUnref;
   });
 
@@ -90,7 +90,7 @@ const addBacklinkTypeTreeItems = (
   const wikilinksCount = wikilinks.length;
   if (wikilinksCount > 0) {
     const backlinkTreeItem = new Backlink(
-      "links",
+      "Linked",
       wikilinks,
       vscode.TreeItemCollapsibleState.Collapsed
     );
@@ -99,15 +99,15 @@ const addBacklinkTypeTreeItems = (
     out.push(backlinkTreeItem);
   }
   if (isUnrefEnabled) {
-    const unrefCount = unreflinks.length;
+    const unrefCount = unrefCandidates.length;
     if (unrefCount > 0) {
       const unrefTreeItem = new Backlink(
-        "unreferenced",
-        unreflinks,
+        "Candidates",
+        unrefCandidates,
         vscode.TreeItemCollapsibleState.Collapsed
       );
       unrefTreeItem.iconPath = new vscode.ThemeIcon(ICONS.UNREFLINK);
-      unrefTreeItem.description = `${unreflinks.length} unreferenced items.`;
+      unrefTreeItem.description = `${unrefCandidates.length} candidate(s).`;
       out.push(unrefTreeItem);
     }
   }
@@ -171,13 +171,13 @@ export default class BacklinksTreeDataProvider
         return [];
       }
       return pathsToBacklinkSourceTreeItems(fsPath, isUnrefEnabled);
-    } else if (element.label === "links" || element.label === "unreferenced") {
+    } else if (element.label === "Linked" || element.label === "Candidates") {
       const refs = element?.refs;
       if (!refs) {
         return [];
       }
 
-      if (!isUnrefEnabled && element.label === "unreferenced") {
+      if (!isUnrefEnabled && element.label === "Candidates") {
         return [];
       }
       return refsToBacklinkTreeItems(refs, fsPath!);

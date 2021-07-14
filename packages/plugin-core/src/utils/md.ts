@@ -384,7 +384,7 @@ export const findReferences = async (
             );
       const location = new vscode.Location(vscode.Uri.file(fsPath), range);
       const foundRef: FoundRefT = {
-        location: location,
+        location,
         matchText: lines.slice(-1)[0],
       };
       if (link.type === "unreferenced") {

@@ -23,7 +23,8 @@ function isHTMLAnchorElement(element: Element): element is HTMLAnchorElement {
   return element.nodeName === "A";
 }
 
-type MermaidInitialzeParams = {
+
+type MermaidInitializeParams = {
   startOnLoad: boolean;
   cloneCssStyles: boolean;
   theme: string;
@@ -31,7 +32,7 @@ type MermaidInitialzeParams = {
 
 type Mermaid = {
   init: () => undefined;
-  initialize: (opts: Partial<MermaidInitialzeParams>) => {};
+  initialize: (opts: Partial<MermaidInitializeParams>) => {};
 };
 
 function getMermaid(window: Window): Mermaid | undefined {

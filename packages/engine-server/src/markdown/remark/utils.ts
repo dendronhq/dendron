@@ -457,6 +457,9 @@ export class LinkUtils {
   }): string | never {
     switch (dest) {
       case DendronASTDest.MD_DENDRON: {
+        if (this.isHashtagLink(link.from)) {
+          return link.from.alias;
+        }
         const ref = link.type === "ref" ? "!" : "";
         const vaultPrefix =
           link.from.vaultName && link.data.xvault
@@ -500,6 +503,10 @@ export class LinkUtils {
       body.slice(endOffset),
     ].join("");
     return newBody;
+  }
+
+  static isHashtagLink(link: DNoteLoc): link is DNoteLoc & { alias: string } {
+    return link.alias !== undefined && link.alias.startsWith("#") && link.fname.startsWith("tags");
   }
 }
 

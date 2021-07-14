@@ -161,6 +161,132 @@ suite("MoveNoteCommand", function () {
     });
   });
 
+  test("update hashtags correctly", (done) => {
+    let tagNote: NoteProps;
+    runLegacySingleWorkspaceTest({
+      ctx,
+      postSetupHook: async ({ wsRoot, vaults }) => {
+        tagNote = await NoteTestUtilsV4.createNote({
+          vault: vaults[0],
+          wsRoot,
+          fname: "tags.test-tag.0",
+        });
+        await NoteTestUtilsV4.createNote({
+          vault: vaults[0],
+          wsRoot,
+          fname: "test",
+          body: "#test-tag.0",
+        });
+      },
+      onInit: async ({ vaults, wsRoot, engine }) => {
+          await VSCodeUtils.openNote(tagNote);
+
+          const cmd = new MoveNoteCommand();
+          await cmd.execute({
+            moves: [
+              {
+                oldLoc: {
+                  fname: "tags.test-tag.0",
+                  vaultName: VaultUtils.getName(vaults[0]),
+                },
+                newLoc: {
+                  fname: "tags.new-0-tag.1",
+                  vaultName: VaultUtils.getName(vaults[0]),
+                },
+              },
+            ],
+          });
+          const testNote = NoteUtils.getNoteByFnameV5({fname: "test", notes: engine.notes, wsRoot, vault: vaults[0]})!;
+          expect(await AssertUtils.assertInString({body: testNote?.body, match: ["#new-0-tag.1"]})).toBeTruthy();
+          done();
+      },
+    });
+  });
+
+  test("moving a note into `tags.` turns links to hashtags", (done) => {
+    let tagNote: NoteProps;
+    runLegacySingleWorkspaceTest({
+      ctx,
+      postSetupHook: async ({ wsRoot, vaults }) => {
+        tagNote = await NoteTestUtilsV4.createNote({
+          vault: vaults[0],
+          wsRoot,
+          fname: "not-really-tag",
+        });
+        await NoteTestUtilsV4.createNote({
+          vault: vaults[0],
+          wsRoot,
+          fname: "test",
+          body: "[[not-really-tag]]",
+        });
+      },
+      onInit: async ({ vaults, wsRoot, engine }) => {
+          await VSCodeUtils.openNote(tagNote);
+
+          const cmd = new MoveNoteCommand();
+          await cmd.execute({
+            moves: [
+              {
+                oldLoc: {
+                  fname: "not-really-tag",
+                  vaultName: VaultUtils.getName(vaults[0]),
+                },
+                newLoc: {
+                  fname: "tags.actually-tag",
+                  vaultName: VaultUtils.getName(vaults[0]),
+                },
+              },
+            ],
+          });
+          const testNote = NoteUtils.getNoteByFnameV5({fname: "test", notes: engine.notes, wsRoot, vault: vaults[0]})!;
+          expect(await AssertUtils.assertInString({body: testNote?.body, match: ["#actually-tag"]})).toBeTruthy();
+          done();
+      },
+    });
+  });
+
+  test("moving a note out of `tags.` turns hashtags into regular links", (done) => {
+    let tagNote: NoteProps;
+    runLegacySingleWorkspaceTest({
+      ctx,
+      postSetupHook: async ({ wsRoot, vaults }) => {
+        tagNote = await NoteTestUtilsV4.createNote({
+          vault: vaults[0],
+          wsRoot,
+          fname: "tags.actually-tag",
+        });
+        await NoteTestUtilsV4.createNote({
+          vault: vaults[0],
+          wsRoot,
+          fname: "test",
+          body: "#actually-tag",
+        });
+      },
+      onInit: async ({ vaults, wsRoot, engine }) => {
+          await VSCodeUtils.openNote(tagNote);
+
+          const cmd = new MoveNoteCommand();
+          await cmd.execute({
+            moves: [
+              {
+                oldLoc: {
+                  fname: "tags.actually-tag",
+                  vaultName: VaultUtils.getName(vaults[0]),
+                },
+                newLoc: {
+                  fname: "not-really-tag",
+                  vaultName: VaultUtils.getName(vaults[0]),
+                },
+              },
+            ],
+          });
+          const testNote = NoteUtils.getNoteByFnameV5({fname: "test", notes: engine.notes, wsRoot, vault: vaults[0]})!;
+          expect(await AssertUtils.assertInString({body: testNote?.body, match: ["[[not-really-tag]]"]})).toBeTruthy();
+          done();
+      },
+    });
+  });
+
   test("move note in same vault", (done) => {
     runLegacyMultiWorkspaceTest({
       ctx,

@@ -13,7 +13,7 @@ export enum CONFIG_KEY {
 export type StageEnv = typeof CONFIG_KEY;
 
 
-export type DefaultWorkspaceParams = {
+export type WorkspaceProps = {
   port: number;
   ws: string;
   theme?: string;
@@ -22,4 +22,4 @@ export type DefaultWorkspaceParams = {
 export type DendronProps = {
   engine: engineSlice.EngineState,
   ide: ideSlice.IDEState;
-} & DefaultWorkspaceParams;
+};

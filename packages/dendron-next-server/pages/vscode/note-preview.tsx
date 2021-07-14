@@ -19,7 +19,7 @@ import Head from "next/head";
 import * as React from "react";
 import { useThemeSwitcher } from "react-css-theme-switcher";
 import { getWsAndPort } from "../../lib/env";
-import { DendronProps } from "../../lib/types";
+import { DendronProps, WorkspaceProps } from "../../lib/types";
 import { getThemeType } from "../../styles/theme";
 
 const logger = createLogger("notePreview");
@@ -106,7 +106,7 @@ const useMermaid = ({ config, themeType }: { config?: DendronConfig, themeType: 
   }, [config]);
 };
 
-function Note({ engine, ide, ws, port }: DendronProps) {
+function Note({ engine, ide, ws, port }: DendronProps & WorkspaceProps) {
   const ctx = "Note";
   logger.info(
     JSON.stringify({

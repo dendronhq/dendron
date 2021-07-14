@@ -24,7 +24,6 @@ router.get("/theme", async (req: Request, res: Response) => {
   const resp = await AssetsController.instance().getTheme(
     req.query as AssetGetThemeRequest
   );
-  debugger;
   if (ExpressUtils.handleError(res, resp)) return;
   res.sendFile(resp.data!);
 });

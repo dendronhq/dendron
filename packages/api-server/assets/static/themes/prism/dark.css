@@ -1,16 +1,15 @@
 /* PrismJS 1.24.1
-https://prismjs.com/download.html?themes=#themes=prism-dark&languages=markup+css+clike+javascript */
+https://prismjs.com/download.html#themes=prism-tomorrow&languages=markup+css+clike+javascript */
 /**
- * prism.js Dark theme for JavaScript, CSS and HTML
- * Based on the slides of the talk “/Reg(exp){2}lained/”
- * @author Lea Verou
+ * prism.js tomorrow night eighties for JavaScript, CoffeeScript, CSS and HTML
+ * Based on https://github.com/chriskempson/tomorrow-theme
+ * @author Rose Pritchard
  */
 
  code[class*="language-"],
  pre[class*="language-"] {
-	 color: white;
+	 color: #ccc;
 	 background: none;
-	 text-shadow: 0 -.1em .2em black;
 	 font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
 	 font-size: 1em;
 	 text-align: left;
@@ -28,18 +27,7 @@ https://prismjs.com/download.html?themes=#themes=prism-dark&languages=markup+css
 	 -moz-hyphens: none;
 	 -ms-hyphens: none;
 	 hyphens: none;
- }
  
- @media print {
-	 code[class*="language-"],
-	 pre[class*="language-"] {
-		 text-shadow: none;
-	 }
- }
- 
- pre[class*="language-"],
- :not(pre) > code[class*="language-"] {
-	 background: hsl(30, 20%, 25%);
  }
  
  /* Code blocks */
@@ -47,71 +35,76 @@ https://prismjs.com/download.html?themes=#themes=prism-dark&languages=markup+css
 	 padding: 1em;
 	 margin: .5em 0;
 	 overflow: auto;
-	 border: .3em solid hsl(30, 20%, 40%);
-	 border-radius: .5em;
-	 box-shadow: 1px 1px .5em black inset;
+ }
+ 
+ :not(pre) > code[class*="language-"],
+ pre[class*="language-"] {
+	 background: #303030;
  }
  
  /* Inline code */
  :not(pre) > code[class*="language-"] {
-	 padding: .15em .2em .05em;
+	 padding: .1em;
 	 border-radius: .3em;
-	 border: .13em solid hsl(30, 20%, 40%);
-	 box-shadow: 1px 1px .3em -.1em black inset;
 	 white-space: normal;
  }
  
  .token.comment,
+ .token.block-comment,
  .token.prolog,
  .token.doctype,
  .token.cdata {
-	 color: hsl(30, 20%, 50%);
+	 color: #999;
  }
  
  .token.punctuation {
-	 opacity: .7;
+	 color: #ccc;
  }
  
- .token.namespace {
-	 opacity: .7;
+ .token.tag,
+ .token.attr-name,
+ .token.namespace,
+ .token.deleted {
+	 color: #e2777a;
+ }
+ 
+ .token.function-name {
+	 color: #6196cc;
+ }
+ 
+ .token.boolean,
+ .token.number,
+ .token.function {
+	 color: #f08d49;
  }
  
  .token.property,
- .token.tag,
- .token.boolean,
- .token.number,
+ .token.class-name,
  .token.constant,
  .token.symbol {
-	 color: hsl(350, 40%, 70%);
+	 color: #f8c555;
  }
  
  .token.selector,
- .token.attr-name,
+ .token.important,
+ .token.atrule,
+ .token.keyword,
+ .token.builtin {
+	 color: #cc99cd;
+ }
+ 
  .token.string,
  .token.char,
- .token.builtin,
- .token.inserted {
-	 color: hsl(75, 70%, 60%);
+ .token.attr-value,
+ .token.regex,
+ .token.variable {
+	 color: #7ec699;
  }
  
  .token.operator,
  .token.entity,
- .token.url,
- .language-css .token.string,
- .style .token.string,
- .token.variable {
-	 color: hsl(40, 90%, 60%);
- }
- 
- .token.atrule,
- .token.attr-value,
- .token.keyword {
-	 color: hsl(350, 40%, 70%);
- }
- 
- .token.regex,
- .token.important {
-	 color: #e90;
+ .token.url {
+	 color: #67cdcc;
  }
  
  .token.important,
@@ -126,8 +119,8 @@ https://prismjs.com/download.html?themes=#themes=prism-dark&languages=markup+css
 	 cursor: help;
  }
  
- .token.deleted {
-	 color: red;
+ .token.inserted {
+	 color: green;
  }
  
  

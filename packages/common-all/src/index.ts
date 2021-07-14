@@ -13,3 +13,4 @@ export * from "./vault";
 export * from "./user";
 export * from "./analytics";
 export * from "./types";
+export * from "./themes";

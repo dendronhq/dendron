@@ -25,6 +25,7 @@ import { Provider } from "react-redux";
 import Layout from "../components/layout";
 import NoOp from "../components/NoOp";
 import PreviewHeader from "../components/PreviewHeader";
+import { DefaultWorkspaceParams } from "../lib/types";
 import "../styles/scss/main.scss";
 
 const themes = {
@@ -33,12 +34,6 @@ const themes = {
 };
 
 const { useEngineAppSelector, useEngine } = engineHooks;
-
-type DefaultWorkspaceParams = {
-  port: number;
-  ws: string;
-  theme?: string;
-};
 
 const getWorkspaceParamsFromQueryString = (): DefaultWorkspaceParams => {
   const { port, ws, theme } = querystring.parse(
@@ -130,7 +125,7 @@ function AppVSCode({ Component, pageProps }: any) {
   return (
     <ThemeSwitcherProvider themeMap={themes} defaultTheme={defaultTheme}>
       <Header engine={engine} ide={ide} {...pageProps} />
-      <Component engine={engine} ide={ide} {...pageProps} />
+      <Component engine={engine} ide={ide} {...pageProps} {...workspaceOpts} />
     </ThemeSwitcherProvider>
   );
 }

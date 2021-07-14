@@ -752,7 +752,7 @@
     "@dendronhq/engine-test-utils": "^0.50.0",
     "@dendronhq/lsp-server": "^0.28.7-alpha.0",
     "@dendronhq/pods-core": "^0.50.0",
-    "@types/vscode": "1.57",
+    "@types/vscode": "1.58",
     "cross-path-sort": "^1.0.0",
     "execa": "^4.0.2",
     "fs-extra": "^9.0.1",

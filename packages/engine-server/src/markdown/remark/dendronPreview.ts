@@ -1,5 +1,5 @@
 import { APIUtils, AssetGetRequest } from "@dendronhq/common-all";
-import { vault2Path } from "@dendronhq/common-server";
+import { createLogger, Logger, vault2Path } from "@dendronhq/common-server";
 import _ from "lodash";
 import { Image } from "mdast";
 import path from "path";
@@ -21,14 +21,18 @@ type PluginOpts = NoteRefsOpts & {};
  * @returns 
  */
 function handleImage({proc, node, useFullPathUrl = false} : {proc: Unified.Processor, node: Image, useFullPathUrl?: boolean}) {
+  const ctx = "handleImage";
+  const logger = createLogger("handleImage");
   // ignore web images
   if (_.some(["http://", "https://"], (ent) => node.url.startsWith(ent))) {
+    logger.info({ctx, url: node.url});
     return;
   }
   if (node.url.startsWith("/")) {
     const { wsRoot, vault } = MDUtilsV5.getProcData(proc);
     const fpath = path.join(vault2Path({ vault, wsRoot }), node.url);
     if (useFullPathUrl === true) {
+      logger.info({ctx, wsRoot, vault, url: node.url, fpath, useFullPathUrl});
       node.url = fpath;
       return;
     }
@@ -40,6 +44,7 @@ function handleImage({proc, node, useFullPathUrl = false} : {proc: Unified.Proce
     };
     node.url = APIUtils.genUrlWithQS({ url, params });
   }
+  logger.info({ctx, url: node.url, useFullPathUrl, opts: MDUtilsV5.getProcOpts(proc)});
 }
 
 function plugin(this: Unified.Processor, _opts?: PluginOpts): Transformer {

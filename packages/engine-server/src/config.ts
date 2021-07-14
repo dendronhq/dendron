@@ -45,6 +45,8 @@ export class DConfig {
       noLegacyNoteRef: true,
       noXVaultWikiLink: true,
       lookupConfirmVaultOnCreate: false,
+      mermaid: true,
+      useKatex: true,
       autoFoldFrontmatter: true,
       journal: {
         dailyDomain: "daily",

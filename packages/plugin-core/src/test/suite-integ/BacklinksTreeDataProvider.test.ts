@@ -221,7 +221,7 @@ suite("BacklinksTreeDataProvider", function () {
     });
   });
 
-  test.only("with hashtag", (done) => {
+  test("with hashtag", (done) => {
     let noteTarget: NoteProps;
     let noteWithLink: NoteProps;
     runMultiVaultTest({

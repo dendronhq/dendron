@@ -9,6 +9,7 @@ import {
 } from "@dendronhq/common-all";
 import { matchWikiLink } from "@dendronhq/engine-server";
 import _ from "lodash";
+import { HASHTAG_REGEX_LOOSE } from "packages/engine-server/src/markdown/remark/hashtag";
 import {
   TextEditor,
   Position,
@@ -63,9 +64,7 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
   getLinkFromSelection() {
     const { selection, editor } = VSCodeUtils.getSelection();
     if (!_.isEmpty(selection) && selection?.start) {
-      const currentLine = editor?.document.getText().split("\n")[
-        selection.start.line
-      ];
+      const currentLine = editor?.document.lineAt(selection.start.line).text;
 
       if (currentLine) {
         const lastIdx = currentLine
@@ -83,6 +82,16 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
           )
         ) {
           return out.link;
+        } else {
+          // handle hashtags
+          for (const hashtag of currentLine.matchAll(new RegExp(HASHTAG_REGEX_LOOSE, "g"))) {
+            if (hashtag.index && _.inRange(selection.start.character, hashtag.index, hashtag.index + hashtag[0].length)) {
+              return {
+                alias: hashtag[0],
+                value: `tags.${hashtag[1]}`,
+              };
+            }
+          }
         }
       }
     }

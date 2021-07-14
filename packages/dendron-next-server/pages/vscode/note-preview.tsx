@@ -2,6 +2,7 @@ import {
   DendronConfig,
   DMessageSource,
   NoteViewMessageType,
+  ThemeType,
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -15,7 +16,7 @@ import * as React from "react";
 import { useThemeSwitcher } from "react-css-theme-switcher";
 import { getWsAndPort } from "../../lib/env";
 import { DendronProps } from "../../lib/types";
-import { getThemeType, ThemeType } from "../../styles/theme";
+import { getThemeType } from "../../styles/theme";
 
 const logger = createLogger("notePreview");
 

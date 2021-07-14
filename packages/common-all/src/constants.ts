@@ -1,5 +1,14 @@
 const ROOT_PATH = "/doc/root";
 
+export enum ThemeType {
+  LIGHT = "LIGHT",
+  DARK = "DARK",
+}
+
+export enum ThemeTarget {
+  PRISM = "PRISM"
+}
+
 export const CONSTANTS = {
   ROOT_PATH,
   ALL_QUERY: "**/*",

@@ -74,9 +74,13 @@ export class NoteSyncService {
     let note = string2Note({ content, fname, vault, calculateHash: true });
     note = NoteUtils.hydrate({ noteRaw: note, noteHydrated });
     const links = LinkUtils.findLinks({ note, engine: eclient });
+    const notesMap = NoteUtils.createFnameNoteMap(
+      _.values(eclient.notes),
+      true
+    )
     const unrefLinks = LinkUtils.findUnreferencedLinks({
-      note: note,
-      notes: _.values(eclient.notes),
+      note,
+      notesMap,
       engine: eclient,
     });
     note.links = links.concat(unrefLinks);

@@ -381,11 +381,12 @@ export class FileStorage implements DStore {
   }
   
   _addUnrefLinks(allNotes: NoteProps[] ) {
-    return _.map(allNotes, (noteFrom) => {
+    const notesMap = NoteUtils.createFnameNoteMap(allNotes, true);
+    return _.map(allNotes, (noteFrom: NoteProps) => {
       try {
         const unreferencedLinks = LinkUtils.findUnreferencedLinks({
           note: noteFrom,
-          notes: allNotes,
+          notesMap,
           engine: this.engine,
         });
         noteFrom.links = noteFrom.links.concat(unreferencedLinks);

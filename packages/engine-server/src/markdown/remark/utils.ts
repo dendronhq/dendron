@@ -203,11 +203,11 @@ const getLinks = ({
 const getUnreferencedLinks = ({
   ast,
   note,
-  notes,
+  notesMap,
 }: {
   ast: DendronASTNode;
   note: NoteProps;
-  notes: NoteProps[];
+  notesMap: Map<string, NoteProps>;
 }) => {
   const textNodes: Text[] = [];
   visit(
@@ -220,23 +220,16 @@ const getUnreferencedLinks = ({
     }
   );
 
-  // OPTIMIZE: map the notes once, and pass it into here as a param.
-  const fnameNoteMap = new Map<string, NoteProps>();
-  notes = notes.filter((n) => !n.stub);
-  notes.map((n) => {
-    fnameNoteMap.set(n.fname, n);
-  });
-
   const unreferencedLinks: DLink[] = [];
   _.map(textNodes, (textNode: Text) => {
     const value = textNode.value as string;
     value.split(/\s/).filter((word) => {
-      const maybeNote = fnameNoteMap.get(word);
+      const maybeNote = notesMap.get(word);
       if (maybeNote !== undefined) {
         unreferencedLinks.push({
           type: "unreferenced",
           from: NoteUtils.toNoteLoc(note),
-          value: value,
+          value,
           position: textNode.position as Position,
           to: {
             fname: word,
@@ -536,11 +529,13 @@ export class LinkUtils {
 
   static findUnreferencedLinks({
     note,
-    notes,
+    // notes,
+    notesMap,
     engine,
   }: {
     note: NoteProps;
-    notes: NoteProps[];
+    // notes: NoteProps[];
+    notesMap: Map<string, NoteProps>;
     engine: DEngineClient;
   }) {
     const content = note.body;
@@ -554,10 +549,15 @@ export class LinkUtils {
       }
     );
     const tree = remark.parse(content) as DendronASTNode;
+    // const notesMap = new Map<string, NoteProps>();
+    // const nonStubNotes = notes.filter((n) => !n.stub);
+    // nonStubNotes.map((n) => {
+    //   notesMap.set(n.fname, n);
+    // });
     const unreferencedLinks: DLink[] = getUnreferencedLinks({
       ast: tree,
       note,
-      notes,
+      notesMap,
     });
     return unreferencedLinks;
   }

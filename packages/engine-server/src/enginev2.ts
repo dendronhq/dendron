@@ -456,6 +456,10 @@ export class DendronEngineV2 implements DEngine {
   }
 
   async refreshNotesV2(notes: NoteChangeEntry[]) {
+    const notesMap = NoteUtils.createFnameNoteMap(
+      _.values(this.notes),
+      true
+    );
     await Promise.all(
       notes.map(async (ent: NoteChangeEntry) => {
         const { id } = ent.note;
@@ -472,7 +476,7 @@ export class DendronEngineV2 implements DEngine {
           const links = LinkUtils.findLinks({ note: ent.note, engine: this });
           const unrefLinks = LinkUtils.findUnreferencedLinks({
             note: ent.note,
-            notes: _.values(this.notes),
+            notesMap,
             engine: this,
           });
           const anchors = await AnchorUtils.findAnchors({

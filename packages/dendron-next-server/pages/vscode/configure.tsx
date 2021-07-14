@@ -27,7 +27,7 @@ const { Title } = Typography;
 const { Content } = Layout;
 
 const generateSchema = (config: Config): any => {
-  if (!config) return {};
+  if (_.isEmpty(config)) return {};
   if (
     config.type === "string" ||
     config.type === "number" ||
@@ -81,8 +81,11 @@ type DefaultProps = {
 const generateRenderableConfig = (
   properties: any,
   definitions: any,
-  label: string
+  label: string,
+  required?: string[]
 ): Config => {
+  if ("not" in properties) return {} as Config;
+
   // `any` type generates empty config object, so we are assuming
   // that it's a string so that nothing breaks
   if (_.isEmpty(properties))
@@ -90,6 +93,16 @@ const generateRenderableConfig = (
       type: "string",
       label,
     } as StringConfig;
+
+  // check if instance of Object
+
+  if (_.isObject(properties.type)) {
+    return {
+      type: "enum",
+      data: properties.type.const,
+      label,
+    } as EnumConfig;
+  }
 
   if (properties.type === "string") {
     return {
@@ -132,7 +145,7 @@ const generateRenderableConfig = (
     return generateRenderableConfig(data, definitions, src);
   }
 
-  if ("additionalProperties" in properties) {
+  if ("additionalProperties" in properties && properties.additionalProperties) {
     return {
       type: "record",
       label,
@@ -167,7 +180,7 @@ const ConfigForm: React.FC<DefaultProps> = ({ engine }) => {
   const dendronConfig = useMemo(
     () =>
       generateRenderableConfig(
-        dendronValidator,
+        { properties: dendronValidator.definitions, type: "object" },
         dendronValidator.definitions,
         ""
       ),
@@ -263,7 +276,8 @@ const ConfigForm: React.FC<DefaultProps> = ({ engine }) => {
           style={{
             display: "flex",
             flexDirection: "column",
-            maxWidth: "50rem",
+            width: "100%",
+            maxWidth: "60rem",
           }}
         >
           <Typography style={{ textAlign: "center", padding: "2rem" }}>

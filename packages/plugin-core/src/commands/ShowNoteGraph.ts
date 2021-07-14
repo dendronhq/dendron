@@ -13,7 +13,7 @@ import { BasicCommand } from "./base";
 import { getEngine, getWS } from "../workspace";
 import { GotoNoteCommand } from "./GotoNote";
 import { VSCodeUtils } from "../utils";
-import { MetadataService } from "packages/engine-server/src/metadata";
+import { MetadataService } from "@dendronhq/engine-server";
 
 type CommandOpts = {};
 

@@ -83,18 +83,18 @@ type DefaultProps = {
 };
 
 const generateRenderableConfig = (
-  properties: any,
+  schema: any,
   definitions: any,
   label: string,
   required?: boolean
 ): Config => {
-  if ("not" in properties) return {} as Config;
+  // if ("not" in schema) return {} as Config;
 
   // console.log({ label, required }, "yooo");
 
   // `any` type generates empty config object, so we are assuming
   // that it's a string so that nothing breaks
-  if (_.isEmpty(properties))
+  if (_.isEmpty(schema))
     return {
       type: "string",
       label,
@@ -103,88 +103,96 @@ const generateRenderableConfig = (
 
   // check if instance of Object
 
-  if (_.isObject(properties.type)) {
+  if (_.isObject(schema.type)) {
+    // TODO: expect const or throw error
     return {
       type: "enum",
-      data: properties.type.const,
+      data: schema.type.const,
       label,
       required,
     } as EnumConfig;
   }
 
-  if (properties.type === "string") {
+  if (schema.type === "string") {
     return {
-      type: "enum" in properties ? "enum" : "string",
+      type: "enum" in schema ? "enum" : "string",
       label,
       required,
-      helperText: properties.description,
-      data: "enum" in properties ? properties.enum : [],
+      helperText: schema.description,
+      data: "enum" in schema ? schema.enum : undefined,
     } as StringConfig | EnumConfig;
   }
 
-  if (properties.type === "number" || properties.type === "boolean") {
+  if (schema.type === "number" || schema.type === "boolean") {
     return {
-      type: properties.type,
-      helperText: properties.description,
+      type: schema.type,
+      helperText: schema.description,
       label,
       required,
     } as NumberConfig | BooleanConfig;
   }
 
-  if (properties.type === "array") {
+  if (schema.type === "array") {
     return {
-      type: properties.type,
+      type: schema.type,
       label,
       required,
-      data: generateRenderableConfig(properties.items, definitions, ""),
+      data: generateRenderableConfig(schema.items, definitions, ""),
     } as ArrayConfig;
   }
 
-  if ("anyOf" in properties) {
+  if ("anyOf" in schema) {
+    const data = schema.anyOf
+      .filter(({ not }: any) => !not)
+      .map((schema: any) => generateRenderableConfig(schema, definitions, ""));
+    if (data.length === 1) return data[0];
     return {
       type: "anyOf",
       label,
       required,
-      data: properties.anyOf.map((schema: any) =>
-        generateRenderableConfig(schema, definitions, "")
-      ),
+      data,
     } as AnyOfConfig;
   }
 
-  if ("$ref" in properties) {
-    const src = properties.$ref.replace("#/definitions/", "");
+  if ("$ref" in schema) {
+    const src = schema.$ref.replace("#/definitions/", "");
     const data = _.get(definitions, src);
-    return generateRenderableConfig(data, definitions, src);
+    return generateRenderableConfig(data, definitions, label);
   }
 
-  if ("additionalProperties" in properties && properties.additionalProperties) {
-    return {
-      type: "record",
-      label,
-      required,
-      data: generateRenderableConfig(
-        properties.additionalProperties,
-        definitions,
-        ""
-      ),
-    } as RecordConfig;
-  }
-
-  return {
-    type: "object",
-    label,
-    data: Object.fromEntries(
-      Object.keys(properties.properties).map((key) => [
-        key,
-        generateRenderableConfig(
-          properties.properties[key],
+  if (schema.type === "object") {
+    if (schema.additionalProperties) {
+      return {
+        type: "record",
+        label,
+        required,
+        data: generateRenderableConfig(
+          schema.additionalProperties,
           definitions,
-          key,
-          properties.required?.includes(key)
+          ""
         ),
-      ])
-    ),
-  } as ObjectConfig;
+      } as RecordConfig;
+    }
+
+    return {
+      type: "object",
+      label,
+      data: Object.fromEntries(
+        Object.entries(schema.properties).map(([key, child]) => [
+          key,
+          generateRenderableConfig(
+            child,
+            definitions,
+            key,
+            schema.required?.includes(key)
+          ),
+        ])
+      ),
+    } as ObjectConfig;
+  }
+
+  console.error({ schema });
+  throw new Error("err");
 };
 
 const ConfigForm: React.FC<DefaultProps> = ({ engine }) => {
@@ -198,7 +206,10 @@ const ConfigForm: React.FC<DefaultProps> = ({ engine }) => {
   const dendronConfig = useMemo(
     () =>
       generateRenderableConfig(
-        { properties: dendronValidator.definitions, type: "object" },
+        _.get(
+          dendronValidator.definitions,
+          dendronValidator.$ref.split("/").pop() as string
+        ),
         dendronValidator.definitions,
         ""
       ),
@@ -247,6 +258,8 @@ const ConfigForm: React.FC<DefaultProps> = ({ engine }) => {
     validate(values);
     const { errors: ajvErrors } = validate;
 
+    console.log({ ajvErrors });
+
     if (!ajvErrors?.length) {
       return {};
     }
@@ -257,6 +270,7 @@ const ConfigForm: React.FC<DefaultProps> = ({ engine }) => {
         errors[`${instancePath.substring(1)}`.replace("/", ".")] = message;
       }
     });
+    console.log({ errors });
     return errors;
   };
 
@@ -288,6 +302,7 @@ const ConfigForm: React.FC<DefaultProps> = ({ engine }) => {
           display: "flex",
           justifyItems: "center",
           alignItems: "center",
+          background: "white",
         }}
       >
         <Content

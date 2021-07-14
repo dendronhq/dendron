@@ -41,7 +41,11 @@ const generateSchema = (config: Config): any => {
   }
 
   if (config.type === "array") {
-    return { type: config.type, items: generateSchema(config.data) };
+    return {
+      type: config.type,
+      items: generateSchema(config.data),
+      minItems: config.required ? 1 : 0,
+    };
   }
 
   if (config.type === "anyOf") {
@@ -82,9 +86,11 @@ const generateRenderableConfig = (
   properties: any,
   definitions: any,
   label: string,
-  required?: string[]
+  required?: boolean
 ): Config => {
   if ("not" in properties) return {} as Config;
+
+  // console.log({ label, required }, "yooo");
 
   // `any` type generates empty config object, so we are assuming
   // that it's a string so that nothing breaks
@@ -92,6 +98,7 @@ const generateRenderableConfig = (
     return {
       type: "string",
       label,
+      required,
     } as StringConfig;
 
   // check if instance of Object
@@ -101,6 +108,7 @@ const generateRenderableConfig = (
       type: "enum",
       data: properties.type.const,
       label,
+      required,
     } as EnumConfig;
   }
 
@@ -108,6 +116,7 @@ const generateRenderableConfig = (
     return {
       type: "enum" in properties ? "enum" : "string",
       label,
+      required,
       helperText: properties.description,
       data: "enum" in properties ? properties.enum : [],
     } as StringConfig | EnumConfig;
@@ -118,6 +127,7 @@ const generateRenderableConfig = (
       type: properties.type,
       helperText: properties.description,
       label,
+      required,
     } as NumberConfig | BooleanConfig;
   }
 
@@ -125,6 +135,7 @@ const generateRenderableConfig = (
     return {
       type: properties.type,
       label,
+      required,
       data: generateRenderableConfig(properties.items, definitions, ""),
     } as ArrayConfig;
   }
@@ -133,6 +144,7 @@ const generateRenderableConfig = (
     return {
       type: "anyOf",
       label,
+      required,
       data: properties.anyOf.map((schema: any) =>
         generateRenderableConfig(schema, definitions, "")
       ),
@@ -149,6 +161,7 @@ const generateRenderableConfig = (
     return {
       type: "record",
       label,
+      required,
       data: generateRenderableConfig(
         properties.additionalProperties,
         definitions,
@@ -163,7 +176,12 @@ const generateRenderableConfig = (
     data: Object.fromEntries(
       Object.keys(properties.properties).map((key) => [
         key,
-        generateRenderableConfig(properties.properties[key], definitions, key),
+        generateRenderableConfig(
+          properties.properties[key],
+          definitions,
+          key,
+          properties.required?.includes(key)
+        ),
       ])
     ),
   } as ObjectConfig;

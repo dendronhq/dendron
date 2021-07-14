@@ -216,7 +216,7 @@ suite("GotoNote", function () {
             body: "#my.test-0.tag",
           });
         },
-        onInit: async ({ vaults }) => {
+        onInit: async () => {
           // Open the note, select the hashtag, and use the command
           VSCodeUtils.openNote(note);
           VSCodeUtils.getActiveTextEditorOrThrow().selection = new vscode.Selection(new vscode.Position(7, 1), new vscode.Position(7, 1));

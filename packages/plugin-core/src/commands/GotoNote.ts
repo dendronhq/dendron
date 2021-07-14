@@ -7,9 +7,8 @@ import {
   NoteUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
-import { matchWikiLink } from "@dendronhq/engine-server";
+import { matchWikiLink, HASHTAG_REGEX_LOOSE } from "@dendronhq/engine-server";
 import _ from "lodash";
-import { HASHTAG_REGEX_LOOSE } from "packages/engine-server/src/markdown/remark/hashtag";
 import {
   TextEditor,
   Position,

@@ -21,3 +21,4 @@ export {
   matchBlockAnchor,
   BLOCK_LINK_REGEX_LOOSE,
 } from "./blockAnchors";
+export { HASHTAG_REGEX, HASHTAG_REGEX_LOOSE, hashtags, matchHashtag } from "./hashtag";

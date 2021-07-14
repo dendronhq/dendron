@@ -23,7 +23,6 @@ export class ConvertLinkCommand extends BasicCommand<
   }
 
   async execute(_opts: CommandOpts) {
-    const ctx = "ConvertLinkCommand";
     const { location, text } = _opts;
     await commands.executeCommand("vscode.open", location.uri);
     const editor = VSCodeUtils.getActiveTextEditor()!;

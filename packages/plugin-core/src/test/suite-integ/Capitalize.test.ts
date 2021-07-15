@@ -7,8 +7,22 @@ import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
 suite("Capitalize", function () {
   let ctx: vscode.ExtensionContext;
+  ctx = setupBeforeAfter(this);
 
-  ctx = setupBeforeAfter(this, {});
+  test("error: nothing selected", (done) => {
+    runLegacyMultiWorkspaceTest({
+      ctx,
+      preSetupHook: ENGINE_HOOKS.setupBasic,
+      onInit: async () => {
+        const cmd = new CapitalizeCommand();
+
+        const { error } = await cmd.execute();
+
+        expect(error!.message).toEqual("nothing selected");
+        done();
+      },
+    });
+  });
 
   test("basic", (done) => {
     runLegacyMultiWorkspaceTest({
@@ -17,12 +31,12 @@ suite("Capitalize", function () {
       onInit: async ({ engine }) => {
         const note = engine.notes["foo"];
         const editor = await VSCodeUtils.openNote(note);
-        editor.selection = new vscode.Selection(8, 0, 8, 8);
+        editor.selection = new vscode.Selection(7, 0, 7, 8);
 
         // run cmd
-        const capitalizedText = await new CapitalizeCommand().run();
+        const result = await new CapitalizeCommand().run();
 
-        expect(capitalizedText).toEqual("FOO BODY");
+        expect(result).toEqual({ capitalized: "FOO BODY" });
         done();
       },
     });

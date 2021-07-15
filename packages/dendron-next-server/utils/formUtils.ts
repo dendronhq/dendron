@@ -181,5 +181,5 @@ export const generateRenderableConfig = (
     } as ObjectConfig;
   }
 
-  throw new Error("err");
+  throw new Error("Schema generation for this type is not implemented yet!");
 };

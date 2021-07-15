@@ -181,6 +181,5 @@ export const generateRenderableConfig = (
     } as ObjectConfig;
   }
 
-  console.error({ schema });
   throw new Error("err");
 };

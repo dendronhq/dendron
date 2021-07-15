@@ -163,7 +163,7 @@ export default class BacklinksTreeDataProvider
   }
 
   public async getChildren(element?: Backlink) {
-    const isUnrefEnabled = getWS().config.dev?.enableUnrefLinks;
+    const isUnrefEnabled = getWS().config.dev?.enableLinkCandidates;
     const fsPath = vscode.window.activeTextEditor?.document.uri.fsPath;
 
     if (!element) {

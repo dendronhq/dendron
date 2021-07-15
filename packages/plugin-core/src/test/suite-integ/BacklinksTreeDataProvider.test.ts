@@ -101,7 +101,7 @@ suite("BacklinksTreeDataProvider", function () {
     });
   });
 
-  test("with enableUnrefLinks from cache", (done) => {
+  test("with enableLinkCandidates from cache", (done) => {
     let noteWithTarget: NoteProps;
 
     runLegacyMultiWorkspaceTest({
@@ -120,14 +120,14 @@ suite("BacklinksTreeDataProvider", function () {
         TestConfigUtils.withConfig(
           (config) => {
             config.dev = {
-              enableUnrefLinks: true,
+              enableLinkCandidates: true,
             };
             return config;
           },
           { wsRoot }
         );
         const isUnrefLinkEnabled = TestConfigUtils.getConfig({ wsRoot }).dev
-          ?.enableUnrefLinks;
+          ?.enableLinkCandidates;
         expect(isUnrefLinkEnabled).toBeTruthy();
 
         await new ReloadIndexCommand().execute();
@@ -196,7 +196,7 @@ suite("BacklinksTreeDataProvider", function () {
         TestConfigUtils.withConfig(
           (config) => {
             config.dev = {
-              enableUnrefLinks: true,
+              enableLinkCandidates: true,
             };
             return config;
           },
@@ -239,7 +239,7 @@ suite("BacklinksTreeDataProvider", function () {
         TestConfigUtils.withConfig(
           (config) => {
             config.dev = {
-              enableUnrefLinks: true,
+              enableLinkCandidates: true,
             };
             return config;
           },
@@ -308,7 +308,7 @@ suite("BacklinksTreeDataProvider", function () {
         TestConfigUtils.withConfig(
           (config) => {
             config.dev = {
-              enableUnrefLinks: true,
+              enableLinkCandidates: true,
             };
             return config;
           },

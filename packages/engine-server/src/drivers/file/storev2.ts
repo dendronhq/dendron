@@ -333,7 +333,7 @@ export class FileStorage implements DStore {
     );
     const allNotes = _.flatten(out);
     this._addBacklinks({ notesWithLinks, allNotes, allNotesCache });
-    if (this.engine.config.dev?.enableUnrefLinks) {
+    if (this.engine.config.dev?.enableLinkCandidates) {
       const ctx = "_addUnrefLinks";
       const start = process.hrtime();
       this._addUnrefLinks(allNotes);

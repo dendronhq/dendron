@@ -457,7 +457,7 @@ suite("BacklinksTreeDataProvider", function () {
       },
       onInit: async ({ wsRoot }) => {
         await VSCodeUtils.openNote(noteTarget);
-        const out = toPlainObject(await getChildren()) as any;
+        const { out } = toPlainObject(await getChildren()) as any;
         expect(out[0].command.arguments[0].path as string).toEqual(
           NoteUtils.getFullPath({ note: noteWithLink, wsRoot })
         );

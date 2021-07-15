@@ -1,4 +1,4 @@
-import React, { ReactNode, useState } from "react";
+import React, { ReactNode, useState, useEffect } from "react";
 import {
   List,
   Typography,
@@ -193,11 +193,17 @@ const AnyOfInput = ({
   errors,
   setSelectedKeys,
   setOpenKeys,
+  setAnyOfValues,
 }: AnyOfInputType) => {
   const [value, setValue] = React.useState<string>("basic");
   const onChange = (e: RadioChangeEvent) => {
     setValue(e.target.value);
   };
+
+  useEffect(
+    () => setAnyOfValues((prev: any) => ({ ...prev, [name]: value })),
+    [value, setAnyOfValues]
+  );
   return (
     <BaseInput
       {...{
@@ -222,6 +228,7 @@ const AnyOfInput = ({
         setSelectedKeys={setSelectedKeys}
         setOpenKeys={setOpenKeys}
         displayTitle={false}
+        setAnyOfValues={setAnyOfValues}
       />
     </BaseInput>
   );
@@ -238,6 +245,7 @@ const ArrayInput = ({
   isRecordType = false,
   setSelectedKeys,
   setOpenKeys,
+  setAnyOfValues,
 }: ArrayInputType) => {
   const props = {
     values,
@@ -245,6 +253,7 @@ const ArrayInput = ({
     errors,
     setSelectedKeys,
     setOpenKeys,
+    setAnyOfValues,
   };
 
   return (
@@ -315,6 +324,7 @@ const RenderRecord = ({
   errors,
   setSelectedKeys,
   setOpenKeys,
+  setAnyOfValues,
 }: {
   values: any;
   dataDefinition: RecordConfig;
@@ -323,6 +333,7 @@ const RenderRecord = ({
   errors: any;
   setSelectedKeys?: (value: string[]) => void;
   setOpenKeys?: (value: string[]) => void;
+  setAnyOfValues: (values: { [key: string]: string }) => void;
 }) => {
   type RecordProps = {
     id: number;
@@ -375,6 +386,7 @@ const RenderRecord = ({
           setSelectedKeys={setSelectedKeys}
           setOpenKeys={setOpenKeys}
           displayTitle={false}
+          setAnyOfValues={setAnyOfValues}
         />
       </Card>
     ))
@@ -413,6 +425,7 @@ const RenderArray = ({
   errors,
   setSelectedKeys,
   setOpenKeys,
+  setAnyOfValues,
 }: {
   values: any;
   dataDefinition: ArrayConfig;
@@ -421,6 +434,7 @@ const RenderArray = ({
   errors: any;
   setSelectedKeys?: (value: string[]) => void;
   setOpenKeys?: (value: string[]) => void;
+  setAnyOfValues: (values: { [key: string]: string }) => void;
 }) => {
   const dataSource =
     get(values, name)?.map((value: any, index: number) => (
@@ -444,6 +458,7 @@ const RenderArray = ({
           setSelectedKeys={setSelectedKeys}
           setOpenKeys={setOpenKeys}
           displayTitle={false}
+          setAnyOfValues={setAnyOfValues}
         />
       </Card>
     )) ?? [];
@@ -478,6 +493,7 @@ const FormGenerator = ({
   addonAfter,
   setSelectedKeys,
   setOpenKeys,
+  setAnyOfValues,
   displayTitle = true,
 }: ConfigInputType) => {
   if (!data) return <></>;
@@ -532,6 +548,7 @@ const FormGenerator = ({
           errors,
           setSelectedKeys,
           setOpenKeys,
+          setAnyOfValues,
         }}
       />
     );
@@ -559,7 +576,15 @@ const FormGenerator = ({
       <AnyOfInput
         name={prefix.join(".")}
         data={data as AnyOfConfig}
-        {...{ label, values, errors, prefix, setSelectedKeys, setOpenKeys }}
+        {...{
+          label,
+          values,
+          errors,
+          prefix,
+          setSelectedKeys,
+          setOpenKeys,
+          setAnyOfValues,
+        }}
       />
     );
   }
@@ -587,6 +612,7 @@ const FormGenerator = ({
           prefix={[...prefix, key]}
           setSelectedKeys={setSelectedKeys}
           setOpenKeys={setOpenKeys}
+          setAnyOfValues={setAnyOfValues}
         />
       ))}
     </div>

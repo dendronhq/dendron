@@ -27,6 +27,9 @@ type DefaultProps = {
 const ConfigForm: React.FC<DefaultProps> = ({ engine }) => {
   const [openKeys, setOpenKeys] = React.useState<string[]>([]);
   const [selectedKeys, setSelectedKeys] = React.useState<string[]>([]);
+  const [anyOfValues, setAnyOfValues] = React.useState<{
+    [key: string]: string;
+  }>({});
   const [currentValues, setCurrentValues] = useState<any>({});
   const router = useRouter();
   const { ws, port } = router.query;
@@ -44,6 +47,8 @@ const ConfigForm: React.FC<DefaultProps> = ({ engine }) => {
       ),
     []
   );
+
+  useEffect(() => console.log(anyOfValues, "yooooo"), [anyOfValues]);
 
   useEffect(() => {
     setCurrentValues(engine.config);
@@ -109,6 +114,7 @@ const ConfigForm: React.FC<DefaultProps> = ({ engine }) => {
           setSelectedKeys,
           currentValues,
           dendronFormConfig: dendronConfig,
+          anyOfValues,
         }}
       />
       <Layout
@@ -166,6 +172,7 @@ const ConfigForm: React.FC<DefaultProps> = ({ engine }) => {
                           prefix={[property]}
                           setSelectedKeys={setSelectedKeys}
                           setOpenKeys={setOpenKeys}
+                          setAnyOfValues={setAnyOfValues}
                         />
                       ))}
                     </React.Fragment>

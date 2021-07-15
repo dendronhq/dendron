@@ -19,12 +19,14 @@ type DefaultProptypes = {
   setSelectedKeys: (selectedKeys: string[]) => void;
   currentValues: any;
   dendronFormConfig: Config;
+  anyOfValues: { [key: string]: string };
 };
 
 const generateMenu = (
   dataDefinition: Config,
   prefix: string[] = [],
-  currentValues: any
+  currentValues: any,
+  anyOfValues: { [key: string]: string }
 ): JSX.Element => {
   if (!dataDefinition) return <></>;
   const name = prefix.join(".");
@@ -35,8 +37,7 @@ const generateMenu = (
     dataDefinition.type === "string" ||
     dataDefinition.type === "number" ||
     dataDefinition.type === "boolean" ||
-    dataDefinition.type === "enum" ||
-    dataDefinition.type === "anyOf"
+    dataDefinition.type === "enum"
   ) {
     return (
       <Menu.Item
@@ -62,10 +63,22 @@ const generateMenu = (
           generateMenu(
             dataDefinition.data,
             [...prefix, index.toString()],
-            currentValues
+            currentValues,
+            anyOfValues
           )
         )}
       </SubMenu>
+    );
+  }
+
+  if (dataDefinition.type === "anyOf") {
+    const currentMode: string = anyOfValues[name];
+    console.log({ dataDefinition, currentMode });
+    return generateMenu(
+      dataDefinition.data[currentMode === "basic" ? 0 : 1],
+      prefix,
+      currentValues,
+      anyOfValues
     );
   }
 
@@ -77,7 +90,12 @@ const generateMenu = (
         title={<a href={`#${prefix.join(".")}`}>{prefix[prefix.length - 1]}</a>}
       >
         {Object.keys(values).map((value: any) =>
-          generateMenu(dataDefinition.data, [...prefix, value], currentValues)
+          generateMenu(
+            dataDefinition.data,
+            [...prefix, value],
+            currentValues,
+            anyOfValues
+          )
         )}
       </SubMenu>
     );
@@ -94,7 +112,8 @@ const generateMenu = (
         generateMenu(
           (dataDefinition as ObjectConfig).data[key],
           [...prefix, key],
-          currentValues
+          currentValues,
+          anyOfValues
         )
       )}
     </SubMenu>
@@ -108,14 +127,9 @@ const SideMenu: React.FC<DefaultProptypes> = ({
   setSelectedKeys,
   currentValues,
   dendronFormConfig: dendronFormConfig,
+  anyOfValues,
 }) => {
-  const onSelectedChange = ({
-    item,
-    key,
-    keyPath,
-    selectedKeys,
-    domEvent,
-  }: any) => {
+  const onSelectedChange = ({ selectedKeys }: any) => {
     setSelectedKeys(selectedKeys);
   };
 
@@ -155,7 +169,8 @@ const SideMenu: React.FC<DefaultProptypes> = ({
                   property
                 ),
                 [property],
-                currentValues
+                currentValues,
+                anyOfValues
               )
             )}
           </SubMenu>

@@ -52,6 +52,7 @@ export type ConfigInputType = {
   addonAfter?: ReactNode;
   setSelectedKeys?: (keys: string[]) => void;
   setOpenKeys?: (keys: string[]) => void;
+  setAnyOfValues: (values: { [key: string]: string }) => void;
   displayTitle?: boolean;
 };
 
@@ -77,6 +78,11 @@ export type ArrayInputType = InputType & {
   data: Config;
   values: any;
   isRecordType?: boolean;
+  setAnyOfValues: any;
 };
 export type SelectInputType = InputType & { data: EnumConfig };
-export type AnyOfInputType = InputType & { data: AnyOfConfig; values: any };
+export type AnyOfInputType = InputType & {
+  data: AnyOfConfig;
+  values: any;
+  setAnyOfValues: any;
+};

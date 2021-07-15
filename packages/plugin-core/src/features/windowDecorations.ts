@@ -16,6 +16,7 @@ import { DateTime } from "luxon";
 import { getConfigValue, getWS } from "../workspace";
 import { CodeConfigKeys, DateTimeFormat } from "../types";
 import { VSCodeUtils } from "../utils";
+import { containsNonDendronUri } from "../utils/md";
 
 export function updateDecorations(activeEditor: TextEditor) {
   const text = activeEditor.document.getText();
@@ -187,7 +188,7 @@ function decorateWikiLink(wikiLink: WikiLinkNoteV4, document: TextDocument) {
     )}]);
   }
 
-  if (foundNote) {
+  if (foundNote || containsNonDendronUri(wikiLink.value)) {
     decorations.push(
       [DECORATION_TYPE_WIKILINK, options]
     );

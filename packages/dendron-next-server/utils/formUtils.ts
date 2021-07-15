@@ -74,10 +74,6 @@ export const generateRenderableConfig = (
   label: string,
   required?: boolean
 ): Config => {
-  // if ("not" in schema) return {} as Config;
-
-  // console.log({ label, required }, "yooo");
-
   // `any` type generates empty config object, so we are assuming
   // that it's a string so that nothing breaks
   if (_.isEmpty(schema))
@@ -153,7 +149,6 @@ export const generateRenderableConfig = (
   }
 
   if (schema.type === "object") {
-    console.log(label, schema, "yooo");
     if (schema.additionalProperties) {
       return {
         type: "record",

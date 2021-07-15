@@ -275,7 +275,7 @@ export type DendronDevConfig = {
   /**
    * Use old preview
    */
-  enableLegacyPreview?: boolean;
+  enablePreviewV2?: boolean;
 };
 
 export type DendronSiteConfig = {

@@ -88,7 +88,7 @@ export class MarkdownUtils {
   static async openPreview(opts?: { reuseWindow?: boolean }) {
     const cleanOpts = _.defaults(opts, { reuseWindow: false });
 
-    if (getWS().config.dev?.enableLegacyPreview) {
+    if (!getWS().config.dev?.enablePreviewV2) {
       const previewEnhanced = extensions.getExtension(
         "dendron.markdown-preview-enhanced"
       );

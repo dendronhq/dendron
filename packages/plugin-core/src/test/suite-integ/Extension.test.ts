@@ -106,6 +106,8 @@ suite("Extension", function testSuite() {
               noXVaultWikiLink: true,
               lookupConfirmVaultOnCreate: false,
               autoFoldFrontmatter: true,
+              mermaid: true,
+              useKatex: true,
               site: {
                 copyAssets: true,
                 siteHierarchies: ["root"],

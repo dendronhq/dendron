@@ -387,6 +387,7 @@ suite("GoToSibling", function () {
             const notePath = path.join(vpath, "foo.journal.2020.08.30.md");
             await VSCodeUtils.openFileInEditor(vscode.Uri.file(notePath));
             const resp = await new GoToSiblingCommand().execute({ direction });
+
             await runJestHarnessV2(
               [
                 {
@@ -396,7 +397,7 @@ suite("GoToSibling", function () {
                 {
                   actual:
                     VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath.endsWith(
-                      `${path.basename(vault.fsPath)}/foo.journal.2020.08.31.md`
+                      (path.join(`${path.basename(vault.fsPath)}`, "foo.journal.2020.08.31.md"))
                     ),
                   expected: true,
                 },

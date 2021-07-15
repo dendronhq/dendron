@@ -40,10 +40,10 @@ suite(DENDRON_COMMANDS.CREATE_HOOK.key, function () {
           expect(config.hooks).toEqual({
             onCreate: [{ id: hook, pattern: "*", type: "js" }],
           });
-          expect(editor.document.uri.fsPath).toEqual(
+          expect(editor.document.uri.fsPath.toLowerCase()).toEqual(
             path.join(
               HookUtils.getHookScriptPath({ basename: `${hook}.js`, wsRoot })
-            )
+            ).toLowerCase()
           );
           expect(
             AssertUtils.assertInString({

@@ -838,7 +838,7 @@ export class TutorialInitializer implements WorkspaceInitializer {
       opts.ws.windowWatcher.registerActiveTextEditorChangedHandler((e) => {
         const fileName = e?.document.uri.fsPath;
 
-        let eventName: TutorialEvents | undefined = undefined;
+        let eventName: TutorialEvents | undefined;
 
         if (fileName?.endsWith("tutorial.md")) {
           eventName = TutorialEvents.Tutorial_0_Show;

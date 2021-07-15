@@ -56,7 +56,7 @@ const generateMenu = (
     const values = get(currentValues, name) ?? [];
     return (
       <SubMenu
-        key={name}
+        key={prefix[prefix.length - 1]}
         title={<a href={`#${prefix.join(".")}`}>{prefix[prefix.length - 1]}</a>}
       >
         {values.map((value: any, index: number) =>
@@ -85,7 +85,7 @@ const generateMenu = (
     const values = get(currentValues, name) ?? {};
     return (
       <SubMenu
-        key={name}
+        key={prefix[prefix.length - 1]}
         title={<a href={`#${prefix.join(".")}`}>{prefix[prefix.length - 1]}</a>}
       >
         {Object.keys(values).map((value: any) =>
@@ -104,7 +104,7 @@ const generateMenu = (
 
   return (
     <SubMenu
-      key={name}
+      key={prefix[prefix.length - 1]}
       title={<a href={`#${prefix.join(".")}`}>{prefix[prefix.length - 1]}</a>}
     >
       {Object.keys((dataDefinition as ObjectConfig).data).map((key) =>

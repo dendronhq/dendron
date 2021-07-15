@@ -46,6 +46,7 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
     if (match) {
       replace = await VSCodeUtils.showInputBox({
         prompt: "Enter replace prefix",
+        value: match,
       });
     }
     if (_.isUndefined(replace) || !match) {

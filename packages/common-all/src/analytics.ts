@@ -9,6 +9,9 @@ export enum VSCodeEvents {
   DisableTelemetry = "DisableTelemetry",
   EnableTelemetry = "EnableTelemetry",
   Uninstall = "Uninstall"
+  ShowLapsedUserMessage = "Show_Lapsed_User_Msg",
+  LapsedUserMessageAccepted = "Lapsed_User_Msg_Accepted",
+  LapsedUserMessageRejected = "Show_Lapsed_User_Rejected"
 }
 
 export enum TutorialEvents {

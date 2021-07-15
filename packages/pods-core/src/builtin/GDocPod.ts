@@ -34,12 +34,12 @@ type GDocImportPodCustomOpts = {
    /**
    * import comments from the doc in text or json format
    */
-  importComments : ImportComments;
+  importComments? : ImportComments;
 };
 
 type ImportComments = {
   enable: boolean;
-  format: string;
+  format?: string;
 }
 
 type GDocImportPodConfig = ImportPodConfig & GDocImportPodCustomOpts;
@@ -68,7 +68,9 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
         },
         importComments: {
           type: "object",
+          nullable: true,
           description: "import comments from the doc in text or json format",
+          required : ["enable"],
           properties: {
             enable: {
               type: "boolean",
@@ -77,7 +79,8 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
             format: {
               type: "string",
               enum: ["json","text"],
-              default: "json"
+              default: "json",
+              nullable: true,
 
             }
           }
@@ -89,9 +92,11 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
   /*
    * method to get data from google document
    */
-  getDataFromGDoc = async (opts: Partial<GDocImportPodConfig>): Promise<Partial<NoteProps>>  => {
+  getDataFromGDoc = async (opts: Partial<GDocImportPodConfig>, 
+    config: ImportPodConfig
+    ): Promise<Partial<NoteProps>>  => {
     let response: Partial<NoteProps>;
-    const {documentId, token } = opts;
+    const {documentId, token, fname } = opts;
     const headers = {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
@@ -104,11 +109,12 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
       const markdown = googleDocsToMarkdown(result.data);
       const body= markdown.split("---")
        response = {
-        title: result.data.title,
         body: body[2],
+        fname: `${fname}.${result.data.title}`,
         custom: {
           documentId: result.data.documentId,
-          revisionId: result.data.revisionId
+          revisionId: result.data.revisionId,
+          ...config.frontmatter
         }
       }
 
@@ -117,7 +123,7 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
         msg: "failed to import the doc",
         payload: stringifyError(error),
       });
-      if(error.response.status === 401) {
+      if(error.response?.status === 401) {
         throw new DendronError({ message: "access token expired or is incorrect." });
       }
       throw new DendronError({ message: stringifyError(error) });
@@ -140,7 +146,8 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
     };
     try {
     comments = await axios.get(`https://www.googleapis.com/drive/v2/files/${documentId}/comments`,
-    {headers})
+    {headers});
+    
     const items= comments.data.items;
     if(items.length > 0) {
     comments = items.map((item: any) => {
@@ -161,12 +168,12 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
         };
         return item;
       })
-      if(importComments?.format === "json")
+      if(importComments?.format === "text")
       {
-        comments= JSON.stringify(comments)
+        comments = this.prettyComment(comments);
       }
       else {
-        comments = this.prettyComment(comments);
+        comments= JSON.stringify(comments)
       }
        response.body = response.body?.concat(`### Comments\n\n ${comments}`)
     }
@@ -195,25 +202,6 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
        }
     })
     return text;
-  }
-
-  /*
-   * method to add fromtmatter to notes: documentId, revisionId
-   */
-  addFrontMatterToData = ( 
-    response: Partial<NoteProps>,
-    fname: string,
-    config: ImportPodConfig
-    ): Partial<NoteProps> => {
-      response = {
-        ...response,
-        fname: `${fname}-${response.title}`,
-        custom: {
-          ...response.custom,
-          ...config.frontmatter,
-        } 
-      }
-   return response;
   }
 
   async _docs2Notes(
@@ -270,11 +258,11 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
       importComments
     } = config as GDocImportPodConfig;
 
-    let response = await this.getDataFromGDoc({documentId, token})
+    let response = await this.getDataFromGDoc({documentId, token, fname}, config)
     if(importComments?.enable) {
      response = await this.getCommentsFromDoc({documentId, token, importComments}, response)
+
     }
-    response = this.addFrontMatterToData(response, fname, config);
     const note: NoteProps = await this._docs2Notes(response, {
       vault,
       fnameAsId

@@ -5,7 +5,7 @@ import {
   NoteProps,
   NoteUtils,
 } from "@dendronhq/common-all";
-import { LinkUtils } from "@dendronhq/engine-server";
+import { HASHTAG_REGEX_LOOSE, LinkUtils } from "@dendronhq/engine-server";
 import { sort as sortPaths } from "cross-path-sort";
 import fs from "fs";
 import _ from "lodash";
@@ -201,28 +201,38 @@ export const getReferenceAtPosition = (
     return null;
   }
 
-  const re = partial ? partialRefPattern : refPattern;
-  const range = document.getWordRangeAtPosition(position, new RegExp(re));
-
+  // check if image
   const rangeForImage = document.getWordRangeAtPosition(
     position,
     new RegExp(mdImageLinkPattern)
   );
-
-  // check if image
   if (rangeForImage) {
     const docText = document.getText(rangeForImage);
     const maybeImage = _.trim(docText.match("\\((.*)\\)")![0], "()");
     if (containsImageExt(maybeImage)) {
       return null;
-      // return {
-      //   ref: maybeImage,
-      //   label: "",
-      //   range: rangeForImage,
-      // };
     }
   }
+
+  // check if hashtag
+  const rangeForHashTag = document.getWordRangeAtPosition(position, HASHTAG_REGEX_LOOSE);
+  if (rangeForHashTag) {
+    const docText = document.getText(rangeForHashTag);
+    const match = docText.match(HASHTAG_REGEX_LOOSE);
+    if (_.isNull(match)) return null;
+    return {
+      range: rangeForHashTag,
+      label: match[0],
+      ref: `tags.${match[1]}`,
+      refText: docText,
+    }
+  }
+
+  // otherwise, this has to be a wikilink or hashtag
+  const re = partial ? partialRefPattern : refPattern;
+  const range = document.getWordRangeAtPosition(position, new RegExp(re));
   if (!range) {
+    // it's not a reference or hashtag either, we don't know what this is
     return null;
   }
 

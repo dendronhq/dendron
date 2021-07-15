@@ -30,7 +30,7 @@ import rif from "replace-in-file";
 import * as vscode from "vscode";
 import { ALL_COMMANDS } from "./commands";
 import { GoToSiblingCommand } from "./commands/GoToSiblingCommand";
-import { LookupCommand } from "./commands/LookupCommand";
+import { LookupCommand, VaultSelectionMode } from "./commands/LookupCommand";
 import { MoveNoteCommand } from "./commands/MoveNoteCommand";
 import { ReloadIndexCommand } from "./commands/ReloadIndex";
 import { SetupWorkspaceCommand } from "./commands/SetupWorkspace";
@@ -90,7 +90,7 @@ export async function when<T = any>(
 export function whenGlobalState(key: string, cb?: () => boolean): boolean {
   cb =
     cb ||
-    function () {
+    function alwaysTrue() {
       return true;
     };
   // @ts-ignore
@@ -531,7 +531,17 @@ export class DendronWorkspace {
       vscode.commands.registerCommand(
         DENDRON_COMMANDS.LOOKUP.key,
         async (args: any) => {
-          new LookupCommand().run({ ...args, flavor: "note" });
+          const confirmVaultSetting =
+            DendronWorkspace.instance().config["lookupConfirmVaultOnCreate"];
+          const selectionMode =
+            confirmVaultSetting === false || _.isUndefined(confirmVaultSetting)
+              ? VaultSelectionMode.smart
+              : VaultSelectionMode.alwaysPrompt;
+          new LookupCommand().run({
+            ...args,
+            flavor: "note",
+            vaultSelectionMode: selectionMode,
+          });
         }
       )
     );

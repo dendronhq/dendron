@@ -18,6 +18,27 @@ export enum LookupNoteTypeEnum {
   "scratch" = "scratch",
 }
 
+/**
+ * Mode for prompting the user on which vault should be used to 
+ */
+export enum VaultSelectionMode {
+  /**
+   * Never prompt the user. Useful for testing
+   */
+  auto,
+
+  /**
+   * Tries to determine the vault automatically, but will prompt the user if
+   * there is ambiguity
+   */
+  smart,
+
+  /**
+   * Always prompt the user if there is more than one vault
+   */
+  alwaysPrompt
+}
+
 type CommandOpts = {
   /**
    * When creating new note, controls
@@ -38,6 +59,7 @@ type CommandOpts = {
   value?: string;
   noteExistBehavior?: LookupNoteExistBehavior;
   effectType?: LookupEffectType;
+  vaultSelectionMode?: VaultSelectionMode;
 };
 
 type CommandOutput = DendronQuickPickerV2;

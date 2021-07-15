@@ -3,6 +3,7 @@ import {
   DNoteAnchor,
   DVault,
   getSlugger,
+  isNotUndefined,
   NoteProps,
   NoteUtils,
   VaultUtils,
@@ -84,7 +85,7 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
         } else {
           // handle hashtags
           for (const hashtag of currentLine.matchAll(new RegExp(HASHTAG_REGEX_LOOSE, "g"))) {
-            if (hashtag.index && _.inRange(selection.start.character, hashtag.index, hashtag.index + hashtag[0].length)) {
+            if (isNotUndefined(hashtag.index) && _.inRange(selection.start.character, hashtag.index, hashtag.index + hashtag[0].length)) {
               return {
                 alias: hashtag[0],
                 value: `tags.${hashtag[1]}`,

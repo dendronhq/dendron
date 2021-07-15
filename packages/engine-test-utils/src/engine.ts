@@ -1,18 +1,16 @@
 import {
   CleanDendronSiteConfig,
-  CONSTANTS,
-  DEngineClient,
+  CONSTANTS, DendronConfig, DEngineClient,
   DVault,
   DWorkspace,
   WorkspaceFolderRaw,
   WorkspaceOpts,
-  WorkspaceSettings,
-  DendronConfig,
+  WorkspaceSettings
 } from "@dendronhq/common-all";
 import {
   getDurationMilliseconds,
   tmpDir,
-  vault2Path,
+  vault2Path
 } from "@dendronhq/common-server";
 import {
   GenTestResults,
@@ -24,20 +22,21 @@ import {
   SetupHookFunction,
   SetupTestFunctionV4,
   sinon,
-  TestResult,
+  TestResult
 } from "@dendronhq/common-test-utils";
 import { LaunchEngineServerCommand } from "@dendronhq/dendron-cli";
 import {
   createEngine as engineServerCreateEngine,
   DConfig,
-  WorkspaceService,
+  WorkspaceService
 } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
+import os from "os";
 import path from "path";
+import { SinonStub } from "sinon";
 import { ENGINE_HOOKS } from "./presets";
 import { GitTestUtils } from "./utils";
-import os from "os";
 
 export type TestSetupWorkspaceOpts = {
   /**
@@ -349,10 +348,9 @@ export function testWithEngine(
 }
 
 export class TestEngineUtils {
-  static mockHomeDir(dir?: string) {
+  static mockHomeDir(dir?: string): SinonStub {
     if (_.isUndefined(dir)) dir = tmpDir().name;
-    sinon.stub(os, "homedir").returns(dir);
-    return dir;
+    return sinon.stub(os, "homedir").returns(dir);
   }
 
   static vault1(vaults: DVault[]) {

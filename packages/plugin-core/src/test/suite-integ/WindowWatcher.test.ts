@@ -45,7 +45,8 @@ suite("WindowWatcher", function () {
     });
   });
 
-  describe("focuses end of frontmatter", () => {
+  // NOTE: flaky tests
+  describe.skip("focuses end of frontmatter", () => {
     function checkPosition(line: number) {
       const { selection } = VSCodeUtils.getSelection();
       expect(selection).toBeTruthy();

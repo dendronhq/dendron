@@ -554,23 +554,29 @@ function showLapsedUserMessage() {
     });
 }
 
-function shouldDisplayLapsedUserMsg(): boolean {
+/**
+ * Visible for Testing purposes only
+ * @returns
+ */
+export function shouldDisplayLapsedUserMsg(): boolean {
+  const ONE_DAY = Duration.fromObject({ days: 1 });
   const ONE_WEEK = Duration.fromObject({ weeks: 1 });
   const CUR_TIME = Duration.fromObject({ seconds: Time.now().toSeconds() });
   const metaData = MetadataService.instance().getMeta();
 
-  // If we haven't prompted the user yet and it's been a week since their
+  // If we haven't prompted the user yet and it's been a day since their
   // initial install OR if it's been one week since we last prompted the user
   const refreshMsg =
-    (!metaData.lapsedUserMsgSendTime &&
-      ONE_WEEK <=
+    (metaData.lapsedUserMsgSendTime === undefined &&
+      ONE_DAY <=
         CUR_TIME.minus(
           Duration.fromObject({ seconds: metaData.firstInstall })
         )) ||
-    ONE_WEEK <=
-      CUR_TIME.minus(
-        Duration.fromObject({ seconds: metaData.lapsedUserMsgSendTime })
-      );
+    (metaData.lapsedUserMsgSendTime !== undefined &&
+      ONE_WEEK <=
+        CUR_TIME.minus(
+          Duration.fromObject({ seconds: metaData.lapsedUserMsgSendTime })
+        ));
 
   // If the user has never initialized and it's time to refresh the lapsed user
   // message

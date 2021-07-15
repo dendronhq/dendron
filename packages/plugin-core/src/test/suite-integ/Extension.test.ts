@@ -1,11 +1,11 @@
-import { isNotUndefined } from "@dendronhq/common-all";
+import { isNotUndefined, Time } from "@dendronhq/common-all";
 import { readYAML, tmpDir } from "@dendronhq/common-server";
 import { MetadataService } from "@dendronhq/engine-server";
 import { TestEngineUtils } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
 import { describe, it } from "mocha";
 import path from "path";
-import sinon from "sinon";
+import { SinonStub } from "sinon";
 import vscode, { ExtensionContext } from "vscode";
 import { ResetConfigCommand } from "../../commands/ResetConfig";
 import { SetupWorkspaceOpts } from "../../commands/SetupWorkspace";
@@ -17,41 +17,42 @@ import {
 } from "../../constants";
 import * as telemetry from "../../telemetry";
 import { getWS } from "../../workspace";
-import { _activate } from "../../_extension";
+import { shouldDisplayLapsedUserMsg, _activate } from "../../_extension";
 import { expect, genEmptyWSFiles, resetCodeWorkspace } from "../testUtilsv2";
 import { setupBeforeAfter, stubSetupWorkspace } from "../testUtilsV3";
 
-// async function initWorkspace(
-//   opts: {
-//     firstWs: boolean;
-//     previousVersion?: string;
-//     currentVersion: string;
-//   } & WorkspaceOpts,
-//   cb: () => Promise<any>
-// ) {
-//   const { firstWs, previousVersion, currentVersion, wsRoot, vaults } =
-//     _.defaults(opts);
-//   const ws = getWS();
-//   await ws.context.globalState.update(GLOBAL_STATE.DENDRON_FIRST_WS, firstWs);
-//   await ws.context.globalState.update(GLOBAL_STATE.VERSION, previousVersion);
-//   sinon.stub(DendronWorkspace, "version").returns(currentVersion);
-//   sinon.stub(DendronWorkspace, "isActive").returns(true);
-//   stubWorkspaceFile(wsRoot);
-//   await WorkspaceService.createWorkspace({ wsRoot, vaults });
-//   await cb();
-// }
+function lapsedMessageTest({
+  done,
+  firstInstall,
+  firstWsInitialize,
+  lapsedUserMsgSendTime,
+  shouldDisplayMessage,
+}: {
+  done: Mocha.Done;
+  firstInstall?: number;
+  firstWsInitialize?: number;
+  lapsedUserMsgSendTime?: number;
+  shouldDisplayMessage: boolean;
+}) {
+  const svc = MetadataService.instance();
+  svc.setMeta("firstInstall", firstInstall);
+  svc.setMeta("firstWsInitialize", firstWsInitialize);
+  svc.setMeta("lapsedUserMsgSendTime", lapsedUserMsgSendTime);
+  expect(shouldDisplayLapsedUserMsg()).toEqual(shouldDisplayMessage);
+  done();
+}
 
-suite("Extension", function () {
-  let ctx: ExtensionContext;
+suite("Extension", function testSuite() {
+  let homeDirStub: SinonStub;
 
-  ctx = setupBeforeAfter(this, {
+  const ctx: ExtensionContext = setupBeforeAfter(this, {
     beforeHook: async () => {
       await resetCodeWorkspace();
       await new ResetConfigCommand().execute({ scope: "all" });
-      TestEngineUtils.mockHomeDir();
+      homeDirStub = TestEngineUtils.mockHomeDir();
     },
     afterHook: async () => {
-      sinon.restore();
+      homeDirStub.restore();
     },
   });
 
@@ -128,28 +129,6 @@ suite("Extension", function () {
           });
         });
     });
-
-    // TODO: stub the vauls
-    // it("active, remote vaults present", function (done) {
-    //   const wsRoot = tmpDir().name;
-    //   getWS()
-    //     .context.globalState.update(GLOBAL_STATE.DENDRON_FIRST_WS, false)
-    //     .then(() => {
-    //       stubWorkspaceFile(wsRoot);
-    //       // add remote vault
-    //       const config = DConfig.getOrCreate(wsRoot);
-    //       config.vaults.push(DENDRON_REMOTE_VAULT);
-    //       writeConfig({ config, wsRoot });
-    //       _activate(ctx).then(async () => {
-    //         const rVaultPath = vault2Path({
-    //           vault: DENDRON_REMOTE_VAULT,
-    //           wsRoot,
-    //         });
-    //         expect(GitUtils.isRepo(rVaultPath)).toBeTruthy();
-    //         done();
-    //       });
-    //     });
-    // });
   });
 
   describe("telemetry", () => {
@@ -160,6 +139,47 @@ suite("Extension", function () {
         result === true || result === false || result === undefined
       ).toBeTruthy();
       done();
+    });
+  });
+
+  describe("test conditions for displaying lapsed user message", () => {
+    test("Workspace Not Initialized; Message Never Sent; > 1 Day ago", (done) => {
+      lapsedMessageTest({ done, firstInstall: 1, shouldDisplayMessage: true });
+    });
+
+    test("Workspace Not Initialized; Message Never Sent; < 1 Day ago", (done) => {
+      lapsedMessageTest({
+        done,
+        firstInstall: Time.now().toSeconds(),
+        shouldDisplayMessage: false,
+      });
+    });
+
+    test("Workspace Not Initialized; Message Sent < 1 week ago", (done) => {
+      lapsedMessageTest({
+        done,
+        firstInstall: 1,
+        lapsedUserMsgSendTime: Time.now().toSeconds(),
+        shouldDisplayMessage: false,
+      });
+    });
+
+    test("Workspace Not Initialized; Message Sent > 1 week ago", (done) => {
+      lapsedMessageTest({
+        done,
+        firstInstall: 1,
+        lapsedUserMsgSendTime: 1,
+        shouldDisplayMessage: true,
+      });
+    });
+
+    test("Workspace Already Initialized", (done) => {
+      lapsedMessageTest({
+        done,
+        firstInstall: 1,
+        firstWsInitialize: 1,
+        shouldDisplayMessage: false,
+      });
     });
   });
 });

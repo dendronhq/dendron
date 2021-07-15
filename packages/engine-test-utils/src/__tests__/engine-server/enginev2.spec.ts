@@ -1,16 +1,7 @@
-import {
-  DVault,
-  NotesCacheEntryMap,
-  VaultUtils,
-  WorkspaceOpts,
-} from "@dendronhq/common-all";
-import { createLogger, vault2Path } from "@dendronhq/common-server";
-import {
-  FileTestUtils,
-  getLogFilePath,
-  NoteTestUtilsV4,
-} from "@dendronhq/common-test-utils";
-import { DendronEngineV2, readNotesFromCache } from "@dendronhq/engine-server";
+import { DVault, NotesCacheEntryMap, VaultUtils } from "@dendronhq/common-all";
+import { vault2Path } from "@dendronhq/common-server";
+import { FileTestUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
+import { readNotesFromCache } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import { runEngineTestV5 } from "../../engine";
@@ -20,12 +11,6 @@ import {
   ENGINE_PRESETS,
   ENGINE_PRESETS_MULTI,
 } from "../../presets";
-
-const createEngine = ({ wsRoot }: WorkspaceOpts) => {
-  const logger = createLogger("testLogger", getLogFilePath("engine-server"));
-  const engine = DendronEngineV2.create({ wsRoot, logger });
-  return engine;
-};
 
 describe("engine, schemas/", () => {
   const nodeType = "SCHEMAS";
@@ -147,7 +132,7 @@ describe("engine, notes/", () => {
         })
       )("%p", async (_key, TestCase) => {
         const { testFunc, ...opts } = TestCase;
-        await runEngineTestV5(testFunc, { ...opts, createEngine, expect });
+        await runEngineTestV5(testFunc, { ...opts, expect });
       });
     });
   });
@@ -165,7 +150,7 @@ describe("engine, notes/multi/", () => {
         })
       )("%p", async (_key, TestCase) => {
         const { testFunc, ...opts } = TestCase;
-        await runEngineTestV5(testFunc, { ...opts, createEngine, expect });
+        await runEngineTestV5(testFunc, { ...opts, expect });
       });
     });
   });
@@ -180,7 +165,7 @@ describe("engine, config/", () => {
         })
       )("%p", async (_key, TestCase) => {
         const { testFunc, ...opts } = TestCase;
-        await runEngineTestV5(testFunc, { ...opts, createEngine, expect });
+        await runEngineTestV5(testFunc, { ...opts, expect });
       });
     });
   });

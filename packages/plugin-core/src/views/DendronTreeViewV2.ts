@@ -125,7 +125,7 @@ export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
         type: DMessageType.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR,
         data: {
           note,
-          sync: true,
+          syncChangedNote: true
         },
         source: "vscode",
       } as OnDidChangeActiveTextEditorMsg);

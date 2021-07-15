@@ -21,9 +21,7 @@ import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
 const { ANCHOR_WITH_SPECIAL_CHARS, ANCHOR } = GOTO_NOTE_PRESETS;
 suite("GotoNote", function () {
-  const ctx = setupBeforeAfter(this, {
-    beforeHook: () => {},
-  });
+  const ctx = setupBeforeAfter(this, {});
 
   describe("using args", () => {
     test("basic", (done) => {

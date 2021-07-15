@@ -48,8 +48,6 @@ const ConfigForm: React.FC<DefaultProps> = ({ engine }) => {
     []
   );
 
-  useEffect(() => console.log(anyOfValues, "yooooo"), [anyOfValues]);
-
   useEffect(() => {
     setCurrentValues(engine.config);
   }, [engine]);
@@ -91,7 +89,6 @@ const ConfigForm: React.FC<DefaultProps> = ({ engine }) => {
         errors[`${instancePath.substring(1)}`.replace("/", ".")] = message;
       }
     });
-    console.log({ errors });
     return errors;
   };
 

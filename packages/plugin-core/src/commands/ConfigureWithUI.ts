@@ -45,7 +45,7 @@ function getWebviewContent2(opts: { title: string }) {
     </style>
   </head>
   <body>
-    <iframe width="100%" height="100%" src="http://localhost:${port}/vscode/configure?ws=${wsRoot}&port=${port}"></iframe>
+    <iframe width="100%" height="100%" src="http://localhost:${port}/workspace/config.html"></iframe>
   </body>
   </html>`;
 }

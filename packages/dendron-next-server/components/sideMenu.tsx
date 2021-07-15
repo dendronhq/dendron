@@ -73,7 +73,6 @@ const generateMenu = (
 
   if (dataDefinition.type === "anyOf") {
     const currentMode: string = anyOfValues[name];
-    console.log({ dataDefinition, currentMode });
     return generateMenu(
       dataDefinition.data[currentMode === "basic" ? 0 : 1],
       prefix,

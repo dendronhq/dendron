@@ -101,7 +101,7 @@ const CMD_PREFIX = "Dendron:";
 export const ICONS = {
   STUB: "gist-new",
   SCHEMA: "repo",
-  UNREFLINK: "debug-disconnect",
+  LINK_CANDIDATE: "debug-disconnect",
   WIKILINK: "link",
 };
 export const DENDRON_WORKSPACE_FILE = "dendron.code-workspace";
@@ -261,7 +261,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     key: "dendron.convertLink",
     title: `${CMD_PREFIX} Convert Link`,
     group: "notes",
-    desc: "Convert unreferenced link into backlink",
+    desc: "Convert link candidate into backlink",
   },
   // --- Lookup
   LOOKUP: {

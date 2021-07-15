@@ -334,9 +334,9 @@ export class FileStorage implements DStore {
     const allNotes = _.flatten(out);
     this._addBacklinks({ notesWithLinks, allNotes, allNotesCache });
     if (this.engine.config.dev?.enableLinkCandidates) {
-      const ctx = "_addUnrefLinks";
+      const ctx = "_addLinkCandidates";
       const start = process.hrtime();
-      this._addUnrefLinks(allNotes);
+      this._addLinkCandidates(allNotes);
       const duration = getDurationMilliseconds(start);
       this.logger.info({ ctx, duration });
     }
@@ -380,19 +380,19 @@ export class FileStorage implements DStore {
     });
   }
   
-  _addUnrefLinks(allNotes: NoteProps[] ) {
+  _addLinkCandidates(allNotes: NoteProps[] ) {
     const notesMap = NoteUtils.createFnameNoteMap(allNotes, true);
     return _.map(allNotes, (noteFrom: NoteProps) => {
       try {
-        const unreferencedLinks = LinkUtils.findUnreferencedLinks({
+        const linkCandidates = LinkUtils.findLinkCandidates({
           note: noteFrom,
           notesMap,
           engine: this.engine,
         });
-        noteFrom.links = noteFrom.links.concat(unreferencedLinks);
+        noteFrom.links = noteFrom.links.concat(linkCandidates);
       } catch (err) {
         const error = error2PlainObject(err);
-        this.logger.error({ error, noteFrom, message: "issue with unref link" });
+        this.logger.error({ error, noteFrom, message: "issue with link candidates" });
         return;
       }
     })

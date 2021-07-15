@@ -695,7 +695,7 @@ describe("RemarkUtils and LinkUtils", () => {
     });
   });
 
-  describe("findUnreferencedLinks", async () => {
+  describe("findLinkCandidates", async () => {
     const preSetupHook = async ({ wsRoot, vaults }: WorkspaceOpts) => {
       await NoteTestUtilsV4.createNote({
         fname: "foo",
@@ -715,7 +715,7 @@ describe("RemarkUtils and LinkUtils", () => {
         fname: "alpha",
         wsRoot,
         vault: vaults[0],
-        body: "note that has lots of unrefs from baz",
+        body: "note that has lots of candidates from baz",
       });
 
       await NoteTestUtilsV4.createNote({
@@ -830,14 +830,14 @@ describe("RemarkUtils and LinkUtils", () => {
           const note = engine.notes["bar"];
           const notes = _.values(engine.notes);
           const notesMap = NoteUtils.createFnameNoteMap(notes, true);
-          const unrefLinks = await LinkUtils.findUnreferencedLinks({
+          const linkCandidates = await LinkUtils.findLinkCandidates({
             note,
             notesMap,
             engine,
           });
-          expect(unrefLinks[0].from.fname).toEqual("bar");
-          expect(unrefLinks[0].to!.fname).toEqual("foo");
-          expect(unrefLinks[0].type).toEqual("unreferenced");
+          expect(linkCandidates[0].from.fname).toEqual("bar");
+          expect(linkCandidates[0].to!.fname).toEqual("foo");
+          expect(linkCandidates[0].type).toEqual("linkCandidate");
         },
         {
           expect,
@@ -846,18 +846,18 @@ describe("RemarkUtils and LinkUtils", () => {
       );
     });
 
-    test("multiple unrefs in one paragraph", async () => {
+    test("multiple link candidates in one paragraph", async () => {
       await runEngineTestV5(
         async ({ engine }) => {
           const note = engine.notes["baz"];
           const notes = _.values(engine.notes);
           const notesMap = NoteUtils.createFnameNoteMap(notes, true);
-          const unrefLinks = await LinkUtils.findUnreferencedLinks({
+          const linkCandidates = await LinkUtils.findLinkCandidates({
             note,
             notesMap,
             engine,
           });
-          expect(unrefLinks.length).toEqual(8);
+          expect(linkCandidates.length).toEqual(8);
         },
         {
           expect,
@@ -872,12 +872,12 @@ describe("RemarkUtils and LinkUtils", () => {
           const note = engine.notes["nodes"];
           const notes = _.values(engine.notes);
           const notesMap = NoteUtils.createFnameNoteMap(notes, true);
-          const unrefLinks = await LinkUtils.findUnreferencedLinks({
+          const linkCandidates = await LinkUtils.findLinkCandidates({
             note,
             notesMap,
             engine,
           });
-          expect(unrefLinks.length).toEqual(7);
+          expect(linkCandidates.length).toEqual(7);
         },
         {
           expect,

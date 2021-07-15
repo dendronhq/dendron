@@ -78,12 +78,12 @@ export class NoteSyncService {
       _.values(eclient.notes),
       true
     )
-    const unrefLinks = LinkUtils.findUnreferencedLinks({
+    const linkCandidates = LinkUtils.findLinkCandidates({
       note,
       notesMap,
       engine: eclient,
     });
-    note.links = links.concat(unrefLinks);
+    note.links = links.concat(linkCandidates);
     const anchors = await AnchorUtils.findAnchors({
       note,
       wsRoot: eclient.wsRoot,

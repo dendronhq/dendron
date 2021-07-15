@@ -200,7 +200,7 @@ const getLinks = ({
   return dlinks;
 };
 
-const getUnreferencedLinks = ({
+const getLinkCandidates = ({
   ast,
   note,
   notesMap,
@@ -220,7 +220,7 @@ const getUnreferencedLinks = ({
     }
   );
 
-  const unreferencedLinks: DLink[] = [];
+  const linkCandidates: DLink[] = [];
   _.map(textNodes, (textNode: Text) => {
     const value = textNode.value as string;
     // handling text nodes that start with \n
@@ -233,8 +233,8 @@ const getUnreferencedLinks = ({
     value.split(/\s+/).filter((word) => {
       const maybeNote = notesMap.get(word);
       if (maybeNote !== undefined) {
-        const unrefLink = {
-          type: "unreferenced",
+        const candidate = {
+          type: "linkCandidate",
           from: NoteUtils.toNoteLoc(note),
           value: value.trim(),
           position: textNode.position as Position,
@@ -243,12 +243,12 @@ const getUnreferencedLinks = ({
             vaultName: VaultUtils.getName(maybeNote.vault),
           },
         } as DLink;
-        unreferencedLinks.push(unrefLink);
+        linkCandidates.push(candidate);
       }
       return maybeNote !== undefined;
     });
   });
-  return unreferencedLinks;
+  return linkCandidates;
 };
 
 export class LinkUtils {
@@ -535,7 +535,7 @@ export class LinkUtils {
     return newBody;
   }
 
-  static findUnreferencedLinks({
+  static findLinkCandidates({
     note,
     // notes,
     notesMap,
@@ -557,12 +557,12 @@ export class LinkUtils {
       }
     );
     const tree = remark.parse(content) as DendronASTNode;
-    const unreferencedLinks: DLink[] = getUnreferencedLinks({
+    const linkCandidates: DLink[] = getLinkCandidates({
       ast: tree,
       note,
       notesMap,
     });
-    return unreferencedLinks;
+    return linkCandidates;
   }
 }
 

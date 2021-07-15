@@ -63,7 +63,7 @@ export type DNoteLinkData = {
   xvault?: boolean;
 };
 export type DNoteLink<TData extends DNoteLinkData = DNoteLinkData> = {
-  type: "ref" | "wiki" | "md" | "backlink" | "unreferenced";
+  type: "ref" | "wiki" | "md" | "backlink" | "linkCandidate";
   position?: Position;
   from: DNoteLoc;
   to?: DNoteLoc;

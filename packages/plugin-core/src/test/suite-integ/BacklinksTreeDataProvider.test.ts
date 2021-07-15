@@ -111,7 +111,7 @@ suite("BacklinksTreeDataProvider", function () {
           wsRoot,
           vault: vaults[0],
         });
-        await NOTE_PRESETS_V4.NOTE_WITH_UNREF_TARGET.create({
+        await NOTE_PRESETS_V4.NOTE_WITH_LINK_CANDIDATE_TARGET.create({
           wsRoot,
           vault: vaults[0],
         });
@@ -126,9 +126,9 @@ suite("BacklinksTreeDataProvider", function () {
           },
           { wsRoot }
         );
-        const isUnrefLinkEnabled = TestConfigUtils.getConfig({ wsRoot }).dev
+        const isLinkCandidateEnabled = TestConfigUtils.getConfig({ wsRoot }).dev
           ?.enableLinkCandidates;
-        expect(isUnrefLinkEnabled).toBeTruthy();
+        expect(isLinkCandidateEnabled).toBeTruthy();
 
         await new ReloadIndexCommand().execute();
         await VSCodeUtils.openNote(noteWithTarget);
@@ -138,7 +138,7 @@ suite("BacklinksTreeDataProvider", function () {
           path.join(wsRoot, vaults[0].fsPath, "gamma.md")
         );
         const ref = out[0].refs[0];
-        expect(ref.isUnref).toBeTruthy();
+        expect(ref.isCandidate).toBeTruthy();
         expect(ref.matchText as string).toEqual("alpha");
         done();
       },
@@ -175,7 +175,7 @@ suite("BacklinksTreeDataProvider", function () {
     });
   });
 
-  test("unref link should only work within a vault", (done) => {
+  test("link candidates should only work within a vault", (done) => {
     let alpha: NoteProps;
     let gamma: NoteProps;
     runMultiVaultTest({
@@ -187,7 +187,7 @@ suite("BacklinksTreeDataProvider", function () {
           vault: vaults[0],
           wsRoot,
         });
-        gamma = await NOTE_PRESETS_V4.NOTE_WITH_UNREF_TARGET.create({
+        gamma = await NOTE_PRESETS_V4.NOTE_WITH_LINK_CANDIDATE_TARGET.create({
           wsRoot,
           vault: vaults[1],
         });
@@ -217,14 +217,14 @@ suite("BacklinksTreeDataProvider", function () {
     });
   });
 
-  test("links and unref links to correct subtree", (done) => {
+  test("links and link candidates to correct subtree", (done) => {
     let alpha: NoteProps;
     runLegacyMultiWorkspaceTest({
       ctx,
       preSetupHook: async ({ wsRoot, vaults }) => {
         alpha = await NoteTestUtilsV4.createNote({
           fname: "alpha",
-          body: "this note has both links and unrefs to it.",
+          body: "this note has both links and candidates to it.",
           vault: vaults[0],
           wsRoot,
         });
@@ -264,11 +264,11 @@ suite("BacklinksTreeDataProvider", function () {
         expect(linkSubTreeItem.refs.length).toEqual(1);
         expect(linkSubTreeItem.refs[0].matchText).toEqual("[[alpha]]");
 
-        // a subtree for unref(s), holding one unref item, "alpha"
-        const unrefSubTreeItem = sourceTreeItem.children[1];
-        expect(unrefSubTreeItem.label).toEqual("Candidates");
-        expect(unrefSubTreeItem.refs.length).toEqual(1);
-        expect(unrefSubTreeItem.refs[0].matchText).toEqual("alpha");
+        // a subtree for candidate(s), holding one candidate item, "alpha"
+        const candidateSubTreeItem = sourceTreeItem.children[1];
+        expect(candidateSubTreeItem.label).toEqual("Candidates");
+        expect(candidateSubTreeItem.refs.length).toEqual(1);
+        expect(candidateSubTreeItem.refs[0].matchText).toEqual("alpha");
 
         // in each subtree, TreeItems that hold actual links should exist.
         // they are leaf nodes (no children).
@@ -276,9 +276,9 @@ suite("BacklinksTreeDataProvider", function () {
         expect(link[0].label).toEqual("[[alpha]]");
         expect(link[0].refs).toEqual(undefined);
 
-        const unref = await provider.getChildren(out[0].children[1]);
-        expect(unref[0].label).toEqual("alpha");
-        expect(unref[0].refs).toEqual(undefined);
+        const candidate = await provider.getChildren(out[0].children[1]);
+        expect(candidate[0].label).toEqual("alpha");
+        expect(candidate[0].refs).toEqual(undefined);
 
         done();
       },
@@ -293,7 +293,7 @@ suite("BacklinksTreeDataProvider", function () {
       preSetupHook: async ({ wsRoot, vaults }) => {
         alpha = await NoteTestUtilsV4.createNote({
           fname: "alpha",
-          body: "this note has many links and unrefs to it.",
+          body: "this note has many links and candidates to it.",
           vault: vaults[0],
           wsRoot,
         });
@@ -334,10 +334,10 @@ suite("BacklinksTreeDataProvider", function () {
         expect(linkSubTreeItem.label).toEqual("Linked");
         expect(linkSubTreeItem.refs.length).toEqual(3);
 
-        // a subtree for unref(s), holding five unref item
-        const unrefSubTreeItem = sourceTreeItem.children[1];
-        expect(unrefSubTreeItem.label).toEqual("Candidates");
-        expect(unrefSubTreeItem.refs.length).toEqual(5);
+        // a subtree for candidate(s), holding five candidate items
+        const candidateSubTreeItem = sourceTreeItem.children[1];
+        expect(candidateSubTreeItem.label).toEqual("Candidates");
+        expect(candidateSubTreeItem.refs.length).toEqual(5);
 
         done();
       },

@@ -32,7 +32,7 @@ export type RefT = {
 export type FoundRefT = {
   location: Location;
   matchText: string;
-  isUnref?: boolean;
+  isCandidate?: boolean;
 };
 
 const markdownExtRegex = /\.md$/i;
@@ -387,8 +387,8 @@ export const findReferences = async (
         location,
         matchText: lines.slice(-1)[0],
       };
-      if (link.type === "unreferenced") {
-        foundRef.isUnref = true;
+      if (link.type === "linkCandidate") {
+        foundRef.isCandidate = true;
       }
 
       refs.push(foundRef);

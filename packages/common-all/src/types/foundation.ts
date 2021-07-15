@@ -48,7 +48,7 @@ export type DLoc = {
  @deprecated use {@link DNoteLink}
  */
 export type DLink = {
-  type: "ref" | "wiki" | "md" | "backlink" | "unreferenced";
+  type: "ref" | "wiki" | "md" | "backlink" | "linkCandidate";
   value: string;
   alias?: string;
   position: Position;

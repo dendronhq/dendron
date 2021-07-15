@@ -27,7 +27,7 @@ class Backlink extends vscode.TreeItem {
  */
 const pathsToBacklinkSourceTreeItems = async (
   fsPath: string,
-  isUnrefEnabled: boolean | undefined
+  isLinkCandidateEnabled: boolean | undefined
 ) => {
   const refFromFilename = path.parse(fsPath).name;
   const referencesByPath = _.groupBy(
@@ -53,9 +53,9 @@ const pathsToBacklinkSourceTreeItems = async (
       referencesByPath[pathParam],
       collapsibleState
     );
-    const backlinkCount = isUnrefEnabled
+    const backlinkCount = isLinkCandidateEnabled
       ? referencesByPath[pathParam].length
-      : referencesByPath[pathParam].filter((ref) => !ref.isUnref).length;
+      : referencesByPath[pathParam].filter((ref) => !ref.isCandidate).length;
 
     backlink.description = `(${backlinkCount}) - (${path.basename(pathParam)})`;
     backlink.tooltip = pathParam;
@@ -73,17 +73,17 @@ const pathsToBacklinkSourceTreeItems = async (
 
 /**
  * Given all the found references to this note, return tree item(s) showing the type of backlinks.
- * If `isUnrefEnabled` is set, the tree item will not be added regardless of the existence of unref links.
+ * If `isLinkCandidateEnabled` is set, the tree item will not be added regardless of the existence of link candidates.
  * @param refs list of found references to this note
- * @param isUnrefEnabled flag that enables displaying unref links
+ * @param isLinkCandidateEnabled flag that enables displaying link candidates
  * @returns list of tree item(s) for the type of backlinks
  */
 const addBacklinkTypeTreeItems = (
   refs: FoundRefT[],
-  isUnrefEnabled: boolean | undefined
+  isLinkCandidateEnabled: boolean | undefined
 ) => {
-  const [wikilinks, unrefCandidates] = _.partition(refs, (ref) => {
-    return !ref.isUnref;
+  const [wikilinks, linkCandidates] = _.partition(refs, (ref) => {
+    return !ref.isCandidate;
   });
 
   const out: Backlink[] = [];
@@ -98,17 +98,17 @@ const addBacklinkTypeTreeItems = (
     backlinkTreeItem.description = `${wikilinks.length} link(s).`;
     out.push(backlinkTreeItem);
   }
-  if (isUnrefEnabled) {
-    const unrefCount = unrefCandidates.length;
-    if (unrefCount > 0) {
-      const unrefTreeItem = new Backlink(
+  if (isLinkCandidateEnabled) {
+    const candidateCount = linkCandidates.length;
+    if (candidateCount > 0) {
+      const candidateTreeItem = new Backlink(
         "Candidates",
-        unrefCandidates,
+        linkCandidates,
         vscode.TreeItemCollapsibleState.Collapsed
       );
-      unrefTreeItem.iconPath = new vscode.ThemeIcon(ICONS.UNREFLINK);
-      unrefTreeItem.description = `${unrefCandidates.length} candidate(s).`;
-      out.push(unrefTreeItem);
+      candidateTreeItem.iconPath = new vscode.ThemeIcon(ICONS.LINK_CANDIDATE);
+      candidateTreeItem.description = `${linkCandidates.length} candidate(s).`;
+      out.push(candidateTreeItem);
     }
   }
   return out;
@@ -135,7 +135,7 @@ const refsToBacklinkTreeItems = (refs: FoundRefT[], fsPath: string) => {
       arguments: [ref.location.uri, { selection: ref.location.range }],
       title: "Open File",
     };
-    if (ref.isUnref) {
+    if (ref.isCandidate) {
       backlink.command = {
         command: "dendron.convertLink",
         title: "Convert Link",
@@ -163,21 +163,21 @@ export default class BacklinksTreeDataProvider
   }
 
   public async getChildren(element?: Backlink) {
-    const isUnrefEnabled = getWS().config.dev?.enableLinkCandidates;
+    const isLinkCandidateEnabled = getWS().config.dev?.enableLinkCandidates;
     const fsPath = vscode.window.activeTextEditor?.document.uri.fsPath;
 
     if (!element) {
       if (!fsPath || (fsPath && !containsMarkdownExt(fsPath))) {
         return [];
       }
-      return pathsToBacklinkSourceTreeItems(fsPath, isUnrefEnabled);
+      return pathsToBacklinkSourceTreeItems(fsPath, isLinkCandidateEnabled);
     } else if (element.label === "Linked" || element.label === "Candidates") {
       const refs = element?.refs;
       if (!refs) {
         return [];
       }
 
-      if (!isUnrefEnabled && element.label === "Candidates") {
+      if (!isLinkCandidateEnabled && element.label === "Candidates") {
         return [];
       }
       return refsToBacklinkTreeItems(refs, fsPath!);
@@ -187,6 +187,6 @@ export default class BacklinksTreeDataProvider
     if (!refs) {
       return [];
     }
-    return addBacklinkTypeTreeItems(refs, isUnrefEnabled);
+    return addBacklinkTypeTreeItems(refs, isLinkCandidateEnabled);
   }
 }

@@ -273,9 +273,9 @@ export type DendronDevConfig = {
    */
   enableWebUI?: boolean;
   /**
-   * Enable displaying and indexing unreferenced links. Default is false
+   * Enable displaying and indexing link candidates. Default is false
    */
-  enableUnrefLinks?: boolean;
+  enableLinkCandidates?: boolean;
 };
 
 export type DendronSiteConfig = {

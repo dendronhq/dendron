@@ -30,8 +30,17 @@ type GDocImportPodCustomOpts = {
    * name of hierarchy to import into
    */
   fname: string;
+
+   /**
+   * import comments from the doc in text or json format
+   */
+  importComments : ImportComments;
 };
 
+type ImportComments = {
+  enable: boolean;
+  format: string;
+}
 
 type GDocImportPodConfig = ImportPodConfig & GDocImportPodCustomOpts;
 
@@ -57,10 +66,29 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
           type: "string",
           description: "name of hierarchy to import into",
         },
+        importComments: {
+          type: "object",
+          description: "import comments from the doc in text or json format",
+          properties: {
+            enable: {
+              type: "boolean",
+              default: "false"
+            },
+            format: {
+              type: "string",
+              enum: ["json","text"],
+              default: "json"
+
+            }
+          }
+        }
       },
     }) as JSONSchemaType<GDocImportPodConfig>;
   }
 
+  /*
+   * method to get data from google document
+   */
   getDataFromGDoc = async (opts: Partial<GDocImportPodConfig>): Promise<Partial<NoteProps>>  => {
     let response: Partial<NoteProps>;
     const {documentId, token } = opts;
@@ -97,9 +125,80 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
    return response;
 
   }
+
+  /*
+   * method to get comments in document
+   */
+  getCommentsFromDoc = async(opts: Partial<GDocImportPodConfig>, 
+    response: Partial<NoteProps>) : Promise<Partial<NoteProps>> => {
+
+    let comments;
+    const {documentId, token, importComments } = opts;
+    const headers = {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    };
+    try {
+    comments = await axios.get(`https://www.googleapis.com/drive/v2/files/${documentId}/comments`,
+    {headers})
+    const items= comments.data.items;
+    if(items.length > 0) {
+    comments = items.map((item: any) => {
+      let replies;
+      if(item.replies.length > 0){
+       replies = item.replies.map((reply: any) => {
+        reply = {
+          author: reply.author.displayName,
+          content: reply.content
+        };
+        return reply;
+       })
+      }
+       item = {
+          author: item.author.displayName,
+          content: item.content,
+          replies
+        };
+        return item;
+      })
+      if(importComments?.format === "json")
+      {
+        comments= JSON.stringify(comments)
+      }
+      else {
+        comments = this.prettyComment(comments);
+      }
+       response.body = response.body?.concat(`### Comments\n\n ${comments}`)
+    }
+  }catch(error) {
+    this.L.error({
+      msg: "failed to import the comments",
+      payload: stringifyError(error),
+    });
+    throw new DendronError({ message: stringifyError(error) });
+  }
+  return response;
+  }
   
   /*
-   * method to add fromtmatter to notes: url, status and tags
+   * method to prettify comment if format is text
+   */
+  prettyComment = (comments: any) => {
+    let text: string = "";
+    comments.forEach((comment: any) => {
+       text += `- ${comment.author}:  ${comment.content}\n`
+       if(comment.replies?.length> 0){
+         comment.replies.forEach((reply: any) => {
+          text += `\t - ${reply.author}: ${reply.content}\n`
+
+         })
+       }
+    })
+    return text;
+  }
+
+  /*
+   * method to add fromtmatter to notes: documentId, revisionId
    */
   addFrontMatterToData = ( 
     response: Partial<NoteProps>,
@@ -167,10 +266,14 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
       token,
       fname,
       documentId,
-      fnameAsId
+      fnameAsId,
+      importComments
     } = config as GDocImportPodConfig;
 
     let response = await this.getDataFromGDoc({documentId, token})
+    if(importComments?.enable) {
+     response = await this.getCommentsFromDoc({documentId, token, importComments}, response)
+    }
     response = this.addFrontMatterToData(response, fname, config);
     const note: NoteProps = await this._docs2Notes(response, {
       vault,

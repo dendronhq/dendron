@@ -8,6 +8,7 @@ export enum VSCodeEvents {
   Upgrade = "Upgrade",
   DisableTelemetry = "DisableTelemetry",
   EnableTelemetry = "EnableTelemetry",
+  Uninstall = "Uninstall"
 }
 
 export enum TutorialEvents {

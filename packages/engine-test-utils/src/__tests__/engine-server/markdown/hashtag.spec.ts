@@ -10,7 +10,7 @@ import {
 import _ from "lodash";
 import { runEngineTestV5 } from "../../../engine";
 import { ENGINE_HOOKS } from "../../../presets";
-import { createProcForTest, createProcTests, ProcTests } from "./utils";
+import { checkVFile, createProcForTest, createProcTests, ProcTests } from "./utils";
 
 function proc() {
   return MDUtilsV5.procRehypeParse({
@@ -121,12 +121,16 @@ describe("hashtag", () => {
             {
               actual: await AssertUtils.assertInString({
                 body: resp.toString(),
-                match: [`[${hashtag}](tags.my-hash.tag0)`],
+                match: [`[${hashtag}](tags.my-hash.tag0.md)`],
               }),
               expected: true,
             },
           ];
         },
+        [DendronASTDest.HTML]: async ({ extra }) => {
+          const { resp } = extra;
+          await checkVFile(resp, '<a href="tags.my-hash.tag0.html">#my-hash.tag0</a>');
+        }
       },
       preSetupHook: ENGINE_HOOKS.setupBasic,
     });

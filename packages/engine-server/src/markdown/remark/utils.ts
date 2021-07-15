@@ -117,6 +117,17 @@ export type LinkFilter = {
   loc?: Partial<DNoteLoc>;
 };
 
+export function hashTag2WikiLinkNoteV4(hashtag: HashTag): WikiLinkNoteV4 {
+  return {
+    ...hashtag,
+    type: DendronASTTypes.WIKI_LINK,
+    value: hashtag.fname,
+    data: {
+      alias: hashtag.value,
+    },
+  };
+}
+
 const getLinks = ({
   ast,
   note,
@@ -148,15 +159,7 @@ const getLinks = ({
           noteRefs.push(node as NoteRefNoteV4_LEGACY);
           break;
         case DendronASTTypes.HASHTAG: {
-          const hashtag = node as HashTag;
-          wikiLinks.push({
-            ...hashtag,
-            type: DendronASTTypes.WIKI_LINK,
-            value: hashtag.fname,
-            data: {
-              alias: hashtag.value,
-            },
-          });
+          wikiLinks.push(hashTag2WikiLinkNoteV4(node as HashTag));
           break;
         }
         default:

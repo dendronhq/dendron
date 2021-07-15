@@ -8,7 +8,7 @@ created: 1624333847315
 
 ## Welcome to Dendron
 
-This guide will help you learn the basics of Dendron. You can also follow the Getting Started guides on our [website](https://wiki.dendron.so/notes/e86ac3ab-dbe1-47a1-bcd7-9df0d0490b40.html).
+This guide will help you learn the basics of Dendron. You can also follow the Getting Started guides on our [website](https://wiki.dendron.so/notes/678c77d9-ef2c-4537-97b5-64556d6337f1.html).
 
 By the end of the tutorial, you will also see how Dendron can help you manage your knowledge with super fast lookup, flexible hierarchies, and powerful linking.
 

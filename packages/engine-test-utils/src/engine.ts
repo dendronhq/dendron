@@ -354,7 +354,16 @@ export class TestEngineUtils {
     sinon.stub(os, "homedir").returns(dir);
     return dir;
   }
+
   static vault1(vaults: DVault[]) {
     return _.find(vaults, { fsPath: "vault1" })!;
+  }
+
+  static vault2(vaults: DVault[]) {
+    return _.find(vaults, { fsPath: "vault2" })!;
+  }
+
+  static vault3(vaults: DVault[]) {
+    return _.find(vaults, { fsPath: "vault3" })!;
   }
 }

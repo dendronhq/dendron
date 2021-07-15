@@ -2,6 +2,7 @@ import { vault2Path } from "@dendronhq/common-server";
 import { AssertUtils } from "@dendronhq/common-test-utils";
 import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import { describe } from "mocha";
+import { Time } from "@dendronhq/common-all";
 import path from "path";
 import sinon from "sinon";
 // // You can import and use all API from the 'vscode' module
@@ -45,6 +46,36 @@ suite("InsertNoteCommand", function () {
           const body = editor.document.getText();
           expect(
             await AssertUtils.assertInString({ body, match: ["template text"] })
+          ).toBeTruthy();
+          done();
+        },
+        preSetupHook: ENGINE_HOOKS.setupBasic,
+      });
+    });
+    test("snippet variable", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        onInit: async ({ wsRoot, vaults }) => {
+          const vault = vaults[0];
+          const notePath = path.join(vault2Path({ vault, wsRoot }), "foo.md");
+          await VSCodeUtils.openFileInEditor(vscode.Uri.file(notePath));
+          const cmd = new InsertNoteCommand();
+          sinon.stub(cmd, "gatherInputs").returns(
+            Promise.resolve({
+              picks: [
+                {
+                  body: `template $CURRENT_YEAR-$CURRENT_MONTH-$CURRENT_DATE`,
+                },
+              ],
+            })
+          );
+          const editor = VSCodeUtils.getActiveTextEditorOrThrow();
+          editor.selection = new vscode.Selection(8, 0, 8, 12);
+          await cmd.run();
+          const date= Time.now().toISODate();
+          const body = editor.document.getText();
+          expect(
+            await AssertUtils.assertInString({ body, match: [`template ${date}`] })
           ).toBeTruthy();
           done();
         },

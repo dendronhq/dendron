@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/pods-core",
-  "version": "0.49.0",
+  "version": "0.50.0",
   "description": "pods-core",
   "license": "GPLv3",
   "repository": {
@@ -58,10 +58,12 @@
     "preset": "ts-jest"
   },
   "dependencies": {
-    "@dendronhq/common-all": "^0.49.0",
-    "@dendronhq/common-server": "^0.49.0",
-    "@dendronhq/engine-server": "^0.49.0",
+    "@dendronhq/common-all": "^0.50.0",
+    "@dendronhq/common-server": "^0.50.0",
+    "@dendronhq/engine-server": "^0.50.0",
+    "@octokit/graphql": "^4.6.4",
     "ajv": "^8.6.0",
+    "ajv-formats": "^2.1.0",
     "csv-writer": "^1.6.0",
     "emailjs": "^3.4.0",
     "fs-extra": "^9.0.1",
@@ -69,9 +71,7 @@
     "limiter": "^2.1.0",
     "lodash": "^4.17.20",
     "through2": "^4.0.2",
-    "vscode-uri": "^2.1.2",
-    "ajv-formats": "^2.1.0",
-    "@octokit/graphql": "^4.6.4"
+    "vscode-uri": "^2.1.2"
   },
   "gitHead": "d2e0e1c5ada1ac4a507e2da387cf761316de76de"
 }

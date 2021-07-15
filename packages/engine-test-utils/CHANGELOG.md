@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.50.0](https://github.com/dendronhq/dendron/compare/v0.49.0...v0.50.0) (2021-07-12)
+
+
+### Bug Fixes
+
+* avoid parsing bad wikilinks instead of erroring out ([#951](https://github.com/dendronhq/dendron/issues/951)) ([00668b0](https://github.com/dendronhq/dendron/commit/00668b0fd3ba12d39a3774d3835ebb64d13f4a1f))
+* local images in hover preview are now displayed ([#946](https://github.com/dendronhq/dendron/issues/946)) ([04b8374](https://github.com/dendronhq/dendron/commit/04b8374dff5b062819a3a1c56e79dc74631f4fe0))
+* store workspace using case insensitive keys ([#934](https://github.com/dendronhq/dendron/issues/934)) ([4de138b](https://github.com/dendronhq/dendron/commit/4de138be7853f35103ca46533546b6275df4193e))
+
+
+### Features Dendron
+
+* auto completion for anchors and headers ([#894](https://github.com/dendronhq/dendron/issues/894)) ([13e81d4](https://github.com/dendronhq/dendron/commit/13e81d49c1f14ee18457543f8e0818d0e36c17db))
+* improved block anchor in publishing ([#933](https://github.com/dendronhq/dendron/issues/933)) ([7b6ab6f](https://github.com/dendronhq/dendron/commit/7b6ab6fbcf22656919ff271382f24011684862a4))
+
+
+
+
+
 # [0.49.0](https://github.com/dendronhq/dendron/compare/v0.48.3...v0.49.0) (2021-07-05)
 
 

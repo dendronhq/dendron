@@ -2,7 +2,7 @@ import { ENGINE_HOOKS } from "../../presets";
 import { runEngineTestV5 } from "../../engine";
 import { GDocImportPod } from "@dendronhq/pods-core";
 import { VaultUtils } from "@dendronhq/common-all";
-import {response, comments} from "./GDocMockResult";
+import {response, comments} from "../../utils/GDocMockResult";
 import axios from 'axios';
 
 jest.mock('axios');

@@ -123,6 +123,7 @@ export const generateRenderableConfig = (
       type: schema.type,
       label,
       required,
+      helperText: schema.description,
       data: generateRenderableConfig(schema.items, definitions, ""),
     } as ArrayConfig;
   }
@@ -135,6 +136,7 @@ export const generateRenderableConfig = (
     return {
       type: "anyOf",
       label,
+      helperText: schema.description,
       required,
       data,
     } as AnyOfConfig;
@@ -143,15 +145,21 @@ export const generateRenderableConfig = (
   if ("$ref" in schema) {
     const src = schema.$ref.replace("#/definitions/", "");
     const data = _.get(definitions, src);
-    return generateRenderableConfig(data, definitions, label);
+    return generateRenderableConfig(
+      { ...data, description: schema.description },
+      definitions,
+      label
+    );
   }
 
   if (schema.type === "object") {
+    console.log(label, schema, "yooo");
     if (schema.additionalProperties) {
       return {
         type: "record",
         label,
         required,
+        helperText: schema.description,
         data: generateRenderableConfig(
           schema.additionalProperties,
           definitions,
@@ -163,6 +171,7 @@ export const generateRenderableConfig = (
     return {
       type: "object",
       label,
+      helperText: schema.description,
       data: Object.fromEntries(
         Object.entries(schema.properties).map(([key, child]) => [
           key,

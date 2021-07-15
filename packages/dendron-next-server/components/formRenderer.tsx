@@ -71,12 +71,18 @@ const BaseInput = ({
           {label}
           {required && <span style={{ color: "red" }}> *</span>}
         </Title>
-        {helperText && (
-          <>
-            <Text type="secondary">{helperText}</Text>
-            <br />
-          </>
-        )}
+        {helperText
+          ?.split("\n")
+          .map((line, index) => (
+            <>
+              <Text type="secondary" key={index}>
+                {line}
+              </Text>
+              <br />
+            </>
+          ))
+          .concat([<br key="br" />])}
+
         {children}
         {error && (
           <>
@@ -499,9 +505,10 @@ const FormGenerator = ({
   if (!data) return <></>;
 
   const lastName = prefix.length ? prefix[prefix.length - 1] : undefined;
+  const { type, required, helperText, label } = data;
+
   if (!shouldDisplay(lastName)) return <></>;
 
-  const { type, required, helperText, label } = data;
   if (type === "string" || type === "number") {
     return (
       <SimpleInput
@@ -578,6 +585,7 @@ const FormGenerator = ({
         data={data as AnyOfConfig}
         {...{
           label,
+          helperText,
           values,
           errors,
           prefix,
@@ -603,6 +611,17 @@ const FormGenerator = ({
           {prefix[prefix.length - 1]}
         </Title>
       )}
+      {helperText
+        ?.split("\n")
+        .map((line, index) => (
+          <>
+            <Text type="secondary" key={index}>
+              {line}
+            </Text>
+            <br />
+          </>
+        ))
+        .concat([<br key="br" />])}
       {Object.keys((data as ObjectConfig).data).map((key) => (
         <FormGenerator
           key={prefix.join(".") + "." + key}

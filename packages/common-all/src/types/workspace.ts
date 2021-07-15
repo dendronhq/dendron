@@ -272,6 +272,10 @@ export type DendronDevConfig = {
    * Enable experimental web ui. Default is false
    */
   enableWebUI?: boolean;
+  /**
+   * Use old preview
+   */
+  enableLegacyPreview?: boolean;
 };
 
 export type DendronSiteConfig = {

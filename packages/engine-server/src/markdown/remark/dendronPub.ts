@@ -12,7 +12,7 @@ import {
   NoteRefDataV4,
   VaultMissingBehavior,
   WikiLinkNoteV4,
-  BlockAnchor, DendronASTTypes
+  BlockAnchor, DendronASTTypes, HashTag
 } from "../types";
 import { MDUtilsV4 } from "../utils";
 import { NoteRefsOpts } from "./noteRefs";
@@ -20,7 +20,6 @@ import { convertNoteRefASTV2 } from "./noteRefsV2";
 import { hashTag2WikiLinkNoteV4, RemarkUtils, addError, getNoteOrError } from "./utils";
 import { blockAnchor2html } from "./blockAnchors";
 import { MDUtilsV5 } from "../utilsv5";
-import { HashTag } from "packages/engine-server/lib";
 
 type PluginOpts = NoteRefsOpts & {
   assetsPrefix?: string;

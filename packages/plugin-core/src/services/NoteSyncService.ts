@@ -3,14 +3,13 @@ import { DLogger, string2Note } from "@dendronhq/common-server";
 import {
   AnchorUtils,
   LinkUtils,
-  WorkspaceUtils,
+  WorkspaceUtils
 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
 import { ShowPreviewV2Command } from "../commands/ShowPreviewV2";
 import { Logger } from "../logger";
-import { VSCodeUtils } from "../utils";
 import { DendronWorkspace, getWS } from "../workspace";
 
 let NOTE_SERVICE: NoteSyncService | undefined;
@@ -41,9 +40,9 @@ export class NoteSyncService {
    * @param uri
    * @returns
    */
-  async onDidChange(uri: vscode.Uri) {
+  async onDidChange(editor: vscode.TextEditor) {
     const ctx = "NoteSyncService:onDidChange";
-
+    const uri = editor.document.uri;
     const eclient = DendronWorkspace.instance().getEngine();
     const fname = path.basename(uri.fsPath, ".md");
 
@@ -69,7 +68,6 @@ export class NoteSyncService {
     // we have this logic currently and it doesn't seem to be causing issues
     // this could lead to thrashing if user makes a change and quickly changes to a dififerent active window
     // in practice, this has never been reported 
-    const editor = await VSCodeUtils.openNote(noteHydrated);
     const doc = editor.document;
     const content = doc.getText();
     if (!WorkspaceUtils.noteContentChanged({ content, note: noteHydrated })) {

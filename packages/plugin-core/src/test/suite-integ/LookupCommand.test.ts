@@ -586,7 +586,7 @@ suite("Lookup, notesv2", function () {
             return [createNoActiveItem(vault)];
           });
           sinon
-            .stub(PickerUtilsV2, "promptVault")
+            .stub(PickerUtilsV2, "getOrPromptVaultForNewNote")
             .returns(Promise.resolve(vaults[1]));
 
           await lp.onDidAccept({

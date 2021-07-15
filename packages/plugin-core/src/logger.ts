@@ -44,6 +44,13 @@ export class Logger {
   }
   private static _level: TraceLevel = "debug";
 
+  /**
+   * Shortcut to check if logger is set to debug
+   */
+  static isDebug(): boolean {
+    return Logger.level === "debug";
+  }
+
   static cmpLevel(lvl: TraceLevel): boolean {
     return levels.indexOf(lvl) >= levels.indexOf(Logger.level || "debug");
   }

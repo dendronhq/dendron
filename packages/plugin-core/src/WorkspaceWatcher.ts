@@ -25,11 +25,15 @@ export class WorkspaceWatcher {
       this,
       context.subscriptions
     );
-    workspace.onDidOpenTextDocument(
-      this.onDidOpenTextDocument,
-      this,
-      context.subscriptions
-    );
+
+    // NOTE: currently, this is only used for logging purposes
+    if (Logger.isDebug()) {
+      workspace.onDidOpenTextDocument(
+        this.onDidOpenTextDocument,
+        this,
+        context.subscriptions
+      );
+    }
   }
 
   async onDidChangeTextDocument(event: TextDocumentChangeEvent) {
@@ -40,7 +44,7 @@ export class WorkspaceWatcher {
         return;
       }
       DendronWorkspace.instance().windowWatcher?.triggerUpdateDecorations();
-      NoteSyncService.instance().onDidChange(activeEditor.document.uri);
+      NoteSyncService.instance().onDidChange(activeEditor);
     }
     return;
   }

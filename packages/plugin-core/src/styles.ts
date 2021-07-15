@@ -11,7 +11,7 @@ Add Dendron graph styles below. The graph can be styled with any valid Cytoscape
 Full Dendron-specific styling documentation can be found here: [LINK HERE]
 
 Note: Empty selectors may affect parsing of following selectors, so be sure to comment/remove them when not in use.
-If styles are not applying, make sure each property is followed with a semicolon.
+If style properties are not applying, make sure each property is followed with a semicolon.
 */
 
 /* Any graph node */

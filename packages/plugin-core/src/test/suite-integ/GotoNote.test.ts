@@ -218,7 +218,7 @@ suite("GotoNote", function () {
         },
         onInit: async () => {
           // Open the note, select the hashtag, and use the command
-          VSCodeUtils.openNote(note);
+          await VSCodeUtils.openNote(note);
           VSCodeUtils.getActiveTextEditorOrThrow().selection = new vscode.Selection(new vscode.Position(7, 1), new vscode.Position(7, 1));
           await new GotoNoteCommand().run();
           // Make sure this took us to the tag note

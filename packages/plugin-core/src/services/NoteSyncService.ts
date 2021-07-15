@@ -74,7 +74,16 @@ export class NoteSyncService {
     let note = string2Note({ content, fname, vault, calculateHash: true });
     note = NoteUtils.hydrate({ noteRaw: note, noteHydrated });
     const links = LinkUtils.findLinks({ note, engine: eclient });
-    note.links = links;
+    const notesMap = NoteUtils.createFnameNoteMap(
+      _.values(eclient.notes),
+      true
+    )
+    const linkCandidates = LinkUtils.findLinkCandidates({
+      note,
+      notesMap,
+      engine: eclient,
+    });
+    note.links = links.concat(linkCandidates);
     const anchors = await AnchorUtils.findAnchors({
       note,
       wsRoot: eclient.wsRoot,

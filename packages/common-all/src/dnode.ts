@@ -855,6 +855,20 @@ export class NoteUtils {
     }
     return true;
   }
+
+  static createFnameNoteMap(
+    notes: NoteProps[],
+    removeStubs?: boolean,
+  ) {
+    const notesMap = new Map<string, NoteProps>();
+    const candidates = removeStubs ? 
+      notes.filter((n) => !n.stub) :
+      notes;
+    candidates.map((n) => {
+      notesMap.set(n.fname, n);
+    })
+    return notesMap;
+  }
 }
 
 type SchemaMatchResult = {

@@ -31,13 +31,27 @@ import {
   AnyOfInputType,
 } from "../types/formTypes";
 import { shouldDisplay } from "../utils/shouldDisplay";
+import bucketConfig from "../data/bucketConfig";
 
 const largeFieldStyles = {
   paddingLeft: "10px",
-  borderWidth: "0px 0px 0px 2px",
+  borderWidth: "0px 0px 0px 1px",
   borderRadius: 0,
   borderColor: "var(--antd-wave-shadow-color)",
   borderStyle: "solid",
+};
+
+const updateMenu = (name: string, setSelectedKeys: any, setOpenKeys: any) => {
+  setSelectedKeys([name]);
+  const allKeys: string[] = name.split(".");
+  const openKeys: string[] =
+    allKeys.length > 1 ? allKeys.slice(0, -1) : allKeys;
+  const bucketName: string[] = Object.keys(bucketConfig).filter((key) =>
+    bucketConfig[key].includes(openKeys[0])
+  );
+  setOpenKeys(() =>
+    allKeys.length > 1 ? [bucketName[0], ...openKeys] : [bucketName[0]]
+  );
 };
 
 const BaseInput = ({
@@ -47,7 +61,6 @@ const BaseInput = ({
   required,
   helperText,
   children,
-  setSelectedKeys,
   customStyles,
 }: BaseInputType) => {
   const error = React.useMemo(() => get(errors, name), [errors, name]);
@@ -91,10 +104,17 @@ const SimpleInput = ({
   errors,
   addonAfter,
   setSelectedKeys,
+  setOpenKeys,
 }: SimpleInputType) => {
   return (
     <BaseInput
-      {...{ name, label, required, helperText, errors, setSelectedKeys }}
+      {...{
+        name,
+        label,
+        required,
+        helperText,
+        errors,
+      }}
     >
       <Input
         type={type}
@@ -102,7 +122,7 @@ const SimpleInput = ({
         placeholder={placeholder}
         required={required}
         addonAfter={addonAfter}
-        onClick={() => setSelectedKeys && setSelectedKeys([name])}
+        onClick={() => updateMenu(name, setSelectedKeys, setOpenKeys)}
       />
     </BaseInput>
   );
@@ -116,12 +136,24 @@ const SelectInput = ({
   helperText,
   errors,
   setSelectedKeys,
+  setOpenKeys,
 }: SelectInputType) => {
   return (
     <BaseInput
-      {...{ name, label, required, helperText, errors, setSelectedKeys }}
+      {...{
+        name,
+        label,
+        required,
+        helperText,
+        errors,
+        setSelectedKeys,
+        setOpenKeys,
+      }}
     >
-      <Select name={name}>
+      <Select
+        name={name}
+        onClick={() => updateMenu(name, setSelectedKeys, setOpenKeys)}
+      >
         {data.data.map((value) => (
           <Select.Option key={value} value={value}>
             {value}
@@ -139,14 +171,13 @@ const BooleanInput = ({
   helperText,
   errors,
   setSelectedKeys,
+  setOpenKeys,
 }: InputType) => {
   return (
-    <BaseInput
-      {...{ name, label, required, helperText, errors, setSelectedKeys }}
-    >
+    <BaseInput {...{ name, label, required, helperText, errors }}>
       <Switch
         name={name}
-        onClick={() => setSelectedKeys && setSelectedKeys([name])}
+        onClick={() => updateMenu(name, setSelectedKeys, setOpenKeys)}
       />
     </BaseInput>
   );
@@ -161,6 +192,7 @@ const AnyOfInput = ({
   helperText,
   errors,
   setSelectedKeys,
+  setOpenKeys,
 }: AnyOfInputType) => {
   const [value, setValue] = React.useState<string>("basic");
   const onChange = (e: RadioChangeEvent) => {
@@ -174,7 +206,6 @@ const AnyOfInput = ({
         required,
         helperText,
         errors,
-        setSelectedKeys,
         customStyles: largeFieldStyles,
       }}
     >
@@ -189,6 +220,7 @@ const AnyOfInput = ({
         errors={errors}
         prefix={[name]}
         setSelectedKeys={setSelectedKeys}
+        setOpenKeys={setOpenKeys}
         displayTitle={false}
       />
     </BaseInput>
@@ -205,7 +237,16 @@ const ArrayInput = ({
   errors,
   isRecordType = false,
   setSelectedKeys,
+  setOpenKeys,
 }: ArrayInputType) => {
+  const props = {
+    values,
+    name,
+    errors,
+    setSelectedKeys,
+    setOpenKeys,
+  };
+
   return (
     <BaseInput
       {...{
@@ -222,25 +263,15 @@ const ArrayInput = ({
         render={(arrayHelpers) =>
           isRecordType ? (
             <RenderRecord
-              {...{
-                values,
-                dataDefinition: data as RecordConfig,
-                name,
-                arrayHelpers,
-                errors,
-                setSelectedKeys,
-              }}
+              dataDefinition={data as RecordConfig}
+              arrayHelpers={arrayHelpers}
+              {...props}
             />
           ) : (
             <RenderArray
-              {...{
-                values,
-                dataDefinition: data as ArrayConfig,
-                name,
-                arrayHelpers,
-                errors,
-                setSelectedKeys,
-              }}
+              dataDefinition={data as ArrayConfig}
+              arrayHelpers={arrayHelpers}
+              {...props}
             />
           )
         }
@@ -283,6 +314,7 @@ const RenderRecord = ({
   arrayHelpers,
   errors,
   setSelectedKeys,
+  setOpenKeys,
 }: {
   values: any;
   dataDefinition: RecordConfig;
@@ -290,6 +322,7 @@ const RenderRecord = ({
   arrayHelpers: any;
   errors: any;
   setSelectedKeys?: (value: string[]) => void;
+  setOpenKeys?: (value: string[]) => void;
 }) => {
   type RecordProps = {
     id: number;
@@ -340,6 +373,7 @@ const RenderRecord = ({
           errors={errors}
           prefix={[name, `${record.value}`]}
           setSelectedKeys={setSelectedKeys}
+          setOpenKeys={setOpenKeys}
           displayTitle={false}
         />
       </Card>
@@ -378,6 +412,7 @@ const RenderArray = ({
   arrayHelpers,
   errors,
   setSelectedKeys,
+  setOpenKeys,
 }: {
   values: any;
   dataDefinition: ArrayConfig;
@@ -385,13 +420,14 @@ const RenderArray = ({
   arrayHelpers: any;
   errors: any;
   setSelectedKeys?: (value: string[]) => void;
+  setOpenKeys?: (value: string[]) => void;
 }) => {
   const dataSource =
     get(values, name)?.map((value: any, index: number) => (
       <Card
         key={`${name}.${index}`}
         size="small"
-        title={index + 1}
+        title={index}
         extra={
           <MinusCircleOutlined onClick={() => arrayHelpers.remove(index)} />
         }
@@ -406,6 +442,7 @@ const RenderArray = ({
           errors={errors}
           prefix={[name, `${index}`]}
           setSelectedKeys={setSelectedKeys}
+          setOpenKeys={setOpenKeys}
           displayTitle={false}
         />
       </Card>
@@ -440,6 +477,7 @@ const FormGenerator = ({
   prefix,
   addonAfter,
   setSelectedKeys,
+  setOpenKeys,
   displayTitle = true,
 }: ConfigInputType) => {
   if (!data) return <></>;
@@ -453,12 +491,15 @@ const FormGenerator = ({
       <SimpleInput
         name={prefix.join(".")}
         type={type === "string" ? "text" : type}
-        label={label}
-        required={required}
-        helperText={helperText}
-        errors={errors}
-        addonAfter={addonAfter}
-        setSelectedKeys={setSelectedKeys}
+        {...{
+          label,
+          required,
+          helperText,
+          errors,
+          addonAfter,
+          setSelectedKeys,
+          setOpenKeys,
+        }}
       />
     );
   }
@@ -471,6 +512,7 @@ const FormGenerator = ({
         helperText={helperText}
         errors={errors}
         setSelectedKeys={setSelectedKeys}
+        setOpenKeys={setOpenKeys}
       />
     );
   }
@@ -489,6 +531,7 @@ const FormGenerator = ({
           helperText,
           errors,
           setSelectedKeys,
+          setOpenKeys,
         }}
       />
     );
@@ -498,7 +541,15 @@ const FormGenerator = ({
       <SelectInput
         name={prefix.join(".")}
         data={data as EnumConfig}
-        {...{ label, values, helperText, errors, prefix, setSelectedKeys }}
+        {...{
+          label,
+          values,
+          helperText,
+          errors,
+          prefix,
+          setSelectedKeys,
+          setOpenKeys,
+        }}
       />
     );
   }
@@ -508,13 +559,13 @@ const FormGenerator = ({
       <AnyOfInput
         name={prefix.join(".")}
         data={data as AnyOfConfig}
-        {...{ label, values, errors, prefix, setSelectedKeys }}
+        {...{ label, values, errors, prefix, setSelectedKeys, setOpenKeys }}
       />
     );
   }
 
   return (
-    <>
+    <div style={largeFieldStyles}>
       {displayTitle && prefix.length !== 0 && (
         <Title
           level={2}
@@ -523,6 +574,7 @@ const FormGenerator = ({
             // textAlign: "center",
             padding: "1rem 1rem 1rem 0rem",
           }}
+          id={prefix.join(".")}
         >
           {prefix[prefix.length - 1]}
         </Title>
@@ -535,9 +587,10 @@ const FormGenerator = ({
           errors={errors}
           prefix={[...prefix, key]}
           setSelectedKeys={setSelectedKeys}
+          setOpenKeys={setOpenKeys}
         />
       ))}
-    </>
+    </div>
   );
 };
 

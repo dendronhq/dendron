@@ -51,6 +51,7 @@ export type ConfigInputType = {
   values?: any;
   addonAfter?: ReactNode;
   setSelectedKeys?: (keys: string[]) => void;
+  setOpenKeys?: (keys: string[]) => void;
   displayTitle?: boolean;
 };
 
@@ -62,6 +63,7 @@ export type InputType = {
   required?: boolean;
   helperText?: string;
   setSelectedKeys?: (keys: string[]) => void;
+  setOpenKeys?: (keys: string[]) => void;
 };
 export type BaseInputType = InputType & {
   children?: ReactNode;

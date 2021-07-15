@@ -76,8 +76,6 @@ const ConfigForm: React.FC<DefaultProps> = ({ engine }) => {
     validate(values);
     const { errors: ajvErrors } = validate;
 
-    console.log({ ajvErrors });
-
     if (!ajvErrors?.length) {
       return {};
     }
@@ -148,7 +146,9 @@ const ConfigForm: React.FC<DefaultProps> = ({ engine }) => {
                       <Typography
                         style={{ textAlign: "center", padding: "2rem" }}
                       >
-                        <Title level={2}>{bucket}</Title>
+                        <Title level={2} id={bucket}>
+                          {bucket}
+                        </Title>
                       </Typography>
                       {bucketConfig[bucket].map((property: string) => (
                         <FormGenerator
@@ -165,6 +165,7 @@ const ConfigForm: React.FC<DefaultProps> = ({ engine }) => {
                           errors={errors}
                           prefix={[property]}
                           setSelectedKeys={setSelectedKeys}
+                          setOpenKeys={setOpenKeys}
                         />
                       ))}
                     </React.Fragment>
@@ -173,9 +174,7 @@ const ConfigForm: React.FC<DefaultProps> = ({ engine }) => {
                 <Form.Item name="submit" style={{ justifyContent: "center" }}>
                   <Button.Group size="large">
                     <ResetButton type="text">Clear changes</ResetButton>
-                    <SubmitButton type="primary" disabled={!_.isEmpty(errors)}>
-                      Save changes
-                    </SubmitButton>
+                    <SubmitButton type="primary">Save changes</SubmitButton>
                   </Button.Group>
                 </Form.Item>
               </Form>

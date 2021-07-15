@@ -46,11 +46,7 @@ const generateMenu = (
           height: "1.5rem",
         }}
       >
-        <a href={`#${name}`}>
-          {isEmpty(dataDefinition.label)
-            ? prefix[prefix.length - 1]
-            : dataDefinition.label}
-        </a>
+        <a href={`#${name}`}>{prefix[prefix.length - 1]}</a>
       </Menu.Item>
     );
   }
@@ -58,7 +54,10 @@ const generateMenu = (
   if (dataDefinition.type === "array") {
     const values = get(currentValues, name) ?? [];
     return (
-      <SubMenu key={name} title={dataDefinition.label}>
+      <SubMenu
+        key={name}
+        title={<a href={`#${prefix.join(".")}`}>{prefix[prefix.length - 1]}</a>}
+      >
         {values.map((value: any, index: number) =>
           generateMenu(
             dataDefinition.data,
@@ -73,7 +72,10 @@ const generateMenu = (
   if (dataDefinition.type === "record") {
     const values = get(currentValues, name) ?? {};
     return (
-      <SubMenu key={name} title={dataDefinition.label}>
+      <SubMenu
+        key={name}
+        title={<a href={`#${prefix.join(".")}`}>{prefix[prefix.length - 1]}</a>}
+      >
         {Object.keys(values).map((value: any) =>
           generateMenu(dataDefinition.data, [...prefix, value], currentValues)
         )}
@@ -87,11 +89,7 @@ const generateMenu = (
     return (
       <SubMenu
         key={name}
-        title={
-          isEmpty(dataDefinition.label)
-            ? prefix[prefix.length - 1]
-            : dataDefinition.label
-        }
+        title={<a href={`#${prefix.join(".")}`}>{prefix[prefix.length - 1]}</a>}
       >
         {Object.keys((dataDefinition as ObjectConfig).data).map((key) =>
           generateMenu(
@@ -149,6 +147,7 @@ const SideMenu: React.FC<DefaultProptypes> = ({
           width: "max-content",
           fontSize: "0.9rem",
           fontFamily: "monospace",
+          borderWidth: 0,
         }}
         inlineIndent={10}
         mode="inline"
@@ -158,7 +157,7 @@ const SideMenu: React.FC<DefaultProptypes> = ({
         onOpenChange={onOpenChange}
       >
         {buckets.map((bucket) => (
-          <SubMenu key={bucket} title={bucket}>
+          <SubMenu key={bucket} title={<a href={`#${bucket}`}>{bucket}</a>}>
             {bucketConfig[bucket].map((property: string) =>
               generateMenu(
                 generateRenderableConfig(

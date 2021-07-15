@@ -27,11 +27,15 @@ export const generateSchema = (config: Config): any => {
   }
 
   if (config.type === "array") {
-    return {
+    const schema: any = {
       type: config.type,
       items: generateSchema(config.data),
-      minItems: config.required ? 1 : 0,
     };
+
+    if (config.required) {
+      schema.minItems = 1;
+    }
+    return schema;
   }
 
   if (config.type === "anyOf") {

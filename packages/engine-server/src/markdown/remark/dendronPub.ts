@@ -32,10 +32,12 @@ type PluginOpts = NoteRefsOpts & {
 
 function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
   const proc = this;
-  let { dest, vault, fname, config, overrides, insideNoteRef } =
-    MDUtilsV4.getDendronData(proc);
+  const procData = MDUtilsV4.getDendronData(proc);
+  const { dest, fname, config, overrides, insideNoteRef } = procData;
+  let vault = procData.vault;
+    
   function transformer(tree: Node, _file: VFile) {
-    let root = tree as Root;
+    const root = tree as Root;
     const { error, engine } = MDUtilsV4.getEngineFromProc(proc);
     const insertTitle = !_.isUndefined(overrides?.insertTitle)
       ? overrides?.insertTitle
@@ -53,7 +55,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
       const note = NoteUtils.getNoteByFnameV5({
         fname,
         notes: engine.notes,
-        vault: vault,
+        vault,
         wsRoot: engine.wsRoot,
       });
       if (!note) {
@@ -148,7 +150,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         _node.data = {
           alias,
           permalink: href,
-          exists: exists,
+          exists,
           hName: "a",
           hProperties: {
             // className: classNames,
@@ -160,7 +162,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
               value: alias,
             },
           ],
-        };
+        } as any /* type checker otherwise complains about hName */;
 
         if (value === "403") {
           _node.data = {
@@ -182,7 +184,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
                 value: alias,
               },
             ],
-          };
+          } as any /* type checker otherwise complains about hName */;
         }
       }
       if (node.type === DendronASTTypes.REF_LINK_V2) {
@@ -202,7 +204,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         if (data) {
           if (parent!.children.length > 1) {
             const children = parent!.children;
-            const idx = RemarkUtils.findIndex(
+            const idx = _.findIndex(
               children,
               RemarkUtils.isNoteRefV2
             );
@@ -274,7 +276,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         }
       }
       if (node.type === "image" && dest === DendronASTDest.HTML) {
-        let imageNode = node as Image;
+        const imageNode = node as Image;
         if (opts?.assetsPrefix) {
           imageNode.url =
             "/" +

@@ -175,7 +175,7 @@ const getLinks = ({
       from: NoteUtils.toNoteLoc(note),
       value: wikiLink.value,
       alias: wikiLink.data.alias,
-      position: wikiLink.position!,
+      position: wikiLink.position as Position,
       xvault: !_.isUndefined(wikiLink.data.vaultName),
       // TODO: error if vault not found
       to: {
@@ -189,7 +189,7 @@ const getLinks = ({
   for (const noteRef of noteRefs as NoteRefNoteV4[]) {
     const { anchorStart, anchorEnd, anchorStartOffset } =
       noteRef.data.link.data;
-    const anchorStartText = anchorStart ? anchorStart : "";
+    const anchorStartText = anchorStart || "";
     const anchorStartOffsetText = anchorStartOffset
       ? `,${anchorStartOffset}`
       : "";
@@ -266,7 +266,7 @@ export class LinkUtils {
     filter?: LinkFilter;
   }): DLink[] {
     const content = note.body;
-    let remark = MDUtilsV5.procRemarkParseFull(
+    const remark = MDUtilsV5.procRemarkParseFull(
       { flavor: ProcFlavor.REGULAR },
       {
         engine,
@@ -275,7 +275,7 @@ export class LinkUtils {
         dest: DendronASTDest.MD_DENDRON,
       }
     );
-    let out = remark.parse(content) as DendronASTNode;
+    const out = remark.parse(content) as DendronASTNode;
     const links: DLink[] = getLinks({
       ast: out,
       filter: { loc: filter?.loc },
@@ -332,7 +332,8 @@ export class LinkUtils {
     const re = new RegExp(LINK_CONTENTS, "i");
     const out = linkString.match(re);
     if (out) {
-      let { alias, value, anchor } = out.groups as any;
+      let { alias, value } = out.groups as any;
+      const { anchor } = out.groups as any;
       if (!value && !anchor) return null; // Does not actually link to anything
       let vaultName: string | undefined;
       if (value) {
@@ -399,7 +400,7 @@ export class LinkUtils {
     }
 
     // pre-parse vault name if it exists
-    let vaultName: string | undefined = undefined;
+    let vaultName: string | undefined;
     ({ vaultName, link: ref } = LinkUtils.parseDendronURI(ref));
 
     const groups = reLink.exec(ref)?.groups;
@@ -422,7 +423,7 @@ export class LinkUtils {
     if (clean.anchorStart && clean.anchorStart.indexOf(",") >= 0) {
       const [anchorStart, offset] = clean.anchorStart.split(",");
       clean.anchorStart = anchorStart;
-      clean.anchorStartOffset = parseInt(offset);
+      clean.anchorStartOffset = parseInt(offset, 10);
     }
     if (_.isUndefined(fname) && _.isUndefined(clean.anchorStart)) {
       throw new DendronError({
@@ -584,7 +585,7 @@ export class AnchorUtils {
 function walk(node: Node, fn: any) {
   fn(node);
   if (node.children) {
-    (node.children as Node[]).forEach(function (n) {
+    (node.children as Node[]).forEach((n) => {
       walk(n, fn);
     });
   }
@@ -603,20 +604,20 @@ const NODE_TYPES_TO_EXTRACT = [
 
 export class RemarkUtils {
   static bumpHeadings(root: Node, baseDepth: number) {
-    var headings: Heading[] = [];
-    walk(root, function (node: Node) {
+    const headings: Heading[] = [];
+    walk(root, (node: Node) => {
       if (node.type === DendronASTTypes.HEADING) {
         headings.push(node as Heading);
       }
     });
 
-    var minDepth = headings.reduce(function (memo, h) {
+    const minDepth = headings.reduce((memo, h) =>{
       return Math.min(memo, h.depth);
     }, MAX_HEADING_DEPTH);
 
-    var diff = baseDepth + 1 - minDepth;
+    const diff = baseDepth + 1 - minDepth;
 
-    headings.forEach(function (h) {
+    headings.forEach((h) => {
       h.depth += diff;
     });
   }
@@ -632,15 +633,6 @@ export class RemarkUtils {
     ];
   }
 
-  static findIndex(array: Node[], fn: any) {
-    for (var i = 0; i < array.length; i++) {
-      if (fn(array[i], i)) {
-        return i;
-      }
-    }
-    return -1;
-  }
-
   static isHeading(node: Node, text: string, depth?: number): node is Heading {
     if (node.type !== DendronASTTypes.HEADING) {
       return false;
@@ -651,7 +643,7 @@ export class RemarkUtils {
       return true;
     }
     if (text) {
-      var headingText = toString(node);
+      const headingText = toString(node);
       return text.trim().toLowerCase() === headingText.trim().toLowerCase();
     }
 
@@ -706,8 +698,8 @@ export class RemarkUtils {
   ) {
     return function (this: Processor) {
       return (tree: Node, _vfile: VFile) => {
-        let root = tree as DendronASTRoot;
-        let wikiLinks: WikiLinkNoteV4[] = selectAll(
+        const root = tree as DendronASTRoot;
+        const wikiLinks: WikiLinkNoteV4[] = selectAll(
           DendronASTTypes.WIKI_LINK,
           root
         ) as WikiLinkNoteV4[];
@@ -719,7 +711,7 @@ export class RemarkUtils {
             }
             linkNode.value = newValue;
             changes.push({
-              note: note,
+              note,
               status: "update",
             });
           }
@@ -734,8 +726,8 @@ export class RemarkUtils {
   ) {
     return function (this: Processor) {
       return (tree: Node, _vfile: VFile) => {
-        let root = tree as DendronASTRoot;
-        let wikiLinks: WikiLinkNoteV4[] = selectAll(
+        const root = tree as DendronASTRoot;
+        const wikiLinks: WikiLinkNoteV4[] = selectAll(
           DendronASTTypes.WIKI_LINK,
           root
         ) as WikiLinkNoteV4[];
@@ -756,7 +748,7 @@ export class RemarkUtils {
 
         if (dirty) {
           changes.push({
-            note: note,
+            note,
             status: "update",
           });
         }
@@ -767,9 +759,9 @@ export class RemarkUtils {
   static oldNoteRef2NewNoteRef(note: NoteProps, changes: NoteChangeEntry[]) {
     return function (this: Processor) {
       return (tree: Node, _vfile: VFile) => {
-        let root = tree as DendronASTRoot;
+        const root = tree as DendronASTRoot;
         //@ts-ignore
-        let notesRefLegacy: NoteRefNoteV4_LEGACY[] = selectAll(
+        const notesRefLegacy: NoteRefNoteV4_LEGACY[] = selectAll(
           DendronASTTypes.REF_LINK,
           root
         );
@@ -804,7 +796,7 @@ export class RemarkUtils {
   static h1ToTitle(note: NoteProps, changes: NoteChangeEntry[]) {
     return function (this: Processor) {
       return (tree: Node, _vfile: VFile) => {
-        let root = tree as Root;
+        const root = tree as Root;
         const idx = _.findIndex(
           root.children,
           (ent) => ent.type === DendronASTTypes.HEADING && ent.depth === 1
@@ -826,7 +818,7 @@ export class RemarkUtils {
   static h1ToH2(note: NoteProps, changes: NoteChangeEntry[]) {
     return function (this: Processor) {
       return (tree: Node, _vfile: VFile) => {
-        let root = tree as Root;
+        const root = tree as Root;
         const idx = _.findIndex(
           root.children,
           (ent) => ent.type === DendronASTTypes.HEADING && ent.depth === 1

@@ -29,7 +29,7 @@ export const createEngineFactoryFactory = ({
     opts: WorkspaceOpts
   ): DEngineClient => {
     const engine = new EngineClass() as DEngineClient;
-    _.map(overrides || {}, (method, key: keyof DEngineCliimpoent) => {
+    _.map(overrides || {}, (method, key: keyof DEngineClient) => {
       // @ts-ignore
       engine[key] = method(opts);
     });

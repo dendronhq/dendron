@@ -113,6 +113,8 @@ suite("Extension", function () {
               noXVaultWikiLink: true,
               lookupConfirmVaultOnCreate: false,
               autoFoldFrontmatter: true,
+              mermaid: true,
+              useKatex: true,
               site: {
                 copyAssets: true,
                 siteHierarchies: ["root"],

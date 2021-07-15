@@ -276,6 +276,10 @@ export type DendronDevConfig = {
    * Enable displaying and indexing link candidates. Default is false
    */
   enableLinkCandidates?: boolean;
+  /**
+   * Enable new preview as default
+   */
+  enablePreviewV2?: boolean;
 };
 
 export type DendronSiteConfig = {

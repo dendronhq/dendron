@@ -4,6 +4,7 @@ import {
   DNoteAnchor,
   NoteProps,
   NoteUtils,
+  TAGS_HIERARCHY,
 } from "@dendronhq/common-all";
 import { HASHTAG_REGEX_LOOSE, LinkUtils } from "@dendronhq/engine-server";
 import { sort as sortPaths } from "cross-path-sort";
@@ -223,7 +224,7 @@ export const getReferenceAtPosition = (
     return {
       range: rangeForHashTag,
       label: match[0],
-      ref: `tags.${match[1]}`,
+      ref: `${TAGS_HIERARCHY}${match[1]}`,
       refText: docText,
     }
   }

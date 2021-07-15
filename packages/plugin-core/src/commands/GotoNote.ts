@@ -6,6 +6,7 @@ import {
   isNotUndefined,
   NoteProps,
   NoteUtils,
+  TAGS_HIERARCHY,
   VaultUtils,
 } from "@dendronhq/common-all";
 import { matchWikiLink, HASHTAG_REGEX_LOOSE } from "@dendronhq/engine-server";
@@ -88,7 +89,7 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
             if (isNotUndefined(hashtag.index) && _.inRange(selection.start.character, hashtag.index, hashtag.index + hashtag[0].length)) {
               return {
                 alias: hashtag[0],
-                value: `tags.${hashtag[1]}`,
+                value: `${TAGS_HIERARCHY}${hashtag[1]}`,
               };
             }
           }

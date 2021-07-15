@@ -34,6 +34,7 @@ import {
   SchemaUtils,
   StoreDeleteNoteResp,
   stringifyError,
+  TAGS_HIERARCHY,
   VaultUtils,
   WriteNoteResp,
 } from "@dendronhq/common-all";
@@ -535,8 +536,8 @@ export class FileStorage implements DStore {
               alias = oldLink.from.alias;
             }
             // for hashtag links, we'll have to regenerate the alias
-            if (newLoc.fname.startsWith("tags.")) {
-              alias = `#${newLoc.fname.slice(5 /* length of "tags." */)}`;
+            if (newLoc.fname.startsWith(TAGS_HIERARCHY)) {
+              alias = `#${newLoc.fname.slice(TAGS_HIERARCHY.length)}`;
             } else if (LinkUtils.isHashtagLink(oldLink.from)) {
               // If this used to be a hashtag but no longer is, the alias is like `#foo.bar` and no longer makes sense.
               alias = undefined;

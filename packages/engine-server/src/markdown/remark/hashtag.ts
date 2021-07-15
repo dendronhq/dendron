@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { DendronError } from "@dendronhq/common-all";
+import { DendronError, TAGS_HIERARCHY } from "@dendronhq/common-all";
 import { Eat } from "remark-parse";
 import Unified, { Plugin } from "unified";
 import { DendronASTDest, DendronASTTypes, HashTag } from "../types";
@@ -58,7 +58,7 @@ function attachParser(proc: Unified.Processor) {
       return eat(match[0])({
         type: DendronASTTypes.HASHTAG,
         value,
-        fname: `tags.${match[1]}`,
+        fname: `${TAGS_HIERARCHY}${match[1]}`,
       });
     }
     return;

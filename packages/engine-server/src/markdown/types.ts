@@ -92,6 +92,10 @@ export type WikiLinkDataV4 = {
   vaultName?: string;
 };
 
+export type RehypeLinkData = WikiLinkDataV4 & {
+  hName: string,
+}
+
 export type NoteRefNoteV4_LEGACY = DendronASTNode & {
   type: DendronASTTypes.REF_LINK;
   value: string;

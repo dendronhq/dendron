@@ -12,7 +12,10 @@ import {
   NoteRefDataV4,
   VaultMissingBehavior,
   WikiLinkNoteV4,
-  BlockAnchor, DendronASTTypes, HashTag
+  BlockAnchor,
+  DendronASTTypes,
+  HashTag,
+  RehypeLinkData,
 } from "../types";
 import { MDUtilsV4 } from "../utils";
 import { NoteRefsOpts } from "./noteRefs";
@@ -162,7 +165,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
               value: alias,
             },
           ],
-        } as any /* type checker otherwise complains about hName */;
+        } as RehypeLinkData;
 
         if (value === "403") {
           _node.data = {
@@ -184,7 +187,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
                 value: alias,
               },
             ],
-          } as any /* type checker otherwise complains about hName */;
+          } as RehypeLinkData;
         }
       }
       if (node.type === DendronASTTypes.REF_LINK_V2) {

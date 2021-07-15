@@ -108,6 +108,40 @@ Array [
 
 exports[`RemarkUtils and LinkUtils findLinks filter loc no match 1`] = `Array []`;
 
+exports[`RemarkUtils and LinkUtils findLinks hashtag link 1`] = `
+Array [
+  Object {
+    "alias": "#bar",
+    "from": Object {
+      "fname": "foo",
+      "id": "foo",
+      "vaultName": "vault1",
+    },
+    "position": Position {
+      "end": Object {
+        "column": 5,
+        "line": 1,
+        "offset": 4,
+      },
+      "indent": Array [],
+      "start": Object {
+        "column": 1,
+        "line": 1,
+        "offset": 0,
+      },
+    },
+    "to": Object {
+      "anchorHeader": undefined,
+      "fname": "tags.bar",
+      "vaultName": undefined,
+    },
+    "type": "wiki",
+    "value": "tags.bar",
+    "xvault": false,
+  },
+]
+`;
+
 exports[`RemarkUtils and LinkUtils findLinks note ref 1`] = `
 Array [
   Object {

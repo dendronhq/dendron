@@ -205,7 +205,6 @@ export async function runJestHarnessV2(results: any, expect: any) {
       }
     } catch (err) {
       console.log(err);
-      debugger;
     }
   });
 }

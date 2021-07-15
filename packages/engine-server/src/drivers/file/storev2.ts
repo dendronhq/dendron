@@ -34,6 +34,7 @@ import {
   SchemaUtils,
   StoreDeleteNoteResp,
   stringifyError,
+  TAGS_HIERARCHY,
   VaultUtils,
   WriteNoteResp,
 } from "@dendronhq/common-all";
@@ -557,12 +558,17 @@ export class FileStorage implements DStore {
             const oldLink = LinkUtils.dlink2DNoteLink(link);
             // current implementation adds alias for all notes
             // check if old note has alias thats different from its fname
-            const alias =
-              oldLink.from.alias &&
-              oldLink.from.alias.toLocaleLowerCase() !==
-                oldLink.from.fname.toLocaleLowerCase()
-                ? oldLink.from.alias
-                : undefined;
+            let alias: string | undefined;
+            if (oldLink.from.alias && oldLink.from.alias.toLocaleLowerCase() !== oldLink.from.fname.toLocaleLowerCase()) {
+              alias = oldLink.from.alias;
+            }
+            // for hashtag links, we'll have to regenerate the alias
+            if (newLoc.fname.startsWith(TAGS_HIERARCHY)) {
+              alias = `#${newLoc.fname.slice(TAGS_HIERARCHY.length)}`;
+            } else if (LinkUtils.isHashtagLink(oldLink.from)) {
+              // If this used to be a hashtag but no longer is, the alias is like `#foo.bar` and no longer makes sense.
+              alias = undefined;
+            }
             // loc doesn't have header info
             const newBody = LinkUtils.updateLink({
               note,

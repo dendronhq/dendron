@@ -318,5 +318,44 @@ suite("DefinitionProvider", function () {
         },
       });
     });
+
+    test("with hashtag", (done) => {
+      let noteWithTarget: NoteProps;
+      let noteWithLink: NoteProps;
+      let _wsRoot: string;
+
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          _wsRoot = wsRoot;
+          noteWithTarget = await NoteTestUtilsV4.createNote({
+            fname: "tags.my-test.note0",
+            vault: vaults[0],
+            wsRoot,
+          });
+          noteWithLink = await NoteTestUtilsV4.createNote({
+            fname: "test-note",
+            vault: vaults[0],
+            body: "#my-test.note0",
+            wsRoot,
+          });
+        },
+        onInit: async () => {
+          const editor = await VSCodeUtils.openNote(noteWithLink);
+          const doc = editor?.document as vscode.TextDocument;
+          const provider = new DefinitionProvider();
+          const pos = LocationTestUtils.getPresetWikiLinkPosition();
+          const loc = (await provider.provideDefinition(
+            doc,
+            pos,
+            null as any
+          )) as vscode.Location;
+          expect(loc.uri.fsPath).toEqual(
+            NoteUtils.getFullPath({ wsRoot: _wsRoot, note: noteWithTarget })
+          );
+          done();
+        },
+      });
+    });
   });
 });

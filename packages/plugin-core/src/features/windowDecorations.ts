@@ -3,6 +3,7 @@ import {
   BlockAnchor,
   DendronASTDest,
   DendronASTTypes,
+  HashTag,
   MDUtilsV5,
   ProcMode,
   WikiLinkNoteV4,
@@ -11,7 +12,7 @@ import {
 import { DecorationOptions, DecorationRangeBehavior, Range, TextEditor, TextEditorDecorationType, ThemeColor, window, TextDocument } from "vscode";
 import visit from "unist-util-visit";
 import _ from "lodash";
-import { isNotUndefined, NoteUtils, Position, VaultUtils } from "@dendronhq/common-all";
+import { isNotUndefined, DefaultMap, randomColor, NoteUtils, Position, VaultUtils } from "@dendronhq/common-all";
 import { DateTime } from "luxon";
 import { getConfigValue, getWS } from "../workspace";
 import { CodeConfigKeys, DateTimeFormat } from "../types";
@@ -28,30 +29,37 @@ export function updateDecorations(activeEditor: TextEditor) {
     { dest: DendronASTDest.MD_DENDRON }
   );
   const tree = proc.parse(text);
-  const decorations: Map<TextEditorDecorationType, DecorationOptions[]> = new Map([
-    [DECORATION_TYPE_TIMESTAMP, []],
-    [DECORATION_TYPE_WIKILINK, []],
-    [DECORATION_TYPE_ALIAS, []],
-    [DECORATION_TYPE_BROKEN_WIKILINK, []],
-    [DECORATION_TYPE_BLOCK_ANCHOR, []],
-  ]);
+  const allDecorations = new DefaultMap<TextEditorDecorationType, DecorationOptions[]>(() => []);
 
   visit(tree, (node) => {
     switch (node.type) {
       case DendronASTTypes.FRONTMATTER: {
-        for (const decoration of decorateTimestamps(node as FrontmatterContent)) {
-          decorations.get(DECORATION_TYPE_TIMESTAMP)?.push(decoration);
+        const decorations = decorateTimestamps(node as FrontmatterContent);
+        if (isNotUndefined(decorations)) {
+          for (const decoration of decorations) {
+            allDecorations.get(DECORATION_TYPE_TIMESTAMP).push(decoration);
+          }
         }
         break;
       }
       case DendronASTTypes.BLOCK_ANCHOR: {
         const decoration = decorateBlockAnchor(node as BlockAnchor);
-        if (isNotUndefined(decoration)) decorations.get(DECORATION_TYPE_BLOCK_ANCHOR)?.push(decoration);
+        if (isNotUndefined(decoration)) {
+          allDecorations.get(DECORATION_TYPE_BLOCK_ANCHOR).push(decoration);
+        }
+        break;
+      }
+      case DendronASTTypes.HASHTAG: {
+        const out = decorateHashTag(node as HashTag);
+        if (isNotUndefined(out)) {
+          const [type, decoration] = out;
+          allDecorations.get(type).push(decoration);
+        }
         break;
       }
       case DendronASTTypes.WIKI_LINK: {
         for (const [type, decoration] of decorateWikiLink(node as WikiLinkNoteV4, activeEditor.document)) {
-          decorations.get(type)?.push(decoration);
+          allDecorations.get(type).push(decoration);
         }
         break;
       }
@@ -60,18 +68,27 @@ export function updateDecorations(activeEditor: TextEditor) {
         const out = decorateReference(node as NoteRefNoteV4);
         if (out) {
           const [type, decoration] = out;
-          decorations.get(type)?.push(decoration);
+          allDecorations.get(type).push(decoration);
         }
         break;
       }
-      default: /* nothing */
+      default:
+        /* Nothing */
     }
   });
 
-  for (const [type, items] of decorations.entries()) {
-    activeEditor.setDecorations(type, items);
+  // Activate the decorations
+  for (const [type, decorations] of allDecorations.entries()) {
+    activeEditor.setDecorations(type, decorations);
   }
-  return decorations;
+  // Clean out the now-unused tag decorations
+  for (const [key, type] of DECORATION_TYPE_TAG.entries()) {
+    if (!allDecorations.has(type)) {
+      type.dispose();
+      DECORATION_TYPE_TAG.delete(key);
+    }
+  }
+  return allDecorations;
 }
 
 export const DECORATION_TYPE_TIMESTAMP = window.createTextEditorDecorationType({});
@@ -130,6 +147,29 @@ function decorateBlockAnchor(blockAnchor: BlockAnchor) {
   return decoration;
 }
 
+export const DECORATION_TYPE_TAG = new DefaultMap<string, TextEditorDecorationType>((fname) => {
+  return window.createTextEditorDecorationType({
+    // sets opacity to about 37%
+    backgroundColor: `${randomColor(fname)}60`,
+    // Do not try to grow the decoration range when the user is typing,
+    // because the color for a partial hashtag `#fo` is different from `#foo`.
+    // We can't just reuse the first computed color and keep the decoration growing.
+    rangeBehavior: DecorationRangeBehavior.ClosedClosed,
+  });
+});
+
+function decorateHashTag(hashtag: HashTag): [TextEditorDecorationType, DecorationOptions] | undefined {
+  const position = hashtag.position;
+  if (_.isUndefined(position)) return; // should never happen
+
+  const type = DECORATION_TYPE_TAG.get(hashtag.fname);
+  const decoration: DecorationOptions = {
+    range: VSCodeUtils.position2VSCodeRange(position),
+    
+  };
+  return [type, decoration];
+}
+
 /** Decoration for wikilinks that point to valid notes. */
 export const DECORATION_TYPE_WIKILINK = window.createTextEditorDecorationType({
   color: new ThemeColor("editorLink.activeForeground"),
@@ -165,7 +205,7 @@ export const DECORATION_TYPE_ALIAS = window.createTextEditorDecorationType({
 const RE_ALIAS = /(?<beforeAlias>\[\[)(?<alias>[^|]+)\|/;
 
 function decorateWikiLink(wikiLink: WikiLinkNoteV4, document: TextDocument) {
-  const position = wikiLink.position;
+  const position = wikiLink.position as Position | undefined;
   if (_.isUndefined(position)) return []; // should never happen
 
   const foundNote = doesLinkedNoteExist({fname: wikiLink.value, vaultName: wikiLink.data.vaultName});

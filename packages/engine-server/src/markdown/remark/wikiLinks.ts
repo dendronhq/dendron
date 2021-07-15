@@ -2,6 +2,7 @@ import {
   CONSTANTS,
   DendronError,
   NoteUtils,
+  Position,
   VaultUtils,
 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
@@ -87,16 +88,16 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
 
       if (pOpts.mode === ProcMode.NO_DATA) {
         const { alias, anchorHeader } = data;
-        let link = value;
-        let calias = alias !== value ? `${alias}|` : "";
-        let anchor = anchorHeader ? `#${anchorHeader}` : "";
-        let vaultPrefix = data.vaultName
+        const link = value;
+        const calias = alias !== value ? `${alias}|` : "";
+        const anchor = anchorHeader ? `#${anchorHeader}` : "";
+        const vaultPrefix = data.vaultName
           ? `${CONSTANTS.DENDRON_DELIMETER}${data.vaultName}/`
           : "";
         return `[[${calias}${vaultPrefix}${link}${anchor}]]`;
       }
 
-      let { dest } = MDUtilsV4.getDendronData(proc);
+      const { dest } = MDUtilsV4.getDendronData(proc);
       const vault = MDUtilsV4.getVault(proc, data.vaultName);
       // if converting back to dendron md, no further processing
       if (dest === DendronASTDest.MD_DENDRON) {
@@ -112,7 +113,7 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
               xvault: !_.isUndefined(data.vaultName),
             },
             type: LinkUtils.astType2DLinkType(DendronASTTypes.WIKI_LINK),
-            position: node.position!,
+            position: node.position as Position,
           },
           dest,
         });
@@ -199,7 +200,9 @@ function attachParser(proc: Unified.Processor) {
       return out;
     }
 
-    let { config, vault, dest, fname } = MDUtilsV5.getProcData(proc);
+    const procData = MDUtilsV5.getProcData(proc);
+    let { vault } = procData;
+    const { config, dest, fname } = procData;
     const { engine } = MDUtilsV4.getEngineFromProc(proc);
     if (out.vaultName) {
       const maybeVault = VaultUtils.getVaultByName({

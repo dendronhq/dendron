@@ -5,7 +5,7 @@ import * as vscode from "vscode";
 import { VSCodeUtils } from "../../utils";
 import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
-import { DECORATION_TYPE_ALIAS, DECORATION_TYPE_BLOCK_ANCHOR, DECORATION_TYPE_BROKEN_WIKILINK, DECORATION_TYPE_TIMESTAMP, DECORATION_TYPE_WIKILINK, updateDecorations } from "../../features/windowDecorations";
+import { DECORATION_TYPE_ALIAS, DECORATION_TYPE_BLOCK_ANCHOR, DECORATION_TYPE_TAG, DECORATION_TYPE_BROKEN_WIKILINK, DECORATION_TYPE_TIMESTAMP, DECORATION_TYPE_WIKILINK, updateDecorations } from "../../features/windowDecorations";
 import _ from "lodash";
 
 /** Check if the ranges decorated by `decorations` contains `text` */
@@ -44,6 +44,9 @@ suite("windowDecorations", function () {
               "  * Sit sed accusamus saepe voluptatem sint animi quis animi. ^anchor-3",
               "* Dolores suscipit maiores nulla accusamus est.",
               "",
+              "#foo",
+              "#bar",
+              "#foo",
               "[[root]]",
               "",
               "[[with alias|root]]",
@@ -67,10 +70,10 @@ suite("windowDecorations", function () {
           });
           const editor = await VSCodeUtils.openNote(note!);
           const document = editor.document;
-          const decorations = updateDecorations(editor);
+          const allDecorations = updateDecorations(editor);
 
-          const timestampDecorations = decorations.get(DECORATION_TYPE_TIMESTAMP);
-          expect(timestampDecorations?.length).toEqual(2);
+          const timestampDecorations = allDecorations.get(DECORATION_TYPE_TIMESTAMP);
+          expect(timestampDecorations.length).toEqual(2);
           // check that the decorations are at the right locations
           expect(
             isTextDecorated(CREATED, timestampDecorations!, document)
@@ -79,8 +82,8 @@ suite("windowDecorations", function () {
             isTextDecorated(UPDATED, timestampDecorations!, document)
           ).toBeTruthy();
 
-          const blockAnchorDecorations = decorations.get(DECORATION_TYPE_BLOCK_ANCHOR);
-          expect(blockAnchorDecorations?.length).toEqual(3);
+          const blockAnchorDecorations = allDecorations.get(DECORATION_TYPE_BLOCK_ANCHOR);
+          expect(blockAnchorDecorations.length).toEqual(3);
           // check that the decorations are at the right locations
           expect(
             isTextDecorated("^anchor-1", blockAnchorDecorations!, document)
@@ -92,8 +95,8 @@ suite("windowDecorations", function () {
             isTextDecorated("^anchor-3", blockAnchorDecorations!, document)
           ).toBeTruthy();
 
-          const wikilinkDecorations = decorations.get(DECORATION_TYPE_WIKILINK);
-          expect(wikilinkDecorations?.length).toEqual(2);
+          const wikilinkDecorations = allDecorations.get(DECORATION_TYPE_WIKILINK);
+          expect(wikilinkDecorations.length).toEqual(2);
           expect(
             isTextDecorated("[[root]]", wikilinkDecorations!, document)
           ).toBeTruthy();
@@ -101,12 +104,15 @@ suite("windowDecorations", function () {
             isTextDecorated("[[with alias|root]]", wikilinkDecorations!, document)
           ).toBeTruthy();
 
-          const aliasDecorations = decorations.get(DECORATION_TYPE_ALIAS);
-          expect(aliasDecorations?.length).toEqual(1);
+          expect(DECORATION_TYPE_TAG.has("tags.foo"));
+          expect(DECORATION_TYPE_TAG.has("tags.bar"));
+
+          const aliasDecorations = allDecorations.get(DECORATION_TYPE_ALIAS);
+          expect(aliasDecorations.length).toEqual(1);
           expect(isTextDecorated("with alias", aliasDecorations!, document));
 
-          const brokenWikilinkDecorations = decorations.get(DECORATION_TYPE_BROKEN_WIKILINK);
-          expect(brokenWikilinkDecorations?.length).toEqual(1);
+          const brokenWikilinkDecorations = allDecorations.get(DECORATION_TYPE_BROKEN_WIKILINK);
+          expect(brokenWikilinkDecorations.length).toEqual(1);
           expect(
             isTextDecorated("[[does.not.exist]]", brokenWikilinkDecorations!, document)
           ).toBeTruthy();

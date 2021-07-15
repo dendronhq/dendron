@@ -9,6 +9,7 @@ import { Heading, Parent, Root } from "mdast";
 import { Processor } from "unified";
 import { DendronPubOpts } from "./remark/dendronPub";
 import { WikiLinksOpts } from "./remark/wikiLinks";
+
 export { Node as UnistNode } from "unist";
 export { VFile } from "vfile";
 export { Processor };
@@ -35,18 +36,19 @@ export enum DendronASTTypes {
   REF_LINK = "refLink",
   REF_LINK_V2 = "refLinkV2",
   BLOCK_ANCHOR = "blockAnchor",
+  HASHTAG = "hashtag",
   // Not dendron-specific, included here for convenience
   ROOT = "root",
   HEADING = "heading",
   LIST = "list",
   LIST_ITEM = "listItem",
   PARAGRAPH = "paragraph",
+  TEXT = "text",
   TABLE = "table",
   TABLE_ROW = "tableRow",
   TABLE_CELL = "tableCell",
   IMAGE = "image",
   FRONTMATTER = "yaml",
-  TEXT = "text",
 }
 
 export enum DendronASTDest {
@@ -77,7 +79,7 @@ export type DendronASTData = {
 
 // --- NODES
 
-export type WikiLinkNoteV4 = DendronASTNode & {
+export type WikiLinkNoteV4 = Omit<DendronASTNode, "children"> & {
   type: DendronASTTypes.WIKI_LINK;
   value: string;
   data: WikiLinkDataV4;
@@ -89,6 +91,10 @@ export type WikiLinkDataV4 = {
   prefix?: string;
   vaultName?: string;
 };
+
+export type RehypeLinkData = WikiLinkDataV4 & {
+  hName: string,
+}
 
 export type NoteRefNoteV4_LEGACY = DendronASTNode & {
   type: DendronASTTypes.REF_LINK;
@@ -125,6 +131,15 @@ export type NoteRefDataV4_LEGACY = {
 export type BlockAnchor = DendronASTNode & {
   type: DendronASTTypes.BLOCK_ANCHOR;
   id: string;
+};
+
+/** Hashtag tags, like `#foo.bar`, a shorthand for `[[tags.foo.bar]]` */
+export type HashTag = DendronASTNode & {
+  type: DendronASTTypes.HASHTAG;
+  /** The fname that the hashtag actually references, like `tags.foo.bar` */
+  fname: string;
+  /** The full test of the hashtag, like `#foo.bar` */
+  value: string;
 };
 
 export type Anchor = BlockAnchor | Heading;

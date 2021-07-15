@@ -67,7 +67,7 @@ export class ShowPreviewV2Command extends BasicCommand<
     return;
   }
 
-  async execute(_opts: CommandOpts) {
+  async execute(_opts?: CommandOpts) {
     // Get workspace information
     const ws = getWS();
 

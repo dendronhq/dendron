@@ -13,7 +13,7 @@ import { BasicCommand } from "./base";
 import { getEngine, getWS } from "../workspace";
 import { GotoNoteCommand } from "./GotoNote";
 import { VSCodeUtils } from "../utils";
-import { MetadataService } from "@dendronhq/engine-server";
+import { GraphStyleService } from "../styles";
 
 type CommandOpts = {};
 
@@ -49,7 +49,6 @@ export class ShowNoteGraphCommand extends BasicCommand<
 
     // If panel already exists
     const existingPanel = ws.getWebView(DendronWebViewKey.NOTE_GRAPH);
-
 
     if (!_.isUndefined(existingPanel)) {
       try {
@@ -107,6 +106,20 @@ export class ShowNoteGraphCommand extends BasicCommand<
           }
           break;
         }
+        case GraphViewMessageType.onRequestGraphStyle: {
+          // Set graph styles
+          const styles = GraphStyleService.getParsedStyles();
+          if (styles) {
+            panel.webview.postMessage({
+              type: "onGraphStyleLoad",
+              data: {
+                styles,
+              },
+              source: "vscode",
+            });
+          }
+          break;
+        }
         // case GraphViewMessageType.onReady: {
         //   const profile = getDurationMilliseconds(start);
         //   Logger.info({ ctx, msg: "treeViewLoaded", profile, start });
@@ -120,9 +133,6 @@ export class ShowNoteGraphCommand extends BasicCommand<
           break;
       }
     });
-
-    const metadataService = MetadataService.instance();
-    // metadataService.
 
     // Update workspace-wide graph panel
     ws.setWebView(DendronWebViewKey.NOTE_GRAPH, panel);

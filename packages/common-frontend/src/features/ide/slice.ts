@@ -10,6 +10,7 @@ type Theme = "light" | "dark" | "unknown";
 type InitialState = {
   noteActive: NoteProps | undefined;
   theme: Theme;
+  graphStyles: string;
   views: {
     [key in DendronTreeViewKey | DendronWebViewKey]: {
       ready: boolean;
@@ -23,6 +24,7 @@ export const ideSlice = createSlice({
   name: "ide",
   initialState: {
     noteActive: undefined,
+    graphStyles: '',
     theme: "unknown",
     views: {
       "dendron.tree-view": {
@@ -36,6 +38,9 @@ export const ideSlice = createSlice({
     },
     setTheme: (state, action: PayloadAction<Theme>) => {
       state.theme = action.payload;
+    },
+    setGraphStyles: (state, action: PayloadAction<string>) => {
+      state.graphStyles = action.payload;
     },
     setViewReady: (
       state,

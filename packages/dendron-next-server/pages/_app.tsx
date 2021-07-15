@@ -83,7 +83,7 @@ function AppVSCode({ Component, pageProps }: any) {
     const { port, ws } = getWorkspaceParamsFromQueryString();
 
     if (msg.type === DMessageType.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR) {
-      let cmsg = msg as OnDidChangeActiveTextEditorMsg;
+      const cmsg = msg as OnDidChangeActiveTextEditorMsg;
       const { sync, note, syncChangedNote } = cmsg.data;
       if (sync) {
         // skip the initial ?
@@ -102,11 +102,17 @@ function AppVSCode({ Component, pageProps }: any) {
       ideDispatch(ideSlice.actions.setNoteActive(note));
       logger.info({ ctx, msg: "setNote:post" });
     } else if (msg.type === ThemeMessageType.onThemeChange) {
-      let cmsg = msg;
+      const cmsg = msg;
       const { theme } = cmsg.data;
       logger.info({ ctx, theme, msg: "theme" });
       ideDispatch(ideSlice.actions.setTheme(theme));
-    } else {
+    } else if (msg.type === "onGraphStyleLoad") {
+      const cmsg = msg;
+      const { styles } = cmsg.data;
+      logger.info({ ctx, styles, msg: "styles" });
+      ideDispatch(ideSlice.actions.setGraphStyles(styles));
+    }
+     else {
       logger.error({ ctx, msg: "unknown message" });
     }
   });

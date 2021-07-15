@@ -570,9 +570,8 @@ const FormGenerator = ({
         <Title
           level={2}
           style={{
-            textTransform: "capitalize",
-            // textAlign: "center",
             padding: "1rem 1rem 1rem 0rem",
+            fontFamily: "monospace",
           }}
           id={prefix.join(".")}
         >

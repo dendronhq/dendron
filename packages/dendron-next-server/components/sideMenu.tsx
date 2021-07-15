@@ -85,25 +85,11 @@ const generateMenu = (
 
   // the rest is logic for handling object type
 
-  if (name.length > 0) {
-    return (
-      <SubMenu
-        key={name}
-        title={<a href={`#${prefix.join(".")}`}>{prefix[prefix.length - 1]}</a>}
-      >
-        {Object.keys((dataDefinition as ObjectConfig).data).map((key) =>
-          generateMenu(
-            (dataDefinition as ObjectConfig).data[key],
-            [...prefix, key],
-            currentValues
-          )
-        )}
-      </SubMenu>
-    );
-  }
-
   return (
-    <>
+    <SubMenu
+      key={name}
+      title={<a href={`#${prefix.join(".")}`}>{prefix[prefix.length - 1]}</a>}
+    >
       {Object.keys((dataDefinition as ObjectConfig).data).map((key) =>
         generateMenu(
           (dataDefinition as ObjectConfig).data[key],
@@ -111,7 +97,7 @@ const generateMenu = (
           currentValues
         )
       )}
-    </>
+    </SubMenu>
   );
 };
 

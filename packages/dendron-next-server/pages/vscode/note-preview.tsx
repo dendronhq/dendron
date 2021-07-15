@@ -5,14 +5,14 @@ import {
   DMessageSource,
   NoteViewMessageType,
   ThemeTarget,
-  ThemeType
+  ThemeType,
 } from "@dendronhq/common-all";
 import {
   createLogger,
   engineHooks,
   engineSlice,
   postVSCodeMessage,
-  querystring
+  querystring,
 } from "@dendronhq/common-frontend";
 import { Col, Layout, Row } from "antd";
 import Head from "next/head";
@@ -98,15 +98,12 @@ function AntLayout(props: React.PropsWithChildren<any>) {
  * @param fn
  * @param opts.initiialized - check if mermaid has already been initialized
  */
-function mermaidReady(
-  fn: () => any,
-  opts?: { checkInit?: boolean;},
-) {
+function mermaidReady(fn: () => any, opts?: { checkInit?: boolean }) {
   // see if DOM is already available
   if (
     getMermaid(window) &&
     // @ts-ignore
-    (opts?.checkInit ? window.MERMAID_INITIALIZED : true) 
+    (opts?.checkInit ? window.MERMAID_INITIALIZED : true)
   ) {
     // call on next available tick
     setTimeout(fn, 1);
@@ -147,12 +144,6 @@ const useMermaid = ({
 
 function Note({ engine, ide, ws, port }: DendronProps & WorkspaceProps) {
   const ctx = "Note";
-  logger.info(
-    JSON.stringify({
-      msg: "enter",
-      noteActive: ide.noteActive,
-    })
-  );
 
   // apply initial hooks
   const dispatch = engineHooks.useEngineAppDispatch();
@@ -172,7 +163,6 @@ function Note({ engine, ide, ws, port }: DendronProps & WorkspaceProps) {
   // hook: update note render
   React.useEffect(() => {
     if (!noteId) {
-      logger.info(JSON.stringify({ msg: "no noteId" }));
       return;
     }
     // if no "render to markdown" has happended or the note body changed
@@ -186,13 +176,11 @@ function Note({ engine, ide, ws, port }: DendronProps & WorkspaceProps) {
     (event: Event) => {
       const target = event.target as Element;
       if (isHTMLAnchorElement(target)) {
-        logger.info(
-          JSON.stringify({
-            ctx: `onClickHandler#${target.nodeName}`,
-            event,
-            target,
-          })
-        );
+        logger.info({
+          ctx: `onClickHandler#${target.nodeName}`,
+          event,
+          target,
+        });
         event.preventDefault();
         event.stopPropagation();
         postVSCodeMessage({
@@ -225,7 +213,7 @@ function Note({ engine, ide, ws, port }: DendronProps & WorkspaceProps) {
           getMermaid(window)!.init();
           logger.info("init mermaid elements:end");
         },
-        { checkInit: true },
+        { checkInit: true }
       );
     }
   }, [noteContent, engine.config]);

@@ -7,13 +7,11 @@ import { VSCodeUtils } from "./utils";
 // TODO: If you'd like to target a specific theme, pre-pend each class with either ".theme-dark" or ".theme-light"
 
 const STYLES_TEMPLATE = `/*
-Add Dendron graph styles below. The graph can be styled in two ways:
+Add Dendron graph styles below. The graph can be styled with any valid Cytoscape.js selector: https://js.cytoscape.org/#cy.style
+Full Dendron-specific styling documentation can be found here: [LINK HERE]
 
-1. Cytoscape.js style: https://js.cytoscape.org/#cy.style
-2. [WIP] Obsidian.md style: https://help.obsidian.md/Plugins/Graph+view#Custom+CSS
-
-More detailed styling documentation can be found at:
-[LINK HERE]
+Note: Empty selectors may affect parsing of following selectors, so be sure to comment/remove them when not in use.
+If styles are not applying, make sure each property is followed with a semicolon.
 */
 
 /* Any graph node */

@@ -58,9 +58,11 @@ suite("BacklinksTreeDataProvider", function () {
       },
       onInit: async ({ wsRoot, vaults }) => {
         await VSCodeUtils.openNote(noteWithTarget);
+
+        const expectedUri = vscode.Uri.file(path.join(wsRoot, vaults[0].fsPath, "beta.md"));
         const out = toPlainObject(await getChildren()) as any;
-        expect(out[0].command.arguments[0].path as string).toEqual(
-          path.join(wsRoot, vaults[0].fsPath, "beta.md")
+        expect(out[0].command.arguments[0].path.toLowerCase() as string).toEqual(
+          expectedUri.path.toLowerCase()
         );
         expect(out.length).toEqual(1);
         done();
@@ -88,8 +90,9 @@ suite("BacklinksTreeDataProvider", function () {
         await new ReloadIndexCommand().run();
         await VSCodeUtils.openNote(noteWithTarget);
         const out = toPlainObject(await getChildren()) as any;
-        expect(out[0].command.arguments[0].path as string).toEqual(
-          path.join(wsRoot, vaults[0].fsPath, "beta.md")
+        const expectedUri = vscode.Uri.file(path.join(wsRoot, vaults[0].fsPath, "beta.md"));
+        expect(out[0].command.arguments[0].path.toLowerCase() as string).toEqual(
+          expectedUri.path.toLowerCase()
         );
         expect(out.length).toEqual(1);
         done();
@@ -118,8 +121,9 @@ suite("BacklinksTreeDataProvider", function () {
         const notePath = path.join(wsRoot, vaults[0].fsPath, "alpha.md");
         await VSCodeUtils.openFileInEditor(Uri.file(notePath));
         const out = toPlainObject(await getChildren()) as any;
-        expect(out[0].command.arguments[0].path as string).toEqual(
-          path.join(wsRoot, vaults[1].fsPath, "beta.md")
+        const expectedUri = vscode.Uri.file(path.join(wsRoot, vaults[1].fsPath, "beta.md"));
+        expect(out[0].command.arguments[0].path.toLowerCase() as string).toEqual(
+          expectedUri.path.toLowerCase()
         );
         expect(out.length).toEqual(1);
         done();
@@ -148,8 +152,9 @@ suite("BacklinksTreeDataProvider", function () {
         const notePath = path.join(wsRoot, vaults[0].fsPath, "alpha.md");
         await VSCodeUtils.openFileInEditor(Uri.file(notePath));
         const out = toPlainObject(await getChildren()) as any;
-        expect(out[0].command.arguments[0].path as string).toEqual(
-          path.join(wsRoot, vaults[1].fsPath, "beta.md")
+        const expectedUri = vscode.Uri.file(path.join(wsRoot, vaults[1].fsPath, "beta.md"));
+        expect(out[0].command.arguments[0].path.toLowerCase() as string).toEqual(
+          expectedUri.path.toLowerCase()
         );
         expect(out.length).toEqual(1);
         done();
@@ -176,11 +181,14 @@ suite("BacklinksTreeDataProvider", function () {
       onInit: async () => {
         await VSCodeUtils.openNote(noteWithTarget);
         const out = toPlainObject(await getChildren()) as any;
-        expect(out[0].command.arguments[0].path as string).toEqual(
-          NoteUtils.getFullPath({
-            note: noteWithLink,
-            wsRoot: DendronWorkspace.wsRoot(),
-          })
+
+        const expectedUri = vscode.Uri.file(NoteUtils.getFullPath({
+          note: noteWithLink,
+          wsRoot: DendronWorkspace.wsRoot(),
+        }));
+
+        expect(out[0].command.arguments[0].path.toLowerCase() as string).toEqual(
+          expectedUri.path.toLowerCase()
         );
         expect(out.length).toEqual(1);
         done();
@@ -207,14 +215,10 @@ suite("BacklinksTreeDataProvider", function () {
       onInit: async ({ wsRoot }) => {
         await VSCodeUtils.openNote(noteWithTarget);
         const out = toPlainObject(await getChildren()) as any;
-        // assert.strictEqual(
-        //   out[0].command.arguments[0].path as string,
-        //   NoteUtils.getPathV4({ note: noteWithLink, wsRoot })
-        // );
-        expect(out[0].command.arguments[0].path as string).toEqual(
-          NoteUtils.getFullPath({ note: noteWithLink, wsRoot })
+        const expectedUri = vscode.Uri.file(NoteUtils.getFullPath({ note: noteWithLink, wsRoot }));
+        expect(out[0].command.arguments[0].path.toLowerCase() as string).toEqual(
+          expectedUri.path.toLowerCase()
         );
-        // assert.strictEqual(out.length, 1);
         expect(out.length).toEqual(1);
         done();
       },

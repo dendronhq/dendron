@@ -556,7 +556,7 @@ suite("Lookup, notesv2", function () {
           });
           expect(
             (await EditorUtils.getURIForActiveEditor()).fsPath.endsWith(
-              "vault1/alpha.md"
+              path.join("vault1", "alpha.md")
             )
           ).toBeTruthy();
           done();
@@ -596,7 +596,7 @@ suite("Lookup, notesv2", function () {
           });
           expect(
             (await EditorUtils.getURIForActiveEditor()).fsPath.endsWith(
-              "vault2/alpha.md"
+              path.join("vault2", "alpha.md")
             )
           ).toBeTruthy();
           done();

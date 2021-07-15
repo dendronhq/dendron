@@ -30,7 +30,7 @@ import rif from "replace-in-file";
 import * as vscode from "vscode";
 import { ALL_COMMANDS } from "./commands";
 import { GoToSiblingCommand } from "./commands/GoToSiblingCommand";
-import { LookupCommand } from "./commands/LookupCommand";
+import { LookupCommand, VaultSelectionMode } from "./commands/LookupCommand";
 import { MoveNoteCommand } from "./commands/MoveNoteCommand";
 import { ReloadIndexCommand } from "./commands/ReloadIndex";
 import { SetupWorkspaceCommand } from "./commands/SetupWorkspace";
@@ -90,7 +90,7 @@ export async function when<T = any>(
 export function whenGlobalState(key: string, cb?: () => boolean): boolean {
   cb =
     cb ||
-    function () {
+    function alwaysTrue() {
       return true;
     };
   // @ts-ignore
@@ -478,12 +478,17 @@ export class DendronWorkspace {
           // eslint-disable-next-line  no-return-await
           async () => await backlinksTreeDataProvider.refresh()
         );
-        context.subscriptions.push(
-          vscode.window.createTreeView(DendronTreeViewKey.BACKLINKS, {
+        const backlinkTreeView = vscode.window.createTreeView(
+          DendronTreeViewKey.BACKLINKS,
+          {
             treeDataProvider: backlinksTreeDataProvider,
             showCollapseAll: true,
-          })
+          }
         );
+        // This persists even if getChildren populates the view.
+        // Removing it for now.
+        // backlinkTreeView.message = "There are no links to this note."
+        context.subscriptions.push(backlinkTreeView);
       }
     });
   }
@@ -526,7 +531,17 @@ export class DendronWorkspace {
       vscode.commands.registerCommand(
         DENDRON_COMMANDS.LOOKUP.key,
         async (args: any) => {
-          new LookupCommand().run({ ...args, flavor: "note" });
+          const confirmVaultSetting =
+            DendronWorkspace.instance().config["lookupConfirmVaultOnCreate"];
+          const selectionMode =
+            confirmVaultSetting === false || _.isUndefined(confirmVaultSetting)
+              ? VaultSelectionMode.smart
+              : VaultSelectionMode.alwaysPrompt;
+          new LookupCommand().run({
+            ...args,
+            flavor: "note",
+            vaultSelectionMode: selectionMode,
+          });
         }
       )
     );
@@ -833,7 +848,7 @@ export class TutorialInitializer implements WorkspaceInitializer {
       opts.ws.windowWatcher.registerActiveTextEditorChangedHandler((e) => {
         const fileName = e?.document.uri.fsPath;
 
-        let eventName: TutorialEvents | undefined = undefined;
+        let eventName: TutorialEvents | undefined;
 
         if (fileName?.endsWith("tutorial.md")) {
           eventName = TutorialEvents.Tutorial_0_Show;

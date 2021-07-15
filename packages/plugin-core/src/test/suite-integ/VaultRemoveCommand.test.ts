@@ -225,7 +225,7 @@ suite("VaultRemoveCommand", function () {
 
           // check that "vault2" is gone from payload
           expect(config.site.duplicateNoteBehavior!.payload).toEqual([
-            vault.fsPath.replace("../", ""),
+            path.parse(vault.fsPath).base,
             "vault3",
           ]);
           done();

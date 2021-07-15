@@ -321,7 +321,7 @@ suite("MoveNoteCommand", function () {
         });
         expect(
           VSCodeUtils.getActiveTextEditor()?.document.fileName.endsWith(
-            "vault1/bar.md"
+            path.join("vault1", "bar.md")
           )
         ).toBeTruthy();
         // note not in old vault
@@ -434,7 +434,7 @@ suite("MoveNoteCommand", function () {
         });
         expect(
           VSCodeUtils.getActiveTextEditor()?.document.fileName.endsWith(
-            "vault1/bar.md"
+            path.join("vault1", "bar.md")
           )
         ).toBeTruthy();
         expect(
@@ -482,7 +482,7 @@ suite("MoveNoteCommand", function () {
         });
         expect(
           VSCodeUtils.getActiveTextEditor()?.document.fileName.endsWith(
-            "vault2/foo.md"
+            path.join("vault2", "foo.md")
           )
         ).toBeTruthy();
         // note not in old vault

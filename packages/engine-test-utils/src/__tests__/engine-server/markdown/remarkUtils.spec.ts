@@ -1,4 +1,4 @@
-import { DLink, NoteProps, WorkspaceOpts } from "@dendronhq/common-all";
+import { DLink, NoteProps, NoteUtils, WorkspaceOpts } from "@dendronhq/common-all";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import {
   DendronASTDest,
@@ -710,6 +710,198 @@ describe("RemarkUtils and LinkUtils", () => {
               ].join("\n"),
             });
           },
+        }
+      );
+    });
+  });
+
+  describe("findLinkCandidates", async () => {
+    const preSetupHook = async ({ wsRoot, vaults }: WorkspaceOpts) => {
+      await NoteTestUtilsV4.createNote({
+        fname: "foo",
+        wsRoot,
+        vault: vaults[0],
+        body: ["Lorem ipsum"].join("\n"),
+      });
+
+      await NoteTestUtilsV4.createNote({
+        fname: "bar",
+        wsRoot,
+        vault: vaults[0],
+        body: ["this is a test.", "see foo for more examples."].join("\n"),
+      });
+
+      await NoteTestUtilsV4.createNote({
+        fname: "alpha",
+        wsRoot,
+        vault: vaults[0],
+        body: "note that has lots of candidates from baz",
+      });
+
+      await NoteTestUtilsV4.createNote({
+        fname: "baz",
+        wsRoot,
+        vault: vaults[0],
+        body: "alpha alpha alpha lorem ipsum alpha one two three alpha",
+      });
+
+      await NoteTestUtilsV4.createNote({
+        fname: "one",
+        wsRoot,
+        vault: vaults[0],
+        body: "Lorem ipsum",
+      });
+
+      await NoteTestUtilsV4.createNote({
+        fname: "two",
+        wsRoot,
+        vault: vaults[0],
+        body: "Lorem ipsum",
+      });
+
+      await NoteTestUtilsV4.createNote({
+        fname: "three",
+        wsRoot,
+        vault: vaults[0],
+        body: "Lorem ipsum",
+      });
+
+      await NoteTestUtilsV4.createNote({
+        fname: "nodes",
+        wsRoot,
+        vault: vaults[0],
+        body: [
+          "# one",
+          "",
+          "## one",
+          "",
+          "### one",
+          "",
+          "#### one",
+          "",
+          "##### one",
+          "",
+          "###### one",
+          "",
+          "> one", // allowed
+          "",
+          "`one`",
+          "",
+          "```",
+          "one",
+          "```",
+          "",
+          "- one", // allowed
+          "",
+          "- [ ] one", // allowed
+          "",
+          "- [x] one", // allowed
+          "",
+          "* one", // allowed
+          "",
+          "<div>one</div>",
+          "",
+          "<div>",
+          "\tone",
+          "</div>",
+          "",
+          "[one]: https://one.com",
+          "",
+          "*one*",
+          "",
+          "_one_",
+          "",
+          "**one**",
+          "",
+          "__one__",
+          "",
+          "[one](https://one.com)",
+          "",
+          '![one](https://one.com/one.ico "one")',
+          "",
+          "[one][stuff]",
+          "",
+          "[stuff][one]",
+          "",
+          "![one][stuff]",
+          "",
+          "![stuff][one]",
+          "",
+          "~~one~~",
+          "",
+          "[^one]",
+          "",
+          "[^one]: stuff",
+          "",
+          "[^stuff]: one",
+          "",
+          "| stuff | one   |", // allowed
+          "|-------|-------|",
+          "| one   | stuff |", // allowed
+          "| stuff | stuff |",
+          "",
+        ].join("\n"),
+      });
+    };
+
+    test("basic", async () => {
+      await runEngineTestV5(
+        async ({ engine }) => {
+          const note = engine.notes["bar"];
+          const notes = _.values(engine.notes);
+          const notesMap = NoteUtils.createFnameNoteMap(notes, true);
+          const linkCandidates = await LinkUtils.findLinkCandidates({
+            note,
+            notesMap,
+            engine,
+          });
+          expect(linkCandidates[0].from.fname).toEqual("bar");
+          expect(linkCandidates[0].to!.fname).toEqual("foo");
+          expect(linkCandidates[0].type).toEqual("linkCandidate");
+        },
+        {
+          expect,
+          preSetupHook,
+        }
+      );
+    });
+
+    test("multiple link candidates in one paragraph", async () => {
+      await runEngineTestV5(
+        async ({ engine }) => {
+          const note = engine.notes["baz"];
+          const notes = _.values(engine.notes);
+          const notesMap = NoteUtils.createFnameNoteMap(notes, true);
+          const linkCandidates = await LinkUtils.findLinkCandidates({
+            note,
+            notesMap,
+            engine,
+          });
+          expect(linkCandidates.length).toEqual(8);
+        },
+        {
+          expect,
+          preSetupHook,
+        }
+      );
+    });
+
+    test("only works for direct child of paragraph and table cell", async () => {
+      await runEngineTestV5(
+        async ({ engine }) => {
+          const note = engine.notes["nodes"];
+          const notes = _.values(engine.notes);
+          const notesMap = NoteUtils.createFnameNoteMap(notes, true);
+          const linkCandidates = await LinkUtils.findLinkCandidates({
+            note,
+            notesMap,
+            engine,
+          });
+          expect(linkCandidates.length).toEqual(7);
+        },
+        {
+          expect,
+          preSetupHook,
         }
       );
     });

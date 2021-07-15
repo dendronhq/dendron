@@ -25,6 +25,7 @@ import { VSCodeUtils } from "../utils";
 import { parseAnchor } from "../utils/md";
 import { DendronWorkspace, getWS } from "../workspace";
 import { BasicCommand } from "./base";
+import { VaultSelectionMode } from "./LookupCommand";
 
 type CommandOpts = {
   qs?: string;
@@ -153,6 +154,25 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
           return;
         }
         vault = resp;
+      } else {
+        // this is a new note:
+        const confirmVaultSetting =
+          DendronWorkspace.instance().config["lookupConfirmVaultOnCreate"];
+        const selectionMode =
+          confirmVaultSetting === false || _.isUndefined(confirmVaultSetting)
+            ? VaultSelectionMode.smart
+            : VaultSelectionMode.alwaysPrompt;
+        const selectedVault = await PickerUtilsV2.getOrPromptVaultForNewNote({
+          vault,
+          fname: qs,
+          vaultSelectionMode: selectionMode,
+        });
+
+        if (_.isUndefined(selectedVault)) {
+          return;
+        }
+
+        vault = selectedVault;
       }
     } else {
       qs = opts.qs;

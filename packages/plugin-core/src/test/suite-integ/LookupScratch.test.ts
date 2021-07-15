@@ -5,6 +5,7 @@ import * as vscode from "vscode";
 import {
   LookupCommand,
   LookupNoteTypeEnum,
+  VaultSelectionMode,
 } from "../../commands/LookupCommand";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace, getWS } from "../../workspace";
@@ -118,6 +119,7 @@ suite("Scratch Notes", function () {
             noteType: LookupNoteTypeEnum.scratch,
             flavor: "note",
             noConfirm: true,
+            vaultSelectionMode: VaultSelectionMode.auto
           });
           const scratchNote = getNoteFromTextEditor();
           expect(scratchNote.fname.startsWith("scratch")).toBeTruthy();

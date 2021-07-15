@@ -556,7 +556,7 @@ suite("Lookup, notesv2", function () {
           });
           expect(
             (await EditorUtils.getURIForActiveEditor()).fsPath.endsWith(
-              "vault1/alpha.md"
+              path.join("vault1", "alpha.md")
             )
           ).toBeTruthy();
           done();
@@ -586,7 +586,7 @@ suite("Lookup, notesv2", function () {
             return [createNoActiveItem(vault)];
           });
           sinon
-            .stub(PickerUtilsV2, "promptVault")
+            .stub(PickerUtilsV2, "getOrPromptVaultForNewNote")
             .returns(Promise.resolve(vaults[1]));
 
           await lp.onDidAccept({
@@ -596,7 +596,7 @@ suite("Lookup, notesv2", function () {
           });
           expect(
             (await EditorUtils.getURIForActiveEditor()).fsPath.endsWith(
-              "vault2/alpha.md"
+              path.join("vault2", "alpha.md")
             )
           ).toBeTruthy();
           done();

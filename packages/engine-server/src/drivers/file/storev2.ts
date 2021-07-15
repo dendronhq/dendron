@@ -45,6 +45,7 @@ import {
   note2File,
   schemaModuleProps2File,
   vault2Path,
+  getDurationMilliseconds,
 } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -333,6 +334,13 @@ export class FileStorage implements DStore {
     );
     const allNotes = _.flatten(out);
     this._addBacklinks({ notesWithLinks, allNotes, allNotesCache });
+    if (this.engine.config.dev?.enableLinkCandidates) {
+      const ctx = "_addLinkCandidates";
+      const start = process.hrtime();
+      this._addLinkCandidates(allNotes);
+      const duration = getDurationMilliseconds(start);
+      this.logger.info({ ctx, duration });
+    }
     return { notes: allNotes, errors };
   }
 
@@ -371,6 +379,24 @@ export class FileStorage implements DStore {
         return;
       }
     });
+  }
+  
+  _addLinkCandidates(allNotes: NoteProps[] ) {
+    const notesMap = NoteUtils.createFnameNoteMap(allNotes, true);
+    return _.map(allNotes, (noteFrom: NoteProps) => {
+      try {
+        const linkCandidates = LinkUtils.findLinkCandidates({
+          note: noteFrom,
+          notesMap,
+          engine: this.engine,
+        });
+        noteFrom.links = noteFrom.links.concat(linkCandidates);
+      } catch (err) {
+        const error = error2PlainObject(err);
+        this.logger.error({ error, noteFrom, message: "issue with link candidates" });
+        return;
+      }
+    })
   }
 
   async _initNotes(vault: DVault): Promise<{
@@ -447,6 +473,7 @@ export class FileStorage implements DStore {
             errors.push(err);
             return;
           }
+
         } else {
           n.links = cache.notes[n.fname].data.links;
         }

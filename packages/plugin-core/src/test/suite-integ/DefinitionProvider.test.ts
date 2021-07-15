@@ -56,8 +56,8 @@ suite("DefinitionProvider", function () {
         onInit: async () => {
           const editor = await VSCodeUtils.openNote(noteWithTarget);
           const location = (await provide(editor)) as vscode.Location;
-          expect(location.uri.fsPath).toEqual(
-            NoteUtils.getFullPath({ wsRoot: _wsRoot, note: noteWithLink })
+          expect(location.uri.fsPath.toLowerCase()).toEqual(
+            NoteUtils.getFullPath({ wsRoot: _wsRoot, note: noteWithLink }).toLowerCase()
           );
           done();
         },
@@ -72,8 +72,8 @@ suite("DefinitionProvider", function () {
           const beta = engine.notes["beta"];
           const editor = await VSCodeUtils.openNote(note);
           const location = (await provide(editor)) as vscode.Location;
-          expect(location.uri.fsPath).toEqual(
-            NoteUtils.getFullPath({ wsRoot, note: beta })
+          expect(location.uri.fsPath.toLowerCase()).toEqual(
+            NoteUtils.getFullPath({ wsRoot, note: beta }).toLowerCase()
           );
           done();
         },
@@ -140,8 +140,8 @@ suite("DefinitionProvider", function () {
         onInit: async () => {
           const editor = await VSCodeUtils.openNote(noteWithLink);
           const location = (await provide(editor)) as vscode.Location;
-          expect(location.uri.fsPath).toEqual(
-            NoteUtils.getFullPath({ wsRoot: _wsRoot, note: noteWithTarget })
+          expect(location.uri.fsPath.toLowerCase()).toEqual(
+            NoteUtils.getFullPath({ wsRoot: _wsRoot, note: noteWithTarget }).toLowerCase()
           );
           done();
         },
@@ -205,8 +205,8 @@ suite("DefinitionProvider", function () {
             LocationTestUtils.getPresetWikiLinkPosition(),
             null as any
           )) as vscode.Location;
-          expect(locations.uri.fsPath).toEqual(
-            path.join(wsRoot, vaults[1].fsPath, "beta.md")
+          expect(locations.uri.fsPath.toLowerCase()).toEqual(
+            path.join(wsRoot, vaults[1].fsPath, "beta.md").toLowerCase()
           );
           done();
         },
@@ -235,8 +235,8 @@ suite("DefinitionProvider", function () {
             LocationTestUtils.getPresetWikiLinkPosition(),
             null as any
           )) as vscode.Location;
-          expect(locations.uri.fsPath).toEqual(
-            path.join(wsRoot, vaults[1].fsPath, "beta.md")
+          expect(locations.uri.fsPath.toLowerCase()).toEqual(
+            path.join(wsRoot, vaults[1].fsPath, "beta.md").toLowerCase()
           );
           done();
         },
@@ -272,9 +272,9 @@ suite("DefinitionProvider", function () {
           const editor = await VSCodeUtils.openNote(noteWithLink);
           const locations = (await provide(editor)) as vscode.Location[];
           expect(locations.length).toEqual(2);
-          expect(locations.map((l) => l.uri.fsPath)).toEqual([
-            NoteUtils.getFullPath({ wsRoot: _wsRoot, note: noteTarget1 }),
-            NoteUtils.getFullPath({ wsRoot: _wsRoot, note: noteTarget2 }),
+          expect(locations.map((l) => l.uri.fsPath.toLowerCase())).toEqual([
+            NoteUtils.getFullPath({ wsRoot: _wsRoot, note: noteTarget1 }).toLowerCase(),
+            NoteUtils.getFullPath({ wsRoot: _wsRoot, note: noteTarget2 }).toLowerCase(),
           ]);
           done();
         },
@@ -311,8 +311,8 @@ suite("DefinitionProvider", function () {
             pos,
             null as any
           )) as vscode.Location;
-          expect(loc.uri.fsPath).toEqual(
-            NoteUtils.getFullPath({ wsRoot: _wsRoot, note: noteWithTarget })
+          expect(loc.uri.fsPath.toLowerCase()).toEqual(
+            NoteUtils.getFullPath({ wsRoot: _wsRoot, note: noteWithTarget }).toLowerCase()
           );
           done();
         },

@@ -1,7 +1,10 @@
+import { Time } from "@dendronhq/common-all";
 import { AssertUtils } from "@dendronhq/common-test-utils";
 import { ENGINE_HOOKS_MULTI } from "@dendronhq/engine-test-utils";
 import _ from "lodash";
+import { DateTime } from "luxon";
 import { describe } from "mocha";
+import sinon from "sinon";
 import * as vscode from "vscode";
 import { NoteSyncService } from "../../services/NoteSyncService";
 import { VSCodeUtils } from "../../utils";
@@ -10,12 +13,19 @@ import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
 suite("NoteSyncService", function () {
   let ctx: vscode.ExtensionContext;
+  let newUpdatedTime: number;
   ctx = setupBeforeAfter(this, {
-    beforeHook: () => {},
+    beforeHook: () => {
+      newUpdatedTime = 60000;
+      sinon.stub(Time, "now").returns(DateTime.fromMillis(newUpdatedTime));
+    },
+    afterHook: () => {
+      sinon.restore();
+    }
   });
 
   describe("onDidChange", () => {
-    test("onDidChange: change", (done) => {
+    test("ok: onDidChange: change", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
         postSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti,
@@ -29,7 +39,8 @@ suite("NoteSyncService", function () {
           });
           const uri = editor.document.uri;
           const resp = await NoteSyncService.instance().onDidChange(uri);
-          expect(resp?.contentHash).toEqual("465a4f4ebf83fbea836eb7b8e8e040ec");
+          expect(resp?.contentHash).toEqual("726bb8a80a207bba30a640e39bf95ebe");
+          expect(resp?.updated).toEqual(newUpdatedTime);
           expect(
             await AssertUtils.assertInString({
               body: engine.notes["foo"].body,

@@ -18,8 +18,8 @@ suite("ConfigureCommand", () => {
         onInit: async ({ wsRoot }) => {
           await new ConfigureCommand().run();
           expect(
-            VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath
-          ).toEqual(path.join(wsRoot, "dendron.yml"));
+            VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath.toLowerCase()
+          ).toEqual(path.join(wsRoot, "dendron.yml").toLowerCase());
           done();
         },
       });

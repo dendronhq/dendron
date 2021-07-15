@@ -719,7 +719,8 @@
     "compile": "tsc -p tsconfig.build.json",
     "pretest": "yarn compile",
     "test": "node ./out/src/test/runTestInteg.js",
-    "format": "echo nop"
+    "format": "echo nop",
+    "vscode:uninstall": "node ./out/src/scripts/uninstallHook.js"
   },
   "devDependencies": {
     "@dendronhq/common-test-utils": "^0.50.0",
@@ -752,7 +753,7 @@
     "@dendronhq/engine-test-utils": "^0.50.0",
     "@dendronhq/lsp-server": "^0.28.7-alpha.0",
     "@dendronhq/pods-core": "^0.50.0",
-    "@types/vscode": "1.57",
+    "@types/vscode": "1.58",
     "cross-path-sort": "^1.0.0",
     "execa": "^4.0.2",
     "fs-extra": "^9.0.1",

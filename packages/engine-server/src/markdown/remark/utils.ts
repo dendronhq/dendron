@@ -18,7 +18,8 @@ import {
   NoteProps,
   NoteUtils,
   Position,
-  NoteBlock
+  NoteBlock,
+  VaultUtils,
 } from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-server";
 import _ from "lodash";
@@ -32,6 +33,7 @@ import type {
   TableCell,
   TableRow,
   Image,
+  Text,
 } from "mdast";
 import * as mdastBuilder from "mdast-builder";
 import { Processor } from "unified";
@@ -219,6 +221,57 @@ const getLinks = ({
     });
   }
   return dlinks;
+};
+
+const getLinkCandidates = ({
+  ast,
+  note,
+  notesMap,
+}: {
+  ast: DendronASTNode;
+  note: NoteProps;
+  notesMap: Map<string, NoteProps>;
+}) => {
+  const textNodes: Text[] = [];
+  visit(
+    ast,
+    [DendronASTTypes.TEXT],
+    (node: Text, _index: number, parent: Parent | undefined) => {
+      if (parent?.type === "paragraph" || parent?.type === "tableCell") {
+        textNodes.push(node);
+      }
+    }
+  );
+
+  const linkCandidates: DLink[] = [];
+  _.map(textNodes, (textNode: Text) => {
+    const value = textNode.value as string;
+    // handling text nodes that start with \n
+    if (textNode.position!.start.line !== textNode.position!.end.line) {
+      textNode.position!.start = {
+        line: textNode.position!.start.line + 1,
+        column: 1
+      } 
+    }
+    value.split(/\s+/).filter((word) => {
+      const maybeNote = notesMap.get(word);
+      if (maybeNote !== undefined) {
+        const candidate = {
+          type: "linkCandidate",
+          from: NoteUtils.toNoteLoc(note),
+          value: value.trim(),
+          position: textNode.position as Position,
+          to: {
+            fname: word,
+            vaultName: VaultUtils.getName(maybeNote.vault),
+          },
+        } as DLink;
+        linkCandidates.push(candidate);
+      }
+      return maybeNote !== undefined;
+    });
+  });
+  return linkCandidates;
 };
 
 export class LinkUtils {
@@ -511,6 +564,36 @@ export class LinkUtils {
 
   static isHashtagLink(link: DNoteLoc): link is DNoteLoc & { alias: string } {
     return link.alias !== undefined && link.alias.startsWith("#") && link.fname.startsWith("tags");
+  }
+
+  static findLinkCandidates({
+    note,
+    // notes,
+    notesMap,
+    engine,
+  }: {
+    note: NoteProps;
+    // notes: NoteProps[];
+    notesMap: Map<string, NoteProps>;
+    engine: DEngineClient;
+  }) {
+    const content = note.body;
+    const remark = MDUtilsV5.procRemarkParse(
+      { mode: ProcMode.FULL },
+      {
+        engine,
+        fname: note.fname,
+        vault: note.vault,
+        dest: DendronASTDest.MD_DENDRON,
+      }
+    );
+    const tree = remark.parse(content) as DendronASTNode;
+    const linkCandidates: DLink[] = getLinkCandidates({
+      ast: tree,
+      note,
+      notesMap,
+    });
+    return linkCandidates;
   }
 }
 

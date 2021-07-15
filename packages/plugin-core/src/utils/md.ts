@@ -33,6 +33,7 @@ export type RefT = {
 export type FoundRefT = {
   location: Location;
   matchText: string;
+  isCandidate?: boolean;
 };
 
 const markdownExtRegex = /\.md$/i;
@@ -377,20 +378,31 @@ export const findReferences = async (
     // we are assuming there won't be a `\n---\n` key inside the frontmatter
     const fmOffset = fileContent.indexOf("\n---") + 4;
     linksMatch.forEach((link) => {
-      const { start } = link.position;
-      const lines = fileContent.slice(0, fmOffset + start.offset!).split("\n");
+      const { end } = link.position;
+      const lines = fileContent
+        .slice(0, fmOffset + end.offset! + 1)
+        .split("\n");
       const lineNum = lines.length;
-
-      refs.push({
-        location: new vscode.Location(
-          vscode.Uri.file(fsPath),
-          new vscode.Range(
-            new vscode.Position(lineNum, 0),
-            new vscode.Position(lineNum + 1, 0)
-          )
-        ),
+      const range =
+        link.type === "wiki"
+          ? new vscode.Range(
+              new vscode.Position(lineNum - 1, 0),
+              new vscode.Position(lineNum, 0)
+            )
+          : new vscode.Range(
+              new vscode.Position(lineNum - 1, link.position.start.column - 1),
+              new vscode.Position(lineNum - 1, link.position.end.column - 1)
+            );
+      const location = new vscode.Location(vscode.Uri.file(fsPath), range);
+      const foundRef: FoundRefT = {
+        location,
         matchText: lines.slice(-1)[0],
-      });
+      };
+      if (link.type === "linkCandidate") {
+        foundRef.isCandidate = true;
+      }
+
+      refs.push(foundRef);
     });
   });
 

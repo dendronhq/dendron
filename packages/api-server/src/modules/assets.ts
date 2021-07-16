@@ -74,7 +74,7 @@ export class AssetsController {
       });
     }
     const getFileForType = ({themeType, targetRoot}:{themeType: ThemeType, targetRoot: string}) => {
-      return path.join(targetRoot, `${themeType}.css`)
+      return path.join(targetRoot, `${themeType.toLowerCase()}.css`)
     }
     const targetRoot = getPathForTarget({themeTarget})
     if (targetRoot instanceof DendronError) {

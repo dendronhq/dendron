@@ -76,7 +76,7 @@ describe("assets/get", () => {
 });
 
 describe("assets/theme/get", () => {
-  test.only("ok: dark theme", async () => {
+  test("ok: dark theme", async () => {
     await runEngineTestV5(
       async ({ wsRoot, vaults }) => {
         const { port } = await createServer({ wsRoot, vaults });

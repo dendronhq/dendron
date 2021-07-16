@@ -1,17 +1,17 @@
 import {
   DendronWebViewKey,
   NoteUtils,
-  OnDidChangeActiveTextEditorMsg,
+  OnDidChangeActiveTextEditorMsg
 } from "@dendronhq/common-all";
+import { DendronASTDest, MDUtilsV5 } from "@dendronhq/engine-server";
 import _ from "lodash";
-import { ExtensionContext, window, TextEditor, Selection } from "vscode";
+import visit from "unist-util-visit";
+import { ExtensionContext, Selection, TextEditor, window } from "vscode";
+import { ShowPreviewV2Command } from "./commands/ShowPreviewV2";
+import { updateDecorations } from "./features/windowDecorations";
 import { Logger } from "./logger";
 import { VSCodeUtils } from "./utils";
 import { getWS } from "./workspace";
-import { ShowPreviewV2Command } from "./commands/ShowPreviewV2";
-import visit from "unist-util-visit";
-import { DendronASTDest, MDUtilsV5 } from "@dendronhq/engine-server";
-import { updateDecorations } from "./features/windowDecorations";
 
 export class WindowWatcher {
   private onDidChangeActiveTextEditorHandlers: ((e: TextEditor | undefined) => void)[] = [];

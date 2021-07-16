@@ -67,7 +67,7 @@ export type SyncActionResult = {
 
 export type WorkspaceServiceCreateOpts = {
   wsRoot: string;
-  vaults: DVault[];
+  vaults?: DVault[];
   /**
    * create dendron.code-workspace file
    */
@@ -94,7 +94,7 @@ type AddRemoveCommonOpts = {
 
 export class WorkspaceService {
   public logger: DLogger;
-  protected seedService: SeedService;
+  protected _seedService: SeedService;
 
   static isNewVersionGreater({
     oldVersion,
@@ -115,7 +115,7 @@ export class WorkspaceService {
   constructor({ wsRoot, seedService }: WorkspaceServiceOpts) {
     this.wsRoot = wsRoot;
     this.logger = createLogger();
-    this.seedService = seedService || new SeedService({ wsRoot });
+    this._seedService = seedService || new SeedService({ wsRoot });
   }
 
   get user(): DUser {
@@ -133,6 +133,10 @@ export class WorkspaceService {
 
   get dendronRoot(): string {
     return path.join(this.wsRoot, "dendron");
+  }
+
+  get seedService(): SeedService {
+    return this._seedService;
   }
 
   async setConfig(config: DendronConfig) {
@@ -730,7 +734,7 @@ export class WorkspaceService {
     await Promise.all(
       _.map(config.seeds, async (entry: SeedEntry, id: string) => {
         if (!(await SeedUtils.exists({ id, wsRoot }))) {
-          const resp = await this.seedService.info({ id });
+          const resp = await this._seedService.info({ id });
           if (_.isUndefined(resp)) {
             seedResults.push({
               id,
@@ -742,7 +746,7 @@ export class WorkspaceService {
             });
             return;
           }
-          const spath = await this.seedService.cloneSeed({
+          const spath = await this._seedService.cloneSeed({
             seed: resp,
             branch: entry.branch,
           });

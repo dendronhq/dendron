@@ -1,7 +1,7 @@
 /* PrismJS 1.24.1
 https://prismjs.com/download.html#themes=prism-tomorrow&languages=markup+css+clike+javascript */
 /**
- * prism.js tomorrow night eighties for JavaScript, CoffeeScript, CSS and HTML
+ * prism.js tomorrow night eighties for JavaScript, CoffeeScript, CSS and HTML. 
  * Based on https://github.com/chriskempson/tomorrow-theme
  * @author Rose Pritchard
  */
@@ -39,7 +39,7 @@ https://prismjs.com/download.html#themes=prism-tomorrow&languages=markup+css+cli
  
  :not(pre) > code[class*="language-"],
  pre[class*="language-"] {
-	 background: #303030;
+	 background: #2d2d2d;
  }
  
  /* Inline code */

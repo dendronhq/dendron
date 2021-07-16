@@ -11,6 +11,7 @@ import { WorkspaceUtils } from "@dendronhq/engine-server";
 import { getWS } from "../utils";
 import fs from "fs-extra";
 import path from "path";
+import { getLogger } from "../core";
 
 export class AssetsController {
   static singleton?: AssetsController;
@@ -50,7 +51,10 @@ export class AssetsController {
   }
 
   async getTheme({ themeTarget, themeType }: AssetGetThemeRequest): Promise<RespV2<string>> {
+    const ctx = "Assets:getTheme"
     const stage = getStage();
+    const logger = getLogger();
+    logger.info({ctx, themeTarget, themeType, stage});
     let root: string;
     if (stage !== "prod") {
       // lib/modules/
@@ -77,6 +81,7 @@ export class AssetsController {
       return {error: targetRoot};
     }
     const pathForTarget = getFileForType({themeType, targetRoot});
+    logger.info({ctx, pathForTarget});
 
     return {
       data: pathForTarget,

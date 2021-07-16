@@ -47,7 +47,7 @@ const pathsToBacklinkSourceTreeItems = async (
     ? vscode.TreeItemCollapsibleState.Collapsed
     : vscode.TreeItemCollapsibleState.Expanded;
 
-  return pathsSorted.map((pathParam) => {
+  const out = pathsSorted.map((pathParam) => {
     const backlink = new Backlink(
       path.basename(pathParam),
       referencesByPath[pathParam],
@@ -56,6 +56,8 @@ const pathsToBacklinkSourceTreeItems = async (
     const backlinkCount = isLinkCandidateEnabled
       ? referencesByPath[pathParam].length
       : referencesByPath[pathParam].filter((ref) => !ref.isCandidate).length;
+    
+    if (backlinkCount === 0) return undefined;
 
     backlink.description = `(${backlinkCount}) - (${path.basename(pathParam)})`;
     backlink.tooltip = pathParam;
@@ -69,6 +71,7 @@ const pathsToBacklinkSourceTreeItems = async (
     };
     return backlink;
   });
+  return _.filter(out, (item) => !_.isUndefined(item)) as Backlink[];
 };
 
 /**
@@ -111,6 +114,7 @@ const addBacklinkTypeTreeItems = (
       out.push(candidateTreeItem);
     }
   }
+  if (_.isEmpty(out)) return undefined;
   return out;
 };
 

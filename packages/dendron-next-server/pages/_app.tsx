@@ -43,18 +43,18 @@ const getWorkspaceParamsFromQueryString = (): WorkspaceProps => {
 };
 
 function AppVSCode({ Component, pageProps }: any) {
-  // --- init
+  // === Init
   const router = useRouter();
   const { query, isReady } = router;
   const ide = ideHooks.useIDEAppSelector((state) => state.ide);
   const engine = useEngineAppSelector((state) => state.engine);
   const ideDispatch = ideHooks.useIDEAppDispatch();
-  const [workspaceOpts, setWorkspaceOpts] =
-    React.useState<WorkspaceProps>();
+  const [workspaceOpts, setWorkspaceOpts] = React.useState<WorkspaceProps>();
 
   const logger = createLogger("AppVSCode");
+  logger.info({ state: "enter", query });
 
-
+  // === Hooks
   // run once
   useEffect(() => {
     setLogLevel("INFO");
@@ -67,12 +67,10 @@ function AppVSCode({ Component, pageProps }: any) {
     // set initial query params
     const out = getWorkspaceParamsFromQueryString();
     setWorkspaceOpts(out);
-    logger.info("AppVSCode.init")
+    logger.info("AppVSCode.init");
   }, []);
 
   useEngine({ engineState: engine, opts: query });
-
-  logger.info({ state: "enter!", query });
 
   // --- effects
   // listen to vscode events
@@ -81,7 +79,7 @@ function AppVSCode({ Component, pageProps }: any) {
     const { query } = router;
     // when we get a msg from vscode, update our msg state
     logger.info({ ctx, msg, query });
-    // NOTE: initial message, state might not be set 
+    // NOTE: initial message, state might not be set
     const { port, ws } = getWorkspaceParamsFromQueryString();
 
     if (msg.type === DMessageType.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR) {
@@ -113,12 +111,12 @@ function AppVSCode({ Component, pageProps }: any) {
     }
   });
 
-  // --- render
-  if (!isReady) {
-    logger.info({ ctx: "exit", state: "router:notInitialized" });
+  // === Render
+  // Don't load children until all following conditions true
+  if (_.some([_.isUndefined(workspaceOpts), ide.theme !== "unknown", !isReady])) {
     return <Spin />;
   }
-  logger.info({ ctx: "exit", state: "render:child", engine, ide });
+
   let defaultTheme = workspaceOpts?.theme || "light";
   if (ide.theme !== "unknown") {
     defaultTheme = ide.theme;
@@ -126,6 +124,8 @@ function AppVSCode({ Component, pageProps }: any) {
   const Header = router.pathname.startsWith("/vscode/note-preview")
     ? PreviewHeader
     : NoOp;
+
+  logger.info({ ctx: "exit", state: "render:child" });
   return (
     <ThemeSwitcherProvider themeMap={themes} defaultTheme={defaultTheme}>
       <Header engine={engine} ide={ide} {...pageProps} />

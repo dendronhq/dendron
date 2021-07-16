@@ -151,7 +151,7 @@ export class SetupWorkspaceCommand extends BasicCommand<
     }
 
     const vaults = opts.workspaceInitializer
-      ? opts.workspaceInitializer.createVaults()
+      ? opts.workspaceInitializer.createVaults(opts.vault)
       : [];
 
     await WorkspaceService.createWorkspace({

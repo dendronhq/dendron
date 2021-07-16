@@ -1,9 +1,13 @@
-import { NoteUtils } from "@dendronhq/common-all";
+import { NoteProps, NoteUtils, Time, VaultUtils } from "@dendronhq/common-all";
 import _ from "lodash";
+import path from "path";
 import {
   ExtensionContext,
+  Range,
   TextDocument,
   TextDocumentChangeEvent,
+  TextDocumentWillSaveEvent,
+  TextEdit,
   window,
   workspace,
 } from "vscode";
@@ -41,15 +45,24 @@ interface DebouncedFunc<T extends (...args: any[]) => any> {
 export class WorkspaceWatcher {
   /** The documents that have been opened during this session that have not been viewed yet in the editor. */
   private _openedDocuments: Map<string, TextDocument>;
-  private _debouncedOnDidChangeTextDocument: DebouncedFunc<(event: TextDocumentChangeEvent) => Promise<void>>;
-
+  private _debouncedOnDidChangeTextDocument: DebouncedFunc<
+    (event: TextDocumentChangeEvent) => Promise<void>
+  >;
 
   constructor() {
     this._openedDocuments = new Map();
-    this._debouncedOnDidChangeTextDocument = _.debounce(this.onDidChangeTextDocument, 100);
+    this._debouncedOnDidChangeTextDocument = _.debounce(
+      this.onDidChangeTextDocument,
+      100
+    );
   }
 
   activate(context: ExtensionContext) {
+    workspace.onWillSaveTextDocument(
+      this.onWillSaveTextDocument,
+      this,
+      context.subscriptions
+    );
 
     workspace.onDidChangeTextDocument(
       this._debouncedOnDidChangeTextDocument,
@@ -80,8 +93,9 @@ export class WorkspaceWatcher {
       if (!getWS().workspaceService?.isPathInWorkspace(uri.fsPath)) {
         return;
       }
+      const contentChanges = event.contentChanges;
       DendronWorkspace.instance().windowWatcher?.triggerUpdateDecorations();
-      NoteSyncService.instance().onDidChange(activeEditor);
+      NoteSyncService.instance().onDidChange(activeEditor, { contentChanges });
     }
     return;
   }
@@ -92,6 +106,60 @@ export class WorkspaceWatcher {
       msg: "Note opened",
       fname: NoteUtils.uri2Fname(document.uri),
     });
+  }
+
+  async onWillSaveTextDocument(
+    ev: TextDocumentWillSaveEvent
+  ): Promise<{ changes: TextEdit[] }> {
+    const ctx = "WorkspaceWatcher:onWillSaveTextDocument";
+    const uri = ev.document.uri;
+    const reason = ev.reason;
+    Logger.info({ ctx, url: uri.fsPath, reason, msg: "enter" });
+    if (!getWS().workspaceService?.isPathInWorkspace(uri.fsPath)) {
+      Logger.debug({ ctx, uri: uri.fsPath, msg: "not in workspace, ignoring" });
+      return { changes: [] };
+    }
+
+    const eclient = DendronWorkspace.instance().getEngine();
+    const fname = path.basename(uri.fsPath, ".md");
+    const now = Time.now().toMillis();
+    const vault = VaultUtils.getVaultByNotePath({
+      fsPath: uri.fsPath,
+      vaults: eclient.vaults,
+      wsRoot: DendronWorkspace.wsRoot(),
+    });
+    const note = NoteUtils.getNoteByFnameV5({
+      fname,
+      vault,
+      notes: eclient.notes,
+      wsRoot: DendronWorkspace.wsRoot(),
+    }) as NoteProps;
+
+    const content = ev.document.getText();
+    const matchFM = NoteUtils.RE_FM;
+    const matchOuter = content.match(matchFM);
+    if (!matchOuter) {
+      return { changes: [] };
+    }
+    const match = NoteUtils.RE_FM_UPDATED.exec(content);
+    let changes: TextEdit[] = [];
+
+    if (match && parseInt(match[1], 10) !== note.updated) {
+      Logger.info({ ctx, match, msg: "update activeText editor" });
+      const startPos = ev.document.positionAt(match.index);
+      const endPos = ev.document.positionAt(match.index + match[0].length);
+      changes = [
+        TextEdit.replace(new Range(startPos, endPos), `updated: ${now}`),
+      ];
+      // eslint-disable-next-line  no-async-promise-executor
+      const p = new Promise(async (resolve) => {
+        note.updated = now;
+        await eclient.updateNote(note);
+        return resolve(changes);
+      });
+      ev.waitUntil(p);
+    }
+    return { changes };
   }
 
   /** Do not use this function, please go to `WindowWatcher.onFirstOpen() instead.`

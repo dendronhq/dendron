@@ -10,11 +10,12 @@ import { ExtensionContext } from "vscode";
 import { ResetConfigCommand } from "../../commands/ResetConfig";
 import {
   SetupWorkspaceCommand,
-  SetupWorkspaceOpts
+  SetupWorkspaceOpts,
 } from "../../commands/SetupWorkspace";
 import {
-  DEFAULT_LEGACY_VAULT_NAME, GLOBAL_STATE,
-  WORKSPACE_ACTIVATION_CONTEXT
+  DEFAULT_LEGACY_VAULT_NAME,
+  GLOBAL_STATE,
+  WORKSPACE_ACTIVATION_CONTEXT,
 } from "../../constants";
 import * as telemetry from "../../telemetry";
 import { getWS } from "../../workspace";
@@ -161,8 +162,7 @@ suite("Extension", function () {
             } as SetupWorkspaceOpts);
 
             const resp = readYAML(path.join(wsRoot, "dendron.yml"));
-            expect(resp).toEqual({
-              version: 1,
+            expect(resp).toContain({
               vaults: [
                 {
                   fsPath: "templates",
@@ -173,35 +173,8 @@ suite("Extension", function () {
                   fsPath: "vault",
                 },
               ],
-              useFMTitle: true,
-              useNoteTitleForLink: true,
-              initializeRemoteVaults: true,
-              journal: {
-                addBehavior: "childOfDomain",
-                dailyDomain: "daily",
-                dateFormat: "y.MM.dd",
-                name: "journal",
-                firstDayOfWeek: 1,
-              },
-              noAutoCreateOnDefinition: true,
-              noLegacyNoteRef: true,
-              noXVaultWikiLink: true,
               seeds: {
                 "dendron.templates": {},
-              },
-              lookupConfirmVaultOnCreate: false,
-              autoFoldFrontmatter: true,
-              site: {
-                copyAssets: true,
-                siteHierarchies: ["root"],
-                siteRootDir: "docs",
-                usePrettyRefs: true,
-                title: "Dendron",
-                description: "Personal knowledge space",
-                duplicateNoteBehavior: {
-                  action: "useVault",
-                  payload: ["vault", "dendron.templates"],
-                },
               },
             });
             const dendronState = MetadataService.instance().getMeta();

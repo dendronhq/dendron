@@ -436,6 +436,9 @@ export const stubWorkspace = ({ wsRoot, vaults }: WorkspaceOpts) => {
 
 export function expect(value: any) {
   return {
+    toContain: (value2: any) => {
+      return _.isMatch(value, value2)
+    },
     toEqual: (value2: any) => {
       assert.deepStrictEqual(value, value2);
     },

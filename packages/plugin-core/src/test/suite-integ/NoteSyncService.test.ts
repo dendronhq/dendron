@@ -38,7 +38,7 @@ suite("NoteSyncService", function () {
             builder.replace(selection, `Hello`);
           });
           const resp = await NoteSyncService.instance().onDidChange(editor);
-          expect(resp?.contentHash).toEqual("726bb8a80a207bba30a640e39bf95ebe");
+          expect(resp?.contentHash).toEqual("465a4f4ebf83fbea836eb7b8e8e040ec");
           expect(resp?.updated).toEqual(newUpdatedTime);
           expect(
             await AssertUtils.assertInString({

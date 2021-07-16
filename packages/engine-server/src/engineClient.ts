@@ -1,8 +1,7 @@
 import {
-  BulkAddNoteOpts,
+  APIUtils, BulkAddNoteOpts,
   ConfigGetPayload,
-  ConfigWriteOpts,
-  DendronConfig,
+  ConfigWriteOpts, DendronAPI, DendronConfig,
   DendronError,
   DEngine,
   DEngineClient,
@@ -17,8 +16,8 @@ import {
   EngineInfoResp,
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
-  ERROR_SEVERITY,
-  GetNoteOptsV2,
+  ERROR_SEVERITY, GetNoteBlocksOpts,
+  GetNoteBlocksPayload, GetNoteOptsV2,
   GetNotePayload,
   NoteChangeEntry,
   NoteProps,
@@ -35,10 +34,7 @@ import {
   SchemaQueryResp,
   SchemaUtils,
   VaultUtils,
-  WriteNoteResp,
-  DendronAPI,
-  GetNoteBlocksOpts,
-  GetNoteBlocksPayload,
+  WriteNoteResp
 } from "@dendronhq/common-all";
 import { createLogger, DLogger, readYAML } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -82,7 +78,7 @@ export class DendronEngineClient implements DEngineClient {
     logger?: DLogger;
   } & DendronEngineClientOpts) {
     const api = new DendronAPI({
-      endpoint: `http://localhost:${port}`,
+      endpoint: APIUtils.getLocalEndpoint(_.isString(port) ? parseInt(port) : port),
       apiPath: "api",
       logger,
     });

@@ -27,7 +27,7 @@ const preSetupHook: SetupHookFunction = async ({ vaults, wsRoot }) => {
 describe("NoteUtils", () => {
   const vault = { fsPath: tmpdir() };
 
-  describe("match", async () => {
+  describe("match", () => {
     test("exact", () => {
       expect(NoteUtils.match({ notePath: "foo", pattern: "foo" })).toBeTruthy();
     });
@@ -47,7 +47,7 @@ describe("NoteUtils", () => {
     });
   });
 
-  describe("getNoteByFnameV5", async () => {
+  describe("getNoteByFnameV5", () => {
     test("basic", async () => {
       await runEngineTestV5(
         async ({ vaults, engine, wsRoot }) => {

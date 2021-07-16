@@ -35,6 +35,7 @@ import {
 import { CONFIG } from "../constants";
 import { VSCodeUtils } from "../utils";
 import { DendronWorkspace, getWS, resolveRelToWSRoot } from "../workspace";
+import { BlankInitializer } from "../workspace/blankInitializer";
 import { _activate } from "../_extension";
 import { createMockConfig, onWSInit } from "./testUtils";
 
@@ -257,6 +258,7 @@ export async function setupCodeWorkspaceV2(opts: SetupCodeWorkspaceV2) {
     rootDirRaw: wsRoot,
     skipOpenWs: true,
     ...setupWsOverride,
+    workspaceInitializer: new BlankInitializer()
   });
   await DendronWorkspace.updateWorkspaceFile({
     updateCb: (settings) => {
@@ -434,6 +436,9 @@ export const stubWorkspace = ({ wsRoot, vaults }: WorkspaceOpts) => {
 
 export function expect(value: any) {
   return {
+    toContain: (value2: any) => {
+      return _.isMatch(value, value2)
+    },
     toEqual: (value2: any) => {
       assert.deepStrictEqual(value, value2);
     },

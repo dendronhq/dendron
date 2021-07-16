@@ -345,7 +345,6 @@ export type WorkspaceExtensionSetting = {
 // --- KLUDGE END
 
 export type EngineDeleteNoteResp = Required<RespV2<EngineDeleteNotePayload>>;
-export type EngineQueryNoteResp = Required<RespV2<DNodeProps[]>>;
 export type NoteQueryResp = Required<RespV2<NoteProps[]>>;
 export type SchemaQueryResp = Required<RespV2<SchemaModuleProps[]>>;
 export type StoreDeleteNoteResp = EngineDeleteNotePayload;
@@ -514,7 +513,8 @@ export enum DMessageSource {
 }
 
 export enum DMessageType {
-  init = "init",
+  INIT = "init",
+  ON_DID_CHANGE_ACTIVE_TEXT_EDITOR = "onDidChangeActiveTextEditor",
 }
 
 export enum TreeViewMessageType {
@@ -549,7 +549,14 @@ export enum ThemeMessageType {
 
 export type OnDidChangeActiveTextEditorData = {
   note: NoteProps;
+  /**
+   * Sync all notes
+   */
   sync?: boolean;
+  /**
+   * Sync the changed note
+   */
+  syncChangedNote?: boolean;
 };
 
 export type VSCodeMessage = DMessage;

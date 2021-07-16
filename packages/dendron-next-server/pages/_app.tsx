@@ -17,6 +17,7 @@ import {
   useVSCodeMessage,
 } from "@dendronhq/common-frontend";
 import { Spin } from "antd";
+import _ from "lodash";
 import { useRouter } from "next/router";
 import React, { useEffect } from "react";
 import { ThemeSwitcherProvider } from "react-css-theme-switcher";
@@ -24,6 +25,7 @@ import { Provider } from "react-redux";
 import Layout from "../components/layout";
 import NoOp from "../components/NoOp";
 import PreviewHeader from "../components/PreviewHeader";
+import { WorkspaceProps } from "../lib/types";
 import "../styles/scss/main.scss";
 
 const themes = {
@@ -33,26 +35,42 @@ const themes = {
 
 const { useEngineAppSelector, useEngine } = engineHooks;
 
+const getWorkspaceParamsFromQueryString = (): WorkspaceProps => {
+  const { port, ws, theme } = querystring.parse(
+    window.location.search.slice(1)
+  ) as WorkspaceProps & { port: string };
+  return { port: parseInt(port), ws, theme };
+};
+
 function AppVSCode({ Component, pageProps }: any) {
-  // --- init
+  // === Init
   const router = useRouter();
   const { query, isReady } = router;
   const ide = ideHooks.useIDEAppSelector((state) => state.ide);
   const engine = useEngineAppSelector((state) => state.engine);
   const ideDispatch = ideHooks.useIDEAppDispatch();
+  const [workspaceOpts, setWorkspaceOpts] = React.useState<WorkspaceProps>();
 
+  const logger = createLogger("AppVSCode");
+  logger.info({ state: "enter", query });
+
+  // === Hooks
+  // run once
   useEffect(() => {
     setLogLevel("INFO");
     // get variables from vscode parent
     postVSCodeMessage({
-      type: DMessageType.init,
+      type: DMessageType.INIT,
       data: {},
       source: DMessageSource.webClient,
     });
+    // set initial query params
+    const out = getWorkspaceParamsFromQueryString();
+    setWorkspaceOpts(out);
+    logger.info("AppVSCode.init");
   }, []);
+
   useEngine({ engineState: engine, opts: query });
-  const logger = createLogger("AppVSCode");
-  logger.info({ state: "enter!", query });
 
   // --- effects
   // listen to vscode events
@@ -61,24 +79,24 @@ function AppVSCode({ Component, pageProps }: any) {
     const { query } = router;
     // when we get a msg from vscode, update our msg state
     logger.info({ ctx, msg, query });
+    // NOTE: initial message, state might not be set
+    const { port, ws } = getWorkspaceParamsFromQueryString();
 
-    if (msg.type === "onDidChangeActiveTextEditor") {
+    if (msg.type === DMessageType.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR) {
       let cmsg = msg as OnDidChangeActiveTextEditorMsg;
-      const { sync, note } = cmsg.data;
+      const { sync, note, syncChangedNote } = cmsg.data;
       if (sync) {
         // skip the initial ?
-        const { port, ws } = querystring.parse(
-          window.location.search.slice(1)
-        ) as { port: string; ws: string };
         logger.info({
           ctx,
           msg: "syncEngine:pre",
           port,
           ws,
         });
-        await ideDispatch(
-          engineSlice.initNotes({ port: parseInt(port as string), ws })
-        );
+        await ideDispatch(engineSlice.initNotes({ port, ws }));
+      }
+      if (syncChangedNote) {
+        await ideDispatch(engineSlice.syncNote({ port, ws, note }));
       }
       logger.info({ ctx, msg: "syncEngine:post" });
       ideDispatch(ideSlice.actions.setNoteActive(note));
@@ -93,23 +111,25 @@ function AppVSCode({ Component, pageProps }: any) {
     }
   });
 
-  // --- render
-  if (!isReady) {
-    logger.info({ ctx: "exit", state: "router:notInitialized" });
+  // === Render
+  // Don't load children until all following conditions true
+  if (_.some([_.isUndefined(workspaceOpts), ide.theme !== "unknown", !isReady])) {
     return <Spin />;
   }
-  logger.info({ ctx: "exit", state: "render:child", engine, ide });
-  let defaultTheme = "light";
+
+  let defaultTheme = workspaceOpts?.theme || "light";
   if (ide.theme !== "unknown") {
     defaultTheme = ide.theme;
   }
   const Header = router.pathname.startsWith("/vscode/note-preview")
     ? PreviewHeader
     : NoOp;
+
+  logger.info({ ctx: "exit", state: "render:child" });
   return (
     <ThemeSwitcherProvider themeMap={themes} defaultTheme={defaultTheme}>
       <Header engine={engine} ide={ide} {...pageProps} />
-      <Component engine={engine} ide={ide} {...pageProps} />
+      <Component engine={engine} ide={ide} {...pageProps} {...workspaceOpts} />
     </ThemeSwitcherProvider>
   );
 }

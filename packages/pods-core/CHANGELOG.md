@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.50.1](https://github.com/dendronhq/dendron/compare/v0.49.0...v0.50.1) (2021-07-16)
+
+
+### Features Dendron
+
+* ajv to validate publish pod ([42db7da](https://github.com/dendronhq/dendron/commit/42db7da23aa7174a27d7249348f6c76919561aa1))
+
+
+
+
+
 # [0.50.0](https://github.com/dendronhq/dendron/compare/v0.49.0...v0.50.0) (2021-07-12)
 
 

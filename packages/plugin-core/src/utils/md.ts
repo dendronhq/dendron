@@ -19,7 +19,8 @@ import vscode, {
   Range,
   TextDocument,
 } from "vscode";
-import { DendronWorkspace } from "../workspace";
+import { ShowPreviewV2Command } from "../commands/ShowPreviewV2";
+import { DendronWorkspace, getWS } from "../workspace";
 
 export type RefT = {
   label: string;
@@ -88,26 +89,31 @@ export const containsOtherKnownExts = (pathParam: string): boolean =>
 export class MarkdownUtils {
   static async openPreview(opts?: { reuseWindow?: boolean }) {
     const cleanOpts = _.defaults(opts, { reuseWindow: false });
-    const previewEnhanced = extensions.getExtension(
-      "dendron.markdown-preview-enhanced"
-    );
-    const previewEnhanced2 = extensions.getExtension(
-      "dendron.dendron-markdown-preview-enhanced"
-    );
-    const cmds = {
-      builtin: {
-        open: "markdown.showPreview",
-        openSide: "markdown.showPreviewToSide",
-      },
-      enhanced: {
-        open: "markdown-preview-enhanced.openPreview",
-        openSide: "markdown-preview-enhanced.openPreviewToTheSide",
-      },
-    };
-    const mdClient =
-      cmds[previewEnhanced || previewEnhanced2 ? "enhanced" : "builtin"];
-    const openCmd = mdClient[cleanOpts.reuseWindow ? "open" : "openSide"];
-    return commands.executeCommand(openCmd);
+
+    if (!getWS().config.dev?.enablePreviewV2) {
+      const previewEnhanced = extensions.getExtension(
+        "dendron.markdown-preview-enhanced"
+      );
+      const previewEnhanced2 = extensions.getExtension(
+        "dendron.dendron-markdown-preview-enhanced"
+      );
+      const cmds = {
+        builtin: {
+          open: "markdown.showPreview",
+          openSide: "markdown.showPreviewToSide",
+        },
+        enhanced: {
+          open: "markdown-preview-enhanced.openPreview",
+          openSide: "markdown-preview-enhanced.openPreviewToTheSide",
+        },
+      };
+      const mdClient =
+        cmds[previewEnhanced || previewEnhanced2 ? "enhanced" : "builtin"];
+      const openCmd = mdClient[cleanOpts.reuseWindow ? "open" : "openSide"];
+      return commands.executeCommand(openCmd);
+    } else {
+      new ShowPreviewV2Command().execute();
+    }
   }
 }
 
@@ -216,25 +222,24 @@ export const getReferenceAtPosition = (
     }
   }
 
-  // check if hashtag
-  const rangeForHashTag = document.getWordRangeAtPosition(position, HASHTAG_REGEX_LOOSE);
-  if (rangeForHashTag) {
-    const docText = document.getText(rangeForHashTag);
-    const match = docText.match(HASHTAG_REGEX_LOOSE);
-    if (_.isNull(match)) return null;
-    return {
-      range: rangeForHashTag,
-      label: match[0],
-      ref: `${TAGS_HIERARCHY}${match.groups!.tagContents}`,
-      refText: docText,
-    }
-  }
-
-  // otherwise, this has to be a wikilink or hashtag
+  // this should be a wikilink or reference
   const re = partial ? partialRefPattern : refPattern;
   const range = document.getWordRangeAtPosition(position, new RegExp(re));
   if (!range) {
-    // it's not a reference or hashtag either, we don't know what this is
+    // if not, it could be a hashtag
+    const rangeForHashTag = document.getWordRangeAtPosition(position, HASHTAG_REGEX_LOOSE);
+    if (rangeForHashTag) {
+      const docText = document.getText(rangeForHashTag);
+      const match = docText.match(HASHTAG_REGEX_LOOSE);
+      if (_.isNull(match)) return null;
+      return {
+        range: rangeForHashTag,
+        label: match[0],
+        ref: `${TAGS_HIERARCHY}${match.groups!.tagContents}`,
+        refText: docText,
+      }
+    }
+    // it's not a wikilink, reference, or a hashtag. Nothing to do here.
     return null;
   }
 

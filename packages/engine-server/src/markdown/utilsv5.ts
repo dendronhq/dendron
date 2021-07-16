@@ -72,7 +72,6 @@ export enum ProcFlavor {
    */
   HOVER_PREVIEW = "HOVER_PREVIEW",
 }
-
 /**
  * Options for how processor should function
  */

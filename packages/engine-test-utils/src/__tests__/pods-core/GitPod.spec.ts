@@ -6,7 +6,7 @@ import path from "path";
 import { testWithEngine } from "../../engine";
 import { checkString, GitTestUtils } from "../../utils";
 
-describe("GitPod", async () => {
+describe("GitPod", () => {
   testWithEngine("basic", async ({ engine, wsRoot, vaults }) => {
     const dest = tmpDir().name;
     await Promise.all(

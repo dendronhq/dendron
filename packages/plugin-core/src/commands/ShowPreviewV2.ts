@@ -1,24 +1,41 @@
+import {
+  assertUnreachable, DendronWebViewKey, DMessageType, NoteProps, NoteViewMessage, NoteViewMessageType, OnDidChangeActiveTextEditorMsg
+} from "@dendronhq/common-all";
 import _ from "lodash";
 import * as vscode from "vscode";
-import {
-  DendronWebViewKey,
-  NoteViewMessageType,
-  NoteViewMessage,
-  assertUnreachable,
-  NoteProps,
-} from "@dendronhq/common-all";
 import { DENDRON_COMMANDS } from "../constants";
+import { Logger } from "../logger";
 import { VSCodeUtils } from "../utils";
 import { WebViewUtils } from "../views/utils";
-import { BasicCommand } from "./base";
 import { getEngine, getWS } from "../workspace";
+import { BasicCommand } from "./base";
 import { GotoNoteCommand } from "./GotoNote";
-import { Logger } from "../logger";
 
 type CommandOpts = {};
 type CommandOutput = any;
 
 const title = "Dendron Preview";
+
+
+const tryGetNoteFromDocument = (document: vscode.TextDocument): NoteProps|undefined => {
+  if (!getWS().workspaceService?.isPathInWorkspace(document.uri.fsPath)) {
+    Logger.info({
+      uri: document.uri.fsPath,
+      msg: "not in workspace",
+    });
+    return;
+  }
+  try {
+    const note = VSCodeUtils.getNoteFromDocument(document);
+    return note;
+  } catch (err) {
+    Logger.info({
+      uri: document.uri.fsPath,
+      msg: "not a valid note",
+    });
+  }
+  return;
+}
 
 export class ShowPreviewV2Command extends BasicCommand<
   CommandOpts,
@@ -27,20 +44,8 @@ export class ShowPreviewV2Command extends BasicCommand<
   key = DENDRON_COMMANDS.SHOW_PREVIEW_V2.key;
 
   static onDidChangeHandler(document: vscode.TextDocument) {
-    const ctx = "ShowPreviewV2:onDidChangeHandler";
-
-    if (!getWS().workspaceService?.isPathInWorkspace(document.uri.fsPath)) {
-      Logger.info({
-        ctx,
-        uri: document.uri.fsPath,
-        msg: "not in workspace",
-      });
-      return;
-    }
-    const note = VSCodeUtils.getNoteFromDocument(document);
-    if (note) {
-      ShowPreviewV2Command.refresh(note);
-    }
+    const maybeNote = tryGetNoteFromDocument(document)
+    if(!_.isUndefined(maybeNote)) ShowPreviewV2Command.refresh(maybeNote);
   }
 
   static refresh(note: NoteProps) {
@@ -48,13 +53,13 @@ export class ShowPreviewV2Command extends BasicCommand<
     if (panel) {
       panel.title = `${title} ${note.fname}`;
       panel.webview.postMessage({
-        type: "onDidChangeActiveTextEditor",
+        type: DMessageType.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR,
         data: {
           note,
-          sync: true,
+          syncChangedNote: true
         },
         source: "vscode",
-      });
+      } as OnDidChangeActiveTextEditorMsg);
     }
   }
 
@@ -65,7 +70,7 @@ export class ShowPreviewV2Command extends BasicCommand<
     return;
   }
 
-  async execute(_opts: CommandOpts) {
+  async execute(_opts?: CommandOpts) {
     // Get workspace information
     const ws = getWS();
 
@@ -135,13 +140,8 @@ export class ShowPreviewV2Command extends BasicCommand<
         case NoteViewMessageType.onGetActiveEditor: {
           // only entered on "init" in `plugin-core/src/views/utils.ts:87`
           const activeTextEditor = VSCodeUtils.getActiveTextEditor();
-          const note =
-            activeTextEditor &&
-            VSCodeUtils.getNoteFromDocument(activeTextEditor.document);
-          if (note) {
-            ShowPreviewV2Command.refresh(note);
-          }
-
+          const maybeNote = !_.isUndefined(activeTextEditor) ? tryGetNoteFromDocument(activeTextEditor?.document) : undefined;
+          if(!_.isUndefined(maybeNote)) ShowPreviewV2Command.refresh(maybeNote);
           break;
         }
         default:

@@ -632,10 +632,10 @@ function convertNoteRefHelperAST(
       )
     );
     let tmpProc = MDUtilsV4.procFull({ ...procOpts });
-    tmpProc = MDUtilsV4.setDendronData(tmpProc, { insideNoteRef: true });
+    tmpProc = MDUtilsV4.setDendronData(tmpProc, { insideNoteRef: true, fname: note.fname, vault: note.vault });
     if (isV5Active) {
       if (procOpts.dest === DendronASTDest.HTML) {
-        tmpProc = MDUtilsV5.procRemarkFull(MDUtilsV5.getProcData(proc));
+        tmpProc = MDUtilsV5.procRemarkFull({...MDUtilsV5.getProcData(proc), fname: note.fname, vault: note.vault});
       }
     }
 

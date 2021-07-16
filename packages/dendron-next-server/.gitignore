@@ -47,6 +47,7 @@ amplify-build-config.json
 amplify-gradle-config.json
 amplifytools.xcconfig
 public/*.css
+public/js
 
 # local type override
 !types/*.d.ts

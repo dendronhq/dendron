@@ -1,4 +1,5 @@
 import {
+  APIUtils,
   CONSTANTS,
   DendronError,
   DEngineClient,
@@ -323,6 +324,6 @@ export class EngineUtils {
   }
 
   static getLocalEngineUrl({ port }: { port: number }) {
-    return `http://localhost:${port}`;
+    return APIUtils.getLocalEndpoint(port);
   }
 }

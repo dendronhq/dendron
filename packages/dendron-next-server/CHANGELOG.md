@@ -3,6 +3,29 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.50.1](https://github.com/dendronhq/dendron/compare/v0.49.0...v0.50.1) (2021-07-16)
+
+
+### Bug Fixes
+
+* hide backlink item when it has no children ([#989](https://github.com/dendronhq/dendron/issues/989)) ([0e3b8eb](https://github.com/dendronhq/dendron/commit/0e3b8eb5a8b10b3628ef7724005e395fae7520b0))
+* note ref use title of referenced note ([a3e217d](https://github.com/dendronhq/dendron/commit/a3e217d3be0774e0ba2b78ad6503e385a8028a80))
+* race condition in web ui ([eba5adc](https://github.com/dendronhq/dendron/commit/eba5adcf3607aad0d833052e50c911b2b73b5ae4))
+* update styling issues with block anchors ([b6990e8](https://github.com/dendronhq/dendron/commit/b6990e82792450cc23f256a6c825a61be401d981))
+* update while render issue in tree view ([d780f8e](https://github.com/dendronhq/dendron/commit/d780f8ee951385804c5a6277df6ab07a9b6a90ef))
+
+
+### Features Dendron
+
+* support dynamic theming ([1da7714](https://github.com/dendronhq/dendron/commit/1da7714f50acbba312a7e2e7a497f9e53920c96f))
+* **preview:** update mermaid theme dynamically ([e9074db](https://github.com/dendronhq/dendron/commit/e9074dbfefe17b462d31bfe00f6563547f93db71))
+* add ability to show/hide labels ([#939](https://github.com/dendronhq/dendron/issues/939)) ([cf67169](https://github.com/dendronhq/dendron/commit/cf671698053e83dab5996c6c98face5344a147e2))
+* add local note graph ([#899](https://github.com/dendronhq/dendron/issues/899)) ([6e9ed81](https://github.com/dendronhq/dendron/commit/6e9ed81c14897d95280ce5f881c7467589cb89ad))
+
+
+
+
+
 # [0.50.0](https://github.com/dendronhq/dendron/compare/v0.49.0...v0.50.0) (2021-07-12)
 
 

@@ -4,12 +4,12 @@ import {
   getStage,
   Time,
   VaultUtils,
-  VSCodeEvents,
+  VSCodeEvents
 } from "@dendronhq/common-all";
 import {
   getDurationMilliseconds,
   getOS,
-  SegmentClient,
+  SegmentClient
 } from "@dendronhq/common-server";
 import {
   DConfig,
@@ -17,7 +17,7 @@ import {
   HistoryService,
   MetadataService,
   MigrationServce,
-  WorkspaceService,
+  WorkspaceService
 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { Duration } from "luxon";
@@ -37,8 +37,8 @@ import {
   DendronWorkspace,
   getEngine,
   getWS,
-  WorkspaceInitFactory,
 } from "./workspace";
+import { WorkspaceInitFactory } from "./workspace/workspaceInitializer";
 
 const MARKDOWN_WORD_PATTERN = new RegExp("([\\w\\.\\#]+)");
 // === Main

@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/dendron-next-server",
-  "version": "0.50.0",
+  "version": "0.50.1",
   "license": "GPLv3",
   "repository": {
     "type": "git",
@@ -11,6 +11,7 @@
     "local:dev": "env LOCAL=true STAGE=dev next dev",
     "local:prod": "env LOCAL=true STAGE=prod next dev",
     "local:prod:aws": "env LOCAL=true STAGE=oneoff_aws_prod next dev",
+    "setup": "yarn gen:theme && yarn build:js",
     "dev": "next dev",
     "prod": "env STAGE=prod next dev",
     "watch": "echo 0",
@@ -22,6 +23,7 @@
     "deploy:dev": "env STAGE=dev amplify publish",
     "deploy:prod": "env STAGE=prod amplify publish",
     "gen:theme": "gulp less",
+    "build:js": "gulp js",
     "format": "echo nop"
   },
   "nohoist": [
@@ -30,9 +32,9 @@
   ],
   "dependencies": {
     "@chakra-ui/react": "^1.0.0",
-    "@dendronhq/common-all": "^0.50.0",
-    "@dendronhq/common-frontend": "^0.50.0",
-    "@dendronhq/engine-server": "^0.50.0",
+    "@dendronhq/common-all": "^0.50.1",
+    "@dendronhq/common-frontend": "^0.50.1",
+    "@dendronhq/engine-server": "^0.50.1",
     "@emotion/react": "^11.1.1",
     "@emotion/styled": "^11.0.0",
     "@reduxjs/toolkit": "^1.5.1",

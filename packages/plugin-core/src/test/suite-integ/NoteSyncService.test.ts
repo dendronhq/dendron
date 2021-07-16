@@ -37,9 +37,8 @@ suite("NoteSyncService", function () {
             const selection = new vscode.Selection(pos, pos);
             builder.replace(selection, `Hello`);
           });
-          const uri = editor.document.uri;
-          const resp = await NoteSyncService.instance().onDidChange(uri);
-          expect(resp?.contentHash).toEqual("726bb8a80a207bba30a640e39bf95ebe");
+          const resp = await NoteSyncService.instance().onDidChange(editor);
+          expect(resp?.contentHash).toEqual("465a4f4ebf83fbea836eb7b8e8e040ec");
           expect(resp?.updated).toEqual(newUpdatedTime);
           expect(
             await AssertUtils.assertInString({
@@ -59,8 +58,7 @@ suite("NoteSyncService", function () {
         onInit: async ({ engine }) => {
           const foo = engine.notes["foo"];
           const editor = await VSCodeUtils.openNote(foo);
-          const uri = editor.document.uri;
-          const resp = await NoteSyncService.instance().onDidChange(uri);
+          const resp = await NoteSyncService.instance().onDidChange(editor);
           expect(_.isUndefined(resp)).toBeTruthy();
           done();
         },

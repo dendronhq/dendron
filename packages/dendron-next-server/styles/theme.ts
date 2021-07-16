@@ -1,4 +1,12 @@
 import { theme as defaultTheme, extendTheme } from "@chakra-ui/react";
+import { ThemeType } from "@dendronhq/common-all";
+
+export const getThemeType = (theme?: string) => {
+  if (theme === "dark") {
+    return ThemeType.DARK;
+  }
+  return ThemeType.LIGHT;
+};
 
 export const theme = extendTheme({
   config: {

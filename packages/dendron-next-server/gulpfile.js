@@ -26,3 +26,12 @@ gulp.task("less", function () {
     )
     .pipe(gulp.dest("./public"));
 });
+
+/**
+ * Move js files 
+ */
+gulp.task("js", ()=> {
+  return gulp.src("assets/js/*.js")
+  .pipe(debug({ title: "Files:" }))
+  .pipe(gulp.dest("./public/js"))
+});

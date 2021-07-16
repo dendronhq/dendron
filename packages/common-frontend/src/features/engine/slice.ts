@@ -1,12 +1,14 @@
 import {
   DendronApiV2,
   DEngineInitPayload,
-  NotePropsDict,
-  stringifyError,
+  NoteProps,
+  NotePropsDict, stringifyError,
+  APIUtils
 } from "@dendronhq/common-all";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import _ from "lodash";
 import { createLogger } from "../../utils";
+
 
 /**
  * Equivalent to engine.init
@@ -15,8 +17,7 @@ export const initNotes = createAsyncThunk(
   "engine/init",
   async ({ port, ws }: { port: number; ws: string }, { dispatch }) => {
     const logger = createLogger("initNotesThunk");
-    const endpoint = `http://localhost:${port}`;
-    logger.info({ state: "enter", endpoint, port, ws });
+    const endpoint = APIUtils.getLocalEndpoint(port);
     const api = new DendronApiV2({
       endpoint,
       apiPath: "api",
@@ -37,13 +38,38 @@ export const initNotes = createAsyncThunk(
   }
 );
 
+export const syncNote = createAsyncThunk(
+  "engine/init",
+  async ({ port, ws, note }: { port: number; ws: string, note: NoteProps }, { dispatch }) => {
+    const logger = createLogger("syncNoteThunk");
+    const endpoint = APIUtils.getLocalEndpoint(port);
+    const api = new DendronApiV2({
+      endpoint,
+      apiPath: "api",
+      logger,
+    });
+    logger.info({ state: "pre:query" });
+    const resp = await api.noteQuery({qs: note.fname, ws, vault: note.vault})
+    logger.info({ state: "post:iquery" });
+    if (resp.error) {
+      dispatch(setError(stringifyError(resp.error)));
+      return resp;
+    }
+    const data = resp.data!;
+    logger.info({ state: "pre:setNotes" });
+    dispatch(updateNote(data[0]));
+    logger.info({ state: "post:setNotes" });
+    return resp;
+  }
+);
+
 export const renderNote = createAsyncThunk(
   "engine/render",
   async (
     { port, ws, id }: { port: number; ws: string; id: string },
     { dispatch }
   ) => {
-    const endpoint = `http://localhost:${port}`;
+    const endpoint = APIUtils.getLocalEndpoint(port);
     const logger = createLogger("renderNoteThunk");
     const api = new DendronApiV2({
       endpoint,
@@ -103,6 +129,13 @@ export const engineSlice = createSlice({
       const { id, body } = action.payload;
       state.notesRendered[id] = body;
     },
+    updateNote: (state, action: PayloadAction<NoteProps>) => {
+      const note = action.payload;
+      if (!state.notes) {
+        state.notes = {};
+      }
+      state.notes[note.id] = note;
+    },
   },
   extraReducers: (builder) => {
     const logger = createLogger("engineSlice");
@@ -137,6 +170,6 @@ export class EngineSliceUtils {
     );
   }
 }
-export const { setNotes, setError, setFromInit, setRenderNote } =
+export const { setNotes, setError, setFromInit, setRenderNote, updateNote } =
   engineSlice.actions;
 export const reducer = engineSlice.reducer;

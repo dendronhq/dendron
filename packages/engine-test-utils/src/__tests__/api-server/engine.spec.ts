@@ -1,16 +1,8 @@
-import { DendronEngineClient } from "@dendronhq/engine-server";
 import _ from "lodash";
-import { createServer, runEngineTestV5, WorkspaceOpts } from "../../engine";
+import { createEngineFromServer, runEngineTestV5 } from "../../engine";
 import { ENGINE_CONFIG_PRESETS, ENGINE_PRESETS } from "../../presets";
 
-const createEngine = async ({ wsRoot, vaults }: WorkspaceOpts) => {
-  const { port } = await createServer({ wsRoot, vaults });
-  return DendronEngineClient.create({
-    port,
-    ws: wsRoot,
-    vaults,
-  });
-};
+const createEngine = createEngineFromServer
 
 describe("engine, schemas/", () => {
   const nodeType = "SCHEMAS";

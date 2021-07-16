@@ -11,17 +11,48 @@ import { Logger } from "./logger";
 import { NoteSyncService } from "./services/NoteSyncService";
 import { DendronWorkspace, getWS } from "./workspace";
 
+interface DebouncedFunc<T extends (...args: any[]) => any> {
+  /**
+   * Call the original function, but applying the debounce rules.
+   *
+   * If the debounced function can be run immediately, this calls it and returns its return
+   * value.
+   *
+   * Otherwise, it returns the return value of the last invokation, or undefined if the debounced
+   * function was not invoked yet.
+   */
+  (...args: Parameters<T>): ReturnType<T> | undefined;
+
+  /**
+   * Throw away any pending invokation of the debounced function.
+   */
+  cancel(): void;
+
+  /**
+   * If there is a pending invokation of the debounced function, invoke it immediately and return
+   * its return value.
+   *
+   * Otherwise, return the value from the last invokation, or undefined if the debounced function
+   * was never invoked.
+   */
+  flush(): ReturnType<T> | undefined;
+}
+
 export class WorkspaceWatcher {
   /** The documents that have been opened during this session that have not been viewed yet in the editor. */
   private _openedDocuments: Map<string, TextDocument>;
+  private _debouncedOnDidChangeTextDocument: DebouncedFunc<(event: TextDocumentChangeEvent) => Promise<void>>;
+
 
   constructor() {
     this._openedDocuments = new Map();
+    this._debouncedOnDidChangeTextDocument = _.debounce(this.onDidChangeTextDocument, 100);
   }
 
   activate(context: ExtensionContext) {
+
     workspace.onDidChangeTextDocument(
-      _.debounce(this.onDidChangeTextDocument, 100),
+      this._debouncedOnDidChangeTextDocument,
       this,
       context.subscriptions
     );
@@ -37,7 +68,13 @@ export class WorkspaceWatcher {
   }
 
   async onDidChangeTextDocument(event: TextDocumentChangeEvent) {
+    // `workspace.onDidChangeTextDocument` fires 2 events for eveyr change
+    // the second one changing the dirty state of the page from `true` to `false`
+    if (event.document.isDirty === false) {
+      return;
+    }
     const activeEditor = window.activeTextEditor;
+    this._debouncedOnDidChangeTextDocument.cancel();
     if (activeEditor && event.document === activeEditor.document) {
       const uri = activeEditor.document.uri;
       if (!getWS().workspaceService?.isPathInWorkspace(uri.fsPath)) {

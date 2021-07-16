@@ -1,13 +1,10 @@
-import { DendronError, DVault } from "@dendronhq/common-all";
+import { DVault } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import { Snippets } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import path from "path";
-import * as vscode from "vscode";
-import { DendronWorkspace } from "../workspace";
-import { Logger } from "../logger";
 import { VSCodeUtils } from "../utils";
-import { MarkdownUtils } from "../utils/md";
+import { DendronWorkspace } from "../workspace";
 import { WorkspaceInitializer } from "./workspaceInitializer";
 
 /**

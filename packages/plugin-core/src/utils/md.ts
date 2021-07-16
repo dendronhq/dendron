@@ -222,25 +222,24 @@ export const getReferenceAtPosition = (
     }
   }
 
-  // check if hashtag
-  const rangeForHashTag = document.getWordRangeAtPosition(position, HASHTAG_REGEX_LOOSE);
-  if (rangeForHashTag) {
-    const docText = document.getText(rangeForHashTag);
-    const match = docText.match(HASHTAG_REGEX_LOOSE);
-    if (_.isNull(match)) return null;
-    return {
-      range: rangeForHashTag,
-      label: match[0],
-      ref: `${TAGS_HIERARCHY}${match[1]}`,
-      refText: docText,
-    }
-  }
-
-  // otherwise, this has to be a wikilink or hashtag
+  // this should be a wikilink or reference
   const re = partial ? partialRefPattern : refPattern;
   const range = document.getWordRangeAtPosition(position, new RegExp(re));
   if (!range) {
-    // it's not a reference or hashtag either, we don't know what this is
+    // if not, it could be a hashtag
+    const rangeForHashTag = document.getWordRangeAtPosition(position, HASHTAG_REGEX_LOOSE);
+    if (rangeForHashTag) {
+      const docText = document.getText(rangeForHashTag);
+      const match = docText.match(HASHTAG_REGEX_LOOSE);
+      if (_.isNull(match)) return null;
+      return {
+        range: rangeForHashTag,
+        label: match[0],
+        ref: `${TAGS_HIERARCHY}${match[1]}`,
+        refText: docText,
+      }
+    }
+    // it's not a wikilink, reference, or a hashtag. Nothing to do here.
     return null;
   }
 

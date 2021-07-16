@@ -113,18 +113,22 @@ export class NoteSyncService {
     const notesMap = NoteUtils.createFnameNoteMap(
       _.values(eclient.notes),
       true
-    )
+    );
+    note.links = links;
+    const anchors = await AnchorUtils.findAnchors({
+      note,
+      wsRoot: eclient.wsRoot,
+    });
+    note.anchors = anchors;
+
+    if (getWS().config.dev?.enableLinkCandidates) {
     const linkCandidates = LinkUtils.findLinkCandidates({
       note,
       notesMap,
       engine: eclient,
     });
     note.links = links.concat(linkCandidates);
-    const anchors = await AnchorUtils.findAnchors({
-      note,
-      wsRoot: eclient.wsRoot,
-    });
-    note.anchors = anchors;
+    }
     note.updated = now;
 
     this.L.info({ ctx, fname, msg: "exit" });

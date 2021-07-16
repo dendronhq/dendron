@@ -82,6 +82,12 @@ export class AssetsController {
     }
     const pathForTarget = getFileForType({themeType, targetRoot});
     logger.info({ctx, pathForTarget});
+    if (!fs.existsSync(pathForTarget)) {
+      return {error: DendronError.createFromStatus({
+        status: ERROR_STATUS.DOES_NOT_EXIST,
+        message: `no file at ${pathForTarget}`,
+      })};
+    }
 
     return {
       data: pathForTarget,

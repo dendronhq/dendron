@@ -4,7 +4,7 @@ import { GitTestUtils } from "../../../utils";
 import fs from "fs-extra";
 import path from "path";
 
-describe("isRepo", async () => {
+describe("isRepo", () => {
   test("no repo", async () => {
     const root = tmpDir().name;
     const repo = await Git.getRepo(root);

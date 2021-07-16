@@ -1,4 +1,4 @@
-import { APIUtils, DendronAPI, DendronError, ThemeTarget, ThemeType, WorkspaceOpts } from "@dendronhq/common-all";
+import { APIUtils, DendronAPI, DendronError, error2PlainObject, ThemeTarget, ThemeType, WorkspaceOpts } from "@dendronhq/common-all";
 import { tmpDir, vault2Path } from "@dendronhq/common-server";
 import path from "path";
 import { createServer, runEngineTestV5 } from "../../engine";
@@ -76,7 +76,7 @@ describe("assets/get", () => {
 });
 
 describe("assets/theme/get", () => {
-  test("ok: dark theme", async () => {
+  test.only("ok: dark theme", async () => {
     await runEngineTestV5(
       async ({ wsRoot, vaults }) => {
         const { port } = await createServer({ wsRoot, vaults });
@@ -86,6 +86,10 @@ describe("assets/theme/get", () => {
         });
         await initRemoteWorkspace({ wsRoot, vaults, api });
         const resp = await api.assetGetTheme({ ws: wsRoot, themeTarget: ThemeTarget.PRISM, themeType: ThemeType.DARK });
+        // TODO: log to figure out why integ test is failing
+        if (resp instanceof DendronError) {
+          console.log(error2PlainObject(resp))
+        }
         await checkString(resp as unknown as string, "tomorrow night");
       },
       { expect }

@@ -24,7 +24,7 @@ function proc(
 }
 
 describe("dendronPub", () => {
-  describe("prefix", async () => {
+  describe("prefix", () => {
     testWithEngine("imagePrefix", async ({ engine, vaults }) => {
       const out = proc(
         engine,

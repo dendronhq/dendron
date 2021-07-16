@@ -32,7 +32,7 @@ const checkLink = ({ src, target }: { src: Partial<DLink>; target: DLink }) => {
 };
 
 describe("RemarkUtils and LinkUtils", () => {
-  describe("findAnchors", async () => {
+  describe("findAnchors", () => {
     test("one header", async () => {
       await runEngineTestV5(
         async ({ engine }) => {
@@ -178,7 +178,7 @@ describe("RemarkUtils and LinkUtils", () => {
     );
   });
 
-  describe("findLinks", async () => {
+  describe("findLinks", () => {
     testWithEngine(
       "one link",
       async ({ engine }) => {
@@ -306,7 +306,7 @@ describe("RemarkUtils and LinkUtils", () => {
       );
     });
 
-    describe("filter", async () => {
+    describe("filter", () => {
       const preSetupHook = async ({ wsRoot, vaults }: WorkspaceOpts) => {
         await NoteTestUtilsV4.createNote({
           fname: "foo",
@@ -368,7 +368,7 @@ describe("RemarkUtils and LinkUtils", () => {
     });
   });
 
-  describe("updateLink", async () => {
+  describe("updateLink", () => {
     test("basic", async () => {
       await runEngineTestV5(
         async ({ engine }) => {
@@ -397,7 +397,7 @@ describe("RemarkUtils and LinkUtils", () => {
       );
     });
 
-    describe("multiple links present", async () => {
+    describe("multiple links present", () => {
       const preSetupHook = async ({ wsRoot, vaults }: WorkspaceOpts) => {
         const vault = vaults[0];
         await NoteTestUtilsV4.createNote({
@@ -715,7 +715,7 @@ describe("RemarkUtils and LinkUtils", () => {
     });
   });
 
-  describe("findLinkCandidates", async () => {
+  describe("findLinkCandidates", () => {
     const preSetupHook = async ({ wsRoot, vaults }: WorkspaceOpts) => {
       await NoteTestUtilsV4.createNote({
         fname: "foo",

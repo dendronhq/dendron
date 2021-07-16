@@ -44,7 +44,7 @@ suite("completionProvider", function () {
           for (const item of items!) {
             // All suggested items exist
             const found = NoteUtils.getNotesByFname({
-              fname: item.label,
+              fname: item.label as string,
               notes: engine.notes,
             });
             expect(found.length > 0).toBeTruthy();

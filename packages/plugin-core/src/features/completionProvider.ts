@@ -159,7 +159,7 @@ export const provideCompletionItems = (
 export const resolveCompletionItem = async (item: CompletionItem, token: CancellationToken): Promise<CompletionItem | undefined> => {
   const ctx = "resolveCompletionItem";
   const { label: fname, detail: vname } = item;
-  if (_.isUndefined(fname) || _.isUndefined(vname) || token.isCancellationRequested) return;
+  if (!_.isString(fname) || !_.isString(vname) || token.isCancellationRequested) return;
 
   const engine = getWS().getEngine();
   const {vaults, notes, wsRoot} = engine;

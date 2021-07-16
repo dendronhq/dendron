@@ -14,7 +14,7 @@ export type WorkspaceInitializer = {
   /**
    * Create the vaults to be added to the workspace being initialized.
    */
-  createVaults(): DVault[];
+  createVaults(vault?: DVault): DVault[];
 
   /**
    * Invoked after workspace has been created. Perform operations such as copying over notes.

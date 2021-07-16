@@ -51,7 +51,9 @@ function AppVSCode({ Component, pageProps }: any) {
   const ideDispatch = ideHooks.useIDEAppDispatch();
   const [workspaceOpts, setWorkspaceOpts] =
     React.useState<WorkspaceProps>();
+
   const logger = createLogger("AppVSCode");
+
 
   // run once
   useEffect(() => {

@@ -14,17 +14,20 @@ import { DendronWorkspace } from "../../workspace";
 import { expect, runMultiVaultTest } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 import { TestConfigUtils } from "@dendronhq/engine-test-utils";
+import _ from "lodash";
 
 const getChildren = async () => {
   const backlinksTreeDataProvider = new BacklinksTreeDataProvider();
   const parents = await backlinksTreeDataProvider.getChildren();
   const parentsWithChildren = [];
 
-  for (const parent of parents) {
-    parentsWithChildren.push({
-      ...parent,
-      children: await backlinksTreeDataProvider.getChildren(parent),
-    });
+  if (parents !== undefined) {
+    for (const parent of parents) {
+      parentsWithChildren.push({
+        ...parent,
+        children: await backlinksTreeDataProvider.getChildren(parent),
+      });
+    }
   }
 
   return {
@@ -272,17 +275,55 @@ suite("BacklinksTreeDataProvider", function () {
 
         // in each subtree, TreeItems that hold actual links should exist.
         // they are leaf nodes (no children).
-        const link = await provider.getChildren(out[0].children[0]);
-        expect(link[0].label).toEqual("[[alpha]]");
-        expect(link[0].refs).toEqual(undefined);
+        const link = await provider.getChildren(out[0].children![0]);
+        expect(link![0].label).toEqual("[[alpha]]");
+        expect(link![0].refs).toEqual(undefined);
 
-        const candidate = await provider.getChildren(out[0].children[1]);
-        expect(candidate[0].label).toEqual("alpha");
-        expect(candidate[0].refs).toEqual(undefined);
+        const candidate = await provider.getChildren(out[0].children![1]);
+        expect(candidate![0].label).toEqual("alpha");
+        expect(candidate![0].refs).toEqual(undefined);
 
         done();
       },
     });
+  });
+  
+  test("candidates subtree doesn't show up if feature flag was not enabled", (done) => {
+    let alpha: NoteProps;
+    let beta: NoteProps;
+    runLegacyMultiWorkspaceTest({
+      ctx,
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        alpha = await NoteTestUtilsV4.createNote({
+          fname: "alpha",
+          body: "[[beta]] beta",
+          vault: vaults[0],
+          wsRoot,
+        });
+        beta = await NoteTestUtilsV4.createNote({
+          fname: "beta",
+          body: "alpha",
+          vault: vaults[0],
+          wsRoot,
+        });
+      },
+      onInit: async () => {
+        await new ReloadIndexCommand().execute();
+        await VSCodeUtils.openNote(alpha);
+       
+        const { out: alphaOut } = await getChildren(); 
+        const alphaOutObj = toPlainObject(alphaOut) as any;
+        expect(_.isEmpty(alphaOutObj)).toBeTruthy();
+        
+        await VSCodeUtils.openNote(beta);
+        const { out: betaOut } = await getChildren();
+        const betaOutObj = toPlainObject(betaOut) as any;
+        expect(betaOutObj[0].children.length).toEqual(1);
+        expect(betaOutObj[0].children[0].label).toEqual("Linked");
+
+        done();
+      },
+    })
   });
 
   test("mult backlink items display correctly", (done) => {

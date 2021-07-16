@@ -409,7 +409,7 @@ suite("ReferenceProvider", function () {
             const provider = new ReferenceHoverProvider();
             const hover = await provider.provideHover(
               editor.document,
-              new vscode.Position(7, 4)
+              new vscode.Position(7, 12)
             );
             expect(hover).toBeTruthy();
             await AssertUtils.assertInString({

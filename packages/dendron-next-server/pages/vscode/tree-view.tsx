@@ -154,6 +154,27 @@ function TreeViewParent({ engine, ide }: DendronProps) {
     }
   }, [noteActive?.id, engineInitialized]);
 
+  // analytics
+  React.useEffect(() => {
+    if (!ide.views[DendronTreeViewKey.TREE_VIEW_V2].ready) {
+      logger.info({
+        ctx,
+        state: "setViewReady",
+      });
+      ideDispatch(
+        ideSlice.actions.setViewReady({
+          key: DendronTreeViewKey.TREE_VIEW_V2,
+          ready: true,
+        })
+      );
+      postVSCodeMessage({
+        source: DMessageSource.webClient,
+        type: TreeViewMessageType.onReady,
+        data: {},
+      });
+    }
+  }, []);
+
   // --- render
   if (!engineInitialized) {
     logger.info({
@@ -173,23 +194,6 @@ function TreeViewParent({ engine, ide }: DendronProps) {
   ) as DataNode[];
   // controlled compo: what keys should be expanded
   const expandKeys = _.isEmpty(activeNoteIds) ? [] : activeNoteIds;
-  if (!ide.views[DendronTreeViewKey.TREE_VIEW_V2].ready) {
-    logger.info({
-      ctx,
-      state: "setViewReady",
-    });
-    ideDispatch(
-      ideSlice.actions.setViewReady({
-        key: DendronTreeViewKey.TREE_VIEW_V2,
-        ready: true,
-      })
-    );
-    postVSCodeMessage({
-      source: DMessageSource.webClient,
-      type: TreeViewMessageType.onReady,
-      data: {},
-    });
-  }
   logger.info({
     ctx,
     state: "exit",

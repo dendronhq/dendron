@@ -51,6 +51,7 @@ function AppVSCode({ Component, pageProps }: any) {
   const ideDispatch = ideHooks.useIDEAppDispatch();
   const [workspaceOpts, setWorkspaceOpts] =
     React.useState<WorkspaceProps>();
+  const logger = createLogger("AppVSCode");
 
   // run once
   useEffect(() => {
@@ -64,10 +65,11 @@ function AppVSCode({ Component, pageProps }: any) {
     // set initial query params
     const out = getWorkspaceParamsFromQueryString();
     setWorkspaceOpts(out);
+    logger.info("AppVSCode.init")
   }, []);
 
   useEngine({ engineState: engine, opts: query });
-  const logger = createLogger("AppVSCode");
+
   logger.info({ state: "enter!", query });
 
   // --- effects

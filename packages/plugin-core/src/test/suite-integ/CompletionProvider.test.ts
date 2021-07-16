@@ -13,7 +13,7 @@ import { expect } from "../testUtilsv2";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 
 suite("completionProvider", function () {
-  let ctx = setupBeforeAfter(this, {});
+  const ctx = setupBeforeAfter(this, {});
 
   describe("wikilink", () => {
     test("basic", (done) => {
@@ -52,7 +52,7 @@ suite("completionProvider", function () {
           // check that same vault items are sorted before other items
           const sortedItems = _.sortBy(items, (item) => item.sortText || item.label);
           const testIndex = _.findIndex(sortedItems, (item) => item.label === 'test');
-          expect(testIndex != -1 && testIndex < 2).toBeTruthy();
+          expect(testIndex !== -1 && testIndex < 2).toBeTruthy();
           done();
         },
         preSetupHook: async (opts) => {

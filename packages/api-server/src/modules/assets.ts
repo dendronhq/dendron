@@ -54,13 +54,13 @@ export class AssetsController {
     let root: string;
     if (stage !== "prod") {
       // lib/modules/
-      root = path.join(__dirname, "..", "..");
+      root = path.join(__dirname, "..", "..", "assets");
     } else {
       root = __dirname
     }
 
     const getPathForTarget = ({themeTarget}:{themeTarget: ThemeTarget}) => {
-      const themeDir = path.join(root, "assets", "static", "themes");
+      const themeDir = path.join(root, "static", "themes");
       if (themeTarget === ThemeTarget.PRISM) {
         return path.join(themeDir, "prism");
       }

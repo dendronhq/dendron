@@ -25,8 +25,8 @@ const getVaultClass = (vault: DVault) => {
   return `vault-${vaultName}`;
 };
 
-const DEFAULT_CLASSES = 'graph-view'
-const DEFAULT_NODE_CLASSES = `${DEFAULT_CLASSES} color-fill`
+const DEFAULT_CLASSES = '' //graph-view
+const DEFAULT_NODE_CLASSES = `${DEFAULT_CLASSES}` //color-fill
 const DEFAULT_EDGE_CLASSES = `${DEFAULT_CLASSES}`
 
 const getLocalNoteGraphElements = ({

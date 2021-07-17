@@ -88,6 +88,5 @@
     "gulp-postcss": "^9.0.0",
     "less-plugin-npm-import": "^2.1.0",
     "nodemon": "^2.0.4"
-  },
-  "gitHead": "d2e0e1c5ada1ac4a507e2da387cf761316de76de"
+  }
 }

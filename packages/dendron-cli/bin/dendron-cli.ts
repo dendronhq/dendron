@@ -20,7 +20,7 @@ if (_.isUndefined(env("LOG_LEVEL", { shouldThrow: false }))) {
   process.env.LOG_LEVEL = "error";
 }
 
-let buildYargs = yargs;
+const buildYargs = yargs;
 
 new BuildSiteV2CLICommand().buildCmd(buildYargs);
 new BuildSiteV2CLICommand("buildSite").buildCmd(buildYargs);

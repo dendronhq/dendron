@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Col, Layout, Row } from "antd";
 
-export default function BasicLayout(props: React.PropsWithChildren<any>) {
+export function BasicLayout(props: React.PropsWithChildren<any>) {
   return (
     <Layout>
       <br />

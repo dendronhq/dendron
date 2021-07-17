@@ -2,9 +2,11 @@
   "extends": "../../tsconfig.build.json",
   "compilerOptions": {
     "outDir": "lib",
-    "jsx": "preserve",
+    "jsx": "react",
+    "esModuleInterop": true,
+    "sourceMap": true,
     "rootDir": "src",
-    "lib": ["DOM", "ES2019"]
+    "lib": ["dom", "dom.iterable", "esnext"],
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "**/*-spec.ts", "**/*.d.ts"]

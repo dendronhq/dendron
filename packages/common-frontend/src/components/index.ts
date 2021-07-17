@@ -1,1 +1,1 @@
-export * as BasicLayout from "./layouts/BasicLayout"
+export {BasicLayout} from "./layouts/BasicLayout"

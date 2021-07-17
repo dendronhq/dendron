@@ -11,12 +11,13 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "export": "next build && next export"
   },
   "dependencies": {
     "@dendronhq/common-all": "^0.50.1",
     "@dendronhq/common-frontend": "^0.50.1",
-    "next": "11.0.1",
+    "next": "10.2.0",
     "react": "17.0.1",
     "react-css-theme-switcher": "0.2.3",
     "react-dom": "17.0.1"

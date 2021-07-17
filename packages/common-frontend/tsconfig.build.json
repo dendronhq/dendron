@@ -2,6 +2,7 @@
   "extends": "../../tsconfig.build.json",
   "compilerOptions": {
     "outDir": "lib",
+    "jsx": "preserve",
     "rootDir": "src",
     "lib": ["DOM", "ES2019"]
   },

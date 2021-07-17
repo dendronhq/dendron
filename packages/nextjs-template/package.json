@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@dendronhq/common-all": "^0.50.1",
+    "@dendronhq/common-frontend": "^0.50.1",
     "next": "11.0.1",
     "react": "17.0.1",
     "react-dom": "17.0.1"

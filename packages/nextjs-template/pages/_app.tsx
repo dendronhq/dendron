@@ -1,7 +1,12 @@
-import '../styles/globals.css'
-import type { AppProps } from 'next/app'
+import "../styles/globals.css";
+import type { AppProps } from "next/app";
+import { BasicLayout } from "@dendronhq/common-frontend";
 
 function MyApp({ Component, pageProps }: AppProps) {
-  return <Component {...pageProps} />
+  return (
+    <BasicLayout>
+      <Component {...pageProps} />
+    </BasicLayout>
+  );
 }
-export default MyApp
+export default MyApp;

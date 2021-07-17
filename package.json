@@ -12,6 +12,7 @@
       "packages/pods-core",
       "packages/dendron-cli",
       "packages/dendron-next-server",
+      "packages/nextjs-template",
       "packages/plugin-core",
       "packages/dendron-11ty",
       "packages/common-frontend"

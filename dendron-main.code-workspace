@@ -47,7 +47,7 @@
             "path": "packages/dendron-next-server"
         },
         {
-            "path": "packages/dendron-nextjs-template"
+            "path": "packages/nextjs-template"
         },
         {
             "path": "bootstrap"

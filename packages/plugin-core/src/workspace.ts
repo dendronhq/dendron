@@ -14,7 +14,7 @@ import {
 import {
   NodeJSUtils,
   readJSONWithComments,
-  readMD, writeJSONWithComments
+  readMD, resolveTilde, writeJSONWithComments
 } from "@dendronhq/common-server";
 import {
   DConfig,

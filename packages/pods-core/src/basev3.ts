@@ -201,7 +201,7 @@ export abstract class ExportPod<
       notes: _.values(engine.notes),
     });
 
-    return await this.plant({ ...opts, dest: destURL, notes });
+    return this.plant({ ...opts, dest: destURL, notes });
   }
   abstract plant(
     opts: ExportPodPlantOpts<T>

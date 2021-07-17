@@ -44,6 +44,7 @@ export class ExportPodCLICommand extends CLICommand<
     const { podClass: PodClass, config, wsRoot, engine, server } = opts;
     const vaults = engine.vaults;
     const pod = new PodClass();
+    // eslint-disable-next-line no-console
     console.log("running pod...");
     await pod.execute({ wsRoot, config, engine, vaults });
     server.close((err: any) => {
@@ -51,6 +52,7 @@ export class ExportPodCLICommand extends CLICommand<
         this.L.error({ msg: "error closing", payload: err });
       }
     });
+    // eslint-disable-next-line no-console
     console.log("done");
   }
 }

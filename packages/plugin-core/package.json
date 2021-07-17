@@ -144,11 +144,6 @@
         "desc": "Open a random note within a configured hierarchy set"
       },
       {
-        "command": "dendron.launchTutorial",
-        "title": "Dendron: Launch Tutorial",
-        "desc": "Launch the Tutorial"
-      },
-      {
         "command": "dendron.renameNote",
         "title": "Dendron: Rename Note",
         "desc": "Rename a note and all backlinks",
@@ -439,6 +434,14 @@
         "docPreview": ""
       },
       {
+        "command": "dendron.configureGraphStyle",
+        "title": "Dendron: Configure Graph Style (css)",
+        "desc": "Modify Dendron Graph styles as raw CSS",
+        "docs": "",
+        "docLink": "",
+        "docPreview": ""
+      },
+      {
         "command": "dendron.dev.doctor",
         "title": "Dendron: Doctor",
         "desc": "Auto fix issues with frontmatter",
@@ -470,6 +473,11 @@
         "desc": "Generate diagnostics report",
         "docLink": "dendron.topic.commands.md",
         "docPreview": ""
+      },
+      {
+        "command": "dendron.launchTutorial",
+        "title": "Dendron: Launch Tutorial",
+        "desc": "Launch the Tutorial"
       }
     ],
     "configuration": {
@@ -699,6 +707,11 @@
       },
       {
         "command": "dendron.showPreview",
+        "windows": "windows+ctrl+p",
+        "mac": "cmd+ctrl+p"
+      },
+      {
+        "command": "dendron.showPreviewV2",
         "windows": "windows+ctrl+p",
         "mac": "cmd+ctrl+p"
       }

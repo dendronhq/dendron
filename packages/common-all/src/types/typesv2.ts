@@ -530,6 +530,7 @@ export enum GraphViewMessageType {
   "onSelect" = "onSelect",
   "onGetActiveEditor" = "onGetActiveEditor",
   "onReady" = "onReady",
+  "onRequestGraphStyle" = "onRequestGraphStyle"
 }
 
 export enum CalendarViewMessageType {

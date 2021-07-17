@@ -119,11 +119,11 @@ function AppVSCode({ Component, pageProps }: any) {
 
   // === Render
   // Don't load children until all following conditions true
-  if (_.some([_.isUndefined(workspaceOpts), ide.theme !== "unknown", !isReady])) {
+  if (_.some([_.isUndefined(workspaceOpts), ide.theme === "unknown", !isReady])) {
     return <Spin />;
   }
 
-  let defaultTheme = workspaceOpts?.theme || "light";
+  let defaultTheme = workspaceOpts?.theme || "dark";
   if (ide.theme !== "unknown") {
     defaultTheme = ide.theme;
   }

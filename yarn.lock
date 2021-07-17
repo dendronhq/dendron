@@ -17800,7 +17800,7 @@ react-clientside-effect@^1.2.2:
   dependencies:
     "@babel/runtime" "^7.12.13"
 
-react-css-theme-switcher@^0.2.3:
+react-css-theme-switcher@0.2.3, react-css-theme-switcher@^0.2.3:
   version "0.2.3"
   resolved "https://registry.npmjs.org/react-css-theme-switcher/-/react-css-theme-switcher-0.2.3.tgz#1de02aa5624790ec44ff51824a142de35ca008f4"
   integrity sha512-sWzbT8IqG8Me7zeLAuoh6q6AU+AQunR7pV4WULNB9oPCCdzYLMCWVhv/I2Burf2DG3HYYcb+XCcyHTQsevQxQw==

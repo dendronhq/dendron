@@ -1,5 +1,5 @@
 {
-  "name": "dendron-nextjs-template",
+  "name": "@dendronhq/dendron-nextjs-template",
   "version": "0.1.0",
   "private": true,
   "scripts": {

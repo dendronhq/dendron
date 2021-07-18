@@ -66,7 +66,7 @@ router.post("/render", async (req: Request, res: Response) => {
 
 router.get("/query", async (req: Request, res: Response) => {
   const resp = await NoteController.instance().query(
-    req.query as NoteQueryRequest
+    req.query as unknown as NoteQueryRequest
   );
   res.json(resp);
 });

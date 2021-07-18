@@ -2,13 +2,14 @@ import {
   CONSTANTS,
   DendronError,
   getStage,
+  Time,
   VaultUtils,
-  VSCodeEvents,
+  VSCodeEvents
 } from "@dendronhq/common-all";
 import {
   getDurationMilliseconds,
   getOS,
-  SegmentClient,
+  SegmentClient
 } from "@dendronhq/common-server";
 import {
   DConfig,
@@ -16,9 +17,10 @@ import {
   HistoryService,
   MetadataService,
   MigrationServce,
-  WorkspaceService,
+  WorkspaceService
 } from "@dendronhq/engine-server";
 import _ from "lodash";
+import { Duration } from "luxon";
 import path from "path";
 import semver from "semver";
 import * as vscode from "vscode";
@@ -35,9 +37,8 @@ import {
   DendronWorkspace,
   getEngine,
   getWS,
-  WorkspaceInitFactory,
 } from "./workspace";
-
+import { WorkspaceInitFactory } from "./workspace/workspaceInitializer";
 const MARKDOWN_WORD_PATTERN = new RegExp("([\\w\\.\\#]+)");
 // === Main
 
@@ -522,4 +523,61 @@ async function showWelcomeOrWhatsNew({
       // no change
       break;
   }
+
+  if (shouldDisplayLapsedUserMsg()) {
+    showLapsedUserMessage();
+  }
+}
+
+function showLapsedUserMessage() {
+  const START_TITLE = "Get Started";
+
+  AnalyticsUtils.track(VSCodeEvents.ShowLapsedUserMessage);
+  MetadataService.instance().setLapsedUserMsgSendTime();
+
+  vscode.window
+    .showInformationMessage(
+      "Get started with Dendron.",
+      { modal: true },
+      { title: START_TITLE }
+    )
+    .then((resp) => {
+      if (resp?.title === START_TITLE) {
+        AnalyticsUtils.track(VSCodeEvents.LapsedUserMessageAccepted);
+        const ws = getWS();
+        return ws.showWelcome();
+      } else {
+        AnalyticsUtils.track(VSCodeEvents.LapsedUserMessageRejected);
+        return;
+      }
+    });
+}
+
+/**
+ * Visible for Testing purposes only
+ * @returns
+ */
+export function shouldDisplayLapsedUserMsg(): boolean {
+  const ONE_DAY = Duration.fromObject({ days: 1 });
+  const ONE_WEEK = Duration.fromObject({ weeks: 1 });
+  const CUR_TIME = Duration.fromObject({ seconds: Time.now().toSeconds() });
+  const metaData = MetadataService.instance().getMeta();
+
+  // If we haven't prompted the user yet and it's been a day since their
+  // initial install OR if it's been one week since we last prompted the user
+  const refreshMsg =
+    (metaData.lapsedUserMsgSendTime === undefined &&
+      ONE_DAY <=
+        CUR_TIME.minus(
+          Duration.fromObject({ seconds: metaData.firstInstall })
+        )) ||
+    (metaData.lapsedUserMsgSendTime !== undefined &&
+      ONE_WEEK <=
+        CUR_TIME.minus(
+          Duration.fromObject({ seconds: metaData.lapsedUserMsgSendTime })
+        ));
+
+  // If the user has never initialized and it's time to refresh the lapsed user
+  // message
+  return !metaData.firstWsInitialize && refreshMsg;
 }

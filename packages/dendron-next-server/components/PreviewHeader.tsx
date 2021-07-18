@@ -3,21 +3,16 @@ import * as React from "react";
 import { DendronProps } from "../lib/types";
 import { createLogger } from "@dendronhq/common-frontend";
 
-function MermaidHeaders() {
+export function MermaidHeaders() {
   return [
     <script
       key="mermaid-js"
-      src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"
+      src="/js/mermaid.8-11.min.js"
     ></script>,
-    <script key="mermaid-init">
-      {" "}
-      (function()&#123; mermaid.initialize(&#123;startOnLoad:true &#125;);
-      &#125;);{" "}
-    </script>,
   ];
 }
 
-function MathJaxHeaders() {
+export function MathJaxHeaders() {
   return [
     <link
       key="math-style"
@@ -42,7 +37,7 @@ function MathJaxHeaders() {
 /**
  * Header for {@link Note} componenet
  */
-function PreviewHeader({ engine, ide }: DendronProps) {
+function PreviewHeader({ engine }: DendronProps) {
   const ctx = "PreviewHeader";
   const logger = createLogger("PreviewHeader");
   logger.info({ ctx, config: engine?.config });
@@ -50,14 +45,9 @@ function PreviewHeader({ engine, ide }: DendronProps) {
   return (
     <Head>
       <script
-        src="https://code.jquery.com/jquery-3.6.0.min.js"
-        integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
-        crossOrigin="anonymous"
+        key="jquery"
+        src="/js/jquery.3-60.min.js"
       ></script>
-      <link
-        rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.22.0/themes/prism.min.css"
-      />
       {engine?.config?.useKatex && MathJaxHeaders()}
       {engine?.config?.mermaid && MermaidHeaders()}
     </Head>

@@ -12,7 +12,6 @@ import {
   EngineDeleteNotePayload,
   EngineDeleteOptsV2,
   EngineInfoResp,
-  EngineQueryNoteResp,
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
   GetNoteOptsV2,
@@ -25,10 +24,12 @@ import {
   SchemaModuleProps,
   WriteNoteResp,
 } from ".";
+import { ThemeTarget, ThemeType } from "./constants";
 import { DendronError } from "./error";
 import {
   DEngineInitPayload,
   GetNoteBlocksPayload,
+  NoteQueryResp,
   RenderNoteOpts,
   RenderNotePayload,
 } from "./types";
@@ -141,6 +142,7 @@ export type EngineBulkAddRequest = {
 export type EngineInfoRequest = WorkspaceRequest;
 export type NoteQueryRequest = {
   qs: string;
+  vault?: DVault;
 } & Partial<WorkspaceRequest>;
 
 export type GetNoteBlocksRequest = {
@@ -165,6 +167,8 @@ export type SchemaUpdateRequest = SchemaWriteRequest;
 
 export type AssetGetRequest = { fpath: string } & WorkspaceRequest;
 
+export type AssetGetThemeRequest = { themeTarget: ThemeTarget, themeType: ThemeType} & WorkspaceRequest;
+
 // --- Payload
 export type InitializePayload = APIPayload<DEngineInitPayload>;
 
@@ -187,6 +191,10 @@ export class APIUtils {
   static genUrlWithQS({ url, params }: { url: string; params: any }) {
     const str = querystring.stringify(params);
     return url + `?${str}`;
+  }
+
+  static getLocalEndpoint(port: number) {
+    return `http://localhost:${port}`;
   }
 }
 
@@ -297,6 +305,15 @@ export class DendronAPI extends API {
   async assetGet(req: AssetGetRequest): Promise<DendronError | Buffer> {
     const resp = await this._makeRequestRaw({
       path: "assets/",
+      method: "get",
+      qs: req,
+    });
+    return resp;
+  }
+
+  async assetGetTheme(req: AssetGetThemeRequest): Promise<DendronError | Buffer> {
+    const resp = await this._makeRequestRaw({
+      path: "assets/theme",
       method: "get",
       qs: req,
     });
@@ -421,7 +438,7 @@ export class DendronAPI extends API {
     return resp;
   }
 
-  async noteQuery(req: NoteQueryRequest): Promise<EngineQueryNoteResp> {
+  async noteQuery(req: NoteQueryRequest): Promise<NoteQueryResp> {
     const resp = await this._makeRequest({
       path: "note/query",
       method: "get",

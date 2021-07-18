@@ -370,5 +370,5 @@ async function changeConfig(
   // Commit this change, otherwise it will be a tracked file with changes which breaks git pull
   const git = new Git({ localUrl: wsRoot });
   await git.add("dendron.yml");
-  await git.commit({ msg: "update config" });
+  await git.commit({ msg: "update-config" });
 }

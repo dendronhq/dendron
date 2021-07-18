@@ -90,14 +90,14 @@ export type WriteConfigOpts = {
 };
 
 export class WorkspaceConfig {
-  static write(wsRoot: string, vaults: DVault[], opts?: WriteConfigOpts) {
+  static write(wsRoot: string, vaults?: DVault[], opts?: WriteConfigOpts) {
     const cleanOpts = _.defaults(opts, {
       vaults,
       overrides: {},
     });
     const jsonBody: WorkspaceSettings = _.merge(
       {
-        folders: cleanOpts.vaults.map((ent) => ({ path: ent.fsPath })),
+        folders: cleanOpts.vaults ? cleanOpts.vaults.map((ent) => ({ path: ent.fsPath })) : [],
         settings: Settings.defaults(),
         extensions: Extensions.defaults(),
       },

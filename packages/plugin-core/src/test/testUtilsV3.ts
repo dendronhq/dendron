@@ -46,6 +46,7 @@ import { StateService } from "../services/stateService";
 import { WorkspaceConfig } from "../settings";
 import { VSCodeUtils } from "../utils";
 import { DendronWorkspace, getWS } from "../workspace";
+import { BlankInitializer } from "../workspace/blankInitializer";
 import { _activate } from "../_extension";
 import { onWSInit, TIMEOUT } from "./testUtils";
 import {
@@ -164,6 +165,7 @@ export async function setupLegacyWorkspace(
     rootDirRaw: wsRoot,
     skipOpenWs: true,
     ...copts.setupWsOverride,
+    workspaceInitializer: new BlankInitializer()
   });
   stubWorkspaceFolders(vaults);
 

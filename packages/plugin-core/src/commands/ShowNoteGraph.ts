@@ -1,18 +1,19 @@
 import _ from "lodash";
 import {
   DendronWebViewKey,
+  DMessageType,
   GraphViewMessage,
   GraphViewMessageType,
   NoteProps,
 } from "@dendronhq/common-all";
-import { ViewColumn, window } from "vscode";
+import { commands, ViewColumn, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { WebViewUtils } from "../views/utils";
 import { BasicCommand } from "./base";
 import { getEngine, getWS } from "../workspace";
 import { GotoNoteCommand } from "./GotoNote";
-import vscode from "vscode";
 import { VSCodeUtils } from "../utils";
+import { GraphStyleService } from "../styles";
 
 type CommandOpts = {};
 
@@ -31,7 +32,7 @@ export class ShowNoteGraphCommand extends BasicCommand<
     if (panel) {
       // panel.title = `${title} ${note.fname}`;
       panel.webview.postMessage({
-        type: "onDidChangeActiveTextEditor",
+        type: DMessageType.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR,
         data: {
           note,
           sync: true,
@@ -86,7 +87,7 @@ export class ShowNoteGraphCommand extends BasicCommand<
       switch (msg.type) {
         case GraphViewMessageType.onSelect: {
           const note = getEngine().notes[msg.data.id];
-          await vscode.commands.executeCommand(
+          await commands.executeCommand(
             "workbench.action.focusFirstEditorGroup"
           );
           await new GotoNoteCommand().execute({
@@ -102,6 +103,20 @@ export class ShowNoteGraphCommand extends BasicCommand<
             VSCodeUtils.getNoteFromDocument(activeTextEditor.document);
           if (note) {
             ShowNoteGraphCommand.refresh(note);
+          }
+          break;
+        }
+        case GraphViewMessageType.onRequestGraphStyle: {
+          // Set graph styles
+          const styles = GraphStyleService.getParsedStyles();
+          if (styles) {
+            panel.webview.postMessage({
+              type: "onGraphStyleLoad",
+              data: {
+                styles,
+              },
+              source: "vscode",
+            });
           }
           break;
         }

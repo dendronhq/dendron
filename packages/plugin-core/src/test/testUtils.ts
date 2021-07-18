@@ -21,6 +21,7 @@ import {
   HistoryEventAction,
   HistoryService,
 } from "@dendronhq/engine-server";
+import { BlankInitializer } from "../workspace/blankInitializer";
 
 export function getActiveEditorBasename() {
   return path.basename(
@@ -150,6 +151,7 @@ export async function setupDendronWorkspace(
     rootDirRaw: rootDir,
     skipOpenWs: true,
     ...optsClean.setupWsOverride,
+    workspaceInitializer: new BlankInitializer()
   });
   await optsClean.useCb(vaultPath);
   const config = DConfig.getOrCreate(rootDir);

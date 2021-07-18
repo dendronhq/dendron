@@ -63,7 +63,7 @@ const expectNote = async ({
   expect(ok).toBeTruthy();
 };
 
-describe("engine", async () => {
+describe("engine", () => {
   testWithEngine(
     "use js ",
     async ({ engine, vaults }) => {
@@ -298,7 +298,7 @@ describe("engine", async () => {
   });
 });
 
-describe("remote engine", async () => {
+describe("remote engine", () => {
   test("bad hook", async () => {
     await runEngineTestV5(
       async ({ initResp }) => {

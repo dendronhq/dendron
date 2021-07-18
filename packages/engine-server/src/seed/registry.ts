@@ -14,7 +14,7 @@ const SEED_REGISTRY: SeedRegistryDict = {
     root: "vault",
     repository: {
       type: "git",
-      url: "git@github.com:dendronhq/dendron-site.git",
+      url: "https://github.com/dendronhq/dendron-site.git",
     },
     site: {
       url: "https://wiki.dendron.so",
@@ -29,12 +29,23 @@ const SEED_REGISTRY: SeedRegistryDict = {
     root: "handbook",
     repository: {
       type: "git",
-      url: "git@github.com:dendronhq/handbook.git",
+      url: "https://github.com/dendronhq/handbook.git",
     },
     site: {
       url: "https://handbook.dendron.so",
       index: "handbook",
     },
+  },
+  "dendron.templates": {
+    name: "templates",
+    publisher: "dendron",
+    description: "Dendron Note Templates",
+    license: "Creative Commons Attribution 4.0 International",
+    root: "templates",
+    repository: {
+      type: "git",
+      url: "https://github.com/dendronhq/templates.git",
+    }
   },
   "dendron.tldr": {
     name: "tldr",

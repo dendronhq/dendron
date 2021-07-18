@@ -631,3 +631,97 @@ VFile {
   "messages": Array [],
 }
 `;
+
+exports[`wikiLinks parse fail: bad format 1`] = `
+Object {
+  "children": Array [
+    Object {
+      "children": Array [
+        Object {
+          "position": Position {
+            "end": Object {
+              "column": 2,
+              "line": 1,
+              "offset": 1,
+            },
+            "indent": Array [],
+            "start": Object {
+              "column": 1,
+              "line": 1,
+              "offset": 0,
+            },
+          },
+          "type": "text",
+          "value": "[",
+        },
+        Object {
+          "data": Object {
+            "alias": "foo bar",
+            "anchorHeader": undefined,
+            "vaultName": undefined,
+          },
+          "position": Position {
+            "end": Object {
+              "column": 13,
+              "line": 1,
+              "offset": 12,
+            },
+            "indent": Array [],
+            "start": Object {
+              "column": 2,
+              "line": 1,
+              "offset": 1,
+            },
+          },
+          "type": "wikiLink",
+          "value": "foo bar",
+        },
+        Object {
+          "position": Position {
+            "end": Object {
+              "column": 14,
+              "line": 1,
+              "offset": 13,
+            },
+            "indent": Array [],
+            "start": Object {
+              "column": 13,
+              "line": 1,
+              "offset": 12,
+            },
+          },
+          "type": "text",
+          "value": "]",
+        },
+      ],
+      "position": Position {
+        "end": Object {
+          "column": 14,
+          "line": 1,
+          "offset": 13,
+        },
+        "indent": Array [],
+        "start": Object {
+          "column": 1,
+          "line": 1,
+          "offset": 0,
+        },
+      },
+      "type": "paragraph",
+    },
+  ],
+  "position": Object {
+    "end": Object {
+      "column": 14,
+      "line": 1,
+      "offset": 13,
+    },
+    "start": Object {
+      "column": 1,
+      "line": 1,
+      "offset": 0,
+    },
+  },
+  "type": "root",
+}
+`;

@@ -1,5 +1,14 @@
 const ROOT_PATH = "/doc/root";
 
+export enum ThemeType {
+  LIGHT = "LIGHT",
+  DARK = "DARK",
+}
+
+export enum ThemeTarget {
+  PRISM = "PRISM"
+}
+
 export const CONSTANTS = {
   ROOT_PATH,
   ALL_QUERY: "**/*",
@@ -57,3 +66,6 @@ export enum RESERVED_KEYS {
   GIT_NOTE_PATH = "gitNotePath",
   GIT_NO_LINK = "gitNoLink",
 }
+
+/** Notes under this hierarchy are considered tags, for example `${TAGS_HIERARCHY}foo` is a tag note. */
+export const TAGS_HIERARCHY = "tags.";

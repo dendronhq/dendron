@@ -101,6 +101,8 @@ const CMD_PREFIX = "Dendron:";
 export const ICONS = {
   STUB: "gist-new",
   SCHEMA: "repo",
+  LINK_CANDIDATE: "debug-disconnect",
+  WIKILINK: "link",
 };
 export const DENDRON_WORKSPACE_FILE = "dendron.code-workspace";
 
@@ -254,6 +256,12 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docLink: "dendron.topic.commands.md",
     docPreview:
       "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/command-rename.gif)",
+  },
+  CONVERT_LINK: {
+    key: "dendron.convertLink",
+    title: `${CMD_PREFIX} Convert Link`,
+    group: "notes",
+    desc: "Convert link candidate into backlink",
   },
   // --- Lookup
   LOOKUP: {
@@ -712,6 +720,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docLink: "",
     docPreview: ``,
   },
+  
   CONFIGURE_UI: {
     key: "dendron.configureUI",
     title: `${CMD_PREFIX} Configure`,
@@ -720,6 +729,15 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docs: [
       `<div style="position: relative; padding-bottom: 62.5%; height: 0;"><iframe src="https://www.loom.com/embed/5b6689eb76344fbb814a3d4405ef62b8" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe></div>`,
     ].join("\n"),
+    docLink: "",
+    docPreview: ``,
+  },
+  CONFIGURE_GRAPH_STYLES: {
+    key: "dendron.configureGraphStyle",
+    title: `${CMD_PREFIX} Configure Graph Style (css)`,
+    group: "workspace",
+    desc: "Modify Dendron Graph styles as raw CSS",
+    docs: [""].join("\n"),
     docLink: "",
     docPreview: ``,
   },

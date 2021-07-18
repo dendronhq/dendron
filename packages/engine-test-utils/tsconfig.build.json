@@ -3,6 +3,8 @@
   "compilerOptions": {
     "outDir": "./lib",
     "rootDir": "src",
+    "lib": ["DOM", "ES2019"],
+		"jsx": "react",
     "skipLibCheck": true
   },
   "include": ["src/**/*"],

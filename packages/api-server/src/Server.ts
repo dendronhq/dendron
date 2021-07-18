@@ -1,13 +1,12 @@
-import { createLogger, findInParent } from "@dendronhq/common-server";
+import { findInParent } from "@dendronhq/common-server";
 import cors from "cors";
 import express, { NextFunction, Request, Response } from "express";
 import fs from "fs-extra";
 import { BAD_REQUEST } from "http-status-codes";
-import _ from "lodash";
 import morgan from "morgan";
 import path from "path";
 import querystring from "querystring";
-import { LOGGER_NAME } from "./constants";
+import { getLogger } from "./core";
 import { baseRouter } from "./routes";
 
 export function appModule({
@@ -20,7 +19,7 @@ export function appModule({
   nextStaticRoot?: string;
 }) {
   const ctx = "appModule:start";
-  const logger = createLogger(LOGGER_NAME);
+  const logger = getLogger()
   const app = express();
   app.use(cors());
   app.use(express.json({ limit: "500mb" }));

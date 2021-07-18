@@ -39,14 +39,11 @@ Vault2
 
 ### Header
 
-((ref: [[dendron.welcome]]#Header1))
 ![[dendron.welcome#header1]]
 
 ### With Special Characters
 
 ![[dendron.welcome#header-special-chars]]
-
-<a data-toggle="popover" title="Popover title" data-content="And here's some amazing content. It's very engaging. Right?">Click to toggle popover</a>
 
 ***
 

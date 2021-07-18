@@ -4,7 +4,7 @@
   "displayName": "dendron",
   "description": "Dendron is a hierarchal note taking tool that grows as you do. ",
   "publisher": "dendron",
-  "version": "0.50.0",
+  "version": "0.50.1",
   "engines": {
     "vscode": "^1.54.0"
   },
@@ -142,11 +142,6 @@
         "command": "dendron.randomNote",
         "title": "Dendron: Random Note",
         "desc": "Open a random note within a configured hierarchy set"
-      },
-      {
-        "command": "dendron.launchTutorial",
-        "title": "Dendron: Launch Tutorial",
-        "desc": "Launch the Tutorial"
       },
       {
         "command": "dendron.renameNote",
@@ -444,6 +439,14 @@
         "docPreview": ""
       },
       {
+        "command": "dendron.configureGraphStyle",
+        "title": "Dendron: Configure Graph Style (css)",
+        "desc": "Modify Dendron Graph styles as raw CSS",
+        "docs": "",
+        "docLink": "",
+        "docPreview": ""
+      },
+      {
         "command": "dendron.dev.doctor",
         "title": "Dendron: Doctor",
         "desc": "Auto fix issues with frontmatter",
@@ -475,6 +478,11 @@
         "desc": "Generate diagnostics report",
         "docLink": "dendron.topic.commands.md",
         "docPreview": ""
+      },
+      {
+        "command": "dendron.launchTutorial",
+        "title": "Dendron: Launch Tutorial",
+        "desc": "Launch the Tutorial"
       }
     ],
     "configuration": {
@@ -706,6 +714,11 @@
         "command": "dendron.showPreview",
         "windows": "windows+ctrl+p",
         "mac": "cmd+ctrl+p"
+      },
+      {
+        "command": "dendron.showPreviewV2",
+        "windows": "windows+ctrl+p",
+        "mac": "cmd+ctrl+p"
       }
     ],
     "markdown.previewStyles": [
@@ -724,10 +737,11 @@
     "compile": "tsc -p tsconfig.build.json",
     "pretest": "yarn compile",
     "test": "node ./out/src/test/runTestInteg.js",
-    "format": "echo nop"
+    "format": "echo nop",
+    "vscode:uninstall": "node ./out/src/scripts/uninstallHook.js"
   },
   "devDependencies": {
-    "@dendronhq/common-test-utils": "^0.50.0",
+    "@dendronhq/common-test-utils": "^0.50.1",
     "@types/execa": "^2.0.0",
     "@types/fs-extra": "^9.0.1",
     "@types/glob": "^7.1.1",
@@ -749,15 +763,15 @@
     "webpack-cli": "^3.3.12"
   },
   "dependencies": {
-    "@dendronhq/api-server": "^0.50.0",
-    "@dendronhq/common-all": "^0.50.0",
-    "@dendronhq/common-server": "^0.50.0",
-    "@dendronhq/dendron-cli": "^0.50.0",
-    "@dendronhq/engine-server": "^0.50.0",
-    "@dendronhq/engine-test-utils": "^0.50.0",
+    "@dendronhq/api-server": "^0.50.1",
+    "@dendronhq/common-all": "^0.50.1",
+    "@dendronhq/common-server": "^0.50.1",
+    "@dendronhq/dendron-cli": "^0.50.1",
+    "@dendronhq/engine-server": "^0.50.1",
+    "@dendronhq/engine-test-utils": "^0.50.1",
     "@dendronhq/lsp-server": "^0.28.7-alpha.0",
-    "@dendronhq/pods-core": "^0.50.0",
-    "@types/vscode": "1.57",
+    "@dendronhq/pods-core": "^0.50.1",
+    "@types/vscode": "1.58",
     "cross-path-sort": "^1.0.0",
     "execa": "^4.0.2",
     "fs-extra": "^9.0.1",

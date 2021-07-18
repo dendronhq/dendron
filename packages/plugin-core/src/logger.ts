@@ -25,7 +25,12 @@ export class Logger {
     fs.ensureDirSync(context.logPath);
     const logPath = path.join(context.logPath, "dendron.log");
     if (fs.existsSync(logPath)) {
-      fs.moveSync(logPath, `${logPath}.old`, { overwrite: true });
+      try {
+        fs.moveSync(logPath, `${logPath}.old`, { overwrite: true });
+      }
+      catch {
+        Logger.error({ ctx, msg: `Unable to rename ${logPath}. Logs will be appended.`});
+      }
     }
     fs.ensureFileSync(logPath);
     const conf = workspace.getConfiguration();
@@ -38,6 +43,13 @@ export class Logger {
     Logger.info({ ctx, msg: "exit", logLevel });
   }
   private static _level: TraceLevel = "debug";
+
+  /**
+   * Shortcut to check if logger is set to debug
+   */
+  static isDebug(): boolean {
+    return Logger.level === "debug";
+  }
 
   static cmpLevel(lvl: TraceLevel): boolean {
     return levels.indexOf(lvl) >= levels.indexOf(Logger.level || "debug");

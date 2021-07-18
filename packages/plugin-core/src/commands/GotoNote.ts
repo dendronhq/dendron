@@ -3,11 +3,13 @@ import {
   DNoteAnchor,
   DVault,
   getSlugger,
+  isNotUndefined,
   NoteProps,
   NoteUtils,
+  TAGS_HIERARCHY,
   VaultUtils,
 } from "@dendronhq/common-all";
-import { matchWikiLink } from "@dendronhq/engine-server";
+import { matchWikiLink, HASHTAG_REGEX_LOOSE } from "@dendronhq/engine-server";
 import _ from "lodash";
 import {
   TextEditor,
@@ -23,6 +25,7 @@ import { VSCodeUtils } from "../utils";
 import { parseAnchor } from "../utils/md";
 import { DendronWorkspace, getWS } from "../workspace";
 import { BasicCommand } from "./base";
+import { VaultSelectionMode } from "./LookupCommand";
 
 type CommandOpts = {
   qs?: string;
@@ -63,9 +66,7 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
   getLinkFromSelection() {
     const { selection, editor } = VSCodeUtils.getSelection();
     if (!_.isEmpty(selection) && selection?.start) {
-      const currentLine = editor?.document.getText().split("\n")[
-        selection.start.line
-      ];
+      const currentLine = editor?.document.lineAt(selection.start.line).text;
 
       if (currentLine) {
         const lastIdx = currentLine
@@ -83,6 +84,16 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
           )
         ) {
           return out.link;
+        } else {
+          // handle hashtags
+          for (const hashtag of currentLine.matchAll(new RegExp(HASHTAG_REGEX_LOOSE, "g"))) {
+            if (isNotUndefined(hashtag.index) && _.inRange(selection.start.character, hashtag.index, hashtag.index + hashtag[0].length)) {
+              return {
+                alias: hashtag[0],
+                value: `${TAGS_HIERARCHY}${hashtag[1]}`,
+              };
+            }
+          }
         }
       }
     }
@@ -143,6 +154,25 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
           return;
         }
         vault = resp;
+      } else {
+        // this is a new note:
+        const confirmVaultSetting =
+          DendronWorkspace.instance().config["lookupConfirmVaultOnCreate"];
+        const selectionMode =
+          confirmVaultSetting === false || _.isUndefined(confirmVaultSetting)
+            ? VaultSelectionMode.smart
+            : VaultSelectionMode.alwaysPrompt;
+        const selectedVault = await PickerUtilsV2.getOrPromptVaultForNewNote({
+          vault,
+          fname: qs,
+          vaultSelectionMode: selectionMode,
+        });
+
+        if (_.isUndefined(selectedVault)) {
+          return;
+        }
+
+        vault = selectedVault;
       }
     } else {
       qs = opts.qs;

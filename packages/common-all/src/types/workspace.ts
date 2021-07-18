@@ -272,6 +272,14 @@ export type DendronDevConfig = {
    * Enable experimental web ui. Default is false
    */
   enableWebUI?: boolean;
+  /**
+   * Enable displaying and indexing link candidates. Default is false
+   */
+  enableLinkCandidates?: boolean;
+  /**
+   * Enable new preview as default
+   */
+  enablePreviewV2?: boolean;
 };
 
 export type DendronSiteConfig = {

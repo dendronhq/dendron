@@ -34,6 +34,7 @@ import {
   SchemaUtils,
   StoreDeleteNoteResp,
   stringifyError,
+  TAGS_HIERARCHY,
   VaultUtils,
   WriteNoteResp,
 } from "@dendronhq/common-all";
@@ -44,6 +45,7 @@ import {
   note2File,
   schemaModuleProps2File,
   vault2Path,
+  getDurationMilliseconds,
 } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -332,6 +334,13 @@ export class FileStorage implements DStore {
     );
     const allNotes = _.flatten(out);
     this._addBacklinks({ notesWithLinks, allNotes, allNotesCache });
+    if (this.engine.config.dev?.enableLinkCandidates) {
+      const ctx = "_addLinkCandidates";
+      const start = process.hrtime();
+      this._addLinkCandidates(allNotes);
+      const duration = getDurationMilliseconds(start);
+      this.logger.info({ ctx, duration });
+    }
     return { notes: allNotes, errors };
   }
 
@@ -370,6 +379,24 @@ export class FileStorage implements DStore {
         return;
       }
     });
+  }
+  
+  _addLinkCandidates(allNotes: NoteProps[] ) {
+    const notesMap = NoteUtils.createFnameNoteMap(allNotes, true);
+    return _.map(allNotes, (noteFrom: NoteProps) => {
+      try {
+        const linkCandidates = LinkUtils.findLinkCandidates({
+          note: noteFrom,
+          notesMap,
+          engine: this.engine,
+        });
+        noteFrom.links = noteFrom.links.concat(linkCandidates);
+      } catch (err) {
+        const error = error2PlainObject(err);
+        this.logger.error({ error, noteFrom, message: "issue with link candidates" });
+        return;
+      }
+    })
   }
 
   async _initNotes(vault: DVault): Promise<{
@@ -446,6 +473,7 @@ export class FileStorage implements DStore {
             errors.push(err);
             return;
           }
+
         } else {
           n.links = cache.notes[n.fname].data.links;
         }
@@ -530,12 +558,17 @@ export class FileStorage implements DStore {
             const oldLink = LinkUtils.dlink2DNoteLink(link);
             // current implementation adds alias for all notes
             // check if old note has alias thats different from its fname
-            const alias =
-              oldLink.from.alias &&
-              oldLink.from.alias.toLocaleLowerCase() !==
-                oldLink.from.fname.toLocaleLowerCase()
-                ? oldLink.from.alias
-                : undefined;
+            let alias: string | undefined;
+            if (oldLink.from.alias && oldLink.from.alias.toLocaleLowerCase() !== oldLink.from.fname.toLocaleLowerCase()) {
+              alias = oldLink.from.alias;
+            }
+            // for hashtag links, we'll have to regenerate the alias
+            if (newLoc.fname.startsWith(TAGS_HIERARCHY)) {
+              alias = `#${newLoc.fname.slice(TAGS_HIERARCHY.length)}`;
+            } else if (LinkUtils.isHashtagLink(oldLink.from)) {
+              // If this used to be a hashtag but no longer is, the alias is like `#foo.bar` and no longer makes sense.
+              alias = undefined;
+            }
             // loc doesn't have header info
             const newBody = LinkUtils.updateLink({
               note,

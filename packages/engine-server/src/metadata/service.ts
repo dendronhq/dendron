@@ -12,9 +12,13 @@ type Metadata = Partial<{
    * When the first workspace was initialized
    */
   firstWsInitialize: number;
+  /**
+   * When the last time the lapsed user message was displayed to the user
+   */
+  lapsedUserMsgSendTime: number;
 }>;
 
-let _singleton: MetadataService | undefined = undefined;
+let _singleton: MetadataService | undefined;
 
 export class MetadataService {
   static instance() {
@@ -47,10 +51,14 @@ export class MetadataService {
   }
 
   setInitialInstall() {
-    return this.setMeta("firstInstall", Time.now().second);
+    return this.setMeta("firstInstall", Time.now().toSeconds());
   }
 
   setFirstWsInitialize() {
-    return this.setMeta("firstWsInitialize", Time.now().second);
+    return this.setMeta("firstWsInitialize", Time.now().toSeconds());
+  }
+
+  setLapsedUserMsgSendTime() {
+    return this.setMeta("lapsedUserMsgSendTime", Time.now().toSeconds());
   }
 }

@@ -1,7 +1,10 @@
+import { Time } from "@dendronhq/common-all";
 import { AssertUtils } from "@dendronhq/common-test-utils";
 import { ENGINE_HOOKS_MULTI } from "@dendronhq/engine-test-utils";
 import _ from "lodash";
+import { DateTime } from "luxon";
 import { describe } from "mocha";
+import sinon from "sinon";
 import * as vscode from "vscode";
 import { NoteSyncService } from "../../services/NoteSyncService";
 import { VSCodeUtils } from "../../utils";
@@ -10,12 +13,19 @@ import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
 suite("NoteSyncService", function () {
   let ctx: vscode.ExtensionContext;
+  let newUpdatedTime: number;
   ctx = setupBeforeAfter(this, {
-    beforeHook: () => {},
+    beforeHook: () => {
+      newUpdatedTime = 60000;
+      sinon.stub(Time, "now").returns(DateTime.fromMillis(newUpdatedTime));
+    },
+    afterHook: () => {
+      sinon.restore();
+    }
   });
 
   describe("onDidChange", () => {
-    test("onDidChange: change", (done) => {
+    test("ok: onDidChange: change", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
         postSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti,
@@ -27,9 +37,9 @@ suite("NoteSyncService", function () {
             const selection = new vscode.Selection(pos, pos);
             builder.replace(selection, `Hello`);
           });
-          const uri = editor.document.uri;
-          const resp = await NoteSyncService.instance().onDidChange(uri);
+          const resp = await NoteSyncService.instance().onDidChange(editor);
           expect(resp?.contentHash).toEqual("465a4f4ebf83fbea836eb7b8e8e040ec");
+          expect(resp?.updated).toEqual(newUpdatedTime);
           expect(
             await AssertUtils.assertInString({
               body: engine.notes["foo"].body,
@@ -48,8 +58,7 @@ suite("NoteSyncService", function () {
         onInit: async ({ engine }) => {
           const foo = engine.notes["foo"];
           const editor = await VSCodeUtils.openNote(foo);
-          const uri = editor.document.uri;
-          const resp = await NoteSyncService.instance().onDidChange(uri);
+          const resp = await NoteSyncService.instance().onDidChange(editor);
           expect(_.isUndefined(resp)).toBeTruthy();
           done();
         },

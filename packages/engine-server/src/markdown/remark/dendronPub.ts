@@ -1,7 +1,6 @@
 import { DendronError, isNotUndefined, NoteUtils } from "@dendronhq/common-all";
 import _ from "lodash";
 import { Image, Root } from "mdast";
-import { BlockAnchor, DendronASTTypes } from "../types";
 import Unified, { Transformer } from "unified";
 import { Node, Parent } from "unist";
 import u from "unist-builder";
@@ -13,12 +12,15 @@ import {
   NoteRefDataV4,
   VaultMissingBehavior,
   WikiLinkNoteV4,
+  BlockAnchor,
+  DendronASTTypes,
+  HashTag,
+  RehypeLinkData,
 } from "../types";
 import { MDUtilsV4 } from "../utils";
 import { NoteRefsOpts } from "./noteRefs";
 import { convertNoteRefASTV2 } from "./noteRefsV2";
-import { RemarkUtils } from "./utils";
-import { addError, getNoteOrError } from "./utils";
+import { hashTag2WikiLinkNoteV4, RemarkUtils, addError, getNoteOrError } from "./utils";
 import { blockAnchor2html } from "./blockAnchors";
 import { MDUtilsV5 } from "../utilsv5";
 
@@ -33,10 +35,12 @@ type PluginOpts = NoteRefsOpts & {
 
 function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
   const proc = this;
-  let { dest, vault, fname, config, overrides, insideNoteRef } =
-    MDUtilsV4.getDendronData(proc);
+  const procData = MDUtilsV4.getDendronData(proc);
+  const { dest, fname, config, overrides, insideNoteRef } = procData;
+  let vault = procData.vault;
+    
   function transformer(tree: Node, _file: VFile) {
-    let root = tree as Root;
+    const root = tree as Root;
     const { error, engine } = MDUtilsV4.getEngineFromProc(proc);
     const insertTitle = !_.isUndefined(overrides?.insertTitle)
       ? overrides?.insertTitle
@@ -54,7 +58,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
       const note = NoteUtils.getNoteByFnameV5({
         fname,
         notes: engine.notes,
-        vault: vault,
+        vault,
         wsRoot: engine.wsRoot,
       });
       if (!note) {
@@ -70,14 +74,21 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
     visitParents(tree, (node, ancestors) => {
       const parent = _.last(ancestors);
       if (_.isUndefined(parent) || !RemarkUtils.isParent(parent)) return; // root node
+      if (node.type === DendronASTTypes.HASHTAG) {
+        // For hashtags, convert them to regular links for rendering
+        const parentIndex = _.findIndex(parent.children, node);
+        if (parentIndex === -1) return;
+        node = hashTag2WikiLinkNoteV4(node as HashTag);
+        parent.children[parentIndex] = node;
+      }
       if (
         node.type === DendronASTTypes.WIKI_LINK &&
         dest !== DendronASTDest.MD_ENHANCED_PREVIEW
       ) {
-        let _node = node as WikiLinkNoteV4;
+        const _node = node as WikiLinkNoteV4;
         let value = node.value as string;
         // we change this later
-        let valueOrig = value;
+        const valueOrig = value;
         let isPublished = true;
         const data = _node.data;
         vault = MDUtilsV4.getVault(proc, data.vaultName, {
@@ -98,22 +109,17 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
           if (error) {
             value = "403";
             addError(proc, error);
+          } else if (!note || !config) {
+            value = "403";
+            addError(proc, new DendronError({ message: "no note or config" }));
           } else {
-            if (!note || !config) {
+            isPublished = SiteUtils.isPublished({
+              note,
+              config,
+              engine,
+            });
+            if (!isPublished) {
               value = "403";
-              addError(
-                proc,
-                new DendronError({ message: "no note or config" })
-              );
-            } else {
-              isPublished = SiteUtils.isPublished({
-                note,
-                config,
-                engine,
-              });
-              if (!isPublished) {
-                value = "403";
-              }
             }
           }
         }
@@ -147,7 +153,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         _node.data = {
           alias,
           permalink: href,
-          exists: exists,
+          exists,
           hName: "a",
           hProperties: {
             // className: classNames,
@@ -159,7 +165,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
               value: alias,
             },
           ],
-        };
+        } as RehypeLinkData;
 
         if (value === "403") {
           _node.data = {
@@ -181,7 +187,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
                 value: alias,
               },
             ],
-          };
+          } as RehypeLinkData;
         }
       }
       if (node.type === DendronASTTypes.REF_LINK_V2) {
@@ -201,7 +207,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         if (data) {
           if (parent!.children.length > 1) {
             const children = parent!.children;
-            const idx = RemarkUtils.findIndex(
+            const idx = _.findIndex(
               children,
               RemarkUtils.isNoteRefV2
             );
@@ -273,7 +279,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         }
       }
       if (node.type === "image" && dest === DendronASTDest.HTML) {
-        let imageNode = node as Image;
+        const imageNode = node as Image;
         if (opts?.assetsPrefix) {
           imageNode.url =
             "/" +

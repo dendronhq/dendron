@@ -4,8 +4,9 @@ import {
   DNoteAnchor,
   NoteProps,
   NoteUtils,
+  TAGS_HIERARCHY,
 } from "@dendronhq/common-all";
-import { LinkUtils } from "@dendronhq/engine-server";
+import { HASHTAG_REGEX_LOOSE, LinkUtils } from "@dendronhq/engine-server";
 import { sort as sortPaths } from "cross-path-sort";
 import fs from "fs";
 import _ from "lodash";
@@ -18,7 +19,8 @@ import vscode, {
   Range,
   TextDocument,
 } from "vscode";
-import { DendronWorkspace } from "../workspace";
+import { ShowPreviewV2Command } from "../commands/ShowPreviewV2";
+import { DendronWorkspace, getWS } from "../workspace";
 
 export type RefT = {
   label: string;
@@ -32,6 +34,7 @@ export type RefT = {
 export type FoundRefT = {
   location: Location;
   matchText: string;
+  isCandidate?: boolean;
 };
 
 const markdownExtRegex = /\.md$/i;
@@ -86,26 +89,31 @@ export const containsOtherKnownExts = (pathParam: string): boolean =>
 export class MarkdownUtils {
   static async openPreview(opts?: { reuseWindow?: boolean }) {
     const cleanOpts = _.defaults(opts, { reuseWindow: false });
-    const previewEnhanced = extensions.getExtension(
-      "dendron.markdown-preview-enhanced"
-    );
-    const previewEnhanced2 = extensions.getExtension(
-      "dendron.dendron-markdown-preview-enhanced"
-    );
-    const cmds = {
-      builtin: {
-        open: "markdown.showPreview",
-        openSide: "markdown.showPreviewToSide",
-      },
-      enhanced: {
-        open: "markdown-preview-enhanced.openPreview",
-        openSide: "markdown-preview-enhanced.openPreviewToTheSide",
-      },
-    };
-    const mdClient =
-      cmds[previewEnhanced || previewEnhanced2 ? "enhanced" : "builtin"];
-    const openCmd = mdClient[cleanOpts.reuseWindow ? "open" : "openSide"];
-    return commands.executeCommand(openCmd);
+
+    if (!getWS().config.dev?.enablePreviewV2) {
+      const previewEnhanced = extensions.getExtension(
+        "dendron.markdown-preview-enhanced"
+      );
+      const previewEnhanced2 = extensions.getExtension(
+        "dendron.dendron-markdown-preview-enhanced"
+      );
+      const cmds = {
+        builtin: {
+          open: "markdown.showPreview",
+          openSide: "markdown.showPreviewToSide",
+        },
+        enhanced: {
+          open: "markdown-preview-enhanced.openPreview",
+          openSide: "markdown-preview-enhanced.openPreviewToTheSide",
+        },
+      };
+      const mdClient =
+        cmds[previewEnhanced || previewEnhanced2 ? "enhanced" : "builtin"];
+      const openCmd = mdClient[cleanOpts.reuseWindow ? "open" : "openSide"];
+      return commands.executeCommand(openCmd);
+    } else {
+      new ShowPreviewV2Command().execute();
+    }
   }
 }
 
@@ -201,28 +209,37 @@ export const getReferenceAtPosition = (
     return null;
   }
 
-  const re = partial ? partialRefPattern : refPattern;
-  const range = document.getWordRangeAtPosition(position, new RegExp(re));
-
+  // check if image
   const rangeForImage = document.getWordRangeAtPosition(
     position,
     new RegExp(mdImageLinkPattern)
   );
-
-  // check if image
   if (rangeForImage) {
     const docText = document.getText(rangeForImage);
     const maybeImage = _.trim(docText.match("\\((.*)\\)")![0], "()");
     if (containsImageExt(maybeImage)) {
       return null;
-      // return {
-      //   ref: maybeImage,
-      //   label: "",
-      //   range: rangeForImage,
-      // };
     }
   }
+
+  // this should be a wikilink or reference
+  const re = partial ? partialRefPattern : refPattern;
+  const range = document.getWordRangeAtPosition(position, new RegExp(re));
   if (!range) {
+    // if not, it could be a hashtag
+    const rangeForHashTag = document.getWordRangeAtPosition(position, HASHTAG_REGEX_LOOSE);
+    if (rangeForHashTag) {
+      const docText = document.getText(rangeForHashTag);
+      const match = docText.match(HASHTAG_REGEX_LOOSE);
+      if (_.isNull(match)) return null;
+      return {
+        range: rangeForHashTag,
+        label: match[0],
+        ref: `${TAGS_HIERARCHY}${match[1]}`,
+        refText: docText,
+      }
+    }
+    // it's not a wikilink, reference, or a hashtag. Nothing to do here.
     return null;
   }
 
@@ -366,20 +383,31 @@ export const findReferences = async (
     // we are assuming there won't be a `\n---\n` key inside the frontmatter
     const fmOffset = fileContent.indexOf("\n---") + 4;
     linksMatch.forEach((link) => {
-      const { start } = link.position;
-      const lines = fileContent.slice(0, fmOffset + start.offset!).split("\n");
+      const { end } = link.position;
+      const lines = fileContent
+        .slice(0, fmOffset + end.offset! + 1)
+        .split("\n");
       const lineNum = lines.length;
-
-      refs.push({
-        location: new vscode.Location(
-          vscode.Uri.file(fsPath),
-          new vscode.Range(
-            new vscode.Position(lineNum, 0),
-            new vscode.Position(lineNum + 1, 0)
-          )
-        ),
+      const range =
+        link.type === "wiki"
+          ? new vscode.Range(
+              new vscode.Position(lineNum - 1, 0),
+              new vscode.Position(lineNum, 0)
+            )
+          : new vscode.Range(
+              new vscode.Position(lineNum - 1, link.position.start.column - 1),
+              new vscode.Position(lineNum - 1, link.position.end.column - 1)
+            );
+      const location = new vscode.Location(vscode.Uri.file(fsPath), range);
+      const foundRef: FoundRefT = {
+        location,
         matchText: lines.slice(-1)[0],
-      });
+      };
+      if (link.type === "linkCandidate") {
+        foundRef.isCandidate = true;
+      }
+
+      refs.push(foundRef);
     });
   });
 

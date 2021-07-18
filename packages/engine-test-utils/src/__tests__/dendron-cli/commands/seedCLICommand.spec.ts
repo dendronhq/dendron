@@ -308,7 +308,7 @@ describe("init", () => {
       url: "",
     },
   };
-  describe("create workspace", async () => {
+  describe("create workspace", () => {
     const mode = SeedInitMode.CREATE_WORKSPACE;
     test(`basic`, async () => {
       await runEngineTestV5(
@@ -360,7 +360,7 @@ describe("init", () => {
     });
   });
 
-  describe("convert workspace", async () => {
+  describe("convert workspace", () => {
     const mode = SeedInitMode.CONVERT_WORKSPACE;
 
     const runInit = async (opts: { engine: DEngineClient; wsRoot: string }) => {

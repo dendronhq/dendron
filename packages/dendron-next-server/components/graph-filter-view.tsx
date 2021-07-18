@@ -6,22 +6,25 @@ import {
   InputNumber,
   Input,
   Spin,
+  Tooltip,
+  Button,
 } from "antd";
+import { MenuUnfoldOutlined, MenuFoldOutlined } from "@ant-design/icons";
 import _ from "lodash";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useThemeSwitcher } from "react-css-theme-switcher";
 import { GraphConfig, GraphConfigItem } from "../lib/graph";
 import AntThemes from "../styles/theme-antd";
+
 const { Panel } = Collapse;
 
 type FilterProps = {
-  type: "note" | "schema";
+  // type: "note" | "schema";
   config: GraphConfig;
   setConfig: React.Dispatch<React.SetStateAction<GraphConfig>>;
-  isVisible: boolean;
 };
 
-const GraphFilterView = ({ config, setConfig, isVisible }: FilterProps) => {
+const GraphFilterView = ({ config, setConfig }: FilterProps) => {
   const sortedSections = [
     "vaults",
     "connections",
@@ -30,6 +33,7 @@ const GraphFilterView = ({ config, setConfig, isVisible }: FilterProps) => {
     "information",
   ];
 
+  const [isVisible, setIsVisible] = useState(false);
   const { currentTheme } = useThemeSwitcher();
 
   const updateConfigField = (key: string, value: string | number | boolean) => {
@@ -49,57 +53,71 @@ const GraphFilterView = ({ config, setConfig, isVisible }: FilterProps) => {
   if (!currentTheme) return <></>;
 
   return (
-    <div
+    <Space
+      direction="vertical"
       style={{
         zIndex: 10,
         position: "absolute",
         top: AntThemes[currentTheme].graph.filterView.margin,
         left: AntThemes[currentTheme].graph.filterView.margin,
-        background: AntThemes[currentTheme].graph.filterView.background,
         borderRadius: AntThemes[currentTheme].graph.filterView.borderRadius,
         minWidth: AntThemes[currentTheme].graph.filterView.minWidth,
-        opacity: isVisible ? 1 : 0,
-        transition: "opacity 0.2s",
       }}
     >
-      <Collapse>
-        <Panel header="Vaults" key="vaults">
-          <FilterViewSection
-            section="vaults"
-            config={config}
-            updateConfigField={updateConfigField}
-          />
-        </Panel>
-        <Panel header="Connections" key="connections">
-          <FilterViewSection
-            section="connections"
-            config={config}
-            updateConfigField={updateConfigField}
-          />
-        </Panel>
-        <Panel header="Filter" key="filter">
-          <FilterViewSection
-            section="filter"
-            config={config}
-            updateConfigField={updateConfigField}
-          />
-        </Panel>
-        <Panel header="Options" key="options">
-          <FilterViewSection
-            section="options"
-            config={config}
-            updateConfigField={updateConfigField}
-          />
-        </Panel>
-        <Panel header="Information" key="information">
-          <FilterViewSection
-            section="information"
-            config={config}
-            updateConfigField={updateConfigField}
-          />
-        </Panel>
-      </Collapse>
-    </div>
+      <Tooltip
+        title={`${isVisible ? "Hide" : "Show"} Graph Configuration`}
+        placement="right"
+      >
+        <Button
+          type="primary"
+          shape="circle"
+          icon={isVisible ? <MenuFoldOutlined /> : <MenuUnfoldOutlined />}
+          onClick={() => setIsVisible((v) => !v)}
+        />
+      </Tooltip>
+        <Collapse
+          style={{
+            background: AntThemes[currentTheme].graph.filterView.background,
+            display: isVisible ? 'block' : 'none' ,
+          }}
+        >
+          <Panel header="Vaults" key="vaults">
+            <FilterViewSection
+              section="vaults"
+              config={config}
+              updateConfigField={updateConfigField}
+            />
+          </Panel>
+          <Panel header="Connections" key="connections">
+            <FilterViewSection
+              section="connections"
+              config={config}
+              updateConfigField={updateConfigField}
+            />
+          </Panel>
+          <Panel header="Filter" key="filter">
+            <FilterViewSection
+              section="filter"
+              config={config}
+              updateConfigField={updateConfigField}
+            />
+          </Panel>
+          <Panel header="Options" key="options">
+            <FilterViewSection
+              section="options"
+              config={config}
+              updateConfigField={updateConfigField}
+            />
+          </Panel>
+          <Panel header="Information" key="information">
+            <FilterViewSection
+              section="information"
+              config={config}
+              updateConfigField={updateConfigField}
+            />
+          </Panel>
+        </Collapse>
+    </Space>
   );
 };
 
@@ -146,7 +164,7 @@ const FilterViewStringInput = ({
           <Spin
             size="small"
             style={{
-              display: !!updateTimeout ? "inline-block" : "none",
+              display: updateTimeout ? "inline-block" : "none",
             }}
           />
         }

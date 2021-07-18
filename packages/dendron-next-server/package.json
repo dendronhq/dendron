@@ -31,6 +31,7 @@
     "**/common-all/**"
   ],
   "dependencies": {
+    "@ant-design/icons": "^4.6.2",
     "@chakra-ui/react": "^1.0.0",
     "@dendronhq/common-all": "^0.50.1",
     "@dendronhq/common-frontend": "^0.50.1",

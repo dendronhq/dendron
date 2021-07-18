@@ -74,6 +74,32 @@ export function randomColor(text: string) {
 }
 
 
+/** Only some colors are recognized, other colors will be returned without being modified.
+ * 
+ * Examples of recognized colors:
+ * * #45AB35
+ * * rgb(123, 23, 45)
+ * * rgb(123 23 45)
+ * * hsl(123, 23%, 45%)
+ * * hsl(123 23% 45%)
+ * 
+ * This function does not verify that the input colors are valid, but as long as a valid color is passed in
+ * it will not generate an invalid color.
+ * 
+ * @param color 
+ * @param translucency A number between 0 and 1, with 0 being fully transparent and 1 being fully opaque.
+ * @returns 
+ */
+export function makeColorTranslucent(color: string, translucency: number) {
+  let match = color.match(/^#[\dA-Fa-f]{6}$/);
+  if (match) return `${color}${(translucency * 255).toString(16)}`;
+  match = color.match(/^((rgb|hsl)\( *[\d.]+ *, *[\d.]+%? *, *[\d.]+%? *)\)$/);
+  if (match) return `${match[1]}, ${translucency})`;
+  match = color.match(/^((rgb|hsl)\( *[\d.]+ *[\d.]+%? *[\d.]+%? *)\)$/);
+  if (match) return `${match[1]} / ${translucency})`;
+}
+
+
 /** A map that automatically inserts a value provided by the factory when a missing key is looked up.
  * 
  * Modeled after python's `defaultdict`.

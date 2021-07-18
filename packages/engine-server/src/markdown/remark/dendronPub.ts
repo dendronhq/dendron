@@ -1,4 +1,4 @@
-import { DendronError, isNotUndefined, NoteUtils } from "@dendronhq/common-all";
+import { DendronError, isNotUndefined, makeColorTranslucent, NoteUtils, TAGS_HIERARCHY } from "@dendronhq/common-all";
 import _ from "lodash";
 import { Image, Root } from "mdast";
 import Unified, { Transformer } from "unified";
@@ -31,8 +31,11 @@ type PluginOpts = NoteRefsOpts & {
    * Don't publish pages that are dis-allowd by dendron.yml
    */
   transformNoPublish?: boolean;
+  /** Don't display randomly generated colors for tags, only display color if it's explicitly set by the user. */
+  noRandomlyColoredTags?: boolean;
 };
 
+const TAG_BG_TRANSLUCENCY = 0.4;
 function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
   const proc = this;
   const procData = MDUtilsV4.getDendronData(proc);
@@ -41,7 +44,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
     
   function transformer(tree: Node, _file: VFile) {
     const root = tree as Root;
-    const { error, engine } = MDUtilsV4.getEngineFromProc(proc);
+    const { error: engineError, engine } = MDUtilsV4.getEngineFromProc(proc);
     const insertTitle = !_.isUndefined(overrides?.insertTitle)
       ? overrides?.insertTitle
       : opts?.insertTitle;
@@ -75,10 +78,11 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
       const parent = _.last(ancestors);
       if (_.isUndefined(parent) || !RemarkUtils.isParent(parent)) return; // root node
       if (node.type === DendronASTTypes.HASHTAG) {
+        const hashtag = node as HashTag;
         // For hashtags, convert them to regular links for rendering
         const parentIndex = _.findIndex(parent.children, node);
         if (parentIndex === -1) return;
-        node = hashTag2WikiLinkNoteV4(node as HashTag);
+        node = hashTag2WikiLinkNoteV4(hashtag);
         parent.children[parentIndex] = node;
       }
       if (
@@ -94,18 +98,27 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         vault = MDUtilsV4.getVault(proc, data.vaultName, {
           vaultMissingBehavior: VaultMissingBehavior.FALLBACK_TO_ORIGINAL_VAULT,
         });
-        if (error) {
-          addError(proc, error);
+        if (engineError) {
+          addError(proc, engineError);
+        }
+
+        const notes = NoteUtils.getNotesByFname({
+          fname: valueOrig,
+          notes: engine.notes,
+          vault,
+        });
+        const { error, note } = getNoteOrError(notes, value);
+
+        let color: string | undefined;
+        if (value.startsWith(TAGS_HIERARCHY)) {
+          const [maybeColor, colorType] = note ? NoteUtils.color({note}) : [];
+          if (maybeColor && (colorType === "configured" || opts?.noRandomlyColoredTags !== false)) {
+            color = makeColorTranslucent(maybeColor, TAG_BG_TRANSLUCENCY);
+          }
         }
 
         const copts = opts?.wikiLinkOpts;
         if (opts?.transformNoPublish) {
-          const notes = NoteUtils.getNotesByFname({
-            fname: valueOrig,
-            notes: engine.notes,
-            vault,
-          });
-          const { error, note } = getNoteOrError(notes, value);
           if (error) {
             value = "403";
             addError(proc, error);
@@ -130,12 +143,6 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         }
 
         if (useId && isPublished) {
-          const notes = NoteUtils.getNotesByFname({
-            fname: valueOrig,
-            notes: engine.notes,
-            vault,
-          });
-          const { error, note } = getNoteOrError(notes, value);
           if (error) {
             addError(proc, error);
           } else {
@@ -158,6 +165,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
           hProperties: {
             // className: classNames,
             href,
+            style: color ? `backgroundColor: ${color};` : undefined,
           },
           hChildren: [
             {

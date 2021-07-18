@@ -138,6 +138,8 @@ export type DNodeProps<T = any, TCustom = any> = {
    * Hash of note content
    */
   contentHash?: string;
+
+  color?: string;
 };
 
 export type SchemaData = {

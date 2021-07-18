@@ -379,6 +379,12 @@ export type DendronSiteConfig = {
   hideBlockAnchors?: boolean;
 
   /**
+   * Do not display the randomly generated colors for tags. Only color tag links
+   * if it has been configured in the frontmatter. False by default.
+   */
+  noRandomlyColoredTags?: boolean;
+
+  /**
    * Control publication on a per hierarchy basis
    */
   config?: { [key: string]: HierarchyConfig };

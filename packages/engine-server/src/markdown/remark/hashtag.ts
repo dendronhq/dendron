@@ -14,8 +14,8 @@ import { Element } from "hast";
  * Other then the reservation on the first character, hashtags can contain any
  * character that a note name can.
  */
-export const HASHTAG_REGEX = /^#([^0-9#|>[\]\s][^#|>[\]\s]*)/;
-export const HASHTAG_REGEX_LOOSE = /#([^0-9#|>[\]\s][^#|>[\]\s]*)/;
+export const HASHTAG_REGEX = /^#([^0-9#|>[\]\s{}][^#|>[\]\s{}]*)/;
+export const HASHTAG_REGEX_LOOSE = /#([^0-9#|>[\]\s{}][^#|>[\]\s{}]*)/;
 
 /**
  *

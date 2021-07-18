@@ -30,7 +30,7 @@ import {
   SchemaRaw,
   SchemaTemplate,
 } from "./types";
-import { getSlugger } from "./utils";
+import { getSlugger, isNotUndefined, randomColor } from "./utils";
 import { genUUID } from "./uuid";
 import { VaultUtils } from "./vault";
 
@@ -59,6 +59,7 @@ export class DNodeUtils {
       data,
       contentHash,
       vault,
+      color,
     } = _.defaults(opts, {
       updated: Time.now().toMillis(),
       created: Time.now().toMillis(),
@@ -71,6 +72,7 @@ export class DNodeUtils {
       body: "",
       data: {},
       fname: null,
+      color: undefined,
     });
     const title = opts.title || NoteUtils.genTitle(fname);
     const cleanProps: DNodeProps = {
@@ -89,6 +91,7 @@ export class DNodeUtils {
       body,
       data,
       contentHash,
+      color,
     };
 
     // don't include optional props
@@ -97,6 +100,7 @@ export class DNodeUtils {
       "schema",
       "schemaStub",
       "custom",
+      "color",
     ];
     _.forEach(optionalProps, (op) => {
       if (opts[op]) {
@@ -225,6 +229,7 @@ export class DNodeUtils {
       "created",
       "parent",
       "children",
+      "color",
       "body",
       "data",
       "schemaStub",
@@ -802,6 +807,7 @@ export class NoteUtils {
       "stub",
       "parent",
       "children",
+      "color",
     ]);
     const { custom: customProps } = props;
     const meta = { ...builtinProps, ...customProps };
@@ -873,6 +879,17 @@ export class NoteUtils {
       notesMap.set(n.fname, n);
     })
     return notesMap;
+  }
+
+  /** Generate a random color for `note`, but allow the user to override that color selection.
+   * 
+   * @param note The fname of note that you want to get the color of.
+   * @param notes: All notes in `engine.notes`, used to check the ancestors of `note`.
+   * @returns The color, and whether this color was randomly generated or explicitly defined.
+   */
+  static color({note}: {note: NoteProps}): [string, "configured" | "generated"] {
+    if (note.color) return [note.color, "configured"];
+    return [randomColor(note.fname), "generated"];
   }
 }
 

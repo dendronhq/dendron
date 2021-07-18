@@ -12,12 +12,14 @@ import {
 import { DecorationOptions, DecorationRangeBehavior, Range, TextEditor, TextEditorDecorationType, ThemeColor, window, TextDocument } from "vscode";
 import visit from "unist-util-visit";
 import _ from "lodash";
-import { isNotUndefined, DefaultMap, randomColor, NoteUtils, Position, VaultUtils } from "@dendronhq/common-all";
+import { isNotUndefined, DefaultMap, randomColor, NoteUtils, Position, VaultUtils, makeColorTranslucent } from "@dendronhq/common-all";
 import { DateTime } from "luxon";
 import { getConfigValue, getWS } from "../workspace";
 import { CodeConfigKeys, DateTimeFormat } from "../types";
 import { VSCodeUtils } from "../utils";
 import { containsNonDendronUri } from "../utils/md";
+
+const TAG_COLORING_TRANSLUCENCY = 0.4;
 
 export function updateDecorations(activeEditor: TextEditor) {
   const text = activeEditor.document.getText();
@@ -148,9 +150,13 @@ function decorateBlockAnchor(blockAnchor: BlockAnchor) {
 }
 
 export const DECORATION_TYPE_TAG = new DefaultMap<string, TextEditorDecorationType>((fname) => {
+  const { notes } = getWS().getEngine();
+  const tagNote = NoteUtils.getNotesByFname({notes, fname})[0];
+  let backgroundColor = tagNote ? NoteUtils.color({note: tagNote})[0] : undefined;
+  if (_.isUndefined(backgroundColor)) backgroundColor = randomColor(fname);
+  backgroundColor = makeColorTranslucent(backgroundColor, TAG_COLORING_TRANSLUCENCY);
   return window.createTextEditorDecorationType({
-    // sets opacity to about 37%
-    backgroundColor: `${randomColor(fname)}60`,
+    backgroundColor,
     // Do not try to grow the decoration range when the user is typing,
     // because the color for a partial hashtag `#fo` is different from `#foo`.
     // We can't just reuse the first computed color and keep the decoration growing.

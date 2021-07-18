@@ -19,12 +19,12 @@ import AntThemes from "../styles/theme-antd";
 const { Panel } = Collapse;
 
 type FilterProps = {
-  // type: "note" | "schema";
   config: GraphConfig;
   setConfig: React.Dispatch<React.SetStateAction<GraphConfig>>;
+  isGraphLoaded: boolean;
 };
 
-const GraphFilterView = ({ config, setConfig }: FilterProps) => {
+const GraphFilterView = ({ config, setConfig, isGraphLoaded }: FilterProps) => {
   const sortedSections = [
     "vaults",
     "connections",
@@ -33,8 +33,10 @@ const GraphFilterView = ({ config, setConfig }: FilterProps) => {
     "information",
   ];
 
-  const [isVisible, setIsVisible] = useState(false);
+  const [showView, setShowView] = useState(false);
   const { currentTheme } = useThemeSwitcher();
+
+  const isVisible = showView && isGraphLoaded;
 
   const updateConfigField = (key: string, value: string | number | boolean) => {
     setConfig((c) => {
@@ -72,51 +74,55 @@ const GraphFilterView = ({ config, setConfig }: FilterProps) => {
           type="primary"
           shape="circle"
           icon={isVisible ? <MenuFoldOutlined /> : <MenuUnfoldOutlined />}
-          onClick={() => setIsVisible((v) => !v)}
+          onClick={() => setShowView((v) => !v)}
+          style={{
+            opacity: isGraphLoaded ? 1 : 0,
+            transform: "0.2s opacity ease-in-out",
+          }}
         />
       </Tooltip>
-        <Collapse
-          style={{
-            background: AntThemes[currentTheme].graph.filterView.background,
-            display: isVisible ? 'block' : 'none' ,
-          }}
-        >
-          <Panel header="Vaults" key="vaults">
-            <FilterViewSection
-              section="vaults"
-              config={config}
-              updateConfigField={updateConfigField}
-            />
-          </Panel>
-          <Panel header="Connections" key="connections">
-            <FilterViewSection
-              section="connections"
-              config={config}
-              updateConfigField={updateConfigField}
-            />
-          </Panel>
-          <Panel header="Filter" key="filter">
-            <FilterViewSection
-              section="filter"
-              config={config}
-              updateConfigField={updateConfigField}
-            />
-          </Panel>
-          <Panel header="Options" key="options">
-            <FilterViewSection
-              section="options"
-              config={config}
-              updateConfigField={updateConfigField}
-            />
-          </Panel>
-          <Panel header="Information" key="information">
-            <FilterViewSection
-              section="information"
-              config={config}
-              updateConfigField={updateConfigField}
-            />
-          </Panel>
-        </Collapse>
+      <Collapse
+        style={{
+          background: AntThemes[currentTheme].graph.filterView.background,
+          display: isVisible ? "block" : "none",
+        }}
+      >
+        <Panel header="Vaults" key="vaults">
+          <FilterViewSection
+            section="vaults"
+            config={config}
+            updateConfigField={updateConfigField}
+          />
+        </Panel>
+        <Panel header="Connections" key="connections">
+          <FilterViewSection
+            section="connections"
+            config={config}
+            updateConfigField={updateConfigField}
+          />
+        </Panel>
+        <Panel header="Filter" key="filter">
+          <FilterViewSection
+            section="filter"
+            config={config}
+            updateConfigField={updateConfigField}
+          />
+        </Panel>
+        <Panel header="Options" key="options">
+          <FilterViewSection
+            section="options"
+            config={config}
+            updateConfigField={updateConfigField}
+          />
+        </Panel>
+        <Panel header="Information" key="information">
+          <FilterViewSection
+            section="information"
+            config={config}
+            updateConfigField={updateConfigField}
+          />
+        </Panel>
+      </Collapse>
     </Space>
   );
 };

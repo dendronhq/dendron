@@ -21,7 +21,6 @@ import {
 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { Duration } from "luxon";
-import path from "path";
 import semver from "semver";
 import * as vscode from "vscode";
 import { CONFIG, DendronContext, DENDRON_COMMANDS } from "./constants";
@@ -33,11 +32,7 @@ import { setupSegmentClient } from "./telemetry";
 import { InstallStatus, VSCodeUtils, WSUtils } from "./utils";
 import { AnalyticsUtils } from "./utils/analytics";
 import { DendronTreeView } from "./views/DendronTreeView";
-import {
-  DendronWorkspace,
-  getEngine,
-  getWS,
-} from "./workspace";
+import { DendronWorkspace, getEngine, getWS } from "./workspace";
 import { WorkspaceInitFactory } from "./workspace/workspaceInitializer";
 
 const MARKDOWN_WORD_PATTERN = new RegExp("([\\w\\.\\#]+)");
@@ -138,25 +133,29 @@ async function postReloadWorkspace() {
   Logger.info({ ctx, msg: "exit" });
 }
 
-async function startServer() {
-  const ctx = "startServer";
+async function startServerProcess() {
   const { nextServerUrl, nextStaticRoot, engineServerPort } =
     getWS().config.dev || {};
+  // const ctx = "startServer";
   const maybePort =
     DendronWorkspace.configuration().get<number | undefined>(
       CONFIG.SERVER_PORT.key
     ) || engineServerPort;
+  const port = maybePort;
   const logPath = DendronWorkspace.instance().context.logPath;
-  Logger.info({ ctx, logLevel: process.env["LOG_LEVEL"], maybePort });
   if (!maybePort) {
-    const { launchv2 } = require("@dendronhq/api-server"); // eslint-disable-line global-require
-    return launchv2({
-      port: maybePort,
-      logPath: path.join(logPath, "dendron.server.log"),
-      nextServerUrl,
-      nextStaticRoot,
-    });
+    return {port: await execServer({logPath, nextServerUrl, nextStaticRoot, port })};
   }
+  // Logger.info({ ctx, logLevel: process.env["LOG_LEVEL"], maybePort });
+  // if (!maybePort) {
+  //   const { launchv2 } = require("@dendronhq/api-server"); // eslint-disable-line global-require
+  //   return launchv2({
+  //     port: maybePort,
+  //     logPath: path.join(logPath, "dendron.server.log"),
+  //     nextServerUrl,
+  //     nextStaticRoot,
+  //   });
+  // }
   return { port: maybePort };
 }
 
@@ -379,7 +378,7 @@ export async function _activate(
         return p;
       }
     );
-    const { port } = await startServer();
+    const { port } = await startServerProcess();
     const durationStartServer = getDurationMilliseconds(start);
     Logger.info({ ctx, msg: "post-start-server", port, durationStartServer });
     WSUtils.updateEngineAPI(port);

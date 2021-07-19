@@ -156,6 +156,7 @@ export class DendronWorkspace {
     return DendronWorkspace._SERVER_CONFIGURATION as ServerConfiguration;
   }
 
+
   /**
    * Global Workspace configuration
    */

@@ -5,6 +5,7 @@ import {
   DNodeUtils,
   DVault,
   getStage,
+  NoteAddBehavior,
   NoteProps,
   NoteUtils,
   Point,
@@ -562,23 +563,34 @@ export class DendronClientUtilsV2 {
     opts?: CreateFnameOpts
   ): string {
     // gather inputs
-    const dateFormatKey: ConfigKey = `DEFAULT_${type}_DATE_FORMAT` as ConfigKey;
-    const dateFormat = DendronWorkspace.configuration().get<string>(
-      CONFIG[dateFormatKey].key
-    ) as string;
-    const addKey = `DEFAULT_${type}_ADD_BEHAVIOR` as ConfigKey;
-    const addBehavior = DendronWorkspace.configuration().get<string>(
-      CONFIG[addKey].key
-    );
+    const dateFormat = type === "SCRATCH" 
+      ? DendronWorkspace.configuration().get<string>(
+          CONFIG["DEFAULT_SCRATCH_DATE_FORMAT"].key
+        ) as string
+      : getWS().config.journal.dateFormat;
+
+    const addBehavior = type === "SCRATCH"
+      ? DendronWorkspace.configuration().get<string>(
+          CONFIG["DEFAULT_SCRATCH_ADD_BEHAVIOR"].key
+        )
+      : getWS().config.journal.addBehavior;
+
     const nameKey: ConfigKey = `DEFAULT_${type}_NAME` as ConfigKey;
-    const name = DendronWorkspace.configuration().get<string>(
-      CONFIG[nameKey].key
-    );
+    const name = type === "SCRATCH"
+      ? DendronWorkspace.configuration().get<string>(
+          CONFIG[nameKey].key
+        )
+      : getWS().config.journal.name;
+    
     if (!_.includes(_noteAddBehaviorEnum, addBehavior)) {
+      const actual = type === "SCRATCH"
+        ? CONFIG["DEFAULT_SCRATCH_ADD_BEHAVIOR"].key
+        : addBehavior;
+      const choices = type === "SCRATCH"
+        ? _noteAddBehaviorEnum.join(", ")
+        : Object.keys(NoteAddBehavior).join(", ");
       throw Error(
-        `${
-          CONFIG[addKey].key
-        } must be one of following ${_noteAddBehaviorEnum.join(", ")}`
+        `${actual} must be one of: ${choices}`
       );
     }
 

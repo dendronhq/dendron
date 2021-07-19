@@ -1,14 +1,14 @@
-import { createLogger, engineSlice } from "@dendronhq/common-frontend";
+import { createLogger, engineSlice, postVSCodeMessage } from "@dendronhq/common-frontend";
 import _ from "lodash";
 import React, { useEffect, useRef, useState } from "react";
-import cytoscape, { Core, EdgeDefinition, EventHandler } from "cytoscape";
+import cytoscape, { Core, EdgeDefinition, EventHandler, use } from "cytoscape";
 import euler from "cytoscape-euler";
 import { useThemeSwitcher } from "react-css-theme-switcher";
 import Head from "next/head";
 import AntThemes from "../styles/theme-antd";
 import GraphFilterView from "./graph-filter-view";
 import { GraphConfig, GraphConfigItem, GraphElements } from "../lib/graph";
-import { VaultUtils } from "@dendronhq/common-all";
+import { DMessageSource, GraphViewMessage, GraphViewMessageType, VaultUtils } from "@dendronhq/common-all";
 import useApplyGraphConfig from "../hooks/useApplyGraphConfig";
 import { DendronProps } from "../lib/types";
 import useSyncGraphWithIDE from "../hooks/useSyncGraphWithIDE";
@@ -20,7 +20,7 @@ export class GraphUtils {
   }
 }
 
-const getCytoscapeStyle = (themes: any, theme: string | undefined) => {
+const getCytoscapeStyle = (themes: any, theme: string | undefined, customCSS: string | undefined) => {
   if (_.isUndefined(theme)) return "";
 
   // Cytoscape's "diamond" node is smaller than it's "circle" node, so
@@ -28,51 +28,53 @@ const getCytoscapeStyle = (themes: any, theme: string | undefined) => {
   const PARENT_NODE_SIZE_MODIFIER = 1.25;
 
   return `
-  node {
-    width: ${AntThemes[theme].graph.node.size};
-    height: ${AntThemes[theme].graph.node.size};
-    background-color: ${AntThemes[theme].graph.node.color};
-    color: ${AntThemes[theme].graph.node.label.color};
-    label: data(label);
-    font-size: ${AntThemes[theme].graph.node.label.fontSize};
-    min-zoomed-font-size: ${
-      AntThemes[theme].graph.node.label.minZoomedFontSize
-    };
-    font-weight: ${AntThemes[theme].graph.node.label.fontWeight};
-  }
+node {
+  width: ${AntThemes[theme].graph.node.size};
+  height: ${AntThemes[theme].graph.node.size};
+  background-color: ${AntThemes[theme].graph.node.color};
+  color: ${AntThemes[theme].graph.node.label.color};
+  label: data(label);
+  font-size: ${AntThemes[theme].graph.node.label.fontSize};
+  min-zoomed-font-size: ${
+    AntThemes[theme].graph.node.label.minZoomedFontSize
+  };
+  font-weight: ${AntThemes[theme].graph.node.label.fontWeight};
+}
 
-  edge {
-    width: ${AntThemes[theme].graph.edge.width};
-    line-color: ${AntThemes[theme].graph.edge.color};
-    target-arrow-shape: none;
-    curve-style: haystack;
-  }
+edge {
+  width: ${AntThemes[theme].graph.edge.width};
+  line-color: ${AntThemes[theme].graph.edge.color};
+  target-arrow-shape: none;
+  curve-style: haystack;
+}
 
-  :selected, .open {
-    background-color: ${AntThemes[theme].graph.node._selected.color};
-    color: ${AntThemes[theme].graph.node._selected.color};
-  }
-  
-  .parent {
-    shape: diamond;
-    width: ${AntThemes[theme].graph.node.size * PARENT_NODE_SIZE_MODIFIER};
-    height: ${AntThemes[theme].graph.node.size * PARENT_NODE_SIZE_MODIFIER};
-  }
+:selected{
+  background-color: ${AntThemes[theme].graph.node._selected.color};
+  color: ${AntThemes[theme].graph.node._selected.color};
+}
 
-  .links {
-    line-style: dashed;
-  }
+.parent {
+  shape: diamond;
+  width: ${AntThemes[theme].graph.node.size * PARENT_NODE_SIZE_MODIFIER};
+  height: ${AntThemes[theme].graph.node.size * PARENT_NODE_SIZE_MODIFIER};
+}
 
-  .hidden--labels {
-    label: ;
-  }
+.links {
+  line-style: dashed;
+}
 
-  .hidden--vault,
-  .hidden--regex-allowlist,
-  .hidden--regex-blocklist,
-  .hidden--stub {
-    display: none;
-  }
+.hidden--labels {
+  label: ;
+}
+
+.hidden--vault,
+.hidden--regex-allowlist,
+.hidden--regex-blocklist,
+.hidden--stub {
+  display: none;
+}
+
+${customCSS || ""}
 `;
 };
 
@@ -139,11 +141,15 @@ export default function Graph({
   const { nodes, edges } = elements;
   const isLargeGraph = nodes.length + Object.values(edges).flat().length > 1000;
 
+  useEffect(() => {
+    logger.log("styles:", ide.graphStyles)
+  }, [ide]);
+
   const renderGraph = () => {
     if (graphRef.current && nodes && edges) {
       logger.log("Rendering graph...");
 
-      let parsedEdges: EdgeDefinition[] = [];
+      const parsedEdges: EdgeDefinition[] = [];
 
       // Filter elements using config
       Object.entries(config)
@@ -160,13 +166,17 @@ export default function Graph({
       // Add layout middleware
       cytoscape.use(euler);
 
+      const style =  getCytoscapeStyle(themes, currentTheme, ide.graphStyles) as any
+
+      logger.log(style)
+
       const network = cytoscape({
         container: graphRef.current,
         elements: {
           nodes,
           edges: parsedEdges,
         },
-        style: getCytoscapeStyle(themes, currentTheme) as any,
+        style,
 
         // Zoom levels
         minZoom: 0.25,
@@ -196,6 +206,16 @@ export default function Graph({
   };
 
   useEffect(() => {
+    logger.log('Requesting graph style...')
+    // Get graph style
+    postVSCodeMessage({
+      type: GraphViewMessageType.onRequestGraphStyle,
+      data: { },
+      source: DMessageSource.webClient,
+    } as GraphViewMessage);
+  }, []);
+
+  useEffect(() => {
     // If changed from local graph to full graph, re-render graph to show all elements
     const wasLocalGraph = cy && cy.$("node[localRoot]").length > 0;
 
@@ -209,7 +229,7 @@ export default function Graph({
     )
       return;
     renderGraph();
-  }, [graphRef, elements]);
+  }, [graphRef, elements, ide.graphStyles]);
 
   useEffect(() => {
     // If initial vault data received

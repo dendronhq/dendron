@@ -409,6 +409,8 @@ export async function _activate(
       numNotes = Math.round(numNotes / 10) * 10;
     }
 
+    MetadataService.instance().setDendronWorkspaceActivated();
+
     AnalyticsUtils.identify();
     AnalyticsUtils.track(VSCodeEvents.InitializeWorkspace, {
       duration: durationReloadWorkspace,
@@ -525,7 +527,10 @@ async function showWelcomeOrWhatsNew({
       break;
   }
 
-  if (shouldDisplayLapsedUserMsg()) {
+  //TODO: Re-enable lapsed user message after a one-week grace period of having
+  //users activate their dendron workspaces
+  // eslint-disable-next-line no-constant-condition
+  if (false && shouldDisplayLapsedUserMsg()) {
     showLapsedUserMessage();
   }
 }

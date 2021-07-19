@@ -714,6 +714,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docLink: "",
     docPreview: ``,
   },
+  
   CONFIGURE_UI: {
     key: "dendron.configureUI",
     title: `${CMD_PREFIX} Configure`,
@@ -722,6 +723,15 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docs: [
       `<div style="position: relative; padding-bottom: 62.5%; height: 0;"><iframe src="https://www.loom.com/embed/5b6689eb76344fbb814a3d4405ef62b8" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe></div>`,
     ].join("\n"),
+    docLink: "",
+    docPreview: ``,
+  },
+  CONFIGURE_GRAPH_STYLES: {
+    key: "dendron.configureGraphStyle",
+    title: `${CMD_PREFIX} Configure Graph Style (css)`,
+    group: "workspace",
+    desc: "Modify Dendron Graph styles as raw CSS",
+    docs: [""].join("\n"),
     docLink: "",
     docPreview: ``,
   },

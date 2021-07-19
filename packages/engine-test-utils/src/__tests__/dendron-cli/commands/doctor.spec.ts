@@ -27,7 +27,7 @@ const setupBasic = async (opts: WorkspaceOpts) => {
   });
 };
 
-const setupWithWikilink = async (opts: WorkspaceOpts) => {
+const setupSingleWithWikilink = async (opts: WorkspaceOpts) => {
   const { wsRoot, vaults } = opts;
   await NoteTestUtilsV4.createNote({
     wsRoot,
@@ -35,11 +35,24 @@ const setupWithWikilink = async (opts: WorkspaceOpts) => {
     fname: "foo",
     body: "[[foo.bar]]\n",
   });
+}
+
+const setupWithWikilink = async (opts: WorkspaceOpts) => {
+  const { wsRoot, vaults } = opts;
+  await NoteTestUtilsV4.createNote({
+    wsRoot,
+    vault: vaults[0],
+    fname: "foo",
+    body: "[[dendron://vault1/foo.bar]]\n",
+  });
   await NoteTestUtilsV4.createNote({
     wsRoot,
     vault: vaults[0],
     fname: "foo.bar",
-    body: "[[fake.link]]\n",
+    body: [
+      "[[dendron://vault1/fake.link]]",
+      "[[fake.link2]]"
+    ].join("\n"),
   });
 };
 
@@ -49,25 +62,25 @@ const setupMultiWithWikilink = async (opts: WorkspaceOpts) => {
     wsRoot,
     vault: vaults[0],
     fname: "foo",
-    body: "[[foo.bar]]\n",
+    body: "[[dendron://vault1/foo.bar]]\n",
   });
   await NoteTestUtilsV4.createNote({
     wsRoot,
     vault: vaults[0],
     fname: "foo.bar",
-    body: "[[fake.link]]\n",
+    body: "[[dendron://vault1/fake.link]]\n",
   });
   await NoteTestUtilsV4.createNote({
     wsRoot,
     vault: vaults[1],
     fname: "baz",
-    body: "[[baz.qaaz]]\n",
+    body: "[[dendron://vault2/baz.qaaz]]\n",
   });
   await NoteTestUtilsV4.createNote({
     wsRoot,
     vault: vaults[1],
     fname: "baz.qaaz",
-    body: "[[fake]]\n",
+    body: "[[dendron://vault2/fake]]\n",
   });
 };
 
@@ -77,7 +90,7 @@ const setupWithAliasedWikilink = async (opts: WorkspaceOpts) => {
     wsRoot,
     vault: vaults[0],
     fname: "foo",
-    body: ["[[foo bar|foo.bar]]", "[[foobaz|foo.baz]]"].join("\n"),
+    body: ["[[foo bar|dendron://vault1/foo.bar]]", "[[foobaz|dendron://vault1/foo.baz]]"].join("\n"),
   });
 };
 
@@ -299,8 +312,7 @@ describe("H1_TO_TITLE", () => {
 
 describe("CREATE_MISSING_LINKED_NOTES", () => {
   const action = DoctorActions.CREATE_MISSING_LINKED_NOTES;
-  // skip this until we enable workspace scope
-  test.skip("basic", async () => {
+  test("basic", async () => {
     await runEngineTestV5(
       async ({ engine, wsRoot, vaults }) => {
         const vault = vaults[0];
@@ -313,6 +325,11 @@ describe("CREATE_MISSING_LINKED_NOTES", () => {
           path.join(wsRoot, vault.fsPath, "fake.link.md")
         );
         expect(fileExists).toBeTruthy();
+
+        const shouldNotExist = !(await fs.pathExists(
+          path.join(wsRoot, vault.fsPath, "fake.link2.md")
+        ));
+        expect(shouldNotExist).toBeTruthy();
       },
       {
         createEngine: createEngineFromServer,
@@ -322,7 +339,7 @@ describe("CREATE_MISSING_LINKED_NOTES", () => {
     );
   });
 
-  test("basic workspace scope should do nothing", async () => {
+  test("basic single vault", async () => {
     await runEngineTestV5(
       async ({ engine, wsRoot, vaults }) => {
         const vault = vaults[0];
@@ -332,17 +349,18 @@ describe("CREATE_MISSING_LINKED_NOTES", () => {
           action,
         });
         const fileExists = await fs.pathExists(
-          path.join(wsRoot, vault.fsPath, "fake.link.md")
+          path.join(wsRoot, vault.fsPath, "foo.bar.md")
         );
-        expect(fileExists).toBeFalsy();
+        expect(fileExists).toBeTruthy();
       },
       {
         createEngine: createEngineFromServer,
         expect,
-        preSetupHook: setupWithWikilink,
+        vaults: [{ fsPath: "vault1" }],
+        preSetupHook: setupSingleWithWikilink,
       }
     );
-  });
+  })
 
   test("basic pass candidates opts", async () => {
     await runEngineTestV5(
@@ -360,7 +378,6 @@ describe("CREATE_MISSING_LINKED_NOTES", () => {
           engine,
           action,
         });
-        engine;
         const fileExists = await fs.pathExists(
           path.join(wsRoot, vault.fsPath, "fake.link.md")
         );
@@ -374,8 +391,7 @@ describe("CREATE_MISSING_LINKED_NOTES", () => {
     );
   });
 
-  // skip this until we enable workspace scope
-  test.skip("dry run", async () => {
+  test("dry run", async () => {
     await runEngineTestV5(
       async ({ engine, wsRoot, vaults }) => {
         const vault = vaults[0];
@@ -428,8 +444,7 @@ describe("CREATE_MISSING_LINKED_NOTES", () => {
     );
   });
 
-  // skip this until we enable workspace scope
-  test.skip("wild link with alias", async () => {
+  test("wild link with alias", async () => {
     await runEngineTestV5(
       async ({ engine, wsRoot, vaults }) => {
         const vault = vaults[0];
@@ -487,8 +502,7 @@ describe("CREATE_MISSING_LINKED_NOTES", () => {
     );
   });
 
-  // skipping this until we enable workspace scope.
-  test.skip("missing notes in multiple vaults", async () => {
+  test("missing notes in multiple vaults", async () => {
     await runEngineTestV5(
       async ({ engine, wsRoot, vaults }) => {
         const vault1 = vaults[0];
@@ -515,8 +529,7 @@ describe("CREATE_MISSING_LINKED_NOTES", () => {
     );
   });
 
-  // skipping this until we enable workspace scope.
-  test.skip("xvaults wild links", async () => {
+  test("xvaults wild links", async () => {
     await runEngineTestV5(
       async ({ engine, wsRoot, vaults }) => {
         const vault1 = vaults[0];

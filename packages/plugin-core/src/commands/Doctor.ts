@@ -123,7 +123,6 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
       "",
       `## The following files will be created`,
     ];
-    console.log("it's here");
     _.forEach(_.sortBy(candidates, ["vault.fsPath"]), (candidate) => {
       content = content.concat(
         `- ${candidate.vault.fsPath}/${candidate.fname}\n`

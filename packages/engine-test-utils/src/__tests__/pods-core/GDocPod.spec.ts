@@ -29,7 +29,7 @@ describe("GDoc import pod", () => {
             token: "xyzabcd",
             vaultName,
             documentId: "sdhdoj",
-            fname: "gdoc.meet",
+            hierarchyDestination: "gdoc.meet",
           },
         });
           expect(importedNotes[0].body).toMatch("\n\n## Testing GDoc Pod\n\nThis is the first line\n\n\n");
@@ -69,7 +69,7 @@ describe("GDoc import pod", () => {
             token: "xyzabcd",
             vaultName,
             documentId: "sdhdoj",
-            fname: "gdoc.meet",
+            hierarchyDestination: "gdoc.meet",
             importComments: {
               enable: true,
               format: "json"
@@ -112,7 +112,7 @@ describe("GDoc import pod", () => {
             token: "xyzabcd",
             vaultName,
             documentId: "sdhdoj",
-            fname: "gdoc.meet",
+            hierarchyDestination: "gdoc.meet",
             importComments: {
               enable: true,
               format: "text"

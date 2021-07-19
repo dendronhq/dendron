@@ -29,7 +29,7 @@ type GDocImportPodCustomOpts = {
   /**
    * name of hierarchy to import into
    */
-  fname: string;
+   hierarchyDestination: string;
 
    /**
    * import comments from the doc in text or json format
@@ -52,7 +52,7 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
 
   get config(): JSONSchemaType<GDocImportPodConfig> {
     return PodUtils.createImportConfig({
-      required: ["token", "fname", "documentId"],
+      required: ["token", "hierarchyDestination", "documentId"],
       properties: {
         token: {
           type: "string",
@@ -62,7 +62,7 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
           type: "string",
           description: "document Id of doc to import",
         },
-        fname: {
+        hierarchyDestination: {
           type: "string",
           description: "name of hierarchy to import into",
         },
@@ -96,7 +96,7 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
     config: ImportPodConfig
     ): Promise<Partial<NoteProps>>  => {
     let response: Partial<NoteProps>;
-    const {documentId, token, fname } = opts;
+    const {documentId, token, hierarchyDestination } = opts;
     const headers = {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
@@ -107,17 +107,20 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
         { headers }
       )
       const markdown = googleDocsToMarkdown(result.data);
-      const body= markdown.split("---")
+
+      /*
+      * to get index of the string after 2nd occurrence of ---
+      */
+      const index= markdown.indexOf("---", markdown.indexOf("---") + 3) + 3;
        response = {
-        body: body[2],
-        fname: `${fname}.${result.data.title}`,
+        body: markdown.substring(index),
+        fname: `${hierarchyDestination}.${result.data.title}`,
         custom: {
           documentId: result.data.documentId,
           revisionId: result.data.revisionId,
           ...config.frontmatter
         }
       }
-
     }catch(error){
       this.L.error({
         msg: "failed to import the doc",
@@ -228,17 +231,17 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
     wsRoot: string,
     vault: DVault
   ) => {
-      const n = NoteUtils.getNoteByFnameV5({
+      const existingNote = NoteUtils.getNoteByFnameV5({
       fname: note.fname,
       notes: engine.notes,
       vault,
       wsRoot,
     });
-    if (!_.isUndefined(n)) {
-      if(n.custom.revisionId && n.custom.revisionId !== note.custom.revisionId) {
-        n.custom.revisionId = note.custom.revisionId;
-        n.body = note.body;
-        await engine.writeNote(n, { newNode: true });
+    if (!_.isUndefined(existingNote)) {
+      if(existingNote.custom.revisionId && existingNote.custom.revisionId !== note.custom.revisionId) {
+        existingNote.custom.revisionId = note.custom.revisionId;
+        existingNote.body = note.body;
+        await engine.writeNote(existingNote, { newNode: true });
         }   
        }
     else {
@@ -252,13 +255,13 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
     const { wsRoot, engine, vault, config } = opts;
     const {
       token,
-      fname,
+      hierarchyDestination,
       documentId,
       fnameAsId,
       importComments
     } = config as GDocImportPodConfig;
 
-    let response = await this.getDataFromGDoc({documentId, token, fname}, config)
+    let response = await this.getDataFromGDoc({documentId, token, hierarchyDestination}, config)
     if(importComments?.enable) {
      response = await this.getCommentsFromDoc({documentId, token, importComments}, response)
 

@@ -6,8 +6,6 @@ updated: 1624934082241
 created: 1624333266168
 ---
 
-_You can also find this guide on our [wiki](https://wiki.dendron.so/notes/784b8d5e-58eb-4e3e-98b0-8ed1690abc74.html)._
-
 ### Create a Note
 
 To create a note, use `%KEYBINDING%+L` to bring up Dendron's lookup. This is a shortcut for the `Dendron: Lookup` command.

@@ -8,10 +8,12 @@ import {
   EditorUtils,
 } from "../testUtilsV3";
 import { DVault, VaultUtils } from "@dendronhq/common-all";
-import { sinon } from "@dendronhq/common-test-utils";
+import { NoteTestUtilsV4, sinon } from "@dendronhq/common-test-utils";
 import _ from "lodash";
 import { PickerUtilsV2 } from "../../components/lookup/utils";
 import { getActiveEditorBasename } from "../testUtils";
+import { CONFIG } from "../../constants"
+import { VSCodeUtils } from "../../utils";
 
 const stubVaultPick = (vaults: DVault[]) => {
   const vault = _.find(vaults, { fsPath: vaults[2].fsPath });
@@ -95,7 +97,7 @@ suite("Create Daily Journal Suite", function () {
         config.journal.dailyDomain = "bar";
         return config;
       },
-      onInit: async ({}) => {
+      onInit: async () => {
         await new CreateDailyJournalCommand().run();
         expect(
           getActiveEditorBasename().startsWith("bar.journal")
@@ -104,4 +106,38 @@ suite("Create Daily Journal Suite", function () {
       },
     });
   });
+
+  test("ignores deprecated config", (done) => {
+    runLegacyMultiWorkspaceTest({
+      ctx,
+      wsSettingsOverride: {
+        settings: {
+          [CONFIG.DEFAULT_JOURNAL_DATE_FORMAT.key]: "'q'q",
+          [CONFIG.DEFAULT_JOURNAL_ADD_BEHAVIOR.key]: "childOfCurrent",
+          [CONFIG.DAILY_JOURNAL_DOMAIN.key]: "daisy",
+          [CONFIG.DEFAULT_JOURNAL_NAME.key]: "journey",
+        },
+      },
+      modConfigCb: (config) => {
+        config.journal.dateFormat = "dd";
+        config.journal.dailyDomain = "daisy";
+        config.journal.name = "journey";
+        return config;
+      },
+      onInit: async ({ wsRoot, vaults }) => {
+        const current = await NoteTestUtilsV4.createNote({
+          wsRoot,
+          vault: vaults[0],
+          fname: "foo.bar.baz",
+        });
+        await VSCodeUtils.openNote(current);
+        await new CreateDailyJournalCommand().run();
+        const fname = getActiveEditorBasename();
+        const today = new Date();
+        const dd = String(today.getDate()).padStart(2, "0");
+        expect(fname).toEqual(`daisy.journey.${dd}.md`);
+        done();
+      }
+    })
+  })
 });

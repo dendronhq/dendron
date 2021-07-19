@@ -295,16 +295,8 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
         break;
       }
       case DoctorActions.CREATE_MISSING_LINKED_NOTES: {
-        // this action is disabled for workspace scope for now.
-        // if (_.isUndefined(candidates)) {
-        //   console.log(
-        //     `doctor ${DoctorActions.CREATE_MISSING_LINKED_NOTES} requires explicitly passing one candidate note.`
-        //   );
-        //   return;
-        // }
         notes = this.getWildLinkDestinations(notes, engine);
         doctorAction = async (note: NoteProps) => {
-          // const vname = VaultUtils.getName(note.vault);
           await engineGetNoteByPath({
             npath: note.fname,
             createIfNew: true,

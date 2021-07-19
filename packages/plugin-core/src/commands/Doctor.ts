@@ -180,12 +180,6 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
         break;
       }
       case DoctorActions.CREATE_MISSING_LINKED_NOTES: {
-        // if (opts.scope === "workspace") {
-        //   window.showInformationMessage(
-        //     "This action is currently not supported in workspace scope."
-        //   );
-        //   break;
-        // }
         const cmd = new DoctorCLICommand();
         let notes;
         if (_.isUndefined(note)) {

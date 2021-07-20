@@ -12,7 +12,7 @@ import {
   expect,
   LocationTestUtils,
   runMultiVaultTest,
-  runSingleVaultTest,
+  runSingleVaultTest
 } from "../testUtilsv2";
 import { setupBeforeAfter } from "../testUtilsV3";
 

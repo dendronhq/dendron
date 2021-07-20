@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.51.1](https://github.com/dendronhq/dendron/compare/v0.51.0...v0.51.1) (2021-07-20)
+
+
+### Bug Fixes
+
+* hashtags links duplicate the text following them ([#1003](https://github.com/dendronhq/dendron/issues/1003)) ([ef5afed](https://github.com/dendronhq/dendron/commit/ef5afedffad293aa0c363a87a6abe5c425b653e5))
+
+
+
+
+
 # [0.51.0](https://github.com/dendronhq/dendron/compare/v0.49.0...v0.51.0) (2021-07-19)
 
 

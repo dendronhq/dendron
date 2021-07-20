@@ -144,7 +144,7 @@ suite("DoctorCommandTest", function () {
     });
   });
 
-  // test.only("lots of files", (done) => {
+  // test("lots of files", (done) => {
   //   runLegacySingleWorkspaceTest({
   //     ctx,
   //     onInit: async ({ engine, wsRoot, vaults }) => {

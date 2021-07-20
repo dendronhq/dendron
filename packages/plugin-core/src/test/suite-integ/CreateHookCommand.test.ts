@@ -14,11 +14,7 @@ import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
 suite(DENDRON_COMMANDS.CREATE_HOOK.key, function () {
   let ctx: vscode.ExtensionContext;
-  ctx = setupBeforeAfter(this, {
-    afterHook: () => {
-      sinon.restore();
-    },
-  });
+  ctx = setupBeforeAfter(this);
   describe("main", () => {
     test("basic", (done) => {
       const hook = "foo";

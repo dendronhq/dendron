@@ -341,11 +341,7 @@ suite("Lookup, notesv2", function () {
   let ctx: vscode.ExtensionContext;
   const engOpts: EngineOpts = { flavor: "note" };
 
-  ctx = setupBeforeAfter(this, {
-    afterHook: async () => {
-      sinon.restore();
-    },
-  });
+  ctx = setupBeforeAfter(this);
 
   // TODO: flaky test, can run by itself
   describe.skip("updateItems", () => {

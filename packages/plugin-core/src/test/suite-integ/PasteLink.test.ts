@@ -31,12 +31,7 @@ const DEFAULT_OPENGRAPH_RESPONSE_FAIL = { error: true } as ogs.ErrorResult;
 suite.skip("pasteLink", function () {
   let ctx: vscode.ExtensionContext;
 
-  ctx = setupBeforeAfter(this, {
-    beforeHook: () => {},
-    afterHook: () => {
-      sinon.restore();
-    },
-  });
+  ctx = setupBeforeAfter(this);
   test("basic", (done) => {
     runLegacyMultiWorkspaceTest({
       ctx,

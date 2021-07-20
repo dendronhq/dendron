@@ -44,9 +44,10 @@ import {
 import { Logger } from "../logger";
 import { StateService } from "../services/stateService";
 import { WorkspaceConfig } from "../settings";
-import { VSCodeUtils } from "../utils";
+import { InstallStatus, VSCodeUtils } from "../utils";
 import { DendronWorkspace, getWS } from "../workspace";
 import { BlankInitializer } from "../workspace/blankInitializer";
+import { WorkspaceInitFactory } from "../workspace/workspaceInitializer";
 import { _activate } from "../_extension";
 import { onWSInit, TIMEOUT } from "./testUtils";
 import {
@@ -280,9 +281,15 @@ export function addDebugServerOverride() {
   };
 }
 
+/**
+ * 
+ * @param _this 
+ * @param opts.noSetInstallStatus: by default, we set install status to NO_CHANGE. use this when you need to test this logic
+ * @returns 
+ */
 export function setupBeforeAfter(
   _this: any,
-  opts?: { beforeHook?: any; afterHook?: any }
+  opts?: { beforeHook?: any; afterHook?: any, noSetInstallStatus?: boolean }
 ) {
   let ctx: ExtensionContext;
   // allows for debugging
@@ -290,6 +297,14 @@ export function setupBeforeAfter(
   ctx = VSCodeUtils.getOrCreateMockContext();
   beforeEach(async () => {
     DendronWorkspace.getOrCreate(ctx);
+
+    // workspace has not upgraded
+    if (!opts?.noSetInstallStatus) {
+      sinon.stub(VSCodeUtils, "getInstallStatusForExtension").returns(InstallStatus.NO_CHANGE)
+    }
+    // workspace is not tutorial workspace
+    sinon.stub(WorkspaceInitFactory,"isTutorialWorkspaceLaunch").returns(false);
+
     if (opts?.beforeHook) {
       await opts.beforeHook();
     }
@@ -300,6 +315,7 @@ export function setupBeforeAfter(
     if (opts?.afterHook) {
       await opts.afterHook();
     }
+    sinon.restore();
   });
   return ctx;
 }

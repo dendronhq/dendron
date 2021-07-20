@@ -2,7 +2,7 @@ import { NoteProps, NoteUtils } from "@dendronhq/common-all";
 import { DirResult, tmpDir, vault2Path } from "@dendronhq/common-server";
 import {
   NodeTestPresetsV2,
-  NoteTestUtilsV4,
+  NoteTestUtilsV4
 } from "@dendronhq/common-test-utils";
 import { DoctorActions } from "@dendronhq/dendron-cli";
 import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
@@ -19,7 +19,7 @@ import { expect } from "../testUtilsv2";
 import {
   runLegacyMultiWorkspaceTest,
   runLegacySingleWorkspaceTest,
-  setupBeforeAfter,
+  setupBeforeAfter
 } from "../testUtilsV3";
 
 suite("DoctorCommandTest", function () {
@@ -29,9 +29,6 @@ suite("DoctorCommandTest", function () {
   ctx = setupBeforeAfter(this, {
     beforeHook: () => {
       root = tmpDir();
-    },
-    afterHook: () => {
-      sinon.restore();
     },
   });
 
@@ -361,11 +358,7 @@ suite("DoctorCommandTest", function () {
 suite("CREATE_MISSING_LINKED_NOTES", function () {
   let ctx: vscode.ExtensionContext;
 
-  ctx = setupBeforeAfter(this, {
-    afterHook: () => {
-      sinon.restore();
-    },
-  });
+  ctx = setupBeforeAfter(this);
 
   test("basic proceed, file scoped", (done) => {
     runLegacySingleWorkspaceTest({

@@ -15,8 +15,8 @@ type CommandOutput = { error: IDendronError } | void;
 const hookTemplate = `
 /**
  @params wsRoot: string, root of your current workspace
- @params note: Object with following properties https://github.com/dendronhq/dendron/blob/dev-kevin/packages/common-all/src/typesv2.ts#L135:L153
- @params NoteUtils: utilities for working with notes. [code](https://github.com/dendronhq/dendron/blob/master/packages/common-all/src/dnode.ts#L307:L307)
+ @params note: Object with following properties https://github.com/dendronhq/dendron/blob/master/packages/common-all/src/types/foundation.ts#L66:L66
+ @params NoteUtils: utilities for working with notes. [code](https://github.com/dendronhq/dendron/blob/master/packages/common-all/src/dnode.ts#L323:L323)
  @params execa: instance of [execa](https://github.com/sindresorhus/execa#execacommandcommand-options)
  @params _: instance of [lodash](https://lodash.com/docs)
  */

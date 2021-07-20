@@ -1,14 +1,11 @@
 //@ts-check
 
-"use strict";
-
 const path = require("path");
 const CopyPlugin = require("copy-webpack-plugin");
 const { IgnorePlugin, DefinePlugin } = require("webpack");
 /**@type {import('webpack').Configuration}*/
 const config = {
-  target: "node", // vscode extensions run in a Node.js-context 📖 -> https://webpack.js.org/configuration/node/
-
+  target: "node", 
   entry: "./src/extension.ts", // the entry point of this extension, 📖 -> https://webpack.js.org/configuration/entry-context/
   output: {
     // the bundle is stored in the 'dist' folder (check package.json), 📖 -> https://webpack.js.org/configuration/output/

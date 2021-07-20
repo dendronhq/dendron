@@ -3,6 +3,150 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.51.0](https://github.com/dendronhq/dendron/compare/v0.49.0...v0.51.0) (2021-07-19)
+
+
+### Bug Fixes
+
+* anchors within wikilinks interpreted as hashtags ([#990](https://github.com/dendronhq/dendron/issues/990)) ([74d3ccc](https://github.com/dendronhq/dendron/commit/74d3ccc326a24ac350c6157bb6523cde4e7d0151))
+* avoid generating IDs containing dashes and underscores ([#947](https://github.com/dendronhq/dendron/issues/947)) ([147772e](https://github.com/dendronhq/dendron/commit/147772e4b5a9eafa34c08aed902d30b00eeb7cb3)), closes [#945](https://github.com/dendronhq/dendron/issues/945)
+* avoid parsing bad wikilinks instead of erroring out ([#951](https://github.com/dendronhq/dendron/issues/951)) ([00668b0](https://github.com/dendronhq/dendron/commit/00668b0fd3ba12d39a3774d3835ebb64d13f4a1f))
+* hide backlink item when it has no children ([#989](https://github.com/dendronhq/dendron/issues/989)) ([0e3b8eb](https://github.com/dendronhq/dendron/commit/0e3b8eb5a8b10b3628ef7724005e395fae7520b0))
+* Improving Tutorial Telemetry ([#942](https://github.com/dendronhq/dendron/issues/942)) ([5c7f0e0](https://github.com/dendronhq/dendron/commit/5c7f0e0fc7bfd5f8befa46f5b714bfd3b61f2f4f))
+* lapsed user delay prompt ([#1002](https://github.com/dendronhq/dendron/issues/1002)) ([90edbb7](https://github.com/dendronhq/dendron/commit/90edbb7f8571657584a49122bc64d774e993137d))
+* last modiified timestamp not updating ([#961](https://github.com/dendronhq/dendron/issues/961)) ([71afabc](https://github.com/dendronhq/dendron/commit/71afabc1a29a09bd0f9acb5cd215b75e973ae3fd))
+* local images in hover preview are now displayed ([#946](https://github.com/dendronhq/dendron/issues/946)) ([04b8374](https://github.com/dendronhq/dendron/commit/04b8374dff5b062819a3a1c56e79dc74631f4fe0))
+* normalize casing when fetchiing assets ([3b42ec4](https://github.com/dendronhq/dendron/commit/3b42ec4dca32f98574092373ecdf61b61f06de55))
+* note ref use title of referenced note ([a3e217d](https://github.com/dendronhq/dendron/commit/a3e217d3be0774e0ba2b78ad6503e385a8028a80))
+* onDidChange event taking focus from window ([7167e16](https://github.com/dendronhq/dendron/commit/7167e16334d490f8c1cf8e2926662b5c453ead87))
+* path for express static assets ([dade093](https://github.com/dendronhq/dendron/commit/dade0935b9e62e0b4ecd2012d988ca520b46dc57))
+* race condition in web ui ([eba5adc](https://github.com/dendronhq/dendron/commit/eba5adcf3607aad0d833052e50c911b2b73b5ae4))
+* store workspace using case insensitive keys ([#934](https://github.com/dendronhq/dendron/issues/934)) ([4de138b](https://github.com/dendronhq/dendron/commit/4de138be7853f35103ca46533546b6275df4193e))
+* update block anchor display ([61fa24f](https://github.com/dendronhq/dendron/commit/61fa24f3e43c84e808596765b8adbd4b68ffe305))
+* update styling issues with block anchors ([b6990e8](https://github.com/dendronhq/dendron/commit/b6990e82792450cc23f256a6c825a61be401d981))
+* update ts on save ([6950e6e](https://github.com/dendronhq/dendron/commit/6950e6ec989b7a637f64537b0358d3fe83760179))
+* update while render issue in tree view ([d780f8e](https://github.com/dendronhq/dendron/commit/d780f8ee951385804c5a6277df6ab07a9b6a90ef))
+* Use new config when creating special notes ([#984](https://github.com/dendronhq/dendron/issues/984)) ([3e9509d](https://github.com/dendronhq/dendron/commit/3e9509d5e322d0e21c3953c3770ac6f96c6492b2))
+
+
+### Features Dendron
+
+* add ability to show/hide labels ([#939](https://github.com/dendronhq/dendron/issues/939)) ([cf67169](https://github.com/dendronhq/dendron/commit/cf671698053e83dab5996c6c98face5344a147e2))
+* add custom graph styling support ([#981](https://github.com/dendronhq/dendron/issues/981)) ([aa88e3a](https://github.com/dendronhq/dendron/commit/aa88e3a0e81f1ceeffe8058eceab93b32120c93b))
+* add local note graph ([#899](https://github.com/dendronhq/dendron/issues/899)) ([6e9ed81](https://github.com/dendronhq/dendron/commit/6e9ed81c14897d95280ce5f881c7467589cb89ad))
+* ajv to validate publish pod ([42db7da](https://github.com/dendronhq/dendron/commit/42db7da23aa7174a27d7249348f6c76919561aa1))
+* auto completion for anchors and headers ([#894](https://github.com/dendronhq/dendron/issues/894)) ([13e81d4](https://github.com/dendronhq/dendron/commit/13e81d49c1f14ee18457543f8e0818d0e36c17db))
+* Doctor "fix frontmatter" fixes broken note ids ([#950](https://github.com/dendronhq/dendron/issues/950)) ([1298093](https://github.com/dendronhq/dendron/commit/1298093620a8be2070d5e91e40e6a70a115c7756))
+* support dynamic theming ([1da7714](https://github.com/dendronhq/dendron/commit/1da7714f50acbba312a7e2e7a497f9e53920c96f))
+* **preview:** update mermaid theme dynamically ([e9074db](https://github.com/dendronhq/dendron/commit/e9074dbfefe17b462d31bfe00f6563547f93db71))
+* de-emphasize block anchors in the editor ([#937](https://github.com/dendronhq/dendron/issues/937)) ([de70ca7](https://github.com/dendronhq/dendron/commit/de70ca78cadd68b43a29d3c37f4853365592c4ab))
+* editor highlighting for wikilinks & references ([#960](https://github.com/dendronhq/dendron/issues/960)) ([4e1653b](https://github.com/dendronhq/dendron/commit/4e1653b53856fa605e82bacb592d6b59449aa149))
+* filter non-stubs in directChildOnly filter ([#940](https://github.com/dendronhq/dendron/issues/940)) ([2cdf8e3](https://github.com/dendronhq/dendron/commit/2cdf8e3de32d6d4a91a7606a85e692695ccbd6e2)), closes [#917](https://github.com/dendronhq/dendron/issues/917)
+* hashtags ([#985](https://github.com/dendronhq/dendron/issues/985)) ([85d44fc](https://github.com/dendronhq/dendron/commit/85d44fc975db4564f5826ae87e380d37c0263b0f))
+* improved block anchor in publishing ([#933](https://github.com/dendronhq/dendron/issues/933)) ([7b6ab6f](https://github.com/dendronhq/dendron/commit/7b6ab6fbcf22656919ff271382f24011684862a4))
+* show unreferenced links in backlink panel ([#909](https://github.com/dendronhq/dendron/issues/909)) ([4e65a20](https://github.com/dendronhq/dendron/commit/4e65a20a344b7276d3452fc0cebb8f19339eea67))
+* wikilink autocomplete sorts current vault notes before other notes ([#949](https://github.com/dendronhq/dendron/issues/949)) ([c195275](https://github.com/dendronhq/dendron/commit/c19527572c039f7ec7bb621e3810c299cc542969))
+
+
+
+
+
+## [0.50.3](https://github.com/dendronhq/dendron/compare/v0.49.0...v0.50.3) (2021-07-19)
+
+
+### Bug Fixes
+
+* anchors within wikilinks interpreted as hashtags ([#990](https://github.com/dendronhq/dendron/issues/990)) ([74d3ccc](https://github.com/dendronhq/dendron/commit/74d3ccc326a24ac350c6157bb6523cde4e7d0151))
+* avoid generating IDs containing dashes and underscores ([#947](https://github.com/dendronhq/dendron/issues/947)) ([147772e](https://github.com/dendronhq/dendron/commit/147772e4b5a9eafa34c08aed902d30b00eeb7cb3)), closes [#945](https://github.com/dendronhq/dendron/issues/945)
+* avoid parsing bad wikilinks instead of erroring out ([#951](https://github.com/dendronhq/dendron/issues/951)) ([00668b0](https://github.com/dendronhq/dendron/commit/00668b0fd3ba12d39a3774d3835ebb64d13f4a1f))
+* hide backlink item when it has no children ([#989](https://github.com/dendronhq/dendron/issues/989)) ([0e3b8eb](https://github.com/dendronhq/dendron/commit/0e3b8eb5a8b10b3628ef7724005e395fae7520b0))
+* Improving Tutorial Telemetry ([#942](https://github.com/dendronhq/dendron/issues/942)) ([5c7f0e0](https://github.com/dendronhq/dendron/commit/5c7f0e0fc7bfd5f8befa46f5b714bfd3b61f2f4f))
+* lapsed user delay prompt ([#1002](https://github.com/dendronhq/dendron/issues/1002)) ([90edbb7](https://github.com/dendronhq/dendron/commit/90edbb7f8571657584a49122bc64d774e993137d))
+* last modiified timestamp not updating ([#961](https://github.com/dendronhq/dendron/issues/961)) ([71afabc](https://github.com/dendronhq/dendron/commit/71afabc1a29a09bd0f9acb5cd215b75e973ae3fd))
+* local images in hover preview are now displayed ([#946](https://github.com/dendronhq/dendron/issues/946)) ([04b8374](https://github.com/dendronhq/dendron/commit/04b8374dff5b062819a3a1c56e79dc74631f4fe0))
+* normalize casing when fetchiing assets ([3b42ec4](https://github.com/dendronhq/dendron/commit/3b42ec4dca32f98574092373ecdf61b61f06de55))
+* note ref use title of referenced note ([a3e217d](https://github.com/dendronhq/dendron/commit/a3e217d3be0774e0ba2b78ad6503e385a8028a80))
+* onDidChange event taking focus from window ([7167e16](https://github.com/dendronhq/dendron/commit/7167e16334d490f8c1cf8e2926662b5c453ead87))
+* path for express static assets ([dade093](https://github.com/dendronhq/dendron/commit/dade0935b9e62e0b4ecd2012d988ca520b46dc57))
+* race condition in web ui ([eba5adc](https://github.com/dendronhq/dendron/commit/eba5adcf3607aad0d833052e50c911b2b73b5ae4))
+* store workspace using case insensitive keys ([#934](https://github.com/dendronhq/dendron/issues/934)) ([4de138b](https://github.com/dendronhq/dendron/commit/4de138be7853f35103ca46533546b6275df4193e))
+* update block anchor display ([61fa24f](https://github.com/dendronhq/dendron/commit/61fa24f3e43c84e808596765b8adbd4b68ffe305))
+* update styling issues with block anchors ([b6990e8](https://github.com/dendronhq/dendron/commit/b6990e82792450cc23f256a6c825a61be401d981))
+* update ts on save ([6950e6e](https://github.com/dendronhq/dendron/commit/6950e6ec989b7a637f64537b0358d3fe83760179))
+* update while render issue in tree view ([d780f8e](https://github.com/dendronhq/dendron/commit/d780f8ee951385804c5a6277df6ab07a9b6a90ef))
+* Use new config when creating special notes ([#984](https://github.com/dendronhq/dendron/issues/984)) ([3e9509d](https://github.com/dendronhq/dendron/commit/3e9509d5e322d0e21c3953c3770ac6f96c6492b2))
+
+
+### Features Dendron
+
+* add ability to show/hide labels ([#939](https://github.com/dendronhq/dendron/issues/939)) ([cf67169](https://github.com/dendronhq/dendron/commit/cf671698053e83dab5996c6c98face5344a147e2))
+* add custom graph styling support ([#981](https://github.com/dendronhq/dendron/issues/981)) ([aa88e3a](https://github.com/dendronhq/dendron/commit/aa88e3a0e81f1ceeffe8058eceab93b32120c93b))
+* add local note graph ([#899](https://github.com/dendronhq/dendron/issues/899)) ([6e9ed81](https://github.com/dendronhq/dendron/commit/6e9ed81c14897d95280ce5f881c7467589cb89ad))
+* ajv to validate publish pod ([42db7da](https://github.com/dendronhq/dendron/commit/42db7da23aa7174a27d7249348f6c76919561aa1))
+* auto completion for anchors and headers ([#894](https://github.com/dendronhq/dendron/issues/894)) ([13e81d4](https://github.com/dendronhq/dendron/commit/13e81d49c1f14ee18457543f8e0818d0e36c17db))
+* Doctor "fix frontmatter" fixes broken note ids ([#950](https://github.com/dendronhq/dendron/issues/950)) ([1298093](https://github.com/dendronhq/dendron/commit/1298093620a8be2070d5e91e40e6a70a115c7756))
+* support dynamic theming ([1da7714](https://github.com/dendronhq/dendron/commit/1da7714f50acbba312a7e2e7a497f9e53920c96f))
+* **preview:** update mermaid theme dynamically ([e9074db](https://github.com/dendronhq/dendron/commit/e9074dbfefe17b462d31bfe00f6563547f93db71))
+* de-emphasize block anchors in the editor ([#937](https://github.com/dendronhq/dendron/issues/937)) ([de70ca7](https://github.com/dendronhq/dendron/commit/de70ca78cadd68b43a29d3c37f4853365592c4ab))
+* editor highlighting for wikilinks & references ([#960](https://github.com/dendronhq/dendron/issues/960)) ([4e1653b](https://github.com/dendronhq/dendron/commit/4e1653b53856fa605e82bacb592d6b59449aa149))
+* filter non-stubs in directChildOnly filter ([#940](https://github.com/dendronhq/dendron/issues/940)) ([2cdf8e3](https://github.com/dendronhq/dendron/commit/2cdf8e3de32d6d4a91a7606a85e692695ccbd6e2)), closes [#917](https://github.com/dendronhq/dendron/issues/917)
+* hashtags ([#985](https://github.com/dendronhq/dendron/issues/985)) ([85d44fc](https://github.com/dendronhq/dendron/commit/85d44fc975db4564f5826ae87e380d37c0263b0f))
+* improved block anchor in publishing ([#933](https://github.com/dendronhq/dendron/issues/933)) ([7b6ab6f](https://github.com/dendronhq/dendron/commit/7b6ab6fbcf22656919ff271382f24011684862a4))
+* show unreferenced links in backlink panel ([#909](https://github.com/dendronhq/dendron/issues/909)) ([4e65a20](https://github.com/dendronhq/dendron/commit/4e65a20a344b7276d3452fc0cebb8f19339eea67))
+* wikilink autocomplete sorts current vault notes before other notes ([#949](https://github.com/dendronhq/dendron/issues/949)) ([c195275](https://github.com/dendronhq/dendron/commit/c19527572c039f7ec7bb621e3810c299cc542969))
+
+
+
+
+
+## [0.50.2](https://github.com/dendronhq/dendron/compare/v0.49.0...v0.50.2) (2021-07-19)
+
+
+### Bug Fixes
+
+* anchors within wikilinks interpreted as hashtags ([#990](https://github.com/dendronhq/dendron/issues/990)) ([74d3ccc](https://github.com/dendronhq/dendron/commit/74d3ccc326a24ac350c6157bb6523cde4e7d0151))
+* avoid generating IDs containing dashes and underscores ([#947](https://github.com/dendronhq/dendron/issues/947)) ([147772e](https://github.com/dendronhq/dendron/commit/147772e4b5a9eafa34c08aed902d30b00eeb7cb3)), closes [#945](https://github.com/dendronhq/dendron/issues/945)
+* avoid parsing bad wikilinks instead of erroring out ([#951](https://github.com/dendronhq/dendron/issues/951)) ([00668b0](https://github.com/dendronhq/dendron/commit/00668b0fd3ba12d39a3774d3835ebb64d13f4a1f))
+* hide backlink item when it has no children ([#989](https://github.com/dendronhq/dendron/issues/989)) ([0e3b8eb](https://github.com/dendronhq/dendron/commit/0e3b8eb5a8b10b3628ef7724005e395fae7520b0))
+* Improving Tutorial Telemetry ([#942](https://github.com/dendronhq/dendron/issues/942)) ([5c7f0e0](https://github.com/dendronhq/dendron/commit/5c7f0e0fc7bfd5f8befa46f5b714bfd3b61f2f4f))
+* lapsed user delay prompt ([#1002](https://github.com/dendronhq/dendron/issues/1002)) ([90edbb7](https://github.com/dendronhq/dendron/commit/90edbb7f8571657584a49122bc64d774e993137d))
+* last modiified timestamp not updating ([#961](https://github.com/dendronhq/dendron/issues/961)) ([71afabc](https://github.com/dendronhq/dendron/commit/71afabc1a29a09bd0f9acb5cd215b75e973ae3fd))
+* local images in hover preview are now displayed ([#946](https://github.com/dendronhq/dendron/issues/946)) ([04b8374](https://github.com/dendronhq/dendron/commit/04b8374dff5b062819a3a1c56e79dc74631f4fe0))
+* normalize casing when fetchiing assets ([3b42ec4](https://github.com/dendronhq/dendron/commit/3b42ec4dca32f98574092373ecdf61b61f06de55))
+* note ref use title of referenced note ([a3e217d](https://github.com/dendronhq/dendron/commit/a3e217d3be0774e0ba2b78ad6503e385a8028a80))
+* onDidChange event taking focus from window ([7167e16](https://github.com/dendronhq/dendron/commit/7167e16334d490f8c1cf8e2926662b5c453ead87))
+* path for express static assets ([dade093](https://github.com/dendronhq/dendron/commit/dade0935b9e62e0b4ecd2012d988ca520b46dc57))
+* race condition in web ui ([eba5adc](https://github.com/dendronhq/dendron/commit/eba5adcf3607aad0d833052e50c911b2b73b5ae4))
+* store workspace using case insensitive keys ([#934](https://github.com/dendronhq/dendron/issues/934)) ([4de138b](https://github.com/dendronhq/dendron/commit/4de138be7853f35103ca46533546b6275df4193e))
+* update block anchor display ([61fa24f](https://github.com/dendronhq/dendron/commit/61fa24f3e43c84e808596765b8adbd4b68ffe305))
+* update styling issues with block anchors ([b6990e8](https://github.com/dendronhq/dendron/commit/b6990e82792450cc23f256a6c825a61be401d981))
+* update ts on save ([6950e6e](https://github.com/dendronhq/dendron/commit/6950e6ec989b7a637f64537b0358d3fe83760179))
+* update while render issue in tree view ([d780f8e](https://github.com/dendronhq/dendron/commit/d780f8ee951385804c5a6277df6ab07a9b6a90ef))
+* Use new config when creating special notes ([#984](https://github.com/dendronhq/dendron/issues/984)) ([3e9509d](https://github.com/dendronhq/dendron/commit/3e9509d5e322d0e21c3953c3770ac6f96c6492b2))
+
+
+### Features Dendron
+
+* add ability to show/hide labels ([#939](https://github.com/dendronhq/dendron/issues/939)) ([cf67169](https://github.com/dendronhq/dendron/commit/cf671698053e83dab5996c6c98face5344a147e2))
+* add custom graph styling support ([#981](https://github.com/dendronhq/dendron/issues/981)) ([aa88e3a](https://github.com/dendronhq/dendron/commit/aa88e3a0e81f1ceeffe8058eceab93b32120c93b))
+* add local note graph ([#899](https://github.com/dendronhq/dendron/issues/899)) ([6e9ed81](https://github.com/dendronhq/dendron/commit/6e9ed81c14897d95280ce5f881c7467589cb89ad))
+* ajv to validate publish pod ([42db7da](https://github.com/dendronhq/dendron/commit/42db7da23aa7174a27d7249348f6c76919561aa1))
+* auto completion for anchors and headers ([#894](https://github.com/dendronhq/dendron/issues/894)) ([13e81d4](https://github.com/dendronhq/dendron/commit/13e81d49c1f14ee18457543f8e0818d0e36c17db))
+* Doctor "fix frontmatter" fixes broken note ids ([#950](https://github.com/dendronhq/dendron/issues/950)) ([1298093](https://github.com/dendronhq/dendron/commit/1298093620a8be2070d5e91e40e6a70a115c7756))
+* support dynamic theming ([1da7714](https://github.com/dendronhq/dendron/commit/1da7714f50acbba312a7e2e7a497f9e53920c96f))
+* **preview:** update mermaid theme dynamically ([e9074db](https://github.com/dendronhq/dendron/commit/e9074dbfefe17b462d31bfe00f6563547f93db71))
+* de-emphasize block anchors in the editor ([#937](https://github.com/dendronhq/dendron/issues/937)) ([de70ca7](https://github.com/dendronhq/dendron/commit/de70ca78cadd68b43a29d3c37f4853365592c4ab))
+* editor highlighting for wikilinks & references ([#960](https://github.com/dendronhq/dendron/issues/960)) ([4e1653b](https://github.com/dendronhq/dendron/commit/4e1653b53856fa605e82bacb592d6b59449aa149))
+* filter non-stubs in directChildOnly filter ([#940](https://github.com/dendronhq/dendron/issues/940)) ([2cdf8e3](https://github.com/dendronhq/dendron/commit/2cdf8e3de32d6d4a91a7606a85e692695ccbd6e2)), closes [#917](https://github.com/dendronhq/dendron/issues/917)
+* hashtags ([#985](https://github.com/dendronhq/dendron/issues/985)) ([85d44fc](https://github.com/dendronhq/dendron/commit/85d44fc975db4564f5826ae87e380d37c0263b0f))
+* improved block anchor in publishing ([#933](https://github.com/dendronhq/dendron/issues/933)) ([7b6ab6f](https://github.com/dendronhq/dendron/commit/7b6ab6fbcf22656919ff271382f24011684862a4))
+* show unreferenced links in backlink panel ([#909](https://github.com/dendronhq/dendron/issues/909)) ([4e65a20](https://github.com/dendronhq/dendron/commit/4e65a20a344b7276d3452fc0cebb8f19339eea67))
+* wikilink autocomplete sorts current vault notes before other notes ([#949](https://github.com/dendronhq/dendron/issues/949)) ([c195275](https://github.com/dendronhq/dendron/commit/c19527572c039f7ec7bb621e3810c299cc542969))
+
+
+
+
+
 ## [0.50.1](https://github.com/dendronhq/dendron/compare/v0.49.0...v0.50.1) (2021-07-16)
 
 

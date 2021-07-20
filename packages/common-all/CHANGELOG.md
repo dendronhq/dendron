@@ -3,6 +3,78 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.51.0](https://github.com/dendronhq/dendron/compare/v0.49.0...v0.51.0) (2021-07-19)
+
+
+### Bug Fixes
+
+* avoid generating IDs containing dashes and underscores ([#947](https://github.com/dendronhq/dendron/issues/947)) ([147772e](https://github.com/dendronhq/dendron/commit/147772e4b5a9eafa34c08aed902d30b00eeb7cb3)), closes [#945](https://github.com/dendronhq/dendron/issues/945)
+* Improving Tutorial Telemetry ([#942](https://github.com/dendronhq/dendron/issues/942)) ([5c7f0e0](https://github.com/dendronhq/dendron/commit/5c7f0e0fc7bfd5f8befa46f5b714bfd3b61f2f4f))
+* last modiified timestamp not updating ([#961](https://github.com/dendronhq/dendron/issues/961)) ([71afabc](https://github.com/dendronhq/dendron/commit/71afabc1a29a09bd0f9acb5cd215b75e973ae3fd))
+
+
+### Features Dendron
+
+* add custom graph styling support ([#981](https://github.com/dendronhq/dendron/issues/981)) ([aa88e3a](https://github.com/dendronhq/dendron/commit/aa88e3a0e81f1ceeffe8058eceab93b32120c93b))
+* auto completion for anchors and headers ([#894](https://github.com/dendronhq/dendron/issues/894)) ([13e81d4](https://github.com/dendronhq/dendron/commit/13e81d49c1f14ee18457543f8e0818d0e36c17db))
+* de-emphasize block anchors in the editor ([#937](https://github.com/dendronhq/dendron/issues/937)) ([de70ca7](https://github.com/dendronhq/dendron/commit/de70ca78cadd68b43a29d3c37f4853365592c4ab))
+* hashtags ([#985](https://github.com/dendronhq/dendron/issues/985)) ([85d44fc](https://github.com/dendronhq/dendron/commit/85d44fc975db4564f5826ae87e380d37c0263b0f))
+* improved block anchor in publishing ([#933](https://github.com/dendronhq/dendron/issues/933)) ([7b6ab6f](https://github.com/dendronhq/dendron/commit/7b6ab6fbcf22656919ff271382f24011684862a4))
+* show unreferenced links in backlink panel ([#909](https://github.com/dendronhq/dendron/issues/909)) ([4e65a20](https://github.com/dendronhq/dendron/commit/4e65a20a344b7276d3452fc0cebb8f19339eea67))
+* support dynamic theming ([1da7714](https://github.com/dendronhq/dendron/commit/1da7714f50acbba312a7e2e7a497f9e53920c96f))
+
+
+
+
+
+## [0.50.3](https://github.com/dendronhq/dendron/compare/v0.49.0...v0.50.3) (2021-07-19)
+
+
+### Bug Fixes
+
+* avoid generating IDs containing dashes and underscores ([#947](https://github.com/dendronhq/dendron/issues/947)) ([147772e](https://github.com/dendronhq/dendron/commit/147772e4b5a9eafa34c08aed902d30b00eeb7cb3)), closes [#945](https://github.com/dendronhq/dendron/issues/945)
+* Improving Tutorial Telemetry ([#942](https://github.com/dendronhq/dendron/issues/942)) ([5c7f0e0](https://github.com/dendronhq/dendron/commit/5c7f0e0fc7bfd5f8befa46f5b714bfd3b61f2f4f))
+* last modiified timestamp not updating ([#961](https://github.com/dendronhq/dendron/issues/961)) ([71afabc](https://github.com/dendronhq/dendron/commit/71afabc1a29a09bd0f9acb5cd215b75e973ae3fd))
+
+
+### Features Dendron
+
+* add custom graph styling support ([#981](https://github.com/dendronhq/dendron/issues/981)) ([aa88e3a](https://github.com/dendronhq/dendron/commit/aa88e3a0e81f1ceeffe8058eceab93b32120c93b))
+* auto completion for anchors and headers ([#894](https://github.com/dendronhq/dendron/issues/894)) ([13e81d4](https://github.com/dendronhq/dendron/commit/13e81d49c1f14ee18457543f8e0818d0e36c17db))
+* de-emphasize block anchors in the editor ([#937](https://github.com/dendronhq/dendron/issues/937)) ([de70ca7](https://github.com/dendronhq/dendron/commit/de70ca78cadd68b43a29d3c37f4853365592c4ab))
+* hashtags ([#985](https://github.com/dendronhq/dendron/issues/985)) ([85d44fc](https://github.com/dendronhq/dendron/commit/85d44fc975db4564f5826ae87e380d37c0263b0f))
+* improved block anchor in publishing ([#933](https://github.com/dendronhq/dendron/issues/933)) ([7b6ab6f](https://github.com/dendronhq/dendron/commit/7b6ab6fbcf22656919ff271382f24011684862a4))
+* show unreferenced links in backlink panel ([#909](https://github.com/dendronhq/dendron/issues/909)) ([4e65a20](https://github.com/dendronhq/dendron/commit/4e65a20a344b7276d3452fc0cebb8f19339eea67))
+* support dynamic theming ([1da7714](https://github.com/dendronhq/dendron/commit/1da7714f50acbba312a7e2e7a497f9e53920c96f))
+
+
+
+
+
+## [0.50.2](https://github.com/dendronhq/dendron/compare/v0.49.0...v0.50.2) (2021-07-19)
+
+
+### Bug Fixes
+
+* avoid generating IDs containing dashes and underscores ([#947](https://github.com/dendronhq/dendron/issues/947)) ([147772e](https://github.com/dendronhq/dendron/commit/147772e4b5a9eafa34c08aed902d30b00eeb7cb3)), closes [#945](https://github.com/dendronhq/dendron/issues/945)
+* Improving Tutorial Telemetry ([#942](https://github.com/dendronhq/dendron/issues/942)) ([5c7f0e0](https://github.com/dendronhq/dendron/commit/5c7f0e0fc7bfd5f8befa46f5b714bfd3b61f2f4f))
+* last modiified timestamp not updating ([#961](https://github.com/dendronhq/dendron/issues/961)) ([71afabc](https://github.com/dendronhq/dendron/commit/71afabc1a29a09bd0f9acb5cd215b75e973ae3fd))
+
+
+### Features Dendron
+
+* add custom graph styling support ([#981](https://github.com/dendronhq/dendron/issues/981)) ([aa88e3a](https://github.com/dendronhq/dendron/commit/aa88e3a0e81f1ceeffe8058eceab93b32120c93b))
+* auto completion for anchors and headers ([#894](https://github.com/dendronhq/dendron/issues/894)) ([13e81d4](https://github.com/dendronhq/dendron/commit/13e81d49c1f14ee18457543f8e0818d0e36c17db))
+* de-emphasize block anchors in the editor ([#937](https://github.com/dendronhq/dendron/issues/937)) ([de70ca7](https://github.com/dendronhq/dendron/commit/de70ca78cadd68b43a29d3c37f4853365592c4ab))
+* hashtags ([#985](https://github.com/dendronhq/dendron/issues/985)) ([85d44fc](https://github.com/dendronhq/dendron/commit/85d44fc975db4564f5826ae87e380d37c0263b0f))
+* improved block anchor in publishing ([#933](https://github.com/dendronhq/dendron/issues/933)) ([7b6ab6f](https://github.com/dendronhq/dendron/commit/7b6ab6fbcf22656919ff271382f24011684862a4))
+* show unreferenced links in backlink panel ([#909](https://github.com/dendronhq/dendron/issues/909)) ([4e65a20](https://github.com/dendronhq/dendron/commit/4e65a20a344b7276d3452fc0cebb8f19339eea67))
+* support dynamic theming ([1da7714](https://github.com/dendronhq/dendron/commit/1da7714f50acbba312a7e2e7a497f9e53920c96f))
+
+
+
+
+
 ## [0.50.1](https://github.com/dendronhq/dendron/compare/v0.49.0...v0.50.1) (2021-07-16)
 
 

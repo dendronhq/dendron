@@ -1,5 +1,5 @@
 import { DendronTreeViewKey } from "@dendronhq/common-all";
-import { CodeConfigKeys } from "./types";
+
 
 export const extensionQualifiedId = `dendron.dendron`;
 export const DEFAULT_LEGACY_VAULT_NAME = "vault";
@@ -914,10 +914,10 @@ export const CONFIG: { [key: string]: ConfigEntry } = {
   },
   // --- timestamp decoration
   DEFAULT_TIMESTAMP_DECORATION_FORMAT: {
-    key: CodeConfigKeys.DEFAULT_TIMESTAMP_DECORATION_FORMAT,
+    key: "dendron.defaultTimestampDecorationFormat",
     default: "DATETIME_MED",
     type: "string",
-    description: "Decide how human readable timestamp decoration is displayed",
+    description: "DEPRECATED. Use journal settings in dendron.yml",
     enum: [
       "DATETIME_FULL",
       "DATETIME_FULL_WITH_SECONDS",

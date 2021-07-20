@@ -12,10 +12,9 @@ import {
 import { DecorationOptions, DecorationRangeBehavior, Range, TextEditor, TextEditorDecorationType, ThemeColor, window, TextDocument } from "vscode";
 import visit from "unist-util-visit";
 import _ from "lodash";
-import { isNotUndefined, DefaultMap, randomColor, NoteUtils, Position, VaultUtils } from "@dendronhq/common-all";
+import { isNotUndefined, DefaultMap, randomColor, NoteUtils, Position, VaultUtils, DateTimeFormat } from "@dendronhq/common-all";
 import { DateTime } from "luxon";
-import { getConfigValue, getWS } from "../workspace";
-import { CodeConfigKeys, DateTimeFormat } from "../types";
+import { getWS } from "../workspace";
 import { VSCodeUtils } from "../utils";
 import { containsNonDendronUri } from "../utils/md";
 
@@ -96,9 +95,7 @@ export const DECORATION_TYPE_TIMESTAMP = window.createTextEditorDecorationType({
 function decorateTimestamps(frontmatter: FrontmatterContent) {
   const { value: contents, position } = frontmatter;
   if (_.isUndefined(position)) return []; // should never happen
-  const tsConfig = getConfigValue(
-    CodeConfigKeys.DEFAULT_TIMESTAMP_DECORATION_FORMAT
-  ) as DateTimeFormat;
+  const tsConfig = getWS().config.defaultTimestampDecorationFormat || DateTimeFormat.DATETIME_MED;
   const formatOption = DateTime[tsConfig];
 
   const entries = contents.split("\n");

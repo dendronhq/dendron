@@ -1,3 +1,4 @@
+import { ServerUtils } from "@dendronhq/api-server";
 import {
   DendronConfig,
   DEngineClient,
@@ -32,6 +33,7 @@ import {
 import fs from "fs-extra";
 import _ from "lodash";
 import { afterEach, beforeEach } from "mocha";
+import path from "path";
 import { ExtensionContext, Uri } from "vscode";
 import {
   SetupWorkspaceCommand,
@@ -166,7 +168,7 @@ export async function setupLegacyWorkspace(
     rootDirRaw: wsRoot,
     skipOpenWs: true,
     ...copts.setupWsOverride,
-    workspaceInitializer: new BlankInitializer()
+    workspaceInitializer: new BlankInitializer(),
   });
   stubWorkspaceFolders(vaults);
 
@@ -282,14 +284,20 @@ export function addDebugServerOverride() {
 }
 
 /**
- * 
- * @param _this 
+ *
+ * @param _this
  * @param opts.noSetInstallStatus: by default, we set install status to NO_CHANGE. use this when you need to test this logic
- * @returns 
+ * @param opts.noStubExecServerNode: stub this to be synchronous engine laungh for tests due to latency
+ * @returns
  */
 export function setupBeforeAfter(
   _this: any,
-  opts?: { beforeHook?: any; afterHook?: any, noSetInstallStatus?: boolean }
+  opts?: {
+    beforeHook?: any;
+    afterHook?: any;
+    noSetInstallStatus?: boolean;
+    noStubExecServerNode?: boolean;
+  }
 ) {
   let ctx: ExtensionContext;
   // allows for
@@ -300,11 +308,25 @@ export function setupBeforeAfter(
 
     // workspace has not upgraded
     if (!opts?.noSetInstallStatus) {
-      sinon.stub(VSCodeUtils, "getInstallStatusForExtension").returns(InstallStatus.NO_CHANGE)
+      sinon
+        .stub(VSCodeUtils, "getInstallStatusForExtension")
+        .returns(InstallStatus.NO_CHANGE);
     }
     // workspace is not tutorial workspace
-    sinon.stub(WorkspaceInitFactory,"isTutorialWorkspaceLaunch").returns(false);
-
+    sinon
+      .stub(WorkspaceInitFactory, "isTutorialWorkspaceLaunch")
+      .returns(false);
+    if (!opts?.noStubExecServerNode) {
+      sinon.stub(ServerUtils, "execServerNode").returns(
+        new Promise(async (resolve) => {
+          const { launchv2 } = require("@dendronhq/api-server"); // eslint-disable-line global-require
+          const { port } = await launchv2({
+            logPath: path.join(__dirname, "..", "..", "dendron.server.log"),
+          });
+          resolve({ port, subprocess: { pid: -1 } as any });
+        })
+      );
+    }
     if (opts?.beforeHook) {
       await opts.beforeHook();
     }

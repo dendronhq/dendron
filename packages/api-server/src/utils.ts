@@ -128,6 +128,10 @@ static async startServerNode({
   return {port: finalPort};
 }
 
+/**
+ * Create a subprocess with a running instance of the engine server
+ * @returns 
+ */
 static async execServerNode({
   scriptPath,
   logPath,

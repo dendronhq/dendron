@@ -512,17 +512,17 @@
         "dendron.defaultScratchName": {
           "type": "string",
           "default": "scratch",
-          "description": "name used for scratch notes"
+          "description": "DEPRECATED. Use journal settings in dendron.yml"
         },
         "dendron.defaultScratchDateFormat": {
           "type": "string",
           "default": "y.MM.dd.HHmmss",
-          "description": "date format used for scratch notes"
+          "description": "DEPRECATED. Use journal settings in dendron.yml"
         },
         "dendron.defaultScratchAddBehavior": {
           "default": "asOwnDomain",
           "type": "string",
-          "description": "strategy for adding new scratch notes",
+          "description": "DEPRECATED. Use journal settings in dendron.yml",
           "enum": [
             "childOfDomain",
             "childOfDomainNamespace",

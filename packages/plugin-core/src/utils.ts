@@ -29,8 +29,6 @@ import * as vscode from "vscode";
 import { CancellationTokenSource } from "vscode-languageclient";
 import { PickerUtilsV2 } from "./components/lookup/utils";
 import {
-  CONFIG,
-  ConfigKey,
   DendronContext,
   GLOBAL_STATE,
   _noteAddBehaviorEnum,
@@ -564,28 +562,20 @@ export class DendronClientUtilsV2 {
   ): string {
     // gather inputs
     const dateFormat = type === "SCRATCH" 
-      ? DendronWorkspace.configuration().get<string>(
-          CONFIG["DEFAULT_SCRATCH_DATE_FORMAT"].key
-        ) as string
+      ? getWS().config.scratch.dateFormat
       : getWS().config.journal.dateFormat;
 
     const addBehavior = type === "SCRATCH"
-      ? DendronWorkspace.configuration().get<string>(
-          CONFIG["DEFAULT_SCRATCH_ADD_BEHAVIOR"].key
-        )
+      ? getWS().config.scratch.addBehavior
       : getWS().config.journal.addBehavior;
 
     const name = type === "SCRATCH"
-      ? getWS().config.defaultScratchName || "scratch"
+      ? getWS().config.scratch.name
       : getWS().config.journal.name;
     
     if (!_.includes(_noteAddBehaviorEnum, addBehavior)) {
-      const actual = type === "SCRATCH"
-        ? CONFIG["DEFAULT_SCRATCH_ADD_BEHAVIOR"].key
-        : addBehavior;
-      const choices = type === "SCRATCH"
-        ? _noteAddBehaviorEnum.join(", ")
-        : Object.keys(NoteAddBehavior).join(", ");
+      const actual = addBehavior;
+      const choices = Object.keys(NoteAddBehavior).join(", ");
       throw Error(
         `${actual} must be one of: ${choices}`
       );

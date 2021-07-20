@@ -146,6 +146,8 @@ export type DendronConfig = {
 
   journal: JournalConfig;
 
+  scratch: Pick<JournalConfig, "name" | "dateFormat" | "addBehavior">;
+  
   /**
    * Workspaces
    */
@@ -268,9 +270,7 @@ export type DendronConfig = {
 
   /** Decide how human readable timestamp decoration is displayed */
   defaultTimestampDecorationFormat?: DateTimeFormat;
-
-  /** name used for scratch notes */
-  defaultScratchName? : string;
+  
 };
 
 export type RandomNoteConfig = {

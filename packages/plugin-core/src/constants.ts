@@ -832,12 +832,16 @@ export enum WORKSPACE_ACTIVATION_CONTEXT {
 
 export type ConfigKey = keyof typeof CONFIG;
 
+/**
+
 const _noteDateDesc = (type: "journal" | "scratch") =>
   `date format used for ${type} notes`;
 const _noteNameDesc = (type: "journal" | "scratch") =>
   `name used for ${type} notes`;
 const _noteAddBehaviorDesc = (type: "journal" | "scratch") =>
   `strategy for adding new ${type} notes`;
+
+*/
 
 export const _noteAddBehaviorEnum = [
   "childOfDomain",
@@ -883,13 +887,13 @@ export const CONFIG: { [key: string]: ConfigEntry } = {
     key: "dendron.defaultScratchDateFormat",
     type: "string",
     default: "y.MM.dd.HHmmss",
-    description: _noteDateDesc("scratch"),
+    description: "DEPRECATED. Use journal settings in dendron.yml",
   },
   DEFAULT_SCRATCH_ADD_BEHAVIOR: {
     key: "dendron.defaultScratchAddBehavior",
     default: "asOwnDomain",
     type: "string",
-    description: _noteAddBehaviorDesc("scratch"),
+    description: "DEPRECATED. Use journal settings in dendron.yml",
     enum: _noteAddBehaviorEnum,
   },
   COPY_NOTE_URL_ROOT: {
@@ -953,7 +957,7 @@ export const CONFIG: { [key: string]: ConfigEntry } = {
     key: "dendron.dendronDir",
     type: "string",
     default: "",
-    description: "location of dendron configuration",
+    description: "DEPRECATED. Use journal settings in dendron.yml",
   },
   // --- other
   LOG_LEVEL: {

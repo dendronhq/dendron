@@ -268,6 +268,9 @@ export type DendronConfig = {
 
   /** Decide how human readable timestamp decoration is displayed */
   defaultTimestampDecorationFormat?: DateTimeFormat;
+
+  /** name used for scratch notes */
+  defaultScratchName? : string;
 };
 
 export type RandomNoteConfig = {

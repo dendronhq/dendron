@@ -575,11 +575,8 @@ export class DendronClientUtilsV2 {
         )
       : getWS().config.journal.addBehavior;
 
-    const nameKey: ConfigKey = `DEFAULT_${type}_NAME` as ConfigKey;
     const name = type === "SCRATCH"
-      ? DendronWorkspace.configuration().get<string>(
-          CONFIG[nameKey].key
-        )
+      ? getWS().config.defaultScratchName || "scratch"
       : getWS().config.journal.name;
     
     if (!_.includes(_noteAddBehaviorEnum, addBehavior)) {

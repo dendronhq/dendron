@@ -555,7 +555,7 @@
         "dendron.defaultTimestampDecorationFormat": {
           "default": "DATETIME_MED",
           "type": "string",
-          "description": "Decide how human readable timestamp decoration is displayed",
+          "description": "DEPRECATED. Use journal settings in dendron.yml",
           "enum": [
             "DATETIME_FULL",
             "DATETIME_FULL_WITH_SECONDS",

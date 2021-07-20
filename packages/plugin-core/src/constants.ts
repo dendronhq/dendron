@@ -877,7 +877,7 @@ export const CONFIG: { [key: string]: ConfigEntry } = {
     key: "dendron.defaultScratchName",
     type: "string",
     default: "scratch",
-    description: _noteNameDesc("scratch"),
+    description: "DEPRECATED. Use journal settings in dendron.yml",
   },
   DEFAULT_SCRATCH_DATE_FORMAT: {
     key: "dendron.defaultScratchDateFormat",

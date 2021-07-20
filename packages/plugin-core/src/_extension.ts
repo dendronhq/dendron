@@ -4,12 +4,12 @@ import {
   getStage,
   Time,
   VaultUtils,
-  VSCodeEvents
+  VSCodeEvents,
 } from "@dendronhq/common-all";
 import {
   getDurationMilliseconds,
   getOS,
-  SegmentClient
+  SegmentClient,
 } from "@dendronhq/common-server";
 import {
   DConfig,
@@ -17,8 +17,9 @@ import {
   HistoryService,
   MetadataService,
   MigrationServce,
-  WorkspaceService
+  WorkspaceService,
 } from "@dendronhq/engine-server";
+import { ExecaChildProcess } from "execa";
 import _ from "lodash";
 import { Duration } from "luxon";
 import semver from "semver";
@@ -133,7 +134,10 @@ async function postReloadWorkspace() {
   Logger.info({ ctx, msg: "exit" });
 }
 
-async function startServerProcess() {
+async function startServerProcess(): Promise<{
+  port: number;
+  subprocess?: ExecaChildProcess;
+}> {
   const { nextServerUrl, nextStaticRoot, engineServerPort } =
     getWS().config.dev || {};
   // const ctx = "startServer";
@@ -142,21 +146,17 @@ async function startServerProcess() {
       CONFIG.SERVER_PORT.key
     ) || engineServerPort;
   const port = maybePort;
-  const logPath = DendronWorkspace.instance().context.logPath;
-  if (!maybePort) {
-    return {port: await execServer({logPath, nextServerUrl, nextStaticRoot, port })};
+  if (port) {
+    return { port };
   }
-  // Logger.info({ ctx, logLevel: process.env["LOG_LEVEL"], maybePort });
-  // if (!maybePort) {
-  //   const { launchv2 } = require("@dendronhq/api-server"); // eslint-disable-line global-require
-  //   return launchv2({
-  //     port: maybePort,
-  //     logPath: path.join(logPath, "dendron.server.log"),
-  //     nextServerUrl,
-  //     nextStaticRoot,
-  //   });
-  // }
-  return { port: maybePort };
+  const logPath = DendronWorkspace.instance().context.logPath;
+  const out = await execServerNode({
+    logPath,
+    nextServerUrl,
+    nextStaticRoot,
+    port,
+  });
+  return out;
 }
 
 // @ts-ignore
@@ -378,7 +378,16 @@ export async function _activate(
         return p;
       }
     );
-    const { port } = await startServerProcess();
+    const { port, subprocess } = await startServerProcess();
+    if (subprocess) {
+      context.subscriptions.push(
+        new vscode.Disposable(() => {
+          Logger.info({ ctx, msg: "kill server start" });
+          process.kill(subprocess.pid);
+          Logger.info({ ctx, msg: "kill server end" });
+        })
+      );
+    }
     const durationStartServer = getDurationMilliseconds(start);
     Logger.info({ ctx, msg: "post-start-server", port, durationStartServer });
     WSUtils.updateEngineAPI(port);

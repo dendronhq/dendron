@@ -3,9 +3,7 @@ import {
   DendronError,
   DEngineClient,
   DNodeUtils,
-  DVault,
-  ERROR_STATUS,
-  getStage,
+  DVault, getStage,
   NoteAddBehavior,
   NoteProps,
   NoteUtils,
@@ -13,13 +11,13 @@ import {
   Position,
   SchemaModuleProps,
   Time,
-  VaultUtils,
+  VaultUtils
 } from "@dendronhq/common-all";
 import {
   goUpTo,
   resolveTilde,
   tmpDir,
-  vault2Path,
+  vault2Path
 } from "@dendronhq/common-server";
 import _ from "lodash";
 import _md from "markdown-it";
@@ -34,7 +32,7 @@ import {
   ConfigKey,
   DendronContext,
   GLOBAL_STATE,
-  _noteAddBehaviorEnum,
+  _noteAddBehaviorEnum
 } from "./constants";
 import { FileItem } from "./external/fileutils/FileItem";
 import { EngineAPIService } from "./services/EngineAPIService";

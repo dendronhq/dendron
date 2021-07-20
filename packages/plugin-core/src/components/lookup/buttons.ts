@@ -31,7 +31,8 @@ export type ButtonCategory =
   | "note"
   | "split"
   | "filter"
-  | "effect";
+  | "effect"
+  | "v2"; //TODO: better category name?
 
 export type ButtonHandleOpts = { quickPick: DendronQuickPickerV2 };
 
@@ -50,6 +51,9 @@ export function getButtonCategory(button: DendronBtn): ButtonCategory {
   }
   if (isEffectButton(button)) {
     return "effect";
+  }
+  if (button.type === "v2") {
+    return "v2"; //TODO: better type name
   }
   throw Error(`unknown btn type ${button}`);
 }
@@ -141,7 +145,7 @@ export class DendronBtn implements IDendronQuickInputButton {
   }
 }
 
-class Selection2LinkBtn extends DendronBtn {
+export class Selection2LinkBtn extends DendronBtn {
   static create(pressed?: boolean) {
     return new DendronBtn({
       title: "Selection to Link",
@@ -193,15 +197,31 @@ export class JournalBtn extends DendronBtn {
   }
 }
 
-class ScratchBtn extends DendronBtn {
+export class ScratchBtn extends DendronBtn {
   static create(pressed?: boolean) {
-    return new DendronBtn({
+    return new ScratchBtn({
       title: "Create Scratch Note",
       iconOff: "new-file",
       iconOn: "menu-selection",
       type: LookupNoteTypeEnum.scratch,
       pressed,
     });
+  }
+
+  async onEnable({ quickPick }: ButtonHandleOpts) {
+    quickPick.modifyPickerValueFunc = (value: string) => {
+      return DendronClientUtilsV2.genNoteName("SCRATCH", {
+        overrides: { domain: value },
+      });
+    };
+    quickPick.rawValue = quickPick.value;
+    quickPick.value = quickPick.modifyPickerValueFunc(quickPick.rawValue);
+    return;
+  }
+
+  async onDisable({ quickPick }: ButtonHandleOpts) {
+    quickPick.modifyPickerValueFunc = undefined;
+    quickPick.value = quickPick.rawValue;
   }
 }
 class HorizontalSplitBtn extends DendronBtn {

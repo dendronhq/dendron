@@ -11,6 +11,7 @@ import { Uri } from "vscode";
 import {
   DirectChildFilterBtn,
   JournalBtn,
+  ScratchBtn,
   MultiSelectBtn,
 } from "../components/lookup/buttons";
 import { LookupControllerV3 } from "../components/lookup/LookupControllerV3";
@@ -130,7 +131,9 @@ export class NoteLookupCommand extends BaseCommand<
         "lookupConfirmVaultOnCreate"
       ),
       extraButtons: [
+        //todo: mirror v2 button sequence
         JournalBtn.create(copts.noteType === LookupNoteTypeEnum.journal),
+        ScratchBtn.create(copts.noteType === LookupNoteTypeEnum.scratch),
         MultiSelectBtn.create(copts.multiSelect),
         DirectChildFilterBtn.create(
           copts.filterMiddleware?.includes("directChildOnly")

@@ -61,6 +61,7 @@ const toString = require("mdast-util-to-string");
 
 export { mdastBuilder };
 export { select, selectAll } from "unist-util-select";
+export { visit };
 
 export const ALIAS_DIVIDER = "|";
 
@@ -165,7 +166,7 @@ const getLinks = ({
           break;
         }
         default:
-          /* nothing */
+        /* nothing */
       }
     }
   );
@@ -250,8 +251,8 @@ const getLinkCandidates = ({
     if (textNode.position!.start.line !== textNode.position!.end.line) {
       textNode.position!.start = {
         line: textNode.position!.start.line + 1,
-        column: 1
-      } 
+        column: 1,
+      };
     }
     value.split(/\s+/).filter((word) => {
       const maybeNote = notesMap.get(word);
@@ -563,7 +564,11 @@ export class LinkUtils {
   }
 
   static isHashtagLink(link: DNoteLoc): link is DNoteLoc & { alias: string } {
-    return link.alias !== undefined && link.alias.startsWith("#") && link.fname.startsWith("tags");
+    return (
+      link.alias !== undefined &&
+      link.alias.startsWith("#") &&
+      link.fname.startsWith("tags")
+    );
   }
 
   static findLinkCandidates({
@@ -598,6 +603,30 @@ export class LinkUtils {
 }
 
 export class AnchorUtils {
+  /** Given a header, finds the text of that header, including any wikilinks or hashtags that are included in the header.
+   *
+   * For example, for the header `## Foo [[Bar|bar]] and #baz`, the text should be `Foo Bar and #baz`.
+   */
+  static headerText(header: Heading): string {
+    const headerText: string[] = [];
+    visit(header, (node) => {
+      switch (node.type) {
+        case DendronASTTypes.TEXT:
+          headerText.push((node as Text).value);
+          break;
+        case DendronASTTypes.WIKI_LINK:
+          headerText.push((node as WikiLinkNoteV4).data.alias);
+          break;
+        case DendronASTTypes.HASHTAG:
+          headerText.push((node as HashTag).value);
+          break;
+        default:
+        /* nothing */
+      }
+    });
+    return _.trim(headerText.join(" "));
+  }
+
   /** Given a *parsed* anchor node, returns the anchor id ("header" or "^block" and positioned anchor object for it. */
   static anchorNode2anchor(
     node: Anchor,
@@ -607,7 +636,7 @@ export class AnchorUtils {
 
     const { line, column } = node.position.start;
     if (node.type === DendronASTTypes.HEADING) {
-      const value = slugger.slug(node.children[0].value as string);
+      const value = slugger.slug(this.headerText(node as Heading));
       return [
         value,
         {
@@ -694,7 +723,7 @@ export class RemarkUtils {
       }
     });
 
-    const minDepth = headings.reduce((memo, h) =>{
+    const minDepth = headings.reduce((memo, h) => {
       return Math.min(memo, h.depth);
     }, MAX_HEADING_DEPTH);
 
@@ -771,6 +800,10 @@ export class RemarkUtils {
 
   static isImage(node: Node): node is Image {
     return node.type === DendronASTTypes.IMAGE;
+  }
+
+  static isText(node: Node): node is Text {
+    return node.type === DendronASTTypes.TEXT;
   }
 
   // --- conversion

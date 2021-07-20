@@ -2,6 +2,7 @@ import { LogLvl } from "@dendronhq/common-server";
 import express from "express";
 import _ from "lodash";
 import { configureLogger, getLogger } from "./core";
+export {ServerUtils} from "./utils"
 
 type LaunchOpts = {
   port?: number;

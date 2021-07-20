@@ -150,7 +150,8 @@ async function startServerProcess(): Promise<{
     return { port };
   }
   const logPath = DendronWorkspace.instance().context.logPath;
-  const out = await execServerNode({
+  const out = await ServerUtils.execServerNode({
+    scriptPath: path.join(__dirname, "server.js"),
     logPath,
     nextServerUrl,
     nextStaticRoot,

@@ -1,11 +1,12 @@
 import { TestEngineUtils } from "@dendronhq/engine-test-utils";
 import { describe } from "mocha";
 import { SinonStub } from "sinon";
+import { ServerUtils } from "@dendronhq/api-server";
 import { ResetConfigCommand } from "../../commands/ResetConfig";
 import { DendronWorkspace } from "../../workspace";
-import { execServerNode } from "../../_server";
 import { expect, resetCodeWorkspace } from "../testUtilsv2";
 import { setupBeforeAfter } from "../testUtilsV3";
+import path from "path";
 
 suite("StartServer", function () {
   let homeDirStub: SinonStub;
@@ -24,7 +25,9 @@ suite("StartServer", function () {
 	describe("basic", function() {
 
 		test("ok", function(done) {
-			execServerNode({logPath: DendronWorkspace.instance().context.logPath}).then(({port}) => {
+			ServerUtils.execServerNode({
+        scriptPath: path.join(__dirname, "..", "..", "server.js"),
+        logPath: DendronWorkspace.instance().context.logPath}).then(({port}) => {
 				expect(port > 0).toBeTruthy();
 				done();
 			});

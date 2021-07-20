@@ -1,15 +1,12 @@
+import { ServerUtils } from "@dendronhq/api-server";
 import { stringifyError } from "@dendronhq/common-all";
-import { prepareServerArgs, startServerNode } from "./_server";
 
 
 (async () => {
   try {
 		// run forever
-		console.log("start server...")
-		const port = await startServerNode(prepareServerArgs());
-		console.log(port);
+		await ServerUtils.startServerNode(ServerUtils.prepareServerArgs());
   } catch (err) {
-    console.error(err);
 		if (process.send) {
 			process.send(stringifyError(err))
 		}

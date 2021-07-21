@@ -9,7 +9,7 @@ import {
   WikiLinkNoteV4,
   NoteRefNoteV4,
 } from "@dendronhq/engine-server";
-import { DecorationOptions, DecorationRangeBehavior, Range, TextEditor, TextEditorDecorationType, ThemeColor, window, TextDocument } from "vscode";
+import { DecorationOptions, DecorationRangeBehavior, Range, TextEditor, TextEditorDecorationType, ThemeColor, window, TextDocument, Diagnostic } from "vscode";
 import visit from "unist-util-visit";
 import _ from "lodash";
 import { isNotUndefined, DefaultMap, randomColor, NoteUtils, Position, VaultUtils } from "@dendronhq/common-all";
@@ -81,8 +81,13 @@ export function updateDecorations(activeEditor: TextEditor) {
   });
 
   // Warn for missing or bad frontmatter
-  if (_.isUndefined(frontmatter)) warnMissingFrontmatter(activeEditor.document);
-  else warnBadFrontmatterContents(activeEditor.document, frontmatter);
+  const allWarnings: Diagnostic[] = [];
+  if (_.isUndefined(frontmatter)) {
+    allWarnings.push(warnMissingFrontmatter(activeEditor.document));
+  }
+  else {
+    allWarnings.push(...warnBadFrontmatterContents(activeEditor.document, frontmatter));
+  }
 
   // Activate the decorations
   for (const [type, decorations] of allDecorations.entries()) {
@@ -95,7 +100,7 @@ export function updateDecorations(activeEditor: TextEditor) {
       DECORATION_TYPE_TAG.delete(key);
     }
   }
-  return allDecorations;
+  return {allDecorations, allWarnings};
 }
 
 export const DECORATION_TYPE_TIMESTAMP = window.createTextEditorDecorationType({});

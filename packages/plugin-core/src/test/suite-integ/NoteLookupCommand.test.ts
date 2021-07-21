@@ -225,7 +225,11 @@ suite("NoteLookupCommand", function () {
   });
 
   describe("modifiers", () => {
+<<<<<<< HEAD
     test("Journal note modifier behaviors", (done) => {
+=======
+    test.only("Journal note modifier behavior", (done) => {
+>>>>>>> 98451d01 (spike: add tests for journal modifier)
       runLegacyMultiWorkspaceTest({
         ctx,
         preSetupHook: async ({ wsRoot, vaults }) => {
@@ -235,6 +239,7 @@ suite("NoteLookupCommand", function () {
           const cmd = new NoteLookupCommand();
           stubVaultPick(vaults);
 
+<<<<<<< HEAD
           // with journal note modifier enabled,
           await VSCodeUtils.openNote(engine.notes["foo"]);
           const out = (await cmd.run({
@@ -256,6 +261,11 @@ suite("NoteLookupCommand", function () {
           // the quickpick value should turn back to name of current note.
           expect(out?.quickpick.value).toEqual("foo");
 
+=======
+          await VSCodeUtils.openNote(engine.notes["foo"]);
+          const opts = (await cmd.run());
+          console.log(opts);
+>>>>>>> 98451d01 (spike: add tests for journal modifier)
           done();
         }
       });

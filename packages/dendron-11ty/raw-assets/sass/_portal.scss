@@ -1,3 +1,5 @@
+@use "sass:math";
+
 // Clear normal iframe styles
 iframe{
 	border: none;
@@ -87,7 +89,7 @@ iframe{
 			z-index: 50;
 		}			
 		.portal-parent-text{
-			padding:$base-line-height / 2;
+			padding:math.div($base-line-height, 2);
 			color: #5C6D73;			
 			z-index: 40;
 		}

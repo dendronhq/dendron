@@ -118,18 +118,14 @@ function TreeViewParent({ engine, ide }: DendronProps) {
     const id = node.key as string;
     logger.info({ ctx: "onExpand", expandedKeys, id, expanded });
     // open up
-    if (expanded) {
-      setActiveNoteIds(
-        TreeViewUtils.getAllParents({ notes: engine.notes!, noteId: id })
-      );
-    } else {
-      setActiveNoteIds(
-        TreeViewUtils.getAllParents({ notes: engine.notes!, noteId: id }).slice(
-          0,
-          -1
-        )
-      );
-    }
+    setActiveNoteIds(
+      expanded
+        ? TreeViewUtils.getAllParents({ notes: engine.notes!, noteId: id })
+        : TreeViewUtils.getAllParents({
+            notes: engine.notes!,
+            noteId: id,
+          }).slice(0, -1)
+    );
   };
   const engineInitialized = EngineSliceUtils.hasInitialized(engine);
   // what keys shod be open

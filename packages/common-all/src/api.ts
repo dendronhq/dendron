@@ -362,12 +362,21 @@ export class DendronAPI extends API {
   }
 
   async workspaceSync(req: WorkspaceSyncRequest): Promise<InitializePayload> {
-    const resp = await this._makeRequest({
-      path: "workspace/sync",
-      method: "post",
-      body: req,
-    });
-    return resp;
+    const [wsSyncRes, configRes] = await Promise.all([
+      this._makeRequest({
+        path: "workspace/sync",
+        method: "post",
+        body: req,
+      }),
+      this._makeRequest({
+        path: "config/get",
+        method: "get",
+        body: req,
+      }),
+    ]);
+
+    wsSyncRes.data.config = configRes.data;
+    return wsSyncRes;
   }
 
   async engineBulkAdd(req: EngineBulkAddRequest): Promise<WriteNoteResp> {

@@ -1,92 +1,193 @@
-import { createLogger, engineSlice } from "@dendronhq/common-frontend";
-import { List, Typography } from "antd";
-import { FieldArray, Formik } from "formik";
-import { Field, Form, Input } from "formik-antd";
-import React from "react";
-const { Title, Paragraph, Text, Link } = Typography;
+import React, { useRef, useState, useEffect, useMemo } from "react";
+import { engineSlice } from "@dendronhq/common-frontend";
+import { Typography, Button, Layout, message } from "antd";
+import { useRouter } from "next/router";
+import { Formik } from "formik";
+import { Form, ResetButton, SubmitButton } from "formik-antd";
+import _ from "lodash";
+import Ajv, { JSONSchemaType } from "ajv";
+import { engineHooks } from "@dendronhq/common-frontend";
+import { configWrite } from "../../lib/effects";
+import FormGenerator from "../../components/formRenderer";
+import SideMenu from "../../components/sideMenu";
+import dendronValidator from "../../data/dendron-yml.validator.json";
+import bucketConfig, { buckets } from "../../data/bucketConfig";
+import {
+  generateSchema,
+  generateRenderableConfig,
+} from "../../utils/formUtils";
 
-const createFormItem = ({
-  name,
-  label,
-}: {
-  name: string;
-  placeholder?: string;
-  label: string;
-}) => {
-  return (
-    <Form.Item name={name} label={label}>
-      <Input name={name} />
-    </Form.Item>
-  );
-};
+const { Title } = Typography;
+const { Content } = Layout;
 
-const renderArray = (arrayEnts: any[], arrayHelpers: any) => {
-  const data = arrayEnts
-    .map((_ent, idx) => (
-      <>
-        <Field key={idx} name={`site.siteHierarchies.${idx}`} />
-        <button type="button" onClick={() => arrayHelpers.remove(idx)}>
-          -
-        </button>
-      </>
-    ))
-    .concat(
-      <button type="button" onClick={() => arrayHelpers.push("")}>
-        +
-      </button>
-    );
-  return (
-    <List
-      itemLayout="vertical"
-      dataSource={data}
-      bordered={false}
-      renderItem={(item) => (
-        <List.Item style={{ borderBottom: "none" }}>{item}</List.Item>
-      )}
-    />
-  );
-};
-
-export default function Config({
-  engine,
-}: {
+type DefaultProps = {
   engine: engineSlice.EngineState;
-}) {
-  const logger = createLogger("Config");
-  if (!engine.config) {
+};
+
+const ConfigForm: React.FC<DefaultProps> = ({ engine }) => {
+  const [openKeys, setOpenKeys] = React.useState<string[]>([]);
+  const [selectedKeys, setSelectedKeys] = React.useState<string[]>([]);
+  const [anyOfValues, setAnyOfValues] = React.useState<{
+    [key: string]: string;
+  }>({});
+  const [currentValues, setCurrentValues] = useState<any>({});
+  const router = useRouter();
+  const { ws, port } = router.query;
+  const dispatch = engineHooks.useEngineAppDispatch();
+  const ajv = useRef(new Ajv({ allErrors: true }));
+  const dendronConfig = useMemo(
+    () =>
+      generateRenderableConfig(
+        _.get(
+          dendronValidator.definitions,
+          dendronValidator.$ref.split("/").pop() as string
+        ),
+        dendronValidator.definitions,
+        ""
+      ),
+    []
+  );
+
+  useEffect(() => {
+    setCurrentValues(engine.config);
+  }, [engine]);
+
+  const schema: JSONSchemaType<any> = useMemo(
+    () => (dendronConfig ? generateSchema(dendronConfig) : {}),
+    [dendronConfig]
+  );
+
+  const onSubmit = async (config: any, { setSubmitting }: any) => {
+    dispatch(
+      configWrite({
+        config,
+        ws: ws as string,
+        port: Number(port as string),
+      })
+    )
+      .then(() => message.success("Saved!"))
+      .catch((err) => message.error(err.message))
+      .finally(() => {
+        setSubmitting(false);
+      });
+  };
+
+  const validate = (values: any) => {
+    setCurrentValues(values);
+    let errors: any = {};
+    const validate = ajv.current.compile(schema);
+    validate(values);
+    const { errors: ajvErrors } = validate;
+
+    if (!ajvErrors?.length) {
+      return {};
+    }
+
+    ajvErrors?.forEach((error) => {
+      const { instancePath, message } = error;
+      if (instancePath !== "") {
+        errors[`${instancePath.substring(1)}`.replace("/", ".")] = message;
+      }
+    });
+    return errors;
+  };
+
+  if (!engine.config || !ws || !port) {
     return <></>;
   }
 
-  const formItemLayout = {
-    labelCol: {
-      xs: { span: 24 },
-      sm: { span: 8 },
-    },
-    wrapperCol: {
-      xs: { span: 24 },
-      sm: { span: 16 },
-    },
-  };
-
   return (
-    <Formik initialValues={engine.config} onSubmit={() => {}}>
-      {({ handleSubmit, handleChange, handleBlur, values, errors }) => (
-        <Form {...formItemLayout}>
-          <Typography>
-            <Title>Publishing </Title>
+    <Layout
+      style={{
+        height: "100vh",
+        overflowY: "hidden",
+      }}
+    >
+      <SideMenu
+        {...{
+          openKeys,
+          setOpenKeys,
+          selectedKeys,
+          setSelectedKeys,
+          currentValues,
+          dendronFormConfig: dendronConfig,
+          anyOfValues,
+        }}
+      />
+      <Layout
+        className="site-layout"
+        style={{
+          overflowY: "scroll",
+          display: "flex",
+          justifyItems: "center",
+          alignItems: "center",
+          background: "white",
+        }}
+      >
+        <Content
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            width: "max-content",
+            maxWidth: "35rem",
+          }}
+        >
+          <Typography style={{ textAlign: "center", padding: "2rem" }}>
+            <Title>Dendron Configuration</Title>
           </Typography>
-
-          <Form.Item name="siteHierarchies" label="Site Hierarchies">
-            <FieldArray
-              name="site.siteHierarchies"
-              render={(arrayHelpers) =>
-                renderArray(values.site.siteHierarchies, arrayHelpers)
-              }
-            />
-          </Form.Item>
-          {createFormItem({ name: "site.siteRootDir", label: "Site Root Dir" })}
-        </Form>
-      )}
-    </Formik>
+          <Formik
+            initialValues={engine.config}
+            onSubmit={onSubmit}
+            validate={validate}
+            validateOnChange={true}
+          >
+            {({ values, errors }) => (
+              <Form>
+                {buckets.map((bucket) => {
+                  return (
+                    <React.Fragment key={bucket}>
+                      <Typography
+                        style={{ textAlign: "center", padding: "2rem" }}
+                      >
+                        <Title level={2} id={bucket}>
+                          {bucket}
+                        </Title>
+                      </Typography>
+                      {bucketConfig[bucket].map((property: string) => (
+                        <FormGenerator
+                          key={property}
+                          data={generateRenderableConfig(
+                            _.get(
+                              dendronValidator,
+                              `definitions.DendronConfig.properties.${property}`
+                            ),
+                            dendronValidator.definitions,
+                            property
+                          )}
+                          values={values}
+                          errors={errors}
+                          prefix={[property]}
+                          setSelectedKeys={setSelectedKeys}
+                          setOpenKeys={setOpenKeys}
+                          setAnyOfValues={setAnyOfValues}
+                        />
+                      ))}
+                    </React.Fragment>
+                  );
+                })}
+                <Form.Item name="submit" style={{ justifyContent: "center" }}>
+                  <Button.Group size="large">
+                    <ResetButton type="text">Clear changes</ResetButton>
+                    <SubmitButton type="primary">Save changes</SubmitButton>
+                  </Button.Group>
+                </Form.Item>
+              </Form>
+            )}
+          </Formik>
+        </Content>
+      </Layout>
+    </Layout>
   );
-}
+};
+
+export default ConfigForm;

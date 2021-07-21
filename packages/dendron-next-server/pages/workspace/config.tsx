@@ -116,7 +116,7 @@ const saveConfigData = async (config: DendronConfig) => {
       delete config.site[k];
     }
   });
-  await configWrite(config);
+  // await configWrite(config);
 };
 
 export default function ConfigSamplePage() {

@@ -1,0 +1,654 @@
+{
+  "$ref": "#/definitions/DendronConfig",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "CustomFMEntry": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "value": {
+        }
+      },
+      "required": [
+        "key",
+        "value"
+      ],
+      "type": "object"
+    },
+    "DHookDict": {
+      "additionalProperties": false,
+      "properties": {
+        "onCreate": {
+          "items": {
+            "$ref": "#/definitions/DHookEntry"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "onCreate"
+      ],
+      "type": "object"
+    },
+    "DHookEntry": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "pattern": {
+          "type": "string"
+        },
+        "type": {
+          "const": "js",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "pattern",
+        "type"
+      ],
+      "type": "object"
+    },
+    "DPermission": {
+      "additionalProperties": false,
+      "properties": {
+        "read": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "write": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "read",
+        "write"
+      ],
+      "type": "object"
+    },
+    "DVault": {
+      "additionalProperties": false,
+      "properties": {
+        "fsPath": {
+          "description": "Filesystem path to fault",
+          "type": "string"
+        },
+        "name": {
+          "description": "Name of vault",
+          "type": "string"
+        },
+        "noAutoPush": {
+          "description": "If this is enabled, don't apply workspace push commands",
+          "type": "boolean"
+        },
+        "remote": {
+          "$ref": "#/definitions/RemoteEndpoint"
+        },
+        "seed": {
+          "description": "Id of a seed this vault belongs to",
+          "type": "string"
+        },
+        "sync": {
+          "$ref": "#/definitions/DVaultSync",
+          "description": "How the vault should be handled when using \"add and commit\" and \"sync\" commands.\n\nOptions are:\n* skip: Skip them entirely. You must manage the repository manually.\n* noPush: Commit any changes and pull updates, but don't push. You can watch the repository and make local changes without sharing them back.\n* noCommit: Pull and push updates if the workspace is clean, but don't commit. You manually commit your local changes, but automatically share them once you committed.\n* sync: Commit changes, and pull and push updates. Treats workspace vaults like regular vaults.\n\nThis setting overrides the `workspaceVaultSync` setting for the vault, even if the vault is a workspace vault.\n\nDefaults to `sync`."
+        },
+        "userPermission": {
+          "$ref": "#/definitions/DPermission"
+        },
+        "visibility": {
+          "$ref": "#/definitions/DVaultVisibility"
+        },
+        "workspace": {
+          "description": "Indicate the workspace that this vault is part of",
+          "type": "string"
+        }
+      },
+      "required": [
+        "fsPath"
+      ],
+      "type": "object"
+    },
+    "DVaultSync": {
+      "description": "How \"add and commit\" and \"sync\" commands should function. Defaults to `noCommit`.\n\n* skip: Skip entirely. You must manage the repository manually.\n* noPush: Commit any changes and pull updates, but don't push. You can watch the repository and make local changes without sharing them back.\n* noCommit: Pull and push updates if the workspace is clean, but don't commit. You manually commit your local changes, but automatically share them once you committed.\n* sync: Commit changes, and pull and push updates.",
+      "enum": [
+        "skip",
+        "noPush",
+        "noCommit",
+        "sync"
+      ],
+      "type": "string"
+    },
+    "DVaultVisibility": {
+      "const": "private",
+      "type": "string"
+    },
+    "DWorkspaceEntry": {
+      "additionalProperties": false,
+      "properties": {
+        "remote": {
+          "$ref": "#/definitions/RemoteEndpoint"
+        }
+      },
+      "required": [
+        "remote"
+      ],
+      "type": "object"
+    },
+    "DendronConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "apiEndpoint": {
+          "description": "If using backend API functionality",
+          "type": "string"
+        },
+        "autoFoldFrontmatter": {
+          "description": "Automatically fold frontmatter when opening a new note. False by default.",
+          "type": "boolean"
+        },
+        "defaultInsertHierarchy": {
+          "description": "Default is templates",
+          "type": "string"
+        },
+        "dendronVersion": {
+          "description": "Dendron version",
+          "type": "string"
+        },
+        "dev": {
+          "$ref": "#/definitions/DendronDevConfig",
+          "description": "Development related options"
+        },
+        "feedback": {
+          "description": "If true, enable feedback widget",
+          "type": "boolean"
+        },
+        "hierarchyDisplay": {
+          "description": "Shoud show hiearchy",
+          "type": "boolean"
+        },
+        "hierarchyDisplayTitle": {
+          "description": "Title used for hiearchies Default: Children",
+          "type": "string"
+        },
+        "hooks": {
+          "$ref": "#/definitions/DHookDict"
+        },
+        "initializeRemoteVaults": {
+          "description": "Initialize remote vaults on startup Default: true",
+          "type": "boolean"
+        },
+        "journal": {
+          "$ref": "#/definitions/JournalConfig"
+        },
+        "lookupConfirmVaultOnCreate": {
+          "description": "Pick vault when creating new note. Docs: https://dendron.so/notes/24b176f1-685d-44e1-a1b0-1704b1a92ca0.html#specify-vault-location-when-creating-a-note",
+          "type": "boolean"
+        },
+        "mermaid": {
+          "description": "Use mermaid diagrams",
+          "type": "boolean"
+        },
+        "noAutoCreateOnDefinition": {
+          "description": "Don't automatically create note when looking up definition",
+          "type": "boolean"
+        },
+        "noCaching": {
+          "description": "Disable caching behavior",
+          "type": "boolean"
+        },
+        "noLegacyNoteRef": {
+          "description": "Turn off legacy note refs;",
+          "type": "boolean"
+        },
+        "noTelemetry": {
+          "description": "Disable telemetry",
+          "type": "boolean"
+        },
+        "noXVaultWikiLink": {
+          "description": "Disable xvault wiki links",
+          "type": "boolean"
+        },
+        "randomNote": {
+          "$ref": "#/definitions/RandomNoteConfig",
+          "description": "Configuration for Random Note Lookup Command"
+        },
+        "seeds": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "$ref": "#/definitions/SeedEntry"
+              },
+              {
+                "not": {
+                }
+              }
+            ]
+          },
+          "type": "object"
+        },
+        "site": {
+          "$ref": "#/definitions/DendronSiteConfig",
+          "description": "Configuration related to publishing notes"
+        },
+        "useFMTitle": {
+          "description": "Use the title from frontmatter",
+          "type": "boolean"
+        },
+        "useKatex": {
+          "description": "Use katex for rendering math default: true",
+          "type": "boolean"
+        },
+        "useNoteTitleForLink": {
+          "description": "If true, use the note title when displaying naked links",
+          "type": "boolean"
+        },
+        "useNunjucks": {
+          "description": "Use nunjucks templating",
+          "type": "boolean"
+        },
+        "usePrettyRefs": {
+          "description": "Use pretty refs for preview",
+          "type": "boolean"
+        },
+        "vaults": {
+          "description": "Dendron vaults in workspace. Setup by plugin.",
+          "items": {
+            "$ref": "#/definitions/DVault"
+          },
+          "type": "array"
+        },
+        "version": {
+          "description": "Dendron version. Setup by plugin",
+          "type": "number"
+        },
+        "workspaceVaultSync": {
+          "$ref": "#/definitions/DVaultSync",
+          "description": "How workspace vaults should be handled when using workspace \"add and commit\" and \"sync\" commands.\n\nOptions are:\n* skip: Skip them entirely. You must manage the repository manually.\n* noPush: Commit any changes and pull updates, but don't push. You can watch the repository and make local changes without sharing them back.\n* noCommit: Pull and push updates if the workspace is clean, but don't commit. You manually commit your local changes, but automatically share them once you committed.\n* sync: Commit changes, and pull and push updates. Treats workspace vaults like regular vaults.\n\nDefaults to `noCommit`."
+        },
+        "workspaces": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "$ref": "#/definitions/DWorkspaceEntry"
+              },
+              {
+                "not": {
+                }
+              }
+            ]
+          },
+          "description": "Workspaces",
+          "type": "object"
+        }
+      },
+      "required": [
+        "version",
+        "site",
+        "journal",
+        "vaults"
+      ],
+      "type": "object"
+    },
+    "DendronDevConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "enableWebUI": {
+          "description": "Enable experimental web ui. Default is false",
+          "type": "boolean"
+        },
+        "engineServerPort": {
+          "description": "What port to use for engine server. Default behavior is to create at startup",
+          "type": "number"
+        },
+        "nextServerUrl": {
+          "description": "Custom next server",
+          "type": "string"
+        },
+        "nextStaticRoot": {
+          "description": "Static assets for next",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "DendronSiteConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "assetsPrefix": {
+          "description": "If set, add prefix to all asset links",
+          "type": "string"
+        },
+        "author": {
+          "type": "string"
+        },
+        "cognitoClientId": {
+          "type": "string"
+        },
+        "cognitoUserPoolId": {
+          "description": "Required for auth",
+          "type": "string"
+        },
+        "config": {
+          "additionalProperties": {
+            "$ref": "#/definitions/HierarchyConfig"
+          },
+          "description": "Control publication on a per hierarchy basis",
+          "type": "object"
+        },
+        "copyAssets": {
+          "description": "Copy assets from vault to site. Default: true",
+          "type": "boolean"
+        },
+        "customHeaderPath": {
+          "description": "If set, path to a custom header to include in published sites",
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "duplicateNoteBehavior": {
+          "$ref": "#/definitions/DuplicateNoteBehavior",
+          "description": "When publishing in multi-vault scenario, how to handle duplicate notes"
+        },
+        "ga_tracking": {
+          "description": "If set, use google analytics to track users",
+          "type": "string"
+        },
+        "generateChangelog": {
+          "description": "Generate changelog for published site Default: false",
+          "type": "boolean"
+        },
+        "gh_edit_branch": {
+          "type": "string"
+        },
+        "gh_edit_link": {
+          "description": "If set, add edit on github to this site\"",
+          "type": "string"
+        },
+        "gh_edit_link_text": {
+          "type": "string"
+        },
+        "gh_edit_repository": {
+          "type": "string"
+        },
+        "gh_edit_view_mode": {
+          "enum": [
+            "tree",
+            "edit"
+          ],
+          "type": "string"
+        },
+        "githubCname": {
+          "description": "Cname used for github pages\n- default: none",
+          "type": "string"
+        },
+        "hideBlockAnchors": {
+          "type": "boolean"
+        },
+        "image": {
+          "type": "string"
+        },
+        "logo": {
+          "description": "Path to site logo",
+          "type": "string"
+        },
+        "previewPort": {
+          "description": "Set alternate port for preview Default: 8080",
+          "type": "boolean"
+        },
+        "segmentKey": {
+          "description": "If set, value of your segment key",
+          "type": "string"
+        },
+        "siteFaviconPath": {
+          "description": "Path to favicon. Relative to workspace. Default: \"favicon.ico\"",
+          "type": "string"
+        },
+        "siteHierarchies": {
+          "description": "Hiearchies to publish",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "siteIndex": {
+          "description": "By default, the domain of your `siteHiearchies` page",
+          "type": "string"
+        },
+        "siteLastModified": {
+          "description": "If true, show a last modified on the site",
+          "type": "boolean"
+        },
+        "siteNotesDir": {
+          "description": "Folder where your notes will be kept. By default, \"notes\"",
+          "type": "string"
+        },
+        "siteRepoDir": {
+          "description": "Location of the github repo where your site notes are located. By default, this is assumed to be your `workspaceRoot` if not set.",
+          "type": "string"
+        },
+        "siteRootDir": {
+          "description": "Where your site will be published. Relative to Dendron workspace",
+          "type": "string"
+        },
+        "siteUrl": {
+          "description": "Url of site without trailing slash eg. dendron.so",
+          "type": "string"
+        },
+        "title": {
+          "description": "SEO related values",
+          "type": "string"
+        },
+        "twitter": {
+          "type": "string"
+        },
+        "useContainers": {
+          "description": "Use  {@link  https://github.com/Nevenall/remark-containers }  in published site",
+          "type": "boolean"
+        },
+        "usePrettyRefs": {
+          "description": "Pretty refs help you identify when content is embedded from elsewhere and provide links back to the source",
+          "type": "boolean"
+        },
+        "writeStubs": {
+          "description": "When publishing, should stubs be written to disk? Default: true NOTE: if this isn't set to true, will cause stub notes to be published with different ids each time",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "siteHierarchies",
+        "siteRootDir"
+      ],
+      "type": "object"
+    },
+    "DuplicateNoteAction": {
+      "const": "useVault",
+      "type": "string"
+    },
+    "DuplicateNoteBehavior": {
+      "$ref": "#/definitions/UseVaultBehavior"
+    },
+    "HierarchyConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "customFrontmatter": {
+          "items": {
+            "$ref": "#/definitions/CustomFMEntry"
+          },
+          "type": "array"
+        },
+        "noindexByDefault": {
+          "type": "boolean"
+        },
+        "publishByDefault": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "additionalProperties": {
+                "type": "boolean"
+              },
+              "type": "object"
+            }
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "JournalConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "addBehavior": {
+          "$ref": "#/definitions/NoteAddBehavior"
+        },
+        "dailyDomain": {
+          "type": "string"
+        },
+        "dailyVault": {
+          "description": "If set, add all daily journals to specified vault",
+          "type": "string"
+        },
+        "dateFormat": {
+          "type": "string"
+        },
+        "firstDayOfWeek": {
+          "description": "0 is Sunday, 1 is Monday, ...",
+          "type": "number"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "dailyDomain",
+        "name",
+        "dateFormat",
+        "addBehavior",
+        "firstDayOfWeek"
+      ],
+      "type": "object"
+    },
+    "NoteAddBehavior": {
+      "enum": [
+        "childOfDomain",
+        "childOfDomainNamespace",
+        "childOfCurrent",
+        "asOwnDomain"
+      ],
+      "type": "string"
+    },
+    "RandomNoteConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "exclude": {
+          "description": "Hiearchies to exclude",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "include": {
+          "description": "Hiearchies to include",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "RemoteEndpoint": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "git",
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "url"
+      ],
+      "type": "object"
+    },
+    "SeedEntry": {
+      "additionalProperties": false,
+      "properties": {
+        "branch": {
+          "description": "Specific branch to pull from",
+          "type": "string"
+        },
+        "site": {
+          "$ref": "#/definitions/SeedSite",
+          "description": "When in this seed, what url to use"
+        }
+      },
+      "type": "object"
+    },
+    "SeedSite": {
+      "additionalProperties": false,
+      "properties": {
+        "index": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "url"
+      ],
+      "type": "object"
+    },
+    "UseVaultBehavior": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "$ref": "#/definitions/DuplicateNoteAction"
+        },
+        "payload": {
+          "$ref": "#/definitions/UseVaultBehaviorPayload"
+        }
+      },
+      "required": [
+        "action",
+        "payload"
+      ],
+      "type": "object"
+    },
+    "UseVaultBehaviorPayload": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "vault": {
+              "$ref": "#/definitions/DVault"
+            }
+          },
+          "required": [
+            "vault"
+          ],
+          "type": "object"
+        },
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      ]
+    }
+  }
+}

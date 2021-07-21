@@ -22,8 +22,10 @@ export async function getWebviewContent(): Promise<string> {
 }
 
 function getWebviewContent2(opts: { title: string }) {
-  const port = DendronWorkspace.instance().port;
-  if (_.isUndefined(port)) {
+  const instance = DendronWorkspace.instance();
+  const port = instance.port;
+  const wsRoot = instance.workspaceService?.wsRoot;
+  if (_.isUndefined(port) || _.isUndefined(wsRoot)) {
     return `<head> Still starting up </head>`;
   }
   return `<!DOCTYPE html>

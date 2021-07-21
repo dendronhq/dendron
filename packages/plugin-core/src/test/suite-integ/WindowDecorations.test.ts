@@ -1,12 +1,13 @@
-import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
+import { AssertUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { describe } from "mocha";
-import { NoteUtils } from "@dendronhq/common-all";
+import { NoteProps, NoteUtils } from "@dendronhq/common-all";
 import * as vscode from "vscode";
 import { VSCodeUtils } from "../../utils";
 import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 import { DECORATION_TYPE_ALIAS, DECORATION_TYPE_BLOCK_ANCHOR, DECORATION_TYPE_TAG, DECORATION_TYPE_BROKEN_WIKILINK, DECORATION_TYPE_TIMESTAMP, DECORATION_TYPE_WIKILINK, updateDecorations } from "../../features/windowDecorations";
 import _ from "lodash";
+import { writeFile } from "fs-extra";
 
 /** Check if the ranges decorated by `decorations` contains `text` */
 function isTextDecorated(
@@ -26,7 +27,7 @@ suite("windowDecorations", function () {
   });
 
   describe("decorations", () => {
-    test("basic", (done) => {
+    test("highlighting", (done) => {
       const CREATED = "1625648278263";
       const UPDATED = "1625758878263";
       const FNAME = "bar";
@@ -70,7 +71,7 @@ suite("windowDecorations", function () {
           });
           const editor = await VSCodeUtils.openNote(note!);
           const document = editor.document;
-          const allDecorations = updateDecorations(editor);
+          const {allDecorations} = updateDecorations(editor);
 
           const timestampDecorations = allDecorations.get(DECORATION_TYPE_TIMESTAMP);
           expect(timestampDecorations.length).toEqual(2);
@@ -116,6 +117,88 @@ suite("windowDecorations", function () {
           expect(
             isTextDecorated("[[does.not.exist]]", brokenWikilinkDecorations!, document)
           ).toBeTruthy();
+          done();
+        },
+      });
+    });
+  });
+
+  describe("warnings", () => {
+    test("missing frontmatter", (done) => {
+      let note: NoteProps;
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ vaults, wsRoot }) => {
+          note = await NoteTestUtilsV4.createNote({
+            fname: "foo",
+            vault: vaults[0],
+            wsRoot,
+          });
+          // Empty out the note, getting rid of the frontmatter
+          const path = NoteUtils.getFullPath({note, wsRoot});
+          await writeFile(path, "foo bar");
+        },
+        onInit: async () => {
+          const editor = await VSCodeUtils.openNote(note!);
+          const { allWarnings } = updateDecorations(editor);
+
+          expect(allWarnings.length).toEqual(1);
+          expect(AssertUtils.assertInString({body: allWarnings[0].message, match: ["frontmatter", "missing"]}));
+          done();
+        },
+      });
+    });
+
+    test("bad note id", (done) => {
+      let note: NoteProps;
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ vaults, wsRoot }) => {
+          note = await NoteTestUtilsV4.createNote({
+            fname: "foo",
+            vault: vaults[0],
+            wsRoot,
+            props: {
+              id: "-foo",
+            },
+          });
+        },
+        onInit: async () => {
+          const editor = await VSCodeUtils.openNote(note!);
+          const { allWarnings } = updateDecorations(editor);
+
+          expect(allWarnings.length).toEqual(1);
+          expect(AssertUtils.assertInString({body: allWarnings[0].message, match: ["id", "bad"]}));
+          done();
+        },
+      });
+    });
+
+    test("note id is missing", (done) => {
+      let note: NoteProps;
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ vaults, wsRoot }) => {
+          note = await NoteTestUtilsV4.createNote({
+            fname: "foo",
+            vault: vaults[0],
+            wsRoot,
+          });
+          // Rewrite the file to have id missing in frontmatter
+          const path = NoteUtils.getFullPath({note, wsRoot});
+          await writeFile(path, [
+            "---",
+            "updated: 234",
+            "created: 123",
+            "---",
+          ].join("\n"));
+        },
+        onInit: async () => {
+          const editor = await VSCodeUtils.openNote(note!);
+          const { allWarnings } = updateDecorations(editor);
+
+          expect(allWarnings.length).toEqual(1);
+          expect(AssertUtils.assertInString({body: allWarnings[0].message, match: ["id", "missing"]}));
           done();
         },
       });

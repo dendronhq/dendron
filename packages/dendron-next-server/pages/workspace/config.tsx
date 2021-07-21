@@ -15,8 +15,7 @@ import {
   Switch,
   useToast,
 } from "@chakra-ui/react";
-import { NoteAddBehavior } from "@dendronhq/common-all";
-import { DendronConfig } from "@dendronhq/common-all";
+import { NoteAddBehavior, DendronConfig } from "@dendronhq/common-all";
 import { Field, FieldArray, Form, Formik } from "formik";
 import _, { get } from "lodash";
 import Head from "next/head";
@@ -41,6 +40,11 @@ const genDefaultConfig = (): DendronConfig => ({
     dateFormat: "y.MM.dd",
     addBehavior: NoteAddBehavior.childOfDomain,
     firstDayOfWeek: 1,
+  },
+  scratch: {
+    name: "scratch",
+    dateFormat: "y.MM.dd.HHmmss",
+    addBehavior: NoteAddBehavior.asOwnDomain,
   },
   site: {
     copyAssets: true,

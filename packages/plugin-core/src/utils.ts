@@ -269,7 +269,13 @@ export class VSCodeUtils {
     const txtPath = document.uri.fsPath;
     const wsRoot = DendronWorkspace.wsRoot();
     const fname = path.basename(txtPath, ".md");
-    const vault = VSCodeUtils.getVaultFromDocument(document);
+    let vault: DVault;
+    try {
+      vault = VSCodeUtils.getVaultFromDocument(document);
+    } catch (err) {
+      // No vault
+      return undefined;
+    }
     return NoteUtils.getNoteByFnameV5({
       fname,
       vault,

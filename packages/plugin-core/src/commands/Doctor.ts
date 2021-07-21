@@ -1,4 +1,4 @@
-import { DEngineClient, NoteProps } from "@dendronhq/common-all";
+import { DEngineClient, isNotUndefined, NoteProps } from "@dendronhq/common-all";
 import {
   BackfillV2Command,
   DoctorActions,
@@ -161,7 +161,10 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     }
     // Make sure to save any changes in the file because Doctor reads them from
     // disk, and won't see changes that haven't been saved.
-    await VSCodeUtils.getActiveTextEditor()?.document.save();
+    const document = VSCodeUtils.getActiveTextEditor()?.document;
+    if (isNotUndefined(document) && isNotUndefined(VSCodeUtils.getNoteFromDocument(document))) {
+      await document.save();
+    }
     this.L.info({ ctx, msg: "pre:Reload" });
     const engine: DEngineClient =
       (await new ReloadIndexCommand().execute()) as DEngineClient;

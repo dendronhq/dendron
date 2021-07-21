@@ -18,6 +18,7 @@ import { getConfigValue, getWS } from "../workspace";
 import { CodeConfigKeys, DateTimeFormat } from "../types";
 import { VSCodeUtils } from "../utils";
 import { containsNonDendronUri } from "../utils/md";
+import { warnBadFrontmatterContents, warnMissingFrontmatter } from "./codeActionProvider";
 
 export function updateDecorations(activeEditor: TextEditor) {
   const text = activeEditor.document.getText();
@@ -30,11 +31,13 @@ export function updateDecorations(activeEditor: TextEditor) {
   );
   const tree = proc.parse(text);
   const allDecorations = new DefaultMap<TextEditorDecorationType, DecorationOptions[]>(() => []);
+  let frontmatter: FrontmatterContent | undefined;
 
   visit(tree, (node) => {
     switch (node.type) {
       case DendronASTTypes.FRONTMATTER: {
-        const decorations = decorateTimestamps(node as FrontmatterContent);
+        frontmatter = node as FrontmatterContent;
+        const decorations = decorateTimestamps(frontmatter);
         if (isNotUndefined(decorations)) {
           for (const decoration of decorations) {
             allDecorations.get(DECORATION_TYPE_TIMESTAMP).push(decoration);
@@ -76,6 +79,10 @@ export function updateDecorations(activeEditor: TextEditor) {
         /* Nothing */
     }
   });
+
+  // Warn for missing or bad frontmatter
+  if (_.isUndefined(frontmatter)) warnMissingFrontmatter(activeEditor.document);
+  else warnBadFrontmatterContents(activeEditor.document, frontmatter);
 
   // Activate the decorations
   for (const [type, decorations] of allDecorations.entries()) {

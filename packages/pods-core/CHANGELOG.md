@@ -3,6 +3,47 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.51.1](https://github.com/dendronhq/dendron/compare/v0.51.0...v0.51.1) (2021-07-20)
+
+**Note:** Version bump only for package @dendronhq/pods-core
+
+
+
+
+
+# [0.51.0](https://github.com/dendronhq/dendron/compare/v0.49.0...v0.51.0) (2021-07-19)
+
+
+### Features Dendron
+
+* ajv to validate publish pod ([42db7da](https://github.com/dendronhq/dendron/commit/42db7da23aa7174a27d7249348f6c76919561aa1))
+
+
+
+
+
+## [0.50.3](https://github.com/dendronhq/dendron/compare/v0.49.0...v0.50.3) (2021-07-19)
+
+
+### Features Dendron
+
+* ajv to validate publish pod ([42db7da](https://github.com/dendronhq/dendron/commit/42db7da23aa7174a27d7249348f6c76919561aa1))
+
+
+
+
+
+## [0.50.2](https://github.com/dendronhq/dendron/compare/v0.49.0...v0.50.2) (2021-07-19)
+
+
+### Features Dendron
+
+* ajv to validate publish pod ([42db7da](https://github.com/dendronhq/dendron/commit/42db7da23aa7174a27d7249348f6c76919561aa1))
+
+
+
+
+
 ## [0.50.1](https://github.com/dendronhq/dendron/compare/v0.49.0...v0.50.1) (2021-07-16)
 
 

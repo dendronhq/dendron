@@ -68,6 +68,7 @@ describe("hashtag", () => {
       expect(getDescendantNode(resp, 0, 1).type).toEqual(
         DendronASTTypes.HASHTAG
       );
+      expect(getDescendantNode(resp, 0, 1).value).toEqual("#my-hash-tag");
     });
 
     test("doesn't parse hashtag starting with number", () => {

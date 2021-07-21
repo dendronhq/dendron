@@ -600,6 +600,12 @@ export class LinkUtils {
     });
     return linkCandidates;
   }
+  
+  static hasVaultPrefix(link: DLink) {
+    if (link.to?.vaultName) {
+      return true;
+    } else return false;
+  }
 }
 
 export class AnchorUtils {

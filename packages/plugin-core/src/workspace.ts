@@ -14,7 +14,7 @@ import {
 import {
   NodeJSUtils,
   readJSONWithComments,
-  readMD, writeJSONWithComments
+  readMD, resolveTilde, writeJSONWithComments
 } from "@dendronhq/common-server";
 import {
   DConfig,
@@ -713,11 +713,35 @@ export class DendronWorkspace {
               AnalyticsUtils.track(TutorialEvents.WelcomeShow);
               return;
 
-            case "initializeWorkspace":
-              await new SetupWorkspaceCommand().run({
-                workspaceInitializer: new TutorialInitializer(),
-              });
+            case "initializeWorkspace": {
+              // Try to put into a Default '~/Dendron' folder first. Only prompt
+              // if that path and the backup path already exist to lower
+              // onboarding friction
+              let wsPath;
+              const wsPathPrimary = path.join(resolveTilde("~"), "Dendron");
+              const wsPathBackup = path.join(resolveTilde("~"), "Dendron-Tutorial");
+
+              if (!fs.pathExistsSync(wsPathPrimary)) {
+                wsPath = wsPathPrimary;
+              }
+              else if (!fs.pathExistsSync(wsPathBackup)) {
+                wsPath = wsPathBackup;
+              }
+
+              if (!wsPath) {
+                await new SetupWorkspaceCommand().run({
+                  workspaceInitializer: new TutorialInitializer()
+                });
+              }
+              else {
+                await new SetupWorkspaceCommand().execute({
+                  rootDirRaw: wsPath,
+                  workspaceInitializer: new TutorialInitializer(),
+                });
+              }
+
               return;
+            }
             default:
               break;
           }

@@ -144,7 +144,7 @@ suite("DoctorCommandTest", function () {
     });
   });
 
-  // test.only("lots of files", (done) => {
+  // test("lots of files", (done) => {
   //   runLegacySingleWorkspaceTest({
   //     ctx,
   //     onInit: async ({ engine, wsRoot, vaults }) => {
@@ -540,7 +540,7 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
     });
   });
 
-  test("workspace scope should do nothing", (done) => {
+  test("should do nothing in multivault workspace if vault prefix isn't there", (done) => {
     runLegacyMultiWorkspaceTest({
       ctx,
       preSetupHook: async (opts) => {
@@ -610,8 +610,7 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
     });
   });
 
-  // TODO: enable this once we enable workspace scope for CREATE_MISSING_LINKED_NOTES
-  test.skip("wild links in multiple vaults with workspace scope", (done) => {
+  test("wild links in multiple vaults with workspace scope", (done) => {
     runLegacyMultiWorkspaceTest({
       ctx,
       preSetupHook: async (opts) => {
@@ -623,9 +622,10 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
         await NoteTestUtilsV4.createNote({
           fname: "first",
           body: [
-            "[[wild]]",
-            "[[somenote|somenote]]",
-            "[[some note|something]]",
+            "[[dendron://vault2/cross2]]",
+            "[[dendron://vault1/wild]]",
+            "[[somenote|dendron://vault1/somenote]]",
+            "[[some note|dendron://vault1/something]]",
           ].join("\n"),
           vault: vault1,
           wsRoot,
@@ -633,9 +633,10 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
         await NoteTestUtilsV4.createNote({
           fname: "second",
           body: [
-            "[[wild2]]",
-            "[[somenote|somenote2]]",
-            "[[some note|something2]]",
+            "[[dendron://vault1/cross1]]",
+            "[[dendron://vault2/wild2]]",
+            "[[somenote|dendron://vault2/somenote2]]",
+            "[[some note|dendron://vault2/something2]]",
           ].join("\n"),
           vault: vault2,
           wsRoot,
@@ -655,7 +656,12 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
           );
         await cmd.run();
         const firstVaultPath = vault2Path({ vault: vault1, wsRoot });
-        const firstVaultFileNames = ["wild.md", "somenote.md", "something.md"];
+        const firstVaultFileNames = [
+          "cross1.md",
+          "wild.md",
+          "somenote.md",
+          "something.md"
+        ];
         _.forEach(firstVaultFileNames, (fileName) => {
           const containsNew = _.includes(
             fs.readdirSync(firstVaultPath),
@@ -665,6 +671,7 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
         });
         const secondVaultPath = vault2Path({ vault: vault2, wsRoot });
         const secondVaultFileNames = [
+          "cross2.md",
           "wild2.md",
           "somenote2.md",
           "something2.md",

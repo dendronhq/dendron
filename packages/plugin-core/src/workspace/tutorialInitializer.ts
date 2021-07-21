@@ -1,4 +1,9 @@
-import { DendronError, DVault, TutorialEvents } from "@dendronhq/common-all";
+import {
+  DendronError,
+  DVault,
+  getStage,
+  TutorialEvents,
+} from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import path from "path";
@@ -77,7 +82,12 @@ export class TutorialInitializer
     if (fs.pathExistsSync(rootUri.fsPath)) {
       // Set the view to have the tutorial page showing with the preview opened to the side.
       await vscode.window.showTextDocument(rootUri);
-      await MarkdownUtils.openPreview({ reuseWindow: false });
+      if (getStage() !== "test") {
+        // TODO: HACK to wait for existing preview to be ready
+        setTimeout(() => {
+          MarkdownUtils.openPreview({ reuseWindow: false });
+        }, 1000);
+      }
     } else {
       Logger.error({
         ctx,

@@ -67,7 +67,7 @@ type CommandOpts = {
   selectedItems: readonly NoteQuickInput[];
 } & CommandGatherOutput;
 
-type CommandOutput = {
+export type CommandOutput = {
   quickpick: DendronQuickPickerV2;
   controller: LookupControllerV3;
   provider: ILookupProviderV3;

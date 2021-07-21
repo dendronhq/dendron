@@ -81,7 +81,7 @@ suite("CopyNoteLink", function () {
           editor.selection = new vscode.Selection(start, end);
           // generate a wikilink for it
           const link = await new CopyNoteLinkCommand().run();
-          expect(link).toEqual(`[[Lörem  Foo：Bar🙂Baz  Ipsum|test#lörem--foo：barbaz--ipsum]]`);
+          expect(link).toEqual(`[[Lörem Foo：Bar🙂Baz Ipsum|test#lörem-foo：barbaz-ipsum]]`);
           done();
         }
       })

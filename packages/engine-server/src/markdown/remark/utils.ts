@@ -630,7 +630,7 @@ export class AnchorUtils {
         /* nothing */
       }
     });
-    return _.trim(headerText.join(" "));
+    return _.trim(headerText.join(""));
   }
 
   /** Given a *parsed* anchor node, returns the anchor id ("header" or "^block" and positioned anchor object for it. */

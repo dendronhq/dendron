@@ -383,6 +383,7 @@ export async function _activate(
     );
     const { port, subprocess } = await startServerProcess();
     if (subprocess) {
+      Logger.info({ctx, msg: "server running", pid: subprocess.pid})
       // if extension closes, reap server process
       context.subscriptions.push(
         new vscode.Disposable(() => {

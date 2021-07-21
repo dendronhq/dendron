@@ -120,7 +120,7 @@ suite("Migration", function () {
             logger: Logger,
             migrations: getMigration({ from: "0.45.0", to: "0.46.1" }),
           });
-          expect(out.length).toEqual(2);
+          expect(out.length).toEqual(3);
           expect(getWS().config.journal).toEqual(
             DConfig.genDefaultConfig().journal
           );
@@ -145,7 +145,7 @@ suite("Migration", function () {
             logger: Logger,
             migrations: getMigration({ from: "0.45.0", to: "0.46.1" }),
           });
-          expect(out.length).toEqual(2);
+          expect(out.length).toEqual(3);
           expect(getWS().config.journal).toEqual({
             ...DConfig.genDefaultConfig().journal,
             name: "foo",
@@ -159,5 +159,38 @@ suite("Migration", function () {
         },
       });
     });
+
+    test("migrate to 0.52.0, non standard settings", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        onInit: async ({ engine, wsRoot }) => {
+          const dendronConfig = engine.config;
+          const wsConfig = await getWS().getWorkspaceSettings();
+          const wsService = new WorkspaceService({ wsRoot });
+          const out = await MigrationServce.applyMigrationRules({
+            currentVersion: "0.52.0",
+            previousVersion: "0.51.0",
+            dendronConfig,
+            wsConfig,
+            wsService,
+            logger: Logger,
+            migrations: getMigration({ from: "0.51.0", to: "0.52.0" }),
+          });
+          expect(out.length).toEqual(1);
+          expect(getWS().config.scratch).toEqual({
+            ...DConfig.genDefaultConfig().scratch,
+            name: "foo",
+          });
+            done();
+        },
+        wsSettingsOverride: {
+          settings: {
+            [CONFIG.DEFAULT_SCRATCH_NAME.key]: "foo",
+          },
+        },
+      });
+    });
+
+    
   });
 });

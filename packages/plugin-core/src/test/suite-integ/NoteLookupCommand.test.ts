@@ -10,6 +10,7 @@ import { describe } from "mocha";
 // // You can import and use all API from the 'vscode' module
 // // as well as import your extension to test it
 import * as vscode from "vscode";
+import { LookupNoteTypeEnum } from "../../commands/LookupCommand";
 import { NoteLookupCommand } from "../../commands/NoteLookupCommand";
 import { PickerUtilsV2 } from "../../components/lookup/utils";
 import { VSCodeUtils } from "../../utils";
@@ -224,7 +225,7 @@ suite("NoteLookupCommand", function () {
   });
 
   describe("modifiers", () => {
-    test.only("Journal note modifier behavior", (done) => {
+    test("Journal note modifier behaviors", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
         preSetupHook: async ({ wsRoot, vaults }) => {
@@ -234,9 +235,28 @@ suite("NoteLookupCommand", function () {
           const cmd = new NoteLookupCommand();
           stubVaultPick(vaults);
 
+          // with journal note modifier enabled,
           await VSCodeUtils.openNote(engine.notes["foo"]);
-          const opts = (await cmd.run());
-          console.log(opts);
+          const out = (await cmd.run({
+            noteType: LookupNoteTypeEnum.journal,
+            noConfirm: true,
+          }));
+          
+          expect(engine.config.journal.dateFormat).toEqual("y.MM.dd");
+          // quickpick value should be `foo.journal.yyyy.mm.dd`
+          const today = ((new Date()).toISOString().split("T")[0]).split("-").join(".");
+          expect(out?.quickpick.value).toEqual(`foo.journal.${today}`)
+
+          // at this point, the button: 
+          const journalBtn = _.find(out?.quickpick.buttons, (button) => {
+            return button.type === LookupNoteTypeEnum.journal
+          });
+          
+          // and if you trigger it again (disable),
+          await journalBtn?.onDisable({ quickPick: out!.quickpick });
+          // the quickpick value should turn back to name of current note.
+          expect(out?.quickpick.value).toEqual("foo");
+
           done();
         }
       });

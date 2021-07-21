@@ -20,6 +20,7 @@ suite("StartServer", function () {
     afterHook: async () => {
       homeDirStub.restore();
     },
+    noStubExecServerNode: true
   });
 
 	describe("basic", function() {
@@ -32,6 +33,17 @@ suite("StartServer", function () {
 				done();
 			});
 		});
+
+		// test("error: sigkiill", function(done) {
+		// 	ServerUtils.execServerNode({
+    //     scriptPath: path.join(__dirname, "..", "..", "server.js"),
+    //     logPath: DendronWorkspace.instance().context.logPath}).then(async ({subprocess}) => {
+    //       process.kill(subprocess.pid);
+		// 	}).catch(err => {
+    //     expect(err).toEqual("");
+    //     done();
+    //   });
+		// });
 
 	});
 });

@@ -1,3 +1,4 @@
+import { ServerUtils } from "@dendronhq/api-server";
 import {
   CONSTANTS,
   DendronError,
@@ -22,6 +23,7 @@ import {
 import { ExecaChildProcess } from "execa";
 import _ from "lodash";
 import { Duration } from "luxon";
+import path from "path";
 import semver from "semver";
 import * as vscode from "vscode";
 import { CONFIG, DendronContext, DENDRON_COMMANDS } from "./constants";
@@ -381,6 +383,7 @@ export async function _activate(
     );
     const { port, subprocess } = await startServerProcess();
     if (subprocess) {
+      // if extension closes, reap server process
       context.subscriptions.push(
         new vscode.Disposable(() => {
           Logger.info({ ctx, msg: "kill server start" });
@@ -388,6 +391,12 @@ export async function _activate(
           Logger.info({ ctx, msg: "kill server end" });
         })
       );
+
+      // if server process has issues, prompt user to restart
+      ServerUtils.onProcessExit({subprocess, cb: () => {
+        // TODO: prompt user to reload
+        vscode.window.showErrorMessage("Dendron engine encountered an error");
+      }});
     }
     const durationStartServer = getDurationMilliseconds(start);
     Logger.info({ ctx, msg: "post-start-server", port, durationStartServer });

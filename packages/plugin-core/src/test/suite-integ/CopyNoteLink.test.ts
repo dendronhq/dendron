@@ -1,6 +1,6 @@
 import { NoteProps } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
-import { AssertUtils, NOTE_PRESETS_V4 } from "@dendronhq/common-test-utils";
+import { AssertUtils, NoteTestUtilsV4, NOTE_PRESETS_V4 } from "@dendronhq/common-test-utils";
 import { ENGINE_HOOKS, TestConfigUtils } from "@dendronhq/engine-test-utils";
 import { describe } from "mocha";
 import path from "path";
@@ -17,10 +17,8 @@ import {
 import { setupBeforeAfter } from "../testUtilsV3";
 
 suite("CopyNoteLink", function () {
-  let ctx: vscode.ExtensionContext;
+  const ctx = setupBeforeAfter(this, {});
   this.timeout(TIMEOUT);
-
-  ctx = setupBeforeAfter(this, {});
 
   describe("single", () => {
     test("basic", (done) => {
@@ -35,6 +33,58 @@ suite("CopyNoteLink", function () {
         },
         preSetupHook: ENGINE_HOOKS.setupBasic,
       });
+    });
+
+    test("with a header that's a link", (done) => {
+      let noteWithLink: NoteProps;
+      runSingleVaultTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          noteWithLink = await NoteTestUtilsV4.createNote({
+            fname: "test",
+            vault: vaults[0],
+            wsRoot,
+            body: "## [[Foo Bar|foo.bar]]",
+          });
+        },
+        onInit: async () => {
+          // Open and select the header
+          const editor = await VSCodeUtils.openNote(noteWithLink);
+          const start = LocationTestUtils.getPresetWikiLinkPosition();
+          const end = LocationTestUtils.getPresetWikiLinkPosition({char: 10});
+          editor.selection = new vscode.Selection(start, end);
+          // generate a wikilink for it
+          const link = await new CopyNoteLinkCommand().run();
+          expect(link).toEqual(`[[Foo Bar|${noteWithLink.fname}#foo-bar]]`);
+          done();
+        }
+      })
+    });
+
+    test("with a header link containing unicode characters", (done) => {
+      let noteWithLink: NoteProps;
+      runSingleVaultTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          noteWithLink = await NoteTestUtilsV4.createNote({
+            fname: "test",
+            vault: vaults[0],
+            wsRoot,
+            body: "## Lörem [[Foo：Bar🙂Baz|foo：bar🙂baz]] Ipsum",
+          });
+        },
+        onInit: async () => {
+          // Open and select the header
+          const editor = await VSCodeUtils.openNote(noteWithLink);
+          const start = LocationTestUtils.getPresetWikiLinkPosition();
+          const end = LocationTestUtils.getPresetWikiLinkPosition({char: 10});
+          editor.selection = new vscode.Selection(start, end);
+          // generate a wikilink for it
+          const link = await new CopyNoteLinkCommand().run();
+          expect(link).toEqual(`[[Lörem Foo：Bar🙂Baz Ipsum|test#lörem-foo：barbaz-ipsum]]`);
+          done();
+        }
+      })
     });
 
     test("with anchor", (done) => {

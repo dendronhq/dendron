@@ -3,7 +3,7 @@
 exports[`wikiLinks compile "HTML: WITH_ALIAS" 1`] = `
 VFile {
   "contents": "<h1 id=\\"root\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#root\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Root</h1>
-<p><a href=\\"foo.html\\">bar</a></p>
+<p><a href=\\"foo.html\\">bar doesn't foo</a></p>
 <hr>
 <h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
 <ol>
@@ -182,7 +182,7 @@ VFile {
 
 exports[`wikiLinks compile "MD_DENDRON: WITH_ALIAS" 1`] = `
 VFile {
-  "contents": "[[bar|foo]]
+  "contents": "[[bar doesn't foo|foo]]
 
 ",
   "cwd": "<PROJECT_ROOT>",
@@ -328,7 +328,7 @@ exports[`wikiLinks compile "MD_ENHANCED_PREVIEW: WITH_ALIAS" 1`] = `
 VFile {
   "contents": "# Root
 
-[bar](foo.md)
+[bar doesn't foo](foo.md)
 
 ",
   "cwd": "<PROJECT_ROOT>",
@@ -482,7 +482,7 @@ exports[`wikiLinks compile "MD_REGULAR: WITH_ALIAS" 1`] = `
 VFile {
   "contents": "# Root
 
-[bar](foo)
+[bar doesn't foo](foo)
 
 ",
   "cwd": "<PROJECT_ROOT>",

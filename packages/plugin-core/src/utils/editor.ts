@@ -5,8 +5,10 @@ import {
   select,
   MDUtilsV4,
   Heading,
-  Text,
   BlockAnchor,
+  MDUtilsV5,
+  ProcMode,
+  AnchorUtils,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import vscode, {
@@ -15,6 +17,7 @@ import vscode, {
   TextEditor,
   TextEditorEdit,
 } from "vscode";
+
 
 export function isAnythingSelected(): boolean {
   return !vscode.window?.activeTextEditor?.selection?.isEmpty;
@@ -29,26 +32,22 @@ export function isAnythingSelected(): boolean {
 export function getHeaderAt({
   editor,
   position,
-  engine,
+  engine: _engine,
 }: {
   editor: TextEditor;
   position: Position;
-  engine: DEngineClient;
+  engine?: DEngineClient;
 }): undefined | string {
   const line = editor.document.lineAt(position.line);
   const headerLine = _.trim(line.text);
   if (headerLine.startsWith("#")) {
-    const proc = MDUtilsV4.procParse({
-      engine,
-      fname: NoteUtils.uri2Fname(editor.document.uri),
-      dest: DendronASTDest.MD_DENDRON,
-    });
+    const proc = MDUtilsV5.procRemarkParse({mode: ProcMode.NO_DATA}, {});
     const parsed = proc.parse(headerLine);
     const header = select(DendronASTTypes.HEADING, parsed) as Heading | null;
     if (_.isNull(header)) return undefined;
-    const headerText = select("text", header) as Text | null;
-    if (_.isNull(headerText) || !headerText.value) return undefined;
-    return _.trim(headerText.value);
+    const headerText = AnchorUtils.headerText(header);
+    if (headerText.length === 0) return undefined;
+    return headerText;
   } else {
     return undefined;
   }

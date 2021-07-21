@@ -20,11 +20,11 @@ import { MDUtilsV4 } from "../utils";
 import { MDUtilsV5, ProcMode } from "../utilsv5";
 import { addError, getNoteOrError, LinkUtils } from "./utils";
 
-export const LINK_REGEX = /^\[\[([\w\.\-_#\^\ \|:\/]+?)\]\]/;
+export const LINK_REGEX = /^\[\[([^\]\n]+)\]\]/;
 /**
  * Does not require wiki link be the start of the word
  */
-export const LINK_REGEX_LOOSE = /\[\[(.+?)\]\]/;
+export const LINK_REGEX_LOOSE = /\[\[([^\]\n]+)\]\]/;
 
 const parseWikiLink = (linkMatch: string) => {
   linkMatch = NoteUtils.normalizeFname(linkMatch);

@@ -146,6 +146,37 @@ suite("GotoNote", function () {
       });
     });
 
+    test("go to note header with wikilink and unicode characters", (done) => {
+      // ## Lörem [[Foo：Bar🙂Baz|foo：bar🙂baz]] Ipsum
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ vaults, wsRoot }) => {
+          await NoteTestUtilsV4.createNote({
+            wsRoot,
+            vault: vaults[0],
+            fname: "target-note",
+            body: "\n\n## Lörem [[Foo：Bar🙂Baz|foo：bar🙂baz]] Ipsum\n\nlorem ipsum",
+          })
+        },
+        onInit: async ({ vaults }) => {
+          const vault = vaults[0];
+          await new GotoNoteCommand().run({
+            qs: "target-note",
+            vault,
+            anchor: {
+              type: "header",
+              value: "lörem-foo：barbaz-ipsum",
+            },
+          });
+          expect(getActiveEditorBasename()).toEqual("target-note.md");
+          const selection = VSCodeUtils.getActiveTextEditor()?.selection;
+          expect(selection?.start.line).toEqual(9);
+          expect(selection?.start.character).toEqual(0);
+          done();
+        },
+      });
+    })
+
     test("anchor with special chars", (done) => {
       let specialCharsHeader: string;
       runLegacyMultiWorkspaceTest({

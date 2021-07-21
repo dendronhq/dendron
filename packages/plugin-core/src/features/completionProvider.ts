@@ -179,21 +179,27 @@ export const resolveCompletionItem = async (item: CompletionItem, token: Cancell
     return;
   }
 
-  // Render a preview of this note
-  const proc = MDUtilsV5.procRemarkFull({
-    dest: DendronASTDest.MD_REGULAR,
-    engine,
-    vault: note.vault,
-    fname: note.fname,
-  }, {
-    flavor: ProcFlavor.HOVER_PREVIEW,
-  });
-  const rendered = await proc.process(
-    `![[${VaultUtils.toURIPrefix(note.vault)}/${note.fname}]]`
-  );
-  if (token.isCancellationRequested) return;
-  item.documentation = new MarkdownString(rendered.toString());
-  Logger.debug({ctx, msg: "rendered note"});
+  try {
+    // Render a preview of this note
+    const proc = MDUtilsV5.procRemarkFull({
+      dest: DendronASTDest.MD_REGULAR,
+      engine,
+      vault: note.vault,
+      fname: note.fname,
+    }, {
+      flavor: ProcFlavor.HOVER_PREVIEW,
+    });
+    const rendered = await proc.process(
+      `![[${VaultUtils.toURIPrefix(note.vault)}/${note.fname}]]`
+    );
+    if (token.isCancellationRequested) return;
+    item.documentation = new MarkdownString(rendered.toString());
+    Logger.debug({ctx, msg: "rendered note"});
+  } catch (err) {
+    // Failed creating preview of the note
+    Logger.info({ctx, err, msg: "failed to render note"});
+    return;
+  }
   
   return item;
 }

@@ -632,7 +632,7 @@ function convertNoteRefHelperAST(
       )
     );
     // Copy the current proc to preserve all options
-    let tmpProc = proc();
+    let tmpProc = MDUtilsV4.procFull(procOpts);
     // but change the fname and vault to the referenced note, since we're inside that note now
     tmpProc = MDUtilsV4.setDendronData(tmpProc, { insideNoteRef: true, fname: note.fname, vault: note.vault });
     if (isV5Active) {

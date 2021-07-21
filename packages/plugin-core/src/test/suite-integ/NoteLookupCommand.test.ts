@@ -222,4 +222,24 @@ suite("NoteLookupCommand", function () {
       });
     });
   });
+
+  describe("modifiers", () => {
+    test.only("Journal note modifier behavior", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+        },
+        onInit: async ({ vaults, engine }) => {
+          const cmd = new NoteLookupCommand();
+          stubVaultPick(vaults);
+
+          await VSCodeUtils.openNote(engine.notes["foo"]);
+          const opts = (await cmd.run());
+          console.log(opts);
+          done();
+        }
+      });
+    });
+  });
 });

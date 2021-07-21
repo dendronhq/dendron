@@ -3,6 +3,50 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.51.1](https://github.com/dendronhq/dendron/compare/v0.51.0...v0.51.1) (2021-07-20)
+
+**Note:** Version bump only for package @dendronhq/common-test-utils
+
+
+
+
+
+# [0.51.0](https://github.com/dendronhq/dendron/compare/v0.49.0...v0.51.0) (2021-07-19)
+
+
+### Features Dendron
+
+* hashtags ([#985](https://github.com/dendronhq/dendron/issues/985)) ([85d44fc](https://github.com/dendronhq/dendron/commit/85d44fc975db4564f5826ae87e380d37c0263b0f))
+* show unreferenced links in backlink panel ([#909](https://github.com/dendronhq/dendron/issues/909)) ([4e65a20](https://github.com/dendronhq/dendron/commit/4e65a20a344b7276d3452fc0cebb8f19339eea67))
+
+
+
+
+
+## [0.50.3](https://github.com/dendronhq/dendron/compare/v0.49.0...v0.50.3) (2021-07-19)
+
+
+### Features Dendron
+
+* hashtags ([#985](https://github.com/dendronhq/dendron/issues/985)) ([85d44fc](https://github.com/dendronhq/dendron/commit/85d44fc975db4564f5826ae87e380d37c0263b0f))
+* show unreferenced links in backlink panel ([#909](https://github.com/dendronhq/dendron/issues/909)) ([4e65a20](https://github.com/dendronhq/dendron/commit/4e65a20a344b7276d3452fc0cebb8f19339eea67))
+
+
+
+
+
+## [0.50.2](https://github.com/dendronhq/dendron/compare/v0.49.0...v0.50.2) (2021-07-19)
+
+
+### Features Dendron
+
+* hashtags ([#985](https://github.com/dendronhq/dendron/issues/985)) ([85d44fc](https://github.com/dendronhq/dendron/commit/85d44fc975db4564f5826ae87e380d37c0263b0f))
+* show unreferenced links in backlink panel ([#909](https://github.com/dendronhq/dendron/issues/909)) ([4e65a20](https://github.com/dendronhq/dendron/commit/4e65a20a344b7276d3452fc0cebb8f19339eea67))
+
+
+
+
+
 ## [0.50.1](https://github.com/dendronhq/dendron/compare/v0.49.0...v0.50.1) (2021-07-16)
 
 

@@ -893,7 +893,7 @@ export class SchemaUtils {
     if (template.type === "note") {
       const tempNote = _.find(_.values(engine.notes), { fname: template.id });
       if (_.isUndefined(tempNote)) {
-        throw Error(`no template found for ${template}`);
+        throw Error(`no template found for ${template.id}`);
       }
       const tempNoteProps = _.pick(tempNote, ["body", "desc", "custom"]);
       _.forEach(tempNoteProps, (v, k) => {

@@ -123,7 +123,6 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
       "",
       `## The following files will be created`,
     ];
-
     _.forEach(_.sortBy(candidates, ["vault.fsPath"]), (candidate) => {
       content = content.concat(
         `- ${candidate.vault.fsPath}/${candidate.fname}\n`
@@ -163,7 +162,6 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
 
     let note;
     if (opts.scope === "file") {
-      console.log("scoped for active file");
       const document = VSCodeUtils.getActiveTextEditor()?.document;
       if (_.isUndefined(document)) {
         throw Error("No note open");
@@ -182,12 +180,6 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
         break;
       }
       case DoctorActions.CREATE_MISSING_LINKED_NOTES: {
-        if (opts.scope === "workspace") {
-          window.showInformationMessage(
-            "This action is currently not supported in workspace scope."
-          );
-          break;
-        }
         const cmd = new DoctorCLICommand();
         let notes;
         if (_.isUndefined(note)) {
@@ -196,7 +188,6 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
         } else {
           notes = [note];
         }
-
         const uniqueCandidates = cmd.getWildLinkDestinations(notes, engine);
         if (uniqueCandidates.length > 0) {
           // show preview before creating

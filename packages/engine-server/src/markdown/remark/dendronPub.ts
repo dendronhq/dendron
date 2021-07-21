@@ -8,21 +8,26 @@ import visitParents from "unist-util-visit-parents";
 import { VFile } from "vfile";
 import { SiteUtils } from "../../topics/site";
 import {
-  DendronASTDest,
-  NoteRefDataV4,
-  VaultMissingBehavior,
-  WikiLinkNoteV4,
   BlockAnchor,
+  DendronASTDest,
   DendronASTTypes,
   HashTag,
+  NoteRefDataV4,
   RehypeLinkData,
+  VaultMissingBehavior,
+  WikiLinkNoteV4,
 } from "../types";
 import { MDUtilsV4 } from "../utils";
+import { MDUtilsV5 } from "../utilsv5";
+import { blockAnchor2html } from "./blockAnchors";
 import { NoteRefsOpts } from "./noteRefs";
 import { convertNoteRefASTV2 } from "./noteRefsV2";
-import { hashTag2WikiLinkNoteV4, RemarkUtils, addError, getNoteOrError } from "./utils";
-import { blockAnchor2html } from "./blockAnchors";
-import { MDUtilsV5 } from "../utilsv5";
+import {
+  addError,
+  getNoteOrError,
+  hashTag2WikiLinkNoteV4,
+  RemarkUtils,
+} from "./utils";
 
 type PluginOpts = NoteRefsOpts & {
   assetsPrefix?: string;
@@ -38,7 +43,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
   const procData = MDUtilsV4.getDendronData(proc);
   const { dest, fname, config, overrides, insideNoteRef } = procData;
   let vault = procData.vault;
-    
+
   function transformer(tree: Node, _file: VFile) {
     const root = tree as Root;
     const { error, engine } = MDUtilsV4.getEngineFromProc(proc);
@@ -207,10 +212,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         if (data) {
           if (parent!.children.length > 1) {
             const children = parent!.children;
-            const idx = _.findIndex(
-              children,
-              RemarkUtils.isNoteRefV2
-            );
+            const idx = _.findIndex(children, RemarkUtils.isNoteRefV2);
             parent!.children = children
               .slice(0, idx)
               .concat(data)
@@ -221,6 +223,10 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         }
       }
       if (node.type === DendronASTTypes.BLOCK_ANCHOR) {
+        // no transform
+        if (dest === DendronASTDest.MD_ENHANCED_PREVIEW) {
+          return;
+        }
         const procOpts = MDUtilsV4.getProcOpts(proc);
         const anchorHTML = blockAnchor2html(
           node as BlockAnchor,

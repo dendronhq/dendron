@@ -3,6 +3,47 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.51.1](https://github.com/dendronhq/dendron/compare/v0.51.0...v0.51.1) (2021-07-20)
+
+**Note:** Version bump only for package @dendronhq/dendron-cli
+
+
+
+
+
+# [0.51.0](https://github.com/dendronhq/dendron/compare/v0.49.0...v0.51.0) (2021-07-19)
+
+
+### Features Dendron
+
+* Doctor "fix frontmatter" fixes broken note ids ([#950](https://github.com/dendronhq/dendron/issues/950)) ([1298093](https://github.com/dendronhq/dendron/commit/1298093620a8be2070d5e91e40e6a70a115c7756))
+
+
+
+
+
+## [0.50.3](https://github.com/dendronhq/dendron/compare/v0.49.0...v0.50.3) (2021-07-19)
+
+
+### Features Dendron
+
+* Doctor "fix frontmatter" fixes broken note ids ([#950](https://github.com/dendronhq/dendron/issues/950)) ([1298093](https://github.com/dendronhq/dendron/commit/1298093620a8be2070d5e91e40e6a70a115c7756))
+
+
+
+
+
+## [0.50.2](https://github.com/dendronhq/dendron/compare/v0.49.0...v0.50.2) (2021-07-19)
+
+
+### Features Dendron
+
+* Doctor "fix frontmatter" fixes broken note ids ([#950](https://github.com/dendronhq/dendron/issues/950)) ([1298093](https://github.com/dendronhq/dendron/commit/1298093620a8be2070d5e91e40e6a70a115c7756))
+
+
+
+
+
 ## [0.50.1](https://github.com/dendronhq/dendron/compare/v0.49.0...v0.50.1) (2021-07-16)
 
 

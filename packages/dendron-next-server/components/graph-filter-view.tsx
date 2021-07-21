@@ -6,22 +6,25 @@ import {
   InputNumber,
   Input,
   Spin,
+  Tooltip,
+  Button,
 } from "antd";
+import { MenuUnfoldOutlined, MenuFoldOutlined } from "@ant-design/icons";
 import _ from "lodash";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useThemeSwitcher } from "react-css-theme-switcher";
 import { GraphConfig, GraphConfigItem } from "../lib/graph";
 import AntThemes from "../styles/theme-antd";
+
 const { Panel } = Collapse;
 
 type FilterProps = {
-  type: "note" | "schema";
   config: GraphConfig;
   setConfig: React.Dispatch<React.SetStateAction<GraphConfig>>;
-  isVisible: boolean;
+  isGraphLoaded: boolean;
 };
 
-const GraphFilterView = ({ config, setConfig, isVisible }: FilterProps) => {
+const GraphFilterView = ({ config, setConfig, isGraphLoaded }: FilterProps) => {
   const sortedSections = [
     "vaults",
     "connections",
@@ -30,7 +33,10 @@ const GraphFilterView = ({ config, setConfig, isVisible }: FilterProps) => {
     "information",
   ];
 
+  const [showView, setShowView] = useState(false);
   const { currentTheme } = useThemeSwitcher();
+
+  const isVisible = showView && isGraphLoaded;
 
   const updateConfigField = (key: string, value: string | number | boolean) => {
     setConfig((c) => {
@@ -49,20 +55,38 @@ const GraphFilterView = ({ config, setConfig, isVisible }: FilterProps) => {
   if (!currentTheme) return <></>;
 
   return (
-    <div
+    <Space
+      direction="vertical"
       style={{
         zIndex: 10,
         position: "absolute",
         top: AntThemes[currentTheme].graph.filterView.margin,
         left: AntThemes[currentTheme].graph.filterView.margin,
-        background: AntThemes[currentTheme].graph.filterView.background,
         borderRadius: AntThemes[currentTheme].graph.filterView.borderRadius,
         minWidth: AntThemes[currentTheme].graph.filterView.minWidth,
-        opacity: isVisible ? 1 : 0,
-        transition: "opacity 0.2s",
       }}
     >
-      <Collapse>
+      <Tooltip
+        title={`${isVisible ? "Hide" : "Show"} Graph Configuration`}
+        placement="right"
+      >
+        <Button
+          type="primary"
+          shape="circle"
+          icon={isVisible ? <MenuFoldOutlined /> : <MenuUnfoldOutlined />}
+          onClick={() => setShowView((v) => !v)}
+          style={{
+            opacity: isGraphLoaded ? 1 : 0,
+            transform: "0.2s opacity ease-in-out",
+          }}
+        />
+      </Tooltip>
+      <Collapse
+        style={{
+          background: AntThemes[currentTheme].graph.filterView.background,
+          display: isVisible ? "block" : "none",
+        }}
+      >
         <Panel header="Vaults" key="vaults">
           <FilterViewSection
             section="vaults"
@@ -99,7 +123,7 @@ const GraphFilterView = ({ config, setConfig, isVisible }: FilterProps) => {
           />
         </Panel>
       </Collapse>
-    </div>
+    </Space>
   );
 };
 
@@ -146,7 +170,7 @@ const FilterViewStringInput = ({
           <Spin
             size="small"
             style={{
-              display: !!updateTimeout ? "inline-block" : "none",
+              display: updateTimeout ? "inline-block" : "none",
             }}
           />
         }

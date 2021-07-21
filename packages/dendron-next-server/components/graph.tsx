@@ -274,10 +274,9 @@ export default function Graph({
         }}
       >
         <GraphFilterView
-          type={type}
           config={config}
           setConfig={setConfig}
-          isVisible={isGraphLoaded}
+          isGraphLoaded={isGraphLoaded}
         />
         <div
           ref={graphRef}

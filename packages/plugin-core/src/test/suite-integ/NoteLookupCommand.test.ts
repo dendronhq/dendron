@@ -10,6 +10,7 @@ import { describe } from "mocha";
 // // You can import and use all API from the 'vscode' module
 // // as well as import your extension to test it
 import * as vscode from "vscode";
+import { LookupNoteTypeEnum } from "../../commands/LookupCommand";
 import { NoteLookupCommand } from "../../commands/NoteLookupCommand";
 import { LookupNoteTypeEnum } from "../../commands/LookupCommand";
 import { PickerUtilsV2 } from "../../components/lookup/utils";
@@ -225,11 +226,7 @@ suite("NoteLookupCommand", function () {
   });
 
   describe("modifiers", () => {
-<<<<<<< HEAD
     test("Journal note modifier behaviors", (done) => {
-=======
-    test.only("Journal note modifier behavior", (done) => {
->>>>>>> 98451d01 (spike: add tests for journal modifier)
       runLegacyMultiWorkspaceTest({
         ctx,
         preSetupHook: async ({ wsRoot, vaults }) => {
@@ -238,8 +235,6 @@ suite("NoteLookupCommand", function () {
         onInit: async ({ vaults, engine }) => {
           const cmd = new NoteLookupCommand();
           stubVaultPick(vaults);
-
-<<<<<<< HEAD
           // with journal note modifier enabled,
           await VSCodeUtils.openNote(engine.notes["foo"]);
           const out = (await cmd.run({
@@ -260,12 +255,7 @@ suite("NoteLookupCommand", function () {
           await journalBtn?.onDisable({ quickPick: out!.quickpick });
           // the quickpick value should turn back to name of current note.
           expect(out?.quickpick.value).toEqual("foo");
-
-=======
-          await VSCodeUtils.openNote(engine.notes["foo"]);
-          const opts = (await cmd.run());
-          console.log(opts);
->>>>>>> 98451d01 (spike: add tests for journal modifier)
+          
           done();
         }
       });

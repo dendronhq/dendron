@@ -5,15 +5,20 @@ import {
   isNotUndefined,
   NoteProps,
   NoteUtils,
+  TAGS_HIERARCHY,
   VaultUtils,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import {
   ALIAS_NAME,
   AnchorUtils,
+  DendronASTDest,
   DendronASTTypes,
+  HASHTAG_REGEX_LOOSE,
   LinkUtils,
   LINK_NAME,
+  MDUtilsV5,
+  ProcFlavor,
 } from "@dendronhq/engine-server";
 import {
   CancellationToken,
@@ -21,18 +26,15 @@ import {
   CompletionItemKind,
   ExtensionContext,
   languages,
+  MarkdownString,
   Position,
   Range,
   TextDocument,
   TextEdit,
-  Uri,
-  workspace,
 } from "vscode";
 import { Logger } from "../logger";
 import { VSCodeUtils } from "../utils";
-import { fsPathToRef } from "../utils/md";
 import { DendronWorkspace, getWS } from "../workspace";
-import path from "path";
 
 function padWithZero(n: number): string {
   if (n > 99) return String(n);
@@ -40,87 +42,167 @@ function padWithZero(n: number): string {
   return `00${n}`;
 }
 
+// prettier-ignore
+const NOTE_AUTOCOMPLETEABLE_REGEX = new RegExp("" +
+  "(?<entireLink>" +
+    // This may be a wikilink or reference
+    "(?<beforeAnchor>" +
+      "(?<beforeNote>" +
+        // Should have the starting brackets
+        "(?<reference>!)?\\[\\[" +
+        // optional alias
+        `(${ALIAS_NAME}(?=\\|)\\|)?` +
+      ")" +
+      // note name
+      `(?<note>${LINK_NAME})?` +
+    ")" +
+    "(?<afterNote>" +
+      // anchor
+      "(?<hash>#+)(?<anchor>\\^)?" +
+      // text of the header or anchor
+      "[^\\[\\]]" +
+    ")?" +
+    // May have ending brackets
+    "\\]?\\]?" +
+    "|" + // or it may be a hashtag (potentially a hashtag that's empty)
+    HASHTAG_REGEX_LOOSE.source + "?" +
+  ")",
+  "g"
+);
+
 export const provideCompletionItems = (
   document: TextDocument,
   position: Position
 ) => {
   const ctx = "provideCompletionItems";
-  const linePrefix = document
-    .lineAt(position)
-    .text.substr(0, position.character);
-  Logger.debug({ ctx, linePrefix, position, msg: "enter" });
+  const line = document.lineAt(position).text;
+  Logger.debug({ ctx, position, msg: "enter" });
 
-  const isResourceAutocomplete = linePrefix.match(/!\[\[\w*$/);
-  const isDocsAutocomplete = linePrefix.match(/\[\[[\w|.#]*$/);
-
-  if (!isDocsAutocomplete && !isResourceAutocomplete) {
-    return undefined;
-  }
-
-  let refString = "";
-  const startIndex = _.max<number>([
-    _.lastIndexOf(linePrefix, "|"),
-    _.lastIndexOf(linePrefix, "["),
-  ]) as number;
-  if (startIndex >= 0) {
-    refString = linePrefix.slice(startIndex + 1, position.character);
-    const endIndex = _.lastIndexOf(refString, ".");
-    if (endIndex) {
-      refString = refString.slice(0, endIndex + 1);
+  let found: RegExpMatchArray | undefined;
+  const matches = line.matchAll(NOTE_AUTOCOMPLETEABLE_REGEX);
+  for (const match of matches) {
+    if (_.isUndefined(match.groups) || _.isUndefined(match.index)) continue;
+    const { entireLink } = match.groups;
+    if (match.index <= position.character && position.character <= match.index + entireLink.length) {
+      found = match;
     }
   }
-  // If there's a # before the cursor, let the block autocomplete take over
-  if (_.lastIndexOf(linePrefix, "#") > startIndex) {
-    Logger.debug({
-      ctx,
-      msg: "Skipping note autocomplete to let block autocomplete take over",
-      refString,
-      linePrefix,
-    });
-    return undefined;
-  }
-  Logger.debug({ ctx, refString });
+  if (
+    _.isUndefined(found) ||
+    _.isUndefined(found.index) ||
+    _.isUndefined(found.groups)
+  ) return;
+  Logger.debug({ ctx, found });
 
+  if (found.groups.hash && found.index + (found.groups.beforeAnchor?.length || 0) > position.character) {
+    Logger.info({ctx, msg: "letting block autocomplete take over" });
+    return;
+  }
+
+  let start: number;
+  let end: number;
+  if (found.groups.hashTag) {
+    // This is a hashtag
+    start = found.index + 1 /* for the # symbol */;
+    end = start + (found.groups.tagContents?.length || 0);
+  } else {
+    // This is a wikilink or a reference
+    start = found.index + (found.groups.beforeNote?.length || 0);
+    end = start + (found.groups.note?.length || 0);
+  }
+  const range = new Range(position.line, start, position.line, end);
+
+  const engine = getWS().getEngine();
   const completionItems: CompletionItem[] = [];
   const notes = DendronWorkspace.instance().getEngine().notes;
   const currentVault = VSCodeUtils.getNoteFromDocument(document)?.vault;
-  const wsRoot = getWS().getEngine().wsRoot;
+  const wsRoot = engine.wsRoot;
+  Logger.debug({ ctx, range, notesLength: notes.length, currentVault, wsRoot });
   
-  _.values(notes).forEach((note, index) => {
-    const uri = Uri.file(NoteUtils.getFullPath({ note, wsRoot: DendronWorkspace.wsRoot() }));
+  _.values(notes).map((note, index) => {
+    const item: CompletionItem = {
+      label: note.fname,
+      insertText: note.fname,
+      kind: CompletionItemKind.File,
+      sortText: padWithZero(index),
+      detail: VaultUtils.getName(note.vault),
+      range,
+    };
 
-    const workspaceFolder = workspace.getWorkspaceFolder(uri);
-
-    const longRef = fsPathToRef({
-      path: uri.fsPath,
-      basePath: workspaceFolder?.uri.fsPath || path.dirname(uri.fsPath),
-      keepExt: false, //containsImageExt(uri.fsPath) || containsOtherKnownExts(uri.fsPath),
-    });
-
-    const shortRef = fsPathToRef({
-      path: uri.fsPath,
-      keepExt: false, //containsImageExt(uri.fsPath) || containsOtherKnownExts(uri.fsPath),
-    });
-
-    if (!longRef || !shortRef) {
-      return;
-    }
-
-    const item = new CompletionItem(longRef, CompletionItemKind.File);
-    item.insertText = longRef; //insertText;
-
-    item.sortText = padWithZero(index);
-    // Sort notes from current vault before other vaults
-    if (currentVault && !VaultUtils.isEqual(currentVault, note.vault, wsRoot)) {
+    if (found?.groups?.hashTag) {
+      // We are completing a hashtag, so only do completion for tags.
+      if (!note.fname.startsWith(TAGS_HIERARCHY)) return;
+      // Since this is a hashtag, `tags.foo` becomes `#foo`.
+      item.label = `${note.fname.slice(TAGS_HIERARCHY.length)}`;
+      item.insertText = item.label;
+      // hashtags don't support xvault links, so we skip any special xvault handling
+    } else if (currentVault && !VaultUtils.isEqual(currentVault, note.vault, wsRoot)) {
+      // For notes from other vaults than the current note, sort them after notes from the current vault.
       // x will get sorted after numbers, so these will appear after notes without x
       item.sortText = 'x' + item.sortText;
+      
+      const sameNameNotes = NoteUtils.getNotesByFname({ fname: note.fname, notes });
+      if (sameNameNotes.length > 1) {
+        // There are multiple notes with the same name in multiple vaults,
+        // and this note is in a different vault than the current note.
+        // To generate a link to this note, we have to do an xvault link.
+        item.insertText = `${VaultUtils.toURIPrefix(note.vault)}/${note.fname}`; 
+      }
     }
 
     completionItems.push(item);
   });
-
+  Logger.info({ ctx, completionItemsLength: completionItems.length });
   return completionItems;
 };
+
+export const resolveCompletionItem = async (item: CompletionItem, token: CancellationToken): Promise<CompletionItem | undefined> => {
+  const ctx = "resolveCompletionItem";
+  const { label: fname, detail: vname } = item;
+  if (!_.isString(fname) || !_.isString(vname) || token.isCancellationRequested) return;
+
+  const engine = getWS().getEngine();
+  const {vaults, notes, wsRoot} = engine;
+  const vault = VaultUtils.getVaultByName({vname, vaults});
+  if (_.isUndefined(vault)) {
+    Logger.info({ctx, msg: "vault not found", fname, vault, wsRoot});
+    return;
+  }
+  const note = NoteUtils.getNoteByFnameV5({
+    fname,
+    vault,
+    notes,
+    wsRoot,
+  });
+  if (_.isUndefined(note)) {
+    Logger.info({ctx, msg: "note not found", fname, vault, wsRoot});
+    return;
+  }
+
+  try {
+    // Render a preview of this note
+    const proc = MDUtilsV5.procRemarkFull({
+      dest: DendronASTDest.MD_REGULAR,
+      engine,
+      vault: note.vault,
+      fname: note.fname,
+    }, {
+      flavor: ProcFlavor.HOVER_PREVIEW,
+    });
+    const rendered = await proc.process(
+      `![[${VaultUtils.toURIPrefix(note.vault)}/${note.fname}]]`
+    );
+    if (token.isCancellationRequested) return;
+    item.documentation = new MarkdownString(rendered.toString());
+    Logger.debug({ctx, msg: "rendered note"});
+  } catch (err) {
+    // Failed creating preview of the note
+    Logger.info({ctx, err, msg: "failed to render note"});
+    return;
+  }
+  
+  return item;
+}
 
 // prettier-ignore
 const PARTIAL_WIKILINK_WITH_ANCHOR_REGEX = new RegExp("" +
@@ -328,7 +410,8 @@ export const activate = (context: ExtensionContext) => {
       {
         provideCompletionItems,
       },
-      "["
+      "[", // for wikilinks and references
+      "#", // for hashtags
     )
   );
   context.subscriptions.push(

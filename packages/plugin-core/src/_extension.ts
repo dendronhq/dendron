@@ -39,6 +39,7 @@ import {
   getWS,
 } from "./workspace";
 import { WorkspaceInitFactory } from "./workspace/workspaceInitializer";
+
 const MARKDOWN_WORD_PATTERN = new RegExp("([\\w\\.\\#]+)");
 // === Main
 

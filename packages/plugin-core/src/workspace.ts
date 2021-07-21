@@ -40,6 +40,7 @@ import {
   GLOBAL_STATE
 } from "./constants";
 import BacklinksTreeDataProvider from "./features/BacklinksTreeDataProvider";
+import { codeActionProvider } from "./features/codeActionProvider";
 import { completionProvider } from "./features/completionProvider";
 import DefinitionProvider from "./features/DefinitionProvider";
 import FrontmatterFoldingRangeProvider from "./features/FrontmatterFoldingRangeProvider";
@@ -509,6 +510,7 @@ export class DendronWorkspace {
       new FrontmatterFoldingRangeProvider()
     );
     completionProvider.activate(context);
+    codeActionProvider.activate(context);
   }
 
   _setupCommands() {

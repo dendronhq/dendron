@@ -235,7 +235,7 @@ export const getReferenceAtPosition = (
       return {
         range: rangeForHashTag,
         label: match[0],
-        ref: `${TAGS_HIERARCHY}${match[1]}`,
+        ref: `${TAGS_HIERARCHY}${match.groups!.tagContents}`,
         refText: docText,
       }
     }

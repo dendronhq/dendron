@@ -14,8 +14,8 @@ import { Element } from "hast";
  * Other then the reservation on the first character, hashtags can contain any
  * character that a note name can.
  */
-export const HASHTAG_REGEX = /^#([^0-9#|>[\]\s][^#|>[\]\s]*)/;
-export const HASHTAG_REGEX_LOOSE = /#([^0-9#|>[\]\s][^#|>[\]\s]*)/;
+export const HASHTAG_REGEX = /^(?<hashTag>#)(?<tagContents>[^0-9#|>[\]\s][^#|>[\]\s]*)/;
+export const HASHTAG_REGEX_LOOSE = /(?<hashTag>#)(?<tagContents>[^0-9#|>[\]\s][^#|>[\]\s]*)/;
 
 /**
  *
@@ -30,7 +30,7 @@ export const matchHashtag = (
   const match = (matchLoose ? HASHTAG_REGEX : HASHTAG_REGEX_LOOSE).exec(
     text
   );
-  if (match && match.length === 1) return match[1];
+  if (match && match.groups) return match.groups.tagContents;
   return undefined;
 };
 
@@ -54,11 +54,11 @@ function attachParser(proc: Unified.Processor) {
 
   function inlineTokenizer(eat: Eat, value: string) {
     const match = HASHTAG_REGEX.exec(value);
-    if (match) {
+    if (match && match.groups?.tagContents) {
       return eat(match[0])({
         type: DendronASTTypes.HASHTAG,
         value: match[0],
-        fname: `${TAGS_HIERARCHY}${match[1]}`,
+        fname: `${TAGS_HIERARCHY}${match.groups.tagContents}`,
       });
     }
     return;

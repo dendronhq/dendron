@@ -1,4 +1,4 @@
-import { NoteUtils } from "@dendronhq/common-all";
+import { NoteAddBehavior, NoteUtils } from "@dendronhq/common-all";
 import { NOTE_PRESETS_V4 } from "@dendronhq/common-test-utils";
 import { describe } from "mocha";
 import * as vscode from "vscode";
@@ -62,8 +62,9 @@ suite("Scratch Notes", function () {
     test("domainAsNamespace", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
-        configOverride: {
-          "dendron.defaultScratchAddBehavior": "childOfDomainNamespace",
+        modConfigCb: (config) => {
+          config.scratch.addBehavior = NoteAddBehavior.childOfDomainNamespace ;
+          return config;
         },
         postSetupHook: async ({ wsRoot, vaults }) => {
           await NOTE_PRESETS_V4.NOTE_DOMAIN_NAMESPACE_CHILD.create({
@@ -84,6 +85,7 @@ suite("Scratch Notes", function () {
             noConfirm: true,
           });
           const scratchNote = getNoteFromTextEditor();
+          console.log('scratchNote',scratchNote.fname)
           expect(scratchNote.fname.startsWith("pro.scratch")).toBeTruthy();
           done();
         },
@@ -131,8 +133,9 @@ suite("Scratch Notes", function () {
     test("domainAsNamespace", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
-        configOverride: {
-          "dendron.defaultScratchAddBehavior": "childOfDomainNamespace",
+        modConfigCb: (config) => {
+          config.scratch.addBehavior = NoteAddBehavior.childOfDomainNamespace ;
+          return config;
         },
         postSetupHook: async ({ wsRoot, vaults }) => {
           await NOTE_PRESETS_V4.NOTE_DOMAIN_NAMESPACE_CHILD.create({

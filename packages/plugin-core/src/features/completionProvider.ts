@@ -409,7 +409,6 @@ export const activate = (context: ExtensionContext) => {
       "markdown",
       {
         provideCompletionItems,
-        resolveCompletionItem,
       },
       "[", // for wikilinks and references
       "#", // for hashtags

@@ -242,7 +242,7 @@ suite("NoteLookupCommand", function () {
     });
   });
 
-  describe.only("modifiers", () => {
+  describe("modifiers", () => {
     test("journal note basic", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,

@@ -651,8 +651,7 @@ function convertNoteRefHelperAST(
       return { error: null, data: out };
     }
   } catch (err) {
-    console.log("ERROR WITH RE in AST");
-    console.log(JSON.stringify(err));
+    console.log(JSON.stringify({ctx: "convertNoteRefHelperAST", msg: "Failed to render note reference", err}));
     return {
       error: new DendronError({
         message: "error processing note ref",

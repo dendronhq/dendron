@@ -61,6 +61,32 @@ suite("CopyNoteLink", function () {
       })
     });
 
+    test("with a header link containing unicode characters", (done) => {
+      let noteWithLink: NoteProps;
+      runSingleVaultTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          noteWithLink = await NoteTestUtilsV4.createNote({
+            fname: "test",
+            vault: vaults[0],
+            wsRoot,
+            body: "## Lörem [[Foo：Bar🙂Baz|foo：bar🙂baz]] Ipsum",
+          });
+        },
+        onInit: async () => {
+          // Open and select the header
+          const editor = await VSCodeUtils.openNote(noteWithLink);
+          const start = LocationTestUtils.getPresetWikiLinkPosition();
+          const end = LocationTestUtils.getPresetWikiLinkPosition({char: 10});
+          editor.selection = new vscode.Selection(start, end);
+          // generate a wikilink for it
+          const link = await new CopyNoteLinkCommand().run();
+          expect(link).toEqual(`[[Lörem  Foo：Bar🙂Baz  Ipsum|test#lörem--foo：barbaz--ipsum]]`);
+          done();
+        }
+      })
+    });
+
     test("with anchor", (done) => {
       let noteWithTarget: NoteProps;
 

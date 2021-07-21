@@ -1,3 +1,4 @@
+import { ServerUtils } from "@dendronhq/api-server";
 import {
   CONSTANTS,
   DendronError,
@@ -19,6 +20,7 @@ import {
   tmpDir,
   vault2Path
 } from "@dendronhq/common-server";
+import { ExecaChildProcess } from "execa";
 import _ from "lodash";
 import _md from "markdown-it";
 import ogs from "open-graph-scraper";
@@ -35,6 +37,7 @@ import {
   _noteAddBehaviorEnum
 } from "./constants";
 import { FileItem } from "./external/fileutils/FileItem";
+import { Logger } from "./logger";
 import { EngineAPIService } from "./services/EngineAPIService";
 import { DendronWorkspace, getWS } from "./workspace";
 
@@ -498,6 +501,25 @@ export class VSCodeUtils {
 }
 
 export class WSUtils {
+
+  static handleServerProcess({subprocess, context, onExit}: {subprocess: ExecaChildProcess, context: vscode.ExtensionContext, onExit: ()=>any}) {
+		const ctx = "WSUtils.handleServerProcess"
+      Logger.info({ ctx, msg: "subprocess running", pid: subprocess.pid });
+      // if extension closes, reap server process
+      context.subscriptions.push(
+        new vscode.Disposable(() => {
+          Logger.info({ ctx, msg: "kill server start" });
+          process.kill(subprocess.pid);
+          Logger.info({ ctx, msg: "kill server end" });
+        })
+      );
+      // if server process has issues, prompt user to restart
+      ServerUtils.onProcessExit({
+        subprocess,
+        cb: onExit
+      });
+  }
+
   static updateEngineAPI(port: number | string): DEngineClient {
     const ws = DendronWorkspace.instance();
     const svc = EngineAPIService.createEngine({

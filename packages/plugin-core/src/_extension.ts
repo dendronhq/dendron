@@ -162,23 +162,6 @@ async function startServerProcess(): Promise<{
   return out;
 }
 
-// @ts-ignore
-function subscribeToPortChange() {
-  const ctx = "subscribeToPortChange";
-  HistoryService.instance().subscribe(
-    "apiServer",
-    async (event: HistoryEvent) => {
-      if (event.action === "changedPort") {
-        const port = DendronWorkspace.serverConfiguration().serverPort;
-        const engine = WSUtils.updateEngineAPI(port);
-        await engine.init();
-        Logger.info({ ctx, msg: "fin init Engine" });
-        await reloadWorkspace();
-      }
-    }
-  );
-}
-
 export async function _activate(
   context: vscode.ExtensionContext
 ): Promise<boolean> {
@@ -383,21 +366,21 @@ export async function _activate(
     );
     const { port, subprocess } = await startServerProcess();
     if (subprocess) {
-      Logger.info({ctx, msg: "server running", pid: subprocess.pid})
-      // if extension closes, reap server process
-      context.subscriptions.push(
-        new vscode.Disposable(() => {
-          Logger.info({ ctx, msg: "kill server start" });
-          process.kill(subprocess.pid);
-          Logger.info({ ctx, msg: "kill server end" });
-        })
-      );
-
-      // if server process has issues, prompt user to restart
-      ServerUtils.onProcessExit({subprocess, cb: () => {
-        // TODO: prompt user to reload
-        vscode.window.showErrorMessage("Dendron engine encountered an error");
-      }});
+      WSUtils.handleServerProcess({
+        subprocess,
+        context,
+        onExit: () => {
+          const txt = "Restart Dendron";
+          vscode.window
+            .showErrorMessage("Dendron engine encountered an error", txt)
+            .then(async (resp) => {
+              if (resp === txt) {
+                AnalyticsUtils.track(VSCodeEvents.ServerCrashed);
+                _activate(context);
+              }
+            });
+        },
+      });
     }
     const durationStartServer = getDurationMilliseconds(start);
     Logger.info({ ctx, msg: "post-start-server", port, durationStartServer });

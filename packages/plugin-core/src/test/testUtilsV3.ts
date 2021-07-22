@@ -46,7 +46,7 @@ import {
 import { Logger } from "../logger";
 import { StateService } from "../services/stateService";
 import { WorkspaceConfig } from "../settings";
-import { InstallStatus, VSCodeUtils } from "../utils";
+import { InstallStatus, VSCodeUtils, WSUtils } from "../utils";
 import { DendronWorkspace, getWS } from "../workspace";
 import { BlankInitializer } from "../workspace/blankInitializer";
 import { WorkspaceInitFactory } from "../workspace/workspaceInitializer";
@@ -326,6 +326,7 @@ export function setupBeforeAfter(
           resolve({ port, subprocess: { pid: -1 } as any });
         })
       );
+      sinon.stub(WSUtils, "handleServerProcess").returns();
     }
     if (opts?.beforeHook) {
       await opts.beforeHook();

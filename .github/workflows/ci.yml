@@ -42,8 +42,8 @@ jobs:
           # Running natively under Windows requires some further work on paths
           # and file access patterns.
           - os: windows-latest
-           env: Get-ChildItem Env:\
-           versions: choco --version
+            env: Get-ChildItem Env:\
+            versions: choco --version
 
     timeout-minutes: 20
 

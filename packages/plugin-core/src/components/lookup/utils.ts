@@ -366,6 +366,7 @@ export class PickerUtilsV2 {
     return vault;
   }
 
+  /** @deprecated use `getVaultForOpenEditor` instead, this function no longer prompts anything. */
   static getOrPromptVaultForOpenEditor(): DVault {
     return PickerUtilsV2.getVaultForOpenEditor();
   }

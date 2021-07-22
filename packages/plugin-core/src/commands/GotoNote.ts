@@ -103,6 +103,12 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     if (opts.qs && opts.vault) return opts;
     const engine = DendronWorkspace.instance().getEngine();
 
+    if (opts.qs && !opts.vault) {
+      // Special case: some code expects GotoNote to default to current vault if qs is provided but vault isn't
+      opts.vault = PickerUtilsV2.getVaultForOpenEditor();
+      return opts;
+    }
+
     const link = this.getLinkFromSelection();
     if (!link) {
       window.showErrorMessage("selection is not a valid link");
@@ -179,6 +185,11 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
   }
 
   /**
+   *
+   * Warning about `opts`! If `opts.qs` is provided but `opts.vault` is empty,
+   * it will default to the current vault. If `opts.qs` is not provided, it will
+   * read the selection from the current document as a link to get it. If both
+   * `opts.qs` and `opts.vault` is empty, both will be read from the selected link.
    *
    * @param opts.qs - query string. should correspond to {@link NoteProps.fname}
    * @param opts.vault - {@link DVault} for note

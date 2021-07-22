@@ -44,12 +44,13 @@ interface DebouncedFunc<T extends (...args: any[]) => any> {
 
 export class WorkspaceWatcher {
   /** The documents that have been opened during this session that have not been viewed yet in the editor. */
-  private _openedDocuments: Set<string> = new Set<string>();
+  private _openedDocuments: Map<string, TextDocument>;
   private _debouncedOnDidChangeTextDocument: DebouncedFunc<
     (event: TextDocumentChangeEvent) => Promise<void>
   >;
 
   constructor() {
+    this._openedDocuments = new Map();
     this._debouncedOnDidChangeTextDocument = _.debounce(
       this.onDidChangeTextDocument,
       100
@@ -100,7 +101,7 @@ export class WorkspaceWatcher {
   }
 
   onDidOpenTextDocument(document: TextDocument) {
-    this._openedDocuments.add(document.uri.fsPath);
+    this._openedDocuments.set(document.uri.fsPath, document);
     Logger.debug({
       msg: "Note opened",
       fname: NoteUtils.uri2Fname(document.uri),

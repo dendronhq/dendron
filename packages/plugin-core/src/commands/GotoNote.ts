@@ -223,10 +223,6 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
           wsRoot: DendronWorkspace.wsRoot(),
         });
         const uri = Uri.file(npath);
-        if (opts.anchor) {
-          // We're going to move somewhere, so don't auto-move past frontmatter
-          getWS().windowWatcher?.dontMoveCursorOnFirstOpen(uri.fsPath);
-        }
         const editor = await VSCodeUtils.openFileInEditor(uri, {
           column: opts.column,
         });

@@ -134,25 +134,12 @@ export class WindowWatcher {
     return;
   }
 
-  /** When these files are opened for the first time, the cursor shouldn't get moved automatically.
-   * This is useful if we're about to open a file and move the cursor somewhere in Dendron.
-   */
-  private dontMoveCursorFiles = new Set<string>();
-  public dontMoveCursorOnFirstOpen(fsPath: string) {
-    this.dontMoveCursorFiles.add(fsPath);
-  }
-
   private async onFirstOpen(editor: TextEditor) {
     Logger.info({
       msg: "First open of note",
       fname: NoteUtils.uri2Fname(editor.document.uri),
     });
-
-    const dontMoveThisFile = this.dontMoveCursorFiles.delete(editor.document.uri.fsPath);
-    if (!dontMoveThisFile) {
-      this.moveCursorPastFrontmatter(editor);
-    }
-
+    this.moveCursorPastFrontmatter(editor);
     if (getWS().config.autoFoldFrontmatter) {
       await this.foldFrontmatter();
     }

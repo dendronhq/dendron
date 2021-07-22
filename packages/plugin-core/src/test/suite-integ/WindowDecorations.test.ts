@@ -8,6 +8,7 @@ import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 import { DECORATION_TYPE_ALIAS, DECORATION_TYPE_BLOCK_ANCHOR, DECORATION_TYPE_TAG, DECORATION_TYPE_BROKEN_WIKILINK, DECORATION_TYPE_TIMESTAMP, DECORATION_TYPE_WIKILINK, updateDecorations } from "../../features/windowDecorations";
 import _ from "lodash";
 import { writeFile } from "fs-extra";
+import path from "path";
 
 /** Check if the ranges decorated by `decorations` contains `text` */
 function isTextDecorated(
@@ -73,7 +74,7 @@ suite("windowDecorations", function () {
           const document = editor.document;
           const {allDecorations} = updateDecorations(editor);
 
-          const timestampDecorations = allDecorations.get(DECORATION_TYPE_TIMESTAMP);
+          const timestampDecorations = allDecorations!.get(DECORATION_TYPE_TIMESTAMP);
           expect(timestampDecorations.length).toEqual(2);
           // check that the decorations are at the right locations
           expect(
@@ -83,7 +84,7 @@ suite("windowDecorations", function () {
             isTextDecorated(UPDATED, timestampDecorations!, document)
           ).toBeTruthy();
 
-          const blockAnchorDecorations = allDecorations.get(DECORATION_TYPE_BLOCK_ANCHOR);
+          const blockAnchorDecorations = allDecorations!.get(DECORATION_TYPE_BLOCK_ANCHOR);
           expect(blockAnchorDecorations.length).toEqual(3);
           // check that the decorations are at the right locations
           expect(
@@ -96,7 +97,7 @@ suite("windowDecorations", function () {
             isTextDecorated("^anchor-3", blockAnchorDecorations!, document)
           ).toBeTruthy();
 
-          const wikilinkDecorations = allDecorations.get(DECORATION_TYPE_WIKILINK);
+          const wikilinkDecorations = allDecorations!.get(DECORATION_TYPE_WIKILINK);
           expect(wikilinkDecorations.length).toEqual(2);
           expect(
             isTextDecorated("[[root]]", wikilinkDecorations!, document)
@@ -108,11 +109,11 @@ suite("windowDecorations", function () {
           expect(DECORATION_TYPE_TAG.has("tags.foo"));
           expect(DECORATION_TYPE_TAG.has("tags.bar"));
 
-          const aliasDecorations = allDecorations.get(DECORATION_TYPE_ALIAS);
+          const aliasDecorations = allDecorations!.get(DECORATION_TYPE_ALIAS);
           expect(aliasDecorations.length).toEqual(1);
           expect(isTextDecorated("with alias", aliasDecorations!, document));
 
-          const brokenWikilinkDecorations = allDecorations.get(DECORATION_TYPE_BROKEN_WIKILINK);
+          const brokenWikilinkDecorations = allDecorations!.get(DECORATION_TYPE_BROKEN_WIKILINK);
           expect(brokenWikilinkDecorations.length).toEqual(1);
           expect(
             isTextDecorated("[[does.not.exist]]", brokenWikilinkDecorations!, document)
@@ -142,8 +143,8 @@ suite("windowDecorations", function () {
           const editor = await VSCodeUtils.openNote(note!);
           const { allWarnings } = updateDecorations(editor);
 
-          expect(allWarnings.length).toEqual(1);
-          expect(AssertUtils.assertInString({body: allWarnings[0].message, match: ["frontmatter", "missing"]}));
+          expect(allWarnings!.length).toEqual(1);
+          expect(AssertUtils.assertInString({body: allWarnings![0].message, match: ["frontmatter", "missing"]}));
           done();
         },
       });
@@ -167,8 +168,8 @@ suite("windowDecorations", function () {
           const editor = await VSCodeUtils.openNote(note!);
           const { allWarnings } = updateDecorations(editor);
 
-          expect(allWarnings.length).toEqual(1);
-          expect(AssertUtils.assertInString({body: allWarnings[0].message, match: ["id", "bad"]}));
+          expect(allWarnings!.length).toEqual(1);
+          expect(AssertUtils.assertInString({body: allWarnings![0].message, match: ["id", "bad"]}));
           done();
         },
       });
@@ -197,8 +198,26 @@ suite("windowDecorations", function () {
           const editor = await VSCodeUtils.openNote(note!);
           const { allWarnings } = updateDecorations(editor);
 
-          expect(allWarnings.length).toEqual(1);
-          expect(AssertUtils.assertInString({body: allWarnings[0].message, match: ["id", "missing"]}));
+          expect(allWarnings!.length).toEqual(1);
+          expect(AssertUtils.assertInString({body: allWarnings![0].message, match: ["id", "missing"]}));
+          done();
+        },
+      });
+    });
+
+    test("doesn't warn for schemas", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        onInit: async ({engine, wsRoot}) => {
+          const schema = engine.schemas.root;
+          const schemaFile = path.join(wsRoot, schema.vault.fsPath, `${schema.fname}.schema.yml`);
+          const schemaURI = vscode.Uri.parse(schemaFile);
+          const editor = await VSCodeUtils.openFileInEditor(schemaURI);
+          
+          const { allDecorations, allWarnings } = updateDecorations(editor!);
+
+          expect(allWarnings).toEqual(undefined);
+          expect(allDecorations).toEqual(undefined);
           done();
         },
       });

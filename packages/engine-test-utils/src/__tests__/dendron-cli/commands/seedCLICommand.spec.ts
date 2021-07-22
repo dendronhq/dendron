@@ -205,7 +205,7 @@ describe("add", () => {
             fpath: path.join(wsRoot, "dendron.code-workspace"),
             snapshot: true,
           },
-          `${id}/vault`
+          path.join(`${id}`, "vault").replace("\\", "\\\\")
         );
         checkVaults(
           {
@@ -275,7 +275,7 @@ describe("add", () => {
             fpath: path.join(wsRoot, "dendron.code-workspace"),
             snapshot: true,
           },
-          `${id}/vault`
+          path.join(`${id}`, `vault`).replace("\\", "\\\\")
         );
         checkVaults(
           {

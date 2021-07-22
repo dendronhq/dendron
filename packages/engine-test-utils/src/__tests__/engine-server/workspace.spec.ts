@@ -78,11 +78,13 @@ describe("WorkspaceUtils", () => {
 
 describe("WorkspaceService", () => {
   describe("create", () => {
+    let homeDirStub: sinon.SinonStub;
+
     beforeEach(() => {
-      TestEngineUtils.mockHomeDir();
+      homeDirStub = TestEngineUtils.mockHomeDir();
     });
     afterEach(() => {
-      sinon.restore();
+      homeDirStub.restore();
     });
     test("basic", async () => {
       const wsRoot = tmpDir().name;
@@ -186,6 +188,7 @@ describe("WorkspaceService", () => {
     });
 
     test("remote seed present", async () => {
+    // test.only("remote seed present", async () => {
       await runEngineTestV5(
         async ({ engine, wsRoot, vaults }) => {
           const tmp = tmpDir().name;
@@ -228,7 +231,8 @@ describe("WorkspaceService", () => {
               fpath: path.join(wsRoot, "dendron.code-workspace"),
               snapshot: true,
             },
-            `${id}/vault`
+            // Necessary for windows test-compat:
+            path.join(`${id}`, `vault`).replace("\\", "\\\\")
           );
           checkVaults(
             {
@@ -311,7 +315,7 @@ describe("WorkspaceService", () => {
       await NoteTestUtilsV4.modifyNoteByPath(
         { wsRoot, vault: vaults[0], fname: "foo" },
         (note: NoteProps) => {
-          note.body = note.body + "\n Foo";
+          note.body += "\n Foo";
           return note;
         }
       );

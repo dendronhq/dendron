@@ -350,8 +350,8 @@ suite("DefinitionProvider", function () {
             pos,
             null as any
           )) as vscode.Location;
-          expect(loc.uri.fsPath).toEqual(
-            NoteUtils.getFullPath({ wsRoot: _wsRoot, note: noteWithTarget })
+          expect(loc.uri.fsPath.toLowerCase()).toEqual(
+            NoteUtils.getFullPath({ wsRoot: _wsRoot, note: noteWithTarget }).toLowerCase()
           );
           done();
         },

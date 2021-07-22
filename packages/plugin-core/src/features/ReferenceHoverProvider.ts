@@ -91,7 +91,10 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
       });
       if (_.isUndefined(maybeVault)) {
         Logger.info({ ctx, msg: "vault specified in link is missing", refAtPos});
-        return null;
+        return new vscode.Hover(
+          `Vault ${refAtPos.vaultName} does not exist.`,
+          hoverRange,
+        );
       }
       vault = maybeVault;
     }

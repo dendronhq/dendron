@@ -96,6 +96,8 @@ jobs:
         run: |
           git config --global user.name CI
           git config --global user.email ci@dendron.so
+          git config user.name
+          git config user.email
 
       - name: Initialize
         run: yarn ci:init

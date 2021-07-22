@@ -33,6 +33,13 @@ export class Git {
   async commit(opts: { msg: string }) {
     const { msg } = opts;
     const { localUrl: cwd } = this.opts;
+    const useremail = await execa.command([`git config user.email`].join(" "), {
+      shell: true,
+      cwd,
+    });
+
+    console.log("git user.email is " + useremail.stdout);
+
     await execa.command([`git commit -m '${msg}'`].join(" "), {
       shell: true,
       cwd,

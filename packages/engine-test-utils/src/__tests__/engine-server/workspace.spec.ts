@@ -188,7 +188,6 @@ describe("WorkspaceService", () => {
     });
 
     test("remote seed present", async () => {
-    // test.only("remote seed present", async () => {
       await runEngineTestV5(
         async ({ engine, wsRoot, vaults }) => {
           const tmp = tmpDir().name;

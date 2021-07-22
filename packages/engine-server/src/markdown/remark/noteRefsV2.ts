@@ -360,86 +360,85 @@ export function convertNoteRefASTV2(
       vault,
       basename: fname + ".md",
     });
-    let note: NoteProps;
     try {
-      note = file2Note(npath, vault);
-    } catch (err) {
-        throw new DendronError({ message: `error reading file, ${npath}` });
-    }
-    
-    if (
-      shouldApplyPublishRules &&
-      !SiteUtils.canPublish({
-        note,
-        config: config!,
-        engine,
-      })
-    ) {
-      // TODO: in the future, add 403 pages
-      return paragraph();
-    }
-
-    const body = note.body;
-    const { error, data } = convertNoteRefHelperAST({
-      body,
-      link,
-      refLvl: refLvl + 1,
-      proc,
-      compilerOpts,
-      procOpts,
-      note,
-    });
-    if (error) {
-      errors.push(error);
-    }
-
-    if (prettyRefs) {
-      let suffix = "";
-      let useId = wikiLinkOpts?.useId;
-      if (MDUtilsV5.isV5Active(proc) && dest === DendronASTDest.HTML) {
-        useId = true;
+      const note = file2Note(npath, vault);
+      if (
+        shouldApplyPublishRules &&
+        !SiteUtils.canPublish({
+          note,
+          config: config!,
+          engine,
+        })
+      ) {
+        // TODO: in the future, add 403 pages
+        return paragraph();
       }
-      let href = useId ? note.id : fname;
-      const title = getTitle({ config, note, loc: ref });
-      if (dest === DendronASTDest.HTML) {
-        suffix = ".html";
-        if (note.custom.permalink === "/") {
-          href = "";
-          suffix = "";
-        }
-      }
-      if (dest === DendronASTDest.MD_ENHANCED_PREVIEW) {
-        suffix = ".md";
-        // NOTE: parsing doesn't work properly for first line, not sure why
-        // this HACK fixes it
-        data.children = [brk].concat(data.children);
-      }
-      let isPublished = true;
-      if (dest === DendronASTDest.HTML) {
-        // check if we need to check publishign rules
-        if (
-          MDUtilsV5.isV5Active(proc) &&
-          !MDUtilsV5.shouldApplyPublishingRules(proc)
-        ) {
-          isPublished = true;
-        } else {
-          isPublished = SiteUtils.isPublished({
-            note,
-            config: config!,
-            engine,
-          });
-        }
-      }
-      const link = isPublished
-        ? `"${wikiLinkOpts?.prefix || ""}${href}${suffix}"`
-        : undefined;
-      return renderPrettyAST({
-        content: data,
-        title,
+      const body = note.body;
+      const { error, data } = convertNoteRefHelperAST({
+        body,
         link,
+        refLvl: refLvl + 1,
+        proc,
+        compilerOpts,
+        procOpts,
+        note,
       });
-    } else {
-      return paragraph(data);
+      if (error) {
+        errors.push(error);
+      }
+      if (prettyRefs) {
+        let suffix = "";
+        let useId = wikiLinkOpts?.useId;
+        if (MDUtilsV5.isV5Active(proc) && dest === DendronASTDest.HTML) {
+          useId = true;
+        }
+        let href = useId ? note.id : fname;
+        let title = getTitle({ config, note, loc: ref });
+        if (dest === DendronASTDest.HTML) {
+          suffix = ".html";
+          if (note.custom.permalink === "/") {
+            href = "";
+            suffix = "";
+          }
+        }
+        if (dest === DendronASTDest.MD_ENHANCED_PREVIEW) {
+          suffix = ".md";
+          // NOTE: parsing doesn't work properly for first line, not sure why
+          // this HACK fixes it
+          data.children = [brk].concat(data.children);
+        }
+        let isPublished = true;
+        if (dest === DendronASTDest.HTML) {
+          // check if we need to check publishign rules
+          if (
+            MDUtilsV5.isV5Active(proc) &&
+            !MDUtilsV5.shouldApplyPublishingRules(proc)
+          ) {
+            isPublished = true;
+          } else {
+            isPublished = SiteUtils.isPublished({
+              note,
+              config: config!,
+              engine,
+            });
+          }
+        }
+        const link = isPublished
+          ? `"${wikiLinkOpts?.prefix || ""}${href}${suffix}"`
+          : undefined;
+        return renderPrettyAST({
+          content: data,
+          title,
+          link,
+        });
+      } else {
+        return paragraph(data);
+      }
+    } catch (err) {
+      const msg = `error reading file, ${npath}`;
+      errors.push(new DendronError({ message: msg }));
+      throw Error(msg);
+      // return msg;
     }
   });
   return { error, data: out };
@@ -520,7 +519,7 @@ function prepareNoteRefIndices<T>({
   // TODO: can i just strip frontmatter when reading?
   let start: FindAnchorResult = {
     type: "header",
-    index: bodyAST.children[0]?.type === "yaml" ? 1 : 0,
+    index: bodyAST.children[0].type === "yaml" ? 1 : 0,
   };
   let end: FindAnchorResult = null;
 

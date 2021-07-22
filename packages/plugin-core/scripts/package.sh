@@ -1,3 +1,3 @@
 #!/bin/bash
-yarn install --no-lockfile --production
+yarn install --no-lockfile 
 vsce package --yarn

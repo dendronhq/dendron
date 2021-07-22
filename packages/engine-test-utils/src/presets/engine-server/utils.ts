@@ -1,4 +1,4 @@
-import { NoteProps, SchemaUtils } from "@dendronhq/common-all";
+import { SchemaUtils } from "@dendronhq/common-all";
 import {
   PreSetupHookFunction,
   NOTE_PRESETS_V4,
@@ -317,49 +317,6 @@ export const setupLinksBase: PreSetupHookFunction = async ({
   });
 };
 
-/** Creates 2 notes with same fname in 2 different vaults, and a note named
- * "test" in second vault with both valid and invalid wikilinks.
- *
- * See [[scratch.2021.07.15.205433.inconsistent-ref-and-link-behavior]] for the
- * invalid behaviors that this is intended to test for. The only difference is
- * that vaultThree is the real vault and vault3 is the bad one.
- *
- * @returns the test note with the wikilinks.
- */
-export const setupMultiVaultSameFname: PreSetupHookFunction = async ({
-  vaults,
-  wsRoot,
-}): Promise<NoteProps> => {
-  await NoteTestUtilsV4.createNote({
-    fname: "eggs",
-    vault: vaults[0],
-    body: "vault 0",
-    wsRoot,
-    props: {id: "eggs-vault-0"},
-  });
-  await NoteTestUtilsV4.createNote({
-    fname: "eggs",
-    vault: vaults[1],
-    body: "vault 1",
-    wsRoot,
-    props: {id: "eggs-vault-1"},
-  });
-  return NoteTestUtilsV4.createNote({
-    fname: "test",
-    vault: vaults[1],
-    body: [
-      "[[eggs]]", // 7
-      "[[dendron://vault1/eggs]]", // 8
-      "[[dendron://vault2/eggs]]", // 9
-      "[[dendron://vaultThree/eggs]]", // 10
-      "[[dendron://vault3/eggs]]", // 11
-      "",
-      "the test note",
-    ].join("\n"),
-    wsRoot,
-  });
-}
-
 export const setupLinksWithVaultBase: PreSetupHookFunction = async ({
   vaults,
   wsRoot,
@@ -429,5 +386,4 @@ export const ENGINE_HOOKS_MULTI = {
   setupBasicMulti,
   setupLinksMulti,
   setupSchemaPresetWithNamespaceTemplateMulti,
-  setupMultiVaultSameFname,
 };

@@ -89,7 +89,7 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
 
   async gatherInputs(inputs: CommandOpts): Promise<CommandOpts | undefined> {
     // If inputs are already provided, don't ask the user.
-    if (inputs.action && inputs.scope) return inputs;
+    if (inputs && inputs.action && inputs.scope) return inputs;
     // eslint-disable-next-line no-async-promise-executor
     const out = new Promise<CommandOpts | undefined>(async (resolve) => {
       const values = _.map(DoctorActions, (ent) => {

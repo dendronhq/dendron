@@ -21,6 +21,7 @@ import {
   tmpDir,
   vault2Path,
 } from "@dendronhq/common-server";
+import { HistoryEvent, HistoryService } from "@dendronhq/engine-server";
 import { ExecaChildProcess } from "execa";
 import _ from "lodash";
 import _md from "markdown-it";
@@ -526,6 +527,43 @@ export class WSUtils {
       subprocess,
       cb: onExit,
     });
+  }
+
+  static showInitProgress() {
+    const ctx = "showInitProgress";
+    vscode.window.withProgress(
+      {
+        location: vscode.ProgressLocation.Notification,
+        title: "Starting Dendron...",
+        cancellable: true,
+      },
+      (_progress, _token) => {
+        _token.onCancellationRequested(() => {
+          console.log("Cancelled");
+        });
+
+        const p = new Promise((resolve) => {
+          HistoryService.instance().subscribe(
+            "extension",
+            async (_event: HistoryEvent) => {
+              if (_event.action === "initialized") {
+                resolve(undefined);
+              }
+            }
+          );
+          HistoryService.instance().subscribe(
+            "extension",
+            async (_event: HistoryEvent) => {
+              if (_event.action === "not_initialized") {
+                Logger.error({ ctx, msg: "issue initializing Dendron" });
+                resolve(undefined);
+              }
+            }
+          );
+        });
+        return p;
+      }
+    );
   }
 
   static updateEngineAPI(port: number | string): DEngineClient {

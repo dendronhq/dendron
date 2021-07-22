@@ -27,7 +27,7 @@ import assert from "assert";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { ExtensionContext, Location, Position, Selection, Uri, window } from "vscode";
+import { ExtensionContext, Location, Position, Uri, window } from "vscode";
 import {
   SetupWorkspaceCommand,
   SetupWorkspaceOpts,
@@ -408,12 +408,6 @@ export class LocationTestUtils {
     line?: number;
     char?: number;
   }) => new Position(opts?.line || 7, opts?.char || 2);
-
-  static getPresetWikiLinkSelection = (opts?: {
-    line?: number;
-    char?: number;
-  }) => new Selection(LocationTestUtils.getPresetWikiLinkPosition(opts), LocationTestUtils.getPresetWikiLinkPosition(opts));
-
   static getBasenameFromLocation = (loc: Location) =>
     path.basename(loc.uri.fsPath);
 }

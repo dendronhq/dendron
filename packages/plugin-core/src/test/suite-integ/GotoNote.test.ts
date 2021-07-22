@@ -1,4 +1,4 @@
-import { NoteProps, NoteUtils, VaultUtils } from "@dendronhq/common-all";
+import { NoteProps, NoteUtils } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import { NoteTestUtilsV4, NOTE_PRESETS_V4 } from "@dendronhq/common-test-utils";
 import { ENGINE_HOOKS, ENGINE_HOOKS_MULTI } from "@dendronhq/engine-test-utils";
@@ -281,105 +281,6 @@ suite("GotoNote", function () {
           expect(editor2.document.uri.fsPath.endsWith(suffix)).toBeTruthy();
           done();
         },
-      });
-    });
-
-    describe("multiple notes & xvault link", () => {
-      test("non-xvault link resolves to same vault", (done) => {
-        let note: NoteProps;
-        runLegacyMultiWorkspaceTest({
-          ctx,
-          preSetupHook: async (opts) => {
-            note = await ENGINE_HOOKS_MULTI.setupMultiVaultSameFname(opts);
-          },
-          onInit: async ({ vaults, wsRoot }) => {
-            const editor = await VSCodeUtils.openNote(note);
-            editor.selection = LocationTestUtils.getPresetWikiLinkSelection({line: 7});
-            await new GotoNoteCommand().run();
-            const openedNote = VSCodeUtils.getNoteFromDocument(VSCodeUtils.getActiveTextEditorOrThrow().document);
-            expect(openedNote?.fname).toEqual("eggs");
-            expect(VaultUtils.isEqual(openedNote!.vault, vaults[1], wsRoot)).toBeTruthy();
-            done();
-          }
-        });
-      });
-
-      test("xvault link to other vault", (done) => {
-        let note: NoteProps;
-        runLegacyMultiWorkspaceTest({
-          ctx,
-          preSetupHook: async (opts) => {
-            note = await ENGINE_HOOKS_MULTI.setupMultiVaultSameFname(opts);
-          },
-          onInit: async ({ vaults, wsRoot }) => {
-            const editor = await VSCodeUtils.openNote(note);
-            editor.selection = LocationTestUtils.getPresetWikiLinkSelection({line: 8});
-            await new GotoNoteCommand().run();
-            const openedNote = VSCodeUtils.getNoteFromDocument(VSCodeUtils.getActiveTextEditorOrThrow().document);
-            expect(openedNote?.fname).toEqual("eggs");
-            expect(VaultUtils.isEqual(openedNote!.vault, vaults[0], wsRoot)).toBeTruthy();
-            done();
-          }
-        });
-      });
-
-      test("xvault link to same vault", (done) => {
-        let note: NoteProps;
-        runLegacyMultiWorkspaceTest({
-          ctx,
-          preSetupHook: async (opts) => {
-            note = await ENGINE_HOOKS_MULTI.setupMultiVaultSameFname(opts);
-          },
-          onInit: async ({ vaults, wsRoot }) => {
-            const editor = await VSCodeUtils.openNote(note);
-            editor.selection = LocationTestUtils.getPresetWikiLinkSelection({line: 9});
-            await new GotoNoteCommand().run();
-            const openedNote = VSCodeUtils.getNoteFromDocument(VSCodeUtils.getActiveTextEditorOrThrow().document);
-            expect(openedNote?.fname).toEqual("eggs");
-            expect(VaultUtils.isEqual(openedNote!.vault, vaults[1], wsRoot)).toBeTruthy();
-            done();
-          }
-        });
-      });
-
-      test("xvault link to non-existant note", (done) => {
-        let note: NoteProps;
-        runLegacyMultiWorkspaceTest({
-          ctx,
-          preSetupHook: async (opts) => {
-            note = await ENGINE_HOOKS_MULTI.setupMultiVaultSameFname(opts);
-          },
-          onInit: async ({ vaults, wsRoot }) => {
-            const editor = await VSCodeUtils.openNote(note);
-            editor.selection = LocationTestUtils.getPresetWikiLinkSelection({line: 10});
-            await new GotoNoteCommand().run();
-            const openedNote = VSCodeUtils.getNoteFromDocument(VSCodeUtils.getActiveTextEditorOrThrow().document);
-            // Should have created the note in this vault
-            expect(openedNote?.fname).toEqual("eggs");
-            expect(VaultUtils.isEqual(openedNote!.vault, vaults[2], wsRoot)).toBeTruthy();
-            done();
-          }
-        });
-      });
-
-      test("xvault link to non-existant vault", (done) => {
-        let note: NoteProps;
-        runLegacyMultiWorkspaceTest({
-          ctx,
-          preSetupHook: async (opts) => {
-            note = await ENGINE_HOOKS_MULTI.setupMultiVaultSameFname(opts);
-          },
-          onInit: async ({ vaults, wsRoot }) => {
-            const editor = await VSCodeUtils.openNote(note);
-            editor.selection = LocationTestUtils.getPresetWikiLinkSelection({line: 11});
-            await new GotoNoteCommand().run();
-            const openedNote = VSCodeUtils.getNoteFromDocument(VSCodeUtils.getActiveTextEditorOrThrow().document);
-            // Should not have changed notes
-            expect(openedNote?.fname).toEqual("test");
-            expect(VaultUtils.isEqual(openedNote!.vault, vaults[1], wsRoot)).toBeTruthy();
-            done();
-          }
-        });
       });
     });
 

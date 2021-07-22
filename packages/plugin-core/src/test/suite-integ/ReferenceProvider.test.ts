@@ -9,12 +9,11 @@ import ReferenceHoverProvider from "../../features/ReferenceHoverProvider";
 import ReferenceProvider from "../../features/ReferenceProvider";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
-import { expect, LocationTestUtils } from "../testUtilsv2";
+import { expect } from "../testUtilsv2";
 import { describe } from "mocha";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 import fs from "fs-extra";
 import path from "path";
-import { ENGINE_HOOKS_MULTI } from "@dendronhq/engine-test-utils";
 
 async function provide(editor: vscode.TextEditor) {
   const doc = editor?.document as vscode.TextDocument;
@@ -27,7 +26,8 @@ async function provide(editor: vscode.TextEditor) {
 }
 
 suite("ReferenceProvider", function () {
-  const ctx = setupBeforeAfter(this, {
+  let ctx: vscode.ExtensionContext;
+  ctx = setupBeforeAfter(this, {
     beforeHook: () => {},
   });
 
@@ -49,7 +49,7 @@ suite("ReferenceProvider", function () {
             wsRoot,
           });
         },
-        onInit: async () => {
+        onInit: async ({}) => {
           const editor = await VSCodeUtils.openNote(noteWithTarget1);
           const links = await provide(editor);
           expect(links.map((l) => l.uri.fsPath)).toEqual(
@@ -79,7 +79,7 @@ suite("ReferenceProvider", function () {
             wsRoot,
           });
         },
-        onInit: async () => {
+        onInit: async ({}) => {
           const editor = await VSCodeUtils.openNote(noteWithTarget1);
           const links = await provide(editor);
           expect(links.map((l) => l.uri.fsPath)).toEqual(
@@ -107,7 +107,7 @@ suite("ReferenceProvider", function () {
             wsRoot,
           });
         },
-        onInit: async () => {
+        onInit: async ({}) => {
           const editor = await VSCodeUtils.openNote(noteWithLink);
           const links = await provide(editor);
           expect(links.map((l) => l.uri.fsPath)).toEqual(
@@ -136,7 +136,7 @@ suite("ReferenceProvider", function () {
             wsRoot,
           });
         },
-        onInit: async () => {
+        onInit: async ({}) => {
           const editor = await VSCodeUtils.openNote(noteWithLink);
           const links = await provide(editor);
           expect(links.map((l) => l.uri.fsPath)).toEqual(
@@ -526,154 +526,6 @@ suite("ReferenceProvider", function () {
             });
             done();
           },
-        });
-      });
-
-      describe("multiple notes & xvault link", () => {
-        test("non-xvault link resolves to same vault", (done) => {
-          let note: NoteProps;
-          runLegacyMultiWorkspaceTest({
-            ctx,
-            preSetupHook: async (opts) => {
-              note = await ENGINE_HOOKS_MULTI.setupMultiVaultSameFname(opts);
-            },
-            onInit: async () => {
-              const editor = await VSCodeUtils.openNote(note);
-              editor.selection = LocationTestUtils.getPresetWikiLinkSelection({line: 7});
-              const provider = new ReferenceHoverProvider();
-              const hover = await provider.provideHover(
-                editor.document,
-                new vscode.Position(7, 4)
-              );
-              expect(hover).toBeTruthy();
-              expect(
-                await AssertUtils.assertInString({
-                  body: hover!.contents.join(""),
-                  match: [
-                    "vault 1"
-                  ],
-                  nomatch: ["vault 0", "the test note"],
-                })
-              ).toBeTruthy();
-              done();
-            }
-          });
-        });
-  
-        test("xvault link to other vault", (done) => {
-          let note: NoteProps;
-          runLegacyMultiWorkspaceTest({
-            ctx,
-            preSetupHook: async (opts) => {
-              note = await ENGINE_HOOKS_MULTI.setupMultiVaultSameFname(opts);
-            },
-            onInit: async () => {
-              const editor = await VSCodeUtils.openNote(note);
-              const provider = new ReferenceHoverProvider();
-              const hover = await provider.provideHover(
-                editor.document,
-                new vscode.Position(8, 4)
-              );
-              expect(hover).toBeTruthy();
-              expect(
-                await AssertUtils.assertInString({
-                  body: hover!.contents.join(""),
-                  match: [
-                    "vault 0"
-                  ],
-                  nomatch: ["vault 1", "the test note"],
-                })
-              ).toBeTruthy();
-              done();
-            }
-          });
-        });
-  
-        test("xvault link to same vault", (done) => {
-          let note: NoteProps;
-          runLegacyMultiWorkspaceTest({
-            ctx,
-            preSetupHook: async (opts) => {
-              note = await ENGINE_HOOKS_MULTI.setupMultiVaultSameFname(opts);
-            },
-            onInit: async () => {
-              const editor = await VSCodeUtils.openNote(note);
-              const provider = new ReferenceHoverProvider();
-              const hover = await provider.provideHover(
-                editor.document,
-                new vscode.Position(9, 4)
-              );
-              expect(hover).toBeTruthy();
-              expect(
-                await AssertUtils.assertInString({
-                  body: hover!.contents.join(""),
-                  match: [
-                    "vault 1"
-                  ],
-                  nomatch: ["vault 0", "the test note"],
-                })
-              ).toBeTruthy();
-              done();
-            }
-          });
-        });
-  
-        test("xvault link to non-existant note", (done) => {
-          let note: NoteProps;
-          runLegacyMultiWorkspaceTest({
-            ctx,
-            preSetupHook: async (opts) => {
-              note = await ENGINE_HOOKS_MULTI.setupMultiVaultSameFname(opts);
-            },
-            onInit: async () => {
-              const editor = await VSCodeUtils.openNote(note);
-              const provider = new ReferenceHoverProvider();
-              const hover = await provider.provideHover(
-                editor.document,
-                new vscode.Position(10, 4)
-              );
-              expect(hover).toBeTruthy();
-              expect(
-                await AssertUtils.assertInString({
-                  body: hover!.contents.join(""),
-                  match: [
-                    "eggs", "vaultThree", "missing",
-                  ],
-                  nomatch: ["vault 0", "vault 1", "vault1", "vault2", "the test note"],
-                })
-              ).toBeTruthy();
-              done();
-            }
-          });
-        });
-  
-        test("xvault link to non-existant vault", (done) => {
-          let note: NoteProps;
-          runLegacyMultiWorkspaceTest({
-            ctx,
-            preSetupHook: async (opts) => {
-              note = await ENGINE_HOOKS_MULTI.setupMultiVaultSameFname(opts);
-            },
-            onInit: async () => {
-              const editor = await VSCodeUtils.openNote(note);
-              const provider = new ReferenceHoverProvider();
-              const hover = await provider.provideHover(
-                editor.document,
-                new vscode.Position(11, 4)
-              );
-              expect(hover).toBeTruthy();
-              expect(
-                await AssertUtils.assertInString({
-                  body: hover!.contents.join(""),
-                  match: [
-                    "vault3", "does not exist"
-                  ],
-                  nomatch: ["vault 0", "vault 1", "vault1", "vault2", "the test note"],
-                })
-              ).toBeTruthy();
-              done();
-            }
-          });
         });
       });
     });

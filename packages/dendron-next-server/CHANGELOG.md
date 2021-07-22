@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.51.2](https://github.com/dendronhq/dendron/compare/v0.51.0...v0.51.2) (2021-07-22)
+
+
+### Features Dendron
+
+* add hideable graph filter view ([#996](https://github.com/dendronhq/dendron/issues/996)) ([f97798c](https://github.com/dendronhq/dendron/commit/f97798cbb4ef23fd3eeaca31b904555fcb780996))
+
+
+
+
+
 ## [0.51.1](https://github.com/dendronhq/dendron/compare/v0.51.0...v0.51.1) (2021-07-20)
 
 

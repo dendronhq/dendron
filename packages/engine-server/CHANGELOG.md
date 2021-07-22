@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.51.2](https://github.com/dendronhq/dendron/compare/v0.51.0...v0.51.2) (2021-07-22)
+
+
+### Bug Fixes
+
+* hashtags links duplicate the text following them ([#1003](https://github.com/dendronhq/dendron/issues/1003)) ([ef5afed](https://github.com/dendronhq/dendron/commit/ef5afedffad293aa0c363a87a6abe5c425b653e5))
+* wikilink aliases with apostrophes & headers containing wikilinks ([#1004](https://github.com/dendronhq/dendron/issues/1004)) ([11bd317](https://github.com/dendronhq/dendron/commit/11bd317bd4f7dfe1fff3dccc87b90aea7f6c0742)), closes [#958](https://github.com/dendronhq/dendron/issues/958) [#959](https://github.com/dendronhq/dendron/issues/959)
+
+
+### Features Dendron
+
+* hashtag & reference autocomplete, and multi-vault autocomplete improvements ([#991](https://github.com/dendronhq/dendron/issues/991)) ([983b149](https://github.com/dendronhq/dendron/commit/983b149c48343b2dc340a0b418fddd0d1adddf2b)), closes [#887](https://github.com/dendronhq/dendron/issues/887)
+
+
+
+
+
 ## [0.51.1](https://github.com/dendronhq/dendron/compare/v0.51.0...v0.51.1) (2021-07-20)
 
 

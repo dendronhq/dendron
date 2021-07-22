@@ -5,6 +5,7 @@ import {
   ERROR_STATUS,
   stringifyError
 } from "@dendronhq/common-all";
+import { createLogger } from "@dendronhq/common-server";
 import { DendronEngineV2 } from "@dendronhq/engine-server";
 import execa, { ExecaChildProcess } from "execa";
 import _ from "lodash";
@@ -85,7 +86,7 @@ export class ServerUtils {
         }
       }
     };
-    this.onProcessExit({ subprocess, cb: handleExit });
+    ServerUtils.onProcessExit({ subprocess, cb: handleExit });
   }
 
   static prepareServerArgs() {
@@ -151,7 +152,9 @@ export class ServerUtils {
     nextStaticRoot,
     port,
   }: ServerArgs): Promise<{ port: number; subprocess: ExecaChildProcess }> {
+    const logger = createLogger("execServer", path.join(logPath, "dendron.log"));
     return new Promise((resolve, reject) => {
+      logger.info({state: "enter"})
       const subprocess = execa.node(scriptPath, {
         env: {
           LOG_PATH: logPath,
@@ -160,21 +163,25 @@ export class ServerUtils {
           NEXT_STATIC_ROOT: nextStaticRoot,
         } as SERVER_ENV,
       });
+      logger.info({state: "post:exec.node"})
       subprocess.on("close", (code) => {
-        console.log(`close: ${code}`);
+        logger.error({state: "close"})
         reject(new DendronError({message: "close", payload: {code}}));
       });
       subprocess.on("disconnect", () => {
+        logger.error({state: "disconnect"})
         reject(new DendronError({message: "disconnect"}));
       });
       subprocess.on("exit", (code) => {
+        logger.error({state: "exit"})
         reject(new DendronError({message: "exit", payload: {code}}));
       });
       subprocess.on("error", (err) => {
-        console.log("error: ", err);
+        logger.error({state: "error", payload: err})
         reject(new DendronError({message: "error", payload: stringifyError(err)}));
       });
       subprocess.on("message", (message) => {
+        logger.info({state: "message", message})
         const port = parseInt(message as string, 10);
         if (port <= 0) {
           reject({

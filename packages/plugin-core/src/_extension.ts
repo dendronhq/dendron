@@ -14,7 +14,6 @@ import {
 } from "@dendronhq/common-server";
 import {
   DConfig,
-  HistoryEvent,
   HistoryService,
   MetadataService,
   MigrationServce,
@@ -50,7 +49,14 @@ export function activate(context: vscode.ExtensionContext) {
     wordPattern: MARKDOWN_WORD_PATTERN,
   });
   if (stage !== "test") {
-    _activate(context);
+    _activate(context).catch((err) => {
+      Logger.error(err);
+      HistoryService.instance().add({
+        action: "not_initialized",
+        source: "extension",
+        data: { err },
+      });
+    });
   }
   return;
 }
@@ -331,39 +337,8 @@ export async function _activate(
     });
 
     // --- Start Initializating the Engine
-    vscode.window.withProgress(
-      {
-        location: vscode.ProgressLocation.Notification,
-        title: "Starting Dendron...",
-        cancellable: true,
-      },
-      (_progress, _token) => {
-        _token.onCancellationRequested(() => {
-          console.log("Cancelled");
-        });
+    WSUtils.showInitProgress();
 
-        const p = new Promise((resolve) => {
-          HistoryService.instance().subscribe(
-            "extension",
-            async (_event: HistoryEvent) => {
-              if (_event.action === "initialized") {
-                resolve(undefined);
-              }
-            }
-          );
-          HistoryService.instance().subscribe(
-            "extension",
-            async (_event: HistoryEvent) => {
-              if (_event.action === "not_initialized") {
-                Logger.error({ ctx, msg: "issue initializing Dendron" });
-                resolve(undefined);
-              }
-            }
-          );
-        });
-        return p;
-      }
-    );
     const { port, subprocess } = await startServerProcess();
     if (subprocess) {
       WSUtils.handleServerProcess({

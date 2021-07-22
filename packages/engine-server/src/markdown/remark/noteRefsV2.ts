@@ -520,7 +520,7 @@ function prepareNoteRefIndices<T>({
   // TODO: can i just strip frontmatter when reading?
   let start: FindAnchorResult = {
     type: "header",
-    index: bodyAST.children[0].type === "yaml" ? 1 : 0,
+    index: bodyAST.children[0]?.type === "yaml" ? 1 : 0,
   };
   let end: FindAnchorResult = null;
 

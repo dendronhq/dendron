@@ -39,9 +39,6 @@ suite("VaultAddCommand", function () {
         .stub(vscode.commands, "executeCommand")
         .returns(Promise.resolve({}));
     },
-    afterHook: () => {
-      sinon.restore();
-    },
   });
 
   // TODO: need to stub git clone with side effects

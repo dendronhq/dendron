@@ -1,26 +1,25 @@
 import { DVault, NoteUtils } from "@dendronhq/common-all";
+import { NoteTestUtilsV4, NOTE_PRESETS_V4, sinon } from "@dendronhq/common-test-utils";
 import {
   ENGINE_HOOKS,
   ENGINE_HOOKS_MULTI,
-  TestEngineUtils,
+  TestEngineUtils
 } from "@dendronhq/engine-test-utils";
-import { NoteTestUtilsV4, NOTE_PRESETS_V4, sinon } from "@dendronhq/common-test-utils";
 import _ from "lodash";
 import { describe } from "mocha";
-
 // // You can import and use all API from the 'vscode' module
 // // as well as import your extension to test it
 import * as vscode from "vscode";
 import { NoteLookupCommand } from "../../commands/NoteLookupCommand";
 import { PickerUtilsV2 } from "../../components/lookup/utils";
 import { VSCodeUtils } from "../../utils";
-import { TIMEOUT } from "../testUtils";
 import { expect } from "../testUtilsv2";
 import {
   runLegacyMultiWorkspaceTest,
   setupBeforeAfter,
-  withConfig,
+  withConfig
 } from "../testUtilsV3";
+
 
 const stubVaultPick = (vaults: DVault[]) => {
   const vault = _.find(vaults, { fsPath: "vault1" });
@@ -30,12 +29,7 @@ const stubVaultPick = (vaults: DVault[]) => {
 
 suite("NoteLookupCommand", function () {
   let ctx: vscode.ExtensionContext;
-  this.timeout(TIMEOUT);
-  ctx = setupBeforeAfter(this, {
-    afterHook: async () => {
-      sinon.restore();
-    },
-  });
+  ctx = setupBeforeAfter(this);
 
   // NOTE: think these tests are wrong
   describe("updateItems", () => {

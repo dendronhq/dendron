@@ -59,6 +59,7 @@ suite("Extension", function () {
     afterHook: async () => {
       homeDirStub.restore();
     },
+    noSetInstallStatus: true,
   });
 
   describe("setup workspace", () => {

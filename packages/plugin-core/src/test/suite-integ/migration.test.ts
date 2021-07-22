@@ -47,12 +47,7 @@ const getMigration = ({
 
 suite("Migration", function () {
   let ctx: ExtensionContext;
-  ctx = setupBeforeAfter(this, {
-    beforeHook: async () => {},
-    afterHook: async () => {
-      sinon.restore();
-    },
-  });
+  ctx = setupBeforeAfter(this);
 
   describe.skip("runMigration from activate", () => {
     test("global version ahead of workspace version", (done) => {

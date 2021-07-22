@@ -1,15 +1,16 @@
+import { ServerUtils } from "@dendronhq/api-server";
 import {
   CONSTANTS,
   DendronError,
   getStage,
   Time,
   VaultUtils,
-  VSCodeEvents
+  VSCodeEvents,
 } from "@dendronhq/common-all";
 import {
   getDurationMilliseconds,
   getOS,
-  SegmentClient
+  SegmentClient,
 } from "@dendronhq/common-server";
 import {
   DConfig,
@@ -17,8 +18,9 @@ import {
   HistoryService,
   MetadataService,
   MigrationServce,
-  WorkspaceService
+  WorkspaceService,
 } from "@dendronhq/engine-server";
+import { ExecaChildProcess } from "execa";
 import _ from "lodash";
 import { Duration } from "luxon";
 import path from "path";
@@ -33,11 +35,7 @@ import { setupSegmentClient } from "./telemetry";
 import { InstallStatus, VSCodeUtils, WSUtils } from "./utils";
 import { AnalyticsUtils } from "./utils/analytics";
 import { DendronTreeView } from "./views/DendronTreeView";
-import {
-  DendronWorkspace,
-  getEngine,
-  getWS,
-} from "./workspace";
+import { DendronWorkspace, getEngine, getWS } from "./workspace";
 import { WorkspaceInitFactory } from "./workspace/workspaceInitializer";
 
 const MARKDOWN_WORD_PATTERN = new RegExp("([\\w\\.\\#]+)");
@@ -138,43 +136,30 @@ async function postReloadWorkspace() {
   Logger.info({ ctx, msg: "exit" });
 }
 
-async function startServer() {
-  const ctx = "startServer";
+async function startServerProcess(): Promise<{
+  port: number;
+  subprocess?: ExecaChildProcess;
+}> {
   const { nextServerUrl, nextStaticRoot, engineServerPort } =
     getWS().config.dev || {};
+  // const ctx = "startServer";
   const maybePort =
     DendronWorkspace.configuration().get<number | undefined>(
       CONFIG.SERVER_PORT.key
     ) || engineServerPort;
-  const logPath = DendronWorkspace.instance().context.logPath;
-  Logger.info({ ctx, logLevel: process.env["LOG_LEVEL"], maybePort });
-  if (!maybePort) {
-    const { launchv2 } = require("@dendronhq/api-server"); // eslint-disable-line global-require
-    return launchv2({
-      port: maybePort,
-      logPath: path.join(logPath, "dendron.server.log"),
-      nextServerUrl,
-      nextStaticRoot,
-    });
+  const port = maybePort;
+  if (port) {
+    return { port };
   }
-  return { port: maybePort };
-}
-
-// @ts-ignore
-function subscribeToPortChange() {
-  const ctx = "subscribeToPortChange";
-  HistoryService.instance().subscribe(
-    "apiServer",
-    async (event: HistoryEvent) => {
-      if (event.action === "changedPort") {
-        const port = DendronWorkspace.serverConfiguration().serverPort;
-        const engine = WSUtils.updateEngineAPI(port);
-        await engine.init();
-        Logger.info({ ctx, msg: "fin init Engine" });
-        await reloadWorkspace();
-      }
-    }
-  );
+  const logPath = DendronWorkspace.instance().context.logPath;
+  const out = await ServerUtils.execServerNode({
+    scriptPath: path.join(__dirname, "server.js"),
+    logPath,
+    nextServerUrl,
+    nextStaticRoot,
+    port,
+  });
+  return out;
 }
 
 export async function _activate(
@@ -379,7 +364,24 @@ export async function _activate(
         return p;
       }
     );
-    const { port } = await startServer();
+    const { port, subprocess } = await startServerProcess();
+    if (subprocess) {
+      WSUtils.handleServerProcess({
+        subprocess,
+        context,
+        onExit: () => {
+          const txt = "Restart Dendron";
+          vscode.window
+            .showErrorMessage("Dendron engine encountered an error", txt)
+            .then(async (resp) => {
+              if (resp === txt) {
+                AnalyticsUtils.track(VSCodeEvents.ServerCrashed);
+                _activate(context);
+              }
+            });
+        },
+      });
+    }
     const durationStartServer = getDurationMilliseconds(start);
     Logger.info({ ctx, msg: "post-start-server", port, durationStartServer });
     WSUtils.updateEngineAPI(port);

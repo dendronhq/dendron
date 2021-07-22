@@ -24,11 +24,7 @@ const stubVaultPick = (vaults: DVault[]) => {
 suite("Create Daily Journal Suite", function () {
   let ctx: vscode.ExtensionContext;
 
-  ctx = setupBeforeAfter(this, {
-    afterHook: async () => {
-      sinon.restore();
-    },
-  });
+  ctx = setupBeforeAfter(this);
 
   test("basic", (done) => {
     runLegacyMultiWorkspaceTest({

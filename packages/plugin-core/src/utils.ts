@@ -4,7 +4,8 @@ import {
   DendronError,
   DEngineClient,
   DNodeUtils,
-  DVault, getStage,
+  DVault,
+  getStage,
   NoteAddBehavior,
   NoteProps,
   NoteUtils,
@@ -12,13 +13,13 @@ import {
   Position,
   SchemaModuleProps,
   Time,
-  VaultUtils
+  VaultUtils,
 } from "@dendronhq/common-all";
 import {
   goUpTo,
   resolveTilde,
   tmpDir,
-  vault2Path
+  vault2Path,
 } from "@dendronhq/common-server";
 import { ExecaChildProcess } from "execa";
 import _ from "lodash";
@@ -34,7 +35,7 @@ import {
   ConfigKey,
   DendronContext,
   GLOBAL_STATE,
-  _noteAddBehaviorEnum
+  _noteAddBehaviorEnum,
 } from "./constants";
 import { FileItem } from "./external/fileutils/FileItem";
 import { Logger } from "./logger";
@@ -501,23 +502,30 @@ export class VSCodeUtils {
 }
 
 export class WSUtils {
-
-  static handleServerProcess({subprocess, context, onExit}: {subprocess: ExecaChildProcess, context: vscode.ExtensionContext, onExit: ()=>any}) {
-		const ctx = "WSUtils.handleServerProcess"
-      Logger.info({ ctx, msg: "subprocess running", pid: subprocess.pid });
-      // if extension closes, reap server process
-      context.subscriptions.push(
-        new vscode.Disposable(() => {
-          Logger.info({ ctx, msg: "kill server start" });
-          process.kill(subprocess.pid);
-          Logger.info({ ctx, msg: "kill server end" });
-        })
-      );
-      // if server process has issues, prompt user to restart
-      ServerUtils.onProcessExit({
-        subprocess,
-        cb: onExit
-      });
+  static handleServerProcess({
+    subprocess,
+    context,
+    onExit,
+  }: {
+    subprocess: ExecaChildProcess;
+    context: vscode.ExtensionContext;
+    onExit: () => any;
+  }) {
+    const ctx = "WSUtils.handleServerProcess";
+    Logger.info({ ctx, msg: "subprocess running", pid: subprocess.pid });
+    // if extension closes, reap server process
+    context.subscriptions.push(
+      new vscode.Disposable(() => {
+        Logger.info({ ctx, msg: "kill server start" });
+        process.kill(subprocess.pid);
+        Logger.info({ ctx, msg: "kill server end" });
+      })
+    );
+    // if server process has issues, prompt user to restart
+    ServerUtils.onProcessExit({
+      subprocess,
+      cb: onExit,
+    });
   }
 
   static updateEngineAPI(port: number | string): DEngineClient {
@@ -590,35 +598,36 @@ export class DendronClientUtilsV2 {
     opts?: CreateFnameOpts
   ): string {
     // gather inputs
-    const dateFormat = type === "SCRATCH" 
-      ? DendronWorkspace.configuration().get<string>(
-          CONFIG["DEFAULT_SCRATCH_DATE_FORMAT"].key
-        ) as string
-      : getWS().config.journal.dateFormat;
+    const dateFormat =
+      type === "SCRATCH"
+        ? (DendronWorkspace.configuration().get<string>(
+            CONFIG["DEFAULT_SCRATCH_DATE_FORMAT"].key
+          ) as string)
+        : getWS().config.journal.dateFormat;
 
-    const addBehavior = type === "SCRATCH"
-      ? DendronWorkspace.configuration().get<string>(
-          CONFIG["DEFAULT_SCRATCH_ADD_BEHAVIOR"].key
-        )
-      : getWS().config.journal.addBehavior;
+    const addBehavior =
+      type === "SCRATCH"
+        ? DendronWorkspace.configuration().get<string>(
+            CONFIG["DEFAULT_SCRATCH_ADD_BEHAVIOR"].key
+          )
+        : getWS().config.journal.addBehavior;
 
     const nameKey: ConfigKey = `DEFAULT_${type}_NAME` as ConfigKey;
-    const name = type === "SCRATCH"
-      ? DendronWorkspace.configuration().get<string>(
-          CONFIG[nameKey].key
-        )
-      : getWS().config.journal.name;
-    
+    const name =
+      type === "SCRATCH"
+        ? DendronWorkspace.configuration().get<string>(CONFIG[nameKey].key)
+        : getWS().config.journal.name;
+
     if (!_.includes(_noteAddBehaviorEnum, addBehavior)) {
-      const actual = type === "SCRATCH"
-        ? CONFIG["DEFAULT_SCRATCH_ADD_BEHAVIOR"].key
-        : addBehavior;
-      const choices = type === "SCRATCH"
-        ? _noteAddBehaviorEnum.join(", ")
-        : Object.keys(NoteAddBehavior).join(", ");
-      throw Error(
-        `${actual} must be one of: ${choices}`
-      );
+      const actual =
+        type === "SCRATCH"
+          ? CONFIG["DEFAULT_SCRATCH_ADD_BEHAVIOR"].key
+          : addBehavior;
+      const choices =
+        type === "SCRATCH"
+          ? _noteAddBehaviorEnum.join(", ")
+          : Object.keys(NoteAddBehavior).join(", ");
+      throw Error(`${actual} must be one of: ${choices}`);
     }
 
     const editorPath = vscode.window.activeTextEditor?.document.uri.fsPath;
@@ -672,5 +681,3 @@ export const clipboard = vscode.env.clipboard;
 export const getOpenGraphMetadata = (opts: ogs.Options) => {
   return ogs(opts);
 };
-
-

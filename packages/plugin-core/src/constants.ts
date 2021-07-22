@@ -1,5 +1,5 @@
 import { DendronTreeViewKey } from "@dendronhq/common-all";
-
+import { CodeConfigKeys } from "./types";
 
 export const extensionQualifiedId = `dendron.dendron`;
 export const DEFAULT_LEGACY_VAULT_NAME = "vault";
@@ -881,19 +881,19 @@ export const CONFIG: { [key: string]: ConfigEntry } = {
     key: "dendron.defaultScratchName",
     type: "string",
     default: "scratch",
-    description: "DEPRECATED. Use journal settings in dendron.yml",
+    description: "DEPRECATED. Use scratch settings in dendron.yml",
   },
   DEFAULT_SCRATCH_DATE_FORMAT: {
     key: "dendron.defaultScratchDateFormat",
     type: "string",
     default: "y.MM.dd.HHmmss",
-    description: "DEPRECATED. Use journal settings in dendron.yml",
+    description: "DEPRECATED. Use scratch settings in dendron.yml",
   },
   DEFAULT_SCRATCH_ADD_BEHAVIOR: {
     key: "dendron.defaultScratchAddBehavior",
     default: "asOwnDomain",
     type: "string",
-    description: "DEPRECATED. Use journal settings in dendron.yml",
+    description: "DEPRECATED. Use scratch settings in dendron.yml",
     enum: _noteAddBehaviorEnum,
   },
   COPY_NOTE_URL_ROOT: {
@@ -918,10 +918,10 @@ export const CONFIG: { [key: string]: ConfigEntry } = {
   },
   // --- timestamp decoration
   DEFAULT_TIMESTAMP_DECORATION_FORMAT: {
-    key: "dendron.defaultTimestampDecorationFormat",
+    key: CodeConfigKeys.DEFAULT_TIMESTAMP_DECORATION_FORMAT,
     default: "DATETIME_MED",
     type: "string",
-    description: "DEPRECATED. Use journal settings in dendron.yml",
+    description: "Decide how human readable timestamp decoration is displayed",
     enum: [
       "DATETIME_FULL",
       "DATETIME_FULL_WITH_SECONDS",

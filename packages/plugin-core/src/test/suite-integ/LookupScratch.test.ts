@@ -85,7 +85,6 @@ suite("Scratch Notes", function () {
             noConfirm: true,
           });
           const scratchNote = getNoteFromTextEditor();
-          console.log('scratchNote',scratchNote.fname)
           expect(scratchNote.fname.startsWith("pro.scratch")).toBeTruthy();
           done();
         },

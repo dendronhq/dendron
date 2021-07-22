@@ -512,17 +512,17 @@
         "dendron.defaultScratchName": {
           "type": "string",
           "default": "scratch",
-          "description": "DEPRECATED. Use journal settings in dendron.yml"
+          "description": "DEPRECATED. Use scratch settings in dendron.yml"
         },
         "dendron.defaultScratchDateFormat": {
           "type": "string",
           "default": "y.MM.dd.HHmmss",
-          "description": "DEPRECATED. Use journal settings in dendron.yml"
+          "description": "DEPRECATED. Use scratch settings in dendron.yml"
         },
         "dendron.defaultScratchAddBehavior": {
           "default": "asOwnDomain",
           "type": "string",
-          "description": "DEPRECATED. Use journal settings in dendron.yml",
+          "description": "DEPRECATED. Use scratch settings in dendron.yml",
           "enum": [
             "childOfDomain",
             "childOfDomainNamespace",
@@ -555,7 +555,7 @@
         "dendron.defaultTimestampDecorationFormat": {
           "default": "DATETIME_MED",
           "type": "string",
-          "description": "DEPRECATED. Use journal settings in dendron.yml",
+          "description": "Decide how human readable timestamp decoration is displayed",
           "enum": [
             "DATETIME_FULL",
             "DATETIME_FULL_WITH_SECONDS",

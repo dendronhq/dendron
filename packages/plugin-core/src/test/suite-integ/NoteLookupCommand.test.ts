@@ -5,7 +5,7 @@ import {
   ENGINE_HOOKS_MULTI,
   TestEngineUtils
 } from "@dendronhq/engine-test-utils";
-import _, { get } from "lodash";
+import _ from "lodash";
 import { describe } from "mocha";
 // // You can import and use all API from the 'vscode' module
 // // as well as import your extension to test it
@@ -49,20 +49,20 @@ function getJournalAndScratchButton(
   journalBtn: JournalBtn,
   scratchBtn: ScratchBtn
 } {
-  const [journalBtn, scratchBtn] = [
-    LookupNoteTypeEnum.journal,
-    LookupNoteTypeEnum.scratch
-  ].map((btnType) => {
-    return _.find(buttons, (button) => {
-      return button.type === btnType;
-    }
-  }) as vscode.QuickInputButton[] & DendronBtn[];
+  const [journalBtn, scratchBtn] = _.map(
+    _.values(LookupNoteTypeEnum), 
+    (btnType) => {
+      return _.find(buttons, (button) => button.type === btnType );
+    }) as vscode.QuickInputButton[] & DendronBtn[];
   return { journalBtn, scratchBtn };
 }
 
 suite("NoteLookupCommand", function () {
-  let ctx: vscode.ExtensionContext;
-  ctx = setupBeforeAfter(this);
+  const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {
+    afterHook: async () => {
+      sinon.restore();
+    },
+  });
 
   // NOTE: think these tests are wrong
   describe("updateItems", () => {

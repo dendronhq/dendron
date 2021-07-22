@@ -18,6 +18,7 @@ import {
 } from "../utils/md";
 import { DendronWorkspace, getEngine } from "../workspace";
 import _ from "lodash";
+import { Logger } from "../logger";
 
 const HOVER_IMAGE_MAX_HEIGHT = Math.max(200, 10);
 
@@ -78,7 +79,7 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
     );
 
     const engine = getEngine();
-    const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
+    const vault = PickerUtilsV2.getVaultForOpenEditor();
 
     // Check if what's being referenced is a note.
     const maybeNotes = NoteUtils.getNotesByFname({
@@ -119,7 +120,11 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
       referenceText.push(`:#${AnchorUtils.anchor2string(refAtPos.anchorEnd)}`);
     referenceText.push("]]");
 
-    const reference = await proc.process(referenceText.join(""));
-    return new vscode.Hover(reference.toString(), hoverRange);
+    try {
+      const reference = await proc.process(referenceText.join(""));
+      return new vscode.Hover(reference.toString(), hoverRange);
+    } catch (err) {
+      Logger.info({ctx: "provideHover", referenceText: referenceText.join(""), refAtPos, err});
+    }
   }
 }

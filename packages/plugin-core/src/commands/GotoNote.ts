@@ -12,7 +12,6 @@ import {
 import { matchWikiLink, HASHTAG_REGEX_LOOSE } from "@dendronhq/engine-server";
 import _ from "lodash";
 import {
-  TextEditor,
   Position,
   Selection,
   Uri,
@@ -99,7 +98,98 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     }
     return;
   }
+
+  private async processInputs(opts: CommandOpts) {
+    if (opts.qs && opts.vault) return opts;
+    const engine = DendronWorkspace.instance().getEngine();
+
+    if (opts.qs && !opts.vault) {
+      // Special case: some code expects GotoNote to default to current vault if qs is provided but vault isn't
+      opts.vault = PickerUtilsV2.getVaultForOpenEditor();
+      return opts;
+    }
+
+    const link = this.getLinkFromSelection();
+    if (!link) {
+      window.showErrorMessage("selection is not a valid link");
+      return;
+    }
+
+    // no fname provided, get it from selected link
+    if (!opts.qs) {
+      if (link.value) {
+        // Reference to another file
+        opts.qs = link.value;
+      } else {
+        // Same-file block reference, implicitly current file
+        const editor = VSCodeUtils.getActiveTextEditorOrThrow();
+        opts.qs = NoteUtils.uri2Fname(editor.document.uri);
+      }
+    }
+
+    if (!opts.anchor && link.anchorHeader) opts.anchor = parseAnchor(link.anchorHeader);
+
+    if (!opts.vault) {
+      if (link.vaultName) {
+        // if vault is defined on the link, then it's always that one
+        opts.vault = VaultUtils.getVaultByNameOrThrow({
+          vaults: getWS().vaultsv4,
+          vname: link.vaultName,
+        });
+      } else {
+        // Otherwise, we need to guess or prompt the vault. If linked note
+        // exists in some vault, we might be able to use that.
+        const notes = NoteUtils.getNotesByFname({
+          fname: opts.qs,
+          vault: opts.vault,
+          notes: engine.notes,
+        });
+        if (notes.length === 1) {
+          // There's just one note, so that's the one we'll go with.
+          opts.vault = notes[0].vault;
+        } else if (notes.length > 1) {
+          // It's ambiguous which note the user wants to go to, so we have to
+          // guess or prompt.
+          const resp = await PickerUtilsV2.promptVault(
+            notes.map((ent) => ent.vault)
+          );
+          if (_.isUndefined(resp)) return;
+          opts.vault = resp;
+        } else {
+          // This is a new note. Depending on the config, we can either
+          // automatically pick the vault or we'll prompt for it.
+          const confirmVaultSetting =
+            DendronWorkspace.instance().config["lookupConfirmVaultOnCreate"];
+          const selectionMode =
+            confirmVaultSetting !== true
+              ? VaultSelectionMode.smart
+              : VaultSelectionMode.alwaysPrompt;
+  
+          const currentVault = PickerUtilsV2.getVaultForOpenEditor();
+          const selectedVault = await PickerUtilsV2.getOrPromptVaultForNewNote({
+            vault: currentVault,
+            fname: opts.qs,
+            vaultSelectionMode: selectionMode,
+          });
+  
+          // If we prompted the user and they selected nothing, then they want to cancel
+          if (_.isUndefined(selectedVault)) {
+            return;
+          }
+          opts.vault = selectedVault;
+        }
+      }
+    }
+
+    return opts;
+  }
+
   /**
+   *
+   * Warning about `opts`! If `opts.qs` is provided but `opts.vault` is empty,
+   * it will default to the current vault. If `opts.qs` is not provided, it will
+   * read the selection from the current document as a link to get it. If both
+   * `opts.qs` and `opts.vault` is empty, both will be read from the selected link.
    *
    * @param opts.qs - query string. should correspond to {@link NoteProps.fname}
    * @param opts.vault - {@link DVault} for note
@@ -110,73 +200,14 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     const ctx = "GotoNoteCommand";
     this.L.info({ ctx, opts, msg: "enter" });
     const { overrides } = opts;
-    let qs: string;
-    let vault: DVault =
-      opts.vault || PickerUtilsV2.getOrPromptVaultForOpenEditor();
     const client = DendronWorkspace.instance().getEngine();
 
-    if (!opts.qs) {
-      const maybeLink = this.getLinkFromSelection();
-      if (!maybeLink) {
-        window.showErrorMessage("selection is not a valid link");
-        return;
-      }
-      if (maybeLink.value) {
-        // Reference to another file
-        qs = maybeLink.value as string;
-      } else {
-        // Same-file block reference, implicitly current file
-        const editor = VSCodeUtils.getActiveTextEditor() as TextEditor;
-        qs = NoteUtils.uri2Fname(editor.document.uri);
-      }
-      const vaults = getWS().vaultsv4;
-      if (maybeLink.vaultName) {
-        vault = VaultUtils.getVaultByNameOrThrow({
-          vaults,
-          vname: maybeLink.vaultName,
-        });
-      }
-      if (maybeLink.anchorHeader)
-        opts.anchor = parseAnchor(maybeLink.anchorHeader);
-      // check if note exist in a different vault
-      const notes = NoteUtils.getNotesByFname({
-        fname: qs,
-        notes: client.notes,
-      });
-      if (notes.length === 1) {
-        vault = notes[0].vault;
-      } else if (notes.length > 1) {
-        // prompt for vault
-        const resp = await PickerUtilsV2.promptVault(
-          notes.map((ent) => ent.vault)
-        );
-        if (_.isUndefined(resp)) {
-          return;
-        }
-        vault = resp;
-      } else {
-        // this is a new note:
-        const confirmVaultSetting =
-          DendronWorkspace.instance().config["lookupConfirmVaultOnCreate"];
-        const selectionMode =
-          confirmVaultSetting === false || _.isUndefined(confirmVaultSetting)
-            ? VaultSelectionMode.smart
-            : VaultSelectionMode.alwaysPrompt;
-        const selectedVault = await PickerUtilsV2.getOrPromptVaultForNewNote({
-          vault,
-          fname: qs,
-          vaultSelectionMode: selectionMode,
-        });
-
-        if (_.isUndefined(selectedVault)) {
-          return;
-        }
-
-        vault = selectedVault;
-      }
-    } else {
-      qs = opts.qs;
+    const { qs, vault } = await this.processInputs(opts) || opts;
+    if (_.isUndefined(qs) || _.isUndefined(vault)) {
+      // There was an error or the user cancelled a prompt
+      return;
     }
+    
     let pos: undefined | Position;
     const out = await DendronWorkspace.instance().pauseWatchers<CommandOutput>(
       async () => {
@@ -197,7 +228,7 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
         });
         this.L.info({ ctx, opts, msg: "exit" });
         if (opts.anchor && editor) {
-          const pos = findAnchorPos({ anchor: opts.anchor, note });
+          pos = findAnchorPos({ anchor: opts.anchor, note });
           editor.selection = new Selection(pos, pos);
           editor.revealRange(editor.selection);
         }

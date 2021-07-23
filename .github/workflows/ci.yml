@@ -98,7 +98,7 @@ jobs:
           git config --global user.email ci@dendron.so
 
       - name: Initialize
-        run: sudo yarn ci:init
+        run: yarn ci:init
         shell: bash
 
       - name: Start Xvfb

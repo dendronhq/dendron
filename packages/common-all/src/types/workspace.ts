@@ -77,6 +77,7 @@ export type SeedEntry = {
   site?: SeedSite;
 };
 
+
 export enum NoteAddBehavior {
   "childOfDomain" = "childOfDomain",
   "childOfDomainNamespace" = "childOfDomainNamespace",
@@ -122,6 +123,8 @@ export type DendronConfig = {
 
   journal: JournalConfig;
 
+  scratch: Pick<JournalConfig, "name" | "dateFormat" | "addBehavior">;
+  
   /**
    * Workspaces
    */
@@ -241,6 +244,7 @@ export type DendronConfig = {
 
   /** Automatically fold frontmatter when opening a new note. False by default. */
   autoFoldFrontmatter?: boolean;
+  
 };
 
 export type RandomNoteConfig = {

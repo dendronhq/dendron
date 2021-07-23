@@ -39,6 +39,10 @@ journal:
     dateFormat: y.MM.dd
     addBehavior: childOfDomain
     firstDayOfWeek: 1
+scratch:
+    name: scratch
+    dateFormat: y.MM.dd.HHmmss
+    addBehavior: asOwnDomain
 site:
     copyAssets: true
     siteHierarchies:
@@ -116,6 +120,10 @@ journal:
     dateFormat: y.MM.dd
     addBehavior: childOfDomain
     firstDayOfWeek: 1
+scratch:
+    name: scratch
+    dateFormat: y.MM.dd.HHmmss
+    addBehavior: asOwnDomain
 site:
     copyAssets: true
     siteHierarchies:
@@ -183,6 +191,10 @@ journal:
     dateFormat: y.MM.dd
     addBehavior: childOfDomain
     firstDayOfWeek: 1
+scratch:
+    name: scratch
+    dateFormat: y.MM.dd.HHmmss
+    addBehavior: asOwnDomain
 site:
     copyAssets: true
     siteHierarchies:
@@ -217,6 +229,10 @@ journal:
     dateFormat: y.MM.dd
     addBehavior: childOfDomain
     firstDayOfWeek: 1
+scratch:
+    name: scratch
+    dateFormat: y.MM.dd.HHmmss
+    addBehavior: asOwnDomain
 site:
     copyAssets: true
     siteHierarchies:
@@ -267,6 +283,10 @@ journal:
     dateFormat: y.MM.dd
     addBehavior: childOfDomain
     firstDayOfWeek: 1
+scratch:
+    name: scratch
+    dateFormat: y.MM.dd.HHmmss
+    addBehavior: asOwnDomain
 site:
     copyAssets: true
     siteHierarchies:
@@ -330,6 +350,10 @@ journal:
     dateFormat: y.MM.dd
     addBehavior: childOfDomain
     firstDayOfWeek: 1
+scratch:
+    name: scratch
+    dateFormat: y.MM.dd.HHmmss
+    addBehavior: asOwnDomain
 site:
     copyAssets: true
     siteHierarchies:
@@ -375,6 +399,10 @@ journal:
     dateFormat: y.MM.dd
     addBehavior: childOfDomain
     firstDayOfWeek: 1
+scratch:
+    name: scratch
+    dateFormat: y.MM.dd.HHmmss
+    addBehavior: asOwnDomain
 site:
     copyAssets: true
     siteHierarchies:

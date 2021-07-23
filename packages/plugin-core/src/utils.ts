@@ -32,8 +32,6 @@ import * as vscode from "vscode";
 import { CancellationTokenSource } from "vscode-languageclient";
 import { PickerUtilsV2 } from "./components/lookup/utils";
 import {
-  CONFIG,
-  ConfigKey,
   DendronContext,
   GLOBAL_STATE,
   _noteAddBehaviorEnum,
@@ -636,36 +634,24 @@ export class DendronClientUtilsV2 {
     opts?: CreateFnameOpts
   ): string {
     // gather inputs
-    const dateFormat =
-      type === "SCRATCH"
-        ? (DendronWorkspace.configuration().get<string>(
-            CONFIG["DEFAULT_SCRATCH_DATE_FORMAT"].key
-          ) as string)
-        : getWS().config.journal.dateFormat;
+    const dateFormat = type === "SCRATCH" 
+      ? getWS().config.scratch.dateFormat
+      : getWS().config.journal.dateFormat;
 
-    const addBehavior =
-      type === "SCRATCH"
-        ? DendronWorkspace.configuration().get<string>(
-            CONFIG["DEFAULT_SCRATCH_ADD_BEHAVIOR"].key
-          )
-        : getWS().config.journal.addBehavior;
+    const addBehavior = type === "SCRATCH"
+      ? getWS().config.scratch.addBehavior
+      : getWS().config.journal.addBehavior;
 
-    const nameKey: ConfigKey = `DEFAULT_${type}_NAME` as ConfigKey;
-    const name =
-      type === "SCRATCH"
-        ? DendronWorkspace.configuration().get<string>(CONFIG[nameKey].key)
-        : getWS().config.journal.name;
-
+    const name = type === "SCRATCH"
+      ? getWS().config.scratch.name
+      : getWS().config.journal.name;
+    
     if (!_.includes(_noteAddBehaviorEnum, addBehavior)) {
-      const actual =
-        type === "SCRATCH"
-          ? CONFIG["DEFAULT_SCRATCH_ADD_BEHAVIOR"].key
-          : addBehavior;
-      const choices =
-        type === "SCRATCH"
-          ? _noteAddBehaviorEnum.join(", ")
-          : Object.keys(NoteAddBehavior).join(", ");
-      throw Error(`${actual} must be one of: ${choices}`);
+      const actual = addBehavior;
+      const choices = Object.keys(NoteAddBehavior).join(", ");
+      throw Error(
+        `${actual} must be one of: ${choices}`
+      );
     }
 
     const editorPath = vscode.window.activeTextEditor?.document.uri.fsPath;

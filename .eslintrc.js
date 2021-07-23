@@ -105,6 +105,8 @@ module.exports = {
         ],
       },
     ],
+    // fix for .tsx
+    "react/jsx-filename-extension": "off",
     // used for redux toolkit
     "no-param-reassign": "off",
     "max-classes-per-file": "off",

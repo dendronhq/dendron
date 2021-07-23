@@ -55,4 +55,8 @@ dev:
 graph:
     zoomSpeed: 1
 initializeRemoteVaults: true
-dendronVersion: 0.50.0
+dendronVersion: 0.51.2
+scratch:
+    name: scratch
+    dateFormat: y.MM.dd.HHmmss
+    addBehavior: asOwnDomain

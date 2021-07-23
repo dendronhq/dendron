@@ -80,6 +80,7 @@ export default function FullNoteGraph({ engine, ide }: DendronProps) {
       setConfig={setConfig}
       engine={engine}
       ide={ide}
+      type='note'
     />
   );
 }

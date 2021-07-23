@@ -1,4 +1,8 @@
-import { createLogger, engineSlice, postVSCodeMessage } from "@dendronhq/common-frontend";
+import {
+  createLogger,
+  engineSlice,
+  postVSCodeMessage,
+} from "@dendronhq/common-frontend";
 import _ from "lodash";
 import React, { useEffect, useRef, useState } from "react";
 import cytoscape, { Core, EdgeDefinition, EventHandler, use } from "cytoscape";
@@ -8,11 +12,17 @@ import Head from "next/head";
 import AntThemes from "../styles/theme-antd";
 import GraphFilterView from "./graph-filter-view";
 import { GraphConfig, GraphConfigItem, GraphElements } from "../lib/graph";
-import { APIUtils, DMessageSource, GraphViewMessage, GraphViewMessageType, VaultUtils } from "@dendronhq/common-all";
+import {
+  DMessageSource,
+  GraphViewMessage,
+  GraphViewMessageType,
+  VaultUtils,
+} from "@dendronhq/common-all";
 import useApplyGraphConfig from "../hooks/useApplyGraphConfig";
 import { DendronProps } from "../lib/types";
 import useSyncGraphWithIDE from "../hooks/useSyncGraphWithIDE";
-import { useDendronConfig } from "../lib/hooks";
+import useGraphLifecycle from "../hooks/useGraphLifecycle";
+import { Button, Space, Spin, Typography } from "antd";
 import { api } from "../lib/config";
 
 export class GraphUtils {
@@ -22,7 +32,11 @@ export class GraphUtils {
   }
 }
 
-const getCytoscapeStyle = (themes: any, theme: string | undefined, customCSS: string | undefined) => {
+const getCytoscapeStyle = (
+  themes: any,
+  theme: string | undefined,
+  customCSS: string | undefined
+) => {
   if (_.isUndefined(theme)) return "";
 
   // Cytoscape's "diamond" node is smaller than it's "circle" node, so
@@ -37,9 +51,7 @@ node {
   color: ${AntThemes[theme].graph.node.label.color};
   label: data(label);
   font-size: ${AntThemes[theme].graph.node.label.fontSize};
-  min-zoomed-font-size: ${
-    AntThemes[theme].graph.node.label.minZoomedFontSize
-  };
+  min-zoomed-font-size: ${AntThemes[theme].graph.node.label.minZoomedFontSize};
   font-weight: ${AntThemes[theme].graph.node.label.fontWeight};
 }
 
@@ -107,7 +119,7 @@ export const getEulerConfig = (shouldAnimate: boolean) => ({
 
 export default function Graph({
   elements,
-  type = "note",
+  type,
   onSelect,
   config,
   setConfig,
@@ -118,13 +130,13 @@ export default function Graph({
   onSelect: EventHandler;
   config: GraphConfig;
   setConfig: React.Dispatch<React.SetStateAction<GraphConfig>>;
-  type?: "note" | "schema";
+  type: "note" | "schema";
 }) {
   const logger = createLogger("Graph");
   const graphRef = useRef<HTMLDivElement>(null);
   const { themes, currentTheme } = useThemeSwitcher();
   const [cy, setCy] = useState<Core>();
-  const [isGraphLoaded, setIsGraphLoaded] = useState(false);
+  const [isReady, setIsReady] = useState(false);
 
   useSyncGraphWithIDE({
     graph: cy,
@@ -142,10 +154,6 @@ export default function Graph({
 
   const { nodes, edges } = elements;
   const isLargeGraph = nodes.length + Object.values(edges).flat().length > 1000;
-
-  useEffect(() => {
-    logger.log("styles:", ide.graphStyles)
-  }, [ide]);
 
   const renderGraph = () => {
     if (graphRef.current && nodes && edges) {
@@ -168,7 +176,11 @@ export default function Graph({
       // Add layout middleware
       cytoscape.use(euler);
 
-      const style =  getCytoscapeStyle(themes, currentTheme, ide.graphStyles) as any
+      const style = getCytoscapeStyle(
+        themes,
+        currentTheme,
+        ide.graphStyles
+      ) as any;
 
       const network = cytoscape({
         container: graphRef.current,
@@ -189,16 +201,22 @@ export default function Graph({
         hideLabelsOnViewport: isLargeGraph,
       });
 
+      let renderTimeout: NodeJS.Timeout;
+
+      // When rendering stops, mark the graph as ready
+      network.on("render", () => {
+        if (isReady) return;
+        if (renderTimeout) clearTimeout(renderTimeout);
+        renderTimeout = setTimeout(() => {
+          setIsReady(true);
+        }, 1000);
+      });
+
       const shouldAnimate =
         type === "schema" ||
         (!isLargeGraph && !GraphUtils.isLocalGraph(config));
 
       network.layout(getEulerConfig(shouldAnimate)).run();
-
-      // Show UI when layout is finished. As a fallback, show on interaction with graph.
-      network.on("layoutstop viewport", () => {
-        if (!isGraphLoaded) setIsGraphLoaded(true);
-      });
 
       network.on("select", (e) => onSelect(e));
 
@@ -207,11 +225,11 @@ export default function Graph({
   };
 
   useEffect(() => {
-    logger.log('Requesting graph style...')
+    logger.log("Requesting graph style...");
     // Get graph style
     postVSCodeMessage({
       type: GraphViewMessageType.onRequestGraphStyle,
-      data: { },
+      data: {},
       source: DMessageSource.webClient,
     } as GraphViewMessage);
   }, []);
@@ -261,23 +279,59 @@ export default function Graph({
     }
   }, [engine.vaults]);
 
+  const updateConfigField = (key: string, value: string | number | boolean) => {
+    setConfig((c) => {
+      const newConfig = {
+        ...c,
+        [key]: {
+          // @ts-ignore
+          ...c[key],
+          value,
+        },
+      };
+      return newConfig;
+    });
+  };
+
+  const showNoteGraphMessage = type === "note" && !ide.noteActive;
+
   return (
     <>
       <Head>
         <title>{_.capitalize(type)} Graph</title>
       </Head>
       <div
+        style={{
+          width: "100vw",
+          height: "100vh",
+          position: "absolute",
+          top: 0,
+          left: 0,
+          display: isReady && !showNoteGraphMessage ? "none" : "grid",
+          placeItems: "center",
+          background: currentTheme
+            ? AntThemes[currentTheme].graph.filterView.background
+            : "transparent",
+        }}
+      >
+        {!isReady && <Spin size="large" />}
+        {isReady && showNoteGraphMessage && (
+          <NoteGraphMessage updateConfigField={updateConfigField} />
+        )}
+      </div>
+      <div
         id="graph"
         style={{
           width: "100vw",
           height: "100vh",
           position: "relative",
+          opacity: isReady ? 1 : 0,
         }}
       >
         <GraphFilterView
           config={config}
-          setConfig={setConfig}
-          isGraphLoaded={isGraphLoaded}
+          isGraphReady={isReady}
+          updateConfigField={updateConfigField}
         />
         <div
           ref={graphRef}
@@ -291,3 +345,33 @@ export default function Graph({
     </>
   );
 }
+
+const NoteGraphMessage = ({
+  updateConfigField,
+}: {
+  updateConfigField: (key: string, value: string | number | boolean) => void;
+}) => (
+  <Space
+    direction="vertical"
+    size="large"
+    style={{
+      zIndex: 10,
+      maxWidth: 400,
+      padding: "0 2rem",
+      textAlign: "center",
+      fontSize: "1.2rem",
+    }}
+  >
+    <Typography>
+      This is the <b>Local Note Graph.</b> In order to show the graph, open a
+      note in the workspace.
+    </Typography>
+    <Typography>To change to the full graph, click below.</Typography>
+    <Button
+      onClick={() => updateConfigField("options.show-local-graph", false)}
+      type="primary"
+    >
+      Show Full Graph
+    </Button>
+  </Space>
+);

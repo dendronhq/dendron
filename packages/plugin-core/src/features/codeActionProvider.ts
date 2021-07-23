@@ -1,7 +1,7 @@
 import { DoctorActions } from "@dendronhq/dendron-cli";
 import _ from "lodash";
 import { FrontmatterContent } from "mdast";
-import { CodeAction, CodeActionKind, CodeActionProvider, Diagnostic, DiagnosticSeverity, ExtensionContext, languages, Range, TextDocument } from "vscode";
+import { CodeAction, CodeActionKind, CodeActionProvider, Diagnostic, DiagnosticSeverity, ExtensionContext, languages, Range, TextDocument, Uri } from "vscode";
 import YAML from "yamljs";
 import { DoctorCommand } from "../commands/Doctor";
 import { Logger } from "../logger";
@@ -13,6 +13,17 @@ const FRONTMATTER_WARNING = languages.createDiagnosticCollection();
 const RESOLVE_MESSAGE_AUTO_ONLY = "Please use the lightbulb, or run the Dendron: Doctor command.";
 const RESOLVE_MESSAGE = "Please use the lightbulb, run the Dendron: Doctor command, or manually correct it.";
 
+
+/** Delay displaying any warnings while the user is still typing.
+ * 
+ * The user is considered to have stopped typing if they didn't type anything after 500ms.
+ */
+const delayedFrontmatterWarning = _.debounce(
+  (uri: Uri, diagnostics: Diagnostic[]) => {
+    FRONTMATTER_WARNING.set(uri, diagnostics);
+  },
+  500,
+);
 
 function badFrontmatter(props: Omit<Diagnostic, "source" | "code">) {
   return {
@@ -34,7 +45,7 @@ export function warnMissingFrontmatter(document: TextDocument) {
   // dangerous as every set discards the previous warnings. This is okay in this
   // case though since the frontmatter can't be missing and bad at the same
   // time.
-  FRONTMATTER_WARNING.set(document.uri, [diagnostic]);
+  delayedFrontmatterWarning(document.uri, [diagnostic]);
   return diagnostic;
 }
 
@@ -66,7 +77,7 @@ export function warnBadFrontmatterContents(document: TextDocument, frontmatter: 
       severity: DiagnosticSeverity.Error,
     }));
   }
-  FRONTMATTER_WARNING.set(document.uri, diagnostics);
+  delayedFrontmatterWarning(document.uri, diagnostics);
   return diagnostics;
 }
 

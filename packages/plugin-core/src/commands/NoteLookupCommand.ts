@@ -37,6 +37,8 @@ import {
   LookupFilterType,
   LookupNoteType,
   LookupNoteTypeEnum,
+  LookupSelectionType,
+  LookupSelectionTypeEnum,
 } from "./LookupCommand";
 
 type CommandRunOpts = {
@@ -45,6 +47,7 @@ type CommandRunOpts = {
   fuzzThreshold?: number;
   multiSelect?: boolean;
   noteType?: LookupNoteType;
+  selectionType?: LookupSelectionType;
   /**
    * NOTE: currently, only one filter is supported
    */
@@ -140,8 +143,8 @@ export class NoteLookupCommand extends BaseCommand<
         DirectChildFilterBtn.create(
           copts.filterMiddleware?.includes("directChildOnly")
         ),
-        Selection2LinkBtn.create(),
-        SelectionExtractBtn.create(),
+        Selection2LinkBtn.create(copts.selectionType === LookupSelectionTypeEnum.selection2link),
+        SelectionExtractBtn.create(copts.selectionType === LookupSelectionTypeEnum.selectionExtract),
       ],
     });
     this._provider = new NoteLookupProvider("lookup", {

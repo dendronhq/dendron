@@ -5,15 +5,15 @@ import {
   ENGINE_HOOKS_MULTI,
   TestEngineUtils
 } from "@dendronhq/engine-test-utils";
-import { TIMEOUT } from "../testUtils";
+import { getActiveEditorBasename, TIMEOUT } from "../testUtils";
 import _ from "lodash";
 import { describe } from "mocha";
 // // You can import and use all API from the 'vscode' module
 // // as well as import your extension to test it
 import * as vscode from "vscode";
-import { LookupNoteTypeEnum } from "../../commands/LookupCommand";
+import { LookupNoteTypeEnum, LookupSelectionTypeEnum } from "../../commands/LookupCommand";
 import { NoteLookupCommand, CommandOutput } from "../../commands/NoteLookupCommand";
-import { JournalBtn, ScratchBtn, DendronBtn } from "../../components/lookup/buttons";
+import { JournalBtn, ScratchBtn, DendronBtn, ButtonType, Selection2LinkBtn, SelectionExtractBtn } from "../../components/lookup/buttons";
 import { PickerUtilsV2 } from "../../components/lookup/utils";
 import { VSCodeUtils } from "../../utils";
 import { expect } from "../testUtilsv2";
@@ -46,17 +46,50 @@ function expectCreateNew({
   }
 }
 
-function getJournalAndScratchButton(
+function getButtonByType(
+  btnType: ButtonType,
+  buttons: vscode.QuickInputButton[] & DendronBtn[]
+) {
+  return _.find(buttons, (button) => {
+    return button.type === btnType;
+  });
+}
+
+function getButtonsByTypeArray(
+  typeArray: ButtonType[],
+  buttons: vscode.QuickInputButton[] & DendronBtn[]
+) {
+  return _.map(
+    typeArray,
+    (btnType) => {
+      return getButtonByType(btnType, buttons);
+    }
+  )
+}
+
+function getSelectionTypeButtons(
+  buttons: vscode.QuickInputButton[] & DendronBtn[]
+): {
+  selection2linkBtn: Selection2LinkBtn,
+  selectionExtractBtn: SelectionExtractBtn,
+} {
+  const [selection2linkBtn, selectionExtractBtn] = getButtonsByTypeArray(
+    _.values(LookupSelectionTypeEnum),
+    buttons
+  ) as vscode.QuickInputButton[] & DendronBtn[];
+  return { selection2linkBtn, selectionExtractBtn };
+}
+
+function getNoteTypeButtons(
   buttons: vscode.QuickInputButton[] & DendronBtn[]
 ): {
   journalBtn: JournalBtn,
   scratchBtn: ScratchBtn
 } {
-  const [journalBtn, scratchBtn] = _.map(
+  const [journalBtn, scratchBtn] = getButtonsByTypeArray(
     _.values(LookupNoteTypeEnum), 
-    (btnType) => {
-      return _.find(buttons, (button) => button.type === btnType );
-    }) as vscode.QuickInputButton[] & DendronBtn[];
+    buttons,
+  ) as vscode.QuickInputButton[] & DendronBtn[];
   return { journalBtn, scratchBtn };
 }
 
@@ -319,7 +352,7 @@ suite("NoteLookupCommand", function () {
           });
 
           controller.quickpick.show();
-          let { journalBtn, scratchBtn } = getJournalAndScratchButton(
+          let { journalBtn, scratchBtn } = getNoteTypeButtons(
             controller.quickpick.buttons
           )
 
@@ -329,7 +362,7 @@ suite("NoteLookupCommand", function () {
           
           await controller.onTriggerButton(journalBtn);
 
-          ({ journalBtn, scratchBtn } = getJournalAndScratchButton(
+          ({ journalBtn, scratchBtn } = getNoteTypeButtons(
             controller.quickpick.buttons
           ));
           expect(journalBtn.pressed).toBeFalsy();
@@ -358,7 +391,7 @@ suite("NoteLookupCommand", function () {
           });
 
           controller.quickpick.show();
-          let { journalBtn, scratchBtn } = getJournalAndScratchButton(
+          let { journalBtn, scratchBtn } = getNoteTypeButtons(
             controller.quickpick.buttons
           )
 
@@ -368,7 +401,7 @@ suite("NoteLookupCommand", function () {
           
           await controller.onTriggerButton(scratchBtn);
 
-          ({ journalBtn, scratchBtn } = getJournalAndScratchButton(
+          ({ journalBtn, scratchBtn } = getNoteTypeButtons(
             controller.quickpick.buttons
           ));
           expect(journalBtn.pressed).toBeFalsy();
@@ -397,7 +430,7 @@ suite("NoteLookupCommand", function () {
           });
 
           controller.quickpick.show();
-          let { journalBtn, scratchBtn } = getJournalAndScratchButton(
+          let { journalBtn, scratchBtn } = getNoteTypeButtons(
             controller.quickpick.buttons
           )
 
@@ -407,7 +440,7 @@ suite("NoteLookupCommand", function () {
           
           await controller.onTriggerButton(scratchBtn);
           
-          ({ journalBtn, scratchBtn } = getJournalAndScratchButton(
+          ({ journalBtn, scratchBtn } = getNoteTypeButtons(
             controller.quickpick.buttons
           ));
           expect(journalBtn.pressed).toBeFalsy();
@@ -416,7 +449,7 @@ suite("NoteLookupCommand", function () {
 
           await controller.onTriggerButton(scratchBtn);
 
-          ({ journalBtn, scratchBtn } = getJournalAndScratchButton(
+          ({ journalBtn, scratchBtn } = getNoteTypeButtons(
             controller.quickpick.buttons
           ));
           expect(journalBtn.pressed).toBeFalsy();
@@ -426,6 +459,217 @@ suite("NoteLookupCommand", function () {
           done();
         }
       }); 
+    });
+
+    test("selection2link basic", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+        },
+        onInit: async ({ vaults, engine }) => {
+          const cmd = new NoteLookupCommand();
+          stubVaultPick(vaults);
+          const fooNoteEditor = await VSCodeUtils.openNote(engine.notes["foo"]);
+
+          // selects "foo body"
+          fooNoteEditor.selection = new vscode.Selection(7, 0, 7, 12);
+          const { text } = VSCodeUtils.getSelection();
+          expect(text).toEqual("foo body");
+
+          await cmd.run({
+            selectionType: "selection2link",
+            noConfirm: true,
+          });
+
+          // should create foo.foo-body.md with an empty body.
+          expect(getActiveEditorBasename().endsWith("foo.foo-body.md"));
+          const newNoteEditor = VSCodeUtils.getActiveTextEditorOrThrow();
+          const newNote = VSCodeUtils.getNoteFromDocument(newNoteEditor.document);
+          expect(newNote?.body).toEqual("");
+
+          // should change selection to link with alais.
+          const changedText = fooNoteEditor.document.getText();
+          expect(changedText.endsWith("[[foo body|foo.foo-body]]\n"));
+          done();
+        }
+      });
+    });
+
+    test("selection2link modifier toggle", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+        },
+        onInit: async ({ vaults, engine }) => {
+          const cmd = new NoteLookupCommand();
+          stubVaultPick(vaults);
+          const fooNoteEditor = await VSCodeUtils.openNote(engine.notes["foo"]);
+
+          fooNoteEditor.selection = new vscode.Selection(7, 0, 7, 12);
+          const { text } = VSCodeUtils.getSelection();
+          expect(text).toEqual("foo body");
+
+          const { controller } = await cmd.gatherInputs({
+            selectionType: "selection2link",
+          });
+
+          controller.quickpick.show();
+
+          let { selection2linkBtn, selectionExtractBtn } = getSelectionTypeButtons(
+            controller.quickpick.buttons
+          );
+
+          expect(selection2linkBtn?.pressed).toBeTruthy();
+          expect(selectionExtractBtn.pressed).toBeFalsy();
+          expect(controller.quickpick.value).toEqual("foo.foo-body");
+          
+          await controller.onTriggerButton(selection2linkBtn);
+
+          ({ selection2linkBtn, selectionExtractBtn } = getSelectionTypeButtons(
+            controller.quickpick.buttons
+          ));
+
+          expect(selection2linkBtn.pressed).toBeFalsy();
+          expect(selectionExtractBtn.pressed).toBeFalsy();
+          expect(controller.quickpick.value).toEqual("foo");
+
+          done();
+        }
+      });
+    });
+
+    test("selectionExtract basic", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+        },
+        onInit: async ({ vaults, engine }) => {
+          const cmd = new NoteLookupCommand();
+          stubVaultPick(vaults);
+          const fooNoteEditor = await VSCodeUtils.openNote(engine.notes["foo"]);
+
+          // selects "foo body"
+          fooNoteEditor.selection = new vscode.Selection(7, 0, 7, 12);
+          const { text } = VSCodeUtils.getSelection();
+          expect(text).toEqual("foo body");
+
+          await cmd.run({
+            selectionType: "selectionExtract",
+            initialValue: "foo.extracted",
+            noConfirm: true,
+          });
+
+          // should create foo.extracted.md with an selected text as body.
+          expect(getActiveEditorBasename().endsWith("foo.extracted.md"));
+          const newNoteEditor = VSCodeUtils.getActiveTextEditorOrThrow();
+          const newNote = VSCodeUtils.getNoteFromDocument(newNoteEditor.document);
+          expect(newNote?.body.trim()).toEqual("foo body");
+
+          // should remove selection
+          const changedText = fooNoteEditor.document.getText();
+          expect(changedText.includes("foo body")).toBeFalsy();
+          done();
+        }
+      });
+    });
+    
+    test("selectionExtract modifier toggle", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+        },
+        onInit: async ({ vaults, engine }) => {
+          const cmd = new NoteLookupCommand();
+          stubVaultPick(vaults);
+          const fooNoteEditor = await VSCodeUtils.openNote(engine.notes["foo"]);
+
+          fooNoteEditor.selection = new vscode.Selection(7, 0, 7, 12);
+          const { text } = VSCodeUtils.getSelection();
+          expect(text).toEqual("foo body");
+
+          const { controller } = await cmd.gatherInputs({
+            selectionType: "selectionExtract",
+          });
+
+          controller.quickpick.show();
+
+          let { selection2linkBtn, selectionExtractBtn } = getSelectionTypeButtons(
+            controller.quickpick.buttons
+          );
+
+          expect(selection2linkBtn?.pressed).toBeFalsy();
+          expect(selectionExtractBtn.pressed).toBeTruthy();
+          
+          await controller.onTriggerButton(selectionExtractBtn);
+
+          ({ selection2linkBtn, selectionExtractBtn } = getSelectionTypeButtons(
+            controller.quickpick.buttons
+          ));
+
+          expect(selection2linkBtn.pressed).toBeFalsy();
+          expect(selectionExtractBtn.pressed).toBeFalsy();
+
+          done();
+        }
+      });
+    });
+
+    test("selection2link and selectionExtract modifiers toggle each other off when triggered", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+        },
+        onInit: async ({ vaults, engine }) => {
+          const cmd = new NoteLookupCommand();
+          stubVaultPick(vaults);
+          const fooNoteEditor = await VSCodeUtils.openNote(engine.notes["foo"]);
+
+          fooNoteEditor.selection = new vscode.Selection(7, 0, 7, 12);
+          const { text } = VSCodeUtils.getSelection();
+          expect(text).toEqual("foo body");
+
+          const { controller } = await cmd.gatherInputs({
+            selectionType: "selection2link",
+          });
+
+          controller.quickpick.show();
+
+          let { selection2linkBtn, selectionExtractBtn } = getSelectionTypeButtons(
+            controller.quickpick.buttons
+          );
+
+          expect(selection2linkBtn?.pressed).toBeTruthy();
+          expect(selectionExtractBtn.pressed).toBeFalsy();
+          expect(controller.quickpick.value).toEqual("foo.foo-body");
+          
+          await controller.onTriggerButton(selectionExtractBtn);
+
+          ({ selection2linkBtn, selectionExtractBtn } = getSelectionTypeButtons(
+            controller.quickpick.buttons
+          ));
+
+          expect(selection2linkBtn.pressed).toBeFalsy();
+          expect(selectionExtractBtn.pressed).toBeTruthy();
+          expect(controller.quickpick.value).toEqual("foo");
+          
+          await controller.onTriggerButton(selectionExtractBtn);
+
+          ({ selection2linkBtn, selectionExtractBtn } = getSelectionTypeButtons(
+            controller.quickpick.buttons
+          ));
+
+          expect(selection2linkBtn.pressed).toBeFalsy();
+          expect(selectionExtractBtn.pressed).toBeFalsy();
+          expect(controller.quickpick.value).toEqual("foo");
+
+          done();
+        }
+      });
     });
   });
 });

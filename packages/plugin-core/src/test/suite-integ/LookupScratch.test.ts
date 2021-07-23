@@ -18,10 +18,9 @@ import {
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
 suite("Scratch Notes", function () {
-  let ctx: vscode.ExtensionContext;
   this.timeout(TIMEOUT);
 
-  ctx = setupBeforeAfter(this, {});
+  const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {});
 
   describe("single", () => {
     test("basic", (done) => {

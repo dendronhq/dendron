@@ -37,6 +37,7 @@ import { createAllButtons } from "../../components/lookup/buttons";
 import { LookupControllerV2 } from "../../components/lookup/LookupControllerV2";
 import { LookupProviderV2 } from "../../components/lookup/LookupProviderV2";
 import { NotePickerUtils, PickerUtilsV2 } from "../../components/lookup/utils";
+import { CONFIG } from "../../constants";
 import { EngineFlavor, EngineOpts } from "../../types";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace, getWS } from "../../workspace";
@@ -233,8 +234,7 @@ const createEngineForNoteAcceptNewItem = createEngineFactory({
 });
 
 suite("Lookup, schemas", function () {
-  let ctx: vscode.ExtensionContext;
-  ctx = setupBeforeAfter(this, {});
+  const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {});
 
   describe("updateItems", () => {
     _.map(
@@ -338,10 +338,9 @@ suite("Lookup, schemas", function () {
 });
 
 suite("Lookup, notesv2", function () {
-  let ctx: vscode.ExtensionContext;
   const engOpts: EngineOpts = { flavor: "note" };
 
-  ctx = setupBeforeAfter(this, {
+  const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {
     afterHook: async () => {
       sinon.restore();
     },
@@ -389,7 +388,7 @@ suite("Lookup, notesv2", function () {
         preSetupHook: async ({ wsRoot, vaults }) => {
           ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
         },
-        onInit: async ({}) => {
+        onInit: async () => {
           const engOpts: EngineOpts = { flavor: "note" };
           const lc = new LookupControllerV2(engOpts);
           const lp = new LookupProviderV2(engOpts);
@@ -423,7 +422,7 @@ suite("Lookup, notesv2", function () {
             wsRoot,
           });
         },
-        onInit: async ({}) => {
+        onInit: async () => {
           const engOpts: EngineOpts = { flavor: "note" };
           const lc = new LookupControllerV2(engOpts);
           const lp = new LookupProviderV2(engOpts);
@@ -463,7 +462,7 @@ suite("Lookup, notesv2", function () {
           const vpath = vault2Path({ vault: vaults[0], wsRoot });
           fs.removeSync(path.join(vpath, "foo.ch1.md"));
         },
-        onInit: async ({}) => {
+        onInit: async () => {
           const { lc, lp, picker: quickpick } = await lookupHelper("note");
           quickpick.value = "foo.";
           await lp.onUpdatePickerItem(
@@ -503,7 +502,7 @@ suite("Lookup, notesv2", function () {
             vault: vaults[0],
           });
         },
-        onInit: async ({}) => {
+        onInit: async () => {
           const { picker: quickpick, lp, lc } = await lookupHelper("note");
           quickpick.value = "foo.";
           quickpick.showDirectChildrenOnly = true;
@@ -598,6 +597,40 @@ suite("Lookup, notesv2", function () {
             (await EditorUtils.getURIForActiveEditor()).fsPath.endsWith(
               path.join("vault2", "alpha.md")
             )
+          ).toBeTruthy();
+          done();
+        },
+      });
+    });
+
+    test("scratch config in yml ", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        wsSettingsOverride: {
+          settings: {
+            [CONFIG.DEFAULT_JOURNAL_NAME.key]: "scratch",
+          },
+        },
+        modConfigCb: (config) => {
+          config.scratch.name = "testScratch" ;
+          return config;
+        },
+        preSetupHook: ENGINE_HOOKS.setupBasic,
+        onInit: async () => {
+          const cmd = new LookupCommand();
+          const note = getWS().getEngine().notes["foo"];
+          await VSCodeUtils.openNote(note);
+          await cmd.run({
+            noConfirm: true,
+            noteType: LookupNoteTypeEnum.scratch,
+            flavor: "note",
+          });
+          expect(
+            path
+              .basename(
+                VSCodeUtils.getActiveTextEditorOrThrow().document.uri.fsPath
+              )
+              .startsWith("testScratch")
           ).toBeTruthy();
           done();
         },
@@ -840,8 +873,7 @@ suite("Lookup, notesv2", function () {
 });
 
 suite("selectionExtract", function () {
-  let ctx: vscode.ExtensionContext;
-  ctx = setupBeforeAfter(this, {});
+  const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {});
 
   describe("extraction from file not in known vault", () => {
     test("basic", (done) => {

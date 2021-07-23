@@ -285,7 +285,7 @@ suite("GotoNote", function () {
     });
 
     describe("multiple notes & xvault link", () => {
-      test("non-xvault link resolves to same vault", (done) => {
+      test("non-xvault link prompts for vault", (done) => {
         let note: NoteProps;
         runLegacyMultiWorkspaceTest({
           ctx,
@@ -294,11 +294,13 @@ suite("GotoNote", function () {
           },
           onInit: async ({ vaults, wsRoot }) => {
             const editor = await VSCodeUtils.openNote(note);
+            const prompt = sinon.stub(PickerUtilsV2, "promptVault").returns(Promise.resolve(vaults[1]));
             editor.selection = LocationTestUtils.getPresetWikiLinkSelection({line: 7});
             await new GotoNoteCommand().run();
             const openedNote = VSCodeUtils.getNoteFromDocument(VSCodeUtils.getActiveTextEditorOrThrow().document);
             expect(openedNote?.fname).toEqual("eggs");
             expect(VaultUtils.isEqual(openedNote!.vault, vaults[1], wsRoot)).toBeTruthy();
+            expect(prompt.calledOnce).toBeTruthy();
             done();
           }
         });

@@ -1,10 +1,11 @@
-import { DNodePropsQuickInputV2, DVault, NoteUtils } from "@dendronhq/common-all";
+import { DNodePropsQuickInputV2, DVault, NoteUtils, Time } from "@dendronhq/common-all";
 import { NoteTestUtilsV4, NOTE_PRESETS_V4, sinon } from "@dendronhq/common-test-utils";
 import {
   ENGINE_HOOKS,
   ENGINE_HOOKS_MULTI,
   TestEngineUtils
 } from "@dendronhq/engine-test-utils";
+import { TIMEOUT } from "../testUtils";
 import _ from "lodash";
 import { describe } from "mocha";
 // // You can import and use all API from the 'vscode' module
@@ -21,6 +22,8 @@ import {
   setupBeforeAfter,
   withConfig
 } from "../testUtilsV3";
+import { DendronWorkspace } from "../../workspace";
+import { CONFIG } from "../../constants";
 
 
 const stubVaultPick = (vaults: DVault[]) => {
@@ -58,6 +61,7 @@ function getJournalAndScratchButton(
 }
 
 suite("NoteLookupCommand", function () {
+  this.timeout(TIMEOUT);
   const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {
     afterHook: async () => {
       sinon.restore();
@@ -261,7 +265,7 @@ suite("NoteLookupCommand", function () {
           
           expect(engine.config.journal.dateFormat).toEqual("y.MM.dd");
           // quickpick value should be `foo.journal.yyyy.mm.dd`
-          const today = ((new Date()).toISOString().split("T")[0]).split("-").join(".");
+          const today = Time.now().toFormat(engine.config.journal.dateFormat);
           expect(out.quickpick.value).toEqual(`foo.journal.${today}`)
 
           done();
@@ -287,8 +291,11 @@ suite("NoteLookupCommand", function () {
           })) as CommandOutput;
           
           // quickpick value should be `scratch.yyyy.mm.dd.ts`
-          const today = ((new Date()).toISOString().split("T")[0]).split("-").join(".");
-          expect(out.quickpick.value.startsWith(`scratch.${today}.`)).toBeTruthy();
+          const dateFormat = DendronWorkspace.configuration().get<string>(
+            CONFIG["DEFAULT_SCRATCH_DATE_FORMAT"].key
+          ) as string;
+          const today = Time.now().toFormat(dateFormat);
+          expect(out.quickpick.value.startsWith(`scratch.${today.split(".").slice(0, -1).join(".")}.`)).toBeTruthy();
 
           done();
         }

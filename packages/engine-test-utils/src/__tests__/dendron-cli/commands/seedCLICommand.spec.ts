@@ -45,7 +45,7 @@ async function createSeed({ engine }: { engine: DEngineClient }) {
   return { registryFile, seedDict, seedId };
 }
 
-describe("remove", () => {
+describe.skip("remove", () => {
   const cmd = SeedCommands.REMOVE;
   test("error: nothing to remove", async () => {
     await runEngineTestV5(
@@ -142,7 +142,7 @@ describe("remove", () => {
   });
 });
 
-describe("add", () => {
+describe.skip("add", () => {
   const cmd = SeedCommands.ADD;
 
   test("error: does not exist", async () => {
@@ -295,7 +295,7 @@ describe("add", () => {
   });
 });
 
-describe("init", () => {
+describe.skip("init", () => {
   const cmd = SeedCommands.INIT;
   const seed: SeedConfig = {
     name: "foo",
@@ -308,7 +308,7 @@ describe("init", () => {
       url: "",
     },
   };
-  describe("create workspace", () => {
+  describe.skip("create workspace", () => {
     const mode = SeedInitMode.CREATE_WORKSPACE;
     test(`basic`, async () => {
       await runEngineTestV5(
@@ -360,7 +360,7 @@ describe("init", () => {
     });
   });
 
-  describe("convert workspace", () => {
+  describe.skip("convert workspace", () => {
     const mode = SeedInitMode.CONVERT_WORKSPACE;
 
     const runInit = async (opts: { engine: DEngineClient; wsRoot: string }) => {

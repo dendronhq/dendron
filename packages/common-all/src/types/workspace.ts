@@ -184,6 +184,11 @@ export type DendronConfig = {
   hierarchyDisplayTitle?: string;
 
   /**
+   * Configuration for note and schema graphs
+   */
+  graph?: DendronGraphConfig;
+
+  /**
    * Don't automatically create note when looking up definition
    */
   noAutoCreateOnDefinition?: boolean;
@@ -437,6 +442,10 @@ export type DendronSiteConfig = {
   cognitoUserPoolId?: string;
   cognitoClientId?: string;
 };
+
+export type DendronGraphConfig = {
+  scrollSpeed: number;
+}
 
 export type HierarchyConfig = {
   publishByDefault?: boolean | { [key: string]: boolean };

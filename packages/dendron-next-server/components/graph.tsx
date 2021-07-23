@@ -8,10 +8,12 @@ import Head from "next/head";
 import AntThemes from "../styles/theme-antd";
 import GraphFilterView from "./graph-filter-view";
 import { GraphConfig, GraphConfigItem, GraphElements } from "../lib/graph";
-import { DMessageSource, GraphViewMessage, GraphViewMessageType, VaultUtils } from "@dendronhq/common-all";
+import { APIUtils, DMessageSource, GraphViewMessage, GraphViewMessageType, VaultUtils } from "@dendronhq/common-all";
 import useApplyGraphConfig from "../hooks/useApplyGraphConfig";
 import { DendronProps } from "../lib/types";
 import useSyncGraphWithIDE from "../hooks/useSyncGraphWithIDE";
+import { useDendronConfig } from "../lib/hooks";
+import { api } from "../lib/config";
 
 export class GraphUtils {
   static isLocalGraph(config: GraphConfig) {
@@ -124,6 +126,8 @@ export default function Graph({
   const [cy, setCy] = useState<Core>();
   const [isGraphLoaded, setIsGraphLoaded] = useState(false);
 
+  const { config: dendronConfig } = useDendronConfig()
+
   useSyncGraphWithIDE({
     graph: cy,
     engine,
@@ -177,6 +181,7 @@ export default function Graph({
           edges: parsedEdges,
         },
         style,
+        wheelSensitivity: dendronConfig?.graph?.scrollSpeed || 1,
 
         // Zoom levels
         minZoom: 0.25,

@@ -135,7 +135,6 @@ export default function Graph({
   const { themes, currentTheme } = useThemeSwitcher();
   const [cy, setCy] = useState<Core>();
   const [isReady, setIsReady] = useState(false);
-  const [shouldBlockRender, setShouldBlockRender] = useState(false);
 
   useSyncGraphWithIDE({
     graph: cy,

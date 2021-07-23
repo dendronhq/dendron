@@ -2,7 +2,7 @@
 id: 9eae08fb-5e3f-4a7e-a989-3f206825d490
 title: Markdown
 desc: ""
-updated: 1614629675327
+updated: 1626837833440
 created: 1614629618966
 ---
 
@@ -40,3 +40,16 @@ graph TD;
     B-->D;
     C-->D;
 ```
+
+### Table
+
+| Sapiente | accusamus |
+|----------|-----------|
+| Laborum  | libero    |
+| Ullam    | optio     |
+
+### List
+
+* foo
+* bar
+* baz

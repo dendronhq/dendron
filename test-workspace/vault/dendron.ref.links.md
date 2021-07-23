@@ -2,7 +2,7 @@
 id: 73eb67ea-0291-45e7-8f2f-193fd6f00643
 title: Links
 desc: ""
-updated: 1614386308909
+updated: 1626756808041
 created: 1608518909864
 ---
 
@@ -50,3 +50,5 @@ Vault2
 ## Block References
 
 ![[dendron.ref.links.target#^123]]
+
+## [[a header that's entirely a link|dendron.apples]]

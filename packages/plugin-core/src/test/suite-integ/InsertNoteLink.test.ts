@@ -13,11 +13,7 @@ import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 suite("InsertNoteLink", function () {
   let ctx: vscode.ExtensionContext;
   this.timeout(TIMEOUT);
-  ctx = setupBeforeAfter(this, {
-    afterHook: async () => {
-      sinon.restore();
-    },
-  });
+  ctx = setupBeforeAfter(this);
 
   describe("basic", () => {
     test("basic", (done) => {

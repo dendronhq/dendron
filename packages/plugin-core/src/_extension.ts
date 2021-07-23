@@ -1,24 +1,25 @@
+import { ServerUtils } from "@dendronhq/api-server";
 import {
   CONSTANTS,
   DendronError,
   getStage,
   Time,
   VaultUtils,
-  VSCodeEvents
+  VSCodeEvents,
 } from "@dendronhq/common-all";
 import {
   getDurationMilliseconds,
   getOS,
-  SegmentClient
+  SegmentClient,
 } from "@dendronhq/common-server";
 import {
   DConfig,
-  HistoryEvent,
   HistoryService,
   MetadataService,
   MigrationServce,
-  WorkspaceService
+  WorkspaceService,
 } from "@dendronhq/engine-server";
+import { ExecaChildProcess } from "execa";
 import _ from "lodash";
 import { Duration } from "luxon";
 import path from "path";
@@ -33,12 +34,9 @@ import { setupSegmentClient } from "./telemetry";
 import { InstallStatus, VSCodeUtils, WSUtils } from "./utils";
 import { AnalyticsUtils } from "./utils/analytics";
 import { DendronTreeView } from "./views/DendronTreeView";
-import {
-  DendronWorkspace,
-  getEngine,
-  getWS,
-} from "./workspace";
+import { DendronWorkspace, getEngine, getWS } from "./workspace";
 import { WorkspaceInitFactory } from "./workspace/workspaceInitializer";
+
 const MARKDOWN_WORD_PATTERN = new RegExp("([\\w\\.\\#]+)");
 // === Main
 
@@ -51,7 +49,14 @@ export function activate(context: vscode.ExtensionContext) {
     wordPattern: MARKDOWN_WORD_PATTERN,
   });
   if (stage !== "test") {
-    _activate(context);
+    _activate(context).catch((err) => {
+      Logger.error(err);
+      HistoryService.instance().add({
+        action: "not_initialized",
+        source: "extension",
+        data: { err },
+      });
+    });
   }
   return;
 }
@@ -137,43 +142,30 @@ async function postReloadWorkspace() {
   Logger.info({ ctx, msg: "exit" });
 }
 
-async function startServer() {
-  const ctx = "startServer";
+async function startServerProcess(): Promise<{
+  port: number;
+  subprocess?: ExecaChildProcess;
+}> {
   const { nextServerUrl, nextStaticRoot, engineServerPort } =
     getWS().config.dev || {};
+  // const ctx = "startServer";
   const maybePort =
     DendronWorkspace.configuration().get<number | undefined>(
       CONFIG.SERVER_PORT.key
     ) || engineServerPort;
-  const logPath = DendronWorkspace.instance().context.logPath;
-  Logger.info({ ctx, logLevel: process.env["LOG_LEVEL"], maybePort });
-  if (!maybePort) {
-    const { launchv2 } = require("@dendronhq/api-server"); // eslint-disable-line global-require
-    return launchv2({
-      port: maybePort,
-      logPath: path.join(logPath, "dendron.server.log"),
-      nextServerUrl,
-      nextStaticRoot,
-    });
+  const port = maybePort;
+  if (port) {
+    return { port };
   }
-  return { port: maybePort };
-}
-
-// @ts-ignore
-function subscribeToPortChange() {
-  const ctx = "subscribeToPortChange";
-  HistoryService.instance().subscribe(
-    "apiServer",
-    async (event: HistoryEvent) => {
-      if (event.action === "changedPort") {
-        const port = DendronWorkspace.serverConfiguration().serverPort;
-        const engine = WSUtils.updateEngineAPI(port);
-        await engine.init();
-        Logger.info({ ctx, msg: "fin init Engine" });
-        await reloadWorkspace();
-      }
-    }
-  );
+  const logPath = DendronWorkspace.instance().context.logPath;
+  const out = await ServerUtils.execServerNode({
+    scriptPath: path.join(__dirname, "server.js"),
+    logPath,
+    nextServerUrl,
+    nextStaticRoot,
+    port,
+  });
+  return out;
 }
 
 export async function _activate(
@@ -345,40 +337,26 @@ export async function _activate(
     });
 
     // --- Start Initializating the Engine
-    vscode.window.withProgress(
-      {
-        location: vscode.ProgressLocation.Notification,
-        title: "Starting Dendron...",
-        cancellable: true,
-      },
-      (_progress, _token) => {
-        _token.onCancellationRequested(() => {
-          console.log("Cancelled");
-        });
+    WSUtils.showInitProgress();
 
-        const p = new Promise((resolve) => {
-          HistoryService.instance().subscribe(
-            "extension",
-            async (_event: HistoryEvent) => {
-              if (_event.action === "initialized") {
-                resolve(undefined);
+    const { port, subprocess } = await startServerProcess();
+    if (subprocess) {
+      WSUtils.handleServerProcess({
+        subprocess,
+        context,
+        onExit: () => {
+          const txt = "Restart Dendron";
+          vscode.window
+            .showErrorMessage("Dendron engine encountered an error", txt)
+            .then(async (resp) => {
+              if (resp === txt) {
+                AnalyticsUtils.track(VSCodeEvents.ServerCrashed);
+                _activate(context);
               }
-            }
-          );
-          HistoryService.instance().subscribe(
-            "extension",
-            async (_event: HistoryEvent) => {
-              if (_event.action === "not_initialized") {
-                Logger.error({ ctx, msg: "issue initializing Dendron" });
-                resolve(undefined);
-              }
-            }
-          );
-        });
-        return p;
-      }
-    );
-    const { port } = await startServer();
+            });
+        },
+      });
+    }
     const durationStartServer = getDurationMilliseconds(start);
     Logger.info({ ctx, msg: "post-start-server", port, durationStartServer });
     WSUtils.updateEngineAPI(port);

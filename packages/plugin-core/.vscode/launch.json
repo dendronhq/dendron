@@ -139,6 +139,7 @@
       "skipFiles": [
         "<node_internals>/**/*.js",
         "${workspaceFolder}/**/node_modules/mocha/**/*.js",
+        "**/extensionHostProcess.js"
       ],
       "outFiles": ["${workspaceFolder}/out/src/test/**/*.js"]
     },

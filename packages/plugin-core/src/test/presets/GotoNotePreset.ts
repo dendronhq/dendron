@@ -36,7 +36,7 @@ const ANCHOR_WITH_SPECIAL_CHARS = new TestPresetEntry({
   label: "anchor with special chars",
   preSetupHook: async ({ wsRoot, vaults }) => {
     const vault = vaults[0];
-    const specialCharsHeader = `H3 &$#@`;
+    const specialCharsHeader = `H3 &$!@`;
     await NoteTestUtilsV4.createNote({
       wsRoot,
       vault,

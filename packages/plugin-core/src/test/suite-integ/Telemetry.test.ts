@@ -1,16 +1,15 @@
-import _ from "lodash";
+import { SegmentClient } from "@dendronhq/common-server";
+import { FileTestUtils } from "@dendronhq/common-test-utils";
+import { DConfig } from "@dendronhq/engine-server";
+import { describe } from "mocha";
+import sinon from "sinon";
 import * as vscode from "vscode";
+import { DisableTelemetryCommand } from "../../commands/DisableTelemetry";
+import { EnableTelemetryCommand } from "../../commands/EnableTelemetry";
+import { setupSegmentClient } from "../../telemetry";
 import { getWS } from "../../workspace";
 import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
-import { describe } from "mocha";
-import sinon from "sinon";
-import { SegmentClient } from "@dendronhq/common-server";
-import { setupSegmentClient } from "../../telemetry";
-import { FileTestUtils } from "@dendronhq/common-test-utils";
-import { DisableTelemetryCommand } from "../../commands/DisableTelemetry";
-import { EnableTelemetryCommand } from "../../commands/EnableTelemetry";
-import { DConfig } from "@dendronhq/engine-server";
 
 suite("telemetry", function () {
   let ctx: vscode.ExtensionContext;
@@ -40,7 +39,7 @@ suite("telemetry", function () {
           setupSegmentClient(ws);
           expect(SegmentClient.instance().hasOptedOut).toBeFalsy();
 
-          sinon.restore();
+          
           done();
         },
       });
@@ -56,7 +55,7 @@ suite("telemetry", function () {
           setupSegmentClient(ws);
           expect(SegmentClient.instance().hasOptedOut).toBeTruthy();
 
-          sinon.restore();
+          
           done();
         },
       });
@@ -73,7 +72,7 @@ suite("telemetry", function () {
           setupSegmentClient(ws);
           expect(SegmentClient.instance().hasOptedOut).toBeTruthy();
 
-          sinon.restore();
+          
           done();
         },
       });
@@ -90,7 +89,7 @@ suite("telemetry", function () {
           setupSegmentClient(ws);
           expect(SegmentClient.instance().hasOptedOut).toBeTruthy();
 
-          sinon.restore();
+          
           done();
         },
       });
@@ -109,7 +108,7 @@ suite("telemetry", function () {
           setupSegmentClient(ws);
           expect(SegmentClient.instance().hasOptedOut).toBeTruthy();
 
-          sinon.restore();
+          
           done();
         },
       });
@@ -129,7 +128,7 @@ suite("telemetry", function () {
           setupSegmentClient(ws);
           expect(SegmentClient.instance().hasOptedOut).toBeFalsy();
 
-          sinon.restore();
+          
           done();
         },
       });
@@ -150,7 +149,7 @@ suite("telemetry", function () {
           setupSegmentClient(ws);
           expect(SegmentClient.instance().hasOptedOut).toBeFalsy();
 
-          sinon.restore();
+          
           done();
         },
       });
@@ -171,7 +170,7 @@ suite("telemetry", function () {
           setupSegmentClient(ws);
           expect(SegmentClient.instance().hasOptedOut).toBeTruthy();
 
-          sinon.restore();
+          
           done();
         },
       });

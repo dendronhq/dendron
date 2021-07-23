@@ -19,11 +19,7 @@ suite("CopyNoteUrl", function () {
   let ctx: vscode.ExtensionContext;
   const rootUrl = "dendron.so";
 
-  ctx = setupBeforeAfter(this, {
-    afterHook: () => {
-      sinon.restore();
-    },
-  });
+  ctx = setupBeforeAfter(this);
 
   test("with override", (done) => {
     runLegacyMultiWorkspaceTest({

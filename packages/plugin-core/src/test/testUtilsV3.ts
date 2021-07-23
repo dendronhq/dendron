@@ -1,3 +1,4 @@
+import { ServerUtils } from "@dendronhq/api-server";
 import {
   DendronConfig,
   DEngineClient,
@@ -32,6 +33,7 @@ import {
 import fs from "fs-extra";
 import _ from "lodash";
 import { afterEach, beforeEach } from "mocha";
+import path from "path";
 import { ExtensionContext, Uri } from "vscode";
 import {
   SetupWorkspaceCommand,
@@ -44,9 +46,10 @@ import {
 import { Logger } from "../logger";
 import { StateService } from "../services/stateService";
 import { WorkspaceConfig } from "../settings";
-import { VSCodeUtils } from "../utils";
+import { InstallStatus, VSCodeUtils, WSUtils } from "../utils";
 import { DendronWorkspace, getWS } from "../workspace";
 import { BlankInitializer } from "../workspace/blankInitializer";
+import { WorkspaceInitFactory } from "../workspace/workspaceInitializer";
 import { _activate } from "../_extension";
 import { onWSInit, TIMEOUT } from "./testUtils";
 import {
@@ -165,7 +168,7 @@ export async function setupLegacyWorkspace(
     rootDirRaw: wsRoot,
     skipOpenWs: true,
     ...copts.setupWsOverride,
-    workspaceInitializer: new BlankInitializer()
+    workspaceInitializer: new BlankInitializer(),
   });
   stubWorkspaceFolders(vaults);
 
@@ -280,16 +283,51 @@ export function addDebugServerOverride() {
   };
 }
 
+/**
+ *
+ * @param _this
+ * @param opts.noSetInstallStatus: by default, we set install status to NO_CHANGE. use this when you need to test this logic
+ * @param opts.noStubExecServerNode: stub this to be synchronous engine laungh for tests due to latency
+ * @returns
+ */
 export function setupBeforeAfter(
   _this: any,
-  opts?: { beforeHook?: any; afterHook?: any }
+  opts?: {
+    beforeHook?: any;
+    afterHook?: any;
+    noSetInstallStatus?: boolean;
+    noStubExecServerNode?: boolean;
+  }
 ) {
   let ctx: ExtensionContext;
-  // allows for debugging
+  // allows for
   _this.timeout(TIMEOUT);
   ctx = VSCodeUtils.getOrCreateMockContext();
   beforeEach(async () => {
     DendronWorkspace.getOrCreate(ctx);
+
+    // workspace has not upgraded
+    if (!opts?.noSetInstallStatus) {
+      sinon
+        .stub(VSCodeUtils, "getInstallStatusForExtension")
+        .returns(InstallStatus.NO_CHANGE);
+    }
+    // workspace is not tutorial workspace
+    sinon
+      .stub(WorkspaceInitFactory, "isTutorialWorkspaceLaunch")
+      .returns(false);
+    if (!opts?.noStubExecServerNode) {
+      sinon.stub(ServerUtils, "execServerNode").returns(
+        new Promise(async (resolve) => {
+          const { launchv2 } = require("@dendronhq/api-server"); // eslint-disable-line global-require
+          const { port } = await launchv2({
+            logPath: path.join(__dirname, "..", "..", "dendron.server.log"),
+          });
+          resolve({ port, subprocess: { pid: -1 } as any });
+        })
+      );
+      sinon.stub(WSUtils, "handleServerProcess").returns();
+    }
     if (opts?.beforeHook) {
       await opts.beforeHook();
     }
@@ -300,6 +338,7 @@ export function setupBeforeAfter(
     if (opts?.afterHook) {
       await opts.afterHook();
     }
+    sinon.restore();
   });
   return ctx;
 }

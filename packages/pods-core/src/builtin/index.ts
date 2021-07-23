@@ -7,3 +7,4 @@ export * from "./GraphvizPod";
 export * from "./HTMLPod";
 export * from "./AirtablePod";
 export * from "./GithubPod";
+export * from "./GDocPod";

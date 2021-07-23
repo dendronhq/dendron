@@ -9,7 +9,7 @@ import {
   WikiLinkNoteV4,
   NoteRefNoteV4,
 } from "@dendronhq/engine-server";
-import { DecorationOptions, DecorationRangeBehavior, Range, TextEditor, TextEditorDecorationType, ThemeColor, window, TextDocument } from "vscode";
+import { DecorationOptions, DecorationRangeBehavior, Range, TextEditor, TextEditorDecorationType, ThemeColor, window, TextDocument, Diagnostic } from "vscode";
 import visit from "unist-util-visit";
 import _ from "lodash";
 import { isNotUndefined, DefaultMap, randomColor, NoteUtils, Position, VaultUtils } from "@dendronhq/common-all";
@@ -18,9 +18,12 @@ import { getConfigValue, getWS } from "../workspace";
 import { CodeConfigKeys, DateTimeFormat } from "../types";
 import { VSCodeUtils } from "../utils";
 import { containsNonDendronUri } from "../utils/md";
+import { warnBadFrontmatterContents, warnMissingFrontmatter } from "./codeActionProvider";
 
 export function updateDecorations(activeEditor: TextEditor) {
   const text = activeEditor.document.getText();
+  // Only show decorations & warnings for notes
+  if (_.isUndefined(VSCodeUtils.getNoteFromDocument(activeEditor.document))) return {};
   const proc = MDUtilsV5.procRemarkParse(
     {
       mode: ProcMode.NO_DATA,
@@ -30,11 +33,13 @@ export function updateDecorations(activeEditor: TextEditor) {
   );
   const tree = proc.parse(text);
   const allDecorations = new DefaultMap<TextEditorDecorationType, DecorationOptions[]>(() => []);
+  let frontmatter: FrontmatterContent | undefined;
 
   visit(tree, (node) => {
     switch (node.type) {
       case DendronASTTypes.FRONTMATTER: {
-        const decorations = decorateTimestamps(node as FrontmatterContent);
+        frontmatter = node as FrontmatterContent;
+        const decorations = decorateTimestamps(frontmatter);
         if (isNotUndefined(decorations)) {
           for (const decoration of decorations) {
             allDecorations.get(DECORATION_TYPE_TIMESTAMP).push(decoration);
@@ -77,6 +82,15 @@ export function updateDecorations(activeEditor: TextEditor) {
     }
   });
 
+  // Warn for missing or bad frontmatter
+  const allWarnings: Diagnostic[] = [];
+  if (_.isUndefined(frontmatter)) {
+    allWarnings.push(warnMissingFrontmatter(activeEditor.document));
+  }
+  else {
+    allWarnings.push(...warnBadFrontmatterContents(activeEditor.document, frontmatter));
+  }
+
   // Activate the decorations
   for (const [type, decorations] of allDecorations.entries()) {
     activeEditor.setDecorations(type, decorations);
@@ -88,7 +102,7 @@ export function updateDecorations(activeEditor: TextEditor) {
       DECORATION_TYPE_TAG.delete(key);
     }
   }
-  return allDecorations;
+  return {allDecorations, allWarnings};
 }
 
 export const DECORATION_TYPE_TIMESTAMP = window.createTextEditorDecorationType({});

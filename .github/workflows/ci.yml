@@ -69,7 +69,8 @@ jobs:
           node --version
           npm --version
           yarn --version
-          rsync --version
+      
+      #rsync --version
 
       - name: Checkout source
         uses: actions/checkout@v2

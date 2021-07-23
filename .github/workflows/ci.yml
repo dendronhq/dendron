@@ -84,7 +84,7 @@ jobs:
             node_modules
             packages/*/node_modules
             packages/*/.vscode-test
-          key: ${{ runner.os }}-${{ matrix.node-version }}-node-modules-${{ hashFiles('yarn.lock')}}
+          key: ${{ runner.os }}-${{ matrix.node-version }}-node-modules-${{ hashFiles('**/package-lock.json') }}${{ hashFiles('yarn.lock')}}
 
       - name: Set up Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v1
@@ -96,8 +96,6 @@ jobs:
         run: |
           git config --global user.name CI
           git config --global user.email ci@dendron.so
-          git config user.name
-          git config user.email
 
       - name: Initialize
         run: yarn ci:init

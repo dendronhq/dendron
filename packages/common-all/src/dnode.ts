@@ -97,6 +97,7 @@ export class DNodeUtils {
       "schema",
       "schemaStub",
       "custom",
+      "tags",
     ];
     _.forEach(optionalProps, (op) => {
       if (opts[op]) {
@@ -229,6 +230,7 @@ export class DNodeUtils {
       "data",
       "schemaStub",
       "type",
+      "tags",
     ];
     return _.omit(props, blacklist);
   }
@@ -802,6 +804,7 @@ export class NoteUtils {
       "stub",
       "parent",
       "children",
+      "tags",
     ]);
     const { custom: customProps } = props;
     const meta = { ...builtinProps, ...customProps };

@@ -13,6 +13,7 @@ import {
   DNoteAnchorPositioned,
   DStore,
   DVault,
+  EngineDeleteNotePayload,
   EngineDeleteOptsV2,
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
@@ -196,17 +197,21 @@ export class FileStorage implements DStore {
       }
       out.push({ note: noteToDelete, status: "delete" });
       // check all stubs
+      const resps: Promise<EngineDeleteNotePayload>[] = [];
       while (parentNote.stub && !opts?.noDeleteParentStub) {
         const newParent = parentNote.parent;
-        const resp = await this.deleteNote(parentNote.id, {
+        const resp = this.deleteNote(parentNote.id, {
           metaOnly: true,
           noDeleteParentStub: true,
         });
+        resps.push(resp);
         if (newParent) {
           parentNote = this.notes[newParent];
         } else {
           assert(false, "illegal state in note delte");
         }
+      }
+      for (const resp of await Promise.all(resps)) {
         out = out.concat(resp);
       }
     }
@@ -446,31 +451,33 @@ export class FileStorage implements DStore {
             cacheUpdates[n.fname].data.links = links;
             n.links = links;
           } catch (err) {
+            let error = err;
             if (!(err instanceof DendronError)) {
-              err = new DendronError({
+              error = new DendronError({
                 message: `Failed to read links in note ${n.fname}`,
                 payload: err,
               });
             }
-            errors.push(err);
+            errors.push(error);
             this.logger.error({ ctx, error: err, note: NoteUtils.toLogObj(n) });
             return;
           }
           try {
             const anchors = await AnchorUtils.findAnchors({
               note: n,
-              wsRoot: wsRoot,
+              wsRoot,
             });
             cacheUpdates[n.fname].data.anchors = anchors;
             n.anchors = anchors;
           } catch (err) {
+            let error = err;
             if (!(err instanceof DendronError)) {
-              err = new DendronError({
+              error = new DendronError({
                 message: `Failed to read headers or block anchors in note ${n.fname}`,
                 payload: err,
               });
             }
-            errors.push(err);
+            errors.push(error);
             return;
           }
 
@@ -547,7 +554,7 @@ export class FileStorage implements DStore {
         const allLinks = _.orderBy(
           foundLinks,
           (link) => {
-            return link.position.start.offset;
+            return link.position?.start.offset;
           },
           "desc"
         );
@@ -592,6 +599,7 @@ export class FileStorage implements DStore {
         //   { from: oldLoc, to: newLoc }
         // ).process(_n.body);
         n.body = noteMod.body;
+        n.tags = noteMod.tags;
         return n;
       })
     ).catch((err) => {
@@ -800,7 +808,7 @@ export class FileStorage implements DStore {
             wsRoot: this.wsRoot,
             basename: hook.id + ".js",
           });
-          return await HookUtils.requireHook({
+          return HookUtils.requireHook({
             note,
             fpath: script,
             wsRoot: this.wsRoot,

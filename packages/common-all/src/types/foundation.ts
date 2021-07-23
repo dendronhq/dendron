@@ -48,10 +48,10 @@ export type DLoc = {
  @deprecated use {@link DNoteLink}
  */
 export type DLink = {
-  type: "ref" | "wiki" | "md" | "backlink" | "linkCandidate";
+  type: "ref" | "wiki" | "md" | "backlink" | "linkCandidate" | "frontmatterTag";
   value: string;
   alias?: string;
-  position: Position;
+  position?: Position;
   from: DLoc;
   to?: DLoc;
   xvault?: boolean;
@@ -138,6 +138,9 @@ export type DNodeProps<T = any, TCustom = any> = {
    * Hash of note content
    */
   contentHash?: string;
+
+  /** One or more frontmatter tags attached to this note. */
+  tags?: string | string[];
 };
 
 export type SchemaData = {

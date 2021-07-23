@@ -126,8 +126,6 @@ export default function Graph({
   const [cy, setCy] = useState<Core>();
   const [isGraphLoaded, setIsGraphLoaded] = useState(false);
 
-  const { config: dendronConfig } = useDendronConfig()
-
   useSyncGraphWithIDE({
     graph: cy,
     engine,
@@ -172,8 +170,6 @@ export default function Graph({
 
       const style =  getCytoscapeStyle(themes, currentTheme, ide.graphStyles) as any
 
-      logger.log(style)
-
       const network = cytoscape({
         container: graphRef.current,
         elements: {
@@ -181,7 +177,7 @@ export default function Graph({
           edges: parsedEdges,
         },
         style,
-        wheelSensitivity: dendronConfig?.graph?.scrollSpeed || 1,
+        wheelSensitivity: engine.config?.graph?.zoomSpeed || 1,
 
         // Zoom levels
         minZoom: 0.25,

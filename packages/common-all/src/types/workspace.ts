@@ -444,7 +444,7 @@ export type DendronSiteConfig = {
 };
 
 export type DendronGraphConfig = {
-  scrollSpeed: number;
+  zoomSpeed: number;
 }
 
 export type HierarchyConfig = {

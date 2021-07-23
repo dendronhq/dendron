@@ -53,6 +53,6 @@ dev:
     nextServerUrl: 'http://localhost:3000'
     engineServerPort: 3005
 graph:
-    scrollSpeed: 0.8
+    zoomSpeed: 1
 initializeRemoteVaults: true
 dendronVersion: 0.50.0

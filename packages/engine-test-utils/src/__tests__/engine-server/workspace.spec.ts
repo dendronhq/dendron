@@ -228,7 +228,7 @@ describe("WorkspaceService", () => {
           await checkFile(
             {
               fpath: path.join(wsRoot, "dendron.code-workspace"),
-              snapshot: true,
+              snapshot: false,
             },
             // Necessary for windows test-compat:
             path.join(`${id}`, `vault`).replace("\\", "\\\\")

@@ -22,8 +22,8 @@ jobs:
 
       matrix:
         os:
-          - macos-latest
-          - ubuntu-latest
+          # - macos-latest
+          # - ubuntu-latest
           - windows-latest
         node-version:
           - 12.x
@@ -98,7 +98,7 @@ jobs:
           git config --global user.email ci@dendron.so
 
       - name: Initialize
-        run: yarn ci:init
+        run: sudo yarn ci:init
         shell: bash
 
       - name: Start Xvfb

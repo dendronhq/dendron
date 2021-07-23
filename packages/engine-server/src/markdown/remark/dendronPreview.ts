@@ -28,22 +28,21 @@ function handleImage({proc, node, useFullPathUrl = false} : {proc: Unified.Proce
     logger.info({ctx, url: node.url});
     return;
   }
-  if (node.url.startsWith("/")) {
-    const { wsRoot, vault } = MDUtilsV5.getProcData(proc);
-    const fpath = path.join(vault2Path({ vault, wsRoot }), node.url);
-    if (useFullPathUrl === true) {
-      logger.info({ctx, wsRoot, vault, url: node.url, fpath, useFullPathUrl});
-      node.url = fpath;
-      return;
-    }
-    const port = EngineUtils.getEnginePort({ wsRoot });
-    const url = EngineUtils.getLocalEngineUrl({ port }) + "/api/assets";
-    const params: AssetGetRequest = {
-      fpath,
-      ws: wsRoot,
-    };
-    node.url = APIUtils.genUrlWithQS({ url, params });
+  // assume that the path is relative to vault
+  const { wsRoot, vault } = MDUtilsV5.getProcData(proc);
+  const fpath = path.join(vault2Path({ vault, wsRoot }), node.url);
+  if (useFullPathUrl === true) {
+    logger.info({ctx, wsRoot, vault, url: node.url, fpath, useFullPathUrl});
+    node.url = fpath;
+    return;
   }
+  const port = EngineUtils.getEnginePort({ wsRoot });
+  const url = EngineUtils.getLocalEngineUrl({ port }) + "/api/assets";
+  const params: AssetGetRequest = {
+    fpath,
+    ws: wsRoot,
+  };
+  node.url = APIUtils.genUrlWithQS({ url, params });
   logger.info({ctx, url: node.url, useFullPathUrl, opts: MDUtilsV5.getProcOpts(proc)});
 }
 

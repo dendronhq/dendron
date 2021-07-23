@@ -280,6 +280,19 @@ export default function Graph({
   }, [engine.vaults]);
 
   const updateConfigField = (key: string, value: string | number | boolean) => {
+    let additionalChanges = {}
+    if (key === 'options.show-local-graph') {
+      // Show loading spinner when switching graph types
+      setIsReady(false);
+      
+      // By default, hide links from full graph and show links for local graph
+      additionalChanges = {
+        'connections.links': {
+          ...config['connections.links'],
+          value
+        }
+      }
+    }
     setConfig((c) => {
       let additionalChanges = {};
       if (key === "options.show-local-graph") {

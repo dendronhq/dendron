@@ -99,6 +99,7 @@ jobs:
 
       - name: Initialize
         run: yarn ci:init
+        shell: bash
 
       - name: Start Xvfb
         if: runner.os == 'Linux' && matrix.suite == 'plugin'

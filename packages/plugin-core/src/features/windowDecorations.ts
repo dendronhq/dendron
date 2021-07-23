@@ -22,6 +22,8 @@ import { warnBadFrontmatterContents, warnMissingFrontmatter } from "./codeAction
 
 export function updateDecorations(activeEditor: TextEditor) {
   const text = activeEditor.document.getText();
+  // Only show decorations & warnings for notes
+  if (_.isUndefined(VSCodeUtils.getNoteFromDocument(activeEditor.document))) return {};
   const proc = MDUtilsV5.procRemarkParse(
     {
       mode: ProcMode.NO_DATA,

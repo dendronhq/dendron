@@ -14,7 +14,7 @@ import {
   LookupSelectionType,
   LookupSplitType,
 } from "../../commands/LookupCommand";
-import { clipboard } from "../../utils";
+import { clipboard, DendronClientUtilsV2 } from "../../utils";
 import { DendronQuickPickerV2 } from "./types";
 import { PickerUtilsV2 } from "./utils";
 
@@ -165,15 +165,31 @@ class SlectionExtractBtn extends DendronBtn {
   }
 }
 
-class JournalBtn extends DendronBtn {
+export class JournalBtn extends DendronBtn {
   static create(pressed?: boolean) {
-    return new DendronBtn({
+    return new JournalBtn({
       title: "Create Journal Note",
       iconOff: "calendar",
       iconOn: "menu-selection",
       type: LookupNoteTypeEnum.journal,
       pressed,
     });
+  }
+
+  async onEnable({ quickPick }: ButtonHandleOpts) {
+    quickPick.modifyPickerValueFunc = (value: string) => {
+      return DendronClientUtilsV2.genNoteName("JOURNAL", {
+        overrides: { domain: value },
+      });
+    };
+    quickPick.rawValue = quickPick.value;
+    quickPick.value = quickPick.modifyPickerValueFunc(quickPick.rawValue);
+    return;
+  }
+
+  async onDisable({ quickPick }: ButtonHandleOpts) {
+    quickPick.modifyPickerValueFunc = undefined;
+    quickPick.value = quickPick.rawValue;
   }
 }
 

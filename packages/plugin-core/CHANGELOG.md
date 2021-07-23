@@ -3,6 +3,26 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.51.2](https://github.com/dendronhq/dendron/compare/v0.51.0...v0.51.2) (2021-07-22)
+
+
+### Bug Fixes
+
+* check for undefined ([355289e](https://github.com/dendronhq/dendron/commit/355289e7ffab0ce9d7697551e1af65b8747cf487))
+* decorations & warnings on non-note files ([#1017](https://github.com/dendronhq/dendron/issues/1017)) ([77c923e](https://github.com/dendronhq/dendron/commit/77c923eeade2f61bb400923f06210662ca1df73a))
+* wikilink aliases with apostrophes & headers containing wikilinks ([#1004](https://github.com/dendronhq/dendron/issues/1004)) ([11bd317](https://github.com/dendronhq/dendron/commit/11bd317bd4f7dfe1fff3dccc87b90aea7f6c0742)), closes [#958](https://github.com/dendronhq/dendron/issues/958) [#959](https://github.com/dendronhq/dendron/issues/959)
+
+
+### Features Dendron
+
+* async launch engine ([0c1a607](https://github.com/dendronhq/dendron/commit/0c1a607d7ec3d19cc369c5f6ca16412c0cd0615e))
+* hashtag & reference autocomplete, and multi-vault autocomplete improvements ([#991](https://github.com/dendronhq/dendron/issues/991)) ([983b149](https://github.com/dendronhq/dendron/commit/983b149c48343b2dc340a0b418fddd0d1adddf2b)), closes [#887](https://github.com/dendronhq/dendron/issues/887)
+* warn against missing or bad frontmatter ([#1005](https://github.com/dendronhq/dendron/issues/1005)) ([cbacf69](https://github.com/dendronhq/dendron/commit/cbacf6986491c44c9d97db8b52fae31dda0860eb))
+
+
+
+
+
 ## [0.51.1](https://github.com/dendronhq/dendron/compare/v0.51.0...v0.51.1) (2021-07-20)
 
 **Note:** Version bump only for package @dendronhq/plugin-core

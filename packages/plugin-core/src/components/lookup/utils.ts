@@ -250,6 +250,7 @@ export class PickerUtilsV2 {
     quickPick.sortByLabel = false;
     quickPick.showNote = async (uri) => window.showTextDocument(uri);
     if (initialValue) {
+      quickPick.rawValue = initialValue;
       quickPick.value = initialValue;
     }
     return quickPick;
@@ -587,6 +588,10 @@ export class PickerUtilsV2 {
     return vaultSuggestions;
   }
 
+  /**
+   * Update button props by value
+   * @param opts
+   */
   static refreshButtons(opts: {
     quickpick: DendronQuickPickerV2;
     buttons: DendronBtn[];

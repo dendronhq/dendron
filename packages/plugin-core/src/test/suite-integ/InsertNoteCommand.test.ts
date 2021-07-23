@@ -15,11 +15,7 @@ import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
 suite("InsertNoteCommand", function () {
   let ctx: vscode.ExtensionContext;
-  ctx = setupBeforeAfter(this, {
-    afterHook: () => {
-      sinon.restore();
-    },
-  });
+  ctx = setupBeforeAfter(this);
 
   describe("insert note", () => {
     test("basic", (done) => {

@@ -6,11 +6,14 @@ const { IgnorePlugin, DefinePlugin } = require("webpack");
 /**@type {import('webpack').Configuration}*/
 const config = {
   target: "node", 
-  entry: "./src/extension.ts", // the entry point of this extension, 📖 -> https://webpack.js.org/configuration/entry-context/
+  entry: {
+    extension: "./src/extension.ts",
+    server: "./src/server.ts"
+  },
   output: {
     // the bundle is stored in the 'dist' folder (check package.json), 📖 -> https://webpack.js.org/configuration/output/
     path: path.resolve(__dirname, "dist"),
-    filename: "extension.js",
+    filename: "[name].js",
     libraryTarget: "commonjs2",
     devtoolModuleFilenameTemplate: "../[resource-path]",
   },

@@ -19,9 +19,6 @@ suite("NoteSyncService", function () {
       newUpdatedTime = 60000;
       sinon.stub(Time, "now").returns(DateTime.fromMillis(newUpdatedTime));
     },
-    afterHook: () => {
-      sinon.restore();
-    }
   });
 
   describe("onDidChange", () => {

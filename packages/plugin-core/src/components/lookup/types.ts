@@ -1,6 +1,7 @@
 import {
   DNodePropsQuickInputV2,
   DNodeProps,
+  NoteProps,
   DVault,
   NoteQuickInput,
 } from "@dendronhq/common-all";
@@ -14,6 +15,7 @@ export type LookupControllerState = {
 
 type FilterQuickPickFunction = (items: NoteQuickInput[]) => NoteQuickInput[];
 type ModifyPickerValueFunc = (value: string) => string;
+type SelectionProcessFunc = (note: NoteProps) => Promise<NoteProps | undefined>;
 
 export type DendronQuickPickItemV2 = QuickPick<DNodePropsQuickInputV2>;
 export type DendronQuickPickerV2 = DendronQuickPickItemV2 & {
@@ -66,6 +68,10 @@ export type DendronQuickPickerV2 = DendronQuickPickItemV2 & {
    * Modify picker value
    */
   modifyPickerValueFunc?: ModifyPickerValueFunc;
+  /**
+   * Method to process selected text in active note.
+   */
+  selectionProcessFunc?: SelectionProcessFunc;
   /**
    * Should show a subsequent picker?
    */

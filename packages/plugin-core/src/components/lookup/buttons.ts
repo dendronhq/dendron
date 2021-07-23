@@ -2,7 +2,10 @@ import {
   DNodePropsQuickInputV2,
   NoteQuickInput,
   NoteUtils,
+  NoteProps,
+  getSlugger,
 } from "@dendronhq/common-all";
+import { getWS } from "../../workspace";
 import _ from "lodash";
 import * as vscode from "vscode";
 import { QuickInputButton, ThemeIcon } from "vscode";
@@ -14,7 +17,7 @@ import {
   LookupSelectionType,
   LookupSplitType,
 } from "../../commands/LookupCommand";
-import { clipboard, DendronClientUtilsV2 } from "../../utils";
+import { clipboard, DendronClientUtilsV2, VSCodeUtils } from "../../utils";
 import { DendronQuickPickerV2 } from "./types";
 import { PickerUtilsV2 } from "./utils";
 
@@ -79,6 +82,48 @@ function isNoteBtn(button: DendronBtn) {
 function isSplitButton(button: DendronBtn) {
   return _.includes(["horizontal", "vertical"], button.type);
 }
+
+// TODO: make it into a utils method?
+const selectionToNoteProps = async (opts: {
+  selectionType: string;
+  note: NoteProps;
+}) => {
+  const ws = getWS();
+  const resp = await VSCodeUtils.extractRangeFromActiveEditor();
+  const { document, range } = resp || {};
+  const { selectionType, note } = opts;
+  const { selection, text } = VSCodeUtils.getSelection();
+  //TODO: split these up?
+  switch(selectionType) {
+    case "selectionExtract": {
+      if (!_.isUndefined(document)) {
+        const body = "\n" + document.getText(range).trim();
+        note.body = body;
+        // don't delete if original file is not in workspace
+        if (!ws.workspaceService?.isPathInWorkspace(document.uri.fsPath)) {
+          return note;
+        }
+        await VSCodeUtils.deleteRange(document, range as vscode.Range);
+      }
+      return note;
+    }
+    case "selection2link": {
+      if (!_.isUndefined(document)) {
+        const editor = VSCodeUtils.getActiveTextEditor();
+        await editor?.edit((builder) => {
+          const link = note.fname;
+          if (!_.isUndefined(selection) && !selection.isEmpty) {
+            builder.replace(selection, `[[${text}|${link}]]`);
+          }
+        });
+      }
+      return note;
+    }
+    default: {
+      return note;
+    }
+  }
+};
 
 export type IDendronQuickInputButton = QuickInputButton & {
   type: ButtonType;
@@ -147,7 +192,7 @@ export class DendronBtn implements IDendronQuickInputButton {
 
 export class Selection2LinkBtn extends DendronBtn {
   static create(pressed?: boolean) {
-    return new DendronBtn({
+    return new Selection2LinkBtn({
       title: "Selection to Link",
       iconOff: "link",
       iconOn: "menu-selection",
@@ -155,17 +200,53 @@ export class Selection2LinkBtn extends DendronBtn {
       pressed,
     });
   }
+
+  async onEnable({ quickPick }: ButtonHandleOpts) {
+    quickPick.selectionProcessFunc = (note: NoteProps) => {
+      return selectionToNoteProps({
+        selectionType: "selection2link",
+        note,
+      });
+    };
+    
+    quickPick.rawValue = quickPick.value;
+    const { text } = VSCodeUtils.getSelection();
+    const slugger = getSlugger();
+    quickPick.value = [quickPick.value, slugger.slug(text!)].join(".");
+    return;
+  }
+
+  async onDisable({ quickPick }: ButtonHandleOpts) {
+    quickPick.selectionProcessFunc = undefined;
+    quickPick.value = quickPick.rawValue;
+    return;
+  }
 }
 
-class SlectionExtractBtn extends DendronBtn {
+export class SelectionExtractBtn extends DendronBtn {
   static create(pressed?: boolean) {
-    return new DendronBtn({
+    return new SelectionExtractBtn({
       title: "Selection Extract",
       iconOff: "find-selection",
       iconOn: "menu-selection",
       type: "selectionExtract",
       pressed,
     });
+  }
+
+  async onEnable({ quickPick }: ButtonHandleOpts) {
+    quickPick.selectionProcessFunc = (note: NoteProps) => {
+      return selectionToNoteProps({
+        selectionType: "selectionExtract",
+        note,
+      });
+    };
+    return;
+  }
+
+  async onDisable({ quickPick }: ButtonHandleOpts) {
+    quickPick.selectionProcessFunc = undefined;
+    return;
   }
 }
 
@@ -350,7 +431,7 @@ export function createAllButtons(
     MultiSelectBtn.create(),
     CopyNoteLinkButton.create(),
     DirectChildFilterBtn.create(),
-    SlectionExtractBtn.create(),
+    SelectionExtractBtn.create(),
     Selection2LinkBtn.create(),
     JournalBtn.create(),
     ScratchBtn.create(),

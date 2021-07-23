@@ -13,6 +13,8 @@ import {
   JournalBtn,
   ScratchBtn,
   MultiSelectBtn,
+  Selection2LinkBtn,
+  SelectionExtractBtn,
 } from "../components/lookup/buttons";
 import { LookupControllerV3 } from "../components/lookup/LookupControllerV3";
 import {
@@ -35,6 +37,8 @@ import {
   LookupFilterType,
   LookupNoteType,
   LookupNoteTypeEnum,
+  LookupSelectionType,
+  LookupSelectionTypeEnum,
 } from "./LookupCommand";
 
 type CommandRunOpts = {
@@ -43,6 +47,7 @@ type CommandRunOpts = {
   fuzzThreshold?: number;
   multiSelect?: boolean;
   noteType?: LookupNoteType;
+  selectionType?: LookupSelectionType;
   /**
    * NOTE: currently, only one filter is supported
    */
@@ -138,6 +143,8 @@ export class NoteLookupCommand extends BaseCommand<
         DirectChildFilterBtn.create(
           copts.filterMiddleware?.includes("directChildOnly")
         ),
+        Selection2LinkBtn.create(copts.selectionType === LookupSelectionTypeEnum.selection2link),
+        SelectionExtractBtn.create(copts.selectionType === LookupSelectionTypeEnum.selectionExtract),
       ],
     });
     this._provider = new NoteLookupProvider("lookup", {
@@ -270,6 +277,9 @@ export class NoteLookupCommand extends BaseCommand<
         ? picker.vault
         : PickerUtilsV2.getOrPromptVaultForOpenEditor();
       nodeNew = NoteUtils.create({ fname, vault });
+      if (picker.selectionProcessFunc !== undefined) {
+        nodeNew = await picker.selectionProcessFunc(nodeNew) as NoteProps;
+      }
     }
     const resp = await engine.writeNote(nodeNew, {
       newNode: true,

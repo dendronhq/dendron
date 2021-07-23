@@ -280,9 +280,23 @@ export default function Graph({
   }, [engine.vaults]);
 
   const updateConfigField = (key: string, value: string | number | boolean) => {
+    let additionalChanges = {}
+    if (key === 'options.show-local-graph') {
+      // Show loading spinner when switching graph types
+      setIsReady(false);
+      
+      // By default, hide links from full graph and show links for local graph
+      additionalChanges = {
+        'connections.links': {
+          ...config['connections.links'],
+          value
+        }
+      }
+    }
     setConfig((c) => {
       const newConfig = {
         ...c,
+        ...additionalChanges,
         [key]: {
           // @ts-ignore
           ...c[key],
@@ -293,7 +307,7 @@ export default function Graph({
     });
   };
 
-  const showNoteGraphMessage = type === "note" && !ide.noteActive;
+  const showNoteGraphMessage = type === "note" && !ide.noteActive && GraphUtils.isLocalGraph(config);
 
   return (
     <>
@@ -363,13 +377,14 @@ const NoteGraphMessage = ({
     }}
   >
     <Typography>
-      This is the <b>Local Note Graph.</b> In order to show the graph, open a
-      note in the workspace.
+      This is the <b>Local Note Graph.</b> Open a
+      note in the workspace to see its connections here.
     </Typography>
-    <Typography>To change to the full graph, click below.</Typography>
+    <Typography>Change to <b>Full Note Graph</b> to see all notes in the workspace.</Typography>
     <Button
       onClick={() => updateConfigField("options.show-local-graph", false)}
       type="primary"
+      size='large'
     >
       Show Full Graph
     </Button>

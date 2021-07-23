@@ -1,4 +1,5 @@
-import { NoteProps ,
+import {
+  NoteProps,
   DVault,
   NotePropsDict,
   NoteUtils,
@@ -25,9 +26,9 @@ const getVaultClass = (vault: DVault) => {
   return `vault-${vaultName}`;
 };
 
-const DEFAULT_CLASSES = '' //graph-view
-const DEFAULT_NODE_CLASSES = `${DEFAULT_CLASSES}` //color-fill
-const DEFAULT_EDGE_CLASSES = `${DEFAULT_CLASSES}`
+const DEFAULT_CLASSES = ""; //graph-view
+const DEFAULT_NODE_CLASSES = `${DEFAULT_CLASSES}`; //color-fill
+const DEFAULT_EDGE_CLASSES = `${DEFAULT_CLASSES}`;
 
 const getLocalNoteGraphElements = ({
   notes,
@@ -42,11 +43,12 @@ const getLocalNoteGraphElements = ({
 }): GraphElements => {
   const logger = createLogger("getLocalNoteGraphElements");
 
-  if (!noteActive)
+  if (_.isUndefined(noteActive)) {
     return {
       nodes: [],
       edges: {},
     };
+  }
 
   const activeNote = notes[noteActive.id];
   const parentNote = activeNote.parent ? notes[activeNote.parent] : undefined;
@@ -81,7 +83,9 @@ const getLocalNoteGraphElements = ({
         fname: parentNote.fname,
         stub: _.isUndefined(parentNote.stub) ? false : parentNote.stub,
       },
-      classes: `${DEFAULT_NODE_CLASSES} parent ${getVaultClass(parentNote.vault)}`,
+      classes: `${DEFAULT_NODE_CLASSES} parent ${getVaultClass(
+        parentNote.vault
+      )}`,
     });
   }
 
@@ -530,13 +534,15 @@ const useGraphElements = ({
   const isLocalGraph = GraphUtils.isLocalGraph(config);
 
   useEffect(() => {
-    if (type === "note" && engine.notes) {
+    if (type === "note" && engine.notes && config["options.show-local-graph"]) {
       // Prevent unnecessary parsing if no notes have been added/deleted
+      const wasGraphEmpty = elements.nodes.length === 0;
       const wasLocalGraph =
         elements.nodes.filter((node) => !!node.data.localRoot).length > 0;
 
       const newNoteCount = Object.keys(engine.notes).length;
-      if (!wasLocalGraph && noteCount === newNoteCount) return;
+      if (!wasLocalGraph && !wasGraphEmpty && noteCount === newNoteCount)
+        return;
       setNoteCount(newNoteCount);
 
       if (!isLocalGraph) {
@@ -550,11 +556,11 @@ const useGraphElements = ({
         );
       }
     }
-  }, [engine.notes, isLocalGraph]);
+  }, [engine.notes, isLocalGraph, config["options.show-local-graph"]]);
 
   // Get new elements if active note changes
   useEffect(() => {
-    if (type === "note" && engine.notes && isLocalGraph && noteActive) {
+    if (type === "note" && engine.notes && isLocalGraph) {
       setElements(
         getLocalNoteGraphElements({
           notes: engine.notes,
@@ -565,6 +571,8 @@ const useGraphElements = ({
       );
     }
   }, [noteActive, engine.notes, isLocalGraph]);
+
+  logger.log("AAAAAAAAA", isLocalGraph, !!noteActive, elements.nodes.length);
 
   useEffect(() => {
     if (type === "schema" && engine.schemas) {

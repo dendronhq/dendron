@@ -111,6 +111,11 @@ suite("Extension", function () {
                 name: "journal",
                 firstDayOfWeek: 1,
               },
+              scratch: {
+                name: "scratch",
+                dateFormat: "y.MM.dd.HHmmss",
+                addBehavior: "asOwnDomain",
+              },
               noAutoCreateOnDefinition: true,
               noLegacyNoteRef: true,
               noXVaultWikiLink: true,

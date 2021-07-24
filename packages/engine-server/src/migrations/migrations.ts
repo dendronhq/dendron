@@ -10,6 +10,36 @@ import { Migrations } from "./types";
 
 export const ALL_MIGRATIONS: Migrations[] = [
   {
+    version: "0.52.0",
+    changes: [
+      {
+        name: "migrate scratch config",
+        func: async ({ dendronConfig, wsConfig }) => {
+          dendronConfig.scratch = DConfig.genDefaultConfig().scratch;
+          if (_.get(wsConfig.settings, "dendron.defaultScratchName")) {
+            dendronConfig.scratch.name = _.get(
+              wsConfig.settings,
+              "dendron.defaultScratchName"
+            );
+          }
+          if (_.get(wsConfig.settings, "dendron.defaultScratchDateFormat")) {
+            dendronConfig.scratch.dateFormat = _.get(
+              wsConfig.settings,
+              "dendron.defaultScratchDateFormat"
+            );
+          }
+          if (_.get(wsConfig.settings, "dendron.defaultScratchAddBehavior")) {
+            dendronConfig.scratch.addBehavior = _.get(
+              wsConfig.settings,
+              "dendron.defaultScratchAddBehavior"
+            );
+          }
+          return { data: { dendronConfig, wsConfig } };
+        },
+      },
+    ],
+  },
+  {
     version: "0.47.1",
     changes: [
       {

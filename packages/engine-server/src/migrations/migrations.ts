@@ -1,3 +1,4 @@
+import { ScratchConfig } from "@dendronhq/common-all";
 import {
   SegmentClient,
   TelemetryStatus,
@@ -10,12 +11,12 @@ import { Migrations } from "./types";
 
 export const ALL_MIGRATIONS: Migrations[] = [
   {
-    version: "0.52.0",
+    version: "0.51.4",
     changes: [
       {
         name: "migrate scratch config",
         func: async ({ dendronConfig, wsConfig }) => {
-          dendronConfig.scratch = DConfig.genDefaultConfig().scratch;
+          dendronConfig.scratch = DConfig.genDefaultConfig().scratch as ScratchConfig;
           if (_.get(wsConfig.settings, "dendron.defaultScratchName")) {
             dendronConfig.scratch.name = _.get(
               wsConfig.settings,

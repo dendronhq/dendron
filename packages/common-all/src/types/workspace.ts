@@ -98,6 +98,8 @@ export type JournalConfig = {
   firstDayOfWeek: number;
 };
 
+export type ScratchConfig = Pick<JournalConfig, "name" | "dateFormat" | "addBehavior">;
+
 export type DendronConfig = {
   /**
    * Disable caching behavior
@@ -123,7 +125,7 @@ export type DendronConfig = {
 
   journal: JournalConfig;
 
-  scratch: Pick<JournalConfig, "name" | "dateFormat" | "addBehavior">;
+  scratch?: ScratchConfig;
   
   /**
    * Workspaces

@@ -328,7 +328,7 @@ export type EngineInfoResp = {
 
 export type WorkspaceSettings = {
   folders: WorkspaceFolderRaw[];
-  settings: any;
+  settings: any|undefined;
   extensions: WorkspaceExtensionSetting;
 };
 

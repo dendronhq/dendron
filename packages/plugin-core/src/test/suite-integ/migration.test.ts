@@ -155,7 +155,7 @@ suite("Migration", function () {
       });
     });
 
-    test("migrate to 0.52.0, non standard settings", (done) => {
+    test("migrate to 0.51.4 (set scratch notes in dendron.yml), non standard settings", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
         onInit: async ({ engine, wsRoot }) => {
@@ -163,13 +163,13 @@ suite("Migration", function () {
           const wsConfig = await getWS().getWorkspaceSettings();
           const wsService = new WorkspaceService({ wsRoot });
           const out = await MigrationServce.applyMigrationRules({
-            currentVersion: "0.52.0",
-            previousVersion: "0.51.0",
+            currentVersion: "0.51.4",
+            previousVersion: "0.51.3",
             dendronConfig,
             wsConfig,
             wsService,
             logger: Logger,
-            migrations: getMigration({ from: "0.51.0", to: "0.52.0" }),
+            migrations: getMigration({ from: "0.51.0", to: "0.51.4" }),
           });
           expect(out.length).toEqual(1);
           expect(getWS().config.scratch).toEqual({

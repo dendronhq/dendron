@@ -634,24 +634,34 @@ export class DendronClientUtilsV2 {
     opts?: CreateFnameOpts
   ): string {
     // gather inputs
-    const dateFormat = type === "SCRATCH" 
-      ? getWS().config.scratch.dateFormat
-      : getWS().config.journal.dateFormat;
+    const dateFormat: string =
+      type === "SCRATCH"
+        ? DendronWorkspace.instance().getWorkspaceSettingOrDefault({
+            wsConfigKey: "dendron.defaultScratchDateFormat",
+            dendronConfigKey: "scratch.dateFormat",
+          })
+        : getWS().config.journal.dateFormat;
 
-    const addBehavior = type === "SCRATCH"
-      ? getWS().config.scratch.addBehavior
-      : getWS().config.journal.addBehavior;
+    const addBehavior: NoteAddBehavior =
+      type === "SCRATCH"
+        ? DendronWorkspace.instance().getWorkspaceSettingOrDefault({
+            wsConfigKey: "dendron.defaultScratchAddBehavior",
+            dendronConfigKey: "scratch.addBehavior",
+          })
+        : getWS().config.journal.addBehavior;
 
-    const name = type === "SCRATCH"
-      ? getWS().config.scratch.name
-      : getWS().config.journal.name;
-    
+    const name: string =
+      type === "SCRATCH"
+        ? DendronWorkspace.instance().getWorkspaceSettingOrDefault({
+            wsConfigKey: "dendron.defaultScratchName",
+            dendronConfigKey: "scratch.name",
+          })
+        : getWS().config.journal.name;
+
     if (!_.includes(_noteAddBehaviorEnum, addBehavior)) {
       const actual = addBehavior;
       const choices = Object.keys(NoteAddBehavior).join(", ");
-      throw Error(
-        `${actual} must be one of: ${choices}`
-      );
+      throw Error(`${actual} must be one of: ${choices}`);
     }
 
     const editorPath = vscode.window.activeTextEditor?.document.uri.fsPath;

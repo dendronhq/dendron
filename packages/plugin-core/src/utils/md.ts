@@ -18,8 +18,10 @@ import vscode, {
   Position,
   Range,
   TextDocument,
+  window,
 } from "vscode";
 import { ShowPreviewV2Command } from "../commands/ShowPreviewV2";
+import { VSCodeUtils } from "../utils";
 import { DendronWorkspace, getWS } from "../workspace";
 
 export type RefT = {
@@ -97,6 +99,20 @@ export class MarkdownUtils {
       const previewEnhanced2 = extensions.getExtension(
         "dendron.dendron-markdown-preview-enhanced"
       );
+      if (!previewEnhanced2) {
+        return window
+          .showInformationMessage(
+            "You need to have 'Dendron Markdown Preview' installed to use the old preview",
+            "Install"
+          )
+          .then((resp) => {
+            if (resp === "Install") {
+              VSCodeUtils.openLink(
+                "https://wiki.dendron.so/notes/8de4209d-84d3-45f8-96a4-34282e34507d.html"
+              );
+            }
+          });
+      }
       const cmds = {
         builtin: {
           open: "markdown.showPreview",
@@ -227,7 +243,10 @@ export const getReferenceAtPosition = (
   const range = document.getWordRangeAtPosition(position, new RegExp(re));
   if (!range) {
     // if not, it could be a hashtag
-    const rangeForHashTag = document.getWordRangeAtPosition(position, HASHTAG_REGEX_LOOSE);
+    const rangeForHashTag = document.getWordRangeAtPosition(
+      position,
+      HASHTAG_REGEX_LOOSE
+    );
     if (rangeForHashTag) {
       const docText = document.getText(rangeForHashTag);
       const match = docText.match(HASHTAG_REGEX_LOOSE);
@@ -237,7 +256,7 @@ export const getReferenceAtPosition = (
         label: match[0],
         ref: `${TAGS_HIERARCHY}${match.groups!.tagContents}`,
         refText: docText,
-      }
+      };
     }
     // it's not a wikilink, reference, or a hashtag. Nothing to do here.
     return null;

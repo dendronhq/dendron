@@ -15,10 +15,7 @@ function stubWindow(returnValue: string) {
 
 suite("SitePreview", function () {
   let ctx: ExtensionContext;
-  ctx = setupBeforeAfter(this, {
-    beforeHook: () => {},
-    afterHook: () => {},
-  });
+  ctx = setupBeforeAfter(this);
 
   describe.skip("checkPreReq", () => {
     test("cancel", (done) => {

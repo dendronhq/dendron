@@ -571,7 +571,8 @@ export class FileStorage implements DStore {
             }
             // for hashtag links, we'll have to regenerate the alias
             if (newLoc.fname.startsWith(TAGS_HIERARCHY)) {
-              alias = `#${newLoc.fname.slice(TAGS_HIERARCHY.length)}`;
+              // Frontmatter tags don't have the hashtag
+              if (link.type !== "frontmatterTag") alias = `#${newLoc.fname.slice(TAGS_HIERARCHY.length)}`;
             } else if (LinkUtils.isHashtagLink(oldLink.from)) {
               // If this used to be a hashtag but no longer is, the alias is like `#foo.bar` and no longer makes sense.
               alias = undefined;

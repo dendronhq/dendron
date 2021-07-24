@@ -30,7 +30,7 @@ import {
   SchemaRaw,
   SchemaTemplate,
 } from "./types";
-import { getSlugger } from "./utils";
+import { getSlugger, isNotUndefined } from "./utils";
 import { genUUID } from "./uuid";
 import { VaultUtils } from "./vault";
 
@@ -795,7 +795,17 @@ export class NoteUtils {
   }
 
   static serializeMeta(props: NoteProps) {
-    const builtinProps = _.pick(props, [
+    // Remove all undefined values, because they cause `matter` to fail serializing them
+    // @ts-ignore
+    const cleanProps: NoteProps = {};
+    _.forEach(Object.entries(props), ([op, value]) => {
+      if (isNotUndefined(value)) {
+        // @ts-ignore;
+        cleanProps[op] = value;
+      }
+    });
+    // Separate custom and builtin props
+    const builtinProps = _.pick(cleanProps, [
       "id",
       "title",
       "desc",
@@ -806,7 +816,7 @@ export class NoteUtils {
       "children",
       "tags",
     ]);
-    const { custom: customProps } = props;
+    const { custom: customProps } = cleanProps;
     const meta = { ...builtinProps, ...customProps };
     return meta;
   }

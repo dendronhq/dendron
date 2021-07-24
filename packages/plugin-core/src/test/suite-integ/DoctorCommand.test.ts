@@ -2,7 +2,7 @@ import { NoteProps, NoteUtils } from "@dendronhq/common-all";
 import { DirResult, tmpDir, vault2Path } from "@dendronhq/common-server";
 import {
   NodeTestPresetsV2,
-  NoteTestUtilsV4
+  NoteTestUtilsV4,
 } from "@dendronhq/common-test-utils";
 import { DoctorActions } from "@dendronhq/dendron-cli";
 import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
@@ -19,7 +19,7 @@ import { expect } from "../testUtilsv2";
 import {
   runLegacyMultiWorkspaceTest,
   runLegacySingleWorkspaceTest,
-  setupBeforeAfter
+  setupBeforeAfter,
 } from "../testUtilsV3";
 
 suite("DoctorCommandTest", function () {
@@ -137,7 +137,7 @@ suite("DoctorCommandTest", function () {
         })!;
         expect(note.id === "-bad-id").toBeFalsy();
         done();
-      }
+      },
     });
   });
 
@@ -380,28 +380,34 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
         });
         await VSCodeUtils.openNote(file);
         const cmd = new DoctorCommand();
-        sinon.stub(cmd, "gatherInputs").returns(
+        const gatherInputsStub = sinon.stub(cmd, "gatherInputs").returns(
           Promise.resolve({
             action: DoctorActions.CREATE_MISSING_LINKED_NOTES,
             scope: "file",
           })
         );
         const quickPickStub = sinon.stub(VSCodeUtils, "showQuickPick");
-        quickPickStub
-          .onCall(0)
-          .returns(
-            Promise.resolve("proceed") as Thenable<vscode.QuickPickItem>
+
+        try {
+          quickPickStub
+            .onCall(0)
+            .returns(
+              Promise.resolve("proceed") as Thenable<vscode.QuickPickItem>
+            );
+          await cmd.run();
+          const vaultPath = vault2Path({ vault, wsRoot });
+          const created = _.includes(fs.readdirSync(vaultPath), "real.fake.md");
+          expect(created).toBeTruthy();
+          const didNotCreate = !_.includes(
+            fs.readdirSync(vaultPath),
+            "real.fake2.md"
           );
-        await cmd.run();
-        const vaultPath = vault2Path({ vault, wsRoot });
-        const created = _.includes(fs.readdirSync(vaultPath), "real.fake.md");
-        expect(created).toBeTruthy();
-        const didNotCreate = !_.includes(
-          fs.readdirSync(vaultPath),
-          "real.fake2.md"
-        );
-        expect(didNotCreate).toBeTruthy();
-        done();
+          expect(didNotCreate).toBeTruthy();
+        } finally {
+          gatherInputsStub.restore();
+          quickPickStub.restore();
+          done();
+        }
       },
     });
   });
@@ -420,26 +426,32 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
         });
         await VSCodeUtils.openNote(file);
         const cmd = new DoctorCommand();
-        sinon.stub(cmd, "gatherInputs").returns(
+        const gatherInputsStub = sinon.stub(cmd, "gatherInputs").returns(
           Promise.resolve({
             action: DoctorActions.CREATE_MISSING_LINKED_NOTES,
             scope: "file",
           })
         );
         const quickPickStub = sinon.stub(VSCodeUtils, "showQuickPick");
-        quickPickStub
-          .onCall(0)
-          .returns(
-            Promise.resolve("cancelled") as Thenable<vscode.QuickPickItem>
+
+        try {
+          quickPickStub
+            .onCall(0)
+            .returns(
+              Promise.resolve("cancelled") as Thenable<vscode.QuickPickItem>
+            );
+          await cmd.run();
+          const vaultPath = vault2Path({ vault, wsRoot });
+          const containsNew = _.includes(
+            fs.readdirSync(vaultPath),
+            "real.fake.md"
           );
-        await cmd.run();
-        const vaultPath = vault2Path({ vault, wsRoot });
-        const containsNew = _.includes(
-          fs.readdirSync(vaultPath),
-          "real.fake.md"
-        );
-        expect(containsNew).toBeFalsy();
-        done();
+          expect(containsNew).toBeFalsy();
+        } finally {
+          gatherInputsStub.restore();
+          quickPickStub.restore();
+          done();
+        }
       },
     });
   });
@@ -461,26 +473,32 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
         });
         await VSCodeUtils.openNote(file);
         const cmd = new DoctorCommand();
-        sinon.stub(cmd, "gatherInputs").returns(
+        const gatherInputsStub = sinon.stub(cmd, "gatherInputs").returns(
           Promise.resolve({
             action: DoctorActions.CREATE_MISSING_LINKED_NOTES,
             scope: "file",
           })
         );
         const quickPickStub = sinon.stub(VSCodeUtils, "showQuickPick");
-        quickPickStub
-          .onCall(0)
-          .returns(
-            Promise.resolve("proceed") as Thenable<vscode.QuickPickItem>
-          );
-        await cmd.run();
-        const vaultPath = vault2Path({ vault, wsRoot });
-        const fileNames = ["real.fake.md", "real.something.md"];
-        _.forEach(fileNames, (fileName) => {
-          const containsNew = _.includes(fs.readdirSync(vaultPath), fileName);
-          expect(containsNew).toBeTruthy();
-        });
-        done();
+
+        try {
+          quickPickStub
+            .onCall(0)
+            .returns(
+              Promise.resolve("proceed") as Thenable<vscode.QuickPickItem>
+            );
+          await cmd.run();
+          const vaultPath = vault2Path({ vault, wsRoot });
+          const fileNames = ["real.fake.md", "real.something.md"];
+          _.forEach(fileNames, (fileName) => {
+            const containsNew = _.includes(fs.readdirSync(vaultPath), fileName);
+            expect(containsNew).toBeTruthy();
+          });
+        } finally {
+          gatherInputsStub.restore();
+          quickPickStub.restore();
+          done();
+        }
       },
     });
   });
@@ -506,29 +524,35 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
         });
         await VSCodeUtils.openNote(file);
         const cmd = new DoctorCommand();
-        sinon.stub(cmd, "gatherInputs").returns(
+        const gatherInputsStub = sinon.stub(cmd, "gatherInputs").returns(
           Promise.resolve({
             action: DoctorActions.CREATE_MISSING_LINKED_NOTES,
             scope: "file",
           })
         );
         const quickPickStub = sinon.stub(VSCodeUtils, "showQuickPick");
-        quickPickStub
-          .onCall(0)
-          .returns(
-            Promise.resolve("proceed") as Thenable<vscode.QuickPickItem>
-          );
-        await cmd.run();
-        const sVaultPath = vault2Path({ vault: vault1, wsRoot });
-        const xVaultPath = vault2Path({ vault: vault2, wsRoot });
-        const fileNames = ["second.md", "somenote.md", "something.md"];
-        _.forEach(fileNames, (fileName) => {
-          const inSVault = _.includes(fs.readdirSync(sVaultPath), fileName);
-          const inXVault = _.includes(fs.readdirSync(xVaultPath), fileName);
-          expect(inSVault).toBeFalsy();
-          expect(inXVault).toBeTruthy();
-        });
-        done();
+
+        try {
+          quickPickStub
+            .onCall(0)
+            .returns(
+              Promise.resolve("proceed") as Thenable<vscode.QuickPickItem>
+            );
+          await cmd.run();
+          const sVaultPath = vault2Path({ vault: vault1, wsRoot });
+          const xVaultPath = vault2Path({ vault: vault2, wsRoot });
+          const fileNames = ["second.md", "somenote.md", "something.md"];
+          _.forEach(fileNames, (fileName) => {
+            const inSVault = _.includes(fs.readdirSync(sVaultPath), fileName);
+            const inXVault = _.includes(fs.readdirSync(xVaultPath), fileName);
+            expect(inSVault).toBeFalsy();
+            expect(inXVault).toBeTruthy();
+          });
+        } finally {
+          gatherInputsStub.restore();
+          quickPickStub.restore();
+          done();
+        }
       },
     });
   });
@@ -563,42 +587,51 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
           wsRoot,
         });
         const cmd = new DoctorCommand();
-        sinon.stub(cmd, "gatherInputs").returns(
+        const gatherInputsStub = sinon.stub(cmd, "gatherInputs").returns(
           Promise.resolve({
             action: DoctorActions.CREATE_MISSING_LINKED_NOTES,
             scope: "workspace",
           })
         );
         const quickPickStub = sinon.stub(VSCodeUtils, "showQuickPick");
-        quickPickStub
-          .onCall(0)
-          .returns(
-            Promise.resolve("proceed") as Thenable<vscode.QuickPickItem>
-          );
-        await cmd.run();
-        const firstVaultPath = vault2Path({ vault: vault1, wsRoot });
-        const firstVaultFileNames = ["wild.md", "somenote.md", "something.md"];
-        _.forEach(firstVaultFileNames, (fileName) => {
-          const containsNew = _.includes(
-            fs.readdirSync(firstVaultPath),
-            fileName
-          );
-          expect(containsNew).toBeFalsy();
-        });
-        const secondVaultPath = vault2Path({ vault: vault2, wsRoot });
-        const secondVaultFileNames = [
-          "wild2.md",
-          "somenote2.md",
-          "something2.md",
-        ];
-        _.forEach(secondVaultFileNames, (fileName) => {
-          const containsNew = _.includes(
-            fs.readdirSync(secondVaultPath),
-            fileName
-          );
-          expect(containsNew).toBeFalsy();
-        });
-        done();
+        try {
+          quickPickStub
+            .onCall(0)
+            .returns(
+              Promise.resolve("proceed") as Thenable<vscode.QuickPickItem>
+            );
+          await cmd.run();
+          const firstVaultPath = vault2Path({ vault: vault1, wsRoot });
+          const firstVaultFileNames = [
+            "wild.md",
+            "somenote.md",
+            "something.md",
+          ];
+          _.forEach(firstVaultFileNames, (fileName) => {
+            const containsNew = _.includes(
+              fs.readdirSync(firstVaultPath),
+              fileName
+            );
+            expect(containsNew).toBeFalsy();
+          });
+          const secondVaultPath = vault2Path({ vault: vault2, wsRoot });
+          const secondVaultFileNames = [
+            "wild2.md",
+            "somenote2.md",
+            "something2.md",
+          ];
+          _.forEach(secondVaultFileNames, (fileName) => {
+            const containsNew = _.includes(
+              fs.readdirSync(secondVaultPath),
+              fileName
+            );
+            expect(containsNew).toBeFalsy();
+          });
+        } finally {
+          gatherInputsStub.restore();
+          quickPickStub.restore();
+          done();
+        }
       },
     });
   });
@@ -635,48 +668,54 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
           wsRoot,
         });
         const cmd = new DoctorCommand();
-        sinon.stub(cmd, "gatherInputs").returns(
+        const gatherInputsStub = sinon.stub(cmd, "gatherInputs").returns(
           Promise.resolve({
             action: DoctorActions.CREATE_MISSING_LINKED_NOTES,
             scope: "workspace",
           })
         );
         const quickPickStub = sinon.stub(VSCodeUtils, "showQuickPick");
-        quickPickStub
-          .onCall(0)
-          .returns(
-            Promise.resolve("proceed") as Thenable<vscode.QuickPickItem>
-          );
-        await cmd.run();
-        const firstVaultPath = vault2Path({ vault: vault1, wsRoot });
-        const firstVaultFileNames = [
-          "cross1.md",
-          "wild.md",
-          "somenote.md",
-          "something.md"
-        ];
-        _.forEach(firstVaultFileNames, (fileName) => {
-          const containsNew = _.includes(
-            fs.readdirSync(firstVaultPath),
-            fileName
-          );
-          expect(containsNew).toBeTruthy();
-        });
-        const secondVaultPath = vault2Path({ vault: vault2, wsRoot });
-        const secondVaultFileNames = [
-          "cross2.md",
-          "wild2.md",
-          "somenote2.md",
-          "something2.md",
-        ];
-        _.forEach(secondVaultFileNames, (fileName) => {
-          const containsNew = _.includes(
-            fs.readdirSync(secondVaultPath),
-            fileName
-          );
-          expect(containsNew).toBeTruthy();
-        });
-        done();
+
+        try {
+          quickPickStub
+            .onCall(0)
+            .returns(
+              Promise.resolve("proceed") as Thenable<vscode.QuickPickItem>
+            );
+          await cmd.run();
+          const firstVaultPath = vault2Path({ vault: vault1, wsRoot });
+          const firstVaultFileNames = [
+            "cross1.md",
+            "wild.md",
+            "somenote.md",
+            "something.md",
+          ];
+          _.forEach(firstVaultFileNames, (fileName) => {
+            const containsNew = _.includes(
+              fs.readdirSync(firstVaultPath),
+              fileName
+            );
+            expect(containsNew).toBeTruthy();
+          });
+          const secondVaultPath = vault2Path({ vault: vault2, wsRoot });
+          const secondVaultFileNames = [
+            "cross2.md",
+            "wild2.md",
+            "somenote2.md",
+            "something2.md",
+          ];
+          _.forEach(secondVaultFileNames, (fileName) => {
+            const containsNew = _.includes(
+              fs.readdirSync(secondVaultPath),
+              fileName
+            );
+            expect(containsNew).toBeTruthy();
+          });
+        } finally {
+          gatherInputsStub.restore();
+          quickPickStub.restore();
+          done();
+        }
       },
     });
   });

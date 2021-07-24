@@ -231,7 +231,7 @@ describe("WorkspaceService", () => {
               snapshot: false,
             },
             // Necessary for windows test-compat:
-            path.join(`${id}`, `vault`).replace("\\", "\\\\")
+            path.join(`seeds`, `${id}`, `vault`).replace("\\", "\\\\")
           );
           checkVaults(
             {

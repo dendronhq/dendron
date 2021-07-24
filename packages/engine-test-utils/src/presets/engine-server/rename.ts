@@ -15,7 +15,7 @@ import {
   TestPresetEntryV4,
   TestResult,
 } from "@dendronhq/common-test-utils";
-import fs from "fs-extra";
+import fs, { readFile } from "fs-extra";
 import _ from "lodash";
 import path from "path";
 
@@ -860,6 +860,127 @@ const NOTES = {
         await NOTE_PRESETS_V4.NOTE_WITH_LINK.create({
           vault: vaults[0],
           wsRoot,
+        });
+      },
+    }
+  ),
+  HASHTAG: new TestPresetEntryV4(
+    async ({ wsRoot, vaults, engine }) => {
+      await engine.renameNote({
+        oldLoc: {
+          fname: "tags.foo",
+          alias: "#foo",
+          vaultName: VaultUtils.getName(vaults[1]),
+        },
+        newLoc: { fname: "tags.bar", vaultName: VaultUtils.getName(vaults[1]) },
+      });
+      const note = NoteUtils.getNoteByFnameV5({fname: "primary", notes: engine.notes, wsRoot, vault: vaults[0]});
+      const noteFileContents = await readFile(NoteUtils.getFullPath({note: note!, wsRoot}), "utf-8");
+      const containsTag = await AssertUtils.assertInString({body: noteFileContents, match: ["#bar"], nomatch: ["#foo"]});
+
+      return [
+        {
+          actual: containsTag,
+          expected: true,
+        },
+      ];
+    },
+    {
+      preSetupHook: async ({ vaults, wsRoot }) => {
+        await NoteTestUtilsV4.createNote({
+          fname: "tags.foo",
+          vault: vaults[0],
+          wsRoot,
+        });
+        await NoteTestUtilsV4.createNote({
+          fname: "primary",
+          vault: vaults[0],
+          wsRoot,
+          body: "Lorem ipsum #foo dolor amet",
+        });
+      },
+    }
+  ),
+  FRONTMATTER_TAG_SINGLE: new TestPresetEntryV4(
+    async ({ wsRoot, vaults, engine }) => {
+      await engine.renameNote({
+        oldLoc: {
+          fname: "tags.foo",
+          vaultName: VaultUtils.getName(vaults[1]),
+        },
+        newLoc: { fname: "tags.bar", vaultName: VaultUtils.getName(vaults[1]) },
+      });
+      const note = NoteUtils.getNoteByFnameV5({fname: "primary", notes: engine.notes, wsRoot, vault: vaults[0]});
+      const noteFileContents = await readFile(NoteUtils.getFullPath({note: note!, wsRoot}), "utf-8");
+      const containsTag = await AssertUtils.assertInString({body: noteFileContents, match: ["tags: bar"], nomatch: ["tags: foo"]});
+
+      return [
+        {
+          actual: note?.tags,
+          expected: "bar",
+        },
+        {
+          actual: containsTag,
+          expected: true,
+        },
+      ];
+    },
+    {
+      preSetupHook: async ({ vaults, wsRoot }) => {
+        await NoteTestUtilsV4.createNote({
+          fname: "tags.foo",
+          vault: vaults[0],
+          wsRoot,
+        });
+        await NoteTestUtilsV4.createNote({
+          fname: "primary",
+          vault: vaults[0],
+          wsRoot,
+          props: {
+            tags: "foo",
+          },
+        });
+      },
+    }
+  ),
+  FRONTMATTER_TAG_MULTI: new TestPresetEntryV4(
+    async ({ wsRoot, vaults, engine }) => {
+      await engine.renameNote({
+        oldLoc: {
+          fname: "tags.foo",
+          vaultName: VaultUtils.getName(vaults[1]),
+        },
+        newLoc: { fname: "tags.bar", vaultName: VaultUtils.getName(vaults[1]) },
+      });
+      const note = NoteUtils.getNoteByFnameV5({fname: "primary", notes: engine.notes, wsRoot, vault: vaults[0]});
+      const noteFileContents = await readFile(NoteUtils.getFullPath({note: note!, wsRoot}), "utf-8");
+      const containsTag = await AssertUtils.assertInString({body: noteFileContents, match: ["bar"], nomatch: ["foo"]});
+
+      return [
+        {
+          actual: note?.tags,
+          expected: ["head", "bar", "tail"],
+        },
+        {
+          actual: containsTag,
+          expected: true,
+        },
+      ];
+    },
+    {
+      preSetupHook: async ({ vaults, wsRoot }) => {
+        await NoteTestUtilsV4.createNote({
+          fname: "tags.foo",
+          vault: vaults[0],
+          wsRoot,
+        });
+        await NoteTestUtilsV4.createNote({
+          fname: "primary",
+          vault: vaults[0],
+          wsRoot,
+          props: {
+            tags: ["head", "foo", "tail"],
+          },
         });
       },
     }

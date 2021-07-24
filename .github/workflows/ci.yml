@@ -45,7 +45,7 @@ jobs:
             env: Get-ChildItem Env:\
             versions: choco --version
 
-    timeout-minutes: 30
+    timeout-minutes: 45
 
     runs-on: ${{ matrix.os }}
 
@@ -112,4 +112,4 @@ jobs:
       - name: Run tests
         run: yarn ci:test:${{ matrix.suite }}
         shell: bash
-        timeout-minutes: 15
+        timeout-minutes: 30

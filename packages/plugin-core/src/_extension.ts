@@ -1,23 +1,23 @@
-import { ServerUtils } from "@dendronhq/api-server";
+import { launchv2, ServerUtils, SubProcessExitType } from "@dendronhq/api-server";
 import {
   CONSTANTS,
   DendronError,
   getStage,
   Time,
   VaultUtils,
-  VSCodeEvents,
+  VSCodeEvents
 } from "@dendronhq/common-all";
 import {
   getDurationMilliseconds,
   getOS,
-  SegmentClient,
+  SegmentClient
 } from "@dendronhq/common-server";
 import {
   DConfig,
   HistoryService,
   MetadataService,
   MigrationServce,
-  WorkspaceService,
+  WorkspaceService
 } from "@dendronhq/engine-server";
 import { ExecaChildProcess } from "execa";
 import _ from "lodash";
@@ -157,6 +157,16 @@ async function startServerProcess(): Promise<{
   if (port) {
     return { port };
   }
+
+  // if in dev mode, simplify debugging without going multi process
+  if (getStage() !== "prod") {
+    const out = await launchv2({
+      logPath: path.join(__dirname, "..", "..", "dendron.server.log"),
+    });
+    return {port: out.port}
+  }
+
+  // start server is separate process
   const logPath = DendronWorkspace.instance().context.logPath;
   const out = await ServerUtils.execServerNode({
     scriptPath: path.join(__dirname, "server.js"),
@@ -344,13 +354,13 @@ export async function _activate(
       WSUtils.handleServerProcess({
         subprocess,
         context,
-        onExit: () => {
+        onExit: (type: SubProcessExitType) => {
           const txt = "Restart Dendron";
           vscode.window
             .showErrorMessage("Dendron engine encountered an error", txt)
             .then(async (resp) => {
               if (resp === txt) {
-                AnalyticsUtils.track(VSCodeEvents.ServerCrashed);
+                AnalyticsUtils.track(VSCodeEvents.ServerCrashed, {code: type});
                 _activate(context);
               }
             });

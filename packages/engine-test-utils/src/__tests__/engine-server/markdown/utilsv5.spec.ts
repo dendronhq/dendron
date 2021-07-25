@@ -60,6 +60,48 @@ const IMAGE_WITH_LEAD_FORWARD_SLASH = createProcCompileTests({
     await ENGINE_HOOKS.setupBasic(opts);
   },
 });
+const IMAGE_NO_LEAD_FORWARD_SLASH = createProcCompileTests({
+  name: "IMAGE_NO_LEAD_FORWARD_SLASH",
+  setup: async (opts) => {
+    const { proc } = getOpts(opts);
+    const txt = `![foo alt txt](assets/foo.jpg)`;
+    const resp = await proc.process(txt);
+    return { resp, proc };
+  },
+  verify: {
+    [DendronASTDest.HTML]: {
+      [ProcFlavor.REGULAR]: async (opts) => {
+        const {
+          extra: { resp },
+        } = cleanVerifyOpts(opts);
+        await checkString(
+          resp.contents,
+          `<img src="assets/foo.jpg" alt="foo alt txt">`
+        );
+      },
+      [ProcFlavor.PREVIEW]: async (opts) => {
+        const {
+          extra: { resp },
+        } = cleanVerifyOpts(opts);
+        await checkString(resp.contents, `assets%2Ffoo.jpg`, "localhost");
+      },
+      [ProcFlavor.PUBLISHING]: ProcFlavor.REGULAR,
+    },
+    [DendronASTDest.MD_REGULAR]: {
+      [ProcFlavor.HOVER_PREVIEW]: async (opts) => {
+        const {
+          extra: { resp },
+        } = cleanVerifyOpts(opts);
+        await checkString(resp.contents,
+          `![foo alt txt](${path.join(opts.wsRoot, opts.vaults[0].fsPath, '/assets/foo.jpg')})`,
+        );
+      },
+    },
+  },
+  preSetupHook: async (opts) => {
+    await ENGINE_HOOKS.setupBasic(opts);
+  },
+});
 const NOTE_REF_BASIC_WITH_REHYPE = createProcCompileTests({
   name: "NOTE_REF_WITH_REHYPE",
   setup: async (opts) => {
@@ -93,6 +135,7 @@ const NOTE_REF_BASIC_WITH_REHYPE = createProcCompileTests({
   },
 });
 const ALL_TEST_CASES = [
+  ...IMAGE_NO_LEAD_FORWARD_SLASH,
   ...IMAGE_WITH_LEAD_FORWARD_SLASH,
   ...NOTE_REF_BASIC_WITH_REHYPE,
 ];

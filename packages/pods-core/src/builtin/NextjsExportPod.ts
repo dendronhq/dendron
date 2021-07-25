@@ -1,3 +1,4 @@
+import { stringifyError } from "@dendronhq/common-all";
 import { SiteUtils } from "@dendronhq/engine-server";
 import { JSONSchemaType } from "ajv";
 import fs from "fs-extra";
@@ -24,10 +25,12 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
   }
 
   async plant(opts: ExportPodPlantOpts) {
+    const ctx = `${ID}:plant`
     const { notes, dest, engine } = opts;
 
     const podDstPath = dest.fsPath;
-    fs.ensureDirSync(path.dirname(podDstPath));
+    const podDstDir = path.dirname(podDstPath);
+    fs.ensureDirSync(podDstDir);
 
     const { notes: publishedNotes, domains } = await SiteUtils.filterByConfig({
       engine,
@@ -42,6 +45,18 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     const noteIndex = _.find(domains, (ent) => ent.custom.permalink === "/");
     const payload = { notes: publishedNotes, domains, noteIndex };
 
+    // render notes
+    const notesDir = path.join(podDstDir, "notes");
+    fs.ensureDirSync(notesDir);
+    await Promise.all(notes.map(async note => {
+      const out = await engine.renderNote({id: note.id});
+      const dst = path.join(notesDir, note.id + ".html")
+      this.L.debug({ctx, dst, msg: "writeNote"});
+      if (out.error) {
+        throw Error(`error rendering: ${stringifyError(out.error)}`)
+      }
+      return fs.writeFile(dst, out.data)
+    }));
     fs.writeJSONSync(podDstPath, payload, { encoding: "utf8", spaces: 2 });
     return { notes };
   }

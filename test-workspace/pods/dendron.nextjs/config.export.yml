@@ -1,0 +1,16 @@
+# description: Where to export to
+# type: string
+# required: true
+dest: /tmp/nextjs/notes.json
+
+# description: should body be included
+# type: boolean
+# includeBody: true
+
+# description: should stubs be included
+# type: boolean
+# includeStubs: TODO
+
+# description: undefined
+# type: array
+# ignore: TODO

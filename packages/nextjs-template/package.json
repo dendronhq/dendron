@@ -15,8 +15,8 @@
     "export": "next build && next export"
   },
   "dependencies": {
-    "@dendronhq/common-all": "^0.50.1",
-    "@dendronhq/common-frontend": "^0.50.1",
+    "@dendronhq/common-all": "^0.50.4",
+    "@dendronhq/common-frontend": "^0.50.4",
     "next": "10.2.0",
     "react": "17.0.1",
     "react-css-theme-switcher": "0.2.3",

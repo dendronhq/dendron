@@ -31,6 +31,7 @@ const getMigration = ({
     return [maybeMigration];
   } else {
     let migrations = ALL_MIGRATIONS;
+    // eg. take all migrations greater than the `from`
     if (from) {
       migrations = _.takeWhile(migrations, (mig) => {
         return semver.lt(from, mig.version);
@@ -38,7 +39,7 @@ const getMigration = ({
     }
     if (to) {
       migrations = _.dropWhile(migrations, (mig) => {
-        return semver.gt(to, mig.version);
+        return semver.gt(mig.version, to);
       });
     }
     return migrations;
@@ -99,59 +100,73 @@ suite("Migration", function () {
       });
     });
 
-    test("migrate to 46.1, default settings", (done) => {
-      runLegacyMultiWorkspaceTest({
-        ctx,
-        onInit: async ({ engine, wsRoot }) => {
-          const dendronConfig = engine.config;
-          const wsConfig = await getWS().getWorkspaceSettings();
-          const wsService = new WorkspaceService({ wsRoot });
-          const out = await MigrationServce.applyMigrationRules({
-            currentVersion: "0.46.1",
-            previousVersion: "0.45.0",
-            dendronConfig,
-            wsConfig,
-            wsService,
-            logger: Logger,
-            migrations: getMigration({ from: "0.45.0", to: "0.46.1" }),
-          });
-          expect(out.length).toEqual(3);
-          expect(getWS().config.journal).toEqual(
-            DConfig.genDefaultConfig().journal
-          );
-          done();
-        },
-      });
-    });
-
-    test("migrate to 46.1, non standard settings", (done) => {
-      runLegacyMultiWorkspaceTest({
-        ctx,
-        onInit: async ({ engine, wsRoot }) => {
-          const dendronConfig = engine.config;
-          const wsConfig = await getWS().getWorkspaceSettings();
-          const wsService = new WorkspaceService({ wsRoot });
-          const out = await MigrationServce.applyMigrationRules({
-            currentVersion: "0.46.1",
-            previousVersion: "0.45.0",
-            dendronConfig,
-            wsConfig,
-            wsService,
-            logger: Logger,
-            migrations: getMigration({ from: "0.45.0", to: "0.46.1" }),
-          });
-          expect(out.length).toEqual(3);
-          expect(getWS().config.journal).toEqual({
-            ...DConfig.genDefaultConfig().journal,
-            name: "foo",
-          });
-          done();
-        },
-        wsSettingsOverride: {
-          settings: {
-            [CONFIG.DEFAULT_JOURNAL_NAME.key]: "foo",
+    describe("migrate to 47.1", function() {
+      test("apply journal config, default settings", (done) => {
+        runLegacyMultiWorkspaceTest({
+          ctx,
+          modConfigCb: (config) => {
+            // we are deleting a field that was optional before migraiton, hence the ignore
+            // @ts-ignore
+            delete config["journal"];
+            return config;
           },
-        },
+          onInit: async ({ engine, wsRoot }) => {
+            const dendronConfig = engine.config;
+            const wsConfig = await getWS().getWorkspaceSettings();
+            const wsService = new WorkspaceService({ wsRoot });
+            const out = await MigrationServce.applyMigrationRules({
+              currentVersion: "0.47.1",
+              previousVersion: "0.46.0",
+              dendronConfig,
+              wsConfig,
+              wsService,
+              logger: Logger,
+              migrations: getMigration({ from: "0.46.0", to: "0.47.1" }),
+            });
+            expect(out.length).toEqual(1);
+            expect(getWS().config.journal).toEqual(
+              DConfig.genDefaultConfig().journal
+            );
+            done();
+          },
+        });
+      });
+
+      test("apply journal config, non standard settings", (done) => {
+        runLegacyMultiWorkspaceTest({
+          ctx,
+          modConfigCb: (config) => {
+            // we are deleting a field that was optional before migraiton, hence the ignore
+            // @ts-ignore
+            delete config["journal"];
+            return config;
+          },
+          onInit: async ({ engine, wsRoot }) => {
+            const dendronConfig = engine.config;
+            const wsConfig = await getWS().getWorkspaceSettings();
+            const wsService = new WorkspaceService({ wsRoot });
+            const out = await MigrationServce.applyMigrationRules({
+              currentVersion: "0.47.1",
+              previousVersion: "0.46.0",
+              dendronConfig,
+              wsConfig,
+              wsService,
+              logger: Logger,
+              migrations: getMigration({ from: "0.46.0", to: "0.47.1" }),
+            });
+            expect(out.length).toEqual(1);
+            expect(getWS().config.journal).toEqual({
+              ...DConfig.genDefaultConfig().journal,
+              name: "foo",
+            });
+            done();
+          },
+          wsSettingsOverride: {
+            settings: {
+              [CONFIG.DEFAULT_JOURNAL_NAME.key]: "foo",
+            },
+          },
+        });
       });
     });
 
@@ -162,7 +177,7 @@ suite("Migration", function () {
           const dendronConfig = engine.config;
           const wsConfig = await getWS().getWorkspaceSettings();
           const wsService = new WorkspaceService({ wsRoot });
-          const out = await MigrationServce.applyMigrationRules({
+          await MigrationServce.applyMigrationRules({
             currentVersion: "0.52.0",
             previousVersion: "0.51.0",
             dendronConfig,
@@ -171,12 +186,11 @@ suite("Migration", function () {
             logger: Logger,
             migrations: getMigration({ from: "0.51.0", to: "0.52.0" }),
           });
-          expect(out.length).toEqual(1);
           expect(getWS().config.scratch).toEqual({
             ...DConfig.genDefaultConfig().scratch,
             name: "foo",
           });
-            done();
+          done();
         },
         wsSettingsOverride: {
           settings: {
@@ -186,6 +200,56 @@ suite("Migration", function () {
       });
     });
 
-    
+    test("migrate to 0.51.4 (set preview v2), previewv2 note set", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        modConfigCb: (config) => {
+          config.dev = { enablePreviewV2: false };
+          return config;
+        },
+        onInit: async ({ engine, wsRoot }) => {
+          const dendronConfig = engine.config;
+          const wsConfig = await getWS().getWorkspaceSettings();
+          const wsService = new WorkspaceService({ wsRoot });
+          await MigrationServce.applyMigrationRules({
+            currentVersion: "0.52.0",
+            previousVersion: "0.51.3",
+            dendronConfig,
+            wsConfig,
+            wsService,
+            logger: Logger,
+            migrations: getMigration({ from: "0.51.0", to: "0.52.0" }),
+          });
+          expect(getWS().config.dev?.enablePreviewV2).toBeFalsy();
+          done();
+        },
+      });
+    });
+
+    test("migrate to 0.51.4 (set preview v2), previewv2 set", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        modConfigCb: (config) => {
+          config.dev = { enablePreviewV2: true };
+          return config;
+        },
+        onInit: async ({ engine, wsRoot }) => {
+          const dendronConfig = engine.config;
+          const wsConfig = await getWS().getWorkspaceSettings();
+          const wsService = new WorkspaceService({ wsRoot });
+          await MigrationServce.applyMigrationRules({
+            currentVersion: "0.52.0",
+            previousVersion: "0.51.3",
+            dendronConfig,
+            wsConfig,
+            wsService,
+            logger: Logger,
+            migrations: getMigration({ from: "0.51.0", to: "0.52.0" }),
+          });
+          expect(getWS().config.dev?.enablePreviewV2).toBeTruthy();
+          done();
+        },
+      });
+    });
   });
 });

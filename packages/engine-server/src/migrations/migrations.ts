@@ -8,6 +8,9 @@ import { DConfig } from "../config";
 import { removeCache } from "../utils";
 import { Migrations } from "./types";
 
+/**
+ * Migrations are sorted by version numbers, from greatest to least
+ */
 export const ALL_MIGRATIONS: Migrations[] = [
   {
     version: "0.52.0",
@@ -33,6 +36,21 @@ export const ALL_MIGRATIONS: Migrations[] = [
               wsConfig.settings,
               "dendron.defaultScratchAddBehavior"
             );
+          }
+          return { data: { dendronConfig, wsConfig } };
+        },
+      },
+    ],
+  },
+  {
+    version: "0.51.4",
+    changes: [
+      {
+        name: "don't switch to legacy preview if not currently on it",
+        func: async ({ dendronConfig, wsConfig }) => {
+          const previewV2Enabled = dendronConfig.dev?.enablePreviewV2
+          if (!previewV2Enabled) {
+            _.set(dendronConfig, "dev.previewV2Enabled", false)
           }
           return { data: { dendronConfig, wsConfig } };
         },

@@ -29,7 +29,6 @@ export class MigrationServce {
     const migrationsToRun = _.reverse(
       _.takeWhile(migrations || ALL_MIGRATIONS, (ent) => {
         const out = semver.lt(previousVersion, ent.version);
-        console.log({ previousVersion, entVersion: ent.version, out });
         return out;
       })
     );
@@ -60,7 +59,6 @@ export class MigrationServce {
   }
 
   static async applyMigrationChanges({
-    currentVersion,
     previousVersion,
     migration,
     wsService,

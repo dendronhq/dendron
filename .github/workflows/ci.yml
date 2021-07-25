@@ -22,8 +22,8 @@ jobs:
 
       matrix:
         os:
-          # - macos-latest
-          # - ubuntu-latest
+          - macos-latest
+          - ubuntu-latest
           - windows-latest
         node-version:
           - 12.x
@@ -50,27 +50,12 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      # The closest we can get to rsync natively is cwRsync. Instead let's get
-      # rsync installed via Cygwin and put that on PATH.
-      # - name: Install dependencies
-      #   if: runner.os == 'Windows'
-      #   run: |
-      #     choco install cygwin
-      #     C:\tools\cygwin\cygwinsetup.exe `
-      #         --quiet-mode --no-desktop --upgrade-also --wait `
-      #         --root C:\tools\cygwin `
-      #         --only-site --site http://mirrors.kernel.org/sourceware/cygwin/ `
-      #         --packages rsync
-      #     "C:\tools\cygwin\bin" | Out-File -Append -FilePath $env:GITHUB_PATH -Encoding utf8
-
       - name: Gather environment data
         run: |
           ${{ matrix.env }}
           node --version
           npm --version
           yarn --version
-      
-      #rsync --version
 
       - name: Checkout source
         uses: actions/checkout@v2
@@ -86,6 +71,17 @@ jobs:
             node_modules
             packages/*/node_modules
             packages/*/.vscode-test
+          key: ${{ runner.os }}-${{ matrix.node-version }}-node-modules-${{ hashFiles('yarn.lock')}}
+
+      - name: Restore Node modules cache (Windows)
+        if: runner.os == 'Windows'
+        uses: actions/cache@v2
+        id: node-modules-cache
+        with:
+          path: |
+            node_modules
+            packages\*\node_modules
+            packages\*\.vscode-test
           key: ${{ runner.os }}-${{ matrix.node-version }}-node-modules-${{ hashFiles('yarn.lock')}}
 
       - name: Set up Node.js ${{ matrix.node-version }}
@@ -111,5 +107,5 @@ jobs:
 
       - name: Run tests
         run: yarn ci:test:${{ matrix.suite }}
-        shell: bash
+        # shell: bash
         timeout-minutes: 30

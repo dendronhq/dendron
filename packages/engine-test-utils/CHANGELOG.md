@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.51.4](https://github.com/dendronhq/dendron/compare/v0.51.3...v0.51.4) (2021-07-25)
+
+
+### Features Dendron
+
+* handle local images in preview v2 ([e4da5aa](https://github.com/dendronhq/dendron/commit/e4da5aa4ddb77eefde5118543b83f2784af34870))
+
+
+
+
+
 ## [0.51.2](https://github.com/dendronhq/dendron/compare/v0.51.0...v0.51.2) (2021-07-22)
 
 

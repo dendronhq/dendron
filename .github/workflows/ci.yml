@@ -107,5 +107,4 @@ jobs:
 
       - name: Run tests
         run: yarn ci:test:${{ matrix.suite }}
-        # shell: bash
         timeout-minutes: 30

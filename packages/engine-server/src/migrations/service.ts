@@ -1,5 +1,5 @@
 import { DendronConfig, WorkspaceSettings } from "@dendronhq/common-all";
-import { DLogger } from "@dendronhq/common-server";
+import { createLogger, DLogger } from "@dendronhq/common-server";
 import _ from "lodash";
 import semver from "semver";
 import { WorkspaceService } from "../workspace";
@@ -28,10 +28,17 @@ export class MigrationServce {
     // run migrations from oldest to newest
     const migrationsToRun = _.reverse(
       _.takeWhile(migrations || ALL_MIGRATIONS, (ent) => {
-        const out = semver.lt(previousVersion, ent.version);
+        const out = semver.lte(previousVersion, ent.version);
         return out;
       })
     );
+    const logger = createLogger("migration");
+    logger.info({
+      migrations: migrationsToRun.map((m) => [
+        m.version,
+        m.changes.map((c) => c.name),
+      ]),
+    });
     await _.reduce(
       migrationsToRun,
       async (prev, migration) => {

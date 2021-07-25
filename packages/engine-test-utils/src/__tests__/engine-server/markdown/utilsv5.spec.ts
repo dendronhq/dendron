@@ -8,10 +8,10 @@ import {
   ProcFlavor,
 } from "@dendronhq/engine-server";
 import path from "path";
-import { createEngineFromServer, runEngineTestV5 } from "../../../engine";
 import { ENGINE_HOOKS } from "../../../presets";
 import { checkString } from "../../../utils";
 import { cleanVerifyOpts, createProcCompileTests } from "./utils";
+import { createEngineFromServer, runEngineTestV5 } from "../../../engine";
 
 const getOpts = (opts: any) => {
   const _copts = opts.extra as { proc: Processor; dest: DendronASTDest };
@@ -176,7 +176,39 @@ describe("MDUtils.proc", () => {
       await ENGINE_HOOKS.setupBasic({ ...opts, extra: { idv2: true } });
     },
   });
+
+  const WITH_FOOTNOTES = createProcCompileTests({
+    name: "WITH_FOOTNOTES",
+    setup: async (opts) => {
+      const { proc } = getOpts(opts);
+      const txt = [
+        "Here is a footnote reference,[^1]",
+        "",
+        "[^1]: Here is the footnote.",
+      ].join("\n");
+      const resp = await proc.process(txt);
+      return { resp, proc };
+    },
+    verify: {
+      [DendronASTDest.HTML]: {
+        [ProcFlavor.REGULAR]: async ({ extra }) => {
+          const { resp } = extra;
+          await checkString(
+            resp.contents,
+            `Here is the footnote.<a href="#fnref-1" class="footnote-backref">↩</a>`,
+          );
+        },
+        [ProcFlavor.PREVIEW]: ProcFlavor.REGULAR,
+        [ProcFlavor.PUBLISHING]: ProcFlavor.REGULAR,
+      },
+    },
+    preSetupHook: async (opts) => {
+      await ENGINE_HOOKS.setupBasic(opts);
+    },
+  });
+
   const ALL_TEST_CASES = [
+    ...WITH_FOOTNOTES,
     ...IMAGE_NO_LEAD_FORWARD_SLASH,
     ...IMAGE_WITH_LEAD_FORWARD_SLASH,
     ...NOTE_REF_BASIC_WITH_REHYPE,

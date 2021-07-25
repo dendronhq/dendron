@@ -1,4 +1,4 @@
-import { DendronConfig, WorkspaceSettings } from "@dendronhq/common-all";
+import { DendronConfig, getStage, InstallStatus, WorkspaceSettings } from "@dendronhq/common-all";
 import { createLogger, DLogger } from "@dendronhq/common-server";
 import _ from "lodash";
 import semver from "semver";
@@ -103,5 +103,13 @@ export class MigrationServce {
       } as MigrationChangeSetStatus)
     );
     return results;
+  }
+
+  /**
+   * Should we attempt to migrate workspace settings
+   * @returns 
+   */
+  static shouldRunMigration({force, workspaceInstallStatus}: {force?: boolean, workspaceInstallStatus: InstallStatus }) {
+      return (workspaceInstallStatus === InstallStatus.UPGRADED || force) && getStage() === "prod"
   }
 }

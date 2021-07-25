@@ -1,11 +1,12 @@
 import { DHookDict } from "./hooks";
 import { SeedSite } from "./seed";
 
-// === Promitives
+// === Primitives
 export type DPermission = {
   read: string[];
   write: string[];
 };
+
 // === Vaults
 export type RemoteEndpoint = {
   type: "git";
@@ -77,6 +78,14 @@ export type SeedEntry = {
   site?: SeedSite;
 };
 
+/**
+ * Extension Install Status
+ */
+export enum InstallStatus {
+  NO_CHANGE = "NO_CHANGE",
+  INITIAL_INSTALL = "INITIAL_INSTALL",
+  UPGRADED = "UPGRADED",
+}
 
 export enum NoteAddBehavior {
   "childOfDomain" = "childOfDomain",

@@ -1,3 +1,4 @@
+import { InstallStatus } from "@dendronhq/common-all";
 import {
   ALL_MIGRATIONS,
   DConfig,
@@ -12,7 +13,7 @@ import sinon from "sinon";
 import { ExtensionContext } from "vscode";
 import { CONFIG, GLOBAL_STATE, WORKSPACE_STATE } from "../../constants";
 import { Logger } from "../../logger";
-import { InstallStatus, VSCodeUtils } from "../../utils";
+import { VSCodeUtils } from "../../utils";
 import { getWS } from "../../workspace";
 import { _activate } from "../../_extension";
 import { expect } from "../testUtilsv2";

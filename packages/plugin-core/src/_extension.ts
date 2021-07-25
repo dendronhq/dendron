@@ -5,7 +5,8 @@ import {
   getStage,
   Time,
   VaultUtils,
-  VSCodeEvents
+  VSCodeEvents,
+  InstallStatus
 } from "@dendronhq/common-all";
 import {
   getDurationMilliseconds,
@@ -31,7 +32,7 @@ import { migrateConfig } from "./migration";
 import { StateService } from "./services/stateService";
 import { Extensions } from "./settings";
 import { setupSegmentClient } from "./telemetry";
-import { InstallStatus, VSCodeUtils, WSUtils } from "./utils";
+import { VSCodeUtils, WSUtils } from "./utils";
 import { AnalyticsUtils } from "./utils/analytics";
 import { DendronTreeView } from "./views/DendronTreeView";
 import { DendronWorkspace, getEngine, getWS } from "./workspace";
@@ -251,10 +252,7 @@ export async function _activate(
       console.error(error);
     }
 
-    if (
-      (workspaceInstallStatus === InstallStatus.UPGRADED || forceUpgrade) &&
-      stage === "prod"
-    ) {
+    if (MigrationServce.shouldRunMigration({force: forceUpgrade, workspaceInstallStatus})) {
       const changes = await MigrationServce.applyMigrationRules({
         currentVersion,
         previousVersion: previousWorkspaceVersion,

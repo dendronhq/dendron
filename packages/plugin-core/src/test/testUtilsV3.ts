@@ -1,3 +1,4 @@
+import { InstallStatus } from "@dendronhq/common-all";
 import {
   DendronConfig,
   DEngineClient,
@@ -44,7 +45,7 @@ import {
 import { Logger } from "../logger";
 import { StateService } from "../services/stateService";
 import { WorkspaceConfig } from "../settings";
-import { InstallStatus, VSCodeUtils } from "../utils";
+import { VSCodeUtils } from "../utils";
 import { DendronWorkspace, getWS } from "../workspace";
 import { BlankInitializer } from "../workspace/blankInitializer";
 import { WorkspaceInitFactory } from "../workspace/workspaceInitializer";

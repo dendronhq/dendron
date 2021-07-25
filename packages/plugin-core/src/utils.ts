@@ -6,6 +6,7 @@ import {
   DNodeUtils,
   DVault,
   getStage,
+  InstallStatus,
   NoteAddBehavior,
   NoteProps,
   NoteUtils,
@@ -40,12 +41,6 @@ import { FileItem } from "./external/fileutils/FileItem";
 import { Logger } from "./logger";
 import { EngineAPIService } from "./services/EngineAPIService";
 import { DendronWorkspace, getWS } from "./workspace";
-
-export enum InstallStatus {
-  NO_CHANGE = "NO_CHANGE",
-  INITIAL_INSTALL = "INITIAL_INSTALL",
-  UPGRADED = "UPGRADED",
-}
 
 export class DisposableStore {
   private _toDispose = new Set<vscode.Disposable>();

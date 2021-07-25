@@ -253,7 +253,7 @@ export async function _activate(
 
     if (
       (workspaceInstallStatus === InstallStatus.UPGRADED || forceUpgrade) &&
-      stage !== "test"
+      stage === "prod"
     ) {
       const changes = await MigrationServce.applyMigrationRules({
         currentVersion,

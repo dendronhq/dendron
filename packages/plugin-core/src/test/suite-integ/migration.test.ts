@@ -200,7 +200,7 @@ suite("Migration", function () {
       });
     });
 
-    test("migrate to 0.51.4 (set preview v2), previewv2 note set", (done) => {
+    test("migrate to 0.51.4 (set preview v2), previewv2 not set", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
         modConfigCb: (config) => {
@@ -226,7 +226,7 @@ suite("Migration", function () {
       });
     });
 
-    test("migrate to 0.51.4 (set preview v2), previewv2 set", (done) => {
+    test("migrate to 0.51.4 (set scratch notes in dendron.yml), non standard settings", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
         modConfigCb: (config) => {
@@ -238,13 +238,13 @@ suite("Migration", function () {
           const wsConfig = await getWS().getWorkspaceSettings();
           const wsService = new WorkspaceService({ wsRoot });
           await MigrationServce.applyMigrationRules({
-            currentVersion: "0.52.0",
+            currentVersion: "0.51.4",
             previousVersion: "0.51.3",
             dendronConfig,
             wsConfig,
             wsService,
             logger: Logger,
-            migrations: getMigration({ from: "0.51.0", to: "0.52.0" }),
+            migrations: getMigration({ from: "0.51.0", to: "0.51.4" }),
           });
           expect(getWS().config.dev?.enablePreviewV2).toBeTruthy();
           done();

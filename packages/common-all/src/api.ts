@@ -204,6 +204,8 @@ export class APIUtils {
 
 // === Base
 
+
+
 abstract class API {
   public opts: IAPIOpts;
 
@@ -303,8 +305,23 @@ abstract class API {
 
 // === DendronAPI
 
+let _DendronAPI_INSTANCE: DendronAPI|undefined;
+
 export class DendronAPI extends API {
-  static instance: DendronAPI;
+
+  static getOrCreate(opts: IAPIConstructor) {
+    if (!_.isUndefined(_DendronAPI_INSTANCE)) {
+      return this.instance();
+    }
+    return new DendronAPI(opts)
+  }
+
+  static instance(): DendronAPI {
+    if (_.isUndefined(_DendronAPI_INSTANCE)) {
+      throw Error("no dendron api");
+    }
+    return _DendronAPI_INSTANCE;
+  }
 
   async assetGet(req: AssetGetRequest): Promise<DendronError | Buffer> {
     const resp = await this._makeRequestRaw({

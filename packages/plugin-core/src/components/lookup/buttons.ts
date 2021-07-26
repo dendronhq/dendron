@@ -27,7 +27,7 @@ export type ButtonType =
   | LookupSelectionType
   | LookupSplitType
   | LookupFilterType
-  | "v2";
+  | "other";
 
 export type ButtonCategory =
   | "selection"
@@ -35,7 +35,7 @@ export type ButtonCategory =
   | "split"
   | "filter"
   | "effect"
-  | "v2"; //TODO: better category name?
+  | "other"; //TODO: better category name?
 
 export type ButtonHandleOpts = { quickPick: DendronQuickPickerV2 };
 
@@ -55,8 +55,8 @@ export function getButtonCategory(button: DendronBtn): ButtonCategory {
   if (isEffectButton(button)) {
     return "effect";
   }
-  if (button.type === "v2") {
-    return "v2"; //TODO: better type name
+  if (button.type === "other") {
+    return "other";
   }
   throw Error(`unknown btn type ${button}`);
 }
@@ -405,7 +405,7 @@ export class VaultSelectButton extends DendronBtn {
       title: "Select Vault",
       iconOff: "package",
       iconOn: "menu-selection",
-      type: "v2" as LookupEffectType,
+      type: "other" as LookupEffectType,
       pressed,
       canToggle: false,
     });

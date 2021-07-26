@@ -5,6 +5,8 @@ import {
   DEngineClient,
   DVault,
   ERROR_STATUS,
+  NotePropsDict,
+  NoteUtils,
 } from "@dendronhq/common-all";
 // @ts-ignore
 import rehypePrism from "@mapbox/rehype-prism";
@@ -105,6 +107,10 @@ export type ProcDataFullOptsV5 = {
   vault: DVault;
   fname: string;
   dest: DendronASTDest;
+  /**
+   * Supply alternative dictionary of notes to use when resolving note ids
+   */
+  notes?: NotePropsDict;
 } & { config?: DendronConfig; wsRoot?: string };
 
 /**
@@ -114,9 +120,12 @@ export type ProcDataFullV5 = {
   engine: DEngineClient;
   vault: DVault;
   fname: string;
-  wsRoot: string;
-  config: DendronConfig;
   dest: DendronASTDest;
+  wsRoot: string;
+
+  // derived
+  config: DendronConfig;
+  notes?: NotePropsDict;
   /**
    * Keep track of current note ref level
    */
@@ -151,9 +160,17 @@ export class MDUtilsV5 {
     return _data || {};
   }
 
-  static setProcOpts(proc: Processor, opts: ProcOptsV5) {
-    const _data = proc.data("dendronProcOptsv5") as ProcOptsV5;
-    return proc.data("dendronProcOptsv5", { ..._data, ...opts });
+  static getNoteByFname(proc: Processor, { fname }: { fname: string }) {
+    const { notes, vault, wsRoot } = this.getProcData(proc);
+    // TODO: this is for backwards compatibility
+    const { engine } = MDUtilsV4.getEngineFromProc(proc);
+    const note = NoteUtils.getNoteByFnameV5({
+      fname,
+      notes: notes || engine.notes,
+      vault,
+      wsRoot,
+    });
+    return note;
   }
 
   static getProcData(proc: Processor): ProcDataFullV5 {
@@ -174,7 +191,13 @@ export class MDUtilsV5 {
     // TODO: for backwards compatibility
     MDUtilsV4.setProcOpts(proc, opts);
     MDUtilsV4.setDendronData(proc, opts);
-    return proc.data("dendronProcDatav5", { ..._data, ...opts });
+    const notes = _.isUndefined(opts.notes) ? opts?.engine?.notes : opts.notes;
+    return proc.data("dendronProcDatav5", { ..._data, ...opts, notes });
+  }
+
+  static setProcOpts(proc: Processor, opts: ProcOptsV5) {
+    const _data = proc.data("dendronProcOptsv5") as ProcOptsV5;
+    return proc.data("dendronProcOptsv5", { ..._data, ...opts });
   }
 
   static isV5Active(proc: Processor) {

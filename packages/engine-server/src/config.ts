@@ -55,6 +55,11 @@ export class DConfig {
         addBehavior: NoteAddBehavior.childOfDomain,
         firstDayOfWeek: 1,
       },
+      scratch: {
+        name: "scratch",
+        dateFormat: "y.MM.dd.HHmmss",
+        addBehavior: NoteAddBehavior.asOwnDomain,
+      },
       site: {
         copyAssets: true,
         siteHierarchies: ["root"],

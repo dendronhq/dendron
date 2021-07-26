@@ -1,4 +1,5 @@
 import {
+  DefaultMap,
   DNoteAnchor,
   ERROR_SEVERITY,
   genUUIDInsecure,
@@ -119,6 +120,11 @@ export const provideCompletionItems = (
   const wsRoot = engine.wsRoot;
   Logger.debug({ ctx, range, notesLength: notes.length, currentVault, wsRoot });
   
+  const notesByFname = new DefaultMap<string, number>(() => 0);
+  _.values(notes).forEach((note) => {
+    notesByFname.set(note.fname, notesByFname.get(note.fname) + 1);
+  });
+
   _.values(notes).map((note, index) => {
     const item: CompletionItem = {
       label: note.fname,
@@ -141,8 +147,8 @@ export const provideCompletionItems = (
       // x will get sorted after numbers, so these will appear after notes without x
       item.sortText = 'x' + item.sortText;
       
-      const sameNameNotes = NoteUtils.getNotesByFname({ fname: note.fname, notes });
-      if (sameNameNotes.length > 1) {
+      const sameNameNotes = notesByFname.get(note.fname);
+      if (sameNameNotes > 1) {
         // There are multiple notes with the same name in multiple vaults,
         // and this note is in a different vault than the current note.
         // To generate a link to this note, we have to do an xvault link.

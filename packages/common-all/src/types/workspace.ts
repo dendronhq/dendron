@@ -77,6 +77,7 @@ export type SeedEntry = {
   site?: SeedSite;
 };
 
+
 export enum NoteAddBehavior {
   "childOfDomain" = "childOfDomain",
   "childOfDomainNamespace" = "childOfDomainNamespace",
@@ -122,6 +123,8 @@ export type DendronConfig = {
 
   journal: JournalConfig;
 
+  scratch: Pick<JournalConfig, "name" | "dateFormat" | "addBehavior">;
+  
   /**
    * Workspaces
    */
@@ -179,6 +182,11 @@ export type DendronConfig = {
    * Default: Children
    */
   hierarchyDisplayTitle?: string;
+
+  /**
+   * Configuration for note and schema graphs
+   */
+  graph?: DendronGraphConfig;
 
   /**
    * Don't automatically create note when looking up definition
@@ -241,6 +249,7 @@ export type DendronConfig = {
 
   /** Automatically fold frontmatter when opening a new note. False by default. */
   autoFoldFrontmatter?: boolean;
+  
 };
 
 export type RandomNoteConfig = {
@@ -433,6 +442,10 @@ export type DendronSiteConfig = {
   cognitoUserPoolId?: string;
   cognitoClientId?: string;
 };
+
+export type DendronGraphConfig = {
+  zoomSpeed: number;
+}
 
 export type HierarchyConfig = {
   publishByDefault?: boolean | { [key: string]: boolean };

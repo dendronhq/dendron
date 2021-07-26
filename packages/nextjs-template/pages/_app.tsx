@@ -1,4 +1,4 @@
-import "../styles/globals.css";
+import "../styles/scss/main.scss";
 import { ThemeSwitcherProvider } from "react-css-theme-switcher";
 import type { AppProps } from "next/app";
 import { BasicLayout } from "@dendronhq/common-frontend";

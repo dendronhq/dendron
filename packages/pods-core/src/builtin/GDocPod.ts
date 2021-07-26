@@ -37,7 +37,7 @@ type GDocImportPodCustomOpts = {
    */
   importComments? : ImportComments;
   /**
-   * import comments from the doc in text or json format
+   * get confirmation before overwriting existing note
    */
    confirmOverwrite? : boolean;
 };

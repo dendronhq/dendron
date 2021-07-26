@@ -1,5 +1,5 @@
-import { stringifyError } from "@dendronhq/common-all";
-import { SiteUtils } from "@dendronhq/engine-server";
+import { DEngineClient, NoteProps, NotePropsDict, NoteUtils, stringifyError } from "@dendronhq/common-all";
+import { MDUtilsV5, ProcFlavor, SiteUtils } from "@dendronhq/engine-server";
 import { JSONSchemaType } from "ajv";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -24,12 +24,37 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     }) as JSONSchemaType<NextjsExportConfig>;
   }
 
+  async _renderNote({engine, note, notes}: {engine: DEngineClient, note: NoteProps, notes: NotePropsDict}) {
+    const proc = MDUtilsV5.procRehypeFull(
+      {
+        engine,
+        fname: note.fname,
+        vault: note.vault,
+        config: engine.config,
+        notes
+      },
+      { flavor: ProcFlavor.PREVIEW }
+    );
+    const payload = await proc.process(NoteUtils.serialize(note));
+    return payload.toString();
+
+  }
+
+  async renderToFile({engine, note, notesDir, notes}: Parameters<NextjsExportPod["_renderNote"]>[0] & {notesDir: string}) {
+    const ctx = `${ID}:renderToFile`
+    // const out = await engine.renderNote({id: note.id});
+    const out = await this._renderNote({engine, note, notes});
+    const dst = path.join(notesDir, note.id + ".html")
+    this.L.debug({ctx, dst, msg: "writeNote"});
+    return fs.writeFile(dst, out)
+  }
+
   async plant(opts: ExportPodPlantOpts) {
     const ctx = `${ID}:plant`
     const { notes, dest, engine } = opts;
 
-    const podDstPath = dest.fsPath;
-    const podDstDir = path.dirname(podDstPath);
+    // const podDstPath = dest.fsPath;
+    const podDstDir = dest.fsPath;
     fs.ensureDirSync(podDstDir);
 
     const { notes: publishedNotes, domains } = await SiteUtils.filterByConfig({
@@ -48,7 +73,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     // render notes
     const notesDir = path.join(podDstDir, "notes");
     fs.ensureDirSync(notesDir);
-    await Promise.all(notes.map(async note => {
+    const out1 = Promise.all(notes.map(async note => {
       const out = await engine.renderNote({id: note.id});
       const dst = path.join(notesDir, note.id + ".html")
       this.L.debug({ctx, dst, msg: "writeNote"});
@@ -57,6 +82,13 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
       }
       return fs.writeFile(dst, out.data)
     }));
+    // render siteOnly notes
+    const out2 = Promise.all(siteNotes.map(async note => {
+      return this.renderToFile({engine, note, notesDir, notes: publishedNotes})
+    }));
+    await Promise.all([out1, out2])
+
+    const podDstPath = path.join(podDstDir, "notes.json");
     fs.writeJSONSync(podDstPath, payload, { encoding: "utf8", spaces: 2 });
     return { notes };
   }

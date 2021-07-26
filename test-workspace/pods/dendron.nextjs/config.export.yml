@@ -1,7 +1,7 @@
 # description: Where to export to
 # type: string
 # required: true
-dest: /tmp/nextjs/notes.json
+dest: /Users/kevinlin/code/dendron/packages/nextjs-template/data
 
 # description: should body be included
 # type: boolean

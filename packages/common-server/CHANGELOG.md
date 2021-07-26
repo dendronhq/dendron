@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.52.0](https://github.com/dendronhq/dendron/compare/v0.51.3...v0.52.0) (2021-07-26)
+
+
+### Bug Fixes
+
+* scratch note migration fixes ([5214535](https://github.com/dendronhq/dendron/commit/52145354331d1a9a84e55520550458762eba6df5))
+
+
+
+
+
 ## [0.51.4](https://github.com/dendronhq/dendron/compare/v0.51.3...v0.51.4) (2021-07-25)
 
 

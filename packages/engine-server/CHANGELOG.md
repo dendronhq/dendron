@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.52.0](https://github.com/dendronhq/dendron/compare/v0.51.3...v0.52.0) (2021-07-26)
+
+
+### Bug Fixes
+
+* run migration when version number is equal to target ([5171a4c](https://github.com/dendronhq/dendron/commit/5171a4c1a222c7d6756f75e5156400f2a2700518))
+* scratch note migration fixes ([5214535](https://github.com/dendronhq/dendron/commit/52145354331d1a9a84e55520550458762eba6df5))
+
+
+### Features Dendron
+
+* handle local images in preview v2 ([e4da5aa](https://github.com/dendronhq/dendron/commit/e4da5aa4ddb77eefde5118543b83f2784af34870))
+
+
+
+
+
 ## [0.51.4](https://github.com/dendronhq/dendron/compare/v0.51.3...v0.51.4) (2021-07-25)
 
 

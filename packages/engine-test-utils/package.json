@@ -1,7 +1,7 @@
 {
   "name": "@dendronhq/engine-test-utils",
   "private": true,
-  "version": "0.51.4",
+  "version": "0.52.0",
   "description": "",
   "license": "GPLv3",
   "repository": {
@@ -56,14 +56,14 @@
     "preset": "ts-jest"
   },
   "dependencies": {
-    "@dendronhq/api-server": "^0.51.4",
-    "@dendronhq/common-all": "^0.51.4",
-    "@dendronhq/common-frontend": "^0.51.4",
-    "@dendronhq/common-server": "^0.51.4",
-    "@dendronhq/common-test-utils": "^0.51.4",
-    "@dendronhq/dendron-cli": "^0.51.4",
-    "@dendronhq/engine-server": "^0.51.4",
-    "@dendronhq/pods-core": "^0.51.4",
+    "@dendronhq/api-server": "^0.52.0",
+    "@dendronhq/common-all": "^0.52.0",
+    "@dendronhq/common-frontend": "^0.52.0",
+    "@dendronhq/common-server": "^0.52.0",
+    "@dendronhq/common-test-utils": "^0.52.0",
+    "@dendronhq/dendron-cli": "^0.52.0",
+    "@dendronhq/engine-server": "^0.52.0",
+    "@dendronhq/pods-core": "^0.52.0",
     "@reduxjs/toolkit": "^1.6.0",
     "@testing-library/react": "^12.0.0",
     "@testing-library/react-hooks": "^7.0.1",

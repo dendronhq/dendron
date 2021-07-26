@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.52.0](https://github.com/dendronhq/dendron/compare/v0.51.3...v0.52.0) (2021-07-26)
+
+
+### Features Dendron
+
+* **community issue:** graph zoom speed option ([#1027](https://github.com/dendronhq/dendron/issues/1027)) ([786628b](https://github.com/dendronhq/dendron/commit/786628b6b1437c962872e91792e22f06793e3888))
+
+
+
+
+
 ## [0.51.4](https://github.com/dendronhq/dendron/compare/v0.51.3...v0.51.4) (2021-07-25)
 
 

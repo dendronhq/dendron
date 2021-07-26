@@ -209,6 +209,7 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
     comments.forEach((comment: any) => {
        text += `- ${comment.author}:  ${comment.content}\n`
        if(comment.replies?.length> 0){
+         text += `\n\t replies to this comment: \n\n`
          comment.replies.forEach((reply: any) => {
           text += `\t - ${reply.author}: ${reply.content}\n`
 
@@ -254,14 +255,14 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
         if(existingNote.custom.revisionId && existingNote.custom.revisionId !== note.custom.revisionId) {
           existingNote.custom.revisionId = note.custom.revisionId;
           existingNote.body = note.body;
-          
+
           if(confirmOverwrite){
           const resp = await window.showInformationMessage(
               "Do you want to overwrite",
                 { modal: true },
                 { title: "Yes" }
               );
-            console.log('resp@@@@@@',resp)  
+
             if(resp?.title === "Yes"){
               await engine.writeNote(existingNote, { newNode: true });
               return existingNote;
@@ -273,7 +274,7 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
             return existingNote;
           }
         }else {
-          window.showInformationMessage("Note is up to date")
+          window.showInformationMessage("Note is already in sync with the google doc")
         }
     }
     else {

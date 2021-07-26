@@ -1,4 +1,5 @@
 import fs from "fs-extra";
+import path from "path";
 
 export function getDataDir(): string {
 	const dataDir = process.env.DATA_DIR;
@@ -10,6 +11,6 @@ export function getDataDir(): string {
 
 export function getNoteBody(id: string) {
 	const dataDir = getDataDir();
-	const body = fs.readFileSync(`/tmp/nextjs/notes/${id}.html`, {encoding: "utf8"})
+	const body = fs.readFileSync(path.join(dataDir, "notes", `${id}.html`), {encoding: "utf8"})
 	return body;
 }

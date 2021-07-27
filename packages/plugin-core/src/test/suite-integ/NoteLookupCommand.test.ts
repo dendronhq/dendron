@@ -11,9 +11,9 @@ import { describe } from "mocha";
 // // You can import and use all API from the 'vscode' module
 // // as well as import your extension to test it
 import * as vscode from "vscode";
-import { LookupNoteTypeEnum, LookupSelectionTypeEnum } from "../../commands/LookupCommand";
+import { LookupNoteTypeEnum, LookupSelectionTypeEnum, LookupSplitTypeEnum } from "../../commands/LookupCommand";
 import { NoteLookupCommand, CommandOutput } from "../../commands/NoteLookupCommand";
-import { JournalBtn, ScratchBtn, DendronBtn, ButtonType, Selection2LinkBtn, SelectionExtractBtn } from "../../components/lookup/buttons";
+import { JournalBtn, ScratchBtn, DendronBtn, ButtonType, Selection2LinkBtn, SelectionExtractBtn, HorizontalSplitBtn } from "../../components/lookup/buttons";
 import { PickerUtilsV2 } from "../../components/lookup/utils";
 import { VSCodeUtils } from "../../utils";
 import { expect } from "../testUtilsv2";
@@ -91,6 +91,18 @@ function getNoteTypeButtons(
     buttons,
   ) as vscode.QuickInputButton[] & DendronBtn[];
   return { journalBtn, scratchBtn };
+}
+
+function getSplitTypeButtons(
+  buttons: vscode.QuickInputButton[] & DendronBtn[]
+): {
+  horizontalSplitBtn: HorizontalSplitBtn,
+} {
+  const [horizontalSplitBtn] = getButtonsByTypeArray(
+    _.values(LookupSplitTypeEnum),
+    buttons,
+  ) as vscode.QuickInputButton[] & DendronBtn[];
+  return { horizontalSplitBtn };
 }
 
 suite("NoteLookupCommand", function () {
@@ -666,6 +678,76 @@ suite("NoteLookupCommand", function () {
           expect(selection2linkBtn.pressed).toBeFalsy();
           expect(selectionExtractBtn.pressed).toBeFalsy();
           expect(controller.quickpick.value).toEqual("foo");
+
+          done();
+        }
+      });
+    });
+
+    test("horizontal split basic", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+        },
+        onInit: async ({ vaults, engine }) => {
+          const cmd = new NoteLookupCommand();
+          stubVaultPick(vaults);
+
+          // close all editors before running.
+          VSCodeUtils.closeAllEditors();
+
+          await VSCodeUtils.openNote(engine.notes["foo"]);
+          await cmd.run({
+            initialValue: "bar",
+            splitType: "horizontal",
+            noConfirm: true,
+          });
+          const barEditor = VSCodeUtils.getActiveTextEditor();
+          expect(barEditor!.viewColumn).toEqual(2);
+
+          await cmd.run({
+            initialValue: "foo.ch1",
+            splitType: "horizontal",
+            noConfirm: true,
+          })
+          const fooChildEditor = VSCodeUtils.getActiveTextEditor();
+          expect(fooChildEditor!.viewColumn).toEqual(3);
+
+          done();
+        }
+      });
+    });
+
+    test.only("horizontal split modifier toggle", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+        },
+        onInit: async ({ vaults }) => {
+          const cmd = new NoteLookupCommand();
+          stubVaultPick(vaults);
+
+          const { controller } = await cmd.gatherInputs({
+            splitType: "horizontal"
+          });
+
+          controller.quickpick.show();
+
+          let { horizontalSplitBtn } = getSplitTypeButtons(
+            controller.quickpick.buttons
+          );
+
+          expect(horizontalSplitBtn?.pressed).toBeTruthy();
+
+          await controller.onTriggerButton(horizontalSplitBtn);
+
+          ({ horizontalSplitBtn } = getSplitTypeButtons(
+            controller.quickpick.buttons
+          ));
+
+          expect(horizontalSplitBtn.pressed).toBeFalsy();
 
           done();
         }

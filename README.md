@@ -1,7 +1,7 @@
 ![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/logo-256.png)
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-55-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-56-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 # Welcome to Dendron!
@@ -131,6 +131,7 @@ Dendron wouldn't be what it is today without help from these wonderful gardeners
     <td align="center"><a href="https://github.com/namjul"><img src="https://avatars.githubusercontent.com/u/328836?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Samuel Hobl</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=namjul" title="Code">💻</a> <a href="https://github.com/dendronhq/dendron/commits?author=namjul" title="Documentation">📖</a></td>
     <td align="center"><a href="https://github.com/apastuszak"><img src="https://avatars.githubusercontent.com/u/3401054?v=4?s=100" width="100px;" alt=""/><br /><sub><b>apastuszak</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Aapastuszak" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/felipewhitaker"><img src="https://avatars.githubusercontent.com/u/36129486?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Felipe Whitaker</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=felipewhitaker" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://github.com/kimds91"><img src="https://avatars.githubusercontent.com/u/11445901?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Do Soon Kim</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Akimds91" title="Bug reports">🐛</a></td>
   </tr>
 </table>
 

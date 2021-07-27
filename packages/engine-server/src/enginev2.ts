@@ -39,14 +39,12 @@ import {
   SchemaQueryResp,
   VaultUtils,
   WorkspaceOpts,
-  WriteNoteResp,
+  WriteNoteResp
 } from "@dendronhq/common-all";
 import {
   createLogger,
   DLogger,
-  NodeJSUtils,
-  readYAML,
-  writeYAML,
+  NodeJSUtils, writeYAML
 } from "@dendronhq/common-server";
 import _ from "lodash";
 import { DConfig } from "./config";
@@ -100,9 +98,8 @@ export class DendronEngineV2 implements DEngine {
 
   static create({ wsRoot, logger }: { logger?: DLogger; wsRoot: string }) {
     const LOGGER = logger || createLogger();
-    const cpath = DConfig.configPath(wsRoot);
-    const config = _.defaultsDeep(
-      readYAML(cpath) as DendronConfig,
+    const config: DendronConfig = _.defaultsDeep(
+      DConfig.getOrCreate(wsRoot),
       DConfig.genDefaultConfig()
     );
 
@@ -322,15 +319,9 @@ export class DendronEngineV2 implements DEngine {
   }
 
   async getConfig() {
-    const cpath = DConfig.configPath(this.configRoot);
-    const config = _.defaultsDeep(
-      readYAML(cpath) as DendronConfig,
-      DConfig.genDefaultConfig()
-    );
-
     return {
       error: null,
-      data: config,
+      data: this.config,
     };
   }
 

@@ -91,11 +91,22 @@ export class DConfig {
     const configPath = DConfig.configPath(dendronRoot);
     let config: DendronConfig;
     if (!fs.existsSync(configPath)) {
-      config = { ...defaults, ...DConfig.genDefaultConfig() };
+      config = {...DConfig.genDefaultConfig(), ...defaults };
       writeYAML(configPath, config);
     } else {
       config = readYAML(configPath) as DendronConfig;
     }
+
+    // Convert path separators in the config's vault paths to use the separator
+    // matching the client's OS:
+    config.vaults.forEach(vault => {
+      if (path.sep === '\\') {
+        vault.fsPath = vault.fsPath.replace(/\//g, '\\');
+      }
+      else if (path.sep === '/') {
+        vault.fsPath = vault.fsPath.replace(/\\/g, '/');
+      }
+    })
     return config;
   }
 

@@ -719,7 +719,7 @@ suite("NoteLookupCommand", function () {
       });
     });
 
-    test.only("horizontal split modifier toggle", (done) => {
+    test("horizontal split modifier toggle", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
         preSetupHook: async ({ wsRoot, vaults }) => {

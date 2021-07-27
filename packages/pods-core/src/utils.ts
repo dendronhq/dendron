@@ -3,14 +3,16 @@ import fs, { ensureDirSync, writeFileSync } from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { PodClassEntryV4, PodItemV4 } from "./types";
+import Ajv, { JSONSchemaType } from "ajv";
+import addFormats from "ajv-formats";
+import { DendronError } from "@dendronhq/common-all";
+
 export * from "./builtin";
 export * from "./types";
 export * from "./utils";
-import Ajv, { JSONSchemaType } from "ajv";
-import addFormats from "ajv-formats";
+
 const ajv = new Ajv();
 addFormats(ajv);
-import { DendronError } from "@dendronhq/common-all";
 
 export const podClassEntryToPodItemV4 = (p: PodClassEntryV4): PodItemV4 => {
   return {
@@ -138,21 +140,8 @@ export class PodUtils {
   static createPublishConfig(opts: { required: string[]; properties: any }) {
     return {
       type: "object",
-      additionalProperties: false,
-      required: ["vaultName", "fname", ...opts.required],
+      required: [...opts.required],
       properties: {
-        fname: {
-          description: "name of src file",
-          type: "string",
-        },
-        vaultName: {
-          description: "name of src vault",
-          type: "string",
-        },
-        dest: {
-          description: "where to export to",
-          type: "string",
-        },
         ...opts.properties,
       },
     };
@@ -212,6 +201,9 @@ export class PodUtils {
 
   static hasRequiredOpts(_pClassEntry: PodClassEntryV4): boolean {
     // TODO:
+    if(_pClassEntry.id === "dendron.github"){
+      return true
+    }
     return false;
   }
 }

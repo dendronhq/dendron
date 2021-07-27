@@ -1,4 +1,5 @@
-import { ImportPod, ImportPodConfig, ImportPodPlantOpts } from "../basev3";
+import { ImportPod, ImportPodConfig, ImportPodPlantOpts, 
+  PublishPod, PublishPodConfig, PublishPodPlantOpts } from "../basev3";
 import { JSONSchemaType } from "ajv";
 import { PodUtils } from "../utils";
 import { graphql } from "@octokit/graphql";
@@ -12,6 +13,7 @@ import {
   Time,
   DEngineClient,
 } from "@dendronhq/common-all";
+import { window } from "vscode";
 
 const ID = "dendron.github";
 
@@ -124,6 +126,7 @@ export class GithubImportPod extends ImportPod<GithubImportPodConfig> {
         edges {
           node {
             ... on Issue {
+              id
               title
               url
               number
@@ -168,7 +171,8 @@ export class GithubImportPod extends ImportPod<GithubImportPodConfig> {
       if (!ent.node.fname) {
         throw Error("fname not defined");
       }
-      let fname = ent.node.fname;
+      const fname = ent.node.fname;
+
       if (opts.fnameAsId) {
         ent.node.id = ent.node.fname;
       }
@@ -213,7 +217,7 @@ export class GithubImportPod extends ImportPod<GithubImportPodConfig> {
         tags = labels.map((label: any) => label.node.name);
       }
       d.node.title = d.node.title.replace(
-        /[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi,
+        /[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi, // eslint-disable-line
         ""
       );
       d.node = {
@@ -223,6 +227,7 @@ export class GithubImportPod extends ImportPod<GithubImportPodConfig> {
           ...config.frontmatter,
           url: d.node.url,
           status: d.node.state,
+          issueID: d.node.id,
           tags,
         },
       };
@@ -267,8 +272,9 @@ export class GithubImportPod extends ImportPod<GithubImportPodConfig> {
         vault,
         wsRoot,
       });
-      if (!_.isUndefined(n) && n.custom.status !== note.custom.status) {
+      if (!_.isUndefined(n) && (n.custom.issueID === undefined || n.custom.status !== note.custom.status)) {
         n.custom.status = note.custom.status;
+        n.custom.issueID = note.custom.issueID;
         updatedNotes = [...updatedNotes, n];
         await engine.writeNote(n, { newNode: true });
       }
@@ -304,7 +310,7 @@ export class GithubImportPod extends ImportPod<GithubImportPodConfig> {
     }
 
     while (hasNextPage) {
-      let result: any = await this.getDataFromGithub({
+      const result: any = await this.getDataFromGithub({
         owner,
         repository,
         status,
@@ -323,10 +329,9 @@ export class GithubImportPod extends ImportPod<GithubImportPodConfig> {
           "No issues present for this filter. Change the config values and try again",
       });
     }
-
     this.addFrontMatterToData(data, fname, config);
 
-    let notes = await this._issues2Notes(data, {
+    const notes = await this._issues2Notes(data, {
       vault,
       destName,
       concatenate,
@@ -338,5 +343,141 @@ export class GithubImportPod extends ImportPod<GithubImportPodConfig> {
     await engine.bulkAddNotes({ notes: newNotes });
 
     return { importedNotes: [...newNotes, ...updatedNotes] };
+  }
+}
+
+type GithubPublishPodCustomOpts = {
+  /**
+   * owner of the repository
+   */
+  owner: string;
+
+  /**
+   * github repository to import from
+   */
+  repository: string;
+
+  /**
+   * github personal access token
+   */
+  token: string;
+};
+
+type GithubPublishPodConfig = PublishPodConfig & GithubPublishPodCustomOpts;
+export class GithubPublishPod extends PublishPod<GithubPublishPodConfig> {
+  static id: string = ID;
+  static description: string = "publish github issues";
+
+  get config(): JSONSchemaType<GithubPublishPodConfig> {
+    return PodUtils.createPublishConfig({
+      required: ["token", "owner", "repository"],
+      properties: {
+        owner: {
+          type: "string",
+          description: "owner of the repository",
+        },
+        repository: {
+          description: "github repository to import from",
+          type: "string",
+        },
+        token: {
+          type: "string",
+          description: "github personal access token",
+        },
+      },
+    }) as JSONSchemaType<GithubPublishPodConfig>;
+  }
+
+/**
+ * 
+ * @param opts 
+ * @returns 
+ */
+
+getLabelsFromGithub = async (opts: Partial<GithubPublishPodConfig>) => {
+  const { owner, repository, token} = opts;
+  let labelsHashMap: any;
+  const query = `query repository($name: String!, $owner: String!)
+    {
+      repository(owner: $owner , name: $name) { 
+        labels(last: 100) {
+          edges{
+            node {
+              id
+              name
+            }
+          }
+        }
+    }
+    }`;
+  try {
+    const result : any= await graphql(query, {
+      headers: { authorization: `token ${token}` },
+      owner,
+      name: repository,
+    });
+    const allLabels = result.repository.labels.edges;
+    allLabels.forEach((label: any) => {
+      labelsHashMap = {
+        ...labelsHashMap,
+        [label.node.name] : label.node.id
+      }
+    })
+  } catch (error) {
+    throw new DendronError({ message: stringifyError(error) });
+  }
+  return labelsHashMap;
+
+}
+
+/**
+ * 
+ * @param opts 
+ * @returns 
+ */
+
+updateIssue = async(issueID: string, labels: any, labelsHashMap: any, token: string, status: string) => {
+  const labelIDs: any = [];
+  labels.forEach((label: string) => {
+    labelIDs.push(labelsHashMap[label])
+  })
+
+  const mutation = `mutation updateIssue($id: ID!, $state: IssueState, $labelIDs: [ID!]){
+  updateIssue(input: {id : $id , state: $state, labelIds: $labelIDs}){
+    issue {
+          id
+        }
+  }
+}`;
+  try {
+    const result : any= await graphql(mutation, {
+      headers: { authorization: `token ${token}` },
+      id: issueID,
+      state: status,
+      labelIDs,
+    });
+    if(!_.isUndefined(result.updateIssue.issue.id)){
+      window.showInformationMessage("Updated this Issue")
+    }
+  } catch (error) {
+    throw new DendronError({ message: stringifyError(error) });
+  }
+
+
+}
+
+  async plant(opts: PublishPodPlantOpts) {
+    const { config } = opts;
+    const {
+      owner,
+      repository,
+      token,
+    } = config as GithubPublishPodConfig;
+    const labelsHashMap = await this.getLabelsFromGithub({owner, repository, token})
+    const note = opts.note;
+    const {issueID, tags, status} = note.custom;
+    this.updateIssue(issueID, tags,labelsHashMap,token, status)
+    const out = JSON.stringify(note, null, 4);
+    return out;
   }
 }

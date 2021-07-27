@@ -12,7 +12,7 @@ import {
   MarkdownPublishPod,
   MarkdownExportPod,
 } from "./builtin/MarkdownPod";
-import { GithubImportPod } from "./builtin/GithubPod";
+import { GithubImportPod, GithubPublishPod } from "./builtin/GithubPod";
 import { PodClassEntryV4 } from "./types";
 import { GDocImportPod } from "./builtin/GDocPod";
 
@@ -30,7 +30,7 @@ export function getAllExportPods(): PodClassEntryV4[] {
   ];
 }
 export function getAllPublishPods(): PodClassEntryV4[] {
-  return [JSONPublishPod, MarkdownPublishPod, HTMLPublishPod];
+  return [JSONPublishPod, MarkdownPublishPod, HTMLPublishPod, GithubPublishPod];
 }
 export function getAllImportPods(): PodClassEntryV4[] {
   return [JSONImportPod, MarkdownImportPod, GithubImportPod, GDocImportPod];

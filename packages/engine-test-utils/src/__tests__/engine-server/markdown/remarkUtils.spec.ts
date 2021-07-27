@@ -892,12 +892,12 @@ describe("RemarkUtils and LinkUtils", () => {
           const note = engine.notes["nodes"];
           const notes = _.values(engine.notes);
           const notesMap = NoteUtils.createFnameNoteMap(notes, true);
-          const linkCandidates = await LinkUtils.findLinkCandidates({
+          const linkCandidates = LinkUtils.findLinkCandidates({
             note,
             notesMap,
             engine,
           });
-          expect(linkCandidates.length).toEqual(7);
+          expect(linkCandidates.length).toEqual(8);
         },
         {
           expect,

@@ -1,5 +1,5 @@
-import { DendronConfig, WorkspaceSettings } from "@dendronhq/common-all";
-import { DLogger } from "@dendronhq/common-server";
+import { DendronConfig, getStage, InstallStatus, WorkspaceSettings } from "@dendronhq/common-all";
+import { createLogger, DLogger } from "@dendronhq/common-server";
 import _ from "lodash";
 import semver from "semver";
 import { WorkspaceService } from "../workspace";
@@ -28,11 +28,17 @@ export class MigrationServce {
     // run migrations from oldest to newest
     const migrationsToRun = _.reverse(
       _.takeWhile(migrations || ALL_MIGRATIONS, (ent) => {
-        const out = semver.lt(previousVersion, ent.version);
-        console.log({ previousVersion, entVersion: ent.version, out });
+        const out = semver.lte(previousVersion, ent.version);
         return out;
       })
     );
+    const logger = createLogger("migration");
+    logger.info({
+      migrations: migrationsToRun.map((m) => [
+        m.version,
+        m.changes.map((c) => c.name),
+      ]),
+    });
     await _.reduce(
       migrationsToRun,
       async (prev, migration) => {
@@ -60,7 +66,6 @@ export class MigrationServce {
   }
 
   static async applyMigrationChanges({
-    currentVersion,
     previousVersion,
     migration,
     wsService,
@@ -98,5 +103,13 @@ export class MigrationServce {
       } as MigrationChangeSetStatus)
     );
     return results;
+  }
+
+  /**
+   * Should we attempt to migrate workspace settings
+   * @returns 
+   */
+  static shouldRunMigration({force, workspaceInstallStatus}: {force?: boolean, workspaceInstallStatus: InstallStatus }) {
+      return (workspaceInstallStatus === InstallStatus.UPGRADED || force) && getStage() === "prod"
   }
 }

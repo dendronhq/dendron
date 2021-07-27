@@ -85,7 +85,7 @@ export class TutorialInitializer
       if (getStage() !== "test") {
         // TODO: HACK to wait for existing preview to be ready
         setTimeout(() => {
-          MarkdownUtils.openPreview({ reuseWindow: false });
+          MarkdownUtils.openPreview();
         }, 1000);
       }
     } else {

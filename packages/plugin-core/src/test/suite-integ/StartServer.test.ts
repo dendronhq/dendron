@@ -2,6 +2,7 @@ import { ServerUtils } from "@dendronhq/api-server";
 import { TestEngineUtils } from "@dendronhq/engine-test-utils";
 import { describe } from "mocha";
 import path from "path";
+import sinon from "sinon";
 import { SinonStub } from "sinon";
 import { ResetConfigCommand } from "../../commands/ResetConfig";
 import { DendronWorkspace } from "../../workspace";
@@ -13,14 +14,14 @@ suite("StartServer", function () {
 
   setupBeforeAfter(this, {
     beforeHook: async () => {
+      sinon.restore();
       await resetCodeWorkspace();
       await new ResetConfigCommand().execute({ scope: "all" });
       homeDirStub = TestEngineUtils.mockHomeDir();
     },
     afterHook: async () => {
       homeDirStub.restore();
-    },
-    noStubExecServerNode: true
+    }
   });
 
 	describe("basic", function() {

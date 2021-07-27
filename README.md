@@ -132,6 +132,7 @@ Dendron wouldn't be what it is today without help from these wonderful gardeners
     <td align="center"><a href="https://github.com/apastuszak"><img src="https://avatars.githubusercontent.com/u/3401054?v=4?s=100" width="100px;" alt=""/><br /><sub><b>apastuszak</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Aapastuszak" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/felipewhitaker"><img src="https://avatars.githubusercontent.com/u/36129486?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Felipe Whitaker</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=felipewhitaker" title="Documentation">📖</a></td>
     <td align="center"><a href="https://github.com/unamusedmon"><img src="https://avatars.githubusercontent.com/u/65274123?v=4?s=100" width="100px;" alt=""/><br /><sub><b>unamusedmon</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Aunamusedmon" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://github.com/kimds91"><img src="https://avatars.githubusercontent.com/u/11445901?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Do Soon Kim</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Akimds91" title="Bug reports">🐛</a></td>
   </tr>
 </table>
 

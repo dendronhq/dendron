@@ -20,6 +20,7 @@ import slug from "rehype-slug";
 import rehypeStringify from "rehype-stringify";
 import remark from "remark";
 import abbrPlugin from "remark-abbr";
+import footnotes from "remark-footnotes";
 import frontmatterPlugin from "remark-frontmatter";
 import remarkParse from "remark-parse";
 import remark2rehype from "remark-rehype";
@@ -201,6 +202,7 @@ export class MDUtilsV5 {
       .use(wikiLinks)
       .use(blockAnchors)
       .use(hashtags)
+      .use(footnotes)
       .data("errors", errors);
 
     // set options and do validation

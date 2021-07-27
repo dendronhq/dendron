@@ -18,8 +18,10 @@ import vscode, {
   Position,
   Range,
   TextDocument,
+  window,
 } from "vscode";
 import { ShowPreviewV2Command } from "../commands/ShowPreviewV2";
+import { VSCodeUtils } from "../utils";
 import { DendronWorkspace, getWS } from "../workspace";
 
 export type RefT = {
@@ -87,33 +89,43 @@ export const containsOtherKnownExts = (pathParam: string): boolean =>
   !!otherExtsRegex.exec(path.parse(pathParam).ext);
 
 export class MarkdownUtils {
-  static async openPreview(opts?: { reuseWindow?: boolean }) {
-    const cleanOpts = _.defaults(opts, { reuseWindow: false });
 
+  static hasLegacyPreview() {
+    return !_.isUndefined(extensions.getExtension(
+      "dendron.dendron-markdown-preview-enhanced"
+    ));
+
+  }
+
+  static promptInstallLegacyPreview() {
+    return window
+    .showInformationMessage(
+      "You need to have 'Dendron Markdown Preview' installed to use the old preview",
+      "Install Instructions"
+    )
+    .then((resp) => {
+      if (resp === "Install Instructions") {
+        VSCodeUtils.openLink(
+          "https://wiki.dendron.so/notes/8de4209d-84d3-45f8-96a4-34282e34507d.html"
+        );
+      }
+    });
+
+  }
+  static async openPreview() {
     if (!getWS().config.dev?.enablePreviewV2) {
-      const previewEnhanced = extensions.getExtension(
-        "dendron.markdown-preview-enhanced"
-      );
-      const previewEnhanced2 = extensions.getExtension(
-        "dendron.dendron-markdown-preview-enhanced"
-      );
-      const cmds = {
-        builtin: {
-          open: "markdown.showPreview",
-          openSide: "markdown.showPreviewToSide",
-        },
-        enhanced: {
-          open: "markdown-preview-enhanced.openPreview",
-          openSide: "markdown-preview-enhanced.openPreviewToTheSide",
-        },
-      };
-      const mdClient =
-        cmds[previewEnhanced || previewEnhanced2 ? "enhanced" : "builtin"];
-      const openCmd = mdClient[cleanOpts.reuseWindow ? "open" : "openSide"];
-      return commands.executeCommand(openCmd);
+      const previewEnhanced2 = this.hasLegacyPreview();
+      if (!previewEnhanced2) {
+        return this.promptInstallLegacyPreview();
+      }
+      return this.showLegacyPreview();
     } else {
       new ShowPreviewV2Command().execute();
     }
+  }
+
+  static showLegacyPreview() {
+    return commands.executeCommand("markdown-preview-enhanced.openPreview");
   }
 }
 
@@ -227,7 +239,10 @@ export const getReferenceAtPosition = (
   const range = document.getWordRangeAtPosition(position, new RegExp(re));
   if (!range) {
     // if not, it could be a hashtag
-    const rangeForHashTag = document.getWordRangeAtPosition(position, HASHTAG_REGEX_LOOSE);
+    const rangeForHashTag = document.getWordRangeAtPosition(
+      position,
+      HASHTAG_REGEX_LOOSE
+    );
     if (rangeForHashTag) {
       const docText = document.getText(rangeForHashTag);
       const match = docText.match(HASHTAG_REGEX_LOOSE);
@@ -237,7 +252,7 @@ export const getReferenceAtPosition = (
         label: match[0],
         ref: `${TAGS_HIERARCHY}${match.groups!.tagContents}`,
         refText: docText,
-      }
+      };
     }
     // it's not a wikilink, reference, or a hashtag. Nothing to do here.
     return null;

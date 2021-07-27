@@ -1,17 +1,17 @@
-import { ServerUtils } from "@dendronhq/api-server";
+import { InstallStatus } from "@dendronhq/common-all";
 import {
   DendronConfig,
   DEngineClient,
   isNotUndefined,
   WorkspaceFolderRaw,
   WorkspaceOpts,
-  WorkspaceSettings,
+  WorkspaceSettings
 } from "@dendronhq/common-all";
 import {
   assignJSONWithComment,
   readYAML,
   tmpDir,
-  writeYAML,
+  writeYAML
 } from "@dendronhq/common-server";
 import {
   CreateEngineFunction,
@@ -19,34 +19,33 @@ import {
   EngineTestUtilsV4,
   PreSetupCmdHookFunction,
   PreSetupHookFunction,
-  sinon,
+  sinon
 } from "@dendronhq/common-test-utils";
 import {
   DConfig,
   DendronEngineV2,
-  HistoryService,
+  HistoryService
 } from "@dendronhq/engine-server";
 import {
   TestConfigUtils,
-  TestSetupWorkspaceOpts,
+  TestSetupWorkspaceOpts
 } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
 import _ from "lodash";
 import { afterEach, beforeEach } from "mocha";
-import path from "path";
 import { ExtensionContext, Uri } from "vscode";
 import {
   SetupWorkspaceCommand,
-  SetupWorkspaceOpts,
+  SetupWorkspaceOpts
 } from "../commands/SetupWorkspace";
 import {
   VaultAddCommand,
-  VaultRemoteSource,
+  VaultRemoteSource
 } from "../commands/VaultAddCommand";
 import { Logger } from "../logger";
 import { StateService } from "../services/stateService";
 import { WorkspaceConfig } from "../settings";
-import { InstallStatus, VSCodeUtils, WSUtils } from "../utils";
+import { VSCodeUtils } from "../utils";
 import { DendronWorkspace, getWS } from "../workspace";
 import { BlankInitializer } from "../workspace/blankInitializer";
 import { WorkspaceInitFactory } from "../workspace/workspaceInitializer";
@@ -57,7 +56,7 @@ import {
   SetupCodeConfigurationV2,
   stubWorkspace,
   stubWorkspaceFile,
-  stubWorkspaceFolders,
+  stubWorkspaceFolders
 } from "./testUtilsv2";
 
 export const DENDRON_REMOTE =
@@ -296,7 +295,6 @@ export function setupBeforeAfter(
     beforeHook?: any;
     afterHook?: any;
     noSetInstallStatus?: boolean;
-    noStubExecServerNode?: boolean;
   }
 ) {
   let ctx: ExtensionContext;
@@ -316,18 +314,6 @@ export function setupBeforeAfter(
     sinon
       .stub(WorkspaceInitFactory, "isTutorialWorkspaceLaunch")
       .returns(false);
-    if (!opts?.noStubExecServerNode) {
-      sinon.stub(ServerUtils, "execServerNode").returns(
-        new Promise(async (resolve) => {
-          const { launchv2 } = require("@dendronhq/api-server"); // eslint-disable-line global-require
-          const { port } = await launchv2({
-            logPath: path.join(__dirname, "..", "..", "dendron.server.log"),
-          });
-          resolve({ port, subprocess: { pid: -1 } as any });
-        })
-      );
-      sinon.stub(WSUtils, "handleServerProcess").returns();
-    }
     if (opts?.beforeHook) {
       await opts.beforeHook();
     }

@@ -62,7 +62,7 @@ suite("Scratch Notes", function () {
       runLegacyMultiWorkspaceTest({
         ctx,
         modConfigCb: (config) => {
-          config.scratch.addBehavior = NoteAddBehavior.childOfDomainNamespace ;
+          config.scratch!.addBehavior = NoteAddBehavior.childOfDomainNamespace ;
           return config;
         },
         postSetupHook: async ({ wsRoot, vaults }) => {
@@ -132,7 +132,7 @@ suite("Scratch Notes", function () {
       runLegacyMultiWorkspaceTest({
         ctx,
         modConfigCb: (config) => {
-          config.scratch.addBehavior = NoteAddBehavior.childOfDomainNamespace ;
+          config.scratch!.addBehavior = NoteAddBehavior.childOfDomainNamespace ;
           return config;
         },
         postSetupHook: async ({ wsRoot, vaults }) => {

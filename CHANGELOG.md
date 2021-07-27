@@ -3,6 +3,44 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.52.0](https://github.com/dendronhq/dendron/compare/v0.51.3...v0.52.0) (2021-07-26)
+
+
+### Bug Fixes
+
+* run migration when version number is equal to target ([5171a4c](https://github.com/dendronhq/dendron/commit/5171a4c1a222c7d6756f75e5156400f2a2700518))
+* scratch note migration fixes ([5214535](https://github.com/dendronhq/dendron/commit/52145354331d1a9a84e55520550458762eba6df5))
+* update welcome screen look ([#1043](https://github.com/dendronhq/dendron/issues/1043)) ([ebf0135](https://github.com/dendronhq/dendron/commit/ebf0135384672caac08e65656968eb0c468c35c6))
+
+
+### Features Dendron
+
+* handle local images in preview v2 ([e4da5aa](https://github.com/dendronhq/dendron/commit/e4da5aa4ddb77eefde5118543b83f2784af34870))
+* scratch modifier for lookup V3 ([#1010](https://github.com/dendronhq/dendron/issues/1010)) ([581a4aa](https://github.com/dendronhq/dendron/commit/581a4aa6d1618a8e8c8af50afb80b9b253bd2671)), closes [#1012](https://github.com/dendronhq/dendron/issues/1012)
+* **community issue:** graph zoom speed option ([#1027](https://github.com/dendronhq/dendron/issues/1027)) ([786628b](https://github.com/dendronhq/dendron/commit/786628b6b1437c962872e91792e22f06793e3888))
+
+
+
+
+
+## [0.51.4](https://github.com/dendronhq/dendron/compare/v0.51.3...v0.51.4) (2021-07-25)
+
+
+### Bug Fixes
+
+* run migration when version number is equal to target ([5171a4c](https://github.com/dendronhq/dendron/commit/5171a4c1a222c7d6756f75e5156400f2a2700518))
+* scratch note migration fixes ([5214535](https://github.com/dendronhq/dendron/commit/52145354331d1a9a84e55520550458762eba6df5))
+
+
+### Features Dendron
+
+* handle local images in preview v2 ([e4da5aa](https://github.com/dendronhq/dendron/commit/e4da5aa4ddb77eefde5118543b83f2784af34870))
+* **community issue:** graph zoom speed option ([#1027](https://github.com/dendronhq/dendron/issues/1027)) ([786628b](https://github.com/dendronhq/dendron/commit/786628b6b1437c962872e91792e22f06793e3888))
+
+
+
+
+
 ## [0.51.2](https://github.com/dendronhq/dendron/compare/v0.51.0...v0.51.2) (2021-07-22)
 
 

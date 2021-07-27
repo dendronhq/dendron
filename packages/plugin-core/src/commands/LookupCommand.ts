@@ -17,6 +17,10 @@ export enum LookupNoteTypeEnum {
   "journal" = "journal",
   "scratch" = "scratch",
 }
+export enum LookupSelectionTypeEnum {
+  "selection2link" = "selection2link",
+  "selectionExtract" = "selectionExtract",
+}
 
 /**
  * Mode for prompting the user on which vault should be used to 

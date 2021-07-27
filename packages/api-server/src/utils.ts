@@ -52,22 +52,29 @@ type SERVER_ENV = {
   LOG_PATH: string;
 };
 
+export enum SubProcessExitType {
+  EXIT = "exit",
+  SIGINT = "SIGINT",
+  SIGURS1 = "SIGUSR1",
+  SIGURS2 = "SIGUSR2",
+  UNCAUGHT_EXCEPTION = "uncaughtException"
+}
 export class ServerUtils {
   static onProcessExit({
     subprocess,
     cb,
   }: {
     subprocess: ExecaChildProcess;
-    cb: () => any;
+    cb: (exitType: SubProcessExitType, args?: any) => any;
   }) {
-    subprocess.on("exit", cb);
-    subprocess.on("SIGINT", cb);
+    subprocess.on("exit", () => cb(SubProcessExitType.EXIT));
+    subprocess.on("SIGINT", () => cb(SubProcessExitType.SIGINT));
     // catches "kill pid" (for example: nodemon restart)
-    subprocess.on("SIGUSR1", cb);
-    subprocess.on("SIGUSR2", cb);
+    subprocess.on("SIGUSR1", () => cb(SubProcessExitType.SIGURS1));
+    subprocess.on("SIGUSR2", () => cb(SubProcessExitType.SIGURS2));
 
     //catches uncaught exceptions
-    subprocess.on("uncaughtException", cb);
+    subprocess.on("uncaughtException", () => cb(SubProcessExitType.UNCAUGHT_EXCEPTION));
   }
 
   /**
@@ -76,12 +83,13 @@ export class ServerUtils {
    */
   static cleanServerProcess(subprocess: ExecaChildProcess) {
     const handleExit = () => {
-      console.log("kill process");
+      console.log("handle exit");
       try {
         process.kill(subprocess.pid);
       } catch (err) {
         // this means process was already killed
         if (err.code !== "ESRCH") {
+          console.log("process already killed");
           throw err;
         }
       }

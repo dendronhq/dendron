@@ -612,7 +612,7 @@ suite("Lookup, notesv2", function () {
           },
         },
         modConfigCb: (config) => {
-          config.scratch.name = "testScratch" ;
+          config.scratch!.name = "testScratch" ;
           return config;
         },
         preSetupHook: ENGINE_HOOKS.setupBasic,

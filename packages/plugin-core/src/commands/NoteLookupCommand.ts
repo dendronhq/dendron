@@ -15,6 +15,7 @@ import {
   MultiSelectBtn,
   Selection2LinkBtn,
   SelectionExtractBtn,
+  HorizontalSplitBtn,
 } from "../components/lookup/buttons";
 import { LookupControllerV3 } from "../components/lookup/LookupControllerV3";
 import {
@@ -39,6 +40,8 @@ import {
   LookupNoteTypeEnum,
   LookupSelectionType,
   LookupSelectionTypeEnum,
+  LookupSplitType,
+  LookupSplitTypeEnum,
 } from "./LookupCommand";
 
 type CommandRunOpts = {
@@ -48,6 +51,7 @@ type CommandRunOpts = {
   multiSelect?: boolean;
   noteType?: LookupNoteType;
   selectionType?: LookupSelectionType;
+  splitType?: LookupSplitType;
   /**
    * NOTE: currently, only one filter is supported
    */
@@ -145,6 +149,7 @@ export class NoteLookupCommand extends BaseCommand<
         ),
         Selection2LinkBtn.create(copts.selectionType === LookupSelectionTypeEnum.selection2link),
         SelectionExtractBtn.create(copts.selectionType === LookupSelectionTypeEnum.selectionExtract),
+        HorizontalSplitBtn.create(copts.splitType === LookupSplitTypeEnum.horizontal),
       ],
     });
     this._provider = new NoteLookupProvider("lookup", {

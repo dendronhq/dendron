@@ -83,7 +83,6 @@ function isSplitButton(button: DendronBtn) {
   return _.includes(["horizontal", "vertical"], button.type);
 }
 
-// TODO: make it into a utils method?
 const selectionToNoteProps = async (opts: {
   selectionType: string;
   note: NoteProps;
@@ -93,7 +92,7 @@ const selectionToNoteProps = async (opts: {
   const { document, range } = resp || {};
   const { selectionType, note } = opts;
   const { selection, text } = VSCodeUtils.getSelection();
-  //TODO: split these up?
+
   switch(selectionType) {
     case "selectionExtract": {
       if (!_.isUndefined(document)) {
@@ -305,15 +304,28 @@ export class ScratchBtn extends DendronBtn {
     quickPick.value = quickPick.rawValue;
   }
 }
-class HorizontalSplitBtn extends DendronBtn {
+export class HorizontalSplitBtn extends DendronBtn {
   static create(pressed?: boolean) {
-    return new DendronBtn({
+    return new HorizontalSplitBtn({
       title: "Split Horizontal",
       iconOff: "split-horizontal",
       iconOn: "menu-selection",
       type: "horizontal",
       pressed,
     });
+  }
+
+  async onEnable({ quickPick }: ButtonHandleOpts) {
+    quickPick.showNote = async (uri) => vscode.window.showTextDocument(
+      uri, 
+      { viewColumn: vscode.ViewColumn.Beside }
+    );
+    return;
+  }
+
+  async onDisable({ quickPick }: ButtonHandleOpts) {
+    quickPick.showNote = async (uri) => vscode.window.showTextDocument(uri);
+    return;
   }
 }
 

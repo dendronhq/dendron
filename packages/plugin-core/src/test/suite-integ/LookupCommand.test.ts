@@ -1106,7 +1106,7 @@ suite("selectionExtract", function () {
 //         (_.find(lc.state.buttons, {
 //           type: "multiSelect",
 //         }) as MultiSelectBtn).pressed = true;
-//         await lc.onTriggerButton(CopyNoteLinkButton.create(true));
+//         await lc.onTriggerButton(CopyNoteLinkBtn.create(true));
 //         assert.strictEqual(
 //           clipboardy.readSync(),
 //           "[[Foo|foo]]\n[[Ch1|foo.ch1]]"

@@ -11,11 +11,20 @@ import { describe } from "mocha";
 // // You can import and use all API from the 'vscode' module
 // // as well as import your extension to test it
 import * as vscode from "vscode";
-import { LookupNoteTypeEnum, LookupSelectionTypeEnum, LookupSplitTypeEnum } from "../../commands/LookupCommand";
+import { LookupNoteTypeEnum, LookupSelectionTypeEnum, LookupSplitTypeEnum, LookupEffectTypeEnum } from "../../commands/LookupCommand";
 import { NoteLookupCommand, CommandOutput } from "../../commands/NoteLookupCommand";
-import { JournalBtn, ScratchBtn, DendronBtn, ButtonType, Selection2LinkBtn, SelectionExtractBtn, HorizontalSplitBtn } from "../../components/lookup/buttons";
+import { 
+  JournalBtn,
+  ScratchBtn,
+  DendronBtn,
+  ButtonType,
+  Selection2LinkBtn, 
+  SelectionExtractBtn, 
+  CopyNoteLinkBtn,
+  HorizontalSplitBtn,
+} from "../../components/lookup/buttons";
 import { PickerUtilsV2 } from "../../components/lookup/utils";
-import { VSCodeUtils } from "../../utils";
+import { clipboard, VSCodeUtils } from "../../utils";
 import { expect } from "../testUtilsv2";
 import {
   runLegacyMultiWorkspaceTest,
@@ -24,7 +33,6 @@ import {
 } from "../testUtilsV3";
 import { DendronWorkspace } from "../../workspace";
 import { CONFIG } from "../../constants";
-
 
 const stubVaultPick = (vaults: DVault[]) => {
   const vault = _.find(vaults, { fsPath: "vault1" });
@@ -103,6 +111,19 @@ function getSplitTypeButtons(
     buttons,
   ) as vscode.QuickInputButton[] & DendronBtn[];
   return { horizontalSplitBtn };
+}
+
+function getEffectTypeButtons(
+  buttons: vscode.QuickInputButton[] & DendronBtn[]
+): {
+  copyNoteLinkBtn: CopyNoteLinkBtn
+} {
+  // copyNoteLinkBtn only for now
+  const [copyNoteLinkBtn] = getButtonsByTypeArray(
+    _.values(LookupEffectTypeEnum),
+    buttons,
+  ) as vscode.QuickInputButton[] & DendronBtn[];
+  return { copyNoteLinkBtn };
 }
 
 suite("NoteLookupCommand", function () {
@@ -752,6 +773,39 @@ suite("NoteLookupCommand", function () {
           done();
         }
       });
+    });
+
+    test("copyNoteLink basic", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+        },
+        onInit: async ({ vaults, }) => {
+          const cmd = new NoteLookupCommand();
+          stubVaultPick(vaults);
+
+          const { controller } = await cmd.gatherInputs({
+            initialValue: "foo"
+          });
+          controller.quickpick.show();
+
+          const { copyNoteLinkBtn } = getEffectTypeButtons(
+            controller.quickpick.buttons
+          );
+
+          // hack: need to wait here a bit.
+          // TODO: A more elegant way to do this.
+          await new Promise(resolve => setTimeout(resolve, 500));
+          
+          await controller.onTriggerButton(copyNoteLinkBtn);
+
+          const content = await clipboard.readText();
+          expect(content).toEqual("[[Foo|foo]]");
+
+          done();
+        }
+      }); 
     });
   });
 });

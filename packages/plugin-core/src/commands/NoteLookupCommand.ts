@@ -13,6 +13,7 @@ import {
   JournalBtn,
   ScratchBtn,
   MultiSelectBtn,
+  CopyNoteLinkBtn,
   Selection2LinkBtn,
   SelectionExtractBtn,
   HorizontalSplitBtn,
@@ -144,6 +145,7 @@ export class NoteLookupCommand extends BaseCommand<
         JournalBtn.create(copts.noteType === LookupNoteTypeEnum.journal),
         ScratchBtn.create(copts.noteType === LookupNoteTypeEnum.scratch),
         MultiSelectBtn.create(copts.multiSelect),
+        CopyNoteLinkBtn.create(),
         DirectChildFilterBtn.create(
           copts.filterMiddleware?.includes("directChildOnly")
         ),

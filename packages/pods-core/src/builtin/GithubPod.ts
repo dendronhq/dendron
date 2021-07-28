@@ -13,7 +13,6 @@ import {
   Time,
   DEngineClient,
 } from "@dendronhq/common-all";
-import { window } from "vscode";
 
 const ID = "dendron.github";
 
@@ -436,34 +435,39 @@ getLabelsFromGithub = async (opts: Partial<GithubPublishPodConfig>) => {
  * @returns 
  */
 
-updateIssue = async(issueID: string, labels: any, labelsHashMap: any, token: string, status: string) => {
-  const labelIDs: any = [];
-  labels.forEach((label: string) => {
-    labelIDs.push(labelsHashMap[label])
-  })
-
-  const mutation = `mutation updateIssue($id: ID!, $state: IssueState, $labelIDs: [ID!]){
-  updateIssue(input: {id : $id , state: $state, labelIds: $labelIDs}){
-    issue {
-          id
+updateIssue = async(opts: 
+  {
+    issueID: string, 
+    token: string, 
+    status: string, 
+    labelIDs: string[]
+    }) => {
+  
+      const {issueID, token, status, labelIDs} = opts;
+      let resp: string ="";
+      const mutation = `mutation updateIssue($id: ID!, $state: IssueState, $labelIDs: [ID!]){
+          updateIssue(input: {id : $id , state: $state, labelIds: $labelIDs}){
+            issue {
+                  id
+                }
+            }
+          }`;
+      try {
+        const result : any= await graphql(mutation, {
+          headers: { authorization: `token ${token}` },
+          id: issueID,
+          state: status,
+          labelIDs,
+        });
+        if(!_.isUndefined(result.updateIssue.issue.id)){
+          resp = "Issue Updated"
         }
-  }
-}`;
-  try {
-    const result : any= await graphql(mutation, {
-      headers: { authorization: `token ${token}` },
-      id: issueID,
-      state: status,
-      labelIDs,
-    });
-    if(!_.isUndefined(result.updateIssue.issue.id)){
-      window.showInformationMessage("Updated this Issue")
-    }
-  } catch (error) {
-    throw new DendronError({ message: stringifyError(error) });
-  }
+      } catch (error) {
+        resp = stringifyError(error);
+        throw new DendronError({ message: stringifyError(error) });
+      }
 
-
+  return resp;
 }
 
   async plant(opts: PublishPodPlantOpts) {
@@ -475,9 +479,18 @@ updateIssue = async(issueID: string, labels: any, labelsHashMap: any, token: str
     } = config as GithubPublishPodConfig;
     const labelsHashMap = await this.getLabelsFromGithub({owner, repository, token})
     const note = opts.note;
-    const {issueID, tags, status} = note.custom;
-    this.updateIssue(issueID, tags,labelsHashMap,token, status)
-    const out = JSON.stringify(note, null, 4);
-    return out;
+    const {issueID, tags , status} = note.custom;
+    const labelIDs: string[] = [];
+
+    tags?.forEach((tag: string) => {
+      if(labelsHashMap[tag])
+          labelIDs.push(labelsHashMap[tag])
+    })
+      if(!_.isUndefined(tags) && labelIDs.length === 0) {
+        return "Github: The labels in the tag does not belong to selected repository";
+      }
+      const resp = await this.updateIssue({issueID, token, status, labelIDs})
+
+      return "Github: ".concat(resp);
   }
 }

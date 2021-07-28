@@ -1,7 +1,7 @@
 import { ENGINE_HOOKS } from "../../presets";
 import { runEngineTestV5 } from "../../engine";
-import { GithubImportPod } from "@dendronhq/pods-core";
-import { NoteUtils, VaultUtils } from "@dendronhq/common-all";
+import { GithubImportPod, GithubPublishPod } from "@dendronhq/pods-core";
+import { NoteProps, NoteUtils, VaultUtils } from "@dendronhq/common-all";
 
 describe("GithubPod import pod", () => {
   let result: any;
@@ -182,4 +182,88 @@ describe("GithubPod import pod", () => {
       }
     );
   });
+});
+
+describe("github publish pod", () => {
+  let issue: NoteProps;
+  
+  beforeEach(() => {
+      issue = {
+          id: 'nCobWD86N10jWq6r',
+          title: 'Test',
+          vault: { fsPath: 'vault1' },
+          type: 'note',
+          desc: '',
+          links: [],
+          anchors: {},
+          fname: 'foo',
+          updated: 1627283357535,
+          created: 1627283357535,
+          parent: null,
+          children: [],
+          body: '\n\n## Testing Github Publish Pod',
+          data: {},
+          contentHash: undefined,
+          custom: {
+              status: 'OPEN',
+              issueID: 'hsahdla',
+              tags: ["area.misc","type.bug"]
+          }
+        }
+  });
+
+  test("basic", async () => {
+    await runEngineTestV5(
+      async ({ engine, vaults, wsRoot }) => {
+        const pod = new GithubPublishPod();
+        const vaultName = VaultUtils.getName(vaults[0]);
+        pod.getLabelsFromGithub = jest.fn().mockReturnValue({"area.misc": "sfgdjio", "type.bug": "gsfahhj"});
+        pod.updateIssue = jest.fn().mockReturnValue("Issue Updated");
+        await engine.writeNote(issue, {newNode: true});
+        const resp = await pod.execute({
+          engine,
+          vaults,
+          wsRoot,
+          config: {
+            fname: "foo",
+            vaultName,
+            dest: "stdout",
+            token: "asjska",
+            repository: "dendron",
+            owner: "dendronhq"
+          },
+        });
+        expect(resp).toEqual("Github: Issue Updated"); 
+      },
+      { expect, preSetupHook: ENGINE_HOOKS.setupBasic }
+    );
+  });
+
+  test("with invalid tags", async () => {
+    await runEngineTestV5(
+      async ({ engine, vaults, wsRoot }) => {
+        const pod = new GithubPublishPod();
+        const vaultName = VaultUtils.getName(vaults[0]);
+        pod.getLabelsFromGithub = jest.fn().mockReturnValue({"question": "abcdwe", "enhancement": "kighxx"});
+        pod.updateIssue = jest.fn().mockReturnValue("Issue Updated");
+        await engine.writeNote(issue, {newNode: true});
+        const resp = await pod.execute({
+          engine,
+          vaults,
+          wsRoot,
+          config: {
+            fname: "foo",
+            vaultName,
+            dest: "stdout",
+            token: "asjska",
+            repository: "dendron",
+            owner: "dendronhq"
+          },
+        });
+        expect(resp).toEqual("Github: The labels in the tag does not belong to selected repository"); 
+      },
+      { expect, preSetupHook: ENGINE_HOOKS.setupBasic }
+    );
+  });
+
 });

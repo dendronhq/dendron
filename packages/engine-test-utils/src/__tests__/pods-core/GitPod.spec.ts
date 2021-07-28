@@ -2,11 +2,16 @@ import { tmpDir, vault2Path } from "@dendronhq/common-server";
 import { FileTestUtils } from "@dendronhq/common-test-utils";
 import { GitPunchCardExportPod } from "@dendronhq/pods-core";
 import fs from "fs-extra";
+import os from "os";
 import path from "path";
 import { testWithEngine } from "../../engine";
 import { checkString, GitTestUtils } from "../../utils";
 
-describe("GitPod", () => {
+// Skip on Windows for now until reliability issues can be fixed.
+//TODO: Re-enable for Windows
+const runTest = os.platform() === "win32" ? describe.skip : describe;
+
+runTest("GitPod", () => {
   testWithEngine("basic", async ({ engine, wsRoot, vaults }) => {
     const dest = tmpDir().name;
     await Promise.all(

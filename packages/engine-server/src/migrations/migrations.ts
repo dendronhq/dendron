@@ -1,3 +1,4 @@
+import { ScratchConfig } from "@dendronhq/common-all";
 import {
   SegmentClient,
   TelemetryStatus,
@@ -8,7 +9,55 @@ import { DConfig } from "../config";
 import { removeCache } from "../utils";
 import { Migrations } from "./types";
 
+/**
+ * Migrations are sorted by version numbers, from greatest to least
+ */
 export const ALL_MIGRATIONS: Migrations[] = [
+  {
+    version: "0.51.4",
+    changes: [
+      {
+        name: "migrate scratch config",
+        func: async ({ dendronConfig, wsConfig }) => {
+          dendronConfig.scratch = DConfig.genDefaultConfig().scratch as ScratchConfig;
+          if (_.get(wsConfig.settings, "dendron.defaultScratchName")) {
+            dendronConfig.scratch.name = _.get(
+              wsConfig.settings,
+              "dendron.defaultScratchName"
+            );
+          }
+          if (_.get(wsConfig.settings, "dendron.defaultScratchDateFormat")) {
+            dendronConfig.scratch.dateFormat = _.get(
+              wsConfig.settings,
+              "dendron.defaultScratchDateFormat"
+            );
+          }
+          if (_.get(wsConfig.settings, "dendron.defaultScratchAddBehavior")) {
+            dendronConfig.scratch.addBehavior = _.get(
+              wsConfig.settings,
+              "dendron.defaultScratchAddBehavior"
+            );
+          }
+          return { data: { dendronConfig, wsConfig } };
+        },
+      },
+    ],
+  },
+  {
+    version: "0.51.4",
+    changes: [
+      {
+        name: "don't switch to legacy preview if not currently on it",
+        func: async ({ dendronConfig, wsConfig }) => {
+          const previewV2Enabled = dendronConfig.dev?.enablePreviewV2
+          if (!previewV2Enabled) {
+            _.set(dendronConfig, "dev.previewV2Enabled", false)
+          }
+          return { data: { dendronConfig, wsConfig } };
+        },
+      },
+    ],
+  },
   {
     version: "0.47.1",
     changes: [

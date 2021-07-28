@@ -2,7 +2,7 @@
 id: 9eae08fb-5e3f-4a7e-a989-3f206825d490
 title: Markdown
 desc: ""
-updated: 1626837833440
+updated: 1627069555582
 created: 1614629618966
 ---
 
@@ -53,3 +53,9 @@ graph TD;
 * foo
 * bar
 * baz
+
+### Footnotes
+
+look at the footnote [^1]
+
+[^1]: this is a footnote

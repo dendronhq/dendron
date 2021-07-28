@@ -1,4 +1,4 @@
-import { ServerUtils } from "@dendronhq/api-server";
+import { InstallStatus } from "@dendronhq/common-all";
 import {
   DendronConfig,
   DEngineClient,
@@ -32,8 +32,7 @@ import {
 } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
 import _ from "lodash";
-import { afterEach, beforeEach } from "mocha";
-import path from "path";
+import { afterEach, beforeEach, describe } from "mocha";
 import { ExtensionContext, Uri } from "vscode";
 import {
   SetupWorkspaceCommand,
@@ -46,7 +45,7 @@ import {
 import { Logger } from "../logger";
 import { StateService } from "../services/stateService";
 import { WorkspaceConfig } from "../settings";
-import { InstallStatus, VSCodeUtils, WSUtils } from "../utils";
+import { VSCodeUtils } from "../utils";
 import { DendronWorkspace, getWS } from "../workspace";
 import { BlankInitializer } from "../workspace/blankInitializer";
 import { WorkspaceInitFactory } from "../workspace/workspaceInitializer";
@@ -59,6 +58,7 @@ import {
   stubWorkspaceFile,
   stubWorkspaceFolders,
 } from "./testUtilsv2";
+import os from "os";
 
 export const DENDRON_REMOTE =
   "https://github.com/dendronhq/dendron-site-vault.git";
@@ -296,7 +296,6 @@ export function setupBeforeAfter(
     beforeHook?: any;
     afterHook?: any;
     noSetInstallStatus?: boolean;
-    noStubExecServerNode?: boolean;
   }
 ) {
   let ctx: ExtensionContext;
@@ -316,18 +315,6 @@ export function setupBeforeAfter(
     sinon
       .stub(WorkspaceInitFactory, "isTutorialWorkspaceLaunch")
       .returns(false);
-    if (!opts?.noStubExecServerNode) {
-      sinon.stub(ServerUtils, "execServerNode").returns(
-        new Promise(async (resolve) => {
-          const { launchv2 } = require("@dendronhq/api-server"); // eslint-disable-line global-require
-          const { port } = await launchv2({
-            logPath: path.join(__dirname, "..", "..", "dendron.server.log"),
-          });
-          resolve({ port, subprocess: { pid: -1 } as any });
-        })
-      );
-      sinon.stub(WSUtils, "handleServerProcess").returns();
-    }
     if (opts?.beforeHook) {
       await opts.beforeHook();
     }
@@ -414,3 +401,8 @@ export const stubVaultInput = (opts: {
   };
   return;
 };
+
+export function runTestButSkipForWindows() {
+  const runTest = os.platform() === "win32" ? describe.skip : describe;
+  return runTest;
+}

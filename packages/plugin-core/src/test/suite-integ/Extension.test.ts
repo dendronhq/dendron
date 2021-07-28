@@ -1,4 +1,4 @@
-import { CONSTANTS, isNotUndefined, Time } from "@dendronhq/common-all";
+import { CONSTANTS, DendronConfig, isNotUndefined, Time } from "@dendronhq/common-all";
 import { readYAML, tmpDir } from "@dendronhq/common-server";
 import { getPortFilePath, getWSMetaFilePath, MetadataService, openWSMetaFile } from "@dendronhq/engine-server";
 import { TestEngineUtils } from "@dendronhq/engine-test-utils";
@@ -111,11 +111,19 @@ suite("Extension", function () {
                 name: "journal",
                 firstDayOfWeek: 1,
               },
+              scratch: {
+                name: "scratch",
+                dateFormat: "y.MM.dd.HHmmss",
+                addBehavior: "asOwnDomain",
+              },
               noAutoCreateOnDefinition: true,
               noLegacyNoteRef: true,
               noXVaultWikiLink: true,
               lookupConfirmVaultOnCreate: false,
               autoFoldFrontmatter: true,
+              dev: {
+                enablePreviewV2: true,
+              },
               mermaid: true,
               useKatex: true,
               site: {
@@ -130,7 +138,7 @@ suite("Extension", function () {
                   payload: ["vault"],
                 },
               },
-            });
+            } as DendronConfig);
             const dendronState = MetadataService.instance().getMeta();
             expect(isNotUndefined(dendronState.firstInstall)).toBeTruthy();
             expect(isNotUndefined(dendronState.firstWsInitialize)).toBeTruthy();

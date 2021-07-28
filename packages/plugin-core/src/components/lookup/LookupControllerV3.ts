@@ -6,6 +6,8 @@ import { VSCodeUtils } from "../../utils";
 import { getWS } from "../../workspace";
 import {
   DendronBtn,
+  ButtonCategory,
+  getButtonCategory,
   IDendronQuickInputButton,
   VaultSelectButton,
 } from "./buttons";
@@ -179,6 +181,16 @@ export class LookupControllerV3 {
       type: btnType,
     }) as DendronBtn;
     btnTriggered.pressed = !btnTriggered.pressed;
+    const btnCategory = getButtonCategory(btnTriggered);
+    if (!_.includes(["effect"] as ButtonCategory[], btnCategory)) {
+      _.filter(this.state.buttons, (ent) => ent.type !== btnTriggered.type).map(
+        (ent) => {
+          if (getButtonCategory(ent) === btnCategory) {
+            ent.pressed = false;
+          }
+        }
+      );
+    }
     // update button state
     PickerUtilsV2.refreshButtons({ quickpick, buttons, buttonsPrev });
     // modify button behavior

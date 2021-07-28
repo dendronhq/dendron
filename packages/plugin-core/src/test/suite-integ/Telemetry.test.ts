@@ -1,6 +1,6 @@
 import { SegmentClient } from "@dendronhq/common-server";
-import { FileTestUtils } from "@dendronhq/common-test-utils";
 import { DConfig } from "@dendronhq/engine-server";
+import { TestEngineUtils } from "@dendronhq/engine-test-utils";
 import { describe } from "mocha";
 import sinon from "sinon";
 import * as vscode from "vscode";
@@ -12,11 +12,14 @@ import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
 suite("telemetry", function () {
-  let ctx: vscode.ExtensionContext;
+  let homeDirStub: sinon.SinonStub;
 
-  ctx = setupBeforeAfter(this, {
+  const ctx = setupBeforeAfter(this, {
     beforeHook: () => {
-      FileTestUtils.mockHome();
+      homeDirStub = TestEngineUtils.mockHomeDir();
+    },
+    afterHook: async () => {
+      homeDirStub.restore();
     },
   });
 
@@ -32,7 +35,7 @@ suite("telemetry", function () {
     test("enabled by configuration", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
-        onInit: async ({}) => {
+        onInit: async () => {
           const ws = getWS();
           sinon.stub(vscode.env as any, "isTelemetryEnabled").value(true);
 
@@ -48,7 +51,7 @@ suite("telemetry", function () {
     test("disabled by vscode configuration", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
-        onInit: async ({}) => {
+        onInit: async () => {
           const ws = getWS();
           sinon.stub(vscode.env as any, "isTelemetryEnabled").value(false);
 
@@ -65,7 +68,7 @@ suite("telemetry", function () {
       runLegacyMultiWorkspaceTest({
         ctx,
         preSetupHook: setNoTelemetry(true),
-        onInit: async ({}) => {
+        onInit: async () => {
           const ws = getWS();
           sinon.stub(vscode.env as any, "isTelemetryEnabled").value(true);
 
@@ -82,7 +85,7 @@ suite("telemetry", function () {
       runLegacyMultiWorkspaceTest({
         ctx,
         preSetupHook: setNoTelemetry(true),
-        onInit: async ({}) => {
+        onInit: async () => {
           const ws = getWS();
           sinon.stub(vscode.env as any, "isTelemetryEnabled").value(true);
 
@@ -98,7 +101,7 @@ suite("telemetry", function () {
     test("disabling by command takes precedence", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
-        onInit: async ({}) => {
+        onInit: async () => {
           const ws = getWS();
           sinon.stub(vscode.env as any, "isTelemetryEnabled").value(true);
 
@@ -118,7 +121,7 @@ suite("telemetry", function () {
       runLegacyMultiWorkspaceTest({
         ctx,
         preSetupHook: setNoTelemetry(true),
-        onInit: async ({}) => {
+        onInit: async () => {
           const ws = getWS();
           sinon.stub(vscode.env as any, "isTelemetryEnabled").value(false);
 
@@ -137,7 +140,7 @@ suite("telemetry", function () {
     test("handles configuration changing from disabled to enabled", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
-        onInit: async ({}) => {
+        onInit: async () => {
           const ws = getWS();
           const stub = sinon.stub(vscode.env as any, "isTelemetryEnabled");
 
@@ -158,7 +161,7 @@ suite("telemetry", function () {
     test("handles configuration changing from enabled to disabled", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
-        onInit: async ({}) => {
+        onInit: async () => {
           const ws = getWS();
           const stub = sinon.stub(vscode.env as any, "isTelemetryEnabled");
 

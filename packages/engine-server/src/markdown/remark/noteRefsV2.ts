@@ -435,10 +435,8 @@ export function convertNoteRefASTV2(
         return paragraph(data);
       }
     } catch (err) {
-      const msg = `error reading file, ${npath}`;
-      errors.push(new DendronError({ message: msg }));
-      throw Error(msg);
-      // return msg;
+      const msg = `Did not find ${npath}`;
+      return MDUtilsV4.genMDMsg(msg);
     }
   });
   return { error, data: out };

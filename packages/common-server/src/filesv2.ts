@@ -339,6 +339,12 @@ export async function readJSONWithComments(fpath: string) {
   return obj;
 }
 
+export function readJSONWithCommentsSync(fpath: string) {
+  const content = fs.readFileSync(fpath);
+  const obj = parse(content.toString());
+  return obj;
+}
+
 export function tmpDir(): DirResult {
   const dirPath = dirSync();
   return dirPath;

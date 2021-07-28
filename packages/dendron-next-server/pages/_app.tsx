@@ -36,10 +36,10 @@ const themes = {
 const { useEngineAppSelector, useEngine } = engineHooks;
 
 const getWorkspaceParamsFromQueryString = (): WorkspaceProps => {
-  const { port, ws, theme } = querystring.parse(
+  const { port, ws, theme, browser } = querystring.parse(
     window.location.search.slice(1)
-  ) as WorkspaceProps & { port: string };
-  return { port: parseInt(port), ws, theme };
+  );
+  return { port: parseInt(port as string, 10), ws, theme, browser } as WorkspaceProps;
 };
 
 function AppVSCode({ Component, pageProps }: any) {
@@ -119,7 +119,7 @@ function AppVSCode({ Component, pageProps }: any) {
 
   // === Render
   // Don't load children until all following conditions true
-  if (_.some([_.isUndefined(workspaceOpts), ide.theme === "unknown", !isReady])) {
+  if (!workspaceOpts?.browser && _.some([_.isUndefined(workspaceOpts), ide.theme === "unknown", !isReady])) {
     return <Spin />;
   }
 

@@ -6,6 +6,7 @@ import {
   DNodeUtils,
   DVault,
   getStage,
+  InstallStatus,
   NoteAddBehavior,
   NoteProps,
   NoteUtils,
@@ -40,12 +41,6 @@ import { FileItem } from "./external/fileutils/FileItem";
 import { Logger } from "./logger";
 import { EngineAPIService } from "./services/EngineAPIService";
 import { DendronWorkspace, getWS } from "./workspace";
-
-export enum InstallStatus {
-  NO_CHANGE = "NO_CHANGE",
-  INITIAL_INSTALL = "INITIAL_INSTALL",
-  UPGRADED = "UPGRADED",
-}
 
 export class DisposableStore {
   private _toDispose = new Set<vscode.Disposable>();
@@ -508,7 +503,7 @@ export class WSUtils {
   }: {
     subprocess: ExecaChildProcess;
     context: vscode.ExtensionContext;
-    onExit: () => any;
+    onExit: Parameters<typeof ServerUtils["onProcessExit"]>[0]["cb"]
   }) {
     const ctx = "WSUtils.handleServerProcess";
     Logger.info({ ctx, msg: "subprocess running", pid: subprocess.pid });
@@ -634,24 +629,34 @@ export class DendronClientUtilsV2 {
     opts?: CreateFnameOpts
   ): string {
     // gather inputs
-    const dateFormat = type === "SCRATCH" 
-      ? getWS().config.scratch.dateFormat
-      : getWS().config.journal.dateFormat;
+    const dateFormat: string =
+      type === "SCRATCH"
+        ? DendronWorkspace.instance().getWorkspaceSettingOrDefault({
+            wsConfigKey: "dendron.defaultScratchDateFormat",
+            dendronConfigKey: "scratch.dateFormat",
+          })
+        : getWS().config.journal.dateFormat;
 
-    const addBehavior = type === "SCRATCH"
-      ? getWS().config.scratch.addBehavior
-      : getWS().config.journal.addBehavior;
+    const addBehavior: NoteAddBehavior =
+      type === "SCRATCH"
+        ? DendronWorkspace.instance().getWorkspaceSettingOrDefault({
+            wsConfigKey: "dendron.defaultScratchAddBehavior",
+            dendronConfigKey: "scratch.addBehavior",
+          })
+        : getWS().config.journal.addBehavior;
 
-    const name = type === "SCRATCH"
-      ? getWS().config.scratch.name
-      : getWS().config.journal.name;
-    
+    const name: string =
+      type === "SCRATCH"
+        ? DendronWorkspace.instance().getWorkspaceSettingOrDefault({
+            wsConfigKey: "dendron.defaultScratchName",
+            dendronConfigKey: "scratch.name",
+          })
+        : getWS().config.journal.name;
+
     if (!_.includes(_noteAddBehaviorEnum, addBehavior)) {
       const actual = addBehavior;
       const choices = Object.keys(NoteAddBehavior).join(", ");
-      throw Error(
-        `${actual} must be one of: ${choices}`
-      );
+      throw Error(`${actual} must be one of: ${choices}`);
     }
 
     const editorPath = vscode.window.activeTextEditor?.document.uri.fsPath;

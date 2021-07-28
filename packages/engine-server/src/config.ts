@@ -48,6 +48,9 @@ export class DConfig {
       mermaid: true,
       useKatex: true,
       autoFoldFrontmatter: true,
+      dev: {
+        enablePreviewV2: true,
+      },
       journal: {
         dailyDomain: "daily",
         name: "journal",

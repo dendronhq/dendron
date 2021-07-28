@@ -19,12 +19,17 @@ import AntThemes from "../styles/theme-antd";
 const { Panel } = Collapse;
 
 type FilterProps = {
+  // type: "note" | "schema";
   config: GraphConfig;
-  setConfig: React.Dispatch<React.SetStateAction<GraphConfig>>;
-  isGraphLoaded: boolean;
+  updateConfigField: (key: string, value: string | number | boolean) => void;
+  isGraphReady: boolean;
 };
 
-const GraphFilterView = ({ config, setConfig, isGraphLoaded }: FilterProps) => {
+const GraphFilterView = ({
+  config,
+  updateConfigField,
+  isGraphReady,
+}: FilterProps) => {
   const sortedSections = [
     "vaults",
     "connections",
@@ -36,23 +41,9 @@ const GraphFilterView = ({ config, setConfig, isGraphLoaded }: FilterProps) => {
   const [showView, setShowView] = useState(false);
   const { currentTheme } = useThemeSwitcher();
 
-  const isVisible = showView && isGraphLoaded;
-
-  const updateConfigField = (key: string, value: string | number | boolean) => {
-    setConfig((c) => {
-      const newConfig = {
-        ...c,
-        [key]: {
-          // @ts-ignore
-          ...c[key],
-          value,
-        },
-      };
-      return newConfig;
-    });
-  };
-
   if (!currentTheme) return <></>;
+
+  const isVisible = showView && isGraphReady;
 
   return (
     <Space
@@ -76,7 +67,7 @@ const GraphFilterView = ({ config, setConfig, isGraphLoaded }: FilterProps) => {
           icon={isVisible ? <MenuFoldOutlined /> : <MenuUnfoldOutlined />}
           onClick={() => setShowView((v) => !v)}
           style={{
-            opacity: isGraphLoaded ? 1 : 0,
+            opacity: isGraphReady ? 1 : 0,
             transform: "0.2s opacity ease-in-out",
           }}
         />

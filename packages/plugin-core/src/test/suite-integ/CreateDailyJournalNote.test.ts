@@ -1,25 +1,19 @@
-import * as vscode from "vscode";
-import { CreateDailyJournalCommand } from "../../commands/CreateDailyJournal";
-import { expect } from "../testUtilsv2";
-import {
-  runLegacyMultiWorkspaceTest,
-  setupBeforeAfter,
-  withConfig,
-  EditorUtils,
-} from "../testUtilsV3";
-import { DVault, VaultUtils } from "@dendronhq/common-all";
+import { VaultUtils } from "@dendronhq/common-all";
 import { NoteTestUtilsV4, sinon } from "@dendronhq/common-test-utils";
 import _ from "lodash";
+import * as vscode from "vscode";
+import { CreateDailyJournalCommand } from "../../commands/CreateDailyJournal";
 import { PickerUtilsV2 } from "../../components/lookup/utils";
-import { getActiveEditorBasename } from "../testUtils";
-import { CONFIG } from "../../constants"
+import { CONFIG } from "../../constants";
 import { VSCodeUtils } from "../../utils";
+import { getActiveEditorBasename } from "../testUtils";
+import { expect } from "../testUtilsv2";
+import {
+  EditorUtils, runLegacyMultiWorkspaceTest,
+  setupBeforeAfter,
+  withConfig
+} from "../testUtilsV3";
 
-const stubVaultPick = (vaults: DVault[]) => {
-  const vault = _.find(vaults, { fsPath: vaults[2].fsPath });
-  sinon.stub(PickerUtilsV2, "promptVault").returns(Promise.resolve(vault));
-  return vault;
-};
 
 suite("Create Daily Journal Suite", function () {
   let ctx: vscode.ExtensionContext;
@@ -74,14 +68,22 @@ suite("Create Daily Journal Suite", function () {
           },
           { wsRoot }
         );
-        stubVaultPick(vaults);
-        await new CreateDailyJournalCommand().run();
-        expect(
-          (await EditorUtils.getURIForActiveEditor()).fsPath.includes(
-            vaults[2].fsPath
-          )
-        ).toBeTruthy();
-        done();
+
+        const vault = _.find(vaults, { fsPath: vaults[2].fsPath });
+        const promptVaultStub =  sinon.stub(PickerUtilsV2, "promptVault").returns(Promise.resolve(vault));
+
+        try {
+          await new CreateDailyJournalCommand().run();
+          expect(
+            (await EditorUtils.getURIForActiveEditor()).fsPath.includes(
+              vaults[2].fsPath
+            )
+          ).toBeTruthy();
+        }
+        finally {
+          promptVaultStub.restore();
+          done();
+        }
       },
     });
   });

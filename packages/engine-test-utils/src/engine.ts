@@ -262,9 +262,12 @@ export async function runEngineTestV5(
     ],
     addVSWorkspace: false,
   });
+
+  let homeDirStub: sinon.SinonStub | undefined;
+
   try {
     // make sure tests don't overwrite local homedir contents
-    TestEngineUtils.mockHomeDir();
+    homeDirStub = TestEngineUtils.mockHomeDir();
     const { wsRoot, vaults } = await setupWS({
       vaults: vaultsInit,
       workspaces,
@@ -321,7 +324,9 @@ export async function runEngineTestV5(
     return { opts: testOpts, resp: undefined, wsRoot };
   } finally {
     // restore sinon so other tests can keep running
-    sinon.restore();
+    if (homeDirStub) {
+      homeDirStub.restore();
+    };
   }
 }
 

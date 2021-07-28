@@ -14,6 +14,7 @@ import {
   WikiLinksOpts,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
+import path from "path";
 import { runEngineTestV5 } from "../../../engine";
 import { ENGINE_HOOKS } from "../../../presets";
 import { checkVFile, createProcForTest, createProcTests } from "./utils";
@@ -505,7 +506,8 @@ describe("wikiLinks", () => {
         },
         [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
           const { resp } = extra;
-          await checkVFile(resp, "[Foo](../vault2/foo.md)");
+          const expectedPath = path.join("..", "vault2", "foo.md");
+          await checkVFile(resp, `[Foo](${expectedPath})`);
         },
       },
       preSetupHook: async ({ wsRoot, vaults }) => {

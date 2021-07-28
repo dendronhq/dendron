@@ -296,22 +296,28 @@ suite("GotoNote", function () {
           });
         },
         onInit: async ({ engine, vaults }) => {
-          sinon
+          const promptVaultStub = sinon
             .stub(PickerUtilsV2, "promptVault")
             .returns(Promise.resolve(vaults[1]));
-          const note = engine.notes[NOTE_PRESETS_V4.NOTE_WITH_TARGET.fname];
-          const editor = await VSCodeUtils.openNote(note);
-          const linkPos = LocationTestUtils.getPresetWikiLinkPosition();
-          editor.selection = new vscode.Selection(linkPos, linkPos);
-          await new GotoNoteCommand().run({});
-          const editor2 = VSCodeUtils.getActiveTextEditorOrThrow();
-          const suffix =
-            path.join(
-              vaults[1].fsPath,
-              NOTE_PRESETS_V4.NOTE_WITH_ANCHOR_LINK.fname
-            ) + ".md";
-          expect(editor2.document.uri.fsPath.endsWith(suffix)).toBeTruthy();
-          done();
+          
+            try {
+              const note = engine.notes[NOTE_PRESETS_V4.NOTE_WITH_TARGET.fname];
+              const editor = await VSCodeUtils.openNote(note);
+              const linkPos = LocationTestUtils.getPresetWikiLinkPosition();
+              editor.selection = new vscode.Selection(linkPos, linkPos);
+              await new GotoNoteCommand().run({});
+              const editor2 = VSCodeUtils.getActiveTextEditorOrThrow();
+              const suffix =
+                path.join(
+                  vaults[1].fsPath,
+                  NOTE_PRESETS_V4.NOTE_WITH_ANCHOR_LINK.fname
+                ) + ".md";
+              expect(editor2.document.uri.fsPath.endsWith(suffix)).toBeTruthy();
+            }
+            finally {
+              promptVaultStub.restore();
+              done();
+            }
         },
       });
     });

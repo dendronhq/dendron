@@ -610,14 +610,16 @@ export class PickerUtilsV2 {
   }) {
     const buttonsEnabled = _.filter(opts.buttons, { pressed: true });
     const buttonsDisabled = _.filter(opts.buttons, { pressed: false });
-    await Promise.all(
-      buttonsEnabled.map((bt) => {
-        bt.onEnable({ quickPick: opts.quickpick });
-      })
-    );
+    // call onDisable first so that
+    // they don't modify state of the quickpick after onEnable.
     await Promise.all(
       buttonsDisabled.map((bt) => {
         bt.onDisable({ quickPick: opts.quickpick });
+      })
+    );
+    await Promise.all(
+      buttonsEnabled.map((bt) => {
+        bt.onEnable({ quickPick: opts.quickpick });
       })
     );
   }

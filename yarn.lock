@@ -4472,7 +4472,7 @@
 
 "@types/vscode@1.58":
   version "1.58.1"
-  resolved "https://registry.yarnpkg.com/@types/vscode/-/vscode-1.58.1.tgz#7deae08792adc73fa57383244a0c79d3530df4f7"
+  resolved "https://registry.npmjs.org/@types/vscode/-/vscode-1.58.1.tgz#7deae08792adc73fa57383244a0c79d3530df4f7"
   integrity sha512-sa76rDXiSif09he8KoaWWUQxsuBr2+uND0xn1GUbEODkuEjp2p7Rqd3t5qlvklfmAedLFdL7MdnsPa57uzwcOw==
 
 "@types/warning@^3.0.0":
@@ -20812,14 +20812,7 @@ unist-util-visit-parents@^3.0.0:
     "@types/unist" "^2.0.0"
     unist-util-is "^4.0.0"
 
-unist-util-visit@^1.1.3:
-  version "1.4.1"
-  resolved "https://registry.npmjs.org/unist-util-visit/-/unist-util-visit-1.4.1.tgz#4724aaa8486e6ee6e26d7ff3c8685960d560b1e3"
-  integrity sha512-AvGNk7Bb//EmJZyhtRUnNMEpId/AZ5Ph/KUpTI09WHQuDZHKovQ1oEv3mfmKpWKtoMzyMC4GLBm1Zy5k12fjIw==
-  dependencies:
-    unist-util-visit-parents "^2.0.0"
-
-unist-util-visit@^2.0.0, unist-util-visit@^2.0.2, unist-util-visit@^2.0.3:
+unist-util-visit@2.0.3, unist-util-visit@^2.0.0, unist-util-visit@^2.0.2, unist-util-visit@^2.0.3:
   version "2.0.3"
   resolved "https://registry.npmjs.org/unist-util-visit/-/unist-util-visit-2.0.3.tgz#c3703893146df47203bb8a9795af47d7b971208c"
   integrity sha512-iJ4/RczbJMkD0712mGktuGpm/U4By4FfDonL7N/9tATGIF4imikjOuagyMY53tnZq3NP6BcmlrHhEKAfGWjh7Q==
@@ -20827,6 +20820,13 @@ unist-util-visit@^2.0.0, unist-util-visit@^2.0.2, unist-util-visit@^2.0.3:
     "@types/unist" "^2.0.0"
     unist-util-is "^4.0.0"
     unist-util-visit-parents "^3.0.0"
+
+unist-util-visit@^1.1.3:
+  version "1.4.1"
+  resolved "https://registry.npmjs.org/unist-util-visit/-/unist-util-visit-1.4.1.tgz#4724aaa8486e6ee6e26d7ff3c8685960d560b1e3"
+  integrity sha512-AvGNk7Bb//EmJZyhtRUnNMEpId/AZ5Ph/KUpTI09WHQuDZHKovQ1oEv3mfmKpWKtoMzyMC4GLBm1Zy5k12fjIw==
+  dependencies:
+    unist-util-visit-parents "^2.0.0"
 
 universal-cookie@^4.0.4:
   version "4.0.4"

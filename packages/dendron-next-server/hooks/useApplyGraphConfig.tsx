@@ -1,7 +1,7 @@
 import cytoscape from "cytoscape";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { createLogger } from "@dendronhq/common-frontend";
-import { getEulerConfig } from "../components/graph";
+import { getEulerConfig, GraphUtils } from "../components/graph";
 import { GraphConfig, GraphElements } from "../lib/graph";
 import _ from "lodash";
 
@@ -17,9 +17,18 @@ const useApplyGraphConfig = ({
   const logger = createLogger("Graph: useApplyGraphConfig");
   const { nodes, edges } = elements;
   const isLargeGraph = nodes.length + Object.values(edges).flat().length > 1000;
+  const [wasLocalGraph, setWasLocalGraph] = useState(true);
 
   const applyDisplayConfig = (allowRelayout: boolean) => {
     if (!graph || graph.$("*").length === 0) return;
+
+    const isLocalGraph = GraphUtils.isLocalGraph(config);
+
+    // Prevent errors from quick re-renders when switching between local and full graphs
+    if (isLocalGraph !== wasLocalGraph) {
+      setWasLocalGraph(isLocalGraph);
+      return;
+    }
 
     Object.entries(config)
       .filter(([k, v]) => k.includes("connections"))
@@ -30,8 +39,10 @@ const useApplyGraphConfig = ({
         const includedEdges = graph.$(`.${edgeType}`);
         const edgeCount = includedEdges.length;
 
+        if (!v) return;
+
         // If edges should be included
-        if (v?.value) {
+        if (v.value) {
           // If these edges aren't rendered, add them
           if (edgeCount === 0) {
             graph.add(edges[edgeType]);
@@ -40,12 +51,10 @@ const useApplyGraphConfig = ({
         }
 
         // If edges should not be included
-        else {
-          // If these edges are rendered, remove them
-          if (edgeCount > 0) {
-            includedEdges.remove();
-            if (allowRelayout) layoutGraph();
-          }
+        // If these edges are rendered, remove them
+        else if (edgeCount > 0) {
+          includedEdges.remove();
+          if (allowRelayout) layoutGraph();
         }
       });
   };
@@ -167,11 +176,9 @@ const useApplyGraphConfig = ({
         stubElements.removeClass("hidden--stub");
         if (allowRelayout) layoutGraph();
       }
-    } else {
-      if (!stubElements.hasClass("hidden--stub")) {
-        stubElements.addClass("hidden--stub");
-        if (allowRelayout) layoutGraph();
-      }
+    } else if (!stubElements.hasClass("hidden--stub")) {
+      stubElements.addClass("hidden--stub");
+      if (allowRelayout) layoutGraph();
     }
   };
   const applyFilterOptionsConfig = () => {

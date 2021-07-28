@@ -91,7 +91,7 @@ ${customCSS || ""}
 `;
 };
 
-export const getEulerConfig = (shouldAnimate: boolean, nodeCount: number) => ({
+export const getEulerConfig = (shouldAnimate: boolean) => ({
   name: "euler",
   springLength: () => 80,
   springCoeff: () => 0.0008,
@@ -215,7 +215,7 @@ export default function Graph({
         type === "schema" ||
         (!isLargeGraph && !GraphUtils.isLocalGraph(config));
 
-      network.layout(getEulerConfig(shouldAnimate, nodes.length)).run();
+      network.layout(getEulerConfig(shouldAnimate)).run();
 
       network.on("select", (e) => onSelect(e));
 

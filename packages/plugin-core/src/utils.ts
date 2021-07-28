@@ -56,7 +56,12 @@ export class DisposableStore {
     }
   }
 }
-
+export class TextUtility {
+  static capitalize(text: string) {
+    return text.replace( /(\w)(\w*)/g,
+      (_match, head, tail) => head.toLocaleUpperCase() + tail);
+  }
+}
 // === File FUtils
 // @DEPRECATE, use src/files.ts#resolvePath
 export function resolvePath(filePath: string, wsRoot?: string): string {

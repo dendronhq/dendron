@@ -1,6 +1,7 @@
 import { window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { BasicCommand } from "./base";
+import { TextUtility } from "../utils";
 
 type CommandOpts = {};
 
@@ -24,10 +25,12 @@ export class CapitalizeCommand extends BasicCommand<
 			const selection = editor.selection;
 
 			// Get the word within the selection
-			const word = document.getText(selection);
-			const capatalized = word.toUpperCase();
+			const text = document.getText(selection);
+			
+			const capatalizedText = TextUtility.capitalize(text);
+			
 			editor.edit(editBuilder => {
-				editBuilder.replace(selection, capatalized);
+				editBuilder.replace(selection, capatalizedText);
 			});
 			window.showInformationMessage("Capitalize command used.");
 		} 

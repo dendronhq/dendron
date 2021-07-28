@@ -168,7 +168,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     // no prefix, we don't want to show this command
     title: `${CMD_PREFIX} Capitalize`,
     group: "notes",
-    desc: "Capitalized the selected text",
+    desc: "Capitalize the selected text",
   },
   CREATE_DAILY_JOURNAL_NOTE: {
     key: "dendron.createDailyJournalNote",

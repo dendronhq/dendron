@@ -46,7 +46,7 @@ jobs:
             env: Get-ChildItem Env:\
             versions: choco --version
 
-    timeout-minutes: 30
+    timeout-minutes: 40
 
     runs-on: ${{ matrix.os }}
 

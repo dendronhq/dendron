@@ -35,8 +35,8 @@ const baseTheme: Theme = {
       size: 5,
       color: "",
       label: {
-        fontSize: 10,
-        minZoomedFontSize: 10,
+        fontSize: 8,
+        minZoomedFontSize: 32,
         fontWeight: 400,
         color: "",
       },

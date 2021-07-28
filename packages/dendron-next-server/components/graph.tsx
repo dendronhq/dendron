@@ -333,7 +333,7 @@ export default function Graph({
       >
         {!isReady && <Spin size="large" />}
         {isReady && showNoteGraphMessage && (
-          <NoteGraphMessage updateConfigField={updateConfigField} />
+          <NoteGraphMessage updateConfigField={updateConfigField} setIsReady={setIsReady} />
         )}
       </div>
       <div
@@ -365,8 +365,10 @@ export default function Graph({
 
 const NoteGraphMessage = ({
   updateConfigField,
+  setIsReady
 }: {
   updateConfigField: (key: string, value: string | number | boolean) => void;
+  setIsReady: (isReady: boolean) => void;
 }) => (
   <Space
     direction="vertical"
@@ -387,7 +389,16 @@ const NoteGraphMessage = ({
       Change to <b>Full Note Graph</b> to see all notes in the workspace.
     </Typography>
     <Button
-      onClick={() => updateConfigField("options.show-local-graph", false)}
+      onClick={() => {
+        setIsReady(false);
+
+        // Slight timeout to show loading spinner before re-rendering,
+        // as re-rendering is render-blocking
+        setTimeout(() => {
+          updateConfigField("options.show-local-graph", false)
+        }, 50)
+      }
+      }
       type="primary"
       size="large"
     >

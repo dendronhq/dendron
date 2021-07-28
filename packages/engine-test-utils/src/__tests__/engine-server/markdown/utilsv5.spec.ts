@@ -43,7 +43,14 @@ describe("MDUtils.proc", () => {
           const {
             extra: { resp },
           } = cleanVerifyOpts(opts);
-          await checkString(resp.contents, `assets%2Ffoo.jpg`, "localhost");
+
+          // For platform test compat: b/c of fwd/backslash differences, on
+          // Windows the path separators show up with %5C whereas linux/mac have
+          // %2F.
+          const fileNameToCheck =
+          os.platform() === "win32" ? `assets%5Cfoo.jpg` : `assets%2Ffoo.jpg`;
+
+          await checkString(resp.contents, fileNameToCheck, "localhost");
         },
         [ProcFlavor.PUBLISHING]: ProcFlavor.REGULAR,
       },
@@ -91,9 +98,6 @@ describe("MDUtils.proc", () => {
             extra: { resp },
           } = cleanVerifyOpts(opts);
 
-          // For platform test compat: b/c of fwd/backslash differences, on
-          // Windows the path separators show up with %5C whereas linux/mac have
-          // %2F.
           const fileNameToCheck =
             os.platform() === "win32" ? `assets%5Cfoo.jpg` : `assets%2Ffoo.jpg`;
 

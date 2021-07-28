@@ -572,8 +572,6 @@ const useGraphElements = ({
     }
   }, [noteActive, engine.notes, isLocalGraph]);
 
-  logger.log("AAAAAAAAA", isLocalGraph, !!noteActive, elements.nodes.length);
-
   useEffect(() => {
     if (type === "schema" && engine.schemas) {
       // Prevent unnecessary parsing if no schemas have been added/deleted

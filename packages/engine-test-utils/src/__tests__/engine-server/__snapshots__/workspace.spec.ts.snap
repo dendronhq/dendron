@@ -11,26 +11,3 @@ build
 exports[`WorkspaceService initialize remote seed present 1`] = `".git .gitignore dendron.code-workspace dendron.yml seed.yml vault"`;
 
 exports[`WorkspaceService initialize remote seed present 2`] = `"dendron.code-workspace dendron.yml hooks seeds vault1 vault2 vault3"`;
-
-exports[`WorkspaceService initialize remote seed present 3`] = `
-"{
-    \\"folders\\": [
-        {
-            \\"path\\": \\"seeds/dendron.foo/vault\\",
-            \\"name\\": \\"dendron.foo\\"
-        },
-        {
-            \\"path\\": \\"vault1\\"
-        },
-        {
-            \\"path\\": \\"vault2\\"
-        },
-        {
-            \\"path\\": \\"vault3\\",
-            \\"name\\": \\"vaultThree\\"
-        }
-    ],
-    \\"settings\\": {},
-    \\"extensions\\": {}
-}"
-`;

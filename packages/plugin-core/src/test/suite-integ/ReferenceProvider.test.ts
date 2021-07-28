@@ -195,7 +195,7 @@ suite("ReferenceProvider", function () {
         });
       });
 
-      test("contains local image", (done) => {
+      test.skip("contains local image", (done) => {
         runLegacyMultiWorkspaceTest({
           ctx,
           preSetupHook: async ({ wsRoot, vaults }) => {

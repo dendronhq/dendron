@@ -541,24 +541,29 @@ suite("Lookup, notesv2", function () {
           await lc.updatePickerBehavior({ quickPick: picker, provider: lp });
 
           picker.value = "alpha";
-          sinon.stub(picker, "selectedItems").get(() => {
+          const pickerStub = sinon.stub(picker, "selectedItems").get(() => {
             return [createNoActiveItem(vault)];
           });
-          sinon
+          const promptVaultStub = sinon
             .stub(PickerUtilsV2, "promptVault")
             .returns(Promise.resolve(vaults[0]));
 
-          await lp.onDidAccept({
-            picker,
-            opts: engOpts,
-            lc,
-          });
-          expect(
-            (await EditorUtils.getURIForActiveEditor()).fsPath.endsWith(
-              path.join("vault1", "alpha.md")
-            )
-          ).toBeTruthy();
-          done();
+          try {
+            await lp.onDidAccept({
+              picker,
+              opts: engOpts,
+              lc,
+            });
+            expect(
+              (await EditorUtils.getURIForActiveEditor()).fsPath.endsWith(
+                path.join("vault1", "alpha.md")
+              )
+            ).toBeTruthy();
+          } finally {
+            pickerStub.restore();
+            promptVaultStub.restore();
+            done();
+          }
         },
       });
     });
@@ -581,24 +586,29 @@ suite("Lookup, notesv2", function () {
           await lc.updatePickerBehavior({ quickPick: picker, provider: lp });
 
           picker.value = "alpha";
-          sinon.stub(picker, "selectedItems").get(() => {
+          const pickerStub = sinon.stub(picker, "selectedItems").get(() => {
             return [createNoActiveItem(vault)];
           });
-          sinon
+          const promptVaultStub = sinon
             .stub(PickerUtilsV2, "getOrPromptVaultForNewNote")
             .returns(Promise.resolve(vaults[1]));
 
-          await lp.onDidAccept({
-            picker,
-            opts: engOpts,
-            lc,
-          });
-          expect(
-            (await EditorUtils.getURIForActiveEditor()).fsPath.endsWith(
-              path.join("vault2", "alpha.md")
-            )
-          ).toBeTruthy();
-          done();
+          try {
+            await lp.onDidAccept({
+              picker,
+              opts: engOpts,
+              lc,
+            });
+            expect(
+              (await EditorUtils.getURIForActiveEditor()).fsPath.endsWith(
+                path.join("vault2", "alpha.md")
+              )
+            ).toBeTruthy();
+          } finally {
+            pickerStub.restore();
+            promptVaultStub.restore();
+            done();
+          }
         },
       });
     });

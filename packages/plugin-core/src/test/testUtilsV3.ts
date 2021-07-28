@@ -5,13 +5,13 @@ import {
   isNotUndefined,
   WorkspaceFolderRaw,
   WorkspaceOpts,
-  WorkspaceSettings
+  WorkspaceSettings,
 } from "@dendronhq/common-all";
 import {
   assignJSONWithComment,
   readYAML,
   tmpDir,
-  writeYAML
+  writeYAML,
 } from "@dendronhq/common-server";
 import {
   CreateEngineFunction,
@@ -19,28 +19,28 @@ import {
   EngineTestUtilsV4,
   PreSetupCmdHookFunction,
   PreSetupHookFunction,
-  sinon
+  sinon,
 } from "@dendronhq/common-test-utils";
 import {
   DConfig,
   DendronEngineV2,
-  HistoryService
+  HistoryService,
 } from "@dendronhq/engine-server";
 import {
   TestConfigUtils,
-  TestSetupWorkspaceOpts
+  TestSetupWorkspaceOpts,
 } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
 import _ from "lodash";
-import { afterEach, beforeEach } from "mocha";
+import { afterEach, beforeEach, describe } from "mocha";
 import { ExtensionContext, Uri } from "vscode";
 import {
   SetupWorkspaceCommand,
-  SetupWorkspaceOpts
+  SetupWorkspaceOpts,
 } from "../commands/SetupWorkspace";
 import {
   VaultAddCommand,
-  VaultRemoteSource
+  VaultRemoteSource,
 } from "../commands/VaultAddCommand";
 import { Logger } from "../logger";
 import { StateService } from "../services/stateService";
@@ -56,8 +56,9 @@ import {
   SetupCodeConfigurationV2,
   stubWorkspace,
   stubWorkspaceFile,
-  stubWorkspaceFolders
+  stubWorkspaceFolders,
 } from "./testUtilsv2";
+import os from "os";
 
 export const DENDRON_REMOTE =
   "https://github.com/dendronhq/dendron-site-vault.git";
@@ -400,3 +401,8 @@ export const stubVaultInput = (opts: {
   };
   return;
 };
+
+export function runTestButSkipForWindows() {
+  const runTest = os.platform() === "win32" ? describe.skip : describe;
+  return runTest;
+}

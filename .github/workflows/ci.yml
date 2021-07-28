@@ -24,7 +24,7 @@ jobs:
         os:
           - macos-latest
           - ubuntu-latest
-          #- windows-latest
+          - windows-latest
         node-version:
           - 12.x
           - 14.x
@@ -41,35 +41,21 @@ jobs:
             versions: ''
           # Running natively under Windows requires some further work on paths
           # and file access patterns.
-          #- os: windows-latest
-          #  env: Get-ChildItem Env:\
-          #  versions: choco --version
+          - os: windows-latest
+            env: Get-ChildItem Env:\
+            versions: choco --version
 
-    timeout-minutes: 20
+    timeout-minutes: 45
 
     runs-on: ${{ matrix.os }}
 
     steps:
-      # The closest we can get to rsync natively is cwRsync. Instead let's get
-      # rsync installed via Cygwin and put that on PATH.
-      - name: Install dependencies
-        if: runner.os == 'Windows'
-        run: |
-          choco install cygwin
-          C:\tools\cygwin\cygwinsetup.exe `
-              --quiet-mode --no-desktop --upgrade-also --wait `
-              --root C:\tools\cygwin `
-              --only-site --site http://mirrors.kernel.org/sourceware/cygwin/ `
-              --packages rsync
-          "C:\tools\cygwin\bin" | Out-File -Append -FilePath $env:GITHUB_PATH -Encoding utf8
-
       - name: Gather environment data
         run: |
           ${{ matrix.env }}
           node --version
           npm --version
           yarn --version
-          rsync --version
 
       - name: Checkout source
         uses: actions/checkout@v2
@@ -77,6 +63,7 @@ jobs:
       # Retain Node modules across builds; some packages download/build binaries
       # here.
       - name: Restore Node modules cache
+        if: runner.os != 'Windows'
         uses: actions/cache@v2
         id: node-modules-cache
         with:
@@ -84,7 +71,18 @@ jobs:
             node_modules
             packages/*/node_modules
             packages/*/.vscode-test
-          key: ${{ runner.os }}-${{ matrix.node-version }}-node-modules-${{ hashFiles('**/package-lock.json') }}${{ hashFiles('yarn.lock')}}
+          key: ${{ runner.os }}-${{ matrix.node-version }}-node-modules-${{ hashFiles('yarn.lock')}}
+
+      - name: Restore Node modules cache for Windows
+        if: runner.os == 'Windows'
+        uses: actions/cache@v2
+        id: node-modules-cache-windows
+        with:
+          path: |
+            node_modules
+            packages\*\node_modules
+            packages\*\.vscode-test
+          key: ${{ runner.os }}-${{ matrix.node-version }}-node-modules-${{ hashFiles('yarn.lock')}}
 
       - name: Set up Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v1
@@ -99,6 +97,7 @@ jobs:
 
       - name: Initialize
         run: yarn ci:init
+        shell: bash
 
       - name: Start Xvfb
         if: runner.os == 'Linux' && matrix.suite == 'plugin'
@@ -108,4 +107,4 @@ jobs:
 
       - name: Run tests
         run: yarn ci:test:${{ matrix.suite }}
-        timeout-minutes: 10
+        timeout-minutes: 30

@@ -11,14 +11,20 @@ import { VSCodeUtils } from "../../utils";
 import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
-suite("NoteSyncService", function () {
-  let ctx: vscode.ExtensionContext;
+suite("NoteSyncService", function testSuite() {
   let newUpdatedTime: number;
-  ctx = setupBeforeAfter(this, {
+  let timeStub: sinon.SinonStub;
+
+  const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {
     beforeHook: () => {
       newUpdatedTime = 60000;
-      sinon.stub(Time, "now").returns(DateTime.fromMillis(newUpdatedTime));
+      timeStub = sinon.stub(Time, "now").returns(DateTime.fromMillis(newUpdatedTime));
     },
+    afterHook: () => {
+      if (timeStub) {
+        timeStub.restore();
+      }
+    }
   });
 
   describe("onDidChange", () => {

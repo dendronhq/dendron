@@ -364,7 +364,8 @@ suite("NoteLookupCommand", function () {
             CONFIG["DEFAULT_SCRATCH_DATE_FORMAT"].key
           ) as string;
           const today = Time.now().toFormat(dateFormat);
-          expect(out.quickpick.value.startsWith(`scratch.${today.split(".").slice(0, -1).join(".")}.`)).toBeTruthy();
+          const todayFormatted = today.split(".").slice(0, -1).join(".");
+          expect(out.quickpick.value.startsWith(`scratch.${todayFormatted}.`)).toBeTruthy();
 
           done();
         }
@@ -812,7 +813,7 @@ suite("NoteLookupCommand", function () {
     });
   });
 
-  describe.only("journal + selection2link interactions", () => {
+  describe("journal + selection2link interactions", () => {
     const prepareCommandFunc = async ({ vaults, engine }: any) => {
       const cmd = new NoteLookupCommand();
       stubVaultPick(vaults);
@@ -861,6 +862,7 @@ suite("NoteLookupCommand", function () {
     });
 
     // doesn't work
+    // TODO: FIX IT
     test.skip("toggling journal modifier off will only leave selection2link applied", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
@@ -918,7 +920,7 @@ suite("NoteLookupCommand", function () {
       });  
     });
 
-    test("toggling note type works, and keeps selection2link applied", (done) => {
+    test("applying scratch strips journal modifier, and keeps selection2link applied", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
         preSetupHook: async ({ wsRoot, vaults }) => {
@@ -939,10 +941,166 @@ suite("NoteLookupCommand", function () {
           expect(selection2linkBtn.pressed).toBeTruthy();
 
           await controller.onTriggerButton(scratchBtn);
+          const dateFormat = DendronWorkspace.configuration().get<string>(
+            CONFIG["DEFAULT_SCRATCH_DATE_FORMAT"].key
+          ) as string;
+          const today = Time.now().toFormat(dateFormat);
+          const todayFormatted = today.split(".").slice(0, -1).join(".")
+          const quickpickValue = controller.quickpick.value;
+          expect(quickpickValue.startsWith(`scratch.${todayFormatted}`)).toBeTruthy();
+          expect(quickpickValue.endsWith(`.foo-body`)).toBeTruthy();
+
+          done();
+        }
+      });  
+    });
+  });
+
+  describe("scratch + selection2link interactions", () => {
+    const prepareCommandFunc = async ({ vaults, engine }: any) => {
+      const cmd = new NoteLookupCommand();
+      stubVaultPick(vaults);
+
+      const fooNoteEditor = await VSCodeUtils.openNote(engine.notes["foo"]);
+
+      // selects "foo body"
+      fooNoteEditor.selection = new vscode.Selection(7, 0, 7, 12);
+      const { text } = VSCodeUtils.getSelection();
+      expect(text).toEqual("foo body");
+
+      const { controller } = await cmd.gatherInputs({
+        noteType: LookupNoteTypeEnum.scratch,
+        selectionType: LookupSelectionTypeEnum.selection2link
+      });
+      controller.quickpick.show();
+      return { controller }
+    }
+
+    const getTodayInScratchDateFormat = () => {
+      const dateFormat = DendronWorkspace.configuration().get<string>(
+        CONFIG["DEFAULT_SCRATCH_DATE_FORMAT"].key
+      ) as string;
+      const today = Time.now().toFormat(dateFormat);
+      return today.split(".").slice(0, -1).join(".");
+    }
+
+    test("scratch and selection2link both applied", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+        },
+        onInit: async ({ vaults, engine }) => {
+          const { controller } = await prepareCommandFunc({ vaults, engine });
+
+          const { scratchBtn } = getNoteTypeButtons(
+            controller.quickpick.buttons
+          );
+
+          const { selection2linkBtn } = getSelectionTypeButtons(
+            controller.quickpick.buttons
+          )
+
+          expect(scratchBtn.pressed).toBeTruthy();
+          expect(selection2linkBtn.pressed).toBeTruthy();
+
+          const todayFormatted = getTodayInScratchDateFormat();
+          const quickpickValue = controller.quickpick.value;
+          expect(quickpickValue.startsWith(`scratch.${todayFormatted}`)).toBeTruthy();
+          expect(quickpickValue.endsWith(".foo-body")).toBeTruthy();
+
+          done();
+        }
+      }); 
+    });
+
+    // doesn't work
+    // TODO: FIX IT
+    test.skip("toggling scratch modifier off will only leave selection2link applied", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+        },
+        onInit: async ({ vaults, engine }) => {
+          const { controller } = await prepareCommandFunc({ vaults, engine });
+
+          const { scratchBtn } = getNoteTypeButtons(
+            controller.quickpick.buttons
+          );
+
+          const { selection2linkBtn } = getSelectionTypeButtons(
+            controller.quickpick.buttons
+          )
+
+          expect(scratchBtn.pressed).toBeTruthy();
+          expect(selection2linkBtn.pressed).toBeTruthy();
+
+          await controller.onTriggerButton(scratchBtn);
+          expect(controller.quickpick.value).toEqual(`foo.foo-body`);
+
+          done();
+        }
+      });  
+    });
+
+    test("toggling selection2link modifier off will only leave scratch modifier applied", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+        },
+        onInit: async ({ vaults, engine }) => {
+          const { controller } = await prepareCommandFunc({ vaults, engine });
+
+          const { scratchBtn } = getNoteTypeButtons(
+            controller.quickpick.buttons
+          );
+
+          const { selection2linkBtn } = getSelectionTypeButtons(
+            controller.quickpick.buttons
+          )
+
+          expect(scratchBtn.pressed).toBeTruthy();
+          expect(selection2linkBtn.pressed).toBeTruthy();
+
+          await controller.onTriggerButton(selection2linkBtn);
+          const todayFormatted = getTodayInScratchDateFormat();
+          const quickpickValue = controller.quickpick.value;
+          expect(quickpickValue.startsWith(`scratch.${todayFormatted}`)).toBeTruthy();
+          expect(quickpickValue.endsWith(".foo-body")).toBeFalsy();
+
+          done();
+        }
+      });  
+    });
+
+    // doesn't work
+    // TODO: FIX IT
+    test.skip("applying journal strips scratch modifier, and keeps selection2link applied", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+        },
+        onInit: async ({ vaults, engine }) => {
+          const { controller } = await prepareCommandFunc({ vaults, engine });
+
+          const { journalBtn, scratchBtn } = getNoteTypeButtons(
+            controller.quickpick.buttons
+          );
+
+          const { selection2linkBtn } = getSelectionTypeButtons(
+            controller.quickpick.buttons
+          )
+
+          expect(scratchBtn.pressed).toBeTruthy();
+          expect(selection2linkBtn.pressed).toBeTruthy();
+
+          await controller.onTriggerButton(journalBtn);
           const today = Time.now().toFormat(engine.config.journal.dateFormat);
           const quickpickValue = controller.quickpick.value;
-          expect(quickpickValue.startsWith(`scratch.${today}`)).toBeTruthy();
-          expect(quickpickValue.endsWith(`.foo-body`)).toBeTruthy();
+          expect(quickpickValue).toEqual(`foo.journal.${today}.foo-body`);
 
           done();
         }

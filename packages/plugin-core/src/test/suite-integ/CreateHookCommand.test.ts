@@ -27,35 +27,26 @@ suite(DENDRON_COMMANDS.CREATE_HOOK.key, function () {
         onInit: async ({ wsRoot }) => {
           const stub = sinon.stub(VSCodeUtils, "showInputBox");
 
-          try {
-            stub.onCall(0).returns(Promise.resolve(hook));
-            stub.onCall(1).returns(Promise.resolve("*"));
+          stub.onCall(0).returns(Promise.resolve(hook));
+          stub.onCall(1).returns(Promise.resolve("*"));
 
-            await new CreateHookCommand().run();
-            const editor = VSCodeUtils.getActiveTextEditorOrThrow();
-            const config = DConfig.getOrCreate(wsRoot);
-            expect(config.hooks).toEqual({
-              onCreate: [{ id: hook, pattern: "*", type: "js" }],
-            });
-            expect(editor.document.uri.fsPath.toLowerCase()).toEqual(
-              path
-                .join(
-                  HookUtils.getHookScriptPath({
-                    basename: `${hook}.js`,
-                    wsRoot,
-                  })
-                )
-                .toLowerCase()
-            );
-            expect(
-              AssertUtils.assertInString({
-                body: editor.document.getText(),
-                match: ["module.export"],
-              })
-            ).toBeTruthy();
-          } finally {
-            stub.restore();
-          }
+          await new CreateHookCommand().run();
+          const editor = VSCodeUtils.getActiveTextEditorOrThrow();
+          const config = DConfig.getOrCreate(wsRoot);
+          expect(config.hooks).toEqual({
+            onCreate: [{ id: hook, pattern: "*", type: "js" }],
+          });
+          expect(editor.document.uri.fsPath.toLowerCase()).toEqual(
+            path.join(
+              HookUtils.getHookScriptPath({ basename: `${hook}.js`, wsRoot })
+            ).toLowerCase()
+          );
+          expect(
+            AssertUtils.assertInString({
+              body: editor.document.getText(),
+              match: ["module.export"],
+            })
+          ).toBeTruthy();
           done();
         },
       });
@@ -74,19 +65,15 @@ suite(DENDRON_COMMANDS.CREATE_HOOK.key, function () {
             canary: "hook",
           });
         },
-        onInit: async () => {
-          const stub = sinon
+        onInit: async ({}) => {
+          sinon
             .stub(VSCodeUtils, "showInputBox")
             .returns(Promise.resolve(hook));
-          try {
-            const { error } = (await new CreateHookCommand().run()) as {
-              error: IDendronError;
-            };
-            expect(error.message.endsWith("exists")).toBeTruthy();
-          } finally {
-            stub.restore();
-            done();
-          }
+          const { error } = (await new CreateHookCommand().run()) as {
+            error: IDendronError;
+          };
+          expect(error.message.endsWith("exists")).toBeTruthy();
+          done();
         },
       });
     });

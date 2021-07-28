@@ -70,19 +70,12 @@ const getWorkspaceFile = () => {
 
 suite("VaultRemoveCommand", function () {
   let ctx: vscode.ExtensionContext;
-  let cmdStub: sinon.SinonStub;
-
   ctx = setupBeforeAfter(this, {
     beforeHook: () => {
-      cmdStub = sinon
+      sinon
         .stub(vscode.commands, "executeCommand")
         .returns(Promise.resolve({}));
     },
-    afterHook: () => {
-      if (cmdStub) {
-        cmdStub.restore();
-      }
-    }
   });
 
   describe("workspace", () => {

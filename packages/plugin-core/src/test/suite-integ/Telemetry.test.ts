@@ -1,6 +1,6 @@
 import { SegmentClient } from "@dendronhq/common-server";
+import { FileTestUtils } from "@dendronhq/common-test-utils";
 import { DConfig } from "@dendronhq/engine-server";
-import { TestEngineUtils } from "@dendronhq/engine-test-utils";
 import { describe } from "mocha";
 import sinon from "sinon";
 import * as vscode from "vscode";
@@ -12,14 +12,11 @@ import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
 suite("telemetry", function () {
-  let homeDirStub: sinon.SinonStub;
+  let ctx: vscode.ExtensionContext;
 
-  const ctx = setupBeforeAfter(this, {
+  ctx = setupBeforeAfter(this, {
     beforeHook: () => {
-      homeDirStub = TestEngineUtils.mockHomeDir();
-    },
-    afterHook: async () => {
-      homeDirStub.restore();
+      FileTestUtils.mockHome();
     },
   });
 

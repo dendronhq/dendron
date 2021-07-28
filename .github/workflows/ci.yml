@@ -9,7 +9,6 @@ on:
       - dev-kevin
       - dev
       - feat/*
-      - fix/*
   pull_request:
     branches:
       - master
@@ -19,27 +18,27 @@ jobs:
     strategy:
       # Allow other matrix jobs to continue after one fails, allowing us to
       # isolate platform-specific issues.
-      fail-fast: true
+      fail-fast: false
 
       matrix:
         os:
-          # - macos-latest
-          # - ubuntu-latest
+          - macos-latest
+          - ubuntu-latest
           - windows-latest
         node-version:
           - 12.x
           - 14.x
         suite:
-          # - cli
+          - cli
           - plugin
 
         include:
-          # - os: macos-latest
-          #   env: env
-          #   versions: ''
-          # - os: ubuntu-latest
-          #   env: env
-          #   versions: ''
+          - os: macos-latest
+            env: env
+            versions: ''
+          - os: ubuntu-latest
+            env: env
+            versions: ''
           # Running natively under Windows requires some further work on paths
           # and file access patterns.
           - os: windows-latest

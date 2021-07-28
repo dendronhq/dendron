@@ -213,7 +213,7 @@ export class GithubImportPod extends ImportPod<GithubImportPodConfig> {
       const labels = d.node.labels.edges;
       let tags: any;
       if (labels.length > 0) {
-        tags = labels.map((label: any) => label.node.name);
+        tags = labels.map((label: any) => `[[tags.${label.node.name}]]`);
       }
       d.node.title = d.node.title.replace(
         /[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi, // eslint-disable-line
@@ -483,13 +483,14 @@ updateIssue = async(opts:
     const labelIDs: string[] = [];
 
     tags?.forEach((tag: string) => {
+      tag = tag.replace(/[#\[\]']+/g,'').replace("tags.",'') // eslint-disable-line
       if(labelsHashMap[tag])
           labelIDs.push(labelsHashMap[tag])
     })
       if(!_.isUndefined(tags) && labelIDs.length === 0) {
         return "Github: The labels in the tag does not belong to selected repository";
       }
-      const resp = await this.updateIssue({issueID, token, status, labelIDs})
+      const resp = await this.updateIssue({issueID, token, status: status.toUpperCase(), labelIDs})
 
       return "Github: ".concat(resp);
   }

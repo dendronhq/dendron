@@ -1,11 +1,11 @@
-import { DNodePropsQuickInputV2, DVault, NoteUtils, Time } from "@dendronhq/common-all";
-import { NoteTestUtilsV4, NOTE_PRESETS_V4 } from "@dendronhq/common-test-utils";
+import { DNodePropsQuickInputV2, DVault, DNodeUtils, NoteUtils, NoteQuickInput, Time } from "@dendronhq/common-all";
+import { NoteTestUtilsV4, NOTE_PRESETS_V4, } from "@dendronhq/common-test-utils";
 import {
   ENGINE_HOOKS,
   ENGINE_HOOKS_MULTI,
   TestEngineUtils
 } from "@dendronhq/engine-test-utils";
-import { getActiveEditorBasename, TIMEOUT } from "../testUtils";
+import { createMockQuickPick, getActiveEditorBasename, TIMEOUT } from "../testUtils";
 import _ from "lodash";
 import { describe } from "mocha";
 // // You can import and use all API from the 'vscode' module
@@ -13,15 +13,13 @@ import { describe } from "mocha";
 import * as vscode from "vscode";
 import { LookupNoteTypeEnum, LookupSelectionTypeEnum, LookupSplitTypeEnum, LookupEffectTypeEnum } from "../../commands/LookupCommand";
 import { NoteLookupCommand, CommandOutput } from "../../commands/NoteLookupCommand";
-// import { LookupControllerV3 } from "../../components/lookup/LookupControllerV3";
-// import { ILookupProviderV3 } from "../../components/lookup/LookupProviderV3";
 import { 
   JournalBtn,
   ScratchBtn,
   DendronBtn,
   ButtonType,
   Selection2LinkBtn, 
-  SelectionExtractBtn, 
+  SelectionExtractBtn,
   CopyNoteLinkBtn,
   HorizontalSplitBtn,
 } from "../../components/lookup/buttons";
@@ -1179,6 +1177,82 @@ suite("NoteLookupCommand", function () {
           });
           expect(newNote.body.trim()).toEqual(selectedText);
 
+          done();
+        }
+      });
+    });
+  });
+
+  describe("split + multiselect interactions", () => {
+
+    // TODO: there's gotta be a better way to mock this.
+    test.only("should have n+1 columns after command", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+          await NoteTestUtilsV4.createNote({
+            fname: "lorem",
+            vault: vaults[0],
+            wsRoot
+          });
+          await NoteTestUtilsV4.createNote({
+            fname: "ipsum",
+            vault: vaults[0],
+            wsRoot
+          });
+        },
+        onInit: async ({ wsRoot, vaults, engine }) => {
+          // make clean slate.
+          VSCodeUtils.closeAllEditors();
+
+          VSCodeUtils.openNote(engine.notes["foo"]);
+          const cmd = new NoteLookupCommand();
+          const notesToSelect = ["foo.ch1", "bar", "lorem", "ipsum"].map((fname) => engine.notes[fname]);
+          const selectedItems = notesToSelect.map((note) => {
+            return DNodeUtils.enhancePropForQuickInputV3({
+              props: note,
+              schemas: engine.schemas,
+              wsRoot,
+              vaults
+            });
+          }) as NoteQuickInput[];
+
+          const gatherOut = await cmd.gatherInputs({
+            multiSelect: true,
+            splitType: LookupSplitTypeEnum.horizontal,
+            noConfirm: true,
+          });
+
+          const mockQuickPick = createMockQuickPick({
+            value: "foo.ch1",
+            selectedItems,
+            canSelectMany: true,
+            buttons: gatherOut.quickpick.buttons,
+          });
+          mockQuickPick.showNote = gatherOut.quickpick.showNote;
+          
+          sinon.stub(cmd, "enrichInputs").returns(
+            Promise.resolve({
+              quickpick: mockQuickPick,
+              controller: gatherOut.controller,
+              provider: gatherOut.provider, 
+              selectedItems
+            })
+          );
+
+          // if we don't wait here, the test runs too fast and misses one note.
+          // TODO: find a better way to get past this.
+          await new Promise((resolve) => setTimeout(resolve, 500));  
+          await cmd.run({
+            multiSelect: true,
+            splitType: LookupSplitTypeEnum.horizontal,
+            noConfirm: true,
+          });
+          const editor = VSCodeUtils.getActiveTextEditor();
+          // one open, lookup with 2 selected. total 3 columns.
+          expect(editor?.viewColumn).toEqual(5);
+          sinon.restore();
           done();
         }
       });

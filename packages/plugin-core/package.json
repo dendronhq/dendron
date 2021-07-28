@@ -94,6 +94,11 @@
         "desc": "Go to a note"
       },
       {
+        "command": "dendron.capitalize",
+        "title": "Dendron: Capitalize",
+        "desc": "Capitalized the selected text"
+      },
+      {
         "command": "dendron.createDailyJournalNote",
         "title": "Dendron: Create Daily Journal Note",
         "desc": "Create a global journal note",

@@ -7,6 +7,7 @@ import { ConfigureCommand } from "./ConfigureCommand";
 import { ConfigurePodCommand } from "./ConfigurePodCommand";
 import { ConfigureWithUICommand } from "./ConfigureWithUI";
 import { ContributeCommand } from "./Contribute";
+import { CapitalizeCommand } from "./CapitalizeCommand";
 import { CopyNoteLinkCommand } from "./CopyNoteLink";
 import { CopyNoteRefCommand } from "./CopyNoteRef";
 import { CopyNoteURLCommand } from "./CopyNoteURL";
@@ -65,6 +66,7 @@ const ALL_COMMANDS = [
   ConfigurePodCommand,
   ConfigureGraphStylesCommand,
   ContributeCommand,
+  CapitalizeCommand,
   CopyNoteLinkCommand,
   CopyNoteRefCommand,
   CopyNoteURLCommand,

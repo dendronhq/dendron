@@ -163,6 +163,13 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
       when: "editorFocus",
     },
   },
+  CAPITALIZE: {
+    key: "dendron.capitalize",
+    // no prefix, we don't want to show this command
+    title: `${CMD_PREFIX} Capitalize`,
+    group: "notes",
+    desc: "Capitalized the selected text",
+  },
   CREATE_DAILY_JOURNAL_NOTE: {
     key: "dendron.createDailyJournalNote",
     title: `${CMD_PREFIX} Create Daily Journal Note`,

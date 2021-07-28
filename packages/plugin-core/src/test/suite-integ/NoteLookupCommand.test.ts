@@ -137,6 +137,14 @@ suite("NoteLookupCommand", function () {
     },
   });
 
+  const getTodayInScratchDateFormat = () => {
+    const dateFormat = DendronWorkspace.configuration().get<string>(
+      CONFIG["DEFAULT_SCRATCH_DATE_FORMAT"].key
+    ) as string;
+    const today = Time.now().toFormat(dateFormat);
+    return today.split(".").slice(0, -1).join(".");
+  }
+
   // NOTE: think these tests are wrong
   describe("updateItems", () => {
     test("picker has value of opened note by default", (done) => {
@@ -976,13 +984,7 @@ suite("NoteLookupCommand", function () {
       return { controller }
     }
 
-    const getTodayInScratchDateFormat = () => {
-      const dateFormat = DendronWorkspace.configuration().get<string>(
-        CONFIG["DEFAULT_SCRATCH_DATE_FORMAT"].key
-      ) as string;
-      const today = Time.now().toFormat(dateFormat);
-      return today.split(".").slice(0, -1).join(".");
-    }
+    
 
     test("scratch and selection2link both applied", (done) => {
       runLegacyMultiWorkspaceTest({
@@ -1105,6 +1107,81 @@ suite("NoteLookupCommand", function () {
           done();
         }
       });  
+    });
+  });
+
+  describe("note modifiers + selectionExtract interactions", () => {
+    const prepareCommandFunc = async ({ vaults, engine, noteType }: any) => {
+      const cmd = new NoteLookupCommand();
+      stubVaultPick(vaults);
+
+      const fooNoteEditor = await VSCodeUtils.openNote(engine.notes["foo"]);
+
+      // selects "foo body"
+      fooNoteEditor.selection = new vscode.Selection(7, 0, 7, 12);
+      const { text } = VSCodeUtils.getSelection();
+      expect(text).toEqual("foo body");
+
+      const cmdOut = await cmd.run({
+        noteType,
+        selectionType: LookupSelectionTypeEnum.selectionExtract,
+        noConfirm: true,
+      });
+      return { cmdOut, selectedText: text }
+    }
+
+    test("journal + selectionExtract both applied", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+        },
+        onInit: async ({ wsRoot, vaults, engine }) => {
+          const { selectedText } = await prepareCommandFunc({
+            vaults, 
+            engine, 
+            noteType: LookupNoteTypeEnum.journal 
+          });
+
+          const today = Time.now().toFormat(engine.config.journal.dateFormat);
+          const newNote = NoteUtils.getNoteOrThrow({
+            fname: `foo.journal.${today}`,
+            notes: engine.notes,
+            vault: vaults[0],
+            wsRoot,
+          });
+
+          expect(newNote.body.trim()).toEqual(selectedText);
+
+          done();
+        }
+      });
+    });
+
+    test("scratch + selectionExtract both applied", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+        },
+        onInit: async ({ wsRoot, vaults, engine }) => {
+          const { cmdOut, selectedText } = await prepareCommandFunc({
+            vaults, 
+            engine, 
+            noteType: LookupNoteTypeEnum.scratch 
+          });
+
+          const newNote = NoteUtils.getNoteOrThrow({
+            fname: cmdOut!.quickpick.value,
+            notes: engine.notes,
+            vault: vaults[0],
+            wsRoot,
+          });
+          expect(newNote.body.trim()).toEqual(selectedText);
+
+          done();
+        }
+      });
     });
   });
 });

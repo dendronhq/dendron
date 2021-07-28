@@ -378,9 +378,9 @@ export class MultiSelectBtn extends DendronBtn {
   }
 }
 
-export class CopyNoteLinkButton extends DendronBtn {
+export class CopyNoteLinkBtn extends DendronBtn {
   static create(pressed?: boolean) {
-    return new CopyNoteLinkButton({
+    return new CopyNoteLinkBtn({
       title: "Copy Note Link",
       iconOff: "clippy",
       iconOn: "menu-selection",
@@ -441,7 +441,7 @@ export function createAllButtons(
 ): DendronBtn[] {
   const buttons = [
     MultiSelectBtn.create(),
-    CopyNoteLinkButton.create(),
+    CopyNoteLinkBtn.create(),
     DirectChildFilterBtn.create(),
     SelectionExtractBtn.create(),
     Selection2LinkBtn.create(),

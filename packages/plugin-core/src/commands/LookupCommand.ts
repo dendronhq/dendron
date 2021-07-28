@@ -8,6 +8,11 @@ import { AnalyticsUtils } from "../utils/analytics";
 import { BasicCommand } from "./base";
 
 export type LookupEffectType = "copyNoteLink" | "copyNoteRef" | "multiSelect";
+export enum LookupEffectTypeEnum {
+  "copyNoteLink" = "copyNoteLink",
+  "copyNoteRef" = "copyNoteRef",
+  "multiSelect" = "multiSelect",
+}
 export type LookupFilterType = "directChildOnly";
 export type LookupSelectionType = "selection2link" | "selectionExtract";
 export type LookupNoteType = LookupNoteTypeEnum;

@@ -1,4 +1,4 @@
-import { postVSCodeMessage } from "@dendronhq/common-frontend";
+import { createLogger, postVSCodeMessage } from "@dendronhq/common-frontend";
 import _ from "lodash";
 import React, { useEffect, useState } from "react";
 import { EventHandler } from "cytoscape";
@@ -26,7 +26,9 @@ export default function FullNoteGraph({ engine, ide }: DendronProps) {
   });
 
   useEffect(() => {
-    if (ide.noteActive && !disregardActiveNote) setActiveNote(ide.noteActive);
+    if (!ide.noteActive) setActiveNote(undefined);
+
+    else if (ide.noteActive && !disregardActiveNote) setActiveNote(ide.noteActive);
     else if (disregardActiveNote) setDisregardActiveNote(false);
   }, [ide.noteActive]);
 
@@ -80,6 +82,7 @@ export default function FullNoteGraph({ engine, ide }: DendronProps) {
       setConfig={setConfig}
       engine={engine}
       ide={ide}
+      type='note'
     />
   );
 }

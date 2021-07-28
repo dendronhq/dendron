@@ -293,15 +293,19 @@ suite("GotoNote", function () {
             note = await ENGINE_HOOKS_MULTI.setupMultiVaultSameFname(opts);
           },
           onInit: async ({ vaults, wsRoot }) => {
-            const editor = await VSCodeUtils.openNote(note);
             const prompt = sinon.stub(PickerUtilsV2, "promptVault").returns(Promise.resolve(vaults[1]));
-            editor.selection = LocationTestUtils.getPresetWikiLinkSelection({line: 7});
-            await new GotoNoteCommand().run();
-            const openedNote = VSCodeUtils.getNoteFromDocument(VSCodeUtils.getActiveTextEditorOrThrow().document);
-            expect(openedNote?.fname).toEqual("eggs");
-            expect(VaultUtils.isEqual(openedNote!.vault, vaults[1], wsRoot)).toBeTruthy();
-            expect(prompt.calledOnce).toBeTruthy();
-            done();
+            try {
+              const editor = await VSCodeUtils.openNote(note);
+              editor.selection = LocationTestUtils.getPresetWikiLinkSelection({line: 7});
+              await new GotoNoteCommand().run();
+              const openedNote = VSCodeUtils.getNoteFromDocument(VSCodeUtils.getActiveTextEditorOrThrow().document);
+              expect(openedNote?.fname).toEqual("eggs");
+              expect(VaultUtils.isEqual(openedNote!.vault, vaults[1], wsRoot)).toBeTruthy();
+              expect(prompt.calledOnce).toBeTruthy();
+              done();
+            } finally {
+              prompt.restore();
+            }
           }
         });
       });

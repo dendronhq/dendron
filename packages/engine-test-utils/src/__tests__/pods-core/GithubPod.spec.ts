@@ -19,6 +19,7 @@ describe("GithubPod import pod", () => {
               url: "https://github.com/dendronhq/dendron/issues/902",
               number: 902,
               state: "OPEN",
+              id: 'sddsnjdek',
               labels: {
                 edges: [
                   {

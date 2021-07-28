@@ -67,7 +67,7 @@ jobs:
             node_modules
             packages/*/node_modules
             packages/*/.vscode-test
-          key: ${{ runner.os }}-${{ matrix.node-version }}-node-modules-${{ hashFiles('yarn.lock')}}
+          key: ${{ runner.os }}-${{ matrix.node-version }}-node-modules-1-${{ hashFiles('yarn.lock')}}
 
       - name: Restore Node modules cache for Windows
         if: runner.os == 'Windows'
@@ -78,7 +78,7 @@ jobs:
             node_modules
             packages\*\node_modules
             packages\*\.vscode-test
-          key: ${{ runner.os }}-${{ matrix.node-version }}-node-modules-${{ hashFiles('yarn.lock')}}
+          key: ${{ runner.os }}-${{ matrix.node-version }}-node-modules-1-${{ hashFiles('yarn.lock')}}
 
       - name: Set up Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v1

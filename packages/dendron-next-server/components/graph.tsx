@@ -21,9 +21,7 @@ import {
 import useApplyGraphConfig from "../hooks/useApplyGraphConfig";
 import { DendronProps } from "../lib/types";
 import useSyncGraphWithIDE from "../hooks/useSyncGraphWithIDE";
-import useGraphLifecycle from "../hooks/useGraphLifecycle";
 import { Button, Space, Spin, Typography } from "antd";
-import { api } from "../lib/config";
 
 export class GraphUtils {
   static isLocalGraph(config: GraphConfig) {

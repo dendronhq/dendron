@@ -5,7 +5,7 @@ import {
 } from "@dendronhq/common-frontend";
 import _ from "lodash";
 import React, { useEffect, useRef, useState } from "react";
-import cytoscape, { Core, EdgeDefinition, EventHandler, use } from "cytoscape";
+import cytoscape, { Core, EdgeDefinition, EventHandler} from "cytoscape";
 import euler from "cytoscape-euler";
 import { useThemeSwitcher } from "react-css-theme-switcher";
 import Head from "next/head";

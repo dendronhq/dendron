@@ -9,6 +9,7 @@ on:
       - dev-kevin
       - dev
       - feat/*
+      - fix/*
   pull_request:
     branches:
       - master

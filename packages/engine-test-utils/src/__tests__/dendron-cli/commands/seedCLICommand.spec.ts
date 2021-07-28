@@ -14,6 +14,7 @@ import {
   SeedService,
   SeedUtils,
 } from "@dendronhq/engine-server";
+import os from "os";
 import path from "path";
 import { runEngineTestV5 } from "../../../engine";
 import {
@@ -45,7 +46,16 @@ async function createSeed({ engine }: { engine: DEngineClient }) {
   return { registryFile, seedDict, seedId };
 }
 
-describe.skip("remove", () => {
+// Platform agnostic check file for a seed vault path
+function getSeedVaultPathForCheckFile(seedId: string) {
+  return path.join(`${seedId}`, `vault`).replace("\\", "\\\\")
+}
+
+// Skip on Windows for now until reliability issues can be fixed.
+//TODO: Re-enable for Windows
+const runTest = os.platform() === "win32" ? describe.skip : describe;
+
+runTest("remove", () => {
   const cmd = SeedCommands.REMOVE;
   test("error: nothing to remove", async () => {
     await runEngineTestV5(
@@ -142,7 +152,7 @@ describe.skip("remove", () => {
   });
 });
 
-describe.skip("add", () => {
+runTest("add", () => {
   const cmd = SeedCommands.ADD;
 
   test("error: does not exist", async () => {
@@ -205,7 +215,7 @@ describe.skip("add", () => {
             fpath: path.join(wsRoot, "dendron.code-workspace"),
             snapshot: true,
           },
-          path.join(`${id}`, "vault").replace("\\", "\\\\")
+          getSeedVaultPathForCheckFile(id)
         );
         checkVaults(
           {
@@ -275,7 +285,7 @@ describe.skip("add", () => {
             fpath: path.join(wsRoot, "dendron.code-workspace"),
             snapshot: true,
           },
-          path.join(`${id}`, `vault`).replace("\\", "\\\\")
+          getSeedVaultPathForCheckFile(id)
         );
         checkVaults(
           {
@@ -295,7 +305,7 @@ describe.skip("add", () => {
   });
 });
 
-describe.skip("init", () => {
+runTest("init", () => {
   const cmd = SeedCommands.INIT;
   const seed: SeedConfig = {
     name: "foo",
@@ -308,7 +318,7 @@ describe.skip("init", () => {
       url: "",
     },
   };
-  describe.skip("create workspace", () => {
+  runTest("create workspace", () => {
     const mode = SeedInitMode.CREATE_WORKSPACE;
     test(`basic`, async () => {
       await runEngineTestV5(
@@ -360,7 +370,7 @@ describe.skip("init", () => {
     });
   });
 
-  describe.skip("convert workspace", () => {
+  runTest("convert workspace", () => {
     const mode = SeedInitMode.CONVERT_WORKSPACE;
 
     const runInit = async (opts: { engine: DEngineClient; wsRoot: string }) => {

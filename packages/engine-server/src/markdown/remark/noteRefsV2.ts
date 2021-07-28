@@ -364,7 +364,8 @@ export function convertNoteRefASTV2(
     try {
       note = file2Note(npath, vault);
     } catch (err) {
-        throw new DendronError({ message: `error reading file, ${npath}` });
+        const msg = `error reading file, ${npath}`;
+        return MDUtilsV4.genMDMsg(msg);
     }
     
     try {

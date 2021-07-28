@@ -5,7 +5,7 @@ import {
 } from "@dendronhq/common-frontend";
 import _ from "lodash";
 import React, { useEffect, useRef, useState } from "react";
-import cytoscape, { Core, EdgeDefinition, EventHandler} from "cytoscape";
+import cytoscape, { Core, EdgeDefinition, EventHandler } from "cytoscape";
 import euler from "cytoscape-euler";
 import { useThemeSwitcher } from "react-css-theme-switcher";
 import Head from "next/head";
@@ -22,6 +22,7 @@ import useApplyGraphConfig from "../hooks/useApplyGraphConfig";
 import { DendronProps } from "../lib/types";
 import useSyncGraphWithIDE from "../hooks/useSyncGraphWithIDE";
 import { Button, Space, Spin, Typography } from "antd";
+
 
 export class GraphUtils {
   static isLocalGraph(config: GraphConfig) {
@@ -90,9 +91,8 @@ ${customCSS || ""}
 `;
 };
 
-export const getEulerConfig = (shouldAnimate: boolean) => ({
+export const getEulerConfig = (shouldAnimate: boolean, nodeCount: number) => ({
   name: "euler",
-  // @ts-ignore
   springLength: () => 80,
   springCoeff: () => 0.0008,
   mass: () => 4,
@@ -107,7 +107,7 @@ export const getEulerConfig = (shouldAnimate: boolean) => ({
   animationDuration: undefined,
   animationEasing: undefined,
   maxIterations: 1000,
-  maxSimulationTime: 1000,
+  maxSimulationTime: 4000,
   ungrabifyWhileSimulating: false,
   fit: true,
   padding: 30,
@@ -191,7 +191,7 @@ export default function Graph({
         wheelSensitivity: engine.config?.graph?.zoomSpeed || 1,
 
         // Zoom levels
-        minZoom: 0.25,
+        minZoom: 0.1,
         maxZoom: 5,
 
         // Options to improve performance
@@ -215,7 +215,7 @@ export default function Graph({
         type === "schema" ||
         (!isLargeGraph && !GraphUtils.isLocalGraph(config));
 
-      network.layout(getEulerConfig(shouldAnimate)).run();
+      network.layout(getEulerConfig(shouldAnimate, nodes.length)).run();
 
       network.on("select", (e) => onSelect(e));
 
@@ -333,7 +333,10 @@ export default function Graph({
       >
         {!isReady && <Spin size="large" />}
         {isReady && showNoteGraphMessage && (
-          <NoteGraphMessage updateConfigField={updateConfigField} setIsReady={setIsReady} />
+          <NoteGraphMessage
+            updateConfigField={updateConfigField}
+            setIsReady={setIsReady}
+          />
         )}
       </div>
       <div
@@ -365,7 +368,7 @@ export default function Graph({
 
 const NoteGraphMessage = ({
   updateConfigField,
-  setIsReady
+  setIsReady,
 }: {
   updateConfigField: (key: string, value: string | number | boolean) => void;
   setIsReady: (isReady: boolean) => void;
@@ -395,10 +398,9 @@ const NoteGraphMessage = ({
         // Slight timeout to show loading spinner before re-rendering,
         // as re-rendering is render-blocking
         setTimeout(() => {
-          updateConfigField("options.show-local-graph", false)
-        }, 50)
-      }
-      }
+          updateConfigField("options.show-local-graph", false);
+        }, 50);
+      }}
       type="primary"
       size="large"
     >

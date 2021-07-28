@@ -13,6 +13,8 @@ import { describe } from "mocha";
 import * as vscode from "vscode";
 import { LookupNoteTypeEnum, LookupSelectionTypeEnum, LookupSplitTypeEnum, LookupEffectTypeEnum } from "../../commands/LookupCommand";
 import { NoteLookupCommand, CommandOutput } from "../../commands/NoteLookupCommand";
+// import { LookupControllerV3 } from "../../components/lookup/LookupControllerV3";
+// import { ILookupProviderV3 } from "../../components/lookup/LookupProviderV3";
 import { 
   JournalBtn,
   ScratchBtn,
@@ -807,6 +809,144 @@ suite("NoteLookupCommand", function () {
           done();
         }
       }); 
+    });
+  });
+
+  describe.only("journal + selection2link interactions", () => {
+    const prepareCommandFunc = async ({ vaults, engine }: any) => {
+      const cmd = new NoteLookupCommand();
+      stubVaultPick(vaults);
+
+      const fooNoteEditor = await VSCodeUtils.openNote(engine.notes["foo"]);
+
+      // selects "foo body"
+      fooNoteEditor.selection = new vscode.Selection(7, 0, 7, 12);
+      const { text } = VSCodeUtils.getSelection();
+      expect(text).toEqual("foo body");
+
+      const { controller } = await cmd.gatherInputs({
+        noteType: LookupNoteTypeEnum.journal,
+        selectionType: LookupSelectionTypeEnum.selection2link
+      });
+      controller.quickpick.show();
+      return { controller }
+    }
+
+    test("journal and selection2link both applied", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+        },
+        onInit: async ({ vaults, engine }) => {
+          const { controller } = await prepareCommandFunc({ vaults, engine });
+
+          const { journalBtn } = getNoteTypeButtons(
+            controller.quickpick.buttons
+          );
+
+          const { selection2linkBtn } = getSelectionTypeButtons(
+            controller.quickpick.buttons
+          )
+
+          expect(journalBtn.pressed).toBeTruthy();
+          expect(selection2linkBtn.pressed).toBeTruthy();
+
+          const today = Time.now().toFormat(engine.config.journal.dateFormat);
+          expect(controller.quickpick.value).toEqual(`foo.journal.${today}.foo-body`);
+
+          done();
+        }
+      }); 
+    });
+
+    // doesn't work
+    test.skip("toggling journal modifier off will only leave selection2link applied", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+        },
+        onInit: async ({ vaults, engine }) => {
+          const { controller } = await prepareCommandFunc({ vaults, engine });
+
+          const { journalBtn } = getNoteTypeButtons(
+            controller.quickpick.buttons
+          );
+
+          const { selection2linkBtn } = getSelectionTypeButtons(
+            controller.quickpick.buttons
+          )
+
+          expect(journalBtn.pressed).toBeTruthy();
+          expect(selection2linkBtn.pressed).toBeTruthy();
+
+          await controller.onTriggerButton(journalBtn);
+          expect(controller.quickpick.value).toEqual(`foo.foo-body`);
+
+          done();
+        }
+      });  
+    });
+
+    test("toggling selection2link modifier off will only leave journal modifier applied", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+        },
+        onInit: async ({ vaults, engine }) => {
+          const { controller } = await prepareCommandFunc({ vaults, engine });
+
+          const { journalBtn } = getNoteTypeButtons(
+            controller.quickpick.buttons
+          );
+
+          const { selection2linkBtn } = getSelectionTypeButtons(
+            controller.quickpick.buttons
+          )
+
+          expect(journalBtn.pressed).toBeTruthy();
+          expect(selection2linkBtn.pressed).toBeTruthy();
+
+          await controller.onTriggerButton(selection2linkBtn);
+          const today = Time.now().toFormat(engine.config.journal.dateFormat);
+          expect(controller.quickpick.value).toEqual(`foo.journal.${today}`);
+
+          done();
+        }
+      });  
+    });
+
+    test("toggling note type works, and keeps selection2link applied", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+        },
+        onInit: async ({ vaults, engine }) => {
+          const { controller } = await prepareCommandFunc({ vaults, engine });
+
+          const { journalBtn, scratchBtn } = getNoteTypeButtons(
+            controller.quickpick.buttons
+          );
+
+          const { selection2linkBtn } = getSelectionTypeButtons(
+            controller.quickpick.buttons
+          )
+
+          expect(journalBtn.pressed).toBeTruthy();
+          expect(selection2linkBtn.pressed).toBeTruthy();
+
+          await controller.onTriggerButton(scratchBtn);
+          const today = Time.now().toFormat(engine.config.journal.dateFormat);
+          const quickpickValue = controller.quickpick.value;
+          expect(quickpickValue.startsWith(`scratch.${today}`)).toBeTruthy();
+          expect(quickpickValue.endsWith(`.foo-body`)).toBeTruthy();
+
+          done();
+        }
+      });  
     });
   });
 });

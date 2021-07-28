@@ -11,7 +11,7 @@ import {
   schemaModuleOpts2File,
   tmpDir,
 } from "@dendronhq/common-server";
-import { FileTestUtils, sinon } from "@dendronhq/common-test-utils";
+import { FileTestUtils } from "@dendronhq/common-test-utils";
 import { DConfig, WorkspaceService } from "@dendronhq/engine-server";
 import {
   checkVaults,
@@ -21,6 +21,7 @@ import {
 import fs from "fs-extra";
 import { describe } from "mocha";
 import path from "path";
+import sinon from "sinon";
 import * as vscode from "vscode";
 import { VaultAddCommand } from "../../commands/VaultAddCommand";
 import { expect, runSingleVaultTest } from "../testUtilsv2";

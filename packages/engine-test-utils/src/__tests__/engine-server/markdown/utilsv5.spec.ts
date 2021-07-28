@@ -175,7 +175,7 @@ describe("MDUtils.proc", () => {
       [DendronASTDest.HTML]: {
         [ProcFlavor.REGULAR]: async ({ extra }) => {
           const { resp } = extra;
-          await checkString(resp.contents, "Did not find");
+          await checkString(resp.contents, "error reading file");
         },
         [ProcFlavor.PREVIEW]: ProcFlavor.REGULAR,
         [ProcFlavor.PUBLISHING]: ProcFlavor.REGULAR,

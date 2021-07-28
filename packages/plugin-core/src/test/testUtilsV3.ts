@@ -19,7 +19,6 @@ import {
   EngineTestUtilsV4,
   PreSetupCmdHookFunction,
   PreSetupHookFunction,
-  sinon,
 } from "@dendronhq/common-test-utils";
 import {
   DConfig,
@@ -59,6 +58,7 @@ import {
   stubWorkspaceFolders,
 } from "./testUtilsv2";
 import os from "os";
+import sinon from "sinon";
 
 export const DENDRON_REMOTE =
   "https://github.com/dendronhq/dendron-site-vault.git";

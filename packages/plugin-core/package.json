@@ -729,7 +729,6 @@
     "watch": "yarn compile --watch",
     "build": "yarn compile",
     "compile": "tsc -p tsconfig.build.json",
-    "pretest": "yarn compile",
     "test": "node ./out/src/test/runTestInteg.js",
     "format": "echo nop",
     "vscode:uninstall": "node ./out/src/scripts/uninstallHook.js"

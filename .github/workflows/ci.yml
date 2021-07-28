@@ -3,12 +3,8 @@ name: CI
 on:
   push:
     branches:
-      - github-actions
       - master
       - integ-publish
-      - dev-kevin
-      - dev
-      - feat/*
   pull_request:
     branches:
       - master
@@ -45,7 +41,7 @@ jobs:
             env: Get-ChildItem Env:\
             versions: choco --version
 
-    timeout-minutes: 45
+    timeout-minutes: 40
 
     runs-on: ${{ matrix.os }}
 
@@ -71,7 +67,7 @@ jobs:
             node_modules
             packages/*/node_modules
             packages/*/.vscode-test
-          key: ${{ runner.os }}-${{ matrix.node-version }}-node-modules-${{ hashFiles('yarn.lock')}}
+          key: ${{ runner.os }}-${{ matrix.node-version }}-node-modules-1-${{ hashFiles('yarn.lock')}}
 
       - name: Restore Node modules cache for Windows
         if: runner.os == 'Windows'
@@ -82,7 +78,7 @@ jobs:
             node_modules
             packages\*\node_modules
             packages\*\.vscode-test
-          key: ${{ runner.os }}-${{ matrix.node-version }}-node-modules-${{ hashFiles('yarn.lock')}}
+          key: ${{ runner.os }}-${{ matrix.node-version }}-node-modules-1-${{ hashFiles('yarn.lock')}}
 
       - name: Set up Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v1

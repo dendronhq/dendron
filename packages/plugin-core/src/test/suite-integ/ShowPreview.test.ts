@@ -49,20 +49,15 @@ suite("ShowPreview", function () {
 				);
 				const note = engine.notes["foo"];
 				await VSCodeUtils.openNote(note)
-				const stub = sinon.stub(MarkdownUtils, "hasLegacyPreview").returns(false)
+				sinon.stub(MarkdownUtils, "hasLegacyPreview").returns(false)
 				// @ts-ignore
 				const installPrompt = sinon.stub(MarkdownUtils, "promptInstallLegacyPreview").returns(()=>{})
-				try {
-					await new ShowPreviewCommand().execute();
-					expect(installPrompt.called).toBeTruthy();
-				}
-				finally {
-					stub.restore();
-					installPrompt.restore();
-					done();
-				}
+				await new ShowPreviewCommand().execute();
+				expect(installPrompt.called).toBeTruthy();
+				done();
 			},
 		});
+
 	});
 
 	test("ok: show legacy preview when installed ", (done) => {
@@ -82,18 +77,14 @@ suite("ShowPreview", function () {
 				);
 				const note = engine.notes["foo"];
 				await VSCodeUtils.openNote(note)
-				const stub = sinon.stub(MarkdownUtils, "hasLegacyPreview").returns(true)
+				sinon.stub(MarkdownUtils, "hasLegacyPreview").returns(true)
 				const showLegacyPreview = sinon.stub(MarkdownUtils, "showLegacyPreview");
-				try {
-					await new ShowPreviewCommand().execute();
-					expect(showLegacyPreview.called).toBeTruthy();
-				}
-				finally {
-					stub.restore();
-					showLegacyPreview.restore();
-					done();
-				}
+				await new ShowPreviewCommand().execute();
+				expect(showLegacyPreview.called).toBeTruthy();
+				done();
 			},
 		});
+
 	});
+	
 });

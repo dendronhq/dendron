@@ -3,13 +3,8 @@ name: CI
 on:
   push:
     branches:
-      - github-actions
       - master
       - integ-publish
-      - dev-kevin
-      - dev
-      - feat/*
-      - fix/*
   pull_request:
     branches:
       - master

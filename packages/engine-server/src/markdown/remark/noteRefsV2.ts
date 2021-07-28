@@ -443,7 +443,7 @@ export function convertNoteRefASTV2(
         return paragraph(data);
       }
     } catch (err) {
-      const msg = `Did not find ${npath}`;
+      const msg = `Error rendering note ${note?.fname}`;
       return MDUtilsV4.genMDMsg(msg);
     }
   });

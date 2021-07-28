@@ -90,8 +90,7 @@ suite("CopyNoteUrl", function () {
         const seedId = TestSeedUtils.defaultSeedId();
         engine.config = getWS().config;
         engine.vaults = engine.config.vaults;
-        // TODO: ugly temporary hack. can be removed when [[Unify Runenginetest and Runworkspacetest|scratch.2021.06.17.164102.unify-runenginetest-and-runworkspacetest]] is implemented
-        const stub = sinon.stub(VSCodeUtils, "getNoteFromDocument").returns(
+        sinon.stub(VSCodeUtils, "getNoteFromDocument").returns(
           await NoteTestUtilsV4.createNote({
             fname: "root",
             vault: vaults[0],
@@ -99,20 +98,16 @@ suite("CopyNoteUrl", function () {
           })
         );
 
-        try {
-          const vault = VaultUtils.getVaultByName({
-            vaults: getWS().config.vaults,
-            vname: seedId,
-          })!;
-          await VSCodeUtils.openNoteByPath({ vault, fname: "root" });
-          VSCodeUtils.getActiveTextEditorOrThrow().selection =
-            new vscode.Selection(0, 0, 0, 0); // Otherwise it has the header selected
-          const link = await new CopyNoteURLCommand().run();
-          expect("https://foo.com").toEqual(link);
-        } finally {
-          stub.restore();
-          done();
-        }
+        const vault = VaultUtils.getVaultByName({
+          vaults: getWS().config.vaults,
+          vname: seedId,
+        })!;
+        await VSCodeUtils.openNoteByPath({ vault, fname: "root" });
+        VSCodeUtils.getActiveTextEditorOrThrow().selection =
+          new vscode.Selection(0, 0, 0, 0); // Otherwise it has the header selected
+        const link = await new CopyNoteURLCommand().run();
+        expect("https://foo.com").toEqual(link);
+        done();
       },
     });
   });
@@ -139,14 +134,13 @@ suite("CopyNoteUrl", function () {
         engine.config = getWS().config;
         engine.vaults = engine.config.vaults;
         // TODO: ugly temporary hack. can be removed when [[Unify Runenginetest and Runworkspacetest|scratch.2021.06.17.164102.unify-runenginetest-and-runworkspacetest]] is implemented
-        const stub = sinon.stub(VSCodeUtils, "getNoteFromDocument").returns(
+        sinon.stub(VSCodeUtils, "getNoteFromDocument").returns(
           await NoteTestUtilsV4.createNote({
             fname: "foo",
             vault: vaults[0],
             wsRoot,
           })
         );
-        try {
           const vault = VaultUtils.getVaultByName({
             vaults: getWS().config.vaults,
             vname: seedId,
@@ -156,10 +150,7 @@ suite("CopyNoteUrl", function () {
             new vscode.Selection(0, 0, 0, 0); // Otherwise it has the header selected
           const link = await new CopyNoteURLCommand().run();
           expect("https://foo.com").toEqual(link);
-        } finally {
-          stub.restore();
           done();
-        }
       },
     });
   });

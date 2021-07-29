@@ -16,34 +16,37 @@ import {
 } from "antd";
 import { Badge, ConfigProvider } from "antd";
 import generateCalendar from "antd/lib/calendar/generateCalendar";
+import { DateTime } from "luxon";
+import luxonGenerateConfig from "./luxon";
 import classNames from "classnames";
 import _ from "lodash";
-import type { Moment } from "moment";
 import moment from "moment";
-import momentGenerateConfig from "rc-picker/lib/generate/moment";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { DendronProps } from "../../lib/types";
 
-function isSameYear(date1: Moment, date2: Moment) {
+const Calendar = generateCalendar<DateTime>(luxonGenerateConfig);
+
+type CalendarProps = AntdCalendarProps<DateTime>;
+
+function isSameYear(date1: DateTime, date2: DateTime) {
   return (
     date1 &&
     date2 &&
-    momentGenerateConfig.getYear(date1) === momentGenerateConfig.getYear(date2)
+    luxonGenerateConfig.getYear(date1) === luxonGenerateConfig.getYear(date2)
   );
 }
 
-function isSameMonth(date1: Moment, date2: Moment) {
+function isSameMonth(date1: DateTime, date2: DateTime) {
   return (
     isSameYear(date1, date2) &&
-    momentGenerateConfig.getMonth(date1) ===
-      momentGenerateConfig.getMonth(date2)
+    luxonGenerateConfig.getMonth(date1) === luxonGenerateConfig.getMonth(date2)
   );
 }
 
-function isSameDate(date1: Moment, date2: Moment) {
+function isSameDate(date1: DateTime, date2: DateTime) {
   return (
     isSameMonth(date1, date2) &&
-    momentGenerateConfig.getDate(date1) === momentGenerateConfig.getDate(date2)
+    luxonGenerateConfig.getDate(date1) === luxonGenerateConfig.getDate(date2)
   );
 }
 
@@ -52,11 +55,8 @@ function getMaybeDatePortion({ fname }: NoteProps, journalName: string) {
   return fname.slice(journalIndex + journalName.length + 1);
 }
 
-const today = momentGenerateConfig.getNow();
-const Calendar = generateCalendar<Moment>(momentGenerateConfig);
+const today = luxonGenerateConfig.getNow();
 const { EngineSliceUtils } = engineSlice;
-
-type CalendarProps = AntdCalendarProps<Moment>;
 
 function CalendarView({ engine, ide }: DendronProps) {
   // --- init
@@ -89,13 +89,13 @@ function CalendarView({ engine, ide }: DendronProps) {
     defaultJournalDateFormat = defaultJournalDateFormat.replace(/dd/, "DD");
   }
 
-  useEffect(() => {
-    moment.updateLocale(locale, {
-      week: {
-        dow: dayOfWeek!,
-      },
-    });
-  }, [dayOfWeek, locale]);
+  // useEffect(() => {
+  //   moment.updateLocale(locale, {
+  //     week: {
+  //       dow: dayOfWeek!,
+  //     },
+  //   });
+  // }, [dayOfWeek, locale]);
 
   const groupedDailyNotes = useMemo(() => {
     const vaultNotes = _.values(notes).filter((notes) => {
@@ -109,7 +109,7 @@ function CalendarView({ engine, ide }: DendronProps) {
       note.fname.startsWith(`${dailyJournalDomain}.`)
     );
     const result = _.groupBy(dailyNotes, (note) => {
-      return getMaybeDatePortion(note, defaultJournalName!);
+      return getMaybeDatePortion(note, defaultJournalName || "");
     });
     return result;
   }, [notes, defaultJournalName, currentVault?.fsPath]);
@@ -118,30 +118,30 @@ function CalendarView({ engine, ide }: DendronProps) {
     if (noteActive) {
       const maybeDatePortion = getMaybeDatePortion(
         noteActive,
-        defaultJournalName!
+        defaultJournalName || ""
       );
 
       return maybeDatePortion && _.first(groupedDailyNotes[maybeDatePortion])
-        ? moment(maybeDatePortion, defaultJournalDateFormat)
+        ? DateTime.fromFormat(maybeDatePortion, defaultJournalDateFormat || "")
         : undefined;
     }
   }, [noteActive, groupedDailyNotes]);
 
   const getDateKey = useCallback<
-    (date: Moment, mode?: CalendarProps["mode"]) => string
+    (date: DateTime, mode?: CalendarProps["mode"]) => string
   >(
     (date, mode) => {
       const format =
         (mode || activeMode) === "month"
           ? defaultJournalDateFormat || "y.MM.dd"
           : "y.MM"; // TODO compute format for currentMode="year" from config
-      return date.format(format);
+      return date.toFormat(format);
     },
     [activeMode, defaultJournalDateFormat]
   );
 
   const onSelect = useCallback<
-    (date: Moment, mode?: CalendarProps["mode"]) => void
+    (date: DateTime, mode?: CalendarProps["mode"]) => void
   >(
     (date, mode) => {
       logger.info({ ctx: "onSelect", date });
@@ -170,7 +170,7 @@ function CalendarView({ engine, ide }: DendronProps) {
   const onClickToday = useCallback(() => {
     const mode = "month";
     setActiveMode(mode);
-    onSelect(moment(), mode);
+    onSelect(DateTime.now(), mode);
   }, [onSelect]);
 
   const dateFullCellRender = useCallback<
@@ -240,7 +240,7 @@ function CalendarView({ engine, ide }: DendronProps) {
             className={`${calendarPrefixCls}-date-value`}
             style={{ color: !dailyNote ? "gray" : undefined }}
           >
-            {_.padStart(String(momentGenerateConfig.getDate(date)), 2, "0")}
+            {_.padStart(String(luxonGenerateConfig.getDate(date)), 2, "0")}
           </div>
           <div className={`${calendarPrefixCls}-date-content`}>{dateCell}</div>
         </div>

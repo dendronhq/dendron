@@ -1,6 +1,6 @@
 import { SegmentClient } from "@dendronhq/common-server";
-import { FileTestUtils } from "@dendronhq/common-test-utils";
 import { DConfig } from "@dendronhq/engine-server";
+import { TestEngineUtils } from "@dendronhq/engine-test-utils";
 import { describe } from "mocha";
 import sinon from "sinon";
 import * as vscode from "vscode";
@@ -16,7 +16,7 @@ suite("telemetry", function () {
 
   ctx = setupBeforeAfter(this, {
     beforeHook: () => {
-      FileTestUtils.mockHome();
+      TestEngineUtils.mockHomeDir();
     },
   });
 

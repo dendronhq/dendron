@@ -449,7 +449,7 @@ suite("MoveNoteCommand", function () {
     });
   });
 
-  test.only("move note to new vault", (done) => {
+  test("move note to new vault", (done) => {
     runLegacyMultiWorkspaceTest({
       ctx,
       preSetupHook: async ({ wsRoot, vaults }) => {

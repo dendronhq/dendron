@@ -10,9 +10,6 @@ export {
   select,
   selectAll,
   LinkFilter,
-  LINK_NAME,
-  ALIAS_NAME,
-  LINK_CONTENTS,
 } from "./utils";
 export { wikiLinks, WikiLinksOpts, matchWikiLink } from "./wikiLinks";
 export {

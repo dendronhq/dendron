@@ -7,6 +7,7 @@ import title from "title";
 import { URI } from "vscode-uri";
 import { CONSTANTS, ERROR_STATUS } from "./constants";
 import { DendronError } from "./error";
+import { LINK_NAME } from "./md";
 import { Time } from "./time";
 import {
   DEngineClient,
@@ -328,6 +329,22 @@ export class NoteUtils {
   static RE_FM_CREATED = /^created:.*$/m;
   static RE_FM_UPDATED_OR_CREATED =
     /^(?<beforeTimestamp>(updated|created): *)(?<timestamp>[0-9]+)$/;
+  /** Extracts all tags from the frontmatter.
+   * 
+   * Extracted tags will be a single string, or a list of strings:
+   * 
+   * "foo"
+   * 
+   * or
+   * 
+   * "  - foo\n  - bar"
+   * 
+   * Use `RE_FM_LIST_ITEM` to check if it's a list and extract individual items.
+   * 
+   */
+  static RE_FM_TAGS = new RegExp(`^tags: *(?<tagsContents>${LINK_NAME}|(\n+ *- *${LINK_NAME})+)`, "m");
+  /** Extracts strings from a YAML list. */
+  static RE_FM_LIST_ITEM = new RegExp(`^ *- *(?<listItem>${LINK_NAME})`, "g");
 
   static addBacklink({
     from,

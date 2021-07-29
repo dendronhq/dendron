@@ -7,17 +7,17 @@ import {
   NoteProps,
   NoteUtils,
   TAGS_HIERARCHY,
+  LINK_NAME,
+  ALIAS_NAME,
   VaultUtils,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import {
-  ALIAS_NAME,
   AnchorUtils,
   DendronASTDest,
   DendronASTTypes,
   HASHTAG_REGEX_LOOSE,
   LinkUtils,
-  LINK_NAME,
   MDUtilsV5,
   ProcFlavor,
 } from "@dendronhq/engine-server";

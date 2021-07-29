@@ -22,6 +22,7 @@ import {
   VaultUtils,
   TAGS_HIERARCHY,
   TagUtils,
+  LINK_CONTENTS,
 } from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-server";
 import _ from "lodash";
@@ -64,27 +65,6 @@ const toString = require("mdast-util-to-string");
 export { mdastBuilder };
 export { select, selectAll } from "unist-util-select";
 export { visit };
-
-export const ALIAS_DIVIDER = "|";
-
-/** A regexp fragment that matches a link name (e.g. a note name) */
-export const LINK_NAME = "[^#\\|>\\]\\[]+";
-/** A regexp fragment that matches an alias name */
-export const ALIAS_NAME = "[^\\|>\\]\\[]+"; // aliases may contain # symbols
-/** A regexp fragment that matches the contents of a link (without the brackets) */
-export const LINK_CONTENTS =
-  "" +
-  // alias?
-  `(` +
-  `(?<alias>${ALIAS_NAME}(?=\\|))` +
-  "\\|" +
-  ")?" +
-  // name
-  `(?<value>${LINK_NAME})?` +
-  // anchor?
-  `(#(?<anchor>${LINK_NAME}))?` +
-  // filters?
-  `(>(?<filtersRaw>.*))?`;
 
 export function addError(proc: Processor, err: DendronError) {
   const errors = proc.data("errors") as DendronError[];

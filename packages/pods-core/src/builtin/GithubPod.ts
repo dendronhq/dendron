@@ -388,9 +388,8 @@ export class GithubPublishPod extends PublishPod<GithubPublishPodConfig> {
   }
 
 /**
+ * method to get all the labels of a repository in key value pair
  * 
- * @param opts 
- * @returns 
  */
 
 getLabelsFromGithub = async (opts: Partial<GithubPublishPodConfig>) => {
@@ -430,9 +429,7 @@ getLabelsFromGithub = async (opts: Partial<GithubPublishPodConfig>) => {
 }
 
 /**
- * 
- * @param opts 
- * @returns 
+ * method to update the issue in github
  */
 
 updateIssue = async(opts: 
@@ -487,6 +484,7 @@ updateIssue = async(opts:
       if(labelsHashMap[tag])
           labelIDs.push(labelsHashMap[tag])
     })
+    
       if(!_.isUndefined(tags) && labelIDs.length === 0) {
         return "Github: The labels in the tag does not belong to selected repository";
       }

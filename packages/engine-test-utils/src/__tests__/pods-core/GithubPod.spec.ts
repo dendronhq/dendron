@@ -208,7 +208,7 @@ describe("github publish pod", () => {
           custom: {
               status: 'OPEN',
               issueID: 'hsahdla',
-              tags: ["area.misc","type.bug"]
+              tags: ["tags.area.misc","tags.type.bug"]
           }
         }
   });

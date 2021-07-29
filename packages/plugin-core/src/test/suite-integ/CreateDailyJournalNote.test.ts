@@ -8,12 +8,13 @@ import {
   EditorUtils,
 } from "../testUtilsV3";
 import { DVault, VaultUtils } from "@dendronhq/common-all";
-import { NoteTestUtilsV4, sinon } from "@dendronhq/common-test-utils";
+import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import _ from "lodash";
 import { PickerUtilsV2 } from "../../components/lookup/utils";
 import { getActiveEditorBasename } from "../testUtils";
 import { CONFIG } from "../../constants"
 import { VSCodeUtils } from "../../utils";
+import sinon from "sinon";
 
 const stubVaultPick = (vaults: DVault[]) => {
   const vault = _.find(vaults, { fsPath: vaults[2].fsPath });

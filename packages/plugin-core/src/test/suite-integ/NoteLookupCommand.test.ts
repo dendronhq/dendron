@@ -1,5 +1,5 @@
 import { DNodePropsQuickInputV2, DVault, NoteUtils, Time } from "@dendronhq/common-all";
-import { NoteTestUtilsV4, NOTE_PRESETS_V4, sinon } from "@dendronhq/common-test-utils";
+import { NoteTestUtilsV4, NOTE_PRESETS_V4 } from "@dendronhq/common-test-utils";
 import {
   ENGINE_HOOKS,
   ENGINE_HOOKS_MULTI,
@@ -24,6 +24,7 @@ import {
 } from "../testUtilsV3";
 import { DendronWorkspace } from "../../workspace";
 import { CONFIG } from "../../constants";
+import sinon from "sinon";
 
 
 const stubVaultPick = (vaults: DVault[]) => {

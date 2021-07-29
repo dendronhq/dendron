@@ -12,7 +12,7 @@ import { describe } from "mocha";
 // // as well as import your extension to test it
 import * as vscode from "vscode";
 import { LookupNoteTypeEnum, LookupSelectionTypeEnum, LookupSplitTypeEnum, LookupEffectTypeEnum } from "../../commands/LookupCommand";
-import { NoteLookupCommand, CommandOutput } from "../../commands/NoteLookupCommand";
+import { NoteLookupCommand, CommandOutput, CommandRunOpts } from "../../commands/NoteLookupCommand";
 import { 
   JournalBtn,
   ScratchBtn,
@@ -1183,10 +1183,58 @@ suite("NoteLookupCommand", function () {
     });
   });
 
-  describe("split + multiselect interactions", () => {
-
+  describe("multiselect interactions", () => {
     // TODO: there's gotta be a better way to mock this.
-    test.only("should have n+1 columns after command", (done) => {
+    const prepareCommandFunc = async ({ wsRoot, vaults, engine, opts }: any) => {
+      const cmd = new NoteLookupCommand();
+      const notesToSelect = ["foo.ch1", "bar", "lorem", "ipsum"].map((fname) => engine.notes[fname]);
+      const selectedItems = notesToSelect.map((note) => {
+        return DNodeUtils.enhancePropForQuickInputV3({
+          props: note,
+          schemas: engine.schemas,
+          wsRoot,
+          vaults
+        });
+      }) as NoteQuickInput[];
+
+      const runOpts = {
+        multiselect: true,
+        noConfirm: true
+      } as CommandRunOpts;
+
+      if (opts.split) runOpts.splitType = LookupSplitTypeEnum.horizontal;
+      
+      const gatherOut = await cmd.gatherInputs(runOpts);
+
+      const mockQuickPick = createMockQuickPick({
+        value: "foo.ch1",
+        selectedItems,
+        canSelectMany: true,
+        buttons: gatherOut.quickpick.buttons,
+      });
+
+      if (opts.copyLink) {
+        mockQuickPick.show();
+        const { copyNoteLinkBtn } = getEffectTypeButtons(mockQuickPick.buttons);
+        await gatherOut.controller.onTriggerButton(copyNoteLinkBtn);
+        const content = await clipboard.readText();
+        return { content };
+      };
+
+      mockQuickPick.showNote = gatherOut.quickpick.showNote;
+      
+      sinon.stub(cmd, "enrichInputs").returns(
+        Promise.resolve({
+          quickpick: mockQuickPick,
+          controller: gatherOut.controller,
+          provider: gatherOut.provider, 
+          selectedItems
+        })
+      );
+      return { cmd };
+    } 
+    
+    test("split + multiselect: should have n+1 columns", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
         preSetupHook: async ({ wsRoot, vaults }) => {
@@ -1207,44 +1255,17 @@ suite("NoteLookupCommand", function () {
           VSCodeUtils.closeAllEditors();
 
           VSCodeUtils.openNote(engine.notes["foo"]);
-          const cmd = new NoteLookupCommand();
-          const notesToSelect = ["foo.ch1", "bar", "lorem", "ipsum"].map((fname) => engine.notes[fname]);
-          const selectedItems = notesToSelect.map((note) => {
-            return DNodeUtils.enhancePropForQuickInputV3({
-              props: note,
-              schemas: engine.schemas,
-              wsRoot,
-              vaults
-            });
-          }) as NoteQuickInput[];
-
-          const gatherOut = await cmd.gatherInputs({
-            multiSelect: true,
-            splitType: LookupSplitTypeEnum.horizontal,
-            noConfirm: true,
+          const { cmd } = await prepareCommandFunc({
+            wsRoot,
+            vaults,
+            engine,
+            opts: { split: true }
           });
-
-          const mockQuickPick = createMockQuickPick({
-            value: "foo.ch1",
-            selectedItems,
-            canSelectMany: true,
-            buttons: gatherOut.quickpick.buttons,
-          });
-          mockQuickPick.showNote = gatherOut.quickpick.showNote;
-          
-          sinon.stub(cmd, "enrichInputs").returns(
-            Promise.resolve({
-              quickpick: mockQuickPick,
-              controller: gatherOut.controller,
-              provider: gatherOut.provider, 
-              selectedItems
-            })
-          );
 
           // if we don't wait here, the test runs too fast and misses one note.
           // TODO: find a better way to get past this.
           await new Promise((resolve) => setTimeout(resolve, 500));  
-          await cmd.run({
+          await cmd!.run({
             multiSelect: true,
             splitType: LookupSplitTypeEnum.horizontal,
             noConfirm: true,
@@ -1256,6 +1277,48 @@ suite("NoteLookupCommand", function () {
           done();
         }
       });
+    });
+
+    // FIX: doesn't work
+    // clipboard testing is flaky
+    test.skip("copyNoteLink + multiselect: should copy link of all selected notes", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+          await NoteTestUtilsV4.createNote({
+            fname: "lorem",
+            vault: vaults[0],
+            wsRoot
+          });
+          await NoteTestUtilsV4.createNote({
+            fname: "ipsum",
+            vault: vaults[0],
+            wsRoot
+          });
+        },
+        onInit: async ({ wsRoot, vaults, engine }) => {
+          // make clean slate.
+          VSCodeUtils.closeAllEditors();
+
+          VSCodeUtils.openNote(engine.notes["foo"]);
+          
+          const { content } = await prepareCommandFunc({ 
+            wsRoot,
+            vaults,
+            engine,
+            opts: { copyLink: true }
+          });
+          
+          expect(content).toEqual([
+            "[[Ch1foo.ch1]]",
+            "[[Bar|bar]]",
+            "[[Lorem|lorem]]",
+            "[[Ipsum|ipsum]]",
+          ].join("\n"));
+          done();
+        }
+      }); 
     });
   });
 });

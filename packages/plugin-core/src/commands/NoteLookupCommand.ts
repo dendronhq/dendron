@@ -45,7 +45,7 @@ import {
   LookupSplitTypeEnum,
 } from "./LookupCommand";
 
-type CommandRunOpts = {
+export type CommandRunOpts = {
   initialValue?: string;
   noConfirm?: boolean;
   fuzzThreshold?: number;

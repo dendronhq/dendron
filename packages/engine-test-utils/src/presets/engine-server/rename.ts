@@ -985,6 +985,90 @@ const NOTES = {
       },
     }
   ),
+  FRONTMATTER_TAG_SINGLE_REMOVE: new TestPresetEntryV4(
+    async ({ wsRoot, vaults, engine }) => {
+      await engine.renameNote({
+        oldLoc: {
+          fname: "tags.foo",
+          vaultName: VaultUtils.getName(vaults[0]),
+        },
+        newLoc: { fname: "bar", vaultName: VaultUtils.getName(vaults[0]) },
+      });
+      const note = NoteUtils.getNoteByFnameV5({fname: "primary", notes: engine.notes, wsRoot, vault: vaults[0]});
+      const noteFileContents = await readFile(NoteUtils.getFullPath({note: note!, wsRoot}), "utf-8");
+      const containsTag = await AssertUtils.assertInString({body: noteFileContents, nomatch: ["tags: foo", "tags: bar", "tags: undefined", "tags: \"undefined\""]});
+
+      return [
+        {
+          actual: note?.tags,
+          expected: undefined,
+        },
+        {
+          actual: containsTag,
+          expected: true,
+        },
+      ];
+    },
+    {
+      preSetupHook: async ({ vaults, wsRoot }) => {
+        await NoteTestUtilsV4.createNote({
+          fname: "tags.foo",
+          vault: vaults[0],
+          wsRoot,
+        });
+        await NoteTestUtilsV4.createNote({
+          fname: "primary",
+          vault: vaults[0],
+          wsRoot,
+          props: {
+            tags: "foo",
+          },
+        });
+      },
+    }
+  ),
+  FRONTMATTER_TAG_MULTI_REMOVE: new TestPresetEntryV4(
+    async ({ wsRoot, vaults, engine }) => {
+      await engine.renameNote({
+        oldLoc: {
+          fname: "tags.foo",
+          vaultName: VaultUtils.getName(vaults[0]),
+        },
+        newLoc: { fname: "bar", vaultName: VaultUtils.getName(vaults[0]) },
+      });
+      const note = NoteUtils.getNoteByFnameV5({fname: "primary", notes: engine.notes, wsRoot, vault: vaults[0]});
+      const noteFileContents = await readFile(NoteUtils.getFullPath({note: note!, wsRoot}), "utf-8");
+      const containsTag = await AssertUtils.assertInString({body: noteFileContents, nomatch: ["foo", "bar", "undefined"]});
+
+      return [
+        {
+          actual: note?.tags,
+          expected: ["head", "tail"],
+        },
+        {
+          actual: containsTag,
+          expected: true,
+        },
+      ];
+    },
+    {
+      preSetupHook: async ({ vaults, wsRoot }) => {
+        await NoteTestUtilsV4.createNote({
+          fname: "tags.foo",
+          vault: vaults[0],
+          wsRoot,
+        });
+        await NoteTestUtilsV4.createNote({
+          fname: "primary",
+          vault: vaults[0],
+          wsRoot,
+          props: {
+            tags: ["head", "foo", "tail"],
+          },
+        });
+      },
+    }
+  ),
   // TODO: need a way of adding findlinks to this test
   /**
    * - pre:init

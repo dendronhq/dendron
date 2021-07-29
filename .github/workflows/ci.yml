@@ -71,7 +71,7 @@ jobs:
             node_modules
             packages/*/node_modules
             packages/*/.vscode-test
-          key: ${{ runner.os }}-${{ matrix.node-version }}-node-modules-1-${{ hashFiles('yarn.lock')}}
+          key: ${{ runner.os }}-${{ matrix.node-version }}-node-modules-3-${{ hashFiles('yarn.lock')}}
 
       - name: Restore Node modules cache for Windows
         if: runner.os == 'Windows'

@@ -16,8 +16,8 @@ jobs:
           - 12.x
           # - 14.x
         suite:
-          - cli
-          # - plugin
+          # - cli
+          - plugin
 
         include:
           - os: windows-latest
@@ -70,4 +70,4 @@ jobs:
 
       - name: Run tests
         run: yarn ci:test:${{ matrix.suite }}
-        timeout-minutes: 30
+        timeout-minutes: 40

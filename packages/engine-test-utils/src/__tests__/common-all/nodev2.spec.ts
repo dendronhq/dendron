@@ -1,4 +1,4 @@
-import { NoteUtils, SchemaUtils, doBond, BondClass } from "@dendronhq/common-all";
+import { NoteUtils, SchemaUtils } from "@dendronhq/common-all";
 import {
   NoteTestUtilsV4,
   SetupHookFunction,
@@ -357,12 +357,4 @@ describe("matchDomain", () => {
       }
     );
   });
-
-  it("test bond func", () => {
-    expect(doBond()).toEqual("bond");
-  })
-
-  it("test bond class", () => {
-    expect(BondClass.sayJames()).toEqual("bond");
-  })
 });

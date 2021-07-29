@@ -21,7 +21,6 @@ import {
   runJestHarnessV2,
   SetupHookFunction,
   SetupTestFunctionV4,
-  sinon,
   TestResult
 } from "@dendronhq/common-test-utils";
 import { LaunchEngineServerCommand } from "@dendronhq/dendron-cli";
@@ -34,6 +33,7 @@ import fs from "fs-extra";
 import _ from "lodash";
 import os from "os";
 import path from "path";
+import sinon from "sinon";
 import { SinonStub } from "sinon";
 import { ENGINE_HOOKS } from "./presets";
 import { GitTestUtils } from "./utils";

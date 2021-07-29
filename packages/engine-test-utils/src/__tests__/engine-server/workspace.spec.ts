@@ -1,6 +1,6 @@
 import { DVault, NoteProps } from "@dendronhq/common-all";
 import { tmpDir } from "@dendronhq/common-server";
-import { NoteTestUtilsV4, sinon } from "@dendronhq/common-test-utils";
+import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import {
   DConfig,
   SeedService,

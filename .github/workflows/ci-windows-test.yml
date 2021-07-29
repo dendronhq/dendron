@@ -14,10 +14,10 @@ jobs:
           - windows-latest
         node-version:
           - 12.x
-          - 14.x
+          # - 14.x
         suite:
           - cli
-          - plugin
+          # - plugin
 
         include:
           - os: windows-latest

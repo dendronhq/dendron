@@ -37,36 +37,6 @@ describe("GithubPod import pod", () => {
     fname = "github.issues.902-Test Issue";
   });
 
-  test.skip("Bad Credentials", async () => {
-    await runEngineTestV5(
-      async ({ engine, vaults, wsRoot }) => {
-        const pod = new GithubImportPod();
-        const vaultName = VaultUtils.getName(vaults[0]);
-        const resp = async () => {
-          return await pod.execute({
-            engine,
-            vaults,
-            wsRoot,
-            config: {
-              src: "github",
-              token: "xyzabcd",
-              owner: "dendronhq",
-              repository: "dendron-site",
-              status: "open",
-              vaultName,
-              fname: "github.issues",
-            },
-          });
-        };
-        expect.assertions(1);
-        return expect(resp()).rejects.toThrowError();
-      },
-      {
-        expect,
-        preSetupHook: ENGINE_HOOKS.setupBasic,
-      }
-    );
-  });
 
   test("Import Issue with status: open", async () => {
     await runEngineTestV5(
@@ -263,6 +233,7 @@ describe("github publish pod", () => {
         });
         expect(resp).toEqual("Github: The labels in the tag does not belong to selected repository"); 
       },
+
       { expect, preSetupHook: ENGINE_HOOKS.setupBasic }
     );
   });

@@ -1,7 +1,5 @@
-@use "sass:math";
-
 @function rem($size, $unit: "") {
-  $remSize: math.div($size, $root-font-size);
+  $remSize: $size / $root-font-size;
 
   @if ($unit == false) {
     @return #{$remSize};

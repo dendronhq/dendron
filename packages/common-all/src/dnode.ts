@@ -331,20 +331,15 @@ export class NoteUtils {
     /^(?<beforeTimestamp>(updated|created): *)(?<timestamp>[0-9]+)$/;
   /** Extracts all tags from the frontmatter.
    * 
-   * Extracted tags will be a single string, or a list of strings:
+   * Captured groups:
    * 
-   * "foo"
-   * 
-   * or
-   * 
-   * "  - foo\n  - bar"
-   * 
-   * Use `RE_FM_LIST_ITEM` to check if it's a list and extract individual items.
-   * 
+   * * `singleTag`: Text is a tag like `tags: foo`, and this is the text (`foo`) of that tag.
+   * * `multiTag`: Text is a list of tags, and this is that list including all list syntax. Use `RE_FM_LIST_ITEM` to extract individual items.
+   * * `lastMultiTag`: Text is a list of tags, and this is the text (`foo`) of the last tag in the list.
    */
-  static RE_FM_TAGS = new RegExp(`^tags: *(?<tagsContents>${LINK_NAME}|(\n+ *- *${LINK_NAME})+)`, "m");
+  static RE_FM_TAGS = new RegExp(`^tags: *((?<singleTag>${LINK_NAME})|(?<multiTag>(\n+ *- *(?<lastMultiTag>${LINK_NAME}))+))`, "m");
   /** Extracts strings from a YAML list. */
-  static RE_FM_LIST_ITEM = new RegExp(`^ *- *(?<listItem>${LINK_NAME})`, "g");
+  static RE_FM_LIST_ITEM = new RegExp(`^ *- *(?<listItem>${LINK_NAME})`);
 
   static addBacklink({
     from,

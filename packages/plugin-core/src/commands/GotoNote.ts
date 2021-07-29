@@ -18,6 +18,7 @@ import {
   Uri,
   window,
   ViewColumn,
+  Range,
 } from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
@@ -93,6 +94,30 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
                 value: `${TAGS_HIERARCHY}${hashtag.groups!.tagContents}`,
               };
             }
+          }
+          // handle frontmatter tags
+          // First, check if the current line has a single line tag like `tags: foo`
+          const singleTag = currentLine.match(NoteUtils.RE_FM_TAGS)?.groups?.singleTag;
+          if (singleTag) {
+            return {
+              alias: singleTag,
+              value: `${TAGS_HIERARCHY}${singleTag}`,
+            };
+          }
+          // Otherwise, check the text up to the selection for frontmatter tags
+          // list. The last tag in that is either the selection, or something
+          // before the selection. If it is the selection, then the user has the
+          // tag selected. This is not perfect since the user could be selecting
+          // something past the frontmatter that just happens to match the last
+          // tag, but that's an edge case that's not disruptive.
+          const frontmatterText = editor?.document.getText(new Range(0, 0, selection.start.line, currentLine.length));
+          const selectedItem = currentLine.match(NoteUtils.RE_FM_LIST_ITEM)?.groups?.listItem;
+          const lastMultiTag = frontmatterText?.match(NoteUtils.RE_FM_TAGS)?.groups?.lastMultiTag;
+          if (lastMultiTag && lastMultiTag === selectedItem) {
+            return {
+              alias: lastMultiTag,
+              value: `${TAGS_HIERARCHY}${lastMultiTag}`,
+            };
           }
         }
       }

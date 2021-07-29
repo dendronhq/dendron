@@ -256,6 +256,62 @@ suite("GotoNote", function () {
         }
       })
     });
+
+    describe("frontmatter tags", () => {
+      test("single tag", (done) => {
+        let note: NoteProps;
+        runLegacyMultiWorkspaceTest({
+          ctx,
+          preSetupHook: async ({ wsRoot, vaults }) => {
+            // Create a note with a hashtag in it
+            note = await NoteTestUtilsV4.createNote({
+              wsRoot,
+              vault: vaults[0],
+              fname: "test.note",
+              props: {
+                tags: "my.test-0.tag",
+              },
+            });
+          },
+          onInit: async () => {
+            // Open the note, select the hashtag, and use the command
+            await VSCodeUtils.openNote(note);
+            VSCodeUtils.getActiveTextEditorOrThrow().selection = new vscode.Selection(new vscode.Position(6, 8), new vscode.Position(6, 8));
+            await new GotoNoteCommand().run();
+            // Make sure this took us to the tag note
+            expect(getActiveEditorBasename()).toEqual("tags.my.test-0.tag.md");
+            done();
+          }
+        })
+      });
+
+      test("multiple tags", (done) => {
+        let note: NoteProps;
+        runLegacyMultiWorkspaceTest({
+          ctx,
+          preSetupHook: async ({ wsRoot, vaults }) => {
+            // Create a note with a hashtag in it
+            note = await NoteTestUtilsV4.createNote({
+              wsRoot,
+              vault: vaults[0],
+              fname: "test.note",
+              props: {
+                tags: ["foo", "my.test-0.tag", "bar"],
+              },
+            });
+          },
+          onInit: async () => {
+            // Open the note, select the hashtag, and use the command
+            await VSCodeUtils.openNote(note);
+            VSCodeUtils.getActiveTextEditorOrThrow().selection = new vscode.Selection(new vscode.Position(8, 6), new vscode.Position(8, 6));
+            await new GotoNoteCommand().run();
+            // Make sure this took us to the tag note
+            expect(getActiveEditorBasename()).toEqual("tags.my.test-0.tag.md");
+            done();
+          }
+        })
+      });
+    });
   });
 
   describe("using selection", () => {

@@ -254,6 +254,41 @@ export const getReferenceAtPosition = (
         refText: docText,
       };
     }
+    // if not, it could be a frontmatter tag
+    // handle frontmatter tags
+    // First, check if the current line has a single line tag like `tags: foo`
+    const currentLine = document.lineAt(position.line).text;
+    const singleTagMatch = currentLine.match(NoteUtils.RE_FM_TAGS);
+    if (singleTagMatch && singleTagMatch.groups?.singleTag && singleTagMatch.groups?.beforeTags) {
+      const { singleTag, beforeTags } = singleTagMatch.groups;
+      return {
+        range: new Range(position.line, beforeTags.length, position.line, beforeTags.length + singleTag.length),
+        label: singleTag,
+        ref: `${TAGS_HIERARCHY}${singleTag}`,
+        refText: singleTagMatch[0],
+      };
+    }
+    // Otherwise, check the text up to the selection for frontmatter tags list.
+    // The last tag in that is either the selection, or something before the
+    // selection. If it is the selection, then the user has the tag selected.
+    // This is not perfect since the user could be selecting something past the
+    // frontmatter that just happens to be formatted like a list and matches the
+    // last tag, but that's an edge case that's not disruptive.
+    const frontmatterText = document.getText(
+      new Range(0, 0, position.line, currentLine.length)
+    );
+    const selectedItemMatch = currentLine.match(NoteUtils.RE_FM_LIST_ITEM);
+    const lastMultiTag = frontmatterText?.match(NoteUtils.RE_FM_TAGS)?.groups
+      ?.lastMultiTag;
+    if (lastMultiTag && lastMultiTag === selectedItemMatch?.groups?.listItem && selectedItemMatch?.groups?.beforeListItem) {
+      const { listItem, beforeListItem } = selectedItemMatch.groups;
+      return {
+        range: new Range(position.line, beforeListItem.length, position.line, beforeListItem.length + listItem.length),
+        label: lastMultiTag,
+        ref: `${TAGS_HIERARCHY}${lastMultiTag}`,
+        refText: selectedItemMatch[0],
+      };
+    }
     // it's not a wikilink, reference, or a hashtag. Nothing to do here.
     return null;
   }

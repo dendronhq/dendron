@@ -337,9 +337,9 @@ export class NoteUtils {
    * * `multiTag`: Text is a list of tags, and this is that list including all list syntax. Use `RE_FM_LIST_ITEM` to extract individual items.
    * * `lastMultiTag`: Text is a list of tags, and this is the text (`foo`) of the last tag in the list.
    */
-  static RE_FM_TAGS = new RegExp(`^tags: *((?<singleTag>${LINK_NAME})|(?<multiTag>(\n+ *- *(?<lastMultiTag>${LINK_NAME}))+))`, "m");
+  static RE_FM_TAGS = new RegExp(`^(?<beforeTags>tags: *)((?<singleTag>${LINK_NAME})|(?<multiTag>(\n+ *- *(?<lastMultiTag>${LINK_NAME}))+))`, "m");
   /** Extracts strings from a YAML list. */
-  static RE_FM_LIST_ITEM = new RegExp(`^ *- *(?<listItem>${LINK_NAME})`);
+  static RE_FM_LIST_ITEM = new RegExp(`^(?<beforeListItem> *- *)(?<listItem>${LINK_NAME})`);
 
   static addBacklink({
     from,

@@ -1311,7 +1311,7 @@ suite("NoteLookupCommand", function () {
           });
           
           expect(content).toEqual([
-            "[[Ch1foo.ch1]]",
+            "[[Ch1|foo.ch1]]",
             "[[Bar|bar]]",
             "[[Lorem|lorem]]",
             "[[Ipsum|ipsum]]",

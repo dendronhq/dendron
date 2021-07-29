@@ -964,6 +964,44 @@ export class RemarkUtils {
     };
   }
 
+  static convertWikiLinkToUrl(
+    note: NoteProps,
+    changes: NoteChangeEntry[],
+    engine: DEngineClient,
+  ) {
+    return function (this: Processor) {
+      return (tree: Node, _vfile: VFile) => {
+        const root = tree as DendronASTRoot;
+        const wikiLinks: WikiLinkNoteV4[] = selectAll(
+          DendronASTTypes.WIKI_LINK,
+          root
+        ) as WikiLinkNoteV4[];
+
+        let dirty = false;
+
+        wikiLinks.forEach((linkNode) => {
+          const existingNote = _.find(engine.notes, { fname : linkNode.value });
+          if (linkNode.value.indexOf(".") >= 0) {
+            const newValue = _.replace(linkNode.value, /\./g, "/");
+            if (linkNode.data.alias === linkNode.value) {
+              linkNode.data.alias = newValue;
+            }
+            linkNode.value = `https://dendron/notes/${existingNote?.id}`;
+            dirty = true;
+          }
+        });
+        //TODO: Add support for Ref Notes and Block Links
+
+        if (dirty) {
+          changes.push({
+            note,
+            status: "update",
+          });
+        }
+      };
+    };
+  }
+
   static oldNoteRef2NewNoteRef(note: NoteProps, changes: NoteChangeEntry[]) {
     return function (this: Processor) {
       return (tree: Node, _vfile: VFile) => {

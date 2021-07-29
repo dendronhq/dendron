@@ -1,88 +1,85 @@
 import { SegmentClient, TelemetryStatus } from "@dendronhq/common-server";
-import { FileTestUtils } from "@dendronhq/common-test-utils";
 import { writeFileSync } from "fs-extra";
+import sinon from "sinon";
+import { TestEngineUtils } from "../../engine";
 
 describe("SegmentClient", () => {
+  afterEach(()=> {
+    sinon.restore();
+  });
   test("enabled by default", (done) => {
     // this is only for the SegmentClient, telemetry as a whole respects VSCode settings by default
-    const { stub, tmpHome: _tmpHome } = FileTestUtils.mockHome();
+    TestEngineUtils.mockHomeDir();
 
     const instance = SegmentClient.instance({ forceNew: true });
     expect(instance.hasOptedOut).toEqual(false);
 
-    stub.restore();
     done();
   });
 
   test("enabled by command", (done) => {
-    const { stub, tmpHome: _tmpHome } = FileTestUtils.mockHome();
+    TestEngineUtils.mockHomeDir();
     SegmentClient.enable(TelemetryStatus.ENABLED_BY_COMMAND);
 
     const instance = SegmentClient.instance({ forceNew: true });
     expect(instance.hasOptedOut).toEqual(false);
 
-    stub.restore();
     done();
   });
 
   test("enabled by config", (done) => {
-    const { stub, tmpHome: _tmpHome } = FileTestUtils.mockHome();
+    TestEngineUtils.mockHomeDir();
     SegmentClient.enable(TelemetryStatus.ENABLED_BY_CONFIG);
 
     const instance = SegmentClient.instance({ forceNew: true });
     expect(instance.hasOptedOut).toEqual(false);
 
-    stub.restore();
     done();
   });
 
   test("disabled by command", (done) => {
-    const { stub, tmpHome: _tmpHome } = FileTestUtils.mockHome();
+    TestEngineUtils.mockHomeDir();
     SegmentClient.disable(TelemetryStatus.DISABLED_BY_COMMAND);
 
     const instance = SegmentClient.instance({ forceNew: true });
     expect(instance.hasOptedOut).toEqual(true);
 
-    stub.restore();
     done();
   });
 
   test("disabled by vscode config", (done) => {
-    const { stub, tmpHome: _tmpHome } = FileTestUtils.mockHome();
+    TestEngineUtils.mockHomeDir();
     SegmentClient.disable(TelemetryStatus.DISABLED_BY_VSCODE_CONFIG);
 
     const instance = SegmentClient.instance({ forceNew: true });
     expect(instance.hasOptedOut).toEqual(true);
 
-    stub.restore();
     done();
   });
 
   test("disabled by workspace config", (done) => {
-    const { stub, tmpHome: _tmpHome } = FileTestUtils.mockHome();
+    TestEngineUtils.mockHomeDir();
     SegmentClient.disable(TelemetryStatus.DISABLED_BY_WS_CONFIG);
 
     const instance = SegmentClient.instance({ forceNew: true });
     expect(instance.hasOptedOut).toEqual(true);
 
-    stub.restore();
     done();
   });
 
   test("still recognizes legacy disable", (done) => {
-    const { stub, tmpHome: _tmpHome } = FileTestUtils.mockHome();
+    TestEngineUtils.mockHomeDir();
     const disablePath = SegmentClient.getDisableConfigPath();
     writeFileSync(disablePath, "");
 
     const instance = SegmentClient.instance({ forceNew: true });
     expect(instance.hasOptedOut).toEqual(true);
 
-    stub.restore();
     done();
   });
 
   test("enable command overrides legacy disable", (done) => {
-    const { stub, tmpHome: _tmpHome } = FileTestUtils.mockHome();
+    TestEngineUtils.mockHomeDir();
     const disablePath = SegmentClient.getDisableConfigPath();
     writeFileSync(disablePath, "");
 
@@ -90,12 +87,11 @@ describe("SegmentClient", () => {
     const instance = SegmentClient.instance({ forceNew: true });
     expect(instance.hasOptedOut).toEqual(false);
 
-    stub.restore();
     done();
   });
 
   test("disabled then enabled with command", (done) => {
-    const { stub, tmpHome: _tmpHome } = FileTestUtils.mockHome();
+    TestEngineUtils.mockHomeDir();
     SegmentClient.disable(TelemetryStatus.DISABLED_BY_COMMAND);
 
     let instance = SegmentClient.instance({ forceNew: true });
@@ -106,12 +102,11 @@ describe("SegmentClient", () => {
     instance = SegmentClient.instance({ forceNew: true });
     expect(instance.hasOptedOut).toEqual(false);
 
-    stub.restore();
     done();
   });
 
   test("enabled then disabled with command", (done) => {
-    const { stub, tmpHome: _tmpHome } = FileTestUtils.mockHome();
+    TestEngineUtils.mockHomeDir();
     SegmentClient.enable(TelemetryStatus.ENABLED_BY_COMMAND);
 
     let instance = SegmentClient.instance({ forceNew: true });
@@ -122,7 +117,6 @@ describe("SegmentClient", () => {
     instance = SegmentClient.instance({ forceNew: true });
     expect(instance.hasOptedOut).toEqual(true);
 
-    stub.restore();
     done();
   });
 });

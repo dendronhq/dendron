@@ -576,7 +576,7 @@ export class LinkUtils {
     if (oldLink.type === "frontmatterTag") {
       // Just change the prop
       const oldTag = oldLink.from.alias!;
-      const newTag = newLink.from.alias!;
+      const newTag = newLink.from.alias;
       TagUtils.replaceTag({note, oldTag, newTag});
       return note.body;
     } else {

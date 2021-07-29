@@ -571,11 +571,17 @@ export class FileStorage implements DStore {
             }
             // for hashtag links, we'll have to regenerate the alias
             if (newLoc.fname.startsWith(TAGS_HIERARCHY)) {
+              const fnameWithoutTag = newLoc.fname.slice(TAGS_HIERARCHY.length);
               // Frontmatter tags don't have the hashtag
-              if (link.type !== "frontmatterTag") alias = `#${newLoc.fname.slice(TAGS_HIERARCHY.length)}`;
+              if (link.type !== "frontmatterTag") alias = `#${fnameWithoutTag}`;
+              else alias = fnameWithoutTag;
             } else if (LinkUtils.isHashtagLink(oldLink.from)) {
               // If this used to be a hashtag but no longer is, the alias is like `#foo.bar` and no longer makes sense.
               alias = undefined;
+            }
+            // if a frontmatter tag is getting moved out of tags, we'll need to remove that tag now.
+            if (oldLoc.fname.startsWith(TAGS_HIERARCHY) && !newLoc.fname.startsWith(TAGS_HIERARCHY)) {
+              newLoc.alias = undefined;
             }
             // loc doesn't have header info
             const newBody = LinkUtils.updateLink({

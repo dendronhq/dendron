@@ -131,16 +131,21 @@ export class DefaultMap<K, V> {
 }
 
 export class TagUtils {
-  static replaceTag({note, oldTag, newTag}: {note: NoteProps, oldTag: string, newTag: string}) {
+  /** Removes `oldTag` from the frontmatter tags of `note` and replaces it with `newTag`, if any. */
+  static replaceTag({note, oldTag, newTag}: {note: NoteProps, oldTag: string, newTag?: string}) {
     if (_.isUndefined(note.tags) || _.isString(note.tags)) {
       note.tags = newTag;
     } else {
-      const index = _.findIndex(note.tags, oldTag);
-      if (index >= 0) {
-        note.tags[index] = newTag;
+      const index = _.findIndex(note.tags, (tag) => tag === oldTag);
+      if (newTag) {
+        if (index >= 0) {
+          note.tags[index] = newTag;
+        } else {
+          // Weird, can't find the old tag. Add the new one anyway.
+          note.tags.push(newTag);
+        }
       } else {
-        // Weird, can't find the old tag. Add the new one anyway.
-        note.tags.push(newTag);
+        _.pull(note.tags, oldTag);
       }
     }
   }

@@ -870,9 +870,9 @@ const NOTES = {
         oldLoc: {
           fname: "tags.foo",
           alias: "#foo",
-          vaultName: VaultUtils.getName(vaults[1]),
+          vaultName: VaultUtils.getName(vaults[0]),
         },
-        newLoc: { fname: "tags.bar", vaultName: VaultUtils.getName(vaults[1]) },
+        newLoc: { fname: "tags.bar", vaultName: VaultUtils.getName(vaults[0]) },
       });
       const note = NoteUtils.getNoteByFnameV5({fname: "primary", notes: engine.notes, wsRoot, vault: vaults[0]});
       const noteFileContents = await readFile(NoteUtils.getFullPath({note: note!, wsRoot}), "utf-8");
@@ -906,9 +906,9 @@ const NOTES = {
       await engine.renameNote({
         oldLoc: {
           fname: "tags.foo",
-          vaultName: VaultUtils.getName(vaults[1]),
+          vaultName: VaultUtils.getName(vaults[0]),
         },
-        newLoc: { fname: "tags.bar", vaultName: VaultUtils.getName(vaults[1]) },
+        newLoc: { fname: "tags.bar", vaultName: VaultUtils.getName(vaults[0]) },
       });
       const note = NoteUtils.getNoteByFnameV5({fname: "primary", notes: engine.notes, wsRoot, vault: vaults[0]});
       const noteFileContents = await readFile(NoteUtils.getFullPath({note: note!, wsRoot}), "utf-8");
@@ -948,9 +948,9 @@ const NOTES = {
       await engine.renameNote({
         oldLoc: {
           fname: "tags.foo",
-          vaultName: VaultUtils.getName(vaults[1]),
+          vaultName: VaultUtils.getName(vaults[0]),
         },
-        newLoc: { fname: "tags.bar", vaultName: VaultUtils.getName(vaults[1]) },
+        newLoc: { fname: "tags.bar", vaultName: VaultUtils.getName(vaults[0]) },
       });
       const note = NoteUtils.getNoteByFnameV5({fname: "primary", notes: engine.notes, wsRoot, vault: vaults[0]});
       const noteFileContents = await readFile(NoteUtils.getFullPath({note: note!, wsRoot}), "utf-8");

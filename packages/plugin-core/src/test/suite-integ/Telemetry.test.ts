@@ -10,13 +10,18 @@ import { setupSegmentClient } from "../../telemetry";
 import { getWS } from "../../workspace";
 import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
+import { SinonStub } from "sinon";
 
 suite("telemetry", function () {
   let ctx: vscode.ExtensionContext;
+  let homeDirStub: SinonStub;
 
   ctx = setupBeforeAfter(this, {
     beforeHook: () => {
-      TestEngineUtils.mockHomeDir();
+      homeDirStub = TestEngineUtils.mockHomeDir();
+    },
+    afterHook: async () => {
+      homeDirStub.restore();
     },
   });
 

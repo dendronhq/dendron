@@ -859,9 +859,7 @@ suite("NoteLookupCommand", function () {
       }); 
     });
 
-    // doesn't work
-    // TODO: FIX IT
-    test.skip("toggling journal modifier off will only leave selection2link applied", (done) => {
+    test("toggling journal modifier off will only leave selection2link applied", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
         preSetupHook: async ({ wsRoot, vaults }) => {
@@ -1006,9 +1004,7 @@ suite("NoteLookupCommand", function () {
       }); 
     });
 
-    // doesn't work
-    // TODO: FIX IT
-    test.skip("toggling scratch modifier off will only leave selection2link applied", (done) => {
+    test("toggling scratch modifier off will only leave selection2link applied", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
         preSetupHook: async ({ wsRoot, vaults }) => {
@@ -1067,9 +1063,7 @@ suite("NoteLookupCommand", function () {
       });  
     });
 
-    // doesn't work
-    // TODO: FIX IT
-    test.skip("applying journal strips scratch modifier, and keeps selection2link applied", (done) => {
+    test("applying journal strips scratch modifier, and keeps selection2link applied", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
         preSetupHook: async ({ wsRoot, vaults }) => {

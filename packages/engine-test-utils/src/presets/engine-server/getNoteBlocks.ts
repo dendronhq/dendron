@@ -35,12 +35,10 @@ const runGetNoteBlocks = async ({
       vault: vaults[0],
       wsRoot,
     });
-  debugger;
   const out = await engine.getNoteBlocks({
     id: note!.id,
     filterByAnchorType,
   });
-  debugger;
   return cb(out);
 };
 

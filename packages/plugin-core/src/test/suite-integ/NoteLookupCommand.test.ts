@@ -794,22 +794,14 @@ suite("NoteLookupCommand", function () {
         onInit: async ({ vaults, }) => {
           const cmd = new NoteLookupCommand();
           stubVaultPick(vaults);
-
           const { controller } = await cmd.gatherInputs({
-            initialValue: "foo"
+            initialValue: "foo",
           });
-          controller.quickpick.show();
-
           const { copyNoteLinkBtn } = getEffectTypeButtons(
             controller.quickpick.buttons
           );
-
-          // hack: need to wait here a bit.
-          // TODO: A more elegant way to do this.
-          await new Promise(resolve => setTimeout(resolve, 500));
-          
+            
           await controller.onTriggerButton(copyNoteLinkBtn);
-
           const content = await clipboard.readText();
           expect(content).toEqual("[[Foo|foo]]");
 
@@ -1198,7 +1190,7 @@ suite("NoteLookupCommand", function () {
       }) as NoteQuickInput[];
 
       const runOpts = {
-        multiselect: true,
+        multiSelect: true,
         noConfirm: true
       } as CommandRunOpts;
 
@@ -1207,7 +1199,7 @@ suite("NoteLookupCommand", function () {
       const gatherOut = await cmd.gatherInputs(runOpts);
 
       const mockQuickPick = createMockQuickPick({
-        value: "foo.ch1",
+        value: "",
         selectedItems,
         canSelectMany: true,
         buttons: gatherOut.quickpick.buttons,
@@ -1216,8 +1208,11 @@ suite("NoteLookupCommand", function () {
       if (opts.copyLink) {
         mockQuickPick.show();
         const { copyNoteLinkBtn } = getEffectTypeButtons(mockQuickPick.buttons);
+        sinon.stub(gatherOut.controller, "_quickpick").value(mockQuickPick);
+        sinon.stub(gatherOut.controller, "quickpick").value(mockQuickPick);
         await gatherOut.controller.onTriggerButton(copyNoteLinkBtn);
         const content = await clipboard.readText();
+        sinon.restore();
         return { content };
       };
 
@@ -1254,7 +1249,7 @@ suite("NoteLookupCommand", function () {
           // make clean slate.
           VSCodeUtils.closeAllEditors();
 
-          VSCodeUtils.openNote(engine.notes["foo"]);
+          await VSCodeUtils.openNote(engine.notes["foo"]);
           const { cmd } = await prepareCommandFunc({
             wsRoot,
             vaults,
@@ -1262,9 +1257,6 @@ suite("NoteLookupCommand", function () {
             opts: { split: true }
           });
 
-          // if we don't wait here, the test runs too fast and misses one note.
-          // TODO: find a better way to get past this.
-          await new Promise((resolve) => setTimeout(resolve, 500));  
           await cmd!.run({
             multiSelect: true,
             splitType: LookupSplitTypeEnum.horizontal,
@@ -1281,7 +1273,7 @@ suite("NoteLookupCommand", function () {
 
     // FIX: doesn't work
     // clipboard testing is flaky
-    test.skip("copyNoteLink + multiselect: should copy link of all selected notes", (done) => {
+    test("copyNoteLink + multiselect: should copy link of all selected notes", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
         preSetupHook: async ({ wsRoot, vaults }) => {
@@ -1301,7 +1293,7 @@ suite("NoteLookupCommand", function () {
           // make clean slate.
           VSCodeUtils.closeAllEditors();
 
-          VSCodeUtils.openNote(engine.notes["foo"]);
+          await VSCodeUtils.openNote(engine.notes["foo"]);
           
           const { content } = await prepareCommandFunc({ 
             wsRoot,
@@ -1309,7 +1301,7 @@ suite("NoteLookupCommand", function () {
             engine,
             opts: { copyLink: true }
           });
-          
+
           expect(content).toEqual([
             "[[Ch1|foo.ch1]]",
             "[[Bar|bar]]",

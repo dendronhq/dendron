@@ -12,7 +12,6 @@ import {
   stringifyError,
   DEngineClient,
 } from "@dendronhq/common-all";
-import { window } from "vscode";
 
 const ID = "dendron.gdoc";
 
@@ -36,10 +35,6 @@ type GDocImportPodCustomOpts = {
    * import comments from the doc in text or json format
    */
   importComments? : ImportComments;
-  /**
-   * get confirmation before overwriting existing note
-   */
-   confirmOverwrite? : boolean;
 };
 
 type ImportComments = {
@@ -89,13 +84,7 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
 
             }
           }
-        },
-        confirmOverwrite: {
-          type: "boolean",
-          default: "true",
-          description: "get confirmation before overwriting existing note",
-          nullable: true
-        },
+        }
       },
     }) as JSONSchemaType<GDocImportPodConfig>;
   }
@@ -209,7 +198,6 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
     comments.forEach((comment: any) => {
        text += `- ${comment.author}:  ${comment.content}\n`
        if(comment.replies?.length> 0){
-         text += `\n\t replies to this comment: \n\n`
          comment.replies.forEach((reply: any) => {
           text += `\t - ${reply.author}: ${reply.content}\n`
 
@@ -237,14 +225,12 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
     return note;
   }
 
-  createNote= async( opts : {
+  createNote= async(
     note: NoteProps,
     engine: DEngineClient,
     wsRoot: string,
-    vault: DVault,
-    confirmOverwrite?: boolean}
+    vault: DVault
   ) => {
-     const { note, engine, wsRoot, vault, confirmOverwrite } = opts;
       const existingNote = NoteUtils.getNoteByFnameV5({
       fname: note.fname,
       notes: engine.notes,
@@ -252,36 +238,15 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
       wsRoot,
     });
     if (!_.isUndefined(existingNote)) {
-        if(existingNote.custom.revisionId && existingNote.custom.revisionId !== note.custom.revisionId) {
-          existingNote.custom.revisionId = note.custom.revisionId;
-          existingNote.body = note.body;
-
-          if(confirmOverwrite){
-          const resp = await window.showInformationMessage(
-              "Do you want to overwrite",
-                { modal: true },
-                { title: "Yes" }
-              );
-
-            if(resp?.title === "Yes"){
-              await engine.writeNote(existingNote, { newNode: true });
-              return existingNote;
-
-            }  
-          }
-          else{
-            await engine.writeNote(existingNote, { newNode: true });
-            return existingNote;
-          }
-        }else {
-          window.showInformationMessage("Note is already in sync with the google doc")
-        }
-    }
+      if(existingNote.custom.revisionId && existingNote.custom.revisionId !== note.custom.revisionId) {
+        existingNote.custom.revisionId = note.custom.revisionId;
+        existingNote.body = note.body;
+        await engine.writeNote(existingNote, { newNode: true });
+        }   
+       }
     else {
       await engine.writeNote(note, { newNode: true });
-      return note;
     }
-    return undefined;
   }
 
   async plant(opts: GDocImportPodPlantOpts) {
@@ -293,8 +258,7 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
       hierarchyDestination,
       documentId,
       fnameAsId,
-      importComments,
-      confirmOverwrite = true
+      importComments
     } = config as GDocImportPodConfig;
 
     let response = await this.getDataFromGDoc({documentId, token, hierarchyDestination}, config)
@@ -306,9 +270,7 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
       vault,
       fnameAsId
     });
-    const createdNotes = await this.createNote({note, engine, wsRoot, vault, confirmOverwrite})
-    const importedNotes: NoteProps[] = (createdNotes === undefined) ? [] : [createdNotes]
-
-    return { importedNotes };
+    this.createNote(note, engine, wsRoot, vault)
+    return { importedNotes: [note] };
   }
 }

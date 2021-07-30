@@ -82,8 +82,11 @@ function CalendarView({ engine, ide }: DendronProps) {
   const wordsPerDot: number = 250;
   const dailyJournalDomain = config?.journal.dailyDomain;
   const defaultJournalName = config?.journal.name;
-  let defaultJournalDateFormat = config?.journal.dateFormat;
+
+  // luxon token format lookup https://github.com/moment/luxon/blob/master/docs/formatting.md#table-of-tokens
+  let defaultJournalDateFormat = config?.journal.dateFormat || "y.MM.dd";
   const defaultJournalMonthDateFormat = "y.MM"; // TODO compute format for currentMode="year" from config
+
   const dayOfWeek = config?.journal.firstDayOfWeek;
   const locale = "en-us";
   if (defaultJournalDateFormat) {

@@ -12,7 +12,6 @@ import {
   stringifyError,
   DEngineClient,
 } from "@dendronhq/common-all";
-import { window } from "vscode";
 
 const ID = "dendron.gdoc";
 
@@ -242,9 +241,10 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
     engine: DEngineClient,
     wsRoot: string,
     vault: DVault,
-    confirmOverwrite?: boolean}
+    confirmOverwrite?: boolean,
+    onPrompt?: any}
   ) => {
-     const { note, engine, wsRoot, vault, confirmOverwrite } = opts;
+     const { note, engine, wsRoot, vault, confirmOverwrite, onPrompt } = opts;
       const existingNote = NoteUtils.getNoteByFnameV5({
       fname: note.fname,
       notes: engine.notes,
@@ -257,11 +257,7 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
           existingNote.body = note.body;
 
           if(confirmOverwrite){
-          const resp = await window.showInformationMessage(
-              "Do you want to overwrite",
-                { modal: true },
-                { title: "Yes" }
-              );
+          const resp = await onPrompt("userPrompt");
 
             if(resp?.title === "Yes"){
               await engine.writeNote(existingNote, { newNode: true });
@@ -274,7 +270,7 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
             return existingNote;
           }
         }else {
-          window.showInformationMessage("Note is already in sync with the google doc")
+          onPrompt();
         }
     }
     else {
@@ -287,7 +283,7 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
   async plant(opts: GDocImportPodPlantOpts) {
     const ctx = "GDocPod";
     this.L.info({ ctx, opts, msg: "enter" });
-    const { wsRoot, engine, vault, config } = opts;
+    const { wsRoot, engine, vault, config, onPrompt } = opts;
     const {
       token,
       hierarchyDestination,
@@ -306,7 +302,7 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
       vault,
       fnameAsId
     });
-    const createdNotes = await this.createNote({note, engine, wsRoot, vault, confirmOverwrite})
+    const createdNotes = await this.createNote({note, engine, wsRoot, vault, confirmOverwrite, onPrompt})
     const importedNotes: NoteProps[] = (createdNotes === undefined) ? [] : [createdNotes]
 
     return { importedNotes };

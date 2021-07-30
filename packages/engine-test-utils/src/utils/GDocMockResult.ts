@@ -1,3 +1,5 @@
+import { NoteProps } from "@dendronhq/common-all";
+
 export const response = {
   "data": {
   "body": {
@@ -497,3 +499,25 @@ export const comments = {
   "selfLink": "https://www.googleapis.com/drive/v2/files/14o1AVg10CBbLlqNqBrCz4HkRNBmrwrXpuP5F___P_cw/comments"
 }
 }
+
+export const existingNote: NoteProps = {
+  id: 'nCobWD86N10jWq6r',
+  title: 'Test',
+  vault: { fsPath: 'vault1' },
+  type: 'note',
+  desc: '',
+  links: [],
+  anchors: {},
+  fname: 'gdoc.meet.test',
+  updated: 1627283357535,
+  created: 1627283357535,
+  parent: null,
+  children: [],
+  body: '\n\n## Testing GDoc Pod\n\nThis is the first line\n\n\n',
+  data: {},
+  contentHash: undefined,
+  custom: {
+    documentId: '14o1AVg10CBbLlqNqBrCz4HkRNBmrwrXpuP5F___P_cw',
+    revisionId: 'ALm37BXFqAKco_HUxV4VkthgGzmqZch7_jtkmDA7MPWbV5iDt-khIo2TIBbG_ANGhaGRXhMxR0JtdmMgfPzhOQ'  
+  }
+};

@@ -142,15 +142,15 @@ export class NoteLookupCommand extends BaseCommand<
       ),
       extraButtons: [
         //todo: mirror v2 button sequence
-        JournalBtn.create(copts.noteType === LookupNoteTypeEnum.journal),
-        ScratchBtn.create(copts.noteType === LookupNoteTypeEnum.scratch),
         MultiSelectBtn.create(copts.multiSelect),
         CopyNoteLinkBtn.create(),
         DirectChildFilterBtn.create(
           copts.filterMiddleware?.includes("directChildOnly")
         ),
-        Selection2LinkBtn.create(copts.selectionType === LookupSelectionTypeEnum.selection2link),
         SelectionExtractBtn.create(copts.selectionType === LookupSelectionTypeEnum.selectionExtract),
+        Selection2LinkBtn.create(copts.selectionType === LookupSelectionTypeEnum.selection2link),
+        JournalBtn.create(copts.noteType === LookupNoteTypeEnum.journal),
+        ScratchBtn.create(copts.noteType === LookupNoteTypeEnum.scratch),
         HorizontalSplitBtn.create(copts.splitType === LookupSplitTypeEnum.horizontal),
       ],
     });

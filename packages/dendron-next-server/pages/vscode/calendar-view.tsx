@@ -314,7 +314,7 @@ function CalendarView({ engine, ide }: DendronProps) {
 }
 
 function areEqual(prevProps: DendronProps, nextProps: DendronProps) {
-  const logger = createLogger("treeViewContainer");
+  const logger = createLogger("calendarViewContainer");
   const isDiff = _.some([
     // active note changed
     prevProps.ide.noteActive?.id !== nextProps.ide.noteActive?.id,

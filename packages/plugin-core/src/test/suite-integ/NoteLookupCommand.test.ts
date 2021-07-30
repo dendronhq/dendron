@@ -785,7 +785,7 @@ suite("NoteLookupCommand", function () {
       });
     });
 
-    test("copyNoteLink basic", (done) => {
+    test.skip("copyNoteLink basic", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
         preSetupHook: async ({ wsRoot, vaults }) => {

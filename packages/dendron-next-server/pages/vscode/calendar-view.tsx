@@ -83,6 +83,7 @@ function CalendarView({ engine, ide }: DendronProps) {
   const dailyJournalDomain = config?.journal.dailyDomain;
   const defaultJournalName = config?.journal.name;
   let defaultJournalDateFormat = config?.journal.dateFormat;
+  const defaultJournalMonthDateFormat = "y.MM"; // TODO compute format for currentMode="year" from config
   const dayOfWeek = config?.journal.firstDayOfWeek;
   const locale = "en-us";
   if (defaultJournalDateFormat) {
@@ -121,8 +122,15 @@ function CalendarView({ engine, ide }: DendronProps) {
         defaultJournalName || ""
       );
 
+      // check if daily file is `y.MM` instead of `y.MM.dd` to apply proper format string.
+      // unlike moment luxon marks the date as invalid if date and dateformat do not match
+      const isMontly = maybeDatePortion.split(".").length === 2;
+
       return maybeDatePortion && _.first(groupedDailyNotes[maybeDatePortion])
-        ? DateTime.fromFormat(maybeDatePortion, defaultJournalDateFormat || "")
+        ? DateTime.fromFormat(
+            maybeDatePortion,
+            isMontly ? defaultJournalMonthDateFormat : defaultJournalDateFormat
+          )
         : undefined;
     }
   }, [noteActive, groupedDailyNotes]);
@@ -134,7 +142,7 @@ function CalendarView({ engine, ide }: DendronProps) {
       const format =
         (mode || activeMode) === "month"
           ? defaultJournalDateFormat || "y.MM.dd"
-          : "y.MM"; // TODO compute format for currentMode="year" from config
+          : defaultJournalMonthDateFormat;
       return date.toFormat(format);
     },
     [activeMode, defaultJournalDateFormat]

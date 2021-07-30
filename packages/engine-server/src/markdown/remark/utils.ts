@@ -113,6 +113,16 @@ export function hashTag2WikiLinkNoteV4(hashtag: HashTag): WikiLinkNoteV4 {
   };
 }
 
+export function frontmatterTag2WikiLinkNoteV4(tag: string): WikiLinkNoteV4 {
+  return {
+    type: DendronASTTypes.WIKI_LINK,
+    value: `${TAGS_HIERARCHY}${tag}`,
+    data: {
+      alias: tag,
+    },
+  };
+}
+
 const getLinks = ({
   ast,
   note,

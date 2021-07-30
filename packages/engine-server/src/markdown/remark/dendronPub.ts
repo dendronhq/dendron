@@ -1,6 +1,13 @@
 import { DendronError, isNotUndefined, NoteUtils } from "@dendronhq/common-all";
 import _ from "lodash";
-import { Image, Root } from "mdast";
+import { Content, Image, Root } from "mdast";
+import { heading, paragraph, text } from "mdast-builder";
+import { frontmatterTag2WikiLinkNoteV4 ,
+  addError,
+  getNoteOrError,
+  hashTag2WikiLinkNoteV4,
+  RemarkUtils,
+} from "./utils";
 import Unified, { Transformer } from "unified";
 import { Node, Parent } from "unist";
 import u from "unist-builder";
@@ -22,12 +29,7 @@ import { MDUtilsV5 } from "../utilsv5";
 import { blockAnchor2html } from "./blockAnchors";
 import { NoteRefsOpts } from "./noteRefs";
 import { convertNoteRefASTV2 } from "./noteRefsV2";
-import {
-  addError,
-  getNoteOrError,
-  hashTag2WikiLinkNoteV4,
-  RemarkUtils,
-} from "./utils";
+
 
 type PluginOpts = NoteRefsOpts & {
   assetsPrefix?: string;
@@ -50,6 +52,12 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
     const insertTitle = !_.isUndefined(overrides?.insertTitle)
       ? overrides?.insertTitle
       : opts?.insertTitle;
+    const note = NoteUtils.getNoteByFnameV5({
+      fname,
+      notes: engine.notes,
+      vault,
+      wsRoot: engine.wsRoot,
+    });
     if (!insideNoteRef && insertTitle && root.children) {
       if (!fname || !vault) {
         // TODO: tmp
@@ -60,12 +68,6 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
           )}`,
         });
       }
-      const note = NoteUtils.getNoteByFnameV5({
-        fname,
-        notes: engine.notes,
-        vault,
-        wsRoot: engine.wsRoot,
-      });
       if (!note) {
         throw new DendronError({ message: `no note found for ${fname}` });
       }
@@ -74,6 +76,19 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         idx,
         0,
         u(DendronASTTypes.HEADING, { depth: 1 }, [u("text", note.title)])
+      );
+    }
+    // Add frontmatter tags, if any, ahead of time. This way wikilink compiler will pick them up and render them.
+    if (note?.tags) {
+      root.children.push(
+        heading(2, text("Tags")) as Content
+      );
+      const tagLinks = _.map(
+        _.isString(note.tags) ? [note.tags] : note.tags,
+        frontmatterTag2WikiLinkNoteV4
+      );
+      root.children.push(
+        paragraph(tagLinks) as Content
       );
     }
     visitParents(tree, (node, ancestors) => {

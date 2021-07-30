@@ -269,7 +269,6 @@ export class JournalBtn extends DendronBtn {
       });
     };
     quickPick.noteModifierValue = quickPick.modifyPickerValueFunc();
-    console.log(quickPick.noteModifierValue);
     quickPick.prevValue = quickPick.value;
     quickPick.value = NotePickerUtils.getPickerValue(quickPick);
     return;

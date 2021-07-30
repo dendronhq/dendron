@@ -268,6 +268,7 @@ export async function provideBlockCompletionItems(
     return;
   Logger.debug({ ctx, found });
 
+  const timestampStart = process.hrtime();
   const engine = getWS().getEngine();
 
   let otherFile = false;
@@ -401,7 +402,8 @@ export async function provideBlockCompletionItems(
       };
     })
     .filter(isNotUndefined);
-  Logger.debug({ ctx, completionCount: completions.length });
+  const duration = process.hrtime(timestampStart);
+  Logger.debug({ ctx, completionCount: completions.length, duration });
   return completions;
 }
 

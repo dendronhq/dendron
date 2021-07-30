@@ -52,13 +52,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
     const insertTitle = !_.isUndefined(overrides?.insertTitle)
       ? overrides?.insertTitle
       : opts?.insertTitle;
-    const note = NoteUtils.getNoteByFnameV5({
-      fname,
-      notes: engine.notes,
-      vault,
-      wsRoot: engine.wsRoot,
-    });
-    if (!insideNoteRef && insertTitle && root.children) {
+    if (!insideNoteRef && root.children) {
       if (!fname || !vault) {
         // TODO: tmp
         console.log(JSON.stringify(engine.notes));
@@ -68,28 +62,36 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
           )}`,
         });
       }
+      const note = NoteUtils.getNoteByFnameV5({
+        fname,
+        notes: engine.notes,
+        vault,
+        wsRoot: engine.wsRoot,
+      });
       if (!note) {
         throw new DendronError({ message: `no note found for ${fname}` });
       }
-      const idx = _.findIndex(root.children, (ent) => ent.type !== "yaml");
-      root.children.splice(
-        idx,
-        0,
-        u(DendronASTTypes.HEADING, { depth: 1 }, [u("text", note.title)])
-      );
-    }
-    // Add frontmatter tags, if any, ahead of time. This way wikilink compiler will pick them up and render them.
-    if (note?.tags) {
-      root.children.push(
-        heading(2, text("Tags")) as Content
-      );
-      const tagLinks = _.map(
-        _.isString(note.tags) ? [note.tags] : note.tags,
-        frontmatterTag2WikiLinkNoteV4
-      );
-      root.children.push(
-        paragraph(tagLinks) as Content
-      );
+      if (insertTitle) {
+        const idx = _.findIndex(root.children, (ent) => ent.type !== "yaml");
+        root.children.splice(
+          idx,
+          0,
+          u(DendronASTTypes.HEADING, { depth: 1 }, [u("text", note.title)])
+        );
+      }
+      // Add frontmatter tags, if any, ahead of time. This way wikilink compiler will pick them up and render them.
+      if (note?.tags && note.tags.length > 0) {
+        root.children.push(
+          heading(2, text("Tags")) as Content
+        );
+        const tagLinks = _.map(
+          _.isString(note.tags) ? [note.tags] : note.tags,
+          frontmatterTag2WikiLinkNoteV4
+        );
+        root.children.push(
+          paragraph(tagLinks) as Content
+        );
+      }
     }
     visitParents(tree, (node, ancestors) => {
       const parent = _.last(ancestors);

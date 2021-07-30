@@ -36,6 +36,7 @@ import {
 import { Logger } from "../logger";
 import { VSCodeUtils } from "../utils";
 import { DendronWorkspace, getWS } from "../workspace";
+import { getDurationMilliseconds } from "@dendronhq/common-server";
 
 function padWithZero(n: number): string {
   if (n > 99) return String(n);
@@ -402,7 +403,7 @@ export async function provideBlockCompletionItems(
       };
     })
     .filter(isNotUndefined);
-  const duration = process.hrtime(timestampStart);
+  const duration = getDurationMilliseconds(timestampStart);
   Logger.debug({ ctx, completionCount: completions.length, duration });
   return completions;
 }

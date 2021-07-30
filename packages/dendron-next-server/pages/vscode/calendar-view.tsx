@@ -90,7 +90,7 @@ function CalendarView({ engine, ide }: DendronProps) {
   const dayOfWeek = config?.journal.firstDayOfWeek;
   const locale = "en-us";
   if (defaultJournalDateFormat) {
-    defaultJournalDateFormat = defaultJournalDateFormat.replace(/dd/, "DD");
+    defaultJournalDateFormat = defaultJournalDateFormat.replace(/DD/, "dd");
   }
 
   // useEffect(() => {

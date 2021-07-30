@@ -11,4 +11,5 @@ git commit -m "chore: publish $version"
 git push --set-upstream origin integ-publish --force --no-verify
 
 lerna publish from-package --ignore-scripts
+./bootstrap/scripts/patch11tyVersion.sh
 node bootstrap/scripts/genMeta.js

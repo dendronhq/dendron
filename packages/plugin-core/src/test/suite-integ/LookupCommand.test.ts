@@ -12,7 +12,6 @@ import {
   FileTestUtils,
   NOTE_PRESETS_V4,
   runJestHarnessV2,
-  sinon,
   TestPresetEntryV4,
 } from "@dendronhq/common-test-utils";
 import { DendronEngineV2 } from "@dendronhq/engine-server";
@@ -25,6 +24,7 @@ import fs from "fs-extra";
 import _ from "lodash";
 import { describe } from "mocha";
 import path from "path";
+import sinon from "sinon";
 // // You can import and use all API from the 'vscode' module
 // // as well as import your extension to test it
 import * as vscode from "vscode";
@@ -541,29 +541,24 @@ suite("Lookup, notesv2", function () {
           await lc.updatePickerBehavior({ quickPick: picker, provider: lp });
 
           picker.value = "alpha";
-          const pickerStub = sinon.stub(picker, "selectedItems").get(() => {
+          sinon.stub(picker, "selectedItems").get(() => {
             return [createNoActiveItem(vault)];
           });
-          const promptVaultStub = sinon
+          sinon
             .stub(PickerUtilsV2, "promptVault")
             .returns(Promise.resolve(vaults[0]));
 
-          try {
-            await lp.onDidAccept({
-              picker,
-              opts: engOpts,
-              lc,
-            });
-            expect(
-              (await EditorUtils.getURIForActiveEditor()).fsPath.endsWith(
-                path.join("vault1", "alpha.md")
-              )
-            ).toBeTruthy();
-          } finally {
-            pickerStub.restore();
-            promptVaultStub.restore();
-            done();
-          }
+          await lp.onDidAccept({
+            picker,
+            opts: engOpts,
+            lc,
+          });
+          expect(
+            (await EditorUtils.getURIForActiveEditor()).fsPath.endsWith(
+              path.join("vault1", "alpha.md")
+            )
+          ).toBeTruthy();
+          done();
         },
       });
     });
@@ -586,29 +581,24 @@ suite("Lookup, notesv2", function () {
           await lc.updatePickerBehavior({ quickPick: picker, provider: lp });
 
           picker.value = "alpha";
-          const pickerStub = sinon.stub(picker, "selectedItems").get(() => {
+          sinon.stub(picker, "selectedItems").get(() => {
             return [createNoActiveItem(vault)];
           });
-          const promptVaultStub = sinon
+          sinon
             .stub(PickerUtilsV2, "getOrPromptVaultForNewNote")
             .returns(Promise.resolve(vaults[1]));
 
-          try {
-            await lp.onDidAccept({
-              picker,
-              opts: engOpts,
-              lc,
-            });
-            expect(
-              (await EditorUtils.getURIForActiveEditor()).fsPath.endsWith(
-                path.join("vault2", "alpha.md")
-              )
-            ).toBeTruthy();
-          } finally {
-            pickerStub.restore();
-            promptVaultStub.restore();
-            done();
-          }
+          await lp.onDidAccept({
+            picker,
+            opts: engOpts,
+            lc,
+          });
+          expect(
+            (await EditorUtils.getURIForActiveEditor()).fsPath.endsWith(
+              path.join("vault2", "alpha.md")
+            )
+          ).toBeTruthy();
+          done();
         },
       });
     });

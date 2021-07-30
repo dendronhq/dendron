@@ -1,6 +1,7 @@
-import { AssertUtils, sinon } from "@dendronhq/common-test-utils";
+import { AssertUtils } from "@dendronhq/common-test-utils";
 import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import { describe } from "mocha";
+import sinon from "sinon";
 // // You can import and use all API from the 'vscode' module
 // // as well as import your extension to test it
 import * as vscode from "vscode";

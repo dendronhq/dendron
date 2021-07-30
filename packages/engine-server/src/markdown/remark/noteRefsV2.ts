@@ -360,8 +360,15 @@ export function convertNoteRefASTV2(
       vault,
       basename: fname + ".md",
     });
+    let note: NoteProps;
     try {
-      const note = file2Note(npath, vault);
+      note = file2Note(npath, vault);
+    } catch (err) {
+        const msg = `error reading file, ${npath}`;
+        return MDUtilsV4.genMDMsg(msg);
+    }
+    
+    try {
       if (
         shouldApplyPublishRules &&
         !SiteUtils.canPublish({
@@ -373,6 +380,7 @@ export function convertNoteRefASTV2(
         // TODO: in the future, add 403 pages
         return paragraph();
       }
+
       const body = note.body;
       const { error, data } = convertNoteRefHelperAST({
         body,
@@ -386,6 +394,7 @@ export function convertNoteRefASTV2(
       if (error) {
         errors.push(error);
       }
+
       if (prettyRefs) {
         let suffix = "";
         let useId = wikiLinkOpts?.useId;
@@ -393,7 +402,7 @@ export function convertNoteRefASTV2(
           useId = true;
         }
         let href = useId ? note.id : fname;
-        let title = getTitle({ config, note, loc: ref });
+        const title = getTitle({ config, note, loc: ref });
         if (dest === DendronASTDest.HTML) {
           suffix = ".html";
           if (note.custom.permalink === "/") {
@@ -435,7 +444,7 @@ export function convertNoteRefASTV2(
         return paragraph(data);
       }
     } catch (err) {
-      const msg = `Did not find ${npath}`;
+      const msg = `Error rendering note ${note?.fname}`;
       return MDUtilsV4.genMDMsg(msg);
     }
   });
@@ -517,7 +526,7 @@ function prepareNoteRefIndices<T>({
   // TODO: can i just strip frontmatter when reading?
   let start: FindAnchorResult = {
     type: "header",
-    index: bodyAST.children[0].type === "yaml" ? 1 : 0,
+    index: bodyAST.children[0]?.type === "yaml" ? 1 : 0,
   };
   let end: FindAnchorResult = null;
 

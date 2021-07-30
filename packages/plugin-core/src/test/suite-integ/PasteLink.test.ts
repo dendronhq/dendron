@@ -1,6 +1,6 @@
-import { sinon } from "@dendronhq/common-test-utils";
 import _ from "lodash";
 import ogs from "open-graph-scraper";
+import sinon from "sinon";
 import * as vscode from "vscode";
 import { PasteLinkCommand } from "../../commands/PasteLink";
 import * as utils from "../../utils";

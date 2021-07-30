@@ -25,7 +25,6 @@ import assert from "assert";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import sinon from "sinon";
 import { PreSetupHookFunctionV4, TestResult } from "./types";
 import { AssertUtils, TestPresetEntry } from "./utils";
 export * from "./fileUtils";
@@ -34,7 +33,6 @@ export * from "./presets";
 export * from "./types";
 export * from "./utils";
 export * from "./utilsv2";
-export { sinon };
 
 export function filterDotFiles(filenames: string[]) {
   return filenames.filter((filename) => !/(^|\/)\.[^\/\.]/g.test(filename));

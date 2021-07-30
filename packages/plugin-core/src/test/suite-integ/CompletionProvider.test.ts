@@ -1,6 +1,6 @@
 import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import { describe } from "mocha";
-import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
+import { runLegacyMultiWorkspaceTest, runTestButSkipForWindows, setupBeforeAfter } from "../testUtilsV3";
 import _ from "lodash";
 import {
   provideBlockCompletionItems,
@@ -132,7 +132,7 @@ suite("completionProvider", function () {
     });
   });
 
-  describe("blocks", () => {
+  runTestButSkipForWindows()("blocks", () => {
     test("doesn't provide outside wikilink", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,

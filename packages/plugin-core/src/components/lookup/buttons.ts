@@ -19,7 +19,7 @@ import {
 } from "../../commands/LookupCommand";
 import { clipboard, DendronClientUtilsV2, VSCodeUtils } from "../../utils";
 import { DendronQuickPickerV2 } from "./types";
-import { PickerUtilsV2 } from "./utils";
+import { NotePickerUtils, PickerUtilsV2 } from "./utils";
 
 export type ButtonType =
   | LookupEffectType
@@ -208,16 +208,18 @@ export class Selection2LinkBtn extends DendronBtn {
       });
     };
     
-    quickPick.rawValue = quickPick.value;
+    quickPick.prevValue = quickPick.value;
     const { text } = VSCodeUtils.getSelection();
     const slugger = getSlugger();
-    quickPick.value = [quickPick.value, slugger.slug(text!)].join(".");
+    quickPick.selectionModifierValue = slugger.slug(text!);
+    quickPick.value = NotePickerUtils.getPickerValue(quickPick);
     return;
   }
 
   async onDisable({ quickPick }: ButtonHandleOpts) {
     quickPick.selectionProcessFunc = undefined;
-    quickPick.value = quickPick.rawValue;
+    quickPick.selectionModifierValue = undefined;
+    quickPick.value = NotePickerUtils.getPickerValue(quickPick);
     return;
   }
 }
@@ -261,19 +263,23 @@ export class JournalBtn extends DendronBtn {
   }
 
   async onEnable({ quickPick }: ButtonHandleOpts) {
-    quickPick.modifyPickerValueFunc = (value: string) => {
+    quickPick.modifyPickerValueFunc = () => {
       return DendronClientUtilsV2.genNoteName("JOURNAL", {
-        overrides: { domain: value },
+        overrides: { excluePrefix: true }
       });
     };
-    quickPick.rawValue = quickPick.value;
-    quickPick.value = quickPick.modifyPickerValueFunc(quickPick.rawValue);
+    quickPick.noteModifierValue = quickPick.modifyPickerValueFunc();
+    console.log(quickPick.noteModifierValue);
+    quickPick.prevValue = quickPick.value;
+    quickPick.value = NotePickerUtils.getPickerValue(quickPick);
     return;
   }
 
   async onDisable({ quickPick }: ButtonHandleOpts) {
     quickPick.modifyPickerValueFunc = undefined;
-    quickPick.value = quickPick.rawValue;
+    quickPick.noteModifierValue = undefined;
+    quickPick.prevValue = quickPick.value;
+    quickPick.value = NotePickerUtils.getPickerValue(quickPick);
   }
 }
 
@@ -289,19 +295,21 @@ export class ScratchBtn extends DendronBtn {
   }
 
   async onEnable({ quickPick }: ButtonHandleOpts) {
-    quickPick.modifyPickerValueFunc = (value: string) => {
+    quickPick.modifyPickerValueFunc = () => {
       return DendronClientUtilsV2.genNoteName("SCRATCH", {
-        overrides: { domain: value },
+        overrides: { excluePrefix: true },
       });
     };
-    quickPick.rawValue = quickPick.value;
-    quickPick.value = quickPick.modifyPickerValueFunc(quickPick.rawValue);
+    quickPick.prevValue = quickPick.value;
+    quickPick.noteModifierValue = quickPick.modifyPickerValueFunc();
+    quickPick.value = NotePickerUtils.getPickerValue(quickPick);
     return;
   }
 
   async onDisable({ quickPick }: ButtonHandleOpts) {
     quickPick.modifyPickerValueFunc = undefined;
-    quickPick.value = quickPick.rawValue;
+    quickPick.noteModifierValue = undefined;
+    quickPick.value = NotePickerUtils.getPickerValue(quickPick);
   }
 }
 export class HorizontalSplitBtn extends DendronBtn {

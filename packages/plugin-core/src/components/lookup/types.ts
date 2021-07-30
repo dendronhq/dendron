@@ -14,7 +14,7 @@ export type LookupControllerState = {
 };
 
 type FilterQuickPickFunction = (items: NoteQuickInput[]) => NoteQuickInput[];
-type ModifyPickerValueFunc = (value: string) => string;
+type ModifyPickerValueFunc = (value?: string) => string;
 type SelectionProcessFunc = (note: NoteProps) => Promise<NoteProps | undefined>;
 
 export type DendronQuickPickItemV2 = QuickPick<DNodePropsQuickInputV2>;
@@ -40,6 +40,8 @@ export type DendronQuickPickerV2 = DendronQuickPickItemV2 & {
    * Value before being modified
    */
   rawValue: string;
+  noteModifierValue?: string;
+  selectionModifierValue?: string;
   onCreate?: (note: DNodeProps) => Promise<DNodeProps | undefined>;
   /**
    @deprecated, replace with filterResults

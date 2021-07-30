@@ -715,4 +715,12 @@ export class NotePickerUtils {
     Logger.info({ ctx, msg: "engine.query", profile });
     return updatedItems;
   }
+
+  static getPickerValue(picker: DendronQuickPickerV2) {
+    return [
+      picker.rawValue,
+      picker.noteModifierValue,
+      picker.selectionModifierValue
+    ].filter((ent) => !_.isEmpty(ent)).join(".");
+  }
 }

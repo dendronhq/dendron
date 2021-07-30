@@ -75,6 +75,22 @@ describe("hashtag", () => {
       const resp = proc().parse("#123-hash-tag");
       expect(getDescendantNode(resp, 0, 0).type).toEqual(DendronASTTypes.TEXT);
     });
+
+    test("doesn't parse trailing punctuation", () => {
+      const resp1 = proc().parse("Dolorem vero sed sapiente #dolores. Et quam id maxime et ratione.");
+      expect(getDescendantNode(resp1, 0, 1).type).toEqual(DendronASTTypes.HASHTAG);
+      expect(getDescendantNode(resp1, 0, 1).value).toEqual("#dolores");
+
+      const resp2 = proc().parse("Dolorem vero sed sapiente #dolores, et quam id maxime et ratione.");
+      expect(getDescendantNode(resp2, 0, 1).type).toEqual(DendronASTTypes.HASHTAG);
+      expect(getDescendantNode(resp2, 0, 1).value).toEqual("#dolores");
+    });
+
+    test("doesn't parse trailing unicode punctuation", () => {
+      const resp1 = proc().parse("彼女に「#よろしく」言って下さい。");
+      expect(getDescendantNode(resp1, 0, 1).type).toEqual(DendronASTTypes.HASHTAG);
+      expect(getDescendantNode(resp1, 0, 1).value).toEqual("#よろしく");
+    });
   });
 
   describe("rendering", () => {

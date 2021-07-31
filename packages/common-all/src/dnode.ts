@@ -30,7 +30,7 @@ import {
   SchemaRaw,
   SchemaTemplate,
 } from "./types";
-import { getSlugger, isNotUndefined, randomColor } from "./utils";
+import { getSlugger, randomColor } from "./utils";
 import { genUUID } from "./uuid";
 import { VaultUtils } from "./vault";
 

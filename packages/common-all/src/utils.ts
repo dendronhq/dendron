@@ -97,6 +97,8 @@ export function makeColorTranslucent(color: string, translucency: number) {
   if (match) return `${match[1]}, ${translucency})`;
   match = color.match(/^((rgb|hsl)\( *[\d.]+ *[\d.]+%? *[\d.]+%? *)\)$/);
   if (match) return `${match[1]} / ${translucency})`;
+  
+  return color;
 }
 
 

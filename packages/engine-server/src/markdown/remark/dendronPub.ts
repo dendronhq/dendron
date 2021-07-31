@@ -170,7 +170,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
           hProperties: {
             // className: classNames,
             href,
-            style: color ? `backgroundColor: ${color};` : undefined,
+            style: color ? `background-color: ${color};` : undefined,
           },
           hChildren: [
             {

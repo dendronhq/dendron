@@ -14,6 +14,8 @@ import {
 } from "./builtin/MarkdownPod";
 import { GithubImportPod } from "./builtin/GithubPod";
 import { PodClassEntryV4 } from "./types";
+import { GDocImportPod } from "./builtin/GDocPod";
+
 export * from "./basev3";
 export * from "./builtin";
 export * from "./types";
@@ -31,5 +33,5 @@ export function getAllPublishPods(): PodClassEntryV4[] {
   return [JSONPublishPod, MarkdownPublishPod, HTMLPublishPod];
 }
 export function getAllImportPods(): PodClassEntryV4[] {
-  return [JSONImportPod, MarkdownImportPod, GithubImportPod];
+  return [JSONImportPod, MarkdownImportPod, GithubImportPod, GDocImportPod];
 }

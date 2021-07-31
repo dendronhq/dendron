@@ -1,8 +1,9 @@
-import { isNotUndefined, Time } from "@dendronhq/common-all";
+import { CONSTANTS, DendronConfig, isNotUndefined, Time } from "@dendronhq/common-all";
 import { readYAML, tmpDir } from "@dendronhq/common-server";
-import { MetadataService } from "@dendronhq/engine-server";
+import { getPortFilePath, getWSMetaFilePath, MetadataService, openWSMetaFile } from "@dendronhq/engine-server";
 import { TestEngineUtils } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
+import _ from "lodash";
 import { describe, it } from "mocha";
 import path from "path";
 import { SinonStub } from "sinon";
@@ -18,12 +19,12 @@ import {
   WORKSPACE_ACTIVATION_CONTEXT,
 } from "../../constants";
 import * as telemetry from "../../telemetry";
-import { getWS } from "../../workspace";
+import { DendronWorkspace, getWS, resolveRelToWSRoot } from "../../workspace";
 import { BlankInitializer } from "../../workspace/blankInitializer";
 import { TemplateInitializer } from "../../workspace/templateInitializer";
 import { shouldDisplayLapsedUserMsg, _activate } from "../../_extension";
-import { expect, genEmptyWSFiles, resetCodeWorkspace } from "../testUtilsv2";
-import { setupBeforeAfter, stubSetupWorkspace } from "../testUtilsV3";
+import { expect, genDefaultSettings, genEmptyWSFiles, resetCodeWorkspace } from "../testUtilsv2";
+import { runLegacySingleWorkspaceTest, setupBeforeAfter, stubSetupWorkspace } from "../testUtilsV3";
 
 function lapsedMessageTest({
   done,
@@ -58,6 +59,7 @@ suite("Extension", function () {
     afterHook: async () => {
       homeDirStub.restore();
     },
+    noSetInstallStatus: true,
   });
 
   describe("setup workspace", () => {
@@ -109,11 +111,19 @@ suite("Extension", function () {
                 name: "journal",
                 firstDayOfWeek: 1,
               },
+              scratch: {
+                name: "scratch",
+                dateFormat: "y.MM.dd.HHmmss",
+                addBehavior: "asOwnDomain",
+              },
               noAutoCreateOnDefinition: true,
               noLegacyNoteRef: true,
               noXVaultWikiLink: true,
               lookupConfirmVaultOnCreate: false,
               autoFoldFrontmatter: true,
+              dev: {
+                enablePreviewV2: true,
+              },
               mermaid: true,
               useKatex: true,
               site: {
@@ -128,7 +138,7 @@ suite("Extension", function () {
                   payload: ["vault"],
                 },
               },
-            });
+            } as DendronConfig);
             const dendronState = MetadataService.instance().getMeta();
             expect(isNotUndefined(dendronState.firstInstall)).toBeTruthy();
             expect(isNotUndefined(dendronState.firstWsInitialize)).toBeTruthy();
@@ -186,6 +196,53 @@ suite("Extension", function () {
             done();
           });
         });
+    });
+
+    it("ok", (done) => {
+      DendronWorkspace.version = () => "0.0.1";
+      runLegacySingleWorkspaceTest({
+        ctx,
+        onInit: async ({ wsRoot, vaults, engine }) => {
+          // check for meta
+          const port = getPortFilePath({ wsRoot });
+          const fpath = getWSMetaFilePath({ wsRoot });
+          const meta = openWSMetaFile({ fpath });
+          expect(
+            _.toInteger(fs.readFileSync(port, { encoding: "utf8" })) > 0
+          ).toBeTruthy();
+          expect(meta.version).toEqual("0.0.1");
+          expect(meta.activationTime < Time.now().toMillis()).toBeTruthy();
+          expect(_.values(engine.notes).length).toEqual(1);
+          const vault = resolveRelToWSRoot(vaults[0].fsPath);
+
+          const settings = fs.readJSONSync(
+            path.join(wsRoot, "dendron.code-workspace")
+          );
+          expect(settings).toEqual(genDefaultSettings());
+          expect(fs.readdirSync(vault)).toEqual(
+            [CONSTANTS.DENDRON_CACHE_FILE].concat(genEmptyWSFiles())
+          );
+          done();
+        },
+      });
+    });
+    it("ok: missing root.schema", (done) => {
+      DendronWorkspace.version = () => "0.0.1";
+      runLegacySingleWorkspaceTest({
+        ctx,
+        onInit: async ({ vaults }) => {
+          const vault = resolveRelToWSRoot(vaults[0].fsPath);
+          expect(fs.readdirSync(vault)).toEqual(
+            [CONSTANTS.DENDRON_CACHE_FILE].concat(genEmptyWSFiles())
+          );
+          done();
+        },
+        postSetupHook: async ({ vaults }) => {
+          fs.removeSync(
+            path.join(resolveRelToWSRoot(vaults[0].fsPath), "root.schema.yml")
+          );
+        },
+      });
     });
   });
 

@@ -43,7 +43,7 @@ export class WorkspaceInitFactory {
     return new BlankInitializer();
   }
 
-  private static isTutorialWorkspaceLaunch(
+  static isTutorialWorkspaceLaunch(
     context: vscode.ExtensionContext
   ): boolean {
     const state = context.globalState.get<string | undefined>(

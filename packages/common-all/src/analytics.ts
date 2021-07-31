@@ -1,4 +1,5 @@
 export enum VSCodeEvents {
+  ServerCrashed = "ServerCrashed",
   InitializeWorkspace = "InitializeWorkspace",
   Install = "Install",
   Lookup_Show = "Lookup_Show",

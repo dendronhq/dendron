@@ -1,6 +1,6 @@
 import { DVault, NoteProps } from "@dendronhq/common-all";
 import { tmpDir } from "@dendronhq/common-server";
-import { NoteTestUtilsV4, sinon } from "@dendronhq/common-test-utils";
+import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import {
   DConfig,
   SeedService,
@@ -78,11 +78,13 @@ describe("WorkspaceUtils", () => {
 
 describe("WorkspaceService", () => {
   describe("create", () => {
+    let homeDirStub: sinon.SinonStub;
+
     beforeEach(() => {
-      TestEngineUtils.mockHomeDir();
+      homeDirStub = TestEngineUtils.mockHomeDir();
     });
     afterEach(() => {
-      sinon.restore();
+      homeDirStub.restore();
     });
     test("basic", async () => {
       const wsRoot = tmpDir().name;
@@ -226,9 +228,10 @@ describe("WorkspaceService", () => {
           await checkFile(
             {
               fpath: path.join(wsRoot, "dendron.code-workspace"),
-              snapshot: true,
+              snapshot: false,
             },
-            `${id}/vault`
+            // Necessary for windows test-compat:
+            path.join(`seeds`, `${id}`, `vault`).replace(/\\/g, "\\\\")
           );
           checkVaults(
             {
@@ -311,7 +314,7 @@ describe("WorkspaceService", () => {
       await NoteTestUtilsV4.modifyNoteByPath(
         { wsRoot, vault: vaults[0], fname: "foo" },
         (note: NoteProps) => {
-          note.body = note.body + "\n Foo";
+          note.body += "\n Foo";
           return note;
         }
       );

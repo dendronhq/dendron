@@ -414,10 +414,10 @@ export class MDUtilsV4 {
       });
     }
 
-    if (opts.mathOpts?.katex) {
+    if (opts.mathOpts?.katex || opts.config?.useKatex) {
       proc = proc.use(math);
     }
-    if (opts.mermaid) {
+    if (opts.mermaid || opts.config?.mermaid) {
       proc = proc.use(mermaid, { simple: true });
     }
     // MD_DENDRON, convert back to itself, no need for transformations

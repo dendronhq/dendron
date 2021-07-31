@@ -1,6 +1,7 @@
 {
   "name": "@dendronhq/dendron-next-server",
-  "version": "0.50.1",
+  "private": true,
+  "version": "0.52.0",
   "license": "GPLv3",
   "repository": {
     "type": "git",
@@ -16,8 +17,8 @@
     "prod": "env STAGE=prod next dev",
     "watch": "echo 0",
     "build": "yarn build:prod && yarn gen:theme",
-    "build:dev": "env CDN_BUILD=1 STAGE=dev next build && next export",
-    "build:prod": "env CDN_BUILD=1 STAGE=prod next build && next export",
+    "build:dev": "cross-env CDN_BUILD=1 STAGE=dev next build && next export",
+    "build:prod": "cross-env CDN_BUILD=1 STAGE=prod next build && next export",
     "start": "next start",
     "checkout:dev": "amplify env checkout dev",
     "deploy:dev": "env STAGE=dev amplify publish",
@@ -31,10 +32,11 @@
     "**/common-all/**"
   ],
   "dependencies": {
+    "@ant-design/icons": "^4.6.2",
     "@chakra-ui/react": "^1.0.0",
-    "@dendronhq/common-all": "^0.50.1",
-    "@dendronhq/common-frontend": "^0.50.1",
-    "@dendronhq/engine-server": "^0.50.1",
+    "@dendronhq/common-all": "^0.52.0",
+    "@dendronhq/common-frontend": "^0.52.0",
+    "@dendronhq/engine-server": "^0.52.0",
     "@emotion/react": "^11.1.1",
     "@emotion/styled": "^11.0.0",
     "@reduxjs/toolkit": "^1.5.1",
@@ -78,6 +80,7 @@
     "@types/styled-components": "^5.1.3",
     "@types/yup": "^0.29.7",
     "autoprefixer": "^10.2.5",
+    "cross-env": "^7.0.3",
     "gulp": "^4.0.2",
     "gulp-csso": "^4.0.1",
     "gulp-debug": "^4.0.0",

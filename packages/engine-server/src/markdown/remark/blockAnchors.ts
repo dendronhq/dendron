@@ -82,8 +82,8 @@ function attachCompiler(proc: Unified.Processor, _opts?: PluginOpts) {
         case DendronASTDest.MD_REGULAR:
           return `^${node.id}`;
         case DendronASTDest.MD_ENHANCED_PREVIEW:
-          const procOpts = MDUtilsV4.getProcOpts(proc);
-          return blockAnchor2htmlRaw(node, procOpts.blockAnchorsOpts);
+          const fullId = node.id;
+          return `<a aria-hidden="true" class="block-anchor anchor-heading" id="${fullId}" href="#${fullId}">^${fullId}</a>`;
         default:
           throw new DendronError({ message: "Unable to render block anchor" });
       }

@@ -1,6 +1,6 @@
-import { sinon } from "@dendronhq/common-test-utils";
 import _ from "lodash";
 import ogs from "open-graph-scraper";
+import sinon from "sinon";
 import * as vscode from "vscode";
 import { PasteLinkCommand } from "../../commands/PasteLink";
 import * as utils from "../../utils";
@@ -31,12 +31,7 @@ const DEFAULT_OPENGRAPH_RESPONSE_FAIL = { error: true } as ogs.ErrorResult;
 suite.skip("pasteLink", function () {
   let ctx: vscode.ExtensionContext;
 
-  ctx = setupBeforeAfter(this, {
-    beforeHook: () => {},
-    afterHook: () => {
-      sinon.restore();
-    },
-  });
+  ctx = setupBeforeAfter(this);
   test("basic", (done) => {
     runLegacyMultiWorkspaceTest({
       ctx,

@@ -173,12 +173,6 @@ export class Snippets {
       body: "- [ ] ",
       description: "render todo box",
     },
-    tag: {
-      prefix: "#",
-      scope: "markdown,yaml",
-      body: "[[#${1:my-tag}|tag.${1}]]",
-      description: "tag",
-    },
     date: {
       prefix: "date",
       scope: "markdown,yaml",

@@ -49,8 +49,11 @@ export class ShowPreviewV2Command extends BasicCommand<
   }
 
   static refresh(note: NoteProps) {
+    const ctx = {ctx: "ShowPreview:refresh", fname: note.fname}
     const panel = getWS().getWebView(DendronWebViewKey.NOTE_PREVIEW);
+    Logger.debug({...ctx, state: "enter"})
     if (panel) {
+      Logger.debug({...ctx, state: "panel found"})
       panel.title = `${title} ${note.fname}`;
       panel.webview.postMessage({
         type: DMessageType.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR,
@@ -113,6 +116,7 @@ export class ShowPreviewV2Command extends BasicCommand<
     panel.webview.html = resp;
 
     panel.webview.onDidReceiveMessage(async (msg: NoteViewMessage) => {
+      const ctx = "ShowPreview:onDidReceiveMessage";
       switch (msg.type) {
         case NoteViewMessageType.onClick: {
           const { data } = msg;
@@ -139,6 +143,7 @@ export class ShowPreviewV2Command extends BasicCommand<
         }
         case NoteViewMessageType.onGetActiveEditor: {
           // only entered on "init" in `plugin-core/src/views/utils.ts:87`
+          Logger.debug({ctx, "msg.type": "onGetActiveEditor"})
           const activeTextEditor = VSCodeUtils.getActiveTextEditor();
           const maybeNote = !_.isUndefined(activeTextEditor) ? tryGetNoteFromDocument(activeTextEditor?.document) : undefined;
           if(!_.isUndefined(maybeNote)) ShowPreviewV2Command.refresh(maybeNote);
@@ -146,7 +151,6 @@ export class ShowPreviewV2Command extends BasicCommand<
         }
         default:
           assertUnreachable(msg.type);
-          break;
       }
     });
 
@@ -156,6 +160,8 @@ export class ShowPreviewV2Command extends BasicCommand<
     // remove webview from workspace when user closes it
     // this prevents throwing `Uncaught Error: Webview is disposed` in `ShowPreviewV2Command#refresh`
     panel.onDidDispose(() => {
+      const ctx = "ShowPreview:onDidDispose"
+      Logger.debug({ctx, state:"dispose preview"})
       ws.setWebView(DendronWebViewKey.NOTE_PREVIEW, undefined);
     });
   }

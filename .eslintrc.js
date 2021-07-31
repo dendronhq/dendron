@@ -49,8 +49,6 @@ module.exports = {
     // don't agree with
     "dot-notation": "off",
     // Less restrictive version of airbnb
-    "no-restricted-syntax": ["error", "ForInStatement", 'WithStatement'],
-    "no-continue": "off",
     'no-labels': ['error', { allowLoop: true, allowSwitch: false }],
     // prettier
     indent: "off",
@@ -105,6 +103,8 @@ module.exports = {
         ],
       },
     ],
+    // Support JSX in .tsx files
+    "react/jsx-filename-extension": [1, { "extensions": [".tsx"] }],
     // used for redux toolkit
     "no-param-reassign": "off",
     "max-classes-per-file": "off",

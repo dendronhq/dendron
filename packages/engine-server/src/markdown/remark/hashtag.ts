@@ -6,16 +6,54 @@ import { DendronASTDest, DendronASTTypes, HashTag } from "../types";
 import { MDUtilsV4 } from "../utils";
 import { Element } from "hast";
 
+/** All sorts of punctuation marks and quotation marks from different languages. Please add any that may be missing.
+ * 
+ * Be warned that this excludes period (.) as it has a special meaning in Dendron. Make sure to handle it appropriately depending on the context.
+ * 
+ * Mind that this may have non regex-safe characters, run it through `_.escapeRegExp` if needed.
+ */
+export const PUNCTUATION_MARKS = ",;:'\"<>?!`~«‹»›„“‟”’❝❞❮❯⹂〝〞〟＂‚‘‛❛❜❟［］【】…‥「」『』·؟،।॥‽⸘¡¿⁈⁉";
+
+/** Can't start with a number or period */
+const GOOD_FIRST_CHARACTER = `[^0-9#|\\[\\]\\s.${PUNCTUATION_MARKS}]`;
+/** Can have numbers and period in the middle */
+const GOOD_MIDDLE_CHARACTER = `[^#|\\[\\]\\s${PUNCTUATION_MARKS}]`;
+/** Can have numbers, but not period in the end */
+const GOOD_END_CHARACTER = `[^#|\\[\\]\\s.${PUNCTUATION_MARKS}]`;
+
 /** Hashtags have the form #foo, or #foo.bar, or #f123
  *
  * Hashtags are not allowed to start with numbers: this is to reserve them in
  * case we want to add Github issues integration, where issues look like #123
  *
- * Other then the reservation on the first character, hashtags can contain any
- * character that a note name can.
+ * Hashtags are also not allowed to contain any punctuation or quotation marks.
+ * This allows them to be more easily mixed into text, for example:
+ * 
+ * ```
+ * This issue is #important, and should be prioritized.
+ * ```
+ * 
+ * Here, the tag is `#important` without the following comma.
  */
-export const HASHTAG_REGEX = /^#([^0-9#|>[\]\s{}][^#|>[\]\s{}]*)/;
-export const HASHTAG_REGEX_LOOSE = /#([^0-9#|>[\]\s{}][^#|>[\]\s{}]*)/;
+export const HASHTAG_REGEX = new RegExp(`^(?<hashTag>#)(?<tagContents>` + 
+  // 2 or more characters, like #a1x or #a.x. This MUST come before 1 character case, or regex will match 1 character and stop.
+  `${GOOD_FIRST_CHARACTER}${GOOD_MIDDLE_CHARACTER}*${GOOD_END_CHARACTER}` +
+  // or
+  "|" +
+  // Just 1 character, like #a
+  `${GOOD_FIRST_CHARACTER}` +
+  ")"
+);
+/** Same as `HASHTAG_REGEX`, except that that it doesn't have to be at the start of the string. */
+export const HASHTAG_REGEX_LOOSE = new RegExp(`^(?<hashTag>#)(?<tagContents>` + 
+  // 2 or more characters, like #a1x or #a.x. This MUST come before 1 character case, or regex will match 1 character and stop.
+  `${GOOD_FIRST_CHARACTER}${GOOD_MIDDLE_CHARACTER}*${GOOD_END_CHARACTER}` +
+  // or
+  "|" +
+  // Just 1 character, like #a
+  `${GOOD_FIRST_CHARACTER}` +
+  ")"
+);
 
 /**
  *
@@ -30,7 +68,7 @@ export const matchHashtag = (
   const match = (matchLoose ? HASHTAG_REGEX : HASHTAG_REGEX_LOOSE).exec(
     text
   );
-  if (match && match.length === 1) return match[1];
+  if (match && match.groups) return match.groups.tagContents;
   return undefined;
 };
 
@@ -54,11 +92,11 @@ function attachParser(proc: Unified.Processor) {
 
   function inlineTokenizer(eat: Eat, value: string) {
     const match = HASHTAG_REGEX.exec(value);
-    if (match) {
+    if (match && match.groups?.tagContents) {
       return eat(match[0])({
         type: DendronASTTypes.HASHTAG,
-        value,
-        fname: `${TAGS_HIERARCHY}${match[1]}`,
+        value: match[0],
+        fname: `${TAGS_HIERARCHY}${match.groups.tagContents}`,
       });
     }
     return;

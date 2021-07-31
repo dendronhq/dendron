@@ -1,4 +1,4 @@
-import { DEngineClient, NoteProps } from "@dendronhq/common-all";
+import { DEngineClient, isNotUndefined, NoteProps } from "@dendronhq/common-all";
 import {
   BackfillV2Command,
   DoctorActions,
@@ -16,6 +16,7 @@ import {
 } from "../components/doctor/buttons";
 import { DoctorScopeType } from "../components/doctor/types";
 import { DENDRON_COMMANDS } from "../constants";
+import { updateDecorations } from "../features/windowDecorations";
 import { VSCodeUtils } from "../utils";
 import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
@@ -86,7 +87,9 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     quickpick.title = `Doctor (${button.type})`;
   };
 
-  async gatherInputs(): Promise<CommandOpts | undefined> {
+  async gatherInputs(inputs: CommandOpts): Promise<CommandOpts | undefined> {
+    // If inputs are already provided, don't ask the user.
+    if (inputs && inputs.action && inputs.scope) return inputs;
     // eslint-disable-next-line no-async-promise-executor
     const out = new Promise<CommandOpts | undefined>(async (resolve) => {
       const values = _.map(DoctorActions, (ent) => {
@@ -123,7 +126,6 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
       "",
       `## The following files will be created`,
     ];
-
     _.forEach(_.sortBy(candidates, ["vault.fsPath"]), (candidate) => {
       content = content.concat(
         `- ${candidate.vault.fsPath}/${candidate.fname}\n`
@@ -157,13 +159,18 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     if (ws.fileWatcher) {
       ws.fileWatcher.pause = true;
     }
+    // Make sure to save any changes in the file because Doctor reads them from
+    // disk, and won't see changes that haven't been saved.
+    const document = VSCodeUtils.getActiveTextEditor()?.document;
+    if (isNotUndefined(document) && isNotUndefined(VSCodeUtils.getNoteFromDocument(document))) {
+      await document.save();
+    }
     this.L.info({ ctx, msg: "pre:Reload" });
     const engine: DEngineClient =
       (await new ReloadIndexCommand().execute()) as DEngineClient;
 
     let note;
     if (opts.scope === "file") {
-      console.log("scoped for active file");
       const document = VSCodeUtils.getActiveTextEditor()?.document;
       if (_.isUndefined(document)) {
         throw Error("No note open");
@@ -182,12 +189,6 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
         break;
       }
       case DoctorActions.CREATE_MISSING_LINKED_NOTES: {
-        if (opts.scope === "workspace") {
-          window.showInformationMessage(
-            "This action is currently not supported in workspace scope."
-          );
-          break;
-        }
         const cmd = new DoctorCLICommand();
         let notes;
         if (_.isUndefined(note)) {
@@ -196,7 +197,6 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
         } else {
           notes = [note];
         }
-
         const uniqueCandidates = cmd.getWildLinkDestinations(notes, engine);
         if (uniqueCandidates.length > 0) {
           // show preview before creating
@@ -250,7 +250,18 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
       ws.fileWatcher.pause = false;
     }
     await new ReloadIndexCommand().execute();
-
+    // Decorations don't auto-update here, I think because the contents of the
+    // note haven't updated within VSCode yet. Regenerate the decorations, but
+    // do so after a delay so that VSCode can update the file contents. Not a
+    // perfect solution, but the simplest.
+    setTimeout(
+      () => {
+        const editor = VSCodeUtils.getActiveTextEditor();
+        if (editor) updateDecorations(editor);
+      }, 
+      200,
+    );
+    
     // create site root, used for publication
     if (!fs.existsSync(siteRoot)) {
       const f: Finding = { issue: "no siteRoot found" };

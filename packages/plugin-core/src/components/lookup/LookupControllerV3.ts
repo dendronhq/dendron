@@ -6,6 +6,8 @@ import { VSCodeUtils } from "../../utils";
 import { getWS } from "../../workspace";
 import {
   DendronBtn,
+  ButtonCategory,
+  getButtonCategory,
   IDendronQuickInputButton,
   VaultSelectButton,
 } from "./buttons";
@@ -111,6 +113,7 @@ export class LookupControllerV3 {
     const { buttonsPrev, buttons } = this.state;
     const quickpick = PickerUtilsV2.createDendronQuickPick(opts);
     this._quickpick = quickpick;
+    // invoke button behaviors
     PickerUtilsV2.refreshButtons({ quickpick, buttons, buttonsPrev });
     await PickerUtilsV2.refreshPickerBehavior({ quickpick, buttons });
     quickpick.onDidTriggerButton(this.onTriggerButton);
@@ -124,6 +127,7 @@ export class LookupControllerV3 {
     const { nonInteractive, provider, quickpick } = _.defaults(opts, {
       nonInteractive: false,
     });
+    // initial call of update
     await provider.onUpdatePickerItems({
       picker: quickpick,
       token: cancelToken.token,
@@ -171,12 +175,25 @@ export class LookupControllerV3 {
     if (!quickpick) {
       return;
     }
+    // set button value
     const btnType = (btn as IDendronQuickInputButton).type;
     const btnTriggered = _.find(this.state.buttons, {
       type: btnType,
     }) as DendronBtn;
     btnTriggered.pressed = !btnTriggered.pressed;
+    const btnCategory = getButtonCategory(btnTriggered);
+    if (!_.includes(["effect"] as ButtonCategory[], btnCategory)) {
+      _.filter(this.state.buttons, (ent) => ent.type !== btnTriggered.type).map(
+        (ent) => {
+          if (getButtonCategory(ent) === btnCategory) {
+            ent.pressed = false;
+          }
+        }
+      );
+    }
+    // update button state
     PickerUtilsV2.refreshButtons({ quickpick, buttons, buttonsPrev });
+    // modify button behavior
     await PickerUtilsV2.refreshPickerBehavior({ quickpick, buttons });
   };
 }

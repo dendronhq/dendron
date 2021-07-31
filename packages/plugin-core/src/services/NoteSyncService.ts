@@ -95,7 +95,7 @@ export class NoteSyncService {
       }
     }
 
-    this.L.info({ ctx, uri: uri.fsPath });
+    this.L.debug({ ctx, uri: uri.fsPath });
     const vault = VaultUtils.getVaultByNotePath({
       vaults: eclient.vaults,
       wsRoot: DendronWorkspace.wsRoot(),
@@ -161,7 +161,7 @@ export class NoteSyncService {
       note.updated = now;
     }
 
-    this.L.info({ ctx, fname, msg: "exit" });
+    this.L.debug({ ctx, fname, msg: "exit" });
     const noteClean = await eclient.updateNote(note);
     ShowPreviewV2Command.refresh(noteClean);
     return noteClean;

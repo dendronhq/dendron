@@ -1,5 +1,5 @@
-import { NoteProps } from "@dendronhq/common-all";
 import {
+  NoteProps,
   DVault,
   NotePropsDict,
   NoteUtils,
@@ -7,6 +7,7 @@ import {
   SchemaProps,
   VaultUtils,
 } from "@dendronhq/common-all";
+
 import { createLogger, engineSlice } from "@dendronhq/common-frontend";
 import { EdgeDefinition } from "cytoscape";
 import _ from "lodash";
@@ -25,6 +26,10 @@ const getVaultClass = (vault: DVault) => {
   return `vault-${vaultName}`;
 };
 
+const DEFAULT_CLASSES = ""; //graph-view
+const DEFAULT_NODE_CLASSES = `${DEFAULT_CLASSES}`; //color-fill
+const DEFAULT_EDGE_CLASSES = `${DEFAULT_CLASSES}`;
+
 const getLocalNoteGraphElements = ({
   notes,
   noteActive,
@@ -38,11 +43,12 @@ const getLocalNoteGraphElements = ({
 }): GraphElements => {
   const logger = createLogger("getLocalNoteGraphElements");
 
-  if (!noteActive)
+  if (_.isUndefined(noteActive)) {
     return {
       nodes: [],
       edges: {},
     };
+  }
 
   const activeNote = notes[noteActive.id];
   const parentNote = activeNote.parent ? notes[activeNote.parent] : undefined;
@@ -62,7 +68,7 @@ const getLocalNoteGraphElements = ({
         stub: _.isUndefined(activeNote.stub) ? false : activeNote.stub,
         localRoot: true,
       },
-      classes: `${getVaultClass(activeNote.vault)}`,
+      classes: `${DEFAULT_NODE_CLASSES} ${getVaultClass(activeNote.vault)}`,
       selected: true,
     },
   ];
@@ -77,7 +83,9 @@ const getLocalNoteGraphElements = ({
         fname: parentNote.fname,
         stub: _.isUndefined(parentNote.stub) ? false : parentNote.stub,
       },
-      classes: `parent ${getVaultClass(parentNote.vault)}`,
+      classes: `${DEFAULT_NODE_CLASSES} parent ${getVaultClass(
+        parentNote.vault
+      )}`,
     });
   }
 
@@ -92,7 +100,7 @@ const getLocalNoteGraphElements = ({
           fname: note.fname,
           stub: _.isUndefined(note.stub) ? false : note.stub,
         },
-        classes: `${getVaultClass(note.vault)}`,
+        classes: `${DEFAULT_NODE_CLASSES} ${getVaultClass(note.vault)}`,
       };
     })
   );
@@ -117,7 +125,7 @@ const getLocalNoteGraphElements = ({
         fname: parentNote.fname,
         stub: _.isUndefined(parentNote.stub) ? false : parentNote.stub,
       },
-      classes: `hierarchy ${noteVaultClass}`,
+      classes: `${DEFAULT_EDGE_CLASSES} hierarchy ${noteVaultClass}`,
     });
   }
 
@@ -131,7 +139,7 @@ const getLocalNoteGraphElements = ({
         fname: childNote.fname,
         stub: _.isUndefined(childNote.stub) ? false : childNote.stub,
       },
-      classes: `${getVaultClass(childNote.vault)}`,
+      classes: `${DEFAULT_NODE_CLASSES} ${getVaultClass(childNote.vault)}`,
     });
 
     edges.hierarchy.push({
@@ -143,7 +151,7 @@ const getLocalNoteGraphElements = ({
         fname: activeNote.fname,
         stub: _.isUndefined(activeNote.stub) ? false : activeNote.stub,
       },
-      classes: `hierarchy ${noteVaultClass}`,
+      classes: `${DEFAULT_EDGE_CLASSES} hierarchy ${noteVaultClass}`,
     });
   });
 
@@ -159,11 +167,9 @@ const getLocalNoteGraphElements = ({
         stub:
           _.isUndefined(activeNote.stub) && _.isUndefined(connectedNote.stub)
             ? false
-            : activeNote.stub || connectedNote.stub
-            ? true
-            : false,
+            : !!(activeNote.stub || connectedNote.stub),
       },
-      classes: `links ${noteVaultClass}`,
+      classes: `${DEFAULT_EDGE_CLASSES} links ${noteVaultClass}`,
     };
   });
 
@@ -196,7 +202,7 @@ const getLocalNoteGraphElements = ({
       const to = NoteUtils.getNoteByFnameV5({
         fname: fnameArray[fnameArray.length - 1],
         vault: toVault,
-        notes: notes,
+        notes,
         wsRoot,
       });
 
@@ -214,9 +220,7 @@ const getLocalNoteGraphElements = ({
       const isStub =
         _.isUndefined(activeNote.stub) && _.isUndefined(to.stub)
           ? false
-          : activeNote.stub || to.stub
-          ? true
-          : false;
+          : !!(activeNote.stub || to.stub);
 
       nodes.push({
         data: {
@@ -226,7 +230,7 @@ const getLocalNoteGraphElements = ({
           fname: to.fname,
           stub: isStub,
         },
-        classes: `${getVaultClass(to.vault)}`,
+        classes: `${DEFAULT_NODE_CLASSES} ${getVaultClass(to.vault)}`,
       });
 
       linkConnections.push({
@@ -238,7 +242,7 @@ const getLocalNoteGraphElements = ({
           fname: activeNote.fname,
           stub: isStub,
         },
-        classes: `links ${noteVaultClass}`,
+        classes: `${DEFAULT_EDGE_CLASSES} links ${noteVaultClass}`,
       });
     }
   });
@@ -275,7 +279,7 @@ const getFullNoteGraphElements = ({
         fname: note.fname,
         stub: _.isUndefined(note.stub) ? false : note.stub,
       },
-      classes: `${getVaultClass(note.vault)}`,
+      classes: `${DEFAULT_NODE_CLASSES} ${getVaultClass(note.vault)}`,
       selected: isActive,
     };
   });
@@ -307,7 +311,7 @@ const getFullNoteGraphElements = ({
             fname: note.fname,
             stub: isStub,
           },
-          classes: `hierarchy ${noteVaultClass}`,
+          classes: `${DEFAULT_EDGE_CLASSES} hierarchy ${noteVaultClass}`,
         };
       })
     );
@@ -343,7 +347,7 @@ const getFullNoteGraphElements = ({
         const to = NoteUtils.getNoteByFnameV5({
           fname: fnameArray[fnameArray.length - 1],
           vault: toVault,
-          notes: notes,
+          notes,
           wsRoot,
         });
 
@@ -378,7 +382,7 @@ const getFullNoteGraphElements = ({
                 ? false
                 : note.stub || to.stub,
           },
-          classes: `links ${noteVaultClass}`,
+          classes: `${DEFAULT_EDGE_CLASSES} links ${noteVaultClass}`,
         });
       }
     });
@@ -425,7 +429,7 @@ const getSchemaGraphElements = (
         vault: vaultName,
         fname: "root",
       },
-      classes: `vault-${vaultName}`,
+      classes: `${DEFAULT_NODE_CLASSES} vault-${vaultName}`,
     });
 
     filteredSchemas
@@ -441,7 +445,7 @@ const getSchemaGraphElements = (
             group: "nodes",
             fname: schema.fname,
           },
-          classes: `vault-${vaultName}`,
+          classes: `${DEFAULT_NODE_CLASSES} vault-${vaultName}`,
         });
 
         // Schema node -> root connection
@@ -453,7 +457,7 @@ const getSchemaGraphElements = (
             target: SCHEMA_ID,
             fname: schema.fname,
           },
-          classes: `hierarchy vault-${vaultName}`,
+          classes: `${DEFAULT_EDGE_CLASSES} hierarchy vault-${vaultName}`,
         });
 
         // Add subschema nodes
@@ -468,7 +472,7 @@ const getSchemaGraphElements = (
               group: "nodes",
               fname: schema.fname,
             },
-            classes: `vault-${vaultName}`,
+            classes: `${DEFAULT_NODE_CLASSES} vault-${vaultName}`,
           });
         });
 
@@ -489,7 +493,7 @@ const getSchemaGraphElements = (
                 target: CHILD_SCHEMA_ID,
                 fname: schema.fname,
               },
-              classes: `hierarchy vault-${vaultName}`,
+              classes: `${DEFAULT_EDGE_CLASSES} hierarchy vault-${vaultName}`,
             });
 
             addChildConnections(childSchema, `${vaultName}_${childSchema.id}`);
@@ -530,13 +534,15 @@ const useGraphElements = ({
   const isLocalGraph = GraphUtils.isLocalGraph(config);
 
   useEffect(() => {
-    if (type === "note" && engine.notes) {
+    if (type === "note" && engine.notes && config["options.show-local-graph"]) {
       // Prevent unnecessary parsing if no notes have been added/deleted
+      const wasGraphEmpty = elements.nodes.length === 0;
       const wasLocalGraph =
         elements.nodes.filter((node) => !!node.data.localRoot).length > 0;
 
       const newNoteCount = Object.keys(engine.notes).length;
-      if (!wasLocalGraph && noteCount === newNoteCount) return;
+      if (!wasLocalGraph && !wasGraphEmpty && noteCount === newNoteCount)
+        return;
       setNoteCount(newNoteCount);
 
       if (!isLocalGraph) {
@@ -550,11 +556,11 @@ const useGraphElements = ({
         );
       }
     }
-  }, [engine.notes, isLocalGraph]);
+  }, [engine.notes, isLocalGraph, config["options.show-local-graph"]]);
 
   // Get new elements if active note changes
   useEffect(() => {
-    if (type === "note" && engine.notes && isLocalGraph && noteActive) {
+    if (type === "note" && engine.notes && isLocalGraph) {
       setElements(
         getLocalNoteGraphElements({
           notes: engine.notes,

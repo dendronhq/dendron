@@ -328,7 +328,7 @@ export type EngineInfoResp = {
 
 export type WorkspaceSettings = {
   folders: WorkspaceFolderRaw[];
-  settings: any;
+  settings: any|undefined;
   extensions: WorkspaceExtensionSetting;
 };
 
@@ -530,6 +530,7 @@ export enum GraphViewMessageType {
   "onSelect" = "onSelect",
   "onGetActiveEditor" = "onGetActiveEditor",
   "onReady" = "onReady",
+  "onRequestGraphStyle" = "onRequestGraphStyle"
 }
 
 export enum CalendarViewMessageType {

@@ -360,8 +360,15 @@ export function convertNoteRefASTV2(
       vault,
       basename: fname + ".md",
     });
+    let note: NoteProps;
     try {
-      const note = file2Note(npath, vault);
+      note = file2Note(npath, vault);
+    } catch (err) {
+        const msg = `error reading file, ${npath}`;
+        return MDUtilsV4.genMDMsg(msg);
+    }
+    
+    try {
       if (
         shouldApplyPublishRules &&
         !SiteUtils.canPublish({
@@ -373,6 +380,7 @@ export function convertNoteRefASTV2(
         // TODO: in the future, add 403 pages
         return paragraph();
       }
+
       const body = note.body;
       const { error, data } = convertNoteRefHelperAST({
         body,
@@ -386,6 +394,7 @@ export function convertNoteRefASTV2(
       if (error) {
         errors.push(error);
       }
+
       if (prettyRefs) {
         let suffix = "";
         let useId = wikiLinkOpts?.useId;
@@ -393,7 +402,7 @@ export function convertNoteRefASTV2(
           useId = true;
         }
         let href = useId ? note.id : fname;
-        let title = getTitle({ config, note, loc: ref });
+        const title = getTitle({ config, note, loc: ref });
         if (dest === DendronASTDest.HTML) {
           suffix = ".html";
           if (note.custom.permalink === "/") {
@@ -435,10 +444,8 @@ export function convertNoteRefASTV2(
         return paragraph(data);
       }
     } catch (err) {
-      const msg = `error reading file, ${npath}`;
-      errors.push(new DendronError({ message: msg }));
-      throw Error(msg);
-      // return msg;
+      const msg = `Error rendering note ${note?.fname}`;
+      return MDUtilsV4.genMDMsg(msg);
     }
   });
   return { error, data: out };
@@ -519,7 +526,7 @@ function prepareNoteRefIndices<T>({
   // TODO: can i just strip frontmatter when reading?
   let start: FindAnchorResult = {
     type: "header",
-    index: bodyAST.children[0].type === "yaml" ? 1 : 0,
+    index: bodyAST.children[0]?.type === "yaml" ? 1 : 0,
   };
   let end: FindAnchorResult = null;
 
@@ -593,13 +600,13 @@ function convertNoteRefHelperAST(
   MDUtilsV4.setDendronData(noteRefProc, { fname: link.from.fname });
   const engine = MDUtilsV4.getEngineFromProc(noteRefProc);
   MDUtilsV4.setNoteRefLvl(noteRefProc, refLvl);
-  let procOpts = MDUtilsV4.getProcOpts(noteRefProc);
+  const procOpts = MDUtilsV4.getProcOpts(noteRefProc);
 
   const isV5Active = MDUtilsV5.isV5Active(proc);
 
   let bodyAST: DendronASTNode;
   if (MDUtilsV4.getProcOpts(proc).config?.useNunjucks) {
-    let contentsClean = renderFromNoteProps({
+    const contentsClean = renderFromNoteProps({
       fname: note.fname,
       vault: note.vault,
       wsRoot: engine!.engine.wsRoot,
@@ -613,7 +620,7 @@ function convertNoteRefHelperAST(
     anchorStartOffset: 0,
   });
 
-  let { start, end, data, error } = prepareNoteRefIndices({
+  const { start, end, data, error } = prepareNoteRefIndices({
     anchorStart,
     anchorEnd,
     bodyAST,
@@ -631,7 +638,9 @@ function convertNoteRefHelperAST(
         end ? end.index + 1 : undefined
       )
     );
-    let tmpProc = MDUtilsV4.procFull({ ...procOpts });
+    // Copy the current proc to preserve all options
+    let tmpProc = MDUtilsV4.procFull(procOpts);
+    // but change the fname and vault to the referenced note, since we're inside that note now
     tmpProc = MDUtilsV4.setDendronData(tmpProc, { insideNoteRef: true, fname: note.fname, vault: note.vault });
     if (isV5Active) {
       if (procOpts.dest === DendronASTDest.HTML) {
@@ -641,16 +650,15 @@ function convertNoteRefHelperAST(
 
     const { dest } = MDUtilsV4.getDendronData(tmpProc);
     if (dest === DendronASTDest.HTML) {
-      let out3 = tmpProc.runSync(out) as Parent;
+      const out3 = tmpProc.runSync(out) as Parent;
       return { error: null, data: out3 };
     } else {
-      let out2 = tmpProc.stringify(out);
+      const out2 = tmpProc.stringify(out);
       out = tmpProc.parse(out2) as Parent;
       return { error: null, data: out };
     }
   } catch (err) {
-    console.log("ERROR WITH RE in AST");
-    console.log(JSON.stringify(err));
+    console.log(JSON.stringify({ctx: "convertNoteRefHelperAST", msg: "Failed to render note reference", err}));
     return {
       error: new DendronError({
         message: "error processing note ref",

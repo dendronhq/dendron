@@ -53,7 +53,7 @@ export class WorkspaceWatcher {
     this._openedDocuments = new Map();
     this._debouncedOnDidChangeTextDocument = _.debounce(
       this.onDidChangeTextDocument,
-      100
+      200
     );
   }
 
@@ -86,17 +86,22 @@ export class WorkspaceWatcher {
     if (event.document.isDirty === false) {
       return;
     }
+    const ctx = {ctx: "WorkspaceWatcher:onDidChangeTextDocument", uri: event.document.uri.fsPath};
+    Logger.debug({...ctx, state: "enter"})
     const activeEditor = window.activeTextEditor;
     this._debouncedOnDidChangeTextDocument.cancel();
     if (activeEditor && event.document === activeEditor.document) {
       const uri = activeEditor.document.uri;
       if (!getWS().workspaceService?.isPathInWorkspace(uri.fsPath)) {
+        Logger.debug({...ctx, state: "uri not in workspace"})
         return;
       }
+      Logger.debug({...ctx, state: "trigger change handlers"})
       const contentChanges = event.contentChanges;
       DendronWorkspace.instance().windowWatcher?.triggerUpdateDecorations();
       NoteSyncService.instance().onDidChange(activeEditor, { contentChanges });
     }
+    Logger.debug({...ctx, state: "exit"})
     return;
   }
 

@@ -14,7 +14,10 @@ import {
 import {
   NodeJSUtils,
   readJSONWithComments,
-  readMD, writeJSONWithComments
+  readJSONWithCommentsSync,
+  readMD,
+  resolveTilde,
+  writeJSONWithComments
 } from "@dendronhq/common-server";
 import {
   DConfig,
@@ -40,6 +43,7 @@ import {
   GLOBAL_STATE
 } from "./constants";
 import BacklinksTreeDataProvider from "./features/BacklinksTreeDataProvider";
+import { codeActionProvider } from "./features/codeActionProvider";
 import { completionProvider } from "./features/completionProvider";
 import DefinitionProvider from "./features/DefinitionProvider";
 import FrontmatterFoldingRangeProvider from "./features/FrontmatterFoldingRangeProvider";
@@ -61,6 +65,25 @@ import { TutorialInitializer } from "./workspace/tutorialInitializer";
 import { WorkspaceWatcher } from "./WorkspaceWatcher";
 
 let _DendronWorkspace: DendronWorkspace | null;
+
+type DendronWorkspaceSettings = Partial<{
+  "dendron.dailyJournalDomain": string;
+  "dendron.defaultJournalName": string;
+  "dendron.defaultJournalDateFormat": string;
+  "dendron.defaultJournalAddBehavior": string;
+  "dendron.defaultScratchName": string;
+  "dendron.defaultScratchDateFormat": string;
+  "dendron.defaultScratchAddBehavior": string;
+  "dendron.copyNoteUrlRoot": string;
+  "dendron.linkSelectAutoTitleBehavior": string;
+  "dendron.defaultLookupCreateBehavior": string;
+  "dendron.defaultTimestampDecorationFormat": string;
+  "dendron.rootDir": string;
+  "dendron.dendronDir": string;
+  "dendron.logLevel": string;
+  "dendron.trace.server": string;
+  "dendron.serverPort": string;
+}>;
 
 export type ServerConfiguration = {
   serverPort: string;
@@ -362,6 +385,32 @@ export class DendronWorkspace {
     )) as WorkspaceSettings;
   }
 
+  getWorkspaceSettingsSync(): WorkspaceSettings {
+    return readJSONWithCommentsSync(
+      DendronWorkspace.workspaceFile().fsPath
+    ) as WorkspaceSettings;
+  }
+
+  getDendronWorkspaceSettingsSync(): DendronWorkspaceSettings {
+    const settings = this.getWorkspaceSettingsSync().settings;
+    return settings;
+  }
+
+  getWorkspaceSettingOrDefault({wsConfigKey, dendronConfigKey}: {wsConfigKey: keyof DendronWorkspaceSettings, dendronConfigKey: string }) {
+    const config = getWS().config;
+    // user already using new value
+    if (_.get(config, dendronConfigKey)) {
+      return _.get(config, dendronConfigKey);
+    }
+    // migrate value from workspace setting. if not exist, migrate from new default
+		const out = _.get(this.getDendronWorkspaceSettingsSync(), wsConfigKey, _.get(DConfig.genDefaultConfig(), dendronConfigKey))
+    // this should not happen
+    if (_.isUndefined(out)) {
+      throw new DendronError({"message": `no config key found. workspace: ${wsConfigKey}, dendron.yml: ${dendronConfigKey}`})
+    }
+    return out;
+	}
+
   get podsDir(): string {
     const rootDir = DendronWorkspace.wsRoot();
     if (!rootDir) {
@@ -509,6 +558,7 @@ export class DendronWorkspace {
       new FrontmatterFoldingRangeProvider()
     );
     completionProvider.activate(context);
+    codeActionProvider.activate(context);
   }
 
   _setupCommands() {
@@ -713,11 +763,36 @@ export class DendronWorkspace {
               AnalyticsUtils.track(TutorialEvents.WelcomeShow);
               return;
 
-            case "initializeWorkspace":
-              await new SetupWorkspaceCommand().run({
-                workspaceInitializer: new TutorialInitializer(),
-              });
+            case "initializeWorkspace": {
+              // Try to put into a Default '~/Dendron' folder first. Only prompt
+              // if that path and the backup path already exist to lower
+              // onboarding friction
+              let wsPath;
+              const wsPathPrimary = path.join(resolveTilde("~"), "Dendron");
+              const wsPathBackup = path.join(
+                resolveTilde("~"),
+                "Dendron-Tutorial"
+              );
+
+              if (!fs.pathExistsSync(wsPathPrimary)) {
+                wsPath = wsPathPrimary;
+              } else if (!fs.pathExistsSync(wsPathBackup)) {
+                wsPath = wsPathBackup;
+              }
+
+              if (!wsPath) {
+                await new SetupWorkspaceCommand().run({
+                  workspaceInitializer: new TutorialInitializer(),
+                });
+              } else {
+                await new SetupWorkspaceCommand().execute({
+                  rootDirRaw: wsPath,
+                  workspaceInitializer: new TutorialInitializer(),
+                });
+              }
+
               return;
+            }
             default:
               break;
           }

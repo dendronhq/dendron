@@ -1,3 +1,4 @@
+import { InstallStatus } from "@dendronhq/common-all";
 import {
   DendronConfig,
   DEngineClient,
@@ -18,7 +19,6 @@ import {
   EngineTestUtilsV4,
   PreSetupCmdHookFunction,
   PreSetupHookFunction,
-  sinon,
 } from "@dendronhq/common-test-utils";
 import {
   DConfig,
@@ -31,7 +31,7 @@ import {
 } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
 import _ from "lodash";
-import { afterEach, beforeEach } from "mocha";
+import { afterEach, beforeEach, describe } from "mocha";
 import { ExtensionContext, Uri } from "vscode";
 import {
   SetupWorkspaceCommand,
@@ -47,6 +47,7 @@ import { WorkspaceConfig } from "../settings";
 import { VSCodeUtils } from "../utils";
 import { DendronWorkspace, getWS } from "../workspace";
 import { BlankInitializer } from "../workspace/blankInitializer";
+import { WorkspaceInitFactory } from "../workspace/workspaceInitializer";
 import { _activate } from "../_extension";
 import { onWSInit, TIMEOUT } from "./testUtils";
 import {
@@ -56,6 +57,8 @@ import {
   stubWorkspaceFile,
   stubWorkspaceFolders,
 } from "./testUtilsv2";
+import os from "os";
+import sinon from "sinon";
 
 export const DENDRON_REMOTE =
   "https://github.com/dendronhq/dendron-site-vault.git";
@@ -165,7 +168,7 @@ export async function setupLegacyWorkspace(
     rootDirRaw: wsRoot,
     skipOpenWs: true,
     ...copts.setupWsOverride,
-    workspaceInitializer: new BlankInitializer()
+    workspaceInitializer: new BlankInitializer(),
   });
   stubWorkspaceFolders(vaults);
 
@@ -280,16 +283,38 @@ export function addDebugServerOverride() {
   };
 }
 
+/**
+ *
+ * @param _this
+ * @param opts.noSetInstallStatus: by default, we set install status to NO_CHANGE. use this when you need to test this logic
+ * @param opts.noStubExecServerNode: stub this to be synchronous engine laungh for tests due to latency
+ * @returns
+ */
 export function setupBeforeAfter(
   _this: any,
-  opts?: { beforeHook?: any; afterHook?: any }
+  opts?: {
+    beforeHook?: any;
+    afterHook?: any;
+    noSetInstallStatus?: boolean;
+  }
 ) {
   let ctx: ExtensionContext;
-  // allows for debugging
+  // allows for
   _this.timeout(TIMEOUT);
   ctx = VSCodeUtils.getOrCreateMockContext();
   beforeEach(async () => {
     DendronWorkspace.getOrCreate(ctx);
+
+    // workspace has not upgraded
+    if (!opts?.noSetInstallStatus) {
+      sinon
+        .stub(VSCodeUtils, "getInstallStatusForExtension")
+        .returns(InstallStatus.NO_CHANGE);
+    }
+    // workspace is not tutorial workspace
+    sinon
+      .stub(WorkspaceInitFactory, "isTutorialWorkspaceLaunch")
+      .returns(false);
     if (opts?.beforeHook) {
       await opts.beforeHook();
     }
@@ -300,6 +325,7 @@ export function setupBeforeAfter(
     if (opts?.afterHook) {
       await opts.afterHook();
     }
+    sinon.restore();
   });
   return ctx;
 }
@@ -375,3 +401,8 @@ export const stubVaultInput = (opts: {
   };
   return;
 };
+
+export function runTestButSkipForWindows() {
+  const runTest = os.platform() === "win32" ? describe.skip : describe;
+  return runTest;
+}

@@ -19,11 +19,7 @@ suite("CopyNoteUrl", function () {
   let ctx: vscode.ExtensionContext;
   const rootUrl = "dendron.so";
 
-  ctx = setupBeforeAfter(this, {
-    afterHook: () => {
-      sinon.restore();
-    },
-  });
+  ctx = setupBeforeAfter(this);
 
   test("with override", (done) => {
     runLegacyMultiWorkspaceTest({
@@ -94,7 +90,6 @@ suite("CopyNoteUrl", function () {
         const seedId = TestSeedUtils.defaultSeedId();
         engine.config = getWS().config;
         engine.vaults = engine.config.vaults;
-        // TODO: ugly temporary hack. can be removed when [[Unify Runenginetest and Runworkspacetest|scratch.2021.06.17.164102.unify-runenginetest-and-runworkspacetest]] is implemented
         sinon.stub(VSCodeUtils, "getNoteFromDocument").returns(
           await NoteTestUtilsV4.createNote({
             fname: "root",
@@ -102,6 +97,7 @@ suite("CopyNoteUrl", function () {
             wsRoot,
           })
         );
+
         const vault = VaultUtils.getVaultByName({
           vaults: getWS().config.vaults,
           vname: seedId,
@@ -145,16 +141,16 @@ suite("CopyNoteUrl", function () {
             wsRoot,
           })
         );
-        const vault = VaultUtils.getVaultByName({
-          vaults: getWS().config.vaults,
-          vname: seedId,
-        })!;
-        await VSCodeUtils.openNoteByPath({ vault, fname: "root" });
-        VSCodeUtils.getActiveTextEditorOrThrow().selection =
-          new vscode.Selection(0, 0, 0, 0); // Otherwise it has the header selected
-        const link = await new CopyNoteURLCommand().run();
-        expect("https://foo.com").toEqual(link);
-        done();
+          const vault = VaultUtils.getVaultByName({
+            vaults: getWS().config.vaults,
+            vname: seedId,
+          })!;
+          await VSCodeUtils.openNoteByPath({ vault, fname: "root" });
+          VSCodeUtils.getActiveTextEditorOrThrow().selection =
+            new vscode.Selection(0, 0, 0, 0); // Otherwise it has the header selected
+          const link = await new CopyNoteURLCommand().run();
+          expect("https://foo.com").toEqual(link);
+          done();
       },
     });
   });

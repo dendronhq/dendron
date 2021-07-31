@@ -76,9 +76,6 @@ suite("VaultRemoveCommand", function () {
         .stub(vscode.commands, "executeCommand")
         .returns(Promise.resolve({}));
     },
-    afterHook: () => {
-      sinon.restore();
-    },
   });
 
   describe("workspace", () => {

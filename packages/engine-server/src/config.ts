@@ -48,12 +48,20 @@ export class DConfig {
       mermaid: true,
       useKatex: true,
       autoFoldFrontmatter: true,
+      dev: {
+        enablePreviewV2: true,
+      },
       journal: {
         dailyDomain: "daily",
         name: "journal",
         dateFormat: "y.MM.dd",
         addBehavior: NoteAddBehavior.childOfDomain,
         firstDayOfWeek: 1,
+      },
+      scratch: {
+        name: "scratch",
+        dateFormat: "y.MM.dd.HHmmss",
+        addBehavior: NoteAddBehavior.asOwnDomain,
       },
       site: {
         copyAssets: true,

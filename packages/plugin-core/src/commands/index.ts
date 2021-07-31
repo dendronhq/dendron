@@ -54,6 +54,7 @@ import { VaultRemoveCommand } from "./VaultRemoveCommand";
 import { RandomNoteCommand } from "./RandomNote";
 import { LaunchTutorialCommand } from "./LaunchTutorialCommand";
 import { ConvertLinkCommand } from "./ConvertLink";
+import { ConfigureGraphStylesCommand } from "./ConfigureGraphStyles";
 
 const ALL_COMMANDS = [
   AddAndCommit,
@@ -62,6 +63,7 @@ const ALL_COMMANDS = [
   ChangeWorkspaceCommand,
   ConfigureCommand,
   ConfigurePodCommand,
+  ConfigureGraphStylesCommand,
   ContributeCommand,
   CopyNoteLinkCommand,
   CopyNoteRefCommand,

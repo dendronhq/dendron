@@ -1,4 +1,8 @@
-import { createLogger, engineSlice } from "@dendronhq/common-frontend";
+import {
+  createLogger,
+  engineSlice,
+  postVSCodeMessage,
+} from "@dendronhq/common-frontend";
 import _ from "lodash";
 import React, { useEffect, useRef, useState } from "react";
 import cytoscape, { Core, EdgeDefinition, EventHandler } from "cytoscape";
@@ -8,10 +12,17 @@ import Head from "next/head";
 import AntThemes from "../styles/theme-antd";
 import GraphFilterView from "./graph-filter-view";
 import { GraphConfig, GraphConfigItem, GraphElements } from "../lib/graph";
-import { VaultUtils } from "@dendronhq/common-all";
+import {
+  DMessageSource,
+  GraphViewMessage,
+  GraphViewMessageType,
+  VaultUtils,
+} from "@dendronhq/common-all";
 import useApplyGraphConfig from "../hooks/useApplyGraphConfig";
 import { DendronProps } from "../lib/types";
 import useSyncGraphWithIDE from "../hooks/useSyncGraphWithIDE";
+import { Button, Space, Spin, Typography } from "antd";
+
 
 export class GraphUtils {
   static isLocalGraph(config: GraphConfig) {
@@ -20,7 +31,11 @@ export class GraphUtils {
   }
 }
 
-const getCytoscapeStyle = (themes: any, theme: string | undefined) => {
+const getCytoscapeStyle = (
+  themes: any,
+  theme: string | undefined,
+  customCSS: string | undefined
+) => {
   if (_.isUndefined(theme)) return "";
 
   // Cytoscape's "diamond" node is smaller than it's "circle" node, so
@@ -28,57 +43,56 @@ const getCytoscapeStyle = (themes: any, theme: string | undefined) => {
   const PARENT_NODE_SIZE_MODIFIER = 1.25;
 
   return `
-  node {
-    width: ${AntThemes[theme].graph.node.size};
-    height: ${AntThemes[theme].graph.node.size};
-    background-color: ${AntThemes[theme].graph.node.color};
-    color: ${AntThemes[theme].graph.node.label.color};
-    label: data(label);
-    font-size: ${AntThemes[theme].graph.node.label.fontSize};
-    min-zoomed-font-size: ${
-      AntThemes[theme].graph.node.label.minZoomedFontSize
-    };
-    font-weight: ${AntThemes[theme].graph.node.label.fontWeight};
-  }
+node {
+  width: ${AntThemes[theme].graph.node.size};
+  height: ${AntThemes[theme].graph.node.size};
+  background-color: ${AntThemes[theme].graph.node.color};
+  color: ${AntThemes[theme].graph.node.label.color};
+  label: data(label);
+  font-size: ${AntThemes[theme].graph.node.label.fontSize};
+  min-zoomed-font-size: ${AntThemes[theme].graph.node.label.minZoomedFontSize};
+  font-weight: ${AntThemes[theme].graph.node.label.fontWeight};
+}
 
-  edge {
-    width: ${AntThemes[theme].graph.edge.width};
-    line-color: ${AntThemes[theme].graph.edge.color};
-    target-arrow-shape: none;
-    curve-style: haystack;
-  }
+edge {
+  width: ${AntThemes[theme].graph.edge.width};
+  line-color: ${AntThemes[theme].graph.edge.color};
+  target-arrow-shape: none;
+  curve-style: haystack;
+}
 
-  :selected, .open {
-    background-color: ${AntThemes[theme].graph.node._selected.color};
-    color: ${AntThemes[theme].graph.node._selected.color};
-  }
-  
-  .parent {
-    shape: diamond;
-    width: ${AntThemes[theme].graph.node.size * PARENT_NODE_SIZE_MODIFIER};
-    height: ${AntThemes[theme].graph.node.size * PARENT_NODE_SIZE_MODIFIER};
-  }
+:selected{
+  background-color: ${AntThemes[theme].graph.node._selected.color};
+  color: ${AntThemes[theme].graph.node._selected.color};
+}
 
-  .links {
-    line-style: dashed;
-  }
+.parent {
+  shape: diamond;
+  width: ${AntThemes[theme].graph.node.size * PARENT_NODE_SIZE_MODIFIER};
+  height: ${AntThemes[theme].graph.node.size * PARENT_NODE_SIZE_MODIFIER};
+}
 
-  .hidden--labels {
-    label: ;
-  }
+.links {
+  line-style: dashed;
+}
 
-  .hidden--vault,
-  .hidden--regex-allowlist,
-  .hidden--regex-blocklist,
-  .hidden--stub {
-    display: none;
-  }
+.hidden--labels {
+  label: ;
+}
+
+.hidden--vault,
+.hidden--regex-allowlist,
+.hidden--regex-blocklist,
+.hidden--stub {
+  display: none;
+}
+
+${customCSS || ""}
 `;
 };
 
 export const getEulerConfig = (shouldAnimate: boolean) => ({
   name: "euler",
-  // @ts-ignore
   springLength: () => 80,
   springCoeff: () => 0.0008,
   mass: () => 4,
@@ -93,7 +107,7 @@ export const getEulerConfig = (shouldAnimate: boolean) => ({
   animationDuration: undefined,
   animationEasing: undefined,
   maxIterations: 1000,
-  maxSimulationTime: 1000,
+  maxSimulationTime: 4000,
   ungrabifyWhileSimulating: false,
   fit: true,
   padding: 30,
@@ -103,7 +117,7 @@ export const getEulerConfig = (shouldAnimate: boolean) => ({
 
 export default function Graph({
   elements,
-  type = "note",
+  type,
   onSelect,
   config,
   setConfig,
@@ -114,13 +128,14 @@ export default function Graph({
   onSelect: EventHandler;
   config: GraphConfig;
   setConfig: React.Dispatch<React.SetStateAction<GraphConfig>>;
-  type?: "note" | "schema";
+  type: "note" | "schema";
 }) {
   const logger = createLogger("Graph");
   const graphRef = useRef<HTMLDivElement>(null);
   const { themes, currentTheme } = useThemeSwitcher();
   const [cy, setCy] = useState<Core>();
-  const [isGraphLoaded, setIsGraphLoaded] = useState(false);
+  const [isReady, setIsReady] = useState(false);
+  const [shouldBlockRender, setShouldBlockRender] = useState(false);
 
   useSyncGraphWithIDE({
     graph: cy,
@@ -143,7 +158,7 @@ export default function Graph({
     if (graphRef.current && nodes && edges) {
       logger.log("Rendering graph...");
 
-      let parsedEdges: EdgeDefinition[] = [];
+      const parsedEdges: EdgeDefinition[] = [];
 
       // Filter elements using config
       Object.entries(config)
@@ -160,16 +175,23 @@ export default function Graph({
       // Add layout middleware
       cytoscape.use(euler);
 
+      const style = getCytoscapeStyle(
+        themes,
+        currentTheme,
+        ide.graphStyles
+      ) as any;
+
       const network = cytoscape({
         container: graphRef.current,
         elements: {
           nodes,
           edges: parsedEdges,
         },
-        style: getCytoscapeStyle(themes, currentTheme) as any,
+        style,
+        wheelSensitivity: engine.config?.graph?.zoomSpeed || 1,
 
         // Zoom levels
-        minZoom: 0.25,
+        minZoom: 0.1,
         maxZoom: 5,
 
         // Options to improve performance
@@ -178,22 +200,38 @@ export default function Graph({
         hideLabelsOnViewport: isLargeGraph,
       });
 
+      let renderTimeout: NodeJS.Timeout;
+
+      // When rendering stops, mark the graph as ready
+      network.on("render", () => {
+        if (isReady) return;
+        if (renderTimeout) clearTimeout(renderTimeout);
+        renderTimeout = setTimeout(() => {
+          setIsReady(true);
+        }, 1000);
+      });
+
       const shouldAnimate =
         type === "schema" ||
         (!isLargeGraph && !GraphUtils.isLocalGraph(config));
 
       network.layout(getEulerConfig(shouldAnimate)).run();
 
-      // Show UI when layout is finished. As a fallback, show on interaction with graph.
-      network.on("layoutstop viewport", () => {
-        if (!isGraphLoaded) setIsGraphLoaded(true);
-      });
-
       network.on("select", (e) => onSelect(e));
 
       setCy(network);
     }
   };
+
+  useEffect(() => {
+    logger.log("Requesting graph style...");
+    // Get graph style
+    postVSCodeMessage({
+      type: GraphViewMessageType.onRequestGraphStyle,
+      data: {},
+      source: DMessageSource.webClient,
+    } as GraphViewMessage);
+  }, []);
 
   useEffect(() => {
     // If changed from local graph to full graph, re-render graph to show all elements
@@ -206,10 +244,12 @@ export default function Graph({
       !wasLocalGraph &&
       cy &&
       cy.elements("*").length > 1
-    )
+    ) {
       return;
+    }
+
     renderGraph();
-  }, [graphRef, elements]);
+  }, [graphRef, elements, ide.graphStyles]);
 
   useEffect(() => {
     // If initial vault data received
@@ -240,24 +280,78 @@ export default function Graph({
     }
   }, [engine.vaults]);
 
+  const updateConfigField = (key: string, value: string | number | boolean) => {
+    setConfig((c) => {
+      let additionalChanges = {};
+      if (key === "options.show-local-graph") {
+        // Show loading spinner when switching graph types
+        setIsReady(false);
+
+        // By default, hide links from full graph and show links for local graph
+        additionalChanges = {
+          "connections.links": {
+            ...c["connections.links"],
+            value,
+          },
+        };
+      }
+
+      const newConfig = {
+        ...c,
+        ...additionalChanges,
+        [key]: {
+          // @ts-ignore
+          ...c[key],
+          value,
+        },
+      };
+      return newConfig;
+    });
+  };
+
+  const showNoteGraphMessage =
+    type === "note" && !ide.noteActive && GraphUtils.isLocalGraph(config);
+
   return (
     <>
       <Head>
         <title>{_.capitalize(type)} Graph</title>
       </Head>
       <div
+        style={{
+          width: "100vw",
+          height: "100vh",
+          position: "absolute",
+          top: 0,
+          left: 0,
+          display: isReady && !showNoteGraphMessage ? "none" : "grid",
+          placeItems: "center",
+          background: currentTheme
+            ? AntThemes[currentTheme].graph.filterView.background
+            : "transparent",
+        }}
+      >
+        {!isReady && <Spin size="large" />}
+        {isReady && showNoteGraphMessage && (
+          <NoteGraphMessage
+            updateConfigField={updateConfigField}
+            setIsReady={setIsReady}
+          />
+        )}
+      </div>
+      <div
         id="graph"
         style={{
           width: "100vw",
           height: "100vh",
           position: "relative",
+          opacity: isReady ? 1 : 0,
         }}
       >
         <GraphFilterView
-          type={type}
           config={config}
-          setConfig={setConfig}
-          isVisible={isGraphLoaded}
+          isGraphReady={isReady}
+          updateConfigField={updateConfigField}
         />
         <div
           ref={graphRef}
@@ -271,3 +365,46 @@ export default function Graph({
     </>
   );
 }
+
+const NoteGraphMessage = ({
+  updateConfigField,
+  setIsReady,
+}: {
+  updateConfigField: (key: string, value: string | number | boolean) => void;
+  setIsReady: (isReady: boolean) => void;
+}) => (
+  <Space
+    direction="vertical"
+    size="large"
+    style={{
+      zIndex: 10,
+      maxWidth: 400,
+      padding: "0 2rem",
+      textAlign: "center",
+      fontSize: "1.2rem",
+    }}
+  >
+    <Typography>
+      This is the <b>Local Note Graph.</b> Open a note in the workspace to see
+      its connections here.
+    </Typography>
+    <Typography>
+      Change to <b>Full Note Graph</b> to see all notes in the workspace.
+    </Typography>
+    <Button
+      onClick={() => {
+        setIsReady(false);
+
+        // Slight timeout to show loading spinner before re-rendering,
+        // as re-rendering is render-blocking
+        setTimeout(() => {
+          updateConfigField("options.show-local-graph", false);
+        }, 50);
+      }}
+      type="primary"
+      size="large"
+    >
+      Show Full Graph
+    </Button>
+  </Space>
+);

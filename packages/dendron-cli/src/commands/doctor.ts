@@ -3,6 +3,7 @@ import {
   NoteProps,
   VaultUtils,
   DLink,
+  DVault,
   NoteUtils,
   DEngineClient,
 } from "@dendronhq/common-all";
@@ -10,6 +11,7 @@ import {
   DendronASTDest,
   MDUtilsV4,
   RemarkUtils,
+  LinkUtils,
 } from "@dendronhq/engine-server";
 // @ts-ignore
 import throttle from "@jcoreio/async-throttle";
@@ -98,16 +100,40 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           if (link.type !== "wiki") {
             return false;
           }
-          const destVault = link.to?.vaultName
-            ? VaultUtils.getVaultByName({ vaults, vname: link.to.vaultName })!
-            : note.vault;
+
+
+          const hasVaultPrefix = LinkUtils.hasVaultPrefix(link);
+          let vaultPrefix: DVault | undefined; 
+          if (hasVaultPrefix) {
+            vaultPrefix = VaultUtils.getVaultByName({
+              vaults, 
+              vname: link.to!.vaultName!
+            });
+            if (!vaultPrefix) return false;
+          }
+          const isMultiVault = vaults.length > 1;
           const noteExists = NoteUtils.getNoteByFnameV5({
             fname: link.to!.fname as string,
-            vault: destVault,
-            notes: notes,
-            wsRoot: wsRoot,
+            vault: hasVaultPrefix 
+              ? vaultPrefix!
+              : note.vault,
+            notes,
+            wsRoot,
           });
-          return !noteExists;
+          if (hasVaultPrefix) {
+            // true: link w/ vault prefix that points to nothing. (candidate for sure)
+            // false: link w/ vault prefix that points to a note. (valid link)
+            return !noteExists;
+          } 
+
+          if (!noteExists) {
+            // true: no vault prefix and single vault. (candidate for sure)
+            // false: no vault prefix and multi vault. (ambiguous)
+            return !isMultiVault;
+          } 
+          
+          // (valid link)
+          return false;
         })
       );
       return true;
@@ -144,23 +170,22 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
         ? engine.queryNotesSync({ qs: query }).data
         : _.values(engine.notes);
     } else {
-      console.log(`${candidates.length} candidate(s) were passed`);
       notes = candidates;
     }
     notes = notes.filter((n) => !n.stub);
     this.L.info({ msg: "prep doctor", numResults: notes.length });
     let numChanges = 0;
-    let engineWrite = dryRun
+    const engineWrite = dryRun
       ? () => {}
       : throttle(_.bind(engine.writeNote, engine), 300, {
           leading: true,
         });
-    let engineDelete = dryRun
+    const engineDelete = dryRun
       ? () => {}
       : throttle(_.bind(engine.deleteNote, engine), 300, {
           leading: true,
         });
-    let engineGetNoteByPath = dryRun
+    const engineGetNoteByPath = dryRun
       ? () => {}
       : throttle(_.bind(engine.getNoteByPath, engine), 300, {
           leading: true,
@@ -270,24 +295,13 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
         break;
       }
       case DoctorActions.CREATE_MISSING_LINKED_NOTES: {
-        // this action is disabled for workspace scope for now.
-        if (_.isUndefined(candidates)) {
-          console.log(
-            `doctor ${DoctorActions.CREATE_MISSING_LINKED_NOTES} requires explicitly passing one candidate note.`
-          );
-          return;
-        }
         notes = this.getWildLinkDestinations(notes, engine);
         doctorAction = async (note: NoteProps) => {
-          const vname = VaultUtils.getName(note.vault);
           await engineGetNoteByPath({
             npath: note.fname,
             createIfNew: true,
             vault: note.vault,
           });
-          console.log(
-            `doctor ${DoctorActions.CREATE_MISSING_LINKED_NOTES} ${note.fname} ${vname}`
-          );
           numChanges += 1;
         };
         break;
@@ -305,7 +319,6 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       },
       Promise.resolve()
     );
-    console.log(`doctor fixed ${numChanges} notes`);
     this.L.info({ msg: "doctor done", numChanges });
     if (exit) {
       process.exit();

@@ -714,6 +714,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docLink: "",
     docPreview: ``,
   },
+  
   CONFIGURE_UI: {
     key: "dendron.configureUI",
     title: `${CMD_PREFIX} Configure`,
@@ -722,6 +723,15 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docs: [
       `<div style="position: relative; padding-bottom: 62.5%; height: 0;"><iframe src="https://www.loom.com/embed/5b6689eb76344fbb814a3d4405ef62b8" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe></div>`,
     ].join("\n"),
+    docLink: "",
+    docPreview: ``,
+  },
+  CONFIGURE_GRAPH_STYLES: {
+    key: "dendron.configureGraphStyle",
+    title: `${CMD_PREFIX} Configure Graph Style (css)`,
+    group: "workspace",
+    desc: "Modify Dendron Graph styles as raw CSS",
+    docs: [""].join("\n"),
     docLink: "",
     docPreview: ``,
   },
@@ -822,12 +832,16 @@ export enum WORKSPACE_ACTIVATION_CONTEXT {
 
 export type ConfigKey = keyof typeof CONFIG;
 
+/**
+
 const _noteDateDesc = (type: "journal" | "scratch") =>
   `date format used for ${type} notes`;
 const _noteNameDesc = (type: "journal" | "scratch") =>
   `name used for ${type} notes`;
 const _noteAddBehaviorDesc = (type: "journal" | "scratch") =>
   `strategy for adding new ${type} notes`;
+
+*/
 
 export const _noteAddBehaviorEnum = [
   "childOfDomain",
@@ -867,19 +881,19 @@ export const CONFIG: { [key: string]: ConfigEntry } = {
     key: "dendron.defaultScratchName",
     type: "string",
     default: "scratch",
-    description: _noteNameDesc("scratch"),
+    description: "DEPRECATED. Use scratch settings in dendron.yml",
   },
   DEFAULT_SCRATCH_DATE_FORMAT: {
     key: "dendron.defaultScratchDateFormat",
     type: "string",
     default: "y.MM.dd.HHmmss",
-    description: _noteDateDesc("scratch"),
+    description: "DEPRECATED. Use scratch settings in dendron.yml",
   },
   DEFAULT_SCRATCH_ADD_BEHAVIOR: {
     key: "dendron.defaultScratchAddBehavior",
     default: "asOwnDomain",
     type: "string",
-    description: _noteAddBehaviorDesc("scratch"),
+    description: "DEPRECATED. Use scratch settings in dendron.yml",
     enum: _noteAddBehaviorEnum,
   },
   COPY_NOTE_URL_ROOT: {
@@ -943,7 +957,7 @@ export const CONFIG: { [key: string]: ConfigEntry } = {
     key: "dendron.dendronDir",
     type: "string",
     default: "",
-    description: "location of dendron configuration",
+    description: "DEPRECATED. Use journal settings in dendron.yml",
   },
   // --- other
   LOG_LEVEL: {

@@ -15,14 +15,13 @@ Dendron supports an extended Markdown syntax, which provides a lot of options fo
 |Bold|**Hello World**|
 |Italics|_Hello World_|
 |Strikethrough|~~Hello World~~|
-|Highlight|==Hello World==|
 
 #### Images
 
 > 🌱 Copy any image onto your clipboard, and then use the `Paste Image` command while focused in your editor pane. This will automatically create a link for you and copy the file contents into the assets directory in your workspace.
 
 Sample Image Link:
-![Dendron Logo](assets/images/logo_small.png)
+![Dendron Logo](/assets/images/logo_small.png)
 
 #### Equations
 

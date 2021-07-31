@@ -13,6 +13,7 @@ import { BasicCommand } from "./base";
 import { getEngine, getWS } from "../workspace";
 import { GotoNoteCommand } from "./GotoNote";
 import { VSCodeUtils } from "../utils";
+import { GraphStyleService } from "../styles";
 
 type CommandOpts = {};
 
@@ -102,6 +103,20 @@ export class ShowNoteGraphCommand extends BasicCommand<
             VSCodeUtils.getNoteFromDocument(activeTextEditor.document);
           if (note) {
             ShowNoteGraphCommand.refresh(note);
+          }
+          break;
+        }
+        case GraphViewMessageType.onRequestGraphStyle: {
+          // Set graph styles
+          const styles = GraphStyleService.getParsedStyles();
+          if (styles) {
+            panel.webview.postMessage({
+              type: "onGraphStyleLoad",
+              data: {
+                styles,
+              },
+              source: "vscode",
+            });
           }
           break;
         }

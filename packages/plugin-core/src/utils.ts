@@ -1,3 +1,4 @@
+import { ServerUtils } from "@dendronhq/api-server";
 import {
   CONSTANTS,
   DendronError,
@@ -5,6 +6,8 @@ import {
   DNodeUtils,
   DVault,
   getStage,
+  InstallStatus,
+  NoteAddBehavior,
   NoteProps,
   NoteUtils,
   Point,
@@ -19,6 +22,8 @@ import {
   tmpDir,
   vault2Path,
 } from "@dendronhq/common-server";
+import { HistoryEvent, HistoryService } from "@dendronhq/engine-server";
+import { ExecaChildProcess } from "execa";
 import _ from "lodash";
 import _md from "markdown-it";
 import ogs from "open-graph-scraper";
@@ -28,21 +33,14 @@ import * as vscode from "vscode";
 import { CancellationTokenSource } from "vscode-languageclient";
 import { PickerUtilsV2 } from "./components/lookup/utils";
 import {
-  CONFIG,
-  ConfigKey,
   DendronContext,
   GLOBAL_STATE,
   _noteAddBehaviorEnum,
 } from "./constants";
 import { FileItem } from "./external/fileutils/FileItem";
+import { Logger } from "./logger";
 import { EngineAPIService } from "./services/EngineAPIService";
 import { DendronWorkspace, getWS } from "./workspace";
-
-export enum InstallStatus {
-  NO_CHANGE = "NO_CHANGE",
-  INITIAL_INSTALL = "INITIAL_INSTALL",
-  UPGRADED = "UPGRADED",
-}
 
 export class DisposableStore {
   private _toDispose = new Set<vscode.Disposable>();
@@ -268,7 +266,13 @@ export class VSCodeUtils {
     const txtPath = document.uri.fsPath;
     const wsRoot = DendronWorkspace.wsRoot();
     const fname = path.basename(txtPath, ".md");
-    const vault = VSCodeUtils.getVaultFromDocument(document);
+    let vault: DVault;
+    try {
+      vault = VSCodeUtils.getVaultFromDocument(document);
+    } catch (err) {
+      // No vault
+      return undefined;
+    }
     return NoteUtils.getNoteByFnameV5({
       fname,
       vault,
@@ -492,6 +496,69 @@ export class VSCodeUtils {
 }
 
 export class WSUtils {
+  static handleServerProcess({
+    subprocess,
+    context,
+    onExit,
+  }: {
+    subprocess: ExecaChildProcess;
+    context: vscode.ExtensionContext;
+    onExit: Parameters<typeof ServerUtils["onProcessExit"]>[0]["cb"]
+  }) {
+    const ctx = "WSUtils.handleServerProcess";
+    Logger.info({ ctx, msg: "subprocess running", pid: subprocess.pid });
+    // if extension closes, reap server process
+    context.subscriptions.push(
+      new vscode.Disposable(() => {
+        Logger.info({ ctx, msg: "kill server start" });
+        process.kill(subprocess.pid);
+        Logger.info({ ctx, msg: "kill server end" });
+      })
+    );
+    // if server process has issues, prompt user to restart
+    ServerUtils.onProcessExit({
+      subprocess,
+      cb: onExit,
+    });
+  }
+
+  static showInitProgress() {
+    const ctx = "showInitProgress";
+    vscode.window.withProgress(
+      {
+        location: vscode.ProgressLocation.Notification,
+        title: "Starting Dendron...",
+        cancellable: true,
+      },
+      (_progress, _token) => {
+        _token.onCancellationRequested(() => {
+          console.log("Cancelled");
+        });
+
+        const p = new Promise((resolve) => {
+          HistoryService.instance().subscribe(
+            "extension",
+            async (_event: HistoryEvent) => {
+              if (_event.action === "initialized") {
+                resolve(undefined);
+              }
+            }
+          );
+          HistoryService.instance().subscribe(
+            "extension",
+            async (_event: HistoryEvent) => {
+              if (_event.action === "not_initialized") {
+                Logger.error({ ctx, msg: "issue initializing Dendron" });
+                resolve(undefined);
+              }
+            }
+          );
+        });
+        return p;
+      }
+    );
+  }
+
   static updateEngineAPI(port: number | string): DEngineClient {
     const ws = DendronWorkspace.instance();
     const svc = EngineAPIService.createEngine({
@@ -562,24 +629,34 @@ export class DendronClientUtilsV2 {
     opts?: CreateFnameOpts
   ): string {
     // gather inputs
-    const dateFormatKey: ConfigKey = `DEFAULT_${type}_DATE_FORMAT` as ConfigKey;
-    const dateFormat = DendronWorkspace.configuration().get<string>(
-      CONFIG[dateFormatKey].key
-    ) as string;
-    const addKey = `DEFAULT_${type}_ADD_BEHAVIOR` as ConfigKey;
-    const addBehavior = DendronWorkspace.configuration().get<string>(
-      CONFIG[addKey].key
-    );
-    const nameKey: ConfigKey = `DEFAULT_${type}_NAME` as ConfigKey;
-    const name = DendronWorkspace.configuration().get<string>(
-      CONFIG[nameKey].key
-    );
+    const dateFormat: string =
+      type === "SCRATCH"
+        ? DendronWorkspace.instance().getWorkspaceSettingOrDefault({
+            wsConfigKey: "dendron.defaultScratchDateFormat",
+            dendronConfigKey: "scratch.dateFormat",
+          })
+        : getWS().config.journal.dateFormat;
+
+    const addBehavior: NoteAddBehavior =
+      type === "SCRATCH"
+        ? DendronWorkspace.instance().getWorkspaceSettingOrDefault({
+            wsConfigKey: "dendron.defaultScratchAddBehavior",
+            dendronConfigKey: "scratch.addBehavior",
+          })
+        : getWS().config.journal.addBehavior;
+
+    const name: string =
+      type === "SCRATCH"
+        ? DendronWorkspace.instance().getWorkspaceSettingOrDefault({
+            wsConfigKey: "dendron.defaultScratchName",
+            dendronConfigKey: "scratch.name",
+          })
+        : getWS().config.journal.name;
+
     if (!_.includes(_noteAddBehaviorEnum, addBehavior)) {
-      throw Error(
-        `${
-          CONFIG[addKey].key
-        } must be one of following ${_noteAddBehaviorEnum.join(", ")}`
-      );
+      const actual = addBehavior;
+      const choices = Object.keys(NoteAddBehavior).join(", ");
+      throw Error(`${actual} must be one of: ${choices}`);
     }
 
     const editorPath = vscode.window.activeTextEditor?.document.uri.fsPath;

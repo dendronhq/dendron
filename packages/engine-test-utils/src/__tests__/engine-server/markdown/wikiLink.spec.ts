@@ -14,6 +14,7 @@ import {
   WikiLinksOpts,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
+import path from "path";
 import { runEngineTestV5 } from "../../../engine";
 import { ENGINE_HOOKS } from "../../../presets";
 import { checkVFile, createProcForTest, createProcTests } from "./utils";
@@ -45,7 +46,7 @@ function getNode(node: UnistNode): UnistNode {
 describe("wikiLinks", () => {
   describe("parse", () => {
     let engine: any;
-    let dendronData = {
+    const dendronData = {
       fname: "placeholder.md",
       dest: DendronASTDest.MD_REGULAR,
     };
@@ -283,7 +284,7 @@ describe("wikiLinks", () => {
       preSetupHook: ENGINE_HOOKS.setupBasic,
     });
 
-    const linkWithAlias = `[[bar|foo]]`;
+    const linkWithAlias = `[[bar doesn't foo|foo]]`;
     const WITH_ALIAS = createProcTests({
       name: "WITH_ALIAS",
       setupFunc: async ({ engine, vaults, extra }) => {
@@ -302,15 +303,15 @@ describe("wikiLinks", () => {
         },
         [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
           const { resp } = extra;
-          await checkVFile(resp, "[bar](foo)");
+          await checkVFile(resp, "[bar doesn't foo](foo)");
         },
         [DendronASTDest.HTML]: async ({ extra }) => {
           const { resp } = extra;
-          await checkVFile(resp, '<a href="foo.html">bar</a>');
+          await checkVFile(resp, `<a href="foo.html">bar doesn't foo</a>`);
         },
         [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
           const { resp } = extra;
-          await checkVFile(resp, "[bar](foo.md)");
+          await checkVFile(resp, "[bar doesn't foo](foo.md)");
         },
       },
       preSetupHook: ENGINE_HOOKS.setupBasic,
@@ -505,7 +506,8 @@ describe("wikiLinks", () => {
         },
         [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
           const { resp } = extra;
-          await checkVFile(resp, "[Foo](../vault2/foo.md)");
+          const expectedPath = path.join("..", "vault2", "foo.md");
+          await checkVFile(resp, `[Foo](${expectedPath})`);
         },
       },
       preSetupHook: async ({ wsRoot, vaults }) => {

@@ -1,0 +1,29 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`GDoc import pod Import Comments in Markdown as json 1`] = `
+"
+
+## Testing GDoc Pod
+
+This is the first line
+
+
+### Comments
+
+ [{\\"author\\":\\"harshita joshi\\",\\"content\\":\\"first\\",\\"replies\\":[{\\"author\\":\\"harshita joshi\\",\\"content\\":\\"@abc This is a reply\\"}]}]"
+`;
+
+exports[`GDoc import pod Import Comments in Markdown as text 1`] = `
+"
+
+## Testing GDoc Pod
+
+This is the first line
+
+
+### Comments
+
+ - harshita joshi:  first
+	 - harshita joshi: @abc This is a reply
+"
+`;

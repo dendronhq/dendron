@@ -250,6 +250,7 @@ export class PickerUtilsV2 {
     quickPick.sortByLabel = false;
     quickPick.showNote = async (uri) => window.showTextDocument(uri);
     if (initialValue) {
+      quickPick.rawValue = initialValue;
       quickPick.value = initialValue;
     }
     return quickPick;
@@ -366,6 +367,7 @@ export class PickerUtilsV2 {
     return vault;
   }
 
+  /** @deprecated use `getVaultForOpenEditor` instead, this function no longer prompts anything. */
   static getOrPromptVaultForOpenEditor(): DVault {
     return PickerUtilsV2.getVaultForOpenEditor();
   }
@@ -586,6 +588,10 @@ export class PickerUtilsV2 {
     return vaultSuggestions;
   }
 
+  /**
+   * Update button props by value
+   * @param opts
+   */
   static refreshButtons(opts: {
     quickpick: DendronQuickPickerV2;
     buttons: DendronBtn[];
@@ -605,14 +611,16 @@ export class PickerUtilsV2 {
   }) {
     const buttonsEnabled = _.filter(opts.buttons, { pressed: true });
     const buttonsDisabled = _.filter(opts.buttons, { pressed: false });
-    await Promise.all(
-      buttonsEnabled.map((bt) => {
-        bt.onEnable({ quickPick: opts.quickpick });
-      })
-    );
+    // call onDisable first so that
+    // they don't modify state of the quickpick after onEnable.
     await Promise.all(
       buttonsDisabled.map((bt) => {
         bt.onDisable({ quickPick: opts.quickpick });
+      })
+    );
+    await Promise.all(
+      buttonsEnabled.map((bt) => {
+        bt.onEnable({ quickPick: opts.quickpick });
       })
     );
   }

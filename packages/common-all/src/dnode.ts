@@ -798,6 +798,8 @@ export class NoteUtils {
   }
 
   static serializeMeta(props: NoteProps) {
+    // `undefined` props crash the serializer, remove them
+    props = Object.fromEntries(Object.entries(props).filter(([_, v]) => v)) as NoteProps;
     const builtinProps = _.pick(props, [
       "id",
       "title",

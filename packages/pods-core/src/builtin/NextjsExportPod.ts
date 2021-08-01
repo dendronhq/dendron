@@ -57,6 +57,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     const podDstDir = dest.fsPath;
     fs.ensureDirSync(podDstDir);
 
+    this.L.info({ctx, msg: "filtering notes..."})
     const { notes: publishedNotes, domains } = await SiteUtils.filterByConfig({
       engine,
       config: engine.config,
@@ -72,17 +73,16 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
 
     // render notes
     const notesDir = path.join(podDstDir, "notes");
+    this.L.info({ctx, msg: "ensuring notesDir...", notesDir})
     fs.ensureDirSync(notesDir);
+    this.L.info({ctx, msg: "writing notes..."})
     const out1 = Promise.all(notes.map(async note => {
-      const out = await engine.renderNote({id: note.id});
+      const out = await this._renderNote({engine, note, notes: engine.notes})
       const dst = path.join(notesDir, note.id + ".html")
-      this.L.debug({ctx, dst, msg: "writeNote"});
-      if (out.error) {
-        throw Error(`error rendering: ${stringifyError(out.error)}`)
-      }
-      return fs.writeFile(dst, out.data)
+      return fs.writeFile(dst, out)
     }));
     // render siteOnly notes
+    this.L.info({ctx, msg: "writing site only notes..."})
     const out2 = Promise.all(siteNotes.map(async note => {
       return this.renderToFile({engine, note, notesDir, notes: publishedNotes})
     }));

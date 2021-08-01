@@ -111,20 +111,25 @@ const GENERATORS = {
 // -----  output  -----
 // generate frontmatter
 
-const created = randomTimestamp();
-console.log(
-`---
+function generateNote() {
+  const created = randomTimestamp();
+  const fm = `---
 id: ${Math.random()}
 title: ${shortGenerator.generate()}
 desc: ${shortGenerator.generate()}
 updated: ${created + randomTimestampDuration()}
 created: ${created}
 stub: false
----`
-);
+---\n`;
+  const pickGenerators = Object.values(GENERATORS);
+  const out = [fm];
+  for (let i = 0; i < GENERATED_LENGTH; i++) {
+    const pick = pickGenerators[Math.floor(Math.random() * pickGenerators.length)];
+    out.push(pick());
+  }
+  return out.join("");
+}
 
-const pickGenerators = Object.values(GENERATORS);
-for (let i = 0; i < GENERATED_LENGTH; i++) {
-  const pick = pickGenerators[Math.floor(Math.random() * pickGenerators.length)];
-  console.log(pick());
+module.exports = {
+  generateNote
 }

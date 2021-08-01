@@ -42,7 +42,6 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
 
   async renderToFile({engine, note, notesDir, notes}: Parameters<NextjsExportPod["_renderNote"]>[0] & {notesDir: string}) {
     const ctx = `${ID}:renderToFile`
-    // const out = await engine.renderNote({id: note.id});
     const out = await this._renderNote({engine, note, notes});
     const dst = path.join(notesDir, note.id + ".html")
     this.L.debug({ctx, dst, msg: "writeNote"});
@@ -51,9 +50,8 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
 
   async plant(opts: ExportPodPlantOpts) {
     const ctx = `${ID}:plant`
-    const { notes, dest, engine } = opts;
+    const { dest, engine } = opts;
 
-    // const podDstPath = dest.fsPath;
     const podDstDir = dest.fsPath;
     fs.ensureDirSync(podDstDir);
 
@@ -76,20 +74,11 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     this.L.info({ctx, msg: "ensuring notesDir...", notesDir})
     fs.ensureDirSync(notesDir);
     this.L.info({ctx, msg: "writing notes..."})
-    const out1 = Promise.all(notes.map(async note => {
-      const out = await this._renderNote({engine, note, notes: engine.notes})
-      const dst = path.join(notesDir, note.id + ".html")
-      return fs.writeFile(dst, out)
+    await Promise.all(_.values(publishedNotes).map(async note => {
+      return this.renderToFile({engine, note, notesDir, notes: publishedNotes});
     }));
-    // render siteOnly notes
-    this.L.info({ctx, msg: "writing site only notes..."})
-    const out2 = Promise.all(siteNotes.map(async note => {
-      return this.renderToFile({engine, note, notesDir, notes: publishedNotes})
-    }));
-    await Promise.all([out1, out2])
-
     const podDstPath = path.join(podDstDir, "notes.json");
     fs.writeJSONSync(podDstPath, payload, { encoding: "utf8", spaces: 2 });
-    return { notes };
+    return { notes: _.values(publishedNotes) };
   }
 }

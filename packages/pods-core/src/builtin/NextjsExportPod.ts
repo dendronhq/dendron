@@ -33,7 +33,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
         config: engine.config,
         notes
       },
-      { flavor: ProcFlavor.PREVIEW }
+      { flavor: ProcFlavor.PUBLISHING }
     );
     const payload = await proc.process(NoteUtils.serialize(note));
     return payload.toString();

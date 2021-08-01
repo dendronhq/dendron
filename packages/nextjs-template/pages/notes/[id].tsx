@@ -26,7 +26,6 @@ export default function Note({note, body}: InferGetStaticPropsType<typeof getSta
 	const router = useRouter()
 	const [bodyFromState, setBody] = React.useState<string|undefined>(undefined);
 	const { id } = router.query as NoteRouterQuery;
-	console.log({ctx, id, note: note.id});
 
 	// initialize command bar
 	React.useEffect(()=> {
@@ -46,7 +45,6 @@ export default function Note({note, body}: InferGetStaticPropsType<typeof getSta
 			};
 			window.CommandBar.addContext("notes-meta", notesFetch);
 			function lookupCb({note}: {note: NoteProps}, context: any) {
-				console.log(note)
 				router.push(`/notes/${note.id}`);
 			}
 		window.CommandBar.addCallback(

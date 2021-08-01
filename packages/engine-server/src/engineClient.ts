@@ -404,9 +404,9 @@ export class DendronEngineClient implements DEngineClient {
   }
 
   async getNoteBlocks({
-    id,
+    id, filterByAnchorType
   }: GetNoteBlocksOpts): Promise<GetNoteBlocksPayload> {
-    const out = await this.api.getNoteBlocks({ id, ws: this.ws });
+    const out = await this.api.getNoteBlocks({ id, filterByAnchorType, ws: this.ws });
     return out;
   }
 }

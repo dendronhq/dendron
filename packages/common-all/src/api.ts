@@ -147,6 +147,7 @@ export type NoteQueryRequest = {
 
 export type GetNoteBlocksRequest = {
   id: string;
+  filterByAnchorType?: "header" | "block";
 } & WorkspaceRequest;
 
 export type SchemaDeleteRequest = {

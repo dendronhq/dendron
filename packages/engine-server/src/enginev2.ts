@@ -567,6 +567,9 @@ export class DendronEngineV2 implements DEngine {
         note,
         engine: this,
       });
+      if (opts.filterByAnchorType) {
+        _.remove(blocks, (block) => block.anchor?.type !== opts.filterByAnchorType);
+      }
       return { data: blocks, error: null };
     } catch (err) {
       return {

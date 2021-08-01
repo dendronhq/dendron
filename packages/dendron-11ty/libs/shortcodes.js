@@ -176,12 +176,16 @@ function genTemplate(node) {
   out.push(`<a href="${href}" rel="permalink">${node.title}</a>`);
   // {% endif %}
   out.push(`</h2>`);
-  const publishedDate = node.custom.date
+  try {
+  const publishedDate = _.get(node, "custom.date", false)
     ? jekyllDate2ShortDate(node.custom.date)
     : ms2ShortDate(node.created);
   out.push(
     `<p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> ${publishedDate} </p>`
   );
+  } catch(err) {
+    throw Error(`no date found for note ${node.id}`);
+  }
   /*
     {% if post.read_time %}
       <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> {% include read-time.html %}</p>

@@ -398,6 +398,7 @@ export class CopyNoteLinkBtn extends DendronBtn {
   }
 
   async onEnable({ quickPick }: ButtonHandleOpts) {
+    console.log({ctx: "copyNoteLinkBtn: onEnable", quickPick, activeItems: quickPick.activeItems});
     if (this.pressed) {
       let items: readonly DNodePropsQuickInputV2[];
       if (quickPick.canSelectMany) {

@@ -785,7 +785,7 @@ suite("NoteLookupCommand", function () {
       });
     });
 
-    test.skip("copyNoteLink basic", (done) => {
+    test("copyNoteLink basic", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
         preSetupHook: async ({ wsRoot, vaults }) => {
@@ -797,6 +797,7 @@ suite("NoteLookupCommand", function () {
           const { controller } = await cmd.gatherInputs({
             initialValue: "foo",
           });
+          controller.quickpick.show();
           const { copyNoteLinkBtn } = getEffectTypeButtons(
             controller.quickpick.buttons
           );
@@ -971,8 +972,6 @@ suite("NoteLookupCommand", function () {
       controller.quickpick.show();
       return { controller }
     }
-
-    
 
     test("scratch and selection2link both applied", (done) => {
       runLegacyMultiWorkspaceTest({

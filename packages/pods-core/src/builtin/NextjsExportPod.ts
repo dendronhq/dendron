@@ -79,6 +79,16 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     }));
     const podDstPath = path.join(podDstDir, "notes.json");
     fs.writeJSONSync(podDstPath, payload, { encoding: "utf8", spaces: 2 });
+
+    const publicPath = path.join(podDstDir, "..", "public");
+    const publicDataPath = path.join(publicPath, "data");
+
+    if (fs.existsSync(publicDataPath)) {
+      this.L.info("removing existing 'public/data");
+      fs.removeSync(publicDataPath);
+    }
+    this.L.info("moving data");
+    fs.copySync(podDstPath, publicDataPath);
     return { notes: _.values(publishedNotes) };
   }
 }

@@ -98,7 +98,17 @@ export class ImportPodCommand extends BaseCommand<
           engine,
           wsRoot,
           vaults,
+          onPrompt: async (type?: String) => {
+            const resp = (type === "userPrompt") ?
+            await window.showInformationMessage(
+              "Do you want to overwrite",
+                { modal: true },
+                { title: "Yes" }
+              ) : window.showInformationMessage("Note is already in sync with the google doc") ;
+              return resp
+          }
         });
+        
         if (errors && errors.length > 0) {
           let errorMsg = `Error while importing ${errors.length} notes:\n`;
           errors.forEach((e) => {

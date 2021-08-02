@@ -13,12 +13,11 @@ import { URI } from "vscode-uri";
 import { PodKind } from "./types";
 import { JSONSchemaType } from "ajv";
 import { PodUtils } from "./utils";
-import { window } from "vscode";
 
 export type PodOpts<T> = {
   engine: DEngineClient;
   config: T;
-  onPrompt?: (arg0?: String) => Promise<any>| undefined
+  onPrompt?: (arg0?: String) => Promise<string | {title : string} | undefined>
 } & WorkspaceOpts;
 
 // === Publish Pod
@@ -120,16 +119,6 @@ export abstract class ImportPod<T extends ImportPodConfig = ImportPodConfig> {
       vname: vaultName,
     });
     const srcURL = URI.file(resolvePath(src, engine.wsRoot));
-
-    opts.onPrompt = async (type?: String) => {
-      const resp = (type === "userPrompt") ?
-      await window.showInformationMessage(
-        "Do you want to overwrite",
-          { modal: true },
-          { title: "Yes" }
-        ) : window.showInformationMessage("Note is already in sync with the google doc") ;
-        return resp
-    }
      
     return await this.plant({ ...opts, src: srcURL, vault });
   }

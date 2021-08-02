@@ -1,6 +1,5 @@
 import fs from "fs-extra";
 import _ from "lodash";
-// import path from "path";
 import {
   // ExportPod,
   // ExportPodPlantOpts,
@@ -11,7 +10,11 @@ import {
 } from "../basev3";
 import { JSONSchemaType } from "ajv";
 import { PodUtils } from "../utils";
-import { parse, Rule, Declaration, Comment } from "css";
+import css, { Declaration, Comment } from "css";
+import moment from "moment";
+import path from "path";
+import os from "os";
+import graphCSS from "../graph";
 
 const ID = "dendron.obsidian-graph-style";
 
@@ -25,6 +28,10 @@ export type ObsidianStyleImportPodPlantOpts = ImportPodPlantOpts & {
 class GraphStyleUtils {
   constructor(file: Buffer) {
     file.toString();
+  }
+
+  static folderPath() {
+    return path.join(os.homedir(), ".dendron", "styles");
   }
 
   static _getCSSDeclarations = (decs: (Comment | Declaration)[]) => {
@@ -60,30 +67,81 @@ class GraphStyleUtils {
   };
 
   static parseObsidianStyles(cssText: string) {
-    const styleObject = parse(cssText);
+    const styleObject = css.parse(cssText);
+
+    // if (!styleObject) return {};
     if (!styleObject.stylesheet) return {};
     if (!styleObject.stylesheet.rules) return {};
 
-    const result: {
-      [key: string]: object;
-    } = {};
+    // const result: {
+    //   [key: string]: object;
+    // } = {};
 
-    styleObject.stylesheet.rules.forEach((untypedRule) => {
-      if (untypedRule.type === "comment") return;
-      const rule = untypedRule as Rule;
+    styleObject.stylesheet.rules = styleObject.stylesheet.rules.filter(
+      (rule) => {
+        if (rule.type === "comment") return false;
+        return true;
+      }
+    );
 
-      if (!rule.selectors || !rule.declarations) return;
-      const [key] = rule.selectors;
+    return styleObject;
+  }
 
-      if (key.length) {
-        result[key] = this._getCSSDeclarations(rule.declarations);
+  static _obsidianToDendronStyleString(styles: css.Stylesheet) {
+    if (!styles) return "";
+    if (!styles.stylesheet) return "";
+    if (!styles.stylesheet.rules) return "";
+
+    const rules = styles.stylesheet.rules;
+
+    rules.forEach((rule: css.Rule, index) => {
+      if (_.isUndefined(rule.declarations) || _.isUndefined(rule.selectors))
+        return;
+
+      const matchingCSS = graphCSS.find((css) =>
+        rule.selectors?.includes(css.obsidian.selector)
+      );
+
+      if (matchingCSS) {
+        rule.selectors = [matchingCSS.dendron.selector];
+
+        const declarationIndex = rule.declarations.findIndex(
+          (declaration) =>
+            declaration.type === "declaration" &&
+            (declaration as Declaration).property ===
+              matchingCSS.obsidian.property
+        );
+
+        if (declarationIndex >= 0) {
+          (rule.declarations[declarationIndex] as Declaration).property = matchingCSS.dendron.property
+        }
+
+        rules[index] = rule;
       }
     });
 
-    return styleObject.stylesheet.rules;
+    styles.stylesheet.rules = rules;
+
+    return css.stringify(styles);
   }
 
-  static writeDendronStyles(styles: object, dest: string) {}
+  static async writeDendronStyles(styles: object) {
+    const dateString = moment().format("YYYY-MM-DD-hh-mm-ss");
+    const filename = `import_${dateString}.css`;
+    const folderPath = GraphStyleUtils.folderPath();
+    const filePath = path.join(folderPath, filename);
+
+    const cssText = GraphStyleUtils._obsidianToDendronStyleString(styles);
+
+    // verify dest exist
+    try {
+      fs.ensureDirSync(folderPath);
+    } catch {
+      await fs.promises.mkdir(folderPath, { recursive: true });
+    }
+
+    fs.writeFileSync(filePath, cssText);
+  }
 }
 
 export class ObsidianStyleImportPod extends ImportPod {
@@ -92,12 +150,12 @@ export class ObsidianStyleImportPod extends ImportPod {
 
   get config(): JSONSchemaType<ImportPodConfig> {
     return PodUtils.createImportConfig({
-      required: ['dest'],
+      required: ["dest"],
       properties: {
         dest: {
           type: "string",
           description: "Output destination for parsed style file",
-        }
+        },
       },
     }) as JSONSchemaType<ImportPodConfig>;
   }
@@ -110,7 +168,7 @@ export class ObsidianStyleImportPod extends ImportPod {
     const file = fs.readFileSync(src.fsPath);
     const styles = GraphStyleUtils.parseObsidianStyles(file.toString());
 
-    GraphStyleUtils.writeDendronStyles(styles, "");
+    await GraphStyleUtils.writeDendronStyles(styles);
 
     return { importedNotes: [] };
   }

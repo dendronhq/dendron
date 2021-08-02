@@ -1,0 +1,39 @@
+.graph-view.color-fill {
+	color: red;
+}
+
+/* .graph-view.color-fill-tag {
+	color: red;
+} */
+
+/* .graph-view.color-fill-attachment {
+	color: red;
+} */
+
+/* .graph-view.color-arrow {
+	color: red;
+} */
+
+/* .graph-view.color-circle {
+	color: red;
+} */
+
+.graph-view.color-line {
+	color: blue;
+}
+
+.graph-view.color-text {
+	color: aqua;
+}
+
+.graph-view.color-fill-highlight {
+	color: purple;
+}
+
+/* .graph-view.color-line-highlight {
+	color: red;
+} */
+
+/* .graph-view.color-fill-unresolved {
+	color: red;
+} */

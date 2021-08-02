@@ -16,8 +16,9 @@ import {
 } from "./builtin/MarkdownPod";
 import { NextjsExportPod } from "./builtin/NextjsExportPod";
 import { PodClassEntryV4 } from "./types";
+import { ObsidianStyleImportPod } from "./builtin/ObsidianStylePod";
 
-NextjsExportPod
+
 export * from "./basev3";
 export * from "./builtin";
 export * from "./types";
@@ -36,5 +37,5 @@ export function getAllPublishPods(): PodClassEntryV4[] {
   return [JSONPublishPod, MarkdownPublishPod, HTMLPublishPod, GithubPublishPod];
 }
 export function getAllImportPods(): PodClassEntryV4[] {
-  return [JSONImportPod, MarkdownImportPod, GithubImportPod, GDocImportPod];
+  return [JSONImportPod, MarkdownImportPod, GithubImportPod, GDocImportPod, ObsidianStyleImportPod];
 }

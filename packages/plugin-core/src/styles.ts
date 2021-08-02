@@ -48,7 +48,7 @@ Obsidian.md style
 
 export class GraphStyleService {
   static styleFilePath() {
-    return path.join(os.homedir(), ".dendron", "styles.css");
+    return path.join(os.homedir(), ".dendron", "styles", "graph.css");
   }
 
   static doesStyleFileExist() {

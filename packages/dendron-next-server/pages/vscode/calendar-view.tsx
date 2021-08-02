@@ -20,7 +20,6 @@ import generateCalendar from "antd/lib/calendar/generateCalendar";
 import luxonGenerateConfig from "./luxon";
 import classNames from "classnames";
 import _ from "lodash";
-import moment from "moment";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { DendronProps } from "../../lib/types";
 

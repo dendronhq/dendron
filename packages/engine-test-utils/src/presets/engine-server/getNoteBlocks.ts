@@ -18,12 +18,14 @@ const runGetNoteBlocks = async ({
   vaults,
   note,
   wsRoot,
+  filterByAnchorType,
   cb,
 }: {
   engine: DEngineClient;
   vaults: DVault[];
   wsRoot: string;
   note?: NoteProps;
+  filterByAnchorType?: "block" | "header";
   cb: (opts: GetNoteBlocksPayload) => TestResult[];
 }) => {
   if (_.isUndefined(note))
@@ -35,6 +37,7 @@ const runGetNoteBlocks = async ({
     });
   const out = await engine.getNoteBlocks({
     id: note!.id,
+    filterByAnchorType,
   });
   return cb(out);
 };
@@ -222,6 +225,91 @@ const NOTES = {
         }),
     }
   ),
+  HEADERS_ONLY: new TestPresetEntryV4(
+    async ({ wsRoot, vaults, engine }) => {
+      return runGetNoteBlocks({
+        engine,
+        wsRoot,
+        vaults,
+        filterByAnchorType: "header",
+        cb: ({ data }) => {
+          return [
+            {
+              actual: data?.length,
+              expected: 1,
+            },
+            { actual: data![0].anchor?.value, expected: "et-et-quam-culpa" },
+          ];
+        },
+      });
+    },
+    {
+      preSetupHook: (opts) =>
+        preSetupHook(opts, {
+          noteBody: [
+            "# Et et quam culpa.",
+            "",
+            "Ullam vel eius reiciendis. ^paragraph",
+            "",
+            "* Cumque molestiae qui deleniti. ^item1",
+            "* Eius odit commodi harum. ^item2",
+            "  * Sequi ut non delectus tempore. ^item3",
+            "",
+            "^list",
+            "",
+            "| Sapiente | accusamus |",
+            "|----------|-----------|",
+            "| Laborum  | libero    |",
+            "| Ullam    | optio     | ^table",
+          ].join("\n"),
+        }),
+    }
+  ),
+  BLOCK_ANCHORS_ONLY: new TestPresetEntryV4(
+    async ({ wsRoot, vaults, engine }) => {
+      return runGetNoteBlocks({
+        engine,
+        wsRoot,
+        vaults,
+        filterByAnchorType: "block",
+        cb: ({ data }) => {
+          return [
+            {
+              actual: data?.length,
+              expected: 6,
+            },
+            { actual: data![0].anchor?.value, expected: "paragraph" },
+            { actual: data![1].anchor?.value, expected: "item1" },
+            { actual: data![2].anchor?.value, expected: "item2" },
+            { actual: data![3].anchor?.value, expected: "item3" },
+            { actual: data![4].anchor?.value, expected: "list" },
+            { actual: data![5].anchor?.value, expected: "table" },
+          ];
+        },
+      });
+    },
+    {
+      preSetupHook: (opts) =>
+        preSetupHook(opts, {
+          noteBody: [
+            "# Et et quam culpa.",
+            "",
+            "Ullam vel eius reiciendis. ^paragraph",
+            "",
+            "* Cumque molestiae qui deleniti. ^item1",
+            "* Eius odit commodi harum. ^item2",
+            "  * Sequi ut non delectus tempore. ^item3",
+            "",
+            "^list",
+            "",
+            "| Sapiente | accusamus |",
+            "|----------|-----------|",
+            "| Laborum  | libero    |",
+            "| Ullam    | optio     | ^table",
+          ].join("\n"),
+        }),
+    }
+  ),
   HEADER: new TestPresetEntryV4(
     async ({ wsRoot, vaults, engine }) => {
       return runGetNoteBlocks({
@@ -264,7 +352,7 @@ const NOTES = {
 };
 export const ENGINE_GET_NOTE_BLOCKS_PRESETS = {
   // use the below to test a specific test
-  //NOTES: {NOTE_REF: NOTES["NOTE_REF"]},
-  NOTES,
+  NOTES: {NOTE_REF: NOTES["HEADERS_ONLY"]},
+  //NOTES,
   SCHEMAS: {},
 };

@@ -2,6 +2,7 @@ import {
   CalendarViewMessageType,
   DMessageSource,
   NoteProps,
+  Time,
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -16,13 +17,14 @@ import {
 } from "antd";
 import { Badge, ConfigProvider } from "antd";
 import generateCalendar from "antd/lib/calendar/generateCalendar";
-import { DateTime } from "luxon";
 import luxonGenerateConfig from "./luxon";
 import classNames from "classnames";
 import _ from "lodash";
 import moment from "moment";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { DendronProps } from "../../lib/types";
+
+type DateTime = InstanceType<typeof Time.DateTime>;
 
 const Calendar = generateCalendar<DateTime>(luxonGenerateConfig);
 
@@ -124,7 +126,7 @@ function CalendarView({ engine, ide }: DendronProps) {
       const isMontly = maybeDatePortion.split(".").length === 2;
 
       return maybeDatePortion && _.first(groupedDailyNotes[maybeDatePortion])
-        ? DateTime.fromFormat(
+        ? Time.DateTime.fromFormat(
             maybeDatePortion,
             isMontly ? defaultJournalMonthDateFormat : defaultJournalDateFormat
           )
@@ -175,7 +177,7 @@ function CalendarView({ engine, ide }: DendronProps) {
   const onClickToday = useCallback(() => {
     const mode = "month";
     setActiveMode(mode);
-    onSelect(DateTime.now(), mode);
+    onSelect(Time.now(), mode);
   }, [onSelect]);
 
   const dateFullCellRender = useCallback<

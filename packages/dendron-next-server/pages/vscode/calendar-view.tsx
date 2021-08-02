@@ -87,19 +87,13 @@ function CalendarView({ engine, ide }: DendronProps) {
   let defaultJournalDateFormat = config?.journal.dateFormat || "y.MM.dd";
   const defaultJournalMonthDateFormat = "y.MM"; // TODO compute format for currentMode="year" from config
 
-  const dayOfWeek = config?.journal.firstDayOfWeek;
-  const locale = "en-us";
+  // Currently luxon does not support setting first day of the week (https://github.com/moment/luxon/issues/373)
+  // const dayOfWeek = config?.journal.firstDayOfWeek;
+  // const locale = "en-us";
+
   if (defaultJournalDateFormat) {
     defaultJournalDateFormat = defaultJournalDateFormat.replace(/DD/, "dd");
   }
-
-  // useEffect(() => {
-  //   moment.updateLocale(locale, {
-  //     week: {
-  //       dow: dayOfWeek!,
-  //     },
-  //   });
-  // }, [dayOfWeek, locale]);
 
   const groupedDailyNotes = useMemo(() => {
     const vaultNotes = _.values(notes).filter((notes) => {

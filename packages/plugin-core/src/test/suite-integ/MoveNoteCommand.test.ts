@@ -579,7 +579,9 @@ suite("MoveNoteCommand", function () {
         }) as NoteProps;
 
         await VSCodeUtils.openNote(fooNote);
-        const lc = LookupControllerV3.create();
+        const lc = LookupControllerV3.create({
+          nodeType: "note",
+        });
         const initialValue = path.basename(
           VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath || "",
           ".md"
@@ -615,7 +617,9 @@ suite("MoveNoteCommand", function () {
         }) as NoteProps;
 
         await VSCodeUtils.openNote(fooNote);
-        const lc = LookupControllerV3.create();
+        const lc = LookupControllerV3.create({
+          nodeType: "note",
+        });
         const initialValue = path.basename(
           VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath || "",
           ".md"

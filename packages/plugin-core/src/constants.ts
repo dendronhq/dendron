@@ -287,8 +287,8 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     when: DendronContext.PLUGIN_ACTIVE,
   },
   LOOKUP_SCHEMA_V3: {
-    key: "dendron.lookupSchema",
-    title: `${CMD_PREFIX} Lookup Schema`,
+    key: "dendron.lookupSchemaV3",
+    title: `${CMD_PREFIX} Lookup Schema V3`,
     group: "navigation",
     desc: "Initiate schema lookup",
     when: DendronContext.PLUGIN_ACTIVE,

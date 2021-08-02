@@ -22,6 +22,10 @@ import {
 
 export type LookupControllerV3CreateOpts = {
   /**
+   * Node type
+   */
+  nodeType: string;
+  /**
    * Replace default buttons
    */
   buttons?: DendronBtn[];
@@ -55,7 +59,7 @@ export class LookupControllerV3 {
     const buttons = opts?.buttons || [VaultSelectButton.create(isMultiVault)];
     const extraButtons = opts?.extraButtons || [];
     return new LookupControllerV3({
-      nodeType: "note",
+      nodeType: opts?.nodeType as DNodeType,
       fuzzThreshold: opts?.fuzzThreshold,
       buttons: buttons.concat(extraButtons),
     });

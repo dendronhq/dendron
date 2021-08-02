@@ -63,12 +63,13 @@ export class SchemaLookupCommand extends BaseCommand<
   }
 
   async gatherInputs(opts?: CommandRunOpts): Promise<CommandGatherOutput> {
+    console.log({ctx: "SchemaLookupCommand:gatherInputs"});
     const copts: CommandRunOpts = _.defaults(opts || {}, {
-
+      //TODO
     } as CommandRunOpts);
     this._controller = LookupControllerV3.create({
-
-    })
+      nodeType: "schema",
+    });
 
     const lc = this.controller;
 
@@ -90,6 +91,7 @@ export class SchemaLookupCommand extends BaseCommand<
   };
 
   async enrichInputs(opts: CommandGatherOutput): Promise<CommandOpts | undefined> {
+    console.log({ctx: "SchemaLookupCommand:enrichInputs"});
     return new Promise((resolve) => {
       resolve(undefined);
       opts.controller.showQuickPick({
@@ -101,6 +103,7 @@ export class SchemaLookupCommand extends BaseCommand<
   }
 
   async execute(opts: CommandOpts) {
+    console.log({ctx: "SchemaLookupCommand:execute"});
     return opts;
   }
 }

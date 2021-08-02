@@ -136,6 +136,7 @@ export class NoteLookupCommand extends BaseCommand<
     Logger.info({ ctx, opts, msg: "enter" });
     // initialize controller and provider
     this._controller = LookupControllerV3.create({
+      nodeType: "note",
       disableVaultSelection: !DConfig.getProp(
         ws.config,
         "lookupConfirmVaultOnCreate"

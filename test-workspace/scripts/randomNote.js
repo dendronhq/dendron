@@ -9,9 +9,9 @@
 /* eslint-disable no-console */
 /* eslint-disable no-lone-blocks */
 /* eslint-disable no-plusplus */
+const _ = require("lodash");
 
 /** How many markdown elements to generate. */
-const GENERATED_LENGTH = 1000;
 /** How many items at most a generated list can have. */
 const LONGEST_LIST = 5;
 /** What ratio of paragraphs or list items should have block anchors */
@@ -111,7 +111,8 @@ const GENERATORS = {
 // -----  output  -----
 // generate frontmatter
 
-function generateNote() {
+function generateNote(opts) {
+  const {generatedLength} = _.defaults(opts, {generatedLength: 1000});
   const created = randomTimestamp();
   const fm = `---
 id: ${Math.random()}
@@ -123,7 +124,8 @@ stub: false
 ---\n`;
   const pickGenerators = Object.values(GENERATORS);
   const out = [fm];
-  for (let i = 0; i < GENERATED_LENGTH; i++) {
+  console.log(`generating ${generatedLength} elements`)
+  for (let i = 0; i < generatedLength; i++) {
     const pick = pickGenerators[Math.floor(Math.random() * pickGenerators.length)];
     out.push(pick());
   }

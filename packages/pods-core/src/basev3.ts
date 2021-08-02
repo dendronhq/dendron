@@ -3,6 +3,7 @@ import {
   DVault,
   NoteProps,
   NoteUtils,
+  stringifyError,
   VaultUtils,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
@@ -201,7 +202,12 @@ export abstract class ExportPod<
       notes: _.values(engine.notes),
     });
 
-    return this.plant({ ...opts, dest: destURL, notes });
+    try {
+      return this.plant({ ...opts, dest: destURL, notes });
+    } catch(err) {
+      console.log("error", stringifyError(err));
+      throw err;
+    }
   }
   abstract plant(
     opts: ExportPodPlantOpts<T>

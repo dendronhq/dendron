@@ -17,9 +17,9 @@ async function main() {
 	const vaultName = "vault-generated";
 	const vaultRoot = path.join(__dirname, "..", vaultName);
 	const vaultFolder = path.join(vaultRoot, "vault");
-	await Promise.all(_.range(0, 100).map(async idx => {
+	await Promise.all(_.range(0, 3).map(async idx => {
 		console.log(idx);
-		return fs.writeFile(path.join(vaultFolder, `${idx}.md`), generateNote());
+		return fs.writeFile(path.join(vaultFolder, `${idx}.md`), generateNote({generatedLength: 5}));
 	}));
 }
 

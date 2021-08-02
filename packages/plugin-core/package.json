@@ -171,6 +171,12 @@
         "docPreview": "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/schema-lookup.gif)"
       },
       {
+        "command": "dendron.lookupSchemaV3",
+        "title": "Dendron: Lookup Schema V3",
+        "desc": "Initiate Schema Lookup",
+        "when": "dendron:pluginActive" 
+      },
+      {
         "command": "dendron.reloadIndex",
         "title": "Dendron: Reload Index",
         "desc": "Reload the index. Necessary for Dendron to pick up on schema changes.",

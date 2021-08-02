@@ -82,9 +82,15 @@ const generateConfig: GenerateConfig<DateTime> = {
     getWeek: (locale, date) =>
       date.setLocale(normalizeLocale(locale)).weekNumber,
     getShortWeekDays: (locale) => {
-      return Info.weekdays("short", {
+      const weekdays = Info.weekdays("short", {
         locale: normalizeLocale(locale),
       });
+
+      // getShortWeekDays should return weekday labels starting from Sunday.
+      // luxon returns them starting from Monday, so we have to shift the results.
+      weekdays.unshift(weekdays.pop() as string);
+
+      return weekdays
     },
     getShortMonths: (locale) =>
       Info.months("short", { locale: normalizeLocale(locale) }),

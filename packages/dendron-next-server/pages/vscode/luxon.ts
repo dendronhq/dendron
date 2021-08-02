@@ -3,16 +3,6 @@
 import { DateTime, Info } from "luxon";
 import type { GenerateConfig } from "rc-picker/lib/generate";
 
-const weekDayFormatMap = {
-  zh_CN: "narrow",
-  zh_TW: "narrow",
-};
-
-const weekDayLengthMap = {
-  en_US: 2,
-  en_GB: 2,
-};
-
 /**
  * Normalizes part of a moment format string that should
  * not be escaped to a luxon compatible format string.
@@ -92,22 +82,13 @@ const generateConfig: GenerateConfig<DateTime> = {
     getWeek: (locale, date) =>
       date.setLocale(normalizeLocale(locale)).weekNumber,
     getShortWeekDays: (locale) => {
-      const weekdays = Info.weekdays(weekDayFormatMap[locale] || "short", {
+      return Info.weekdays("short", {
         locale: normalizeLocale(locale),
       });
-
-      const shifted = weekdays.map((weekday) =>
-        weekday.slice(0, weekDayLengthMap[locale])
-      );
-
-      // getShortWeekDays should return weekday labels starting from Sunday.
-      // luxon returns them starting from Monday, so we have to shift the results.
-      shifted.unshift(shifted.pop() as string);
-
-      return shifted;
     },
     getShortMonths: (locale) =>
       Info.months("short", { locale: normalizeLocale(locale) }),
+    // @ts-ignore -- allow format to return `null`
     format: (locale, date, format) => {
       if (!date || !date.isValid) {
         return null;

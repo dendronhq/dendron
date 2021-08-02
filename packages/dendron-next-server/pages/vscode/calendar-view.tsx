@@ -17,10 +17,10 @@ import {
 } from "antd";
 import { Badge, ConfigProvider } from "antd";
 import generateCalendar from "antd/lib/calendar/generateCalendar";
-import luxonGenerateConfig from "./luxon";
 import classNames from "classnames";
 import _ from "lodash";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import luxonGenerateConfig from "../../lib/luxon";
 import { DendronProps } from "../../lib/types";
 
 type DateTime = InstanceType<typeof Time.DateTime>;

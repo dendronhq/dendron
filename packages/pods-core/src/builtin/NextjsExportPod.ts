@@ -42,6 +42,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
 
   async renderToFile({engine, note, notesDir, notes}: Parameters<NextjsExportPod["_renderNote"]>[0] & {notesDir: string}) {
     const ctx = `${ID}:renderToFile`
+    this.L.debug({ctx, msg: "renderNote:pre", note: note.id});
     const out = await this._renderNote({engine, note, notes});
     const dst = path.join(notesDir, note.id + ".html")
     this.L.debug({ctx, dst, msg: "writeNote"});

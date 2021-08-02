@@ -286,6 +286,13 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     desc: "Initiate note lookup",
     when: DendronContext.PLUGIN_ACTIVE,
   },
+  LOOKUP_SCHEMA_V3: {
+    key: "dendron.lookupSchema",
+    title: `${CMD_PREFIX} Lookup Schema`,
+    group: "navigation",
+    desc: "Initiate schema lookup",
+    when: DendronContext.PLUGIN_ACTIVE,
+  },
   LOOKUP_JOURNAL: {
     key: "dendron.lookup",
     shortcut: true,

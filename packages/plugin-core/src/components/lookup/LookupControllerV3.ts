@@ -54,7 +54,7 @@ export class LookupControllerV3 {
   static create(opts?: LookupControllerV3CreateOpts) {
     const vaults = getWS().getEngine().vaults;
     const disableVaultSelection =
-      _.isBoolean(opts?.disableVaultSelection) && opts?.disableVaultSelection;
+      (_.isBoolean(opts?.disableVaultSelection) && opts?.disableVaultSelection) || opts?.nodeType === "schema";
     const isMultiVault = vaults.length > 1 && !disableVaultSelection;
     const buttons = opts?.buttons || [VaultSelectButton.create(isMultiVault)];
     const extraButtons = opts?.extraButtons || [];

@@ -2,7 +2,7 @@ import _ from "lodash";
 import { DendronError, ERROR_STATUS } from "@dendronhq/common-all";
 import { BaseCommand } from "./base";
 import { LookupControllerV3 } from "../components/lookup/LookupControllerV3";
-import { ILookupProviderV3 } from "../components/lookup/LookupProviderV3";
+import { ILookupProviderV3, SchemaLookupProvider } from "../components/lookup/LookupProviderV3";
 import { DendronQuickPickerV2 } from "../components/lookup/types";
 import { DENDRON_COMMANDS } from "../constants";
 
@@ -70,7 +70,10 @@ export class SchemaLookupCommand extends BaseCommand<
     this._controller = LookupControllerV3.create({
       nodeType: "schema",
     });
-
+    this._provider = new SchemaLookupProvider("schemaLookup", {
+      allowNewNote: true,
+      noHidePickerOnAccept: true,
+    });
     const lc = this.controller;
 
     const { quickpick } = await lc.prepareQuickPick({

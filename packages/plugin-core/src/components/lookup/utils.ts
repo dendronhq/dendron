@@ -12,6 +12,7 @@ import {
   NoteUtils,
   RenameNoteOpts,
   RespV2,
+  SchemaUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
 import { getDurationMilliseconds, vault2Path } from "@dendronhq/common-server";
@@ -744,5 +745,42 @@ export class NotePickerUtils {
     ]
       .filter((ent) => !_.isEmpty(ent))
       .join(".");
+  }
+}
+
+export class SchemaPickerUtils {
+  static async fetchPickerResults(opts: {
+    picker: DendronQuickPickerV2;
+    qs: string;
+  }) {
+    const ctx = "SchemaPickerUtils:fetchPickerResults"
+    const start = process.hrtime();
+    const { picker, qs } = opts;
+    const engine = getWS().getEngine();
+    const resp = await engine.querySchema(qs);
+    let nodes = resp.data.map((ent) => SchemaUtils.getModuleRoot(ent));
+
+    if (nodes.length > PAGINATE_LIMIT) {
+      picker.allResults = nodes;
+      picker.offset = PAGINATE_LIMIT;
+      picker.moreResults = true;
+      nodes = nodes.slice(0, PAGINATE_LIMIT);
+    } else {
+      PickerUtilsV2.resetPaginationOpts(picker);
+    }
+    const updatedItems = await Promise.all(
+      nodes.map(async (ent) =>
+        DNodeUtils.enhancePropForQuickInputV3({
+          wsRoot: DendronWorkspace.wsRoot(),
+          props: ent,
+          schemas: engine.schemas,
+          vaults: DendronWorkspace.instance().vaultsv4,
+          alwaysShow: picker.alwaysShowAll,
+        })
+      )
+    ); 
+    const profile = getDurationMilliseconds(start);
+    Logger.info({ ctx, msg: "engine.querySchema", profile });
+    return updatedItems;
   }
 }

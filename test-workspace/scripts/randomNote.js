@@ -115,7 +115,7 @@ function generateNote(opts) {
   const {generatedLength} = _.defaults(opts, {generatedLength: 1000});
   const created = randomTimestamp();
   const fm = `---
-id: ${Math.random()}
+id: "${Math.random()}"
 title: ${shortGenerator.generate()}
 desc: ${shortGenerator.generate()}
 updated: ${created + randomTimestampDuration()}
@@ -124,7 +124,6 @@ stub: false
 ---\n`;
   const pickGenerators = Object.values(GENERATORS);
   const out = [fm];
-  console.log(`generating ${generatedLength} elements`)
   for (let i = 0; i < generatedLength; i++) {
     const pick = pickGenerators[Math.floor(Math.random() * pickGenerators.length)];
     out.push(pick());

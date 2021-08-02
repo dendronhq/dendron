@@ -1,4 +1,4 @@
-import { DEngineClient, NoteProps, NotePropsDict, NoteUtils, stringifyError } from "@dendronhq/common-all";
+import { DEngineClient, NoteProps, NotePropsDict, NoteUtils } from "@dendronhq/common-all";
 import { MDUtilsV5, ProcFlavor, SiteUtils } from "@dendronhq/engine-server";
 import { JSONSchemaType } from "ajv";
 import fs from "fs-extra";
@@ -89,7 +89,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
       fs.removeSync(publicDataPath);
     }
     this.L.info("moving data");
-    fs.copySync(podDstPath, publicDataPath);
+    fs.copySync(podDstDir, publicDataPath);
     return { notes: _.values(publishedNotes) };
   }
 }

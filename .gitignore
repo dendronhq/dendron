@@ -36,3 +36,4 @@ storage/.verdaccio-db.json
 packages/plugin-core/dendron.server.log
 dendron.server
 dendron.server.log.old
+test-workspace-*-profile

@@ -251,6 +251,7 @@ export class PickerUtilsV2 {
     quickPick.showNote = async (uri) => window.showTextDocument(uri);
     if (initialValue) {
       quickPick.rawValue = initialValue;
+      quickPick.prefix = initialValue;
       quickPick.value = initialValue;
     }
     return quickPick;
@@ -615,12 +616,12 @@ export class PickerUtilsV2 {
     // they don't modify state of the quickpick after onEnable.
     await Promise.all(
       buttonsDisabled.map((bt) => {
-        bt.onDisable({ quickPick: opts.quickpick });
+        return bt.onDisable({ quickPick: opts.quickpick });
       })
     );
     await Promise.all(
       buttonsEnabled.map((bt) => {
-        bt.onEnable({ quickPick: opts.quickpick });
+        return bt.onEnable({ quickPick: opts.quickpick });
       })
     );
   }
@@ -718,7 +719,7 @@ export class NotePickerUtils {
 
   static getPickerValue(picker: DendronQuickPickerV2) {
     return [
-      picker.rawValue,
+      picker.prefix,
       picker.noteModifierValue,
       picker.selectionModifierValue
     ].filter((ent) => !_.isEmpty(ent)).join(".");

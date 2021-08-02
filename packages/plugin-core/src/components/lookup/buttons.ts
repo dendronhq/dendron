@@ -212,7 +212,14 @@ export class Selection2LinkBtn extends DendronBtn {
     const { text } = VSCodeUtils.getSelection();
     const slugger = getSlugger();
     quickPick.selectionModifierValue = slugger.slug(text!);
-    quickPick.value = NotePickerUtils.getPickerValue(quickPick);
+    if (quickPick.noteModifierValue || quickPick.prefix) {
+      quickPick.value = NotePickerUtils.getPickerValue(quickPick);
+    } else {
+      quickPick.value = [
+        quickPick.rawValue,
+        NotePickerUtils.getPickerValue(quickPick)
+      ].join(".");
+    }
     return;
   }
 
@@ -264,12 +271,12 @@ export class JournalBtn extends DendronBtn {
 
   async onEnable({ quickPick }: ButtonHandleOpts) {
     quickPick.modifyPickerValueFunc = () => {
-      return DendronClientUtilsV2.genNoteName("JOURNAL", {
-        overrides: { excluePrefix: true }
-      });
+      return DendronClientUtilsV2.genNoteName("JOURNAL");
     };
-    quickPick.noteModifierValue = quickPick.modifyPickerValueFunc();
+    const { noteName, prefix } = quickPick.modifyPickerValueFunc();
+    quickPick.noteModifierValue = _.difference(noteName.split("."), prefix.split(".")).join(".");
     quickPick.prevValue = quickPick.value;
+    quickPick.prefix = prefix;
     quickPick.value = NotePickerUtils.getPickerValue(quickPick);
     return;
   }
@@ -278,7 +285,7 @@ export class JournalBtn extends DendronBtn {
     quickPick.modifyPickerValueFunc = undefined;
     quickPick.noteModifierValue = undefined;
     quickPick.prevValue = quickPick.value;
-    quickPick.value = NotePickerUtils.getPickerValue(quickPick);
+    quickPick.value = quickPick.rawValue;
   }
 }
 
@@ -295,12 +302,12 @@ export class ScratchBtn extends DendronBtn {
 
   async onEnable({ quickPick }: ButtonHandleOpts) {
     quickPick.modifyPickerValueFunc = () => {
-      return DendronClientUtilsV2.genNoteName("SCRATCH", {
-        overrides: { excluePrefix: true },
-      });
+      return DendronClientUtilsV2.genNoteName("SCRATCH");
     };
     quickPick.prevValue = quickPick.value;
-    quickPick.noteModifierValue = quickPick.modifyPickerValueFunc();
+    const { noteName, prefix } = quickPick.modifyPickerValueFunc();
+    quickPick.noteModifierValue = _.difference(noteName.split("."), prefix.split(".")).join(".");
+    quickPick.prefix = prefix;
     quickPick.value = NotePickerUtils.getPickerValue(quickPick);
     return;
   }
@@ -308,7 +315,8 @@ export class ScratchBtn extends DendronBtn {
   async onDisable({ quickPick }: ButtonHandleOpts) {
     quickPick.modifyPickerValueFunc = undefined;
     quickPick.noteModifierValue = undefined;
-    quickPick.value = NotePickerUtils.getPickerValue(quickPick);
+    quickPick.prevValue = quickPick.value;
+    quickPick.value = quickPick.rawValue;
   }
 }
 export class HorizontalSplitBtn extends DendronBtn {
@@ -398,7 +406,6 @@ export class CopyNoteLinkBtn extends DendronBtn {
   }
 
   async onEnable({ quickPick }: ButtonHandleOpts) {
-    console.log({ctx: "copyNoteLinkBtn: onEnable", quickPick, activeItems: quickPick.activeItems});
     if (this.pressed) {
       let items: readonly DNodePropsQuickInputV2[];
       if (quickPick.canSelectMany) {

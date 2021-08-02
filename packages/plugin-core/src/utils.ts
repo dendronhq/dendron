@@ -93,7 +93,6 @@ let _MOCK_CONTEXT: undefined | vscode.ExtensionContext;
 
 type CreateFnameOverrides = {
   domain?: string;
-  excluePrefix?: boolean;
 };
 
 type CreateFnameOpts = {
@@ -628,7 +627,10 @@ export class DendronClientUtilsV2 {
   static genNoteName(
     type: "JOURNAL" | "SCRATCH",
     opts?: CreateFnameOpts
-  ): string {
+  ): {
+    noteName: string,
+    prefix: string,
+  } {
     // gather inputs
     const dateFormat: string =
       type === "SCRATCH"
@@ -669,17 +671,17 @@ export class DendronClientUtilsV2 {
     }
 
     const engine = DendronWorkspace.instance().getEngine();
-    const prefix = opts?.overrides?.excluePrefix ? 
-      "" : DendronClientUtilsV2.genNotePrefix(
-        currentNoteFname,
-        addBehavior as AddBehavior,
-        {
-          engine,
-        }
-      );
+    const prefix = DendronClientUtilsV2.genNotePrefix(
+      currentNoteFname,
+      addBehavior as AddBehavior,
+      {
+        engine,
+      }
+    );
 
     const noteDate = Time.now().toFormat(dateFormat);
-    return [prefix, name, noteDate].filter((ent) => !_.isEmpty(ent)).join(".");
+    const noteName = [prefix, name, noteDate].filter((ent) => !_.isEmpty(ent)).join(".");
+    return { noteName, prefix };
   }
 
   static getSchemaModByFname = async ({

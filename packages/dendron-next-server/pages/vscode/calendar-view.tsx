@@ -82,8 +82,8 @@ function CalendarView({ engine, ide }: DendronProps) {
 
   const maxDots: number = 5;
   const wordsPerDot: number = 250;
-  const dailyJournalDomain = config?.journal.dailyDomain;
-  const defaultJournalName = config?.journal.name;
+  const dailyJournalDomain = config?.journal.dailyDomain || "daily";
+  const defaultJournalName = config?.journal.name || "journal";
 
   // luxon token format lookup https://github.com/moment/luxon/blob/master/docs/formatting.md#table-of-tokens
   let defaultJournalDateFormat = config?.journal.dateFormat || "y.MM.dd";
@@ -109,7 +109,7 @@ function CalendarView({ engine, ide }: DendronProps) {
       note.fname.startsWith(`${dailyJournalDomain}.`)
     );
     const result = _.groupBy(dailyNotes, (note) => {
-      return getMaybeDatePortion(note, defaultJournalName || "");
+      return getMaybeDatePortion(note, defaultJournalName);
     });
     return result;
   }, [notes, defaultJournalName, currentVault?.fsPath]);
@@ -118,7 +118,7 @@ function CalendarView({ engine, ide }: DendronProps) {
     if (noteActive) {
       const maybeDatePortion = getMaybeDatePortion(
         noteActive,
-        defaultJournalName || ""
+        defaultJournalName
       );
 
       // check if daily file is `y.MM` instead of `y.MM.dd` to apply proper format string.

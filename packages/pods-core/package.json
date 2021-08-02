@@ -37,6 +37,7 @@
     "test:watch": "LOG_DST=../../logs/pods-core.log jest --watch"
   },
   "devDependencies": {
+    "@types/css": "^0.0.33",
     "@types/fs-extra": "^9.0.1",
     "@types/klaw": "^3.0.1",
     "@types/lodash": "^4.14.161",
@@ -64,6 +65,7 @@
     "@octokit/graphql": "^4.6.4",
     "ajv": "^8.6.0",
     "ajv-formats": "^2.1.0",
+    "css": "^3.0.0",
     "csv-writer": "^1.6.0",
     "docs-markdown": "^1.2.0",
     "emailjs": "^3.4.0",

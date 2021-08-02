@@ -242,7 +242,8 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
     wsRoot: string,
     vault: DVault,
     confirmOverwrite?: boolean,
-    onPrompt?: any}
+    onPrompt?: (arg0?: String) => Promise<{title : string} | undefined>
+  }
   ) => {
      const { note, engine, wsRoot, vault, confirmOverwrite, onPrompt } = opts;
       const existingNote = NoteUtils.getNoteByFnameV5({
@@ -256,10 +257,10 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
           existingNote.custom.revisionId = note.custom.revisionId;
           existingNote.body = note.body;
 
-          if(confirmOverwrite){
+          if(confirmOverwrite && onPrompt){
           const resp = await onPrompt("userPrompt");
 
-            if(resp?.title === "Yes"){
+            if(resp?.title.toLowerCase() === "yes"){
               await engine.writeNote(existingNote, { newNode: true });
               return existingNote;
 
@@ -269,7 +270,7 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
             await engine.writeNote(existingNote, { newNode: true });
             return existingNote;
           }
-        }else {
+        }else if(onPrompt){
           onPrompt();
         }
     }

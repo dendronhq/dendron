@@ -17,7 +17,7 @@ import { PodUtils } from "./utils";
 export type PodOpts<T> = {
   engine: DEngineClient;
   config: T;
-  onPrompt?: (arg0?: String) => Promise<string | {title : string} | undefined>
+  onPrompt?: (arg0?: String) => Promise<any | undefined>
 } & WorkspaceOpts;
 
 // === Publish Pod

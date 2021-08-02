@@ -16,6 +16,15 @@ sinon.stub(window, "showInformationMessage").resolves(resp)
 
 describe("GDoc import pod", () => {
   let result: any;
+  const onPrompt= async (type?: String) => {
+    const resp = (type === "userPrompt") ?
+    await window.showInformationMessage(
+      "Do you want to overwrite",
+        { modal: true },
+        { title: "Yes" }
+      ) : window.showInformationMessage("Note is already in sync with the google doc") ;
+      return resp
+  };
   afterEach(() => {
     sinon.restore();
   });
@@ -31,6 +40,7 @@ describe("GDoc import pod", () => {
           engine,
           vaults,
           wsRoot,
+          onPrompt,
           config: {
             src: "foo",
             token: "xyzabcd",
@@ -69,6 +79,7 @@ describe("GDoc import pod", () => {
           engine,
           vaults,
           wsRoot,
+          onPrompt,
           config: {
             src: "foo",
             token: "xyzabcd",
@@ -111,6 +122,7 @@ describe("GDoc import pod", () => {
           engine,
           vaults,
           wsRoot,
+          onPrompt,
           config: {
             src: "foo",
             token: "xyzabcd",
@@ -144,6 +156,7 @@ describe("GDoc import pod", () => {
           engine,
           vaults,
           wsRoot,
+          onPrompt,
           config: {
             src: "foo",
             token: "xyzabcd",
@@ -174,6 +187,7 @@ describe("GDoc import pod", () => {
           engine,
           vaults,
           wsRoot,
+          onPrompt,
           config: {
             src: "foo",
             token: "xyzabcd",
@@ -209,6 +223,7 @@ describe("GDoc import pod", () => {
           engine,
           vaults,
           wsRoot,
+          onPrompt,
           config: {
             src: "foo",
             token: "xyzabcd",
@@ -244,6 +259,7 @@ describe("GDoc import pod", () => {
           engine,
           vaults,
           wsRoot,
+          onPrompt,
           config: {
             src: "foo",
             token: "xyzabcd",

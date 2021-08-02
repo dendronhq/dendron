@@ -6,7 +6,7 @@ import { useRouter } from 'next/router';
 import {DendronNote, FRONTEND_CONSTANTS} from "@dendronhq/common-frontend";
 import fs from "fs-extra";
 import path from "path";
-import { getDataDir, getNoteBody } from "../../utils";
+import { getDataDir, getNoteBody, getNoteMeta, getNotes } from "../../utils";
 import React from "react";
 
 type NoteData = {
@@ -81,7 +81,7 @@ export default function Note({note, body}: InferGetStaticPropsType<typeof getSta
 }
 export const getStaticPaths: GetStaticPaths = async () => {
 	const dataDir = getDataDir();
-	const {notes} = fs.readJSONSync(path.join(dataDir, "notes.json")) as NoteData
+	const {notes} = getNotes();
 	return {
     paths: _.map(notes, (_note, id) => {
 
@@ -95,10 +95,6 @@ export const getStaticProps: GetStaticProps = async (
   context: GetStaticPropsContext
 ) => {
 	const {params} = context;
-	// TODO: run static
-	const fs = require("fs-extra");
-	const dataDir = getDataDir();
-	const {notes} = fs.readJSONSync(path.join(dataDir, "notes.json")) as NoteData
 	if (!params) {
 		throw Error("params required")
 	}
@@ -106,8 +102,7 @@ export const getStaticProps: GetStaticProps = async (
 	if (!_.isString(id)) {
 		throw Error("id required")
 	}
-	const body = getNoteBody(id);
-	const note = notes[id];
+	const [body, note] = await Promise.all([getNoteBody(id), getNoteMeta(id)])
 	return {
 		props: {
 			body,

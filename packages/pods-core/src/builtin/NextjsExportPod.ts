@@ -1,4 +1,9 @@
-import { DEngineClient, NoteProps, NotePropsDict, NoteUtils } from "@dendronhq/common-all";
+import {
+  DEngineClient,
+  NoteProps,
+  NotePropsDict,
+  NoteUtils,
+} from "@dendronhq/common-all";
 import { MDUtilsV5, ProcFlavor, SiteUtils } from "@dendronhq/engine-server";
 import { JSONSchemaType } from "ajv";
 import fs from "fs-extra";
@@ -24,39 +29,66 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     }) as JSONSchemaType<NextjsExportConfig>;
   }
 
-  async _renderNote({engine, note, notes}: {engine: DEngineClient, note: NoteProps, notes: NotePropsDict}) {
+  async _renderNote({
+    engine,
+    note,
+    notes,
+  }: {
+    engine: DEngineClient;
+    note: NoteProps;
+    notes: NotePropsDict;
+  }) {
     const proc = MDUtilsV5.procRehypeFull(
       {
         engine,
         fname: note.fname,
         vault: note.vault,
         config: engine.config,
-        notes
+        notes,
       },
       { flavor: ProcFlavor.PUBLISHING }
     );
     const payload = await proc.process(NoteUtils.serialize(note));
     return payload.toString();
-
   }
 
-  async renderToFile({engine, note, notesDir, notes}: Parameters<NextjsExportPod["_renderNote"]>[0] & {notesDir: string}) {
-    const ctx = `${ID}:renderToFile`
-    this.L.debug({ctx, msg: "renderNote:pre", note: note.id});
-    const out = await this._renderNote({engine, note, notes});
-    const dst = path.join(notesDir, note.id + ".html")
-    this.L.debug({ctx, dst, msg: "writeNote"});
-    return fs.writeFile(dst, out)
+  async renderBodyToHTML({
+    engine,
+    note,
+    notesDir,
+    notes,
+  }: Parameters<NextjsExportPod["_renderNote"]>[0] & { notesDir: string }) {
+    const ctx = `${ID}:renderBodyToHTML`;
+    this.L.debug({ ctx, msg: "renderNote:pre", note: note.id });
+    const out = await this._renderNote({ engine, note, notes });
+    const dst = path.join(notesDir, note.id + ".html");
+    this.L.debug({ ctx, dst, msg: "writeNote" });
+    return fs.writeFile(dst, out);
+  }
+
+  async renderMetaToJSON({
+    note,
+    notesDir,
+  }: {
+    notesDir: string;
+    note: NoteProps;
+  }) {
+    const ctx = `${ID}:renderMetaToJSON`;
+    this.L.debug({ ctx, msg: "renderNote:pre", note: note.id });
+    const out = _.omit(note, "body");
+    const dst = path.join(notesDir, note.id + ".json");
+    this.L.debug({ ctx, dst, msg: "writeNote" });
+    return fs.writeJSON(dst, out);
   }
 
   async plant(opts: ExportPodPlantOpts) {
-    const ctx = `${ID}:plant`
+    const ctx = `${ID}:plant`;
     const { dest, engine } = opts;
 
     const podDstDir = dest.fsPath;
     fs.ensureDirSync(podDstDir);
 
-    this.L.info({ctx, msg: "filtering notes..."})
+    this.L.info({ ctx, msg: "filtering notes..." });
     const { notes: publishedNotes, domains } = await SiteUtils.filterByConfig({
       engine,
       config: engine.config,
@@ -71,13 +103,25 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     const payload = { notes: publishedNotes, domains, noteIndex };
 
     // render notes
-    const notesDir = path.join(podDstDir, "notes");
-    this.L.info({ctx, msg: "ensuring notesDir...", notesDir})
-    fs.ensureDirSync(notesDir);
-    this.L.info({ctx, msg: "writing notes..."})
-    await Promise.all(_.values(publishedNotes).map(async note => {
-      return this.renderToFile({engine, note, notesDir, notes: publishedNotes});
-    }));
+    const notesBodyDir = path.join(podDstDir, "notes");
+    const notesMetaDir = path.join(podDstDir, "meta");
+    this.L.info({ ctx, msg: "ensuring notesDir...", notesDir: notesBodyDir });
+    fs.ensureDirSync(notesBodyDir);
+    fs.ensureDirSync(notesMetaDir);
+    this.L.info({ ctx, msg: "writing notes..." });
+    await Promise.all(
+      _.values(publishedNotes).flatMap(async (note) => {
+        return [
+          this.renderBodyToHTML({
+            engine,
+            note,
+            notesDir: notesBodyDir,
+            notes: publishedNotes,
+          }),
+          this.renderMetaToJSON({ note, notesDir: notesMetaDir }),
+        ];
+      })
+    );
     const podDstPath = path.join(podDstDir, "notes.json");
     fs.writeJSONSync(podDstPath, payload, { encoding: "utf8", spaces: 2 });
 

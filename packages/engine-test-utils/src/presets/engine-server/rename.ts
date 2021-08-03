@@ -15,7 +15,7 @@ import {
   TestPresetEntryV4,
   TestResult,
 } from "@dendronhq/common-test-utils";
-import fs, { readFile } from "fs-extra";
+import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { checkFile } from "../../utils";

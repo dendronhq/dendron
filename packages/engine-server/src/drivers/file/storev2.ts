@@ -13,6 +13,7 @@ import {
   DNoteAnchorPositioned,
   DStore,
   DVault,
+  EngineDeleteNotePayload,
   EngineDeleteOptsV2,
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
@@ -577,7 +578,7 @@ export class FileStorage implements DStore {
                 ...oldLink,
                 from: {
                   ...newLoc,
-                  anchorHeader: oldLink.from.anchorHeader,
+                  anchorHeader: newLoc.anchorHeader || oldLink.from.anchorHeader,
                   alias,
                 },
               },
@@ -616,15 +617,26 @@ export class FileStorage implements DStore {
       msg: "deleteNote:meta:pre",
       note: NoteUtils.toLogObj(oldNote),
     });
-    const changedFromDelete = await this.deleteNote(oldNote.id, {
-      metaOnly: true,
-    });
-    this.logger.info({
-      ctx,
-      msg: "writeNewNote:pre",
-      note: NoteUtils.toLogObj(newNote),
-    });
-    await this.writeNote(newNote, { newNode: true });
+    let deleteOldFile = false;
+    let changedFromDelete: EngineDeleteNotePayload = [];
+    if (oldNote.fname === newNote.fname && VaultUtils.isEqual(oldNote.vault, newNote.vault, wsRoot)) {
+      // The file is being renamed to itself. We do this to rename a header.
+      this.logger.info({ ctx, msg: "Renaming the file to same name" });
+      await this.writeNote(newNote, { updateExisting: true });
+    } else {
+      // The file is being renamed to a new file.
+      this.logger.info({ ctx, msg: "Renaming the file to a new name" });
+      changedFromDelete = await this.deleteNote(oldNote.id, {
+        metaOnly: true,
+      });
+      deleteOldFile = true;
+      this.logger.info({
+        ctx,
+        msg: "writeNewNote:pre",
+        note: NoteUtils.toLogObj(newNote),
+      });
+      await this.writeNote(newNote, { newNode: true });
+    }
     this.logger.info({ ctx, msg: "updateAllNotes:pre" });
     // update all new notes
     await Promise.all(
@@ -643,7 +655,7 @@ export class FileStorage implements DStore {
     }));
 
     // remove old note only when rename is success
-    fs.removeSync(oldLocPath);
+    if (deleteOldFile) fs.removeSync(oldLocPath);
 
     // create needs to be very last element added
     out = changedFromDelete

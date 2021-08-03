@@ -55,6 +55,8 @@ export type DLink = {
   from: DLoc;
   to?: DLoc;
   xvault?: boolean;
+  /** Denotes a same file link, for example `[[#anchor]]` */
+  sameFile?: boolean;
 };
 
 export type DNodeType = "note" | "schema";

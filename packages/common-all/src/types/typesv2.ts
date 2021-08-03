@@ -61,6 +61,8 @@ export type DLinkType = "wiki" | "refv2";
 export type DNoteLinkData = {
   // TODO: should be backfilled to be mandatory
   xvault?: boolean;
+  /** Denotes that the link is a same file link, for example `[[#anchor]]` */
+  sameFile?: boolean;
 };
 export type DNoteLink<TData extends DNoteLinkData = DNoteLinkData> = {
   type: "ref" | "wiki" | "md" | "backlink" | "linkCandidate";

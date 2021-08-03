@@ -13,6 +13,7 @@ export {
   LINK_NAME,
   ALIAS_NAME,
   LINK_CONTENTS,
+  visit,
 } from "./utils";
 export { wikiLinks, WikiLinksOpts, matchWikiLink } from "./wikiLinks";
 export {

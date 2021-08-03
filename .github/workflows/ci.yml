@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - dev
       - integ-publish
   pull_request:
     branches:

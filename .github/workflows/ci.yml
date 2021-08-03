@@ -56,6 +56,10 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v2
 
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+
       # Retain Node modules across builds; some packages download/build binaries
       # here.
       - name: Restore Node modules cache
@@ -74,11 +78,10 @@ jobs:
         uses: actions/cache@v2
         id: node-modules-cache-windows
         with:
-          path: |
-            node_modules
-            packages\*\node_modules
-            packages\*\.vscode-test
-          key: ${{ runner.os }}-${{ matrix.node-version }}-node-modules-1-${{ hashFiles('yarn.lock')}}
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-${{ matrix.node-version }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.node-version }}-yarn-
 
       - name: Set up Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v1

@@ -26,6 +26,7 @@ import {
   LINK_CONTENTS,
   LINK_NAME,
   ALIAS_NAME,
+  DendronConfig,
 } from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-server";
 import _ from "lodash";
@@ -48,6 +49,7 @@ import { selectAll } from "unist-util-select";
 import visit from "unist-util-visit";
 import { VFile } from "vfile";
 import { normalizev2 } from "../../utils";
+import { WorkspaceUtils } from "../../workspace";
 import {
   Anchor,
   BlockAnchor,
@@ -968,6 +970,7 @@ export class RemarkUtils {
     note: NoteProps,
     changes: NoteChangeEntry[],
     engine: DEngineClient,
+    dendronConfig: DendronConfig
   ) {
     return function (this: Processor) {
       return (tree: Node, _vfile: VFile) => {
@@ -981,14 +984,23 @@ export class RemarkUtils {
 
         wikiLinks.forEach((linkNode) => {
           const existingNote = _.find(engine.notes, { fname : linkNode.value });
-          if (linkNode.value.indexOf(".") >= 0) {
-            const newValue = _.replace(linkNode.value, /\./g, "/");
-            if (linkNode.data.alias === linkNode.value) {
-              linkNode.data.alias = newValue;
-            }
-            linkNode.value = `https://dendron/notes/${existingNote?.id}`;
-            dirty = true;
+          if(existingNote) {
+            const urlRoot = dendronConfig.site?.siteUrl || '';
+            const vault = existingNote.vault;  
+            linkNode.value = WorkspaceUtils.getNoteUrl({
+              config: dendronConfig,
+              note: existingNote,
+              vault,
+              urlRoot,
+              maybeNote: existingNote
+            })
+              const newValue = _.replace(linkNode.value, /\./g, "/");
+              if (linkNode.data.alias === linkNode.value) {
+                linkNode.data.alias = newValue;
+              }
+              dirty = true;
           }
+          
         });
         //TODO: Add support for Ref Notes and Block Links
 

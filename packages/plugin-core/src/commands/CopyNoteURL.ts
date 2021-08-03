@@ -1,5 +1,5 @@
-import { DNodeUtils, getSlugger, isBlockAnchor } from "@dendronhq/common-all";
 import _ from "lodash";
+import { WorkspaceUtils } from "@dendronhq/engine-server";
 import path from "path";
 import { Selection, window } from "vscode";
 import { CONFIG, DENDRON_COMMANDS } from "../constants";
@@ -31,75 +31,49 @@ export class CopyNoteURLCommand extends BasicCommand<
 
   async execute() {
     const config = getWS().config;
-    let urlRoot =
+    const urlRoot =
       config?.site?.siteUrl ||
       DendronWorkspace.configuration().get<string>(
         CONFIG.COPY_NOTE_URL_ROOT.key
       );
-    /**
-     * set to true if index node, don't append id at the end
-     */
-    let isIndex: boolean = false;
-
     const maybeTextEditor = VSCodeUtils.getActiveTextEditor();
+
     if (_.isUndefined(maybeTextEditor)) {
       window.showErrorMessage("no active document found");
       return;
     }
-    // check for url from seed
     const vault = VSCodeUtils.getVaultFromDocument(maybeTextEditor.document);
-    if (vault.seed) {
-      if (config.seeds && config.seeds[vault.seed]) {
-        const maybeSite = config.seeds[vault.seed]?.site;
-        if (maybeSite) {
-          urlRoot = maybeSite.url;
-          const maybeNote = VSCodeUtils.getNoteFromDocument(
-            maybeTextEditor.document
-          );
-          if (!_.isUndefined(maybeNote)) {
-            // if custom index is set, match against that, otherwise `root` is default index
-            isIndex = maybeSite.index
-              ? maybeNote.fname === maybeSite.index
-              : DNodeUtils.isRoot(maybeNote);
-          }
-        }
-      }
-    }
-    let root = "";
-    if (!_.isUndefined(urlRoot)) {
-      root = urlRoot;
-    } else {
-      // assume github
-      throw Error("not implemented");
-    }
 
-    const notePrefix = "notes";
+    const maybeNote = VSCodeUtils.getNoteFromDocument(
+      maybeTextEditor.document
+    );
+
     const fname = path.basename(maybeTextEditor.document.uri.fsPath, ".md");
-
     const engine = getEngine();
     const note = _.find(engine.notes, { fname });
     if (!note) {
       throw Error(`${fname} not found in engine`);
     }
 
-    let link = isIndex ? root : [root, notePrefix, note.id + ".html"].join("/");
-
     // add the anchor if one is selected and exists
     const { selection, editor } = VSCodeUtils.getSelection();
+    let anchor;
     if (selection) {
-      const anchor = getAnchorAt({
+       anchor = getAnchorAt({
         editor: editor!,
         position: selection.start,
         engine,
       });
-      if (anchor) {
-        if (!isBlockAnchor(anchor)) {
-          link += `#${getSlugger().slug(anchor)}`;
-        } else {
-          link += `#${anchor}`;
-        }
-      }
     }
+   
+    const link = WorkspaceUtils.getNoteUrl({
+      config,
+      note,
+      vault,
+      urlRoot,
+      maybeNote,
+      anchor,
+    });
 
     this.showFeedback(link);
     clipboard.writeText(link);

@@ -342,7 +342,7 @@ export class MarkdownPublishPod extends PublishPod<MarkdownPublishPodConfig> {
   }
 
   async plant(opts: PublishPodPlantOpts) {
-    const { engine, note, config } = opts;
+    const { engine, note, config, dendronConfig } = opts;
     let remark = MDUtilsV4.procFull({
       dest: DendronASTDest.MD_REGULAR,
       config: {
@@ -354,8 +354,8 @@ export class MarkdownPublishPod extends PublishPod<MarkdownPublishPodConfig> {
       vault: note.vault,
       shouldApplyPublishRules: false,
     })
-    if(config?.wikiLinkToURL){
-      remark = remark.use(RemarkUtils.convertWikiLinkToUrl(note, [], engine));
+    if(config?.wikiLinkToURL && !_.isUndefined(dendronConfig)){
+      remark = remark.use(RemarkUtils.convertWikiLinkToUrl(note, [], engine, dendronConfig));
     } else {
         remark = remark.use(RemarkUtils.convertLinksFromDotNotation(note, []));
     }

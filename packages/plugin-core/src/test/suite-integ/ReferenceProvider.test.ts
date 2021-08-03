@@ -925,6 +925,98 @@ suite("ReferenceProvider", function () {
       });
     });
 
+    describe("frontmatter tags", () => {
+      test("single tag", (done) => {
+        runLegacyMultiWorkspaceTest({
+          ctx,
+          preSetupHook: async ({ wsRoot, vaults }) => {
+            await NoteTestUtilsV4.createNote({
+              vault: vaults[0],
+              wsRoot,
+              fname: "tags.foo.test",
+              body: "this is tag foo.test",
+            });
+            await NoteTestUtilsV4.createNote({
+              vault: vaults[0],
+              wsRoot,
+              fname: "source",
+              props: {
+                tags: "foo.test"
+              },
+            });
+          },
+          onInit: async ({ vaults }) => {
+            const editor = await VSCodeUtils.openNoteByPath({
+              vault: vaults[0],
+              fname: "source",
+            });
+            const provider = new ReferenceHoverProvider();
+            const hover = await provider.provideHover(
+              editor.document,
+              new vscode.Position(6, 10)
+            );
+            expect(hover).toBeTruthy();
+            await AssertUtils.assertInString({
+              body: hover!.contents.join(""),
+              match: ["this is tag foo.test"],
+            });
+            done();
+          },
+        });
+      });
+
+      test("multiple tags", (done) => {
+        runLegacyMultiWorkspaceTest({
+          ctx,
+          preSetupHook: async ({ wsRoot, vaults }) => {
+            await NoteTestUtilsV4.createNote({
+              vault: vaults[0],
+              wsRoot,
+              fname: "tags.foo.test",
+              body: "this is tag foo.test",
+            });
+            await NoteTestUtilsV4.createNote({
+              vault: vaults[0],
+              wsRoot,
+              fname: "tags.foo.bar",
+              body: "this is the wrong tag",
+            });
+            await NoteTestUtilsV4.createNote({
+              vault: vaults[0],
+              wsRoot,
+              fname: "tags.foo.baz",
+              body: "this is the wrong tag",
+            });
+            await NoteTestUtilsV4.createNote({
+              vault: vaults[0],
+              wsRoot,
+              fname: "source",
+              props: {
+                tags: ["foo.bar", "foo.test", "foo.baz"],
+              },
+            });
+          },
+          onInit: async ({ vaults }) => {
+            const editor = await VSCodeUtils.openNoteByPath({
+              vault: vaults[0],
+              fname: "source",
+            });
+            const provider = new ReferenceHoverProvider();
+            const hover = await provider.provideHover(
+              editor.document,
+              new vscode.Position(8, 4)
+            );
+            expect(hover).toBeTruthy();
+            await AssertUtils.assertInString({
+              body: hover!.contents.join(""),
+              match: ["this is tag foo.test"],
+            });
+            done();
+          },
+        });
+      });
+    });
+
     describe("non-note", () => {
       test("image", (done) => {
         runLegacyMultiWorkspaceTest({

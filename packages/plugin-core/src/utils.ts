@@ -99,6 +99,8 @@ type CreateFnameOpts = {
   overrides?: CreateFnameOverrides;
 };
 
+type PointOffset = { line?: number; column?: number };
+
 type AddBehavior =
   | "childOfDomain"
   | "childOfCurrent"
@@ -461,7 +463,7 @@ export class VSCodeUtils {
    */
   static point2VSCodePosition(
     point: Point,
-    offset?: { line?: number; column?: number }
+    offset?: PointOffset
   ) {
     return new vscode.Position(
       // remark Point's are 0 indexed
@@ -475,11 +477,11 @@ export class VSCodeUtils {
    * @param position The position to convert.
    * @returns The converted Range.
    */
-  static position2VSCodeRange(position: Position) {
+  static position2VSCodeRange(position: Position, offset?: PointOffset) {
     return new vscode.Range(
       // remark Point's are 0 indexed
-      this.point2VSCodePosition(position.start),
-      this.point2VSCodePosition(position.end)
+      this.point2VSCodePosition(position.start, offset),
+      this.point2VSCodePosition(position.end, offset)
     );
   }
 

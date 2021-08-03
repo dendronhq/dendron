@@ -6,7 +6,14 @@ import {
   NoteUtils,
   TAGS_HIERARCHY,
 } from "@dendronhq/common-all";
-import { HASHTAG_REGEX_LOOSE, LinkUtils } from "@dendronhq/engine-server";
+import {
+  DendronASTTypes,
+  HASHTAG_REGEX_LOOSE,
+  LinkUtils,
+  MDUtilsV5,
+  ProcMode,
+  visit,
+} from "@dendronhq/engine-server";
 import { sort as sortPaths } from "cross-path-sort";
 import fs from "fs";
 import _ from "lodash";
@@ -23,6 +30,8 @@ import vscode, {
 import { ShowPreviewV2Command } from "../commands/ShowPreviewV2";
 import { VSCodeUtils } from "../utils";
 import { DendronWorkspace, getWS } from "../workspace";
+import { getFrontmatterTags, parseFrontmatter } from "./yaml";
+import type { YAML } from "mdast";
 
 export type RefT = {
   label: string;
@@ -89,28 +98,25 @@ export const containsOtherKnownExts = (pathParam: string): boolean =>
   !!otherExtsRegex.exec(path.parse(pathParam).ext);
 
 export class MarkdownUtils {
-
   static hasLegacyPreview() {
-    return !_.isUndefined(extensions.getExtension(
-      "dendron.dendron-markdown-preview-enhanced"
-    ));
-
+    return !_.isUndefined(
+      extensions.getExtension("dendron.dendron-markdown-preview-enhanced")
+    );
   }
 
   static promptInstallLegacyPreview() {
     return window
-    .showInformationMessage(
-      "You need to have 'Dendron Markdown Preview' installed to use the old preview",
-      "Install Instructions"
-    )
-    .then((resp) => {
-      if (resp === "Install Instructions") {
-        VSCodeUtils.openLink(
-          "https://wiki.dendron.so/notes/8de4209d-84d3-45f8-96a4-34282e34507d.html"
-        );
-      }
-    });
-
+      .showInformationMessage(
+        "You need to have 'Dendron Markdown Preview' installed to use the old preview",
+        "Install Instructions"
+      )
+      .then((resp) => {
+        if (resp === "Install Instructions") {
+          VSCodeUtils.openLink(
+            "https://wiki.dendron.so/notes/8de4209d-84d3-45f8-96a4-34282e34507d.html"
+          );
+        }
+      });
   }
   static async openPreview() {
     if (!getWS().config.dev?.enablePreviewV2) {
@@ -255,40 +261,36 @@ export const getReferenceAtPosition = (
       };
     }
     // if not, it could be a frontmatter tag
-    // handle frontmatter tags
-    // First, check if the current line has a single line tag like `tags: foo`
-    const currentLine = document.lineAt(position.line).text;
-    const singleTagMatch = currentLine.match(NoteUtils.RE_FM_TAGS);
-    if (singleTagMatch && singleTagMatch.groups?.singleTag && singleTagMatch.groups?.beforeTags) {
-      const { singleTag, beforeTags } = singleTagMatch.groups;
-      return {
-        range: new Range(position.line, beforeTags.length, position.line, beforeTags.length + singleTag.length),
-        label: singleTag,
-        ref: `${TAGS_HIERARCHY}${singleTag}`,
-        refText: singleTagMatch[0],
-      };
+    let parsed: ReturnType<typeof parseFrontmatter> | undefined;
+    const noteAST = MDUtilsV5.procRemarkParse(
+      { mode: ProcMode.NO_DATA },
+      {}
+    ).parse(document.getText());
+    visit(noteAST, [DendronASTTypes.FRONTMATTER], (frontmatter: YAML) => {
+      parsed = parseFrontmatter(frontmatter);
+      return false; // stop traversing, there is only one frontmatter
+    });
+    if (parsed) {
+      const tags = getFrontmatterTags(parsed);
+      for (const tag of tags) {
+        // Offset 1 for the starting `---` line of frontmatter
+        const tagPos = VSCodeUtils.position2VSCodeRange(tag.position, {line: 1});
+        if (
+          tagPos.start.line <= position.line &&
+          position.line <= tagPos.end.line &&
+          tagPos.start.character <= position.character &&
+          position.character <= tagPos.end.character
+        ) {
+          return {
+            range: tagPos,
+            label: tag.value,
+            ref: `${TAGS_HIERARCHY}${tag.value}`,
+            refText: tag.value,
+          };
+        }
+      }
     }
-    // Otherwise, check the text up to the selection for frontmatter tags list.
-    // The last tag in that is either the selection, or something before the
-    // selection. If it is the selection, then the user has the tag selected.
-    // This is not perfect since the user could be selecting something past the
-    // frontmatter that just happens to be formatted like a list and matches the
-    // last tag, but that's an edge case that's not disruptive.
-    const frontmatterText = document.getText(
-      new Range(0, 0, position.line, currentLine.length)
-    );
-    const selectedItemMatch = currentLine.match(NoteUtils.RE_FM_LIST_ITEM);
-    const lastMultiTag = frontmatterText?.match(NoteUtils.RE_FM_TAGS)?.groups
-      ?.lastMultiTag;
-    if (lastMultiTag && lastMultiTag === selectedItemMatch?.groups?.listItem && selectedItemMatch?.groups?.beforeListItem) {
-      const { listItem, beforeListItem } = selectedItemMatch.groups;
-      return {
-        range: new Range(position.line, beforeListItem.length, position.line, beforeListItem.length + listItem.length),
-        label: lastMultiTag,
-        ref: `${TAGS_HIERARCHY}${lastMultiTag}`,
-        refText: selectedItemMatch[0],
-      };
-    }
+
     // it's not a wikilink, reference, or a hashtag. Nothing to do here.
     return null;
   }
@@ -434,9 +436,7 @@ export const findReferences = async (
     const fmOffset = fileContent.indexOf("\n---") + 4;
     linksMatch.forEach((link) => {
       const endOffset = link.position?.end.offset || 0;
-      const lines = fileContent
-        .slice(0, fmOffset + endOffset + 1)
-        .split("\n");
+      const lines = fileContent.slice(0, fmOffset + endOffset + 1).split("\n");
       const lineNum = lines.length;
       let range: vscode.Range;
       switch (link.type) {
@@ -449,14 +449,26 @@ export const findReferences = async (
         case "frontmatterTag":
           // -2 in lineNum so that it targets the end of the frontmatter
           range = new vscode.Range(
-            new vscode.Position(lineNum - 2, (link.position?.start.column || 1) - 1),
-            new vscode.Position(lineNum - 2, (link.position?.end.column || 1) - 1)
+            new vscode.Position(
+              lineNum - 2,
+              (link.position?.start.column || 1) - 1
+            ),
+            new vscode.Position(
+              lineNum - 2,
+              (link.position?.end.column || 1) - 1
+            )
           );
           break;
         default:
           range = new vscode.Range(
-            new vscode.Position(lineNum - 1, (link.position?.start.column || 1) - 1),
-            new vscode.Position(lineNum - 1, (link.position?.end.column || 1) - 1)
+            new vscode.Position(
+              lineNum - 1,
+              (link.position?.start.column || 1) - 1
+            ),
+            new vscode.Position(
+              lineNum - 1,
+              (link.position?.end.column || 1) - 1
+            )
           );
       }
       const location = new vscode.Location(vscode.Uri.file(fsPath), range);

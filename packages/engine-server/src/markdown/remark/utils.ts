@@ -655,6 +655,9 @@ export class AnchorUtils {
       end = node.position!.end;
     });
     if (_.isUndefined(start) || _.isUndefined(end)) throw new DendronError({ message: "Unable to find the region of text containing the header" });
+    // Preserve whitespace after the header. This is important if there is a
+    // block anchor after the header, for example `# foo ^bar`, where the block
+    // anchor is not part of the header and the space must be maintained.
     end.column -= 1;
     return { start, end };
   }

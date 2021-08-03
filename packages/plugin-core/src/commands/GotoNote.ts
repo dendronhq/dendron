@@ -3,13 +3,10 @@ import {
   DNoteAnchor,
   DVault,
   getSlugger,
-  isNotUndefined,
   NoteProps,
   NoteUtils,
-  TAGS_HIERARCHY,
   VaultUtils,
 } from "@dendronhq/common-all";
-import { matchWikiLink, HASHTAG_REGEX_LOOSE } from "@dendronhq/engine-server";
 import _ from "lodash";
 import {
   Position,
@@ -17,12 +14,11 @@ import {
   Uri,
   window,
   ViewColumn,
-  Range,
 } from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../utils";
-import { parseAnchor } from "../utils/md";
+import { getReferenceAtPosition } from "../utils/md";
 import { DendronWorkspace, getWS } from "../workspace";
 import { BasicCommand } from "./base";
 import { VaultSelectionMode } from "./LookupCommand";
@@ -65,63 +61,17 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
 
   getLinkFromSelection() {
     const { selection, editor } = VSCodeUtils.getSelection();
-    if (!_.isEmpty(selection) && selection?.start) {
-      const currentLine = editor?.document.lineAt(selection.start.line).text;
-
-      if (currentLine) {
-        const lastIdx = currentLine
-          .slice(0, selection.start.character)
-          .lastIndexOf("[[");
-        const padding = Math.max(lastIdx - 3, 0);
-        const txtToMatch = currentLine.slice(padding);
-        const out = matchWikiLink(txtToMatch);
-        if (
-          out &&
-          _.inRange(
-            selection.start.character,
-            out.start + padding,
-            out.end + padding
-          )
-        ) {
-          return out.link;
-        } else {
-          // handle hashtags
-          for (const hashtag of currentLine.matchAll(new RegExp(HASHTAG_REGEX_LOOSE, "g"))) {
-            if (isNotUndefined(hashtag.index) && _.inRange(selection.start.character, hashtag.index, hashtag.index + hashtag[0].length)) {
-              return {
-                alias: hashtag[0],
-                value: `${TAGS_HIERARCHY}${hashtag.groups!.tagContents}`,
-              };
-            }
-          }
-          // handle frontmatter tags
-          // First, check if the current line has a single line tag like `tags: foo`
-          const singleTag = currentLine.match(NoteUtils.RE_FM_TAGS)?.groups?.singleTag;
-          if (singleTag) {
-            return {
-              alias: singleTag,
-              value: `${TAGS_HIERARCHY}${singleTag}`,
-            };
-          }
-          // Otherwise, check the text up to the selection for frontmatter tags
-          // list. The last tag in that is either the selection, or something
-          // before the selection. If it is the selection, then the user has the
-          // tag selected. This is not perfect since the user could be selecting
-          // something past the frontmatter that just happens to match the last
-          // tag, but that's an edge case that's not disruptive.
-          const frontmatterText = editor?.document.getText(new Range(0, 0, selection.start.line, currentLine.length));
-          const selectedItem = currentLine.match(NoteUtils.RE_FM_LIST_ITEM)?.groups?.listItem;
-          const lastMultiTag = frontmatterText?.match(NoteUtils.RE_FM_TAGS)?.groups?.lastMultiTag;
-          if (lastMultiTag && lastMultiTag === selectedItem) {
-            return {
-              alias: lastMultiTag,
-              value: `${TAGS_HIERARCHY}${lastMultiTag}`,
-            };
-          }
-        }
-      }
+    if (_.isEmpty(selection) || _.isUndefined(selection) || _.isUndefined(selection.start)) return;
+    const currentLine = editor?.document.lineAt(selection.start.line).text;
+    if (!currentLine) return;
+    const reference = getReferenceAtPosition(editor!.document, selection.start);
+    if (!reference) return;
+    return {
+      alias: reference?.label,
+      value: reference?.ref,
+      vaultName: reference?.vaultName,
+      anchorHeader: reference.anchorStart,
     }
-    return;
   }
 
   private async processInputs(opts: CommandOpts) {
@@ -152,7 +102,7 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
       }
     }
 
-    if (!opts.anchor && link.anchorHeader) opts.anchor = parseAnchor(link.anchorHeader);
+    if (!opts.anchor && link.anchorHeader) opts.anchor = link.anchorHeader;
 
     if (!opts.vault) {
       if (link.vaultName) {

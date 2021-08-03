@@ -9,6 +9,7 @@ import {
 import {
   DendronASTTypes,
   HASHTAG_REGEX_LOOSE,
+  HASHTAG_REGEX_BASIC,
   LinkUtils,
   MDUtilsV5,
   ProcMode,
@@ -247,7 +248,7 @@ export const getReferenceAtPosition = (
     // if not, it could be a hashtag
     const rangeForHashTag = document.getWordRangeAtPosition(
       position,
-      HASHTAG_REGEX_LOOSE
+      HASHTAG_REGEX_BASIC,
     );
     if (rangeForHashTag) {
       const docText = document.getText(rangeForHashTag);

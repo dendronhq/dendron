@@ -90,6 +90,8 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
               return {
                 alias: hashtag[0],
                 value: `${TAGS_HIERARCHY}${hashtag.groups!.tagContents}`,
+                anchorHeader: undefined,
+                vaultName: undefined,
               };
             }
           }
@@ -127,7 +129,7 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
       }
     }
 
-    if (!opts.anchor && link.anchorHeader) opts.anchor = parseAnchor(link.anchorHeader);
+    if (!opts.anchor && link?.anchorHeader) opts.anchor = parseAnchor(link?.anchorHeader);
 
     if (!opts.vault) {
       if (link.vaultName) {

@@ -193,7 +193,7 @@ suite("RenameNote", function () {
             expect(
               await AssertUtils.assertInString({
                 body: afterRenameLink!.body,
-                match: ["[[has-header#foo-bar]]]"],
+                match: ["[[has-header#foo-bar]]"],
                 nomatch: ["[[has-header#lorem-ipsum-dolor-amet]]"],
               })
             ).toBeTruthy();
@@ -255,7 +255,7 @@ suite("RenameNote", function () {
             expect(
               await AssertUtils.assertInString({
                 body: afterRenameLink!.body,
-                match: ["[[has-header#foo-bar]]]"],
+                match: ["[[has-header#foo-bar]]"],
                 nomatch: ["[[has-header#lorem-ipsum-dolor-amet]]"],
               })
             ).toBeTruthy();
@@ -317,7 +317,7 @@ suite("RenameNote", function () {
             expect(
               await AssertUtils.assertInString({
                 body: afterRenameLink!.body,
-                match: ["[[has-header#foo-bar-baz]]]"],
+                match: ["[[has-header#foo-bar-baz]]"],
                 nomatch: ["[[has-header#lorem-ipsum-dolor-amet]]"],
               })
             ).toBeTruthy();

@@ -649,12 +649,13 @@ export class AnchorUtils {
   static headerTextPosition(header: Heading): Position {
     let start: Point | undefined;
     let end: Point | undefined;
-    visit(header, (node) => {
+    visit(header, [DendronASTTypes.TEXT, DendronASTTypes.WIKI_LINK, DendronASTTypes.HASHTAG], (node) => {
       if (node.type === DendronASTTypes.HEADING) return;
       if (_.isUndefined(start)) start = node.position!.start;
       end = node.position!.end;
     });
     if (_.isUndefined(start) || _.isUndefined(end)) throw new DendronError({ message: "Unable to find the region of text containing the header" });
+    end.column -= 1;
     return { start, end };
   }
 

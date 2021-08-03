@@ -398,6 +398,9 @@ export type DendronSiteConfig = {
   /** @deprecated anchors are now always "hidden, but reveal on mouseover" in published sites. */
   hideBlockAnchors?: boolean;
 
+  /** Whether frontmatter tags should be rendered in published websites. Defaults to true. */
+  showFrontMatterTags?: boolean;
+
   /**
    * Control publication on a per hierarchy basis
    */

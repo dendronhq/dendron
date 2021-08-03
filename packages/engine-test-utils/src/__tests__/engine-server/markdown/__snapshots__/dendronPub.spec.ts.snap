@@ -1,5 +1,69 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`dendronPub frontmatter tags are not rendered when disabled 1`] = `
+VFile {
+  "contents": "# Fmtags
+
+has fm tags
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`dendronPub frontmatter tags are not rendered when missing 1`] = `
+VFile {
+  "contents": "# Fmtags
+
+has no fm tags
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`dendronPub frontmatter tags are rendered when available multiple tags 1`] = `
+VFile {
+  "contents": "# Fmtags
+
+has fm tags
+
+## Tags
+
+[first](tags.first.html)[second](tags.second.html)
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`dendronPub frontmatter tags are rendered when available single tag 1`] = `
+VFile {
+  "contents": "# Fmtags
+
+has fm tags
+
+## Tags
+
+[first](tags.first.html)
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
 exports[`dendronPub no publish basic 1`] = `
 VFile {
   "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>

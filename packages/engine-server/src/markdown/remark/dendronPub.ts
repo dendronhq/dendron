@@ -80,7 +80,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         );
       }
       // Add frontmatter tags, if any, ahead of time. This way wikilink compiler will pick them up and render them.
-      if (note?.tags && note.tags.length > 0) {
+      if (config.site.showFrontMatterTags !== false && note?.tags && note.tags.length > 0) {
         root.children.push(
           heading(2, text("Tags")) as Content
         );

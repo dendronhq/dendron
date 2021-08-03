@@ -18,6 +18,7 @@ import {
 import fs, { readFile } from "fs-extra";
 import _ from "lodash";
 import path from "path";
+import { checkFile } from "../../utils";
 
 const findCreated = (changed: NoteChangeEntry[]) => {
   const created = _.find(changed, { status: "create" });
@@ -874,9 +875,19 @@ const NOTES = {
         },
         newLoc: { fname: "tags.bar", vaultName: VaultUtils.getName(vaults[0]) },
       });
-      const note = NoteUtils.getNoteByFnameV5({fname: "primary", notes: engine.notes, wsRoot, vault: vaults[0]});
-      const noteFileContents = await readFile(NoteUtils.getFullPath({note: note!, wsRoot}), "utf-8");
-      const containsTag = await AssertUtils.assertInString({body: noteFileContents, match: ["#bar"], nomatch: ["#foo"]});
+      const note = NoteUtils.getNoteByFnameV5({
+        fname: "primary",
+        notes: engine.notes,
+        wsRoot,
+        vault: vaults[0],
+      });
+      const containsTag = checkFile(
+        {
+          fpath: NoteUtils.getFullPath({ note: note!, wsRoot }),
+          nomatch: ["#foo"],
+        },
+        "#bar"
+      );
 
       return [
         {
@@ -910,9 +921,19 @@ const NOTES = {
         },
         newLoc: { fname: "tags.bar", vaultName: VaultUtils.getName(vaults[0]) },
       });
-      const note = NoteUtils.getNoteByFnameV5({fname: "primary", notes: engine.notes, wsRoot, vault: vaults[0]});
-      const noteFileContents = await readFile(NoteUtils.getFullPath({note: note!, wsRoot}), "utf-8");
-      const containsTag = await AssertUtils.assertInString({body: noteFileContents, match: ["tags: bar"], nomatch: ["tags: foo"]});
+      const note = NoteUtils.getNoteByFnameV5({
+        fname: "primary",
+        notes: engine.notes,
+        wsRoot,
+        vault: vaults[0],
+      });
+      const containsTag = checkFile(
+        {
+          fpath: NoteUtils.getFullPath({ note: note!, wsRoot }),
+          nomatch: ["tags: foo"],
+        },
+        "tags: bar"
+      );
 
       return [
         {
@@ -952,9 +973,19 @@ const NOTES = {
         },
         newLoc: { fname: "tags.bar", vaultName: VaultUtils.getName(vaults[0]) },
       });
-      const note = NoteUtils.getNoteByFnameV5({fname: "primary", notes: engine.notes, wsRoot, vault: vaults[0]});
-      const noteFileContents = await readFile(NoteUtils.getFullPath({note: note!, wsRoot}), "utf-8");
-      const containsTag = await AssertUtils.assertInString({body: noteFileContents, match: ["bar"], nomatch: ["foo"]});
+      const note = NoteUtils.getNoteByFnameV5({
+        fname: "primary",
+        notes: engine.notes,
+        wsRoot,
+        vault: vaults[0],
+      });
+      const containsTag = checkFile(
+        {
+          fpath: NoteUtils.getFullPath({ note: note!, wsRoot }),
+          nomatch: ["foo"],
+        },
+        "bar"
+      );
 
       return [
         {
@@ -994,9 +1025,21 @@ const NOTES = {
         },
         newLoc: { fname: "bar", vaultName: VaultUtils.getName(vaults[0]) },
       });
-      const note = NoteUtils.getNoteByFnameV5({fname: "primary", notes: engine.notes, wsRoot, vault: vaults[0]});
-      const noteFileContents = await readFile(NoteUtils.getFullPath({note: note!, wsRoot}), "utf-8");
-      const containsTag = await AssertUtils.assertInString({body: noteFileContents, nomatch: ["tags: foo", "tags: bar", "tags: undefined", "tags: \"undefined\""]});
+      const note = NoteUtils.getNoteByFnameV5({
+        fname: "primary",
+        notes: engine.notes,
+        wsRoot,
+        vault: vaults[0],
+      });
+      const containsTag = checkFile({
+        fpath: NoteUtils.getFullPath({ note: note!, wsRoot }),
+        nomatch: [
+          "tags: foo",
+          "tags: bar",
+          "tags: undefined",
+          'tags: "undefined"',
+        ],
+      });
 
       return [
         {
@@ -1036,9 +1079,16 @@ const NOTES = {
         },
         newLoc: { fname: "bar", vaultName: VaultUtils.getName(vaults[0]) },
       });
-      const note = NoteUtils.getNoteByFnameV5({fname: "primary", notes: engine.notes, wsRoot, vault: vaults[0]});
-      const noteFileContents = await readFile(NoteUtils.getFullPath({note: note!, wsRoot}), "utf-8");
-      const containsTag = await AssertUtils.assertInString({body: noteFileContents, nomatch: ["foo", "bar", "undefined"]});
+      const note = NoteUtils.getNoteByFnameV5({
+        fname: "primary",
+        notes: engine.notes,
+        wsRoot,
+        vault: vaults[0],
+      });
+      const containsTag = checkFile({
+        fpath: NoteUtils.getFullPath({ note: note!, wsRoot }),
+        nomatch: ["foo", "bar", "undefined"],
+      });
 
       return [
         {

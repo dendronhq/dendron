@@ -249,11 +249,11 @@ export class PickerUtilsV2 {
     quickPick.matchOnDetail = false;
     quickPick.sortByLabel = false;
     quickPick.showNote = async (uri) => window.showTextDocument(uri);
-    if (initialValue) {
+    if (initialValue !== undefined) {
       quickPick.rawValue = initialValue;
       quickPick.prefix = initialValue;
       quickPick.value = initialValue;
-    }
+    } 
     return quickPick;
   }
 

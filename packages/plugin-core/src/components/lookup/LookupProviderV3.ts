@@ -191,7 +191,7 @@ export class NoteLookupProvider implements ILookupProviderV3 {
       }
 
       // check if we have an exact match in the results and keep track for later
-      // const perfectMatch = _.find(updatedItems, { fname: queryOrig });
+      const perfectMatch = _.find(updatedItems, { fname: queryOrig });
 
       // check if single item query, vscode doesn't surface single letter queries
       // we need this so that suggestions will show up
@@ -313,6 +313,11 @@ export class SchemaLookupProvider implements ILookupProviderV3 {
         }
       }
       const selectedItems = NotePickerUtils.getSelection(picker);
+      const isMultiLevel = picker.value.split(".").length > 1;
+      if (isMultiLevel) {
+        window.showErrorMessage("schemas can only be one level deep");
+        return;
+      }
       // last chance to cancel
       lc.cancelToken.cancel();
       if (!this.opts.noHidePickerOnAccept) {
@@ -358,10 +363,7 @@ export class SchemaLookupProvider implements ILookupProviderV3 {
     // get prior
     const querystring = PickerUtilsV2.slashToDot(pickerValue);
     const queryOrig = PickerUtilsV2.slashToDot(picker.value);
-    console.log({querystring, queryOrig});
-    // const depth = queryOrig.split(".").length;
     const ws = DendronWorkspace.instance();
-    // const vault = this.getVault();
     let profile: number;
 
     const engine = ws.getEngine();
@@ -402,7 +404,7 @@ export class SchemaLookupProvider implements ILookupProviderV3 {
       }
 
       // // check if we have an exact match in the results and keep track for later
-      // const perfectMatch = _.find(updatedItems, { fname: queryOrig });
+      const perfectMatch = _.find(updatedItems, { fname: queryOrig });
 
       // check if single item query, vscode doesn't surface single letter queries
       // we need this so that suggestions will show up
@@ -412,6 +414,13 @@ export class SchemaLookupProvider implements ILookupProviderV3 {
         picker.activeItems = picker.items;
         return;
       }
+
+      // TODO: spike
+      // updatedItems =
+      //   this.opts.allowNewNote &&
+      //   !perfectMatch
+      //     ? updatedItems.concat([SchemaUtils.createModuleProps({})])
+      //     : updatedItems;
 
       picker.items = updatedItems;
     } catch (err) {

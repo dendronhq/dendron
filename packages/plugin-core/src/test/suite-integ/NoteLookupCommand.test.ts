@@ -394,7 +394,6 @@ suite("NoteLookupCommand", function () {
             noteType: LookupNoteTypeEnum.journal
           });
 
-          controller.quickpick.show();
           let { journalBtn, scratchBtn } = getNoteTypeButtons(
             controller.quickpick.buttons
           )
@@ -433,7 +432,6 @@ suite("NoteLookupCommand", function () {
             noteType: LookupNoteTypeEnum.scratch
           });
 
-          controller.quickpick.show();
           let { journalBtn, scratchBtn } = getNoteTypeButtons(
             controller.quickpick.buttons
           )
@@ -472,7 +470,6 @@ suite("NoteLookupCommand", function () {
             noteType: LookupNoteTypeEnum.journal
           });
 
-          controller.quickpick.show();
           let { journalBtn, scratchBtn } = getNoteTypeButtons(
             controller.quickpick.buttons
           )
@@ -558,7 +555,6 @@ suite("NoteLookupCommand", function () {
             selectionType: "selection2link",
           });
 
-          controller.quickpick.show();
 
           let { selection2linkBtn, selectionExtractBtn } = getSelectionTypeButtons(
             controller.quickpick.buttons
@@ -638,7 +634,6 @@ suite("NoteLookupCommand", function () {
             selectionType: "selectionExtract",
           });
 
-          controller.quickpick.show();
 
           let { selection2linkBtn, selectionExtractBtn } = getSelectionTypeButtons(
             controller.quickpick.buttons
@@ -680,7 +675,6 @@ suite("NoteLookupCommand", function () {
             selectionType: "selection2link",
           });
 
-          controller.quickpick.show();
 
           let { selection2linkBtn, selectionExtractBtn } = getSelectionTypeButtons(
             controller.quickpick.buttons
@@ -764,7 +758,6 @@ suite("NoteLookupCommand", function () {
             splitType: "horizontal"
           });
 
-          controller.quickpick.show();
 
           let { horizontalSplitBtn } = getSplitTypeButtons(
             controller.quickpick.buttons
@@ -798,7 +791,6 @@ suite("NoteLookupCommand", function () {
           const { controller } = await cmd.gatherInputs({
             initialValue: "foo",
           });
-          controller.quickpick.show();
           const { copyNoteLinkBtn } = getEffectTypeButtons(
             controller.quickpick.buttons
           );
@@ -829,7 +821,6 @@ suite("NoteLookupCommand", function () {
         noteType: LookupNoteTypeEnum.journal,
         selectionType: LookupSelectionTypeEnum.selection2link
       });
-      controller.quickpick.show();
       return { controller }
     }
 
@@ -970,7 +961,6 @@ suite("NoteLookupCommand", function () {
         noteType: LookupNoteTypeEnum.scratch,
         selectionType: LookupSelectionTypeEnum.selection2link
       });
-      controller.quickpick.show();
       return { controller }
     }
 
@@ -1200,7 +1190,6 @@ suite("NoteLookupCommand", function () {
       });
 
       if (opts.copyLink) {
-        mockQuickPick.show();
         const { copyNoteLinkBtn } = getEffectTypeButtons(mockQuickPick.buttons);
         sinon.stub(gatherOut.controller, "_quickpick").value(mockQuickPick);
         sinon.stub(gatherOut.controller, "quickpick").value(mockQuickPick);

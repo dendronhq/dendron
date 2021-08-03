@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.53.0](https://github.com/dendronhq/dendron/compare/v0.52.0...v0.53.0) (2021-08-03)
+
+
+### Features Dendron
+
+* add a variety of graph indicators ([#1024](https://github.com/dendronhq/dendron/issues/1024)) ([995bcf3](https://github.com/dendronhq/dendron/commit/995bcf33a58a5b2778e59f96a512d5c0cff035a8))
+* graph performance and layout improvements ([#1051](https://github.com/dendronhq/dendron/issues/1051)) ([b2db353](https://github.com/dendronhq/dendron/commit/b2db35305094212fd7fe7b3dc0c05689ced842d8))
+
+
+
+
+
 # [0.52.0](https://github.com/dendronhq/dendron/compare/v0.51.3...v0.52.0) (2021-07-26)
 
 

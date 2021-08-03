@@ -7,7 +7,6 @@ import title from "title";
 import { URI } from "vscode-uri";
 import { CONSTANTS, ERROR_STATUS } from "./constants";
 import { DendronError } from "./error";
-import { LINK_NAME } from "./md";
 import { Time } from "./time";
 import {
   DEngineClient,
@@ -30,6 +29,7 @@ import {
   SchemaProps,
   SchemaRaw,
   SchemaTemplate,
+  REQUIRED_DNODEPROPS,
 } from "./types";
 import { getSlugger, isNotUndefined } from "./utils";
 import { genUUID } from "./uuid";
@@ -795,16 +795,17 @@ export class NoteUtils {
     return _.trim(nodePath);
   }
 
+  static isNoteProps(props: Partial<NoteProps>): props is NoteProps {
+    return _.isObject(props) && REQUIRED_DNODEPROPS.every(
+      (key) => key in props && isNotUndefined(props[key])
+    );
+  }
+
   static serializeMeta(props: NoteProps) {
     // Remove all undefined values, because they cause `matter` to fail serializing them
-    // @ts-ignore
-    const cleanProps: NoteProps = {};
-    _.forEach(Object.entries(props), ([op, value]) => {
-      if (isNotUndefined(value)) {
-        // @ts-ignore;
-        cleanProps[op] = value;
-      }
-    });
+    const cleanProps: Partial<NoteProps> = Object.fromEntries(Object.entries(props).filter(([_k, v]) => isNotUndefined(v)));
+    if (!this.isNoteProps(cleanProps)) throw new DendronError({ message: "Note is missing some properties that are required" })
+    
     // Separate custom and builtin props
     const builtinProps = _.pick(cleanProps, [
       "id",

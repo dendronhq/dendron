@@ -60,6 +60,8 @@ export type DLink = {
 export type DNodeType = "note" | "schema";
 export type DNodePointer = string;
 
+export const REQUIRED_DNODEPROPS: (keyof DNodeProps)[] = ["id", "title", "desc", "links", "anchors", "fname", "type", "updated", "created", "parent", "children", "data", "body", "vault"];
+
 /**
  * Props are the official interface for a node
  */

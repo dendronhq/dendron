@@ -16,10 +16,9 @@ import {
 } from "../testUtilsV3";
 
 suite("CopyNoteUrl", function () {
-  let ctx: vscode.ExtensionContext;
   const rootUrl = "dendron.so";
 
-  ctx = setupBeforeAfter(this);
+ const ctx: vscode.ExtensionContext = setupBeforeAfter(this);
 
   test("with override", (done) => {
     runLegacyMultiWorkspaceTest({
@@ -161,7 +160,7 @@ suite("CopyNoteUrl", function () {
       preSetupHook: async (opts) => {
         const { vaults, wsRoot } = opts;
         const vault = vaults[0];
-        await ENGINE_HOOKS.setupBasic(opts),
+        await ENGINE_HOOKS.setupBasic(opts);
           await NOTE_PRESETS_V4.NOTE_WITH_ANCHOR_TARGET.create({
             wsRoot,
             vault,
@@ -189,8 +188,8 @@ suite("CopyNoteUrl", function () {
       preSetupHook: async (opts) => {
         const { vaults, wsRoot } = opts;
         const vault = vaults[0];
-        await ENGINE_HOOKS.setupBasic(opts),
-          await NOTE_PRESETS_V4.NOTE_WITH_BLOCK_ANCHOR_TARGET.create({
+        await ENGINE_HOOKS.setupBasic(opts);
+        await NOTE_PRESETS_V4.NOTE_WITH_BLOCK_ANCHOR_TARGET.create({
             wsRoot,
             vault,
           });

@@ -523,10 +523,9 @@ async function showWelcomeOrWhatsNew({
       break;
   }
 
-  //TODO: Re-enable lapsed user message after a one-week grace period of having
-  //users activate their dendron workspaces
-  // eslint-disable-next-line no-constant-condition
-  if (false && shouldDisplayLapsedUserMsg()) {
+  // Show lapsed users (users who have installed Dendron but haven't initialied
+  // a workspace) a reminder prompt to re-engage them.
+  if (shouldDisplayLapsedUserMsg()) {
     showLapsedUserMessage();
   }
 }
@@ -579,7 +578,11 @@ export function shouldDisplayLapsedUserMsg(): boolean {
           Duration.fromObject({ seconds: metaData.lapsedUserMsgSendTime })
         ));
 
-  // If the user has never initialized and it's time to refresh the lapsed user
-  // message
-  return !metaData.firstWsInitialize && refreshMsg;
+  // If the user has never initialized, has never activated a dendron workspace,
+  // and it's time to refresh the lapsed user message
+  return (
+    !metaData.dendronWorkspaceActivated &&
+    !metaData.firstWsInitialize &&
+    refreshMsg
+  );
 }

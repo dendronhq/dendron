@@ -107,7 +107,10 @@ export type JournalConfig = {
   firstDayOfWeek: number;
 };
 
-export type ScratchConfig = Pick<JournalConfig, "name" | "dateFormat" | "addBehavior">;
+export type ScratchConfig = Pick<
+  JournalConfig,
+  "name" | "dateFormat" | "addBehavior"
+>;
 
 export type DendronConfig = {
   /**
@@ -135,7 +138,7 @@ export type DendronConfig = {
   journal: JournalConfig;
 
   scratch?: ScratchConfig;
-  
+
   /**
    * Workspaces
    */
@@ -260,7 +263,6 @@ export type DendronConfig = {
 
   /** Automatically fold frontmatter when opening a new note. False by default. */
   autoFoldFrontmatter?: boolean;
-  
 };
 
 export type RandomNoteConfig = {
@@ -456,7 +458,7 @@ export type DendronSiteConfig = {
 
 export type DendronGraphConfig = {
   zoomSpeed: number;
-}
+};
 
 export type HierarchyConfig = {
   publishByDefault?: boolean | { [key: string]: boolean };

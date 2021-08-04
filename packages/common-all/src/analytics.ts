@@ -12,7 +12,7 @@ export enum VSCodeEvents {
   Uninstall = "Uninstall",
   ShowLapsedUserMessage = "Show_Lapsed_User_Msg",
   LapsedUserMessageAccepted = "Lapsed_User_Msg_Accepted",
-  LapsedUserMessageRejected = "Show_Lapsed_User_Rejected"
+  LapsedUserMessageRejected = "Show_Lapsed_User_Rejected",
 }
 
 export enum TutorialEvents {
@@ -27,5 +27,5 @@ export enum TutorialEvents {
 
 export const DendronEvents = {
   VSCodeEvents,
-  TutorialEvents
+  TutorialEvents,
 };

@@ -285,7 +285,7 @@ export class NoteLookupCommand extends BaseCommand<
         : PickerUtilsV2.getOrPromptVaultForOpenEditor();
       nodeNew = NoteUtils.create({ fname, vault });
       if (picker.selectionProcessFunc !== undefined) {
-        nodeNew = await picker.selectionProcessFunc(nodeNew) as NoteProps;
+        nodeNew = (await picker.selectionProcessFunc(nodeNew)) as NoteProps;
       }
     }
     const resp = await engine.writeNote(nodeNew, {

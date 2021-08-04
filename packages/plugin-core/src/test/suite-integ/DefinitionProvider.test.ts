@@ -57,7 +57,10 @@ suite("DefinitionProvider", function () {
           const editor = await VSCodeUtils.openNote(noteWithTarget);
           const location = (await provide(editor)) as vscode.Location;
           expect(location.uri.fsPath.toLowerCase()).toEqual(
-            NoteUtils.getFullPath({ wsRoot: _wsRoot, note: noteWithLink }).toLowerCase()
+            NoteUtils.getFullPath({
+              wsRoot: _wsRoot,
+              note: noteWithLink,
+            }).toLowerCase()
           );
           done();
         },
@@ -141,7 +144,10 @@ suite("DefinitionProvider", function () {
           const editor = await VSCodeUtils.openNote(noteWithLink);
           const location = (await provide(editor)) as vscode.Location;
           expect(location.uri.fsPath.toLowerCase()).toEqual(
-            NoteUtils.getFullPath({ wsRoot: _wsRoot, note: noteWithTarget }).toLowerCase()
+            NoteUtils.getFullPath({
+              wsRoot: _wsRoot,
+              note: noteWithTarget,
+            }).toLowerCase()
           );
           done();
         },
@@ -273,8 +279,14 @@ suite("DefinitionProvider", function () {
           const locations = (await provide(editor)) as vscode.Location[];
           expect(locations.length).toEqual(2);
           expect(locations.map((l) => l.uri.fsPath.toLowerCase())).toEqual([
-            NoteUtils.getFullPath({ wsRoot: _wsRoot, note: noteTarget1 }).toLowerCase(),
-            NoteUtils.getFullPath({ wsRoot: _wsRoot, note: noteTarget2 }).toLowerCase(),
+            NoteUtils.getFullPath({
+              wsRoot: _wsRoot,
+              note: noteTarget1,
+            }).toLowerCase(),
+            NoteUtils.getFullPath({
+              wsRoot: _wsRoot,
+              note: noteTarget2,
+            }).toLowerCase(),
           ]);
           done();
         },
@@ -312,7 +324,10 @@ suite("DefinitionProvider", function () {
             null as any
           )) as vscode.Location;
           expect(loc.uri.fsPath.toLowerCase()).toEqual(
-            NoteUtils.getFullPath({ wsRoot: _wsRoot, note: noteWithTarget }).toLowerCase()
+            NoteUtils.getFullPath({
+              wsRoot: _wsRoot,
+              note: noteWithTarget,
+            }).toLowerCase()
           );
           done();
         },
@@ -351,7 +366,10 @@ suite("DefinitionProvider", function () {
             null as any
           )) as vscode.Location;
           expect(loc.uri.fsPath.toLowerCase()).toEqual(
-            NoteUtils.getFullPath({ wsRoot: _wsRoot, note: noteWithTarget }).toLowerCase()
+            NoteUtils.getFullPath({
+              wsRoot: _wsRoot,
+              note: noteWithTarget,
+            }).toLowerCase()
           );
           done();
         },

@@ -422,10 +422,13 @@ export class PickerUtilsV2 {
   }): Promise<DVault | undefined> {
     const vaultSuggestions = await PickerUtilsV2.getVaultRecommendations({
       vault,
-      fname
+      fname,
     });
 
-    if (vaultSuggestions?.length === 1 || vaultSelectionMode === VaultSelectionMode.auto) {
+    if (
+      vaultSuggestions?.length === 1 ||
+      vaultSelectionMode === VaultSelectionMode.auto
+    ) {
       return vaultSuggestions[0].vault;
     }
 
@@ -481,7 +484,7 @@ export class PickerUtilsV2 {
    */
   static async getVaultRecommendations({
     vault,
-    fname
+    fname,
   }: {
     vault: DVault;
     fname: string;

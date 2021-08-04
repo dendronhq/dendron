@@ -714,7 +714,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docLink: "",
     docPreview: ``,
   },
-  
+
   CONFIGURE_UI: {
     key: "dendron.configureUI",
     title: `${CMD_PREFIX} Configure`,

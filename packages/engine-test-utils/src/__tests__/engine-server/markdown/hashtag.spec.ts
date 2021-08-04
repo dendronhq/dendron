@@ -1,4 +1,8 @@
-import { AssertUtils, TestPresetEntryV4, getDescendantNode } from "@dendronhq/common-test-utils";
+import {
+  AssertUtils,
+  TestPresetEntryV4,
+  getDescendantNode,
+} from "@dendronhq/common-test-utils";
 import {
   DendronASTDest,
   DendronASTTypes,
@@ -10,7 +14,12 @@ import {
 import _ from "lodash";
 import { runEngineTestV5 } from "../../../engine";
 import { ENGINE_HOOKS } from "../../../presets";
-import { checkVFile, createProcForTest, createProcTests, ProcTests } from "./utils";
+import {
+  checkVFile,
+  createProcForTest,
+  createProcTests,
+  ProcTests,
+} from "./utils";
 
 function proc() {
   return MDUtilsV5.procRehypeParse({
@@ -31,7 +40,6 @@ function runAllTests(opts: { name: string; testCases: ProcTests[] }) {
     });
   });
 }
-
 
 function getHashtag(node: UnistNode): HashTag {
   return getDescendantNode<HashTag>(node, 0, 0);
@@ -62,9 +70,7 @@ describe("hashtag", () => {
     });
 
     test("parses a hashtag in the middle of a paragraph", () => {
-      const resp = proc().parse(
-        "Lorem ipsum #my-hash-tag dolor amet."
-      );
+      const resp = proc().parse("Lorem ipsum #my-hash-tag dolor amet.");
       expect(getDescendantNode(resp, 0, 1).type).toEqual(
         DendronASTTypes.HASHTAG
       );
@@ -77,25 +83,35 @@ describe("hashtag", () => {
     });
 
     test("doesn't parse trailing punctuation", () => {
-      const resp1 = proc().parse("Dolorem vero sed sapiente #dolores. Et quam id maxime et ratione.");
-      expect(getDescendantNode(resp1, 0, 1).type).toEqual(DendronASTTypes.HASHTAG);
+      const resp1 = proc().parse(
+        "Dolorem vero sed sapiente #dolores. Et quam id maxime et ratione."
+      );
+      expect(getDescendantNode(resp1, 0, 1).type).toEqual(
+        DendronASTTypes.HASHTAG
+      );
       expect(getDescendantNode(resp1, 0, 1).value).toEqual("#dolores");
 
-      const resp2 = proc().parse("Dolorem vero sed sapiente #dolores, et quam id maxime et ratione.");
-      expect(getDescendantNode(resp2, 0, 1).type).toEqual(DendronASTTypes.HASHTAG);
+      const resp2 = proc().parse(
+        "Dolorem vero sed sapiente #dolores, et quam id maxime et ratione."
+      );
+      expect(getDescendantNode(resp2, 0, 1).type).toEqual(
+        DendronASTTypes.HASHTAG
+      );
       expect(getDescendantNode(resp2, 0, 1).value).toEqual("#dolores");
     });
 
     test("doesn't parse trailing unicode punctuation", () => {
       const resp1 = proc().parse("彼女に「#よろしく」言って下さい。");
-      expect(getDescendantNode(resp1, 0, 1).type).toEqual(DendronASTTypes.HASHTAG);
+      expect(getDescendantNode(resp1, 0, 1).type).toEqual(
+        DendronASTTypes.HASHTAG
+      );
       expect(getDescendantNode(resp1, 0, 1).value).toEqual("#よろしく");
     });
   });
 
   describe("rendering", () => {
     const hashtag = "#my-hash.tag0";
-    
+
     const SIMPLE = createProcTests({
       name: "simple",
       setupFunc: async ({ engine, vaults, extra }) => {
@@ -146,8 +162,11 @@ describe("hashtag", () => {
         },
         [DendronASTDest.HTML]: async ({ extra }) => {
           const { resp } = extra;
-          await checkVFile(resp, '<a href="tags.my-hash.tag0.html">#my-hash.tag0</a>');
-        }
+          await checkVFile(
+            resp,
+            '<a href="tags.my-hash.tag0.html">#my-hash.tag0</a>'
+          );
+        },
       },
       preSetupHook: ENGINE_HOOKS.setupBasic,
     });

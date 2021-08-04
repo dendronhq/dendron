@@ -1,4 +1,4 @@
 export const fonts = {
-  heading: 'montserrat',
-  body: 'roboto',
+  heading: "montserrat",
+  body: "roboto",
 };

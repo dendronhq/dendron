@@ -89,8 +89,7 @@
     }
   },
   "lint-staged": {
-    "*.{ts,tsx}": "prettier --config prettier.config.js --loglevel debug --write",
-    "*.{ts,tsx}": "eslint"
+    "*.{ts,tsx}": ["prettier --config prettier.config.js --loglevel debug --write", "eslint"]
   },
   "dependencies": {
     "@dendronhq/conventional-changelog-dendron": "^5.0.11",

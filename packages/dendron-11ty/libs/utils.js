@@ -27,15 +27,15 @@ const env = () => {
      * Override output of config.yml
      */
     output: process.env.OUTPUT,
-    logLvl: process.env.LOG_LEVEL
+    logLvl: process.env.LOG_LEVEL,
   };
   return out;
-}
+};
 
 /**
- * 
+ *
  * @param force: force engine initialization
- * @returns 
+ * @returns
  */
 const getEngine = async (force) => {
   const engineConnector = EngineConnector.getOrCreate({
@@ -66,9 +66,9 @@ const getSiteConfig = () => {
 };
 
 const getSiteUrl = () => {
-  const siteUrl = process.env["SITE_URL"] || getSiteConfig().siteUrl
+  const siteUrl = process.env["SITE_URL"] || getSiteConfig().siteUrl;
   return siteUrl;
-}
+};
 
 const logger = () => {
   const logger = createLogger();
@@ -113,16 +113,19 @@ class NOTE_UTILS {
   }
 
   static getAbsUrl(suffix) {
-    return NOTE_UTILS.getAbsUrlForAsset(suffix)
+    return NOTE_UTILS.getAbsUrlForAsset(suffix);
   }
 
   static getAbsUrlForAsset(suffix) {
     suffix = suffix || "";
-    const {assetsPrefix} = getSiteConfig();
+    const { assetsPrefix } = getSiteConfig();
     const siteUrl = getSiteUrl();
     let sitePrefix = _.trimEnd(siteUrl, "/");
     if (assetsPrefix) {
-      sitePrefix = _.join([_.trimEnd(siteUrl, "/"), _.trim(assetsPrefix, "/")], "/")
+      sitePrefix = _.join(
+        [_.trimEnd(siteUrl, "/"), _.trim(assetsPrefix, "/")],
+        "/"
+      );
     }
     if (siteUrl && env().stage !== "dev") {
       const out = _.trimEnd(
@@ -131,7 +134,13 @@ class NOTE_UTILS {
       );
       return out;
     } else {
-      return "http://" + path.posix.join(`localhost:${getSiteConfig().previewPort || 8080}`, suffix);
+      return (
+        "http://" +
+        path.posix.join(
+          `localhost:${getSiteConfig().previewPort || 8080}`,
+          suffix
+        )
+      );
     }
   }
 

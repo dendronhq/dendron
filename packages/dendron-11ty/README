@@ -28,6 +28,7 @@ LOG_DST=/tmp/server.txt LOG_LEVEL=debug dendron-cli launchEngineServer --port 30
 ```
 
 4. run eleventy with the engine options
+
 ```sh
 env WS_ROOT=/Users/kevinlin/projects/dendronv2/dendron-site ENGINE_PORT=3006 STAGE=dev npx eleventy --watch --serve
 ```
@@ -36,7 +37,7 @@ env WS_ROOT=/Users/kevinlin/projects/dendronv2/dendron-site ENGINE_PORT=3006 STA
 
 # Testing New Features
 
-Dendron 11ty comes with a sample 
+Dendron 11ty comes with a sample
 
 In order to test with a sample workspace to test out new syntax
 
@@ -48,10 +49,11 @@ env WS_ROOT={dendron-11ty}/fixtures/test-workspace/ ENGINE_PORT=3008 STAGE=dev n
 ```
 
 # Tasks
+
 - [ ] make the arrows smaller on the nav
-- [ ] migrate search functionality 
-    - [x] build search data
-    - [ ] integrate search js fields
+- [ ] migrate search functionality
+  - [x] build search data
+  - [ ] integrate search js fields
 - [x] load notes based on dynamic pages
-- [x] render dendron specific markdown 
+- [x] render dendron specific markdown
 - [ ] restrict published notes based on dendron site configuration

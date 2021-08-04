@@ -380,8 +380,8 @@ export class FileStorage implements DStore {
       }
     });
   }
-  
-  _addLinkCandidates(allNotes: NoteProps[] ) {
+
+  _addLinkCandidates(allNotes: NoteProps[]) {
     const notesMap = NoteUtils.createFnameNoteMap(allNotes, true);
     return _.map(allNotes, (noteFrom: NoteProps) => {
       try {
@@ -393,10 +393,14 @@ export class FileStorage implements DStore {
         noteFrom.links = noteFrom.links.concat(linkCandidates);
       } catch (err) {
         const error = error2PlainObject(err);
-        this.logger.error({ error, noteFrom, message: "issue with link candidates" });
+        this.logger.error({
+          error,
+          noteFrom,
+          message: "issue with link candidates",
+        });
         return;
       }
-    })
+    });
   }
 
   async _initNotes(vault: DVault): Promise<{
@@ -473,7 +477,6 @@ export class FileStorage implements DStore {
             errors.push(err);
             return;
           }
-
         } else {
           n.links = cache.notes[n.fname].data.links;
         }
@@ -559,7 +562,11 @@ export class FileStorage implements DStore {
             // current implementation adds alias for all notes
             // check if old note has alias thats different from its fname
             let alias: string | undefined;
-            if (oldLink.from.alias && oldLink.from.alias.toLocaleLowerCase() !== oldLink.from.fname.toLocaleLowerCase()) {
+            if (
+              oldLink.from.alias &&
+              oldLink.from.alias.toLocaleLowerCase() !==
+                oldLink.from.fname.toLocaleLowerCase()
+            ) {
               alias = oldLink.from.alias;
             }
             // for hashtag links, we'll have to regenerate the alias

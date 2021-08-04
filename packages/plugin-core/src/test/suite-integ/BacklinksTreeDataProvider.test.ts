@@ -66,10 +66,12 @@ suite("BacklinksTreeDataProvider", function () {
       onInit: async ({ wsRoot, vaults }) => {
         await VSCodeUtils.openNote(noteWithTarget);
         const { out } = toPlainObject(await getChildren()) as any;
-        const expectedPath = vscode.Uri.file(path.join(wsRoot, vaults[0].fsPath, "beta.md")).path;
-        expect(out[0].command.arguments[0].path.toLowerCase() as string).toEqual(
-          expectedPath.toLowerCase()
-        );
+        const expectedPath = vscode.Uri.file(
+          path.join(wsRoot, vaults[0].fsPath, "beta.md")
+        ).path;
+        expect(
+          out[0].command.arguments[0].path.toLowerCase() as string
+        ).toEqual(expectedPath.toLowerCase());
         expect(out.length).toEqual(1);
         done();
       },
@@ -96,10 +98,12 @@ suite("BacklinksTreeDataProvider", function () {
         await new ReloadIndexCommand().run();
         await VSCodeUtils.openNote(noteWithTarget);
         const { out } = toPlainObject(await getChildren()) as any;
-        const expectedPath = vscode.Uri.file(path.join(wsRoot, vaults[0].fsPath, "beta.md")).path;
-        expect(out[0].command.arguments[0].path.toLowerCase() as string).toEqual(
-          expectedPath.toLowerCase()
-        );
+        const expectedPath = vscode.Uri.file(
+          path.join(wsRoot, vaults[0].fsPath, "beta.md")
+        ).path;
+        expect(
+          out[0].command.arguments[0].path.toLowerCase() as string
+        ).toEqual(expectedPath.toLowerCase());
         expect(out.length).toEqual(1);
         done();
       },
@@ -139,10 +143,12 @@ suite("BacklinksTreeDataProvider", function () {
         await VSCodeUtils.openNote(noteWithTarget);
 
         const { out } = toPlainObject(await getChildren()) as any;
-        const expectedPath = vscode.Uri.file(path.join(wsRoot, vaults[0].fsPath, "gamma.md")).path;
-        expect(out[0].command.arguments[0].path.toLowerCase() as string).toEqual(
-          expectedPath.toLowerCase()
-        );
+        const expectedPath = vscode.Uri.file(
+          path.join(wsRoot, vaults[0].fsPath, "gamma.md")
+        ).path;
+        expect(
+          out[0].command.arguments[0].path.toLowerCase() as string
+        ).toEqual(expectedPath.toLowerCase());
         const ref = out[0].refs[0];
         expect(ref.isCandidate).toBeTruthy();
         expect(ref.matchText as string).toEqual("alpha");
@@ -172,10 +178,12 @@ suite("BacklinksTreeDataProvider", function () {
         const notePath = path.join(wsRoot, vaults[0].fsPath, "alpha.md");
         await VSCodeUtils.openFileInEditor(Uri.file(notePath));
         const { out } = toPlainObject(await getChildren()) as any;
-        const expectedPath = vscode.Uri.file(path.join(wsRoot, vaults[1].fsPath, "beta.md")).path;
-        expect(out[0].command.arguments[0].path.toLowerCase() as string).toEqual(
-          expectedPath.toLowerCase()
-        );
+        const expectedPath = vscode.Uri.file(
+          path.join(wsRoot, vaults[1].fsPath, "beta.md")
+        ).path;
+        expect(
+          out[0].command.arguments[0].path.toLowerCase() as string
+        ).toEqual(expectedPath.toLowerCase());
         expect(out.length).toEqual(1);
         done();
       },
@@ -291,7 +299,7 @@ suite("BacklinksTreeDataProvider", function () {
       },
     });
   });
-  
+
   test("candidates subtree doesn't show up if feature flag was not enabled", (done) => {
     let alpha: NoteProps;
     let beta: NoteProps;
@@ -314,11 +322,11 @@ suite("BacklinksTreeDataProvider", function () {
       onInit: async () => {
         await new ReloadIndexCommand().execute();
         await VSCodeUtils.openNote(alpha);
-       
-        const { out: alphaOut } = await getChildren(); 
+
+        const { out: alphaOut } = await getChildren();
         const alphaOutObj = toPlainObject(alphaOut) as any;
         expect(_.isEmpty(alphaOutObj)).toBeTruthy();
-        
+
         await VSCodeUtils.openNote(beta);
         const { out: betaOut } = await getChildren();
         const betaOutObj = toPlainObject(betaOut) as any;
@@ -327,7 +335,7 @@ suite("BacklinksTreeDataProvider", function () {
 
         done();
       },
-    })
+    });
   });
 
   test("mult backlink items display correctly", (done) => {
@@ -359,7 +367,7 @@ suite("BacklinksTreeDataProvider", function () {
           },
           { wsRoot }
         );
-        
+
         // need this until we move it out of the feature flag.
         await new ReloadIndexCommand().execute();
 
@@ -410,10 +418,12 @@ suite("BacklinksTreeDataProvider", function () {
         const notePath = path.join(wsRoot, vaults[0].fsPath, "alpha.md");
         await VSCodeUtils.openFileInEditor(Uri.file(notePath));
         const { out } = toPlainObject(await getChildren()) as any;
-        const expectedPath = vscode.Uri.file(path.join(wsRoot, vaults[1].fsPath, "beta.md")).path;
-        expect(out[0].command.arguments[0].path.toLowerCase() as string).toEqual(
-          expectedPath.toLowerCase()
-        );
+        const expectedPath = vscode.Uri.file(
+          path.join(wsRoot, vaults[1].fsPath, "beta.md")
+        ).path;
+        expect(
+          out[0].command.arguments[0].path.toLowerCase() as string
+        ).toEqual(expectedPath.toLowerCase());
         expect(out.length).toEqual(1);
         done();
       },
@@ -439,14 +449,16 @@ suite("BacklinksTreeDataProvider", function () {
       onInit: async () => {
         await VSCodeUtils.openNote(noteWithTarget);
         const { out } = toPlainObject(await getChildren()) as any;
-        const expectedPath = vscode.Uri.file(NoteUtils.getFullPath({
-          note: noteWithLink,
-          wsRoot: DendronWorkspace.wsRoot(),
-        })).path;
+        const expectedPath = vscode.Uri.file(
+          NoteUtils.getFullPath({
+            note: noteWithLink,
+            wsRoot: DendronWorkspace.wsRoot(),
+          })
+        ).path;
 
-        expect(out[0].command.arguments[0].path.toLowerCase() as string).toEqual(
-          expectedPath.toLowerCase()
-        );
+        expect(
+          out[0].command.arguments[0].path.toLowerCase() as string
+        ).toEqual(expectedPath.toLowerCase());
         expect(out.length).toEqual(1);
         done();
       },
@@ -476,13 +488,15 @@ suite("BacklinksTreeDataProvider", function () {
         //   out[0].command.arguments[0].path.toLowerCase() as string,
         //   NoteUtils.getPathV4({ note: noteWithLink, wsRoot })
         // );
-        const expectedPath = vscode.Uri.file(NoteUtils.getFullPath({
-          note: noteWithLink,
-          wsRoot
-        })).path;
-        expect(out[0].command.arguments[0].path.toLowerCase() as string).toEqual(
-          expectedPath.toLowerCase()
-        );
+        const expectedPath = vscode.Uri.file(
+          NoteUtils.getFullPath({
+            note: noteWithLink,
+            wsRoot,
+          })
+        ).path;
+        expect(
+          out[0].command.arguments[0].path.toLowerCase() as string
+        ).toEqual(expectedPath.toLowerCase());
         expect(out.length).toEqual(1);
         done();
       },
@@ -510,18 +524,20 @@ suite("BacklinksTreeDataProvider", function () {
       onInit: async ({ wsRoot }) => {
         await VSCodeUtils.openNote(noteTarget);
         const { out } = toPlainObject(await getChildren()) as any;
-        const expectedPath = vscode.Uri.file(NoteUtils.getFullPath({
-          note: noteWithLink,
-          wsRoot
-        })).path;
-        expect(out[0].command.arguments[0].path.toLowerCase() as string).toEqual(
-          expectedPath.toLowerCase()
-        );
+        const expectedPath = vscode.Uri.file(
+          NoteUtils.getFullPath({
+            note: noteWithLink,
+            wsRoot,
+          })
+        ).path;
+        expect(
+          out[0].command.arguments[0].path.toLowerCase() as string
+        ).toEqual(expectedPath.toLowerCase());
         expect(out.length).toEqual(1);
         done();
       },
-    })
-  })
+    });
+  });
 });
 
 // suite('BacklinksTreeDataProvider', () => {

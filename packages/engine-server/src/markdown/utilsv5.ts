@@ -253,7 +253,7 @@ export class MDUtilsV5 {
             proc = proc.use(dendronPreview);
           }
           if (opts.flavor === ProcFlavor.HOVER_PREVIEW) {
-            proc = proc.use(dendronHoverPreview)
+            proc = proc.use(dendronHoverPreview);
           }
         }
         break;
@@ -341,9 +341,15 @@ export class MDUtilsV5 {
     return pRehype;
   }
 
-  static procRemarkFull(data: ProcDataFullOptsV5, opts?: { mode?: ProcMode, flavor?: ProcFlavor }) {
+  static procRemarkFull(
+    data: ProcDataFullOptsV5,
+    opts?: { mode?: ProcMode; flavor?: ProcFlavor }
+  ) {
     return this._procRemark(
-      { mode: opts?.mode || ProcMode.FULL, flavor: opts?.flavor || ProcFlavor.REGULAR },
+      {
+        mode: opts?.mode || ProcMode.FULL,
+        flavor: opts?.flavor || ProcFlavor.REGULAR,
+      },
       data
     );
   }

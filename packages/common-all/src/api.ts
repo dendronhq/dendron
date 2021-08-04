@@ -168,7 +168,10 @@ export type SchemaUpdateRequest = SchemaWriteRequest;
 
 export type AssetGetRequest = { fpath: string } & WorkspaceRequest;
 
-export type AssetGetThemeRequest = { themeTarget: ThemeTarget, themeType: ThemeType} & WorkspaceRequest;
+export type AssetGetThemeRequest = {
+  themeTarget: ThemeTarget;
+  themeType: ThemeType;
+} & WorkspaceRequest;
 
 // --- Payload
 export type InitializePayload = APIPayload<DEngineInitPayload>;
@@ -312,7 +315,9 @@ export class DendronAPI extends API {
     return resp;
   }
 
-  async assetGetTheme(req: AssetGetThemeRequest): Promise<DendronError | Buffer> {
+  async assetGetTheme(
+    req: AssetGetThemeRequest
+  ): Promise<DendronError | Buffer> {
     const resp = await this._makeRequestRaw({
       path: "assets/theme",
       method: "get",

@@ -2,13 +2,13 @@ import {
   DendronApiV2,
   DEngineInitPayload,
   NoteProps,
-  NotePropsDict, stringifyError,
-  APIUtils
+  NotePropsDict,
+  stringifyError,
+  APIUtils,
 } from "@dendronhq/common-all";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import _ from "lodash";
 import { createLogger } from "../../utils";
-
 
 /**
  * Equivalent to engine.init
@@ -40,7 +40,10 @@ export const initNotes = createAsyncThunk(
 
 export const syncNote = createAsyncThunk(
   "engine/init",
-  async ({ port, ws, note }: { port: number; ws: string, note: NoteProps }, { dispatch }) => {
+  async (
+    { port, ws, note }: { port: number; ws: string; note: NoteProps },
+    { dispatch }
+  ) => {
     const logger = createLogger("syncNoteThunk");
     const endpoint = APIUtils.getLocalEndpoint(port);
     const api = new DendronApiV2({
@@ -49,7 +52,7 @@ export const syncNote = createAsyncThunk(
       logger,
     });
     logger.info({ state: "pre:query" });
-    const resp = await api.noteQuery({qs: note.fname, ws, vault: note.vault})
+    const resp = await api.noteQuery({ qs: note.fname, ws, vault: note.vault });
     logger.info({ state: "post:iquery" });
     if (resp.error) {
       dispatch(setError(stringifyError(resp.error)));

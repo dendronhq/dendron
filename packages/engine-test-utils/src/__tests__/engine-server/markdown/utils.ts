@@ -212,12 +212,15 @@ export const createProcCompileTests = (opts: {
                     );
                     break;
                   default:
-                    proc = MDUtilsV5.procRemarkFull({
-                      dest,
-                      engine,
-                      fname,
-                      vault,
-                    }, {flavor: flavor as ProcFlavor});
+                    proc = MDUtilsV5.procRemarkFull(
+                      {
+                        dest,
+                        engine,
+                        fname,
+                        vault,
+                      },
+                      { flavor: flavor as ProcFlavor }
+                    );
                 }
                 const extra = await setupFunc({
                   ...presetOpts,

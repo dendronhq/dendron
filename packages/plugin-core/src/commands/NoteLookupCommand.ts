@@ -147,11 +147,17 @@ export class NoteLookupCommand extends BaseCommand<
         DirectChildFilterBtn.create(
           copts.filterMiddleware?.includes("directChildOnly")
         ),
-        SelectionExtractBtn.create(copts.selectionType === LookupSelectionTypeEnum.selectionExtract),
-        Selection2LinkBtn.create(copts.selectionType === LookupSelectionTypeEnum.selection2link),
+        SelectionExtractBtn.create(
+          copts.selectionType === LookupSelectionTypeEnum.selectionExtract
+        ),
+        Selection2LinkBtn.create(
+          copts.selectionType === LookupSelectionTypeEnum.selection2link
+        ),
         JournalBtn.create(copts.noteType === LookupNoteTypeEnum.journal),
         ScratchBtn.create(copts.noteType === LookupNoteTypeEnum.scratch),
-        HorizontalSplitBtn.create(copts.splitType === LookupSplitTypeEnum.horizontal),
+        HorizontalSplitBtn.create(
+          copts.splitType === LookupSplitTypeEnum.horizontal
+        ),
       ],
     });
     this._provider = new NoteLookupProvider("lookup", {

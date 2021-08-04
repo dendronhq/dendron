@@ -4,6 +4,7 @@ import GithubSlugger from "github-slugger";
 import querystring from "querystring";
 import _ from "lodash";
 import { COLORS_LIST } from "./colors";
+import { NoteProps } from "./types";
 
 export class DUtils {
   static minimatch = minimatch;
@@ -130,5 +131,34 @@ export class DefaultMap<K, V> {
 
   public delete(key: K) {
     return this._internalMap.delete(key);
+  }
+}
+
+export class TagUtils {
+  /** Removes `oldTag` from the frontmatter tags of `note` and replaces it with `newTag`, if any. */
+  static replaceTag({
+    note,
+    oldTag,
+    newTag,
+  }: {
+    note: NoteProps;
+    oldTag: string;
+    newTag?: string;
+  }) {
+    if (_.isUndefined(note.tags) || _.isString(note.tags)) {
+      note.tags = newTag;
+    } else {
+      const index = _.findIndex(note.tags, (tag) => tag === oldTag);
+      if (newTag) {
+        if (index >= 0) {
+          note.tags[index] = newTag;
+        } else {
+          // Weird, can't find the old tag. Add the new one anyway.
+          note.tags.push(newTag);
+        }
+      } else {
+        _.pull(note.tags, oldTag);
+      }
+    }
   }
 }

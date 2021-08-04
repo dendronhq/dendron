@@ -57,6 +57,8 @@ export const HASHTAG_REGEX_LOOSE = new RegExp(
     `${GOOD_FIRST_CHARACTER}` +
     ")"
 );
+/** Used for `getWordAtRange` queries. Too permissive, but the full regex breaks the function. */
+export const HASHTAG_REGEX_BASIC = new RegExp(`#${GOOD_MIDDLE_CHARACTER}+`);
 
 /**
  *

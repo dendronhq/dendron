@@ -29,8 +29,9 @@ import {
   SchemaProps,
   SchemaRaw,
   SchemaTemplate,
+  REQUIRED_DNODEPROPS,
 } from "./types";
-import { getSlugger } from "./utils";
+import { getSlugger, isNotUndefined } from "./utils";
 import { genUUID } from "./uuid";
 import { VaultUtils } from "./vault";
 
@@ -97,6 +98,7 @@ export class DNodeUtils {
       "schema",
       "schemaStub",
       "custom",
+      "tags",
     ];
     _.forEach(optionalProps, (op) => {
       if (opts[op]) {
@@ -229,6 +231,7 @@ export class DNodeUtils {
       "data",
       "schemaStub",
       "type",
+      "tags",
     ];
     return _.omit(props, blacklist);
   }
@@ -792,8 +795,27 @@ export class NoteUtils {
     return _.trim(nodePath);
   }
 
+  static isNoteProps(props: Partial<NoteProps>): props is NoteProps {
+    return (
+      _.isObject(props) &&
+      REQUIRED_DNODEPROPS.every(
+        (key) => key in props && isNotUndefined(props[key])
+      )
+    );
+  }
+
   static serializeMeta(props: NoteProps) {
-    const builtinProps = _.pick(props, [
+    // Remove all undefined values, because they cause `matter` to fail serializing them
+    const cleanProps: Partial<NoteProps> = Object.fromEntries(
+      Object.entries(props).filter(([_k, v]) => isNotUndefined(v))
+    );
+    if (!this.isNoteProps(cleanProps))
+      throw new DendronError({
+        message: "Note is missing some properties that are required",
+      });
+
+    // Separate custom and builtin props
+    const builtinProps = _.pick(cleanProps, [
       "id",
       "title",
       "desc",
@@ -802,8 +824,9 @@ export class NoteUtils {
       "stub",
       "parent",
       "children",
+      "tags",
     ]);
-    const { custom: customProps } = props;
+    const { custom: customProps } = cleanProps;
     const meta = { ...builtinProps, ...customProps };
     return meta;
   }

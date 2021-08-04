@@ -32,7 +32,13 @@ suite("CopyNoteRef", function () {
       runMultiVaultTest({
         ctx,
         onInit: async ({ wsRoot, vaults }) => {
-          TestConfigUtils.withConfig((config) => { config.noXVaultWikiLink = false; return config; }, { wsRoot });
+          TestConfigUtils.withConfig(
+            (config) => {
+              config.noXVaultWikiLink = false;
+              return config;
+            },
+            { wsRoot }
+          );
           const notePath = path.join(
             vault2Path({ vault: vaults[0], wsRoot }),
             "foo.md"
@@ -50,7 +56,13 @@ suite("CopyNoteRef", function () {
       runMultiVaultTest({
         ctx,
         onInit: async ({ wsRoot, vaults }) => {
-          TestConfigUtils.withConfig((config) => { config.noXVaultWikiLink = true; return config; }, { wsRoot });
+          TestConfigUtils.withConfig(
+            (config) => {
+              config.noXVaultWikiLink = true;
+              return config;
+            },
+            { wsRoot }
+          );
           const notePath = path.join(
             vault2Path({ vault: vaults[0], wsRoot }),
             "foo.md"
@@ -62,7 +74,7 @@ suite("CopyNoteRef", function () {
         },
         preSetupHook: async (opts) => {
           await ENGINE_HOOKS.setupBasic(opts);
-        }
+        },
       });
     });
   });

@@ -1,24 +1,44 @@
-import { DNodePropsQuickInputV2, DVault, DNodeUtils, NoteUtils, NoteQuickInput, Time } from "@dendronhq/common-all";
-import { NoteTestUtilsV4, NOTE_PRESETS_V4, } from "@dendronhq/common-test-utils";
+import {
+  DNodePropsQuickInputV2,
+  DVault,
+  DNodeUtils,
+  NoteUtils,
+  NoteQuickInput,
+  Time,
+} from "@dendronhq/common-all";
+import { NoteTestUtilsV4, NOTE_PRESETS_V4 } from "@dendronhq/common-test-utils";
 import {
   ENGINE_HOOKS,
   ENGINE_HOOKS_MULTI,
   TestEngineUtils,
 } from "@dendronhq/engine-test-utils";
-import { createMockQuickPick, getActiveEditorBasename, TIMEOUT } from "../testUtils";
+import {
+  createMockQuickPick,
+  getActiveEditorBasename,
+  TIMEOUT,
+} from "../testUtils";
 import _ from "lodash";
 import { describe } from "mocha";
 // // You can import and use all API from the 'vscode' module
 // // as well as import your extension to test it
 import * as vscode from "vscode";
-import { LookupNoteTypeEnum, LookupSelectionTypeEnum, LookupSplitTypeEnum, LookupEffectTypeEnum } from "../../commands/LookupCommand";
-import { NoteLookupCommand, CommandOutput, CommandRunOpts } from "../../commands/NoteLookupCommand";
-import { 
+import {
+  LookupNoteTypeEnum,
+  LookupSelectionTypeEnum,
+  LookupSplitTypeEnum,
+  LookupEffectTypeEnum,
+} from "../../commands/LookupCommand";
+import {
+  NoteLookupCommand,
+  CommandOutput,
+  CommandRunOpts,
+} from "../../commands/NoteLookupCommand";
+import {
   JournalBtn,
   ScratchBtn,
   DendronBtn,
   ButtonType,
-  Selection2LinkBtn, 
+  Selection2LinkBtn,
   SelectionExtractBtn,
   CopyNoteLinkBtn,
   HorizontalSplitBtn,
@@ -102,11 +122,11 @@ function getNoteTypeButtons(
 function getSplitTypeButtons(
   buttons: vscode.QuickInputButton[] & DendronBtn[]
 ): {
-  horizontalSplitBtn: HorizontalSplitBtn,
+  horizontalSplitBtn: HorizontalSplitBtn;
 } {
   const [horizontalSplitBtn] = getButtonsByTypeArray(
     _.values(LookupSplitTypeEnum),
-    buttons,
+    buttons
   ) as vscode.QuickInputButton[] & DendronBtn[];
   return { horizontalSplitBtn };
 }
@@ -114,12 +134,12 @@ function getSplitTypeButtons(
 function getEffectTypeButtons(
   buttons: vscode.QuickInputButton[] & DendronBtn[]
 ): {
-  copyNoteLinkBtn: CopyNoteLinkBtn
+  copyNoteLinkBtn: CopyNoteLinkBtn;
 } {
   // copyNoteLinkBtn only for now
   const [copyNoteLinkBtn] = getButtonsByTypeArray(
     _.values(LookupEffectTypeEnum),
-    buttons,
+    buttons
   ) as vscode.QuickInputButton[] & DendronBtn[];
   return { copyNoteLinkBtn };
 }
@@ -138,7 +158,7 @@ suite("NoteLookupCommand", function () {
     ) as string;
     const today = Time.now().toFormat(dateFormat);
     return today.split(".").slice(0, -1).join(".");
-  }
+  };
 
   // NOTE: think these tests are wrong
   describe("updateItems", () => {
@@ -368,7 +388,9 @@ suite("NoteLookupCommand", function () {
           ) as string;
           const today = Time.now().toFormat(dateFormat);
           const todayFormatted = today.split(".").slice(0, -1).join(".");
-          expect(out.quickpick.value.startsWith(`scratch.${todayFormatted}.`)).toBeTruthy();
+          expect(
+            out.quickpick.value.startsWith(`scratch.${todayFormatted}.`)
+          ).toBeTruthy();
 
           done();
         },
@@ -554,7 +576,6 @@ suite("NoteLookupCommand", function () {
             selectionType: "selection2link",
           });
 
-
           let { selection2linkBtn, selectionExtractBtn } =
             getSelectionTypeButtons(controller.quickpick.buttons);
 
@@ -634,7 +655,6 @@ suite("NoteLookupCommand", function () {
             selectionType: "selectionExtract",
           });
 
-
           let { selection2linkBtn, selectionExtractBtn } =
             getSelectionTypeButtons(controller.quickpick.buttons);
 
@@ -673,7 +693,6 @@ suite("NoteLookupCommand", function () {
           const { controller } = await cmd.gatherInputs({
             selectionType: "selection2link",
           });
-
 
           let { selection2linkBtn, selectionExtractBtn } =
             getSelectionTypeButtons(controller.quickpick.buttons);
@@ -733,12 +752,12 @@ suite("NoteLookupCommand", function () {
             initialValue: "foo.ch1",
             splitType: "horizontal",
             noConfirm: true,
-          })
+          });
           const fooChildEditor = VSCodeUtils.getActiveTextEditor();
           expect(fooChildEditor!.viewColumn).toEqual(3);
 
           done();
-        }
+        },
       });
     });
 
@@ -753,9 +772,8 @@ suite("NoteLookupCommand", function () {
           stubVaultPick(vaults);
 
           const { controller } = await cmd.gatherInputs({
-            splitType: "horizontal"
+            splitType: "horizontal",
           });
-
 
           let { horizontalSplitBtn } = getSplitTypeButtons(
             controller.quickpick.buttons
@@ -772,7 +790,7 @@ suite("NoteLookupCommand", function () {
           expect(horizontalSplitBtn.pressed).toBeFalsy();
 
           done();
-        }
+        },
       });
     });
 
@@ -783,7 +801,7 @@ suite("NoteLookupCommand", function () {
         preSetupHook: async ({ wsRoot, vaults }) => {
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
         },
-        onInit: async ({ vaults, }) => {
+        onInit: async ({ vaults }) => {
           const cmd = new NoteLookupCommand();
           stubVaultPick(vaults);
           const { controller } = await cmd.gatherInputs({
@@ -792,14 +810,14 @@ suite("NoteLookupCommand", function () {
           const { copyNoteLinkBtn } = getEffectTypeButtons(
             controller.quickpick.buttons
           );
-            
+
           await controller.onTriggerButton(copyNoteLinkBtn);
           const content = await clipboard.readText();
           expect(content).toEqual("[[Foo|foo]]");
 
           done();
-        }
-      }); 
+        },
+      });
     });
   });
 
@@ -817,10 +835,10 @@ suite("NoteLookupCommand", function () {
 
       const { controller } = await cmd.gatherInputs({
         noteType: LookupNoteTypeEnum.journal,
-        selectionType: LookupSelectionTypeEnum.selection2link
+        selectionType: LookupSelectionTypeEnum.selection2link,
       });
-      return { controller }
-    }
+      return { controller };
+    };
 
     test("journal and selection2link both applied", (done) => {
       runLegacyMultiWorkspaceTest({
@@ -837,17 +855,19 @@ suite("NoteLookupCommand", function () {
 
           const { selection2linkBtn } = getSelectionTypeButtons(
             controller.quickpick.buttons
-          )
+          );
 
           expect(journalBtn.pressed).toBeTruthy();
           expect(selection2linkBtn.pressed).toBeTruthy();
 
           const today = Time.now().toFormat(engine.config.journal.dateFormat);
-          expect(controller.quickpick.value).toEqual(`foo.journal.${today}.foo-body`);
+          expect(controller.quickpick.value).toEqual(
+            `foo.journal.${today}.foo-body`
+          );
 
           done();
-        }
-      }); 
+        },
+      });
     });
 
     test("toggling journal modifier off will only leave selection2link applied", (done) => {
@@ -865,7 +885,7 @@ suite("NoteLookupCommand", function () {
 
           const { selection2linkBtn } = getSelectionTypeButtons(
             controller.quickpick.buttons
-          )
+          );
 
           expect(journalBtn.pressed).toBeTruthy();
           expect(selection2linkBtn.pressed).toBeTruthy();
@@ -874,8 +894,8 @@ suite("NoteLookupCommand", function () {
           expect(controller.quickpick.value).toEqual(`foo.foo-body`);
 
           done();
-        }
-      });  
+        },
+      });
     });
 
     test("toggling selection2link modifier off will only leave journal modifier applied", (done) => {
@@ -893,7 +913,7 @@ suite("NoteLookupCommand", function () {
 
           const { selection2linkBtn } = getSelectionTypeButtons(
             controller.quickpick.buttons
-          )
+          );
 
           expect(journalBtn.pressed).toBeTruthy();
           expect(selection2linkBtn.pressed).toBeTruthy();
@@ -903,8 +923,8 @@ suite("NoteLookupCommand", function () {
           expect(controller.quickpick.value).toEqual(`foo.journal.${today}`);
 
           done();
-        }
-      });  
+        },
+      });
     });
 
     test("applying scratch strips journal modifier, and keeps selection2link applied", (done) => {
@@ -922,7 +942,7 @@ suite("NoteLookupCommand", function () {
 
           const { selection2linkBtn } = getSelectionTypeButtons(
             controller.quickpick.buttons
-          )
+          );
 
           expect(journalBtn.pressed).toBeTruthy();
           expect(selection2linkBtn.pressed).toBeTruthy();
@@ -932,14 +952,16 @@ suite("NoteLookupCommand", function () {
             CONFIG["DEFAULT_SCRATCH_DATE_FORMAT"].key
           ) as string;
           const today = Time.now().toFormat(dateFormat);
-          const todayFormatted = today.split(".").slice(0, -1).join(".")
+          const todayFormatted = today.split(".").slice(0, -1).join(".");
           const quickpickValue = controller.quickpick.value;
-          expect(quickpickValue.startsWith(`scratch.${todayFormatted}`)).toBeTruthy();
+          expect(
+            quickpickValue.startsWith(`scratch.${todayFormatted}`)
+          ).toBeTruthy();
           expect(quickpickValue.endsWith(`.foo-body`)).toBeTruthy();
 
           done();
-        }
-      });  
+        },
+      });
     });
   });
 
@@ -957,10 +979,10 @@ suite("NoteLookupCommand", function () {
 
       const { controller } = await cmd.gatherInputs({
         noteType: LookupNoteTypeEnum.scratch,
-        selectionType: LookupSelectionTypeEnum.selection2link
+        selectionType: LookupSelectionTypeEnum.selection2link,
       });
-      return { controller }
-    }
+      return { controller };
+    };
 
     test("scratch and selection2link both applied", (done) => {
       runLegacyMultiWorkspaceTest({
@@ -977,19 +999,21 @@ suite("NoteLookupCommand", function () {
 
           const { selection2linkBtn } = getSelectionTypeButtons(
             controller.quickpick.buttons
-          )
+          );
 
           expect(scratchBtn.pressed).toBeTruthy();
           expect(selection2linkBtn.pressed).toBeTruthy();
 
           const todayFormatted = getTodayInScratchDateFormat();
           const quickpickValue = controller.quickpick.value;
-          expect(quickpickValue.startsWith(`scratch.${todayFormatted}`)).toBeTruthy();
+          expect(
+            quickpickValue.startsWith(`scratch.${todayFormatted}`)
+          ).toBeTruthy();
           expect(quickpickValue.endsWith(".foo-body")).toBeTruthy();
 
           done();
-        }
-      }); 
+        },
+      });
     });
 
     test("toggling scratch modifier off will only leave selection2link applied", (done) => {
@@ -1007,7 +1031,7 @@ suite("NoteLookupCommand", function () {
 
           const { selection2linkBtn } = getSelectionTypeButtons(
             controller.quickpick.buttons
-          )
+          );
 
           expect(scratchBtn.pressed).toBeTruthy();
           expect(selection2linkBtn.pressed).toBeTruthy();
@@ -1016,8 +1040,8 @@ suite("NoteLookupCommand", function () {
           expect(controller.quickpick.value).toEqual(`foo.foo-body`);
 
           done();
-        }
-      });  
+        },
+      });
     });
 
     test("toggling selection2link modifier off will only leave scratch modifier applied", (done) => {
@@ -1035,7 +1059,7 @@ suite("NoteLookupCommand", function () {
 
           const { selection2linkBtn } = getSelectionTypeButtons(
             controller.quickpick.buttons
-          )
+          );
 
           expect(scratchBtn.pressed).toBeTruthy();
           expect(selection2linkBtn.pressed).toBeTruthy();
@@ -1043,12 +1067,14 @@ suite("NoteLookupCommand", function () {
           await controller.onTriggerButton(selection2linkBtn);
           const todayFormatted = getTodayInScratchDateFormat();
           const quickpickValue = controller.quickpick.value;
-          expect(quickpickValue.startsWith(`scratch.${todayFormatted}`)).toBeTruthy();
+          expect(
+            quickpickValue.startsWith(`scratch.${todayFormatted}`)
+          ).toBeTruthy();
           expect(quickpickValue.endsWith(".foo-body")).toBeFalsy();
 
           done();
-        }
-      });  
+        },
+      });
     });
 
     test("applying journal strips scratch modifier, and keeps selection2link applied", (done) => {
@@ -1066,7 +1092,7 @@ suite("NoteLookupCommand", function () {
 
           const { selection2linkBtn } = getSelectionTypeButtons(
             controller.quickpick.buttons
-          )
+          );
 
           expect(scratchBtn.pressed).toBeTruthy();
           expect(selection2linkBtn.pressed).toBeTruthy();
@@ -1077,8 +1103,8 @@ suite("NoteLookupCommand", function () {
           expect(quickpickValue).toEqual(`foo.journal.${today}.foo-body`);
 
           done();
-        }
-      });  
+        },
+      });
     });
   });
 
@@ -1099,8 +1125,8 @@ suite("NoteLookupCommand", function () {
         selectionType: LookupSelectionTypeEnum.selectionExtract,
         noConfirm: true,
       });
-      return { cmdOut, selectedText: text }
-    }
+      return { cmdOut, selectedText: text };
+    };
 
     test("journal + selectionExtract both applied", (done) => {
       runLegacyMultiWorkspaceTest({
@@ -1110,9 +1136,9 @@ suite("NoteLookupCommand", function () {
         },
         onInit: async ({ wsRoot, vaults, engine }) => {
           const { selectedText } = await prepareCommandFunc({
-            vaults, 
-            engine, 
-            noteType: LookupNoteTypeEnum.journal 
+            vaults,
+            engine,
+            noteType: LookupNoteTypeEnum.journal,
           });
 
           const today = Time.now().toFormat(engine.config.journal.dateFormat);
@@ -1126,7 +1152,7 @@ suite("NoteLookupCommand", function () {
           expect(newNote.body.trim()).toEqual(selectedText);
 
           done();
-        }
+        },
       });
     });
 
@@ -1138,9 +1164,9 @@ suite("NoteLookupCommand", function () {
         },
         onInit: async ({ wsRoot, vaults, engine }) => {
           const { cmdOut, selectedText } = await prepareCommandFunc({
-            vaults, 
-            engine, 
-            noteType: LookupNoteTypeEnum.scratch 
+            vaults,
+            engine,
+            noteType: LookupNoteTypeEnum.scratch,
           });
 
           const newNote = NoteUtils.getNoteOrThrow({
@@ -1152,32 +1178,39 @@ suite("NoteLookupCommand", function () {
           expect(newNote.body.trim()).toEqual(selectedText);
 
           done();
-        }
+        },
       });
     });
   });
 
   describe("multiselect interactions", () => {
     // TODO: there's gotta be a better way to mock this.
-    const prepareCommandFunc = async ({ wsRoot, vaults, engine, opts }: any) => {
+    const prepareCommandFunc = async ({
+      wsRoot,
+      vaults,
+      engine,
+      opts,
+    }: any) => {
       const cmd = new NoteLookupCommand();
-      const notesToSelect = ["foo.ch1", "bar", "lorem", "ipsum"].map((fname) => engine.notes[fname]);
+      const notesToSelect = ["foo.ch1", "bar", "lorem", "ipsum"].map(
+        (fname) => engine.notes[fname]
+      );
       const selectedItems = notesToSelect.map((note) => {
         return DNodeUtils.enhancePropForQuickInputV3({
           props: note,
           schemas: engine.schemas,
           wsRoot,
-          vaults
+          vaults,
         });
       }) as NoteQuickInput[];
 
       const runOpts = {
         multiSelect: true,
-        noConfirm: true
+        noConfirm: true,
       } as CommandRunOpts;
 
       if (opts.split) runOpts.splitType = LookupSplitTypeEnum.horizontal;
-      
+
       const gatherOut = await cmd.gatherInputs(runOpts);
 
       const mockQuickPick = createMockQuickPick({
@@ -1195,21 +1228,21 @@ suite("NoteLookupCommand", function () {
         const content = await clipboard.readText();
         sinon.restore();
         return { content };
-      };
+      }
 
       mockQuickPick.showNote = gatherOut.quickpick.showNote;
-      
+
       sinon.stub(cmd, "enrichInputs").returns(
         Promise.resolve({
           quickpick: mockQuickPick,
           controller: gatherOut.controller,
-          provider: gatherOut.provider, 
-          selectedItems
+          provider: gatherOut.provider,
+          selectedItems,
         })
       );
       return { cmd };
-    } 
-    
+    };
+
     test("split + multiselect: should have n+1 columns", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
@@ -1218,12 +1251,12 @@ suite("NoteLookupCommand", function () {
           await NoteTestUtilsV4.createNote({
             fname: "lorem",
             vault: vaults[0],
-            wsRoot
+            wsRoot,
           });
           await NoteTestUtilsV4.createNote({
             fname: "ipsum",
             vault: vaults[0],
-            wsRoot
+            wsRoot,
           });
         },
         onInit: async ({ wsRoot, vaults, engine }) => {
@@ -1235,7 +1268,7 @@ suite("NoteLookupCommand", function () {
             wsRoot,
             vaults,
             engine,
-            opts: { split: true }
+            opts: { split: true },
           });
 
           await cmd!.run({
@@ -1248,7 +1281,7 @@ suite("NoteLookupCommand", function () {
           expect(editor?.viewColumn).toEqual(5);
           sinon.restore();
           done();
-        }
+        },
       });
     });
 
@@ -1262,12 +1295,12 @@ suite("NoteLookupCommand", function () {
           await NoteTestUtilsV4.createNote({
             fname: "lorem",
             vault: vaults[0],
-            wsRoot
+            wsRoot,
           });
           await NoteTestUtilsV4.createNote({
             fname: "ipsum",
             vault: vaults[0],
-            wsRoot
+            wsRoot,
           });
         },
         onInit: async ({ wsRoot, vaults, engine }) => {
@@ -1275,23 +1308,25 @@ suite("NoteLookupCommand", function () {
           VSCodeUtils.closeAllEditors();
 
           await VSCodeUtils.openNote(engine.notes["foo"]);
-          
-          const { content } = await prepareCommandFunc({ 
+
+          const { content } = await prepareCommandFunc({
             wsRoot,
             vaults,
             engine,
-            opts: { copyLink: true }
+            opts: { copyLink: true },
           });
 
-          expect(content).toEqual([
-            "[[Ch1|foo.ch1]]",
-            "[[Bar|bar]]",
-            "[[Lorem|lorem]]",
-            "[[Ipsum|ipsum]]",
-          ].join("\n"));
+          expect(content).toEqual(
+            [
+              "[[Ch1|foo.ch1]]",
+              "[[Bar|bar]]",
+              "[[Lorem|lorem]]",
+              "[[Ipsum|ipsum]]",
+            ].join("\n")
+          );
           done();
-        }
-      }); 
+        },
+      });
     });
   });
 });

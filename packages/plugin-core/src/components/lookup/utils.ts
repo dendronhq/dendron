@@ -41,7 +41,9 @@ export const CONTEXT_DETAIL = "current note context";
 export const HIERARCHY_MATCH_DETAIL = "hierarchy match";
 export const FULL_MATCH_DETAIL = "hierarchy match and current note context";
 
-export type VaultPickerItem = { vault: DVault, label: string } & Partial<Omit<QuickPickItem, "label">>;
+export type VaultPickerItem = { vault: DVault; label: string } & Partial<
+  Omit<QuickPickItem, "label">
+>;
 
 function isDVaultArray(
   overrides?: VaultPickerItem[] | DVault[]
@@ -253,7 +255,7 @@ export class PickerUtilsV2 {
       quickPick.rawValue = initialValue;
       quickPick.prefix = initialValue;
       quickPick.value = initialValue;
-    } 
+    }
     return quickPick;
   }
 
@@ -520,7 +522,7 @@ export class PickerUtilsV2 {
           return {
             vault: value,
             detail: HIERARCHY_MATCH_DETAIL,
-            label: VaultUtils.getName(vault)
+            label: VaultUtils.getName(vault),
           };
         });
 
@@ -529,12 +531,15 @@ export class PickerUtilsV2 {
       vaultSuggestions.push({
         vault,
         detail: CONTEXT_DETAIL,
-        label: VaultUtils.getName(vault)
+        label: VaultUtils.getName(vault),
       });
 
       allVaults.forEach((cmpVault) => {
         if (cmpVault.fsPath !== vault.fsPath) {
-          vaultSuggestions.push({ vault: cmpVault, label: VaultUtils.getName(vault) });
+          vaultSuggestions.push({
+            vault: cmpVault,
+            label: VaultUtils.getName(vault),
+          });
         }
       });
     }
@@ -548,7 +553,7 @@ export class PickerUtilsV2 {
       vaultSuggestions.push({
         vault,
         detail: FULL_MATCH_DETAIL,
-        label: VaultUtils.getName(vault)
+        label: VaultUtils.getName(vault),
       });
 
       vaultsWithMatchingHierarchy.forEach((ent) => {
@@ -560,7 +565,7 @@ export class PickerUtilsV2 {
           vaultSuggestions.push({
             vault: ent.vault,
             detail: HIERARCHY_MATCH_DETAIL,
-            label: VaultUtils.getName(vault)
+            label: VaultUtils.getName(vault),
           });
         }
       });
@@ -571,7 +576,10 @@ export class PickerUtilsV2 {
             (suggestion) => suggestion.vault.fsPath === wsVault.fsPath
           )
         ) {
-          vaultSuggestions.push({ vault: wsVault, label: VaultUtils.getName(wsVault) });
+          vaultSuggestions.push({
+            vault: wsVault,
+            label: VaultUtils.getName(wsVault),
+          });
         }
       });
     } else {
@@ -580,7 +588,7 @@ export class PickerUtilsV2 {
       vaultSuggestions.push({
         vault,
         detail: CONTEXT_DETAIL,
-        label: VaultUtils.getName(vault)
+        label: VaultUtils.getName(vault),
       });
 
       allVaults.forEach((wsVault) => {
@@ -589,7 +597,10 @@ export class PickerUtilsV2 {
             (suggestion) => suggestion.vault.fsPath === wsVault.fsPath
           )
         ) {
-          vaultSuggestions.push({ vault: wsVault, label: VaultUtils.getName(wsVault) });
+          vaultSuggestions.push({
+            vault: wsVault,
+            label: VaultUtils.getName(wsVault),
+          });
         }
       });
     }
@@ -729,7 +740,9 @@ export class NotePickerUtils {
     return [
       picker.prefix,
       picker.noteModifierValue,
-      picker.selectionModifierValue
-    ].filter((ent) => !_.isEmpty(ent)).join(".");
+      picker.selectionModifierValue,
+    ]
+      .filter((ent) => !_.isEmpty(ent))
+      .join(".");
   }
 }

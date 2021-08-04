@@ -6,7 +6,15 @@ import {
   NoteUtils,
   TAGS_HIERARCHY,
 } from "@dendronhq/common-all";
-import { HASHTAG_REGEX_LOOSE, LinkUtils } from "@dendronhq/engine-server";
+import {
+  DendronASTTypes,
+  HASHTAG_REGEX_LOOSE,
+  HASHTAG_REGEX_BASIC,
+  LinkUtils,
+  MDUtilsV5,
+  ProcMode,
+  visit,
+} from "@dendronhq/engine-server";
 import { sort as sortPaths } from "cross-path-sort";
 import fs from "fs";
 import _ from "lodash";
@@ -23,6 +31,8 @@ import vscode, {
 import { ShowPreviewV2Command } from "../commands/ShowPreviewV2";
 import { VSCodeUtils } from "../utils";
 import { DendronWorkspace, getWS } from "../workspace";
+import { getFrontmatterTags, parseFrontmatter } from "./yaml";
+import type { YAML } from "mdast";
 
 export type RefT = {
   label: string;
@@ -238,7 +248,7 @@ export const getReferenceAtPosition = (
     // if not, it could be a hashtag
     const rangeForHashTag = document.getWordRangeAtPosition(
       position,
-      HASHTAG_REGEX_LOOSE
+      HASHTAG_REGEX_BASIC,
     );
     if (rangeForHashTag) {
       const docText = document.getText(rangeForHashTag);
@@ -251,6 +261,38 @@ export const getReferenceAtPosition = (
         refText: docText,
       };
     }
+    // if not, it could be a frontmatter tag
+    let parsed: ReturnType<typeof parseFrontmatter> | undefined;
+    const noteAST = MDUtilsV5.procRemarkParse(
+      { mode: ProcMode.NO_DATA },
+      {}
+    ).parse(document.getText());
+    visit(noteAST, [DendronASTTypes.FRONTMATTER], (frontmatter: YAML) => {
+      parsed = parseFrontmatter(frontmatter);
+      return false; // stop traversing, there is only one frontmatter
+    });
+    if (parsed) {
+      const tags = getFrontmatterTags(parsed);
+      for (const tag of tags) {
+        // Offset 1 for the starting `---` line of frontmatter
+        const tagPos = VSCodeUtils.position2VSCodeRange(tag.position, {line: 1});
+        if (
+          tagPos.start.line <= position.line &&
+          position.line <= tagPos.end.line &&
+          tagPos.start.character <= position.character &&
+          position.character <= tagPos.end.character
+        ) {
+          tag.value = _.trim(tag.value);
+          return {
+            range: tagPos,
+            label: tag.value,
+            ref: `${TAGS_HIERARCHY}${tag.value}`,
+            refText: tag.value,
+          };
+        }
+      }
+    }
+
     // it's not a wikilink, reference, or a hashtag. Nothing to do here.
     return null;
   }
@@ -343,8 +385,8 @@ export const noteLinks2Locations = (note: NoteProps) => {
   const fileContent = fs.readFileSync(fsPath).toString();
   const fmOffset = fileContent.indexOf("\n---") + 4;
   linksMatch.forEach((link) => {
-    const { start } = link.position;
-    const lines = fileContent.slice(0, fmOffset + start.offset!).split("\n");
+    const startOffset = link.position?.start.offset || 0;
+    const lines = fileContent.slice(0, fmOffset + startOffset).split("\n");
     const lineNum = lines.length;
 
     refs.push({
@@ -395,21 +437,42 @@ export const findReferences = async (
     // we are assuming there won't be a `\n---\n` key inside the frontmatter
     const fmOffset = fileContent.indexOf("\n---") + 4;
     linksMatch.forEach((link) => {
-      const { end } = link.position;
-      const lines = fileContent
-        .slice(0, fmOffset + end.offset! + 1)
-        .split("\n");
+      const endOffset = link.position?.end.offset || 0;
+      const lines = fileContent.slice(0, fmOffset + endOffset + 1).split("\n");
       const lineNum = lines.length;
-      const range =
-        link.type === "wiki"
-          ? new vscode.Range(
-              new vscode.Position(lineNum - 1, 0),
-              new vscode.Position(lineNum, 0)
+      let range: vscode.Range;
+      switch (link.type) {
+        case "wiki":
+          range = new vscode.Range(
+            new vscode.Position(lineNum - 1, 0),
+            new vscode.Position(lineNum, 0)
+          );
+          break;
+        case "frontmatterTag":
+          // -2 in lineNum so that it targets the end of the frontmatter
+          range = new vscode.Range(
+            new vscode.Position(
+              lineNum - 2,
+              (link.position?.start.column || 1) - 1
+            ),
+            new vscode.Position(
+              lineNum - 2,
+              (link.position?.end.column || 1) - 1
             )
-          : new vscode.Range(
-              new vscode.Position(lineNum - 1, link.position.start.column - 1),
-              new vscode.Position(lineNum - 1, link.position.end.column - 1)
-            );
+          );
+          break;
+        default:
+          range = new vscode.Range(
+            new vscode.Position(
+              lineNum - 1,
+              (link.position?.start.column || 1) - 1
+            ),
+            new vscode.Position(
+              lineNum - 1,
+              (link.position?.end.column || 1) - 1
+            )
+          );
+      }
       const location = new vscode.Location(vscode.Uri.file(fsPath), range);
       const foundRef: FoundRefT = {
         location,

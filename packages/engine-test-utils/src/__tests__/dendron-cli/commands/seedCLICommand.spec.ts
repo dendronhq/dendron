@@ -4,14 +4,11 @@ import {
   DVault,
   ERROR_STATUS,
   SeedCommands,
-  SeedConfig
+  SeedConfig,
 } from "@dendronhq/common-all";
 import { tmpDir } from "@dendronhq/common-server";
 import { SeedCLICommand, SeedCLICommandOpts } from "@dendronhq/dendron-cli";
-import {
-  DConfig,
-  SeedInitMode
-} from "@dendronhq/engine-server";
+import { DConfig, SeedInitMode } from "@dendronhq/engine-server";
 import os from "os";
 import path from "path";
 import { runEngineTestV5 } from "../../../engine";
@@ -19,7 +16,7 @@ import {
   checkDir,
   checkFile,
   checkNotInDir,
-  checkVaults
+  checkVaults,
 } from "../../../utils";
 import { TestSeedUtils } from "../../../utils/seed";
 
@@ -33,7 +30,6 @@ export const runSeedCmd = ({
 };
 
 const BAD_SEED_ID = () => "dendron.no-exist";
-
 
 // Platform agnostic check file for a seed vault path
 function getSeedVaultPathForCheckFile(seedId: string) {

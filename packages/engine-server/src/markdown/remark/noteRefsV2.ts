@@ -364,10 +364,10 @@ export function convertNoteRefASTV2(
     try {
       note = file2Note(npath, vault);
     } catch (err) {
-        const msg = `error reading file, ${npath}`;
-        return MDUtilsV4.genMDMsg(msg);
+      const msg = `error reading file, ${npath}`;
+      return MDUtilsV4.genMDMsg(msg);
     }
-    
+
     try {
       if (
         shouldApplyPublishRules &&
@@ -641,10 +641,18 @@ function convertNoteRefHelperAST(
     // Copy the current proc to preserve all options
     let tmpProc = MDUtilsV4.procFull(procOpts);
     // but change the fname and vault to the referenced note, since we're inside that note now
-    tmpProc = MDUtilsV4.setDendronData(tmpProc, { insideNoteRef: true, fname: note.fname, vault: note.vault });
+    tmpProc = MDUtilsV4.setDendronData(tmpProc, {
+      insideNoteRef: true,
+      fname: note.fname,
+      vault: note.vault,
+    });
     if (isV5Active) {
       if (procOpts.dest === DendronASTDest.HTML) {
-        tmpProc = MDUtilsV5.procRemarkFull({...MDUtilsV5.getProcData(proc), fname: note.fname, vault: note.vault});
+        tmpProc = MDUtilsV5.procRemarkFull({
+          ...MDUtilsV5.getProcData(proc),
+          fname: note.fname,
+          vault: note.vault,
+        });
       }
     }
 
@@ -658,7 +666,13 @@ function convertNoteRefHelperAST(
       return { error: null, data: out };
     }
   } catch (err) {
-    console.log(JSON.stringify({ctx: "convertNoteRefHelperAST", msg: "Failed to render note reference", err}));
+    console.log(
+      JSON.stringify({
+        ctx: "convertNoteRefHelperAST",
+        msg: "Failed to render note reference",
+        err,
+      })
+    );
     return {
       error: new DendronError({
         message: "error processing note ref",

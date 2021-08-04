@@ -171,7 +171,7 @@ const getLinks = ({
     } else {
       tags = note.tags;
     }
-    
+
     for (const tag of tags) {
       dlinks.push({
         type: "frontmatterTag",
@@ -183,7 +183,7 @@ const getLinks = ({
         to: {
           fname: `${TAGS_HIERARCHY}${tag}`,
         },
-      })
+      });
     }
   }
 
@@ -567,7 +567,7 @@ export class LinkUtils {
       // Just change the prop
       const oldTag = oldLink.from.alias!;
       const newTag = newLink.from.alias;
-      TagUtils.replaceTag({note, oldTag, newTag});
+      TagUtils.replaceTag({ note, oldTag, newTag });
       return note.body;
     } else {
       // Need to update note body
@@ -624,7 +624,7 @@ export class LinkUtils {
     });
     return linkCandidates;
   }
-  
+
   static hasVaultPrefix(link: DLink) {
     if (link.to?.vaultName) {
       return true;

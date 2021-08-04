@@ -796,16 +796,24 @@ export class NoteUtils {
   }
 
   static isNoteProps(props: Partial<NoteProps>): props is NoteProps {
-    return _.isObject(props) && REQUIRED_DNODEPROPS.every(
-      (key) => key in props && isNotUndefined(props[key])
+    return (
+      _.isObject(props) &&
+      REQUIRED_DNODEPROPS.every(
+        (key) => key in props && isNotUndefined(props[key])
+      )
     );
   }
 
   static serializeMeta(props: NoteProps) {
     // Remove all undefined values, because they cause `matter` to fail serializing them
-    const cleanProps: Partial<NoteProps> = Object.fromEntries(Object.entries(props).filter(([_k, v]) => isNotUndefined(v)));
-    if (!this.isNoteProps(cleanProps)) throw new DendronError({ message: "Note is missing some properties that are required" })
-    
+    const cleanProps: Partial<NoteProps> = Object.fromEntries(
+      Object.entries(props).filter(([_k, v]) => isNotUndefined(v))
+    );
+    if (!this.isNoteProps(cleanProps))
+      throw new DendronError({
+        message: "Note is missing some properties that are required",
+      });
+
     // Separate custom and builtin props
     const builtinProps = _.pick(cleanProps, [
       "id",
@@ -876,17 +884,12 @@ export class NoteUtils {
     return true;
   }
 
-  static createFnameNoteMap(
-    notes: NoteProps[],
-    removeStubs?: boolean,
-  ) {
+  static createFnameNoteMap(notes: NoteProps[], removeStubs?: boolean) {
     const notesMap = new Map<string, NoteProps>();
-    const candidates = removeStubs ? 
-      notes.filter((n) => !n.stub) :
-      notes;
+    const candidates = removeStubs ? notes.filter((n) => !n.stub) : notes;
     candidates.map((n) => {
       notesMap.set(n.fname, n);
-    })
+    });
     return notesMap;
   }
 }

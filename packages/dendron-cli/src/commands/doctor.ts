@@ -104,22 +104,19 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
             return false;
           }
 
-
           const hasVaultPrefix = LinkUtils.hasVaultPrefix(link);
-          let vaultPrefix: DVault | undefined; 
+          let vaultPrefix: DVault | undefined;
           if (hasVaultPrefix) {
             vaultPrefix = VaultUtils.getVaultByName({
-              vaults, 
-              vname: link.to!.vaultName!
+              vaults,
+              vname: link.to!.vaultName!,
             });
             if (!vaultPrefix) return false;
           }
           const isMultiVault = vaults.length > 1;
           const noteExists = NoteUtils.getNoteByFnameV5({
             fname: link.to!.fname as string,
-            vault: hasVaultPrefix 
-              ? vaultPrefix!
-              : note.vault,
+            vault: hasVaultPrefix ? vaultPrefix! : note.vault,
             notes,
             wsRoot,
           });
@@ -127,14 +124,14 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
             // true: link w/ vault prefix that points to nothing. (candidate for sure)
             // false: link w/ vault prefix that points to a note. (valid link)
             return !noteExists;
-          } 
+          }
 
           if (!noteExists) {
             // true: no vault prefix and single vault. (candidate for sure)
             // false: no vault prefix and multi vault. (ambiguous)
             return !isMultiVault;
-          } 
-          
+          }
+
           // (valid link)
           return false;
         })
@@ -318,7 +315,10 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
         break;
       }
       default:
-        throw new DendronError({ message: "Unexpected Doctor action. If this is something Dendron should support, please create an issue on our Github repository." });
+        throw new DendronError({
+          message:
+            "Unexpected Doctor action. If this is something Dendron should support, please create an issue on our Github repository.",
+        });
     }
     await _.reduce<any, Promise<any>>(
       notes,

@@ -68,17 +68,19 @@ export class TestPresetEntryV4 {
       workspaces?: DWorkspace[];
     }
   ) {
-    const { preSetupHook, postSetupHook, extraOpts, setupTest, genTestResults } =
-      opts || {};
+    const {
+      preSetupHook,
+      postSetupHook,
+      extraOpts,
+      setupTest,
+      genTestResults,
+    } = opts || {};
     this.preSetupHook = preSetupHook || (async () => {});
     this.postSetupHook = postSetupHook || (async () => {});
     this.testFunc = _.bind(func, this);
     this.extraOpts = extraOpts;
     this.setupTest = setupTest;
-    this.genTestResults = _.bind(
-      genTestResults || (async () => []),
-      this
-    );
+    this.genTestResults = _.bind(genTestResults || (async () => []), this);
     this.workspaces = opts?.workspaces || [];
     this.vaults = opts?.vaults || [
       { fsPath: "vault1" },

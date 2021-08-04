@@ -477,6 +477,16 @@
         "command": "dendron.launchTutorial",
         "title": "Dendron: Launch Tutorial",
         "desc": "Launch the Tutorial"
+      },
+      {
+        "command": "dendron.seedAdd",
+        "title": "Dendron: Seed Add",
+        "desc": "Add Seed to Current Workspace"
+      },
+      {
+        "command": "dendron.seedRemove",
+        "title": "Dendron: Seed Remove",
+        "desc": "Remove Seed from Current Workspace"
       }
     ],
     "configuration": {

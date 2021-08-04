@@ -61,7 +61,7 @@ export class CopyNoteLinkCommand extends BasicCommand<
             value: anchor,
             type: isBlockAnchor(anchor) ? "blockAnchor" : "header",
           },
-      useVaultPrefix: DendronClientUtilsV2.useVaultPrefix(getEngine()), // eslint-disable-line react-hooks/rules-of-hooks
+      useVaultPrefix: DendronClientUtilsV2.shouldUseVaultPrefix(getEngine()),
     });
     try {
       clipboard.writeText(link);

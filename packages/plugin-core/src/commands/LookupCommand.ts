@@ -31,7 +31,7 @@ export enum LookupSelectionTypeEnum {
 }
 
 /**
- * Mode for prompting the user on which vault should be used to 
+ * Mode for prompting the user on which vault should be used to
  */
 export enum VaultSelectionMode {
   /**
@@ -48,7 +48,7 @@ export enum VaultSelectionMode {
   /**
    * Always prompt the user if there is more than one vault
    */
-  alwaysPrompt
+  alwaysPrompt,
 }
 
 type CommandOpts = {
@@ -79,7 +79,6 @@ type CommandOutput = DendronQuickPickerV2;
 export { CommandOpts as LookupCommandOpts };
 
 export class LookupCommand extends BasicCommand<CommandOpts, CommandOutput> {
-
   // Placeholder for telemetry purposes. More detailed telemetry exists on the lookup command.
   key = "dendron.Lookup";
 

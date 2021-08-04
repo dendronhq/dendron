@@ -97,7 +97,9 @@ export class WorkspaceConfig {
     });
     const jsonBody: WorkspaceSettings = _.merge(
       {
-        folders: cleanOpts.vaults ? cleanOpts.vaults.map((ent) => ({ path: ent.fsPath })) : [],
+        folders: cleanOpts.vaults
+          ? cleanOpts.vaults.map((ent) => ({ path: ent.fsPath }))
+          : [],
         settings: Settings.defaults(),
         extensions: Extensions.defaults(),
       },

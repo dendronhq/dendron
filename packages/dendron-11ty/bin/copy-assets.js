@@ -24,15 +24,20 @@ async function copyAssets() {
   logger().info({ ctx, msg: "copying", vaults });
   let deleteSiteAssetsDir = true;
   await vaults.reduce(async (resp, vault) => {
-      let acc = await resp;
-      console.log("copying assets from...", vault)
-      if (vault.visibility === "private") {
-        console.log(`skipping copy assets from private vault ${vault.fsPath}`)
-        return;
-      }
-      await SiteUtils.copyAssets({ wsRoot, vault, siteAssetsDir, deleteSiteAssetsDir });
-      deleteSiteAssetsDir = false;
-    }, Promise.resolve({}));
+    let acc = await resp;
+    console.log("copying assets from...", vault);
+    if (vault.visibility === "private") {
+      console.log(`skipping copy assets from private vault ${vault.fsPath}`);
+      return;
+    }
+    await SiteUtils.copyAssets({
+      wsRoot,
+      vault,
+      siteAssetsDir,
+      deleteSiteAssetsDir,
+    });
+    deleteSiteAssetsDir = false;
+  }, Promise.resolve({}));
 
   logger().info({ ctx, msg: "finish copying assets" });
   // get raw-assets

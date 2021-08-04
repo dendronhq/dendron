@@ -1,6 +1,10 @@
 import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import { describe } from "mocha";
-import { runLegacyMultiWorkspaceTest, runTestButSkipForWindows, setupBeforeAfter } from "../testUtilsV3";
+import {
+  runLegacyMultiWorkspaceTest,
+  runTestButSkipForWindows,
+  setupBeforeAfter,
+} from "../testUtilsV3";
 import _ from "lodash";
 import {
   provideBlockCompletionItems,
@@ -8,7 +12,12 @@ import {
 } from "../../features/completionProvider";
 import { VSCodeUtils } from "../../utils";
 import { CompletionItem, Position } from "vscode";
-import { CONSTANTS, NoteUtils, TAGS_HIERARCHY, VaultUtils } from "@dendronhq/common-all";
+import {
+  CONSTANTS,
+  NoteUtils,
+  TAGS_HIERARCHY,
+  VaultUtils,
+} from "@dendronhq/common-all";
 import { expect } from "../testUtilsv2";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 
@@ -50,8 +59,14 @@ suite("completionProvider", function () {
             expect(found.length > 0).toBeTruthy();
           }
           // check that same vault items are sorted before other items
-          const sortedItems = _.sortBy(items, (item) => item.sortText || item.label);
-          const testIndex = _.findIndex(sortedItems, (item) => item.label === 'test');
+          const sortedItems = _.sortBy(
+            items,
+            (item) => item.sortText || item.label
+          );
+          const testIndex = _.findIndex(
+            sortedItems,
+            (item) => item.label === "test"
+          );
           expect(testIndex !== -1 && testIndex < 2).toBeTruthy();
           // Check that xvault links were generated where needed, and only where needed.
           // Using root notes since they are in every vault.
@@ -60,10 +75,18 @@ suite("completionProvider", function () {
             if (item.detail === VaultUtils.getName(vaults[1])) {
               // don't need an xvault link, should be a regular one
               expect(item.insertText).toEqual(item.label);
-              expect((item.insertText as string).startsWith(CONSTANTS.DENDRON_DELIMETER)).toBeFalsy();
+              expect(
+                (item.insertText as string).startsWith(
+                  CONSTANTS.DENDRON_DELIMETER
+                )
+              ).toBeFalsy();
             } else {
               // does need an xvault link
-              expect((item.insertText as string).startsWith(CONSTANTS.DENDRON_DELIMETER)).toBeTruthy();
+              expect(
+                (item.insertText as string).startsWith(
+                  CONSTANTS.DENDRON_DELIMETER
+                )
+              ).toBeTruthy();
             }
           }
           done();

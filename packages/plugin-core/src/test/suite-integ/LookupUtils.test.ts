@@ -7,7 +7,7 @@ import {
   CONTEXT_DETAIL,
   FULL_MATCH_DETAIL,
   HIERARCHY_MATCH_DETAIL,
-  PickerUtilsV2
+  PickerUtilsV2,
 } from "../../components/lookup/utils";
 import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";

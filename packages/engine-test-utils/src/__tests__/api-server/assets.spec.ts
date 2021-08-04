@@ -1,4 +1,12 @@
-import { APIUtils, DendronAPI, DendronError, error2PlainObject, ThemeTarget, ThemeType, WorkspaceOpts } from "@dendronhq/common-all";
+import {
+  APIUtils,
+  DendronAPI,
+  DendronError,
+  error2PlainObject,
+  ThemeTarget,
+  ThemeType,
+  WorkspaceOpts,
+} from "@dendronhq/common-all";
 import { tmpDir, vault2Path } from "@dendronhq/common-server";
 import path from "path";
 import { createServer, runEngineTestV5 } from "../../engine";
@@ -85,10 +93,14 @@ describe("assets/theme/get", () => {
           apiPath: "api",
         });
         await initRemoteWorkspace({ wsRoot, vaults, api });
-        const resp = await api.assetGetTheme({ ws: wsRoot, themeTarget: ThemeTarget.PRISM, themeType: ThemeType.DARK });
+        const resp = await api.assetGetTheme({
+          ws: wsRoot,
+          themeTarget: ThemeTarget.PRISM,
+          themeType: ThemeType.DARK,
+        });
         // TODO: log to figure out why integ test is failing
         if (resp instanceof DendronError) {
-          console.log(error2PlainObject(resp))
+          console.log(error2PlainObject(resp));
         }
         await checkString(resp as unknown as string, "tomorrow night");
       },
@@ -105,28 +117,14 @@ describe("assets/theme/get", () => {
           apiPath: "api",
         });
         await initRemoteWorkspace({ wsRoot, vaults, api });
-        const resp = await api.assetGetTheme({ ws: wsRoot, themeTarget: ThemeTarget.PRISM, themeType: ThemeType.LIGHT});
+        const resp = await api.assetGetTheme({
+          ws: wsRoot,
+          themeTarget: ThemeTarget.PRISM,
+          themeType: ThemeType.LIGHT,
+        });
         await checkString(resp as unknown as string, "default theme");
       },
       { expect }
     );
   });
-
-  test("fail: invald target", async () => {
-    await runEngineTestV5(
-      async ({ wsRoot, vaults }) => {
-        const { port } = await createServer({ wsRoot, vaults });
-        const api = new DendronAPI({
-          endpoint: APIUtils.getLocalEndpoint(port),
-          apiPath: "api",
-        });
-        await initRemoteWorkspace({ wsRoot, vaults, api });
-        // @ts-ignore
-        const resp = await api.assetGetTheme({ ws: wsRoot, themeTarget: "bogus target", themeType: ThemeType.DARK });
-        await checkString((resp as DendronError).message, "not valid");
-      },
-      { expect }
-    );
-  });
 });
-

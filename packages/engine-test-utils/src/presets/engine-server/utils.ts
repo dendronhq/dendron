@@ -335,14 +335,14 @@ export const setupMultiVaultSameFname: PreSetupHookFunction = async ({
     vault: vaults[0],
     body: "vault 0",
     wsRoot,
-    props: {id: "eggs-vault-0"},
+    props: { id: "eggs-vault-0" },
   });
   await NoteTestUtilsV4.createNote({
     fname: "eggs",
     vault: vaults[1],
     body: "vault 1",
     wsRoot,
-    props: {id: "eggs-vault-1"},
+    props: { id: "eggs-vault-1" },
   });
   return NoteTestUtilsV4.createNote({
     fname: "test",
@@ -358,7 +358,7 @@ export const setupMultiVaultSameFname: PreSetupHookFunction = async ({
     ].join("\n"),
     wsRoot,
   });
-}
+};
 
 export const setupLinksWithVaultBase: PreSetupHookFunction = async ({
   vaults,

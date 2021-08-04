@@ -156,7 +156,7 @@ suite("GotoNote", function () {
             vault: vaults[0],
             fname: "target-note",
             body: "\n\n## Lörem [[Foo：Bar🙂Baz|foo：bar🙂baz]] Ipsum\n\nlorem ipsum",
-          })
+          });
         },
         onInit: async ({ vaults }) => {
           const vault = vaults[0];
@@ -175,7 +175,7 @@ suite("GotoNote", function () {
           done();
         },
       });
-    })
+    });
 
     test("anchor with special chars", (done) => {
       let specialCharsHeader: string;
@@ -248,13 +248,17 @@ suite("GotoNote", function () {
         onInit: async () => {
           // Open the note, select the hashtag, and use the command
           await VSCodeUtils.openNote(note);
-          VSCodeUtils.getActiveTextEditorOrThrow().selection = new vscode.Selection(new vscode.Position(7, 1), new vscode.Position(7, 1));
+          VSCodeUtils.getActiveTextEditorOrThrow().selection =
+            new vscode.Selection(
+              new vscode.Position(7, 1),
+              new vscode.Position(7, 1)
+            );
           await new GotoNoteCommand().run();
           // Make sure this took us to the tag note
           expect(getActiveEditorBasename()).toEqual("tags.my.test-0.tag.md");
           done();
-        }
-      })
+        },
+      });
     });
 
     describe("frontmatter tags", () => {
@@ -276,13 +280,17 @@ suite("GotoNote", function () {
           onInit: async () => {
             // Open the note, select the hashtag, and use the command
             await VSCodeUtils.openNote(note);
-            VSCodeUtils.getActiveTextEditorOrThrow().selection = new vscode.Selection(new vscode.Position(6, 8), new vscode.Position(6, 8));
+            VSCodeUtils.getActiveTextEditorOrThrow().selection =
+              new vscode.Selection(
+                new vscode.Position(6, 8),
+                new vscode.Position(6, 8)
+              );
             await new GotoNoteCommand().run();
             // Make sure this took us to the tag note
             expect(getActiveEditorBasename()).toEqual("tags.my.test-0.tag.md");
             done();
-          }
-        })
+          },
+        });
       });
 
       test("tag containing space", (done) => {
@@ -303,13 +311,17 @@ suite("GotoNote", function () {
           onInit: async () => {
             // Open the note, select the hashtag, and use the command
             await VSCodeUtils.openNote(note);
-            VSCodeUtils.getActiveTextEditorOrThrow().selection = new vscode.Selection(new vscode.Position(6, 8), new vscode.Position(6, 8));
+            VSCodeUtils.getActiveTextEditorOrThrow().selection =
+              new vscode.Selection(
+                new vscode.Position(6, 8),
+                new vscode.Position(6, 8)
+              );
             await new GotoNoteCommand().run();
             // Make sure this took us to the tag note
             expect(getActiveEditorBasename()).toEqual("tags.one.md");
             done();
-          }
-        })
+          },
+        });
       });
 
       test("multiple tags", (done) => {
@@ -330,13 +342,17 @@ suite("GotoNote", function () {
           onInit: async () => {
             // Open the note, select the hashtag, and use the command
             await VSCodeUtils.openNote(note);
-            VSCodeUtils.getActiveTextEditorOrThrow().selection = new vscode.Selection(new vscode.Position(8, 6), new vscode.Position(8, 6));
+            VSCodeUtils.getActiveTextEditorOrThrow().selection =
+              new vscode.Selection(
+                new vscode.Position(8, 6),
+                new vscode.Position(8, 6)
+              );
             await new GotoNoteCommand().run();
             // Make sure this took us to the tag note
             expect(getActiveEditorBasename()).toEqual("tags.my.test-0.tag.md");
             done();
-          }
-        })
+          },
+        });
       });
     });
   });
@@ -376,20 +392,28 @@ suite("GotoNote", function () {
             note = await ENGINE_HOOKS_MULTI.setupMultiVaultSameFname(opts);
           },
           onInit: async ({ vaults, wsRoot }) => {
-            const prompt = sinon.stub(PickerUtilsV2, "promptVault").returns(Promise.resolve(vaults[1]));
+            const prompt = sinon
+              .stub(PickerUtilsV2, "promptVault")
+              .returns(Promise.resolve(vaults[1]));
             try {
               const editor = await VSCodeUtils.openNote(note);
-              editor.selection = LocationTestUtils.getPresetWikiLinkSelection({line: 7});
+              editor.selection = LocationTestUtils.getPresetWikiLinkSelection({
+                line: 7,
+              });
               await new GotoNoteCommand().run();
-              const openedNote = VSCodeUtils.getNoteFromDocument(VSCodeUtils.getActiveTextEditorOrThrow().document);
+              const openedNote = VSCodeUtils.getNoteFromDocument(
+                VSCodeUtils.getActiveTextEditorOrThrow().document
+              );
               expect(openedNote?.fname).toEqual("eggs");
-              expect(VaultUtils.isEqual(openedNote!.vault, vaults[1], wsRoot)).toBeTruthy();
+              expect(
+                VaultUtils.isEqual(openedNote!.vault, vaults[1], wsRoot)
+              ).toBeTruthy();
               expect(prompt.calledOnce).toBeTruthy();
               done();
             } finally {
               prompt.restore();
             }
-          }
+          },
         });
       });
 
@@ -402,13 +426,19 @@ suite("GotoNote", function () {
           },
           onInit: async ({ vaults, wsRoot }) => {
             const editor = await VSCodeUtils.openNote(note);
-            editor.selection = LocationTestUtils.getPresetWikiLinkSelection({line: 8});
+            editor.selection = LocationTestUtils.getPresetWikiLinkSelection({
+              line: 8,
+            });
             await new GotoNoteCommand().run();
-            const openedNote = VSCodeUtils.getNoteFromDocument(VSCodeUtils.getActiveTextEditorOrThrow().document);
+            const openedNote = VSCodeUtils.getNoteFromDocument(
+              VSCodeUtils.getActiveTextEditorOrThrow().document
+            );
             expect(openedNote?.fname).toEqual("eggs");
-            expect(VaultUtils.isEqual(openedNote!.vault, vaults[0], wsRoot)).toBeTruthy();
+            expect(
+              VaultUtils.isEqual(openedNote!.vault, vaults[0], wsRoot)
+            ).toBeTruthy();
             done();
-          }
+          },
         });
       });
 
@@ -421,13 +451,19 @@ suite("GotoNote", function () {
           },
           onInit: async ({ vaults, wsRoot }) => {
             const editor = await VSCodeUtils.openNote(note);
-            editor.selection = LocationTestUtils.getPresetWikiLinkSelection({line: 9});
+            editor.selection = LocationTestUtils.getPresetWikiLinkSelection({
+              line: 9,
+            });
             await new GotoNoteCommand().run();
-            const openedNote = VSCodeUtils.getNoteFromDocument(VSCodeUtils.getActiveTextEditorOrThrow().document);
+            const openedNote = VSCodeUtils.getNoteFromDocument(
+              VSCodeUtils.getActiveTextEditorOrThrow().document
+            );
             expect(openedNote?.fname).toEqual("eggs");
-            expect(VaultUtils.isEqual(openedNote!.vault, vaults[1], wsRoot)).toBeTruthy();
+            expect(
+              VaultUtils.isEqual(openedNote!.vault, vaults[1], wsRoot)
+            ).toBeTruthy();
             done();
-          }
+          },
         });
       });
 
@@ -440,14 +476,20 @@ suite("GotoNote", function () {
           },
           onInit: async ({ vaults, wsRoot }) => {
             const editor = await VSCodeUtils.openNote(note);
-            editor.selection = LocationTestUtils.getPresetWikiLinkSelection({line: 10});
+            editor.selection = LocationTestUtils.getPresetWikiLinkSelection({
+              line: 10,
+            });
             await new GotoNoteCommand().run();
-            const openedNote = VSCodeUtils.getNoteFromDocument(VSCodeUtils.getActiveTextEditorOrThrow().document);
+            const openedNote = VSCodeUtils.getNoteFromDocument(
+              VSCodeUtils.getActiveTextEditorOrThrow().document
+            );
             // Should have created the note in this vault
             expect(openedNote?.fname).toEqual("eggs");
-            expect(VaultUtils.isEqual(openedNote!.vault, vaults[2], wsRoot)).toBeTruthy();
+            expect(
+              VaultUtils.isEqual(openedNote!.vault, vaults[2], wsRoot)
+            ).toBeTruthy();
             done();
-          }
+          },
         });
       });
 
@@ -460,14 +502,20 @@ suite("GotoNote", function () {
           },
           onInit: async ({ vaults, wsRoot }) => {
             const editor = await VSCodeUtils.openNote(note);
-            editor.selection = LocationTestUtils.getPresetWikiLinkSelection({line: 11});
+            editor.selection = LocationTestUtils.getPresetWikiLinkSelection({
+              line: 11,
+            });
             await new GotoNoteCommand().run();
-            const openedNote = VSCodeUtils.getNoteFromDocument(VSCodeUtils.getActiveTextEditorOrThrow().document);
+            const openedNote = VSCodeUtils.getNoteFromDocument(
+              VSCodeUtils.getActiveTextEditorOrThrow().document
+            );
             // Should not have changed notes
             expect(openedNote?.fname).toEqual("test");
-            expect(VaultUtils.isEqual(openedNote!.vault, vaults[1], wsRoot)).toBeTruthy();
+            expect(
+              VaultUtils.isEqual(openedNote!.vault, vaults[1], wsRoot)
+            ).toBeTruthy();
             done();
-          }
+          },
         });
       });
     });

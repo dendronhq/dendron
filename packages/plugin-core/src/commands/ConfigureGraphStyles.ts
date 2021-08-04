@@ -6,15 +6,18 @@ type CommandOpts = {};
 
 type CommandOutput = void;
 
-export class ConfigureGraphStylesCommand extends BasicCommand<CommandOpts, CommandOutput> {
+export class ConfigureGraphStylesCommand extends BasicCommand<
+  CommandOpts,
+  CommandOutput
+> {
   key = DENDRON_COMMANDS.CONFIGURE_GRAPH_STYLES.key;
   async gatherInputs(): Promise<any> {
     return {};
   }
   async execute() {
     if (!GraphStyleService.doesStyleFileExist()) {
-      GraphStyleService.createStyleFile()
+      GraphStyleService.createStyleFile();
     }
-    await GraphStyleService.openStyleFile()
+    await GraphStyleService.openStyleFile();
   }
 }

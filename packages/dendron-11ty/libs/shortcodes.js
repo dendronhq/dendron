@@ -223,7 +223,7 @@ function githubUrl(note) {
 }
 
 function getValue(obj, key) {
-  return _.get(obj, key)
+  return _.get(obj, key);
 }
 
 module.exports = {

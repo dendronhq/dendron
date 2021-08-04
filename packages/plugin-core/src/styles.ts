@@ -31,7 +31,7 @@ If style properties are not applying, make sure each property is followed with a
 
 /* Any hierarchy connection edge */
 /* .hierarchy {} */
-`
+`;
 /*
 Obsidian.md style
 .graph-view.color-fill {}
@@ -52,7 +52,7 @@ export class GraphStyleService {
   }
 
   static doesStyleFileExist() {
-    return fs.pathExistsSync(this.styleFilePath())
+    return fs.pathExistsSync(this.styleFilePath());
   }
 
   static createStyleFile() {
@@ -77,10 +77,10 @@ export class GraphStyleService {
     if (!css) return undefined;
 
     // Remove comments
-    css = css.replace("/\\/\\*.+?\\*\\//",'');
+    css = css.replace("/\\/\\*.+?\\*\\//", "");
 
     // Remove ".graph-view" class, as it is only kept for Obsidian compatibility
-    css.replace(".graph-view", '')
+    css.replace(".graph-view", "");
 
     return css;
   }

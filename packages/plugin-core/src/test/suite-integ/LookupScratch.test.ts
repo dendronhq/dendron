@@ -62,7 +62,7 @@ suite("Scratch Notes", function () {
       runLegacyMultiWorkspaceTest({
         ctx,
         modConfigCb: (config) => {
-          config.scratch!.addBehavior = NoteAddBehavior.childOfDomainNamespace ;
+          config.scratch!.addBehavior = NoteAddBehavior.childOfDomainNamespace;
           return config;
         },
         postSetupHook: async ({ wsRoot, vaults }) => {
@@ -119,7 +119,7 @@ suite("Scratch Notes", function () {
             noteType: LookupNoteTypeEnum.scratch,
             flavor: "note",
             noConfirm: true,
-            vaultSelectionMode: VaultSelectionMode.auto
+            vaultSelectionMode: VaultSelectionMode.auto,
           });
           const scratchNote = getNoteFromTextEditor();
           expect(scratchNote.fname.startsWith("scratch")).toBeTruthy();
@@ -132,7 +132,7 @@ suite("Scratch Notes", function () {
       runLegacyMultiWorkspaceTest({
         ctx,
         modConfigCb: (config) => {
-          config.scratch!.addBehavior = NoteAddBehavior.childOfDomainNamespace ;
+          config.scratch!.addBehavior = NoteAddBehavior.childOfDomainNamespace;
           return config;
         },
         postSetupHook: async ({ wsRoot, vaults }) => {

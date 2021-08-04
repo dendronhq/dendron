@@ -11,13 +11,7 @@ import {
 } from "@dendronhq/common-all";
 import { matchWikiLink, HASHTAG_REGEX_LOOSE } from "@dendronhq/engine-server";
 import _ from "lodash";
-import {
-  Position,
-  Selection,
-  Uri,
-  window,
-  ViewColumn,
-} from "vscode";
+import { Position, Selection, Uri, window, ViewColumn } from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../utils";
@@ -85,8 +79,17 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
           return out.link;
         } else {
           // handle hashtags
-          for (const hashtag of currentLine.matchAll(new RegExp(HASHTAG_REGEX_LOOSE, "g"))) {
-            if (isNotUndefined(hashtag.index) && _.inRange(selection.start.character, hashtag.index, hashtag.index + hashtag[0].length)) {
+          for (const hashtag of currentLine.matchAll(
+            new RegExp(HASHTAG_REGEX_LOOSE, "g")
+          )) {
+            if (
+              isNotUndefined(hashtag.index) &&
+              _.inRange(
+                selection.start.character,
+                hashtag.index,
+                hashtag.index + hashtag[0].length
+              )
+            ) {
               return {
                 alias: hashtag[0],
                 value: `${TAGS_HIERARCHY}${hashtag.groups!.tagContents}`,
@@ -127,7 +130,8 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
       }
     }
 
-    if (!opts.anchor && link.anchorHeader) opts.anchor = parseAnchor(link.anchorHeader);
+    if (!opts.anchor && link.anchorHeader)
+      opts.anchor = parseAnchor(link.anchorHeader);
 
     if (!opts.vault) {
       if (link.vaultName) {
@@ -164,14 +168,14 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
             confirmVaultSetting !== true
               ? VaultSelectionMode.smart
               : VaultSelectionMode.alwaysPrompt;
-  
+
           const currentVault = PickerUtilsV2.getVaultForOpenEditor();
           const selectedVault = await PickerUtilsV2.getOrPromptVaultForNewNote({
             vault: currentVault,
             fname: opts.qs,
             vaultSelectionMode: selectionMode,
           });
-  
+
           // If we prompted the user and they selected nothing, then they want to cancel
           if (_.isUndefined(selectedVault)) {
             return;
@@ -202,12 +206,12 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     const { overrides } = opts;
     const client = DendronWorkspace.instance().getEngine();
 
-    const { qs, vault } = await this.processInputs(opts) || opts;
+    const { qs, vault } = (await this.processInputs(opts)) || opts;
     if (_.isUndefined(qs) || _.isUndefined(vault)) {
       // There was an error or the user cancelled a prompt
       return;
     }
-    
+
     let pos: undefined | Position;
     const out = await DendronWorkspace.instance().pauseWatchers<CommandOutput>(
       async () => {

@@ -2,11 +2,10 @@ import { ENGINE_HOOKS } from "../../presets";
 import { runEngineTestV5 } from "../../engine";
 import { GDocImportPod } from "@dendronhq/pods-core";
 import { VaultUtils } from "@dendronhq/common-all";
-import {response, comments} from "../../utils/GDocMockResult";
-import axios from 'axios';
+import { response, comments } from "../../utils/GDocMockResult";
+import axios from "axios";
 
-jest.mock('axios');
-
+jest.mock("axios");
 
 describe("GDoc import pod", () => {
   let result: any;
@@ -17,7 +16,7 @@ describe("GDoc import pod", () => {
         const pod = new GDocImportPod();
         const vaultName = VaultUtils.getName(vaults[0]);
         const mockedAxios = axios as jest.Mocked<typeof axios>;
-        result=response;
+        result = response;
         mockedAxios.get.mockResolvedValue(result);
 
         const { importedNotes } = await pod.execute({
@@ -32,8 +31,9 @@ describe("GDoc import pod", () => {
             hierarchyDestination: "gdoc.meet",
           },
         });
-          expect(importedNotes[0].body).toMatch("\n\n## Testing GDoc Pod\n\nThis is the first line\n\n\n");
-          
+        expect(importedNotes[0].body).toMatch(
+          "\n\n## Testing GDoc Pod\n\nThis is the first line\n\n\n"
+        );
       },
       {
         expect,
@@ -50,14 +50,14 @@ describe("GDoc import pod", () => {
         const response = {
           fname: "gdoc.meet",
           custom: {
-            documentId: 'sjkakauwu',
-            revisionId: 'ALm37BXFqAKco_'
+            documentId: "sjkakauwu",
+            revisionId: "ALm37BXFqAKco_",
           },
-          body: '\n\n## Testing GDoc Pod\n\nThis is the first line\n\n\n'
+          body: "\n\n## Testing GDoc Pod\n\nThis is the first line\n\n\n",
         };
         pod.getDataFromGDoc = jest.fn().mockReturnValue(response);
         const mockedAxios = axios as jest.Mocked<typeof axios>;
-        result=comments;
+        result = comments;
         mockedAxios.get.mockResolvedValue(result);
 
         const { importedNotes } = await pod.execute({
@@ -72,11 +72,11 @@ describe("GDoc import pod", () => {
             hierarchyDestination: "gdoc.meet",
             importComments: {
               enable: true,
-              format: "json"
-            }
+              format: "json",
+            },
           },
         });
-          expect(importedNotes[0].body).toMatchSnapshot()
+        expect(importedNotes[0].body).toMatchSnapshot();
       },
       {
         expect,
@@ -93,14 +93,14 @@ describe("GDoc import pod", () => {
         const response = {
           fname: "gdoc.meet",
           custom: {
-            documentId: 'sjkakauwu',
-            revisionId: 'ALm37BXFqAKco_'
+            documentId: "sjkakauwu",
+            revisionId: "ALm37BXFqAKco_",
           },
-          body: '\n\n## Testing GDoc Pod\n\nThis is the first line\n\n\n'
+          body: "\n\n## Testing GDoc Pod\n\nThis is the first line\n\n\n",
         };
         pod.getDataFromGDoc = jest.fn().mockReturnValue(response);
         const mockedAxios = axios as jest.Mocked<typeof axios>;
-        result=comments;
+        result = comments;
         mockedAxios.get.mockResolvedValue(result);
 
         const { importedNotes } = await pod.execute({
@@ -115,11 +115,11 @@ describe("GDoc import pod", () => {
             hierarchyDestination: "gdoc.meet",
             importComments: {
               enable: true,
-              format: "text"
-            }
+              format: "text",
+            },
           },
         });
-          expect(importedNotes[0].body).toMatchSnapshot()
+        expect(importedNotes[0].body).toMatchSnapshot();
       },
       {
         expect,

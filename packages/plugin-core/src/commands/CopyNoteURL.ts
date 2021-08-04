@@ -1,8 +1,4 @@
-import {
-  DNodeUtils,
-  getSlugger,
-  isBlockAnchor
-} from "@dendronhq/common-all";
+import { DNodeUtils, getSlugger, isBlockAnchor } from "@dendronhq/common-all";
 import _ from "lodash";
 import path from "path";
 import { Selection, window } from "vscode";

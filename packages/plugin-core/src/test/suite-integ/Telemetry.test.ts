@@ -44,7 +44,6 @@ suite("telemetry", function () {
           setupSegmentClient(ws);
           expect(SegmentClient.instance().hasOptedOut).toBeFalsy();
 
-          
           done();
         },
       });
@@ -60,7 +59,6 @@ suite("telemetry", function () {
           setupSegmentClient(ws);
           expect(SegmentClient.instance().hasOptedOut).toBeTruthy();
 
-          
           done();
         },
       });
@@ -77,7 +75,6 @@ suite("telemetry", function () {
           setupSegmentClient(ws);
           expect(SegmentClient.instance().hasOptedOut).toBeTruthy();
 
-          
           done();
         },
       });
@@ -94,7 +91,6 @@ suite("telemetry", function () {
           setupSegmentClient(ws);
           expect(SegmentClient.instance().hasOptedOut).toBeTruthy();
 
-          
           done();
         },
       });
@@ -113,7 +109,6 @@ suite("telemetry", function () {
           setupSegmentClient(ws);
           expect(SegmentClient.instance().hasOptedOut).toBeTruthy();
 
-          
           done();
         },
       });
@@ -133,7 +128,6 @@ suite("telemetry", function () {
           setupSegmentClient(ws);
           expect(SegmentClient.instance().hasOptedOut).toBeFalsy();
 
-          
           done();
         },
       });
@@ -154,7 +148,6 @@ suite("telemetry", function () {
           setupSegmentClient(ws);
           expect(SegmentClient.instance().hasOptedOut).toBeFalsy();
 
-          
           done();
         },
       });
@@ -175,7 +168,6 @@ suite("telemetry", function () {
           setupSegmentClient(ws);
           expect(SegmentClient.instance().hasOptedOut).toBeTruthy();
 
-          
           done();
         },
       });

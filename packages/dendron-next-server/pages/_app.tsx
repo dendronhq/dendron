@@ -39,7 +39,12 @@ const getWorkspaceParamsFromQueryString = (): WorkspaceProps => {
   const { port, ws, theme, browser } = querystring.parse(
     window.location.search.slice(1)
   );
-  return { port: parseInt(port as string, 10), ws, theme, browser } as WorkspaceProps;
+  return {
+    port: parseInt(port as string, 10),
+    ws,
+    theme,
+    browser,
+  } as WorkspaceProps;
 };
 
 function AppVSCode({ Component, pageProps }: any) {
@@ -111,15 +116,17 @@ function AppVSCode({ Component, pageProps }: any) {
       const { styles } = cmsg.data;
       logger.info({ ctx, styles, msg: "styles" });
       ideDispatch(ideSlice.actions.setGraphStyles(styles));
-    }
-     else {
+    } else {
       logger.error({ ctx, msg: "unknown message" });
     }
   });
 
   // === Render
   // Don't load children until all following conditions true
-  if (!workspaceOpts?.browser && _.some([_.isUndefined(workspaceOpts), ide.theme === "unknown", !isReady])) {
+  if (
+    !workspaceOpts?.browser &&
+    _.some([_.isUndefined(workspaceOpts), ide.theme === "unknown", !isReady])
+  ) {
     return <Spin />;
   }
 

@@ -3,7 +3,7 @@ import { NoteTestUtilsV4, NOTE_PRESETS_V4, } from "@dendronhq/common-test-utils"
 import {
   ENGINE_HOOKS,
   ENGINE_HOOKS_MULTI,
-  TestEngineUtils
+  TestEngineUtils,
 } from "@dendronhq/engine-test-utils";
 import { createMockQuickPick, getActiveEditorBasename, TIMEOUT } from "../testUtils";
 import _ from "lodash";
@@ -29,7 +29,7 @@ import { expect } from "../testUtilsv2";
 import {
   runLegacyMultiWorkspaceTest,
   setupBeforeAfter,
-  withConfig
+  withConfig,
 } from "../testUtilsV3";
 import { DendronWorkspace } from "../../workspace";
 import { CONFIG } from "../../constants";
@@ -68,19 +68,16 @@ function getButtonsByTypeArray(
   typeArray: ButtonType[],
   buttons: vscode.QuickInputButton[] & DendronBtn[]
 ) {
-  return _.map(
-    typeArray,
-    (btnType) => {
-      return getButtonByType(btnType, buttons);
-    }
-  )
+  return _.map(typeArray, (btnType) => {
+    return getButtonByType(btnType, buttons);
+  });
 }
 
 function getSelectionTypeButtons(
   buttons: vscode.QuickInputButton[] & DendronBtn[]
 ): {
-  selection2linkBtn: Selection2LinkBtn,
-  selectionExtractBtn: SelectionExtractBtn,
+  selection2linkBtn: Selection2LinkBtn;
+  selectionExtractBtn: SelectionExtractBtn;
 } {
   const [selection2linkBtn, selectionExtractBtn] = getButtonsByTypeArray(
     _.values(LookupSelectionTypeEnum),
@@ -92,12 +89,12 @@ function getSelectionTypeButtons(
 function getNoteTypeButtons(
   buttons: vscode.QuickInputButton[] & DendronBtn[]
 ): {
-  journalBtn: JournalBtn,
-  scratchBtn: ScratchBtn
+  journalBtn: JournalBtn;
+  scratchBtn: ScratchBtn;
 } {
   const [journalBtn, scratchBtn] = getButtonsByTypeArray(
-    _.values(LookupNoteTypeEnum), 
-    buttons,
+    _.values(LookupNoteTypeEnum),
+    buttons
   ) as vscode.QuickInputButton[] & DendronBtn[];
   return { journalBtn, scratchBtn };
 }
@@ -337,14 +334,14 @@ suite("NoteLookupCommand", function () {
             noteType: LookupNoteTypeEnum.journal,
             noConfirm: true,
           })) as CommandOutput;
-          
+
           expect(engine.config.journal.dateFormat).toEqual("y.MM.dd");
           // quickpick value should be `foo.journal.yyyy.mm.dd`
           const today = Time.now().toFormat(engine.config.journal.dateFormat);
-          expect(out.quickpick.value).toEqual(`foo.journal.${today}`)
+          expect(out.quickpick.value).toEqual(`foo.journal.${today}`);
 
           done();
-        }
+        },
       });
     });
 
@@ -364,7 +361,7 @@ suite("NoteLookupCommand", function () {
             noteType: LookupNoteTypeEnum.scratch,
             noConfirm: true,
           })) as CommandOutput;
-          
+
           // quickpick value should be `scratch.yyyy.mm.dd.ts`
           const dateFormat = DendronWorkspace.configuration().get<string>(
             CONFIG["DEFAULT_SCRATCH_DATE_FORMAT"].key
@@ -374,7 +371,7 @@ suite("NoteLookupCommand", function () {
           expect(out.quickpick.value.startsWith(`scratch.${todayFormatted}.`)).toBeTruthy();
 
           done();
-        }
+        },
       });
     });
 
@@ -391,17 +388,17 @@ suite("NoteLookupCommand", function () {
           stubVaultPick(vaults);
 
           const { controller } = await cmd.gatherInputs({
-            noteType: LookupNoteTypeEnum.journal
+            noteType: LookupNoteTypeEnum.journal,
           });
 
           let { journalBtn, scratchBtn } = getNoteTypeButtons(
             controller.quickpick.buttons
-          )
+          );
 
           expect(journalBtn.pressed).toBeTruthy();
           expect(scratchBtn.pressed).toBeFalsy();
           expect(controller.quickpick.value.startsWith("foo.journal."));
-          
+
           await controller.onTriggerButton(journalBtn);
 
           ({ journalBtn, scratchBtn } = getNoteTypeButtons(
@@ -412,7 +409,7 @@ suite("NoteLookupCommand", function () {
           expect(controller.quickpick.value).toEqual("foo");
 
           done();
-        }
+        },
       });
     });
 
@@ -429,17 +426,17 @@ suite("NoteLookupCommand", function () {
           stubVaultPick(vaults);
 
           const { controller } = await cmd.gatherInputs({
-            noteType: LookupNoteTypeEnum.scratch
+            noteType: LookupNoteTypeEnum.scratch,
           });
 
           let { journalBtn, scratchBtn } = getNoteTypeButtons(
             controller.quickpick.buttons
-          )
+          );
 
           expect(journalBtn.pressed).toBeFalsy();
           expect(scratchBtn.pressed).toBeTruthy();
           expect(controller.quickpick.value.startsWith("scratch."));
-          
+
           await controller.onTriggerButton(scratchBtn);
 
           ({ journalBtn, scratchBtn } = getNoteTypeButtons(
@@ -450,7 +447,7 @@ suite("NoteLookupCommand", function () {
           expect(controller.quickpick.value).toEqual("foo");
 
           done();
-        }
+        },
       });
     });
 
@@ -467,19 +464,19 @@ suite("NoteLookupCommand", function () {
           stubVaultPick(vaults);
 
           const { controller } = await cmd.gatherInputs({
-            noteType: LookupNoteTypeEnum.journal
+            noteType: LookupNoteTypeEnum.journal,
           });
 
           let { journalBtn, scratchBtn } = getNoteTypeButtons(
             controller.quickpick.buttons
-          )
+          );
 
           expect(journalBtn.pressed).toBeTruthy();
           expect(scratchBtn.pressed).toBeFalsy();
           expect(controller.quickpick.value.startsWith("foo.journal."));
-          
+
           await controller.onTriggerButton(scratchBtn);
-          
+
           ({ journalBtn, scratchBtn } = getNoteTypeButtons(
             controller.quickpick.buttons
           ));
@@ -497,8 +494,8 @@ suite("NoteLookupCommand", function () {
           expect(controller.quickpick.value).toEqual("foo");
 
           done();
-        }
-      }); 
+        },
+      });
     });
 
     test("selection2link basic", (done) => {
@@ -525,14 +522,16 @@ suite("NoteLookupCommand", function () {
           // should create foo.foo-body.md with an empty body.
           expect(getActiveEditorBasename().endsWith("foo.foo-body.md"));
           const newNoteEditor = VSCodeUtils.getActiveTextEditorOrThrow();
-          const newNote = VSCodeUtils.getNoteFromDocument(newNoteEditor.document);
+          const newNote = VSCodeUtils.getNoteFromDocument(
+            newNoteEditor.document
+          );
           expect(newNote?.body).toEqual("");
 
           // should change selection to link with alais.
           const changedText = fooNoteEditor.document.getText();
           expect(changedText.endsWith("[[foo body|foo.foo-body]]\n"));
           done();
-        }
+        },
       });
     });
 
@@ -556,14 +555,13 @@ suite("NoteLookupCommand", function () {
           });
 
 
-          let { selection2linkBtn, selectionExtractBtn } = getSelectionTypeButtons(
-            controller.quickpick.buttons
-          );
+          let { selection2linkBtn, selectionExtractBtn } =
+            getSelectionTypeButtons(controller.quickpick.buttons);
 
           expect(selection2linkBtn?.pressed).toBeTruthy();
           expect(selectionExtractBtn.pressed).toBeFalsy();
           expect(controller.quickpick.value).toEqual("foo.foo-body");
-          
+
           await controller.onTriggerButton(selection2linkBtn);
 
           ({ selection2linkBtn, selectionExtractBtn } = getSelectionTypeButtons(
@@ -575,7 +573,7 @@ suite("NoteLookupCommand", function () {
           expect(controller.quickpick.value).toEqual("foo");
 
           done();
-        }
+        },
       });
     });
 
@@ -604,17 +602,19 @@ suite("NoteLookupCommand", function () {
           // should create foo.extracted.md with an selected text as body.
           expect(getActiveEditorBasename().endsWith("foo.extracted.md"));
           const newNoteEditor = VSCodeUtils.getActiveTextEditorOrThrow();
-          const newNote = VSCodeUtils.getNoteFromDocument(newNoteEditor.document);
+          const newNote = VSCodeUtils.getNoteFromDocument(
+            newNoteEditor.document
+          );
           expect(newNote?.body.trim()).toEqual("foo body");
 
           // should remove selection
           const changedText = fooNoteEditor.document.getText();
           expect(changedText.includes("foo body")).toBeFalsy();
           done();
-        }
+        },
       });
     });
-    
+
     test("selectionExtract modifier toggle", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
@@ -635,13 +635,12 @@ suite("NoteLookupCommand", function () {
           });
 
 
-          let { selection2linkBtn, selectionExtractBtn } = getSelectionTypeButtons(
-            controller.quickpick.buttons
-          );
+          let { selection2linkBtn, selectionExtractBtn } =
+            getSelectionTypeButtons(controller.quickpick.buttons);
 
           expect(selection2linkBtn?.pressed).toBeFalsy();
           expect(selectionExtractBtn.pressed).toBeTruthy();
-          
+
           await controller.onTriggerButton(selectionExtractBtn);
 
           ({ selection2linkBtn, selectionExtractBtn } = getSelectionTypeButtons(
@@ -652,7 +651,7 @@ suite("NoteLookupCommand", function () {
           expect(selectionExtractBtn.pressed).toBeFalsy();
 
           done();
-        }
+        },
       });
     });
 
@@ -676,14 +675,13 @@ suite("NoteLookupCommand", function () {
           });
 
 
-          let { selection2linkBtn, selectionExtractBtn } = getSelectionTypeButtons(
-            controller.quickpick.buttons
-          );
+          let { selection2linkBtn, selectionExtractBtn } =
+            getSelectionTypeButtons(controller.quickpick.buttons);
 
           expect(selection2linkBtn?.pressed).toBeTruthy();
           expect(selectionExtractBtn.pressed).toBeFalsy();
           expect(controller.quickpick.value).toEqual("foo.foo-body");
-          
+
           await controller.onTriggerButton(selectionExtractBtn);
 
           ({ selection2linkBtn, selectionExtractBtn } = getSelectionTypeButtons(
@@ -693,7 +691,7 @@ suite("NoteLookupCommand", function () {
           expect(selection2linkBtn.pressed).toBeFalsy();
           expect(selectionExtractBtn.pressed).toBeTruthy();
           expect(controller.quickpick.value).toEqual("foo");
-          
+
           await controller.onTriggerButton(selectionExtractBtn);
 
           ({ selection2linkBtn, selectionExtractBtn } = getSelectionTypeButtons(
@@ -705,7 +703,7 @@ suite("NoteLookupCommand", function () {
           expect(controller.quickpick.value).toEqual("foo");
 
           done();
-        }
+        },
       });
     });
 

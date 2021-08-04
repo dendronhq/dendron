@@ -109,9 +109,7 @@ describe("wikiLinks", () => {
       });
 
       test("avoids parsing broken links", () => {
-        const resp = proc(engine, genDendronData(dendronData)).parse(
-          `[[#]]`
-        );
+        const resp = proc(engine, genDendronData(dendronData)).parse(`[[#]]`);
         const wikiLink = getWikiLink(resp);
         expect(wikiLink.type).not.toEqual(DendronASTTypes.WIKI_LINK);
       });
@@ -316,7 +314,6 @@ describe("wikiLinks", () => {
       },
       preSetupHook: ENGINE_HOOKS.setupBasic,
     });
-
 
     const linkWithAliasHash = `[[#bar|foo]]`;
     const WITH_ALIAS_HASH = createProcTests({

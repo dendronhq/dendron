@@ -131,7 +131,7 @@ export class LookupControllerV2 {
       range,
       provider,
       changed: btnTriggered,
-      vaultSelectionMode: this.vaultSelectionMode
+      vaultSelectionMode: this.vaultSelectionMode,
     });
   };
 
@@ -188,7 +188,7 @@ export class LookupControllerV2 {
       range,
       quickPickValue: cleanOpts.value,
       provider,
-      vaultSelectionMode: this.vaultSelectionMode
+      vaultSelectionMode: this.vaultSelectionMode,
     });
     Logger.info({ ctx, profile, msg: "post:updatePickerBehavior" });
     quickPick.onDidTriggerButton(this.onTriggerButton);

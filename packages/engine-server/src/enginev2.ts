@@ -456,10 +456,7 @@ export class DendronEngineV2 implements DEngine {
   }
 
   async refreshNotesV2(notes: NoteChangeEntry[]) {
-    const notesMap = NoteUtils.createFnameNoteMap(
-      _.values(this.notes),
-      true
-    );
+    const notesMap = NoteUtils.createFnameNoteMap(_.values(this.notes), true);
     await Promise.all(
       notes.map(async (ent: NoteChangeEntry) => {
         const { id } = ent.note;
@@ -568,7 +565,10 @@ export class DendronEngineV2 implements DEngine {
         engine: this,
       });
       if (opts.filterByAnchorType) {
-        _.remove(blocks, (block) => block.anchor?.type !== opts.filterByAnchorType);
+        _.remove(
+          blocks,
+          (block) => block.anchor?.type !== opts.filterByAnchorType
+        );
       }
       return { data: blocks, error: null };
     } catch (err) {

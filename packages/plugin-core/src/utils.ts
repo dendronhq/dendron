@@ -503,7 +503,7 @@ export class WSUtils {
   }: {
     subprocess: ExecaChildProcess;
     context: vscode.ExtensionContext;
-    onExit: Parameters<typeof ServerUtils["onProcessExit"]>[0]["cb"]
+    onExit: Parameters<typeof ServerUtils["onProcessExit"]>[0]["cb"];
   }) {
     const ctx = "WSUtils.handleServerProcess";
     Logger.info({ ctx, msg: "subprocess running", pid: subprocess.pid });

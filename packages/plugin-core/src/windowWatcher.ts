@@ -2,7 +2,7 @@ import {
   DendronWebViewKey,
   DMessageType,
   NoteUtils,
-  OnDidChangeActiveTextEditorMsg
+  OnDidChangeActiveTextEditorMsg,
 } from "@dendronhq/common-all";
 import { DendronASTDest, MDUtilsV5 } from "@dendronhq/engine-server";
 import _ from "lodash";
@@ -15,7 +15,9 @@ import { VSCodeUtils } from "./utils";
 import { getWS } from "./workspace";
 
 export class WindowWatcher {
-  private onDidChangeActiveTextEditorHandlers: ((e: TextEditor | undefined) => void)[] = [];
+  private onDidChangeActiveTextEditorHandlers: ((
+    e: TextEditor | undefined
+  ) => void)[] = [];
 
   activate(context: ExtensionContext) {
     window.onDidChangeVisibleTextEditors((editors) => {
@@ -32,7 +34,9 @@ export class WindowWatcher {
     );
   }
 
-  registerActiveTextEditorChangedHandler(handler:(e: TextEditor | undefined) => void) {
+  registerActiveTextEditorChangedHandler(
+    handler: (e: TextEditor | undefined) => void
+  ) {
     this.onDidChangeActiveTextEditorHandlers.push(handler);
   }
 
@@ -54,7 +58,9 @@ export class WindowWatcher {
       this.triggerSchemaGraphViewUpdate();
       this.triggerNotePreviewUpdate(editor);
 
-      this.onDidChangeActiveTextEditorHandlers.forEach(value => value.call(this, editor));
+      this.onDidChangeActiveTextEditorHandlers.forEach((value) =>
+        value.call(this, editor)
+      );
 
       if (getWS().workspaceWatcher?.getNewlyOpenedDocument(editor.document)) {
         this.onFirstOpen(editor);

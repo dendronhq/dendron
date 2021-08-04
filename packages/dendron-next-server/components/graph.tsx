@@ -23,7 +23,6 @@ import { DendronProps } from "../lib/types";
 import useSyncGraphWithIDE from "../hooks/useSyncGraphWithIDE";
 import { Button, Space, Spin, Typography } from "antd";
 
-
 export class GraphUtils {
   static isLocalGraph(config: GraphConfig) {
     if (_.isUndefined(config["options.show-local-graph"])) return false;

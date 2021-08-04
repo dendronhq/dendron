@@ -48,7 +48,7 @@ async function createSeed({ engine }: { engine: DEngineClient }) {
 
 // Platform agnostic check file for a seed vault path
 function getSeedVaultPathForCheckFile(seedId: string) {
-  return path.join(`${seedId}`, `vault`).replace("\\", "\\\\")
+  return path.join(`${seedId}`, `vault`).replace("\\", "\\\\");
 }
 
 // Skip on Windows for now until reliability issues can be fixed.

@@ -29,10 +29,9 @@ const getFrontmatterPosition = (
     const parsed = proc.parse(editor.document.getText());
     visit(parsed, ["yaml"], (node) => {
       if (_.isUndefined(node.position)) return resolve(false); // Should never happen
-      const position = VSCodeUtils.point2VSCodePosition(
-        node.position.end,
-        { line: 1 }
-      );
+      const position = VSCodeUtils.point2VSCodePosition(node.position.end, {
+        line: 1,
+      });
       resolve(position);
     });
   });
@@ -85,9 +84,9 @@ export class NoteSyncService {
       return;
     }
     if (hints?.contentChanges) {
-      const allChangesInFM = _.every(hints.contentChanges, contentChange => {
+      const allChangesInFM = _.every(hints.contentChanges, (contentChange) => {
         const endPosition = contentChange.range.end;
-        return endPosition.isBefore(maybePos)
+        return endPosition.isBefore(maybePos);
       });
       if (allChangesInFM) {
         this.L.debug({ ctx, uri: uri.fsPath, msg: "frontmatter change only" });

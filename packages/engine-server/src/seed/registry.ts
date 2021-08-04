@@ -45,7 +45,7 @@ const SEED_REGISTRY: SeedRegistryDict = {
     repository: {
       type: "git",
       url: "https://github.com/dendronhq/templates.git",
-    }
+    },
   },
   "dendron.tldr": {
     name: "tldr",

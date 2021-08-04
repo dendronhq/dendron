@@ -27,9 +27,11 @@ export class Logger {
     if (fs.existsSync(logPath)) {
       try {
         fs.moveSync(logPath, `${logPath}.old`, { overwrite: true });
-      }
-      catch {
-        Logger.error({ ctx, msg: `Unable to rename ${logPath}. Logs will be appended.`});
+      } catch {
+        Logger.error({
+          ctx,
+          msg: `Unable to rename ${logPath}. Logs will be appended.`,
+        });
       }
     }
     fs.ensureFileSync(logPath);

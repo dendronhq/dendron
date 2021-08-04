@@ -122,12 +122,12 @@ function CalendarView({ engine, ide }: DendronProps) {
 
       // check if daily file is `y.MM` instead of `y.MM.dd` to apply proper format string.
       // unlike moment luxon marks the date as invalid if date and dateformat do not match
-      const isMontly = maybeDatePortion.split(".").length === 2;
+      const isMonthly = maybeDatePortion.split(".").length === 2;
 
       return maybeDatePortion && _.first(groupedDailyNotes[maybeDatePortion])
         ? Time.DateTime.fromFormat(
             maybeDatePortion,
-            isMontly ? defaultJournalMonthDateFormat : defaultJournalDateFormat
+            isMonthly ? defaultJournalMonthDateFormat : defaultJournalDateFormat
           )
         : undefined;
     }

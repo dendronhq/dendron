@@ -649,16 +649,18 @@ export class AnchorUtils {
   static headerTextPosition(header: Heading): Position {
     let start: Point | undefined;
     let end: Point | undefined;
-    visit(header, [DendronASTTypes.TEXT, DendronASTTypes.WIKI_LINK, DendronASTTypes.HASHTAG], (node) => {
-      if (node.type === DendronASTTypes.HEADING) return;
+    visit(header, [DendronASTTypes.TEXT, DendronASTTypes.WIKI_LINK, DendronASTTypes.HASHTAG, DendronASTTypes.BLOCK_ANCHOR], (node) => {
+      if (node.type === DendronASTTypes.BLOCK_ANCHOR && end) {
+        // Preserve whitespace after the header, for example `# foo ^bar`, where
+        // `^bar` must be separated with a space since it's not part of the header
+        end.column -= 1;
+        return;
+      }
       if (_.isUndefined(start)) start = node.position!.start;
       end = node.position!.end;
     });
     if (_.isUndefined(start) || _.isUndefined(end)) throw new DendronError({ message: "Unable to find the region of text containing the header" });
-    // Preserve whitespace after the header. This is important if there is a
-    // block anchor after the header, for example `# foo ^bar`, where the block
-    // anchor is not part of the header and the space must be maintained.
-    end.column -= 1;
+    
     return { start, end };
   }
 

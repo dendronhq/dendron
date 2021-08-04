@@ -24,7 +24,7 @@ export class CreateDailyJournalCommand extends BaseCommand<
   key = DENDRON_COMMANDS.CREATE_DAILY_JOURNAL_NOTE.key;
   async gatherInputs(): Promise<CommandInput | undefined> {
     const dailyJournalDomain = getWS().config.journal.dailyDomain;
-    const fname = DendronClientUtilsV2.genNoteName("JOURNAL", {
+    const { noteName: fname } = DendronClientUtilsV2.genNoteName("JOURNAL", {
       overrides: { domain: dailyJournalDomain },
     });
     return { title: fname };

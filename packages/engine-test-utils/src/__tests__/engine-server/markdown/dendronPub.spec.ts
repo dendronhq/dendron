@@ -8,8 +8,9 @@ import {
   DendronPubOpts,
   MDUtilsV4,
 } from "@dendronhq/engine-server";
-import { testWithEngine } from "../../../engine";
-import { checkVFile } from "./utils";
+import { runEngineTestV5, testWithEngine } from "../../../engine";
+import { checkNotInVFile, checkVFile } from "./utils";
+import { TestConfigUtils } from "../../../config";
 
 function proc(
   engine: DEngineClient,
@@ -59,6 +60,116 @@ describe("dendronPub", () => {
         await checkVFile(out, "![alt-text](/bond/image-url.jpg)");
       }
     );
+  });
+
+  describe("frontmatter tags", () => {
+    describe("are rendered when available", () => {
+      test("single tag", async () => {
+        await runEngineTestV5(
+          async ({ engine, vaults }) => {
+            const out = await proc(engine, {
+              fname: "has.fmtags",
+              dest: DendronASTDest.HTML,
+              vault: vaults[0],
+              config: engine.config,
+            }).process("has fm tags");
+            await checkVFile(out, "Tags", "first");
+          },
+          {
+            preSetupHook: async ({ wsRoot, vaults }) => {
+              await NoteTestUtilsV4.createNote({
+                fname: "has.fmtags",
+                wsRoot,
+                vault: vaults[0],
+                props: { tags: "first" },
+              });
+            },
+            expect,
+          }
+        );
+      });
+
+      test("multiple tags", async () => {
+        await runEngineTestV5(
+          async ({ engine, vaults }) => {
+            const out = await proc(engine, {
+              fname: "has.fmtags",
+              dest: DendronASTDest.HTML,
+              vault: vaults[0],
+              config: engine.config,
+            }).process("has fm tags");
+            await checkVFile(out, "Tags", "first", "second");
+          },
+          {
+            preSetupHook: async ({ wsRoot, vaults }) => {
+              await NoteTestUtilsV4.createNote({
+                fname: "has.fmtags",
+                wsRoot,
+                vault: vaults[0],
+                props: { tags: ["first", "second"] },
+              });
+            },
+            expect,
+          }
+        );
+      });
+    });
+
+    test("are not rendered when missing", async () => {
+      await runEngineTestV5(
+        async ({ engine, vaults }) => {
+          const out = await proc(engine, {
+            fname: "no.fmtags",
+            dest: DendronASTDest.HTML,
+            vault: vaults[0],
+            config: engine.config,
+          }).process("has no fm tags");
+          await checkNotInVFile(out, "Tags");
+        },
+        {
+          preSetupHook: async ({ wsRoot, vaults }) => {
+            await NoteTestUtilsV4.createNote({
+              fname: "no.fmtags",
+              wsRoot,
+              vault: vaults[0],
+            });
+          },
+          expect,
+        }
+      );
+    });
+
+    test("are not rendered when disabled", async () => {
+      await runEngineTestV5(
+        async ({ engine, vaults }) => {
+          const out = await proc(engine, {
+            fname: "has.fmtags",
+            dest: DendronASTDest.HTML,
+            vault: vaults[0],
+            config: engine.config,
+          }).process("has fm tags");
+          await checkNotInVFile(out, "Tags");
+        },
+        {
+          preSetupHook: async ({ wsRoot, vaults }) => {
+            TestConfigUtils.withConfig(
+              (c) => {
+                c.site.showFrontMatterTags = false;
+                return c;
+              },
+              { wsRoot }
+            );
+            await NoteTestUtilsV4.createNote({
+              fname: "has.fmtags",
+              wsRoot,
+              vault: vaults[0],
+              props: { tags: ["first", "second"] },
+            });
+          },
+          expect,
+        }
+      );
+    });
   });
 
   describe("no publish", () => {

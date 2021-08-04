@@ -35,7 +35,7 @@ const setupSingleWithWikilink = async (opts: WorkspaceOpts) => {
     fname: "foo",
     body: "[[foo.bar]]\n",
   });
-}
+};
 
 const setupWithWikilink = async (opts: WorkspaceOpts) => {
   const { wsRoot, vaults } = opts;
@@ -49,10 +49,7 @@ const setupWithWikilink = async (opts: WorkspaceOpts) => {
     wsRoot,
     vault: vaults[0],
     fname: "foo.bar",
-    body: [
-      "[[dendron://vault1/fake.link]]",
-      "[[fake.link2]]"
-    ].join("\n"),
+    body: ["[[dendron://vault1/fake.link]]", "[[fake.link2]]"].join("\n"),
   });
 };
 
@@ -90,7 +87,10 @@ const setupWithAliasedWikilink = async (opts: WorkspaceOpts) => {
     wsRoot,
     vault: vaults[0],
     fname: "foo",
-    body: ["[[foo bar|dendron://vault1/foo.bar]]", "[[foobaz|dendron://vault1/foo.baz]]"].join("\n"),
+    body: [
+      "[[foo bar|dendron://vault1/foo.bar]]",
+      "[[foobaz|dendron://vault1/foo.baz]]",
+    ].join("\n"),
   });
 };
 
@@ -360,7 +360,7 @@ describe("CREATE_MISSING_LINKED_NOTES", () => {
         preSetupHook: setupSingleWithWikilink,
       }
     );
-  })
+  });
 
   test("basic pass candidates opts", async () => {
     await runEngineTestV5(

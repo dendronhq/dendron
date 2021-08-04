@@ -18,13 +18,15 @@ suite("NoteSyncService", function testSuite() {
   const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {
     beforeHook: () => {
       newUpdatedTime = 60000;
-      timeStub = sinon.stub(Time, "now").returns(DateTime.fromMillis(newUpdatedTime));
+      timeStub = sinon
+        .stub(Time, "now")
+        .returns(DateTime.fromMillis(newUpdatedTime));
     },
     afterHook: () => {
       if (timeStub) {
         timeStub.restore();
       }
-    }
+    },
   });
 
   describe("onDidChange", () => {

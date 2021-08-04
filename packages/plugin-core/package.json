@@ -4,7 +4,7 @@
   "displayName": "dendron",
   "description": "Dendron is a hierarchal note taking tool that grows as you do. ",
   "publisher": "dendron",
-  "version": "0.52.0",
+  "version": "0.53.0",
   "engines": {
     "vscode": "^1.54.0"
   },
@@ -482,6 +482,16 @@
         "command": "dendron.launchTutorial",
         "title": "Dendron: Launch Tutorial",
         "desc": "Launch the Tutorial"
+      },
+      {
+        "command": "dendron.seedAdd",
+        "title": "Dendron: Seed Add",
+        "desc": "Add Seed to Current Workspace"
+      },
+      {
+        "command": "dendron.seedRemove",
+        "title": "Dendron: Seed Remove",
+        "desc": "Remove Seed from Current Workspace"
       }
     ],
     "configuration": {
@@ -739,8 +749,8 @@
     "vscode:uninstall": "node ./out/src/scripts/uninstallHook.js"
   },
   "devDependencies": {
-    "@dendronhq/common-test-utils": "^0.52.0",
-    "@dendronhq/engine-test-utils": "^0.52.0",
+    "@dendronhq/common-test-utils": "^0.53.0",
+    "@dendronhq/engine-test-utils": "^0.53.0",
     "@types/execa": "^2.0.0",
     "@types/fs-extra": "^9.0.1",
     "@types/glob": "^7.1.1",
@@ -762,12 +772,12 @@
     "webpack-cli": "^3.3.12"
   },
   "dependencies": {
-    "@dendronhq/api-server": "^0.52.0",
-    "@dendronhq/common-all": "^0.52.0",
-    "@dendronhq/common-server": "^0.52.0",
-    "@dendronhq/dendron-cli": "^0.52.0",
-    "@dendronhq/engine-server": "^0.52.0",
-    "@dendronhq/pods-core": "^0.52.0",
+    "@dendronhq/api-server": "^0.53.0",
+    "@dendronhq/common-all": "^0.53.0",
+    "@dendronhq/common-server": "^0.53.0",
+    "@dendronhq/dendron-cli": "^0.53.0",
+    "@dendronhq/engine-server": "^0.53.0",
+    "@dendronhq/pods-core": "^0.53.0",
     "@types/vscode": "1.58",
     "cross-path-sort": "^1.0.0",
     "execa": "^4.0.2",
@@ -780,7 +790,8 @@
     "replace-in-file": "^6.2.0",
     "semver": "^7.3.2",
     "unist-util-visit": "2.0.3",
-    "vscode-languageclient": "^6.1.3"
+    "vscode-languageclient": "^6.1.3",
+    "yaml-unist-parser": "^1.3.1"
   },
   "repository": {
     "type": "git",

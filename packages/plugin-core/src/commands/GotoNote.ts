@@ -3,25 +3,16 @@ import {
   DNoteAnchor,
   DVault,
   getSlugger,
-  isNotUndefined,
   NoteProps,
   NoteUtils,
-  TAGS_HIERARCHY,
   VaultUtils,
 } from "@dendronhq/common-all";
-import { matchWikiLink, HASHTAG_REGEX_LOOSE } from "@dendronhq/engine-server";
 import _ from "lodash";
-import {
-  Position,
-  Selection,
-  Uri,
-  window,
-  ViewColumn,
-} from "vscode";
+import { Position, Selection, Uri, window, ViewColumn } from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../utils";
-import { parseAnchor } from "../utils/md";
+import { getReferenceAtPosition } from "../utils/md";
 import { DendronWorkspace, getWS } from "../workspace";
 import { BasicCommand } from "./base";
 import { VaultSelectionMode } from "./LookupCommand";
@@ -64,41 +55,22 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
 
   getLinkFromSelection() {
     const { selection, editor } = VSCodeUtils.getSelection();
-    if (!_.isEmpty(selection) && selection?.start) {
-      const currentLine = editor?.document.lineAt(selection.start.line).text;
-
-      if (currentLine) {
-        const lastIdx = currentLine
-          .slice(0, selection.start.character)
-          .lastIndexOf("[[");
-        const padding = Math.max(lastIdx - 3, 0);
-        const txtToMatch = currentLine.slice(padding);
-        const out = matchWikiLink(txtToMatch);
-        if (
-          out &&
-          _.inRange(
-            selection.start.character,
-            out.start + padding,
-            out.end + padding
-          )
-        ) {
-          return out.link;
-        } else {
-          // handle hashtags
-          for (const hashtag of currentLine.matchAll(new RegExp(HASHTAG_REGEX_LOOSE, "g"))) {
-            if (isNotUndefined(hashtag.index) && _.inRange(selection.start.character, hashtag.index, hashtag.index + hashtag[0].length)) {
-              return {
-                alias: hashtag[0],
-                value: `${TAGS_HIERARCHY}${hashtag.groups!.tagContents}`,
-                anchorHeader: undefined,
-                vaultName: undefined,
-              };
-            }
-          }
-        }
-      }
-    }
-    return;
+    if (
+      _.isEmpty(selection) ||
+      _.isUndefined(selection) ||
+      _.isUndefined(selection.start)
+    )
+      return;
+    const currentLine = editor?.document.lineAt(selection.start.line).text;
+    if (!currentLine) return;
+    const reference = getReferenceAtPosition(editor!.document, selection.start);
+    if (!reference) return;
+    return {
+      alias: reference?.label,
+      value: reference?.ref,
+      vaultName: reference?.vaultName,
+      anchorHeader: reference.anchorStart,
+    };
   }
 
   private async processInputs(opts: CommandOpts) {
@@ -129,7 +101,7 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
       }
     }
 
-    if (!opts.anchor && link?.anchorHeader) opts.anchor = parseAnchor(link?.anchorHeader);
+    if (!opts.anchor && link.anchorHeader) opts.anchor = link.anchorHeader;
 
     if (!opts.vault) {
       if (link.vaultName) {
@@ -166,14 +138,14 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
             confirmVaultSetting !== true
               ? VaultSelectionMode.smart
               : VaultSelectionMode.alwaysPrompt;
-  
+
           const currentVault = PickerUtilsV2.getVaultForOpenEditor();
           const selectedVault = await PickerUtilsV2.getOrPromptVaultForNewNote({
             vault: currentVault,
             fname: opts.qs,
             vaultSelectionMode: selectionMode,
           });
-  
+
           // If we prompted the user and they selected nothing, then they want to cancel
           if (_.isUndefined(selectedVault)) {
             return;
@@ -204,12 +176,12 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     const { overrides } = opts;
     const client = DendronWorkspace.instance().getEngine();
 
-    const { qs, vault } = await this.processInputs(opts) || opts;
+    const { qs, vault } = (await this.processInputs(opts)) || opts;
     if (_.isUndefined(qs) || _.isUndefined(vault)) {
       // There was an error or the user cancelled a prompt
       return;
     }
-    
+
     let pos: undefined | Position;
     const out = await DendronWorkspace.instance().pauseWatchers<CommandOutput>(
       async () => {

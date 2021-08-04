@@ -4,12 +4,7 @@ import { DendronProps } from "../lib/types";
 import { createLogger } from "@dendronhq/common-frontend";
 
 export function MermaidHeaders() {
-  return [
-    <script
-      key="mermaid-js"
-      src="/js/mermaid.8-11.min.js"
-    ></script>,
-  ];
+  return [<script key="mermaid-js" src="/js/mermaid.8-11.min.js"></script>];
 }
 
 export function MathJaxHeaders() {
@@ -44,10 +39,7 @@ function PreviewHeader({ engine }: DendronProps) {
 
   return (
     <Head>
-      <script
-        key="jquery"
-        src="/js/jquery.3-60.min.js"
-      ></script>
+      <script key="jquery" src="/js/jquery.3-60.min.js"></script>
       {engine?.config?.useKatex && MathJaxHeaders()}
       {engine?.config?.mermaid && MermaidHeaders()}
     </Head>

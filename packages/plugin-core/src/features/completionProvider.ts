@@ -7,17 +7,17 @@ import {
   NoteProps,
   NoteUtils,
   TAGS_HIERARCHY,
+  LINK_NAME,
+  ALIAS_NAME,
   VaultUtils,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import {
-  ALIAS_NAME,
   AnchorUtils,
   DendronASTDest,
   DendronASTTypes,
   HASHTAG_REGEX_LOOSE,
   LinkUtils,
-  LINK_NAME,
   MDUtilsV5,
   ProcFlavor,
 } from "@dendronhq/engine-server";
@@ -85,7 +85,10 @@ export const provideCompletionItems = (
   for (const match of matches) {
     if (_.isUndefined(match.groups) || _.isUndefined(match.index)) continue;
     const { entireLink } = match.groups;
-    if (match.index <= position.character && position.character <= match.index + entireLink.length) {
+    if (
+      match.index <= position.character &&
+      position.character <= match.index + entireLink.length
+    ) {
       found = match;
     }
   }
@@ -93,11 +96,15 @@ export const provideCompletionItems = (
     _.isUndefined(found) ||
     _.isUndefined(found.index) ||
     _.isUndefined(found.groups)
-  ) return;
+  )
+    return;
   Logger.debug({ ctx, found });
 
-  if (found.groups.hash && found.index + (found.groups.beforeAnchor?.length || 0) > position.character) {
-    Logger.info({ctx, msg: "letting block autocomplete take over" });
+  if (
+    found.groups.hash &&
+    found.index + (found.groups.beforeAnchor?.length || 0) > position.character
+  ) {
+    Logger.info({ ctx, msg: "letting block autocomplete take over" });
     return;
   }
 
@@ -120,7 +127,7 @@ export const provideCompletionItems = (
   const currentVault = VSCodeUtils.getNoteFromDocument(document)?.vault;
   const wsRoot = engine.wsRoot;
   Logger.debug({ ctx, range, notesLength: notes.length, currentVault, wsRoot });
-  
+
   const notesByFname = new DefaultMap<string, number>(() => 0);
   _.values(notes).forEach((note) => {
     notesByFname.set(note.fname, notesByFname.get(note.fname) + 1);
@@ -143,17 +150,20 @@ export const provideCompletionItems = (
       item.label = `${note.fname.slice(TAGS_HIERARCHY.length)}`;
       item.insertText = item.label;
       // hashtags don't support xvault links, so we skip any special xvault handling
-    } else if (currentVault && !VaultUtils.isEqual(currentVault, note.vault, wsRoot)) {
+    } else if (
+      currentVault &&
+      !VaultUtils.isEqual(currentVault, note.vault, wsRoot)
+    ) {
       // For notes from other vaults than the current note, sort them after notes from the current vault.
       // x will get sorted after numbers, so these will appear after notes without x
-      item.sortText = 'x' + item.sortText;
-      
+      item.sortText = "x" + item.sortText;
+
       const sameNameNotes = notesByFname.get(note.fname);
       if (sameNameNotes > 1) {
         // There are multiple notes with the same name in multiple vaults,
         // and this note is in a different vault than the current note.
         // To generate a link to this note, we have to do an xvault link.
-        item.insertText = `${VaultUtils.toURIPrefix(note.vault)}/${note.fname}`; 
+        item.insertText = `${VaultUtils.toURIPrefix(note.vault)}/${note.fname}`;
       }
     }
 
@@ -163,16 +173,20 @@ export const provideCompletionItems = (
   return completionItems;
 };
 
-export const resolveCompletionItem = async (item: CompletionItem, token: CancellationToken): Promise<CompletionItem | undefined> => {
+export const resolveCompletionItem = async (
+  item: CompletionItem,
+  token: CancellationToken
+): Promise<CompletionItem | undefined> => {
   const ctx = "resolveCompletionItem";
   const { label: fname, detail: vname } = item;
-  if (!_.isString(fname) || !_.isString(vname) || token.isCancellationRequested) return;
+  if (!_.isString(fname) || !_.isString(vname) || token.isCancellationRequested)
+    return;
 
   const engine = getWS().getEngine();
-  const {vaults, notes, wsRoot} = engine;
-  const vault = VaultUtils.getVaultByName({vname, vaults});
+  const { vaults, notes, wsRoot } = engine;
+  const vault = VaultUtils.getVaultByName({ vname, vaults });
   if (_.isUndefined(vault)) {
-    Logger.info({ctx, msg: "vault not found", fname, vault, wsRoot});
+    Logger.info({ ctx, msg: "vault not found", fname, vault, wsRoot });
     return;
   }
   const note = NoteUtils.getNoteByFnameV5({
@@ -182,34 +196,37 @@ export const resolveCompletionItem = async (item: CompletionItem, token: Cancell
     wsRoot,
   });
   if (_.isUndefined(note)) {
-    Logger.info({ctx, msg: "note not found", fname, vault, wsRoot});
+    Logger.info({ ctx, msg: "note not found", fname, vault, wsRoot });
     return;
   }
 
   try {
     // Render a preview of this note
-    const proc = MDUtilsV5.procRemarkFull({
-      dest: DendronASTDest.MD_REGULAR,
-      engine,
-      vault: note.vault,
-      fname: note.fname,
-    }, {
-      flavor: ProcFlavor.HOVER_PREVIEW,
-    });
+    const proc = MDUtilsV5.procRemarkFull(
+      {
+        dest: DendronASTDest.MD_REGULAR,
+        engine,
+        vault: note.vault,
+        fname: note.fname,
+      },
+      {
+        flavor: ProcFlavor.HOVER_PREVIEW,
+      }
+    );
     const rendered = await proc.process(
       `![[${VaultUtils.toURIPrefix(note.vault)}/${note.fname}]]`
     );
     if (token.isCancellationRequested) return;
     item.documentation = new MarkdownString(rendered.toString());
-    Logger.debug({ctx, msg: "rendered note"});
+    Logger.debug({ ctx, msg: "rendered note" });
   } catch (err) {
     // Failed creating preview of the note
-    Logger.info({ctx, err, msg: "failed to render note"});
+    Logger.info({ ctx, err, msg: "failed to render note" });
     return;
   }
-  
+
   return item;
-}
+};
 
 // prettier-ignore
 const PARTIAL_WIKILINK_WITH_ANCHOR_REGEX = new RegExp("" +
@@ -321,12 +338,14 @@ export async function provideBlockCompletionItems(
     // There is already #^ which we are not removing, so don't duplicate it when inserting the text
     insertValueOnly = true;
   } else if (isNotUndefined(found.groups?.hash)) {
-    filterByAnchorType = "header"
+    filterByAnchorType = "header";
     // There is already # which we are not removing, so don't duplicate it when inserting the text
     insertValueOnly = true;
   }
 
-  const blocks = await getWS().getEngine().getNoteBlocks({ id: note.id, filterByAnchorType });
+  const blocks = await getWS()
+    .getEngine()
+    .getNoteBlocks({ id: note.id, filterByAnchorType });
   if (
     _.isUndefined(blocks.data) ||
     blocks.error?.severity === ERROR_SEVERITY.FATAL
@@ -416,7 +435,7 @@ export const activate = (context: ExtensionContext) => {
         provideCompletionItems,
       },
       "[", // for wikilinks and references
-      "#", // for hashtags
+      "#" // for hashtags
     )
   );
   context.subscriptions.push(

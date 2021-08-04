@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.53.0](https://github.com/dendronhq/dendron/compare/v0.52.0...v0.53.0) (2021-08-03)
+
+
+### Bug Fixes
+
+* Add code contrib tag for [@hydrosquall](https://github.com/hydrosquall) ([#1071](https://github.com/dendronhq/dendron/issues/1071)) ([2e8dfa4](https://github.com/dendronhq/dendron/commit/2e8dfa4cc111959592b165dc72c945eb632598f4))
+* clear out decoration types that have no decorations ([#1064](https://github.com/dendronhq/dendron/issues/1064)) ([7e8ff0b](https://github.com/dendronhq/dendron/commit/7e8ff0b96a25cc0377497766c69594486e593347))
+* hashtags include punctuation and quotation marks ([#1054](https://github.com/dendronhq/dendron/issues/1054)) ([8afa5bf](https://github.com/dendronhq/dendron/commit/8afa5bf07853d98f3c9939e3b8490c45cf2a5e1a)), closes [#1048](https://github.com/dendronhq/dendron/issues/1048)
+
+
+### Features Dendron
+
+* add a variety of graph indicators ([#1024](https://github.com/dendronhq/dendron/issues/1024)) ([995bcf3](https://github.com/dendronhq/dendron/commit/995bcf33a58a5b2778e59f96a512d5c0cff035a8))
+* graph performance and layout improvements ([#1051](https://github.com/dendronhq/dendron/issues/1051)) ([b2db353](https://github.com/dendronhq/dendron/commit/b2db35305094212fd7fe7b3dc0c05689ced842d8))
+
+
+
+
+
 # [0.52.0](https://github.com/dendronhq/dendron/compare/v0.51.3...v0.52.0) (2021-07-26)
 
 

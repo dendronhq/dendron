@@ -48,10 +48,10 @@ export type DLoc = {
  @deprecated use {@link DNoteLink}
  */
 export type DLink = {
-  type: "ref" | "wiki" | "md" | "backlink" | "linkCandidate";
+  type: "ref" | "wiki" | "md" | "backlink" | "linkCandidate" | "frontmatterTag";
   value: string;
   alias?: string;
-  position: Position;
+  position?: Position;
   from: DLoc;
   to?: DLoc;
   xvault?: boolean;
@@ -61,6 +61,23 @@ export type DLink = {
 
 export type DNodeType = "note" | "schema";
 export type DNodePointer = string;
+
+export const REQUIRED_DNODEPROPS: (keyof DNodeProps)[] = [
+  "id",
+  "title",
+  "desc",
+  "links",
+  "anchors",
+  "fname",
+  "type",
+  "updated",
+  "created",
+  "parent",
+  "children",
+  "data",
+  "body",
+  "vault",
+];
 
 /**
  * Props are the official interface for a node
@@ -140,6 +157,9 @@ export type DNodeProps<T = any, TCustom = any> = {
    * Hash of note content
    */
   contentHash?: string;
+
+  /** One or more frontmatter tags attached to this note. */
+  tags?: string | string[];
 };
 
 export type SchemaData = {

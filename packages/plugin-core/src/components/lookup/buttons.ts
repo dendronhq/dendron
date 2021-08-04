@@ -19,7 +19,7 @@ import {
 } from "../../commands/LookupCommand";
 import { clipboard, DendronClientUtilsV2, VSCodeUtils } from "../../utils";
 import { DendronQuickPickerV2 } from "./types";
-import { PickerUtilsV2 } from "./utils";
+import { NotePickerUtils, PickerUtilsV2 } from "./utils";
 
 export type ButtonType =
   | LookupEffectType
@@ -83,7 +83,6 @@ function isSplitButton(button: DendronBtn) {
   return _.includes(["horizontal", "vertical"], button.type);
 }
 
-// TODO: make it into a utils method?
 const selectionToNoteProps = async (opts: {
   selectionType: string;
   note: NoteProps;
@@ -93,8 +92,8 @@ const selectionToNoteProps = async (opts: {
   const { document, range } = resp || {};
   const { selectionType, note } = opts;
   const { selection, text } = VSCodeUtils.getSelection();
-  //TODO: split these up?
-  switch(selectionType) {
+
+  switch (selectionType) {
     case "selectionExtract": {
       if (!_.isUndefined(document)) {
         const body = "\n" + document.getText(range).trim();
@@ -208,17 +207,26 @@ export class Selection2LinkBtn extends DendronBtn {
         note,
       });
     };
-    
-    quickPick.rawValue = quickPick.value;
+
+    quickPick.prevValue = quickPick.value;
     const { text } = VSCodeUtils.getSelection();
     const slugger = getSlugger();
-    quickPick.value = [quickPick.value, slugger.slug(text!)].join(".");
+    quickPick.selectionModifierValue = slugger.slug(text!);
+    if (quickPick.noteModifierValue || quickPick.prefix) {
+      quickPick.value = NotePickerUtils.getPickerValue(quickPick);
+    } else {
+      quickPick.value = [
+        quickPick.rawValue,
+        NotePickerUtils.getPickerValue(quickPick),
+      ].join(".");
+    }
     return;
   }
 
   async onDisable({ quickPick }: ButtonHandleOpts) {
     quickPick.selectionProcessFunc = undefined;
-    quickPick.value = quickPick.rawValue;
+    quickPick.selectionModifierValue = undefined;
+    quickPick.value = NotePickerUtils.getPickerValue(quickPick);
     return;
   }
 }
@@ -262,18 +270,24 @@ export class JournalBtn extends DendronBtn {
   }
 
   async onEnable({ quickPick }: ButtonHandleOpts) {
-    quickPick.modifyPickerValueFunc = (value: string) => {
-      return DendronClientUtilsV2.genNoteName("JOURNAL", {
-        overrides: { domain: value },
-      });
+    quickPick.modifyPickerValueFunc = () => {
+      return DendronClientUtilsV2.genNoteName("JOURNAL");
     };
-    quickPick.rawValue = quickPick.value;
-    quickPick.value = quickPick.modifyPickerValueFunc(quickPick.rawValue);
+    const { noteName, prefix } = quickPick.modifyPickerValueFunc();
+    quickPick.noteModifierValue = _.difference(
+      noteName.split("."),
+      prefix.split(".")
+    ).join(".");
+    quickPick.prevValue = quickPick.value;
+    quickPick.prefix = prefix;
+    quickPick.value = NotePickerUtils.getPickerValue(quickPick);
     return;
   }
 
   async onDisable({ quickPick }: ButtonHandleOpts) {
     quickPick.modifyPickerValueFunc = undefined;
+    quickPick.noteModifierValue = undefined;
+    quickPick.prevValue = quickPick.value;
     quickPick.value = quickPick.rawValue;
   }
 }
@@ -290,30 +304,49 @@ export class ScratchBtn extends DendronBtn {
   }
 
   async onEnable({ quickPick }: ButtonHandleOpts) {
-    quickPick.modifyPickerValueFunc = (value: string) => {
-      return DendronClientUtilsV2.genNoteName("SCRATCH", {
-        overrides: { domain: value },
-      });
+    quickPick.modifyPickerValueFunc = () => {
+      return DendronClientUtilsV2.genNoteName("SCRATCH");
     };
-    quickPick.rawValue = quickPick.value;
-    quickPick.value = quickPick.modifyPickerValueFunc(quickPick.rawValue);
+    quickPick.prevValue = quickPick.value;
+    const { noteName, prefix } = quickPick.modifyPickerValueFunc();
+    quickPick.noteModifierValue = _.difference(
+      noteName.split("."),
+      prefix.split(".")
+    ).join(".");
+    quickPick.prefix = prefix;
+    quickPick.value = NotePickerUtils.getPickerValue(quickPick);
     return;
   }
 
   async onDisable({ quickPick }: ButtonHandleOpts) {
     quickPick.modifyPickerValueFunc = undefined;
+    quickPick.noteModifierValue = undefined;
+    quickPick.prevValue = quickPick.value;
     quickPick.value = quickPick.rawValue;
   }
 }
-class HorizontalSplitBtn extends DendronBtn {
+export class HorizontalSplitBtn extends DendronBtn {
   static create(pressed?: boolean) {
-    return new DendronBtn({
+    return new HorizontalSplitBtn({
       title: "Split Horizontal",
       iconOff: "split-horizontal",
       iconOn: "menu-selection",
       type: "horizontal",
       pressed,
     });
+  }
+
+  async onEnable({ quickPick }: ButtonHandleOpts) {
+    quickPick.showNote = async (uri) =>
+      vscode.window.showTextDocument(uri, {
+        viewColumn: vscode.ViewColumn.Beside,
+      });
+    return;
+  }
+
+  async onDisable({ quickPick }: ButtonHandleOpts) {
+    quickPick.showNote = async (uri) => vscode.window.showTextDocument(uri);
+    return;
   }
 }
 
@@ -366,9 +399,9 @@ export class MultiSelectBtn extends DendronBtn {
   }
 }
 
-export class CopyNoteLinkButton extends DendronBtn {
+export class CopyNoteLinkBtn extends DendronBtn {
   static create(pressed?: boolean) {
-    return new CopyNoteLinkButton({
+    return new CopyNoteLinkBtn({
       title: "Copy Note Link",
       iconOff: "clippy",
       iconOn: "menu-selection",
@@ -429,7 +462,7 @@ export function createAllButtons(
 ): DendronBtn[] {
   const buttons = [
     MultiSelectBtn.create(),
-    CopyNoteLinkButton.create(),
+    CopyNoteLinkBtn.create(),
     DirectChildFilterBtn.create(),
     SelectionExtractBtn.create(),
     Selection2LinkBtn.create(),

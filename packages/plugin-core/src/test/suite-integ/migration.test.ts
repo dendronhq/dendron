@@ -101,7 +101,7 @@ suite("Migration", function () {
       });
     });
 
-    describe("migrate to 47.1", function() {
+    describe("migrate to 47.1", function () {
       test("apply journal config, default settings", (done) => {
         runLegacyMultiWorkspaceTest({
           ctx,

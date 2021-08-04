@@ -65,7 +65,7 @@ export type DNoteLinkData = {
   sameFile?: boolean;
 };
 export type DNoteLink<TData extends DNoteLinkData = DNoteLinkData> = {
-  type: "ref" | "wiki" | "md" | "backlink" | "linkCandidate";
+  type: "ref" | "wiki" | "md" | "backlink" | "linkCandidate" | "frontmatterTag";
   position?: Position;
   from: DNoteLoc;
   to?: DNoteLoc;
@@ -331,7 +331,7 @@ export type EngineInfoResp = {
 
 export type WorkspaceSettings = {
   folders: WorkspaceFolderRaw[];
-  settings: any|undefined;
+  settings: any | undefined;
   extensions: WorkspaceExtensionSetting;
 };
 
@@ -533,7 +533,7 @@ export enum GraphViewMessageType {
   "onSelect" = "onSelect",
   "onGetActiveEditor" = "onGetActiveEditor",
   "onReady" = "onReady",
-  "onRequestGraphStyle" = "onRequestGraphStyle"
+  "onRequestGraphStyle" = "onRequestGraphStyle",
 }
 
 export enum CalendarViewMessageType {

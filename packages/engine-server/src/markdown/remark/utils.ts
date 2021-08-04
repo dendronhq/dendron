@@ -21,6 +21,11 @@ import {
   NoteBlock,
   VaultUtils,
   Point,
+  TAGS_HIERARCHY,
+  TagUtils,
+  LINK_CONTENTS,
+  LINK_NAME,
+  ALIAS_NAME,
 } from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-server";
 import _ from "lodash";
@@ -63,27 +68,7 @@ const toString = require("mdast-util-to-string");
 export { mdastBuilder };
 export { select, selectAll } from "unist-util-select";
 export { visit };
-
-export const ALIAS_DIVIDER = "|";
-
-/** A regexp fragment that matches a link name (e.g. a note name) */
-export const LINK_NAME = "[^#\\|>\\]\\[]+";
-/** A regexp fragment that matches an alias name */
-export const ALIAS_NAME = "[^\\|>\\]\\[]+"; // aliases may contain # symbols
-/** A regexp fragment that matches the contents of a link (without the brackets) */
-export const LINK_CONTENTS =
-  "" +
-  // alias?
-  `(` +
-  `(?<alias>${ALIAS_NAME}(?=\\|))` +
-  "\\|" +
-  ")?" +
-  // name
-  `(?<value>${LINK_NAME})?` +
-  // anchor?
-  `(#(?<anchor>${LINK_NAME}))?` +
-  // filters?
-  `(>(?<filtersRaw>.*))?`;
+export { LINK_CONTENTS, LINK_NAME, ALIAS_NAME };
 
 export function addError(proc: Processor, err: DendronError) {
   const errors = proc.data("errors") as DendronError[];
@@ -132,6 +117,16 @@ export function hashTag2WikiLinkNoteV4(hashtag: HashTag): WikiLinkNoteV4 {
   };
 }
 
+export function frontmatterTag2WikiLinkNoteV4(tag: string): WikiLinkNoteV4 {
+  return {
+    type: DendronASTTypes.WIKI_LINK,
+    value: `${TAGS_HIERARCHY}${tag}`,
+    data: {
+      alias: tag,
+    },
+  };
+}
+
 const getLinks = ({
   ast,
   note,
@@ -171,8 +166,31 @@ const getLinks = ({
       }
     }
   );
-
   const dlinks: DLink[] = [];
+
+  if (isNotUndefined(note.tags)) {
+    let tags: string[];
+    if (_.isString(note.tags)) {
+      tags = [note.tags];
+    } else {
+      tags = note.tags;
+    }
+
+    for (const tag of tags) {
+      dlinks.push({
+        type: "frontmatterTag",
+        from: NoteUtils.toNoteLoc(note),
+        value: `${TAGS_HIERARCHY}${tag}`,
+        alias: tag,
+        xvault: false,
+        position: undefined,
+        to: {
+          fname: `${TAGS_HIERARCHY}${tag}`,
+        },
+      });
+    }
+  }
+
   for (const wikiLink of wikiLinks) {
     dlinks.push({
       type: LinkUtils.astType2DLinkType(wikiLink.type),
@@ -211,7 +229,7 @@ const getLinks = ({
       // TODO: error if vault not found
       to: {
         fname: noteRef.data.link.from.fname, // not sure why, but noteRef's have their targets in `from` field
-        anchorHeader: anchorHeader ? anchorHeader : undefined,
+        anchorHeader: anchorHeader || undefined,
         vaultName: noteRef.data.link.data.vaultName,
       },
     });
@@ -403,7 +421,13 @@ export class LinkUtils {
         alias = _.trim(alias);
         value = _.trim(value);
       }
-      return { alias, value, anchorHeader: anchor, vaultName, sameFile: _.isUndefined(value) };
+      return {
+        alias,
+        value,
+        anchorHeader: anchor,
+        vaultName,
+        sameFile: _.isUndefined(value),
+      };
     } else {
       return null;
     }
@@ -517,7 +541,7 @@ export class LinkUtils {
   }: {
     link: DNoteLink;
     dest: DendronASTDest;
-    }): string | never {
+  }): string | never {
     switch (dest) {
       case DendronASTDest.MD_DENDRON: {
         if (this.isHashtagLink(link.from)) {
@@ -557,19 +581,28 @@ export class LinkUtils {
     oldLink: DNoteLink;
     newLink: DNoteLink;
   }) {
-    const { start, end } = oldLink.position!;
-    const startOffset = start.offset!;
-    const endOffset = end.offset!;
-    const body = note.body;
-    const newBody = [
-      body.slice(0, startOffset),
-      LinkUtils.renderNoteLink({
-        link: newLink,
-        dest: DendronASTDest.MD_DENDRON,
-      }),
-      body.slice(endOffset),
-    ].join("");
-    return newBody;
+    if (oldLink.type === "frontmatterTag") {
+      // Just change the prop
+      const oldTag = oldLink.from.alias!;
+      const newTag = newLink.from.alias;
+      TagUtils.replaceTag({ note, oldTag, newTag });
+      return note.body;
+    } else {
+      // Need to update note body
+      const { start, end } = oldLink.position!;
+      const startOffset = start.offset!;
+      const endOffset = end.offset!;
+      const body = note.body;
+      const newBody = [
+        body.slice(0, startOffset),
+        LinkUtils.renderNoteLink({
+          link: newLink,
+          dest: DendronASTDest.MD_DENDRON,
+        }),
+        body.slice(endOffset),
+      ].join("");
+      return newBody;
+    }
   }
 
   static isHashtagLink(link: DNoteLoc): link is DNoteLoc & { alias: string } {
@@ -609,7 +642,7 @@ export class LinkUtils {
     });
     return linkCandidates;
   }
-  
+
   static hasVaultPrefix(link: DLink) {
     if (link.to?.vaultName) {
       return true;
@@ -649,18 +682,30 @@ export class AnchorUtils {
   static headerTextPosition(header: Heading): Position {
     let start: Point | undefined;
     let end: Point | undefined;
-    visit(header, [DendronASTTypes.TEXT, DendronASTTypes.WIKI_LINK, DendronASTTypes.HASHTAG, DendronASTTypes.BLOCK_ANCHOR], (node) => {
-      if (node.type === DendronASTTypes.BLOCK_ANCHOR && end) {
-        // Preserve whitespace after the header, for example `# foo ^bar`, where
-        // `^bar` must be separated with a space since it's not part of the header
-        end.column -= 1;
-        return;
+    visit(
+      header,
+      [
+        DendronASTTypes.TEXT,
+        DendronASTTypes.WIKI_LINK,
+        DendronASTTypes.HASHTAG,
+        DendronASTTypes.BLOCK_ANCHOR,
+      ],
+      (node) => {
+        if (node.type === DendronASTTypes.BLOCK_ANCHOR && end) {
+          // Preserve whitespace after the header, for example `# foo ^bar`, where
+          // `^bar` must be separated with a space since it's not part of the header
+          end.column -= 1;
+          return;
+        }
+        if (_.isUndefined(start)) start = node.position!.start;
+        end = node.position!.end;
       }
-      if (_.isUndefined(start)) start = node.position!.start;
-      end = node.position!.end;
-    });
-    if (_.isUndefined(start) || _.isUndefined(end)) throw new DendronError({ message: "Unable to find the region of text containing the header" });
-    
+    );
+    if (_.isUndefined(start) || _.isUndefined(end))
+      throw new DendronError({
+        message: "Unable to find the region of text containing the header",
+      });
+
     return { start, end };
   }
 

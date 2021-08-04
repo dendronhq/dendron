@@ -56,6 +56,8 @@ import { LaunchTutorialCommand } from "./LaunchTutorialCommand";
 import { ConvertLinkCommand } from "./ConvertLink";
 import { ConfigureGraphStylesCommand } from "./ConfigureGraphStyles";
 import { RenameHeaderCommand } from "./RenameHeader";
+import { SeedAddCommand } from "./SeedAddCommand";
+import { SeedRemoveCommand } from "./SeedRemoveCommand";
 
 const ALL_COMMANDS = [
   AddAndCommit,
@@ -115,6 +117,8 @@ const ALL_COMMANDS = [
   VaultRemoveCommand,
   LaunchTutorialCommand,
   ConvertLinkCommand,
+  SeedAddCommand,
+  SeedRemoveCommand,
 ] as CodeCommandConstructor[];
 
 // when("betaFeatures", ()=> {

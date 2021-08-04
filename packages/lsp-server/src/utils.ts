@@ -18,8 +18,9 @@ export class LSPUtils {
       const uri = path.join(getSettings().wsRoot, "vault");
       return [{ uri, name: "vault" }];
     }
-    return await (this
-      .connection as IConnection).workspace.getWorkspaceFolders();
+    return await (
+      this.connection as IConnection
+    ).workspace.getWorkspaceFolders();
   }
 
   static log(msg: any) {

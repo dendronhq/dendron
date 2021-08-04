@@ -24,7 +24,7 @@ export const ideSlice = createSlice({
   name: "ide",
   initialState: {
     noteActive: undefined,
-    graphStyles: '',
+    graphStyles: "",
     theme: "unknown",
     views: {
       "dendron.tree-view": {

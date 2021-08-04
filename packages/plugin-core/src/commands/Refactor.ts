@@ -107,7 +107,7 @@ export abstract class RefactorBaseCommand<
 
 export class RefactorCommand extends BasicCommand<RefactorCommandOpts> {
   key: string = "dendron.LegacyRefactorCommand";
-  
+
   public rules: { [key: string]: RefactorRule };
 
   constructor() {

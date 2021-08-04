@@ -46,7 +46,7 @@ export class SchemaLookupCommand extends BaseCommand<
   CommandGatherOutput,
   CommandRunOpts
 > {
-  // temp key for now. change to LOOKUP_SCHEMA after deprecating V2
+  // TODO: temp key for now. change to LOOKUP_SCHEMA after deprecating V2
   key = DENDRON_COMMANDS.LOOKUP_SCHEMA_V3.key;
   protected _controller: LookupControllerV3 | undefined;
   protected _provider: ILookupProviderV3 | undefined;
@@ -76,9 +76,7 @@ export class SchemaLookupCommand extends BaseCommand<
   }
 
   async gatherInputs(opts?: CommandRunOpts): Promise<CommandGatherOutput> {
-    const copts: CommandRunOpts = _.defaults(opts || {}, {
-      //TODO
-    } as CommandRunOpts);
+    const copts: CommandRunOpts = opts || {};
     this._controller = LookupControllerV3.create({
       nodeType: "schema",
     });
@@ -131,7 +129,7 @@ export class SchemaLookupCommand extends BaseCommand<
             });
             this.L.error({ error });
           }
-          HistoryService.instance().remove("lookup", "lookupProvider");
+          HistoryService.instance().remove("schemaLookup", "lookupProvider");
         },
       });
 
@@ -160,14 +158,14 @@ export class SchemaLookupCommand extends BaseCommand<
       vault: item.vault,
       wsRoot: DendronWorkspace.wsRoot(),
     });
-    const smod = DendronWorkspace.instance().getEngine().schemas[item.id];
+    const schemaModule = DendronWorkspace.instance().getEngine().schemas[item.id];
     const uri = Uri.file(
       SchemaUtils.getPath({
         root: vpath,
-        fname: smod.fname,
+        fname: schemaModule.fname,
       })
     )
-    return { uri, node: smod };
+    return { uri, node: schemaModule };
   }
 
   async acceptNewSchemaItem(): Promise<OnDidAcceptReturn | undefined> {

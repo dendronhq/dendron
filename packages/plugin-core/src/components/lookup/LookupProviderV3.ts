@@ -422,6 +422,7 @@ export class SchemaLookupProvider implements ILookupProviderV3 {
         !perfectMatch
           ? updatedItems.concat([NotePickerUtils.createNoActiveItem({} as any)])
           : updatedItems;
+
       picker.items = updatedItems;
     } catch (err) {
       window.showErrorMessage(err);

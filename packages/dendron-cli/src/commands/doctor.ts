@@ -6,6 +6,8 @@ import {
   DVault,
   NoteUtils,
   DEngineClient,
+  genUUID,
+  DendronError,
 } from "@dendronhq/common-all";
 import {
   DendronASTDest,
@@ -55,6 +57,7 @@ export enum DoctorActions {
   REMOVE_STUBS = "removeStubs",
   OLD_NOTE_REF_TO_NEW = "oldNoteRefToNew",
   CREATE_MISSING_LINKED_NOTES = "createMissingLinkedNotes",
+  REGENERATE_NOTE_ID = "regenerateNoteId",
 }
 
 export { CommandOpts as DoctorCLICommandOpts };
@@ -306,6 +309,16 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
         };
         break;
       }
+      case DoctorActions.REGENERATE_NOTE_ID: {
+        for (const note of notes) {
+          if (note.id === "root") continue; // Root notes are special, preserve them
+          note.id = genUUID();
+          engine.writeNote(note);
+        }
+        break;
+      }
+      default:
+        throw new DendronError({ message: "Unexpected Doctor action. If this is something Dendron should support, please create an issue on our Github repository." });
     }
     await _.reduce<any, Promise<any>>(
       notes,

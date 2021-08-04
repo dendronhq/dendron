@@ -95,11 +95,24 @@ export function updateDecorations(activeEditor: TextEditor) {
   for (const [type, decorations] of allDecorations.entries()) {
     activeEditor.setDecorations(type, decorations);
   }
-  // Clean out the now-unused tag decorations
+
+  // Clean out now-unused tag decorations
   for (const [key, type] of DECORATION_TYPE_TAG.entries()) {
     if (!allDecorations.has(type)) {
       type.dispose();
       DECORATION_TYPE_TAG.delete(key);
+    }
+  }
+  const allTypes = [
+    DECORATION_TYPE_TIMESTAMP,
+    DECORATION_TYPE_BLOCK_ANCHOR,
+    DECORATION_TYPE_WIKILINK,
+    DECORATION_TYPE_BROKEN_WIKILINK,
+    DECORATION_TYPE_ALIAS,
+  ];
+  for (const type of allTypes) {
+    if (!allDecorations.has(type)) {
+      type.dispose();
     }
   }
   return {allDecorations, allWarnings};

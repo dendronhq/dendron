@@ -36,6 +36,7 @@ import {
 import { Logger } from "../logger";
 import { VSCodeUtils } from "../utils";
 import { DendronWorkspace, getWS } from "../workspace";
+import { getDurationMilliseconds } from "@dendronhq/common-server";
 
 function padWithZero(n: number): string {
   if (n > 99) return String(n);
@@ -268,6 +269,7 @@ export async function provideBlockCompletionItems(
     return;
   Logger.debug({ ctx, found });
 
+  const timestampStart = process.hrtime();
   const engine = getWS().getEngine();
 
   let otherFile = false;
@@ -298,20 +300,6 @@ export async function provideBlockCompletionItems(
   if (_.isUndefined(note) || token?.isCancellationRequested) return;
   Logger.debug({ ctx, fname: note.fname });
 
-  const blocks = await getWS().getEngine().getNoteBlocks({ id: note.id });
-  if (
-    _.isUndefined(blocks.data) ||
-    blocks.error?.severity === ERROR_SEVERITY.FATAL
-  ) {
-    Logger.error({
-      ctx,
-      error: blocks.error || undefined,
-      msg: `Unable to get blocks for autocomplete`,
-    });
-    return;
-  }
-  Logger.debug({ ctx, blockCount: blocks.data.length });
-
   // If there is [[^ or [[^^ , remove that because it's not a valid wikilink
   const removeTrigger = isNotUndefined(found.groups.trigger)
     ? new TextEdit(
@@ -325,22 +313,32 @@ export async function provideBlockCompletionItems(
       )
     : undefined;
 
+  let filterByAnchorType: "header" | "block" | undefined;
   // When triggered by [[#^, only show existing block anchors
   let insertValueOnly = false;
-  let completeableBlocks = blocks.data;
   if (isNotUndefined(found.groups?.anchor)) {
-    completeableBlocks = completeableBlocks.filter(
-      (block) => block.anchor?.type === "block"
-    );
+    filterByAnchorType = "block";
     // There is already #^ which we are not removing, so don't duplicate it when inserting the text
     insertValueOnly = true;
   } else if (isNotUndefined(found.groups?.hash)) {
-    // When trigger by [[#, only show headers. Without this, it also shows paragraphs that include `#`
-    completeableBlocks = completeableBlocks.filter(
-      (block) => block.anchor?.type === "header"
-    );
+    filterByAnchorType = "header"
+    // There is already # which we are not removing, so don't duplicate it when inserting the text
     insertValueOnly = true;
   }
+
+  const blocks = await getWS().getEngine().getNoteBlocks({ id: note.id, filterByAnchorType });
+  if (
+    _.isUndefined(blocks.data) ||
+    blocks.error?.severity === ERROR_SEVERITY.FATAL
+  ) {
+    Logger.error({
+      ctx,
+      error: blocks.error || undefined,
+      msg: `Unable to get blocks for autocomplete`,
+    });
+    return;
+  }
+  Logger.debug({ ctx, blockCount: blocks.data.length });
 
   // Calculate the replacement range. This must contain any text the user has typed for the block, but not the trigger symbols (#, ^, #^)
   // This is used to determine what the user has typed to narrow the options, and also to pick what will get replaced once the completion is picked.
@@ -363,7 +361,7 @@ export async function provideBlockCompletionItems(
   const range = new Range(position.line, start, position.line, end);
   Logger.debug({ ctx, start: range.start, end: range.end });
 
-  const completions = completeableBlocks
+  const completions = blocks.data
     .map((block, index) => {
       const edits: TextEdit[] = [];
       if (removeTrigger) edits.push(removeTrigger);
@@ -405,7 +403,8 @@ export async function provideBlockCompletionItems(
       };
     })
     .filter(isNotUndefined);
-  Logger.debug({ ctx, completionCount: completions.length });
+  const duration = getDurationMilliseconds(timestampStart);
+  Logger.debug({ ctx, completionCount: completions.length, duration });
   return completions;
 }
 

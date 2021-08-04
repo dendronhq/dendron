@@ -1,4 +1,4 @@
-import { DEngineClient, genUUID, NoteUtils } from "@dendronhq/common-all";
+import { DEngineClient, genUUIDInsecure, NoteUtils } from "@dendronhq/common-all";
 import {
   DendronASTDest,
   DendronASTTypes,
@@ -106,7 +106,7 @@ export function addOrGetAnchorAt(opts: {
   const line = editor.document.lineAt(position.line);
   const existingAnchor = getAnchorAt(opts);
   if (!_.isUndefined(existingAnchor)) return existingAnchor;
-  if (_.isUndefined(anchor)) anchor = genUUID();
+  if (_.isUndefined(anchor)) anchor = genUUIDInsecure();
   editBuilder.insert(line.range.end, ` ^${anchor}`);
   return `^${anchor}`;
 }

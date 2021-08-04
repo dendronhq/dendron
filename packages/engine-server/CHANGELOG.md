@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.53.0](https://github.com/dendronhq/dendron/compare/v0.52.0...v0.53.0) (2021-08-03)
+
+
+### Bug Fixes
+
+* hashtags include punctuation and quotation marks ([#1054](https://github.com/dendronhq/dendron/issues/1054)) ([8afa5bf](https://github.com/dendronhq/dendron/commit/8afa5bf07853d98f3c9939e3b8490c45cf2a5e1a)), closes [#1048](https://github.com/dendronhq/dendron/issues/1048)
+
+
+
+
+
 # [0.52.0](https://github.com/dendronhq/dendron/compare/v0.51.3...v0.52.0) (2021-07-26)
 
 

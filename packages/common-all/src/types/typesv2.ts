@@ -241,6 +241,7 @@ export type RenderNoteOpts = {
 
 export type GetNoteBlocksOpts = {
   id: string;
+  filterByAnchorType?: "header" | "block";
 };
 
 export type ConfigWriteOpts = {

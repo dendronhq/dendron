@@ -406,8 +406,8 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
         } finally {
           gatherInputsStub.restore();
           quickPickStub.restore();
-          done();
         }
+        done();
       },
     });
   });
@@ -450,8 +450,8 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
         } finally {
           gatherInputsStub.restore();
           quickPickStub.restore();
-          done();
         }
+        done();
       },
     });
   });
@@ -497,8 +497,8 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
         } finally {
           gatherInputsStub.restore();
           quickPickStub.restore();
-          done();
         }
+        done();
       },
     });
   });
@@ -551,8 +551,8 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
         } finally {
           gatherInputsStub.restore();
           quickPickStub.restore();
-          done();
         }
+        done();
       },
     });
   });
@@ -630,8 +630,8 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
         } finally {
           gatherInputsStub.restore();
           quickPickStub.restore();
-          done();
         }
+        done();
       },
     });
   });
@@ -714,8 +714,129 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
         } finally {
           gatherInputsStub.restore();
           quickPickStub.restore();
-          done();
         }
+        done();
+      },
+    });
+  });
+});
+
+suite("REGENERATE_NOTE_ID", function () {
+  const ctx = setupBeforeAfter(this);
+
+  test("file scoped", (done) => {
+    runLegacySingleWorkspaceTest({
+      ctx,
+      postSetupHook: ENGINE_HOOKS.setupBasic,
+      onInit: async ({ wsRoot, vaults, engine }) => {
+        const vault = vaults[0];
+        const oldNote = NoteUtils.getNoteOrThrow({
+          fname: "foo",
+          notes: engine.notes,
+          vault,
+          wsRoot,
+        });
+        const oldId = oldNote.id;
+        await VSCodeUtils.openNote(oldNote);
+        const cmd = new DoctorCommand();
+        const gatherInputsStub = sinon.stub(cmd, "gatherInputs").returns(
+          Promise.resolve({
+            action: DoctorActions.REGENERATE_NOTE_ID,
+            scope: "file",
+          })
+        );
+        const quickPickStub = sinon.stub(VSCodeUtils, "showQuickPick");
+
+        try {
+          quickPickStub
+            .onCall(0)
+            .returns(
+              Promise.resolve("proceed") as Thenable<vscode.QuickPickItem>
+            );
+          await cmd.run();
+          const note = NoteUtils.getNoteByFnameV5({
+            fname: "foo",
+            notes: engine.notes,
+            vault,
+            wsRoot,
+          });
+          expect(note?.id).toNotEqual(oldId);
+        } finally {
+          gatherInputsStub.restore();
+          quickPickStub.restore();
+        }
+        done();
+      },
+    });
+  });
+
+  test("workspace scoped", (done) => {
+    runLegacySingleWorkspaceTest({
+      ctx,
+      postSetupHook: ENGINE_HOOKS.setupBasic,
+      onInit: async ({ wsRoot, vaults, engine }) => {
+        const vault = vaults[0];
+        const oldRootId = NoteUtils.getNoteOrThrow({
+          fname: "root",
+          notes: engine.notes,
+          vault,
+          wsRoot,
+        }).id;
+        const oldFooId = NoteUtils.getNoteOrThrow({
+          fname: "foo",
+          notes: engine.notes,
+          vault,
+          wsRoot,
+        }).id;
+        const oldBarId = NoteUtils.getNoteOrThrow({
+          fname: "foo",
+          notes: engine.notes,
+          vault,
+          wsRoot,
+        }).id;
+
+        const cmd = new DoctorCommand();
+        const gatherInputsStub = sinon.stub(cmd, "gatherInputs").returns(
+          Promise.resolve({
+            action: DoctorActions.REGENERATE_NOTE_ID,
+            scope: "workspace",
+          })
+        );
+        const quickPickStub = sinon.stub(VSCodeUtils, "showQuickPick");
+
+        try {
+          quickPickStub
+            .onCall(0)
+            .returns(
+              Promise.resolve("proceed") as Thenable<vscode.QuickPickItem>
+            );
+          await cmd.run();
+          const root = NoteUtils.getNoteByFnameV5({
+            fname: "root",
+            notes: engine.notes,
+            vault,
+            wsRoot,
+          });
+          const foo = NoteUtils.getNoteByFnameV5({
+            fname: "foo",
+            notes: engine.notes,
+            vault,
+            wsRoot,
+          });
+          const bar = NoteUtils.getNoteByFnameV5({
+            fname: "foo",
+            notes: engine.notes,
+            vault,
+            wsRoot,
+          });
+          expect(root?.id).toNotEqual(oldRootId);
+          expect(foo?.id).toNotEqual(oldFooId);
+          expect(bar?.id).toNotEqual(oldBarId);
+        } finally {
+          gatherInputsStub.restore();
+          quickPickStub.restore();
+        }
+        done();
       },
     });
   });

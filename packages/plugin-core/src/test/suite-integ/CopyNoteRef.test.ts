@@ -5,7 +5,7 @@ import {
   NodeTestPresetsV2,
   NoteTestUtilsV4,
 } from "@dendronhq/common-test-utils";
-import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
+import { ENGINE_HOOKS, TestConfigUtils } from "@dendronhq/engine-test-utils";
 import { describe } from "mocha";
 import path from "path";
 import * as vscode from "vscode";
@@ -18,21 +18,21 @@ import _ from "lodash";
 
 suite("CopyNoteRef", function () {
   let root: DirResult;
-  let ctx: vscode.ExtensionContext;
   let vaultPath: string;
   let vault: DVault;
 
-  ctx = setupBeforeAfter(this, {
+  const ctx = setupBeforeAfter(this, {
     beforeHook: () => {
       root = tmpDir();
     },
   });
 
   describe("multi", () => {
-    test("basic", (done) => {
+    test("xvault link when allowed in config", (done) => {
       runMultiVaultTest({
         ctx,
         onInit: async ({ wsRoot, vaults }) => {
+          TestConfigUtils.withConfig((config) => { config.noXVaultWikiLink = false; return config; }, { wsRoot });
           const notePath = path.join(
             vault2Path({ vault: vaults[0], wsRoot }),
             "foo.md"
@@ -43,6 +43,26 @@ suite("CopyNoteRef", function () {
           done();
         },
         preSetupHook: ENGINE_HOOKS.setupBasic,
+      });
+    });
+
+    test("no xvault link when disabled in config", (done) => {
+      runMultiVaultTest({
+        ctx,
+        onInit: async ({ wsRoot, vaults }) => {
+          TestConfigUtils.withConfig((config) => { config.noXVaultWikiLink = true; return config; }, { wsRoot });
+          const notePath = path.join(
+            vault2Path({ vault: vaults[0], wsRoot }),
+            "foo.md"
+          );
+          await VSCodeUtils.openFileInEditor(vscode.Uri.file(notePath));
+          const link = await new CopyNoteRefCommand().run();
+          expect(link).toEqual("![[foo]]");
+          done();
+        },
+        preSetupHook: async (opts) => {
+          await ENGINE_HOOKS.setupBasic(opts);
+        }
       });
     });
   });

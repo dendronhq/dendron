@@ -158,12 +158,12 @@ function CalendarView({ engine, ide }: DendronProps) {
         type: CalendarViewMessageType.onSelect,
         data: {
           id: selectedNote?.id,
-          fname: `daily.journal.${dateKey}`,
+          fname: `${dailyJournalDomain}.${defaultJournalName}.${dateKey}`,
         },
         source: DMessageSource.webClient,
       });
     },
-    [groupedDailyNotes, getDateKey]
+    [groupedDailyNotes, getDateKey, dailyJournalDomain, defaultJournalName]
   );
 
   const onPanelChange = useCallback<

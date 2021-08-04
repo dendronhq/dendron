@@ -110,7 +110,7 @@ describe("markdown publish pod", () => {
           },
         });
         // note id is foo.one, hence notes/foo.one.html
-        expect(resp).toMatchSnapshot();
+        expect(resp).toContain("(https://localhost:8080/notes/foo.one.html)");
         await checkString(
           resp,
           "[Link](https://localhost:8080/notes/foo.one.html)"

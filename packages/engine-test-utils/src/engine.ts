@@ -26,6 +26,7 @@ import {
   TestResult,
 } from "@dendronhq/common-test-utils";
 import { LaunchEngineServerCommand } from "@dendronhq/dendron-cli";
+import { WorkspaceConfig } from "@dendronhq/engine-server";
 import {
   createEngine as engineServerCreateEngine,
   DConfig,
@@ -126,6 +127,9 @@ export async function setupWS(opts: {
   const wsRoot = opts.wsRoot || tmpDir().name;
   const ws = new WorkspaceService({ wsRoot });
   ws.createConfig();
+  // create dendron.code-workspace
+  WorkspaceConfig.write(wsRoot, opts.vaults);
+
   const config = ws.config;
   let vaults = await Promise.all(
     opts.vaults.map(async (vault) => {

@@ -698,7 +698,7 @@ export class DendronClientUtilsV2 {
     return smod;
   };
 
-  static useVaultPrefix(engine: DEngineClient) {
+  static shouldUseVaultPrefix(engine: DEngineClient) {
     const noXVaultLink = getWS().config.noXVaultWikiLink;
     const useVaultPrefix =
       _.size(engine.vaults) > 1 &&

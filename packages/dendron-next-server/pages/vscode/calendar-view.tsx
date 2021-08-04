@@ -275,11 +275,6 @@ function CalendarView({ engine, ide }: DendronProps) {
       `only "journal.addBehavior = "childOfDomain" is supported currently`
     );
   }
-  if (engine.config?.journal.dailyDomain !== "daily") {
-    return genError(
-      `only "journal.dailyDomain = "daily" is supported currently`
-    );
-  }
   if (engine.config?.journal.name !== "journal") {
     return genError(`only "journal.name = "name" is supported currently`);
   }

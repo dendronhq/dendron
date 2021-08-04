@@ -117,16 +117,25 @@ function CalendarView({ engine, ide }: DendronProps) {
     if (noteActive) {
       const maybeDatePortion = getMaybeDatePortion(noteActive, journalName);
 
-      // check if daily file is `y.MM` instead of `y.MM.dd` to apply proper format string.
-      // unlike moment luxon marks the date as invalid if date and dateformat do not match
-      const isMonthly = maybeDatePortion.split(".").length === 2;
+      if (maybeDatePortion && _.first(groupedDailyNotes[maybeDatePortion])) {
+        const dailyDate = Time.DateTime.fromFormat(
+          maybeDatePortion,
+          journalDateFormat
+        );
 
-      return maybeDatePortion && _.first(groupedDailyNotes[maybeDatePortion])
-        ? Time.DateTime.fromFormat(
-            maybeDatePortion,
-            isMonthly ? journalMonthDateFormat : journalDateFormat
-          )
-        : undefined;
+        const monthlyDate = Time.DateTime.fromFormat(
+          maybeDatePortion,
+          journalMonthDateFormat
+        );
+
+        return dailyDate.isValid
+          ? dailyDate
+          : monthlyDate.isValid
+          ? monthlyDate
+          : undefined;
+      }
+
+      return undefined;
     }
   }, [noteActive, groupedDailyNotes]);
 
@@ -265,11 +274,6 @@ function CalendarView({ engine, ide }: DendronProps) {
     );
   };
 
-  if (engine.config?.journal.dateFormat !== "y.MM.dd") {
-    return genError(
-      `only "journal.dateFormat:"y.MM.dd" is supported currently`
-    );
-  }
   if (engine.config?.journal.addBehavior !== "childOfDomain") {
     return genError(
       `only "journal.addBehavior = "childOfDomain" is supported currently`

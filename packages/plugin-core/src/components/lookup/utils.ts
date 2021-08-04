@@ -41,7 +41,7 @@ export const CONTEXT_DETAIL = "current note context";
 export const HIERARCHY_MATCH_DETAIL = "hierarchy match";
 export const FULL_MATCH_DETAIL = "hierarchy match and current note context";
 
-export type VaultPickerItem = { vault: DVault } & Partial<QuickPickItem>;
+export type VaultPickerItem = { vault: DVault, label: string } & Partial<Omit<QuickPickItem, "label">>;
 
 function isDVaultArray(
   overrides?: VaultPickerItem[] | DVault[]
@@ -451,14 +451,14 @@ export class PickerUtilsV2 {
   ): Promise<DVault | undefined> {
     const pickerOverrides = isDVaultArray(overrides)
       ? overrides.map((value) => {
-          return { vault: value };
+          return { vault: value, label: VaultUtils.getName(value) };
         })
       : overrides;
 
     const vaults: VaultPickerItem[] =
       pickerOverrides ??
-      DendronWorkspace.instance().vaultsv4.map((value) => {
-        return { vault: value };
+      DendronWorkspace.instance().vaultsv4.map((vault) => {
+        return { vault, label: VaultUtils.getName(vault) };
       });
 
     const items = vaults.map((ent) => ({
@@ -491,7 +491,7 @@ export class PickerUtilsV2 {
 
     // Only 1 vault, no other options to choose from:
     if (engine.vaults.length <= 1) {
-      return Array.of({ vault });
+      return Array.of({ vault, label: VaultUtils.getName(vault) });
     }
 
     const domain = fname.split(".").slice(0, -1);
@@ -516,6 +516,7 @@ export class PickerUtilsV2 {
           return {
             vault: value,
             detail: HIERARCHY_MATCH_DETAIL,
+            label: VaultUtils.getName(vault)
           };
         });
 
@@ -524,11 +525,12 @@ export class PickerUtilsV2 {
       vaultSuggestions.push({
         vault,
         detail: CONTEXT_DETAIL,
+        label: VaultUtils.getName(vault)
       });
 
       allVaults.forEach((cmpVault) => {
         if (cmpVault.fsPath !== vault.fsPath) {
-          vaultSuggestions.push({ vault: cmpVault });
+          vaultSuggestions.push({ vault: cmpVault, label: VaultUtils.getName(vault) });
         }
       });
     }
@@ -542,6 +544,7 @@ export class PickerUtilsV2 {
       vaultSuggestions.push({
         vault,
         detail: FULL_MATCH_DETAIL,
+        label: VaultUtils.getName(vault)
       });
 
       vaultsWithMatchingHierarchy.forEach((ent) => {
@@ -553,6 +556,7 @@ export class PickerUtilsV2 {
           vaultSuggestions.push({
             vault: ent.vault,
             detail: HIERARCHY_MATCH_DETAIL,
+            label: VaultUtils.getName(vault)
           });
         }
       });
@@ -563,7 +567,7 @@ export class PickerUtilsV2 {
             (suggestion) => suggestion.vault.fsPath === wsVault.fsPath
           )
         ) {
-          vaultSuggestions.push({ vault: wsVault });
+          vaultSuggestions.push({ vault: wsVault, label: VaultUtils.getName(wsVault) });
         }
       });
     } else {
@@ -572,6 +576,7 @@ export class PickerUtilsV2 {
       vaultSuggestions.push({
         vault,
         detail: CONTEXT_DETAIL,
+        label: VaultUtils.getName(vault)
       });
 
       allVaults.forEach((wsVault) => {
@@ -580,7 +585,7 @@ export class PickerUtilsV2 {
             (suggestion) => suggestion.vault.fsPath === wsVault.fsPath
           )
         ) {
-          vaultSuggestions.push({ vault: wsVault });
+          vaultSuggestions.push({ vault: wsVault, label: VaultUtils.getName(wsVault) });
         }
       });
     }

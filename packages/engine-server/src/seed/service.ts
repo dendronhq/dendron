@@ -155,7 +155,7 @@ export class SeedService {
           vaults: [],
           createCodeWorkspace: true,
         });
-        let config = ws.config;
+        const config = ws.config;
         await ws.createVault({
           vault: { fsPath: "vault" },
           updateWorkspace: true,

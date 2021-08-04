@@ -1,16 +1,14 @@
 import {
   DEngineClient,
   DVault,
-  ERROR_STATUS,
-  SeedCommands,
-  SeedConfig,
+  ERROR_STATUS, SeedConfig
 } from "@dendronhq/common-all";
 import { tmpDir } from "@dendronhq/common-server";
 import {
   DConfig,
   SeedInitMode,
   SeedService,
-  SeedUtils,
+  SeedUtils
 } from "@dendronhq/engine-server";
 import os from "os";
 import path from "path";
@@ -273,7 +271,6 @@ runTest("add", () => {
 });
 
 runTest("init", () => {
-  const cmd = SeedCommands.INIT;
   const seed: SeedConfig = {
     name: "foo",
     publisher: "dendron",

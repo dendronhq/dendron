@@ -1,4 +1,4 @@
-import { DNodeUtils, NoteQuickInput, RespV2, SchemaModuleProps, SchemaUtils } from "@dendronhq/common-all";
+import { DNodeUtils, NoteQuickInput, RespV2, SchemaModuleProps, SchemaQuickInput, SchemaUtils } from "@dendronhq/common-all";
 import { getDurationMilliseconds } from "@dendronhq/common-server";
 import { HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
@@ -41,6 +41,12 @@ export type NoteLookupProviderSuccessResp<T = never> = {
   onAcceptHookResp: T[];
   cancel?: boolean;
 };
+
+export type SchemaLookupProviderSuccessResp<T = never> = {
+  selectedItems: readonly SchemaQuickInput[];
+  onAcceptHookResp: T[];
+  cancel?: boolean;
+}
 
 export class NoteLookupProvider implements ILookupProviderV3 {
   private _onAcceptHooks: OnAcceptHook[];
@@ -344,16 +350,13 @@ export class SchemaLookupProvider implements ILookupProviderV3 {
           data: {
             selectedItems,
             onAcceptHookResp: _.map(onAcceptHookResp, (ent) => ent.data!),
-          } as NoteLookupProviderSuccessResp<OldNewLocation>,
+          } as SchemaLookupProviderSuccessResp<OldNewLocation>,
         });
       }
     };
   }
 
   async onUpdatePickerItems(opts: OnUpdatePickerItemsOpts) {
-    console.log({
-      ctx: "SchemaLookupProvider:onUpdatePickerItems",
-    });
     const { picker, token } = opts;
     const ctx = "updatePickerItems";
     picker.busy = true;
@@ -383,7 +386,6 @@ export class SchemaLookupProvider implements ILookupProviderV3 {
             vaults: ws.vaultsv4,
           });
         });
-        // picker.items = NotePickerUtils.fetchRootResults({ engine });
         return;
       }
 
@@ -415,13 +417,11 @@ export class SchemaLookupProvider implements ILookupProviderV3 {
         return;
       }
 
-      // TODO: spike
-      // updatedItems =
-      //   this.opts.allowNewNote &&
-      //   !perfectMatch
-      //     ? updatedItems.concat([SchemaUtils.createModuleProps({})])
-      //     : updatedItems;
-
+      updatedItems =
+        this.opts.allowNewNote &&
+        !perfectMatch
+          ? updatedItems.concat([NotePickerUtils.createNoActiveItem({} as any)])
+          : updatedItems;
       picker.items = updatedItems;
     } catch (err) {
       window.showErrorMessage(err);

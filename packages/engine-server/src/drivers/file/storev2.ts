@@ -21,6 +21,7 @@ import {
   ERROR_SEVERITY,
   ERROR_STATUS,
   IDendronError,
+  isNotUndefined,
   NoteChangeEntry,
   NoteProps,
   NotePropsDict,
@@ -570,7 +571,25 @@ export class FileStorage implements DStore {
               // If this used to be a hashtag but no longer is, the alias is like `#foo.bar` and no longer makes sense.
               alias = undefined;
             }
-            // loc doesn't have header info
+            // Correctly handle header renames in references with range based references
+            if (
+              oldLoc.anchorHeader && 
+              link.type === "ref" &&
+              isNotUndefined(oldLink.from.anchorHeader) &&
+              oldLink.from.anchorHeader.indexOf(":") > -1 &&
+              isNotUndefined(newLoc.anchorHeader) &&
+              newLoc.anchorHeader.indexOf(":") === -1
+            ) {
+              // This is a reference, old anchor had a ":" in it, a new anchor header is provided and does not have ":" in it.
+              // For example, `![[foo#start:#end]]` to `![[foo#something]]`. In this case, `something` is actually supposed to replace only one part of the range.
+              // Find the part that matches the old header, and replace just that with the new one.
+              let [start, end] = oldLink.from.anchorHeader?.split(":");
+              start = start.replace(/^#*/, "");
+              end = end.replace(/^#*/, "");
+              if (start === oldLoc.anchorHeader) start = newLoc.anchorHeader;
+              if (end === oldLoc.anchorHeader) end = newLoc.anchorHeader;
+              newLoc.anchorHeader = `${start}:#${end}`;
+            }
             const newBody = LinkUtils.updateLink({
               note,
               oldLink,

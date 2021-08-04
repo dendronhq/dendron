@@ -409,7 +409,13 @@ suite("RenameNote", function () {
             fname: "has-header",
             wsRoot,
             vault: vaults[0],
-            body: ["## Lorem ipsum dolor amet", "", "middle", "", "# end"].join("\n"),
+            body: [
+              "## Lorem ipsum dolor amet",
+              "",
+              "middle",
+              "",
+              "## end",
+            ].join("\n"),
           });
           await NoteTestUtilsV4.createNote({
             fname: "has-link",
@@ -465,76 +471,78 @@ suite("RenameNote", function () {
       });
     });
 
-        test("with a reference range, header at the start", (done) => {
-          let note: NoteProps;
-          runLegacyMultiWorkspaceTest({
-            ctx,
-            preSetupHook: async ({ wsRoot, vaults }) => {
-              note = await NoteTestUtilsV4.createNote({
-                fname: "has-header",
-                wsRoot,
-                vault: vaults[0],
-                body: [
-                  "## start",
-                  "",
-                  "middle",
-                  "",
-                  "# Lorem Ipsum Dolor Amet",
-                ].join("\n"),
-              });
-              await NoteTestUtilsV4.createNote({
-                fname: "has-link",
-                wsRoot,
-                vault: vaults[0],
-                body: "![[has-header#start:#lorem-ipsum-dolor-amet]]",
-              });
-            },
-            onInit: async ({ engine, vaults, wsRoot }) => {
-              const editor = await VSCodeUtils.openNote(note);
-              editor.selection = LocationTestUtils.getPresetWikiLinkSelection({line: 11});
-
-              const prompt = sinon
-                .stub(vscode.window, "showInputBox")
-                .returns(Promise.resolve("Foo Bar"));
-              try {
-                await new RenameHeaderCommand().run({});
-
-                const afterRename = NoteUtils.getNoteByFnameV5({
-                  fname: "has-header",
-                  wsRoot,
-                  vault: vaults[0],
-                  notes: engine.notes,
-                });
-                expect(
-                  await AssertUtils.assertInString({
-                    body: afterRename!.body,
-                    match: ["## Foo Bar"],
-                    nomatch: ["Lorem", "ipsum", "dolor", "amet"],
-                  })
-                ).toBeTruthy();
-                const afterRenameLink = NoteUtils.getNoteByFnameV5({
-                  fname: "has-link",
-                  wsRoot,
-                  vault: vaults[0],
-                  notes: engine.notes,
-                });
-                expect(
-                  await AssertUtils.assertInString({
-                    body: afterRenameLink!.body,
-                    match: ["![[has-header#start:#foo-bar]]"],
-                    nomatch: [
-                      "![[has-header#start:#lorem-ipsum-dolor-amet]]",
-                      "![[has-header#foo-bar]]",
-                      "![[has-header#start]]",
-                    ],
-                  })
-                ).toBeTruthy();
-                done();
-              } finally {
-                prompt.restore();
-              }
-            },
+    test("with a reference range, header at the end", (done) => {
+      let note: NoteProps;
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          note = await NoteTestUtilsV4.createNote({
+            fname: "has-header",
+            wsRoot,
+            vault: vaults[0],
+            body: [
+              "## start",
+              "",
+              "middle",
+              "",
+              "## Lorem Ipsum Dolor Amet",
+            ].join("\n"),
           });
-        });
+          await NoteTestUtilsV4.createNote({
+            fname: "has-link",
+            wsRoot,
+            vault: vaults[0],
+            body: "![[has-header#start:#lorem-ipsum-dolor-amet]]",
+          });
+        },
+        onInit: async ({ engine, vaults, wsRoot }) => {
+          const editor = await VSCodeUtils.openNote(note);
+          editor.selection = LocationTestUtils.getPresetWikiLinkSelection({
+            line: 11,
+          });
+
+          const prompt = sinon
+            .stub(vscode.window, "showInputBox")
+            .returns(Promise.resolve("Foo Bar"));
+          try {
+            await new RenameHeaderCommand().run({});
+
+            const afterRename = NoteUtils.getNoteByFnameV5({
+              fname: "has-header",
+              wsRoot,
+              vault: vaults[0],
+              notes: engine.notes,
+            });
+            expect(
+              await AssertUtils.assertInString({
+                body: afterRename!.body,
+                match: ["## Foo Bar"],
+                nomatch: ["Lorem", "ipsum", "dolor", "amet"],
+              })
+            ).toBeTruthy();
+            const afterRenameLink = NoteUtils.getNoteByFnameV5({
+              fname: "has-link",
+              wsRoot,
+              vault: vaults[0],
+              notes: engine.notes,
+            });
+            expect(
+              await AssertUtils.assertInString({
+                body: afterRenameLink!.body,
+                match: ["![[has-header#start:#foo-bar]]"],
+                nomatch: [
+                  "![[has-header#start:#lorem-ipsum-dolor-amet]]",
+                  "![[has-header#foo-bar]]",
+                  "![[has-header#start]]",
+                ],
+              })
+            ).toBeTruthy();
+            done();
+          } finally {
+            prompt.restore();
+          }
+        },
+      });
+    });
   });
 });

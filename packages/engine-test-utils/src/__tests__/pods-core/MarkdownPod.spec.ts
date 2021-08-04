@@ -1,6 +1,10 @@
 import { NoteUtils, VaultUtils, WorkspaceOpts } from "@dendronhq/common-all";
 import { tmpDir, vault2Path } from "@dendronhq/common-server";
-import { FileTestUtils, NoteTestUtilsV4, NOTE_PRESETS_V4 } from "@dendronhq/common-test-utils";
+import {
+  FileTestUtils,
+  NoteTestUtilsV4,
+  NOTE_PRESETS_V4,
+} from "@dendronhq/common-test-utils";
 import {
   MarkdownExportPod,
   MarkdownImportPod,
@@ -31,7 +35,6 @@ const setupBasic = async (opts: WorkspaceOpts) => {
 };
 
 describe("markdown publish pod", () => {
-
   test("basic", async () => {
     await runEngineTestV5(
       async ({ engine, vaults, wsRoot }) => {
@@ -77,7 +80,7 @@ describe("markdown publish pod", () => {
     );
   });
 
-  test("wikiLink to URL with siteUrl", async () => {
+  test("wikiLinktoURL with siteUrl", async () => {
     await runEngineTestV5(
       async ({ engine, vaults, wsRoot }) => {
         const pod = new MarkdownPublishPod();
@@ -86,7 +89,7 @@ describe("markdown publish pod", () => {
           (config) => {
             config.site = createSiteConfig({
               siteHierarchies: ["test-wikilink-to-url"],
-              siteRootDir: "docs"
+              siteRootDir: "docs",
             });
             return config;
           },
@@ -103,18 +106,19 @@ describe("markdown publish pod", () => {
             fname: "parent",
             vaultName,
             dest: "stdout",
-            wikiLinkToURL: true
+            wikiLinkToURL: true,
           },
         });
         // note id is foo.one, hence notes/foo.one.html
         expect(resp).toMatchSnapshot();
-        await checkString(resp, '[Link](https://localhost:8080/notes/foo.one.html)')
-
+        await checkString(
+          resp,
+          "[Link](https://localhost:8080/notes/foo.one.html)"
+        );
       },
       { expect, preSetupHook: setupBasic }
     );
   });
-
 });
 
 function setupImport(src: string) {

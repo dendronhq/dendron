@@ -40,12 +40,13 @@ suite("PublishV2", function () {
         const podsDir = path.join(wsRoot, "pods");
         const configPath = PodUtils.getConfigPath({ podsDir, podClass });
 
-        const createConfig = async (config) => {
+        const createConfig = async (config: any) => {
           ensureDirSync(path.dirname(configPath));
-          writeYAML(configPath, config);}
+          writeYAML(configPath, config);
+        };
 
         createConfig({
-          wikiLinkToURL : false
+          wikiLinkToURL: false,
         });
 
         // when a user runs publish pod, they are presented with a list of pods

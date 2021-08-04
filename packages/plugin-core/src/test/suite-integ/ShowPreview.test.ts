@@ -52,9 +52,9 @@ suite("ShowPreview", function () {
         const note = engine.notes["foo"];
         await VSCodeUtils.openNote(note);
         sinon.stub(MarkdownUtils, "hasLegacyPreview").returns(false);
-        // @ts-ignore
         const installPrompt = sinon
           .stub(MarkdownUtils, "promptInstallLegacyPreview")
+          // @ts-ignore
           .returns(() => {});
         await new ShowPreviewCommand().execute();
         expect(installPrompt.called).toBeTruthy();

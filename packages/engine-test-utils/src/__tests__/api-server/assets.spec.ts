@@ -127,25 +127,4 @@ describe("assets/theme/get", () => {
       { expect }
     );
   });
-
-  test("fail: invald target", async () => {
-    await runEngineTestV5(
-      async ({ wsRoot, vaults }) => {
-        const { port } = await createServer({ wsRoot, vaults });
-        const api = new DendronAPI({
-          endpoint: APIUtils.getLocalEndpoint(port),
-          apiPath: "api",
-        });
-        await initRemoteWorkspace({ wsRoot, vaults, api });
-        // @ts-ignore
-        const resp = await api.assetGetTheme({
-          ws: wsRoot,
-          themeTarget: "bogus target",
-          themeType: ThemeType.DARK,
-        });
-        await checkString((resp as DendronError).message, "not valid");
-      },
-      { expect }
-    );
-  });
 });

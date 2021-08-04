@@ -5,7 +5,7 @@ type SeedRegistryEntry = {} & SeedConfig;
 
 type SeedRegistryDict = { [key: string]: SeedRegistryEntry | undefined };
 
-const SEED_REGISTRY: SeedRegistryDict = {
+export const SEED_REGISTRY: SeedRegistryDict = {
   "dendron.dendron-site": {
     name: "dendron-site",
     publisher: "dendron",

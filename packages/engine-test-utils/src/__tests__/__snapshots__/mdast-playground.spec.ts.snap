@@ -130,6 +130,7 @@ Object {
                   "data": Object {
                     "alias": "one",
                     "anchorHeader": undefined,
+                    "sameFile": false,
                     "vaultName": undefined,
                   },
                   "position": Position {
@@ -190,6 +191,7 @@ Object {
                   "data": Object {
                     "alias": "two",
                     "anchorHeader": undefined,
+                    "sameFile": false,
                     "vaultName": undefined,
                   },
                   "position": Position {

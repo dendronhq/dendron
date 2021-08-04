@@ -94,6 +94,7 @@ Array [
         "offset": 0,
       },
     },
+    "sameFile": false,
     "to": Object {
       "anchorHeader": undefined,
       "fname": "foo",
@@ -130,6 +131,7 @@ Array [
         "offset": 0,
       },
     },
+    "sameFile": undefined,
     "to": Object {
       "anchorHeader": undefined,
       "fname": "tags.bar",
@@ -164,6 +166,7 @@ Array [
         "offset": 41,
       },
     },
+    "sameFile": false,
     "to": Object {
       "anchorHeader": undefined,
       "fname": "foo.two",
@@ -226,6 +229,7 @@ Array [
         "offset": 0,
       },
     },
+    "sameFile": false,
     "to": Object {
       "anchorHeader": undefined,
       "fname": "bar",
@@ -260,6 +264,7 @@ Array [
         "offset": 0,
       },
     },
+    "sameFile": false,
     "to": Object {
       "anchorHeader": undefined,
       "fname": "bar",

@@ -136,7 +136,7 @@ function CalendarView({ engine, ide }: DendronProps) {
     (date, mode) => {
       const format =
         (mode || activeMode) === "month"
-          ? journalDateFormat || "y.MM.dd"
+          ? journalDateFormat
           : journalMonthDateFormat;
       return date.toFormat(format);
     },

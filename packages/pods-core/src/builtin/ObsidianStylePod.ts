@@ -26,10 +26,6 @@ export type ObsidianStyleImportPodPlantOpts = ImportPodPlantOpts & {
 };
 
 class GraphStyleUtils {
-  constructor(file: Buffer) {
-    file.toString();
-  }
-
   static folderPath() {
     return path.join(os.homedir(), ".dendron", "styles");
   }
@@ -69,13 +65,9 @@ class GraphStyleUtils {
   static parseObsidianStyles(cssText: string) {
     const styleObject = css.parse(cssText);
 
-    // if (!styleObject) return {};
+    if (!styleObject) return {};
     if (!styleObject.stylesheet) return {};
     if (!styleObject.stylesheet.rules) return {};
-
-    // const result: {
-    //   [key: string]: object;
-    // } = {};
 
     styleObject.stylesheet.rules = styleObject.stylesheet.rules.filter(
       (rule) => {
@@ -93,34 +85,50 @@ class GraphStyleUtils {
     if (!styles.stylesheet.rules) return "";
 
     const rules = styles.stylesheet.rules;
+    const parsedRules: (css.Comment | css.Rule | css.AtRule)[] = [];
 
-    rules.forEach((rule: css.Rule, index) => {
+    rules.forEach((rule: css.Rule) => {
       if (_.isUndefined(rule.declarations) || _.isUndefined(rule.selectors))
         return;
 
-      const matchingCSS = graphCSS.find((css) =>
-        rule.selectors?.includes(css.obsidian.selector)
+      const cssRulesToCheck = graphCSS.filter((cssRule) =>
+        rule.selectors?.includes(cssRule.obsidian.selector)
       );
 
-      if (matchingCSS) {
-        rule.selectors = [matchingCSS.dendron.selector];
+      if (cssRulesToCheck.length > 0) {
+        rule.selectors = rule.selectors.reduce((parsedSelectors: string[], selector) => {
+          const cssRule = cssRulesToCheck.find(
+            (cssRule) => cssRule.obsidian.selector === selector
+          );
 
-        const declarationIndex = rule.declarations.findIndex(
-          (declaration) =>
-            declaration.type === "declaration" &&
-            (declaration as Declaration).property ===
-              matchingCSS.obsidian.property
-        );
+          if (cssRule) return [...parsedSelectors, cssRule.dendron.selector];
+          return parsedSelectors;
+        }, []);
 
-        if (declarationIndex >= 0) {
-          (rule.declarations[declarationIndex] as Declaration).property = matchingCSS.dendron.property
-        }
+        const parsedDeclarations: (css.Comment | css.Declaration)[] = [];
+        rule.declarations.forEach((declaration) => {
+          if (declaration.type === "comment") {
+            parsedDeclarations.push(declaration);
+            return;
+          }
 
-        rules[index] = rule;
+          const cssRule = cssRulesToCheck.find(
+            (cssRule) =>
+              (declaration as Declaration).property ===
+              cssRule.obsidian.property
+          );
+
+          if (cssRule) {
+            (declaration as Declaration).property = cssRule.dendron.property;
+            parsedDeclarations.push(declaration);
+          }
+        });
+        rule.declarations = parsedDeclarations;
+        parsedRules.push(rule);
       }
     });
 
-    styles.stylesheet.rules = rules;
+    styles.stylesheet.rules = parsedRules;
 
     return css.stringify(styles);
   }

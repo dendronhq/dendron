@@ -1,5 +1,6 @@
 .graph-view.color-fill {
 	color: red;
+	opacity: 0.5;
 }
 
 /* .graph-view.color-fill-tag {
@@ -20,14 +21,21 @@
 
 .graph-view.color-line {
 	color: blue;
+	opacity: 0.6;
 }
 
 .graph-view.color-text {
 	color: aqua;
+	opacity: 0.7;
 }
 
 .graph-view.color-fill-highlight {
 	color: purple;
+	opacity: 0.8;
+}
+
+.unrelated-class {
+	color: blue;
 }
 
 /* .graph-view.color-line-highlight {

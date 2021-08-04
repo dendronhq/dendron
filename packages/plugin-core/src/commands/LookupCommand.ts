@@ -8,10 +8,18 @@ import { AnalyticsUtils } from "../utils/analytics";
 import { BasicCommand } from "./base";
 
 export type LookupEffectType = "copyNoteLink" | "copyNoteRef" | "multiSelect";
+export enum LookupEffectTypeEnum {
+  "copyNoteLink" = "copyNoteLink",
+  "copyNoteRef" = "copyNoteRef",
+  "multiSelect" = "multiSelect",
+}
 export type LookupFilterType = "directChildOnly";
 export type LookupSelectionType = "selection2link" | "selectionExtract";
 export type LookupNoteType = LookupNoteTypeEnum;
 export type LookupSplitType = "horizontal";
+export enum LookupSplitTypeEnum {
+  "horizontal" = "horizontal",
+}
 export type LookupNoteExistBehavior = "open" | "overwrite";
 export enum LookupNoteTypeEnum {
   "journal" = "journal",

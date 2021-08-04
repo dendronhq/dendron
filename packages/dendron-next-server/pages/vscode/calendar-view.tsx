@@ -266,21 +266,6 @@ function CalendarView({ engine, ide }: DendronProps) {
     return <Spin />;
   }
 
-  const genError = (msg: string) => {
-    const suffix = "Please update your dendron.yml configuration";
-    return (
-      <>
-        `{msg} {suffix}`
-      </>
-    );
-  };
-
-  if (engine.config?.journal.addBehavior !== "childOfDomain") {
-    return genError(
-      `only "journal.addBehavior = "childOfDomain" is supported currently`
-    );
-  }
-
   return (
     <>
       <Calendar

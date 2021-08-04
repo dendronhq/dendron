@@ -103,6 +103,7 @@ export function updateDecorations(activeEditor: TextEditor) {
       DECORATION_TYPE_TAG.delete(key);
     }
   }
+  // Clear out any old decorations left over from last pass
   const allTypes = [
     DECORATION_TYPE_TIMESTAMP,
     DECORATION_TYPE_BLOCK_ANCHOR,
@@ -112,7 +113,7 @@ export function updateDecorations(activeEditor: TextEditor) {
   ];
   for (const type of allTypes) {
     if (!allDecorations.has(type)) {
-      type.dispose();
+      activeEditor.setDecorations(type, []);
     }
   }
   return {allDecorations, allWarnings};

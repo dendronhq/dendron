@@ -282,6 +282,7 @@ export const getReferenceAtPosition = (
           tagPos.start.character <= position.character &&
           position.character <= tagPos.end.character
         ) {
+          tag.value = _.trim(tag.value);
           return {
             range: tagPos,
             label: tag.value,

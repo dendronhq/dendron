@@ -1,10 +1,13 @@
 import {
+  Literal,
   Mapping,
   MappingItem,
   Node as YamlUnistNode,
   Parent as YamlUnistParent,
   parse as yamlparse,
   Plain,
+  QuoteDouble,
+  QuoteSingle,
 } from "yaml-unist-parser";
 import type { YAML } from "mdast";
 import _ from "lodash";
@@ -20,6 +23,18 @@ export function isMappingItem(node: any): node is MappingItem {
 
 export function isPlain(node: any): node is Plain {
   return node?.type === "plain";
+}
+
+export function isQuoteSingle(node: any): node is QuoteSingle {
+  return node?.type === "quoteSingle";
+}
+
+export function isQuoteDouble(node: any): node is QuoteDouble {
+  return node?.type === "quoteDouble";
+}
+
+export function isYamlString(node: any): node is Literal {
+  return isPlain(node) || isQuoteSingle(node) || isQuoteDouble(node);
 }
 
 /** `unist-util-visit`, kind of, but for YamlUnist.
@@ -55,13 +70,13 @@ export function parseFrontmatter(frontmatter: YAML | string) {
 }
 
 export function getFrontmatterTags(frontmatter: MappingItem[]) {
-  const tags: Plain[] = [];
+  const tags: Literal[] = [];
   visitYamlUnist(frontmatter, (node) => {
     if (!isMappingItem(node)) return;
     const [key, value] = node.children;
     let isTags = false;
     visitYamlUnist(key, (keyPlain) => {
-      if (!isPlain(keyPlain)) return;
+      if (!isYamlString(keyPlain)) return;
       if (keyPlain.value === "tags") {
         isTags = true;
         return false; // stop traversal
@@ -70,7 +85,7 @@ export function getFrontmatterTags(frontmatter: MappingItem[]) {
     });
     if (!isTags) return;
     visitYamlUnist(value, (valuePlain) => {
-      if (!isPlain(valuePlain)) return;
+      if (!isYamlString(valuePlain)) return;
       tags.push(valuePlain);
       return;
     });

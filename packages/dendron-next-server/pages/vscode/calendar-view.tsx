@@ -105,13 +105,13 @@ function CalendarView({ engine, ide }: DendronProps) {
     });
 
     const dailyNotes = vaultNotes.filter((note) =>
-      note.fname.startsWith(`${journalDailyDomain}.`)
+      note.fname.startsWith(`${journalDailyDomain}.${journalName}`)
     );
     const result = _.groupBy(dailyNotes, (note) => {
       return getMaybeDatePortion(note, journalName);
     });
     return result;
-  }, [notes, journalName, currentVault?.fsPath]);
+  }, [notes, journalName, journalDailyDomain, currentVault?.fsPath]);
 
   const activeDate = useMemo(() => {
     if (noteActive) {
@@ -274,9 +274,6 @@ function CalendarView({ engine, ide }: DendronProps) {
     return genError(
       `only "journal.addBehavior = "childOfDomain" is supported currently`
     );
-  }
-  if (engine.config?.journal.name !== "journal") {
-    return genError(`only "journal.name = "name" is supported currently`);
   }
 
   return (

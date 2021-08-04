@@ -24,7 +24,7 @@ type CommandOpts = {
   };
   /** The new text for the header. */
   newHeader?: string;
-};
+} | undefined;
 type CommandOutput = {} | undefined;
 
 export class RenameHeaderCommand extends BasicCommand<
@@ -36,7 +36,7 @@ export class RenameHeaderCommand extends BasicCommand<
   async gatherInputs(
     opts: CommandOpts
   ): Promise<Required<CommandOpts> | undefined> {
-    let { oldHeader, newHeader } = opts;
+    let { oldHeader, newHeader } = opts || {};
     if (_.isUndefined(oldHeader)) {
       // parse from current selection
       const { editor, selection } = VSCodeUtils.getSelection();
@@ -73,14 +73,15 @@ export class RenameHeaderCommand extends BasicCommand<
         placeHolder: "Header text here",
         title: "Rename Header",
         prompt: "Enter the new header text",
-        value: opts.oldHeader?.text,
+        value: oldHeader.text,
       });
       if (!newHeader) return; // User cancelled the prompt
     }
     return { oldHeader, newHeader };
   }
 
-  async execute({ oldHeader, newHeader }: CommandOpts): Promise<CommandOutput> {
+  async execute(opts: CommandOpts): Promise<CommandOutput> {
+    const { oldHeader, newHeader } = opts || {};
     const ctx = "RenameHeaderCommand";
     this.L.info({ ctx, oldHeader, newHeader, msg: "enter" });
     const engine = DendronWorkspace.instance().getEngine();

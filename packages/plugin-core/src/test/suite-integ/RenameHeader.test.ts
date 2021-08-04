@@ -100,6 +100,68 @@ suite("RenameNote", function () {
       });
     });
 
+    test("does not rename a wikilink to another header", (done) => {
+      let note: NoteProps;
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          note = await NoteTestUtilsV4.createNote({
+            fname: "has-header",
+            wsRoot,
+            vault: vaults[0],
+            body: "## Lorem ipsum dolor amet\n\n## Maxime Distinctio Officia",
+          });
+          await NoteTestUtilsV4.createNote({
+            fname: "has-link",
+            wsRoot,
+            vault: vaults[0],
+            body: "[[has-header#maxime-distinctio-officia]]",
+          });
+        },
+        onInit: async ({ engine, vaults, wsRoot }) => {
+          const editor = await VSCodeUtils.openNote(note);
+          editor.selection = LocationTestUtils.getPresetWikiLinkSelection();
+
+          const prompt = sinon
+            .stub(vscode.window, "showInputBox")
+            .returns(Promise.resolve("Foo Bar"));
+          try {
+            await new RenameHeaderCommand().run({});
+
+            const afterRename = NoteUtils.getNoteByFnameV5({
+              fname: "has-header",
+              wsRoot,
+              vault: vaults[0],
+              notes: engine.notes,
+            });
+            expect(
+              await AssertUtils.assertInString({
+                body: afterRename!.body,
+                match: ["## Foo Bar", "## Maxime Distinctio Officia"],
+                nomatch: ["Lorem", "ipsum", "dolor", "amet"],
+              })
+            ).toBeTruthy();
+            const afterRenameLink = NoteUtils.getNoteByFnameV5({
+              fname: "has-link",
+              wsRoot,
+              vault: vaults[0],
+              notes: engine.notes,
+            });
+            expect(
+              await AssertUtils.assertInString({
+                body: afterRenameLink!.body,
+                match: ["[[has-header#maxime-distinctio-officia]]"],
+                nomatch: ["[[has-header#foo-bar]]"],
+              })
+            ).toBeTruthy();
+            done();
+          } finally {
+            prompt.restore();
+          }
+        },
+      });
+    });
+
     test("wikilink to same file", (done) => {
       let note: NoteProps;
       runLegacyMultiWorkspaceTest({
@@ -534,6 +596,79 @@ suite("RenameNote", function () {
                   "![[has-header#start:#lorem-ipsum-dolor-amet]]",
                   "![[has-header#foo-bar]]",
                   "![[has-header#start]]",
+                ],
+              })
+            ).toBeTruthy();
+            done();
+          } finally {
+            prompt.restore();
+          }
+        },
+      });
+    });
+
+    test("does not rename a reference range to another header", (done) => {
+      let note: NoteProps;
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          note = await NoteTestUtilsV4.createNote({
+            fname: "has-header",
+            wsRoot,
+            vault: vaults[0],
+            body: [
+              "## Lorem ipsum dolor amet",
+              "",
+              "## Maxime Distinctio Officia",
+              "",
+              "middle",
+              "",
+              "## end",
+            ].join("\n"),
+          });
+          await NoteTestUtilsV4.createNote({
+            fname: "has-link",
+            wsRoot,
+            vault: vaults[0],
+            body: "![[has-header#maxime-distinctio-officia:#end]]",
+          });
+        },
+        onInit: async ({ engine, vaults, wsRoot }) => {
+          const editor = await VSCodeUtils.openNote(note);
+          editor.selection = LocationTestUtils.getPresetWikiLinkSelection();
+
+          const prompt = sinon
+            .stub(vscode.window, "showInputBox")
+            .returns(Promise.resolve("Foo Bar"));
+          try {
+            await new RenameHeaderCommand().run({});
+
+            const afterRename = NoteUtils.getNoteByFnameV5({
+              fname: "has-header",
+              wsRoot,
+              vault: vaults[0],
+              notes: engine.notes,
+            });
+            expect(
+              await AssertUtils.assertInString({
+                body: afterRename!.body,
+                match: ["## Foo Bar"],
+                nomatch: ["Lorem", "ipsum", "dolor", "amet"],
+              })
+            ).toBeTruthy();
+            const afterRenameLink = NoteUtils.getNoteByFnameV5({
+              fname: "has-link",
+              wsRoot,
+              vault: vaults[0],
+              notes: engine.notes,
+            });
+            expect(
+              await AssertUtils.assertInString({
+                body: afterRenameLink!.body,
+                match: ["![[has-header#maxime-distinctio-officia:#end]]"],
+                nomatch: [
+                  "![[has-header#foo-bar:#end]]",
+                  "![[has-header#foo-bar]]",
                 ],
               })
             ).toBeTruthy();

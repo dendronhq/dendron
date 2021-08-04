@@ -382,8 +382,8 @@ export class FileStorage implements DStore {
       }
     });
   }
-  
-  _addLinkCandidates(allNotes: NoteProps[] ) {
+
+  _addLinkCandidates(allNotes: NoteProps[]) {
     const notesMap = NoteUtils.createFnameNoteMap(allNotes, true);
     return _.map(allNotes, (noteFrom: NoteProps) => {
       try {
@@ -395,10 +395,14 @@ export class FileStorage implements DStore {
         noteFrom.links = noteFrom.links.concat(linkCandidates);
       } catch (err) {
         const error = error2PlainObject(err);
-        this.logger.error({ error, noteFrom, message: "issue with link candidates" });
+        this.logger.error({
+          error,
+          noteFrom,
+          message: "issue with link candidates",
+        });
         return;
       }
-    })
+    });
   }
 
   async _initNotes(vault: DVault): Promise<{
@@ -475,7 +479,6 @@ export class FileStorage implements DStore {
             errors.push(err);
             return;
           }
-
         } else {
           n.links = cache.notes[n.fname].data.links;
         }
@@ -503,6 +506,14 @@ export class FileStorage implements DStore {
       error: null,
       data: notesChanged,
     };
+  }
+
+  private referenceRangeParts(anchorHeader?: string): string[] {
+    if (!anchorHeader || anchorHeader.indexOf(":") === -1) return [];
+    let [start, end] = anchorHeader.split(":");
+    start = start.replace(/^#*/, "");
+    end = end.replace(/^#*/, "");
+    return [start, end];
   }
 
   async renameNote(opts: RenameNoteOpts): Promise<RenameNotePayload> {
@@ -546,13 +557,33 @@ export class FileStorage implements DStore {
           engine: this.engine,
           filter: { loc: oldLoc },
         });
-        const allLinks = _.orderBy(
+        let allLinks = _.orderBy(
           foundLinks,
           (link) => {
             return link.position.start.offset;
           },
           "desc"
         );
+        if (
+          oldLoc.fname === newLoc.fname &&
+          oldLoc.vaultName === newLoc.vaultName &&
+          oldLoc.anchorHeader &&
+          newLoc.anchorHeader
+        ) {
+          // Renaming the header, only update links that link to the old header
+          allLinks = _.filter(allLinks, (link): boolean => {
+            // This is a wikilink to this header
+            if (link.to?.anchorHeader === oldLoc.anchorHeader) return true;
+            // Or this is a range reference, and one part of the range includes this header
+            return (
+              link.type === "ref" &&
+              isNotUndefined(oldLoc.anchorHeader) &&
+              this.referenceRangeParts(link.to?.anchorHeader).includes(
+                oldLoc.anchorHeader
+              )
+            );
+          });
+        }
 
         const noteMod = _.reduce(
           allLinks,
@@ -561,7 +592,11 @@ export class FileStorage implements DStore {
             // current implementation adds alias for all notes
             // check if old note has alias thats different from its fname
             let alias: string | undefined;
-            if (oldLink.from.alias && oldLink.from.alias.toLocaleLowerCase() !== oldLink.from.fname.toLocaleLowerCase()) {
+            if (
+              oldLink.from.alias &&
+              oldLink.from.alias.toLocaleLowerCase() !==
+                oldLink.from.fname.toLocaleLowerCase()
+            ) {
               alias = oldLink.from.alias;
             }
             // for hashtag links, we'll have to regenerate the alias
@@ -573,7 +608,7 @@ export class FileStorage implements DStore {
             }
             // Correctly handle header renames in references with range based references
             if (
-              oldLoc.anchorHeader && 
+              oldLoc.anchorHeader &&
               link.type === "ref" &&
               isNotUndefined(oldLink.from.anchorHeader) &&
               oldLink.from.anchorHeader.indexOf(":") > -1 &&
@@ -583,9 +618,9 @@ export class FileStorage implements DStore {
               // This is a reference, old anchor had a ":" in it, a new anchor header is provided and does not have ":" in it.
               // For example, `![[foo#start:#end]]` to `![[foo#something]]`. In this case, `something` is actually supposed to replace only one part of the range.
               // Find the part that matches the old header, and replace just that with the new one.
-              let [start, end] = oldLink.from.anchorHeader?.split(":");
-              start = start.replace(/^#*/, "");
-              end = end.replace(/^#*/, "");
+              let [start, end] = this.referenceRangeParts(
+                oldLink.from.anchorHeader
+              );
               if (start === oldLoc.anchorHeader) start = newLoc.anchorHeader;
               if (end === oldLoc.anchorHeader) end = newLoc.anchorHeader;
               newLoc.anchorHeader = `${start}:#${end}`;
@@ -597,7 +632,8 @@ export class FileStorage implements DStore {
                 ...oldLink,
                 from: {
                   ...newLoc,
-                  anchorHeader: newLoc.anchorHeader || oldLink.from.anchorHeader,
+                  anchorHeader:
+                    newLoc.anchorHeader || oldLink.from.anchorHeader,
                   alias,
                 },
               },
@@ -638,7 +674,10 @@ export class FileStorage implements DStore {
     });
     let deleteOldFile = false;
     let changedFromDelete: EngineDeleteNotePayload = [];
-    if (oldNote.fname === newNote.fname && VaultUtils.isEqual(oldNote.vault, newNote.vault, wsRoot)) {
+    if (
+      oldNote.fname === newNote.fname &&
+      VaultUtils.isEqual(oldNote.vault, newNote.vault, wsRoot)
+    ) {
       // The file is being renamed to itself. We do this to rename a header.
       this.logger.info({ ctx, msg: "Renaming the file to same name" });
       await this.writeNote(newNote, { updateExisting: true });

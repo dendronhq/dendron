@@ -55,6 +55,7 @@ import { RandomNoteCommand } from "./RandomNote";
 import { LaunchTutorialCommand } from "./LaunchTutorialCommand";
 import { ConvertLinkCommand } from "./ConvertLink";
 import { ConfigureGraphStylesCommand } from "./ConfigureGraphStyles";
+import { RenameHeaderCommand } from "./RenameHeader";
 
 const ALL_COMMANDS = [
   AddAndCommit,
@@ -91,6 +92,7 @@ const ALL_COMMANDS = [
   PasteLinkCommand,
   PublishPodCommand,
   MoveNoteCommand,
+  RenameHeaderCommand,
   RefactorHierarchyCommandV2,
   RandomNoteCommand,
   ResetConfigCommand,

@@ -1,6 +1,6 @@
-import { NoteUtils, VaultUtils } from "@dendronhq/common-all";
+import { NoteUtils, VaultUtils, WorkspaceOpts } from "@dendronhq/common-all";
 import { tmpDir, vault2Path } from "@dendronhq/common-server";
-import { FileTestUtils, NOTE_PRESETS_V4 } from "@dendronhq/common-test-utils";
+import { FileTestUtils, NoteTestUtilsV4, NOTE_PRESETS_V4 } from "@dendronhq/common-test-utils";
 import {
   MarkdownExportPod,
   MarkdownImportPod,
@@ -9,11 +9,29 @@ import {
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { runEngineTestV5 } from "../../engine";
+import { TestConfigUtils } from "../../config";
+import { createSiteConfig, runEngineTestV5 } from "../../engine";
 import { ENGINE_HOOKS } from "../../presets";
 import { checkNotInString, checkString } from "../../utils";
 
+const setupBasic = async (opts: WorkspaceOpts) => {
+  const { wsRoot, vaults } = opts;
+  await NoteTestUtilsV4.createNote({
+    wsRoot,
+    vault: vaults[0],
+    fname: "parent",
+    body: [`Test: [[Link| foo.one]]`].join("\n"),
+  });
+  await NoteTestUtilsV4.createNote({
+    wsRoot,
+    vault: vaults[0],
+    fname: "foo.one",
+    body: [`## Test`].join("\n"),
+  });
+};
+
 describe("markdown publish pod", () => {
+
   test("basic", async () => {
     await runEngineTestV5(
       async ({ engine, vaults, wsRoot }) => {
@@ -58,6 +76,45 @@ describe("markdown publish pod", () => {
       { expect, preSetupHook: ENGINE_HOOKS.setupRefs }
     );
   });
+
+  test("wikiLink to URL with siteUrl", async () => {
+    await runEngineTestV5(
+      async ({ engine, vaults, wsRoot }) => {
+        const pod = new MarkdownPublishPod();
+        const vaultName = VaultUtils.getName(vaults[0]);
+        const config = TestConfigUtils.withConfig(
+          (config) => {
+            config.site = createSiteConfig({
+              siteHierarchies: ["test-wikilink-to-url"],
+              siteRootDir: "docs"
+            });
+            return config;
+          },
+          {
+            wsRoot,
+          }
+        );
+        const resp = await pod.execute({
+          engine,
+          vaults,
+          wsRoot,
+          dendronConfig: config,
+          config: {
+            fname: "parent",
+            vaultName,
+            dest: "stdout",
+            wikiLinkToURL: true
+          },
+        });
+        // note id is foo.one, hence notes/foo.one.html
+        expect(resp).toMatchSnapshot();
+        await checkString(resp, '[Link](https://localhost:8080/notes/foo.one.html)')
+
+      },
+      { expect, preSetupHook: setupBasic }
+    );
+  });
+
 });
 
 function setupImport(src: string) {

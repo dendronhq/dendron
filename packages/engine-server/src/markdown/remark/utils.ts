@@ -986,13 +986,12 @@ export class RemarkUtils {
           const existingNote = _.find(engine.notes, { fname : linkNode.value });
           if(existingNote) {
             const urlRoot = dendronConfig.site?.siteUrl || '';
-            const vault = existingNote.vault;  
+            const { vault } = existingNote;  
             linkNode.value = WorkspaceUtils.getNoteUrl({
               config: dendronConfig,
               note: existingNote,
               vault,
               urlRoot,
-              maybeNote: existingNote
             })
               const newValue = _.replace(linkNode.value, /\./g, "/");
               if (linkNode.data.alias === linkNode.value) {

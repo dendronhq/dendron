@@ -65,9 +65,12 @@ export class WorkspaceUtils {
  */
   static getNoteUrl(opts: {config: DendronConfig, note: NoteProps, vault: DVault, urlRoot?: string, maybeNote?: NoteProps, anchor?: string}){
   
-    const {config, note, anchor, vault, maybeNote} = opts;
-    let urlRoot = opts.urlRoot;
+    const {config, note, anchor, vault} = opts;
+    let { urlRoot, maybeNote } = opts;
     const notePrefix = "notes";
+    if(_.isUndefined(maybeNote)){
+      maybeNote = note;
+    }
      /**
      * set to true if index node, don't append id at the end
      */

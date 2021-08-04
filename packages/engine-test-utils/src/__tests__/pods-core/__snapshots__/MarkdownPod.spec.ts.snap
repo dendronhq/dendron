@@ -33,3 +33,9 @@ exports[`markdown publish pod ref 1`] = `
 
 body text"
 `;
+
+exports[`markdown publish pod wikiLink to URL with siteUrl 1`] = `
+"# Parent
+
+Test: [Link](https://localhost:8080/notes/foo.one.html)"
+`;

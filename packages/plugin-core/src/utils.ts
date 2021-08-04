@@ -627,7 +627,10 @@ export class DendronClientUtilsV2 {
   static genNoteName(
     type: "JOURNAL" | "SCRATCH",
     opts?: CreateFnameOpts
-  ): string {
+  ): {
+    noteName: string,
+    prefix: string,
+  } {
     // gather inputs
     const dateFormat: string =
       type === "SCRATCH"
@@ -677,7 +680,8 @@ export class DendronClientUtilsV2 {
     );
 
     const noteDate = Time.now().toFormat(dateFormat);
-    return [prefix, name, noteDate].filter((ent) => !_.isEmpty(ent)).join(".");
+    const noteName = [prefix, name, noteDate].filter((ent) => !_.isEmpty(ent)).join(".");
+    return { noteName, prefix };
   }
 
   static getSchemaModByFname = async ({

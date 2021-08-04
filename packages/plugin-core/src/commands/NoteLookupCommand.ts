@@ -13,8 +13,10 @@ import {
   JournalBtn,
   ScratchBtn,
   MultiSelectBtn,
+  CopyNoteLinkBtn,
   Selection2LinkBtn,
   SelectionExtractBtn,
+  HorizontalSplitBtn,
 } from "../components/lookup/buttons";
 import { LookupControllerV3 } from "../components/lookup/LookupControllerV3";
 import {
@@ -39,15 +41,18 @@ import {
   LookupNoteTypeEnum,
   LookupSelectionType,
   LookupSelectionTypeEnum,
+  LookupSplitType,
+  LookupSplitTypeEnum,
 } from "./LookupCommand";
 
-type CommandRunOpts = {
+export type CommandRunOpts = {
   initialValue?: string;
   noConfirm?: boolean;
   fuzzThreshold?: number;
   multiSelect?: boolean;
   noteType?: LookupNoteType;
   selectionType?: LookupSelectionType;
+  splitType?: LookupSplitType;
   /**
    * NOTE: currently, only one filter is supported
    */
@@ -137,14 +142,16 @@ export class NoteLookupCommand extends BaseCommand<
       ),
       extraButtons: [
         //todo: mirror v2 button sequence
-        JournalBtn.create(copts.noteType === LookupNoteTypeEnum.journal),
-        ScratchBtn.create(copts.noteType === LookupNoteTypeEnum.scratch),
         MultiSelectBtn.create(copts.multiSelect),
+        CopyNoteLinkBtn.create(),
         DirectChildFilterBtn.create(
           copts.filterMiddleware?.includes("directChildOnly")
         ),
-        Selection2LinkBtn.create(copts.selectionType === LookupSelectionTypeEnum.selection2link),
         SelectionExtractBtn.create(copts.selectionType === LookupSelectionTypeEnum.selectionExtract),
+        Selection2LinkBtn.create(copts.selectionType === LookupSelectionTypeEnum.selection2link),
+        JournalBtn.create(copts.noteType === LookupNoteTypeEnum.journal),
+        ScratchBtn.create(copts.noteType === LookupNoteTypeEnum.scratch),
+        HorizontalSplitBtn.create(copts.splitType === LookupSplitTypeEnum.horizontal),
       ],
     });
     this._provider = new NoteLookupProvider("lookup", {

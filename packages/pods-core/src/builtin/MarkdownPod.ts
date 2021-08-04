@@ -1,7 +1,7 @@
 import {
   DNodeUtils,
   DVault,
-  genUUID,
+  genUUIDInsecure,
   NoteProps,
   NoteUtils,
   VaultUtils,
@@ -208,7 +208,7 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
           if (config.noAddUUID) {
             assetBaseNew = `${cleanFileName(name)}${ext}`;
           } else {
-            const uuid = genUUID();
+            const uuid = genUUIDInsecure();
             assetBaseNew = `${cleanFileName(name)}-${uuid}${ext}`;
           }
           const assetPathFull = path.join(assetDir, assetBaseNew);

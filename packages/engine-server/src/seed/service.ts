@@ -20,6 +20,14 @@ export enum SeedInitMode {
   CONVERT_WORKSPACE = "convert_workspace",
 }
 
+export type SeedSvcResp = {
+  data?: {
+    seed: SeedConfig;
+    seedPath?: string; // optional, not set if we're working with metadata only
+  };
+  error?: DendronError;
+};
+
 export class SeedService {
   public wsRoot: string;
   public registryFile?: string;
@@ -57,18 +65,28 @@ export class SeedService {
     return maybeSeed;
   }
 
-  async addSeed({ id, metaOnly }: { id: string; metaOnly?: boolean }) {
+  async addSeed({
+    id,
+    metaOnly,
+  }: {
+    id: string;
+    metaOnly?: boolean;
+  }): Promise<SeedSvcResp> {
     const seedOrError = await this.getSeedOrErrorFromId(id);
     if (seedOrError instanceof DendronError) {
       return {
         error: seedOrError,
       };
     }
-    this.addSeedMetadata({ seed: seedOrError, wsRoot: this.wsRoot });
     let seedPath;
+
+    // Seed cloning must occur before the metadata changes - if the current
+    // workspace that is open is the one being modified in addSeedMetadata(), VS
+    // Code will reload the current window and the seed cloning may not execute.
     if (!metaOnly) {
       seedPath = await this.cloneSeed({ seed: seedOrError });
     }
+    await this.addSeedMetadata({ seed: seedOrError, wsRoot: this.wsRoot });
     return { data: { seedPath, seed: seedOrError } };
   }
 
@@ -94,6 +112,7 @@ export class SeedService {
       seedEntry.site = seed.site;
     }
     config.seeds[id] = seedEntry;
+
     await ws.addVault({
       vault: SeedUtils.seed2Vault({ seed }),
       updateWorkspace: true,
@@ -175,7 +194,7 @@ export class SeedService {
     return resp;
   }
 
-  async removeSeed({ id }: { id: string }) {
+  async removeSeed({ id }: { id: string }): Promise<SeedSvcResp> {
     const ws = new WorkspaceService({ wsRoot: this.wsRoot });
     const config = ws.config;
     if (!_.has(config.seeds, id)) {
@@ -192,12 +211,17 @@ export class SeedService {
         error: seedOrError,
       };
     }
-    await this.removeSeedMetadata({ seed: seedOrError });
+    // Folder cleanup must occur before the metadata changes - if the current
+    // workspace that is open is the one being modified in addSeedMetadata(), VS
+    // Code will reload the current window and the seed cloning may not execute.
     const spath = SeedUtils.seed2Path({ wsRoot: this.wsRoot, id });
     if (fs.pathExistsSync(spath)) {
       fs.removeSync(spath);
     }
-    return { data: {} };
+
+    await this.removeSeedMetadata({ seed: seedOrError });
+
+    return { data: { seed: seedOrError } };
   }
 
   async removeSeedMetadata({ seed }: { seed: SeedConfig }) {
@@ -210,5 +234,18 @@ export class SeedService {
     const config = ws.config;
     delete (config.seeds || {})[SeedUtils.getSeedId(seed)];
     ws.setConfig(config);
+  }
+
+  isSeedInWorkspace(id: string): boolean {
+    const ws = new WorkspaceService({ wsRoot: this.wsRoot });
+    return undefined !== ws.config.vaults.find((vault) => vault.seed === id);
+  }
+
+  getSeedsInWorkspace(): string[] {
+    const ws = new WorkspaceService({ wsRoot: this.wsRoot });
+
+    return ws.config.vaults
+      .filter((vault) => vault.seed !== undefined)
+      .map((vault) => vault.seed!);
   }
 }

@@ -93,6 +93,7 @@ function CalendarView({ engine, ide }: DendronProps) {
   // const locale = "en-us";
 
   if (journalDateFormat) {
+    // correct possible user mistake that very likely is meant to be day of the month, padded to 2 (dd) and not localized date with abbreviated month (DD)
     journalDateFormat = journalDateFormat.replace(/DD/, "dd");
   }
 

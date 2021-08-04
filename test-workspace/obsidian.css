@@ -15,9 +15,9 @@
 	color: red;
 } */
 
-/* .graph-view.color-circle {
-	color: red;
-} */
+.graph-view.color-circle {
+	color: maroon;
+}
 
 .graph-view.color-line {
 	color: blue;

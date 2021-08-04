@@ -32,6 +32,16 @@ const graphCSS: GraphCSS = [
   },
   {
     obsidian: {
+      selector: '.graph-view.color-circle',
+      property: 'color',
+    },
+    dendron: {
+      selector: 'node',
+      property: 'border-color'
+    }
+  },
+  {
+    obsidian: {
       selector: '.graph-view.color-line',
       property: 'color',
     },

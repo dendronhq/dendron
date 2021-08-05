@@ -121,7 +121,6 @@ const ConfigForm: React.FC<DefaultProps> = ({ engine }) => {
           display: "flex",
           justifyItems: "center",
           alignItems: "center",
-          background: "white",
         }}
       >
         <Content

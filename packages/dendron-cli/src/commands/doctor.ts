@@ -191,7 +191,7 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           leading: true,
         });
 
-    let doctorAction: (note: NoteProps) => Promise<void>;
+    let doctorAction: (note: NoteProps) => Promise<any>;
     switch (action) {
       case DoctorActions.FIX_FRONTMATTER: {
         console.log(
@@ -311,7 +311,11 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
         doctorAction = async (note: NoteProps) => {
           if (note.id === "root") return; // Root notes are special, preserve them
           note.id = genUUID();
-          engine.writeNote(note);
+          await engine.writeNote(note, {
+            runHooks: false,
+            updateExisting: true,
+          });
+          numChanges += 1;
         };
         break;
       }

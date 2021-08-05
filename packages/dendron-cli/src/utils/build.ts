@@ -12,6 +12,7 @@ type PkgJson = {
 };
 
 export enum SemverVersion {
+  MAJOR = "major",
   MINOR = "minor",
   PATCH = "patch",
 }
@@ -38,7 +39,22 @@ export class BuildUtils {
     currentVersion: string;
     upgradeType: SemverVersion;
   }) {
-    return semver.inc(opts.currentVersion, opts.upgradeType);
+    return semver.inc(opts.currentVersion, opts.upgradeType) as string;
+  }
+
+  static bump11ty(opts: { currentVersion: string; nextVersion: string }) {
+    const root = this.getPluginPkgPath();
+    const sitePath = path.join(root, "src", "utils", "site.ts");
+    // "@dendronhq/dendron-11ty": "^1.53.0"
+    const src = "^" + opts.currentVersion.replace(/^0./, "1.");
+    const dst = "^" + opts.nextVersion.replace(/^0./, "1.");
+
+    const newContent = fs
+      .readFileSync(sitePath, { encoding: "utf8" })
+      .replace(src, dst);
+    fs.writeFileSync(sitePath, newContent);
+    $("git add packages/plugin-core/src/utils/site.ts");
+    $(`git commit -m "chore: bump 11ty"`);
   }
 
   static updatePkgMeta({

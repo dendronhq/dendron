@@ -98,16 +98,8 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       return subprocess;
     };
 
-    const bump11ty = (opts: {
-      currentVersion: string;
-      nextVersion: string;
-    }) => {
-      $(
-        `sed  -ibak "s/$${opts.currentVersion}/$${opts.nextVersion}/" packages/plugin-core/src/utils/site.ts`
-      );
-      $(`git add packages/plugin-core/src/utils/site.ts`);
-      $(`git commit -m "chore: bump 11ty"`);
-    };
+    // $(`git add packages/plugin-core/src/utils/site.ts`);
+    // $(`git commit -m "chore: bump 11ty"`);
 
     // this.print("setRegLocal...");
     // setRegLocal();
@@ -122,6 +114,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       upgradeType: opts.upgradeType,
     });
     this.L.info({ currentVersion, nextVersion });
+    BuildUtils.bump11ty({ currentVersion, nextVersion });
 
     this.L.info("done");
   }

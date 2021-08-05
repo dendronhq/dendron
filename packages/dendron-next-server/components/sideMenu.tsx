@@ -3,7 +3,7 @@ import { Layout, Menu } from "antd";
 import get from "lodash/get";
 import isEmpty from "lodash/isEmpty";
 
-import { Config, ObjectConfig } from "../types/formTypes";
+import { FieldProps, ObjectFieldProps } from "../types/formTypes";
 import { shouldDisplay } from "../utils/shouldDisplay";
 import dendronValidator from "../data/dendron-yml.validator.json";
 import bucketConfig, { buckets } from "../data/bucketConfig";
@@ -18,12 +18,12 @@ type DefaultProptypes = {
   selectedKeys: string[];
   setSelectedKeys: (selectedKeys: string[]) => void;
   currentValues: any;
-  dendronFormConfig: Config;
+  dendronFormConfig: FieldProps;
   anyOfValues: { [key: string]: string };
 };
 
 const generateMenu = (
-  dataDefinition: Config,
+  dataDefinition: FieldProps,
   prefix: string[] = [],
   currentValues: any,
   anyOfValues: { [key: string]: string }
@@ -107,9 +107,9 @@ const generateMenu = (
       key={prefix[prefix.length - 1]}
       title={<a href={`#${prefix.join(".")}`}>{prefix[prefix.length - 1]}</a>}
     >
-      {Object.keys((dataDefinition as ObjectConfig).data).map((key) =>
+      {Object.keys((dataDefinition as ObjectFieldProps).data).map((key) =>
         generateMenu(
-          (dataDefinition as ObjectConfig).data[key],
+          (dataDefinition as ObjectFieldProps).data[key],
           [...prefix, key],
           currentValues,
           anyOfValues

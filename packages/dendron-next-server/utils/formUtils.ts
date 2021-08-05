@@ -1,18 +1,23 @@
 import _ from "lodash";
+import {
+  DendronConfig,
+  DendronSiteConfig,
+  DVault,
+} from "@dendronhq/common-all";
 
 import {
-  Config,
-  EnumConfig,
-  StringConfig,
-  NumberConfig,
-  BooleanConfig,
-  ArrayConfig,
-  RecordConfig,
-  ObjectConfig,
-  AnyOfConfig,
+  FieldProps,
+  EnumFieldProps,
+  StringFieldProps,
+  NumberFieldProps,
+  BooleanFieldProps,
+  ArrayFieldProps,
+  RecordFieldProps,
+  ObjectFieldProps,
+  AnyOfFieldProps,
 } from "../types/formTypes";
 
-export const generateSchema = (config: Config): any => {
+export const generateSchema = (config: FieldProps): any => {
   if (_.isEmpty(config)) return {};
   if (
     config.type === "string" ||
@@ -58,11 +63,11 @@ export const generateSchema = (config: Config): any => {
     properties: Object.fromEntries(
       Object.keys(config.data).map((key) => [
         key,
-        generateSchema((config as ObjectConfig).data[key]),
+        generateSchema((config as ObjectFieldProps).data[key]),
       ])
     ),
     required: Object.keys(config.data).filter(
-      (key) => (config as ObjectConfig).data[key].required
+      (key) => (config as ObjectFieldProps).data[key].required
     ),
   };
   return schema;
@@ -73,7 +78,7 @@ export const generateRenderableConfig = (
   definitions: any,
   label: string,
   required?: boolean
-): Config => {
+): FieldProps => {
   // `any` type generates empty config object, so we are assuming
   // that it's a string so that nothing breaks
   if (_.isEmpty(schema))
@@ -81,7 +86,7 @@ export const generateRenderableConfig = (
       type: "string",
       label,
       required,
-    } as StringConfig;
+    } as StringFieldProps;
 
   // check if instance of Object
 
@@ -92,7 +97,7 @@ export const generateRenderableConfig = (
       data: schema.type.const,
       label,
       required,
-    } as EnumConfig;
+    } as EnumFieldProps;
   }
 
   if (schema.type === "string") {
@@ -102,7 +107,7 @@ export const generateRenderableConfig = (
       required,
       helperText: schema.description,
       data: "enum" in schema ? schema.enum : undefined,
-    } as StringConfig | EnumConfig;
+    } as StringFieldProps | EnumFieldProps;
   }
 
   if (schema.type === "number" || schema.type === "boolean") {
@@ -111,7 +116,7 @@ export const generateRenderableConfig = (
       helperText: schema.description,
       label,
       required,
-    } as NumberConfig | BooleanConfig;
+    } as NumberFieldProps | BooleanFieldProps;
   }
 
   if (schema.type === "array") {
@@ -121,7 +126,7 @@ export const generateRenderableConfig = (
       required,
       helperText: schema.description,
       data: generateRenderableConfig(schema.items, definitions, ""),
-    } as ArrayConfig;
+    } as ArrayFieldProps;
   }
 
   if ("anyOf" in schema) {
@@ -135,7 +140,7 @@ export const generateRenderableConfig = (
       helperText: schema.description,
       required,
       data,
-    } as AnyOfConfig;
+    } as AnyOfFieldProps;
   }
 
   if ("$ref" in schema) {
@@ -160,7 +165,7 @@ export const generateRenderableConfig = (
           definitions,
           ""
         ),
-      } as RecordConfig;
+      } as RecordFieldProps;
     }
 
     return {
@@ -178,8 +183,19 @@ export const generateRenderableConfig = (
           ),
         ])
       ),
-    } as ObjectConfig;
+    } as ObjectFieldProps;
   }
 
   throw new Error("Schema generation for this type is not implemented yet!");
 };
+
+export type ConfigKey =
+  | keyof DendronConfig
+  | keyof DendronSiteConfig
+  | keyof DVault;
+export class FormUtils {
+  static shouldBeReadOnly = (key: string) => {
+    const READ_ONLY_KEYS: ConfigKey[] = ["vaults"];
+    return READ_ONLY_KEYS.includes(key as ConfigKey);
+  };
+}

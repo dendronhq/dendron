@@ -155,7 +155,7 @@ const ConfigForm: React.FC<DefaultProps> = ({ engine }) => {
                       {bucketConfig[bucket].map((property: string) => (
                         <FormGenerator
                           key={property}
-                          data={generateRenderableConfig(
+                          field={generateRenderableConfig(
                             _.get(
                               dendronValidator,
                               `definitions.DendronConfig.properties.${property}`
@@ -169,6 +169,7 @@ const ConfigForm: React.FC<DefaultProps> = ({ engine }) => {
                           setSelectedKeys={setSelectedKeys}
                           setOpenKeys={setOpenKeys}
                           setAnyOfValues={setAnyOfValues}
+                          parentField={null}
                         />
                       ))}
                     </React.Fragment>

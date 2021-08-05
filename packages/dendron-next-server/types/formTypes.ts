@@ -1,51 +1,57 @@
 import { ReactNode } from "react";
 
-export type CommonConfig = {
+export type CommonFieldProps = {
   required?: boolean;
   helperText?: string;
   label?: string;
 };
 
-export type BooleanConfig = CommonConfig & { type: "boolean" };
+export type BooleanFieldProps = CommonFieldProps & { type: "boolean" };
 
-export type StringConfig = CommonConfig & { type: "string" };
+export type StringFieldProps = CommonFieldProps & { type: "string" };
 
-export type NumberConfig = CommonConfig & { type: "number" };
+export type NumberFieldProps = CommonFieldProps & { type: "number" };
 
-export type EnumConfig = CommonConfig & { type: "enum"; data: string[] };
+export type EnumFieldProps = CommonFieldProps & {
+  type: "enum";
+  data: string[];
+};
 
-export type ArrayConfig = CommonConfig & {
+export type ArrayFieldProps = CommonFieldProps & {
   type: "array";
-  data: Config;
+  data: FieldProps;
 };
 
-export type RecordConfig = CommonConfig & {
+export type RecordFieldProps = CommonFieldProps & {
   type: "record";
-  data: Config;
+  data: FieldProps;
 };
 
-export type ObjectConfig = CommonConfig & {
+export type ObjectFieldProps = CommonFieldProps & {
   type: "object";
-  data: Record<string, Config>;
+  data: Record<string, FieldProps>;
 };
 
-export type AnyOfConfig = CommonConfig & {
+export type AnyOfFieldProps = CommonFieldProps & {
   type: "anyOf";
-  data: Config[];
+  data: FieldProps[];
 };
 
-export type Config =
-  | ArrayConfig
-  | BooleanConfig
-  | EnumConfig
-  | StringConfig
-  | NumberConfig
-  | RecordConfig
-  | ObjectConfig
-  | AnyOfConfig;
+/**
+ * FieldType
+ */
+export type FieldProps =
+  | ArrayFieldProps
+  | BooleanFieldProps
+  | EnumFieldProps
+  | StringFieldProps
+  | NumberFieldProps
+  | RecordFieldProps
+  | ObjectFieldProps
+  | AnyOfFieldProps;
 
-export type ConfigInputType = {
-  data: Config;
+export type FormInputType = {
+  field: FieldProps;
   prefix: string[];
   errors?: any;
   values?: any;
@@ -54,6 +60,11 @@ export type ConfigInputType = {
   setOpenKeys?: (keys: string[]) => void;
   setAnyOfValues: (values: { [key: string]: string }) => void;
   displayTitle?: boolean;
+  /**
+   * Check if parent field was required. If not, required children field
+   * should not be required either unless parent is set
+   */
+  parentField: FieldProps | null;
 };
 
 export type InputType = {
@@ -63,6 +74,7 @@ export type InputType = {
   placeholder?: string;
   required?: boolean;
   helperText?: string;
+  readOnly?: boolean;
   setSelectedKeys?: (keys: string[]) => void;
   setOpenKeys?: (keys: string[]) => void;
 };
@@ -75,14 +87,14 @@ export type SimpleInputType = InputType & {
   addonAfter?: ReactNode;
 };
 export type ArrayInputType = InputType & {
-  data: Config;
+  data: FieldProps;
   values: any;
   isRecordType?: boolean;
   setAnyOfValues: any;
 };
-export type SelectInputType = InputType & { data: EnumConfig };
+export type SelectInputType = InputType & { data: EnumFieldProps };
 export type AnyOfInputType = InputType & {
-  data: AnyOfConfig;
+  data: AnyOfFieldProps;
   values: any;
   setAnyOfValues: any;
 };

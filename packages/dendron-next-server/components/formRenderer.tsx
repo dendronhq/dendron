@@ -23,17 +23,19 @@ import {
   SimpleInputType,
   SelectInputType,
   ArrayInputType,
-  Config,
-  EnumConfig,
-  ArrayConfig,
-  RecordConfig,
-  ObjectConfig,
-  ConfigInputType,
-  AnyOfConfig,
+  FieldProps,
+  EnumFieldProps,
+  ArrayFieldProps,
+  RecordFieldProps,
+  ObjectFieldProps,
+  FormInputType,
+  AnyOfFieldProps,
   AnyOfInputType,
 } from "../types/formTypes";
 import { shouldDisplay } from "../utils/shouldDisplay";
 import bucketConfig from "../data/bucketConfig";
+import { FormUtils } from "../utils/formUtils";
+import { boolean } from "yup";
 
 const largeFieldStyles = {
   paddingLeft: "10px",
@@ -73,15 +75,13 @@ const BaseInput = ({
           {label}
           {required && <span style={{ color: "red" }}> *</span>}
         </Title>
-        {helperText
-          ?.split("\n")
-          .map((line, index) => (
-            <>
-              <Text type="secondary" key={index}>
-                <ReactMarkdown>{line}</ReactMarkdown>
-              </Text>
-            </>
-          ))}
+        {helperText?.split("\n").map((line, index) => (
+          <>
+            <Text type="secondary" key={index}>
+              <ReactMarkdown>{line}</ReactMarkdown>
+            </Text>
+          </>
+        ))}
 
         {children}
         {error && (
@@ -111,6 +111,7 @@ const SimpleInput = ({
   addonAfter,
   setSelectedKeys,
   setOpenKeys,
+  readOnly,
 }: SimpleInputType) => {
   return (
     <BaseInput
@@ -126,6 +127,7 @@ const SimpleInput = ({
         type={type}
         name={name}
         placeholder={placeholder}
+        readOnly={readOnly || false}
         required={required}
         addonAfter={addonAfter}
         onClick={() => updateMenu(name, setSelectedKeys, setOpenKeys)}
@@ -228,13 +230,14 @@ const AnyOfInput = ({
 
       <FormGenerator
         values={values}
-        data={(data as AnyOfConfig).data[value === "basic" ? 0 : 1]}
+        field={(data as AnyOfFieldProps).data[value === "basic" ? 0 : 1]}
         errors={errors}
         prefix={[name]}
         setSelectedKeys={setSelectedKeys}
         setOpenKeys={setOpenKeys}
         displayTitle={false}
         setAnyOfValues={setAnyOfValues}
+        parentField={data}
       />
     </BaseInput>
   );
@@ -252,6 +255,7 @@ const ArrayInput = ({
   setSelectedKeys,
   setOpenKeys,
   setAnyOfValues,
+  readOnly,
 }: ArrayInputType) => {
   const props = {
     values,
@@ -270,6 +274,7 @@ const ArrayInput = ({
         required,
         helperText,
         errors,
+        readOnly,
         customStyles: largeFieldStyles,
       }}
     >
@@ -278,14 +283,16 @@ const ArrayInput = ({
         render={(arrayHelpers) =>
           isRecordType ? (
             <RenderRecord
-              dataDefinition={data as RecordConfig}
+              dataDefinition={data as RecordFieldProps}
               arrayHelpers={arrayHelpers}
+              readOnly={readOnly}
               {...props}
             />
           ) : (
             <RenderArray
-              dataDefinition={data as ArrayConfig}
+              dataDefinition={data as ArrayFieldProps}
               arrayHelpers={arrayHelpers}
+              readOnly={readOnly}
               {...props}
             />
           )
@@ -295,7 +302,7 @@ const ArrayInput = ({
   );
 };
 
-const makeDefault = (config: Config): any => {
+const makeDefault = (config: FieldProps): any => {
   const { type } = config;
   switch (type) {
     case "array":
@@ -303,12 +310,12 @@ const makeDefault = (config: Config): any => {
     case "boolean":
       return false;
     case "enum":
-      return (config as EnumConfig).data[0];
+      return (config as EnumFieldProps).data[0];
     case "number":
       return 0;
     case "object":
       return Object.fromEntries(
-        Object.entries((config as ObjectConfig).data).map(([k, v]) => [
+        Object.entries((config as ObjectFieldProps).data).map(([k, v]) => [
           k,
           makeDefault(v),
         ])
@@ -331,12 +338,14 @@ const RenderRecord = ({
   setSelectedKeys,
   setOpenKeys,
   setAnyOfValues,
+  readOnly,
 }: {
   values: any;
-  dataDefinition: RecordConfig;
+  dataDefinition: RecordFieldProps;
   name: any;
   arrayHelpers: any;
   errors: any;
+  readOnly?: boolean;
   setSelectedKeys?: (value: string[]) => void;
   setOpenKeys?: (value: string[]) => void;
   setAnyOfValues: (values: { [key: string]: string }) => void;
@@ -364,39 +373,45 @@ const RenderRecord = ({
       prev.map((r: RecordProps) => (r.id !== record.id ? r : record))
     );
 
-  const dataSource = records
-    ?.map((record: RecordProps, index: number) => (
-      <Card
-        key={`${name}.${index}`}
-        size="small"
-        title={
-          <AntInput
-            type="text"
-            value={record.value}
-            style={{ width: "85%" }}
-            addonBefore="Key"
-            onChange={(e) => handleChange({ ...record, value: e.target.value })}
-          />
-        }
-        extra={<MinusCircleOutlined onClick={() => removeRecord(record)} />}
-        style={{
-          borderWidth: 0,
-        }}
-      >
-        <FormGenerator
-          key={`${name}.${record.value}`}
-          values={values}
-          data={(dataDefinition as RecordConfig).data}
-          errors={errors}
-          prefix={[name, `${record.value}`]}
-          setSelectedKeys={setSelectedKeys}
-          setOpenKeys={setOpenKeys}
-          displayTitle={false}
-          setAnyOfValues={setAnyOfValues}
+  const dataSource = records?.map((record: RecordProps, index: number) => (
+    <Card
+      key={`${name}.${index}`}
+      size="small"
+      title={
+        <AntInput
+          type="text"
+          value={record.value}
+          style={{ width: "85%" }}
+          addonBefore="Key"
+          onChange={(e) => handleChange({ ...record, value: e.target.value })}
         />
-      </Card>
-    ))
-    .concat(
+      }
+      extra={
+        readOnly ? undefined : (
+          <MinusCircleOutlined onClick={() => removeRecord(record)} />
+        )
+      }
+      style={{
+        borderWidth: 0,
+      }}
+    >
+      <p>Rendering Record</p>
+      <FormGenerator
+        key={`${name}.${record.value}`}
+        values={values}
+        field={(dataDefinition as RecordFieldProps).data}
+        errors={errors}
+        prefix={[name, `${record.value}`]}
+        setSelectedKeys={setSelectedKeys}
+        setOpenKeys={setOpenKeys}
+        displayTitle={false}
+        setAnyOfValues={setAnyOfValues}
+        parentField={dataDefinition}
+      />
+    </Card>
+  ));
+  if (!readOnly) {
+    dataSource.push(
       <Button
         type="primary"
         size="large"
@@ -410,6 +425,7 @@ const RenderRecord = ({
         Add
       </Button>
     );
+  }
 
   return (
     <List
@@ -429,12 +445,14 @@ const RenderArray = ({
   name,
   arrayHelpers,
   errors,
+  readOnly,
   setSelectedKeys,
   setOpenKeys,
   setAnyOfValues,
 }: {
   values: any;
-  dataDefinition: ArrayConfig;
+  readOnly?: boolean;
+  dataDefinition: ArrayFieldProps;
   name: any;
   arrayHelpers: any;
   errors: any;
@@ -449,35 +467,40 @@ const RenderArray = ({
         size="small"
         title={index}
         extra={
-          <MinusCircleOutlined onClick={() => arrayHelpers.remove(index)} />
+          readOnly ? undefined : (
+            <MinusCircleOutlined onClick={() => arrayHelpers.remove(index)} />
+          )
         }
         style={{
           borderWidth: 0,
         }}
       >
+        <p>Rendering Array</p>
         <FormGenerator
           key={`${name}.${index}`}
           values={values}
-          data={dataDefinition.data}
+          field={dataDefinition.data}
           errors={errors}
           prefix={[name, `${index}`]}
           setSelectedKeys={setSelectedKeys}
           setOpenKeys={setOpenKeys}
           displayTitle={false}
           setAnyOfValues={setAnyOfValues}
+          parentField={dataDefinition}
         />
       </Card>
     )) ?? [];
-
-  dataSource?.push(
-    <Button
-      type="primary"
-      size="large"
-      onClick={() => arrayHelpers.push(makeDefault(dataDefinition.data))}
-    >
-      Add
-    </Button>
-  );
+  if (!readOnly) {
+    dataSource?.push(
+      <Button
+        type="primary"
+        size="large"
+        onClick={() => arrayHelpers.push(makeDefault(dataDefinition.data))}
+      >
+        Add
+      </Button>
+    );
+  }
 
   return (
     <List
@@ -492,7 +515,7 @@ const RenderArray = ({
 };
 
 const FormGenerator = ({
-  data,
+  field: data,
   values,
   errors,
   prefix,
@@ -501,13 +524,19 @@ const FormGenerator = ({
   setOpenKeys,
   setAnyOfValues,
   displayTitle = true,
-}: ConfigInputType) => {
+  parentField,
+}: FormInputType) => {
   if (!data) return <></>;
 
   const lastName = prefix.length ? prefix[prefix.length - 1] : undefined;
-  const { type, required, helperText, label } = data;
+  const { type, required: fieldRequired, helperText, label } = data;
+  // if parent is not required, children fields are not required
+  const required = !_.isNull(parentField)
+    ? fieldRequired && parentField.required
+    : fieldRequired;
 
   if (!shouldDisplay(lastName)) return <></>;
+  const readOnly = FormUtils.shouldBeReadOnly(lastName || "");
 
   if (type === "string" || type === "number") {
     return (
@@ -522,6 +551,7 @@ const FormGenerator = ({
           addonAfter,
           setSelectedKeys,
           setOpenKeys,
+          readOnly,
         }}
       />
     );
@@ -556,6 +586,7 @@ const FormGenerator = ({
           setSelectedKeys,
           setOpenKeys,
           setAnyOfValues,
+          readOnly,
         }}
       />
     );
@@ -564,7 +595,7 @@ const FormGenerator = ({
     return (
       <SelectInput
         name={prefix.join(".")}
-        data={data as EnumConfig}
+        data={data as EnumFieldProps}
         {...{
           label,
           values,
@@ -582,7 +613,7 @@ const FormGenerator = ({
     return (
       <AnyOfInput
         name={prefix.join(".")}
-        data={data as AnyOfConfig}
+        data={data as AnyOfFieldProps}
         {...{
           label,
           helperText,
@@ -621,16 +652,17 @@ const FormGenerator = ({
           </>
         ))
         .concat([<br key="br" />])}
-      {Object.keys((data as ObjectConfig).data).map((key) => (
+      {Object.keys((data as ObjectFieldProps).data).map((key) => (
         <FormGenerator
           key={prefix.join(".") + "." + key}
           values={values}
-          data={(data as ObjectConfig).data[key]}
+          field={(data as ObjectFieldProps).data[key]}
           errors={errors}
           prefix={[...prefix, key]}
           setSelectedKeys={setSelectedKeys}
           setOpenKeys={setOpenKeys}
           setAnyOfValues={setAnyOfValues}
+          parentField={data}
         />
       ))}
     </div>

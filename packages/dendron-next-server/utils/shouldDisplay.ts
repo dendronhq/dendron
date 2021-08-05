@@ -1,8 +1,7 @@
 import _ from "lodash";
-import { DendronConfig, DendronSiteConfig, DVault } from "@dendronhq/common-all";
+import { ConfigKey } from "./formUtils";
 
 // NOTE: not meant to be configurable in UI just yet
-type ConfigKey = keyof DendronConfig | keyof DendronSiteConfig | keyof DVault;
 const HIDDEN_KEYS: ConfigKey[] = [
   "hideBlockAnchors",
   "version",
@@ -28,7 +27,7 @@ const HIDDEN_KEYS: ConfigKey[] = [
   // --- vault
   "userPermission",
   "sync",
-  "noAutoPush"
+  "noAutoPush",
 ];
 
 export const shouldDisplay = (name?: string): boolean => {

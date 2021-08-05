@@ -72,6 +72,61 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     return { ...args };
   }
 
+  async build() {
+    const setRegLocal = () => {
+      $(`yarn config set registry http://localhost:4873`);
+      $(`npm set registry http://localhost:4873/`);
+    };
+    const startVerdaccio = () => {
+      const subprocess = execa("verdaccio");
+      const logger = this.L;
+      logger.info({ state: "post:exec.node" });
+      subprocess.on("close", () => {
+        logger.error({ state: "close" });
+      });
+      subprocess.on("disconnect", () => {
+        logger.error({ state: "disconnect" });
+      });
+      subprocess.on("exit", () => {
+        logger.error({ state: "exit" });
+      });
+      subprocess.on("error", (err) => {
+        logger.error({ state: "error", payload: err });
+      });
+      subprocess.on("message", (message) => {
+        logger.info({ state: "message", message });
+      });
+      if (subprocess.stdout && subprocess.stderr) {
+        subprocess.stdout.on("data", (chunk) => {
+          process.stdout.write(chunk);
+        });
+        subprocess.stderr.on("data", (chunk) => {
+          process.stdout.write(chunk);
+        });
+      }
+      return subprocess;
+    };
+
+    const bump11ty = () => {
+      $(
+        `sed  -ibak "s/$VERSION_OLD/$VERSION_NEW/" packages/plugin-core/src/utils/site.ts`
+      );
+      $(`git add packages/plugin-core/src/utils/site.ts`);
+      $(`git commit -m "chore: bump 11ty"`);
+    };
+
+    // this.print("setRegLocal...");
+    // setRegLocal();
+
+    // this.print("startVerdaccio...");
+    // startVerdaccio();
+
+    // get package version
+    const currentVersion = BuildUtils.getCurrentVersion();
+    this.L.info({ currentVersion });
+    this.L.info("done");
+  }
+
   async generateJSONSchemaFromConfig() {
     const repoRoot = process.cwd();
     const pkgRoot = path.join(repoRoot, "packages", "engine-server");

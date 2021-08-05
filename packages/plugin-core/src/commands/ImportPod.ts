@@ -5,6 +5,7 @@ import {
   PodClassEntryV4,
   PodItemV4,
   PodUtils,
+  PROMPT
 } from "@dendronhq/pods-core";
 import { ProgressLocation, Uri, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
@@ -98,8 +99,8 @@ export class ImportPodCommand extends BaseCommand<
           engine,
           wsRoot,
           vaults,
-          onPrompt: async (type?: String) => {
-            const resp = (type === "userPrompt") ?
+          onPrompt: async (type?: PROMPT) => {
+            const resp = (type === PROMPT.USERPROMPT) ?
             await window.showInformationMessage(
               "Do you want to overwrite",
                 { modal: true },

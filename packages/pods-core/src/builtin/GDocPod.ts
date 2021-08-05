@@ -1,4 +1,4 @@
-import { ImportPod, ImportPodConfig, ImportPodPlantOpts } from "../basev3";
+import { ImportPod, ImportPodConfig, ImportPodPlantOpts, PROMPT } from "../basev3";
 import { JSONSchemaType } from "ajv";
 import { PodUtils } from "../utils";
 import axios from "axios";
@@ -242,7 +242,7 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
     wsRoot: string,
     vault: DVault,
     confirmOverwrite?: boolean,
-    onPrompt?: (arg0?: String) => Promise<{title : string} | undefined>
+    onPrompt?: (arg0?: PROMPT) => Promise<{title : string} | undefined>
   }
   ) => {
      const { note, engine, wsRoot, vault, confirmOverwrite, onPrompt } = opts;
@@ -258,7 +258,7 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
           existingNote.body = note.body;
 
           if(confirmOverwrite && onPrompt){
-          const resp = await onPrompt("userPrompt");
+          const resp = await onPrompt( PROMPT.USERPROMPT );
 
             if(resp?.title.toLowerCase() === "yes"){
               await engine.writeNote(existingNote, { newNode: true });

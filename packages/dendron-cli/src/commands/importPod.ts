@@ -1,4 +1,4 @@
-import { getAllImportPods } from "@dendronhq/pods-core";
+import { getAllImportPods, PROMPT } from "@dendronhq/pods-core";
 import yargs from "yargs";
 import { CLICommand } from "./base";
 import { enrichPodArgs, PodCLIOpts, setupPodArgs } from "./pod";
@@ -12,7 +12,7 @@ type CommandCLIOpts = {} & SetupEngineCLIOpts & PodCLIOpts;
 type CommandOpts = CommandCLIOpts & {
   podClass: any;
   config: any;
-  onPrompt?: (arg0?: String) => Promise<string | {title : string} | undefined>
+  onPrompt?: (arg0?: PROMPT) => Promise<string | {title : string} | undefined>
 } & SetupEngineResp;
 
 type CommandOutput = void;
@@ -48,8 +48,8 @@ export class ImportPodCLICommand extends CLICommand<
       config, 
       engine, 
       vaults,
-      onPrompt : async (type? : String) => {
-        const resp = (type === "userPrompt") ? await prompts({
+      onPrompt : async (type? : PROMPT) => {
+        const resp = (type === PROMPT.USERPROMPT ) ? await prompts({
           type: 'text',
           name: 'title',
           message: 'Do you want to overwrite: Yes/No',

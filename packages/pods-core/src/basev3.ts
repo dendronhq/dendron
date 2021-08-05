@@ -14,10 +14,14 @@ import { PodKind } from "./types";
 import { JSONSchemaType } from "ajv";
 import { PodUtils } from "./utils";
 
+export enum PROMPT {
+  USERPROMPT = "userPrompt",
+}
+
 export type PodOpts<T> = {
   engine: DEngineClient;
   config: T;
-  onPrompt?: (arg0?: String) => Promise<any | undefined>
+  onPrompt?: (arg0?: PROMPT) => Promise<any | undefined>
 } & WorkspaceOpts;
 
 // === Publish Pod

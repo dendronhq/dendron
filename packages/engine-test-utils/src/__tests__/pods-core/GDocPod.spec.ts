@@ -1,6 +1,6 @@
 import { ENGINE_HOOKS } from "../../presets";
 import { runEngineTestV5 } from "../../engine";
-import { GDocImportPod } from "@dendronhq/pods-core";
+import { GDocImportPod, PROMPT } from "@dendronhq/pods-core";
 import { VaultUtils } from "@dendronhq/common-all";
 import {response, comments, existingNote} from "../../utils/GDocMockResult";
 import axios from 'axios';
@@ -16,8 +16,8 @@ sinon.stub(window, "showInformationMessage").resolves(resp)
 
 describe("GDoc import pod", () => {
   let result: any;
-  const onPrompt= async (type?: String) => {
-    const resp = (type === "userPrompt") ?
+  const onPrompt= async (type?: PROMPT) => {
+    const resp = (type === PROMPT.USERPROMPT) ?
     await window.showInformationMessage(
       "Do you want to overwrite",
         { modal: true },

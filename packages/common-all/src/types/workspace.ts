@@ -152,7 +152,7 @@ export type DendronConfig = {
   hooks?: DHookDict;
   /**
    * Pick vault when creating new note.
-   * Docs: https://dendron.so/notes/24b176f1-685d-44e1-a1b0-1704b1a92ca0.html#specify-vault-location-when-creating-a-note
+   * [Docs](https://dendron.so/notes/24b176f1-685d-44e1-a1b0-1704b1a92ca0.html#specify-vault-location-when-creating-a-note)
    */
   lookupConfirmVaultOnCreate?: boolean;
   /**
@@ -166,7 +166,7 @@ export type DendronConfig = {
   useNoteTitleForLink?: boolean;
 
   /**
-   * Use mermaid diagrams
+   * Enable mermaid diagram sytnax
    */
   mermaid?: boolean;
 

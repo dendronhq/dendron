@@ -93,7 +93,7 @@ const selectionToNoteProps = async (opts: {
   const { selectionType, note } = opts;
   const { selection, text } = VSCodeUtils.getSelection();
 
-  switch(selectionType) {
+  switch (selectionType) {
     case "selectionExtract": {
       if (!_.isUndefined(document)) {
         const body = "\n" + document.getText(range).trim();
@@ -207,7 +207,7 @@ export class Selection2LinkBtn extends DendronBtn {
         note,
       });
     };
-    
+
     quickPick.prevValue = quickPick.value;
     const { text } = VSCodeUtils.getSelection();
     const slugger = getSlugger();
@@ -217,7 +217,7 @@ export class Selection2LinkBtn extends DendronBtn {
     } else {
       quickPick.value = [
         quickPick.rawValue,
-        NotePickerUtils.getPickerValue(quickPick)
+        NotePickerUtils.getPickerValue(quickPick),
       ].join(".");
     }
     return;
@@ -274,7 +274,10 @@ export class JournalBtn extends DendronBtn {
       return DendronClientUtilsV2.genNoteName("JOURNAL");
     };
     const { noteName, prefix } = quickPick.modifyPickerValueFunc();
-    quickPick.noteModifierValue = _.difference(noteName.split("."), prefix.split(".")).join(".");
+    quickPick.noteModifierValue = _.difference(
+      noteName.split("."),
+      prefix.split(".")
+    ).join(".");
     quickPick.prevValue = quickPick.value;
     quickPick.prefix = prefix;
     quickPick.value = NotePickerUtils.getPickerValue(quickPick);
@@ -306,7 +309,10 @@ export class ScratchBtn extends DendronBtn {
     };
     quickPick.prevValue = quickPick.value;
     const { noteName, prefix } = quickPick.modifyPickerValueFunc();
-    quickPick.noteModifierValue = _.difference(noteName.split("."), prefix.split(".")).join(".");
+    quickPick.noteModifierValue = _.difference(
+      noteName.split("."),
+      prefix.split(".")
+    ).join(".");
     quickPick.prefix = prefix;
     quickPick.value = NotePickerUtils.getPickerValue(quickPick);
     return;
@@ -331,10 +337,10 @@ export class HorizontalSplitBtn extends DendronBtn {
   }
 
   async onEnable({ quickPick }: ButtonHandleOpts) {
-    quickPick.showNote = async (uri) => vscode.window.showTextDocument(
-      uri, 
-      { viewColumn: vscode.ViewColumn.Beside }
-    );
+    quickPick.showNote = async (uri) =>
+      vscode.window.showTextDocument(uri, {
+        viewColumn: vscode.ViewColumn.Beside,
+      });
     return;
   }
 

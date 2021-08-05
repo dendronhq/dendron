@@ -1,4 +1,9 @@
-import { ImportPod, ImportPodConfig, ImportPodPlantOpts } from "../basev3";
+import {
+  ImportPod,
+  ImportPodConfig,
+  ImportPodPlantOpts,
+  PROMPT,
+} from "../basev3";
 import { JSONSchemaType } from "ajv";
 import { PodUtils } from "../utils";
 import axios from "axios";
@@ -35,6 +40,10 @@ type GDocImportPodCustomOpts = {
    * import comments from the doc in text or json format
    */
   importComments?: ImportComments;
+  /**
+   * get confirmation before overwriting existing note
+   */
+  confirmOverwrite?: boolean;
 };
 
 type ImportComments = {
@@ -83,6 +92,12 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
               nullable: true,
             },
           },
+        },
+        confirmOverwrite: {
+          type: "boolean",
+          default: "true",
+          description: "get confirmation before overwriting existing note",
+          nullable: true,
         },
       },
     }) as JSONSchemaType<GDocImportPodConfig>;
@@ -200,6 +215,7 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
     comments.forEach((comment: any) => {
       text += `- ${comment.author}:  ${comment.content}\n`;
       if (comment.replies?.length > 0) {
+        text += `\n\t replies to this comment: \n\n`;
         comment.replies.forEach((reply: any) => {
           text += `\t - ${reply.author}: ${reply.content}\n`;
         });
@@ -226,12 +242,15 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
     return note;
   }
 
-  createNote = async (
-    note: NoteProps,
-    engine: DEngineClient,
-    wsRoot: string,
-    vault: DVault
-  ) => {
+  createNote = async (opts: {
+    note: NoteProps;
+    engine: DEngineClient;
+    wsRoot: string;
+    vault: DVault;
+    confirmOverwrite?: boolean;
+    onPrompt?: (arg0?: PROMPT) => Promise<{ title: string } | undefined>;
+  }) => {
+    const { note, engine, wsRoot, vault, confirmOverwrite, onPrompt } = opts;
     const existingNote = NoteUtils.getNoteByFnameV5({
       fname: note.fname,
       notes: engine.notes,
@@ -245,23 +264,39 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
       ) {
         existingNote.custom.revisionId = note.custom.revisionId;
         existingNote.body = note.body;
-        await engine.writeNote(existingNote, { newNode: true });
+
+        if (confirmOverwrite && onPrompt) {
+          const resp = await onPrompt(PROMPT.USERPROMPT);
+
+          if (resp?.title.toLowerCase() === "yes") {
+            await engine.writeNote(existingNote, { newNode: true });
+            return existingNote;
+          }
+        } else {
+          await engine.writeNote(existingNote, { newNode: true });
+          return existingNote;
+        }
+      } else if (onPrompt) {
+        onPrompt();
       }
     } else {
       await engine.writeNote(note, { newNode: true });
+      return note;
     }
+    return undefined;
   };
 
   async plant(opts: GDocImportPodPlantOpts) {
     const ctx = "GDocPod";
     this.L.info({ ctx, opts, msg: "enter" });
-    const { wsRoot, engine, vault, config } = opts;
+    const { wsRoot, engine, vault, config, onPrompt } = opts;
     const {
       token,
       hierarchyDestination,
       documentId,
       fnameAsId,
       importComments,
+      confirmOverwrite = true,
     } = config as GDocImportPodConfig;
 
     let response = await this.getDataFromGDoc(
@@ -278,7 +313,17 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
       vault,
       fnameAsId,
     });
-    this.createNote(note, engine, wsRoot, vault);
-    return { importedNotes: [note] };
+    const createdNotes = await this.createNote({
+      note,
+      engine,
+      wsRoot,
+      vault,
+      confirmOverwrite,
+      onPrompt,
+    });
+    const importedNotes: NoteProps[] =
+      createdNotes === undefined ? [] : [createdNotes];
+
+    return { importedNotes };
   }
 }

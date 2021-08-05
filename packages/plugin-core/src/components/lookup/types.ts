@@ -15,8 +15,8 @@ export type LookupControllerState = {
 
 type FilterQuickPickFunction = (items: NoteQuickInput[]) => NoteQuickInput[];
 type ModifyPickerValueFunc = (value?: string) => {
-  noteName: string,
-  prefix: string,
+  noteName: string;
+  prefix: string;
 };
 type SelectionProcessFunc = (note: NoteProps) => Promise<NoteProps | undefined>;
 

@@ -248,7 +248,7 @@ export const getReferenceAtPosition = (
     // if not, it could be a hashtag
     const rangeForHashTag = document.getWordRangeAtPosition(
       position,
-      HASHTAG_REGEX_BASIC,
+      HASHTAG_REGEX_BASIC
     );
     if (rangeForHashTag) {
       const docText = document.getText(rangeForHashTag);
@@ -275,7 +275,9 @@ export const getReferenceAtPosition = (
       const tags = getFrontmatterTags(parsed);
       for (const tag of tags) {
         // Offset 1 for the starting `---` line of frontmatter
-        const tagPos = VSCodeUtils.position2VSCodeRange(tag.position, {line: 1});
+        const tagPos = VSCodeUtils.position2VSCodeRange(tag.position, {
+          line: 1,
+        });
         if (
           tagPos.start.line <= position.line &&
           position.line <= tagPos.end.line &&

@@ -166,7 +166,6 @@ export class LookupControllerV3 {
     this._quickpick = undefined;
     this._cancelTokenSource?.dispose();
   }
-  
 
   onTriggerButton = async (btn: QuickInputButton) => {
     const { _quickpick: quickpick } = this;

@@ -12,7 +12,6 @@ import {
 import type { YAML } from "mdast";
 import _ from "lodash";
 
-
 export function isYamlUnistParent(node: any): node is YamlUnistParent {
   return _.isArray(node?.children);
 }

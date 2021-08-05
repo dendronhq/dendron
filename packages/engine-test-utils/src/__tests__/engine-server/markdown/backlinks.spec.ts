@@ -170,9 +170,7 @@ describe("backlinks", () => {
           expect(
             await AssertUtils.assertInString({
               body: resp.contents as string,
-              match: [
-                `<a href="one.html">One (vault1)</a>`,
-              ],
+              match: [`<a href="one.html">One (vault1)</a>`],
             })
           ).toBeTruthy();
         },
@@ -272,9 +270,7 @@ describe("backlinks", () => {
         expect(
           await AssertUtils.assertInString({
             body: resp.contents as string,
-            match: [
-              `<a href="one.html">One (vault1)</a>`,
-            ],
+            match: [`<a href="one.html">One (vault1)</a>`],
           })
         ).toBeTruthy();
       },
@@ -287,7 +283,7 @@ describe("backlinks", () => {
             fname: "one",
             vault,
             wsRoot,
-            body: "#test"
+            body: "#test",
           });
           await NoteTestUtilsV4.createNote({
             fname: "tags.test",

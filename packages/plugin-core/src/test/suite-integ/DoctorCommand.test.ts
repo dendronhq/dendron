@@ -789,7 +789,7 @@ suite("REGENERATE_NOTE_ID", function () {
           wsRoot,
         }).id;
         const oldBarId = NoteUtils.getNoteOrThrow({
-          fname: "foo",
+          fname: "bar",
           notes: engine.notes,
           vault,
           wsRoot,
@@ -824,7 +824,7 @@ suite("REGENERATE_NOTE_ID", function () {
             wsRoot,
           });
           const bar = NoteUtils.getNoteByFnameV5({
-            fname: "foo",
+            fname: "bar",
             notes: engine.notes,
             vault,
             wsRoot,

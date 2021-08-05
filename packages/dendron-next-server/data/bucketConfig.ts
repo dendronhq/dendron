@@ -1,3 +1,4 @@
+
 export enum ConfigAreas {
   GENERAL = "General",
   ADVANCED = "Advanced",
@@ -16,8 +17,8 @@ const bucketConfig: { [key in ConfigAreas]: string[] } = {
   [ConfigAreas.WORKSPACE]: [
     // "workspaces",
     // "seeds",
+    "vaults",
     "hooks",
-    "initializeRemoteVaults",
     // "workspaceVaultSync",
   ],
   [ConfigAreas.PUBLISHING]: ["site"],
@@ -31,5 +32,7 @@ const bucketConfig: { [key in ConfigAreas]: string[] } = {
     "dev",
   ],
 };
+
+
 
 export default bucketConfig;

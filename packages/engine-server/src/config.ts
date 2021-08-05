@@ -76,6 +76,7 @@ export class DConfig {
         usePrettyRefs: true,
         title: "Dendron",
         description: "Personal knowledge space",
+        showFrontMatterTags: true,
       },
     };
   }

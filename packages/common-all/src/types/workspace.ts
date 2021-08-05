@@ -127,12 +127,18 @@ export type ScratchConfig = Pick<
 >;
 
 export type DendronConfig = {
+
   // === General
 
   /**
-   * Default: false
+   * Enable mermaid 
    */
   mermaid?: boolean;
+
+  /**
+   * Enable katex 
+   */
+  useKatex?: boolean;
 
   // === Other
   /**
@@ -176,6 +182,10 @@ export type DendronConfig = {
    * Setup by plugin.
    */
   vaults: DVault[];
+
+  /**
+   * Use Dendron Hooks
+   */
   hooks?: DHookDict;
   /**
    * Pick vault when creating new note.
@@ -201,12 +211,6 @@ export type DendronConfig = {
    * Use pretty refs for preview
    */
   usePrettyRefs?: boolean;
-
-  /**
-   * Use katex for rendering math
-   * default: true
-   */
-  useKatex?: boolean;
 
   /**
    * Shoud show hiearchy
@@ -386,12 +390,13 @@ export type DendronSiteConfig = {
   logo?: string;
 
   /**
-   * By default, the domain of your `siteHiearchies` page
+   * Your home page. 
+   * Default: the first entry in `siteHierarchies`
    */
   siteIndex?: string;
 
   /**
-   * Hiearchies to publish
+   * Hierarchies to publish. Setting this to `root` will publish all hierarchies
    */
   siteHierarchies: string[];
 
@@ -426,17 +431,33 @@ export type DendronSiteConfig = {
 
   /**
    * Cname used for github pages
-   * - default: none
    */
   githubCname?: string;
 
   /**
-   * If set, add edit on github to this site"
+   * If set, add a "Edit this page on GitHub" Link to the bottom of each page
    */
   gh_edit_link?: string;
+
+  /**
+   * Custom text for `gh_edit_link`
+   */
   gh_edit_link_text?: string;
+
+  /**
+   * Branch of Github repo.
+   * Default: master
+   */
   gh_edit_branch?: string;
+
+  /**
+   * Toggle behavior of `gh_edit_link`
+   */
   gh_edit_view_mode?: "tree" | "edit";
+
+  /**
+   * Where is the github repository for this document stored
+   */
   gh_edit_repository?: string;
 
   /**
@@ -448,7 +469,7 @@ export type DendronSiteConfig = {
   /** @deprecated anchors are now always "hidden, but reveal on mouseover" in published sites. */
   hideBlockAnchors?: boolean;
 
-  /** Whether frontmatter tags should be rendered in published websites. Defaults to true. */
+  /** Whether frontmatter tags should be rendered in published websites */
   showFrontMatterTags?: boolean;
 
   /**

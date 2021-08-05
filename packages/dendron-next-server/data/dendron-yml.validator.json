@@ -7,7 +7,11 @@
       "properties": {
         "mermaid": {
           "type": "boolean",
-          "description": "Enable [mermaid sytnax](https://mermaid-js.github.io/mermaid/#/)"
+          "description": "Enable mermaid"
+        },
+        "useKatex": {
+          "type": "boolean",
+          "description": "Enable katex"
         },
         "noCaching": {
           "type": "boolean",
@@ -70,7 +74,8 @@
           "description": "Dendron vaults in workspace. Setup by plugin."
         },
         "hooks": {
-          "$ref": "#/definitions/DHookDict"
+          "$ref": "#/definitions/DHookDict",
+          "description": "Use Dendron Hooks"
         },
         "lookupConfirmVaultOnCreate": {
           "type": "boolean",
@@ -91,10 +96,6 @@
         "usePrettyRefs": {
           "type": "boolean",
           "description": "Use pretty refs for preview"
-        },
-        "useKatex": {
-          "type": "boolean",
-          "description": "Use katex for rendering math default: true"
         },
         "hierarchyDisplay": {
           "type": "boolean",
@@ -170,7 +171,7 @@
         },
         "copyAssets": {
           "type": "boolean",
-          "description": "Copy assets from vault to site. Default: true"
+          "description": "Copy assets from vault to site"
         },
         "customHeaderPath": {
           "type": "string",
@@ -190,14 +191,14 @@
         },
         "siteIndex": {
           "type": "string",
-          "description": "By default, the domain of your `siteHiearchies` page"
+          "description": "Your home page. Default: the first entry in `siteHierarchies`"
         },
         "siteHierarchies": {
           "type": "array",
           "items": {
             "type": "string"
           },
-          "description": "Hiearchies to publish"
+          "description": "Hierarchies to publish. Setting this to `root` will publish all hierarchies"
         },
         "siteLastModified": {
           "type": "boolean",
@@ -221,17 +222,19 @@
         },
         "githubCname": {
           "type": "string",
-          "description": "Cname used for github pages\n- default: none"
+          "description": "Cname used for github pages"
         },
         "gh_edit_link": {
           "type": "string",
-          "description": "If set, add edit on github to this site\""
+          "description": "If set, add a \"\"Edit this page on GitHub\"\" Link to the bottom of each page"
         },
         "gh_edit_link_text": {
-          "type": "string"
+          "type": "string",
+          "description": "Custom text for `gh_edit_link`"
         },
         "gh_edit_branch": {
-          "type": "string"
+          "type": "string",
+          "description": "Branch of Github repo. Default: master"
         },
         "gh_edit_view_mode": {
           "type": "string",

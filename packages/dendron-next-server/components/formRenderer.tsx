@@ -80,10 +80,8 @@ const BaseInput = ({
               <Text type="secondary" key={index}>
                 <ReactMarkdown>{line}</ReactMarkdown>
               </Text>
-              <br />
             </>
-          ))
-          .concat([<br key="br" />])}
+          ))}
 
         {children}
         {error && (

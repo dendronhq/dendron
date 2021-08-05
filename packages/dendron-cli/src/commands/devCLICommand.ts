@@ -8,6 +8,8 @@ import { CLICommand } from "./base";
 import * as tsj from "ts-json-schema-generator";
 import path from "path";
 import fs from "fs-extra";
+import execa from "execa";
+import { BuildUtils } from "../utils/build";
 
 type CommandCLIOpts = {
   cmd: DevCommands;
@@ -15,11 +17,16 @@ type CommandCLIOpts = {
 
 export enum DevCommands {
   GENERATE_JSON_SCHEMA_FROM_CONFIG = "generate_json_schema_from_config",
+  BUILD = "build",
 }
 
 type CommandOpts = CommandCLIOpts; //& SetupEngineOpts & {};
 
 type CommandOutput = Partial<{ error: DendronError; data: any }>;
+
+const $ = (cmd: string) => {
+  return execa.commandSync(cmd, { shell: true });
+};
 
 export { CommandOpts as DevCLICommandOpts };
 
@@ -46,6 +53,61 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
 
   async enrichArgs(args: CommandCLIOpts): Promise<CommandOpts> {
     return { ...args };
+  }
+
+  async build() {
+    const setRegLocal = () => {
+      $(`yarn config set registry http://localhost:4873`);
+      $(`npm set registry http://localhost:4873/`);
+    };
+    const startVerdaccio = () => {
+      const subprocess = execa("verdaccio");
+      const logger = this.L;
+      logger.info({ state: "post:exec.node" });
+      subprocess.on("close", () => {
+        logger.error({ state: "close" });
+      });
+      subprocess.on("disconnect", () => {
+        logger.error({ state: "disconnect" });
+      });
+      subprocess.on("exit", () => {
+        logger.error({ state: "exit" });
+      });
+      subprocess.on("error", (err) => {
+        logger.error({ state: "error", payload: err });
+      });
+      subprocess.on("message", (message) => {
+        logger.info({ state: "message", message });
+      });
+      if (subprocess.stdout && subprocess.stderr) {
+        subprocess.stdout.on("data", (chunk) => {
+          process.stdout.write(chunk);
+        });
+        subprocess.stderr.on("data", (chunk) => {
+          process.stdout.write(chunk);
+        });
+      }
+      return subprocess;
+    };
+
+    const bump11ty = () => {
+      $(
+        `sed  -ibak "s/$VERSION_OLD/$VERSION_NEW/" packages/plugin-core/src/utils/site.ts`
+      );
+      $(`git add packages/plugin-core/src/utils/site.ts`);
+      $(`git commit -m "chore: bump 11ty"`);
+    };
+
+    // this.print("setRegLocal...");
+    // setRegLocal();
+
+    // this.print("startVerdaccio...");
+    // startVerdaccio();
+
+    // get package version
+    const currentVersion = BuildUtils.getCurrentVersion();
+    this.L.info({ currentVersion });
+    this.L.info("done");
   }
 
   async generateJSONSchemaFromConfig() {
@@ -90,6 +152,10 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       switch (cmd) {
         case DevCommands.GENERATE_JSON_SCHEMA_FROM_CONFIG: {
           await this.generateJSONSchemaFromConfig();
+          return { error: null };
+        }
+        case DevCommands.BUILD: {
+          await this.build();
           return { error: null };
         }
         default:

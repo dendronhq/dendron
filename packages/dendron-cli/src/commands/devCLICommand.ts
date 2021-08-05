@@ -72,7 +72,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     return { ...args };
   }
 
-  async build() {
+  async build(opts: BuildCmdOpts) {
     const setRegLocal = () => {
       $(`yarn config set registry http://localhost:4873`);
       $(`npm set registry http://localhost:4873/`);
@@ -107,9 +107,12 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       return subprocess;
     };
 
-    const bump11ty = () => {
+    const bump11ty = (opts: {
+      currentVersion: string;
+      nextVersion: string;
+    }) => {
       $(
-        `sed  -ibak "s/$VERSION_OLD/$VERSION_NEW/" packages/plugin-core/src/utils/site.ts`
+        `sed  -ibak "s/$${opts.currentVersion}/$${opts.nextVersion}/" packages/plugin-core/src/utils/site.ts`
       );
       $(`git add packages/plugin-core/src/utils/site.ts`);
       $(`git commit -m "chore: bump 11ty"`);
@@ -123,7 +126,12 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
 
     // get package version
     const currentVersion = BuildUtils.getCurrentVersion();
-    this.L.info({ currentVersion });
+    const nextVersion = BuildUtils.genNextVersion({
+      currentVersion,
+      upgradeType: opts.upgradeType,
+    });
+    this.L.info({ currentVersion, nextVersion });
+
     this.L.info("done");
   }
 

@@ -51,10 +51,17 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
   async generateJSONSchemaFromConfig() {
     const repoRoot = process.cwd();
     const pkgRoot = path.join(repoRoot, "packages", "engine-server");
-    const outputPath = path.join(
+    const nextOutputPath = path.join(
       repoRoot,
       "packages",
       "dendron-next-server",
+      "data",
+      "dendron-yml.validator.json"
+    );
+    const commonOutputPath = path.join(
+      repoRoot,
+      "packages",
+      "common-all",
       "data",
       "dendron-yml.validator.json"
     );
@@ -68,9 +75,10 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       })
       .createSchema(configType);
     const schemaString = JSON.stringify(schema, null, 2);
-    fs.writeFile(outputPath, schemaString, (err) => {
-      if (err) throw err;
-    });
+    await Promise.all([
+      fs.writeFile(nextOutputPath, schemaString),
+      fs.writeFile(commonOutputPath, schemaString),
+    ]);
     return;
   }
 

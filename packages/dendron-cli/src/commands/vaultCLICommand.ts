@@ -68,7 +68,7 @@ export class VaultCLICommand extends CLICommand<CommandOpts, CommandOutput> {
             noAddToConfig,
             addToCodeWorkspace: true,
           });
-          this.print(`${vaultPath} crated`);
+          this.print(`${vaultPath} created`);
           return resp;
         }
         default: {

@@ -131,7 +131,7 @@ export class LookupControllerV2 {
       range,
       provider,
       changed: btnTriggered,
-      vaultSelectionMode: this.vaultSelectionMode
+      vaultSelectionMode: this.vaultSelectionMode,
     });
   };
 
@@ -188,7 +188,7 @@ export class LookupControllerV2 {
       range,
       quickPickValue: cleanOpts.value,
       provider,
-      vaultSelectionMode: this.vaultSelectionMode
+      vaultSelectionMode: this.vaultSelectionMode,
     });
     Logger.info({ ctx, profile, msg: "post:updatePickerBehavior" });
     quickPick.onDidTriggerButton(this.onTriggerButton);
@@ -267,16 +267,18 @@ export class LookupControllerV2 {
 
     switch (noteResp?.type) {
       case "journal": {
-        onUpdateValue = DendronClientUtilsV2.genNoteName("JOURNAL", {
+        const { noteName } = DendronClientUtilsV2.genNoteName("JOURNAL", {
           overrides: { domain: quickPickValue },
         });
+        onUpdateValue = noteName;
         onUpdateReason = "updatePickerBehavior:journal";
         break;
       }
       case "scratch": {
-        onUpdateValue = DendronClientUtilsV2.genNoteName("SCRATCH", {
+        const { noteName } = DendronClientUtilsV2.genNoteName("SCRATCH", {
           overrides: { domain: quickPickValue },
         });
+        onUpdateValue = noteName;
         onUpdateReason = "updatePickerBehavior:scratch";
         break;
       }

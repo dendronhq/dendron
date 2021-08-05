@@ -117,7 +117,10 @@ export class LookupControllerV3 {
     PickerUtilsV2.refreshButtons({ quickpick, buttons, buttonsPrev });
     await PickerUtilsV2.refreshPickerBehavior({ quickpick, buttons });
     quickpick.onDidTriggerButton(this.onTriggerButton);
-    quickpick.onDidHide(this.onHide);
+    quickpick.onDidHide(() => {
+      quickpick.dispose();
+      this.onHide();
+    });
     provider.provide(this);
     return { quickpick };
   }
@@ -160,11 +163,6 @@ export class LookupControllerV3 {
   }
 
   onHide() {
-    const { _quickpick: quickpick } = this;
-    if (!quickpick) {
-      return;
-    }
-    quickpick.dispose();
     this._quickpick = undefined;
     this._cancelTokenSource?.dispose();
   }

@@ -31,7 +31,7 @@ Some popular use cases include:
 
 ## Getting Started
 
-Follow the instructions [here](https://www.dendron.so/notes/e86ac3ab-dbe1-47a1-bcd7-9df0d0490b40.html) to get started with Dendron.
+Follow the instructions [here](https://wiki.dendron.so/notes/678c77d9-ef2c-4537-97b5-64556d6337f1.html) to get started with Dendron.
 
 ## Join Us
 

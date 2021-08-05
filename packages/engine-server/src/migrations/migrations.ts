@@ -19,7 +19,8 @@ export const ALL_MIGRATIONS: Migrations[] = [
       {
         name: "migrate scratch config",
         func: async ({ dendronConfig, wsConfig }) => {
-          dendronConfig.scratch = DConfig.genDefaultConfig().scratch as ScratchConfig;
+          dendronConfig.scratch = DConfig.genDefaultConfig()
+            .scratch as ScratchConfig;
           if (_.get(wsConfig.settings, "dendron.defaultScratchName")) {
             dendronConfig.scratch.name = _.get(
               wsConfig.settings,
@@ -49,9 +50,9 @@ export const ALL_MIGRATIONS: Migrations[] = [
       {
         name: "don't switch to legacy preview if not currently on it",
         func: async ({ dendronConfig, wsConfig }) => {
-          const previewV2Enabled = dendronConfig.dev?.enablePreviewV2
+          const previewV2Enabled = dendronConfig.dev?.enablePreviewV2;
           if (!previewV2Enabled) {
-            _.set(dendronConfig, "dev.previewV2Enabled", false)
+            _.set(dendronConfig, "dev.previewV2Enabled", false);
           }
           return { data: { dendronConfig, wsConfig } };
         },

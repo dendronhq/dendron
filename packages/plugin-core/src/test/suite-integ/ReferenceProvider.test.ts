@@ -231,7 +231,11 @@ suite("ReferenceProvider", function () {
               body: hover!.contents.join(""),
               match: [
                 "Sint quo sunt maxime.",
-                `![](${path.join(wsRoot, VaultUtils.getRelPath(vaults[0]), 'assets/test/image.png')})`,
+                `![](${path.join(
+                  wsRoot,
+                  VaultUtils.getRelPath(vaults[0]),
+                  "assets/test/image.png"
+                )})`,
               ],
             });
             done();
@@ -539,7 +543,9 @@ suite("ReferenceProvider", function () {
             },
             onInit: async () => {
               const editor = await VSCodeUtils.openNote(note);
-              editor.selection = LocationTestUtils.getPresetWikiLinkSelection({line: 7});
+              editor.selection = LocationTestUtils.getPresetWikiLinkSelection({
+                line: 7,
+              });
               const provider = new ReferenceHoverProvider();
               const hover = await provider.provideHover(
                 editor.document,
@@ -549,17 +555,15 @@ suite("ReferenceProvider", function () {
               expect(
                 await AssertUtils.assertInString({
                   body: hover!.contents.join(""),
-                  match: [
-                    "vault 1"
-                  ],
+                  match: ["vault 1"],
                   nomatch: ["vault 0", "the test note"],
                 })
               ).toBeTruthy();
               done();
-            }
+            },
           });
         });
-  
+
         test("xvault link to other vault", (done) => {
           let note: NoteProps;
           runLegacyMultiWorkspaceTest({
@@ -578,17 +582,15 @@ suite("ReferenceProvider", function () {
               expect(
                 await AssertUtils.assertInString({
                   body: hover!.contents.join(""),
-                  match: [
-                    "vault 0"
-                  ],
+                  match: ["vault 0"],
                   nomatch: ["vault 1", "the test note"],
                 })
               ).toBeTruthy();
               done();
-            }
+            },
           });
         });
-  
+
         test("xvault link to same vault", (done) => {
           let note: NoteProps;
           runLegacyMultiWorkspaceTest({
@@ -607,17 +609,15 @@ suite("ReferenceProvider", function () {
               expect(
                 await AssertUtils.assertInString({
                   body: hover!.contents.join(""),
-                  match: [
-                    "vault 1"
-                  ],
+                  match: ["vault 1"],
                   nomatch: ["vault 0", "the test note"],
                 })
               ).toBeTruthy();
               done();
-            }
+            },
           });
         });
-  
+
         test("xvault link to non-existant note", (done) => {
           let note: NoteProps;
           runLegacyMultiWorkspaceTest({
@@ -636,17 +636,21 @@ suite("ReferenceProvider", function () {
               expect(
                 await AssertUtils.assertInString({
                   body: hover!.contents.join(""),
-                  match: [
-                    "eggs", "vaultThree", "missing",
+                  match: ["eggs", "vaultThree", "missing"],
+                  nomatch: [
+                    "vault 0",
+                    "vault 1",
+                    "vault1",
+                    "vault2",
+                    "the test note",
                   ],
-                  nomatch: ["vault 0", "vault 1", "vault1", "vault2", "the test note"],
                 })
               ).toBeTruthy();
               done();
-            }
+            },
           });
         });
-  
+
         test("xvault link to non-existant vault", (done) => {
           let note: NoteProps;
           runLegacyMultiWorkspaceTest({
@@ -665,14 +669,18 @@ suite("ReferenceProvider", function () {
               expect(
                 await AssertUtils.assertInString({
                   body: hover!.contents.join(""),
-                  match: [
-                    "vault3", "does not exist"
+                  match: ["vault3", "does not exist"],
+                  nomatch: [
+                    "vault 0",
+                    "vault 1",
+                    "vault1",
+                    "vault2",
+                    "the test note",
                   ],
-                  nomatch: ["vault 0", "vault 1", "vault1", "vault2", "the test note"],
                 })
               ).toBeTruthy();
               done();
-            }
+            },
           });
         });
       });
@@ -918,6 +926,98 @@ suite("ReferenceProvider", function () {
                 "Voluptatem possimus harum nisi.",
                 "Ut quo eius laudantium.",
               ],
+            });
+            done();
+          },
+        });
+      });
+    });
+
+    describe("frontmatter tags", () => {
+      test("single tag", (done) => {
+        runLegacyMultiWorkspaceTest({
+          ctx,
+          preSetupHook: async ({ wsRoot, vaults }) => {
+            await NoteTestUtilsV4.createNote({
+              vault: vaults[0],
+              wsRoot,
+              fname: "tags.foo.test",
+              body: "this is tag foo.test",
+            });
+            await NoteTestUtilsV4.createNote({
+              vault: vaults[0],
+              wsRoot,
+              fname: "source",
+              props: {
+                tags: "foo.test",
+              },
+            });
+          },
+          onInit: async ({ vaults }) => {
+            const editor = await VSCodeUtils.openNoteByPath({
+              vault: vaults[0],
+              fname: "source",
+            });
+            const provider = new ReferenceHoverProvider();
+            const hover = await provider.provideHover(
+              editor.document,
+              new vscode.Position(6, 10)
+            );
+            expect(hover).toBeTruthy();
+            await AssertUtils.assertInString({
+              body: hover!.contents.join(""),
+              match: ["this is tag foo.test"],
+            });
+            done();
+          },
+        });
+      });
+
+      test("multiple tags", (done) => {
+        runLegacyMultiWorkspaceTest({
+          ctx,
+          preSetupHook: async ({ wsRoot, vaults }) => {
+            await NoteTestUtilsV4.createNote({
+              vault: vaults[0],
+              wsRoot,
+              fname: "tags.foo.test",
+              body: "this is tag foo.test",
+            });
+            await NoteTestUtilsV4.createNote({
+              vault: vaults[0],
+              wsRoot,
+              fname: "tags.foo.bar",
+              body: "this is the wrong tag",
+            });
+            await NoteTestUtilsV4.createNote({
+              vault: vaults[0],
+              wsRoot,
+              fname: "tags.foo.baz",
+              body: "this is the wrong tag",
+            });
+            await NoteTestUtilsV4.createNote({
+              vault: vaults[0],
+              wsRoot,
+              fname: "source",
+              props: {
+                tags: ["foo.bar", "foo.test", "foo.baz"],
+              },
+            });
+          },
+          onInit: async ({ vaults }) => {
+            const editor = await VSCodeUtils.openNoteByPath({
+              vault: vaults[0],
+              fname: "source",
+            });
+            const provider = new ReferenceHoverProvider();
+            const hover = await provider.provideHover(
+              editor.document,
+              new vscode.Position(8, 4)
+            );
+            expect(hover).toBeTruthy();
+            await AssertUtils.assertInString({
+              body: hover!.contents.join(""),
+              match: ["this is tag foo.test"],
             });
             done();
           },

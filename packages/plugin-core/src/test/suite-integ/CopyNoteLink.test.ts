@@ -1,6 +1,10 @@
 import { NoteProps } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
-import { AssertUtils, NoteTestUtilsV4, NOTE_PRESETS_V4 } from "@dendronhq/common-test-utils";
+import {
+  AssertUtils,
+  NoteTestUtilsV4,
+  NOTE_PRESETS_V4,
+} from "@dendronhq/common-test-utils";
 import { ENGINE_HOOKS, TestConfigUtils } from "@dendronhq/engine-test-utils";
 import { describe } from "mocha";
 import path from "path";
@@ -51,14 +55,14 @@ suite("CopyNoteLink", function () {
           // Open and select the header
           const editor = await VSCodeUtils.openNote(noteWithLink);
           const start = LocationTestUtils.getPresetWikiLinkPosition();
-          const end = LocationTestUtils.getPresetWikiLinkPosition({char: 10});
+          const end = LocationTestUtils.getPresetWikiLinkPosition({ char: 10 });
           editor.selection = new vscode.Selection(start, end);
           // generate a wikilink for it
           const link = await new CopyNoteLinkCommand().run();
           expect(link).toEqual(`[[Foo Bar|${noteWithLink.fname}#foo-bar]]`);
           done();
-        }
-      })
+        },
+      });
     });
 
     test("with a header link containing unicode characters", (done) => {
@@ -77,14 +81,16 @@ suite("CopyNoteLink", function () {
           // Open and select the header
           const editor = await VSCodeUtils.openNote(noteWithLink);
           const start = LocationTestUtils.getPresetWikiLinkPosition();
-          const end = LocationTestUtils.getPresetWikiLinkPosition({char: 10});
+          const end = LocationTestUtils.getPresetWikiLinkPosition({ char: 10 });
           editor.selection = new vscode.Selection(start, end);
           // generate a wikilink for it
           const link = await new CopyNoteLinkCommand().run();
-          expect(link).toEqual(`[[Lörem Foo：Bar🙂Baz Ipsum|test#lörem-foo：barbaz-ipsum]]`);
+          expect(link).toEqual(
+            `[[Lörem Foo：Bar🙂Baz Ipsum|test#lörem-foo：barbaz-ipsum]]`
+          );
           done();
-        }
-      })
+        },
+      });
     });
 
     test("with anchor", (done) => {

@@ -56,7 +56,7 @@ const pathsToBacklinkSourceTreeItems = async (
     const backlinkCount = isLinkCandidateEnabled
       ? referencesByPath[pathParam].length
       : referencesByPath[pathParam].filter((ref) => !ref.isCandidate).length;
-    
+
     if (backlinkCount === 0) return undefined;
 
     backlink.description = `(${backlinkCount}) - (${path.basename(pathParam)})`;

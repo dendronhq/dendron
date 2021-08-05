@@ -28,10 +28,11 @@ gulp.task("less", function () {
 });
 
 /**
- * Move js files 
+ * Move js files
  */
-gulp.task("js", ()=> {
-  return gulp.src("assets/js/*.js")
-  .pipe(debug({ title: "Files:" }))
-  .pipe(gulp.dest("./public/js"))
+gulp.task("js", () => {
+  return gulp
+    .src("assets/js/*.js")
+    .pipe(debug({ title: "Files:" }))
+    .pipe(gulp.dest("./public/js"));
 });

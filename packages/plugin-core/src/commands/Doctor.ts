@@ -1,4 +1,8 @@
-import { DEngineClient, isNotUndefined, NoteProps } from "@dendronhq/common-all";
+import {
+  DEngineClient,
+  isNotUndefined,
+  NoteProps,
+} from "@dendronhq/common-all";
 import {
   BackfillV2Command,
   DoctorActions,
@@ -162,7 +166,10 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     // Make sure to save any changes in the file because Doctor reads them from
     // disk, and won't see changes that haven't been saved.
     const document = VSCodeUtils.getActiveTextEditor()?.document;
-    if (isNotUndefined(document) && isNotUndefined(VSCodeUtils.getNoteFromDocument(document))) {
+    if (
+      isNotUndefined(document) &&
+      isNotUndefined(VSCodeUtils.getNoteFromDocument(document))
+    ) {
       await document.save();
     }
     this.L.info({ ctx, msg: "pre:Reload" });
@@ -254,14 +261,11 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     // note haven't updated within VSCode yet. Regenerate the decorations, but
     // do so after a delay so that VSCode can update the file contents. Not a
     // perfect solution, but the simplest.
-    setTimeout(
-      () => {
-        const editor = VSCodeUtils.getActiveTextEditor();
-        if (editor) updateDecorations(editor);
-      }, 
-      200,
-    );
-    
+    setTimeout(() => {
+      const editor = VSCodeUtils.getActiveTextEditor();
+      if (editor) updateDecorations(editor);
+    }, 200);
+
     // create site root, used for publication
     if (!fs.existsSync(siteRoot)) {
       const f: Finding = { issue: "no siteRoot found" };

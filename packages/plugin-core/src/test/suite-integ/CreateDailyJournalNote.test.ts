@@ -12,7 +12,7 @@ import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import _ from "lodash";
 import { PickerUtilsV2 } from "../../components/lookup/utils";
 import { getActiveEditorBasename } from "../testUtils";
-import { CONFIG } from "../../constants"
+import { CONFIG } from "../../constants";
 import { VSCodeUtils } from "../../utils";
 import sinon from "sinon";
 
@@ -134,7 +134,7 @@ suite("Create Daily Journal Suite", function () {
         const dd = String(today.getDate()).padStart(2, "0");
         expect(fname).toEqual(`daisy.journey.${dd}.md`);
         done();
-      }
-    })
-  })
+      },
+    });
+  });
 });

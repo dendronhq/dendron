@@ -27,7 +27,14 @@ import assert from "assert";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { ExtensionContext, Location, Position, Selection, Uri, window } from "vscode";
+import {
+  ExtensionContext,
+  Location,
+  Position,
+  Selection,
+  Uri,
+  window,
+} from "vscode";
 import {
   SetupWorkspaceCommand,
   SetupWorkspaceOpts,
@@ -258,7 +265,7 @@ export async function setupCodeWorkspaceV2(opts: SetupCodeWorkspaceV2) {
     rootDirRaw: wsRoot,
     skipOpenWs: true,
     ...setupWsOverride,
-    workspaceInitializer: new BlankInitializer()
+    workspaceInitializer: new BlankInitializer(),
   });
   await DendronWorkspace.updateWorkspaceFile({
     updateCb: (settings) => {
@@ -412,7 +419,11 @@ export class LocationTestUtils {
   static getPresetWikiLinkSelection = (opts?: {
     line?: number;
     char?: number;
-  }) => new Selection(LocationTestUtils.getPresetWikiLinkPosition(opts), LocationTestUtils.getPresetWikiLinkPosition(opts));
+  }) =>
+    new Selection(
+      LocationTestUtils.getPresetWikiLinkPosition(opts),
+      LocationTestUtils.getPresetWikiLinkPosition(opts)
+    );
 
   static getBasenameFromLocation = (loc: Location) =>
     path.basename(loc.uri.fsPath);
@@ -443,7 +454,7 @@ export const stubWorkspace = ({ wsRoot, vaults }: WorkspaceOpts) => {
 export function expect(value: any) {
   return {
     toContain: (value2: any) => {
-      return _.isMatch(value, value2)
+      return _.isMatch(value, value2);
     },
     toEqual: (value2: any) => {
       assert.deepStrictEqual(value, value2);

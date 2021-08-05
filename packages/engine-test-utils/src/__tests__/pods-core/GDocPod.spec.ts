@@ -2,28 +2,31 @@ import { ENGINE_HOOKS } from "../../presets";
 import { runEngineTestV5 } from "../../engine";
 import { GDocImportPod, PROMPT } from "@dendronhq/pods-core";
 import { VaultUtils } from "@dendronhq/common-all";
-import {response, comments, existingNote} from "../../utils/GDocMockResult";
-import axios from 'axios';
+import { response, comments, existingNote } from "../../utils/GDocMockResult";
+import axios from "axios";
 import sinon from "sinon";
-import { window } from "../../__mocks__/vscode"
+import { window } from "../../__mocks__/vscode";
 
-jest.mock('axios');
+jest.mock("axios");
 
 const stubWindow = (resp: any) => {
-sinon.stub(window, "showInformationMessage").resolves(resp)
-}
-
+  sinon.stub(window, "showInformationMessage").resolves(resp);
+};
 
 describe("GDoc import pod", () => {
   let result: any;
-  const onPrompt= async (type?: PROMPT) => {
-    const resp = (type === PROMPT.USERPROMPT) ?
-    await window.showInformationMessage(
-      "Do you want to overwrite",
-        { modal: true },
-        { title: "Yes" }
-      ) : window.showInformationMessage("Note is already in sync with the google doc") ;
-      return resp
+  const onPrompt = async (type?: PROMPT) => {
+    const resp =
+      type === PROMPT.USERPROMPT
+        ? await window.showInformationMessage(
+            "Do you want to overwrite",
+            { modal: true },
+            { title: "Yes" }
+          )
+        : window.showInformationMessage(
+            "Note is already in sync with the google doc"
+          );
+    return resp;
   };
   afterEach(() => {
     sinon.restore();
@@ -34,7 +37,7 @@ describe("GDoc import pod", () => {
         const pod = new GDocImportPod();
         const vaultName = VaultUtils.getName(vaults[0]);
         const mockedAxios = axios as jest.Mocked<typeof axios>;
-        result=response;
+        result = response;
         mockedAxios.get.mockResolvedValue(result);
         const { importedNotes } = await pod.execute({
           engine,
@@ -49,7 +52,9 @@ describe("GDoc import pod", () => {
             hierarchyDestination: "gdoc.meet",
           },
         });
-          expect(importedNotes[0].body).toMatch("\n\n## Testing GDoc Pod\n\nThis is the first line\n\n\n");
+        expect(importedNotes[0].body).toMatch(
+          "\n\n## Testing GDoc Pod\n\nThis is the first line\n\n\n"
+        );
       },
       {
         expect,
@@ -66,14 +71,14 @@ describe("GDoc import pod", () => {
         const response = {
           fname: "gdoc.meet",
           custom: {
-            documentId: 'sjkakauwu',
-            revisionId: 'ALm37BXFqAKco_'
+            documentId: "sjkakauwu",
+            revisionId: "ALm37BXFqAKco_",
           },
-          body: '\n\n## Testing GDoc Pod\n\nThis is the first line\n\n\n'
+          body: "\n\n## Testing GDoc Pod\n\nThis is the first line\n\n\n",
         };
         pod.getDataFromGDoc = jest.fn().mockReturnValue(response);
         const mockedAxios = axios as jest.Mocked<typeof axios>;
-        result=comments;
+        result = comments;
         mockedAxios.get.mockResolvedValue(result);
         const { importedNotes } = await pod.execute({
           engine,
@@ -88,11 +93,11 @@ describe("GDoc import pod", () => {
             hierarchyDestination: "gdoc.meet",
             importComments: {
               enable: true,
-              format: "json"
-            }
+              format: "json",
+            },
           },
         });
-          expect(importedNotes[0].body).toMatchSnapshot()
+        expect(importedNotes[0].body).toMatchSnapshot();
       },
       {
         expect,
@@ -109,14 +114,14 @@ describe("GDoc import pod", () => {
         const response = {
           fname: "gdoc.meet",
           custom: {
-            documentId: 'sjkakauwu',
-            revisionId: 'ALm37BXFqAKco_'
+            documentId: "sjkakauwu",
+            revisionId: "ALm37BXFqAKco_",
           },
-          body: '\n\n## Testing GDoc Pod\n\nThis is the first line\n\n\n'
+          body: "\n\n## Testing GDoc Pod\n\nThis is the first line\n\n\n",
         };
         pod.getDataFromGDoc = jest.fn().mockReturnValue(response);
         const mockedAxios = axios as jest.Mocked<typeof axios>;
-        result=comments;
+        result = comments;
         mockedAxios.get.mockResolvedValue(result);
         const { importedNotes } = await pod.execute({
           engine,
@@ -131,11 +136,11 @@ describe("GDoc import pod", () => {
             hierarchyDestination: "gdoc.meet",
             importComments: {
               enable: true,
-              format: "text"
-            }
+              format: "text",
+            },
           },
         });
-          expect(importedNotes[0].body).toMatchSnapshot()
+        expect(importedNotes[0].body).toMatchSnapshot();
       },
       {
         expect,
@@ -150,7 +155,7 @@ describe("GDoc import pod", () => {
         const pod = new GDocImportPod();
         const vaultName = VaultUtils.getName(vaults[0]);
         const mockedAxios = axios as jest.Mocked<typeof axios>;
-        result=response;
+        result = response;
         mockedAxios.get.mockResolvedValue(result);
         const { importedNotes } = await pod.execute({
           engine,
@@ -163,25 +168,25 @@ describe("GDoc import pod", () => {
             vaultName,
             documentId: "sdhdoj",
             hierarchyDestination: "gdoc.meet",
-            confirmOverwrite: false
+            confirmOverwrite: false,
           },
         });
-          expect(importedNotes).toHaveLength(1)
+        expect(importedNotes).toHaveLength(1);
       },
       {
         expect,
         preSetupHook: ENGINE_HOOKS.setupBasic,
       }
     );
-  }); 
+  });
   test("with same revision ID of notes", async () => {
     await runEngineTestV5(
       async ({ engine, vaults, wsRoot }) => {
         const pod = new GDocImportPod();
         const vaultName = VaultUtils.getName(vaults[0]);
         const mockedAxios = axios as jest.Mocked<typeof axios>;
-        result=response;
-        await engine.writeNote(existingNote, {newNode: true});
+        result = response;
+        await engine.writeNote(existingNote, { newNode: true });
         mockedAxios.get.mockResolvedValue(result);
         await pod.execute({
           engine,
@@ -196,17 +201,18 @@ describe("GDoc import pod", () => {
             hierarchyDestination: "gdoc.meet",
           },
         });
-      
+
         expect.assertions(1);
-        return expect(window.showInformationMessage).toHaveBeenCalledWith("Note is already in sync with the google doc");
-        
+        return expect(window.showInformationMessage).toHaveBeenCalledWith(
+          "Note is already in sync with the google doc"
+        );
       },
       {
         expect,
         preSetupHook: ENGINE_HOOKS.setupBasic,
       }
     );
-  }); 
+  });
 
   test("with confirmOverwrite true and selecting cancel from prompt", async () => {
     await runEngineTestV5(
@@ -214,9 +220,9 @@ describe("GDoc import pod", () => {
         const pod = new GDocImportPod();
         const vaultName = VaultUtils.getName(vaults[0]);
         const mockedAxios = axios as jest.Mocked<typeof axios>;
-        result=response;
-        existingNote.custom.revisionId = 'jslkdhsal';
-        await engine.writeNote(existingNote, {newNode: true});
+        result = response;
+        existingNote.custom.revisionId = "jslkdhsal";
+        await engine.writeNote(existingNote, { newNode: true });
         mockedAxios.get.mockResolvedValue(result);
         stubWindow(undefined);
         const { importedNotes } = await pod.execute({
@@ -232,7 +238,7 @@ describe("GDoc import pod", () => {
             hierarchyDestination: "gdoc.meet",
           },
         });
-        return expect(importedNotes).toEqual([])       
+        return expect(importedNotes).toEqual([]);
       },
       {
         expect,
@@ -247,13 +253,13 @@ describe("GDoc import pod", () => {
         const pod = new GDocImportPod();
         const vaultName = VaultUtils.getName(vaults[0]);
         const mockedAxios = axios as jest.Mocked<typeof axios>;
-        result=response;
-        existingNote.custom.revisionId = 'jslkdhsa';
-        await engine.writeNote(existingNote, {newNode: true});
+        result = response;
+        existingNote.custom.revisionId = "jslkdhsa";
+        await engine.writeNote(existingNote, { newNode: true });
         mockedAxios.get.mockResolvedValue(result);
-        const resp ={
-          title: "Yes"
-        }
+        const resp = {
+          title: "Yes",
+        };
         stubWindow(resp);
         const { importedNotes } = await pod.execute({
           engine,
@@ -269,7 +275,7 @@ describe("GDoc import pod", () => {
           },
         });
         expect.assertions(1);
-        expect(importedNotes).toHaveLength(1)
+        expect(importedNotes).toHaveLength(1);
       },
       {
         expect,

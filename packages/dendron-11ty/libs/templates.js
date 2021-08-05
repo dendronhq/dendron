@@ -1,9 +1,9 @@
-const { Liquid } = require('liquidjs');
+const { Liquid } = require("liquidjs");
 
 module.exports = (() => {
   const liquidParser = new Liquid({
-    root: ['_includes'],
-    extname: '.liquid',
+    root: ["_includes"],
+    extname: ".liquid",
     dynamicPartials: false,
     strictFilters: true,
   });

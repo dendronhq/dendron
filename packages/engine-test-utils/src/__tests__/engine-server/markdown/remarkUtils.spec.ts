@@ -1,4 +1,9 @@
-import { DLink, NoteProps, NoteUtils, WorkspaceOpts } from "@dendronhq/common-all";
+import {
+  DLink,
+  NoteProps,
+  NoteUtils,
+  WorkspaceOpts,
+} from "@dendronhq/common-all";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import {
   DendronASTDest,

@@ -15,24 +15,32 @@ import { NoteRefsOpts } from "./noteRefs";
 type PluginOpts = NoteRefsOpts & {};
 
 /**
- * 
+ *
  * @param useFullPathUrl `false` by default, and the generated URL for images will go through engine API.
  *   When `true`, the image URL will be a full path to the image on disk instead.
- * @returns 
+ * @returns
  */
-function handleImage({proc, node, useFullPathUrl = false} : {proc: Unified.Processor, node: Image, useFullPathUrl?: boolean}) {
+function handleImage({
+  proc,
+  node,
+  useFullPathUrl = false,
+}: {
+  proc: Unified.Processor;
+  node: Image;
+  useFullPathUrl?: boolean;
+}) {
   const ctx = "handleImage";
   const logger = createLogger("handleImage");
   // ignore web images
   if (_.some(["http://", "https://"], (ent) => node.url.startsWith(ent))) {
-    logger.info({ctx, url: node.url});
+    logger.info({ ctx, url: node.url });
     return;
   }
   // assume that the path is relative to vault
   const { wsRoot, vault } = MDUtilsV5.getProcData(proc);
   const fpath = path.join(vault2Path({ vault, wsRoot }), node.url);
   if (useFullPathUrl === true) {
-    logger.info({ctx, wsRoot, vault, url: node.url, fpath, useFullPathUrl});
+    logger.info({ ctx, wsRoot, vault, url: node.url, fpath, useFullPathUrl });
     node.url = fpath;
     return;
   }
@@ -43,7 +51,12 @@ function handleImage({proc, node, useFullPathUrl = false} : {proc: Unified.Proce
     ws: wsRoot,
   };
   node.url = APIUtils.genUrlWithQS({ url, params });
-  logger.info({ctx, url: node.url, useFullPathUrl, opts: MDUtilsV5.getProcOpts(proc)});
+  logger.info({
+    ctx,
+    url: node.url,
+    useFullPathUrl,
+    opts: MDUtilsV5.getProcOpts(proc),
+  });
 }
 
 function plugin(this: Unified.Processor, _opts?: PluginOpts): Transformer {
@@ -51,20 +64,23 @@ function plugin(this: Unified.Processor, _opts?: PluginOpts): Transformer {
   function transformer(tree: Node, _file: VFile) {
     visit(tree, (node, _index, _parent) => {
       if (RemarkUtils.isImage(node)) {
-        return handleImage({proc, node});
+        return handleImage({ proc, node });
       }
     });
   }
   return transformer;
 }
 
-export function dendronHoverPreview(this: Unified.Processor, _opts?: PluginOpts): Transformer {
+export function dendronHoverPreview(
+  this: Unified.Processor,
+  _opts?: PluginOpts
+): Transformer {
   const proc = this;
   function transformer(tree: Node, _file: VFile) {
     visit(tree, (node, _index, _parent) => {
       if (RemarkUtils.isImage(node)) {
         // Hover preview can't use API URL's because they are http not https, so we instead have to get the image from disk.
-        return handleImage({proc, node, useFullPathUrl: true});
+        return handleImage({ proc, node, useFullPathUrl: true });
       }
     });
   }

@@ -1,4 +1,9 @@
-const { NOTE_UTILS, getNavOutput, getMetaPath, getSiteConfig } = require("../libs/utils");
+const {
+  NOTE_UTILS,
+  getNavOutput,
+  getMetaPath,
+  getSiteConfig,
+} = require("../libs/utils");
 const _ = require("lodash");
 const fs = require("fs-extra");
 

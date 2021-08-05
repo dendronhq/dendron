@@ -12,7 +12,7 @@ import { MDUtilsV4 } from "../utils";
 const plugin: Plugin = function (this: Unified.Processor) {
   const proc = this;
   function transformer(tree: Node): void {
-    let root = tree as Root;
+    const root = tree as Root;
     const { fname, vault, dest, insideNoteRef } =
       MDUtilsV4.getDendronData(proc);
     if (!fname || insideNoteRef) {
@@ -23,7 +23,7 @@ const plugin: Plugin = function (this: Unified.Processor) {
     }
     const { engine } = MDUtilsV4.getEngineFromProc(proc);
     const note = NoteUtils.getNoteByFnameV5({
-      fname: fname,
+      fname,
       notes: engine.notes,
       vault: vault!,
       wsRoot: engine.wsRoot,

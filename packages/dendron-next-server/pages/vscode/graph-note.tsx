@@ -27,8 +27,8 @@ export default function FullNoteGraph({ engine, ide }: DendronProps) {
 
   useEffect(() => {
     if (!ide.noteActive) setActiveNote(undefined);
-
-    else if (ide.noteActive && !disregardActiveNote) setActiveNote(ide.noteActive);
+    else if (ide.noteActive && !disregardActiveNote)
+      setActiveNote(ide.noteActive);
     else if (disregardActiveNote) setDisregardActiveNote(false);
   }, [ide.noteActive]);
 
@@ -82,7 +82,7 @@ export default function FullNoteGraph({ engine, ide }: DendronProps) {
       setConfig={setConfig}
       engine={engine}
       ide={ide}
-      type='note'
+      type="note"
     />
   );
 }

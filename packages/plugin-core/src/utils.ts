@@ -99,6 +99,8 @@ type CreateFnameOpts = {
   overrides?: CreateFnameOverrides;
 };
 
+type PointOffset = { line?: number; column?: number };
+
 type AddBehavior =
   | "childOfDomain"
   | "childOfCurrent"
@@ -459,10 +461,7 @@ export class VSCodeUtils {
    * @param offset When converting the point, shift it by this much.
    * @returns The converted Position, shifted by `offset` if provided.
    */
-  static point2VSCodePosition(
-    point: Point,
-    offset?: { line?: number; column?: number }
-  ) {
+  static point2VSCodePosition(point: Point, offset?: PointOffset) {
     return new vscode.Position(
       // remark Point's are 0 indexed
       point.line - 1 + (offset?.line || 0),
@@ -475,11 +474,11 @@ export class VSCodeUtils {
    * @param position The position to convert.
    * @returns The converted Range.
    */
-  static position2VSCodeRange(position: Position) {
+  static position2VSCodeRange(position: Position, offset?: PointOffset) {
     return new vscode.Range(
       // remark Point's are 0 indexed
-      this.point2VSCodePosition(position.start),
-      this.point2VSCodePosition(position.end)
+      this.point2VSCodePosition(position.start, offset),
+      this.point2VSCodePosition(position.end, offset)
     );
   }
 
@@ -503,7 +502,7 @@ export class WSUtils {
   }: {
     subprocess: ExecaChildProcess;
     context: vscode.ExtensionContext;
-    onExit: Parameters<typeof ServerUtils["onProcessExit"]>[0]["cb"]
+    onExit: Parameters<typeof ServerUtils["onProcessExit"]>[0]["cb"];
   }) {
     const ctx = "WSUtils.handleServerProcess";
     Logger.info({ ctx, msg: "subprocess running", pid: subprocess.pid });
@@ -627,7 +626,10 @@ export class DendronClientUtilsV2 {
   static genNoteName(
     type: "JOURNAL" | "SCRATCH",
     opts?: CreateFnameOpts
-  ): string {
+  ): {
+    noteName: string;
+    prefix: string;
+  } {
     // gather inputs
     const dateFormat: string =
       type === "SCRATCH"
@@ -677,7 +679,10 @@ export class DendronClientUtilsV2 {
     );
 
     const noteDate = Time.now().toFormat(dateFormat);
-    return [prefix, name, noteDate].filter((ent) => !_.isEmpty(ent)).join(".");
+    const noteName = [prefix, name, noteDate]
+      .filter((ent) => !_.isEmpty(ent))
+      .join(".");
+    return { noteName, prefix };
   }
 
   static getSchemaModByFname = async ({
@@ -694,7 +699,7 @@ export class DendronClientUtilsV2 {
     return smod;
   };
 
-  static useVaultPrefix(engine: DEngineClient) {
+  static shouldUseVaultPrefix(engine: DEngineClient) {
     const noXVaultLink = getWS().config.noXVaultWikiLink;
     const useVaultPrefix =
       _.size(engine.vaults) > 1 &&

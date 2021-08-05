@@ -100,6 +100,71 @@ suite("RenameNote", function () {
       });
     });
 
+    test("updates default alias", (done) => {
+      let note: NoteProps;
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          note = await NoteTestUtilsV4.createNote({
+            fname: "has-header",
+            wsRoot,
+            vault: vaults[0],
+            body: "## Lorem ipsum dolor amet",
+          });
+          await NoteTestUtilsV4.createNote({
+            fname: "has-link",
+            wsRoot,
+            vault: vaults[0],
+            body: "[[Lorem ipsum dolor amet|has-header#lorem-ipsum-dolor-amet]]",
+          });
+        },
+        onInit: async ({ engine, vaults, wsRoot }) => {
+          const editor = await VSCodeUtils.openNote(note);
+          editor.selection = LocationTestUtils.getPresetWikiLinkSelection();
+
+          const prompt = sinon
+            .stub(vscode.window, "showInputBox")
+            .returns(Promise.resolve("Foo Bar"));
+          try {
+            await new RenameHeaderCommand().run({});
+
+            const afterRename = NoteUtils.getNoteByFnameV5({
+              fname: "has-header",
+              wsRoot,
+              vault: vaults[0],
+              notes: engine.notes,
+            });
+            expect(
+              await AssertUtils.assertInString({
+                body: afterRename!.body,
+                match: ["## Foo Bar"],
+                nomatch: ["Lorem", "ipsum", "dolor", "amet"],
+              })
+            ).toBeTruthy();
+            const afterRenameLink = NoteUtils.getNoteByFnameV5({
+              fname: "has-link",
+              wsRoot,
+              vault: vaults[0],
+              notes: engine.notes,
+            });
+            expect(
+              await AssertUtils.assertInString({
+                body: afterRenameLink!.body,
+                match: ["[[Foo Bar|has-header#foo-bar]]"],
+                nomatch: [
+                  "[[Lorem ipsum dolor amet|has-header#lorem-ipsum-dolor-amet]]",
+                  "[[has-header#foo-bar]]",
+                ],
+              })
+            ).toBeTruthy();
+            done();
+          } finally {
+            prompt.restore();
+          }
+        },
+      });
+    });
+
     test("does not rename a wikilink to another header", (done) => {
       let note: NoteProps;
       runLegacyMultiWorkspaceTest({

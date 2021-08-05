@@ -14,17 +14,19 @@ import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 import { Range, window } from "vscode";
 
-type CommandOpts = {
-  /** If missing, this will be parsed from the currently selected line. */
-  oldHeader?: {
-    /** The contents of the old header. */
-    text: string;
-    /** The region of the document containing the text of the old header. */
-    range: Range;
-  };
-  /** The new text for the header. */
-  newHeader?: string;
-} | undefined;
+type CommandOpts =
+  | {
+      /** If missing, this will be parsed from the currently selected line. */
+      oldHeader?: {
+        /** The contents of the old header. */
+        text: string;
+        /** The region of the document containing the text of the old header. */
+        range: Range;
+      };
+      /** The new text for the header. */
+      newHeader?: string;
+    }
+  | undefined;
 type CommandOutput = {} | undefined;
 
 export class RenameHeaderCommand extends BasicCommand<
@@ -118,10 +120,12 @@ export class RenameHeaderCommand extends BasicCommand<
       oldLoc: {
         ...noteLoc,
         anchorHeader: slugger.slug(oldHeader.text),
+        alias: oldHeader.text,
       },
       newLoc: {
         ...noteLoc,
         anchorHeader: slugger.slug(newAnchorHeader),
+        alias: newAnchorHeader,
       },
     });
     return;

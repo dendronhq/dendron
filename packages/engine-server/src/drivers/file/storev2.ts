@@ -604,6 +604,14 @@ export class FileStorage implements DStore {
                 oldLink.from.fname.toLocaleLowerCase()
             ) {
               alias = oldLink.from.alias;
+              // Update the alias if it was using the default alias.
+              if (
+                oldLoc.alias?.toLocaleLowerCase() ===
+                  oldLink.from.alias.toLocaleLowerCase() &&
+                newLoc.alias
+              ) {
+                alias = newLoc.alias;
+              }
             }
             // for hashtag links, we'll have to regenerate the alias
             if (newLoc.fname.startsWith(TAGS_HIERARCHY)) {

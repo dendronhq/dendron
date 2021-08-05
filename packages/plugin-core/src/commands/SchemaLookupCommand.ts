@@ -82,7 +82,7 @@ export class SchemaLookupCommand extends BaseCommand<
     });
     this._provider = new SchemaLookupProvider("schemaLookup", {
       allowNewNote: true,
-      noHidePickerOnAccept: true,
+      noHidePickerOnAccept: false,
     });
     const lc = this.controller;
 

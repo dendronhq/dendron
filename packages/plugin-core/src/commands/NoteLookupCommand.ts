@@ -163,7 +163,7 @@ export class NoteLookupCommand extends BaseCommand<
     });
     this._provider = new NoteLookupProvider("lookup", {
       allowNewNote: true,
-      noHidePickerOnAccept: true,
+      noHidePickerOnAccept: false,
     });
     const lc = this.controller;
     if (copts.fuzzThreshold) {

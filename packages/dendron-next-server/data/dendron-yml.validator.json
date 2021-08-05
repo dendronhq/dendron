@@ -5,6 +5,10 @@
     "DendronConfig": {
       "type": "object",
       "properties": {
+        "mermaid": {
+          "type": "boolean",
+          "description": "Enable [mermaid sytnax](https://mermaid-js.github.io/mermaid/#/)"
+        },
         "noCaching": {
           "type": "boolean",
           "description": "Disable caching behavior"
@@ -79,10 +83,6 @@
         "useNoteTitleForLink": {
           "type": "boolean",
           "description": "If true, use the note title when displaying naked links"
-        },
-        "mermaid": {
-          "type": "boolean",
-          "description": "Enable mermaid diagram sytnax"
         },
         "useNunjucks": {
           "type": "boolean",

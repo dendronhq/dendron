@@ -1,31 +1,35 @@
-export const buckets: string[] = [
-  "Workspace",
-  "Features",
-  "Advanced",
-  "Publishing",
+export enum ConfigAreas {
+  GENERAL = "General",
+  ADVANCED = "Advanced",
+  PUBLISHING = "Publishing",
+  WORKSPACE = "Workspace",
+}
+export const buckets: ConfigAreas[] = [
+  ConfigAreas.GENERAL,
+  ConfigAreas.WORKSPACE,
+  ConfigAreas.PUBLISHING,
+  ConfigAreas.ADVANCED,
 ];
 
-const bucketConfig: { [key: string]: string[] } = {
-  Workspace: [
-    "workspaces",
-    "seeds",
-    "workspaceVaultSync",
+const bucketConfig: { [key in ConfigAreas]: string[] } = {
+  [ConfigAreas.GENERAL]: ["mermaid", "useKatex", "defaultInsertHierarchy"],
+  [ConfigAreas.WORKSPACE]: [
+    // "workspaces",
+    // "seeds",
     "hooks",
     "initializeRemoteVaults",
+    // "workspaceVaultSync",
   ],
-  Features: ["journal", "mermaid", "randomNote", "usePrettyRefs", "useKatex"],
-  Advanced: [
+  [ConfigAreas.PUBLISHING]: ["site"],
+  [ConfigAreas.ADVANCED]: [
     "lookupConfirmVaultOnCreate",
     "noAutoCreateOnDefinition",
     "noXVaultWikiLink",
     "useFMTitle",
     "useNoteTitleForLink",
-    "defaultInsertHierarchy",
-    "dev",
     "noTelemetry",
-    "noCaching",
+    "dev",
   ],
-  Publishing: ["hierarchyDisplay", "hierarchyDisplayTitle", "site"],
 };
 
 export default bucketConfig;

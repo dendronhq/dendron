@@ -14,6 +14,8 @@ const { Title, Text } = Typography;
 import { MinusCircleOutlined } from "@ant-design/icons";
 import _ from "lodash";
 import get from "lodash/get";
+import ReactMarkdown from "react-markdown";
+import { ConfigAreas } from "../data/bucketConfig";
 
 import {
   BaseInputType,
@@ -47,7 +49,7 @@ const updateMenu = (name: string, setSelectedKeys: any, setOpenKeys: any) => {
   const openKeys: string[] =
     allKeys.length > 1 ? allKeys.slice(0, -1) : allKeys;
   const bucketName: string[] = Object.keys(bucketConfig).filter((key) =>
-    bucketConfig[key].includes(openKeys[0])
+    bucketConfig[key as ConfigAreas].includes(openKeys[0])
   );
   setOpenKeys(() =>
     allKeys.length > 1 ? [bucketName[0], ...openKeys] : [bucketName[0]]
@@ -76,7 +78,7 @@ const BaseInput = ({
           .map((line, index) => (
             <>
               <Text type="secondary" key={index}>
-                {line}
+                <ReactMarkdown>{line}</ReactMarkdown>
               </Text>
               <br />
             </>

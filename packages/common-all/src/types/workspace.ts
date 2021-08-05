@@ -127,6 +127,14 @@ export type ScratchConfig = Pick<
 >;
 
 export type DendronConfig = {
+  // === General
+
+  /**
+   * Default: false
+   */
+  mermaid?: boolean;
+
+  // === Other
   /**
    * Disable caching behavior
    */
@@ -183,11 +191,6 @@ export type DendronConfig = {
    * If true, use the note title when displaying naked links
    */
   useNoteTitleForLink?: boolean;
-
-  /**
-   * Enable mermaid diagram sytnax
-   */
-  mermaid?: boolean;
 
   /**
    * Use nunjucks templating

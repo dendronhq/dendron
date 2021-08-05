@@ -40,6 +40,17 @@ import {
   warnMissingFrontmatter,
 } from "./codeActionProvider";
 
+const DECORATION_UPDATE_DELAY = 100;
+
+export function delayedUpdateDecorations(
+  updateDelay: number = DECORATION_UPDATE_DELAY
+) {
+  setTimeout(() => {
+    const editor = VSCodeUtils.getActiveTextEditor();
+    if (editor) updateDecorations(editor);
+  }, updateDelay);
+}
+
 export function updateDecorations(activeEditor: TextEditor) {
   const text = activeEditor.document.getText();
   // Only show decorations & warnings for notes

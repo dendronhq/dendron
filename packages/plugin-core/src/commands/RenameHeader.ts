@@ -13,6 +13,7 @@ import { VSCodeUtils } from "../utils";
 import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 import { Range, window } from "vscode";
+import { delayedUpdateDecorations } from "../features/windowDecorations";
 
 type CommandOpts =
   | {
@@ -116,6 +117,9 @@ export class RenameHeaderCommand extends BasicCommand<
 
     // Save the updated header, so that same file links update correctly with `renameNote` which reads the files.
     await editor.document.save();
+    // This doesn't update the decorations for some reason, we need to update them to get any same-file decorations updated
+    delayedUpdateDecorations();
+
     await engine.renameNote({
       oldLoc: {
         ...noteLoc,

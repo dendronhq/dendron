@@ -10,6 +10,9 @@ import { SegmentClient } from "@dendronhq/common-server";
  */
 async function main() {
   SegmentClient.instance().track(VSCodeEvents.Uninstall);
+
+  // Force an upload flush():
+  SegmentClient.instance().identify();
 }
 
 main();

@@ -1,6 +1,8 @@
 import { command as $ } from "execa";
 import fs from "fs-extra";
 import path from "path";
+import semver from "semver";
+
 type PkgJson = {
   name: string;
   displayName: string;
@@ -8,6 +10,11 @@ type PkgJson = {
   main: string;
   version: string;
 };
+
+export enum SemverVersion {
+  MINOR = "minor",
+  PATCH = "patch",
+}
 
 export class BuildUtils {
   static getLernaRoot() {
@@ -25,6 +32,13 @@ export class BuildUtils {
 
   static getPkgMeta({ pkgPath }: { pkgPath: string }) {
     return fs.readJSONSync(pkgPath) as PkgJson;
+  }
+
+  static genNextVersion(opts: {
+    currentVersion: string;
+    upgradeType: SemverVersion;
+  }) {
+    return semver.inc(opts.currentVersion, opts.upgradeType);
   }
 
   static updatePkgMeta({

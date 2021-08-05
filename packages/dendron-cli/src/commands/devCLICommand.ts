@@ -9,7 +9,7 @@ import * as tsj from "ts-json-schema-generator";
 import path from "path";
 import fs from "fs-extra";
 import execa from "execa";
-import { BuildUtils } from "../utils/build";
+import { BuildUtils, SemverVersion } from "../utils/build";
 
 type CommandCLIOpts = {
   cmd: DevCommands;
@@ -20,9 +20,13 @@ export enum DevCommands {
   BUILD = "build",
 }
 
-type CommandOpts = CommandCLIOpts; //& SetupEngineOpts & {};
+type CommandOpts = CommandCLIOpts & Partial<BuildCmdOpts>; //& SetupEngineOpts & {};
 
 type CommandOutput = Partial<{ error: DendronError; data: any }>;
+
+type BuildCmdOpts = {
+  upgradeType: SemverVersion;
+} & CommandCLIOpts;
 
 const $ = (cmd: string) => {
   return execa.commandSync(cmd, { shell: true });
@@ -49,13 +53,17 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       choices: Object.values(DevCommands),
       type: "string",
     });
+    args.option("upgradeType", {
+      describe: "how to do upgrade",
+      choices: Object.values(SemverVersion),
+    });
   }
 
   async enrichArgs(args: CommandCLIOpts): Promise<CommandOpts> {
     return { ...args };
   }
 
-  async build() {
+  async build(opts: BuildCmdOpts) {
     const setRegLocal = () => {
       $(`yarn config set registry http://localhost:4873`);
       $(`npm set registry http://localhost:4873/`);
@@ -90,9 +98,12 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       return subprocess;
     };
 
-    const bump11ty = () => {
+    const bump11ty = (opts: {
+      currentVersion: string;
+      nextVersion: string;
+    }) => {
       $(
-        `sed  -ibak "s/$VERSION_OLD/$VERSION_NEW/" packages/plugin-core/src/utils/site.ts`
+        `sed  -ibak "s/$${opts.currentVersion}/$${opts.nextVersion}/" packages/plugin-core/src/utils/site.ts`
       );
       $(`git add packages/plugin-core/src/utils/site.ts`);
       $(`git commit -m "chore: bump 11ty"`);
@@ -106,7 +117,12 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
 
     // get package version
     const currentVersion = BuildUtils.getCurrentVersion();
-    this.L.info({ currentVersion });
+    const nextVersion = BuildUtils.genNextVersion({
+      currentVersion,
+      upgradeType: opts.upgradeType,
+    });
+    this.L.info({ currentVersion, nextVersion });
+
     this.L.info("done");
   }
 
@@ -155,7 +171,14 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           return { error: null };
         }
         case DevCommands.BUILD: {
-          await this.build();
+          if (!this.validateBuildArgs(opts)) {
+            return {
+              error: new DendronError({
+                message: "missing options for build command",
+              }),
+            };
+          }
+          await this.build(opts);
           return { error: null };
         }
         default:
@@ -171,5 +194,12 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       return { error: err };
     } finally {
     }
+  }
+
+  validateBuildArgs(opts: CommandOpts): opts is BuildCmdOpts {
+    if (!opts.upgradeType) {
+      return false;
+    }
+    return true;
   }
 }

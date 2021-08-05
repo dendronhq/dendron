@@ -13,6 +13,7 @@ import {
   DNoteAnchorPositioned,
   DStore,
   DVault,
+  EngineDeleteNotePayload,
   EngineDeleteOptsV2,
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
@@ -196,17 +197,21 @@ export class FileStorage implements DStore {
       }
       out.push({ note: noteToDelete, status: "delete" });
       // check all stubs
+      const resps: Promise<EngineDeleteNotePayload>[] = [];
       while (parentNote.stub && !opts?.noDeleteParentStub) {
         const newParent = parentNote.parent;
-        const resp = await this.deleteNote(parentNote.id, {
+        const resp = this.deleteNote(parentNote.id, {
           metaOnly: true,
           noDeleteParentStub: true,
         });
+        resps.push(resp);
         if (newParent) {
           parentNote = this.notes[newParent];
         } else {
           assert(false, "illegal state in note delte");
         }
+      }
+      for (const resp of await Promise.all(resps)) {
         out = out.concat(resp);
       }
     }
@@ -380,8 +385,8 @@ export class FileStorage implements DStore {
       }
     });
   }
-  
-  _addLinkCandidates(allNotes: NoteProps[] ) {
+
+  _addLinkCandidates(allNotes: NoteProps[]) {
     const notesMap = NoteUtils.createFnameNoteMap(allNotes, true);
     return _.map(allNotes, (noteFrom: NoteProps) => {
       try {
@@ -393,10 +398,14 @@ export class FileStorage implements DStore {
         noteFrom.links = noteFrom.links.concat(linkCandidates);
       } catch (err) {
         const error = error2PlainObject(err);
-        this.logger.error({ error, noteFrom, message: "issue with link candidates" });
+        this.logger.error({
+          error,
+          noteFrom,
+          message: "issue with link candidates",
+        });
         return;
       }
-    })
+    });
   }
 
   async _initNotes(vault: DVault): Promise<{
@@ -446,34 +455,35 @@ export class FileStorage implements DStore {
             cacheUpdates[n.fname].data.links = links;
             n.links = links;
           } catch (err) {
+            let error = err;
             if (!(err instanceof DendronError)) {
-              err = new DendronError({
+              error = new DendronError({
                 message: `Failed to read links in note ${n.fname}`,
                 payload: err,
               });
             }
-            errors.push(err);
+            errors.push(error);
             this.logger.error({ ctx, error: err, note: NoteUtils.toLogObj(n) });
             return;
           }
           try {
             const anchors = await AnchorUtils.findAnchors({
               note: n,
-              wsRoot: wsRoot,
+              wsRoot,
             });
             cacheUpdates[n.fname].data.anchors = anchors;
             n.anchors = anchors;
           } catch (err) {
+            let error = err;
             if (!(err instanceof DendronError)) {
-              err = new DendronError({
+              error = new DendronError({
                 message: `Failed to read headers or block anchors in note ${n.fname}`,
                 payload: err,
               });
             }
-            errors.push(err);
+            errors.push(error);
             return;
           }
-
         } else {
           n.links = cache.notes[n.fname].data.links;
         }
@@ -547,7 +557,7 @@ export class FileStorage implements DStore {
         const allLinks = _.orderBy(
           foundLinks,
           (link) => {
-            return link.position.start.offset;
+            return link.position?.start.offset;
           },
           "desc"
         );
@@ -559,14 +569,22 @@ export class FileStorage implements DStore {
             // current implementation adds alias for all notes
             // check if old note has alias thats different from its fname
             let alias: string | undefined;
-            if (oldLink.from.alias && oldLink.from.alias.toLocaleLowerCase() !== oldLink.from.fname.toLocaleLowerCase()) {
+            if (
+              oldLink.from.alias &&
+              oldLink.from.alias.toLocaleLowerCase() !==
+                oldLink.from.fname.toLocaleLowerCase()
+            ) {
               alias = oldLink.from.alias;
             }
             // for hashtag links, we'll have to regenerate the alias
             if (newLoc.fname.startsWith(TAGS_HIERARCHY)) {
-              alias = `#${newLoc.fname.slice(TAGS_HIERARCHY.length)}`;
-            } else if (LinkUtils.isHashtagLink(oldLink.from)) {
+              const fnameWithoutTag = newLoc.fname.slice(TAGS_HIERARCHY.length);
+              // Frontmatter tags don't have the hashtag
+              if (link.type !== "frontmatterTag") alias = `#${fnameWithoutTag}`;
+              else alias = fnameWithoutTag;
+            } else if (oldLink.from.fname.startsWith(TAGS_HIERARCHY)) {
               // If this used to be a hashtag but no longer is, the alias is like `#foo.bar` and no longer makes sense.
+              // And if this used to be a frontmatter tag, the alias being undefined will force it to be removed because a frontmatter tag can't point to something outside of tags hierarchy.
               alias = undefined;
             }
             // loc doesn't have header info
@@ -592,6 +610,7 @@ export class FileStorage implements DStore {
         //   { from: oldLoc, to: newLoc }
         // ).process(_n.body);
         n.body = noteMod.body;
+        n.tags = noteMod.tags;
         return n;
       })
     ).catch((err) => {
@@ -800,7 +819,7 @@ export class FileStorage implements DStore {
             wsRoot: this.wsRoot,
             basename: hook.id + ".js",
           });
-          return await HookUtils.requireHook({
+          return HookUtils.requireHook({
             note,
             fpath: script,
             wsRoot: this.wsRoot,

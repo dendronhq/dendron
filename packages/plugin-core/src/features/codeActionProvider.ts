@@ -1,7 +1,18 @@
 import { DoctorActions } from "@dendronhq/dendron-cli";
 import _ from "lodash";
 import { FrontmatterContent } from "mdast";
-import { CodeAction, CodeActionKind, CodeActionProvider, Diagnostic, DiagnosticSeverity, ExtensionContext, languages, Range, TextDocument, Uri } from "vscode";
+import {
+  CodeAction,
+  CodeActionKind,
+  CodeActionProvider,
+  Diagnostic,
+  DiagnosticSeverity,
+  ExtensionContext,
+  languages,
+  Range,
+  TextDocument,
+  Uri,
+} from "vscode";
 import YAML from "yamljs";
 import { DoctorCommand } from "../commands/Doctor";
 import { Logger } from "../logger";
@@ -10,19 +21,20 @@ import { VSCodeUtils } from "../utils";
 /** Used to match the warnings to code actions. Also displayed for users along with the warning message. */
 const BAD_FRONTMATTER_CODE = "bad frontmatter";
 const FRONTMATTER_WARNING = languages.createDiagnosticCollection();
-const RESOLVE_MESSAGE_AUTO_ONLY = "Please use the lightbulb, or run the Dendron: Doctor command.";
-const RESOLVE_MESSAGE = "Please use the lightbulb, run the Dendron: Doctor command, or manually correct it.";
-
+const RESOLVE_MESSAGE_AUTO_ONLY =
+  "Please use the lightbulb, or run the Dendron: Doctor command.";
+const RESOLVE_MESSAGE =
+  "Please use the lightbulb, run the Dendron: Doctor command, or manually correct it.";
 
 /** Delay displaying any warnings while the user is still typing.
- * 
+ *
  * The user is considered to have stopped typing if they didn't type anything after 500ms.
  */
 const delayedFrontmatterWarning = _.debounce(
   (uri: Uri, diagnostics: Diagnostic[]) => {
     FRONTMATTER_WARNING.set(uri, diagnostics);
   },
-  500,
+  500
 );
 
 function badFrontmatter(props: Omit<Diagnostic, "source" | "code">) {
@@ -31,9 +43,8 @@ function badFrontmatter(props: Omit<Diagnostic, "source" | "code">) {
     source: "Dendron",
     code: BAD_FRONTMATTER_CODE,
     ...props,
-  }
+  };
 }
-
 
 export function warnMissingFrontmatter(document: TextDocument) {
   const diagnostic: Diagnostic = badFrontmatter({
@@ -49,7 +60,10 @@ export function warnMissingFrontmatter(document: TextDocument) {
   return diagnostic;
 }
 
-export function warnBadFrontmatterContents(document: TextDocument, frontmatter: FrontmatterContent) {
+export function warnBadFrontmatterContents(
+  document: TextDocument,
+  frontmatter: FrontmatterContent
+) {
   const ctx = "warnBadFrontmatterContents";
   const diagnostics: Diagnostic[] = [];
   const range = VSCodeUtils.position2VSCodeRange(frontmatter.position!);
@@ -57,37 +71,39 @@ export function warnBadFrontmatterContents(document: TextDocument, frontmatter: 
     const frontmatterData = YAML.parse(frontmatter.value);
     if (!_.isString(frontmatterData.id)) {
       // Missing id
-      diagnostics.push(badFrontmatter({
-        message: `Note id is missing. ${RESOLVE_MESSAGE_AUTO_ONLY}`,
-        range,
-        severity: DiagnosticSeverity.Error,
-      }));
+      diagnostics.push(
+        badFrontmatter({
+          message: `Note id is missing. ${RESOLVE_MESSAGE_AUTO_ONLY}`,
+          range,
+          severity: DiagnosticSeverity.Error,
+        })
+      );
     } else if (frontmatterData.id.match(/^[-_]|[-_]$/)) {
-      diagnostics.push(badFrontmatter({
-        message: `Note id is bad, it will not work in Github publishing. ${RESOLVE_MESSAGE}`,
-        range,
-        severity: DiagnosticSeverity.Warning,
-      }));
+      diagnostics.push(
+        badFrontmatter({
+          message: `Note id is bad, it will not work in Github publishing. ${RESOLVE_MESSAGE}`,
+          range,
+          severity: DiagnosticSeverity.Warning,
+        })
+      );
     }
   } catch (err) {
-    Logger.info({ctx, msg: "failed to parse frontmatter", err});
-    diagnostics.push(badFrontmatter({
-      message: `The frontmatter is broken. ${RESOLVE_MESSAGE}`,
-      range,
-      severity: DiagnosticSeverity.Error,
-    }));
+    Logger.info({ ctx, msg: "failed to parse frontmatter", err });
+    diagnostics.push(
+      badFrontmatter({
+        message: `The frontmatter is broken. ${RESOLVE_MESSAGE}`,
+        range,
+        severity: DiagnosticSeverity.Error,
+      })
+    );
   }
   delayedFrontmatterWarning(document.uri, diagnostics);
   return diagnostics;
 }
 
-
 function activate(context: ExtensionContext) {
   context.subscriptions.push(
-    languages.registerCodeActionsProvider(
-      "markdown",
-      doctorFrontmatterProvider,
-    )
+    languages.registerCodeActionsProvider("markdown", doctorFrontmatterProvider)
   );
 }
 export const codeActionProvider = {
@@ -97,7 +113,9 @@ export const codeActionProvider = {
 export const doctorFrontmatterProvider: CodeActionProvider = {
   provideCodeActions: (_document, _range, context, _token) => {
     // Only provide fix frontmatter action if the diagnostic is correct
-    const diagnostics = context.diagnostics.filter((item) => item.code === BAD_FRONTMATTER_CODE);
+    const diagnostics = context.diagnostics.filter(
+      (item) => item.code === BAD_FRONTMATTER_CODE
+    );
     if (diagnostics.length === 0) return undefined;
     const action: CodeAction = {
       title: "Fix the frontmatter",
@@ -107,9 +125,9 @@ export const doctorFrontmatterProvider: CodeActionProvider = {
       command: {
         command: new DoctorCommand().key,
         title: "Fix the frontmatter",
-        arguments: [{scope: "file", action: DoctorActions.FIX_FRONTMATTER}]
+        arguments: [{ scope: "file", action: DoctorActions.FIX_FRONTMATTER }],
       },
     };
     return [action];
-  }
-}
+  },
+};

@@ -1,7 +1,10 @@
 import {
-  APIUtils, BulkAddNoteOpts,
+  APIUtils,
+  BulkAddNoteOpts,
   ConfigGetPayload,
-  ConfigWriteOpts, DendronAPI, DendronConfig,
+  ConfigWriteOpts,
+  DendronAPI,
+  DendronConfig,
   DendronError,
   DEngine,
   DEngineClient,
@@ -16,8 +19,10 @@ import {
   EngineInfoResp,
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
-  ERROR_SEVERITY, GetNoteBlocksOpts,
-  GetNoteBlocksPayload, GetNoteOptsV2,
+  ERROR_SEVERITY,
+  GetNoteBlocksOpts,
+  GetNoteBlocksPayload,
+  GetNoteOptsV2,
   GetNotePayload,
   NoteChangeEntry,
   NoteProps,
@@ -34,7 +39,7 @@ import {
   SchemaQueryResp,
   SchemaUtils,
   VaultUtils,
-  WriteNoteResp
+  WriteNoteResp,
 } from "@dendronhq/common-all";
 import { createLogger, DLogger, readYAML } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -78,7 +83,9 @@ export class DendronEngineClient implements DEngineClient {
     logger?: DLogger;
   } & DendronEngineClientOpts) {
     const api = new DendronAPI({
-      endpoint: APIUtils.getLocalEndpoint(_.isString(port) ? parseInt(port) : port),
+      endpoint: APIUtils.getLocalEndpoint(
+        _.isString(port) ? parseInt(port) : port
+      ),
       apiPath: "api",
       logger,
     });
@@ -405,8 +412,13 @@ export class DendronEngineClient implements DEngineClient {
 
   async getNoteBlocks({
     id,
+    filterByAnchorType,
   }: GetNoteBlocksOpts): Promise<GetNoteBlocksPayload> {
-    const out = await this.api.getNoteBlocks({ id, ws: this.ws });
+    const out = await this.api.getNoteBlocks({
+      id,
+      filterByAnchorType,
+      ws: this.ws,
+    });
     return out;
   }
 }

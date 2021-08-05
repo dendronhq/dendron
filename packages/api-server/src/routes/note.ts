@@ -115,10 +115,10 @@ router.post("/bulkAdd", async (req: Request, res: Response<WriteNoteResp>) => {
 router.get(
   "/blocks",
   async (req: Request, res: Response<GetNoteBlocksPayload>) => {
-    const { id, ws } = req.query as GetNoteBlocksRequest;
+    const { id, ws, filterByAnchorType } = req.query as GetNoteBlocksRequest;
     const engine = await getWS({ ws: ws || "" });
     try {
-      const out = await engine.getNoteBlocks({ id });
+      const out = await engine.getNoteBlocks({ id, filterByAnchorType });
       if (out.error instanceof DendronError)
         out.error = DendronError.createPlainError(out.error);
       res.json(out);

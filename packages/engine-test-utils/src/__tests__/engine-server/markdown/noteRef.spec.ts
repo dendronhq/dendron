@@ -39,7 +39,7 @@ describe("parse", () => {
       async ({ engine, vaults }) => {
         let _proc = proc(
           engine,
-          genDendronData({ dest, vault: vaults[0] })
+          genDendronData({ fname: "root", dest, vault: vaults[0] })
         ).use(dendronPub);
         const resp = _proc.parse(`((ref: [[foo.md]]))`);
         expect(resp).toMatchSnapshot();

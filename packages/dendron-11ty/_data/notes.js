@@ -36,7 +36,7 @@ async function getNotes() {
   if (env().logLvl === "debug") {
     fs.writeJSONSync(path.join("/tmp/", "notes.log"), notes, { spaces: 4 });
   }
-  const noteIndex = _.find(domains, ent => ent.custom.permalink === "/");
+  const noteIndex = _.find(domains, (ent) => ent.custom.permalink === "/");
   if (!noteIndex) {
     throw Error("no site index found");
   }

@@ -4,10 +4,22 @@ import { writeFile } from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
-import { DECORATION_TYPE_ALIAS, DECORATION_TYPE_BLOCK_ANCHOR, DECORATION_TYPE_BROKEN_WIKILINK, DECORATION_TYPE_TAG, DECORATION_TYPE_TIMESTAMP, DECORATION_TYPE_WIKILINK, updateDecorations } from "../../features/windowDecorations";
+import {
+  DECORATION_TYPE_ALIAS,
+  DECORATION_TYPE_BLOCK_ANCHOR,
+  DECORATION_TYPE_BROKEN_WIKILINK,
+  DECORATION_TYPE_TAG,
+  DECORATION_TYPE_TIMESTAMP,
+  DECORATION_TYPE_WIKILINK,
+  updateDecorations,
+} from "../../features/windowDecorations";
 import { VSCodeUtils } from "../../utils";
 import { expect } from "../testUtilsv2";
-import { runLegacyMultiWorkspaceTest, runTestButSkipForWindows, setupBeforeAfter } from "../testUtilsV3";
+import {
+  runLegacyMultiWorkspaceTest,
+  runTestButSkipForWindows,
+  setupBeforeAfter,
+} from "../testUtilsV3";
 
 /** Check if the ranges decorated by `decorations` contains `text` */
 function isTextDecorated(
@@ -74,9 +86,11 @@ suite("windowDecorations", function () {
           });
           const editor = await VSCodeUtils.openNote(note!);
           const document = editor.document;
-          const {allDecorations} = updateDecorations(editor);
+          const { allDecorations } = updateDecorations(editor);
 
-          const timestampDecorations = allDecorations!.get(DECORATION_TYPE_TIMESTAMP);
+          const timestampDecorations = allDecorations!.get(
+            DECORATION_TYPE_TIMESTAMP
+          );
           expect(timestampDecorations.length).toEqual(2);
           // check that the decorations are at the right locations
           expect(
@@ -86,7 +100,9 @@ suite("windowDecorations", function () {
             isTextDecorated(UPDATED, timestampDecorations!, document)
           ).toBeTruthy();
 
-          const blockAnchorDecorations = allDecorations!.get(DECORATION_TYPE_BLOCK_ANCHOR);
+          const blockAnchorDecorations = allDecorations!.get(
+            DECORATION_TYPE_BLOCK_ANCHOR
+          );
           expect(blockAnchorDecorations.length).toEqual(3);
           // check that the decorations are at the right locations
           expect(
@@ -99,13 +115,19 @@ suite("windowDecorations", function () {
             isTextDecorated("^anchor-3", blockAnchorDecorations!, document)
           ).toBeTruthy();
 
-          const wikilinkDecorations = allDecorations!.get(DECORATION_TYPE_WIKILINK);
+          const wikilinkDecorations = allDecorations!.get(
+            DECORATION_TYPE_WIKILINK
+          );
           expect(wikilinkDecorations.length).toEqual(2);
           expect(
             isTextDecorated("[[root]]", wikilinkDecorations!, document)
           ).toBeTruthy();
           expect(
-            isTextDecorated("[[with alias|root]]", wikilinkDecorations!, document)
+            isTextDecorated(
+              "[[with alias|root]]",
+              wikilinkDecorations!,
+              document
+            )
           ).toBeTruthy();
 
           expect(DECORATION_TYPE_TAG.has("tags.foo"));
@@ -115,10 +137,16 @@ suite("windowDecorations", function () {
           expect(aliasDecorations.length).toEqual(1);
           expect(isTextDecorated("with alias", aliasDecorations!, document));
 
-          const brokenWikilinkDecorations = allDecorations!.get(DECORATION_TYPE_BROKEN_WIKILINK);
+          const brokenWikilinkDecorations = allDecorations!.get(
+            DECORATION_TYPE_BROKEN_WIKILINK
+          );
           expect(brokenWikilinkDecorations.length).toEqual(1);
           expect(
-            isTextDecorated("[[does.not.exist]]", brokenWikilinkDecorations!, document)
+            isTextDecorated(
+              "[[does.not.exist]]",
+              brokenWikilinkDecorations!,
+              document
+            )
           ).toBeTruthy();
           done();
         },
@@ -138,7 +166,7 @@ suite("windowDecorations", function () {
             wsRoot,
           });
           // Empty out the note, getting rid of the frontmatter
-          const path = NoteUtils.getFullPath({note, wsRoot});
+          const path = NoteUtils.getFullPath({ note, wsRoot });
           await writeFile(path, "foo bar");
         },
         onInit: async () => {
@@ -146,7 +174,12 @@ suite("windowDecorations", function () {
           const { allWarnings } = updateDecorations(editor);
 
           expect(allWarnings!.length).toEqual(1);
-          expect(AssertUtils.assertInString({body: allWarnings![0].message, match: ["frontmatter", "missing"]}));
+          expect(
+            AssertUtils.assertInString({
+              body: allWarnings![0].message,
+              match: ["frontmatter", "missing"],
+            })
+          );
           done();
         },
       });
@@ -171,7 +204,12 @@ suite("windowDecorations", function () {
           const { allWarnings } = updateDecorations(editor);
 
           expect(allWarnings!.length).toEqual(1);
-          expect(AssertUtils.assertInString({body: allWarnings![0].message, match: ["id", "bad"]}));
+          expect(
+            AssertUtils.assertInString({
+              body: allWarnings![0].message,
+              match: ["id", "bad"],
+            })
+          );
           done();
         },
       });
@@ -188,20 +226,23 @@ suite("windowDecorations", function () {
             wsRoot,
           });
           // Rewrite the file to have id missing in frontmatter
-          const path = NoteUtils.getFullPath({note, wsRoot});
-          await writeFile(path, [
-            "---",
-            "updated: 234",
-            "created: 123",
-            "---",
-          ].join("\n"));
+          const path = NoteUtils.getFullPath({ note, wsRoot });
+          await writeFile(
+            path,
+            ["---", "updated: 234", "created: 123", "---"].join("\n")
+          );
         },
         onInit: async () => {
           const editor = await VSCodeUtils.openNote(note!);
           const { allWarnings } = updateDecorations(editor);
 
           expect(allWarnings!.length).toEqual(1);
-          expect(AssertUtils.assertInString({body: allWarnings![0].message, match: ["id", "missing"]}));
+          expect(
+            AssertUtils.assertInString({
+              body: allWarnings![0].message,
+              match: ["id", "missing"],
+            })
+          );
           done();
         },
       });
@@ -210,12 +251,16 @@ suite("windowDecorations", function () {
     test("doesn't warn for schemas", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
-        onInit: async ({engine, wsRoot}) => {
+        onInit: async ({ engine, wsRoot }) => {
           const schema = engine.schemas.root;
-          const schemaFile = path.join(wsRoot, schema.vault.fsPath, `${schema.fname}.schema.yml`);
+          const schemaFile = path.join(
+            wsRoot,
+            schema.vault.fsPath,
+            `${schema.fname}.schema.yml`
+          );
           const schemaURI = vscode.Uri.parse(schemaFile);
           const editor = await VSCodeUtils.openFileInEditor(schemaURI);
-          
+
           const { allDecorations, allWarnings } = updateDecorations(editor!);
 
           expect(allWarnings).toEqual(undefined);

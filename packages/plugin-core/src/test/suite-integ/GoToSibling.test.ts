@@ -397,7 +397,10 @@ suite("GoToSibling", function () {
                 {
                   actual:
                     VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath.endsWith(
-                      (path.join(`${path.basename(vault.fsPath)}`, "foo.journal.2020.08.31.md"))
+                      path.join(
+                        `${path.basename(vault.fsPath)}`,
+                        "foo.journal.2020.08.31.md"
+                      )
                     ),
                   expected: true,
                 },

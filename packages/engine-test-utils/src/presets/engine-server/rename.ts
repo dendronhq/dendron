@@ -18,6 +18,7 @@ import {
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
+import { checkFile } from "../../utils";
 
 const findCreated = (changed: NoteChangeEntry[]) => {
   const created = _.find(changed, { status: "create" });
@@ -860,6 +861,260 @@ const NOTES = {
         await NOTE_PRESETS_V4.NOTE_WITH_LINK.create({
           vault: vaults[0],
           wsRoot,
+        });
+      },
+    }
+  ),
+  HASHTAG: new TestPresetEntryV4(
+    async ({ wsRoot, vaults, engine }) => {
+      await engine.renameNote({
+        oldLoc: {
+          fname: "tags.foo",
+          alias: "#foo",
+          vaultName: VaultUtils.getName(vaults[0]),
+        },
+        newLoc: { fname: "tags.bar", vaultName: VaultUtils.getName(vaults[0]) },
+      });
+      const note = NoteUtils.getNoteByFnameV5({
+        fname: "primary",
+        notes: engine.notes,
+        wsRoot,
+        vault: vaults[0],
+      });
+      const containsTag = checkFile(
+        {
+          fpath: NoteUtils.getFullPath({ note: note!, wsRoot }),
+          nomatch: ["#foo"],
+        },
+        "#bar"
+      );
+
+      return [
+        {
+          actual: containsTag,
+          expected: true,
+        },
+      ];
+    },
+    {
+      preSetupHook: async ({ vaults, wsRoot }) => {
+        await NoteTestUtilsV4.createNote({
+          fname: "tags.foo",
+          vault: vaults[0],
+          wsRoot,
+        });
+        await NoteTestUtilsV4.createNote({
+          fname: "primary",
+          vault: vaults[0],
+          wsRoot,
+          body: "Lorem ipsum #foo dolor amet",
+        });
+      },
+    }
+  ),
+  FRONTMATTER_TAG_SINGLE: new TestPresetEntryV4(
+    async ({ wsRoot, vaults, engine }) => {
+      await engine.renameNote({
+        oldLoc: {
+          fname: "tags.foo",
+          vaultName: VaultUtils.getName(vaults[0]),
+        },
+        newLoc: { fname: "tags.bar", vaultName: VaultUtils.getName(vaults[0]) },
+      });
+      const note = NoteUtils.getNoteByFnameV5({
+        fname: "primary",
+        notes: engine.notes,
+        wsRoot,
+        vault: vaults[0],
+      });
+      const containsTag = checkFile(
+        {
+          fpath: NoteUtils.getFullPath({ note: note!, wsRoot }),
+          nomatch: ["tags: foo"],
+        },
+        "tags: bar"
+      );
+
+      return [
+        {
+          actual: note?.tags,
+          expected: "bar",
+        },
+        {
+          actual: containsTag,
+          expected: true,
+        },
+      ];
+    },
+    {
+      preSetupHook: async ({ vaults, wsRoot }) => {
+        await NoteTestUtilsV4.createNote({
+          fname: "tags.foo",
+          vault: vaults[0],
+          wsRoot,
+        });
+        await NoteTestUtilsV4.createNote({
+          fname: "primary",
+          vault: vaults[0],
+          wsRoot,
+          props: {
+            tags: "foo",
+          },
+        });
+      },
+    }
+  ),
+  FRONTMATTER_TAG_MULTI: new TestPresetEntryV4(
+    async ({ wsRoot, vaults, engine }) => {
+      await engine.renameNote({
+        oldLoc: {
+          fname: "tags.foo",
+          vaultName: VaultUtils.getName(vaults[0]),
+        },
+        newLoc: { fname: "tags.bar", vaultName: VaultUtils.getName(vaults[0]) },
+      });
+      const note = NoteUtils.getNoteByFnameV5({
+        fname: "primary",
+        notes: engine.notes,
+        wsRoot,
+        vault: vaults[0],
+      });
+      const containsTag = checkFile(
+        {
+          fpath: NoteUtils.getFullPath({ note: note!, wsRoot }),
+          nomatch: ["foo"],
+        },
+        "bar"
+      );
+
+      return [
+        {
+          actual: note?.tags,
+          expected: ["head", "bar", "tail"],
+        },
+        {
+          actual: containsTag,
+          expected: true,
+        },
+      ];
+    },
+    {
+      preSetupHook: async ({ vaults, wsRoot }) => {
+        await NoteTestUtilsV4.createNote({
+          fname: "tags.foo",
+          vault: vaults[0],
+          wsRoot,
+        });
+        await NoteTestUtilsV4.createNote({
+          fname: "primary",
+          vault: vaults[0],
+          wsRoot,
+          props: {
+            tags: ["head", "foo", "tail"],
+          },
+        });
+      },
+    }
+  ),
+  FRONTMATTER_TAG_SINGLE_REMOVE: new TestPresetEntryV4(
+    async ({ wsRoot, vaults, engine }) => {
+      await engine.renameNote({
+        oldLoc: {
+          fname: "tags.foo",
+          vaultName: VaultUtils.getName(vaults[0]),
+        },
+        newLoc: { fname: "bar", vaultName: VaultUtils.getName(vaults[0]) },
+      });
+      const note = NoteUtils.getNoteByFnameV5({
+        fname: "primary",
+        notes: engine.notes,
+        wsRoot,
+        vault: vaults[0],
+      });
+      const containsTag = checkFile({
+        fpath: NoteUtils.getFullPath({ note: note!, wsRoot }),
+        nomatch: [
+          "tags: foo",
+          "tags: bar",
+          "tags: undefined",
+          'tags: "undefined"',
+        ],
+      });
+
+      return [
+        {
+          actual: note?.tags,
+          expected: undefined,
+        },
+        {
+          actual: containsTag,
+          expected: true,
+        },
+      ];
+    },
+    {
+      preSetupHook: async ({ vaults, wsRoot }) => {
+        await NoteTestUtilsV4.createNote({
+          fname: "tags.foo",
+          vault: vaults[0],
+          wsRoot,
+        });
+        await NoteTestUtilsV4.createNote({
+          fname: "primary",
+          vault: vaults[0],
+          wsRoot,
+          props: {
+            tags: "foo",
+          },
+        });
+      },
+    }
+  ),
+  FRONTMATTER_TAG_MULTI_REMOVE: new TestPresetEntryV4(
+    async ({ wsRoot, vaults, engine }) => {
+      await engine.renameNote({
+        oldLoc: {
+          fname: "tags.foo",
+          vaultName: VaultUtils.getName(vaults[0]),
+        },
+        newLoc: { fname: "bar", vaultName: VaultUtils.getName(vaults[0]) },
+      });
+      const note = NoteUtils.getNoteByFnameV5({
+        fname: "primary",
+        notes: engine.notes,
+        wsRoot,
+        vault: vaults[0],
+      });
+      const containsTag = checkFile({
+        fpath: NoteUtils.getFullPath({ note: note!, wsRoot }),
+        nomatch: ["foo", "bar", "undefined"],
+      });
+
+      return [
+        {
+          actual: note?.tags,
+          expected: ["head", "tail"],
+        },
+        {
+          actual: containsTag,
+          expected: true,
+        },
+      ];
+    },
+    {
+      preSetupHook: async ({ vaults, wsRoot }) => {
+        await NoteTestUtilsV4.createNote({
+          fname: "tags.foo",
+          vault: vaults[0],
+          wsRoot,
+        });
+        await NoteTestUtilsV4.createNote({
+          fname: "primary",
+          vault: vaults[0],
+          wsRoot,
+          props: {
+            tags: ["head", "foo", "tail"],
+          },
         });
       },
     }

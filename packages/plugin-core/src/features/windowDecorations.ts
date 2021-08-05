@@ -9,23 +9,45 @@ import {
   WikiLinkNoteV4,
   NoteRefNoteV4,
 } from "@dendronhq/engine-server";
-import { DecorationOptions, DecorationRangeBehavior, Range, TextEditor, TextEditorDecorationType, ThemeColor, window, TextDocument, Diagnostic } from "vscode";
+import {
+  DecorationOptions,
+  DecorationRangeBehavior,
+  Range,
+  TextEditor,
+  TextEditorDecorationType,
+  ThemeColor,
+  window,
+  TextDocument,
+  Diagnostic,
+} from "vscode";
 import visit from "unist-util-visit";
 import _ from "lodash";
-import { isNotUndefined, DefaultMap, randomColor, NoteUtils, Position, VaultUtils, makeColorTranslucent } from "@dendronhq/common-all";
+import {
+  isNotUndefined,
+  DefaultMap,
+  randomColor,
+  NoteUtils,
+  Position,
+  VaultUtils,
+  makeColorTranslucent,
+} from "@dendronhq/common-all";
 import { DateTime } from "luxon";
 import { getConfigValue, getWS } from "../workspace";
 import { CodeConfigKeys, DateTimeFormat } from "../types";
 import { VSCodeUtils } from "../utils";
 import { containsNonDendronUri } from "../utils/md";
-import { warnBadFrontmatterContents, warnMissingFrontmatter } from "./codeActionProvider";
+import {
+  warnBadFrontmatterContents,
+  warnMissingFrontmatter,
+} from "./codeActionProvider";
 
 const TAG_COLORING_TRANSLUCENCY = 0.4;
 
 export function updateDecorations(activeEditor: TextEditor) {
   const text = activeEditor.document.getText();
   // Only show decorations & warnings for notes
-  if (_.isUndefined(VSCodeUtils.getNoteFromDocument(activeEditor.document))) return {};
+  if (_.isUndefined(VSCodeUtils.getNoteFromDocument(activeEditor.document)))
+    return {};
   const proc = MDUtilsV5.procRemarkParse(
     {
       mode: ProcMode.NO_DATA,
@@ -34,7 +56,10 @@ export function updateDecorations(activeEditor: TextEditor) {
     { dest: DendronASTDest.MD_DENDRON }
   );
   const tree = proc.parse(text);
-  const allDecorations = new DefaultMap<TextEditorDecorationType, DecorationOptions[]>(() => []);
+  const allDecorations = new DefaultMap<
+    TextEditorDecorationType,
+    DecorationOptions[]
+  >(() => []);
   let frontmatter: FrontmatterContent | undefined;
 
   visit(tree, (node) => {
@@ -65,7 +90,10 @@ export function updateDecorations(activeEditor: TextEditor) {
         break;
       }
       case DendronASTTypes.WIKI_LINK: {
-        for (const [type, decoration] of decorateWikiLink(node as WikiLinkNoteV4, activeEditor.document)) {
+        for (const [type, decoration] of decorateWikiLink(
+          node as WikiLinkNoteV4,
+          activeEditor.document
+        )) {
           allDecorations.get(type).push(decoration);
         }
         break;
@@ -80,7 +108,7 @@ export function updateDecorations(activeEditor: TextEditor) {
         break;
       }
       default:
-        /* Nothing */
+      /* Nothing */
     }
   });
 
@@ -88,26 +116,43 @@ export function updateDecorations(activeEditor: TextEditor) {
   const allWarnings: Diagnostic[] = [];
   if (_.isUndefined(frontmatter)) {
     allWarnings.push(warnMissingFrontmatter(activeEditor.document));
-  }
-  else {
-    allWarnings.push(...warnBadFrontmatterContents(activeEditor.document, frontmatter));
+  } else {
+    allWarnings.push(
+      ...warnBadFrontmatterContents(activeEditor.document, frontmatter)
+    );
   }
 
   // Activate the decorations
   for (const [type, decorations] of allDecorations.entries()) {
     activeEditor.setDecorations(type, decorations);
   }
-  // Clean out the now-unused tag decorations
+
+  // Clean out now-unused tag decorations
   for (const [key, type] of DECORATION_TYPE_TAG.entries()) {
     if (!allDecorations.has(type)) {
       type.dispose();
       DECORATION_TYPE_TAG.delete(key);
     }
   }
-  return {allDecorations, allWarnings};
+  // Clear out any old decorations left over from last pass
+  const allTypes = [
+    DECORATION_TYPE_TIMESTAMP,
+    DECORATION_TYPE_BLOCK_ANCHOR,
+    DECORATION_TYPE_WIKILINK,
+    DECORATION_TYPE_BROKEN_WIKILINK,
+    DECORATION_TYPE_ALIAS,
+  ];
+  for (const type of allTypes) {
+    if (!allDecorations.has(type)) {
+      activeEditor.setDecorations(type, []);
+    }
+  }
+  return { allDecorations, allWarnings };
 }
 
-export const DECORATION_TYPE_TIMESTAMP = window.createTextEditorDecorationType({});
+export const DECORATION_TYPE_TIMESTAMP = window.createTextEditorDecorationType(
+  {}
+);
 
 function decorateTimestamps(frontmatter: FrontmatterContent) {
   const { value: contents, position } = frontmatter;
@@ -148,10 +193,11 @@ function decorateTimestamps(frontmatter: FrontmatterContent) {
     .filter(isNotUndefined);
 }
 
-export const DECORATION_TYPE_BLOCK_ANCHOR = window.createTextEditorDecorationType({
-  opacity: "40%",
-  rangeBehavior: DecorationRangeBehavior.ClosedOpen,
-});
+export const DECORATION_TYPE_BLOCK_ANCHOR =
+  window.createTextEditorDecorationType({
+    opacity: "40%",
+    rangeBehavior: DecorationRangeBehavior.ClosedOpen,
+  });
 
 function decorateBlockAnchor(blockAnchor: BlockAnchor) {
   const position = blockAnchor.position;
@@ -163,12 +209,20 @@ function decorateBlockAnchor(blockAnchor: BlockAnchor) {
   return decoration;
 }
 
-export const DECORATION_TYPE_TAG = new DefaultMap<string, TextEditorDecorationType>((fname) => {
+export const DECORATION_TYPE_TAG = new DefaultMap<
+  string,
+  TextEditorDecorationType
+>((fname) => {
   const { notes } = getWS().getEngine();
-  const tagNote = NoteUtils.getNotesByFname({notes, fname})[0];
-  let backgroundColor = tagNote ? NoteUtils.color({note: tagNote})[0] : undefined;
+  const tagNote = NoteUtils.getNotesByFname({ notes, fname })[0];
+  let backgroundColor = tagNote
+    ? NoteUtils.color({ note: tagNote })[0]
+    : undefined;
   if (_.isUndefined(backgroundColor)) backgroundColor = randomColor(fname);
-  backgroundColor = makeColorTranslucent(backgroundColor, TAG_COLORING_TRANSLUCENCY);
+  backgroundColor = makeColorTranslucent(
+    backgroundColor,
+    TAG_COLORING_TRANSLUCENCY
+  );
   return window.createTextEditorDecorationType({
     backgroundColor,
     // Do not try to grow the decoration range when the user is typing,
@@ -178,14 +232,15 @@ export const DECORATION_TYPE_TAG = new DefaultMap<string, TextEditorDecorationTy
   });
 });
 
-function decorateHashTag(hashtag: HashTag): [TextEditorDecorationType, DecorationOptions] | undefined {
+function decorateHashTag(
+  hashtag: HashTag
+): [TextEditorDecorationType, DecorationOptions] | undefined {
   const position = hashtag.position;
   if (_.isUndefined(position)) return; // should never happen
 
   const type = DECORATION_TYPE_TAG.get(hashtag.fname);
   const decoration: DecorationOptions = {
     range: VSCodeUtils.position2VSCodeRange(position),
-    
   };
   return [type, decoration];
 }
@@ -197,16 +252,24 @@ export const DECORATION_TYPE_WIKILINK = window.createTextEditorDecorationType({
 });
 
 /** Decoration for wikilinks that do *not* point to valid notes (e.g. broken). */
-export const DECORATION_TYPE_BROKEN_WIKILINK = window.createTextEditorDecorationType({
-  color: new ThemeColor("editorWarning.foreground"),
-  backgroundColor: new ThemeColor("editorWarning.background"),
-  rangeBehavior: DecorationRangeBehavior.ClosedClosed,
-});
+export const DECORATION_TYPE_BROKEN_WIKILINK =
+  window.createTextEditorDecorationType({
+    color: new ThemeColor("editorWarning.foreground"),
+    backgroundColor: new ThemeColor("editorWarning.background"),
+    rangeBehavior: DecorationRangeBehavior.ClosedClosed,
+  });
 
-
-function doesLinkedNoteExist({fname, vaultName}: {fname: string, vaultName?: string}) {
-  const {notes, vaults} = getWS().getEngine();
-  const vault = vaultName ? VaultUtils.getVaultByName({vname: vaultName, vaults}) : undefined;
+function doesLinkedNoteExist({
+  fname,
+  vaultName,
+}: {
+  fname: string;
+  vaultName?: string;
+}) {
+  const { notes, vaults } = getWS().getEngine();
+  const vault = vaultName
+    ? VaultUtils.getVaultByName({ vname: vaultName, vaults })
+    : undefined;
   // Vault specified, but can't find it.
   if (vaultName && !vault) return false;
   const found = NoteUtils.getNotesByFname({
@@ -228,43 +291,56 @@ function decorateWikiLink(wikiLink: WikiLinkNoteV4, document: TextDocument) {
   const position = wikiLink.position as Position | undefined;
   if (_.isUndefined(position)) return []; // should never happen
 
-  const foundNote = doesLinkedNoteExist({fname: wikiLink.value, vaultName: wikiLink.data.vaultName});
+  const foundNote = doesLinkedNoteExist({
+    fname: wikiLink.value,
+    vaultName: wikiLink.data.vaultName,
+  });
   const wikiLinkrange = VSCodeUtils.position2VSCodeRange(position);
   const options: DecorationOptions = {
     range: wikiLinkrange,
   };
   const decorations: [TextEditorDecorationType, DecorationOptions][] = [];
-  
+
   // Highlight the alias part
   const linkText = document.getText(options.range);
   const aliasMatch = linkText.match(RE_ALIAS);
-  if (aliasMatch && aliasMatch.groups?.beforeAlias && aliasMatch.groups?.alias) {
-    const {beforeAlias, alias} = aliasMatch.groups;
-    decorations.push([DECORATION_TYPE_ALIAS, { range: new Range(
-      wikiLinkrange.start.line,
-      wikiLinkrange.start.character + beforeAlias.length,
-      wikiLinkrange.start.line,
-      wikiLinkrange.start.character + beforeAlias.length + alias.length,
-    )}]);
+  if (
+    aliasMatch &&
+    aliasMatch.groups?.beforeAlias &&
+    aliasMatch.groups?.alias
+  ) {
+    const { beforeAlias, alias } = aliasMatch.groups;
+    decorations.push([
+      DECORATION_TYPE_ALIAS,
+      {
+        range: new Range(
+          wikiLinkrange.start.line,
+          wikiLinkrange.start.character + beforeAlias.length,
+          wikiLinkrange.start.line,
+          wikiLinkrange.start.character + beforeAlias.length + alias.length
+        ),
+      },
+    ]);
   }
 
   if (foundNote || containsNonDendronUri(wikiLink.value)) {
-    decorations.push(
-      [DECORATION_TYPE_WIKILINK, options]
-    );
+    decorations.push([DECORATION_TYPE_WIKILINK, options]);
   } else {
-    decorations.push(
-      [DECORATION_TYPE_BROKEN_WIKILINK, options]
-    );
+    decorations.push([DECORATION_TYPE_BROKEN_WIKILINK, options]);
   }
   return decorations;
 }
 
-function decorateReference(reference: NoteRefNoteV4): [TextEditorDecorationType, DecorationOptions] | undefined {
+function decorateReference(
+  reference: NoteRefNoteV4
+): [TextEditorDecorationType, DecorationOptions] | undefined {
   const position = reference.position as Position;
   if (_.isUndefined(position)) return undefined;
 
-  const foundNote = doesLinkedNoteExist({fname: reference.data.link.from.fname, vaultName: reference.data.link.data.vaultName});
+  const foundNote = doesLinkedNoteExist({
+    fname: reference.data.link.from.fname,
+    vaultName: reference.data.link.data.vaultName,
+  });
   const options: DecorationOptions = {
     range: VSCodeUtils.position2VSCodeRange(position),
   };
@@ -272,6 +348,6 @@ function decorateReference(reference: NoteRefNoteV4): [TextEditorDecorationType,
   if (foundNote) {
     return [DECORATION_TYPE_WIKILINK, options];
   } else {
-    return [DECORATION_TYPE_BROKEN_WIKILINK, options]
+    return [DECORATION_TYPE_BROKEN_WIKILINK, options];
   }
 }

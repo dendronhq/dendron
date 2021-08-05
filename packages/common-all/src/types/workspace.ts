@@ -107,7 +107,10 @@ export type JournalConfig = {
   firstDayOfWeek: number;
 };
 
-export type ScratchConfig = Pick<JournalConfig, "name" | "dateFormat" | "addBehavior">;
+export type ScratchConfig = Pick<
+  JournalConfig,
+  "name" | "dateFormat" | "addBehavior"
+>;
 
 export type DendronConfig = {
   /**
@@ -135,7 +138,7 @@ export type DendronConfig = {
   journal: JournalConfig;
 
   scratch?: ScratchConfig;
-  
+
   /**
    * Workspaces
    */
@@ -260,7 +263,6 @@ export type DendronConfig = {
 
   /** Automatically fold frontmatter when opening a new note. False by default. */
   autoFoldFrontmatter?: boolean;
-  
 };
 
 export type RandomNoteConfig = {
@@ -398,6 +400,9 @@ export type DendronSiteConfig = {
   /** @deprecated anchors are now always "hidden, but reveal on mouseover" in published sites. */
   hideBlockAnchors?: boolean;
 
+  /** Whether frontmatter tags should be rendered in published websites. Defaults to true. */
+  showFrontMatterTags?: boolean;
+
   /**
    * Do not display the randomly generated colors for tags. Only color tag links
    * if it has been configured in the frontmatter. False by default.
@@ -462,7 +467,7 @@ export type DendronSiteConfig = {
 
 export type DendronGraphConfig = {
   zoomSpeed: number;
-}
+};
 
 export type HierarchyConfig = {
   publishByDefault?: boolean | { [key: string]: boolean };

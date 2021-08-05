@@ -7,12 +7,13 @@ import { MDUtilsV4 } from "../utils";
 import { Element } from "hast";
 
 /** All sorts of punctuation marks and quotation marks from different languages. Please add any that may be missing.
- * 
+ *
  * Be warned that this excludes period (.) as it has a special meaning in Dendron. Make sure to handle it appropriately depending on the context.
- * 
+ *
  * Mind that this may have non regex-safe characters, run it through `_.escapeRegExp` if needed.
  */
-export const PUNCTUATION_MARKS = ",;:'\"<>?!`~«‹»›„“‟”’❝❞❮❯⹂〝〞〟＂‚‘‛❛❜❟［］【】…‥「」『』·؟،।॥‽⸘¡¿⁈⁉";
+export const PUNCTUATION_MARKS =
+  ",;:'\"<>?!`~«‹»›„“‟”’❝❞❮❯⹂〝〞〟＂‚‘‛❛❜❟［］【】…‥「」『』·؟،।॥‽⸘¡¿⁈⁉";
 
 /** Can't start with a number or period */
 const GOOD_FIRST_CHARACTER = `[^0-9#|\\[\\]\\s.${PUNCTUATION_MARKS}]`;
@@ -28,32 +29,36 @@ const GOOD_END_CHARACTER = `[^#|\\[\\]\\s.${PUNCTUATION_MARKS}]`;
  *
  * Hashtags are also not allowed to contain any punctuation or quotation marks.
  * This allows them to be more easily mixed into text, for example:
- * 
+ *
  * ```
  * This issue is #important, and should be prioritized.
  * ```
- * 
+ *
  * Here, the tag is `#important` without the following comma.
  */
-export const HASHTAG_REGEX = new RegExp(`^(?<hashTag>#)(?<tagContents>` + 
-  // 2 or more characters, like #a1x or #a.x. This MUST come before 1 character case, or regex will match 1 character and stop.
-  `${GOOD_FIRST_CHARACTER}${GOOD_MIDDLE_CHARACTER}*${GOOD_END_CHARACTER}` +
-  // or
-  "|" +
-  // Just 1 character, like #a
-  `${GOOD_FIRST_CHARACTER}` +
-  ")"
+export const HASHTAG_REGEX = new RegExp(
+  `^(?<hashTag>#)(?<tagContents>` +
+    // 2 or more characters, like #a1x or #a.x. This MUST come before 1 character case, or regex will match 1 character and stop.
+    `${GOOD_FIRST_CHARACTER}${GOOD_MIDDLE_CHARACTER}*${GOOD_END_CHARACTER}` +
+    // or
+    "|" +
+    // Just 1 character, like #a
+    `${GOOD_FIRST_CHARACTER}` +
+    ")"
 );
 /** Same as `HASHTAG_REGEX`, except that that it doesn't have to be at the start of the string. */
-export const HASHTAG_REGEX_LOOSE = new RegExp(`^(?<hashTag>#)(?<tagContents>` + 
-  // 2 or more characters, like #a1x or #a.x. This MUST come before 1 character case, or regex will match 1 character and stop.
-  `${GOOD_FIRST_CHARACTER}${GOOD_MIDDLE_CHARACTER}*${GOOD_END_CHARACTER}` +
-  // or
-  "|" +
-  // Just 1 character, like #a
-  `${GOOD_FIRST_CHARACTER}` +
-  ")"
+export const HASHTAG_REGEX_LOOSE = new RegExp(
+  `^(?<hashTag>#)(?<tagContents>` +
+    // 2 or more characters, like #a1x or #a.x. This MUST come before 1 character case, or regex will match 1 character and stop.
+    `${GOOD_FIRST_CHARACTER}${GOOD_MIDDLE_CHARACTER}*${GOOD_END_CHARACTER}` +
+    // or
+    "|" +
+    // Just 1 character, like #a
+    `${GOOD_FIRST_CHARACTER}` +
+    ")"
 );
+/** Used for `getWordAtRange` queries. Too permissive, but the full regex breaks the function. */
+export const HASHTAG_REGEX_BASIC = new RegExp(`#${GOOD_MIDDLE_CHARACTER}+`);
 
 /**
  *
@@ -65,17 +70,14 @@ export const matchHashtag = (
   text: string,
   matchLoose: boolean = true
 ): string | undefined => {
-  const match = (matchLoose ? HASHTAG_REGEX : HASHTAG_REGEX_LOOSE).exec(
-    text
-  );
+  const match = (matchLoose ? HASHTAG_REGEX : HASHTAG_REGEX_LOOSE).exec(text);
   if (match && match.groups) return match.groups.tagContents;
   return undefined;
 };
 
-type PluginOpts = {
-};
+type PluginOpts = {};
 
-const plugin: Plugin<[PluginOpts?]> = function plugin (
+const plugin: Plugin<[PluginOpts?]> = function plugin(
   this: Unified.Processor,
   opts?: PluginOpts
 ) {

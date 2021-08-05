@@ -48,10 +48,10 @@ export type DLoc = {
  @deprecated use {@link DNoteLink}
  */
 export type DLink = {
-  type: "ref" | "wiki" | "md" | "backlink" | "linkCandidate";
+  type: "ref" | "wiki" | "md" | "backlink" | "linkCandidate" | "frontmatterTag";
   value: string;
   alias?: string;
-  position: Position;
+  position?: Position;
   from: DLoc;
   to?: DLoc;
   xvault?: boolean;
@@ -59,6 +59,23 @@ export type DLink = {
 
 export type DNodeType = "note" | "schema";
 export type DNodePointer = string;
+
+export const REQUIRED_DNODEPROPS: (keyof DNodeProps)[] = [
+  "id",
+  "title",
+  "desc",
+  "links",
+  "anchors",
+  "fname",
+  "type",
+  "updated",
+  "created",
+  "parent",
+  "children",
+  "data",
+  "body",
+  "vault",
+];
 
 /**
  * Props are the official interface for a node
@@ -139,7 +156,11 @@ export type DNodeProps<T = any, TCustom = any> = {
    */
   contentHash?: string;
 
+  /** Override the randomly generated color for tag notes. Colors can be entered as `#12AC35`, `rgb(123, 56, 200)`, or `hsl(235, 100%, 50%)`. */
   color?: string;
+
+  /** One or more frontmatter tags attached to this note. */
+  tags?: string | string[];
 };
 
 export type SchemaData = {

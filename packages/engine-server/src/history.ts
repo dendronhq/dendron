@@ -4,11 +4,26 @@ import { URI } from "vscode-uri";
 export type HistoryEvent = {
   action: HistoryEventAction;
   source: HistoryEventSource;
+  /**
+   * Used to further narrow down the source.
+   * This is used in {@link LookupProviderV3} as this can be embedded in multiple commands (eg. NoteLookup vs RenameNote)
+   * For example, for [RenameNote](https://github.com/dendronhq/dendron/blob/6c98d466536632530399bd45f1220ae725ff3e2f/packages/plugin-core/src/commands/RenameNoteV2a.ts#L52-L52),
+   * the id is "rename" whereas for NoteLookup, the id is "lookup"
+   */
   id?: string;
+  /**
+   * Sometimes events have uris attached to them (eg. {@link HistoryEventAction.create})
+   */
   uri?: URI;
+  /**
+   * Arbitrary data that can be passed to the event
+   */
   data?: any;
 };
 
+/**
+ * Where did the event come from
+ */
 export type HistoryEventSource =
   | "engine"
   | "src"
@@ -17,6 +32,10 @@ export type HistoryEventSource =
   | "apiServer"
   | "lookupProvider"
   | "watcher";
+
+/**
+ * What action was performed
+ */
 export type HistoryEventAction =
   | "delete"
   | "create"
@@ -46,6 +65,10 @@ interface IHistoryService {
 
 let _HISTORY_SERVICE: undefined | HistoryService = undefined;
 
+/**
+ * Keeps of lifecycle evnts in Dendron.
+ * You can find more details about it [here](https://wiki.dendron.so/notes/Rp1yFBOH6BletGam.html#summary)
+ */
 export class HistoryService implements IHistoryService {
   public readonly events: HistoryEvent[];
   /**

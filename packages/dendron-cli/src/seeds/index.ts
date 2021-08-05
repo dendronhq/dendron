@@ -1,4 +1,5 @@
 import { SeedConfig } from "@dendronhq/common-all";
+import { SEED_REGISTRY } from "@dendronhq/engine-server";
 
 type SeedRegistryEntry = {} & SeedConfig;
 
@@ -9,20 +10,6 @@ export class SeedUtils {
     return `${publisher}.${name}`;
   }
 }
-
-const SEED_REGISTRY: SeedRegistryDict = {
-  "dendron.dendron-site": {
-    name: "dendron-site",
-    publisher: "dendron",
-    description: "Dendron site docs",
-    license: "Creative Commons",
-    root: "vault",
-    repository: {
-      type: "git",
-      url: "",
-    },
-  },
-};
 
 export class SeedRegistry {
   public registry: SeedRegistryDict;

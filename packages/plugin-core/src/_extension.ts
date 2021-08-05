@@ -1,4 +1,8 @@
-import { launchv2, ServerUtils, SubProcessExitType } from "@dendronhq/api-server";
+import {
+  launchv2,
+  ServerUtils,
+  SubProcessExitType,
+} from "@dendronhq/api-server";
 import {
   CONSTANTS,
   DendronError,
@@ -6,19 +10,19 @@ import {
   Time,
   VaultUtils,
   VSCodeEvents,
-  InstallStatus
+  InstallStatus,
 } from "@dendronhq/common-all";
 import {
   getDurationMilliseconds,
   getOS,
-  SegmentClient
+  SegmentClient,
 } from "@dendronhq/common-server";
 import {
   DConfig,
   HistoryService,
   MetadataService,
   MigrationServce,
-  WorkspaceService
+  WorkspaceService,
 } from "@dendronhq/engine-server";
 import { ExecaChildProcess } from "execa";
 import _ from "lodash";
@@ -164,7 +168,7 @@ async function startServerProcess(): Promise<{
     const out = await launchv2({
       logPath: path.join(__dirname, "..", "..", "dendron.server.log"),
     });
-    return {port: out.port}
+    return { port: out.port };
   }
 
   // start server is separate process
@@ -252,7 +256,12 @@ export async function _activate(
       console.error(error);
     }
 
-    if (MigrationServce.shouldRunMigration({force: forceUpgrade, workspaceInstallStatus})) {
+    if (
+      MigrationServce.shouldRunMigration({
+        force: forceUpgrade,
+        workspaceInstallStatus,
+      })
+    ) {
       const changes = await MigrationServce.applyMigrationRules({
         currentVersion,
         previousVersion: previousWorkspaceVersion,
@@ -358,7 +367,9 @@ export async function _activate(
             .showErrorMessage("Dendron engine encountered an error", txt)
             .then(async (resp) => {
               if (resp === txt) {
-                AnalyticsUtils.track(VSCodeEvents.ServerCrashed, {code: type});
+                AnalyticsUtils.track(VSCodeEvents.ServerCrashed, {
+                  code: type,
+                });
                 _activate(context);
               }
             });
@@ -512,10 +523,9 @@ async function showWelcomeOrWhatsNew({
       break;
   }
 
-  //TODO: Re-enable lapsed user message after a one-week grace period of having
-  //users activate their dendron workspaces
-  // eslint-disable-next-line no-constant-condition
-  if (false && shouldDisplayLapsedUserMsg()) {
+  // Show lapsed users (users who have installed Dendron but haven't initialied
+  // a workspace) a reminder prompt to re-engage them.
+  if (shouldDisplayLapsedUserMsg()) {
     showLapsedUserMessage();
   }
 }
@@ -568,7 +578,11 @@ export function shouldDisplayLapsedUserMsg(): boolean {
           Duration.fromObject({ seconds: metaData.lapsedUserMsgSendTime })
         ));
 
-  // If the user has never initialized and it's time to refresh the lapsed user
-  // message
-  return !metaData.firstWsInitialize && refreshMsg;
+  // If the user has never initialized, has never activated a dendron workspace,
+  // and it's time to refresh the lapsed user message
+  return (
+    !metaData.dendronWorkspaceActivated &&
+    !metaData.firstWsInitialize &&
+    refreshMsg
+  );
 }

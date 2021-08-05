@@ -1,4 +1,8 @@
-import { AssertUtils, TestPresetEntryV4, getDescendantNode } from "@dendronhq/common-test-utils";
+import {
+  AssertUtils,
+  TestPresetEntryV4,
+  getDescendantNode,
+} from "@dendronhq/common-test-utils";
 import {
   BlockAnchor,
   DendronASTDest,
@@ -33,7 +37,6 @@ function runAllTests(opts: { name: string; testCases: ProcTests[] }) {
     });
   });
 }
-
 
 function getBlockAnchor(node: UnistNode): BlockAnchor {
   return getDescendantNode<BlockAnchor>(node, 0, 0);

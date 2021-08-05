@@ -5,10 +5,10 @@ const CopyPlugin = require("copy-webpack-plugin");
 const { IgnorePlugin, DefinePlugin } = require("webpack");
 /**@type {import('webpack').Configuration}*/
 const config = {
-  target: "node", 
+  target: "node",
   entry: {
     extension: "./src/extension.ts",
-    server: "./src/server.ts"
+    server: "./src/server.ts",
   },
   output: {
     // the bundle is stored in the 'dist' folder (check package.json), 📖 -> https://webpack.js.org/configuration/output/

@@ -1,4 +1,9 @@
-import { DVault, NoteProps, NoteUtils, VaultUtils } from "@dendronhq/common-all";
+import {
+  DVault,
+  NoteProps,
+  NoteUtils,
+  VaultUtils,
+} from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import {
@@ -28,7 +33,10 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
   }: {
     refAtPos: NonNullable<ReturnType<typeof getReferenceAtPosition>>;
   }): Promise<string> {
-    const vpath = vault2Path({ vault: PickerUtilsV2.getVaultForOpenEditor(), wsRoot: DendronWorkspace.wsRoot() });
+    const vpath = vault2Path({
+      vault: PickerUtilsV2.getVaultForOpenEditor(),
+      wsRoot: DendronWorkspace.wsRoot(),
+    });
     const fullPath = path.join(vpath, refAtPos.ref);
     const foundUri = Uri.file(fullPath);
 
@@ -50,7 +58,9 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
       const ext = path.parse(foundUri.fsPath).ext;
       if (ext === "") {
         // No extension, this is probably not a file but instead a broken note link.
-        return `Note ${refAtPos.ref}${refAtPos.vaultName ? " in vault " + refAtPos.vaultName : ""} is missing, Ctrl+click or use "Dendron: Goto Note" command to create it.`;
+        return `Note ${refAtPos.ref}${
+          refAtPos.vaultName ? " in vault " + refAtPos.vaultName : ""
+        } is missing, Ctrl+click or use "Dendron: Goto Note" command to create it.`;
       }
       return `Preview is not supported for "${ext}" file type. [Click to open in the default app](${foundUri.toString()}).`;
     }
@@ -90,10 +100,14 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
         vaults: engine.vaults,
       });
       if (_.isUndefined(maybeVault)) {
-        Logger.info({ ctx, msg: "vault specified in link is missing", refAtPos});
+        Logger.info({
+          ctx,
+          msg: "vault specified in link is missing",
+          refAtPos,
+        });
         return new vscode.Hover(
           `Vault ${refAtPos.vaultName} does not exist.`,
-          hoverRange,
+          hoverRange
         );
       }
       vault = maybeVault;
@@ -116,7 +130,9 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
     } else if (maybeNotes.length > 1) {
       // If there are multiple notes with this fname, default to one that's in the same vault first.
       const currentVault = PickerUtilsV2.getVaultForOpenEditor();
-      const sameVaultNote = _.filter(maybeNotes, (note) => VaultUtils.isEqual(note.vault,  currentVault, engine.wsRoot))[0];
+      const sameVaultNote = _.filter(maybeNotes, (note) =>
+        VaultUtils.isEqual(note.vault, currentVault, engine.wsRoot)
+      )[0];
       if (!_.isUndefined(sameVaultNote)) {
         // There is a note that's within the same vault, let's go with that.
         note = sameVaultNote;
@@ -130,14 +146,17 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
     }
 
     // For notes, let's use the noteRef functionality to render the referenced portion
-    const proc = MDUtilsV5.procRemarkFull({
-      dest: DendronASTDest.MD_REGULAR,
-      engine,
-      vault: note.vault,
-      fname: note.fname,
-    }, {
-      flavor: ProcFlavor.HOVER_PREVIEW,
-    });
+    const proc = MDUtilsV5.procRemarkFull(
+      {
+        dest: DendronASTDest.MD_REGULAR,
+        engine,
+        vault: note.vault,
+        fname: note.fname,
+      },
+      {
+        flavor: ProcFlavor.HOVER_PREVIEW,
+      }
+    );
     const referenceText = ["![["];
     if (refAtPos.vaultName)
       referenceText.push(`dendron://${refAtPos.vaultName}/`);
@@ -152,7 +171,12 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
       const reference = await proc.process(referenceText.join(""));
       return new vscode.Hover(reference.toString(), hoverRange);
     } catch (err) {
-      Logger.info({ctx, referenceText: referenceText.join(""), refAtPos, err});
+      Logger.info({
+        ctx,
+        referenceText: referenceText.join(""),
+        refAtPos,
+        err,
+      });
       return null;
     }
   }

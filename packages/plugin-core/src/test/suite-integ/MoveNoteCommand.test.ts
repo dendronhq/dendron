@@ -179,26 +179,36 @@ suite("MoveNoteCommand", function () {
         });
       },
       onInit: async ({ vaults, wsRoot, engine }) => {
-          await VSCodeUtils.openNote(tagNote);
+        await VSCodeUtils.openNote(tagNote);
 
-          const cmd = new MoveNoteCommand();
-          await cmd.execute({
-            moves: [
-              {
-                oldLoc: {
-                  fname: "tags.test-tag.0",
-                  vaultName: VaultUtils.getName(vaults[0]),
-                },
-                newLoc: {
-                  fname: "tags.new-0-tag.1",
-                  vaultName: VaultUtils.getName(vaults[0]),
-                },
+        const cmd = new MoveNoteCommand();
+        await cmd.execute({
+          moves: [
+            {
+              oldLoc: {
+                fname: "tags.test-tag.0",
+                vaultName: VaultUtils.getName(vaults[0]),
               },
-            ],
-          });
-          const testNote = NoteUtils.getNoteByFnameV5({fname: "test", notes: engine.notes, wsRoot, vault: vaults[0]})!;
-          expect(await AssertUtils.assertInString({body: testNote?.body, match: ["#new-0-tag.1"]})).toBeTruthy();
-          done();
+              newLoc: {
+                fname: "tags.new-0-tag.1",
+                vaultName: VaultUtils.getName(vaults[0]),
+              },
+            },
+          ],
+        });
+        const testNote = NoteUtils.getNoteByFnameV5({
+          fname: "test",
+          notes: engine.notes,
+          wsRoot,
+          vault: vaults[0],
+        })!;
+        expect(
+          await AssertUtils.assertInString({
+            body: testNote?.body,
+            match: ["#new-0-tag.1"],
+          })
+        ).toBeTruthy();
+        done();
       },
     });
   });
@@ -221,26 +231,36 @@ suite("MoveNoteCommand", function () {
         });
       },
       onInit: async ({ vaults, wsRoot, engine }) => {
-          await VSCodeUtils.openNote(tagNote);
+        await VSCodeUtils.openNote(tagNote);
 
-          const cmd = new MoveNoteCommand();
-          await cmd.execute({
-            moves: [
-              {
-                oldLoc: {
-                  fname: "not-really-tag",
-                  vaultName: VaultUtils.getName(vaults[0]),
-                },
-                newLoc: {
-                  fname: "tags.actually-tag",
-                  vaultName: VaultUtils.getName(vaults[0]),
-                },
+        const cmd = new MoveNoteCommand();
+        await cmd.execute({
+          moves: [
+            {
+              oldLoc: {
+                fname: "not-really-tag",
+                vaultName: VaultUtils.getName(vaults[0]),
               },
-            ],
-          });
-          const testNote = NoteUtils.getNoteByFnameV5({fname: "test", notes: engine.notes, wsRoot, vault: vaults[0]})!;
-          expect(await AssertUtils.assertInString({body: testNote?.body, match: ["#actually-tag"]})).toBeTruthy();
-          done();
+              newLoc: {
+                fname: "tags.actually-tag",
+                vaultName: VaultUtils.getName(vaults[0]),
+              },
+            },
+          ],
+        });
+        const testNote = NoteUtils.getNoteByFnameV5({
+          fname: "test",
+          notes: engine.notes,
+          wsRoot,
+          vault: vaults[0],
+        })!;
+        expect(
+          await AssertUtils.assertInString({
+            body: testNote?.body,
+            match: ["#actually-tag"],
+          })
+        ).toBeTruthy();
+        done();
       },
     });
   });
@@ -263,26 +283,36 @@ suite("MoveNoteCommand", function () {
         });
       },
       onInit: async ({ vaults, wsRoot, engine }) => {
-          await VSCodeUtils.openNote(tagNote);
+        await VSCodeUtils.openNote(tagNote);
 
-          const cmd = new MoveNoteCommand();
-          await cmd.execute({
-            moves: [
-              {
-                oldLoc: {
-                  fname: "tags.actually-tag",
-                  vaultName: VaultUtils.getName(vaults[0]),
-                },
-                newLoc: {
-                  fname: "not-really-tag",
-                  vaultName: VaultUtils.getName(vaults[0]),
-                },
+        const cmd = new MoveNoteCommand();
+        await cmd.execute({
+          moves: [
+            {
+              oldLoc: {
+                fname: "tags.actually-tag",
+                vaultName: VaultUtils.getName(vaults[0]),
               },
-            ],
-          });
-          const testNote = NoteUtils.getNoteByFnameV5({fname: "test", notes: engine.notes, wsRoot, vault: vaults[0]})!;
-          expect(await AssertUtils.assertInString({body: testNote?.body, match: ["[[not-really-tag]]"]})).toBeTruthy();
-          done();
+              newLoc: {
+                fname: "not-really-tag",
+                vaultName: VaultUtils.getName(vaults[0]),
+              },
+            },
+          ],
+        });
+        const testNote = NoteUtils.getNoteByFnameV5({
+          fname: "test",
+          notes: engine.notes,
+          wsRoot,
+          vault: vaults[0],
+        })!;
+        expect(
+          await AssertUtils.assertInString({
+            body: testNote?.body,
+            match: ["[[not-really-tag]]"],
+          })
+        ).toBeTruthy();
+        done();
       },
     });
   });

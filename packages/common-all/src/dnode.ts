@@ -29,8 +29,9 @@ import {
   SchemaProps,
   SchemaRaw,
   SchemaTemplate,
+  REQUIRED_DNODEPROPS,
 } from "./types";
-import { getSlugger, randomColor } from "./utils";
+import { getSlugger, isNotUndefined, randomColor } from "./utils";
 import { genUUID } from "./uuid";
 import { VaultUtils } from "./vault";
 
@@ -59,7 +60,6 @@ export class DNodeUtils {
       data,
       contentHash,
       vault,
-      color,
     } = _.defaults(opts, {
       updated: Time.now().toMillis(),
       created: Time.now().toMillis(),
@@ -72,7 +72,6 @@ export class DNodeUtils {
       body: "",
       data: {},
       fname: null,
-      color: undefined,
     });
     const title = opts.title || NoteUtils.genTitle(fname);
     const cleanProps: DNodeProps = {
@@ -91,7 +90,6 @@ export class DNodeUtils {
       body,
       data,
       contentHash,
-      color,
     };
 
     // don't include optional props
@@ -101,6 +99,7 @@ export class DNodeUtils {
       "schemaStub",
       "custom",
       "color",
+      "tags",
     ];
     _.forEach(optionalProps, (op) => {
       if (opts[op]) {
@@ -234,6 +233,7 @@ export class DNodeUtils {
       "data",
       "schemaStub",
       "type",
+      "tags",
     ];
     return _.omit(props, blacklist);
   }
@@ -797,10 +797,27 @@ export class NoteUtils {
     return _.trim(nodePath);
   }
 
+  static isNoteProps(props: Partial<NoteProps>): props is NoteProps {
+    return (
+      _.isObject(props) &&
+      REQUIRED_DNODEPROPS.every(
+        (key) => key in props && isNotUndefined(props[key])
+      )
+    );
+  }
+
   static serializeMeta(props: NoteProps) {
-    // `undefined` props crash the serializer, remove them
-    props = Object.fromEntries(Object.entries(props).filter(([_, v]) => v)) as NoteProps;
-    const builtinProps = _.pick(props, [
+    // Remove all undefined values, because they cause `matter` to fail serializing them
+    const cleanProps: Partial<NoteProps> = Object.fromEntries(
+      Object.entries(props).filter(([_k, v]) => isNotUndefined(v))
+    );
+    if (!this.isNoteProps(cleanProps))
+      throw new DendronError({
+        message: "Note is missing some properties that are required",
+      });
+
+    // Separate custom and builtin props
+    const builtinProps = _.pick(cleanProps, [
       "id",
       "title",
       "desc",
@@ -810,8 +827,9 @@ export class NoteUtils {
       "parent",
       "children",
       "color",
+      "tags",
     ]);
-    const { custom: customProps } = props;
+    const { custom: customProps } = cleanProps;
     const meta = { ...builtinProps, ...customProps };
     return meta;
   }
@@ -869,27 +887,26 @@ export class NoteUtils {
     return true;
   }
 
-  static createFnameNoteMap(
-    notes: NoteProps[],
-    removeStubs?: boolean,
-  ) {
+  static createFnameNoteMap(notes: NoteProps[], removeStubs?: boolean) {
     const notesMap = new Map<string, NoteProps>();
-    const candidates = removeStubs ? 
-      notes.filter((n) => !n.stub) :
-      notes;
+    const candidates = removeStubs ? notes.filter((n) => !n.stub) : notes;
     candidates.map((n) => {
       notesMap.set(n.fname, n);
-    })
+    });
     return notesMap;
   }
 
   /** Generate a random color for `note`, but allow the user to override that color selection.
-   * 
+   *
    * @param note The fname of note that you want to get the color of.
    * @param notes: All notes in `engine.notes`, used to check the ancestors of `note`.
    * @returns The color, and whether this color was randomly generated or explicitly defined.
    */
-  static color({note}: {note: NoteProps}): [string, "configured" | "generated"] {
+  static color({
+    note,
+  }: {
+    note: NoteProps;
+  }): [string, "configured" | "generated"] {
     if (note.color) return [note.color, "configured"];
     return [randomColor(note.fname), "generated"];
   }

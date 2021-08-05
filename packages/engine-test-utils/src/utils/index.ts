@@ -47,14 +47,21 @@ export async function checkNotInDir(
 }
 
 export async function checkFile(
-  { fpath, snapshot }: { fpath: string; snapshot?: boolean },
+  {
+    fpath,
+    snapshot,
+    nomatch,
+  }: { fpath: string; snapshot?: boolean; nomatch?: string[] },
   ...match: string[]
 ) {
   const body = fs.readFileSync(fpath, { encoding: "utf8" });
   if (snapshot) {
     expect(body).toMatchSnapshot();
   }
-  return checkString(body, ...match);
+  return (
+    checkString(body, ...match) &&
+    (!nomatch || checkNotInString(body, ...nomatch))
+  );
 }
 
 export async function checkNotInString(body: string, ...nomatch: string[]) {

@@ -8,10 +8,18 @@ import { AnalyticsUtils } from "../utils/analytics";
 import { BasicCommand } from "./base";
 
 export type LookupEffectType = "copyNoteLink" | "copyNoteRef" | "multiSelect";
+export enum LookupEffectTypeEnum {
+  "copyNoteLink" = "copyNoteLink",
+  "copyNoteRef" = "copyNoteRef",
+  "multiSelect" = "multiSelect",
+}
 export type LookupFilterType = "directChildOnly";
 export type LookupSelectionType = "selection2link" | "selectionExtract";
 export type LookupNoteType = LookupNoteTypeEnum;
 export type LookupSplitType = "horizontal";
+export enum LookupSplitTypeEnum {
+  "horizontal" = "horizontal",
+}
 export type LookupNoteExistBehavior = "open" | "overwrite";
 export enum LookupNoteTypeEnum {
   "journal" = "journal",
@@ -23,7 +31,7 @@ export enum LookupSelectionTypeEnum {
 }
 
 /**
- * Mode for prompting the user on which vault should be used to 
+ * Mode for prompting the user on which vault should be used to
  */
 export enum VaultSelectionMode {
   /**
@@ -40,7 +48,7 @@ export enum VaultSelectionMode {
   /**
    * Always prompt the user if there is more than one vault
    */
-  alwaysPrompt
+  alwaysPrompt,
 }
 
 type CommandOpts = {
@@ -71,7 +79,6 @@ type CommandOutput = DendronQuickPickerV2;
 export { CommandOpts as LookupCommandOpts };
 
 export class LookupCommand extends BasicCommand<CommandOpts, CommandOutput> {
-
   // Placeholder for telemetry purposes. More detailed telemetry exists on the lookup command.
   key = "dendron.Lookup";
 

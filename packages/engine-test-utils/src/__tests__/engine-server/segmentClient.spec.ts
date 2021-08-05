@@ -4,7 +4,7 @@ import sinon from "sinon";
 import { TestEngineUtils } from "../../engine";
 
 describe("SegmentClient", () => {
-  afterEach(()=> {
+  afterEach(() => {
     sinon.restore();
   });
   test("enabled by default", (done) => {

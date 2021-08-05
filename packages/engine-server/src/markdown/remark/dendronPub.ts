@@ -1,6 +1,20 @@
-import { DendronError, isNotUndefined, makeColorTranslucent, NoteUtils, TAGS_HIERARCHY } from "@dendronhq/common-all";
+import {
+  DendronError,
+  isNotUndefined,
+  makeColorTranslucent,
+  NoteUtils,
+  TAGS_HIERARCHY,
+} from "@dendronhq/common-all";
 import _ from "lodash";
-import { Image, Root } from "mdast";
+import { Content, Image, Root } from "mdast";
+import { heading, paragraph, text } from "mdast-builder";
+import {
+  frontmatterTag2WikiLinkNoteV4,
+  addError,
+  getNoteOrError,
+  hashTag2WikiLinkNoteV4,
+  RemarkUtils,
+} from "./utils";
 import Unified, { Transformer } from "unified";
 import { Node, Parent } from "unist";
 import u from "unist-builder";
@@ -22,12 +36,6 @@ import { MDUtilsV5 } from "../utilsv5";
 import { blockAnchor2html } from "./blockAnchors";
 import { NoteRefsOpts } from "./noteRefs";
 import { convertNoteRefASTV2 } from "./noteRefsV2";
-import {
-  addError,
-  getNoteOrError,
-  hashTag2WikiLinkNoteV4,
-  RemarkUtils,
-} from "./utils";
 
 type PluginOpts = NoteRefsOpts & {
   assetsPrefix?: string;
@@ -53,7 +61,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
     const insertTitle = !_.isUndefined(overrides?.insertTitle)
       ? overrides?.insertTitle
       : opts?.insertTitle;
-    if (!insideNoteRef && insertTitle && root.children) {
+    if (!insideNoteRef && root.children) {
       if (!fname || !vault) {
         // TODO: tmp
         console.log(JSON.stringify(engine.notes));
@@ -72,12 +80,27 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
       if (!note) {
         throw new DendronError({ message: `no note found for ${fname}` });
       }
-      const idx = _.findIndex(root.children, (ent) => ent.type !== "yaml");
-      root.children.splice(
-        idx,
-        0,
-        u(DendronASTTypes.HEADING, { depth: 1 }, [u("text", note.title)])
-      );
+      if (insertTitle) {
+        const idx = _.findIndex(root.children, (ent) => ent.type !== "yaml");
+        root.children.splice(
+          idx,
+          0,
+          u(DendronASTTypes.HEADING, { depth: 1 }, [u("text", note.title)])
+        );
+      }
+      // Add frontmatter tags, if any, ahead of time. This way wikilink compiler will pick them up and render them.
+      if (
+        config?.site?.showFrontMatterTags !== false &&
+        note?.tags &&
+        note.tags.length > 0
+      ) {
+        root.children.push(heading(2, text("Tags")) as Content);
+        const tagLinks = _.map(
+          _.isString(note.tags) ? [note.tags] : note.tags,
+          frontmatterTag2WikiLinkNoteV4
+        );
+        root.children.push(paragraph(tagLinks) as Content);
+      }
     }
     visitParents(tree, (node, ancestors) => {
       const parent = _.last(ancestors);
@@ -116,8 +139,12 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
 
         let color: string | undefined;
         if (value.startsWith(TAGS_HIERARCHY)) {
-          const [maybeColor, colorType] = note ? NoteUtils.color({note}) : [];
-          if (maybeColor && (colorType === "configured" || opts?.noRandomlyColoredTags !== false)) {
+          const [maybeColor, colorType] = note ? NoteUtils.color({ note }) : [];
+          if (
+            maybeColor &&
+            (colorType === "configured" ||
+              opts?.noRandomlyColoredTags !== false)
+          ) {
             color = makeColorTranslucent(maybeColor, TAG_BG_TRANSLUCENCY);
           }
         }

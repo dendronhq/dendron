@@ -1,18 +1,16 @@
-
-
 type Theme = {
-	bodyBackground: string;
-}
+  bodyBackground: string;
+};
 
 const LIGHT: Theme = {
-	bodyBackground: "#ffffff"
-}
+  bodyBackground: "#ffffff",
+};
 
 const DARK: Theme = {
-	bodyBackground: "#303030"
-}
+  bodyBackground: "#303030",
+};
 
 export const THEMES = {
-	DARK,
-	LIGHT,
-}
+  DARK,
+  LIGHT,
+};

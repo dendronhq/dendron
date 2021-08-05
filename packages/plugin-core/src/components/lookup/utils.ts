@@ -41,7 +41,9 @@ export const CONTEXT_DETAIL = "current note context";
 export const HIERARCHY_MATCH_DETAIL = "hierarchy match";
 export const FULL_MATCH_DETAIL = "hierarchy match and current note context";
 
-export type VaultPickerItem = { vault: DVault } & Partial<QuickPickItem>;
+export type VaultPickerItem = { vault: DVault; label: string } & Partial<
+  Omit<QuickPickItem, "label">
+>;
 
 function isDVaultArray(
   overrides?: VaultPickerItem[] | DVault[]
@@ -249,8 +251,9 @@ export class PickerUtilsV2 {
     quickPick.matchOnDetail = false;
     quickPick.sortByLabel = false;
     quickPick.showNote = async (uri) => window.showTextDocument(uri);
-    if (initialValue) {
+    if (initialValue !== undefined) {
       quickPick.rawValue = initialValue;
+      quickPick.prefix = initialValue;
       quickPick.value = initialValue;
     }
     return quickPick;
@@ -421,10 +424,13 @@ export class PickerUtilsV2 {
   }): Promise<DVault | undefined> {
     const vaultSuggestions = await PickerUtilsV2.getVaultRecommendations({
       vault,
-      fname
+      fname,
     });
 
-    if (vaultSuggestions?.length === 1 || vaultSelectionMode === VaultSelectionMode.auto) {
+    if (
+      vaultSuggestions?.length === 1 ||
+      vaultSelectionMode === VaultSelectionMode.auto
+    ) {
       return vaultSuggestions[0].vault;
     }
 
@@ -451,14 +457,14 @@ export class PickerUtilsV2 {
   ): Promise<DVault | undefined> {
     const pickerOverrides = isDVaultArray(overrides)
       ? overrides.map((value) => {
-          return { vault: value };
+          return { vault: value, label: VaultUtils.getName(value) };
         })
       : overrides;
 
     const vaults: VaultPickerItem[] =
       pickerOverrides ??
-      DendronWorkspace.instance().vaultsv4.map((value) => {
-        return { vault: value };
+      DendronWorkspace.instance().vaultsv4.map((vault) => {
+        return { vault, label: VaultUtils.getName(vault) };
       });
 
     const items = vaults.map((ent) => ({
@@ -480,7 +486,7 @@ export class PickerUtilsV2 {
    */
   static async getVaultRecommendations({
     vault,
-    fname
+    fname,
   }: {
     vault: DVault;
     fname: string;
@@ -491,7 +497,7 @@ export class PickerUtilsV2 {
 
     // Only 1 vault, no other options to choose from:
     if (engine.vaults.length <= 1) {
-      return Array.of({ vault });
+      return Array.of({ vault, label: VaultUtils.getName(vault) });
     }
 
     const domain = fname.split(".").slice(0, -1);
@@ -516,6 +522,7 @@ export class PickerUtilsV2 {
           return {
             vault: value,
             detail: HIERARCHY_MATCH_DETAIL,
+            label: VaultUtils.getName(vault),
           };
         });
 
@@ -524,11 +531,15 @@ export class PickerUtilsV2 {
       vaultSuggestions.push({
         vault,
         detail: CONTEXT_DETAIL,
+        label: VaultUtils.getName(vault),
       });
 
       allVaults.forEach((cmpVault) => {
         if (cmpVault.fsPath !== vault.fsPath) {
-          vaultSuggestions.push({ vault: cmpVault });
+          vaultSuggestions.push({
+            vault: cmpVault,
+            label: VaultUtils.getName(vault),
+          });
         }
       });
     }
@@ -542,6 +553,7 @@ export class PickerUtilsV2 {
       vaultSuggestions.push({
         vault,
         detail: FULL_MATCH_DETAIL,
+        label: VaultUtils.getName(vault),
       });
 
       vaultsWithMatchingHierarchy.forEach((ent) => {
@@ -553,6 +565,7 @@ export class PickerUtilsV2 {
           vaultSuggestions.push({
             vault: ent.vault,
             detail: HIERARCHY_MATCH_DETAIL,
+            label: VaultUtils.getName(vault),
           });
         }
       });
@@ -563,7 +576,10 @@ export class PickerUtilsV2 {
             (suggestion) => suggestion.vault.fsPath === wsVault.fsPath
           )
         ) {
-          vaultSuggestions.push({ vault: wsVault });
+          vaultSuggestions.push({
+            vault: wsVault,
+            label: VaultUtils.getName(wsVault),
+          });
         }
       });
     } else {
@@ -572,6 +588,7 @@ export class PickerUtilsV2 {
       vaultSuggestions.push({
         vault,
         detail: CONTEXT_DETAIL,
+        label: VaultUtils.getName(vault),
       });
 
       allVaults.forEach((wsVault) => {
@@ -580,7 +597,10 @@ export class PickerUtilsV2 {
             (suggestion) => suggestion.vault.fsPath === wsVault.fsPath
           )
         ) {
-          vaultSuggestions.push({ vault: wsVault });
+          vaultSuggestions.push({
+            vault: wsVault,
+            label: VaultUtils.getName(wsVault),
+          });
         }
       });
     }
@@ -615,12 +635,12 @@ export class PickerUtilsV2 {
     // they don't modify state of the quickpick after onEnable.
     await Promise.all(
       buttonsDisabled.map((bt) => {
-        bt.onDisable({ quickPick: opts.quickpick });
+        return bt.onDisable({ quickPick: opts.quickpick });
       })
     );
     await Promise.all(
       buttonsEnabled.map((bt) => {
-        bt.onEnable({ quickPick: opts.quickpick });
+        return bt.onEnable({ quickPick: opts.quickpick });
       })
     );
   }
@@ -714,5 +734,15 @@ export class NotePickerUtils {
     const profile = getDurationMilliseconds(start);
     Logger.info({ ctx, msg: "engine.query", profile });
     return updatedItems;
+  }
+
+  static getPickerValue(picker: DendronQuickPickerV2) {
+    return [
+      picker.prefix,
+      picker.noteModifierValue,
+      picker.selectionModifierValue,
+    ]
+      .filter((ent) => !_.isEmpty(ent))
+      .join(".");
   }
 }

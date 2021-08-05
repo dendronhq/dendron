@@ -84,7 +84,8 @@ type CommandEntry = {
     | "hierarchies"
     | "navigation"
     | "misc"
-    | "publishing";
+    | "publishing"
+    | "seeds";
   /**
    * Skip doc generation
    */
@@ -714,7 +715,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docLink: "",
     docPreview: ``,
   },
-  
+
   CONFIGURE_UI: {
     key: "dendron.configureUI",
     title: `${CMD_PREFIX} Configure`,
@@ -731,6 +732,25 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX} Configure Graph Style (css)`,
     group: "workspace",
     desc: "Modify Dendron Graph styles as raw CSS",
+    docs: [""].join("\n"),
+    docLink: "",
+    docPreview: ``,
+  },
+  //-- Seeds
+  SEED_ADD: {
+    key: "dendron.seedAdd",
+    title: `${CMD_PREFIX} Add Seed to Workspace`,
+    group: "seeds",
+    desc: "Add a seed to the current workspace",
+    docs: [""].join("\n"),
+    docLink: "",
+    docPreview: ``,
+  },
+  SEED_REMOVE: {
+    key: "dendron.seedRemove",
+    title: `${CMD_PREFIX} Remove Seed from Workspace`,
+    group: "seeds",
+    desc: "Remove a seed from the current workspace",
     docs: [""].join("\n"),
     docLink: "",
     docPreview: ``,

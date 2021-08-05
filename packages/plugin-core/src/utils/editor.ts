@@ -1,4 +1,8 @@
-import { DEngineClient, genUUID, NoteUtils } from "@dendronhq/common-all";
+import {
+  DEngineClient,
+  genUUIDInsecure,
+  NoteUtils,
+} from "@dendronhq/common-all";
 import {
   DendronASTDest,
   DendronASTTypes,
@@ -17,7 +21,6 @@ import vscode, {
   TextEditor,
   TextEditorEdit,
 } from "vscode";
-
 
 export function isAnythingSelected(): boolean {
   return !vscode.window?.activeTextEditor?.selection?.isEmpty;
@@ -41,7 +44,7 @@ export function getHeaderAt({
   const line = editor.document.lineAt(position.line);
   const headerLine = _.trim(line.text);
   if (headerLine.startsWith("#")) {
-    const proc = MDUtilsV5.procRemarkParse({mode: ProcMode.NO_DATA}, {});
+    const proc = MDUtilsV5.procRemarkParse({ mode: ProcMode.NO_DATA }, {});
     const parsed = proc.parse(headerLine);
     const header = select(DendronASTTypes.HEADING, parsed) as Heading | null;
     if (_.isNull(header)) return undefined;
@@ -106,7 +109,7 @@ export function addOrGetAnchorAt(opts: {
   const line = editor.document.lineAt(position.line);
   const existingAnchor = getAnchorAt(opts);
   if (!_.isUndefined(existingAnchor)) return existingAnchor;
-  if (_.isUndefined(anchor)) anchor = genUUID();
+  if (_.isUndefined(anchor)) anchor = genUUIDInsecure();
   editBuilder.insert(line.range.end, ` ^${anchor}`);
   return `^${anchor}`;
 }

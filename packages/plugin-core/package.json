@@ -159,7 +159,7 @@
       },
       {
         "command": "dendron.lookupNote",
-        "title": "Dendron: Lookup Note",
+        "title": "Dendron: Note Lookup",
         "desc": "Initiate note lookup",
         "when": "dendron:pluginActive"
       },
@@ -172,7 +172,7 @@
       },
       {
         "command": "dendron.lookupSchemaV3",
-        "title": "Dendron: Lookup Schema V3",
+        "title": "Dendron: Schema Lookup",
         "desc": "Initiate Schema Lookup",
         "when": "dendron:pluginActive" 
       },

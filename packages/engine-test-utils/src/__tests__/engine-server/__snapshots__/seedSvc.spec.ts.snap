@@ -169,7 +169,7 @@ exports[`add ok: seed with site 4`] = `
 }"
 `;
 
-exports[`init convert workspace error: no vaults 1`] = `"dendron.yml hooks"`;
+exports[`init convert workspace error: no vaults 1`] = `"dendron.code-workspace dendron.yml hooks"`;
 
 exports[`init convert workspace error: no vaults 2`] = `
 "version: 1
@@ -207,7 +207,7 @@ initializeRemoteVaults: true
 "
 `;
 
-exports[`init convert workspace ok: diff root name 1`] = `"dendron.yml fooVault hooks seed.yml"`;
+exports[`init convert workspace ok: diff root name 1`] = `"dendron.code-workspace dendron.yml fooVault hooks seed.yml"`;
 
 exports[`init convert workspace ok: diff root name 2`] = `
 "version: 1

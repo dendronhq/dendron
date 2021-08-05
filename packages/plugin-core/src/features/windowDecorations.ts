@@ -45,9 +45,13 @@ const DECORATION_UPDATE_DELAY = 100;
 export function delayedUpdateDecorations(
   updateDelay: number = DECORATION_UPDATE_DELAY
 ) {
+  const beforeTimerPath =
+    VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath;
   setTimeout(() => {
     const editor = VSCodeUtils.getActiveTextEditor();
-    if (editor) updateDecorations(editor);
+    // Avoid running this if the same document is no longer open
+    if (editor && editor.document.uri.fsPath === beforeTimerPath)
+      updateDecorations(editor);
   }, updateDelay);
 }
 

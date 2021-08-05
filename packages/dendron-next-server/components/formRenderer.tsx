@@ -67,7 +67,7 @@ const BaseInput = ({
   return (
     <Form.Item name={name} required={required}>
       <div style={{ ...customStyles }}>
-        <Title id={name} level={3} style={{ fontFamily: "monospace" }}>
+        <Title id={name} level={3}>
           {label}
           {required && <span style={{ color: "red" }}> *</span>}
         </Title>
@@ -604,7 +604,6 @@ const FormGenerator = ({
           level={2}
           style={{
             padding: "1rem 1rem 1rem 0rem",
-            fontFamily: "monospace",
           }}
           id={prefix.join(".")}
         >

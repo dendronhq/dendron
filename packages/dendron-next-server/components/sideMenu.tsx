@@ -145,7 +145,6 @@ const SideMenu: React.FC<DefaultProptypes> = ({
           minWidth: "100%",
           width: "max-content",
           fontSize: "0.9rem",
-          fontFamily: "monospace",
           borderWidth: 0,
         }}
         inlineIndent={10}

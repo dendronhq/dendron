@@ -132,6 +132,10 @@ export class DefaultMap<K, V> {
   public delete(key: K) {
     return this._internalMap.delete(key);
   }
+
+  public get size() {
+    return this._internalMap.size;
+  }
 }
 
 export class TagUtils {

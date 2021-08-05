@@ -62,10 +62,20 @@ export function delayedUpdateDecorations(
 }
 
 export function updateDecorations(activeEditor: TextEditor) {
+  const ctx = "updateDecorations";
   const text = activeEditor.document.getText();
   // Only show decorations & warnings for notes
-  if (_.isUndefined(VSCodeUtils.getNoteFromDocument(activeEditor.document)))
+  try {
+    if (_.isUndefined(VSCodeUtils.getNoteFromDocument(activeEditor.document)))
+      return {};
+  } catch (error) {
+    Logger.info({
+      ctx,
+      msg: "Unable to check if decorations should be updated",
+      error,
+    });
     return {};
+  }
   const proc = MDUtilsV5.procRemarkParse(
     {
       mode: ProcMode.NO_DATA,
@@ -141,6 +151,10 @@ export function updateDecorations(activeEditor: TextEditor) {
   }
 
   // Activate the decorations
+  Logger.info({
+    ctx,
+    msg: `Displaying ${allWarnings.length} warnings and ${allDecorations.size} decorations`,
+  });
   for (const [type, decorations] of allDecorations.entries()) {
     activeEditor.setDecorations(type, decorations);
   }

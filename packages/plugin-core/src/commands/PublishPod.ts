@@ -90,7 +90,12 @@ export class PublishPodCommand extends BaseCommand<
     }
   }
 
-  async showResponse() {
-    window.showInformationMessage("contents copied to clipboard");
+  async showResponse(resp: any) {
+    if(resp.startsWith("Github: ")){
+      window.showInformationMessage(resp);
+    }
+    else {
+      window.showInformationMessage("contents copied to clipboard");
+    }
   }
 }

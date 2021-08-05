@@ -191,7 +191,7 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           leading: true,
         });
 
-    let doctorAction: any;
+    let doctorAction: (note: NoteProps) => Promise<any>;
     switch (action) {
       case DoctorActions.FIX_FRONTMATTER: {
         console.log(
@@ -199,9 +199,10 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
         );
         process.exit();
       }
+      // eslint-disable-next-line no-fallthrough
       case DoctorActions.H1_TO_TITLE: {
         doctorAction = async (note: NoteProps) => {
-          let changes: NoteChangeEntry[] = [];
+          const changes: NoteChangeEntry[] = [];
           const proc = MDUtilsV4.procFull({
             dest: DendronASTDest.MD_DENDRON,
             engine,
@@ -225,7 +226,7 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       }
       case DoctorActions.HI_TO_H2: {
         doctorAction = async (note: NoteProps) => {
-          let changes: NoteChangeEntry[] = [];
+          const changes: NoteChangeEntry[] = [];
           const proc = MDUtilsV4.procFull({
             dest: DendronASTDest.MD_DENDRON,
             engine,
@@ -249,7 +250,7 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       }
       case DoctorActions.REMOVE_STUBS: {
         doctorAction = async (note: NoteProps) => {
-          let changes: NoteChangeEntry[] = [];
+          const changes: NoteChangeEntry[] = [];
           if (_.trim(note.body) === "") {
             changes.push({
               status: "delete",
@@ -272,7 +273,7 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       }
       case DoctorActions.OLD_NOTE_REF_TO_NEW: {
         doctorAction = async (note: NoteProps) => {
-          let changes: NoteChangeEntry[] = [];
+          const changes: NoteChangeEntry[] = [];
           const proc = MDUtilsV4.procFull({
             dest: DendronASTDest.MD_DENDRON,
             engine,
@@ -307,11 +308,15 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
         break;
       }
       case DoctorActions.REGENERATE_NOTE_ID: {
-        for (const note of notes) {
-          if (note.id === "root") continue; // Root notes are special, preserve them
+        doctorAction = async (note: NoteProps) => {
+          if (note.id === "root") return; // Root notes are special, preserve them
           note.id = genUUID();
-          engine.writeNote(note);
-        }
+          await engine.writeNote(note, {
+            runHooks: false,
+            updateExisting: true,
+          });
+          numChanges += 1;
+        };
         break;
       }
       default:

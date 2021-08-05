@@ -231,6 +231,8 @@ export class WorkspaceService {
 
   /**
    * Create vault files if it does not exist
+   * @param opts.noAddToConfig: don't add to dendron.yml
+   * @param opts.addToCodeWorkspace: add to dendron.code-workspace
    * @returns void
    *
    * Effects:
@@ -241,6 +243,7 @@ export class WorkspaceService {
   async createVault(
     opts: {
       noAddToConfig?: boolean;
+      addToCodeWorkspace?: boolean;
     } & Parameters<WorkspaceService["addVault"]>[0]
   ) {
     const { vault, noAddToConfig } = opts;
@@ -267,7 +270,10 @@ export class WorkspaceService {
     if (!noAddToConfig) {
       await this.addVault({ ...opts });
     }
-    return;
+    if (opts.addToCodeWorkspace) {
+      await this.addVaultToCodeWorkspace(vault);
+    }
+    return vault;
   }
 
   /** For vaults in the same repository, ensure that their sync configurations do not conflict. Returns the coordinated sync config. */
@@ -462,7 +468,8 @@ export class WorkspaceService {
       vaults,
       async (prev, vault) => {
         await prev;
-        return ws.createVault({ vault });
+        await ws.createVault({ vault });
+        return;
       },
       Promise.resolve()
     );
@@ -482,6 +489,23 @@ export class WorkspaceService {
         return ws.cloneVaultWithAccessToken({ vault });
       })
     );
+    return;
+  }
+
+  async addVaultToCodeWorkspace(vault: DVault) {
+    const wsRoot = this.wsRoot;
+
+    // workspace file
+    const wsPath = WorkspaceConfig.workspaceFile(wsRoot);
+    let out = (await readJSONWithComments(wsPath)) as WorkspaceSettings;
+    if (
+      !_.find(out.folders, (ent) => ent.path === VaultUtils.getRelPath(vault))
+    ) {
+      const vault2Folder = VaultUtils.toWorkspaceFolder(vault);
+      const folders = [vault2Folder].concat(out.folders);
+      out = assignJSONWithComment({ folders }, out);
+      writeJSONWithComments(wsPath, out);
+    }
     return;
   }
 

@@ -143,12 +143,34 @@ export type SchemaModuleOpts = {
   schemas: SchemaOpts[];
 };
 
+/**
+ * This represents a `schema.yml` file
+ */
 export type SchemaModuleProps = {
+  /**
+   * Currently, this is set to 1. In the future, we might introduce
+   * non-backward compatible schema changes
+   */
   version: number;
+  /**
+   * A schema can import schmeas from other files
+   */
   imports?: SchemaImport;
+  /**
+   * This is all the schema definitions in a schema module
+   */
   schemas: SchemaPropsDict;
+  /**
+   * This is the root note of your schema definitions.
+   */
   root: SchemaProps;
+  /**
+   * Name of the schema file without the `.schema.yml` suffix
+   */
   fname: string;
+  /**
+   * Vault
+   */
   vault: DVault;
 };
 

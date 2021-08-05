@@ -47,7 +47,8 @@ export enum ProcMode {
    */
   FULL = "all data",
   /**
-   * Running processor in import mode. notes don't exist
+   * Running processor in import mode. Notes don't exist. Used for import pods like {@link MarkdownPod}
+   * where notes don't exist in the engine prior to import.
    */
   IMPORT = "IMPORT",
 }

@@ -22,6 +22,14 @@ const $ = (cmd: string, opts?: any) => {
   return execa.commandSync(cmd, { shell: true, ...opts });
 };
 
+export class LernaUtils {
+  static bumpVersion(version: SemverVersion) {
+    $(`lerna version ${version} --no-git-tag-version`);
+    $(`git add .`);
+    $(`git commit -m "chore: publish ${version}"`);
+  }
+}
+
 export class BuildUtils {
   static getLernaRoot() {
     return process.cwd();

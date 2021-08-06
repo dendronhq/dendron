@@ -8,7 +8,7 @@ import { CLICommand } from "./base";
 import * as tsj from "ts-json-schema-generator";
 import path from "path";
 import fs from "fs-extra";
-import { BuildUtils, SemverVersion } from "../utils/build";
+import { BuildUtils, LernaUtils, SemverVersion } from "../utils/build";
 
 type CommandCLIOpts = {
   cmd: DevCommands;
@@ -77,7 +77,10 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     // BuildUtils.bump11ty({ currentVersion, nextVersion });
 
     this.print("run type-check...");
-    BuildUtils.runTypeCheck();
+    // BuildUtils.runTypeCheck();
+
+    this.print("bump version...");
+    LernaUtils.bumpVersion(opts.upgradeType);
 
     this.L.info("done");
   }

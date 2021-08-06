@@ -58,20 +58,6 @@ function getMaybeDatePortion({ fname }: NoteProps, journalName: string) {
 
 const today = luxonGenerateConfig.getNow();
 const { EngineSliceUtils } = engineSlice;
-const {
-  journal: {
-    dailyDomain: DEFAULT_JOURNAL_DAILY_DOMAIN,
-    dateFormat: DEFAULT_JOURNAL_FORMAT,
-    name: DEFAULT_JOURNAL_NAME,
-  },
-} = {
-  // TODO replace with `DConfig.getDefaultConfig() from @dendronhq/engine-server`
-  journal: {
-    dailyDomain: "daily",
-    name: "journal",
-    dateFormat: "y.MM.dd",
-  },
-};
 
 function CalendarView({ engine, ide }: DendronProps) {
   // --- init
@@ -95,12 +81,11 @@ function CalendarView({ engine, ide }: DendronProps) {
 
   const maxDots: number = 5;
   const wordsPerDot: number = 250;
-  const journalDailyDomain =
-    config?.journal.dailyDomain || DEFAULT_JOURNAL_DAILY_DOMAIN;
-  const journalName = config?.journal.name || DEFAULT_JOURNAL_NAME;
+  const journalDailyDomain = config?.journal.dailyDomain;
+  const journalName = config?.journal.name;
 
   // luxon token format lookup https://github.com/moment/luxon/blob/master/docs/formatting.md#table-of-tokens
-  let journalDateFormat = config?.journal.dateFormat || DEFAULT_JOURNAL_FORMAT;
+  let journalDateFormat = config?.journal.dateFormat;
   const journalMonthDateFormat = "y.MM"; // TODO compute format for currentMode="year" from config
 
   // Currently luxon does not support setting first day of the week (https://github.com/moment/luxon/issues/373)
@@ -124,13 +109,13 @@ function CalendarView({ engine, ide }: DendronProps) {
       note.fname.startsWith(`${journalDailyDomain}.${journalName}`)
     );
     const result = _.groupBy(dailyNotes, (note) => {
-      return getMaybeDatePortion(note, journalName);
+      return journalName ? getMaybeDatePortion(note, journalName) : undefined;
     });
     return result;
   }, [notes, journalName, journalDailyDomain, currentVault?.fsPath]);
 
   const activeDate = useMemo(() => {
-    if (noteActive) {
+    if (noteActive && journalName && journalDateFormat) {
       const maybeDatePortion = getMaybeDatePortion(noteActive, journalName);
 
       if (maybeDatePortion && _.first(groupedDailyNotes[maybeDatePortion])) {
@@ -153,17 +138,17 @@ function CalendarView({ engine, ide }: DendronProps) {
 
       return undefined;
     }
-  }, [noteActive, groupedDailyNotes]);
+  }, [noteActive, groupedDailyNotes, journalName, journalDateFormat]);
 
   const getDateKey = useCallback<
-    (date: DateTime, mode?: CalendarProps["mode"]) => string
+    (date: DateTime, mode?: CalendarProps["mode"]) => string | undefined
   >(
     (date, mode) => {
       const format =
         (mode || activeMode) === "month"
           ? journalDateFormat
           : journalMonthDateFormat;
-      return date.toFormat(format);
+      return format ? date.toFormat(format) : undefined;
     },
     [activeMode, journalDateFormat]
   );
@@ -174,16 +159,20 @@ function CalendarView({ engine, ide }: DendronProps) {
     (date, mode) => {
       logger.info({ ctx: "onSelect", date });
       const dateKey = getDateKey(date, mode);
-      const selectedNote = _.first(groupedDailyNotes[dateKey]);
+      const selectedNote = dateKey
+        ? _.first(groupedDailyNotes[dateKey])
+        : undefined;
 
-      postVSCodeMessage({
-        type: CalendarViewMessageType.onSelect,
-        data: {
-          id: selectedNote?.id,
-          fname: `${journalDailyDomain}.${journalName}.${dateKey}`,
-        },
-        source: DMessageSource.webClient,
-      });
+      if (selectedNote) {
+        postVSCodeMessage({
+          type: CalendarViewMessageType.onSelect,
+          data: {
+            id: selectedNote?.id,
+            fname: `${journalDailyDomain}.${journalName}.${dateKey}`,
+          },
+          source: DMessageSource.webClient,
+        });
+      }
     },
     [groupedDailyNotes, getDateKey, journalDailyDomain, journalName]
   );
@@ -206,7 +195,9 @@ function CalendarView({ engine, ide }: DendronProps) {
   >(
     (date) => {
       const dateKey = getDateKey(date);
-      const dailyNote = _.first(groupedDailyNotes[dateKey]);
+      const dailyNote = dateKey
+        ? _.first(groupedDailyNotes[dateKey])
+        : undefined;
       const dailyNotes = dailyNote ? [dailyNote] : []; // keeping for case of showing all dailyNotes of day in multi-vault
 
       const dateCell =

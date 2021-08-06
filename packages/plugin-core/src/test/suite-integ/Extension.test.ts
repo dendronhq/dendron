@@ -5,7 +5,7 @@ import {
   isNotUndefined,
   Time,
 } from "@dendronhq/common-all";
-import { readJSONWithCommentsSync, readYAML, tmpDir, writeJSONWithComments } from "@dendronhq/common-server";
+import { readJSONWithCommentsSync, readYAML, tmpDir } from "@dendronhq/common-server";
 import {
   getPortFilePath,
   getWSMetaFilePath,
@@ -72,8 +72,10 @@ function lapsedMessageTest({
 suite("Extension", function () {
   let homeDirStub: SinonStub;
   let keybindings: any;
+  let backupKeybindingConfigPath: any;
+  const userConfigDir = VSCodeUtils.getCodeUserConfigDir()[0];
   const keybindingConfigPath = [
-    VSCodeUtils.getCodeUserConfigDir()[0],
+    userConfigDir,
     "keybindings.json"
   ].join("");
 
@@ -82,13 +84,23 @@ suite("Extension", function () {
       await resetCodeWorkspace();
       await new ResetConfigCommand().execute({ scope: "all" });
       homeDirStub = TestEngineUtils.mockHomeDir();
-      fs.ensureFileSync(keybindingConfigPath);
-      fs.writeFileSync(keybindingConfigPath, "[]");
+      if (!fs.existsSync(keybindingConfigPath)) {
+        fs.ensureFileSync(keybindingConfigPath);
+        fs.writeFileSync(keybindingConfigPath, "[]");
+      } else {
+        backupKeybindingConfigPath = [
+          userConfigDir,
+          "keybindings.bak.json"
+        ].join("");
+        fs.copyFileSync(keybindingConfigPath, backupKeybindingConfigPath);
+      }
       keybindings = readJSONWithCommentsSync(keybindingConfigPath);
     },
     afterHook: async () => {
       homeDirStub.restore();
       fs.removeSync(keybindingConfigPath);
+      fs.copyFileSync(backupKeybindingConfigPath, keybindingConfigPath);
+      fs.removeSync(backupKeybindingConfigPath);
     },
     noSetInstallStatus: true,
   });
@@ -371,7 +383,7 @@ suite("Extension", function () {
             expect(isNotUndefined(dendronState.firstWsInitialize)).toBeTruthy();
 
             const newKeybindings = readJSONWithCommentsSync(keybindingConfigPath);
-            expect(newKeybindings.length - existingKeybindings.length).toEqual(1);
+            expect(newKeybindings.length - keybindings.length).toEqual(1);
             const override = newKeybindings[newKeybindings.length-1]
             const metaKey = os.type() === "Darwin" ? "cmd" : "ctrl";
             expect(override.key).toEqual(`${metaKey}+l`);

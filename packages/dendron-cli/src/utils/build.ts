@@ -1,5 +1,5 @@
 import { createLogger } from "@dendronhq/common-server";
-import execa from "execa";
+import execa, { ExecaChildProcess } from "execa";
 import fs from "fs-extra";
 import path from "path";
 import semver from "semver";
@@ -91,6 +91,14 @@ export class BuildUtils {
     $("yarn lerna:typecheck");
   }
 
+  static async sleep(ms: number) {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve({});
+      }, ms);
+    });
+  }
+
   static startVerdaccio() {
     const subprocess = execa("verdaccio");
     const logger = createLogger("verdaccio");
@@ -110,8 +118,11 @@ export class BuildUtils {
       logger.info({ state: "message", message });
     });
     if (subprocess.stdout && subprocess.stderr) {
-      subprocess.stdout.on("data", (chunk) => {
+      subprocess.stdout.on("data", (chunk: Buffer) => {
         process.stdout.write(chunk);
+        // verdaccio is ready
+        // if (chunk.toString().match("http address")) {
+        // }
       });
       subprocess.stderr.on("data", (chunk) => {
         process.stdout.write(chunk);

@@ -68,10 +68,12 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     this.L.info({ currentVersion, nextVersion });
 
     this.print("setRegLocal...");
-    // BuildUtils.setRegLocal();
+    BuildUtils.setRegLocal();
 
     this.print("startVerdaccio...");
     BuildUtils.startVerdaccio();
+    // HACK: give verdaccio chance to start
+    await BuildUtils.sleep(3000);
 
     this.print("bump 11ty...");
     // BuildUtils.bump11ty({ currentVersion, nextVersion });
@@ -82,7 +84,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     this.print("bump version...");
     // LernaUtils.bumpVersion(opts.upgradeType);
 
-    this.print("publish version...");
+    // this.print("publish version...");
     LernaUtils.publishVersion();
 
     this.L.info("done");

@@ -21,6 +21,7 @@ site:
     siteHierarchies:
         - dendron
         - bar
+        - tags
     siteRootDir: docs
     logo: vault/assets/images/logo.png
     siteFaviconPath: vault/assets/images/favicon.ico
@@ -50,8 +51,6 @@ site:
             - vault2
 dev:
     enableWebUI: true
-    nextServerUrl: 'http://localhost:3000'
-    engineServerPort: 3005
 graph:
     zoomSpeed: 1
 initializeRemoteVaults: true

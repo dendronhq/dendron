@@ -7,6 +7,8 @@ import {
   DendronASTDest,
   DendronPubOpts,
   MDUtilsV4,
+  MDUtilsV5,
+  ProcMode,
 } from "@dendronhq/engine-server";
 import { runEngineTestV5, testWithEngine } from "../../../engine";
 import { checkNotInVFile, checkVFile } from "./utils";
@@ -60,6 +62,15 @@ describe("dendronPub", () => {
         await checkVFile(out, "![alt-text](/bond/image-url.jpg)");
       }
     );
+  });
+
+  testWithEngine("in IMPORT mode", async ({ engine, vaults, wsRoot }) => {
+    const proc = MDUtilsV5.procRemarkParse(
+      { mode: ProcMode.IMPORT },
+      { dest: DendronASTDest.HTML, engine, wsRoot, vault: vaults[0] }
+    );
+    const out = await proc.process("Testing publishing in IMPORT mode");
+    await checkVFile(out, "Testing publishing in IMPORT mode");
   });
 
   describe("frontmatter tags", () => {

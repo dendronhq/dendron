@@ -5,7 +5,7 @@ const {getMetaPath} = require("./utils");
 async function main() {
   const PKG_ROOT = path.join(__dirname, "..", "..", "packages");
   const projects = fs.readdirSync(PKG_ROOT);
-  const exclude = [".DS_Store"];
+  const exclude = [".DS_Store", "nextjs-template"];
   const meta = await Promise.all(projects
     .filter((ent) => !exclude.includes(ent))
     .map(async (ent) => {

@@ -584,7 +584,7 @@ export enum ThemeMessageType {
 }
 
 export type OnDidChangeActiveTextEditorData = {
-  note: NoteProps;
+  note: NoteProps | undefined;
   /**
    * Sync all notes
    */

@@ -28,6 +28,7 @@ import { InsertNoteCommand } from "./InsertNoteCommand";
 import { InsertNoteLinkCommand } from "./InsertNoteLink";
 import { MoveNoteCommand } from "./MoveNoteCommand";
 import { NoteLookupCommand } from "./NoteLookupCommand";
+import { SchemaLookupCommand } from "./SchemaLookupCommand";
 import { OpenLinkCommand } from "./OpenLink";
 import { OpenLogsCommand } from "./OpenLogs";
 import { PasteFileCommand } from "./PasteFile";
@@ -87,6 +88,7 @@ const ALL_COMMANDS = [
   InsertNoteCommand,
   InsertNoteLinkCommand,
   NoteLookupCommand,
+  SchemaLookupCommand,
   OpenLinkCommand,
   OpenLogsCommand,
   PasteFileCommand,

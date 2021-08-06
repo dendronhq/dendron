@@ -73,6 +73,7 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
         })
       : undefined;
     const lookupCreateOpts: LookupControllerV3CreateOpts = {
+      nodeType: "note",
       disableVaultSelection: opts?.useSameVault,
     };
     if (vault) {

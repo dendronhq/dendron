@@ -132,6 +132,12 @@ export type SchemaModuleDict = {
   [key: string]: SchemaModuleProps;
 };
 
+export type SchemaQuickInput = SchemaProps & {
+  label: string;
+  detail?: string;
+  alwaysShow?: boolean;
+};
+
 // ---
 
 export type SchemaImport = string[];

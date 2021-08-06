@@ -607,15 +607,6 @@ export class DendronWorkspace {
 
     this.context.subscriptions.push(
       vscode.commands.registerCommand(
-        DENDRON_COMMANDS.LOOKUP_SCHEMA.key,
-        async () => {
-          return new LookupCommand().run({ flavor: "schema" });
-        }
-      )
-    );
-
-    this.context.subscriptions.push(
-      vscode.commands.registerCommand(
         DENDRON_COMMANDS.RELOAD_INDEX.key,
         async (silent?: boolean) => {
           const out = await new ReloadIndexCommand().run();

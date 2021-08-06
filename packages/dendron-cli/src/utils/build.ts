@@ -221,6 +221,24 @@ export class BuildUtils {
   }
 
   /**
+   * Set NPM to publish locally
+   */
+  static async prepPublishLocal() {
+    this.setRegLocal();
+    this.startVerdaccio();
+    // HACK: give verdaccio chance to start
+    await this.sleep(3000);
+    return 
+  }
+
+  /**
+   * Set NPM to publish remotely
+   */
+  static async prepPublishRemote() {
+    this.setRegRemote();
+  }
+
+  /**
    *
    * @returns
    * @throws Error if typecheck is not successful

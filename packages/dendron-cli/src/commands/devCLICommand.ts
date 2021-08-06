@@ -188,8 +188,8 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
   }
 
 	async syncAssets() {
-		this.print("build next server...")
-		BuildUtils.buildNextServer();
+		// this.print("build next server...")
+		// BuildUtils.buildNextServer();
 		this.print("sync static...")
 		await BuildUtils.syncStaticAssets();
 		this.print("done")

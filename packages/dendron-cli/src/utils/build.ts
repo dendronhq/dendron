@@ -93,8 +93,8 @@ export class BuildUtils {
   static buildNextServer() {
     const root = this.getNextServerRootPath();
     $(`yarn  --ignore-lockfile`, { cwd: root });
-    $(`yarn build`);
-    $(`yarn gen:theme`);
+    $(`yarn build`, {cwd: root});
+    $(`yarn gen:theme`, {cwd: root});
   }
 
   static bump11ty(opts: { currentVersion: string; nextVersion: string }) {
@@ -196,14 +196,22 @@ export class BuildUtils {
   }
 
   static syncStaticAssets() {
-    const pluginStaticPath = path.join(
+
+    const pluginAssetPath = path.join(
       this.getPluginRootPath(),
       "assets",
+    );
+    const pluginStaticPath = path.join(
+      pluginAssetPath,
       "static"
     );
     const apiRoot = path.join(this.getLernaRoot(), "packages", "api-server");
+    const nextServerRoot = this.getNextServerRootPath();
 
-    fs.removeSync(pluginStaticPath);
+    fs.ensureDirSync(pluginStaticPath);
+    fs.emptyDirSync(pluginStaticPath);
+
+    fs.copySync(path.join(nextServerRoot, "out"), pluginStaticPath);
     return Promise.all([
       fs.copy(
         path.join(this.getNextServerRootPath(), "assets", "js"),

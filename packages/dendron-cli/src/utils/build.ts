@@ -28,6 +28,9 @@ export enum SemverVersion {
 const $ = (cmd: string, opts?: any) => {
   return execa.commandSync(cmd, { shell: true, ...opts });
 };
+const $$ = (cmd: string, opts?: any) => {
+  return execa.command(cmd, { shell: true, ...opts });
+};
 
 export class LernaUtils {
   static bumpVersion(version: SemverVersion) {
@@ -61,9 +64,19 @@ export class BuildUtils {
     return fs.readJSONSync(pkgPath) as PkgJson;
   }
 
+  static restorePluginPkgJson() {
+    const pkgPath = path.join(this.getPluginRootPath(), "package.json");
+    $(`git checkout -- ${pkgPath}`);
+  }
+
   static setRegLocal() {
     $(`yarn config set registry http://localhost:4873`);
     $(`npm set registry http://localhost:4873/`);
+  }
+
+  static setRegRemote() {
+    $(`yarn config set registry https://registry.npmjs.org/`);
+    $(`npm set registry https://registry.npmjs.org/`);
   }
 
   static genNextVersion(opts: {
@@ -87,6 +100,26 @@ export class BuildUtils {
     $("git add packages/plugin-core/src/utils/site.ts");
     const { stdout, stderr } = $(`git commit -m "chore: bump 11ty"`);
     console.log(stdout, stderr);
+  }
+
+  static installPluginDependencies() {
+    return $(`yarn install --no-lockfile`, { cwd: this.getPluginRootPath() });
+  }
+
+  static installPluginLocally(version: string) {
+    return Promise.all([
+      $$(
+        `code-insiders --install-extension "dendron-${version}.vsix" --force`,
+        { cwd: this.getPluginRootPath() }
+      ),
+      $$(`codium --install-extension "dendron-${version}.vsix" --force`, {
+        cwd: this.getPluginRootPath(),
+      }),
+    ]);
+  }
+
+  static packagePluginDependencies() {
+    return $(`vsce package --yarn`, { cwd: this.getPluginRootPath() });
   }
 
   static prep() {

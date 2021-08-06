@@ -9,7 +9,6 @@ import {
   engineSlice,
   postVSCodeMessage,
 } from "@dendronhq/common-frontend";
-import { DConfig } from "@dendronhq/engine-server";
 import {
   CalendarProps as AntdCalendarProps,
   Spin,
@@ -65,7 +64,13 @@ const {
     dateFormat: DEFAULT_JOURNAL_FORMAT,
     name: DEFAULT_JOURNAL_NAME,
   },
-} = DConfig.genDefaultConfig();
+} = {
+  journal: {
+    dailyDomain: "daily",
+    name: "journal",
+    dateFormat: "y.MM.dd",
+  },
+};
 
 function CalendarView({ engine, ide }: DendronProps) {
   // --- init

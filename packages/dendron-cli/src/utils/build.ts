@@ -1,4 +1,5 @@
-import { command as $ } from "execa";
+import { createLogger } from "@dendronhq/common-server";
+import execa from "execa";
 import fs from "fs-extra";
 import path from "path";
 import semver from "semver";
@@ -17,6 +18,10 @@ export enum SemverVersion {
   PATCH = "patch",
 }
 
+const $ = (cmd: string, opts?: any) => {
+  return execa.commandSync(cmd, { shell: true, ...opts });
+};
+
 export class BuildUtils {
   static getLernaRoot() {
     return process.cwd();
@@ -33,6 +38,11 @@ export class BuildUtils {
 
   static getPkgMeta({ pkgPath }: { pkgPath: string }) {
     return fs.readJSONSync(pkgPath) as PkgJson;
+  }
+
+  static setRegLocal() {
+    $(`yarn config set registry http://localhost:4873`);
+    $(`npm set registry http://localhost:4873/`);
   }
 
   static genNextVersion(opts: {
@@ -54,7 +64,46 @@ export class BuildUtils {
       .replace(src, dst);
     fs.writeFileSync(sitePath, newContent);
     $("git add packages/plugin-core/src/utils/site.ts");
-    $(`git commit -m "chore: bump 11ty"`);
+    const { stdout, stderr } = $(`git commit -m "chore: bump 11ty"`);
+    console.log(stdout, stderr);
+  }
+
+  /**
+   *
+   * @returns
+   * @throws Error if typecheck is not successful
+   */
+  static runTypeCheck() {
+    $("yarn lerna:typecheck");
+  }
+
+  static startVerdaccio() {
+    const subprocess = execa("verdaccio");
+    const logger = createLogger("verdaccio");
+    subprocess.on("close", () => {
+      logger.error({ state: "close" });
+    });
+    subprocess.on("disconnect", () => {
+      logger.error({ state: "disconnect" });
+    });
+    subprocess.on("exit", () => {
+      logger.error({ state: "exit" });
+    });
+    subprocess.on("error", (err) => {
+      logger.error({ state: "error", payload: err });
+    });
+    subprocess.on("message", (message) => {
+      logger.info({ state: "message", message });
+    });
+    if (subprocess.stdout && subprocess.stderr) {
+      subprocess.stdout.on("data", (chunk) => {
+        process.stdout.write(chunk);
+      });
+      subprocess.stderr.on("data", (chunk) => {
+        process.stdout.write(chunk);
+      });
+    }
+    return subprocess;
   }
 
   static updatePkgMeta({

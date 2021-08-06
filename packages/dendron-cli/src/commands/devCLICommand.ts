@@ -8,7 +8,6 @@ import { CLICommand } from "./base";
 import * as tsj from "ts-json-schema-generator";
 import path from "path";
 import fs from "fs-extra";
-import execa from "execa";
 import { BuildUtils, SemverVersion } from "../utils/build";
 
 type CommandCLIOpts = {
@@ -27,10 +26,6 @@ type CommandOutput = Partial<{ error: DendronError; data: any }>;
 type BuildCmdOpts = {
   upgradeType: SemverVersion;
 } & CommandCLIOpts;
-
-const $ = (cmd: string) => {
-  return execa.commandSync(cmd, { shell: true });
-};
 
 export { CommandOpts as DevCLICommandOpts };
 
@@ -64,49 +59,6 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
   }
 
   async build(opts: BuildCmdOpts) {
-    const setRegLocal = () => {
-      $(`yarn config set registry http://localhost:4873`);
-      $(`npm set registry http://localhost:4873/`);
-    };
-    const startVerdaccio = () => {
-      const subprocess = execa("verdaccio");
-      const logger = this.L;
-      logger.info({ state: "post:exec.node" });
-      subprocess.on("close", () => {
-        logger.error({ state: "close" });
-      });
-      subprocess.on("disconnect", () => {
-        logger.error({ state: "disconnect" });
-      });
-      subprocess.on("exit", () => {
-        logger.error({ state: "exit" });
-      });
-      subprocess.on("error", (err) => {
-        logger.error({ state: "error", payload: err });
-      });
-      subprocess.on("message", (message) => {
-        logger.info({ state: "message", message });
-      });
-      if (subprocess.stdout && subprocess.stderr) {
-        subprocess.stdout.on("data", (chunk) => {
-          process.stdout.write(chunk);
-        });
-        subprocess.stderr.on("data", (chunk) => {
-          process.stdout.write(chunk);
-        });
-      }
-      return subprocess;
-    };
-
-    // $(`git add packages/plugin-core/src/utils/site.ts`);
-    // $(`git commit -m "chore: bump 11ty"`);
-
-    // this.print("setRegLocal...");
-    // setRegLocal();
-
-    // this.print("startVerdaccio...");
-    // startVerdaccio();
-
     // get package version
     const currentVersion = BuildUtils.getCurrentVersion();
     const nextVersion = BuildUtils.genNextVersion({
@@ -114,7 +66,18 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       upgradeType: opts.upgradeType,
     });
     this.L.info({ currentVersion, nextVersion });
-    BuildUtils.bump11ty({ currentVersion, nextVersion });
+
+    this.print("setRegLocal...");
+    // BuildUtils.setRegLocal();
+
+    this.print("startVerdaccio...");
+    // BuildUtils.startVerdaccio();
+
+    this.print("bump 11ty...");
+    // BuildUtils.bump11ty({ currentVersion, nextVersion });
+
+    this.print("run type-check...");
+    BuildUtils.runTypeCheck();
 
     this.L.info("done");
   }

@@ -8,7 +8,12 @@ import { CLICommand } from "./base";
 import * as tsj from "ts-json-schema-generator";
 import path from "path";
 import fs from "fs-extra";
-import { BuildUtils, LernaUtils, SemverVersion } from "../utils/build";
+import {
+  BuildUtils,
+  LernaUtils,
+  PublishEndpoint,
+  SemverVersion,
+} from "../utils/build";
 
 type CommandCLIOpts = {
   cmd: DevCommands;
@@ -17,10 +22,10 @@ type CommandCLIOpts = {
 export enum DevCommands {
   GENERATE_JSON_SCHEMA_FROM_CONFIG = "generate_json_schema_from_config",
   BUILD = "build",
-	SYNC_ASSETS = "sync_assets",
-	PREP_PLUGIN = "prep_plugin",
-	PACKAGE_PLUGIN = "package_plugin",
-	INSTALL_PLUGIN = "install_plugin"
+  SYNC_ASSETS = "sync_assets",
+  PREP_PLUGIN = "prep_plugin",
+  PACKAGE_PLUGIN = "package_plugin",
+  INSTALL_PLUGIN = "install_plugin",
 }
 
 type CommandOpts = CommandCLIOpts & Partial<BuildCmdOpts>; //& SetupEngineOpts & {};
@@ -29,6 +34,7 @@ type CommandOutput = Partial<{ error: DendronError; data: any }>;
 
 type BuildCmdOpts = {
   upgradeType: SemverVersion;
+  publishEndpoint: PublishEndpoint;
 } & CommandCLIOpts;
 
 export { CommandOpts as DevCLICommandOpts };
@@ -56,57 +62,14 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       describe: "how to do upgrade",
       choices: Object.values(SemverVersion),
     });
+    args.option("publish endpoint", {
+      describe: "where to publish",
+      choices: Object.values(PublishEndpoint),
+    });
   }
 
   async enrichArgs(args: CommandCLIOpts): Promise<CommandOpts> {
     return { ...args };
-  }
-
-  async build(opts: BuildCmdOpts) {
-    // get package version
-    const currentVersion = BuildUtils.getCurrentVersion();
-    const nextVersion = BuildUtils.genNextVersion({
-      currentVersion,
-      upgradeType: opts.upgradeType,
-    });
-    this.L.info({ currentVersion, nextVersion });
-
-    this.print("setRegLocal...");
-    BuildUtils.setRegLocal();
-
-    this.print("startVerdaccio...");
-    BuildUtils.startVerdaccio();
-    // HACK: give verdaccio chance to start
-    await BuildUtils.sleep(3000);
-
-    this.print("bump 11ty...");
-    BuildUtils.bump11ty({ currentVersion, nextVersion });
-
-    this.print("run type-check...");
-    BuildUtils.runTypeCheck();
-
-    this.print("bump version...");
-    LernaUtils.bumpVersion(opts.upgradeType);
-
-    this.print("publish version...");
-    LernaUtils.publishVersion();
-
-    this.print("prep repo...");
-    BuildUtils.prepPluginPkg();
-
-    this.print("install deps...");
-		BuildUtils.installPluginDependencies();
-
-    this.print("package deps...");
-		BuildUtils.packagePluginDependencies();
-
-    this.print("setRegRemote...");
-		BuildUtils.setRegRemote();
-
-    this.print("restore package.json...");
-		BuildUtils.restorePluginPkgJson();
-
-    this.L.info("done");
   }
 
   async generateJSONSchemaFromConfig() {
@@ -169,20 +132,20 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           return { error: null };
         }
         case DevCommands.PREP_PLUGIN: {
-					BuildUtils.prepPluginPkg();
+          BuildUtils.prepPluginPkg();
           return { error: null };
         }
         case DevCommands.PACKAGE_PLUGIN: {
-					this.print("install deps...");
-					BuildUtils.installPluginDependencies();
-			
-					this.print("package deps...");
-					BuildUtils.packagePluginDependencies();
+          this.print("install deps...");
+          BuildUtils.installPluginDependencies();
+
+          this.print("package deps...");
+          BuildUtils.packagePluginDependencies();
           return { error: null };
         }
         case DevCommands.INSTALL_PLUGIN: {
-					const currentVersion = BuildUtils.getCurrentVersion();
-					await BuildUtils.installPluginLocally(currentVersion);
+          const currentVersion = BuildUtils.getCurrentVersion();
+          await BuildUtils.installPluginLocally(currentVersion);
           return { error: null };
         }
         default:
@@ -200,17 +163,72 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     }
   }
 
-	async syncAssets() {
-		// this.print("build next server...")
-		// BuildUtils.buildNextServer();
-		this.print("sync static...")
-		await BuildUtils.syncStaticAssets();
-		this.print("done")
+  async build(opts: BuildCmdOpts) {
+    // get package version
+    const currentVersion = BuildUtils.getCurrentVersion();
+    const nextVersion = BuildUtils.genNextVersion({
+      currentVersion,
+      upgradeType: opts.upgradeType,
+    });
+    const shouldPublishLocal = opts.publishEndpoint === PublishEndpoint.LOCAL;
+    this.L.info({ currentVersion, nextVersion });
 
-	}
+    if (shouldPublishLocal) {
+      this.print("setRegLocal...");
+      BuildUtils.setRegLocal();
+
+      this.print("startVerdaccio...");
+      BuildUtils.startVerdaccio();
+      // HACK: give verdaccio chance to start
+      await BuildUtils.sleep(3000);
+    } else {
+			this.print("setRegRemote...");
+      BuildUtils.setRegRemote();
+		}
+
+    this.print("bump 11ty...");
+    BuildUtils.bump11ty({ currentVersion, nextVersion });
+
+    this.print("run type-check...");
+    BuildUtils.runTypeCheck();
+
+    this.print("bump version...");
+    LernaUtils.bumpVersion(opts.upgradeType);
+
+    this.print("publish version...");
+    LernaUtils.publishVersion();
+
+		this.print("sync assets...");
+		await this.syncAssets();
+
+    this.print("prep repo...");
+    BuildUtils.prepPluginPkg();
+
+    this.print("install deps...");
+    BuildUtils.installPluginDependencies();
+
+    this.print("package deps...");
+    BuildUtils.packagePluginDependencies();
+
+    this.print("setRegRemote...");
+    BuildUtils.setRegRemote();
+
+    this.print("restore package.json...");
+    BuildUtils.restorePluginPkgJson();
+
+    this.L.info("done");
+  }
+
+  async syncAssets() {
+    this.print("build next server...");
+    BuildUtils.buildNextServer();
+    this.print("sync static...");
+    await BuildUtils.syncStaticAssets();
+    this.print("done");
+  }
 
   validateBuildArgs(opts: CommandOpts): opts is BuildCmdOpts {
-    if (!opts.upgradeType) {
+    if (!opts.upgradeType || !opts.publishEndpoint) {
       return false;
     }
     return true;

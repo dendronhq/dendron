@@ -25,6 +25,11 @@ export enum SemverVersion {
   PATCH = "patch",
 }
 
+export enum PublishEndpoint {
+  LOCAL = "local",
+  REMOTE = "remote"
+}
+
 const $ = (cmd: string, opts?: any) => {
   return execa.commandSync(cmd, { shell: true, ...opts });
 };

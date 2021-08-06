@@ -187,6 +187,19 @@ export class BuildUtils {
     this.setRegRemote();
   }
 
+  static prep() {
+    const pkgPath = this.getPluginPkgPath();
+    this.updatePkgMeta({
+      pkgPath,
+      name: "dendron",
+      main: "./dist/extension.js",
+      repository: {
+        url: "https://github.com/dendronhq/dendron.git",
+        type: "git",
+      },
+    });
+  }
+
   /**
    *
    * @returns

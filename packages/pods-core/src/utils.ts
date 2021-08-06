@@ -213,20 +213,19 @@ export class PodUtils {
 
   static hasRequiredOpts(_pClassEntry: PodClassEntryV4): boolean {
     const pod = new _pClassEntry();
-
     if (pod.config.required.length > 0) {
       return true;
     }
-
+    let hasReqOpts: boolean = false;
     const properties = pod.config.properties;
 
     Object.keys(properties).forEach((prop: any) => {
       if (prop.nullable && _.isUndefined(prop.default)) {
-        return true;
+        hasReqOpts = true;
       }
     });
 
-    return false;
+    return hasReqOpts;
   }
 
   static getAnalyticsPayload(opts?: { config: any; podChoice: PodItemV4 }) {

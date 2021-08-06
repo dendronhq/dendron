@@ -1,4 +1,4 @@
-import { vault2Path, writeYAML } from "@dendronhq/common-server";
+import { vault2Path } from "@dendronhq/common-server";
 import {
   AssertUtils,
   NOTE_BODY_PRESETS_V4,
@@ -8,9 +8,7 @@ import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import {
   MarkdownPublishPod,
   podClassEntryToPodItemV4,
-  PodUtils,
 } from "@dendronhq/pods-core";
-import { ensureDirSync } from "fs-extra";
 import path from "path";
 // // You can import and use all API from the 'vscode' module
 // // as well as import your extension to test it
@@ -36,18 +34,6 @@ suite("PublishV2", function () {
         const vpath = vault2Path({ vault, wsRoot });
         const fpath = path.join(vpath, "foo.md");
         await VSCodeUtils.openFileInEditor(vscode.Uri.file(fpath));
-        const podClass = MarkdownPublishPod;
-        const podsDir = path.join(wsRoot, "pods");
-        const configPath = PodUtils.getConfigPath({ podsDir, podClass });
-
-        const createConfig = async (config: any) => {
-          ensureDirSync(path.dirname(configPath));
-          writeYAML(configPath, config);
-        };
-
-        createConfig({
-          wikiLinkToURL: false,
-        });
 
         // when a user runs publish pod, they are presented with a list of pods
         // to execute

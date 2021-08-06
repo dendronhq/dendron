@@ -64,6 +64,18 @@ has fm tags
 }
 `;
 
+exports[`dendronPub in IMPORT mode 1`] = `
+VFile {
+  "contents": "Testing publishing in IMPORT mode
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
 exports[`dendronPub no publish basic 1`] = `
 VFile {
   "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>

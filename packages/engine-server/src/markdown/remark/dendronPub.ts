@@ -2,6 +2,7 @@ import {
   DendronError,
   isNotUndefined,
   makeColorTranslucent,
+  NoteProps,
   NoteUtils,
   TAGS_HIERARCHY,
 } from "@dendronhq/common-all";
@@ -32,7 +33,7 @@ import {
   WikiLinkNoteV4,
 } from "../types";
 import { MDUtilsV4 } from "../utils";
-import { MDUtilsV5 } from "../utilsv5";
+import { MDUtilsV5, ProcMode } from "../utilsv5";
 import { blockAnchor2html } from "./blockAnchors";
 import { NoteRefsOpts } from "./noteRefs";
 import { convertNoteRefASTV2 } from "./noteRefsV2";
@@ -52,6 +53,7 @@ const TAG_BG_TRANSLUCENCY = 0.4;
 function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
   const proc = this;
   const procData = MDUtilsV4.getDendronData(proc);
+  const { mode } = MDUtilsV5.getProcOpts(proc);
   const { dest, fname, config, overrides, insideNoteRef } = procData;
   let vault = procData.vault;
 
@@ -61,7 +63,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
     const insertTitle = !_.isUndefined(overrides?.insertTitle)
       ? overrides?.insertTitle
       : opts?.insertTitle;
-    if (!insideNoteRef && root.children) {
+    if (mode !== ProcMode.IMPORT && !insideNoteRef && root.children) {
       if (!fname || !vault) {
         // TODO: tmp
         console.log(JSON.stringify(engine.notes));
@@ -130,27 +132,32 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
           addError(proc, engineError);
         }
 
-        const notes = NoteUtils.getNotesByFname({
-          fname: valueOrig,
-          notes: engine.notes,
-          vault,
-        });
-        const { error, note } = getNoteOrError(notes, value);
+        let error: DendronError | undefined;
+        let note: NoteProps | undefined;
+        if (mode !== ProcMode.IMPORT) {
+          const notes = NoteUtils.getNotesByFname({
+            fname: valueOrig,
+            notes: engine.notes,
+            vault,
+          });
+          const out = getNoteOrError(notes, value);
+          error = out.error;
+          note = out.note;
+        }
 
         let color: string | undefined;
-        if (value.startsWith(TAGS_HIERARCHY)) {
-          const [maybeColor, colorType] = note ? NoteUtils.color({ note }) : [];
+        if (note && value.startsWith(TAGS_HIERARCHY)) {
+          const [maybeColor, colorType] = NoteUtils.color({ note });
           if (
-            maybeColor &&
-            (colorType === "configured" ||
-              opts?.noRandomlyColoredTags !== false)
+            colorType === "configured" ||
+            opts?.noRandomlyColoredTags !== false
           ) {
             color = makeColorTranslucent(maybeColor, TAG_BG_TRANSLUCENCY);
           }
         }
 
         const copts = opts?.wikiLinkOpts;
-        if (opts?.transformNoPublish) {
+        if (note && opts?.transformNoPublish) {
           if (error) {
             value = "403";
             addError(proc, error);
@@ -174,11 +181,11 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
           useId = true;
         }
 
-        if (useId && isPublished) {
+        if (note && useId && isPublished) {
           if (error) {
             addError(proc, error);
           } else {
-            value = note!.id;
+            value = note.id;
           }
         }
         const alias = data.alias ? data.alias : value;

@@ -46,8 +46,7 @@ export class SchemaLookupCommand extends BaseCommand<
   CommandGatherOutput,
   CommandRunOpts
 > {
-  // TODO: temp key for now. change to LOOKUP_SCHEMA after deprecating V2
-  key = DENDRON_COMMANDS.LOOKUP_SCHEMA_V3.key;
+  key = DENDRON_COMMANDS.LOOKUP_SCHEMA.key;
   protected _controller: LookupControllerV3 | undefined;
   protected _provider: ILookupProviderV3 | undefined;
 

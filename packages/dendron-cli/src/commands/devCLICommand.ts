@@ -72,53 +72,6 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     return { ...args };
   }
 
-  async build(opts: BuildCmdOpts) {
-    // get package version
-    const currentVersion = BuildUtils.getCurrentVersion();
-    const nextVersion = BuildUtils.genNextVersion({
-      currentVersion,
-      upgradeType: opts.upgradeType,
-    });
-    this.L.info({ currentVersion, nextVersion });
-
-    this.print("setRegLocal...");
-    BuildUtils.setRegLocal();
-
-    this.print("startVerdaccio...");
-    BuildUtils.startVerdaccio();
-    // HACK: give verdaccio chance to start
-    await BuildUtils.sleep(3000);
-
-    this.print("bump 11ty...");
-    BuildUtils.bump11ty({ currentVersion, nextVersion });
-
-    this.print("run type-check...");
-    BuildUtils.runTypeCheck();
-
-    this.print("bump version...");
-    LernaUtils.bumpVersion(opts.upgradeType);
-
-    this.print("publish version...");
-    LernaUtils.publishVersion();
-
-    this.print("prep repo...");
-    BuildUtils.prepPluginPkg();
-
-    this.print("install deps...");
-		BuildUtils.installPluginDependencies();
-
-    this.print("package deps...");
-		BuildUtils.packagePluginDependencies();
-
-    this.print("setRegRemote...");
-		BuildUtils.setRegRemote();
-
-    this.print("restore package.json...");
-		BuildUtils.restorePluginPkgJson();
-
-    this.L.info("done");
-  }
-
   async generateJSONSchemaFromConfig() {
     const repoRoot = process.cwd();
     const pkgRoot = path.join(repoRoot, "packages", "engine-server");

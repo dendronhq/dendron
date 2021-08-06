@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.53.1](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.53.1) (2021-08-06)
+
+
+### Bug Fixes
+
+* add new vaults from CLI to code workspace ([#1094](https://github.com/dendronhq/dendron/issues/1094)) ([2cde108](https://github.com/dendronhq/dendron/commit/2cde108b4c88a5c9d13b8eb6370f69879d6c9a62))
+* Doctor `regenerateNoteId` action error ([#1097](https://github.com/dendronhq/dendron/issues/1097)) ([f0480c7](https://github.com/dendronhq/dendron/commit/f0480c7306eb07a2d40ea2b4278757d6c8dd26bb))
+
+
+### Features Dendron
+
+* generate json schema from config ([#1100](https://github.com/dendronhq/dendron/issues/1100)) ([53b189e](https://github.com/dendronhq/dendron/commit/53b189ec973a8d3d3ccf300a0e59908197f4efb1))
+* seed cmds in plugin ([#1080](https://github.com/dendronhq/dendron/issues/1080)) ([e07a092](https://github.com/dendronhq/dendron/commit/e07a092b1a75548574f2ea45f1b465490b2091f3))
+
+
+
+
+
 # [0.53.0](https://github.com/dendronhq/dendron/compare/v0.52.0...v0.53.0) (2021-08-03)
 
 **Note:** Version bump only for package @dendronhq/dendron-cli

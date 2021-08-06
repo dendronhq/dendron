@@ -3,6 +3,27 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.53.1](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.53.1) (2021-08-06)
+
+
+### Bug Fixes
+
+* Doctor `regenerateNoteId` action error ([#1097](https://github.com/dendronhq/dendron/issues/1097)) ([f0480c7](https://github.com/dendronhq/dendron/commit/f0480c7306eb07a2d40ea2b4278757d6c8dd26bb))
+* undefined tags breaks note serialization ([b1d784c](https://github.com/dendronhq/dendron/commit/b1d784c8df18b3b45999f01c14793436ff669a3f))
+
+
+### Features Dendron
+
+* basic frontmatter tag support ([2fe8ea5](https://github.com/dendronhq/dendron/commit/2fe8ea5733cdf6c047c39b8b9865cb7e5fdb541b))
+* generate json schema from config ([#1100](https://github.com/dendronhq/dendron/issues/1100)) ([53b189e](https://github.com/dendronhq/dendron/commit/53b189ec973a8d3d3ccf300a0e59908197f4efb1))
+* goto definition & hover support for frontmatter tags ([18faa1e](https://github.com/dendronhq/dendron/commit/18faa1e1549d2ed6a29118a0fb5a888c7e92f927))
+* GotoNote support for frontmatter tags ([4b3ba55](https://github.com/dendronhq/dendron/commit/4b3ba55ceb8459652b09f8be1f79e842d90213d9))
+* option to disable frontmatter tag rendering ([7985e23](https://github.com/dendronhq/dendron/commit/7985e2323950f16f2c5afa55c115a1af52e82b07))
+
+
+
+
+
 # [0.53.0](https://github.com/dendronhq/dendron/compare/v0.52.0...v0.53.0) (2021-08-03)
 
 **Note:** Version bump only for package @dendronhq/common-all

@@ -99,8 +99,10 @@ suite("Extension", function () {
     afterHook: async () => {
       homeDirStub.restore();
       fs.removeSync(keybindingConfigPath);
-      fs.copyFileSync(backupKeybindingConfigPath, keybindingConfigPath);
-      fs.removeSync(backupKeybindingConfigPath);
+      if (fs.existsSync(backupKeybindingConfigPath)) {
+        fs.copyFileSync(backupKeybindingConfigPath, keybindingConfigPath);
+        fs.removeSync(backupKeybindingConfigPath);
+      }
     },
     noSetInstallStatus: true,
   });

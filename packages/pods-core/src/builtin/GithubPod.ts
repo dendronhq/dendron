@@ -1,5 +1,11 @@
-import { ImportPod, ImportPodConfig, ImportPodPlantOpts, 
-  PublishPod, PublishPodConfig, PublishPodPlantOpts } from "../basev3";
+import {
+  ImportPod,
+  ImportPodConfig,
+  ImportPodPlantOpts,
+  PublishPod,
+  PublishPodConfig,
+  PublishPodPlantOpts,
+} from "../basev3";
 import { JSONSchemaType } from "ajv";
 import { PodUtils } from "../utils";
 import { graphql } from "@octokit/graphql";
@@ -227,8 +233,8 @@ export class GithubImportPod extends ImportPod<GithubImportPodConfig> {
           url: d.node.url,
           status: d.node.state,
           issueID: d.node.id,
-          tags,
         },
+        tags,
       };
     });
   };
@@ -271,7 +277,11 @@ export class GithubImportPod extends ImportPod<GithubImportPodConfig> {
         vault,
         wsRoot,
       });
-      if (!_.isUndefined(n) && (n.custom.issueID === undefined || n.custom.status !== note.custom.status)) {
+      if (
+        !_.isUndefined(n) &&
+        (n.custom.issueID === undefined ||
+          n.custom.status !== note.custom.status)
+      ) {
         n.custom.status = note.custom.status;
         n.custom.issueID = note.custom.issueID;
         updatedNotes = [...updatedNotes, n];
@@ -387,15 +397,15 @@ export class GithubPublishPod extends PublishPod<GithubPublishPodConfig> {
     }) as JSONSchemaType<GithubPublishPodConfig>;
   }
 
-/**
- * method to get all the labels of a repository in key value pair
- * 
- */
+  /**
+   * method to get all the labels of a repository in key value pair
+   *
+   */
 
-getLabelsFromGithub = async (opts: Partial<GithubPublishPodConfig>) => {
-  const { owner, repository, token} = opts;
-  let labelsHashMap: any;
-  const query = `query repository($name: String!, $owner: String!)
+  getLabelsFromGithub = async (opts: Partial<GithubPublishPodConfig>) => {
+    const { owner, repository, token } = opts;
+    let labelsHashMap: any;
+    const query = `query repository($name: String!, $owner: String!)
     {
       repository(owner: $owner , name: $name) { 
         labels(last: 100) {
@@ -408,95 +418,92 @@ getLabelsFromGithub = async (opts: Partial<GithubPublishPodConfig>) => {
         }
     }
     }`;
-  try {
-    const result : any= await graphql(query, {
-      headers: { authorization: `token ${token}` },
-      owner,
-      name: repository,
-    });
-    const allLabels = result.repository.labels.edges;
-    allLabels.forEach((label: any) => {
-      labelsHashMap = {
-        ...labelsHashMap,
-        [label.node.name] : label.node.id
-      }
-    })
-  } catch (error) {
-    throw new DendronError({ message: stringifyError(error) });
-  }
-  return labelsHashMap;
+    try {
+      const result: any = await graphql(query, {
+        headers: { authorization: `token ${token}` },
+        owner,
+        name: repository,
+      });
+      const allLabels = result.repository.labels.edges;
+      allLabels.forEach((label: any) => {
+        labelsHashMap = {
+          ...labelsHashMap,
+          [label.node.name]: label.node.id,
+        };
+      });
+    } catch (error) {
+      throw new DendronError({ message: stringifyError(error) });
+    }
+    return labelsHashMap;
+  };
 
-}
+  /**
+   * method to update the issue in github
+   */
 
-/**
- * method to update the issue in github
- */
-
-updateIssue = async(opts: 
-  {
-    issueID: string, 
-    token: string, 
-    status: string, 
-    labelIDs: string[]
-    }) => {
-  
-      const {issueID, token, status, labelIDs} = opts;
-      let resp: string ="";
-      const mutation = `mutation updateIssue($id: ID!, $state: IssueState, $labelIDs: [ID!]){
+  updateIssue = async (opts: {
+    issueID: string;
+    token: string;
+    status: string;
+    labelIDs: string[];
+  }) => {
+    const { issueID, token, status, labelIDs } = opts;
+    let resp: string = "";
+    const mutation = `mutation updateIssue($id: ID!, $state: IssueState, $labelIDs: [ID!]){
           updateIssue(input: {id : $id , state: $state, labelIds: $labelIDs}){
             issue {
                   id
                 }
             }
           }`;
-      try {
-        const result : any= await graphql(mutation, {
-          headers: { authorization: `token ${token}` },
-          id: issueID,
-          state: status,
-          labelIDs,
-        });
-        if(!_.isUndefined(result.updateIssue.issue.id)){
-          resp = "Issue Updated"
-        }
-      } catch (error) {
-        resp = stringifyError(error);
-        throw new DendronError({ message: stringifyError(error) });
+    try {
+      const result: any = await graphql(mutation, {
+        headers: { authorization: `token ${token}` },
+        id: issueID,
+        state: status,
+        labelIDs,
+      });
+      if (!_.isUndefined(result.updateIssue.issue.id)) {
+        resp = "Issue Updated";
       }
+    } catch (error) {
+      resp = stringifyError(error);
+      throw new DendronError({ message: stringifyError(error) });
+    }
 
-  return resp;
-}
+    return resp;
+  };
 
   async plant(opts: PublishPodPlantOpts) {
     const { config } = opts;
-    const {
+    const { owner, repository, token } = config as GithubPublishPodConfig;
+    const labelsHashMap = await this.getLabelsFromGithub({
       owner,
       repository,
       token,
-    } = config as GithubPublishPodConfig;
-    const labelsHashMap = await this.getLabelsFromGithub({owner, repository, token})
+    });
     const note = opts.note;
-    const {issueID, tags , status} = note.custom;
+    const tags = opts.note.tags;
+    const { issueID, status } = note.custom;
     const labelIDs: string[] = [];
-
-    if(_.isString(tags)){
-      if(labelsHashMap[tags])
-      labelIDs.push(labelsHashMap[tags])
-    }
-    else {
+    if (_.isString(tags)) {
+      if (labelsHashMap[tags]) labelIDs.push(labelsHashMap[tags]);
+    } else {
       tags?.forEach((tag: string) => {
-        //tag = tag.replace(/[#\[\]']+/g,'').replace("tags.",'') // eslint-disable-line
-        if(labelsHashMap[tag])
-            labelIDs.push(labelsHashMap[tag])
-      })
+        if (labelsHashMap[tag]) labelIDs.push(labelsHashMap[tag]);
+      });
     }
- 
-    
-      if(!_.isUndefined(tags) && labelIDs.length === 0) {
-        return "Github: The labels in the tag does not belong to selected repository";
-      }
-      const resp = await this.updateIssue({issueID, token, status: status.toUpperCase(), labelIDs})
 
-      return "Github: ".concat(resp);
+    if (!_.isUndefined(tags) && labelIDs.length === 0) {
+      return "Github: The labels in the tag does not belong to selected repository";
+    }
+    const resp = await this.updateIssue({
+      issueID,
+      token,
+      status: status.toUpperCase(),
+      labelIDs,
+    });
+
+    return "Github: ".concat(resp);
   }
 }

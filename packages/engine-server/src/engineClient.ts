@@ -20,6 +20,7 @@ import {
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
   ERROR_SEVERITY,
+  FuseEngine,
   GetNoteBlocksOpts,
   GetNoteBlocksPayload,
   GetNoteOptsV2,
@@ -46,7 +47,6 @@ import fs from "fs-extra";
 import _ from "lodash";
 import { DConfig } from "./config";
 import { FileStorage } from "./drivers/file/storev2";
-import { FuseEngine } from "./fuseEngine";
 import { HistoryService } from "./history";
 import { getPortFilePath } from "./utils";
 

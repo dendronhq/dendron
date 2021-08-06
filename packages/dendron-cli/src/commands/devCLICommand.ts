@@ -18,7 +18,9 @@ export enum DevCommands {
   GENERATE_JSON_SCHEMA_FROM_CONFIG = "generate_json_schema_from_config",
   BUILD = "build",
 	SYNC_ASSETS = "sync_assets",
-	PREP_PLUGIN = "prep_plugin"
+	PREP_PLUGIN = "prep_plugin",
+	PACKAGE_PLUGIN = "package_plugin",
+	INSTALL_PLUGIN = "install_plugin"
 }
 
 type CommandOpts = CommandCLIOpts & Partial<BuildCmdOpts>; //& SetupEngineOpts & {};
@@ -163,14 +165,24 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           return { error: null };
         }
         case DevCommands.SYNC_ASSETS: {
-          // if (!this.validateBuildArgs(opts)) {
-          //   return {
-          //     error: new DendronError({
-          //       message: "missing options for build command",
-          //     }),
-          //   };
-          // }
           await this.syncAssets();
+          return { error: null };
+        }
+        case DevCommands.PREP_PLUGIN: {
+					BuildUtils.prepPluginPkg();
+          return { error: null };
+        }
+        case DevCommands.PACKAGE_PLUGIN: {
+					this.print("install deps...");
+					BuildUtils.installPluginDependencies();
+			
+					this.print("package deps...");
+					BuildUtils.packagePluginDependencies();
+          return { error: null };
+        }
+        case DevCommands.INSTALL_PLUGIN: {
+					const currentVersion = BuildUtils.getCurrentVersion();
+					await BuildUtils.installPluginLocally(currentVersion);
           return { error: null };
         }
         default:

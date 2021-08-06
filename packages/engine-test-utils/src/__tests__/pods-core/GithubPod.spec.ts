@@ -19,7 +19,7 @@ describe("GithubPod import pod", () => {
               url: "https://github.com/dendronhq/dendron/issues/902",
               number: 902,
               state: "OPEN",
-              id: 'sddsnjdek',
+              id: "sddsnjdek",
               labels: {
                 edges: [
                   {
@@ -36,7 +36,6 @@ describe("GithubPod import pod", () => {
     };
     fname = "github.issues.902-Test Issue";
   });
-
 
   test("Import Issue with status: open", async () => {
     await runEngineTestV5(
@@ -157,30 +156,30 @@ describe("GithubPod import pod", () => {
 
 describe("github publish pod", () => {
   let issue: NoteProps;
-  
+
   beforeEach(() => {
-      issue = {
-          id: 'nCobWD86N10jWq6r',
-          title: 'Test',
-          vault: { fsPath: 'vault1' },
-          type: 'note',
-          desc: '',
-          links: [],
-          anchors: {},
-          fname: 'foo',
-          updated: 1627283357535,
-          created: 1627283357535,
-          parent: null,
-          children: [],
-          body: '\n\n## Testing Github Publish Pod',
-          data: {},
-          contentHash: undefined,
-          custom: {
-              status: 'OPEN',
-              issueID: 'hsahdla',
-              tags: ["area.misc","type.bug"]
-          }
-        }
+    issue = {
+      id: "nCobWD86N10jWq6r",
+      title: "Test",
+      vault: { fsPath: "vault1" },
+      type: "note",
+      desc: "",
+      links: [],
+      anchors: {},
+      fname: "foo",
+      updated: 1627283357535,
+      created: 1627283357535,
+      parent: null,
+      children: [],
+      body: "\n\n## Testing Github Publish Pod",
+      data: {},
+      contentHash: undefined,
+      tags: ["area.misc", "type.bug"],
+      custom: {
+        status: "OPEN",
+        issueID: "hsahdla",
+      },
+    };
   });
 
   test("basic", async () => {
@@ -188,9 +187,11 @@ describe("github publish pod", () => {
       async ({ engine, vaults, wsRoot }) => {
         const pod = new GithubPublishPod();
         const vaultName = VaultUtils.getName(vaults[0]);
-        pod.getLabelsFromGithub = jest.fn().mockReturnValue({"area.misc": "sfgdjio", "type.bug": "gsfahhj"});
+        pod.getLabelsFromGithub = jest
+          .fn()
+          .mockReturnValue({ "area.misc": "sfgdjio", "type.bug": "gsfahhj" });
         pod.updateIssue = jest.fn().mockReturnValue("Issue Updated");
-        await engine.writeNote(issue, {newNode: true});
+        await engine.writeNote(issue, { newNode: true });
         const resp = await pod.execute({
           engine,
           vaults,
@@ -201,10 +202,10 @@ describe("github publish pod", () => {
             dest: "stdout",
             token: "asjska",
             repository: "dendron",
-            owner: "dendronhq"
+            owner: "dendronhq",
           },
         });
-        expect(resp).toEqual("Github: Issue Updated"); 
+        expect(resp).toEqual("Github: Issue Updated");
       },
       { expect, preSetupHook: ENGINE_HOOKS.setupBasic }
     );
@@ -215,9 +216,11 @@ describe("github publish pod", () => {
       async ({ engine, vaults, wsRoot }) => {
         const pod = new GithubPublishPod();
         const vaultName = VaultUtils.getName(vaults[0]);
-        pod.getLabelsFromGithub = jest.fn().mockReturnValue({"question": "abcdwe", "enhancement": "kighxx"});
+        pod.getLabelsFromGithub = jest
+          .fn()
+          .mockReturnValue({ question: "abcdwe", enhancement: "kighxx" });
         pod.updateIssue = jest.fn().mockReturnValue("Issue Updated");
-        await engine.writeNote(issue, {newNode: true});
+        await engine.writeNote(issue, { newNode: true });
         const resp = await pod.execute({
           engine,
           vaults,
@@ -228,14 +231,15 @@ describe("github publish pod", () => {
             dest: "stdout",
             token: "asjska",
             repository: "dendron",
-            owner: "dendronhq"
+            owner: "dendronhq",
           },
         });
-        expect(resp).toEqual("Github: The labels in the tag does not belong to selected repository"); 
+        expect(resp).toEqual(
+          "Github: The labels in the tag does not belong to selected repository"
+        );
       },
 
       { expect, preSetupHook: ENGINE_HOOKS.setupBasic }
     );
   });
-
 });

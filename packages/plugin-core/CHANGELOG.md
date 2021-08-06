@@ -3,6 +3,58 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.53.2](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.53.2) (2021-08-06)
+
+
+### Bug Fixes
+
+* CopyNoteRef respects noXVaultWikiLink option ([#1085](https://github.com/dendronhq/dendron/issues/1085)) ([b4b3da3](https://github.com/dendronhq/dendron/commit/b4b3da3306e2c5621c3c79a53b9f6e4cc31856c6)), closes [#1072](https://github.com/dendronhq/dendron/issues/1072)
+* Doctor `regenerateNoteId` action error ([#1097](https://github.com/dendronhq/dendron/issues/1097)) ([f0480c7](https://github.com/dendronhq/dendron/commit/f0480c7306eb07a2d40ea2b4278757d6c8dd26bb))
+* extension readme getting started link ([#1084](https://github.com/dendronhq/dendron/issues/1084)) ([d3f5b7d](https://github.com/dendronhq/dendron/commit/d3f5b7dc49873cbbb9e44ce1ff473cd4d95e1214))
+* FM tags with quoted strings & with spaces ([1a16689](https://github.com/dendronhq/dendron/commit/1a1668914f70b48a4e74a218bd43521df226de38))
+* highlighting is not displayed ([#1083](https://github.com/dendronhq/dendron/issues/1083)) ([86ead9b](https://github.com/dendronhq/dendron/commit/86ead9b7ec66a51712a265f263a515c624f2861c))
+* uninstall hook force flush ([#1087](https://github.com/dendronhq/dendron/issues/1087)) ([386aac2](https://github.com/dendronhq/dendron/commit/386aac2b8036cd58c190da99609cef2d3ed2467f))
+
+
+### Features Dendron
+
+* add remaining modifiers to NoteLookup ([#1056](https://github.com/dendronhq/dendron/issues/1056)) ([49c6005](https://github.com/dendronhq/dendron/commit/49c6005d2a2c8fd422eb653977e926084e743d6a)), closes [#1045](https://github.com/dendronhq/dendron/issues/1045) [#1046](https://github.com/dendronhq/dendron/issues/1046)
+* basic frontmatter tag support ([2fe8ea5](https://github.com/dendronhq/dendron/commit/2fe8ea5733cdf6c047c39b8b9865cb7e5fdb541b))
+* goto definition & hover support for frontmatter tags ([18faa1e](https://github.com/dendronhq/dendron/commit/18faa1e1549d2ed6a29118a0fb5a888c7e92f927))
+* GotoNote support for frontmatter tags ([4b3ba55](https://github.com/dendronhq/dendron/commit/4b3ba55ceb8459652b09f8be1f79e842d90213d9))
+* re-engage lapsed users with prompt ([#1086](https://github.com/dendronhq/dendron/issues/1086)) ([f4e6dc5](https://github.com/dendronhq/dendron/commit/f4e6dc563aafdfc0b46966e74d9b38920aee1207))
+* seed cmds in plugin ([#1080](https://github.com/dendronhq/dendron/issues/1080)) ([e07a092](https://github.com/dendronhq/dendron/commit/e07a092b1a75548574f2ea45f1b465490b2091f3))
+
+
+
+
+
+## [0.53.1](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.53.1) (2021-08-06)
+
+
+### Bug Fixes
+
+* CopyNoteRef respects noXVaultWikiLink option ([#1085](https://github.com/dendronhq/dendron/issues/1085)) ([b4b3da3](https://github.com/dendronhq/dendron/commit/b4b3da3306e2c5621c3c79a53b9f6e4cc31856c6)), closes [#1072](https://github.com/dendronhq/dendron/issues/1072)
+* Doctor `regenerateNoteId` action error ([#1097](https://github.com/dendronhq/dendron/issues/1097)) ([f0480c7](https://github.com/dendronhq/dendron/commit/f0480c7306eb07a2d40ea2b4278757d6c8dd26bb))
+* extension readme getting started link ([#1084](https://github.com/dendronhq/dendron/issues/1084)) ([d3f5b7d](https://github.com/dendronhq/dendron/commit/d3f5b7dc49873cbbb9e44ce1ff473cd4d95e1214))
+* FM tags with quoted strings & with spaces ([1a16689](https://github.com/dendronhq/dendron/commit/1a1668914f70b48a4e74a218bd43521df226de38))
+* highlighting is not displayed ([#1083](https://github.com/dendronhq/dendron/issues/1083)) ([86ead9b](https://github.com/dendronhq/dendron/commit/86ead9b7ec66a51712a265f263a515c624f2861c))
+* uninstall hook force flush ([#1087](https://github.com/dendronhq/dendron/issues/1087)) ([386aac2](https://github.com/dendronhq/dendron/commit/386aac2b8036cd58c190da99609cef2d3ed2467f))
+
+
+### Features Dendron
+
+* add remaining modifiers to NoteLookup ([#1056](https://github.com/dendronhq/dendron/issues/1056)) ([49c6005](https://github.com/dendronhq/dendron/commit/49c6005d2a2c8fd422eb653977e926084e743d6a)), closes [#1045](https://github.com/dendronhq/dendron/issues/1045) [#1046](https://github.com/dendronhq/dendron/issues/1046)
+* basic frontmatter tag support ([2fe8ea5](https://github.com/dendronhq/dendron/commit/2fe8ea5733cdf6c047c39b8b9865cb7e5fdb541b))
+* goto definition & hover support for frontmatter tags ([18faa1e](https://github.com/dendronhq/dendron/commit/18faa1e1549d2ed6a29118a0fb5a888c7e92f927))
+* GotoNote support for frontmatter tags ([4b3ba55](https://github.com/dendronhq/dendron/commit/4b3ba55ceb8459652b09f8be1f79e842d90213d9))
+* re-engage lapsed users with prompt ([#1086](https://github.com/dendronhq/dendron/issues/1086)) ([f4e6dc5](https://github.com/dendronhq/dendron/commit/f4e6dc563aafdfc0b46966e74d9b38920aee1207))
+* seed cmds in plugin ([#1080](https://github.com/dendronhq/dendron/issues/1080)) ([e07a092](https://github.com/dendronhq/dendron/commit/e07a092b1a75548574f2ea45f1b465490b2091f3))
+
+
+
+
+
 # [0.53.0](https://github.com/dendronhq/dendron/compare/v0.52.0...v0.53.0) (2021-08-03)
 
 

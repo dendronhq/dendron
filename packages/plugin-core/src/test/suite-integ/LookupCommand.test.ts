@@ -826,6 +826,33 @@ suite("Lookup, notesv2", function () {
     });
   });
 
+  describe("arguments", () => {
+    test("accepting splitType modifier as argument will pre-press button", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        postSetupHook: async ({ wsRoot, vaults }) => {
+          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+        },
+        onInit: async () => {
+          
+          const controller = new LookupControllerV2(
+            engOpts,
+            { splitType: "horizontal" }
+          );
+          const picker = await controller.show();
+          const splitBtn = _.find(picker.buttons, (button) => {
+            return button.type === "horizontal";
+          });
+          
+          expect(splitBtn?.pressed).toBeTruthy();
+
+          picker.hide();
+          done();
+        }, 
+      });
+    });
+  });
+
   describe("onAccept:multiple", () => {
     test("existing notes", (done) => {
       runLegacyMultiWorkspaceTest({

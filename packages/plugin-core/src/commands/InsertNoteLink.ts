@@ -25,6 +25,7 @@ export class InsertNoteLinkCommand extends BasicCommand<
 
   async gatherInputs(): Promise<CommandOpts | undefined> {
     const lc = LookupControllerV3.create({
+      nodeType: "note",
       disableVaultSelection: true,
     });
     const provider = new NoteLookupProvider(this.key, {

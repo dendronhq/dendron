@@ -158,6 +158,9 @@ export type DNodeProps<T = any, TCustom = any> = {
    */
   contentHash?: string;
 
+  /** Override the randomly generated color for tag notes. Colors can be entered as `#12AC35`, `rgb(123, 56, 200)`, or `hsl(235, 100%, 50%)`. */
+  color?: string;
+
   /** One or more frontmatter tags attached to this note. */
   tags?: string | string[];
 };

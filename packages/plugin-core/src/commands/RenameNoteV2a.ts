@@ -48,7 +48,9 @@ export class RenameNoteV2aCommand extends BaseCommand<
   public silent?: boolean;
 
   async gatherInputs(): Promise<CommandInput> {
-    const lc = LookupControllerV3.create();
+    const lc = LookupControllerV3.create({
+      nodeType: "note",
+    });
     const provider = new NoteLookupProvider("rename", { allowNewNote: true });
     provider.registerOnAcceptHook(ProviderAcceptHooks.oldNewLocationHook);
 

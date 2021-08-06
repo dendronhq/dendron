@@ -9,6 +9,7 @@ import {
   engineSlice,
   postVSCodeMessage,
 } from "@dendronhq/common-frontend";
+import { DConfig } from "@dendronhq/engine-server";
 import {
   CalendarProps as AntdCalendarProps,
   Spin,
@@ -58,6 +59,13 @@ function getMaybeDatePortion({ fname }: NoteProps, journalName: string) {
 
 const today = luxonGenerateConfig.getNow();
 const { EngineSliceUtils } = engineSlice;
+const {
+  journal: {
+    dailyDomain: DEFAULT_JOURNAL_DAILY_DOMAIN,
+    dateFormat: DEFAULT_JOURNAL_FORMAT,
+    name: DEFAULT_JOURNAL_NAME,
+  },
+} = DConfig.genDefaultConfig();
 
 function CalendarView({ engine, ide }: DendronProps) {
   // --- init
@@ -81,11 +89,12 @@ function CalendarView({ engine, ide }: DendronProps) {
 
   const maxDots: number = 5;
   const wordsPerDot: number = 250;
-  const journalDailyDomain = config?.journal.dailyDomain || "daily";
-  const journalName = config?.journal.name || "journal";
+  const journalDailyDomain =
+    config?.journal.dailyDomain || DEFAULT_JOURNAL_DAILY_DOMAIN;
+  const journalName = config?.journal.name || DEFAULT_JOURNAL_NAME;
 
   // luxon token format lookup https://github.com/moment/luxon/blob/master/docs/formatting.md#table-of-tokens
-  let journalDateFormat = config?.journal.dateFormat || "y.MM.dd";
+  let journalDateFormat = config?.journal.dateFormat || DEFAULT_JOURNAL_FORMAT;
   const journalMonthDateFormat = "y.MM"; // TODO compute format for currentMode="year" from config
 
   // Currently luxon does not support setting first day of the week (https://github.com/moment/luxon/issues/373)

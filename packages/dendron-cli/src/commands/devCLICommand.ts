@@ -17,6 +17,7 @@ type CommandCLIOpts = {
 export enum DevCommands {
   GENERATE_JSON_SCHEMA_FROM_CONFIG = "generate_json_schema_from_config",
   BUILD = "build",
+	SYNC_ASSETS = "sync_assets"
 }
 
 type CommandOpts = CommandCLIOpts & Partial<BuildCmdOpts>; //& SetupEngineOpts & {};
@@ -160,6 +161,17 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           await this.build(opts);
           return { error: null };
         }
+        case DevCommands.SYNC_ASSETS: {
+          // if (!this.validateBuildArgs(opts)) {
+          //   return {
+          //     error: new DendronError({
+          //       message: "missing options for build command",
+          //     }),
+          //   };
+          // }
+          await this.syncAssets();
+          return { error: null };
+        }
         default:
           return assertUnreachable();
       }
@@ -174,6 +186,15 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     } finally {
     }
   }
+
+	async syncAssets() {
+		this.print("build next server...")
+		BuildUtils.buildNextServer();
+		this.print("sync static...")
+		await BuildUtils.syncStaticAssets();
+		this.print("done")
+
+	}
 
   validateBuildArgs(opts: CommandOpts): opts is BuildCmdOpts {
     if (!opts.upgradeType) {

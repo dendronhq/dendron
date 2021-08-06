@@ -60,6 +60,10 @@ export class BuildUtils {
     return path.join(this.getLernaRoot(), "packages", "plugin-core");
   }
 
+  static getNextServerRootPath() {
+    return path.join(this.getLernaRoot(), "packages", "dendron-next-server");
+  }
+
   static getPkgMeta({ pkgPath }: { pkgPath: string }) {
     return fs.readJSONSync(pkgPath) as PkgJson;
   }
@@ -84,6 +88,13 @@ export class BuildUtils {
     upgradeType: SemverVersion;
   }) {
     return semver.inc(opts.currentVersion, opts.upgradeType) as string;
+  }
+
+  static buildNextServer() {
+    const root = this.getNextServerRootPath();
+    $(`yarn  --ignore-lockfile`, { cwd: root });
+    $(`yarn build`);
+    $(`yarn gen:theme`);
   }
 
   static bump11ty(opts: { currentVersion: string; nextVersion: string }) {
@@ -182,6 +193,24 @@ export class BuildUtils {
       });
     }
     return subprocess;
+  }
+
+  static syncStaticAssets() {
+    const pluginStaticPath = path.join(
+      this.getPluginRootPath(),
+      "assets",
+      "static"
+    );
+    const apiRoot = path.join(this.getLernaRoot(), "packages", "api-server");
+
+    fs.removeSync(pluginStaticPath);
+    return Promise.all([
+      fs.copy(
+        path.join(this.getNextServerRootPath(), "assets", "js"),
+        pluginStaticPath
+      ),
+      fs.copy(path.join(apiRoot, "assets", "static"), pluginStaticPath),
+    ]);
   }
 
   static updatePkgMeta({

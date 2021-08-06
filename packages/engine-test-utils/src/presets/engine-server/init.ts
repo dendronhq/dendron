@@ -275,8 +275,11 @@ const NOTES = {
                   offset: 0,
                 },
               },
+              sameFile: false,
               to: {
+                anchorHeader: undefined,
                 fname: "beta",
+                vaultName: undefined,
               },
               type: "wiki",
               value: "beta",

@@ -258,6 +258,12 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docPreview:
       "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/command-rename.gif)",
   },
+  RENAME_HEADER: {
+    key: "dendron.renameHeader",
+    title: `${CMD_PREFIX} Rename Header`,
+    group: "notes",
+    desc: "Rename a header, and update all links to it.",
+  },
   CONVERT_LINK: {
     key: "dendron.convertLink",
     title: `${CMD_PREFIX} Convert Link`,

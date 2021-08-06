@@ -21,6 +21,7 @@ import {
   ERROR_SEVERITY,
   ERROR_STATUS,
   IDendronError,
+  isNotUndefined,
   NoteChangeEntry,
   NoteProps,
   NotePropsDict,
@@ -513,6 +514,14 @@ export class FileStorage implements DStore {
     };
   }
 
+  private referenceRangeParts(anchorHeader?: string): string[] {
+    if (!anchorHeader || anchorHeader.indexOf(":") === -1) return [];
+    let [start, end] = anchorHeader.split(":");
+    start = start.replace(/^#*/, "");
+    end = end.replace(/^#*/, "");
+    return [start, end];
+  }
+
   async renameNote(opts: RenameNoteOpts): Promise<RenameNotePayload> {
     const ctx = "Store:renameNote";
     const { oldLoc, newLoc } = opts;
@@ -554,13 +563,33 @@ export class FileStorage implements DStore {
           engine: this.engine,
           filter: { loc: oldLoc },
         });
-        const allLinks = _.orderBy(
+        let allLinks = _.orderBy(
           foundLinks,
           (link) => {
             return link.position?.start.offset;
           },
           "desc"
         );
+        if (
+          oldLoc.fname === newLoc.fname &&
+          oldLoc.vaultName === newLoc.vaultName &&
+          oldLoc.anchorHeader &&
+          newLoc.anchorHeader
+        ) {
+          // Renaming the header, only update links that link to the old header
+          allLinks = _.filter(allLinks, (link): boolean => {
+            // This is a wikilink to this header
+            if (link.to?.anchorHeader === oldLoc.anchorHeader) return true;
+            // Or this is a range reference, and one part of the range includes this header
+            return (
+              link.type === "ref" &&
+              isNotUndefined(oldLoc.anchorHeader) &&
+              this.referenceRangeParts(link.to?.anchorHeader).includes(
+                oldLoc.anchorHeader
+              )
+            );
+          });
+        }
 
         const noteMod = _.reduce(
           allLinks,
@@ -575,6 +604,14 @@ export class FileStorage implements DStore {
                 oldLink.from.fname.toLocaleLowerCase()
             ) {
               alias = oldLink.from.alias;
+              // Update the alias if it was using the default alias.
+              if (
+                oldLoc.alias?.toLocaleLowerCase() ===
+                  oldLink.from.alias.toLocaleLowerCase() &&
+                newLoc.alias
+              ) {
+                alias = newLoc.alias;
+              }
             }
             // for hashtag links, we'll have to regenerate the alias
             if (newLoc.fname.startsWith(TAGS_HIERARCHY)) {
@@ -587,7 +624,25 @@ export class FileStorage implements DStore {
               // And if this used to be a frontmatter tag, the alias being undefined will force it to be removed because a frontmatter tag can't point to something outside of tags hierarchy.
               alias = undefined;
             }
-            // loc doesn't have header info
+            // Correctly handle header renames in references with range based references
+            if (
+              oldLoc.anchorHeader &&
+              link.type === "ref" &&
+              isNotUndefined(oldLink.from.anchorHeader) &&
+              oldLink.from.anchorHeader.indexOf(":") > -1 &&
+              isNotUndefined(newLoc.anchorHeader) &&
+              newLoc.anchorHeader.indexOf(":") === -1
+            ) {
+              // This is a reference, old anchor had a ":" in it, a new anchor header is provided and does not have ":" in it.
+              // For example, `![[foo#start:#end]]` to `![[foo#something]]`. In this case, `something` is actually supposed to replace only one part of the range.
+              // Find the part that matches the old header, and replace just that with the new one.
+              let [start, end] = this.referenceRangeParts(
+                oldLink.from.anchorHeader
+              );
+              if (start === oldLoc.anchorHeader) start = newLoc.anchorHeader;
+              if (end === oldLoc.anchorHeader) end = newLoc.anchorHeader;
+              newLoc.anchorHeader = `${start}:#${end}`;
+            }
             const newBody = LinkUtils.updateLink({
               note,
               oldLink,
@@ -595,7 +650,8 @@ export class FileStorage implements DStore {
                 ...oldLink,
                 from: {
                   ...newLoc,
-                  anchorHeader: oldLink.from.anchorHeader,
+                  anchorHeader:
+                    newLoc.anchorHeader || oldLink.from.anchorHeader,
                   alias,
                 },
               },
@@ -635,15 +691,29 @@ export class FileStorage implements DStore {
       msg: "deleteNote:meta:pre",
       note: NoteUtils.toLogObj(oldNote),
     });
-    const changedFromDelete = await this.deleteNote(oldNote.id, {
-      metaOnly: true,
-    });
-    this.logger.info({
-      ctx,
-      msg: "writeNewNote:pre",
-      note: NoteUtils.toLogObj(newNote),
-    });
-    await this.writeNote(newNote, { newNode: true });
+    let deleteOldFile = false;
+    let changedFromDelete: EngineDeleteNotePayload = [];
+    if (
+      oldNote.fname === newNote.fname &&
+      VaultUtils.isEqual(oldNote.vault, newNote.vault, wsRoot)
+    ) {
+      // The file is being renamed to itself. We do this to rename a header.
+      this.logger.info({ ctx, msg: "Renaming the file to same name" });
+      await this.writeNote(newNote, { updateExisting: true });
+    } else {
+      // The file is being renamed to a new file.
+      this.logger.info({ ctx, msg: "Renaming the file to a new name" });
+      changedFromDelete = await this.deleteNote(oldNote.id, {
+        metaOnly: true,
+      });
+      deleteOldFile = true;
+      this.logger.info({
+        ctx,
+        msg: "writeNewNote:pre",
+        note: NoteUtils.toLogObj(newNote),
+      });
+      await this.writeNote(newNote, { newNode: true });
+    }
     this.logger.info({ ctx, msg: "updateAllNotes:pre" });
     // update all new notes
     await Promise.all(
@@ -662,7 +732,7 @@ export class FileStorage implements DStore {
     }));
 
     // remove old note only when rename is success
-    fs.removeSync(oldLocPath);
+    if (deleteOldFile) fs.removeSync(oldLocPath);
 
     // create needs to be very last element added
     out = changedFromDelete

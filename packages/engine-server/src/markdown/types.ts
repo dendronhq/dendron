@@ -90,6 +90,8 @@ export type WikiLinkDataV4 = {
   anchorHeader?: string;
   prefix?: string;
   vaultName?: string;
+  /** Denotes a same file link, for example `[[#anchor]]` */
+  sameFile?: boolean;
 };
 
 export type RehypeLinkData = WikiLinkDataV4 & {

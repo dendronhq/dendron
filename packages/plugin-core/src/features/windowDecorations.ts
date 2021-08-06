@@ -42,6 +42,26 @@ import {
 } from "./codeActionProvider";
 import { Logger } from "../logger";
 
+const DECORATION_UPDATE_DELAY = 100;
+
+export function delayedUpdateDecorations(
+  updateDelay: number = DECORATION_UPDATE_DELAY
+) {
+  const beforeTimerPath =
+    VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath;
+  setTimeout(() => {
+    const editor = VSCodeUtils.getActiveTextEditor();
+    // Avoid running this if the same document is no longer open
+    if (editor && editor.document.uri.fsPath === beforeTimerPath) {
+      try {
+        updateDecorations(editor);
+      } catch (error) {
+        Logger.info({ ctx: "delayedUpdateDecorations", error });
+      }
+    }
+  }, updateDelay);
+}
+
 const TAG_COLORING_TRANSLUCENCY = 0.4;
 
 export function updateDecorations(activeEditor: TextEditor) {
@@ -287,12 +307,19 @@ function doesLinkedNoteExist({
     : undefined;
   // Vault specified, but can't find it.
   if (vaultName && !vault) return false;
-  const found = NoteUtils.getNotesByFname({
-    fname,
-    vault,
-    notes,
-  });
-  return found.length > 0;
+  let exists: boolean;
+  try {
+    exists =
+      NoteUtils.getNotesByFname({
+        fname,
+        vault,
+        notes,
+      }).length > 0;
+  } catch (err) {
+    Logger.info({ ctx: "doesLinkedNoteExist", err });
+    exists = false;
+  }
+  return exists;
 }
 
 /** Decoration for the alias part of wikilinks. */

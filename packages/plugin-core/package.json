@@ -150,6 +150,11 @@
         "docPreview": "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/command-rename.gif)"
       },
       {
+        "command": "dendron.renameHeader",
+        "title": "Dendron: Rename Header",
+        "desc": "Rename a header, and update all links to it."
+      },
+      {
         "command": "dendron.lookup",
         "title": "Dendron: Lookup",
         "desc": "Initiate note lookup",
@@ -598,7 +603,7 @@
         "dendron.dendronDir": {
           "type": "string",
           "default": "",
-          "description": "location of dendron configuration"
+          "description": "DEPRECATED. Use journal settings in dendron.yml"
         },
         "dendron.logLevel": {
           "type": "string",

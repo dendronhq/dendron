@@ -20,7 +20,7 @@ import {
 } from "../components/doctor/buttons";
 import { DoctorScopeType } from "../components/doctor/types";
 import { DENDRON_COMMANDS } from "../constants";
-import { updateDecorations } from "../features/windowDecorations";
+import { delayedUpdateDecorations } from "../features/windowDecorations";
 import { VSCodeUtils } from "../utils";
 import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
@@ -261,10 +261,7 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     // note haven't updated within VSCode yet. Regenerate the decorations, but
     // do so after a delay so that VSCode can update the file contents. Not a
     // perfect solution, but the simplest.
-    setTimeout(() => {
-      const editor = VSCodeUtils.getActiveTextEditor();
-      if (editor) updateDecorations(editor);
-    }, 200);
+    delayedUpdateDecorations();
 
     // create site root, used for publication
     if (!fs.existsSync(siteRoot)) {

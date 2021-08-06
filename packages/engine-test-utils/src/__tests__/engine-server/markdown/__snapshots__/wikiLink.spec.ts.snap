@@ -658,6 +658,7 @@ Object {
           "data": Object {
             "alias": "foo bar",
             "anchorHeader": undefined,
+            "sameFile": false,
             "vaultName": undefined,
           },
           "position": Position {

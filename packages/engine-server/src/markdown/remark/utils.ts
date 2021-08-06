@@ -20,9 +20,12 @@ import {
   Position,
   NoteBlock,
   VaultUtils,
+  Point,
   TAGS_HIERARCHY,
   TagUtils,
   LINK_CONTENTS,
+  LINK_NAME,
+  ALIAS_NAME,
 } from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-server";
 import _ from "lodash";
@@ -65,6 +68,7 @@ const toString = require("mdast-util-to-string");
 export { mdastBuilder };
 export { select, selectAll } from "unist-util-select";
 export { visit };
+export { LINK_CONTENTS, LINK_NAME, ALIAS_NAME };
 
 export function addError(proc: Processor, err: DendronError) {
   const errors = proc.data("errors") as DendronError[];
@@ -195,6 +199,7 @@ const getLinks = ({
       alias: wikiLink.data.alias,
       position: wikiLink.position as Position,
       xvault: !_.isUndefined(wikiLink.data.vaultName),
+      sameFile: wikiLink.data.sameFile,
       // TODO: error if vault not found
       to: {
         fname: wikiLink.value,
@@ -306,6 +311,7 @@ export class LinkUtils {
     return {
       data: {
         xvault: link.xvault,
+        sameFile: link.sameFile,
       },
       from: {
         fname: link.value,
@@ -390,19 +396,21 @@ export class LinkUtils {
         value: string;
         anchorHeader?: string;
         vaultName?: string;
+        sameFile: false;
       }
     | {
         alias?: string;
         value?: string;
         anchorHeader: string;
         vaultName?: string;
+        sameFile: true;
       }
     | null {
     const re = new RegExp(LINK_CONTENTS, "i");
     const out = linkString.match(re);
-    if (out) {
-      let { alias, value } = out.groups as any;
-      const { anchor } = out.groups as any;
+    if (out && out.groups) {
+      let { alias, value } = out.groups;
+      const { anchor } = out.groups;
       if (!value && !anchor) return null; // Does not actually link to anything
       let vaultName: string | undefined;
       if (value) {
@@ -413,7 +421,13 @@ export class LinkUtils {
         alias = _.trim(alias);
         value = _.trim(value);
       }
-      return { alias, value, anchorHeader: anchor, vaultName };
+      return {
+        alias,
+        value,
+        anchorHeader: anchor,
+        vaultName,
+        sameFile: _.isUndefined(value),
+      };
     } else {
       return null;
     }
@@ -538,7 +552,7 @@ export class LinkUtils {
           link.from.vaultName && link.data.xvault
             ? `${CONSTANTS.DENDRON_DELIMETER}${link.from.vaultName}/`
             : "";
-        const value = link.from.fname;
+        let value = link.from.fname;
         const alias =
           !_.isUndefined(link.from.alias) && link.from.alias !== value
             ? link.from.alias + "|"
@@ -546,6 +560,10 @@ export class LinkUtils {
         const anchor = link.from.anchorHeader
           ? `#${link.from.anchorHeader}`
           : "";
+        if (link.data.sameFile && anchor !== "") {
+          // This is a same file reference, for example `[[#anchor]]`
+          value = "";
+        }
         // TODO: take into account piping direction
         return [ref, `[[`, alias, vaultPrefix, value, anchor, `]]`].join("");
       }
@@ -655,6 +673,40 @@ export class AnchorUtils {
       }
     });
     return _.trim(headerText.join(""));
+  }
+
+  /** Given a header, finds the range of text that marks the contents of the header.
+   *
+   * For example, for the header `## Foo [[Bar|bar]] and #baz`, the range will start after `## ` and end at the end of the line.
+   */
+  static headerTextPosition(header: Heading): Position {
+    let start: Point | undefined;
+    let end: Point | undefined;
+    visit(
+      header,
+      [
+        DendronASTTypes.TEXT,
+        DendronASTTypes.WIKI_LINK,
+        DendronASTTypes.HASHTAG,
+        DendronASTTypes.BLOCK_ANCHOR,
+      ],
+      (node) => {
+        if (node.type === DendronASTTypes.BLOCK_ANCHOR && end) {
+          // Preserve whitespace after the header, for example `# foo ^bar`, where
+          // `^bar` must be separated with a space since it's not part of the header
+          end.column -= 1;
+          return;
+        }
+        if (_.isUndefined(start)) start = node.position!.start;
+        end = node.position!.end;
+      }
+    );
+    if (_.isUndefined(start) || _.isUndefined(end))
+      throw new DendronError({
+        message: "Unable to find the region of text containing the header",
+      });
+
+    return { start, end };
   }
 
   /** Given a *parsed* anchor node, returns the anchor id ("header" or "^block" and positioned anchor object for it. */

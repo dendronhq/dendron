@@ -73,6 +73,20 @@ export async function checkNotInString(body: string, ...nomatch: string[]) {
   ).toBeTruthy();
 }
 
+/** The regular version of this only works in engine tests. If the test has to run in the plugin too, use this version. Make sure to check the return value! */
+export async function checkFileNoExpect({
+  fpath,
+  nomatch,
+  match,
+}: {
+  fpath: string;
+  nomatch?: string[];
+  match?: string[];
+}) {
+  const body = await fs.readFile(fpath, { encoding: "utf8" });
+  return AssertUtils.assertInString({ body, match, nomatch });
+}
+
 const getWorkspaceFolders = (wsRoot: string) => {
   const wsPath = path.join(wsRoot, CONSTANTS.DENDRON_WS_NAME);
   const settings = fs.readJSONSync(wsPath) as WorkspaceSettings;

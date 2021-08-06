@@ -102,7 +102,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     LernaUtils.publishVersion();
 
     this.print("prep repo...");
-    BuildUtils.prep();
+    BuildUtils.prepPluginPkg();
 
     this.print("install deps...");
 		BuildUtils.installPluginDependencies();

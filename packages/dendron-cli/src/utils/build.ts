@@ -204,6 +204,14 @@ export class BuildUtils {
     });
   }
 
+  static async sleep(ms: number) {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve({});
+      }, ms);
+    });
+  }
+
   static startVerdaccio() {
     const subprocess = execa("verdaccio");
     const logger = createLogger("verdaccio");

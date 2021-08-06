@@ -71,21 +71,24 @@ function lapsedMessageTest({
 
 suite("Extension", function () {
   let homeDirStub: SinonStub;
+  let keybindings: any;
   const keybindingConfigPath = [
     VSCodeUtils.getCodeUserConfigDir()[0],
     "keybindings.json"
   ].join("");
-  const existingKeybindings = readJSONWithCommentsSync(keybindingConfigPath);
 
   const ctx: ExtensionContext = setupBeforeAfter(this, {
     beforeHook: async () => {
       await resetCodeWorkspace();
       await new ResetConfigCommand().execute({ scope: "all" });
       homeDirStub = TestEngineUtils.mockHomeDir();
+      fs.ensureFileSync(keybindingConfigPath);
+      fs.writeFileSync(keybindingConfigPath, "[]");
+      keybindings = readJSONWithCommentsSync(keybindingConfigPath);
     },
     afterHook: async () => {
       homeDirStub.restore();
-      writeJSONWithComments(keybindingConfigPath, existingKeybindings);
+      fs.removeSync(keybindingConfigPath);
     },
     noSetInstallStatus: true,
   });
@@ -378,5 +381,5 @@ suite("Extension", function () {
           });
         });
     });
-  })
+  });
 });

@@ -82,27 +82,39 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     this.L.info({ currentVersion, nextVersion });
 
     this.print("setRegLocal...");
-    // BuildUtils.setRegLocal();
+    BuildUtils.setRegLocal();
 
     this.print("startVerdaccio...");
-    // BuildUtils.startVerdaccio();
-    // // HACK: give verdaccio chance to start
-    // await BuildUtils.sleep(3000);
+    BuildUtils.startVerdaccio();
+    // HACK: give verdaccio chance to start
+    await BuildUtils.sleep(3000);
 
     this.print("bump 11ty...");
-    // BuildUtils.bump11ty({ currentVersion, nextVersion });
+    BuildUtils.bump11ty({ currentVersion, nextVersion });
 
     this.print("run type-check...");
-    // BuildUtils.runTypeCheck();
+    BuildUtils.runTypeCheck();
 
     this.print("bump version...");
-    // LernaUtils.bumpVersion(opts.upgradeType);
+    LernaUtils.bumpVersion(opts.upgradeType);
 
     this.print("publish version...");
-    // LernaUtils.publishVersion();
+    LernaUtils.publishVersion();
 
     this.print("prep repo...");
     BuildUtils.prep();
+
+    this.print("install deps...");
+		BuildUtils.installPluginDependencies();
+
+    this.print("package deps...");
+		BuildUtils.packagePluginDependencies();
+
+    this.print("setRegRemote...");
+		BuildUtils.setRegRemote();
+
+    this.print("restore package.json...");
+		BuildUtils.restorePluginPkgJson();
 
     this.L.info("done");
   }

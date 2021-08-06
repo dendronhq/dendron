@@ -187,6 +187,26 @@ export class BuildUtils {
     this.setRegRemote();
   }
 
+  static installPluginDependencies() {
+    return $(`yarn install --no-lockfile`, { cwd: this.getPluginRootPath() });
+  }
+
+  static installPluginLocally(version: string) {
+    return Promise.all([
+      $$(
+        `code-insiders --install-extension "dendron-${version}.vsix" --force`,
+        { cwd: this.getPluginRootPath() }
+      ),
+      $$(`codium --install-extension "dendron-${version}.vsix" --force`, {
+        cwd: this.getPluginRootPath(),
+      }),
+    ]);
+  }
+
+  static packagePluginDependencies() {
+    return $(`vsce package --yarn`, { cwd: this.getPluginRootPath() });
+  }
+
   static prep() {
     const pkgPath = path.join(this.getPluginRootPath(), "package.json");
     this.updatePkgMeta({

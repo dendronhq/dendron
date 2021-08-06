@@ -58,9 +58,10 @@ const SCHEMAS = {
         schemas,
         vault,
       });
+      const fooSchema = _.find(data, {fname: sid});
       return [
         {
-          actual: data[0],
+          actual: fooSchema,
           expected: expectedSchema,
         },
       ];

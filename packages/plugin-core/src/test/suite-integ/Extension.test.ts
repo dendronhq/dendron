@@ -353,6 +353,7 @@ suite("Extension", function () {
               wsRoot,
             });
             sinon.stub(VSCodeUtils, "getInstallStatusForExtension").returns(InstallStatus.INITIAL_INSTALL);
+            // somehow stub is ignored if --disable-extensions is passed during the test.
             sinon.stub(VSCodeUtils, "isExtensionInstalled").returns(true);
             const cmd = new SetupWorkspaceCommand();
             await cmd.execute({

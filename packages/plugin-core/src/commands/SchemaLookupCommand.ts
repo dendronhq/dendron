@@ -86,7 +86,7 @@ export class SchemaLookupCommand extends BaseCommand<
     const lc = this.controller;
 
     const { quickpick } = await lc.prepareQuickPick({
-      title: "Schema Lookup",
+      title: "Lookup Schema",
       placeholder: "schema",
       provider: this.provider,
       initialValue: copts.initialValue,

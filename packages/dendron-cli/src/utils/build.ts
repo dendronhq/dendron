@@ -53,7 +53,7 @@ export class BuildUtils {
       .version;
   }
 
-  static getPluginPkgPath() {
+  static getPluginRootPath() {
     return path.join(this.getLernaRoot(), "packages", "plugin-core");
   }
 
@@ -74,7 +74,7 @@ export class BuildUtils {
   }
 
   static bump11ty(opts: { currentVersion: string; nextVersion: string }) {
-    const root = this.getPluginPkgPath();
+    const root = this.getPluginRootPath();
     const sitePath = path.join(root, "src", "utils", "site.ts");
     // "@dendronhq/dendron-11ty": "^1.53.0"
     const src = "^" + opts.currentVersion.replace(/^0./, "1.");
@@ -90,7 +90,7 @@ export class BuildUtils {
   }
 
   static prep() {
-    const pkgPath = this.getPluginPkgPath();
+    const pkgPath = path.join(this.getPluginRootPath(), "package.json");
     this.updatePkgMeta({
       pkgPath,
       name: "dendron",
@@ -194,7 +194,7 @@ export class BuildUtils {
   }
 
   static async publishInsider() {
-    const pkgPath = this.getPluginPkgPath();
+    const pkgPath = this.getPluginRootPath();
     const { name, version } = await this.getPkgMeta({ pkgPath });
     const pkg = `${name}-${version}.vsix`;
     await $(

@@ -28,6 +28,12 @@ export class LernaUtils {
     $(`git add .`);
     $(`git commit -m "chore: publish ${version}"`);
   }
+
+  static publishVersion() {
+    $(`lerna publish from-package --ignore-scripts`);
+    $(`node bootstrap/scripts/genMeta.js`);
+    $(`bootstrap/scripts/patch11tyVersion.sh`);
+  }
 }
 
 export class BuildUtils {

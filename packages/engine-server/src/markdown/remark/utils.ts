@@ -983,23 +983,18 @@ export class RemarkUtils {
         let dirty = false;
 
         wikiLinks.forEach((linkNode) => {
-          const existingNote = _.find(engine.notes, { fname : linkNode.value });
-          if(existingNote) {
-            const urlRoot = dendronConfig.site?.siteUrl || '';
-            const { vault } = existingNote;  
+          const existingNote = _.find(engine.notes, { fname: linkNode.value });
+          if (existingNote) {
+            const urlRoot = dendronConfig.site?.siteUrl || "";
+            const { vault } = existingNote;
             linkNode.value = WorkspaceUtils.getNoteUrl({
               config: dendronConfig,
               note: existingNote,
               vault,
               urlRoot,
-            })
-              const newValue = _.replace(linkNode.value, /\./g, "/");
-              if (linkNode.data.alias === linkNode.value) {
-                linkNode.data.alias = newValue;
-              }
-              dirty = true;
+            });
+            dirty = true;
           }
-          
         });
         //TODO: Add support for Ref Notes and Block Links
 

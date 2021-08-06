@@ -335,7 +335,8 @@ export class MarkdownPublishPod extends PublishPod<MarkdownPublishPodConfig> {
         wikiLinkToURL: {
           type: "boolean",
           description: "convert all the wikilinks to URL",
-          nullable: true
+          default: "false",
+          nullable: true,
         },
       },
     }) as JSONSchemaType<MarkdownPublishPodConfig>;
@@ -343,6 +344,7 @@ export class MarkdownPublishPod extends PublishPod<MarkdownPublishPodConfig> {
 
   async plant(opts: PublishPodPlantOpts) {
     const { engine, note, config, dendronConfig } = opts;
+    const { wikiLinkToURL = false } = config;
     let remark = MDUtilsV4.procFull({
       dest: DendronASTDest.MD_REGULAR,
       config: {
@@ -353,11 +355,13 @@ export class MarkdownPublishPod extends PublishPod<MarkdownPublishPodConfig> {
       fname: note.fname,
       vault: note.vault,
       shouldApplyPublishRules: false,
-    })
-    if(config?.wikiLinkToURL && !_.isUndefined(dendronConfig)){
-      remark = remark.use(RemarkUtils.convertWikiLinkToUrl(note, [], engine, dendronConfig));
+    });
+    if (wikiLinkToURL && !_.isUndefined(dendronConfig)) {
+      remark = remark.use(
+        RemarkUtils.convertWikiLinkToUrl(note, [], engine, dendronConfig)
+      );
     } else {
-        remark = remark.use(RemarkUtils.convertLinksFromDotNotation(note, []));
+      remark = remark.use(RemarkUtils.convertLinksFromDotNotation(note, []));
     }
     const out = remark.processSync(note.body).toString();
     return _.trim(out);

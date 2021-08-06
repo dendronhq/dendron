@@ -295,12 +295,16 @@ function CalendarView({ engine, ide }: DendronProps) {
 
 function areEqual(prevProps: DendronProps, nextProps: DendronProps) {
   const logger = createLogger("calendarViewContainer");
+
+  const didNotesLengthChanged =
+    Object.keys(prevProps.engine.notes || {}).length !==
+    Object.keys(nextProps.engine.notes || {}).length;
+
   const isDiff = _.some([
     // active note changed
     prevProps.ide.noteActive?.id !== nextProps.ide.noteActive?.id,
     // engine initialized for first time
-    _.isUndefined(prevProps.engine.notes) ||
-      (_.isEmpty(prevProps.engine.notes) && !_.isEmpty(nextProps.engine.notes)),
+    _.isUndefined(prevProps.engine.notes) || didNotesLengthChanged,
     // engine just went from pending to loading
     prevProps.engine.loading === "pending" &&
       nextProps.engine.loading === "idle",

@@ -4,8 +4,10 @@ import {
   DevCommands,
   BuildUtils,
   LernaUtils,
+	PublishEndpoint,
+	SemverVersion,
 } from "@dendronhq/dendron-cli";
-import { spy, stub } from "sinon";
+import { stub } from "sinon";
 import { runEngineTestV5 } from "../../../engine";
 
 export const runDevCmd = ({
@@ -20,7 +22,7 @@ describe("build", () => {
   const cmd = DevCommands.BUILD;
   test("ok, build local", async () => {
     await runEngineTestV5(
-      async ({ engine, wsRoot }) => {
+      async ({}) => {
         const prepPublishLocalStub = stub(
           BuildUtils,
           "prepPublishLocal"
@@ -54,6 +56,8 @@ describe("build", () => {
 
         await runDevCmd({
           cmd,
+					publishEndpoint: PublishEndpoint.LOCAL,
+					upgradeType: SemverVersion.PATCH
         });
         [
           prepPublishLocalStub,

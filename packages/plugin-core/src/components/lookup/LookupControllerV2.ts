@@ -61,6 +61,10 @@ export class LookupControllerV2 {
     if (lookupOpts?.effectType) {
       initialTypes.push(lookupOpts.effectType);
     }
+    // split behavior
+    if (lookupOpts?.splitType) {
+      initialTypes.push(lookupOpts.splitType);
+    }
 
     // initialize rest
     this.state = {

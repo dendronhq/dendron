@@ -188,7 +188,7 @@ export class BuildUtils {
   }
 
   static prep() {
-    const pkgPath = this.getPluginPkgPath();
+    const pkgPath = path.join(this.getPluginRootPath(), "package.json");
     this.updatePkgMeta({
       pkgPath,
       name: "dendron",

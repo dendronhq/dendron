@@ -173,17 +173,11 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     const shouldPublishLocal = opts.publishEndpoint === PublishEndpoint.LOCAL;
     this.L.info({ currentVersion, nextVersion });
 
+		this.print(`prep publish ${opts.publishEndpoint}...`);
     if (shouldPublishLocal) {
-      this.print("setRegLocal...");
-      BuildUtils.setRegLocal();
-
-      this.print("startVerdaccio...");
-      BuildUtils.startVerdaccio();
-      // HACK: give verdaccio chance to start
-      await BuildUtils.sleep(3000);
+      BuildUtils.prepPublishLocal();
     } else {
-			this.print("setRegRemote...");
-      BuildUtils.setRegRemote();
+      BuildUtils.prepPublishRemote();
 		}
 
     this.print("bump 11ty...");

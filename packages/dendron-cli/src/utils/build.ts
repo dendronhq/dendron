@@ -1,4 +1,5 @@
-import { createLogger } from "@dendronhq/common-server";
+import { DendronError } from "@dendronhq/common-all";
+import { createLogger, findUpTo } from "@dendronhq/common-server";
 import execa from "execa";
 import fs from "fs-extra";
 import path from "path";
@@ -53,7 +54,11 @@ export class LernaUtils {
 
 export class BuildUtils {
   static getLernaRoot() {
-    return process.cwd();
+    const maybeRoot = findUpTo({base: process.cwd(), fname: "lerna.json", returnDirPath: true, maxLvl: 4})
+    if (!maybeRoot) {
+      throw new DendronError({message: `no lerna root found from ${process.cwd()}`})
+    }
+    return maybeRoot;
   }
 
   static getCurrentVersion(): string {
@@ -116,6 +121,7 @@ export class BuildUtils {
     $("git add packages/plugin-core/src/utils/site.ts");
     const { stdout, stderr } = $(`git commit -m "chore: bump 11ty"`);
     console.log(stdout, stderr);
+    return;
   }
 
   static installPluginDependencies() {
@@ -152,12 +158,30 @@ export class BuildUtils {
   }
 
   /**
+   * Set NPM to publish locally
+   */
+  static async prepPublishLocal() {
+    this.setRegLocal();
+    this.startVerdaccio();
+    // HACK: give verdaccio chance to start
+    await this.sleep(3000);
+    return 
+  }
+
+  /**
+   * Set NPM to publish remotely
+   */
+  static async prepPublishRemote() {
+    this.setRegRemote();
+  }
+
+  /**
    *
    * @returns
    * @throws Error if typecheck is not successful
    */
   static runTypeCheck() {
-    $("yarn lerna:typecheck");
+    $("yarn lerna:typecheck", {cwd: this.getLernaRoot()});
   }
 
   static async sleep(ms: number) {
@@ -200,7 +224,7 @@ export class BuildUtils {
     return subprocess;
   }
 
-  static syncStaticAssets() {
+  static async syncStaticAssets() {
 
     const pluginAssetPath = path.join(
       this.getPluginRootPath(),
@@ -217,13 +241,14 @@ export class BuildUtils {
     fs.emptyDirSync(pluginStaticPath);
 
     fs.copySync(path.join(nextServerRoot, "out"), pluginStaticPath);
-    return Promise.all([
+    await Promise.all([
       fs.copy(
         path.join(this.getNextServerRootPath(), "assets", "js"),
         pluginStaticPath
       ),
       fs.copy(path.join(apiRoot, "assets", "static"), pluginStaticPath),
     ]);
+    return;
   }
 
   static updatePkgMeta({

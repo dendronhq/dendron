@@ -17,7 +17,8 @@ type CommandCLIOpts = {
 export enum DevCommands {
   GENERATE_JSON_SCHEMA_FROM_CONFIG = "generate_json_schema_from_config",
   BUILD = "build",
-	SYNC_ASSETS = "sync_assets"
+	SYNC_ASSETS = "sync_assets",
+	PREP_PLUGIN = "prep_plugin"
 }
 
 type CommandOpts = CommandCLIOpts & Partial<BuildCmdOpts>; //& SetupEngineOpts & {};
@@ -89,7 +90,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     LernaUtils.publishVersion();
 
     this.print("prep repo...");
-    BuildUtils.prep();
+    BuildUtils.prepPluginPkg();
 
     this.print("install deps...");
 		BuildUtils.installPluginDependencies();

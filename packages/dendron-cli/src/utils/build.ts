@@ -133,7 +133,7 @@ export class BuildUtils {
     return $(`vsce package --yarn`, { cwd: this.getPluginRootPath() });
   }
 
-  static prep() {
+  static prepPluginPkg() {
     const pkgPath = path.join(this.getPluginRootPath(), "package.json");
     this.updatePkgMeta({
       pkgPath,

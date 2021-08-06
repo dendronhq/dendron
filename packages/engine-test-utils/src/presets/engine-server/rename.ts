@@ -18,7 +18,7 @@ import {
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { checkFile } from "../../utils";
+import { checkFileNoExpect } from "../../utils";
 
 const findCreated = (changed: NoteChangeEntry[]) => {
   const created = _.find(changed, { status: "create" });
@@ -881,13 +881,11 @@ const NOTES = {
         wsRoot,
         vault: vaults[0],
       });
-      const containsTag = checkFile(
-        {
-          fpath: NoteUtils.getFullPath({ note: note!, wsRoot }),
-          nomatch: ["#foo"],
-        },
-        "#bar"
-      );
+      const containsTag = checkFileNoExpect({
+        fpath: NoteUtils.getFullPath({ note: note!, wsRoot }),
+        match: ["#bar"],
+        nomatch: ["#foo"],
+      });
 
       return [
         {
@@ -927,13 +925,11 @@ const NOTES = {
         wsRoot,
         vault: vaults[0],
       });
-      const containsTag = checkFile(
-        {
-          fpath: NoteUtils.getFullPath({ note: note!, wsRoot }),
-          nomatch: ["tags: foo"],
-        },
-        "tags: bar"
-      );
+      const containsTag = checkFileNoExpect({
+        fpath: NoteUtils.getFullPath({ note: note!, wsRoot }),
+        match: ["tags: bar"],
+        nomatch: ["tags: foo"],
+      });
 
       return [
         {
@@ -979,13 +975,11 @@ const NOTES = {
         wsRoot,
         vault: vaults[0],
       });
-      const containsTag = checkFile(
-        {
-          fpath: NoteUtils.getFullPath({ note: note!, wsRoot }),
-          nomatch: ["foo"],
-        },
-        "bar"
-      );
+      const containsTag = checkFileNoExpect({
+        fpath: NoteUtils.getFullPath({ note: note!, wsRoot }),
+        match: ["bar"],
+        nomatch: ["foo"],
+      });
 
       return [
         {
@@ -1031,7 +1025,7 @@ const NOTES = {
         wsRoot,
         vault: vaults[0],
       });
-      const containsTag = checkFile({
+      const containsTag = checkFileNoExpect({
         fpath: NoteUtils.getFullPath({ note: note!, wsRoot }),
         nomatch: [
           "tags: foo",
@@ -1085,7 +1079,7 @@ const NOTES = {
         wsRoot,
         vault: vaults[0],
       });
-      const containsTag = checkFile({
+      const containsTag = checkFileNoExpect({
         fpath: NoteUtils.getFullPath({ note: note!, wsRoot }),
         nomatch: ["foo", "bar", "undefined"],
       });

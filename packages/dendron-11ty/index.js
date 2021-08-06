@@ -5,8 +5,7 @@ const { buildSearch } = require("./bin/build-search.js");
 const { buildStyles } = require("./bin/build-styles.js");
 const { buildNav } = require("./bin/build-nav.js");
 const { copyAssets } = require("./bin/copy-assets.js");
-const {getEngine} = require("./libs/utils")
-
+const { getEngine } = require("./libs/utils");
 
 async function compile(env, overrides) {
   const argv = _.merge(
@@ -44,7 +43,6 @@ async function compile(env, overrides) {
   } else {
     return elev.write();
   }
-
 }
 
 module.exports = {

@@ -10,9 +10,7 @@ export {
   select,
   selectAll,
   LinkFilter,
-  LINK_NAME,
-  ALIAS_NAME,
-  LINK_CONTENTS,
+  visit,
 } from "./utils";
 export { wikiLinks, WikiLinksOpts, matchWikiLink } from "./wikiLinks";
 export {
@@ -21,4 +19,10 @@ export {
   matchBlockAnchor,
   BLOCK_LINK_REGEX_LOOSE,
 } from "./blockAnchors";
-export { HASHTAG_REGEX, HASHTAG_REGEX_LOOSE, hashtags, matchHashtag } from "./hashtag";
+export {
+  HASHTAG_REGEX,
+  HASHTAG_REGEX_LOOSE,
+  HASHTAG_REGEX_BASIC,
+  hashtags,
+  matchHashtag,
+} from "./hashtag";

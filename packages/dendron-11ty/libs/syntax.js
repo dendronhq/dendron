@@ -1,8 +1,7 @@
 const syntaxHighlight = require("@11ty/eleventy-plugin-syntaxhighlight");
 
-module.exports = function(eleventyConfig) {
+module.exports = function (eleventyConfig) {
   eleventyConfig.addPlugin(syntaxHighlight, {
-
     // Change which Eleventy template formats use syntax highlighters
     templateFormats: ["*"], // default
 
@@ -10,9 +9,9 @@ module.exports = function(eleventyConfig) {
     // templateFormats: ["njk", "md"],
 
     // init callback lets you customize Prism
-    init: function({ Prism }) {
-    //   const textLanguage = Prism.languages['text'];
-    //   Prism.languages.badlang = textLanguage;
+    init: function ({ Prism }) {
+      //   const textLanguage = Prism.languages['text'];
+      //   Prism.languages.badlang = textLanguage;
     },
 
     // Added in 3.0, set to true to always wrap lines in `<span class="highlight-line">`
@@ -22,7 +21,7 @@ module.exports = function(eleventyConfig) {
     // Added in 3.0.2, set to false to opt-out of pre-highlight removal of leading
     // and trailing whitespace
     trim: true,
-    
+
     // Added in 3.0.4, change the separator between lines (you may want "\n")
     lineSeparator: "<br>",
   });

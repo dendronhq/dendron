@@ -14,9 +14,14 @@ import { PodKind } from "./types";
 import { JSONSchemaType } from "ajv";
 import { PodUtils } from "./utils";
 
+export enum PROMPT {
+  USERPROMPT = "userPrompt",
+}
+
 export type PodOpts<T> = {
   engine: DEngineClient;
   config: T;
+  onPrompt?: (arg0?: PROMPT) => Promise<any | undefined>
 } & WorkspaceOpts;
 
 // === Publish Pod
@@ -118,6 +123,7 @@ export abstract class ImportPod<T extends ImportPodConfig = ImportPodConfig> {
       vname: vaultName,
     });
     const srcURL = URI.file(resolvePath(src, engine.wsRoot));
+     
     return await this.plant({ ...opts, src: srcURL, vault });
   }
   abstract plant(

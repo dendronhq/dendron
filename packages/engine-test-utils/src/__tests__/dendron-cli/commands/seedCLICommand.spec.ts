@@ -8,12 +8,7 @@ import {
 } from "@dendronhq/common-all";
 import { tmpDir } from "@dendronhq/common-server";
 import { SeedCLICommand, SeedCLICommandOpts } from "@dendronhq/dendron-cli";
-import {
-  DConfig,
-  SeedInitMode,
-  SeedService,
-  SeedUtils,
-} from "@dendronhq/engine-server";
+import { DConfig, SeedInitMode } from "@dendronhq/engine-server";
 import os from "os";
 import path from "path";
 import { runEngineTestV5 } from "../../../engine";
@@ -36,19 +31,9 @@ export const runSeedCmd = ({
 
 const BAD_SEED_ID = () => "dendron.no-exist";
 
-async function createSeed({ engine }: { engine: DEngineClient }) {
-  const tmp = tmpDir().name;
-  const { registryFile, seedDict } = await TestSeedUtils.createSeedRegistry({
-    engine,
-    wsRoot: tmp,
-  });
-  const seedId = TestSeedUtils.defaultSeedId();
-  return { registryFile, seedDict, seedId };
-}
-
 // Platform agnostic check file for a seed vault path
 function getSeedVaultPathForCheckFile(seedId: string) {
-  return path.join(`${seedId}`, `vault`).replace("\\", "\\\\")
+  return path.join(`${seedId}`, `vault`).replace("\\", "\\\\");
 }
 
 // Skip on Windows for now until reliability issues can be fixed.
@@ -72,81 +57,6 @@ runTest("remove", () => {
       },
       {
         expect,
-      }
-    );
-  });
-
-  test("ok: remove non-initialized seed", async () => {
-    await runEngineTestV5(
-      async ({ engine, wsRoot, vaults }) => {
-        // create seed
-        const {
-          registryFile,
-          seedDict,
-          seedId: id,
-        } = await createSeed({ engine });
-
-        // add seed to config;
-        const seed = seedDict[id];
-        const seedService = new SeedService({ wsRoot, registryFile });
-        await seedService.addSeedMetadata({ seed, wsRoot });
-
-        // remove seed
-        await seedService.removeSeed({ id });
-
-        await checkFile({
-          fpath: path.join(wsRoot, "dendron.yml"),
-          snapshot: true,
-        });
-        checkVaults(
-          {
-            wsRoot,
-            vaults,
-          },
-          expect
-        );
-      },
-      {
-        expect,
-        addVSWorkspace: true,
-      }
-    );
-  });
-
-  test("ok: remove initialized seed", async () => {
-    await runEngineTestV5(
-      async ({ engine, wsRoot, vaults }) => {
-        // create seed
-        const { registryFile, seedId: id } = await createSeed({ engine });
-
-        // add seed to config;
-        const seedService = new SeedService({ wsRoot, registryFile });
-        await seedService.addSeed({ id });
-
-        // remove seed
-        await seedService.removeSeed({ id });
-
-        const seedPath = SeedUtils.seed2Path({ wsRoot, id });
-        await checkNotInDir(
-          { fpath: path.dirname(seedPath), snapshot: true },
-          id
-        );
-        expect(id).toMatchSnapshot();
-        await checkFile({
-          fpath: path.join(wsRoot, "dendron.yml"),
-          snapshot: true,
-        });
-        checkVaults(
-          {
-            wsRoot,
-            vaults,
-          },
-          expect
-        );
-      },
-      {
-        expect,
-        addVSWorkspace: true,
       }
     );
   });

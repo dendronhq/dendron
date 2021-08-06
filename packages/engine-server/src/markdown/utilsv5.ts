@@ -47,7 +47,8 @@ export enum ProcMode {
    */
   FULL = "all data",
   /**
-   * Running processor in import mode. notes don't exist
+   * Running processor in import mode. Notes don't exist. Used for import pods like {@link MarkdownPod}
+   * where notes don't exist in the engine prior to import.
    */
   IMPORT = "IMPORT",
 }
@@ -253,7 +254,7 @@ export class MDUtilsV5 {
             proc = proc.use(dendronPreview);
           }
           if (opts.flavor === ProcFlavor.HOVER_PREVIEW) {
-            proc = proc.use(dendronHoverPreview)
+            proc = proc.use(dendronHoverPreview);
           }
         }
         break;
@@ -341,9 +342,15 @@ export class MDUtilsV5 {
     return pRehype;
   }
 
-  static procRemarkFull(data: ProcDataFullOptsV5, opts?: { mode?: ProcMode, flavor?: ProcFlavor }) {
+  static procRemarkFull(
+    data: ProcDataFullOptsV5,
+    opts?: { mode?: ProcMode; flavor?: ProcFlavor }
+  ) {
     return this._procRemark(
-      { mode: opts?.mode || ProcMode.FULL, flavor: opts?.flavor || ProcFlavor.REGULAR },
+      {
+        mode: opts?.mode || ProcMode.FULL,
+        flavor: opts?.flavor || ProcFlavor.REGULAR,
+      },
       data
     );
   }

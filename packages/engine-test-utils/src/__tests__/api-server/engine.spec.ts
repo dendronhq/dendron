@@ -2,7 +2,7 @@ import _ from "lodash";
 import { createEngineFromServer, runEngineTestV5 } from "../../engine";
 import { ENGINE_CONFIG_PRESETS, ENGINE_PRESETS } from "../../presets";
 
-const createEngine = createEngineFromServer
+const createEngine = createEngineFromServer;
 
 describe("engine, schemas/", () => {
   const nodeType = "SCHEMAS";

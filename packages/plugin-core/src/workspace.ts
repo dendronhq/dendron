@@ -9,7 +9,7 @@ import {
   getStage,
   ResponseCode,
   TutorialEvents,
-  WorkspaceSettings
+  WorkspaceSettings,
 } from "@dendronhq/common-all";
 import {
   NodeJSUtils,
@@ -17,12 +17,12 @@ import {
   readJSONWithCommentsSync,
   readMD,
   resolveTilde,
-  writeJSONWithComments
+  writeJSONWithComments,
 } from "@dendronhq/common-server";
 import {
   DConfig,
   HistoryService,
-  WorkspaceService
+  WorkspaceService,
 } from "@dendronhq/engine-server";
 import { PodUtils } from "@dendronhq/pods-core";
 import fs from "fs-extra";
@@ -40,7 +40,7 @@ import {
   DendronContext,
   DENDRON_COMMANDS,
   extensionQualifiedId,
-  GLOBAL_STATE
+  GLOBAL_STATE,
 } from "./constants";
 import BacklinksTreeDataProvider from "./features/BacklinksTreeDataProvider";
 import { codeActionProvider } from "./features/codeActionProvider";
@@ -396,20 +396,32 @@ export class DendronWorkspace {
     return settings;
   }
 
-  getWorkspaceSettingOrDefault({wsConfigKey, dendronConfigKey}: {wsConfigKey: keyof DendronWorkspaceSettings, dendronConfigKey: string }) {
+  getWorkspaceSettingOrDefault({
+    wsConfigKey,
+    dendronConfigKey,
+  }: {
+    wsConfigKey: keyof DendronWorkspaceSettings;
+    dendronConfigKey: string;
+  }) {
     const config = getWS().config;
     // user already using new value
     if (_.get(config, dendronConfigKey)) {
       return _.get(config, dendronConfigKey);
     }
     // migrate value from workspace setting. if not exist, migrate from new default
-		const out = _.get(this.getDendronWorkspaceSettingsSync(), wsConfigKey, _.get(DConfig.genDefaultConfig(), dendronConfigKey))
+    const out = _.get(
+      this.getDendronWorkspaceSettingsSync(),
+      wsConfigKey,
+      _.get(DConfig.genDefaultConfig(), dendronConfigKey)
+    );
     // this should not happen
     if (_.isUndefined(out)) {
-      throw new DendronError({"message": `no config key found. workspace: ${wsConfigKey}, dendron.yml: ${dendronConfigKey}`})
+      throw new DendronError({
+        message: `no config key found. workspace: ${wsConfigKey}, dendron.yml: ${dendronConfigKey}`,
+      });
     }
     return out;
-	}
+  }
 
   get podsDir(): string {
     const rootDir = DendronWorkspace.wsRoot();

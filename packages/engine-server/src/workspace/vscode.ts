@@ -90,6 +90,17 @@ export type WriteConfigOpts = {
 };
 
 export class WorkspaceConfig {
+  static workspaceFile(wsRoot: string) {
+    return path.join(wsRoot, CONSTANTS.DENDRON_WS_NAME);
+  }
+
+  /**
+   * Create dendron.code-workspace file
+   * @param wsRoot
+   * @param vaults
+   * @param opts
+   * @returns
+   */
   static write(wsRoot: string, vaults?: DVault[], opts?: WriteConfigOpts) {
     const cleanOpts = _.defaults(opts, {
       vaults,
@@ -97,17 +108,20 @@ export class WorkspaceConfig {
     });
     const jsonBody: WorkspaceSettings = _.merge(
       {
-        folders: cleanOpts.vaults ? cleanOpts.vaults.map((ent) => ({ path: ent.fsPath })) : [],
+        folders: cleanOpts.vaults
+          ? cleanOpts.vaults.map((ent) => ({
+              path: ent.fsPath,
+              name: ent.name,
+            }))
+          : [],
         settings: Settings.defaults(),
         extensions: Extensions.defaults(),
       },
       cleanOpts.overrides
     );
-    return fs.writeJSONSync(
-      path.join(wsRoot, CONSTANTS.DENDRON_WS_NAME),
-      jsonBody,
-      { spaces: 2 }
-    );
+    return fs.writeJSONSync(WorkspaceConfig.workspaceFile(wsRoot), jsonBody, {
+      spaces: 2,
+    });
   }
 }
 

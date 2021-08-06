@@ -147,11 +147,17 @@ export class NoteLookupCommand extends BaseCommand<
         DirectChildFilterBtn.create(
           copts.filterMiddleware?.includes("directChildOnly")
         ),
-        SelectionExtractBtn.create(copts.selectionType === LookupSelectionTypeEnum.selectionExtract),
-        Selection2LinkBtn.create(copts.selectionType === LookupSelectionTypeEnum.selection2link),
+        SelectionExtractBtn.create(
+          copts.selectionType === LookupSelectionTypeEnum.selectionExtract
+        ),
+        Selection2LinkBtn.create(
+          copts.selectionType === LookupSelectionTypeEnum.selection2link
+        ),
         JournalBtn.create(copts.noteType === LookupNoteTypeEnum.journal),
         ScratchBtn.create(copts.noteType === LookupNoteTypeEnum.scratch),
-        HorizontalSplitBtn.create(copts.splitType === LookupSplitTypeEnum.horizontal),
+        HorizontalSplitBtn.create(
+          copts.splitType === LookupSplitTypeEnum.horizontal
+        ),
       ],
     });
     this._provider = new NoteLookupProvider("lookup", {
@@ -285,7 +291,7 @@ export class NoteLookupCommand extends BaseCommand<
         : PickerUtilsV2.getOrPromptVaultForOpenEditor();
       nodeNew = NoteUtils.create({ fname, vault });
       if (picker.selectionProcessFunc !== undefined) {
-        nodeNew = await picker.selectionProcessFunc(nodeNew) as NoteProps;
+        nodeNew = (await picker.selectionProcessFunc(nodeNew)) as NoteProps;
       }
     }
     const resp = await engine.writeNote(nodeNew, {

@@ -68,10 +68,13 @@ suite("InsertNoteCommand", function () {
           const editor = VSCodeUtils.getActiveTextEditorOrThrow();
           editor.selection = new vscode.Selection(8, 0, 8, 12);
           await cmd.run();
-          const date= Time.now().toISODate();
+          const date = Time.now().toISODate();
           const body = editor.document.getText();
           expect(
-            await AssertUtils.assertInString({ body, match: [`template ${date}`] })
+            await AssertUtils.assertInString({
+              body,
+              match: [`template ${date}`],
+            })
           ).toBeTruthy();
           done();
         },

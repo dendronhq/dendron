@@ -1,4 +1,4 @@
-import image from '@rollup/plugin-image';
+import image from "@rollup/plugin-image";
 
 module.exports = {
   rollup(config) {

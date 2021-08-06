@@ -21,18 +21,18 @@ suite("StartServer", function () {
     },
     afterHook: async () => {
       homeDirStub.restore();
-    }
+    },
   });
 
-	describe("basic", function() {
-
-		test("ok", function(done) {
-			ServerUtils.execServerNode({
+  describe("basic", function () {
+    test("ok", function (done) {
+      ServerUtils.execServerNode({
         scriptPath: path.join(__dirname, "..", "..", "server.js"),
-        logPath: DendronWorkspace.instance().context.logPath}).then(({port}) => {
-				expect(port > 0).toBeTruthy();
-				done();
-			});
-		});
-	});
+        logPath: DendronWorkspace.instance().context.logPath,
+      }).then(({ port }) => {
+        expect(port > 0).toBeTruthy();
+        done();
+      });
+    });
+  });
 });

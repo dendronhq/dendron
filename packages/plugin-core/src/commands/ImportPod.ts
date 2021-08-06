@@ -5,6 +5,7 @@ import {
   PodClassEntryV4,
   PodItemV4,
   PodUtils,
+  PROMPT
 } from "@dendronhq/pods-core";
 import { ProgressLocation, Uri, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
@@ -98,7 +99,17 @@ export class ImportPodCommand extends BaseCommand<
           engine,
           wsRoot,
           vaults,
+          onPrompt: async (type?: PROMPT) => {
+            const resp = (type === PROMPT.USERPROMPT) ?
+            await window.showInformationMessage(
+              "Do you want to overwrite",
+                { modal: true },
+                { title: "Yes" }
+              ) : window.showInformationMessage("Note is already in sync with the google doc") ;
+              return resp
+          }
         });
+        
         if (errors && errors.length > 0) {
           let errorMsg = `Error while importing ${errors.length} notes:\n`;
           errors.forEach((e) => {

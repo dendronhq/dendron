@@ -1,16 +1,18 @@
 import {
   CleanDendronSiteConfig,
-  CONSTANTS, DendronConfig, DEngineClient,
+  CONSTANTS,
+  DendronConfig,
+  DEngineClient,
   DVault,
   DWorkspace,
   WorkspaceFolderRaw,
   WorkspaceOpts,
-  WorkspaceSettings
+  WorkspaceSettings,
 } from "@dendronhq/common-all";
 import {
   getDurationMilliseconds,
   tmpDir,
-  vault2Path
+  vault2Path,
 } from "@dendronhq/common-server";
 import {
   GenTestResults,
@@ -21,13 +23,14 @@ import {
   runJestHarnessV2,
   SetupHookFunction,
   SetupTestFunctionV4,
-  TestResult
+  TestResult,
 } from "@dendronhq/common-test-utils";
 import { LaunchEngineServerCommand } from "@dendronhq/dendron-cli";
+import { WorkspaceConfig } from "@dendronhq/engine-server";
 import {
   createEngine as engineServerCreateEngine,
   DConfig,
-  WorkspaceService
+  WorkspaceService,
 } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -57,13 +60,16 @@ export type TestSetupWorkspaceOpts = {
 
 export type AsyncCreateEngineFunction = (
   opts: WorkspaceOpts
-) => Promise<{engine: DEngineClient, port?: number}>;
+) => Promise<{ engine: DEngineClient; port?: number }>;
 
 /**
  * Create an {@link DendronEngine}
  */
 export async function createEngineFromEngine(opts: WorkspaceOpts) {
-  return {engine: engineServerCreateEngine(opts) as DEngineClient, port: undefined};
+  return {
+    engine: engineServerCreateEngine(opts) as DEngineClient,
+    port: undefined,
+  };
 }
 
 export { DEngineClient, DVault, WorkspaceOpts };
@@ -88,7 +94,7 @@ export async function createEngineFromServer(
 ): Promise<any> {
   const { engine, port } = await createServer(opts);
   await engine.init();
-  return {engine, port};
+  return { engine, port };
 }
 
 export function createSiteConfig(
@@ -121,6 +127,9 @@ export async function setupWS(opts: {
   const wsRoot = opts.wsRoot || tmpDir().name;
   const ws = new WorkspaceService({ wsRoot });
   ws.createConfig();
+  // create dendron.code-workspace
+  WorkspaceConfig.write(wsRoot, opts.vaults);
+
   const config = ws.config;
   let vaults = await Promise.all(
     opts.vaults.map(async (vault) => {
@@ -173,7 +182,11 @@ export type RunEngineTestV5Opts = {
 } & TestSetupWorkspaceOpts;
 
 export type RunEngineTestFunctionV5<T = any> = (
-  opts: RunEngineTestFunctionOpts & { extra?: any; engineInitDuration: number, port?: number }
+  opts: RunEngineTestFunctionOpts & {
+    extra?: any;
+    engineInitDuration: number;
+    port?: number;
+  }
 ) => Promise<TestResult[] | void | T>;
 
 export class TestPresetEntryV5 {
@@ -326,7 +339,7 @@ export async function runEngineTestV5(
     // restore sinon so other tests can keep running
     if (homeDirStub) {
       homeDirStub.restore();
-    };
+    }
   }
 }
 

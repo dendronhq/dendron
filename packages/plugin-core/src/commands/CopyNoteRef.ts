@@ -12,7 +12,7 @@ import _ from "lodash";
 import { TextEditor, window, Selection, Range, Position } from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
-import { clipboard, VSCodeUtils } from "../utils";
+import { clipboard, DendronClientUtilsV2, VSCodeUtils } from "../utils";
 import { getSelectionAnchors } from "../utils/editor";
 import { DendronWorkspace, getEngine } from "../workspace";
 import { BasicCommand } from "./base";
@@ -108,13 +108,14 @@ export class CopyNoteRefCommand extends BasicCommand<
     const fname = NoteUtils.uri2Fname(editor.document.uri);
     const wsRoot = DendronWorkspace.wsRoot();
     const vault = PickerUtilsV2.getVaultForOpenEditor();
+    const engine = getEngine();
     const note: NoteProps = NoteUtils.getNoteOrThrow({
       fname,
-      notes: getEngine().notes,
+      notes: engine.notes,
       wsRoot,
       vault,
     });
-    const useVaultPrefix = _.size(getEngine().vaults) > 1;
+    const useVaultPrefix = DendronClientUtilsV2.shouldUseVaultPrefix(engine);
     const link = await this.buildLink({ note, useVaultPrefix, editor });
     try {
       clipboard.writeText(link);

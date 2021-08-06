@@ -72,11 +72,11 @@ export class InsertNoteCommand extends BasicCommand<
       return pick.body;
     });
     const txt = templates.join("\n");
-    const snippet = new SnippetString(txt)
+    const snippet = new SnippetString(txt);
     const editor = VSCodeUtils.getActiveTextEditor()!;
     const pos = editor.selection.active;
     const selection = new Selection(pos, pos);
-    await editor.insertSnippet(snippet,selection);
+    await editor.insertSnippet(snippet, selection);
     return txt;
   }
 }

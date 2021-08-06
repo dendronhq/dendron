@@ -6,7 +6,7 @@ export enum ThemeType {
 }
 
 export enum ThemeTarget {
-  PRISM = "PRISM"
+  PRISM = "PRISM",
 }
 
 export const CONSTANTS = {

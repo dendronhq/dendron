@@ -39,7 +39,8 @@ connection.onInitialize((params: InitializeParams) => {
   const ctx = "connection:onInitialize";
   LSPUtils.log({ ctx: "enter" });
   let capabilities = params.capabilities;
-  const dendronOptions = params.initializationOptions as DendronInitializationOptions;
+  const dendronOptions =
+    params.initializationOptions as DendronInitializationOptions;
   if (!dendronOptions) {
     connection.console.error("no dendron options found");
     throw Error("no dendron options found");
@@ -251,18 +252,16 @@ connection.onCompletion(
 
 // This handler resolves additional information for the item selected in
 // the completion list.
-connection.onCompletionResolve(
-  (item: CompletionItem): CompletionItem => {
-    if (item.data === 1) {
-      item.detail = "TypeScript details!!";
-      item.documentation = "TypeScript documentation";
-    } else if (item.data === 2) {
-      item.detail = "JavaScript details!!";
-      item.documentation = "JavaScript documentation";
-    }
-    return item;
+connection.onCompletionResolve((item: CompletionItem): CompletionItem => {
+  if (item.data === 1) {
+    item.detail = "TypeScript details!!";
+    item.documentation = "TypeScript documentation";
+  } else if (item.data === 2) {
+    item.detail = "JavaScript details!!";
+    item.documentation = "JavaScript documentation";
   }
-);
+  return item;
+});
 
 // Make the text document manager listen on the connection
 // for open, change and close text document events

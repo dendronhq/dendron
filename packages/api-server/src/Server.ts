@@ -20,7 +20,7 @@ export function appModule({
   nextStaticRoot?: string;
 }) {
   const ctx = "appModule:start";
-  const logger = getLogger()
+  const logger = getLogger();
   const app = express();
   app.use(cors());
   app.use(express.json({ limit: "500mb" }));
@@ -44,8 +44,14 @@ export function appModule({
   // for dev environment, get preview from next-server in monorepo
   if (getStage() !== "prod") {
     // packages/api-server/lib/Server.ts
-    const devStaticRoot = path.join(__dirname, "..", "..", "dendron-next-server", "out");
-    logger.info({ ctx, msg: "devStaticRoot:add", devStaticRoot});
+    const devStaticRoot = path.join(
+      __dirname,
+      "..",
+      "..",
+      "dendron-next-server",
+      "out"
+    );
+    logger.info({ ctx, msg: "devStaticRoot:add", devStaticRoot });
     app.use(express.static(devStaticRoot));
   }
   if (nextStaticRoot) {

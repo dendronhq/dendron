@@ -141,16 +141,16 @@ suite("CopyNoteUrl", function () {
             wsRoot,
           })
         );
-          const vault = VaultUtils.getVaultByName({
-            vaults: getWS().config.vaults,
-            vname: seedId,
-          })!;
-          await VSCodeUtils.openNoteByPath({ vault, fname: "root" });
-          VSCodeUtils.getActiveTextEditorOrThrow().selection =
-            new vscode.Selection(0, 0, 0, 0); // Otherwise it has the header selected
-          const link = await new CopyNoteURLCommand().run();
-          expect("https://foo.com").toEqual(link);
-          done();
+        const vault = VaultUtils.getVaultByName({
+          vaults: getWS().config.vaults,
+          vname: seedId,
+        })!;
+        await VSCodeUtils.openNoteByPath({ vault, fname: "root" });
+        VSCodeUtils.getActiveTextEditorOrThrow().selection =
+          new vscode.Selection(0, 0, 0, 0); // Otherwise it has the header selected
+        const link = await new CopyNoteURLCommand().run();
+        expect("https://foo.com").toEqual(link);
+        done();
       },
     });
   });

@@ -65,6 +65,7 @@ const {
     name: DEFAULT_JOURNAL_NAME,
   },
 } = {
+  // TODO replace with `DConfig.getDefaultConfig() from @dendronhq/engine-server`
   journal: {
     dailyDomain: "daily",
     name: "journal",

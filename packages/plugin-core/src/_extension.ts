@@ -28,6 +28,7 @@ import {
   WorkspaceService,
 } from "@dendronhq/engine-server";
 import { ExecaChildProcess } from "execa";
+import fs from "fs-extra";
 import _ from "lodash";
 import { Duration } from "luxon";
 import path from "path";
@@ -434,6 +435,10 @@ export async function _activate(
       AnalyticsUtils.track(ExtensionEvents.VimExtensionInstalledInitial);
       const [keybindingConfigPath, resolvedKeybindings] = getVimExtensionResolvedKeybinding();
       if (!_.isUndefined(resolvedKeybindings)) {
+        if (!fs.existsSync(keybindingConfigPath)) {
+          fs.ensureFileSync(keybindingConfigPath);
+          fs.writeFileSync(keybindingConfigPath, "[]");
+        }
         writeJSONWithComments(keybindingConfigPath, resolvedKeybindings);
       }
     }

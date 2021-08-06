@@ -25,7 +25,12 @@ export enum TutorialEvents {
   Tutorial_5_Show = "Tutorial_5_Show",
 }
 
+export enum ExtensionEvents {
+  VimExtensionInstalledInitial = "Vim_Extension_Installed_Initial",
+}
+
 export const DendronEvents = {
   VSCodeEvents,
   TutorialEvents,
+  ExtensionEvents,
 };

@@ -902,13 +902,76 @@ export class NoteUtils {
    * @param notes: All notes in `engine.notes`, used to check the ancestors of `note`.
    * @returns The color, and whether this color was randomly generated or explicitly defined.
    */
-  static color({
-    note,
-  }: {
-    note: NoteProps;
+  static color(opts: {
+    fname: string;
+    vault?: DVault;
+    notes: NotePropsDict;
   }): [string, "configured" | "generated"] {
-    if (note.color) return [note.color, "configured"];
-    return [randomColor(note.fname), "generated"];
+    const ancestors = NoteUtils.ancestors({ ...opts, includeSelf: true });
+    for (const note of ancestors) {
+      if (note.color) return [note.color, "configured"];
+    }
+    return [randomColor(opts.fname), "generated"];
+  }
+
+  /** Get the ancestors of a note, in the order of the closest to farthest.
+   *
+   * This function will continue searching for ancestors even if a note with `fname`
+   * doesn't exist, provided that it has ancestors.
+   * For example, if fname is `foo.bar.baz` but only `foo` exists, this function
+   * will find `foo`.
+   *
+   * ```ts
+   * const ancestorNotes = NoteUtils.ancestors({ fname, notes: engine.notes });
+   * for (const ancestor of ancestorNotes) { }
+   * // or
+   * const allAncestors = [...ancestorNotes];
+   * ```
+   *
+   * @param opts.fname The fname of the note you are trying to get the ancestors of.
+   * @param opts.vault The vault to look for. If provided, only notes from this vault will be included.
+   * @param opts.notes All notes in `engine.notes`.
+   * @param opts.includeSelf: If true, note with `fname` itself will be included in the ancestors.
+   * @param opts.nonStubOnly: If true, only notes that are not stubs will be included.
+   */
+  static *ancestors(opts: {
+    fname: string;
+    vault?: DVault;
+    notes: NotePropsDict;
+    includeSelf?: boolean;
+    nonStubOnly?: boolean;
+  }): Generator<NoteProps> {
+    const { fname, notes, includeSelf, nonStubOnly } = opts;
+    let { vault } = opts;
+    let parts = fname.split(".");
+    let note: NoteProps | undefined = NoteUtils.getNotesByFname({
+      fname,
+      vault,
+      notes,
+    })[0];
+
+    // Check if we need this note itself
+    if (note && includeSelf && !(nonStubOnly && note.stub)) yield note;
+    if (fname === "root") return;
+
+    // All ancestors within the same hierarchy
+    while (parts.length > 1) {
+      parts = parts.slice(undefined, parts.length - 1);
+      note = NoteUtils.getNotesByFname({
+        fname: parts.join("."),
+        vault,
+        notes,
+      })[0];
+      if (note && !(nonStubOnly && note.stub)) yield note;
+    }
+
+    // The ultimate ancestor of all notes is root
+    if (note) {
+      // Yielded at least one note
+      if (!vault) vault = note.vault;
+      note = NoteUtils.getNotesByFname({ fname: "root", notes, vault })[0];
+      if (note) yield note;
+    }
   }
 }
 

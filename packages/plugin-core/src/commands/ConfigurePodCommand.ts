@@ -1,6 +1,7 @@
 import {
   getAllExportPods,
   getAllImportPods,
+  getAllPublishPods,
   podClassEntryToPodItemV4,
   PodClassEntryV4,
   PodItemV4,
@@ -34,9 +35,12 @@ export class ConfigurePodCommand extends BasicCommand<
   async gatherInputs(): Promise<CommandInput | undefined> {
     const podsImport = getAllImportPods();
     const podsExport = getAllExportPods();
+    /**added publish pod to configure publish configs */
+    const podsPublish = getAllPublishPods();
     const podItems: PodItemV4[] = podsExport
       .map((p) => podClassEntryToPodItemV4(p))
-      .concat(podsImport.map((p) => podClassEntryToPodItemV4(p)));
+      .concat(podsImport.map((p) => podClassEntryToPodItemV4(p)))
+      .concat(podsPublish.map((p) => podClassEntryToPodItemV4(p)));
     const userPick = await showPodQuickPickItemsV4(podItems);
     if (!userPick) {
       return;

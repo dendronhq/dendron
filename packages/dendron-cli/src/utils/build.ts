@@ -1,5 +1,5 @@
 import { createLogger } from "@dendronhq/common-server";
-import execa, { ExecaChildProcess } from "execa";
+import execa from "execa";
 import fs from "fs-extra";
 import path from "path";
 import semver from "semver";
@@ -10,6 +10,13 @@ type PkgJson = {
   description: string;
   main: string;
   version: string;
+  repository: PkgRepository;
+};
+
+type PkgRepository = {
+  type: "git";
+  url: string;
+  directory?: string;
 };
 
 export enum SemverVersion {
@@ -82,6 +89,19 @@ export class BuildUtils {
     console.log(stdout, stderr);
   }
 
+  static prep() {
+    const pkgPath = this.getPluginPkgPath();
+    this.updatePkgMeta({
+      pkgPath,
+      name: "dendron",
+      main: "./dist/extension.js",
+      repository: {
+        url: "https://github.com/dendronhq/dendron.git",
+        type: "git",
+      },
+    });
+  }
+
   /**
    *
    * @returns
@@ -135,15 +155,23 @@ export class BuildUtils {
     pkgPath,
     name,
     description,
+    main,
+    repository,
   }: {
     pkgPath: string;
     name: string;
-    description: string;
-  }) {
+  } & Partial<PkgJson>) {
     const pkg = fs.readJSONSync(pkgPath) as PkgJson;
     pkg.name = name;
-    pkg.displayName = name;
-    pkg.description = description;
+    if (description) {
+      pkg.description = description;
+    }
+    if (main) {
+      pkg.main = main;
+    }
+    if (repository) {
+      pkg.repository = repository;
+    }
     pkg.main = "dist/extension.js";
     fs.writeJSONSync(pkgPath, pkg, { spaces: 4 });
   }

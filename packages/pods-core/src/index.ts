@@ -2,21 +2,22 @@ import {
   GitPunchCardExportPod,
   JSONExportPod,
   JSONImportPod,
-  JSONPublishPod,
+  JSONPublishPod
 } from "./builtin";
 import { AirtableExportPod } from "./builtin/AirtablePod";
-import { GithubImportPod } from "./builtin/GithubPod";
+import { GDocImportPod } from "./builtin/GDocPod";
+import { GithubImportPod, GithubPublishPod } from "./builtin/GithubPod";
 import { GraphvizExportPod } from "./builtin/GraphvizPod";
 import { HTMLPublishPod } from "./builtin/HTMLPod";
 import {
   MarkdownExportPod,
   MarkdownImportPod,
-  MarkdownPublishPod,
+  MarkdownPublishPod
 } from "./builtin/MarkdownPod";
-import { GithubImportPod, GithubPublishPod } from "./builtin/GithubPod";
+import { NextjsExportPod } from "./builtin/NextjsExportPod";
 import { PodClassEntryV4 } from "./types";
-import { GDocImportPod } from "./builtin/GDocPod";
 
+NextjsExportPod
 export * from "./basev3";
 export * from "./builtin";
 export * from "./types";

@@ -52,6 +52,14 @@ export class LernaUtils {
   }
 }
 
+export class LernaUtils {
+  static bumpVersion(version: SemverVersion) {
+    $(`lerna version ${version} --no-git-tag-version`);
+    $(`git add .`);
+    $(`git commit -m "chore: publish ${version}"`);
+  }
+}
+
 export class BuildUtils {
   static getLernaRoot() {
     const maybeRoot = findUpTo({base: process.cwd(), fname: "lerna.json", returnDirPath: true, maxLvl: 4})

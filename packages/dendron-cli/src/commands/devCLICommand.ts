@@ -91,7 +91,10 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     // BuildUtils.bump11ty({ currentVersion, nextVersion });
 
     this.print("run type-check...");
-    BuildUtils.runTypeCheck();
+    // BuildUtils.runTypeCheck();
+
+    this.print("bump version...");
+    LernaUtils.bumpVersion(opts.upgradeType);
 
     this.L.info("done");
   }

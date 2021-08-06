@@ -11,11 +11,14 @@ import {
   VaultUtils,
   VSCodeEvents,
   InstallStatus,
+  ExtensionEvents,
 } from "@dendronhq/common-all";
 import {
   getDurationMilliseconds,
   getOS,
+  readJSONWithCommentsSync,
   SegmentClient,
+  writeJSONWithComments,
 } from "@dendronhq/common-server";
 import {
   DConfig,
@@ -425,6 +428,17 @@ export async function _activate(
     toggleViews(false);
   }
 
+  if (extensionInstallStatus === InstallStatus.INITIAL_INSTALL) {
+    const VimInstalled = VSCodeUtils.isExtensionInstalled("vscodevim.vim");
+    if (VimInstalled) {
+      AnalyticsUtils.track(ExtensionEvents.VimExtensionInstalledInitial);
+      const [keybindingConfigPath, resolvedKeybindings] = getVimExtensionResolvedKeybinding();
+      if (!_.isUndefined(resolvedKeybindings)) {
+        writeJSONWithComments(keybindingConfigPath, resolvedKeybindings);
+      }
+    }
+  }
+
   return showWelcomeOrWhatsNew({
     extensionInstallStatus,
     version: DendronWorkspace.version(),
@@ -585,4 +599,38 @@ export function shouldDisplayLapsedUserMsg(): boolean {
     !metaData.firstWsInitialize &&
     refreshMsg
   );
+}
+
+export function getVimExtensionResolvedKeybinding() {
+  // check where the keyboard shortcut is configured
+  const [userConfigDir, _delimiter, osName] = VSCodeUtils.getCodeUserConfigDir();
+  const keybindingConfigPath = [userConfigDir, "keybindings.json"].join("");
+
+  // read keybindings.json
+  const keybindings = readJSONWithCommentsSync(keybindingConfigPath);
+
+  // check if override is already there
+  const alreadyHasOverride = keybindings.filter((entry: any) => {
+    if (!_.isUndefined(entry.command)) {
+      return entry.command === "-expandLineSelection"
+    } else {
+      return false;
+    }
+  }).length > 0;
+  
+  if (alreadyHasOverride) {
+    return [];
+  }
+
+  // add override if there isn't.
+  const metaKey = osName === "Darwin" ? "cmd" : "ctrl";
+  const OVERRIDE_EXPAND_LINE_SELECTION = {
+    "key": `${metaKey}+l`,
+    "command": "-expandLineSelection",
+    "when": "textInputFocus"
+  };
+
+  const newKeybindings = keybindings.concat(OVERRIDE_EXPAND_LINE_SELECTION);
+  
+  return [keybindingConfigPath, newKeybindings];
 }

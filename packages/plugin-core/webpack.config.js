@@ -44,6 +44,11 @@ const config = {
     new CopyPlugin({
       patterns: [{ from: path.join("assets", "dendron-ws"), to: "dendron-ws" }],
     }),
+    new CopyPlugin({
+      patterns: [
+        { from: path.join("..", "common-all", "data", "dendron-yml.validator.json"), to: "dendron-yml.validator.json" },
+      ],
+    }),
     // @ts-ignore
     new CopyPlugin({
       patterns: [

@@ -76,6 +76,8 @@ export const _SETTINGS: ConfigUpdateChangeSet = {
 const _EXTENSIONS: ConfigUpdateEntry[] = [
   { default: "dendron.dendron-paste-image" },
   { default: "dendron.dendron-markdown-shortcuts" },
+  // Autocomplete & warnings when editing `dendron.yml`
+  { default: "redhat.vscode-yaml" },
   { default: "dendron.dendron-markdown-preview-enhanced" },
   { default: "dendron.dendron-markdown-links", action: "REMOVE" },
   { default: "dendron.dendron-markdown-notes", action: "REMOVE" },

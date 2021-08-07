@@ -66,10 +66,7 @@ export default function Note({
   }
 
   return (
-    <>
-      Loading status: {pageState.loadingStatus}
-      <DendronNote noteContent={noteBody} />
-    </>
+    <DendronNote noteContent={noteBody} />
   );
 }
 export const getStaticPaths: GetStaticPaths = async () => {

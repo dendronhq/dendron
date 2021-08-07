@@ -7,6 +7,7 @@ import { useState } from "react";
 import { NotePropsDict } from "@dendronhq/common-all";
 import React from "react";
 import { createLogger, setLogLevel } from "@dendronhq/common-frontend";
+import { NoteData } from "../utils/types";
 
 const themes = {
   dark: `/dark-theme.css`,
@@ -15,7 +16,7 @@ const themes = {
 
 function MyApp({ Component, pageProps }: AppProps) {
   const defaultTheme = "light";
-  const [notes, setNotes] = useState<NotePropsDict>();
+  const [noteData, setNoteData] = useState<NoteData>();
   const logger = createLogger("App");
 
   React.useEffect(() => {
@@ -23,7 +24,7 @@ function MyApp({ Component, pageProps }: AppProps) {
     logger.info({ ctx: "fetchNotes:pre" });
     fetchNotes().then((data) => {
       logger.info({ ctx: "fetchNotes:got-data" });
-      setNotes(data.notes);
+      setNoteData(data);
     });
   }, []);
 
@@ -31,8 +32,8 @@ function MyApp({ Component, pageProps }: AppProps) {
 
   return (
     <ThemeSwitcherProvider themeMap={themes} defaultTheme={defaultTheme}>
-      <DendronLayout>
-        <Component {...pageProps} notes={notes} />
+      <DendronLayout {...noteData}>
+        <Component {...pageProps} notes={noteData} />
       </DendronLayout>
     </ThemeSwitcherProvider>
   );

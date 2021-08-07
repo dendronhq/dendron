@@ -12,14 +12,7 @@ import { getDataDir, getNoteBody, getNoteMeta, getNotes } from "../../utils/buil
 import React from "react";
 import {FuseEngine} from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-frontend";
-
-type NoteData = {
-  notes: NotePropsDict;
-};
-
-type NoteRouterQuery = {
-  id: string;
-};
+import { NoteData, NoteRouterQuery } from "../../utils/types";
 
 declare global {
   interface Window {

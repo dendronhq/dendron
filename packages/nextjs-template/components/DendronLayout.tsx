@@ -11,7 +11,7 @@ export default function DendronLayout(
   props: React.PropsWithChildren<DendronCommonProps>
 ) {
   return (
-    <Layout>
+    <Layout style={{height: "100%"}}>
       <Header
         style={{
           alignItems: "center",
@@ -21,7 +21,11 @@ export default function DendronLayout(
       >
         <DendronLookup {...props} />
       </Header>
-      <Layout id="main-content-wrap" className="main-content-wrap">
+      <Layout
+        id="main-content-wrap"
+        className="main-content-wrap"
+        style={{ flex: 1 }}
+      >
         <Layout>
           <Sider width={200}>
             <DendronTreeView {...props} />

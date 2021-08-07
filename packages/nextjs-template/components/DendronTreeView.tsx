@@ -10,19 +10,27 @@ import { useRouter } from "next/router";
 import { DataNode } from "rc-tree/lib/interface";
 import React, { useState } from "react";
 import { getNoteRouterQuery } from "../utils/etc";
+import { DendronRouterProps, useDendronRouter } from "../utils/hooks";
 import { NoteData } from "../utils/types";
 
 type OnExpandFunc = TreeProps["onExpand"];
 type OnSelectFunc = TreeProps["onSelect"];
 
-export default function DendronTreeView({notes, domains}: Partial<NoteData>) {
+type DendronTreeViewProps = Partial<NoteData> & {dendronRouter: DendronRouterProps};
+
+export default function DendronTreeViewContainer({notes, domains}: Partial<NoteData>) {
+	const dendronRouter = useDendronRouter();
+	return DendronTreeView({notes, domains, dendronRouter})
+}
+
+
+function DendronTreeView({notes, domains, dendronRouter}: DendronTreeViewProps) {
   const logger = createLogger("DendronTreeView");
   const [activeNoteIds, setActiveNoteIds] = useState<string[]>([]);
+	const {changeActiveNote} = dendronRouter;
 
 	// --- Effects
-	const router = useRouter();
-	const noteQuery = getNoteRouterQuery(router);
-	const noteActiveId = noteQuery.id;
+	const noteActiveId = dendronRouter.query.id;
 
   React.useEffect(() => {
 		if (_.isEmpty(notes) || _.isUndefined(notes)) {
@@ -63,6 +71,10 @@ export default function DendronTreeView({notes, domains}: Partial<NoteData>) {
       );
     }
   };
+	const onSelect: OnSelectFunc = (_selectedKeys, { node }) => {
+    const id = node.key as string;
+		changeActiveNote(id);
+  };
 
 	// --- Render
   if (_.isEmpty(notes) || _.isUndefined(notes)) {
@@ -87,6 +99,7 @@ export default function DendronTreeView({notes, domains}: Partial<NoteData>) {
         treeData={roots}
         defaultExpandKeys={expandKeys}
         onExpand={onExpand}
+				onSelect={onSelect}
       />
     </>
   );
@@ -96,15 +109,13 @@ function TreeView({
   treeData,
   defaultExpandKeys,
   onExpand,
+	onSelect,
 }: {
   treeData: DataNode[];
   defaultExpandKeys: string[];
   onExpand: OnExpandFunc;
+	onSelect: OnSelectFunc;
 }) {
-  const onSelect: OnSelectFunc = (_selectedKeys, { node }) => {
-    const id = node.key;
-		throw Error("not implemented");
-  };
   return (
     <>
       {treeData.length ? (

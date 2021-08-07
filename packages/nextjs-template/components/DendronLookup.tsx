@@ -44,19 +44,6 @@ export function DendronLookup(props: DendronCommonProps) {
   const { dendronRouter, notes } = props;
   const noteActive = notes[dendronRouter.query.id];
   return <AntDAutoComplete lookup={lookup} {...props} />;
-  // return (
-  //   <>
-  //     <Input placeholder="Lookup" onClick={showModal} />
-  //     <Modal
-  //       title="Basic Modal"
-  //       visible={isModalVisible}
-  //       onOk={handleOk}
-  //       onCancel={handleCancel}
-  //     >
-  //       <AntDAutoComplete lookup={lookup} />
-  //     </Modal>
-  //   </>
-  // );
 }
 
 
@@ -84,7 +71,7 @@ function AntDAutoComplete(
   return (
     <AutoComplete
       value={value}
-      style={{ width: 200 }}
+      style={{ width: "60%"}}
       onSelect={onSelect}
       onSearch={onSearch}
       onChange={onChange}

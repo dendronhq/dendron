@@ -1,4 +1,5 @@
-import { NoteProps, NotePropsDict } from "@dendronhq/common-all";
+import { FuseEngine } from "@dendronhq/common-all";
+import { createLogger, DendronNote } from "@dendronhq/common-frontend";
 import _ from "lodash";
 import {
   GetStaticPaths,
@@ -7,18 +8,14 @@ import {
   InferGetStaticPropsType,
 } from "next";
 import { useRouter } from "next/router";
-import { DendronNote, FRONTEND_CONSTANTS } from "@dendronhq/common-frontend";
+import React from "react";
 import {
   getDataDir,
   getNoteBody,
   getNoteMeta,
   getNotes,
 } from "../../utils/build";
-import React from "react";
-import { FuseEngine } from "@dendronhq/common-all";
-import { createLogger } from "@dendronhq/common-frontend";
-import { DendronCommonProps, NoteData, NoteRouterQuery } from "../../utils/types";
-import { DendronLookup } from "../../components/DendronLookup";
+import { DendronCommonProps, NoteRouterQuery } from "../../utils/types";
 
 export default function Note({
   note,
@@ -57,7 +54,6 @@ export default function Note({
 
   return (
     <>
-      <DendronLookup {...rest} />
       <DendronNote noteContent={noteBody} />
     </>
   );

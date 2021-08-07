@@ -9,6 +9,7 @@ import {
 } from "next";
 import { useRouter } from "next/router";
 import React from "react";
+import DendronSpinner from "../../components/DendronSpinner";
 import { useCombinedDispatch, useCombinedSelector } from "../../features";
 import { pageStateSlice } from "../../features/pageState";
 import { LoadingStatus } from "../../features/pageState/slice";
@@ -29,10 +30,7 @@ export default function Note({
   const router = useRouter();
   const [bodyFromState, setBody] =
     React.useState<string | undefined>(undefined);
-  const [noteIndex, setNoteIndex] =
-    React.useState<FuseEngine | undefined>(undefined);
   const { id } = router.query as NoteRouterQuery;
-
 
   // --- Hooks
   const dispatch = useCombinedDispatch()
@@ -63,12 +61,13 @@ export default function Note({
 
   let noteBody = id === note.id ? body : bodyFromState;
 
-  if (_.isUndefined(noteBody) || pageState.loadingStatus === LoadingStatus.IDLE) {
-    return <>Loading...</>;
+  if (_.isUndefined(noteBody) || pageState.loadingStatus === LoadingStatus.PENDING) {
+    return <DendronSpinner/>
   }
 
   return (
     <>
+      Loading status: {pageState.loadingStatus}
       <DendronNote noteContent={noteBody} />
     </>
   );

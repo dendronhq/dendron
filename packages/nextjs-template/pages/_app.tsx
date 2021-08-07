@@ -34,7 +34,7 @@ function MyApp({ Component, pageProps }: AppProps) {
   return (
     <ThemeSwitcherProvider themeMap={themes} defaultTheme={defaultTheme}>
       <DendronLayout {...noteData} dendronRouter={dendronRouter}>
-        <Component {...pageProps} notes={noteData} />
+        <Component {...pageProps} notes={noteData} dendronRouter={dendronRouter} />
       </DendronLayout>
     </ThemeSwitcherProvider>
   );

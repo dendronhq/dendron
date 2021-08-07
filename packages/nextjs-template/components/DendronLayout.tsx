@@ -19,7 +19,7 @@ export default function DendronLayout(
           display: "flex",
         }}
       >
-        <DendronLookup {...props} />
+        {/* <DendronLookup {...props} /> */}
       </Header>
       <Layout id="main-content-wrap" className="main-content-wrap">
         <Layout>

@@ -8,73 +8,31 @@ import {
 } from "next";
 import { useRouter } from "next/router";
 import { DendronNote, FRONTEND_CONSTANTS } from "@dendronhq/common-frontend";
-import { getDataDir, getNoteBody, getNoteMeta, getNotes } from "../../utils/build";
+import {
+  getDataDir,
+  getNoteBody,
+  getNoteMeta,
+  getNotes,
+} from "../../utils/build";
 import React from "react";
-import {FuseEngine} from "@dendronhq/common-all";
+import { FuseEngine } from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-frontend";
-import { NoteData, NoteRouterQuery } from "../../utils/types";
+import { DendronCommonProps, NoteData, NoteRouterQuery } from "../../utils/types";
+import { DendronLookup } from "../../components/DendronLookup";
 
 export default function Note({
   note,
   body,
-}: InferGetStaticPropsType<typeof getStaticProps>) {
-	const logger = createLogger("Note");
+  ...rest
+}: InferGetStaticPropsType<typeof getStaticProps> & DendronCommonProps) {
+  const logger = createLogger("Note");
   const router = useRouter();
   const [bodyFromState, setBody] =
     React.useState<string | undefined>(undefined);
   const [noteIndex, setNoteIndex] =
-    React.useState<FuseEngine|undefined>(undefined);
+    React.useState<FuseEngine | undefined>(undefined);
   const { id } = router.query as NoteRouterQuery;
-	logger.info({ctx: "enter"});
-
-  // initialize command bar
-  React.useEffect(() => {
-    const org = "5c96ee1c";
-		// @ts-ignore
-		var w=window;var d=document;var cb=[];cb.q=[];window.CommandBar=new Proxy(cb,{get:function(f,n){if(n in f){return f[n]} return function(){var a=Array.prototype.slice.call(arguments);a.unshift(n);cb.q.push(a)}},});var load=function(){var a="h";var t="s";var r=null;try { r = localStorage.getItem('commandbar.lc'); } catch (e) {};var e="https://api.commandbar.com";var o="o";var c="l";var n="t";var l="c";if(r&&r.includes("local")){var v="a";var s=":8";var i="p:/";e="htt"+i+"/"+c+o+l+v+c+a+o+t+n+s+"000"}var m=d.createElement("script");var h=e+"/latest/"+org;h=r?h+"?lc="+r:h;m.type="text/javascript";m.async=true;m.src=h;d.head.appendChild(m)};if(w.attachEvent){w.attachEvent("onload",load)}else{w.addEventListener("load",load,false)}
-		const loggedInUserId = '12345'
-		window.CommandBar.boot(loggedInUserId);
-	}, []);
-
-	// initialize note index
-	React.useEffect(()=> {
-		fetch("/data/notes.json").then(async (resp) => {
-			const {notes} = await resp.json() as NoteData;
-			const noteIndex = new FuseEngine({mode:'fuzzy'})
-			noteIndex.updateNotesIndex(notes)
-			console.log("setting note index");
-			setNoteIndex(noteIndex)
-		});
-	}, []);
-
-
-	// setup commandbar callback
-  React.useEffect(() => {
-		if (_.isUndefined(noteIndex)) {
-			console.log("note index not ready");
-			return
-		}
-		console.log("note index ready");
-
-    const notesFetch = () => {
-      return fetch("/data/notes.json").then(async (resp) => {
-        const data = (await resp.json()) as NoteData;
-        const allNotes = _.values(data.notes);
-        return allNotes;
-      });
-    };
-		const fuseFetch = (qs: string) => {
-			return noteIndex.queryNote({qs})
-		}
-    window.CommandBar.addContext("notes-meta", [], {searchOptions:{searchFunction: fuseFetch}});
-
-		// executed when command completse
-    function lookupCb({ note }: { note: NoteProps }, context: any) {
-      router.push(`/notes/${note.id}`);
-    }
-    window.CommandBar.addCallback("lookup", lookupCb);
-  }, [noteIndex]);
-
+  logger.info({ ctx: "enter" });
   // setup body
   React.useEffect(() => {
     if (_.isUndefined(id)) {
@@ -99,6 +57,7 @@ export default function Note({
 
   return (
     <>
+      <DendronLookup {...rest} />
       <DendronNote noteContent={noteBody} />
     </>
   );

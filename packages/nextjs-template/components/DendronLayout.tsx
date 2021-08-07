@@ -11,12 +11,13 @@ export default function DendronLayout(
   props: React.PropsWithChildren<DendronCommonProps>
 ) {
   return (
-    <Layout style={{height: "100%"}}>
+    <Layout style={{ height: "100%" }}>
       <Header
         style={{
           alignItems: "center",
           justifyContent: "center",
           display: "flex",
+          borderBottom: "1px solid #d4dadf"
         }}
       >
         <DendronLookup {...props} />
@@ -27,10 +28,10 @@ export default function DendronLayout(
         style={{ flex: 1 }}
       >
         <Layout>
-          <Sider width={200}>
+          <Sider width={200} style={{position: 'fixed', height: "100vh", paddingLeft: "24px", paddingTop: "32px", fontSize: "15px"}}>
             <DendronTreeView {...props} />
           </Sider>
-          <Layout style={{ padding: "0 24px 24px" }}>
+          <Layout style={{ padding: "0 24px 24px", marginLeft: "200px" }}>
             <DendronBreadCrumb {...props} />
             <Content
               id="main-content"

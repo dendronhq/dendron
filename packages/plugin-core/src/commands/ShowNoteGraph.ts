@@ -108,7 +108,8 @@ export class ShowNoteGraphCommand extends BasicCommand<
         }
         case GraphViewMessageType.onRequestGraphStyle: {
           // Set graph styles
-          const styles = GraphStyleService.getParsedStyles();
+          const styleService = GraphStyleService.getInstance()
+          const styles = styleService.getParsedStyles();
           if (styles) {
             panel.webview.postMessage({
               type: "onGraphStyleLoad",

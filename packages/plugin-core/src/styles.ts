@@ -3,6 +3,10 @@ import os from "os";
 import fs from "fs-extra";
 import { Uri } from "vscode";
 import { VSCodeUtils } from "./utils";
+import { DConfig } from "@dendronhq/engine-server";
+import { DendronWorkspace } from "./workspace";
+import { DendronConfig } from "@dendronhq/common-all";
+import { readYAML } from "@dendronhq/common-server";
 
 // TODO: If you'd like to target a specific theme, pre-pend each class with either ".theme-dark" or ".theme-light"
 
@@ -45,34 +49,49 @@ Obsidian.md style
 /* .graph-view.color-fill-attachment {} */
 /* .graph-view.color-line-highlight {} */
 /* .graph-view.color-fill-unresolved {} */
-
+ 
 export class GraphStyleService {
-  static styleFilePath() {
-    return path.join(os.homedir(), ".dendron", "styles", "graph.css");
+  private static singleton: GraphStyleService;
+  private static dendronConfig: DendronConfig
+
+  private constructor() {
+    const configPath = DConfig.configPath(DendronWorkspace.wsRoot());
+    GraphStyleService.dendronConfig = readYAML(configPath)
+  }
+  
+  static getInstance() {
+    if (!GraphStyleService.singleton) GraphStyleService.singleton = new GraphStyleService()
+    return GraphStyleService.singleton
+  }  
+
+  styleFilePath() {
+    const filePath = GraphStyleService.dendronConfig.graph?.stylePath || 'graph.css'
+
+    return path.join(os.homedir(), ".dendron", "styles", filePath);
   }
 
-  static doesStyleFileExist() {
+  doesStyleFileExist() {
     return fs.pathExistsSync(this.styleFilePath());
   }
 
-  static createStyleFile() {
+  createStyleFile() {
     fs.ensureFileSync(this.styleFilePath());
     fs.writeFileSync(this.styleFilePath(), STYLES_TEMPLATE);
   }
 
-  static async openStyleFile() {
+  async openStyleFile() {
     const uri = Uri.file(this.styleFilePath());
     await VSCodeUtils.openFileInEditor(uri);
   }
 
-  static readStyleFile() {
+  readStyleFile() {
     if (this.doesStyleFileExist()) {
       return fs.readFileSync(this.styleFilePath()).toString();
     }
     return undefined;
   }
 
-  static getParsedStyles() {
+  getParsedStyles() {
     let css = this.readStyleFile();
     if (!css) return undefined;
 

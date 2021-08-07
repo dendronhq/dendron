@@ -485,8 +485,9 @@ export type DendronSiteConfig = {
 };
 
 export type DendronGraphConfig = {
-  zoomSpeed: number;
-};
+  zoomSpeed?: number;
+  stylePath?: string;
+}
 
 export type HierarchyConfig = {
   publishByDefault?: boolean | { [key: string]: boolean };

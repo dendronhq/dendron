@@ -1,4 +1,4 @@
-import { NoteIndexProps, NoteProps } from "@dendronhq/common-all";
+import { NoteIndexProps } from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-frontend";
 import { AutoComplete } from "antd";
 import _ from "lodash";
@@ -11,7 +11,6 @@ const { Option } = AutoComplete;
 export function DendronLookup(props: DendronCommonProps) {
   const logger = createLogger("DendronLookup");
   // --- Hooks
-  const [isModalVisible, setIsModalVisible] = React.useState<boolean>(false);
   const lookup = useDendronLookup();
   logger.info({ state: "enter", lookup });
 
@@ -21,24 +20,6 @@ export function DendronLookup(props: DendronCommonProps) {
   }
 
   // --- Methods
-  const onClick = (noteActive: NoteProps) => {
-    console.log("BOND: onclickCalled");
-    window.CommandBar.execute(3724);
-    window.CommandBar.open(noteActive.fname);
-    return undefined;
-  };
-
-  const showModal = () => {
-    setIsModalVisible(true);
-  };
-
-  const handleOk = () => {
-    setIsModalVisible(false);
-  };
-
-  const handleCancel = () => {
-    setIsModalVisible(false);
-  };
 
   // --- Logic
   const { dendronRouter, notes } = props;
@@ -52,9 +33,10 @@ function AntDAutoComplete(
   props: { lookup: DendronLookupProps } & DendronCommonProps
 ) {
   const logger = createLogger("AntDAutoComplete");
-  const [value, setValue] = React.useState("");
+  const { lookup, dendronRouter, notes } = props;
+  const initValue = notes ? notes[dendronRouter.query.id].fname : "";
+  const [value, setValue] = React.useState(initValue);
   const [result, setResult] = React.useState<NoteIndexProps[]>([]);
-  const { lookup, dendronRouter } = props;
   const onSearch = (qs: string) => {
     logger.info({ state: "onSearch:enter", qs });
     const out = lookup?.queryNote({ qs });

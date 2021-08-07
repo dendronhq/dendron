@@ -1,12 +1,12 @@
-import "../styles/scss/main.scss";
-import { ThemeSwitcherProvider } from "react-css-theme-switcher";
-import type { AppProps } from "next/app";
-import DendronLayout from "../components/DendronLayout";
-import { fetchNotes } from "../utils/fetchers";
-import { useState } from "react";
-import { NotePropsDict } from "@dendronhq/common-all";
-import React from "react";
 import { createLogger, setLogLevel } from "@dendronhq/common-frontend";
+import 'antd/dist/antd.css';
+import type { AppProps } from "next/app";
+import React, { useState } from "react";
+import { ThemeSwitcherProvider } from "react-css-theme-switcher";
+import DendronLayout from "../components/DendronLayout";
+import "../styles/scss/main.scss";
+import { fetchNotes } from "../utils/fetchers";
+import { useDendronRouter } from "../utils/hooks";
 import { NoteData } from "../utils/types";
 
 const themes = {
@@ -18,6 +18,7 @@ function MyApp({ Component, pageProps }: AppProps) {
   const defaultTheme = "light";
   const [noteData, setNoteData] = useState<NoteData>();
   const logger = createLogger("App");
+  const dendronRouter = useDendronRouter();
 
   React.useEffect(() => {
     setLogLevel("INFO");
@@ -32,7 +33,7 @@ function MyApp({ Component, pageProps }: AppProps) {
 
   return (
     <ThemeSwitcherProvider themeMap={themes} defaultTheme={defaultTheme}>
-      <DendronLayout {...noteData}>
+      <DendronLayout {...noteData} dendronRouter={dendronRouter}>
         <Component {...pageProps} notes={noteData} />
       </DendronLayout>
     </ThemeSwitcherProvider>

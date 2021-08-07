@@ -2,9 +2,10 @@ import * as React from "react";
 import { Col, Layout, Row, Breadcrumb } from "antd";
 const { Header, Content, Sider } = Layout;
 import DendronTreeView from "./DendronTreeView";
-import { NoteData } from "../utils/types";
+import { DendronCommonProps, NoteData } from "../utils/types";
+import { DendronBreadCrumb } from "./DendronBreadCrumb";
 
-export default function DendronLayout(props: React.PropsWithChildren<Partial<NoteData>>) {
+export default function DendronLayout(props: React.PropsWithChildren<DendronCommonProps>) {
   return (
     <Layout>
       <br />
@@ -15,11 +16,7 @@ export default function DendronLayout(props: React.PropsWithChildren<Partial<Not
             <DendronTreeView {...props} />
           </Sider>
           <Layout style={{ padding: "0 24px 24px" }}>
-            <Breadcrumb style={{ margin: "16px 0" }}>
-              <Breadcrumb.Item>Home</Breadcrumb.Item>
-              <Breadcrumb.Item>List</Breadcrumb.Item>
-              <Breadcrumb.Item>App</Breadcrumb.Item>
-            </Breadcrumb>
+						<DendronBreadCrumb {...props}/>
             <Content
               id="main-content"
               className="main-content"

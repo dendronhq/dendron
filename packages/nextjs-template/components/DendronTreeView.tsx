@@ -1,15 +1,10 @@
 import {
-	DNodeUtils
-} from "@dendronhq/common-all";
-import {
 	createLogger, TreeViewUtils
 } from "@dendronhq/common-frontend";
 import { Spin, Tree, TreeProps } from "antd";
 import _ from "lodash";
-import { useRouter } from "next/router";
 import { DataNode } from "rc-tree/lib/interface";
 import React, { useState } from "react";
-import { getNoteRouterQuery } from "../utils/etc";
 import { DendronRouterProps, useDendronRouter } from "../utils/hooks";
 import { NoteData } from "../utils/types";
 

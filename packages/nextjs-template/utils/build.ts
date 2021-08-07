@@ -2,10 +2,8 @@ import fs from "fs-extra";
 import path from "path";
 import { NoteProps, NotePropsDict } from "@dendronhq/common-all";
 import _ from "lodash";
-
-export type NoteData = {
-	notes: NotePropsDict;
-}
+import { NoteData } from "./types";
+export * from "./fetchers";
 
 const NOTE_META_DIR = "meta";
 const NOTE_BODY_DIR = "notes";

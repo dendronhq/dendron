@@ -8,9 +8,10 @@ import {
 } from "next";
 import { useRouter } from "next/router";
 import { DendronNote, FRONTEND_CONSTANTS } from "@dendronhq/common-frontend";
-import { getDataDir, getNoteBody, getNoteMeta, getNotes } from "../../utils";
+import { getDataDir, getNoteBody, getNoteMeta, getNotes } from "../../utils/build";
 import React from "react";
 import {FuseEngine} from "@dendronhq/common-all";
+import { createLogger } from "@dendronhq/common-frontend";
 
 type NoteData = {
   notes: NotePropsDict;
@@ -30,13 +31,14 @@ export default function Note({
   note,
   body,
 }: InferGetStaticPropsType<typeof getStaticProps>) {
-  const ctx = "Note";
+	const logger = createLogger("Note");
   const router = useRouter();
   const [bodyFromState, setBody] =
     React.useState<string | undefined>(undefined);
   const [noteIndex, setNoteIndex] =
     React.useState<FuseEngine|undefined>(undefined);
   const { id } = router.query as NoteRouterQuery;
+	logger.info({ctx: "enter"});
 
   // initialize command bar
   React.useEffect(() => {

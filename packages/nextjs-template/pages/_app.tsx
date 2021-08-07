@@ -1,10 +1,10 @@
 import {
   createLogger,
-  setLogLevel,
   Provider,
-  configureStore,
+  setLogLevel,
 } from "@dendronhq/common-frontend";
 import "antd/dist/antd.css";
+import "../public/light-theme.css"
 import type { AppProps } from "next/app";
 import React, { useState } from "react";
 import { ThemeSwitcherProvider } from "react-css-theme-switcher";

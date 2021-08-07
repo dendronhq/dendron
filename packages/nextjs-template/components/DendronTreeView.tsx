@@ -1,10 +1,11 @@
 import {
-	createLogger, TreeViewUtils
+	createLogger, ThemeUtils, TreeViewUtils
 } from "@dendronhq/common-frontend";
 import { Spin, Tree, TreeProps } from "antd";
 import _ from "lodash";
 import { DataNode } from "rc-tree/lib/interface";
 import React, { useState } from "react";
+import { ThemeSwitcherProvider, useThemeSwitcher } from "react-css-theme-switcher";
 import { DendronRouterProps, useDendronRouter } from "../utils/hooks";
 import { NoteData } from "../utils/types";
 
@@ -23,6 +24,7 @@ function DendronTreeView({notes, domains, dendronRouter}: DendronTreeViewProps) 
   const logger = createLogger("DendronTreeView");
   const [activeNoteIds, setActiveNoteIds] = useState<string[]>([]);
 	const {changeActiveNote} = dendronRouter;
+
 
 	// --- Effects
 	const noteActiveId = dendronRouter.query.id;
@@ -111,10 +113,13 @@ function TreeView({
   onExpand: OnExpandFunc;
 	onSelect: OnSelectFunc;
 }) {
+  const { currentTheme } = useThemeSwitcher();
+  const maybeTheme = ThemeUtils.getTheme(currentTheme || "light");
   return (
     <>
       {treeData.length ? (
         <Tree
+          style={{background: maybeTheme?.layoutHeaderBackground}}
           showIcon
           expandedKeys={defaultExpandKeys}
           selectedKeys={defaultExpandKeys.slice(-1)}

@@ -14,12 +14,6 @@ import {FuseEngine} from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-frontend";
 import { NoteData, NoteRouterQuery } from "../../utils/types";
 
-declare global {
-  interface Window {
-    CommandBar: any;
-  }
-}
-
 export default function Note({
   note,
   body,
@@ -79,11 +73,6 @@ export default function Note({
       router.push(`/notes/${note.id}`);
     }
     window.CommandBar.addCallback("lookup", lookupCb);
-
-    // setTimeout(() => {
-    //   window.CommandBar.execute(3724);
-    //   window.CommandBar.open("foo.one");
-    // }, 2000);
   }, [noteIndex]);
 
   // setup body

@@ -2,6 +2,12 @@ import { NoteProps, NotePropsDict } from "@dendronhq/common-all";
 import _ from "lodash";
 import { DendronRouterProps } from "./hooks";
 
+declare global {
+  interface Window {
+    CommandBar: any;
+  }
+}
+
 export type NoteData = {
   notes: NotePropsDict;
   domains: NoteProps[] ;

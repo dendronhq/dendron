@@ -1,22 +1,33 @@
+import { Layout, Menu } from "antd";
 import * as React from "react";
-import { Col, Layout, Row, Breadcrumb } from "antd";
-const { Header, Content, Sider } = Layout;
-import DendronTreeView from "./DendronTreeView";
-import { DendronCommonProps, NoteData } from "../utils/types";
+import { DendronCommonProps } from "../utils/types";
 import { DendronBreadCrumb } from "./DendronBreadCrumb";
+import DendronTreeView from "./DendronTreeView";
+import { AutoComplete } from "antd";
+import { DendronLookup } from "./DendronLookup";
+const { Header, Content, Sider } = Layout;
 
-export default function DendronLayout(props: React.PropsWithChildren<DendronCommonProps>) {
+export default function DendronLayout(
+  props: React.PropsWithChildren<DendronCommonProps>
+) {
   return (
     <Layout>
-      <br />
-      <br />
+      <Header
+        style={{
+          alignItems: "center",
+          justifyContent: "center",
+          display: "flex",
+        }}
+      >
+        <DendronLookup {...props} />
+      </Header>
       <Layout id="main-content-wrap" className="main-content-wrap">
         <Layout>
           <Sider width={200}>
             <DendronTreeView {...props} />
           </Sider>
           <Layout style={{ padding: "0 24px 24px" }}>
-						<DendronBreadCrumb {...props}/>
+            <DendronBreadCrumb {...props} />
             <Content
               id="main-content"
               className="main-content"

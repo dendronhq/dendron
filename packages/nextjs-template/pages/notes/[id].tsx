@@ -9,6 +9,9 @@ import {
 } from "next";
 import { useRouter } from "next/router";
 import React from "react";
+import { useCombinedDispatch, useCombinedSelector } from "../../features";
+import { pageStateSlice } from "../../features/pageState";
+import { LoadingStatus } from "../../features/pageState/slice";
 import {
   getDataDir,
   getNoteBody,
@@ -29,26 +32,38 @@ export default function Note({
   const [noteIndex, setNoteIndex] =
     React.useState<FuseEngine | undefined>(undefined);
   const { id } = router.query as NoteRouterQuery;
-  logger.info({ ctx: "enter" });
+
+
+  // --- Hooks
+  const dispatch = useCombinedDispatch()
+  const pageState = useCombinedSelector((state) => state.pageState);
+  logger.info({ ctx: "enter", id });
   // setup body
   React.useEffect(() => {
+    logger.info({ ctx: "updateNoteBody:enter", id });
     if (_.isUndefined(id)) {
+      logger.info({ ctx: "updateNoteBody:exit", id, state: "id undefined" });
       return;
     }
     // loaded page statically
     if (id === note.id) {
+      dispatch(pageStateSlice.actions.setLoadingStatus(LoadingStatus.FUFILLED));
+      logger.info({ ctx: "updateNoteBody:exit", id, state: "id = note.id" });
       return;
     }
+    logger.info({ ctx: "updateNoteBody:fetch:pre", id});
     // otherwise, dynamically fetch page
     fetch(`/data/notes/${id}.html`).then(async (resp) => {
+      logger.info({ ctx: "updateNoteBody:fetch:post", id});
       const contents = await resp.text();
       setBody(contents);
+      dispatch(pageStateSlice.actions.setLoadingStatus(LoadingStatus.FUFILLED));
     });
   }, [id]);
 
   let noteBody = id === note.id ? body : bodyFromState;
 
-  if (_.isUndefined(noteBody)) {
+  if (_.isUndefined(noteBody) || pageState.loadingStatus === LoadingStatus.IDLE) {
     return <>Loading...</>;
   }
 

@@ -3,6 +3,9 @@ import { createLogger } from "@dendronhq/common-frontend";
 import { AutoComplete } from "antd";
 import _ from "lodash";
 import React from "react";
+import { useCombinedDispatch } from "../features";
+import { pageStateSlice } from "../features/pageState";
+import { LoadingStatus } from "../features/pageState/slice";
 import { DendronLookupProps, useDendronLookup } from "../utils/hooks";
 import { DendronCommonProps, verifyNoteData } from "../utils/types";
 import DendronSpinner from "./DendronSpinner";
@@ -32,6 +35,10 @@ type AntDOnSelect = Parameters<typeof AutoComplete>["0"]["onSelect"]
 function AntDAutoComplete(
   props: { lookup: DendronLookupProps } & DendronCommonProps
 ) {
+  // --- Hooks
+  const dispatch = useCombinedDispatch()
+
+  // --- Main
   const logger = createLogger("AntDAutoComplete");
   const { lookup, dendronRouter, notes } = props;
   const initValue = notes ? notes[dendronRouter.query.id].fname : "";
@@ -46,6 +53,7 @@ function AntDAutoComplete(
     logger.info({state: "onSelect", noteId, option})
     const id = option.key?.toString()!
     dendronRouter.changeActiveNote(id);
+    dispatch(pageStateSlice.actions.setLoadingStatus(LoadingStatus.PENDING));
   };
   const onChange = (data: string) => {
     setValue(data);

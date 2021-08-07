@@ -1,9 +1,15 @@
-import { createLogger, setLogLevel } from "@dendronhq/common-frontend";
-import 'antd/dist/antd.css';
+import {
+  createLogger,
+  setLogLevel,
+  Provider,
+  configureStore,
+} from "@dendronhq/common-frontend";
+import "antd/dist/antd.css";
 import type { AppProps } from "next/app";
 import React, { useState } from "react";
 import { ThemeSwitcherProvider } from "react-css-theme-switcher";
 import DendronLayout from "../components/DendronLayout";
+import { combinedStore } from "../features";
 import "../styles/scss/main.scss";
 import { fetchNotes } from "../utils/fetchers";
 import { useDendronRouter } from "../utils/hooks";
@@ -32,11 +38,17 @@ function MyApp({ Component, pageProps }: AppProps) {
   logger.info({ ctx: "render" });
 
   return (
-    <ThemeSwitcherProvider themeMap={themes} defaultTheme={defaultTheme}>
-      <DendronLayout {...noteData} dendronRouter={dendronRouter}>
-        <Component {...pageProps} notes={noteData} dendronRouter={dendronRouter} />
-      </DendronLayout>
-    </ThemeSwitcherProvider>
+    <Provider store={combinedStore}>
+      <ThemeSwitcherProvider themeMap={themes} defaultTheme={defaultTheme}>
+        <DendronLayout {...noteData} dendronRouter={dendronRouter}>
+          <Component
+            {...pageProps}
+            notes={noteData}
+            dendronRouter={dendronRouter}
+          />
+        </DendronLayout>
+      </ThemeSwitcherProvider>
+    </Provider>
   );
 }
 export default MyApp;

@@ -17,8 +17,8 @@
     "proto": "echo `pwd`"
   },
   "dependencies": {
-    "@dendronhq/common-all": "^0.53.2",
-    "@dendronhq/common-frontend": "^0.53.2",
+    "@dendronhq/common-all": "^0.53.3",
+    "@dendronhq/common-frontend": "^0.53.3",
     "lodash": "^4.17.21",
     "next": "10.2.0",
     "react": "17.0.1",

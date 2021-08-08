@@ -1,5 +1,8 @@
-import { AssertUtils, NoteTestUtilsV4, TestPresetEntryV4 } from "@dendronhq/common-test-utils";
-import { checkString } from "../../utils";
+import {
+  AssertUtils,
+  NoteTestUtilsV4,
+  TestPresetEntryV4,
+} from "@dendronhq/common-test-utils";
 import { ENGINE_HOOKS } from "./utils";
 
 const NOTES = {
@@ -34,14 +37,21 @@ const NOTES = {
       return [
         {
           actual: true,
-          expected: checkString(data!, ""),
+          expected: await AssertUtils.assertInString({
+            body: data!,
+            match: [`<h1 id="empty">Empty</h1>`],
+          }),
           msg: "empty string",
         },
       ];
     },
     {
       preSetupHook: async (opts) => {
-        return NoteTestUtilsV4.createNote({...opts, fname: "empty", vault: opts.vaults[0]});
+        return NoteTestUtilsV4.createNote({
+          ...opts,
+          fname: "empty",
+          vault: opts.vaults[0],
+        });
       },
     }
   ),

@@ -3,6 +3,29 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.53.3](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.53.3) (2021-08-08)
+
+
+### Bug Fixes
+
+* add new vaults from CLI to code workspace ([#1094](https://github.com/dendronhq/dendron/issues/1094)) ([2cde108](https://github.com/dendronhq/dendron/commit/2cde108b4c88a5c9d13b8eb6370f69879d6c9a62))
+* renaming frontmatter tags adds # ([223d9f5](https://github.com/dendronhq/dendron/commit/223d9f50430569b440e45567ffc71a7fff81f96f))
+
+
+### Features Dendron
+
+* basic frontmatter tag support ([2fe8ea5](https://github.com/dendronhq/dendron/commit/2fe8ea5733cdf6c047c39b8b9865cb7e5fdb541b))
+* custom tag coloring ([#1069](https://github.com/dendronhq/dendron/issues/1069)) ([5fe0a3c](https://github.com/dendronhq/dendron/commit/5fe0a3c7c62608f3796c58e4b807061498199168))
+* option to disable frontmatter tag rendering ([7985e23](https://github.com/dendronhq/dendron/commit/7985e2323950f16f2c5afa55c115a1af52e82b07))
+* remove frontmatter tags if tag is moved outside `tags.` ([1bce9af](https://github.com/dendronhq/dendron/commit/1bce9af293a60fd453389a907fc3043fe173330c))
+* rename header updates default link aliases ([1f0e405](https://github.com/dendronhq/dendron/commit/1f0e405d2c67a547fdecc41d76f062251a7cae01))
+* render frontmatter tags in HTML ([86f798a](https://github.com/dendronhq/dendron/commit/86f798a3c72ca405922945b835119aa0e0b1c3d9))
+* seed cmds in plugin ([#1080](https://github.com/dendronhq/dendron/issues/1080)) ([e07a092](https://github.com/dendronhq/dendron/commit/e07a092b1a75548574f2ea45f1b465490b2091f3))
+
+
+
+
+
 ## [0.53.2](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.53.2) (2021-08-06)
 
 

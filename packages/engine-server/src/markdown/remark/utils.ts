@@ -541,7 +541,7 @@ export class LinkUtils {
   }: {
     link: DNoteLink;
     dest: DendronASTDest;
-  }): string | never {
+    }): string | never {
     switch (dest) {
       case DendronASTDest.MD_DENDRON: {
         if (this.isHashtagLink(link.from)) {

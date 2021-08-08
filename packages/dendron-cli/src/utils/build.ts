@@ -52,20 +52,6 @@ export class LernaUtils {
   }
 }
 
-export class LernaUtils {
-  static bumpVersion(version: SemverVersion) {
-    $(`lerna version ${version} --no-git-tag-version`);
-    $(`git add .`);
-    $(`git commit -m "chore: publish ${version}"`);
-  }
-
-  static publishVersion() {
-    $(`lerna publish from-package --ignore-scripts`);
-    $(`node bootstrap/scripts/genMeta.js`);
-    $(`bootstrap/scripts/patch11tyVersion.sh`);
-  }
-}
-
 export class BuildUtils {
   static getLernaRoot() {
     const maybeRoot = findUpTo({base: process.cwd(), fname: "lerna.json", returnDirPath: true, maxLvl: 4})
@@ -187,57 +173,6 @@ export class BuildUtils {
     this.setRegRemote();
   }
 
-  static installPluginDependencies() {
-    return $(`yarn install --no-lockfile`, { cwd: this.getPluginRootPath() });
-  }
-
-  static installPluginLocally(version: string) {
-    return Promise.all([
-      $$(
-        `code-insiders --install-extension "dendron-${version}.vsix" --force`,
-        { cwd: this.getPluginRootPath() }
-      ),
-      $$(`codium --install-extension "dendron-${version}.vsix" --force`, {
-        cwd: this.getPluginRootPath(),
-      }),
-    ]);
-  }
-
-  static packagePluginDependencies() {
-    return $(`vsce package --yarn`, { cwd: this.getPluginRootPath() });
-  }
-
-  static prepPluginPkg() {
-    const pkgPath = path.join(this.getPluginRootPath(), "package.json");
-    this.updatePkgMeta({
-      pkgPath,
-      name: "dendron",
-      main: "./dist/extension.js",
-      repository: {
-        url: "https://github.com/dendronhq/dendron.git",
-        type: "git",
-      },
-    });
-  }
-
-  /**
-   * Set NPM to publish locally
-   */
-  static async prepPublishLocal() {
-    this.setRegLocal();
-    this.startVerdaccio();
-    // HACK: give verdaccio chance to start
-    await this.sleep(3000);
-    return 
-  }
-
-  /**
-   * Set NPM to publish remotely
-   */
-  static async prepPublishRemote() {
-    this.setRegRemote();
-  }
-
   /**
    *
    * @returns
@@ -245,14 +180,6 @@ export class BuildUtils {
    */
   static runTypeCheck() {
     $("yarn lerna:typecheck", {cwd: this.getLernaRoot()});
-  }
-
-  static async sleep(ms: number) {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve({});
-      }, ms);
-    });
   }
 
   static async sleep(ms: number) {

@@ -70,7 +70,6 @@ export default function Note({
   );
 }
 export const getStaticPaths: GetStaticPaths = async () => {
-  const dataDir = getDataDir();
   const { notes } = getNotes();
   return {
     paths: _.map(notes, (_note, id) => {

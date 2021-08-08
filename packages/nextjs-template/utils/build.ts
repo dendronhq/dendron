@@ -25,9 +25,7 @@ export function getNoteBody(id: string) {
 let _NOTES_CACHE: NoteData|undefined;
 
 export function getNotes() {
-	console.log("getNotes")
 	if (_.isUndefined(_NOTES_CACHE)) {
-		console.log("getNotes:readFromDisk")
 		const dataDir = getDataDir();
 		_NOTES_CACHE = fs.readJSONSync(path.join(dataDir, "notes.json")) as NoteData
 	}

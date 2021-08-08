@@ -175,13 +175,14 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
 
 		this.print(`prep publish ${opts.publishEndpoint}...`);
     if (shouldPublishLocal) {
-      BuildUtils.prepPublishLocal();
+      await BuildUtils.prepPublishLocal();
     } else {
-      BuildUtils.prepPublishRemote();
+      await BuildUtils.prepPublishRemote();
 		}
 
     this.print("bump 11ty...");
     BuildUtils.bump11ty({ currentVersion, nextVersion });
+    process.exit();
 
     this.print("run type-check...");
     BuildUtils.runTypeCheck();

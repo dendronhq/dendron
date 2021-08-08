@@ -1,14 +1,16 @@
+import { tmpDir } from "@dendronhq/common-server";
 import {
-  DevCLICommand,
+  BuildUtils, DevCLICommand,
   DevCLICommandOpts,
-  DevCommands,
-  BuildUtils,
-  LernaUtils,
-	PublishEndpoint,
-	SemverVersion,
+  DevCommands, LernaUtils,
+  PublishEndpoint,
+  SemverVersion
 } from "@dendronhq/dendron-cli";
+import fs from "fs-extra";
+import path from "path";
 import { stub } from "sinon";
 import { runEngineTestV5 } from "../../../engine";
+
 
 export const runDevCmd = ({
   cmd,
@@ -23,10 +25,17 @@ describe("build", () => {
   test("ok, build local", async () => {
     await runEngineTestV5(
       async ({}) => {
+
+        // stub lerna.json
+        const root = tmpDir().name;
+        fs.writeJsonSync(path.join(root, "lerna.json"), {version: "1.0.0"})
+        stub(process, "cwd").returns(root);
+
         const prepPublishLocalStub = stub(
           BuildUtils,
           "prepPublishLocal"
         ).returns(Promise.resolve());
+
         const bump11tyStub = stub(BuildUtils, "bump11ty").returns();
         const typecheckStub = stub(BuildUtils, "runTypeCheck").returns();
         const bumpVersionStub = stub(LernaUtils, "bumpVersion").returns();
@@ -73,6 +82,7 @@ describe("build", () => {
           setRegRemoteStub,
           restorePluginPkgJsonStub,
         ].map((_stub) => {
+          console.log(_stub);
           expect(_stub.calledOnce).toBeTruthy();
         });
       },

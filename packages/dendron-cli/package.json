@@ -64,6 +64,7 @@
     "@types/lodash": "^4.14.158",
     "@types/node": "13.11.0",
     "@types/rsync": "^0.4.30",
+    "@types/semver": "^7.3.8",
     "@types/yargs": "^15.0.5",
     "coveralls": "^3.0.2",
     "jest": "^23.6.0",

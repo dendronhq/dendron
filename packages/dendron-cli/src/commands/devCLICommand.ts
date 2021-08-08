@@ -183,7 +183,6 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
 
     this.print("bump 11ty...");
     BuildUtils.bump11ty({ currentVersion, nextVersion });
-    process.exit();
 
     this.print("run type-check...");
     BuildUtils.runTypeCheck();

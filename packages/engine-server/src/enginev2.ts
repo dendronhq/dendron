@@ -19,6 +19,7 @@ import {
   EngineWriteOptsV2,
   ERROR_SEVERITY,
   ERROR_STATUS,
+  FuseEngine,
   GetNoteBlocksOpts,
   GetNoteBlocksPayload,
   GetNoteOptsV2,
@@ -51,7 +52,6 @@ import {
 import _ from "lodash";
 import { DConfig } from "./config";
 import { FileStorage } from "./drivers/file/storev2";
-import { FuseEngine } from "./fuseEngine";
 import { LinkUtils, MDUtilsV5, ProcFlavor } from "./markdown";
 import { AnchorUtils, RemarkUtils } from "./markdown/remark/utils";
 import { HookUtils } from "./topics/hooks";

@@ -188,7 +188,7 @@ export interface RespV2<T> {
 }
 
 export function isDendronResp<T = any>(args: any): args is RespV2<T> {
-  return args.error instanceof DendronError;
+  return args?.error instanceof DendronError;
 }
 
 export type RespRequired<T> =

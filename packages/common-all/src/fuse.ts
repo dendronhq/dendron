@@ -1,15 +1,7 @@
-import {
-  DEngineMode,
-  DVault,
-  NotePropsDict,
-  NoteProps,
-  SchemaModuleDict,
-  SchemaModuleProps,
-  SchemaProps,
-  SchemaUtils,
-} from "@dendronhq/common-all";
 import Fuse from "fuse.js";
 import _ from "lodash";
+import { DEngineMode, SchemaProps, NoteProps, SchemaModuleDict, SchemaUtils, NotePropsDict, SchemaModuleProps } from ".";
+import { DVault } from "./types/workspace";
 
 export type NoteIndexProps = {
   id: string;

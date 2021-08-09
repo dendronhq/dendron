@@ -77,11 +77,14 @@ module.exports = {
 
     "no-shadow": "off",
     "@typescript-eslint/no-shadow": "off", // TODO should be turned on
-
-    "react/no-children-prop": "off",
-    "react/prop-types": "off",
     "import/order": "off",
     "import/no-cycle": "off",
+    // --- Reac
+    "react/no-children-prop": "off",
+    "react/prop-types": "off",
+    // suppress errors for missing 'import React' in files
+    "react/react-in-jsx-scope": "off",
+    "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx", ".ts", ".tsx"] }],
     "react/destructuring-assignment": "off",
     "react/jsx-curly-newline": "off",
     "react/jsx-props-no-spreading": "off",

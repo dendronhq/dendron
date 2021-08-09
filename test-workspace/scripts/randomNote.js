@@ -9,9 +9,9 @@
 /* eslint-disable no-console */
 /* eslint-disable no-lone-blocks */
 /* eslint-disable no-plusplus */
+const _ = require("lodash");
 
 /** How many markdown elements to generate. */
-const GENERATED_LENGTH = 1000;
 /** How many items at most a generated list can have. */
 const LONGEST_LIST = 5;
 /** What ratio of paragraphs or list items should have block anchors */
@@ -111,20 +111,26 @@ const GENERATORS = {
 // -----  output  -----
 // generate frontmatter
 
-const created = randomTimestamp();
-console.log(
-`---
-id: ${Math.random()}
+function generateNote(opts) {
+  const {generatedLength} = _.defaults(opts, {generatedLength: 1000});
+  const created = randomTimestamp();
+  const fm = `---
+id: "${Math.random()}"
 title: ${shortGenerator.generate()}
 desc: ${shortGenerator.generate()}
 updated: ${created + randomTimestampDuration()}
 created: ${created}
 stub: false
----`
-);
+---\n`;
+  const pickGenerators = Object.values(GENERATORS);
+  const out = [fm];
+  for (let i = 0; i < generatedLength; i++) {
+    const pick = pickGenerators[Math.floor(Math.random() * pickGenerators.length)];
+    out.push(pick());
+  }
+  return out.join("");
+}
 
-const pickGenerators = Object.values(GENERATORS);
-for (let i = 0; i < GENERATED_LENGTH; i++) {
-  const pick = pickGenerators[Math.floor(Math.random() * pickGenerators.length)];
-  console.log(pick());
+module.exports = {
+  generateNote
 }

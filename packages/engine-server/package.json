@@ -59,7 +59,6 @@
     "diff2html": "^3.2.0",
     "execa": "^4.0.3",
     "fs-extra": "^9.0.1",
-    "fuse.js": "^6.3.0",
     "gray-matter": "^4.0.2",
     "klaw": "^3.0.0",
     "lodash": "^4.17.15",

@@ -9,7 +9,7 @@ import {
   ENGINE_CONFIG_PRESETS,
   ENGINE_HOOKS,
   ENGINE_PRESETS,
-  ENGINE_PRESETS_MULTI,
+  ENGINE_PRESETS_MULTI
 } from "../../presets";
 
 describe("engine, schemas/", () => {

@@ -29,6 +29,9 @@ useKatex: true
 autoFoldFrontmatter: true
 dev:
     enablePreviewV2: true
+lookup:
+    note:
+        selectionType: selectionExtract
 journal:
     dailyDomain: daily
     name: journal
@@ -112,6 +115,9 @@ useKatex: true
 autoFoldFrontmatter: true
 dev:
     enablePreviewV2: true
+lookup:
+    note:
+        selectionType: selectionExtract
 journal:
     dailyDomain: daily
     name: journal
@@ -185,6 +191,9 @@ useKatex: true
 autoFoldFrontmatter: true
 dev:
     enablePreviewV2: true
+lookup:
+    note:
+        selectionType: selectionExtract
 journal:
     dailyDomain: daily
     name: journal
@@ -225,6 +234,9 @@ useKatex: true
 autoFoldFrontmatter: true
 dev:
     enablePreviewV2: true
+lookup:
+    note:
+        selectionType: selectionExtract
 journal:
     dailyDomain: daily
     name: journal
@@ -281,6 +293,9 @@ useKatex: true
 autoFoldFrontmatter: true
 dev:
     enablePreviewV2: true
+lookup:
+    note:
+        selectionType: selectionExtract
 journal:
     dailyDomain: daily
     name: journal
@@ -344,6 +359,9 @@ useKatex: true
 autoFoldFrontmatter: true
 dev:
     enablePreviewV2: true
+lookup:
+    note:
+        selectionType: selectionExtract
 journal:
     dailyDomain: daily
     name: journal
@@ -395,6 +413,9 @@ useKatex: true
 autoFoldFrontmatter: true
 dev:
     enablePreviewV2: true
+lookup:
+    note:
+        selectionType: selectionExtract
 journal:
     dailyDomain: daily
     name: journal

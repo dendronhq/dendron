@@ -71,7 +71,6 @@ export class NoteLookupProvider implements ILookupProviderV3 {
       100,
       {
         leading: true,
-        maxWait: 200,
       }
     );
     quickpick.onDidChangeValue(onUpdateDebounced);

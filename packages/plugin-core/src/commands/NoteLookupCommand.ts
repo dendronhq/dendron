@@ -1,6 +1,7 @@
 import {
   DendronError,
   ERROR_STATUS,
+  NoteLookupConfig,
   NoteProps,
   NoteQuickInput,
   NoteUtils,
@@ -126,13 +127,15 @@ export class NoteLookupCommand extends BaseCommand<
   }
 
   async gatherInputs(opts?: CommandRunOpts): Promise<CommandGatherOutput> {
+    const ws = getWS();
+    const noteLookupConfig: NoteLookupConfig  = DConfig.getProp(ws.config, "lookup").note;
     const copts: CommandRunOpts = _.defaults(opts || {}, {
       multiSelect: false,
       filterMiddleware: [],
       initialValue: NotePickerUtils.getInitialValueFromOpenEditor(),
+      selectionType: noteLookupConfig.selectionType,
     } as CommandRunOpts);
     const ctx = "LookupCommand:execute";
-    const ws = getWS();
     Logger.info({ ctx, opts, msg: "enter" });
     // initialize controller and provider
     this._controller = LookupControllerV3.create({

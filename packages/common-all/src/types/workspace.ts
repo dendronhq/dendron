@@ -94,6 +94,20 @@ export enum NoteAddBehavior {
   "asOwnDomain" = "asOwnDomain",
 }
 
+export enum LookupSelectionType {
+  "selection2link" = "selection2link",
+  "selectionExtract" = "selectionExtract",
+}
+
+export type NoteLookupConfig = {
+  selectionType: LookupSelectionType;
+}
+
+export type LookupConfig = {
+  note: NoteLookupConfig;
+  // schema: SchemaLookupConfig;
+}
+
 export type JournalConfig = {
   dailyDomain: string;
   /**
@@ -134,6 +148,11 @@ export type DendronConfig = {
    * Configuration related to publishing notes
    */
   site: DendronSiteConfig;
+
+  /**
+   * Configuration related to lookup v3.
+   */
+  lookup: LookupConfig;
 
   journal: JournalConfig;
 

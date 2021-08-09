@@ -6,6 +6,7 @@ import {
   DendronSiteConfig,
   ERROR_STATUS,
   getStage,
+  LookupSelectionType,
   NoteAddBehavior,
 } from "@dendronhq/common-all";
 import { readYAML, writeYAML } from "@dendronhq/common-server";
@@ -50,6 +51,11 @@ export class DConfig {
       autoFoldFrontmatter: true,
       dev: {
         enablePreviewV2: true,
+      },
+      lookup: {
+        note: {
+          selectionType: LookupSelectionType.selectionExtract,
+        }
       },
       journal: {
         dailyDomain: "daily",

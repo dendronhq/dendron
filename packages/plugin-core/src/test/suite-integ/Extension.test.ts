@@ -91,12 +91,6 @@ function lapsedMessageTest({
 suite("Extension", function () {
   let homeDirStub: SinonStub;
   let userConfigDirStub: SinonStub;
-  // let backupKeybindingConfigPath: any;
-  // const { userConfigDir } = VSCodeUtils.getCodeUserConfigDir();
-  // const keybindingConfigPath = [
-  //   userConfigDir,
-  //   "keybindings.json"
-  // ].join("");
 
   const ctx: ExtensionContext = setupBeforeAfter(this, {
     beforeHook: async () => {
@@ -104,25 +98,9 @@ suite("Extension", function () {
       await new ResetConfigCommand().execute({ scope: "all" });
       homeDirStub = TestEngineUtils.mockHomeDir();
       userConfigDirStub = mockUserConfigDir();
-      // if (!fs.existsSync(keybindingConfigPath)) {
-      //   fs.ensureFileSync(keybindingConfigPath);
-      //   fs.writeFileSync(keybindingConfigPath, "[]");
-      // } else {
-      //   backupKeybindingConfigPath = [
-      //     userConfigDir,
-      //     "keybindings.bak.json"
-      //   ].join("");
-      //   fs.copyFileSync(keybindingConfigPath, backupKeybindingConfigPath);
-      // }
-      // keybindings = readJSONWithCommentsSync(keybindingConfigPath);
     },
     afterHook: async () => {
       homeDirStub.restore();
-      // fs.removeSync(keybindingConfigPath);
-      // if (fs.existsSync(backupKeybindingConfigPath)) {
-      //   fs.copyFileSync(backupKeybindingConfigPath, keybindingConfigPath);
-      //   fs.removeSync(backupKeybindingConfigPath);
-      // }
       userConfigDirStub.restore();
     },
     noSetInstallStatus: true,
@@ -378,7 +356,7 @@ suite("Extension", function () {
     });
 
     // this test only works if you don't pass --disable-extensions when testing.
-    test("with vim extension installed, resolve keyboard shortcut conflict.", (done) => {
+    test.skip("with vim extension installed, resolve keyboard shortcut conflict.", (done) => {
       const wsRoot = tmpDir().name;
       getWS()
         .updateGlobalState(

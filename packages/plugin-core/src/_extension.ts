@@ -430,10 +430,13 @@ export async function _activate(
   }
 
   if (extensionInstallStatus === InstallStatus.INITIAL_INSTALL) {
-    const VimInstalled = VSCodeUtils.isExtensionInstalled("vscodevim.vim");
-    if (VimInstalled) {
+    const vimInstalled = VSCodeUtils.isExtensionInstalled("vscodevim.vim");
+    if (vimInstalled) {
       AnalyticsUtils.track(ExtensionEvents.VimExtensionInstalledInitial);
-      const [keybindingConfigPath, resolvedKeybindings] = getVimExtensionResolvedKeybinding();
+      const {
+        keybindingConfigPath, 
+        newKeybindings: resolvedKeybindings, 
+      } = checkAndApplyVimKeybindingOverrideIfExists();
       if (!_.isUndefined(resolvedKeybindings)) {
         if (!fs.existsSync(keybindingConfigPath)) {
           fs.ensureFileSync(keybindingConfigPath);
@@ -606,12 +609,20 @@ export function shouldDisplayLapsedUserMsg(): boolean {
   );
 }
 
-export function getVimExtensionResolvedKeybinding() {
+export function checkAndApplyVimKeybindingOverrideIfExists(): {
+  keybindingConfigPath: string,
+  newKeybindings?: any
+} {
   // check where the keyboard shortcut is configured
-  const [userConfigDir, _delimiter, osName] = VSCodeUtils.getCodeUserConfigDir();
+  const { userConfigDir, osName } = VSCodeUtils.getCodeUserConfigDir();
   const keybindingConfigPath = [userConfigDir, "keybindings.json"].join("");
 
   // read keybindings.json
+  // create if it doesn't exist
+  if (!fs.existsSync(keybindingConfigPath)) {
+    fs.ensureFileSync(keybindingConfigPath);
+    fs.writeFileSync(keybindingConfigPath, "[]");
+  }
   const keybindings = readJSONWithCommentsSync(keybindingConfigPath);
 
   // check if override is already there
@@ -624,7 +635,7 @@ export function getVimExtensionResolvedKeybinding() {
   }).length > 0;
   
   if (alreadyHasOverride) {
-    return [];
+    return { keybindingConfigPath };
   }
 
   // add override if there isn't.
@@ -637,5 +648,5 @@ export function getVimExtensionResolvedKeybinding() {
 
   const newKeybindings = keybindings.concat(OVERRIDE_EXPAND_LINE_SELECTION);
   
-  return [keybindingConfigPath, newKeybindings];
+  return { keybindingConfigPath, newKeybindings };
 }

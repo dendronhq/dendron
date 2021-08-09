@@ -525,7 +525,12 @@ export class VSCodeUtils {
         break;
       }
     }
-    return [userConfigDir, delimiter, osName];
+    // return [userConfigDir, delimiter, osName];
+    return {
+      userConfigDir,
+      delimiter,
+      osName
+    }
   }
 
   static isExtensionInstalled(extensionId: string) {

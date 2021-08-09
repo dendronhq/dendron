@@ -12,5 +12,4 @@ git push --set-upstream origin integ-publish --force
 
 lerna publish from-package --ignore-scripts
 node bootstrap/scripts/genMeta.js
-
 ./bootstrap/scripts/patch11tyVersion.sh

@@ -11,3 +11,4 @@ export * from "./notes";
 export * from "./vaultCLICommand";
 export * from "./workspaceCLICommand";
 export * from "./seedCLICommand";
+export * from "./devCLICommand";

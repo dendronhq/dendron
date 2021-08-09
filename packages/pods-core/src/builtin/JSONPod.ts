@@ -59,7 +59,7 @@ export class JSONImportPod extends ImportPod {
       if (!ent.fname) {
         throw Error("fname not defined");
       }
-      let fname = ent.fname;
+      const fname = ent.fname;
       return NoteUtils.create({ ...ent, fname, vault });
     });
     if (opts.concatenate) {

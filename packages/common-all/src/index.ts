@@ -14,3 +14,4 @@ export * from "./user";
 export * from "./analytics";
 export * from "./types";
 export * from "./themes";
+export * from "./fuse";

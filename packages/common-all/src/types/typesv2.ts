@@ -187,6 +187,10 @@ export interface RespV2<T> {
   error: IDendronError | null;
 }
 
+export function isDendronResp<T = any>(args: any): args is RespV2<T> {
+  return args?.error instanceof DendronError;
+}
+
 export type RespRequired<T> =
   | {
       error: null | undefined;
@@ -580,7 +584,7 @@ export enum ThemeMessageType {
 }
 
 export type OnDidChangeActiveTextEditorData = {
-  note: NoteProps;
+  note: NoteProps | undefined;
   /**
    * Sync all notes
    */

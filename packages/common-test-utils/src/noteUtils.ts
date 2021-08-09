@@ -52,6 +52,14 @@ export class NoteTestUtilsV4 {
     return schema;
   };
 
+  /**
+   * By default, create note with following properties:
+   *  - created & updated = 1
+   *  - id = note.fname
+   *  - body = ""
+   * @param opts 
+   * @returns 
+   */
   static createNote = async (opts: CreateNoteOptsV4) => {
     const { fname, vault, props, body, genRandomId, noWrite, wsRoot } =
       _.defaults(opts, { noWrite: false });

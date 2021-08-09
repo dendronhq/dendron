@@ -4,6 +4,5 @@ title: Cmd
 desc: ''
 updated: 1622736289753
 created: 1622736289753
-stub: true
 ---
 

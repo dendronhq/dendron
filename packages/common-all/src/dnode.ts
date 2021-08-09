@@ -11,25 +11,15 @@ import { Time } from "./time";
 import {
   DEngineClient,
   DLink,
-  DNodeOpts,
-  DNodePropsDict,
-  DNodePropsQuickInputV2,
-  DNodeProps,
-  DNoteLoc,
+  DNodeOpts, DNodeProps, DNodePropsDict,
+  DNodePropsQuickInputV2, DNoteLoc,
   DVault,
-  NoteOpts,
-  NotePropsDict,
-  NoteProps,
-  SchemaData,
+  NoteOpts, NoteProps, NotePropsDict, REQUIRED_DNODEPROPS, SchemaData,
   SchemaModuleDict,
   SchemaModuleOpts,
   SchemaModuleProps,
-  SchemaOpts,
-  SchemaPropsDict,
-  SchemaProps,
-  SchemaRaw,
-  SchemaTemplate,
-  REQUIRED_DNODEPROPS,
+  SchemaOpts, SchemaProps, SchemaPropsDict, SchemaRaw,
+  SchemaTemplate
 } from "./types";
 import { getSlugger, isNotUndefined, randomColor } from "./utils";
 import { genUUID } from "./uuid";
@@ -753,6 +743,33 @@ export class NoteUtils {
 
   static getURI({ note, wsRoot }: { note: NoteProps; wsRoot: string }): URI {
     return URI.file(this.getFullPath({ note, wsRoot }));
+  }
+
+  /**
+   * Get a list that has all the parents of the current note with the current note
+   */
+  static getNoteWithParents({note, notes, sortDesc = true}: {note: NoteProps, notes: NotePropsDict, sortDesc?: boolean}): NoteProps[] {
+    const out = [];
+    if (!note || _.isUndefined(note)) {
+      return [];
+    }
+    while (note.parent !== null) {
+      out.push(note);
+      try {
+        let tmp = notes[note.parent];
+        if (_.isUndefined(tmp)) {
+          throw "note is undefined";
+        }
+        note = tmp;
+      } catch (err) {
+        throw Error(`no parent found for note ${note.id}`)
+      }
+    }
+    out.push(note);
+    if (sortDesc) {
+      _.reverse(out);
+    }
+    return out;
   }
 
   static getPathUpTo(hpath: string, numCompoenents: number) {

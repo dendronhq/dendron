@@ -1,3 +1,4 @@
+import { isDendronResp } from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-server";
 import { WorkspaceUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
@@ -61,7 +62,11 @@ export abstract class CLICommand<TOpts, TOut> extends BaseCommand<TOpts, TOut> {
       this.opts.quiet = true;
     }
     const opts = await this.enrichArgs(args);
-    return this.execute(opts);
+    const out = await this.execute(opts);
+    if (isDendronResp(out) && out.error) {
+      this.L.error(out.error);
+    }
+    return out;
   };
 
   print(obj: any) {

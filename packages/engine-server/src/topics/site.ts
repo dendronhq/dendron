@@ -205,7 +205,7 @@ export class SiteUtils {
     navOrder: number;
   }): Promise<{ notes: NotePropsDict; domain: NoteProps } | undefined> {
     const { domain, engine, navOrder, config } = opts;
-    logger.info({ ctx: "filterByHiearchy", domain, config });
+    logger.info({ ctx: "filterByHiearchy:enter", domain, config });
     const sconfig = config.site;
     let hConfig = this.getConfigForHierarchy({
       config: sconfig,

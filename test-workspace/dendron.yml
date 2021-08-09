@@ -14,7 +14,7 @@ journal:
     dailyDomain: daily
     name: journal
     dateFormat: y.MM.dd
-    addBehavior: childOfDomain
+    addBehavior: childOfCurrent
     firstDayOfWeek: 1
 site:
     copyAssets: true
@@ -51,6 +51,8 @@ site:
             - vault2
 dev:
     enableWebUI: true
+    nextServerUrl: 'http://localhost:3000'
+    engineServerPort: 3005
 graph:
     zoomSpeed: 1
 initializeRemoteVaults: true

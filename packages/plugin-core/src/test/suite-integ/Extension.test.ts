@@ -34,7 +34,11 @@ import * as telemetry from "../../telemetry";
 import { DendronWorkspace, getWS, resolveRelToWSRoot } from "../../workspace";
 import { BlankInitializer } from "../../workspace/blankInitializer";
 import { TemplateInitializer } from "../../workspace/templateInitializer";
-import { getVimExtensionResolvedKeybinding, shouldDisplayLapsedUserMsg, _activate } from "../../_extension";
+import { 
+  checkAndApplyVimKeybindingOverrideIfExists,
+  shouldDisplayLapsedUserMsg,
+  _activate 
+} from "../../_extension";
 import {
   expect,
   genDefaultSettings,
@@ -47,6 +51,21 @@ import {
   stubSetupWorkspace,
 } from "../testUtilsV3";
 import { VSCodeUtils } from "../../utils";
+
+function mockUserConfigDir() {
+  const dir = tmpDir().name;
+  const getCodeUserConfigDurStub = sinon.stub(VSCodeUtils, "getCodeUserConfigDir");
+  getCodeUserConfigDurStub.callsFake(() => {
+    const wrappedMethod = getCodeUserConfigDurStub.wrappedMethod;
+    const originalOut = wrappedMethod();
+    return {
+      userConfigDir: [dir, originalOut.delimiter].join(""),
+      delimiter: originalOut.delimiter,
+      osName: originalOut.osName,
+    }
+  });
+  return getCodeUserConfigDurStub;
+}
 
 function lapsedMessageTest({
   done,
@@ -71,38 +90,40 @@ function lapsedMessageTest({
 
 suite("Extension", function () {
   let homeDirStub: SinonStub;
-  let keybindings: any;
-  let backupKeybindingConfigPath: any;
-  const userConfigDir = VSCodeUtils.getCodeUserConfigDir()[0];
-  const keybindingConfigPath = [
-    userConfigDir,
-    "keybindings.json"
-  ].join("");
+  let userConfigDirStub: SinonStub;
+  // let backupKeybindingConfigPath: any;
+  // const { userConfigDir } = VSCodeUtils.getCodeUserConfigDir();
+  // const keybindingConfigPath = [
+  //   userConfigDir,
+  //   "keybindings.json"
+  // ].join("");
 
   const ctx: ExtensionContext = setupBeforeAfter(this, {
     beforeHook: async () => {
       await resetCodeWorkspace();
       await new ResetConfigCommand().execute({ scope: "all" });
       homeDirStub = TestEngineUtils.mockHomeDir();
-      if (!fs.existsSync(keybindingConfigPath)) {
-        fs.ensureFileSync(keybindingConfigPath);
-        fs.writeFileSync(keybindingConfigPath, "[]");
-      } else {
-        backupKeybindingConfigPath = [
-          userConfigDir,
-          "keybindings.bak.json"
-        ].join("");
-        fs.copyFileSync(keybindingConfigPath, backupKeybindingConfigPath);
-      }
-      keybindings = readJSONWithCommentsSync(keybindingConfigPath);
+      userConfigDirStub = mockUserConfigDir();
+      // if (!fs.existsSync(keybindingConfigPath)) {
+      //   fs.ensureFileSync(keybindingConfigPath);
+      //   fs.writeFileSync(keybindingConfigPath, "[]");
+      // } else {
+      //   backupKeybindingConfigPath = [
+      //     userConfigDir,
+      //     "keybindings.bak.json"
+      //   ].join("");
+      //   fs.copyFileSync(keybindingConfigPath, backupKeybindingConfigPath);
+      // }
+      // keybindings = readJSONWithCommentsSync(keybindingConfigPath);
     },
     afterHook: async () => {
       homeDirStub.restore();
-      fs.removeSync(keybindingConfigPath);
-      if (fs.existsSync(backupKeybindingConfigPath)) {
-        fs.copyFileSync(backupKeybindingConfigPath, keybindingConfigPath);
-        fs.removeSync(backupKeybindingConfigPath);
-      }
+      // fs.removeSync(keybindingConfigPath);
+      // if (fs.existsSync(backupKeybindingConfigPath)) {
+      //   fs.copyFileSync(backupKeybindingConfigPath, keybindingConfigPath);
+      //   fs.removeSync(backupKeybindingConfigPath);
+      // }
+      userConfigDirStub.restore();
     },
     noSetInstallStatus: true,
   });
@@ -345,7 +366,7 @@ suite("Extension", function () {
 
   describe("keyboard shortcut conflict resolution", () => {
     test("vim extension expandLineSelection override", (done) => {
-      const [_keybindingConfigPath, newKeybindings] = getVimExtensionResolvedKeybinding();
+      const { newKeybindings } = checkAndApplyVimKeybindingOverrideIfExists();
       const override = newKeybindings[newKeybindings.length-1];
       const metaKey = os.type() === "Darwin" ? "cmd" : "ctrl";
       expect(override).toEqual({
@@ -357,7 +378,7 @@ suite("Extension", function () {
     });
 
     // this test only works if you don't pass --disable-extensions when testing.
-    test.skip("with vim extension installed, resolve keyboard shortcut conflict.", (done) => {
+    test("with vim extension installed, resolve keyboard shortcut conflict.", (done) => {
       const wsRoot = tmpDir().name;
       getWS()
         .updateGlobalState(
@@ -384,9 +405,14 @@ suite("Extension", function () {
             expect(isNotUndefined(dendronState.firstInstall)).toBeTruthy();
             expect(isNotUndefined(dendronState.firstWsInitialize)).toBeTruthy();
 
+            const { userConfigDir } = VSCodeUtils.getCodeUserConfigDir();
+            const keybindingConfigPath = [
+              userConfigDir,
+              "keybindings.json",
+            ].join("");
+
             const newKeybindings = readJSONWithCommentsSync(keybindingConfigPath);
-            expect(newKeybindings.length - keybindings.length).toEqual(1);
-            const override = newKeybindings[newKeybindings.length-1]
+            const override = newKeybindings[newKeybindings.length-1];
             const metaKey = os.type() === "Darwin" ? "cmd" : "ctrl";
             expect(override.key).toEqual(`${metaKey}+l`);
             expect(override.command).toEqual("-expandLineSelection");

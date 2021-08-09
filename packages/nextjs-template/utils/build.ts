@@ -3,6 +3,7 @@ import path from "path";
 import { NoteProps, NotePropsDict } from "@dendronhq/common-all";
 import _ from "lodash";
 import { NoteData } from "./types";
+
 export * from "./fetchers";
 
 const NOTE_META_DIR = "meta";

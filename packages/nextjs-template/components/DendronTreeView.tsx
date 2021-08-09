@@ -126,7 +126,7 @@ function TreeView({
           onExpand={onExpand}
           onSelect={onSelect}
           treeData={treeData}
-        ></Tree>
+         />
       ) : (
         <Spin />
       )}

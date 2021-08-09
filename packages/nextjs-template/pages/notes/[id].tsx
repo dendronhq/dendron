@@ -59,7 +59,7 @@ export default function Note({
     });
   }, [id]);
 
-  let noteBody = id === note.id ? body : bodyFromState;
+  const noteBody = id === note.id ? body : bodyFromState;
 
   if (_.isUndefined(noteBody) || pageState.loadingStatus === LoadingStatus.PENDING) {
     return <DendronSpinner/>

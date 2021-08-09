@@ -1,6 +1,7 @@
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import { configureStore } from "@dendronhq/common-frontend";
 import { pageStateSlice } from "./pageState";
+
 const store = configureStore({
   reducer: {
     pageState: pageStateSlice.reducer,

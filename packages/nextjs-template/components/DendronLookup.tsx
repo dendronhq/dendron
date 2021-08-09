@@ -9,6 +9,7 @@ import { LoadingStatus } from "../features/pageState/slice";
 import { DendronLookupProps, useDendronLookup } from "../utils/hooks";
 import { DendronCommonProps, verifyNoteData } from "../utils/types";
 import DendronSpinner from "./DendronSpinner";
+
 const { Option } = AutoComplete;
 
 export function DendronLookup(props: DendronCommonProps) {

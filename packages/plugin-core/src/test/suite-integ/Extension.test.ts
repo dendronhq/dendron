@@ -123,6 +123,11 @@ suite("Extension", function () {
               useFMTitle: true,
               useNoteTitleForLink: true,
               initializeRemoteVaults: true,
+              lookup: {
+                note: {
+                  selectionType: "selectionExtract",
+                }
+              },
               journal: {
                 addBehavior: "childOfDomain",
                 dailyDomain: "daily",

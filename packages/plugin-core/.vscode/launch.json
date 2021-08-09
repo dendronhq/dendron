@@ -144,7 +144,7 @@
       "outFiles": ["${workspaceFolder}/out/src/test/**/*.js"]
     },
     {
-      "name": "Extension Integ Tests - File Remote",
+      "name": "Extension Integ Tests - File (with extensions)",
       "type": "extensionHost",
       "request": "launch",
       "runtimeExecutable": "${execPath}",

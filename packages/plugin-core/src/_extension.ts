@@ -11,11 +11,14 @@ import {
   VaultUtils,
   VSCodeEvents,
   InstallStatus,
+  ExtensionEvents,
 } from "@dendronhq/common-all";
 import {
   getDurationMilliseconds,
   getOS,
+  readJSONWithCommentsSync,
   SegmentClient,
+  writeJSONWithComments,
 } from "@dendronhq/common-server";
 import {
   DConfig,
@@ -25,6 +28,7 @@ import {
   WorkspaceService,
 } from "@dendronhq/engine-server";
 import { ExecaChildProcess } from "execa";
+import fs from "fs-extra";
 import _ from "lodash";
 import { Duration } from "luxon";
 import path from "path";
@@ -425,6 +429,27 @@ export async function _activate(
     toggleViews(false);
   }
 
+  if (extensionInstallStatus === InstallStatus.INITIAL_INSTALL) {
+    const vimInstalled = VSCodeUtils.isExtensionInstalled("vscodevim.vim");
+    if (vimInstalled) {
+      AnalyticsUtils.track(ExtensionEvents.VimExtensionInstalled);
+      const {
+        keybindingConfigPath, 
+        newKeybindings: resolvedKeybindings, 
+      } = checkAndApplyVimKeybindingOverrideIfExists();
+      if (!_.isUndefined(resolvedKeybindings)) {
+        if (!fs.existsSync(keybindingConfigPath)) {
+          fs.ensureFileSync(keybindingConfigPath);
+          fs.writeFileSync(keybindingConfigPath, "[]");
+        }
+        writeJSONWithComments(keybindingConfigPath, resolvedKeybindings);
+        AnalyticsUtils.track(ExtensionEvents.VimExtensionInstalled, {
+          fixApplied: true,
+        });
+      }
+    }
+  }
+
   return showWelcomeOrWhatsNew({
     extensionInstallStatus,
     version: DendronWorkspace.version(),
@@ -585,4 +610,46 @@ export function shouldDisplayLapsedUserMsg(): boolean {
     !metaData.firstWsInitialize &&
     refreshMsg
   );
+}
+
+export function checkAndApplyVimKeybindingOverrideIfExists(): {
+  keybindingConfigPath: string,
+  newKeybindings?: any
+} {
+  // check where the keyboard shortcut is configured
+  const { userConfigDir, osName } = VSCodeUtils.getCodeUserConfigDir();
+  const keybindingConfigPath = [userConfigDir, "keybindings.json"].join("");
+
+  // read keybindings.json
+  // create if it doesn't exist
+  if (!fs.existsSync(keybindingConfigPath)) {
+    fs.ensureFileSync(keybindingConfigPath);
+    fs.writeFileSync(keybindingConfigPath, "[]");
+  }
+  const keybindings = readJSONWithCommentsSync(keybindingConfigPath);
+
+  // check if override is already there
+  const alreadyHasOverride = keybindings.filter((entry: any) => {
+    if (!_.isUndefined(entry.command)) {
+      return entry.command === "-expandLineSelection"
+    } else {
+      return false;
+    }
+  }).length > 0;
+  
+  if (alreadyHasOverride) {
+    return { keybindingConfigPath };
+  }
+
+  // add override if there isn't.
+  const metaKey = osName === "Darwin" ? "cmd" : "ctrl";
+  const OVERRIDE_EXPAND_LINE_SELECTION = {
+    "key": `${metaKey}+l`,
+    "command": "-expandLineSelection",
+    "when": "textInputFocus"
+  };
+
+  const newKeybindings = keybindings.concat(OVERRIDE_EXPAND_LINE_SELECTION);
+  
+  return { keybindingConfigPath, newKeybindings };
 }

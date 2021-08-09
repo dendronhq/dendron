@@ -492,6 +492,52 @@ export class VSCodeUtils {
       levels: opts.levels,
     });
   }
+
+  static getCodeUserConfigDir() {
+    const CODE_RELEASE_MAP = {
+      VSCodium: "VSCodium",
+      "Visual Studio Code - Insiders": "Code - Insiders",
+    };
+    const vscodeRelease = vscode.env.appName;
+    const name = _.get(CODE_RELEASE_MAP, vscodeRelease, "Code");
+
+    const osName = os.type();
+    let delimiter = "/";
+    let userConfigDir;
+  
+    switch (osName) {
+      case "Darwin": {
+        userConfigDir =
+          process.env.HOME + "/Library/Application Support/" + name + "/User/";
+        break;
+      }
+      case "Linux": {
+        userConfigDir = process.env.HOME + "/.config/" + name + "/User/";
+        break;
+      }
+      case "Windows_NT": {
+        userConfigDir = process.env.APPDATA + "\\" + name + "\\User\\";
+        delimiter = "\\";
+        break;
+      }
+      default: {
+        userConfigDir = process.env.HOME + "/.config/" + name + "/User/";
+        break;
+      }
+    }
+    // return [userConfigDir, delimiter, osName];
+    return {
+      userConfigDir,
+      delimiter,
+      osName
+    }
+  }
+
+  static isExtensionInstalled(extensionId: string) {
+    return !_.isUndefined(
+      vscode.extensions.getExtension(extensionId)
+    );
+  }
 }
 
 export class WSUtils {

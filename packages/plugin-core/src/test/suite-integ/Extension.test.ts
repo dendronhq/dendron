@@ -1,10 +1,11 @@
 import {
   CONSTANTS,
   DendronConfig,
+  InstallStatus,
   isNotUndefined,
   Time,
 } from "@dendronhq/common-all";
-import { readYAML, tmpDir } from "@dendronhq/common-server";
+import { readJSONWithCommentsSync, readYAML, tmpDir } from "@dendronhq/common-server";
 import {
   getPortFilePath,
   getWSMetaFilePath,
@@ -12,11 +13,12 @@ import {
   openWSMetaFile,
 } from "@dendronhq/engine-server";
 import { TestEngineUtils } from "@dendronhq/engine-test-utils";
+import os from "os";
 import fs from "fs-extra";
 import _ from "lodash";
 import { describe, it } from "mocha";
 import path from "path";
-import { SinonStub } from "sinon";
+import sinon, { SinonStub } from "sinon";
 import { ExtensionContext } from "vscode";
 import { ResetConfigCommand } from "../../commands/ResetConfig";
 import {
@@ -32,7 +34,11 @@ import * as telemetry from "../../telemetry";
 import { DendronWorkspace, getWS, resolveRelToWSRoot } from "../../workspace";
 import { BlankInitializer } from "../../workspace/blankInitializer";
 import { TemplateInitializer } from "../../workspace/templateInitializer";
-import { shouldDisplayLapsedUserMsg, _activate } from "../../_extension";
+import { 
+  checkAndApplyVimKeybindingOverrideIfExists,
+  shouldDisplayLapsedUserMsg,
+  _activate 
+} from "../../_extension";
 import {
   expect,
   genDefaultSettings,
@@ -44,6 +50,22 @@ import {
   setupBeforeAfter,
   stubSetupWorkspace,
 } from "../testUtilsV3";
+import { VSCodeUtils } from "../../utils";
+
+function mockUserConfigDir() {
+  const dir = tmpDir().name;
+  const getCodeUserConfigDurStub = sinon.stub(VSCodeUtils, "getCodeUserConfigDir");
+  getCodeUserConfigDurStub.callsFake(() => {
+    const wrappedMethod = getCodeUserConfigDurStub.wrappedMethod;
+    const originalOut = wrappedMethod();
+    return {
+      userConfigDir: [dir, originalOut.delimiter].join(""),
+      delimiter: originalOut.delimiter,
+      osName: originalOut.osName,
+    }
+  });
+  return getCodeUserConfigDurStub;
+}
 
 function lapsedMessageTest({
   done,
@@ -68,15 +90,18 @@ function lapsedMessageTest({
 
 suite("Extension", function () {
   let homeDirStub: SinonStub;
+  let userConfigDirStub: SinonStub;
 
   const ctx: ExtensionContext = setupBeforeAfter(this, {
     beforeHook: async () => {
       await resetCodeWorkspace();
       await new ResetConfigCommand().execute({ scope: "all" });
       homeDirStub = TestEngineUtils.mockHomeDir();
+      userConfigDirStub = mockUserConfigDir();
     },
     afterHook: async () => {
       homeDirStub.restore();
+      userConfigDirStub.restore();
     },
     noSetInstallStatus: true,
   });
@@ -314,6 +339,65 @@ suite("Extension", function () {
         firstWsInitialize: 1,
         shouldDisplayMessage: false,
       });
+    });
+  });
+
+  describe("keyboard shortcut conflict resolution", () => {
+    test("vim extension expandLineSelection override", (done) => {
+      const { newKeybindings } = checkAndApplyVimKeybindingOverrideIfExists();
+      const override = newKeybindings[newKeybindings.length-1];
+      const metaKey = os.type() === "Darwin" ? "cmd" : "ctrl";
+      expect(override).toEqual({
+        "key": `${metaKey}+l`,
+        "command": "-expandLineSelection",
+        "when": "textInputFocus"
+      },)
+      done();
+    });
+
+    // this test only works if you don't pass --disable-extensions when testing.
+    test.skip("with vim extension installed, resolve keyboard shortcut conflict.", (done) => {
+      const wsRoot = tmpDir().name;
+      getWS()
+        .updateGlobalState(
+          GLOBAL_STATE.WORKSPACE_ACTIVATION_CONTEXT,
+          WORKSPACE_ACTIVATION_CONTEXT.NORMAL
+        )
+        .then(() => {
+          _activate(ctx).then(async () => {
+            stubSetupWorkspace({
+              wsRoot,
+            });
+            sinon.stub(VSCodeUtils, "getInstallStatusForExtension").returns(InstallStatus.INITIAL_INSTALL);
+            // somehow stub is ignored if --disable-extensions is passed during the test.
+            sinon.stub(VSCodeUtils, "isExtensionInstalled").returns(true);
+            const cmd = new SetupWorkspaceCommand();
+            await cmd.execute({
+              rootDirRaw: wsRoot,
+              skipOpenWs: true,
+              skipConfirmation: true,
+              workspaceInitializer: new BlankInitializer(),
+            });
+
+            const dendronState = MetadataService.instance().getMeta();
+            expect(isNotUndefined(dendronState.firstInstall)).toBeTruthy();
+            expect(isNotUndefined(dendronState.firstWsInitialize)).toBeTruthy();
+
+            const { userConfigDir } = VSCodeUtils.getCodeUserConfigDir();
+            const keybindingConfigPath = [
+              userConfigDir,
+              "keybindings.json",
+            ].join("");
+
+            const newKeybindings = readJSONWithCommentsSync(keybindingConfigPath);
+            const override = newKeybindings[newKeybindings.length-1];
+            const metaKey = os.type() === "Darwin" ? "cmd" : "ctrl";
+            expect(override.key).toEqual(`${metaKey}+l`);
+            expect(override.command).toEqual("-expandLineSelection");
+
+            done();
+          });
+        });
     });
   });
 });

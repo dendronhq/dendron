@@ -27,6 +27,7 @@ import {
   LINK_NAME,
   ALIAS_NAME,
   DendronConfig,
+  DVault,
 } from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-server";
 import _ from "lodash";
@@ -764,7 +765,7 @@ export class AnchorUtils {
       const error = DendronError.createFromStatus({
         status: ERROR_STATUS.UNKNOWN,
         payload: { note: NoteUtils.toLogObj(opts.note), wsRoot: opts.wsRoot },
-        error: err,
+        error: err as Error,
       });
       createLogger("AnchorUtils").error(error);
       return {};
@@ -966,7 +967,7 @@ export class RemarkUtils {
     };
   }
 
-  static convertWikiLinkToUrl(
+  static convertWikiLinkToNoteUrl(
     note: NoteProps,
     changes: NoteChangeEntry[],
     engine: DEngineClient,
@@ -980,23 +981,41 @@ export class RemarkUtils {
           root
         ) as WikiLinkNoteV4[];
 
+        /** used findLinks to get vault of wikilink */
+        const links = LinkUtils.findLinks({ note, engine }).filter(
+          (linkNode) => linkNode.type === "wiki"
+        );
         let dirty = false;
 
-        wikiLinks.forEach((linkNode) => {
-          const existingNote = _.find(engine.notes, { fname: linkNode.value });
+        links.forEach((linkNode, i) => {
+          let vault: DVault | undefined;
+
+          // If the link specifies a vault, we should only look at that vault
+          if (linkNode.to && !_.isUndefined(linkNode.to?.vaultName)) {
+            vault = VaultUtils.getVaultByName({
+              vaults: engine.vaults,
+              vname: linkNode.to?.vaultName,
+            });
+          }
+          const existingNote = WorkspaceUtils.getNoteFromMultiVault({
+            fname: linkNode.value,
+            engine,
+            note,
+            vault,
+          });
           if (existingNote) {
             const urlRoot = dendronConfig.site?.siteUrl || "";
             const { vault } = existingNote;
-            linkNode.value = WorkspaceUtils.getNoteUrl({
+            wikiLinks[i]["value"] = WorkspaceUtils.getNoteUrl({
               config: dendronConfig,
               note: existingNote,
               vault,
               urlRoot,
+              anchor: linkNode.to?.anchorHeader,
             });
             dirty = true;
           }
         });
-        //TODO: Add support for Ref Notes and Block Links
 
         if (dirty) {
           changes.push({

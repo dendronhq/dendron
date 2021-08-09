@@ -33,6 +33,36 @@ const setupBasic = async (opts: WorkspaceOpts) => {
     body: [`## Test`].join("\n"),
   });
 };
+const setupBasicMulti = async (opts: WorkspaceOpts) => {
+  const { wsRoot, vaults } = opts;
+  // Creating a note of the same name in multiple vaults to check that it gets the right one
+  await NoteTestUtilsV4.createNote({
+    props: {
+      id: "test2",
+    },
+    vault: vaults[1],
+    wsRoot,
+    fname: "target",
+    body: ["Sint quo sunt maxime.", "Nisi nam dolorem qui ut minima."].join(
+      "\n"
+    ),
+  });
+  await NoteTestUtilsV4.createNote({
+    props: {
+      id: "test1",
+    },
+    vault: vaults[0],
+    wsRoot,
+    fname: "target",
+    body: "Voluptatem possimus harum nisi.",
+  });
+  await NoteTestUtilsV4.createNote({
+    vault: vaults[0],
+    wsRoot,
+    fname: "source",
+    body: `[[dendron://${VaultUtils.getName(vaults[0])}/target]]`,
+  });
+};
 
 describe("markdown publish pod", () => {
   test("basic", async () => {
@@ -117,6 +147,45 @@ describe("markdown publish pod", () => {
         );
       },
       { expect, preSetupHook: setupBasic }
+    );
+  });
+
+  test("test with xvault link to same vault", async () => {
+    await runEngineTestV5(
+      async ({ engine, vaults, wsRoot }) => {
+        const pod = new MarkdownPublishPod();
+        const vaultName = VaultUtils.getName(vaults[0]);
+        const config = TestConfigUtils.withConfig(
+          (config) => {
+            config.noXVaultWikiLink = false;
+            config.site = createSiteConfig({
+              siteHierarchies: ["test-wikilink-to-url"],
+              siteRootDir: "docs",
+            });
+            return config;
+          },
+          {
+            wsRoot,
+          }
+        );
+
+        const resp = await pod.execute({
+          engine,
+          vaults,
+          wsRoot,
+          dendronConfig: config,
+          config: {
+            fname: "source",
+            vaultName,
+            dest: "stdout",
+            wikiLinkToURL: true,
+          },
+        });
+        // note id is foo.one, hence notes/foo.one.html
+        expect(resp).toContain("https://localhost:8080/notes/test1.html");
+        await checkNotInString(resp, "https://localhost:8080/notes/test2.html");
+      },
+      { expect, preSetupHook: setupBasicMulti }
     );
   });
 });

@@ -358,7 +358,7 @@ export class MarkdownPublishPod extends PublishPod<MarkdownPublishPodConfig> {
     });
     if (wikiLinkToURL && !_.isUndefined(dendronConfig)) {
       remark = remark.use(
-        RemarkUtils.convertWikiLinkToUrl(note, [], engine, dendronConfig)
+        RemarkUtils.convertWikiLinkToNoteUrl(note, [], engine, dendronConfig)
       );
     } else {
       remark = remark.use(RemarkUtils.convertLinksFromDotNotation(note, []));

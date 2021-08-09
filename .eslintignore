@@ -4,4 +4,5 @@ node_modules
 # TODO remove after fixing eslint errors in other packages
 packages/*
 !packages/plugin-core/
+!packages/nextjs-template/
 **/src/test/**

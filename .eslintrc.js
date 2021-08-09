@@ -80,7 +80,6 @@ module.exports = {
     "import/order": "off",
     "import/no-cycle": "off",
     // --- React
-    "react/no-children-prop": "off",
     "react/prop-types": "off",
     // we use 'logger' inside of hooks, gets flagged 
     "react-hooks/exhaustive-deps": "off",

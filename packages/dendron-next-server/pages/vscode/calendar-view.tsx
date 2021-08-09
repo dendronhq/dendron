@@ -163,16 +163,14 @@ function CalendarView({ engine, ide }: DendronProps) {
         ? _.first(groupedDailyNotes[dateKey])
         : undefined;
 
-      if (selectedNote) {
-        postVSCodeMessage({
-          type: CalendarViewMessageType.onSelect,
-          data: {
-            id: selectedNote?.id,
-            fname: `${journalDailyDomain}.${journalName}.${dateKey}`,
-          },
-          source: DMessageSource.webClient,
-        });
-      }
+      postVSCodeMessage({
+        type: CalendarViewMessageType.onSelect,
+        data: {
+          id: selectedNote?.id,
+          fname: `${journalDailyDomain}.${journalName}.${dateKey}`,
+        },
+        source: DMessageSource.webClient,
+      });
     },
     [groupedDailyNotes, getDateKey, journalDailyDomain, journalName]
   );

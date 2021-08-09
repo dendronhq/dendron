@@ -81,7 +81,7 @@ export class BuildSiteV2CLICommand extends CLICommand<
   }
 
   async execute(opts: CommandOpts) {
-    let { wsRoot, port, stage, output, server, engine } = _.defaults(opts);
+    const{ wsRoot, port, stage, output, server, engine } = _.defaults(opts);
     let cwd = opts.cwd;
     if (!cwd) {
       // need to be inside

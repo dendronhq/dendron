@@ -25,7 +25,6 @@ import _ from "lodash";
 import {
   isNotUndefined,
   DefaultMap,
-  randomColor,
   NoteUtils,
   Position,
   VaultUtils,
@@ -249,11 +248,7 @@ export const DECORATION_TYPE_TAG = new DefaultMap<
   TextEditorDecorationType
 >((fname) => {
   const { notes } = getWS().getEngine();
-  const tagNote = NoteUtils.getNotesByFname({ notes, fname })[0];
-  let backgroundColor = tagNote
-    ? NoteUtils.color({ note: tagNote })[0]
-    : undefined;
-  if (_.isUndefined(backgroundColor)) backgroundColor = randomColor(fname);
+  let { color: backgroundColor } = NoteUtils.color({ fname, notes });
   backgroundColor = makeColorTranslucent(
     backgroundColor,
     TAG_COLORING_TRANSLUCENCY

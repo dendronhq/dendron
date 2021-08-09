@@ -3,3 +3,4 @@ docs/*
 !docs/index.*
 .dendron.*
 docs
+vault-generated/

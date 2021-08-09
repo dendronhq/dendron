@@ -12,24 +12,24 @@ import {
   DEngineClient,
   DLink,
   DNodeOpts,
+  DNodeProps,
   DNodePropsDict,
   DNodePropsQuickInputV2,
-  DNodeProps,
   DNoteLoc,
   DVault,
   NoteOpts,
-  NotePropsDict,
   NoteProps,
+  NotePropsDict,
+  REQUIRED_DNODEPROPS,
   SchemaData,
   SchemaModuleDict,
   SchemaModuleOpts,
   SchemaModuleProps,
   SchemaOpts,
-  SchemaPropsDict,
   SchemaProps,
+  SchemaPropsDict,
   SchemaRaw,
   SchemaTemplate,
-  REQUIRED_DNODEPROPS,
 } from "./types";
 import { getSlugger, isNotUndefined, randomColor } from "./utils";
 import { genUUID } from "./uuid";
@@ -755,6 +755,41 @@ export class NoteUtils {
     return URI.file(this.getFullPath({ note, wsRoot }));
   }
 
+  /**
+   * Get a list that has all the parents of the current note with the current note
+   */
+  static getNoteWithParents({
+    note,
+    notes,
+    sortDesc = true,
+  }: {
+    note: NoteProps;
+    notes: NotePropsDict;
+    sortDesc?: boolean;
+  }): NoteProps[] {
+    const out = [];
+    if (!note || _.isUndefined(note)) {
+      return [];
+    }
+    while (note.parent !== null) {
+      out.push(note);
+      try {
+        let tmp = notes[note.parent];
+        if (_.isUndefined(tmp)) {
+          throw "note is undefined";
+        }
+        note = tmp;
+      } catch (err) {
+        throw Error(`no parent found for note ${note.id}`);
+      }
+    }
+    out.push(note);
+    if (sortDesc) {
+      _.reverse(out);
+    }
+    return out;
+  }
+
   static getPathUpTo(hpath: string, numCompoenents: number) {
     return hpath.split(".").slice(0, numCompoenents).join(".");
   }
@@ -902,13 +937,75 @@ export class NoteUtils {
    * @param notes: All notes in `engine.notes`, used to check the ancestors of `note`.
    * @returns The color, and whether this color was randomly generated or explicitly defined.
    */
-  static color({
-    note,
-  }: {
-    note: NoteProps;
-  }): [string, "configured" | "generated"] {
-    if (note.color) return [note.color, "configured"];
-    return [randomColor(note.fname), "generated"];
+  static color(opts: { fname: string; vault?: DVault; notes: NotePropsDict }): {
+    color: string;
+    type: "configured" | "generated";
+  } {
+    const ancestors = NoteUtils.ancestors({ ...opts, includeSelf: true });
+    for (const note of ancestors) {
+      if (note.color) return { color: note.color, type: "configured" };
+    }
+    return { color: randomColor(opts.fname), type: "generated" };
+  }
+
+  /** Get the ancestors of a note, in the order of the closest to farthest.
+   *
+   * This function will continue searching for ancestors even if a note with `fname`
+   * doesn't exist, provided that it has ancestors.
+   * For example, if fname is `foo.bar.baz` but only `foo` exists, this function
+   * will find `foo`.
+   *
+   * ```ts
+   * const ancestorNotes = NoteUtils.ancestors({ fname, notes: engine.notes });
+   * for (const ancestor of ancestorNotes) { }
+   * // or
+   * const allAncestors = [...ancestorNotes];
+   * ```
+   *
+   * @param opts.fname The fname of the note you are trying to get the ancestors of.
+   * @param opts.vault The vault to look for. If provided, only notes from this vault will be included.
+   * @param opts.notes All notes in `engine.notes`.
+   * @param opts.includeSelf: If true, note with `fname` itself will be included in the ancestors.
+   * @param opts.nonStubOnly: If true, only notes that are not stubs will be included.
+   */
+  static *ancestors(opts: {
+    fname: string;
+    vault?: DVault;
+    notes: NotePropsDict;
+    includeSelf?: boolean;
+    nonStubOnly?: boolean;
+  }): Generator<NoteProps> {
+    const { fname, notes, includeSelf, nonStubOnly } = opts;
+    let { vault } = opts;
+    let parts = fname.split(".");
+    let note: NoteProps | undefined = NoteUtils.getNotesByFname({
+      fname,
+      vault,
+      notes,
+    })[0];
+
+    // Check if we need this note itself
+    if (note && includeSelf && !(nonStubOnly && note.stub)) yield note;
+    if (fname === "root") return;
+
+    // All ancestors within the same hierarchy
+    while (parts.length > 1) {
+      parts = parts.slice(undefined, parts.length - 1);
+      note = NoteUtils.getNotesByFname({
+        fname: parts.join("."),
+        vault,
+        notes,
+      })[0];
+      if (note && !(nonStubOnly && note.stub)) yield note;
+    }
+
+    // The ultimate ancestor of all notes is root
+    if (note) {
+      // Yielded at least one note
+      if (!vault) vault = note.vault;
+      note = NoteUtils.getNotesByFname({ fname: "root", notes, vault })[0];
+      if (note) yield note;
+    }
   }
 }
 

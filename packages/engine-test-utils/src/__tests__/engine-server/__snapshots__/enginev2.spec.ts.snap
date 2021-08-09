@@ -1,0 +1,3 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`engine, notes/ render "EMPTY_NOTE" 1`] = `"<h1 id=\\"empty\\">Empty</h1>"`;

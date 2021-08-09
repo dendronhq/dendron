@@ -9,6 +9,7 @@
     "esModuleInterop": true,
     "strict": true,
     "declaration": true,
+    "jsx": "preserve",
     // --- checks
     "noUnusedLocals": true,
     "noUnusedParameters": true,

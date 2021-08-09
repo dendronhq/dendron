@@ -1,4 +1,4 @@
-import { LookupConfig, LookupSelectionType, ScratchConfig } from "@dendronhq/common-all";
+import { ScratchConfig } from "@dendronhq/common-all";
 import {
   SegmentClient,
   TelemetryStatus,

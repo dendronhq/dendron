@@ -432,7 +432,7 @@ export async function _activate(
   if (extensionInstallStatus === InstallStatus.INITIAL_INSTALL) {
     const vimInstalled = VSCodeUtils.isExtensionInstalled("vscodevim.vim");
     if (vimInstalled) {
-      AnalyticsUtils.track(ExtensionEvents.VimExtensionInstalledInitial);
+      AnalyticsUtils.track(ExtensionEvents.VimExtensionInstalled);
       const {
         keybindingConfigPath, 
         newKeybindings: resolvedKeybindings, 
@@ -443,6 +443,9 @@ export async function _activate(
           fs.writeFileSync(keybindingConfigPath, "[]");
         }
         writeJSONWithComments(keybindingConfigPath, resolvedKeybindings);
+        AnalyticsUtils.track(ExtensionEvents.VimExtensionInstalled, {
+          fixApplied: true,
+        });
       }
     }
   }

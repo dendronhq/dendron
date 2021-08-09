@@ -26,7 +26,7 @@ export enum TutorialEvents {
 }
 
 export enum ExtensionEvents {
-  VimExtensionInstalledInitial = "Vim_Extension_Installed_Initial",
+  VimExtensionInstalled = "Vim_Extension_Installed",
 }
 
 export const DendronEvents = {

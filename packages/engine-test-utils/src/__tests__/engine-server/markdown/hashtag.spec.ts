@@ -2,6 +2,7 @@ import {
   AssertUtils,
   TestPresetEntryV4,
   getDescendantNode,
+  NoteTestUtilsV4,
 } from "@dendronhq/common-test-utils";
 import {
   DendronASTDest,
@@ -12,6 +13,7 @@ import {
   UnistNode,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
+import { NoteProps } from "@dendronhq/common-all";
 import { runEngineTestV5 } from "../../../engine";
 import { ENGINE_HOOKS } from "../../../presets";
 import {
@@ -164,11 +166,140 @@ describe("hashtag", () => {
           const { resp } = extra;
           await checkVFile(
             resp,
-            '<a href="tags.my-hash.tag0.html">#my-hash.tag0</a>'
+            '<a href="tags.my-hash.tag0.html" style="background-color: #c95efb66;">#my-hash.tag0</a>'
           );
         },
       },
       preSetupHook: ENGINE_HOOKS.setupBasic,
+    });
+
+    describe("colors", () => {
+      test("with color", async () => {
+        let note: NoteProps;
+        await runEngineTestV5(
+          async ({ engine }) => {
+            const proc = createProcForTest({
+              engine,
+              dest: DendronASTDest.HTML,
+              vault: note.vault,
+            });
+            const resp = await proc.process(`#color`);
+            await checkVFile(
+              resp,
+              '<a href="tags.color.html" style="background-color: #FF003366;">#color</a>'
+            );
+          },
+          {
+            expect,
+            preSetupHook: async ({ wsRoot, vaults }) => {
+              note = await NoteTestUtilsV4.createNote({
+                fname: "tags.color",
+                wsRoot,
+                vault: vaults[0],
+                props: { color: "#FF0033" },
+              });
+            },
+          }
+        );
+      });
+
+      test("with color cascading from parent, self missing", async () => {
+        let note: NoteProps;
+        await runEngineTestV5(
+          async ({ engine }) => {
+            const proc = createProcForTest({
+              engine,
+              dest: DendronASTDest.HTML,
+              vault: note.vault,
+            });
+            const resp = await proc.process(`#parent.color`);
+            await checkVFile(
+              resp,
+              '<a href="tags.parent.color.html" style="background-color: #FF003366;">#parent.color</a>'
+            );
+          },
+          {
+            expect,
+            preSetupHook: async ({ wsRoot, vaults }) => {
+              note = await NoteTestUtilsV4.createNote({
+                fname: "tags.parent",
+                wsRoot,
+                vault: vaults[0],
+                props: { color: "#FF0033" },
+              });
+            },
+          }
+        );
+      });
+
+      test("with color cascading from parent, self exists", async () => {
+        let note: NoteProps;
+        await runEngineTestV5(
+          async ({ engine }) => {
+            const proc = createProcForTest({
+              engine,
+              dest: DendronASTDest.HTML,
+              vault: note.vault,
+            });
+            const resp = await proc.process(`#parent.color`);
+            await checkVFile(
+              resp,
+              '<a href="tags.parent.color.html" style="background-color: #FF003366;">#parent.color</a>'
+            );
+          },
+          {
+            expect,
+            preSetupHook: async ({ wsRoot, vaults }) => {
+              note = await NoteTestUtilsV4.createNote({
+                fname: "tags.parent",
+                wsRoot,
+                vault: vaults[0],
+                props: { color: "#FF0033" },
+              });
+              await NoteTestUtilsV4.createNote({
+                fname: "tags.parent.color",
+                wsRoot,
+                vault: vaults[0],
+              });
+            },
+          }
+        );
+      });
+
+      test("overrides color cascading from parent", async () => {
+        let note: NoteProps;
+        await runEngineTestV5(
+          async ({ engine }) => {
+            const proc = createProcForTest({
+              engine,
+              dest: DendronASTDest.HTML,
+              vault: note.vault,
+            });
+            const resp = await proc.process(`#parent.color`);
+            await checkVFile(
+              resp,
+              '<a href="tags.parent.color.html" style="background-color: #00FF1166;">#parent.color</a>'
+            );
+          },
+          {
+            expect,
+            preSetupHook: async ({ wsRoot, vaults }) => {
+              note = await NoteTestUtilsV4.createNote({
+                fname: "tags.parent",
+                wsRoot,
+                vault: vaults[0],
+                props: { color: "#FF0033" },
+              });
+              await NoteTestUtilsV4.createNote({
+                fname: "tags.parent.color",
+                wsRoot,
+                vault: vaults[0],
+                props: { color: "#00FF11" },
+              });
+            },
+          }
+        );
+      });
     });
 
     const ALL_TEST_CASES = [...SIMPLE];

@@ -73,7 +73,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
           )}`,
         });
       }
-      const note = MDUtilsV5.getNoteByFname(proc, {fname})
+      const note = MDUtilsV5.getNoteByFname(proc, { fname });
       if (!note) {
         throw new DendronError({ message: `no note found for ${fname}` });
       }
@@ -141,8 +141,12 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         }
 
         let color: string | undefined;
-        if (note && value.startsWith(TAGS_HIERARCHY)) {
-          const [maybeColor, colorType] = NoteUtils.color({ note });
+        if (mode !== ProcMode.IMPORT && value.startsWith(TAGS_HIERARCHY)) {
+          const { color: maybeColor, type: colorType } = NoteUtils.color({
+            fname: value,
+            vault,
+            notes: engine.notes,
+          });
           if (
             colorType === "configured" ||
             opts?.noRandomlyColoredTags !== false

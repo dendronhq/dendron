@@ -60,13 +60,14 @@ export const createProcForTest = (opts: {
   engine: DEngineClient;
   dest: DendronASTDest;
   vault: DVault;
+  fname?: string;
   useIdAsLink?: boolean;
 }) => {
-  const { engine, dest, vault } = opts;
+  const { engine, dest, vault, fname } = opts;
   const proc2 = MDUtilsV4.procFull({
     engine,
     dest,
-    fname: "root",
+    fname: fname || "root",
     vault,
     wikiLinksOpts: {
       useId: opts.useIdAsLink,

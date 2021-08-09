@@ -11,15 +11,25 @@ import { Time } from "./time";
 import {
   DEngineClient,
   DLink,
-  DNodeOpts, DNodeProps, DNodePropsDict,
-  DNodePropsQuickInputV2, DNoteLoc,
+  DNodeOpts,
+  DNodeProps,
+  DNodePropsDict,
+  DNodePropsQuickInputV2,
+  DNoteLoc,
   DVault,
-  NoteOpts, NoteProps, NotePropsDict, REQUIRED_DNODEPROPS, SchemaData,
+  NoteOpts,
+  NoteProps,
+  NotePropsDict,
+  REQUIRED_DNODEPROPS,
+  SchemaData,
   SchemaModuleDict,
   SchemaModuleOpts,
   SchemaModuleProps,
-  SchemaOpts, SchemaProps, SchemaPropsDict, SchemaRaw,
-  SchemaTemplate
+  SchemaOpts,
+  SchemaProps,
+  SchemaPropsDict,
+  SchemaRaw,
+  SchemaTemplate,
 } from "./types";
 import { getSlugger, isNotUndefined, randomColor } from "./utils";
 import { genUUID } from "./uuid";
@@ -748,7 +758,15 @@ export class NoteUtils {
   /**
    * Get a list that has all the parents of the current note with the current note
    */
-  static getNoteWithParents({note, notes, sortDesc = true}: {note: NoteProps, notes: NotePropsDict, sortDesc?: boolean}): NoteProps[] {
+  static getNoteWithParents({
+    note,
+    notes,
+    sortDesc = true,
+  }: {
+    note: NoteProps;
+    notes: NotePropsDict;
+    sortDesc?: boolean;
+  }): NoteProps[] {
     const out = [];
     if (!note || _.isUndefined(note)) {
       return [];
@@ -762,7 +780,7 @@ export class NoteUtils {
         }
         note = tmp;
       } catch (err) {
-        throw Error(`no parent found for note ${note.id}`)
+        throw Error(`no parent found for note ${note.id}`);
       }
     }
     out.push(note);
@@ -919,16 +937,15 @@ export class NoteUtils {
    * @param notes: All notes in `engine.notes`, used to check the ancestors of `note`.
    * @returns The color, and whether this color was randomly generated or explicitly defined.
    */
-  static color(opts: {
-    fname: string;
-    vault?: DVault;
-    notes: NotePropsDict;
-  }): [string, "configured" | "generated"] {
+  static color(opts: { fname: string; vault?: DVault; notes: NotePropsDict }): {
+    color: string;
+    type: "configured" | "generated";
+  } {
     const ancestors = NoteUtils.ancestors({ ...opts, includeSelf: true });
     for (const note of ancestors) {
-      if (note.color) return [note.color, "configured"];
+      if (note.color) return { color: note.color, type: "configured" };
     }
-    return [randomColor(opts.fname), "generated"];
+    return { color: randomColor(opts.fname), type: "generated" };
   }
 
   /** Get the ancestors of a note, in the order of the closest to farthest.

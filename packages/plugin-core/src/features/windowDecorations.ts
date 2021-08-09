@@ -248,7 +248,7 @@ export const DECORATION_TYPE_TAG = new DefaultMap<
   TextEditorDecorationType
 >((fname) => {
   const { notes } = getWS().getEngine();
-  let backgroundColor = NoteUtils.color({ fname, notes })[0];
+  let { color: backgroundColor } = NoteUtils.color({ fname, notes });
   backgroundColor = makeColorTranslucent(
     backgroundColor,
     TAG_COLORING_TRANSLUCENCY

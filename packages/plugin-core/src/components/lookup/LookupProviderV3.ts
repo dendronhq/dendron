@@ -1,4 +1,13 @@
-import { DNodeUtils, NoteQuickInput, RespV2, SchemaModuleProps, SchemaQuickInput, SchemaUtils } from "@dendronhq/common-all";
+import { 
+  NoteUtils,
+  DNodeUtils,
+  NoteQuickInput,
+  RespV2,
+  NoteProps,
+  SchemaModuleProps, 
+  SchemaQuickInput, 
+  SchemaUtils 
+} from "@dendronhq/common-all";
 import { getDurationMilliseconds } from "@dendronhq/common-server";
 import { HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
@@ -167,6 +176,10 @@ export class NoteLookupProvider implements ILookupProviderV3 {
     const ws = DendronWorkspace.instance();
     let profile: number;
     const queryEndsWithDot = queryOrig.endsWith(".");
+    const queryUpToLastDot =
+      queryOrig.lastIndexOf(".") >= 0
+      ? queryOrig.slice(0, queryOrig.lastIndexOf("."))
+      : undefined;
 
     const engine = ws.getEngine();
     Logger.info({ ctx, msg: "enter", queryOrig });
@@ -206,6 +219,55 @@ export class NoteLookupProvider implements ILookupProviderV3 {
         picker.items = updatedItems;
         picker.activeItems = picker.items;
         return;
+      }
+
+      if (!_.isUndefined(queryUpToLastDot)) {
+        const results = SchemaUtils.matchPath({
+          notePath: queryUpToLastDot,
+          schemaModDict: engine.schemas,
+        });
+        // since namespace matches everything, we don't do queries on that
+        if (results && !results.namespace) {
+          const { schema, schemaModule } = results;
+          const dirName = queryUpToLastDot;
+          const candidates = schema.children
+            .map((ent) => {
+              const mschema = schemaModule.schemas[ent];
+              if (
+                SchemaUtils.hasSimplePattern(mschema, {
+                  isNotNamespace: true,
+                })
+              ) {
+                const pattern = SchemaUtils.getPattern(mschema, {
+                  isNotNamespace: true,
+                });
+                const fname = [dirName, pattern].join(".");
+                return NoteUtils.fromSchema({
+                  schemaModule,
+                  schemaId: ent,
+                  fname,
+                  vault: PickerUtilsV2.getVaultForOpenEditor(),
+                });
+              }
+              return;
+            })
+            .filter(Boolean) as NoteProps[];
+          const candidatesToAdd = _.differenceBy(
+            candidates,
+            updatedItems,
+            (ent) => ent.fname
+          );
+          updatedItems = updatedItems.concat(
+            candidatesToAdd.map((ent) => {
+              return DNodeUtils.enhancePropForQuickInputV3({
+                wsRoot: DendronWorkspace.wsRoot(),
+                props: ent,
+                schemas: engine.schemas,
+                vaults: DendronWorkspace.instance().vaultsv4,
+              });
+            })
+          );
+        }
       }
 
       // filter the results through optional middleware

@@ -275,11 +275,6 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     key: "dendron.lookup",
     title: `${CMD_PREFIX} Lookup`,
     group: "navigation",
-    keybindings: {
-      mac: "cmd+L",
-      key: "ctrl+l",
-      when: DendronContext.PLUGIN_ACTIVE,
-    },
     desc: "Initiate note lookup",
     docLink: "dendron.topic.lookup.md",
     docPreview: "",
@@ -293,7 +288,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     when: DendronContext.PLUGIN_ACTIVE,
   },
   LOOKUP_JOURNAL: {
-    key: "dendron.lookup",
+    key: "dendron.lookupNote",
     shortcut: true,
     title: `${CMD_PREFIX} Lookup (Journal Note)`,
     group: "navigation",
@@ -310,7 +305,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docPreview: "",
   },
   LOOKUP_SCRATCH: {
-    key: "dendron.lookup",
+    key: "dendron.lookupNote",
     shortcut: true,
     title: `${CMD_PREFIX} Lookup (Scratch Note)`,
     group: "navigation",

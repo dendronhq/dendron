@@ -100,7 +100,7 @@ function AppVSCode({ Component, pageProps }: any) {
         });
         await ideDispatch(engineSlice.initNotes({ port, ws }));
       }
-      if (syncChangedNote) {
+      if (syncChangedNote && note) {
         await ideDispatch(engineSlice.syncNote({ port, ws, note }));
       }
       logger.info({ ctx, msg: "syncEngine:post" });

@@ -43,12 +43,14 @@
     "@types/lodash": "^4.14.161",
     "@types/node": "^14.11.2",
     "@types/react": "^17.0.5",
+    "@types/redux-logger": "^3.0.9",
     "antd": "4.15.4",
     "lodash": "^4.17.20",
     "querystring": "^0.2.1",
     "react": "17.0.1",
     "react-dom": "^17.0.2",
-    "react-redux": "^7.2.3"
+    "react-redux": "^7.2.3",
+    "redux-logger": "^3.0.6"
   },
   "nohoist": [
     "**/common-all",

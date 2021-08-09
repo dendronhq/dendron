@@ -33,7 +33,7 @@ export const ideSlice = createSlice({
     },
   } as InitialState,
   reducers: {
-    setNoteActive: (state, action: PayloadAction<NoteProps>) => {
+    setNoteActive: (state, action: PayloadAction<NoteProps | undefined>) => {
       state.noteActive = action.payload;
     },
     setTheme: (state, action: PayloadAction<Theme>) => {

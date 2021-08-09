@@ -81,19 +81,20 @@ function CalendarView({ engine, ide }: DendronProps) {
 
   const maxDots: number = 5;
   const wordsPerDot: number = 250;
-  const dailyJournalDomain = config?.journal.dailyDomain || "daily";
-  const defaultJournalName = config?.journal.name || "journal";
+  const journalDailyDomain = config?.journal.dailyDomain;
+  const journalName = config?.journal.name;
 
   // luxon token format lookup https://github.com/moment/luxon/blob/master/docs/formatting.md#table-of-tokens
-  let defaultJournalDateFormat = config?.journal.dateFormat || "y.MM.dd";
-  const defaultJournalMonthDateFormat = "y.MM"; // TODO compute format for currentMode="year" from config
+  let journalDateFormat = config?.journal.dateFormat;
+  const journalMonthDateFormat = "y.MM"; // TODO compute format for currentMode="year" from config
 
   // Currently luxon does not support setting first day of the week (https://github.com/moment/luxon/issues/373)
   // const dayOfWeek = config?.journal.firstDayOfWeek;
   // const locale = "en-us";
 
-  if (defaultJournalDateFormat) {
-    defaultJournalDateFormat = defaultJournalDateFormat.replace(/DD/, "dd");
+  if (journalDateFormat) {
+    // correct possible user mistake that very likely is meant to be day of the month, padded to 2 (dd) and not localized date with abbreviated month (DD)
+    journalDateFormat = journalDateFormat.replace(/DD/, "dd");
   }
 
   const groupedDailyNotes = useMemo(() => {
@@ -105,45 +106,51 @@ function CalendarView({ engine, ide }: DendronProps) {
     });
 
     const dailyNotes = vaultNotes.filter((note) =>
-      note.fname.startsWith(`${dailyJournalDomain}.`)
+      note.fname.startsWith(`${journalDailyDomain}.${journalName}`)
     );
     const result = _.groupBy(dailyNotes, (note) => {
-      return getMaybeDatePortion(note, defaultJournalName);
+      return journalName ? getMaybeDatePortion(note, journalName) : undefined;
     });
     return result;
-  }, [notes, defaultJournalName, currentVault?.fsPath]);
+  }, [notes, journalName, journalDailyDomain, currentVault?.fsPath]);
 
   const activeDate = useMemo(() => {
-    if (noteActive) {
-      const maybeDatePortion = getMaybeDatePortion(
-        noteActive,
-        defaultJournalName
-      );
+    if (noteActive && journalName && journalDateFormat) {
+      const maybeDatePortion = getMaybeDatePortion(noteActive, journalName);
 
-      // check if daily file is `y.MM` instead of `y.MM.dd` to apply proper format string.
-      // unlike moment luxon marks the date as invalid if date and dateformat do not match
-      const isMonthly = maybeDatePortion.split(".").length === 2;
+      if (maybeDatePortion && _.first(groupedDailyNotes[maybeDatePortion])) {
+        const dailyDate = Time.DateTime.fromFormat(
+          maybeDatePortion,
+          journalDateFormat
+        );
 
-      return maybeDatePortion && _.first(groupedDailyNotes[maybeDatePortion])
-        ? Time.DateTime.fromFormat(
-            maybeDatePortion,
-            isMonthly ? defaultJournalMonthDateFormat : defaultJournalDateFormat
-          )
-        : undefined;
+        const monthlyDate = Time.DateTime.fromFormat(
+          maybeDatePortion,
+          journalMonthDateFormat
+        );
+
+        return dailyDate.isValid
+          ? dailyDate
+          : monthlyDate.isValid
+          ? monthlyDate
+          : undefined;
+      }
+
+      return undefined;
     }
-  }, [noteActive, groupedDailyNotes]);
+  }, [noteActive, groupedDailyNotes, journalName, journalDateFormat]);
 
   const getDateKey = useCallback<
-    (date: DateTime, mode?: CalendarProps["mode"]) => string
+    (date: DateTime, mode?: CalendarProps["mode"]) => string | undefined
   >(
     (date, mode) => {
       const format =
         (mode || activeMode) === "month"
-          ? defaultJournalDateFormat || "y.MM.dd"
-          : defaultJournalMonthDateFormat;
-      return date.toFormat(format);
+          ? journalDateFormat
+          : journalMonthDateFormat;
+      return format ? date.toFormat(format) : undefined;
     },
-    [activeMode, defaultJournalDateFormat]
+    [activeMode, journalDateFormat]
   );
 
   const onSelect = useCallback<
@@ -152,18 +159,20 @@ function CalendarView({ engine, ide }: DendronProps) {
     (date, mode) => {
       logger.info({ ctx: "onSelect", date });
       const dateKey = getDateKey(date, mode);
-      const selectedNote = _.first(groupedDailyNotes[dateKey]);
+      const selectedNote = dateKey
+        ? _.first(groupedDailyNotes[dateKey])
+        : undefined;
 
       postVSCodeMessage({
         type: CalendarViewMessageType.onSelect,
         data: {
           id: selectedNote?.id,
-          fname: `daily.journal.${dateKey}`,
+          fname: `${journalDailyDomain}.${journalName}.${dateKey}`,
         },
         source: DMessageSource.webClient,
       });
     },
-    [groupedDailyNotes, getDateKey]
+    [groupedDailyNotes, getDateKey, journalDailyDomain, journalName]
   );
 
   const onPanelChange = useCallback<
@@ -184,7 +193,9 @@ function CalendarView({ engine, ide }: DendronProps) {
   >(
     (date) => {
       const dateKey = getDateKey(date);
-      const dailyNote = _.first(groupedDailyNotes[dateKey]);
+      const dailyNote = dateKey
+        ? _.first(groupedDailyNotes[dateKey])
+        : undefined;
       const dailyNotes = dailyNote ? [dailyNote] : []; // keeping for case of showing all dailyNotes of day in multi-vault
 
       const dateCell =
@@ -259,34 +270,6 @@ function CalendarView({ engine, ide }: DendronProps) {
     return <Spin />;
   }
 
-  const genError = (msg: string) => {
-    const suffix = "Please update your dendron.yml configuration";
-    return (
-      <>
-        `{msg} {suffix}`
-      </>
-    );
-  };
-
-  if (engine.config?.journal.dateFormat !== "y.MM.dd") {
-    return genError(
-      `only "journal.dateFormat:"y.MM.dd" is supported currently`
-    );
-  }
-  if (engine.config?.journal.addBehavior !== "childOfDomain") {
-    return genError(
-      `only "journal.addBehavior = "childOfDomain" is supported currently`
-    );
-  }
-  if (engine.config?.journal.dailyDomain !== "daily") {
-    return genError(
-      `only "journal.dailyDomain = "daily" is supported currently`
-    );
-  }
-  if (engine.config?.journal.name !== "journal") {
-    return genError(`only "journal.name = "name" is supported currently`);
-  }
-
   return (
     <>
       <Calendar
@@ -310,12 +293,16 @@ function CalendarView({ engine, ide }: DendronProps) {
 
 function areEqual(prevProps: DendronProps, nextProps: DendronProps) {
   const logger = createLogger("calendarViewContainer");
+
+  const didNotesLengthChanged =
+    Object.keys(prevProps.engine.notes || {}).length !==
+    Object.keys(nextProps.engine.notes || {}).length;
+
   const isDiff = _.some([
     // active note changed
     prevProps.ide.noteActive?.id !== nextProps.ide.noteActive?.id,
     // engine initialized for first time
-    _.isUndefined(prevProps.engine.notes) ||
-      (_.isEmpty(prevProps.engine.notes) && !_.isEmpty(nextProps.engine.notes)),
+    _.isUndefined(prevProps.engine.notes) || didNotesLengthChanged,
     // engine just went from pending to loading
     prevProps.engine.loading === "pending" &&
       nextProps.engine.loading === "idle",

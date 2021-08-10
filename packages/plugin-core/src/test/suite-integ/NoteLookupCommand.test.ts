@@ -54,6 +54,9 @@ import {
 import { DendronWorkspace } from "../../workspace";
 import { CONFIG } from "../../constants";
 import sinon from "sinon";
+import { vault2Path } from "@dendronhq/common-server";
+import fs from "fs-extra";
+import path from "path";
 
 const stubVaultPick = (vaults: DVault[]) => {
   const vault = _.find(vaults, { fsPath: "vault1" });
@@ -215,6 +218,41 @@ suite("NoteLookupCommand", function () {
         },
       });
     });
+
+    test("schema suggestions basic", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        postSetupHook: async ({ wsRoot, vaults }) => {
+          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+          const vpath = vault2Path({ vault: vaults[0], wsRoot });
+          fs.removeSync(path.join(vpath, "foo.ch1.md"));
+        },
+        onInit: async ({ vaults }) => {
+          const cmd = new NoteLookupCommand();
+          stubVaultPick(vaults);
+
+          const { controller, provider, quickpick } = await cmd.gatherInputs({
+            noteType: LookupNoteTypeEnum.journal,
+          });
+
+          quickpick.value = "foo.";
+          await provider.onUpdatePickerItems({
+            picker: quickpick,
+            token: controller.cancelToken.token,
+            fuzzThreshold: controller.fuzzThreshold,
+          });
+          const schemaItem = _.pick(
+            _.find(quickpick.items, { fname: "foo.ch1" }),
+            ["fname", "schemaStub"]
+          );
+          expect(schemaItem).toEqual({
+            fname: "foo.ch1",
+            schemaStub: true,
+          });
+          done();
+        },
+      });
+    })
   });
 
   describe("onAccept", () => {

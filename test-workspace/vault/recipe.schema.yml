@@ -1,0 +1,25 @@
+version: 1
+imports: []
+schemas:
+  - id: recipe
+    desc: a recipe
+    parent: root
+    children:
+      - ing
+      - nutri
+      - vari
+      - tips
+  - id: ing
+    desc: |
+      Ingredients
+  - id: nutri
+    title: nutrition
+    desc: |
+      Various nutritional values per serving
+  - id: vari
+    title: variation
+    desc: |
+      Ways to modify and adapt the recipe
+  - id: tips
+    desc: |
+      Good to know facts about the recipe

@@ -14,7 +14,6 @@ const SCHEMAS = {
   //     const vault = vaults[0];
   //     const schemas = engine.schemas;
   //     const { data } = await engine.querySchema("");
-  //     debugger;
   //     const expectedNote = SchemaUtils.getSchemaModuleByFnameV4({
   //       fname: "root",
   //       schemas,
@@ -58,7 +57,7 @@ const SCHEMAS = {
         schemas,
         vault,
       });
-      const fooSchema = _.find(data, {fname: sid});
+      const fooSchema = _.find(data, { fname: sid });
       return [
         {
           actual: fooSchema,

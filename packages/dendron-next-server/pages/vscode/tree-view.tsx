@@ -1,4 +1,4 @@
-import { BookOutlined, PlusOutlined } from "@ant-design/icons";
+import { BookOutlined, PlusOutlined, NumberOutlined } from "@ant-design/icons";
 import { Spin } from "antd";
 import {
   DendronTreeViewKey,
@@ -9,6 +9,11 @@ import {
   TreeViewMessage,
   TreeViewMessageType,
   VaultUtils,
+  TAGS_HIERARCHY,
+  TAGS_HIERARCHY_BASE,
+  NoteUtils,
+  makeColorTranslucent,
+  isNotUndefined,
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -63,22 +68,43 @@ class TreeViewUtils {
       return undefined;
     }
     const vname = VaultUtils.getName(note.vault);
-    let icon = undefined;
-    if (note.stub) {
-      icon = <PlusOutlined />;
-    }
+    let icon;
     if (note.schema) {
       icon = <BookOutlined />;
+    } else if (note.fname === TAGS_HIERARCHY_BASE) {
+      icon = <NumberOutlined />;
+    } else if (note.stub) {
+      icon = <PlusOutlined />;
     }
+
+    let title: any = note.title;
+    if (showVaultName) title = `${title} (${vname})`;
+
+    if (note.fname.startsWith(TAGS_HIERARCHY)) {
+      let { color } = NoteUtils.color({
+        fname: note.fname,
+        notes: noteDict,
+        vault: note.vault,
+      });
+      color = makeColorTranslucent(color, 0.6);
+      title = (
+        <span>
+          <NumberOutlined style={{ color }} />
+          {title}
+        </span>
+      );
+    }
+
     return {
       key: note.id,
-      title: note.title + (showVaultName ? ` (${vname})` : ""),
+      title,
       icon,
-      children: note.children
-        .map((ent) =>
-          TreeViewUtils.note2TreeDatanote({ noteId: ent, noteDict })
-        )
-        .filter((ent) => !_.isUndefined(ent)) as DataNode[],
+      children: _.sortBy(
+        note.children,
+        (noteId) => !noteDict[noteId]?.fname?.startsWith(TAGS_HIERARCHY)
+      )
+        .map((noteId) => TreeViewUtils.note2TreeDatanote({ noteId, noteDict }))
+        .filter(isNotUndefined),
     };
   }
 }

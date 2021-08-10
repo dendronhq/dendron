@@ -49,6 +49,8 @@ site:
             - vault2
             - vault
             - vault2
+            - vaultThree
+            - vaultThree
 dev:
     enableWebUI: true
 graph:

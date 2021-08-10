@@ -503,6 +503,7 @@ export class LookupProviderV2 {
     flavor: EngineFlavor;
     picker: DendronQuickPickerV2;
     qs: string;
+    depth?: number;
   }) {
     const ctx = "createPickerItemsFromEngine";
     const start = process.hrtime();
@@ -516,7 +517,13 @@ export class LookupProviderV2 {
       // eslint-disable-next-line no-useless-catch
       try {
         const resp = await engine.queryNotes({ qs });
-        nodes = resp.data;
+        if (opts.depth) {
+          nodes = resp.data.filter((ent) => {
+            return DNodeUtils.getDepth(ent) > opts.depth!;
+          }).filter((ent) => !ent.stub);
+        } else {
+          nodes = resp.data;
+        }
         Logger.info({ ctx, msg: "post:queryNotes" });
       } catch (err) {
         throw err;
@@ -616,6 +623,7 @@ export class LookupProviderV2 {
         picker,
         flavor: opts.flavor,
         qs: querystring,
+        depth: picker.showDirectChildrenOnly ? depth : undefined,
       });
 
       if (token.isCancellationRequested) {
@@ -696,10 +704,6 @@ export class LookupProviderV2 {
         Logger.debug({ ctx, msg: "no matches" });
         picker.items = updatedItems;
         return;
-      }
-      if (picker.showDirectChildrenOnly) {
-        updatedItems = PickerUtilsV2.filterByDepth(updatedItems, depth);
-        updatedItems = PickerUtilsV2.filterNonStubs(updatedItems);
       }
 
       if (perfectMatch) {

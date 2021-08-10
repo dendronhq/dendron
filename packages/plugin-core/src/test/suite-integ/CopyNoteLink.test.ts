@@ -165,6 +165,44 @@ suite("CopyNoteLink", function () {
       });
     });
 
+    test("doesn't confuse a footnote for a block anchor", (done) => {
+      let note: NoteProps;
+
+      runSingleVaultTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          note = await NoteTestUtilsV4.createNote({
+            fname: "test",
+            vault: vaults[0],
+            wsRoot,
+            body: "Sapiente accusantium omnis quia. [^est]\n\n[^est]: Quia iure tempore eum.",
+          });
+        },
+        onInit: async () => {
+          const editor = await VSCodeUtils.openNote(note);
+          const cmd = new CopyNoteLinkCommand();
+          editor.selection = new vscode.Selection(
+            LocationTestUtils.getPresetWikiLinkPosition(),
+            LocationTestUtils.getPresetWikiLinkPosition({ char: 10 })
+          );
+          const link = await cmd.execute({});
+          const body = editor.document.getText();
+
+          // check that the link looks like what we expect
+          expect(link).toNotEqual("[[Test|test#^est]]");
+          const anchor = getAnchorFromLink(link);
+
+          // check that the anchor has been inserted into the note
+          AssertUtils.assertTimesInString({
+            body,
+            match: [[1, anchor]],
+          });
+
+          done();
+        },
+      });
+    });
+
     test("generated block anchor", (done) => {
       let note: NoteProps;
 

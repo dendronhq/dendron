@@ -1,13 +1,8 @@
-import {
-  DEngineClient,
-  genUUIDInsecure,
-  NoteUtils,
-} from "@dendronhq/common-all";
+import { DEngineClient, genUUIDInsecure } from "@dendronhq/common-all";
 import {
   DendronASTDest,
   DendronASTTypes,
   select,
-  MDUtilsV4,
   Heading,
   BlockAnchor,
   MDUtilsV5,
@@ -65,18 +60,16 @@ export function getHeaderAt({
 export function getBlockAnchorAt({
   editor,
   position,
-  engine,
 }: {
   editor: TextEditor;
   position: Position;
-  engine: DEngineClient;
+  engine?: DEngineClient;
 }): string | undefined {
   const line = editor.document.lineAt(position.line);
-  const proc = MDUtilsV4.procParse({
-    engine,
-    fname: NoteUtils.uri2Fname(editor.document.uri),
-    dest: DendronASTDest.MD_DENDRON,
-  });
+  const proc = MDUtilsV5.procRemarkParseNoData(
+    {},
+    { dest: DendronASTDest.MD_DENDRON }
+  );
   const parsed = proc.parse(_.trim(line.text));
   const blockAnchor = select(
     DendronASTTypes.BLOCK_ANCHOR,

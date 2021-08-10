@@ -15,6 +15,8 @@ import {
   OauthService,
   registerOauthHandler,
 } from "./routes/oauth";
+import * as Sentry from "@sentry/node";
+import * as Tracing from "@sentry/tracing";
 
 export function appModule({
   logPath,
@@ -51,6 +53,29 @@ export function appModule({
   logger.info({ ctx, dirPath: __dirname });
   const staticDir = path.join(__dirname, "static");
   app.use(express.static(staticDir));
+
+  // Setup Sentry:
+
+  Sentry.init({
+    dsn: "https://bc206b31a30a4595a2efb31e8cc0c04e@o949501.ingest.sentry.io/5898219",
+    integrations: [
+      // enable HTTP calls tracing
+      new Sentry.Integrations.Http({ tracing: true }),
+      // enable Express.js middleware tracing
+      new Tracing.Integrations.Express({ app }),
+    ],
+
+    // Set tracesSampleRate to 1.0 to capture 100%
+    // of transactions for performance monitoring.
+    // We recommend adjusting this value in production
+    tracesSampleRate: 1.0,
+  });
+
+  // RequestHandler creates a separate execution context using domains, so that every
+  // transaction/span/breadcrumb is attached to its own Hub instance
+  app.use(Sentry.Handlers.requestHandler());
+  // TracingHandler creates a trace for every incoming request
+  app.use(Sentry.Handlers.tracingHandler());
 
   // for dev environment, get preview from next-server in monorepo
   if (getStage() !== "prod") {
@@ -104,6 +129,13 @@ export function appModule({
   baseRouter.use("/oauth", oauthRouter);
 
   app.use("/api", baseRouter);
+
+  app.get("/debug-sentry", (req, res) => {
+    throw new Error("My first Sentry error!");
+  });
+
+  // The error handler must be before any other error middleware and after all controllers
+  app.use(Sentry.Handlers.errorHandler());
 
   app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
     console.error(err.message, err);

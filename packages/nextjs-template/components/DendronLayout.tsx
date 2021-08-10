@@ -1,10 +1,10 @@
-import { Layout, Menu } from "antd";
+import { Layout } from "antd";
 import * as React from "react";
 import { DendronCommonProps } from "../utils/types";
 import { DendronBreadCrumb } from "./DendronBreadCrumb";
-import DendronTreeView from "./DendronTreeView";
-import { AutoComplete } from "antd";
 import { DendronLookup } from "./DendronLookup";
+import DendronTreeView from "./DendronTreeView";
+
 const { Header, Content, Sider } = Layout;
 
 export default function DendronLayout(

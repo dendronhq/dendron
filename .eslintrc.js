@@ -79,9 +79,10 @@ module.exports = {
     "@typescript-eslint/no-shadow": "off", // TODO should be turned on
     "import/order": "off",
     "import/no-cycle": "off",
-    // --- Reac
-    "react/no-children-prop": "off",
+    // --- React
     "react/prop-types": "off",
+    // we use 'logger' inside of hooks, gets flagged 
+    "react-hooks/exhaustive-deps": "off",
     // suppress errors for missing 'import React' in files
     "react/react-in-jsx-scope": "off",
     "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx", ".ts", ".tsx"] }],
@@ -106,8 +107,6 @@ module.exports = {
         ],
       },
     ],
-    // Support JSX in .tsx files
-    "react/jsx-filename-extension": [1, { "extensions": [".tsx"] }],
     // used for redux toolkit
     "no-param-reassign": "off",
     "max-classes-per-file": "off",

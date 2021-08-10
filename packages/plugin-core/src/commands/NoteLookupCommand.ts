@@ -5,6 +5,7 @@ import {
   NoteProps,
   NoteQuickInput,
   NoteUtils,
+  SchemaUtils,
 } from "@dendronhq/common-all";
 import { DConfig, HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
@@ -297,6 +298,31 @@ export class NoteLookupCommand extends BaseCommand<
       if (picker.selectionProcessFunc !== undefined) {
         nodeNew = (await picker.selectionProcessFunc(nodeNew)) as NoteProps;
       }
+      const schemaMatchResult = SchemaUtils.matchPath({
+        notePath: fname,
+        schemaModDict: engine.schemas,
+      });
+      if (schemaMatchResult) {
+        NoteUtils.addSchema({
+          note: nodeNew,
+          schemaModule: schemaMatchResult.schemaModule,
+          schema: schemaMatchResult.schema,
+        });
+      }
+    }
+
+    const maybeSchema = SchemaUtils.getSchemaFromNote({
+      note: nodeNew,
+      engine,
+    });
+    const maybeTemplate =
+      maybeSchema?.schemas[nodeNew.schema?.schemaId as string].data.template;
+    if (maybeSchema && maybeTemplate) {
+      SchemaUtils.applyTemplate({
+        template: maybeTemplate,
+        note: nodeNew,
+        engine,
+      });
     }
     const resp = await engine.writeNote(nodeNew, {
       newNode: true,

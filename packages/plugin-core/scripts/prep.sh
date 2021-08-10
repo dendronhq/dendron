@@ -1,13 +1,5 @@
 #!/bin/bash
 
-git reset --hard
-git clean -f
-git checkout master
-git fetch
-git branch -D integ-publish
-git checkout --track origin/integ-publish
-git clean -f
-
 echo "updating pkg"
 rm ../../package.json
 sed  -ibak 's/@dendronhq.plugin-core/dendron/' package.json

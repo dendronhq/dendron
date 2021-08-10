@@ -1,10 +1,16 @@
+if [ $PUBLISH_ENDPOINT == "local" ]; then
+	echo "start verdaccio"
+	verdaccio &
+	FOO_PID=$!
+	echo "$FOO_PID"
+	sleep 3
+fi
 
-verdaccio &
-FOO_PID=$!
-echo "$FOO_PID"
+echo "building... upgrade: $UPGRADE_TYPE, endpoint: $PUBLISH_ENDPOINT"
 
-sleep 3
-LOG_LEVEL=info dendron dev build --upgradeType patch --publishEndpoint local
+LOG_LEVEL=info dendron dev build --upgradeType $UPGRADE_TYPE --publishEndpoint $PUBLISH_ENDPOINT
 
-echo "killing "
-kill $FOO_PID
+if [ $PUBLISH_ENDPOINT == "local" ]; then
+	echo "killing "
+	kill $FOO_PID
+fi

@@ -22,6 +22,7 @@ export * from "./basev3";
 export * from "./builtin";
 export * from "./types";
 export * from "./utils";
+export * from "./graph";
 export function getAllExportPods(): PodClassEntryV4[] {
   return [
     JSONExportPod,

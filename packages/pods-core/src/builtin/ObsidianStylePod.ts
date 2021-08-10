@@ -1,9 +1,9 @@
 import fs from "fs-extra";
 import _ from "lodash";
 import {
-  ExportPod,
-  ExportPodPlantOpts,
-  ExportPodConfig,
+  // ExportPod,
+  // ExportPodPlantOpts,
+  // ExportPodConfig,
   ImportPod,
   ImportPodConfig,
   ImportPodPlantOpts,
@@ -15,9 +15,9 @@ import moment from "moment";
 import path from "path";
 import os from "os";
 import graphCSS from "../graph";
-import { DConfig } from "@dendronhq/engine-server";
-import { readYAML } from "@dendronhq/common-server";
-import { DendronConfig } from "@dendronhq/common-all";
+// import { DConfig } from "@dendronhq/engine-server";
+// import { readYAML } from "@dendronhq/common-server";
+// import { DendronConfig } from "@dendronhq/common-all";
 
 const ID = "dendron.obsidian-graph-style";
 
@@ -194,13 +194,8 @@ export class ObsidianStyleImportPod extends ImportPod {
 
   get config(): JSONSchemaType<ImportPodConfig> {
     return PodUtils.createImportConfig({
-      required: ["dest"],
-      properties: {
-        dest: {
-          type: "string",
-          description: "Output destination for parsed style file",
-        },
-      },
+      required: [],
+      properties: {},
     }) as JSONSchemaType<ImportPodConfig>;
   }
 

@@ -5,14 +5,14 @@ import {
   GraphViewMessageType,
   VaultUtils,
 } from "@dendronhq/common-all";
-import { Uri, ViewColumn, window } from "vscode";
+import vscode, { Uri, ViewColumn, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { WebViewUtils } from "../views/utils";
 import { BasicCommand } from "./base";
 import { getWS } from "../workspace";
 import { VSCodeUtils } from "../utils";
 import path from "path";
-import vscode from "vscode";
+import { GraphStyleService } from "../styles";
 
 type CommandOpts = {};
 
@@ -125,14 +125,21 @@ export class ShowSchemaGraphCommand extends BasicCommand<
         //   }
         //   break;
         // }
-        // case GraphViewMessageType.onReady: {
-        //   const profile = getDurationMilliseconds(start);
-        //   Logger.info({ ctx, msg: "treeViewLoaded", profile, start });
-        //   AnalyticsUtils.track(VSCodeEvents.TreeView_Ready, {
-        //     duration: profile,
-        //   });
-        //   break;
-        // }
+        case GraphViewMessageType.onRequestGraphStyle: {
+          // Set graph styles
+          const styleService = GraphStyleService.getInstance();
+          const styles = styleService.getParsedStyles();
+          if (styles) {
+            panel.webview.postMessage({
+              type: "onGraphStyleLoad",
+              data: {
+                styles,
+              },
+              source: "vscode",
+            });
+          }
+          break;
+        }
         default:
           console.log("got data", msg);
           break;

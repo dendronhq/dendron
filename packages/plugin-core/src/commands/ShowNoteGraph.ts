@@ -108,7 +108,7 @@ export class ShowNoteGraphCommand extends BasicCommand<
         }
         case GraphViewMessageType.onRequestGraphStyle: {
           // Set graph styles
-          const styleService = GraphStyleService.getInstance()
+          const styleService = GraphStyleService.getInstance();
           const styles = styleService.getParsedStyles();
           if (styles) {
             panel.webview.postMessage({
@@ -121,14 +121,6 @@ export class ShowNoteGraphCommand extends BasicCommand<
           }
           break;
         }
-        // case GraphViewMessageType.onReady: {
-        //   const profile = getDurationMilliseconds(start);
-        //   Logger.info({ ctx, msg: "treeViewLoaded", profile, start });
-        //   AnalyticsUtils.track(VSCodeEvents.TreeView_Ready, {
-        //     duration: profile,
-        //   });
-        //   break;
-        // }
         default:
           console.log("got data", msg);
           break;

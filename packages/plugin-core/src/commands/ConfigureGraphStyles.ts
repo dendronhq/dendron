@@ -15,9 +15,10 @@ export class ConfigureGraphStylesCommand extends BasicCommand<
     return {};
   }
   async execute() {
-    if (!GraphStyleService.doesStyleFileExist()) {
-      GraphStyleService.createStyleFile();
+    const service = GraphStyleService.getInstance();
+    if (!service.doesStyleFileExist()) {
+      service.createStyleFile();
     }
-    await GraphStyleService.openStyleFile();
+    await service.openStyleFile();
   }
 }

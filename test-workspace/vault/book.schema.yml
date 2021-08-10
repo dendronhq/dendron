@@ -1,0 +1,12 @@
+version: 1
+imports: []
+schemas:
+  - id: book
+    children: []
+    namespace: true
+    title: book
+    parent: root
+    template:
+      id: templates.book
+      type: note
+

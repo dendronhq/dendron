@@ -1,8 +1,13 @@
-
-import { BookOutlined, PlusOutlined } from "@ant-design/icons";
+import { BookOutlined, PlusOutlined, NumberOutlined } from "@ant-design/icons";
 import {
-	NoteProps,
-	NotePropsDict, VaultUtils
+  isNotUndefined,
+  makeColorTranslucent,
+  NoteProps,
+  NotePropsDict,
+  NoteUtils,
+  TAGS_HIERARCHY,
+  TAGS_HIERARCHY_BASE,
+  VaultUtils,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { DataNode } from "rc-tree/lib/interface";
@@ -23,7 +28,7 @@ export class TreeViewUtils {
     noteId: string;
   }) => {
     let pNote: NoteProps = notes[noteId];
-    let activeNoteIds: string[] = [];
+    const activeNoteIds: string[] = [];
     do {
       activeNoteIds.unshift(pNote.id);
       pNote = notes[pNote.parent as string];
@@ -45,22 +50,43 @@ export class TreeViewUtils {
       return undefined;
     }
     const vname = VaultUtils.getName(note.vault);
-    let icon = undefined;
-    if (note.stub) {
-      icon = <PlusOutlined />;
-    }
+    let icon;
     if (note.schema) {
       icon = <BookOutlined />;
+    } else if (note.fname === TAGS_HIERARCHY_BASE) {
+      icon = <NumberOutlined />;
+    } else if (note.stub) {
+      icon = <PlusOutlined />;
     }
+
+    let title: any = note.title;
+    if (showVaultName) title = `${title} (${vname})`;
+
+    if (note.fname.startsWith(TAGS_HIERARCHY)) {
+      let { color } = NoteUtils.color({
+        fname: note.fname,
+        notes: noteDict,
+        vault: note.vault,
+      });
+      color = makeColorTranslucent(color, 0.6);
+      title = (
+        <span>
+          <NumberOutlined style={{ color }} />
+          {title}
+        </span>
+      );
+    }
+
     return {
       key: note.id,
-      title: note.title + (showVaultName ? ` (${vname})` : ""),
+      title,
       icon,
-      children: note.children
-        .map((ent) =>
-          TreeViewUtils.note2TreeDatanote({ noteId: ent, noteDict })
-        )
-        .filter((ent) => !_.isUndefined(ent)) as DataNode[],
+      children: _.sortBy(
+        note.children,
+        (noteId) => !noteDict[noteId]?.fname?.startsWith(TAGS_HIERARCHY)
+      )
+        .map((noteId) => TreeViewUtils.note2TreeDatanote({ noteId, noteDict }))
+        .filter(isNotUndefined),
     };
   }
 }

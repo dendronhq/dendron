@@ -67,5 +67,6 @@ export enum RESERVED_KEYS {
   GIT_NO_LINK = "gitNoLink",
 }
 
+export const TAGS_HIERARCHY_BASE = "tags";
 /** Notes under this hierarchy are considered tags, for example `${TAGS_HIERARCHY}foo` is a tag note. */
-export const TAGS_HIERARCHY = "tags.";
+export const TAGS_HIERARCHY = `${TAGS_HIERARCHY_BASE}.`;

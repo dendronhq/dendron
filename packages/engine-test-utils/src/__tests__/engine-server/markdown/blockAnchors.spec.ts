@@ -92,6 +92,11 @@ describe("blockAnchors", () => {
       expect(anchor.type).toEqual(DendronASTTypes.BLOCK_ANCHOR);
       expect(anchor.id).toEqual("block-id");
     });
+
+    test("doesn't parse footnote as block anchor", async () => {
+      const resp = proc().parse("Lorem ipsum [^footnote]");
+      expect(getDescendantNode(resp, 0, 1).type).toEqual("footnoteReference");
+    });
   });
 
   describe("rendering", () => {

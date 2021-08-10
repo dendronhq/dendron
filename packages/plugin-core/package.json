@@ -734,6 +734,12 @@
     "markdown.previewStyles": [
       "./media/fontello/css/fontello.css",
       "./media/markdown.css"
+    ],
+    "yamlValidation": [
+      {
+        "fileMatch": "dendron.yml",
+        "url": "./dist/dendron-yml.validator.json"
+      }
     ]
   },
   "icon": "assets/images/logo.png",

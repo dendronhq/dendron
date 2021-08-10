@@ -2,7 +2,7 @@ import {
   GitPunchCardExportPod,
   JSONExportPod,
   JSONImportPod,
-  JSONPublishPod
+  JSONPublishPod,
 } from "./builtin";
 import { AirtableExportPod } from "./builtin/AirtablePod";
 import { GDocImportPod } from "./builtin/GDocPod";
@@ -12,12 +12,11 @@ import { HTMLPublishPod } from "./builtin/HTMLPod";
 import {
   MarkdownExportPod,
   MarkdownImportPod,
-  MarkdownPublishPod
+  MarkdownPublishPod,
 } from "./builtin/MarkdownPod";
 import { NextjsExportPod } from "./builtin/NextjsExportPod";
 import { PodClassEntryV4 } from "./types";
 import { ObsidianStyleImportPod } from "./builtin/ObsidianStylePod";
-
 
 export * from "./basev3";
 export * from "./builtin";
@@ -30,12 +29,18 @@ export function getAllExportPods(): PodClassEntryV4[] {
     MarkdownExportPod,
     GraphvizExportPod,
     AirtableExportPod,
-    NextjsExportPod
+    NextjsExportPod,
   ];
 }
 export function getAllPublishPods(): PodClassEntryV4[] {
   return [JSONPublishPod, MarkdownPublishPod, HTMLPublishPod, GithubPublishPod];
 }
 export function getAllImportPods(): PodClassEntryV4[] {
-  return [JSONImportPod, MarkdownImportPod, GithubImportPod, GDocImportPod, ObsidianStyleImportPod];
+  return [
+    JSONImportPod,
+    MarkdownImportPod,
+    GithubImportPod,
+    GDocImportPod,
+    ObsidianStyleImportPod,
+  ];
 }

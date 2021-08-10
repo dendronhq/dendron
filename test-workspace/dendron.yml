@@ -55,8 +55,9 @@ dev:
     engineServerPort: 3005
 graph:
     zoomSpeed: 1
+    stylePath: import_2021-08-09-07-53-33.css
 initializeRemoteVaults: true
-dendronVersion: 0.51.2
+dendronVersion: 0.52.0
 scratch:
     name: scratch
     dateFormat: y.MM.dd.HHmmss

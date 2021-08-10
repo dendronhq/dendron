@@ -6,7 +6,13 @@
         },
         {
             "path": "vault"
-        }
+        },
+        {
+            "path": "../../../.dendron/styles"
+        },
+        {
+            "path": "."
+        },
     ],
     "settings": {
         "dendron.rootDir": ".",

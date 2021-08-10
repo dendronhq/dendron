@@ -43,7 +43,7 @@ import {
   CopyNoteLinkBtn,
   HorizontalSplitBtn,
 } from "../../components/lookup/buttons";
-import { PickerUtilsV2 } from "../../components/lookup/utils";
+import { createNoActiveItem, PickerUtilsV2 } from "../../components/lookup/utils";
 import { clipboard, VSCodeUtils } from "../../utils";
 import { expect } from "../testUtilsv2";
 import {
@@ -372,6 +372,77 @@ suite("NoteLookupCommand", function () {
             },
           });
         });
+      });
+    });
+
+    test("new node with schema template", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        postSetupHook: async ({ wsRoot, vaults }) => {
+          await ENGINE_HOOKS.setupSchemaPreseet({ wsRoot, vaults });
+        },
+        onInit: async ({ vaults }) => {
+          const cmd = new NoteLookupCommand();
+          stubVaultPick(vaults);
+          const gatherOut = await cmd.gatherInputs({
+            initialValue: "bar.ch1",
+            noConfirm: true,
+          });
+
+          const enrichOut = await cmd.enrichInputs(gatherOut);
+          const mockQuickPick = createMockQuickPick({
+            value: "bar.ch1",
+            selectedItems: [createNoActiveItem(vaults[0])],
+          });
+          mockQuickPick.showNote = enrichOut?.quickpick.showNote;
+          
+          await cmd.execute({
+            ...enrichOut!,
+            quickpick: mockQuickPick,
+          });
+          const document = VSCodeUtils.getActiveTextEditor()?.document;
+          const newNote = VSCodeUtils.getNoteFromDocument(document!);
+          expect(_.trim(newNote!.body)).toEqual("ch1 template");
+
+          done();
+        },
+      });
+    });
+
+    test("new node with schema template on namespace", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        postSetupHook: async ({ wsRoot, vaults }) => {
+          await ENGINE_HOOKS.setupSchemaPresetWithNamespaceTemplate({
+            wsRoot,
+            vaults,
+          });
+        },
+        onInit: async ({ vaults }) => {
+          const cmd = new NoteLookupCommand();
+          stubVaultPick(vaults);
+          const gatherOut = await cmd.gatherInputs({
+            initialValue: "daily.journal.2021.08.10",
+            noConfirm: true,
+          });
+
+          const enrichOut = await cmd.enrichInputs(gatherOut);
+          const mockQuickPick = createMockQuickPick({
+            value: "daily.journal.2021.08.10",
+            selectedItems: [createNoActiveItem(vaults[0])],
+          });
+          mockQuickPick.showNote = enrichOut?.quickpick.showNote;
+          
+          await cmd.execute({
+            ...enrichOut!,
+            quickpick: mockQuickPick,
+          });
+          const document = VSCodeUtils.getActiveTextEditor()?.document;
+          const newNote = VSCodeUtils.getNoteFromDocument(document!);
+          expect(_.trim(newNote!.body)).toEqual("Template text");
+
+          done();
+        },
       });
     });
   });

@@ -1,6 +1,9 @@
 version: 1
 vaults:
     -
+        fsPath: vault3
+        name: vaultThree
+    -
         fsPath: vault2
         visibility: private
     -

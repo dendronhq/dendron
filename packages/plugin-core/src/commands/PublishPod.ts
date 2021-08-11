@@ -1,10 +1,10 @@
 import { DNodeUtils, VaultUtils } from "@dendronhq/common-all";
 import {
   getAllPublishPods,
-  JSONPublishPod,
   podClassEntryToPodItemV4,
   PodItemV4,
   PodUtils,
+  PublishPod,
 } from "@dendronhq/pods-core";
 import * as vscode from "vscode";
 import { Uri, window } from "vscode";
@@ -15,7 +15,7 @@ import { showPodQuickPickItemsV4 } from "../utils/pods";
 import { DendronWorkspace } from "../workspace";
 import { BaseCommand } from "./base";
 
-type CommandOpts = { podClass: any; noteByName: string; config: any };
+type CommandOpts = CommandInput & { noteByName: string; config: any };
 
 type CommandInput = { podChoice: PodItemV4 };
 
@@ -28,7 +28,7 @@ export class PublishPodCommand extends BaseCommand<
   CommandInput
 > {
   key = DENDRON_COMMANDS.PUBLISH_POD.key;
-  async gatherInputs(): Promise<any> {
+  async gatherInputs(): Promise<CommandInput | undefined> {
     const pods = getAllPublishPods();
     const podItems: PodItemV4[] = pods.map((p) => podClassEntryToPodItemV4(p));
     const podChoice = await showPodQuickPickItemsV4(podItems);
@@ -38,7 +38,7 @@ export class PublishPodCommand extends BaseCommand<
     return { podChoice };
   }
 
-  async enrichInputs(inputs: CommandInput) {
+  async enrichInputs(inputs: CommandInput): Promise<CommandOpts | undefined> {
     const podChoice = inputs.podChoice;
     const podsDir = DendronWorkspace.instance().podsDir;
     const podClass = podChoice.podClass;
@@ -60,15 +60,15 @@ export class PublishPodCommand extends BaseCommand<
       );
       return;
     }
-    return { podClass, config: maybeConfig, noteByName };
+    return { config: maybeConfig, noteByName, ...inputs };
   }
 
   async execute(opts: CommandOpts) {
-    const { podClass, config, noteByName } = opts;
+    const { podChoice, config, noteByName } = opts;
 
     const engine = DendronWorkspace.instance().getEngine();
     const wsRoot = DendronWorkspace.wsRoot() as string;
-    const pod = new podClass() as JSONPublishPod; // eslint-disable-line new-cap
+    const pod = new podChoice.podClass() as PublishPod; // eslint-disable-line new-cap
     const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
     try {
       const link = await pod.execute({
@@ -91,11 +91,14 @@ export class PublishPodCommand extends BaseCommand<
   }
 
   async showResponse(resp: any) {
-    if(resp.startsWith("Github: ")){
+    if (resp.startsWith("Github: ")) {
       window.showInformationMessage(resp);
-    }
-    else {
+    } else {
       window.showInformationMessage("contents copied to clipboard");
     }
+  }
+
+  addAnalyticsPayload(opts?: CommandOpts) {
+    return PodUtils.getAnalyticsPayload(opts);
   }
 }

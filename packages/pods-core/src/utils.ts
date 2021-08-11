@@ -1,11 +1,11 @@
+import { DendronError } from "@dendronhq/common-all";
 import { readYAML } from "@dendronhq/common-server";
+import Ajv, { JSONSchemaType } from "ajv";
+import addFormats from "ajv-formats";
 import fs, { ensureDirSync, writeFileSync } from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { PodClassEntryV4, PodItemV4 } from "./types";
-import Ajv, { JSONSchemaType } from "ajv";
-import addFormats from "ajv-formats";
-import { DendronError } from "@dendronhq/common-all";
 
 export * from "./builtin";
 export * from "./types";
@@ -201,9 +201,22 @@ export class PodUtils {
 
   static hasRequiredOpts(_pClassEntry: PodClassEntryV4): boolean {
     // TODO:
-    if(_pClassEntry.id === "dendron.github"){
-      return true
+    if (_pClassEntry.id === "dendron.github") {
+      return true;
     }
     return false;
+  }
+
+  static getAnalyticsPayload(opts?: { config: any; podChoice: PodItemV4 }) {
+    if (!opts || !opts.config) {
+      return {
+        configured: false,
+      };
+    }
+
+    return {
+      configured: true,
+      podId: opts.podChoice.id,
+    };
   }
 }

@@ -71,4 +71,8 @@ export class ExportPodCommand extends BaseCommand<
     const dest = opts.config.dest;
     window.showInformationMessage(`done exporting. destination: ${dest}`);
   }
+
+  addAnalyticsPayload(opts?: CommandOpts) {
+    return PodUtils.getAnalyticsPayload(opts);
+  }
 }

@@ -55,7 +55,7 @@ export class DConfig {
       lookup: {
         note: {
           selectionType: LookupSelectionType.selectionExtract,
-        }
+        },
       },
       journal: {
         dailyDomain: "daily",
@@ -95,12 +95,14 @@ export class DConfig {
     defaults?: Partial<DendronConfig>
   ): DendronConfig {
     const configPath = DConfig.configPath(dendronRoot);
-    let config: DendronConfig;
+    let config: DendronConfig = { ...defaults, ...DConfig.genDefaultConfig() };
     if (!fs.existsSync(configPath)) {
-      config = { ...defaults, ...DConfig.genDefaultConfig() };
       writeYAML(configPath, config);
     } else {
-      config = readYAML(configPath) as DendronConfig;
+      config = {
+        ...config,
+        ...readYAML(configPath),
+      } as DendronConfig;
     }
     return config;
   }

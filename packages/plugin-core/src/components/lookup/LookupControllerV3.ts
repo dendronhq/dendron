@@ -3,7 +3,7 @@ import _ from "lodash";
 import { QuickInputButton } from "vscode";
 import { CancellationTokenSource } from "vscode-languageclient";
 import { VSCodeUtils } from "../../utils";
-import { getWS } from "../../workspace";
+import { DendronWorkspace, getWS } from "../../workspace";
 import {
   DendronBtn,
   ButtonCategory,
@@ -53,14 +53,13 @@ export class LookupControllerV3 {
 
   static create(opts?: LookupControllerV3CreateOpts) {
     const vaults = getWS().getEngine().vaults;
-    const disableVaultSelection = (
-        _.isBoolean(opts?.disableVaultSelection) && 
-        opts?.disableVaultSelection) || 
-        opts?.nodeType === "schema";
+    const disableVaultSelection =
+      (_.isBoolean(opts?.disableVaultSelection) &&
+        opts?.disableVaultSelection) ||
+      opts?.nodeType === "schema";
     const isMultiVault = vaults.length > 1 && !disableVaultSelection;
-    const maybeVaultSelectButton = opts?.nodeType === "note"
-      ? [VaultSelectButton.create(isMultiVault)]
-      : [];
+    const maybeVaultSelectButton =
+      opts?.nodeType === "note" ? [VaultSelectButton.create(isMultiVault)] : [];
     const buttons = opts?.buttons || maybeVaultSelectButton;
     const extraButtons = opts?.extraButtons || [];
     return new LookupControllerV3({
@@ -130,6 +129,10 @@ export class LookupControllerV3 {
       quickpick.dispose();
       this.onHide();
     });
+    quickpick.title = [
+      `Lookup (${this.nodeType})`,
+      `- version: ${DendronWorkspace.version()}`,
+    ].join(" ");
     provider.provide(this);
     return { quickpick };
   }

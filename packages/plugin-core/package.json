@@ -52,7 +52,6 @@
         {
           "id": "dendron.calendar-view",
           "name": "Calendar View",
-          "when": "dendron:webUIEnabled",
           "type": "webview"
         },
         {

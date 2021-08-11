@@ -104,6 +104,7 @@ export class NoteLookupProvider implements ILookupProviderV3 {
     lc: LookupControllerV3;
   }) {
     return async () => {
+      const ctx = "LookupProvider:onDidAccept"
       const { quickpick: picker, lc } = opts;
       const nextPicker = picker.nextPicker;
       if (nextPicker) {
@@ -120,6 +121,7 @@ export class NoteLookupProvider implements ILookupProviderV3 {
         }
       }
       const selectedItems = NotePickerUtils.getSelection(picker);
+      Logger.debug({ctx, selectedItems: selectedItems.map(item => NoteUtils.toLogObj(item))});
       // last chance to cancel
       lc.cancelToken.cancel();
       if (!this.opts.noHidePickerOnAccept) {

@@ -236,10 +236,10 @@ export class NoteLookupCommand extends BaseCommand<
 
   async execute(opts: CommandOpts) {
     try {
-      const { quickpick } = opts;
+      const { quickpick, selectedItems } = opts;
       const selected = quickpick.canSelectMany
-        ? quickpick.selectedItems
-        : quickpick.selectedItems.slice(0, 1);
+        ? selectedItems
+        : selectedItems.slice(0, 1);
       // if not selecting many, we want to check for a perfect match
       const out = await Promise.all(
         selected.map((item) => {

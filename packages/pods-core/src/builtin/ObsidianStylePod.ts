@@ -21,12 +21,7 @@ import graphCSS from "../graph";
 
 const ID = "dendron.obsidian-graph-style";
 
-export type ObsidianStyleImportPodPlantOpts = ImportPodPlantOpts & {
-  /**
-   * Where to output the parsed styles to
-   */
-  dest: string;
-};
+export type ObsidianStyleImportPodPlantOpts = ImportPodPlantOpts;
 
 class GraphStyleUtils {
   static folderPath() {

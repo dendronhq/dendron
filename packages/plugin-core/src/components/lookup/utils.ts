@@ -382,6 +382,13 @@ export class PickerUtilsV2 {
       : "";
   };
 
+  static getCreateNewItem = (
+    items: readonly DNodePropsQuickInputV2[]
+  ): DNodePropsQuickInputV2|undefined => {
+    return _.find(items, { label: CREATE_NEW_LABEL });
+  };
+
+
   static isCreateNewNotePickForSingle(node: DNodePropsQuickInputV2): boolean {
     if (!node) {
       return true;

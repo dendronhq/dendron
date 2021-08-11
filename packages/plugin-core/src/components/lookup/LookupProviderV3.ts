@@ -160,8 +160,9 @@ export class NoteLookupProvider implements ILookupProviderV3 {
     picker.busy = true;
     let pickerValue = picker.value;
     const start = process.hrtime();
+
+    // just activated picker's have special behavior
     if (picker._justActivated && !picker.nonInteractive) {
-      // no hiearchy, query everything
       const lastDotIndex = pickerValue.lastIndexOf(".");
       if (lastDotIndex < 0) {
         pickerValue = "";
@@ -199,19 +200,16 @@ export class NoteLookupProvider implements ILookupProviderV3 {
         return;
       }
 
-      // if we entered a different level of hierarchy, re-run search
-      // if (queryDotLevelChanged) {
       updatedItems = await NotePickerUtils.fetchPickerResults({
         picker,
         qs: querystring,
       });
-      // }
       if (token.isCancellationRequested) {
         return;
       }
 
       // check if we have an exact match in the results and keep track for later
-      const perfectMatch = _.find(updatedItems, { fname: queryOrig });
+      const perfectMatch: boolean = !_.isUndefined(_.find(updatedItems, { fname: queryOrig }));
 
       // check if single item query, vscode doesn't surface single letter queries
       // we need this so that suggestions will show up
@@ -222,6 +220,7 @@ export class NoteLookupProvider implements ILookupProviderV3 {
         return;
       }
 
+      // add schema completions
       if (!_.isUndefined(queryUpToLastDot)) {
         const results = SchemaUtils.matchPath({
           notePath: queryUpToLastDot,

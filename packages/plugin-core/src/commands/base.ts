@@ -14,6 +14,24 @@ export type CodeCommandInstance = {
   run: (opts?: any) => Promise<void>;
 };
 
+export type AnalyticProps = {
+  props?: any;
+};
+
+export interface BaseCommand<
+  TOpts,
+  TOut = any,
+  TGatherOutput = TOpts,
+  TRunOpts = TOpts
+> {
+  /**
+   * Optional method to add properties to the analytics payload
+   * @param opts - Arguments passed to execute()
+   * @param out - return value from execute()
+   */
+  addAnalyticsPayload?(opts?: TOpts, out?: TOut): any;
+}
+
 /**
  * Generics:
  *   - TOpts: passed into {@link BaseCommand.execute}
@@ -21,6 +39,7 @@ export type CodeCommandInstance = {
  *   - TOut: returned by {@link BaseCommand.execute}
  *   - TRunOpts: returned by command
  */
+// eslint-disable-next-line no-redeclare
 export abstract class BaseCommand<
   TOpts,
   TOut = any,
@@ -61,6 +80,8 @@ export abstract class BaseCommand<
     const ctx = `${this.key}:run`;
     const start = process.hrtime();
     let isError = false;
+    let opts: TOpts | undefined;
+    let resp: TOut | undefined;
 
     try {
       const out = await this.sanityCheck();
@@ -75,12 +96,12 @@ export abstract class BaseCommand<
       // @ts-ignore
       const inputs = await this.gatherInputs(args);
       if (!_.isUndefined(inputs)) {
-        const opts: TOpts | undefined = await this.enrichInputs(inputs);
+        opts = await this.enrichInputs(inputs);
         if (_.isUndefined(opts)) {
           return;
         }
         this.L.info({ ctx, msg: "pre-execute" });
-        const resp = await this.execute({ ...opts, ...args });
+        resp = await this.execute({ ...opts, ...args });
         this.L.info({ ctx, msg: "post-execute" });
         this.showResponse(resp);
         return resp;
@@ -102,9 +123,14 @@ export abstract class BaseCommand<
       isError = true;
       return;
     } finally {
+      const payload = this.addAnalyticsPayload
+        ? this.addAnalyticsPayload(opts, resp)
+        : {};
+
       AnalyticsUtils.track(this.key, {
         duration: getDurationMilliseconds(start),
         error: isError,
+        ...payload,
       });
     }
   }

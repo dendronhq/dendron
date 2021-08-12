@@ -1,94 +1,97 @@
 import {
-	createLogger, ThemeUtils, TreeViewUtils
+  createLogger,
+  ThemeUtils,
+  TreeViewUtils,
 } from "@dendronhq/common-frontend";
 import { Spin, Tree, TreeProps } from "antd";
 import _ from "lodash";
 import { DataNode } from "rc-tree/lib/interface";
 import React, { useState } from "react";
-import { ThemeSwitcherProvider, useThemeSwitcher } from "react-css-theme-switcher";
-import { DendronRouterProps, useDendronRouter } from "../utils/hooks";
-import { NoteData } from "../utils/types";
+import { useThemeSwitcher } from "react-css-theme-switcher";
+import { useDendronRouter } from "../utils/hooks";
+import {
+  DendronCommonProps,
+  DendronPageWithNoteDataProps,
+  NoteData,
+  verifyNoteData,
+} from "../utils/types";
+import DendronSpinner from "./DendronSpinner";
 
 type OnExpandFunc = TreeProps["onExpand"];
 type OnSelectFunc = TreeProps["onSelect"];
 
-type DendronTreeViewProps = Partial<NoteData> & {dendronRouter: DendronRouterProps};
-
-export default function DendronTreeViewContainer({notes, domains}: Partial<NoteData>) {
-	const dendronRouter = useDendronRouter();
-	return DendronTreeView({notes, domains, dendronRouter})
+export default function DendronTreeViewContainer(props: Partial<NoteData>) {
+  const dendronRouter = useDendronRouter();
+  return DendronTreeView({ ...props, dendronRouter });
 }
 
-
-function DendronTreeView({notes, domains, dendronRouter}: DendronTreeViewProps) {
+function DendronTreeView({
+  dendronRouter,
+  ...noteDataProps
+}: DendronCommonProps) {
+  const { notes, domains, noteIndex } = noteDataProps;
   const logger = createLogger("DendronTreeView");
   const [activeNoteIds, setActiveNoteIds] = useState<string[]>([]);
-	const {changeActiveNote} = dendronRouter;
+  const { changeActiveNote } = dendronRouter;
 
-
-	// --- Effects
-	const noteActiveId = dendronRouter.query.id;
+  // --- Effects
 
   React.useEffect(() => {
-		if (_.isEmpty(notes) || _.isUndefined(notes)) {
-			return;
-		}
-      logger.info({
-        state: "useEffect:preCalculateTree",
-      });
-      const _activeNoteIds = TreeViewUtils.getAllParents({
-        notes,
-        noteId: noteActiveId,
-      });
-      setActiveNoteIds(_activeNoteIds);
-      logger.info({
-        state: "useEffect:postCalculateTree",
-        activeNoteIds,
-      });
-  }, [notes, noteActiveId]);
+    if (!verifyNoteData(noteDataProps)) {
+      return;
+    }
+    const noteActiveId = _.isUndefined(dendronRouter.query.id)
+      ? noteDataProps.noteIndex.id
+      : dendronRouter.query.id;
+    logger.info({
+      state: "useEffect:preCalculateTree",
+    });
+    const _activeNoteIds = TreeViewUtils.getAllParents({
+      notes: noteDataProps.notes,
+      noteId: noteActiveId,
+    });
+    setActiveNoteIds(_activeNoteIds);
+    logger.info({
+      state: "useEffect:postCalculateTree",
+      activeNoteIds,
+    });
+  }, [notes, dendronRouter.query.id]);
 
-	// --- Methods
+  // --- Methods
   const onExpand: OnExpandFunc = (expandedKeys, { node, expanded }) => {
     const id = node.key as string;
     logger.info({ ctx: "onExpand", expandedKeys, id, expanded });
-		if (_.isUndefined(notes)) {
-			return;
-		}
+    if (_.isUndefined(notes)) {
+      return;
+    }
     // open up
     if (expanded) {
-      setActiveNoteIds(
-        TreeViewUtils.getAllParents({ notes, noteId: id })
-      );
+      setActiveNoteIds(TreeViewUtils.getAllParents({ notes, noteId: id }));
     } else {
       setActiveNoteIds(
-        TreeViewUtils.getAllParents({ notes, noteId: id }).slice(
-          0,
-          -1
-        )
+        TreeViewUtils.getAllParents({ notes, noteId: id }).slice(0, -1)
       );
     }
   };
-	const onSelect: OnSelectFunc = (_selectedKeys, { node }) => {
+  const onSelect: OnSelectFunc = (_selectedKeys, { node }) => {
     const id = node.key as string;
-		changeActiveNote(id);
+    changeActiveNote(id);
   };
 
-	// --- Render
+  // --- Render
   if (_.isEmpty(notes) || _.isUndefined(notes)) {
     logger.info({
       state: "exit:notes not initialized",
     });
     return <Spin />;
   }
-  const roots = _.filter(domains).map(
-    (ent) => {
-      return TreeViewUtils.note2TreeDatanote({
-        noteId: ent.id,
-        noteDict: notes,
-        showVaultName: true,
-      });
-    }
-  ) as DataNode[];
+  const roots = _.filter(domains).map((ent) => {
+    return TreeViewUtils.note2TreeDatanote({
+      noteId: ent.id,
+      noteDict: notes,
+      showVaultName: true,
+    });
+  }) as DataNode[];
   const expandKeys = _.isEmpty(activeNoteIds) ? [] : activeNoteIds;
   return (
     <>
@@ -96,7 +99,7 @@ function DendronTreeView({notes, domains, dendronRouter}: DendronTreeViewProps) 
         treeData={roots}
         defaultExpandKeys={expandKeys}
         onExpand={onExpand}
-				onSelect={onSelect}
+        onSelect={onSelect}
       />
     </>
   );
@@ -106,12 +109,12 @@ function TreeView({
   treeData,
   defaultExpandKeys,
   onExpand,
-	onSelect,
+  onSelect,
 }: {
   treeData: DataNode[];
   defaultExpandKeys: string[];
   onExpand: OnExpandFunc;
-	onSelect: OnSelectFunc;
+  onSelect: OnSelectFunc;
 }) {
   const { currentTheme } = useThemeSwitcher();
   const maybeTheme = ThemeUtils.getTheme(currentTheme || "light");
@@ -119,14 +122,14 @@ function TreeView({
     <>
       {treeData.length ? (
         <Tree
-          style={{background: maybeTheme?.layoutHeaderBackground}}
+          style={{ background: maybeTheme?.layoutHeaderBackground }}
           showIcon
           expandedKeys={defaultExpandKeys}
           selectedKeys={defaultExpandKeys.slice(-1)}
           onExpand={onExpand}
           onSelect={onSelect}
           treeData={treeData}
-         />
+        />
       ) : (
         <Spin />
       )}

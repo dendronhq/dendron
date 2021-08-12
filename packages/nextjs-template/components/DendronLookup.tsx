@@ -7,7 +7,7 @@ import { useCombinedDispatch } from "../features";
 import { pageStateSlice } from "../features/pageState";
 import { LoadingStatus } from "../features/pageState/slice";
 import { DendronLookupProps, useDendronLookup } from "../utils/hooks";
-import { DendronCommonProps, verifyNoteData } from "../utils/types";
+import { DendronCommonProps, DendronPageWithNoteDataProps, verifyNoteData } from "../utils/types";
 import DendronSpinner from "./DendronSpinner";
 
 const { Option } = AutoComplete;
@@ -26,15 +26,13 @@ export function DendronLookup(props: DendronCommonProps) {
   // --- Methods
 
   // --- Logic
-  const { dendronRouter, notes } = props;
-  const noteActive = notes[dendronRouter.query.id];
   return <AntDAutoComplete lookup={lookup} {...props} />;
 }
 
 
 type AntDOnSelect = Parameters<typeof AutoComplete>["0"]["onSelect"]
 function AntDAutoComplete(
-  props: { lookup: DendronLookupProps } & DendronCommonProps
+  props: { lookup: DendronLookupProps } & DendronPageWithNoteDataProps
 ) {
   // --- Hooks
   const dispatch = useCombinedDispatch()
@@ -42,7 +40,9 @@ function AntDAutoComplete(
   // --- Main
   const logger = createLogger("AntDAutoComplete");
   const { lookup, dendronRouter, notes } = props;
-  const initValue = notes ? notes[dendronRouter.query.id].fname : "";
+  const maybeIdByQuery = dendronRouter.query?.id;
+  const maybeNote = !_.isUndefined(maybeIdByQuery) ? notes[maybeIdByQuery] : undefined;
+  const initValue = !_.isUndefined(maybeIdByQuery) ? notes[maybeIdByQuery].fname : "";
   const [value, setValue] = React.useState(initValue);
   const [result, setResult] = React.useState<NoteIndexProps[]>([]);
   const onSearch = (qs: string) => {

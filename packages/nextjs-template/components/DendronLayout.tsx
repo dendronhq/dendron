@@ -50,21 +50,3 @@ export default function DendronLayout(
     </Layout>
   );
 }
-
-// <Row gutter={16}>
-//   <Col className="gutter-row" span={2}>
-//     <Sider width={200} style={{ background: "#fff" }}>
-//       This is the sider
-//     </Sider>
-//   </Col>
-//   <Col className="gutter-row" span={20}>
-//     <Layout.Content
-//       id="main-content"
-//       className="main-content"
-//       role="main"
-//     >
-//       {props.children}
-//     </Layout.Content>
-//   </Col>
-//   <Col className="gutter-row" span={2} />
-// </Row>

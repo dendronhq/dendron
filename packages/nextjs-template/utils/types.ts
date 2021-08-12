@@ -11,6 +11,7 @@ declare global {
 export type NoteData = {
   notes: NotePropsDict;
   domains: NoteProps[] ;
+  noteIndex: NoteProps;
 };
 
 export type NoteRouterQuery = {
@@ -18,7 +19,7 @@ export type NoteRouterQuery = {
 };
 
 export type DendronCommonProps = Partial<NoteData> & {dendronRouter: DendronRouterProps};
-
+export type DendronPageWithNoteDataProps = NoteData & {dendronRouter: DendronRouterProps};
 
 export function verifyNoteData(noteData: Partial<NoteData>): noteData is NoteData {
   const {notes} = noteData;

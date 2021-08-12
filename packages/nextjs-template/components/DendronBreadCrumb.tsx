@@ -9,8 +9,8 @@ export function DendronBreadCrumb(props: DendronCommonProps) {
   if (!verifyNoteData(props)) {
     return <DendronSpinner />;
   } else {
-    const { dendronRouter, notes } = props;
-    const noteActive = notes[dendronRouter.query.id];
+    const { dendronRouter, notes, noteIndex } = props;
+    const noteActive = _.isUndefined(dendronRouter.query.id) ? noteIndex : notes[dendronRouter.query.id];
     const noteParents = NoteUtils.getNoteWithParents({ note: noteActive, notes });
     return (
       <Breadcrumb style={{ margin: "16px 0" }}>

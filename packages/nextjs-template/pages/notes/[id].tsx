@@ -1,11 +1,10 @@
-import { FuseEngine } from "@dendronhq/common-all";
 import { createLogger, DendronNote } from "@dendronhq/common-frontend";
 import _ from "lodash";
 import {
   GetStaticPaths,
   GetStaticProps,
   GetStaticPropsContext,
-  InferGetStaticPropsType,
+  InferGetStaticPropsType
 } from "next";
 import { useRouter } from "next/router";
 import React from "react";
@@ -14,18 +13,19 @@ import { useCombinedDispatch, useCombinedSelector } from "../../features";
 import { pageStateSlice } from "../../features/pageState";
 import { LoadingStatus } from "../../features/pageState/slice";
 import {
-  getDataDir,
   getNoteBody,
   getNoteMeta,
-  getNotes,
+  getNotes
 } from "../../utils/build";
 import { DendronCommonProps, NoteRouterQuery } from "../../utils/types";
+
+export type NotePageProps = InferGetStaticPropsType<typeof getStaticProps> & DendronCommonProps;
 
 export default function Note({
   note,
   body,
   ...rest
-}: InferGetStaticPropsType<typeof getStaticProps> & DendronCommonProps) {
+}: NotePageProps) {
   const logger = createLogger("Note");
   const router = useRouter();
   const [bodyFromState, setBody] =

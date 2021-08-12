@@ -89,7 +89,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     fs.ensureDirSync(podDstDir);
 
     this.L.info({ ctx, msg: "filtering notes..." });
-    const { notes: publishedNotes, domains } = await SiteUtils.filterByConfig({
+    const { notes: publishedNotes, domains} = await SiteUtils.filterByConfig({
       engine,
       config: engine.config,
     });

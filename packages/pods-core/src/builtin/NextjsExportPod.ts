@@ -123,7 +123,9 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
       })
     );
     const podDstPath = path.join(podDstDir, "notes.json");
+    const podConfigDstPath = path.join(podDstDir, "dendron.json");
     fs.writeJSONSync(podDstPath, payload, { encoding: "utf8", spaces: 2 });
+    fs.writeJSONSync(podConfigDstPath, engine.config, { encoding: "utf8", spaces: 2 })
 
     const publicPath = path.join(podDstDir, "..", "public");
     const publicDataPath = path.join(publicPath, "data");

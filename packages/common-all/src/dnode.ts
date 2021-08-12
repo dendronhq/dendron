@@ -20,6 +20,7 @@ import {
   NoteOpts,
   NoteProps,
   NotePropsDict,
+  NoteSEOProps,
   REQUIRED_DNODEPROPS,
   SchemaData,
   SchemaModuleDict,
@@ -29,7 +30,7 @@ import {
   SchemaProps,
   SchemaPropsDict,
   SchemaRaw,
-  SchemaTemplate,
+  SchemaTemplate
 } from "./types";
 import { getSlugger, isNotUndefined, randomColor } from "./utils";
 import { genUUID } from "./uuid";
@@ -748,6 +749,19 @@ export class NoteUtils {
         message: "bad path",
         payload: { note, wsRoot },
       });
+    }
+  }
+
+  static getSEOProps(note: NoteProps): NoteSEOProps {
+    const {title, created, updated} = note;
+    const {excerpt, canonicalUrl, noindex} = note.custom;
+    return {
+      title,
+      excerpt,
+      updated,
+      created,
+      canonicalUrl,
+      noindex
     }
   }
 

@@ -8,6 +8,7 @@ import {
 } from "@dendronhq/common-all";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import _ from "lodash";
+import { EngineSliceState, LoadingStatus } from "../../types";
 import { createLogger } from "../../utils";
 
 /**
@@ -93,12 +94,9 @@ export const renderNote = createAsyncThunk(
 export type InitNoteOpts = Parameters<typeof initNotes>[0];
 
 type InitialState = InitializedState;
-type InitializedState = {
-  error: any;
-  loading: "idle" | "pending" | "fulfilled";
-  currentRequestId: string | undefined;
+type InitializedState = EngineSliceState & {
   notesRendered: { [key: string]: string | undefined };
-} & Partial<DEngineInitPayload>;
+} 
 
 export type EngineState = InitializedState;
 export const engineSlice = createSlice({
@@ -145,7 +143,7 @@ export const engineSlice = createSlice({
     builder.addCase(initNotes.pending, (state, { meta }) => {
       logger.info({ state: "start:initNotes", requestId: meta.requestId });
       if (state.loading === "idle") {
-        state.loading = "pending";
+        state.loading = LoadingStatus.PENDING;
         state.currentRequestId = meta.requestId;
       }
     });
@@ -157,7 +155,7 @@ export const engineSlice = createSlice({
         requestId: state.currentRequestId,
       });
       if (state.loading === "pending" && state.currentRequestId === requestId) {
-        state.loading = "idle";
+        state.loading = LoadingStatus.IDLE;
         state.currentRequestId = undefined;
       }
     });

@@ -178,3 +178,11 @@ export type SchemaTemplate = {
 
 export type SchemaProps = DNodeProps<SchemaData>;
 export type NoteProps = DNodeProps<any, any>;
+export type NoteSEOProps = {
+  title: string,
+  updated: number,
+  created: number
+  excerpt?: string
+  canonicalUrl?: string;
+  noindex?: boolean
+}

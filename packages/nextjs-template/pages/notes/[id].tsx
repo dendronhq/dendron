@@ -1,31 +1,28 @@
-import { createLogger, DendronNote } from "@dendronhq/common-frontend";
+import {
+  createLogger,
+  DendronNote,
+  LoadingStatus,
+} from "@dendronhq/common-frontend";
 import _ from "lodash";
 import {
   GetStaticPaths,
   GetStaticProps,
   GetStaticPropsContext,
-  InferGetStaticPropsType
+  InferGetStaticPropsType,
 } from "next";
 import { useRouter } from "next/router";
 import React from "react";
+import DendronSEO from "../../components/DendronSEO";
 import DendronSpinner from "../../components/DendronSpinner";
 import { useCombinedDispatch, useCombinedSelector } from "../../features";
-import { pageStateSlice } from "../../features/pageState";
-import { LoadingStatus } from "../../features/pageState/slice";
-import {
-  getNoteBody,
-  getNoteMeta,
-  getNotes
-} from "../../utils/build";
+import { browserEngineSlice } from "../../features/engine";
+import { getNoteBody, getNoteMeta, getNotes } from "../../utils/build";
 import { DendronCommonProps, NoteRouterQuery } from "../../utils/types";
 
-export type NotePageProps = InferGetStaticPropsType<typeof getStaticProps> & DendronCommonProps;
+export type NotePageProps = InferGetStaticPropsType<typeof getStaticProps> &
+  DendronCommonProps;
 
-export default function Note({
-  note,
-  body,
-  ...rest
-}: NotePageProps) {
+export default function Note({ note, body, ...rest }: NotePageProps) {
   const logger = createLogger("Note");
   const router = useRouter();
   const [bodyFromState, setBody] =
@@ -33,9 +30,10 @@ export default function Note({
   const { id } = router.query as NoteRouterQuery;
 
   // --- Hooks
-  const dispatch = useCombinedDispatch()
-  const pageState = useCombinedSelector((state) => state.pageState);
+  const dispatch = useCombinedDispatch();
+  const engine = useCombinedSelector((state) => state.engine);
   logger.info({ ctx: "enter", id });
+
   // setup body
   React.useEffect(() => {
     logger.info({ ctx: "updateNoteBody:enter", id });
@@ -45,28 +43,35 @@ export default function Note({
     }
     // loaded page statically
     if (id === note.id) {
-      dispatch(pageStateSlice.actions.setLoadingStatus(LoadingStatus.FUFILLED));
+      dispatch(
+        browserEngineSlice.actions.setLoadingStatus(LoadingStatus.FUFILLED)
+      );
       logger.info({ ctx: "updateNoteBody:exit", id, state: "id = note.id" });
       return;
     }
-    logger.info({ ctx: "updateNoteBody:fetch:pre", id});
+    logger.info({ ctx: "updateNoteBody:fetch:pre", id });
     // otherwise, dynamically fetch page
     fetch(`/data/notes/${id}.html`).then(async (resp) => {
-      logger.info({ ctx: "updateNoteBody:fetch:post", id});
+      logger.info({ ctx: "updateNoteBody:fetch:post", id });
       const contents = await resp.text();
       setBody(contents);
-      dispatch(pageStateSlice.actions.setLoadingStatus(LoadingStatus.FUFILLED));
+      dispatch(
+        browserEngineSlice.actions.setLoadingStatus(LoadingStatus.FUFILLED)
+      );
     });
   }, [id]);
 
   const noteBody = id === note.id ? body : bodyFromState;
 
-  if (_.isUndefined(noteBody) || pageState.loadingStatus === LoadingStatus.PENDING) {
-    return <DendronSpinner/>
+  if (_.isUndefined(noteBody) || engine.loading === LoadingStatus.PENDING) {
+    return <DendronSpinner />;
   }
 
   return (
-    <DendronNote noteContent={noteBody} />
+    <>
+      <DendronSEO />
+      <DendronNote noteContent={noteBody} />
+    </>
   );
 }
 export const getStaticPaths: GetStaticPaths = async () => {

@@ -1,6 +1,6 @@
 import fs from "fs-extra";
 import path from "path";
-import { NoteProps, NotePropsDict } from "@dendronhq/common-all";
+import { DendronConfig, NoteProps, NotePropsDict } from "@dendronhq/common-all";
 import _ from "lodash";
 import { NoteData } from "./types";
 
@@ -36,4 +36,9 @@ export function getNotes() {
 export function getNoteMeta(id: string) {
 	const dataDir = getDataDir();
 	return fs.readJSON(path.join(dataDir, NOTE_META_DIR, `${id}.json`)) as Promise<NoteProps>;
+}
+
+export function getConfig(): Promise<DendronConfig> {
+	const dataDir = getDataDir();
+	return fs.readJSON(path.join(dataDir, "dendron.yml"));
 }

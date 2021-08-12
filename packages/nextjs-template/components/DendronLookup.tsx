@@ -1,11 +1,10 @@
 import { NoteIndexProps } from "@dendronhq/common-all";
-import { createLogger } from "@dendronhq/common-frontend";
+import { createLogger, LoadingStatus } from "@dendronhq/common-frontend";
 import { AutoComplete } from "antd";
 import _ from "lodash";
 import React from "react";
 import { useCombinedDispatch } from "../features";
-import { pageStateSlice } from "../features/pageState";
-import { LoadingStatus } from "../features/pageState/slice";
+import { browserEngineSlice } from "../features/engine";
 import { DendronLookupProps, useDendronLookup } from "../utils/hooks";
 import { DendronCommonProps, DendronPageWithNoteDataProps, verifyNoteData } from "../utils/types";
 import DendronSpinner from "./DendronSpinner";
@@ -42,7 +41,6 @@ function AntDAutoComplete(
   const ctx = "AntDAutoComplete";
   const { lookup, dendronRouter, notes, noteIndex } = props;
   const maybeIdByQuery = dendronRouter.query?.id;
-  const maybeNote = !_.isUndefined(maybeIdByQuery) ? notes[maybeIdByQuery] : undefined;
   const initValue = !_.isUndefined(maybeIdByQuery) ? notes[maybeIdByQuery].fname : "";
   const [value, setValue] = React.useState(initValue);
   const [result, setResult] = React.useState<NoteIndexProps[]>([]);
@@ -62,7 +60,7 @@ function AntDAutoComplete(
     logger.info({state: "onSelect", noteId, option})
     const id = option.key?.toString()!
     dendronRouter.changeActiveNote(id, {noteIndex});
-    dispatch(pageStateSlice.actions.setLoadingStatus(LoadingStatus.PENDING));
+    dispatch(browserEngineSlice.actions.setLoadingStatus(LoadingStatus.PENDING));
   };
   const onChange = (data: string) => {
     setValue(data);

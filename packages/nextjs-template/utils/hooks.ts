@@ -1,4 +1,5 @@
-import { FuseEngine, NoteProps } from "@dendronhq/common-all";
+import { FuseEngine, NoteProps, NotePropsDict } from "@dendronhq/common-all";
+import _ from "lodash";
 import { useRouter } from "next/router";
 import React from "react";
 import { getNoteRouterQuery } from "./etc";
@@ -16,10 +17,15 @@ export function useDendronRouter() {
     }
     return router.push(`/notes/${id}`);
   };
+  const getActiveNote = ({notes}: {notes: NotePropsDict}): NoteProps|undefined => {
+    const maybeIdByQuery = query?.id;
+    return !_.isUndefined(maybeIdByQuery) ? notes[maybeIdByQuery] : undefined;
+  }
   return {
     router,
     query,
     changeActiveNote,
+    getActiveNote
   };
 }
 
@@ -39,20 +45,3 @@ export function useDendronLookup() {
   }, []);
 	return noteIndex
 }
-
-
-// function useFriendStatus(friendID) {  const [isOnline, setIsOnline] = useState(null);
-
-//   useEffect(() => {
-//     function handleStatusChange(status) {
-//       setIsOnline(status.isOnline);
-//     }
-
-//     ChatAPI.subscribeToFriendStatus(friendID, handleStatusChange);
-//     return () => {
-//       ChatAPI.unsubscribeFromFriendStatus(friendID, handleStatusChange);
-//     };
-//   });
-
-//   return isOnline;
-// }

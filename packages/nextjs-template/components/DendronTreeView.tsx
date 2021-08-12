@@ -15,7 +15,6 @@ import {
   NoteData,
   verifyNoteData,
 } from "../utils/types";
-import DendronSpinner from "./DendronSpinner";
 
 type OnExpandFunc = TreeProps["onExpand"];
 type OnSelectFunc = TreeProps["onSelect"];
@@ -79,16 +78,16 @@ function DendronTreeView({
   };
 
   // --- Render
-  if (_.isEmpty(notes) || _.isUndefined(notes)) {
+  if (!verifyNoteData(noteDataProps)) {
     logger.info({
       state: "exit:notes not initialized",
     });
     return <Spin />;
   }
-  const roots = _.filter(domains).map((ent) => {
+  const roots = noteDataProps.domains.map((note) => {
     return TreeViewUtils.note2TreeDatanote({
-      noteId: ent.id,
-      noteDict: notes,
+      noteId: note.id,
+      noteDict: noteDataProps.notes,
       showVaultName: true,
     });
   }) as DataNode[];

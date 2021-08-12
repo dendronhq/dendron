@@ -76,17 +76,27 @@ export class TreeViewUtils {
         </span>
       );
     }
-
     return {
       key: note.id,
       title,
       icon,
-      children: _.sortBy(
-        note.children,
-        (noteId) => !noteDict[noteId]?.fname?.startsWith(TAGS_HIERARCHY)
-      )
+      children: this.sortNotesAtLevel({noteIds: note.children, noteDict})
         .map((noteId) => TreeViewUtils.note2TreeDatanote({ noteId, noteDict }))
         .filter(isNotUndefined),
     };
   }
+
+  static sortNotesAtLevel = ({noteIds, noteDict}: {noteIds: string[], noteDict: NotePropsDict}): string[] => {
+    return _.sortBy(noteIds, (id: string) => {
+      const note = noteDict[id];
+      if (note.custom?.nav_order) {
+        return `0${note.custom?.nav_order}`;
+      }
+      if (note.fname.startsWith(TAGS_HIERARCHY)) {
+        return `9${note.fname}`;
+      }
+      return `1${note.title}`;
+    });
+  }
+  
 }

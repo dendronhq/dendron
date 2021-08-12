@@ -9,8 +9,17 @@ declare global {
 }
 
 export type NoteData = {
+  /**
+   * All notes that are published
+   */
   notes: NotePropsDict;
+  /**
+   * All top level domains that are published
+   */
   domains: NoteProps[] ;
+  /**
+   * The note for the home page
+   */
   noteIndex: NoteProps;
 };
 

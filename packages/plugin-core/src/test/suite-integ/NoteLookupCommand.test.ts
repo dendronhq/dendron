@@ -165,7 +165,7 @@ suite("NoteLookupCommand", function () {
 
   // NOTE: think these tests are wrong
   describe("updateItems", () => {
-    test("picker has value of opened note by default", (done) => {
+    test("direct child filter", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
         preSetupHook: async ({ wsRoot, vaults }) => {
@@ -203,7 +203,7 @@ suite("NoteLookupCommand", function () {
       });
     });
 
-    test("direct child filter", (done) => {
+    test("picker has value of opened note by default", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
         preSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti,

@@ -180,6 +180,8 @@ class GraphStyleUtils {
     }
 
     fs.writeFileSync(filePath, cssText);
+
+    return filePath;
   }
 }
 
@@ -202,9 +204,9 @@ export class ObsidianStyleImportPod extends ImportPod {
     const file = fs.readFileSync(src.fsPath);
     const styles = GraphStyleUtils.parseStyles(file.toString());
 
-    await GraphStyleUtils.writeStyles(styles, "import");
+    const dest = await GraphStyleUtils.writeStyles(styles, "import");
 
-    return { importedNotes: [] };
+    return { importedNotes: [], dest };
   }
 }
 

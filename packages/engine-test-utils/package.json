@@ -69,6 +69,7 @@
     "@testing-library/react-hooks": "^7.0.1",
     "@types/sinon": "^9.0.9",
     "cross-env": "^7.0.3",
+    "css": "^3.0.0",
     "fs-extra": "^9.0.1",
     "jest": "26",
     "lodash": "^4.17.20",

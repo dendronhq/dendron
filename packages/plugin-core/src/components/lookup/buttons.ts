@@ -288,7 +288,8 @@ export class JournalBtn extends DendronBtn {
     quickPick.modifyPickerValueFunc = undefined;
     quickPick.noteModifierValue = undefined;
     quickPick.prevValue = quickPick.value;
-    quickPick.value = quickPick.rawValue;
+    quickPick.prefix = quickPick.rawValue;
+    quickPick.value = NotePickerUtils.getPickerValue(quickPick);
   }
 }
 
@@ -322,7 +323,8 @@ export class ScratchBtn extends DendronBtn {
     quickPick.modifyPickerValueFunc = undefined;
     quickPick.noteModifierValue = undefined;
     quickPick.prevValue = quickPick.value;
-    quickPick.value = quickPick.rawValue;
+    quickPick.prefix = quickPick.rawValue;
+    quickPick.value = NotePickerUtils.getPickerValue(quickPick);
   }
 }
 export class HorizontalSplitBtn extends DendronBtn {

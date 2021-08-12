@@ -48,7 +48,7 @@ export class WorkspaceInitFactory {
       GLOBAL_STATE.WORKSPACE_ACTIVATION_CONTEXT
     );
     return (
-      _.isUndefined(state) ||
+      _.isUndefined(state) &&
       state === WORKSPACE_ACTIVATION_CONTEXT.TUTORIAL.toString()
     );
   }

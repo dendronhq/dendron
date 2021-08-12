@@ -177,4 +177,12 @@ export const NOTE_PRESETS_V4 = {
     fname: "simple-wikilink.one",
     body: ["# Header ", "body text"].join("\n"),
   }),
+  NOTE_WITH_WIKILINK_TOP_HIERARCHY: CreateNoteFactory({
+    fname: "wikilink-top-hierarchy",
+    body: "[[wikilink-top-hierarchy-target]]",
+  }),
+  NOTE_WITH_WIKILINK_TOP_HIERARCHY_TARGET: CreateNoteFactory({
+    fname: "wikilink-top-hierarchy-target",
+    body: ["# Header ", "body text"].join("\n"),
+  }),
 };

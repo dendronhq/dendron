@@ -541,7 +541,7 @@ export class LinkUtils {
   }: {
     link: DNoteLink;
     dest: DendronASTDest;
-    }): string | never {
+  }): string | never {
     switch (dest) {
       case DendronASTDest.MD_DENDRON: {
         if (this.isHashtagLink(link.from)) {
@@ -933,14 +933,24 @@ export class RemarkUtils {
         let dirty = false;
 
         wikiLinks.forEach((linkNode) => {
+          let newValue = linkNode.value;
+
+          // Add a leading slash to the path as some markdown parsers require it for links
+          if (!newValue.startsWith("/")) {
+            newValue = "/" + newValue;
+            dirty = true;
+          }
+
           if (linkNode.value.indexOf(".") >= 0) {
-            const newValue = _.replace(linkNode.value, /\./g, "/");
+            newValue = _.replace(newValue, /\./g, "/");
+
             if (linkNode.data.alias === linkNode.value) {
               linkNode.data.alias = newValue;
             }
-            linkNode.value = newValue;
             dirty = true;
           }
+
+          linkNode.value = newValue;
         });
         //TODO: Add support for Ref Notes and Block Links
 

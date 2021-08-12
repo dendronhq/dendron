@@ -1,20 +1,34 @@
 import _ from "lodash";
-import { DendronError, DVault, ERROR_STATUS, SchemaModuleProps, SchemaQuickInput, SchemaUtils } from "@dendronhq/common-all";
+import {
+  DendronError,
+  DVault,
+  ERROR_STATUS,
+  SchemaModuleProps,
+  SchemaQuickInput,
+  SchemaUtils,
+  VSCodeEvents,
+} from "@dendronhq/common-all";
 import { BaseCommand } from "./base";
 import { LookupControllerV3 } from "../components/lookup/LookupControllerV3";
-import { ILookupProviderV3, SchemaLookupProvider, SchemaLookupProviderSuccessResp } from "../components/lookup/LookupProviderV3";
+import {
+  ILookupProviderV3,
+  SchemaLookupProvider,
+  SchemaLookupProviderSuccessResp,
+} from "../components/lookup/LookupProviderV3";
 import { DendronQuickPickerV2 } from "../components/lookup/types";
 import { DENDRON_COMMANDS } from "../constants";
 import { PickerUtilsV2, OldNewLocation } from "../components/lookup/utils";
 import { Uri } from "vscode";
 import { DendronWorkspace } from "../workspace";
-import { vault2Path } from "@dendronhq/common-server";
+import { getDurationMilliseconds, vault2Path } from "@dendronhq/common-server";
 import { HistoryService } from "@dendronhq/engine-server";
+import { AnalyticsUtils } from "../utils/analytics";
+import { Logger } from "../logger";
 
 type CommandRunOpts = {
   initialValue?: string;
   noConfirm?: boolean;
-}
+};
 
 type CommandGatherOutput = {
   quickpick: DendronQuickPickerV2;
@@ -22,7 +36,7 @@ type CommandGatherOutput = {
   provider: ILookupProviderV3;
   noConfirm?: boolean;
   fuzzThreshold?: number;
-}
+};
 
 type CommandOpts = {
   selectedItems: readonly SchemaQuickInput[];
@@ -38,7 +52,7 @@ type OnDidAcceptReturn = {
   uri: Uri;
   node: SchemaModuleProps;
   resp?: any;
-}
+};
 
 export class SchemaLookupCommand extends BaseCommand<
   CommandOpts,
@@ -75,6 +89,9 @@ export class SchemaLookupCommand extends BaseCommand<
   }
 
   async gatherInputs(opts?: CommandRunOpts): Promise<CommandGatherOutput> {
+    const start = process.hrtime();
+    const ctx = "SchemaLookupCommand:gatherInput";
+    Logger.info({ ctx, opts, msg: "enter" });
     const copts: CommandRunOpts = opts || {};
     this._controller = LookupControllerV3.create({
       nodeType: "schema",
@@ -94,30 +111,38 @@ export class SchemaLookupCommand extends BaseCommand<
       alwaysShow: true,
     });
 
+    const profile = getDurationMilliseconds(start);
+    AnalyticsUtils.track(VSCodeEvents.SchemaLookup_Gather, {
+      duration: profile,
+    });
+
     return {
       controller: this.controller,
       provider: this.provider,
       quickpick,
       noConfirm: copts.noConfirm,
-    }
-  };
+    };
+  }
 
-  async enrichInputs(opts: CommandGatherOutput): Promise<CommandOpts | undefined> {
+  async enrichInputs(
+    opts: CommandGatherOutput
+  ): Promise<CommandOpts | undefined> {
     return new Promise((resolve) => {
+      const start = process.hrtime();
       HistoryService.instance().subscribev2("lookupProvider", {
         id: "schemaLookup",
         listener: async (event) => {
           if (event.action === "done") {
             const data =
               event.data as SchemaLookupProviderSuccessResp<OldNewLocation>;
-              if (data.cancel) {
-                resolve(undefined);
-              }
-              const _opts: CommandOpts = {
-                selectedItems: data.selectedItems,
-                ...opts,
-              };
-              resolve(_opts);
+            if (data.cancel) {
+              resolve(undefined);
+            }
+            const _opts: CommandOpts = {
+              selectedItems: data.selectedItems,
+              ...opts,
+            };
+            resolve(_opts);
           } else if (event.action === "error") {
             const error = event.data.error as DendronError;
             this.L.error({ error });
@@ -137,17 +162,30 @@ export class SchemaLookupCommand extends BaseCommand<
         quickpick: opts.quickpick,
         nonInteractive: opts.noConfirm,
       });
+      const profile = getDurationMilliseconds(start);
+      AnalyticsUtils.track(VSCodeEvents.SchemaLookup_Show, {
+        duration: profile,
+      });
     });
   }
 
   async acceptItem(
     item: SchemaQuickInput
   ): Promise<OnDidAcceptReturn | undefined> {
-    if (PickerUtilsV2.isCreateNewNotePick(item)) {
-      return this.acceptNewSchemaItem();
+    let result: Promise<OnDidAcceptReturn | undefined>;
+    const start = process.hrtime();
+    const isNew = PickerUtilsV2.isCreateNewNotePick(item);
+    if (isNew) {
+      result = this.acceptNewSchemaItem();
     } else {
-      return this.acceptExistingSchemaItem(item);
+      result = this.acceptExistingSchemaItem(item);
     }
+    const profile = getDurationMilliseconds(start);
+    AnalyticsUtils.track(VSCodeEvents.SchemaLookup_Accept, {
+      duration: profile,
+      isNew,
+    });
+    return result;
   }
 
   async acceptExistingSchemaItem(
@@ -157,13 +195,14 @@ export class SchemaLookupCommand extends BaseCommand<
       vault: item.vault,
       wsRoot: DendronWorkspace.wsRoot(),
     });
-    const schemaModule = DendronWorkspace.instance().getEngine().schemas[item.id];
+    const schemaModule =
+      DendronWorkspace.instance().getEngine().schemas[item.id];
     const uri = Uri.file(
       SchemaUtils.getPath({
         root: vpath,
         fname: schemaModule.fname,
       })
-    )
+    );
     return { uri, node: schemaModule };
   }
 
@@ -175,21 +214,25 @@ export class SchemaLookupCommand extends BaseCommand<
     const vault: DVault = picker.vault
       ? picker.vault
       : PickerUtilsV2.getVaultForOpenEditor();
-    const nodeSchemaModuleNew: SchemaModuleProps = SchemaUtils.createModuleProps({
-      fname,
-      vault,
-    });
+    const nodeSchemaModuleNew: SchemaModuleProps =
+      SchemaUtils.createModuleProps({
+        fname,
+        vault,
+      });
     const vpath = vault2Path({ vault, wsRoot: DendronWorkspace.wsRoot() });
     const uri = Uri.file(SchemaUtils.getPath({ root: vpath, fname }));
     const resp = await engine.writeSchema(nodeSchemaModuleNew);
-    
+
     return { uri, node: nodeSchemaModuleNew, resp };
   }
 
   async execute(opts: CommandOpts) {
     try {
       const { quickpick } = opts;
-      const selected = quickpick.selectedItems.slice(0, 1) as SchemaQuickInput[];
+      const selected = quickpick.selectedItems.slice(
+        0,
+        1
+      ) as SchemaQuickInput[];
       const out = await Promise.all(
         selected.map((item) => {
           return this.acceptItem(item);

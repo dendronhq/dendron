@@ -1,22 +1,29 @@
-import { 
+import {
   NoteUtils,
   DNodeUtils,
   NoteQuickInput,
   RespV2,
   NoteProps,
-  SchemaModuleProps, 
-  SchemaQuickInput, 
-  SchemaUtils 
+  SchemaModuleProps,
+  SchemaQuickInput,
+  SchemaUtils,
+  VSCodeEvents,
 } from "@dendronhq/common-all";
 import { getDurationMilliseconds } from "@dendronhq/common-server";
 import { HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { CancellationToken, window } from "vscode";
 import { Logger } from "../../logger";
+import { AnalyticsUtils } from "../../utils/analytics";
 import { DendronWorkspace } from "../../workspace";
 import { LookupControllerV3 } from "./LookupControllerV3";
 import { DendronQuickPickerV2 } from "./types";
-import { NotePickerUtils, OldNewLocation, PickerUtilsV2, SchemaPickerUtils } from "./utils";
+import {
+  NotePickerUtils,
+  OldNewLocation,
+  PickerUtilsV2,
+  SchemaPickerUtils,
+} from "./utils";
 
 export type OnUpdatePickerItemsOpts = {
   picker: DendronQuickPickerV2;
@@ -55,7 +62,7 @@ export type SchemaLookupProviderSuccessResp<T = never> = {
   selectedItems: readonly SchemaQuickInput[];
   onAcceptHookResp: T[];
   cancel?: boolean;
-}
+};
 
 export class NoteLookupProvider implements ILookupProviderV3 {
   private _onAcceptHooks: OnAcceptHook[];
@@ -180,8 +187,8 @@ export class NoteLookupProvider implements ILookupProviderV3 {
     const queryEndsWithDot = queryOrig.endsWith(".");
     const queryUpToLastDot =
       queryOrig.lastIndexOf(".") >= 0
-      ? queryOrig.slice(0, queryOrig.lastIndexOf("."))
-      : undefined;
+        ? queryOrig.slice(0, queryOrig.lastIndexOf("."))
+        : undefined;
 
     const engine = ws.getEngine();
     Logger.info({ ctx, msg: "enter", queryOrig });
@@ -203,7 +210,9 @@ export class NoteLookupProvider implements ILookupProviderV3 {
       updatedItems = await NotePickerUtils.fetchPickerResults({
         picker,
         qs: querystring,
-        depth: picker.showDirectChildrenOnly? queryOrig.split(".").length : undefined,
+        depth: picker.showDirectChildrenOnly
+          ? queryOrig.split(".").length
+          : undefined,
       });
       if (token.isCancellationRequested) {
         return;
@@ -308,6 +317,9 @@ export class NoteLookupProvider implements ILookupProviderV3 {
         queryOrig,
         profile,
         cancelled: token.isCancellationRequested,
+      });
+      AnalyticsUtils.track(VSCodeEvents.NoteLookup_Update, {
+        duration: profile,
       });
       return; // eslint-disable-line no-unsafe-finally -- probably can be just removed
     }
@@ -438,9 +450,12 @@ export class SchemaLookupProvider implements ILookupProviderV3 {
       // if empty string, show all 1st level results
       if (querystring === "") {
         Logger.debug({ ctx, msg: "empty qs" });
-        const nodes = _.map(_.values(engine.schemas), (ent: SchemaModuleProps) => {
-          return SchemaUtils.getModuleRoot(ent);
-        });
+        const nodes = _.map(
+          _.values(engine.schemas),
+          (ent: SchemaModuleProps) => {
+            return SchemaUtils.getModuleRoot(ent);
+          }
+        );
         picker.items = nodes.map((ent) => {
           return DNodeUtils.enhancePropForQuickInputV3({
             wsRoot: DendronWorkspace.wsRoot(),
@@ -463,7 +478,7 @@ export class SchemaLookupProvider implements ILookupProviderV3 {
       updatedItems = await SchemaPickerUtils.fetchPickerResults({
         picker,
         qs: querystring,
-      })
+      });
       if (token.isCancellationRequested) {
         return;
       }
@@ -481,8 +496,7 @@ export class SchemaLookupProvider implements ILookupProviderV3 {
       }
 
       updatedItems =
-        this.opts.allowNewNote &&
-        !perfectMatch
+        this.opts.allowNewNote && !perfectMatch
           ? updatedItems.concat([NotePickerUtils.createNoActiveItem({} as any)])
           : updatedItems;
 
@@ -501,6 +515,9 @@ export class SchemaLookupProvider implements ILookupProviderV3 {
         queryOrig,
         profile,
         cancelled: token.isCancellationRequested,
+      });
+      AnalyticsUtils.track(VSCodeEvents.SchemaLookup_Update, {
+        duration: profile,
       });
       return; // eslint-disable-line no-unsafe-finally -- probably can be just removed
     }

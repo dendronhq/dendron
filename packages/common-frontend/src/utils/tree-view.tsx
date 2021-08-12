@@ -40,15 +40,21 @@ export class TreeViewUtils {
     noteId,
     noteDict,
     showVaultName,
+    applyNavExclude = false,
   }: {
     noteId: string;
     noteDict: NotePropsDict;
     showVaultName?: boolean;
+    applyNavExclude: boolean;
   }): DataNode | undefined {
     const note = noteDict[noteId];
     if (_.isUndefined(note)) {
       return undefined;
     }
+    if (applyNavExclude && note.custom.nav_exclude) {
+      return undefined;
+    }
+
     const vname = VaultUtils.getName(note.vault);
     let icon;
     if (note.schema) {
@@ -81,7 +87,7 @@ export class TreeViewUtils {
       title,
       icon,
       children: this.sortNotesAtLevel({noteIds: note.children, noteDict})
-        .map((noteId) => TreeViewUtils.note2TreeDatanote({ noteId, noteDict }))
+        .map((noteId) => TreeViewUtils.note2TreeDatanote({ noteId, noteDict, showVaultName, applyNavExclude }))
         .filter(isNotUndefined),
     };
   }

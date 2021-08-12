@@ -100,7 +100,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
       publishedNotes[ent.id] = ent;
     });
     const noteIndex = _.find(domains, (ent) => ent.custom.permalink === "/");
-    const payload = { notes: publishedNotes, domains, noteIndex };
+    const payload = { notes: publishedNotes, domains, noteIndex, vaults: engine.vaults };
 
     // render notes
     const notesBodyDir = path.join(podDstDir, "notes");

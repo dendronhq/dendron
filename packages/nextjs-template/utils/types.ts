@@ -1,4 +1,4 @@
-import { NoteProps, NotePropsDict } from "@dendronhq/common-all";
+import { DVault, NoteProps, NotePropsDict } from "@dendronhq/common-all";
 import _ from "lodash";
 import { DendronRouterProps } from "./hooks";
 
@@ -21,6 +21,7 @@ export type NoteData = {
    * The note for the home page
    */
   noteIndex: NoteProps;
+  vaults: DVault[];
 };
 
 export type NoteRouterQuery = {

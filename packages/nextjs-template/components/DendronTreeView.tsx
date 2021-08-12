@@ -88,7 +88,8 @@ function DendronTreeView({
     return TreeViewUtils.note2TreeDatanote({
       noteId: note.id,
       noteDict: noteDataProps.notes,
-      showVaultName: true,
+      showVaultName: false,
+      applyNavExclude: true
     });
   }) as DataNode[];
   const expandKeys = _.isEmpty(activeNoteIds) ? [] : activeNoteIds;

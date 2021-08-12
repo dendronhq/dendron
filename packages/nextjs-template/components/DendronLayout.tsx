@@ -14,10 +14,13 @@ export default function DendronLayout(
     <Layout style={{ height: "100%" }}>
       <Header
         style={{
+          position: "fixed",
+          zIndex: 1,
+          width: "100%",
           alignItems: "center",
           justifyContent: "center",
           display: "flex",
-          borderBottom: "1px solid #d4dadf"
+          borderBottom: "1px solid #d4dadf",
         }}
       >
         <DendronLookup {...props} />
@@ -25,10 +28,19 @@ export default function DendronLayout(
       <Layout
         id="main-content-wrap"
         className="main-content-wrap"
-        style={{ flex: 1 }}
+        style={{ flex: 1, marginTop: 64  }}
       >
         <Layout>
-          <Sider width={200} style={{position: 'fixed', height: "100vh", paddingLeft: "24px", paddingTop: "32px", fontSize: "15px"}}>
+          <Sider
+            width={200}
+            style={{
+              position: "fixed",
+              height: "100vh",
+              paddingLeft: "24px",
+              paddingTop: "32px",
+              fontSize: "15px",
+            }}
+          >
             <DendronTreeView {...props} />
           </Sider>
           <Layout style={{ padding: "0 24px 24px", marginLeft: "200px" }}>

@@ -39,7 +39,7 @@ function AntDAutoComplete(
 
   // --- Main
   const logger = createLogger("AntDAutoComplete");
-  const { lookup, dendronRouter, notes } = props;
+  const { lookup, dendronRouter, notes, noteIndex } = props;
   const maybeIdByQuery = dendronRouter.query?.id;
   const maybeNote = !_.isUndefined(maybeIdByQuery) ? notes[maybeIdByQuery] : undefined;
   const initValue = !_.isUndefined(maybeIdByQuery) ? notes[maybeIdByQuery].fname : "";
@@ -53,7 +53,7 @@ function AntDAutoComplete(
   const onSelect: AntDOnSelect = (noteId, option) => {
     logger.info({state: "onSelect", noteId, option})
     const id = option.key?.toString()!
-    dendronRouter.changeActiveNote(id);
+    dendronRouter.changeActiveNote(id, {noteIndex});
     dispatch(pageStateSlice.actions.setLoadingStatus(LoadingStatus.PENDING));
   };
   const onChange = (data: string) => {

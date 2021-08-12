@@ -1,4 +1,4 @@
-import { FuseEngine } from "@dendronhq/common-all";
+import { FuseEngine, NoteProps } from "@dendronhq/common-all";
 import { useRouter } from "next/router";
 import React from "react";
 import { getNoteRouterQuery } from "./etc";
@@ -10,8 +10,11 @@ export type DendronLookupProps = ReturnType<typeof useDendronLookup>
 export function useDendronRouter() {
   const router = useRouter();
   const query = getNoteRouterQuery(router);
-  const changeActiveNote = (id: string) => {
-    router.push(`/notes/${id}`);
+  const changeActiveNote = (id: string, opts: {noteIndex: NoteProps}) => {
+    if (id === opts.noteIndex.id) {
+      return router.push(`/`);
+    }
+    return router.push(`/notes/${id}`);
   };
   return {
     router,

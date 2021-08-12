@@ -28,7 +28,7 @@ function DendronTreeView({
   dendronRouter,
   ...noteDataProps
 }: DendronCommonProps) {
-  const { notes, domains, noteIndex } = noteDataProps;
+  const { notes } = noteDataProps;
   const logger = createLogger("DendronTreeView");
   const [activeNoteIds, setActiveNoteIds] = useState<string[]>([]);
   const { changeActiveNote } = dendronRouter;
@@ -56,6 +56,14 @@ function DendronTreeView({
     });
   }, [notes, dendronRouter.query.id]);
 
+  // --- Verify
+  if (!verifyNoteData(noteDataProps)) {
+    logger.info({
+      state: "exit:notes not initialized",
+    });
+    return <Spin />;
+  }
+
   // --- Methods
   const onExpand: OnExpandFunc = (expandedKeys, { node, expanded }) => {
     const id = node.key as string;
@@ -74,16 +82,10 @@ function DendronTreeView({
   };
   const onSelect: OnSelectFunc = (_selectedKeys, { node }) => {
     const id = node.key as string;
-    changeActiveNote(id);
+    changeActiveNote(id, {noteIndex: noteDataProps.noteIndex});
   };
 
   // --- Render
-  if (!verifyNoteData(noteDataProps)) {
-    logger.info({
-      state: "exit:notes not initialized",
-    });
-    return <Spin />;
-  }
   const roots = noteDataProps.domains.map((note) => {
     return TreeViewUtils.note2TreeDatanote({
       noteId: note.id,

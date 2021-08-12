@@ -3,8 +3,8 @@ import path from "path";
 import fs, { ensureDirSync } from "fs-extra";
 import { runEngineTestV5, WorkspaceOpts } from "../../engine";
 import { ObsidianStyleImportPod } from "@dendronhq/pods-core";
+import { assert } from "@dendronhq/common-all/lib";
 import css from "css";
-import { assert } from "../../../../common-all/lib";
 
 const obsidianCSS = `.graph-view.color-fill {
 	color: red;

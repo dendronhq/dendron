@@ -189,18 +189,22 @@ export class LookupControllerV3 {
     }) as DendronBtn;
     btnTriggered.pressed = !btnTriggered.pressed;
     const btnCategory = getButtonCategory(btnTriggered);
+    let btnsToRefresh: DendronBtn[] = [];
     if (!_.includes(["effect"] as ButtonCategory[], btnCategory)) {
-      _.filter(this.state.buttons, (ent) => ent.type !== btnTriggered.type).map(
-        (ent) => {
-          if (getButtonCategory(ent) === btnCategory) {
-            ent.pressed = false;
-          }
-        }
+      btnsToRefresh = _.filter(this.state.buttons, (ent) => {
+        return (
+          ent.type !== btnTriggered.type &&
+          getButtonCategory(ent) === btnCategory
+        );
+      });
+      btnsToRefresh.map(
+        (ent) => { ent.pressed = false }
       );
-    }
+    };
+    btnsToRefresh.push(btnTriggered);
     // update button state
     PickerUtilsV2.refreshButtons({ quickpick, buttons, buttonsPrev });
     // modify button behavior
-    await PickerUtilsV2.refreshPickerBehavior({ quickpick, buttons });
+    await PickerUtilsV2.refreshPickerBehavior({ quickpick, buttons: btnsToRefresh });
   };
 }

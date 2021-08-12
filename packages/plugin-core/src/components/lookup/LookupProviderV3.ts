@@ -202,6 +202,7 @@ export class NoteLookupProvider implements ILookupProviderV3 {
       updatedItems = await NotePickerUtils.fetchPickerResults({
         picker,
         qs: querystring,
+        depth: picker.showDirectChildrenOnly? queryOrig.split(".").length : undefined,
       });
       // }
       if (token.isCancellationRequested) {

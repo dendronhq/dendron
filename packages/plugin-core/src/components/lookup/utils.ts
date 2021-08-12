@@ -703,6 +703,7 @@ export class NotePickerUtils {
   static async fetchPickerResults(opts: {
     picker: DendronQuickPickerV2;
     qs: string;
+    depth?: number;
   }) {
     const ctx = "createPickerItemsFromEngine";
     const start = process.hrtime();
@@ -712,7 +713,14 @@ export class NotePickerUtils {
     // if we are doing a query, reset pagination options
     PickerUtilsV2.resetPaginationOpts(picker);
     const resp = await engine.queryNotes({ qs });
-    nodes = resp.data;
+    if (opts.depth) {
+      nodes = resp.data.filter((ent) => {
+        return DNodeUtils.getDepth(ent) > opts.depth!;
+      }).filter((ent) => !ent.stub);
+    } else {
+      nodes = resp.data;
+    }
+    Logger.info({ ctx, msg: "post:queryNotes" });
     if (nodes.length > PAGINATE_LIMIT) {
       picker.allResults = nodes;
       picker.offset = PAGINATE_LIMIT;

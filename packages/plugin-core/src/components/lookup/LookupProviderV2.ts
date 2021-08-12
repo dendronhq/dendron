@@ -519,7 +519,7 @@ export class LookupProviderV2 {
         const resp = await engine.queryNotes({ qs });
         if (opts.depth) {
           nodes = resp.data.filter((ent) => {
-            return DNodeUtils.getDepth(ent) > opts.depth!;
+            return DNodeUtils.getDepth(ent) === opts.depth!;
           }).filter((ent) => !ent.stub);
         } else {
           nodes = resp.data;

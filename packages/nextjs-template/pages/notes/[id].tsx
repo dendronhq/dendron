@@ -8,7 +8,7 @@ import {
   GetStaticPaths,
   GetStaticProps,
   GetStaticPropsContext,
-  InferGetStaticPropsType
+  InferGetStaticPropsType,
 } from "next";
 import { useRouter } from "next/router";
 import React from "react";

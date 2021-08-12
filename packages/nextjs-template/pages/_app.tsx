@@ -16,6 +16,8 @@ import "../styles/scss/main.scss";
 import { fetchConfig, fetchNotes } from "../utils/fetchers";
 import { useDendronRouter } from "../utils/hooks";
 import { NoteData } from "../utils/types";
+import { DendronConfig } from "@dendronhq/common-all";
+import { browserEngineSlice } from "../features/engine";
 
 const themes = {
   dark: `/dark-theme.css`,

@@ -39,12 +39,20 @@ function AntDAutoComplete(
 
   // --- Main
   const logger = createLogger("AntDAutoComplete");
+  const ctx = "AntDAutoComplete";
   const { lookup, dendronRouter, notes, noteIndex } = props;
   const maybeIdByQuery = dendronRouter.query?.id;
   const maybeNote = !_.isUndefined(maybeIdByQuery) ? notes[maybeIdByQuery] : undefined;
   const initValue = !_.isUndefined(maybeIdByQuery) ? notes[maybeIdByQuery].fname : "";
   const [value, setValue] = React.useState(initValue);
   const [result, setResult] = React.useState<NoteIndexProps[]>([]);
+  logger.info({ctx, value, initValue});
+
+  // update lookup when current note changes
+  React.useEffect(()=> {
+    setValue(initValue);
+  }, [initValue])
+
   const onSearch = (qs: string) => {
     logger.info({ state: "onSearch:enter", qs });
     const out = lookup?.queryNote({ qs });

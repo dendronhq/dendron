@@ -28,7 +28,8 @@ import {
   LookupNoteTypeEnum,
   LookupSelectionTypeEnum,
   LookupSplitTypeEnum,
-} from "../../commands/LookupCommand";
+  LookupEffectTypeEnum,
+} from "../../components/lookup/types";
 import {
   CommandOutput,
   CommandRunOpts,

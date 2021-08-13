@@ -20,7 +20,6 @@ import { getDurationMilliseconds, vault2Path } from "@dendronhq/common-server";
 import _ from "lodash";
 import path from "path";
 import { QuickPickItem, TextEditor, Uri, ViewColumn, window } from "vscode";
-import { VaultSelectionMode } from "../../commands/LookupCommand";
 import { Logger } from "../../logger";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace, getEngine, getWS } from "../../workspace";
@@ -31,7 +30,7 @@ import {
   MORE_RESULTS_LABEL,
 } from "./constants";
 import { ILookupProviderV3, OnAcceptHook } from "./LookupProviderV3";
-import { DendronQuickPickerV2, DendronQuickPickState } from "./types";
+import { VaultSelectionMode, DendronQuickPickerV2, DendronQuickPickState } from "./types";
 
 const PAGINATE_LIMIT = 50;
 export const UPDATET_SOURCE = {

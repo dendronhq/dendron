@@ -110,3 +110,49 @@ export type DendronQuickPickerV2 = DendronQuickPickItemV2 & {
    */
   showNote?: (uri: Uri) => Promise<TextEditor>;
 };
+
+
+export type LookupFilterType = "directChildOnly";
+
+export enum LookupNoteTypeEnum {
+  "journal" = "journal",
+  "scratch" = "scratch",
+}
+export type LookupNoteType = LookupNoteTypeEnum;
+
+export enum LookupEffectTypeEnum {
+  "copyNoteLink" = "copyNoteLink",
+  "copyNoteRef" = "copyNoteRef",
+  "multiSelect" = "multiSelect",
+}
+export enum LookupSelectionTypeEnum {
+  "selection2link" = "selection2link",
+  "selectionExtract" = "selectionExtract",
+}
+export type LookupSelectionType = "selection2link" | "selectionExtract";
+
+export enum LookupSplitTypeEnum {
+  "horizontal" = "horizontal",
+}
+export type LookupSplitType = "horizontal";
+
+export type LookupEffectType = "copyNoteLink" | "copyNoteRef" | "multiSelect";
+export type LookupNoteExistBehavior = "open" | "overwrite";
+
+export enum VaultSelectionMode {
+  /**
+   * Never prompt the user. Useful for testing
+   */
+  auto,
+
+  /**
+   * Tries to determine the vault automatically, but will prompt the user if
+   * there is ambiguity
+   */
+  smart,
+
+  /**
+   * Always prompt the user if there is more than one vault
+   */
+  alwaysPrompt,
+}

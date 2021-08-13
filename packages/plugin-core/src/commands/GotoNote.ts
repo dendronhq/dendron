@@ -10,12 +10,12 @@ import {
 import _ from "lodash";
 import { Position, Selection, Uri, window, ViewColumn } from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
+import { VaultSelectionMode } from "../components/lookup/types";
 import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../utils";
 import { getReferenceAtPosition } from "../utils/md";
 import { DendronWorkspace, getWS } from "../workspace";
 import { BasicCommand } from "./base";
-import { VaultSelectionMode } from "./LookupCommand";
 
 type CommandOpts = {
   qs?: string;

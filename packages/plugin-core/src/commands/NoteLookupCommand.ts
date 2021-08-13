@@ -32,6 +32,13 @@ import {
 import {
   DendronQuickPickerV2,
   DendronQuickPickState,
+  LookupFilterType,
+  LookupNoteType,
+  LookupNoteTypeEnum,
+  LookupSelectionType,
+  LookupSelectionTypeEnum,
+  LookupSplitType,
+  LookupSplitTypeEnum,
 } from "../components/lookup/types";
 import {
   node2Uri,
@@ -44,15 +51,6 @@ import { Logger } from "../logger";
 import { AnalyticsUtils } from "../utils/analytics";
 import { DendronWorkspace, getEngine, getWS } from "../workspace";
 import { BaseCommand } from "./base";
-import {
-  LookupFilterType,
-  LookupNoteType,
-  LookupNoteTypeEnum,
-  LookupSelectionType,
-  LookupSelectionTypeEnum,
-  LookupSplitType,
-  LookupSplitTypeEnum,
-} from "./LookupCommand";
 
 export type CommandRunOpts = {
   initialValue?: string;

@@ -175,6 +175,7 @@ export class LookupControllerV3 {
   }
 
   onHide() {
+    this._quickpick?.dispose();
     this._quickpick = undefined;
     this._cancelTokenSource?.dispose();
   }

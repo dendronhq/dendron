@@ -384,21 +384,9 @@ suite("NoteLookupCommand", function () {
         onInit: async ({ vaults }) => {
           const cmd = new NoteLookupCommand();
           stubVaultPick(vaults);
-          const gatherOut = await cmd.gatherInputs({
+          await cmd.run({
             initialValue: "bar.ch1",
             noConfirm: true,
-          });
-
-          const enrichOut = await cmd.enrichInputs(gatherOut);
-          const mockQuickPick = createMockQuickPick({
-            value: "bar.ch1",
-            selectedItems: [createNoActiveItem(vaults[0])],
-          });
-          mockQuickPick.showNote = enrichOut?.quickpick.showNote;
-          
-          await cmd.execute({
-            ...enrichOut!,
-            quickpick: mockQuickPick,
           });
           const document = VSCodeUtils.getActiveTextEditor()?.document;
           const newNote = VSCodeUtils.getNoteFromDocument(document!);

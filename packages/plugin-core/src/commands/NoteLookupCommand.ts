@@ -129,7 +129,10 @@ export class NoteLookupCommand extends BaseCommand<
 
   async gatherInputs(opts?: CommandRunOpts): Promise<CommandGatherOutput> {
     const ws = getWS();
-    const noteLookupConfig: NoteLookupConfig  = DConfig.getProp(ws.config, "lookup").note;
+    const noteLookupConfig: NoteLookupConfig = DConfig.getProp(
+      ws.config,
+      "lookup"
+    ).note;
     const copts: CommandRunOpts = _.defaults(opts || {}, {
       multiSelect: false,
       filterMiddleware: [],
@@ -234,13 +237,24 @@ export class NoteLookupCommand extends BaseCommand<
     });
   }
 
+  getSelected({
+    quickpick,
+    selectedItems,
+  }: Pick<CommandOpts, "selectedItems"|"quickpick">): readonly NoteQuickInput[] {
+    const maybeCreateNew = PickerUtilsV2.getCreateNewItem(selectedItems);
+    const {nonInteractive, canSelectMany} = quickpick;
+    if (nonInteractive && maybeCreateNew) {
+      return [maybeCreateNew];
+    }
+    return canSelectMany
+      ? selectedItems
+      : selectedItems.slice(0, 1);
+  }
+
   async execute(opts: CommandOpts) {
     try {
-      const { quickpick } = opts;
-      const selected = quickpick.canSelectMany
-        ? quickpick.selectedItems
-        : quickpick.selectedItems.slice(0, 1);
-      // if not selecting many, we want to check for a perfect match
+      const { quickpick, selectedItems } = opts;
+      const selected = this.getSelected({quickpick, selectedItems});
       const out = await Promise.all(
         selected.map((item) => {
           return this.acceptItem(item);

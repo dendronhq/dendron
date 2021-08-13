@@ -4,7 +4,9 @@ import { VSCodeUtils } from "../utils";
 import { DNodeUtils, NoteProps } from "@dendronhq/common-all";
 import { getEngine } from "../workspace";
 
-type CommandOpts = {};
+type CommandOpts = {
+  marker?: boolean;
+};
 
 type CommandOutput = CommandOpts;
 
@@ -43,7 +45,9 @@ export class InsertNoteIndexCommand extends BasicCommand<
     const children = DNodeUtils.getChildren(activeNote, { nodeDict: engine.notes });
     console.log({children});
     // format fname of child into markdown list of wikilinks
-    const noteIndex = this.genNoteIndex(children, {marker: true});
+    const noteIndex = this.genNoteIndex(children, {
+      marker: opts.marker
+    });
     // insert at position
     const current = editor.selection;
     await editor.edit((builder) => {

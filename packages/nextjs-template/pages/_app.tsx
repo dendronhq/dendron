@@ -2,7 +2,7 @@ import {
   batch,
   createLogger,
   Provider,
-  setLogLevel,
+  setLogLevel
 } from "@dendronhq/common-frontend";
 import "antd/dist/antd.css";
 import type { AppProps } from "next/app";
@@ -16,8 +16,6 @@ import "../styles/scss/main.scss";
 import { fetchConfig, fetchNotes } from "../utils/fetchers";
 import { useDendronRouter } from "../utils/hooks";
 import { NoteData } from "../utils/types";
-import { DendronConfig } from "@dendronhq/common-all";
-import { browserEngineSlice } from "../features/engine";
 
 const themes = {
   dark: `/dark-theme.css`,

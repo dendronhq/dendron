@@ -1,10 +1,10 @@
 /* eslint-disable */
 import {
-  DendronConfig,
-  NoteProps,
-  RESERVED_KEYS,
-  Time,
-  VaultUtils,
+	DendronConfig,
+	NoteProps,
+	RESERVED_KEYS,
+	Time,
+	VaultUtils
 } from "@dendronhq/common-all";
 import { Layout, Row, Col, Typography } from "antd";
 import _ from "lodash";

@@ -5,6 +5,9 @@ import { DNodeUtils, NoteProps } from "@dendronhq/common-all";
 import { getEngine } from "../workspace";
 
 type CommandOpts = {
+  /*
+   * optional flag that will wrap the index block with markers.
+   */
   marker?: boolean;
 };
 
@@ -16,6 +19,8 @@ export class InsertNoteIndexCommand extends BasicCommand<
 > {
   key = DENDRON_COMMANDS.INSERT_NOTE_INDEX.key;
 
+  // TODO: make this into a util once the cli version is implemented.
+  // NOTE: the marker flag is not exposed to the plugin yet.
   genNoteIndex(notes: NoteProps[], opts: {
     marker?: boolean
   }) {
@@ -37,17 +42,13 @@ export class InsertNoteIndexCommand extends BasicCommand<
   async execute(opts: CommandOpts) {
     const ctx = "InsertNoteIndexCommand";
     this.L.info({ ctx, msg: "execute", opts });
-    // get open note's prop
     const editor = VSCodeUtils.getActiveTextEditor()!;
     const activeNote = VSCodeUtils.getNoteFromDocument(editor.document)!;
-    // list direct child
     const engine = getEngine();
     const children = DNodeUtils.getChildren(activeNote, { nodeDict: engine.notes });
-    // format fname of child into markdown list of wikilinks
     const noteIndex = this.genNoteIndex(children, {
       marker: opts.marker
     });
-    // insert at position
     const current = editor.selection;
     await editor.edit((builder) => {
       builder.insert(current.start, noteIndex);

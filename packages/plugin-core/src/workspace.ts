@@ -31,7 +31,6 @@ import path from "path";
 import * as vscode from "vscode";
 import { ALL_COMMANDS } from "./commands";
 import { GoToSiblingCommand } from "./commands/GoToSiblingCommand";
-// import { LookupCommand, VaultSelectionMode } from "./commands/LookupCommand";
 import { MoveNoteCommand } from "./commands/MoveNoteCommand";
 import { ReloadIndexCommand } from "./commands/ReloadIndex";
 import { SetupWorkspaceCommand } from "./commands/SetupWorkspace";
@@ -584,27 +583,6 @@ export class DendronWorkspace {
         })
       );
     });
-
-    // ----
-
-    // this.context.subscriptions.push(
-    //   vscode.commands.registerCommand(
-    //     DENDRON_COMMANDS.LOOKUP.key,
-    //     async (args: any) => {
-    //       const confirmVaultSetting =
-    //         DendronWorkspace.instance().config["lookupConfirmVaultOnCreate"];
-    //       const selectionMode =
-    //         confirmVaultSetting === false || _.isUndefined(confirmVaultSetting)
-    //           ? VaultSelectionMode.smart
-    //           : VaultSelectionMode.alwaysPrompt;
-    //       new LookupCommand().run({
-    //         ...args,
-    //         flavor: "note",
-    //         vaultSelectionMode: selectionMode,
-    //       });
-    //     }
-    //   )
-    // );
 
     this.context.subscriptions.push(
       vscode.commands.registerCommand(

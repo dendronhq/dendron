@@ -1,20 +1,23 @@
 import path from "path";
-import { DendronQuickPickerV2 } from "../components/lookup/types";
+// import { DendronQuickPickerV2 } from "../components/lookup/types";
 import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../utils";
 import { BasicCommand } from "./base";
-import { LookupCommand } from "./LookupCommand";
+import { NoteLookupCommand, CommandOutput as NoteLookupCommandOut } from "./NoteLookupCommand";
 
-type CommandOpts = {};
+type CommandOpts = {
+  noConfirm?: boolean;
+};
 
-type CommandOutput = DendronQuickPickerV2;
+type CommandOutput = NoteLookupCommandOut;
+
 
 export class GoDownCommand extends BasicCommand<CommandOpts, CommandOutput> {
   key = DENDRON_COMMANDS.GO_DOWN_HIERARCHY.key;
   async gatherInputs(): Promise<any> {
     return {};
   }
-  async execute() {
+  async execute(opts: CommandOpts) {
     const maybeTextEditor = VSCodeUtils.getActiveTextEditor();
     let value = "";
     if (maybeTextEditor) {
@@ -24,10 +27,10 @@ export class GoDownCommand extends BasicCommand<CommandOpts, CommandOutput> {
       }
     }
 
-    const picker = (await new LookupCommand().execute({
-      flavor: "note",
-      value,
-    })) as DendronQuickPickerV2;
-    return picker;
+    const out = (await new NoteLookupCommand().run({
+      initialValue: value,
+      noConfirm: opts.noConfirm,
+    }));
+    return out!;
   }
 }

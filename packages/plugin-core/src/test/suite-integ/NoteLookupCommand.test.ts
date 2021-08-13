@@ -455,7 +455,13 @@ suite("NoteLookupCommand", function () {
           expect(engine.config.journal.dateFormat).toEqual("y.MM.dd");
           // quickpick value should be `foo.journal.yyyy.mm.dd`
           const today = Time.now().toFormat(engine.config.journal.dateFormat);
-          expect(out.quickpick.value).toEqual(`foo.journal.${today}`);
+          const noteName = `foo.journal.${today}`;
+          expect(out.quickpick.value).toEqual(noteName);
+
+          // note title should be overriden.
+          const note = VSCodeUtils.getNoteFromDocument(VSCodeUtils.getActiveTextEditor()!.document);
+          const titleOverride = today.split(".").join("-");
+          expect(note!.title).toEqual(titleOverride);
 
           done();
         },

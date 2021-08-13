@@ -3,6 +3,7 @@ import * as React from "react";
 import { DendronCommonProps } from "../utils/types";
 import { DendronBreadCrumb } from "./DendronBreadCrumb";
 import { DendronLookup } from "./DendronLookup";
+import { DendronNoteFooter } from "./DendronNoteFooter";
 import DendronTreeView from "./DendronTreeView";
 
 const { Header, Content, Sider } = Layout;
@@ -28,7 +29,7 @@ export default function DendronLayout(
       <Layout
         id="main-content-wrap"
         className="main-content-wrap"
-        style={{ flex: 1, marginTop: 64  }}
+        style={{ flex: 1, marginTop: 64 }}
       >
         <Layout>
           <Sider
@@ -55,6 +56,7 @@ export default function DendronLayout(
               }}
             >
               {props.children}
+              <DendronNoteFooter />
             </Content>
           </Layout>
         </Layout>

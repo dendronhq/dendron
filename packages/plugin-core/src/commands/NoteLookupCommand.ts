@@ -6,9 +6,11 @@ import {
   NoteQuickInput,
   NoteUtils,
   SchemaUtils,
+  VSCodeEvents,
 } from "@dendronhq/common-all";
 import { DConfig, HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
+import { getDurationMilliseconds } from "@dendronhq/common-server";
 import { Uri } from "vscode";
 import {
   DirectChildFilterBtn,
@@ -35,6 +37,7 @@ import {
 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { Logger } from "../logger";
+import { AnalyticsUtils } from "../utils/analytics";
 import { DendronWorkspace, getEngine, getWS } from "../workspace";
 import { BaseCommand } from "./base";
 import {
@@ -128,6 +131,7 @@ export class NoteLookupCommand extends BaseCommand<
   }
 
   async gatherInputs(opts?: CommandRunOpts): Promise<CommandGatherOutput> {
+    const start = process.hrtime();
     const ws = getWS();
     const noteLookupConfig: NoteLookupConfig = DConfig.getProp(
       ws.config,
@@ -139,7 +143,7 @@ export class NoteLookupCommand extends BaseCommand<
       initialValue: NotePickerUtils.getInitialValueFromOpenEditor(),
       selectionType: noteLookupConfig.selectionType,
     } as CommandRunOpts);
-    const ctx = "LookupCommand:execute";
+    const ctx = "NoteLookupCommand:gatherInput";
     Logger.info({ ctx, opts, msg: "enter" });
     // initialize controller and provider
     this._controller = LookupControllerV3.create({
@@ -185,6 +189,11 @@ export class NoteLookupCommand extends BaseCommand<
       alwaysShow: true,
     });
 
+    const profile = getDurationMilliseconds(start);
+    AnalyticsUtils.track(VSCodeEvents.NoteLookup_Gather, {
+      duration: profile,
+    });
+
     return {
       controller: this.controller,
       provider: this.provider,
@@ -198,6 +207,7 @@ export class NoteLookupCommand extends BaseCommand<
     opts: CommandGatherOutput
   ): Promise<CommandOpts | undefined> {
     return new Promise((resolve) => {
+      const start = process.hrtime();
       HistoryService.instance().subscribev2("lookupProvider", {
         id: "lookup",
         listener: async (event) => {
@@ -233,6 +243,10 @@ export class NoteLookupCommand extends BaseCommand<
         quickpick: opts.quickpick,
         nonInteractive: opts.noConfirm,
         fuzzThreshold: opts.fuzzThreshold,
+      });
+      const profile = getDurationMilliseconds(start);
+      AnalyticsUtils.track(VSCodeEvents.NoteLookup_Show, {
+        duration: profile,
       });
     });
   }
@@ -280,11 +294,20 @@ export class NoteLookupCommand extends BaseCommand<
   async acceptItem(
     item: NoteQuickInput
   ): Promise<OnDidAcceptReturn | undefined> {
-    if (PickerUtilsV2.isCreateNewNotePick(item)) {
-      return this.acceptNewItem(item);
+    let result: Promise<OnDidAcceptReturn | undefined>;
+    const start = process.hrtime();
+    const isNew = PickerUtilsV2.isCreateNewNotePick(item);
+    if (isNew) {
+      result = this.acceptNewItem(item);
     } else {
-      return this.acceptExistingItem(item);
+      result = this.acceptExistingItem(item);
     }
+    const profile = getDurationMilliseconds(start);
+    AnalyticsUtils.track(VSCodeEvents.NoteLookup_Accept, {
+      duration: profile,
+      isNew,
+    });
+    return result;
   }
   async acceptExistingItem(
     item: NoteQuickInput

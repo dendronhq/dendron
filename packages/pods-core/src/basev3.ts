@@ -22,7 +22,12 @@ export enum PROMPT {
 export type PodOpts<T> = {
   engine: DEngineClient;
   config: T;
-  onPrompt?: (arg0?: PROMPT) => Promise<any | undefined>
+  onPrompt?: (arg0?: PROMPT) => Promise<any | undefined>;
+  showDocumentQuickPick?: (arg0: string[]) => any;
+  getHierarchyDest?: (arg0: string) => Promise<string | undefined>;
+  getGlobalState?: (arg0: any) => any;
+  updateGlobalState?: (arg0: any) => any;
+  openFileInEditor?: (arg0: NoteProps) => any;
 } & WorkspaceOpts;
 
 // === Publish Pod
@@ -124,7 +129,7 @@ export abstract class ImportPod<T extends ImportPodConfig = ImportPodConfig> {
       vname: vaultName,
     });
     const srcURL = URI.file(resolvePath(src, engine.wsRoot));
-     
+
     return await this.plant({ ...opts, src: srcURL, vault });
   }
   abstract plant(
@@ -204,7 +209,7 @@ export abstract class ExportPod<
 
     try {
       return this.plant({ ...opts, dest: destURL, notes });
-    } catch(err) {
+    } catch (err) {
       console.log("error", stringifyError(err));
       throw err;
     }

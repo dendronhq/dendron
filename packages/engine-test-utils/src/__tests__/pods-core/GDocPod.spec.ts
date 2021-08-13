@@ -47,6 +47,7 @@ describe("GDoc import pod", () => {
           config: {
             src: "foo",
             token: "xyzabcd",
+            refreshToken: "dhdjdjs",
             vaultName,
             documentId: "sdhdoj",
             hierarchyDestination: "gdoc.meet",
@@ -91,6 +92,7 @@ describe("GDoc import pod", () => {
             vaultName,
             documentId: "sdhdoj",
             hierarchyDestination: "gdoc.meet",
+            refreshToken: "hksall",
             importComments: {
               enable: true,
               format: "json",
@@ -131,6 +133,7 @@ describe("GDoc import pod", () => {
           config: {
             src: "foo",
             token: "xyzabcd",
+            refreshToken: "emeiice",
             vaultName,
             documentId: "sdhdoj",
             hierarchyDestination: "gdoc.meet",
@@ -165,6 +168,7 @@ describe("GDoc import pod", () => {
           config: {
             src: "foo",
             token: "xyzabcd",
+            refreshToken: "akSAal",
             vaultName,
             documentId: "sdhdoj",
             hierarchyDestination: "gdoc.meet",
@@ -196,6 +200,7 @@ describe("GDoc import pod", () => {
           config: {
             src: "foo",
             token: "xyzabcd",
+            refreshToken: "LalaLAL",
             vaultName,
             documentId: "sdhdoj",
             hierarchyDestination: "gdoc.meet",
@@ -233,6 +238,7 @@ describe("GDoc import pod", () => {
           config: {
             src: "foo",
             token: "xyzabcd",
+            refreshToken: "hjsjisw",
             vaultName,
             documentId: "sdhdoj",
             hierarchyDestination: "gdoc.meet",
@@ -269,6 +275,7 @@ describe("GDoc import pod", () => {
           config: {
             src: "foo",
             token: "xyzabcd",
+            refreshToken: "kqSLA",
             vaultName,
             documentId: "sdhdoj",
             hierarchyDestination: "gdoc.meet",

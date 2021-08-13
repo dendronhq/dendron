@@ -8,9 +8,17 @@ import {
   PROMPT,
 } from "@dendronhq/pods-core";
 import { ProgressLocation, Uri, window } from "vscode";
-import { DENDRON_COMMANDS } from "../constants";
+import { DENDRON_COMMANDS, Oauth2Pods } from "../constants";
 import { VSCodeUtils } from "../utils";
-import { showPodQuickPickItemsV4 } from "../utils/pods";
+import {
+  getHierarchyDest,
+  getOauthClient,
+  showDocumentQuickPick,
+  showPodQuickPickItemsV4,
+  getGlobalState,
+  updateGlobalState,
+  openFileInEditor,
+} from "../utils/pods";
 import { DendronWorkspace, getWS } from "../workspace";
 import { BaseCommand } from "./base";
 import { ReloadIndexCommand } from "./ReloadIndex";
@@ -53,14 +61,22 @@ export class ImportPodCommand extends BaseCommand<
 
       if (!maybeConfig) {
         const configPath = PodUtils.genConfigFile({ podsDir, podClass });
-        await VSCodeUtils.openFileInEditor(Uri.file(configPath));
-        window.showInformationMessage(
-          "Looks like this is your first time running this pod. Please fill out the configuration and then run this command again."
-        );
+        if (Oauth2Pods.includes(podChoice.id)) {
+          getOauthClient();
+          window.showInformationMessage(
+            "Please authenticate. Waiting for browser to open..."
+          );
+          await VSCodeUtils.openFileInEditor(Uri.file(configPath));
+        } else {
+          await VSCodeUtils.openFileInEditor(Uri.file(configPath));
+          window.showInformationMessage(
+            "Looks like this is your first time running this pod. Please fill out the configuration and then run this command again."
+          );
+        }
         return;
       }
       return { podChoice, config: maybeConfig };
-    } catch (e) {
+    } catch (e: any) {
       // The user's import configuration has YAML syntax errors:
       if (e.name === "YAMLException")
         window.showErrorMessage(
@@ -99,6 +115,11 @@ export class ImportPodCommand extends BaseCommand<
           engine,
           wsRoot,
           vaults,
+          getGlobalState,
+          updateGlobalState,
+          showDocumentQuickPick,
+          getHierarchyDest,
+          openFileInEditor,
           onPrompt: async (type?: PROMPT) => {
             const resp =
               type === PROMPT.USERPROMPT

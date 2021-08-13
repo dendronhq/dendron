@@ -338,6 +338,10 @@ export class NoteLookupCommand extends BaseCommand<
         engine,
       });
     }
+
+    const maybeJournalTitleOverride = this.journalTitleOverride();
+    if (!_.isUndefined(maybeJournalTitleOverride)) nodeNew.title = maybeJournalTitleOverride;
+
     const resp = await engine.writeNote(nodeNew, {
       newNode: true,
     });
@@ -350,5 +354,36 @@ export class NoteLookupCommand extends BaseCommand<
       wsRoot: DendronWorkspace.wsRoot(),
     });
     return { uri, node: nodeNew, resp };
+  }
+ 
+  /**
+   * this is a hacky title override for journal notes.
+   * TODO: remove this once we implement a more general way to override note titles.
+   * this is a hacky title override for journal notes.
+   * This only works when the journal note modifier was explicitly pressed
+   * and when the date portion is the last bit of the hierarchy.
+   * e.g.) if the picker value is journal.2021.08.13.some-stuff, we don't override (title is some-stuff)
+   */
+  journalTitleOverride(): string | undefined {
+    const journalBtn = _.find(this.controller.state.buttons, (btn) => {
+      return btn.type === LookupNoteTypeEnum.journal
+    });
+    if (journalBtn?.pressed) {
+      const quickpick = this.controller.quickpick;
+
+      // note modifier value exists, and nothing else after that.
+      if (quickpick.noteModifierValue && 
+          quickpick.value.split(quickpick.noteModifierValue).slice(-1)[0] === "") {
+        const [, ...maybeDatePortion ] = quickpick.noteModifierValue.split(".")
+        // we only override y.MM.dd
+        if (maybeDatePortion.length === 3) {
+          const maybeTitleOverride = maybeDatePortion.join("-");
+          if (maybeTitleOverride.match(/\d\d\d\d-\d\d-\d\d$/)) {
+            return maybeTitleOverride;
+          }
+        }
+      }
+    }
+    return;
   }
 }

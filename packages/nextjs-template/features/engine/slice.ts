@@ -4,23 +4,27 @@ import {
   EngineSliceState,
   LoadingStatus
 } from "@dendronhq/common-frontend";
-import { DendronConfig, NotePropsDict } from "@dendronhq/common-all";
+import { DendronConfig, NoteProps, NotePropsDict } from "@dendronhq/common-all";
+
+export type BrowserEngineSliceState = EngineSliceState & {
+  noteIndex: NoteProps;
+}
 
 export const slice = createSlice({
   name: "engine",
   initialState: {
     loading: LoadingStatus.IDLE,
     error: null,
-  } as EngineSliceState,
+  } as BrowserEngineSliceState,
   reducers: {
     setLoadingStatus: (
-      state: EngineSliceState,
+      state: BrowserEngineSliceState,
       action: PayloadAction<LoadingStatus>
     ) => {
       state.loading = action.payload;
     },
     setConfig: (
-      state: EngineSliceState,
+      state: BrowserEngineSliceState,
       action: PayloadAction<DendronConfig>
     ) => {
       state.config = action.payload;
@@ -28,8 +32,12 @@ export const slice = createSlice({
     setNotes: (state, action: PayloadAction<NotePropsDict>) => {
       state.notes = action.payload;
     },
+    setNoteIndex: (state, action: PayloadAction<NoteProps>) => {
+      state.noteIndex = action.payload;
+    },
   },
 });
 
 export const actions = slice.actions;
 export const reducer = slice.reducer;
+

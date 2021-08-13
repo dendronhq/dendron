@@ -1,17 +1,16 @@
-import { verifyEngineSliceState } from "@dendronhq/common-frontend";
-import { Layout } from "antd";
-import React from "react";
 import {
-  DendronConfig,
-  NoteProps,
-  RESERVED_KEYS,
-  Time,
-  VaultUtils,
+	DendronConfig,
+	NoteProps,
+	RESERVED_KEYS,
+	Time,
+	VaultUtils
 } from "@dendronhq/common-all";
-import { useEngineAppSelector } from "../features/engine/hooks";
-import { useDendronRouter } from "../utils/hooks";
+import { Layout } from "antd";
 import _ from "lodash";
 import path from "path";
+import React from "react";
+import { useEngineAppSelector } from "../features/engine/hooks";
+import { useDendronRouter, useNoteActive } from "../utils/hooks";
 
 const { Footer } = Layout;
 
@@ -106,17 +105,17 @@ class GitUtils {
 export function DendronNoteFooter() {
   const dendronRouter = useDendronRouter();
   const engine = useEngineAppSelector((state) => state.engine);
-  if (!verifyEngineSliceState(engine)) {
-    return null;
-  }
-  const { config, notes } = engine;
-  const maybeActiveNote = dendronRouter.getActiveNote({ notes });
-  if (!maybeActiveNote) {
+  const { noteActive } = useNoteActive(dendronRouter.getActiveNoteId());
+  const { config } = engine;
+
+	// Sanity check
+  if (!noteActive || !config) {
     return null;
   }
   return (
-    <Footer>
-      <FooterText config={config} activeNote={maybeActiveNote} />
+    <Footer style={{ paddingLeft: "0px" }}>
+      <hr style={{ height: "1px" }} />
+      <FooterText config={config} activeNote={noteActive} />
     </Footer>
   );
 }
@@ -131,11 +130,11 @@ function FooterText({
   const { siteLastModified, gh_edit_link_text } = config.site;
   const lastUpdated = ms2ShortDate(activeNote.updated);
   return (
-    <div className="">
+    <div>
       {siteLastModified && (
         <span className="text-small text-grey-dk-000 mb-0 mr-2">
           Page last modified:{" "}
-          <span className="d-inline-block">{lastUpdated}</span>.{" "}{" "}
+          <span className="d-inline-block">{lastUpdated}</span>.{" "}
         </span>
       )}
       {GitUtils.canShowGitLink({ config, note: activeNote }) && (
@@ -151,25 +150,3 @@ function FooterText({
     </div>
   );
 }
-
-//   <footer>
-// 	{% if site.back_to_top %}
-// 		<p><a href="#top" id="back-to-top">{{ site.back_to_top_text }}</a></p>
-// 	{% endif %}
-// 	{% if site.footer_content != nil %}
-// 		<p class="text-small text-grey-dk-000 mb-0">{{ site.footer_content }}</p>
-// 	{% endif %}
-
-// 	{% if site.siteLastModified  %}
-// 		<div class="d-flex mt-2">
-// 		<p class="text-small text-grey-dk-000 mb-0 mr-2">
-// 			Page last modified: <span class="d-inline-block">{{ nodeCurrent.updated | ms2ShortDate }}</span>.
-// 		</p>
-// 	{% endif %}
-// 			{% if canShowGit %}
-// 				<p class="text-small text-grey-dk-000 mb-0">
-// 					<a href="{% githubUrl nodeCurrent %}" id="edit-this-page">{{ dendronConfig.site.gh_edit_link_text }}</a>
-// 				</p>
-// 			{% endif %}
-// 		</div>
-// </footer>

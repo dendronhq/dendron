@@ -1,21 +1,21 @@
 import {
+  batch,
   createLogger,
   Provider,
-  setLogLevel,
+  setLogLevel
 } from "@dendronhq/common-frontend";
 import "antd/dist/antd.css";
-import "../public/light-theme.css";
 import type { AppProps } from "next/app";
 import React, { useState } from "react";
 import { ThemeSwitcherProvider } from "react-css-theme-switcher";
 import DendronLayout from "../components/DendronLayout";
 import { combinedStore, useCombinedDispatch } from "../features";
+import { browserEngineSlice } from "../features/engine";
+import "../public/light-theme.css";
 import "../styles/scss/main.scss";
 import { fetchConfig, fetchNotes } from "../utils/fetchers";
 import { useDendronRouter } from "../utils/hooks";
 import { NoteData } from "../utils/types";
-import { DendronConfig } from "@dendronhq/common-all";
-import { browserEngineSlice } from "../features/engine";
 
 const themes = {
   dark: `/dark-theme.css`,
@@ -49,7 +49,10 @@ function DendronApp({ Component, pageProps }: AppProps) {
     fetchNotes().then((data) => {
       logger.info({ ctx: "fetchNotes:got-data" });
       setNoteData(data);
-      dispatch(browserEngineSlice.actions.setNotes(data.notes));
+      batch(() => {
+        dispatch(browserEngineSlice.actions.setNotes(data.notes));
+        dispatch(browserEngineSlice.actions.setNoteIndex(data.noteIndex));
+      });
     });
     fetchConfig().then((data) => {
       logger.info({ ctx: "fetchConfig:got-data" });

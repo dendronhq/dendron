@@ -155,7 +155,6 @@ export class NoteLookupCommand extends BaseCommand<
         "lookupConfirmVaultOnCreate"
       ),
       extraButtons: [
-        //todo: mirror v2 button sequence
         MultiSelectBtn.create(copts.multiSelect),
         CopyNoteLinkBtn.create(),
         DirectChildFilterBtn.create(

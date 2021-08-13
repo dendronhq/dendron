@@ -1,4 +1,4 @@
-import { ENGINE_HOOKS } from "packages/engine-test-utils/src/presets";
+import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import * as vscode from "vscode";
 import { InsertNoteIndexCommand } from "../../commands/InsertNoteIndexCommand";
 import { TIMEOUT } from "../testUtils";

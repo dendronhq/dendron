@@ -5,10 +5,9 @@ import {
   getSlugger,
   isBlockAnchor,
   NoteProps,
-  NoteUtils,
   VaultUtils,
-  DEngineClient,
   WorkspaceOpts,
+  DendronError,
 } from "@dendronhq/common-all";
 import { findUpTo, genHash } from "@dendronhq/common-server";
 import _ from "lodash";
@@ -112,7 +111,7 @@ export class WorkspaceUtils {
       root = urlRoot;
     } else {
       // assume github
-      throw Error("not implemented");
+      throw new DendronError({ message: "not implemented" });
     }
     let link = isIndex ? root : [root, notePrefix, note.id + ".html"].join("/");
 
@@ -124,41 +123,5 @@ export class WorkspaceUtils {
       }
     }
     return link;
-  }
-
-  /** If vault is defined, returns note from that vault
-   *  else searches all the vaults, to return from the same vault first. */
-
-  static getNoteFromMultiVault(opts: {
-    fname: string;
-    engine: DEngineClient;
-    note: NoteProps;
-    vault?: DVault;
-  }) {
-    const { fname, engine, note, vault } = opts;
-    let existingNote: NoteProps | undefined;
-    const maybeNotes = NoteUtils.getNotesByFname({
-      fname,
-      notes: engine.notes,
-      vault,
-    });
-
-    if (maybeNotes.length > 1) {
-      // If there are multiple notes with this fname, default to one that's in the same vault first.
-      const sameVaultNote = _.filter(maybeNotes, (n) =>
-        VaultUtils.isEqual(n.vault, note.vault, engine.wsRoot)
-      )[0];
-      if (!_.isUndefined(sameVaultNote)) {
-        // There is a note that's within the same vault, let's go with that.
-        existingNote = sameVaultNote;
-      } else {
-        // Otherwise, just pick one, doesn't matter which.
-        existingNote = maybeNotes[0];
-      }
-    } else {
-      // Just 1 note
-      existingNote = maybeNotes[0];
-    }
-    return existingNote;
   }
 }

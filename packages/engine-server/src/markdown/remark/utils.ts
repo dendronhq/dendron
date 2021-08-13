@@ -997,11 +997,12 @@ export class RemarkUtils {
               vname: linkNode.to?.vaultName,
             });
           }
-          const existingNote = WorkspaceUtils.getNoteFromMultiVault({
+          const existingNote = NoteUtils.getNoteFromMultiVault({
             fname: linkNode.value,
-            engine,
-            note,
-            vault,
+            notes: engine.notes,
+            fromVault: note.vault,
+            toVault: vault,
+            wsRoot: engine.wsRoot,
           });
           if (existingNote) {
             const urlRoot = dendronConfig.site?.siteUrl || "";

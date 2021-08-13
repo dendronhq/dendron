@@ -40,11 +40,12 @@ export default function DendronLayout(
               paddingLeft: "24px",
               paddingTop: "32px",
               fontSize: "15px",
+              overflow: "scroll",
             }}
           >
             <DendronTreeView {...props} />
           </Sider>
-          <Layout style={{ padding: "0 24px 24px", marginLeft: "200px" }}>
+          <Layout style={{ padding: "0 24px 24px", marginLeft: "200px"}}>
             <DendronBreadCrumb {...props} />
             <Content
               id="main-content"

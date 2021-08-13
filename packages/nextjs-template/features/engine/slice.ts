@@ -1,14 +1,14 @@
-import {
-	createSlice,
-	PayloadAction,
-  EngineSliceState,
-  LoadingStatus
-} from "@dendronhq/common-frontend";
 import { DendronConfig, NoteProps, NotePropsDict } from "@dendronhq/common-all";
+import {
+  createSlice,
+  EngineSliceState,
+  LoadingStatus,
+  PayloadAction,
+} from "@dendronhq/common-frontend";
 
 export type BrowserEngineSliceState = EngineSliceState & {
   noteIndex: NoteProps;
-}
+};
 
 export const slice = createSlice({
   name: "engine",
@@ -40,4 +40,3 @@ export const slice = createSlice({
 
 export const actions = slice.actions;
 export const reducer = slice.reducer;
-

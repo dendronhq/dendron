@@ -11,7 +11,13 @@ foo.ch1 body"
 exports[`markdown export pod test wikilink conversion: note link reference 1`] = `
 "# Simple Wikilink
 
-[One](simple-wikilink/one)"
+[One](/simple-wikilink/one)"
+`;
+
+exports[`markdown export pod test wikilink conversion: top hierarchy note link reference 1`] = `
+"# Wikilink Top Hierarchy
+
+[Wikilink Top Hierarchy Target](/wikilink-top-hierarchy-target)"
 `;
 
 exports[`markdown publish pod basic 1`] = `

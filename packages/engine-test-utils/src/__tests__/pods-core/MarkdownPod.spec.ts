@@ -85,7 +85,7 @@ describe("markdown import pod", () => {
 
   afterEach(() => {
     // make sure files are there
-    let [expectedFiles, actualFiles] = FileTestUtils.cmpFiles(vpath, [
+    const [expectedFiles, actualFiles] = FileTestUtils.cmpFiles(vpath, [
       "project.p1.n1.md",
       "project.p1.n2.md",
       "project.p2.n1.md",
@@ -367,7 +367,13 @@ describe("markdown export pod", () => {
 
         let [actualFiles, expectedFiles] = FileTestUtils.cmpFiles(
           path.join(exportDest, "vault1"),
-          ["root.md", "simple-wikilink.md", "simple-wikilink"]
+          [
+            "root.md",
+            "simple-wikilink.md",
+            "simple-wikilink",
+            "wikilink-top-hierarchy.md",
+            "wikilink-top-hierarchy-target.md",
+          ]
         );
         expect(actualFiles).toEqual(expectedFiles);
 
@@ -378,15 +384,28 @@ describe("markdown export pod", () => {
         expect(actualFiles).toEqual(expectedFiles);
 
         // check contents
-        const foo = fs.readFileSync(
+        let foo = fs.readFileSync(
           path.join(exportDest, "vault1", "simple-wikilink.md"),
           {
             encoding: "utf8",
           }
         );
-        debugger;
         expect(foo).toMatchSnapshot("note link reference");
-        await checkString(foo, "[One](simple-wikilink/one)");
+        await checkString(foo, "[One](/simple-wikilink/one)");
+
+        // Now do a comparison for a note reference at the top level hierarchy
+        // check contents
+        foo = fs.readFileSync(
+          path.join(exportDest, "vault1", "wikilink-top-hierarchy.md"),
+          {
+            encoding: "utf8",
+          }
+        );
+        expect(foo).toMatchSnapshot("top hierarchy note link reference");
+        await checkString(
+          foo,
+          "[Wikilink Top Hierarchy Target](/wikilink-top-hierarchy-target)"
+        );
       },
       {
         expect,
@@ -396,6 +415,14 @@ describe("markdown export pod", () => {
             vault: vaults[0],
           });
           await NOTE_PRESETS_V4.NOTE_WITH_WIKILINK_SIMPLE_TARGET.create({
+            wsRoot,
+            vault: vaults[0],
+          });
+          await NOTE_PRESETS_V4.NOTE_WITH_WIKILINK_TOP_HIERARCHY.create({
+            wsRoot,
+            vault: vaults[0],
+          });
+          await NOTE_PRESETS_V4.NOTE_WITH_WIKILINK_TOP_HIERARCHY_TARGET.create({
             wsRoot,
             vault: vaults[0],
           });

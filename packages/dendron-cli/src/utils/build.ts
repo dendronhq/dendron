@@ -267,7 +267,7 @@ export class BuildUtils {
     dependencies: string[];
   }) {
     const pkg = fs.readJSONSync(pkgPath) as PkgJson;
-    _.forEach(pkg.devDependencies, (v, k) => {
+    _.forEach(pkg.devDependencies, (_v, k) => {
       if (dependencies.includes(k)) {
         delete pkg.devDependencies[k];
       }

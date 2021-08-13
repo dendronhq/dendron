@@ -136,6 +136,7 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
     const port = fs.readFileSync(path.join(wsRoot, ".dendron.port"), {
       encoding: "utf8",
     });
+
     let result;
     let newtoken;
 
@@ -353,26 +354,26 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
 
   async plant(opts: GDocImportPodPlantOpts) {
     const ctx = "GDocPod";
+
     this.L.info({ ctx, opts, msg: "enter" });
     const {
-      openFileInEditor = () => {},
-      getGlobalState = () => {},
-      updateGlobalState = () => {},
       wsRoot,
       engine,
       vault,
       config,
       onPrompt,
-      showDocumentQuickPick,
-      getHierarchyDest,
+      utilityMethods,
     } = opts;
+
     const {
       refreshToken,
       fnameAsId,
       importComments,
       confirmOverwrite = true,
     } = config as GDocImportPodConfig;
+
     let { token } = config as GDocImportPodConfig;
+
     const { docIdsHashMap, newtoken } = await this.getAllDocuments(
       token,
       wsRoot,
@@ -386,34 +387,35 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
     if (!_.isUndefined(newtoken)) {
       token = newtoken;
     }
-    const documentChoice = showDocumentQuickPick
-      ? await showDocumentQuickPick(Object.keys(docIdsHashMap))
-      : undefined;
-
+    /** document selected by user */
+    const documentChoice = await utilityMethods?.showDocumentQuickPick(Object.keys(docIdsHashMap))
+  
     if (_.isUndefined(documentChoice)) {
       return { importedNotes: [] };
     }
-    const documentId = docIdsHashMap[documentChoice.label];
 
-    const defaultChoice = _.isUndefined(
-      await getGlobalState(documentChoice.label)
-    )
-      ? documentChoice.label
-      : await getGlobalState(documentChoice.label);
-    const hierarchyDestination = getHierarchyDest
-      ? await getHierarchyDest(defaultChoice)
-      : documentChoice.label;
+    const documentId = docIdsHashMap[documentChoice.label];
+    const cachedLabel = await utilityMethods?.getGlobalState(documentChoice.label);
+    const defaultChoice = _.isUndefined(cachedLabel) ? documentChoice.label : cachedLabel;
+    
+    /**hierarchy destination entered by user */
+    const hierarchyDestination =  await utilityMethods?.getHierarchyDest(defaultChoice)
+      
     if (_.isUndefined(hierarchyDestination)) {
       return { importedNotes: [] };
     }
-    await updateGlobalState({
+
+    /**updates global state with key as document name and value as latest hierarchy selected by user */
+    await utilityMethods?.updateGlobalState({
       key: documentChoice.label,
       value: hierarchyDestination,
     });
+
     let response = await this.getDataFromGDoc(
       { documentId, token, hierarchyDestination },
       config
     );
+
     if (importComments?.enable) {
       response = await this.getCommentsFromDoc(
         { documentId, token, importComments },
@@ -432,9 +434,9 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
       confirmOverwrite,
       onPrompt,
     });
-    const importedNotes: NoteProps[] =
-      createdNotes === undefined ? [] : [createdNotes];
-    openFileInEditor(importedNotes[0]);
+
+    const importedNotes: NoteProps[] = createdNotes === undefined ? [] : [createdNotes];
+    utilityMethods?.openFileInEditor(importedNotes[0]);
     return { importedNotes };
   }
 }

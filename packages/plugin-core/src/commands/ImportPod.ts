@@ -93,6 +93,13 @@ export class ImportPodCommand extends BaseCommand<
     const ctx = { ctx: "ImportPod" };
     this.L.info({ ctx, opts });
     const wsRoot = DendronWorkspace.wsRoot();
+    const utilityMethods = {
+      getGlobalState,
+      updateGlobalState,
+      showDocumentQuickPick,
+      getHierarchyDest,
+      openFileInEditor,
+    }
     if (!wsRoot) {
       throw Error("ws root not defined");
     }
@@ -115,11 +122,7 @@ export class ImportPodCommand extends BaseCommand<
           engine,
           wsRoot,
           vaults,
-          getGlobalState,
-          updateGlobalState,
-          showDocumentQuickPick,
-          getHierarchyDest,
-          openFileInEditor,
+          utilityMethods,
           onPrompt: async (type?: PROMPT) => {
             const resp =
               type === PROMPT.USERPROMPT

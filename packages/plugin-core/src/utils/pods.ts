@@ -45,8 +45,8 @@ export const getOauthClient = async () => {
     `https://accounts.google.com/o/oauth2/v2/auth?${stringifiedParams}`
   );
 };
-
-export const showDocumentQuickPick = (docs: string[]) => {
+  // eslint-disable-next-line no-undef -- eslint does not recognize `Thenable`
+export const showDocumentQuickPick = (docs: string[]): Thenable<{label: string} | undefined> => {
   const pickItems = docs.map((doc) => {
     return {
       label: doc,
@@ -76,16 +76,16 @@ export const getHierarchyDest = async (
 export const updateGlobalState = async (opts: {
   key: GLOBAL_STATE;
   value: any;
-}) => {
+}): Promise<void> => {
   const { key, value } = opts;
   DendronWorkspace.instance().updateGlobalState(key, value);
 };
 
-export const getGlobalState = async (key: GLOBAL_STATE) => {
+export const getGlobalState = async (key: GLOBAL_STATE): Promise<string | undefined> => {
   return DendronWorkspace.instance().getGlobalState(key);
 };
 
-export const openFileInEditor = async (note: NoteProps) => {
+export const openFileInEditor = async (note: NoteProps): Promise<void> => {
   const npath = NoteUtils.getFullPath({
     note,
     wsRoot: DendronWorkspace.wsRoot(),

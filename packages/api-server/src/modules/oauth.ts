@@ -81,13 +81,13 @@ export class AuthController {
         },
       });
       if (!_.isEmpty(data)) {
-        // const opts = {
-        //   path: path.join(wsRoot,"pods","dendron.gdoc", "config.import.yml"),
-        //   tokens: {
-        //     token: data.access_token,
-        //   }
-        // }
-        // engine.writePodsConfig(opts)
+        const opts = {
+          path: path.join(wsRoot,"pods","dendron.gdoc", "config.import.yml"),
+          tokens: {
+            token: data.access_token,
+          }
+        }
+        engine.writePodsConfig(opts)
         resp = data.access_token;
       }
       return resp;

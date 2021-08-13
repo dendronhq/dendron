@@ -50,7 +50,6 @@ import {
   NodeJSUtils,
   readYAML,
   writeYAML,
-  appendYAML,
 } from "@dendronhq/common-server";
 import _ from "lodash";
 import { DConfig } from "./config";
@@ -551,20 +550,21 @@ export class DendronEngineV2 implements DEngine {
 
   async writePodsConfig(opts: any) {
     const { path, tokens } = opts;
-    //const { token, refreshToken} = tokens;
+    const { token, refreshToken} = tokens;
 
-    // let podConfig = readYAML(path)
-    // podConfig = {
-    //   ... podConfig,
-    //   token,
-    // }
-    // if(!_.isUndefined(refreshToken)){
-    //   podConfig = {
-    //     ... podConfig,
-    //     refreshToken,
-    //   }
-    // }
-    appendYAML(path, tokens);
+    let podConfig = readYAML(path)
+
+    podConfig = {
+      ... podConfig,
+      token,
+    }
+    if(!_.isUndefined(refreshToken)){
+      podConfig = {
+        ... podConfig,
+        refreshToken,
+      }
+    }
+  writeYAML(path, podConfig)
   }
 
   async writeNote(

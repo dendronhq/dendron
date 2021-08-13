@@ -43,7 +43,6 @@ export class InsertNoteIndexCommand extends BasicCommand<
     // list direct child
     const engine = getEngine();
     const children = DNodeUtils.getChildren(activeNote, { nodeDict: engine.notes });
-    console.log({children});
     // format fname of child into markdown list of wikilinks
     const noteIndex = this.genNoteIndex(children, {
       marker: opts.marker

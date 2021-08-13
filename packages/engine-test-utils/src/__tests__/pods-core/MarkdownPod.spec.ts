@@ -16,7 +16,7 @@ import path from "path";
 import { TestConfigUtils } from "../../config";
 import { createSiteConfig, runEngineTestV5 } from "../../engine";
 import { ENGINE_HOOKS } from "../../presets";
-import { checkNotInString, checkString } from "../../utils";
+import { checkNotInString, checkString, TestSeedUtils } from "../../utils";
 
 const setupBasic = async (opts: WorkspaceOpts) => {
   const { wsRoot, vaults } = opts;
@@ -186,6 +186,58 @@ describe("markdown publish pod", () => {
         await checkNotInString(resp, "https://localhost:8080/notes/test2.html");
       },
       { expect, preSetupHook: setupBasicMulti }
+    );
+  });
+
+  test.skip("test with regular link in a seed", async () => {
+    await runEngineTestV5(
+      async ({ engine, vaults, wsRoot }) => {
+        await TestSeedUtils.addSeed2WS({
+          wsRoot,
+          engine,
+          modifySeed: (seed) => {
+            seed.site = {
+              url: "https://foo.com",
+            };
+            return seed;
+          },
+        });
+        const seedId = TestSeedUtils.defaultSeedId();
+        engine.config = TestConfigUtils.getConfig({ wsRoot });
+        engine.vaults = engine.config.vaults;
+        const vault = VaultUtils.getVaultByName({
+          vaults: engine.vaults,
+          vname: seedId,
+        })!;
+        await NoteTestUtilsV4.createNote({
+          fname: "foo",
+          vault,
+          wsRoot,
+          body: `Lorem ipsum`,
+        });
+        await NoteTestUtilsV4.createNote({
+          fname: "parent",
+          vault,
+          wsRoot,
+          body: `[[foo]]`,
+        });
+        const pod = new MarkdownPublishPod();
+
+        const resp = await pod.execute({
+          engine,
+          vaults,
+          wsRoot,
+          dendronConfig: engine.config,
+          config: {
+            fname: "parent",
+            vaultName: seedId,
+            dest: "stdout",
+            wikiLinkToURL: true,
+          },
+        });
+        expect(resp).toContain("https://foo.com");
+      },
+      { expect, preSetupHook: ENGINE_HOOKS.setupBasic }
     );
   });
 });

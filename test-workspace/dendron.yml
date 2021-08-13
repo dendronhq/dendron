@@ -1,6 +1,9 @@
 version: 1
 vaults:
     -
+        fsPath: vault3
+        name: vaultThree
+    -
         fsPath: vault2
         visibility: private
     -
@@ -49,6 +52,8 @@ site:
             - vault2
             - vault
             - vault2
+            - vaultThree
+            - vaultThree
 dev:
     enableWebUI: true
     nextServerUrl: 'http://localhost:3000'

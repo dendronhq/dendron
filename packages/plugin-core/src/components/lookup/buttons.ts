@@ -1,9 +1,9 @@
 import {
   DNodePropsQuickInputV2,
-  NoteQuickInput,
   NoteUtils,
   NoteProps,
   getSlugger,
+  NoteQuickInput,
 } from "@dendronhq/common-all";
 import { getWS } from "../../workspace";
 import _ from "lodash";
@@ -288,7 +288,8 @@ export class JournalBtn extends DendronBtn {
     quickPick.modifyPickerValueFunc = undefined;
     quickPick.noteModifierValue = undefined;
     quickPick.prevValue = quickPick.value;
-    quickPick.value = quickPick.rawValue;
+    quickPick.prefix = quickPick.rawValue;
+    quickPick.value = NotePickerUtils.getPickerValue(quickPick);
   }
 }
 
@@ -322,7 +323,8 @@ export class ScratchBtn extends DendronBtn {
     quickPick.modifyPickerValueFunc = undefined;
     quickPick.noteModifierValue = undefined;
     quickPick.prevValue = quickPick.value;
-    quickPick.value = quickPick.rawValue;
+    quickPick.prefix = quickPick.rawValue;
+    quickPick.value = NotePickerUtils.getPickerValue(quickPick);
   }
 }
 export class HorizontalSplitBtn extends DendronBtn {
@@ -362,19 +364,15 @@ export class DirectChildFilterBtn extends DendronBtn {
   }
 
   async onEnable({ quickPick }: ButtonHandleOpts) {
-    quickPick.filterMiddleware = (items: NoteQuickInput[]) => {
-      const depth = PickerUtilsV2.slashToDot(
-        PickerUtilsV2.getValue(quickPick)
-      ).split(".").length;
-      items = PickerUtilsV2.filterByDepth(items, depth);
-      items = PickerUtilsV2.filterNonStubs(items);
-      return items;
-    };
+    quickPick.showDirectChildrenOnly = true;
+    quickPick.filterMiddleware = ((items: NoteQuickInput[]) => items);
     return;
   }
 
   async onDisable({ quickPick }: ButtonHandleOpts) {
+    quickPick.showDirectChildrenOnly = false;
     quickPick.filterMiddleware = undefined;
+    return;
   }
 }
 

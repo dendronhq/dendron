@@ -50,6 +50,7 @@ export class LookupControllerV3 {
   protected _cancelTokenSource?: CancellationTokenSource;
   public _quickpick?: DendronQuickPickerV2;
   public fuzzThreshold: number;
+  public _provider?: ILookupProviderV3;
 
   static create(opts?: LookupControllerV3CreateOpts) {
     const vaults = getWS().getEngine().vaults;
@@ -101,6 +102,13 @@ export class LookupControllerV3 {
     return this._cancelTokenSource;
   }
 
+  get provider() {
+    if (_.isUndefined(this._provider)) {
+      throw new DendronError({ message: "no provider" });
+    }
+    return this._provider;
+  }
+
   createCancelSource() {
     const tokenSource = new CancellationTokenSource();
     if (this._cancelTokenSource) {
@@ -118,6 +126,7 @@ export class LookupControllerV3 {
     const { provider } = _.defaults(opts, {
       nonInteractive: false,
     });
+    this._provider = provider;
     const { buttonsPrev, buttons } = this.state;
     const quickpick = PickerUtilsV2.createDendronQuickPick(opts);
     this._quickpick = quickpick;
@@ -193,18 +202,30 @@ export class LookupControllerV3 {
     }) as DendronBtn;
     btnTriggered.pressed = !btnTriggered.pressed;
     const btnCategory = getButtonCategory(btnTriggered);
+    let btnsToRefresh: DendronBtn[] = [];
     if (!_.includes(["effect"] as ButtonCategory[], btnCategory)) {
-      _.filter(this.state.buttons, (ent) => ent.type !== btnTriggered.type).map(
-        (ent) => {
-          if (getButtonCategory(ent) === btnCategory) {
-            ent.pressed = false;
-          }
-        }
+      btnsToRefresh = _.filter(this.state.buttons, (ent) => {
+        return (
+          ent.type !== btnTriggered.type &&
+          getButtonCategory(ent) === btnCategory
+        );
+      });
+      btnsToRefresh.map(
+        (ent) => { ent.pressed = false }
       );
-    }
+    };
+    btnsToRefresh.push(btnTriggered);
     // update button state
     PickerUtilsV2.refreshButtons({ quickpick, buttons, buttonsPrev });
     // modify button behavior
-    await PickerUtilsV2.refreshPickerBehavior({ quickpick, buttons });
+    await PickerUtilsV2.refreshPickerBehavior({ quickpick, buttons: btnsToRefresh });
+    
+    if (btnTriggered.type === "directChildOnly") {
+      await this.provider.onUpdatePickerItems({
+        picker: quickpick,
+        token: this.cancelToken.token,
+        fuzzThreshold: this.fuzzThreshold,
+      });
+    }
   };
 }

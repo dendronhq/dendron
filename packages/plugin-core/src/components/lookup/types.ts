@@ -13,7 +13,7 @@ export type LookupControllerState = {
   buttonsPrev: DendronBtn[];
 };
 
-type FilterQuickPickFunction = (items: NoteQuickInput[]) => NoteQuickInput[];
+export type FilterQuickPickFunction = (items: NoteQuickInput[]) => NoteQuickInput[];
 type ModifyPickerValueFunc = (value?: string) => {
   noteName: string;
   prefix: string;
@@ -47,9 +47,7 @@ export type DendronQuickPickerV2 = DendronQuickPickItemV2 & {
   noteModifierValue?: string;
   selectionModifierValue?: string;
   onCreate?: (note: DNodeProps) => Promise<DNodeProps | undefined>;
-  /**
-   @deprecated, replace with filterResults
-   */
+
   showDirectChildrenOnly?: boolean;
   // pagiation
   offset?: number;

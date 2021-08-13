@@ -132,6 +132,11 @@
         "desc": "Insert note link"
       },
       {
+        "command": "dendron.insertNoteIndex",
+        "title": "Dendron: Insert Note Index",
+        "desc": "Insert note index"
+      },
+      {
         "command": "dendron.moveNote",
         "title": "Dendron: Move Note",
         "desc": "Move a note"

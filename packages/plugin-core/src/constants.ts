@@ -236,6 +236,12 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     group: "notes",
     desc: "Insert note link",
   },
+  INSERT_NOTE_INDEX: {
+    key: "dendron.insertNoteIndex",
+    title: `${CMD_PREFIX} Insert Note Index`,
+    group: "notes",
+    desc: "Insert note index",
+  },
   MOVE_NOTE: {
     key: "dendron.moveNote",
     title: `${CMD_PREFIX} Move Note`,

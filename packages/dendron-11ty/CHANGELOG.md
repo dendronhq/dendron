@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.54.1](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.54.1) (2021-08-13)
+
+**Note:** Version bump only for package @dendronhq/dendron-11ty
+
+
+
+
+
 # [0.54.0](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.54.0) (2021-08-10)
 
 **Note:** Version bump only for package @dendronhq/dendron-11ty

@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.54.1](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.54.1) (2021-08-13)
+
+
+### Bug Fixes
+
+* **calendar-view:** header selection throws error ([#1122](https://github.com/dendronhq/dendron/issues/1122)) ([5bc8ca1](https://github.com/dendronhq/dendron/commit/5bc8ca1a256328bd6d05f7d351e2c7ae7042580c)), closes [/ant.design/changelog#4](https://github.com//ant.design/changelog/issues/4)
+
+
+### Features Dendron
+
+* colored tags in tree view & tags at bottom ([#1119](https://github.com/dendronhq/dendron/issues/1119)) ([2577e01](https://github.com/dendronhq/dendron/commit/2577e0189e3ba0d813823bc4d81a340d91db440d))
+* **calendar-view:** allow journal settings deviating from defaults ([#1088](https://github.com/dendronhq/dendron/issues/1088)) ([74ce384](https://github.com/dendronhq/dendron/commit/74ce384f1b833abf68d3b145cbed55fe02fa8e1f))
+* generate json schema from config ([#1100](https://github.com/dendronhq/dendron/issues/1100)) ([53b189e](https://github.com/dendronhq/dendron/commit/53b189ec973a8d3d3ccf300a0e59908197f4efb1))
+
+
+
+
+
 # [0.54.0](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.54.0) (2021-08-10)
 
 

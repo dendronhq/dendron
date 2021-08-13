@@ -2,6 +2,7 @@ import { DendronError } from "@dendronhq/common-all";
 import { createLogger, findUpTo } from "@dendronhq/common-server";
 import execa from "execa";
 import fs from "fs-extra";
+import _ from "lodash";
 import path from "path";
 import semver from "semver";
 
@@ -12,6 +13,7 @@ type PkgJson = {
   main: string;
   version: string;
   repository: PkgRepository;
+  devDependencies: { [key: string]: string };
 };
 
 type PkgRepository = {
@@ -28,7 +30,7 @@ export enum SemverVersion {
 
 export enum PublishEndpoint {
   LOCAL = "local",
-  REMOTE = "remote"
+  REMOTE = "remote",
 }
 
 const $ = (cmd: string, opts?: any) => {
@@ -54,9 +56,16 @@ export class LernaUtils {
 
 export class BuildUtils {
   static getLernaRoot() {
-    const maybeRoot = findUpTo({base: process.cwd(), fname: "lerna.json", returnDirPath: true, maxLvl: 4})
+    const maybeRoot = findUpTo({
+      base: process.cwd(),
+      fname: "lerna.json",
+      returnDirPath: true,
+      maxLvl: 4,
+    });
     if (!maybeRoot) {
-      throw new DendronError({message: `no lerna root found from ${process.cwd()}`})
+      throw new DendronError({
+        message: `no lerna root found from ${process.cwd()}`,
+      });
     }
     return maybeRoot;
   }
@@ -103,8 +112,8 @@ export class BuildUtils {
   static buildNextServer() {
     const root = this.getNextServerRootPath();
     $(`yarn  --ignore-lockfile`, { cwd: root });
-    $(`yarn build`, {cwd: root});
-    $(`yarn gen:theme`, {cwd: root});
+    $(`yarn build`, { cwd: root });
+    $(`yarn gen:theme`, { cwd: root });
   }
 
   static bump11ty(opts: { currentVersion: string; nextVersion: string }) {
@@ -123,6 +132,7 @@ export class BuildUtils {
   }
 
   static installPluginDependencies() {
+    fs.removeSync(path.join(this.getPluginRootPath(), "package.json"));
     return $(`yarn install --no-lockfile`, { cwd: this.getPluginRootPath() });
   }
 
@@ -153,6 +163,13 @@ export class BuildUtils {
         type: "git",
       },
     });
+    this.removeDevDepsFromPkgJson({
+      pkgPath,
+      dependencies: [
+        "@dendronhq/common-test-utils",
+        "@dendronhq/engine-test-utils",
+      ],
+    });
   }
 
   /**
@@ -163,7 +180,7 @@ export class BuildUtils {
     // this.startVerdaccio();
     // // HACK: give verdaccio chance to start
     // await this.sleep(3000);
-    return 
+    return;
   }
 
   /**
@@ -179,7 +196,7 @@ export class BuildUtils {
    * @throws Error if typecheck is not successful
    */
   static runTypeCheck() {
-    $("yarn lerna:typecheck", {cwd: this.getLernaRoot()});
+    $("yarn lerna:typecheck", { cwd: this.getLernaRoot() });
   }
 
   static async sleep(ms: number) {
@@ -223,15 +240,8 @@ export class BuildUtils {
   }
 
   static async syncStaticAssets() {
-
-    const pluginAssetPath = path.join(
-      this.getPluginRootPath(),
-      "assets",
-    );
-    const pluginStaticPath = path.join(
-      pluginAssetPath,
-      "static"
-    );
+    const pluginAssetPath = path.join(this.getPluginRootPath(), "assets");
+    const pluginStaticPath = path.join(pluginAssetPath, "static");
     const apiRoot = path.join(this.getLernaRoot(), "packages", "api-server");
     const nextServerRoot = this.getNextServerRootPath();
 
@@ -247,6 +257,22 @@ export class BuildUtils {
       fs.copy(path.join(apiRoot, "assets", "static"), pluginStaticPath),
     ]);
     return;
+  }
+
+  static removeDevDepsFromPkgJson({
+    pkgPath,
+    dependencies,
+  }: {
+    pkgPath: string;
+    dependencies: string[];
+  }) {
+    const pkg = fs.readJSONSync(pkgPath) as PkgJson;
+    _.forEach(pkg.devDependencies, (v, k) => {
+      if (dependencies.includes(k)) {
+        delete pkg.devDependencies[k];
+      }
+    });
+    fs.writeJSONSync(pkgPath, pkg, { spaces: 4 });
   }
 
   static updatePkgMeta({

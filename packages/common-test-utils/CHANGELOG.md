@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.54.1](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.54.1) (2021-08-13)
+
+
+### Bug Fixes
+
+* leading slash in markdown export pod ([#1136](https://github.com/dendronhq/dendron/issues/1136)) ([0f8ebbf](https://github.com/dendronhq/dendron/commit/0f8ebbf228f7af1bbbf677c9fea38989f87c635e))
+
+
+
+
+
 # [0.54.0](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.54.0) (2021-08-10)
 
 **Note:** Version bump only for package @dendronhq/common-test-utils

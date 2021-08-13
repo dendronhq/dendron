@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.54.1](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.54.1) (2021-08-13)
+
+
+### Bug Fixes
+
+* frontmatter tags ([#1104](https://github.com/dendronhq/dendron/issues/1104)) ([e4c022f](https://github.com/dendronhq/dendron/commit/e4c022f422b1ce020215d59d2658218f10c75250))
+
+
+
+
+
 # [0.54.0](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.54.0) (2021-08-10)
 
 

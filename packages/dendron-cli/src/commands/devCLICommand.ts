@@ -89,6 +89,13 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       "data",
       "dendron-yml.validator.json"
     );
+    const pluginOutputPath = path.join(
+      repoRoot,
+      "packages",
+      "plugin-core",
+      "dist",
+      "dendron-yml.validator.json"
+    );
     const configType = "DendronConfig";
     const schema = tsj
       .createGenerator({
@@ -99,9 +106,11 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       })
       .createSchema(configType);
     const schemaString = JSON.stringify(schema, null, 2);
+    fs.ensureDirSync(path.dirname(pluginOutputPath));
     await Promise.all([
       fs.writeFile(nextOutputPath, schemaString),
       fs.writeFile(commonOutputPath, schemaString),
+      fs.writeFile(pluginOutputPath, schemaString),
     ]);
     return;
   }
@@ -174,12 +183,12 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     const shouldPublishLocal = opts.publishEndpoint === PublishEndpoint.LOCAL;
     this.L.info({ ctx, currentVersion, nextVersion });
 
-		this.print(`prep publish ${opts.publishEndpoint}...`);
+    this.print(`prep publish ${opts.publishEndpoint}...`);
     if (shouldPublishLocal) {
       await BuildUtils.prepPublishLocal();
     } else {
       await BuildUtils.prepPublishRemote();
-		}
+    }
 
     this.print("bump 11ty...");
     BuildUtils.bump11ty({ currentVersion, nextVersion });
@@ -193,8 +202,8 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     this.print("publish version...");
     LernaUtils.publishVersion();
 
-		this.print("sync assets...");
-		await this.syncAssets();
+    this.print("sync assets...");
+    await this.syncAssets();
 
     this.print("prep repo...");
     BuildUtils.prepPluginPkg();

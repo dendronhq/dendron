@@ -13,8 +13,9 @@ export class InsertNoteIndexCommand extends BasicCommand<
   key = DENDRON_COMMANDS.INSERT_NOTE_INDEX.key;
 
   async execute(opts: CommandOpts) {
-    const ctx = "InsertNoteLinkCommand";
+    const ctx = "InsertNoteIndexCommand";
     Logger.info({ ctx, msg: "execute", opts });
+
     return {};
   }
 }

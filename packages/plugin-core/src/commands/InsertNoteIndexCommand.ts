@@ -3,6 +3,8 @@ import { BasicCommand } from "./base";
 import { VSCodeUtils } from "../utils";
 import { DNodeUtils, NoteProps } from "@dendronhq/common-all";
 import { getEngine } from "../workspace";
+import { window } from "vscode";
+import _ from "lodash";
 
 type CommandOpts = {
   /*
@@ -42,15 +44,33 @@ export class InsertNoteIndexCommand extends BasicCommand<
   async execute(opts: CommandOpts) {
     const ctx = "InsertNoteIndexCommand";
     this.L.info({ ctx, msg: "execute", opts });
-    const editor = VSCodeUtils.getActiveTextEditor()!;
-    const activeNote = VSCodeUtils.getNoteFromDocument(editor.document)!;
+    const maybeEditor = VSCodeUtils.getActiveTextEditor()!;
+    if (_.isUndefined(maybeEditor)) {
+      window.showErrorMessage(
+        "No active text editor found. Try running this command in a Dendron note."
+      )
+      return opts;
+    }
+    const activeNote = VSCodeUtils.getNoteFromDocument(maybeEditor.document)!;
+    if (_.isUndefined(activeNote)) {
+      window.showErrorMessage(
+        "Active file is not a Dendron note."
+      );
+      return opts;
+    }
     const engine = getEngine();
     const children = DNodeUtils.getChildren(activeNote, { nodeDict: engine.notes });
+    if (children.length === 0) {
+      window.showInformationMessage(
+        "This note does not have any child notes."
+      )
+      return opts;
+    }
     const noteIndex = this.genNoteIndex(children, {
       marker: opts.marker
     });
-    const current = editor.selection;
-    await editor.edit((builder) => {
+    const current = maybeEditor.selection;
+    await maybeEditor.edit((builder) => {
       builder.insert(current.start, noteIndex);
     });
     return opts;

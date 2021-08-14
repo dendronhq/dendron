@@ -44,8 +44,20 @@ export default function DendronLayout(
             }}
           >
             <DendronTreeView {...props} />
+            <footer
+              style={{
+                paddingRight: "2em",
+                paddingLeft: "2em",
+                paddingTop: "2em",
+                paddingBottom: "5em",
+                fontSize: "12p",
+              }}
+            >
+              🌱 with 💕 using{" "}
+              <a href="https://www.dendron.so/"> Dendron 🌲 </a>
+            </footer>
           </Sider>
-          <Layout style={{ padding: "0 24px 24px", marginLeft: "200px"}}>
+          <Layout style={{ padding: "0 24px 24px", marginLeft: "200px" }}>
             <DendronBreadCrumb {...props} />
             <Content
               id="main-content"

@@ -1,7 +1,16 @@
 import Fuse from "fuse.js";
 import _ from "lodash";
-import { DEngineMode, SchemaProps, NoteProps, SchemaModuleDict, SchemaUtils, NotePropsDict, SchemaModuleProps } from ".";
-import { DVault } from "./types/workspace";
+import {
+  DEngineMode,
+  SchemaProps,
+  NoteProps,
+  SchemaModuleDict,
+  SchemaUtils,
+  NotePropsDict,
+  SchemaModuleProps,
+  NoteUtils,
+} from ".";
+import { DendronConfig, DVault } from "./types/workspace";
 
 export type NoteIndexProps = {
   id: string;
@@ -129,4 +138,31 @@ export class FuseEngine {
       return doc.id === SchemaUtils.getModuleRoot(smod).id;
     });
   }
+}
+
+export class NoteLookupUtils {
+  /**
+   * Get qs for current level of the hierarchy
+   * @param qs
+   * @returns
+   */
+  static getQsForCurrentLevel = (qs: string) => {
+    const lastDotIndex = qs.lastIndexOf(".");
+    return lastDotIndex < 0 ? "" : qs.slice(0, lastDotIndex + 1);
+  };
+
+  static fetchRootResults = (
+    notes: NotePropsDict,
+    opts?: Partial<{ config: DendronConfig }>
+  ) => {
+    const roots: NoteProps[] =
+      opts?.config?.site.siteHierarchies === ["root"]
+        ? NoteUtils.getRoots(notes)
+        : opts!.config!.site.siteHierarchies.flatMap((fname) =>
+            NoteUtils.getNotesByFname({ fname, notes })
+          );
+    const childrenOfRoot = roots.flatMap((ent) => ent.children);
+    const nodes = _.map(childrenOfRoot, (ent) => notes[ent]).concat(roots);
+    return nodes;
+  };
 }

@@ -7,6 +7,7 @@ import {
   DNodeUtils,
   DNoteLoc,
   DVault,
+  NoteLookupUtils,
   NoteProps,
   NoteQuickInput,
   NoteUtils,
@@ -384,10 +385,9 @@ export class PickerUtilsV2 {
 
   static getCreateNewItem = (
     items: readonly DNodePropsQuickInputV2[]
-  ): DNodePropsQuickInputV2|undefined => {
+  ): DNodePropsQuickInputV2 | undefined => {
     return _.find(items, { label: CREATE_NEW_LABEL });
   };
-
 
   static isCreateNewNotePickForSingle(node: DNodePropsQuickInputV2): boolean {
     if (!node) {
@@ -691,12 +691,12 @@ export class NotePickerUtils {
     return [...picker.selectedItems];
   }
 
-  static fetchRootResults = (opts: { engine: DEngineClient }) => {
-    const { engine } = opts;
-    const nodeDict = engine.notes;
-    const roots = NoteUtils.getRoots(nodeDict);
-    const childrenOfRoot = roots.flatMap((ent) => ent.children);
-    const nodes = _.map(childrenOfRoot, (ent) => nodeDict[ent]).concat(roots);
+  static fetchRootQuickPickResults = ({
+    engine,
+  }: {
+    engine: DEngineClient;
+  }) => {
+    const nodes = NoteLookupUtils.fetchRootResults(engine.notes);
     return nodes.map((ent) => {
       return DNodeUtils.enhancePropForQuickInput({
         wsRoot: DendronWorkspace.wsRoot(),
@@ -721,9 +721,11 @@ export class NotePickerUtils {
     PickerUtilsV2.resetPaginationOpts(picker);
     const resp = await engine.queryNotes({ qs });
     if (opts.depth) {
-      nodes = resp.data.filter((ent) => {
-        return DNodeUtils.getDepth(ent) === opts.depth!;
-      }).filter((ent) => !ent.stub);
+      nodes = resp.data
+        .filter((ent) => {
+          return DNodeUtils.getDepth(ent) === opts.depth!;
+        })
+        .filter((ent) => !ent.stub);
     } else {
       nodes = resp.data;
     }
@@ -768,7 +770,7 @@ export class SchemaPickerUtils {
     picker: DendronQuickPickerV2;
     qs: string;
   }) {
-    const ctx = "SchemaPickerUtils:fetchPickerResults"
+    const ctx = "SchemaPickerUtils:fetchPickerResults";
     const start = process.hrtime();
     const { picker, qs } = opts;
     const engine = getWS().getEngine();
@@ -793,7 +795,7 @@ export class SchemaPickerUtils {
           alwaysShow: picker.alwaysShowAll,
         })
       )
-    ); 
+    );
     const profile = getDurationMilliseconds(start);
     Logger.info({ ctx, msg: "engine.querySchema", profile });
     return updatedItems;

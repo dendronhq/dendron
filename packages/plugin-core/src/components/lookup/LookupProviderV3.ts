@@ -8,6 +8,7 @@ import {
   SchemaQuickInput,
   SchemaUtils,
   VSCodeEvents,
+  NoteLookupUtils,
 } from "@dendronhq/common-all";
 import { getDurationMilliseconds } from "@dendronhq/common-server";
 import { HistoryService } from "@dendronhq/engine-server";
@@ -111,7 +112,7 @@ export class NoteLookupProvider implements ILookupProviderV3 {
     lc: LookupControllerV3;
   }) {
     return async () => {
-      const ctx = "LookupProvider:onDidAccept"
+      const ctx = "LookupProvider:onDidAccept";
       const { quickpick: picker, lc } = opts;
       const nextPicker = picker.nextPicker;
       if (nextPicker) {
@@ -128,7 +129,10 @@ export class NoteLookupProvider implements ILookupProviderV3 {
         }
       }
       const selectedItems = NotePickerUtils.getSelection(picker);
-      Logger.debug({ctx, selectedItems: selectedItems.map(item => NoteUtils.toLogObj(item))});
+      Logger.debug({
+        ctx,
+        selectedItems: selectedItems.map((item) => NoteUtils.toLogObj(item)),
+      });
       // last chance to cancel
       lc.cancelToken.cancel();
       if (!this.opts.noHidePickerOnAccept) {
@@ -170,13 +174,7 @@ export class NoteLookupProvider implements ILookupProviderV3 {
 
     // just activated picker's have special behavior
     if (picker._justActivated && !picker.nonInteractive) {
-      const lastDotIndex = pickerValue.lastIndexOf(".");
-      if (lastDotIndex < 0) {
-        pickerValue = "";
-      } else {
-        // assume query from last dot
-        pickerValue = pickerValue.slice(0, lastDotIndex + 1);
-      }
+      pickerValue = NoteLookupUtils.getQsForCurrentLevel(pickerValue);
     }
 
     // get prior
@@ -196,7 +194,7 @@ export class NoteLookupProvider implements ILookupProviderV3 {
       // if empty string, show all 1st level results
       if (querystring === "") {
         Logger.debug({ ctx, msg: "empty qs" });
-        picker.items = NotePickerUtils.fetchRootResults({ engine });
+        picker.items = NotePickerUtils.fetchRootQuickPickResults({ engine });
         return;
       }
 
@@ -219,7 +217,9 @@ export class NoteLookupProvider implements ILookupProviderV3 {
       }
 
       // check if we have an exact match in the results and keep track for later
-      const perfectMatch: boolean = !_.isUndefined(_.find(updatedItems, { fname: queryOrig }));
+      const perfectMatch: boolean = !_.isUndefined(
+        _.find(updatedItems, { fname: queryOrig })
+      );
 
       // check if single item query, vscode doesn't surface single letter queries
       // we need this so that suggestions will show up

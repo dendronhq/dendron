@@ -9,6 +9,7 @@ import {
   SchemaQuickInput,
   SchemaUtils,
   VSCodeEvents,
+  NoteLookupUtils,
 } from "@dendronhq/common-all";
 import { getDurationMilliseconds } from "@dendronhq/common-server";
 import { HistoryService } from "@dendronhq/engine-server";

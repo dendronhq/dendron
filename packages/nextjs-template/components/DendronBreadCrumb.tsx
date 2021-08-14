@@ -1,7 +1,7 @@
 import { Breadcrumb } from "antd";
 import _ from "lodash";
 import React from "react";
-import { NoteUtils } from "../../common-all/lib";
+import { NoteUtils } from "@dendronhq/common-all";
 import { useNoteActive } from "../utils/hooks";
 import { DendronCommonProps, verifyNoteData } from "../utils/types";
 import DendronSpinner from "./DendronSpinner";

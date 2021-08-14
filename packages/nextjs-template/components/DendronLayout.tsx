@@ -2,6 +2,7 @@ import { Layout } from "antd";
 import * as React from "react";
 import { DendronCommonProps } from "../utils/types";
 import { DendronBreadCrumb } from "./DendronBreadCrumb";
+import DendronLogoOrTitle from "./DendronLogoOrTitle";
 import { DendronLookup } from "./DendronLookup";
 import { DendronNoteFooter } from "./DendronNoteFooter";
 import DendronTreeView from "./DendronTreeView";
@@ -24,6 +25,7 @@ export default function DendronLayout(
           borderBottom: "1px solid #d4dadf",
         }}
       >
+        <DendronLogoOrTitle />
         <DendronLookup {...props} />
       </Header>
       <Layout

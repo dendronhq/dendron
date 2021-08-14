@@ -34,3 +34,6 @@ yarn-error.log*
 .vercel
 data
 *.zip
+public/assets
+public/CNAME
+public/logo.*

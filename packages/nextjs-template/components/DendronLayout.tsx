@@ -59,7 +59,13 @@ export default function DendronLayout(
               <a href="https://www.dendron.so/"> Dendron 🌲 </a>
             </footer>
           </Sider>
-          <Layout style={{ padding: "0 24px 24px", marginLeft: "200px" }}>
+          <Layout
+            style={{
+              padding: "0 24px 24px",
+              marginLeft: "200px",
+              width: "auto",
+            }}
+          >
             <DendronBreadCrumb {...props} />
             <Content
               id="main-content"

@@ -2,22 +2,33 @@ import { Breadcrumb } from "antd";
 import _ from "lodash";
 import React from "react";
 import { NoteUtils } from "../../common-all/lib";
+import { useNoteActive } from "../utils/hooks";
 import { DendronCommonProps, verifyNoteData } from "../utils/types";
 import DendronSpinner from "./DendronSpinner";
 
 export function DendronBreadCrumb(props: DendronCommonProps) {
+  const { dendronRouter } = props;
+  const { noteActive } = useNoteActive(dendronRouter.getActiveNoteId());
+  // no breadcrumb for home page
   if (!verifyNoteData(props)) {
-    return <DendronSpinner />;
-  } else {
-    const { dendronRouter, notes, noteIndex } = props;
-    const noteActive = _.isUndefined(dendronRouter.query.id) ? noteIndex : notes[dendronRouter.query.id];
-    const noteParents = NoteUtils.getNoteWithParents({ note: noteActive, notes });
-    return (
-      <Breadcrumb style={{ margin: "16px 0" }}>
-        {_.map(noteParents, (note) => {
-          return <Breadcrumb.Item key={note.id}>{note.title}</Breadcrumb.Item>;
-        })}
-      </Breadcrumb>
-    );
+    return null;
   }
+  if (
+    !noteActive ||
+    !verifyNoteData(props) ||
+    noteActive.id === props.noteIndex.id
+  ) {
+    return null;
+  }
+  const noteParents = NoteUtils.getNoteWithParents({
+    note: noteActive,
+    notes: props.notes,
+  });
+  return (
+    <Breadcrumb style={{ margin: "16px 0" }}>
+      {_.map(noteParents, (note) => {
+        return <Breadcrumb.Item key={note.id}>{note.title}</Breadcrumb.Item>;
+      })}
+    </Breadcrumb>
+  );
 }

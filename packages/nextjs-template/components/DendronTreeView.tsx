@@ -9,12 +9,7 @@ import { DataNode } from "rc-tree/lib/interface";
 import React, { useState } from "react";
 import { useThemeSwitcher } from "react-css-theme-switcher";
 import { useDendronRouter } from "../utils/hooks";
-import {
-  DendronCommonProps,
-  DendronPageWithNoteDataProps,
-  NoteData,
-  verifyNoteData,
-} from "../utils/types";
+import { DendronCommonProps, NoteData, verifyNoteData } from "../utils/types";
 
 type OnExpandFunc = TreeProps["onExpand"];
 type OnSelectFunc = TreeProps["onSelect"];
@@ -82,7 +77,7 @@ function DendronTreeView({
   };
   const onSelect: OnSelectFunc = (_selectedKeys, { node }) => {
     const id = node.key as string;
-    changeActiveNote(id, {noteIndex: noteDataProps.noteIndex});
+    changeActiveNote(id, { noteIndex: noteDataProps.noteIndex });
   };
 
   // --- Render
@@ -91,7 +86,7 @@ function DendronTreeView({
       noteId: note.id,
       noteDict: noteDataProps.notes,
       showVaultName: false,
-      applyNavExclude: true
+      applyNavExclude: true,
     });
   }) as DataNode[];
   const expandKeys = _.isEmpty(activeNoteIds) ? [] : activeNoteIds;

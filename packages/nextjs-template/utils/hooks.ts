@@ -1,4 +1,9 @@
-import { FuseEngine, NoteProps, NotePropsDict } from "@dendronhq/common-all";
+import {
+  FuseEngine,
+  getStage,
+  NoteProps,
+  NotePropsDict,
+} from "@dendronhq/common-all";
 import _ from "lodash";
 import { useRouter } from "next/router";
 import React from "react";
@@ -14,10 +19,11 @@ export function useDendronRouter() {
   const router = useRouter();
   const query = getNoteRouterQuery(router);
   const changeActiveNote = (id: string, opts: { noteIndex: NoteProps }) => {
+    const suffix = getStage() === "prod" ? ".html" : "";
     if (id === opts.noteIndex.id) {
       return router.push(`/`);
     }
-    return router.push(`/notes/${id}`);
+    return router.push(`/notes/${id}${suffix}`);
   };
 
   const getActiveNote = ({
@@ -31,11 +37,11 @@ export function useDendronRouter() {
   const getActiveNoteId = () => {
     // assume home page
     if (!router.asPath.startsWith("/notes")) {
-      return "root"
+      return "root";
     } else {
-      return query.id
+      return query.id;
     }
-  }
+  };
 
   return {
     router,
@@ -70,11 +76,11 @@ type DendronNotesHookProps = {
 
 /**
  * Get the currently active note
- * @param id 
- * @returns 
+ * @param id
+ * @returns
  */
 export function useNoteActive(id: string | undefined): DendronNotesHookProps {
-  const [noteActive, setNoteActive] = React.useState<NoteProps|undefined>();
+  const [noteActive, setNoteActive] = React.useState<NoteProps | undefined>();
   const engine = useEngineAppSelector((state) => state.engine);
   React.useEffect(() => {
     if (!verifyEngineSliceState(engine) || !id) {
@@ -85,7 +91,7 @@ export function useNoteActive(id: string | undefined): DendronNotesHookProps {
     }
     // TODO: in the future, we want to fetch this  dynamically
     const note = engine.notes[id];
-    setNoteActive(note)
+    setNoteActive(note);
   }, [id, engine.noteIndex]);
   return { noteActive };
 }

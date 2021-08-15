@@ -30,7 +30,7 @@ import {
   SchemaProps,
   SchemaPropsDict,
   SchemaRaw,
-  SchemaTemplate
+  SchemaTemplate,
 } from "./types";
 import { getSlugger, isNotUndefined, randomColor } from "./utils";
 import { genUUID } from "./uuid";

@@ -13,6 +13,17 @@ const { Header, Content, Sider } = Layout;
 export default function DendronLayout(
   props: React.PropsWithChildren<DendronCommonProps>
 ) {
+  const [collapsed, setCollapsed] = React.useState(false);
+  const siderProps: React.CSSProperties = collapsed
+    ? {
+        width: "0px",
+        overflow: "hidden",
+      }
+    : {
+        overflow: "scroll",
+        paddingLeft: DENDRON_STYLE_CONSTANTS.SIDER.PADDING.LEFT,
+        position: "fixed",
+      };
   return (
     <Layout style={{ height: "100%" }}>
       <Header
@@ -22,7 +33,6 @@ export default function DendronLayout(
           width: "100%",
           alignItems: "center",
           justifyContent: "center",
-          display: "flex",
           borderBottom: "1px solid #d4dadf",
         }}
       >
@@ -36,14 +46,21 @@ export default function DendronLayout(
       >
         <Layout>
           <Sider
-            width={DENDRON_STYLE_CONSTANTS.SIDER.WIDTH}
+            width={collapsed ? 0 : DENDRON_STYLE_CONSTANTS.SIDER.WIDTH}
             style={{
-              position: "fixed",
               height: "100%",
-              paddingLeft: DENDRON_STYLE_CONSTANTS.SIDER.PADDING.LEFT,
               paddingTop: "32px",
               fontSize: "15px",
-              overflow: "scroll",
+              ...siderProps,
+            }}
+            breakpoint="lg"
+            collapsedWidth="0"
+            onBreakpoint={(broken) => {
+              console.log(broken);
+            }}
+            onCollapse={(collapsed, type) => {
+              console.log("collapsed", collapsed, type);
+              setCollapsed(collapsed);
             }}
           >
             <DendronTreeView {...props} />
@@ -62,8 +79,8 @@ export default function DendronLayout(
           </Sider>
           <Layout
             style={{
-              padding: "0 24px 24px",
-              marginLeft: "200px",
+              padding: collapsed ? "0 0 0" : "0 24px 24px",
+              marginLeft: collapsed ? 0 : "200px",
               width: "auto",
             }}
           >
@@ -73,8 +90,8 @@ export default function DendronLayout(
               className="main-content"
               role="main"
               style={{
-                padding: 24,
                 minHeight: 280,
+                padding: collapsed ? "5px" : 0,
               }}
             >
               {props.children}

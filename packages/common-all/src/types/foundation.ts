@@ -179,10 +179,14 @@ export type SchemaTemplate = {
 export type SchemaProps = DNodeProps<SchemaData>;
 export type NoteProps = DNodeProps<any, any>;
 export type NoteSEOProps = {
-  title: string,
-  updated: number,
-  created: number
-  excerpt?: string
+  title: string;
+  updated: number;
+  created: number;
+  excerpt?: string;
+  /**
+   * Use as root canonical url for all published notes
+   */
+  canonicalBaseUrl?: string;
   canonicalUrl?: string;
-  noindex?: boolean
-}
+  noindex?: boolean;
+};

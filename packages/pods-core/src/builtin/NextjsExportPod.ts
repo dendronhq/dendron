@@ -1,5 +1,6 @@
 import {
   DendronConfig,
+  DendronSiteConfig,
   DEngineClient,
   NoteProps,
   NotePropsDict,
@@ -15,9 +16,27 @@ import { PodUtils } from "../utils";
 
 const ID = "dendron.nextjs";
 
-type NextjsExportPodCustomOpts = {};
+type NextjsExportPodCustomOpts = {
+  siteUrl?: string;
+  canonicalBaseUrl?: string;
+};
+
+function getSiteConfig({
+  siteConfig,
+  overrides,
+}: {
+  siteConfig: DendronSiteConfig;
+  overrides: Partial<DendronSiteConfig>;
+}): DendronSiteConfig {
+  return {
+    ...siteConfig,
+    ...overrides,
+  };
+}
 
 export type NextjsExportConfig = ExportPodConfig & NextjsExportPodCustomOpts;
+
+type NextjsExportPlantOpts = ExportPodPlantOpts<NextjsExportConfig>;
 
 export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
   static id: string = ID;
@@ -26,7 +45,17 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
   get config(): JSONSchemaType<NextjsExportConfig> {
     return PodUtils.createExportConfig({
       required: [],
-      properties: {},
+      properties: {
+        siteUrl: {
+          type: "string",
+          description: "url of published site. eg. https://foo.com",
+        },
+        canonicalBaseUrl: {
+          type: "string",
+          description:
+            "the base url used for generating canonical urls from each page",
+        },
+      },
     }) as JSONSchemaType<NextjsExportConfig>;
   }
 
@@ -34,17 +63,19 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     engine,
     note,
     notes,
+    engineConfig,
   }: {
     engine: DEngineClient;
     note: NoteProps;
     notes: NotePropsDict;
+    engineConfig: DendronConfig;
   }) {
     const proc = MDUtilsV5.procRehypeFull(
       {
         engine,
         fname: note.fname,
         vault: note.vault,
-        config: engine.config,
+        config: engineConfig,
         notes,
       },
       { flavor: ProcFlavor.PUBLISHING }
@@ -129,10 +160,14 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     note,
     notesDir,
     notes,
-  }: Parameters<NextjsExportPod["_renderNote"]>[0] & { notesDir: string }) {
+    engineConfig,
+  }: Parameters<NextjsExportPod["_renderNote"]>[0] & {
+    notesDir: string;
+    engineConfig: DendronConfig;
+  }) {
     const ctx = `${ID}:renderBodyToHTML`;
     this.L.debug({ ctx, msg: "renderNote:pre", note: note.id });
-    const out = await this._renderNote({ engine, note, notes });
+    const out = await this._renderNote({ engine, note, notes, engineConfig });
     const dst = path.join(notesDir, note.id + ".html");
     this.L.debug({ ctx, dst, msg: "writeNote" });
     return fs.writeFile(dst, out);
@@ -153,9 +188,9 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     return fs.writeJSON(dst, out);
   }
 
-  async plant(opts: ExportPodPlantOpts) {
+  async plant(opts: NextjsExportPlantOpts) {
     const ctx = `${ID}:plant`;
-    const { dest, engine, wsRoot } = opts;
+    const { dest, engine, wsRoot, config: podConfig } = opts;
 
     const podDstDir = path.join(dest.fsPath, "data");
     fs.ensureDirSync(podDstDir);
@@ -163,9 +198,17 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     await this.copyAssets({ wsRoot, config: engine.config, dest: dest.fsPath });
 
     this.L.info({ ctx, msg: "filtering notes..." });
+    const engineConfig: DendronConfig = {
+      ...engine.config,
+      site: getSiteConfig({
+        siteConfig: engine.config.site,
+        overrides: podConfig,
+      }),
+    };
+
     const { notes: publishedNotes, domains } = await SiteUtils.filterByConfig({
       engine,
-      config: engine.config,
+      config: engineConfig,
     });
     const siteNotes = SiteUtils.addSiteOnlyNotes({
       engine,
@@ -196,6 +239,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
             note,
             notesDir: notesBodyDir,
             notes: publishedNotes,
+            engineConfig,
           }),
           this.renderMetaToJSON({ note, notesDir: notesMetaDir }),
         ];
@@ -204,7 +248,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     const podDstPath = path.join(podDstDir, "notes.json");
     const podConfigDstPath = path.join(podDstDir, "dendron.json");
     fs.writeJSONSync(podDstPath, payload, { encoding: "utf8", spaces: 2 });
-    fs.writeJSONSync(podConfigDstPath, engine.config, {
+    fs.writeJSONSync(podConfigDstPath, engineConfig, {
       encoding: "utf8",
       spaces: 2,
     });

@@ -30,7 +30,7 @@ import {
   SchemaProps,
   SchemaPropsDict,
   SchemaRaw,
-  SchemaTemplate
+  SchemaTemplate,
 } from "./types";
 import { getSlugger, isNotUndefined, randomColor } from "./utils";
 import { genUUID } from "./uuid";
@@ -753,16 +753,17 @@ export class NoteUtils {
   }
 
   static getSEOProps(note: NoteProps): NoteSEOProps {
-    const {title, created, updated} = note;
-    const {excerpt, canonicalUrl, noindex} = note.custom;
+    const { title, created, updated } = note;
+    const { excerpt, canonicalUrl, noindex, canonicalBaseUrl } = note.custom;
     return {
       title,
       excerpt,
       updated,
       created,
+      canonicalBaseUrl,
       canonicalUrl,
-      noindex
-    }
+      noindex,
+    };
   }
 
   static getURI({ note, wsRoot }: { note: NoteProps; wsRoot: string }): URI {

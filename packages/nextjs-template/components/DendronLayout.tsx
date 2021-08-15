@@ -38,7 +38,7 @@ export default function DendronLayout(
             width={200}
             style={{
               position: "fixed",
-              height: "100vh",
+              height: "100%",
               paddingLeft: "24px",
               paddingTop: "32px",
               fontSize: "15px",
@@ -48,10 +48,10 @@ export default function DendronLayout(
             <DendronTreeView {...props} />
             <footer
               style={{
-                paddingRight: "2em",
-                paddingLeft: "2em",
-                paddingTop: "2em",
-                paddingBottom: "5em",
+                position: "fixed",
+                bottom: "0px",
+                width: "180px",
+                padding: "10px",
                 fontSize: "12p",
               }}
             >

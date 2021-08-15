@@ -28,6 +28,9 @@ const plugin: Plugin = function (this: Unified.Processor) {
       vault: vault!,
       wsRoot: engine.wsRoot,
     });
+    if (_.isUndefined(note)) {
+      return;
+    }
 
     const backlinks = _.uniqBy(
       (note?.links || []).filter((ent) => ent.type === "backlink"),

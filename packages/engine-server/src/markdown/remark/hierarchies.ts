@@ -37,12 +37,15 @@ const plugin: Plugin = function (this: Unified.Processor, opts?: PluginOpts) {
     }
 
     const { engine } = MDUtilsV4.getEngineFromProc(proc);
-    const note = NoteUtils.getNoteOrThrow({
+    const note = NoteUtils.getNoteByFnameV5({
       fname: fname,
       notes: engine.notes,
       vault: vault!,
       wsRoot: engine.wsRoot,
     });
+    if (_.isUndefined(note)) {
+      return;
+    }
     // don't include if collection present
     if (note.children.length <= 0 || note.custom?.has_collection) {
       return;

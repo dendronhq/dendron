@@ -1,6 +1,5 @@
 import { tmpDir } from "@dendronhq/common-server";
 import { NextjsExportPod } from "@dendronhq/pods-core";
-import fs from "fs-extra";
 import path from "path";
 import { TestConfigUtils } from "../../config";
 import { runEngineTestV5 } from "../../engine";
@@ -13,7 +12,6 @@ describe("nextjs export", () => {
       async ({ engine, vaults, wsRoot }) => {
         const dest = tmpDir().name;
         const pod = new NextjsExportPod();
-        debugger;
         await pod.execute({
           engine,
           vaults,
@@ -99,7 +97,6 @@ describe("nextjs export", () => {
       async ({ engine, vaults, wsRoot }) => {
         const dest = tmpDir().name;
         const pod = new NextjsExportPod();
-        debugger;
         await pod.execute({
           engine,
           vaults,

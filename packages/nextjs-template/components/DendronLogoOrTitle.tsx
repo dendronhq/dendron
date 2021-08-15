@@ -5,7 +5,7 @@ import { DENDRON_STYLE_CONSTANTS } from "../styles/constants";
 
 export default function DendronLogoOrTitle() {
   const engine = useEngineAppSelector((state) => state.engine);
-  const title = engine.config?.site.title || "No title set";
+  const title = engine.config?.site.title || "";
   if (engine.config?.site.logo) {
     const logoUrl = "/" + path.basename(engine.config?.site.logo);
     return <Logo logoUrl={logoUrl} />;
@@ -33,5 +33,18 @@ export function Logo({ logoUrl }: { logoUrl: string }) {
 }
 
 export function Title({ data }: { data: string }) {
-  return <>{data}</>;
+  return (
+    <div
+      className="site-logo"
+      style={{
+        width: "60px",
+        height: "60px",
+        position: "fixed",
+        left: DENDRON_STYLE_CONSTANTS.SIDER.PADDING.LEFT,
+        top: "2px",
+      }}
+    >
+      {data}
+    </div>
+  );
 }

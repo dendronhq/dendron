@@ -3,13 +3,14 @@ import {
   ThemeUtils,
   TreeViewUtils,
 } from "@dendronhq/common-frontend";
-import { Spin, Tree, TreeProps } from "antd";
+import { Tree, TreeProps } from "antd";
 import _ from "lodash";
 import { DataNode } from "rc-tree/lib/interface";
 import React, { useState } from "react";
 import { useThemeSwitcher } from "react-css-theme-switcher";
 import { useDendronRouter } from "../utils/hooks";
 import { DendronCommonProps, NoteData, verifyNoteData } from "../utils/types";
+import DendronSpinner from "./DendronSpinner";
 
 type OnExpandFunc = TreeProps["onExpand"];
 type OnSelectFunc = TreeProps["onSelect"];
@@ -56,7 +57,7 @@ function DendronTreeView({
     logger.info({
       state: "exit:notes not initialized",
     });
-    return <Spin />;
+    return <DendronSpinner />;
   }
 
   // --- Methods
@@ -128,7 +129,7 @@ function TreeView({
           treeData={treeData}
         />
       ) : (
-        <Spin />
+        <DendronSpinner />
       )}
     </>
   );

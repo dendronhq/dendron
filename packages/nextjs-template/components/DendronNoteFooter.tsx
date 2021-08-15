@@ -1,9 +1,9 @@
 import {
-	DendronConfig,
-	NoteProps,
-	RESERVED_KEYS,
-	Time,
-	VaultUtils
+  DendronConfig,
+  NoteProps,
+  RESERVED_KEYS,
+  Time,
+  VaultUtils,
 } from "@dendronhq/common-all";
 import { Layout } from "antd";
 import _ from "lodash";
@@ -108,7 +108,7 @@ export function DendronNoteFooter() {
   const { noteActive } = useNoteActive(dendronRouter.getActiveNoteId());
   const { config } = engine;
 
-	// Sanity check
+  // Sanity check
   if (!noteActive || !config) {
     return null;
   }
@@ -147,6 +147,10 @@ function FooterText({
           </a>
         </span>
       )}
+      <span style={{ float: "right" }}>
+        {" "}
+        🌱 with 💕 using <a href="https://www.dendron.so/"> Dendron 🌲 </a>
+      </span>
     </div>
   );
 }

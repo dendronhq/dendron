@@ -47,7 +47,7 @@ export default function DendronLayout(
             }}
           >
             <DendronTreeView {...props} />
-            <footer
+            {/* <footer
               style={{
                 position: "fixed",
                 bottom: "0px",
@@ -58,7 +58,7 @@ export default function DendronLayout(
             >
               🌱 with 💕 using{" "}
               <a href="https://www.dendron.so/"> Dendron 🌲 </a>
-            </footer>
+            </footer> */}
           </Sider>
           <Layout
             style={{

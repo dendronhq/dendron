@@ -5,12 +5,18 @@ import {
   InferGetStaticPropsType,
 } from "next";
 import React from "react";
+import DendronSEO from "../components/DendronSEO";
 import { getNoteBody, getNotes } from "../utils/build";
 
 export default function Home({
   body,
 }: InferGetStaticPropsType<typeof getStaticProps>) {
-  return <DendronNote noteContent={body} />;
+  return (
+    <>
+      <DendronSEO />
+      <DendronNote noteContent={body} />;
+    </>
+  );
 }
 
 export const getStaticProps: GetStaticProps = async (

@@ -8,7 +8,7 @@ import { verifyEngineSliceState } from "@dendronhq/common-frontend";
 import _ from "lodash";
 import { NextSeo } from "next-seo";
 import { useEngineAppSelector } from "../features/engine/hooks";
-import { useDendronRouter } from "../utils/hooks";
+import { useDendronRouter, useNoteActive } from "../utils/hooks";
 
 const getCanonicalUrl = ({
   sitePath,
@@ -28,21 +28,23 @@ const getCanonicalUrl = ({
   const base = siteConfig.canonicalBaseUrl
     ? siteConfig.canonicalBaseUrl
     : siteConfig.siteUrl;
-  return [base, sitePath].join("");
+  // home page, no suffix
+  const suffix = sitePath === "/" ? "" : ".html";
+  return [base, sitePath, suffix].join("");
 };
 
 export default function DendronSEO() {
   const dendronRouter = useDendronRouter();
   const engine = useEngineAppSelector((state) => state.engine);
+  const { noteActive } = useNoteActive(dendronRouter.getActiveNoteId());
+  if (!noteActive) {
+    return null;
+  }
   if (!verifyEngineSliceState(engine)) {
     return null;
   }
-  const { config, notes } = engine;
-  const maybeActiveNote = dendronRouter.getActiveNote({ notes });
-  if (!maybeActiveNote) {
-    return null;
-  }
-  const seoProps = NoteUtils.getSEOProps(maybeActiveNote);
+  const { config } = engine;
+  const seoProps = NoteUtils.getSEOProps(noteActive);
   const title = seoProps.title;
   const description = seoProps.excerpt;
   const path = dendronRouter.router.asPath;
@@ -55,6 +57,7 @@ export default function DendronSEO() {
   const unix2SEOTime = (ts: number) =>
     Time.DateTime.fromMillis(_.toInteger(ts))
       .setZone("utc")
+      // @ts-ignore
       .toLocaleString("yyyy-LL-dd");
   return (
     <NextSeo

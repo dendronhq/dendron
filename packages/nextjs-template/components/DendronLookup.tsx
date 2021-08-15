@@ -85,12 +85,12 @@ function AntDAutoComplete(
   return (
     <AutoComplete
       value={value}
-      style={{ width: "60%" }}
+      style={{ width: "60%", paddingLeft: "100px" }}
       onSelect={onSelect}
       onSearch={onSearch}
       onChange={onChange}
       onClick={onClick}
-      placeholder="input here"
+      placeholder="Lookup"
     >
       {result.map((noteIndex: NoteIndexProps) => (
         <Option key={noteIndex.id} value={noteIndex.fname}>

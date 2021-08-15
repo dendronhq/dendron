@@ -1,5 +1,6 @@
 import { Layout } from "antd";
 import * as React from "react";
+import { DENDRON_STYLE_CONSTANTS } from "../styles/constants";
 import { DendronCommonProps } from "../utils/types";
 import { DendronBreadCrumb } from "./DendronBreadCrumb";
 import DendronLogoOrTitle from "./DendronLogoOrTitle";
@@ -35,11 +36,11 @@ export default function DendronLayout(
       >
         <Layout>
           <Sider
-            width={200}
+            width={DENDRON_STYLE_CONSTANTS.SIDER.WIDTH}
             style={{
               position: "fixed",
               height: "100%",
-              paddingLeft: "24px",
+              paddingLeft: DENDRON_STYLE_CONSTANTS.SIDER.PADDING.LEFT,
               paddingTop: "32px",
               fontSize: "15px",
               overflow: "scroll",

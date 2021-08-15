@@ -1,6 +1,7 @@
 import React from "react";
 import { useEngineAppSelector } from "../features/engine/hooks";
 import path from "path";
+import { DENDRON_STYLE_CONSTANTS } from "../styles/constants";
 
 export default function DendronLogoOrTitle() {
   const engine = useEngineAppSelector((state) => state.engine);
@@ -17,15 +18,15 @@ export function Logo({ logoUrl }: { logoUrl: string }) {
     <div
       className="site-logo"
       style={{
-        width: "20%",
-        height: "100%",
+        width: "60px",
+        height: "60px",
+        position: "fixed",
+        left: DENDRON_STYLE_CONSTANTS.SIDER.PADDING.LEFT,
+        top: "2px",
         backgroundImage: `url(${logoUrl})`,
         backgroundRepeat: "no-repeat",
         backgroundPosition: "left center",
         backgroundSize: "contain",
-        maxHeight: "2rem",
-        marginLeft: 0,
-        marginRight: "0.5rem",
       }}
     />
   );

@@ -51,7 +51,9 @@ const getCanonicalUrl = ({
   const base = siteConfig.canonicalBaseUrl
     ? siteConfig.canonicalBaseUrl
     : siteConfig.siteUrl;
-  return [base, sitePath].join("");
+  // home page, no suffix
+  const suffix = sitePath === "/" ? "" : ".html";
+  return [base, sitePath, suffix].join("");
 };
 
 export default function DendronSEO() {

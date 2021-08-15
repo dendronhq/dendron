@@ -56,7 +56,6 @@ describe("nextjs export", () => {
       async ({ engine, vaults, wsRoot }) => {
         const dest = tmpDir().name;
         const pod = new NextjsExportPod();
-        debugger;
         await pod.execute({
           engine,
           vaults,

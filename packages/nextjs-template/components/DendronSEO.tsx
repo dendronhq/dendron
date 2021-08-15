@@ -46,7 +46,7 @@ export default function DendronSEO() {
   const { config } = engine;
   const seoProps = NoteUtils.getSEOProps(noteActive);
   const title = seoProps.title;
-  const description = seoProps.excerpt;
+  const description = seoProps.excerpt || config.site.description;
   const path = dendronRouter.router.asPath;
   const canonical = getCanonicalUrl({
     sitePath: path,

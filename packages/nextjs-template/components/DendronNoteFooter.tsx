@@ -132,7 +132,7 @@ function FooterText({
   const { siteLastModified, gh_edit_link_text } = config.site;
   const lastUpdated = ms2ShortDate(activeNote.updated);
   return (
-    <Row style={{ paddingTop: "10px" }}>
+    <Row style={{}}>
       <Col sm={24} md={7} lg={8} xl={4}>
         {siteLastModified && (
           <Text type="secondary">

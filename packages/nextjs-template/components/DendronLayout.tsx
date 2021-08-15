@@ -1,4 +1,4 @@
-import { Layout } from "antd";
+import { Layout, Row, Col } from "antd";
 import * as React from "react";
 import { DENDRON_STYLE_CONSTANTS } from "../styles/constants";
 import { DendronCommonProps } from "../utils/types";
@@ -36,8 +36,14 @@ export default function DendronLayout(
           borderBottom: "1px solid #d4dadf",
         }}
       >
-        <DendronLogoOrTitle />
-        <DendronLookup {...props} />
+        <Row>
+          <Col xs={{ span: 4 }} md={{ span: 4 }}>
+            <DendronLogoOrTitle />
+          </Col>
+          <Col xs={18} md={{ span: 16 }}>
+            <DendronLookup {...props} />
+          </Col>
+        </Row>
       </Header>
       <Layout
         id="main-content-wrap"

@@ -85,7 +85,7 @@ function AntDAutoComplete(
   return (
     <AutoComplete
       value={value}
-      style={{ width: "60%", paddingLeft: "100px" }}
+      style={{ width: "100%" }}
       onSelect={onSelect}
       onSearch={onSearch}
       onChange={onChange}

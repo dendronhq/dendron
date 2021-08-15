@@ -1,3 +1,4 @@
+/* eslint-disable */
 import {
   DendronConfig,
   NoteProps,
@@ -5,7 +6,7 @@ import {
   Time,
   VaultUtils,
 } from "@dendronhq/common-all";
-import { Layout } from "antd";
+import { Layout, Row, Col, Typography } from "antd";
 import _ from "lodash";
 import path from "path";
 import React from "react";
@@ -13,6 +14,7 @@ import { useEngineAppSelector } from "../features/engine/hooks";
 import { useDendronRouter, useNoteActive } from "../utils/hooks";
 
 const { Footer } = Layout;
+const { Text, Link } = Typography;
 
 const ms2ShortDate = (ts: number) => {
   const dt = Time.DateTime.fromMillis(ts);
@@ -130,27 +132,33 @@ function FooterText({
   const { siteLastModified, gh_edit_link_text } = config.site;
   const lastUpdated = ms2ShortDate(activeNote.updated);
   return (
-    <div>
-      {siteLastModified && (
-        <span className="text-small text-grey-dk-000 mb-0 mr-2">
-          Page last modified:{" "}
-          <span className="d-inline-block">{lastUpdated}</span>.{" "}
-        </span>
-      )}
-      {GitUtils.canShowGitLink({ config, note: activeNote }) && (
-        <span className="text-small text-grey-dk-000 mb-0">
-          <a
+    <Row style={{ paddingTop: "10px" }}>
+      <Col sm={24} md={7} lg={8} xl={4}>
+        {siteLastModified && (
+          <Text type="secondary">
+            Page last modified: {lastUpdated} {"   "}
+          </Text>
+        )}
+      </Col>
+      <Col sm={24} md={9} lg={8} xl={12}>
+        {GitUtils.canShowGitLink({ config, note: activeNote }) && (
+          <Link
             href={GitUtils.githubUrl({ note: activeNote, config })}
-            id="edit-this-page"
+            target="_blank"
           >
             {gh_edit_link_text}
-          </a>
-        </span>
-      )}
-      <span style={{ float: "right" }}>
-        {" "}
-        🌱 with 💕 using <a href="https://www.dendron.so/"> Dendron 🌲 </a>
-      </span>
-    </div>
+          </Link>
+        )}
+      </Col>
+      <Col sm={24} md={8} style={{ textAlign: "right" }}>
+        <Text>
+          {" "}
+          🌱 with 💕 using
+          <Link href="https://www.dendron.so/" target="_blank">
+            Dendron 🌲
+          </Link>
+        </Text>
+      </Col>
+    </Row>
   );
 }

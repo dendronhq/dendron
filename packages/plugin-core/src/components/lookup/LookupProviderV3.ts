@@ -115,7 +115,14 @@ export class NoteLookupProvider implements ILookupProviderV3 {
       const ctx = "LookupProvider:onDidAccept";
       const { quickpick: picker, lc } = opts;
       const nextPicker = picker.nextPicker;
-      if (nextPicker) {
+      const selectedItems = NotePickerUtils.getSelection(picker);
+      const isNewNotePick = PickerUtilsV2.isCreateNewNotePick(selectedItems[0]);
+      Logger.debug({
+        ctx,
+        selectedItems: selectedItems.map((item) => NoteUtils.toLogObj(item)),
+      });
+
+      if (nextPicker && isNewNotePick) {
         picker.vault = await nextPicker();
         // check if we exited from selecting a vault
         if (_.isUndefined(picker.vault)) {
@@ -128,11 +135,6 @@ export class NoteLookupProvider implements ILookupProviderV3 {
           return;
         }
       }
-      const selectedItems = NotePickerUtils.getSelection(picker);
-      Logger.debug({
-        ctx,
-        selectedItems: selectedItems.map((item) => NoteUtils.toLogObj(item)),
-      });
       // last chance to cancel
       lc.cancelToken.cancel();
       if (!this.opts.noHidePickerOnAccept) {

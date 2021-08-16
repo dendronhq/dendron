@@ -1,16 +1,27 @@
+import { getStage } from "@dendronhq/common-all";
+import { verifyEngineSliceState } from "@dendronhq/common-frontend";
+import path from "path";
 import React from "react";
 import { useEngineAppSelector } from "../features/engine/hooks";
-import path from "path";
 import { DENDRON_STYLE_CONSTANTS } from "../styles/constants";
 
 export default function DendronLogoOrTitle() {
   const engine = useEngineAppSelector((state) => state.engine);
-  const title = engine.config?.site.title || "";
-  if (engine.config?.site.logo) {
-    const logoUrl = "/" + path.basename(engine.config?.site.logo);
-    return <Logo logoUrl={logoUrl} />;
+  if (!verifyEngineSliceState(engine)) {
+    return null;
   }
-  return <Title data={title} />;
+  const title = engine.config.site.title || "";
+  const siteUrl =
+    getStage() === "dev" ? "/" : engine.config.site.siteUrl || "/";
+  return (
+    <a href={siteUrl} className="site-title lh-tight">
+      {engine.config?.site.logo ? (
+        <Logo logoUrl={"/" + path.basename(engine.config?.site.logo)} />
+      ) : (
+        <Title data={title} />
+      )}
+    </a>
+  );
 }
 
 export function Logo({ logoUrl }: { logoUrl: string }) {

@@ -19,11 +19,10 @@ export function useDendronRouter() {
   const router = useRouter();
   const query = getNoteRouterQuery(router);
   const changeActiveNote = (id: string, opts: { noteIndex: NoteProps }) => {
-    const suffix = getStage() === "prod" ? ".html" : "";
     if (id === opts.noteIndex.id) {
       return router.push(`/`);
     }
-    return router.push(`/notes/${id}${suffix}`);
+    router.push(`/notes/${id}`);
   };
 
   const getActiveNote = ({

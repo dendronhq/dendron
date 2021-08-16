@@ -230,6 +230,7 @@ function Note({ engine, ide, ws, port }: DendronProps & WorkspaceProps) {
     ws,
     port,
   });
+  debugger;
   return (
     <AntLayout>
       <Head>

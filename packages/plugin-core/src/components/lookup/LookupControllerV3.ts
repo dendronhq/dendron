@@ -136,7 +136,6 @@ export class LookupControllerV3 {
     quickpick.onDidTriggerButton(this.onTriggerButton);
     quickpick.onDidHide(() => {
       quickpick.dispose();
-      this.onHide();
     });
     quickpick.title = [
       `Lookup (${this.nodeType})`,
@@ -210,16 +209,19 @@ export class LookupControllerV3 {
           getButtonCategory(ent) === btnCategory
         );
       });
-      btnsToRefresh.map(
-        (ent) => { ent.pressed = false }
-      );
-    };
+      btnsToRefresh.map((ent) => {
+        ent.pressed = false;
+      });
+    }
     btnsToRefresh.push(btnTriggered);
     // update button state
     PickerUtilsV2.refreshButtons({ quickpick, buttons, buttonsPrev });
     // modify button behavior
-    await PickerUtilsV2.refreshPickerBehavior({ quickpick, buttons: btnsToRefresh });
-    
+    await PickerUtilsV2.refreshPickerBehavior({
+      quickpick,
+      buttons: btnsToRefresh,
+    });
+
     if (btnTriggered.type === "directChildOnly") {
       await this.provider.onUpdatePickerItems({
         picker: quickpick,

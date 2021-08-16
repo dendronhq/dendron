@@ -35,6 +35,8 @@ import { wikiLinks } from "./remark/wikiLinks";
 import { DendronASTDest } from "./types";
 import { MDUtilsV4 } from "./utils";
 import { hashtags } from "./remark/hashtag";
+import { backlinks } from "./remark/backlinks";
+import { hierarchies } from "./remark";
 
 /**
  * What mode a processor should run in
@@ -262,6 +264,11 @@ export class MDUtilsV5 {
           this.setProcData(proc, data as ProcDataFullV5);
           MDUtilsV4.setEngine(proc, data.engine!);
 
+          // NOTE: order matters. this needs to appear before `dendronPub`
+          if (data.dest === DendronASTDest.HTML) {
+            proc = proc.use(backlinks).use(hierarchies);
+          }
+
           // add additional plugins
           proc = proc.use(dendronPub, {
             insertTitle: data.config?.useFMTitle,
@@ -326,6 +333,9 @@ export class MDUtilsV5 {
       ...data,
       dest: DendronASTDest.HTML,
     });
+
+    // add additional plugin for publishing
+
     let pRehype = pRemarkParse
       .use(remark2rehype, { allowDangerousHtml: true })
       .use(rehypePrism, { ignoreMissing: true })

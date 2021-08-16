@@ -154,8 +154,10 @@ export class SiteUtils {
     const { siteHierarchies } = sconfig;
     logger.info({ ctx: "filterByConfig", config });
     let domains: NoteProps[] = [];
-    // TODO: return domains from here
-    const hiearchiesToPublish = await Promise.all(
+    let hiearchiesToPublish: NotePropsDict[] = [];
+
+    // async pass to process all notes
+    const domainsAndhiearchiesToPublish = await Promise.all(
       siteHierarchies.map(async (domain, idx) => {
         const out = await SiteUtils.filterByHiearchy({
           domain,
@@ -164,12 +166,21 @@ export class SiteUtils {
           navOrder: idx,
         });
         if (_.isUndefined(out)) {
-          return {};
+          return undefined;
         }
-        domains.push(out.domain);
-        return out.notes;
+        return out;
       })
     );
+
+    // synchronous pass to add notes in order
+    _.forEach(domainsAndhiearchiesToPublish, (ent) => {
+      if (_.isUndefined(ent)) {
+        return;
+      }
+      const { domain, notes } = ent;
+      domains.push(domain);
+      hiearchiesToPublish.push(notes);
+    });
     // if single hiearchy, domain includes all immediate children
     if (siteHierarchies.length === 1 && domains.length === 1) {
       const rootDomain = domains[0];

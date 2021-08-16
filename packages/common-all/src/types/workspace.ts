@@ -101,12 +101,12 @@ export enum LookupSelectionType {
 
 export type NoteLookupConfig = {
   selectionType: LookupSelectionType;
-}
+};
 
 export type LookupConfig = {
   note: NoteLookupConfig;
   // schema: SchemaLookupConfig;
-}
+};
 
 export type JournalConfig = {
   dailyDomain: string;
@@ -328,6 +328,11 @@ export type DendronSiteConfig = {
    * If set, add prefix to all asset links
    */
   assetsPrefix?: string;
+
+  /**
+   * Use this as root for creating canonical url for sites
+   */
+  canonicalBaseUrl?: string;
 
   /**
    * Copy assets from vault to site.

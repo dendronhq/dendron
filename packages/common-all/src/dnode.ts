@@ -20,6 +20,7 @@ import {
   NoteOpts,
   NoteProps,
   NotePropsDict,
+  NoteSEOProps,
   REQUIRED_DNODEPROPS,
   SchemaData,
   SchemaModuleDict,
@@ -749,6 +750,20 @@ export class NoteUtils {
         payload: { note, wsRoot },
       });
     }
+  }
+
+  static getSEOProps(note: NoteProps): NoteSEOProps {
+    const { title, created, updated } = note;
+    const { excerpt, canonicalUrl, noindex, canonicalBaseUrl } = note.custom;
+    return {
+      title,
+      excerpt,
+      updated,
+      created,
+      canonicalBaseUrl,
+      canonicalUrl,
+      noindex,
+    };
   }
 
   static getURI({ note, wsRoot }: { note: NoteProps; wsRoot: string }): URI {

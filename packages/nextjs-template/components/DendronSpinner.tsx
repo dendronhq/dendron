@@ -7,5 +7,16 @@ import React from "react";
  * @returns
  */
 export default function DendronSpinner() {
-  return <Spin />;
+  const [showSpinner, setShowSpinner] = React.useState(false);
+
+  React.useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setShowSpinner(true);
+    }, 1000);
+    return () => clearTimeout(timeoutId);
+  }, []);
+  if (showSpinner) {
+    return <Spin />;
+  }
+  return null;
 }

@@ -29,6 +29,10 @@ export class VaultUtils {
     );
   }
 
+  static isEqualV2(vaultSrc: DVault, vaultCmp: DVault) {
+    return VaultUtils.getRelPath(vaultSrc) === VaultUtils.getRelPath(vaultCmp);
+  }
+
   static getRelPath(vault: DVault) {
     if (vault.workspace) {
       return path.join(vault.workspace, vault.fsPath);
@@ -134,6 +138,23 @@ export class VaultUtils {
     const { vault, vaults, wsRoot } = opts;
     const maybeMatch = _.filter(vaults, (v) => {
       return VaultUtils.isEqual(v, vault, wsRoot);
+    });
+    if (maybeMatch.length === 1) {
+      return maybeMatch[0];
+    } else {
+      return false;
+    }
+  };
+
+  /**
+   * Match vault without using wsRoot
+   * @param opts
+   * @returns
+   */
+  static matchVaultV2 = (opts: { vault: DVault; vaults: DVault[] }) => {
+    const { vault, vaults } = opts;
+    const maybeMatch = _.filter(vaults, (v) => {
+      return VaultUtils.isEqualV2(v, vault);
     });
     if (maybeMatch.length === 1) {
       return maybeMatch[0];

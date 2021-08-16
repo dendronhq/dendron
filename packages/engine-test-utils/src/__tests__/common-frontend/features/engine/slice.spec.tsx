@@ -32,7 +32,6 @@ describe("syncNote", () => {
     await runEngineTestV5(
       async ({ port, wsRoot, engine }) => {
         const note = engine.notes["foo"];
-        debugger;
         const { getByTestId } = render(
           <App port={port!} ws={wsRoot} note={note} />
         );

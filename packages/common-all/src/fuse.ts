@@ -9,7 +9,9 @@ import {
   NotePropsDict,
   SchemaModuleProps,
   NoteUtils,
+  DNodeUtils,
 } from ".";
+import { DEngineClient } from "../lib";
 import { DendronConfig, DVault } from "./types/workspace";
 
 export type NoteIndexProps = {
@@ -140,6 +142,7 @@ export class FuseEngine {
   }
 }
 
+const PAGINATE_LIMIT = 50;
 export class NoteLookupUtils {
   /**
    * Get qs for current level of the hierarchy
@@ -165,4 +168,40 @@ export class NoteLookupUtils {
     const nodes = _.map(childrenOfRoot, (ent) => notes[ent]).concat(roots);
     return nodes;
   };
+
+  static async lookup({
+    qs,
+    engine,
+    showDirectChildrenOnly,
+  }: {
+    qs: string;
+    engine: DEngineClient;
+    showDirectChildrenOnly?: boolean;
+  }): Promise<NoteProps[]> {
+    const { notes } = engine;
+    const qsClean = this.slashToDot(qs);
+    if (_.isEmpty(qsClean)) {
+      return NoteLookupUtils.fetchRootResults(notes);
+    }
+    const resp = await engine.queryNotes({ qs });
+    let nodes: NoteProps[];
+    if (showDirectChildrenOnly) {
+      const depth = qs.split(".").length;
+      nodes = resp.data
+        .filter((ent) => {
+          return DNodeUtils.getDepth(ent) === depth;
+        })
+        .filter((ent) => !ent.stub);
+    } else {
+      nodes = resp.data;
+    }
+    if (nodes.length > PAGINATE_LIMIT) {
+      nodes = nodes.slice(0, PAGINATE_LIMIT);
+    }
+    return nodes;
+  }
+
+  static slashToDot(ent: string) {
+    return ent.replace(/\//g, ".");
+  }
 }

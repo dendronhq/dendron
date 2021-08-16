@@ -659,6 +659,11 @@ export class PickerUtilsV2 {
     delete picker.allResults;
   }
 
+  /**
+   @deprecated use {@link NoteLookupUtils.slashToDot}
+   * @param ent
+   * @returns 
+   */
   static slashToDot(ent: string) {
     return ent.replace(/\//g, ".");
   }

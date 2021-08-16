@@ -2,6 +2,7 @@ import { DendronError, DNodeType, ERROR_STATUS } from "@dendronhq/common-all";
 import _ from "lodash";
 import { QuickInputButton } from "vscode";
 import { CancellationTokenSource } from "vscode-languageclient";
+import { Logger } from "../../logger";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace, getWS } from "../../workspace";
 import {
@@ -123,6 +124,8 @@ export class LookupControllerV3 {
    * Wire up quickpick and initialize buttons
    */
   async prepareQuickPick(opts: PrepareQuickPickOpts) {
+    const ctx = "prepareQuickPick";
+    Logger.info({ ctx, msg: "enter" });
     const { provider } = _.defaults(opts, {
       nonInteractive: false,
     });
@@ -142,26 +145,32 @@ export class LookupControllerV3 {
       `- version: ${DendronWorkspace.version()}`,
     ].join(" ");
     provider.provide(this);
+    Logger.info({ ctx, msg: "exit" });
     return { quickpick };
   }
 
   async showQuickPick(opts: ShowQuickPickOpts) {
+    const ctx = "showQuickPick";
+    Logger.info({ ctx, msg: "enter" });
     const cancelToken = this.createCancelSource();
     const { nonInteractive, provider, quickpick } = _.defaults(opts, {
       nonInteractive: false,
     });
+    Logger.info({ ctx, msg: "onUpdatePickerItems:pre" });
     // initial call of update
     await provider.onUpdatePickerItems({
       picker: quickpick,
       token: cancelToken.token,
       fuzzThreshold: this.fuzzThreshold,
     });
+    Logger.info({ ctx, msg: "onUpdatePickerItems:post" });
     if (!nonInteractive) {
       quickpick.show();
     } else {
       quickpick.selectedItems = quickpick.items;
       await provider.onDidAccept({ quickpick, lc: this })();
     }
+    Logger.info({ ctx, msg: "exit" });
     return quickpick;
   }
 

@@ -1,7 +1,7 @@
 {
   "name": "@dendronhq/nextjs-template",
   "version": "0.54.1",
-  "license": "GPLv3",
+  "license": "Apache-2.0",
   "private": true,
   "repository": {
     "type": "git",

@@ -153,7 +153,7 @@ function FooterText({
       <Col sm={24} md={8} style={{ textAlign: "right" }}>
         <Text>
           {" "}
-          🌱 with 💕 using
+          🌱 with 💕 using{" "}
           <Link href="https://www.dendron.so/" target="_blank">
             Dendron 🌲
           </Link>

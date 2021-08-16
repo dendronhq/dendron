@@ -144,7 +144,6 @@ export class LookupControllerV3 {
       `Lookup (${this.nodeType})`,
       `- version: ${DendronWorkspace.version()}`,
     ].join(" ");
-    provider.provide(this);
     Logger.info({ ctx, msg: "exit" });
     return { quickpick };
   }
@@ -165,6 +164,7 @@ export class LookupControllerV3 {
     });
     Logger.info({ ctx, msg: "onUpdatePickerItems:post" });
     if (!nonInteractive) {
+      provider.provide(this);
       quickpick.show();
     } else {
       quickpick.selectedItems = quickpick.items;

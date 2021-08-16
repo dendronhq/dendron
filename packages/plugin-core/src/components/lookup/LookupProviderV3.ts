@@ -16,7 +16,7 @@ import _ from "lodash";
 import { CancellationToken, CancellationTokenSource, window } from "vscode";
 import { Logger } from "../../logger";
 import { AnalyticsUtils } from "../../utils/analytics";
-import { DendronWorkspace, getEngine } from "../../workspace";
+import { DendronWorkspace } from "../../workspace";
 import { LookupControllerV3 } from "./LookupControllerV3";
 import { DendronQuickPickerV2 } from "./types";
 import {
@@ -139,24 +139,9 @@ export class NoteLookupProvider implements ILookupProviderV3 {
       // NOTE: if user presses <ENTER> before picker has a chance to process, this will be `[]`
       // In this case we want to calculate picker item from current value
       if (_.isEmpty(selectedItems)) {
-        const engine = getEngine();
-        const resp = await NoteLookupUtils.lookup({
-          qs: picker.value,
-          engine,
-          showDirectChildrenOnly: picker.showDirectChildrenOnly,
+        selectedItems = await NotePickerUtils.fetchPickerResultsNoInput({
+          picker,
         });
-        const note = resp[0];
-        const perfectMatch = note.fname === picker.value;
-        selectedItems = !perfectMatch
-          ? [NotePickerUtils.createNoActiveItem({} as any)]
-          : [
-              DNodeUtils.enhancePropForQuickInputV3({
-                wsRoot: DendronWorkspace.wsRoot(),
-                props: note,
-                schemas: engine.schemas,
-                vaults: DendronWorkspace.instance().vaultsv4,
-              }),
-            ];
       }
 
       if (nextPicker && isNewNotePick) {

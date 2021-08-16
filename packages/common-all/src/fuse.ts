@@ -10,8 +10,8 @@ import {
   SchemaModuleProps,
   NoteUtils,
   DNodeUtils,
+  DEngineClient,
 } from ".";
-import { DEngineClient } from "../lib";
 import { DendronConfig, DVault } from "./types/workspace";
 
 export type NoteIndexProps = {

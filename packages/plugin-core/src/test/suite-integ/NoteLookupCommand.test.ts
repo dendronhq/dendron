@@ -45,6 +45,7 @@ import {
 } from "../../components/lookup/buttons";
 import {
   createNoActiveItem,
+  NotePickerUtils,
   PickerUtilsV2,
 } from "../../components/lookup/utils";
 import { CONFIG } from "../../constants";
@@ -438,6 +439,30 @@ suite("NoteLookupCommand", function () {
         },
       });
     });
+
+    test("on accept, nothing selected", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+        },
+        onInit: async ({ vaults }) => {
+          const cmd = new NoteLookupCommand();
+          stubVaultPick(vaults);
+          const spyFetchPickerResultsNoInput = sinon.spy(
+            NotePickerUtils,
+            "fetchPickerResultsNoInput"
+          );
+          const { quickpick, provider, controller } = await cmd.gatherInputs({
+            noConfirm: true,
+            initialValue: "foo",
+          });
+          await provider.onDidAccept({ quickpick, lc: controller })();
+          expect(spyFetchPickerResultsNoInput.calledOnce).toBeTruthy();
+          done();
+        },
+      });
+    });
   });
 
   describe("onAccept with lookupConfirmVaultOnCreate", () => {
@@ -509,27 +534,6 @@ suite("NoteLookupCommand", function () {
         },
       });
     });
-
-    // test("turned on, new note", (done) => {
-    //   runLegacyMultiWorkspaceTest({
-    //     ctx,
-    //     modConfigCb: (config) => {
-    //       config.lookupConfirmVaultOnCreate = true;
-    //       return config;
-    //     },
-    //     preSetupHook: async ({ wsRoot, vaults }) => {
-    //       await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
-    //     },
-    //     onInit: async () => {
-    //       const cmd = new NoteLookupCommand();
-    //       // stubVaultPick(vaults);
-    //       const promptVaultSpy = sinon.spy(PickerUtilsV2, "promptVault");
-    //       cmd.run({ noConfirm: true, initialValue: "foo" });
-    //       expect(promptVaultSpy.calledOnce).toBeFalsy();
-    //       done();
-    //     },
-    //   });
-    // });
   });
 
   describe("modifiers", () => {

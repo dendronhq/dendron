@@ -934,7 +934,43 @@ describe("noteRefV2", () => {
       },
     });
 
+    const WILDCARD_WITHOUT_FOLLOWING_HEADER = createProcTests({
+      name: "wildcard without a following header",
+      setupFunc: async (opts) => {
+        const { engine, vaults } = opts;
+        return processTextV2({
+          text: "![[foo.ch1#Reprehenderit:#*]]",
+          dest: opts.extra.dest,
+          engine,
+          vault: vaults[0],
+          fname: "foo",
+        });
+      },
+      preSetupHook: async (opts) => {
+        await ENGINE_HOOKS.setupBasic(opts);
+        await modifyNote(opts, "foo.ch1", (note: NoteProps) => {
+          const txt = [
+            "Sint minus fuga omnis non.",
+            "",
+            "# Reprehenderit",
+            "",
+            "Sapiente sed accusamus eum.",
+          ];
+          note.body = txt.join("\n");
+          return note;
+        });
+      },
+      verifyFuncDict: {
+        [DendronASTDest.HTML]: async ({ extra }) => {
+          const { resp } = extra;
+          await checkVFile(resp, "Sapiente sed accusamus eum.");
+          await checkNotInVFile(resp, "Sint minus fuga omnis non.");
+        },
+      },
+    });
+
     const ALL_TEST_CASES = [
+      ...WILDCARD_WITHOUT_FOLLOWING_HEADER,
       ...WITH_PUBLISHING,
       ...WITH_START_AND_END_WILDCARD_ANCHOR,
       ...WITH_START_AND_END_ANCHOR,

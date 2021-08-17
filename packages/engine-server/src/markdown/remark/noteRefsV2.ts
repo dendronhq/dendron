@@ -546,10 +546,18 @@ function prepareNoteRefIndices<T>({
   }
 
   if (anchorEnd) {
+    const nodes = bodyAST.children.slice(start.index);
     end = findAnchor({
-      nodes: bodyAST.children.slice(start.index),
+      nodes,
       match: anchorEnd,
     });
+    if (anchorEnd === "*" && _.isNull(end)) {
+      end = {
+        type: "header",
+        index: nodes.length,
+        anchorType: "header",
+      };
+    }
     if (_.isNull(end)) {
       return {
         data: makeErrorData(anchorEnd, "End"),
@@ -771,15 +779,12 @@ function findHeader({
   match: string;
   slugger: ReturnType<typeof getSlugger>;
 }): FindAnchorResult {
-  const foundIndex = MDUtilsV4.findIndex(
-    nodes,
-    function (node: Node, idx: number) {
-      if (idx === 0 && match === "*") {
-        return false;
-      }
-      return MDUtilsV4.matchHeading(node, match, { slugger });
+  let foundIndex = MDUtilsV4.findIndex(nodes, (node: Node, idx: number) => {
+    if (idx === 0 && match === "*") {
+      return false;
     }
-  );
+    return MDUtilsV4.matchHeading(node, match, { slugger });
+  });
   if (foundIndex < 0) return null;
   return { type: "header", index: foundIndex, anchorType: "header" };
 }

@@ -144,7 +144,8 @@ export class NoteLookupProvider implements ILookupProviderV3 {
         });
       }
 
-      if (nextPicker && isNewNotePick) {
+      // when doing lookup, opening existing notes don't require vault picker
+      if (nextPicker && (this.id === "lookup" ? isNewNotePick : true)) {
         picker.vault = await nextPicker();
         // check if we exited from selecting a vault
         if (_.isUndefined(picker.vault)) {

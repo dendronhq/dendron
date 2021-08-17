@@ -11,6 +11,7 @@ vaults:
 useFMTitle: true
 useNoteTitleForLink: true
 autoFoldFrontmatter: true
+lookupConfirmVaultOnCreate: true
 mermaid: true
 useKatex: true
 journal:

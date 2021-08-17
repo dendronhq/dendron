@@ -459,9 +459,9 @@ export class FileStorage implements DStore {
           });
           errors.push(
             new DendronError({
-              message: `Note ${n.fname} in vault ${VaultUtils.getName(
+              message: `Note "${n.fname}" in vault "${VaultUtils.getName(
                 n.vault
-              )} is too large, some features like backlinks may not work correctly for it.`,
+              )}" is too large, some features like backlinks may not work correctly for it.`,
               severity: ERROR_SEVERITY.MINOR,
             })
           );

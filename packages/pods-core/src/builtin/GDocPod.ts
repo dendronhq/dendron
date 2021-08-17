@@ -17,8 +17,6 @@ import {
   stringifyError,
   DEngineClient,
 } from "@dendronhq/common-all";
-// import open from "open";
-// import * as queryString from 'query-string';
 import fs from "fs-extra";
 import path from "path";
 
@@ -28,22 +26,11 @@ type GDocImportPodCustomOpts = {
   /**
    * google docs personal access token
    */
-  token: string;
+  accessToken: string;
   /**
    * google docs personal refresh token
    */
   refreshToken: string;
-
-  /**
-   * document Id of doc to import
-   */
-  documentId?: string;
-
-  /**
-   * name of hierarchy to import into
-   */
-  hierarchyDestination?: string;
-
   /**
    * import comments from the doc in text or json format
    */
@@ -69,12 +56,15 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
 
   get config(): JSONSchemaType<GDocImportPodConfig> {
     return PodUtils.createImportConfig({
-      required: [],
+      required: ["accessToken", "refreshToken"],
       properties: {
-        hierarchyDestination: {
+        accessToken: {
           type: "string",
-          description: "name of hierarchy to import into",
-          nullable: true,
+          description: "google docs personal access token",
+        },
+        refreshToken: {
+          type: "string",
+          description: "google docs personal refresh token",
         },
         importComments: {
           type: "object",
@@ -108,9 +98,9 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
    * sends request to drive API to fetch docs of mime type document
    */
 
-  sendRequest = async (token: string) => {
+  sendRequest = async (accessToken: string) => {
     const headers = {
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${accessToken}`,
     };
     const result = await axios.get(
       `https://www.googleapis.com/drive/v3/files`,
@@ -128,7 +118,7 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
    * get all documents present in google docs
    */
   getAllDocuments = async (
-    token: string,
+    accessToken: string,
     wsRoot: string,
     refreshToken: string
   ) => {
@@ -141,7 +131,7 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
     let newtoken;
 
     try {
-      result = await this.sendRequest(token);
+      result = await this.sendRequest(accessToken);
     } catch (err: any) {
       /**
        * send request to refresh access token if the token is expired
@@ -178,13 +168,17 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
    * method to get data from google document
    */
   getDataFromGDoc = async (
-    opts: Partial<GDocImportPodConfig>,
+    opts: {
+      documentId: string;
+      hierarchyDestination: string;
+      accessToken: string;
+    },
     config: ImportPodConfig
   ): Promise<Partial<NoteProps>> => {
     let response: Partial<NoteProps>;
-    const { documentId, token, hierarchyDestination } = opts;
+    const { documentId, accessToken, hierarchyDestination } = opts;
     const headers = {
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${accessToken}`,
       "Content-Type": "application/json",
     };
     try {
@@ -221,13 +215,13 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
    * method to get comments in document
    */
   getCommentsFromDoc = async (
-    opts: Partial<GDocImportPodConfig>,
+    opts: Partial<GDocImportPodConfig> & { documentId: string },
     response: Partial<NoteProps>
   ): Promise<Partial<NoteProps>> => {
     let comments;
-    const { documentId, token, importComments } = opts;
+    const { documentId, accessToken, importComments } = opts;
     const headers = {
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${accessToken}`,
       "Content-Type": "application/json",
     };
     try {
@@ -356,14 +350,7 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
     const ctx = "GDocPod";
 
     this.L.info({ ctx, opts, msg: "enter" });
-    const {
-      wsRoot,
-      engine,
-      vault,
-      config,
-      onPrompt,
-      utilityMethods,
-    } = opts;
+    const { wsRoot, engine, vault, config, onPrompt, utilityMethods } = opts;
 
     const {
       refreshToken,
@@ -372,10 +359,10 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
       confirmOverwrite = true,
     } = config as GDocImportPodConfig;
 
-    let { token } = config as GDocImportPodConfig;
+    let { accessToken } = config as GDocImportPodConfig;
 
     const { docIdsHashMap, newtoken } = await this.getAllDocuments(
-      token,
+      accessToken,
       wsRoot,
       refreshToken
     );
@@ -385,22 +372,30 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
       });
     }
     if (!_.isUndefined(newtoken)) {
-      token = newtoken;
+      accessToken = newtoken;
     }
     /** document selected by user */
-    const documentChoice = await utilityMethods?.showDocumentQuickPick(Object.keys(docIdsHashMap))
-  
+    const documentChoice = await utilityMethods?.showDocumentQuickPick(
+      Object.keys(docIdsHashMap)
+    );
+
     if (_.isUndefined(documentChoice)) {
       return { importedNotes: [] };
     }
 
     const documentId = docIdsHashMap[documentChoice.label];
-    const cachedLabel = await utilityMethods?.getGlobalState(documentChoice.label);
-    const defaultChoice = _.isUndefined(cachedLabel) ? documentChoice.label : cachedLabel;
-    
+    const cachedLabel = await utilityMethods?.getGlobalState(
+      documentChoice.label
+    );
+    const defaultChoice = _.isUndefined(cachedLabel)
+      ? documentChoice.label
+      : cachedLabel;
+
     /**hierarchy destination entered by user */
-    const hierarchyDestination =  await utilityMethods?.getHierarchyDest(defaultChoice)
-      
+    const hierarchyDestination = await utilityMethods?.getHierarchyDest(
+      defaultChoice
+    );
+
     if (_.isUndefined(hierarchyDestination)) {
       return { importedNotes: [] };
     }
@@ -412,13 +407,13 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
     });
 
     let response = await this.getDataFromGDoc(
-      { documentId, token, hierarchyDestination },
+      { documentId, accessToken, hierarchyDestination },
       config
     );
 
     if (importComments?.enable) {
       response = await this.getCommentsFromDoc(
-        { documentId, token, importComments },
+        { documentId, accessToken, importComments },
         response
       );
     }
@@ -435,8 +430,10 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
       onPrompt,
     });
 
-    const importedNotes: NoteProps[] = createdNotes === undefined ? [] : [createdNotes];
-    utilityMethods?.openFileInEditor(importedNotes[0]);
+    const importedNotes: NoteProps[] =
+      createdNotes === undefined ? [] : [createdNotes];
+    if (importedNotes.length > 0)
+      utilityMethods?.openFileInEditor(importedNotes[0]);
     return { importedNotes };
   }
 }

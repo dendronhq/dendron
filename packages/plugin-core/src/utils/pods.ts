@@ -8,6 +8,7 @@ import path from "path";
 import fs from "fs-extra";
 import { VSCodeUtils } from "../utils";
 import { NoteUtils, NoteProps } from "@dendronhq/common-all";
+import _ from "lodash";
 
 export type PodQuickPickItemV4 = QuickPickItem & PodItemV4;
 
@@ -45,13 +46,22 @@ export const getOauthClient = async () => {
     `https://accounts.google.com/o/oauth2/v2/auth?${stringifiedParams}`
   );
 };
-  // eslint-disable-next-line no-undef -- eslint does not recognize `Thenable`
-export const showDocumentQuickPick = (docs: string[]): Thenable<{label: string} | undefined> => {
-  const pickItems = docs.map((doc) => {
+export const showDocumentQuickPick = async (
+  docs: string[]
+): Promise<{ label: string } | undefined> => {
+  /** Least Recently Used Documents */
+  let LRUDocs: string[] | undefined =
+    await DendronWorkspace.instance().getGlobalState(GLOBAL_STATE.LRUDocs);
+  LRUDocs = _.isUndefined(LRUDocs) ? [] : LRUDocs;
+
+  docs = docs.filter((doc) => !LRUDocs?.includes(doc));
+
+  const pickItems = LRUDocs.concat(docs).map((doc) => {
     return {
       label: doc,
     };
   });
+
   return window.showQuickPick(pickItems, {
     placeHolder: "Choose a document",
     ignoreFocusOut: false,
@@ -79,9 +89,19 @@ export const updateGlobalState = async (opts: {
 }): Promise<void> => {
   const { key, value } = opts;
   DendronWorkspace.instance().updateGlobalState(key, value);
+
+  /** to update the Least Recently Used Doc list with most recent doc at first */
+  let LRUDocs: string[] | undefined =
+    await DendronWorkspace.instance().getGlobalState(GLOBAL_STATE.LRUDocs);
+  LRUDocs = _.isUndefined(LRUDocs)
+    ? []
+    : [key, ...LRUDocs.filter((doc) => doc !== key)];
+  DendronWorkspace.instance().updateGlobalState(GLOBAL_STATE.LRUDocs, LRUDocs);
 };
 
-export const getGlobalState = async (key: GLOBAL_STATE): Promise<string | undefined> => {
+export const getGlobalState = async (
+  key: GLOBAL_STATE
+): Promise<string | undefined> => {
   return DendronWorkspace.instance().getGlobalState(key);
 };
 

@@ -23,14 +23,15 @@ export type PodOpts<T> = {
   engine: DEngineClient;
   config: T;
   onPrompt?: (arg0?: PROMPT) => Promise<any | undefined>;
-  utilityMethods? : {
-        getHierarchyDest: (arg0: string) => Promise<string | undefined>;
-        getGlobalState: (arg0: any) => Promise<string | undefined>;
-        updateGlobalState: (arg0: any) =>  Promise<void>;
-        openFileInEditor: (arg0: NoteProps) =>  Promise<void>;
-        showDocumentQuickPick: (arg0: string[]) => any;// eslint-disable-line
-
-  },
+  utilityMethods?: {
+    getHierarchyDest: (arg0: string) => Promise<string | undefined>;
+    openFileInEditor: (arg0: NoteProps) => Promise<void>;
+    showDocumentQuickPick: (
+      arg0: string[]
+    ) => Promise<{ label: string } | undefined>;
+    getGlobalState: (arg0: any) => Promise<string | undefined>;
+    updateGlobalState: (arg0: any) => Promise<void>;
+  };
 } & WorkspaceOpts;
 
 // === Publish Pod

@@ -39,7 +39,7 @@ export class AuthController {
         const opts = {
           path: path.join(wsRoot, "pods", "dendron.gdoc", "config.import.yml"),
           tokens: {
-            token: data.access_token,
+            accessToken: data.access_token,
             refreshToken: data.refresh_token,
           },
         };
@@ -50,7 +50,6 @@ export class AuthController {
 
       return resp;
     } catch (err) {
-      console.log("error", err);
       return {
         error: new DendronError({
           message: `Authorization Failed. ${JSON.stringify(err)}`,
@@ -82,18 +81,16 @@ export class AuthController {
       });
       if (!_.isEmpty(data)) {
         const opts = {
-          path: path.join(wsRoot,"pods","dendron.gdoc", "config.import.yml"),
+          path: path.join(wsRoot, "pods", "dendron.gdoc", "config.import.yml"),
           tokens: {
-            token: data.access_token,
-          }
-        }
-        engine.writePodsConfig(opts)
+            accessToken: data.access_token,
+          },
+        };
+        engine.writePodsConfig(opts);
         resp = data.access_token;
       }
       return resp;
     } catch (err) {
-      console.log("error", err);
-
       return {
         error: new DendronError({ message: JSON.stringify(err) }),
         data: undefined,

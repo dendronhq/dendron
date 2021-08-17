@@ -843,6 +843,10 @@ export enum GLOBAL_STATE {
    * Extension is being debugged
    */
   VSCODE_DEBUGGING_EXTENSION = "dendron.vscode_debugging_extension",
+  /**
+   * Least Recently Imported Doc
+   */
+  LRUDocs = "LRUDocs",
 }
 
 export enum WORKSPACE_ACTIVATION_CONTEXT {

@@ -28,6 +28,15 @@ describe("GDoc import pod", () => {
           );
     return resp;
   };
+  const docIdsHashMap = { foo: "1dejjityws", bar: "skdeugndk" };
+  const utilityMethods = {
+    getHierarchyDest: jest.fn().mockResolvedValue("gdoc.meet"),
+    getGlobalState: jest.fn().mockResolvedValue(undefined),
+    updateGlobalState: jest.fn().mockResolvedValue(undefined),
+    openFileInEditor: jest.fn().mockResolvedValue(undefined),
+    showDocumentQuickPick: jest.fn().mockResolvedValue({ label: "foo" }),
+  };
+
   afterEach(() => {
     sinon.restore();
   });
@@ -35,6 +44,7 @@ describe("GDoc import pod", () => {
     await runEngineTestV5(
       async ({ engine, vaults, wsRoot }) => {
         const pod = new GDocImportPod();
+        pod.getAllDocuments = jest.fn().mockReturnValue({ docIdsHashMap });
         const vaultName = VaultUtils.getName(vaults[0]);
         const mockedAxios = axios as jest.Mocked<typeof axios>;
         result = response;
@@ -43,14 +53,13 @@ describe("GDoc import pod", () => {
           engine,
           vaults,
           wsRoot,
+          utilityMethods,
           onPrompt,
           config: {
             src: "foo",
-            token: "xyzabcd",
+            accessToken: "xyzabcd",
             refreshToken: "dhdjdjs",
             vaultName,
-            documentId: "sdhdoj",
-            hierarchyDestination: "gdoc.meet",
           },
         });
         expect(importedNotes[0].body).toMatch(
@@ -77,6 +86,7 @@ describe("GDoc import pod", () => {
           },
           body: "\n\n## Testing GDoc Pod\n\nThis is the first line\n\n\n",
         };
+        pod.getAllDocuments = jest.fn().mockReturnValue({ docIdsHashMap });
         pod.getDataFromGDoc = jest.fn().mockReturnValue(response);
         const mockedAxios = axios as jest.Mocked<typeof axios>;
         result = comments;
@@ -85,13 +95,12 @@ describe("GDoc import pod", () => {
           engine,
           vaults,
           wsRoot,
+          utilityMethods,
           onPrompt,
           config: {
             src: "foo",
-            token: "xyzabcd",
+            accessToken: "xyzabcd",
             vaultName,
-            documentId: "sdhdoj",
-            hierarchyDestination: "gdoc.meet",
             refreshToken: "hksall",
             importComments: {
               enable: true,
@@ -121,6 +130,7 @@ describe("GDoc import pod", () => {
           },
           body: "\n\n## Testing GDoc Pod\n\nThis is the first line\n\n\n",
         };
+        pod.getAllDocuments = jest.fn().mockReturnValue({ docIdsHashMap });
         pod.getDataFromGDoc = jest.fn().mockReturnValue(response);
         const mockedAxios = axios as jest.Mocked<typeof axios>;
         result = comments;
@@ -129,14 +139,13 @@ describe("GDoc import pod", () => {
           engine,
           vaults,
           wsRoot,
+          utilityMethods,
           onPrompt,
           config: {
             src: "foo",
-            token: "xyzabcd",
+            accessToken: "xyzabcd",
             refreshToken: "emeiice",
             vaultName,
-            documentId: "sdhdoj",
-            hierarchyDestination: "gdoc.meet",
             importComments: {
               enable: true,
               format: "text",
@@ -159,19 +168,19 @@ describe("GDoc import pod", () => {
         const vaultName = VaultUtils.getName(vaults[0]);
         const mockedAxios = axios as jest.Mocked<typeof axios>;
         result = response;
+        pod.getAllDocuments = jest.fn().mockReturnValue({ docIdsHashMap });
         mockedAxios.get.mockResolvedValue(result);
         const { importedNotes } = await pod.execute({
           engine,
           vaults,
           wsRoot,
+          utilityMethods,
           onPrompt,
           config: {
             src: "foo",
-            token: "xyzabcd",
+            accessToken: "xyzabcd",
             refreshToken: "akSAal",
             vaultName,
-            documentId: "sdhdoj",
-            hierarchyDestination: "gdoc.meet",
             confirmOverwrite: false,
           },
         });
@@ -190,20 +199,20 @@ describe("GDoc import pod", () => {
         const vaultName = VaultUtils.getName(vaults[0]);
         const mockedAxios = axios as jest.Mocked<typeof axios>;
         result = response;
+        pod.getAllDocuments = jest.fn().mockReturnValue({ docIdsHashMap });
         await engine.writeNote(existingNote, { newNode: true });
         mockedAxios.get.mockResolvedValue(result);
         await pod.execute({
           engine,
           vaults,
           wsRoot,
+          utilityMethods,
           onPrompt,
           config: {
             src: "foo",
-            token: "xyzabcd",
+            accessToken: "xyzabcd",
             refreshToken: "LalaLAL",
             vaultName,
-            documentId: "sdhdoj",
-            hierarchyDestination: "gdoc.meet",
           },
         });
 
@@ -227,6 +236,7 @@ describe("GDoc import pod", () => {
         const mockedAxios = axios as jest.Mocked<typeof axios>;
         result = response;
         existingNote.custom.revisionId = "jslkdhsal";
+        pod.getAllDocuments = jest.fn().mockReturnValue({ docIdsHashMap });
         await engine.writeNote(existingNote, { newNode: true });
         mockedAxios.get.mockResolvedValue(result);
         stubWindow(undefined);
@@ -234,14 +244,13 @@ describe("GDoc import pod", () => {
           engine,
           vaults,
           wsRoot,
+          utilityMethods,
           onPrompt,
           config: {
             src: "foo",
-            token: "xyzabcd",
+            accessToken: "xyzabcd",
             refreshToken: "hjsjisw",
             vaultName,
-            documentId: "sdhdoj",
-            hierarchyDestination: "gdoc.meet",
           },
         });
         return expect(importedNotes).toEqual([]);
@@ -261,6 +270,7 @@ describe("GDoc import pod", () => {
         const mockedAxios = axios as jest.Mocked<typeof axios>;
         result = response;
         existingNote.custom.revisionId = "jslkdhsa";
+        pod.getAllDocuments = jest.fn().mockReturnValue({ docIdsHashMap });
         await engine.writeNote(existingNote, { newNode: true });
         mockedAxios.get.mockResolvedValue(result);
         const resp = {
@@ -271,14 +281,13 @@ describe("GDoc import pod", () => {
           engine,
           vaults,
           wsRoot,
+          utilityMethods,
           onPrompt,
           config: {
             src: "foo",
-            token: "xyzabcd",
+            accessToken: "xyzabcd",
             refreshToken: "kqSLA",
             vaultName,
-            documentId: "sdhdoj",
-            hierarchyDestination: "gdoc.meet",
           },
         });
         expect.assertions(1);

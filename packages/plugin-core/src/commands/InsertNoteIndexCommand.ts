@@ -2,7 +2,7 @@ import { DENDRON_COMMANDS } from "../constants";
 import { BasicCommand } from "./base";
 import { DendronClientUtilsV2, VSCodeUtils } from "../utils";
 import { DNodeUtils, NoteProps, NoteUtils } from "@dendronhq/common-all";
-import { getEngine } from "../workspace";
+import { getEngine, getWS } from "../workspace";
 import { window } from "vscode";
 import _ from "lodash";
 
@@ -70,8 +70,9 @@ export class InsertNoteIndexCommand extends BasicCommand<
       window.showInformationMessage("This note does not have any child notes.");
       return opts;
     }
+    const maybeMarker = getWS().config.insertNoteIndex?.marker
     const noteIndex = this.genNoteIndex(children, {
-      marker: opts.marker,
+      marker: _.isBoolean(maybeMarker) ? maybeMarker : opts.marker,
     });
     const current = maybeEditor.selection;
     await maybeEditor.edit((builder) => {

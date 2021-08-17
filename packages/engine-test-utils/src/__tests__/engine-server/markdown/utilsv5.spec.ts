@@ -142,8 +142,6 @@ describe("MDUtils.proc", () => {
             resp.contents,
             // should have id for link
             `<a href="alpha-id.html"`,
-            // title should be fname,
-            "Alpha</h1>",
             // html quoted
             `<p><a href="bar.html">Bar</a></p>`
           );

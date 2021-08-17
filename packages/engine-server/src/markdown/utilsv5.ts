@@ -264,14 +264,16 @@ export class MDUtilsV5 {
           this.setProcData(proc, data as ProcDataFullV5);
           MDUtilsV4.setEngine(proc, data.engine!);
 
+          const isNoteRef = !_.isUndefined((data as ProcDataFullV5).noteRefLvl);
+
+          const shouldInsertTitle = isNoteRef ? false : data.config?.useFMTitle;
           // NOTE: order matters. this needs to appear before `dendronPub`
           if (data.dest === DendronASTDest.HTML) {
             proc = proc.use(backlinks).use(hierarchies);
           }
-
           // add additional plugins
           proc = proc.use(dendronPub, {
-            insertTitle: data.config?.useFMTitle,
+            insertTitle: shouldInsertTitle,
           });
           if (data.config?.useKatex) {
             proc = proc.use(math);

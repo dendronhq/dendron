@@ -282,6 +282,11 @@ export type DendronConfig = {
 
   /** Automatically fold frontmatter when opening a new note. False by default. */
   autoFoldFrontmatter?: boolean;
+
+  /**
+   * Configuration for Insert Note Index Command
+   */
+  insertNoteIndex?: InsertNoteIndexConfig;
 };
 
 export type RandomNoteConfig = {
@@ -295,6 +300,13 @@ export type RandomNoteConfig = {
    */
   exclude?: string[];
 };
+
+export type InsertNoteIndexConfig = {
+  /**
+   * Include marker when inserting note index.
+   */
+  marker?: boolean;
+}
 
 export type DendronDevConfig = {
   /**

@@ -46,7 +46,8 @@ export type HistoryEventAction =
   | "upgraded"
   | APIServerEvent
   | "done"
-  | "error";
+  | "error"
+  | "changeState";
 
 export type APIServerEvent = "changedPort";
 

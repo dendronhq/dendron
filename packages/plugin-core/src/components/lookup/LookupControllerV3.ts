@@ -1,4 +1,5 @@
 import { DendronError, DNodeType, ERROR_STATUS } from "@dendronhq/common-all";
+import { HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { QuickInputButton } from "vscode";
 import { CancellationTokenSource } from "vscode-languageclient";
@@ -6,8 +7,8 @@ import { Logger } from "../../logger";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace, getWS } from "../../workspace";
 import {
-  DendronBtn,
   ButtonCategory,
+  DendronBtn,
   getButtonCategory,
   IDendronQuickInputButton,
   VaultSelectButton,
@@ -76,6 +77,8 @@ export class LookupControllerV3 {
     buttons: DendronBtn[];
     fuzzThreshold?: number;
   }) {
+    const ctx = "LookupControllerV3:new";
+    Logger.info({ ctx, msg: "enter" });
     const { buttons, nodeType } = opts;
     this.nodeType = nodeType;
     this.state = {
@@ -138,7 +141,14 @@ export class LookupControllerV3 {
     await PickerUtilsV2.refreshPickerBehavior({ quickpick, buttons });
     quickpick.onDidTriggerButton(this.onTriggerButton);
     quickpick.onDidHide(() => {
+      Logger.debug({ ctx: "quickpick", msg: "onHide" });
       quickpick.dispose();
+      HistoryService.instance().add({
+        source: "lookupProvider",
+        action: "changeState",
+        id: provider.id,
+        data: { action: "hide" },
+      });
     });
     quickpick.title = [
       `Lookup (${this.nodeType})`,
@@ -192,9 +202,11 @@ export class LookupControllerV3 {
   }
 
   onHide() {
+    const ctx = "LookupControllerV3:onHide";
     this._quickpick?.dispose();
     this._quickpick = undefined;
     this._cancelTokenSource?.dispose();
+    Logger.info({ ctx, msg: "exit" });
   }
 
   onTriggerButton = async (btn: QuickInputButton) => {

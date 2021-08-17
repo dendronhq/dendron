@@ -31,7 +31,7 @@ import {
   MORE_RESULTS_LABEL,
 } from "./constants";
 import { ILookupProviderV3, OnAcceptHook } from "./LookupProviderV3";
-import { DendronQuickPickerV2 } from "./types";
+import { DendronQuickPickerV2, DendronQuickPickState } from "./types";
 
 const PAGINATE_LIMIT = 50;
 export const UPDATET_SOURCE = {
@@ -244,6 +244,7 @@ export class PickerUtilsV2 {
     const quickPick =
       window.createQuickPick<DNodePropsQuickInputV2>() as DendronQuickPickerV2;
     quickPick.title = title;
+    quickPick.state = DendronQuickPickState.IDLE;
     quickPick.nonInteractive = opts.nonInteractive;
     quickPick.placeholder = placeholder;
     quickPick.ignoreFocusOut = ignoreFocusOut;
@@ -387,6 +388,24 @@ export class PickerUtilsV2 {
     items: readonly DNodePropsQuickInputV2[]
   ): DNodePropsQuickInputV2 | undefined => {
     return _.find(items, { label: CREATE_NEW_LABEL });
+  };
+
+  /**
+   * Check if this picker still has further pickers
+   */
+  static hasNextPicker = (
+    quickpick: DendronQuickPickerV2,
+    opts: {
+      selectedItems: readonly DNodePropsQuickInputV2[];
+      providerId: string;
+    }
+  ): quickpick is Required<DendronQuickPickerV2> => {
+    const { selectedItems, providerId } = opts;
+    const nextPicker = quickpick.nextPicker;
+    const isNewPick = PickerUtilsV2.isCreateNewNotePick(selectedItems[0]);
+    return (
+      !_.isUndefined(nextPicker) && (providerId === "lookup" ? isNewPick : true)
+    );
   };
 
   static isCreateNewNotePickForSingle(node: DNodePropsQuickInputV2): boolean {

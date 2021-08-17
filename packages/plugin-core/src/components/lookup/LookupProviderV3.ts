@@ -18,7 +18,7 @@ import { Logger } from "../../logger";
 import { AnalyticsUtils } from "../../utils/analytics";
 import { DendronWorkspace } from "../../workspace";
 import { LookupControllerV3 } from "./LookupControllerV3";
-import { DendronQuickPickerV2 } from "./types";
+import { DendronQuickPickerV2, DendronQuickPickState } from "./types";
 import {
   NotePickerUtils,
   OldNewLocation,
@@ -57,6 +57,9 @@ export type NoteLookupProviderSuccessResp<T = never> = {
   selectedItems: readonly NoteQuickInput[];
   onAcceptHookResp: T[];
   cancel?: boolean;
+};
+export type NoteLookupProviderChangeStateResp = {
+  action: "hide";
 };
 
 export type SchemaLookupProviderSuccessResp<T = never> = {
@@ -129,9 +132,7 @@ export class NoteLookupProvider implements ILookupProviderV3 {
     return async () => {
       const ctx = "LookupProvider:onDidAccept";
       const { quickpick: picker, lc } = opts;
-      const nextPicker = picker.nextPicker;
       let selectedItems = NotePickerUtils.getSelection(picker);
-      const isNewNotePick = PickerUtilsV2.isCreateNewNotePick(selectedItems[0]);
       Logger.debug({
         ctx,
         selectedItems: selectedItems.map((item) => NoteUtils.toLogObj(item)),
@@ -143,10 +144,16 @@ export class NoteLookupProvider implements ILookupProviderV3 {
           picker,
         });
       }
-
       // when doing lookup, opening existing notes don't require vault picker
-      if (nextPicker && (this.id === "lookup" ? isNewNotePick : true)) {
-        picker.vault = await nextPicker();
+      if (
+        PickerUtilsV2.hasNextPicker(picker, {
+          selectedItems,
+          providerId: this.id,
+        })
+      ) {
+        Logger.debug({ ctx, msg: "nextPicker:pre" });
+        picker.state = DendronQuickPickState.PENDING_NEXT_PICK;
+        picker.vault = await picker.nextPicker();
         // check if we exited from selecting a vault
         if (_.isUndefined(picker.vault)) {
           HistoryService.instance().add({
@@ -161,6 +168,7 @@ export class NoteLookupProvider implements ILookupProviderV3 {
       // last chance to cancel
       lc.cancelToken.cancel();
       if (!this.opts.noHidePickerOnAccept) {
+        picker.state = DendronQuickPickState.FUFILLED;
         picker.hide();
       }
       const onAcceptHookResp = await Promise.all(

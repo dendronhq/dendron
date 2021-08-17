@@ -8,27 +8,31 @@ import {
   SchemaUtils,
   VSCodeEvents,
 } from "@dendronhq/common-all";
+import { getDurationMilliseconds } from "@dendronhq/common-server";
 import { DConfig, HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
-import { getDurationMilliseconds } from "@dendronhq/common-server";
 import { Uri } from "vscode";
 import {
-  DirectChildFilterBtn,
-  JournalBtn,
-  ScratchBtn,
-  MultiSelectBtn,
   CopyNoteLinkBtn,
+  DirectChildFilterBtn,
+  HorizontalSplitBtn,
+  JournalBtn,
+  MultiSelectBtn,
+  ScratchBtn,
   Selection2LinkBtn,
   SelectionExtractBtn,
-  HorizontalSplitBtn,
 } from "../components/lookup/buttons";
 import { LookupControllerV3 } from "../components/lookup/LookupControllerV3";
 import {
   ILookupProviderV3,
   NoteLookupProvider,
+  NoteLookupProviderChangeStateResp,
   NoteLookupProviderSuccessResp,
 } from "../components/lookup/LookupProviderV3";
-import { DendronQuickPickerV2 } from "../components/lookup/types";
+import {
+  DendronQuickPickerV2,
+  DendronQuickPickState,
+} from "../components/lookup/types";
 import {
   node2Uri,
   NotePickerUtils,
@@ -206,69 +210,100 @@ export class NoteLookupCommand extends BaseCommand<
   async enrichInputs(
     opts: CommandGatherOutput
   ): Promise<CommandOpts | undefined> {
-    return new Promise((resolve) => {
-      const start = process.hrtime();
-      HistoryService.instance().subscribev2("lookupProvider", {
-        id: "lookup",
-        listener: async (event) => {
-          if (event.action === "done") {
-            const data =
-              event.data as NoteLookupProviderSuccessResp<OldNewLocation>;
-            if (data.cancel) {
-              resolve(undefined);
-            }
-            const _opts: CommandOpts = {
-              selectedItems: data.selectedItems,
-              ...opts,
-            };
-            resolve(_opts);
-          } else if (event.action === "error") {
-            const error = event.data.error as DendronError;
-            this.L.error({ error });
-            resolve(undefined);
-          } else {
-            const error = new DendronError({
-              message: `unexpected event: ${event}`,
-            });
-            this.L.error({ error });
+    const ctx = "NoteLookupCommand:enrichInputs";
+
+    let promiseResolve: (
+      value: CommandOpts | undefined
+    ) => PromiseLike<CommandOpts | undefined>;
+    HistoryService.instance().subscribev2("lookupProvider", {
+      id: "lookup",
+      listener: async (event) => {
+        if (event.action === "done") {
+          const data =
+            event.data as NoteLookupProviderSuccessResp<OldNewLocation>;
+          if (data.cancel) {
+            this.cleanUp();
+            promiseResolve(undefined);
           }
+          const _opts: CommandOpts = {
+            selectedItems: data.selectedItems,
+            ...opts,
+          };
+          promiseResolve(_opts);
+        } else if (event.action === "changeState") {
+          const data = event.data as NoteLookupProviderChangeStateResp;
 
-          HistoryService.instance().remove("lookup", "lookupProvider");
-        },
-      });
+          // check if we hid the picker and there is no next picker
+          if (data.action === "hide") {
+            const { quickpick } = opts;
+            Logger.debug({
+              ctx,
+              subscribers: HistoryService.instance().subscribersv2,
+            });
+            // check if user has hidden picker
+            if (
+              !_.includes(
+                [
+                  DendronQuickPickState.PENDING_NEXT_PICK,
+                  DendronQuickPickState.FUFILLED,
+                ],
+                quickpick.state
+              )
+            ) {
+              this.cleanUp();
+              promiseResolve(undefined);
+            }
+          }
+          // don't remove the lookup provider
+          return;
+        } else if (event.action === "error") {
+          const error = event.data.error as DendronError;
+          this.L.error({ error });
+          this.cleanUp();
+          promiseResolve(undefined);
+        } else {
+          const error = new DendronError({
+            message: `unexpected event: ${event}`,
+          });
+          this.L.error({ error });
+          this.cleanUp();
+        }
+      },
+    });
 
-      // show quickpick (maybe)
+    const promise = new Promise<CommandOpts | undefined>((resolve) => {
+      promiseResolve = resolve as typeof promiseResolve;
       opts.controller.showQuickPick({
         provider: opts.provider,
         quickpick: opts.quickpick,
         nonInteractive: opts.noConfirm,
         fuzzThreshold: opts.fuzzThreshold,
       });
-      const profile = getDurationMilliseconds(start);
-      AnalyticsUtils.track(VSCodeEvents.NoteLookup_Show, {
-        duration: profile,
-      });
     });
+    return promise;
   }
 
   getSelected({
     quickpick,
     selectedItems,
-  }: Pick<CommandOpts, "selectedItems"|"quickpick">): readonly NoteQuickInput[] {
+  }: Pick<
+    CommandOpts,
+    "selectedItems" | "quickpick"
+  >): readonly NoteQuickInput[] {
     const maybeCreateNew = PickerUtilsV2.getCreateNewItem(selectedItems);
-    const {nonInteractive, canSelectMany} = quickpick;
+    const { nonInteractive, canSelectMany } = quickpick;
     if (nonInteractive && maybeCreateNew) {
       return [maybeCreateNew];
     }
-    return canSelectMany
-      ? selectedItems
-      : selectedItems.slice(0, 1);
+    return canSelectMany ? selectedItems : selectedItems.slice(0, 1);
   }
 
   async execute(opts: CommandOpts) {
+    const ctx = "NoteLookupCommand:execute";
+    Logger.info({ ctx, msg: "enter" });
     try {
       const { quickpick, selectedItems } = opts;
-      const selected = this.getSelected({quickpick, selectedItems});
+      const selected = this.getSelected({ quickpick, selectedItems });
       const out = await Promise.all(
         selected.map((item) => {
           return this.acceptItem(item);
@@ -286,9 +321,17 @@ export class NoteLookupCommand extends BaseCommand<
         Promise.resolve({})
       );
     } finally {
-      opts.controller.onHide();
+      this.cleanUp();
+      Logger.info({ ctx, msg: "exit" });
     }
     return opts;
+  }
+
+  cleanUp() {
+    const ctx = "NoteLookupCommand:cleanup";
+    Logger.debug({ ctx, msg: "enter" });
+    this.controller.onHide();
+    HistoryService.instance().remove("lookup", "lookupProvider");
   }
 
   async acceptItem(
@@ -363,7 +406,8 @@ export class NoteLookupCommand extends BaseCommand<
     }
 
     const maybeJournalTitleOverride = this.journalTitleOverride();
-    if (!_.isUndefined(maybeJournalTitleOverride)) nodeNew.title = maybeJournalTitleOverride;
+    if (!_.isUndefined(maybeJournalTitleOverride))
+      nodeNew.title = maybeJournalTitleOverride;
 
     const resp = await engine.writeNote(nodeNew, {
       newNode: true,
@@ -378,7 +422,7 @@ export class NoteLookupCommand extends BaseCommand<
     });
     return { uri, node: nodeNew, resp };
   }
- 
+
   /**
    * this is a hacky title override for journal notes.
    * TODO: remove this once we implement a more general way to override note titles.
@@ -389,15 +433,17 @@ export class NoteLookupCommand extends BaseCommand<
    */
   journalTitleOverride(): string | undefined {
     const journalBtn = _.find(this.controller.state.buttons, (btn) => {
-      return btn.type === LookupNoteTypeEnum.journal
+      return btn.type === LookupNoteTypeEnum.journal;
     });
     if (journalBtn?.pressed) {
       const quickpick = this.controller.quickpick;
 
       // note modifier value exists, and nothing else after that.
-      if (quickpick.noteModifierValue && 
-          quickpick.value.split(quickpick.noteModifierValue).slice(-1)[0] === "") {
-        const [, ...maybeDatePortion ] = quickpick.noteModifierValue.split(".")
+      if (
+        quickpick.noteModifierValue &&
+        quickpick.value.split(quickpick.noteModifierValue).slice(-1)[0] === ""
+      ) {
+        const [, ...maybeDatePortion] = quickpick.noteModifierValue.split(".");
         // we only override y.MM.dd
         if (maybeDatePortion.length === 3) {
           const maybeTitleOverride = maybeDatePortion.join("-");

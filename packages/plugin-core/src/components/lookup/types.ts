@@ -22,6 +22,21 @@ type ModifyPickerValueFunc = (value?: string) => {
 };
 type SelectionProcessFunc = (note: NoteProps) => Promise<NoteProps | undefined>;
 
+export enum DendronQuickPickState {
+  /**
+   * Default state
+   */
+  IDLE = "IDLE",
+  /**
+   * Finished taking request
+   */
+  FUFILLED = "FUFILLED",
+  /**
+   * About to show a new picker. Old picker will be hidden but we are still gathering further input
+   */
+  PENDING_NEXT_PICK = "PENDING_NEXT_PICK",
+}
+
 export type DendronQuickPickItemV2 = QuickPick<DNodePropsQuickInputV2>;
 export type DendronQuickPickerV2 = DendronQuickPickItemV2 & {
   // --- Private State
@@ -33,6 +48,7 @@ export type DendronQuickPickerV2 = DendronQuickPickItemV2 & {
    * Setting this true will always show ALL results that lookup returns
    */
   alwaysShowAll?: boolean;
+  state: DendronQuickPickState;
   /**
    * Buttons control modifiers for lookup
    */

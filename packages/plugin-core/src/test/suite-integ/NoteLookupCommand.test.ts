@@ -9,6 +9,7 @@ import {
 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import { NoteTestUtilsV4, NOTE_PRESETS_V4 } from "@dendronhq/common-test-utils";
+import { HistoryService } from "@dendronhq/engine-server";
 import {
   ENGINE_HOOKS,
   ENGINE_HOOKS_MULTI,
@@ -51,11 +52,7 @@ import {
 import { CONFIG } from "../../constants";
 import { clipboard, VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
-import {
-  createMockQuickPick,
-  getActiveEditorBasename,
-  TIMEOUT,
-} from "../testUtils";
+import { createMockQuickPick, getActiveEditorBasename } from "../testUtils";
 import { expect } from "../testUtilsv2";
 import {
   runLegacyMultiWorkspaceTest,
@@ -154,12 +151,7 @@ function getEffectTypeButtons(
 }
 
 suite("NoteLookupCommand", function () {
-  this.timeout(TIMEOUT);
-  const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {
-    afterHook: async () => {
-      sinon.restore();
-    },
-  });
+  const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {});
 
   const getTodayInScratchDateFormat = () => {
     const dateFormat = DendronWorkspace.configuration().get<string>(
@@ -168,6 +160,35 @@ suite("NoteLookupCommand", function () {
     const today = Time.now().toFormat(dateFormat);
     return today.split(".").slice(0, -1).join(".");
   };
+
+  describe("enrichInputs", () => {
+    test("edge, quickpick cleans up when hidden", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+        },
+        onInit: async ({ engine: _engine }) => {
+          const cmd = new NoteLookupCommand();
+          const opts = await cmd.gatherInputs();
+          const out = cmd.enrichInputs(opts);
+          expect(
+            HistoryService.instance().subscribersv2.lookupProvider.length
+          ).toEqual(1);
+          // delicate test
+          setTimeout(async () => {
+            opts.quickpick.hide();
+            await out;
+            expect(
+              HistoryService.instance().subscribersv2.lookupProvider.length
+            ).toEqual(0);
+            done();
+          }, 1000);
+          // await out;
+        },
+      });
+    });
+  });
 
   // NOTE: think these tests are wrong
   describe("updateItems", () => {

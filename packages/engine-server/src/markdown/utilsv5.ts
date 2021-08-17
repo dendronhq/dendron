@@ -32,7 +32,7 @@ import { dendronPreview, dendronHoverPreview } from "./remark/dendronPreview";
 import { dendronPub } from "./remark/dendronPub";
 import { noteRefsV2 } from "./remark/noteRefsV2";
 import { wikiLinks } from "./remark/wikiLinks";
-import { DendronASTData, DendronASTDest } from "./types";
+import { DendronASTDest } from "./types";
 import { MDUtilsV4 } from "./utils";
 import { hashtags } from "./remark/hashtag";
 import { backlinks } from "./remark/backlinks";

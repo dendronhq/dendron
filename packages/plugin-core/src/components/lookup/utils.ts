@@ -31,7 +31,7 @@ import {
   MORE_RESULTS_LABEL,
 } from "./constants";
 import { ILookupProviderV3, OnAcceptHook } from "./LookupProviderV3";
-import { DendronQuickPickerV2 } from "./types";
+import { DendronQuickPickerV2, DendronQuickPickState } from "./types";
 
 const PAGINATE_LIMIT = 50;
 export const UPDATET_SOURCE = {
@@ -244,6 +244,7 @@ export class PickerUtilsV2 {
     const quickPick =
       window.createQuickPick<DNodePropsQuickInputV2>() as DendronQuickPickerV2;
     quickPick.title = title;
+    quickPick.state = DendronQuickPickState.IDLE;
     quickPick.nonInteractive = opts.nonInteractive;
     quickPick.placeholder = placeholder;
     quickPick.ignoreFocusOut = ignoreFocusOut;

@@ -18,7 +18,7 @@ import { Logger } from "../../logger";
 import { AnalyticsUtils } from "../../utils/analytics";
 import { DendronWorkspace } from "../../workspace";
 import { LookupControllerV3 } from "./LookupControllerV3";
-import { DendronQuickPickerV2 } from "./types";
+import { DendronQuickPickerV2, DendronQuickPickState } from "./types";
 import {
   NotePickerUtils,
   OldNewLocation,
@@ -151,6 +151,8 @@ export class NoteLookupProvider implements ILookupProviderV3 {
           providerId: this.id,
         })
       ) {
+        Logger.debug({ ctx, msg: "nextPicker:pre" });
+        picker.state = DendronQuickPickState.PENDING_NEXT_PICK;
         picker.vault = await picker.nextPicker();
         // check if we exited from selecting a vault
         if (_.isUndefined(picker.vault)) {
@@ -166,6 +168,7 @@ export class NoteLookupProvider implements ILookupProviderV3 {
       // last chance to cancel
       lc.cancelToken.cancel();
       if (!this.opts.noHidePickerOnAccept) {
+        picker.state = DendronQuickPickState.FUFILLED;
         picker.hide();
       }
       const onAcceptHookResp = await Promise.all(

@@ -29,7 +29,10 @@ import {
   NoteLookupProviderChangeStateResp,
   NoteLookupProviderSuccessResp,
 } from "../components/lookup/LookupProviderV3";
-import { DendronQuickPickerV2 } from "../components/lookup/types";
+import {
+  DendronQuickPickerV2,
+  DendronQuickPickState,
+} from "../components/lookup/types";
 import {
   node2Uri,
   NotePickerUtils,
@@ -207,6 +210,7 @@ export class NoteLookupCommand extends BaseCommand<
   async enrichInputs(
     opts: CommandGatherOutput
   ): Promise<CommandOpts | undefined> {
+    const ctx = "NoteLookupCommand:enrichInputs";
     return new Promise((resolve) => {
       const start = process.hrtime();
       HistoryService.instance().subscribev2("lookupProvider", {
@@ -216,6 +220,7 @@ export class NoteLookupCommand extends BaseCommand<
             const data =
               event.data as NoteLookupProviderSuccessResp<OldNewLocation>;
             if (data.cancel) {
+              this.cleanUp();
               resolve(undefined);
             }
             const _opts: CommandOpts = {
@@ -223,18 +228,44 @@ export class NoteLookupCommand extends BaseCommand<
               ...opts,
             };
             resolve(_opts);
+          } else if (event.action === "changeState") {
+            const data = event.data as NoteLookupProviderChangeStateResp;
+
+            // check if we hid the picker and there is no next picker
+            if (data.action === "hide") {
+              const { quickpick } = opts;
+              Logger.debug({
+                ctx,
+                subscribers: HistoryService.instance().subscribersv2,
+              });
+              // check if user has hidden picker
+              if (
+                !_.includes(
+                  [
+                    DendronQuickPickState.PENDING_NEXT_PICK,
+                    DendronQuickPickState.FUFILLED,
+                  ],
+                  quickpick.state
+                )
+              ) {
+                this.cleanUp();
+                resolve(undefined);
+              }
+            }
+            // don't remove the lookup provider
+            return;
           } else if (event.action === "error") {
             const error = event.data.error as DendronError;
             this.L.error({ error });
+            this.cleanUp();
             resolve(undefined);
           } else {
             const error = new DendronError({
               message: `unexpected event: ${event}`,
             });
             this.L.error({ error });
+            this.cleanUp();
           }
-
-          HistoryService.instance().remove("lookup", "lookupProvider");
         },
       });
 
@@ -290,10 +321,17 @@ export class NoteLookupCommand extends BaseCommand<
         Promise.resolve({})
       );
     } finally {
-      opts.controller.onHide();
+      this.cleanUp();
       Logger.info({ ctx, msg: "exit" });
     }
     return opts;
+  }
+
+  cleanUp() {
+    const ctx = "NoteLookupCommand:cleanup";
+    Logger.debug({ ctx, msg: "enter" });
+    this.controller.onHide();
+    HistoryService.instance().remove("lookup", "lookupProvider");
   }
 
   async acceptItem(

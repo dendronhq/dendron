@@ -13,7 +13,9 @@ export type LookupControllerState = {
   buttonsPrev: DendronBtn[];
 };
 
-export type FilterQuickPickFunction = (items: NoteQuickInput[]) => NoteQuickInput[];
+export type FilterQuickPickFunction = (
+  items: NoteQuickInput[]
+) => NoteQuickInput[];
 type ModifyPickerValueFunc = (value?: string) => {
   noteName: string;
   prefix: string;
@@ -37,7 +39,14 @@ export type DendronQuickPickerV2 = DendronQuickPickItemV2 & {
   buttons: DendronBtn[];
   nonInteractive?: boolean;
   prev?: { activeItems: any; items: any };
+  /**
+   * Used by {@link DendronBtn} to store tmp state
+   */
   prevValue?: string;
+  /**
+   * Previous value in quickpick
+   */
+  prevQuickpickValue?: string;
 
   /**
    * Value before being modified

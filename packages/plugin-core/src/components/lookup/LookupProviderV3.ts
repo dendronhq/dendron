@@ -1,19 +1,19 @@
 import {
-  NoteUtils,
   DNodeUtils,
-  NoteQuickInput,
-  RespV2,
+  NoteLookupUtils,
   NoteProps,
+  NoteQuickInput,
+  NoteUtils,
+  RespV2,
   SchemaModuleProps,
   SchemaQuickInput,
   SchemaUtils,
   VSCodeEvents,
-  NoteLookupUtils,
 } from "@dendronhq/common-all";
 import { getDurationMilliseconds } from "@dendronhq/common-server";
 import { HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
-import { CancellationToken, window } from "vscode";
+import { CancellationToken, CancellationTokenSource, window } from "vscode";
 import { Logger } from "../../logger";
 import { AnalyticsUtils } from "../../utils/analytics";
 import { DendronWorkspace } from "../../workspace";
@@ -75,15 +75,21 @@ export class NoteLookupProvider implements ILookupProviderV3 {
   }
 
   async provide(lc: LookupControllerV3) {
+    const ctx = "NoteLookupProvider.provide";
+    Logger.info({ ctx, msg: "enter" });
     const quickpick = lc.quickpick;
     const onUpdatePickerItems = _.bind(this.onUpdatePickerItems, this);
     const onUpdateDebounced = _.debounce(
       () => {
-        onUpdatePickerItems({
+        const ctx = "NoteLookupProvider.onUpdateDebounced";
+        Logger.debug({ ctx, msg: "enter" });
+        const out = onUpdatePickerItems({
           picker: quickpick,
           token: lc.createCancelSource().token,
           fuzzThreshold: lc.fuzzThreshold,
         } as OnUpdatePickerItemsOpts);
+        Logger.debug({ ctx, msg: "exit" });
+        return out;
       },
       100,
       {
@@ -91,14 +97,23 @@ export class NoteLookupProvider implements ILookupProviderV3 {
       }
     );
     quickpick.onDidChangeValue(onUpdateDebounced);
-    quickpick.onDidAccept(() => {
+
+    quickpick.onDidAccept(async () => {
       Logger.info({
         ctx: "NoteLookupProvider:onDidAccept",
         quickpick: quickpick.value,
       });
       onUpdateDebounced.cancel();
+      if (_.isEmpty(quickpick.selectedItems)) {
+        await onUpdatePickerItems({
+          picker: quickpick,
+          token: new CancellationTokenSource().token,
+          fuzzThreshold: lc.fuzzThreshold,
+        });
+      }
       this.onDidAccept({ quickpick, lc })();
     });
+    Logger.info({ ctx, msg: "exit" });
     return;
   }
 
@@ -115,7 +130,21 @@ export class NoteLookupProvider implements ILookupProviderV3 {
       const ctx = "LookupProvider:onDidAccept";
       const { quickpick: picker, lc } = opts;
       const nextPicker = picker.nextPicker;
-      if (nextPicker) {
+      let selectedItems = NotePickerUtils.getSelection(picker);
+      const isNewNotePick = PickerUtilsV2.isCreateNewNotePick(selectedItems[0]);
+      Logger.debug({
+        ctx,
+        selectedItems: selectedItems.map((item) => NoteUtils.toLogObj(item)),
+      });
+      // NOTE: if user presses <ENTER> before picker has a chance to process, this will be `[]`
+      // In this case we want to calculate picker item from current value
+      if (_.isEmpty(selectedItems)) {
+        selectedItems = await NotePickerUtils.fetchPickerResultsNoInput({
+          picker,
+        });
+      }
+
+      if (nextPicker && isNewNotePick) {
         picker.vault = await nextPicker();
         // check if we exited from selecting a vault
         if (_.isUndefined(picker.vault)) {
@@ -128,11 +157,6 @@ export class NoteLookupProvider implements ILookupProviderV3 {
           return;
         }
       }
-      const selectedItems = NotePickerUtils.getSelection(picker);
-      Logger.debug({
-        ctx,
-        selectedItems: selectedItems.map((item) => NoteUtils.toLogObj(item)),
-      });
       // last chance to cancel
       lc.cancelToken.cancel();
       if (!this.opts.noHidePickerOnAccept) {
@@ -189,8 +213,19 @@ export class NoteLookupProvider implements ILookupProviderV3 {
         : undefined;
 
     const engine = ws.getEngine();
-    Logger.info({ ctx, msg: "enter", queryOrig });
+    Logger.info({
+      ctx,
+      msg: "enter",
+      queryOrig,
+      justActivated: picker._justActivated,
+      prevQuickpickValue: picker.prevQuickpickValue,
+    });
+
     try {
+      if (picker.value === picker.prevQuickpickValue) {
+        Logger.debug({ ctx, msg: "picker value did not change" });
+        return;
+      }
       // if empty string, show all 1st level results
       if (querystring === "") {
         Logger.debug({ ctx, msg: "empty qs" });
@@ -311,6 +346,7 @@ export class NoteLookupProvider implements ILookupProviderV3 {
       picker.busy = false;
       picker._justActivated = false;
       picker.prevValue = picker.value;
+      picker.prevQuickpickValue = picker.value;
       Logger.info({
         ctx,
         msg: "exit",
@@ -509,6 +545,7 @@ export class SchemaLookupProvider implements ILookupProviderV3 {
       picker.busy = false;
       picker._justActivated = false;
       picker.prevValue = picker.value;
+      picker.prevQuickpickValue = picker.value;
       Logger.info({
         ctx,
         msg: "exit",

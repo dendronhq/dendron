@@ -1,67 +1,73 @@
 import {
+  DendronConfig,
   DNodePropsQuickInputV2,
-  DVault,
   DNodeUtils,
-  NoteUtils,
+  DVault,
   NoteQuickInput,
+  NoteUtils,
   Time,
 } from "@dendronhq/common-all";
+import { vault2Path } from "@dendronhq/common-server";
 import { NoteTestUtilsV4, NOTE_PRESETS_V4 } from "@dendronhq/common-test-utils";
 import {
   ENGINE_HOOKS,
   ENGINE_HOOKS_MULTI,
   TestEngineUtils,
 } from "@dendronhq/engine-test-utils";
+import fs from "fs-extra";
+import _ from "lodash";
+import { describe } from "mocha";
+import path from "path";
+import sinon from "sinon";
+// // You can import and use all API from the 'vscode' module
+// // as well as import your extension to test it
+import * as vscode from "vscode";
+import {
+  LookupEffectTypeEnum,
+  LookupNoteTypeEnum,
+  LookupSelectionTypeEnum,
+  LookupSplitTypeEnum,
+} from "../../commands/LookupCommand";
+import {
+  CommandOutput,
+  CommandRunOpts,
+  NoteLookupCommand,
+} from "../../commands/NoteLookupCommand";
+import {
+  ButtonType,
+  CopyNoteLinkBtn,
+  DendronBtn,
+  HorizontalSplitBtn,
+  JournalBtn,
+  ScratchBtn,
+  Selection2LinkBtn,
+  SelectionExtractBtn,
+} from "../../components/lookup/buttons";
+import {
+  createNoActiveItem,
+  NotePickerUtils,
+  PickerUtilsV2,
+} from "../../components/lookup/utils";
+import { CONFIG } from "../../constants";
+import { clipboard, VSCodeUtils } from "../../utils";
+import { DendronWorkspace } from "../../workspace";
 import {
   createMockQuickPick,
   getActiveEditorBasename,
   TIMEOUT,
 } from "../testUtils";
-import _ from "lodash";
-import { describe } from "mocha";
-// // You can import and use all API from the 'vscode' module
-// // as well as import your extension to test it
-import * as vscode from "vscode";
-import {
-  LookupNoteTypeEnum,
-  LookupSelectionTypeEnum,
-  LookupSplitTypeEnum,
-  LookupEffectTypeEnum,
-} from "../../commands/LookupCommand";
-import {
-  NoteLookupCommand,
-  CommandOutput,
-  CommandRunOpts,
-} from "../../commands/NoteLookupCommand";
-import {
-  JournalBtn,
-  ScratchBtn,
-  DendronBtn,
-  ButtonType,
-  Selection2LinkBtn,
-  SelectionExtractBtn,
-  CopyNoteLinkBtn,
-  HorizontalSplitBtn,
-} from "../../components/lookup/buttons";
-import { createNoActiveItem, PickerUtilsV2 } from "../../components/lookup/utils";
-import { clipboard, VSCodeUtils } from "../../utils";
 import { expect } from "../testUtilsv2";
 import {
   runLegacyMultiWorkspaceTest,
   setupBeforeAfter,
   withConfig,
 } from "../testUtilsV3";
-import { DendronWorkspace } from "../../workspace";
-import { CONFIG } from "../../constants";
-import sinon from "sinon";
-import { vault2Path } from "@dendronhq/common-server";
-import fs from "fs-extra";
-import path from "path";
 
 const stubVaultPick = (vaults: DVault[]) => {
   const vault = _.find(vaults, { fsPath: "vault1" });
-  sinon.stub(PickerUtilsV2, "promptVault").returns(Promise.resolve(vault));
-  return vault;
+  return sinon
+    .stub(PickerUtilsV2, "promptVault")
+    .returns(Promise.resolve(vault));
 };
 
 // @ts-ignore
@@ -252,7 +258,7 @@ suite("NoteLookupCommand", function () {
           done();
         },
       });
-    })
+    });
   });
 
   describe("onAccept", () => {
@@ -420,7 +426,7 @@ suite("NoteLookupCommand", function () {
             selectedItems: [createNoActiveItem(vaults[0])],
           });
           mockQuickPick.showNote = enrichOut?.quickpick.showNote;
-          
+
           await cmd.execute({
             ...enrichOut!,
             quickpick: mockQuickPick,
@@ -429,6 +435,101 @@ suite("NoteLookupCommand", function () {
           const newNote = VSCodeUtils.getNoteFromDocument(document!);
           expect(_.trim(newNote!.body)).toEqual("Template text");
 
+          done();
+        },
+      });
+    });
+
+    test("on accept, nothing selected", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+        },
+        onInit: async ({ vaults }) => {
+          const cmd = new NoteLookupCommand();
+          stubVaultPick(vaults);
+          const spyFetchPickerResultsNoInput = sinon.spy(
+            NotePickerUtils,
+            "fetchPickerResultsNoInput"
+          );
+          const { quickpick, provider, controller } = await cmd.gatherInputs({
+            noConfirm: true,
+            initialValue: "foo",
+          });
+          await provider.onDidAccept({ quickpick, lc: controller })();
+          expect(spyFetchPickerResultsNoInput.calledOnce).toBeTruthy();
+          done();
+        },
+      });
+    });
+  });
+
+  describe("onAccept with lookupConfirmVaultOnCreate", () => {
+    const modConfigCb = (config: DendronConfig) => {
+      config.lookupConfirmVaultOnCreate = true;
+      return config;
+    };
+    test("turned off, existing note", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+        },
+        onInit: async ({ vaults }) => {
+          const cmd = new NoteLookupCommand();
+          const promptVaultSpy = stubVaultPick(vaults);
+          await cmd.run({ noConfirm: true, initialValue: "foo" });
+          expect(promptVaultSpy.calledOnce).toBeFalsy();
+          done();
+        },
+      });
+    });
+    test("turned off, new note", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+        },
+        onInit: async ({ vaults }) => {
+          const cmd = new NoteLookupCommand();
+          const promptVaultSpy = stubVaultPick(vaults);
+          await cmd.run({ noConfirm: true, initialValue: "foo" });
+          expect(promptVaultSpy.calledOnce).toBeFalsy();
+          done();
+        },
+      });
+    });
+
+    test("turned on, existing note", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        modConfigCb,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+        },
+        onInit: async ({ vaults }) => {
+          const cmd = new NoteLookupCommand();
+          const promptVaultSpy = stubVaultPick(vaults);
+          await cmd.run({ noConfirm: true, initialValue: "foo" });
+          expect(promptVaultSpy.calledOnce).toBeFalsy();
+          done();
+        },
+      });
+    });
+
+    test("turned on, new note", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        modConfigCb,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+        },
+        onInit: async ({ vaults }) => {
+          const cmd = new NoteLookupCommand();
+          const promptVaultSpy = stubVaultPick(vaults);
+          await cmd.run({ noConfirm: true, initialValue: "gamma" });
+          expect(promptVaultSpy.calledOnce).toBeTruthy();
           done();
         },
       });
@@ -459,7 +560,9 @@ suite("NoteLookupCommand", function () {
           expect(out.quickpick.value).toEqual(noteName);
 
           // note title should be overriden.
-          const note = VSCodeUtils.getNoteFromDocument(VSCodeUtils.getActiveTextEditor()!.document);
+          const note = VSCodeUtils.getNoteFromDocument(
+            VSCodeUtils.getActiveTextEditor()!.document
+          );
           const titleOverride = today.split(".").join("-");
           expect(note!.title).toEqual(titleOverride);
 

@@ -23,7 +23,7 @@ import { QuickPickItem, TextEditor, Uri, ViewColumn, window } from "vscode";
 import { VaultSelectionMode } from "../../commands/LookupCommand";
 import { Logger } from "../../logger";
 import { VSCodeUtils } from "../../utils";
-import { DendronWorkspace, getWS } from "../../workspace";
+import { DendronWorkspace, getEngine, getWS } from "../../workspace";
 import { DendronBtn, getButtonCategory } from "./buttons";
 import {
   CREATE_NEW_DETAIL,
@@ -659,6 +659,11 @@ export class PickerUtilsV2 {
     delete picker.allResults;
   }
 
+  /**
+   @deprecated use {@link NoteLookupUtils.slashToDot}
+   * @param ent
+   * @returns 
+   */
   static slashToDot(ent: string) {
     return ent.replace(/\//g, ".");
   }
@@ -706,6 +711,34 @@ export class NotePickerUtils {
       });
     });
   };
+
+  /**
+   * Get picker results without input from the user
+   */
+  static async fetchPickerResultsNoInput({
+    picker,
+  }: {
+    picker: DendronQuickPickerV2;
+  }) {
+    const engine = getEngine();
+    const resp = await NoteLookupUtils.lookup({
+      qs: picker.value,
+      engine,
+      showDirectChildrenOnly: picker.showDirectChildrenOnly,
+    });
+    const note = resp[0];
+    const perfectMatch = note.fname === picker.value;
+    return !perfectMatch
+      ? [NotePickerUtils.createNoActiveItem({} as any)]
+      : [
+          DNodeUtils.enhancePropForQuickInputV3({
+            wsRoot: DendronWorkspace.wsRoot(),
+            props: note,
+            schemas: engine.schemas,
+            vaults: DendronWorkspace.instance().vaultsv4,
+          }),
+        ];
+  }
 
   static async fetchPickerResults(opts: {
     picker: DendronQuickPickerV2;

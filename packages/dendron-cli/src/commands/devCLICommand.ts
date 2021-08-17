@@ -22,6 +22,7 @@ type CommandCLIOpts = {
 export enum DevCommands {
   GENERATE_JSON_SCHEMA_FROM_CONFIG = "generate_json_schema_from_config",
   BUILD = "build",
+  PUBLISH = "publish",
   SYNC_ASSETS = "sync_assets",
   PREP_PLUGIN = "prep_plugin",
   PACKAGE_PLUGIN = "package_plugin",
@@ -138,6 +139,11 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
         }
         case DevCommands.SYNC_ASSETS: {
           await this.syncAssets();
+          return { error: null };
+        }
+        case DevCommands.PUBLISH: {
+          await BuildUtils.prepPublishRemote();
+          LernaUtils.publishVersion();
           return { error: null };
         }
         case DevCommands.PREP_PLUGIN: {

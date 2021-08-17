@@ -29,6 +29,10 @@ export const CONSTANTS = {
    * Initial version for first installaion
    */
   DENDRON_INIT_VERSION: "0.0.0",
+  /** Files larger than this size (in characters) don't get parsed for links,
+   * link candidates, and anchors. Currently about 1MiB, although may be larger
+   * due to unicode since it's counted in characters. */
+  DENDRON_FILE_TOO_BIG: 2 ** 20,
 };
 
 export enum ERROR_STATUS {

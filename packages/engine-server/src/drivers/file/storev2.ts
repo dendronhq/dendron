@@ -1,6 +1,7 @@
 import {
   assert,
   BulkAddNoteOpts,
+  CONSTANTS,
   DendronCompositeError,
   DendronConfig,
   DendronError,
@@ -391,12 +392,14 @@ export class FileStorage implements DStore {
     const notesMap = NoteUtils.createFnameNoteMap(allNotes, true);
     return _.map(allNotes, (noteFrom: NoteProps) => {
       try {
-        const linkCandidates = LinkUtils.findLinkCandidates({
-          note: noteFrom,
-          notesMap,
-          engine: this.engine,
-        });
-        noteFrom.links = noteFrom.links.concat(linkCandidates);
+        if (noteFrom.body.length < CONSTANTS.DENDRON_FILE_TOO_BIG) {
+          const linkCandidates = LinkUtils.findLinkCandidates({
+            note: noteFrom,
+            notesMap,
+            engine: this.engine,
+          });
+          noteFrom.links = noteFrom.links.concat(linkCandidates);
+        }
       } catch (err) {
         const error = error2PlainObject(err);
         this.logger.error({
@@ -445,6 +448,25 @@ export class FileStorage implements DStore {
       notes.map(async (n) => {
         this.logger.debug({ ctx, note: NoteUtils.toLogObj(n) });
         if (n.stub) {
+          return;
+        }
+        if (n.body.length >= CONSTANTS.DENDRON_FILE_TOO_BIG) {
+          this.logger.info({
+            ctx,
+            msg: "Note too large, skipping",
+            note: NoteUtils.toLogObj(n),
+            length: n.body.length,
+          });
+          errors.push(
+            new DendronError({
+              message: `Note ${n.fname} in vault ${VaultUtils.getName(
+                n.vault
+              )} is too large, some features like backlinks may not work correctly for it.`,
+              severity: ERROR_SEVERITY.MINOR,
+            })
+          );
+          n.links = [];
+          n.anchors = {};
           return;
         }
         if (_.has(cacheUpdates, n.fname)) {

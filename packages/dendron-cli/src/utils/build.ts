@@ -132,7 +132,8 @@ export class BuildUtils {
   }
 
   static installPluginDependencies() {
-    fs.removeSync(path.join(this.getPluginRootPath(), "package.json"));
+    // remove root package.json before installing locally
+    fs.removeSync(path.join(this.getLernaRoot(), "package.json"));
     return $(`yarn install --no-lockfile`, { cwd: this.getPluginRootPath() });
   }
 

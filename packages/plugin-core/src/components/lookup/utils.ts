@@ -713,7 +713,7 @@ export class NotePickerUtils {
   };
 
   /**
-   * Get picker results without input from the user
+   * Get picker results with current picker value
    */
   static async fetchPickerResultsNoInput({
     picker,

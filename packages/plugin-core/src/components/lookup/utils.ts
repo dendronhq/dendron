@@ -389,6 +389,24 @@ export class PickerUtilsV2 {
     return _.find(items, { label: CREATE_NEW_LABEL });
   };
 
+  /**
+   * Check if this picker still has further pickers
+   */
+  static hasNextPicker = (
+    quickpick: DendronQuickPickerV2,
+    opts: {
+      selectedItems: readonly DNodePropsQuickInputV2[];
+      providerId: string;
+    }
+  ): quickpick is Required<DendronQuickPickerV2> => {
+    const { selectedItems, providerId } = opts;
+    const nextPicker = quickpick.nextPicker;
+    const isNewPick = PickerUtilsV2.isCreateNewNotePick(selectedItems[0]);
+    return (
+      !_.isUndefined(nextPicker) && (providerId === "lookup" ? isNewPick : true)
+    );
+  };
+
   static isCreateNewNotePickForSingle(node: DNodePropsQuickInputV2): boolean {
     if (!node) {
       return true;

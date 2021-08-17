@@ -8,24 +8,25 @@ import {
   SchemaUtils,
   VSCodeEvents,
 } from "@dendronhq/common-all";
+import { getDurationMilliseconds } from "@dendronhq/common-server";
 import { DConfig, HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
-import { getDurationMilliseconds } from "@dendronhq/common-server";
 import { Uri } from "vscode";
 import {
-  DirectChildFilterBtn,
-  JournalBtn,
-  ScratchBtn,
-  MultiSelectBtn,
   CopyNoteLinkBtn,
+  DirectChildFilterBtn,
+  HorizontalSplitBtn,
+  JournalBtn,
+  MultiSelectBtn,
+  ScratchBtn,
   Selection2LinkBtn,
   SelectionExtractBtn,
-  HorizontalSplitBtn,
 } from "../components/lookup/buttons";
 import { LookupControllerV3 } from "../components/lookup/LookupControllerV3";
 import {
   ILookupProviderV3,
   NoteLookupProvider,
+  NoteLookupProviderChangeStateResp,
   NoteLookupProviderSuccessResp,
 } from "../components/lookup/LookupProviderV3";
 import { DendronQuickPickerV2 } from "../components/lookup/types";
@@ -254,21 +255,24 @@ export class NoteLookupCommand extends BaseCommand<
   getSelected({
     quickpick,
     selectedItems,
-  }: Pick<CommandOpts, "selectedItems"|"quickpick">): readonly NoteQuickInput[] {
+  }: Pick<
+    CommandOpts,
+    "selectedItems" | "quickpick"
+  >): readonly NoteQuickInput[] {
     const maybeCreateNew = PickerUtilsV2.getCreateNewItem(selectedItems);
-    const {nonInteractive, canSelectMany} = quickpick;
+    const { nonInteractive, canSelectMany } = quickpick;
     if (nonInteractive && maybeCreateNew) {
       return [maybeCreateNew];
     }
-    return canSelectMany
-      ? selectedItems
-      : selectedItems.slice(0, 1);
+    return canSelectMany ? selectedItems : selectedItems.slice(0, 1);
   }
 
   async execute(opts: CommandOpts) {
+    const ctx = "NoteLookupCommand:execute";
+    Logger.info({ ctx, msg: "enter" });
     try {
       const { quickpick, selectedItems } = opts;
-      const selected = this.getSelected({quickpick, selectedItems});
+      const selected = this.getSelected({ quickpick, selectedItems });
       const out = await Promise.all(
         selected.map((item) => {
           return this.acceptItem(item);
@@ -287,6 +291,7 @@ export class NoteLookupCommand extends BaseCommand<
       );
     } finally {
       opts.controller.onHide();
+      Logger.info({ ctx, msg: "exit" });
     }
     return opts;
   }
@@ -363,7 +368,8 @@ export class NoteLookupCommand extends BaseCommand<
     }
 
     const maybeJournalTitleOverride = this.journalTitleOverride();
-    if (!_.isUndefined(maybeJournalTitleOverride)) nodeNew.title = maybeJournalTitleOverride;
+    if (!_.isUndefined(maybeJournalTitleOverride))
+      nodeNew.title = maybeJournalTitleOverride;
 
     const resp = await engine.writeNote(nodeNew, {
       newNode: true,
@@ -378,7 +384,7 @@ export class NoteLookupCommand extends BaseCommand<
     });
     return { uri, node: nodeNew, resp };
   }
- 
+
   /**
    * this is a hacky title override for journal notes.
    * TODO: remove this once we implement a more general way to override note titles.
@@ -389,15 +395,17 @@ export class NoteLookupCommand extends BaseCommand<
    */
   journalTitleOverride(): string | undefined {
     const journalBtn = _.find(this.controller.state.buttons, (btn) => {
-      return btn.type === LookupNoteTypeEnum.journal
+      return btn.type === LookupNoteTypeEnum.journal;
     });
     if (journalBtn?.pressed) {
       const quickpick = this.controller.quickpick;
 
       // note modifier value exists, and nothing else after that.
-      if (quickpick.noteModifierValue && 
-          quickpick.value.split(quickpick.noteModifierValue).slice(-1)[0] === "") {
-        const [, ...maybeDatePortion ] = quickpick.noteModifierValue.split(".")
+      if (
+        quickpick.noteModifierValue &&
+        quickpick.value.split(quickpick.noteModifierValue).slice(-1)[0] === ""
+      ) {
+        const [, ...maybeDatePortion] = quickpick.noteModifierValue.split(".");
         // we only override y.MM.dd
         if (maybeDatePortion.length === 3) {
           const maybeTitleOverride = maybeDatePortion.join("-");

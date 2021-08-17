@@ -58,6 +58,9 @@ export type NoteLookupProviderSuccessResp<T = never> = {
   onAcceptHookResp: T[];
   cancel?: boolean;
 };
+export type NoteLookupProviderChangeStateResp = {
+  action: "hide";
+};
 
 export type SchemaLookupProviderSuccessResp<T = never> = {
   selectedItems: readonly SchemaQuickInput[];
@@ -129,9 +132,7 @@ export class NoteLookupProvider implements ILookupProviderV3 {
     return async () => {
       const ctx = "LookupProvider:onDidAccept";
       const { quickpick: picker, lc } = opts;
-      const nextPicker = picker.nextPicker;
       let selectedItems = NotePickerUtils.getSelection(picker);
-      const isNewNotePick = PickerUtilsV2.isCreateNewNotePick(selectedItems[0]);
       Logger.debug({
         ctx,
         selectedItems: selectedItems.map((item) => NoteUtils.toLogObj(item)),
@@ -143,10 +144,14 @@ export class NoteLookupProvider implements ILookupProviderV3 {
           picker,
         });
       }
-
       // when doing lookup, opening existing notes don't require vault picker
-      if (nextPicker && (this.id === "lookup" ? isNewNotePick : true)) {
-        picker.vault = await nextPicker();
+      if (
+        PickerUtilsV2.hasNextPicker(picker, {
+          selectedItems,
+          providerId: this.id,
+        })
+      ) {
+        picker.vault = await picker.nextPicker();
         // check if we exited from selecting a vault
         if (_.isUndefined(picker.vault)) {
           HistoryService.instance().add({

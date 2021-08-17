@@ -211,76 +211,76 @@ export class NoteLookupCommand extends BaseCommand<
     opts: CommandGatherOutput
   ): Promise<CommandOpts | undefined> {
     const ctx = "NoteLookupCommand:enrichInputs";
-    return new Promise((resolve) => {
-      const start = process.hrtime();
-      HistoryService.instance().subscribev2("lookupProvider", {
-        id: "lookup",
-        listener: async (event) => {
-          if (event.action === "done") {
-            const data =
-              event.data as NoteLookupProviderSuccessResp<OldNewLocation>;
-            if (data.cancel) {
-              this.cleanUp();
-              resolve(undefined);
-            }
-            const _opts: CommandOpts = {
-              selectedItems: data.selectedItems,
-              ...opts,
-            };
-            resolve(_opts);
-          } else if (event.action === "changeState") {
-            const data = event.data as NoteLookupProviderChangeStateResp;
 
-            // check if we hid the picker and there is no next picker
-            if (data.action === "hide") {
-              const { quickpick } = opts;
-              Logger.debug({
-                ctx,
-                subscribers: HistoryService.instance().subscribersv2,
-              });
-              // check if user has hidden picker
-              if (
-                !_.includes(
-                  [
-                    DendronQuickPickState.PENDING_NEXT_PICK,
-                    DendronQuickPickState.FUFILLED,
-                  ],
-                  quickpick.state
-                )
-              ) {
-                this.cleanUp();
-                resolve(undefined);
-              }
-            }
-            // don't remove the lookup provider
-            return;
-          } else if (event.action === "error") {
-            const error = event.data.error as DendronError;
-            this.L.error({ error });
+    let promiseResolve: (
+      value: CommandOpts | undefined
+    ) => PromiseLike<CommandOpts | undefined>;
+    HistoryService.instance().subscribev2("lookupProvider", {
+      id: "lookup",
+      listener: async (event) => {
+        if (event.action === "done") {
+          const data =
+            event.data as NoteLookupProviderSuccessResp<OldNewLocation>;
+          if (data.cancel) {
             this.cleanUp();
-            resolve(undefined);
-          } else {
-            const error = new DendronError({
-              message: `unexpected event: ${event}`,
-            });
-            this.L.error({ error });
-            this.cleanUp();
+            promiseResolve(undefined);
           }
-        },
-      });
+          const _opts: CommandOpts = {
+            selectedItems: data.selectedItems,
+            ...opts,
+          };
+          promiseResolve(_opts);
+        } else if (event.action === "changeState") {
+          const data = event.data as NoteLookupProviderChangeStateResp;
 
-      // show quickpick (maybe)
+          // check if we hid the picker and there is no next picker
+          if (data.action === "hide") {
+            const { quickpick } = opts;
+            Logger.debug({
+              ctx,
+              subscribers: HistoryService.instance().subscribersv2,
+            });
+            // check if user has hidden picker
+            if (
+              !_.includes(
+                [
+                  DendronQuickPickState.PENDING_NEXT_PICK,
+                  DendronQuickPickState.FUFILLED,
+                ],
+                quickpick.state
+              )
+            ) {
+              this.cleanUp();
+              promiseResolve(undefined);
+            }
+          }
+          // don't remove the lookup provider
+          return;
+        } else if (event.action === "error") {
+          const error = event.data.error as DendronError;
+          this.L.error({ error });
+          this.cleanUp();
+          promiseResolve(undefined);
+        } else {
+          const error = new DendronError({
+            message: `unexpected event: ${event}`,
+          });
+          this.L.error({ error });
+          this.cleanUp();
+        }
+      },
+    });
+
+    const promise = new Promise<CommandOpts | undefined>((resolve) => {
+      promiseResolve = resolve as typeof promiseResolve;
       opts.controller.showQuickPick({
         provider: opts.provider,
         quickpick: opts.quickpick,
         nonInteractive: opts.noConfirm,
         fuzzThreshold: opts.fuzzThreshold,
       });
-      const profile = getDurationMilliseconds(start);
-      AnalyticsUtils.track(VSCodeEvents.NoteLookup_Show, {
-        duration: profile,
-      });
     });
+    return promise;
   }
 
   getSelected({

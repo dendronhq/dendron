@@ -32,7 +32,7 @@ import { dendronPreview, dendronHoverPreview } from "./remark/dendronPreview";
 import { dendronPub } from "./remark/dendronPub";
 import { noteRefsV2 } from "./remark/noteRefsV2";
 import { wikiLinks } from "./remark/wikiLinks";
-import { DendronASTDest } from "./types";
+import { DendronASTData, DendronASTDest } from "./types";
 import { MDUtilsV4 } from "./utils";
 import { hashtags } from "./remark/hashtag";
 import { backlinks } from "./remark/backlinks";
@@ -264,14 +264,16 @@ export class MDUtilsV5 {
           this.setProcData(proc, data as ProcDataFullV5);
           MDUtilsV4.setEngine(proc, data.engine!);
 
+          const isNoteRef = !_.isUndefined((data as ProcDataFullV5).noteRefLvl);
+
+          const shouldInsertTitle = isNoteRef ? false : data.config?.useFMTitle;
           // NOTE: order matters. this needs to appear before `dendronPub`
           if (data.dest === DendronASTDest.HTML) {
             proc = proc.use(backlinks).use(hierarchies);
           }
-
           // add additional plugins
           proc = proc.use(dendronPub, {
-            insertTitle: data.config?.useFMTitle,
+            insertTitle: shouldInsertTitle,
           });
           if (data.config?.useKatex) {
             proc = proc.use(math);

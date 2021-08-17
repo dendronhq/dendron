@@ -86,6 +86,9 @@ export class DendronError extends Error implements IDendronError {
     }
     this.code = code;
     this.error = error;
+    if (error) {
+      this.stack = error.stack;
+    }
   }
 }
 

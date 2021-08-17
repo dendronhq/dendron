@@ -12,8 +12,7 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div><h1 id=\\"alpha\\">Alpha</h1>
-<p><a href=\\"bar.html\\">Bar</a></p>
+<div class=\\"portal-parent-fader-bottom\\"></div><p><a href=\\"bar.html\\">Bar</a></p>
 </div></div><p></p><p></p>
 <hr>
 <h2 id=\\"children\\">Children</h2>
@@ -39,8 +38,7 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div><h1 id=\\"alpha\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#alpha\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Alpha</h1>
-<p><a href=\\"bar.html\\">Bar</a></p>
+<div class=\\"portal-parent-fader-bottom\\"></div><p><a href=\\"bar.html\\">Bar</a></p>
 </div></div><p></p><p></p>
 <hr>
 <h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
@@ -66,8 +64,7 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div><h1 id=\\"alpha\\">Alpha</h1>
-<p><a href=\\"bar.html\\">Bar</a></p>
+<div class=\\"portal-parent-fader-bottom\\"></div><p><a href=\\"bar.html\\">Bar</a></p>
 </div></div><p></p><p></p>
 <hr>
 <h2 id=\\"children\\">Children</h2>

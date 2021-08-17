@@ -18,7 +18,7 @@ import {
 suite("CopyNoteUrl", function () {
   const rootUrl = "dendron.so";
 
- const ctx: vscode.ExtensionContext = setupBeforeAfter(this);
+  const ctx: vscode.ExtensionContext = setupBeforeAfter(this);
 
   test("with override", (done) => {
     runLegacyMultiWorkspaceTest({
@@ -124,7 +124,7 @@ suite("CopyNoteUrl", function () {
           modifySeed: (seed) => {
             seed.site = {
               url: "https://foo.com",
-              index: "foo",
+              index: "root",
             };
             return seed;
           },
@@ -161,10 +161,10 @@ suite("CopyNoteUrl", function () {
         const { vaults, wsRoot } = opts;
         const vault = vaults[0];
         await ENGINE_HOOKS.setupBasic(opts);
-          await NOTE_PRESETS_V4.NOTE_WITH_ANCHOR_TARGET.create({
-            wsRoot,
-            vault,
-          });
+        await NOTE_PRESETS_V4.NOTE_WITH_ANCHOR_TARGET.create({
+          wsRoot,
+          vault,
+        });
       },
       onInit: async ({ vaults }) => {
         const vault = vaults[0];
@@ -190,9 +190,9 @@ suite("CopyNoteUrl", function () {
         const vault = vaults[0];
         await ENGINE_HOOKS.setupBasic(opts);
         await NOTE_PRESETS_V4.NOTE_WITH_BLOCK_ANCHOR_TARGET.create({
-            wsRoot,
-            vault,
-          });
+          wsRoot,
+          vault,
+        });
       },
       onInit: async ({ vaults }) => {
         const vault = vaults[0];

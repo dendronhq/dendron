@@ -78,15 +78,11 @@ export class WorkspaceUtils {
     note: NoteProps;
     vault: DVault;
     urlRoot?: string;
-    maybeNote?: NoteProps;
     anchor?: string;
   }) {
     const { config, note, anchor, vault } = opts;
-    let { urlRoot, maybeNote } = opts;
+    let { urlRoot } = opts;
     const notePrefix = "notes";
-    if (_.isUndefined(maybeNote)) {
-      maybeNote = note;
-    }
     /**
      * set to true if index node, don't append id at the end
      */
@@ -97,11 +93,11 @@ export class WorkspaceUtils {
         const maybeSite = config.seeds[vault.seed]?.site;
         if (maybeSite) {
           urlRoot = maybeSite.url;
-          if (!_.isUndefined(maybeNote)) {
+          if (!_.isUndefined(note)) {
             // if custom index is set, match against that, otherwise `root` is default index
             isIndex = maybeSite.index
-              ? maybeNote.fname === maybeSite.index
-              : DNodeUtils.isRoot(maybeNote);
+              ? note.fname === maybeSite.index
+              : DNodeUtils.isRoot(note);
           }
         }
       }

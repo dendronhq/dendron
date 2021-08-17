@@ -44,10 +44,11 @@ export class CopyNoteURLCommand extends BasicCommand<
     }
     const vault = VSCodeUtils.getVaultFromDocument(maybeTextEditor.document);
 
-    const maybeNote = VSCodeUtils.getNoteFromDocument(
-      maybeTextEditor.document
-    );
-
+    const maybeNote = VSCodeUtils.getNoteFromDocument(maybeTextEditor.document);
+    if (_.isUndefined(maybeNote)) {
+      window.showErrorMessage("You need to be in a note to use this command");
+      return;
+    }
     const fname = path.basename(maybeTextEditor.document.uri.fsPath, ".md");
     const engine = getEngine();
     const note = _.find(engine.notes, { fname });
@@ -59,19 +60,18 @@ export class CopyNoteURLCommand extends BasicCommand<
     const { selection, editor } = VSCodeUtils.getSelection();
     let anchor;
     if (selection) {
-       anchor = getAnchorAt({
+      anchor = getAnchorAt({
         editor: editor!,
         position: selection.start,
         engine,
       });
     }
-   
+
     const link = WorkspaceUtils.getNoteUrl({
       config,
       note,
       vault,
       urlRoot,
-      maybeNote,
       anchor,
     });
 

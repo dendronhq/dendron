@@ -503,6 +503,7 @@ export type WorkspaceVault = {
 export type WorkspaceOpts = {
   wsRoot: string;
   vaults: DVault[];
+  dendronConfig? : DendronConfig
 };
 
 /**

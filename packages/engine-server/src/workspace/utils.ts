@@ -1,4 +1,14 @@
-import { NoteProps, VaultUtils, WorkspaceOpts } from "@dendronhq/common-all";
+import {
+  DendronConfig,
+  DNodeUtils,
+  DVault,
+  getSlugger,
+  isBlockAnchor,
+  NoteProps,
+  VaultUtils,
+  WorkspaceOpts,
+  DendronError,
+} from "@dendronhq/common-all";
 import { findUpTo, genHash } from "@dendronhq/common-server";
 import _ from "lodash";
 
@@ -56,5 +66,58 @@ export class WorkspaceUtils {
       return true;
     }
     return noteHash !== note.contentHash;
+  }
+
+  /**
+   * Generate url for given note or return `undefined` if no url is specified
+   * @param opts
+   *
+   */
+  static getNoteUrl(opts: {
+    config: DendronConfig;
+    note: NoteProps;
+    vault: DVault;
+    urlRoot?: string;
+    anchor?: string;
+  }) {
+    const { config, note, anchor, vault } = opts;
+    let { urlRoot } = opts;
+    const notePrefix = "notes";
+    /**
+     * set to true if index node, don't append id at the end
+     */
+    let isIndex: boolean = false;
+
+    if (vault.seed) {
+      if (config.seeds && config.seeds[vault.seed]) {
+        const maybeSite = config.seeds[vault.seed]?.site;
+        if (maybeSite) {
+          urlRoot = maybeSite.url;
+          if (!_.isUndefined(note)) {
+            // if custom index is set, match against that, otherwise `root` is default index
+            isIndex = maybeSite.index
+              ? note.fname === maybeSite.index
+              : DNodeUtils.isRoot(note);
+          }
+        }
+      }
+    }
+    let root = "";
+    if (!_.isUndefined(urlRoot)) {
+      root = urlRoot;
+    } else {
+      // assume github
+      throw new DendronError({ message: "not implemented" });
+    }
+    let link = isIndex ? root : [root, notePrefix, note.id + ".html"].join("/");
+
+    if (anchor) {
+      if (!isBlockAnchor(anchor)) {
+        link += `#${getSlugger().slug(anchor)}`;
+      } else {
+        link += `#${anchor}`;
+      }
+    }
+    return link;
   }
 }

@@ -320,20 +320,32 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
   }
 }
 
-export class MarkdownPublishPod extends PublishPod {
+type MarkdownPublishPodConfig = PublishPodConfig & {
+  wikiLinkToURL?: boolean;
+};
+
+export class MarkdownPublishPod extends PublishPod<MarkdownPublishPodConfig> {
   static id: string = ID;
   static description: string = "publish markdown";
 
-  get config(): JSONSchemaType<PublishPodConfig> {
+  get config(): JSONSchemaType<MarkdownPublishPodConfig> {
     return PodUtils.createPublishConfig({
       required: [],
-      properties: {},
-    }) as JSONSchemaType<PublishPodConfig>;
+      properties: {
+        wikiLinkToURL: {
+          type: "boolean",
+          description: "convert all the wikilinks to URL",
+          default: "false",
+          nullable: true,
+        },
+      },
+    }) as JSONSchemaType<MarkdownPublishPodConfig>;
   }
 
   async plant(opts: PublishPodPlantOpts) {
-    const { engine, note } = opts;
-    const remark = MDUtilsV4.procFull({
+    const { engine, note, config, dendronConfig } = opts;
+    const { wikiLinkToURL = false } = config;
+    let remark = MDUtilsV4.procFull({
       dest: DendronASTDest.MD_REGULAR,
       config: {
         ...engine.config,
@@ -343,7 +355,14 @@ export class MarkdownPublishPod extends PublishPod {
       fname: note.fname,
       vault: note.vault,
       shouldApplyPublishRules: false,
-    }).use(RemarkUtils.convertLinksFromDotNotation(note, []));
+    });
+    if (wikiLinkToURL && !_.isUndefined(dendronConfig)) {
+      remark = remark.use(
+        RemarkUtils.convertWikiLinkToNoteUrl(note, [], engine, dendronConfig)
+      );
+    } else {
+      remark = remark.use(RemarkUtils.convertLinksFromDotNotation(note, []));
+    }
     const out = remark.processSync(note.body).toString();
     return _.trim(out);
   }
@@ -377,7 +396,7 @@ export class MarkdownExportPod extends ExportPod {
         const body = await mdPublishPod.plant({ ...opts, note });
         const hpath = dot2Slash(note.fname) + ".md";
         const vname = VaultUtils.getName(note.vault);
-        let fpath = path.join(podDstPath, vname, hpath);
+        const fpath = path.join(podDstPath, vname, hpath);
         // fpath = _.isEmpty(note.children)
         //   ? fpath + ".md"
         //   : path.join(fpath, "index.md");

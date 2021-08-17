@@ -648,6 +648,44 @@ export class NoteUtils {
     return out;
   }
 
+  /** If `to vault` is defined, returns note from that vault
+   *  else searches all the vaults, to get the note with matching fname.
+   * If more than one notes are with same fname, returns the note with same vault as `fromVault` */
+
+  static getNoteFromMultiVault(opts: {
+    fname: string;
+    notes: NotePropsDict | NoteProps[];
+    fromVault: DVault;
+    wsRoot: string;
+    toVault?: DVault;
+  }) {
+    const { fname, notes, fromVault, toVault, wsRoot } = opts;
+    let existingNote: NoteProps | undefined;
+    const maybeNotes = NoteUtils.getNotesByFname({
+      fname,
+      notes,
+      vault: toVault,
+    });
+
+    if (maybeNotes.length > 1) {
+      // If there are multiple notes with this fname, default to one that's in the same vault first.
+      const sameVaultNote = _.filter(maybeNotes, (n) =>
+        VaultUtils.isEqual(n.vault, fromVault, wsRoot)
+      )[0];
+      if (!_.isUndefined(sameVaultNote)) {
+        // There is a note that's within the same vault, let's go with that.
+        existingNote = sameVaultNote;
+      } else {
+        // Otherwise, just pick one, doesn't matter which.
+        existingNote = maybeNotes[0];
+      }
+    } else {
+      // Just 1 note
+      existingNote = maybeNotes[0];
+    }
+    return existingNote;
+  }
+
   static getNoteOrThrow({
     fname,
     notes,

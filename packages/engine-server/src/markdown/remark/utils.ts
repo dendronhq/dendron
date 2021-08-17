@@ -26,6 +26,8 @@ import {
   LINK_CONTENTS,
   LINK_NAME,
   ALIAS_NAME,
+  DendronConfig,
+  DVault,
 } from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-server";
 import _ from "lodash";
@@ -48,6 +50,7 @@ import { selectAll } from "unist-util-select";
 import visit from "unist-util-visit";
 import { VFile } from "vfile";
 import { normalizev2 } from "../../utils";
+import { WorkspaceUtils } from "../../workspace";
 import {
   Anchor,
   BlockAnchor,
@@ -762,7 +765,7 @@ export class AnchorUtils {
       const error = DendronError.createFromStatus({
         status: ERROR_STATUS.UNKNOWN,
         payload: { note: NoteUtils.toLogObj(opts.note), wsRoot: opts.wsRoot },
-        error: err,
+        error: err as Error,
       });
       createLogger("AnchorUtils").error(error);
       return {};
@@ -953,6 +956,67 @@ export class RemarkUtils {
           linkNode.value = newValue;
         });
         //TODO: Add support for Ref Notes and Block Links
+
+        if (dirty) {
+          changes.push({
+            note,
+            status: "update",
+          });
+        }
+      };
+    };
+  }
+
+  static convertWikiLinkToNoteUrl(
+    note: NoteProps,
+    changes: NoteChangeEntry[],
+    engine: DEngineClient,
+    dendronConfig: DendronConfig
+  ) {
+    return function (this: Processor) {
+      return (tree: Node, _vfile: VFile) => {
+        const root = tree as DendronASTRoot;
+        const wikiLinks: WikiLinkNoteV4[] = selectAll(
+          DendronASTTypes.WIKI_LINK,
+          root
+        ) as WikiLinkNoteV4[];
+
+        /** used findLinks to get vault of wikilink */
+        const links = LinkUtils.findLinks({ note, engine }).filter(
+          (linkNode) => linkNode.type === "wiki"
+        );
+        let dirty = false;
+
+        links.forEach((linkNode, i) => {
+          let vault: DVault | undefined;
+
+          // If the link specifies a vault, we should only look at that vault
+          if (linkNode.to && !_.isUndefined(linkNode.to?.vaultName)) {
+            vault = VaultUtils.getVaultByName({
+              vaults: engine.vaults,
+              vname: linkNode.to?.vaultName,
+            });
+          }
+          const existingNote = NoteUtils.getNoteFromMultiVault({
+            fname: linkNode.value,
+            notes: engine.notes,
+            fromVault: note.vault,
+            toVault: vault,
+            wsRoot: engine.wsRoot,
+          });
+          if (existingNote) {
+            const urlRoot = dendronConfig.site?.siteUrl || "";
+            const { vault } = existingNote;
+            wikiLinks[i]["value"] = WorkspaceUtils.getNoteUrl({
+              config: dendronConfig,
+              note: existingNote,
+              vault,
+              urlRoot,
+              anchor: linkNode.to?.anchorHeader,
+            });
+            dirty = true;
+          }
+        });
 
         if (dirty) {
           changes.push({

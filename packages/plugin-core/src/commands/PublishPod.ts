@@ -70,6 +70,7 @@ export class PublishPodCommand extends BaseCommand<
     const wsRoot = DendronWorkspace.wsRoot() as string;
     const pod = new podChoice.podClass() as PublishPod; // eslint-disable-line new-cap
     const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
+    const dendronConfig = DendronWorkspace.instance().config;
     try {
       const link = await pod.execute({
         config: {
@@ -81,6 +82,7 @@ export class PublishPodCommand extends BaseCommand<
         vaults: DendronWorkspace.instance().vaultsv4,
         wsRoot,
         engine,
+        dendronConfig
       });
       await vscode.env.clipboard.writeText(link);
       return link;

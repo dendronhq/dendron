@@ -142,6 +142,18 @@ export class PodUtils {
       type: "object",
       required: [...opts.required],
       properties: {
+        fname: {
+          description: "name of src file",
+          type: "string",
+        },
+        vaultName: {
+          description: "name of src vault",
+          type: "string",
+        },
+        dest: {
+          description: "where to export to",
+          type: "string",
+        },
         ...opts.properties,
       },
     };
@@ -200,11 +212,20 @@ export class PodUtils {
   }
 
   static hasRequiredOpts(_pClassEntry: PodClassEntryV4): boolean {
-    // TODO:
-    if (_pClassEntry.id === "dendron.github") {
+    const pod = new _pClassEntry();
+    if (pod.config.required.length > 0) {
       return true;
     }
-    return false;
+    let hasReqOpts: boolean = false;
+    const properties = pod.config.properties;
+
+    Object.keys(properties).forEach((prop: any) => {
+      if (prop.nullable && _.isUndefined(prop.default)) {
+        hasReqOpts = true;
+      }
+    });
+
+    return hasReqOpts;
   }
 
   static getAnalyticsPayload(opts?: { config: any; podChoice: PodItemV4 }) {

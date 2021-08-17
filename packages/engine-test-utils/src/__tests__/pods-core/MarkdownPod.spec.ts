@@ -1,6 +1,10 @@
-import { NoteUtils, VaultUtils } from "@dendronhq/common-all";
+import { NoteUtils, VaultUtils, WorkspaceOpts } from "@dendronhq/common-all";
 import { tmpDir, vault2Path } from "@dendronhq/common-server";
-import { FileTestUtils, NOTE_PRESETS_V4 } from "@dendronhq/common-test-utils";
+import {
+  FileTestUtils,
+  NoteTestUtilsV4,
+  NOTE_PRESETS_V4,
+} from "@dendronhq/common-test-utils";
 import {
   MarkdownExportPod,
   MarkdownImportPod,
@@ -9,9 +13,56 @@ import {
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { runEngineTestV5 } from "../../engine";
+import { TestConfigUtils } from "../../config";
+import { createSiteConfig, runEngineTestV5 } from "../../engine";
 import { ENGINE_HOOKS } from "../../presets";
-import { checkNotInString, checkString } from "../../utils";
+import { checkNotInString, checkString, TestSeedUtils } from "../../utils";
+
+const setupBasic = async (opts: WorkspaceOpts) => {
+  const { wsRoot, vaults } = opts;
+  await NoteTestUtilsV4.createNote({
+    wsRoot,
+    vault: vaults[0],
+    fname: "parent",
+    body: [`Test: [[Link| foo.one]]`].join("\n"),
+  });
+  await NoteTestUtilsV4.createNote({
+    wsRoot,
+    vault: vaults[0],
+    fname: "foo.one",
+    body: [`## Test`].join("\n"),
+  });
+};
+const setupBasicMulti = async (opts: WorkspaceOpts) => {
+  const { wsRoot, vaults } = opts;
+  // Creating a note of the same name in multiple vaults to check that it gets the right one
+  await NoteTestUtilsV4.createNote({
+    props: {
+      id: "test2",
+    },
+    vault: vaults[1],
+    wsRoot,
+    fname: "target",
+    body: ["Sint quo sunt maxime.", "Nisi nam dolorem qui ut minima."].join(
+      "\n"
+    ),
+  });
+  await NoteTestUtilsV4.createNote({
+    props: {
+      id: "test1",
+    },
+    vault: vaults[0],
+    wsRoot,
+    fname: "target",
+    body: "Voluptatem possimus harum nisi.",
+  });
+  await NoteTestUtilsV4.createNote({
+    vault: vaults[0],
+    wsRoot,
+    fname: "source",
+    body: `[[dendron://${VaultUtils.getName(vaults[0])}/target]]`,
+  });
+};
 
 describe("markdown publish pod", () => {
   test("basic", async () => {
@@ -56,6 +107,137 @@ describe("markdown publish pod", () => {
         await checkNotInString(resp, "portal");
       },
       { expect, preSetupHook: ENGINE_HOOKS.setupRefs }
+    );
+  });
+
+  test("wikiLinktoURL with siteUrl", async () => {
+    await runEngineTestV5(
+      async ({ engine, vaults, wsRoot }) => {
+        const pod = new MarkdownPublishPod();
+        const vaultName = VaultUtils.getName(vaults[0]);
+        const config = TestConfigUtils.withConfig(
+          (config) => {
+            config.site = createSiteConfig({
+              siteHierarchies: ["test-wikilink-to-url"],
+              siteRootDir: "docs",
+            });
+            return config;
+          },
+          {
+            wsRoot,
+          }
+        );
+        const resp = await pod.execute({
+          engine,
+          vaults,
+          wsRoot,
+          dendronConfig: config,
+          config: {
+            fname: "parent",
+            vaultName,
+            dest: "stdout",
+            wikiLinkToURL: true,
+          },
+        });
+        // note id is foo.one, hence notes/foo.one.html
+        expect(resp).toContain("(https://localhost:8080/notes/foo.one.html)");
+        await checkString(
+          resp,
+          "[Link](https://localhost:8080/notes/foo.one.html)"
+        );
+      },
+      { expect, preSetupHook: setupBasic }
+    );
+  });
+
+  test("test with xvault link to same vault", async () => {
+    await runEngineTestV5(
+      async ({ engine, vaults, wsRoot }) => {
+        const pod = new MarkdownPublishPod();
+        const vaultName = VaultUtils.getName(vaults[0]);
+        const config = TestConfigUtils.withConfig(
+          (config) => {
+            config.noXVaultWikiLink = false;
+            config.site = createSiteConfig({
+              siteHierarchies: ["test-wikilink-to-url"],
+              siteRootDir: "docs",
+            });
+            return config;
+          },
+          {
+            wsRoot,
+          }
+        );
+
+        const resp = await pod.execute({
+          engine,
+          vaults,
+          wsRoot,
+          dendronConfig: config,
+          config: {
+            fname: "source",
+            vaultName,
+            dest: "stdout",
+            wikiLinkToURL: true,
+          },
+        });
+        // note id is foo.one, hence notes/foo.one.html
+        expect(resp).toContain("https://localhost:8080/notes/test1.html");
+        await checkNotInString(resp, "https://localhost:8080/notes/test2.html");
+      },
+      { expect, preSetupHook: setupBasicMulti }
+    );
+  });
+
+  test.skip("test with regular link in a seed", async () => {
+    await runEngineTestV5(
+      async ({ engine, vaults, wsRoot }) => {
+        await TestSeedUtils.addSeed2WS({
+          wsRoot,
+          engine,
+          modifySeed: (seed) => {
+            seed.site = {
+              url: "https://foo.com",
+            };
+            return seed;
+          },
+        });
+        const seedId = TestSeedUtils.defaultSeedId();
+        engine.config = TestConfigUtils.getConfig({ wsRoot });
+        engine.vaults = engine.config.vaults;
+        const vault = VaultUtils.getVaultByName({
+          vaults: engine.vaults,
+          vname: seedId,
+        })!;
+        await NoteTestUtilsV4.createNote({
+          fname: "foo",
+          vault,
+          wsRoot,
+          body: `Lorem ipsum`,
+        });
+        await NoteTestUtilsV4.createNote({
+          fname: "parent",
+          vault,
+          wsRoot,
+          body: `[[foo]]`,
+        });
+        const pod = new MarkdownPublishPod();
+
+        const resp = await pod.execute({
+          engine,
+          vaults,
+          wsRoot,
+          dendronConfig: engine.config,
+          config: {
+            fname: "parent",
+            vaultName: seedId,
+            dest: "stdout",
+            wikiLinkToURL: true,
+          },
+        });
+        expect(resp).toContain("https://foo.com");
+      },
+      { expect, preSetupHook: ENGINE_HOOKS.setupBasic }
     );
   });
 });

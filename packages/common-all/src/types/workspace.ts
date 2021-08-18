@@ -499,6 +499,11 @@ export type DendronSiteConfig = {
    */
   cognitoUserPoolId?: string;
   cognitoClientId?: string;
+
+  /**
+   * notes are published without the .html file extension
+   */
+  usePrettyLinks?: boolean;
 };
 
 export type DendronGraphConfig = {

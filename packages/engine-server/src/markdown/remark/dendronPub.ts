@@ -188,7 +188,9 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
           }
         }
         const alias = data.alias ? data.alias : value;
-        const href = `${copts?.prefix || ""}${value}.html${
+        const usePrettyLinks = engine.config.site.usePrettyLinks;
+        const maybeFileExtension = _.isBoolean(usePrettyLinks) && usePrettyLinks ? "" : ".html";
+        const href = `${copts?.prefix || ""}${value}${maybeFileExtension}${
           data.anchorHeader ? "#" + data.anchorHeader : ""
         }`;
         const exists = true;

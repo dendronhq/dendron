@@ -1,6 +1,9 @@
 import { Layout, Row, Col } from "antd";
 import * as React from "react";
-import { DENDRON_STYLE_CONSTANTS } from "../styles/constants";
+import {
+  DENDRON_STYLE_CONSTANTS,
+  ANTD_STYLE_CONSTANTS,
+} from "../styles/constants";
 import { DendronCommonProps } from "../utils/types";
 import { DendronBreadCrumb } from "./DendronBreadCrumb";
 import DendronLogoOrTitle from "./DendronLogoOrTitle";
@@ -9,9 +12,6 @@ import { FooterText } from "./DendronNoteFooter";
 import DendronTreeView from "./DendronTreeView";
 
 const { Header, Content, Sider, Footer } = Layout;
-
-// antd default values from https://github.com/ant-design/ant-design/blob/master/components/style/themes/default.less
-const LAYOUT_HEADER_HEIGHT = 64;
 
 export default function DendronLayout(
   props: React.PropsWithChildren<DendronCommonProps>
@@ -57,7 +57,7 @@ export default function DendronLayout(
           <Sider
             width={collapsed ? 0 : DENDRON_STYLE_CONSTANTS.SIDER.WIDTH}
             style={{
-              height: `calc(100vh - ${LAYOUT_HEADER_HEIGHT}px)`, // `antd`
+              height: `calc(100vh - ${ANTD_STYLE_CONSTANTS.LAYOUT_HEADER_HEIGHT}px)`, // `antd`
               paddingTop: "32px",
               fontSize: "15px",
               ...siderProps,

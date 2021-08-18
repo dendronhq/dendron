@@ -31,6 +31,7 @@ export type DendronErrorProps = {
 
 export type DendronErrorPlainObj = {
   isComposite: boolean;
+  severity?: ERROR_SEVERITY;
 } & DendronErrorProps;
 
 export type IDendronError = DendronErrorPlainObj;
@@ -95,12 +96,35 @@ export class DendronError extends Error implements IDendronError {
 export class DendronCompositeError extends Error implements IDendronError {
   public payload: DendronErrorPlainObj[];
   public message: string;
+  public severity?: ERROR_SEVERITY;
   isComposite = true;
 
   constructor(errors: IDendronError[]) {
     super("multiple errors");
     this.payload = errors.map((err) => error2PlainObject(err));
-    this.message = "multiple errors";
+    this.message = "Multiple errors:\n";
+
+    const hasFatalError =
+      _.find(errors, (err) => err.severity === ERROR_SEVERITY.FATAL) !==
+      undefined;
+    const allMinorErrors =
+      _.filter(errors, (err) => err.severity !== ERROR_SEVERITY.MINOR)
+        .length === 0;
+
+    if (hasFatalError) {
+      // If there is even one fatal error, then the composite is also fatal
+      this.severity = ERROR_SEVERITY.FATAL;
+    } else if (allMinorErrors) {
+      // No fatal errors, and everything is a minor error.
+      // The composite can be safely marked as a minor error too.
+      this.message = "Multiple warnings:\n";
+      this.severity = ERROR_SEVERITY.MINOR;
+    }
+    // Otherwise, there are no fatal errors but at least one error has
+    // undefined severity. Then the composite also has undefined severity.
+
+    // Combine all error messages to display to the user.
+    this.message += _.map(errors, (err) => err.message).join("\n");
   }
 }
 

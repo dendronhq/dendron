@@ -1,6 +1,7 @@
 import {
   BulkAddNoteOpts,
   ConfigWriteOpts,
+  CONSTANTS,
   DendronCompositeError,
   DendronConfig,
   DendronError,
@@ -470,18 +471,24 @@ export class DendronEngineV2 implements DEngine {
             // this.history &&
             //   this.history.add({ source: "engine", action: "create", uri });
           }
-          const links = LinkUtils.findLinks({ note: ent.note, engine: this });
-          const linkCandidates = LinkUtils.findLinkCandidates({
-            note: ent.note,
-            notesMap,
-            engine: this,
-          });
-          const anchors = await AnchorUtils.findAnchors({
-            note: ent.note,
-            wsRoot: this.wsRoot,
-          });
-          ent.note.links = links.concat(linkCandidates);
-          ent.note.anchors = anchors;
+          if (
+            ent.note.body.length <
+            (this.config.maxNoteLength ||
+              CONSTANTS.DENDRON_DEFAULT_MAX_NOTE_LENGTH)
+          ) {
+            const links = LinkUtils.findLinks({ note: ent.note, engine: this });
+            const linkCandidates = LinkUtils.findLinkCandidates({
+              note: ent.note,
+              notesMap,
+              engine: this,
+            });
+            const anchors = await AnchorUtils.findAnchors({
+              note: ent.note,
+              wsRoot: this.wsRoot,
+            });
+            ent.note.links = links.concat(linkCandidates);
+            ent.note.anchors = anchors;
+          }
           this.notes[id] = ent.note;
         }
       })

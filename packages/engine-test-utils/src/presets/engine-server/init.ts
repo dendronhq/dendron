@@ -16,6 +16,7 @@ import {
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
+import { TestConfigUtils } from "../../config";
 import { ENGINE_HOOKS, setupBasic } from "./utils";
 
 const SCHEMAS = {
@@ -212,6 +213,82 @@ const NOTES = {
           fname: "three",
           vault: vault3,
           wsRoot,
+        });
+      },
+    }
+  ),
+  NOTE_TOO_LONG: new TestPresetEntryV4(
+    async ({ engine }) => {
+      const one = engine.notes["one"];
+      const two = engine.notes["two"];
+      return [
+        // Links in one didn't get parsed since it's too long, but two did
+        { actual: one.links.length, expected: 1 },
+        { actual: one.links[0].type, expected: "backlink" },
+        { actual: two.links.length, expected: 1 },
+        // Anchors in one didn't get parsed since it's too long
+        { actual: Object.entries(one.anchors).length, expected: 0 },
+      ];
+    },
+    {
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        const vault1 = vaults[0];
+        const vault3 = vaults[2];
+        // Create a really large note with outgoing links and anchors
+        await NoteTestUtilsV4.createNote({
+          fname: "one",
+          vault: vault1,
+          wsRoot,
+          body: "# head\n[[two]]\n".repeat(20000),
+        });
+        // The target note
+        await NoteTestUtilsV4.createNote({
+          fname: "two",
+          vault: vault3,
+          wsRoot,
+          body: "[[one]]",
+        });
+      },
+    }
+  ),
+  NOTE_TOO_LONG_CONFIG: new TestPresetEntryV4(
+    async ({ engine }) => {
+      const one = engine.notes["one"];
+      const two = engine.notes["two"];
+      return [
+        // Links in one didn't get parsed since it's too long, but two did
+        { actual: one.links.length, expected: 1 },
+        { actual: one.links[0].type, expected: "backlink" },
+        { actual: two.links.length, expected: 1 },
+        // Anchors in one didn't get parsed since it's too long
+        { actual: Object.entries(one.anchors).length, expected: 0 },
+      ];
+    },
+    {
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        console.log(wsRoot);
+        TestConfigUtils.withConfig(
+          (c) => {
+            c.maxNoteLength = 10;
+            return c;
+          },
+          { wsRoot }
+        );
+        const vault1 = vaults[0];
+        const vault3 = vaults[2];
+        // Not really a super long note, but we set the max in config to even shorter
+        await NoteTestUtilsV4.createNote({
+          fname: "one",
+          vault: vault1,
+          wsRoot,
+          body: "# head\n[[two]]\n".repeat(3),
+        });
+        // The target note
+        await NoteTestUtilsV4.createNote({
+          fname: "two",
+          vault: vault3,
+          wsRoot,
+          body: "[[one]]",
         });
       },
     }

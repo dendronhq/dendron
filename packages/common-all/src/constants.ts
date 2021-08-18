@@ -29,6 +29,8 @@ export const CONSTANTS = {
    * Initial version for first installaion
    */
   DENDRON_INIT_VERSION: "0.0.0",
+  /** Default for the `maxNoteLength` config. */
+  DENDRON_DEFAULT_MAX_NOTE_LENGTH: 204800,
 };
 
 export enum ERROR_STATUS {

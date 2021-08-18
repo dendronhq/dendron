@@ -287,6 +287,15 @@ export type DendronConfig = {
    * Configuration for Insert Note Index Command
    */
   insertNoteIndex?: InsertNoteIndexConfig;
+
+  /** Notes that are too large can cause serious slowdowns for Dendron. For
+   * notes longer than this many characters, some features like backlinks will
+   * be disabled to avoid slowdowns. Other functionality like note lookups will
+   * continue to function.
+   *
+   * Defaults to 204800 characters, which is about 200 KiB.
+   */
+  maxNoteLength?: number;
 };
 
 export type RandomNoteConfig = {
@@ -306,7 +315,7 @@ export type InsertNoteIndexConfig = {
    * Include marker when inserting note index.
    */
   marker?: boolean;
-}
+};
 
 export type DendronDevConfig = {
   /**

@@ -10,6 +10,9 @@ import DendronTreeView from "./DendronTreeView";
 
 const { Header, Content, Sider } = Layout;
 
+// antd default values from https://github.com/ant-design/ant-design/blob/master/components/style/themes/default.less
+const LAYOUT_HEADER_HEIGHT = 64;
+
 export default function DendronLayout(
   props: React.PropsWithChildren<DendronCommonProps>
 ) {
@@ -54,7 +57,7 @@ export default function DendronLayout(
           <Sider
             width={collapsed ? 0 : DENDRON_STYLE_CONSTANTS.SIDER.WIDTH}
             style={{
-              height: "100%",
+              height: `calc(100vh - ${LAYOUT_HEADER_HEIGHT}px)`, // `antd`
               paddingTop: "32px",
               fontSize: "15px",
               ...siderProps,

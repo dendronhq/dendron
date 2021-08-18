@@ -16,7 +16,7 @@ export default function DendronLogoOrTitle() {
   return (
     <a
       href={siteUrl}
-      style={{ display: "inline-block", height: "100%" }}
+      style={{ display: "inline-block", height: "100%", padding: "4px" }}
       className="site-title"
     >
       {engine.config?.site.logo ? (
@@ -30,15 +30,15 @@ export default function DendronLogoOrTitle() {
 
 export function Logo({ logoUrl }: { logoUrl: string }) {
   return (
-    <div
+    <img
+      src={logoUrl}
       className="site-logo"
+      alt="logo"
       style={{
-        width: "60px",
+        objectFit: "contain",
+        width: "100%",
         height: "100%",
-        backgroundImage: `url(${logoUrl})`,
-        backgroundRepeat: "no-repeat",
-        backgroundPosition: "left center",
-        backgroundSize: "contain",
+        verticalAlign: "top",
       }}
     />
   );

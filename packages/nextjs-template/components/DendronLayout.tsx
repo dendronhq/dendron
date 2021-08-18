@@ -39,8 +39,8 @@ export default function DendronLayout(
           borderBottom: "1px solid #d4dadf",
         }}
       >
-        <Row>
-          <Col xs={{ span: 4 }} md={{ span: 4 }}>
+        <Row style={{ height: "100%" }}>
+          <Col xs={{ span: 4 }} md={{ span: 4 }} style={{ height: "100%" }}>
             <DendronLogoOrTitle />
           </Col>
           <Col xs={18} md={{ span: 16 }}>

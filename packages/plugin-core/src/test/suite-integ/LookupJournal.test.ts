@@ -7,10 +7,8 @@ import { ENGINE_HOOKS_MULTI } from "@dendronhq/engine-test-utils";
 import _ from "lodash";
 import { describe } from "mocha";
 import * as vscode from "vscode";
-import {
-  LookupCommand,
-  LookupNoteTypeEnum,
-} from "../../commands/LookupCommand";
+import { NoteLookupCommand } from "../../commands/NoteLookupCommand";
+import { LookupNoteTypeEnum } from "../../components/lookup/types";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace, getWS } from "../../workspace";
 import { TIMEOUT } from "../testUtils";
@@ -44,9 +42,8 @@ suite("Scratch Notes", function () {
             wsRoot: DendronWorkspace.wsRoot(),
           });
           await VSCodeUtils.openNote(note!);
-          await new LookupCommand().execute({
+          await new NoteLookupCommand().run({
             noteType: LookupNoteTypeEnum.journal,
-            flavor: "note",
             noConfirm: true,
           });
           const newNote = getNoteFromTextEditor();
@@ -76,9 +73,8 @@ suite("Scratch Notes", function () {
             wsRoot: DendronWorkspace.wsRoot(),
           });
           await VSCodeUtils.openNote(note!);
-          await new LookupCommand().execute({
+          await new NoteLookupCommand().run({
             noteType: LookupNoteTypeEnum.journal,
-            flavor: "note",
             noConfirm: true,
           });
           const newNote = getNoteFromTextEditor();

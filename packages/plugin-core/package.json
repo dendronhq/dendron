@@ -159,14 +159,6 @@
         "desc": "Rename a header, and update all links to it."
       },
       {
-        "command": "dendron.lookup",
-        "title": "Dendron: Lookup",
-        "desc": "Initiate note lookup",
-        "docLink": "dendron.topic.lookup.md",
-        "docPreview": "",
-        "when": "dendron:pluginActive"
-      },
-      {
         "command": "dendron.lookupNote",
         "title": "Dendron: Lookup Note",
         "desc": "Initiate note lookup",
@@ -666,13 +658,13 @@
         "when": "dendron:pluginActive"
       },
       {
-        "command": "dendron.lookup",
+        "command": "dendron.lookupNote",
         "mac": "cmd+L",
         "key": "ctrl+l",
         "when": "dendron:pluginActive"
       },
       {
-        "command": "dendron.lookup",
+        "command": "dendron.lookupNote",
         "key": "ctrl+shift+j",
         "mac": "cmd+shift+j",
         "args": {
@@ -681,7 +673,7 @@
         "when": "dendron:pluginActive"
       },
       {
-        "command": "dendron.lookup",
+        "command": "dendron.lookupNote",
         "key": "ctrl+shift+s",
         "mac": "cmd+shift+s",
         "args": {

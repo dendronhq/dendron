@@ -9,16 +9,16 @@ import { getWS } from "../../workspace";
 import _ from "lodash";
 import * as vscode from "vscode";
 import { QuickInputButton, ThemeIcon } from "vscode";
-import {
+import { clipboard, DendronClientUtilsV2, VSCodeUtils } from "../../utils";
+import { 
+  DendronQuickPickerV2,
   LookupEffectType,
   LookupFilterType,
   LookupNoteType,
   LookupNoteTypeEnum,
   LookupSelectionType,
   LookupSplitType,
-} from "../../commands/LookupCommand";
-import { clipboard, DendronClientUtilsV2, VSCodeUtils } from "../../utils";
-import { DendronQuickPickerV2 } from "./types";
+} from "./types";
 import { NotePickerUtils, PickerUtilsV2 } from "./utils";
 
 export type ButtonType =
@@ -35,7 +35,7 @@ export type ButtonCategory =
   | "split"
   | "filter"
   | "effect"
-  | "other"; //TODO: better category name?
+  | "other"; 
 
 export type ButtonHandleOpts = { quickPick: DendronQuickPickerV2 };
 

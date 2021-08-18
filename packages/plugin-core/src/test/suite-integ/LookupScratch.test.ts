@@ -2,11 +2,8 @@ import { NoteAddBehavior, NoteUtils } from "@dendronhq/common-all";
 import { NOTE_PRESETS_V4 } from "@dendronhq/common-test-utils";
 import { describe } from "mocha";
 import * as vscode from "vscode";
-import {
-  LookupCommand,
-  LookupNoteTypeEnum,
-  VaultSelectionMode,
-} from "../../commands/LookupCommand";
+import { NoteLookupCommand } from "../../commands/NoteLookupCommand";
+import { LookupNoteTypeEnum, LookupSelectionTypeEnum } from "../../components/lookup/types";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace, getWS } from "../../workspace";
 import { TIMEOUT } from "../testUtils";
@@ -45,10 +42,9 @@ suite("Scratch Notes", function () {
           const editor = await VSCodeUtils.openNote(note!);
           const SIMPLE_SELECTION = new vscode.Selection(7, 0, 7, 12);
           editor.selection = SIMPLE_SELECTION;
-          await new LookupCommand().execute({
-            selectionType: "selection2link",
+          await new NoteLookupCommand().run({
+            selectionType: LookupSelectionTypeEnum.selection2link,
             noteType: LookupNoteTypeEnum.scratch,
-            flavor: "note",
             noConfirm: true,
           });
           const scratchNote = getNoteFromTextEditor();
@@ -77,10 +73,9 @@ suite("Scratch Notes", function () {
             NOTE_PRESETS_V4.NOTE_DOMAIN_NAMESPACE_CHILD;
           const editor = await getNoteFromFname({ fname, vault });
           editor.selection = new vscode.Selection(...selection);
-          await new LookupCommand().execute({
-            selectionType: "selection2link",
+          await new NoteLookupCommand().run({
+            selectionType: LookupSelectionTypeEnum.selection2link, 
             noteType: LookupNoteTypeEnum.scratch,
-            flavor: "note",
             noConfirm: true,
           });
           const scratchNote = getNoteFromTextEditor();
@@ -114,12 +109,10 @@ suite("Scratch Notes", function () {
           const editor = await VSCodeUtils.openNote(note!);
           const SIMPLE_SELECTION = new vscode.Selection(7, 0, 7, 12);
           editor.selection = SIMPLE_SELECTION;
-          await new LookupCommand().execute({
-            selectionType: "selection2link",
+          await new NoteLookupCommand().run({
+            selectionType: LookupSelectionTypeEnum.selection2link,
             noteType: LookupNoteTypeEnum.scratch,
-            flavor: "note",
             noConfirm: true,
-            vaultSelectionMode: VaultSelectionMode.auto,
           });
           const scratchNote = getNoteFromTextEditor();
           expect(scratchNote.fname.startsWith("scratch")).toBeTruthy();
@@ -147,10 +140,9 @@ suite("Scratch Notes", function () {
             NOTE_PRESETS_V4.NOTE_DOMAIN_NAMESPACE_CHILD;
           const editor = await getNoteFromFname({ fname, vault });
           editor.selection = new vscode.Selection(...selection);
-          await new LookupCommand().execute({
-            selectionType: "selection2link",
+          await new NoteLookupCommand().run({
+            selectionType: LookupSelectionTypeEnum.selection2link,
             noteType: LookupNoteTypeEnum.scratch,
-            flavor: "note",
             noConfirm: true,
           });
           const scratchNote = getNoteFromTextEditor();

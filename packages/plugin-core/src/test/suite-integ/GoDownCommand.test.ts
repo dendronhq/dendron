@@ -3,7 +3,7 @@ import { NodeTestPresetsV2 } from "@dendronhq/common-test-utils";
 import path from "path";
 import * as vscode from "vscode";
 import { GoDownCommand } from "../../commands/GoDownCommand";
-import { DendronQuickPickerV2 } from "../../components/lookup/types";
+// import { DendronQuickPickerV2 } from "../../components/lookup/types";
 import { VSCodeUtils } from "../../utils";
 import { onWSInit, setupDendronWorkspace } from "../testUtils";
 import { expect } from "../testUtilsv2";
@@ -19,20 +19,16 @@ suite("notes", function () {
     },
   });
 
-  // TODO: currently this opens a quickpick
-  test.skip("basic", (done) => {
+  test("basic", (done) => {
     onWSInit(async () => {
       const notePath = path.join(vaultPath, "foo.md");
       await VSCodeUtils.openFileInEditor(vscode.Uri.file(notePath));
-      const quickpick =
-        (await new GoDownCommand().run()) as DendronQuickPickerV2;
-      quickpick.onDidChangeValue(() => {});
-      quickpick.onDidChangeSelection(() => {});
-      quickpick.onDidChangeActive(() => {
-        const item = quickpick.activeItems[0];
-        expect(item.id).toEqual("foo.ch1");
-        done();
-      });
+      await new GoDownCommand().run({noConfirm: true});
+      const editor = VSCodeUtils.getActiveTextEditor();
+      const activeNote = VSCodeUtils.getNoteFromDocument(editor!.document);
+      expect(activeNote?.fname).toEqual("foo.ch1");
+
+      done();
     });
     setupDendronWorkspace(root.name, ctx, {
       lsp: true,

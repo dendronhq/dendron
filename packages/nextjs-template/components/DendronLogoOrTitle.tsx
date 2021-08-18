@@ -14,7 +14,11 @@ export default function DendronLogoOrTitle() {
   const siteUrl =
     getStage() === "dev" ? "/" : engine.config.site.siteUrl || "/";
   return (
-    <a href={siteUrl} className="site-title lh-tight">
+    <a
+      href={siteUrl}
+      style={{ display: "inline-block" }}
+      className="site-title lh-tight"
+    >
       {engine.config?.site.logo ? (
         <Logo logoUrl={"/" + path.basename(engine.config?.site.logo)} />
       ) : (

@@ -114,3 +114,71 @@ export default function DendronLayout(
     </Layout>
   );
 }
+
+function DendronLayoutV2(props: React.PropsWithChildren<DendronCommonProps>) {
+  const [collapsed, setCollapsed] = React.useState(false);
+  return (
+    <Layout>
+      <Header
+        style={{
+          position: "fixed",
+          zIndex: 1,
+          width: "100%",
+          borderBottom: "1px solid #d4dadf",
+          paddingLeft: DENDRON_STYLE_CONSTANTS.SIDER.PADDING.LEFT,
+        }}
+      >
+        <Row style={{ height: "100%" }}>
+          <Col xs={{ span: 4 }} md={{ span: 4 }} style={{ height: "100%" }}>
+            <DendronLogoOrTitle />
+          </Col>
+          <Col xs={18} md={{ span: 16 }}>
+            <DendronLookup {...props} />
+          </Col>
+        </Row>
+      </Header>
+      <Layout className="site-layout" style={{ marginTop: 64 }}>
+        <Sider
+          width={DENDRON_STYLE_CONSTANTS.SIDER.WIDTH}
+          collapsible
+          collapsedWidth={0}
+          trigger={null}
+          onCollapse={(collapsed, type) => {
+            setCollapsed(collapsed);
+          }}
+          breakpoint="lg"
+          style={{
+            paddingLeft: collapsed
+              ? 0
+              : DENDRON_STYLE_CONSTANTS.SIDER.PADDING.LEFT,
+            position: "fixed",
+            overflow: "auto",
+            height: `calc(100vh - ${ANTD_STYLE_CONSTANTS.LAYOUT_HEADER_HEIGHT}px)`,
+            paddingTop: "32px",
+          }}
+        >
+          <DendronTreeView {...props} />
+        </Sider>
+        <Layout
+          style={{
+            marginLeft: collapsed ? 0 : DENDRON_STYLE_CONSTANTS.SIDER.WIDTH,
+          }}
+        >
+          <Content
+            className="main-content"
+            role="main"
+            style={{ padding: "0 24px" }}
+          >
+            <DendronBreadCrumb {...props} />
+            {props.children}
+          </Content>
+          <Footer style={{ padding: 0 }}>
+            <FooterText />
+          </Footer>
+        </Layout>
+      </Layout>
+    </Layout>
+  );
+}
+
+// export default DendronLayout;

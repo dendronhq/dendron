@@ -6,6 +6,7 @@ import { DendronWorkspace } from "../workspace";
 import { GLOBAL_STATE, WORKSPACE_ACTIVATION_CONTEXT } from "../constants";
 import { BlankInitializer } from "./blankInitializer";
 import { TutorialInitializer } from "./tutorialInitializer";
+import { SeedBrowserInitializer } from "./seedBrowserInitializer";
 
 /**
  * Type that can execute custom code as part of workspace creation and opening of a workspace.
@@ -38,6 +39,8 @@ export class WorkspaceInitFactory {
   static create(ws: DendronWorkspace): WorkspaceInitializer | undefined {
     if (this.isTutorialWorkspaceLaunch(ws.context)) {
       return new TutorialInitializer();
+    } else if (this.isSeedBrowserWorkspaceLaunch(ws.context)) {
+      return new SeedBrowserInitializer();
     }
 
     return new BlankInitializer();
@@ -48,5 +51,14 @@ export class WorkspaceInitFactory {
       GLOBAL_STATE.WORKSPACE_ACTIVATION_CONTEXT
     );
     return state === WORKSPACE_ACTIVATION_CONTEXT.TUTORIAL.toString();
+  }
+
+  static isSeedBrowserWorkspaceLaunch(
+    context: vscode.ExtensionContext
+  ): boolean {
+    const state = context.globalState.get<string | undefined>(
+      GLOBAL_STATE.WORKSPACE_ACTIVATION_CONTEXT
+    );
+    return state === WORKSPACE_ACTIVATION_CONTEXT.SEED_BROWSER.toString();
   }
 }

@@ -278,6 +278,10 @@ export type GetNoteBlocksOpts = {
   filterByAnchorType?: "header" | "block";
 };
 
+// export type GetSeedsOpts = {
+//   //TODO: Add?
+// };
+
 export type ConfigWriteOpts = {
   config: DendronConfig;
 };
@@ -551,6 +555,7 @@ export enum DMessageSource {
 export enum DMessageType {
   INIT = "init",
   ON_DID_CHANGE_ACTIVE_TEXT_EDITOR = "onDidChangeActiveTextEditor",
+  MESSAGE_DISPATCHER_READY = "messageDispatcherReady",
 }
 
 export enum TreeViewMessageType {
@@ -582,6 +587,12 @@ export enum NoteViewMessageType {
 export enum ThemeMessageType {
   "onThemeChange" = "onThemeChange",
   "getTheme" = "getTheme",
+}
+
+export enum SeedBrowserMessageType {
+  "onSeedAdd" = "onSeedAdd",
+  "onOpenUrl" = "onOpenUrl",
+  "onSeedStateChange" = "onSeedStateChange",
 }
 
 export type OnDidChangeActiveTextEditorData = {
@@ -618,6 +629,11 @@ export type NoteViewMessage = DMessage<
   { id?: string; href?: string }
 >;
 
+export type SeedBrowserMessage = DMessage<
+  SeedBrowserMessageType | DMessageType,
+  { data: any }
+>;
+
 // --- Views
 
 export enum DendronWebViewKey {
@@ -625,6 +641,7 @@ export enum DendronWebViewKey {
   NOTE_GRAPH = "dendron.graph-note",
   SCHEMA_GRAPH = "dendron.graph-schema",
   NOTE_PREVIEW = "dendron.note-preview",
+  SEED_BROWSER = "dendron.seed-browser",
 }
 
 export enum DendronTreeViewKey {

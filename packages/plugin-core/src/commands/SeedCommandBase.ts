@@ -1,5 +1,12 @@
-import { DendronError, ERROR_SEVERITY } from "@dendronhq/common-all";
+import {
+  DendronError,
+  DendronWebViewKey,
+  ERROR_SEVERITY,
+  SeedBrowserMessageType,
+} from "@dendronhq/common-all";
 import { SeedService } from "@dendronhq/engine-server";
+import { commands } from "vscode";
+import { GLOBAL_STATE, WORKSPACE_ACTIVATION_CONTEXT } from "../constants";
 import { getWS } from "../workspace";
 import { BasicCommand } from "./base";
 
@@ -37,5 +44,30 @@ export abstract class SeedCommandBase<
     }
 
     return this.seedSvc;
+  }
+
+  protected postSeedStateToWebview() {
+    const ws = getWS();
+    const existingPanel = ws.getWebView(DendronWebViewKey.SEED_BROWSER);
+
+    existingPanel?.webview.postMessage({
+      type: SeedBrowserMessageType.onSeedStateChange,
+      data: {
+        msg: this.getSeedSvc().getSeedsInWorkspace(),
+      },
+      source: "vscode",
+    });
+  }
+
+  protected async onUpdatingWorkspace() {
+    const ws = getWS();
+    await ws.updateGlobalState(
+      GLOBAL_STATE.WORKSPACE_ACTIVATION_CONTEXT,
+      WORKSPACE_ACTIVATION_CONTEXT.SEED_BROWSER.toString()
+    );
+  }
+
+  protected async onUpdatedWorkspace() {
+    await commands.executeCommand("workbench.action.reloadWindow");
   }
 }

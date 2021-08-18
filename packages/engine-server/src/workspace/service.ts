@@ -90,6 +90,18 @@ type AddRemoveCommonOpts = {
    * Default: false
    */
   updateWorkspace?: boolean;
+
+  /**
+   * Method to run immediately before updating the workspace file - this is
+   * useful as updating the workspace file while it's open will sometimes cause
+   * the window to reload and the plugin to restart
+   */
+  onUpdatingWorkspace?: () => Promise<void>;
+
+  /**
+   * Method to run immediately after updating the workspace file
+   */
+  onUpdatedWorkspace?: () => Promise<void>;
 };
 
 export class WorkspaceService {
@@ -107,7 +119,7 @@ export class WorkspaceService {
   }
 
   static async isWorkspaceVault(fpath: string) {
-    return await fs.pathExists(path.join(fpath, CONSTANTS.DENDRON_CONFIG_FILE));
+    return fs.pathExists(path.join(fpath, CONSTANTS.DENDRON_CONFIG_FILE));
   }
 
   public wsRoot: string;
@@ -223,7 +235,15 @@ export class WorkspaceService {
         const vault2Folder = VaultUtils.toWorkspaceFolder(vault);
         const folders = [vault2Folder].concat(out.folders);
         out = assignJSONWithComment({ folders }, out);
+
+        if (opts.onUpdatingWorkspace) {
+          await opts.onUpdatingWorkspace();
+        }
         writeJSONWithComments(wsPath, out);
+
+        if (opts.onUpdatedWorkspace) {
+          await opts.onUpdatedWorkspace();
+        }
       }
     }
     return vault;
@@ -405,7 +425,7 @@ export class WorkspaceService {
       config.site.duplicateNoteBehavior &&
       _.isArray(config.site.duplicateNoteBehavior.payload)
     ) {
-      if (config.vaults.length == 1) {
+      if (config.vaults.length === 1) {
         // if there is only one vault left, remove duplicateNoteBehavior setting
         config.site = _.omit(config.site, ["duplicateNoteBehavior"]);
       } else {
@@ -427,7 +447,16 @@ export class WorkspaceService {
         (ent) => ent.path === VaultUtils.getRelPath(vault)
       );
       settings = assignJSONWithComment({ folders }, settings);
+
+      if (opts.onUpdatingWorkspace) {
+        opts.onUpdatingWorkspace();
+      }
+
       writeJSONWithComments(wsPath, settings);
+
+      if (opts.onUpdatedWorkspace) {
+        await opts.onUpdatedWorkspace();
+      }
     }
   }
 

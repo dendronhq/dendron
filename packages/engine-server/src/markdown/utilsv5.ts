@@ -288,6 +288,13 @@ export class MDUtilsV5 {
           if (opts.flavor === ProcFlavor.HOVER_PREVIEW) {
             proc = proc.use(dendronHoverPreview);
           }
+          if (opts.flavor === ProcFlavor.PUBLISHING) {
+            proc = proc.use(dendronPub, {
+              wikiLinkOpts: {
+                prefix: "/notes/"
+              }
+            });
+          }
         }
         break;
       case ProcMode.IMPORT: {

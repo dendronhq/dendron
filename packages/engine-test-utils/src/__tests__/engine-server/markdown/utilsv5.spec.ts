@@ -10,7 +10,7 @@ import {
 import os from "os";
 import path from "path";
 import { ENGINE_HOOKS } from "../../../presets";
-import { checkString } from "../../../utils";
+import { checkNotInString, checkString } from "../../../utils";
 import { cleanVerifyOpts, createProcCompileTests } from "./utils";
 import { createEngineFromServer, runEngineTestV5 } from "../../../engine";
 
@@ -144,6 +144,11 @@ describe("MDUtils.proc", () => {
             `<a href="alpha-id.html"`,
             // html quoted
             `<p><a href="bar.html">Bar</a></p>`
+          );
+          await checkNotInString(
+            resp.contents,
+            // should not have title
+            `Alpha<h1>`
           );
         },
         [ProcFlavor.PREVIEW]: ProcFlavor.REGULAR,

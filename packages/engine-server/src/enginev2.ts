@@ -471,7 +471,11 @@ export class DendronEngineV2 implements DEngine {
             // this.history &&
             //   this.history.add({ source: "engine", action: "create", uri });
           }
-          if (ent.note.body.length < CONSTANTS.DENDRON_FILE_TOO_BIG) {
+          if (
+            ent.note.body.length <
+            (this.config.maxNoteLength ||
+              CONSTANTS.DENDRON_DEFAULT_MAX_NOTE_LENGTH)
+          ) {
             const links = LinkUtils.findLinks({ note: ent.note, engine: this });
             const linkCandidates = LinkUtils.findLinkCandidates({
               note: ent.note,

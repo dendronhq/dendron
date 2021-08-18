@@ -31,6 +31,7 @@ export type DendronErrorProps = {
 
 export type DendronErrorPlainObj = {
   isComposite: boolean;
+  severity?: ERROR_SEVERITY;
 } & DendronErrorProps;
 
 export type IDendronError = DendronErrorPlainObj;
@@ -92,12 +93,18 @@ export class DendronError extends Error implements IDendronError {
 export class DendronCompositeError extends Error implements IDendronError {
   public payload: DendronErrorPlainObj[];
   public message: string;
+  public severity: ERROR_SEVERITY;
   isComposite = true;
 
   constructor(errors: IDendronError[]) {
     super("multiple errors");
     this.payload = errors.map((err) => error2PlainObject(err));
-    this.message = "multiple errors";
+    const hasFatalError =
+      _.find(errors, (err) => err.severity === ERROR_SEVERITY.FATAL) !==
+      undefined;
+    this.message = hasFatalError ? "Multiple errors" : "Multiple warnings";
+    this.severity = hasFatalError ? ERROR_SEVERITY.FATAL : ERROR_SEVERITY.MINOR;
+    this.message += [":", ..._.map(errors, (err) => err.message)].join("\n");
   }
 }
 

@@ -392,7 +392,11 @@ export class FileStorage implements DStore {
     const notesMap = NoteUtils.createFnameNoteMap(allNotes, true);
     return _.map(allNotes, (noteFrom: NoteProps) => {
       try {
-        if (noteFrom.body.length < CONSTANTS.DENDRON_FILE_TOO_BIG) {
+        if (
+          noteFrom.body.length <
+          (this.config.maxNoteLength ||
+            CONSTANTS.DENDRON_DEFAULT_MAX_NOTE_LENGTH)
+        ) {
           const linkCandidates = LinkUtils.findLinkCandidates({
             note: noteFrom,
             notesMap,
@@ -450,7 +454,11 @@ export class FileStorage implements DStore {
         if (n.stub) {
           return;
         }
-        if (n.body.length >= CONSTANTS.DENDRON_FILE_TOO_BIG) {
+        if (
+          n.body.length >=
+          (this.config.maxNoteLength ||
+            CONSTANTS.DENDRON_DEFAULT_MAX_NOTE_LENGTH)
+        ) {
           this.logger.info({
             ctx,
             msg: "Note too large, skipping",
@@ -459,9 +467,14 @@ export class FileStorage implements DStore {
           });
           errors.push(
             new DendronError({
-              message: `Note "${n.fname}" in vault "${VaultUtils.getName(
-                n.vault
-              )}" is too large, some features like backlinks may not work correctly for it.`,
+              message:
+                `Note "${n.fname}" in vault "${VaultUtils.getName(
+                  n.vault
+                )}" is longer than ${
+                  this.config.maxNoteLength ||
+                  CONSTANTS.DENDRON_DEFAULT_MAX_NOTE_LENGTH
+                } characters, some features like backlinks may not work correctly for it. ` +
+                `You may increase "maxNoteLength" in "dendron.yml" to override this warning.`,
               severity: ERROR_SEVERITY.MINOR,
             })
           );

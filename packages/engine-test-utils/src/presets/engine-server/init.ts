@@ -252,7 +252,7 @@ const NOTES = {
     }
   ),
   NOTE_TOO_LONG_CONFIG: new TestPresetEntryV4(
-    async ({ engine, initResp }) => {
+    async ({ engine }) => {
       const one = engine.notes["one"];
       const two = engine.notes["two"];
       return [

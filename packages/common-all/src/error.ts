@@ -120,10 +120,8 @@ export class DendronCompositeError extends Error implements IDendronError {
     // Otherwise, there are no fatal errors but at least one error has
     // undefined severity. Then the composite also has undefined severity.
 
-    // Combine all error messages to display to the user. Since this is
-    // displayed in markdown in the editor, need to line breaks to separate
-    // paragraphs.
-    this.message += _.map(errors, (err) => err.message).join("\n\n");
+    // Combine all error messages to display to the user.
+    this.message += _.map(errors, (err) => err.message).join("\n");
   }
 }
 

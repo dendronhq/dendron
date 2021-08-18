@@ -35,7 +35,6 @@ export function Logo({ logoUrl }: { logoUrl: string }) {
       style={{
         width: "60px",
         height: "60px",
-        position: "fixed",
         left: DENDRON_STYLE_CONSTANTS.SIDER.PADDING.LEFT,
         top: "2px",
         backgroundImage: `url(${logoUrl})`,
@@ -54,7 +53,6 @@ export function Title({ data }: { data: string }) {
       style={{
         width: "60px",
         height: "60px",
-        position: "fixed",
         left: DENDRON_STYLE_CONSTANTS.SIDER.PADDING.LEFT,
         top: "2px",
       }}

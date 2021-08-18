@@ -82,15 +82,6 @@ export function writeYAML(fpath: string, data: any) {
   return fs.writeFileSync(fpath, out);
 }
 
-// export function appendYAML(fpath: string, data: any) {
-//   const out = YAML.safeDump(data, {
-//     noRefs: true,
-//     indent: 4,
-//     schema: YAML.JSON_SCHEMA,
-//   });
-//   return fs.appendFileSync(fpath, `\n\n${out}`);
-// }
-
 export function deleteFile(fpath: string) {
   return fs.unlinkSync(fpath);
 }

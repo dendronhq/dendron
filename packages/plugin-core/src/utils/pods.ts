@@ -1,6 +1,6 @@
 import { PodItemV4 } from "@dendronhq/pods-core";
 import { QuickPickItem, Uri, window } from "vscode";
-import { gdocScope, GLOBAL_STATE } from "../constants";
+import { gdocRequiredScopes, GLOBAL_STATE } from "../constants";
 import open from "open";
 import * as queryString from "query-string";
 import { DendronWorkspace } from "../workspace";
@@ -27,7 +27,7 @@ export const showPodQuickPickItemsV4 = (podItem: PodItemV4[]) => {
   });
 };
 
-export const getOauthClient = async () => {
+export const launchGoogleOAuthFlow = async () => {
   const port = fs.readFileSync(
     path.join(DendronWorkspace.wsRoot(), ".dendron.port"),
     { encoding: "utf8" }
@@ -37,7 +37,7 @@ export const getOauthClient = async () => {
     client_id:
       "587163973906-od2u5uaop9b2u6ero5ltl342hh38frth.apps.googleusercontent.com",
     redirect_uri: `http://localhost:${port}/api/oauth/getToken`,
-    scope: gdocScope.join(" "), // space seperated string
+    scope: gdocRequiredScopes.join(" "), // space seperated string
     response_type: "code",
     access_type: "offline",
     prompt: "consent",
@@ -50,13 +50,13 @@ export const showDocumentQuickPick = async (
   docs: string[]
 ): Promise<{ label: string } | undefined> => {
   /** Least Recently Used Documents */
-  let LRUDocs: string[] | undefined =
-    await DendronWorkspace.instance().getGlobalState(GLOBAL_STATE.LRUDocs);
-  LRUDocs = _.isUndefined(LRUDocs) ? [] : LRUDocs;
+  let MRUDocs: string[] | undefined =
+    await DendronWorkspace.instance().getGlobalState(GLOBAL_STATE.MRUDocs);
+  MRUDocs = _.isUndefined(MRUDocs) ? [] : MRUDocs;
 
-  docs = docs.filter((doc) => !LRUDocs?.includes(doc));
+  docs = docs.filter((doc) => !MRUDocs?.includes(doc));
 
-  const pickItems = LRUDocs.concat(docs).map((doc) => {
+  const pickItems = MRUDocs.concat(docs).map((doc) => {
     return {
       label: doc,
     };
@@ -90,13 +90,13 @@ export const updateGlobalState = async (opts: {
   const { key, value } = opts;
   DendronWorkspace.instance().updateGlobalState(key, value);
 
-  /** to update the Least Recently Used Doc list with most recent doc at first */
-  let LRUDocs: string[] | undefined =
-    await DendronWorkspace.instance().getGlobalState(GLOBAL_STATE.LRUDocs);
-  LRUDocs = _.isUndefined(LRUDocs)
+  /** to update the Most Recently Used Doc list with most recent doc at first */
+  let MRUDocs: string[] | undefined =
+    await DendronWorkspace.instance().getGlobalState(GLOBAL_STATE.MRUDocs);
+  MRUDocs = _.isUndefined(MRUDocs)
     ? []
-    : [key, ...LRUDocs.filter((doc) => doc !== key)];
-  DendronWorkspace.instance().updateGlobalState(GLOBAL_STATE.LRUDocs, LRUDocs);
+    : [key, ...MRUDocs.filter((doc) => doc !== key)];
+  DendronWorkspace.instance().updateGlobalState(GLOBAL_STATE.MRUDocs, MRUDocs);
 };
 
 export const getGlobalState = async (

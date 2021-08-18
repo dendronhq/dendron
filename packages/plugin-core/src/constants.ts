@@ -844,9 +844,9 @@ export enum GLOBAL_STATE {
    */
   VSCODE_DEBUGGING_EXTENSION = "dendron.vscode_debugging_extension",
   /**
-   * Least Recently Imported Doc
+   * Most Recently Imported Doc
    */
-  LRUDocs = "LRUDocs",
+  MRUDocs = "MRUDocs",
 }
 
 export enum WORKSPACE_ACTIVATION_CONTEXT {
@@ -1027,7 +1027,7 @@ export const CONFIG: { [key: string]: ConfigEntry } = {
   },
 };
 
-export const gdocScope = [
+export const gdocRequiredScopes = [
   "https://www.googleapis.com/auth/documents",
   "https://www.googleapis.com/auth/drive",
 ];

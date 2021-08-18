@@ -29,7 +29,7 @@ export class AuthController {
         data: {
           client_id:
             "587163973906-od2u5uaop9b2u6ero5ltl342hh38frth.apps.googleusercontent.com",
-          client_secret: "WVoSohnyXH1_isszg6RFpPtz",
+          client_secret: "scXCYiq0boH7bk_c43mZbvBZ",
           redirect_uri: `http://localhost:${port}/api/oauth/getToken`,
           grant_type: "authorization_code",
           code,
@@ -43,7 +43,7 @@ export class AuthController {
             refreshToken: data.refresh_token,
           },
         };
-        engine.writePodsConfig(opts);
+        engine.addAccessTokensToPodConfig(opts);
         resp =
           "Authorization completed. Please return to your workspace to modify any additional import options and run import pod again";
       }
@@ -73,7 +73,7 @@ export class AuthController {
         data: {
           client_id:
             "587163973906-od2u5uaop9b2u6ero5ltl342hh38frth.apps.googleusercontent.com",
-          client_secret: "WVoSohnyXH1_isszg6RFpPtz",
+          client_secret: "scXCYiq0boH7bk_c43mZbvBZ",
           redirect_uri: `http://localhost:${port}/api/oauth/getToken`,
           grant_type: "refresh_token",
           refresh_token: refreshToken,
@@ -86,7 +86,7 @@ export class AuthController {
             accessToken: data.access_token,
           },
         };
-        engine.writePodsConfig(opts);
+        engine.addAccessTokensToPodConfig(opts);
         resp = data.access_token;
       }
       return resp;

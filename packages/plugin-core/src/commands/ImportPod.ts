@@ -12,7 +12,7 @@ import { DENDRON_COMMANDS, Oauth2Pods } from "../constants";
 import { VSCodeUtils } from "../utils";
 import {
   getHierarchyDest,
-  getOauthClient,
+  launchGoogleOAuthFlow,
   showDocumentQuickPick,
   showPodQuickPickItemsV4,
   getGlobalState,
@@ -62,9 +62,9 @@ export class ImportPodCommand extends BaseCommand<
       if (!maybeConfig) {
         const configPath = PodUtils.genConfigFile({ podsDir, podClass });
         if (Oauth2Pods.includes(podChoice.id)) {
-          getOauthClient();
+          launchGoogleOAuthFlow();
           window.showInformationMessage(
-            "Please authenticate. Waiting for browser to open..."
+            "Please authenticate with Google on your browser to continue."
           );
           await VSCodeUtils.openFileInEditor(Uri.file(configPath));
         } else {
@@ -99,7 +99,7 @@ export class ImportPodCommand extends BaseCommand<
       showDocumentQuickPick,
       getHierarchyDest,
       openFileInEditor,
-    }
+    };
     if (!wsRoot) {
       throw Error("ws root not defined");
     }

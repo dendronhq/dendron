@@ -548,7 +548,10 @@ export class DendronEngineV2 implements DEngine {
     };
   }
 
-  async writePodsConfig(opts: any) {
+  async addAccessTokensToPodConfig(opts: {
+    path: string;
+    tokens: { accessToken: string; refreshToken?: string };
+  }) {
     const { path, tokens } = opts;
     const { accessToken, refreshToken } = tokens;
 

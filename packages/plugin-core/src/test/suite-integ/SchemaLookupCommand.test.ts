@@ -5,7 +5,7 @@ import { describe } from "mocha";
 import sinon from "sinon";
 import path from "path";
 import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
-import { SchemaLookupCommand } from "../../commands/SchemaLookupCommand";
+import { CommandOutput, SchemaLookupCommand } from "../../commands/SchemaLookupCommand";
 import { VSCodeUtils } from "../../utils";
 import { expect } from "../testUtilsv2";
 import _ from "lodash";
@@ -36,6 +36,26 @@ suite("SchemaLookupCommand", function () {
           expect(basename).toEqual("foo.schema");
           done();
         },
+      });
+    });
+
+    describe("updateItems", () => {
+      test("star query", (done) => {
+        runLegacyMultiWorkspaceTest({
+          ctx,
+          preSetupHook: async ({ wsRoot, vaults }) => {
+            await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+          },
+          onInit: async () => {
+            const cmd = new SchemaLookupCommand();
+            const { quickpick } = (await cmd.run({
+              noConfirm: true,
+              initialValue: "*" 
+            })) as CommandOutput;
+            expect(quickpick.selectedItems.length).toEqual(2);
+            done();
+          }
+        })
       });
     });
 

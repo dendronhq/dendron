@@ -113,6 +113,10 @@ export type ProcDataFullOptsV5 = {
    * Supply alternative dictionary of notes to use when resolving note ids
    */
   notes?: NotePropsDict;
+  /**
+   * Check to see if we are in a note reference.
+   */
+  insideNoteRef?: boolean;
 } & { config?: DendronConfig; wsRoot?: string };
 
 /**
@@ -128,6 +132,7 @@ export type ProcDataFullV5 = {
   // derived
   config: DendronConfig;
   notes?: NotePropsDict;
+  insideNoteRef?: boolean;
   /**
    * Keep track of current note ref level
    */

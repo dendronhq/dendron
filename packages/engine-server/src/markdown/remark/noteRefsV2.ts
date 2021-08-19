@@ -658,6 +658,7 @@ function convertNoteRefHelperAST(
       if (procOpts.dest === DendronASTDest.HTML) {
         tmpProc = MDUtilsV5.procRemarkFull({
           ...MDUtilsV5.getProcData(proc),
+          insideNoteRef: true,
           fname: note.fname,
           vault: note.vault,
         });

@@ -612,14 +612,21 @@ export function shouldDisplayLapsedUserMsg(): boolean {
   );
 }
 
+const getKeybindingConfigPath = () => {
+  const { userConfigDir, osName } = VSCodeUtils.getCodeUserConfigDir();
+  return {
+    keybindingConfigPath: [userConfigDir, "keybindings.json"].join(""),
+    osName,
+  };
+}
+
 export function checkAndApplyVimKeybindingOverrideIfExists(): {
   keybindingConfigPath: string,
   newKeybindings?: any
 } {
   // check where the keyboard shortcut is configured
-  const { userConfigDir, osName } = VSCodeUtils.getCodeUserConfigDir();
-  const keybindingConfigPath = [userConfigDir, "keybindings.json"].join("");
-
+  const { keybindingConfigPath, osName } = getKeybindingConfigPath();
+  
   // read keybindings.json
   // create if it doesn't exist
   if (!fs.existsSync(keybindingConfigPath)) {
@@ -652,4 +659,76 @@ export function checkAndApplyVimKeybindingOverrideIfExists(): {
   const newKeybindings = keybindings.concat(OVERRIDE_EXPAND_LINE_SELECTION);
   
   return { keybindingConfigPath, newKeybindings };
+}
+
+export function checkAndMigrateLookupKeybindingIfExists(): {
+  keybindingConfigPath: string,
+  migratedKeybindings: any,
+} | undefined {
+  // check where the keyboard shortcut is configured
+  const { keybindingConfigPath, osName } = getKeybindingConfigPath();
+
+  // do nothing if it didn't exist before
+  if (!fs.existsSync(keybindingConfigPath)) {
+    return;
+  }
+
+  const keybindings = readJSONWithCommentsSync(keybindingConfigPath);
+
+  let needsMigration = false;
+  const migratedKeybindings = keybindings.map((entry: any) => {
+    if (!_.isUndefined(entry.command)) {
+      const newEntry = _.cloneDeep(entry);
+      if (entry.command === "dendron.lookup") {
+        needsMigration = true;
+        newEntry.command = DENDRON_COMMANDS.LOOKUP_NOTE
+        if (_.isUndefined(entry.args)) {
+          // keybinding with no override (simple combo change)
+          // swap out command
+          return newEntry;
+        } else {
+          // keybinding with override. map them to new ones
+          const newArgs = _.cloneDeep(entry);
+          
+          // delete obsolete
+          _.forEach([
+            "flavor",
+            "noteExistBehavior",
+            "filterType",
+            "value",
+            "effectType",
+            "vaultSelectionMode"
+          ], (key: string) => {
+            if (!_.isUndefined(entry.args[key]))
+              delete newArgs[key];
+          });
+
+          // migrate overrides to new keys
+          if (!_.isUndefined(entry.args.filterType))
+            newArgs.filterMiddleware = [entry.args.filterType];
+
+          if (!_.isUndefined(entry.args.value))
+            newArgs.initialValue = entry.args.value;
+
+          if (!_.isUndefined(entry.args.effectType)) {
+            if (entry.args.effectType === "multiSelect") 
+              newArgs.multiSelect = true;
+          };
+
+          newEntry.args = newArgs;
+          return newEntry;
+        }
+      } else if (entry.command === "-dendron.lookup") {
+        needsMigration = true;
+        newEntry.command = `-${DENDRON_COMMANDS.LOOKUP_NOTE}`
+        return newEntry;
+      }
+    }
+    return entry;
+  });
+
+  if (!needsMigration)
+    return;
+
+  return { keybindingConfigPath, migratedKeybindings };
 }

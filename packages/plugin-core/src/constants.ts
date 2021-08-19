@@ -276,22 +276,6 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     group: "notes",
     desc: "Convert link candidate into backlink",
   },
-  // --- Lookup
-  // LOOKUP: {
-  //   // @deprecated
-  //   key: "dendron.lookup",
-  //   title: `${CMD_PREFIX} Lookup`,
-  //   group: "navigation",
-  //    keybindings: {
-  //      mac: "cmd+L",
-  //      key: "ctrl+l",
-  //      when: DendronContext.PLUGIN_ACTIVE,
-  //    },
-  //   desc: "Initiate note lookup",
-  //   docLink: "dendron.topic.lookup.md",
-  //   docPreview: "",
-  //   when: DendronContext.PLUGIN_ACTIVE,
-  // },
   LOOKUP_NOTE: {
     key: "dendron.lookupNote",
     title: `${CMD_PREFIX} Lookup`,

@@ -817,6 +817,27 @@ export class NotePickerUtils {
 }
 
 export class SchemaPickerUtils {
+  static async fetchPickerResultsWithCurrentValue({
+    picker,
+  }: {
+    picker: DendronQuickPickerV2;
+  }) {
+    const engine = getEngine();
+    const resp = await engine.querySchema(picker.value);
+    const node = SchemaUtils.getModuleRoot(resp.data[0]);
+    const perfectMatch = node.fname === picker.value;
+    return !perfectMatch
+      ? [NotePickerUtils.createNoActiveItem({} as any)]
+      : [
+          DNodeUtils.enhancePropForQuickInputV3({
+            wsRoot: DendronWorkspace.wsRoot(),
+            props: node,
+            schemas: engine.schemas,
+            vaults: DendronWorkspace.instance().vaultsv4,
+          }),
+        ];
+  }
+  
   static async fetchPickerResults(opts: {
     picker: DendronQuickPickerV2;
     qs: string;

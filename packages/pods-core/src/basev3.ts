@@ -24,7 +24,7 @@ export type PodOpts<T> = {
   config: T;
   onPrompt?: (arg0?: PROMPT) => Promise<any | undefined>;
   utilityMethods?: {
-    getHierarchyDest: (arg0: string) => Promise<string | undefined>;
+    showInputBox: (arg0: any, arg1?: string) => Promise<string | undefined>;
     openFileInEditor: (arg0: NoteProps) => Promise<void>;
     showDocumentQuickPick: (
       arg0: string[]

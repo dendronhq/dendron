@@ -70,17 +70,15 @@ export const showDocumentQuickPick = async (
   });
 };
 
-export const getHierarchyDest = async (
-  title: string
+export const showInputBox = async (
+  options: any,
+  title?: string
 ): Promise<string | undefined> => {
-  const hierarchyDestination = await window.showInputBox({
-    ignoreFocusOut: true,
-    placeHolder: "Destination name here",
-    title: "Hierarchy destination",
-    prompt: "Enter the destination to import into ",
+  const value = await window.showInputBox({
+    ...options,
     value: title,
   });
-  return hierarchyDestination;
+  return value;
 };
 
 export const updateGlobalState = async (opts: {

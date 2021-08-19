@@ -1,4 +1,4 @@
-import { DendronError } from "@dendronhq/common-all";
+import { DendronError, Time } from "@dendronhq/common-all";
 import { MemoryStore } from "../store/memoryStore";
 import axios from "axios";
 import path from "path";
@@ -41,6 +41,7 @@ export class AuthController {
           tokens: {
             accessToken: data.access_token,
             refreshToken: data.refresh_token,
+            expiresIn: Time.now().toSeconds() + data.expires_in - 300,
           },
         };
         engine.addAccessTokensToPodConfig(opts);
@@ -84,6 +85,8 @@ export class AuthController {
           path: path.join(wsRoot, "pods", "dendron.gdoc", "config.import.yml"),
           tokens: {
             accessToken: data.access_token,
+            // expiration time of token is 55mins from now.
+            expiresIn: Time.now().toSeconds() + data.expires_in - 300,
           },
         };
         engine.addAccessTokensToPodConfig(opts);

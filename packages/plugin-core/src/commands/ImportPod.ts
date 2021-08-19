@@ -11,7 +11,7 @@ import { ProgressLocation, Uri, window } from "vscode";
 import { DENDRON_COMMANDS, Oauth2Pods } from "../constants";
 import { VSCodeUtils } from "../utils";
 import {
-  getHierarchyDest,
+  showInputBox,
   launchGoogleOAuthFlow,
   showDocumentQuickPick,
   showPodQuickPickItemsV4,
@@ -97,7 +97,7 @@ export class ImportPodCommand extends BaseCommand<
       getGlobalState,
       updateGlobalState,
       showDocumentQuickPick,
-      getHierarchyDest,
+      showInputBox,
       openFileInEditor,
     };
     if (!wsRoot) {

@@ -719,7 +719,7 @@ export class NotePickerUtils {
   }: {
     engine: DEngineClient;
   }) => {
-    const nodes = NoteLookupUtils.fetchRootResults(engine.notes);
+    const nodes = NoteLookupUtils.fetchRootResults(engine.notes, { config: engine.config });
     return nodes.map((ent) => {
       return DNodeUtils.enhancePropForQuickInput({
         wsRoot: DendronWorkspace.wsRoot(),

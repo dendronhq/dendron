@@ -14,7 +14,7 @@ Welcome to Dendron! This guide will help get you started with your knowledge bas
 
 Here are the basics of Dendron so you can get started growing your knowledge base.
 - [ ] Create your first note. 
-    - [ ] Dendron uses the [lookup](https://www.dendron.so/notes/a7c3a810-28c8-4b47-96a6-8156b1524af3.html#lookup-menu) command to create. So, hit CMD+L (or ctrl+L if you're on Windows) to bring up the lookup bar, type in a new note name and hit enter to create it. You can also run the lookup command through the command palette "Dendron: Lookup". 
+    - [ ] Dendron uses the [lookup](https://www.dendron.so/notes/a7c3a810-28c8-4b47-96a6-8156b1524af3.html#lookup-menu) command to create. So, hit CMD+L (or ctrl+L if you're on Windows) to bring up the lookup bar, type in a new note name and hit enter to create it. You can also run the lookup command through the command palette "Dendron: Lookup Note". 
     - [ ] Wiki-style links are supported. If the note doesn't exist, we'll create the note for you. For example, just try [[this link]] from the editor view.
 - [ ] Find your notes. Dendron really shines when you need to look up notes quickly. For this, you use *drumroll* the lookup command (again). Just hit CMD/ctrl+L and you can search your entire set of notes.
 - [ ] To delete a note, navigate to it and use the "Dendron: Delete Node" command. As with everything else in VSCode, bring up the command palette with CMD/ctrl+shift+P and run the command.  

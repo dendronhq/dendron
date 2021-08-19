@@ -1,7 +1,7 @@
 import { ENGINE_HOOKS } from "../../presets";
 import { runEngineTestV5 } from "../../engine";
 import { GDocImportPod, PROMPT } from "@dendronhq/pods-core";
-import { VaultUtils } from "@dendronhq/common-all";
+import { Time, VaultUtils } from "@dendronhq/common-all";
 import { response, comments, existingNote } from "../../utils/GDocMockResult";
 import axios from "axios";
 import sinon from "sinon";
@@ -30,7 +30,7 @@ describe("GDoc import pod", () => {
   };
   const docIdsHashMap = { foo: "1dejjityws", bar: "skdeugndk" };
   const utilityMethods = {
-    getHierarchyDest: jest.fn().mockResolvedValue("gdoc.meet"),
+    showInputBox: jest.fn().mockResolvedValue("gdoc.meet"),
     getGlobalState: jest.fn().mockResolvedValue(undefined),
     updateGlobalState: jest.fn().mockResolvedValue(undefined),
     openFileInEditor: jest.fn().mockResolvedValue(undefined),
@@ -59,6 +59,7 @@ describe("GDoc import pod", () => {
             src: "foo",
             accessToken: "xyzabcd",
             refreshToken: "dhdjdjs",
+            expiresIn: Time.now().toSeconds() + 500,
             vaultName,
           },
         });
@@ -102,6 +103,7 @@ describe("GDoc import pod", () => {
             accessToken: "xyzabcd",
             vaultName,
             refreshToken: "hksall",
+            expiresIn: Time.now().toSeconds() + 500,
             importComments: {
               enable: true,
               format: "json",
@@ -145,6 +147,7 @@ describe("GDoc import pod", () => {
             src: "foo",
             accessToken: "xyzabcd",
             refreshToken: "emeiice",
+            expiresIn: Time.now().toSeconds() + 500,
             vaultName,
             importComments: {
               enable: true,
@@ -180,6 +183,7 @@ describe("GDoc import pod", () => {
             src: "foo",
             accessToken: "xyzabcd",
             refreshToken: "akSAal",
+            expiresIn: Time.now().toSeconds() + 500,
             vaultName,
             confirmOverwrite: false,
           },
@@ -212,6 +216,7 @@ describe("GDoc import pod", () => {
             src: "foo",
             accessToken: "xyzabcd",
             refreshToken: "LalaLAL",
+            expiresIn: Time.now().toSeconds() + 500,
             vaultName,
           },
         });
@@ -250,6 +255,7 @@ describe("GDoc import pod", () => {
             src: "foo",
             accessToken: "xyzabcd",
             refreshToken: "hjsjisw",
+            expiresIn: Time.now().toSeconds() + 500,
             vaultName,
           },
         });
@@ -287,6 +293,7 @@ describe("GDoc import pod", () => {
             src: "foo",
             accessToken: "xyzabcd",
             refreshToken: "kqSLA",
+            expiresIn: Time.now().toSeconds() + 500,
             vaultName,
           },
         });

@@ -1,10 +1,12 @@
 import { Breadcrumb } from "antd";
 import _ from "lodash";
 import React from "react";
-import { NoteUtils } from "@dendronhq/common-all";
+import { NoteUtils, NoteProps } from "@dendronhq/common-all";
 import { useNoteActive } from "../utils/hooks";
+import { getNoteUrl } from "../utils/links";
 import { DendronCommonProps, verifyNoteData } from "../utils/types";
 import DendronSpinner from "./DendronSpinner";
+import Link from "next/link";
 
 export function DendronBreadCrumb(props: DendronCommonProps) {
   const { dendronRouter } = props;
@@ -27,7 +29,14 @@ export function DendronBreadCrumb(props: DendronCommonProps) {
   return (
     <Breadcrumb style={{ margin: "16px 0" }}>
       {_.map(noteParents, (note) => {
-        return <Breadcrumb.Item key={note.id}>{note.title}</Breadcrumb.Item>;
+        const dest = getNoteUrl({note, noteIndex: props.noteIndex})
+        return (
+          <Breadcrumb.Item key={note.id}>
+            <Link href={dest}>
+              {note.title}
+            </Link>
+          </Breadcrumb.Item>
+        )
       })}
     </Breadcrumb>
   );

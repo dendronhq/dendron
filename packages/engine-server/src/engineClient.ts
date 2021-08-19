@@ -324,6 +324,9 @@ export class DendronEngineClient implements DEngineClient {
 
   async renameNote(opts: RenameNoteOpts): Promise<RespV2<RenameNotePayload>> {
     const resp = await this.api.engineRenameNote({ ...opts, ws: this.ws });
+    if (resp.error || _.isUndefined(resp.data)) {
+      throw resp.error;
+    }
     await this.refreshNotesV2(resp.data as NoteChangeEntry[]);
     return resp;
   }

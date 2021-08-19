@@ -8,7 +8,7 @@ created: 1624333266168
 
 ### Create a Note
 
-To create a note, use `%KEYBINDING%+L` to bring up Dendron's lookup. This is a shortcut for the `Dendron: Lookup` command.
+To create a note, use `%KEYBINDING%+L` to bring up Dendron's lookup. This is a shortcut for the `Dendron: Lookup Note` command.
 
 > 💡 The lookup command is the main way to interact with Dendron. It is used for both looking up your notes and creating new notes. When you do a lookup on a note that hasn't been created, Dendron will create it for you. Remember the `%KEYBINDING%+L` shortcut.
 

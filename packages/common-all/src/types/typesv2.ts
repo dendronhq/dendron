@@ -278,10 +278,6 @@ export type GetNoteBlocksOpts = {
   filterByAnchorType?: "header" | "block";
 };
 
-// export type GetSeedsOpts = {
-//   //TODO: Add?
-// };
-
 export type ConfigWriteOpts = {
   config: DendronConfig;
 };
@@ -507,7 +503,7 @@ export type WorkspaceVault = {
 export type WorkspaceOpts = {
   wsRoot: string;
   vaults: DVault[];
-  dendronConfig? : DendronConfig
+  dendronConfig?: DendronConfig;
 };
 
 /**

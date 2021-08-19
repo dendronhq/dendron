@@ -79,7 +79,7 @@ export default function SeedBrowser({
                       hoverable
                       actions={[
                         <GoToSiteButton
-                          url={item.site ? item.site.url : undefined}
+                          url={item!.site ? item!.site.url : undefined}
                           inVscode={!browser}
                         />,
                         <AddToWorkspaceButton
@@ -101,8 +101,8 @@ export default function SeedBrowser({
                             }
                           />
                         }
-                        title={item.name}
-                        description={item.description}
+                        title={item!.name}
+                        description={item!.description}
                       />
                     </Card>
                   </List.Item>

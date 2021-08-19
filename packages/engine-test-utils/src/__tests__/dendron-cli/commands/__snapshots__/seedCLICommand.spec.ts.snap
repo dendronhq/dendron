@@ -270,7 +270,8 @@ initializeRemoteVaults: true
 `;
 
 exports[`init convert workspace ok: diff root name 3`] = `
-"name: foo
+"id: dendron.foo
+name: foo
 publisher: dendron
 description: some foo
 license: CC
@@ -329,7 +330,8 @@ initializeRemoteVaults: true
 `;
 
 exports[`init create workspace basic 3`] = `
-"name: foo
+"id: dendron.foo
+name: foo
 publisher: dendron
 description: some foo
 license: CC

@@ -315,6 +315,11 @@ export function setupBeforeAfter(
     sinon
       .stub(WorkspaceInitFactory, "isTutorialWorkspaceLaunch")
       .returns(false);
+
+    sinon
+      .stub(WorkspaceInitFactory, "isSeedBrowserWorkspaceLaunch")
+      .returns(false);
+
     if (opts?.beforeHook) {
       await opts.beforeHook();
     }

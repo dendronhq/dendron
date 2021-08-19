@@ -43,8 +43,6 @@ export type SeedBrowserAssets = {
   publisherLogo?: string;
 };
 
-// export type SeedRegistryEntry = {} & SeedConfig;
-
 export type SeedRegistryDict = { [key: string]: SeedConfig | undefined };
 
 export const SEED_REGISTRY: SeedRegistryDict = {

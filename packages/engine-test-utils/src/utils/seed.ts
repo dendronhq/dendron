@@ -51,6 +51,7 @@ export class TestSeedUtils {
     const cmd = SeedCommands.INIT;
     const id = this.defaultSeedId();
     const seed: SeedConfig = {
+      id: "dendron.foo",
       description: "",
       license: "",
       name: "foo",

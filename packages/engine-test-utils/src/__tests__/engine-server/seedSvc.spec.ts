@@ -273,6 +273,7 @@ runTest("add", () => {
 
 runTest("init", () => {
   const seed: SeedConfig = {
+    id: "dendron.foo",
     name: "foo",
     publisher: "dendron",
     description: "some foo",

@@ -1,4 +1,4 @@
-import { InstallStatus } from "@dendronhq/common-all";
+import { InstallStatus, LookupSelectionType } from "@dendronhq/common-all";
 import {
   ALL_MIGRATIONS,
   DConfig,
@@ -252,5 +252,72 @@ suite("Migration", function () {
         },
       });
     });
+
+    test.only("migrate to 0.55.2 (old existing ws config to new dendron config)", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        modConfigCb: (config) => {
+          // @ts-ignore
+          delete config["lookup"];
+          return config;
+        },
+        onInit: async ({ engine, wsRoot }) => {
+          const dendronConfig = engine.config;
+          const wsConfig = await getWS().getWorkspaceSettings();
+          const wsService = new WorkspaceService({ wsRoot });
+          expect(wsConfig.settings[CONFIG.DEFAULT_LOOKUP_CREATE_BEHAVIOR.key]).toEqual(
+            LookupSelectionType.selection2link
+          );
+          expect(_.isUndefined(dendronConfig.lookup)).toBeTruthy();
+          await MigrationServce.applyMigrationRules({
+            currentVersion: "0.55.2",
+            previousVersion: "0.55.1",
+            dendronConfig,
+            wsConfig,
+            wsService,
+            logger: Logger,
+            migrations: getMigration({ from: "0.55.0", to: "0.55.2"}),
+          });
+          expect(getWS().config.lookup.note.selectionType).toEqual(LookupSelectionType.selection2link);
+          done();
+        },
+        wsSettingsOverride: {
+          settings: {
+            [CONFIG.DEFAULT_LOOKUP_CREATE_BEHAVIOR.key]: LookupSelectionType.selection2link,
+          },
+        },
+      })
+    })
+
+    test.only("migrate to 0.55.2 (implicit to new dendron config)", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        modConfigCb: (config) => {
+          // @ts-ignore
+          delete config["lookup"];
+          return config;
+        },
+        onInit: async ({ engine, wsRoot }) => {
+          const dendronConfig = engine.config;
+          const wsConfig = await getWS().getWorkspaceSettings();
+          const wsService = new WorkspaceService({ wsRoot });
+          expect(_.isUndefined(wsConfig.settings[CONFIG.DEFAULT_LOOKUP_CREATE_BEHAVIOR.key])).toBeTruthy();
+          expect(_.isUndefined(dendronConfig.lookup)).toBeTruthy();
+          await MigrationServce.applyMigrationRules({
+            currentVersion: "0.55.2",
+            previousVersion: "0.55.1",
+            dendronConfig,
+            wsConfig,
+            wsService,
+            logger: Logger,
+            migrations: getMigration({ from: "0.55.0", to: "0.55.2"}),
+          });
+          expect(getWS().config.lookup.note.selectionType).toEqual(
+            DConfig.genDefaultConfig().lookup.note.selectionType
+          );
+          done();
+        }
+      })
+    })
   });
 });

@@ -36,7 +36,7 @@ export const launchGoogleOAuthFlow = async () => {
   const stringifiedParams = queryString.stringify({
     client_id:
       "587163973906-od2u5uaop9b2u6ero5ltl342hh38frth.apps.googleusercontent.com",
-    redirect_uri: `http://localhost:${port}/api/oauth/getToken`,
+    redirect_uri: `http://localhost:${port}/api/oauth/getToken?service=google`,
     scope: gdocRequiredScopes.join(" "), // space seperated string
     response_type: "code",
     access_type: "offline",

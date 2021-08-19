@@ -5,17 +5,27 @@ import path from "path";
 import fs from "fs-extra";
 import _ from "lodash";
 
-export class AuthController {
-  static singleton?: AuthController;
+interface TokenMethods {
+  getToken: (opts: GetTokenOpts) => Promise<any>;
+  refreshToken: (opts: RefreshTokenOpts) => any;
+}
 
+type GetTokenOpts = {
+  code: string;
+};
+
+type RefreshTokenOpts = {
+  refreshToken: string;
+};
+
+export class GoogleAuthController implements TokenMethods {
   static instance() {
-    if (!AuthController.singleton) {
-      AuthController.singleton = new AuthController();
-    }
-    return AuthController.singleton;
+    const googleAuthController = new GoogleAuthController();
+    return googleAuthController;
   }
 
-  async getToken(code: string): Promise<any> {
+  async getToken(opts: GetTokenOpts): Promise<any> {
+    const { code } = opts;
     const engine = MemoryStore.instance().getEngine();
     const { wsRoot } = engine;
     const port = fs.readFileSync(path.join(wsRoot, ".dendron.port"), {
@@ -30,7 +40,7 @@ export class AuthController {
           client_id:
             "587163973906-od2u5uaop9b2u6ero5ltl342hh38frth.apps.googleusercontent.com",
           client_secret: "scXCYiq0boH7bk_c43mZbvBZ",
-          redirect_uri: `http://localhost:${port}/api/oauth/getToken`,
+          redirect_uri: `http://localhost:${port}/api/oauth/getToken?service=google`,
           grant_type: "authorization_code",
           code,
         },
@@ -60,7 +70,8 @@ export class AuthController {
     }
   }
 
-  async refreshToken(refreshToken: string): Promise<any> {
+  async refreshToken(opts: RefreshTokenOpts): Promise<any> {
+    const { refreshToken } = opts;
     const engine = MemoryStore.instance().getEngine();
     const { wsRoot } = engine;
     const port = fs.readFileSync(path.join(wsRoot, ".dendron.port"), {
@@ -75,7 +86,7 @@ export class AuthController {
           client_id:
             "587163973906-od2u5uaop9b2u6ero5ltl342hh38frth.apps.googleusercontent.com",
           client_secret: "scXCYiq0boH7bk_c43mZbvBZ",
-          redirect_uri: `http://localhost:${port}/api/oauth/getToken`,
+          redirect_uri: `http://localhost:${port}/api/oauth/getToken?service=google`,
           grant_type: "refresh_token",
           refresh_token: refreshToken,
         },

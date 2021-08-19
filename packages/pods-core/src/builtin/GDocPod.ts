@@ -398,6 +398,7 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
           {
             params: {
               refreshToken,
+              service: "google",
             },
           }
         );

@@ -147,7 +147,15 @@ describe("MDUtils.proc", () => {
           );
         },
         [ProcFlavor.PREVIEW]: ProcFlavor.REGULAR,
-        [ProcFlavor.PUBLISHING]: ProcFlavor.REGULAR,
+        [ProcFlavor.PUBLISHING]: async ({ extra }) => {
+          const { resp } = extra;
+          expect(resp).toMatchSnapshot();
+          await checkString(
+            resp.contents,
+            // should have id for link
+            `<a href="/notes/alpha-id.html"`,
+          );
+        },
       },
     },
     preSetupHook: async (opts) => {

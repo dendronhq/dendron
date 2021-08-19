@@ -3,7 +3,7 @@ import {
   ThemeUtils,
   TreeViewUtils,
 } from "@dendronhq/common-frontend";
-import { Tree, TreeProps } from "antd";
+import { Tree, TreeProps, Menu, MenuItemProps, SubMenuProps } from "antd";
 import _ from "lodash";
 import { DataNode } from "rc-tree/lib/interface";
 import React, { useState } from "react";
@@ -12,8 +12,10 @@ import { useDendronRouter } from "../utils/hooks";
 import { DendronCommonProps, NoteData, verifyNoteData } from "../utils/types";
 import DendronSpinner from "./DendronSpinner";
 
-type OnExpandFunc = TreeProps["onExpand"];
-type OnSelectFunc = TreeProps["onSelect"];
+const { SubMenu } = Menu;
+
+type OnExpandFunc = SubMenuProps["onTitleClick"];
+type OnSelectFunc = MenuItemProps["onClick"];
 
 export default function DendronTreeViewContainer(props: Partial<NoteData>) {
   const dendronRouter = useDendronRouter();
@@ -61,23 +63,23 @@ function DendronTreeView({
   }
 
   // --- Methods
-  const onExpand: OnExpandFunc = (expandedKeys, { node, expanded }) => {
-    const id = node.key as string;
-    logger.info({ ctx: "onExpand", expandedKeys, id, expanded });
+  const onExpand: OnExpandFunc = (event) => {
+    const id = event.key as string;
+    logger.info({ ctx: "onExpand", id });
     if (_.isUndefined(notes)) {
       return;
     }
     // open up
-    if (expanded) {
-      setActiveNoteIds(TreeViewUtils.getAllParents({ notes, noteId: id }));
-    } else {
-      setActiveNoteIds(
-        TreeViewUtils.getAllParents({ notes, noteId: id }).slice(0, -1)
-      );
-    }
+    // if (expanded) {
+    //   setActiveNoteIds(TreeViewUtils.getAllParents({ notes, noteId: id }));
+    // } else {
+    //   setActiveNoteIds(
+    //     TreeViewUtils.getAllParents({ notes, noteId: id }).slice(0, -1)
+    //   );
+    // }
   };
-  const onSelect: OnSelectFunc = (_selectedKeys, { node }) => {
-    const id = node.key as string;
+  const onSelect: OnSelectFunc = (event) => {
+    const id = event.key as string;
     changeActiveNote(id, { noteIndex: noteDataProps.noteIndex });
   };
 
@@ -91,46 +93,93 @@ function DendronTreeView({
     });
   }) as DataNode[];
   const expandKeys = _.isEmpty(activeNoteIds) ? [] : activeNoteIds;
+
   return (
-    <>
-      <TreeView
-        treeData={roots}
-        defaultExpandKeys={expandKeys}
-        onExpand={onExpand}
-        onSelect={onSelect}
-      />
-    </>
+    <MenuView
+      roots={roots}
+      expandKeys={expandKeys}
+      onExpand={onExpand}
+      onSelect={onSelect}
+    />
   );
+
+  // return (
+  //   <>
+  //     <TreeView
+  //       treeData={roots}
+  //       defaultExpandKeys={expandKeys}
+  //       onExpand={onExpand}
+  //       onSelect={onSelect}
+  //     />
+  //   </>
+  // );
 }
 
-function TreeView({
-  treeData,
-  defaultExpandKeys,
+function MenuView({
+  roots,
+  expandKeys,
   onExpand,
   onSelect,
 }: {
-  treeData: DataNode[];
-  defaultExpandKeys: string[];
-  onExpand: OnExpandFunc;
+  roots: DataNode[];
+  expandKeys: string[];
   onSelect: OnSelectFunc;
+  onExpand: OnExpandFunc;
 }) {
-  const { currentTheme } = useThemeSwitcher();
-  const maybeTheme = ThemeUtils.getTheme(currentTheme || "light");
+  const createMenu = (menu: DataNode) => {
+    if (menu.children && menu.children.length > 0) {
+      return (
+        <SubMenu key={menu.key} title={menu.title} onTitleClick={onExpand}>
+          {menu.children.map((childMenu: DataNode) => {
+            return createMenu(childMenu);
+          })}
+        </SubMenu>
+      );
+    }
+    return (
+      <Menu.Item key={menu.key} onClick={onSelect}>
+        {menu.title}
+      </Menu.Item>
+    );
+  };
+
   return (
-    <>
-      {treeData.length ? (
-        <Tree
-          style={{ background: maybeTheme?.layoutHeaderBackground }}
-          showIcon
-          expandedKeys={defaultExpandKeys}
-          selectedKeys={defaultExpandKeys.slice(-1)}
-          onExpand={onExpand}
-          onSelect={onSelect}
-          treeData={treeData}
-        />
-      ) : (
-        <DendronSpinner />
-      )}
-    </>
+    <Menu mode="inline" defaultOpenKeys={expandKeys}>
+      {roots.map((menu) => {
+        return createMenu(menu);
+      })}
+    </Menu>
   );
 }
+
+// function TreeView({
+//   treeData,
+//   defaultExpandKeys,
+//   onExpand,
+//   onSelect,
+// }: {
+//   treeData: DataNode[];
+//   defaultExpandKeys: string[];
+//   onSelect: OnSelectFunc;
+//   onExpand: OnExpandFunc;
+// }) {
+//   const { currentTheme } = useThemeSwitcher();
+//   const maybeTheme = ThemeUtils.getTheme(currentTheme || "light");
+//   return (
+//     <>
+//       {treeData.length ? (
+//         <Tree
+//           style={{ background: maybeTheme?.layoutHeaderBackground }}
+//           showIcon
+//           expandedKeys={defaultExpandKeys}
+//           selectedKeys={defaultExpandKeys.slice(-1)}
+//           onExpand={onExpand}
+//           onSelect={onSelect}
+//           treeData={treeData}
+//         />
+//       ) : (
+//         <DendronSpinner />
+//       )}
+//     </>
+//   );
+// }

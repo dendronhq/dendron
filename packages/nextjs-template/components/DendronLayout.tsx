@@ -13,9 +13,9 @@ import DendronTreeView from "./DendronTreeView";
 
 const { Header, Content, Sider, Footer } = Layout;
 
-export default function DendronLayout(
-  props: React.PropsWithChildren<DendronCommonProps>
-) {
+const SIDER_COLLAPSED_WIDTH = 80;
+
+function DendronLayout(props: React.PropsWithChildren<DendronCommonProps>) {
   const [collapsed, setCollapsed] = React.useState(false);
   const siderProps: React.CSSProperties = collapsed
     ? {
@@ -115,7 +115,9 @@ export default function DendronLayout(
   );
 }
 
-function DendronLayoutV2(props: React.PropsWithChildren<DendronCommonProps>) {
+export default function DendronLayoutV2(
+  props: React.PropsWithChildren<DendronCommonProps>
+) {
   const [collapsed, setCollapsed] = React.useState(false);
   return (
     <Layout>
@@ -141,11 +143,12 @@ function DendronLayoutV2(props: React.PropsWithChildren<DendronCommonProps>) {
         <Sider
           width={DENDRON_STYLE_CONSTANTS.SIDER.WIDTH}
           collapsible
-          collapsedWidth={0}
-          trigger={null}
+          collapsed={collapsed}
+          collapsedWidth={SIDER_COLLAPSED_WIDTH}
           onCollapse={(collapsed, type) => {
             setCollapsed(collapsed);
           }}
+          trigger={collapsed ? undefined : null}
           breakpoint="lg"
           style={{
             paddingLeft: collapsed
@@ -161,7 +164,9 @@ function DendronLayoutV2(props: React.PropsWithChildren<DendronCommonProps>) {
         </Sider>
         <Layout
           style={{
-            marginLeft: collapsed ? 0 : DENDRON_STYLE_CONSTANTS.SIDER.WIDTH,
+            marginLeft: collapsed
+              ? SIDER_COLLAPSED_WIDTH
+              : DENDRON_STYLE_CONSTANTS.SIDER.WIDTH,
           }}
         >
           <Content
@@ -180,5 +185,3 @@ function DendronLayoutV2(props: React.PropsWithChildren<DendronCommonProps>) {
     </Layout>
   );
 }
-
-// export default DendronLayout;

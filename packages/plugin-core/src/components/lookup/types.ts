@@ -104,7 +104,7 @@ export type DendronQuickPickerV2 = DendronQuickPickItemV2 & {
   /**
    * Should show a subsequent picker?
    */
-  nextPicker?: () => any;
+  nextPicker?: (opts: any) => any;
   /**
    * TODO: should be required
    */

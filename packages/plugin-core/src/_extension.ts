@@ -232,7 +232,7 @@ export async function _activate(
     currentVersion,
   });
 
-  if (DendronWorkspace.isActive()) {
+  if (DendronWorkspace.isActive(context)) {
     const start = process.hrtime();
     let dendronConfig = ws.config;
     const wsConfig = await ws.getWorkspaceSettings();
@@ -477,7 +477,7 @@ export async function _activate(
     previousExtensionVersion: previousWorkspaceVersion,
     start: startActivate,
   }).then(() => {
-    if (DendronWorkspace.isActive()) {
+    if (DendronWorkspace.isActive(context)) {
       HistoryService.instance().add({
         source: "extension",
         action: "activate",

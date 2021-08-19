@@ -258,12 +258,22 @@ export class DendronWorkspace {
   /**
    * Currently, this is a check to see if rootDir is defined in settings
    */
-  static isActive(): boolean {
+  static isActive(context?: vscode.ExtensionContext) {
     /**
      * we do a try catch because `DendronWorkspace.workspaceFile` throws an error if workspace file doesn't exist
      * the reason we don't use `vscode.*` method is because we need to stub this value during tests
      */
     try {
+      if (context) {
+        const { workspaceFolders, workspaceFile } = vscode.workspace;
+        const dendronWorkspaceFolders =
+          workspaceFolders?.filter((ent) => {
+            return fs.pathExistsSync(path.join(ent.uri.fsPath, "dendron.yml"));
+          }) || [];
+        if (dendronWorkspaceFolders.length > 0) {
+          return dendronWorkspaceFolders[0];
+        }
+      }
       return (
         path.basename(DendronWorkspace.workspaceFile().fsPath) ===
         this.DENDRON_WORKSPACE_FILE

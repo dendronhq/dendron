@@ -156,12 +156,18 @@ export class FileStorage implements DStore {
       });
     }
     const noteToDelete = this.notes[id];
+    this.logger.info({ ctx, noteToDelete, opts, id });
+    if (_.isUndefined(noteToDelete))
+      throw new DendronError({
+        message: `Unable to find node ${id}`,
+        severity: ERROR_SEVERITY.FATAL,
+        payload: ctx,
+      });
     const ext = ".md";
     const vault = noteToDelete.vault;
     const vpath = vault2Path({ vault, wsRoot: this.wsRoot });
     const fpath = path.join(vpath, noteToDelete.fname + ext);
     let out: NoteChangeEntry[] = [];
-    this.logger.info({ ctx, noteToDelete, opts });
 
     const noteAsLog = NoteUtils.toLogObj(noteToDelete);
 
@@ -738,9 +744,21 @@ export class FileStorage implements DStore {
     } else {
       // The file is being renamed to a new file.
       this.logger.info({ ctx, msg: "Renaming the file to a new name" });
-      changedFromDelete = await this.deleteNote(oldNote.id, {
-        metaOnly: true,
-      });
+      try {
+        changedFromDelete = await this.deleteNote(oldNote.id, {
+          metaOnly: true,
+        });
+      } catch (err) {
+        throw new DendronError({
+          message:
+            `Unable to delete note "${
+              oldNote.fname
+            }" in vault "${VaultUtils.getName(oldNote.vault)}".` +
+            ` Check that this note exists, and make sure it has a frontmatter with an id.`,
+          severity: ERROR_SEVERITY.FATAL,
+          payload: err,
+        });
+      }
       deleteOldFile = true;
       this.logger.info({
         ctx,

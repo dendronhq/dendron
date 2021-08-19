@@ -1,6 +1,7 @@
 import {
   DEngineClient,
   DVault,
+  IDendronError,
   NoteChangeEntry,
   NoteUtils,
   VaultUtils,
@@ -862,6 +863,51 @@ const NOTES = {
           vault: vaults[0],
           wsRoot,
         });
+      },
+    }
+  ),
+  NOTE_WITHOUT_ID: new TestPresetEntryV4(
+    async ({ vaults, engine }) => {
+      let error: IDendronError;
+      try {
+        const out = await engine.renameNote({
+          oldLoc: {
+            fname: "tag.foo",
+            alias: "#foo",
+            vaultName: VaultUtils.getName(vaults[0]),
+          },
+          newLoc: {
+            fname: "tags.foo",
+            vaultName: VaultUtils.getName(vaults[0]),
+          },
+        });
+        error = out.error!;
+      } catch (err) {
+        // Need to check both `out.error` and caught error
+        // since this runs in both API and engine tests
+        error = err;
+      }
+      // Renaming a note without a frontmatter fails.
+      // Make sure we fail gracefully.
+
+      return [
+        {
+          actual: _.pick(error, "severity", "isComposite"),
+          expected: { severity: "fatal", isComposite: false },
+        },
+        {
+          actual: error?.message?.includes("Unable to delete"),
+          expected: true,
+        },
+      ];
+    },
+    {
+      preSetupHook: async ({ vaults, wsRoot }) => {
+        // Create an empty file without a frontmatter.
+        await fs.writeFile(
+          path.join(wsRoot, vaults[0].fsPath, "tag.foo.md"),
+          ""
+        );
       },
     }
   ),

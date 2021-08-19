@@ -18,6 +18,7 @@ import {
   EngineDeleteOptsV2,
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
+  error2PlainObject,
   ERROR_SEVERITY,
   ERROR_STATUS,
   FuseEngine,
@@ -505,9 +506,10 @@ export class DendronEngineV2 implements DEngine {
         data: resp,
       };
     } catch (err) {
-      return {
-        error: new DendronError({ message: "rename error", payload: err }),
-      };
+      let error = err;
+      if (err instanceof DendronError) error = error2PlainObject(err);
+      if (_.isUndefined(err.message)) err.message = "rename error";
+      return { error };
     }
   }
 

@@ -39,6 +39,7 @@ import {
   LookupSelectionTypeEnum,
   LookupSplitType,
   LookupSplitTypeEnum,
+  VaultSelectionMode,
 } from "../components/lookup/types";
 import {
   node2Uri,
@@ -64,6 +65,7 @@ export type CommandRunOpts = {
    * NOTE: currently, only one filter is supported
    */
   filterMiddleware?: LookupFilterType[];
+  vaultSelectionMode?: VaultSelectionMode;
 };
 
 /**
@@ -154,6 +156,7 @@ export class NoteLookupCommand extends BaseCommand<
         ws.config,
         "lookupConfirmVaultOnCreate"
       ),
+      vaultButtonPressed: copts.vaultSelectionMode === VaultSelectionMode.alwaysPrompt,
       extraButtons: [
         MultiSelectBtn.create(copts.multiSelect),
         CopyNoteLinkBtn.create(),

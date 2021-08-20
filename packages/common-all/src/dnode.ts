@@ -901,7 +901,9 @@ export class NoteUtils {
     );
     if (!this.isNoteProps(cleanProps))
       throw new DendronError({
-        message: "Note is missing some properties that are required",
+        message: `Note is missing some properties that are required. Found properties: ${JSON.stringify(
+          props
+        )}`,
       });
 
     // Separate custom and builtin props

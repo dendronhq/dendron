@@ -136,7 +136,12 @@ function MenuView({
   };
 
   return (
-    <Menu mode="inline" defaultOpenKeys={expandKeys} onClick={onSelect}>
+    <Menu
+      mode="inline"
+      defaultOpenKeys={expandKeys}
+      defaultSelectedKeys={expandKeys}
+      onClick={onSelect}
+    >
       {roots.map((menu) => {
         return createMenu(menu);
       })}

@@ -21,7 +21,7 @@ type ModifyPickerValueFunc = (value?: string) => {
   prefix: string;
 };
 type SelectionProcessFunc = (note: NoteProps) => Promise<NoteProps | undefined>;
-
+type CopyNoteLinkFunc = (items: NoteProps[]) => Promise<void> | undefined;
 export enum DendronQuickPickState {
   /**
    * Default state
@@ -101,6 +101,10 @@ export type DendronQuickPickerV2 = DendronQuickPickItemV2 & {
    * Method to process selected text in active note.
    */
   selectionProcessFunc?: SelectionProcessFunc;
+  /**
+   * Method to copy note link
+   */
+  copyNoteLinkFunc?: CopyNoteLinkFunc;
   /**
    * Should show a subsequent picker?
    */

@@ -13,7 +13,7 @@ import {
 } from "antd";
 import _ from "lodash";
 import { DataNode } from "rc-tree/lib/interface";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useThemeSwitcher } from "react-css-theme-switcher";
 import { useDendronRouter } from "../utils/hooks";
 import { DendronCommonProps, NoteData, verifyNoteData } from "../utils/types";
@@ -35,6 +35,30 @@ function DendronTreeView({
 }: DendronCommonProps) {
   const logger = createLogger("DendronTreeView");
   const { changeActiveNote } = dendronRouter;
+  const [activeNoteIds, setActiveNoteIds] = useState<string[]>([]);
+
+  // --- Effect
+  useEffect(() => {
+    if (!verifyNoteData(noteDataProps)) {
+      return;
+    }
+
+    const { noteIndex, notes } = noteDataProps;
+
+    const noteActiveId = _.isUndefined(dendronRouter.query.id)
+      ? noteIndex.id
+      : dendronRouter.query.id;
+    logger.info({
+      state: "useEffect:preCalculateTree",
+    });
+
+    setActiveNoteIds(
+      TreeViewUtils.getAllParents({
+        notes,
+        noteId: noteActiveId,
+      })
+    );
+  }, [noteDataProps.noteIndex, noteDataProps.notes]);
 
   // --- Verify
   if (!verifyNoteData(noteDataProps)) {
@@ -44,21 +68,9 @@ function DendronTreeView({
     return <DendronSpinner />;
   }
 
-  const { notes, noteIndex, domains } = noteDataProps;
+  const { notes, domains } = noteDataProps;
 
   // --- Calc
-  const noteActiveId = _.isUndefined(dendronRouter.query.id)
-    ? noteIndex.id
-    : dendronRouter.query.id;
-  logger.info({
-    state: "useEffect:preCalculateTree",
-  });
-
-  const activeNoteIds = TreeViewUtils.getAllParents({
-    notes,
-    noteId: noteActiveId,
-  });
-
   const roots = domains.map((note) => {
     return TreeViewUtils.note2TreeDatanote({
       noteId: note.id,
@@ -77,14 +89,15 @@ function DendronTreeView({
     if (_.isUndefined(notes)) {
       return;
     }
+    const expanded = expandKeys.includes(id);
     // open up
-    // if (expanded) {
-    //   setActiveNoteIds(TreeViewUtils.getAllParents({ notes, noteId: id }));
-    // } else {
-    //   setActiveNoteIds(
-    //     TreeViewUtils.getAllParents({ notes, noteId: id }).slice(0, -1)
-    //   );
-    // }
+    if (expanded) {
+      setActiveNoteIds(
+        TreeViewUtils.getAllParents({ notes, noteId: id }).slice(0, -1)
+      );
+    } else {
+      setActiveNoteIds(TreeViewUtils.getAllParents({ notes, noteId: id }));
+    }
   };
   const onSelect: OnSelectFunc = ({ key: id }) => {
     changeActiveNote(id, { noteIndex: noteDataProps.noteIndex });
@@ -138,9 +151,9 @@ function MenuView({
   return (
     <Menu
       mode="inline"
-      defaultOpenKeys={expandKeys}
-      defaultSelectedKeys={expandKeys}
+      openKeys={expandKeys}
       onClick={onSelect}
+      selectedKeys={expandKeys}
     >
       {roots.map((menu) => {
         return createMenu(menu);

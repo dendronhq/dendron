@@ -1,4 +1,4 @@
-import { ScratchConfig } from "@dendronhq/common-all";
+import { LookupConfig, LookupSelectionType, ScratchConfig } from "@dendronhq/common-all";
 import {
   SegmentClient,
   TelemetryStatus,
@@ -13,29 +13,27 @@ import { Migrations } from "./types";
  * Migrations are sorted by version numbers, from greatest to least
  */
 export const ALL_MIGRATIONS: Migrations[] = [
-  // TODO: use correct version for this migration once it's confirmed when
-  //       `NoteLookupCommand` will completely replace lookup v2.
-  // {
-  //   version: "0.54.0",
-  //   changes: [
-  //     {
-  //       name: "migrate note lookup config",
-  //       func: async ({ dendronConfig, wsConfig }) => {
-  //         dendronConfig.lookup = DConfig.genDefaultConfig().lookup as LookupConfig;
-  //         const oldLookupCreateBehavior = _.get(
-  //           wsConfig.settings, 
-  //           "dendron.defaultLookupCreateBehavior",
-  //           undefined,
-  //         ) as LookupSelectionType;
-  //         if (oldLookupCreateBehavior !== undefined) {
-  //           dendronConfig.lookup.note.selectionType = oldLookupCreateBehavior;
-  //         }
+  {
+    version: "0.55.2",
+    changes: [
+      {
+        name: "migrate note lookup config",
+        func: async ({ dendronConfig, wsConfig }) => {
+          dendronConfig.lookup = DConfig.genDefaultConfig().lookup as LookupConfig;
+          const oldLookupCreateBehavior = _.get(
+            wsConfig.settings, 
+            "dendron.defaultLookupCreateBehavior",
+            undefined,
+          ) as LookupSelectionType;
+          if (oldLookupCreateBehavior !== undefined) {
+            dendronConfig.lookup.note.selectionType = oldLookupCreateBehavior;
+          }
 
-  //         return { data: { dendronConfig, wsConfig }};
-  //       },
-  //     },
-  //   ],
-  // },
+          return { data: { dendronConfig, wsConfig }};
+        },
+      },
+    ],
+  },
   {
     version: "0.51.4",
     changes: [

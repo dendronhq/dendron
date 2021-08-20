@@ -35,7 +35,6 @@ import { DendronWorkspace, getWS, resolveRelToWSRoot } from "../../workspace";
 import { BlankInitializer } from "../../workspace/blankInitializer";
 import { TemplateInitializer } from "../../workspace/templateInitializer";
 import { 
-  checkAndApplyVimKeybindingOverrideIfExists,
   shouldDisplayLapsedUserMsg,
   _activate 
 } from "../../_extension";
@@ -50,7 +49,8 @@ import {
   setupBeforeAfter,
   stubSetupWorkspace,
 } from "../testUtilsV3";
-import { VSCodeUtils } from "../../utils";
+import { VSCodeUtils, KeybindingUtils } from "../../utils";
+import { toPlainObject } from "@dendronhq/common-test-utils";
 
 function mockUserConfigDir() {
   const dir = tmpDir().name;
@@ -346,10 +346,29 @@ suite("Extension", function () {
       });
     });
   });
+});
+
+suite("keybindings", function () {
+  let homeDirStub: SinonStub;
+  let userConfigDirStub: SinonStub;
+
+  const ctx: ExtensionContext = setupBeforeAfter(this, {
+    beforeHook: async () => {
+      await resetCodeWorkspace();
+      await new ResetConfigCommand().execute({ scope: "all" });
+      homeDirStub = TestEngineUtils.mockHomeDir();
+      userConfigDirStub = mockUserConfigDir();
+    },
+    afterHook: async () => {
+      homeDirStub.restore();
+      userConfigDirStub.restore();
+    },
+    noSetInstallStatus: true,
+  });
 
   describe("keyboard shortcut conflict resolution", () => {
     test("vim extension expandLineSelection override", (done) => {
-      const { newKeybindings } = checkAndApplyVimKeybindingOverrideIfExists();
+      const { newKeybindings } = KeybindingUtils.checkAndApplyVimKeybindingOverrideIfExists();
       const override = newKeybindings[newKeybindings.length-1];
       const metaKey = os.type() === "Darwin" ? "cmd" : "ctrl";
       expect(override).toEqual({
@@ -405,4 +424,195 @@ suite("Extension", function () {
         });
     });
   });
+
+  describe("keyboard shortcut migration", () => {
+    test("lookup v2 to v3 migration, nothing happens", (done) => {
+      const { migratedKeybindings } = KeybindingUtils.checkAndMigrateLookupKeybindingIfExists();
+      expect(_.isUndefined(migratedKeybindings)).toBeTruthy();
+      done();
+    });
+
+    test("lookup v2 to v3 migration", (done) => {
+      const { keybindingConfigPath } = KeybindingUtils.getKeybindingConfigPath();
+      const metaKey = os.type() === "Darwin" ? "cmd" : "ctrl";
+      fs.ensureFileSync(keybindingConfigPath);
+      const startingConfig = [
+        {
+          key: `shift+${metaKey}+d`,
+          command: "-dendron.deleteNode",
+          when: "dendron:pluginActive"
+        },
+        {
+          key: `${metaKey}+k l`,
+          command: "dendron.lookup",
+          args: {
+            flavor: "note",
+            noteExistBehavior: "open",
+            filterType: "directChildOnly",
+            value: "foo",
+            effectType: "multiSelect"
+          }
+        },
+        {
+          key: `${metaKey}+k shift+l`,
+          command: "dendron.lookup",
+          args: {
+            effectType: "copyNoteLink",
+          }
+        },
+        {
+          key: `${metaKey}+l`,
+          command: "-dendron.lookup",
+        },
+        {
+          key: `${metaKey}+l`,
+          command: "dendron.lookup",
+          args: {
+            splitType: "horizontal",
+            selectionType: "selectionExtract",
+            noConfirm: true,
+            vaultSelectionMode: 2,
+          }
+        }
+      ];
+      fs.writeFileSync(keybindingConfigPath, JSON.stringify(startingConfig));
+      const { migratedKeybindings } = KeybindingUtils.checkAndMigrateLookupKeybindingIfExists();
+      expect(toPlainObject(migratedKeybindings)).toEqual([
+        // leaves non-lookup keybinding as is
+        {
+          key: `shift+${metaKey}+d`,
+          command: "-dendron.deleteNode",
+          when: "dendron:pluginActive"
+        },
+        // migrate to new args
+        {
+          key: `${metaKey}+k l`,
+          command: "dendron.lookupNote",
+          args: {
+            filterMiddleware: ["directChildOnly"],
+            initialValue: "foo",
+            multiSelect: true,
+          }
+        },
+        {
+          key: `${metaKey}+k shift+l`,
+          command: "dendron.lookupNote",
+          args: {
+            copyNoteLink: true,
+          }
+        },
+        // migrates keybinding overrides
+        {
+          key: `${metaKey}+l`,
+          command: "-dendron.lookupNote",
+        },
+        // leaves keys that don't change as is
+        {
+          key: `${metaKey}+l`,
+          command: "dendron.lookupNote",
+          args: {
+            splitType: "horizontal",
+            selectionType: "selectionExtract",
+            noConfirm: true,
+            vaultSelectionMode: 2,
+          }
+        }
+      ]);
+      done();
+    });
+
+    test("does nothing on extension activate if not necessary", (done) => {
+      const wsRoot = tmpDir().name;
+      const { userConfigDir } = VSCodeUtils.getCodeUserConfigDir();
+      const keybindingConfigPath = [
+        userConfigDir,
+        "keybindings.json",
+      ].join("");
+      expect(fs.existsSync(keybindingConfigPath)).toBeFalsy();
+
+      getWS()
+        .updateGlobalState(
+          GLOBAL_STATE.WORKSPACE_ACTIVATION_CONTEXT,
+          WORKSPACE_ACTIVATION_CONTEXT.NORMAL
+        )
+        .then(() => {
+          _activate(ctx).then(async () => {
+            stubSetupWorkspace({
+              wsRoot,
+            });
+            const cmd = new SetupWorkspaceCommand();
+            await cmd.execute({
+              rootDirRaw: wsRoot,
+              skipOpenWs: true,
+              skipConfirmation: true,
+              workspaceInitializer: new BlankInitializer(),
+            });
+            expect(fs.existsSync(keybindingConfigPath)).toBeFalsy();
+
+            done();
+          });
+        });
+    });
+
+    test("v2 to v3 migration happens on extension activation on upgrade", (done) => {
+      const wsRoot = tmpDir().name;
+      const metaKey = os.type() === "Darwin" ? "cmd" : "ctrl";
+      const { userConfigDir } = VSCodeUtils.getCodeUserConfigDir();
+      const keybindingConfigPath = [
+        userConfigDir,
+        "keybindings.json",
+      ].join("");
+      fs.ensureFileSync(keybindingConfigPath);
+      fs.writeFileSync(keybindingConfigPath, JSON.stringify([
+        {
+          key: `${metaKey}+l`,
+          command: "-dendron.lookup",
+        },
+        {
+          key: `${metaKey}+l`,
+          command: "dendron.lookup",
+          args: {
+            effectType: "copyNoteLink"
+          }
+        }
+      ]));
+
+      getWS()
+        .updateGlobalState(
+          GLOBAL_STATE.WORKSPACE_ACTIVATION_CONTEXT,
+          WORKSPACE_ACTIVATION_CONTEXT.NORMAL
+        )
+        .then(() => {
+          _activate(ctx).then(async () => {
+            stubSetupWorkspace({
+              wsRoot,
+            });
+            const cmd = new SetupWorkspaceCommand();
+            await cmd.execute({
+              rootDirRaw: wsRoot,
+              skipOpenWs: true,
+              skipConfirmation: true,
+              workspaceInitializer: new BlankInitializer(),
+            });
+
+            const migratedKeybindings = readJSONWithCommentsSync(keybindingConfigPath);
+            expect(toPlainObject(migratedKeybindings)).toEqual([
+              {
+                key: `${metaKey}+l`,
+                command: "-dendron.lookupNote",
+              },
+              {
+                key: `${metaKey}+l`,
+                command: "dendron.lookupNote",
+                args: {
+                  copyNoteLink: true
+                }
+              }
+            ])
+
+            done();
+          });
+        });
+    });
+  })
 });

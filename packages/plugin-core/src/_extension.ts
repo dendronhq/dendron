@@ -16,7 +16,6 @@ import {
 import {
   getDurationMilliseconds,
   getOS,
-  readJSONWithCommentsSync,
   SegmentClient,
   writeJSONWithComments,
 } from "@dendronhq/common-server";
@@ -40,7 +39,7 @@ import { migrateConfig } from "./migration";
 import { StateService } from "./services/stateService";
 import { Extensions } from "./settings";
 import { setupSegmentClient } from "./telemetry";
-import { VSCodeUtils, WSUtils } from "./utils";
+import { VSCodeUtils, KeybindingUtils, WSUtils } from "./utils";
 import { AnalyticsUtils } from "./utils/analytics";
 import { DendronTreeView } from "./views/DendronTreeView";
 import { DendronWorkspace, getEngine, getWS } from "./workspace";
@@ -436,7 +435,7 @@ export async function _activate(
       const {
         keybindingConfigPath, 
         newKeybindings: resolvedKeybindings, 
-      } = checkAndApplyVimKeybindingOverrideIfExists();
+      } = KeybindingUtils.checkAndApplyVimKeybindingOverrideIfExists();
       if (!_.isUndefined(resolvedKeybindings)) {
         if (!fs.existsSync(keybindingConfigPath)) {
           fs.ensureFileSync(keybindingConfigPath);
@@ -448,6 +447,12 @@ export async function _activate(
         });
       }
     }
+  }
+
+  const { keybindingConfigPath, migratedKeybindings } = KeybindingUtils.checkAndMigrateLookupKeybindingIfExists();
+  if (!_.isUndefined(migratedKeybindings)) {
+    fs.ensureFileSync(keybindingConfigPath);
+    fs.writeFileSync(keybindingConfigPath, JSON.stringify(migratedKeybindings));
   }
 
   return showWelcomeOrWhatsNew({
@@ -610,46 +615,4 @@ export function shouldDisplayLapsedUserMsg(): boolean {
     !metaData.firstWsInitialize &&
     refreshMsg
   );
-}
-
-export function checkAndApplyVimKeybindingOverrideIfExists(): {
-  keybindingConfigPath: string,
-  newKeybindings?: any
-} {
-  // check where the keyboard shortcut is configured
-  const { userConfigDir, osName } = VSCodeUtils.getCodeUserConfigDir();
-  const keybindingConfigPath = [userConfigDir, "keybindings.json"].join("");
-
-  // read keybindings.json
-  // create if it doesn't exist
-  if (!fs.existsSync(keybindingConfigPath)) {
-    fs.ensureFileSync(keybindingConfigPath);
-    fs.writeFileSync(keybindingConfigPath, "[]");
-  }
-  const keybindings = readJSONWithCommentsSync(keybindingConfigPath);
-
-  // check if override is already there
-  const alreadyHasOverride = keybindings.filter((entry: any) => {
-    if (!_.isUndefined(entry.command)) {
-      return entry.command === "-expandLineSelection"
-    } else {
-      return false;
-    }
-  }).length > 0;
-  
-  if (alreadyHasOverride) {
-    return { keybindingConfigPath };
-  }
-
-  // add override if there isn't.
-  const metaKey = osName === "Darwin" ? "cmd" : "ctrl";
-  const OVERRIDE_EXPAND_LINE_SELECTION = {
-    "key": `${metaKey}+l`,
-    "command": "-expandLineSelection",
-    "when": "textInputFocus"
-  };
-
-  const newKeybindings = keybindings.concat(OVERRIDE_EXPAND_LINE_SELECTION);
-  
-  return { keybindingConfigPath, newKeybindings };
 }

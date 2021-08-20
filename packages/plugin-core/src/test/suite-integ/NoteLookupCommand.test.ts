@@ -1724,9 +1724,9 @@ suite("NoteLookupCommand", function () {
           await cmd.run({
             multiSelect: true,
             noConfirm: true,
-            effectType: "copyNoteLink"
+            copyNoteLink: true,
           });
-          
+
           const content = await clipboard.readText();
 
           expect(content).toEqual(

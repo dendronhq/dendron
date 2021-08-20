@@ -32,8 +32,6 @@ import {
 import {
   DendronQuickPickerV2,
   DendronQuickPickState,
-  LookupEffectType,
-  LookupEffectTypeEnum,
   LookupFilterType,
   LookupNoteType,
   LookupNoteTypeEnum,
@@ -59,10 +57,10 @@ export type CommandRunOpts = {
   noConfirm?: boolean;
   fuzzThreshold?: number;
   multiSelect?: boolean;
+  copyNoteLink?: boolean;
   noteType?: LookupNoteType;
   selectionType?: LookupSelectionType;
   splitType?: LookupSplitType;
-  effectType?: LookupEffectType;
   /**
    * NOTE: currently, only one filter is supported
    */
@@ -159,7 +157,7 @@ export class NoteLookupCommand extends BaseCommand<
       ),
       extraButtons: [
         MultiSelectBtn.create(copts.multiSelect),
-        CopyNoteLinkBtn.create(copts.effectType === LookupEffectTypeEnum.copyNoteLink),
+        CopyNoteLinkBtn.create(copts.copyNoteLink),
         DirectChildFilterBtn.create(
           copts.filterMiddleware?.includes("directChildOnly")
         ),

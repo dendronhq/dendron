@@ -1,10 +1,11 @@
 import { DVault } from "@dendronhq/common-all";
 import { WorkspaceService } from "@dendronhq/engine-server";
+import * as vscode from "vscode";
 import { SeedBrowseCommand } from "../commands/SeedBrowseCommand";
-import { GLOBAL_STATE, WORKSPACE_ACTIVATION_CONTEXT } from "../constants";
+import { WORKSPACE_ACTIVATION_CONTEXT } from "../constants";
+import { StateService } from "../services/stateService";
 import { DendronWorkspace } from "../workspace";
 import { WorkspaceInitializer } from "./workspaceInitializer";
-import * as vscode from "vscode";
 
 /**
  * Seed Browser Workspace Initializer - Open the Seed Browser
@@ -30,15 +31,14 @@ export class SeedBrowserInitializer implements WorkspaceInitializer {
 
   /**
    * Launch Seed Browser Webview
-   * @param opts
+   * @param _opts
    */
-  async onWorkspaceOpen(opts: { ws: DendronWorkspace }): Promise<void> {
+  async onWorkspaceOpen(_opts: { ws: DendronWorkspace }): Promise<void> {
     const cmd = new SeedBrowseCommand();
     await cmd.execute();
 
-    await opts.ws.updateGlobalState(
-      GLOBAL_STATE.WORKSPACE_ACTIVATION_CONTEXT,
-      WORKSPACE_ACTIVATION_CONTEXT.NORMAL.toString()
+    StateService.instance().setActivationContext(
+      WORKSPACE_ACTIVATION_CONTEXT.NORMAL
     );
 
     vscode.window.showInformationMessage("Seeds Updated");

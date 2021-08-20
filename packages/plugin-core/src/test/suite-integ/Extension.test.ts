@@ -11,6 +11,7 @@ import {
   tmpDir,
   writeJSONWithComments,
 } from "@dendronhq/common-server";
+import { toPlainObject } from "@dendronhq/common-test-utils";
 import {
   getPortFilePath,
   getWSMetaFilePath,
@@ -18,10 +19,10 @@ import {
   openWSMetaFile,
 } from "@dendronhq/engine-server";
 import { TestEngineUtils } from "@dendronhq/engine-test-utils";
-import os from "os";
 import fs from "fs-extra";
 import _ from "lodash";
 import { describe, it } from "mocha";
+import os from "os";
 import path from "path";
 import sinon, { SinonStub } from "sinon";
 import { ExtensionContext } from "vscode";
@@ -35,7 +36,9 @@ import {
   GLOBAL_STATE,
   WORKSPACE_ACTIVATION_CONTEXT,
 } from "../../constants";
+import { StateService } from "../../services/stateService";
 import * as telemetry from "../../telemetry";
+import { KeybindingUtils, VSCodeUtils } from "../../utils";
 import { DendronWorkspace, getWS, resolveRelToWSRoot } from "../../workspace";
 import { BlankInitializer } from "../../workspace/blankInitializer";
 import { TemplateInitializer } from "../../workspace/templateInitializer";
@@ -51,8 +54,6 @@ import {
   setupBeforeAfter,
   stubSetupWorkspace,
 } from "../testUtilsV3";
-import { VSCodeUtils, KeybindingUtils } from "../../utils";
-import { toPlainObject } from "@dendronhq/common-test-utils";
 
 function mockUserConfigDir() {
   const dir = tmpDir().name;
@@ -124,6 +125,7 @@ suite("Extension", function () {
 
     it("not active, initial create ws", (done) => {
       const wsRoot = tmpDir().name;
+
       getWS()
         .updateGlobalState(
           GLOBAL_STATE.WORKSPACE_ACTIVATION_CONTEXT,
@@ -141,7 +143,6 @@ suite("Extension", function () {
               skipConfirmation: true,
               workspaceInitializer: new BlankInitializer(),
             });
-
             const resp = readYAML(path.join(wsRoot, "dendron.yml"));
             expect(resp).toEqual({
               version: 1,
@@ -202,152 +203,152 @@ suite("Extension", function () {
             done();
           });
         });
-    });
 
-    it("setup with template initializer", (done) => {
-      const wsRoot = tmpDir().name;
-      getWS()
-        .updateGlobalState(
-          GLOBAL_STATE.WORKSPACE_ACTIVATION_CONTEXT,
+      it("setup with template initializer", (done) => {
+        const wsRoot = tmpDir().name;
+        StateService.instance().setActivationContext(
           WORKSPACE_ACTIVATION_CONTEXT.NORMAL
-        )
-        .then(() => {
-          _activate(ctx).then(async () => {
-            stubSetupWorkspace({
-              wsRoot,
-            });
+        );
+        _activate(ctx).then(async () => {
+          stubSetupWorkspace({
+            wsRoot,
+          });
 
-            const cmd = new SetupWorkspaceCommand();
-            await cmd.execute({
-              rootDirRaw: wsRoot,
-              skipOpenWs: true,
-              skipConfirmation: true,
-              workspaceInitializer: new TemplateInitializer(),
-            } as SetupWorkspaceOpts);
+          const cmd = new SetupWorkspaceCommand();
+          await cmd.execute({
+            rootDirRaw: wsRoot,
+            skipOpenWs: true,
+            skipConfirmation: true,
+            workspaceInitializer: new TemplateInitializer(),
+          } as SetupWorkspaceOpts);
 
-            const resp = readYAML(path.join(wsRoot, "dendron.yml"));
-            expect(resp).toContain({
-              vaults: [
-                {
-                  fsPath: "templates",
-                  name: "dendron.templates",
-                  seed: "dendron.templates",
-                },
-                {
-                  fsPath: "vault",
-                },
-              ],
-              seeds: {
-                "dendron.templates": {},
+          const resp = readYAML(path.join(wsRoot, "dendron.yml"));
+          expect(resp).toContain({
+            vaults: [
+              {
+                fsPath: "templates",
+                name: "dendron.templates",
+                seed: "dendron.templates",
               },
-            });
-            const dendronState = MetadataService.instance().getMeta();
-            expect(isNotUndefined(dendronState.firstInstall)).toBeTruthy();
-            expect(isNotUndefined(dendronState.firstWsInitialize)).toBeTruthy();
+              {
+                fsPath: "vault",
+              },
+            ],
+            seeds: {
+              "dendron.templates": {},
+            },
+          });
+          const dendronState = MetadataService.instance().getMeta();
+          expect(isNotUndefined(dendronState.firstInstall)).toBeTruthy();
+          expect(isNotUndefined(dendronState.firstWsInitialize)).toBeTruthy();
+          expect(
+            fs.readdirSync(path.join(wsRoot, DEFAULT_LEGACY_VAULT_NAME))
+          ).toEqual(genEmptyWSFiles());
+          done();
+        });
+      });
+
+      it("ok", (done) => {
+        DendronWorkspace.version = () => "0.0.1";
+        runLegacySingleWorkspaceTest({
+          ctx,
+          onInit: async ({ wsRoot, vaults, engine }) => {
+            // check for meta
+            const port = getPortFilePath({ wsRoot });
+            const fpath = getWSMetaFilePath({ wsRoot });
+            const meta = openWSMetaFile({ fpath });
             expect(
-              fs.readdirSync(path.join(wsRoot, DEFAULT_LEGACY_VAULT_NAME))
-            ).toEqual(genEmptyWSFiles());
+              _.toInteger(fs.readFileSync(port, { encoding: "utf8" })) > 0
+            ).toBeTruthy();
+            expect(meta.version).toEqual("0.0.1");
+            expect(meta.activationTime < Time.now().toMillis()).toBeTruthy();
+            expect(_.values(engine.notes).length).toEqual(1);
+            const vault = resolveRelToWSRoot(vaults[0].fsPath);
+
+            const settings = fs.readJSONSync(
+              path.join(wsRoot, "dendron.code-workspace")
+            );
+            expect(settings).toEqual(genDefaultSettings());
+            expect(fs.readdirSync(vault)).toEqual(
+              [CONSTANTS.DENDRON_CACHE_FILE].concat(genEmptyWSFiles())
+            );
             done();
+          },
+        });
+      });
+      it("ok: missing root.schema", (done) => {
+        DendronWorkspace.version = () => "0.0.1";
+        runLegacySingleWorkspaceTest({
+          ctx,
+          onInit: async ({ vaults }) => {
+            const vault = resolveRelToWSRoot(vaults[0].fsPath);
+            expect(fs.readdirSync(vault)).toEqual(
+              [CONSTANTS.DENDRON_CACHE_FILE].concat(genEmptyWSFiles())
+            );
+            done();
+          },
+          postSetupHook: async ({ vaults }) => {
+            fs.removeSync(
+              path.join(resolveRelToWSRoot(vaults[0].fsPath), "root.schema.yml")
+            );
+          },
+        });
+      });
+
+      describe("telemetry", () => {
+        test("can get VSCode telemetry settings", (done) => {
+          // Just checking that we get some expected result, and that it doesn't just crash.
+          const result = telemetry.isVSCodeTelemetryEnabled();
+          expect(
+            result === true || result === false || result === undefined
+          ).toBeTruthy();
+          done();
+        });
+      });
+
+      describe("test conditions for displaying lapsed user message", () => {
+        test("Workspace Not Initialized; Message Never Sent; > 1 Day ago", (done) => {
+          lapsedMessageTest({
+            done,
+            firstInstall: 1,
+            shouldDisplayMessage: true,
           });
         });
-    });
 
-    it("ok", (done) => {
-      DendronWorkspace.version = () => "0.0.1";
-      runLegacySingleWorkspaceTest({
-        ctx,
-        onInit: async ({ wsRoot, vaults, engine }) => {
-          // check for meta
-          const port = getPortFilePath({ wsRoot });
-          const fpath = getWSMetaFilePath({ wsRoot });
-          const meta = openWSMetaFile({ fpath });
-          expect(
-            _.toInteger(fs.readFileSync(port, { encoding: "utf8" })) > 0
-          ).toBeTruthy();
-          expect(meta.version).toEqual("0.0.1");
-          expect(meta.activationTime < Time.now().toMillis()).toBeTruthy();
-          expect(_.values(engine.notes).length).toEqual(1);
-          const vault = resolveRelToWSRoot(vaults[0].fsPath);
+        test("Workspace Not Initialized; Message Never Sent; < 1 Day ago", (done) => {
+          lapsedMessageTest({
+            done,
+            firstInstall: Time.now().toSeconds(),
+            shouldDisplayMessage: false,
+          });
+        });
 
-          const settings = fs.readJSONSync(
-            path.join(wsRoot, "dendron.code-workspace")
-          );
-          expect(settings).toEqual(genDefaultSettings());
-          expect(fs.readdirSync(vault)).toEqual(
-            [CONSTANTS.DENDRON_CACHE_FILE].concat(genEmptyWSFiles())
-          );
-          done();
-        },
-      });
-    });
-    it("ok: missing root.schema", (done) => {
-      DendronWorkspace.version = () => "0.0.1";
-      runLegacySingleWorkspaceTest({
-        ctx,
-        onInit: async ({ vaults }) => {
-          const vault = resolveRelToWSRoot(vaults[0].fsPath);
-          expect(fs.readdirSync(vault)).toEqual(
-            [CONSTANTS.DENDRON_CACHE_FILE].concat(genEmptyWSFiles())
-          );
-          done();
-        },
-        postSetupHook: async ({ vaults }) => {
-          fs.removeSync(
-            path.join(resolveRelToWSRoot(vaults[0].fsPath), "root.schema.yml")
-          );
-        },
-      });
-    });
-  });
+        test("Workspace Not Initialized; Message Sent < 1 week ago", (done) => {
+          lapsedMessageTest({
+            done,
+            firstInstall: 1,
+            lapsedUserMsgSendTime: Time.now().toSeconds(),
+            shouldDisplayMessage: false,
+          });
+        });
 
-  describe("telemetry", () => {
-    test("can get VSCode telemetry settings", (done) => {
-      // Just checking that we get some expected result, and that it doesn't just crash.
-      const result = telemetry.isVSCodeTelemetryEnabled();
-      expect(
-        result === true || result === false || result === undefined
-      ).toBeTruthy();
-      done();
-    });
-  });
+        test("Workspace Not Initialized; Message Sent > 1 week ago", (done) => {
+          lapsedMessageTest({
+            done,
+            firstInstall: 1,
+            lapsedUserMsgSendTime: 1,
+            shouldDisplayMessage: true,
+          });
+        });
 
-  describe("test conditions for displaying lapsed user message", () => {
-    test("Workspace Not Initialized; Message Never Sent; > 1 Day ago", (done) => {
-      lapsedMessageTest({ done, firstInstall: 1, shouldDisplayMessage: true });
-    });
-
-    test("Workspace Not Initialized; Message Never Sent; < 1 Day ago", (done) => {
-      lapsedMessageTest({
-        done,
-        firstInstall: Time.now().toSeconds(),
-        shouldDisplayMessage: false,
-      });
-    });
-
-    test("Workspace Not Initialized; Message Sent < 1 week ago", (done) => {
-      lapsedMessageTest({
-        done,
-        firstInstall: 1,
-        lapsedUserMsgSendTime: Time.now().toSeconds(),
-        shouldDisplayMessage: false,
-      });
-    });
-
-    test("Workspace Not Initialized; Message Sent > 1 week ago", (done) => {
-      lapsedMessageTest({
-        done,
-        firstInstall: 1,
-        lapsedUserMsgSendTime: 1,
-        shouldDisplayMessage: true,
-      });
-    });
-
-    test("Workspace Already Initialized", (done) => {
-      lapsedMessageTest({
-        done,
-        firstInstall: 1,
-        firstWsInitialize: 1,
-        shouldDisplayMessage: false,
+        test("Workspace Already Initialized", (done) => {
+          lapsedMessageTest({
+            done,
+            firstInstall: 1,
+            firstWsInitialize: 1,
+            shouldDisplayMessage: false,
+          });
+        });
       });
     });
   });
@@ -440,43 +441,61 @@ suite("keybindings", function () {
               workspaceInitializer: new BlankInitializer(),
             });
 
-            const dendronState = MetadataService.instance().getMeta();
-            expect(isNotUndefined(dendronState.firstInstall)).toBeTruthy();
-            expect(isNotUndefined(dendronState.firstWsInitialize)).toBeTruthy();
+            _activate(ctx).then(async () => {
+              stubSetupWorkspace({
+                wsRoot,
+              });
+              sinon
+                .stub(VSCodeUtils, "getInstallStatusForExtension")
+                .returns(InstallStatus.INITIAL_INSTALL);
+              // somehow stub is ignored if --disable-extensions is passed during the test.
+              sinon.stub(VSCodeUtils, "isExtensionInstalled").returns(true);
+              const cmd = new SetupWorkspaceCommand();
+              await cmd.execute({
+                rootDirRaw: wsRoot,
+                skipOpenWs: true,
+                skipConfirmation: true,
+                workspaceInitializer: new BlankInitializer(),
+              });
 
-            const { userConfigDir } = VSCodeUtils.getCodeUserConfigDir();
-            const keybindingConfigPath = [
-              userConfigDir,
-              "keybindings.json",
-            ].join("");
+              const dendronState = MetadataService.instance().getMeta();
+              expect(isNotUndefined(dendronState.firstInstall)).toBeTruthy();
+              expect(
+                isNotUndefined(dendronState.firstWsInitialize)
+              ).toBeTruthy();
 
-            const newKeybindings =
-              readJSONWithCommentsSync(keybindingConfigPath);
-            const override = newKeybindings[newKeybindings.length - 1];
-            const metaKey = os.type() === "Darwin" ? "cmd" : "ctrl";
-            expect(override.key).toEqual(`${metaKey}+l`);
-            expect(override.command).toEqual("-expandLineSelection");
+              const { userConfigDir } = VSCodeUtils.getCodeUserConfigDir();
+              const keybindingConfigPath = [
+                userConfigDir,
+                "keybindings.json",
+              ].join("");
 
-            done();
+              const newKeybindings =
+                readJSONWithCommentsSync(keybindingConfigPath);
+              const override = newKeybindings[newKeybindings.length - 1];
+              const metaKey = os.type() === "Darwin" ? "cmd" : "ctrl";
+              expect(override.key).toEqual(`${metaKey}+l`);
+              expect(override.command).toEqual("-expandLineSelection");
+
+              done();
+            });
           });
         });
-    });
-  });
 
-  describe("keyboard shortcut migration", () => {
-    test("lookup v2 to v3 migration, nothing happens", (done) => {
-      const { migratedKeybindings } =
-        KeybindingUtils.checkAndMigrateLookupKeybindingIfExists();
-      expect(_.isUndefined(migratedKeybindings)).toBeTruthy();
-      done();
-    });
+      describe("keyboard shortcut migration", () => {
+        test("lookup v2 to v3 migration, nothing happens", (done) => {
+          const { migratedKeybindings } =
+            KeybindingUtils.checkAndMigrateLookupKeybindingIfExists();
+          expect(_.isUndefined(migratedKeybindings)).toBeTruthy();
+          done();
+        });
 
-    test("lookup v2 to v3 migration", (done) => {
-      const { keybindingConfigPath } =
-        KeybindingUtils.getKeybindingConfigPath();
-      const metaKey = os.type() === "Darwin" ? "cmd" : "ctrl";
-      fs.ensureFileSync(keybindingConfigPath);
-      const startingConfig = `// My awesome Dendron Config
+        test("lookup v2 to v3 migration", (done) => {
+          const { keybindingConfigPath } =
+            KeybindingUtils.getKeybindingConfigPath();
+          const metaKey = os.type() === "Darwin" ? "cmd" : "ctrl";
+          fs.ensureFileSync(keybindingConfigPath);
+          const startingConfig = `// My awesome Dendron Config
       [
         { // disable delete node keybinding
           "key": "shift+${metaKey}+d",
@@ -525,91 +544,95 @@ suite("keybindings", function () {
           }
         }
       ]`;
-      fs.writeFileSync(keybindingConfigPath, startingConfig);
-      const { migratedKeybindings } =
-        KeybindingUtils.checkAndMigrateLookupKeybindingIfExists();
-      expect(toPlainObject(migratedKeybindings)).toEqual([
-        // leaves non-lookup keybinding as is
-        {
-          key: `shift+${metaKey}+d`,
-          command: "-dendron.deleteNode",
-          when: "dendron:pluginActive",
-        },
-        // migrate to new args
-        {
-          key: `${metaKey}+k l`,
-          command: "dendron.lookupNote",
-          args: {
-            filterMiddleware: ["directChildOnly"],
-            initialValue: "foo",
-            multiSelect: true,
-          },
-        },
-        {
-          key: `${metaKey}+k shift+l`,
-          command: "dendron.lookupNote",
-          args: {
-            copyNoteLink: true,
-          },
-        },
-        // migrates keybinding overrides
-        {
-          key: `${metaKey}+l`,
-          command: "-dendron.lookupNote",
-        },
-        // leaves keys that don't change as is
-        {
-          key: `${metaKey}+l`,
-          command: "dendron.lookupNote",
-          args: {
-            splitType: "horizontal",
-            selectionType: "selectionExtract",
-            noConfirm: true,
-            vaultSelectionMode: 2,
-          },
-        },
-      ]);
-      writeJSONWithComments(keybindingConfigPath, migratedKeybindings);
-      done();
-    });
-
-    test("does nothing on extension activate if not necessary", (done) => {
-      const wsRoot = tmpDir().name;
-      const { userConfigDir } = VSCodeUtils.getCodeUserConfigDir();
-      const keybindingConfigPath = [userConfigDir, "keybindings.json"].join("");
-      expect(fs.existsSync(keybindingConfigPath)).toBeFalsy();
-
-      getWS()
-        .updateGlobalState(
-          GLOBAL_STATE.WORKSPACE_ACTIVATION_CONTEXT,
-          WORKSPACE_ACTIVATION_CONTEXT.NORMAL
-        )
-        .then(() => {
-          _activate(ctx).then(async () => {
-            stubSetupWorkspace({
-              wsRoot,
-            });
-            const cmd = new SetupWorkspaceCommand();
-            await cmd.execute({
-              rootDirRaw: wsRoot,
-              skipOpenWs: true,
-              skipConfirmation: true,
-              workspaceInitializer: new BlankInitializer(),
-            });
-            expect(fs.existsSync(keybindingConfigPath)).toBeFalsy();
-
-            done();
-          });
+          fs.writeFileSync(keybindingConfigPath, startingConfig);
+          const { migratedKeybindings } =
+            KeybindingUtils.checkAndMigrateLookupKeybindingIfExists();
+          expect(toPlainObject(migratedKeybindings)).toEqual([
+            // leaves non-lookup keybinding as is
+            {
+              key: `shift+${metaKey}+d`,
+              command: "-dendron.deleteNode",
+              when: "dendron:pluginActive",
+            },
+            // migrate to new args
+            {
+              key: `${metaKey}+k l`,
+              command: "dendron.lookupNote",
+              args: {
+                filterMiddleware: ["directChildOnly"],
+                initialValue: "foo",
+                multiSelect: true,
+              },
+            },
+            {
+              key: `${metaKey}+k shift+l`,
+              command: "dendron.lookupNote",
+              args: {
+                copyNoteLink: true,
+              },
+            },
+            // migrates keybinding overrides
+            {
+              key: `${metaKey}+l`,
+              command: "-dendron.lookupNote",
+            },
+            // leaves keys that don't change as is
+            {
+              key: `${metaKey}+l`,
+              command: "dendron.lookupNote",
+              args: {
+                splitType: "horizontal",
+                selectionType: "selectionExtract",
+                noConfirm: true,
+                vaultSelectionMode: 2,
+              },
+            },
+          ]);
+          writeJSONWithComments(keybindingConfigPath, migratedKeybindings);
+          done();
         });
-    });
 
-    test("v2 to v3 migration happens on extension activation only on upgrade", (done) => {
-      const wsRoot = tmpDir().name;
-      const metaKey = os.type() === "Darwin" ? "cmd" : "ctrl";
-      const { userConfigDir } = VSCodeUtils.getCodeUserConfigDir();
-      const keybindingConfigPath = [userConfigDir, "keybindings.json"].join("");
-      fs.ensureFileSync(keybindingConfigPath);
-      const config = `// This is my awesome Dendron keybinding
+        test("does nothing on extension activate if not necessary", (done) => {
+          const wsRoot = tmpDir().name;
+          const { userConfigDir } = VSCodeUtils.getCodeUserConfigDir();
+          const keybindingConfigPath = [userConfigDir, "keybindings.json"].join(
+            ""
+          );
+          expect(fs.existsSync(keybindingConfigPath)).toBeFalsy();
+
+          getWS()
+            .updateGlobalState(
+              GLOBAL_STATE.WORKSPACE_ACTIVATION_CONTEXT,
+              WORKSPACE_ACTIVATION_CONTEXT.NORMAL
+            )
+            .then(() => {
+              _activate(ctx).then(async () => {
+                stubSetupWorkspace({
+                  wsRoot,
+                });
+                const cmd = new SetupWorkspaceCommand();
+                await cmd.execute({
+                  rootDirRaw: wsRoot,
+                  skipOpenWs: true,
+                  skipConfirmation: true,
+                  workspaceInitializer: new BlankInitializer(),
+                });
+                expect(fs.existsSync(keybindingConfigPath)).toBeFalsy();
+
+                done();
+              });
+            });
+        });
+
+        test("v2 to v3 migration happens on extension activation only on upgrade", (done) => {
+          const wsRoot = tmpDir().name;
+          const metaKey = os.type() === "Darwin" ? "cmd" : "ctrl";
+          const { userConfigDir } = VSCodeUtils.getCodeUserConfigDir();
+          const keybindingConfigPath = [userConfigDir, "keybindings.json"].join(
+            ""
+          );
+          fs.ensureFileSync(keybindingConfigPath);
+          const config = `// This is my awesome Dendron keybinding
       [
         { // lookup disable
           "key": "${metaKey}+l",
@@ -623,61 +646,65 @@ suite("keybindings", function () {
           }
         }
       ]`;
-      fs.writeFileSync(keybindingConfigPath, config);
-      sinon
-        .stub(VSCodeUtils, "getInstallStatusForExtension")
-        .returns(InstallStatus.UPGRADED);
-      getWS()
-        .updateGlobalState(
-          GLOBAL_STATE.WORKSPACE_ACTIVATION_CONTEXT,
-          WORKSPACE_ACTIVATION_CONTEXT.NORMAL
-        )
-        .then(() => {
-          _activate(ctx).then(async () => {
-            stubSetupWorkspace({
-              wsRoot,
+          fs.writeFileSync(keybindingConfigPath, config);
+          sinon
+            .stub(VSCodeUtils, "getInstallStatusForExtension")
+            .returns(InstallStatus.UPGRADED);
+          getWS()
+            .updateGlobalState(
+              GLOBAL_STATE.WORKSPACE_ACTIVATION_CONTEXT,
+              WORKSPACE_ACTIVATION_CONTEXT.NORMAL
+            )
+            .then(() => {
+              _activate(ctx).then(async () => {
+                stubSetupWorkspace({
+                  wsRoot,
+                });
+                const cmd = new SetupWorkspaceCommand();
+                await cmd.execute({
+                  rootDirRaw: wsRoot,
+                  skipOpenWs: true,
+                  skipConfirmation: true,
+                  workspaceInitializer: new BlankInitializer(),
+                });
+
+                const migratedKeybindings =
+                  readJSONWithCommentsSync(keybindingConfigPath);
+                expect(toPlainObject(migratedKeybindings)).toEqual([
+                  {
+                    key: `${metaKey}+l`,
+                    command: "-dendron.lookupNote",
+                  },
+                  {
+                    key: `${metaKey}+l`,
+                    command: "dendron.lookupNote",
+                    args: {
+                      // copy note link by default!
+                      copyNoteLink: true,
+                    },
+                  },
+                ]);
+                // simple comments are preserved
+                expect(
+                  Object.getOwnPropertySymbols(migratedKeybindings).length
+                ).toEqual(1);
+                expect(
+                  Object.getOwnPropertySymbols(migratedKeybindings[0]).length
+                ).toEqual(1);
+                expect(
+                  Object.getOwnPropertySymbols(migratedKeybindings[1]).length
+                ).toEqual(1);
+
+                // old file is backed up
+                expect(
+                  fs.existsSync(`${keybindingConfigPath}.old`)
+                ).toBeTruthy();
+
+                done();
+              });
             });
-            const cmd = new SetupWorkspaceCommand();
-            await cmd.execute({
-              rootDirRaw: wsRoot,
-              skipOpenWs: true,
-              skipConfirmation: true,
-              workspaceInitializer: new BlankInitializer(),
-            });
-
-            const migratedKeybindings =
-              readJSONWithCommentsSync(keybindingConfigPath);
-            expect(toPlainObject(migratedKeybindings)).toEqual([
-              {
-                key: `${metaKey}+l`,
-                command: "-dendron.lookupNote",
-              },
-              {
-                key: `${metaKey}+l`,
-                command: "dendron.lookupNote",
-                args: {
-                  // copy note link by default!
-                  copyNoteLink: true,
-                },
-              },
-            ]);
-            // simple comments are preserved
-            expect(
-              Object.getOwnPropertySymbols(migratedKeybindings).length
-            ).toEqual(1);
-            expect(
-              Object.getOwnPropertySymbols(migratedKeybindings[0]).length
-            ).toEqual(1);
-            expect(
-              Object.getOwnPropertySymbols(migratedKeybindings[1]).length
-            ).toEqual(1);
-
-            // old file is backed up
-            expect(fs.existsSync(`${keybindingConfigPath}.old`)).toBeTruthy();
-
-            done();
-          });
         });
+      });
     });
   });
 });

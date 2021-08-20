@@ -6,7 +6,8 @@ import {
 } from "@dendronhq/common-all";
 import { SeedService } from "@dendronhq/engine-server";
 import { commands } from "vscode";
-import { GLOBAL_STATE, WORKSPACE_ACTIVATION_CONTEXT } from "../constants";
+import { WORKSPACE_ACTIVATION_CONTEXT } from "../constants";
+import { StateService } from "../services/stateService";
 import { getWS } from "../workspace";
 import { BasicCommand } from "./base";
 
@@ -60,10 +61,8 @@ export abstract class SeedCommandBase<
   }
 
   protected async onUpdatingWorkspace() {
-    const ws = getWS();
-    await ws.updateGlobalState(
-      GLOBAL_STATE.WORKSPACE_ACTIVATION_CONTEXT,
-      WORKSPACE_ACTIVATION_CONTEXT.SEED_BROWSER.toString()
+    StateService.instance().setActivationContext(
+      WORKSPACE_ACTIVATION_CONTEXT.SEED_BROWSER
     );
   }
 

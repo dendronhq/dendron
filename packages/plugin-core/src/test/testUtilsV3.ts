@@ -311,14 +311,8 @@ export function setupBeforeAfter(
         .stub(VSCodeUtils, "getInstallStatusForExtension")
         .returns(InstallStatus.NO_CHANGE);
     }
-    // workspace is not tutorial workspace
-    sinon
-      .stub(WorkspaceInitFactory, "isTutorialWorkspaceLaunch")
-      .returns(false);
 
-    sinon
-      .stub(WorkspaceInitFactory, "isSeedBrowserWorkspaceLaunch")
-      .returns(false);
+    sinon.stub(WorkspaceInitFactory, "create").returns(new BlankInitializer());
 
     if (opts?.beforeHook) {
       await opts.beforeHook();

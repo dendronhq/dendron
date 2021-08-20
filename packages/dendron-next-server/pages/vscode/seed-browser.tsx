@@ -19,10 +19,6 @@ export default function SeedBrowser({
   const { switcher, themes, currentTheme, status } = useThemeSwitcher();
   const [_isDarkMode, setIsDarkMode] = React.useState(false);
 
-  if (status === "loading") {
-    return <div>Loading styles...</div>;
-  }
-
   const seedDataToRender = _.values(seedRegistryData).map((data) => {
     if (data) {
       let payload: SeedConfig & { seedInWorkspace: boolean } = {
@@ -48,7 +44,7 @@ export default function SeedBrowser({
   };
 
   const { Meta } = Card;
-  const { Footer, Content } = Layout;
+  const { Content } = Layout;
 
   return (
     <>
@@ -111,12 +107,6 @@ export default function SeedBrowser({
             </div>
           </div>
         </Content>
-        <Footer>
-          <h4>Current theme: {currentTheme}</h4>
-          <Button type="primary" onClick={toggleDarkMode}>
-            Toggle Theme
-          </Button>
-        </Footer>
       </Layout>
     </>
   );

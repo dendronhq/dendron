@@ -18,6 +18,7 @@ import {
 } from "@dendronhq/common-all";
 import {
   goUpTo,
+  readJSONWithCommentsSync,
   resolveTilde,
   tmpDir,
   vault2Path,
@@ -29,11 +30,13 @@ import _md from "markdown-it";
 import ogs from "open-graph-scraper";
 import os from "os";
 import path from "path";
+import fs from "fs-extra";
 import * as vscode from "vscode";
 import { CancellationTokenSource } from "vscode-languageclient";
 import { PickerUtilsV2 } from "./components/lookup/utils";
 import {
   DendronContext,
+  DENDRON_COMMANDS,
   GLOBAL_STATE,
   _noteAddBehaviorEnum,
 } from "./constants";
@@ -751,6 +754,131 @@ export class DendronClientUtilsV2 {
       _.size(engine.vaults) > 1 &&
       (_.isBoolean(noXVaultLink) ? !noXVaultLink : true);
     return useVaultPrefix;
+  }
+}
+
+export class KeybindingUtils {
+  static getKeybindingConfigPath = () => {
+    const { userConfigDir, osName } = VSCodeUtils.getCodeUserConfigDir();
+    return {
+      keybindingConfigPath: [userConfigDir, "keybindings.json"].join(""),
+      osName,
+    };
+  }
+  
+  static checkAndApplyVimKeybindingOverrideIfExists(): {
+    keybindingConfigPath: string,
+    newKeybindings?: any
+  } {
+    // check where the keyboard shortcut is configured
+    const { keybindingConfigPath, osName } = this.getKeybindingConfigPath();
+    
+    // read keybindings.json
+    // create if it doesn't exist
+    if (!fs.existsSync(keybindingConfigPath)) {
+      fs.ensureFileSync(keybindingConfigPath);
+      fs.writeFileSync(keybindingConfigPath, "[]");
+    }
+    const keybindings = readJSONWithCommentsSync(keybindingConfigPath);
+  
+    // check if override is already there
+    const alreadyHasOverride = keybindings.filter((entry: any) => {
+      if (!_.isUndefined(entry.command)) {
+        return entry.command === "-expandLineSelection"
+      } else {
+        return false;
+      }
+    }).length > 0;
+    
+    if (alreadyHasOverride) {
+      return { keybindingConfigPath };
+    }
+  
+    // add override if there isn't.
+    const metaKey = osName === "Darwin" ? "cmd" : "ctrl";
+    const OVERRIDE_EXPAND_LINE_SELECTION = {
+      "key": `${metaKey}+l`,
+      "command": "-expandLineSelection",
+      "when": "textInputFocus"
+    };
+  
+    const newKeybindings = keybindings.concat(OVERRIDE_EXPAND_LINE_SELECTION);
+    
+    return { keybindingConfigPath, newKeybindings };
+  }
+
+  static checkAndMigrateLookupKeybindingIfExists(): {
+    keybindingConfigPath: string,
+    migratedKeybindings: any,
+  } {
+    // check where the keyboard shortcut is configured
+    const { keybindingConfigPath } = this.getKeybindingConfigPath();
+
+    // do nothing if it didn't exist before
+    if (!fs.existsSync(keybindingConfigPath)) {
+      return { keybindingConfigPath, migratedKeybindings: undefined};
+    }
+
+    const keybindings = readJSONWithCommentsSync(keybindingConfigPath);
+
+    let needsMigration = false;
+    const migratedKeybindings = keybindings.map((entry: any) => {
+      if (!_.isUndefined(entry.command)) {
+        const newEntry = _.cloneDeep(entry);
+        if (entry.command === "dendron.lookup") {
+          needsMigration = true;
+          newEntry.command = DENDRON_COMMANDS.LOOKUP_NOTE.key;
+          if (_.isUndefined(entry.args)) {
+            // keybinding with no override (simple combo change)
+            // swap out command
+            return newEntry;
+          } else {
+            // keybinding with override. map them to new ones
+            const newArgs = _.cloneDeep(entry.args);
+            
+            // delete obsolete
+            _.forEach([
+              "flavor",
+              "noteExistBehavior",
+              "filterType",
+              "value",
+              "effectType",
+            ], (key: string) => {
+              if (!_.isUndefined(entry.args[key]))
+                delete newArgs[key];
+            });
+
+            // migrate overrides to new keys
+            if (!_.isUndefined(entry.args.filterType))
+              newArgs.filterMiddleware = [entry.args.filterType];
+
+            if (!_.isUndefined(entry.args.value))
+              newArgs.initialValue = entry.args.value;
+
+            if (!_.isUndefined(entry.args.effectType)) {
+              if (entry.args.effectType === "multiSelect") 
+                newArgs.multiSelect = true;
+              if (entry.args.effectType === "copyNoteLink")
+                newArgs.copyNoteLink = true;
+            };
+
+            newEntry.args = newArgs;
+            return newEntry;
+          }
+        } else if (entry.command === "-dendron.lookup") {
+          needsMigration = true;
+          newEntry.command = `-${DENDRON_COMMANDS.LOOKUP_NOTE.key}`
+          return newEntry;
+        }
+      }
+      // non-lookup keybinding. return as-is
+      return entry;
+    });
+
+    if (!needsMigration)
+      return { keybindingConfigPath, migratedKeybindings: undefined};
+
+    return { keybindingConfigPath, migratedKeybindings };
   }
 }
 

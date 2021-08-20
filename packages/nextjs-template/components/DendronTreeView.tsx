@@ -100,8 +100,9 @@ function DendronTreeView({
       setActiveNoteIds(TreeViewUtils.getAllParents({ notes, noteId: id }));
     }
   };
-  const onSelect: OnSelectFunc = ({ key: id }) => {
-    changeActiveNote(id, { noteIndex: noteDataProps.noteIndex });
+  const onSelect: OnSelectFunc = ({ key: noteId }) => {
+    changeActiveNote(noteId, { noteIndex: noteDataProps.noteIndex });
+    setActiveNoteIds(TreeViewUtils.getAllParents({ notes, noteId }));
   };
 
   return (

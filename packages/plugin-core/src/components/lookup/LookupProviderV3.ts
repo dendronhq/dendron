@@ -30,6 +30,10 @@ export type OnUpdatePickerItemsOpts = {
   picker: DendronQuickPickerV2;
   token: CancellationToken;
   fuzzThreshold?: number;
+  /**
+   * force update even if picker vaule didn't change
+   */
+  forceUpdate?: boolean;
 };
 
 export type OnAcceptHook = (opts: {
@@ -232,8 +236,10 @@ export class NoteLookupProvider implements ILookupProviderV3 {
 
     try {
       if (picker.value === picker.prevQuickpickValue) {
-        Logger.debug({ ctx, msg: "picker value did not change" });
-        return;
+        if (!opts.forceUpdate) {
+          Logger.debug({ ctx, msg: "picker value did not change" });
+          return;
+        }
       }
       // if empty string, show all 1st level results
       if (querystring === "") {

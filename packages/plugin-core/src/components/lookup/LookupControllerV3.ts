@@ -248,6 +248,7 @@ export class LookupControllerV3 {
         picker: quickpick,
         token: this.cancelToken.token,
         fuzzThreshold: this.fuzzThreshold,
+        forceUpdate: true,
       });
     }
   };

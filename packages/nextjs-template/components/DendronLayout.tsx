@@ -147,7 +147,6 @@ export default function DendronLayoutV2(
           onCollapse={(collapsed, type) => {
             setCollapsed(collapsed);
           }}
-          trigger={collapsed ? undefined : null}
           breakpoint="lg"
           style={{
             position: "fixed",

@@ -24,7 +24,6 @@ import sinon from "sinon";
 // // as well as import your extension to test it
 import * as vscode from "vscode";
 import {
-  LookupEffectTypeEnum,
   LookupNoteTypeEnum,
   LookupSelectionTypeEnum,
   LookupSplitTypeEnum,
@@ -36,7 +35,6 @@ import {
 } from "../../commands/NoteLookupCommand";
 import {
   ButtonType,
-  CopyNoteLinkBtn,
   DendronBtn,
   HorizontalSplitBtn,
   JournalBtn,
@@ -135,19 +133,6 @@ function getSplitTypeButtons(
     buttons
   ) as vscode.QuickInputButton[] & DendronBtn[];
   return { horizontalSplitBtn };
-}
-
-function getEffectTypeButtons(
-  buttons: vscode.QuickInputButton[] & DendronBtn[]
-): {
-  copyNoteLinkBtn: CopyNoteLinkBtn;
-} {
-  // copyNoteLinkBtn only for now
-  const [copyNoteLinkBtn] = getButtonsByTypeArray(
-    _.values(LookupEffectTypeEnum),
-    buttons
-  ) as vscode.QuickInputButton[] & DendronBtn[];
-  return { copyNoteLinkBtn };
 }
 
 suite("NoteLookupCommand", function () {
@@ -1208,8 +1193,7 @@ suite("NoteLookupCommand", function () {
       });
     });
 
-    // TODO: fix later.
-    test.skip("copyNoteLink basic", (done) => {
+    test("copyNoteLink basic", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
         preSetupHook: async ({ wsRoot, vaults }) => {
@@ -1218,16 +1202,14 @@ suite("NoteLookupCommand", function () {
         onInit: async ({ vaults }) => {
           const cmd = new NoteLookupCommand();
           stubVaultPick(vaults);
-          const { controller } = await cmd.gatherInputs({
+          const out = await cmd.run({
             initialValue: "foo",
+            noConfirm: true,
+            copyNoteLink: true,
           });
-          const { copyNoteLinkBtn } = getEffectTypeButtons(
-            controller.quickpick.buttons
-          );
-
-          await controller.onTriggerButton(copyNoteLinkBtn);
           const content = await clipboard.readText();
           expect(content).toEqual("[[Foo|foo]]");
+          expect(!_.isUndefined(out?.quickpick.copyNoteLinkFunc)).toBeTruthy();
 
           done();
         },
@@ -1621,7 +1603,7 @@ suite("NoteLookupCommand", function () {
       const runOpts = {
         multiSelect: true,
         noConfirm: true,
-        effectType: opts.copyLink ? "copyNoteLink" : undefined,
+        copyNoteLink: opts.copyLink ? true : undefined,
       } as CommandRunOpts;
 
       if (opts.split) runOpts.splitType = LookupSplitTypeEnum.horizontal;
@@ -1636,6 +1618,7 @@ suite("NoteLookupCommand", function () {
       });
 
       mockQuickPick.showNote = gatherOut.quickpick.showNote;
+      mockQuickPick.copyNoteLinkFunc = gatherOut.quickpick.copyNoteLinkFunc;
 
       sinon.stub(cmd, "enrichInputs").returns(
         Promise.resolve({
@@ -1690,8 +1673,6 @@ suite("NoteLookupCommand", function () {
       });
     });
 
-    // FIX: doesn't work
-    // clipboard testing is flaky
     test("copyNoteLink + multiselect: should copy link of all selected notes", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,

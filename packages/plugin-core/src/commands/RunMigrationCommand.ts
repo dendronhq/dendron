@@ -24,7 +24,7 @@ export class RunMigrationCommand extends BasicCommand<
     const migrationItems: vscode.QuickPickItem[] = _.map(ALL_MIGRATIONS, (migration) => {
       return {
         label: migration.version,
-        description: `${migration.changes.length} changes`,
+        description: `${migration.changes.length} change(s)`,
         detail: migration.changes.map((set) => {
           return set.name
         }).join("\n"),

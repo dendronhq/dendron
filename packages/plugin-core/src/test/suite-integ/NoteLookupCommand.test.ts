@@ -1621,6 +1621,7 @@ suite("NoteLookupCommand", function () {
       const runOpts = {
         multiSelect: true,
         noConfirm: true,
+        effectType: opts.copyLink ? "copyNoteLink" : undefined,
       } as CommandRunOpts;
 
       if (opts.split) runOpts.splitType = LookupSplitTypeEnum.horizontal;
@@ -1633,16 +1634,6 @@ suite("NoteLookupCommand", function () {
         canSelectMany: true,
         buttons: gatherOut.quickpick.buttons,
       });
-
-      if (opts.copyLink) {
-        const { copyNoteLinkBtn } = getEffectTypeButtons(mockQuickPick.buttons);
-        sinon.stub(gatherOut.controller, "_quickpick").value(mockQuickPick);
-        sinon.stub(gatherOut.controller, "quickpick").value(mockQuickPick);
-        await gatherOut.controller.onTriggerButton(copyNoteLinkBtn);
-        const content = await clipboard.readText();
-        sinon.restore();
-        return { content };
-      }
 
       mockQuickPick.showNote = gatherOut.quickpick.showNote;
 
@@ -1723,12 +1714,20 @@ suite("NoteLookupCommand", function () {
 
           await VSCodeUtils.openNote(engine.notes["foo"]);
 
-          const { content } = await prepareCommandFunc({
+          const { cmd } = await prepareCommandFunc({
             wsRoot,
             vaults,
             engine,
             opts: { copyLink: true },
           });
+
+          await cmd.run({
+            multiSelect: true,
+            noConfirm: true,
+            effectType: "copyNoteLink"
+          });
+          
+          const content = await clipboard.readText();
 
           expect(content).toEqual(
             [

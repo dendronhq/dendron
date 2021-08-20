@@ -29,3 +29,9 @@ $text-color:       #111 !default;
 hr {
 	height: "1px";
 }
+
+[data-expandedicon="true"] {
+	svg {
+		pointer-events: none;
+	}
+}

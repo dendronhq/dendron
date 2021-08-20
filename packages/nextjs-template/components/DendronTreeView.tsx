@@ -34,30 +34,6 @@ function DendronTreeView({
 }: DendronCommonProps) {
   const logger = createLogger("DendronTreeView");
   const { changeActiveNote } = dendronRouter;
-  const [activeNoteIds, setActiveNoteIds] = useState<string[]>([]);
-
-  // --- Effect
-  useEffect(() => {
-    if (!verifyNoteData(noteDataProps)) {
-      return;
-    }
-
-    const { noteIndex, notes } = noteDataProps;
-
-    const noteActiveId = _.isUndefined(dendronRouter.query.id)
-      ? noteIndex.id
-      : dendronRouter.query.id;
-    logger.info({
-      state: "useEffect:preCalculateTree",
-    });
-
-    setActiveNoteIds(
-      TreeViewUtils.getAllParents({
-        notes,
-        noteId: noteActiveId,
-      })
-    );
-  }, [noteDataProps.noteIndex, noteDataProps.notes]);
 
   // --- Verify
   if (!verifyNoteData(noteDataProps)) {
@@ -67,7 +43,21 @@ function DendronTreeView({
     return <DendronSpinner />;
   }
 
-  const { notes, domains } = noteDataProps;
+  const { notes, domains, noteIndex } = noteDataProps;
+
+  const noteActiveId = _.isUndefined(dendronRouter.query.id)
+    ? noteIndex.id
+    : dendronRouter.query.id;
+  logger.info({
+    state: "useEffect:preCalculateTree",
+  });
+
+  const activeNoteIds = TreeViewUtils.getAllParents({
+    notes,
+    noteId: noteActiveId,
+  });
+
+  const expandKeys = _.isEmpty(activeNoteIds) ? [] : activeNoteIds;
 
   // --- Calc
   const roots = domains.map((note) => {
@@ -79,38 +69,13 @@ function DendronTreeView({
     });
   }) as DataNode[];
 
-  const expandKeys = _.isEmpty(activeNoteIds) ? [] : activeNoteIds;
-
   // --- Methods
-  const onExpand = (noteId: string) => {
-    logger.info({ ctx: "onExpand", id: noteId });
-    if (_.isUndefined(notes)) {
-      return;
-    }
-    const expanded = expandKeys.includes(noteId);
-    // open up
-    if (expanded) {
-      setActiveNoteIds(
-        TreeViewUtils.getAllParents({ notes, noteId }).slice(0, -1)
-      );
-    } else {
-      setActiveNoteIds(TreeViewUtils.getAllParents({ notes, noteId }));
-    }
-  };
   const onSelect = (noteId: string) => {
     logger.info({ ctx: "onSelect", id: noteId });
     changeActiveNote(noteId, { noteIndex: noteDataProps.noteIndex });
-    setActiveNoteIds(TreeViewUtils.getAllParents({ notes, noteId }));
   };
 
-  return (
-    <MenuView
-      roots={roots}
-      expandKeys={expandKeys}
-      onExpand={onExpand}
-      onSelect={onSelect}
-    />
-  );
+  return <MenuView roots={roots} expandKeys={expandKeys} onSelect={onSelect} />;
 
   // return (
   //   <>
@@ -127,25 +92,20 @@ function DendronTreeView({
 function ExpandIcon({
   eventKey,
   isOpen,
-  onExpand,
 }: {
   eventKey: string;
   isOpen: boolean;
-  onExpand: (noteid: string) => void;
 }) {
   const Icon = isOpen ? UpOutlined : DownOutlined;
   return (
     <Icon
+      data-expandedicon="true"
       style={{
         position: "absolute",
         right: 10,
         margin: 0,
         padding: 10,
         // TODO and onHover styles
-      }}
-      onClick={(e) => {
-        e.stopPropagation();
-        onExpand(eventKey);
       }}
     />
   );
@@ -154,13 +114,11 @@ function ExpandIcon({
 function MenuView({
   roots,
   expandKeys,
-  onExpand,
   onSelect,
 }: {
   roots: DataNode[];
   expandKeys: string[];
   onSelect: (noteId: string) => void;
-  onExpand: (noteId: string) => void;
 }) {
   const createMenu = (menu: DataNode) => {
     if (menu.children && menu.children.length > 0) {
@@ -168,9 +126,18 @@ function MenuView({
         <SubMenu
           key={menu.key}
           title={menu.title}
-          onTitleClick={(event) => onSelect(event.key)}
-          // @ts-ignore -- `onExpand` gets forwared to `expandIcon` but is not part of the SubMenuProps
-          onExpand={onExpand}
+          onTitleClick={(event) => {
+            onSelect(event.key);
+            // const target = event.domEvent.target as HTMLElement;
+            // const isArrow = target.dataset.expandedicon;
+            // console.log(
+            //   isArrow,
+            //   target
+            // );
+            // if (!isArrow) {
+            //   onSelect(event.key);
+            // }
+          }}
         >
           {menu.children.map((childMenu: DataNode) => {
             return createMenu(childMenu);
@@ -184,11 +151,10 @@ function MenuView({
   return (
     <Menu
       mode="inline"
-      openKeys={expandKeys}
-      selectedKeys={expandKeys}
+      defaultOpenKeys={expandKeys}
+      defaultSelectedKeys={expandKeys}
       onClick={({ key }) => onSelect(key)}
       inlineIndent={DENDRON_STYLE_CONSTANTS.SIDER.INDENT}
-      expandIcon={ExpandIcon}
     >
       {roots.map((menu) => {
         return createMenu(menu);

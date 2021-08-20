@@ -33,33 +33,8 @@ function DendronTreeView({
   dendronRouter,
   ...noteDataProps
 }: DendronCommonProps) {
-  const { notes } = noteDataProps;
   const logger = createLogger("DendronTreeView");
-  const [activeNoteIds, setActiveNoteIds] = useState<string[]>([]);
   const { changeActiveNote } = dendronRouter;
-
-  // --- Effects
-
-  React.useEffect(() => {
-    if (!verifyNoteData(noteDataProps)) {
-      return;
-    }
-    const noteActiveId = _.isUndefined(dendronRouter.query.id)
-      ? noteDataProps.noteIndex.id
-      : dendronRouter.query.id;
-    logger.info({
-      state: "useEffect:preCalculateTree",
-    });
-    const _activeNoteIds = TreeViewUtils.getAllParents({
-      notes: noteDataProps.notes,
-      noteId: noteActiveId,
-    });
-    setActiveNoteIds(_activeNoteIds);
-    logger.info({
-      state: "useEffect:postCalculateTree",
-      activeNoteIds,
-    });
-  }, [notes, dendronRouter.query.id]);
 
   // --- Verify
   if (!verifyNoteData(noteDataProps)) {
@@ -68,6 +43,32 @@ function DendronTreeView({
     });
     return <DendronSpinner />;
   }
+
+  const { notes, noteIndex, domains } = noteDataProps;
+
+  // --- Calc
+  const noteActiveId = _.isUndefined(dendronRouter.query.id)
+    ? noteIndex.id
+    : dendronRouter.query.id;
+  logger.info({
+    state: "useEffect:preCalculateTree",
+  });
+
+  const activeNoteIds = TreeViewUtils.getAllParents({
+    notes,
+    noteId: noteActiveId,
+  });
+
+  const roots = domains.map((note) => {
+    return TreeViewUtils.note2TreeDatanote({
+      noteId: note.id,
+      noteDict: notes,
+      showVaultName: false,
+      applyNavExclude: true,
+    });
+  }) as DataNode[];
+
+  const expandKeys = _.isEmpty(activeNoteIds) ? [] : activeNoteIds;
 
   // --- Methods
   const onExpand: OnExpandFunc = (event) => {
@@ -88,17 +89,6 @@ function DendronTreeView({
   const onSelect: OnSelectFunc = ({ key: id }) => {
     changeActiveNote(id, { noteIndex: noteDataProps.noteIndex });
   };
-
-  // --- Render
-  const roots = noteDataProps.domains.map((note) => {
-    return TreeViewUtils.note2TreeDatanote({
-      noteId: note.id,
-      noteDict: noteDataProps.notes,
-      showVaultName: false,
-      applyNavExclude: true,
-    });
-  }) as DataNode[];
-  const expandKeys = _.isEmpty(activeNoteIds) ? [] : activeNoteIds;
 
   return (
     <MenuView

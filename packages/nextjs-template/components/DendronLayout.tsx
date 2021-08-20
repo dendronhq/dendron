@@ -127,7 +127,6 @@ export default function DendronLayoutV2(
           zIndex: 1,
           width: "100%",
           borderBottom: "1px solid #d4dadf",
-          paddingLeft: DENDRON_STYLE_CONSTANTS.SIDER.PADDING.LEFT,
         }}
       >
         <Row style={{ height: "100%" }}>
@@ -151,13 +150,9 @@ export default function DendronLayoutV2(
           trigger={collapsed ? undefined : null}
           breakpoint="lg"
           style={{
-            paddingLeft: collapsed
-              ? 0
-              : DENDRON_STYLE_CONSTANTS.SIDER.PADDING.LEFT,
             position: "fixed",
             overflow: "auto",
             height: `calc(100vh - ${ANTD_STYLE_CONSTANTS.LAYOUT_HEADER_HEIGHT}px)`,
-            paddingTop: "32px",
           }}
         >
           <DendronTreeView {...props} />

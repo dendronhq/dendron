@@ -253,7 +253,7 @@ suite("Migration", function () {
       });
     });
 
-    test.only("migrate to 0.55.2 (old existing ws config to new dendron config)", (done) => {
+    test("migrate to 0.55.2 (old existing ws config to new dendron config)", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
         modConfigCb: (config) => {
@@ -289,7 +289,7 @@ suite("Migration", function () {
       })
     })
 
-    test.only("migrate to 0.55.2 (implicit to new dendron config)", (done) => {
+    test("migrate to 0.55.2 (implicit to new dendron config)", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
         modConfigCb: (config) => {

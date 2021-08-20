@@ -3,7 +3,14 @@ import {
   ThemeUtils,
   TreeViewUtils,
 } from "@dendronhq/common-frontend";
-import { Tree, TreeProps, Menu, MenuItemProps, SubMenuProps } from "antd";
+import {
+  Tree,
+  TreeProps,
+  Menu,
+  MenuProps,
+  MenuItemProps,
+  SubMenuProps,
+} from "antd";
 import _ from "lodash";
 import { DataNode } from "rc-tree/lib/interface";
 import React, { useState } from "react";
@@ -15,7 +22,7 @@ import DendronSpinner from "./DendronSpinner";
 const { SubMenu } = Menu;
 
 type OnExpandFunc = SubMenuProps["onTitleClick"];
-type OnSelectFunc = MenuItemProps["onClick"];
+type OnSelectFunc = MenuProps["onClick"];
 
 export default function DendronTreeViewContainer(props: Partial<NoteData>) {
   const dendronRouter = useDendronRouter();
@@ -78,8 +85,7 @@ function DendronTreeView({
     //   );
     // }
   };
-  const onSelect: OnSelectFunc = (event) => {
-    const id = event.key as string;
+  const onSelect: OnSelectFunc = ({ key: id }) => {
     changeActiveNote(id, { noteIndex: noteDataProps.noteIndex });
   };
 
@@ -136,15 +142,11 @@ function MenuView({
         </SubMenu>
       );
     }
-    return (
-      <Menu.Item key={menu.key} onClick={onSelect}>
-        {menu.title}
-      </Menu.Item>
-    );
+    return <Menu.Item key={menu.key}>{menu.title}</Menu.Item>;
   };
 
   return (
-    <Menu mode="inline" defaultOpenKeys={expandKeys}>
+    <Menu mode="inline" defaultOpenKeys={expandKeys} onClick={onSelect}>
       {roots.map((menu) => {
         return createMenu(menu);
       })}

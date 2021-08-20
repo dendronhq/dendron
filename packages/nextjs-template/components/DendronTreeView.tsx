@@ -124,6 +124,11 @@ function MenuView({
     if (menu.children && menu.children.length > 0) {
       return (
         <SubMenu
+          className={
+            expandKeys.includes(String(menu.key))
+              ? "OPEN_SUBMENU" // TODO create css classes
+              : ""
+          }
           key={menu.key}
           title={menu.title}
           onTitleClick={(event) => {

@@ -3,6 +3,7 @@ const SIDER = {
   PADDING: {
     LEFT: 24,
   },
+  INDENT: 10,
 };
 
 export const DENDRON_STYLE_CONSTANTS = {

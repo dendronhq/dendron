@@ -18,6 +18,7 @@ import { useThemeSwitcher } from "react-css-theme-switcher";
 import { useDendronRouter } from "../utils/hooks";
 import { DendronCommonProps, NoteData, verifyNoteData } from "../utils/types";
 import DendronSpinner from "./DendronSpinner";
+import { DENDRON_STYLE_CONSTANTS } from "../styles/constants";
 
 const { SubMenu } = Menu;
 
@@ -154,6 +155,7 @@ function MenuView({
       openKeys={expandKeys}
       onClick={onSelect}
       selectedKeys={expandKeys}
+      inlineIndent={DENDRON_STYLE_CONSTANTS.SIDER.INDENT}
     >
       {roots.map((menu) => {
         return createMenu(menu);

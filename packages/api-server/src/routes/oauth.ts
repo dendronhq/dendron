@@ -17,7 +17,7 @@ router.get("/getToken", async (req: Request, res: Response) => {
   let resp;
   switch (req.query.service) {
     case OauthSevice.GOOGLE:
-      resp = await GoogleAuthController.instance().getToken({
+      resp = await new GoogleAuthController().getToken({
         code: req.query.code as string,
       });
       break;
@@ -33,7 +33,7 @@ router.get("/refreshToken", async (req: Request, res: Response) => {
   let resp;
   switch (req.query.service) {
     case OauthSevice.GOOGLE:
-      resp = await GoogleAuthController.instance().refreshToken({
+      resp = await new GoogleAuthController().refreshToken({
         refreshToken: req.query.refreshToken as string,
       });
       break;

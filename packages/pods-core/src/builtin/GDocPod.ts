@@ -35,7 +35,7 @@ type GDocImportPodCustomOpts = {
   /**
    * expiration time of access token
    */
-  expiresIn: number;
+  expirationTime: number;
   /**
    * import comments from the doc in text or json format
    */
@@ -75,7 +75,7 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
           type: "string",
           description: "google docs personal refresh token",
         },
-        expiresIn: {
+        expirationTime: {
           type: "number",
           description: "expiration time of access token",
         },
@@ -382,13 +382,13 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
       fnameAsId,
       importComments,
       confirmOverwrite = true,
-      expiresIn,
+      expirationTime,
     } = config as GDocImportPodConfig;
 
     let { accessToken } = config as GDocImportPodConfig;
 
     /** refreshes token if token has already expired */
-    if (Time.now().toSeconds() > expiresIn) {
+    if (Time.now().toSeconds() > expirationTime) {
       const port = fs.readFileSync(path.join(wsRoot, ".dendron.port"), {
         encoding: "utf8",
       });

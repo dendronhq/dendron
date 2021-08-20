@@ -1,4 +1,4 @@
-import { DendronError, Time } from "@dendronhq/common-all";
+import { DendronError, RespV2, Time } from "@dendronhq/common-all";
 import { MemoryStore } from "../store/memoryStore";
 import axios from "axios";
 import path from "path";
@@ -6,29 +6,33 @@ import fs from "fs-extra";
 import _ from "lodash";
 
 interface TokenMethods {
-  getToken: (opts: GetTokenOpts) => Promise<any>;
-  refreshToken: (opts: RefreshTokenOpts) => any;
+  getToken: (opts: GetTokenOpts) => Promise<RespV2<any> | GetTokenPayload>;
+  refreshToken: (opts: RefreshTokenOpts) => Promise<RespV2<string>>;
 }
 
+type GetTokenPayload = string | undefined;
+
+/**
+ * clientId and secret is added as optional parameters
+ */
 type GetTokenOpts = {
   code: string;
+  clientId?: string;
+  clientSecret?: string;
 };
 
 type RefreshTokenOpts = {
   refreshToken: string;
+  clientId?: string;
+  clientSecret?: string;
 };
 
 export class GoogleAuthController implements TokenMethods {
-  static instance() {
-    const googleAuthController = new GoogleAuthController();
-    return googleAuthController;
-  }
-
-  async getToken(opts: GetTokenOpts): Promise<any> {
-    const { code } = opts;
+  async getToken(opts: GetTokenOpts): Promise<RespV2<any> | GetTokenPayload> {
+    const { code, clientId, clientSecret } = opts;
     const engine = MemoryStore.instance().getEngine();
     const { wsRoot } = engine;
-    const port = fs.readFileSync(path.join(wsRoot, ".dendron.port"), {
+    const port = await fs.readFile(path.join(wsRoot, ".dendron.port"), {
       encoding: "utf8",
     });
     let resp;
@@ -37,9 +41,8 @@ export class GoogleAuthController implements TokenMethods {
         url: `https://oauth2.googleapis.com/token`,
         method: "post",
         data: {
-          client_id:
-            "587163973906-od2u5uaop9b2u6ero5ltl342hh38frth.apps.googleusercontent.com",
-          client_secret: "scXCYiq0boH7bk_c43mZbvBZ",
+          client_id: clientId,
+          client_secret: clientSecret,
           redirect_uri: `http://localhost:${port}/api/oauth/getToken?service=google`,
           grant_type: "authorization_code",
           code,
@@ -51,7 +54,7 @@ export class GoogleAuthController implements TokenMethods {
           tokens: {
             accessToken: data.access_token,
             refreshToken: data.refresh_token,
-            expiresIn: Time.now().toSeconds() + data.expires_in - 300,
+            expirationTime: Time.now().toSeconds() + data.expires_in - 300,
           },
         };
         engine.addAccessTokensToPodConfig(opts);
@@ -70,11 +73,11 @@ export class GoogleAuthController implements TokenMethods {
     }
   }
 
-  async refreshToken(opts: RefreshTokenOpts): Promise<any> {
-    const { refreshToken } = opts;
+  async refreshToken(opts: RefreshTokenOpts): Promise<RespV2<string>> {
+    const { refreshToken, clientId, clientSecret } = opts;
     const engine = MemoryStore.instance().getEngine();
     const { wsRoot } = engine;
-    const port = fs.readFileSync(path.join(wsRoot, ".dendron.port"), {
+    const port = await fs.readFile(path.join(wsRoot, ".dendron.port"), {
       encoding: "utf8",
     });
     let resp;
@@ -83,9 +86,8 @@ export class GoogleAuthController implements TokenMethods {
         url: `https://oauth2.googleapis.com/token`,
         method: "post",
         data: {
-          client_id:
-            "587163973906-od2u5uaop9b2u6ero5ltl342hh38frth.apps.googleusercontent.com",
-          client_secret: "scXCYiq0boH7bk_c43mZbvBZ",
+          client_id: clientId,
+          client_secret: clientSecret,
           redirect_uri: `http://localhost:${port}/api/oauth/getToken?service=google`,
           grant_type: "refresh_token",
           refresh_token: refreshToken,
@@ -96,8 +98,8 @@ export class GoogleAuthController implements TokenMethods {
           path: path.join(wsRoot, "pods", "dendron.gdoc", "config.import.yml"),
           tokens: {
             accessToken: data.access_token,
-            // expiration time of token is 55mins from now.
-            expiresIn: Time.now().toSeconds() + data.expires_in - 300,
+            // expiration time of token is set to 55mins from now.
+            expirationTime: Time.now().toSeconds() + data.expires_in - 300,
           },
         };
         engine.addAccessTokensToPodConfig(opts);

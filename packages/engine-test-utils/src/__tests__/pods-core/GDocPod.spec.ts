@@ -59,7 +59,7 @@ describe("GDoc import pod", () => {
             src: "foo",
             accessToken: "xyzabcd",
             refreshToken: "dhdjdjs",
-            expiresIn: Time.now().toSeconds() + 500,
+            expirationTime: Time.now().toSeconds() + 500,
             vaultName,
           },
         });
@@ -103,7 +103,7 @@ describe("GDoc import pod", () => {
             accessToken: "xyzabcd",
             vaultName,
             refreshToken: "hksall",
-            expiresIn: Time.now().toSeconds() + 500,
+            expirationTime: Time.now().toSeconds() + 500,
             importComments: {
               enable: true,
               format: "json",
@@ -147,7 +147,7 @@ describe("GDoc import pod", () => {
             src: "foo",
             accessToken: "xyzabcd",
             refreshToken: "emeiice",
-            expiresIn: Time.now().toSeconds() + 500,
+            expirationTime: Time.now().toSeconds() + 500,
             vaultName,
             importComments: {
               enable: true,
@@ -183,7 +183,7 @@ describe("GDoc import pod", () => {
             src: "foo",
             accessToken: "xyzabcd",
             refreshToken: "akSAal",
-            expiresIn: Time.now().toSeconds() + 500,
+            expirationTime: Time.now().toSeconds() + 500,
             vaultName,
             confirmOverwrite: false,
           },
@@ -216,7 +216,7 @@ describe("GDoc import pod", () => {
             src: "foo",
             accessToken: "xyzabcd",
             refreshToken: "LalaLAL",
-            expiresIn: Time.now().toSeconds() + 500,
+            expirationTime: Time.now().toSeconds() + 500,
             vaultName,
           },
         });
@@ -255,7 +255,7 @@ describe("GDoc import pod", () => {
             src: "foo",
             accessToken: "xyzabcd",
             refreshToken: "hjsjisw",
-            expiresIn: Time.now().toSeconds() + 500,
+            expirationTime: Time.now().toSeconds() + 500,
             vaultName,
           },
         });
@@ -293,7 +293,7 @@ describe("GDoc import pod", () => {
             src: "foo",
             accessToken: "xyzabcd",
             refreshToken: "kqSLA",
-            expiresIn: Time.now().toSeconds() + 500,
+            expirationTime: Time.now().toSeconds() + 500,
             vaultName,
           },
         });

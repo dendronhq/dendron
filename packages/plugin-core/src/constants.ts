@@ -787,6 +787,13 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     group: "dev",
     skipDocs: true,
   },
+  RUN_MIGRATION: {
+    key: "dendron.dev.runMigration",
+    title: `${CMD_PREFIX}Dev: Run Migration`,
+    desc: "Select and run a migration",
+    group: "dev",
+    skipDocs: true,
+  },
   OPEN_LOGS: {
     key: "dendron.dev.openLogs",
     title: `${CMD_PREFIX}Dev: Open Logs`,

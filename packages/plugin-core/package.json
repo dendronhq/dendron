@@ -462,6 +462,11 @@
         "desc": "Reset the config"
       },
       {
+        "command": "dendron.dev.runMigration",
+        "title": "Dendron:Dev: Run Migration",
+        "desc": "Select and run a migration"
+      },
+      {
         "command": "dendron.dev.openLogs",
         "title": "Dendron:Dev: Open Logs",
         "desc": "Open Dendron logs for current session",

@@ -60,6 +60,7 @@ import { ConfigureGraphStylesCommand } from "./ConfigureGraphStyles";
 import { RenameHeaderCommand } from "./RenameHeader";
 import { SeedAddCommand } from "./SeedAddCommand";
 import { SeedRemoveCommand } from "./SeedRemoveCommand";
+import { RunMigrationCommand } from "./RunMigrationCommand";
 
 const ALL_COMMANDS = [
   AddAndCommit,
@@ -123,6 +124,7 @@ const ALL_COMMANDS = [
   ConvertLinkCommand,
   SeedAddCommand,
   SeedRemoveCommand,
+  RunMigrationCommand,
 ] as CodeCommandConstructor[];
 
 // when("betaFeatures", ()=> {

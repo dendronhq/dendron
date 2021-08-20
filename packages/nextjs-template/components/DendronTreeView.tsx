@@ -127,16 +127,11 @@ function MenuView({
           key={menu.key}
           title={menu.title}
           onTitleClick={(event) => {
-            onSelect(event.key);
-            // const target = event.domEvent.target as HTMLElement;
-            // const isArrow = target.dataset.expandedicon;
-            // console.log(
-            //   isArrow,
-            //   target
-            // );
-            // if (!isArrow) {
-            //   onSelect(event.key);
-            // }
+            const target = event.domEvent.target as HTMLElement;
+            const isArrow = target.dataset.expandedicon;
+            if (!isArrow) {
+              onSelect(event.key);
+            }
           }}
         >
           {menu.children.map((childMenu: DataNode) => {
@@ -155,6 +150,7 @@ function MenuView({
       defaultSelectedKeys={expandKeys}
       onClick={({ key }) => onSelect(key)}
       inlineIndent={DENDRON_STYLE_CONSTANTS.SIDER.INDENT}
+      expandIcon={ExpandIcon}
     >
       {roots.map((menu) => {
         return createMenu(menu);

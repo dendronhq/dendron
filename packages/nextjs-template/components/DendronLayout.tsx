@@ -154,7 +154,7 @@ export default function DendronLayoutV2(
             height: `calc(100vh - ${ANTD_STYLE_CONSTANTS.LAYOUT_HEADER_HEIGHT}px)`,
           }}
         >
-          <DendronTreeView {...props} />
+          <DendronTreeView {...props} collapsed={collapsed} />
         </Sider>
         <Layout
           style={{

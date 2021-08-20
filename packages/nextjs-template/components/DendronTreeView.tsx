@@ -23,27 +23,22 @@ import { DENDRON_STYLE_CONSTANTS } from "../styles/constants";
 
 const { SubMenu } = Menu;
 
-export default function DendronTreeViewContainer(props: Partial<NoteData>) {
-  const dendronRouter = useDendronRouter();
-  return DendronTreeView({ ...props, dendronRouter });
-}
-
-function DendronTreeView({
-  dendronRouter,
-  ...noteDataProps
-}: DendronCommonProps) {
+export default function DendronTreeView(
+  props: Partial<NoteData> & { collapsed: boolean }
+) {
   const logger = createLogger("DendronTreeView");
+  const dendronRouter = useDendronRouter();
   const { changeActiveNote } = dendronRouter;
 
   // --- Verify
-  if (!verifyNoteData(noteDataProps)) {
+  if (!verifyNoteData(props)) {
     logger.info({
       state: "exit:notes not initialized",
     });
     return <DendronSpinner />;
   }
 
-  const { notes, domains, noteIndex } = noteDataProps;
+  const { notes, domains, noteIndex, collapsed } = props;
 
   const noteActiveId = _.isUndefined(dendronRouter.query.id)
     ? noteIndex.id
@@ -72,10 +67,17 @@ function DendronTreeView({
   // --- Methods
   const onSelect = (noteId: string) => {
     logger.info({ ctx: "onSelect", id: noteId });
-    changeActiveNote(noteId, { noteIndex: noteDataProps.noteIndex });
+    changeActiveNote(noteId, { noteIndex: props.noteIndex });
   };
 
-  return <MenuView roots={roots} expandKeys={expandKeys} onSelect={onSelect} />;
+  return (
+    <MenuView
+      roots={roots}
+      expandKeys={expandKeys}
+      onSelect={onSelect}
+      collapsed={collapsed}
+    />
+  );
 
   // return (
   //   <>
@@ -115,10 +117,12 @@ function MenuView({
   roots,
   expandKeys,
   onSelect,
+  collapsed,
 }: {
   roots: DataNode[];
   expandKeys: string[];
   onSelect: (noteId: string) => void;
+  collapsed: boolean;
 }) {
   const createMenu = (menu: DataNode) => {
     if (menu.children && menu.children.length > 0) {
@@ -151,11 +155,14 @@ function MenuView({
   return (
     <Menu
       mode="inline"
-      defaultOpenKeys={expandKeys}
-      defaultSelectedKeys={expandKeys}
+      {...(!collapsed && {
+        openKeys: expandKeys,
+        selectedKeys: expandKeys,
+      })}
       onClick={({ key }) => onSelect(key)}
       inlineIndent={DENDRON_STYLE_CONSTANTS.SIDER.INDENT}
       expandIcon={ExpandIcon}
+      inlineCollapsed={collapsed}
     >
       {roots.map((menu) => {
         return createMenu(menu);

@@ -17,7 +17,6 @@ jobs:
     steps:
       - name: Gather environment data
         run: |
-          ${{ matrix.env }}
           node --version
           npm --version
           yarn --version
@@ -41,24 +40,28 @@ jobs:
       #     key: ${{ runner.os }}-${{ matrix.node-version }}-node-modules-${{ hashFiles('yarn.lock')}}
 
       - name: Set up Node.js
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v2
         with:
           node-version:  14.x
+      - run: yarn setup
+      - run: yarn config set registry http://localhost:4873
+      - run: npm set registry http://localhost:4873/
+      - run: yarn build:patch:local
 
-      - name: Setup Dependencies
-        run: yarn setup
-        shell: bash
+      # - name: Setup Dependencies
+      #   run: yarn setup
+      #   shell: bash
 
-      - name: Setup Verdaccio
-        run: |
-          npm install verdaccio
-          yarn config set registry http://localhost:4873
-          npm set registry http://localhost:4873/
-        shell: bash
+      # - name: Setup Verdaccio
+      #   run: |
+      #     npm install verdaccio
+      #     yarn config set registry http://localhost:4873
+      #     npm set registry http://localhost:4873/
+      #   shell: bash
 
-      - name: Build
-        run: yarn build:patch:local
-        shell: bash
+      # - name: Build
+      #   run: yarn build:patch:local
+      #   shell: bash
 
       # - name: Store VSIX Artifact
       #   uses: actions/upload-artifact@v2

@@ -49,6 +49,13 @@ jobs:
         run: yarn setup
         shell: bash
 
+      - name: Setup Verdaccio
+        run: |
+          npm install verdaccio
+          yarn config set registry http://localhost:4873
+          npm set registry http://localhost:4873/
+        shell: bash
+
       - name: Build
         run: yarn build:patch:local
         shell: bash

@@ -10,7 +10,7 @@ jobs:
     strategy:
       fail-fast: true
 
-    timeout-minutes: 10
+    timeout-minutes: 30
 
     runs-on: ubuntu-latest
 

@@ -45,6 +45,10 @@ jobs:
         with:
           node-version:  14.x
 
+      - name: Setup Dependencies
+        run: yarn setup
+        shell: bash
+
       - name: Build
         run: yarn build:patch:local
         shell: bash

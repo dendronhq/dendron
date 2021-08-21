@@ -1,0 +1,59 @@
+name: CI Test Build
+
+on:
+  push:
+    branches:
+      - enhance/auth-build
+
+jobs:
+  build:
+    strategy:
+      fail-fast: true
+
+    timeout-minutes: 10
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Gather environment data
+        run: |
+          ${{ matrix.env }}
+          node --version
+          npm --version
+          yarn --version
+
+      - name: Checkout source
+        uses: actions/checkout@v2
+
+      # - name: Get yarn cache directory path
+      #   id: yarn-cache-dir-path
+      #   run: echo "::set-output name=dir::$(yarn cache dir)"
+
+      # Retain Node modules across builds; some packages download/build binaries
+      # here.
+      # - name: Restore Node modules cache
+      #   uses: actions/cache@v2
+      #   id: node-modules-cache
+      #   with:
+      #     path: |
+      #       node_modules
+      #       packages/*/node_modules
+      #     key: ${{ runner.os }}-${{ matrix.node-version }}-node-modules-${{ hashFiles('yarn.lock')}}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version:  14.x
+
+      - name: Build
+        run: yarn build:patch:local
+        shell: bash
+
+      # - name: Store VSIX Artifact
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: dist-without-markdown
+      #     path: |
+      #       dist
+      #       !dist/**/*.md
+

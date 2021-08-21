@@ -21,6 +21,11 @@ jobs:
           npm --version
           yarn --version
 
+      - name: Configure Git user
+        run: |
+          git config --global user.name CI
+          git config --global user.email ci@dendron.so
+
       - name: Checkout source
         uses: actions/checkout@v2
 

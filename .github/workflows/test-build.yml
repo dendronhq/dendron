@@ -51,7 +51,7 @@ jobs:
       - run: yarn setup
       - run: yarn config set registry http://localhost:4873
       - run: npm set registry http://localhost:4873/
-      - run: npm-cli-login -u testUser -p testPass -e test@example.com
+      - run: yarn setup:npmlogin
       - run: yarn build:patch:local
 
       # - name: Setup Dependencies

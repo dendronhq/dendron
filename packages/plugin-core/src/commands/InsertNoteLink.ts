@@ -1,5 +1,7 @@
 import { NoteProps, NoteUtils } from "@dendronhq/common-all";
 import { HistoryService } from "@dendronhq/engine-server";
+import _ from "lodash";
+import * as vscode from "vscode";
 import { LookupControllerV3 } from "../components/lookup/LookupControllerV3";
 import {
   NoteLookupProvider,
@@ -50,6 +52,9 @@ export class InsertNoteLinkCommand extends BasicCommand<
           } else if (event.action === "error") {
             this.L.error({ msg: `error: ${event.data}` });
             resolve(undefined);
+          } else if (event.action === "changeState") {
+            this.L.info({ msg: "cancelled" });
+            resolve(undefined);
           } else {
             this.L.error({ msg: `unhandled error: ${event.data}` });
             resolve(undefined);
@@ -65,7 +70,13 @@ export class InsertNoteLinkCommand extends BasicCommand<
     const links: string[] = opts.notes.map((note) => {
       return NoteUtils.createWikiLink({ note, useTitle: false });
     });
-    const editor = VSCodeUtils.getActiveTextEditor()!;
+    const editor = VSCodeUtils.getActiveTextEditor();
+    if (!editor) {
+      vscode.window.showErrorMessage(
+        "You need to have a note open to insert note links."
+      );
+      return opts;
+    }
     const current = editor.selection;
     await editor.edit((builder) => {
       builder.insert(current.start, links.join("\n"));

@@ -1,9 +1,10 @@
-name: CI Test Build
+name: Create VSIX Artifact
 
 on:
   push:
     branches:
       - enhance/auth-build
+      - prerelease-*
 
 jobs:
   build:
@@ -29,21 +30,6 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v2
 
-      # - name: Get yarn cache directory path
-      #   id: yarn-cache-dir-path
-      #   run: echo "::set-output name=dir::$(yarn cache dir)"
-
-      # Retain Node modules across builds; some packages download/build binaries
-      # here.
-      # - name: Restore Node modules cache
-      #   uses: actions/cache@v2
-      #   id: node-modules-cache
-      #   with:
-      #     path: |
-      #       node_modules
-      #       packages/*/node_modules
-      #     key: ${{ runner.os }}-${{ matrix.node-version }}-node-modules-${{ hashFiles('yarn.lock')}}
-
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
@@ -62,7 +48,7 @@ jobs:
         env: 
           GOOGLE_OAUTH_CLIENT_SECRET: ${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}
           GOOGLE_OAUTH_CLIENT_ID: ${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}
-        run: yarn build:patch:local
+        run: yarn build:patch:local:ci
 
       - name: Upload VSIX Artifact
         uses: actions/upload-artifact@v2

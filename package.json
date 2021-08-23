@@ -50,6 +50,7 @@
     "setup:cli": "./bootstrap/scripts/chmod-cli.js",
     "setup:npmlogin": "npm-cli-login -u dendron -p temporarydendronpassword -e test@dendron.com -r http://localhost:4873",
     "build:patch:local": "cross-env UPGRADE_TYPE=patch PUBLISH_ENDPOINT=local ./bootstrap/scripts/buildPatch.sh",
+    "build:patch:local:ci": "cross-env UPGRADE_TYPE=patch PUBLISH_ENDPOINT=local BUILD_ENV=ci ./bootstrap/scripts/buildPatch.sh",
     "build:patch:remote": "cross-env UPGRADE_TYPE=patch PUBLISH_ENDPOINT=remote ./bootstrap/scripts/buildPatch.sh",
     "build:minor:local": "cross-env UPGRADE_TYPE=minor PUBLISH_ENDPOINT=local ./bootstrap/scripts/buildPatch.sh",
     "build:minor:remote": "cross-env UPGRADE_TYPE=minor PUBLISH_ENDPOINT=remote ./bootstrap/scripts/buildPatch.sh",

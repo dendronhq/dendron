@@ -31,7 +31,6 @@ unpublish.sh
 workspaces
 tmp
 storage/.verdaccio-db.json
-*.d.ts
 *.js.map
 packages/plugin-core/dendron.server.log
 dendron.server

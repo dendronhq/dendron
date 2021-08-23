@@ -8,9 +8,15 @@ if [ $PUBLISH_ENDPOINT = "local" ]; then
 	sleep 3
 fi
 
-echo "building... upgrade: $UPGRADE_TYPE, endpoint: $PUBLISH_ENDPOINT"
+SCRIPT_BUILD_ENV=${BUILD_ENV:-local}
+echo "building... upgrade: $UPGRADE_TYPE, endpoint: $PUBLISH_ENDPOINT build environment: $SCRIPT_BUILD_ENV"
 
-LOG_LEVEL=info ./packages/dendron-cli/lib/bin/dendron-cli.js dev build --upgradeType $UPGRADE_TYPE --publishEndpoint $PUBLISH_ENDPOINT
+DENDRON_CLI=dendron
+if [ $SCRIPT_BUILD_ENV = "ci" ]; then
+  DENDRON_CLI=./packages/dendron-cli/lib/bin/dendron-cli.js
+fi
+
+LOG_LEVEL=info $DENDRON_CLI dev build --upgradeType $UPGRADE_TYPE --publishEndpoint $PUBLISH_ENDPOINT
 
 if [ $PUBLISH_ENDPOINT = "local" ]; then
 	echo "killing "

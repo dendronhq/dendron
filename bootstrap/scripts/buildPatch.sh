@@ -3,6 +3,8 @@ if [ $PUBLISH_ENDPOINT = "local" ]; then
 	verdaccio &
 	FOO_PID=$!
 	echo "$FOO_PID"
+	echo "npm login"
+	yarn setup:npmlogin
 	sleep 3
 fi
 

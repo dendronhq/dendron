@@ -7,8 +7,8 @@ on:
       - prerelease-*
 
 jobs:
-  environment: plugin
   build:
+    environment: plugin
     strategy:
       fail-fast: true
 

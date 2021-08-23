@@ -8,7 +8,11 @@ import {
   Time,
 } from "@dendronhq/common-all";
 import { tmpDir, vault2Path } from "@dendronhq/common-server";
-import { FileTestUtils, NoteTestUtilsV4, NOTE_PRESETS_V4 } from "@dendronhq/common-test-utils";
+import {
+  FileTestUtils,
+  NoteTestUtilsV4,
+  NOTE_PRESETS_V4,
+} from "@dendronhq/common-test-utils";
 import { HistoryService } from "@dendronhq/engine-server";
 import {
   ENGINE_HOOKS,
@@ -63,7 +67,7 @@ import {
 const stubVaultPick = (vaults: DVault[]) => {
   const vault = _.find(vaults, { fsPath: "vault1" });
   return sinon
-    .stub(PickerUtilsV2, "promptVault")
+    .stub(PickerUtilsV2, "getOrPromptVaultForNewNote")
     .returns(Promise.resolve(vault));
 };
 
@@ -248,16 +252,16 @@ suite("NoteLookupCommand", function () {
             initialValue: "foo",
           })!;
           const editor = VSCodeUtils.getActiveTextEditor();
-          const actualNote = VSCodeUtils.getNoteFromDocument(editor!.document)
+          const actualNote = VSCodeUtils.getNoteFromDocument(editor!.document);
           const expectedNote = engine.notes["foo"];
           expect(actualNote).toEqual(expectedNote);
           expect(actualNote!.schema).toEqual({
             moduleId: "foo",
-            schemaId: "foo"
-          })
+            schemaId: "foo",
+          });
           done();
         },
-      }); 
+      });
     });
 
     test("child query with schema", (done) => {
@@ -274,16 +278,16 @@ suite("NoteLookupCommand", function () {
             initialValue: "foo.ch1",
           })!;
           const editor = VSCodeUtils.getActiveTextEditor();
-          const actualNote = VSCodeUtils.getNoteFromDocument(editor!.document)
+          const actualNote = VSCodeUtils.getNoteFromDocument(editor!.document);
           const expectedNote = engine.notes["foo.ch1"];
           expect(actualNote).toEqual(expectedNote);
           expect(actualNote!.schema).toEqual({
             moduleId: "foo",
-            schemaId: "ch1"
-          })
+            schemaId: "ch1",
+          });
           done();
         },
-      }); 
+      });
     });
 
     test("direct child filter", (done) => {
@@ -389,9 +393,11 @@ suite("NoteLookupCommand", function () {
             initialValue: "foobar",
           }))!;
           expect(opts.quickpick.selectedItems.length).toEqual(4);
-          expect(_.last(opts.quickpick.selectedItems)?.title).toEqual(
-            "Create New"
-          );
+          const lastItem = _.last(opts.quickpick.selectedItems);
+          expect(_.pick(lastItem, ["id", "fname"])).toEqual({
+            id: "Create New",
+            fname: "foobar",
+          });
           expect(
             VSCodeUtils.getNoteFromDocument(
               VSCodeUtils.getActiveTextEditorOrThrow().document
@@ -435,7 +441,7 @@ suite("NoteLookupCommand", function () {
     test("new domain", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
-        preSetupHook: ENGINE_HOOKS.setupBasic, 
+        preSetupHook: ENGINE_HOOKS.setupBasic,
         onInit: async ({ vaults, engine }) => {
           const cmd = new NoteLookupCommand();
           stubVaultPick(vaults);
@@ -447,10 +453,12 @@ suite("NoteLookupCommand", function () {
           const editor = VSCodeUtils.getActiveTextEditor()!;
           const activeNote = VSCodeUtils.getNoteFromDocument(editor.document);
           expect(activeNote).toEqual(barFromEngine);
-          expect(DNodeUtils.isRoot(engine.notes[barFromEngine.parent as string]));
+          expect(
+            DNodeUtils.isRoot(engine.notes[barFromEngine.parent as string])
+          );
           done();
-        }
-      })
+        },
+      });
     });
 
     test("regular multi-select, no pick new", (done) => {
@@ -505,9 +513,7 @@ suite("NoteLookupCommand", function () {
           expect(_.isUndefined(quickpick?.nextPicker)).toBeFalsy();
           // selected items shoudl equal
           expect(quickpick.selectedItems.length).toEqual(1);
-          expect(
-            _.pick(quickpick.selectedItems[0], ["id", "vault"])
-          ).toEqual({
+          expect(_.pick(quickpick.selectedItems[0], ["id", "vault"])).toEqual({
             id: fname,
             vault,
           });
@@ -1019,7 +1025,7 @@ suite("NoteLookupCommand", function () {
         onInit: async ({ vaults }) => {
           const cmd = new NoteLookupCommand();
           stubVaultPick(vaults);
-          
+
           // open and create a file outside of vault.
           const extDir = tmpDir().name;
           const extPath = "outside.md";
@@ -1028,7 +1034,9 @@ suite("NoteLookupCommand", function () {
             { path: extPath, body: extBody },
           ]);
           const uri = vscode.Uri.file(path.join(extDir, extPath));
-          const editor = (await VSCodeUtils.openFileInEditor(uri)) as vscode.TextEditor;
+          const editor = (await VSCodeUtils.openFileInEditor(
+            uri
+          )) as vscode.TextEditor;
           editor.selection = new vscode.Selection(0, 0, 0, 17);
 
           await cmd.run({
@@ -1042,12 +1050,14 @@ suite("NoteLookupCommand", function () {
             newNoteEditor.document
           );
           expect(newNote?.body.trim()).toEqual("non vault content");
-          
-          const nonVaultFileEditor = await VSCodeUtils.openFileInEditor(uri) as vscode.TextEditor;
+
+          const nonVaultFileEditor = (await VSCodeUtils.openFileInEditor(
+            uri
+          )) as vscode.TextEditor;
           expect(nonVaultFileEditor.document.getText()).toEqual(extBody);
           done();
-        }
-      })
+        },
+      });
     });
 
     test("selectionExtract modifier toggle", (done) => {

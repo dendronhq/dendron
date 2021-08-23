@@ -36,6 +36,11 @@ export type LookupControllerV3CreateOpts = {
    */
   disableVaultSelection?: boolean;
   /**
+   * if vault selection isn't disabled,
+   * press button on init if true
+   */
+  vaultButtonPressed?: boolean;
+  /**
    * Additional buttons
    */
   extraButtons?: DendronBtn[];
@@ -61,8 +66,11 @@ export class LookupControllerV3 {
         opts?.disableVaultSelection) ||
       opts?.nodeType === "schema";
     const isMultiVault = vaults.length > 1 && !disableVaultSelection;
+    const maybeVaultSelectButtonPressed = _.isUndefined(opts?.vaultButtonPressed)
+      ? isMultiVault
+      : isMultiVault && opts!.vaultButtonPressed; 
     const maybeVaultSelectButton =
-      opts?.nodeType === "note" ? [VaultSelectButton.create(isMultiVault)] : [];
+      opts?.nodeType === "note" ? [VaultSelectButton.create(maybeVaultSelectButtonPressed)] : [];
     const buttons = opts?.buttons || maybeVaultSelectButton;
     const extraButtons = opts?.extraButtons || [];
     return new LookupControllerV3({

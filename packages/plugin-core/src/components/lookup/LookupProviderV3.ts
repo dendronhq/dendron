@@ -134,7 +134,7 @@ export class NoteLookupProvider implements ILookupProviderV3 {
     lc: LookupControllerV3;
   }) {
     return async () => {
-      const ctx = "LookupProvider:onDidAccept";
+      const ctx = "NoteLookupProvider:onDidAccept";
       const { quickpick: picker, lc } = opts;
       let selectedItems = NotePickerUtils.getSelection(picker);
       Logger.debug({
@@ -157,7 +157,8 @@ export class NoteLookupProvider implements ILookupProviderV3 {
       ) {
         Logger.debug({ ctx, msg: "nextPicker:pre" });
         picker.state = DendronQuickPickState.PENDING_NEXT_PICK;
-        picker.vault = await picker.nextPicker();
+        
+        picker.vault = await picker.nextPicker({ note: selectedItems[0] });
         // check if we exited from selecting a vault
         if (_.isUndefined(picker.vault)) {
           HistoryService.instance().add({
@@ -344,7 +345,9 @@ export class NoteLookupProvider implements ILookupProviderV3 {
         !queryEndsWithDot &&
         !picker.canSelectMany &&
         !perfectMatch
-          ? updatedItems.concat([NotePickerUtils.createNoActiveItem({} as any)])
+          ? updatedItems.concat([
+              NotePickerUtils.createNoActiveItem({ fname: querystring }),
+            ])
           : updatedItems;
 
       // check fuzz threshold. tune fuzzyness. currently hardcoded
@@ -408,12 +411,19 @@ export class SchemaLookupProvider implements ILookupProviderV3 {
       }
     );
     quickpick.onDidChangeValue(onUpdateDebounced);
-    quickpick.onDidAccept(() => {
+    quickpick.onDidAccept(async () => {
       Logger.info({
         ctx: "SchemaLookupProvider:onDidAccept",
         quickpick: quickpick.value,
       });
       onUpdateDebounced.cancel();
+      if (_.isEmpty(quickpick.selectedItems)) {
+        await onUpdatePickerItems({
+          picker: quickpick,
+          token: new CancellationTokenSource().token,
+          fuzzThreshold: lc.fuzzThreshold,
+        });
+      }
       this.onDidAccept({ quickpick, lc })();
     });
     return;
@@ -429,10 +439,29 @@ export class SchemaLookupProvider implements ILookupProviderV3 {
     lc: LookupControllerV3;
   }) {
     return async () => {
+      const ctx = "SchemaLookupProvider:onDidAccept";
       const { quickpick: picker, lc } = opts;
-      const nextPicker = picker.nextPicker;
-      if (nextPicker) {
-        picker.vault = await nextPicker();
+      let selectedItems = NotePickerUtils.getSelection(picker);
+      Logger.debug({
+        ctx,
+        selectedItems: selectedItems.map((item) => NoteUtils.toLogObj(item)),
+      });
+      if (_.isEmpty(selectedItems)) {
+        selectedItems =
+          await SchemaPickerUtils.fetchPickerResultsWithCurrentValue({
+            picker,
+          });
+      }
+      if (
+        PickerUtilsV2.hasNextPicker(picker, {
+          selectedItems,
+          providerId: this.id,
+        })
+      ) {
+        Logger.debug({ ctx, msg: "nextPicker:pre" });
+        picker.state = DendronQuickPickState.PENDING_NEXT_PICK;
+        
+        picker.vault = await picker.nextPicker({ note: selectedItems[0] });
         // check if we exited from selecting a vault
         if (_.isUndefined(picker.vault)) {
           HistoryService.instance().add({
@@ -444,7 +473,6 @@ export class SchemaLookupProvider implements ILookupProviderV3 {
           return;
         }
       }
-      const selectedItems = NotePickerUtils.getSelection(picker);
       const isMultiLevel = picker.value.split(".").length > 1;
       if (isMultiLevel) {
         window.showErrorMessage("schemas can only be one level deep");
@@ -548,7 +576,9 @@ export class SchemaLookupProvider implements ILookupProviderV3 {
 
       updatedItems =
         this.opts.allowNewNote && !perfectMatch
-          ? updatedItems.concat([NotePickerUtils.createNoActiveItem({} as any)])
+          ? updatedItems.concat([
+              NotePickerUtils.createNoActiveItem({ fname: querystring }),
+            ])
           : updatedItems;
 
       picker.items = updatedItems;

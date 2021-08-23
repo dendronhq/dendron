@@ -30,7 +30,11 @@ import {
   MORE_RESULTS_LABEL,
 } from "./constants";
 import { ILookupProviderV3, OnAcceptHook } from "./LookupProviderV3";
-import { VaultSelectionMode, DendronQuickPickerV2, DendronQuickPickState } from "./types";
+import {
+  DendronQuickPickerV2,
+  DendronQuickPickState,
+  VaultSelectionMode,
+} from "./types";
 
 const PAGINATE_LIMIT = 50;
 export const UPDATET_SOURCE = {
@@ -217,22 +221,6 @@ export class ProviderAcceptHooks {
 }
 
 export class PickerUtilsV2 {
-  static createDefaultItems = ({
-    picker,
-    vault,
-  }: {
-    picker: DendronQuickPickerV2;
-    vault: DVault;
-  }) => {
-    const out = [];
-    if (_.find(picker.buttons, { type: "multiSelect" })?.pressed) {
-      return [];
-    } else {
-      out.push(NotePickerUtils.createNoActiveItem(vault));
-    }
-    return out;
-  };
-
   static createDendronQuickPick(opts: CreateQuickPickOpts) {
     const { title, placeholder, ignoreFocusOut, initialValue } = _.defaults(
       opts,
@@ -688,11 +676,17 @@ export class PickerUtilsV2 {
 }
 
 export class NotePickerUtils {
-  static createNoActiveItem(vault: DVault): DNodePropsQuickInputV2 {
+  static createNoActiveItem({
+    fname,
+  }: {
+    fname: string;
+  }): DNodePropsQuickInputV2 {
     const props = DNodeUtils.create({
-      fname: CREATE_NEW_LABEL,
+      id: CREATE_NEW_LABEL,
+      fname,
       type: "note",
-      vault,
+      // @ts-ignore
+      vault: {},
     });
     return {
       ...props,
@@ -747,7 +741,7 @@ export class NotePickerUtils {
     const note = resp[0];
     const perfectMatch = note.fname === picker.value;
     return !perfectMatch
-      ? [NotePickerUtils.createNoActiveItem({} as any)]
+      ? [NotePickerUtils.createNoActiveItem({ fname: picker.value })]
       : [
           DNodeUtils.enhancePropForQuickInputV3({
             wsRoot: DendronWorkspace.wsRoot(),
@@ -817,6 +811,27 @@ export class NotePickerUtils {
 }
 
 export class SchemaPickerUtils {
+  static async fetchPickerResultsWithCurrentValue({
+    picker,
+  }: {
+    picker: DendronQuickPickerV2;
+  }) {
+    const engine = getEngine();
+    const resp = await engine.querySchema(picker.value);
+    const node = SchemaUtils.getModuleRoot(resp.data[0]);
+    const perfectMatch = node.fname === picker.value;
+    return !perfectMatch
+      ? [NotePickerUtils.createNoActiveItem({ fname: picker.value })]
+      : [
+          DNodeUtils.enhancePropForQuickInputV3({
+            wsRoot: DendronWorkspace.wsRoot(),
+            props: node,
+            schemas: engine.schemas,
+            vaults: DendronWorkspace.instance().vaultsv4,
+          }),
+        ];
+  }
+
   static async fetchPickerResults(opts: {
     picker: DendronQuickPickerV2;
     qs: string;

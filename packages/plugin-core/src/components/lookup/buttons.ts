@@ -18,6 +18,7 @@ import {
   LookupNoteTypeEnum,
   LookupSelectionType,
   LookupSplitType,
+  VaultSelectionMode,
 } from "./types";
 import { NotePickerUtils, PickerUtilsV2 } from "./utils";
 
@@ -441,17 +442,36 @@ export class VaultSelectButton extends DendronBtn {
       canToggle: false,
     });
   }
+
+  get tooltip(): string {
+    return `${this.title}, status: ${this.pressed ? "always prompt" : "smart"}`;
+  }
+
+  setNextPicker({quickPick, mode}: {quickPick: DendronQuickPickerV2, mode: VaultSelectionMode}) {
+    quickPick.nextPicker = async (opts: { note: NoteProps }) => {
+      const { note } = opts;
+      const currentVault = PickerUtilsV2.getVaultForOpenEditor();
+      const vaultSelection = await PickerUtilsV2.getOrPromptVaultForNewNote({
+        vault: currentVault,
+        fname: note.fname,
+        vaultSelectionMode: mode
+      });
+
+      if (_.isUndefined(vaultSelection)) {
+        vscode.window.showInformationMessage("Note creation cancelled.");
+        return;
+      }
+
+      return vaultSelection;
+    }
+  }
+
   async onEnable({ quickPick }: ButtonHandleOpts) {
-    quickPick.nextPicker = async () => {
-      const vault = await PickerUtilsV2.promptVault();
-      return vault;
-    };
+    this.setNextPicker({ quickPick, mode: VaultSelectionMode.alwaysPrompt });
   }
 
   async onDisable({ quickPick }: ButtonHandleOpts) {
-    if (quickPick.nextPicker) {
-      delete quickPick["nextPicker"];
-    }
+    this.setNextPicker({ quickPick, mode: VaultSelectionMode.smart});
   }
 }
 

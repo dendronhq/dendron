@@ -17,6 +17,7 @@ import {
   VaultUtils,
 } from "@dendronhq/common-all";
 import {
+  assignJSONWithComment,
   goUpTo,
   readJSONWithCommentsSync,
   resolveTilde,
@@ -44,6 +45,7 @@ import { FileItem } from "./external/fileutils/FileItem";
 import { Logger } from "./logger";
 import { EngineAPIService } from "./services/EngineAPIService";
 import { DendronWorkspace, getWS } from "./workspace";
+import { assign } from "comment-json";
 
 export class DisposableStore {
   private _toDispose = new Set<vscode.Disposable>();
@@ -780,7 +782,7 @@ export class KeybindingUtils {
       fs.writeFileSync(keybindingConfigPath, "[]");
     }
     const keybindings = readJSONWithCommentsSync(keybindingConfigPath);
-  
+
     // check if override is already there
     const alreadyHasOverride = keybindings.filter((entry: any) => {
       if (!_.isUndefined(entry.command)) {
@@ -802,29 +804,28 @@ export class KeybindingUtils {
       "when": "textInputFocus"
     };
   
-    const newKeybindings = keybindings.concat(OVERRIDE_EXPAND_LINE_SELECTION);
-    
+    const newKeybindings = assignJSONWithComment(keybindings, keybindings.concat(OVERRIDE_EXPAND_LINE_SELECTION))
     return { keybindingConfigPath, newKeybindings };
   }
 
   static checkAndMigrateLookupKeybindingIfExists(): {
     keybindingConfigPath: string,
-    migratedKeybindings: any,
+    migratedKeybindings?: any,
   } {
     // check where the keyboard shortcut is configured
     const { keybindingConfigPath } = this.getKeybindingConfigPath();
 
     // do nothing if it didn't exist before
     if (!fs.existsSync(keybindingConfigPath)) {
-      return { keybindingConfigPath, migratedKeybindings: undefined};
+      return { keybindingConfigPath };
     }
 
     const keybindings = readJSONWithCommentsSync(keybindingConfigPath);
 
     let needsMigration = false;
-    const migratedKeybindings = keybindings.map((entry: any) => {
+    let migratedKeybindings = keybindings.map((entry: any) => {
       if (!_.isUndefined(entry.command)) {
-        const newEntry = _.cloneDeep(entry);
+        const newEntry = assign({}, entry);
         if (entry.command === "dendron.lookup") {
           needsMigration = true;
           newEntry.command = DENDRON_COMMANDS.LOOKUP_NOTE.key;
@@ -834,8 +835,7 @@ export class KeybindingUtils {
             return newEntry;
           } else {
             // keybinding with override. map them to new ones
-            const newArgs = _.cloneDeep(entry.args);
-            
+            const newArgs = assign({}, entry.args);
             // delete obsolete
             _.forEach([
               "flavor",
@@ -844,22 +844,27 @@ export class KeybindingUtils {
               "value",
               "effectType",
             ], (key: string) => {
-              if (!_.isUndefined(entry.args[key]))
+              if (!_.isUndefined(entry.args[key])) {
                 delete newArgs[key];
+              }
             });
 
             // migrate overrides to new keys
-            if (!_.isUndefined(entry.args.filterType))
+            if (!_.isUndefined(entry.args.filterType)) {
               newArgs.filterMiddleware = [entry.args.filterType];
+            }
 
-            if (!_.isUndefined(entry.args.value))
+            if (!_.isUndefined(entry.args.value)) {
               newArgs.initialValue = entry.args.value;
+            }
 
             if (!_.isUndefined(entry.args.effectType)) {
-              if (entry.args.effectType === "multiSelect") 
+              if (entry.args.effectType === "multiSelect") {
                 newArgs.multiSelect = true;
-              if (entry.args.effectType === "copyNoteLink")
+              }
+              if (entry.args.effectType === "copyNoteLink") {
                 newArgs.copyNoteLink = true;
+              }
             };
 
             newEntry.args = newArgs;
@@ -876,8 +881,9 @@ export class KeybindingUtils {
     });
 
     if (!needsMigration)
-      return { keybindingConfigPath, migratedKeybindings: undefined};
+      return { keybindingConfigPath };
 
+    migratedKeybindings = assign(keybindings, migratedKeybindings);
     return { keybindingConfigPath, migratedKeybindings };
   }
 }

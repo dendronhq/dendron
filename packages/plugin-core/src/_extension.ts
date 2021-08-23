@@ -451,8 +451,8 @@ export async function _activate(
 
   const { keybindingConfigPath, migratedKeybindings } = KeybindingUtils.checkAndMigrateLookupKeybindingIfExists();
   if (!_.isUndefined(migratedKeybindings)) {
-    fs.ensureFileSync(keybindingConfigPath);
-    fs.writeFileSync(keybindingConfigPath, JSON.stringify(migratedKeybindings));
+    fs.copyFileSync(keybindingConfigPath, `${keybindingConfigPath}.old`);
+    writeJSONWithComments(keybindingConfigPath, migratedKeybindings);
   }
 
   return showWelcomeOrWhatsNew({

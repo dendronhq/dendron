@@ -30,10 +30,13 @@ export default function DendronTreeView(
   const dendronRouter = useDendronRouter();
   const { changeActiveNote } = dendronRouter;
   const [activeNoteIds, setActiveNoteIds] = useState<string[]>([]);
+  const noteActiveId = _.isUndefined(dendronRouter.query.id)
+    ? props.noteIndex?.id
+    : dendronRouter.query.id;
 
   // set `activeNoteIds`
   useEffect(() => {
-    if (!verifyNoteData(props)) {
+    if (!verifyNoteData(props) || !noteActiveId) {
       return undefined;
     }
 
@@ -41,17 +44,13 @@ export default function DendronTreeView(
       state: "useEffect:preCalculateTree",
     });
 
-    const noteActiveId = _.isUndefined(dendronRouter.query.id)
-      ? props.noteIndex.id
-      : dendronRouter.query.id;
-
     const activeNoteIds = TreeViewUtils.getAllParents({
       notes: props.notes,
       noteId: noteActiveId,
     });
 
     setActiveNoteIds(activeNoteIds);
-  }, [props.notes, props.noteIndex, dendronRouter.query.id]);
+  }, [props.notes, props.noteIndex, dendronRouter.query.id, noteActiveId]);
 
   // --- Verify
   if (!verifyNoteData(props)) {
@@ -93,6 +92,7 @@ export default function DendronTreeView(
       onSelect={onSelect}
       onExpand={onExpand}
       collapsed={collapsed}
+      activeNote={noteActiveId}
     />
   );
 
@@ -136,21 +136,21 @@ function MenuView({
   onSelect,
   onExpand,
   collapsed,
+  activeNote,
 }: {
   roots: DataNode[];
   expandKeys: string[];
   onSelect: (noteId: string) => void;
   onExpand: (noteIds: string[]) => void;
   collapsed: boolean;
+  activeNote: string | undefined;
 }) {
   const createMenu = (menu: DataNode) => {
     if (menu.children && menu.children.length > 0) {
       return (
         <SubMenu
           className={
-            expandKeys.includes(String(menu.key))
-              ? "OPEN_SUBMENU" // TODO create css classes
-              : ""
+            menu.key === activeNote ? "dendron-ant-menu-submenu-selected" : ""
           }
           key={menu.key}
           title={menu.title}

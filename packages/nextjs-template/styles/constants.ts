@@ -1,4 +1,5 @@
 const SIDER = {
+  COLLAPSED_WIDTH: 80,
   WIDTH: 200,
   PADDING: {
     LEFT: 24,

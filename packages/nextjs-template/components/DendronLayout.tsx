@@ -13,8 +13,6 @@ import DendronTreeView from "./DendronTreeView";
 
 const { Header, Content, Sider, Footer } = Layout;
 
-const SIDER_COLLAPSED_WIDTH = 80;
-
 export default function DendronLayout(
   props: React.PropsWithChildren<DendronCommonProps>
 ) {
@@ -43,7 +41,7 @@ export default function DendronLayout(
           width={DENDRON_STYLE_CONSTANTS.SIDER.WIDTH}
           collapsible
           collapsed={collapsed}
-          collapsedWidth={SIDER_COLLAPSED_WIDTH}
+          collapsedWidth={DENDRON_STYLE_CONSTANTS.SIDER.COLLAPSED_WIDTH}
           onCollapse={(collapsed, type) => {
             setCollapsed(collapsed);
           }}
@@ -59,7 +57,7 @@ export default function DendronLayout(
         <Layout
           style={{
             marginLeft: collapsed
-              ? SIDER_COLLAPSED_WIDTH
+              ? DENDRON_STYLE_CONSTANTS.SIDER.COLLAPSED_WIDTH
               : DENDRON_STYLE_CONSTANTS.SIDER.WIDTH,
           }}
         >

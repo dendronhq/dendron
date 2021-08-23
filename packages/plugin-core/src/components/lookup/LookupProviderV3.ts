@@ -345,7 +345,9 @@ export class NoteLookupProvider implements ILookupProviderV3 {
         !queryEndsWithDot &&
         !picker.canSelectMany &&
         !perfectMatch
-          ? updatedItems.concat([NotePickerUtils.createNoActiveItem({} as any)])
+          ? updatedItems.concat([
+              NotePickerUtils.createNoActiveItem({ fname: querystring }),
+            ])
           : updatedItems;
 
       // check fuzz threshold. tune fuzzyness. currently hardcoded
@@ -445,9 +447,10 @@ export class SchemaLookupProvider implements ILookupProviderV3 {
         selectedItems: selectedItems.map((item) => NoteUtils.toLogObj(item)),
       });
       if (_.isEmpty(selectedItems)) {
-        selectedItems = await SchemaPickerUtils.fetchPickerResultsWithCurrentValue({
-          picker,
-        })
+        selectedItems =
+          await SchemaPickerUtils.fetchPickerResultsWithCurrentValue({
+            picker,
+          });
       }
       if (
         PickerUtilsV2.hasNextPicker(picker, {
@@ -573,7 +576,9 @@ export class SchemaLookupProvider implements ILookupProviderV3 {
 
       updatedItems =
         this.opts.allowNewNote && !perfectMatch
-          ? updatedItems.concat([NotePickerUtils.createNoActiveItem({} as any)])
+          ? updatedItems.concat([
+              NotePickerUtils.createNoActiveItem({ fname: querystring }),
+            ])
           : updatedItems;
 
       picker.items = updatedItems;

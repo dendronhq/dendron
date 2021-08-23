@@ -1,6 +1,6 @@
 import { env, Uri } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
-import { GOOGLE_OAUTH_CLIENT_ID } from "../types/global";
+import { GOOGLE_OAUTH_ID } from "../types/global";
 import { BasicCommand } from "./base";
 
 type CommandOpts = {};
@@ -12,10 +12,11 @@ type CommandOutput = void;
 export class ShowHelpCommand extends BasicCommand<CommandOpts, CommandOutput> {
   key = DENDRON_COMMANDS.SHOW_HELP.key;
   async gatherInputs(): Promise<CommandInput | undefined> {
-    console.log(GOOGLE_OAUTH_CLIENT_ID);
     return {};
   }
   async execute() {
+    console.log(GOOGLE_OAUTH_ID);
+
     env.openExternal(
       Uri.parse(
         "https://www.dendron.so/notes/f9540bb6-7a5a-46db-ae7c-e1a606f28c73.html"

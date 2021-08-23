@@ -15,7 +15,7 @@ export class ShowHelpCommand extends BasicCommand<CommandOpts, CommandOutput> {
     return {};
   }
   async execute() {
-    console.log(GOOGLE_OAUTH_ID);
+    console.log("This is the client id: " + GOOGLE_OAUTH_ID);
 
     env.openExternal(
       Uri.parse(

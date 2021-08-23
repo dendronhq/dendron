@@ -108,13 +108,7 @@ export default function DendronTreeView(
   );
 }
 
-function ExpandIcon({
-  eventKey,
-  isOpen,
-}: {
-  eventKey: string;
-  isOpen: boolean;
-}) {
+function ExpandIcon({ isOpen }: { isOpen: boolean }) {
   const Icon = isOpen ? UpOutlined : DownOutlined;
   return (
     <Icon
@@ -149,6 +143,7 @@ function MenuView({
     if (menu.children && menu.children.length > 0) {
       return (
         <SubMenu
+          icon={menu.icon}
           className={
             menu.key === activeNote ? "dendron-ant-menu-submenu-selected" : ""
           }
@@ -170,7 +165,11 @@ function MenuView({
         </SubMenu>
       );
     }
-    return <Menu.Item key={menu.key}>{menu.title}</Menu.Item>;
+    return (
+      <Menu.Item key={menu.key} icon={menu.icon}>
+        {menu.title}
+      </Menu.Item>
+    );
   };
 
   return (

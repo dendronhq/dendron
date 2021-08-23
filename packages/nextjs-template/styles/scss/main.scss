@@ -39,6 +39,13 @@ hr {
 	}
 }
 
+
+.ant-menu.ant-menu-inline-collapsed {
+	[data-expandedicon="true"] {
+		display: none;
+	}
+}
+
 .ant-menu-submenu {
 	> .ant-menu-submenu-title:after {
 		position: absolute;

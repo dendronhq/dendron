@@ -29,6 +29,29 @@ export default function DendronTreeView(
   const logger = createLogger("DendronTreeView");
   const dendronRouter = useDendronRouter();
   const { changeActiveNote } = dendronRouter;
+  const [activeNoteIds, setActiveNoteIds] = useState<string[]>([]);
+
+  // set `activeNoteIds`
+  useEffect(() => {
+    if (!verifyNoteData(props)) {
+      return undefined;
+    }
+
+    logger.info({
+      state: "useEffect:preCalculateTree",
+    });
+
+    const noteActiveId = _.isUndefined(dendronRouter.query.id)
+      ? props.noteIndex.id
+      : dendronRouter.query.id;
+
+    const activeNoteIds = TreeViewUtils.getAllParents({
+      notes: props.notes,
+      noteId: noteActiveId,
+    });
+
+    setActiveNoteIds(activeNoteIds);
+  }, [props.notes, props.noteIndex, dendronRouter.query.id]);
 
   // --- Verify
   if (!verifyNoteData(props)) {
@@ -39,18 +62,6 @@ export default function DendronTreeView(
   }
 
   const { notes, domains, noteIndex, collapsed } = props;
-
-  const noteActiveId = _.isUndefined(dendronRouter.query.id)
-    ? noteIndex.id
-    : dendronRouter.query.id;
-  logger.info({
-    state: "useEffect:preCalculateTree",
-  });
-
-  const activeNoteIds = TreeViewUtils.getAllParents({
-    notes,
-    noteId: noteActiveId,
-  });
 
   const expandKeys = _.isEmpty(activeNoteIds) ? [] : activeNoteIds;
 
@@ -70,11 +81,17 @@ export default function DendronTreeView(
     changeActiveNote(noteId, { noteIndex: props.noteIndex });
   };
 
+  const onExpand = (noteIds: string[]) => {
+    logger.info({ ctx: "onExpand", id: noteIds });
+    setActiveNoteIds(noteIds);
+  };
+
   return (
     <MenuView
       roots={roots}
       expandKeys={expandKeys}
       onSelect={onSelect}
+      onExpand={onExpand}
       collapsed={collapsed}
     />
   );
@@ -117,11 +134,13 @@ function MenuView({
   roots,
   expandKeys,
   onSelect,
+  onExpand,
   collapsed,
 }: {
   roots: DataNode[];
   expandKeys: string[];
   onSelect: (noteId: string) => void;
+  onExpand: (noteIds: string[]) => void;
   collapsed: boolean;
 }) {
   const createMenu = (menu: DataNode) => {
@@ -163,6 +182,9 @@ function MenuView({
       inlineIndent={DENDRON_STYLE_CONSTANTS.SIDER.INDENT}
       expandIcon={ExpandIcon}
       inlineCollapsed={collapsed}
+      onOpenChange={(noteIds) => {
+        onExpand(noteIds as unknown as string[]); // `notesIds` will ever only be strings
+      }}
     >
       {roots.map((menu) => {
         return createMenu(menu);

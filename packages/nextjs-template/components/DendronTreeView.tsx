@@ -106,17 +106,6 @@ export default function DendronTreeView(
       activeNote={noteActiveId}
     />
   );
-
-  // return (
-  //   <>
-  //     <TreeView
-  //       treeData={roots}
-  //       defaultExpandKeys={expandKeys}
-  //       onExpand={onExpand}
-  //       onSelect={onSelect}
-  //     />
-  //   </>
-  // );
 }
 
 function ExpandIcon({
@@ -202,35 +191,3 @@ function MenuView({
     </Menu>
   );
 }
-
-// function TreeView({
-//   treeData,
-//   defaultExpandKeys,
-//   onExpand,
-//   onSelect,
-// }: {
-//   treeData: DataNode[];
-//   defaultExpandKeys: string[];
-//   onSelect: OnSelectFunc;
-//   onExpand: OnExpandFunc;
-// }) {
-//   const { currentTheme } = useThemeSwitcher();
-//   const maybeTheme = ThemeUtils.getTheme(currentTheme || "light");
-//   return (
-//     <>
-//       {treeData.length ? (
-//         <Tree
-//           style={{ background: maybeTheme?.layoutHeaderBackground }}
-//           showIcon
-//           expandedKeys={defaultExpandKeys}
-//           selectedKeys={defaultExpandKeys.slice(-1)}
-//           onExpand={onExpand}
-//           onSelect={onSelect}
-//           treeData={treeData}
-//         />
-//       ) : (
-//         <DendronSpinner />
-//       )}
-//     </>
-//   );
-// }

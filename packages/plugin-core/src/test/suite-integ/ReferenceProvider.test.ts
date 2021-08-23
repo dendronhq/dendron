@@ -195,6 +195,39 @@ suite("ReferenceProvider", function () {
         });
       });
 
+      test("missing notes are marked as such", (done) => {
+        runLegacyMultiWorkspaceTest({
+          ctx,
+          preSetupHook: async ({ wsRoot, vaults }) => {
+            await NoteTestUtilsV4.createNote({
+              vault: vaults[0],
+              wsRoot,
+              fname: "source",
+              body: "[[target]]", // target doesn't exist
+            });
+          },
+          onInit: async ({ vaults }) => {
+            const editor = await VSCodeUtils.openNoteByPath({
+              vault: vaults[0],
+              fname: "source",
+            });
+            const provider = new ReferenceHoverProvider();
+            const hover = await provider.provideHover(
+              editor.document,
+              new vscode.Position(7, 4)
+            );
+            expect(hover).toBeTruthy();
+            await AssertUtils.assertInString({
+              body: hover!.contents.join(""),
+              match: [
+                `Note target is missing, Ctrl+click or use "Dendron: Goto Note" command to create it.`,
+              ],
+            });
+            done();
+          },
+        });
+      });
+
       test.skip("contains local image", (done) => {
         runLegacyMultiWorkspaceTest({
           ctx,

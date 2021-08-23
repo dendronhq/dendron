@@ -453,6 +453,18 @@ export async function _activate(
   if (!_.isUndefined(migratedKeybindings)) {
     fs.copyFileSync(keybindingConfigPath, `${keybindingConfigPath}.old`);
     writeJSONWithComments(keybindingConfigPath, migratedKeybindings);
+    vscode.window.showInformationMessage("Keybindings for lookup has been updated.", ...["Open keybindings.json"]).then((selection) => {
+      if (selection) {
+        const uri = vscode.Uri.file(keybindingConfigPath);
+        VSCodeUtils.openFileInEditor(uri);
+      }
+    })
+    vscode.window.showInformationMessage("Old config has been backed up.", ...["Open backup"]).then((selection) => {
+      if (selection) {
+        const uri = vscode.Uri.file(`${keybindingConfigPath}.old`);
+        VSCodeUtils.openFileInEditor(uri);
+      }
+    });
   }
 
   return showWelcomeOrWhatsNew({

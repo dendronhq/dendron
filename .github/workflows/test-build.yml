@@ -48,43 +48,20 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version:  14.x
-      - run: yarn setup
+        run: yarn setup
 
-    - name: Set Up Local Registry
-      - run: yarn config set registry http://localhost:4873
-      - run: npm set registry http://localhost:4873/
-    
-    - name: Build the VSIX
-      env: GOOGLE_OAUTH_CLIENT_SECRET: ${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}
-      env: GOOGLE_OAUTH_CLIENT_ID: ${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}
-      - run: yarn build:patch:local
+      - name: Set Up Local Registry
+        - run: yarn config set registry http://localhost:4873
+        - run: npm set registry http://localhost:4873/
+      
+      - name: Build the VSIX
+        env: 
+          GOOGLE_OAUTH_CLIENT_SECRET: ${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}
+          GOOGLE_OAUTH_CLIENT_ID: ${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}
+        run: yarn build:patch:local
 
-    - name: Upload VSIX Artifact
-      uses: actions/upload-artifact@v2
-      with:
-        name: vsix
-        path: ./packages/plugin-core/*.vsix
-
-      # - name: Setup Dependencies
-      #   run: yarn setup
-      #   shell: bash
-
-      # - name: Setup Verdaccio
-      #   run: |
-      #     npm install verdaccio
-      #     yarn config set registry http://localhost:4873
-      #     npm set registry http://localhost:4873/
-      #   shell: bash
-
-      # - name: Build
-      #   run: yarn build:patch:local
-      #   shell: bash
-
-      # - name: Store VSIX Artifact
-      #   uses: actions/upload-artifact@v2
-      #   with:
-      #     name: dist-without-markdown
-      #     path: |
-      #       dist
-      #       !dist/**/*.md
-
+      - name: Upload VSIX Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: vsix
+          path: ./packages/plugin-core/*.vsix

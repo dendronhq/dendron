@@ -80,9 +80,20 @@ export default function DendronTreeView(
     changeActiveNote(noteId, { noteIndex: props.noteIndex });
   };
 
-  const onExpand = (noteIds: string[]) => {
-    logger.info({ ctx: "onExpand", id: noteIds });
-    setActiveNoteIds(noteIds);
+  const onExpand = (noteId: string) => {
+    logger.info({ ctx: "onExpand", id: noteId });
+    if (_.isUndefined(notes)) {
+      return;
+    }
+    const expanded = expandKeys.includes(noteId);
+    // open up
+    if (expanded) {
+      setActiveNoteIds(
+        TreeViewUtils.getAllParents({ notes, noteId }).slice(0, -1)
+      );
+    } else {
+      setActiveNoteIds(TreeViewUtils.getAllParents({ notes, noteId }));
+    }
   };
 
   return (
@@ -141,7 +152,7 @@ function MenuView({
   roots: DataNode[];
   expandKeys: string[];
   onSelect: (noteId: string) => void;
-  onExpand: (noteIds: string[]) => void;
+  onExpand: (noteId: string) => void;
   collapsed: boolean;
   activeNote: string | undefined;
 }) {
@@ -159,6 +170,8 @@ function MenuView({
             const isArrow = target.dataset.expandedicon;
             if (!isArrow) {
               onSelect(event.key);
+            } else {
+              onExpand(event.key);
             }
           }}
         >
@@ -182,9 +195,6 @@ function MenuView({
       inlineIndent={DENDRON_STYLE_CONSTANTS.SIDER.INDENT}
       expandIcon={ExpandIcon}
       inlineCollapsed={collapsed}
-      onOpenChange={(noteIds) => {
-        onExpand(noteIds as unknown as string[]); // `notesIds` will ever only be strings
-      }}
     >
       {roots.map((menu) => {
         return createMenu(menu);

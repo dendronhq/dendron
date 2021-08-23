@@ -58,6 +58,7 @@ export type CommandRunOpts = {
   noConfirm?: boolean;
   fuzzThreshold?: number;
   multiSelect?: boolean;
+  copyNoteLink?: boolean;
   noteType?: LookupNoteType;
   selectionType?: LookupSelectionType;
   splitType?: LookupSplitType;
@@ -159,7 +160,7 @@ export class NoteLookupCommand extends BaseCommand<
       vaultButtonPressed: copts.vaultSelectionMode === VaultSelectionMode.alwaysPrompt,
       extraButtons: [
         MultiSelectBtn.create(copts.multiSelect),
-        CopyNoteLinkBtn.create(),
+        CopyNoteLinkBtn.create(copts.copyNoteLink),
         DirectChildFilterBtn.create(
           copts.filterMiddleware?.includes("directChildOnly")
         ),
@@ -312,6 +313,9 @@ export class NoteLookupCommand extends BaseCommand<
       const outClean = out.filter(
         (ent) => !_.isUndefined(ent)
       ) as OnDidAcceptReturn[];
+      if (!_.isUndefined(quickpick.copyNoteLinkFunc)) {
+        await quickpick.copyNoteLinkFunc!(outClean.map((item) => item.node));
+      }
       await _.reduce(
         outClean,
         async (acc, item) => {

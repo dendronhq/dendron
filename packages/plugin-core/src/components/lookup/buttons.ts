@@ -1,5 +1,4 @@
 import {
-  DNodePropsQuickInputV2,
   NoteUtils,
   NoteProps,
   getSlugger,
@@ -411,16 +410,10 @@ export class CopyNoteLinkBtn extends DendronBtn {
   }
 
   async onEnable({ quickPick }: ButtonHandleOpts) {
-    if (this.pressed) {
-      let items: readonly DNodePropsQuickInputV2[];
-      if (quickPick.canSelectMany) {
-        items = quickPick.selectedItems;
-      } else {
-        items = quickPick.activeItems;
-      }
-      const links = items
-        .filter((ent) => !PickerUtilsV2.isCreateNewNotePick(ent))
-        .map((note) => NoteUtils.createWikiLink({ note }));
+    quickPick.copyNoteLinkFunc = async (
+      items: NoteProps[],
+    ) => {
+      const links = items.map((note) => NoteUtils.createWikiLink({ note }));
       if (_.isEmpty(links)) {
         vscode.window.showInformationMessage(`no items selected`);
       } else {
@@ -428,6 +421,10 @@ export class CopyNoteLinkBtn extends DendronBtn {
         vscode.window.showInformationMessage(`${links.length} links copied`);
       }
     }
+  }
+
+  async onDisable({ quickPick }: ButtonHandleOpts) {
+    quickPick.copyNoteLinkFunc = undefined;
   }
 }
 

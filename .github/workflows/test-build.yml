@@ -49,10 +49,21 @@ jobs:
         with:
           node-version:  14.x
       - run: yarn setup
+
+    - name: Set Up Local Registry
       - run: yarn config set registry http://localhost:4873
       - run: npm set registry http://localhost:4873/
-      # - run: yarn setup:npmlogin
+    
+    - name: Build the VSIX
+      env: GOOGLE_OAUTH_CLIENT_SECRET: ${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}
+      env: GOOGLE_OAUTH_CLIENT_ID: ${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}
       - run: yarn build:patch:local
+
+    - name: Upload VSIX Artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: vsix
+        path: ./packages/plugin-core/*.vsix
 
       # - name: Setup Dependencies
       #   run: yarn setup

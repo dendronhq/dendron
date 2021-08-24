@@ -432,10 +432,8 @@ export async function _activate(
     const vimInstalled = VSCodeUtils.isExtensionInstalled("vscodevim.vim");
     if (vimInstalled) {
       AnalyticsUtils.track(ExtensionEvents.VimExtensionInstalled);
-      const {
-        keybindingConfigPath, 
-        newKeybindings: resolvedKeybindings, 
-      } = KeybindingUtils.checkAndApplyVimKeybindingOverrideIfExists();
+      const { keybindingConfigPath, newKeybindings: resolvedKeybindings } =
+        KeybindingUtils.checkAndApplyVimKeybindingOverrideIfExists();
       if (!_.isUndefined(resolvedKeybindings)) {
         if (!fs.existsSync(keybindingConfigPath)) {
           fs.ensureFileSync(keybindingConfigPath);
@@ -449,10 +447,28 @@ export async function _activate(
     }
   }
 
-  const { keybindingConfigPath, migratedKeybindings } = KeybindingUtils.checkAndMigrateLookupKeybindingIfExists();
-  if (!_.isUndefined(migratedKeybindings)) {
-    fs.ensureFileSync(keybindingConfigPath);
-    fs.writeFileSync(keybindingConfigPath, JSON.stringify(migratedKeybindings));
+  if (extensionInstallStatus === InstallStatus.UPGRADED) {
+    const { keybindingConfigPath, migratedKeybindings } =
+      KeybindingUtils.checkAndMigrateLookupKeybindingIfExists();
+    if (!_.isUndefined(migratedKeybindings)) {
+      fs.copyFileSync(keybindingConfigPath, `${keybindingConfigPath}.old`);
+      writeJSONWithComments(keybindingConfigPath, migratedKeybindings);
+      vscode.window
+        .showInformationMessage(
+          "Keybindings for lookup has been updated. Click the button below to see changes.",
+          ...["Open changes"]
+        )
+        .then(async (selection) => {
+          if (selection) {
+            const uri = vscode.Uri.file(keybindingConfigPath);
+            const backupUri = vscode.Uri.file(`${keybindingConfigPath}.old`);
+            await VSCodeUtils.openFileInEditor(uri);
+            await VSCodeUtils.openFileInEditor(backupUri, {
+              column: vscode.ViewColumn.Beside,
+            });
+          }
+        });
+    }
   }
 
   return showWelcomeOrWhatsNew({

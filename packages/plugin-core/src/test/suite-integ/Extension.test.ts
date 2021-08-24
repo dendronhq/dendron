@@ -5,7 +5,12 @@ import {
   isNotUndefined,
   Time,
 } from "@dendronhq/common-all";
-import { readJSONWithCommentsSync, readYAML, tmpDir } from "@dendronhq/common-server";
+import {
+  readJSONWithCommentsSync,
+  readYAML,
+  tmpDir,
+  writeJSONWithComments,
+} from "@dendronhq/common-server";
 import {
   getPortFilePath,
   getWSMetaFilePath,
@@ -34,10 +39,7 @@ import * as telemetry from "../../telemetry";
 import { DendronWorkspace, getWS, resolveRelToWSRoot } from "../../workspace";
 import { BlankInitializer } from "../../workspace/blankInitializer";
 import { TemplateInitializer } from "../../workspace/templateInitializer";
-import { 
-  shouldDisplayLapsedUserMsg,
-  _activate 
-} from "../../_extension";
+import { shouldDisplayLapsedUserMsg, _activate } from "../../_extension";
 import {
   expect,
   genDefaultSettings,
@@ -54,7 +56,10 @@ import { toPlainObject } from "@dendronhq/common-test-utils";
 
 function mockUserConfigDir() {
   const dir = tmpDir().name;
-  const getCodeUserConfigDurStub = sinon.stub(VSCodeUtils, "getCodeUserConfigDir");
+  const getCodeUserConfigDurStub = sinon.stub(
+    VSCodeUtils,
+    "getCodeUserConfigDir"
+  );
   getCodeUserConfigDurStub.callsFake(() => {
     const wrappedMethod = getCodeUserConfigDurStub.wrappedMethod;
     const originalOut = wrappedMethod();
@@ -62,7 +67,7 @@ function mockUserConfigDir() {
       userConfigDir: [dir, originalOut.delimiter].join(""),
       delimiter: originalOut.delimiter,
       osName: originalOut.osName,
-    }
+    };
   });
   return getCodeUserConfigDurStub;
 }
@@ -151,7 +156,7 @@ suite("Extension", function () {
               lookup: {
                 note: {
                   selectionType: "selectionExtract",
-                }
+                },
               },
               journal: {
                 addBehavior: "childOfDomain",
@@ -368,14 +373,44 @@ suite("keybindings", function () {
 
   describe("keyboard shortcut conflict resolution", () => {
     test("vim extension expandLineSelection override", (done) => {
-      const { newKeybindings } = KeybindingUtils.checkAndApplyVimKeybindingOverrideIfExists();
-      const override = newKeybindings[newKeybindings.length-1];
+      const { keybindingConfigPath } =
+        KeybindingUtils.getKeybindingConfigPath();
+      fs.ensureFileSync(keybindingConfigPath);
       const metaKey = os.type() === "Darwin" ? "cmd" : "ctrl";
+      const config = `// This is my awesome Dendron Keybinding
+      [
+        { // look up note to the side
+          "key": "${metaKey}+k l",
+          "command": "dendron.lookupNote",
+          "args": {
+            "splitType": "horizontal"
+          }
+        }
+      ]`;
+      fs.writeFileSync(keybindingConfigPath, config);
+      const existingConfig = readJSONWithCommentsSync(keybindingConfigPath);
+      const beforeAllSymbol = Object.getOwnPropertySymbols(existingConfig)[0];
+      const beforeKeySymbol = Object.getOwnPropertySymbols(
+        existingConfig[0]
+      )[0];
+      const { newKeybindings } =
+        KeybindingUtils.checkAndApplyVimKeybindingOverrideIfExists();
+      const override = newKeybindings[1];
+
+      // override config exists after migration
       expect(override).toEqual({
-        "key": `${metaKey}+l`,
-        "command": "-expandLineSelection",
-        "when": "textInputFocus"
-      },)
+        key: `${metaKey}+l`,
+        command: "-expandLineSelection",
+        when: "textInputFocus",
+      });
+
+      // existing comments are preserved
+      expect(Object.getOwnPropertySymbols(newKeybindings)[0]).toEqual(
+        beforeAllSymbol
+      );
+      expect(Object.getOwnPropertySymbols(newKeybindings[0])[0]).toEqual(
+        beforeKeySymbol
+      );
       done();
     });
 
@@ -392,7 +427,9 @@ suite("keybindings", function () {
             stubSetupWorkspace({
               wsRoot,
             });
-            sinon.stub(VSCodeUtils, "getInstallStatusForExtension").returns(InstallStatus.INITIAL_INSTALL);
+            sinon
+              .stub(VSCodeUtils, "getInstallStatusForExtension")
+              .returns(InstallStatus.INITIAL_INSTALL);
             // somehow stub is ignored if --disable-extensions is passed during the test.
             sinon.stub(VSCodeUtils, "isExtensionInstalled").returns(true);
             const cmd = new SetupWorkspaceCommand();
@@ -413,8 +450,9 @@ suite("keybindings", function () {
               "keybindings.json",
             ].join("");
 
-            const newKeybindings = readJSONWithCommentsSync(keybindingConfigPath);
-            const override = newKeybindings[newKeybindings.length-1];
+            const newKeybindings =
+              readJSONWithCommentsSync(keybindingConfigPath);
+            const override = newKeybindings[newKeybindings.length - 1];
             const metaKey = os.type() === "Darwin" ? "cmd" : "ctrl";
             expect(override.key).toEqual(`${metaKey}+l`);
             expect(override.command).toEqual("-expandLineSelection");
@@ -427,62 +465,75 @@ suite("keybindings", function () {
 
   describe("keyboard shortcut migration", () => {
     test("lookup v2 to v3 migration, nothing happens", (done) => {
-      const { migratedKeybindings } = KeybindingUtils.checkAndMigrateLookupKeybindingIfExists();
+      const { migratedKeybindings } =
+        KeybindingUtils.checkAndMigrateLookupKeybindingIfExists();
       expect(_.isUndefined(migratedKeybindings)).toBeTruthy();
       done();
     });
 
     test("lookup v2 to v3 migration", (done) => {
-      const { keybindingConfigPath } = KeybindingUtils.getKeybindingConfigPath();
+      const { keybindingConfigPath } =
+        KeybindingUtils.getKeybindingConfigPath();
       const metaKey = os.type() === "Darwin" ? "cmd" : "ctrl";
       fs.ensureFileSync(keybindingConfigPath);
-      const startingConfig = [
-        {
-          key: `shift+${metaKey}+d`,
-          command: "-dendron.deleteNode",
-          when: "dendron:pluginActive"
+      const startingConfig = `// My awesome Dendron Config
+      [
+        { // disable delete node keybinding
+          "key": "shift+${metaKey}+d",
+          "command": "-dendron.deleteNode",
+          "when": "dendron:pluginActive"
         },
-        {
-          key: `${metaKey}+k l`,
-          command: "dendron.lookup",
-          args: {
-            flavor: "note",
-            noteExistBehavior: "open",
-            filterType: "directChildOnly",
-            value: "foo",
-            effectType: "multiSelect"
+        { // super specific lookup
+          "key": "${metaKey}+k l",
+          "command": "dendron.lookup",
+          "args": {
+            /* arg-comment-0 */ 
+            // arg-comment-1
+            "flavor": "note", // arg-comment-2
+            // arg-comment-3
+            "noteExistBehavior": "open", // arg-comment-4
+            // arg-comment-5
+            "filterType": "directChildOnly", // arg-comment-6
+            // arg-comment-7
+            "value": "foo", // arg-comment-8
+            // arg-comment-9
+            "effectType": "multiSelect" // arg-comment-10
+            // arg-comment-11
           }
         },
         {
-          key: `${metaKey}+k shift+l`,
-          command: "dendron.lookup",
-          args: {
-            effectType: "copyNoteLink",
+          "key": "${metaKey}+k shift+l",
+          "command": "dendron.lookup",
+          "args": {
+            // arg-comment-12
+            "effectType": "copyNoteLink", // arg-comment-13
+            // arg-comment-14
           }
         },
         {
-          key: `${metaKey}+l`,
-          command: "-dendron.lookup",
+          "key": "${metaKey}+l",
+          "command": "-dendron.lookup",
         },
         {
-          key: `${metaKey}+l`,
-          command: "dendron.lookup",
-          args: {
-            splitType: "horizontal",
-            selectionType: "selectionExtract",
-            noConfirm: true,
-            vaultSelectionMode: 2,
+          "key": "${metaKey}+l",
+          "command": "dendron.lookup",
+          "args": {
+            "splitType": "horizontal",
+            "selectionType": "selectionExtract",
+            "noConfirm": true,
+            "vaultSelectionMode": 2,
           }
         }
-      ];
-      fs.writeFileSync(keybindingConfigPath, JSON.stringify(startingConfig));
-      const { migratedKeybindings } = KeybindingUtils.checkAndMigrateLookupKeybindingIfExists();
+      ]`;
+      fs.writeFileSync(keybindingConfigPath, startingConfig);
+      const { migratedKeybindings } =
+        KeybindingUtils.checkAndMigrateLookupKeybindingIfExists();
       expect(toPlainObject(migratedKeybindings)).toEqual([
         // leaves non-lookup keybinding as is
         {
           key: `shift+${metaKey}+d`,
           command: "-dendron.deleteNode",
-          when: "dendron:pluginActive"
+          when: "dendron:pluginActive",
         },
         // migrate to new args
         {
@@ -492,14 +543,14 @@ suite("keybindings", function () {
             filterMiddleware: ["directChildOnly"],
             initialValue: "foo",
             multiSelect: true,
-          }
+          },
         },
         {
           key: `${metaKey}+k shift+l`,
           command: "dendron.lookupNote",
           args: {
             copyNoteLink: true,
-          }
+          },
         },
         // migrates keybinding overrides
         {
@@ -515,19 +566,17 @@ suite("keybindings", function () {
             selectionType: "selectionExtract",
             noConfirm: true,
             vaultSelectionMode: 2,
-          }
-        }
+          },
+        },
       ]);
+      writeJSONWithComments(keybindingConfigPath, migratedKeybindings);
       done();
     });
 
     test("does nothing on extension activate if not necessary", (done) => {
       const wsRoot = tmpDir().name;
       const { userConfigDir } = VSCodeUtils.getCodeUserConfigDir();
-      const keybindingConfigPath = [
-        userConfigDir,
-        "keybindings.json",
-      ].join("");
+      const keybindingConfigPath = [userConfigDir, "keybindings.json"].join("");
       expect(fs.existsSync(keybindingConfigPath)).toBeFalsy();
 
       getWS()
@@ -554,29 +603,30 @@ suite("keybindings", function () {
         });
     });
 
-    test("v2 to v3 migration happens on extension activation on upgrade", (done) => {
+    test("v2 to v3 migration happens on extension activation only on upgrade", (done) => {
       const wsRoot = tmpDir().name;
       const metaKey = os.type() === "Darwin" ? "cmd" : "ctrl";
       const { userConfigDir } = VSCodeUtils.getCodeUserConfigDir();
-      const keybindingConfigPath = [
-        userConfigDir,
-        "keybindings.json",
-      ].join("");
+      const keybindingConfigPath = [userConfigDir, "keybindings.json"].join("");
       fs.ensureFileSync(keybindingConfigPath);
-      fs.writeFileSync(keybindingConfigPath, JSON.stringify([
-        {
-          key: `${metaKey}+l`,
-          command: "-dendron.lookup",
+      const config = `// This is my awesome Dendron keybinding
+      [
+        { // lookup disable
+          "key": "${metaKey}+l",
+          "command": "-dendron.lookup",
         },
-        {
-          key: `${metaKey}+l`,
-          command: "dendron.lookup",
-          args: {
-            effectType: "copyNoteLink"
+        { // lookup with args
+          "key": "${metaKey}+l",
+          "command": "dendron.lookup",
+          "args": {
+            "effectType": "copyNoteLink"
           }
         }
-      ]));
-
+      ]`;
+      fs.writeFileSync(keybindingConfigPath, config);
+      sinon
+        .stub(VSCodeUtils, "getInstallStatusForExtension")
+        .returns(InstallStatus.UPGRADED);
       getWS()
         .updateGlobalState(
           GLOBAL_STATE.WORKSPACE_ACTIVATION_CONTEXT,
@@ -595,7 +645,8 @@ suite("keybindings", function () {
               workspaceInitializer: new BlankInitializer(),
             });
 
-            const migratedKeybindings = readJSONWithCommentsSync(keybindingConfigPath);
+            const migratedKeybindings =
+              readJSONWithCommentsSync(keybindingConfigPath);
             expect(toPlainObject(migratedKeybindings)).toEqual([
               {
                 key: `${metaKey}+l`,
@@ -605,14 +656,28 @@ suite("keybindings", function () {
                 key: `${metaKey}+l`,
                 command: "dendron.lookupNote",
                 args: {
-                  copyNoteLink: true
-                }
-              }
-            ])
+                  // copy note link by default!
+                  copyNoteLink: true,
+                },
+              },
+            ]);
+            // simple comments are preserved
+            expect(
+              Object.getOwnPropertySymbols(migratedKeybindings).length
+            ).toEqual(1);
+            expect(
+              Object.getOwnPropertySymbols(migratedKeybindings[0]).length
+            ).toEqual(1);
+            expect(
+              Object.getOwnPropertySymbols(migratedKeybindings[1]).length
+            ).toEqual(1);
+
+            // old file is backed up
+            expect(fs.existsSync(`${keybindingConfigPath}.old`)).toBeTruthy();
 
             done();
           });
         });
     });
-  })
+  });
 });

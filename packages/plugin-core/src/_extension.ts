@@ -449,22 +449,23 @@ export async function _activate(
     }
   }
 
-  const { keybindingConfigPath, migratedKeybindings } = KeybindingUtils.checkAndMigrateLookupKeybindingIfExists();
-  if (!_.isUndefined(migratedKeybindings)) {
-    fs.copyFileSync(keybindingConfigPath, `${keybindingConfigPath}.old`);
-    writeJSONWithComments(keybindingConfigPath, migratedKeybindings);
-    vscode.window.showInformationMessage("Keybindings for lookup has been updated.", ...["Open keybindings.json"]).then((selection) => {
-      if (selection) {
-        const uri = vscode.Uri.file(keybindingConfigPath);
-        VSCodeUtils.openFileInEditor(uri);
-      }
-    })
-    vscode.window.showInformationMessage("Old config has been backed up.", ...["Open backup"]).then((selection) => {
-      if (selection) {
-        const uri = vscode.Uri.file(`${keybindingConfigPath}.old`);
-        VSCodeUtils.openFileInEditor(uri);
-      }
-    });
+  if (extensionInstallStatus === InstallStatus.UPGRADED) {
+    const { keybindingConfigPath, migratedKeybindings } = KeybindingUtils.checkAndMigrateLookupKeybindingIfExists();
+    if (!_.isUndefined(migratedKeybindings)) {
+      fs.copyFileSync(keybindingConfigPath, `${keybindingConfigPath}.old`);
+      writeJSONWithComments(keybindingConfigPath, migratedKeybindings);
+      vscode.window.showInformationMessage(
+        "Keybindings for lookup has been updated. Click the button below to see changes.",
+        ...["Open changes"]
+      ).then( async (selection) => {
+        if (selection) { 
+          const uri = vscode.Uri.file(keybindingConfigPath);
+          const backupUri = vscode.Uri.file(`${keybindingConfigPath}.old`);
+          await VSCodeUtils.openFileInEditor(uri);
+          await VSCodeUtils.openFileInEditor(backupUri, { column: vscode.ViewColumn.Beside });
+        }
+      });
+    }
   }
 
   return showWelcomeOrWhatsNew({

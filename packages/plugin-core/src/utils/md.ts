@@ -92,9 +92,9 @@ export const otherExts = [
 /** Kind-of parses a URI and extracts the scheme. Not an actual parser and will accept invalid URIs. */
 export const uriRegex = /^(?<scheme>[\w+.-]+):(\/\/)?\S+/;
 export const imageExts = ["png", "jpg", "jpeg", "svg", "gif", "webp"];
-const imageExtsRegex = new RegExp(`.(${imageExts.join("|")})$`, "i");
+const imageExtsRegex = new RegExp(`[.](${imageExts.join("|")})$`, "i");
 export const isUncPath = (path: string): boolean => uncPathRegex.test(path);
-const otherExtsRegex = new RegExp(`.(${otherExts.join("|")})$`, "i");
+const otherExtsRegex = new RegExp(`[.](${otherExts.join("|")})$`, "i");
 export const containsOtherKnownExts = (pathParam: string): boolean =>
   !!otherExtsRegex.exec(path.parse(pathParam).ext);
 

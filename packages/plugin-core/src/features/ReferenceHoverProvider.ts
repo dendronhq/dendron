@@ -18,6 +18,7 @@ import { PickerUtilsV2 } from "../components/lookup/utils";
 import {
   containsImageExt,
   containsNonDendronUri,
+  containsOtherKnownExts,
   getReferenceAtPosition,
   isUncPath,
 } from "../utils/md";
@@ -48,22 +49,25 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
       return "UNC paths are not supported for images preview due to VSCode Content Security Policy. Use markdown preview or open image via cmd (ctrl) + click instead.";
 
     if (containsImageExt(foundUri.fsPath)) {
-      // File exists and is an image type that the preview supports.
+      // This is an image that the preview supports
       if (!(await fs.pathExists(foundUri.fsPath))) {
+        // Warn the user if the image is missing
         return `file ${foundUri.fsPath} in reference ${refAtPos.ref} is missing`;
       }
       return `![](${foundUri.toString()}|height=${HOVER_IMAGE_MAX_HEIGHT})`;
-    } else {
-      // File exists, but we can't preview it. Just inform the user.
+    }
+
+    if (containsOtherKnownExts(foundUri.fsPath)) {
+      // This is some other kind of file that we can't preview
       const ext = path.parse(foundUri.fsPath).ext;
-      if (ext === "") {
-        // No extension, this is probably not a file but instead a broken note link.
-        return `Note ${refAtPos.ref}${
-          refAtPos.vaultName ? " in vault " + refAtPos.vaultName : ""
-        } is missing, Ctrl+click or use "Dendron: Goto Note" command to create it.`;
-      }
       return `Preview is not supported for "${ext}" file type. [Click to open in the default app](${foundUri.toString()}).`;
     }
+
+    // Otherwise, this is a note link, but the note doesn't exist (otherwise `provideHover` wouldn't call this function).
+    const vaultName = refAtPos.vaultName
+      ? ` in vault "${refAtPos.vaultName}"`
+      : "";
+    return `Note ${refAtPos.ref}${vaultName} is missing, Ctrl+click or use "Dendron: Goto Note" command to create it.`;
   }
 
   /** Returns a message if this is a non-dendron URI. */

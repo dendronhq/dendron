@@ -11,7 +11,7 @@ import {
   MenuItemProps,
   SubMenuProps,
 } from "antd";
-import { UpOutlined, DownOutlined } from "@ant-design/icons";
+import { DownOutlined } from "@ant-design/icons";
 import _ from "lodash";
 import { DataNode } from "rc-tree/lib/interface";
 import React, { useState, useEffect } from "react";
@@ -108,10 +108,9 @@ export default function DendronTreeView(
   );
 }
 
-function ExpandIcon({ isOpen }: { isOpen: boolean }) {
-  const Icon = isOpen ? UpOutlined : DownOutlined;
+function ExpandIcon({ isOpen, ...rest }: { isOpen: boolean }) {
   return (
-    <Icon
+    <DownOutlined
       data-expandedicon="true"
       style={{
         position: "absolute",

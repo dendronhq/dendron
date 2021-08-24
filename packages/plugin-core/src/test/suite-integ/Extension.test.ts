@@ -587,7 +587,7 @@ suite("keybindings", function () {
         });
     });
 
-    test("v2 to v3 migration happens on extension activation on upgrade", (done) => {
+    test("v2 to v3 migration happens on extension activation only on upgrade", (done) => {
       const wsRoot = tmpDir().name;
       const metaKey = os.type() === "Darwin" ? "cmd" : "ctrl";
       const { userConfigDir } = VSCodeUtils.getCodeUserConfigDir();
@@ -611,7 +611,7 @@ suite("keybindings", function () {
         }
       ]`;
       fs.writeFileSync(keybindingConfigPath, config);
-
+      sinon.stub(VSCodeUtils, "getInstallStatusForExtension").returns(InstallStatus.UPGRADED);
       getWS()
         .updateGlobalState(
           GLOBAL_STATE.WORKSPACE_ACTIVATION_CONTEXT,

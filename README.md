@@ -136,6 +136,7 @@ Dendron wouldn't be what it is today without help from these wonderful gardeners
   <tr>
     <td align="center"><a href="https://github.com/kimds91"><img src="https://avatars.githubusercontent.com/u/11445901?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Do Soon Kim</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Akimds91" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/gereleth"><img src="https://avatars.githubusercontent.com/u/6080076?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Daria Vasyukova</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Agereleth" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://github.com/fdaguin"><img src="https://avatars.githubusercontent.com/u/72013963?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Florian Daguin</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Afdaguin" title="Bug reports">🐛</a></td>
   </tr>
 </table>
 

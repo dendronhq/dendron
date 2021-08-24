@@ -547,11 +547,20 @@
         "bug"
       ]
     },
+      {
+    "login": "gereleth",
+    "name": "Daria Vasyukova",
+    "avatar_url": "https://avatars.githubusercontent.com/u/6080076?v=4",
+    "profile": "https://github.com/gereleth",
+    "contributions": [
+      "bug"
+    ]
+  },
     {
-      "login": "gereleth",
-      "name": "Daria Vasyukova",
-      "avatar_url": "https://avatars.githubusercontent.com/u/6080076?v=4",
-      "profile": "https://github.com/gereleth",
+      "login": "fdaguin",
+      "name": "Florian Daguin",
+      "avatar_url": "https://avatars.githubusercontent.com/u/72013963?v=4",
+      "profile": "https://github.com/fdaguin",
       "contributions": [
         "bug"
       ]

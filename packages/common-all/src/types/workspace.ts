@@ -97,6 +97,7 @@ export enum NoteAddBehavior {
 export enum LookupSelectionType {
   "selection2link" = "selection2link",
   "selectionExtract" = "selectionExtract",
+  "none" = "none"
 }
 
 export type NoteLookupConfig = {
@@ -105,7 +106,6 @@ export type NoteLookupConfig = {
 
 export type LookupConfig = {
   note: NoteLookupConfig;
-  // schema: SchemaLookupConfig;
 };
 
 export type JournalConfig = {

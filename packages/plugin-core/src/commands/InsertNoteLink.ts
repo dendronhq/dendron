@@ -12,7 +12,9 @@ import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../utils";
 import { BasicCommand } from "./base";
 
-type CommandInput = {};
+type CommandInput = {
+  multiSelect?: boolean;
+};
 
 type CommandOpts = {
   notes: readonly NoteProps[];
@@ -26,12 +28,12 @@ export class InsertNoteLinkCommand extends BasicCommand<
 > {
   key = DENDRON_COMMANDS.INSERT_NOTE_LINK.key;
 
-  async gatherInputs(): Promise<CommandOpts | undefined> {
+  async gatherInputs(opts: CommandInput): Promise<CommandOpts | undefined> {
     const lc = LookupControllerV3.create({
       nodeType: "note",
       disableVaultSelection: true,
       extraButtons: [
-        MultiSelectBtn.create()
+        MultiSelectBtn.create(opts.multiSelect)
       ]
     });
     const provider = new NoteLookupProvider(this.key, {

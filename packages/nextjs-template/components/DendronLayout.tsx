@@ -1,4 +1,5 @@
 import { Layout, Row, Col, Divider } from "antd";
+import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import * as React from "react";
 import { DENDRON_STYLE_CONSTANTS } from "../styles/constants";
 import { DendronCommonProps } from "../utils/types";
@@ -51,6 +52,21 @@ export default function DendronLayout(
             overflow: "auto",
             height: `calc(100% - ${HEADER.HEIGHT}px)`,
           }}
+          trigger={
+            // eslint-disable-next-line jsx-a11y/click-events-have-key-events -- role indicates that it is a button and therefore interactive
+            <div
+              role="button"
+              tabIndex={0}
+              className="ant-trigger"
+              onClick={() => setCollapsed(!collapsed)}
+              style={{
+                backgroundColor:
+                  "#43B02A" /* color copied from packages/dendron-next-server/assets/themes/light-theme.less TODO make dependent on active theme */,
+              }}
+            >
+              {collapsed ? <RightOutlined /> : <LeftOutlined />}
+            </div>
+          }
         >
           <DendronTreeMenu {...props} collapsed={collapsed} />
         </Sider>

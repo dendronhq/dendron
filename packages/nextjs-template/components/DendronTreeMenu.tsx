@@ -114,9 +114,12 @@ function ExpandIcon({ isOpen, ...rest }: { isOpen: boolean }) {
       data-expandedicon="true"
       style={{
         position: "absolute",
-        right: 10,
         margin: 0,
         padding: 10,
+        height: "100%",
+        display: "flex",
+        alignItems: "center",
+        right: "3px",
         // TODO and onHover styles
       }}
     />

@@ -42,5 +42,31 @@ suite("InsertNoteLink", function () {
         },
       });
     });
+
+    test("basic multiselect", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+        },
+        onInit: async ({ engine }) => {
+          const notes = engine.notes;
+          const cmd = new InsertNoteLinkCommand();
+          sinon.stub(cmd, "gatherInputs").returns(
+            Promise.resolve({
+              notes: [notes["foo"], notes["foo.ch1"]],
+            })
+          );
+          const editor = VSCodeUtils.getActiveTextEditorOrThrow();
+          editor.selection = new vscode.Selection(10, 0, 10, 12);
+          await cmd.run({ multiSelect: true });
+          const body = editor.document.getText();
+          expect(
+            await AssertUtils.assertInString({ body, match: ["[[foo]]", "[[foo.ch1]]"] })
+          ).toBeTruthy();
+          done();
+        },
+      }); 
+    })
   });
 });

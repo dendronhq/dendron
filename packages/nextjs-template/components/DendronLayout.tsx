@@ -49,7 +49,7 @@ export default function DendronLayout(
           style={{
             position: "fixed",
             overflow: "auto",
-            height: `calc(100vh - ${HEADER.HEIGHT}px)`,
+            height: `calc(100% - ${HEADER.HEIGHT}px)`,
           }}
         >
           <DendronTreeMenu {...props} collapsed={collapsed} />

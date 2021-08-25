@@ -45,9 +45,6 @@ export interface Resp<T> {
   error?: Error | null;
 }
 
-export type NotesCacheAll = {
-  [key: string]: { cache: NotesCache; cacheUpdates: NotesCacheEntryMap };
-};
 export type NotesCache = {
   version: number;
   notes: NotesCacheEntryMap;

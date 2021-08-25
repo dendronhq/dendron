@@ -11,6 +11,7 @@ import {
 import { DendronEngineV2 } from "@dendronhq/engine-server";
 import { getLogger } from "../../core";
 import { getWS, putWS } from "../../utils";
+import { getDurationMilliseconds } from "@dendronhq/common-server";
 
 export class WorkspaceController {
   static singleton?: WorkspaceController;
@@ -22,6 +23,8 @@ export class WorkspaceController {
   }
 
   async init({ uri }: WorkspaceInitRequest): Promise<InitializePayload> {
+    const start = process.hrtime();
+
     let notes: NotePropsDict;
     let schemas: SchemaModuleDict;
     const ctx = "WorkspaceController:init";
@@ -39,7 +42,8 @@ export class WorkspaceController {
     notes = engine.notes;
     schemas = engine.schemas;
     await putWS({ ws: uri, engine });
-    logger.info({ ctx, msg: "finish init", uri, error });
+    const duration = getDurationMilliseconds(start);
+    logger.info({ ctx, msg: "finish init", duration, uri, error });
     if (error) {
       error = error2PlainObject(error);
     }

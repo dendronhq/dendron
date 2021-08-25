@@ -3,6 +3,7 @@ import {
   DNodePropsQuickInputV2,
   DNodeUtils,
   DVault,
+  LookupSelectionType,
   NoteQuickInput,
   NoteUtils,
   Time,
@@ -886,6 +887,66 @@ suite("NoteLookupCommand", function () {
           done();
         },
       });
+    });
+
+    test("selection modifier set to none in configs", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        modConfigCb: (config: DendronConfig) => {
+          config.lookup.note.selectionType = LookupSelectionType.none;
+          return config;
+        },
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+        },
+        onInit: async ({ vaults }) => {
+          const cmd = new NoteLookupCommand();
+          stubVaultPick(vaults);
+          const gatherOut = await cmd.gatherInputs({});
+          const { selection2linkBtn, selectionExtractBtn } = getSelectionTypeButtons(gatherOut.quickpick.buttons)
+          expect(selection2linkBtn.pressed).toBeFalsy();
+          expect(selectionExtractBtn.pressed).toBeFalsy();
+          done();
+        },
+      });
+    });
+    
+    test("selectionType: none in args", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+        },
+        onInit: async ({ vaults }) => {
+          const cmd = new NoteLookupCommand();
+          stubVaultPick(vaults);
+          const gatherOut = await cmd.gatherInputs({
+            selectionType: LookupSelectionType.none
+          });
+          const { selection2linkBtn, selectionExtractBtn } = getSelectionTypeButtons(gatherOut.quickpick.buttons)
+          expect(selection2linkBtn.pressed).toBeFalsy();
+          expect(selectionExtractBtn.pressed).toBeFalsy();
+          done();
+        },
+      }); 
+    });
+
+    test("selectionType is selectionExtract by default", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+        },
+        onInit: async ({ vaults }) => {
+          const cmd = new NoteLookupCommand();
+          stubVaultPick(vaults);
+          const gatherOut = await cmd.gatherInputs({});
+          const { selection2linkBtn, selectionExtractBtn } = getSelectionTypeButtons(gatherOut.quickpick.buttons)
+          expect(selection2linkBtn.pressed).toBeFalsy();
+          expect(selectionExtractBtn.pressed).toBeTruthy();
+          done();
+        },
+      }); 
     });
 
     test("selection2link basic", (done) => {

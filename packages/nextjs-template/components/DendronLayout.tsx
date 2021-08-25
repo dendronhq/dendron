@@ -1,4 +1,4 @@
-import { Layout, Row, Col } from "antd";
+import { Layout, Row, Col, Divider } from "antd";
 import * as React from "react";
 import {
   DENDRON_STYLE_CONSTANTS,
@@ -69,7 +69,8 @@ export default function DendronLayout(
             <DendronBreadCrumb {...props} />
             {props.children}
           </Content>
-          <Footer style={{ padding: 0 }}>
+          <Divider />
+          <Footer style={{ padding: "0 24px 24px" }}>
             <FooterText />
           </Footer>
         </Layout>

@@ -118,36 +118,33 @@ export function FooterText() {
   const { siteLastModified, gh_edit_link_text } = config.site;
   const lastUpdated = ms2ShortDate(noteActive.updated);
   return (
-    <>
-      <hr style={{ height: "1px" }} />
-      <Row style={{}}>
-        <Col sm={24} md={7} lg={8} xl={4}>
-          {siteLastModified && (
-            <Text type="secondary">
-              Page last modified: {lastUpdated} {"   "}
-            </Text>
-          )}
-        </Col>
-        <Col sm={24} md={9} lg={8} xl={12}>
-          {GitUtils.canShowGitLink({ config, note: noteActive }) && (
-            <Link
-              href={GitUtils.githubUrl({ note: noteActive, config })}
-              target="_blank"
-            >
-              {gh_edit_link_text}
-            </Link>
-          )}
-        </Col>
-        <Col sm={24} md={8} style={{ textAlign: "right" }}>
-          <Text>
-            {" "}
-            🌱 with 💕 using{" "}
-            <Link href="https://www.dendron.so/" target="_blank">
-              Dendron 🌲
-            </Link>
+    <Row style={{}}>
+      <Col sm={24} md={7} lg={8} xl={4}>
+        {siteLastModified && (
+          <Text type="secondary">
+            Page last modified: {lastUpdated} {"   "}
           </Text>
-        </Col>
-      </Row>
-    </>
+        )}
+      </Col>
+      <Col sm={24} md={9} lg={8} xl={12}>
+        {GitUtils.canShowGitLink({ config, note: noteActive }) && (
+          <Link
+            href={GitUtils.githubUrl({ note: noteActive, config })}
+            target="_blank"
+          >
+            {gh_edit_link_text}
+          </Link>
+        )}
+      </Col>
+      <Col sm={24} md={8} style={{ textAlign: "right" }}>
+        <Text>
+          {" "}
+          🌱 with 💕 using{" "}
+          <Link href="https://www.dendron.so/" target="_blank">
+            Dendron 🌲
+          </Link>
+        </Text>
+      </Col>
+    </Row>
   );
 }

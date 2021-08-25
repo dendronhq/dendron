@@ -39,7 +39,7 @@ export class InsertNoteLinkCommand extends BasicCommand<
     )?.aliasMode;
     const copts: CommandInput = _.defaults(opts || {}, {
       multiSelect: false,
-      aliasMode: aliasModeConfig || "title",
+      aliasMode: aliasModeConfig || "none",
     });
     const lc = LookupControllerV3.create({
       nodeType: "note",
@@ -82,6 +82,17 @@ export class InsertNoteLinkCommand extends BasicCommand<
     });
   }
 
+  async promptForAlias(note: NoteProps) {
+    const value = await VSCodeUtils.showInputBox({
+      prompt: `Alias for note link of ${note.fname}. Leave blank to skip aliasing.`,
+      ignoreFocusOut: true,
+      placeHolder: "alias",
+      title: "Type alias",
+      value: note.title,
+    });
+    return value;
+  }
+
   async execute(opts: CommandOpts) {
     const ctx = "InsertNoteLinkCommand";
     this.L.info({ ctx, notes: opts.notes.map((n) => NoteUtils.toLogObj(n)) });
@@ -122,13 +133,7 @@ export class InsertNoteLinkCommand extends BasicCommand<
       case "prompt": {
         for (const note of opts.notes) {
           // eslint-disable-next-line no-await-in-loop
-          const value = await VSCodeUtils.showInputBox({
-            prompt: `Alias for note link of ${note.fname}. Leave blank to skip aliasing.`,
-            ignoreFocusOut: true,
-            placeHolder: "alias",
-            title: "Type alias",
-            value: note.title,
-          });
+          const value = await this.promptForAlias(note);
           if (value !== "") {
             links.push(NoteUtils.createWikiLink({ note, aliasMode: "value", aliasValue: value}));
           } else {
@@ -137,20 +142,20 @@ export class InsertNoteLinkCommand extends BasicCommand<
         }
         break;
       }
-      case "none": {
+      case "title": {
+        links = opts.notes.map((note) => {
+          return NoteUtils.createWikiLink({ note, aliasMode: "title" });
+        });
+        break;
+      }
+      case "none": 
+      default: {
         links = opts.notes.map((note) => {
           return NoteUtils.createWikiLink({ note, aliasMode: "none"});
         })
         break;
       }
-      case "title": 
-      default: {
-        links = opts.notes.map((note) => {
-          return NoteUtils.createWikiLink({ note, aliasMode: "title" });
-        });
-      }
     }
-
     const current = editor.selection;
     if (opts.aliasMode === "snippet") {
       const snippet = new vscode.SnippetString(links.join("\n"));

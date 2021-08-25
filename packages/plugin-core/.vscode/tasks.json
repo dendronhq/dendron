@@ -23,6 +23,12 @@
       "type": "shell",
       "command": "node out/scripts/genConfig.js",
       "problemMatcher": []
-    }
+    },
+    {
+      "label": "variableSub",
+      "type": "shell",
+      "command": "node out/scripts/variableSubstitution.js",
+      "problemMatcher": []
+    },
   ]
 }

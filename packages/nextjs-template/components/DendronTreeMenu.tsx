@@ -23,7 +23,7 @@ import { DENDRON_STYLE_CONSTANTS } from "../styles/constants";
 
 const { SubMenu } = Menu;
 
-export default function DendronTreeView(
+export default function DendronTreeMenu(
   props: Partial<NoteData> & { collapsed: boolean }
 ) {
   const logger = createLogger("DendronTreeView");

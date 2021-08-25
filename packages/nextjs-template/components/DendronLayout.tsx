@@ -6,7 +6,7 @@ import { DendronBreadCrumb } from "./DendronBreadCrumb";
 import DendronLogoOrTitle from "./DendronLogoOrTitle";
 import { DendronLookup } from "./DendronLookup";
 import { FooterText } from "./DendronNoteFooter";
-import DendronTreeView from "./DendronTreeView";
+import DendronTreeMenu from "./DendronTreeMenu";
 
 const { Header, Content, Sider, Footer } = Layout;
 const { LAYOUT, HEADER, SIDER } = DENDRON_STYLE_CONSTANTS;
@@ -52,7 +52,7 @@ export default function DendronLayout(
             height: `calc(100vh - ${HEADER.HEIGHT}px)`,
           }}
         >
-          <DendronTreeView {...props} collapsed={collapsed} />
+          <DendronTreeMenu {...props} collapsed={collapsed} />
         </Sider>
         <Layout
           style={{

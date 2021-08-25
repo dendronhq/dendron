@@ -969,6 +969,49 @@ describe("noteRefV2", () => {
       },
     });
 
+    const NO_TAGS_SECTION_IN_REFERENCES = createProcTests({
+      name: "tags section shouldn't be included in references",
+      setupFunc: async (opts) => {
+        const { engine, vaults } = opts;
+        return processTextV2({
+          text: "![[foo.ch1]]",
+          dest: opts.extra.dest,
+          engine,
+          vault: vaults[0],
+          fname: "foo",
+        });
+      },
+      preSetupHook: async (opts) => {
+        await ENGINE_HOOKS.setupBasic(opts);
+        await modifyNote(opts, "foo.ch1", (note: NoteProps) => {
+          const txt = ["Sint minus fuga omnis non."];
+          note.body = txt.join("\n");
+          note.tags = ["sed", "eum"];
+          return note;
+        });
+      },
+      verifyFuncDict: {
+        [DendronASTDest.HTML]: async ({ extra }) => {
+          const { resp } = extra;
+          await checkVFile(resp, "Sint minus fuga omnis non.");
+          await checkNotInVFile(resp, "Tags");
+          await checkNotInVFile(resp, "sed", "eum");
+        },
+        [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
+          const { resp } = extra;
+          await checkVFile(resp, "Sint minus fuga omnis non.");
+          await checkNotInVFile(resp, "Tags");
+          await checkNotInVFile(resp, "sed", "eum");
+        },
+        [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
+          const { resp } = extra;
+          await checkVFile(resp, "Sint minus fuga omnis non.");
+          await checkNotInVFile(resp, "Tags");
+          await checkNotInVFile(resp, "sed", "eum");
+        },
+      },
+    });
+
     const ALL_TEST_CASES = [
       ...WILDCARD_WITHOUT_FOLLOWING_HEADER,
       ...WITH_PUBLISHING,
@@ -986,6 +1029,7 @@ describe("noteRefV2", () => {
       ...XVAULT_CASE,
       ...WITH_NOTE_LINK_TITLE,
       ...WITH_ANCHOR_TO_SAME_FILE,
+      ...NO_TAGS_SECTION_IN_REFERENCES,
     ];
 
     runAllTests({

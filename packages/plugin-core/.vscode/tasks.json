@@ -27,7 +27,7 @@
     {
       "label": "variableSub",
       "type": "shell",
-      "command": "node out/scripts/variableSubstitution.js",
+      "command": "node ./out/scripts/variableSubstitution.js",
       "problemMatcher": []
     },
   ]

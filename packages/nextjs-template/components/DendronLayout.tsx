@@ -50,7 +50,7 @@ export default function DendronLayout(
           style={{
             position: "fixed",
             overflow: "auto",
-            height: `calc(100% - ${HEADER.HEIGHT}px)`,
+            height: `calc(100vh - ${HEADER.HEIGHT}px)`,
           }}
           trigger={
             // eslint-disable-next-line jsx-a11y/click-events-have-key-events -- role indicates that it is a button and therefore interactive

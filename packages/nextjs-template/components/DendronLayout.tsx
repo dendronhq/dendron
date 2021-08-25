@@ -1,9 +1,6 @@
 import { Layout, Row, Col, Divider } from "antd";
 import * as React from "react";
-import {
-  DENDRON_STYLE_CONSTANTS,
-  ANTD_STYLE_CONSTANTS,
-} from "../styles/constants";
+import { DENDRON_STYLE_CONSTANTS } from "../styles/constants";
 import { DendronCommonProps } from "../utils/types";
 import { DendronBreadCrumb } from "./DendronBreadCrumb";
 import DendronLogoOrTitle from "./DendronLogoOrTitle";
@@ -12,6 +9,7 @@ import { FooterText } from "./DendronNoteFooter";
 import DendronTreeView from "./DendronTreeView";
 
 const { Header, Content, Sider, Footer } = Layout;
+const { LAYOUT, HEADER, SIDER } = DENDRON_STYLE_CONSTANTS;
 
 export default function DendronLayout(
   props: React.PropsWithChildren<DendronCommonProps>
@@ -25,6 +23,8 @@ export default function DendronLayout(
           zIndex: 1,
           width: "100%",
           borderBottom: "1px solid #d4dadf",
+          height: HEADER.HEIGHT,
+          padding: `0 ${LAYOUT.PADDING}px`,
         }}
       >
         <Row style={{ height: "100%" }}>
@@ -38,10 +38,10 @@ export default function DendronLayout(
       </Header>
       <Layout className="site-layout" style={{ marginTop: 64 }}>
         <Sider
-          width={DENDRON_STYLE_CONSTANTS.SIDER.WIDTH}
+          width={SIDER.WIDTH}
           collapsible
           collapsed={collapsed}
-          collapsedWidth={DENDRON_STYLE_CONSTANTS.SIDER.COLLAPSED_WIDTH}
+          collapsedWidth={SIDER.COLLAPSED_WIDTH}
           onCollapse={(collapsed, type) => {
             setCollapsed(collapsed);
           }}
@@ -49,28 +49,30 @@ export default function DendronLayout(
           style={{
             position: "fixed",
             overflow: "auto",
-            height: `calc(100vh - ${ANTD_STYLE_CONSTANTS.LAYOUT_HEADER_HEIGHT}px)`,
+            height: `calc(100vh - ${HEADER.HEIGHT}px)`,
           }}
         >
           <DendronTreeView {...props} collapsed={collapsed} />
         </Sider>
         <Layout
           style={{
-            marginLeft: collapsed
-              ? DENDRON_STYLE_CONSTANTS.SIDER.COLLAPSED_WIDTH
-              : DENDRON_STYLE_CONSTANTS.SIDER.WIDTH,
+            marginLeft: collapsed ? SIDER.COLLAPSED_WIDTH : SIDER.WIDTH,
           }}
         >
           <Content
             className="main-content"
             role="main"
-            style={{ padding: "0 24px" }}
+            style={{ padding: `0 ${LAYOUT.PADDING}px` }}
           >
             <DendronBreadCrumb {...props} />
             {props.children}
           </Content>
           <Divider />
-          <Footer style={{ padding: "0 24px 24px" }}>
+          <Footer
+            style={{
+              padding: `0 ${LAYOUT.PADDING}px ${LAYOUT.PADDING}px`,
+            }}
+          >
             <FooterText />
           </Footer>
         </Layout>

@@ -1,3 +1,7 @@
+/*
+ * Reference for ant default values https://github.com/ant-design/ant-design/blob/master/components/style/themes/default.less
+ */
+
 const SIDER = {
   COLLAPSED_WIDTH: 80,
   WIDTH: 200,
@@ -7,11 +11,16 @@ const SIDER = {
   INDENT: 10,
 };
 
-export const DENDRON_STYLE_CONSTANTS = {
-  SIDER,
+const HEADER = {
+  HEIGHT: 64,
 };
 
-// antd default values from https://github.com/ant-design/ant-design/blob/master/components/style/themes/default.less
-export const ANTD_STYLE_CONSTANTS = {
-  LAYOUT_HEADER_HEIGHT: 64,
+const LAYOUT = {
+  PADDING: 24,
+};
+
+export const DENDRON_STYLE_CONSTANTS = {
+  LAYOUT,
+  HEADER,
+  SIDER,
 };

@@ -2,6 +2,7 @@ import { NoteProps, NoteUtils } from "@dendronhq/common-all";
 import { HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
 import * as vscode from "vscode";
+import { MultiSelectBtn } from "../components/lookup/buttons";
 import { LookupControllerV3 } from "../components/lookup/LookupControllerV3";
 import {
   NoteLookupProvider,
@@ -29,6 +30,9 @@ export class InsertNoteLinkCommand extends BasicCommand<
     const lc = LookupControllerV3.create({
       nodeType: "note",
       disableVaultSelection: true,
+      extraButtons: [
+        MultiSelectBtn.create()
+      ]
     });
     const provider = new NoteLookupProvider(this.key, {
       allowNewNote: false,

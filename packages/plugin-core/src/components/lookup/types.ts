@@ -132,8 +132,9 @@ export enum LookupEffectTypeEnum {
 export enum LookupSelectionTypeEnum {
   "selection2link" = "selection2link",
   "selectionExtract" = "selectionExtract",
+  "none" = "none"
 }
-export type LookupSelectionType = "selection2link" | "selectionExtract";
+export type LookupSelectionType = "selection2link" | "selectionExtract" | "none";
 
 export enum LookupSplitTypeEnum {
   "horizontal" = "horizontal",

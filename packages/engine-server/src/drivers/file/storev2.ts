@@ -27,7 +27,6 @@ import {
   NoteProps,
   NotePropsDict,
   NotesCache,
-  NotesCacheAll,
   NotesCacheEntryMap,
   NoteUtils,
   RenameNoteOpts,
@@ -45,10 +44,10 @@ import {
   DLogger,
   file2Note,
   getAllFiles,
+  getDurationMilliseconds,
   note2File,
   schemaModuleProps2File,
   vault2Path,
-  getDurationMilliseconds,
 } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -58,6 +57,8 @@ import { HookUtils, RequireHookResp } from "../../topics/hooks";
 import { readNotesFromCache, writeNotesToCache } from "../../utils";
 import { NoteParser } from "./noteParser";
 import { SchemaParser } from "./schemaParser";
+import { ResponseUtil } from "../../util/ResponseUtil";
+import { InMemoryNoteCacheFactory } from "../../util/inMemoryNoteCache";
 
 export type FileMeta = {
   // file name: eg. foo.md, name = foo
@@ -105,14 +106,8 @@ export class FileStorage implements DStore {
     let errors: DendronError[] = [];
     try {
       const resp = await this.initSchema();
-      if (!_.isNull(resp.error)) {
-        errors.push(
-          new DendronError({
-            message: "schema malformed",
-            severity: ERROR_SEVERITY.MINOR,
-            payload: { schema: resp.error },
-          })
-        );
+      if (ResponseUtil.hasError(resp)) {
+        errors.push(FileStorage.createMalformedSchemaError(resp));
       }
       resp.data.map((ent) => {
         this.schemas[ent.root.id] = ent;
@@ -142,6 +137,14 @@ export class FileStorage implements DStore {
       this.logger.error(err);
       throw err;
     }
+  }
+
+  private static createMalformedSchemaError(resp: DEngineInitSchemaResp) {
+    return new DendronError({
+      message: "schema malformed",
+      severity: ERROR_SEVERITY.MINOR,
+      payload: { schema: resp.error },
+    });
   }
 
   async deleteNote(
@@ -308,8 +311,8 @@ export class FileStorage implements DStore {
   async initNotes(): Promise<{ notes: NoteProps[]; errors: DendronError[] }> {
     const ctx = "initNotes";
     this.logger.info({ ctx, msg: "enter" });
+
     let notesWithLinks: NoteProps[] = [];
-    const allNotesCache: NotesCacheAll = {};
     let errors: DendronError[] = [];
     const out = await Promise.all(
       (this.vaults as DVault[]).map(async (vault) => {
@@ -323,10 +326,7 @@ export class FileStorage implements DStore {
         notesWithLinks = notesWithLinks.concat(
           _.filter(notes, (n) => !_.isEmpty(n.links))
         );
-        allNotesCache[VaultUtils.getName(vault)] = {
-          cache,
-          cacheUpdates,
-        };
+
         this.logger.info({
           ctx,
           vault,
@@ -346,7 +346,9 @@ export class FileStorage implements DStore {
       })
     );
     const allNotes = _.flatten(out);
-    this._addBacklinks({ notesWithLinks, allNotes, allNotesCache });
+
+    this._addBacklinks({ notesWithLinks, allNotes });
+
     if (this.engine.config.dev?.enableLinkCandidates) {
       const ctx = "_addLinkCandidates";
       const start = process.hrtime();
@@ -357,39 +359,48 @@ export class FileStorage implements DStore {
     return { notes: allNotes, errors };
   }
 
-  async _addBacklinks({
+  /** Adds backlinks mutating 'allNotes' argument in place. */
+  private _addBacklinks({
     notesWithLinks,
     allNotes,
   }: {
     notesWithLinks: NoteProps[];
     allNotes: NoteProps[];
-    allNotesCache: NotesCacheAll;
-  }) {
-    return _.map(notesWithLinks, async (noteFrom) => {
+  }): void {
+    const ctx = "_addBacklinks:ext";
+    const start = process.hrtime();
+
+    this._addBacklinksImpl(allNotes, notesWithLinks);
+
+    const duration = getDurationMilliseconds(start);
+    this.logger.info({ ctx, duration });
+  }
+
+  private _addBacklinksImpl(
+    allNotes: NoteProps[],
+    notesWithLinks: NoteProps[]
+  ) {
+    const noteCache = InMemoryNoteCacheFactory.createCache(allNotes);
+
+    notesWithLinks.forEach((noteFrom) => {
       try {
-        return Promise.all(
-          noteFrom.links.map(async (link) => {
-            const fname = link.to?.fname;
-            if (fname) {
-              const notes = NoteUtils.getNotesByFname({
-                fname,
-                notes: allNotes,
+        noteFrom.links.forEach((link) => {
+          const fname = link.to?.fname;
+          if (fname) {
+            const notes = noteCache.getNotesByFileNameIgnoreCase(fname);
+
+            notes.forEach((noteTo: NoteProps) => {
+              NoteUtils.addBacklink({
+                from: noteFrom,
+                to: noteTo,
+                link,
               });
-              return notes.map((noteTo) => {
-                return NoteUtils.addBacklink({
-                  from: noteFrom,
-                  to: noteTo,
-                  link,
-                });
-              });
-            }
-            return;
-          })
-        );
+            });
+          }
+        });
       } catch (err) {
         const error = error2PlainObject(err);
         this.logger.error({ error, noteFrom, message: "issue with backlinks" });
-        return;
       }
     });
   }

@@ -19,6 +19,7 @@ import {
   Time,
   DEngineClient,
   ERROR_SEVERITY,
+  getSlugger,
 } from "@dendronhq/common-all";
 
 const ID = "dendron.github";
@@ -216,15 +217,18 @@ export class GithubImportPod extends ImportPod<GithubImportPodConfig> {
     fname: string,
     config: ImportPodConfig
   ) => {
+    const slugger = getSlugger();
     return data.map((d: any) => {
       const labels = d.node.labels.edges;
       let tags: any;
       if (labels.length > 0) {
         tags = labels.map((label: any) => label.node.name);
       }
-      d.node.title = d.node.title.replace(
-        /[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi, // eslint-disable-line
-        ""
+      d.node.title = slugger.slug(
+        d.node.title.replace(
+          /[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi, // eslint-disable-line
+          ""
+        )
       );
       d.node = {
         body: d.node.body,

@@ -133,14 +133,17 @@ export class NoteSyncService {
     });
     note = NoteUtils.hydrate({ noteRaw: note, noteHydrated });
 
+    // Links have to be updated even with frontmatter only changes
+    // because `tags` in frontmatter adds new links
+    const links = LinkUtils.findLinks({ note, engine: eclient });
+    note.links = links;
+
     // iif frontmatter changed, don't bother with heavy updates
     if (!fmChangeOnly) {
-      const links = LinkUtils.findLinks({ note, engine: eclient });
       const notesMap = NoteUtils.createFnameNoteMap(
         _.values(eclient.notes),
         true
       );
-      note.links = links;
       const anchors = await AnchorUtils.findAnchors({
         note,
         wsRoot: eclient.wsRoot,

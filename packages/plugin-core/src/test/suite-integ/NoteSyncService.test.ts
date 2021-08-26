@@ -1,5 +1,5 @@
 import { Time } from "@dendronhq/common-all";
-import { AssertUtils } from "@dendronhq/common-test-utils";
+import { AssertUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { ENGINE_HOOKS_MULTI } from "@dendronhq/engine-test-utils";
 import _ from "lodash";
 import { DateTime } from "luxon";
@@ -51,6 +51,36 @@ suite("NoteSyncService", function testSuite() {
               match: ["Hello"],
             })
           ).toBeTruthy();
+          done();
+        },
+      });
+    });
+
+    test("onDidChange: changing `tags` updates links", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        postSetupHook: async (opts) => {
+          await ENGINE_HOOKS_MULTI.setupBasicMulti(opts);
+          await NoteTestUtilsV4.createNote({
+            fname: "tags.test",
+            wsRoot: opts.wsRoot,
+            vault: opts.vaults[0],
+          });
+        },
+        onInit: async ({ engine }) => {
+          const foo = engine.notes["foo"];
+          const editor = await VSCodeUtils.openNote(foo);
+          await editor?.edit((builder) => {
+            const pos = new vscode.Position(6, 0);
+            builder.insert(pos, `tags: test\n`);
+          });
+          await NoteSyncService.instance().onDidChange(editor);
+
+          // "foo" should have the frontmatter link to "tags.test"
+          const updatedFoo = engine.notes["foo"];
+          expect(updatedFoo.links.length).toEqual(1);
+          expect(updatedFoo.links[0].type).toEqual("frontmatterTag");
+          expect(updatedFoo.links[0].to?.fname).toEqual("tags.test");
           done();
         },
       });

@@ -11,10 +11,10 @@ import {
   MenuItemProps,
   SubMenuProps,
 } from "antd";
-import { UpOutlined, DownOutlined } from "@ant-design/icons";
+import { UpOutlined, DownOutlined, RightOutlined } from "@ant-design/icons";
 import _ from "lodash";
 import { DataNode } from "rc-tree/lib/interface";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useThemeSwitcher } from "react-css-theme-switcher";
 import { useDendronRouter } from "../utils/hooks";
 import { DendronCommonProps, NoteData, verifyNoteData } from "../utils/types";
@@ -108,20 +108,6 @@ export default function DendronTreeMenu(
   );
 }
 
-function ExpandIcon({ isOpen, ...rest }: { isOpen: boolean }) {
-  const Icon = isOpen ? UpOutlined : DownOutlined;
-  return (
-    <i data-expandedicon="true">
-      <Icon
-        style={{
-          pointerEvents: "none", // only allow custom element to be gesture target
-          margin: 0,
-        }}
-      />
-    </i>
-  );
-}
-
 function MenuView({
   roots,
   expandKeys,
@@ -137,6 +123,24 @@ function MenuView({
   collapsed: boolean;
   activeNote: string | undefined;
 }) {
+  const ExpandIcon = useCallback(
+    ({ isOpen, ...rest }: { isOpen: boolean }) => {
+      const UncollapsedIcon = isOpen ? UpOutlined : DownOutlined;
+      const Icon = collapsed ? RightOutlined : UncollapsedIcon;
+      return (
+        <i data-expandedicon="true">
+          <Icon
+            style={{
+              pointerEvents: "none", // only allow custom element to be gesture target
+              margin: 0,
+            }}
+          />
+        </i>
+      );
+    },
+    [collapsed]
+  );
+
   const createMenu = (menu: DataNode) => {
     if (menu.children && menu.children.length > 0) {
       return (

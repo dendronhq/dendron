@@ -33,12 +33,11 @@ export class InsertNoteLinkCommand extends BasicCommand<
   key = DENDRON_COMMANDS.INSERT_NOTE_LINK.key;
 
   async gatherInputs(opts: CommandInput): Promise<CommandOpts | undefined> {
-    const aliasModeConfig: InsertNoteLinkAliasMode | undefined = DConfig.getProp(
-      getWS().config,
-      "insertNoteLink"
-    )?.aliasMode;
+    const config = DConfig.getProp(getWS().config, "insertNoteLink");
+    const aliasModeConfig = config?.aliasMode;
+    const multiSelectConfig = config?.multiSelect;
     const copts: CommandInput = _.defaults(opts || {}, {
-      multiSelect: false,
+      multiSelect: multiSelectConfig || false,
       aliasMode: aliasModeConfig || "none",
     });
     const lc = LookupControllerV3.create({

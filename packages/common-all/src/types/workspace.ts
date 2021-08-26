@@ -118,6 +118,7 @@ export enum InsertNoteLinkAliasMode {
 
 export type InsertNoteLinkConfig = {
   aliasMode: InsertNoteLinkAliasMode;
+  multiSelect: boolean;
 }
 
 export type JournalConfig = {

@@ -165,6 +165,7 @@ export function updateDecorations(activeEditor: TextEditor) {
     DECORATION_TYPE_WIKILINK,
     DECORATION_TYPE_BROKEN_WIKILINK,
     DECORATION_TYPE_ALIAS,
+    DECORATION_TYPE_TAG,
   ];
   for (const type of allTypes) {
     if (!allDecorations.has(type)) {

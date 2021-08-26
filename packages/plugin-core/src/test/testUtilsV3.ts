@@ -303,7 +303,7 @@ export function setupBeforeAfter(
   _this.timeout(TIMEOUT);
   ctx = VSCodeUtils.getOrCreateMockContext();
   beforeEach(async () => {
-    DendronWorkspace.getOrCreate(ctx);
+    // DendronWorkspace.getOrCreate(ctx);
 
     // workspace has not upgraded
     if (!opts?.noSetInstallStatus) {

@@ -1,3 +1,4 @@
+import { URI } from "vscode-uri";
 import { DHookDict } from "./hooks";
 import { SeedSite } from "./seed";
 
@@ -82,6 +83,16 @@ export type DWorkspaceV2 = {
   type: WorkspaceType;
   config: DendronConfig;
   vaults: DVault[];
+  logUri: URI;
+  /**
+   * Where are assets stored
+   */
+  assetUri: URI;
+  // --- methods
+  /**
+   * Show message when workspace is initialized
+   */
+  showWelcome(): Promise<void>;
 };
 
 export type SeedEntry = {

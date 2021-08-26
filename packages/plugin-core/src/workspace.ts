@@ -63,7 +63,6 @@ import { DendronTreeViewV2 } from "./views/DendronTreeViewV2";
 import { SampleView } from "./views/SampleView";
 import { SchemaWatcher } from "./watchers/schemaWatcher";
 import { WindowWatcher } from "./windowWatcher";
-import { DendronNativeWorkspace } from "./workspace/nativeWorkspace";
 import { TutorialInitializer } from "./workspace/tutorialInitializer";
 import { WorkspaceWatcher } from "./WorkspaceWatcher";
 
@@ -145,7 +144,7 @@ export function getWS() {
 export function getWSV2(): DWorkspaceV2 {
   const ws = DendronWorkspace.instance();
   if (WorkspaceUtils.isNativeWorkspace(ws)) {
-    return ws.getOrThrowNativeWOrkspace();
+    return ws.getOrThrowWorkspaceImpl();
   } else {
     return ws;
   }
@@ -332,14 +331,13 @@ export class DendronWorkspace {
   public context: vscode.ExtensionContext;
   public windowWatcher?: WindowWatcher;
   public workspaceWatcher?: WorkspaceWatcher;
-  public fsWatcher?: vscode.FileSystemWatcher;
   public serverWatcher?: vscode.FileSystemWatcher;
   public schemaWatcher?: SchemaWatcher;
   public L: typeof Logger;
   public _enginev2?: EngineAPIService;
   public type: WorkspaceType;
   private disposableStore: DisposableStore;
-  public nativeWorkspace?: DendronNativeWorkspace;
+  public workspaceImpl?: DWorkspaceV2;
 
   static getOrCreate(
     context: vscode.ExtensionContext,
@@ -384,11 +382,16 @@ export class DendronWorkspace {
     this.L.info({ ctx, msg: "initialized" });
   }
 
-  getOrThrowNativeWOrkspace(): DendronNativeWorkspace {
-    if (_.isUndefined(this.nativeWorkspace)) {
+  getOrThrowWorkspaceImpl(): DWorkspaceV2 {
+    if (_.isUndefined(this.workspaceImpl)) {
       throw Error("no native workspace");
     }
-    return this.nativeWorkspace;
+    return this.workspaceImpl;
+  }
+
+  get assetUri(): vscode.Uri {
+    const uri = VSCodeUtils.joinPath(this.context.extensionUri, "assets");
+    return uri;
   }
 
   get configRoot(): string {
@@ -407,7 +410,7 @@ export class DendronWorkspace {
    */
   get config(): DendronConfig {
     if (WorkspaceUtils.isNativeWorkspace(this)) {
-      return this.getOrThrowNativeWOrkspace().config;
+      return this.getOrThrowWorkspaceImpl().config;
     }
     const dendronRoot = getWS().configRoot;
     if (!dendronRoot) {
@@ -492,6 +495,10 @@ export class DendronWorkspace {
       path.join(this.context.extensionPath, "assets")
     );
     return assetsDir;
+  }
+
+  get logUri() {
+    return this.context.logUri;
   }
 
   get vaults(): DVault[] {
@@ -722,18 +729,14 @@ export class DendronWorkspace {
   async deactivate() {
     const ctx = "deactivateWorkspace";
     this.L.info({ ctx });
-    this.fsWatcher?.dispose();
     this.disposableStore.dispose();
   }
 
   async showWelcome() {
     try {
-      const ws = DendronWorkspace.instance();
-
       // NOTE: this needs to be from extension because no workspace might exist at this point
       const uri = VSCodeUtils.joinPath(
-        ws.context.extensionUri,
-        "assets",
+        this.assetUri,
         "dendron-ws",
         "vault",
         "welcome.html"

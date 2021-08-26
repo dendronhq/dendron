@@ -42,7 +42,8 @@ import { setupSegmentClient } from "./telemetry";
 import { KeybindingUtils, VSCodeUtils, WSUtils } from "./utils";
 import { AnalyticsUtils } from "./utils/analytics";
 import { DendronTreeView } from "./views/DendronTreeView";
-import { DendronWorkspace, getEngine, getWS } from "./workspace";
+import { DendronWorkspace, getEngine, getWS, getWSV2 } from "./workspace";
+import { DendronCodeWorkspace } from "./workspace/codeWorkspace";
 import { DendronNativeWorkspace } from "./workspace/nativeWorkspace";
 import { WorkspaceInitFactory } from "./workspace/workspaceInitializer";
 
@@ -176,7 +177,7 @@ async function startServerProcess(): Promise<{
   }
 
   // start server is separate process
-  const logPath = DendronWorkspace.instance().context.logPath;
+  const logPath = getWSV2().logUri.fsPath;
   const out = await ServerUtils.execServerNode({
     scriptPath: path.join(__dirname, "server.js"),
     logPath,
@@ -243,12 +244,19 @@ export async function _activate(
         Logger.error({ msg: "No dendron.yml found in any workspace folder" });
         return false;
       }
-      ws.nativeWorkspace = new DendronNativeWorkspace({
+      ws.workspaceImpl = new DendronNativeWorkspace({
         wsRoot: workspaceFolder?.uri.fsPath,
+        logUri: context.logUri,
+        assetUri: VSCodeUtils.joinPath(ws.context.extensionUri, "assets"),
       });
-      wsImpl = ws.nativeWorkspace;
+      wsImpl = ws.workspaceImpl;
     } else {
       wsImpl = getWS();
+      ws.workspaceImpl = new DendronCodeWorkspace({
+        wsRoot: DendronWorkspace.wsRoot(),
+        logUri: context.logUri,
+        assetUri: VSCodeUtils.joinPath(ws.context.extensionUri, "assets"),
+      });
     }
     const start = process.hrtime();
     const dendronConfig = ws.config;
@@ -482,11 +490,10 @@ function toggleViews(enabled: boolean) {
 
 // this method is called when your extension is deactivated
 export function deactivate() {
-  const ctx = "deactivate";
-  const ws = DendronWorkspace.instance();
-  ws.deactivate();
-  ws.L.info({ ctx });
-
+  const ws = getWSV2();
+  if (!WorkspaceUtils.isNativeWorkspace(ws)) {
+    getWS().deactivate();
+  }
   toggleViews(false);
 }
 
@@ -503,7 +510,6 @@ async function showWelcomeOrWhatsNew({
 }) {
   const ctx = "showWelcomeOrWhatsNew";
   Logger.info({ ctx, version, previousExtensionVersion });
-  const ws = DendronWorkspace.instance();
   switch (extensionInstallStatus) {
     case InstallStatus.INITIAL_INSTALL: {
       Logger.info({ ctx, msg: "extension, initial install" });
@@ -518,8 +524,7 @@ async function showWelcomeOrWhatsNew({
       if (!SegmentClient.instance().hasOptedOut) {
         StateService.instance().showTelemetryNotice();
       }
-
-      await ws.showWelcome();
+      await getWSV2().showWelcome();
       break;
     }
     case InstallStatus.UPGRADED: {

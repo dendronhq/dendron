@@ -261,7 +261,7 @@ export async function _activate(
     const wsRoot = wsImpl.wsRoot;
     const wsService = new WorkspaceService({ wsRoot });
 
-    wsService.runMigrationsIfNecessary({
+    await wsService.runMigrationsIfNecessary({
       currentVersion,
       previousVersion: previousWorkspaceVersion,
       dendronConfig,

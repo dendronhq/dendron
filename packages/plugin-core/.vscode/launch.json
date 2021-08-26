@@ -24,7 +24,8 @@
         "STAGE": "dev",
         "VSCODE_DEBUGGING_EXTENSION": "dendron",
         "LOG_LEVEL": "debug"
-      }
+      },
+      "preLaunchTask": "variableSub"
     },
     {
       "name": "Run Extension:Remote",

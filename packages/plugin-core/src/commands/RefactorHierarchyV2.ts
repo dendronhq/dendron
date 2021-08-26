@@ -68,13 +68,13 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
       _.map(
         _.groupBy(operations, "vault.fsPath"),
         (ops: RenameOperation[], k: string) => {
-          const out = [`${k}`];
+          const out = [`${k}`].concat("\n||||\n|-|-|-|"); //create table of changes
           return out
             .concat(
               ops.map(({ oldUri, newUri }) => {
-                return `- ${path.basename(oldUri.fsPath)} --> ${path.basename(
+                return `| ${path.basename(oldUri.fsPath)} |-->| ${path.basename(
                   newUri.fsPath
-                )}`;
+                )} |`;
               })
             )
             .join("\n");
@@ -96,11 +96,12 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
       "",
       "### The following files would be overwritten",
     ]
+      .concat("\n||||\n|-|-|-|")
       .concat(
         operations.map(({ oldUri, newUri }) => {
-          return `- ${path.basename(oldUri.fsPath)} --> ${path.basename(
+          return `| ${path.basename(oldUri.fsPath)} |-->| ${path.basename(
             newUri.fsPath
-          )}`;
+          )} |`;
         })
       )
       .join("\n");

@@ -1,5 +1,6 @@
 import { getStage } from "@dendronhq/common-all";
 import { verifyEngineSliceState } from "@dendronhq/common-frontend";
+import Link from "next/link";
 import path from "path";
 import React from "react";
 import { useEngineAppSelector } from "../features/engine/hooks";
@@ -14,17 +15,19 @@ export default function DendronLogoOrTitle() {
   const siteUrl =
     getStage() === "dev" ? "/" : engine.config.site.siteUrl || "/";
   return (
-    <a
-      href={siteUrl}
-      style={{ display: "inline-block", height: "100%", padding: "4px" }}
-      className="site-title"
-    >
-      {engine.config?.site.logo ? (
-        <Logo logoUrl={"/" + path.basename(engine.config?.site.logo)} />
-      ) : (
-        <Title data={title} />
-      )}
-    </a>
+    <Link href={siteUrl}>
+      {/* eslint-disable-next-line jsx-a11y/anchor-is-valid -- `href` will be provided by `Link` */}
+      <a
+        style={{ display: "inline-block", height: "100%", padding: "4px" }}
+        className="site-title"
+      >
+        {engine.config?.site.logo ? (
+          <Logo logoUrl={"/" + path.basename(engine.config?.site.logo)} />
+        ) : (
+          <Title data={title} />
+        )}
+      </a>
+    </Link>
   );
 }
 

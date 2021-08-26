@@ -35,7 +35,7 @@ describe("GithubPod import pod", () => {
         ],
       },
     };
-    fname = "github.issues.902-Test Issue";
+    fname = "github.issues.902-test-issue";
   });
 
   test("Import Issue with status: open", async () => {

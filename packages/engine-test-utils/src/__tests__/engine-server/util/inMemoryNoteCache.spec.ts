@@ -1,5 +1,5 @@
-import { InMemoryNoteCacheFactory } from "@dendronhq/engine-server/lib/util/inMemoryNoteCache";
 import { NoteProps } from "@dendronhq/common-all";
+import { InMemoryNoteCache } from "@dendronhq/engine-server/lib/util/inMemoryNoteCache";
 
 /** Create note prop with some sensible default (for tests only). */
 function createNoteProp(opts: { id: string; fname?: string }): NoteProps {
@@ -47,7 +47,7 @@ describe("inMemoryNoteCache.spec.ts", () => {
 
       const VALID_NOTES_1: NoteProps[] = [NOTE_1A, NOTE_1B, NOTE_2];
 
-      const cache = InMemoryNoteCacheFactory.createCache(VALID_NOTES_1);
+      const cache = new InMemoryNoteCache(VALID_NOTES_1);
 
       it("WHEN calling for file name that has different cases in notes THEN get both", () => {
         const notes = cache.getNotesByFileNameIgnoreCase("/tmp/onE");

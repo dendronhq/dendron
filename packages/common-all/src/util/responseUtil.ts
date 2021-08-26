@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { RespV2 } from "@dendronhq/common-all";
+import { RespV2 } from "../types";
 
 /** Utility for {@link RespV2} */
 export class ResponseUtil {

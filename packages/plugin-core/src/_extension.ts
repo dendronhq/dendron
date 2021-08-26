@@ -6,12 +6,13 @@ import {
 import {
   CONSTANTS,
   DendronError,
+  DWorkspaceV2,
+  ExtensionEvents,
   getStage,
+  InstallStatus,
   Time,
   VaultUtils,
   VSCodeEvents,
-  InstallStatus,
-  ExtensionEvents,
 } from "@dendronhq/common-all";
 import {
   getDurationMilliseconds,
@@ -20,11 +21,10 @@ import {
   writeJSONWithComments,
 } from "@dendronhq/common-server";
 import {
-  DConfig,
   HistoryService,
   MetadataService,
-  MigrationServce,
   WorkspaceService,
+  WorkspaceUtils,
 } from "@dendronhq/engine-server";
 import { ExecaChildProcess } from "execa";
 import fs from "fs-extra";
@@ -39,10 +39,11 @@ import { migrateConfig } from "./migration";
 import { StateService } from "./services/stateService";
 import { Extensions } from "./settings";
 import { setupSegmentClient } from "./telemetry";
-import { VSCodeUtils, KeybindingUtils, WSUtils } from "./utils";
+import { KeybindingUtils, VSCodeUtils, WSUtils } from "./utils";
 import { AnalyticsUtils } from "./utils/analytics";
 import { DendronTreeView } from "./views/DendronTreeView";
 import { DendronWorkspace, getEngine, getWS } from "./workspace";
+import { DendronNativeWorkspace } from "./workspace/nativeWorkspace";
 import { WorkspaceInitFactory } from "./workspace/workspaceInitializer";
 
 const MARKDOWN_WORD_PATTERN = new RegExp("([\\w\\.\\#]+)");
@@ -233,53 +234,39 @@ export async function _activate(
   });
 
   if (DendronWorkspace.isActive(context)) {
+    let wsImpl: DWorkspaceV2;
+    if (WorkspaceUtils.isNativeWorkspace(ws)) {
+      const workspaceFolder = WorkspaceUtils.findWSRootInWorkspaceFolders(
+        DendronWorkspace.workspaceFolders()!
+      );
+      if (!workspaceFolder) {
+        Logger.error({ msg: "No dendron.yml found in any workspace folder" });
+        return false;
+      }
+      ws.nativeWorkspace = new DendronNativeWorkspace({
+        wsRoot: workspaceFolder?.uri.fsPath,
+      });
+      wsImpl = ws.nativeWorkspace;
+    } else {
+      wsImpl = getWS();
+    }
     const start = process.hrtime();
-    let dendronConfig = ws.config;
-    const wsConfig = await ws.getWorkspaceSettings();
+    const dendronConfig = ws.config;
+
     // --- Get Version State
     const workspaceInstallStatus = VSCodeUtils.getInstallStatusForWorkspace({
       previousWorkspaceVersion,
       currentVersion,
     });
-    const wsRoot = DendronWorkspace.wsRoot() as string;
+    const wsRoot = wsImpl.wsRoot;
     const wsService = new WorkspaceService({ wsRoot });
 
-    // we changed how we track upgrades. this makes sure everyone has their workspace version set initially
-    let forceUpgrade = false;
-    try {
-      const maybeRaw = DConfig.getRaw(wsRoot);
-      if (
-        _.isUndefined(maybeRaw.journal) &&
-        workspaceInstallStatus === InstallStatus.INITIAL_INSTALL
-      ) {
-        forceUpgrade = true;
-        Logger.info({ ctx, forceUpgrade });
-      }
-    } catch (error) {
-      console.error(error);
-    }
-
-    if (
-      MigrationServce.shouldRunMigration({
-        force: forceUpgrade,
-        workspaceInstallStatus,
-      })
-    ) {
-      const changes = await MigrationServce.applyMigrationRules({
-        currentVersion,
-        previousVersion: previousWorkspaceVersion,
-        dendronConfig,
-        wsConfig,
-        wsService,
-        logger: Logger,
-      });
-      // if changes were made, use updated changes in subsequent configuration
-      if (!_.isEmpty(changes)) {
-        const { data } = _.last(changes)!;
-        dendronConfig = data.dendronConfig;
-      }
-    }
-
+    wsService.runMigrationsIfNecessary({
+      currentVersion,
+      previousVersion: previousWorkspaceVersion,
+      dendronConfig,
+      workspaceInstallStatus,
+    });
     // initialize client
     setupSegmentClient(ws);
     const didClone = await wsService.initialize({

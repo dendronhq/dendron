@@ -10,6 +10,7 @@ import {
   ResponseCode,
   TutorialEvents,
   WorkspaceSettings,
+  WorkspaceType,
 } from "@dendronhq/common-all";
 import {
   NodeJSUtils,
@@ -23,6 +24,7 @@ import {
   DConfig,
   HistoryService,
   WorkspaceService,
+  WorkspaceUtils,
 } from "@dendronhq/engine-server";
 import { PodUtils } from "@dendronhq/pods-core";
 import fs from "fs-extra";
@@ -60,6 +62,7 @@ import { DendronTreeViewV2 } from "./views/DendronTreeViewV2";
 import { SampleView } from "./views/SampleView";
 import { SchemaWatcher } from "./watchers/schemaWatcher";
 import { WindowWatcher } from "./windowWatcher";
+import { DendronNativeWorkspace } from "./workspace/nativeWorkspace";
 import { TutorialInitializer } from "./workspace/tutorialInitializer";
 import { WorkspaceWatcher } from "./WorkspaceWatcher";
 
@@ -229,6 +232,10 @@ export class DendronWorkspace {
     return workspaceDir;
   }
 
+  get wsRoot(): string {
+    return DendronWorkspace.wsRoot();
+  }
+
   static lsp(): boolean {
     return true;
   }
@@ -265,7 +272,7 @@ export class DendronWorkspace {
      */
     try {
       if (context) {
-        const { workspaceFolders, workspaceFile } = vscode.workspace;
+        const { workspaceFolders } = vscode.workspace;
         const dendronWorkspaceFolders =
           workspaceFolders?.filter((ent) => {
             return fs.pathExistsSync(path.join(ent.uri.fsPath, "dendron.yml"));
@@ -320,7 +327,9 @@ export class DendronWorkspace {
   public schemaWatcher?: SchemaWatcher;
   public L: typeof Logger;
   public _enginev2?: EngineAPIService;
+  public type: WorkspaceType;
   private disposableStore: DisposableStore;
+  public nativeWorkspace?: DendronNativeWorkspace;
 
   static getOrCreate(
     context: vscode.ExtensionContext,
@@ -349,6 +358,10 @@ export class DendronWorkspace {
   ) {
     opts = _.defaults(opts, { skipSetup: false });
     this.context = context;
+    this.type = WorkspaceUtils.getWorkspaceType({
+      workspaceFile: vscode.workspace.workspaceFile,
+      workspaceFolders: vscode.workspace.workspaceFolders,
+    });
     _DendronWorkspace = this;
     this.L = Logger;
     this.disposableStore = new DisposableStore();
@@ -359,6 +372,13 @@ export class DendronWorkspace {
     this.setupViews(context);
     const ctx = "DendronWorkspace";
     this.L.info({ ctx, msg: "initialized" });
+  }
+
+  getOrThrowNativeWOrkspace(): DendronNativeWorkspace {
+    if (_.isUndefined(this.nativeWorkspace)) {
+      throw Error("no native workspace");
+    }
+    return this.nativeWorkspace;
   }
 
   get configRoot(): string {
@@ -376,6 +396,9 @@ export class DendronWorkspace {
    * @remark: We need to get the config from disk because the engine might not be initialized yet
    */
   get config(): DendronConfig {
+    if (WorkspaceUtils.isNativeWorkspace(this)) {
+      return this.getOrThrowNativeWOrkspace().config;
+    }
     const dendronRoot = getWS().configRoot;
     if (!dendronRoot) {
       throw new Error(`dendronRoot not set when get config`);

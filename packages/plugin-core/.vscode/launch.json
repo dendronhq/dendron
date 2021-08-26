@@ -18,7 +18,8 @@
       "skipFiles": [
         "<node_internals>/**/*.js",
         "${workspaceFolder}/**/node_modules/mocha/**/*.js",
-        "**/extension.js"
+        "**/extension.js",
+        "**/extensionHostProcess.js"
       ],
       "env": {
         "STAGE": "dev",

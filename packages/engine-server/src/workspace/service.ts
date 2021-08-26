@@ -9,6 +9,7 @@ import {
   DVaultSync,
   DWorkspace,
   DWorkspaceEntry,
+  InstallStatus,
   NoteUtils,
   SchemaUtils,
   SeedEntry,
@@ -33,6 +34,7 @@ import _ from "lodash";
 import path from "path";
 import { DConfig } from "../config";
 import { MetadataService } from "../metadata";
+import { MigrationServce } from "../migrations";
 import { SeedService, SeedUtils } from "../seed";
 import { Git } from "../topics/git";
 import {
@@ -738,6 +740,56 @@ export class WorkspaceService {
         return removeCache(vault2Path({ wsRoot: this.wsRoot, vault }));
       })
     );
+  }
+
+  /**
+   * See if there's anythign we need to change with the configuration
+   */
+  async runMigrationsIfNecessary({
+    forceUpgrade,
+    workspaceInstallStatus,
+    currentVersion,
+    previousVersion,
+    dendronConfig,
+  }: {
+    forceUpgrade?: boolean;
+    workspaceInstallStatus: InstallStatus;
+    currentVersion: string;
+    previousVersion: string;
+    dendronConfig: DendronConfig;
+  }) {
+    // check if we need to force a migration
+    try {
+      const maybeRaw = DConfig.getRaw(this.wsRoot);
+      if (
+        _.isUndefined(maybeRaw.journal) &&
+        workspaceInstallStatus === InstallStatus.INITIAL_INSTALL
+      ) {
+        forceUpgrade = true;
+      }
+    } catch (error) {
+      this.logger.error(error);
+    }
+
+    if (
+      MigrationServce.shouldRunMigration({
+        force: forceUpgrade,
+        workspaceInstallStatus,
+      })
+    ) {
+      const changes = await MigrationServce.applyMigrationRules({
+        currentVersion,
+        previousVersion,
+        dendronConfig,
+        wsService: this,
+        logger: this.logger,
+      });
+      // if changes were made, use updated changes in subsequent configuration
+      if (!_.isEmpty(changes)) {
+        const { data } = _.last(changes)!;
+        dendronConfig = data.dendronConfig;
+      }
+    }
   }
 
   /**

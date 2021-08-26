@@ -67,6 +67,22 @@ export type DWorkspace = {
 };
 
 export type DWorkspaceEntry = Omit<DWorkspace, "name" | "vaults">;
+
+export enum WorkspaceType {
+  NATIVE = "NATIVE",
+  CODE = "CODE",
+  NONE = "NONE",
+}
+
+export type DWorkspaceV2 = {
+  /**
+   * Absolute path to the workspace directory
+   */
+  wsRoot: string;
+  type: WorkspaceType;
+  config: DendronConfig;
+};
+
 export type SeedEntry = {
   /**
    * Specific branch to pull from

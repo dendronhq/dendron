@@ -27,6 +27,8 @@ import { Logger } from "../logger";
 import { VSCodeUtils } from "../utils";
 import { DendronWorkspace, getWS } from "../workspace";
 import { BasicCommand } from "./base";
+import { MultiSelectBtn } from "../components/lookup/buttons";
+import { EngineAPIService } from "../services/EngineAPIService";
 
 type CommandInput = any;
 
@@ -75,6 +77,7 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     const lookupCreateOpts: LookupControllerV3CreateOpts = {
       nodeType: "note",
       disableVaultSelection: opts?.useSameVault,
+      extraButtons: [MultiSelectBtn.create(false)],
     };
     if (vault) {
       lookupCreateOpts.buttons = [];
@@ -105,7 +108,7 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
               resolve(undefined);
             }
             const opts: CommandOpts = {
-              moves: data.onAcceptHookResp,
+              moves: this.getDesiredMoves(data),
             };
             resolve(opts);
             lc.onHide();
@@ -122,11 +125,30 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     });
   }
 
+  private getDesiredMoves(
+    data: NoteLookupProviderSuccessResp<OldNewLocation>
+  ): RenameNoteOpts[] {
+    const newVaultName = data.onAcceptHookResp[0].newLoc.vaultName;
+
+    return data.selectedItems.map((item) => {
+      const renameOpt: RenameNoteOpts = {
+        oldLoc: {
+          fname: item.fname,
+          vaultName: VaultUtils.getName(item.vault),
+        },
+        newLoc: {
+          fname: item.fname,
+          vaultName: newVaultName,
+        },
+      };
+      return renameOpt;
+    });
+  }
+
   async execute(opts: CommandOpts) {
     const ctx = "MoveNoteCommand";
     opts = _.defaults(opts, { closeAndOpenFile: true });
     const ws = getWS();
-    const wsRoot = DendronWorkspace.wsRoot();
     const engine = ws.getEngine();
 
     if (ws.fileWatcher && !opts.noPauseWatcher) {
@@ -134,22 +156,22 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     }
     try {
       Logger.info({ ctx, opts });
-      // TODO: work for multi
-      const moveOpts = opts.moves[0];
-      // move notes
-      const resp = await engine.renameNote(moveOpts);
-      const changed = resp.data as NoteChangeEntry[];
-      const vault = VaultUtils.getVaultByName({
-        vaults: engine.vaults,
-        vname: moveOpts.newLoc.vaultName!,
-      })!;
+
+      // Trigger all the file moves asynchronously.
+      const responsePromises = [];
+      for (const move of opts.moves) {
+        responsePromises.push(engine.renameNote(move));
+      }
+
+      // Now wait for all the moves to finish.
+      const changed: NoteChangeEntry[] = (await Promise.all(responsePromises))
+        .map((response) => response.data as NoteChangeEntry[])
+        .flat();
+
       if (opts.closeAndOpenFile) {
-        const vpath = vault2Path({ wsRoot, vault });
-        const newUri = Uri.file(
-          path.join(vpath, moveOpts.newLoc.fname + ".md")
-        );
-        await VSCodeUtils.closeCurrentFileEditor();
-        await VSCodeUtils.openFileInEditor(new FileItem(newUri));
+        // During bulk move we will only open a single file that was moved to avoid
+        // cluttering user tabs with all moved files.
+        await closeCurrentFileOpenMovedFile(engine, opts.moves[0]);
       }
       return { changed };
     } finally {
@@ -164,4 +186,21 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
       }
     }
   }
+}
+
+async function closeCurrentFileOpenMovedFile(
+  engine: EngineAPIService,
+  moveOpts: RenameNoteOpts
+) {
+  const wsRoot = DendronWorkspace.wsRoot();
+
+  const vault = VaultUtils.getVaultByName({
+    vaults: engine.vaults,
+    vname: moveOpts.newLoc.vaultName!,
+  })!;
+
+  const vpath = vault2Path({ wsRoot, vault });
+  const newUri = Uri.file(path.join(vpath, moveOpts.newLoc.fname + ".md"));
+  await VSCodeUtils.closeCurrentFileEditor();
+  await VSCodeUtils.openFileInEditor(new FileItem(newUri));
 }

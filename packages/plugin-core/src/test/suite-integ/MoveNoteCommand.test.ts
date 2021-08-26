@@ -556,6 +556,132 @@ suite("MoveNoteCommand", function () {
     });
   });
 
+  test("bulk-move 2 notes to new vault", (done) => {
+    runLegacyMultiWorkspaceTest({
+      ctx,
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+      },
+      onInit: async ({ engine, vaults, wsRoot }) => {
+        const notes = engine.notes;
+        const vault1 = vaults[0];
+        const vault2 = vaults[1];
+        const fooNote = NoteUtils.getNoteByFnameV5({
+          fname: "foo",
+          notes,
+          vault: vault1,
+          wsRoot,
+        }) as NoteProps;
+
+        await VSCodeUtils.openNote(fooNote);
+        const cmd = new MoveNoteCommand();
+        await cmd.execute({
+          moves: [
+            {
+              oldLoc: {
+                fname: "foo",
+                vaultName: VaultUtils.getName(vault1),
+              },
+              newLoc: {
+                fname: "foo",
+                vaultName: VaultUtils.getName(vault2),
+              },
+            },
+            {
+              oldLoc: {
+                fname: "foo.ch1",
+                vaultName: VaultUtils.getName(vault1),
+              },
+              newLoc: {
+                fname: "foo.ch1",
+                vaultName: VaultUtils.getName(vault2),
+              },
+            },
+          ],
+        });
+        expect(
+          VSCodeUtils.getActiveTextEditor()?.document.fileName.endsWith(
+            path.join("vault2", "foo.md")
+          )
+        ).toBeTruthy();
+        // note not in old vault
+        expect(
+          await EngineTestUtilsV4.checkVault({
+            wsRoot,
+            vault: vault1,
+            nomatch: ["foo.md"],
+          })
+        ).toBeTruthy();
+        expect(
+          await EngineTestUtilsV4.checkVault({
+            wsRoot,
+            vault: vault1,
+            nomatch: ["foo.ch1.md"],
+          })
+        ).toBeTruthy();
+
+        expect(
+          _.isUndefined(
+            NoteUtils.getNoteByFnameV5({
+              fname: "foo",
+              notes,
+              vault: vault1,
+              wsRoot,
+            })
+          )
+        ).toBeTruthy();
+        expect(
+          _.isUndefined(
+            NoteUtils.getNoteByFnameV5({
+              fname: "foo.ch1",
+              notes,
+              vault: vault1,
+              wsRoot,
+            })
+          )
+        ).toBeTruthy();
+
+        // To be found in new vault
+        expect(
+          await EngineTestUtilsV4.checkVault({
+            wsRoot,
+            vault: vault2,
+            match: ["foo.md"],
+          })
+        ).toBeTruthy();
+        expect(
+          await EngineTestUtilsV4.checkVault({
+            wsRoot,
+            vault: vault2,
+            match: ["foo.ch1.md"],
+          })
+        ).toBeTruthy();
+
+        expect(
+          _.isUndefined(
+            NoteUtils.getNoteByFnameV5({
+              fname: "foo",
+              notes,
+              vault: vault2,
+              wsRoot,
+            })
+          )
+        ).toBeFalsy();
+
+        expect(
+          _.isUndefined(
+            NoteUtils.getNoteByFnameV5({
+              fname: "foo.ch1",
+              notes,
+              vault: vault2,
+              wsRoot,
+            })
+          )
+        ).toBeFalsy();
+        done();
+      },
+    });
+  });
   const mockProvider: any = {
     provide: () => {},
     onUpdatePickerItems: () => {},

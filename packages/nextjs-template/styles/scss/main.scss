@@ -34,11 +34,26 @@ hr {
 
 // DendronTreeView
 
+.ant-menu {
+	.ant-menu-submenu-title {
+		[data-expandedicon="true"] {
+			position: absolute;
+			top: 0;
+			right: 3px;
+			height: 100%;
+			margin: 0;
+			padding: 10px;
+			display: flex;
+			align-items: center;
+			// TODO and onHover styles
+		}
+	}
 
-// remove submenu icon in collapsed Menu for first level
-.ant-menu.ant-menu-inline-collapsed {
-	[data-expandedicon="true"] {
-		display: none;
+	&.ant-menu-inline-collapsed {
+		[data-expandedicon="true"] {
+			// remove submenu icon in collapsed Menu for first level
+			display: none;
+		}
 	}
 }
 

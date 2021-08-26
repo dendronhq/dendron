@@ -109,21 +109,7 @@ export default function DendronTreeMenu(
 }
 
 function ExpandIcon({ isOpen, ...rest }: { isOpen: boolean }) {
-  return (
-    <DownOutlined
-      data-expandedicon="true"
-      style={{
-        position: "absolute",
-        margin: 0,
-        padding: 10,
-        height: "100%",
-        display: "flex",
-        alignItems: "center",
-        right: "3px",
-        // TODO and onHover styles
-      }}
-    />
-  );
+  return <DownOutlined data-expandedicon="true" />;
 }
 
 function MenuView({

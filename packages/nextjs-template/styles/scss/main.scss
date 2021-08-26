@@ -45,7 +45,15 @@ hr {
 			padding: 10px;
 			display: flex;
 			align-items: center;
-			// TODO and onHover styles
+		}
+	}
+
+	&.ant-menu-inline {
+		.ant-menu-title-content:hover {
+			text-decoration: underline;
+		}
+		[data-expandedicon="true"]:hover {
+			background-color: rgba(0, 0, 0, 0.05);
 		}
 	}
 

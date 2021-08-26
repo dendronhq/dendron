@@ -6,14 +6,13 @@ import {
   Time,
   VaultUtils,
 } from "@dendronhq/common-all";
-import { Layout, Row, Col, Typography } from "antd";
+import { Row, Col, Typography } from "antd";
 import _ from "lodash";
 import path from "path";
 import React from "react";
 import { useEngineAppSelector } from "../features/engine/hooks";
 import { useDendronRouter, useNoteActive } from "../utils/hooks";
 
-const { Footer } = Layout;
 const { Text, Link } = Typography;
 
 const ms2ShortDate = (ts: number) => {
@@ -104,7 +103,8 @@ class GitUtils {
     return `https://github.com/${user}/${path.basename(repo, ".git")}`;
   }
 }
-export function DendronNoteFooter() {
+
+export function FooterText() {
   const dendronRouter = useDendronRouter();
   const engine = useEngineAppSelector((state) => state.engine);
   const { noteActive } = useNoteActive(dendronRouter.getActiveNoteId());
@@ -114,23 +114,9 @@ export function DendronNoteFooter() {
   if (!noteActive || !config) {
     return null;
   }
-  return (
-    <Footer style={{ paddingLeft: "0px" }}>
-      <hr style={{ height: "1px" }} />
-      <FooterText config={config} activeNote={noteActive} />
-    </Footer>
-  );
-}
 
-function FooterText({
-  config,
-  activeNote,
-}: {
-  config: DendronConfig;
-  activeNote: NoteProps;
-}) {
   const { siteLastModified, gh_edit_link_text } = config.site;
-  const lastUpdated = ms2ShortDate(activeNote.updated);
+  const lastUpdated = ms2ShortDate(noteActive.updated);
   return (
     <Row style={{}}>
       <Col sm={24} md={7} lg={8} xl={4}>
@@ -141,9 +127,9 @@ function FooterText({
         )}
       </Col>
       <Col sm={24} md={9} lg={8} xl={12}>
-        {GitUtils.canShowGitLink({ config, note: activeNote }) && (
+        {GitUtils.canShowGitLink({ config, note: noteActive }) && (
           <Link
-            href={GitUtils.githubUrl({ note: activeNote, config })}
+            href={GitUtils.githubUrl({ note: noteActive, config })}
             target="_blank"
           >
             {gh_edit_link_text}

@@ -1,5 +1,6 @@
 import { getStage } from "@dendronhq/common-all";
 import { verifyEngineSliceState } from "@dendronhq/common-frontend";
+import Link from "next/link";
 import path from "path";
 import React from "react";
 import { useEngineAppSelector } from "../features/engine/hooks";
@@ -14,48 +15,38 @@ export default function DendronLogoOrTitle() {
   const siteUrl =
     getStage() === "dev" ? "/" : engine.config.site.siteUrl || "/";
   return (
-    <a href={siteUrl} className="site-title lh-tight">
-      {engine.config?.site.logo ? (
-        <Logo logoUrl={"/" + path.basename(engine.config?.site.logo)} />
-      ) : (
-        <Title data={title} />
-      )}
-    </a>
+    <Link href={siteUrl}>
+      {/* eslint-disable-next-line jsx-a11y/anchor-is-valid -- `href` will be provided by `Link` */}
+      <a
+        style={{ display: "inline-block", height: "100%", padding: "4px" }}
+        className="site-title"
+      >
+        {engine.config?.site.logo ? (
+          <Logo logoUrl={"/" + path.basename(engine.config?.site.logo)} />
+        ) : (
+          <Title data={title} />
+        )}
+      </a>
+    </Link>
   );
 }
 
 export function Logo({ logoUrl }: { logoUrl: string }) {
   return (
-    <div
+    <img
+      src={logoUrl}
       className="site-logo"
+      alt="logo"
       style={{
-        width: "60px",
-        height: "60px",
-        position: "fixed",
-        left: DENDRON_STYLE_CONSTANTS.SIDER.PADDING.LEFT,
-        top: "2px",
-        backgroundImage: `url(${logoUrl})`,
-        backgroundRepeat: "no-repeat",
-        backgroundPosition: "left center",
-        backgroundSize: "contain",
+        objectFit: "contain",
+        width: "100%",
+        height: "100%",
+        verticalAlign: "top",
       }}
     />
   );
 }
 
 export function Title({ data }: { data: string }) {
-  return (
-    <div
-      className="site-logo"
-      style={{
-        width: "60px",
-        height: "60px",
-        position: "fixed",
-        left: DENDRON_STYLE_CONSTANTS.SIDER.PADDING.LEFT,
-        top: "2px",
-      }}
-    >
-      {data}
-    </div>
-  );
+  return <div className="site-logo">{data}</div>;
 }

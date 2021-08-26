@@ -1,43 +1,35 @@
-import { Layout, Row, Col } from "antd";
+import { Layout, Row, Col, Divider } from "antd";
+import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import * as React from "react";
 import { DENDRON_STYLE_CONSTANTS } from "../styles/constants";
 import { DendronCommonProps } from "../utils/types";
 import { DendronBreadCrumb } from "./DendronBreadCrumb";
 import DendronLogoOrTitle from "./DendronLogoOrTitle";
 import { DendronLookup } from "./DendronLookup";
-import { DendronNoteFooter } from "./DendronNoteFooter";
-import DendronTreeView from "./DendronTreeView";
+import { FooterText } from "./DendronNoteFooter";
+import DendronTreeMenu from "./DendronTreeMenu";
 
-const { Header, Content, Sider } = Layout;
+const { Header, Content, Sider, Footer } = Layout;
+const { LAYOUT, HEADER, SIDER } = DENDRON_STYLE_CONSTANTS;
 
 export default function DendronLayout(
   props: React.PropsWithChildren<DendronCommonProps>
 ) {
   const [collapsed, setCollapsed] = React.useState(false);
-  const siderProps: React.CSSProperties = collapsed
-    ? {
-        width: "0px",
-        overflow: "hidden",
-      }
-    : {
-        overflow: "scroll",
-        paddingLeft: DENDRON_STYLE_CONSTANTS.SIDER.PADDING.LEFT,
-        position: "fixed",
-      };
   return (
-    <Layout style={{ height: "100%" }}>
+    <Layout>
       <Header
         style={{
           position: "fixed",
           zIndex: 1,
           width: "100%",
-          alignItems: "center",
-          justifyContent: "center",
           borderBottom: "1px solid #d4dadf",
+          height: HEADER.HEIGHT,
+          padding: `0 ${LAYOUT.PADDING}px`,
         }}
       >
-        <Row>
-          <Col xs={{ span: 4 }} md={{ span: 4 }}>
+        <Row style={{ height: "100%" }}>
+          <Col xs={{ span: 4 }} md={{ span: 4 }} style={{ height: "100%" }}>
             <DendronLogoOrTitle />
           </Col>
           <Col xs={18} md={{ span: 16 }}>
@@ -45,65 +37,60 @@ export default function DendronLayout(
           </Col>
         </Row>
       </Header>
-      <Layout
-        id="main-content-wrap"
-        className="main-content-wrap"
-        style={{ flex: 1, marginTop: 64 }}
-      >
-        <Layout>
-          <Sider
-            width={collapsed ? 0 : DENDRON_STYLE_CONSTANTS.SIDER.WIDTH}
-            style={{
-              height: "100%",
-              paddingTop: "32px",
-              fontSize: "15px",
-              ...siderProps,
-            }}
-            breakpoint="lg"
-            collapsedWidth="0"
-            onBreakpoint={(broken) => {
-              console.log(broken);
-            }}
-            onCollapse={(collapsed, type) => {
-              console.log("collapsed", collapsed, type);
-              setCollapsed(collapsed);
-            }}
-          >
-            <DendronTreeView {...props} />
-            {/* <footer
+      <Layout className="site-layout" style={{ marginTop: 64 }}>
+        <Sider
+          width={SIDER.WIDTH}
+          collapsible
+          collapsed={collapsed}
+          collapsedWidth={SIDER.COLLAPSED_WIDTH}
+          onCollapse={(collapsed, type) => {
+            setCollapsed(collapsed);
+          }}
+          breakpoint="lg"
+          style={{
+            position: "fixed",
+            overflow: "auto",
+            height: `calc(100vh - ${HEADER.HEIGHT}px)`,
+          }}
+          trigger={
+            // eslint-disable-next-line jsx-a11y/click-events-have-key-events -- role indicates that it is a button and therefore interactive
+            <div
+              role="button"
+              tabIndex={0}
+              className="ant-trigger"
+              onClick={() => setCollapsed(!collapsed)}
               style={{
-                position: "fixed",
-                bottom: "0px",
-                width: "180px",
-                padding: "10px",
-                fontSize: "12p",
+                backgroundColor:
+                  "#43B02A" /* color copied from packages/dendron-next-server/assets/themes/light-theme.less TODO make dependent on active theme */,
               }}
             >
-              🌱 with 💕 using{" "}
-              <a href="https://www.dendron.so/"> Dendron 🌲 </a>
-            </footer> */}
-          </Sider>
-          <Layout
-            style={{
-              padding: collapsed ? "0 0 0" : "0 24px 24px",
-              marginLeft: collapsed ? 0 : "200px",
-              width: "auto",
-            }}
+              {collapsed ? <RightOutlined /> : <LeftOutlined />}
+            </div>
+          }
+        >
+          <DendronTreeMenu {...props} collapsed={collapsed} />
+        </Sider>
+        <Layout
+          style={{
+            marginLeft: collapsed ? SIDER.COLLAPSED_WIDTH : SIDER.WIDTH,
+          }}
+        >
+          <Content
+            className="main-content"
+            role="main"
+            style={{ padding: `0 ${LAYOUT.PADDING}px` }}
           >
             <DendronBreadCrumb {...props} />
-            <Content
-              id="main-content"
-              className="main-content"
-              role="main"
-              style={{
-                minHeight: 280,
-                padding: collapsed ? "5px" : 0,
-              }}
-            >
-              {props.children}
-              <DendronNoteFooter />
-            </Content>
-          </Layout>
+            {props.children}
+          </Content>
+          <Divider />
+          <Footer
+            style={{
+              padding: `0 ${LAYOUT.PADDING}px ${LAYOUT.PADDING}px`,
+            }}
+          >
+            <FooterText />
+          </Footer>
         </Layout>
       </Layout>
     </Layout>

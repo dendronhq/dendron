@@ -1,5 +1,9 @@
-import { DendronError, ERROR_SEVERITY } from "@dendronhq/common-all";
-import { SeedSvcResp, SEED_REGISTRY } from "@dendronhq/engine-server";
+import {
+  DendronError,
+  ERROR_SEVERITY,
+  SEED_REGISTRY,
+} from "@dendronhq/common-all";
+import { SeedSvcResp } from "@dendronhq/engine-server";
 import * as vscode from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { SeedCommandBase } from "./SeedCommandBase";
@@ -58,7 +62,11 @@ export class SeedRemoveCommand extends SeedCommandBase<
           cancellable: false,
         },
         async () => {
-          return this.getSeedSvc().removeSeed({ id: _opts.seedId });
+          return this.getSeedSvc().removeSeed({
+            id: _opts.seedId,
+            onUpdatingWorkspace: this.onUpdatingWorkspace,
+            onUpdatedWorkspace: this.onUpdatedWorkspace,
+          });
         }
       )
       .then((resp) => {

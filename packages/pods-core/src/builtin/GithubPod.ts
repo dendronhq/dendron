@@ -18,6 +18,7 @@ import {
   stringifyError,
   Time,
   DEngineClient,
+  ERROR_SEVERITY,
 } from "@dendronhq/common-all";
 
 const ID = "dendron.github";
@@ -114,7 +115,7 @@ export class GithubImportPod extends ImportPod<GithubImportPodConfig> {
     }) as JSONSchemaType<GithubImportPodConfig>;
   }
 
-  /*
+  /**
    * method to fetch issues from github graphql api
    */
   getDataFromGithub = async (opts: Partial<GithubAPIOpts>) => {
@@ -155,7 +156,7 @@ export class GithubImportPod extends ImportPod<GithubImportPodConfig> {
         val: queryVal,
         after: afterCursor,
       });
-    } catch (error) {
+    } catch (error: any) {
       this.L.error({
         msg: "failed to import all the issues",
         payload: stringifyError(error),
@@ -207,7 +208,7 @@ export class GithubImportPod extends ImportPod<GithubImportPodConfig> {
     }
   }
 
-  /*
+  /**
    * method to add fromtmatter to notes: url, status and tags
    */
   addFrontMatterToData = (
@@ -239,10 +240,9 @@ export class GithubImportPod extends ImportPod<GithubImportPodConfig> {
     });
   };
 
-  /*
+  /**
    * method to get notes that are not already present in the vault
    */
-
   getNewNotes(
     notes: NoteProps[],
     engine: DEngineClient,
@@ -260,7 +260,7 @@ export class GithubImportPod extends ImportPod<GithubImportPodConfig> {
     });
   }
 
-  /*
+  /**
    * method to update the notes whose status has changed
    */
   getUpdatedNotes(
@@ -401,7 +401,6 @@ export class GithubPublishPod extends PublishPod<GithubPublishPodConfig> {
    * method to get all the labels of a repository in key value pair
    *
    */
-
   getLabelsFromGithub = async (opts: Partial<GithubPublishPodConfig>) => {
     const { owner, repository, token } = opts;
     let labelsHashMap: any;
@@ -431,7 +430,7 @@ export class GithubPublishPod extends PublishPod<GithubPublishPodConfig> {
           [label.node.name]: label.node.id,
         };
       });
-    } catch (error) {
+    } catch (error: any) {
       throw new DendronError({ message: stringifyError(error) });
     }
     return labelsHashMap;
@@ -440,7 +439,6 @@ export class GithubPublishPod extends PublishPod<GithubPublishPodConfig> {
   /**
    * method to update the issue in github
    */
-
   updateIssue = async (opts: {
     issueID: string;
     token: string;
@@ -466,7 +464,7 @@ export class GithubPublishPod extends PublishPod<GithubPublishPodConfig> {
       if (!_.isUndefined(result.updateIssue.issue.id)) {
         resp = "Issue Updated";
       }
-    } catch (error) {
+    } catch (error: any) {
       resp = stringifyError(error);
       throw new DendronError({ message: stringifyError(error) });
     }
@@ -474,8 +472,90 @@ export class GithubPublishPod extends PublishPod<GithubPublishPodConfig> {
     return resp;
   };
 
+  /**
+   * method to get the repository id
+   */
+  getRepositoryId = async (opts: Partial<GithubPublishPodConfig>) => {
+    let repositoryId: string;
+    const { owner, repository, token } = opts;
+    const query = `query repository($name: String!, $owner: String!)
+    {
+      repository(owner: $owner , name: $name) { 
+      id
+    }
+    }`;
+    try {
+      const result: any = await graphql(query, {
+        headers: { authorization: `token ${token}` },
+        owner,
+        name: repository,
+      });
+      repositoryId = result.repository.id;
+    } catch (error: any) {
+      throw new DendronError({
+        message: stringifyError(error),
+        severity: ERROR_SEVERITY.MINOR,
+      });
+    }
+    return repositoryId;
+  };
+
+  /**
+   * method to create an issue in github
+   */
+  createIssue = async (opts: {
+    token: string;
+    labelIDs: string[];
+    owner: string;
+    repository: string;
+    note: NoteProps;
+    engine: DEngineClient;
+  }) => {
+    const { token, labelIDs, owner, repository, note, engine } = opts;
+    const { title, body } = note;
+    let resp: string = "";
+    const repositoryId = await this.getRepositoryId({
+      token,
+      owner,
+      repository,
+    });
+    const mutation = `mutation createIssue($repositoryId: ID!, $title: String!, $body: String, $labelIDs: [ID!]){
+      createIssue(input: {repositoryId : $repositoryId , title: $title, body: $body, labelIds: $labelIDs}){
+                issue {
+                      id
+                      url
+                      state
+                    }
+                }
+              }`;
+    try {
+      const result: any = await graphql(mutation, {
+        headers: { authorization: `token ${token}` },
+        repositoryId,
+        title,
+        body,
+        labelIDs,
+      });
+      const issue = result.createIssue.issue;
+      if (!_.isUndefined(result.createIssue.issue.id)) {
+        note.custom.issueID = issue.id;
+        note.custom.url = issue.url;
+        note.custom.status = issue.state;
+        await engine.writeNote(note, { newNode: true });
+        resp = "Issue Created";
+      }
+    } catch (error: any) {
+      resp = stringifyError(error);
+      throw new DendronError({
+        message: stringifyError(error),
+        severity: ERROR_SEVERITY.MINOR,
+      });
+    }
+    return resp;
+  };
+
   async plant(opts: PublishPodPlantOpts) {
-    const { config } = opts;
+    const { config, engine } = opts;
     const { owner, repository, token } = config as GithubPublishPodConfig;
     const labelsHashMap = await this.getLabelsFromGithub({
       owner,
@@ -497,12 +577,22 @@ export class GithubPublishPod extends PublishPod<GithubPublishPodConfig> {
     if (!_.isUndefined(tags) && labelIDs.length === 0) {
       return "Github: The labels in the tag does not belong to selected repository";
     }
-    const resp = await this.updateIssue({
-      issueID,
-      token,
-      status: status.toUpperCase(),
-      labelIDs,
-    });
+    const resp =
+      _.isUndefined(issueID) && _.isUndefined(status)
+        ? await this.createIssue({
+            token,
+            owner,
+            repository,
+            labelIDs,
+            note,
+            engine,
+          })
+        : await this.updateIssue({
+            issueID,
+            token,
+            status: status.toUpperCase(),
+            labelIDs,
+          });
 
     return "Github: ".concat(resp);
   }

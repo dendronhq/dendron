@@ -127,10 +127,6 @@ export function getConfigValue(key: CodeConfigKeys) {
   return DendronWorkspace.configuration().get(key);
 }
 
-export function getGlobalState<T>(key: GLOBAL_STATE) {
-  return DendronWorkspace.instance().getGlobalState<T>(key);
-}
-
 /**
  @deprecated: use `getConfigValue`
  */
@@ -631,16 +627,6 @@ export class DendronWorkspace {
   addDisposable(disposable: vscode.Disposable) {
     // handle all disposables
     this.disposableStore.add(disposable);
-  }
-
-  // === Utils
-
-  getGlobalState<T>(key: GLOBAL_STATE) {
-    return this.context.globalState.get<T>(key);
-  }
-
-  updateGlobalState(key: GLOBAL_STATE, value: any) {
-    return this.context.globalState.update(key, value);
   }
 
   // === Workspace

@@ -494,6 +494,11 @@
         "command": "dendron.seedRemove",
         "title": "Dendron: Seed Remove",
         "desc": "Remove Seed from Current Workspace"
+      },
+      {
+        "command": "dendron.seedBrowse",
+        "title": "Dendron: Seed Browse",
+        "desc": "Browse the Seed Registry and Add Seeds to Current Workspace"
       }
     ],
     "configuration": {

@@ -21,7 +21,7 @@ type CommandCLIOpts = {
   wsRoot: string;
   vault?: string;
   cmd: SeedCommands;
-  id?: string;
+  id: string;
   // INIT
   mode?: SeedInitMode;
   config?: SeedConfig;
@@ -108,6 +108,7 @@ export class SeedCLICommand extends CLICommand<CommandOpts, CommandOutput> {
             }
           );
           const seed = SeedUtils.genDefaultConfig({
+            id: opts.id,
             seed: config,
             ...initOpts,
           });

@@ -79,7 +79,7 @@ async function reloadWorkspace() {
   Logger.info({ ctx, msg: "post-ws.reloadWorkspace" });
 
   // Run any initialization code necessary for this workspace invocation.
-  const initializer = WorkspaceInitFactory.create(ws);
+  const initializer = WorkspaceInitFactory.create();
 
   if (initializer?.onWorkspaceOpen) {
     initializer.onWorkspaceOpen({ ws });

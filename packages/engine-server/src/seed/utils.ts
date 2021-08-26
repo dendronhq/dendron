@@ -17,10 +17,12 @@ export class SeedUtils {
   }
 
   static genDefaultConfig(opts: {
+    id: string;
     seed?: SeedConfig;
     name: string;
   }): SeedConfig {
     return _.defaults(opts.seed || {}, {
+      id: opts.id,
       name: opts.name,
       publisher: DEFAULT_SEED_PUBLISHER,
       description: "a seed waiting to sprout",

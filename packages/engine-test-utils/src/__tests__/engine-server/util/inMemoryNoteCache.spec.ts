@@ -1,51 +1,46 @@
 import { InMemoryNoteCacheFactory } from "@dendronhq/engine-server/lib/util/inMemoryNoteCache";
 import { NoteProps } from "@dendronhq/common-all";
 
-/** For tests ONLY.
- *
- *  Utility class for making {@link NoteProps} test values. */
-class NotePropsMaker {
-  /** Create note prop with some sensible default (for tests only). */
-  static createNoteProp(opts: { id: string; fname?: string }): NoteProps {
-    const id = opts.id;
-    const fname = opts.fname ? opts.fname : `/tmp/filename-${id}`;
+/** Create note prop with some sensible default (for tests only). */
+function createNoteProp(opts: { id: string; fname?: string }): NoteProps {
+  const id = opts.id;
+  const fname = opts.fname ? opts.fname : `/tmp/filename-${id}`;
 
-    return {
-      id: id,
-      title: `title-val-${id}`,
-      vault: { fsPath: "vault-1" },
-      type: "note",
-      desc: "",
-      links: [],
-      anchors: {},
-      fname: fname,
-      updated: 1627283357535,
-      created: 1627283357535,
-      parent: null,
-      children: [],
-      body: `body-val-${id}`,
-      data: {},
-      contentHash: undefined,
-      tags: ["tag-1", "tag-2"],
-    };
-  }
+  return {
+    id: id,
+    title: `title-val-${id}`,
+    vault: { fsPath: "vault-1" },
+    type: "note",
+    desc: "",
+    links: [],
+    anchors: {},
+    fname: fname,
+    updated: 1627283357535,
+    created: 1627283357535,
+    parent: null,
+    children: [],
+    body: `body-val-${id}`,
+    data: {},
+    contentHash: undefined,
+    tags: ["tag-1", "tag-2"],
+  };
 }
 
 describe("inMemoryNoteCache.spec.ts", () => {
   describe("getNotesByFileNameIgnoreCase tests:", () => {
     describe("GIVEN cache with valid note props", () => {
       /** Two notes that have file name that differs only by case. */
-      const NOTE_1A = NotePropsMaker.createNoteProp({
+      const NOTE_1A = createNoteProp({
         id: "1a",
         fname: "/tmp/one",
       });
-      const NOTE_1B = NotePropsMaker.createNoteProp({
+      const NOTE_1B = createNoteProp({
         id: "1b",
         fname: "/tmp/ONE",
       });
 
       /** Note that has a single file name matching */
-      const NOTE_2 = NotePropsMaker.createNoteProp({
+      const NOTE_2 = createNoteProp({
         id: "2",
         fname: "/tmp/two",
       });

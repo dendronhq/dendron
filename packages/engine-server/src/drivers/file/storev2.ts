@@ -57,8 +57,8 @@ import { HookUtils, RequireHookResp } from "../../topics/hooks";
 import { readNotesFromCache, writeNotesToCache } from "../../utils";
 import { NoteParser } from "./noteParser";
 import { SchemaParser } from "./schemaParser";
-import { ResponseUtil } from "../../util/responseUtil";
-import { InMemoryNoteCacheFactory } from "../../util/inMemoryNoteCache";
+import { ResponseUtil } from "@dendronhq/common-all/src/util/responseUtil";
+import { InMemoryNoteCache } from "../../util/inMemoryNoteCache";
 
 export type FileMeta = {
   // file name: eg. foo.md, name = foo
@@ -380,7 +380,7 @@ export class FileStorage implements DStore {
     allNotes: NoteProps[],
     notesWithLinks: NoteProps[]
   ) {
-    const noteCache = InMemoryNoteCacheFactory.createCache(allNotes);
+    const noteCache = new InMemoryNoteCache(allNotes);
 
     notesWithLinks.forEach((noteFrom) => {
       try {

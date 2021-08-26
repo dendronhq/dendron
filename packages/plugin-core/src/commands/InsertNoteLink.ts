@@ -1,4 +1,4 @@
-import { NoteProps, NoteUtils } from "@dendronhq/common-all";
+import { NoteProps, NoteUtils, InsertNoteLinkAliasMode } from "@dendronhq/common-all";
 import { DConfig, HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
 import * as vscode from "vscode";
@@ -15,7 +15,7 @@ import { getWS } from "../workspace"
 
 type CommandInput = {
   multiSelect?: boolean;
-  aliasMode?: InsertNoteLinkAliasMode;
+  aliasMode?: keyof typeof InsertNoteLinkAliasMode;
 };
 
 type CommandOpts = {
@@ -23,7 +23,6 @@ type CommandOpts = {
 } & CommandInput;
 type CommandOutput = CommandOpts;
 
-export type InsertNoteLinkAliasMode = "snippet" | "selection" | "title" | "prompt" | "none";
 
 export class InsertNoteLinkCommand extends BasicCommand<
   CommandOpts,
@@ -108,7 +107,7 @@ export class InsertNoteLinkCommand extends BasicCommand<
     switch(opts.aliasMode) {
       case "snippet": {
         links = opts.notes.map((note, index) => {
-          return NoteUtils.createWikiLink({ note, aliasMode: "snippet", tabStopIndex: index+1 }); 
+          return NoteUtils.createWikiLink({ note, alias: { mode: "snippet", tabStopIndex: index + 1 }}); 
         });
         break;
       }
@@ -124,7 +123,7 @@ export class InsertNoteLinkCommand extends BasicCommand<
           vscode.window.showWarningMessage("Selection doesn't contain any text. Ignoring aliases.")
         }
         links = opts.notes.map((note) => {
-          return NoteUtils.createWikiLink({ note, aliasMode: "value", aliasValue: maybeAliasValue });
+          return NoteUtils.createWikiLink({ note, alias: { mode: "value", value: maybeAliasValue }});
         });
         break;
       }
@@ -133,23 +132,23 @@ export class InsertNoteLinkCommand extends BasicCommand<
           // eslint-disable-next-line no-await-in-loop
           const value = await this.promptForAlias(note);
           if (value !== "") {
-            links.push(NoteUtils.createWikiLink({ note, aliasMode: "value", aliasValue: value}));
+            links.push(NoteUtils.createWikiLink({ note, alias: { mode: "value", value}}));
           } else {
-            links.push(NoteUtils.createWikiLink({ note, aliasMode: "none" }));
+            links.push(NoteUtils.createWikiLink({ note, alias: { mode: "none" }}));
           }
         }
         break;
       }
       case "title": {
         links = opts.notes.map((note) => {
-          return NoteUtils.createWikiLink({ note, aliasMode: "title" });
+          return NoteUtils.createWikiLink({ note, alias: { mode: "title" }});
         });
         break;
       }
       case "none": 
       default: {
         links = opts.notes.map((note) => {
-          return NoteUtils.createWikiLink({ note, aliasMode: "none"});
+          return NoteUtils.createWikiLink({ note, alias: { mode: "none" }});
         })
         break;
       }

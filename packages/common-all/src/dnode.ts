@@ -496,15 +496,18 @@ export class NoteUtils {
       value: string;
       type: "header" | "blockAnchor";
     };
+    alias?: {
+      mode: "snippet" | "title" | "value" | "none";
+      value?: string;
+      tabStopIndex?: number;
+    }
     useVaultPrefix?: boolean;
-    aliasMode?: "snippet" | "title" | "value" | "none";
-    aliasValue?: string;
-    tabStopIndex?: number;
   }): string {
-    const { note, anchor, useVaultPrefix, aliasMode, aliasValue } = _.defaults(opts, {
-      aliasMode: "title",
-      aliasValue: "",
-    });
+    const { note, anchor, useVaultPrefix, alias } = opts;
+    const { mode: aliasMode, value: aliasValue, tabStopIndex } = _.defaults(alias, {
+      value: "",
+      tabStopIndex: 1
+    })
     let { title, fname, vault } = note;
     let suffix = "";
     if (anchor) {
@@ -521,25 +524,25 @@ export class NoteUtils {
     const vaultPrefix = useVaultPrefix
       ? `${CONSTANTS.DENDRON_DELIMETER}${VaultUtils.getName(vault)}/`
       : "";
-    let alias = "";
+    let aliasPrefix = "";
 
     switch(aliasMode) {
       case "snippet": {
-        alias = `\${${opts.tabStopIndex}:alias}|`;
+        aliasPrefix = `\${${tabStopIndex}:alias}|`;
         break;
       }
       case "title": {
-        alias = `${title}|`
+        aliasPrefix = `${title}|`
         break;
       }
       case "value": {
-        alias = aliasValue !== "" ? `${aliasValue}|` : "";
+        aliasPrefix = aliasValue !== "" ? `${aliasValue}|` : "";
         break;
       }
       default:
         break;
     }
-    const link = `[[${alias}${vaultPrefix}${fname}${suffix}]]`;
+    const link = `[[${aliasPrefix}${vaultPrefix}${fname}${suffix}]]`;
     return link;
   }
 

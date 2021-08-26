@@ -5,6 +5,7 @@ import {
   DendronTreeViewKey,
   DendronWebViewKey,
   DVault,
+  DWorkspaceV2,
   ERROR_STATUS,
   getStage,
   ResponseCode,
@@ -139,6 +140,15 @@ export function getCodeConfig<T>(key: string): T | undefined {
 
 export function getWS() {
   return DendronWorkspace.instance();
+}
+
+export function getWSV2(): DWorkspaceV2 {
+  const ws = DendronWorkspace.instance();
+  if (WorkspaceUtils.isNativeWorkspace(ws)) {
+    return ws.getOrThrowNativeWOrkspace();
+  } else {
+    return ws;
+  }
 }
 
 export function getEngine() {
@@ -484,6 +494,9 @@ export class DendronWorkspace {
     return assetsDir;
   }
 
+  get vaults(): DVault[] {
+    return this.vaultsv4;
+  }
   /**
    * Relative vaults
    */
@@ -711,24 +724,6 @@ export class DendronWorkspace {
     this.L.info({ ctx });
     this.fsWatcher?.dispose();
     this.disposableStore.dispose();
-  }
-
-  /**
-   * Performs a series of step to initialize the workspace
-   *  Calls activate workspace
-   * - initializes DendronEngine
-   * @param mainVault
-   */
-  async reloadWorkspace() {
-    try {
-      const out = await vscode.commands.executeCommand(
-        DENDRON_COMMANDS.RELOAD_INDEX.key,
-        true
-      );
-      return out;
-    } catch (err) {
-      Logger.error({ error: err });
-    }
   }
 
   async showWelcome() {

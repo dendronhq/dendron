@@ -607,6 +607,24 @@ export class WSUtils {
     );
   }
 
+  /**
+   * Performs a series of step to initialize the workspace
+   *  Calls activate workspace
+   * - initializes DendronEngine
+   * @param mainVault
+   */
+  static async reloadWorkspace() {
+    try {
+      const out = await vscode.commands.executeCommand(
+        DENDRON_COMMANDS.RELOAD_INDEX.key,
+        true
+      );
+      return out;
+    } catch (err) {
+      Logger.error({ error: err });
+    }
+  }
+
   static updateEngineAPI(port: number | string): DEngineClient {
     const ws = DendronWorkspace.instance();
     const svc = EngineAPIService.createEngine({

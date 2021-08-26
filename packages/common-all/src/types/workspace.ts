@@ -81,6 +81,7 @@ export type DWorkspaceV2 = {
   wsRoot: string;
   type: WorkspaceType;
   config: DendronConfig;
+  vaults: DVault[];
 };
 
 export type SeedEntry = {

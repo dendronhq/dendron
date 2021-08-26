@@ -4,7 +4,7 @@ import fs, { readdirSync } from "fs-extra";
 import path from "path";
 import { window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
-import { VSCodeUtils } from "../utils";
+import { VSCodeUtils, WSUtils } from "../utils";
 import { DendronWorkspace } from "../workspace";
 import { BaseCommand } from "./base";
 
@@ -73,7 +73,7 @@ export class RestoreVaultCommand extends BaseCommand<
         config: { src, vaultName: VaultUtils.getName(vault) },
       });
       window.showInformationMessage(`restored from snapshot`);
-      await ws.reloadWorkspace();
+      await WSUtils.reloadWorkspace();
       return;
     } finally {
       if (ws.fileWatcher) {

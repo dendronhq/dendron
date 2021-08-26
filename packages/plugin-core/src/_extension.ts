@@ -72,8 +72,8 @@ export function activate(context: vscode.ExtensionContext) {
 
 async function reloadWorkspace() {
   const ctx = "reloadWorkspace";
-  const ws = DendronWorkspace.instance();
-  const maybeEngine = await ws.reloadWorkspace();
+  const ws = getWS();
+  const maybeEngine = await WSUtils.reloadWorkspace();
   if (!maybeEngine) {
     return maybeEngine;
   }

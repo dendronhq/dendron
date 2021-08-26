@@ -49,7 +49,7 @@ import { DendronWorkspace, getWS } from "../workspace";
 import { BlankInitializer } from "../workspace/blankInitializer";
 import { WorkspaceInitFactory } from "../workspace/workspaceInitializer";
 import { _activate } from "../_extension";
-import { onWSInit, TIMEOUT } from "./testUtils";
+import { onWSInit } from "./testUtils";
 import {
   setupCodeConfiguration,
   SetupCodeConfigurationV2,
@@ -59,6 +59,7 @@ import {
 } from "./testUtilsv2";
 import os from "os";
 import sinon from "sinon";
+const TIMEOUT = 60 * 1000 * 5;
 
 export const DENDRON_REMOTE =
   "https://github.com/dendronhq/dendron-site-vault.git";

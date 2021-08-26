@@ -11,7 +11,6 @@ import path from "path";
 import * as vscode from "vscode";
 import { CopyNoteLinkCommand } from "../../commands/CopyNoteLink";
 import { VSCodeUtils } from "../../utils";
-import { TIMEOUT } from "../testUtils";
 import {
   expect,
   LocationTestUtils,
@@ -22,7 +21,6 @@ import { setupBeforeAfter } from "../testUtilsV3";
 
 suite("CopyNoteLink", function () {
   const ctx = setupBeforeAfter(this, {});
-  this.timeout(TIMEOUT);
 
   describe("single", () => {
     test("basic", (done) => {

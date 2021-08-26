@@ -33,6 +33,11 @@ export class VaultUtils {
     return VaultUtils.getRelPath(vaultSrc) === VaultUtils.getRelPath(vaultCmp);
   }
 
+  /**
+   * Path of vault relative to workspace root
+   * @param vault
+   * @returns
+   */
   static getRelPath(vault: DVault) {
     if (vault.workspace) {
       return path.join(vault.workspace, vault.fsPath);

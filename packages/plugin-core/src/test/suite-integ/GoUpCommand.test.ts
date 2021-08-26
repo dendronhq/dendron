@@ -1,64 +1,47 @@
-import { DirResult } from "@dendronhq/common-server";
-import { FileTestUtils, NodeTestPresetsV2 } from "@dendronhq/common-test-utils";
-import fs from "fs-extra";
-import path from "path";
+import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import * as vscode from "vscode";
 import { GoUpCommand } from "../../commands/GoUpCommand";
 import { VSCodeUtils } from "../../utils";
-import { onWSInit, setupDendronWorkspace } from "../testUtils";
 import { expect } from "../testUtilsv2";
-import { setupBeforeAfter } from "../testUtilsV3";
+import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
 suite("GoUpCommand", function () {
-  let root: DirResult;
   let ctx: vscode.ExtensionContext;
-  let vaultPath: string;
 
-  ctx = setupBeforeAfter(this, {
-    beforeHook: () => {
-      root = FileTestUtils.tmpDir();
-    },
-  });
+  ctx = setupBeforeAfter(this, {});
 
   test("basic", (done) => {
-    onWSInit(async () => {
-      const notePath = path.join(vaultPath, "foo.md");
-      await VSCodeUtils.openFileInEditor(vscode.Uri.file(notePath));
-      await new GoUpCommand().run();
-      expect(
-        VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath.endsWith(
-          "root.md"
-        )
-      ).toBeTruthy();
-      done();
-    });
-    setupDendronWorkspace(root.name, ctx, {
-      lsp: true,
-      useCb: async (vaultDir) => {
-        vaultPath = vaultDir;
-        await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
+    runLegacyMultiWorkspaceTest({
+      ctx,
+      preSetupHook: ENGINE_HOOKS.setupBasic,
+      onInit: async ({ engine }) => {
+        const note = engine.notes["foo"];
+        await VSCodeUtils.openNote(note);
+        await new GoUpCommand().run();
+        expect(
+          VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath.endsWith(
+            "root.md"
+          )
+        ).toBeTruthy();
+        done();
       },
     });
   });
 
   test("go up with stub", (done) => {
-    onWSInit(async () => {
-      const notePath = path.join(vaultPath, "foo.ch1.md");
-      await VSCodeUtils.openFileInEditor(vscode.Uri.file(notePath));
-      await new GoUpCommand().run();
-      expect(
-        VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath.endsWith(
-          "root.md"
-        )
-      ).toBeTruthy();
-      done();
-    });
-    setupDendronWorkspace(root.name, ctx, {
-      lsp: true,
-      useCb: async (vaultDir) => {
-        vaultPath = vaultDir;
-        await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
-        fs.removeSync(path.join(vaultPath, "foo.md"));
+    runLegacyMultiWorkspaceTest({
+      ctx,
+      preSetupHook: ENGINE_HOOKS.setupBasic,
+      onInit: async ({ engine }) => {
+        const note = engine.notes["foo.ch1"];
+        await VSCodeUtils.openNote(note);
+        await new GoUpCommand().run();
+        expect(
+          VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath.endsWith(
+            "foo.md"
+          )
+        ).toBeTruthy();
+        done();
       },
     });
   });

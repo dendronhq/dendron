@@ -1,9 +1,11 @@
 import {
   DendronConfig,
+  DendronError,
   DVault,
   DWorkspaceV2,
   TutorialEvents,
   WorkspaceType,
+  DEngineClient,
 } from "@dendronhq/common-all";
 import { readMD, resolveTilde } from "@dendronhq/common-server";
 import { DConfig } from "@dendronhq/engine-server";
@@ -22,6 +24,7 @@ export abstract class DendronBaseWorkspace implements DWorkspaceV2 {
   public vaults: DVault[];
   public logUri: vscode.Uri;
   public assetUri: vscode.Uri;
+  protected _engine?: DEngineClient;
 
   constructor({
     wsRoot,
@@ -40,6 +43,17 @@ export abstract class DendronBaseWorkspace implements DWorkspaceV2 {
 
   get config(): DendronConfig {
     return DConfig.defaults(DConfig.getOrCreate(this.wsRoot));
+  }
+
+  get engine(): DEngineClient {
+    if (!this._engine) {
+      throw new DendronError({ message: "no engiine set" });
+    }
+    return this._engine;
+  }
+
+  set engine(engine: DEngineClient) {
+    this._engine = engine;
   }
 
   async showWelcome() {

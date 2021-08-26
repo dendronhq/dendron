@@ -11,13 +11,11 @@ import { NoteLookupCommand } from "../../commands/NoteLookupCommand";
 import { LookupNoteTypeEnum } from "../../components/lookup/types";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace, getWS } from "../../workspace";
-import { TIMEOUT } from "../testUtils";
 import { expect, getNoteFromTextEditor } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
 suite("Scratch Notes", function () {
   let ctx: vscode.ExtensionContext;
-  this.timeout(TIMEOUT);
 
   ctx = setupBeforeAfter(this, {});
 

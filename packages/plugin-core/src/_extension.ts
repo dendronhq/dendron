@@ -6,13 +6,13 @@ import {
 import {
   CONSTANTS,
   DendronError,
-  DWorkspaceV2,
   ExtensionEvents,
   getStage,
   InstallStatus,
   Time,
   VaultUtils,
   VSCodeEvents,
+  WorkspaceType,
 } from "@dendronhq/common-all";
 import {
   getDurationMilliseconds,
@@ -235,8 +235,7 @@ export async function _activate(
   });
 
   if (DendronWorkspace.isActive(context)) {
-    let wsImpl: DWorkspaceV2;
-    if (WorkspaceUtils.isNativeWorkspace(ws)) {
+    if (ws.type === WorkspaceType.NATIVE) {
       const workspaceFolder = WorkspaceUtils.findWSRootInWorkspaceFolders(
         DendronWorkspace.workspaceFolders()!
       );
@@ -249,9 +248,7 @@ export async function _activate(
         logUri: context.logUri,
         assetUri: VSCodeUtils.joinPath(ws.context.extensionUri, "assets"),
       });
-      wsImpl = ws.workspaceImpl;
     } else {
-      wsImpl = getWS();
       ws.workspaceImpl = new DendronCodeWorkspace({
         wsRoot: DendronWorkspace.wsRoot(),
         logUri: context.logUri,
@@ -260,6 +257,7 @@ export async function _activate(
     }
     const start = process.hrtime();
     const dendronConfig = ws.config;
+    const wsImpl = getWSV2();
 
     // --- Get Version State
     const workspaceInstallStatus = VSCodeUtils.getInstallStatusForWorkspace({

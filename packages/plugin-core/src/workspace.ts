@@ -143,11 +143,7 @@ export function getWS() {
 
 export function getWSV2(): DWorkspaceV2 {
   const ws = DendronWorkspace.instance();
-  if (WorkspaceUtils.isNativeWorkspace(ws)) {
-    return ws.getOrThrowWorkspaceImpl();
-  } else {
-    return ws;
-  }
+  return ws.getOrThrowWorkspaceImpl();
 }
 
 export function getEngine() {
@@ -280,7 +276,8 @@ export class DendronWorkspace {
      * the reason we don't use `vscode.*` method is because we need to stub this value during tests
      */
     try {
-      if (context) {
+      // ground work for standalone vaults. only activate in dev mode
+      if (context && getStage() !== "prod") {
         const { workspaceFolders } = vscode.workspace;
         const dendronWorkspaceFolders =
           workspaceFolders?.filter((ent) => {
@@ -409,15 +406,7 @@ export class DendronWorkspace {
    * @remark: We need to get the config from disk because the engine might not be initialized yet
    */
   get config(): DendronConfig {
-    if (WorkspaceUtils.isNativeWorkspace(this)) {
-      return this.getOrThrowWorkspaceImpl().config;
-    }
-    const dendronRoot = getWS().configRoot;
-    if (!dendronRoot) {
-      throw new Error(`dendronRoot not set when get config`);
-    }
-    const config = DConfig.getOrCreate(dendronRoot);
-    return DConfig.defaults(config);
+    return getWSV2().config;
   }
 
   async getWorkspaceSettings(): Promise<WorkspaceSettings> {
@@ -537,6 +526,7 @@ export class DendronWorkspace {
 
   setEngine(engine: EngineAPIService) {
     this._enginev2 = engine;
+    this.getOrThrowWorkspaceImpl().engine = engine;
   }
 
   async setupViews(context: vscode.ExtensionContext) {

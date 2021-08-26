@@ -176,6 +176,7 @@ function MenuView({
 
   return (
     <Menu
+      key={String(collapsed)}
       mode="inline"
       {...(!collapsed && {
         openKeys: expandKeys,

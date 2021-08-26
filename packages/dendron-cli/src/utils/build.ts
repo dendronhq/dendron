@@ -322,11 +322,8 @@ export class BuildUtils {
     const pkgPath = this.getPluginRootPath();
     const { name, version } = await this.getPkgMeta({ pkgPath });
     const pkg = `${name}-${version}.vsix`;
-    await $(
-      `aws s3 cp $package s3://artifacts-prod-artifactb7980f61-19orqnnuurvwy/publish/$${pkg}`
-    );
-    console.log(
-      `https://artifacts-prod-artifactb7980f61-19orqnnuurvwy.s3.amazonaws.com/publish/${pkg}`
-    );
+    const bucket = "org-dendron-public-assets";
+    await $(`aws s3 cp $package s3://${bucket}/publish/$${pkg}`);
+    console.log(`https://${bucket}.s3.amazonaws.com/publish/${pkg}`);
   }
 }

@@ -1,10 +1,9 @@
-import { ALL_MIGRATIONS, MigrationChangeSetStatus, Migrations, MigrationServce } from "@dendronhq/engine-server";
+import { ALL_MIGRATIONS, MigrationChangeSetStatus, Migrations, MigrationServce, WorkspaceService } from "@dendronhq/engine-server";
 import * as vscode from "vscode";
 import _ from "lodash";
 import { DENDRON_COMMANDS } from "../constants";
 import { BasicCommand } from "./base";
-import { NodeJSUtils } from "@dendronhq/common-server";
-import { getWS } from "../workspace";
+import { DendronWorkspace, getWS } from "../workspace";
 
 type CommandOpts = {
   version: string;
@@ -46,6 +45,8 @@ export class RunMigrationCommand extends BasicCommand<
     const { version } = opts;
     const migrationsToRun: Migrations[] = _.filter(ALL_MIGRATIONS, (migration) => migration.version === version);
     const ws = getWS();
+    const wsRoot = DendronWorkspace.wsRoot();
+    const wsService = new WorkspaceService({ wsRoot });
     const response = vscode.window.withProgress(
       {
         location: vscode.ProgressLocation.Notification,
@@ -53,15 +54,15 @@ export class RunMigrationCommand extends BasicCommand<
         cancellable: false,
       },
       async () => {
-        const out = await MigrationServce.applyMigrationChanges({
+        const out = await MigrationServce.applyMigrationRules({
+          currentVersion: version,
           previousVersion: "0.0.0",
-          currentVersion: NodeJSUtils.getVersionFromPkg(),
-          migration: migrationsToRun[0],
-          dendronConfig: ws.getEngine().config,
+          migrations: migrationsToRun,
+          wsService,
+          logger: this.L,
           wsConfig: await ws.getWorkspaceSettings(),
-          wsService: ws.workspaceService!,
-          logger: this.L
-        });
+          dendronConfig: ws.config
+        })
         return out;
       }
     ).then((resp) => {

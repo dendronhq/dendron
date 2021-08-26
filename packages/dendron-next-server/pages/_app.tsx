@@ -2,6 +2,7 @@ import {
   DMessageSource,
   DMessageType,
   OnDidChangeActiveTextEditorMsg,
+  SeedBrowserMessageType,
   ThemeMessageType,
 } from "@dendronhq/common-all";
 import {
@@ -116,6 +117,10 @@ function AppVSCode({ Component, pageProps }: any) {
       const { styles } = cmsg.data;
       logger.info({ ctx, styles, msg: "styles" });
       ideDispatch(ideSlice.actions.setGraphStyles(styles));
+    } else if (msg.type === SeedBrowserMessageType.onSeedStateChange) {
+      const seeds = msg.data.msg;
+      logger.info({ ctx, seeds, msg: "seeds" });
+      ideDispatch(ideSlice.actions.setSeedsInWorkspace(seeds));
     } else {
       logger.error({ ctx, msg: "unknown message" });
     }

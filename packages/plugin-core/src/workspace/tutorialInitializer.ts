@@ -9,12 +9,13 @@ import fs from "fs-extra";
 import path from "path";
 import rif from "replace-in-file";
 import * as vscode from "vscode";
-import { AnalyticsUtils } from "../utils/analytics";
-import { DendronWorkspace } from "../workspace";
-import { GLOBAL_STATE, WORKSPACE_ACTIVATION_CONTEXT } from "../constants";
+import { WORKSPACE_ACTIVATION_CONTEXT } from "../constants";
 import { Logger } from "../logger";
+import { StateService } from "../services/stateService";
 import { VSCodeUtils } from "../utils";
+import { AnalyticsUtils } from "../utils/analytics";
 import { MarkdownUtils } from "../utils/md";
+import { DendronWorkspace } from "../workspace";
 import { BlankInitializer } from "./blankInitializer";
 import { WorkspaceInitializer } from "./workspaceInitializer";
 
@@ -35,9 +36,8 @@ export class TutorialInitializer
 
     const ws = DendronWorkspace.instance();
 
-    await ws.updateGlobalState(
-      GLOBAL_STATE.WORKSPACE_ACTIVATION_CONTEXT,
-      WORKSPACE_ACTIVATION_CONTEXT.TUTORIAL.toString()
+    StateService.instance().setActivationContext(
+      WORKSPACE_ACTIVATION_CONTEXT.TUTORIAL
     );
 
     const dendronWSTemplate = VSCodeUtils.joinPath(
@@ -95,8 +95,7 @@ export class TutorialInitializer
       });
     }
 
-    await opts.ws.updateGlobalState(
-      GLOBAL_STATE.WORKSPACE_ACTIVATION_CONTEXT,
+    StateService.instance().setActivationContext(
       WORKSPACE_ACTIVATION_CONTEXT.NORMAL
     );
 

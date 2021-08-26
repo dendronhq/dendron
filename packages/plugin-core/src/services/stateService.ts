@@ -1,7 +1,12 @@
 import { ExtensionContext } from "vscode";
-import { GLOBAL_STATE, WORKSPACE_STATE } from "../constants";
+import {
+  GLOBAL_STATE,
+  WORKSPACE_ACTIVATION_CONTEXT,
+  WORKSPACE_STATE,
+} from "../constants";
 import * as vscode from "vscode";
 import { VSCodeUtils } from "../utils";
+import _ from "lodash";
 
 let _StateService: StateService | undefined;
 
@@ -54,6 +59,27 @@ export class StateService {
 
   setWorkspaceVersion(version: string) {
     return this.workspaceState.update(WORKSPACE_STATE.VERSION, version);
+  }
+
+  getActivationContext(): WORKSPACE_ACTIVATION_CONTEXT {
+    return (
+      this.globalState.get<WORKSPACE_ACTIVATION_CONTEXT>(
+        GLOBAL_STATE.WORKSPACE_ACTIVATION_CONTEXT
+      ) ?? WORKSPACE_ACTIVATION_CONTEXT.NORMAL
+    );
+  }
+
+  setActivationContext(context: WORKSPACE_ACTIVATION_CONTEXT) {
+    return this.globalState.update(
+      GLOBAL_STATE.WORKSPACE_ACTIVATION_CONTEXT,
+      context
+    );
+  }
+
+  resetGlobalState() {
+    _.values(GLOBAL_STATE).map((k) => {
+      return this.globalState.update(k, undefined);
+    });
   }
 
   showTelemetryNotice() {

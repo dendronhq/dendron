@@ -218,6 +218,7 @@ runTest("add", () => {
 runTest("init", () => {
   const cmd = SeedCommands.INIT;
   const seed: SeedConfig = {
+    id: "dendron.foo",
     name: "foo",
     publisher: "dendron",
     description: "some foo",
@@ -234,6 +235,7 @@ runTest("init", () => {
       await runEngineTestV5(
         async ({ engine, wsRoot }) => {
           await runSeedCmd({
+            id: "dendron.foo",
             cmd,
             engine,
             wsRoot,
@@ -285,6 +287,7 @@ runTest("init", () => {
 
     const runInit = async (opts: { engine: DEngineClient; wsRoot: string }) => {
       const resp = await runSeedCmd({
+        id: "dendron.foo",
         cmd,
         mode,
         config: seed,

@@ -1,10 +1,10 @@
 import { DVault } from "@dendronhq/common-all";
 import { WorkspaceService } from "@dendronhq/engine-server";
-import _ from "lodash";
-import * as vscode from "vscode";
+import { WORKSPACE_ACTIVATION_CONTEXT } from "../constants";
+import { StateService } from "../services/stateService";
 import { DendronWorkspace } from "../workspace";
-import { GLOBAL_STATE, WORKSPACE_ACTIVATION_CONTEXT } from "../constants";
 import { BlankInitializer } from "./blankInitializer";
+import { SeedBrowserInitializer } from "./seedBrowserInitializer";
 import { TutorialInitializer } from "./tutorialInitializer";
 
 /**
@@ -35,18 +35,16 @@ export type WorkspaceInitializer = {
  * Factory class for creating WorkspaceInitializer types
  */
 export class WorkspaceInitFactory {
-  static create(ws: DendronWorkspace): WorkspaceInitializer | undefined {
-    if (this.isTutorialWorkspaceLaunch(ws.context)) {
-      return new TutorialInitializer();
+  static create(): WorkspaceInitializer | undefined {
+    switch (StateService.instance().getActivationContext()) {
+      case WORKSPACE_ACTIVATION_CONTEXT.TUTORIAL:
+        return new TutorialInitializer();
+
+      case WORKSPACE_ACTIVATION_CONTEXT.SEED_BROWSER:
+        return new SeedBrowserInitializer();
+
+      default:
+        return new BlankInitializer();
     }
-
-    return new BlankInitializer();
-  }
-
-  static isTutorialWorkspaceLaunch(context: vscode.ExtensionContext): boolean {
-    const state = context.globalState.get<string | undefined>(
-      GLOBAL_STATE.WORKSPACE_ACTIVATION_CONTEXT
-    );
-    return state === WORKSPACE_ACTIVATION_CONTEXT.TUTORIAL.toString();
   }
 }

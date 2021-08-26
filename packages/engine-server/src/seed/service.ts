@@ -68,9 +68,13 @@ export class SeedService {
   async addSeed({
     id,
     metaOnly,
+    onUpdatingWorkspace,
+    onUpdatedWorkspace,
   }: {
     id: string;
     metaOnly?: boolean;
+    onUpdatingWorkspace?: () => Promise<void>;
+    onUpdatedWorkspace?: () => Promise<void>;
   }): Promise<SeedSvcResp> {
     const seedOrError = await this.getSeedOrErrorFromId(id);
     if (seedOrError instanceof DendronError) {
@@ -86,7 +90,12 @@ export class SeedService {
     if (!metaOnly) {
       seedPath = await this.cloneSeed({ seed: seedOrError });
     }
-    await this.addSeedMetadata({ seed: seedOrError, wsRoot: this.wsRoot });
+    await this.addSeedMetadata({
+      seed: seedOrError,
+      wsRoot: this.wsRoot,
+      onUpdatingWorkspace,
+      onUpdatedWorkspace,
+    });
     return { data: { seedPath, seed: seedOrError } };
   }
 
@@ -97,9 +106,13 @@ export class SeedService {
   async addSeedMetadata({
     seed,
     wsRoot,
+    onUpdatingWorkspace,
+    onUpdatedWorkspace,
   }: {
     seed: SeedConfig;
     wsRoot: string;
+    onUpdatingWorkspace?: () => Promise<void>;
+    onUpdatedWorkspace?: () => Promise<void>;
   }) {
     const ws = new WorkspaceService({ wsRoot });
     const config = ws.config;
@@ -118,6 +131,8 @@ export class SeedService {
       updateWorkspace: true,
       config,
       updateConfig: true,
+      onUpdatingWorkspace,
+      onUpdatedWorkspace,
     });
 
     return { seed };
@@ -194,7 +209,15 @@ export class SeedService {
     return resp;
   }
 
-  async removeSeed({ id }: { id: string }): Promise<SeedSvcResp> {
+  async removeSeed({
+    id,
+    onUpdatingWorkspace,
+    onUpdatedWorkspace,
+  }: {
+    id: string;
+    onUpdatingWorkspace?: () => Promise<void>;
+    onUpdatedWorkspace?: () => Promise<void>;
+  }): Promise<SeedSvcResp> {
     const ws = new WorkspaceService({ wsRoot: this.wsRoot });
     const config = ws.config;
     if (!_.has(config.seeds, id)) {
@@ -219,21 +242,36 @@ export class SeedService {
       fs.removeSync(spath);
     }
 
-    await this.removeSeedMetadata({ seed: seedOrError });
-
+    await this.removeSeedMetadata({
+      seed: seedOrError,
+      onUpdatingWorkspace,
+      onUpdatedWorkspace,
+    });
     return { data: { seed: seedOrError } };
   }
 
-  async removeSeedMetadata({ seed }: { seed: SeedConfig }) {
+  async removeSeedMetadata({
+    seed,
+    onUpdatingWorkspace,
+    onUpdatedWorkspace,
+  }: {
+    seed: SeedConfig;
+    onUpdatingWorkspace?: () => Promise<void>;
+    onUpdatedWorkspace?: () => Promise<void>;
+  }) {
     const ws = new WorkspaceService({ wsRoot: this.wsRoot });
-    await ws.removeVault({
-      vault: SeedUtils.seed2Vault({ seed }),
-      updateWorkspace: true,
-    });
+
     // remove seed entry
     const config = ws.config;
     delete (config.seeds || {})[SeedUtils.getSeedId(seed)];
     ws.setConfig(config);
+
+    await ws.removeVault({
+      vault: SeedUtils.seed2Vault({ seed }),
+      updateWorkspace: true,
+      onUpdatingWorkspace,
+      onUpdatedWorkspace,
+    });
   }
 
   isSeedInWorkspace(id: string): boolean {

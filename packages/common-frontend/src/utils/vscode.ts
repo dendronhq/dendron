@@ -1,4 +1,9 @@
-import { DMessage, VSCodeMessage } from "@dendronhq/common-all";
+import {
+  DMessage,
+  DMessageSource,
+  DMessageType,
+  VSCodeMessage,
+} from "@dendronhq/common-all";
 import { useEffect } from "react";
 
 /**
@@ -18,7 +23,7 @@ export const useVSCodeMessage = (setMsgHook: (msg: VSCodeMessage) => void) => {
     if (window.parent !== window) {
       // If using TypeScript, next line should be:
       // let listener = (e: KeyboardEvent) =>
-      let keyListener = (e: any) => {
+      const keyListener = (e: any) => {
         console.log("sending key event");
         window.parent.postMessage(
           JSON.stringify({
@@ -41,6 +46,13 @@ export const useVSCodeMessage = (setMsgHook: (msg: VSCodeMessage) => void) => {
         window.addEventListener("keydown", keyListener);
       }
     }
+
+    postVSCodeMessage({
+      type: DMessageType.MESSAGE_DISPATCHER_READY,
+      data: {},
+      source: DMessageSource.webClient,
+    });
+
     return () => {
       // @ts-ignore
       window.removeEventListener("message", listener);

@@ -1,6 +1,7 @@
 import _ from "lodash";
 import { window } from "vscode";
-import { DENDRON_COMMANDS, GLOBAL_STATE, WORKSPACE_STATE } from "../constants";
+import { DENDRON_COMMANDS, WORKSPACE_STATE } from "../constants";
+import { StateService } from "../services/stateService";
 import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 
@@ -52,21 +53,13 @@ export class ResetConfigCommand extends BasicCommand<
     );
   }
 
-  async resetGlobalState() {
-    return Promise.all(
-      _.values(GLOBAL_STATE).map((k) => {
-        return DendronWorkspace.instance().updateGlobalState(k, undefined);
-      })
-    );
-  }
-
   async execute(opts: CommandOpts) {
     const scope = opts.scope;
     if (scope === "all") {
-      await this.resetGlobalState();
+      StateService.instance().resetGlobalState();
       await this.resetWorkspaceState();
     } else if (scope === "global") {
-      await this.resetGlobalState();
+      StateService.instance().resetGlobalState();
     } else if (scope === "local") {
       await this.resetWorkspaceState();
     } else {

@@ -16,6 +16,7 @@ type InitialState = {
       ready: boolean;
     };
   };
+  seedsInWorkspace: string[] | undefined; // Contains the seed ID's
 };
 
 export { InitialState as IDEState };
@@ -31,6 +32,7 @@ export const ideSlice = createSlice({
         ready: false,
       },
     },
+    seedsInWorkspace: undefined,
   } as InitialState,
   reducers: {
     setNoteActive: (state, action: PayloadAction<NoteProps | undefined>) => {
@@ -48,6 +50,9 @@ export const ideSlice = createSlice({
     ) => {
       const { key, ready } = action.payload;
       state.views[key].ready = ready;
+    },
+    setSeedsInWorkspace: (state, action: PayloadAction<string[]>) => {
+      state.seedsInWorkspace = action.payload;
     },
   },
 });

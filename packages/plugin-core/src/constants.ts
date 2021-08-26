@@ -759,6 +759,15 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docLink: "",
     docPreview: ``,
   },
+  SEED_BROWSE: {
+    key: "dendron.seedBrowse",
+    title: `${CMD_PREFIX} Browse the Seed Registry`,
+    group: "seeds",
+    desc: "Browse and Add seeds from the Registry to the current workspace",
+    docs: [""].join("\n"),
+    docLink: "",
+    docPreview: ``,
+  },
   // --- Dev
   DOCTOR: {
     key: "dendron.dev.doctor",
@@ -833,6 +842,7 @@ export enum WORKSPACE_ACTIVATION_CONTEXT {
   // UNSET - Indicates this is the first Workspace Launch
   "NORMAL", // Normal Launch; No Special Behavior
   "TUTORIAL", // Launch the Tutorial
+  "SEED_BROWSER", // Open with Seed Browser Webview
 }
 
 // export const GLOBAL_STATE = {

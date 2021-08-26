@@ -2,6 +2,7 @@ import { ENGINE_HOOKS } from "../../presets";
 import { runEngineTestV5 } from "../../engine";
 import { GithubImportPod, GithubPublishPod } from "@dendronhq/pods-core";
 import { NoteProps, NoteUtils, VaultUtils } from "@dendronhq/common-all";
+import _ from "lodash";
 
 describe("GithubPod import pod", () => {
   let result: any;
@@ -156,7 +157,6 @@ describe("GithubPod import pod", () => {
 
 describe("github publish pod", () => {
   let issue: NoteProps;
-
   beforeEach(() => {
     issue = {
       id: "nCobWD86N10jWq6r",
@@ -237,6 +237,38 @@ describe("github publish pod", () => {
         expect(resp).toEqual(
           "Github: The labels in the tag does not belong to selected repository"
         );
+      },
+
+      { expect, preSetupHook: ENGINE_HOOKS.setupBasic }
+    );
+  });
+
+  test("create Issue", async () => {
+    await runEngineTestV5(
+      async ({ engine, vaults, wsRoot }) => {
+        const pod = new GithubPublishPod();
+        const vaultName = VaultUtils.getName(vaults[0]);
+        pod.getLabelsFromGithub = jest
+          .fn()
+          .mockReturnValue({ "area.misc": "sfgdjio", "type.bug": "gsfahhj" });
+        pod.createIssue = jest.fn().mockReturnValue("Issue Created");
+        const scratchIssue: NoteProps = _.omit(issue, "custom");
+        scratchIssue.custom = {};
+        await engine.writeNote(scratchIssue, { newNode: true });
+        const resp = await pod.execute({
+          engine,
+          vaults,
+          wsRoot,
+          config: {
+            fname: "foo",
+            vaultName,
+            dest: "stdout",
+            token: "asjska",
+            repository: "dendron",
+            owner: "dendronhq",
+          },
+        });
+        expect(resp).toEqual("Github: Issue Created");
       },
 
       { expect, preSetupHook: ENGINE_HOOKS.setupBasic }

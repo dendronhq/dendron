@@ -4,7 +4,7 @@ import fs from "fs-extra";
 import _ from "lodash";
 import _md from "markdown-it";
 import path from "path";
-import { Uri, ViewColumn, window } from "vscode";
+import { ProgressLocation, Uri, ViewColumn, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { FileWatcher } from "../fileWatcher";
 import { VSCodeUtils } from "../utils";
@@ -173,36 +173,45 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
       return;
     }
     try {
-      window.showInformationMessage("refactoring...");
       if (ws.fileWatcher) {
         ws.fileWatcher.pause = true;
       }
       const renameCmd = new RenameNoteV2aCommand();
-      const out = await _.reduce<
-        typeof operations[0],
-        Promise<RenameNoteOutputV2a>
-      >(
-        operations,
-        async (resp, op) => {
-          const acc = await resp;
-          this.L.info({
-            ctx,
-            orig: op.oldUri.fsPath,
-            replace: op.newUri.fsPath,
-          });
-          const resp2 = await renameCmd.execute({
-            files: [op],
-            silent: true,
-            closeCurrentFile: false,
-            openNewFile: false,
-            noModifyWatcher: true,
-          });
-          acc.changed = resp2.changed.concat(acc.changed);
-          return acc;
+      const out = await window.withProgress(
+        {
+          location: ProgressLocation.Notification,
+          title: "Refactoring...",
+          cancellable: false,
         },
-        Promise.resolve({
-          changed: [],
-        })
+        async () => {
+          const out = await _.reduce<
+            typeof operations[0],
+            Promise<RenameNoteOutputV2a>
+          >(
+            operations,
+            async (resp, op) => {
+              const acc = await resp;
+              this.L.info({
+                ctx,
+                orig: op.oldUri.fsPath,
+                replace: op.newUri.fsPath,
+              });
+              const resp2 = await renameCmd.execute({
+                files: [op],
+                silent: true,
+                closeCurrentFile: false,
+                openNewFile: false,
+                noModifyWatcher: true,
+              });
+              acc.changed = resp2.changed.concat(acc.changed);
+              return acc;
+            },
+            Promise.resolve({
+              changed: [],
+            })
+          );
+          return out;
+        }
       );
       return { changed: _.uniqBy(out.changed, (ent) => ent.note.fname) };
     } finally {

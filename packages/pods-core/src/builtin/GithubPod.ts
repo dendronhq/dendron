@@ -18,6 +18,7 @@ import {
   stringifyError,
   Time,
   DEngineClient,
+  ERROR_SEVERITY,
 } from "@dendronhq/common-all";
 
 const ID = "dendron.github";
@@ -114,7 +115,7 @@ export class GithubImportPod extends ImportPod<GithubImportPodConfig> {
     }) as JSONSchemaType<GithubImportPodConfig>;
   }
 
-  /*
+  /**
    * method to fetch issues from github graphql api
    */
   getDataFromGithub = async (opts: Partial<GithubAPIOpts>) => {
@@ -207,7 +208,7 @@ export class GithubImportPod extends ImportPod<GithubImportPodConfig> {
     }
   }
 
-  /*
+  /**
    * method to add fromtmatter to notes: url, status and tags
    */
   addFrontMatterToData = (
@@ -239,10 +240,9 @@ export class GithubImportPod extends ImportPod<GithubImportPodConfig> {
     });
   };
 
-  /*
+  /**
    * method to get notes that are not already present in the vault
    */
-
   getNewNotes(
     notes: NoteProps[],
     engine: DEngineClient,
@@ -260,7 +260,7 @@ export class GithubImportPod extends ImportPod<GithubImportPodConfig> {
     });
   }
 
-  /*
+  /**
    * method to update the notes whose status has changed
    */
   getUpdatedNotes(
@@ -401,7 +401,6 @@ export class GithubPublishPod extends PublishPod<GithubPublishPodConfig> {
    * method to get all the labels of a repository in key value pair
    *
    */
-
   getLabelsFromGithub = async (opts: Partial<GithubPublishPodConfig>) => {
     const { owner, repository, token } = opts;
     let labelsHashMap: any;
@@ -440,7 +439,6 @@ export class GithubPublishPod extends PublishPod<GithubPublishPodConfig> {
   /**
    * method to update the issue in github
    */
-
   updateIssue = async (opts: {
     issueID: string;
     token: string;
@@ -477,7 +475,6 @@ export class GithubPublishPod extends PublishPod<GithubPublishPodConfig> {
   /**
    * method to get the repository id
    */
-
   getRepositoryId = async (opts: Partial<GithubPublishPodConfig>) => {
     let repositoryId: string;
     const { owner, repository, token } = opts;
@@ -495,7 +492,10 @@ export class GithubPublishPod extends PublishPod<GithubPublishPodConfig> {
       });
       repositoryId = result.repository.id;
     } catch (error: any) {
-      throw new DendronError({ message: stringifyError(error) });
+      throw new DendronError({
+        message: stringifyError(error),
+        severity: ERROR_SEVERITY.MINOR,
+      });
     }
     return repositoryId;
   };
@@ -503,7 +503,6 @@ export class GithubPublishPod extends PublishPod<GithubPublishPodConfig> {
   /**
    * method to create an issue in github
    */
-
   createIssue = async (opts: {
     token: string;
     labelIDs: string[];
@@ -547,7 +546,10 @@ export class GithubPublishPod extends PublishPod<GithubPublishPodConfig> {
       }
     } catch (error: any) {
       resp = stringifyError(error);
-      throw new DendronError({ message: stringifyError(error) });
+      throw new DendronError({
+        message: stringifyError(error),
+        severity: ERROR_SEVERITY.MINOR,
+      });
     }
     return resp;
   };

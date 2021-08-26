@@ -58,28 +58,6 @@ hr {
 }
 
 .ant-menu-submenu {
-
-	// only allow custom element to be gesture target
-	[data-expandedicon="true"] {
-		svg {
-			pointer-events: none;
-		}
-	}
-
-	// adjust icon position(open/close) for inline Menu
-	&.ant-menu-submenu-inline.ant-menu-submenu-open {
-		> .ant-menu-submenu-title > [data-expandedicon="true"] {
-			transform: rotate(180deg);
-		}
-	}
-
-	// adjust icon position for collabsed/vertical Menu
-	&.ant-menu-submenu-vertical {
-		> .ant-menu-submenu-title > [data-expandedicon="true"] {
-			transform: rotate(-90deg);
-		}
-	}
-
 	> .ant-menu-submenu-title:after {
 		position: absolute;
 		top: 0;

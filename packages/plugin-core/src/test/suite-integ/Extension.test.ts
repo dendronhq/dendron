@@ -78,17 +78,20 @@ function lapsedMessageTest({
   firstWsInitialize,
   lapsedUserMsgSendTime,
   shouldDisplayMessage,
+  workspaceActivated = false,
 }: {
   done: Mocha.Done;
   firstInstall?: number;
   firstWsInitialize?: number;
   lapsedUserMsgSendTime?: number;
+  workspaceActivated?: boolean;
   shouldDisplayMessage: boolean;
 }) {
   const svc = MetadataService.instance();
   svc.setMeta("firstInstall", firstInstall);
   svc.setMeta("firstWsInitialize", firstWsInitialize);
   svc.setMeta("lapsedUserMsgSendTime", lapsedUserMsgSendTime);
+  svc.setMeta("dendronWorkspaceActivated", workspaceActivated);
   expect(shouldDisplayLapsedUserMsg()).toEqual(shouldDisplayMessage);
   done();
 }

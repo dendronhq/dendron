@@ -121,7 +121,6 @@ export class InsertNoteLinkCommand extends BasicCommand<
         if (!_.isUndefined(range)) {
           await VSCodeUtils.deleteRange(editor.document, range as vscode.Range);
         } else {
-          console.log({mode: opts.aliasMode})
           vscode.window.showWarningMessage("Selection doesn't contain any text. Ignoring aliases.")
         }
         links = opts.notes.map((note) => {

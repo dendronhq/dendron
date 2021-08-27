@@ -496,12 +496,17 @@ export class NoteUtils {
       value: string;
       type: "header" | "blockAnchor";
     };
+    alias?: {
+      mode: "snippet" | "title" | "value" | "none";
+      value?: string;
+      tabStopIndex?: number;
+    }
     useVaultPrefix?: boolean;
-    useTitle?: boolean;
   }): string {
-    const { note, anchor, useVaultPrefix, useTitle } = _.defaults(opts, {
-      useTitle: true,
-    });
+    const { note, anchor, useVaultPrefix, alias } = opts;
+    const aliasMode = alias?.mode;
+    const aliasValue = alias?.value;
+    const tabStopIndex = alias?.tabStopIndex;
     let { title, fname, vault } = note;
     let suffix = "";
     if (anchor) {
@@ -518,8 +523,26 @@ export class NoteUtils {
     const vaultPrefix = useVaultPrefix
       ? `${CONSTANTS.DENDRON_DELIMETER}${VaultUtils.getName(vault)}/`
       : "";
-    const titlePrefix = useTitle ? title + "|" : "";
-    const link = `[[${titlePrefix}${vaultPrefix}${fname}${suffix}]]`;
+    
+    let aliasPrefix = "";
+
+    switch(aliasMode) {
+      case "snippet": {
+        aliasPrefix = `\${${tabStopIndex}:alias}|`;
+        break;
+      }
+      case "title": {
+        aliasPrefix = `${title}|`
+        break;
+      }
+      case "value": {
+        aliasPrefix = aliasValue !== "" ? `${aliasValue}|` : "";
+        break;
+      }
+      default:
+        break;
+    }
+    const link = `[[${aliasPrefix}${vaultPrefix}${fname}${suffix}]]`;
     return link;
   }
 

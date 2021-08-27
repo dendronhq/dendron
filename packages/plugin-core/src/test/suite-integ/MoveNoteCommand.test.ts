@@ -592,7 +592,7 @@ suite("MoveNoteCommand", function () {
           provider: mockProvider,
           initialValue,
         });
-        expect(lc.quickpick.buttons[0].pressed).toBeFalsy();
+        expect(_.isEmpty(lc.quickpick.buttons)).toBeTruthy();
 
         done();
       },

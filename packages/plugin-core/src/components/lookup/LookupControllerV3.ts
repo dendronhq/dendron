@@ -70,7 +70,7 @@ export class LookupControllerV3 {
       ? isMultiVault
       : isMultiVault && opts!.vaultButtonPressed; 
     const maybeVaultSelectButton =
-      opts?.nodeType === "note" ? [VaultSelectButton.create(maybeVaultSelectButtonPressed)] : [];
+      opts?.nodeType === "note" && isMultiVault ? [VaultSelectButton.create(maybeVaultSelectButtonPressed)] : [];
     const buttons = opts?.buttons || maybeVaultSelectButton;
     const extraButtons = opts?.extraButtons || [];
     return new LookupControllerV3({

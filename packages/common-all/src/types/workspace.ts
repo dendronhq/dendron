@@ -108,6 +108,19 @@ export type LookupConfig = {
   note: NoteLookupConfig;
 };
 
+export enum InsertNoteLinkAliasMode {
+  "snippet" = "snippet",
+  "selection" = "selection",
+  "title" = "title",
+  "prompt" = "prompt",
+  "none" = "none",
+}
+
+export type InsertNoteLinkConfig = {
+  aliasMode: InsertNoteLinkAliasMode;
+  multiSelect: boolean;
+}
+
 export type JournalConfig = {
   dailyDomain: string;
   /**
@@ -157,6 +170,8 @@ export type DendronConfig = {
   journal: JournalConfig;
 
   scratch?: ScratchConfig;
+
+  insertNoteLink?: InsertNoteLinkConfig;
 
   /**
    * Workspaces

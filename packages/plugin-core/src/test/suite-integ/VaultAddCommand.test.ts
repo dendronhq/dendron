@@ -90,7 +90,7 @@ suite("VaultAddCommand", function () {
           expect(
             FileTestUtils.assertInFile({
               fpath: gitIgnoreInsideVault,
-              match: [".dendron.cache.json"],
+              match: [".dendron.cache.*"],
             })
           ).toBeTruthy();
           done();
@@ -153,7 +153,7 @@ suite("VaultAddCommand", function () {
           expect(
             FileTestUtils.assertInFile({
               fpath: gitIgnoreInsideVault,
-              match: [".dendron.cache.json"],
+              match: [".dendron.cache.*"],
             })
           ).toBeTruthy();
           done();
@@ -253,7 +253,7 @@ suite("VaultAddCommand", function () {
             fs.readFileSync(path.join(vpath, ".gitignore"), {
               encoding: "utf8",
             })
-          ).toEqual("\n.dendron.cache.json");
+          ).toEqual("\n.dendron.cache.*");
           checkVaults(
             {
               wsRoot,

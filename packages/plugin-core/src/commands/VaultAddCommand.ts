@@ -210,7 +210,7 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
       ".gitignore"
     );
     fs.ensureFileSync(gitIgnoreInsideVault);
-    fs.appendFileSync(gitIgnoreInsideVault, "\n.dendron.cache.json", {
+    fs.appendFileSync(gitIgnoreInsideVault, "\n.dendron.cache.*", {
       encoding: "utf8",
     });
   }
@@ -240,7 +240,7 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
     //check for .gitignore inside vault
     const gitIgnoreInsideVault = path.join(wsRoot, vault.fsPath, ".gitignore");
     fs.ensureFileSync(gitIgnoreInsideVault);
-    fs.appendFileSync(gitIgnoreInsideVault, "\n.dendron.cache.json", {
+    fs.appendFileSync(gitIgnoreInsideVault, "\n.dendron.cache.*", {
       encoding: "utf8",
     });
     return;

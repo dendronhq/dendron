@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - prerelease/*
-      - enhance/build-automation
 
 jobs:
   build:

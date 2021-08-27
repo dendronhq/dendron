@@ -32,6 +32,12 @@ export class GoogleAuthController implements TokenMethods {
     const { code, clientId, clientSecret } = opts;
     const engine = MemoryStore.instance().getEngine();
     const { wsRoot } = engine;
+    const configPath = path.join(
+      wsRoot,
+      "pods",
+      "dendron.gdoc",
+      "config.import.yml"
+    );
     const port = await fs.readFile(path.join(wsRoot, ".dendron.port"), {
       encoding: "utf8",
     });
@@ -50,7 +56,7 @@ export class GoogleAuthController implements TokenMethods {
       });
       if (!_.isEmpty(data)) {
         const opts = {
-          path: path.join(wsRoot, "pods", "dendron.gdoc", "config.import.yml"),
+          path: configPath,
           tokens: {
             accessToken: data.access_token,
             refreshToken: data.refresh_token,
@@ -64,6 +70,7 @@ export class GoogleAuthController implements TokenMethods {
 
       return resp;
     } catch (err) {
+      fs.unlink(configPath);
       return {
         error: new DendronError({
           message: `Authorization Failed. ${JSON.stringify(err)}`,

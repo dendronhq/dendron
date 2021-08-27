@@ -76,6 +76,26 @@ export class StateService {
     );
   }
 
+  getMRUGoogleDocs(): Promise<string[] | undefined> | undefined {
+    return this.globalState.get(GLOBAL_STATE.MRUDocs);
+  }
+
+  updateMRUGoogleDocs(value: any) {
+    return this.globalState.update(GLOBAL_STATE.MRUDocs, value);
+  }
+
+  /**
+   * added generic method for cases when the keys and values both are dynamic
+   * eg: hierarchy destination for imported google doc.
+   */
+  getGlobalState(key: string): Promise<string> | undefined {
+    return this.globalState.get(key);
+  }
+
+  updateGlobalState(key: string, value: any) {
+    return this.globalState.update(key, value);
+  }
+
   resetGlobalState() {
     _.values(GLOBAL_STATE).map((k) => {
       return this.globalState.update(k, undefined);

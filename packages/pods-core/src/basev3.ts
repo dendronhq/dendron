@@ -29,7 +29,7 @@ export type PodOpts<T> = {
     showDocumentQuickPick: (
       arg0: string[]
     ) => Promise<{ label: string } | undefined>;
-    getGlobalState: (arg0: any) => Promise<string | undefined>;
+    getGlobalState: (arg0: any) => Promise<string | undefined> | undefined;
     updateGlobalState: (arg0: any) => Promise<void>;
   };
 } & WorkspaceOpts;

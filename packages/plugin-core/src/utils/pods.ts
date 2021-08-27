@@ -6,9 +6,11 @@ import * as queryString from "query-string";
 import { DendronWorkspace } from "../workspace";
 import path from "path";
 import fs from "fs-extra";
-import { VSCodeUtils } from "../utils";
+import { clipboard, VSCodeUtils } from "../utils";
 import { NoteUtils, NoteProps } from "@dendronhq/common-all";
 import _ from "lodash";
+import { GOOGLE_OAUTH_ID } from "../types/global";
+import { StateService } from "../services/stateService";
 
 export type PodQuickPickItemV4 = QuickPickItem & PodItemV4;
 
@@ -34,24 +36,23 @@ export const launchGoogleOAuthFlow = async () => {
   );
 
   const stringifiedParams = queryString.stringify({
-    client_id:
-      "587163973906-od2u5uaop9b2u6ero5ltl342hh38frth.apps.googleusercontent.com",
+    client_id: GOOGLE_OAUTH_ID,
     redirect_uri: `http://localhost:${port}/api/oauth/getToken?service=google`,
     scope: gdocRequiredScopes.join(" "), // space seperated string
     response_type: "code",
     access_type: "offline",
     prompt: "consent",
   });
-  await open(
-    `https://accounts.google.com/o/oauth2/v2/auth?${stringifiedParams}`
-  );
+  const link = `https://accounts.google.com/o/oauth2/v2/auth?${stringifiedParams}`;
+  await open(link);
+  clipboard.writeText(link);
 };
 export const showDocumentQuickPick = async (
   docs: string[]
 ): Promise<{ label: string } | undefined> => {
   /** Least Recently Used Documents */
   let MRUDocs: string[] | undefined =
-    await DendronWorkspace.instance().getGlobalState(GLOBAL_STATE.MRUDocs);
+    await StateService.instance().getMRUGoogleDocs();
   MRUDocs = _.isUndefined(MRUDocs) ? [] : MRUDocs;
 
   docs = docs.filter((doc) => !MRUDocs?.includes(doc));
@@ -86,21 +87,19 @@ export const updateGlobalState = async (opts: {
   value: any;
 }): Promise<void> => {
   const { key, value } = opts;
-  DendronWorkspace.instance().updateGlobalState(key, value);
+  StateService.instance().updateGlobalState(key, value);
 
   /** to update the Most Recently Used Doc list with most recent doc at first */
   let MRUDocs: string[] | undefined =
-    await DendronWorkspace.instance().getGlobalState(GLOBAL_STATE.MRUDocs);
+    await StateService.instance().getMRUGoogleDocs();
   MRUDocs = _.isUndefined(MRUDocs)
     ? []
     : [key, ...MRUDocs.filter((doc) => doc !== key)];
-  DendronWorkspace.instance().updateGlobalState(GLOBAL_STATE.MRUDocs, MRUDocs);
+  StateService.instance().updateMRUGoogleDocs(MRUDocs);
 };
 
-export const getGlobalState = async (
-  key: GLOBAL_STATE
-): Promise<string | undefined> => {
-  return DendronWorkspace.instance().getGlobalState(key);
+export const getGlobalState = async (key: GLOBAL_STATE) => {
+  return StateService.instance().getGlobalState(key);
 };
 
 export const openFileInEditor = async (note: NoteProps): Promise<void> => {

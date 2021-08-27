@@ -57,15 +57,15 @@ jobs:
           name: vsix
           path: ./packages/plugin-core/*.vsix
 
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.DENDRON_BOT_S3_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.DENDRON_BOT_S3_ACCESS_KEY }}
-        aws-region: us-east-1
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.DENDRON_BOT_S3_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.DENDRON_BOT_S3_ACCESS_KEY }}
+          aws-region: us-east-1
 
-    - name: Publish VSIX to S3
-      run: |
+      - name: Publish VSIX to S3
+        run: |
           version=`cat ./packages/plugin-core/package.json | jq ".version" -r`
           name=`cat ./packages/plugin-core/package.json | jq ".displayName" -r`
           package="$name-$version.vsix"

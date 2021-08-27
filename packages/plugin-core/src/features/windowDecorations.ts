@@ -234,7 +234,12 @@ function decorateBlockAnchor(blockAnchor: BlockAnchor) {
   return decoration;
 }
 
+const WIKILINK_DECORATION_OPTIONS = {
+  color: new ThemeColor("editorLink.activeForeground"),
+};
+
 export const DECORATION_TYPE_TAG = window.createTextEditorDecorationType({
+  ...WIKILINK_DECORATION_OPTIONS,
   // Do not try to grow the decoration range when the user is typing,
   // because the color for a partial hashtag `#fo` is different from `#foo`.
   // We can't just reuse the first computed color and keep the decoration growing.
@@ -273,7 +278,7 @@ function decorateHashTag(
 
 /** Decoration for wikilinks that point to valid notes. */
 export const DECORATION_TYPE_WIKILINK = window.createTextEditorDecorationType({
-  color: new ThemeColor("editorLink.activeForeground"),
+  ...WIKILINK_DECORATION_OPTIONS,
   rangeBehavior: DecorationRangeBehavior.ClosedClosed,
 });
 

@@ -56,21 +56,19 @@ jobs:
           name: vsix
           path: ./packages/plugin-core/*.vsix
 
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.DENDRON_BOT_S3_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.DENDRON_BOT_S3_ACCESS_KEY }}
+        aws-region: us-east-1
 
-      - name: Publish VSIX to S3
-        shell: bash
-        env:
-          aws_key_id: ${{ secrets.DENDRON_BOT_S3_KEY_ID }}
-          aws_secret_access_key: ${{ secrets.DENDRON_BOT_S3_ACCESS_KEY }}
-        run: |
+    - name: Publish VSIX to S3
+      run: |
           version=`cat ./packages/plugin-core/package.json | jq ".version" -r`
           name=`cat ./packages/plugin-core/package.json | jq ".displayName" -r`
           package="$name-$version.vsix"
           echo $package
           BUCKET=org-dendron-public-assets
-          sudo apt-get update && sudo apt-get -y install awscli
-          aws configure set aws_access_key_id $aws_key_id
-          aws configure set aws_secret_access_key $aws_secret_access_key
-          aws configure set default.region us-east-1
           aws s3 cp ./packages/plugin-core/$package s3://$BUCKET/publish/$package
           echo https://$BUCKET.s3.amazonaws.com/publish/$package

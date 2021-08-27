@@ -73,5 +73,5 @@ jobs:
           aws configure set aws_access_key_id $aws_key_id
           aws configure set aws_secret_access_key $aws_secret_access_key
           aws configure set default.region us-east-1
-          aws s3 cp $package s3://$BUCKET/publish/$package
+          aws s3 cp ./packages/plugin-core/$package s3://$BUCKET/publish/$package
           echo https://$BUCKET.s3.amazonaws.com/publish/$package

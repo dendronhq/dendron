@@ -233,6 +233,7 @@ const getLocalNoteGraphElements = ({
           label: to.title,
           group: "nodes",
           fname: to.fname,
+          color: getNoteColor({ fname: to.fname, notes }),
           stub: isStub,
         },
         classes: `${DEFAULT_NODE_CLASSES} ${getVaultClass(to.vault)}`,

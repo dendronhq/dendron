@@ -54,7 +54,7 @@ node {
 }
 
 node[color] {
-  color: data(color);
+  background-color: data(color);
 }
 
 edge {

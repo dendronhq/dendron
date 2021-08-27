@@ -3,8 +3,7 @@ name: Early Seed Build
 on:
   push:
     branches:
-      - enhance/build-automation
-      # - prerelease/* TODO- re-enable after finishing testing.
+      - prerelease/*
 
 jobs:
   build:

@@ -1,53 +1,59 @@
 import { NoteProps } from "@dendronhq/common-all";
 import { InMemoryNoteCache } from "@dendronhq/engine-server/lib/util/inMemoryNoteCache";
+import {
+  CreateNoteOptsV4,
+  NoteTestUtilsV4,
+} from "@dendronhq/common-test-utils";
 
 /** Create note prop with some sensible default (for tests only). */
-function createNoteProp(opts: { id: string; fname?: string }): NoteProps {
-  const id = opts.id;
-  const fname = opts.fname ? opts.fname : `/tmp/filename-${id}`;
-
-  return {
-    id: id,
-    title: `title-val-${id}`,
-    vault: { fsPath: "vault-1" },
-    type: "note",
-    desc: "",
-    links: [],
-    anchors: {},
-    fname: fname,
-    updated: 1627283357535,
-    created: 1627283357535,
-    parent: null,
-    children: [],
-    body: `body-val-${id}`,
-    data: {},
-    contentHash: undefined,
-    tags: ["tag-1", "tag-2"],
+async function createNoteProp(opts: {
+  id: string;
+  fname: string;
+}): Promise<NoteProps> {
+  const createOpts: CreateNoteOptsV4 = {
+    fname: opts.fname,
+    props: {
+      id: opts.id,
+    },
+    wsRoot: "/tmp/test-ws",
+    vault: {
+      fsPath: "vault-1",
+    },
+    noWrite: true,
   };
+  return NoteTestUtilsV4.createNote(createOpts);
 }
 
 describe("inMemoryNoteCache.spec.ts", () => {
   describe("getNotesByFileNameIgnoreCase tests:", () => {
     describe("GIVEN cache with valid note props", () => {
       /** Two notes that have file name that differs only by case. */
-      const NOTE_1A = createNoteProp({
-        id: "1a",
-        fname: "/tmp/one",
-      });
-      const NOTE_1B = createNoteProp({
-        id: "1b",
-        fname: "/tmp/ONE",
-      });
-
+      let NOTE_1A: NoteProps;
+      let NOTE_1B: NoteProps;
       /** Note that has a single file name matching */
-      const NOTE_2 = createNoteProp({
-        id: "2",
-        fname: "/tmp/two",
+      let NOTE_2: NoteProps;
+      /** List of all the notes in this test suite.  */
+      let VALID_NOTES_1: NoteProps[];
+      let cache: InMemoryNoteCache;
+
+      beforeEach(async () => {
+        NOTE_1A = await createNoteProp({
+          id: "1a",
+          fname: "/tmp/one",
+        });
+        NOTE_1B = await createNoteProp({
+          id: "1b",
+          fname: "/tmp/ONE",
+        });
+
+        NOTE_2 = await createNoteProp({
+          id: "2",
+          fname: "/tmp/two",
+        });
+
+        VALID_NOTES_1 = [NOTE_1A, NOTE_1B, NOTE_2];
+        cache = new InMemoryNoteCache(VALID_NOTES_1);
       });
-
-      const VALID_NOTES_1: NoteProps[] = [NOTE_1A, NOTE_1B, NOTE_2];
-
-      const cache = new InMemoryNoteCache(VALID_NOTES_1);
 
       it("WHEN calling for file name that has different cases in notes THEN get both", () => {
         const notes = cache.getNotesByFileNameIgnoreCase("/tmp/onE");

@@ -79,9 +79,7 @@ suite("InsertNoteLink", function () {
     test("snippet", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
-        preSetupHook: async ({ wsRoot, vaults }) => {
-          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
-        },
+        preSetupHook: ENGINE_HOOKS.setupBasic,
         onInit: async ({ engine }) => {
           const notes = engine.notes;
           const cmd = new InsertNoteLinkCommand();
@@ -107,9 +105,7 @@ suite("InsertNoteLink", function () {
     test("snippet multiSelect", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
-        preSetupHook: async ({ wsRoot, vaults }) => {
-          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
-        },
+        preSetupHook: ENGINE_HOOKS.setupBasic,
         onInit: async ({ engine }) => {
           const notes = engine.notes;
           const cmd = new InsertNoteLinkCommand();
@@ -138,9 +134,7 @@ suite("InsertNoteLink", function () {
     test("selection", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
-        preSetupHook: async ({ wsRoot, vaults }) => {
-          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
-        },
+        preSetupHook: ENGINE_HOOKS.setupBasic,
         onInit: async ({ engine }) => {
           const notes = engine.notes;
           await VSCodeUtils.openNote(notes["foo.ch1"]);
@@ -165,9 +159,7 @@ suite("InsertNoteLink", function () {
     test("selection multiSelect", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
-        preSetupHook: async ({ wsRoot, vaults }) => {
-          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
-        },
+        preSetupHook: ENGINE_HOOKS.setupBasic,
         onInit: async ({ engine }) => {
           const notes = engine.notes;
           await VSCodeUtils.openNote(notes["foo.ch1"]);
@@ -195,9 +187,7 @@ suite("InsertNoteLink", function () {
     test("title", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
-        preSetupHook: async ({ wsRoot, vaults }) => {
-          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
-        },
+        preSetupHook: ENGINE_HOOKS.setupBasic,
         onInit: async ({ engine }) => {
           const notes = engine.notes;
           await VSCodeUtils.openNote(notes["foo.ch1"]);
@@ -222,9 +212,7 @@ suite("InsertNoteLink", function () {
     test("title multiSelect", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
-        preSetupHook: async ({ wsRoot, vaults }) => {
-          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
-        },
+        preSetupHook: ENGINE_HOOKS.setupBasic,
         onInit: async ({ engine }) => {
           const notes = engine.notes;
           await VSCodeUtils.openNote(notes["foo.ch1"]);
@@ -252,9 +240,7 @@ suite("InsertNoteLink", function () {
     test("prompt", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
-        preSetupHook: async ({ wsRoot, vaults }) => {
-          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
-        },
+        preSetupHook: ENGINE_HOOKS.setupBasic,
         onInit: async ({ engine }) => {
           const notes = engine.notes;
           await VSCodeUtils.openNote(notes["foo.ch1"]);
@@ -280,9 +266,7 @@ suite("InsertNoteLink", function () {
     test("prompt multiSelect", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
-        preSetupHook: async ({ wsRoot, vaults }) => {
-          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
-        },
+        preSetupHook: ENGINE_HOOKS.setupBasic,
         onInit: async ({ engine }) => {
           const notes = engine.notes;
           await VSCodeUtils.openNote(notes["foo.ch1"]);
@@ -313,9 +297,7 @@ suite("InsertNoteLink", function () {
     test("none", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
-        preSetupHook: async ({ wsRoot, vaults }) => {
-          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
-        },
+        preSetupHook: ENGINE_HOOKS.setupBasic,
         onInit: async ({ engine }) => {
           const notes = engine.notes;
           await VSCodeUtils.openNote(notes["foo.ch1"]);
@@ -340,9 +322,7 @@ suite("InsertNoteLink", function () {
     test("none multiSelect", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
-        preSetupHook: async ({ wsRoot, vaults }) => {
-          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
-        },
+        preSetupHook: ENGINE_HOOKS.setupBasic,
         onInit: async ({ engine }) => {
           const notes = engine.notes;
           await VSCodeUtils.openNote(notes["foo.ch1"]);

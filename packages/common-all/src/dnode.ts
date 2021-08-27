@@ -504,7 +504,6 @@ export class NoteUtils {
     useVaultPrefix?: boolean;
   }): string {
     const { note, anchor, useVaultPrefix, alias } = opts;
-    // const { mode, value, tabStopIndex } = alias;
     const aliasMode = alias?.mode;
     const aliasValue = alias?.value;
     const tabStopIndex = alias?.tabStopIndex;

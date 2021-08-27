@@ -62,6 +62,7 @@ export class CopyNoteLinkCommand extends BasicCommand<
             type: isBlockAnchor(anchor) ? "blockAnchor" : "header",
           },
       useVaultPrefix: DendronClientUtilsV2.shouldUseVaultPrefix(getEngine()),
+      alias: { mode: "title" }
     });
     try {
       clipboard.writeText(link);

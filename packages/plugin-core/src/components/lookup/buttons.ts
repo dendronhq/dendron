@@ -413,7 +413,7 @@ export class CopyNoteLinkBtn extends DendronBtn {
     quickPick.copyNoteLinkFunc = async (
       items: NoteProps[],
     ) => {
-      const links = items.map((note) => NoteUtils.createWikiLink({ note }));
+      const links = items.map((note) => NoteUtils.createWikiLink({ note, alias: { mode: "title" } }));
       if (_.isEmpty(links)) {
         vscode.window.showInformationMessage(`no items selected`);
       } else {

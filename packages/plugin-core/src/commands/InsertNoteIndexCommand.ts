@@ -33,6 +33,7 @@ export class InsertNoteIndexCommand extends BasicCommand<
       const link = NoteUtils.createWikiLink({
         note,
         useVaultPrefix: DendronClientUtilsV2.shouldUseVaultPrefix(getEngine()),
+        alias: { mode: "title" }
       });
       return `- ${link}`;
     });

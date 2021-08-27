@@ -504,10 +504,10 @@ export class NoteUtils {
     useVaultPrefix?: boolean;
   }): string {
     const { note, anchor, useVaultPrefix, alias } = opts;
-    const { mode: aliasMode, value: aliasValue, tabStopIndex } = _.defaults(alias, {
-      value: "",
-      tabStopIndex: 1
-    })
+    // const { mode, value, tabStopIndex } = alias;
+    const aliasMode = alias?.mode;
+    const aliasValue = alias?.value;
+    const tabStopIndex = alias?.tabStopIndex;
     let { title, fname, vault } = note;
     let suffix = "";
     if (anchor) {
@@ -524,6 +524,7 @@ export class NoteUtils {
     const vaultPrefix = useVaultPrefix
       ? `${CONSTANTS.DENDRON_DELIMETER}${VaultUtils.getName(vault)}/`
       : "";
+    
     let aliasPrefix = "";
 
     switch(aliasMode) {

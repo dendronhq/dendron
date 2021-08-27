@@ -32,8 +32,7 @@ import {
 } from "../testUtilsV3";
 
 suite("VaultAddCommand", function () {
-  let ctx: vscode.ExtensionContext;
-  ctx = setupBeforeAfter(this, {
+  const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {
     beforeHook: () => {
       // prevents a ReloadWorkspace
       sinon
@@ -52,6 +51,11 @@ suite("VaultAddCommand", function () {
 
           await GitTestUtils.createRepoForRemoteWorkspace(wsRoot, remoteDir);
           const gitIgnore = path.join(wsRoot, ".gitignore");
+          const gitIgnoreInsideVault = path.join(
+            wsRoot,
+            "vaultRemote",
+            ".gitignore"
+          );
 
           const cmd = new VaultAddCommand();
           stubVaultInput({
@@ -83,6 +87,12 @@ suite("VaultAddCommand", function () {
               match: ["vaultRemote"],
             })
           ).toBeTruthy();
+          expect(
+            FileTestUtils.assertInFile({
+              fpath: gitIgnoreInsideVault,
+              match: [".dendron.cache.*"],
+            })
+          ).toBeTruthy();
           done();
         },
       });
@@ -99,6 +109,7 @@ suite("VaultAddCommand", function () {
 
           // stub
           const gitIgnore = path.join(wsRoot, ".gitignore");
+
           const cmd = new VaultAddCommand();
           const wsName = "wsRemote";
           stubVaultInput({
@@ -109,6 +120,7 @@ suite("VaultAddCommand", function () {
             sourceName: "dendron",
           });
           await cmd.run();
+          const gitIgnoreInsideVault = path.join(wsRoot, wsName, ".gitignore");
 
           expect(DConfig.getOrCreate(wsRoot).workspaces).toEqual({
             [wsName]: {
@@ -136,6 +148,12 @@ suite("VaultAddCommand", function () {
             FileTestUtils.assertInFile({
               fpath: gitIgnore,
               match: [wsName],
+            })
+          ).toBeTruthy();
+          expect(
+            FileTestUtils.assertInFile({
+              fpath: gitIgnoreInsideVault,
+              match: [".dendron.cache.*"],
             })
           ).toBeTruthy();
           done();
@@ -226,8 +244,16 @@ suite("VaultAddCommand", function () {
           stubVaultInput({ sourceType: "local", sourcePath: vpath });
 
           await new VaultAddCommand().run();
-          expect(fs.readdirSync(vpath)).toEqual(["root.md", "root.schema.yml"]);
-
+          expect(fs.readdirSync(vpath)).toEqual([
+            ".gitignore",
+            "root.md",
+            "root.schema.yml",
+          ]);
+          expect(
+            fs.readFileSync(path.join(vpath, ".gitignore"), {
+              encoding: "utf8",
+            })
+          ).toEqual("\n.dendron.cache.*");
           checkVaults(
             {
               wsRoot,
@@ -277,7 +303,11 @@ suite("VaultAddCommand", function () {
           const vpath = path.join(wsRoot, "vault2");
           stubVaultInput({ sourceType: "local", sourcePath: vpath });
           await new VaultAddCommand().run();
-          expect(fs.readdirSync(vpath)).toEqual(["root.md", "root.schema.yml"]);
+          expect(fs.readdirSync(vpath)).toEqual([
+            ".gitignore",
+            "root.md",
+            "root.schema.yml",
+          ]);
           checkVaults(
             {
               wsRoot,
@@ -303,7 +333,11 @@ suite("VaultAddCommand", function () {
           stubVaultInput({ sourceType: "local", sourcePath });
           await new VaultAddCommand().run();
           const vpath = path.join(wsRoot, sourcePath);
-          expect(fs.readdirSync(vpath)).toEqual(["root.md", "root.schema.yml"]);
+          expect(fs.readdirSync(vpath)).toEqual([
+            ".gitignore",
+            "root.md",
+            "root.schema.yml",
+          ]);
           checkVaults(
             {
               wsRoot,
@@ -329,7 +363,11 @@ suite("VaultAddCommand", function () {
           const vaultRelPath = path.relative(wsRoot, vpath);
           stubVaultInput({ sourceType: "local", sourcePath: vpath });
           await new VaultAddCommand().run();
-          expect(fs.readdirSync(vpath)).toEqual(["root.md", "root.schema.yml"]);
+          expect(fs.readdirSync(vpath)).toEqual([
+            ".gitignore",
+            "root.md",
+            "root.schema.yml",
+          ]);
 
           checkVaults(
             {

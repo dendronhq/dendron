@@ -203,6 +203,16 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
         encoding: "utf8",
       });
     }
+
+    const gitIgnoreInsideVault = path.join(
+      wsRoot,
+      workspace.name,
+      ".gitignore"
+    );
+    fs.ensureFileSync(gitIgnoreInsideVault);
+    fs.appendFileSync(gitIgnoreInsideVault, "\n.dendron.cache.*", {
+      encoding: "utf8",
+    });
   }
 
   async addVaultToWorkspace(vault: DVault) {
@@ -227,6 +237,12 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
         encoding: "utf8",
       });
     }
+    //check for .gitignore inside vault
+    const gitIgnoreInsideVault = path.join(wsRoot, vault.fsPath, ".gitignore");
+    fs.ensureFileSync(gitIgnoreInsideVault);
+    fs.appendFileSync(gitIgnoreInsideVault, "\n.dendron.cache.*", {
+      encoding: "utf8",
+    });
     return;
   }
 

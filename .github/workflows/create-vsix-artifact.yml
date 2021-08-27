@@ -36,26 +36,26 @@ jobs:
         with:
           node-version:  14.x
 
-      # - name: Yarn Setup
-      #   run: yarn setup
+      - name: Yarn Setup
+        run: yarn setup
 
-      # - name: Set Up Yarn Local Registry
-      #   run: yarn config set registry http://localhost:4873
+      - name: Set Up Yarn Local Registry
+        run: yarn config set registry http://localhost:4873
       
-      # - name: Set Up NPM Local Registry
-      #   run: npm set registry http://localhost:4873/
+      - name: Set Up NPM Local Registry
+        run: npm set registry http://localhost:4873/
       
-      # - name: Build the VSIX
-      #   env: 
-      #     GOOGLE_OAUTH_CLIENT_SECRET: ${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}
-      #     GOOGLE_OAUTH_CLIENT_ID: ${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}
-      #   run: yarn build:patch:local:ci
+      - name: Build the VSIX
+        env: 
+          GOOGLE_OAUTH_CLIENT_SECRET: ${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}
+          GOOGLE_OAUTH_CLIENT_ID: ${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}
+        run: yarn build:patch:local:ci
 
-      # - name: Upload VSIX Artifact
-      #   uses: actions/upload-artifact@v2
-      #   with:
-      #     name: vsix
-      #     path: ./packages/plugin-core/*.vsix
+      - name: Upload VSIX Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: vsix
+          path: ./packages/plugin-core/*.vsix
 
 
       - name: Publish VSIX to S3
@@ -68,10 +68,10 @@ jobs:
           name=`cat ./packages/plugin-core/package.json | jq ".displayName" -r`
           package="$name-$version.vsix"
           echo $package
-          echo $aws_key_id
           BUCKET=org-dendron-public-assets
           sudo apt-get update && sudo apt-get -y install awscli
           aws configure set aws_access_key_id $aws_key_id
           aws configure set aws_secret_access_key $aws_secret_access_key
           aws configure set default.region us-east-1
+          aws s3 $package s3://$BUCKET/publish/$package
           echo https://$BUCKET.s3.amazonaws.com/publish/$package

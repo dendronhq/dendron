@@ -70,5 +70,5 @@ jobs:
           package="$name-$version.vsix"
           echo $package
           BUCKET=org-dendron-public-assets
-          aws s3 cp ./packages/plugin-core/$package s3://$BUCKET/publish/$package
+          aws s3 cp --acl public-read ./packages/plugin-core/$package s3://$BUCKET/publish/$package
           echo https://$BUCKET.s3.amazonaws.com/publish/$package

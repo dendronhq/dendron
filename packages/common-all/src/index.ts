@@ -15,3 +15,4 @@ export * from "./analytics";
 export * from "./types";
 export * from "./themes";
 export * from "./fuse";
+export * from "./arrays";

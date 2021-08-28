@@ -261,6 +261,35 @@ suite("GotoNote", function () {
       });
     });
 
+    test("user tag", (done) => {
+      let note: NoteProps;
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          // Create a note with a hashtag in it
+          note = await NoteTestUtilsV4.createNote({
+            wsRoot,
+            vault: vaults[0],
+            fname: "test.note",
+            body: "@test.mctestface",
+          });
+        },
+        onInit: async () => {
+          // Open the note, select the hashtag, and use the command
+          await VSCodeUtils.openNote(note);
+          VSCodeUtils.getActiveTextEditorOrThrow().selection =
+            new vscode.Selection(
+              new vscode.Position(7, 1),
+              new vscode.Position(7, 1)
+            );
+          await new GotoNoteCommand().run();
+          // Make sure this took us to the tag note
+          expect(getActiveEditorBasename()).toEqual("user.test.mctestface.md");
+          done();
+        },
+      });
+    });
+
     describe("frontmatter tags", () => {
       test("single tag", (done) => {
         let note: NoteProps;

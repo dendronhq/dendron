@@ -65,6 +65,8 @@ suite("windowDecorations", function () {
               "#foo",
               "[[root]]",
               "",
+              "@Hamilton.Margaret",
+              "",
               "[[with alias|root]]",
               "",
               "[[does.not.exist]]",
@@ -140,10 +142,17 @@ suite("windowDecorations", function () {
           const brokenWikilinkDecorations = allDecorations!.get(
             DECORATION_TYPE_BROKEN_WIKILINK
           );
-          expect(brokenWikilinkDecorations.length).toEqual(1);
+          expect(brokenWikilinkDecorations.length).toEqual(2);
           expect(
             isTextDecorated(
               "[[does.not.exist]]",
+              brokenWikilinkDecorations!,
+              document
+            )
+          ).toBeTruthy();
+          expect(
+            isTextDecorated(
+              "@Hamilton.Margaret",
               brokenWikilinkDecorations!,
               document
             )

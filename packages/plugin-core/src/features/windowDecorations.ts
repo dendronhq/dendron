@@ -8,6 +8,7 @@ import {
   ProcMode,
   WikiLinkNoteV4,
   NoteRefNoteV4,
+  UserTag,
 } from "@dendronhq/engine-server";
 import {
   DecorationOptions,
@@ -113,6 +114,14 @@ export function updateDecorations(activeEditor: TextEditor) {
       }
       case DendronASTTypes.HASHTAG: {
         const out = decorateHashTag(node as HashTag);
+        if (isNotUndefined(out)) {
+          const [type, decoration] = out;
+          allDecorations.get(type).push(decoration);
+        }
+        break;
+      }
+      case DendronASTTypes.USERTAG: {
+        const out = decorateUserTag(node as UserTag);
         if (isNotUndefined(out)) {
           const [type, decoration] = out;
           allDecorations.get(type).push(decoration);
@@ -366,6 +375,22 @@ function decorateWikiLink(wikiLink: WikiLinkNoteV4, document: TextDocument) {
     decorations.push([DECORATION_TYPE_BROKEN_WIKILINK, options]);
   }
   return decorations;
+}
+
+function decorateUserTag(
+  userTag: UserTag
+): [TextEditorDecorationType, DecorationOptions] | undefined {
+  const position = userTag.position as Position;
+  if (_.isUndefined(position)) return undefined;
+
+  const userNoteFound = doesLinkedNoteExist({
+    fname: userTag.fname,
+  });
+  const type = userNoteFound
+    ? DECORATION_TYPE_WIKILINK
+    : DECORATION_TYPE_BROKEN_WIKILINK;
+
+  return [type, { range: VSCodeUtils.position2VSCodeRange(position) }];
 }
 
 function decorateReference(

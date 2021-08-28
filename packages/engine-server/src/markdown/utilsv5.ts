@@ -35,6 +35,7 @@ import { wikiLinks } from "./remark/wikiLinks";
 import { DendronASTDest } from "./types";
 import { MDUtilsV4 } from "./utils";
 import { hashtags } from "./remark/hashtag";
+import { userTags } from "./remark/userTags";
 import { backlinks } from "./remark/backlinks";
 import { hierarchies } from "./remark";
 
@@ -233,6 +234,7 @@ export class MDUtilsV5 {
       .use(wikiLinks)
       .use(blockAnchors)
       .use(hashtags)
+      .use(userTags)
       .use(footnotes)
       .data("errors", errors);
 
@@ -296,8 +298,8 @@ export class MDUtilsV5 {
           if (opts.flavor === ProcFlavor.PUBLISHING) {
             proc = proc.use(dendronPub, {
               wikiLinkOpts: {
-                prefix: "/notes/"
-              }
+                prefix: "/notes/",
+              },
             });
           }
         }

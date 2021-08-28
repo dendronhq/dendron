@@ -61,6 +61,7 @@ import {
   HashTag,
   NoteRefNoteV4,
   NoteRefNoteV4_LEGACY,
+  UserTag,
   WikiLinkNoteV4,
   WikiLinkProps,
 } from "../types";
@@ -116,6 +117,17 @@ export function hashTag2WikiLinkNoteV4(hashtag: HashTag): WikiLinkNoteV4 {
     value: hashtag.fname,
     data: {
       alias: hashtag.value,
+    },
+  };
+}
+
+export function userTag2WikiLinkNoteV4(userTag: UserTag): WikiLinkNoteV4 {
+  return {
+    ...userTag,
+    type: DendronASTTypes.WIKI_LINK,
+    value: userTag.fname,
+    data: {
+      alias: userTag.value,
     },
   };
 }

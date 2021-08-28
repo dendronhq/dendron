@@ -16,11 +16,11 @@ export const PUNCTUATION_MARKS =
   ",;:'\"<>?!`~«‹»›„“‟”’❝❞❮❯⹂〝〞〟＂‚‘‛❛❜❟［］【】…‥「」『』·؟،।॥‽⸘¡¿⁈⁉";
 
 /** Can't start with a number or period */
-const GOOD_FIRST_CHARACTER = `[^0-9#|\\[\\]\\s.${PUNCTUATION_MARKS}]`;
+const GOOD_FIRST_CHARACTER = `[^0-9#@|\\[\\]\\s.${PUNCTUATION_MARKS}]`;
 /** Can have numbers and period in the middle */
-const GOOD_MIDDLE_CHARACTER = `[^#|\\[\\]\\s${PUNCTUATION_MARKS}]`;
+const GOOD_MIDDLE_CHARACTER = `[^@#|\\[\\]\\s${PUNCTUATION_MARKS}]`;
 /** Can have numbers, but not period in the end */
-const GOOD_END_CHARACTER = `[^#|\\[\\]\\s.${PUNCTUATION_MARKS}]`;
+const GOOD_END_CHARACTER = `[^@#|\\[\\]\\s.${PUNCTUATION_MARKS}]`;
 
 /** Hashtags have the form #foo, or #foo.bar, or #f123
  *

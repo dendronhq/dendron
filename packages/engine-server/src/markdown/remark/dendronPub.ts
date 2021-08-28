@@ -15,6 +15,7 @@ import {
   getNoteOrError,
   hashTag2WikiLinkNoteV4,
   RemarkUtils,
+  userTag2WikiLinkNoteV4,
 } from "./utils";
 import Unified, { Transformer } from "unified";
 import { Node, Parent } from "unist";
@@ -29,6 +30,7 @@ import {
   HashTag,
   NoteRefDataV4,
   RehypeLinkData,
+  UserTag,
   VaultMissingBehavior,
   WikiLinkNoteV4,
 } from "../types";
@@ -110,6 +112,14 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         node = hashTag2WikiLinkNoteV4(hashtag);
         parent.children[parentIndex] = node;
       }
+      if (node.type === DendronASTTypes.USERTAG) {
+        const userTag = node as UserTag;
+        // Convert user tags to regular links for rendering
+        const parentIndex = _.findIndex(parent.children, node);
+        if (parentIndex === -1) return;
+        node = userTag2WikiLinkNoteV4(userTag);
+        parent.children[parentIndex] = node;
+      }
       if (
         node.type === DendronASTTypes.WIKI_LINK &&
         dest !== DendronASTDest.MD_ENHANCED_PREVIEW
@@ -189,7 +199,8 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         }
         const alias = data.alias ? data.alias : value;
         const usePrettyLinks = engine.config.site.usePrettyLinks;
-        const maybeFileExtension = _.isBoolean(usePrettyLinks) && usePrettyLinks ? "" : ".html";
+        const maybeFileExtension =
+          _.isBoolean(usePrettyLinks) && usePrettyLinks ? "" : ".html";
         const href = `${copts?.prefix || ""}${value}${maybeFileExtension}${
           data.anchorHeader ? "#" + data.anchorHeader : ""
         }`;

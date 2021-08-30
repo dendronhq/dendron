@@ -14,6 +14,7 @@ export type GraphConfigItem<T> = {
   value: T;
   mutable: boolean;
   label?: string;
+  color?: string;
   placeholder?: string;
 };
 

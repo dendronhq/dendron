@@ -6,6 +6,7 @@ import {
   SchemaModuleDict,
   SchemaProps,
   VaultUtils,
+  TAGS_HIERARCHY,
 } from "@dendronhq/common-all";
 
 import { createLogger, engineSlice } from "@dendronhq/common-frontend";
@@ -65,6 +66,7 @@ const getLocalNoteGraphElements = ({
         label: activeNote.title,
         group: "nodes",
         fname: activeNote.fname,
+        color: getNoteColor({ fname: activeNote.fname, notes }),
         stub: _.isUndefined(activeNote.stub) ? false : activeNote.stub,
         localRoot: true,
       },
@@ -81,6 +83,7 @@ const getLocalNoteGraphElements = ({
         label: parentNote.title,
         group: "nodes",
         fname: parentNote.fname,
+        color: getNoteColor({ fname: parentNote.fname, notes }),
         stub: _.isUndefined(parentNote.stub) ? false : parentNote.stub,
       },
       classes: `${DEFAULT_NODE_CLASSES} parent ${getVaultClass(
@@ -98,6 +101,7 @@ const getLocalNoteGraphElements = ({
           label: note.title,
           group: "nodes",
           fname: note.fname,
+          color: getNoteColor({ fname: note.fname, notes }),
           stub: _.isUndefined(note.stub) ? false : note.stub,
         },
         classes: `${DEFAULT_NODE_CLASSES} ${getVaultClass(note.vault)}`,
@@ -136,6 +140,7 @@ const getLocalNoteGraphElements = ({
         id: child,
         label: childNote.title,
         group: "nodes",
+        color: getNoteColor({ fname: childNote.fname, notes }),
         fname: childNote.fname,
         stub: _.isUndefined(childNote.stub) ? false : childNote.stub,
       },
@@ -228,6 +233,7 @@ const getLocalNoteGraphElements = ({
           label: to.title,
           group: "nodes",
           fname: to.fname,
+          color: getNoteColor({ fname: to.fname, notes }),
           stub: isStub,
         },
         classes: `${DEFAULT_NODE_CLASSES} ${getVaultClass(to.vault)}`,
@@ -255,6 +261,15 @@ const getLocalNoteGraphElements = ({
   };
 };
 
+function getNoteColor(opts: { fname: string; notes: NotePropsDict }) {
+  // Avoiding using color for non-tag notes because it's a little expensive right now,
+  // it requires multiple getNotesByFName calls. Once that function is cheaper
+  // we can use this for all notes.
+  if (!opts.fname.startsWith(TAGS_HIERARCHY)) return undefined;
+  const { color } = NoteUtils.color(opts);
+  return color;
+}
+
 const getFullNoteGraphElements = ({
   notes,
   wsRoot,
@@ -277,6 +292,7 @@ const getFullNoteGraphElements = ({
         label: note.title,
         group: "nodes",
         fname: note.fname,
+        color: getNoteColor({ fname: note.fname, notes }),
         stub: _.isUndefined(note.stub) ? false : note.stub,
       },
       classes: `${DEFAULT_NODE_CLASSES} ${getVaultClass(note.vault)}`,

@@ -53,6 +53,10 @@ node {
   font-weight: ${AntThemes[theme].graph.node.label.fontWeight};
 }
 
+node[color] {
+  background-color: data(color);
+}
+
 edge {
   width: ${AntThemes[theme].graph.edge.width};
   line-color: ${AntThemes[theme].graph.edge.color};

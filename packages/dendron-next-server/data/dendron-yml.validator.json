@@ -25,11 +25,18 @@
           "$ref": "#/definitions/DendronSiteConfig",
           "description": "Configuration related to publishing notes"
         },
+        "lookup": {
+          "$ref": "#/definitions/LookupConfig",
+          "description": "Configuration related to lookup v3."
+        },
         "journal": {
           "$ref": "#/definitions/JournalConfig"
         },
         "scratch": {
           "$ref": "#/definitions/ScratchConfig"
+        },
+        "insertNoteLink": {
+          "$ref": "#/definitions/InsertNoteLinkConfig"
         },
         "workspaces": {
           "type": "object",
@@ -151,11 +158,20 @@
         "autoFoldFrontmatter": {
           "type": "boolean",
           "description": "Automatically fold frontmatter when opening a new note. False by default."
+        },
+        "insertNoteIndex": {
+          "$ref": "#/definitions/InsertNoteIndexConfig",
+          "description": "Configuration for Insert Note Index Command"
+        },
+        "maxNoteLength": {
+          "type": "number",
+          "description": "Notes that are too large can cause serious slowdowns for Dendron. For notes longer than this many characters, some features like backlinks will be disabled to avoid slowdowns. Other functionality like note lookups will continue to function.\n\nDefaults to 204800 characters, which is about 200 KiB."
         }
       },
       "required": [
         "version",
         "site",
+        "lookup",
         "journal",
         "vaults"
       ],
@@ -167,6 +183,10 @@
         "assetsPrefix": {
           "type": "string",
           "description": "If set, add prefix to all asset links"
+        },
+        "canonicalBaseUrl": {
+          "type": "string",
+          "description": "Use this as root for creating canonical url for sites"
         },
         "copyAssets": {
           "type": "boolean",
@@ -254,6 +274,10 @@
           "type": "boolean",
           "description": "Whether frontmatter tags should be rendered in published websites. Defaults to true."
         },
+        "noRandomlyColoredTags": {
+          "type": "boolean",
+          "description": "Do not display the randomly generated colors for tags. Only color tag links if it has been configured in the frontmatter. False by default."
+        },
         "config": {
           "type": "object",
           "additionalProperties": {
@@ -307,6 +331,10 @@
         },
         "cognitoClientId": {
           "type": "string"
+        },
+        "usePrettyLinks": {
+          "type": "boolean",
+          "description": "notes are published without the .html file extension"
         }
       },
       "required": [
@@ -496,6 +524,38 @@
         "sync"
       ]
     },
+    "LookupConfig": {
+      "type": "object",
+      "properties": {
+        "note": {
+          "$ref": "#/definitions/NoteLookupConfig"
+        }
+      },
+      "required": [
+        "note"
+      ],
+      "additionalProperties": false
+    },
+    "NoteLookupConfig": {
+      "type": "object",
+      "properties": {
+        "selectionType": {
+          "$ref": "#/definitions/LookupSelectionType"
+        }
+      },
+      "required": [
+        "selectionType"
+      ],
+      "additionalProperties": false
+    },
+    "LookupSelectionType": {
+      "type": "string",
+      "enum": [
+        "selection2link",
+        "selectionExtract",
+        "none"
+      ]
+    },
     "JournalConfig": {
       "type": "object",
       "properties": {
@@ -557,6 +617,32 @@
         "addBehavior"
       ],
       "additionalProperties": false
+    },
+    "InsertNoteLinkConfig": {
+      "type": "object",
+      "properties": {
+        "aliasMode": {
+          "$ref": "#/definitions/InsertNoteLinkAliasMode"
+        },
+        "multiSelect": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "aliasMode",
+        "multiSelect"
+      ],
+      "additionalProperties": false
+    },
+    "InsertNoteLinkAliasMode": {
+      "type": "string",
+      "enum": [
+        "snippet",
+        "selection",
+        "title",
+        "prompt",
+        "none"
+      ]
     },
     "DWorkspaceEntry": {
       "type": "object",
@@ -693,6 +779,16 @@
             "type": "string"
           },
           "description": "Hiearchies to exclude"
+        }
+      },
+      "additionalProperties": false
+    },
+    "InsertNoteIndexConfig": {
+      "type": "object",
+      "properties": {
+        "marker": {
+          "type": "boolean",
+          "description": "Include marker when inserting note index."
         }
       },
       "additionalProperties": false

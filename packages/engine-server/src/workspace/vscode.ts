@@ -78,7 +78,6 @@ const _EXTENSIONS: ConfigUpdateEntry[] = [
   { default: "dendron.dendron-markdown-shortcuts" },
   // Autocomplete & warnings when editing `dendron.yml`
   { default: "redhat.vscode-yaml" },
-  { default: "dendron.dendron-markdown-preview-enhanced" },
   { default: "dendron.dendron-markdown-links", action: "REMOVE" },
   { default: "dendron.dendron-markdown-notes", action: "REMOVE" },
   { default: "shd101wyy.markdown-preview-enhanced", action: "REMOVE" },

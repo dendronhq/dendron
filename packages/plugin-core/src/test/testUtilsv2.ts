@@ -104,7 +104,6 @@ export function genDefaultSettings() {
         "dendron.dendron-paste-image",
         "dendron.dendron-markdown-shortcuts",
         "redhat.vscode-yaml",
-        "dendron.dendron-markdown-preview-enhanced",
       ],
       unwantedRecommendations: [
         "dendron.dendron-markdown-links",

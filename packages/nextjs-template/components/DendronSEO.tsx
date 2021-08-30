@@ -33,29 +33,6 @@ const getCanonicalUrl = ({
   return [base, sitePath, suffix].join("");
 };
 
-const getCanonicalUrl = ({
-  sitePath,
-  seoProps,
-  siteConfig,
-}: {
-  sitePath: string;
-  seoProps: NoteSEOProps;
-  siteConfig: DendronSiteConfig;
-}): string => {
-  if (seoProps.canonicalBaseUrl) {
-    return [siteConfig.siteUrl, sitePath].join("");
-  }
-  if (seoProps.canonicalUrl) {
-    return seoProps.canonicalUrl;
-  }
-  const base = siteConfig.canonicalBaseUrl
-    ? siteConfig.canonicalBaseUrl
-    : siteConfig.siteUrl;
-  // home page, no suffix
-  const suffix = sitePath === "/" ? "" : ".html";
-  return [base, sitePath, suffix].join("");
-};
-
 export default function DendronSEO() {
   const dendronRouter = useDendronRouter();
   const engine = useEngineAppSelector((state) => state.engine);

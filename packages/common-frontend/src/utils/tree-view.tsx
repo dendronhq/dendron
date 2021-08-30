@@ -51,7 +51,7 @@ export class TreeViewUtils {
     if (_.isUndefined(note)) {
       return undefined;
     }
-    if (applyNavExclude && note.custom.nav_exclude) {
+    if (applyNavExclude && note.custom?.nav_exclude) {
       return undefined;
     }
 

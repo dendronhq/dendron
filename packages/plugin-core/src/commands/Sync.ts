@@ -1,7 +1,7 @@
 import _ from "lodash";
 import { ERROR_SEVERITY, DendronError } from "@dendronhq/common-all";
 
-import { window } from "vscode";
+import { ProgressLocation, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { Logger } from "../logger";
 import { getWS } from "../workspace";
@@ -48,14 +48,28 @@ export class SyncCommand extends BasicCommand<CommandOpts, CommandReturns> {
         severity: ERROR_SEVERITY.FATAL,
       });
 
-    const committed = await workspaceService.commitAndAddAll();
-    L.info(committed);
+    const { committed, pulled, pushed } = await window.withProgress(
+      {
+        location: ProgressLocation.Notification,
+        title: "Syncing Workspace",
+        cancellable: false,
+      },
+      async (progress) => {
+        progress.report({ increment: 0, message: "committing repos" });
+        const committed = await workspaceService.commitAndAddAll();
+        L.info(committed);
+        progress.report({ increment: 25, message: "pulling repos" });
+        const pulled = await workspaceService.pullVaults();
+        L.info(pulled);
+        progress.report({ increment: 50, message: "pushing repos" });
 
-    const pulled = await workspaceService.pullVaults();
-    L.info(pulled);
+        const pushed = await workspaceService.pushVaults();
+        progress.report({ increment: 100 });
+        L.info(pushed);
 
-    const pushed = await workspaceService.pushVaults();
-    L.info(pushed);
+        return { committed, pulled, pushed };
+      }
+    );
 
     const message = ["Finished sync."];
 

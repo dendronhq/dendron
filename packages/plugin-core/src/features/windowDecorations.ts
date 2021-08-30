@@ -28,7 +28,6 @@ import {
   NoteUtils,
   Position,
   VaultUtils,
-  makeColorTranslucent,
 } from "@dendronhq/common-all";
 import { DateTime } from "luxon";
 import { getConfigValue, getWS } from "../workspace";
@@ -60,8 +59,6 @@ export function delayedUpdateDecorations(
     }
   }, updateDelay);
 }
-
-const TAG_COLORING_TRANSLUCENCY = 0.4;
 
 export function updateDecorations(activeEditor: TextEditor) {
   const ctx = "updateDecorations";
@@ -161,13 +158,6 @@ export function updateDecorations(activeEditor: TextEditor) {
     activeEditor.setDecorations(type, decorations);
   }
 
-  // Clean out now-unused tag decorations
-  for (const [key, type] of DECORATION_TYPE_TAG.entries()) {
-    if (!allDecorations.has(type)) {
-      type.dispose();
-      DECORATION_TYPE_TAG.delete(key);
-    }
-  }
   // Clear out any old decorations left over from last pass
   const allTypes = [
     DECORATION_TYPE_TIMESTAMP,
@@ -175,6 +165,7 @@ export function updateDecorations(activeEditor: TextEditor) {
     DECORATION_TYPE_WIKILINK,
     DECORATION_TYPE_BROKEN_WIKILINK,
     DECORATION_TYPE_ALIAS,
+    DECORATION_TYPE_TAG,
   ];
   for (const type of allTypes) {
     if (!allDecorations.has(type)) {
@@ -243,23 +234,16 @@ function decorateBlockAnchor(blockAnchor: BlockAnchor) {
   return decoration;
 }
 
-export const DECORATION_TYPE_TAG = new DefaultMap<
-  string,
-  TextEditorDecorationType
->((fname) => {
-  const { notes } = getWS().getEngine();
-  let { color: backgroundColor } = NoteUtils.color({ fname, notes });
-  backgroundColor = makeColorTranslucent(
-    backgroundColor,
-    TAG_COLORING_TRANSLUCENCY
-  );
-  return window.createTextEditorDecorationType({
-    backgroundColor,
-    // Do not try to grow the decoration range when the user is typing,
-    // because the color for a partial hashtag `#fo` is different from `#foo`.
-    // We can't just reuse the first computed color and keep the decoration growing.
-    rangeBehavior: DecorationRangeBehavior.ClosedClosed,
-  });
+const WIKILINK_DECORATION_OPTIONS = {
+  color: new ThemeColor("editorLink.activeForeground"),
+};
+
+export const DECORATION_TYPE_TAG = window.createTextEditorDecorationType({
+  ...WIKILINK_DECORATION_OPTIONS,
+  // Do not try to grow the decoration range when the user is typing,
+  // because the color for a partial hashtag `#fo` is different from `#foo`.
+  // We can't just reuse the first computed color and keep the decoration growing.
+  rangeBehavior: DecorationRangeBehavior.ClosedClosed,
 });
 
 function decorateHashTag(
@@ -268,16 +252,33 @@ function decorateHashTag(
   const position = hashtag.position;
   if (_.isUndefined(position)) return; // should never happen
 
-  const type = DECORATION_TYPE_TAG.get(hashtag.fname);
+  const { color: backgroundColor } = NoteUtils.color({
+    fname: hashtag.fname,
+    notes: getWS().getEngine().notes,
+  });
+
+  const type = DECORATION_TYPE_TAG;
   const decoration: DecorationOptions = {
     range: VSCodeUtils.position2VSCodeRange(position),
+    renderOptions: {
+      before: {
+        contentText: " ",
+        width: "0.8rem",
+        height: "0.8rem",
+        margin: "auto 0.2rem",
+        border: "1px solid",
+        borderColor: new ThemeColor("foreground"),
+        backgroundColor,
+      },
+    },
   };
+
   return [type, decoration];
 }
 
 /** Decoration for wikilinks that point to valid notes. */
 export const DECORATION_TYPE_WIKILINK = window.createTextEditorDecorationType({
-  color: new ThemeColor("editorLink.activeForeground"),
+  ...WIKILINK_DECORATION_OPTIONS,
   rangeBehavior: DecorationRangeBehavior.ClosedClosed,
 });
 

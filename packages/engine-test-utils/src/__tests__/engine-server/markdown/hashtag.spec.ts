@@ -166,7 +166,7 @@ describe("hashtag", () => {
           const { resp } = extra;
           await checkVFile(
             resp,
-            '<a href="tags.my-hash.tag0.html" style="background-color: #c95efb66;">#my-hash.tag0</a>'
+            '<a class="color-tag" style="--tag-color: #c95efb;" href="tags.my-hash.tag0.html">#my-hash.tag0</a>'
           );
         },
       },
@@ -186,7 +186,7 @@ describe("hashtag", () => {
             const resp = await proc.process(`#color`);
             await checkVFile(
               resp,
-              '<a href="tags.color.html" style="background-color: #FF003366;">#color</a>'
+              '<a class="color-tag" style="--tag-color: #FF0033;" href="tags.color.html">#color</a>'
             );
           },
           {
@@ -215,7 +215,7 @@ describe("hashtag", () => {
             const resp = await proc.process(`#parent.color`);
             await checkVFile(
               resp,
-              '<a href="tags.parent.color.html" style="background-color: #FF003366;">#parent.color</a>'
+              '<a class="color-tag" style="--tag-color: #FF0033;" href="tags.parent.color.html">#parent.color</a>'
             );
           },
           {
@@ -244,7 +244,7 @@ describe("hashtag", () => {
             const resp = await proc.process(`#parent.color`);
             await checkVFile(
               resp,
-              '<a href="tags.parent.color.html" style="background-color: #FF003366;">#parent.color</a>'
+              '<a class="color-tag" style="--tag-color: #FF0033;" href="tags.parent.color.html">#parent.color</a>'
             );
           },
           {
@@ -278,7 +278,7 @@ describe("hashtag", () => {
             const resp = await proc.process(`#parent.color`);
             await checkVFile(
               resp,
-              '<a href="tags.parent.color.html" style="background-color: #00FF1166;">#parent.color</a>'
+              '<a class="color-tag" style="--tag-color: #00FF11;" href="tags.parent.color.html">#parent.color</a>'
             );
           },
           {

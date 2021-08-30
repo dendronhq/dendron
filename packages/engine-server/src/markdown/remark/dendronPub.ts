@@ -1,7 +1,6 @@
 import {
   DendronError,
   isNotUndefined,
-  makeColorTranslucent,
   NoteProps,
   NoteUtils,
   TAGS_HIERARCHY,
@@ -49,7 +48,6 @@ type PluginOpts = NoteRefsOpts & {
   noRandomlyColoredTags?: boolean;
 };
 
-const TAG_BG_TRANSLUCENCY = 0.4;
 function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
   const proc = this;
   const procData = MDUtilsV4.getDendronData(proc);
@@ -151,7 +149,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
             colorType === "configured" ||
             opts?.noRandomlyColoredTags !== false
           ) {
-            color = makeColorTranslucent(maybeColor, TAG_BG_TRANSLUCENCY);
+            color = maybeColor;
           }
         }
 
@@ -189,7 +187,8 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         }
         const alias = data.alias ? data.alias : value;
         const usePrettyLinks = engine.config.site.usePrettyLinks;
-        const maybeFileExtension = _.isBoolean(usePrettyLinks) && usePrettyLinks ? "" : ".html";
+        const maybeFileExtension =
+          _.isBoolean(usePrettyLinks) && usePrettyLinks ? "" : ".html";
         const href = `${copts?.prefix || ""}${value}${maybeFileExtension}${
           data.anchorHeader ? "#" + data.anchorHeader : ""
         }`;
@@ -203,9 +202,9 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
           exists,
           hName: "a",
           hProperties: {
-            // className: classNames,
+            className: color ? "color-tag" : undefined,
+            style: color ? `--tag-color: ${color};` : undefined,
             href,
-            style: color ? `background-color: ${color};` : undefined,
           },
           hChildren: [
             {

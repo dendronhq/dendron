@@ -130,12 +130,20 @@ suite("windowDecorations", function () {
             )
           ).toBeTruthy();
 
-          expect(DECORATION_TYPE_TAG.has("tags.foo"));
-          expect(DECORATION_TYPE_TAG.has("tags.bar"));
+          const tagDecorations = allDecorations!.get(DECORATION_TYPE_TAG);
+          expect(tagDecorations.length).toEqual(3);
+          expect(
+            isTextDecorated("#foo", tagDecorations!, document)
+          ).toBeTruthy();
+          expect(
+            isTextDecorated("#bar", tagDecorations!, document)
+          ).toBeTruthy();
 
           const aliasDecorations = allDecorations!.get(DECORATION_TYPE_ALIAS);
           expect(aliasDecorations.length).toEqual(1);
-          expect(isTextDecorated("with alias", aliasDecorations!, document));
+          expect(
+            isTextDecorated("with alias", aliasDecorations!, document)
+          ).toBeTruthy();
 
           const brokenWikilinkDecorations = allDecorations!.get(
             DECORATION_TYPE_BROKEN_WIKILINK

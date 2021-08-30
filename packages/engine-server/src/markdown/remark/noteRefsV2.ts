@@ -16,6 +16,7 @@ import {
 import { file2Note } from "@dendronhq/common-server";
 import _ from "lodash";
 import { brk, html, paragraph, root } from "mdast-builder";
+import { ConfigUtils } from "../../config";
 import { Eat } from "remark-parse";
 import Unified, { Plugin } from "unified";
 import { Node, Parent } from "unist";
@@ -306,39 +307,31 @@ export function convertNoteRefASTV2(
   const refLvl = MDUtilsV4.getNoteRefLvl(proc());
   let { dest, vault, config, shouldApplyPublishRules } =
     MDUtilsV4.getDendronData(proc);
-
   if (MDUtilsV5.isV5Active(proc)) {
     shouldApplyPublishRules = MDUtilsV5.shouldApplyPublishingRules(proc);
   }
-
   if (link.data.vaultName) {
     vault = VaultUtils.getVaultByNameOrThrow({
       vaults: engine.vaults,
       vname: link.data.vaultName,
     })!;
   }
-
   if (!vault) {
     return {
       error: new DendronError({ message: "no vault specified" }),
       data: [],
     };
   }
-  let { prettyRefs, wikiLinkOpts } = compilerOpts;
-  if (
-    !prettyRefs &&
-    _.includes([DendronASTDest.HTML, DendronASTDest.MD_ENHANCED_PREVIEW], dest)
-  ) {
-    prettyRefs = true;
-  }
-
+  const { wikiLinkOpts } = compilerOpts;
+  const prettyRefs = shouldApplyPublishRules
+    ? procOpts.config.site.usePrettyRefs
+    : procOpts.config.usePrettyRefs
   if (refLvl >= MAX_REF_LVL) {
     return {
       error: new DendronError({ message: "too many nested note refs" }),
       data: [MDUtilsV4.genMDMsg("too many nested note refs")],
     };
   }
-
   let noteRefs: DNoteLoc[] = [];
   if (link.from.fname.endsWith("*")) {
     const resp = engine.queryNotesSync({ qs: link.from.fname, vault });

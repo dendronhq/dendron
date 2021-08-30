@@ -288,7 +288,7 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     // functionality hence the files that do not require a move must have
     // been attempted to be moved into the vault that they are already are.
     const sameVaultMoves = moves.filter((m) => !isMoveNecessary(m));
-    if (sameVaultMoves.hasElements()) {
+    if (sameVaultMoves.length) {
       contentLines.push(`|The following are already in vault: ${destVault}|`);
       contentLines.push(`|-----------------------------------------------|`);
       sameVaultMoves.forEach((m) => {

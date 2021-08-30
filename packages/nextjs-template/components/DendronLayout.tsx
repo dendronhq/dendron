@@ -37,7 +37,14 @@ export default function DendronLayout(
           </Col>
         </Row>
       </Header>
-      <Layout className="site-layout" style={{ marginTop: 64 }}>
+      <Layout
+        className="site-layout"
+        style={{
+          maxWidth: LAYOUT.BREAKPOINTS.lg,
+          width: "100%",
+          margin: "64px auto 0 auto",
+        }}
+      >
         <Sider
           width={SIDER.WIDTH}
           collapsible

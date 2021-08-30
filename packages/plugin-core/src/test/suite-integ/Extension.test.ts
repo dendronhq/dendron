@@ -185,6 +185,7 @@ suite("Extension", function () {
           dev: {
             enablePreviewV2: true,
           },
+          maxPreviewsCached: 10,
           mermaid: true,
           useKatex: true,
           site: {

@@ -16,7 +16,6 @@ import {
 import { file2Note } from "@dendronhq/common-server";
 import _ from "lodash";
 import { brk, html, paragraph, root } from "mdast-builder";
-import { ConfigUtils } from "../../config";
 import { Eat } from "remark-parse";
 import Unified, { Plugin } from "unified";
 import { Node, Parent } from "unist";
@@ -323,9 +322,23 @@ export function convertNoteRefASTV2(
     };
   }
   const { wikiLinkOpts } = compilerOpts;
-  const prettyRefs = shouldApplyPublishRules
-    ? procOpts.config.site.usePrettyRefs
-    : procOpts.config.usePrettyRefs
+  const sitePrettyRefConfig = _.isUndefined(procOpts.config?.site?.usePrettyRefs)
+    ? true
+    : procOpts.config.site.usePrettyRefs;
+  const prettyRefConfig = _.isUndefined(procOpts.config?.usePrettyRefs)
+    ? true
+    : procOpts.config.usePrettyRefs;
+  let prettyRefs = shouldApplyPublishRules
+    ? sitePrettyRefConfig
+    : prettyRefConfig
+  if (
+    prettyRefs && _.includes(
+      [DendronASTDest.MD_DENDRON, DendronASTDest.MD_REGULAR], 
+      dest
+    )
+  ) {
+    prettyRefs = false;
+  }
   if (refLvl >= MAX_REF_LVL) {
     return {
       error: new DendronError({ message: "too many nested note refs" }),

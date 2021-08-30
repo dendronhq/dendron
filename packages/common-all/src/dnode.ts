@@ -333,6 +333,11 @@ export class NoteUtils {
   static RE_FM_UPDATED_OR_CREATED =
     /^(?<beforeTimestamp>(updated|created): *)(?<timestamp>[0-9]+)$/;
 
+  /** Adds a backlink by mutating the 'to' argument in place.
+   *
+   *  @param from note that the link is pointing from.
+   *  @param to note that the link is pointing to. (mutated)
+   *  @param link backlink to add. */
   static addBacklink({
     from,
     to,
@@ -341,14 +346,13 @@ export class NoteUtils {
     from: NoteProps;
     to: NoteProps;
     link: DLink;
-  }) {
+  }): void {
     to.links.push({
       from: { fname: from.fname, vaultName: VaultUtils.getName(from.vault) },
       type: "backlink",
       position: link.position,
       value: link.value,
     });
-    // }
   }
 
   /**

@@ -39,6 +39,7 @@ import { migrateConfig } from "./migration";
 import { StateService } from "./services/stateService";
 import { Extensions } from "./settings";
 import { setupSegmentClient } from "./telemetry";
+import { GOOGLE_OAUTH_ID, GOOGLE_OAUTH_SECRET } from "./types/global";
 import { VSCodeUtils, KeybindingUtils, WSUtils } from "./utils";
 import { AnalyticsUtils } from "./utils/analytics";
 import { DendronTreeView } from "./views/DendronTreeView";
@@ -182,6 +183,8 @@ async function startServerProcess(): Promise<{
     nextServerUrl,
     nextStaticRoot,
     port,
+    googleOauthClientId: GOOGLE_OAUTH_ID,
+    googleOauthClientSecret: GOOGLE_OAUTH_SECRET,
   });
   return out;
 }

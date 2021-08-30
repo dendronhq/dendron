@@ -14,10 +14,14 @@ export function appModule({
   logPath,
   nextServerUrl,
   nextStaticRoot,
+  googleOauthClientId,
+  googleOauthClientSecret,
 }: {
   logPath: string;
   nextServerUrl?: string;
   nextStaticRoot?: string;
+  googleOauthClientId?: string;
+  googleOauthClientSecret: string;
 }) {
   const ctx = "appModule:start";
   const logger = getLogger();
@@ -37,6 +41,7 @@ export function appModule({
     );
   }
 
+  logger.info(googleOauthClientId);
   logger.info({ ctx, dirPath: __dirname });
   const staticDir = path.join(__dirname, "static");
   app.use(express.static(staticDir));

@@ -2,6 +2,7 @@ import { LogLvl } from "@dendronhq/common-server";
 import express from "express";
 import _ from "lodash";
 import { configureLogger, getLogger } from "./core";
+
 export { ServerUtils, SubProcessExitType } from "./utils";
 
 type LaunchOpts = {
@@ -10,6 +11,8 @@ type LaunchOpts = {
   logLevel?: LogLvl;
   nextServerUrl?: string;
   nextStaticRoot?: string;
+  googleOauthClientId?: string;
+  googleOauthClientSecret?: string;
 };
 
 function launchv2(
@@ -27,6 +30,8 @@ function launchv2(
       logPath: LOG_DST,
       nextServerUrl: opts?.nextServerUrl,
       nextStaticRoot: opts?.nextStaticRoot,
+      googleOauthClientId: opts?.googleOauthClientId,
+      googleOauthClientSecret: opts?.googleOauthClientSecret,
     });
     const server = app.listen(listenPort, () => {
       const port = (server.address() as any).port;

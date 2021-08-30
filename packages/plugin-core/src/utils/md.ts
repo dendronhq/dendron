@@ -5,6 +5,7 @@ import {
   NoteProps,
   NoteUtils,
   TAGS_HIERARCHY,
+  USERS_HIERARCHY,
 } from "@dendronhq/common-all";
 import {
   DendronASTTypes,
@@ -14,6 +15,7 @@ import {
   MDUtilsV5,
   ProcMode,
   visit,
+  USERTAG_REGEX_LOOSE,
 } from "@dendronhq/engine-server";
 import { sort as sortPaths } from "cross-path-sort";
 import fs from "fs";
@@ -258,6 +260,22 @@ export const getReferenceAtPosition = (
         range: rangeForHashTag,
         label: match[0],
         ref: `${TAGS_HIERARCHY}${match.groups!.tagContents}`,
+        refText: docText,
+      };
+    }
+    // if not, it could be a user tag
+    const rangeForUserTag = document.getWordRangeAtPosition(
+      position,
+      USERTAG_REGEX_LOOSE
+    );
+    if (rangeForUserTag) {
+      const docText = document.getText(rangeForUserTag);
+      const match = docText.match(USERTAG_REGEX_LOOSE);
+      if (_.isNull(match)) return null;
+      return {
+        range: rangeForUserTag,
+        label: match[0],
+        ref: `${USERS_HIERARCHY}${match.groups!.tagContents}`,
         refText: docText,
       };
     }

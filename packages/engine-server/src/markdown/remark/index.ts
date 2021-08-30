@@ -29,3 +29,9 @@ export {
   hashtags,
   matchHashtag,
 } from "./hashtag";
+export {
+  USERTAG_REGEX,
+  USERTAG_REGEX_LOOSE,
+  userTags,
+  matchUserTag,
+} from "./userTags";

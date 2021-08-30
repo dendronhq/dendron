@@ -37,6 +37,7 @@ export enum DendronASTTypes {
   REF_LINK_V2 = "refLinkV2",
   BLOCK_ANCHOR = "blockAnchor",
   HASHTAG = "hashtag",
+  USERTAG = "usertag",
   // Not dendron-specific, included here for convenience
   ROOT = "root",
   HEADING = "heading",
@@ -141,6 +142,15 @@ export type HashTag = DendronASTNode & {
   /** The fname that the hashtag actually references, like `tags.foo.bar` */
   fname: string;
   /** The full test of the hashtag, like `#foo.bar` */
+  value: string;
+};
+
+/** User tags, like `@Hamilton.Margaret`, a shorthand for `[[user.Hamilton.Margaret]]` */
+export type UserTag = DendronASTNode & {
+  type: DendronASTTypes.USERTAG;
+  /** The fname that the hashtag actually references, like `user.Hamilton.Margaret` */
+  fname: string;
+  /** The full test of the hashtag, like `@Hamilton.Margaret` */
   value: string;
 };
 

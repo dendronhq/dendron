@@ -12,7 +12,7 @@ To create a note, use `%KEYBINDING%+L` to bring up Dendron's lookup. This is a s
 
 > 💡 The lookup command is the main way to interact with Dendron. It is used for both looking up your notes and creating new notes. When you do a lookup on a note that hasn't been created, Dendron will create it for you. Remember the `%KEYBINDING%+L` shortcut.
 
-> 🌱 Try it yourself - bring up the lookup bar with %KEYBINDING%+L. Type `recipes` and hit Enter. Afterward, you can use the `%KEYBINDING%+Tab` shortcut to get back to this note.
+> 🌱 Try it yourself - bring up the lookup bar with %KEYBINDING%+L. Type `recipes` and hit Enter. Afterward, you can use the `Ctrl+Tab` shortcut to get back to this note.
 
 This should have created a note named `recipes.md`. Notes in Dendron are just plaintext markdown. They live in your file system and are portable across any platform, which makes it very easy to import/ export your notes and even to publish your notes to a hosted website. You can try to add some content to the body of your `recipes` note now.
 

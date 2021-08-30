@@ -55,15 +55,16 @@ export class SyncCommand extends BasicCommand<CommandOpts, CommandReturns> {
         cancellable: false,
       },
       async (progress) => {
-        progress.report({ message: "committing repos" });
+        progress.report({ increment: 0, message: "committing repos" });
         const committed = await workspaceService.commitAndAddAll();
         L.info(committed);
-        progress.report({ message: "pulling repos" });
+        progress.report({ increment: 25, message: "pulling repos" });
         const pulled = await workspaceService.pullVaults();
         L.info(pulled);
-        progress.report({ message: "pushing repos" });
+        progress.report({ increment: 50, message: "pushing repos" });
 
         const pushed = await workspaceService.pushVaults();
+        progress.report({ increment: 100 });
         L.info(pushed);
 
         return { committed, pulled, pushed };

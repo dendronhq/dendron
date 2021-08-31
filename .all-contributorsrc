@@ -583,6 +583,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "HopperTech",
+      "name": "Jeff Hopper",
+      "avatar_url": "https://avatars.githubusercontent.com/u/35973180?v=4",
+      "profile": "http://hoppertech.net",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

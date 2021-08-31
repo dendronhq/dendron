@@ -1,6 +1,6 @@
 import LRU from "lru-cache";
 import { Cache } from "./cache";
-import { DendronError } from "@dendronhq/common-all";
+import { DendronError } from "../../error";
 
 export type LruCacheOpts = {
   /** Max number of items to keep in cache. */

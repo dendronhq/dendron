@@ -1,4 +1,4 @@
-import { NullCache } from "@dendronhq/engine-server/lib/util/cache";
+import { NullCache } from "@dendronhq/common-all";
 
 describe("NullCache tests", () => {
   describe("GIVEN null cache", () => {

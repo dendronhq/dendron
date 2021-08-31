@@ -11,13 +11,11 @@ export interface Cache<K, T> {
 /** Null object implementation of {@link Cache} to be used when we
  *  dont want the code to actually use the cache. */
 export class NullCache<K, T> implements Cache<K, T> {
-  // @ts-ignore
-  get(key: K): T | undefined {
+  get(_key: K): T | undefined {
     return undefined;
   }
 
-  // @ts-ignore
-  set(key: K, data: T): void {
+  set(_key: K, _data: T): void {
     // Empty since this is null object implementation
   }
 }

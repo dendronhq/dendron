@@ -1,8 +1,10 @@
-import { RESERVED_KEYS } from "@dendronhq/common-all";
+import { RESERVED_KEYS, VaultUtils } from "@dendronhq/common-all";
 import { GitUtils } from "@dendronhq/common-server";
 import { DConfig } from "@dendronhq/engine-server";
 import _ from "lodash";
-import { testWithEngine } from "../../engine";
+import path from "path";
+import { runEngineTestV5, testWithEngine } from "../../engine";
+import { ENGINE_HOOKS } from "../../presets";
 
 describe("GitUtils", () => {
   describe("getGithubEditUrl", () => {
@@ -45,6 +47,50 @@ describe("GitUtils", () => {
       note.custom[RESERVED_KEYS.GIT_NOTE_PATH] = "{{ noteHiearchy }}.md";
       expect(GitUtils.getGithubEditUrl({ note, config, wsRoot })).toEqual(
         "https://github.com/dendronhq/dendron-site/edit/main/foo/ch1.md"
+      );
+    });
+  });
+
+  describe("getGithubFileUrl", () => {
+    test("ok - unix separator", async () => {
+      await runEngineTestV5(
+        async ({ wsRoot, vaults }) => {
+          const vaultURI = path.join(wsRoot, VaultUtils.getRelPath(vaults[0]));
+          expect(
+            await GitUtils.getGithubFileUrl(vaultURI, "foo.md", 1, 2)
+          ).toEqual(
+            "https://github.com/dendronhq/dendron-site/blob/master/foo.md#L2:L3"
+          );
+        },
+        {
+          expect,
+          initGit: true,
+          preSetupHook: ENGINE_HOOKS.setupBasic,
+          git: {
+            initVaultWithRemote: true,
+          },
+        }
+      );
+    });
+
+    test("ok - windows separtor", async () => {
+      await runEngineTestV5(
+        async ({ wsRoot, vaults }) => {
+          const vaultURI = path.join(wsRoot, VaultUtils.getRelPath(vaults[0]));
+          expect(
+            await GitUtils.getGithubFileUrl(vaultURI, "\\foo.md", 1, 2)
+          ).toEqual(
+            "https://github.com/dendronhq/dendron-site/blob/master/foo.md#L2:L3"
+          );
+        },
+        {
+          expect,
+          initGit: true,
+          preSetupHook: ENGINE_HOOKS.setupBasic,
+          git: {
+            initVaultWithRemote: true,
+          },
+        }
       );
     });
   });

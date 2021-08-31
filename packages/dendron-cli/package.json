@@ -46,7 +46,6 @@
     "@dendronhq/api-server": "^0.57.0",
     "@dendronhq/common-all": "^0.57.0",
     "@dendronhq/common-server": "^0.57.0",
-    "@dendronhq/dendron-11ty": "^0.57.0",
     "@dendronhq/engine-server": "^0.57.0",
     "@dendronhq/pods-core": "^0.57.0",
     "@jcoreio/async-throttle": "^1.3.2",
@@ -58,6 +57,9 @@
     "rsync": "^0.6.1",
     "ts-json-schema-generator": "^0.95.0",
     "yargs": "^15.4.1"
+  },
+  "peerDependencies": {
+    "@dendronhq/dendron-11ty": "^0.57.0"
   },
   "devDependencies": {
     "@types/fs-extra": "^9.0.1",

@@ -49,6 +49,7 @@ export class DConfig {
       mermaid: true,
       useKatex: true,
       autoFoldFrontmatter: true,
+      usePrettyRefs: true,
       dev: {
         enablePreviewV2: true,
       },

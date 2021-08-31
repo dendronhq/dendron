@@ -4,10 +4,11 @@ import path from "path";
 
 export class GitTestUtils {
   static async createRepoForWorkspace(wsRoot: string) {
-    const git = new Git({ localUrl: wsRoot });
+    const git = new Git({ localUrl: wsRoot, remoteUrl: "git-test-remote.com" });
     await git.init();
     await git.add("dendron.yml");
     await git.commit({ msg: "init" });
+    await git.remoteAdd();
   }
 
   /** Creates a "bare" git repository, to be used as the remote for a workspace.
@@ -54,11 +55,15 @@ export class GitTestUtils {
   }
 
   static async createRepoWithReadme(root: string) {
-    const git = new Git({ localUrl: root });
+    const git = new Git({
+      localUrl: root,
+      remoteUrl: "git@github.com:dendronhq/dendron-site.git",
+    });
     await git.init();
     const readmePath = path.join(root, "README.md");
     fs.ensureFileSync(readmePath);
     await git.add(".");
     await git.commit({ msg: "init" });
+    await git.remoteAdd();
   }
 }

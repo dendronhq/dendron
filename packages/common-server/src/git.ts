@@ -209,7 +209,7 @@ export class GitUtils {
     const hostname = await this.getGitHostname(uri);
     const [owner, repo] = await this.getGitProviderOwnerAndRepository(uri);
     const branch = await this.getCurrentBranch(uri);
-    const currentFile = file.replace(/^\//, "");
+    const currentFile = file.replace(/^\//, "").replace(/^\\/, "");
     return `https://${hostname}/${owner}/${repo}/blob/${branch}/${currentFile}#L${
       line + 1
     }:L${endLine + 1}`;
@@ -219,6 +219,11 @@ export class GitUtils {
     return (await this.getGitProviderOwnerAndRepositoryFromGitConfig(uri))[1];
   }
 
+  /**
+   * Looks at URI for git repo
+   * @param uri
+   * @returns
+   */
   static async getGitProviderOwnerAndRepositoryFromGitConfig(
     uri: string
   ): Promise<string[]> {

@@ -1,7 +1,7 @@
 ![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/logo-256.png)
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-60-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-61-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 # Welcome to Dendron!
@@ -138,6 +138,7 @@ Dendron wouldn't be what it is today without help from these wonderful gardeners
     <td align="center"><a href="https://github.com/gereleth"><img src="https://avatars.githubusercontent.com/u/6080076?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Daria Vasyukova</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Agereleth" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/djradon"><img src="https://avatars.githubusercontent.com/u/5224156?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Dave Richardson</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Adjradon" title="Bug reports">🐛</a> <a href="https://github.com/dendronhq/dendron/commits?author=djradon" title="Documentation">📖</a></td>
     <td align="center"><a href="http://me-ding-fan.vercel.app"><img src="https://avatars.githubusercontent.com/u/26438549?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Ding</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=Ding-Fan" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://github.com/nz-john"><img src="https://avatars.githubusercontent.com/u/89765379?v=4?s=100" width="100px;" alt=""/><br /><sub><b>John</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Anz-john" title="Bug reports">🐛</a></td>
   </tr>
 </table>
 

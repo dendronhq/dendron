@@ -565,6 +565,15 @@
         "bug",
         "doc"
       ]
+    },
+    {
+      "login": "Ding-Fan",
+      "name": "Ding",
+      "avatar_url": "https://avatars.githubusercontent.com/u/26438549?v=4",
+      "profile": "http://me-ding-fan.vercel.app",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,

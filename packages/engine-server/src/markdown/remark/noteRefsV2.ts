@@ -16,6 +16,7 @@ import {
 import { file2Note } from "@dendronhq/common-server";
 import _ from "lodash";
 import { brk, html, paragraph, root } from "mdast-builder";
+import { DConfig } from "@dendronhq/engine-server";
 import { Eat } from "remark-parse";
 import Unified, { Plugin } from "unified";
 import { Node, Parent } from "unist";
@@ -322,12 +323,8 @@ export function convertNoteRefASTV2(
     };
   }
   const { wikiLinkOpts } = compilerOpts;
-  const sitePrettyRefConfig = _.isUndefined(procOpts.config?.site?.usePrettyRefs)
-    ? true
-    : procOpts.config.site.usePrettyRefs;
-  const prettyRefConfig = _.isUndefined(procOpts.config?.usePrettyRefs)
-    ? true
-    : procOpts.config.usePrettyRefs;
+  const sitePrettyRefConfig = DConfig.getProp(procOpts.config, "site").usePrettyRefs;
+  const prettyRefConfig = DConfig.getProp(procOpts.config, "usePrettyRefs");
   let prettyRefs = shouldApplyPublishRules
     ? sitePrettyRefConfig
     : prettyRefConfig

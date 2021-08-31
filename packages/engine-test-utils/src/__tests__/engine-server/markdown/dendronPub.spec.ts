@@ -273,6 +273,7 @@ describe("dendronPub", () => {
         config.site = {
           siteHierarchies: ["foo"],
           siteRootDir: "foo",
+          usePrettyRefs: true
         };
         const resp = await MDUtilsV4.procRehype({
           proc: proc(
@@ -432,10 +433,6 @@ describe("dendronPub", () => {
       "usePrettyRef defaults to true in both cases",
       async ({ engine, vaults }) => {
         const config = DConfig.genDefaultConfig();
-        config.site = {
-          siteHierarchies: ["foo"],
-          siteRootDir: "foo",
-        };
         const previewResp = await MDUtilsV5.procRehypeFull(
           {
             engine,

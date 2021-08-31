@@ -143,7 +143,7 @@ export function getWS() {
 
 export function getWSV2(): DWorkspaceV2 {
   const ws = DendronWorkspace.instance();
-  return ws.getOrThrowWorkspaceImpl();
+  return ws.getWorkspaceImplOrThrow();
 }
 
 export function getEngine() {
@@ -379,7 +379,7 @@ export class DendronWorkspace {
     this.L.info({ ctx, msg: "initialized" });
   }
 
-  getOrThrowWorkspaceImpl(): DWorkspaceV2 {
+  getWorkspaceImplOrThrow(): DWorkspaceV2 {
     if (_.isUndefined(this.workspaceImpl)) {
       throw Error("no native workspace");
     }
@@ -526,7 +526,7 @@ export class DendronWorkspace {
 
   setEngine(engine: EngineAPIService) {
     this._enginev2 = engine;
-    this.getOrThrowWorkspaceImpl().engine = engine;
+    this.getWorkspaceImplOrThrow().engine = engine;
   }
 
   async setupViews(context: vscode.ExtensionContext) {

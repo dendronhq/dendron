@@ -761,10 +761,7 @@ export class WorkspaceService {
     // check if we need to force a migration
     try {
       const maybeRaw = DConfig.getRaw(this.wsRoot);
-      if (
-        _.isUndefined(maybeRaw.journal) &&
-        workspaceInstallStatus === InstallStatus.INITIAL_INSTALL
-      ) {
+      if (_.isUndefined(maybeRaw.journal)) {
         forceUpgrade = true;
       }
     } catch (error) {

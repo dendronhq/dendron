@@ -5,9 +5,11 @@ const ErrorMessages = {
   AVOID_DIRECT_IMPORT_FROM_PACKAGES:[
     `Direct import from a package.`,
     `This check catches direct imports such as:`,
-    `import { milliseconds } from "@dendronhq/common-all/lib/timing";`,
-    `While the above import should look as:`,
-    `import { milliseconds } from "@dendronhq/common-all";`
+    `import { your_import1 } from "@dendronhq/common-all/path1";`,
+    `import { your_import2 } from "@dendronhq/common-server/path2";`,
+    `While the above imports should look as:`,
+    `import { your_import1 } from "@dendronhq/common-all";`,
+    `import { your_import2 } from "@dendronhq/common-server";`
   ].join('\n')
 }
 

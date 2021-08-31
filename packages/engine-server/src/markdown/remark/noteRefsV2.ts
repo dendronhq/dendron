@@ -822,7 +822,11 @@ function findBlockAnchor({
 
   if (_.isUndefined(foundIndex)) return null;
   if (!_.isEmpty(foundAncestors)) {
-    if (foundAncestors[0].ancestor.children.length === 1) {
+    if (
+      foundAncestors[0].ancestor.children.length === 1 &&
+      foundAncestors[0].ancestor.children[0].type ===
+        DendronASTTypes.BLOCK_ANCHOR
+    ) {
       // If located by itself after a block, then the block anchor refers to the previous block
       return { type: "block", index: foundIndex - 1 };
     }

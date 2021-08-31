@@ -601,6 +601,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "CyberFoxar",
+      "name": "CyberFoxar",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1347036?v=4",
+      "profile": "https://github.com/CyberFoxar",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

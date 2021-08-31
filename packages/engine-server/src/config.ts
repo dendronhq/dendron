@@ -39,6 +39,7 @@ export class DConfig {
   static genDefaultConfig(): DendronConfig {
     return {
       version: 1,
+      maxPreviewsCached: 10,
       vaults: [],
       useFMTitle: true,
       useNoteTitleForLink: true,

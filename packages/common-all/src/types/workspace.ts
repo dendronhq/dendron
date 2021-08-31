@@ -97,7 +97,7 @@ export enum NoteAddBehavior {
 export enum LookupSelectionType {
   "selection2link" = "selection2link",
   "selectionExtract" = "selectionExtract",
-  "none" = "none"
+  "none" = "none",
 }
 
 export type NoteLookupConfig = {
@@ -119,7 +119,7 @@ export enum InsertNoteLinkAliasMode {
 export type InsertNoteLinkConfig = {
   aliasMode: InsertNoteLinkAliasMode;
   multiSelect: boolean;
-}
+};
 
 export type JournalConfig = {
   dailyDomain: string;
@@ -144,6 +144,12 @@ export type DendronConfig = {
    * Disable caching behavior
    */
   noCaching?: boolean;
+
+  /** Maximum number of rendered previews to cache in Dendron Engine.
+   *  Note: this value is ignored when {@link DendronConfig.noCaching} is set to true.
+   *  When set this value must be greater than 0. */
+  maxPreviewsCached?: number;
+
   /**
    * Disable telemetry
    */

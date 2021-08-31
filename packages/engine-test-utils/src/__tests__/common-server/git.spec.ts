@@ -62,7 +62,14 @@ describe("GitUtils", () => {
             "https://github.com/dendronhq/dendron-site/blob/master/foo.md#L2:L3"
           );
         },
-        { expect, initGit: true, preSetupHook: ENGINE_HOOKS.setupBasic }
+        {
+          expect,
+          initGit: true,
+          preSetupHook: ENGINE_HOOKS.setupBasic,
+          git: {
+            initVaultWithRemote: true,
+          },
+        }
       );
     });
 
@@ -76,7 +83,14 @@ describe("GitUtils", () => {
             "https://github.com/dendronhq/dendron-site/blob/master/foo.md#L2:L3"
           );
         },
-        { expect, initGit: true, preSetupHook: ENGINE_HOOKS.setupBasic }
+        {
+          expect,
+          initGit: true,
+          preSetupHook: ENGINE_HOOKS.setupBasic,
+          git: {
+            initVaultWithRemote: true,
+          },
+        }
       );
     });
   });

@@ -56,6 +56,9 @@ export type TestSetupWorkspaceOpts = {
    * Modify dendron config before initialization
    */
   modConfigCb?: (config: DendronConfig) => DendronConfig;
+  git?: {
+    initVaultWithRemote?: boolean;
+  };
 };
 
 export type AsyncCreateEngineFunction = (
@@ -262,6 +265,7 @@ export async function runEngineTestV5(
     initGit,
     workspaces,
     addVSWorkspace,
+    git,
   } = _.defaults(opts, {
     preSetupHook: async ({}) => {},
     postSetupHook: async ({}) => {},
@@ -324,7 +328,8 @@ export async function runEngineTestV5(
       await Promise.all(
         vaults.map((vault) => {
           return GitTestUtils.createRepoWithReadme(
-            vault2Path({ vault, wsRoot })
+            vault2Path({ vault, wsRoot }),
+            { remote: git?.initVaultWithRemote }
           );
         })
       );

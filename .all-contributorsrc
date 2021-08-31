@@ -555,6 +555,16 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "djradon",
+      "name": "Dave Richardson",
+      "avatar_url": "https://avatars.githubusercontent.com/u/5224156?v=4",
+      "profile": "https://github.com/djradon",
+      "contributions": [
+        "bug",
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,

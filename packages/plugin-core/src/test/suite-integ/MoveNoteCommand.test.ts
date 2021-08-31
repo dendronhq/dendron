@@ -16,6 +16,7 @@ import {
 import { DendronEngineV2, HistoryService } from "@dendronhq/engine-server";
 import {
   ENGINE_HOOKS,
+  ENGINE_HOOKS_MULTI,
   ENGINE_RENAME_PRESETS,
 } from "@dendronhq/engine-test-utils";
 import _ from "lodash";
@@ -25,6 +26,7 @@ import { MoveNoteCommand } from "../../commands/MoveNoteCommand";
 import { LookupControllerV3 } from "../../components/lookup/LookupControllerV3";
 import { VSCodeUtils } from "../../utils";
 import { expect } from "../testUtilsv2";
+import sinon from "sinon";
 import {
   createEngineFactory,
   runLegacyMultiWorkspaceTest,
@@ -516,6 +518,7 @@ suite("MoveNoteCommand", function () {
             path.join("vault2", "foo.md")
           )
         ).toBeTruthy();
+
         // note not in old vault
         expect(
           await EngineTestUtilsV4.checkVault({
@@ -551,6 +554,247 @@ suite("MoveNoteCommand", function () {
             })
           )
         ).toBeFalsy();
+
+        done();
+      },
+    });
+  });
+
+  test("bulk-move: move 2 notes from different vaults to new vault", (done) => {
+    runLegacyMultiWorkspaceTest({
+      ctx,
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        await ENGINE_HOOKS_MULTI.setupBasicMulti({ wsRoot, vaults });
+      },
+      onInit: async ({ engine, vaults, wsRoot }) => {
+        const notes = engine.notes;
+        const vault1 = vaults[0];
+        const vault2 = vaults[1];
+        const vault3 = vaults[2];
+
+        const fooNote = NoteUtils.getNoteByFnameV5({
+          fname: "foo",
+          notes,
+          vault: vault1,
+          wsRoot,
+        }) as NoteProps;
+
+        await VSCodeUtils.openNote(fooNote);
+        const cmd = new MoveNoteCommand();
+
+        sinon
+          .stub(VSCodeUtils, "showQuickPick")
+          .returns(
+            Promise.resolve("proceed") as Thenable<vscode.QuickPickItem>
+          );
+        await cmd.execute({
+          moves: [
+            {
+              oldLoc: {
+                fname: "foo",
+                vaultName: VaultUtils.getName(vault1),
+              },
+              newLoc: {
+                fname: "foo",
+                vaultName: VaultUtils.getName(vault3),
+              },
+            },
+            {
+              oldLoc: {
+                fname: "bar",
+                vaultName: VaultUtils.getName(vault2),
+              },
+              newLoc: {
+                fname: "bar",
+                vaultName: VaultUtils.getName(vault3),
+              },
+            },
+          ],
+        });
+        expect(
+          VSCodeUtils.getActiveTextEditor()?.document.fileName.endsWith(
+            path.join("vault3", "foo.md")
+          )
+        ).toBeTruthy();
+
+        // Check that the files are not in old vaults anymore
+        expect(
+          await EngineTestUtilsV4.checkVault({
+            wsRoot,
+            vault: vault1,
+            nomatch: ["foo.md"],
+          })
+        ).toBeTruthy();
+        expect(
+          await EngineTestUtilsV4.checkVault({
+            wsRoot,
+            vault: vault2,
+            nomatch: ["bar.md"],
+          })
+        ).toBeTruthy();
+
+        expect(
+          _.isUndefined(
+            NoteUtils.getNoteByFnameV5({
+              fname: "foo",
+              notes,
+              vault: vault1,
+              wsRoot,
+            })
+          )
+        ).toBeTruthy();
+        expect(
+          _.isUndefined(
+            NoteUtils.getNoteByFnameV5({
+              fname: "bar",
+              notes,
+              vault: vault2,
+              wsRoot,
+            })
+          )
+        ).toBeTruthy();
+
+        // Should be in vault 3
+        expect(
+          await EngineTestUtilsV4.checkVault({
+            wsRoot,
+            vault: vault3,
+            match: ["foo.md", "bar.md"],
+          })
+        ).toBeTruthy();
+
+        expect(
+          NoteUtils.getNoteByFnameV5({
+            fname: "foo",
+            notes,
+            vault: vault3,
+            wsRoot,
+          })
+        ).toBeTruthy();
+        expect(
+          NoteUtils.getNoteByFnameV5({
+            fname: "bar",
+            notes,
+            vault: vault3,
+            wsRoot,
+          })
+        ).toBeTruthy();
+
+        done();
+      },
+    });
+  });
+
+  test("bulk-move: move 2 notes from same vault to new vault", (done) => {
+    runLegacyMultiWorkspaceTest({
+      ctx,
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+      },
+      onInit: async ({ engine, vaults, wsRoot }) => {
+        const notes = engine.notes;
+        const vault1 = vaults[0];
+        const vault2 = vaults[1];
+        const fooNote = NoteUtils.getNoteByFnameV5({
+          fname: "foo",
+          notes,
+          vault: vault1,
+          wsRoot,
+        }) as NoteProps;
+
+        await VSCodeUtils.openNote(fooNote);
+        const cmd = new MoveNoteCommand();
+
+        sinon
+          .stub(VSCodeUtils, "showQuickPick")
+          .returns(
+            Promise.resolve("proceed") as Thenable<vscode.QuickPickItem>
+          );
+
+        await cmd.execute({
+          moves: [
+            {
+              oldLoc: {
+                fname: "foo",
+                vaultName: VaultUtils.getName(vault1),
+              },
+              newLoc: {
+                fname: "foo",
+                vaultName: VaultUtils.getName(vault2),
+              },
+            },
+            {
+              oldLoc: {
+                fname: "foo.ch1",
+                vaultName: VaultUtils.getName(vault1),
+              },
+              newLoc: {
+                fname: "foo.ch1",
+                vaultName: VaultUtils.getName(vault2),
+              },
+            },
+          ],
+        });
+        expect(
+          VSCodeUtils.getActiveTextEditor()?.document.fileName.endsWith(
+            path.join("vault2", "foo.md")
+          )
+        ).toBeTruthy();
+
+        expect(
+          await EngineTestUtilsV4.checkVault({
+            wsRoot,
+            vault: vault1,
+            nomatch: ["foo.md", "foo.ch1.md"],
+          })
+        ).toBeTruthy();
+
+        expect(
+          _.isUndefined(
+            NoteUtils.getNoteByFnameV5({
+              fname: "foo",
+              notes,
+              vault: vault1,
+              wsRoot,
+            })
+          )
+        ).toBeTruthy();
+        expect(
+          _.isUndefined(
+            NoteUtils.getNoteByFnameV5({
+              fname: "foo.ch1",
+              notes,
+              vault: vault1,
+              wsRoot,
+            })
+          )
+        ).toBeTruthy();
+
+        expect(
+          await EngineTestUtilsV4.checkVault({
+            wsRoot,
+            vault: vault1,
+            nomatch: ["foo.md", "foo.ch1.md"],
+          })
+        ).toBeTruthy();
+
+        expect(
+          NoteUtils.getNoteByFnameV5({
+            fname: "foo",
+            notes,
+            vault: vault2,
+            wsRoot,
+          })
+        ).toBeTruthy();
+        expect(
+          NoteUtils.getNoteByFnameV5({
+            fname: "foo.ch1",
+            notes,
+            vault: vault2,
+            wsRoot,
+          })
+        ).toBeTruthy();
+
         done();
       },
     });

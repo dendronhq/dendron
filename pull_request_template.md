@@ -13,8 +13,8 @@ You can go to [dendron pull requests](https://wiki.dendron.so/notes/adc39825-77a
   - NOTE: if you running mac/linux, check the windows output and vice versa if you are developing on windows
 
 #### Special Cases
-- [ ] if your tests changes an existing snaphot, make sure that snapshots are [updated](https://wiki.dendron.so/notes/cb22bd36-d45a-4ffd-a31e-96c4b39cb7fb.html#test-workspace)
-- [ ] if you are adding a new language feature (graphically visible in vscode/preview/publishing), make sure that it is included in [test-workspace](https://github.com/dendronhq/dendron/blob/feat/hashtag-tags/test-workspace/dendron.yml#L1:L1). We use this to manually inspect new changes and for auto regression testiing 
+- [ ] if your tests changes an existing snaphot, make sure that snapshots are [updated](https://wiki.dendron.so/notes/cb22bd36-d45a-4ffd-a31e-96c4b39cb7fb.html#updating-test-snapshots)
+- [ ] if you are adding a new language feature (graphically visible in vscode/preview/publishing), make sure that it is included in [test-workspace](https://wiki.dendron.so/notes/cb22bd36-d45a-4ffd-a31e-96c4b39cb7fb.html#test-workspace). We use this to manually inspect new changes and for auto regression testiing 
 
 ### Docs
 - [ ] if your change reflects documentation changes, also submit a PR to [dendron-site](https://github.com/dendronhq/dendron-site) and mention the doc PR link in your current PR
@@ -28,4 +28,4 @@ You can go to [dendron pull requests](https://wiki.dendron.so/notes/adc39825-77a
 
 
 ### Analytics
-- [ ] if you are adding analytics related changes, make sure the [Telemetry](dendron.ref.telemetry) docs are updated
+- [ ] if you are adding analytics related changes, make sure the [Telemetry](https://wiki.dendron.so/notes/84df871b-9442-42fd-b4c3-0024e35b5f3c.html) docs are updated

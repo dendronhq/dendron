@@ -1,0 +1,31 @@
+
+# Pull Request Checklist
+
+You can go to [dendron pull requests](https://wiki.dendron.so/notes/adc39825-77a6-46cf-9c49-2642fcb4248e.html) to see full details for items in this checklist.
+
+## General
+
+### Quality Assurance
+- [ ] add a [test](https://wiki.dendron.so/notes/cb22bd36-d45a-4ffd-a31e-96c4b39cb7fb.html#writing-tests) for the new feature
+- [ ] make sure all the existing [tests](https://wiki.dendron.so/notes/cb22bd36-d45a-4ffd-a31e-96c4b39cb7fb.html#running-all-tests) pass
+- [ ] do a spot check by running your feature with our [test Workspace](https://wiki.dendron.so/notes/cb22bd36-d45a-4ffd-a31e-96c4b39cb7fb.html#test-workspace)
+- [ ] after you submit your pull request, check the output of our [integration test](https://github.com/dendronhq/dendron/actions) and make sure all tests pass
+  - NOTE: if you running mac/linux, check the windows output and vice versa if you are developing on windows
+
+#### Special Cases
+- [ ] if your tests changes an existing snaphot, make sure that snapshots are [updated](https://wiki.dendron.so/notes/cb22bd36-d45a-4ffd-a31e-96c4b39cb7fb.html#test-workspace)
+- [ ] if you are adding a new language feature (graphically visible in vscode/preview/publishing), make sure that it is included in [test-workspace](https://github.com/dendronhq/dendron/blob/feat/hashtag-tags/test-workspace/dendron.yml#L1:L1). We use this to manually inspect new changes and for auto regression testiing 
+
+### Docs
+- [ ] if your change reflects documentation changes, also submit a PR to [dendron-site](https://github.com/dendronhq/dendron-site) and mention the doc PR link in your current PR
+
+## Special Cases
+
+### First Time PR
+- [ ] sign the [CLA](https://en.wikipedia.org/wiki/Contributor_License_Agreement) which will be prompted by our github bot after you submit the PR
+- [ ] add your [discord](https://discord.gg/AE3NRw9) alias in the review so that we can give you the [horticulturalist](https://wiki.dendron.so/notes/7c00d606-7b75-4d28-b563-d75f33f8e0d7.html#horticulturalist) badge in our community
+
+
+
+### Analytics
+- [ ] if you are adding analytics related changes, make sure the [Telemetry](dendron.ref.telemetry) docs are updated

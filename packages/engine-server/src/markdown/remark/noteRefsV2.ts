@@ -16,7 +16,7 @@ import {
 import { file2Note } from "@dendronhq/common-server";
 import _ from "lodash";
 import { brk, html, paragraph, root } from "mdast-builder";
-import { DConfig } from "@dendronhq/engine-server";
+import { DConfig } from "../../config";
 import { Eat } from "remark-parse";
 import Unified, { Plugin } from "unified";
 import { Node, Parent } from "unist";

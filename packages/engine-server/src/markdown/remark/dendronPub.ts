@@ -252,7 +252,6 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         const ndata = node.data as NoteRefDataV4;
         const copts: NoteRefsOpts = {
           wikiLinkOpts: opts?.wikiLinkOpts,
-          prettyRefs: opts?.prettyRefs,
         };
         const procOpts = MDUtilsV4.getProcOpts(proc);
         const { data } = convertNoteRefASTV2({

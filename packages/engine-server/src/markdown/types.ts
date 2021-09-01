@@ -50,6 +50,7 @@ export enum DendronASTTypes {
   TABLE_CELL = "tableCell",
   IMAGE = "image",
   FRONTMATTER = "yaml",
+  LINK = "link",
 }
 
 export enum DendronASTDest {

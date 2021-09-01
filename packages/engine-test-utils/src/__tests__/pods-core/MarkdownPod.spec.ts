@@ -252,6 +252,7 @@ function setupImport(src: string) {
     { path: "project/p1/n1.pdf" },
     { path: "project/p1/n1.pdf" },
     { path: "project/p.3/n1.md" },
+    { path: "project/p4/test.txt" },
   ]);
 }
 
@@ -399,12 +400,13 @@ describe("markdown import pod", () => {
             concatenate: false,
             src: importSrc,
             vaultName,
+            noAddUUID: true,
           },
         });
         const vault = vaults[0];
         vpath = vault2Path({ wsRoot, vault });
         const assetsDir = fs.readdirSync(path.join(vpath, "assets"));
-        expect(assetsDir.length).toEqual(2);
+        expect(assetsDir.length).toEqual(3);
         const fileBody = fs.readFileSync(path.join(vpath, "project.p1.md"), {
           encoding: "utf8",
         });
@@ -415,6 +417,51 @@ describe("markdown import pod", () => {
         expect,
         preSetupHook: async () => {
           await setupImport(importSrc);
+        },
+      }
+    );
+  });
+
+  test("update asset reference in md", async () => {
+    await runEngineTestV5(
+      async ({ engine, vaults, wsRoot }) => {
+        const pod = new MarkdownImportPod();
+        const vaultName = VaultUtils.getName(vaults[0]);
+        const vault = vaults[0];
+        vpath = vault2Path({ wsRoot, vault });
+        await pod.execute({
+          engine,
+          vaults,
+          wsRoot,
+          config: {
+            concatenate: false,
+            src: importSrc,
+            vaultName,
+            noAddUUID: true,
+          },
+        });
+        const assetsDir = fs.readdirSync(path.join(vpath, "assets"));
+        const fileBody = fs.readFileSync(path.join(vpath, "project.p4.md"), {
+          encoding: "utf8",
+        });
+        const fileBodyContent = fs.readFileSync(
+          path.join(vpath, "project.p2.n1.md"),
+          {
+            encoding: "utf8",
+          }
+        );
+        expect(fileBody.match("test.txt")).toBeTruthy();
+        expect(fileBodyContent).toContain("[test-pdf](/assets\\test.txt)");
+        expect(assetsDir.length).toEqual(3);
+      },
+      {
+        expect,
+        preSetupHook: async () => {
+          await setupImport(importSrc);
+          fs.writeFileSync(
+            path.join(importSrc, "project", "p2", "n1.md"),
+            "[test-pdf](/project/p4/test.txt)"
+          );
         },
       }
     );

@@ -44,7 +44,6 @@ import type {
   Text,
 } from "mdast";
 import * as mdastBuilder from "mdast-builder";
-import path from "path";
 import { Processor } from "unified";
 import { Node, Parent } from "unist";
 import { selectAll } from "unist-util-select";
@@ -941,10 +940,13 @@ export class RemarkUtils {
     return function (this: Processor) {
       return (tree: Node, _vfile: VFile) => {
         const root = tree as DendronASTRoot;
-        const assetReferences = selectAll(DendronASTTypes.IMAGE, root);
+        const assetReferences = [
+          ...selectAll(DendronASTTypes.IMAGE, root),
+          ...selectAll(DendronASTTypes.LINK, root),
+        ];
         assetReferences.forEach((asset) => {
           const key = _.replace(asset.url as string, /[\\|\/]/g, "");
-          asset.url = assetHashMap[key];
+          if (assetHashMap[key]) asset.url = assetHashMap[key];
           changes.push({
             note,
             status: "update",

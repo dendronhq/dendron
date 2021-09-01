@@ -2070,7 +2070,7 @@ VFile {
 }
 `;
 
-exports[`noteRefV2 with block anchors compile "HTML: nested list element targeting a single item" 1`] = `
+exports[`noteRefV2 with block anchors compile "HTML: nested list element targeting a single item without children" 1`] = `
 VFile {
   "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
 <h1 id=\\"foo-bar\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo-bar\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo Bar</h1>
@@ -2099,7 +2099,7 @@ VFile {
 }
 `;
 
-exports[`noteRefV2 with block anchors compile "HTML: nested list element targeting a single item" 2`] = `
+exports[`noteRefV2 with block anchors compile "HTML: nested list element targeting a single item without children" 2`] = `
 VFile {
   "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
 <h1 id=\\"foo-bar\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo-bar\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo Bar</h1>

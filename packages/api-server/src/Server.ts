@@ -8,7 +8,13 @@ import morgan from "morgan";
 import path from "path";
 import querystring from "querystring";
 import { getLogger } from "./core";
+import { GoogleAuthController } from "./modules/oauth";
 import { baseRouter } from "./routes";
+import {
+  oauthRouter,
+  OauthService,
+  registerOauthHandler,
+} from "./routes/oauth";
 
 export function appModule({
   logPath,
@@ -91,7 +97,14 @@ export function appModule({
     return res.json({ version });
   });
 
+  registerOauthHandler(
+    OauthService.GOOGLE,
+    new GoogleAuthController(googleOauthClientId!, googleOauthClientSecret)
+  );
+  baseRouter.use("/oauth", oauthRouter);
+
   app.use("/api", baseRouter);
+
   app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
     console.error(err.message, err);
     return res.status(BAD_REQUEST).json({

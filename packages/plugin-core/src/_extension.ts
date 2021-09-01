@@ -171,6 +171,8 @@ async function startServerProcess(): Promise<{
   if (getStage() !== "prod") {
     const out = await launchv2({
       logPath: path.join(__dirname, "..", "..", "dendron.server.log"),
+      googleOauthClientId: GOOGLE_OAUTH_ID,
+      googleOauthClientSecret: GOOGLE_OAUTH_SECRET,
     });
     return { port: out.port };
   }

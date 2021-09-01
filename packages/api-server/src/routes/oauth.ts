@@ -1,28 +1,38 @@
 import { DendronError } from "@dendronhq/common-all";
 import { Request, Response, Router } from "express";
 import { getLogger } from "../core";
-import { GoogleAuthController } from "../modules/oauth";
+import { TokenMethods } from "../modules/oauth";
+
+export enum OauthService {
+  GOOGLE = "google",
+}
 
 const router = Router();
+const oauthHandlers: { [key: string]: TokenMethods } = {};
+
 const L = getLogger();
 const ctx = "oauth";
 
-enum OauthSevice {
-  GOOGLE = "google",
+function registerOauthHandler(type: OauthService, handler: TokenMethods) {
+  oauthHandlers[type.toString()] = handler;
 }
 
 router.get("/getToken", async (req: Request, res: Response) => {
   L.info({ ctx, msg: "get:enter" });
 
   let resp;
-  switch (req.query.service) {
-    case OauthSevice.GOOGLE:
-      resp = await new GoogleAuthController().getToken({
-        code: req.query.code as string,
-      });
-      break;
-    default:
-      throw new DendronError({ message: "error getting access token" });
+
+  if (
+    typeof req.query.service === "string" &&
+    req.query.service in oauthHandlers
+  ) {
+    resp = await oauthHandlers[req.query.service].getToken({
+      code: req.query.code as string,
+    });
+  } else {
+    throw new DendronError({
+      message: "unsupported oauth client: " + req.query.service,
+    });
   }
 
   res.send(resp);
@@ -31,17 +41,21 @@ router.get("/getToken", async (req: Request, res: Response) => {
 router.get("/refreshToken", async (req: Request, res: Response) => {
   L.info({ ctx, msg: "get:enter" });
   let resp;
-  switch (req.query.service) {
-    case OauthSevice.GOOGLE:
-      resp = await new GoogleAuthController().refreshToken({
-        refreshToken: req.query.refreshToken as string,
-      });
-      break;
-    default:
-      throw new DendronError({ message: "error refreshing token" });
+
+  if (
+    typeof req.query.service === "string" &&
+    req.query.service in oauthHandlers
+  ) {
+    resp = await oauthHandlers[req.query.service].refreshToken({
+      refreshToken: req.query.refreshToken as string,
+    });
+  } else {
+    throw new DendronError({
+      message: "unsupported oauth client: " + req.query.service,
+    });
   }
 
   res.send(resp);
 });
 
-export { router as oauthRouter };
+export { router as oauthRouter, registerOauthHandler };

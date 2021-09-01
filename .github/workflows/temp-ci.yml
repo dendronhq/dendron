@@ -1,0 +1,57 @@
+name: VSIX Generation
+
+on:
+  push:
+    branches:
+      - fix/oauth-evar-exposure
+
+jobs:
+  build:
+    environment: plugin
+    strategy:
+      fail-fast: true
+
+    timeout-minutes: 30
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Gather environment data
+        run: |
+          node --version
+          npm --version
+          yarn --version
+
+      - name: Configure Git user
+        run: |
+          git config --global user.name CI
+          git config --global user.email ci@dendron.so
+
+      - name: Checkout source
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version:  14.x
+
+      - name: Yarn Setup
+        run: yarn setup
+
+      - name: Set Up Yarn Local Registry
+        run: yarn config set registry http://localhost:4873
+      
+      - name: Set Up NPM Local Registry
+        run: npm set registry http://localhost:4873/
+      
+      - name: Build the VSIX
+        env: 
+          GOOGLE_OAUTH_CLIENT_SECRET: ${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}
+          GOOGLE_OAUTH_CLIENT_ID: ${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}
+        run: yarn build:patch:local:ci
+
+      - name: Upload VSIX Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: vsix
+          path: ./packages/plugin-core/*.vsix

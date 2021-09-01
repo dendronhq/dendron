@@ -5,7 +5,7 @@ import path from "path";
 import fs from "fs-extra";
 import _ from "lodash";
 
-interface TokenMethods {
+export interface TokenMethods {
   getToken: (opts: GetTokenOpts) => Promise<RespV2<any> | GetTokenPayload>;
   refreshToken: (opts: RefreshTokenOpts) => Promise<RespV2<string>>;
 }
@@ -17,19 +17,22 @@ type GetTokenPayload = string | undefined;
  */
 type GetTokenOpts = {
   code: string;
-  clientId?: string;
-  clientSecret?: string;
 };
 
 type RefreshTokenOpts = {
   refreshToken: string;
-  clientId?: string;
-  clientSecret?: string;
 };
 
 export class GoogleAuthController implements TokenMethods {
+  clientId: string;
+  clientSecret: string;
+
+  constructor(clientId: string, clientSecret: string) {
+    this.clientId = clientId;
+    this.clientSecret = clientSecret;
+  }
   async getToken(opts: GetTokenOpts): Promise<RespV2<any> | GetTokenPayload> {
-    const { code, clientId, clientSecret } = opts;
+    const { code } = opts;
     const engine = MemoryStore.instance().getEngine();
     const { wsRoot } = engine;
     const configPath = path.join(
@@ -47,8 +50,8 @@ export class GoogleAuthController implements TokenMethods {
         url: `https://oauth2.googleapis.com/token`,
         method: "post",
         data: {
-          client_id: clientId,
-          client_secret: clientSecret,
+          client_id: this.clientId,
+          client_secret: this.clientSecret,
           redirect_uri: `http://localhost:${port}/api/oauth/getToken?service=google`,
           grant_type: "authorization_code",
           code,
@@ -65,7 +68,7 @@ export class GoogleAuthController implements TokenMethods {
         };
         engine.addAccessTokensToPodConfig(opts);
         resp =
-          "Authorization completed. Please return to your workspace to modify any additional import options and run import pod again";
+          "Authorization completed. Please return to your workspace and specify vaultName in config.import.yml and then run the import pod again. You can now close this window.";
       }
 
       return resp;
@@ -81,7 +84,7 @@ export class GoogleAuthController implements TokenMethods {
   }
 
   async refreshToken(opts: RefreshTokenOpts): Promise<RespV2<string>> {
-    const { refreshToken, clientId, clientSecret } = opts;
+    const { refreshToken } = opts;
     const engine = MemoryStore.instance().getEngine();
     const { wsRoot } = engine;
     const port = await fs.readFile(path.join(wsRoot, ".dendron.port"), {
@@ -93,8 +96,8 @@ export class GoogleAuthController implements TokenMethods {
         url: `https://oauth2.googleapis.com/token`,
         method: "post",
         data: {
-          client_id: clientId,
-          client_secret: clientSecret,
+          client_id: this.clientId,
+          client_secret: this.clientSecret,
           redirect_uri: `http://localhost:${port}/api/oauth/getToken?service=google`,
           grant_type: "refresh_token",
           refresh_token: refreshToken,

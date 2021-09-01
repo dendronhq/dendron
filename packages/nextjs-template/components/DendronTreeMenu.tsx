@@ -174,6 +174,10 @@ function MenuView({
     );
   };
 
+  if (activeNote) {
+    expandKeys.push(activeNote);
+  }
+
   return (
     <Menu
       key={String(collapsed)}

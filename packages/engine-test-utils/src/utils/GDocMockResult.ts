@@ -510,7 +510,7 @@ export const existingNote: NoteProps = {
   desc: "",
   links: [],
   anchors: {},
-  fname: "gdoc.meet.test",
+  fname: "gdoc.meet",
   updated: 1627283357535,
   created: 1627283357535,
   parent: null,

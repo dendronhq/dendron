@@ -16,7 +16,10 @@ import {
   NoteUtils,
   stringifyError,
   DEngineClient,
+  Time,
 } from "@dendronhq/common-all";
+import fs from "fs-extra";
+import path from "path";
 
 const ID = "dendron.gdoc";
 
@@ -24,18 +27,15 @@ type GDocImportPodCustomOpts = {
   /**
    * google docs personal access token
    */
-  token: string;
-
+  accessToken: string;
   /**
-   * document Id of doc to import
+   * google docs personal refresh token
    */
-  documentId: string;
-
+  refreshToken: string;
   /**
-   * name of hierarchy to import into
+   * expiration time of access token
    */
-  hierarchyDestination: string;
-
+  expirationTime: number;
   /**
    * import comments from the doc in text or json format
    */
@@ -51,7 +51,11 @@ type ImportComments = {
   format?: string;
 };
 
-type GDocImportPodConfig = ImportPodConfig & GDocImportPodCustomOpts;
+enum ErrMsg {
+  TIMEOUT = "timeout",
+}
+
+export type GDocImportPodConfig = ImportPodConfig & GDocImportPodCustomOpts;
 
 export type GDocImportPodPlantOpts = ImportPodPlantOpts;
 
@@ -61,19 +65,19 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
 
   get config(): JSONSchemaType<GDocImportPodConfig> {
     return PodUtils.createImportConfig({
-      required: ["token", "hierarchyDestination", "documentId"],
+      required: ["accessToken", "refreshToken"],
       properties: {
-        token: {
+        accessToken: {
           type: "string",
           description: "google docs personal access token",
         },
-        documentId: {
+        refreshToken: {
           type: "string",
-          description: "document Id of doc to import",
+          description: "google docs personal refresh token",
         },
-        hierarchyDestination: {
-          type: "string",
-          description: "name of hierarchy to import into",
+        expirationTime: {
+          type: "number",
+          description: "expiration time of access token",
         },
         importComments: {
           type: "object",
@@ -103,17 +107,103 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
     }) as JSONSchemaType<GDocImportPodConfig>;
   }
 
+  /**
+   * sends Request to drive API to get document id of the document name
+   */
+  getDocumentId = async (accessToken: string, documentName: string) => {
+    const headers = {
+      Authorization: `Bearer ${accessToken}`,
+    };
+    let response: string;
+    try {
+      const result = await axios.get(
+        `https://www.googleapis.com/drive/v3/files`,
+        {
+          params: {
+            q: `mimeType= 'application/vnd.google-apps.document' and name = '${documentName}'`,
+          },
+          headers,
+        }
+      );
+
+      response = result.data.files[0]?.id;
+    } catch (err: any) {
+      throw new DendronError({ message: stringifyError(err) });
+    }
+    return response;
+  };
+
+  /**
+   * sends request to drive API to fetch docs of mime type document
+   */
+
+  fetchDocListFromDrive = async (accessToken: string) => {
+    const headers = {
+      Authorization: `Bearer ${accessToken}`,
+    };
+    const result = await axios.get(
+      `https://www.googleapis.com/drive/v3/files`,
+      {
+        params: {
+          q: "mimeType= 'application/vnd.google-apps.document'",
+        },
+        headers,
+        timeout: 5000,
+      }
+    );
+    return result;
+  };
+
+  /**
+   * gets all document List present in google docs and create HashMap of doc Id and Name
+   */
+  getAllDocuments = async (accessToken: string) => {
+    let docIdsHashMap: any;
+
+    let result;
+    let error;
+    try {
+      result = await this.fetchDocListFromDrive(accessToken);
+    } catch (err: any) {
+      if (err.code === "ECONNABORTED") {
+        result = ErrMsg.TIMEOUT;
+      } else {
+        throw new DendronError({ message: stringifyError(err) });
+      }
+    }
+
+    if (result === ErrMsg.TIMEOUT) {
+      error = ErrMsg.TIMEOUT;
+    } else {
+      const files = result?.data.files;
+
+      //creates HashMap of documents with key as doc name and value as doc id
+      files.forEach((file: any) => {
+        docIdsHashMap = {
+          ...docIdsHashMap,
+          [file.name]: file.id,
+        };
+      });
+    }
+
+    return { docIdsHashMap, error };
+  };
+
   /*
    * method to get data from google document
    */
   getDataFromGDoc = async (
-    opts: Partial<GDocImportPodConfig>,
+    opts: {
+      documentId: string;
+      hierarchyDestination: string;
+      accessToken: string;
+    },
     config: ImportPodConfig
   ): Promise<Partial<NoteProps>> => {
     let response: Partial<NoteProps>;
-    const { documentId, token, hierarchyDestination } = opts;
+    const { documentId, accessToken, hierarchyDestination } = opts;
     const headers = {
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${accessToken}`,
       "Content-Type": "application/json",
     };
     try {
@@ -129,23 +219,18 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
       const index = markdown.indexOf("---", markdown.indexOf("---") + 3) + 3;
       response = {
         body: markdown.substring(index),
-        fname: `${hierarchyDestination}.${result.data.title}`,
+        fname: `${hierarchyDestination}`,
         custom: {
           documentId: result.data.documentId,
           revisionId: result.data.revisionId,
           ...config.frontmatter,
         },
       };
-    } catch (error) {
+    } catch (error: any) {
       this.L.error({
         msg: "failed to import the doc",
         payload: stringifyError(error),
       });
-      if (error.response?.status === 401) {
-        throw new DendronError({
-          message: "access token expired or is incorrect.",
-        });
-      }
       throw new DendronError({ message: stringifyError(error) });
     }
     return response;
@@ -155,13 +240,13 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
    * method to get comments in document
    */
   getCommentsFromDoc = async (
-    opts: Partial<GDocImportPodConfig>,
+    opts: Partial<GDocImportPodConfig> & { documentId: string },
     response: Partial<NoteProps>
   ): Promise<Partial<NoteProps>> => {
     let comments;
-    const { documentId, token, importComments } = opts;
+    const { documentId, accessToken, importComments } = opts;
     const headers = {
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${accessToken}`,
       "Content-Type": "application/json",
     };
     try {
@@ -197,7 +282,7 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
         }
         response.body = response.body?.concat(`### Comments\n\n ${comments}`);
       }
-    } catch (error) {
+    } catch (error: any) {
       this.L.error({
         msg: "failed to import the comments",
         payload: stringifyError(error),
@@ -232,7 +317,7 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
   ) {
     const { vault } = opts;
     if (!entry.fname) {
-      throw Error("fname not defined");
+      throw new DendronError({ message: "fname not defined" });
     }
     const fname = entry.fname;
     if (opts.fnameAsId) {
@@ -288,24 +373,112 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
 
   async plant(opts: GDocImportPodPlantOpts) {
     const ctx = "GDocPod";
+
     this.L.info({ ctx, opts, msg: "enter" });
-    const { wsRoot, engine, vault, config, onPrompt } = opts;
+    const { wsRoot, engine, vault, config, onPrompt, utilityMethods } = opts;
+
     const {
-      token,
-      hierarchyDestination,
-      documentId,
+      refreshToken,
       fnameAsId,
       importComments,
       confirmOverwrite = true,
+      expirationTime,
     } = config as GDocImportPodConfig;
 
+    let { accessToken } = config as GDocImportPodConfig;
+
+    /** refreshes token if token has already expired */
+    if (Time.now().toSeconds() > expirationTime) {
+      const port = fs.readFileSync(path.join(wsRoot, ".dendron.port"), {
+        encoding: "utf8",
+      });
+      try {
+        const result = await axios.get(
+          `http://localhost:${port}/api/oauth/refreshToken`,
+          {
+            params: {
+              refreshToken,
+              service: "google",
+            },
+          }
+        );
+        accessToken = result.data;
+      } catch (err: any) {
+        throw new DendronError({ message: stringifyError(err) });
+      }
+    }
+
+    const hierarchyDestOptions = {
+      ignoreFocusOut: true,
+      placeHolder: "Destination name here",
+      title: "Hierarchy destination",
+      prompt: "Enter the destination to import into ",
+    };
+    const documentIdOptions = {
+      ignoreFocusOut: true,
+      placeHolder: "Document ID here",
+      title: "Document ID",
+      prompt: "Request Timed Out. Enter the document Name",
+    };
+    const { docIdsHashMap, error } = await this.getAllDocuments(accessToken);
+
+    if (_.isEmpty(docIdsHashMap) && _.isUndefined(error)) {
+      throw new DendronError({
+        message: "No documents present in google docs",
+      });
+    }
+
+    /** document selected by user */
+    const documentChoice = _.isUndefined(error)
+      ? await utilityMethods?.showDocumentQuickPick(Object.keys(docIdsHashMap))
+      : await utilityMethods?.showInputBox(documentIdOptions);
+    if (_.isUndefined(documentChoice)) {
+      return { importedNotes: [] };
+    }
+
+    const documentId =
+      typeof documentChoice !== "string"
+        ? docIdsHashMap[documentChoice.label]
+        : await this.getDocumentId(accessToken, documentChoice);
+
+    if (_.isUndefined(documentId)) {
+      throw new DendronError({
+        message: "No document present in google docs with this name",
+      });
+    }
+
+    const cacheOption =
+      typeof documentChoice !== "string"
+        ? documentChoice.label
+        : documentChoice;
+    const cachedLabel = await utilityMethods?.getGlobalState(cacheOption);
+    const defaultChoice = _.isUndefined(cachedLabel)
+      ? cacheOption
+      : cachedLabel;
+
+    /**hierarchy destination entered by user */
+    const hierarchyDestination = await utilityMethods?.showInputBox(
+      hierarchyDestOptions,
+      defaultChoice
+    );
+
+    if (_.isUndefined(hierarchyDestination)) {
+      return { importedNotes: [] };
+    }
+
+    /**updates global state with key as document name and value as latest hierarchy selected by user */
+    await utilityMethods?.updateGlobalState({
+      key: cacheOption,
+      value: hierarchyDestination,
+    });
+
     let response = await this.getDataFromGDoc(
-      { documentId, token, hierarchyDestination },
+      { documentId, accessToken, hierarchyDestination },
       config
     );
     if (importComments?.enable) {
       response = await this.getCommentsFromDoc(
-        { documentId, token, importComments },
+        { documentId, accessToken, importComments },
         response
       );
     }
@@ -321,9 +494,11 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
       confirmOverwrite,
       onPrompt,
     });
+
     const importedNotes: NoteProps[] =
       createdNotes === undefined ? [] : [createdNotes];
-
+    if (importedNotes.length > 0)
+      utilityMethods?.openFileInEditor(importedNotes[0]);
     return { importedNotes };
   }
 }

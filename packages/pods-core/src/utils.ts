@@ -93,7 +93,6 @@ export class PodUtils {
   static createImportConfig(opts: { required: string[]; properties: any }) {
     return {
       type: "object",
-      additionalProperties: false,
       required: ["src", "vaultName", ...opts.required],
       properties: {
         src: {

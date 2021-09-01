@@ -843,6 +843,10 @@ export enum GLOBAL_STATE {
    * Extension is being debugged
    */
   VSCODE_DEBUGGING_EXTENSION = "dendron.vscode_debugging_extension",
+  /**
+   * Most Recently Imported Doc
+   */
+  MRUDocs = "MRUDocs",
 }
 
 export enum WORKSPACE_ACTIVATION_CONTEXT {
@@ -1022,3 +1026,10 @@ export const CONFIG: { [key: string]: ConfigEntry } = {
       "port for server. If not set, will be randomly generated at startup.",
   },
 };
+
+export const gdocRequiredScopes = [
+  "https://www.googleapis.com/auth/documents",
+  "https://www.googleapis.com/auth/drive",
+];
+
+export const Oauth2Pods = ["dendron.gdoc"];

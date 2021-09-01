@@ -630,6 +630,33 @@ export class DendronEngineV2 implements DEngine {
     };
   }
 
+  async addAccessTokensToPodConfig(opts: {
+    path: string;
+    tokens: {
+      accessToken: string;
+      expirationTime: number;
+      refreshToken?: string;
+    };
+  }) {
+    const { path, tokens } = opts;
+    const { accessToken, refreshToken, expirationTime } = tokens;
+
+    let podConfig = readYAML(path);
+
+    podConfig = {
+      ...podConfig,
+      accessToken,
+      expirationTime,
+    };
+    if (!_.isUndefined(refreshToken)) {
+      podConfig = {
+        ...podConfig,
+        refreshToken,
+      };
+    }
+    writeYAML(path, podConfig);
+  }
+
   async writeNote(
     note: NoteProps,
     opts?: EngineWriteOptsV2

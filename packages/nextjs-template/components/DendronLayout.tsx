@@ -16,6 +16,8 @@ export default function DendronLayout(
   props: React.PropsWithChildren<DendronCommonProps>
 ) {
   const [collapsed, setCollapsed] = React.useState(false);
+  const [isResponsive, setResponsive] = React.useState(false);
+
   return (
     <Layout>
       <Header
@@ -52,6 +54,9 @@ export default function DendronLayout(
           collapsedWidth={SIDER.COLLAPSED_WIDTH}
           onCollapse={(collapsed, type) => {
             setCollapsed(collapsed);
+            if (type === "responsive") {
+              setResponsive(collapsed);
+            }
           }}
           breakpoint="lg"
           style={{
@@ -60,19 +65,20 @@ export default function DendronLayout(
             height: `calc(100vh - ${HEADER.HEIGHT}px)`,
           }}
           trigger={
-            // eslint-disable-next-line jsx-a11y/click-events-have-key-events -- role indicates that it is a button and therefore interactive
-            <div
-              role="button"
-              tabIndex={0}
-              className="ant-trigger"
-              onClick={() => setCollapsed(!collapsed)}
-              style={{
-                backgroundColor:
-                  "#43B02A" /* color copied from packages/dendron-next-server/assets/themes/light-theme.less TODO make dependent on active theme */,
-              }}
-            >
-              {collapsed ? <RightOutlined /> : <LeftOutlined />}
-            </div>
+            isResponsive ? (
+              // eslint-disable-next-line jsx-a11y/click-events-have-key-events -- role indicates that it is a button and therefore interactive
+              <div
+                role="button"
+                tabIndex={0}
+                className="ant-trigger"
+                style={{
+                  backgroundColor:
+                    "#43B02A" /* color copied from packages/dendron-next-server/assets/themes/light-theme.less TODO make dependent on active theme */,
+                }}
+              >
+                {collapsed ? <RightOutlined /> : <LeftOutlined />}
+              </div>
+            ) : null
           }
         >
           <DendronTreeMenu {...props} collapsed={collapsed} />

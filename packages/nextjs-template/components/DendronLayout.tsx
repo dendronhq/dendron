@@ -124,7 +124,10 @@ export default function DendronLayout(
         >
           {sidebar}
         </Layout>
-        <Layout className="side-layout-main" style={{ maxWidth: 800 }}>
+        <Layout
+          className="side-layout-main"
+          style={{ maxWidth: LAYOUT.CONTENT_MAX_WIDTH }}
+        >
           {content}
         </Layout>
       </Layout>

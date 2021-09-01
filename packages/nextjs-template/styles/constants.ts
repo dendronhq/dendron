@@ -25,6 +25,7 @@ const LAYOUT = {
     xl: "1200px",
     xxl: "1600px",
   },
+  CONTENT_MAX_WIDTH: 800,
 };
 
 export const DENDRON_STYLE_CONSTANTS = {

@@ -1,13 +1,25 @@
-import { DownOutlined, RightOutlined, UpOutlined } from "@ant-design/icons";
-import { createLogger, TreeViewUtils } from "@dendronhq/common-frontend";
-import { Menu } from "antd";
+import {
+  createLogger,
+  ThemeUtils,
+  TreeViewUtils,
+} from "@dendronhq/common-frontend";
+import {
+  Tree,
+  TreeProps,
+  Menu,
+  MenuProps,
+  MenuItemProps,
+  SubMenuProps,
+} from "antd";
+import { UpOutlined, DownOutlined, RightOutlined } from "@ant-design/icons";
 import _ from "lodash";
 import { DataNode } from "rc-tree/lib/interface";
-import React, { useCallback, useEffect, useState } from "react";
-import { DENDRON_STYLE_CONSTANTS } from "../styles/constants";
+import React, { useState, useEffect, useCallback } from "react";
+import { useThemeSwitcher } from "react-css-theme-switcher";
 import { useDendronRouter } from "../utils/hooks";
-import { NoteData, verifyNoteData } from "../utils/types";
+import { DendronCommonProps, NoteData, verifyNoteData } from "../utils/types";
 import DendronSpinner from "./DendronSpinner";
+import { DENDRON_STYLE_CONSTANTS } from "../styles/constants";
 
 const { SubMenu } = Menu;
 
@@ -48,7 +60,7 @@ export default function DendronTreeMenu(
     return <DendronSpinner />;
   }
 
-  const { notes, domains, collapsed } = props;
+  const { notes, domains, noteIndex, collapsed } = props;
 
   const expandKeys = _.isEmpty(activeNoteIds) ? [] : activeNoteIds;
 

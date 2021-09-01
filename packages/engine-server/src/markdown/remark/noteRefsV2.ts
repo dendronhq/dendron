@@ -484,6 +484,22 @@ function removeListItems({
   }
 }
 
+/** For references like `#^item:#^item`, only include a single list item and not it's children. */
+function removeExceptSingleItem(nodes: ParentWithIndex[]) {
+  let closestListItem: Parent | undefined;
+  // Find the list item closest to the anchor
+  _.forEach(nodes, ({ ancestor }) => {
+    if (ancestor.type === DendronASTTypes.LIST_ITEM) {
+      closestListItem = ancestor;
+    }
+  });
+  if (_.isUndefined(closestListItem)) return;
+  // If this list item has any nested lists, remove them to get rid of the children
+  closestListItem.children = closestListItem.children.filter(
+    (node) => !(node.type === DendronASTTypes.LIST)
+  );
+}
+
 /** If there are nested lists with a single item in them, replaces the outer single-item lists with the first multi-item list. */
 function removeSingleItemNestedLists(nodes: ParentWithIndex[]): void {
   let outermost: ParentWithIndex | undefined;
@@ -583,6 +599,16 @@ function prepareNoteRefIndices<T>({
   }
   if (start && start.type === "list") {
     removeListItems({ nodes: start.ancestors, remove: "before-index" });
+  }
+  // For anchors inside lists, if the start and end is the same then the reference is only referring to a single item
+  if (
+    end &&
+    start &&
+    end.type === "list" &&
+    start.type === "list" &&
+    anchorStart === anchorEnd
+  ) {
+    removeExceptSingleItem(start.ancestors);
   }
   // If removing items left single-item nested lists at the start of the ancestors, we trim these out.
   if (end && end.type === "list") {

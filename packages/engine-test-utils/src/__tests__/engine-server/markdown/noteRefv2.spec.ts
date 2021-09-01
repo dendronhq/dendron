@@ -1262,6 +1262,47 @@ describe("noteRefV2", () => {
       },
     });
 
+    const NESTED_LIST_ELEMENT_TARGET_WITHOUT_CHILDREN = createProcTests({
+      name: "nested list element targeting a single item without children",
+      setupFunc: async (opts) => {
+        const { engine, vaults } = opts;
+        return processTextV2({
+          text: "# Foo Bar\n![[foo.ch1#^block-anchor:#^block-anchor]]",
+          dest: opts.extra.dest,
+          engine,
+          vault: vaults[0],
+          fname: "foo",
+        });
+      },
+      preSetupHook: async (opts) => {
+        await ENGINE_HOOKS.setupBasic(opts);
+        await modifyNote(opts, "foo.ch1", (note: NoteProps) => {
+          const txt = [
+            "* Iure neque alias dolorem.",
+            "* Ullam optio est quia. ^block-anchor",
+            "  * Laborum libero quia ducimus.",
+            "  * Reprehenderit doloribus.",
+            "* Sint minus fuga omnis non.",
+          ];
+          note.body = txt.join("\n");
+          return note;
+        });
+      },
+      verifyFuncDict: {
+        [DendronASTDest.HTML]: async ({ extra }) => {
+          const { resp } = extra;
+          await checkVFile(resp, "Ullam optio est quia.");
+          await checkNotInVFile(
+            resp,
+            "Reprehenderit doloribus.",
+            "Laborum libero quia ducimus.",
+            "Iure neque alias dolorem.",
+            "Sint minus fuga omnis non."
+          );
+        },
+      },
+    });
+
     /** When the anchor is immediately after the last list element, it only references the last element. */
     const AFTER_LIST = createProcTests({
       name: "immediately after last list element",
@@ -2041,6 +2082,7 @@ describe("noteRefV2", () => {
         ...SAME_FILE_NESTED_REFERENCES,
         ...LIST_ELEMENT,
         ...NESTED_LIST_ELEMENT,
+        ...NESTED_LIST_ELEMENT_TARGET_WITHOUT_CHILDREN,
         ...AFTER_LIST,
         ...AFTER_LIST_BLOCK,
         ...IN_TABLE,

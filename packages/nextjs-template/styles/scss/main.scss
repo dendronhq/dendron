@@ -32,9 +32,21 @@ hr {
 
 // Components
 
-// DendronTreeView
+// DendronLayout
+
+$layout-header-background: #F5F7F9; // @layout-header-background from packages/dendron-next-server/assets/themes/light-theme.less
+
+.site-layout-sidebar.ant-layout {
+	background-color: $layout-header-background;
+	.ant-menu.ant-menu-inline {
+		background-color: $layout-header-background;
+	}
+}
+
+// DendronTreeMenu
 
 .ant-menu {
+
 	.ant-menu-submenu-title {
 		[data-expandedicon="true"] {
 			position: absolute;

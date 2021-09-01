@@ -451,7 +451,8 @@ describe("markdown import pod", () => {
           }
         );
         expect(fileBody.match("test.txt")).toBeTruthy();
-        expect(fileBodyContent).toContain("[test-pdf](/assets\\test.txt)");
+        const assetPath = path.join("assets", "test.txt");
+        expect(fileBodyContent).toContain(`[test-pdf](/${assetPath})`);
         expect(assetsDir.length).toEqual(3);
       },
       {

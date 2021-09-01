@@ -1,4 +1,4 @@
-import vscode from "vscode";
+import vscode, { ProviderResult } from "vscode";
 import path from "path";
 import {
   containsMarkdownExt,
@@ -8,15 +8,27 @@ import {
 } from "../utils/md";
 import _ from "lodash";
 import { ICONS } from "../constants";
-import { getWS } from "../workspace";
 
-class Backlink extends vscode.TreeItem {
+export type BacklinkFoundRef = FoundRefT & {
+  parentBacklink: Backlink | undefined;
+};
+
+export class Backlink extends vscode.TreeItem {
+  public refs: BacklinkFoundRef[] | undefined;
+  public parentBacklink: Backlink | undefined;
+
   constructor(
     public readonly label: string,
-    public refs: FoundRefT[] | undefined,
+    refs: FoundRefT[] | undefined,
     public readonly collapsibleState: vscode.TreeItemCollapsibleState
   ) {
     super(label, collapsibleState);
+
+    if (refs) {
+      this.refs = refs.map((r) => ({ ...r, parentBacklink: this }));
+    } else {
+      this.refs = undefined;
+    }
   }
 }
 
@@ -43,9 +55,7 @@ const pathsToBacklinkSourceTreeItems = async (
     return [];
   }
 
-  const collapsibleState = true
-    ? vscode.TreeItemCollapsibleState.Collapsed
-    : vscode.TreeItemCollapsibleState.Expanded;
+  const collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
 
   const out = pathsSorted.map((pathParam) => {
     const backlink = new Backlink(
@@ -81,10 +91,10 @@ const pathsToBacklinkSourceTreeItems = async (
  * @param isLinkCandidateEnabled flag that enables displaying link candidates
  * @returns list of tree item(s) for the type of backlinks
  */
-const addBacklinkTypeTreeItems = (
-  refs: FoundRefT[],
+export const secondLevelRefsToBacklinks = (
+  refs: BacklinkFoundRef[],
   isLinkCandidateEnabled: boolean | undefined
-) => {
+): Backlink[] | undefined => {
   const [wikilinks, linkCandidates] = _.partition(refs, (ref) => {
     return !ref.isCandidate;
   });
@@ -97,6 +107,7 @@ const addBacklinkTypeTreeItems = (
       wikilinks,
       vscode.TreeItemCollapsibleState.Collapsed
     );
+    backlinkTreeItem.parentBacklink = wikilinks[0].parentBacklink;
     backlinkTreeItem.iconPath = new vscode.ThemeIcon(ICONS.WIKILINK);
     backlinkTreeItem.description = `${wikilinks.length} link(s).`;
     out.push(backlinkTreeItem);
@@ -109,6 +120,7 @@ const addBacklinkTypeTreeItems = (
         linkCandidates,
         vscode.TreeItemCollapsibleState.Collapsed
       );
+      candidateTreeItem.parentBacklink = linkCandidates[0].parentBacklink;
       candidateTreeItem.iconPath = new vscode.ThemeIcon(ICONS.LINK_CANDIDATE);
       candidateTreeItem.description = `${linkCandidates.length} candidate(s).`;
       out.push(candidateTreeItem);
@@ -122,9 +134,14 @@ const addBacklinkTypeTreeItems = (
  * Takes found references and turn them into TreeItems that could be views in the TreeView
  * @param refs list of found references
  * @param fsPath fsPath of current note
+ * @param parent parent backlink of these refs.
  * @returns list of TreeItems of found references
  */
-const refsToBacklinkTreeItems = (refs: FoundRefT[], fsPath: string) => {
+const refsToBacklinkTreeItems = (
+  refs: FoundRefT[],
+  fsPath: string,
+  parent: Backlink
+) => {
   return refs.map((ref) => {
     const lineNum = ref.location.range.start.line;
     const backlink = new Backlink(
@@ -132,6 +149,7 @@ const refsToBacklinkTreeItems = (refs: FoundRefT[], fsPath: string) => {
       undefined,
       vscode.TreeItemCollapsibleState.None
     );
+    backlink.parentBacklink = parent;
     backlink.description = `on line ${lineNum + 1}`;
     backlink.tooltip = ref.matchText;
     backlink.command = {
@@ -157,6 +175,11 @@ export default class BacklinksTreeDataProvider
     new vscode.EventEmitter<Backlink | undefined>();
   readonly onDidChangeTreeData: vscode.Event<Backlink | undefined> =
     this._onDidChangeTreeData.event;
+  readonly isLinkCandidateEnabled: boolean | undefined;
+
+  constructor(isLinkCandidateEnabled: boolean | undefined) {
+    this.isLinkCandidateEnabled = isLinkCandidateEnabled;
+  }
 
   refresh(): void {
     this._onDidChangeTreeData.fire(undefined);
@@ -166,31 +189,45 @@ export default class BacklinksTreeDataProvider
     return element;
   }
 
+  public getParent(element: Backlink): ProviderResult<Backlink> {
+    if (element.parentBacklink) {
+      return element.parentBacklink;
+    } else {
+      return undefined;
+    }
+  }
+
   public async getChildren(element?: Backlink) {
-    const isLinkCandidateEnabled = getWS().config.dev?.enableLinkCandidates;
     const fsPath = vscode.window.activeTextEditor?.document.uri.fsPath;
 
     if (!element) {
+      // Root case, branch will get top level backlinks.
+      // Top level children/1st-level children.
       if (!fsPath || (fsPath && !containsMarkdownExt(fsPath))) {
         return [];
       }
-      return pathsToBacklinkSourceTreeItems(fsPath, isLinkCandidateEnabled);
+      return pathsToBacklinkSourceTreeItems(
+        fsPath,
+        this.isLinkCandidateEnabled
+      );
     } else if (element.label === "Linked" || element.label === "Candidates") {
+      // 3rd-level children.
       const refs = element?.refs;
       if (!refs) {
         return [];
       }
 
-      if (!isLinkCandidateEnabled && element.label === "Candidates") {
+      if (!this.isLinkCandidateEnabled && element.label === "Candidates") {
         return [];
       }
-      return refsToBacklinkTreeItems(refs, fsPath!);
+      return refsToBacklinkTreeItems(refs, fsPath!, element);
+    } else {
+      // 2nd-level children.
+      const refs = element?.refs;
+      if (!refs) {
+        return [];
+      }
+      return secondLevelRefsToBacklinks(refs, this.isLinkCandidateEnabled);
     }
-
-    const refs = element?.refs;
-    if (!refs) {
-      return [];
-    }
-    return addBacklinkTypeTreeItems(refs, isLinkCandidateEnabled);
   }
 }

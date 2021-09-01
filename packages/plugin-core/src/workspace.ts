@@ -36,12 +36,15 @@ import { ReloadIndexCommand } from "./commands/ReloadIndex";
 import { SetupWorkspaceCommand } from "./commands/SetupWorkspace";
 import {
   CONFIG,
-  DendronContext,
   DENDRON_COMMANDS,
+  DendronContext,
   extensionQualifiedId,
   GLOBAL_STATE,
 } from "./constants";
-import BacklinksTreeDataProvider from "./features/BacklinksTreeDataProvider";
+import BacklinksTreeDataProvider, {
+  secondLevelRefsToBacklinks,
+  Backlink,
+} from "./features/BacklinksTreeDataProvider";
 import { codeActionProvider } from "./features/codeActionProvider";
 import { completionProvider } from "./features/completionProvider";
 import DefinitionProvider from "./features/DefinitionProvider";
@@ -526,25 +529,64 @@ export class DendronWorkspace {
         }
 
         // backlinks
-        Logger.info({ ctx, msg: "init:backlinks" });
-        const backlinksTreeDataProvider = new BacklinksTreeDataProvider();
-        vscode.window.onDidChangeActiveTextEditor(
-          // eslint-disable-next-line  no-return-await
-          async () => await backlinksTreeDataProvider.refresh()
-        );
-        const backlinkTreeView = vscode.window.createTreeView(
-          DendronTreeViewKey.BACKLINKS,
-          {
-            treeDataProvider: backlinksTreeDataProvider,
-            showCollapseAll: true,
-          }
-        );
+        const backlinkTreeView = this.setupBacklinkTreeView();
+
         // This persists even if getChildren populates the view.
         // Removing it for now.
         // backlinkTreeView.message = "There are no links to this note."
         context.subscriptions.push(backlinkTreeView);
       }
     });
+  }
+
+  private setupBacklinkTreeView() {
+    const ctx = "setupBacklinkTreeView";
+    Logger.info({ ctx, msg: "init:backlinks" });
+
+    const backlinksTreeDataProvider = new BacklinksTreeDataProvider(
+      getWS().config.dev?.enableLinkCandidates
+    );
+    vscode.window.onDidChangeActiveTextEditor(
+      // eslint-disable-next-line  no-return-await
+      async () => await backlinksTreeDataProvider.refresh()
+    );
+    const backlinkTreeView = vscode.window.createTreeView(
+      DendronTreeViewKey.BACKLINKS,
+      {
+        treeDataProvider: backlinksTreeDataProvider,
+        showCollapseAll: true,
+      }
+    );
+
+    vscode.commands.registerCommand("dendron.backlinks.expandAll", async () => {
+      function expand(backlink: Backlink) {
+        backlinkTreeView.reveal(backlink, {
+          expand: true,
+          focus: false,
+          select: false,
+        });
+      }
+
+      const children = await backlinksTreeDataProvider.getChildren();
+      children?.forEach((backlink) => {
+        expand(backlink);
+
+        if (backlink.refs) {
+          const childBacklinks = secondLevelRefsToBacklinks(
+            backlink.refs,
+            backlinksTreeDataProvider.isLinkCandidateEnabled
+          );
+
+          if (childBacklinks) {
+            childBacklinks.forEach((b) => {
+              expand(b);
+            });
+          }
+        }
+      });
+    });
+
+    return backlinkTreeView;
   }
 
   setupLanguageFeatures(context: vscode.ExtensionContext) {

@@ -42,6 +42,10 @@ type BuildCmdOpts = {} & CommandCLIOpts;
 
 export { CommandOpts as PublishCLICommandOpts };
 
+const getNextRoot = (wsRoot: string) => {
+  return path.join(wsRoot, ".next");
+};
+
 /**
  * To use when working on dendron
  */
@@ -99,7 +103,7 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       podId: NextjsExportPod.id,
       podSource: PodSource.BUILTIN,
       wsRoot,
-      config: `dest=${path.join(wsRoot, ".next")}`,
+      config: `dest=${getNextRoot(wsRoot)}`,
     });
     // if no siteUrl set, override with localhost
     if (stage !== "prod") {
@@ -116,9 +120,8 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     const cmd = `git clone git@github.com:dendronhq/nextjs-template.git .next`;
     $(cmd, { cwd });
     this.print(
-      `run "cd ${path.join(
-        cwd,
-        ".next"
+      `run "cd ${getNextRoot(
+        cwd
       )} && npm install" to finish the install process`
     );
     return { error: null };
@@ -128,7 +131,7 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     this.print(`generating metadata for publishing...`);
     await this._buildNextData({ wsRoot, stage: getStage() });
     this.print(
-      `to preview changes, run "cd ${path.join(wsRoot, ".next")} && npx dev"`
+      `to preview changes, run "cd ${getNextRoot(wsRoot)} && npx dev"`
     );
     return { error: null };
   }

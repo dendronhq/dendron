@@ -181,6 +181,7 @@ function MenuView({
   return (
     <Menu
       key={String(collapsed)}
+      className="dendron-tree-menu"
       mode="inline"
       {...(!collapsed && {
         openKeys: expandKeys,

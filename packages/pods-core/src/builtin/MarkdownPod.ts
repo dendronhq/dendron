@@ -55,6 +55,11 @@ type DItem = Item & {
 
 type HierarichalDict = { [k: string]: NoteProps[] };
 
+/**
+ * Hash Map for assets
+ */
+type assetHashMap = { [k: string]: string };
+
 const toMarkdownLink = (assetPath: string, opts?: { name?: string }) => {
   const name = opts?.name ? opts.name : path.parse(assetPath).name;
   return `- [${name}](${assetPath})`;
@@ -167,9 +172,10 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
     vault: DVault;
     wsRoot: string;
     config: MarkdownImportPodConfig;
-  }): HierarichalDict {
+  }) {
     const { files, src, vault, wsRoot, config } = opts;
     const out: HierarichalDict = {};
+    let assetHashMap: assetHashMap = {};
     _.forEach(files, (item) => {
       const fname = cleanFileName(item.path, {
         isDir: item.stats.isDirectory(),
@@ -213,6 +219,11 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
           }
           const assetPathFull = path.join(assetDir, assetBaseNew);
           const assetPathRel = path.join(assetDirName, assetBaseNew);
+          const key = _.replace(_item.path as string, /[\\|\/]/g, ""); // eslint-disable-line
+          assetHashMap = {
+            ...assetHashMap,
+            [key]: `/${assetPathRel}`,
+          };
           fs.copyFileSync(path.join(src, _item.path), assetPathFull);
           mdLinks.push(
             toMarkdownLink(`/${assetPathRel}`, { name: `${name}${ext}` })
@@ -223,7 +234,7 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
 
       out[lvl].push(noteProps);
     });
-    return out;
+    return { hDict: out, assetHashMap };
   }
 
   hDict2Notes(
@@ -276,7 +287,7 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
     const { items, errors } = await this._collectItems(src.fsPath);
     this.L.info({ ctx, wsRoot, numItems: _.size(items), msg: "collectItems" });
     const { engineFileDict } = await this._prepareItems(items);
-    const hDict = this._files2HierarichalDict({
+    const { hDict, assetHashMap } = this._files2HierarichalDict({
       files: _.values(engineFileDict),
       src: src.fsPath,
       vault,
@@ -298,6 +309,7 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
             { mode: ProcMode.IMPORT }
           )
             .use(RemarkUtils.convertLinksToDotNotation(n, []))
+            .use(RemarkUtils.convertAssetReferences(n, assetHashMap, []))
             .process(n.body);
           n.body = cBody.toString();
           if (config.frontmatter) {

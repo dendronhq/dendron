@@ -53,12 +53,20 @@ export class GitTestUtils {
     await git.commit({ msg: "init" });
   }
 
-  static async createRepoWithReadme(root: string) {
-    const git = new Git({ localUrl: root });
+  static async createRepoWithReadme(root: string, opts?: { remote?: boolean }) {
+    const git = new Git({
+      localUrl: root,
+      remoteUrl: opts?.remote
+        ? "git@github.com:dendronhq/dendron-site.git"
+        : undefined,
+    });
     await git.init();
     const readmePath = path.join(root, "README.md");
     fs.ensureFileSync(readmePath);
     await git.add(".");
     await git.commit({ msg: "init" });
+    if (opts?.remote) {
+      await git.remoteAdd();
+    }
   }
 }

@@ -36,6 +36,7 @@ import {
   RenameNotePayload,
   RenderNoteOpts,
   RenderNotePayload,
+  ResponseUtil,
   RespV2,
   SchemaModuleDict,
   SchemaModuleProps,
@@ -43,6 +44,10 @@ import {
   VaultUtils,
   WorkspaceOpts,
   WriteNoteResp,
+  Cache,
+  NullCache,
+  LruCache,
+  milliseconds,
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -70,6 +75,49 @@ type DendronEngineOptsV2 = {
 };
 type DendronEnginePropsV2 = Required<DendronEngineOptsV2>;
 
+type CachedPreview = {
+  data: string;
+  updated: number;
+};
+
+function createRenderedCache(
+  config: DendronConfig,
+  logger: DLogger
+): Cache<string, CachedPreview> {
+  const ctx = "createRenderedCache";
+
+  if (config.noCaching) {
+    // If no caching flag is set we will use null caching object to avoid doing any
+    // actual caching of rendered previews.
+    logger.info({
+      ctx,
+      msg: `noCaching flag is true, will NOT use preview cache.`,
+    });
+
+    return new NullCache();
+  } else {
+    if (config.maxPreviewsCached && config.maxPreviewsCached > 0) {
+      logger.info({
+        ctx,
+        msg: `Creating rendered preview cache set to hold maximum of '${config.maxPreviewsCached}' items.`,
+      });
+
+      return new LruCache({ maxItems: config.maxPreviewsCached });
+    } else {
+      // This is most likely to happen if the user were to set incorrect configuration
+      // value for maxPreviewsCached, we don't want to crash initialization due to
+      // not being able to cache previews. Hence we will log an error and not use
+      // the preview cache.
+      logger.error({
+        ctx,
+        msg: `Did not find valid maxPreviewsCached (value was '${config.maxPreviewsCached}')
+        in configuration. When specified th value must be a number greater than 0. Using null cache.`,
+      });
+      return new NullCache();
+    }
+  }
+}
+
 export class DendronEngineV2 implements DEngine {
   public wsRoot: string;
   public store: DStore;
@@ -81,6 +129,7 @@ export class DendronEngineV2 implements DEngine {
   public config: DendronConfig;
   public hooks: DHookDict;
   private _vaults: DVault[];
+  private renderedCache: Cache<string, CachedPreview>;
 
   static _instance: DendronEngineV2 | undefined;
 
@@ -98,6 +147,7 @@ export class DendronEngineV2 implements DEngine {
       onCreate: [],
     });
     this.hooks = hooks;
+    this.renderedCache = createRenderedCache(this.config, this.logger);
   }
 
   static create({ wsRoot, logger }: { logger?: DLogger; wsRoot: string }) {
@@ -426,16 +476,52 @@ export class DendronEngineV2 implements DEngine {
   }
 
   async renderNote({ id }: RenderNoteOpts): Promise<RespV2<RenderNotePayload>> {
+    const ctx = "DendronEngineV2:renderNote";
+
     const note = this.notes[id];
+
     if (!note) {
-      return {
+      return ResponseUtil.createUnhappyResponse({
         error: DendronError.createFromStatus({
           status: ERROR_STATUS.INVALID_STATE,
           message: `${id} does not exist`,
         }),
-        data: undefined,
-      };
+      });
     }
+
+    const cachedPreview = this.renderedCache.get(id);
+    if (cachedPreview && cachedPreview.updated === note.updated) {
+      this.logger.info({ ctx, id, msg: `Will use cached rendered preview.` });
+
+      // Cached preview updated time is the same as note.updated time.
+      // Hence we can skip re-rendering and return the cached version of preview.
+      return ResponseUtil.createHappyResponse({ data: cachedPreview.data });
+    } else {
+      this.logger.info({
+        ctx,
+        id,
+        msg: `Did not find usable cached rendered preview. Starting to render.`,
+      });
+
+      const beforeRenderMillis = milliseconds();
+
+      // Either we don't have have the cached preview or the version that is
+      // cached has gotten stale, hence we will re-render the note and cache
+      // the new value.
+      const data = await this._renderNote(note);
+
+      this.renderedCache.set(id, {
+        updated: note.updated,
+        data: data,
+      });
+
+      const duration = milliseconds() - beforeRenderMillis;
+      this.logger.info({ ctx, id, duration, msg: `Render preview finished.` });
+      return ResponseUtil.createHappyResponse({ data });
+    }
+  }
+
+  private async _renderNote(note: NoteProps): Promise<string> {
     const proc = MDUtilsV5.procRehypeFull(
       {
         engine: this,
@@ -446,12 +532,8 @@ export class DendronEngineV2 implements DEngine {
       { flavor: ProcFlavor.PREVIEW }
     );
     const payload = await proc.process(NoteUtils.serialize(note));
-    return {
-      error: null,
-      data: payload.toString(),
-    };
+    return payload.toString();
   }
-
   async sync() {
     throw Error("sync not implemented");
     return {} as any;

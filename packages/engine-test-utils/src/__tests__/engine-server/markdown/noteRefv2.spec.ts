@@ -1303,6 +1303,49 @@ describe("noteRefV2", () => {
       },
     });
 
+    const SINGLE_TOP_LEVEL_LIST = createProcTests({
+      name: "a single top level list",
+      setupFunc: async (opts) => {
+        const { engine, vaults } = opts;
+        return processTextV2({
+          text: "# Foo Bar\n![[foo.ch1#^block-anchor]]",
+          dest: opts.extra.dest,
+          engine,
+          vault: vaults[0],
+          fname: "foo",
+        });
+      },
+      preSetupHook: async (opts) => {
+        await ENGINE_HOOKS.setupBasic(opts);
+        await modifyNote(opts, "foo.ch1", (note: NoteProps) => {
+          const txt = [
+            "Ut temporibus quidem nihil corporis",
+            "",
+            "* Ullam optio est quia.",
+            "  * Laborum libero quia ducimus.",
+            "  * Reprehenderit doloribus. ^block-anchor",
+            "  * Iure neque alias dolorem.",
+          ];
+          note.body = txt.join("\n");
+          return note;
+        });
+      },
+      verifyFuncDict: {
+        [DendronASTDest.HTML]: async ({ extra }) => {
+          const { resp } = extra;
+          await checkVFile(resp, "Reprehenderit doloribus.");
+          await checkNotInVFile(
+            resp,
+            "Ut temporibus quidem nihil corporis",
+            "Ullam optio est quia.",
+            "Laborum libero quia ducimus.",
+            "Iure neque alias dolorem.",
+            "Sint minus fuga omnis non."
+          );
+        },
+      },
+    });
+
     /** When the anchor is immediately after the last list element, it only references the last element. */
     const AFTER_LIST = createProcTests({
       name: "immediately after last list element",
@@ -2095,6 +2138,7 @@ describe("noteRefV2", () => {
         ...PARAGRAPH_TO_LIST,
         ...HEADER_TO_BLOCK_ANCHOR,
         ...BLOCK_ANCHOR_TO_HEADER,
+        ...SINGLE_TOP_LEVEL_LIST,
       ],
     });
   });

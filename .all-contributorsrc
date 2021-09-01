@@ -555,6 +555,74 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "djradon",
+      "name": "Dave Richardson",
+      "avatar_url": "https://avatars.githubusercontent.com/u/5224156?v=4",
+      "profile": "https://github.com/djradon",
+      "contributions": [
+        "bug",
+        "doc"
+      ]
+    },
+    {
+      "login": "Ding-Fan",
+      "name": "Ding",
+      "avatar_url": "https://avatars.githubusercontent.com/u/26438549?v=4",
+      "profile": "http://me-ding-fan.vercel.app",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "nz-john",
+      "name": "John",
+      "avatar_url": "https://avatars.githubusercontent.com/u/89765379?v=4",
+      "profile": "https://github.com/nz-john",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "HopperTech",
+      "name": "Jeff Hopper",
+      "avatar_url": "https://avatars.githubusercontent.com/u/35973180?v=4",
+      "profile": "http://hoppertech.net",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "ryan-p-randall",
+      "name": "Ryan Randall",
+      "avatar_url": "https://avatars.githubusercontent.com/u/850915?v=4",
+      "profile": "http://www.ryanpatrickrandall.com",
+      "contributions": [
+        "bug",
+        "doc"
+      ]
+    },
+    {
+      "login": "CyberFoxar",
+      "name": "CyberFoxar",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1347036?v=4",
+      "profile": "https://github.com/CyberFoxar",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "bs",
+      "name": "Britt Selvitelle",
+      "avatar_url": "https://avatars.githubusercontent.com/u/68?v=4",
+      "profile": "https://bri.tt",
+      "contributions": [
+        "bug",
+        "financial",
+        "doc",
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,

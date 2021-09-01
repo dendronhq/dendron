@@ -322,6 +322,12 @@ export class DendronEngineClient implements DEngineClient {
     });
   }
 
+  /** Renames the note.
+   *
+   *  WARNING: When doing bulk operations. Do not invoke multiple requests to this
+   *  command in parallel, wait for a single call to finish before requesting another call.
+   *  Otherwise some race condition starts to cause intermittent failures.
+   *  */
   async renameNote(opts: RenameNoteOpts): Promise<RespV2<RenameNotePayload>> {
     const resp = await this.api.engineRenameNote({ ...opts, ws: this.ws });
     if (resp.error || _.isUndefined(resp.data)) {

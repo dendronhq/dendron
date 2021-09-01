@@ -15,9 +15,76 @@ const { LAYOUT, HEADER, SIDER } = DENDRON_STYLE_CONSTANTS;
 export default function DendronLayout(
   props: React.PropsWithChildren<DendronCommonProps>
 ) {
-  const [collapsed, setCollapsed] = React.useState(false);
+  const [isCollapsed, setCollapsed] = React.useState(false);
+  const [isResponsive, setResponsive] = React.useState(false);
+
+  const sidebar = (
+    <Sider
+      width={SIDER.WIDTH}
+      collapsible
+      collapsed={isCollapsed}
+      collapsedWidth={SIDER.COLLAPSED_WIDTH}
+      onCollapse={(collapsed, type) => {
+        setCollapsed(collapsed);
+        if (type === "responsive") {
+          setResponsive(collapsed);
+        }
+      }}
+      breakpoint="lg"
+      style={{
+        position: "fixed",
+        overflow: "auto",
+        height: `calc(100vh - ${HEADER.HEIGHT}px)`,
+      }}
+      trigger={
+        isResponsive ? (
+          // eslint-disable-next-line jsx-a11y/click-events-have-key-events -- role indicates that it is a button and therefore interactive
+          <div
+            role="button"
+            tabIndex={0}
+            className="ant-trigger"
+            style={{
+              backgroundColor:
+                "#43B02A" /* color copied from packages/dendron-next-server/assets/themes/light-theme.less TODO make dependent on active theme */,
+            }}
+          >
+            {isCollapsed ? <RightOutlined /> : <LeftOutlined />}
+          </div>
+        ) : null
+      }
+    >
+      <DendronTreeMenu {...props} collapsed={isCollapsed} />
+    </Sider>
+  );
+
+  const content = (
+    <>
+      <Content
+        className="main-content"
+        role="main"
+        style={{ padding: `0 ${LAYOUT.PADDING}px` }}
+      >
+        <DendronBreadCrumb {...props} />
+        {props.children}
+      </Content>
+      <Divider />
+      <Footer
+        style={{
+          padding: `0 ${LAYOUT.PADDING}px ${LAYOUT.PADDING}px`,
+        }}
+      >
+        <FooterText />
+      </Footer>
+    </>
+  );
+
   return (
-    <Layout>
+    <Layout
+      style={{
+        width: "100%",
+        minHeight: "100%",
+      }}
+    >
       <Header
         style={{
           position: "fixed",
@@ -40,64 +107,28 @@ export default function DendronLayout(
       <Layout
         className="site-layout"
         style={{
-          maxWidth: LAYOUT.BREAKPOINTS.lg,
-          width: "100%",
-          margin: "64px auto 0 auto",
+          marginTop: 64,
+          flexDirection: "row",
         }}
       >
-        <Sider
-          width={SIDER.WIDTH}
-          collapsible
-          collapsed={collapsed}
-          collapsedWidth={SIDER.COLLAPSED_WIDTH}
-          onCollapse={(collapsed, type) => {
-            setCollapsed(collapsed);
-          }}
-          breakpoint="lg"
-          style={{
-            position: "fixed",
-            overflow: "auto",
-            height: `calc(100vh - ${HEADER.HEIGHT}px)`,
-          }}
-          trigger={
-            // eslint-disable-next-line jsx-a11y/click-events-have-key-events -- role indicates that it is a button and therefore interactive
-            <div
-              role="button"
-              tabIndex={0}
-              className="ant-trigger"
-              onClick={() => setCollapsed(!collapsed)}
-              style={{
-                backgroundColor:
-                  "#43B02A" /* color copied from packages/dendron-next-server/assets/themes/light-theme.less TODO make dependent on active theme */,
-              }}
-            >
-              {collapsed ? <RightOutlined /> : <LeftOutlined />}
-            </div>
-          }
-        >
-          <DendronTreeMenu {...props} collapsed={collapsed} />
-        </Sider>
         <Layout
+          className="site-layout-sidebar"
           style={{
-            marginLeft: collapsed ? SIDER.COLLAPSED_WIDTH : SIDER.WIDTH,
+            flex: "0 0 auto",
+            width: `calc((100% - ${LAYOUT.BREAKPOINTS.lg}) / 2 + ${
+              isCollapsed ? SIDER.COLLAPSED_WIDTH : SIDER.WIDTH
+            }px)`,
+            paddingLeft: `calc((100% - ${LAYOUT.BREAKPOINTS.lg}) / 2)`,
+            minWidth: isCollapsed ? SIDER.COLLAPSED_WIDTH : SIDER.WIDTH,
           }}
         >
-          <Content
-            className="main-content"
-            role="main"
-            style={{ padding: `0 ${LAYOUT.PADDING}px` }}
-          >
-            <DendronBreadCrumb {...props} />
-            {props.children}
-          </Content>
-          <Divider />
-          <Footer
-            style={{
-              padding: `0 ${LAYOUT.PADDING}px ${LAYOUT.PADDING}px`,
-            }}
-          >
-            <FooterText />
-          </Footer>
+          {sidebar}
+        </Layout>
+        <Layout
+          className="side-layout-main"
+          style={{ maxWidth: LAYOUT.CONTENT_MAX_WIDTH }}
+        >
+          {content}
         </Layout>
       </Layout>
     </Layout>

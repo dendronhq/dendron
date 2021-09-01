@@ -174,9 +174,14 @@ function MenuView({
     );
   };
 
+  if (activeNote) {
+    expandKeys.push(activeNote);
+  }
+
   return (
     <Menu
       key={String(collapsed)}
+      className="dendron-tree-menu"
       mode="inline"
       {...(!collapsed && {
         openKeys: expandKeys,

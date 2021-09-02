@@ -1,18 +1,48 @@
 import {
   DendronConfig,
+  DendronError,
   DNodeUtils,
   DVault,
+  DWorkspaceV2,
   getSlugger,
   isBlockAnchor,
   NoteProps,
   VaultUtils,
+  WorkspaceFolderCode,
   WorkspaceOpts,
-  DendronError,
+  WorkspaceType,
 } from "@dendronhq/common-all";
 import { findUpTo, genHash } from "@dendronhq/common-server";
+import fs from "fs-extra";
 import _ from "lodash";
+import path from "path";
+import { URI } from "vscode-uri";
 
 export class WorkspaceUtils {
+  static getWorkspaceType({
+    workspaceFolders,
+    workspaceFile,
+  }: {
+    workspaceFolders?: readonly WorkspaceFolderCode[];
+    workspaceFile?: URI;
+  }): WorkspaceType {
+    if (!_.isUndefined(workspaceFolders)) {
+      const dendronWorkspaceFolders =
+        workspaceFolders.filter((ent) => {
+          return fs.pathExistsSync(path.join(ent.uri.fsPath, "dendron.yml"));
+        }) || [];
+      if (dendronWorkspaceFolders.length > 0) {
+        return WorkspaceType.NATIVE;
+      }
+    }
+    if (
+      !_.isUndefined(workspaceFile) &&
+      path.basename(workspaceFile.fsPath) === "dendron.code-workspace"
+    ) {
+      return WorkspaceType.CODE;
+    }
+    return WorkspaceType.NONE;
+  }
   /**
    * Find wsRoot if exists
    * @returns
@@ -26,6 +56,20 @@ export class WorkspaceUtils {
       returnDirPath: true,
     });
     return configPath;
+  }
+
+  static findWSRootInWorkspaceFolders(
+    workspaceFolders: readonly WorkspaceFolderCode[]
+  ): WorkspaceFolderCode | undefined {
+    const dendronWorkspaceFolders =
+      workspaceFolders.filter((ent) => {
+        return fs.pathExistsSync(path.join(ent.uri.fsPath, "dendron.yml"));
+      }) || [];
+    return dendronWorkspaceFolders[0];
+  }
+
+  static isNativeWorkspace(workspace: DWorkspaceV2) {
+    return workspace.type === WorkspaceType.NATIVE;
   }
 
   /**

@@ -146,6 +146,7 @@ export class SiteUtils {
   static async filterByConfig(opts: {
     engine: DEngineClient;
     config: DendronConfig;
+    noExpandSingleDomain?: boolean;
   }): Promise<{ notes: NotePropsDict; domains: NoteProps[] }> {
     const { engine, config } = opts;
     const notes = _.clone(engine.notes);
@@ -182,7 +183,11 @@ export class SiteUtils {
       hiearchiesToPublish.push(notes);
     });
     // if single hiearchy, domain includes all immediate children
-    if (siteHierarchies.length === 1 && domains.length === 1) {
+    if (
+      !opts.noExpandSingleDomain &&
+      siteHierarchies.length === 1 &&
+      domains.length === 1
+    ) {
       const rootDomain = domains[0];
       // special case, check if any of these children were supposed to be hidden
       domains = domains

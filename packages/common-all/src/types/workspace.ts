@@ -1,5 +1,7 @@
+import { URI } from "vscode-uri";
 import { DHookDict } from "./hooks";
 import { SeedSite } from "./seed";
+import { DEngineClient } from "./typesv2";
 
 // === Primitives
 export type DPermission = {
@@ -67,6 +69,37 @@ export type DWorkspace = {
 };
 
 export type DWorkspaceEntry = Omit<DWorkspace, "name" | "vaults">;
+
+export enum WorkspaceType {
+  NATIVE = "NATIVE",
+  CODE = "CODE",
+  NONE = "NONE",
+}
+
+export type DWorkspaceV2 = {
+  /**
+   * Absolute path to the workspace directory
+   */
+  wsRoot: string;
+  type: WorkspaceType;
+  config: DendronConfig;
+  vaults: DVault[];
+  engine: DEngineClient;
+  /**
+   * Where are assets stored
+   */
+  assetUri: URI;
+  /**
+   * Log storage
+   */
+  logUri: URI;
+  // --- methods
+  /**
+   * Show message when workspace is initialized
+   */
+  showWelcome(): Promise<void>;
+};
+
 export type SeedEntry = {
   /**
    * Specific branch to pull from

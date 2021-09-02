@@ -8,6 +8,7 @@ import {
   DendronPubOpts,
   MDUtilsV4,
   MDUtilsV5,
+  ProcFlavor,
   ProcMode,
 } from "@dendronhq/engine-server";
 import { runEngineTestV5, testWithEngine } from "../../../engine";
@@ -272,6 +273,7 @@ describe("dendronPub", () => {
         config.site = {
           siteHierarchies: ["foo"],
           siteRootDir: "foo",
+          usePrettyRefs: true
         };
         const resp = await MDUtilsV4.procRehype({
           proc: proc(
@@ -303,6 +305,169 @@ describe("dendronPub", () => {
           });
         },
       }
+    );
+  });
+
+  describe("usePrettyRefs", () => {
+    testWithEngine(
+      "config.site.usePrettyRef: true",
+      async ({ engine, vaults }) => {
+        const config = DConfig.genDefaultConfig();
+        config.usePrettyRefs = false;
+        config.site = {
+          siteHierarchies: ["foo"],
+          siteRootDir: "foo",
+          usePrettyRefs: true
+        };
+        const resp = await MDUtilsV5.procRehypeFull(
+          {
+            engine,
+            fname: "foo",
+            vault: vaults[0],
+            config
+          },
+          { flavor: ProcFlavor.PUBLISHING }
+        ).process(`![[bar]]`);
+        expect(resp).toMatchSnapshot();
+        expect(
+          await AssertUtils.assertInString({
+            body: resp.contents as string,
+            match: ["portal-container"],
+          })
+        ).toBeTruthy();
+      },
+      { preSetupHook: ENGINE_HOOKS.setupBasic }
+    );
+
+    testWithEngine(
+      "config.site.usePrettyRef: false",
+      async ({ engine, vaults }) => {
+        const config = DConfig.genDefaultConfig();
+        config.usePrettyRefs = false;
+        config.site = {
+          siteHierarchies: ["foo"],
+          siteRootDir: "foo",
+          usePrettyRefs: false
+        };
+        const resp = await MDUtilsV5.procRehypeFull(
+          {
+            engine,
+            fname: "foo",
+            vault: vaults[0],
+            config
+          },
+          { flavor: ProcFlavor.PUBLISHING }
+        ).process(`![[bar]]`);
+        expect(resp).toMatchSnapshot();
+        expect(
+          await AssertUtils.assertInString({
+            body: resp.contents as string,
+            nomatch: ["portal-container"],
+          })
+        ).toBeTruthy();
+      },
+      { preSetupHook: ENGINE_HOOKS.setupBasic }
+    );
+
+    testWithEngine(
+      "config.usePrettyRef: true",
+      async ({ engine, vaults }) => {
+        const config = DConfig.genDefaultConfig();
+        config.usePrettyRefs = true;
+        config.site = {
+          siteHierarchies: ["foo"],
+          siteRootDir: "foo",
+          usePrettyRefs: false
+        };
+        const resp = await MDUtilsV5.procRehypeFull(
+          {
+            engine,
+            fname: "foo",
+            vault: vaults[0],
+            config
+          },
+          { flavor: ProcFlavor.PREVIEW }
+        ).process(`![[bar]]`);
+        expect(resp).toMatchSnapshot();
+        expect(
+          await AssertUtils.assertInString({
+            body: resp.contents as string,
+            match: ["portal-container"],
+          })
+        ).toBeTruthy();
+      },
+      { preSetupHook: ENGINE_HOOKS.setupBasic }
+    );
+
+    testWithEngine(
+      "config.usePrettyRef: false",
+      async ({ engine, vaults }) => {
+        const config = DConfig.genDefaultConfig();
+        config.usePrettyRefs = false;
+        config.site = {
+          siteHierarchies: ["foo"],
+          siteRootDir: "foo",
+          usePrettyRefs: false
+        };
+        const resp = await MDUtilsV5.procRehypeFull(
+          {
+            engine,
+            fname: "foo",
+            vault: vaults[0],
+            config
+          },
+          { flavor: ProcFlavor.PREVIEW }
+        ).process(`![[bar]]`);
+        expect(resp).toMatchSnapshot();
+        expect(
+          await AssertUtils.assertInString({
+            body: resp.contents as string,
+            nomatch: ["portal-container"],
+          })
+        ).toBeTruthy();
+      },
+      { preSetupHook: ENGINE_HOOKS.setupBasic }
+    );
+
+    testWithEngine(
+      "usePrettyRef defaults to true in both cases",
+      async ({ engine, vaults }) => {
+        const config = DConfig.genDefaultConfig();
+        const previewResp = await MDUtilsV5.procRehypeFull(
+          {
+            engine,
+            fname: "foo",
+            vault: vaults[0],
+            config
+          },
+          { flavor: ProcFlavor.PREVIEW }
+        ).process(`![[bar]]`);
+        expect(previewResp).toMatchSnapshot();
+        expect(
+          await AssertUtils.assertInString({
+            body: previewResp.contents as string,
+            match: ["portal-container"],
+          })
+        ).toBeTruthy();
+
+        const publishResp = await MDUtilsV5.procRehypeFull(
+          {
+            engine,
+            fname: "foo",
+            vault: vaults[0],
+            config
+          },
+          { flavor: ProcFlavor.PUBLISHING }
+        ).process(`![[bar]]`);
+        expect(publishResp).toMatchSnapshot();
+        expect(
+          await AssertUtils.assertInString({
+            body: publishResp.contents as string,
+            match: ["portal-container"],
+          })
+        ).toBeTruthy();
+      },
+      { preSetupHook: ENGINE_HOOKS.setupBasic }
     );
   });
 });

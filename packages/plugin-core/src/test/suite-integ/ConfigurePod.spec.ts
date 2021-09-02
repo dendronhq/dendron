@@ -1,5 +1,5 @@
 import { DirResult, tmpDir, writeYAML } from "@dendronhq/common-server";
-import { NodeTestPresetsV2 } from "@dendronhq/common-test-utils";
+import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import {
   JSONExportPod,
   podClassEntryToPodItemV4,
@@ -12,14 +12,12 @@ import path from "path";
 import * as vscode from "vscode";
 import { ConfigurePodCommand } from "../../commands/ConfigurePodCommand";
 import { VSCodeUtils } from "../../utils";
-import { onWSInit, setupDendronWorkspace } from "../testUtils";
 import { expect } from "../testUtilsv2";
-import { setupBeforeAfter } from "../testUtilsV3";
+import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
 suite("ConfigurePod", function () {
   let root: DirResult;
   let ctx: vscode.ExtensionContext;
-  let vaultDir: string;
   let podsDir: string;
 
   ctx = setupBeforeAfter(this, {
@@ -30,64 +28,54 @@ suite("ConfigurePod", function () {
   });
 
   test("no config", (done) => {
-    onWSInit(async () => {
-      const cmd = new ConfigurePodCommand();
-      const podChoice = podClassEntryToPodItemV4(JSONExportPod);
-      cmd.gatherInputs = async () => {
-        return { podClass: podChoice.podClass };
-      };
-      await cmd.run();
-      const activePath = VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath;
-      expect(
-        activePath?.endsWith("pods/dendron.json/config.export.yml")
-      ).toBeTruthy();
-      done();
-    });
-
-    setupDendronWorkspace(root.name, ctx, {
-      lsp: true,
-      useCb: async (_vaultDir) => {
-        vaultDir = _vaultDir;
-        await NodeTestPresetsV2.createOneNoteOneSchemaPresetWithBody({
-          vaultDir,
-        });
+    runLegacyMultiWorkspaceTest({
+      ctx,
+      preSetupHook: ENGINE_HOOKS.setupBasic,
+      onInit: async ({}) => {
+        const cmd = new ConfigurePodCommand();
+        const podChoice = podClassEntryToPodItemV4(JSONExportPod);
+        cmd.gatherInputs = async () => {
+          return { podClass: podChoice.podClass };
+        };
+        await cmd.run();
+        const activePath =
+          VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath;
+        expect(
+          activePath?.endsWith("pods/dendron.json/config.export.yml")
+        ).toBeTruthy();
+        done();
       },
     });
   });
 
   test("config present", (done) => {
-    onWSInit(async () => {
-      const cmd = new ConfigurePodCommand();
-      const podChoice = podClassEntryToPodItemV4(JSONExportPod);
-      const podClass = podChoice.podClass;
-      cmd.gatherInputs = async () => {
-        return { podClass };
-      };
+    runLegacyMultiWorkspaceTest({
+      ctx,
+      preSetupHook: ENGINE_HOOKS.setupBasic,
+      onInit: async ({}) => {
+        const cmd = new ConfigurePodCommand();
+        const podChoice = podClassEntryToPodItemV4(JSONExportPod);
+        const podClass = podChoice.podClass;
+        cmd.gatherInputs = async () => {
+          return { podClass };
+        };
 
-      // setup
-      const configPath = PodUtils.getConfigPath({ podsDir, podClass });
-      const exportDest = path.join(
-        PodUtils.getPath({ podsDir, podClass }),
-        "export.json"
-      );
-      ensureDirSync(path.dirname(configPath));
+        // setup
+        const configPath = PodUtils.getConfigPath({ podsDir, podClass });
+        const exportDest = path.join(
+          PodUtils.getPath({ podsDir, podClass }),
+          "export.json"
+        );
+        ensureDirSync(path.dirname(configPath));
 
-      writeYAML(configPath, { dest: exportDest });
-      await cmd.run();
-      const activePath = VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath;
-      expect(
-        activePath?.endsWith("pods/dendron.json/config.export.yml")
-      ).toBeTruthy();
-      done();
-    });
-
-    setupDendronWorkspace(root.name, ctx, {
-      lsp: true,
-      useCb: async (_vaultDir) => {
-        vaultDir = _vaultDir;
-        await NodeTestPresetsV2.createOneNoteOneSchemaPresetWithBody({
-          vaultDir,
-        });
+        writeYAML(configPath, { dest: exportDest });
+        await cmd.run();
+        const activePath =
+          VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath;
+        expect(
+          activePath?.endsWith("pods/dendron.json/config.export.yml")
+        ).toBeTruthy();
+        done();
       },
     });
   });

@@ -545,7 +545,7 @@ export class GithubPublishPod extends PublishPod<GithubPublishPodConfig> {
         note.custom.issueID = issue.id;
         note.custom.url = issue.url;
         note.custom.status = issue.state;
-        await engine.writeNote(note, { newNode: true });
+        await engine.writeNote(note, { updateExisting: true });
         resp = "Issue Created";
       }
     } catch (error: any) {

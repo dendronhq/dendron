@@ -3,10 +3,12 @@ import { NOTE_PRESETS_V4 } from "@dendronhq/common-test-utils";
 import { describe } from "mocha";
 import * as vscode from "vscode";
 import { NoteLookupCommand } from "../../commands/NoteLookupCommand";
-import { LookupNoteTypeEnum, LookupSelectionTypeEnum } from "../../components/lookup/types";
+import {
+  LookupNoteTypeEnum,
+  LookupSelectionTypeEnum,
+} from "../../components/lookup/types";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace, getWS } from "../../workspace";
-import { TIMEOUT } from "../testUtils";
 import {
   expect,
   getNoteFromFname,
@@ -15,8 +17,6 @@ import {
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
 suite("Scratch Notes", function () {
-  this.timeout(TIMEOUT);
-
   const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {});
 
   describe("single", () => {
@@ -74,7 +74,7 @@ suite("Scratch Notes", function () {
           const editor = await getNoteFromFname({ fname, vault });
           editor.selection = new vscode.Selection(...selection);
           await new NoteLookupCommand().run({
-            selectionType: LookupSelectionTypeEnum.selection2link, 
+            selectionType: LookupSelectionTypeEnum.selection2link,
             noteType: LookupNoteTypeEnum.scratch,
             noConfirm: true,
           });

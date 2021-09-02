@@ -158,6 +158,7 @@ suite("Extension", function () {
             },
           ],
           useFMTitle: true,
+          usePrettyRefs: true,
           useNoteTitleForLink: true,
           initializeRemoteVaults: true,
           lookup: {

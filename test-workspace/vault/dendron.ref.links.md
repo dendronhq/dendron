@@ -2,7 +2,7 @@
 id: 73eb67ea-0291-45e7-8f2f-193fd6f00643
 title: Links
 desc: ""
-updated: 1626756808041
+updated: 1630474118518
 created: 1608518909864
 ---
 
@@ -52,3 +52,16 @@ Vault2
 ![[dendron.ref.links.target#^123]]
 
 ## [[a header that's entirely a link|dendron.apples]]
+
+## Targeting a single list item without its children
+
+
+## testing with ordered list
+
+1. first ^nPm286FpKzGj
+   1. first-a  ^0NFOQ4Hi4frn
+      1. first-a-1
+1. second
+   1.  second-a ^AKRCeAVwwIX2
+
+![[#^0NFOQ4Hi4frn:#^0NFOQ4Hi4frn]]

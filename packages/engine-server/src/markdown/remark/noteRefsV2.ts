@@ -16,6 +16,7 @@ import {
 import { file2Note } from "@dendronhq/common-server";
 import _ from "lodash";
 import { brk, html, paragraph, root } from "mdast-builder";
+import { DConfig } from "../../config";
 import { Eat } from "remark-parse";
 import Unified, { Plugin } from "unified";
 import { Node, Parent } from "unist";
@@ -306,39 +307,41 @@ export function convertNoteRefASTV2(
   const refLvl = MDUtilsV4.getNoteRefLvl(proc());
   let { dest, vault, config, shouldApplyPublishRules } =
     MDUtilsV4.getDendronData(proc);
-
   if (MDUtilsV5.isV5Active(proc)) {
     shouldApplyPublishRules = MDUtilsV5.shouldApplyPublishingRules(proc);
   }
-
   if (link.data.vaultName) {
     vault = VaultUtils.getVaultByNameOrThrow({
       vaults: engine.vaults,
       vname: link.data.vaultName,
     })!;
   }
-
   if (!vault) {
     return {
       error: new DendronError({ message: "no vault specified" }),
       data: [],
     };
   }
-  let { prettyRefs, wikiLinkOpts } = compilerOpts;
+  const { wikiLinkOpts } = compilerOpts;
+  const sitePrettyRefConfig = DConfig.getProp(procOpts.config, "site").usePrettyRefs;
+  const prettyRefConfig = DConfig.getProp(procOpts.config, "usePrettyRefs");
+  let prettyRefs = shouldApplyPublishRules
+    ? sitePrettyRefConfig
+    : prettyRefConfig
   if (
-    !prettyRefs &&
-    _.includes([DendronASTDest.HTML, DendronASTDest.MD_ENHANCED_PREVIEW], dest)
+    prettyRefs && _.includes(
+      [DendronASTDest.MD_DENDRON, DendronASTDest.MD_REGULAR], 
+      dest
+    )
   ) {
-    prettyRefs = true;
+    prettyRefs = false;
   }
-
   if (refLvl >= MAX_REF_LVL) {
     return {
       error: new DendronError({ message: "too many nested note refs" }),
       data: [MDUtilsV4.genMDMsg("too many nested note refs")],
     };
   }
-
   let noteRefs: DNoteLoc[] = [];
   if (link.from.fname.endsWith("*")) {
     const resp = engine.queryNotesSync({ qs: link.from.fname, vault });
@@ -484,6 +487,22 @@ function removeListItems({
   }
 }
 
+/** For references like `#^item:#^item`, only include a single list item and not it's children. */
+function removeExceptSingleItem(nodes: ParentWithIndex[]) {
+  let closestListItem: Parent | undefined;
+  // Find the list item closest to the anchor
+  _.forEach(nodes, ({ ancestor }) => {
+    if (ancestor.type === DendronASTTypes.LIST_ITEM) {
+      closestListItem = ancestor;
+    }
+  });
+  if (_.isUndefined(closestListItem)) return;
+  // If this list item has any nested lists, remove them to get rid of the children
+  closestListItem.children = closestListItem.children.filter(
+    (node) => !(node.type === DendronASTTypes.LIST)
+  );
+}
+
 /** If there are nested lists with a single item in them, replaces the outer single-item lists with the first multi-item list. */
 function removeSingleItemNestedLists(nodes: ParentWithIndex[]): void {
   let outermost: ParentWithIndex | undefined;
@@ -583,6 +602,16 @@ function prepareNoteRefIndices<T>({
   }
   if (start && start.type === "list") {
     removeListItems({ nodes: start.ancestors, remove: "before-index" });
+  }
+  // For anchors inside lists, if the start and end is the same then the reference is only referring to a single item
+  if (
+    end &&
+    start &&
+    end.type === "list" &&
+    start.type === "list" &&
+    anchorStart === anchorEnd
+  ) {
+    removeExceptSingleItem(start.ancestors);
   }
   // If removing items left single-item nested lists at the start of the ancestors, we trim these out.
   if (end && end.type === "list") {

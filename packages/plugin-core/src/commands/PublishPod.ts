@@ -14,7 +14,6 @@ import { VSCodeUtils } from "../utils";
 import { showPodQuickPickItemsV4 } from "../utils/pods";
 import { DendronWorkspace } from "../workspace";
 import { BaseCommand } from "./base";
-import { ReloadIndexCommand } from "./ReloadIndex";
 
 type CommandOpts = CommandInput & { noteByName: string; config: any };
 
@@ -99,7 +98,6 @@ export class PublishPodCommand extends BaseCommand<
     } else {
       window.showInformationMessage("contents copied to clipboard");
     }
-    await new ReloadIndexCommand().execute();
   }
 
   addAnalyticsPayload(opts?: CommandOpts) {

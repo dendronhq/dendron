@@ -17,7 +17,7 @@ import {
   userTag2WikiLinkNoteV4,
 } from "./utils";
 import Unified, { Transformer } from "unified";
-import { Node, Parent } from "unist";
+import { Node } from "unist";
 import u from "unist-builder";
 import visitParents from "unist-util-visit-parents";
 import { VFile } from "vfile";
@@ -283,7 +283,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
           node as BlockAnchor,
           procOpts.blockAnchorsOpts
         );
-        let target: Parent | undefined;
+        let target: Node | undefined;
         const grandParent = ancestors[ancestors.length - 2];
         if (
           RemarkUtils.isParagraph(parent) &&
@@ -294,9 +294,13 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
           // If the block anchor is at the top level, then it references the block before it
           const parentIndex = _.indexOf(grandParent.children, parent);
           const previous = grandParent.children[parentIndex - 1];
-          if (_.isUndefined(previous) || !RemarkUtils.isParent(previous))
-            return; // invalid anchor, doesn't represent anything
-          target = previous;
+          if (_.isUndefined(previous)) {
+            // Block anchor at the very start of the note, just add anchor to the start
+            target = grandParent;
+          } else {
+            // There's an actual block before the anchor
+            target = previous;
+          }
         } else if (RemarkUtils.isTableRow(grandParent)) {
           // An anchor inside a table references the whole table.
           const greatGrandParent = ancestors[ancestors.length - 3];
@@ -311,13 +315,29 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
           // Otherwise, it references the block it's inside
           target = parent;
         }
+
         if (_.isUndefined(target)) return;
         if (RemarkUtils.isList(target)) {
           // Can't install as a child of the list, has to go into a list item
           target = target.children[0];
         }
-        // Install the block anchor at the target node
-        target.children.unshift(anchorHTML);
+
+        if (RemarkUtils.isParent(target)) {
+          // Install the block anchor at the target node
+          target.children.unshift(anchorHTML);
+        } else if (RemarkUtils.isRoot(target)) {
+          // If the anchor is the first thing in the note, anchorHTML goes to the start of the document
+          target.children.unshift(anchorHTML);
+        } else if (RemarkUtils.isParent(grandParent)) {
+          // For some elements (for example code blocks) we can't install the block anchor on them.
+          // In that case we at least put a link before the element so that the link will at least work.
+          const targetIndex = _.indexOf(grandParent.children, target);
+          const targetWrapper = paragraph([
+            anchorHTML,
+            grandParent.children[targetIndex],
+          ]);
+          grandParent.children.splice(targetIndex, 1, targetWrapper);
+        }
         // Remove the block anchor itself since we install the anchor at the target
         const index = _.indexOf(parent.children, node);
         parent!.children.splice(index, 1);

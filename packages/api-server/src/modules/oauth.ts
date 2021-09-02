@@ -1,9 +1,14 @@
-import { DendronError, RespV2, Time } from "@dendronhq/common-all";
-import { MemoryStore } from "../store/memoryStore";
+import {
+  DendronError,
+  ERROR_SEVERITY,
+  RespV2,
+  Time,
+} from "@dendronhq/common-all";
 import axios from "axios";
-import path from "path";
 import fs from "fs-extra";
 import _ from "lodash";
+import path from "path";
+import { MemoryStore } from "../store/memoryStore";
 
 export interface TokenMethods {
   getToken: (opts: GetTokenOpts) => Promise<RespV2<any> | GetTokenPayload>;
@@ -69,6 +74,12 @@ export class GoogleAuthController implements TokenMethods {
         engine.addAccessTokensToPodConfig(opts);
         resp =
           "Authorization completed. Please return to your workspace and specify vaultName in config.import.yml and then run the import pod again. You can now close this window.";
+      } else {
+        throw new DendronError({
+          message:
+            "Failed to get a token response from Google Authentication Service",
+          severity: ERROR_SEVERITY.MINOR,
+        });
       }
 
       return resp;

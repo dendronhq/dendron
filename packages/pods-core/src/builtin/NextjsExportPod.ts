@@ -209,6 +209,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     const { notes: publishedNotes, domains } = await SiteUtils.filterByConfig({
       engine,
       config: engineConfig,
+      noExpandSingleDomain: true,
     });
     const siteNotes = SiteUtils.addSiteOnlyNotes({
       engine,

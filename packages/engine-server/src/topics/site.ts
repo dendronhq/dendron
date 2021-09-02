@@ -146,8 +146,10 @@ export class SiteUtils {
   static async filterByConfig(opts: {
     engine: DEngineClient;
     config: DendronConfig;
+    noExpandSingleDomain?: boolean;
   }): Promise<{ notes: NotePropsDict; domains: NoteProps[] }> {
     const { engine, config } = opts;
+    const notes = _.clone(engine.notes);
     config.site = DConfig.cleanSiteConfig(config.site);
     const sconfig = config.site;
     const { siteHierarchies } = sconfig;
@@ -180,6 +182,18 @@ export class SiteUtils {
       domains.push(domain);
       hiearchiesToPublish.push(notes);
     });
+    // if single hiearchy, domain includes all immediate children
+    if (
+      !opts.noExpandSingleDomain &&
+      siteHierarchies.length === 1 &&
+      domains.length === 1
+    ) {
+      const rootDomain = domains[0];
+      // special case, check if any of these children were supposed to be hidden
+      domains = domains
+        .concat(rootDomain.children.map((id) => notes[id]))
+        .filter((note) => this.canPublish({ note, config, engine }));
+    }
     logger.info({
       ctx: "filterByConfig",
       domains: domains.map((ent) => ent.fname),

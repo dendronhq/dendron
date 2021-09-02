@@ -29,6 +29,7 @@ import {
   NoteUtils,
   Position,
   VaultUtils,
+  TAGS_HIERARCHY,
 } from "@dendronhq/common-all";
 import { DateTime } from "luxon";
 import { getConfigValue, getWS } from "../workspace";
@@ -40,6 +41,7 @@ import {
   warnMissingFrontmatter,
 } from "./codeActionProvider";
 import { Logger } from "../logger";
+import { getFrontmatterTags, parseFrontmatter } from "../utils/yaml";
 
 const DECORATION_UPDATE_DELAY = 100;
 
@@ -94,10 +96,10 @@ export function updateDecorations(activeEditor: TextEditor) {
     switch (node.type) {
       case DendronASTTypes.FRONTMATTER: {
         frontmatter = node as FrontmatterContent;
-        const decorations = decorateTimestamps(frontmatter);
+        const decorations = decorateFrontmatter(frontmatter);
         if (isNotUndefined(decorations)) {
-          for (const decoration of decorations) {
-            allDecorations.get(DECORATION_TYPE_TIMESTAMP).push(decoration);
+          for (const [type, decoration] of decorations) {
+            allDecorations.get(type).push(decoration);
           }
         }
         break;
@@ -188,9 +190,10 @@ export const DECORATION_TYPE_TIMESTAMP = window.createTextEditorDecorationType(
   {}
 );
 
-function decorateTimestamps(frontmatter: FrontmatterContent) {
+function decorateFrontmatter(frontmatter: FrontmatterContent) {
   const { value: contents, position } = frontmatter;
   if (_.isUndefined(position)) return []; // should never happen
+  // Decorate the timestamps
   const tsConfig = getConfigValue(
     CodeConfigKeys.DEFAULT_TIMESTAMP_DECORATION_FORMAT
   ) as DateTimeFormat;
@@ -200,8 +203,10 @@ function decorateTimestamps(frontmatter: FrontmatterContent) {
   const lineOffset =
     VSCodeUtils.point2VSCodePosition(position.start).line +
     1; /* `---` line of frontmatter */
-  return entries
-    .map((entry, line) => {
+  const timestampDecorations = entries
+    .map((entry, line):
+      | undefined
+      | [TextEditorDecorationType, DecorationOptions] => {
       const match = NoteUtils.RE_FM_UPDATED_OR_CREATED.exec(entry);
       if (!_.isNull(match) && match.groups?.timestamp) {
         const timestamp = DateTime.fromMillis(
@@ -220,11 +225,22 @@ function decorateTimestamps(frontmatter: FrontmatterContent) {
             },
           },
         };
-        return decoration;
+        return [DECORATION_TYPE_TIMESTAMP, decoration];
       }
       return undefined;
     })
     .filter(isNotUndefined);
+
+  // Decorate the frontmatter tags
+  const tags = getFrontmatterTags(parseFrontmatter(contents));
+  const fmTagDecorations = tags.map((tag) =>
+    decorateTag({
+      fname: `${TAGS_HIERARCHY}${tag.value}`,
+      position: tag.position,
+      lineOffset,
+    })
+  );
+  return _.concat(timestampDecorations, fmTagDecorations);
 }
 
 export const DECORATION_TYPE_BLOCK_ANCHOR =
@@ -247,6 +263,11 @@ const WIKILINK_DECORATION_OPTIONS = {
   color: new ThemeColor("editorLink.activeForeground"),
 };
 
+const BROKEN_WIKILINK_DECORATION_OPTIONS = {
+  color: new ThemeColor("editorWarning.foreground"),
+  backgroundColor: new ThemeColor("editorWarning.background"),
+};
+
 export const DECORATION_TYPE_TAG = window.createTextEditorDecorationType({
   ...WIKILINK_DECORATION_OPTIONS,
   // Do not try to grow the decoration range when the user is typing,
@@ -255,20 +276,41 @@ export const DECORATION_TYPE_TAG = window.createTextEditorDecorationType({
   rangeBehavior: DecorationRangeBehavior.ClosedClosed,
 });
 
+export const DECORATION_TYPE_BROKEN_TAG = window.createTextEditorDecorationType(
+  {
+    ...BROKEN_WIKILINK_DECORATION_OPTIONS,
+    rangeBehavior: DecorationRangeBehavior.ClosedClosed,
+  }
+);
+
 function decorateHashTag(
   hashtag: HashTag
 ): [TextEditorDecorationType, DecorationOptions] | undefined {
   const position = hashtag.position;
   if (_.isUndefined(position)) return; // should never happen
 
+  return decorateTag({ fname: hashtag.fname, position });
+}
+
+function decorateTag({
+  fname,
+  position,
+  lineOffset,
+}: {
+  fname: string;
+  position: Position;
+  lineOffset?: number;
+}): [TextEditorDecorationType, DecorationOptions] {
   const { color: backgroundColor } = NoteUtils.color({
-    fname: hashtag.fname,
+    fname,
     notes: getWS().getEngine().notes,
   });
 
-  const type = DECORATION_TYPE_TAG;
+  const type = doesLinkedNoteExist({ fname })
+    ? DECORATION_TYPE_TAG
+    : DECORATION_TYPE_BROKEN_TAG;
   const decoration: DecorationOptions = {
-    range: VSCodeUtils.position2VSCodeRange(position),
+    range: VSCodeUtils.position2VSCodeRange(position, { line: lineOffset }),
     renderOptions: {
       before: {
         contentText: " ",
@@ -294,8 +336,7 @@ export const DECORATION_TYPE_WIKILINK = window.createTextEditorDecorationType({
 /** Decoration for wikilinks that do *not* point to valid notes (e.g. broken). */
 export const DECORATION_TYPE_BROKEN_WIKILINK =
   window.createTextEditorDecorationType({
-    color: new ThemeColor("editorWarning.foreground"),
-    backgroundColor: new ThemeColor("editorWarning.background"),
+    ...BROKEN_WIKILINK_DECORATION_OPTIONS,
     rangeBehavior: DecorationRangeBehavior.ClosedClosed,
   });
 

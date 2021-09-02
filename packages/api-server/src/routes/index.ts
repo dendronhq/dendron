@@ -2,7 +2,6 @@ import { Router } from "express";
 import { assetsRouter } from "./assets";
 import { configRouter } from "./config";
 import { noteRouter } from "./note";
-import { oauthRouter } from "./oauth";
 import { schemaRouter } from "./schema";
 import { workspaceRouter } from "./workspace";
 
@@ -15,7 +14,8 @@ router.use("/note", noteRouter);
 router.use("/schema", schemaRouter);
 router.use("/config", configRouter);
 router.use("/assets", assetsRouter);
-router.use("/oauth", oauthRouter);
+// oauth route is added later within Server.ts.
+// TODO: Improve route construction when necessary
 
 // const engineRouter = Router();
 // engineRouter.get("health", async (_req: Request, res: Response) => {

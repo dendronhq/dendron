@@ -7,8 +7,7 @@ import {
 } from "@dendronhq/common-all";
 import { DendronEngineClient, HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
-import path from "path";
-import { DendronWorkspace } from "../workspace";
+import { getWSV2 } from "../workspace";
 
 export class EngineAPIService extends DendronEngineClient {
   private _trustedWorkspace: boolean = true;
@@ -27,8 +26,7 @@ export class EngineAPIService extends DendronEngineClient {
     port: number | string;
     enableWorkspaceTrust?: boolean | undefined;
   }) {
-    const vaults = DendronWorkspace.instance().vaultsv4 || [];
-    const ws = path.dirname(DendronWorkspace.workspaceFile().fsPath);
+    const { vaults, wsRoot } = getWSV2();
     const history = HistoryService.instance();
 
     const api = new DendronAPI({
@@ -38,7 +36,7 @@ export class EngineAPIService extends DendronEngineClient {
       apiPath: "api",
     });
 
-    const newSvc = new EngineAPIService({ api, vaults, ws, history });
+    const newSvc = new EngineAPIService({ api, vaults, ws: wsRoot, history });
     if (enableWorkspaceTrust !== undefined) {
       newSvc._trustedWorkspace = enableWorkspaceTrust;
     }

@@ -1,9 +1,9 @@
-import { NoteChangeEntry, EngineDeletePayload } from "@dendronhq/common-all";
-import { DirResult, tmpDir } from "@dendronhq/common-server";
 import {
-  NodeTestPresetsV2,
-  NoteTestPresetsV2,
-} from "@dendronhq/common-test-utils";
+  EngineDeletePayload,
+  NoteChangeEntry,
+  VaultUtils,
+} from "@dendronhq/common-all";
+import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -11,125 +11,108 @@ import * as vscode from "vscode";
 import { DeleteNodeCommand } from "../../commands/DeleteNodeCommand";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
-import { onWSInit, setupDendronWorkspace } from "../testUtils";
 import { expect } from "../testUtilsv2";
-import { setupBeforeAfter } from "../testUtilsV3";
-
-const NOTE_DELETE_PRESET =
-  NoteTestPresetsV2.presets.OneNoteOneSchemaPreset.delete;
+import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
 suite("notes", function () {
-  let root: DirResult;
   let ctx: vscode.ExtensionContext;
-  let vaultPath: string;
 
-  ctx = setupBeforeAfter(this, {
-    beforeHook: () => {
-      root = tmpDir();
-    },
-  });
+  ctx = setupBeforeAfter(this);
 
   test("basic", (done) => {
-    onWSInit(async () => {
-      const notePath = path.join(vaultPath, "foo.md");
-      await VSCodeUtils.openFileInEditor(vscode.Uri.file(notePath));
-      await new DeleteNodeCommand().execute();
-      const vaultFiles = fs.readdirSync(vaultPath);
-      const noteFiles = vaultFiles.filter((ent) => ent.endsWith(".md"));
-      expect(noteFiles.length).toEqual(2);
-      expect(noteFiles.sort()).toEqual(["foo.ch1.md", "root.md"]);
-      done();
-    });
-    setupDendronWorkspace(root.name, ctx, {
-      lsp: true,
-      useCb: async (vaultDir) => {
-        vaultPath = vaultDir;
-        await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
+    runLegacyMultiWorkspaceTest({
+      ctx,
+      preSetupHook: ENGINE_HOOKS.setupBasic,
+      onInit: async ({ engine, vaults, wsRoot }) => {
+        const note = engine.notes["foo"];
+        await VSCodeUtils.openNote(note);
+        await new DeleteNodeCommand().execute();
+
+        const vaultFiles = fs.readdirSync(
+          path.join(wsRoot, VaultUtils.getRelPath(vaults[0]))
+        );
+        const noteFiles = vaultFiles.filter((ent) => ent.endsWith(".md"));
+        expect(noteFiles.sort()).toEqual(["bar.md", "foo.ch1.md", "root.md"]);
+        done();
       },
     });
   });
 
-  test(NOTE_DELETE_PRESET.domainNoChildren.label, (done) => {
-    onWSInit(async () => {
-      const notePath = path.join(vaultPath, "foo.md");
-      await VSCodeUtils.openFileInEditor(vscode.Uri.file(notePath));
-      const resp = await new DeleteNodeCommand().execute();
-      const changed = (resp as EngineDeletePayload).data as NoteChangeEntry[];
-      const notes = DendronWorkspace.instance().getEngine().notes;
-      _.map(
-        await NOTE_DELETE_PRESET.domainNoChildren.results({
-          changed,
-          vaultDir: vaultPath,
-          notes,
-        }),
-        (ent) => {
-          expect(ent.expected).toEqual(ent.actual);
-        }
-      );
-      done();
-    });
-
-    setupDendronWorkspace(root.name, ctx, {
-      lsp: true,
-      useCb: async (vaultDir) => {
-        vaultPath = vaultDir;
-        await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
-        fs.removeSync(path.join(vaultDir, "foo.ch1.md"));
+  test("domain w/no children", (done) => {
+    runLegacyMultiWorkspaceTest({
+      ctx,
+      preSetupHook: async (opts) => {
+        await ENGINE_HOOKS.setupBasic(opts);
+        const { wsRoot, vaults } = opts;
+        const vaultRoot = path.join(wsRoot, VaultUtils.getRelPath(vaults[0]));
+        fs.removeSync(path.join(vaultRoot, "foo.ch1.md"));
       },
-    });
-  });
+      onInit: async ({ engine, vaults, wsRoot }) => {
+        const note = engine.notes["foo"];
+        await VSCodeUtils.openNote(note);
+        const resp = await new DeleteNodeCommand().execute();
+        const changed = (resp as EngineDeletePayload).data as NoteChangeEntry[];
+        const vaultDir = path.join(wsRoot, VaultUtils.getRelPath(vaults[0]));
+        const notes = engine.notes;
+        expect(
+          _.every(
+            [
+              {
+                actual: changed[0].note.fname,
+                expected: "root",
+                msg: "root updated",
+              },
+              {
+                actual: changed[0].note.children,
+                expected: ["bar"],
+                msg: "root has one child",
+              },
+              { actual: notes["foo"], expected: undefined },
+              {
+                actual: _.includes(fs.readdirSync(vaultDir), "foo.md"),
+                expected: false,
+              },
+            ],
+            (ent) => {
+              if (!_.isEqual(ent.actual, ent.expected)) {
+                throw `issue with ${JSON.stringify(ent)}`;
+              }
+              return true;
+            }
+          )
+        ).toBeTruthy();
 
-  test("basic", (done) => {
-    onWSInit(async () => {
-      const notePath = path.join(vaultPath, "foo.md");
-      await VSCodeUtils.openFileInEditor(vscode.Uri.file(notePath));
-      await new DeleteNodeCommand().execute();
-      const vaultFiles = fs.readdirSync(vaultPath);
-      const noteFiles = vaultFiles.filter((ent) => ent.endsWith(".md"));
-      expect(noteFiles.length).toEqual(2);
-      expect(noteFiles.sort()).toEqual(["foo.ch1.md", "root.md"]);
-      done();
-    });
-    setupDendronWorkspace(root.name, ctx, {
-      lsp: true,
-      useCb: async (vaultDir) => {
-        vaultPath = vaultDir;
-        await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
+        done();
       },
     });
   });
 });
 
 suite("schemas", function () {
-  let root: DirResult;
   let ctx: vscode.ExtensionContext;
-  let vaultPath: string;
 
-  ctx = setupBeforeAfter(this, {
-    beforeHook: () => {
-      root = tmpDir();
-    },
-  });
+  ctx = setupBeforeAfter(this, {});
 
   test("basic", (done) => {
-    onWSInit(async () => {
-      const notePath = path.join(vaultPath, "foo.schema.yml");
-      await VSCodeUtils.openFileInEditor(vscode.Uri.file(notePath));
-      await new DeleteNodeCommand().execute();
-      const vaultFiles = fs.readdirSync(vaultPath);
-      const noteFiles = vaultFiles.filter((ent) => ent.endsWith(".schema.yml"));
-      expect(
-        DendronWorkspace.instance().getEngine().notes["foo"].schema
-      ).toEqual(undefined);
-      expect(noteFiles.length).toEqual(1);
-      expect(noteFiles.sort()).toEqual(["root.schema.yml"]);
-      done();
-    });
-    setupDendronWorkspace(root.name, ctx, {
-      lsp: true,
-      useCb: async (vaultDir) => {
-        vaultPath = vaultDir;
-        await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
+    runLegacyMultiWorkspaceTest({
+      ctx,
+      preSetupHook: ENGINE_HOOKS.setupBasic,
+      onInit: async ({ vaults, wsRoot }) => {
+        const vaultRoot = path.join(wsRoot, VaultUtils.getRelPath(vaults[0]));
+        const notePath = path.join(vaultRoot, "foo.schema.yml");
+        await VSCodeUtils.openFileInEditor(vscode.Uri.file(notePath));
+        await new DeleteNodeCommand().execute();
+
+        const vaultFiles = fs.readdirSync(vaultRoot);
+        const noteFiles = vaultFiles.filter((ent) =>
+          ent.endsWith(".schema.yml")
+        );
+        expect(
+          DendronWorkspace.instance().getEngine().notes["foo"].schema
+        ).toEqual(undefined);
+        expect(noteFiles.length).toEqual(1);
+        expect(noteFiles.sort()).toEqual(["root.schema.yml"]);
+        done();
       },
     });
   });

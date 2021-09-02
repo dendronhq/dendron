@@ -5,11 +5,13 @@ import {
   DendronTreeViewKey,
   DendronWebViewKey,
   DVault,
+  DWorkspaceV2,
   ERROR_STATUS,
   getStage,
   ResponseCode,
   TutorialEvents,
   WorkspaceSettings,
+  WorkspaceType,
 } from "@dendronhq/common-all";
 import {
   NodeJSUtils,
@@ -23,6 +25,7 @@ import {
   DConfig,
   HistoryService,
   WorkspaceService,
+  WorkspaceUtils,
 } from "@dendronhq/engine-server";
 import { PodUtils } from "@dendronhq/pods-core";
 import fs from "fs-extra";
@@ -141,6 +144,11 @@ export function getWS() {
   return DendronWorkspace.instance();
 }
 
+export function getWSV2(): DWorkspaceV2 {
+  const ws = DendronWorkspace.instance();
+  return ws.getWorkspaceImplOrThrow();
+}
+
 export function getEngine() {
   return DendronWorkspace.instance().getEngine();
 }
@@ -232,6 +240,10 @@ export class DendronWorkspace {
     return workspaceDir;
   }
 
+  get wsRoot(): string {
+    return DendronWorkspace.wsRoot();
+  }
+
   static lsp(): boolean {
     return true;
   }
@@ -261,12 +273,23 @@ export class DendronWorkspace {
   /**
    * Currently, this is a check to see if rootDir is defined in settings
    */
-  static isActive(): boolean {
+  static isActive(context?: vscode.ExtensionContext) {
     /**
      * we do a try catch because `DendronWorkspace.workspaceFile` throws an error if workspace file doesn't exist
      * the reason we don't use `vscode.*` method is because we need to stub this value during tests
      */
     try {
+      // ground work for standalone vaults. only activate in dev mode
+      if (context && getStage() !== "prod") {
+        const { workspaceFolders } = vscode.workspace;
+        const dendronWorkspaceFolders =
+          workspaceFolders?.filter((ent) => {
+            return fs.pathExistsSync(path.join(ent.uri.fsPath, "dendron.yml"));
+          }) || [];
+        if (dendronWorkspaceFolders.length > 0) {
+          return dendronWorkspaceFolders[0];
+        }
+      }
       return (
         path.basename(DendronWorkspace.workspaceFile().fsPath) ===
         this.DENDRON_WORKSPACE_FILE
@@ -308,12 +331,13 @@ export class DendronWorkspace {
   public context: vscode.ExtensionContext;
   public windowWatcher?: WindowWatcher;
   public workspaceWatcher?: WorkspaceWatcher;
-  public fsWatcher?: vscode.FileSystemWatcher;
   public serverWatcher?: vscode.FileSystemWatcher;
   public schemaWatcher?: SchemaWatcher;
   public L: typeof Logger;
   public _enginev2?: EngineAPIService;
+  public type: WorkspaceType;
   private disposableStore: DisposableStore;
+  public workspaceImpl?: DWorkspaceV2;
 
   static getOrCreate(
     context: vscode.ExtensionContext,
@@ -342,6 +366,10 @@ export class DendronWorkspace {
   ) {
     opts = _.defaults(opts, { skipSetup: false });
     this.context = context;
+    this.type = WorkspaceUtils.getWorkspaceType({
+      workspaceFile: vscode.workspace.workspaceFile,
+      workspaceFolders: vscode.workspace.workspaceFolders,
+    });
     _DendronWorkspace = this;
     this.L = Logger;
     this.disposableStore = new DisposableStore();
@@ -352,6 +380,18 @@ export class DendronWorkspace {
     this.setupViews(context);
     const ctx = "DendronWorkspace";
     this.L.info({ ctx, msg: "initialized" });
+  }
+
+  getWorkspaceImplOrThrow(): DWorkspaceV2 {
+    if (_.isUndefined(this.workspaceImpl)) {
+      throw Error("no native workspace");
+    }
+    return this.workspaceImpl;
+  }
+
+  get assetUri(): vscode.Uri {
+    const uri = VSCodeUtils.joinPath(this.context.extensionUri, "assets");
+    return uri;
   }
 
   get configRoot(): string {
@@ -369,12 +409,7 @@ export class DendronWorkspace {
    * @remark: We need to get the config from disk because the engine might not be initialized yet
    */
   get config(): DendronConfig {
-    const dendronRoot = getWS().configRoot;
-    if (!dendronRoot) {
-      throw new Error(`dendronRoot not set when get config`);
-    }
-    const config = DConfig.getOrCreate(dendronRoot);
-    return DConfig.defaults(config);
+    return getWSV2().config;
   }
 
   async getWorkspaceSettings(): Promise<WorkspaceSettings> {
@@ -454,6 +489,13 @@ export class DendronWorkspace {
     return assetsDir;
   }
 
+  get logUri() {
+    return this.context.logUri;
+  }
+
+  get vaults(): DVault[] {
+    return this.vaultsv4;
+  }
   /**
    * Relative vaults
    */
@@ -487,6 +529,7 @@ export class DendronWorkspace {
 
   setEngine(engine: EngineAPIService) {
     this._enginev2 = engine;
+    this.getWorkspaceImplOrThrow().engine = engine;
   }
 
   async setupViews(context: vscode.ExtensionContext) {
@@ -718,36 +761,14 @@ export class DendronWorkspace {
   async deactivate() {
     const ctx = "deactivateWorkspace";
     this.L.info({ ctx });
-    this.fsWatcher?.dispose();
     this.disposableStore.dispose();
-  }
-
-  /**
-   * Performs a series of step to initialize the workspace
-   *  Calls activate workspace
-   * - initializes DendronEngine
-   * @param mainVault
-   */
-  async reloadWorkspace() {
-    try {
-      const out = await vscode.commands.executeCommand(
-        DENDRON_COMMANDS.RELOAD_INDEX.key,
-        true
-      );
-      return out;
-    } catch (err) {
-      Logger.error({ error: err });
-    }
   }
 
   async showWelcome() {
     try {
-      const ws = DendronWorkspace.instance();
-
       // NOTE: this needs to be from extension because no workspace might exist at this point
       const uri = VSCodeUtils.joinPath(
-        ws.context.extensionUri,
-        "assets",
+        this.assetUri,
         "dendron-ws",
         "vault",
         "welcome.html"

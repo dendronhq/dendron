@@ -1,40 +1,27 @@
-import { DirResult, tmpDir } from "@dendronhq/common-server";
-import { NodeTestPresetsV2 } from "@dendronhq/common-test-utils";
-import path from "path";
+import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import * as vscode from "vscode";
 import { GoDownCommand } from "../../commands/GoDownCommand";
-// import { DendronQuickPickerV2 } from "../../components/lookup/types";
 import { VSCodeUtils } from "../../utils";
-import { onWSInit, setupDendronWorkspace } from "../testUtils";
 import { expect } from "../testUtilsv2";
-import { setupBeforeAfter } from "../testUtilsV3";
+import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
 suite("notes", function () {
-  let root: DirResult;
   let ctx: vscode.ExtensionContext;
-  let vaultPath: string;
-  ctx = setupBeforeAfter(this, {
-    beforeHook: () => {
-      root = tmpDir();
-    },
-  });
+  ctx = setupBeforeAfter(this);
 
   test("basic", (done) => {
-    onWSInit(async () => {
-      const notePath = path.join(vaultPath, "foo.md");
-      await VSCodeUtils.openFileInEditor(vscode.Uri.file(notePath));
-      await new GoDownCommand().run({noConfirm: true});
-      const editor = VSCodeUtils.getActiveTextEditor();
-      const activeNote = VSCodeUtils.getNoteFromDocument(editor!.document);
-      expect(activeNote?.fname).toEqual("foo.ch1");
+    runLegacyMultiWorkspaceTest({
+      ctx,
+      preSetupHook: ENGINE_HOOKS.setupBasic,
+      onInit: async ({ engine }) => {
+        const note = engine.notes["foo"];
+        await VSCodeUtils.openNote(note);
+        await new GoDownCommand().run({ noConfirm: true });
+        const editor = VSCodeUtils.getActiveTextEditor();
+        const activeNote = VSCodeUtils.getNoteFromDocument(editor!.document);
+        expect(activeNote?.fname).toEqual("foo.ch1");
 
-      done();
-    });
-    setupDendronWorkspace(root.name, ctx, {
-      lsp: true,
-      useCb: async (vaultDir) => {
-        vaultPath = vaultDir;
-        await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
+        done();
       },
     });
   });

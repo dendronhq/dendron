@@ -7,13 +7,11 @@ import sinon from "sinon";
 import * as vscode from "vscode";
 import { InsertNoteLinkCommand } from "../../commands/InsertNoteLink";
 import { VSCodeUtils } from "../../utils";
-import { TIMEOUT } from "../testUtils";
 import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
 suite("InsertNoteLink", function () {
   let ctx: vscode.ExtensionContext;
-  this.timeout(TIMEOUT);
   ctx = setupBeforeAfter(this);
 
   describe("basic", () => {

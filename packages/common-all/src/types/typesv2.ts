@@ -1,3 +1,4 @@
+import { URI } from "vscode-uri";
 import { DendronError, IDendronError } from "../error";
 import {
   DLink,
@@ -371,6 +372,27 @@ export type WorkspaceFolderRaw = {
   path: string;
   name?: string;
 };
+
+export interface WorkspaceFolderCode {
+  /**
+   * The associated uri for this workspace folder.
+   *
+   * *Note:* The {@link Uri}-type was intentionally chosen such that future releases of the editor can support
+   * workspace folders that are not stored on the local disk, e.g. `ftp://server/workspaces/foo`.
+   */
+  readonly uri: URI;
+
+  /**
+   * The name of this workspace folder. Defaults to
+   * the basename of its {@link Uri.path uri-path}
+   */
+  readonly name: string;
+
+  /**
+   * The ordinal number of this workspace folder.
+   */
+  readonly index: number;
+}
 
 export type WorkspaceExtensionSetting = {
   recommendations: string[];

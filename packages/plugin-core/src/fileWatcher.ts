@@ -1,5 +1,4 @@
 import {
-  DEngineClient,
   DVault,
   NoteProps,
   NoteUtils,
@@ -12,7 +11,7 @@ import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
 import { Logger } from "./logger";
-import { DendronWorkspace } from "./workspace";
+import { DendronWorkspace, getWS, getWSV2 } from "./workspace";
 
 export class FileWatcher {
   public watchers: { vault: DVault; watcher: vscode.FileSystemWatcher }[];
@@ -21,8 +20,6 @@ export class FileWatcher {
    */
   public pause: boolean;
   public L = Logger;
-  public ws: DendronWorkspace;
-  public engine: DEngineClient;
 
   constructor(opts: WorkspaceOpts) {
     const { vaults, wsRoot } = opts;
@@ -41,8 +38,6 @@ export class FileWatcher {
       );
       return { vault, watcher };
     });
-    this.ws = DendronWorkspace.instance();
-    this.engine = this.ws.getEngine();
     this.pause = false;
   }
 
@@ -82,8 +77,9 @@ export class FileWatcher {
 
       try {
         this.L.debug({ ctx, uri, msg: "pre-add-to-engine" });
+        const { vaults, engine } = getWSV2();
         const vault = VaultUtils.getVaultByNotePath({
-          vaults: this.engine.vaults,
+          vaults,
           fsPath: uri.fsPath,
           wsRoot: DendronWorkspace.wsRoot(),
         });
@@ -93,7 +89,7 @@ export class FileWatcher {
         const maybeNote = NoteUtils.getNoteByFnameV5({
           fname,
           vault,
-          notes: this.engine.notes,
+          notes: engine.notes,
           wsRoot: DendronWorkspace.wsRoot(),
         }) as NoteProps;
         if (maybeNote) {
@@ -106,7 +102,7 @@ export class FileWatcher {
         }
 
         // add note
-        await this.engine.updateNote(note as NoteProps, {
+        await engine.updateNote(note as NoteProps, {
           newNode: true,
         });
       } catch (err) {
@@ -148,12 +144,13 @@ export class FileWatcher {
         return;
       }
       try {
+        const { engine } = getWSV2();
         this.L.debug({ ctx, uri, msg: "preparing to delete" });
-        const nodeToDelete = _.find(this.engine.notes, { fname });
+        const nodeToDelete = _.find(engine.notes, { fname });
         if (_.isUndefined(nodeToDelete)) {
           throw new Error(`${fname} not found`);
         }
-        await this.engine.deleteNote(nodeToDelete.id, { metaOnly: true });
+        await engine.deleteNote(nodeToDelete.id, { metaOnly: true });
         await HistoryService.instance().add({
           action: "delete",
           source: "watcher",
@@ -172,6 +169,6 @@ export class FileWatcher {
   static refreshTree = _.debounce(() => {
     const ctx = "refreshTree";
     Logger.info({ ctx });
-    DendronWorkspace.instance().dendronTreeView?.treeProvider.refresh();
+    getWS().dendronTreeView?.treeProvider.refresh();
   }, 100);
 }

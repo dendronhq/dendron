@@ -27,6 +27,7 @@ import assert from "assert";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
+import sinon from "sinon";
 import {
   ExtensionContext,
   Location,
@@ -34,6 +35,7 @@ import {
   Selection,
   Uri,
   window,
+  workspace,
 } from "vscode";
 import {
   SetupWorkspaceCommand,
@@ -431,12 +433,20 @@ export class LocationTestUtils {
 export const stubWorkspaceFile = (wsRoot: string) => {
   const wsPath = path.join(wsRoot, "dendron.code-workspace");
   fs.writeJSONSync(wsPath, {});
+  sinon.stub(workspace, "workspaceFile").returns(Uri.file(wsPath));
   DendronWorkspace.workspaceFile = () => {
     return Uri.file(wsPath);
   };
 };
 
 export const stubWorkspaceFolders = (vaults: DVault[]) => {
+  sinon.stub(workspace, "workspaceFolders").returns(
+    vaults.map((v) => ({
+      name: VaultUtils.getName(v),
+      index: 1,
+      uri: Uri.file(resolveRelToWSRoot(v.fsPath)),
+    }))
+  );
   DendronWorkspace.workspaceFolders = () => {
     return vaults.map((v) => ({
       name: VaultUtils.getName(v),

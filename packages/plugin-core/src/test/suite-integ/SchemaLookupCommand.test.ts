@@ -1,22 +1,18 @@
-import { TIMEOUT } from "../testUtils";
-import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
-import * as vscode from "vscode";
-import { describe } from "mocha";
-import sinon from "sinon";
-import path from "path";
 import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
-import { CommandOutput, SchemaLookupCommand } from "../../commands/SchemaLookupCommand";
+import _ from "lodash";
+import { describe } from "mocha";
+import path from "path";
+import * as vscode from "vscode";
+import {
+  CommandOutput,
+  SchemaLookupCommand,
+} from "../../commands/SchemaLookupCommand";
 import { VSCodeUtils } from "../../utils";
 import { expect } from "../testUtilsv2";
-import _ from "lodash";
+import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
 suite("SchemaLookupCommand", function () {
-  this.timeout(TIMEOUT);
-  const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {
-    afterHook: async () => {
-      sinon.restore();
-    },
-  });
+  const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {});
 
   describe("basics", () => {
     test("lookup existing schema", (done) => {
@@ -27,7 +23,7 @@ suite("SchemaLookupCommand", function () {
         },
         onInit: async () => {
           const cmd = new SchemaLookupCommand();
-          
+
           await cmd.run({ noConfirm: true, initialValue: "foo" });
           const editor = VSCodeUtils.getActiveTextEditor();
           expect(editor).toBeTruthy();
@@ -50,12 +46,12 @@ suite("SchemaLookupCommand", function () {
             const cmd = new SchemaLookupCommand();
             const { quickpick } = (await cmd.run({
               noConfirm: true,
-              initialValue: "*" 
+              initialValue: "*",
             })) as CommandOutput;
             expect(quickpick.selectedItems.length).toEqual(2);
             done();
-          }
-        })
+          },
+        });
       });
     });
 
@@ -67,7 +63,7 @@ suite("SchemaLookupCommand", function () {
         },
         onInit: async () => {
           const cmd = new SchemaLookupCommand();
-          
+
           await cmd.run({ noConfirm: true, initialValue: "baz" });
           const editor = VSCodeUtils.getActiveTextEditor();
           expect(editor).toBeTruthy();

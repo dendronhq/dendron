@@ -7,7 +7,6 @@ on:
 
 jobs:
   build:
-    environment: plugin
     strategy:
       fail-fast: true
 

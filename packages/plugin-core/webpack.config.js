@@ -58,10 +58,10 @@ const config = {
         { from: "webpack-require-hack.js", to: "webpack-require-hack.js" },
       ],
     }),
-    new DefinePlugin({
-      GOOGLE_OAUTH_CLIENT_SECRET: JSON.stringify(process.env.GOOGLE_OAUTH_CLIENT_SECRET),
-      GOOGLE_OAUTH_CLIENT_ID: JSON.stringify(process.env.GOOGLE_OAUTH_CLIENT_ID),
-    })
+    // new DefinePlugin({
+    //   GOOGLE_OAUTH_CLIENT_SECRET: JSON.stringify(process.env.GOOGLE_OAUTH_CLIENT_SECRET),
+    //   GOOGLE_OAUTH_CLIENT_ID: JSON.stringify(process.env.GOOGLE_OAUTH_CLIENT_ID),
+    // })
   ],
   module: {
     rules: [

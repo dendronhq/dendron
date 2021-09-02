@@ -40,9 +40,6 @@ const config = {
     new IgnorePlugin({
       resourceRegExp: /fsevents/,
     }),
-    new IgnorePlugin({
-      resourceRegExp: /ts-json-schema-generator/,
-    }),
     // @ts-ignore
     new CopyPlugin({
       patterns: [{ from: path.join("assets", "dendron-ws"), to: "dendron-ws" }],

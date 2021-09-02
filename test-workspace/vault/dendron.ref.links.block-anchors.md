@@ -2,7 +2,7 @@
 id: links.block-anchors
 title: Block Anchors
 desc: ""
-updated: 1608147857388
+updated: 1630537995313
 created: 1608147795766
 ---
 
@@ -22,6 +22,11 @@ Voluptatem ipsum et possimus aut. In modi quaerat temporibus. ^last-paragraph
 |----------|-----------|
 | Laborum  | libero    |
 | Ullam    | optio     | ^table
+
+```js
+const x = 0;
+```
+^code
 
 ## Mollitia ipsum et velit quia vel
 

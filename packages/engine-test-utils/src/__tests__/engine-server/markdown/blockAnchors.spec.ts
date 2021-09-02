@@ -161,7 +161,43 @@ describe("blockAnchors", () => {
       preSetupHook: ENGINE_HOOKS.setupBasic,
     });
 
-    const ALL_TEST_CASES = [...SIMPLE, ...END_OF_PARAGRAPH];
+    const AFTER_CODE_BLOCK = createProcTests({
+      name: "after code block",
+      setupFunc: async ({ engine, vaults, extra }) => {
+        const proc2 = createProcForTest({
+          engine,
+          dest: extra.dest,
+          vault: vaults[0],
+        });
+        const resp = await proc2.process(
+          ["```", "const x = 1;", "```", "", anchor].join("\n")
+        );
+        return { resp };
+      },
+      verifyFuncDict: {
+        [DendronASTDest.HTML]: async ({ extra }) => {
+          const { resp } = extra;
+          expect(resp).toMatchSnapshot();
+          return [
+            {
+              actual: await AssertUtils.assertInString({
+                body: resp.toString(),
+                match: ["<a", `href="#${anchor}"`, `id="${anchor}"`, "</a>"],
+                nomatch: ["visibility: hidden"],
+              }),
+              expected: true,
+            },
+          ];
+        },
+      },
+      preSetupHook: ENGINE_HOOKS.setupBasic,
+    });
+
+    const ALL_TEST_CASES = [
+      ...SIMPLE,
+      ...END_OF_PARAGRAPH,
+      ...AFTER_CODE_BLOCK,
+    ];
     runAllTests({ name: "compile", testCases: ALL_TEST_CASES });
   });
 });

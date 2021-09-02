@@ -17,7 +17,18 @@ You can go to [dendron pull requests](https://wiki.dendron.so/notes/adc39825-77a
 - [ ] if you are adding a new language feature (graphically visible in vscode/preview/publishing), make sure that it is included in [test-workspace](https://wiki.dendron.so/notes/cb22bd36-d45a-4ffd-a31e-96c4b39cb7fb.html#test-workspace). We use this to manually inspect new changes and for auto regression testiing 
 
 ### Docs
-- [ ] if your change reflects documentation changes, also submit a PR to [dendron-site](https://github.com/dendronhq/dendron-site) and mention the doc PR link in your current PR
+- [ ] Make sure that the PR title follows our [commit style](https://wiki.dendron.so/notes/adc39825-77a6-46cf-9c49-2642fcb4248e.html#commit-style)
+- [ ] Please summarize the feature or impact in 1-2 lines in the PR description
+- [ ] If your change reflects documentation changes, also submit a PR to [dendron-site](https://github.com/dendronhq/dendron-site) and mention the doc PR link in your current PR
+
+Example PR Description
+```markdown
+# feat: capitalize all foos
+
+This changes capitalizes all occurences of `foo` to `Foo` 
+
+Docs PR: <URL_TO_DOCS_PR>
+```
 
 ## Special Cases
 

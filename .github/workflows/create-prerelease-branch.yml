@@ -24,5 +24,5 @@ jobs:
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
-          git checkout -branch jy-build-test
+          git checkout -b jy-build-test
           git push origin jy-build-test

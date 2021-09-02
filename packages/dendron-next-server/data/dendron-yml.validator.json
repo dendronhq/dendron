@@ -9,6 +9,10 @@
           "type": "boolean",
           "description": "Disable caching behavior"
         },
+        "maxPreviewsCached": {
+          "type": "number",
+          "description": "Maximum number of rendered previews to cache in Dendron Engine. Note: this value is ignored when  {@link  DendronConfig.noCaching }  is set to true. When set this value must be greater than 0."
+        },
         "noTelemetry": {
           "type": "boolean",
           "description": "Disable telemetry"

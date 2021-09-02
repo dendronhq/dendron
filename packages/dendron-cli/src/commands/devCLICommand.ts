@@ -5,7 +5,6 @@ import {
 } from "@dendronhq/common-all";
 import yargs from "yargs";
 import { CLICommand } from "./base";
-import * as tsj from "ts-json-schema-generator";
 import path from "path";
 import fs from "fs-extra";
 import {
@@ -98,6 +97,8 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       "dendron-yml.validator.json"
     );
     const configType = "DendronConfig";
+    // NOTE: this is removed by webpack when building plugin which is why we're loading this dynamically
+    const tsj = require("ts-json-schema-generator");
     const schema = tsj
       .createGenerator({
         path: path.join(pkgRoot, "src", "config.ts"),

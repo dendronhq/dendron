@@ -77,6 +77,11 @@
     ],
     "commands": [
       {
+        "command": "dendron.backlinks.expandAll",
+        "title": "Expand All",
+        "icon": "$(expand-all)"
+      },
+      {
         "command": "dendron.browseNote",
         "title": "Dendron: Browse Note",
         "desc": "Browse note on github"
@@ -501,6 +506,15 @@
         "desc": "Browse the Seed Registry and Add Seeds to Current Workspace"
       }
     ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "dendron.backlinks.expandAll",
+          "when": "view == dendron.backlinks",
+          "group": "navigation"
+        }
+      ]
+    },
     "configuration": {
       "title": "dendron",
       "properties": {

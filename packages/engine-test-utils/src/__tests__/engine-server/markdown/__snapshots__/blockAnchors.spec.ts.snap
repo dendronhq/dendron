@@ -3,9 +3,8 @@
 exports[`blockAnchors rendering compile "HTML: after code block" 1`] = `
 VFile {
   "contents": "<h1 id=\\"root\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#root\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Root</h1>
-<a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^my-block-anchor-0\\" href=\\"#^my-block-anchor-0\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>
-<pre><code>const x = 1;
-</code></pre>
+<p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^my-block-anchor-0\\" href=\\"#^my-block-anchor-0\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a></p><pre><code>const x = 1;
+</code></pre><p></p>
 <p></p>
 <hr>
 <h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>

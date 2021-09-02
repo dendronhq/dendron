@@ -7,7 +7,7 @@ import {
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { Content, Image, Root } from "mdast";
-import { heading, html, paragraph, text } from "mdast-builder";
+import { heading, paragraph, text } from "mdast-builder";
 import {
   frontmatterTag2WikiLinkNoteV4,
   addError,
@@ -17,7 +17,7 @@ import {
   userTag2WikiLinkNoteV4,
 } from "./utils";
 import Unified, { Transformer } from "unified";
-import { Node, Parent } from "unist";
+import { Node } from "unist";
 import u from "unist-builder";
 import visitParents from "unist-util-visit-parents";
 import { VFile } from "vfile";

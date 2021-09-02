@@ -333,7 +333,11 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
           // For some elements (for example code blocks) we can't install the block anchor on them.
           // In that case we at least put a link before the element so that the link will at least work.
           const targetIndex = _.indexOf(grandParent.children, target);
-          grandParent.children.splice(targetIndex, 0, anchorHTML);
+          const targetWrapper = paragraph([
+            anchorHTML,
+            grandParent.children[targetIndex],
+          ]);
+          grandParent.children.splice(targetIndex, 1, targetWrapper);
         }
         // Remove the block anchor itself since we install the anchor at the target
         const index = _.indexOf(parent.children, node);

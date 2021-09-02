@@ -5,6 +5,7 @@ import fs from "fs-extra";
  * Workaround to substitute values for global consts that are normally injected
  * through webpack definePlugin.
  */
+// @ts-ignore
 function main() {
   const pathToUpdate = "./out/src/types/global.js";
   const globalfile = fs.readFileSync(pathToUpdate);
@@ -15,4 +16,4 @@ function main() {
   fs.writeFileSync(pathToUpdate, outputFile);
 }
 
-main();
+// main();

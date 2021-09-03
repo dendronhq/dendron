@@ -4,7 +4,7 @@ import _ from "lodash";
 export enum LoadingStatus {
   IDLE = "idle",
   PENDING = "pending",
-  FUFILLED = "fufilled",
+  FULFILLED = "fulfilled",
 }
 
 export type EngineSliceState = {

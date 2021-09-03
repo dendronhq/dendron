@@ -173,7 +173,7 @@ export class NoteLookupProvider implements ILookupProviderV3 {
       // last chance to cancel
       lc.cancelToken.cancel();
       if (!this.opts.noHidePickerOnAccept) {
-        picker.state = DendronQuickPickState.FUFILLED;
+        picker.state = DendronQuickPickState.FULFILLED;
         picker.hide();
       }
       const onAcceptHookResp = await Promise.all(

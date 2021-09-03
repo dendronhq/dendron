@@ -246,7 +246,7 @@ export class NoteLookupCommand extends BaseCommand<
               !_.includes(
                 [
                   DendronQuickPickState.PENDING_NEXT_PICK,
-                  DendronQuickPickState.FUFILLED,
+                  DendronQuickPickState.FULFILLED,
                 ],
                 quickpick.state
               )

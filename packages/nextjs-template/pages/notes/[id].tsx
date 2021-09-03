@@ -45,7 +45,7 @@ export default function Note({ note, body, customHeadContent, ...rest }: NotePag
     // loaded page statically
     if (id === note.id) {
       dispatch(
-        browserEngineSlice.actions.setLoadingStatus(LoadingStatus.FUFILLED)
+        browserEngineSlice.actions.setLoadingStatus(LoadingStatus.FULFILLED)
       );
       logger.info({ ctx: "updateNoteBody:exit", id, state: "id = note.id" });
       return;
@@ -57,7 +57,7 @@ export default function Note({ note, body, customHeadContent, ...rest }: NotePag
       const contents = await resp.text();
       setBody(contents);
       dispatch(
-        browserEngineSlice.actions.setLoadingStatus(LoadingStatus.FUFILLED)
+        browserEngineSlice.actions.setLoadingStatus(LoadingStatus.FULFILLED)
       );
     });
   }, [id]);

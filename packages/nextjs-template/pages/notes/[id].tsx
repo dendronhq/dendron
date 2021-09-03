@@ -15,15 +15,32 @@ import React from "react";
 import DendronSEO from "../../components/DendronSEO";
 import DendronCustomHead from "../../components/DendronCustomHead";
 import DendronSpinner from "../../components/DendronSpinner";
+import {
+  DendronCollectionItem,
+  prepChildrenForCollection,
+} from "../../components/DendronCollection";
 import { useCombinedDispatch, useCombinedSelector } from "../../features";
 import { browserEngineSlice } from "../../features/engine";
-import { generateCollectionBody, getCustomHead, getNoteBody, getNoteMeta, getNotes } from "../../utils/build";
+import {
+  getCustomHead,
+  getNoteBody,
+  getNoteMeta,
+  getNotes,
+} from "../../utils/build";
 import { DendronCommonProps, NoteRouterQuery } from "../../utils/types";
+import { NoteProps } from "@dendronhq/common-all";
 
 export type NotePageProps = InferGetStaticPropsType<typeof getStaticProps> &
   DendronCommonProps;
 
-export default function Note({ note, body, customHeadContent, ...rest }: NotePageProps) {
+export default function Note({
+  note,
+  body,
+  collectionChildren,
+  noteIndex,
+  customHeadContent,
+  ...rest
+}: NotePageProps) {
   const logger = createLogger("Note");
   const router = useRouter();
   const [bodyFromState, setBody] =
@@ -68,11 +85,18 @@ export default function Note({ note, body, customHeadContent, ...rest }: NotePag
     return <DendronSpinner />;
   }
 
+  const maybeCollection = note.custom.has_collection
+    ? collectionChildren.map((child: NoteProps) =>
+        DendronCollectionItem({ note: child, noteIndex })
+      )
+    : null;
+
   return (
     <>
       <DendronSEO />
-      <DendronCustomHead content={customHeadContent}/>
+      <DendronCustomHead content={customHeadContent} />
       <DendronNote noteContent={noteBody} />
+      {maybeCollection}
     </>
   );
 }
@@ -98,20 +122,21 @@ export const getStaticProps: GetStaticProps = async (
     throw Error("id required");
   }
 
-  // prepare note body
-  let body = await getNoteBody(id);
-  const note = await getNoteMeta(id);
-  if (note.custom.has_collection) {
-    body = [body, generateCollectionBody(note)].join("\n");
-  }
-
-  // prepare custom head content
+  const [body, note] = await Promise.all([getNoteBody(id), getNoteMeta(id)]);
+  const noteData = getNotes();
   const customHeadContent = await getCustomHead();
+  const { notes, noteIndex } = noteData;
+
+  const collectionChildren = note.custom.has_collection
+    ? prepChildrenForCollection(note, notes, noteIndex)
+    : null;
 
   return {
     props: {
-      body,
       note,
+      body,
+      noteIndex,
+      collectionChildren,
       customHeadContent,
     },
   };

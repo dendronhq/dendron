@@ -152,7 +152,7 @@ export class FuseEngine {
       });
       let results = this.notesIndex.search(fuseQueryString);
 
-      results = this.filterByThreshold(results);
+      results = this.postQueryFilter(results, fuseQueryString);
 
       results = FuseEngine.sortMatchingScores(results);
 
@@ -271,6 +271,30 @@ export class FuseEngine {
     }
 
     return scores.map((score) => groupedByScore[score.key]).flat();
+  }
+
+  private postQueryFilter(
+    results: Fuse.FuseResult<NoteIndexProps>[],
+    queryString: string
+  ) {
+    // Filter by threshold due to what appears to be a FuseJS bug
+    results = this.filterByThreshold(results);
+
+    // Filter out matches that are same length as query string but are not exact.
+    //
+    // For example
+    // 'user.nickolay.journal.2021.09.03'
+    // matches
+    // 'user.nickolay.journal.2021.09.02'
+    // with a super low score of '0.03' but we don't want to display all the journal
+    // dates with the same length, whenever the length of our query is equal or more than
+    // the query results, we want to create a new note, not show those results.
+    results = results.filter(
+      (r) =>
+        r.item.fname.length > queryString.length || r.item.fname === queryString
+    );
+
+    return results;
   }
 }
 

@@ -40,6 +40,10 @@ function assertHasFName(queryResult: NoteIndexProps[], fname: string) {
   expect(queryResult.some((qr) => qr.fname === fname)).toBeTruthy();
 }
 
+function assertDoesNotHaveFName(queryResult: NoteIndexProps[], fname: string) {
+  expect(queryResult.some((qr) => qr.fname === fname)).toBeFalsy();
+}
+
 async function initializeFuseEngine(testData: TestData[]): Promise<FuseEngine> {
   const fuseEngine = new FuseEngine({});
   const notePropsDict: NotePropsDict = await testDataToNotePropsDict(testData);
@@ -188,9 +192,7 @@ describe("Fuse Engine tests with dummy data", () => {
       });
 
       it('THEN exclude "user.tim.test"', () => {
-        expect(
-          queryResult.some((qr) => qr.fname === "user.tim.test")
-        ).toBeFalsy();
+        assertDoesNotHaveFName(queryResult, "user.tim.test");
       });
     });
 
@@ -208,6 +210,10 @@ describe("Fuse Engine tests with dummy data", () => {
 
       it('THEN string which contains exact match "parent.new-note-1" comes second', () => {
         expect(queryResults[1].fname).toEqual("parent.new-note-1");
+      });
+
+      it("THEN string with same size but not exact match is excluded.", () => {
+        assertDoesNotHaveFName(queryResults, "note-2");
       });
     });
   });

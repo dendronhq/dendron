@@ -16,6 +16,7 @@ import {
   CONSTANTS,
   NoteUtils,
   TAGS_HIERARCHY,
+  USERS_HIERARCHY,
   VaultUtils,
 } from "@dendronhq/common-all";
 import { expect } from "../testUtilsv2";
@@ -147,6 +148,57 @@ suite("completionProvider", function () {
           });
           await NoteTestUtilsV4.createNote({
             fname: "tags.bar",
+            vault: vaults[1],
+            wsRoot,
+          });
+        },
+      });
+    });
+
+    test("user tag", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        onInit: async ({ wsRoot, vaults, engine }) => {
+          // Open a note, add [[]]
+          await VSCodeUtils.openNote(
+            NoteUtils.getNoteOrThrow({
+              fname: "root",
+              vault: vaults[1],
+              wsRoot,
+              notes: engine.notes,
+            })
+          );
+          const editor = VSCodeUtils.getActiveTextEditorOrThrow();
+          await editor.edit((editBuilder) => {
+            editBuilder.insert(new Position(8, 0), "@");
+          });
+          // have the completion provider complete this wikilink
+          const items = provideCompletionItems(
+            editor.document,
+            new Position(8, 1)
+          );
+          expect(items).toBeTruthy();
+          // Suggested all the notes
+          expect(items!.length).toEqual(2);
+          for (const item of items!) {
+            // All suggested items exist
+            const found = NoteUtils.getNotesByFname({
+              fname: `${USERS_HIERARCHY}${item.label}`,
+              notes: engine.notes,
+            });
+            expect(found.length > 0).toBeTruthy();
+          }
+          done();
+        },
+        preSetupHook: async (opts) => {
+          const { wsRoot, vaults } = opts;
+          await NoteTestUtilsV4.createNote({
+            fname: "user.foo",
+            vault: vaults[1],
+            wsRoot,
+          });
+          await NoteTestUtilsV4.createNote({
+            fname: "user.bar",
             vault: vaults[1],
             wsRoot,
           });

@@ -275,7 +275,7 @@ export const getReferenceAtPosition = (
       return {
         range: rangeForUserTag,
         label: match[0],
-        ref: `${USERS_HIERARCHY}${match.groups!.tagContents}`,
+        ref: `${USERS_HIERARCHY}${match.groups!.userTagContents}`,
         refText: docText,
       };
     }

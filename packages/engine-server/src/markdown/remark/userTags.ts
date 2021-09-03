@@ -31,7 +31,7 @@ export const USERTAG_REGEX = new RegExp(
 );
 /** Same as `USERTAG_REGEX`, except that that it doesn't have to be at the start of the string. */
 export const USERTAG_REGEX_LOOSE = new RegExp(
-  `(?<tagSymbol>@)(?<tagContents>` +
+  `(?<userTag>@)(?<userTagContents>` +
     `${GOOD_MIDDLE_CHARACTER}*` +
     `${GOOD_END_CHARACTER}` +
     `)`
@@ -48,7 +48,8 @@ export const matchUserTag = (
   matchLoose: boolean = true
 ): string | undefined => {
   const match = (matchLoose ? USERTAG_REGEX : USERTAG_REGEX_LOOSE).exec(text);
-  if (match && match.groups) return match.groups.tagContents;
+  if (match && match.groups)
+    return match.groups.tagContents || match.groups.userTagContents;
   return undefined;
 };
 

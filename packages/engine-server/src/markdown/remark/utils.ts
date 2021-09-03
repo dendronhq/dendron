@@ -28,6 +28,8 @@ import {
   ALIAS_NAME,
   DendronConfig,
   DVault,
+  USERS_HIERARCHY_BASE,
+  TAGS_HIERARCHY_BASE,
 } from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-server";
 import _ from "lodash";
@@ -153,34 +155,29 @@ const getLinks = ({
 }) => {
   const wikiLinks: WikiLinkNoteV4[] = [];
   const noteRefs: (NoteRefNoteV4 | NoteRefNoteV4_LEGACY)[] = [];
-  visit(
-    ast,
-    [
-      DendronASTTypes.WIKI_LINK,
-      DendronASTTypes.REF_LINK_V2,
-      DendronASTTypes.REF_LINK,
-      DendronASTTypes.HASHTAG,
-    ],
-    (node) => {
-      switch (node.type) {
-        case DendronASTTypes.WIKI_LINK:
-          wikiLinks.push(node as WikiLinkNoteV4);
-          break;
-        case DendronASTTypes.REF_LINK_V2:
-          noteRefs.push(node as NoteRefNoteV4);
-          break;
-        case DendronASTTypes.REF_LINK:
-          noteRefs.push(node as NoteRefNoteV4_LEGACY);
-          break;
-        case DendronASTTypes.HASHTAG: {
-          wikiLinks.push(hashTag2WikiLinkNoteV4(node as HashTag));
-          break;
-        }
-        default:
-        /* nothing */
+  visit(ast, (node) => {
+    switch (node.type) {
+      case DendronASTTypes.WIKI_LINK:
+        wikiLinks.push(node as WikiLinkNoteV4);
+        break;
+      case DendronASTTypes.REF_LINK_V2:
+        noteRefs.push(node as NoteRefNoteV4);
+        break;
+      case DendronASTTypes.REF_LINK:
+        noteRefs.push(node as NoteRefNoteV4_LEGACY);
+        break;
+      case DendronASTTypes.HASHTAG: {
+        wikiLinks.push(hashTag2WikiLinkNoteV4(node as HashTag));
+        break;
       }
+      case DendronASTTypes.USERTAG: {
+        wikiLinks.push(userTag2WikiLinkNoteV4(node as UserTag));
+        break;
+      }
+      default:
+      /* nothing */
     }
-  );
+  });
   const dlinks: DLink[] = [];
 
   if (isNotUndefined(note.tags)) {
@@ -562,6 +559,9 @@ export class LinkUtils {
         if (this.isHashtagLink(link.from)) {
           return link.from.alias;
         }
+        if (this.isUserTagLink(link.from)) {
+          return link.from.alias;
+        }
         const ref = link.type === "ref" ? "!" : "";
         const vaultPrefix =
           link.from.vaultName && link.data.xvault
@@ -624,7 +624,15 @@ export class LinkUtils {
     return (
       link.alias !== undefined &&
       link.alias.startsWith("#") &&
-      link.fname.startsWith("tags")
+      link.fname.startsWith(TAGS_HIERARCHY_BASE)
+    );
+  }
+
+  static isUserTagLink(link: DNoteLoc): link is DNoteLoc & { alias: string } {
+    return (
+      link.alias !== undefined &&
+      link.alias.startsWith("@") &&
+      link.fname.startsWith(USERS_HIERARCHY_BASE)
     );
   }
 

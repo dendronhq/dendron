@@ -10,6 +10,7 @@ import {
   LINK_NAME,
   ALIAS_NAME,
   VaultUtils,
+  USERS_HIERARCHY,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import {
@@ -20,6 +21,7 @@ import {
   LinkUtils,
   MDUtilsV5,
   ProcFlavor,
+  USERTAG_REGEX_LOOSE,
 } from "@dendronhq/engine-server";
 import {
   CancellationToken,
@@ -68,6 +70,8 @@ const NOTE_AUTOCOMPLETEABLE_REGEX = new RegExp("" +
     "\\]?\\]?" +
     "|" + // or it may be a hashtag (potentially a hashtag that's empty)
     HASHTAG_REGEX_LOOSE.source + "?" +
+    "|" + // or it may be a user tag
+    USERTAG_REGEX_LOOSE.source + "?" +
   ")",
   "g"
 );
@@ -110,10 +114,14 @@ export const provideCompletionItems = (
 
   let start: number;
   let end: number;
-  if (found.groups.hashTag) {
-    // This is a hashtag
-    start = found.index + 1 /* for the # symbol */;
-    end = start + (found.groups.tagContents?.length || 0);
+  if (found.groups.hashTag || found.groups.userTag) {
+    // This is a hashtag or user tag
+    start = found.index + 1 /* for the # or @ symbol */;
+    end =
+      start +
+      (found.groups.tagContents?.length ||
+        found.groups.userTagContents?.length ||
+        0);
   } else {
     // This is a wikilink or a reference
     start = found.index + (found.groups.beforeNote?.length || 0);
@@ -144,12 +152,19 @@ export const provideCompletionItems = (
     };
 
     if (found?.groups?.hashTag) {
-      // We are completing a hashtag, so only do completion for tags.
+      // We are completing a hashtag, so only do completion for tag notes.
       if (!note.fname.startsWith(TAGS_HIERARCHY)) return;
       // Since this is a hashtag, `tags.foo` becomes `#foo`.
       item.label = `${note.fname.slice(TAGS_HIERARCHY.length)}`;
       item.insertText = item.label;
       // hashtags don't support xvault links, so we skip any special xvault handling
+    } else if (found?.groups?.userTag) {
+      // We are completing a user tag, so only do completion for user notes.
+      if (!note.fname.startsWith(USERS_HIERARCHY)) return;
+      // Since this is a hashtag, `tags.foo` becomes `#foo`.
+      item.label = `${note.fname.slice(USERS_HIERARCHY.length)}`;
+      item.insertText = item.label;
+      // user tags don't support xvault links, so we skip any special xvault handling
     } else if (
       currentVault &&
       !VaultUtils.isEqual(currentVault, note.vault, wsRoot)
@@ -435,7 +450,8 @@ export const activate = (context: ExtensionContext) => {
         provideCompletionItems,
       },
       "[", // for wikilinks and references
-      "#" // for hashtags
+      "#", // for hashtags
+      "@" // for user tags
     )
   );
   context.subscriptions.push(

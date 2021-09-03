@@ -956,6 +956,51 @@ const NOTES = {
       },
     }
   ),
+  USERTAG: new TestPresetEntryV4(
+    async ({ wsRoot, vaults, engine }) => {
+      await engine.renameNote({
+        oldLoc: {
+          fname: "user.foo",
+          alias: "@foo",
+          vaultName: VaultUtils.getName(vaults[0]),
+        },
+        newLoc: { fname: "user.bar", vaultName: VaultUtils.getName(vaults[0]) },
+      });
+      const note = NoteUtils.getNoteByFnameV5({
+        fname: "primary",
+        notes: engine.notes,
+        wsRoot,
+        vault: vaults[0],
+      });
+      const containsTag = checkFileNoExpect({
+        fpath: NoteUtils.getFullPath({ note: note!, wsRoot }),
+        match: ["@bar"],
+        nomatch: ["@foo"],
+      });
+
+      return [
+        {
+          actual: containsTag,
+          expected: true,
+        },
+      ];
+    },
+    {
+      preSetupHook: async ({ vaults, wsRoot }) => {
+        await NoteTestUtilsV4.createNote({
+          fname: "user.foo",
+          vault: vaults[0],
+          wsRoot,
+        });
+        await NoteTestUtilsV4.createNote({
+          fname: "primary",
+          vault: vaults[0],
+          wsRoot,
+          body: "Lorem ipsum @foo dolor amet",
+        });
+      },
+    }
+  ),
   FRONTMATTER_TAG_SINGLE: new TestPresetEntryV4(
     async ({ wsRoot, vaults, engine }) => {
       await engine.renameNote({

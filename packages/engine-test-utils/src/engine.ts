@@ -58,6 +58,7 @@ export type TestSetupWorkspaceOpts = {
   modConfigCb?: (config: DendronConfig) => DendronConfig;
   git?: {
     initVaultWithRemote?: boolean;
+    branchName?: string;
   };
 };
 
@@ -329,7 +330,7 @@ export async function runEngineTestV5(
         vaults.map((vault) => {
           return GitTestUtils.createRepoWithReadme(
             vault2Path({ vault, wsRoot }),
-            { remote: git?.initVaultWithRemote }
+            { remote: git?.initVaultWithRemote, branchName: git?.branchName }
           );
         })
       );

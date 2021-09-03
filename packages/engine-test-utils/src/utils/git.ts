@@ -53,7 +53,10 @@ export class GitTestUtils {
     await git.commit({ msg: "init" });
   }
 
-  static async createRepoWithReadme(root: string, opts?: { remote?: boolean }) {
+  static async createRepoWithReadme(
+    root: string,
+    opts?: { remote?: boolean; branchName: string }
+  ) {
     const git = new Git({
       localUrl: root,
       remoteUrl: opts?.remote
@@ -61,6 +64,9 @@ export class GitTestUtils {
         : undefined,
     });
     await git.init();
+    if (opts?.branchName) {
+      await git.branch({ m: { newBranch: opts.branchName } });
+    }
     const readmePath = path.join(root, "README.md");
     fs.ensureFileSync(readmePath);
     await git.add(".");

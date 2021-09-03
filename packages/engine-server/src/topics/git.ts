@@ -66,6 +66,20 @@ export class Git {
     await this._execute(`git init${this.opts.bare ? " --bare" : ""}`);
   }
 
+  /** Equivalent to `git branch`.
+   *
+   * @param opts.m Can be used to rename a branch. If `opts.m.oldBranch` is not provided, it's the current branch.
+   */
+  async branch(opts: { m?: { oldBranch?: string; newBranch: string } }) {
+    const args = ["git", "branch"];
+    if (opts.m) {
+      args.push("-m");
+      if (opts.m.oldBranch) args.push(opts.m.oldBranch);
+      args.push(opts.m.newBranch);
+    }
+    await this._execute(args.join(" "));
+  }
+
   async pull() {
     const { localUrl: cwd } = this.opts;
     await execa.command([`git pull --rebase`].join(" "), {

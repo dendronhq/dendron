@@ -68,6 +68,7 @@ describe("GitUtils", () => {
           preSetupHook: ENGINE_HOOKS.setupBasic,
           git: {
             initVaultWithRemote: true,
+            branchName: "master",
           },
         }
       );
@@ -89,6 +90,7 @@ describe("GitUtils", () => {
           preSetupHook: ENGINE_HOOKS.setupBasic,
           git: {
             initVaultWithRemote: true,
+            branchName: "master",
           },
         }
       );

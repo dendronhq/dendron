@@ -17,7 +17,7 @@ import DendronCustomHead from "../../components/DendronCustomHead";
 import DendronSpinner from "../../components/DendronSpinner";
 import { useCombinedDispatch, useCombinedSelector } from "../../features";
 import { browserEngineSlice } from "../../features/engine";
-import { getCustomHead, getNoteBody, getNoteMeta, getNotes } from "../../utils/build";
+import { generateCollectionBody, getCustomHead, getNoteBody, getNoteMeta, getNotes } from "../../utils/build";
 import { DendronCommonProps, NoteRouterQuery } from "../../utils/types";
 
 export type NotePageProps = InferGetStaticPropsType<typeof getStaticProps> &
@@ -97,8 +97,17 @@ export const getStaticProps: GetStaticProps = async (
   if (!_.isString(id)) {
     throw Error("id required");
   }
-  const [body, note] = await Promise.all([getNoteBody(id), getNoteMeta(id)]);
+
+  // prepare note body
+  let body = await getNoteBody(id);
+  const note = await getNoteMeta(id);
+  if (note.custom.has_collection) {
+    body = [body, generateCollectionBody(note)].join("\n");
+  }
+
+  // prepare custom head content
   const customHeadContent = await getCustomHead();
+
   return {
     props: {
       body,

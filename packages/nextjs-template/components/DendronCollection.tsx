@@ -24,11 +24,11 @@ export function DendronCollectionItem(props: {
       <article itemScope itemType="https://schema.org/CreativeWork">
         <h2 itemProp="headline">
           <Link href={href}>{note.title}</Link>
-          {!_.isUndefined(publishedDate) && <p>{publishedDate}</p>}
-          {_.has(note, "custom.excerpt") && (
-            <p itemProp="description">{note.custom.excerpt}</p>
-          )}
         </h2>
+        {!_.isUndefined(publishedDate) && <p>{publishedDate}</p>}
+        {_.has(note, "custom.excerpt") && (
+          <p itemProp="description">{note.custom.excerpt}</p>
+        )}
       </article>
     </div>
   );

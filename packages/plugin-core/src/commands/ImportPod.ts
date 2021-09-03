@@ -59,23 +59,36 @@ export class ImportPodCommand extends BaseCommand<
     try {
       const maybeConfig = PodUtils.getConfig({ podsDir, podClass });
 
-      if (!maybeConfig) {
-        const configPath = PodUtils.genConfigFile({ podsDir, podClass });
-        if (Oauth2Pods.includes(podChoice.id)) {
-          launchGoogleOAuthFlow();
-          window.showInformationMessage(
-            "Please authenticate with Google on your browser to continue."
-          );
-          await VSCodeUtils.openFileInEditor(Uri.file(configPath));
-        } else {
-          await VSCodeUtils.openFileInEditor(Uri.file(configPath));
-          window.showInformationMessage(
-            "Looks like this is your first time running this pod. Please fill out the configuration and then run this command again."
-          );
-        }
-        return;
+      // config defined and not just the default placeholder config
+      if (
+        maybeConfig &&
+        (maybeConfig.src !== "TODO" || maybeConfig.vaultName !== "TODO")
+      ) {
+        return { podChoice, config: maybeConfig };
       }
-      return { podChoice, config: maybeConfig };
+
+      if (!maybeConfig) {
+        PodUtils.genConfigFile({ podsDir, podClass });
+      }
+
+      const configPath = PodUtils.getConfigPath({ podsDir, podClass });
+      if (
+        Oauth2Pods.includes(podChoice.id) &&
+        (maybeConfig.accessToken === undefined ||
+          maybeConfig.accessToken === "TODO")
+      ) {
+        launchGoogleOAuthFlow();
+        window.showInformationMessage(
+          "Google OAuth is a beta feature. Please contact us at support@dendron.so or on Discord to first gain access. Then, try again and authenticate with Google on your browser to continue."
+        );
+        await VSCodeUtils.openFileInEditor(Uri.file(configPath));
+      } else {
+        await VSCodeUtils.openFileInEditor(Uri.file(configPath));
+        window.showInformationMessage(
+          "Looks like this is your first time running this pod. Please fill out the configuration and then run this command again."
+        );
+      }
+      return;
     } catch (e: any) {
       // The user's import configuration has YAML syntax errors:
       if (e.name === "YAMLException")

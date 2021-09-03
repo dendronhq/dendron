@@ -5,6 +5,7 @@ import {
   DVault,
   DWorkspaceV2,
   getSlugger,
+  getStage,
   isBlockAnchor,
   NoteProps,
   VaultUtils,
@@ -26,7 +27,13 @@ export class WorkspaceUtils {
     workspaceFolders?: readonly WorkspaceFolderCode[];
     workspaceFile?: URI;
   }): WorkspaceType {
-    if (!_.isUndefined(workspaceFolders)) {
+    if (
+      !_.isUndefined(workspaceFile) &&
+      path.basename(workspaceFile.fsPath) === "dendron.code-workspace"
+    ) {
+      return WorkspaceType.CODE;
+    }
+    if (!_.isUndefined(workspaceFolders) && getStage() !== "prod") {
       const dendronWorkspaceFolders =
         workspaceFolders.filter((ent) => {
           return fs.pathExistsSync(path.join(ent.uri.fsPath, "dendron.yml"));
@@ -34,12 +41,6 @@ export class WorkspaceUtils {
       if (dendronWorkspaceFolders.length > 0) {
         return WorkspaceType.NATIVE;
       }
-    }
-    if (
-      !_.isUndefined(workspaceFile) &&
-      path.basename(workspaceFile.fsPath) === "dendron.code-workspace"
-    ) {
-      return WorkspaceType.CODE;
     }
     return WorkspaceType.NONE;
   }

@@ -39,7 +39,8 @@ import { migrateConfig } from "./migration";
 import { StateService } from "./services/stateService";
 import { Extensions } from "./settings";
 import { setupSegmentClient } from "./telemetry";
-import { KeybindingUtils, VSCodeUtils, WSUtils } from "./utils";
+import { GOOGLE_OAUTH_ID, GOOGLE_OAUTH_SECRET } from "./types/global";
+import { VSCodeUtils, KeybindingUtils, WSUtils } from "./utils";
 import { AnalyticsUtils } from "./utils/analytics";
 import { DendronTreeView } from "./views/DendronTreeView";
 import { DendronWorkspace, getEngine, getWS, getWSV2 } from "./workspace";
@@ -172,6 +173,8 @@ async function startServerProcess(): Promise<{
   if (getStage() !== "prod") {
     const out = await launchv2({
       logPath: path.join(__dirname, "..", "..", "dendron.server.log"),
+      googleOauthClientId: GOOGLE_OAUTH_ID,
+      googleOauthClientSecret: GOOGLE_OAUTH_SECRET,
     });
     return { port: out.port };
   }
@@ -184,6 +187,8 @@ async function startServerProcess(): Promise<{
     nextServerUrl,
     nextStaticRoot,
     port,
+    googleOauthClientId: GOOGLE_OAUTH_ID,
+    googleOauthClientSecret: GOOGLE_OAUTH_SECRET,
   });
   return out;
 }

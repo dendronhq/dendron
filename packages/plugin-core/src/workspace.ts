@@ -669,7 +669,7 @@ export class DendronWorkspace {
       vscode.commands.registerCommand(
         DENDRON_COMMANDS.RELOAD_INDEX.key,
         async (silent?: boolean) => {
-          const out = await new ReloadIndexCommand().run();
+          const out = await new ReloadIndexCommand().run({ silent });
           if (!silent) {
             vscode.window.showInformationMessage(`finish reload`);
           }

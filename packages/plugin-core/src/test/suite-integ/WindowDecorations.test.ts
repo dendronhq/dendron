@@ -7,6 +7,7 @@ import * as vscode from "vscode";
 import {
   DECORATION_TYPE_ALIAS,
   DECORATION_TYPE_BLOCK_ANCHOR,
+  DECORATION_TYPE_BROKEN_TAG,
   DECORATION_TYPE_BROKEN_WIKILINK,
   DECORATION_TYPE_TAG,
   DECORATION_TYPE_TIMESTAMP,
@@ -50,6 +51,11 @@ suite("windowDecorations", function () {
       runLegacyMultiWorkspaceTest({
         ctx,
         preSetupHook: async ({ vaults, wsRoot }) => {
+          await NoteTestUtilsV4.createNote({
+            fname: "tags.bar",
+            vault: vaults[0],
+            wsRoot,
+          });
           await NoteTestUtilsV4.createNote({
             fname: FNAME,
             body: [
@@ -133,12 +139,17 @@ suite("windowDecorations", function () {
           ).toBeTruthy();
 
           const tagDecorations = allDecorations!.get(DECORATION_TYPE_TAG);
-          expect(tagDecorations.length).toEqual(3);
-          expect(
-            isTextDecorated("#foo", tagDecorations!, document)
-          ).toBeTruthy();
+          expect(tagDecorations.length).toEqual(1);
           expect(
             isTextDecorated("#bar", tagDecorations!, document)
+          ).toBeTruthy();
+
+          const brokenTagDecorations = allDecorations!.get(
+            DECORATION_TYPE_BROKEN_TAG
+          );
+          expect(brokenTagDecorations.length).toEqual(2);
+          expect(
+            isTextDecorated("#foo", brokenTagDecorations!, document)
           ).toBeTruthy();
 
           const aliasDecorations = allDecorations!.get(DECORATION_TYPE_ALIAS);

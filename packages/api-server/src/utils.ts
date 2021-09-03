@@ -43,6 +43,8 @@ type ServerArgs = {
   port?: number;
   nextServerUrl?: string;
   nextStaticRoot?: string;
+  googleOauthClientId?: string;
+  googleOauthClientSecret?: string;
 };
 
 type SERVER_ENV = {
@@ -50,6 +52,8 @@ type SERVER_ENV = {
   NEXT_STATIC_ROOT?: string;
   ENGINE_SERVER_PORT?: string;
   LOG_PATH: string;
+  GOOGLE_OAUTH_ID?: string;
+  GOOGLE_OAUTH_SECRET?: string;
 };
 
 export enum SubProcessExitType {
@@ -100,8 +104,14 @@ export class ServerUtils {
   }
 
   static prepareServerArgs() {
-    const { NEXT_SERVER_URL, NEXT_STATIC_ROOT, ENGINE_SERVER_PORT, LOG_PATH } =
-      process.env;
+    const {
+      NEXT_SERVER_URL,
+      NEXT_STATIC_ROOT,
+      ENGINE_SERVER_PORT,
+      LOG_PATH,
+      GOOGLE_OAUTH_ID,
+      GOOGLE_OAUTH_SECRET,
+    } = process.env;
     if (
       _.some(["LOG_PATH"], (k) => {
         return _.isUndefined(process.env[k]);
@@ -119,11 +129,15 @@ export class ServerUtils {
     }
     const nextServerUrl = NEXT_SERVER_URL;
     const nextStaticRoot = NEXT_STATIC_ROOT;
+    const googleOauthClientId = GOOGLE_OAUTH_ID!;
+    const googleOauthClientSecret = GOOGLE_OAUTH_SECRET!;
     return {
       port,
       logPath,
       nextServerUrl,
       nextStaticRoot,
+      googleOauthClientId,
+      googleOauthClientSecret,
     };
   }
 
@@ -137,12 +151,16 @@ export class ServerUtils {
     nextServerUrl,
     nextStaticRoot,
     port,
+    googleOauthClientId,
+    googleOauthClientSecret,
   }: Omit<ServerArgs, "scriptPath">) {
     const { port: finalPort } = await launchv2({
       port,
       logPath: path.join(logPath, "dendron.server.log"),
       nextServerUrl,
       nextStaticRoot,
+      googleOauthClientId,
+      googleOauthClientSecret,
     });
     if (!process.send) {
       throw new DendronError({ message: "expect a child process" });
@@ -161,6 +179,8 @@ export class ServerUtils {
     nextServerUrl,
     nextStaticRoot,
     port,
+    googleOauthClientId,
+    googleOauthClientSecret,
   }: ServerArgs): Promise<{ port: number; subprocess: ExecaChildProcess }> {
     const logger = createLogger(
       "execServer",
@@ -174,6 +194,8 @@ export class ServerUtils {
           ENGINE_SERVER_PORT: port,
           NEXT_SERVER_URL: nextServerUrl,
           NEXT_STATIC_ROOT: nextStaticRoot,
+          GOOGLE_OAUTH_ID: googleOauthClientId,
+          GOOGLE_OAUTH_SECRET: googleOauthClientSecret,
         } as SERVER_ENV,
       });
       logger.info({ state: "post:exec.node" });

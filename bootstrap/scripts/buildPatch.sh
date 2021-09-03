@@ -8,8 +8,6 @@ if [ $PUBLISH_ENDPOINT = "local" ]; then
 	sleep 3
 fi
 
-echo "Environment: $GOOGLE_OAUTH_CLIENT_ID"
-
 SCRIPT_BUILD_ENV=${BUILD_ENV:-local}
 echo "building... upgrade: $UPGRADE_TYPE, endpoint: $PUBLISH_ENDPOINT build environment: $SCRIPT_BUILD_ENV"
 

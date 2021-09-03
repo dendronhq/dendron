@@ -20,24 +20,13 @@ export function DendronCollectionItem(props: {
   }
 
   return (
-    <div className="list__item">
-      <article
-        className="archive__item"
-        itemScope
-        itemType="https://schema.org/CreativeWork"
-      >
-        <h2 className="archive__item-title no_toc" itemProp="headline">
+    <div>
+      <article itemScope itemType="https://schema.org/CreativeWork">
+        <h2 itemProp="headline">
           <Link href={href}>{note.title}</Link>
-          {!_.isUndefined(publishedDate) && (
-            <p className="page__meta">
-              <i className="far fa-clock" aria-hidden="true" />
-              {publishedDate}
-            </p>
-          )}
+          {!_.isUndefined(publishedDate) && <p>{publishedDate}</p>}
           {_.has(note, "custom.excerpt") && (
-            <p className="archive__item-excerpt" itemProp="description">
-              {note.custom.excerpt}
-            </p>
+            <p itemProp="description">{note.custom.excerpt}</p>
           )}
         </h2>
       </article>

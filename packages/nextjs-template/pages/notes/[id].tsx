@@ -13,16 +13,17 @@ import {
 import { useRouter } from "next/router";
 import React from "react";
 import DendronSEO from "../../components/DendronSEO";
+import DendronCustomHead from "../../components/DendronCustomHead";
 import DendronSpinner from "../../components/DendronSpinner";
 import { useCombinedDispatch, useCombinedSelector } from "../../features";
 import { browserEngineSlice } from "../../features/engine";
-import { getNoteBody, getNoteMeta, getNotes } from "../../utils/build";
+import { getCustomHead, getNoteBody, getNoteMeta, getNotes } from "../../utils/build";
 import { DendronCommonProps, NoteRouterQuery } from "../../utils/types";
 
 export type NotePageProps = InferGetStaticPropsType<typeof getStaticProps> &
   DendronCommonProps;
 
-export default function Note({ note, body, ...rest }: NotePageProps) {
+export default function Note({ note, body, customHeadContent, ...rest }: NotePageProps) {
   const logger = createLogger("Note");
   const router = useRouter();
   const [bodyFromState, setBody] =
@@ -70,6 +71,7 @@ export default function Note({ note, body, ...rest }: NotePageProps) {
   return (
     <>
       <DendronSEO />
+      <DendronCustomHead content={customHeadContent}/>
       <DendronNote noteContent={noteBody} />
     </>
   );
@@ -96,10 +98,12 @@ export const getStaticProps: GetStaticProps = async (
     throw Error("id required");
   }
   const [body, note] = await Promise.all([getNoteBody(id), getNoteMeta(id)]);
+  const customHeadContent = await getCustomHead();
   return {
     props: {
       body,
       note,
+      customHeadContent,
     },
   };
 };

@@ -20,6 +20,7 @@
   "dependencies": {
     "@dendronhq/common-all": "^0.57.0",
     "@dendronhq/common-frontend": "^0.57.0",
+    "html-react-parser": "^1.2.8",
     "lodash": "^4.17.21",
     "next": "10.2.0",
     "next-seo": "^4.26.0",

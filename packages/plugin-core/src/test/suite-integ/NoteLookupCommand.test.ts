@@ -13,6 +13,7 @@ import {
   FileTestUtils,
   NoteTestUtilsV4,
   NOTE_PRESETS_V4,
+  EngineTestUtilsV4,
 } from "@dendronhq/common-test-utils";
 import { HistoryService } from "@dendronhq/engine-server";
 import {
@@ -378,7 +379,7 @@ suite("NoteLookupCommand", function () {
             noConfirm: true,
             initialValue: "foobar",
           }))!;
-          expect(opts.quickpick.selectedItems.length).toEqual(4);
+          expect(opts.quickpick.selectedItems.length).toEqual(1);
           const lastItem = _.last(opts.quickpick.selectedItems);
           expect(_.pick(lastItem, ["id", "fname"])).toEqual({
             id: "Create New",
@@ -451,21 +452,29 @@ suite("NoteLookupCommand", function () {
       runLegacyMultiWorkspaceTest({
         ctx,
         preSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti,
-        onInit: async ({ vaults }) => {
+        onInit: async ({ vaults, wsRoot }) => {
           const vault = _.find(vaults, { fsPath: "vault2" });
           const cmd = new NoteLookupCommand();
           sinon
-            .stub(PickerUtilsV2, "promptVault")
-            .returns(Promise.resolve(vault));
+            .stub(PickerUtilsV2, "getOrPromptVaultForOpenEditor")
+            .returns(vault!);
+
           const opts = (await cmd.run({
             noConfirm: true,
             initialValue: "foobar",
             multiSelect: true,
           }))!;
-          expect(opts.quickpick.selectedItems.length).toEqual(3);
+          expect(opts.quickpick.selectedItems.length).toEqual(0);
           expect(_.last(opts.quickpick.selectedItems)?.title).toNotEqual(
             "Create New"
           );
+          expect(
+            await EngineTestUtilsV4.checkVault({
+              wsRoot,
+              vault: vault!,
+              match: ["foobar.md"],
+            })
+          ).toBeTruthy();
           done();
         },
       });
@@ -903,14 +912,15 @@ suite("NoteLookupCommand", function () {
           const cmd = new NoteLookupCommand();
           stubVaultPick(vaults);
           const gatherOut = await cmd.gatherInputs({});
-          const { selection2linkBtn, selectionExtractBtn } = getSelectionTypeButtons(gatherOut.quickpick.buttons)
+          const { selection2linkBtn, selectionExtractBtn } =
+            getSelectionTypeButtons(gatherOut.quickpick.buttons);
           expect(selection2linkBtn.pressed).toBeFalsy();
           expect(selectionExtractBtn.pressed).toBeFalsy();
           done();
         },
       });
     });
-    
+
     test("selectionType: none in args", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
@@ -921,14 +931,15 @@ suite("NoteLookupCommand", function () {
           const cmd = new NoteLookupCommand();
           stubVaultPick(vaults);
           const gatherOut = await cmd.gatherInputs({
-            selectionType: LookupSelectionType.none
+            selectionType: LookupSelectionType.none,
           });
-          const { selection2linkBtn, selectionExtractBtn } = getSelectionTypeButtons(gatherOut.quickpick.buttons)
+          const { selection2linkBtn, selectionExtractBtn } =
+            getSelectionTypeButtons(gatherOut.quickpick.buttons);
           expect(selection2linkBtn.pressed).toBeFalsy();
           expect(selectionExtractBtn.pressed).toBeFalsy();
           done();
         },
-      }); 
+      });
     });
 
     test("selectionType is selectionExtract by default", (done) => {
@@ -941,12 +952,13 @@ suite("NoteLookupCommand", function () {
           const cmd = new NoteLookupCommand();
           stubVaultPick(vaults);
           const gatherOut = await cmd.gatherInputs({});
-          const { selection2linkBtn, selectionExtractBtn } = getSelectionTypeButtons(gatherOut.quickpick.buttons)
+          const { selection2linkBtn, selectionExtractBtn } =
+            getSelectionTypeButtons(gatherOut.quickpick.buttons);
           expect(selection2linkBtn.pressed).toBeFalsy();
           expect(selectionExtractBtn.pressed).toBeTruthy();
           done();
         },
-      }); 
+      });
     });
 
     test("selection2link basic", (done) => {

@@ -35,6 +35,7 @@ import {
   DendronQuickPickState,
   VaultSelectionMode,
 } from "./types";
+import { EngineAPIService } from "../../services/EngineAPIService";
 
 const PAGINATE_LIMIT = 50;
 export const UPDATET_SOURCE = {
@@ -668,7 +669,7 @@ export class PickerUtilsV2 {
   /**
    @deprecated use {@link NoteLookupUtils.slashToDot}
    * @param ent
-   * @returns 
+   * @returns
    */
   static slashToDot(ent: string) {
     return ent.replace(/\//g, ".");
@@ -713,7 +714,9 @@ export class NotePickerUtils {
   }: {
     engine: DEngineClient;
   }) => {
-    const nodes = NoteLookupUtils.fetchRootResults(engine.notes, { config: engine.config });
+    const nodes = NoteLookupUtils.fetchRootResults(engine.notes, {
+      config: engine.config,
+    });
     return nodes.map((ent) => {
       return DNodeUtils.enhancePropForQuickInput({
         wsRoot: DendronWorkspace.wsRoot(),
@@ -738,18 +741,27 @@ export class NotePickerUtils {
       engine,
       showDirectChildrenOnly: picker.showDirectChildrenOnly,
     });
-    const note = resp[0];
-    const perfectMatch = note.fname === picker.value;
-    return !perfectMatch
-      ? [NotePickerUtils.createNoActiveItem({ fname: picker.value })]
-      : [
-          DNodeUtils.enhancePropForQuickInputV3({
-            wsRoot: DendronWorkspace.wsRoot(),
-            props: note,
-            schemas: engine.schemas,
-            vaults: DendronWorkspace.instance().vaultsv4,
-          }),
-        ];
+
+    if (resp.length) {
+      const note = resp[0];
+      const isPerfectMatch = note.fname === picker.value;
+      if (isPerfectMatch) {
+        return [this.enhanceNoteForQuickInput({ note, engine })];
+      }
+    }
+    return [NotePickerUtils.createNoActiveItem({ fname: picker.value })];
+  }
+
+  private static enhanceNoteForQuickInput(input: {
+    note: NoteProps;
+    engine: EngineAPIService;
+  }) {
+    return DNodeUtils.enhancePropForQuickInputV3({
+      wsRoot: DendronWorkspace.wsRoot(),
+      props: input.note,
+      schemas: input.engine.schemas,
+      vaults: DendronWorkspace.instance().vaultsv4,
+    });
   }
 
   static async fetchPickerResults(opts: {

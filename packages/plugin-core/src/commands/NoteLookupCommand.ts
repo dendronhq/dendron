@@ -157,7 +157,8 @@ export class NoteLookupCommand extends BaseCommand<
         ws.config,
         "lookupConfirmVaultOnCreate"
       ),
-      vaultButtonPressed: copts.vaultSelectionMode === VaultSelectionMode.alwaysPrompt,
+      vaultButtonPressed:
+        copts.vaultSelectionMode === VaultSelectionMode.alwaysPrompt,
       extraButtons: [
         MultiSelectBtn.create(copts.multiSelect),
         CopyNoteLinkBtn.create(copts.copyNoteLink),

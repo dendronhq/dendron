@@ -732,17 +732,14 @@ export class NotePickerUtils {
    */
   static async fetchPickerResultsNoInput({
     picker,
-    noQSTransform,
   }: {
     picker: DendronQuickPickerV2;
-    noQSTransform?: boolean;
   }) {
     const engine = getEngine();
     const resp = await NoteLookupUtils.lookup({
       qs: picker.value,
       engine,
       showDirectChildrenOnly: picker.showDirectChildrenOnly,
-      noQSTransform,
     });
 
     if (resp.length) {
@@ -771,16 +768,15 @@ export class NotePickerUtils {
     picker: DendronQuickPickerV2;
     qs: string;
     depth?: number;
-    noQSTransform?: boolean;
   }) {
     const ctx = "createPickerItemsFromEngine";
     const start = process.hrtime();
-    const { picker, qs, noQSTransform } = opts;
+    const { picker, qs } = opts;
     const engine = getWS().getEngine();
     let nodes: NoteProps[];
     // if we are doing a query, reset pagination options
     PickerUtilsV2.resetPaginationOpts(picker);
-    const resp = await engine.queryNotes({ qs, noQSTransform });
+    const resp = await engine.queryNotes({ qs });
     if (opts.depth) {
       nodes = resp.data
         .filter((ent) => {

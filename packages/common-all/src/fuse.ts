@@ -128,17 +128,9 @@ export class FuseEngine {
   /**
    * If qs = "", return root note
    * @param qs query string.
-   * @param noQSTransform optional parameter to NOT do any transformation
-   *        to the query string.
    * @returns
    */
-  queryNote({
-    qs,
-    noQSTransform,
-  }: {
-    qs: string;
-    noQSTransform?: boolean;
-  }): NoteIndexProps[] {
+  queryNote({ qs }: { qs: string }): NoteIndexProps[] {
     let items: NoteIndexProps[];
     if (qs === "") {
       const results = this.notesIndex.search("root");
@@ -152,7 +144,6 @@ export class FuseEngine {
     } else {
       const fuseQueryString = FuseEngine.formatQueryForFuse({
         qs,
-        noQSTransform,
       });
       let results = this.notesIndex.search(fuseQueryString);
       results = FuseEngine.sortMatchingScores(results);
@@ -202,30 +193,19 @@ export class FuseEngine {
   }
 
   /**
-   * Fuse does not appear to see [*] or [.] as anything special.
+   * Fuse does not appear to see [*] as anything special.
    * For example:
-   * `dev.vs` matches `dendron.dev.ref.vscode` with score of 0.33
    * `dev*vs` matches `dendron.dev.ref.vscode` with score of 0.5
    *
    * To compare with
    * `dev vs` matches `dendron.dev.ref.vscode` with score of 0.001
    *
    * Fuse extended search https://fusejs.io/examples.html#extended-search
-   * uses spaces for AND and '|' for OR hence this function will replace '*' and '.'
-   * with spaces. We do this replacement since VSCode quick pick actually respects '*'
-   * and our general dendron guidelines see '.' as special split character.
+   * uses spaces for AND and '|' for OR hence this function will replace '*' with spaces.
+   * We do this replacement since VSCode quick pick actually appears to respect '*'.
    * */
-  static formatQueryForFuse({
-    qs,
-    noQSTransform,
-  }: {
-    qs: string;
-    noQSTransform?: boolean;
-  }): string {
-    if (noQSTransform) {
-      return qs;
-    }
-    return qs.split("*").join(" ").split(".").join(" ");
+  static formatQueryForFuse({ qs }: { qs: string }): string {
+    return qs.split("*").join(" ");
   }
 
   /**
@@ -299,19 +279,17 @@ export class NoteLookupUtils {
     qs,
     engine,
     showDirectChildrenOnly,
-    noQSTransform,
   }: {
     qs: string;
     engine: DEngineClient;
     showDirectChildrenOnly?: boolean;
-    noQSTransform?: boolean;
   }): Promise<NoteProps[]> {
     const { notes } = engine;
     const qsClean = this.slashToDot(qs);
     if (_.isEmpty(qsClean)) {
       return NoteLookupUtils.fetchRootResults(notes);
     }
-    const resp = await engine.queryNotes({ qs, noQSTransform });
+    const resp = await engine.queryNotes({ qs });
     let nodes: NoteProps[];
     if (showDirectChildrenOnly) {
       const depth = qs.split(".").length;

@@ -32,7 +32,6 @@ export class GoDownCommand extends BasicCommand<CommandOpts, CommandOutput> {
     const out = await new NoteLookupCommand().run({
       initialValue: value,
       noConfirm: opts.noConfirm,
-      noQSTransform: true,
     });
     return out!;
   }

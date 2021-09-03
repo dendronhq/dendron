@@ -415,7 +415,6 @@ export type GetNotePayload = {
 };
 export type QueryNotesOpts = {
   qs: string;
-  noQSTransform?: boolean;
   vault?: DVault;
   createIfNew?: boolean;
 };

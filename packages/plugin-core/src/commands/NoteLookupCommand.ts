@@ -62,7 +62,6 @@ export type CommandRunOpts = {
   noteType?: LookupNoteType;
   selectionType?: LookupSelectionType;
   splitType?: LookupSplitType;
-  noQSTransform?: boolean;
   /**
    * NOTE: currently, only one filter is supported
    */
@@ -179,13 +178,9 @@ export class NoteLookupCommand extends BaseCommand<
         ),
       ],
     });
-    console.log(
-      `Creating provider copts.noQSTransform='${copts.noQSTransform}'`
-    );
     this._provider = new NoteLookupProvider("lookup", {
       allowNewNote: true,
       noHidePickerOnAccept: false,
-      noQSTransform: copts.noQSTransform,
     });
     const lc = this.controller;
     if (copts.fuzzThreshold) {

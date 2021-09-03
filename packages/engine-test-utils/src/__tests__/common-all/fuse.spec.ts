@@ -66,10 +66,7 @@ describe("Fuse utility function tests", () => {
   describe("formatQueryForFuse", () => {
     test.each([
       ["dev*vs", "dev vs"],
-      ["dev.vs", "dev vs"],
       ["dev*vs*ts", "dev vs ts"],
-      ["dev.vs.ts", "dev vs ts"],
-      ["dev*vs.ts", "dev vs ts"],
     ])(
       'WHEN input="%s" THEN output is "%s"',
       (input: string, expected: string) => {
@@ -285,10 +282,6 @@ describe("FuseEngine tests with extracted data.", () => {
     test.each([
       [
         "dev*vs",
-        ["dendron.dev.design.files-vs-folders", "dendron.dev.ref.vscode"],
-      ],
-      [
-        "dev.vs",
         ["dendron.dev.design.files-vs-folders", "dendron.dev.ref.vscode"],
       ],
       [

@@ -14,26 +14,30 @@ import {
   Position,
   SchemaModuleProps,
   Time,
+  TutorialEvents,
   VaultUtils,
 } from "@dendronhq/common-all";
 import {
   assignJSONWithComment,
   goUpTo,
   readJSONWithCommentsSync,
+  readMD,
   resolveTilde,
   tmpDir,
   vault2Path,
 } from "@dendronhq/common-server";
 import { HistoryEvent, HistoryService } from "@dendronhq/engine-server";
+import { assign } from "comment-json";
 import { ExecaChildProcess } from "execa";
+import fs from "fs-extra";
 import _ from "lodash";
 import _md from "markdown-it";
 import ogs from "open-graph-scraper";
 import os from "os";
 import path from "path";
-import fs from "fs-extra";
 import * as vscode from "vscode";
 import { CancellationTokenSource } from "vscode-languageclient";
+import { SetupWorkspaceCommand } from "./commands/SetupWorkspace";
 import { PickerUtilsV2 } from "./components/lookup/utils";
 import {
   DendronContext,
@@ -44,8 +48,9 @@ import {
 import { FileItem } from "./external/fileutils/FileItem";
 import { Logger } from "./logger";
 import { EngineAPIService } from "./services/EngineAPIService";
+import { AnalyticsUtils } from "./utils/analytics";
 import { DendronWorkspace, getWS } from "./workspace";
-import { assign } from "comment-json";
+import { TutorialInitializer } from "./workspace/tutorialInitializer";
 
 export class DisposableStore {
   private _toDispose = new Set<vscode.Disposable>();
@@ -622,6 +627,78 @@ export class WSUtils {
       return out;
     } catch (err) {
       Logger.error({ error: err });
+    }
+  }
+
+  static async showWelcome(assetUri: vscode.Uri) {
+    try {
+      // NOTE: this needs to be from extension because no workspace might exist at this point
+      const uri = VSCodeUtils.joinPath(
+        assetUri,
+        "dendron-ws",
+        "vault",
+        "welcome.html"
+      );
+
+      const { content } = readMD(uri.fsPath);
+      const title = "Welcome to Dendron";
+
+      const panel = vscode.window.createWebviewPanel(
+        _.kebabCase(title),
+        title,
+        vscode.ViewColumn.One,
+        {
+          enableScripts: true,
+        }
+      );
+      panel.webview.html = content;
+
+      panel.webview.onDidReceiveMessage(
+        async (message) => {
+          switch (message.command) {
+            case "loaded":
+              AnalyticsUtils.track(TutorialEvents.WelcomeShow);
+              return;
+
+            case "initializeWorkspace": {
+              // Try to put into a Default '~/Dendron' folder first. Only prompt
+              // if that path and the backup path already exist to lower
+              // onboarding friction
+              let wsPath;
+              const wsPathPrimary = path.join(resolveTilde("~"), "Dendron");
+              const wsPathBackup = path.join(
+                resolveTilde("~"),
+                "Dendron-Tutorial"
+              );
+
+              if (!fs.pathExistsSync(wsPathPrimary)) {
+                wsPath = wsPathPrimary;
+              } else if (!fs.pathExistsSync(wsPathBackup)) {
+                wsPath = wsPathBackup;
+              }
+
+              if (!wsPath) {
+                await new SetupWorkspaceCommand().run({
+                  workspaceInitializer: new TutorialInitializer(),
+                });
+              } else {
+                await new SetupWorkspaceCommand().execute({
+                  rootDirRaw: wsPath,
+                  workspaceInitializer: new TutorialInitializer(),
+                });
+              }
+
+              return;
+            }
+            default:
+              break;
+          }
+        },
+        undefined,
+        undefined
+      );
+    } catch (err) {
+      vscode.window.showErrorMessage(JSON.stringify(err));
     }
   }
 

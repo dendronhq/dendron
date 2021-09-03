@@ -107,7 +107,6 @@ suite("Extension", function () {
         globalState: ctx.globalState,
         workspaceState: ctx.workspaceState,
       });
-
       await resetCodeWorkspace();
       await new ResetConfigCommand().execute({ scope: "all" });
       homeDirStub = TestEngineUtils.mockHomeDir();

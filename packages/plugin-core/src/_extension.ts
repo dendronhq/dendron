@@ -265,9 +265,9 @@ export async function _activate(
         assetUri: VSCodeUtils.joinPath(ws.context.extensionUri, "assets"),
       });
     }
+    const wsImpl = getWSV2();
     const start = process.hrtime();
     const dendronConfig = ws.config;
-    const wsImpl = getWSV2();
 
     // --- Get Version State
     const workspaceInstallStatus = VSCodeUtils.getInstallStatusForWorkspace({
@@ -479,6 +479,7 @@ export async function _activate(
     version: DendronWorkspace.version(),
     previousExtensionVersion: previousWorkspaceVersion,
     start: startActivate,
+    assetUri: VSCodeUtils.joinPath(context.extensionUri, "assets"),
   }).then(() => {
     if (DendronWorkspace.isActive(context)) {
       HistoryService.instance().add({
@@ -510,11 +511,13 @@ async function showWelcomeOrWhatsNew({
   version,
   previousExtensionVersion,
   start,
+  assetUri,
 }: {
   extensionInstallStatus: InstallStatus;
   version: string;
   previousExtensionVersion: string;
   start: [number, number];
+  assetUri: vscode.Uri;
 }) {
   const ctx = "showWelcomeOrWhatsNew";
   Logger.info({ ctx, version, previousExtensionVersion });
@@ -532,7 +535,7 @@ async function showWelcomeOrWhatsNew({
       if (!SegmentClient.instance().hasOptedOut) {
         StateService.instance().showTelemetryNotice();
       }
-      await getWSV2().showWelcome();
+      await WSUtils.showWelcome(assetUri);
       break;
     }
     case InstallStatus.UPGRADED: {

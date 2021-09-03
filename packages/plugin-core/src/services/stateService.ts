@@ -102,6 +102,12 @@ export class StateService {
     });
   }
 
+  resetWorkspaceState() {
+    _.keys(WORKSPACE_STATE).map((k) => {
+      this.workspaceState.update(k, undefined);
+    });
+  }
+
   showTelemetryNotice() {
     vscode.window
       .showInformationMessage(

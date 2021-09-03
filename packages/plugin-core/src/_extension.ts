@@ -230,6 +230,11 @@ export async function _activate(
   const ws = DendronWorkspace.getOrCreate(context, {
     skipSetup: stage === "test",
   });
+  Logger.info({
+    ctx,
+    msg: "initializeWorkspace",
+    wsType: ws.type,
+  });
 
   const currentVersion = DendronWorkspace.version();
   const previousWorkspaceVersion = stateService.getWorkspaceVersion();

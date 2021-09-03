@@ -28,6 +28,8 @@ import {
   ALIAS_NAME,
   DendronConfig,
   DVault,
+  USERS_HIERARCHY_BASE,
+  TAGS_HIERARCHY_BASE,
 } from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-server";
 import _ from "lodash";
@@ -562,6 +564,9 @@ export class LinkUtils {
         if (this.isHashtagLink(link.from)) {
           return link.from.alias;
         }
+        if (this.isUserTagLink(link.from)) {
+          return link.from.alias;
+        }
         const ref = link.type === "ref" ? "!" : "";
         const vaultPrefix =
           link.from.vaultName && link.data.xvault
@@ -624,7 +629,15 @@ export class LinkUtils {
     return (
       link.alias !== undefined &&
       link.alias.startsWith("#") &&
-      link.fname.startsWith("tags")
+      link.fname.startsWith(TAGS_HIERARCHY_BASE)
+    );
+  }
+
+  static isUserTagLink(link: DNoteLoc): link is DNoteLoc & { alias: string } {
+    return (
+      link.alias !== undefined &&
+      link.alias.startsWith("@") &&
+      link.fname.startsWith(USERS_HIERARCHY_BASE)
     );
   }
 

@@ -764,14 +764,14 @@
   },
   "icon": "assets/images/logo.png",
   "scripts": {
-    "vscode:prepublish": "yarn webpack:prod",
+    "vscode:prepublish": "yarn webpack:prod && ./scripts/varSub.sh",
     "webpack": "webpack --mode development",
     "webpack:prod": "webpack --mode production",
     "webpack:dev:watch": "webpack --mode development --watch",
     "watch": "yarn compile --watch",
     "build": "yarn compile",
     "compile": "tsc -p tsconfig.build.json",
-    "test": "node ./out/scripts/variableSubstitution.js && node ./out/src/test/runTestInteg.js",
+    "test": "node ./out/src/test/runTestInteg.js",
     "format": "echo nop",
     "vscode:uninstall": "node ./out/src/scripts/uninstallHook.js"
   },

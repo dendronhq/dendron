@@ -370,6 +370,7 @@ export class DendronWorkspace {
       workspaceFile: vscode.workspace.workspaceFile,
       workspaceFolders: vscode.workspace.workspaceFolders,
     });
+    this.type = WorkspaceType.CODE;
     _DendronWorkspace = this;
     this.L = Logger;
     this.disposableStore = new DisposableStore();

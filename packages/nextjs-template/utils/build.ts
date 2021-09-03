@@ -56,7 +56,7 @@ export function getPublicDir() {
 export async function getCustomHead() {
   const config = await getConfig();
   const customHeadPathConfig = config.site.customHeaderPath;
-  if(_.isUndefined(customHeadPathConfig)) {
+  if (_.isUndefined(customHeadPathConfig)) {
     return null;
   }
   const publicDir = getPublicDir();

@@ -15,15 +15,35 @@ import React from "react";
 import DendronSEO from "../../components/DendronSEO";
 import DendronCustomHead from "../../components/DendronCustomHead";
 import DendronSpinner from "../../components/DendronSpinner";
+import {
+  DendronCollectionItem,
+  prepChildrenForCollection,
+} from "../../components/DendronCollection";
 import { useCombinedDispatch, useCombinedSelector } from "../../features";
 import { browserEngineSlice } from "../../features/engine";
-import { getCustomHead, getNoteBody, getNoteMeta, getNotes } from "../../utils/build";
+import {
+  getCustomHead,
+  getNoteBody,
+  getNoteMeta,
+  getNotes,
+} from "../../utils/build";
 import { DendronCommonProps, NoteRouterQuery } from "../../utils/types";
+import { NoteProps } from "@dendronhq/common-all";
 
 export type NotePageProps = InferGetStaticPropsType<typeof getStaticProps> &
-  DendronCommonProps;
+  DendronCommonProps & { // `InferGetStaticPropsType` doesn't get right types for some reason, hence the manual override here
+    customHeadContent: string | null;
+    noteIndex: NoteProps;
+  };
 
-export default function Note({ note, body, customHeadContent, ...rest }: NotePageProps) {
+export default function Note({
+  note,
+  body,
+  collectionChildren,
+  noteIndex,
+  customHeadContent,
+  ...rest
+}: NotePageProps) {
   const logger = createLogger("Note");
   const router = useRouter();
   const [bodyFromState, setBody] =
@@ -45,7 +65,7 @@ export default function Note({ note, body, customHeadContent, ...rest }: NotePag
     // loaded page statically
     if (id === note.id) {
       dispatch(
-        browserEngineSlice.actions.setLoadingStatus(LoadingStatus.FUFILLED)
+        browserEngineSlice.actions.setLoadingStatus(LoadingStatus.FULFILLED)
       );
       logger.info({ ctx: "updateNoteBody:exit", id, state: "id = note.id" });
       return;
@@ -57,7 +77,7 @@ export default function Note({ note, body, customHeadContent, ...rest }: NotePag
       const contents = await resp.text();
       setBody(contents);
       dispatch(
-        browserEngineSlice.actions.setLoadingStatus(LoadingStatus.FUFILLED)
+        browserEngineSlice.actions.setLoadingStatus(LoadingStatus.FULFILLED)
       );
     });
   }, [id]);
@@ -68,11 +88,18 @@ export default function Note({ note, body, customHeadContent, ...rest }: NotePag
     return <DendronSpinner />;
   }
 
+  const maybeCollection = note.custom.has_collection
+    ? collectionChildren.map((child: NoteProps) =>
+        DendronCollectionItem({ note: child, noteIndex })
+      )
+    : null;
+
   return (
     <>
       <DendronSEO />
-      <DendronCustomHead content={customHeadContent}/>
+      {customHeadContent && <DendronCustomHead content={customHeadContent} />}
       <DendronNote noteContent={noteBody} />
+      {maybeCollection}
     </>
   );
 }
@@ -97,12 +124,22 @@ export const getStaticProps: GetStaticProps = async (
   if (!_.isString(id)) {
     throw Error("id required");
   }
+
   const [body, note] = await Promise.all([getNoteBody(id), getNoteMeta(id)]);
-  const customHeadContent = await getCustomHead();
+  const noteData = getNotes();
+  const customHeadContent: string | null = await getCustomHead();
+  const { notes, noteIndex } = noteData;
+
+  const collectionChildren = note.custom.has_collection
+    ? prepChildrenForCollection(note, notes, noteIndex)
+    : null;
+
   return {
     props: {
-      body,
       note,
+      body,
+      noteIndex,
+      collectionChildren,
       customHeadContent,
     },
   };

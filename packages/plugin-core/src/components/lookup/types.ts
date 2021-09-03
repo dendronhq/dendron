@@ -30,7 +30,7 @@ export enum DendronQuickPickState {
   /**
    * Finished taking request
    */
-  FUFILLED = "FUFILLED",
+  FULFILLED = "FULFILLED",
   /**
    * About to show a new picker. Old picker will be hidden but we are still gathering further input
    */

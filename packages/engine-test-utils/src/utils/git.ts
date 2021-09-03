@@ -55,7 +55,7 @@ export class GitTestUtils {
 
   static async createRepoWithReadme(
     root: string,
-    opts?: { remote?: boolean; branchName: string }
+    opts?: { remote?: boolean; branchName?: string }
   ) {
     const git = new Git({
       localUrl: root,

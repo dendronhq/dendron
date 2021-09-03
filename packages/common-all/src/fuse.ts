@@ -32,14 +32,13 @@ export type NoteIndexProps = {
  * 'scratch.2021.06.15.104331.make-sure-seeds-are-initialized-on-startup' with score 0.42.
  * Which is too fuzzy of a match.
  *
- * 'rename' matched 'dendron.scratch.2020.11.07.publish-under-original-filenames' with 0.16.
- * Which would prompt lowering the value below 0.3. However:
- * 'dendron' matched misspelled 'dendorn' & 'dendorn.sop' at 0.28. Which
- * could be quite nice to match/find/fix misspells like this hence for now leaving it at 0.3.
+ * 'rename' fuzzy matches 'dendron.scratch.2020.11.07.publish-under-original-filenames' with 0.16.
  *
  * For reference
  * 'dendron rename' matches 'dendron.dev.design.commands.rename' with 0.001.
  *
+ * Having this score too high gets too unrelated matches which pushes the
+ * 'Create New' entry out of the view.
  * --------------------------------------------------------------------------------
  *
  * Note if you are going to be tweaking this value it is highly suggested to add a
@@ -59,7 +58,7 @@ export type NoteIndexProps = {
 //         });
 //       const path = `${dir}/${THRESHOLD_VALUE}_${new Date().getTime()}.json`;
 //       require('fs').writeFile(path, data, ()=>{});
-const THRESHOLD_VALUE = 0.3;
+const THRESHOLD_VALUE = 0.2;
 
 function createFuse<T>(
   initList: T[],

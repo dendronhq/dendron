@@ -155,34 +155,29 @@ const getLinks = ({
 }) => {
   const wikiLinks: WikiLinkNoteV4[] = [];
   const noteRefs: (NoteRefNoteV4 | NoteRefNoteV4_LEGACY)[] = [];
-  visit(
-    ast,
-    [
-      DendronASTTypes.WIKI_LINK,
-      DendronASTTypes.REF_LINK_V2,
-      DendronASTTypes.REF_LINK,
-      DendronASTTypes.HASHTAG,
-    ],
-    (node) => {
-      switch (node.type) {
-        case DendronASTTypes.WIKI_LINK:
-          wikiLinks.push(node as WikiLinkNoteV4);
-          break;
-        case DendronASTTypes.REF_LINK_V2:
-          noteRefs.push(node as NoteRefNoteV4);
-          break;
-        case DendronASTTypes.REF_LINK:
-          noteRefs.push(node as NoteRefNoteV4_LEGACY);
-          break;
-        case DendronASTTypes.HASHTAG: {
-          wikiLinks.push(hashTag2WikiLinkNoteV4(node as HashTag));
-          break;
-        }
-        default:
-        /* nothing */
+  visit(ast, (node) => {
+    switch (node.type) {
+      case DendronASTTypes.WIKI_LINK:
+        wikiLinks.push(node as WikiLinkNoteV4);
+        break;
+      case DendronASTTypes.REF_LINK_V2:
+        noteRefs.push(node as NoteRefNoteV4);
+        break;
+      case DendronASTTypes.REF_LINK:
+        noteRefs.push(node as NoteRefNoteV4_LEGACY);
+        break;
+      case DendronASTTypes.HASHTAG: {
+        wikiLinks.push(hashTag2WikiLinkNoteV4(node as HashTag));
+        break;
       }
+      case DendronASTTypes.USERTAG: {
+        wikiLinks.push(userTag2WikiLinkNoteV4(node as UserTag));
+        break;
+      }
+      default:
+      /* nothing */
     }
-  );
+  });
   const dlinks: DLink[] = [];
 
   if (isNotUndefined(note.tags)) {

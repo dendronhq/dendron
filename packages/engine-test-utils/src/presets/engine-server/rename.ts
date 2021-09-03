@@ -996,7 +996,7 @@ const NOTES = {
           fname: "primary",
           vault: vaults[0],
           wsRoot,
-          body: "Lorem ipsum #foo dolor amet",
+          body: "Lorem ipsum @foo dolor amet",
         });
       },
     }

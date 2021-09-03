@@ -31,7 +31,10 @@ import { DendronCommonProps, NoteRouterQuery } from "../../utils/types";
 import { NoteProps } from "@dendronhq/common-all";
 
 export type NotePageProps = InferGetStaticPropsType<typeof getStaticProps> &
-  DendronCommonProps;
+  DendronCommonProps & { // `InferGetStaticPropsType` doesn't get right types for some reason, hence the manual override here
+    customHeadContent: string | null;
+    noteIndex: NoteProps;
+  };
 
 export default function Note({
   note,
@@ -94,7 +97,7 @@ export default function Note({
   return (
     <>
       <DendronSEO />
-      <DendronCustomHead content={customHeadContent} />
+      {customHeadContent && <DendronCustomHead content={customHeadContent} />}
       <DendronNote noteContent={noteBody} />
       {maybeCollection}
     </>
@@ -124,7 +127,7 @@ export const getStaticProps: GetStaticProps = async (
 
   const [body, note] = await Promise.all([getNoteBody(id), getNoteMeta(id)]);
   const noteData = getNotes();
-  const customHeadContent = await getCustomHead();
+  const customHeadContent: string | null = await getCustomHead();
   const { notes, noteIndex } = noteData;
 
   const collectionChildren = note.custom.has_collection

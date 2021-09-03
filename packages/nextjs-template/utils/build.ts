@@ -46,5 +46,20 @@ export function getNoteMeta(id: string) {
 
 export function getConfig(): Promise<DendronConfig> {
   const dataDir = getDataDir();
-  return fs.readJSON(path.join(dataDir, "dendron.yml"));
+  return fs.readJSON(path.join(dataDir, "dendron.json"));
+}
+
+export function getPublicDir() {
+  return path.join(process.cwd(), "public");
+}
+
+export async function getCustomHead() {
+  const config = await getConfig();
+  const customHeadPathConfig = config.site.customHeaderPath;
+  if(_.isUndefined(customHeadPathConfig)) {
+    return null;
+  }
+  const publicDir = getPublicDir();
+  const headPath = path.join(publicDir, customHeadPathConfig);
+  return fs.readFileSync(headPath, { encoding: "utf-8" });
 }

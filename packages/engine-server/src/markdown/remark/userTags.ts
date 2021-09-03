@@ -31,7 +31,7 @@ export const USERTAG_REGEX = new RegExp(
 );
 /** Same as `USERTAG_REGEX`, except that that it doesn't have to be at the start of the string. */
 export const USERTAG_REGEX_LOOSE = new RegExp(
-  `(?<tagSymbol>@)(?<tagContents>` +
+  `(?<userTag>@)(?<userTagContents>` +
     `${GOOD_MIDDLE_CHARACTER}*` +
     `${GOOD_END_CHARACTER}` +
     `)`

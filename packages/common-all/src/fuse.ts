@@ -12,14 +12,54 @@ import {
   DNodeUtils,
   DEngineClient,
 } from ".";
-import { DendronConfig, DVault } from "./types/workspace";
+import { DendronConfig, DVault } from "./types";
 
 export type NoteIndexProps = {
   id: string;
   title: string;
   fname: string;
   vault: DVault;
+  updated: number;
+  stub?: boolean;
 };
+
+/**
+ * Experimentally set.
+ *
+ * At the time of testing:
+ *
+ * At previous threshold of 0.5 string 'dendron' matched
+ * 'scratch.2021.06.15.104331.make-sure-seeds-are-initialized-on-startup' with score 0.42.
+ * Which is too fuzzy of a match.
+ *
+ * 'rename' matched 'dendron.scratch.2020.11.07.publish-under-original-filenames' with 0.16.
+ * Which would prompt lowering the value below 0.3. However:
+ * 'dendron' matched misspelled 'dendorn' & 'dendorn.sop' at 0.28. Which
+ * could be quite nice to match/find/fix misspells like this hence for now leaving it at 0.3.
+ *
+ * For reference
+ * 'dendron rename' matches 'dendron.dev.design.commands.rename' with 0.001.
+ *
+ * --------------------------------------------------------------------------------
+ *
+ * Note if you are going to be tweaking this value it is highly suggested to add a
+ * temporary piece of code To be able to see the all the results that are matched by
+ * fuse engine along with their scores, inside {@link FuseEngine.queryNote}
+ * */
+//       const dir = `<YOUR-DIR>/${qs}`;
+//       try{
+//         require('fs').mkdirSync(dir)
+//       }catch (e){
+//       }
+//       const data = JSON.stringify(
+//         {
+//           qs: qs,
+//           fuseQueryString: fuseQueryString,
+//           results:results
+//         });
+//       const path = `${dir}/${THRESHOLD_VALUE}_${new Date().getTime()}.json`;
+//       require('fs').writeFile(path, data, ()=>{});
+const THRESHOLD_VALUE = 0.3;
 
 function createFuse<T>(
   initList: T[],
@@ -30,13 +70,15 @@ function createFuse<T>(
 ) {
   const options: Fuse.IFuseOptions<any> = {
     shouldSort: true,
-    threshold: opts.exactMatch ? 0.0 : 0.5,
-    location: 0,
+    threshold: opts.exactMatch ? 0.0 : THRESHOLD_VALUE,
     distance: 15,
     minMatchCharLength: 2,
     keys: ["fname"],
     useExtendedSearch: true,
     includeScore: true,
+    // As long as we have ignoreLocation set to true location the location
+    // value should be ignored.
+    location: 0,
     ignoreLocation: true,
     ignoreFieldNorm: true,
   };
@@ -75,7 +117,9 @@ export class FuseEngine {
       // @ts-ignore
       items = this.schemaIndex._docs;
     } else {
-      const results = this.schemaIndex.search(qs);
+      const results = this.schemaIndex.search(
+        FuseEngine.formatQueryForFuse({ qs })
+      );
       items = _.map(results, (resp) => resp.item);
     }
     return items;
@@ -83,10 +127,18 @@ export class FuseEngine {
 
   /**
    * If qs = "", return root note
-   * @param param0
+   * @param qs query string.
+   * @param noQSTransform optional parameter to NOT do any transformation
+   *        to the query string.
    * @returns
    */
-  queryNote({ qs }: { qs: string }): NoteIndexProps[] {
+  queryNote({
+    qs,
+    noQSTransform,
+  }: {
+    qs: string;
+    noQSTransform?: boolean;
+  }): NoteIndexProps[] {
     let items: NoteIndexProps[];
     if (qs === "") {
       const results = this.notesIndex.search("root");
@@ -98,7 +150,13 @@ export class FuseEngine {
       // @ts-ignore
       items = this.notesIndex._docs as NoteProps[];
     } else {
-      const results = this.notesIndex.search(qs);
+      const fuseQueryString = FuseEngine.formatQueryForFuse({
+        qs,
+        noQSTransform,
+      });
+      let results = this.notesIndex.search(fuseQueryString);
+      results = FuseEngine.sortMatchingScores(results);
+
       items = _.map(results, (resp) => resp.item);
     }
     return items;
@@ -112,11 +170,13 @@ export class FuseEngine {
 
   async updateNotesIndex(notes: NotePropsDict) {
     this.notesIndex.setCollection(
-      _.map(notes, ({ fname, title, id, vault }, _key) => ({
+      _.map(notes, ({ fname, title, id, vault, updated, stub }, _key) => ({
         fname,
         id,
         title,
         vault,
+        updated,
+        stub,
       }))
     );
   }
@@ -140,9 +200,75 @@ export class FuseEngine {
       return doc.id === SchemaUtils.getModuleRoot(smod).id;
     });
   }
+
+  /**
+   * Fuse does not appear to see [*] or [.] as anything special.
+   * For example:
+   * `dev.vs` matches `dendron.dev.ref.vscode` with score of 0.33
+   * `dev*vs` matches `dendron.dev.ref.vscode` with score of 0.5
+   *
+   * To compare with
+   * `dev vs` matches `dendron.dev.ref.vscode` with score of 0.001
+   *
+   * Fuse extended search https://fusejs.io/examples.html#extended-search
+   * uses spaces for AND and '|' for OR hence this function will replace '*' and '.'
+   * with spaces. We do this replacement since VSCode quick pick actually respects '*'
+   * and our general dendron guidelines see '.' as special split character.
+   * */
+  static formatQueryForFuse({
+    qs,
+    noQSTransform,
+  }: {
+    qs: string;
+    noQSTransform?: boolean;
+  }): string {
+    if (noQSTransform) {
+      return qs;
+    }
+    return qs.split("*").join(" ").split(".").join(" ");
+  }
+
+  /**
+   * When there are multiple items with exact same score apply sorting
+   * within that group of elements. (The items with better match scores
+   * should still come before elements with worse match scores).
+   * */
+  static sortMatchingScores(
+    results: Fuse.FuseResult<NoteIndexProps>[]
+  ): Fuse.FuseResult<NoteIndexProps>[] {
+    const groupedByScore = _.groupBy(results, (r) => r.score);
+
+    // lodash group by makes strings out of number hence to sort scores
+    // we will parse them back into a number keeping the key string.
+    const scores = _.keys(groupedByScore).map((stringKey) => ({
+      key: stringKey,
+      score: Number.parseFloat(stringKey),
+    }));
+
+    // We want ascending scores since the lowest score represents the best match.
+    scores.sort((a, b) => a.score - b.score);
+
+    // We want the items with the same match scores to be sorted by
+    // descending order of their update date. And if the item is a
+    // stub it should go towards the end of the same match group.
+    for (const score of scores) {
+      const sameScoreMatches = groupedByScore[score.key];
+
+      const [stubs, notes] = _.partition(sameScoreMatches, (m) => m.item.stub);
+
+      notes.sort((a, b) => {
+        return b.item.updated - a.item.updated;
+      });
+
+      groupedByScore[score.key] = [...notes, ...stubs];
+    }
+
+    return scores.map((score) => groupedByScore[score.key]).flat();
+  }
 }
 
 const PAGINATE_LIMIT = 50;
+
 export class NoteLookupUtils {
   /**
    * Get qs for current level of the hierarchy
@@ -173,17 +299,19 @@ export class NoteLookupUtils {
     qs,
     engine,
     showDirectChildrenOnly,
+    noQSTransform,
   }: {
     qs: string;
     engine: DEngineClient;
     showDirectChildrenOnly?: boolean;
+    noQSTransform?: boolean;
   }): Promise<NoteProps[]> {
     const { notes } = engine;
     const qsClean = this.slashToDot(qs);
     if (_.isEmpty(qsClean)) {
       return NoteLookupUtils.fetchRootResults(notes);
     }
-    const resp = await engine.queryNotes({ qs });
+    const resp = await engine.queryNotes({ qs, noQSTransform });
     let nodes: NoteProps[];
     if (showDirectChildrenOnly) {
       const depth = qs.split(".").length;

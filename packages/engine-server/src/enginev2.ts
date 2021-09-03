@@ -407,10 +407,12 @@ export class DendronEngineV2 implements DEngine {
 
   queryNotesSync({
     qs,
+    noQSTransform,
   }: {
     qs: string;
+    noQSTransform?: boolean;
   }): ReturnType<DEngineClient["queryNotesSync"]> {
-    const items = this.fuseEngine.queryNote({ qs });
+    const items = this.fuseEngine.queryNote({ qs, noQSTransform });
     return {
       error: null,
       data: items.map((ent) => this.notes[ent.id]),
@@ -442,8 +444,8 @@ export class DendronEngineV2 implements DEngine {
     opts: QueryNotesOpts
   ): ReturnType<DEngineClient["queryNotes"]> {
     const ctx = "Engine:queryNotes";
-    const { qs, vault, createIfNew } = opts;
-    let items = await this.fuseEngine.queryNote({ qs });
+    const { qs, vault, createIfNew, noQSTransform } = opts;
+    let items = await this.fuseEngine.queryNote({ qs, noQSTransform });
     let item = this.notes[items[0].id];
     if (createIfNew) {
       let noteNew: NoteProps;

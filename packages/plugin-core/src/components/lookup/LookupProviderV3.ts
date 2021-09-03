@@ -55,6 +55,7 @@ export type ILookupProviderV3 = {
 export type ILookupProviderOptsV3 = {
   allowNewNote: boolean;
   noHidePickerOnAccept?: boolean;
+  noQSTransform?: boolean;
 };
 
 export type NoteLookupProviderSuccessResp<T = never> = {
@@ -259,6 +260,7 @@ export class NoteLookupProvider implements ILookupProviderV3 {
       updatedItems = await NotePickerUtils.fetchPickerResults({
         picker,
         qs: querystring,
+        noQSTransform: this.opts.noQSTransform,
         depth: picker.showDirectChildrenOnly
           ? queryOrig.split(".").length
           : undefined,
@@ -355,6 +357,12 @@ export class NoteLookupProvider implements ILookupProviderV3 {
       if (opts.fuzzThreshold === 1) {
         updatedItems = updatedItems.filter((ent) => ent.fname === picker.value);
       }
+
+      // We do NOT want quick pick to filter out items since it does not match with FuseJS.
+      updatedItems.forEach((item) => {
+        item.alwaysShow = true;
+      });
+
       picker.items = updatedItems;
     } catch (err) {
       window.showErrorMessage(err);

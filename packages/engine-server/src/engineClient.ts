@@ -237,8 +237,8 @@ export class DendronEngineClient implements DEngineClient {
   async queryNote(
     opts: Parameters<DEngineClient["queryNotes"]>[0]
   ): Promise<NoteProps[]> {
-    const { qs, vault } = opts;
-    let noteIndexProps = await this.fuseEngine.queryNote({ qs });
+    const { qs, vault, noQSTransform } = opts;
+    let noteIndexProps = await this.fuseEngine.queryNote({ qs, noQSTransform });
     // TODO: hack
     if (!_.isUndefined(vault)) {
       noteIndexProps = noteIndexProps.filter((ent) =>

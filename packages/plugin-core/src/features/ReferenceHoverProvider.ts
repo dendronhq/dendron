@@ -22,7 +22,7 @@ import {
   getReferenceAtPosition,
   isUncPath,
 } from "../utils/md";
-import { DendronWorkspace, getEngine } from "../workspace";
+import { DendronWorkspace, getEngine, getWS } from "../workspace";
 import _ from "lodash";
 import { Logger } from "../logger";
 
@@ -67,7 +67,9 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
     const vaultName = refAtPos.vaultName
       ? ` in vault "${refAtPos.vaultName}"`
       : "";
-    return `Note ${refAtPos.ref}${vaultName} is missing, Ctrl+click or use "Dendron: Goto Note" command to create it.`;
+    const ctrlClickToCreate =
+      getWS().config.noAutoCreateOnDefinition === false ? "Ctrl+Click or " : "";
+    return `Note ${refAtPos.ref}${vaultName} is missing, ${ctrlClickToCreate}use "Dendron: Goto Note" command to create it.`;
   }
 
   /** Returns a message if this is a non-dendron URI. */

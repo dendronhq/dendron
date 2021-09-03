@@ -220,7 +220,8 @@ suite("ReferenceProvider", function () {
             await AssertUtils.assertInString({
               body: hover!.contents.join(""),
               match: [
-                `Note target is missing, Ctrl+click or use "Dendron: Goto Note" command to create it.`,
+                `Note target is missing`,
+                `use "Dendron: Goto Note" command`,
               ],
             });
             done();

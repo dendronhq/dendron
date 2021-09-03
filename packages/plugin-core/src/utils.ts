@@ -549,6 +549,10 @@ export class VSCodeUtils {
 }
 
 export class WSUtils {
+  static getAssetUri(context: vscode.ExtensionContext) {
+    return VSCodeUtils.joinPath(context.extensionUri, "assets");
+  }
+
   static handleServerProcess({
     subprocess,
     context,

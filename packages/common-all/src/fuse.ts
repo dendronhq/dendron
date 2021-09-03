@@ -63,13 +63,12 @@ const THRESHOLD_VALUE = 0.2;
 function createFuse<T>(
   initList: T[],
   opts: Fuse.IFuseOptions<any> & {
-    exactMatch: boolean;
     preset: "schema" | "note";
   }
 ) {
   const options: Fuse.IFuseOptions<any> = {
     shouldSort: true,
-    threshold: opts.exactMatch ? 0.0 : THRESHOLD_VALUE,
+    threshold: opts.threshold,
     distance: 15,
     minMatchCharLength: 2,
     keys: ["fname"],
@@ -96,14 +95,18 @@ export class FuseEngine {
   public notesIndex: Fuse<NoteIndexProps>;
   public schemaIndex: Fuse<SchemaProps>;
 
+  private readonly threshold: number;
+
   constructor(opts: FuseEngineOpts) {
+    this.threshold = opts.mode === "exact" ? 0.0 : THRESHOLD_VALUE;
+
     this.notesIndex = createFuse<NoteProps>([], {
-      exactMatch: opts.mode === "exact",
       preset: "note",
+      threshold: this.threshold,
     });
     this.schemaIndex = createFuse<SchemaProps>([], {
-      exactMatch: opts.mode === "exact",
       preset: "schema",
+      threshold: this.threshold,
     });
   }
 
@@ -116,9 +119,12 @@ export class FuseEngine {
       // @ts-ignore
       items = this.schemaIndex._docs;
     } else {
-      const results = this.schemaIndex.search(
+      let results = this.schemaIndex.search(
         FuseEngine.formatQueryForFuse({ qs })
       );
+
+      results = this.filterByThreshold(results);
+
       items = _.map(results, (resp) => resp.item);
     }
     return items;
@@ -145,11 +151,33 @@ export class FuseEngine {
         qs,
       });
       let results = this.notesIndex.search(fuseQueryString);
+
+      results = this.filterByThreshold(results);
+
       results = FuseEngine.sortMatchingScores(results);
 
       items = _.map(results, (resp) => resp.item);
     }
     return items;
+  }
+
+  private filterByThreshold<T>(results: Fuse.FuseResult<T>[]) {
+    // TODO: Try to isolate and submit a bug to FuseJS.
+    //
+    // There appears to be a bug in FuseJS that sometimes it gives results with much higher
+    // score than the threshold. From my understanding it should not do such thing.
+    // Hence for now we will filter the results ourselves to adhere to threshold.
+    //
+    // Example data that was matched:
+    // Querying for 'user.hikchoi.discussions.himewhat' with threshold of 0.2
+    // Matched:
+    // 'user.hikchoi.discussions.this' with 0.59375
+    // 'user.hikchoi.discussions.triage-plans' with 0.59375
+    // 'user.hikchoi.discussions.note-graph-glitch' with 0.59375
+    // Other notes were matched with score of under 0.2
+    // 'user.hikchoi.discussions.deleting-notes-with-links' with 0.1875
+    // In fact all the notes I saw thus far that were out of threshold range were with '0.59375'
+    return results.filter((r) => r.score! <= this.threshold);
   }
 
   async updateSchemaIndex(schemas: SchemaModuleDict) {

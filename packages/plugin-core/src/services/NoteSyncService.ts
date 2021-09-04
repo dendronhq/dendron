@@ -9,12 +9,12 @@ import {
 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
+import visit from "unist-util-visit";
 import * as vscode from "vscode";
 import { ShowPreviewV2Command } from "../commands/ShowPreviewV2";
 import { Logger } from "../logger";
-import { DendronWorkspace, getWS } from "../workspace";
-import visit from "unist-util-visit";
 import { VSCodeUtils } from "../utils";
+import { DendronWorkspace, getWS, getWSV2 } from "../workspace";
 
 let NOTE_SERVICE: NoteSyncService | undefined;
 
@@ -97,14 +97,14 @@ export class NoteSyncService {
     this.L.debug({ ctx, uri: uri.fsPath });
     const vault = VaultUtils.getVaultByNotePath({
       vaults: eclient.vaults,
-      wsRoot: DendronWorkspace.wsRoot(),
+      wsRoot: getWSV2().wsRoot,
       fsPath: uri.fsPath,
     });
     const noteHydrated = NoteUtils.getNoteByFnameV5({
       fname,
       vault,
       notes: eclient.notes,
-      wsRoot: DendronWorkspace.wsRoot(),
+      wsRoot: getWSV2().wsRoot,
     }) as NoteProps;
 
     // NOTE: it might be worthwile to only do this after checking that the current note is still active
@@ -150,7 +150,7 @@ export class NoteSyncService {
       });
       note.anchors = anchors;
 
-      if (getWS().config.dev?.enableLinkCandidates) {
+      if (getWSV2().config.dev?.enableLinkCandidates) {
         const linkCandidates = LinkUtils.findLinkCandidates({
           note,
           notesMap,

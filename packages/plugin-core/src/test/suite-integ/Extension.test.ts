@@ -4,6 +4,7 @@ import {
   InstallStatus,
   isNotUndefined,
   Time,
+  VaultUtils,
 } from "@dendronhq/common-all";
 import {
   readJSONWithCommentsSync,
@@ -38,7 +39,7 @@ import {
 import { StateService } from "../../services/stateService";
 import * as telemetry from "../../telemetry";
 import { KeybindingUtils, VSCodeUtils } from "../../utils";
-import { DendronWorkspace, resolveRelToWSRoot } from "../../workspace";
+import { DendronWorkspace } from "../../workspace";
 import { BlankInitializer } from "../../workspace/blankInitializer";
 import { TemplateInitializer } from "../../workspace/templateInitializer";
 import { shouldDisplayLapsedUserMsg, _activate } from "../../_extension";
@@ -269,7 +270,7 @@ suite("Extension", function () {
             expect(meta.version).toEqual("0.0.1");
             expect(meta.activationTime < Time.now().toMillis()).toBeTruthy();
             expect(_.values(engine.notes).length).toEqual(1);
-            const vault = resolveRelToWSRoot(vaults[0].fsPath);
+            const vault = path.join(wsRoot, VaultUtils.getRelPath(vaults[0]));
 
             const settings = fs.readJSONSync(
               path.join(wsRoot, "dendron.code-workspace")
@@ -286,17 +287,16 @@ suite("Extension", function () {
         DendronWorkspace.version = () => "0.0.1";
         runLegacySingleWorkspaceTest({
           ctx,
-          onInit: async ({ vaults }) => {
-            const vault = resolveRelToWSRoot(vaults[0].fsPath);
+          onInit: async ({ vaults, wsRoot }) => {
+            const vault = path.join(wsRoot, VaultUtils.getRelPath(vaults[0]));
             expect(fs.readdirSync(vault)).toEqual(
               [CONSTANTS.DENDRON_CACHE_FILE].concat(genEmptyWSFiles())
             );
             done();
           },
-          postSetupHook: async ({ vaults }) => {
-            fs.removeSync(
-              path.join(resolveRelToWSRoot(vaults[0].fsPath), "root.schema.yml")
-            );
+          postSetupHook: async ({ vaults, wsRoot }) => {
+            const vault = path.join(wsRoot, VaultUtils.getRelPath(vaults[0]));
+            fs.removeSync(path.join(vault, "root.schema.yml"));
           },
         });
       });

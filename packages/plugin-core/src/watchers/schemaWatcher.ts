@@ -4,7 +4,7 @@ import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
 import { Logger } from "../logger";
-import { DendronWorkspace } from "../workspace";
+import { DendronWorkspace, getWSV2 } from "../workspace";
 
 export class SchemaWatcher {
   public watcher: vscode.FileSystemWatcher;
@@ -60,7 +60,7 @@ export class SchemaWatcher {
         vault,
         content,
         fname,
-        wsRoot: DendronWorkspace.wsRoot(),
+        wsRoot: getWSV2().wsRoot,
       });
       await engine.updateSchema(maybeSchema);
       vscode.window.showInformationMessage("schema updated");

@@ -13,7 +13,7 @@ import {
 } from "vscode";
 import { Logger } from "./logger";
 import { NoteSyncService } from "./services/NoteSyncService";
-import { DendronWorkspace, getWS } from "./workspace";
+import { DendronWorkspace, getWS, getWSV2 } from "./workspace";
 
 interface DebouncedFunc<T extends (...args: any[]) => any> {
   /**
@@ -134,13 +134,13 @@ export class WorkspaceWatcher {
     const vault = VaultUtils.getVaultByNotePath({
       fsPath: uri.fsPath,
       vaults: eclient.vaults,
-      wsRoot: DendronWorkspace.wsRoot(),
+      wsRoot: getWSV2().wsRoot,
     });
     const note = NoteUtils.getNoteByFnameV5({
       fname,
       vault,
       notes: eclient.notes,
-      wsRoot: DendronWorkspace.wsRoot(),
+      wsRoot: getWSV2().wsRoot,
     }) as NoteProps;
 
     const content = ev.document.getText();

@@ -171,7 +171,7 @@ export async function setupLegacyWorkspace(
     ...copts.setupWsOverride,
     workspaceInitializer: new BlankInitializer(),
   });
-  stubWorkspaceFolders(vaults);
+  stubWorkspaceFolders(wsRoot, vaults);
 
   await copts.postSetupHook({
     wsRoot,

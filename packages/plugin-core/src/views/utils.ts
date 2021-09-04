@@ -4,7 +4,7 @@ import {
   DUtils,
 } from "@dendronhq/common-all";
 import { Logger } from "../logger";
-import { DendronWorkspace, getWS } from "../workspace";
+import { getWS, getWSV2 } from "../workspace";
 
 export class WebViewUtils {
   static genHTMLForView = ({
@@ -16,7 +16,7 @@ export class WebViewUtils {
   }) => {
     const ws = getWS();
     const qs = DUtils.querystring.stringify({
-      ws: DendronWorkspace.wsRoot(),
+      ws: getWSV2().wsRoot,
       port: ws.port,
     });
 

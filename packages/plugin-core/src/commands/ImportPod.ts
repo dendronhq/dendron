@@ -19,7 +19,7 @@ import {
   updateGlobalState,
   openFileInEditor,
 } from "../utils/pods";
-import { DendronWorkspace, getWS } from "../workspace";
+import { DendronWorkspace, getWS, getWSV2 } from "../workspace";
 import { BaseCommand } from "./base";
 import { ReloadIndexCommand } from "./ReloadIndex";
 
@@ -105,7 +105,7 @@ export class ImportPodCommand extends BaseCommand<
   async execute(opts: CommandOpts) {
     const ctx = { ctx: "ImportPod" };
     this.L.info({ ctx, opts });
-    const wsRoot = DendronWorkspace.wsRoot();
+    const wsRoot = getWSV2().wsRoot;
     const utilityMethods = {
       getGlobalState,
       updateGlobalState,

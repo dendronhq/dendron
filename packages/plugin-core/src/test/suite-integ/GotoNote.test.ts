@@ -13,7 +13,7 @@ import * as vscode from "vscode";
 import { GotoNoteCommand } from "../../commands/GotoNote";
 import { PickerUtilsV2 } from "../../components/lookup/utils";
 import { VSCodeUtils } from "../../utils";
-import { DendronWorkspace } from "../../workspace";
+import { DendronWorkspace, getWSV2 } from "../../workspace";
 import { GOTO_NOTE_PRESETS } from "../presets/GotoNotePreset";
 import { getActiveEditorBasename } from "../testUtils";
 import { expect, LocationTestUtils } from "../testUtilsv2";
@@ -59,7 +59,7 @@ suite("GotoNote", function () {
             fname: "foo",
             notes: engine.notes,
             vault,
-            wsRoot: DendronWorkspace.wsRoot(),
+            wsRoot: getWSV2().wsRoot,
           }) as NoteProps;
           expect(_.pick(note, ["fname", "stub"])).toEqual({
             fname: "foo",

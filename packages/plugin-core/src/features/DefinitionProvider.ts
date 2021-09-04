@@ -4,7 +4,7 @@ import vscode, { Location, Position, Uri } from "vscode";
 import { findAnchorPos, GotoNoteCommand } from "../commands/GotoNote";
 import { Logger } from "../logger";
 import { getReferenceAtPosition } from "../utils/md";
-import { DendronWorkspace, getWS } from "../workspace";
+import { DendronWorkspace, getWSV2 } from "../workspace";
 
 export default class DefinitionProvider implements vscode.DefinitionProvider {
   public async provideDefinition(
@@ -34,9 +34,7 @@ export default class DefinitionProvider implements vscode.DefinitionProvider {
       vault,
     });
     const uris = notes.map((note) =>
-      Uri.file(
-        NoteUtils.getFullPath({ note, wsRoot: DendronWorkspace.wsRoot() })
-      )
+      Uri.file(NoteUtils.getFullPath({ note, wsRoot: getWSV2().wsRoot }))
     );
     const out = uris.map((uri) => new Location(uri, new Position(0, 0)));
     if (out.length > 1) {
@@ -52,7 +50,7 @@ export default class DefinitionProvider implements vscode.DefinitionProvider {
       }
       return loc;
     } else {
-      if (getWS().config.noAutoCreateOnDefinition) {
+      if (getWSV2().config.noAutoCreateOnDefinition) {
         return;
       }
       const out = await new GotoNoteCommand().execute({
@@ -64,9 +62,7 @@ export default class DefinitionProvider implements vscode.DefinitionProvider {
       }
       const { note, pos } = out;
       return new Location(
-        Uri.file(
-          NoteUtils.getFullPath({ note, wsRoot: DendronWorkspace.wsRoot() })
-        ),
+        Uri.file(NoteUtils.getFullPath({ note, wsRoot: getWSV2().wsRoot })),
         pos || new Position(0, 0)
       );
     }

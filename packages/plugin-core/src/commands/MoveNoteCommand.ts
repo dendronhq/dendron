@@ -24,7 +24,7 @@ import {
 import { DENDRON_COMMANDS } from "../constants";
 import { FileItem } from "../external/fileutils/FileItem";
 import { VSCodeUtils } from "../utils";
-import { DendronWorkspace, getWS } from "../workspace";
+import { DendronWorkspace, getWS, getWSV2 } from "../workspace";
 import { BasicCommand } from "./base";
 import { MultiSelectBtn } from "../components/lookup/buttons";
 import { EngineAPIService } from "../services/EngineAPIService";
@@ -310,7 +310,7 @@ async function closeCurrentFileOpenMovedFile(
   engine: EngineAPIService,
   moveOpts: RenameNoteOpts
 ) {
-  const wsRoot = DendronWorkspace.wsRoot();
+  const wsRoot = getWSV2().wsRoot;
 
   const vault = VaultUtils.getVaultByName({
     vaults: engine.vaults,

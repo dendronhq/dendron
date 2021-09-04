@@ -12,7 +12,7 @@ import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../utils";
 import { showPodQuickPickItemsV4 } from "../utils/pods";
-import { DendronWorkspace } from "../workspace";
+import { DendronWorkspace, getWSV2 } from "../workspace";
 import { BaseCommand } from "./base";
 
 type CommandOpts = CommandInput & { noteByName: string; config: any };
@@ -67,7 +67,7 @@ export class PublishPodCommand extends BaseCommand<
     const { podChoice, config, noteByName } = opts;
 
     const engine = DendronWorkspace.instance().getEngine();
-    const wsRoot = DendronWorkspace.wsRoot() as string;
+    const wsRoot = getWSV2().wsRoot as string;
     const pod = new podChoice.podClass() as PublishPod; // eslint-disable-line new-cap
     const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
     const dendronConfig = DendronWorkspace.instance().config;

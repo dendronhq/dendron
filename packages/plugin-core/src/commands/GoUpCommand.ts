@@ -5,7 +5,7 @@ import { Uri, window } from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../utils";
-import { DendronWorkspace } from "../workspace";
+import { DendronWorkspace, getWSV2 } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandOpts = {};
@@ -30,12 +30,12 @@ export class GoUpCommand extends BasicCommand<CommandOpts, CommandOutput> {
       {
         noStubs: true,
         vault: PickerUtilsV2.getVaultForOpenEditor(),
-        wsRoot: DendronWorkspace.wsRoot(),
+        wsRoot: getWSV2().wsRoot,
       }
     ) as NoteProps;
     const nppath = NoteUtils.getFullPath({
       note: nparent,
-      wsRoot: DendronWorkspace.wsRoot(),
+      wsRoot: getWSV2().wsRoot,
     });
     await VSCodeUtils.openFileInEditor(Uri.file(nppath));
     return;

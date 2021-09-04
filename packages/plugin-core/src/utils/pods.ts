@@ -1,16 +1,16 @@
+import { NoteProps, NoteUtils } from "@dendronhq/common-all";
 import { PodItemV4 } from "@dendronhq/pods-core";
+import fs from "fs-extra";
+import _ from "lodash";
+import open from "open";
+import path from "path";
+import * as queryString from "query-string";
 import { QuickPickItem, Uri, window } from "vscode";
 import { gdocRequiredScopes, GLOBAL_STATE } from "../constants";
-import open from "open";
-import * as queryString from "query-string";
-import { DendronWorkspace } from "../workspace";
-import path from "path";
-import fs from "fs-extra";
-import { clipboard, VSCodeUtils } from "../utils";
-import { NoteUtils, NoteProps } from "@dendronhq/common-all";
-import _ from "lodash";
-import { GOOGLE_OAUTH_ID } from "../types/global";
 import { StateService } from "../services/stateService";
+import { GOOGLE_OAUTH_ID } from "../types/global";
+import { clipboard, VSCodeUtils } from "../utils";
+import { getWSV2 } from "../workspace";
 
 export type PodQuickPickItemV4 = QuickPickItem & PodItemV4;
 
@@ -30,10 +30,9 @@ export const showPodQuickPickItemsV4 = (podItem: PodItemV4[]) => {
 };
 
 export const launchGoogleOAuthFlow = async () => {
-  const port = fs.readFileSync(
-    path.join(DendronWorkspace.wsRoot(), ".dendron.port"),
-    { encoding: "utf8" }
-  );
+  const port = fs.readFileSync(path.join(getWSV2().wsRoot, ".dendron.port"), {
+    encoding: "utf8",
+  });
 
   const stringifiedParams = queryString.stringify({
     client_id: GOOGLE_OAUTH_ID,
@@ -105,7 +104,7 @@ export const getGlobalState = async (key: GLOBAL_STATE) => {
 export const openFileInEditor = async (note: NoteProps): Promise<void> => {
   const npath = NoteUtils.getFullPath({
     note,
-    wsRoot: DendronWorkspace.wsRoot(),
+    wsRoot: getWSV2().wsRoot,
   });
   const uri = Uri.file(npath);
   await VSCodeUtils.openFileInEditor(uri);

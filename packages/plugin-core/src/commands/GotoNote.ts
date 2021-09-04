@@ -14,7 +14,7 @@ import { VaultSelectionMode } from "../components/lookup/types";
 import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../utils";
 import { getReferenceAtPosition } from "../utils/md";
-import { DendronWorkspace, getWS } from "../workspace";
+import { DendronWorkspace, getWS, getWSV2 } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandOpts = {
@@ -194,7 +194,7 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
         const note = data?.note as NoteProps;
         const npath = NoteUtils.getFullPath({
           note,
-          wsRoot: DendronWorkspace.wsRoot(),
+          wsRoot: getWSV2().wsRoot,
         });
         const uri = Uri.file(npath);
         const editor = await VSCodeUtils.openFileInEditor(uri, {

@@ -8,7 +8,7 @@ import {
   LookupSelectionTypeEnum,
 } from "../../components/lookup/types";
 import { VSCodeUtils } from "../../utils";
-import { DendronWorkspace, getWS } from "../../workspace";
+import { getWS, getWSV2 } from "../../workspace";
 import {
   expect,
   getNoteFromFname,
@@ -37,7 +37,7 @@ suite("Scratch Notes", function () {
             fname,
             notes,
             vault,
-            wsRoot: DendronWorkspace.wsRoot(),
+            wsRoot: getWSV2().wsRoot,
           });
           const editor = await VSCodeUtils.openNote(note!);
           const SIMPLE_SELECTION = new vscode.Selection(7, 0, 7, 12);
@@ -104,7 +104,7 @@ suite("Scratch Notes", function () {
             fname,
             notes,
             vault,
-            wsRoot: DendronWorkspace.wsRoot(),
+            wsRoot: getWSV2().wsRoot,
           });
           const editor = await VSCodeUtils.openNote(note!);
           const SIMPLE_SELECTION = new vscode.Selection(7, 0, 7, 12);

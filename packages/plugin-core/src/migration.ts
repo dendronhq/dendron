@@ -2,41 +2,12 @@ import {
   DendronConfig,
   DendronError,
   WorkspaceOpts,
-  WorkspaceSettings,
 } from "@dendronhq/common-all";
-import {
-  assignJSONWithComment,
-  writeJSONWithComments,
-} from "@dendronhq/common-server";
 import { DConfig } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
 import { Logger } from "./logger";
 import { DendronWorkspace } from "./workspace";
-
-export async function migrateSettings({
-  settings,
-}: {
-  settings: WorkspaceSettings;
-  config: DendronConfig;
-}) {
-  let changed = false;
-  const newFolders: WorkspaceSettings["folders"] = [];
-  settings.folders.forEach((ent) => {
-    if (path.isAbsolute(ent.path)) {
-      const relPath = path.relative(DendronWorkspace.wsRoot(), ent.path);
-      changed = true;
-      newFolders.push({ ...ent, path: relPath });
-    } else {
-      newFolders.push(ent);
-    }
-  });
-  if (changed) {
-    settings = await assignJSONWithComment({ folders: newFolders }, settings);
-  }
-  writeJSONWithComments(DendronWorkspace.workspaceFile().fsPath, settings);
-  return { changed, settings };
-}
 
 /**
  * Migrate dendron.yml if necessary

@@ -8,7 +8,7 @@ import { ProgressLocation, Uri, ViewColumn, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { FileWatcher } from "../fileWatcher";
 import { VSCodeUtils } from "../utils";
-import { DendronWorkspace } from "../workspace";
+import { DendronWorkspace, getWSV2 } from "../workspace";
 import { BasicCommand } from "./base";
 import { RenameNoteOutputV2a, RenameNoteV2aCommand } from "./RenameNoteV2a";
 
@@ -143,7 +143,7 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
         .filter((ent) => !_.isEmpty(ent))
         .join("");
 
-      const wsRoot = DendronWorkspace.wsRoot();
+      const wsRoot = getWSV2().wsRoot;
       const vault = note.vault;
       const vpath = vault2Path({ wsRoot, vault });
       const rootUri = Uri.file(vpath);

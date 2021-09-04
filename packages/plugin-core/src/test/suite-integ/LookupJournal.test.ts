@@ -10,7 +10,7 @@ import * as vscode from "vscode";
 import { NoteLookupCommand } from "../../commands/NoteLookupCommand";
 import { LookupNoteTypeEnum } from "../../components/lookup/types";
 import { VSCodeUtils } from "../../utils";
-import { DendronWorkspace, getWS } from "../../workspace";
+import { getWS, getWSV2 } from "../../workspace";
 import { expect, getNoteFromTextEditor } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
@@ -37,7 +37,7 @@ suite("Scratch Notes", function () {
             fname,
             notes,
             vault,
-            wsRoot: DendronWorkspace.wsRoot(),
+            wsRoot: getWSV2().wsRoot,
           });
           await VSCodeUtils.openNote(note!);
           await new NoteLookupCommand().run({
@@ -68,7 +68,7 @@ suite("Scratch Notes", function () {
             fname,
             notes,
             vault,
-            wsRoot: DendronWorkspace.wsRoot(),
+            wsRoot: getWSV2().wsRoot,
           });
           await VSCodeUtils.openNote(note!);
           await new NoteLookupCommand().run({

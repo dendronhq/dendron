@@ -4,17 +4,17 @@ import {
   NoteTestUtilsV4,
   NOTE_PRESETS_V4,
 } from "@dendronhq/common-test-utils";
+import { ENGINE_HOOKS_MULTI } from "@dendronhq/engine-test-utils";
+import fs from "fs-extra";
+import { describe } from "mocha";
+import path from "path";
 import * as vscode from "vscode";
 import ReferenceHoverProvider from "../../features/ReferenceHoverProvider";
 import ReferenceProvider from "../../features/ReferenceProvider";
 import { VSCodeUtils } from "../../utils";
-import { DendronWorkspace } from "../../workspace";
+import { getWSV2 } from "../../workspace";
 import { expect, LocationTestUtils } from "../testUtilsv2";
-import { describe } from "mocha";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
-import fs from "fs-extra";
-import path from "path";
-import { ENGINE_HOOKS_MULTI } from "@dendronhq/engine-test-utils";
 
 async function provide(editor: vscode.TextEditor) {
   const doc = editor?.document as vscode.TextDocument;
@@ -54,7 +54,7 @@ suite("ReferenceProvider", function () {
           const links = await provide(editor);
           expect(links.map((l) => l.uri.fsPath)).toEqual(
             [noteWithTarget1, noteWithTarget2].map((note) =>
-              NoteUtils.getFullPath({ note, wsRoot: DendronWorkspace.wsRoot() })
+              NoteUtils.getFullPath({ note, wsRoot: getWSV2().wsRoot })
             )
           );
           done();
@@ -84,7 +84,7 @@ suite("ReferenceProvider", function () {
           const links = await provide(editor);
           expect(links.map((l) => l.uri.fsPath)).toEqual(
             [noteWithTarget1, noteWithTarget2].map((note) =>
-              NoteUtils.getFullPath({ note, wsRoot: DendronWorkspace.wsRoot() })
+              NoteUtils.getFullPath({ note, wsRoot: getWSV2().wsRoot })
             )
           );
           done();
@@ -112,7 +112,7 @@ suite("ReferenceProvider", function () {
           const links = await provide(editor);
           expect(links.map((l) => l.uri.fsPath)).toEqual(
             [noteWithLink].map((note) =>
-              NoteUtils.getFullPath({ note, wsRoot: DendronWorkspace.wsRoot() })
+              NoteUtils.getFullPath({ note, wsRoot: getWSV2().wsRoot })
             )
           );
           done();
@@ -141,7 +141,7 @@ suite("ReferenceProvider", function () {
           const links = await provide(editor);
           expect(links.map((l) => l.uri.fsPath)).toEqual(
             [noteWithLink].map((note) =>
-              NoteUtils.getFullPath({ note, wsRoot: DendronWorkspace.wsRoot() })
+              NoteUtils.getFullPath({ note, wsRoot: getWSV2().wsRoot })
             )
           );
           done();

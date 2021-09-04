@@ -8,7 +8,7 @@ import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { Logger } from "../logger";
 import { clipboard, VSCodeUtils } from "../utils";
-import { DendronWorkspace, getWS } from "../workspace";
+import { getWS, getWSV2 } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandInput = {
@@ -69,10 +69,10 @@ export class PasteFileCommand extends BasicCommand<CommandOpts, CommandOutput> {
     }
     const vault = VaultUtils.getVaultByNotePath({
       vaults: getWS().getEngine().vaults,
-      wsRoot: DendronWorkspace.wsRoot(),
+      wsRoot: getWSV2().wsRoot,
       fsPath: uri.fsPath,
     });
-    const vpath = vault2Path({ vault, wsRoot: DendronWorkspace.wsRoot() });
+    const vpath = vault2Path({ vault, wsRoot: getWSV2().wsRoot });
     const suffix = path.join("assets", cleanFname(path.basename(filePath)));
     const dstPath = path.join(vpath, suffix);
 

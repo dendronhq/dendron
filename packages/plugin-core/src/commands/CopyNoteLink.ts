@@ -5,7 +5,7 @@ import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { clipboard, DendronClientUtilsV2, VSCodeUtils } from "../utils";
 import { getSelectionAnchors } from "../utils/editor";
-import { DendronWorkspace, getEngine } from "../workspace";
+import { getEngine, getWSV2 } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandOpts = {};
@@ -37,7 +37,7 @@ export class CopyNoteLinkCommand extends BasicCommand<
       fname,
       vault,
       notes,
-      wsRoot: DendronWorkspace.wsRoot(),
+      wsRoot: getWSV2().wsRoot,
     }) as NoteProps;
     if (!note) {
       throw Error(
@@ -62,7 +62,7 @@ export class CopyNoteLinkCommand extends BasicCommand<
             type: isBlockAnchor(anchor) ? "blockAnchor" : "header",
           },
       useVaultPrefix: DendronClientUtilsV2.shouldUseVaultPrefix(getEngine()),
-      alias: { mode: "title" }
+      alias: { mode: "title" },
     });
     try {
       clipboard.writeText(link);

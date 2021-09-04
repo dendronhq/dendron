@@ -5,7 +5,7 @@ import { commands, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { Logger } from "../logger";
 import { VSCodeUtils } from "../utils";
-import { DendronWorkspace } from "../workspace";
+import { DendronWorkspace, getWSV2 } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandOpts = {
@@ -40,7 +40,7 @@ export class VaultRemoveCommand extends BasicCommand<
     const ctx = "VaultRemove";
     // NOTE: relative vault
     const { vault } = opts;
-    const wsRoot = DendronWorkspace.wsRoot() as string;
+    const wsRoot = getWSV2().wsRoot as string;
     const wsService = new WorkspaceService({ wsRoot });
     Logger.info({ ctx, msg: "preRemoveVault", vault });
     await wsService.removeVault({ vault, updateWorkspace: true });

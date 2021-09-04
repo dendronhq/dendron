@@ -5,16 +5,18 @@ import {
   VaultUtils,
 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
-import fs from "fs-extra";
 import {
-  DendronASTDest,
   AnchorUtils,
+  DendronASTDest,
   MDUtilsV5,
   ProcFlavor,
 } from "@dendronhq/engine-server";
+import fs from "fs-extra";
+import _ from "lodash";
 import path from "path";
 import vscode, { Uri } from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
+import { Logger } from "../logger";
 import {
   containsImageExt,
   containsNonDendronUri,
@@ -22,9 +24,7 @@ import {
   getReferenceAtPosition,
   isUncPath,
 } from "../utils/md";
-import { DendronWorkspace, getEngine, getWS } from "../workspace";
-import _ from "lodash";
-import { Logger } from "../logger";
+import { getEngine, getWSV2 } from "../workspace";
 
 const HOVER_IMAGE_MAX_HEIGHT = Math.max(200, 10);
 
@@ -36,7 +36,7 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
   }): Promise<string> {
     const vpath = vault2Path({
       vault: PickerUtilsV2.getVaultForOpenEditor(),
-      wsRoot: DendronWorkspace.wsRoot(),
+      wsRoot: getWSV2().wsRoot,
     });
     const fullPath = path.join(vpath, refAtPos.ref);
     const foundUri = Uri.file(fullPath);
@@ -68,7 +68,9 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
       ? ` in vault "${refAtPos.vaultName}"`
       : "";
     const ctrlClickToCreate =
-      getWS().config.noAutoCreateOnDefinition === false ? "Ctrl+Click or " : "";
+      getWSV2().config.noAutoCreateOnDefinition === false
+        ? "Ctrl+Click or "
+        : "";
     return `Note ${refAtPos.ref}${vaultName} is missing, ${ctrlClickToCreate}use "Dendron: Goto Note" command to create it.`;
   }
 

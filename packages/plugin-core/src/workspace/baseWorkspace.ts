@@ -12,7 +12,6 @@ import * as vscode from "vscode";
 export abstract class DendronBaseWorkspace implements DWorkspaceV2 {
   public wsRoot: string;
   public type = WorkspaceType.NATIVE;
-  public vaults: DVault[];
   public logUri: vscode.Uri;
   public assetUri: vscode.Uri;
   protected _engine?: DEngineClient;
@@ -28,12 +27,17 @@ export abstract class DendronBaseWorkspace implements DWorkspaceV2 {
   }) {
     this.wsRoot = wsRoot;
     this.logUri = logUri;
-    this.vaults = this.config.vaults;
     this.assetUri = assetUri;
   }
 
+  // TODO: optimize to not read every time
   get config(): DendronConfig {
     return DConfig.defaults(DConfig.getOrCreate(this.wsRoot));
+  }
+
+  // TODO: optimize to not read every time
+  get vaults(): DVault[] {
+    return this.config.vaults;
   }
 
   get engine(): DEngineClient {

@@ -13,7 +13,7 @@ import { Uri, window } from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { UNKNOWN_ERROR_MSG } from "../logger";
 import { VSCodeUtils } from "../utils";
-import { DendronWorkspace } from "../workspace";
+import { DendronWorkspace, getWSV2 } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandOpts = { direction: "next" | "prev" };
@@ -48,14 +48,14 @@ export class GoToSiblingCommand extends BasicCommand<
     if (value === "root") {
       const vault = VaultUtils.getVaultByNotePath({
         vaults: client.vaults,
-        wsRoot: DendronWorkspace.wsRoot(),
+        wsRoot: getWSV2().wsRoot,
         fsPath: maybeTextEditor.document.uri.fsPath,
       });
       const rootNode = NoteUtils.getNoteByFnameV5({
         fname: value,
         vault,
         notes: client.notes,
-        wsRoot: DendronWorkspace.wsRoot(),
+        wsRoot: getWSV2().wsRoot,
       }) as NoteProps;
       if (_.isUndefined(rootNode)) {
         throw new DendronError({ message: "no root node found" });
@@ -129,7 +129,7 @@ export class GoToSiblingCommand extends BasicCommand<
     }
     const vpath = vault2Path({
       vault: siblingNote.vault,
-      wsRoot: DendronWorkspace.wsRoot(),
+      wsRoot: getWSV2().wsRoot,
     });
     await VSCodeUtils.openFileInEditor(
       VSCodeUtils.joinPath(Uri.file(vpath), siblingNote.fname + ".md")

@@ -5,7 +5,7 @@ import path from "path";
 import { window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils, WSUtils } from "../utils";
-import { DendronWorkspace } from "../workspace";
+import { DendronWorkspace, getWSV2 } from "../workspace";
 import { BaseCommand } from "./base";
 
 type CommandOpts = { src: string };
@@ -22,10 +22,7 @@ export class RestoreVaultCommand extends BaseCommand<
 > {
   key = DENDRON_COMMANDS.RESTORE_VAULT.key;
   async gatherInputs(): Promise<any> {
-    const snapshots = path.join(
-      DendronWorkspace.wsRoot() as string,
-      "snapshots"
-    );
+    const snapshots = path.join(getWSV2().wsRoot as string, "snapshots");
 
     const choices = readdirSync(snapshots)
       .sort()
@@ -39,10 +36,7 @@ export class RestoreVaultCommand extends BaseCommand<
   }
 
   async enrichInputs(inputs: CommandInput): Promise<CommandOpts | undefined> {
-    const snapshots = path.join(
-      DendronWorkspace.wsRoot() as string,
-      "snapshots"
-    );
+    const snapshots = path.join(getWSV2().wsRoot as string, "snapshots");
     const { data } = inputs;
     const src = path.join(snapshots, data);
     if (!fs.existsSync(src)) {
@@ -59,7 +53,7 @@ export class RestoreVaultCommand extends BaseCommand<
       const pod = new SnapshotImportPod();
       const engine = DendronWorkspace.instance().getEngine();
       const vault = engine.vaults[0];
-      const wsRoot = DendronWorkspace.wsRoot() as string;
+      const wsRoot = getWSV2().wsRoot as string;
       if (ws.fileWatcher) {
         ws.fileWatcher.pause = true;
       }

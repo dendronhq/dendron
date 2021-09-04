@@ -9,12 +9,12 @@ import {
 } from "@dendronhq/common-all";
 import { refLink2Stringv2 } from "@dendronhq/engine-server";
 import _ from "lodash";
-import { TextEditor, window, Selection, Range, Position } from "vscode";
+import { Position, Range, Selection, TextEditor, window } from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { clipboard, DendronClientUtilsV2, VSCodeUtils } from "../utils";
 import { getSelectionAnchors } from "../utils/editor";
-import { DendronWorkspace, getEngine } from "../workspace";
+import { getEngine, getWSV2 } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandOpts = {};
@@ -106,7 +106,7 @@ export class CopyNoteRefCommand extends BasicCommand<
   async execute(_opts: CommandOpts) {
     const editor = VSCodeUtils.getActiveTextEditor() as TextEditor;
     const fname = NoteUtils.uri2Fname(editor.document.uri);
-    const wsRoot = DendronWorkspace.wsRoot();
+    const wsRoot = getWSV2().wsRoot;
     const vault = PickerUtilsV2.getVaultForOpenEditor();
     const engine = getEngine();
     const note: NoteProps = NoteUtils.getNoteOrThrow({

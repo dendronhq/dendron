@@ -1,12 +1,12 @@
+import { getPortFilePath } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import path from "path";
 import { window, workspace } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { Logger } from "../logger";
-import { DendronWorkspace, getWS } from "../workspace";
-import { BasicCommand } from "./base";
-import { getPortFilePath } from "@dendronhq/engine-server";
 import { clipboard } from "../utils";
+import { DendronWorkspace, getWSV2 } from "../workspace";
+import { BasicCommand } from "./base";
 
 const L = Logger;
 
@@ -35,8 +35,8 @@ export class DiagnosticsReportCommand extends BasicCommand<
     const serverLogFile = fs.readFileSync(serverLogPath, { encoding: "utf8" });
     const serverLastLines = serverLogFile.slice(-3000);
 
-    const config = JSON.stringify(getWS().config);
-    const wsRoot = DendronWorkspace.wsRoot();
+    const config = JSON.stringify(getWSV2().config);
+    const wsRoot = getWSV2().wsRoot;
     const port = getPortFilePath({ wsRoot });
     const portFromFile = fs.readFileSync(port, { encoding: "utf8" });
 

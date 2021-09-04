@@ -19,7 +19,7 @@ import { DendronQuickPickerV2 } from "../components/lookup/types";
 import { DENDRON_COMMANDS } from "../constants";
 import { PickerUtilsV2, OldNewLocation } from "../components/lookup/utils";
 import { Uri } from "vscode";
-import { DendronWorkspace } from "../workspace";
+import { DendronWorkspace, getWSV2 } from "../workspace";
 import { getDurationMilliseconds, vault2Path } from "@dendronhq/common-server";
 import { HistoryService } from "@dendronhq/engine-server";
 import { AnalyticsUtils } from "../utils/analytics";
@@ -193,7 +193,7 @@ export class SchemaLookupCommand extends BaseCommand<
   ): Promise<OnDidAcceptReturn | undefined> {
     const vpath = vault2Path({
       vault: item.vault,
-      wsRoot: DendronWorkspace.wsRoot(),
+      wsRoot: getWSV2().wsRoot,
     });
     const schemaModule =
       DendronWorkspace.instance().getEngine().schemas[item.id];
@@ -219,7 +219,7 @@ export class SchemaLookupCommand extends BaseCommand<
         fname,
         vault,
       });
-    const vpath = vault2Path({ vault, wsRoot: DendronWorkspace.wsRoot() });
+    const vpath = vault2Path({ vault, wsRoot: getWSV2().wsRoot });
     const uri = Uri.file(SchemaUtils.getPath({ root: vpath, fname }));
     const resp = await engine.writeSchema(nodeSchemaModuleNew);
 

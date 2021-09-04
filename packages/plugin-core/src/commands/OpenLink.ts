@@ -1,5 +1,4 @@
-import { ERROR_STATUS, DendronError } from "@dendronhq/common-all";
-
+import { DendronError, ERROR_STATUS } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -9,7 +8,7 @@ import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { resolvePath, VSCodeUtils } from "../utils";
 import { isAnythingSelected } from "../utils/editor";
-import { DendronWorkspace, getWS } from "../workspace";
+import { getWS, getWSV2 } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandOpts = {};
@@ -44,7 +43,7 @@ export class OpenLinkCommand extends BasicCommand<CommandOpts, CommandOutput> {
       this.L.error({ error });
       return { error };
     }
-    const wsRoot = DendronWorkspace.wsRoot();
+    const wsRoot = getWSV2().wsRoot;
     let assetPath: string;
     if (text.startsWith("asset")) {
       const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();

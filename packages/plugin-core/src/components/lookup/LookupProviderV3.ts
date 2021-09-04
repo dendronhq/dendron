@@ -1,5 +1,6 @@
 import {
   DNodeUtils,
+  NoteLookupUtils,
   NoteProps,
   NoteQuickInput,
   NoteUtils,
@@ -8,7 +9,6 @@ import {
   SchemaQuickInput,
   SchemaUtils,
   VSCodeEvents,
-  NoteLookupUtils,
 } from "@dendronhq/common-all";
 import { getDurationMilliseconds } from "@dendronhq/common-server";
 import { HistoryService } from "@dendronhq/engine-server";
@@ -16,7 +16,7 @@ import _ from "lodash";
 import { CancellationToken, CancellationTokenSource, window } from "vscode";
 import { Logger } from "../../logger";
 import { AnalyticsUtils } from "../../utils/analytics";
-import { DendronWorkspace, getWSV2 } from "../../workspace";
+import { getWSV2 } from "../../workspace";
 import { LookupControllerV3 } from "./LookupControllerV3";
 import { DendronQuickPickerV2, DendronQuickPickState } from "./types";
 import {
@@ -318,7 +318,7 @@ export class NoteLookupProvider implements ILookupProviderV3 {
             updatedItems,
             (ent) => ent.fname
           );
-          const {wsRoot, vaults} = getWSV2();
+          const { wsRoot, vaults } = getWSV2();
           updatedItems = updatedItems.concat(
             candidatesToAdd.map((ent) => {
               return DNodeUtils.enhancePropForQuickInputV3({
@@ -544,7 +544,7 @@ export class SchemaLookupProvider implements ILookupProviderV3 {
         );
         picker.items = nodes.map((ent) => {
           return DNodeUtils.enhancePropForQuickInputV3({
-            wsRoot: DendronWorkspace.wsRoot(),
+            wsRoot: getWSV2().wsRoot,
             props: ent,
             schemas: engine.schemas,
             vaults: ws.vaults,

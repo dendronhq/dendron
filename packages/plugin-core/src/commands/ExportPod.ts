@@ -9,7 +9,7 @@ import { Uri, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../utils";
 import { showPodQuickPickItemsV4 } from "../utils/pods";
-import { DendronWorkspace } from "../workspace";
+import { DendronWorkspace, getWSV2 } from "../workspace";
 import { BaseCommand } from "./base";
 
 type CommandOutput = void;
@@ -61,7 +61,7 @@ export class ExportPodCommand extends BaseCommand<
     const ctx = { ctx: "ExportPod" };
     this.L.info({ ctx, opts });
     const vaults = DendronWorkspace.instance().vaultsv4;
-    const wsRoot = DendronWorkspace.wsRoot();
+    const wsRoot = getWSV2().wsRoot;
     if (!wsRoot) {
       throw Error("ws root not defined");
     }

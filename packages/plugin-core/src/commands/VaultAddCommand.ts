@@ -20,7 +20,7 @@ import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS, DENDRON_REMOTE_VAULTS } from "../constants";
 import { Logger } from "../logger";
 import { VSCodeUtils } from "../utils";
-import { DendronWorkspace } from "../workspace";
+import { DendronWorkspace, getWSV2 } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandOpts = {
@@ -146,12 +146,12 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
         progress.report({
           message: "cloning repo",
         });
-        const baseDir = DendronWorkspace.wsRoot();
+        const baseDir = getWSV2().wsRoot;
         const git = simpleGit({ baseDir });
         await git.clone(opts.pathRemote!, opts.path);
         const { vaults, workspace } = GitUtils.getVaultsFromRepo({
           repoPath: path.join(baseDir, opts.path),
-          wsRoot: DendronWorkspace.wsRoot(),
+          wsRoot: getWSV2().wsRoot,
           repoUrl: opts.pathRemote!,
         });
         if (_.size(vaults) === 1 && opts.name) {
@@ -161,7 +161,7 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
         progress.report({
           message: "adding vault",
         });
-        const wsRoot = DendronWorkspace.wsRoot();
+        const wsRoot = getWSV2().wsRoot;
         const wsService = new WorkspaceService({ wsRoot });
 
         if (workspace) {
@@ -185,7 +185,7 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
   }
 
   async addWorkspaceToWorkspace(workspace: DWorkspace) {
-    const wsRoot = DendronWorkspace.wsRoot();
+    const wsRoot = getWSV2().wsRoot;
     const vaults = workspace.vaults;
 
     await _.reduce(
@@ -216,7 +216,7 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
   }
 
   async addVaultToWorkspace(vault: DVault) {
-    const wsRoot = DendronWorkspace.wsRoot();
+    const wsRoot = getWSV2().wsRoot;
 
     // workspace file
     const wsPath = DendronWorkspace.workspaceFile().fsPath;
@@ -258,7 +258,7 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
     if (opts.type === "remote") {
       ({ vaults } = await this.handleRemoteRepo(opts));
     } else {
-      const wsRoot = DendronWorkspace.wsRoot();
+      const wsRoot = getWSV2().wsRoot;
       const fsPath = VaultUtils.normVaultPath({
         vault: { fsPath: opts.path },
         wsRoot,

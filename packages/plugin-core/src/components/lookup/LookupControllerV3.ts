@@ -5,13 +5,13 @@ import { QuickInputButton } from "vscode";
 import { CancellationTokenSource } from "vscode-languageclient";
 import { Logger } from "../../logger";
 import { VSCodeUtils } from "../../utils";
-import { DendronWorkspace, getWS } from "../../workspace";
+import { DendronWorkspace, getWSV2 } from "../../workspace";
 import {
   ButtonCategory,
   DendronBtn,
   getButtonCategory,
   IDendronQuickInputButton,
-  VaultSelectButton,
+  VaultSelectButton
 } from "./buttons";
 import { ILookupProviderV3 } from "./LookupProviderV3";
 import { DendronQuickPickerV2, LookupControllerState } from "./types";
@@ -19,7 +19,7 @@ import {
   CreateQuickPickOpts,
   PickerUtilsV2,
   PrepareQuickPickOpts,
-  ShowQuickPickOpts,
+  ShowQuickPickOpts
 } from "./utils";
 
 export type LookupControllerV3CreateOpts = {
@@ -60,7 +60,7 @@ export class LookupControllerV3 {
   public _provider?: ILookupProviderV3;
 
   static create(opts?: LookupControllerV3CreateOpts) {
-    const vaults = getWS().getEngine().vaults;
+    const {vaults} = getWSV2();
     const disableVaultSelection =
       (_.isBoolean(opts?.disableVaultSelection) &&
         opts?.disableVaultSelection) ||

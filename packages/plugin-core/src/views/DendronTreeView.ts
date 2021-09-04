@@ -5,7 +5,7 @@ import {
   NoteProps,
   NotePropsDict,
   NoteUtils,
-  VaultUtils,
+  VaultUtils
 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import { HistoryEvent, HistoryService } from "@dendronhq/engine-server";
@@ -17,12 +17,12 @@ import vscode, {
   ThemeIcon,
   TreeView,
   Uri,
-  window,
+  window
 } from "vscode";
 import { GotoNoteCommandOpts } from "../commands/GotoNote";
 import { DENDRON_COMMANDS, ICONS } from "../constants";
 import { Logger } from "../logger";
-import { DendronWorkspace, getEngine, getWS, getWSV2 } from "../workspace";
+import { getExtension, getWSV2 } from "../workspace";
 
 function createTreeNote(note: NoteProps) {
   const collapsibleState = _.isEmpty(note.children)
@@ -60,7 +60,7 @@ export class TreeNote extends vscode.TreeItem {
     this.tooltip = this.note.title;
     const vpath = vault2Path({
       vault: this.note.vault,
-      wsRoot: DendronWorkspace.wsRoot(),
+      wsRoot: getWSV2().wsRoot,
     });
     this.uri = Uri.file(path.join(vpath, this.note.fname + ".md"));
     if (DNodeUtils.isRoot(note)) {
@@ -174,7 +174,7 @@ export class DendronTreeView {
       "extension",
       async (_event: HistoryEvent) => {
         if (_event.action === "initialized") {
-          const ws = DendronWorkspace.instanceV2();
+          const ws = getExtension();
           const treeDataProvider = new EngineNoteProvider();
           await treeDataProvider.getChildren();
           const treeView = window.createTreeView(DendronTreeViewKey.TREE_VIEW, {
@@ -192,7 +192,7 @@ export class DendronTreeView {
     public treeView: TreeView<string>,
     public treeProvider: EngineNoteProvider
   ) {
-    DendronWorkspace.instanceV2().addDisposable(
+    getExtension().addDisposable(
       window.onDidChangeActiveTextEditor(this.onOpenTextDocument, this)
     );
   }
@@ -206,22 +206,22 @@ export class DendronTreeView {
     }
     const uri = editor.document.uri;
     const basename = path.basename(uri.fsPath);
-    const wsRoot = DendronWorkspace.wsRoot();
-    const ws = getWS();
-    if (!ws.workspaceService?.isPathInWorkspace(uri.fsPath)) {
+    const {wsRoot, vaults, engine} = getWSV2();
+    const ext = getExtension();
+    if (!ext.workspaceService?.isPathInWorkspace(uri.fsPath)) {
       return;
     }
     if (basename.endsWith(".md")) {
       const vault = VaultUtils.getVaultByNotePath({
         fsPath: uri.fsPath,
         wsRoot,
-        vaults: getWSV2().vaults,
+        vaults,
       });
       const fname = NoteUtils.uri2Fname(uri);
       const note = NoteUtils.getNoteByFnameV5({
         fname,
         vault,
-        notes: getEngine().notes,
+        notes: engine.notes,
         wsRoot,
       }) as NoteProps;
       if (note && !this.pause) {

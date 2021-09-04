@@ -1,7 +1,7 @@
 import {
   launchv2,
   ServerUtils,
-  SubProcessExitType,
+  SubProcessExitType
 } from "@dendronhq/api-server";
 import {
   CONSTANTS,
@@ -12,19 +12,19 @@ import {
   Time,
   VaultUtils,
   VSCodeEvents,
-  WorkspaceType,
+  WorkspaceType
 } from "@dendronhq/common-all";
 import {
   getDurationMilliseconds,
   getOS,
   SegmentClient,
-  writeJSONWithComments,
+  writeJSONWithComments
 } from "@dendronhq/common-server";
 import {
   HistoryService,
   MetadataService,
   WorkspaceService,
-  WorkspaceUtils,
+  WorkspaceUtils
 } from "@dendronhq/engine-server";
 import { ExecaChildProcess } from "execa";
 import fs from "fs-extra";
@@ -42,7 +42,8 @@ import { setupSegmentClient } from "./telemetry";
 import { GOOGLE_OAUTH_ID, GOOGLE_OAUTH_SECRET } from "./types/global";
 import { KeybindingUtils, VSCodeUtils, WSUtils } from "./utils";
 import { AnalyticsUtils } from "./utils/analytics";
-import { DendronWorkspace, getEngine, getWSV2 } from "./workspace";
+import { DendronTreeView } from "./views/DendronTreeView";
+import { DendronWorkspace, getEngine, getExtension, getWSV2 } from "./workspace";
 import { DendronCodeWorkspace } from "./workspace/codeWorkspace";
 import { DendronNativeWorkspace } from "./workspace/nativeWorkspace";
 import { WorkspaceInitFactory } from "./workspace/workspaceInitializer";
@@ -53,6 +54,7 @@ const MARKDOWN_WORD_PATTERN = new RegExp("([\\w\\.\\#]+)");
 // this method is called when your extension is activated
 export function activate(context: vscode.ExtensionContext) {
   const stage = getStage();
+  DendronTreeView.register(context);
   // override default word pattern
   vscode.languages.setLanguageConfiguration("markdown", {
     wordPattern: MARKDOWN_WORD_PATTERN,
@@ -221,7 +223,7 @@ export async function _activate(
 
   // Setup the workspace trust callback to detect changes from the user's workspace trust settings
   vscode.workspace.onDidGrantWorkspaceTrust(() => {
-    getEngine().trustedWorkspace = vscode.workspace.isTrusted;
+    getExtension().getEngine().trustedWorkspace = vscode.workspace.isTrusted;
   });
 
   //  needs to be initialized to setup commands

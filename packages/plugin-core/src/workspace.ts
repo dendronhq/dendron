@@ -143,8 +143,12 @@ export function getWSV2(): DWorkspaceV2 {
   return ws.getWorkspaceImplOrThrow();
 }
 
+export function getExtension(): DendronWorkspace {
+  return DendronWorkspace.instanceV2();
+}
+
 export function getEngine() {
-  return DendronWorkspace.instance().getEngine();
+  return getExtension().getEngine();
 }
 
 export function resolveRelToWSRoot(fpath: string): string {
@@ -725,7 +729,7 @@ export class DendronWorkspace {
     const ctx = "activateWorkspace";
     const stage = getStage();
     this.L.info({ ctx, stage, msg: "enter" });
-    const wsRoot = DendronWorkspace.wsRoot();
+    const {wsRoot} = getWSV2();
     if (!wsRoot) {
       throw new Error(`rootDir not set when activating Watcher`);
     }

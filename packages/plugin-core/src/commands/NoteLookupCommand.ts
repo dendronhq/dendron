@@ -6,7 +6,7 @@ import {
   NoteQuickInput,
   NoteUtils,
   SchemaUtils,
-  VSCodeEvents,
+  VSCodeEvents
 } from "@dendronhq/common-all";
 import { getDurationMilliseconds } from "@dendronhq/common-server";
 import { DConfig, HistoryService } from "@dendronhq/engine-server";
@@ -20,14 +20,14 @@ import {
   MultiSelectBtn,
   ScratchBtn,
   Selection2LinkBtn,
-  SelectionExtractBtn,
+  SelectionExtractBtn
 } from "../components/lookup/buttons";
 import { LookupControllerV3 } from "../components/lookup/LookupControllerV3";
 import {
   ILookupProviderV3,
   NoteLookupProvider,
   NoteLookupProviderChangeStateResp,
-  NoteLookupProviderSuccessResp,
+  NoteLookupProviderSuccessResp
 } from "../components/lookup/LookupProviderV3";
 import {
   DendronQuickPickerV2,
@@ -39,18 +39,18 @@ import {
   LookupSelectionTypeEnum,
   LookupSplitType,
   LookupSplitTypeEnum,
-  VaultSelectionMode,
+  VaultSelectionMode
 } from "../components/lookup/types";
 import {
   node2Uri,
   NotePickerUtils,
   OldNewLocation,
-  PickerUtilsV2,
+  PickerUtilsV2
 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { Logger } from "../logger";
 import { AnalyticsUtils } from "../utils/analytics";
-import { DendronWorkspace, getEngine, getWS } from "../workspace";
+import { DendronWorkspace, getEngine, getWSV2 } from "../workspace";
 import { BaseCommand } from "./base";
 
 export type CommandRunOpts = {
@@ -137,7 +137,7 @@ export class NoteLookupCommand extends BaseCommand<
 
   async gatherInputs(opts?: CommandRunOpts): Promise<CommandGatherOutput> {
     const start = process.hrtime();
-    const ws = getWS();
+    const ws = getWSV2();
     const noteLookupConfig: NoteLookupConfig = DConfig.getProp(
       ws.config,
       "lookup"

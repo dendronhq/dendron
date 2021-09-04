@@ -16,7 +16,7 @@ import _ from "lodash";
 import { CancellationToken, CancellationTokenSource, window } from "vscode";
 import { Logger } from "../../logger";
 import { AnalyticsUtils } from "../../utils/analytics";
-import { DendronWorkspace } from "../../workspace";
+import { DendronWorkspace, getWSV2 } from "../../workspace";
 import { LookupControllerV3 } from "./LookupControllerV3";
 import { DendronQuickPickerV2, DendronQuickPickState } from "./types";
 import {
@@ -218,7 +218,7 @@ export class NoteLookupProvider implements ILookupProviderV3 {
     // get prior
     const querystring = PickerUtilsV2.slashToDot(pickerValue);
     const queryOrig = PickerUtilsV2.slashToDot(picker.value);
-    const ws = DendronWorkspace.instance();
+    const ws = getWSV2();
     let profile: number;
     const queryEndsWithDot = queryOrig.endsWith(".");
     const queryUpToLastDot =
@@ -226,7 +226,7 @@ export class NoteLookupProvider implements ILookupProviderV3 {
         ? queryOrig.slice(0, queryOrig.lastIndexOf("."))
         : undefined;
 
-    const engine = ws.getEngine();
+    const engine = ws.engine;
     Logger.info({
       ctx,
       msg: "enter",
@@ -318,13 +318,14 @@ export class NoteLookupProvider implements ILookupProviderV3 {
             updatedItems,
             (ent) => ent.fname
           );
+          const {wsRoot, vaults} = getWSV2();
           updatedItems = updatedItems.concat(
             candidatesToAdd.map((ent) => {
               return DNodeUtils.enhancePropForQuickInputV3({
-                wsRoot: DendronWorkspace.wsRoot(),
+                wsRoot,
                 props: ent,
                 schemas: engine.schemas,
-                vaults: DendronWorkspace.instance().vaultsv4,
+                vaults,
               });
             })
           );
@@ -526,10 +527,10 @@ export class SchemaLookupProvider implements ILookupProviderV3 {
     // get prior
     const querystring = PickerUtilsV2.slashToDot(pickerValue);
     const queryOrig = PickerUtilsV2.slashToDot(picker.value);
-    const ws = DendronWorkspace.instance();
+    const ws = getWSV2();
     let profile: number;
 
-    const engine = ws.getEngine();
+    const engine = ws.engine;
     Logger.info({ ctx, msg: "enter", queryOrig });
     try {
       // if empty string, show all 1st level results
@@ -546,7 +547,7 @@ export class SchemaLookupProvider implements ILookupProviderV3 {
             wsRoot: DendronWorkspace.wsRoot(),
             props: ent,
             schemas: engine.schemas,
-            vaults: ws.vaultsv4,
+            vaults: ws.vaults,
           });
         });
         return;

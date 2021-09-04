@@ -751,12 +751,14 @@ export class WorkspaceService {
     currentVersion,
     previousVersion,
     dendronConfig,
+    wsConfig,
   }: {
     forceUpgrade?: boolean;
     workspaceInstallStatus: InstallStatus;
     currentVersion: string;
     previousVersion: string;
     dendronConfig: DendronConfig;
+    wsConfig: WorkspaceSettings;
   }) {
     // check if we need to force a migration
     try {
@@ -778,6 +780,7 @@ export class WorkspaceService {
         currentVersion,
         previousVersion,
         dendronConfig,
+        wsConfig,
         wsService: this,
         logger: this.logger,
       });

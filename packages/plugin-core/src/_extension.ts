@@ -288,6 +288,7 @@ export async function _activate(
       previousVersion: previousWorkspaceVersion,
       dendronConfig,
       workspaceInstallStatus,
+      wsConfig: await DendronWorkspace.instance().getWorkspaceSettings(),
     });
     // initialize client
     setupSegmentClient(ws);

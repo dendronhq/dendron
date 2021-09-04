@@ -18,7 +18,11 @@ export default function DendronLogoOrTitle() {
     <Link href={siteUrl}>
       {/* eslint-disable-next-line jsx-a11y/anchor-is-valid -- `href` will be provided by `Link` */}
       <a
-        style={{ display: "inline-block", height: "100%", padding: "4px" }}
+        style={{
+          display: "inline-block",
+          height: DENDRON_STYLE_CONSTANTS.HEADER.HEIGHT,
+          padding: "4px",
+        }}
         className="site-title"
       >
         {engine.config?.site.logo ? (

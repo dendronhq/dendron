@@ -143,7 +143,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     // get logo
     if (siteConfig.logo) {
       const logoPath = path.join(wsRoot, siteConfig.logo);
-      fs.copySync(logoPath, path.join(destPublicPath, path.basename(logoPath)));
+      fs.copySync(logoPath, path.join(siteAssetsDir, path.basename(logoPath)));
     }
     // /get cname
     if (siteConfig.githubCname) {

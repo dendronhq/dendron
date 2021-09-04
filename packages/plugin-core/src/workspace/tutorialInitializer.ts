@@ -1,8 +1,10 @@
 import {
   DendronError,
   DVault,
+  DWorkspaceV2,
   getStage,
   TutorialEvents,
+  VaultUtils,
 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -71,14 +73,12 @@ export class TutorialInitializer
     });
   }
 
-  async onWorkspaceOpen(opts: { ws: DendronWorkspace }): Promise<void> {
+  async onWorkspaceOpen(opts: { ws: DWorkspaceV2 }): Promise<void> {
     const ctx = "TutorialInitializer.onWorkspaceOpen";
 
-    const rootUri = VSCodeUtils.joinPath(
-      opts.ws.rootWorkspace.uri,
-      "tutorial.md"
-    );
-
+    const { wsRoot, vaults } = opts.ws;
+    const vaultRelPath = VaultUtils.getRelPath(vaults[0]);
+    const rootUri = vscode.Uri.file(path.join(wsRoot, vaultRelPath));
     if (fs.pathExistsSync(rootUri.fsPath)) {
       // Set the view to have the tutorial page showing with the preview opened to the side.
       await vscode.window.showTextDocument(rootUri);
@@ -100,8 +100,9 @@ export class TutorialInitializer
     );
 
     // Register a special analytics handler for the tutorial:
-    if (opts.ws.windowWatcher) {
-      opts.ws.windowWatcher.registerActiveTextEditorChangedHandler((e) => {
+    const extension = DendronWorkspace.instanceV2();
+    if (extension.windowWatcher) {
+      extension.windowWatcher.registerActiveTextEditorChangedHandler((e) => {
         const fileName = e?.document.uri.fsPath;
 
         let eventName: TutorialEvents | undefined;

@@ -175,6 +175,13 @@ export class DendronWorkspace {
     return _DendronWorkspace;
   }
 
+  static instanceV2(): DendronWorkspace {
+    if (!_DendronWorkspace) {
+      throw Error("Dendronworkspace not initialized");
+    }
+    return _DendronWorkspace;
+  }
+
   static serverConfiguration() {
     if (!DendronWorkspace._SERVER_CONFIGURATION) {
       DendronWorkspace._SERVER_CONFIGURATION = {};
@@ -364,11 +371,12 @@ export class DendronWorkspace {
   ) {
     opts = _.defaults(opts, { skipSetup: false });
     this.context = context;
+    // set the default
+    this.type = WorkspaceType.CODE;
     this.type = WorkspaceUtils.getWorkspaceType({
       workspaceFile: vscode.workspace.workspaceFile,
       workspaceFolders: vscode.workspace.workspaceFolders,
     });
-    this.type = WorkspaceType.CODE;
     _DendronWorkspace = this;
     this.L = Logger;
     this.disposableStore = new DisposableStore();

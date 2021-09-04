@@ -1,12 +1,14 @@
 import {
   DendronError,
+  DendronTreeViewKey,
   DNodeUtils,
-  NotePropsDict,
   NoteProps,
+  NotePropsDict,
   NoteUtils,
   VaultUtils,
-  DendronTreeViewKey,
 } from "@dendronhq/common-all";
+import { vault2Path } from "@dendronhq/common-server";
+import { HistoryEvent, HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
 import vscode, {
@@ -20,9 +22,7 @@ import vscode, {
 import { GotoNoteCommandOpts } from "../commands/GotoNote";
 import { DENDRON_COMMANDS, ICONS } from "../constants";
 import { Logger } from "../logger";
-import { DendronWorkspace, getEngine, getWS } from "../workspace";
-import { HistoryEvent, HistoryService } from "@dendronhq/engine-server";
-import { vault2Path } from "@dendronhq/common-server";
+import { DendronWorkspace, getEngine, getWS, getWSV2 } from "../workspace";
 
 function createTreeNote(note: NoteProps) {
   const collapsibleState = _.isEmpty(note.children)
@@ -77,7 +77,7 @@ export class TreeNote extends vscode.TreeItem {
         } as GotoNoteCommandOpts,
       ],
     };
-    this.L = DendronWorkspace.instance().L;
+    this.L = Logger;
   }
 }
 
@@ -109,28 +109,28 @@ export class EngineNoteProvider implements vscode.TreeDataProvider<string> {
   getChildren(id?: string): Thenable<string[]> {
     const ctx = "TreeView:getChildren";
     Logger.debug({ ctx, id });
-    const client = DendronWorkspace.instance().getEngine();
-    const roots = _.filter(_.values(client.notes), DNodeUtils.isRoot);
+    const { engine } = getWSV2();
+    const roots = _.filter(_.values(engine.notes), DNodeUtils.isRoot);
     if (!roots) {
       vscode.window.showInformationMessage("No notes found");
       return Promise.resolve([]);
     }
     if (id) {
       const children = this.tree[id].children;
-      this.sortChildren(children, client.notes);
+      this.sortChildren(children, engine.notes);
       return Promise.resolve(children);
     } else {
       Logger.info({ ctx, msg: "reconstructing tree" });
       return Promise.all(
         roots.flatMap(
-          async (root) => (await this.parseTree(root, client.notes)).id
+          async (root) => (await this.parseTree(root, engine.notes)).id
         )
       );
     }
   }
 
   async getParent(id: string) {
-    const client = DendronWorkspace.instance().getEngine();
+    const { engine: client } = getWSV2();
     const maybeParent =
       client.notes[(this.tree[id] as TreeNote).note.parent || ""];
     return maybeParent ? maybeParent.id : null;
@@ -174,7 +174,7 @@ export class DendronTreeView {
       "extension",
       async (_event: HistoryEvent) => {
         if (_event.action === "initialized") {
-          const ws = DendronWorkspace.instance();
+          const ws = DendronWorkspace.instanceV2();
           const treeDataProvider = new EngineNoteProvider();
           await treeDataProvider.getChildren();
           const treeView = window.createTreeView(DendronTreeViewKey.TREE_VIEW, {
@@ -192,7 +192,7 @@ export class DendronTreeView {
     public treeView: TreeView<string>,
     public treeProvider: EngineNoteProvider
   ) {
-    DendronWorkspace.instance().addDisposable(
+    DendronWorkspace.instanceV2().addDisposable(
       window.onDidChangeActiveTextEditor(this.onOpenTextDocument, this)
     );
   }
@@ -215,7 +215,7 @@ export class DendronTreeView {
       const vault = VaultUtils.getVaultByNotePath({
         fsPath: uri.fsPath,
         wsRoot,
-        vaults: DendronWorkspace.instance().vaultsv4,
+        vaults: getWSV2().vaults,
       });
       const fname = NoteUtils.uri2Fname(uri);
       const note = NoteUtils.getNoteByFnameV5({

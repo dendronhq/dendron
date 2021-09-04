@@ -42,8 +42,7 @@ import { setupSegmentClient } from "./telemetry";
 import { GOOGLE_OAUTH_ID, GOOGLE_OAUTH_SECRET } from "./types/global";
 import { KeybindingUtils, VSCodeUtils, WSUtils } from "./utils";
 import { AnalyticsUtils } from "./utils/analytics";
-import { DendronTreeView } from "./views/DendronTreeView";
-import { DendronWorkspace, getEngine, getWS, getWSV2 } from "./workspace";
+import { DendronWorkspace, getEngine, getWSV2 } from "./workspace";
 import { DendronCodeWorkspace } from "./workspace/codeWorkspace";
 import { DendronNativeWorkspace } from "./workspace/nativeWorkspace";
 import { WorkspaceInitFactory } from "./workspace/workspaceInitializer";
@@ -54,7 +53,6 @@ const MARKDOWN_WORD_PATTERN = new RegExp("([\\w\\.\\#]+)");
 // this method is called when your extension is activated
 export function activate(context: vscode.ExtensionContext) {
   const stage = getStage();
-  DendronTreeView.register(context);
   // override default word pattern
   vscode.languages.setLanguageConfiguration("markdown", {
     wordPattern: MARKDOWN_WORD_PATTERN,
@@ -74,7 +72,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 async function reloadWorkspace() {
   const ctx = "reloadWorkspace";
-  const ws = getWS();
+  const ws = getWSV2();
   const maybeEngine = await WSUtils.reloadWorkspace();
   if (!maybeEngine) {
     return maybeEngine;
@@ -158,7 +156,7 @@ async function startServerProcess(): Promise<{
   subprocess?: ExecaChildProcess;
 }> {
   const { nextServerUrl, nextStaticRoot, engineServerPort } =
-    getWS().config.dev || {};
+    getWSV2().config.dev || {};
   // const ctx = "startServer";
   const maybePort =
     DendronWorkspace.configuration().get<number | undefined>(
@@ -502,7 +500,7 @@ function toggleViews(enabled: boolean) {
 export function deactivate() {
   const ws = getWSV2();
   if (!WorkspaceUtils.isNativeWorkspace(ws)) {
-    getWS().deactivate();
+    DendronWorkspace.instanceV2().deactivate();
   }
   toggleViews(false);
 }

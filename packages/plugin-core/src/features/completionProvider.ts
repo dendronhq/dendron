@@ -38,7 +38,7 @@ import {
 } from "vscode";
 import { Logger } from "../logger";
 import { VSCodeUtils } from "../utils";
-import { DendronWorkspace, getExtension, getWSV2 } from "../workspace";
+import { getExtension, getWSV2 } from "../workspace";
 
 function padWithZero(n: number): string {
   if (n > 99) return String(n);
@@ -130,8 +130,8 @@ export const provideCompletionItems = (
   const range = new Range(position.line, start, position.line, end);
 
   const { engine } = getWSV2();
+  const notes = engine.notes;
   const completionItems: CompletionItem[] = [];
-  const notes = DendronWorkspace.instance().getEngine().notes;
   const currentVault = VSCodeUtils.getNoteFromDocument(document)?.vault;
   const wsRoot = engine.wsRoot;
   Logger.debug({ ctx, range, notesLength: notes.length, currentVault, wsRoot });

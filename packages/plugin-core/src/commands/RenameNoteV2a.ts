@@ -19,7 +19,7 @@ import {
 import { DENDRON_COMMANDS } from "../constants";
 import { FileItem } from "../external/fileutils/FileItem";
 import { VSCodeUtils } from "../utils";
-import { DendronWorkspace, getWSV2 } from "../workspace";
+import { getExtension, getWSV2 } from "../workspace";
 import { BaseCommand } from "./base";
 
 type CommandInput = {
@@ -115,14 +115,14 @@ export class RenameNoteV2aCommand extends BaseCommand<
   async execute(opts: CommandOpts) {
     const ctx = "RenameNoteV2a";
     this.L.info({ ctx, msg: "enter", opts });
-    const ws = DendronWorkspace.instance();
+    const ext = getExtension();
     try {
       const { files } = opts;
       const { newUri, oldUri } = files[0];
-      if (ws.fileWatcher && !opts.noModifyWatcher) {
-        ws.fileWatcher.pause = true;
+      if (ext.fileWatcher && !opts.noModifyWatcher) {
+        ext.fileWatcher.pause = true;
       }
-      const engine = ws.getEngine();
+      const engine = ext.getEngine();
       const oldFname = DNodeUtils.fname(oldUri.fsPath);
       const vault = VaultUtils.getVaultByNotePath({
         fsPath: oldUri.fsPath,
@@ -155,10 +155,10 @@ export class RenameNoteV2aCommand extends BaseCommand<
         changed,
       };
     } finally {
-      if (ws.fileWatcher && !opts.noModifyWatcher) {
+      if (ext.fileWatcher && !opts.noModifyWatcher) {
         setTimeout(() => {
-          if (ws.fileWatcher) {
-            ws.fileWatcher.pause = false;
+          if (ext.fileWatcher) {
+            ext.fileWatcher.pause = false;
           }
           this.L.info({ ctx, msg: "exit" });
         }, 3000);

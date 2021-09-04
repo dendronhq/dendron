@@ -8,7 +8,7 @@ import { ProgressLocation, Uri, ViewColumn, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { FileWatcher } from "../fileWatcher";
 import { VSCodeUtils } from "../utils";
-import { DendronWorkspace, getWSV2 } from "../workspace";
+import { getExtension, getWSV2 } from "../workspace";
 import { BasicCommand } from "./base";
 import { RenameNoteOutputV2a, RenameNoteV2aCommand } from "./RenameNoteV2a";
 
@@ -118,8 +118,9 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
     const ctx = "RefactorHierarchy:execute";
     const { match, replace } = _.defaults(opts);
     this.L.info({ ctx, opts, msg: "enter" });
-    const ws = DendronWorkspace.instance();
-    const notes = ws.getEngine().notes;
+    const ext = getExtension();
+    const { engine } = getWSV2();
+    const notes = engine.notes;
     const re = new RegExp(`(.*)(${match})(.*)`);
     const candidates = _.filter(notes, (n) => {
       if (n.stub) {
@@ -173,8 +174,8 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
       return;
     }
     try {
-      if (ws.fileWatcher) {
-        ws.fileWatcher.pause = true;
+      if (ext.fileWatcher) {
+        ext.fileWatcher.pause = true;
       }
       const renameCmd = new RenameNoteV2aCommand();
       const out = await window.withProgress(
@@ -215,10 +216,10 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
       );
       return { changed: _.uniqBy(out.changed, (ent) => ent.note.fname) };
     } finally {
-      if (ws.fileWatcher) {
+      if (ext.fileWatcher) {
         setTimeout(() => {
-          if (ws.fileWatcher) {
-            ws.fileWatcher.pause = false;
+          if (ext.fileWatcher) {
+            ext.fileWatcher.pause = false;
             FileWatcher.refreshTree();
           }
           this.L.info({ ctx, msg: "exit" });

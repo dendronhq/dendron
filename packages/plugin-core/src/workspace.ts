@@ -96,7 +96,7 @@ export async function when<T = any>(
   cb: () => Promise<T>
 ): Promise<T | ResponseCode> {
   try {
-    const out = DendronWorkspace.instance().config[key];
+    const out = getExtension().config[key];
     if (!(out === false || _.isUndefined(out))) {
       return cb();
     }
@@ -113,7 +113,7 @@ export function whenGlobalState(key: string, cb?: () => boolean): boolean {
       return true;
     };
   // @ts-ignore
-  const out = DendronWorkspace.instance().getGlobalState(key);
+  const out = getExtension().getGlobalState(key);
   if (!(out === false || _.isUndefined(out))) {
     return cb();
   }
@@ -134,12 +134,8 @@ export function getCodeConfig<T>(key: string): T | undefined {
   return DendronWorkspace.configuration().get<T>(key);
 }
 
-export function getWS() {
-  return DendronWorkspace.instance();
-}
-
 export function getWSV2(): DWorkspaceV2 {
-  const ws = DendronWorkspace.instance();
+  const ws = getExtension();
   return ws.getWorkspaceImplOrThrow();
 }
 
@@ -169,7 +165,7 @@ export class DendronWorkspace {
   protected webViews: { [key: string]: vscode.WebviewPanel | undefined };
 
   static context(): vscode.ExtensionContext {
-    return DendronWorkspace.instance().context;
+    return getExtension().context;
   }
 
   static instance(): DendronWorkspace {
@@ -499,7 +495,7 @@ export class DendronWorkspace {
    * Relative vaults
    */
   get vaultsv4(): DVault[] {
-    const vaults = DendronWorkspace.instance().config.vaults;
+    const vaults = getExtension().config.vaults;
     return vaults;
   }
 
@@ -744,7 +740,7 @@ export class DendronWorkspace {
       throw Error("no folders set for workspace");
     }
     const vaults = wsFolders as vscode.WorkspaceFolder[];
-    const realVaults = DendronWorkspace.instance().vaultsv4;
+    const realVaults = getExtension().vaultsv4;
     const fileWatcher = new FileWatcher({
       wsRoot,
       vaults: realVaults,
@@ -753,7 +749,7 @@ export class DendronWorkspace {
     schemaWatcher.activate(this.context);
     this.schemaWatcher = schemaWatcher;
 
-    fileWatcher.activate(DendronWorkspace.instance().context);
+    fileWatcher.activate(getExtension().context);
     this.fileWatcher = fileWatcher;
   }
 

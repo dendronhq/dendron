@@ -49,7 +49,7 @@ import { FileItem } from "./external/fileutils/FileItem";
 import { Logger } from "./logger";
 import { EngineAPIService } from "./services/EngineAPIService";
 import { AnalyticsUtils } from "./utils/analytics";
-import { DendronWorkspace, getWSV2 } from "./workspace";
+import { getExtension, getWSV2 } from "./workspace";
 import { TutorialInitializer } from "./workspace/tutorialInitializer";
 
 export class DisposableStore {
@@ -707,14 +707,14 @@ export class WSUtils {
   }
 
   static updateEngineAPI(port: number | string): DEngineClient {
-    const ws = DendronWorkspace.instance();
+    const ext = getExtension();
     const svc = EngineAPIService.createEngine({
       port,
       enableWorkspaceTrust: vscode.workspace.isTrusted,
     });
-    ws.setEngine(svc);
-    ws.port = _.toInteger(port);
-    const engine = ws.getEngine();
+    ext.setEngine(svc);
+    ext.port = _.toInteger(port);
+    const engine = ext.getEngine();
     return engine;
   }
 }
@@ -781,7 +781,7 @@ export class DendronClientUtilsV2 {
     // gather inputs
     const dateFormat: string =
       type === "SCRATCH"
-        ? DendronWorkspace.instance().getWorkspaceSettingOrDefault({
+        ? getExtension().getWorkspaceSettingOrDefault({
             wsConfigKey: "dendron.defaultScratchDateFormat",
             dendronConfigKey: "scratch.dateFormat",
           })
@@ -789,7 +789,7 @@ export class DendronClientUtilsV2 {
 
     const addBehavior: NoteAddBehavior =
       type === "SCRATCH"
-        ? DendronWorkspace.instance().getWorkspaceSettingOrDefault({
+        ? getExtension().getWorkspaceSettingOrDefault({
             wsConfigKey: "dendron.defaultScratchAddBehavior",
             dendronConfigKey: "scratch.addBehavior",
           })
@@ -797,7 +797,7 @@ export class DendronClientUtilsV2 {
 
     const name: string =
       type === "SCRATCH"
-        ? DendronWorkspace.instance().getWorkspaceSettingOrDefault({
+        ? getExtension().getWorkspaceSettingOrDefault({
             wsConfigKey: "dendron.defaultScratchName",
             dendronConfigKey: "scratch.name",
           })
@@ -817,7 +817,7 @@ export class DendronClientUtilsV2 {
       throw Error("Must be run from within a note");
     }
 
-    const engine = DendronWorkspace.instance().getEngine();
+    const engine = getWSV2().engine;
     const prefix = DendronClientUtilsV2.genNotePrefix(
       currentNoteFname,
       addBehavior as AddBehavior,

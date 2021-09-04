@@ -16,7 +16,7 @@ import { GotoNoteCommand } from "../commands/GotoNote";
 import { Logger } from "../logger";
 import { VSCodeUtils } from "../utils";
 import { AnalyticsUtils } from "../utils/analytics";
-import { DendronWorkspace, getEngine, getExtension } from "../workspace";
+import { getEngine, getExtension } from "../workspace";
 import { WebViewUtils } from "./utils";
 
 export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
@@ -26,7 +26,7 @@ export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
 
   constructor() {
     getExtension().dendronTreeViewV2 = this;
-    DendronWorkspace.instance().addDisposable(
+    getExtension().addDisposable(
       vscode.window.onDidChangeActiveTextEditor(this.onOpenTextDocument, this)
     );
   }

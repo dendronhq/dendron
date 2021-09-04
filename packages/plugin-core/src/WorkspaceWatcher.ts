@@ -13,7 +13,7 @@ import {
 } from "vscode";
 import { Logger } from "./logger";
 import { NoteSyncService } from "./services/NoteSyncService";
-import { DendronWorkspace, getExtension, getWSV2 } from "./workspace";
+import { getExtension, getWSV2 } from "./workspace";
 
 interface DebouncedFunc<T extends (...args: any[]) => any> {
   /**
@@ -101,7 +101,7 @@ export class WorkspaceWatcher {
       }
       Logger.debug({ ...ctx, state: "trigger change handlers" });
       const contentChanges = event.contentChanges;
-      DendronWorkspace.instance().windowWatcher?.triggerUpdateDecorations();
+      getExtension().windowWatcher?.triggerUpdateDecorations();
       NoteSyncService.instance().onDidChange(activeEditor, { contentChanges });
     }
     Logger.debug({ ...ctx, state: "exit" });
@@ -128,7 +128,7 @@ export class WorkspaceWatcher {
       return { changes: [] };
     }
 
-    const eclient = DendronWorkspace.instance().getEngine();
+    const eclient = getWSV2().engine;
     const fname = path.basename(uri.fsPath, ".md");
     const now = Time.now().toMillis();
     const vault = VaultUtils.getVaultByNotePath({

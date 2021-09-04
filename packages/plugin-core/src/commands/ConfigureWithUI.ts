@@ -4,7 +4,7 @@ import { ViewColumn, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { EngineAPIService } from "../services/EngineAPIService";
 import { WebViewUtils } from "../views/utils";
-import { DendronWorkspace } from "../workspace";
+import { getExtension } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandOpts = {};
@@ -12,8 +12,7 @@ type CommandOpts = {};
 type CommandOutput = void;
 
 export async function getWebviewContent(): Promise<string> {
-  const ws = DendronWorkspace.instance();
-  const engine = ws.getEngine() as EngineAPIService;
+  const engine = getExtension().getEngine() as EngineAPIService;
   const resp = await engine.api._makeRequest({
     path: "static",
     method: "get",
@@ -22,7 +21,7 @@ export async function getWebviewContent(): Promise<string> {
 }
 
 function getWebviewContent2(opts: { title: string }) {
-  const port = DendronWorkspace.instance().port;
+  const port = getExtension().port;
   if (_.isUndefined(port)) {
     return `<head> Still starting up </head>`;
   }

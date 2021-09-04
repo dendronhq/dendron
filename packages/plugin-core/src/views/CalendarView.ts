@@ -15,7 +15,7 @@ import { CreateDailyJournalCommand } from "../commands/CreateDailyJournal";
 import { GotoNoteCommand } from "../commands/GotoNote";
 import { Logger } from "../logger";
 import { VSCodeUtils } from "../utils";
-import { DendronWorkspace, getEngine, getExtension } from "../workspace";
+import { getEngine, getExtension } from "../workspace";
 import { WebViewUtils } from "./utils";
 
 export class CalendarView implements vscode.WebviewViewProvider {
@@ -23,7 +23,7 @@ export class CalendarView implements vscode.WebviewViewProvider {
   private _view?: vscode.WebviewView;
 
   constructor() {
-    const dendronWorkspace = DendronWorkspace.instance();
+    const dendronWorkspace = getExtension();
     dendronWorkspace.addDisposable(
       vscode.window.onDidChangeActiveTextEditor(
         // An `ChangeActiveTextEditor` event might be immediately followed by a new one (e.g. switch TextDocument).

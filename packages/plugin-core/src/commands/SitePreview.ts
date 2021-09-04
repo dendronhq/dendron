@@ -6,7 +6,7 @@ import fs from "fs-extra";
 import { env, ProgressLocation, Uri, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { buildSite, checkPreReq, getSiteRootDirPath } from "../utils/site";
-import { DendronWorkspace, getEngine, getWSV2 } from "../workspace";
+import { getEngine, getExtension, getWSV2 } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandOpts = Partial<BuildSiteV2CLICommandOpts>;
@@ -35,7 +35,7 @@ export class SitePreviewCommand extends BasicCommand<
     const ctx = "SitePreviewCommand";
     this.L.info({ ctx, msg: "enter" });
     const wsRoot = getWSV2().wsRoot;
-    const port = DendronWorkspace.instance().port!;
+    const port = getExtension().port!;
     await window.withProgress(
       {
         location: ProgressLocation.Notification,

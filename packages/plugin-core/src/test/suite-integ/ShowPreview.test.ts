@@ -6,7 +6,7 @@ import { ExtensionContext } from "vscode";
 import { ShowPreviewCommand } from "../../commands/ShowPreview";
 import { VSCodeUtils } from "../../utils";
 import { MarkdownUtils } from "../../utils/md";
-import { DendronWorkspace } from "../../workspace";
+import { getExtension } from "../../workspace";
 import { expect } from "../testUtilsv2";
 import {
   runLegacyMultiWorkspaceTest,
@@ -26,7 +26,7 @@ suite("ShowPreview", function () {
         const note = engine.notes["foo"];
         await VSCodeUtils.openNote(note);
         await new ShowPreviewCommand().execute();
-        const preview = DendronWorkspace.instance().getWebView(
+        const preview = getExtension().getWebView(
           DendronWebViewKey.NOTE_PREVIEW
         );
         expect(preview?.visible).toBeTruthy();

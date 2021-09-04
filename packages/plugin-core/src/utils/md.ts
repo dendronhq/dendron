@@ -33,7 +33,7 @@ import vscode, {
 } from "vscode";
 import { ShowPreviewV2Command } from "../commands/ShowPreviewV2";
 import { VSCodeUtils } from "../utils";
-import { DendronWorkspace, getWSV2 } from "../workspace";
+import { getWSV2 } from "../workspace";
 import { getFrontmatterTags, parseFrontmatter } from "./yaml";
 
 export type RefT = {
@@ -430,7 +430,7 @@ export const findReferences = async (
 ): Promise<FoundRefT[]> => {
   const refs: FoundRefT[] = [];
 
-  const engine = DendronWorkspace.instance().getEngine();
+  const { engine } = getWSV2();
   // clean for anchor
   const fname = ref;
   const notes = NoteUtils.getNotesByFname({ fname, notes: engine.notes });

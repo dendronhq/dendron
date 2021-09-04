@@ -12,7 +12,7 @@ import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../utils";
 import { showPodQuickPickItemsV4 } from "../utils/pods";
-import { DendronWorkspace, getWSV2 } from "../workspace";
+import { getExtension, getWSV2 } from "../workspace";
 import { BaseCommand } from "./base";
 
 type CommandOpts = CommandInput & { noteByName: string; config: any };
@@ -40,7 +40,7 @@ export class PublishPodCommand extends BaseCommand<
 
   async enrichInputs(inputs: CommandInput): Promise<CommandOpts | undefined> {
     const podChoice = inputs.podChoice;
-    const podsDir = DendronWorkspace.instance().podsDir;
+    const podsDir = getExtension().podsDir;
     const podClass = podChoice.podClass;
     const maybeConfig = PodUtils.getConfig({ podsDir, podClass });
     let noteByName = VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath;
@@ -66,11 +66,9 @@ export class PublishPodCommand extends BaseCommand<
   async execute(opts: CommandOpts) {
     const { podChoice, config, noteByName } = opts;
 
-    const engine = DendronWorkspace.instance().getEngine();
-    const wsRoot = getWSV2().wsRoot as string;
+    const { engine, wsRoot, config: dendronConfig, vaults } = getWSV2();
     const pod = new podChoice.podClass() as PublishPod; // eslint-disable-line new-cap
     const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
-    const dendronConfig = DendronWorkspace.instance().config;
     try {
       const link = await pod.execute({
         config: {
@@ -79,7 +77,7 @@ export class PublishPodCommand extends BaseCommand<
           vaultName: VaultUtils.getName(vault),
           dest: "stdout",
         },
-        vaults: DendronWorkspace.instance().vaultsv4,
+        vaults,
         wsRoot,
         engine,
         dendronConfig,

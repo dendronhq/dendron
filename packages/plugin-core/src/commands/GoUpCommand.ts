@@ -5,7 +5,7 @@ import { Uri, window } from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../utils";
-import { DendronWorkspace, getWSV2 } from "../workspace";
+import { getWSV2 } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandOpts = {};
@@ -23,7 +23,7 @@ export class GoUpCommand extends BasicCommand<CommandOpts, CommandOutput> {
       window.showErrorMessage("no active document found");
       return;
     }
-    const engine = DendronWorkspace.instance().getEngine();
+    const engine = getWSV2().engine;
     const nparent = DNodeUtils.findClosestParent(
       path.basename(maybeTextEditor.document.uri.fsPath, ".md"),
       _.values(engine.notes),

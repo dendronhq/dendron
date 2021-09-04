@@ -3,7 +3,7 @@ import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import vscode, { TextDocument, workspace } from "vscode";
-import { DendronWorkspace } from "../../../workspace";
+import { getExtension } from "../../../workspace";
 import { RefT, WorkspaceCache } from "../types";
 
 export { sortPaths };
@@ -144,7 +144,7 @@ export const fsPathToRef = ({
 };
 
 export const getWorkspaceFolder = (): string | undefined =>
-  DendronWorkspace.instance().rootWorkspace.uri.fsPath;
+  getExtension().rootWorkspace.uri.fsPath;
 
 export const parseRef = (rawRef: string): RefT => {
   const dividerPosition = rawRef.indexOf("|");

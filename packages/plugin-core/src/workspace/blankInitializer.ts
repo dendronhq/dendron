@@ -4,7 +4,7 @@ import { Snippets } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import path from "path";
 import { VSCodeUtils } from "../utils";
-import { DendronWorkspace } from "../workspace";
+import { getExtension } from "../workspace";
 import { WorkspaceInitializer } from "./workspaceInitializer";
 
 /**
@@ -20,7 +20,7 @@ export class BlankInitializer implements WorkspaceInitializer {
     vaults: DVault[];
     wsRoot: string;
   }): Promise<void> {
-    const ws = DendronWorkspace.instance();
+    const ws = getExtension();
 
     const vpath = vault2Path({ vault: opts.vaults[0], wsRoot: opts.wsRoot });
 

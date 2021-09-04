@@ -4,7 +4,7 @@ import vscode, { Location, Position, Uri } from "vscode";
 import { findAnchorPos, GotoNoteCommand } from "../commands/GotoNote";
 import { Logger } from "../logger";
 import { getReferenceAtPosition } from "../utils/md";
-import { DendronWorkspace, getWSV2 } from "../workspace";
+import { getWSV2 } from "../workspace";
 
 export default class DefinitionProvider implements vscode.DefinitionProvider {
   public async provideDefinition(
@@ -17,7 +17,7 @@ export default class DefinitionProvider implements vscode.DefinitionProvider {
       return;
     }
     let vault;
-    const engine = DendronWorkspace.instance().getEngine();
+    const { engine } = getWSV2();
     if (refAtPos.vaultName) {
       try {
         vault = VaultUtils.getVaultByName({

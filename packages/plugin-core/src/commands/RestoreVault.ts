@@ -5,7 +5,7 @@ import path from "path";
 import { window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils, WSUtils } from "../utils";
-import { DendronWorkspace, getWSV2 } from "../workspace";
+import { getExtension, getWSV2 } from "../workspace";
 import { BaseCommand } from "./base";
 
 type CommandOpts = { src: string };
@@ -47,18 +47,17 @@ export class RestoreVaultCommand extends BaseCommand<
   }
 
   async execute(opts: CommandOpts) {
-    const ws = DendronWorkspace.instance();
+    const ext = getExtension();
+    const { engine, vaults, wsRoot } = getWSV2();
     try {
       const { src } = opts;
       const pod = new SnapshotImportPod();
-      const engine = DendronWorkspace.instance().getEngine();
-      const vault = engine.vaults[0];
-      const wsRoot = getWSV2().wsRoot as string;
-      if (ws.fileWatcher) {
-        ws.fileWatcher.pause = true;
+      const vault = vaults[0];
+      if (ext.fileWatcher) {
+        ext.fileWatcher.pause = true;
       }
-      if (ws.schemaWatcher) {
-        ws.schemaWatcher.pause = true;
+      if (ext.schemaWatcher) {
+        ext.schemaWatcher.pause = true;
       }
       await pod.execute({
         vaults: [vault],
@@ -70,11 +69,11 @@ export class RestoreVaultCommand extends BaseCommand<
       await WSUtils.reloadWorkspace();
       return;
     } finally {
-      if (ws.fileWatcher) {
-        ws.fileWatcher.pause = false;
+      if (ext.fileWatcher) {
+        ext.fileWatcher.pause = false;
       }
-      if (ws.schemaWatcher) {
-        ws.schemaWatcher.pause = false;
+      if (ext.schemaWatcher) {
+        ext.schemaWatcher.pause = false;
       }
     }
   }

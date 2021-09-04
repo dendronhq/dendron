@@ -182,7 +182,7 @@ export async function runWorkspaceTestV3(
   const { ctx } = opts;
   const { vaults, wsRoot } = await setupCodeWorkspaceV3(opts);
   onWSInit(async () => {
-    const engine = DendronWorkspace.instance().getEngine();
+    const { engine } = getWSV2();
     await opts.onInit({ wsRoot, vaults, engine });
   });
   if (opts?.preActivateHook) {

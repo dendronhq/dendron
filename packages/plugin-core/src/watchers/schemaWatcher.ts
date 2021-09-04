@@ -4,7 +4,7 @@ import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
 import { Logger } from "../logger";
-import { DendronWorkspace, getWSV2 } from "../workspace";
+import { DendronWorkspace, getExtension, getWSV2 } from "../workspace";
 
 export class SchemaWatcher {
   public watcher: vscode.FileSystemWatcher;
@@ -26,7 +26,7 @@ export class SchemaWatcher {
       true
     );
     this.watcher = watcher;
-    this.ws = DendronWorkspace.instance();
+    this.ws = getExtension();
     this.engine = this.ws.getEngine();
     this.pause = false;
   }
@@ -43,7 +43,7 @@ export class SchemaWatcher {
       return;
     }
     this.L.info({ ctx, uri });
-    const engine = DendronWorkspace.instance().getEngine();
+    const { engine } = getWSV2();
     const { vaults, wsRoot } = engine;
     const fname = path.basename(uri.fsPath, ".schema.yml");
     const dirname = path.dirname(uri.fsPath);
@@ -77,6 +77,6 @@ export class SchemaWatcher {
   static refreshTree = _.debounce(() => {
     const ctx = "refreshTree";
     Logger.info({ ctx });
-    DendronWorkspace.instance().dendronTreeView?.treeProvider.refresh();
+    getExtension().dendronTreeView?.treeProvider.refresh();
   }, 100);
 }

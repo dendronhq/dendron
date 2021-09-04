@@ -17,7 +17,7 @@ import { StateService } from "../services/stateService";
 import { VSCodeUtils } from "../utils";
 import { AnalyticsUtils } from "../utils/analytics";
 import { MarkdownUtils } from "../utils/md";
-import { DendronWorkspace } from "../workspace";
+import { DendronWorkspace, getExtension } from "../workspace";
 import { BlankInitializer } from "./blankInitializer";
 import { WorkspaceInitializer } from "./workspaceInitializer";
 
@@ -36,7 +36,7 @@ export class TutorialInitializer
     const ctx = "TutorialInitializer.onWorkspaceCreation";
     super.onWorkspaceCreation(opts);
 
-    const ws = DendronWorkspace.instance();
+    const ws = getExtension();
 
     StateService.instance().setActivationContext(
       WORKSPACE_ACTIVATION_CONTEXT.TUTORIAL

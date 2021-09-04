@@ -29,7 +29,7 @@ import { FileItem } from "../external/fileutils/FileItem";
 import { UNKNOWN_ERROR_MSG } from "../logger";
 import { VSCodeUtils } from "../utils";
 import { ProceedCancel, QuickPickUtil } from "../utils/quickPick";
-import { DendronWorkspace, getExtension, getWSV2 } from "../workspace";
+import { getExtension, getWSV2 } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandInput = any;
@@ -220,7 +220,7 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
       }
       return { changed };
     } finally {
-      DendronWorkspace.instance().dendronTreeView?.treeProvider.refresh();
+      getExtension().dendronTreeView?.treeProvider.refresh();
       if (ext.fileWatcher && !opts.noPauseWatcher) {
         setTimeout(() => {
           if (ext.fileWatcher) {

@@ -160,7 +160,7 @@ suite("VaultRemoveCommand", function () {
           // confirm that duplicateNoteBehavior option exists
           expect(config.site.duplicateNoteBehavior).toBeTruthy();
 
-          const vaults = DendronWorkspace.instance().vaultsv4;
+          const { vaults } = getWSV2();
 
           // @ts-ignore
           VSCodeUtils.showQuickPick = () => {
@@ -192,7 +192,7 @@ suite("VaultRemoveCommand", function () {
           stubVaultInput({ sourceType: "local", sourcePath: vpath3 });
           await new VaultAddCommand().run();
 
-          const vaults = DendronWorkspace.instance().vaultsv4;
+          const { vaults } = getWSV2();
 
           const configPathOrig = DConfig.configPath(getWSV2().wsRoot as string);
           const configOrig = readYAML(configPathOrig) as DendronConfig;

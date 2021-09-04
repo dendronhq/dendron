@@ -12,10 +12,10 @@ import {
 } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import path from "path";
-import { DENDRON_COMMANDS } from "../constants";
-import { BasicCommand } from "./base";
 import { ProgressLocation, window } from "vscode";
-import { DendronWorkspace, getWSV2 } from "../workspace";
+import { DENDRON_COMMANDS } from "../constants";
+import { getExtension, getWSV2 } from "../workspace";
+import { BasicCommand } from "./base";
 
 type ReloadIndexCommandOpts = {
   silent?: boolean;
@@ -92,7 +92,7 @@ export class ReloadIndexCommand extends BasicCommand<
     }
 
     this.L.info({ ctx, msg: "exit" });
-    DendronWorkspace.instanceV2().dendronTreeView?.treeProvider.refresh();
+    getExtension().dendronTreeView?.treeProvider.refresh();
     return engine;
   }
 }

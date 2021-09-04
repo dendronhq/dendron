@@ -17,7 +17,7 @@ import { StateService } from "../services/stateService";
 import { VSCodeUtils } from "../utils";
 import { AnalyticsUtils } from "../utils/analytics";
 import { MarkdownUtils } from "../utils/md";
-import { DendronWorkspace, getExtension } from "../workspace";
+import { getExtension } from "../workspace";
 import { BlankInitializer } from "./blankInitializer";
 import { WorkspaceInitializer } from "./workspaceInitializer";
 
@@ -100,7 +100,7 @@ export class TutorialInitializer
     );
 
     // Register a special analytics handler for the tutorial:
-    const extension = DendronWorkspace.instanceV2();
+    const extension = getExtension();
     if (extension.windowWatcher) {
       extension.windowWatcher.registerActiveTextEditorChangedHandler((e) => {
         const fileName = e?.document.uri.fsPath;

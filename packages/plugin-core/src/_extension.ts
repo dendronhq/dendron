@@ -1,7 +1,7 @@
 import {
   launchv2,
   ServerUtils,
-  SubProcessExitType
+  SubProcessExitType,
 } from "@dendronhq/api-server";
 import {
   CONSTANTS,
@@ -12,19 +12,19 @@ import {
   Time,
   VaultUtils,
   VSCodeEvents,
-  WorkspaceType
+  WorkspaceType,
 } from "@dendronhq/common-all";
 import {
   getDurationMilliseconds,
   getOS,
   SegmentClient,
-  writeJSONWithComments
+  writeJSONWithComments,
 } from "@dendronhq/common-server";
 import {
   HistoryService,
   MetadataService,
   WorkspaceService,
-  WorkspaceUtils
+  WorkspaceUtils,
 } from "@dendronhq/engine-server";
 import { ExecaChildProcess } from "execa";
 import fs from "fs-extra";
@@ -43,7 +43,12 @@ import { GOOGLE_OAUTH_ID, GOOGLE_OAUTH_SECRET } from "./types/global";
 import { KeybindingUtils, VSCodeUtils, WSUtils } from "./utils";
 import { AnalyticsUtils } from "./utils/analytics";
 import { DendronTreeView } from "./views/DendronTreeView";
-import { DendronWorkspace, getEngine, getExtension, getWSV2 } from "./workspace";
+import {
+  DendronWorkspace,
+  getEngine,
+  getExtension,
+  getWSV2,
+} from "./workspace";
 import { DendronCodeWorkspace } from "./workspace/codeWorkspace";
 import { DendronNativeWorkspace } from "./workspace/nativeWorkspace";
 import { WorkspaceInitFactory } from "./workspace/workspaceInitializer";
@@ -502,7 +507,7 @@ function toggleViews(enabled: boolean) {
 export function deactivate() {
   const ws = getWSV2();
   if (!WorkspaceUtils.isNativeWorkspace(ws)) {
-    DendronWorkspace.instanceV2().deactivate();
+    getExtension().deactivate();
   }
   toggleViews(false);
 }

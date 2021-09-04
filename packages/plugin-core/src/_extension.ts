@@ -207,7 +207,7 @@ export async function _activate(
   const stage = getStage();
   const { workspaceFile, workspaceFolders } = vscode.workspace;
   const logLevel = process.env["LOG_LEVEL"];
-  const { logPath, extensionPath, extensionUri, storagePath } = context;
+  const { extensionPath, extensionUri, logUri } = context;
   const stateService = new StateService({
     globalState: context.globalState,
     workspaceState: context.workspaceState,
@@ -217,13 +217,12 @@ export async function _activate(
     ctx,
     stage,
     isDebug,
-    logPath,
     logLevel,
+    logPath: logUri.fsPath,
     extensionPath,
-    extensionUri,
-    storagePath,
-    workspaceFile,
-    workspaceFolders,
+    extensionUri: extensionUri.fsPath,
+    workspaceFile: workspaceFile?.fsPath,
+    workspaceFolders: workspaceFolders?.map((fd) => fd.uri.fsPath),
   });
 
   // Setup the workspace trust callback to detect changes from the user's workspace trust settings
@@ -235,11 +234,6 @@ export async function _activate(
   const ws = DendronWorkspace.getOrCreate(context, {
     skipSetup: stage === "test",
   });
-  Logger.info({
-    ctx,
-    msg: "initializeWorkspace",
-    wsType: ws.type,
-  });
 
   const currentVersion = DendronWorkspace.version();
   const previousWorkspaceVersion = stateService.getWorkspaceVersion();
@@ -249,6 +243,16 @@ export async function _activate(
     currentVersion,
   });
   const assetUri = WSUtils.getAssetUri(context);
+
+  Logger.info({
+    ctx,
+    msg: "initializeWorkspace",
+    wsType: ws.type,
+    currentVersion,
+    previousWorkspaceVersion,
+    previousGlobalVersion,
+    extensionInstallStatus,
+  });
 
   if (DendronWorkspace.isActive(context)) {
     if (ws.type === WorkspaceType.NATIVE) {

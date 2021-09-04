@@ -6,10 +6,9 @@ import {
   TAGS_HIERARCHY,
 } from "@dendronhq/common-all";
 import _ from "lodash";
-import { Content, Image, Root } from "mdast";
-import { heading, paragraph, text } from "mdast-builder";
+import type { Image, Root } from "mdast";
+import { paragraph } from "mdast-builder";
 import {
-  frontmatterTag2WikiLinkNoteV4,
   addError,
   getNoteOrError,
   hashTag2WikiLinkNoteV4,
@@ -84,19 +83,6 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
           0,
           u(DendronASTTypes.HEADING, { depth: 1 }, [u("text", note.title)])
         );
-      }
-      // Add frontmatter tags, if any, ahead of time. This way wikilink compiler will pick them up and render them.
-      if (
-        config?.site?.showFrontMatterTags !== false &&
-        note?.tags &&
-        note.tags.length > 0
-      ) {
-        root.children.push(heading(2, text("Tags")) as Content);
-        const tagLinks = _.map(
-          _.isString(note.tags) ? [note.tags] : note.tags,
-          frontmatterTag2WikiLinkNoteV4
-        );
-        root.children.push(paragraph(tagLinks) as Content);
       }
     }
     visitParents(tree, (node, ancestors) => {

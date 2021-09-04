@@ -14,7 +14,7 @@ export default function Home({
   return (
     <>
       <DendronSEO />
-      <DendronNote noteContent={body} />;
+      <DendronNote noteContent={body} />
     </>
   );
 }

@@ -14,7 +14,7 @@ import { ExtensionContext } from "vscode";
 import { CONFIG, GLOBAL_STATE, WORKSPACE_STATE } from "../../constants";
 import { Logger } from "../../logger";
 import { VSCodeUtils } from "../../utils";
-import { getWS, getWSV2 } from "../../workspace";
+import { getExtension, getWSV2 } from "../../workspace";
 import { _activate } from "../../_extension";
 import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
@@ -81,7 +81,7 @@ suite("Migration", function () {
         ctx,
         onInit: async ({ engine, wsRoot }) => {
           const dendronConfig = engine.config;
-          const wsConfig = await getWS().getWorkspaceSettings();
+          const wsConfig = await getExtension().getWorkspaceSettings();
           const wsService = new WorkspaceService({ wsRoot });
           const out = await MigrationServce.applyMigrationRules({
             currentVersion: "0.46.0",
@@ -113,7 +113,7 @@ suite("Migration", function () {
           },
           onInit: async ({ engine, wsRoot }) => {
             const dendronConfig = engine.config;
-            const wsConfig = await getWS().getWorkspaceSettings();
+            const wsConfig = await getExtension().getWorkspaceSettings();
             const wsService = new WorkspaceService({ wsRoot });
             const out = await MigrationServce.applyMigrationRules({
               currentVersion: "0.47.1",
@@ -144,7 +144,7 @@ suite("Migration", function () {
           },
           onInit: async ({ engine, wsRoot }) => {
             const dendronConfig = engine.config;
-            const wsConfig = await getWS().getWorkspaceSettings();
+            const wsConfig = await getExtension().getWorkspaceSettings();
             const wsService = new WorkspaceService({ wsRoot });
             const out = await MigrationServce.applyMigrationRules({
               currentVersion: "0.47.1",
@@ -176,7 +176,7 @@ suite("Migration", function () {
         ctx,
         onInit: async ({ engine, wsRoot }) => {
           const dendronConfig = engine.config;
-          const wsConfig = await getWS().getWorkspaceSettings();
+          const wsConfig = await getExtension().getWorkspaceSettings();
           const wsService = new WorkspaceService({ wsRoot });
           await MigrationServce.applyMigrationRules({
             currentVersion: "0.52.0",
@@ -210,7 +210,7 @@ suite("Migration", function () {
         },
         onInit: async ({ engine, wsRoot }) => {
           const dendronConfig = engine.config;
-          const wsConfig = await getWS().getWorkspaceSettings();
+          const wsConfig = await getExtension().getWorkspaceSettings();
           const wsService = new WorkspaceService({ wsRoot });
           await MigrationServce.applyMigrationRules({
             currentVersion: "0.52.0",
@@ -236,7 +236,7 @@ suite("Migration", function () {
         },
         onInit: async ({ engine, wsRoot }) => {
           const dendronConfig = engine.config;
-          const wsConfig = await getWS().getWorkspaceSettings();
+          const wsConfig = await getExtension().getWorkspaceSettings();
           const wsService = new WorkspaceService({ wsRoot });
           await MigrationServce.applyMigrationRules({
             currentVersion: "0.51.4",
@@ -263,7 +263,7 @@ suite("Migration", function () {
         },
         onInit: async ({ engine, wsRoot }) => {
           const dendronConfig = engine.config;
-          const wsConfig = await getWS().getWorkspaceSettings();
+          const wsConfig = await getExtension().getWorkspaceSettings();
           const wsService = new WorkspaceService({ wsRoot });
           expect(
             wsConfig.settings[CONFIG.DEFAULT_LOOKUP_CREATE_BEHAVIOR.key]
@@ -302,7 +302,7 @@ suite("Migration", function () {
         },
         onInit: async ({ engine, wsRoot }) => {
           const dendronConfig = engine.config;
-          const wsConfig = await getWS().getWorkspaceSettings();
+          const wsConfig = await getExtension().getWorkspaceSettings();
           const wsService = new WorkspaceService({ wsRoot });
           expect(
             _.isUndefined(

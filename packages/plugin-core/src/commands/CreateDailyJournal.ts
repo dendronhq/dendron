@@ -1,12 +1,12 @@
 import { NoteUtils, VaultUtils } from "@dendronhq/common-all";
 import { cleanName } from "@dendronhq/common-server";
+import * as vscode from "vscode";
+import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { DendronClientUtilsV2 } from "../utils";
-import { getWS, getWSV2 } from "../workspace";
+import { getWSV2 } from "../workspace";
 import { BaseCommand } from "./base";
 import { GotoNoteCommand } from "./GotoNote";
-import { PickerUtilsV2 } from "../components/lookup/utils";
-import * as vscode from "vscode";
 
 type CommandOpts = {
   fname: string;
@@ -47,8 +47,7 @@ export class CreateDailyJournalCommand extends BaseCommand<
       fname,
       journalName,
     });
-    const engine = getWS().getEngine();
-    const config = getWSV2().config;
+    const { config, engine } = getWSV2();
     let vault;
     if (config.lookupConfirmVaultOnCreate) {
       vault = await PickerUtilsV2.promptVault(engine.vaults);

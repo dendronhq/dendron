@@ -8,7 +8,7 @@ import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { resolvePath, VSCodeUtils } from "../utils";
 import { isAnythingSelected } from "../utils/editor";
-import { getWS, getWSV2 } from "../workspace";
+import { getExtension, getWSV2 } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandOpts = {};
@@ -24,7 +24,6 @@ export class OpenLinkCommand extends BasicCommand<CommandOpts, CommandOutput> {
   }
   async execute() {
     const ctx = DENDRON_COMMANDS.OPEN_LINK;
-    const ws = getWS();
     this.L.info({ ctx });
     if (!isAnythingSelected()) {
       const error = DendronError.createFromStatus({
@@ -49,7 +48,7 @@ export class OpenLinkCommand extends BasicCommand<CommandOpts, CommandOutput> {
       const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
       assetPath = path.join(vault2Path({ vault, wsRoot }), text);
     } else {
-      assetPath = resolvePath(text, ws.rootWorkspace.uri.fsPath);
+      assetPath = resolvePath(text, getExtension().rootWorkspace.uri.fsPath);
     }
     if (!fs.existsSync(assetPath)) {
       const error = DendronError.createFromStatus({

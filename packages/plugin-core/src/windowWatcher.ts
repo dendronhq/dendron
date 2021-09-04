@@ -12,7 +12,7 @@ import { ShowPreviewV2Command } from "./commands/ShowPreviewV2";
 import { updateDecorations } from "./features/windowDecorations";
 import { Logger } from "./logger";
 import { VSCodeUtils } from "./utils";
-import { getWS, getWSV2 } from "./workspace";
+import { getExtension, getWSV2 } from "./workspace";
 
 export class WindowWatcher {
   private onDidChangeActiveTextEditorHandlers: ((
@@ -49,7 +49,7 @@ export class WindowWatcher {
     ) {
       const uri = editor.document.uri;
       Logger.info({ ctx, editor: uri.fsPath });
-      if (!getWS().workspaceService?.isPathInWorkspace(uri.fsPath)) {
+      if (!getExtension().workspaceService?.isPathInWorkspace(uri.fsPath)) {
         Logger.info({ ctx, uri: uri.fsPath, msg: "not in workspace" });
         return;
       }
@@ -62,7 +62,9 @@ export class WindowWatcher {
         value.call(this, editor)
       );
 
-      if (getWS().workspaceWatcher?.getNewlyOpenedDocument(editor.document)) {
+      if (
+        getExtension().workspaceWatcher?.getNewlyOpenedDocument(editor.document)
+      ) {
         this.onFirstOpen(editor);
       }
     } else {
@@ -85,7 +87,9 @@ export class WindowWatcher {
   }
 
   async triggerNoteGraphViewUpdate() {
-    const noteGraphPanel = getWS().getWebView(DendronWebViewKey.NOTE_GRAPH);
+    const noteGraphPanel = getExtension().getWebView(
+      DendronWebViewKey.NOTE_GRAPH
+    );
     if (!_.isUndefined(noteGraphPanel)) {
       if (noteGraphPanel.visible) {
         // TODO Logic here + test
@@ -110,7 +114,9 @@ export class WindowWatcher {
     return;
   }
   async triggerSchemaGraphViewUpdate() {
-    const schemaGraphPanel = getWS().getWebView(DendronWebViewKey.SCHEMA_GRAPH);
+    const schemaGraphPanel = getExtension().getWebView(
+      DendronWebViewKey.SCHEMA_GRAPH
+    );
     if (!_.isUndefined(schemaGraphPanel)) {
       if (schemaGraphPanel.visible) {
         // TODO Logic here + test

@@ -1,18 +1,18 @@
 import {
+  ALIAS_NAME,
   DefaultMap,
   DNoteAnchor,
   ERROR_SEVERITY,
   genUUIDInsecure,
   isNotUndefined,
+  LINK_NAME,
   NoteProps,
   NoteUtils,
   TAGS_HIERARCHY,
-  LINK_NAME,
-  ALIAS_NAME,
-  VaultUtils,
   USERS_HIERARCHY,
+  VaultUtils,
 } from "@dendronhq/common-all";
-import _ from "lodash";
+import { getDurationMilliseconds } from "@dendronhq/common-server";
 import {
   AnchorUtils,
   DendronASTDest,
@@ -23,6 +23,7 @@ import {
   ProcFlavor,
   USERTAG_REGEX_LOOSE,
 } from "@dendronhq/engine-server";
+import _ from "lodash";
 import {
   CancellationToken,
   CompletionItem,
@@ -37,8 +38,7 @@ import {
 } from "vscode";
 import { Logger } from "../logger";
 import { VSCodeUtils } from "../utils";
-import { DendronWorkspace, getWS } from "../workspace";
-import { getDurationMilliseconds } from "@dendronhq/common-server";
+import { DendronWorkspace, getExtension, getWSV2 } from "../workspace";
 
 function padWithZero(n: number): string {
   if (n > 99) return String(n);
@@ -129,7 +129,7 @@ export const provideCompletionItems = (
   }
   const range = new Range(position.line, start, position.line, end);
 
-  const engine = getWS().getEngine();
+  const { engine } = getWSV2();
   const completionItems: CompletionItem[] = [];
   const notes = DendronWorkspace.instance().getEngine().notes;
   const currentVault = VSCodeUtils.getNoteFromDocument(document)?.vault;
@@ -197,7 +197,7 @@ export const resolveCompletionItem = async (
   if (!_.isString(fname) || !_.isString(vname) || token.isCancellationRequested)
     return;
 
-  const engine = getWS().getEngine();
+  const engine = getWSV2().engine;
   const { vaults, notes, wsRoot } = engine;
   const vault = VaultUtils.getVaultByName({ vname, vaults });
   if (_.isUndefined(vault)) {
@@ -302,7 +302,7 @@ export async function provideBlockCompletionItems(
   Logger.debug({ ctx, found });
 
   const timestampStart = process.hrtime();
-  const engine = getWS().getEngine();
+  const engine = getWSV2().engine;
 
   let otherFile = false;
   let note: NoteProps | undefined;
@@ -358,7 +358,7 @@ export async function provideBlockCompletionItems(
     insertValueOnly = true;
   }
 
-  const blocks = await getWS()
+  const blocks = await getExtension()
     .getEngine()
     .getNoteBlocks({ id: note.id, filterByAnchorType });
   if (

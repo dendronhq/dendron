@@ -1,18 +1,17 @@
-import _ from "lodash";
 import {
   DendronWebViewKey,
   GraphViewMessage,
   GraphViewMessageType,
   VaultUtils,
 } from "@dendronhq/common-all";
-import { Uri, ViewColumn, window } from "vscode";
-import { DENDRON_COMMANDS } from "../constants";
-import { WebViewUtils } from "../views/utils";
-import { BasicCommand } from "./base";
-import { getWS } from "../workspace";
-import { VSCodeUtils } from "../utils";
+import _ from "lodash";
 import path from "path";
-import vscode from "vscode";
+import vscode, { Uri, ViewColumn, window } from "vscode";
+import { DENDRON_COMMANDS } from "../constants";
+import { VSCodeUtils } from "../utils";
+import { WebViewUtils } from "../views/utils";
+import { getExtension, getWSV2 } from "../workspace";
+import { BasicCommand } from "./base";
 
 type CommandOpts = {};
 
@@ -30,10 +29,10 @@ export class ShowSchemaGraphCommand extends BasicCommand<
     const title = "Schema Graph";
 
     // Get workspace information
-    const ws = getWS();
+    const ext = getExtension();
 
     // If panel already exists
-    const existingPanel = ws.getWebView(DendronWebViewKey.SCHEMA_GRAPH);
+    const existingPanel = ext.getWebView(DendronWebViewKey.SCHEMA_GRAPH);
 
     if (!_.isUndefined(existingPanel)) {
       try {
@@ -71,10 +70,10 @@ export class ShowSchemaGraphCommand extends BasicCommand<
     panel.webview.onDidReceiveMessage(async (msg: GraphViewMessage) => {
       switch (msg.type) {
         case GraphViewMessageType.onSelect: {
-          const engine = getWS().getEngine();
+          const engine = getExtension().getEngine();
           const schema = engine.schemas[msg.data.id];
 
-          const wsRoot = ws._enginev2?.wsRoot;
+          const { wsRoot } = getWSV2();
 
           await vscode.commands.executeCommand(
             "workbench.action.focusFirstEditorGroup"
@@ -112,7 +111,7 @@ export class ShowSchemaGraphCommand extends BasicCommand<
         //   const document = VSCodeUtils.getActiveTextEditor()?.document;
         //   if (document) {
         //     if (
-        //       !getWS().workspaceService?.isPathInWorkspace(document.uri.fsPath)
+        //       !getExtension().workspaceService?.isPathInWorkspace(document.uri.fsPath)
         //     ) {
         //       // not in workspace
         //       return;
@@ -140,6 +139,6 @@ export class ShowSchemaGraphCommand extends BasicCommand<
     });
 
     // Update workspace-wide graph panel
-    ws.setWebView(DendronWebViewKey.SCHEMA_GRAPH, panel);
+    ext.setWebView(DendronWebViewKey.SCHEMA_GRAPH, panel);
   }
 }

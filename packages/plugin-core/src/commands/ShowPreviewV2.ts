@@ -13,7 +13,7 @@ import { DENDRON_COMMANDS } from "../constants";
 import { Logger } from "../logger";
 import { VSCodeUtils } from "../utils";
 import { WebViewUtils } from "../views/utils";
-import { getEngine, getWS } from "../workspace";
+import { getEngine, getExtension } from "../workspace";
 import { BasicCommand } from "./base";
 import { GotoNoteCommand } from "./GotoNote";
 
@@ -25,7 +25,9 @@ const title = "Dendron Preview";
 const tryGetNoteFromDocument = (
   document: vscode.TextDocument
 ): NoteProps | undefined => {
-  if (!getWS().workspaceService?.isPathInWorkspace(document.uri.fsPath)) {
+  if (
+    !getExtension().workspaceService?.isPathInWorkspace(document.uri.fsPath)
+  ) {
     Logger.info({
       uri: document.uri.fsPath,
       msg: "not in workspace",
@@ -57,7 +59,7 @@ export class ShowPreviewV2Command extends BasicCommand<
 
   static refresh(note: NoteProps) {
     const ctx = { ctx: "ShowPreview:refresh", fname: note.fname };
-    const panel = getWS().getWebView(DendronWebViewKey.NOTE_PREVIEW);
+    const panel = getExtension().getWebView(DendronWebViewKey.NOTE_PREVIEW);
     Logger.debug({ ...ctx, state: "enter" });
     if (panel) {
       Logger.debug({ ...ctx, state: "panel found" });
@@ -82,10 +84,10 @@ export class ShowPreviewV2Command extends BasicCommand<
 
   async execute(_opts?: CommandOpts) {
     // Get workspace information
-    const ws = getWS();
+    const ext = getExtension();
 
     // If panel already exists
-    const existingPanel = ws.getWebView(DendronWebViewKey.NOTE_PREVIEW);
+    const existingPanel = ext.getWebView(DendronWebViewKey.NOTE_PREVIEW);
 
     const viewColumn = vscode.ViewColumn.Beside; // Editor column to show the new webview panel in.
     const preserveFocus = true;
@@ -165,14 +167,14 @@ export class ShowPreviewV2Command extends BasicCommand<
     });
 
     // Update workspace-wide graph panel
-    ws.setWebView(DendronWebViewKey.NOTE_PREVIEW, panel);
+    ext.setWebView(DendronWebViewKey.NOTE_PREVIEW, panel);
 
     // remove webview from workspace when user closes it
     // this prevents throwing `Uncaught Error: Webview is disposed` in `ShowPreviewV2Command#refresh`
     panel.onDidDispose(() => {
       const ctx = "ShowPreview:onDidDispose";
       Logger.debug({ ctx, state: "dispose preview" });
-      ws.setWebView(DendronWebViewKey.NOTE_PREVIEW, undefined);
+      ext.setWebView(DendronWebViewKey.NOTE_PREVIEW, undefined);
     });
   }
 }

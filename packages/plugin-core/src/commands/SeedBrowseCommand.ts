@@ -5,13 +5,13 @@ import {
   SeedBrowserMessageType,
 } from "@dendronhq/common-all";
 import _ from "lodash";
-import { DENDRON_COMMANDS } from "../constants";
-import { WebViewUtils } from "../views/utils";
-import { getWS } from "../workspace";
-import { SeedAddCommand } from "./SeedAddCommand";
-import { SeedCommandBase } from "./SeedCommandBase";
 import * as vscode from "vscode";
 import { ViewColumn } from "vscode";
+import { DENDRON_COMMANDS } from "../constants";
+import { WebViewUtils } from "../views/utils";
+import { getExtension } from "../workspace";
+import { SeedAddCommand } from "./SeedAddCommand";
+import { SeedCommandBase } from "./SeedCommandBase";
 
 type CommandOpts = {};
 
@@ -26,8 +26,9 @@ export class SeedBrowseCommand extends SeedCommandBase<
     return {};
   }
   async execute() {
-    const ws = getWS();
-    const existingPanel = ws.getWebView(DendronWebViewKey.SEED_BROWSER);
+    const existingPanel = getExtension().getWebView(
+      DendronWebViewKey.SEED_BROWSER
+    );
 
     if (!_.isUndefined(existingPanel)) {
       existingPanel.reveal();
@@ -83,10 +84,10 @@ export class SeedBrowseCommand extends SeedCommandBase<
       }
     });
 
-    ws.setWebView(DendronWebViewKey.SEED_BROWSER, panel);
+    getExtension().setWebView(DendronWebViewKey.SEED_BROWSER, panel);
 
     panel.onDidDispose(() => {
-      ws.setWebView(DendronWebViewKey.SEED_BROWSER, undefined);
+      getExtension().setWebView(DendronWebViewKey.SEED_BROWSER, undefined);
     });
   }
 }

@@ -13,7 +13,7 @@ import {
 } from "vscode";
 import { Logger } from "./logger";
 import { NoteSyncService } from "./services/NoteSyncService";
-import { DendronWorkspace, getWS, getWSV2 } from "./workspace";
+import { DendronWorkspace, getExtension, getWSV2 } from "./workspace";
 
 interface DebouncedFunc<T extends (...args: any[]) => any> {
   /**
@@ -95,7 +95,7 @@ export class WorkspaceWatcher {
     this._debouncedOnDidChangeTextDocument.cancel();
     if (activeEditor && event.document === activeEditor.document) {
       const uri = activeEditor.document.uri;
-      if (!getWS().workspaceService?.isPathInWorkspace(uri.fsPath)) {
+      if (!getExtension().workspaceService?.isPathInWorkspace(uri.fsPath)) {
         Logger.debug({ ...ctx, state: "uri not in workspace" });
         return;
       }
@@ -123,7 +123,7 @@ export class WorkspaceWatcher {
     const uri = ev.document.uri;
     const reason = ev.reason;
     Logger.info({ ctx, url: uri.fsPath, reason, msg: "enter" });
-    if (!getWS().workspaceService?.isPathInWorkspace(uri.fsPath)) {
+    if (!getExtension().workspaceService?.isPathInWorkspace(uri.fsPath)) {
       Logger.debug({ ctx, uri: uri.fsPath, msg: "not in workspace, ignoring" });
       return { changes: [] };
     }

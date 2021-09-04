@@ -8,13 +8,13 @@ import {
   VaultUtils,
 } from "@dendronhq/common-all";
 import _ from "lodash";
-import { Position, Selection, Uri, window, ViewColumn } from "vscode";
-import { PickerUtilsV2 } from "../components/lookup/utils";
+import { Position, Selection, Uri, ViewColumn, window } from "vscode";
 import { VaultSelectionMode } from "../components/lookup/types";
+import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../utils";
 import { getReferenceAtPosition } from "../utils/md";
-import { DendronWorkspace, getWS, getWSV2 } from "../workspace";
+import { DendronWorkspace, getWSV2 } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandOpts = {
@@ -107,7 +107,7 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
       if (link.vaultName) {
         // if vault is defined on the link, then it's always that one
         opts.vault = VaultUtils.getVaultByNameOrThrow({
-          vaults: getWS().vaultsv4,
+          vaults: getWSV2().vaults,
           vname: link.vaultName,
         });
       } else {

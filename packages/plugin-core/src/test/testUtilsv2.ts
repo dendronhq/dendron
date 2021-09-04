@@ -43,7 +43,7 @@ import {
 } from "../commands/SetupWorkspace";
 import { CONFIG } from "../constants";
 import { VSCodeUtils } from "../utils";
-import { DendronWorkspace, getWS, getWSV2 } from "../workspace";
+import { DendronWorkspace, getWSV2 } from "../workspace";
 import { BlankInitializer } from "../workspace/blankInitializer";
 import { _activate } from "../_extension";
 import { createMockConfig, onWSInit } from "./testUtils";
@@ -389,7 +389,7 @@ export async function setupCodeWorkspaceV3(
 }
 
 export const getNoteFromFname = (opts: { fname: string; vault: DVault }) => {
-  const notes = getWS().getEngine().notes;
+  const notes = getWSV2().engine.notes;
   const note = NoteUtils.getNoteByFnameV5({
     ...opts,
     notes,

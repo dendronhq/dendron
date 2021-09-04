@@ -8,7 +8,7 @@ import {
   LookupSelectionTypeEnum,
 } from "../../components/lookup/types";
 import { VSCodeUtils } from "../../utils";
-import { getWS, getWSV2 } from "../../workspace";
+import { getWSV2 } from "../../workspace";
 import {
   expect,
   getNoteFromFname,
@@ -32,7 +32,7 @@ suite("Scratch Notes", function () {
         onInit: async ({ vaults }) => {
           const vault = vaults[0];
           const fname = NOTE_PRESETS_V4.NOTE_SIMPLE.fname;
-          const notes = getWS().getEngine().notes;
+          const notes = getWSV2().engine.notes;
           const note = NoteUtils.getNoteByFnameV5({
             fname,
             notes,
@@ -99,7 +99,7 @@ suite("Scratch Notes", function () {
         onInit: async ({ vaults }) => {
           const vault = vaults[1];
           const fname = NOTE_PRESETS_V4.NOTE_SIMPLE.fname;
-          const notes = getWS().getEngine().notes;
+          const notes = getWSV2().engine.notes;
           const note = NoteUtils.getNoteByFnameV5({
             fname,
             notes,

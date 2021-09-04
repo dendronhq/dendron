@@ -8,7 +8,7 @@ import {
 import _ from "lodash";
 import * as vscode from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
-import { getWS, getWSV2 } from "../workspace";
+import { getExtension, getWSV2 } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandOpts = {
@@ -60,8 +60,7 @@ export class RunMigrationCommand extends BasicCommand<
       ALL_MIGRATIONS,
       (migration) => migration.version === version
     );
-    const ws = getWS();
-    const wsRoot = getWSV2().wsRoot;
+    const { wsRoot, config } = getWSV2();
     const wsService = new WorkspaceService({ wsRoot });
     const response = vscode.window
       .withProgress(
@@ -77,8 +76,8 @@ export class RunMigrationCommand extends BasicCommand<
             migrations: migrationsToRun,
             wsService,
             logger: this.L,
-            wsConfig: await ws.getWorkspaceSettings(),
-            dendronConfig: ws.config,
+            wsConfig: await getExtension().getWorkspaceSettings(),
+            dendronConfig: config,
           });
           return out;
         }

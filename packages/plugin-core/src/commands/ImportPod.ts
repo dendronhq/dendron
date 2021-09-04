@@ -11,15 +11,15 @@ import { ProgressLocation, Uri, window } from "vscode";
 import { DENDRON_COMMANDS, Oauth2Pods } from "../constants";
 import { VSCodeUtils } from "../utils";
 import {
-  showInputBox,
-  launchGoogleOAuthFlow,
-  showDocumentQuickPick,
-  showPodQuickPickItemsV4,
   getGlobalState,
-  updateGlobalState,
+  launchGoogleOAuthFlow,
   openFileInEditor,
+  showDocumentQuickPick,
+  showInputBox,
+  showPodQuickPickItemsV4,
+  updateGlobalState,
 } from "../utils/pods";
-import { DendronWorkspace, getWS, getWSV2 } from "../workspace";
+import { DendronWorkspace, getExtension, getWSV2 } from "../workspace";
 import { BaseCommand } from "./base";
 import { ReloadIndexCommand } from "./ReloadIndex";
 
@@ -119,7 +119,7 @@ export class ImportPodCommand extends BaseCommand<
     const engine = DendronWorkspace.instance().getEngine();
     const vaults = DendronWorkspace.instance().vaultsv4;
     const pod = new opts.podChoice.podClass() as ImportPod; // eslint-disable-line new-cap
-    const fileWatcher = getWS().fileWatcher;
+    const fileWatcher = getExtension().fileWatcher;
     if (fileWatcher) {
       fileWatcher.pause = true;
     }

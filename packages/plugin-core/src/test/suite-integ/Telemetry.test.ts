@@ -2,15 +2,14 @@ import { SegmentClient } from "@dendronhq/common-server";
 import { DConfig } from "@dendronhq/engine-server";
 import { TestEngineUtils } from "@dendronhq/engine-test-utils";
 import { describe } from "mocha";
-import sinon from "sinon";
+import sinon, { SinonStub } from "sinon";
 import * as vscode from "vscode";
 import { DisableTelemetryCommand } from "../../commands/DisableTelemetry";
 import { EnableTelemetryCommand } from "../../commands/EnableTelemetry";
 import { setupSegmentClient } from "../../telemetry";
-import { getWS } from "../../workspace";
+import { getExtension } from "../../workspace";
 import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
-import { SinonStub } from "sinon";
 
 suite("telemetry", function () {
   let ctx: vscode.ExtensionContext;
@@ -38,10 +37,10 @@ suite("telemetry", function () {
       runLegacyMultiWorkspaceTest({
         ctx,
         onInit: async () => {
-          const ws = getWS();
+          const ext = getExtension();
           sinon.stub(vscode.env as any, "isTelemetryEnabled").value(true);
 
-          setupSegmentClient(ws);
+          setupSegmentClient(ext);
           expect(SegmentClient.instance().hasOptedOut).toBeFalsy();
 
           done();
@@ -53,10 +52,10 @@ suite("telemetry", function () {
       runLegacyMultiWorkspaceTest({
         ctx,
         onInit: async () => {
-          const ws = getWS();
+          const ext = getExtension();
           sinon.stub(vscode.env as any, "isTelemetryEnabled").value(false);
 
-          setupSegmentClient(ws);
+          setupSegmentClient(ext);
           expect(SegmentClient.instance().hasOptedOut).toBeTruthy();
 
           done();
@@ -69,10 +68,10 @@ suite("telemetry", function () {
         ctx,
         preSetupHook: setNoTelemetry(true),
         onInit: async () => {
-          const ws = getWS();
+          const ext = getExtension();
           sinon.stub(vscode.env as any, "isTelemetryEnabled").value(true);
 
-          setupSegmentClient(ws);
+          setupSegmentClient(ext);
           expect(SegmentClient.instance().hasOptedOut).toBeTruthy();
 
           done();
@@ -85,10 +84,10 @@ suite("telemetry", function () {
         ctx,
         preSetupHook: setNoTelemetry(true),
         onInit: async () => {
-          const ws = getWS();
+          const ext = getExtension();
           sinon.stub(vscode.env as any, "isTelemetryEnabled").value(true);
 
-          setupSegmentClient(ws);
+          setupSegmentClient(ext);
           expect(SegmentClient.instance().hasOptedOut).toBeTruthy();
 
           done();
@@ -100,13 +99,13 @@ suite("telemetry", function () {
       runLegacyMultiWorkspaceTest({
         ctx,
         onInit: async () => {
-          const ws = getWS();
+          const ext = getExtension();
           sinon.stub(vscode.env as any, "isTelemetryEnabled").value(true);
 
           const cmd = new DisableTelemetryCommand();
           await cmd.run();
 
-          setupSegmentClient(ws);
+          setupSegmentClient(ext);
           expect(SegmentClient.instance().hasOptedOut).toBeTruthy();
 
           done();
@@ -119,13 +118,13 @@ suite("telemetry", function () {
         ctx,
         preSetupHook: setNoTelemetry(true),
         onInit: async () => {
-          const ws = getWS();
+          const ext = getExtension();
           sinon.stub(vscode.env as any, "isTelemetryEnabled").value(false);
 
           const cmd = new EnableTelemetryCommand();
           await cmd.run();
 
-          setupSegmentClient(ws);
+          setupSegmentClient(ext);
           expect(SegmentClient.instance().hasOptedOut).toBeFalsy();
 
           done();
@@ -137,15 +136,15 @@ suite("telemetry", function () {
       runLegacyMultiWorkspaceTest({
         ctx,
         onInit: async () => {
-          const ws = getWS();
+          const ext = getExtension();
           const stub = sinon.stub(vscode.env as any, "isTelemetryEnabled");
 
           stub.value(false); // telemetry is disabled
-          setupSegmentClient(ws);
+          setupSegmentClient(ext);
           expect(SegmentClient.instance().hasOptedOut).toBeTruthy();
 
           stub.value(true); // telemetry is enabled
-          setupSegmentClient(ws);
+          setupSegmentClient(ext);
           expect(SegmentClient.instance().hasOptedOut).toBeFalsy();
 
           done();
@@ -157,15 +156,15 @@ suite("telemetry", function () {
       runLegacyMultiWorkspaceTest({
         ctx,
         onInit: async () => {
-          const ws = getWS();
+          const ext = getExtension();
           const stub = sinon.stub(vscode.env as any, "isTelemetryEnabled");
 
           stub.value(true); // telemetry is enabled
-          setupSegmentClient(ws);
+          setupSegmentClient(ext);
           expect(SegmentClient.instance().hasOptedOut).toBeFalsy();
 
           stub.value(false); // telemetry is disabled
-          setupSegmentClient(ws);
+          setupSegmentClient(ext);
           expect(SegmentClient.instance().hasOptedOut).toBeTruthy();
 
           done();

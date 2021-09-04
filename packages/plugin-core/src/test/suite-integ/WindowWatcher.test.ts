@@ -1,14 +1,14 @@
+import { NoteUtils } from "@dendronhq/common-all";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { describe } from "mocha";
-import { NoteUtils } from "@dendronhq/common-all";
 import path from "path";
 import * as vscode from "vscode";
 import { VSCodeUtils } from "../../utils";
 import { WindowWatcher } from "../../windowWatcher";
+import { getExtension } from "../../workspace";
+import { WorkspaceWatcher } from "../../WorkspaceWatcher";
 import { expect, runSingleVaultTest } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
-import { getWS } from "../../workspace";
-import { WorkspaceWatcher } from "../../WorkspaceWatcher";
 
 suite("WindowWatcher", function () {
   let ctx: vscode.ExtensionContext;
@@ -61,8 +61,8 @@ suite("WindowWatcher", function () {
           // Try to make sure we're opening this for the first time
           await VSCodeUtils.closeAllEditors();
 
-          getWS().workspaceWatcher = new WorkspaceWatcher();
-          getWS().workspaceWatcher?.activate(ctx);
+          getExtension().workspaceWatcher = new WorkspaceWatcher();
+          getExtension().workspaceWatcher?.activate(ctx);
           watcher = new WindowWatcher();
           watcher.activate(ctx);
           // Open a note
@@ -87,8 +87,8 @@ suite("WindowWatcher", function () {
         onInit: async ({ vaults, wsRoot, engine }) => {
           // Try to make sure we're opening this for the first time
           await VSCodeUtils.closeAllEditors();
-          getWS().workspaceWatcher = new WorkspaceWatcher();
-          getWS().workspaceWatcher?.activate(ctx);
+          getExtension().workspaceWatcher = new WorkspaceWatcher();
+          getExtension().workspaceWatcher?.activate(ctx);
           watcher = new WindowWatcher();
           watcher.activate(ctx);
           // Open a note

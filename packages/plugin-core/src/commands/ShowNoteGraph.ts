@@ -1,4 +1,3 @@
-import _ from "lodash";
 import {
   DendronWebViewKey,
   DMessageType,
@@ -6,14 +5,15 @@ import {
   GraphViewMessageType,
   NoteProps,
 } from "@dendronhq/common-all";
+import _ from "lodash";
 import { commands, ViewColumn, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
-import { WebViewUtils } from "../views/utils";
-import { BasicCommand } from "./base";
-import { getEngine, getWS } from "../workspace";
-import { GotoNoteCommand } from "./GotoNote";
-import { VSCodeUtils } from "../utils";
 import { GraphStyleService } from "../styles";
+import { VSCodeUtils } from "../utils";
+import { WebViewUtils } from "../views/utils";
+import { getEngine, getExtension } from "../workspace";
+import { BasicCommand } from "./base";
+import { GotoNoteCommand } from "./GotoNote";
 
 type CommandOpts = {};
 
@@ -28,7 +28,7 @@ export class ShowNoteGraphCommand extends BasicCommand<
     return {};
   }
   static refresh(note: NoteProps) {
-    const panel = getWS().getWebView(DendronWebViewKey.NOTE_GRAPH);
+    const panel = getExtension().getWebView(DendronWebViewKey.NOTE_GRAPH);
     if (panel) {
       // panel.title = `${title} ${note.fname}`;
       panel.webview.postMessage({
@@ -45,10 +45,10 @@ export class ShowNoteGraphCommand extends BasicCommand<
     const title = "Note Graph";
 
     // Get workspace information
-    const ws = getWS();
+    const ext = getExtension();
 
     // If panel already exists
-    const existingPanel = ws.getWebView(DendronWebViewKey.NOTE_GRAPH);
+    const existingPanel = ext.getWebView(DendronWebViewKey.NOTE_GRAPH);
 
     if (!_.isUndefined(existingPanel)) {
       try {
@@ -135,6 +135,6 @@ export class ShowNoteGraphCommand extends BasicCommand<
     });
 
     // Update workspace-wide graph panel
-    ws.setWebView(DendronWebViewKey.NOTE_GRAPH, panel);
+    ext.setWebView(DendronWebViewKey.NOTE_GRAPH, panel);
   }
 }

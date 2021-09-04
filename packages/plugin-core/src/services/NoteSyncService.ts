@@ -14,7 +14,7 @@ import * as vscode from "vscode";
 import { ShowPreviewV2Command } from "../commands/ShowPreviewV2";
 import { Logger } from "../logger";
 import { VSCodeUtils } from "../utils";
-import { DendronWorkspace, getWS, getWSV2 } from "../workspace";
+import { DendronWorkspace, getExtension, getWSV2 } from "../workspace";
 
 let NOTE_SERVICE: NoteSyncService | undefined;
 
@@ -72,7 +72,7 @@ export class NoteSyncService {
     const eclient = DendronWorkspace.instance().getEngine();
     const fname = path.basename(uri.fsPath, ".md");
 
-    if (!getWS().workspaceService?.isPathInWorkspace(uri.fsPath)) {
+    if (!getExtension().workspaceService?.isPathInWorkspace(uri.fsPath)) {
       this.L.debug({ ctx, uri: uri.fsPath, msg: "not in workspace, ignoring" });
       return;
     }

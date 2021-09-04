@@ -4,7 +4,7 @@ import {
   DUtils,
 } from "@dendronhq/common-all";
 import { Logger } from "../logger";
-import { getWS, getWSV2 } from "../workspace";
+import { getExtension, getWSV2 } from "../workspace";
 
 export class WebViewUtils {
   static genHTMLForView = ({
@@ -14,19 +14,21 @@ export class WebViewUtils {
     title: string;
     view: DendronTreeViewKey | DendronWebViewKey;
   }) => {
-    const ws = getWS();
+    const { wsRoot, config } = getWSV2();
+    const ext = getExtension();
+    const port = getExtension().port;
     const qs = DUtils.querystring.stringify({
-      ws: getWSV2().wsRoot,
-      port: ws.port,
+      ws: wsRoot,
+      port,
     });
 
     // View is `dendron.{camelCase}`
     // we want to remove `dendron` and transform camelCase to snake case
     // In addition, if we are serving using a live nextjs server, don't append .html at the end
-    const src = `${ws.getClientAPIRootUrl()}/vscode/${view.replace(
+    const src = `${ext.getClientAPIRootUrl()}/vscode/${view.replace(
       /^dendron\./,
       ""
-    )}${ws.config.dev?.nextServerUrl ? "" : ".html"}?${qs}`;
+    )}${config.dev?.nextServerUrl ? "" : ".html"}?${qs}`;
     Logger.info({ ctx: "genHTML", view, src });
     return `<!DOCTYPE html>
 <html lang="en">

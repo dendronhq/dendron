@@ -1,47 +1,47 @@
-import { FrontmatterContent } from "mdast";
+import {
+  DefaultMap,
+  isNotUndefined,
+  NoteUtils,
+  Position,
+  TAGS_HIERARCHY,
+  VaultUtils,
+} from "@dendronhq/common-all";
 import {
   BlockAnchor,
   DendronASTDest,
   DendronASTTypes,
   HashTag,
   MDUtilsV5,
-  ProcMode,
-  WikiLinkNoteV4,
   NoteRefNoteV4,
+  ProcMode,
   UserTag,
+  WikiLinkNoteV4,
 } from "@dendronhq/engine-server";
+import _ from "lodash";
+import { DateTime } from "luxon";
+import { FrontmatterContent } from "mdast";
+import visit from "unist-util-visit";
 import {
   DecorationOptions,
   DecorationRangeBehavior,
+  Diagnostic,
   Range,
+  TextDocument,
   TextEditor,
   TextEditorDecorationType,
   ThemeColor,
   window,
-  TextDocument,
-  Diagnostic,
 } from "vscode";
-import visit from "unist-util-visit";
-import _ from "lodash";
-import {
-  isNotUndefined,
-  DefaultMap,
-  NoteUtils,
-  Position,
-  VaultUtils,
-  TAGS_HIERARCHY,
-} from "@dendronhq/common-all";
-import { DateTime } from "luxon";
-import { getConfigValue, getWS } from "../workspace";
+import { Logger } from "../logger";
 import { CodeConfigKeys, DateTimeFormat } from "../types";
 import { VSCodeUtils } from "../utils";
 import { containsNonDendronUri } from "../utils/md";
+import { getFrontmatterTags, parseFrontmatter } from "../utils/yaml";
+import { getConfigValue, getWSV2 } from "../workspace";
 import {
   warnBadFrontmatterContents,
   warnMissingFrontmatter,
 } from "./codeActionProvider";
-import { Logger } from "../logger";
-import { getFrontmatterTags, parseFrontmatter } from "../utils/yaml";
 
 const DECORATION_UPDATE_DELAY = 100;
 
@@ -303,7 +303,7 @@ function decorateTag({
 }): [TextEditorDecorationType, DecorationOptions] {
   const { color: backgroundColor } = NoteUtils.color({
     fname,
-    notes: getWS().getEngine().notes,
+    notes: getWSV2().engine.notes,
   });
 
   const type = doesLinkedNoteExist({ fname })
@@ -347,7 +347,7 @@ function doesLinkedNoteExist({
   fname: string;
   vaultName?: string;
 }) {
-  const { notes, vaults } = getWS().getEngine();
+  const { notes, vaults } = getWSV2().engine;
   const vault = vaultName
     ? VaultUtils.getVaultByName({ vname: vaultName, vaults })
     : undefined;

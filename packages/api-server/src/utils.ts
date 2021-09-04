@@ -27,7 +27,7 @@ export async function putWS({
   MemoryStore.instance().put(`ws:${getWSKey(ws)}`, engine);
 }
 
-export async function getWS({ ws }: { ws: string }) {
+export async function getWSEngine({ ws }: { ws: string }) {
   const engine = await MemoryStore.instance().get<DEngine>(
     `ws:${getWSKey(ws)}`
   );

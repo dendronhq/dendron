@@ -6,7 +6,7 @@ import {
   WorkspaceRequest,
 } from "@dendronhq/common-all";
 import { MemoryStore } from "../store/memoryStore";
-import { getWS } from "../utils";
+import { getWSEngine } from "../utils";
 
 export class ConfigController {
   static singleton?: ConfigController;
@@ -20,7 +20,7 @@ export class ConfigController {
 
   async get({ ws }: WorkspaceRequest): Promise<RespV2<ConfigGetPayload>> {
     const engine = ws
-      ? await getWS({ ws })
+      ? await getWSEngine({ ws })
       : MemoryStore.instance().getEngine();
     try {
       const resp = await engine.getConfig();
@@ -38,7 +38,7 @@ export class ConfigController {
     ...opts
   }: WorkspaceRequest & ConfigWriteOpts): Promise<RespV2<void>> {
     const engine = ws
-      ? await getWS({ ws })
+      ? await getWSEngine({ ws })
       : MemoryStore.instance().getEngine();
     try {
       const resp = await engine.writeConfig(opts);

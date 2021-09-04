@@ -10,7 +10,7 @@ import {
 } from "@dendronhq/common-all";
 import { DendronEngineV2 } from "@dendronhq/engine-server";
 import { getLogger } from "../../core";
-import { getWS, putWS } from "../../utils";
+import { getWSEngine, putWS } from "../../utils";
 import { getDurationMilliseconds } from "@dendronhq/common-server";
 
 export class WorkspaceController {
@@ -61,7 +61,7 @@ export class WorkspaceController {
   }
 
   async sync({ ws }: WorkspaceSyncRequest): Promise<WorkspaceSyncPayload> {
-    const engine = await getWS({ ws });
+    const engine = await getWSEngine({ ws });
     const { notes, schemas } = engine;
     return {
       error: null,

@@ -73,18 +73,20 @@ iframe{
 			position: absolute;
 			width: 100%;
 			margin-left: 0px;
-			height: 36px;
+			height: 0px;
 			// background-image: linear-gradient(rgba(255,255,255,1), rgba(255,255,255,0));
 			z-index: 50;
+			pointer-events: none;
 		}
 		.portal-parent-fader-bottom{
 			position: absolute;
 			width: 100%;
 			bottom: 6px;
 			margin-left: 0px;
-			height: 36px;
+			height: 0px;
 			// background-image: linear-gradient(rgba(255,255,255,0), rgba(255,255,255,1));
 			z-index: 50;
+			pointer-events: none;
 		}			
 		.portal-parent-text{
 			padding:$base-line-height / 2;

@@ -15,7 +15,7 @@ import BacklinksTreeDataProvider, {
   secondLevelRefsToBacklinks,
 } from "../../features/BacklinksTreeDataProvider";
 import { VSCodeUtils } from "../../utils";
-import { getWSV2 } from "../../workspace";
+import { getDWorkspace } from "../../workspace";
 import { expect, runMultiVaultTest } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
@@ -25,7 +25,7 @@ type BacklinkWithChildren = Backlink & { children?: Backlink[] | undefined };
  *  data provider will us the backlinks. */
 const getRootChildrenBacklinks = async () => {
   const backlinksTreeDataProvider = new BacklinksTreeDataProvider(
-    getWSV2().config.dev?.enableLinkCandidates
+    getDWorkspace().config.dev?.enableLinkCandidates
   );
   const parents = await backlinksTreeDataProvider.getChildren();
   const parentsWithChildren = [];
@@ -577,7 +577,7 @@ suite("BacklinksTreeDataProvider", function () {
         const expectedPath = vscode.Uri.file(
           NoteUtils.getFullPath({
             note: noteWithLink,
-            wsRoot: getWSV2().wsRoot,
+            wsRoot: getDWorkspace().wsRoot,
           })
         ).path;
 

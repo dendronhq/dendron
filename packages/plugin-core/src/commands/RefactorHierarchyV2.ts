@@ -8,7 +8,7 @@ import { ProgressLocation, Uri, ViewColumn, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { FileWatcher } from "../fileWatcher";
 import { VSCodeUtils } from "../utils";
-import { getExtension, getWSV2 } from "../workspace";
+import { getExtension, getDWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 import { RenameNoteOutputV2a, RenameNoteV2aCommand } from "./RenameNoteV2a";
 
@@ -119,7 +119,7 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
     const { match, replace } = _.defaults(opts);
     this.L.info({ ctx, opts, msg: "enter" });
     const ext = getExtension();
-    const { engine } = getWSV2();
+    const { engine } = getDWorkspace();
     const notes = engine.notes;
     const re = new RegExp(`(.*)(${match})(.*)`);
     const candidates = _.filter(notes, (n) => {
@@ -144,7 +144,7 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
         .filter((ent) => !_.isEmpty(ent))
         .join("");
 
-      const wsRoot = getWSV2().wsRoot;
+      const wsRoot = getDWorkspace().wsRoot;
       const vault = note.vault;
       const vpath = vault2Path({ wsRoot, vault });
       const rootUri = Uri.file(vpath);

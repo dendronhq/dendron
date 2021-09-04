@@ -8,7 +8,7 @@ import {
   LookupSelectionTypeEnum,
 } from "../../components/lookup/types";
 import { VSCodeUtils } from "../../utils";
-import { getWSV2 } from "../../workspace";
+import { getDWorkspace } from "../../workspace";
 import {
   expect,
   getNoteFromFname,
@@ -32,12 +32,12 @@ suite("Scratch Notes", function () {
         onInit: async ({ vaults }) => {
           const vault = vaults[0];
           const fname = NOTE_PRESETS_V4.NOTE_SIMPLE.fname;
-          const notes = getWSV2().engine.notes;
+          const notes = getDWorkspace().engine.notes;
           const note = NoteUtils.getNoteByFnameV5({
             fname,
             notes,
             vault,
-            wsRoot: getWSV2().wsRoot,
+            wsRoot: getDWorkspace().wsRoot,
           });
           const editor = await VSCodeUtils.openNote(note!);
           const SIMPLE_SELECTION = new vscode.Selection(7, 0, 7, 12);
@@ -99,12 +99,12 @@ suite("Scratch Notes", function () {
         onInit: async ({ vaults }) => {
           const vault = vaults[1];
           const fname = NOTE_PRESETS_V4.NOTE_SIMPLE.fname;
-          const notes = getWSV2().engine.notes;
+          const notes = getDWorkspace().engine.notes;
           const note = NoteUtils.getNoteByFnameV5({
             fname,
             notes,
             vault,
-            wsRoot: getWSV2().wsRoot,
+            wsRoot: getDWorkspace().wsRoot,
           });
           const editor = await VSCodeUtils.openNote(note!);
           const SIMPLE_SELECTION = new vscode.Selection(7, 0, 7, 12);

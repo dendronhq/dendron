@@ -22,7 +22,7 @@ import { OldNewLocation, PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { Logger } from "../logger";
 import { AnalyticsUtils } from "../utils/analytics";
-import { getWSV2 } from "../workspace";
+import { getDWorkspace } from "../workspace";
 import { BaseCommand } from "./base";
 
 type CommandRunOpts = {
@@ -191,7 +191,7 @@ export class SchemaLookupCommand extends BaseCommand<
   async acceptExistingSchemaItem(
     item: SchemaQuickInput
   ): Promise<OnDidAcceptReturn | undefined> {
-    const { wsRoot, engine } = getWSV2();
+    const { wsRoot, engine } = getDWorkspace();
     const schemas = engine.schemas;
     const vpath = vault2Path({
       vault: item.vault,
@@ -210,7 +210,7 @@ export class SchemaLookupCommand extends BaseCommand<
   async acceptNewSchemaItem(): Promise<OnDidAcceptReturn | undefined> {
     const picker = this.controller.quickpick;
     const fname = picker.value;
-    const { engine } = getWSV2();
+    const { engine } = getDWorkspace();
     const vault: DVault = picker.vault
       ? picker.vault
       : PickerUtilsV2.getVaultForOpenEditor();
@@ -219,7 +219,7 @@ export class SchemaLookupCommand extends BaseCommand<
         fname,
         vault,
       });
-    const vpath = vault2Path({ vault, wsRoot: getWSV2().wsRoot });
+    const vpath = vault2Path({ vault, wsRoot: getDWorkspace().wsRoot });
     const uri = Uri.file(SchemaUtils.getPath({ root: vpath, fname }));
     const resp = await engine.writeSchema(nodeSchemaModuleNew);
 

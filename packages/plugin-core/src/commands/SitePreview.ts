@@ -6,7 +6,7 @@ import fs from "fs-extra";
 import { env, ProgressLocation, Uri, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { buildSite, checkPreReq, getSiteRootDirPath } from "../utils/site";
-import { getEngine, getExtension, getWSV2 } from "../workspace";
+import { getEngine, getExtension, getDWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandOpts = Partial<BuildSiteV2CLICommandOpts>;
@@ -34,7 +34,7 @@ export class SitePreviewCommand extends BasicCommand<
   async execute(_opts?: CommandOpts) {
     const ctx = "SitePreviewCommand";
     this.L.info({ ctx, msg: "enter" });
-    const wsRoot = getWSV2().wsRoot;
+    const wsRoot = getDWorkspace().wsRoot;
     const port = getExtension().port!;
     await window.withProgress(
       {
@@ -56,7 +56,7 @@ export class SitePreviewCommand extends BasicCommand<
             window.showErrorMessage(err);
           }
           const siteOutput = SiteUtils.getSiteOutputPath({
-            config: getWSV2().config,
+            config: getDWorkspace().config,
             wsRoot,
             stage: "dev",
           });

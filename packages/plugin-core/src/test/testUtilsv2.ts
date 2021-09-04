@@ -43,7 +43,7 @@ import {
 } from "../commands/SetupWorkspace";
 import { CONFIG } from "../constants";
 import { VSCodeUtils } from "../utils";
-import { DendronWorkspace, getWSV2 } from "../workspace";
+import { DendronWorkspace, getDWorkspace } from "../workspace";
 import { BlankInitializer } from "../workspace/blankInitializer";
 import { _activate } from "../_extension";
 import { createMockConfig, onWSInit } from "./testUtils";
@@ -182,7 +182,7 @@ export async function runWorkspaceTestV3(
   const { ctx } = opts;
   const { vaults, wsRoot } = await setupCodeWorkspaceV3(opts);
   onWSInit(async () => {
-    const { engine } = getWSV2();
+    const { engine } = getDWorkspace();
     await opts.onInit({ wsRoot, vaults, engine });
   });
   if (opts?.preActivateHook) {
@@ -389,11 +389,11 @@ export async function setupCodeWorkspaceV3(
 }
 
 export const getNoteFromFname = (opts: { fname: string; vault: DVault }) => {
-  const notes = getWSV2().engine.notes;
+  const notes = getDWorkspace().engine.notes;
   const note = NoteUtils.getNoteByFnameV5({
     ...opts,
     notes,
-    wsRoot: getWSV2().wsRoot,
+    wsRoot: getDWorkspace().wsRoot,
   });
   return VSCodeUtils.openNote(note!);
 };
@@ -401,7 +401,7 @@ export const getNoteFromTextEditor = (): NoteProps => {
   const txtPath = window.activeTextEditor?.document.uri.fsPath as string;
   const vault = { fsPath: path.dirname(txtPath) };
   const fullPath = DNodeUtils.getFullPath({
-    wsRoot: getWSV2().wsRoot,
+    wsRoot: getDWorkspace().wsRoot,
     vault,
     basename: path.basename(txtPath),
   });

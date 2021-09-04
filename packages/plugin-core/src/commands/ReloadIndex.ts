@@ -14,7 +14,7 @@ import fs from "fs-extra";
 import path from "path";
 import { ProgressLocation, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
-import { getExtension, getWSV2 } from "../workspace";
+import { getExtension, getDWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 
 type ReloadIndexCommandOpts = {
@@ -36,7 +36,7 @@ export class ReloadIndexCommand extends BasicCommand<
   ): Promise<DEngineClient | undefined> {
     const ctx = "ReloadIndex.execute";
     this.L.info({ ctx, msg: "enter" });
-    const ws = getWSV2();
+    const ws = getDWorkspace();
     const { wsRoot, engine } = ws;
 
     const reloadIndex = async () => {

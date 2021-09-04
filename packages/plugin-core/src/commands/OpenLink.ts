@@ -8,7 +8,7 @@ import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { resolvePath, VSCodeUtils } from "../utils";
 import { isAnythingSelected } from "../utils/editor";
-import { getExtension, getWSV2 } from "../workspace";
+import { getExtension, getDWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandOpts = {};
@@ -42,7 +42,7 @@ export class OpenLinkCommand extends BasicCommand<CommandOpts, CommandOutput> {
       this.L.error({ error });
       return { error };
     }
-    const wsRoot = getWSV2().wsRoot;
+    const wsRoot = getDWorkspace().wsRoot;
     let assetPath: string;
     if (text.startsWith("asset")) {
       const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();

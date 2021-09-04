@@ -12,7 +12,7 @@ import * as vscode from "vscode";
 import ReferenceHoverProvider from "../../features/ReferenceHoverProvider";
 import ReferenceProvider from "../../features/ReferenceProvider";
 import { VSCodeUtils } from "../../utils";
-import { getWSV2 } from "../../workspace";
+import { getDWorkspace } from "../../workspace";
 import { expect, LocationTestUtils } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
@@ -54,7 +54,7 @@ suite("ReferenceProvider", function () {
           const links = await provide(editor);
           expect(links.map((l) => l.uri.fsPath)).toEqual(
             [noteWithTarget1, noteWithTarget2].map((note) =>
-              NoteUtils.getFullPath({ note, wsRoot: getWSV2().wsRoot })
+              NoteUtils.getFullPath({ note, wsRoot: getDWorkspace().wsRoot })
             )
           );
           done();
@@ -84,7 +84,7 @@ suite("ReferenceProvider", function () {
           const links = await provide(editor);
           expect(links.map((l) => l.uri.fsPath)).toEqual(
             [noteWithTarget1, noteWithTarget2].map((note) =>
-              NoteUtils.getFullPath({ note, wsRoot: getWSV2().wsRoot })
+              NoteUtils.getFullPath({ note, wsRoot: getDWorkspace().wsRoot })
             )
           );
           done();
@@ -112,7 +112,7 @@ suite("ReferenceProvider", function () {
           const links = await provide(editor);
           expect(links.map((l) => l.uri.fsPath)).toEqual(
             [noteWithLink].map((note) =>
-              NoteUtils.getFullPath({ note, wsRoot: getWSV2().wsRoot })
+              NoteUtils.getFullPath({ note, wsRoot: getDWorkspace().wsRoot })
             )
           );
           done();
@@ -141,7 +141,7 @@ suite("ReferenceProvider", function () {
           const links = await provide(editor);
           expect(links.map((l) => l.uri.fsPath)).toEqual(
             [noteWithLink].map((note) =>
-              NoteUtils.getFullPath({ note, wsRoot: getWSV2().wsRoot })
+              NoteUtils.getFullPath({ note, wsRoot: getDWorkspace().wsRoot })
             )
           );
           done();

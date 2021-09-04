@@ -134,7 +134,7 @@ export function getCodeConfig<T>(key: string): T | undefined {
   return DendronWorkspace.configuration().get<T>(key);
 }
 
-export function getWSV2(): DWorkspaceV2 {
+export function getDWorkspace(): DWorkspaceV2 {
   const ws = getExtension();
   return ws.getWorkspaceImplOrThrow();
 }
@@ -148,7 +148,7 @@ export function getEngine() {
 }
 
 export function resolveRelToWSRoot(fpath: string): string {
-  return resolvePath(fpath, getWSV2().wsRoot as string);
+  return resolvePath(fpath, getDWorkspace().wsRoot as string);
 }
 
 // --- Main
@@ -246,7 +246,7 @@ export class DendronWorkspace {
   }
 
   get wsRoot(): string {
-    return getWSV2().wsRoot;
+    return getDWorkspace().wsRoot;
   }
 
   static lsp(): boolean {
@@ -397,14 +397,14 @@ export class DendronWorkspace {
   }
 
   get configRoot(): string {
-    return getWSV2().wsRoot;
+    return getDWorkspace().wsRoot;
   }
 
   /**
    * @remark: We need to get the config from disk because the engine might not be initialized yet
    */
   get config(): DendronConfig {
-    return getWSV2().config;
+    return getDWorkspace().config;
   }
 
   async getWorkspaceSettings(): Promise<WorkspaceSettings> {
@@ -431,7 +431,7 @@ export class DendronWorkspace {
     wsConfigKey: keyof DendronWorkspaceSettings;
     dendronConfigKey: string;
   }) {
-    const config = getWSV2().config;
+    const config = getDWorkspace().config;
     // user already using new value
     if (_.get(config, dendronConfigKey)) {
       return _.get(config, dendronConfigKey);
@@ -452,7 +452,7 @@ export class DendronWorkspace {
   }
 
   get podsDir(): string {
-    const rootDir = getWSV2().wsRoot;
+    const rootDir = getDWorkspace().wsRoot;
     if (!rootDir) {
       throw new Error(`rootdir not set when get podsDir`);
     }
@@ -550,7 +550,7 @@ export class DendronWorkspace {
           )
         );
 
-        if (getWSV2().config.dev?.enableWebUI) {
+        if (getDWorkspace().config.dev?.enableWebUI) {
           Logger.info({ ctx, msg: "initWebUI" });
           context.subscriptions.push(
             vscode.window.registerWebviewViewProvider(
@@ -582,7 +582,7 @@ export class DendronWorkspace {
     Logger.info({ ctx, msg: "init:backlinks" });
 
     const backlinksTreeDataProvider = new BacklinksTreeDataProvider(
-      getWSV2().config.dev?.enableLinkCandidates
+      getDWorkspace().config.dev?.enableLinkCandidates
     );
     vscode.window.onDidChangeActiveTextEditor(
       // eslint-disable-next-line  no-return-await
@@ -718,7 +718,7 @@ export class DendronWorkspace {
     const ctx = "activateWorkspace";
     const stage = getStage();
     this.L.info({ ctx, stage, msg: "enter" });
-    const { wsRoot } = getWSV2();
+    const { wsRoot } = getDWorkspace();
     if (!wsRoot) {
       throw new Error(`rootDir not set when activating Watcher`);
     }

@@ -10,7 +10,7 @@ import vscode, { Uri, ViewColumn, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../utils";
 import { WebViewUtils } from "../views/utils";
-import { getExtension, getWSV2 } from "../workspace";
+import { getExtension, getDWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandOpts = {};
@@ -73,7 +73,7 @@ export class ShowSchemaGraphCommand extends BasicCommand<
           const engine = getExtension().getEngine();
           const schema = engine.schemas[msg.data.id];
 
-          const { wsRoot } = getWSV2();
+          const { wsRoot } = getDWorkspace();
 
           await vscode.commands.executeCommand(
             "workbench.action.focusFirstEditorGroup"

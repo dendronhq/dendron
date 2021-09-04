@@ -12,7 +12,7 @@ import { ShowPreviewV2Command } from "./commands/ShowPreviewV2";
 import { updateDecorations } from "./features/windowDecorations";
 import { Logger } from "./logger";
 import { VSCodeUtils } from "./utils";
-import { getExtension, getWSV2 } from "./workspace";
+import { getExtension, getDWorkspace } from "./workspace";
 
 export class WindowWatcher {
   private onDidChangeActiveTextEditorHandlers: ((
@@ -152,7 +152,7 @@ export class WindowWatcher {
       fname: NoteUtils.uri2Fname(editor.document.uri),
     });
     this.moveCursorPastFrontmatter(editor);
-    if (getWSV2().config.autoFoldFrontmatter) {
+    if (getDWorkspace().config.autoFoldFrontmatter) {
       await this.foldFrontmatter();
     }
   }

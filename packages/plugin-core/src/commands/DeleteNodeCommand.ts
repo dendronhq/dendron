@@ -10,7 +10,7 @@ import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { Logger } from "../logger";
 import { DendronClientUtilsV2, VSCodeUtils } from "../utils";
-import { getEngine, getExtension, getWSV2 } from "../workspace";
+import { getEngine, getExtension, getDWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandOpts = {};
@@ -44,7 +44,7 @@ export class DeleteNodeCommand extends BasicCommand<
         fname,
         vault,
         notes: getEngine().notes,
-        wsRoot: getWSV2().wsRoot,
+        wsRoot: getDWorkspace().wsRoot,
       }) as NoteProps;
       const out = (await client.deleteNote(note.id)) as EngineDeletePayload;
       if (out.error) {

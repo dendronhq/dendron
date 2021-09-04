@@ -14,7 +14,7 @@ import { ExtensionContext } from "vscode";
 import { CONFIG, GLOBAL_STATE, WORKSPACE_STATE } from "../../constants";
 import { Logger } from "../../logger";
 import { VSCodeUtils } from "../../utils";
-import { getExtension, getWSV2 } from "../../workspace";
+import { getExtension, getDWorkspace } from "../../workspace";
 import { _activate } from "../../_extension";
 import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
@@ -125,7 +125,7 @@ suite("Migration", function () {
               migrations: getMigration({ from: "0.46.0", to: "0.47.1" }),
             });
             expect(out.length).toEqual(1);
-            expect(getWSV2().config.journal).toEqual(
+            expect(getDWorkspace().config.journal).toEqual(
               DConfig.genDefaultConfig().journal
             );
             done();
@@ -156,7 +156,7 @@ suite("Migration", function () {
               migrations: getMigration({ from: "0.46.0", to: "0.47.1" }),
             });
             expect(out.length).toEqual(1);
-            expect(getWSV2().config.journal).toEqual({
+            expect(getDWorkspace().config.journal).toEqual({
               ...DConfig.genDefaultConfig().journal,
               name: "foo",
             });
@@ -187,7 +187,7 @@ suite("Migration", function () {
             logger: Logger,
             migrations: getMigration({ from: "0.51.0", to: "0.52.0" }),
           });
-          expect(getWSV2().config.scratch).toEqual({
+          expect(getDWorkspace().config.scratch).toEqual({
             ...DConfig.genDefaultConfig().scratch,
             name: "foo",
           });
@@ -221,7 +221,7 @@ suite("Migration", function () {
             logger: Logger,
             migrations: getMigration({ from: "0.51.0", to: "0.52.0" }),
           });
-          expect(getWSV2().config.dev?.enablePreviewV2).toBeFalsy();
+          expect(getDWorkspace().config.dev?.enablePreviewV2).toBeFalsy();
           done();
         },
       });
@@ -247,7 +247,7 @@ suite("Migration", function () {
             logger: Logger,
             migrations: getMigration({ from: "0.51.0", to: "0.51.4" }),
           });
-          expect(getWSV2().config.dev?.enablePreviewV2).toBeTruthy();
+          expect(getDWorkspace().config.dev?.enablePreviewV2).toBeTruthy();
           done();
         },
       });
@@ -278,7 +278,7 @@ suite("Migration", function () {
             logger: Logger,
             migrations: getMigration({ from: "0.55.0", to: "0.55.2" }),
           });
-          expect(getWSV2().config.lookup.note.selectionType).toEqual(
+          expect(getDWorkspace().config.lookup.note.selectionType).toEqual(
             LookupSelectionType.selection2link
           );
           done();
@@ -319,7 +319,7 @@ suite("Migration", function () {
             logger: Logger,
             migrations: getMigration({ from: "0.55.0", to: "0.55.2" }),
           });
-          expect(getWSV2().config.lookup.note.selectionType).toEqual(
+          expect(getDWorkspace().config.lookup.note.selectionType).toEqual(
             DConfig.genDefaultConfig().lookup.note.selectionType
           );
           done();

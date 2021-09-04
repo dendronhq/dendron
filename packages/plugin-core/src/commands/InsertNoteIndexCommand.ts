@@ -3,7 +3,7 @@ import _ from "lodash";
 import { window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { DendronClientUtilsV2, VSCodeUtils } from "../utils";
-import { getEngine, getWSV2 } from "../workspace";
+import { getEngine, getDWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandOpts = {
@@ -71,7 +71,7 @@ export class InsertNoteIndexCommand extends BasicCommand<
       window.showInformationMessage("This note does not have any child notes.");
       return opts;
     }
-    const maybeMarker = getWSV2().config.insertNoteIndex?.marker;
+    const maybeMarker = getDWorkspace().config.insertNoteIndex?.marker;
     const noteIndex = this.genNoteIndex(children, {
       marker: _.isBoolean(maybeMarker) ? maybeMarker : opts.marker,
     });

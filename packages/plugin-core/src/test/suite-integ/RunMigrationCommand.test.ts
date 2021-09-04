@@ -3,7 +3,7 @@ import sinon from "sinon";
 import * as vscode from "vscode";
 import { RunMigrationCommand } from "../../commands/RunMigrationCommand";
 import { CONFIG } from "../../constants";
-import { getWSV2 } from "../../workspace";
+import { getDWorkspace } from "../../workspace";
 import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
@@ -30,7 +30,7 @@ suite("RunMigrationCommand", function () {
         const out = await cmd.run();
         expect(out!.length).toEqual(1);
         expect(out![0].data.version === "0.55.2");
-        expect(getWSV2().config.lookup.note.selectionType).toEqual(
+        expect(getDWorkspace().config.lookup.note.selectionType).toEqual(
           "selection2link"
         );
         done();

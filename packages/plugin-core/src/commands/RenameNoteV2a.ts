@@ -19,7 +19,7 @@ import {
 import { DENDRON_COMMANDS } from "../constants";
 import { FileItem } from "../external/fileutils/FileItem";
 import { VSCodeUtils } from "../utils";
-import { getExtension, getWSV2 } from "../workspace";
+import { getExtension, getDWorkspace } from "../workspace";
 import { BaseCommand } from "./base";
 
 type CommandInput = {
@@ -88,7 +88,7 @@ export class RenameNoteV2aCommand extends BaseCommand<
     const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
     const move = inputs.move[0];
     const fname = move.newLoc.fname;
-    const vpath = vault2Path({ vault, wsRoot: getWSV2().wsRoot });
+    const vpath = vault2Path({ vault, wsRoot: getDWorkspace().wsRoot });
     const newUri = Uri.file(path.join(vpath, fname + ".md"));
     return {
       files: [{ oldUri, newUri }],
@@ -126,7 +126,7 @@ export class RenameNoteV2aCommand extends BaseCommand<
       const oldFname = DNodeUtils.fname(oldUri.fsPath);
       const vault = VaultUtils.getVaultByNotePath({
         fsPath: oldUri.fsPath,
-        wsRoot: getWSV2().wsRoot,
+        wsRoot: getDWorkspace().wsRoot,
         vaults: engine.vaults,
       });
 

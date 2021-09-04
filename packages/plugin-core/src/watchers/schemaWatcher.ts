@@ -4,7 +4,7 @@ import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
 import { Logger } from "../logger";
-import { DendronWorkspace, getExtension, getWSV2 } from "../workspace";
+import { DendronWorkspace, getExtension, getDWorkspace } from "../workspace";
 
 export class SchemaWatcher {
   public watcher: vscode.FileSystemWatcher;
@@ -43,7 +43,7 @@ export class SchemaWatcher {
       return;
     }
     this.L.info({ ctx, uri });
-    const { engine } = getWSV2();
+    const { engine } = getDWorkspace();
     const { vaults, wsRoot } = engine;
     const fname = path.basename(uri.fsPath, ".schema.yml");
     const dirname = path.dirname(uri.fsPath);
@@ -60,7 +60,7 @@ export class SchemaWatcher {
         vault,
         content,
         fname,
-        wsRoot: getWSV2().wsRoot,
+        wsRoot: getDWorkspace().wsRoot,
       });
       await engine.updateSchema(maybeSchema);
       vscode.window.showInformationMessage("schema updated");

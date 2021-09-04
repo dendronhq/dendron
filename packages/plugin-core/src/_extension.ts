@@ -47,7 +47,7 @@ import {
   DendronWorkspace,
   getEngine,
   getExtension,
-  getWSV2,
+  getDWorkspace,
 } from "./workspace";
 import { DendronCodeWorkspace } from "./workspace/codeWorkspace";
 import { DendronNativeWorkspace } from "./workspace/nativeWorkspace";
@@ -79,7 +79,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 async function reloadWorkspace() {
   const ctx = "reloadWorkspace";
-  const ws = getWSV2();
+  const ws = getDWorkspace();
   const maybeEngine = await WSUtils.reloadWorkspace();
   if (!maybeEngine) {
     return maybeEngine;
@@ -163,7 +163,7 @@ async function startServerProcess(): Promise<{
   subprocess?: ExecaChildProcess;
 }> {
   const { nextServerUrl, nextStaticRoot, engineServerPort } =
-    getWSV2().config.dev || {};
+    getDWorkspace().config.dev || {};
   // const ctx = "startServer";
   const maybePort =
     DendronWorkspace.configuration().get<number | undefined>(
@@ -185,7 +185,7 @@ async function startServerProcess(): Promise<{
   }
 
   // start server is separate process
-  const logPath = getWSV2().logUri.fsPath;
+  const logPath = getDWorkspace().logUri.fsPath;
   const out = await ServerUtils.execServerNode({
     scriptPath: path.join(__dirname, "server.js"),
     logPath,
@@ -275,7 +275,7 @@ export async function _activate(
         assetUri,
       });
     }
-    const wsImpl = getWSV2();
+    const wsImpl = getDWorkspace();
     const start = process.hrtime();
     const dendronConfig = ws.config;
 
@@ -510,7 +510,7 @@ function toggleViews(enabled: boolean) {
 
 // this method is called when your extension is deactivated
 export function deactivate() {
-  const ws = getWSV2();
+  const ws = getDWorkspace();
   if (!WorkspaceUtils.isNativeWorkspace(ws)) {
     getExtension().deactivate();
   }

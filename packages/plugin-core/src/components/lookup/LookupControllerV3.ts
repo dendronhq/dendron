@@ -5,7 +5,7 @@ import { QuickInputButton } from "vscode";
 import { CancellationTokenSource } from "vscode-languageclient";
 import { Logger } from "../../logger";
 import { VSCodeUtils } from "../../utils";
-import { DendronWorkspace, getWSV2 } from "../../workspace";
+import { DendronWorkspace, getDWorkspace } from "../../workspace";
 import {
   ButtonCategory,
   DendronBtn,
@@ -60,7 +60,7 @@ export class LookupControllerV3 {
   public _provider?: ILookupProviderV3;
 
   static create(opts?: LookupControllerV3CreateOpts) {
-    const { vaults } = getWSV2();
+    const { vaults } = getDWorkspace();
     const disableVaultSelection =
       (_.isBoolean(opts?.disableVaultSelection) &&
         opts?.disableVaultSelection) ||

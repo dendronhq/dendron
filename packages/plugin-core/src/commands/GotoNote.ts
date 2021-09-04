@@ -14,7 +14,7 @@ import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../utils";
 import { getReferenceAtPosition } from "../utils/md";
-import { getExtension, getWSV2 } from "../workspace";
+import { getExtension, getDWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandOpts = {
@@ -75,7 +75,7 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
 
   private async processInputs(opts: CommandOpts) {
     if (opts.qs && opts.vault) return opts;
-    const { engine } = getWSV2();
+    const { engine } = getDWorkspace();
 
     if (opts.qs && !opts.vault) {
       // Special case: some code expects GotoNote to default to current vault if qs is provided but vault isn't
@@ -107,7 +107,7 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
       if (link.vaultName) {
         // if vault is defined on the link, then it's always that one
         opts.vault = VaultUtils.getVaultByNameOrThrow({
-          vaults: getWSV2().vaults,
+          vaults: getDWorkspace().vaults,
           vname: link.vaultName,
         });
       } else {
@@ -133,7 +133,7 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
           // This is a new note. Depending on the config, we can either
           // automatically pick the vault or we'll prompt for it.
           const confirmVaultSetting =
-            getWSV2().config["lookupConfirmVaultOnCreate"];
+            getDWorkspace().config["lookupConfirmVaultOnCreate"];
           const selectionMode =
             confirmVaultSetting !== true
               ? VaultSelectionMode.smart
@@ -193,7 +193,7 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
       const note = data?.note as NoteProps;
       const npath = NoteUtils.getFullPath({
         note,
-        wsRoot: getWSV2().wsRoot,
+        wsRoot: getDWorkspace().wsRoot,
       });
       const uri = Uri.file(npath);
       const editor = await VSCodeUtils.openFileInEditor(uri, {

@@ -47,7 +47,7 @@ import { Logger } from "../logger";
 import { StateService } from "../services/stateService";
 import { WorkspaceConfig } from "../settings";
 import { VSCodeUtils } from "../utils";
-import { DendronWorkspace, getWSV2 } from "../workspace";
+import { DendronWorkspace, getDWorkspace } from "../workspace";
 import { BlankInitializer } from "../workspace/blankInitializer";
 import { WorkspaceInitFactory } from "../workspace/workspaceInitializer";
 import { _activate } from "../_extension";
@@ -250,7 +250,7 @@ export async function runLegacySingleWorkspaceTest(
 ) {
   const { wsRoot, vaults } = await setupLegacyWorkspace(opts);
   onWSInit(async () => {
-    const engine = getWSV2().engine;
+    const engine = getDWorkspace().engine;
     await opts.onInit({ wsRoot, vaults, engine });
   });
   await _activate(opts.ctx);
@@ -265,7 +265,7 @@ export async function runLegacyMultiWorkspaceTest(
 ) {
   const { wsRoot, vaults } = await setupLegacyWorkspaceMulti(opts);
   onWSInit(async () => {
-    const engine = getWSV2().engine;
+    const engine = getDWorkspace().engine;
     await opts.onInit({ wsRoot, vaults, engine });
   });
   await _activate(opts.ctx);
@@ -339,10 +339,10 @@ export function stubSetupWorkspace({ wsRoot }: { wsRoot: string }) {
 
 class FakeEngine {
   get notes() {
-    return getWSV2().engine.notes;
+    return getDWorkspace().engine.notes;
   }
   get schemas() {
-    return getWSV2().engine.schemas;
+    return getDWorkspace().engine.schemas;
   }
 }
 

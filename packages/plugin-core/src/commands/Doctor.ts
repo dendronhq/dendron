@@ -22,7 +22,7 @@ import { DoctorScopeType } from "../components/doctor/types";
 import { DENDRON_COMMANDS } from "../constants";
 import { delayedUpdateDecorations } from "../features/windowDecorations";
 import { VSCodeUtils } from "../utils";
-import { getExtension, getWSV2 } from "../workspace";
+import { getExtension, getDWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 import { ReloadIndexCommand } from "./ReloadIndex";
 
@@ -149,7 +149,7 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     const ctx = "DoctorCommand:execute";
     window.showInformationMessage("Calling the doctor.");
     const ext = getExtension();
-    const { wsRoot, config } = getWSV2();
+    const { wsRoot, config } = getDWorkspace();
     const findings: Finding[] = [];
     if (_.isUndefined(wsRoot)) {
       throw Error("rootDir undefined");

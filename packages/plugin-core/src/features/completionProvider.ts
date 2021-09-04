@@ -38,7 +38,7 @@ import {
 } from "vscode";
 import { Logger } from "../logger";
 import { VSCodeUtils } from "../utils";
-import { getExtension, getWSV2 } from "../workspace";
+import { getExtension, getDWorkspace } from "../workspace";
 
 function padWithZero(n: number): string {
   if (n > 99) return String(n);
@@ -129,7 +129,7 @@ export const provideCompletionItems = (
   }
   const range = new Range(position.line, start, position.line, end);
 
-  const { engine } = getWSV2();
+  const { engine } = getDWorkspace();
   const notes = engine.notes;
   const completionItems: CompletionItem[] = [];
   const currentVault = VSCodeUtils.getNoteFromDocument(document)?.vault;
@@ -197,7 +197,7 @@ export const resolveCompletionItem = async (
   if (!_.isString(fname) || !_.isString(vname) || token.isCancellationRequested)
     return;
 
-  const engine = getWSV2().engine;
+  const engine = getDWorkspace().engine;
   const { vaults, notes, wsRoot } = engine;
   const vault = VaultUtils.getVaultByName({ vname, vaults });
   if (_.isUndefined(vault)) {
@@ -302,7 +302,7 @@ export async function provideBlockCompletionItems(
   Logger.debug({ ctx, found });
 
   const timestampStart = process.hrtime();
-  const engine = getWSV2().engine;
+  const engine = getDWorkspace().engine;
 
   let otherFile = false;
   let note: NoteProps | undefined;

@@ -11,7 +11,7 @@ import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
 import { Logger } from "./logger";
-import { getExtension, getWSV2 } from "./workspace";
+import { getExtension, getDWorkspace } from "./workspace";
 
 export class FileWatcher {
   public watchers: { vault: DVault; watcher: vscode.FileSystemWatcher }[];
@@ -77,8 +77,8 @@ export class FileWatcher {
 
       try {
         this.L.debug({ ctx, uri, msg: "pre-add-to-engine" });
-        const { vaults, engine } = getWSV2();
-        const { wsRoot } = getWSV2();
+        const { vaults, engine } = getDWorkspace();
+        const { wsRoot } = getDWorkspace();
         const vault = VaultUtils.getVaultByNotePath({
           vaults,
           fsPath: uri.fsPath,
@@ -145,7 +145,7 @@ export class FileWatcher {
         return;
       }
       try {
-        const { engine } = getWSV2();
+        const { engine } = getDWorkspace();
         this.L.debug({ ctx, uri, msg: "preparing to delete" });
         const nodeToDelete = _.find(engine.notes, { fname });
         if (_.isUndefined(nodeToDelete)) {

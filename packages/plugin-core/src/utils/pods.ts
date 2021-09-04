@@ -10,7 +10,7 @@ import { gdocRequiredScopes, GLOBAL_STATE } from "../constants";
 import { StateService } from "../services/stateService";
 import { GOOGLE_OAUTH_ID } from "../types/global";
 import { clipboard, VSCodeUtils } from "../utils";
-import { getWSV2 } from "../workspace";
+import { getDWorkspace } from "../workspace";
 
 export type PodQuickPickItemV4 = QuickPickItem & PodItemV4;
 
@@ -30,7 +30,7 @@ export const showPodQuickPickItemsV4 = (podItem: PodItemV4[]) => {
 };
 
 export const launchGoogleOAuthFlow = async () => {
-  const port = fs.readFileSync(path.join(getWSV2().wsRoot, ".dendron.port"), {
+  const port = fs.readFileSync(path.join(getDWorkspace().wsRoot, ".dendron.port"), {
     encoding: "utf8",
   });
 
@@ -104,7 +104,7 @@ export const getGlobalState = async (key: GLOBAL_STATE) => {
 export const openFileInEditor = async (note: NoteProps): Promise<void> => {
   const npath = NoteUtils.getFullPath({
     note,
-    wsRoot: getWSV2().wsRoot,
+    wsRoot: getDWorkspace().wsRoot,
   });
   const uri = Uri.file(npath);
   await VSCodeUtils.openFileInEditor(uri);

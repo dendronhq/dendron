@@ -14,7 +14,7 @@ import {
 } from "../components/lookup/LookupProviderV3";
 import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../utils";
-import { getWSV2 } from "../workspace";
+import { getDWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandInput = {
@@ -35,7 +35,7 @@ export class InsertNoteLinkCommand extends BasicCommand<
   key = DENDRON_COMMANDS.INSERT_NOTE_LINK.key;
 
   async gatherInputs(opts: CommandInput): Promise<CommandOpts | undefined> {
-    const config = DConfig.getProp(getWSV2().config, "insertNoteLink");
+    const config = DConfig.getProp(getDWorkspace().config, "insertNoteLink");
     const aliasModeConfig = config?.aliasMode;
     const multiSelectConfig = config?.multiSelect;
     const copts: CommandInput = _.defaults(opts || {}, {

@@ -33,7 +33,7 @@ import vscode, {
 } from "vscode";
 import { ShowPreviewV2Command } from "../commands/ShowPreviewV2";
 import { VSCodeUtils } from "../utils";
-import { getWSV2 } from "../workspace";
+import { getDWorkspace } from "../workspace";
 import { getFrontmatterTags, parseFrontmatter } from "./yaml";
 
 export type RefT = {
@@ -122,7 +122,7 @@ export class MarkdownUtils {
       });
   }
   static async openPreview() {
-    if (!getWSV2().config.dev?.enablePreviewV2) {
+    if (!getDWorkspace().config.dev?.enablePreviewV2) {
       const previewEnhanced2 = this.hasLegacyPreview();
       if (!previewEnhanced2) {
         return this.promptInstallLegacyPreview();
@@ -400,7 +400,7 @@ export const noteLinks2Locations = (note: NoteProps) => {
   const linksMatch = note.links.filter((l) => l.type !== "backlink");
   const fsPath = NoteUtils.getFullPath({
     note,
-    wsRoot: getWSV2().wsRoot,
+    wsRoot: getDWorkspace().wsRoot,
   });
   const fileContent = fs.readFileSync(fsPath).toString();
   const fmOffset = fileContent.indexOf("\n---") + 4;
@@ -430,7 +430,7 @@ export const findReferences = async (
 ): Promise<FoundRefT[]> => {
   const refs: FoundRefT[] = [];
 
-  const { engine } = getWSV2();
+  const { engine } = getDWorkspace();
   // clean for anchor
   const fname = ref;
   const notes = NoteUtils.getNotesByFname({ fname, notes: engine.notes });
@@ -447,7 +447,7 @@ export const findReferences = async (
     const linksMatch = note.links.filter((l) => l.to?.fname === fname);
     const fsPath = NoteUtils.getFullPath({
       note,
-      wsRoot: getWSV2().wsRoot,
+      wsRoot: getDWorkspace().wsRoot,
     });
 
     if (excludePaths.includes(fsPath) || !fs.existsSync(fsPath)) {

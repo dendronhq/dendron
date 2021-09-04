@@ -5,7 +5,7 @@ import { Uri, window } from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../utils";
-import { getWSV2 } from "../workspace";
+import { getDWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandOpts = {};
@@ -23,19 +23,19 @@ export class GoUpCommand extends BasicCommand<CommandOpts, CommandOutput> {
       window.showErrorMessage("no active document found");
       return;
     }
-    const engine = getWSV2().engine;
+    const engine = getDWorkspace().engine;
     const nparent = DNodeUtils.findClosestParent(
       path.basename(maybeTextEditor.document.uri.fsPath, ".md"),
       _.values(engine.notes),
       {
         noStubs: true,
         vault: PickerUtilsV2.getVaultForOpenEditor(),
-        wsRoot: getWSV2().wsRoot,
+        wsRoot: getDWorkspace().wsRoot,
       }
     ) as NoteProps;
     const nppath = NoteUtils.getFullPath({
       note: nparent,
-      wsRoot: getWSV2().wsRoot,
+      wsRoot: getDWorkspace().wsRoot,
     });
     await VSCodeUtils.openFileInEditor(Uri.file(nppath));
     return;

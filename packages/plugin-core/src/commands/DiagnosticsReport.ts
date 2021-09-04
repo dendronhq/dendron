@@ -5,7 +5,7 @@ import { window, workspace } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { Logger } from "../logger";
 import { clipboard } from "../utils";
-import { DendronWorkspace, getWSV2 } from "../workspace";
+import { DendronWorkspace, getDWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 
 const L = Logger;
@@ -35,8 +35,8 @@ export class DiagnosticsReportCommand extends BasicCommand<
     const serverLogFile = fs.readFileSync(serverLogPath, { encoding: "utf8" });
     const serverLastLines = serverLogFile.slice(-3000);
 
-    const config = JSON.stringify(getWSV2().config);
-    const wsRoot = getWSV2().wsRoot;
+    const config = JSON.stringify(getDWorkspace().config);
+    const wsRoot = getDWorkspace().wsRoot;
     const port = getPortFilePath({ wsRoot });
     const portFromFile = fs.readFileSync(port, { encoding: "utf8" });
 

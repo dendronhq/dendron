@@ -34,9 +34,12 @@ VFile {
 
 has fm tags
 
+* * *
+
 ## Tags
 
-[first](tags.first.html)[second](tags.second.html)
+1. [first](tags.first.html)
+2. [second](tags.second.html)
 
 ",
   "cwd": "<PROJECT_ROOT>",
@@ -52,9 +55,11 @@ VFile {
 
 has fm tags
 
+* * *
+
 ## Tags
 
-[first](tags.first.html)
+1. [first](tags.first.html)
 
 ",
   "cwd": "<PROJECT_ROOT>",

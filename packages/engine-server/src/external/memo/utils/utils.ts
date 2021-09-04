@@ -137,9 +137,6 @@ export const fsPathToRef = ({
   );
 };
 
-// export const getWorkspaceFolder = (): string | undefined =>
-//   DendronWorkspace.instance().rootWorkspace.uri.fsPath;
-
 export const parseRef = (rawRef: string): RefT => {
   const dividerPosition = rawRef.indexOf("|");
   if (dividerPosition < 0) {
@@ -154,73 +151,6 @@ export const parseRef = (rawRef: string): RefT => {
     };
   }
 };
-
-// === Cache
-// export const cacheWorkspace = async () => {
-//   // await cacheUris();
-//   await cacheRefs();
-// };
-
-// export const cacheUris = async () => {
-//   const root = DendronWorkspace.instance().rootWorkspace;
-//   const markdownUris = _.values(DendronWorkspace.instance().engine.notes)
-//     .filter((n) => !n.stub)
-//     .map((n) => {
-//       return URI.joinPath(root.uri, n.fname + ".md");
-//     });
-//   workspaceCache.markdownUris = sortPaths(markdownUris, {
-//     pathKey: "path",
-//     shallowFirst: true,
-//   });
-//   workspaceCache.allUris = sortPaths([...markdownUris], {
-//     pathKey: "path",
-//     shallowFirst: true,
-//   });
-// };
-
-// export const cacheRefs = async () => {
-//   workspaceCache.danglingRefsByFsPath = await findDanglingRefsByFsPath(
-//     workspaceCache.markdownUris
-//   );
-//   workspaceCache.danglingRefs = sortPaths(
-//     Array.from(
-//       new Set(
-//         Object.values(workspaceCache.danglingRefsByFsPath).flatMap(
-//           (refs) => refs
-//         )
-//       )
-//     ),
-//     { shallowFirst: true }
-//   );
-// };
-
-// export const findDanglingRefsByFsPath = async (uris: URI[]) => {
-//   const refsByFsPath: { [key: string]: string[] } = {};
-
-//   for (const { fsPath } of uris) {
-//     const fsPathExists = fs.existsSync(fsPath);
-//     if (
-//       !fsPathExists ||
-//       !containsMarkdownExt(fsPath) ||
-//       (fsPathExists && fs.lstatSync(fsPath).isDirectory())
-//     ) {
-//       continue;
-//     }
-
-//     const doc = workspace.textDocuments.find(
-//       (doc) => doc.uri.fsPath === fsPath
-//     );
-//     const refs = extractDanglingRefs(
-//       doc ? doc.getText() : fs.readFileSync(fsPath).toString()
-//     );
-
-//     if (refs.length) {
-//       refsByFsPath[fsPath] = refs;
-//     }
-//   }
-
-//   return refsByFsPath;
-// };
 
 const refRegexp = new RegExp(refPattern, "gi");
 

@@ -16,7 +16,7 @@ import { GotoNoteCommand } from "../commands/GotoNote";
 import { Logger } from "../logger";
 import { VSCodeUtils } from "../utils";
 import { AnalyticsUtils } from "../utils/analytics";
-import { DendronWorkspace, getEngine, getWS } from "../workspace";
+import { getEngine, getExtension } from "../workspace";
 import { WebViewUtils } from "./utils";
 
 export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
@@ -25,8 +25,8 @@ export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
   private _view?: vscode.WebviewView;
 
   constructor() {
-    getWS().dendronTreeViewV2 = this;
-    DendronWorkspace.instance().addDisposable(
+    getExtension().dendronTreeViewV2 = this;
+    getExtension().addDisposable(
       vscode.window.onDidChangeActiveTextEditor(this.onOpenTextDocument, this)
     );
   }
@@ -40,8 +40,8 @@ export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
     }
     const uri = editor.document.uri;
     const basename = path.basename(uri.fsPath);
-    const ws = getWS();
-    if (!ws.workspaceService?.isPathInWorkspace(uri.fsPath)) {
+    const ext = getExtension();
+    if (!ext.workspaceService?.isPathInWorkspace(uri.fsPath)) {
       return;
     }
     if (basename.endsWith(".md")) {
@@ -82,7 +82,9 @@ export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
           const document = VSCodeUtils.getActiveTextEditor()?.document;
           if (document) {
             if (
-              !getWS().workspaceService?.isPathInWorkspace(document.uri.fsPath)
+              !getExtension().workspaceService?.isPathInWorkspace(
+                document.uri.fsPath
+              )
             ) {
               Logger.info({
                 ctx,

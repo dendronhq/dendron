@@ -1,8 +1,7 @@
-import { DVault } from "@dendronhq/common-all";
+import { DVault, DWorkspaceV2 } from "@dendronhq/common-all";
 import { WorkspaceService } from "@dendronhq/engine-server";
 import { WORKSPACE_ACTIVATION_CONTEXT } from "../constants";
 import { StateService } from "../services/stateService";
-import { DendronWorkspace } from "../workspace";
 import { BlankInitializer } from "./blankInitializer";
 import { SeedBrowserInitializer } from "./seedBrowserInitializer";
 import { TutorialInitializer } from "./tutorialInitializer";
@@ -28,7 +27,7 @@ export type WorkspaceInitializer = {
   /**
    * Invoked after the workspace has been opened. Perform any operations such as re-arranging the layout.
    */
-  onWorkspaceOpen?(opts: { ws: DendronWorkspace }): Promise<void>;
+  onWorkspaceOpen?(opts: { ws: DWorkspaceV2 }): Promise<void>;
 };
 
 /**

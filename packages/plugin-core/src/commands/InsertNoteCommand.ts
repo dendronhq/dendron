@@ -7,7 +7,7 @@ import { NoteLookupProvider } from "../components/lookup/LookupProviderV3";
 import { DENDRON_COMMANDS } from "../constants";
 import { Logger } from "../logger";
 import { VSCodeUtils } from "../utils";
-import { getWS } from "../workspace";
+import { getWSV2 } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandInput = any;
@@ -39,7 +39,7 @@ export class InsertNoteCommand extends BasicCommand<
   async gatherInputs(): Promise<CommandInput | undefined> {
     const lc = this.createLookup();
     const provider = new NoteLookupProvider("insert", { allowNewNote: false });
-    const tempPrefix = getWS().config.defaultInsertHierarchy;
+    const tempPrefix = getWSV2().config.defaultInsertHierarchy;
     const initialValue = tempPrefix ? `${tempPrefix}.` : undefined;
     lc.show({
       title: "Insert note",

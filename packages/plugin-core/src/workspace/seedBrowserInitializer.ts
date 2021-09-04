@@ -1,10 +1,9 @@
-import { DVault } from "@dendronhq/common-all";
+import { DVault, DWorkspaceV2 } from "@dendronhq/common-all";
 import { WorkspaceService } from "@dendronhq/engine-server";
 import * as vscode from "vscode";
 import { SeedBrowseCommand } from "../commands/SeedBrowseCommand";
 import { WORKSPACE_ACTIVATION_CONTEXT } from "../constants";
 import { StateService } from "../services/stateService";
-import { DendronWorkspace } from "../workspace";
 import { WorkspaceInitializer } from "./workspaceInitializer";
 
 /**
@@ -33,7 +32,7 @@ export class SeedBrowserInitializer implements WorkspaceInitializer {
    * Launch Seed Browser Webview
    * @param _opts
    */
-  async onWorkspaceOpen(_opts: { ws: DendronWorkspace }): Promise<void> {
+  async onWorkspaceOpen(_opts: { ws: DWorkspaceV2 }): Promise<void> {
     const cmd = new SeedBrowseCommand();
     await cmd.execute();
 

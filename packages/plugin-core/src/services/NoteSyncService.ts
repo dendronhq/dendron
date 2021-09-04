@@ -9,12 +9,12 @@ import {
 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
+import visit from "unist-util-visit";
 import * as vscode from "vscode";
 import { ShowPreviewV2Command } from "../commands/ShowPreviewV2";
 import { Logger } from "../logger";
-import { DendronWorkspace, getWS } from "../workspace";
-import visit from "unist-util-visit";
 import { VSCodeUtils } from "../utils";
+import { getExtension, getWSV2 } from "../workspace";
 
 let NOTE_SERVICE: NoteSyncService | undefined;
 
@@ -69,10 +69,10 @@ export class NoteSyncService {
   ) {
     const ctx = "NoteSyncService:onDidChange";
     const uri = editor.document.uri;
-    const eclient = DendronWorkspace.instance().getEngine();
+    const { engine } = getWSV2();
     const fname = path.basename(uri.fsPath, ".md");
 
-    if (!getWS().workspaceService?.isPathInWorkspace(uri.fsPath)) {
+    if (!getExtension().workspaceService?.isPathInWorkspace(uri.fsPath)) {
       this.L.debug({ ctx, uri: uri.fsPath, msg: "not in workspace, ignoring" });
       return;
     }
@@ -96,15 +96,15 @@ export class NoteSyncService {
 
     this.L.debug({ ctx, uri: uri.fsPath });
     const vault = VaultUtils.getVaultByNotePath({
-      vaults: eclient.vaults,
-      wsRoot: DendronWorkspace.wsRoot(),
+      vaults: engine.vaults,
+      wsRoot: getWSV2().wsRoot,
       fsPath: uri.fsPath,
     });
     const noteHydrated = NoteUtils.getNoteByFnameV5({
       fname,
       vault,
-      notes: eclient.notes,
-      wsRoot: DendronWorkspace.wsRoot(),
+      notes: engine.notes,
+      wsRoot: getWSV2().wsRoot,
     }) as NoteProps;
 
     // NOTE: it might be worthwile to only do this after checking that the current note is still active
@@ -135,26 +135,26 @@ export class NoteSyncService {
 
     // Links have to be updated even with frontmatter only changes
     // because `tags` in frontmatter adds new links
-    const links = LinkUtils.findLinks({ note, engine: eclient });
+    const links = LinkUtils.findLinks({ note, engine });
     note.links = links;
 
     // iif frontmatter changed, don't bother with heavy updates
     if (!fmChangeOnly) {
       const notesMap = NoteUtils.createFnameNoteMap(
-        _.values(eclient.notes),
+        _.values(engine.notes),
         true
       );
       const anchors = await AnchorUtils.findAnchors({
         note,
-        wsRoot: eclient.wsRoot,
+        wsRoot: engine.wsRoot,
       });
       note.anchors = anchors;
 
-      if (getWS().config.dev?.enableLinkCandidates) {
+      if (getWSV2().config.dev?.enableLinkCandidates) {
         const linkCandidates = LinkUtils.findLinkCandidates({
           note,
           notesMap,
-          engine: eclient,
+          engine,
         });
         note.links = links.concat(linkCandidates);
       }
@@ -164,7 +164,7 @@ export class NoteSyncService {
     }
 
     this.L.debug({ ctx, fname, msg: "exit" });
-    const noteClean = await eclient.updateNote(note);
+    const noteClean = await engine.updateNote(note);
     ShowPreviewV2Command.refresh(noteClean);
     return noteClean;
   }

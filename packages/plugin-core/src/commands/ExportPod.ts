@@ -9,7 +9,7 @@ import { Uri, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../utils";
 import { showPodQuickPickItemsV4 } from "../utils/pods";
-import { DendronWorkspace } from "../workspace";
+import { getExtension, getWSV2 } from "../workspace";
 import { BaseCommand } from "./base";
 
 type CommandOutput = void;
@@ -43,7 +43,7 @@ export class ExportPodCommand extends BaseCommand<
 
   async enrichInputs(inputs: CommandInput): Promise<CommandOpts | undefined> {
     const podChoice = inputs.podChoice;
-    const podsDir = DendronWorkspace.instance().podsDir;
+    const podsDir = getExtension().podsDir;
     const podClass = podChoice.podClass;
     const maybeConfig = PodUtils.getConfig({ podsDir, podClass });
     if (!maybeConfig) {
@@ -60,13 +60,12 @@ export class ExportPodCommand extends BaseCommand<
   async execute(opts: CommandOpts) {
     const ctx = { ctx: "ExportPod" };
     this.L.info({ ctx, opts });
-    const vaults = DendronWorkspace.instance().vaultsv4;
-    const wsRoot = DendronWorkspace.wsRoot();
+    const { wsRoot, vaults } = getWSV2();
     if (!wsRoot) {
       throw Error("ws root not defined");
     }
     const pod = new opts.podChoice.podClass(); // eslint-disable-line new-cap
-    const engine = DendronWorkspace.instance().getEngine();
+    const engine = getExtension().getEngine();
     await pod.execute({ config: opts.config, engine, wsRoot, vaults });
     const dest = opts.config.dest;
     window.showInformationMessage(`done exporting. destination: ${dest}`);

@@ -4,20 +4,20 @@ import {
   NOTE_PRESETS_V4,
   toPlainObject,
 } from "@dendronhq/common-test-utils";
+import { TestConfigUtils } from "@dendronhq/engine-test-utils";
+import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
 import { ProviderResult, Uri } from "vscode";
 import { ReloadIndexCommand } from "../../commands/ReloadIndex";
 import BacklinksTreeDataProvider, {
-  secondLevelRefsToBacklinks,
   Backlink,
+  secondLevelRefsToBacklinks,
 } from "../../features/BacklinksTreeDataProvider";
 import { VSCodeUtils } from "../../utils";
-import { DendronWorkspace, getWS } from "../../workspace";
+import { getWSV2 } from "../../workspace";
 import { expect, runMultiVaultTest } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
-import { TestConfigUtils } from "@dendronhq/engine-test-utils";
-import _ from "lodash";
 
 type BacklinkWithChildren = Backlink & { children?: Backlink[] | undefined };
 
@@ -25,7 +25,7 @@ type BacklinkWithChildren = Backlink & { children?: Backlink[] | undefined };
  *  data provider will us the backlinks. */
 const getRootChildrenBacklinks = async () => {
   const backlinksTreeDataProvider = new BacklinksTreeDataProvider(
-    getWS().config.dev?.enableLinkCandidates
+    getWSV2().config.dev?.enableLinkCandidates
   );
   const parents = await backlinksTreeDataProvider.getChildren();
   const parentsWithChildren = [];
@@ -577,7 +577,7 @@ suite("BacklinksTreeDataProvider", function () {
         const expectedPath = vscode.Uri.file(
           NoteUtils.getFullPath({
             note: noteWithLink,
-            wsRoot: DendronWorkspace.wsRoot(),
+            wsRoot: getWSV2().wsRoot,
           })
         ).path;
 

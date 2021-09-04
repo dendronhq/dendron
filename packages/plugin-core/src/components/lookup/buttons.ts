@@ -1,15 +1,15 @@
 import {
-  NoteUtils,
-  NoteProps,
   getSlugger,
+  NoteProps,
   NoteQuickInput,
+  NoteUtils,
 } from "@dendronhq/common-all";
-import { getWS } from "../../workspace";
 import _ from "lodash";
 import * as vscode from "vscode";
 import { QuickInputButton, ThemeIcon } from "vscode";
 import { clipboard, DendronClientUtilsV2, VSCodeUtils } from "../../utils";
-import { 
+import { getExtension } from "../../workspace";
+import {
   DendronQuickPickerV2,
   LookupEffectType,
   LookupFilterType,
@@ -35,7 +35,7 @@ export type ButtonCategory =
   | "split"
   | "filter"
   | "effect"
-  | "other"; 
+  | "other";
 
 export type ButtonHandleOpts = { quickPick: DendronQuickPickerV2 };
 
@@ -87,7 +87,7 @@ const selectionToNoteProps = async (opts: {
   selectionType: string;
   note: NoteProps;
 }) => {
-  const ws = getWS();
+  const ext = getExtension();
   const resp = await VSCodeUtils.extractRangeFromActiveEditor();
   const { document, range } = resp || {};
   const { selectionType, note } = opts;
@@ -99,7 +99,7 @@ const selectionToNoteProps = async (opts: {
         const body = "\n" + document.getText(range).trim();
         note.body = body;
         // don't delete if original file is not in workspace
-        if (!ws.workspaceService?.isPathInWorkspace(document.uri.fsPath)) {
+        if (!ext.workspaceService?.isPathInWorkspace(document.uri.fsPath)) {
           return note;
         }
         await VSCodeUtils.deleteRange(document, range as vscode.Range);
@@ -365,7 +365,7 @@ export class DirectChildFilterBtn extends DendronBtn {
 
   async onEnable({ quickPick }: ButtonHandleOpts) {
     quickPick.showDirectChildrenOnly = true;
-    quickPick.filterMiddleware = ((items: NoteQuickInput[]) => items);
+    quickPick.filterMiddleware = (items: NoteQuickInput[]) => items;
     return;
   }
 
@@ -410,17 +410,17 @@ export class CopyNoteLinkBtn extends DendronBtn {
   }
 
   async onEnable({ quickPick }: ButtonHandleOpts) {
-    quickPick.copyNoteLinkFunc = async (
-      items: NoteProps[],
-    ) => {
-      const links = items.map((note) => NoteUtils.createWikiLink({ note, alias: { mode: "title" } }));
+    quickPick.copyNoteLinkFunc = async (items: NoteProps[]) => {
+      const links = items.map((note) =>
+        NoteUtils.createWikiLink({ note, alias: { mode: "title" } })
+      );
       if (_.isEmpty(links)) {
         vscode.window.showInformationMessage(`no items selected`);
       } else {
         await clipboard.writeText(links.join("\n"));
         vscode.window.showInformationMessage(`${links.length} links copied`);
       }
-    }
+    };
   }
 
   async onDisable({ quickPick }: ButtonHandleOpts) {
@@ -444,14 +444,20 @@ export class VaultSelectButton extends DendronBtn {
     return `${this.title}, status: ${this.pressed ? "always prompt" : "smart"}`;
   }
 
-  setNextPicker({quickPick, mode}: {quickPick: DendronQuickPickerV2, mode: VaultSelectionMode}) {
+  setNextPicker({
+    quickPick,
+    mode,
+  }: {
+    quickPick: DendronQuickPickerV2;
+    mode: VaultSelectionMode;
+  }) {
     quickPick.nextPicker = async (opts: { note: NoteProps }) => {
       const { note } = opts;
       const currentVault = PickerUtilsV2.getVaultForOpenEditor();
       const vaultSelection = await PickerUtilsV2.getOrPromptVaultForNewNote({
         vault: currentVault,
         fname: note.fname,
-        vaultSelectionMode: mode
+        vaultSelectionMode: mode,
       });
 
       if (_.isUndefined(vaultSelection)) {
@@ -460,7 +466,7 @@ export class VaultSelectButton extends DendronBtn {
       }
 
       return vaultSelection;
-    }
+    };
   }
 
   async onEnable({ quickPick }: ButtonHandleOpts) {
@@ -468,7 +474,7 @@ export class VaultSelectButton extends DendronBtn {
   }
 
   async onDisable({ quickPick }: ButtonHandleOpts) {
-    this.setNextPicker({ quickPick, mode: VaultSelectionMode.smart});
+    this.setNextPicker({ quickPick, mode: VaultSelectionMode.smart });
   }
 }
 

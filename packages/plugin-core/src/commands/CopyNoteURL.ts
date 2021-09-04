@@ -1,11 +1,11 @@
-import _ from "lodash";
 import { WorkspaceUtils } from "@dendronhq/engine-server";
+import _ from "lodash";
 import path from "path";
 import { Selection, window } from "vscode";
 import { CONFIG, DENDRON_COMMANDS } from "../constants";
 import { clipboard, VSCodeUtils } from "../utils";
 import { getAnchorAt } from "../utils/editor";
-import { DendronWorkspace, getEngine, getWS } from "../workspace";
+import { DendronWorkspace, getWSV2 } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandOpts = {};
@@ -30,7 +30,7 @@ export class CopyNoteURLCommand extends BasicCommand<
   }
 
   async execute() {
-    const config = getWS().config;
+    const config = getWSV2().config;
     const urlRoot =
       config?.site?.siteUrl ||
       DendronWorkspace.configuration().get<string>(
@@ -50,7 +50,7 @@ export class CopyNoteURLCommand extends BasicCommand<
       return;
     }
     const fname = path.basename(maybeTextEditor.document.uri.fsPath, ".md");
-    const engine = getEngine();
+    const engine = getWSV2().engine;
     const note = _.find(engine.notes, { fname });
     if (!note) {
       throw Error(`${fname} not found in engine`);

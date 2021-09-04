@@ -11,7 +11,7 @@ import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
 import { Logger } from "./logger";
-import { DendronWorkspace, getWS, getWSV2 } from "./workspace";
+import { getExtension, getWSV2 } from "./workspace";
 
 export class FileWatcher {
   public watchers: { vault: DVault; watcher: vscode.FileSystemWatcher }[];
@@ -78,10 +78,11 @@ export class FileWatcher {
       try {
         this.L.debug({ ctx, uri, msg: "pre-add-to-engine" });
         const { vaults, engine } = getWSV2();
+        const { wsRoot } = getWSV2();
         const vault = VaultUtils.getVaultByNotePath({
           vaults,
           fsPath: uri.fsPath,
-          wsRoot: DendronWorkspace.wsRoot(),
+          wsRoot,
         });
         note = file2Note(uri.fsPath, vault);
 
@@ -90,7 +91,7 @@ export class FileWatcher {
           fname,
           vault,
           notes: engine.notes,
-          wsRoot: DendronWorkspace.wsRoot(),
+          wsRoot,
         }) as NoteProps;
         if (maybeNote) {
           note = {
@@ -169,6 +170,6 @@ export class FileWatcher {
   static refreshTree = _.debounce(() => {
     const ctx = "refreshTree";
     Logger.info({ ctx });
-    getWS().dendronTreeView?.treeProvider.refresh();
+    getExtension().dendronTreeView?.treeProvider.refresh();
   }, 100);
 }

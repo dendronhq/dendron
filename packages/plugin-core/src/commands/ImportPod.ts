@@ -11,15 +11,15 @@ import { ProgressLocation, Uri, window } from "vscode";
 import { DENDRON_COMMANDS, Oauth2Pods } from "../constants";
 import { VSCodeUtils } from "../utils";
 import {
-  showInputBox,
-  launchGoogleOAuthFlow,
-  showDocumentQuickPick,
-  showPodQuickPickItemsV4,
   getGlobalState,
-  updateGlobalState,
+  launchGoogleOAuthFlow,
   openFileInEditor,
+  showDocumentQuickPick,
+  showInputBox,
+  showPodQuickPickItemsV4,
+  updateGlobalState,
 } from "../utils/pods";
-import { DendronWorkspace, getWS } from "../workspace";
+import { getExtension, getWSV2 } from "../workspace";
 import { BaseCommand } from "./base";
 import { ReloadIndexCommand } from "./ReloadIndex";
 
@@ -55,7 +55,7 @@ export class ImportPodCommand extends BaseCommand<
   async enrichInputs(inputs: CommandInput): Promise<CommandOpts | undefined> {
     const podChoice = inputs.podChoice;
     const podClass = podChoice.podClass;
-    const podsDir = DendronWorkspace.instance().podsDir;
+    const podsDir = getExtension().podsDir;
     try {
       const maybeConfig = PodUtils.getConfig({ podsDir, podClass });
 
@@ -105,7 +105,7 @@ export class ImportPodCommand extends BaseCommand<
   async execute(opts: CommandOpts) {
     const ctx = { ctx: "ImportPod" };
     this.L.info({ ctx, opts });
-    const wsRoot = DendronWorkspace.wsRoot();
+    const wsRoot = getWSV2().wsRoot;
     const utilityMethods = {
       getGlobalState,
       updateGlobalState,
@@ -116,10 +116,9 @@ export class ImportPodCommand extends BaseCommand<
     if (!wsRoot) {
       throw Error("ws root not defined");
     }
-    const engine = DendronWorkspace.instance().getEngine();
-    const vaults = DendronWorkspace.instance().vaultsv4;
+    const { engine, vaults } = getWSV2();
     const pod = new opts.podChoice.podClass() as ImportPod; // eslint-disable-line new-cap
-    const fileWatcher = getWS().fileWatcher;
+    const fileWatcher = getExtension().fileWatcher;
     if (fileWatcher) {
       fileWatcher.pause = true;
     }

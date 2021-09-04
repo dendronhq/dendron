@@ -1,12 +1,11 @@
+import { DendronError, ERROR_SEVERITY } from "@dendronhq/common-all";
+import { SyncActionResult, SyncActionStatus } from "@dendronhq/engine-server";
 import _ from "lodash";
-import { ERROR_SEVERITY, DendronError } from "@dendronhq/common-all";
-
 import { ProgressLocation, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { Logger } from "../logger";
-import { getWS } from "../workspace";
+import { getExtension } from "../workspace";
 import { BasicCommand } from "./base";
-import { SyncActionResult, SyncActionStatus } from "@dendronhq/engine-server";
 
 const L = Logger;
 
@@ -41,7 +40,7 @@ export class SyncCommand extends BasicCommand<CommandOpts, CommandReturns> {
   async execute(opts?: CommandOpts) {
     const ctx = "execute";
     L.info({ ctx, opts });
-    const workspaceService = getWS().workspaceService;
+    const workspaceService = getExtension().workspaceService;
     if (_.isUndefined(workspaceService))
       throw new DendronError({
         message: "Workspace is not initialized",

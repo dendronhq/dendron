@@ -1,4 +1,3 @@
-import _ from "lodash";
 import { DendronError, getSlugger, VaultUtils } from "@dendronhq/common-all";
 import {
   AnchorUtils,
@@ -8,12 +7,13 @@ import {
   MDUtilsV5,
   visit,
 } from "@dendronhq/engine-server";
-import { DENDRON_COMMANDS } from "../constants";
-import { VSCodeUtils } from "../utils";
-import { DendronWorkspace } from "../workspace";
-import { BasicCommand } from "./base";
+import _ from "lodash";
 import { Range, window } from "vscode";
+import { DENDRON_COMMANDS } from "../constants";
 import { delayedUpdateDecorations } from "../features/windowDecorations";
+import { VSCodeUtils } from "../utils";
+import { getExtension } from "../workspace";
+import { BasicCommand } from "./base";
 
 type CommandOpts =
   | {
@@ -87,7 +87,7 @@ export class RenameHeaderCommand extends BasicCommand<
     const { oldHeader, newHeader } = opts || {};
     const ctx = "RenameHeaderCommand";
     this.L.info({ ctx, oldHeader, newHeader, msg: "enter" });
-    const engine = DendronWorkspace.instance().getEngine();
+    const engine = getExtension().getEngine();
     const editor = VSCodeUtils.getActiveTextEditor();
     if (_.isUndefined(newHeader) || _.isUndefined(oldHeader) || !editor) return;
     const document = editor.document;

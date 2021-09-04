@@ -1,15 +1,15 @@
+import { DendronConfig, DVaultSync } from "@dendronhq/common-all";
+import { tmpDir } from "@dendronhq/common-server";
+import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
+import { Git, SyncActionStatus } from "@dendronhq/engine-server";
+import { GitTestUtils } from "@dendronhq/engine-test-utils";
+import _, { PartialShallow } from "lodash";
+import { describe } from "mocha";
+import * as vscode from "vscode";
 import { SyncCommand } from "../../commands/Sync";
+import { getExtension } from "../../workspace";
 import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
-import * as vscode from "vscode";
-import _, { PartialShallow } from "lodash";
-import { GitTestUtils } from "@dendronhq/engine-test-utils";
-import { tmpDir } from "@dendronhq/common-server";
-import { describe } from "mocha";
-import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
-import { getWS } from "../../workspace";
-import { Git, SyncActionStatus } from "@dendronhq/engine-server";
-import { DendronConfig, DVaultSync } from "@dendronhq/common-all";
 
 suite("workspace sync command", function () {
   let ctx: vscode.ExtensionContext;
@@ -363,7 +363,7 @@ async function changeConfig(
   overrideConfig: PartialShallow<DendronConfig>
 ) {
   // Get old config, and override it with the new config
-  const serv = getWS().workspaceService!;
+  const serv = getExtension().workspaceService!;
   const config = serv.config;
   await serv.setConfig(_.merge(config, overrideConfig));
 

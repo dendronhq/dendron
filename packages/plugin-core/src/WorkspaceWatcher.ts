@@ -13,7 +13,7 @@ import {
 } from "vscode";
 import { Logger } from "./logger";
 import { NoteSyncService } from "./services/NoteSyncService";
-import { DendronWorkspace, getWS } from "./workspace";
+import { getExtension, getWSV2 } from "./workspace";
 
 interface DebouncedFunc<T extends (...args: any[]) => any> {
   /**
@@ -95,13 +95,13 @@ export class WorkspaceWatcher {
     this._debouncedOnDidChangeTextDocument.cancel();
     if (activeEditor && event.document === activeEditor.document) {
       const uri = activeEditor.document.uri;
-      if (!getWS().workspaceService?.isPathInWorkspace(uri.fsPath)) {
+      if (!getExtension().workspaceService?.isPathInWorkspace(uri.fsPath)) {
         Logger.debug({ ...ctx, state: "uri not in workspace" });
         return;
       }
       Logger.debug({ ...ctx, state: "trigger change handlers" });
       const contentChanges = event.contentChanges;
-      DendronWorkspace.instance().windowWatcher?.triggerUpdateDecorations();
+      getExtension().windowWatcher?.triggerUpdateDecorations();
       NoteSyncService.instance().onDidChange(activeEditor, { contentChanges });
     }
     Logger.debug({ ...ctx, state: "exit" });
@@ -123,24 +123,24 @@ export class WorkspaceWatcher {
     const uri = ev.document.uri;
     const reason = ev.reason;
     Logger.info({ ctx, url: uri.fsPath, reason, msg: "enter" });
-    if (!getWS().workspaceService?.isPathInWorkspace(uri.fsPath)) {
+    if (!getExtension().workspaceService?.isPathInWorkspace(uri.fsPath)) {
       Logger.debug({ ctx, uri: uri.fsPath, msg: "not in workspace, ignoring" });
       return { changes: [] };
     }
 
-    const eclient = DendronWorkspace.instance().getEngine();
+    const eclient = getWSV2().engine;
     const fname = path.basename(uri.fsPath, ".md");
     const now = Time.now().toMillis();
     const vault = VaultUtils.getVaultByNotePath({
       fsPath: uri.fsPath,
       vaults: eclient.vaults,
-      wsRoot: DendronWorkspace.wsRoot(),
+      wsRoot: getWSV2().wsRoot,
     });
     const note = NoteUtils.getNoteByFnameV5({
       fname,
       vault,
       notes: eclient.notes,
-      wsRoot: DendronWorkspace.wsRoot(),
+      wsRoot: getWSV2().wsRoot,
     }) as NoteProps;
 
     const content = ev.document.getText();

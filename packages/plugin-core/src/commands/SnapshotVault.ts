@@ -5,7 +5,7 @@ import {
 } from "@dendronhq/pods-core";
 import { window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
-import { DendronWorkspace } from "../workspace";
+import { getWSV2 } from "../workspace";
 import { BaseCommand } from "./base";
 
 type CommandOpts = {};
@@ -30,9 +30,9 @@ export class SnapshotVaultCommand extends BaseCommand<
 
   async execute(_opts: CommandOpts) {
     const pod = new SnapshotExportPod();
-    const engine = DendronWorkspace.instance().getEngine();
+    const { engine } = getWSV2();
     const vault = engine.vaults[0];
-    const wsRoot = DendronWorkspace.wsRoot() as string;
+    const wsRoot = getWSV2().wsRoot as string;
     const { data: snapshotDirPath } = await pod.execute({
       vaults: [vault],
       wsRoot,

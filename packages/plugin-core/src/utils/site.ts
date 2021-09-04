@@ -8,7 +8,7 @@ import _ from "lodash";
 import path from "path";
 import { ProgressLocation, window } from "vscode";
 import { Logger } from "../logger";
-import { DendronWorkspace, getWS } from "../workspace";
+import { getWSV2 } from "../workspace";
 
 const packageJson = {
   name: "dendron-site",
@@ -27,7 +27,7 @@ export const pkgCreate = (pkgPath: string) => {
 };
 const pkgInstall = async () => {
   await execa("npm", ["install"], {
-    cwd: DendronWorkspace.wsRoot(),
+    cwd: getWSV2().wsRoot,
   });
 };
 
@@ -38,13 +38,13 @@ const pkgUpgrade = async (pkg: string, version: string) => {
     "@"
   )}`.split(" ");
   await execa("npm", cmdInstall, {
-    cwd: DendronWorkspace.wsRoot(),
+    cwd: getWSV2().wsRoot,
   });
 };
 
 export const buildSite = async (opts: BuildSiteV2CLICommandCliOpts) => {
   const eleventyPath = path.join(
-    DendronWorkspace.wsRoot(),
+    getWSV2().wsRoot,
     "node_modules",
     "@dendronhq",
     "dendron-11ty"
@@ -68,8 +68,8 @@ export const buildSite = async (opts: BuildSiteV2CLICommandCliOpts) => {
 
 export const checkPreReq = async () => {
   // check for package.json
-  const pkgPath = path.join(DendronWorkspace.wsRoot(), "package.json");
-  const nmPath = path.join(DendronWorkspace.wsRoot(), "node_modules");
+  const pkgPath = path.join(getWSV2().wsRoot, "package.json");
+  const nmPath = path.join(getWSV2().wsRoot, "node_modules");
   if (!fs.existsSync(pkgPath)) {
     const resp = await window.showInformationMessage(
       "install dependencies from package.json?",
@@ -169,7 +169,7 @@ export const checkPreReq = async () => {
 };
 
 export const getSiteRootDirPath = () => {
-  const wsRoot = DendronWorkspace.wsRoot();
-  const sitePath = path.join(wsRoot, getWS().config.site.siteRootDir);
+  const wsRoot = getWSV2().wsRoot;
+  const sitePath = path.join(wsRoot, getWSV2().config.site.siteRootDir);
   return sitePath;
 };

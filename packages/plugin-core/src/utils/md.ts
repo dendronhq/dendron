@@ -9,17 +9,18 @@ import {
 } from "@dendronhq/common-all";
 import {
   DendronASTTypes,
-  HASHTAG_REGEX_LOOSE,
   HASHTAG_REGEX_BASIC,
+  HASHTAG_REGEX_LOOSE,
   LinkUtils,
   MDUtilsV5,
   ProcMode,
-  visit,
   USERTAG_REGEX_LOOSE,
+  visit,
 } from "@dendronhq/engine-server";
 import { sort as sortPaths } from "cross-path-sort";
 import fs from "fs";
 import _ from "lodash";
+import type { YAML } from "mdast";
 import path from "path";
 import vscode, {
   commands,
@@ -32,9 +33,8 @@ import vscode, {
 } from "vscode";
 import { ShowPreviewV2Command } from "../commands/ShowPreviewV2";
 import { VSCodeUtils } from "../utils";
-import { DendronWorkspace, getWS } from "../workspace";
+import { getWSV2 } from "../workspace";
 import { getFrontmatterTags, parseFrontmatter } from "./yaml";
-import type { YAML } from "mdast";
 
 export type RefT = {
   label: string;
@@ -122,7 +122,7 @@ export class MarkdownUtils {
       });
   }
   static async openPreview() {
-    if (!getWS().config.dev?.enablePreviewV2) {
+    if (!getWSV2().config.dev?.enablePreviewV2) {
       const previewEnhanced2 = this.hasLegacyPreview();
       if (!previewEnhanced2) {
         return this.promptInstallLegacyPreview();
@@ -400,7 +400,7 @@ export const noteLinks2Locations = (note: NoteProps) => {
   const linksMatch = note.links.filter((l) => l.type !== "backlink");
   const fsPath = NoteUtils.getFullPath({
     note,
-    wsRoot: DendronWorkspace.wsRoot(),
+    wsRoot: getWSV2().wsRoot,
   });
   const fileContent = fs.readFileSync(fsPath).toString();
   const fmOffset = fileContent.indexOf("\n---") + 4;
@@ -430,7 +430,7 @@ export const findReferences = async (
 ): Promise<FoundRefT[]> => {
   const refs: FoundRefT[] = [];
 
-  const engine = DendronWorkspace.instance().getEngine();
+  const { engine } = getWSV2();
   // clean for anchor
   const fname = ref;
   const notes = NoteUtils.getNotesByFname({ fname, notes: engine.notes });
@@ -447,7 +447,7 @@ export const findReferences = async (
     const linksMatch = note.links.filter((l) => l.to?.fname === fname);
     const fsPath = NoteUtils.getFullPath({
       note,
-      wsRoot: DendronWorkspace.wsRoot(),
+      wsRoot: getWSV2().wsRoot,
     });
 
     if (excludePaths.includes(fsPath) || !fs.existsSync(fsPath)) {

@@ -12,10 +12,10 @@ import {
 } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import path from "path";
-import { DENDRON_COMMANDS } from "../constants";
-import { DendronWorkspace } from "../workspace";
-import { BasicCommand } from "./base";
 import { ProgressLocation, window } from "vscode";
+import { DENDRON_COMMANDS } from "../constants";
+import { getExtension, getWSV2 } from "../workspace";
+import { BasicCommand } from "./base";
 
 type ReloadIndexCommandOpts = {
   silent?: boolean;
@@ -36,9 +36,8 @@ export class ReloadIndexCommand extends BasicCommand<
   ): Promise<DEngineClient | undefined> {
     const ctx = "ReloadIndex.execute";
     this.L.info({ ctx, msg: "enter" });
-    const ws = DendronWorkspace.instance();
-    const wsRoot = DendronWorkspace.wsRoot();
-    const engine = ws.getEngine();
+    const ws = getWSV2();
+    const { wsRoot, engine } = ws;
 
     const reloadIndex = async () => {
       await Promise.all(
@@ -57,7 +56,7 @@ export class ReloadIndexCommand extends BasicCommand<
             await note2File({
               note,
               vault,
-              wsRoot: DendronWorkspace.wsRoot(),
+              wsRoot,
             });
           }
         })
@@ -93,7 +92,7 @@ export class ReloadIndexCommand extends BasicCommand<
     }
 
     this.L.info({ ctx, msg: "exit" });
-    ws.dendronTreeView?.treeProvider.refresh();
+    getExtension().dendronTreeView?.treeProvider.refresh();
     return engine;
   }
 }

@@ -5,7 +5,7 @@ import { QuickInputButton } from "vscode";
 import { CancellationTokenSource } from "vscode-languageclient";
 import { Logger } from "../../logger";
 import { VSCodeUtils } from "../../utils";
-import { DendronWorkspace, getWS } from "../../workspace";
+import { DendronWorkspace, getWSV2 } from "../../workspace";
 import {
   ButtonCategory,
   DendronBtn,
@@ -60,17 +60,21 @@ export class LookupControllerV3 {
   public _provider?: ILookupProviderV3;
 
   static create(opts?: LookupControllerV3CreateOpts) {
-    const vaults = getWS().getEngine().vaults;
+    const { vaults } = getWSV2();
     const disableVaultSelection =
       (_.isBoolean(opts?.disableVaultSelection) &&
         opts?.disableVaultSelection) ||
       opts?.nodeType === "schema";
     const isMultiVault = vaults.length > 1 && !disableVaultSelection;
-    const maybeVaultSelectButtonPressed = _.isUndefined(opts?.vaultButtonPressed)
+    const maybeVaultSelectButtonPressed = _.isUndefined(
+      opts?.vaultButtonPressed
+    )
       ? isMultiVault
-      : isMultiVault && opts!.vaultButtonPressed; 
+      : isMultiVault && opts!.vaultButtonPressed;
     const maybeVaultSelectButton =
-      opts?.nodeType === "note" && isMultiVault ? [VaultSelectButton.create(maybeVaultSelectButtonPressed)] : [];
+      opts?.nodeType === "note" && isMultiVault
+        ? [VaultSelectButton.create(maybeVaultSelectButtonPressed)]
+        : [];
     const buttons = opts?.buttons || maybeVaultSelectButton;
     const extraButtons = opts?.extraButtons || [];
     return new LookupControllerV3({

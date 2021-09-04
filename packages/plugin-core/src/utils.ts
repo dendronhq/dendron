@@ -14,26 +14,30 @@ import {
   Position,
   SchemaModuleProps,
   Time,
+  TutorialEvents,
   VaultUtils,
 } from "@dendronhq/common-all";
 import {
   assignJSONWithComment,
   goUpTo,
   readJSONWithCommentsSync,
+  readMD,
   resolveTilde,
   tmpDir,
   vault2Path,
 } from "@dendronhq/common-server";
 import { HistoryEvent, HistoryService } from "@dendronhq/engine-server";
+import { assign } from "comment-json";
 import { ExecaChildProcess } from "execa";
+import fs from "fs-extra";
 import _ from "lodash";
 import _md from "markdown-it";
 import ogs from "open-graph-scraper";
 import os from "os";
 import path from "path";
-import fs from "fs-extra";
 import * as vscode from "vscode";
 import { CancellationTokenSource } from "vscode-languageclient";
+import { SetupWorkspaceCommand } from "./commands/SetupWorkspace";
 import { PickerUtilsV2 } from "./components/lookup/utils";
 import {
   DendronContext,
@@ -44,8 +48,9 @@ import {
 import { FileItem } from "./external/fileutils/FileItem";
 import { Logger } from "./logger";
 import { EngineAPIService } from "./services/EngineAPIService";
-import { DendronWorkspace, getWS } from "./workspace";
-import { assign } from "comment-json";
+import { AnalyticsUtils } from "./utils/analytics";
+import { getExtension, getWSV2 } from "./workspace";
+import { TutorialInitializer } from "./workspace/tutorialInitializer";
 
 export class DisposableStore {
   private _toDispose = new Set<vscode.Disposable>();
@@ -269,9 +274,8 @@ export class VSCodeUtils {
   }
 
   static getNoteFromDocument(document: vscode.TextDocument) {
-    const engine = getWS().getEngine();
+    const { engine, wsRoot } = getWSV2();
     const txtPath = document.uri.fsPath;
-    const wsRoot = DendronWorkspace.wsRoot();
     const fname = path.basename(txtPath, ".md");
     let vault: DVault;
     try {
@@ -290,10 +294,10 @@ export class VSCodeUtils {
 
   static getVaultFromDocument(document: vscode.TextDocument) {
     const txtPath = document.uri.fsPath;
-    const wsRoot = DendronWorkspace.wsRoot();
+    const { wsRoot, vaults } = getWSV2();
     const vault = VaultUtils.getVaultByNotePath({
       wsRoot,
-      vaults: getWS().getEngine().vaults,
+      vaults,
       fsPath: txtPath,
     });
     return vault;
@@ -343,7 +347,8 @@ export class VSCodeUtils {
     vault: DVault;
     fname: string;
   }) {
-    const vpath = vault2Path({ vault, wsRoot: DendronWorkspace.wsRoot() });
+    const { wsRoot } = getWSV2();
+    const vpath = vault2Path({ vault, wsRoot });
     const notePath = path.join(vpath, `${fname}.md`);
     const editor = await VSCodeUtils.openFileInEditor(
       vscode.Uri.file(notePath)
@@ -353,7 +358,7 @@ export class VSCodeUtils {
 
   static async openNote(note: NoteProps) {
     const { vault, fname } = note;
-    const wsRoot = DendronWorkspace.wsRoot();
+    const wsRoot = getWSV2().wsRoot;
     const vpath = vault2Path({ vault, wsRoot });
     const notePath = path.join(vpath, `${fname}.md`);
     const editor = await VSCodeUtils.openFileInEditor(
@@ -544,6 +549,10 @@ export class VSCodeUtils {
 }
 
 export class WSUtils {
+  static getAssetUri(context: vscode.ExtensionContext) {
+    return VSCodeUtils.joinPath(context.extensionUri, "assets");
+  }
+
   static handleServerProcess({
     subprocess,
     context,
@@ -625,15 +634,87 @@ export class WSUtils {
     }
   }
 
+  static async showWelcome(assetUri: vscode.Uri) {
+    try {
+      // NOTE: this needs to be from extension because no workspace might exist at this point
+      const uri = VSCodeUtils.joinPath(
+        assetUri,
+        "dendron-ws",
+        "vault",
+        "welcome.html"
+      );
+
+      const { content } = readMD(uri.fsPath);
+      const title = "Welcome to Dendron";
+
+      const panel = vscode.window.createWebviewPanel(
+        _.kebabCase(title),
+        title,
+        vscode.ViewColumn.One,
+        {
+          enableScripts: true,
+        }
+      );
+      panel.webview.html = content;
+
+      panel.webview.onDidReceiveMessage(
+        async (message) => {
+          switch (message.command) {
+            case "loaded":
+              AnalyticsUtils.track(TutorialEvents.WelcomeShow);
+              return;
+
+            case "initializeWorkspace": {
+              // Try to put into a Default '~/Dendron' folder first. Only prompt
+              // if that path and the backup path already exist to lower
+              // onboarding friction
+              let wsPath;
+              const wsPathPrimary = path.join(resolveTilde("~"), "Dendron");
+              const wsPathBackup = path.join(
+                resolveTilde("~"),
+                "Dendron-Tutorial"
+              );
+
+              if (!fs.pathExistsSync(wsPathPrimary)) {
+                wsPath = wsPathPrimary;
+              } else if (!fs.pathExistsSync(wsPathBackup)) {
+                wsPath = wsPathBackup;
+              }
+
+              if (!wsPath) {
+                await new SetupWorkspaceCommand().run({
+                  workspaceInitializer: new TutorialInitializer(),
+                });
+              } else {
+                await new SetupWorkspaceCommand().execute({
+                  rootDirRaw: wsPath,
+                  workspaceInitializer: new TutorialInitializer(),
+                });
+              }
+
+              return;
+            }
+            default:
+              break;
+          }
+        },
+        undefined,
+        undefined
+      );
+    } catch (err) {
+      vscode.window.showErrorMessage(JSON.stringify(err));
+    }
+  }
+
   static updateEngineAPI(port: number | string): DEngineClient {
-    const ws = DendronWorkspace.instance();
+    const ext = getExtension();
     const svc = EngineAPIService.createEngine({
       port,
       enableWorkspaceTrust: vscode.workspace.isTrusted,
     });
-    ws.setEngine(svc);
-    ws.port = _.toInteger(port);
-    const engine = ws.getEngine();
+    ext.setEngine(svc);
+    ext.port = _.toInteger(port);
+    const engine = ext.getEngine();
     return engine;
   }
 }
@@ -657,7 +738,7 @@ export class DendronClientUtilsV2 {
           fname,
           notes: opts.engine.notes,
           vault,
-          wsRoot: DendronWorkspace.wsRoot(),
+          wsRoot: getWSV2().wsRoot,
         });
         if (domain && domain.schema) {
           const smod = opts.engine.schemas[domain.schema.moduleId];
@@ -700,27 +781,27 @@ export class DendronClientUtilsV2 {
     // gather inputs
     const dateFormat: string =
       type === "SCRATCH"
-        ? DendronWorkspace.instance().getWorkspaceSettingOrDefault({
+        ? getExtension().getWorkspaceSettingOrDefault({
             wsConfigKey: "dendron.defaultScratchDateFormat",
             dendronConfigKey: "scratch.dateFormat",
           })
-        : getWS().config.journal.dateFormat;
+        : getWSV2().config.journal.dateFormat;
 
     const addBehavior: NoteAddBehavior =
       type === "SCRATCH"
-        ? DendronWorkspace.instance().getWorkspaceSettingOrDefault({
+        ? getExtension().getWorkspaceSettingOrDefault({
             wsConfigKey: "dendron.defaultScratchAddBehavior",
             dendronConfigKey: "scratch.addBehavior",
           })
-        : getWS().config.journal.addBehavior;
+        : getWSV2().config.journal.addBehavior;
 
     const name: string =
       type === "SCRATCH"
-        ? DendronWorkspace.instance().getWorkspaceSettingOrDefault({
+        ? getExtension().getWorkspaceSettingOrDefault({
             wsConfigKey: "dendron.defaultScratchName",
             dendronConfigKey: "scratch.name",
           })
-        : getWS().config.journal.name;
+        : getWSV2().config.journal.name;
 
     if (!_.includes(_noteAddBehaviorEnum, addBehavior)) {
       const actual = addBehavior;
@@ -736,7 +817,7 @@ export class DendronClientUtilsV2 {
       throw Error("Must be run from within a note");
     }
 
-    const engine = DendronWorkspace.instance().getEngine();
+    const engine = getWSV2().engine;
     const prefix = DendronClientUtilsV2.genNotePrefix(
       currentNoteFname,
       addBehavior as AddBehavior,
@@ -767,7 +848,7 @@ export class DendronClientUtilsV2 {
   };
 
   static shouldUseVaultPrefix(engine: DEngineClient) {
-    const noXVaultLink = getWS().config.noXVaultWikiLink;
+    const noXVaultLink = getWSV2().config.noXVaultWikiLink;
     const useVaultPrefix =
       _.size(engine.vaults) > 1 &&
       (_.isBoolean(noXVaultLink) ? !noXVaultLink : true);

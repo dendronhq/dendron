@@ -1,4 +1,3 @@
-import _ from "lodash";
 import {
   DendronError,
   DVault,
@@ -8,7 +7,10 @@ import {
   SchemaUtils,
   VSCodeEvents,
 } from "@dendronhq/common-all";
-import { BaseCommand } from "./base";
+import { getDurationMilliseconds, vault2Path } from "@dendronhq/common-server";
+import { HistoryService } from "@dendronhq/engine-server";
+import _ from "lodash";
+import { Uri } from "vscode";
 import { LookupControllerV3 } from "../components/lookup/LookupControllerV3";
 import {
   ILookupProviderV3,
@@ -16,14 +18,12 @@ import {
   SchemaLookupProviderSuccessResp,
 } from "../components/lookup/LookupProviderV3";
 import { DendronQuickPickerV2 } from "../components/lookup/types";
+import { OldNewLocation, PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
-import { PickerUtilsV2, OldNewLocation } from "../components/lookup/utils";
-import { Uri } from "vscode";
-import { DendronWorkspace } from "../workspace";
-import { getDurationMilliseconds, vault2Path } from "@dendronhq/common-server";
-import { HistoryService } from "@dendronhq/engine-server";
-import { AnalyticsUtils } from "../utils/analytics";
 import { Logger } from "../logger";
+import { AnalyticsUtils } from "../utils/analytics";
+import { getWSV2 } from "../workspace";
+import { BaseCommand } from "./base";
 
 type CommandRunOpts = {
   initialValue?: string;
@@ -191,12 +191,13 @@ export class SchemaLookupCommand extends BaseCommand<
   async acceptExistingSchemaItem(
     item: SchemaQuickInput
   ): Promise<OnDidAcceptReturn | undefined> {
+    const { wsRoot, engine } = getWSV2();
+    const schemas = engine.schemas;
     const vpath = vault2Path({
       vault: item.vault,
-      wsRoot: DendronWorkspace.wsRoot(),
+      wsRoot,
     });
-    const schemaModule =
-      DendronWorkspace.instance().getEngine().schemas[item.id];
+    const schemaModule = schemas[item.id];
     const uri = Uri.file(
       SchemaUtils.getPath({
         root: vpath,
@@ -209,8 +210,7 @@ export class SchemaLookupCommand extends BaseCommand<
   async acceptNewSchemaItem(): Promise<OnDidAcceptReturn | undefined> {
     const picker = this.controller.quickpick;
     const fname = picker.value;
-    const ws = DendronWorkspace.instance();
-    const engine = ws.getEngine();
+    const { engine } = getWSV2();
     const vault: DVault = picker.vault
       ? picker.vault
       : PickerUtilsV2.getVaultForOpenEditor();
@@ -219,7 +219,7 @@ export class SchemaLookupCommand extends BaseCommand<
         fname,
         vault,
       });
-    const vpath = vault2Path({ vault, wsRoot: DendronWorkspace.wsRoot() });
+    const vpath = vault2Path({ vault, wsRoot: getWSV2().wsRoot });
     const uri = Uri.file(SchemaUtils.getPath({ root: vpath, fname }));
     const resp = await engine.writeSchema(nodeSchemaModuleNew);
 

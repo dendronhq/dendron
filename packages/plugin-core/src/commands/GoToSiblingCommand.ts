@@ -1,10 +1,10 @@
 import {
   DendronError,
   DNodeUtils,
+  isNumeric,
   NoteProps,
   NoteUtils,
   VaultUtils,
-  isNumeric,
 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import _ from "lodash";
@@ -13,7 +13,7 @@ import { Uri, window } from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { UNKNOWN_ERROR_MSG } from "../logger";
 import { VSCodeUtils } from "../utils";
-import { DendronWorkspace } from "../workspace";
+import { getWSV2 } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandOpts = { direction: "next" | "prev" };
@@ -44,34 +44,34 @@ export class GoToSiblingCommand extends BasicCommand<
     value = path.basename(maybeTextEditor.document.uri.fsPath, ".md");
     let respNodes: NoteProps[];
 
-    const client = DendronWorkspace.instance().getEngine();
+    const { vaults, engine, wsRoot } = getWSV2();
     if (value === "root") {
       const vault = VaultUtils.getVaultByNotePath({
-        vaults: client.vaults,
-        wsRoot: DendronWorkspace.wsRoot(),
+        vaults,
+        wsRoot,
         fsPath: maybeTextEditor.document.uri.fsPath,
       });
       const rootNode = NoteUtils.getNoteByFnameV5({
         fname: value,
         vault,
-        notes: client.notes,
-        wsRoot: DendronWorkspace.wsRoot(),
+        notes: engine.notes,
+        wsRoot,
       }) as NoteProps;
       if (_.isUndefined(rootNode)) {
         throw new DendronError({ message: "no root node found" });
       }
       respNodes = rootNode.children
-        .map((ent) => client.notes[ent])
+        .map((ent) => engine.notes[ent])
         .concat([rootNode]);
     } else {
       const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
       const note = NoteUtils.getNotesByFname({
         fname: value,
-        notes: client.notes,
+        notes: engine.notes,
         vault,
       })[0] as NoteProps;
-      respNodes = client.notes[note.parent as string].children
-        .map((id) => client.notes[id])
+      respNodes = engine.notes[note.parent as string].children
+        .map((id) => engine.notes[id])
         .filter((ent) => _.isUndefined(ent.stub));
     }
 
@@ -129,7 +129,7 @@ export class GoToSiblingCommand extends BasicCommand<
     }
     const vpath = vault2Path({
       vault: siblingNote.vault,
-      wsRoot: DendronWorkspace.wsRoot(),
+      wsRoot: getWSV2().wsRoot,
     });
     await VSCodeUtils.openFileInEditor(
       VSCodeUtils.joinPath(Uri.file(vpath), siblingNote.fname + ".md")

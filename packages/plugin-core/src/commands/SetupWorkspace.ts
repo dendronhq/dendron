@@ -1,5 +1,4 @@
 import { CONSTANTS, DVault } from "@dendronhq/common-all";
-import { resolveTilde } from "@dendronhq/common-server";
 import { WorkspaceService } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -7,12 +6,13 @@ import path from "path";
 import vscode from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../utils";
-import { DendronWorkspace } from "../workspace";
 import { BlankInitializer } from "../workspace/blankInitializer";
 import { TemplateInitializer } from "../workspace/templateInitializer";
 import { TutorialInitializer } from "../workspace/tutorialInitializer";
 import { WorkspaceInitializer } from "../workspace/workspaceInitializer";
 import { BasicCommand } from "./base";
+import { Logger } from "../logger";
+import { resolveTilde } from "@dendronhq/common-server";
 
 type CommandOpts = {
   rootDirRaw: string;
@@ -135,11 +135,10 @@ export class SetupWorkspaceCommand extends BasicCommand<
 
   async execute(opts: CommandOpts): Promise<DVault[]> {
     const ctx = "SetupWorkspaceCommand extends BaseCommand";
-    const ws = DendronWorkspace.instance();
     const { rootDirRaw: rootDir, skipOpenWs } = _.defaults(opts, {
       skipOpenWs: false,
     });
-    ws.L.info({ ctx, rootDir, skipOpenWs });
+    Logger.info({ ctx, rootDir, skipOpenWs });
 
     if (
       !(await this.handleExistingRoot({
@@ -158,12 +157,12 @@ export class SetupWorkspaceCommand extends BasicCommand<
       vaults,
       wsRoot: rootDir,
       createCodeWorkspace: true,
-    }).then(async (ws) => {
+    }).then(async (svc) => {
       if (opts?.workspaceInitializer?.onWorkspaceCreation) {
         await opts.workspaceInitializer.onWorkspaceCreation({
           vaults,
           wsRoot: rootDir,
-          svc: ws,
+          svc,
         });
       }
     });

@@ -1,29 +1,29 @@
 import {
-  DendronTreeViewKey,
-  CalendarViewMessage,
-  NoteProps,
-  CalendarViewMessageType,
-  OnDidChangeActiveTextEditorMsg,
-  DMessage,
-  NoteUtils,
   assertUnreachable,
+  CalendarViewMessage,
+  CalendarViewMessageType,
+  DendronTreeViewKey,
+  DMessage,
   DMessageType,
+  NoteProps,
+  NoteUtils,
+  OnDidChangeActiveTextEditorMsg,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import * as vscode from "vscode";
-import { WebViewUtils } from "./utils";
-import { VSCodeUtils } from "../utils";
-import { DendronWorkspace, getEngine, getWS } from "../workspace";
-import { GotoNoteCommand } from "../commands/GotoNote";
 import { CreateDailyJournalCommand } from "../commands/CreateDailyJournal";
+import { GotoNoteCommand } from "../commands/GotoNote";
 import { Logger } from "../logger";
+import { VSCodeUtils } from "../utils";
+import { getEngine, getExtension } from "../workspace";
+import { WebViewUtils } from "./utils";
 
 export class CalendarView implements vscode.WebviewViewProvider {
   public static readonly viewType = DendronTreeViewKey.CALENDAR_VIEW;
   private _view?: vscode.WebviewView;
 
   constructor() {
-    const dendronWorkspace = DendronWorkspace.instance();
+    const dendronWorkspace = getExtension();
     dendronWorkspace.addDisposable(
       vscode.window.onDidChangeActiveTextEditor(
         // An `ChangeActiveTextEditor` event might be immediately followed by a new one (e.g. switch TextDocument).
@@ -48,7 +48,9 @@ export class CalendarView implements vscode.WebviewViewProvider {
       return;
     }
     const ctx = "CalendarView:openTextDocument";
-    if (!getWS().workspaceService?.isPathInWorkspace(document.uri.fsPath)) {
+    if (
+      !getExtension().workspaceService?.isPathInWorkspace(document.uri.fsPath)
+    ) {
       Logger.info({
         ctx,
         uri: document.uri.fsPath,

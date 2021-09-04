@@ -8,7 +8,7 @@ import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { Logger } from "../logger";
 import { clipboard, VSCodeUtils } from "../utils";
-import { DendronWorkspace, getWS } from "../workspace";
+import { getExtension, getWSV2 } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandInput = {
@@ -58,8 +58,9 @@ export class PasteFileCommand extends BasicCommand<CommandOpts, CommandOutput> {
     }
 
     const uri = editor.document.uri;
-    const ws = getWS();
-    if (!ws.workspaceService?.isPathInWorkspace(uri.fsPath)) {
+    const ext = getExtension();
+    const { vaults, wsRoot } = getWSV2();
+    if (!ext.workspaceService?.isPathInWorkspace(uri.fsPath)) {
       const error = DendronError.createFromStatus({
         status: ERROR_STATUS.INVALID_STATE,
         message: "not in a vault",
@@ -68,11 +69,11 @@ export class PasteFileCommand extends BasicCommand<CommandOpts, CommandOutput> {
       return { error };
     }
     const vault = VaultUtils.getVaultByNotePath({
-      vaults: getWS().getEngine().vaults,
-      wsRoot: DendronWorkspace.wsRoot(),
+      vaults,
+      wsRoot,
       fsPath: uri.fsPath,
     });
-    const vpath = vault2Path({ vault, wsRoot: DendronWorkspace.wsRoot() });
+    const vpath = vault2Path({ vault, wsRoot });
     const suffix = path.join("assets", cleanFname(path.basename(filePath)));
     const dstPath = path.join(vpath, suffix);
 

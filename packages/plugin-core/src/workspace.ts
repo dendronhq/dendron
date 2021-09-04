@@ -9,7 +9,6 @@ import {
   ERROR_STATUS,
   getStage,
   ResponseCode,
-  TutorialEvents,
   WorkspaceSettings,
   WorkspaceType,
 } from "@dendronhq/common-all";
@@ -17,8 +16,6 @@ import {
   NodeJSUtils,
   readJSONWithComments,
   readJSONWithCommentsSync,
-  readMD,
-  resolveTilde,
   writeJSONWithComments,
 } from "@dendronhq/common-server";
 import {
@@ -36,17 +33,16 @@ import { ALL_COMMANDS } from "./commands";
 import { GoToSiblingCommand } from "./commands/GoToSiblingCommand";
 import { MoveNoteCommand } from "./commands/MoveNoteCommand";
 import { ReloadIndexCommand } from "./commands/ReloadIndex";
-import { SetupWorkspaceCommand } from "./commands/SetupWorkspace";
 import {
   CONFIG,
-  DENDRON_COMMANDS,
   DendronContext,
+  DENDRON_COMMANDS,
   extensionQualifiedId,
   GLOBAL_STATE,
 } from "./constants";
 import BacklinksTreeDataProvider, {
-  secondLevelRefsToBacklinks,
   Backlink,
+  secondLevelRefsToBacklinks,
 } from "./features/BacklinksTreeDataProvider";
 import { codeActionProvider } from "./features/codeActionProvider";
 import { completionProvider } from "./features/completionProvider";
@@ -59,14 +55,12 @@ import { Logger } from "./logger";
 import { EngineAPIService } from "./services/EngineAPIService";
 import { CodeConfigKeys } from "./types";
 import { DisposableStore, resolvePath, VSCodeUtils } from "./utils";
-import { AnalyticsUtils } from "./utils/analytics";
 import { CalendarView } from "./views/CalendarView";
 import { DendronTreeView } from "./views/DendronTreeView";
 import { DendronTreeViewV2 } from "./views/DendronTreeViewV2";
 import { SampleView } from "./views/SampleView";
 import { SchemaWatcher } from "./watchers/schemaWatcher";
 import { WindowWatcher } from "./windowWatcher";
-import { TutorialInitializer } from "./workspace/tutorialInitializer";
 import { WorkspaceWatcher } from "./WorkspaceWatcher";
 
 let _DendronWorkspace: DendronWorkspace | null;
@@ -102,7 +96,7 @@ export async function when<T = any>(
   cb: () => Promise<T>
 ): Promise<T | ResponseCode> {
   try {
-    const out = DendronWorkspace.instance().config[key];
+    const out = getExtension().config[key];
     if (!(out === false || _.isUndefined(out))) {
       return cb();
     }
@@ -119,7 +113,7 @@ export function whenGlobalState(key: string, cb?: () => boolean): boolean {
       return true;
     };
   // @ts-ignore
-  const out = DendronWorkspace.instance().getGlobalState(key);
+  const out = getExtension().getGlobalState(key);
   if (!(out === false || _.isUndefined(out))) {
     return cb();
   }
@@ -140,21 +134,21 @@ export function getCodeConfig<T>(key: string): T | undefined {
   return DendronWorkspace.configuration().get<T>(key);
 }
 
-export function getWS() {
-  return DendronWorkspace.instance();
-}
-
 export function getWSV2(): DWorkspaceV2 {
-  const ws = DendronWorkspace.instance();
+  const ws = getExtension();
   return ws.getWorkspaceImplOrThrow();
 }
 
+export function getExtension(): DendronWorkspace {
+  return DendronWorkspace.instanceV2();
+}
+
 export function getEngine() {
-  return DendronWorkspace.instance().getEngine();
+  return getExtension().getEngine();
 }
 
 export function resolveRelToWSRoot(fpath: string): string {
-  return resolvePath(fpath, DendronWorkspace.wsRoot() as string);
+  return resolvePath(fpath, getWSV2().wsRoot as string);
 }
 
 // --- Main
@@ -170,7 +164,18 @@ export class DendronWorkspace {
   protected treeViews: { [key: string]: vscode.WebviewViewProvider };
   protected webViews: { [key: string]: vscode.WebviewPanel | undefined };
 
+  static context(): vscode.ExtensionContext {
+    return getExtension().context;
+  }
+
   static instance(): DendronWorkspace {
+    if (!_DendronWorkspace) {
+      throw Error("Dendronworkspace not initialized");
+    }
+    return _DendronWorkspace;
+  }
+
+  static instanceV2(): DendronWorkspace {
     if (!_DendronWorkspace) {
       throw Error("Dendronworkspace not initialized");
     }
@@ -241,7 +246,7 @@ export class DendronWorkspace {
   }
 
   get wsRoot(): string {
-    return DendronWorkspace.wsRoot();
+    return getWSV2().wsRoot;
   }
 
   static lsp(): boolean {
@@ -366,11 +371,12 @@ export class DendronWorkspace {
   ) {
     opts = _.defaults(opts, { skipSetup: false });
     this.context = context;
+    // set the default
+    this.type = WorkspaceType.CODE;
     this.type = WorkspaceUtils.getWorkspaceType({
       workspaceFile: vscode.workspace.workspaceFile,
       workspaceFolders: vscode.workspace.workspaceFolders,
     });
-    this.type = WorkspaceType.CODE;
     _DendronWorkspace = this;
     this.L = Logger;
     this.disposableStore = new DisposableStore();
@@ -390,20 +396,8 @@ export class DendronWorkspace {
     return this.workspaceImpl;
   }
 
-  get assetUri(): vscode.Uri {
-    const uri = VSCodeUtils.joinPath(this.context.extensionUri, "assets");
-    return uri;
-  }
-
   get configRoot(): string {
-    const dendronDir = getCodeConfig<string | undefined>(
-      CONFIG.DENDRON_DIR.key
-    );
-    if (_.isEmpty(dendronDir) || _.isUndefined(dendronDir)) {
-      return DendronWorkspace.wsRoot();
-    } else {
-      return resolveRelToWSRoot(dendronDir);
-    }
+    return getWSV2().wsRoot;
   }
 
   /**
@@ -437,7 +431,7 @@ export class DendronWorkspace {
     wsConfigKey: keyof DendronWorkspaceSettings;
     dendronConfigKey: string;
   }) {
-    const config = getWS().config;
+    const config = getWSV2().config;
     // user already using new value
     if (_.get(config, dendronConfigKey)) {
       return _.get(config, dendronConfigKey);
@@ -458,7 +452,7 @@ export class DendronWorkspace {
   }
 
   get podsDir(): string {
-    const rootDir = DendronWorkspace.wsRoot();
+    const rootDir = getWSV2().wsRoot;
     if (!rootDir) {
       throw new Error(`rootdir not set when get podsDir`);
     }
@@ -501,7 +495,7 @@ export class DendronWorkspace {
    * Relative vaults
    */
   get vaultsv4(): DVault[] {
-    const vaults = DendronWorkspace.instance().config.vaults;
+    const vaults = getExtension().config.vaults;
     return vaults;
   }
 
@@ -556,7 +550,7 @@ export class DendronWorkspace {
           )
         );
 
-        if (getWS().config.dev?.enableWebUI) {
+        if (getWSV2().config.dev?.enableWebUI) {
           Logger.info({ ctx, msg: "initWebUI" });
           context.subscriptions.push(
             vscode.window.registerWebviewViewProvider(
@@ -588,7 +582,7 @@ export class DendronWorkspace {
     Logger.info({ ctx, msg: "init:backlinks" });
 
     const backlinksTreeDataProvider = new BacklinksTreeDataProvider(
-      getWS().config.dev?.enableLinkCandidates
+      getWSV2().config.dev?.enableLinkCandidates
     );
     vscode.window.onDidChangeActiveTextEditor(
       // eslint-disable-next-line  no-return-await
@@ -724,7 +718,7 @@ export class DendronWorkspace {
     const ctx = "activateWorkspace";
     const stage = getStage();
     this.L.info({ ctx, stage, msg: "enter" });
-    const wsRoot = DendronWorkspace.wsRoot();
+    const { wsRoot } = getWSV2();
     if (!wsRoot) {
       throw new Error(`rootDir not set when activating Watcher`);
     }
@@ -746,7 +740,7 @@ export class DendronWorkspace {
       throw Error("no folders set for workspace");
     }
     const vaults = wsFolders as vscode.WorkspaceFolder[];
-    const realVaults = DendronWorkspace.instance().vaultsv4;
+    const realVaults = getExtension().vaultsv4;
     const fileWatcher = new FileWatcher({
       wsRoot,
       vaults: realVaults,
@@ -755,7 +749,7 @@ export class DendronWorkspace {
     schemaWatcher.activate(this.context);
     this.schemaWatcher = schemaWatcher;
 
-    fileWatcher.activate(DendronWorkspace.instance().context);
+    fileWatcher.activate(getExtension().context);
     this.fileWatcher = fileWatcher;
   }
 
@@ -763,77 +757,5 @@ export class DendronWorkspace {
     const ctx = "deactivateWorkspace";
     this.L.info({ ctx });
     this.disposableStore.dispose();
-  }
-
-  async showWelcome() {
-    try {
-      // NOTE: this needs to be from extension because no workspace might exist at this point
-      const uri = VSCodeUtils.joinPath(
-        this.assetUri,
-        "dendron-ws",
-        "vault",
-        "welcome.html"
-      );
-
-      const { content } = readMD(uri.fsPath);
-      const title = "Welcome to Dendron";
-
-      const panel = vscode.window.createWebviewPanel(
-        _.kebabCase(title),
-        title,
-        vscode.ViewColumn.One,
-        {
-          enableScripts: true,
-        }
-      );
-      panel.webview.html = content;
-
-      panel.webview.onDidReceiveMessage(
-        async (message) => {
-          switch (message.command) {
-            case "loaded":
-              AnalyticsUtils.track(TutorialEvents.WelcomeShow);
-              return;
-
-            case "initializeWorkspace": {
-              // Try to put into a Default '~/Dendron' folder first. Only prompt
-              // if that path and the backup path already exist to lower
-              // onboarding friction
-              let wsPath;
-              const wsPathPrimary = path.join(resolveTilde("~"), "Dendron");
-              const wsPathBackup = path.join(
-                resolveTilde("~"),
-                "Dendron-Tutorial"
-              );
-
-              if (!fs.pathExistsSync(wsPathPrimary)) {
-                wsPath = wsPathPrimary;
-              } else if (!fs.pathExistsSync(wsPathBackup)) {
-                wsPath = wsPathBackup;
-              }
-
-              if (!wsPath) {
-                await new SetupWorkspaceCommand().run({
-                  workspaceInitializer: new TutorialInitializer(),
-                });
-              } else {
-                await new SetupWorkspaceCommand().execute({
-                  rootDirRaw: wsPath,
-                  workspaceInitializer: new TutorialInitializer(),
-                });
-              }
-
-              return;
-            }
-            default:
-              break;
-          }
-        },
-        undefined,
-        undefined
-      );
-    } catch (err) {
-      vscode.window.showErrorMessage(JSON.stringify(err));
-    }
   }
 }

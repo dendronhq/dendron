@@ -13,7 +13,7 @@ import * as vscode from "vscode";
 import { GotoNoteCommand } from "../../commands/GotoNote";
 import { PickerUtilsV2 } from "../../components/lookup/utils";
 import { VSCodeUtils } from "../../utils";
-import { DendronWorkspace } from "../../workspace";
+import { getWSV2 } from "../../workspace";
 import { GOTO_NOTE_PRESETS } from "../presets/GotoNotePreset";
 import { getActiveEditorBasename } from "../testUtils";
 import { expect, LocationTestUtils } from "../testUtilsv2";
@@ -28,9 +28,9 @@ suite("GotoNote", function () {
       runLegacyMultiWorkspaceTest({
         ctx,
         preSetupHook: ENGINE_HOOKS.setupBasic,
-        onInit: async ({ vaults }) => {
+        onInit: async ({ vaults, engine }) => {
           const vault = vaults[0];
-          const note = DendronWorkspace.instance().getEngine().notes["foo"];
+          const note = engine.notes["foo"];
           const { note: out } = (await new GotoNoteCommand().run({
             qs: "foo",
             vault,
@@ -51,15 +51,13 @@ suite("GotoNote", function () {
           const vpath = vault2Path({ vault, wsRoot });
           fs.removeSync(path.join(vpath, "foo.md"));
         },
-        onInit: async ({ vaults }) => {
+        onInit: async ({ vaults, engine }) => {
           const vault = vaults[0];
-          const ws = DendronWorkspace.instance();
-          const engine = ws.getEngine();
           const note = NoteUtils.getNoteByFnameV5({
             fname: "foo",
             notes: engine.notes,
             vault,
-            wsRoot: DendronWorkspace.wsRoot(),
+            wsRoot: getWSV2().wsRoot,
           }) as NoteProps;
           expect(_.pick(note, ["fname", "stub"])).toEqual({
             fname: "foo",

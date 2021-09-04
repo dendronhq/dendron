@@ -8,7 +8,7 @@ import { SeedService } from "@dendronhq/engine-server";
 import { commands } from "vscode";
 import { WORKSPACE_ACTIVATION_CONTEXT } from "../constants";
 import { StateService } from "../services/stateService";
-import { getWS } from "../workspace";
+import { getExtension } from "../workspace";
 import { BasicCommand } from "./base";
 
 export abstract class SeedCommandBase<
@@ -33,14 +33,14 @@ export abstract class SeedCommandBase<
   // time the commands are constructed in the initialization lifecycle.
   protected getSeedSvc(): SeedService {
     if (!this.seedSvc) {
-      const ws = getWS().workspaceService;
-      if (!ws) {
+      const wsService = getExtension().workspaceService;
+      if (!wsService) {
         throw new DendronError({
           message: `workspace service unavailable`,
           severity: ERROR_SEVERITY.MINOR,
         });
       } else {
-        this.seedSvc = ws.seedService;
+        this.seedSvc = wsService.seedService;
       }
     }
 
@@ -48,8 +48,9 @@ export abstract class SeedCommandBase<
   }
 
   protected postSeedStateToWebview() {
-    const ws = getWS();
-    const existingPanel = ws.getWebView(DendronWebViewKey.SEED_BROWSER);
+    const existingPanel = getExtension().getWebView(
+      DendronWebViewKey.SEED_BROWSER
+    );
 
     existingPanel?.webview.postMessage({
       type: SeedBrowserMessageType.onSeedStateChange,

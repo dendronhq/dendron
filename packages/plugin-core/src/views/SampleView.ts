@@ -1,6 +1,6 @@
 import { DendronTreeViewKey, DMessage } from "@dendronhq/common-all";
 import * as vscode from "vscode";
-import { getWS } from "../workspace";
+import { getExtension } from "../workspace";
 import { WebViewUtils } from "./utils";
 
 export class SampleView implements vscode.WebviewViewProvider {
@@ -8,7 +8,7 @@ export class SampleView implements vscode.WebviewViewProvider {
   private _view?: vscode.WebviewView;
 
   constructor() {
-    getWS().setTreeView(DendronTreeViewKey.SAMPLE_VIEW, this);
+    getExtension().setTreeView(DendronTreeViewKey.SAMPLE_VIEW, this);
   }
 
   public postMessage(msg: DMessage) {

@@ -12,7 +12,7 @@ import path from "path";
 // // as well as import your extension to test it
 import * as vscode from "vscode";
 import { ImportPodCommand } from "../../commands/ImportPod";
-import { getWS } from "../../workspace";
+import { getWSV2 } from "../../workspace";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
 suite("ImportPod", function () {
@@ -50,7 +50,7 @@ suite("ImportPod", function () {
           };
         };
         const pod = fakePod();
-        const engine = getWS().getEngine();
+        const engine = getWSV2().engine;
         await PODS_CORE.JSON.IMPORT.BASIC.testFunc({
           engine,
           wsRoot,

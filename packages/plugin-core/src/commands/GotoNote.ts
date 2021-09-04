@@ -8,13 +8,13 @@ import {
   VaultUtils,
 } from "@dendronhq/common-all";
 import _ from "lodash";
-import { Position, Selection, Uri, window, ViewColumn } from "vscode";
-import { PickerUtilsV2 } from "../components/lookup/utils";
+import { Position, Selection, Uri, ViewColumn, window } from "vscode";
 import { VaultSelectionMode } from "../components/lookup/types";
+import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../utils";
 import { getReferenceAtPosition } from "../utils/md";
-import { DendronWorkspace, getWS } from "../workspace";
+import { getExtension, getWSV2 } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandOpts = {
@@ -75,7 +75,7 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
 
   private async processInputs(opts: CommandOpts) {
     if (opts.qs && opts.vault) return opts;
-    const engine = DendronWorkspace.instance().getEngine();
+    const { engine } = getWSV2();
 
     if (opts.qs && !opts.vault) {
       // Special case: some code expects GotoNote to default to current vault if qs is provided but vault isn't
@@ -107,7 +107,7 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
       if (link.vaultName) {
         // if vault is defined on the link, then it's always that one
         opts.vault = VaultUtils.getVaultByNameOrThrow({
-          vaults: getWS().vaultsv4,
+          vaults: getWSV2().vaults,
           vname: link.vaultName,
         });
       } else {
@@ -133,7 +133,7 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
           // This is a new note. Depending on the config, we can either
           // automatically pick the vault or we'll prompt for it.
           const confirmVaultSetting =
-            DendronWorkspace.instance().config["lookupConfirmVaultOnCreate"];
+            getWSV2().config["lookupConfirmVaultOnCreate"];
           const selectionMode =
             confirmVaultSetting !== true
               ? VaultSelectionMode.smart
@@ -174,7 +174,7 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     const ctx = "GotoNoteCommand";
     this.L.info({ ctx, opts, msg: "enter" });
     const { overrides } = opts;
-    const client = DendronWorkspace.instance().getEngine();
+    const client = getExtension().getEngine();
 
     const { qs, vault } = (await this.processInputs(opts)) || opts;
     if (_.isUndefined(qs) || _.isUndefined(vault)) {
@@ -183,32 +183,30 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     }
 
     let pos: undefined | Position;
-    const out = await DendronWorkspace.instance().pauseWatchers<CommandOutput>(
-      async () => {
-        const { data } = await client.getNoteByPath({
-          npath: qs,
-          createIfNew: true,
-          vault,
-          overrides,
-        });
-        const note = data?.note as NoteProps;
-        const npath = NoteUtils.getFullPath({
-          note,
-          wsRoot: DendronWorkspace.wsRoot(),
-        });
-        const uri = Uri.file(npath);
-        const editor = await VSCodeUtils.openFileInEditor(uri, {
-          column: opts.column,
-        });
-        this.L.info({ ctx, opts, msg: "exit" });
-        if (opts.anchor && editor) {
-          pos = findAnchorPos({ anchor: opts.anchor, note });
-          editor.selection = new Selection(pos, pos);
-          editor.revealRange(editor.selection);
-        }
-        return { note, pos };
+    const out = await getExtension().pauseWatchers<CommandOutput>(async () => {
+      const { data } = await client.getNoteByPath({
+        npath: qs,
+        createIfNew: true,
+        vault,
+        overrides,
+      });
+      const note = data?.note as NoteProps;
+      const npath = NoteUtils.getFullPath({
+        note,
+        wsRoot: getWSV2().wsRoot,
+      });
+      const uri = Uri.file(npath);
+      const editor = await VSCodeUtils.openFileInEditor(uri, {
+        column: opts.column,
+      });
+      this.L.info({ ctx, opts, msg: "exit" });
+      if (opts.anchor && editor) {
+        pos = findAnchorPos({ anchor: opts.anchor, note });
+        editor.selection = new Selection(pos, pos);
+        editor.revealRange(editor.selection);
       }
-    );
+      return { note, pos };
+    });
     return out;
   }
 }

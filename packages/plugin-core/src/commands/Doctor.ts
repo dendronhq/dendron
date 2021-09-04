@@ -22,7 +22,7 @@ import { DoctorScopeType } from "../components/doctor/types";
 import { DENDRON_COMMANDS } from "../constants";
 import { delayedUpdateDecorations } from "../features/windowDecorations";
 import { VSCodeUtils } from "../utils";
-import { DendronWorkspace } from "../workspace";
+import { getExtension, getWSV2 } from "../workspace";
 import { BasicCommand } from "./base";
 import { ReloadIndexCommand } from "./ReloadIndex";
 
@@ -148,20 +148,19 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
   async execute(opts: CommandOpts) {
     const ctx = "DoctorCommand:execute";
     window.showInformationMessage("Calling the doctor.");
-    const ws = DendronWorkspace.instance();
-    const wsRoot = DendronWorkspace.wsRoot();
+    const ext = getExtension();
+    const { wsRoot, config } = getWSV2();
     const findings: Finding[] = [];
     if (_.isUndefined(wsRoot)) {
       throw Error("rootDir undefined");
     }
-    const config = ws?.config;
     if (_.isUndefined(config)) {
       throw Error("no config found");
     }
 
     const siteRoot = path.join(wsRoot, config.site.siteRootDir);
-    if (ws.fileWatcher) {
-      ws.fileWatcher.pause = true;
+    if (ext.fileWatcher) {
+      ext.fileWatcher.pause = true;
     }
     // Make sure to save any changes in the file because Doctor reads them from
     // disk, and won't see changes that haven't been saved.
@@ -218,8 +217,8 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
             break;
           }
           window.showInformationMessage("creating missing links...");
-          if (ws.fileWatcher) {
-            ws.fileWatcher.pause = true;
+          if (ext.fileWatcher) {
+            ext.fileWatcher.pause = true;
           }
           await cmd.execute({
             action: opts.action,
@@ -232,8 +231,8 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
         } else {
           window.showInformationMessage(`There are no missing links!`);
         }
-        if (ws.fileWatcher) {
-          ws.fileWatcher.pause = false;
+        if (ext.fileWatcher) {
+          ext.fileWatcher.pause = false;
         }
         break;
       }
@@ -253,8 +252,8 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
       }
     }
 
-    if (ws.fileWatcher) {
-      ws.fileWatcher.pause = false;
+    if (ext.fileWatcher) {
+      ext.fileWatcher.pause = false;
     }
     await new ReloadIndexCommand().execute();
     // Decorations don't auto-update here, I think because the contents of the
@@ -267,7 +266,7 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     if (!fs.existsSync(siteRoot)) {
       const f: Finding = { issue: "no siteRoot found" };
       const dendronJekyll = VSCodeUtils.joinPath(
-        ws.extensionAssetsDir,
+        ext.extensionAssetsDir,
         "jekyll"
       );
       fs.copySync(dendronJekyll.fsPath, siteRoot);

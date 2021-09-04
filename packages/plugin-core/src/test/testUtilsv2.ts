@@ -43,7 +43,7 @@ import {
 } from "../commands/SetupWorkspace";
 import { CONFIG } from "../constants";
 import { VSCodeUtils } from "../utils";
-import { DendronWorkspace, getWS, resolveRelToWSRoot } from "../workspace";
+import { DendronWorkspace, getWSV2 } from "../workspace";
 import { BlankInitializer } from "../workspace/blankInitializer";
 import { _activate } from "../_extension";
 import { createMockConfig, onWSInit } from "./testUtils";
@@ -182,7 +182,7 @@ export async function runWorkspaceTestV3(
   const { ctx } = opts;
   const { vaults, wsRoot } = await setupCodeWorkspaceV3(opts);
   onWSInit(async () => {
-    const engine = DendronWorkspace.instance().getEngine();
+    const { engine } = getWSV2();
     await opts.onInit({ wsRoot, vaults, engine });
   });
   if (opts?.preActivateHook) {
@@ -389,11 +389,11 @@ export async function setupCodeWorkspaceV3(
 }
 
 export const getNoteFromFname = (opts: { fname: string; vault: DVault }) => {
-  const notes = getWS().getEngine().notes;
+  const notes = getWSV2().engine.notes;
   const note = NoteUtils.getNoteByFnameV5({
     ...opts,
     notes,
-    wsRoot: DendronWorkspace.wsRoot(),
+    wsRoot: getWSV2().wsRoot,
   });
   return VSCodeUtils.openNote(note!);
 };
@@ -401,7 +401,7 @@ export const getNoteFromTextEditor = (): NoteProps => {
   const txtPath = window.activeTextEditor?.document.uri.fsPath as string;
   const vault = { fsPath: path.dirname(txtPath) };
   const fullPath = DNodeUtils.getFullPath({
-    wsRoot: DendronWorkspace.wsRoot(),
+    wsRoot: getWSV2().wsRoot,
     vault,
     basename: path.basename(txtPath),
   });
@@ -439,26 +439,27 @@ export const stubWorkspaceFile = (wsRoot: string) => {
   };
 };
 
-export const stubWorkspaceFolders = (vaults: DVault[]) => {
+export const stubWorkspaceFolders = (wsRoot: string, vaults: DVault[]) => {
   sinon.stub(workspace, "workspaceFolders").returns(
     vaults.map((v) => ({
       name: VaultUtils.getName(v),
       index: 1,
-      uri: Uri.file(resolveRelToWSRoot(v.fsPath)),
+      uri: Uri.file(path.join(wsRoot, VaultUtils.getRelPath(v))),
     }))
   );
+
   DendronWorkspace.workspaceFolders = () => {
     return vaults.map((v) => ({
       name: VaultUtils.getName(v),
       index: 1,
-      uri: Uri.file(resolveRelToWSRoot(v.fsPath)),
+      uri: Uri.file(path.join(wsRoot, VaultUtils.getRelPath(v))),
     }));
   };
 };
 
 export const stubWorkspace = ({ wsRoot, vaults }: WorkspaceOpts) => {
   stubWorkspaceFile(wsRoot);
-  stubWorkspaceFolders(vaults);
+  stubWorkspaceFolders(wsRoot, vaults);
 };
 
 export function expect(value: any) {

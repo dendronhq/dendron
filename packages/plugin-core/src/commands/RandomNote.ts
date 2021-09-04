@@ -1,10 +1,10 @@
 import { NoteProps, NoteUtils } from "@dendronhq/common-all";
+import _ from "lodash";
 import { Uri, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../utils";
-import { getWS } from "../workspace";
+import { getWSV2 } from "../workspace";
 import { BasicCommand } from "./base";
-import _ from "lodash";
 
 type CommandOpts = {};
 
@@ -23,12 +23,10 @@ export class RandomNoteCommand extends BasicCommand<
   }
 
   async execute(_opts: CommandOpts): Promise<CommandOutput> {
-    const ws = getWS();
-    const engine = ws.getEngine();
-    const config = ws.config.randomNote;
+    const { engine, config } = getWSV2();
 
     // If no pattern is specified for include, then include all notes for the search set.
-    const includeSet: string[] = config?.include ?? [""];
+    const includeSet: string[] = config.randomNote?.include ?? [""];
 
     const searchPredicate = function (note: NoteProps) {
       if (note.stub === true) {
@@ -46,9 +44,9 @@ export class RandomNoteCommand extends BasicCommand<
       }
 
       // Remove Exclude Paths, if specified:
-      if (config?.exclude) {
+      if (config.randomNote?.exclude) {
         // eslint-disable-next-line no-restricted-syntax
-        for (const pattern of config?.exclude) {
+        for (const pattern of config.randomNote?.exclude) {
           if (note.fname.toLowerCase().startsWith(pattern.toLowerCase())) {
             isMatch = false;
             break;

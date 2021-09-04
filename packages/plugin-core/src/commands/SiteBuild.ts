@@ -2,7 +2,7 @@ import { BuildSiteV2CLICommandOpts } from "@dendronhq/dendron-cli";
 import { env, Uri, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { buildSite, checkPreReq, getSiteRootDirPath } from "../utils/site";
-import { DendronWorkspace } from "../workspace";
+import { getExtension, getWSV2 } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandOpts = Partial<BuildSiteV2CLICommandOpts>;
@@ -22,9 +22,9 @@ export class SiteBuildCommand extends BasicCommand<CommandOpts, CommandOutput> {
   }
 
   async execute(_opts?: CommandOpts) {
-    const wsRoot = DendronWorkspace.wsRoot();
+    const wsRoot = getWSV2().wsRoot;
     window.showInformationMessage("building...");
-    const port = DendronWorkspace.instance().port!;
+    const port = getExtension().port!;
     await buildSite({
       wsRoot,
       stage: "prod",

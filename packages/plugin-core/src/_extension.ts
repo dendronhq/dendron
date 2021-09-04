@@ -40,10 +40,15 @@ import { StateService } from "./services/stateService";
 import { Extensions } from "./settings";
 import { setupSegmentClient } from "./telemetry";
 import { GOOGLE_OAUTH_ID, GOOGLE_OAUTH_SECRET } from "./types/global";
-import { VSCodeUtils, KeybindingUtils, WSUtils } from "./utils";
+import { KeybindingUtils, VSCodeUtils, WSUtils } from "./utils";
 import { AnalyticsUtils } from "./utils/analytics";
 import { DendronTreeView } from "./views/DendronTreeView";
-import { DendronWorkspace, getEngine, getWS, getWSV2 } from "./workspace";
+import {
+  DendronWorkspace,
+  getEngine,
+  getExtension,
+  getWSV2,
+} from "./workspace";
 import { DendronCodeWorkspace } from "./workspace/codeWorkspace";
 import { DendronNativeWorkspace } from "./workspace/nativeWorkspace";
 import { WorkspaceInitFactory } from "./workspace/workspaceInitializer";
@@ -74,7 +79,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 async function reloadWorkspace() {
   const ctx = "reloadWorkspace";
-  const ws = getWS();
+  const ws = getWSV2();
   const maybeEngine = await WSUtils.reloadWorkspace();
   if (!maybeEngine) {
     return maybeEngine;
@@ -158,7 +163,7 @@ async function startServerProcess(): Promise<{
   subprocess?: ExecaChildProcess;
 }> {
   const { nextServerUrl, nextStaticRoot, engineServerPort } =
-    getWS().config.dev || {};
+    getWSV2().config.dev || {};
   // const ctx = "startServer";
   const maybePort =
     DendronWorkspace.configuration().get<number | undefined>(
@@ -223,7 +228,7 @@ export async function _activate(
 
   // Setup the workspace trust callback to detect changes from the user's workspace trust settings
   vscode.workspace.onDidGrantWorkspaceTrust(() => {
-    getEngine().trustedWorkspace = vscode.workspace.isTrusted;
+    getExtension().getEngine().trustedWorkspace = vscode.workspace.isTrusted;
   });
 
   //  needs to be initialized to setup commands
@@ -243,6 +248,7 @@ export async function _activate(
     previousGlobalVersion,
     currentVersion,
   });
+  const assetUri = WSUtils.getAssetUri(context);
 
   if (DendronWorkspace.isActive(context)) {
     if (ws.type === WorkspaceType.NATIVE) {
@@ -256,18 +262,18 @@ export async function _activate(
       ws.workspaceImpl = new DendronNativeWorkspace({
         wsRoot: workspaceFolder?.uri.fsPath,
         logUri: context.logUri,
-        assetUri: VSCodeUtils.joinPath(ws.context.extensionUri, "assets"),
+        assetUri,
       });
     } else {
       ws.workspaceImpl = new DendronCodeWorkspace({
         wsRoot: DendronWorkspace.wsRoot(),
         logUri: context.logUri,
-        assetUri: VSCodeUtils.joinPath(ws.context.extensionUri, "assets"),
+        assetUri,
       });
     }
+    const wsImpl = getWSV2();
     const start = process.hrtime();
     const dendronConfig = ws.config;
-    const wsImpl = getWSV2();
 
     // --- Get Version State
     const workspaceInstallStatus = VSCodeUtils.getInstallStatusForWorkspace({
@@ -479,6 +485,7 @@ export async function _activate(
     version: DendronWorkspace.version(),
     previousExtensionVersion: previousWorkspaceVersion,
     start: startActivate,
+    assetUri,
   }).then(() => {
     if (DendronWorkspace.isActive(context)) {
       HistoryService.instance().add({
@@ -500,7 +507,7 @@ function toggleViews(enabled: boolean) {
 export function deactivate() {
   const ws = getWSV2();
   if (!WorkspaceUtils.isNativeWorkspace(ws)) {
-    getWS().deactivate();
+    getExtension().deactivate();
   }
   toggleViews(false);
 }
@@ -510,11 +517,13 @@ async function showWelcomeOrWhatsNew({
   version,
   previousExtensionVersion,
   start,
+  assetUri,
 }: {
   extensionInstallStatus: InstallStatus;
   version: string;
   previousExtensionVersion: string;
   start: [number, number];
+  assetUri: vscode.Uri;
 }) {
   const ctx = "showWelcomeOrWhatsNew";
   Logger.info({ ctx, version, previousExtensionVersion });
@@ -532,7 +541,7 @@ async function showWelcomeOrWhatsNew({
       if (!SegmentClient.instance().hasOptedOut) {
         StateService.instance().showTelemetryNotice();
       }
-      await getWSV2().showWelcome();
+      await WSUtils.showWelcome(assetUri);
       break;
     }
     case InstallStatus.UPGRADED: {
@@ -572,11 +581,11 @@ async function showWelcomeOrWhatsNew({
   // Show lapsed users (users who have installed Dendron but haven't initialied
   // a workspace) a reminder prompt to re-engage them.
   if (shouldDisplayLapsedUserMsg()) {
-    showLapsedUserMessage();
+    showLapsedUserMessage(assetUri);
   }
 }
 
-function showLapsedUserMessage() {
+function showLapsedUserMessage(assetUri: vscode.Uri) {
   const START_TITLE = "Get Started";
 
   AnalyticsUtils.track(VSCodeEvents.ShowLapsedUserMessage);
@@ -591,8 +600,7 @@ function showLapsedUserMessage() {
     .then((resp) => {
       if (resp?.title === START_TITLE) {
         AnalyticsUtils.track(VSCodeEvents.LapsedUserMessageAccepted);
-        const ws = getWS();
-        return ws.showWelcome();
+        WSUtils.showWelcome(assetUri);
       } else {
         AnalyticsUtils.track(VSCodeEvents.LapsedUserMessageRejected);
         return;

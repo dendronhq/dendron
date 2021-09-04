@@ -1,7 +1,7 @@
 import _ from "lodash";
 import { DENDRON_COMMANDS } from "../constants";
 import { Logger } from "../logger";
-import { DendronWorkspace } from "../workspace";
+import { getWSV2 } from "../workspace";
 import { BasicCommand } from "./base";
 import { OpenLogsCommand } from "./OpenLogs";
 
@@ -16,7 +16,7 @@ export class DumpStateCommand extends BasicCommand<CommandOpts, CommandOutput> {
   }
   async execute() {
     const ctx = "DumpStateCommand";
-    const engine = DendronWorkspace.instance().getEngine();
+    const { engine } = getWSV2();
     const notes = _.mapValues(engine.notes, (val) => _.omit(val, "body"));
     const schemas = engine.schemas;
     Logger.info({ ctx, notes, schemas });

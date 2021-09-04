@@ -93,11 +93,6 @@ export type DWorkspaceV2 = {
    * Log storage
    */
   logUri: URI;
-  // --- methods
-  /**
-   * Show message when workspace is initialized
-   */
-  showWelcome(): Promise<void>;
 };
 
 export type SeedEntry = {

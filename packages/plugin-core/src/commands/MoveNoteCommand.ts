@@ -1,5 +1,6 @@
 import {
   DendronError,
+  DEngineClient,
   NoteChangeEntry,
   RenameNoteOpts,
   VaultUtils,
@@ -7,8 +8,10 @@ import {
 import { vault2Path } from "@dendronhq/common-server";
 import { HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
+import _md from "markdown-it";
 import path from "path";
 import { Uri, ViewColumn, window } from "vscode";
+import { MultiSelectBtn } from "../components/lookup/buttons";
 import {
   LookupControllerV3,
   LookupControllerV3CreateOpts,
@@ -23,14 +26,11 @@ import {
 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { FileItem } from "../external/fileutils/FileItem";
-import { VSCodeUtils } from "../utils";
-import { DendronWorkspace, getWS } from "../workspace";
-import { BasicCommand } from "./base";
-import { MultiSelectBtn } from "../components/lookup/buttons";
-import { EngineAPIService } from "../services/EngineAPIService";
-import { ProceedCancel, QuickPickUtil } from "../utils/quickPick";
-import _md from "markdown-it";
 import { UNKNOWN_ERROR_MSG } from "../logger";
+import { VSCodeUtils } from "../utils";
+import { ProceedCancel, QuickPickUtil } from "../utils/quickPick";
+import { getExtension, getWSV2 } from "../workspace";
+import { BasicCommand } from "./base";
 
 type CommandInput = any;
 
@@ -82,7 +82,7 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
   }
 
   async gatherInputs(opts?: CommandOpts): Promise<CommandInput | undefined> {
-    const engine = getWS().getEngine();
+    const engine = getWSV2().engine;
     const vault = opts?.vaultName
       ? VaultUtils.getVaultByName({
           vaults: engine.vaults,
@@ -191,11 +191,11 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
   async execute(opts: CommandOpts): Promise<{ changed: NoteChangeEntry[] }> {
     const ctx = "MoveNoteCommand:execute";
     opts = _.defaults(opts, { closeAndOpenFile: true });
-    const ws = getWS();
-    const engine = ws.getEngine();
+    const { engine } = getWSV2();
+    const ext = getExtension();
 
-    if (ws.fileWatcher && !opts.noPauseWatcher) {
-      ws.fileWatcher.pause = true;
+    if (ext.fileWatcher && !opts.noPauseWatcher) {
+      ext.fileWatcher.pause = true;
     }
     try {
       this.L.info({ ctx, opts });
@@ -220,11 +220,11 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
       }
       return { changed };
     } finally {
-      DendronWorkspace.instance().dendronTreeView?.treeProvider.refresh();
-      if (ws.fileWatcher && !opts.noPauseWatcher) {
+      getExtension().dendronTreeView?.treeProvider.refresh();
+      if (ext.fileWatcher && !opts.noPauseWatcher) {
         setTimeout(() => {
-          if (ws.fileWatcher) {
-            ws.fileWatcher.pause = false;
+          if (ext.fileWatcher) {
+            ext.fileWatcher.pause = false;
           }
           this.L.info({ ctx, msg: "exit" });
         }, 3000);
@@ -234,7 +234,7 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
 
   /** Performs the actual move of the notes. */
   private async moveNotes(
-    engine: EngineAPIService,
+    engine: DEngineClient,
     moves: RenameNoteOpts[]
   ): Promise<NoteChangeEntry[]> {
     const necessaryMoves = moves.filter((move) => isMoveNecessary(move));
@@ -307,10 +307,10 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
 }
 
 async function closeCurrentFileOpenMovedFile(
-  engine: EngineAPIService,
+  engine: DEngineClient,
   moveOpts: RenameNoteOpts
 ) {
-  const wsRoot = DendronWorkspace.wsRoot();
+  const wsRoot = getWSV2().wsRoot;
 
   const vault = VaultUtils.getVaultByName({
     vaults: engine.vaults,

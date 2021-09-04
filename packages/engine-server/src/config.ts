@@ -78,6 +78,7 @@ export class DConfig {
         usePrettyRefs: true,
         title: "Dendron",
         description: "Personal knowledge space",
+        siteLastModified: true,
       },
     };
   }

@@ -3,7 +3,7 @@ import _ from "lodash";
 import { Uri, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../utils";
-import { getWSV2 } from "../workspace";
+import { getDWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandOpts = {};
@@ -23,7 +23,7 @@ export class RandomNoteCommand extends BasicCommand<
   }
 
   async execute(_opts: CommandOpts): Promise<CommandOutput> {
-    const { engine, config } = getWSV2();
+    const { engine, config } = getDWorkspace();
 
     // If no pattern is specified for include, then include all notes for the search set.
     const includeSet: string[] = config.randomNote?.include ?? [""];

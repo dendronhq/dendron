@@ -5,7 +5,7 @@ import path from "path";
 import { Extension, extensions, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { WorkspaceConfig } from "../settings";
-import { DendronWorkspace } from "../workspace";
+import { DendronExtension } from "../workspace";
 import { BasicCommand } from "./base";
 
 const L = createLogger("UpgradeSettingsCommand");
@@ -24,7 +24,7 @@ export class UpgradeSettingsCommand extends BasicCommand<
     const ctx = "Upgrade:execute";
     L.info({ ctx });
     const newConfig = await WorkspaceConfig.update(
-      path.dirname(DendronWorkspace.workspaceFile().fsPath)
+      path.dirname(DendronExtension.workspaceFile().fsPath)
     );
     this.L.info({ ctx, newConfig });
     // vscode doesn't let us uninstall extensions

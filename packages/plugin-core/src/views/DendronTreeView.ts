@@ -22,7 +22,7 @@ import vscode, {
 import { GotoNoteCommandOpts } from "../commands/GotoNote";
 import { DENDRON_COMMANDS, ICONS } from "../constants";
 import { Logger } from "../logger";
-import { getExtension, getWSV2 } from "../workspace";
+import { getExtension, getDWorkspace } from "../workspace";
 
 function createTreeNote(note: NoteProps) {
   const collapsibleState = _.isEmpty(note.children)
@@ -60,7 +60,7 @@ export class TreeNote extends vscode.TreeItem {
     this.tooltip = this.note.title;
     const vpath = vault2Path({
       vault: this.note.vault,
-      wsRoot: getWSV2().wsRoot,
+      wsRoot: getDWorkspace().wsRoot,
     });
     this.uri = Uri.file(path.join(vpath, this.note.fname + ".md"));
     if (DNodeUtils.isRoot(note)) {
@@ -109,7 +109,7 @@ export class EngineNoteProvider implements vscode.TreeDataProvider<string> {
   getChildren(id?: string): Thenable<string[]> {
     const ctx = "TreeView:getChildren";
     Logger.debug({ ctx, id });
-    const { engine } = getWSV2();
+    const { engine } = getDWorkspace();
     const roots = _.filter(_.values(engine.notes), DNodeUtils.isRoot);
     if (!roots) {
       vscode.window.showInformationMessage("No notes found");
@@ -130,7 +130,7 @@ export class EngineNoteProvider implements vscode.TreeDataProvider<string> {
   }
 
   async getParent(id: string) {
-    const { engine: client } = getWSV2();
+    const { engine: client } = getDWorkspace();
     const maybeParent =
       client.notes[(this.tree[id] as TreeNote).note.parent || ""];
     return maybeParent ? maybeParent.id : null;
@@ -206,7 +206,7 @@ export class DendronTreeView {
     }
     const uri = editor.document.uri;
     const basename = path.basename(uri.fsPath);
-    const { wsRoot, vaults, engine } = getWSV2();
+    const { wsRoot, vaults, engine } = getDWorkspace();
     const ext = getExtension();
     if (!ext.workspaceService?.isPathInWorkspace(uri.fsPath)) {
       return;

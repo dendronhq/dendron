@@ -19,7 +19,7 @@ import {
 } from "vscode";
 import { CONFIG } from "./constants";
 import { Logger } from "./logger";
-import { DendronWorkspace, getWSV2 } from "./workspace";
+import { DendronExtension, getDWorkspace } from "./workspace";
 
 export { Snippets };
 
@@ -39,9 +39,9 @@ export class Extensions extends EngineExtension {
 export class WorkspaceConfig extends EngineWorkspaceConfig {
   static async update(_wsRoot: string): Promise<Required<CodeConfigChanges>> {
     const ctx = "WorkspaceConfig:update";
-    const src = DendronWorkspace.configuration();
+    const src = DendronExtension.configuration();
     const changes = await Settings.upgrade(src, _SETTINGS);
-    const { wsRoot, vaults } = getWSV2();
+    const { wsRoot, vaults } = getDWorkspace();
     const vpath = vault2Path({ wsRoot, vault: vaults[0] });
     const vscodeDir = path.join(vpath, ".vscode");
     const snippetChanges = await Snippets.upgradeOrCreate(vscodeDir);

@@ -16,7 +16,7 @@ import _ from "lodash";
 import { CancellationToken, CancellationTokenSource, window } from "vscode";
 import { Logger } from "../../logger";
 import { AnalyticsUtils } from "../../utils/analytics";
-import { getWSV2 } from "../../workspace";
+import { getDWorkspace } from "../../workspace";
 import { LookupControllerV3 } from "./LookupControllerV3";
 import { DendronQuickPickerV2, DendronQuickPickState } from "./types";
 import {
@@ -218,7 +218,7 @@ export class NoteLookupProvider implements ILookupProviderV3 {
     // get prior
     const querystring = PickerUtilsV2.slashToDot(pickerValue);
     const queryOrig = PickerUtilsV2.slashToDot(picker.value);
-    const ws = getWSV2();
+    const ws = getDWorkspace();
     let profile: number;
     const queryEndsWithDot = queryOrig.endsWith(".");
     const queryUpToLastDot =
@@ -318,7 +318,7 @@ export class NoteLookupProvider implements ILookupProviderV3 {
             updatedItems,
             (ent) => ent.fname
           );
-          const { wsRoot, vaults } = getWSV2();
+          const { wsRoot, vaults } = getDWorkspace();
           updatedItems = updatedItems.concat(
             candidatesToAdd.map((ent) => {
               return DNodeUtils.enhancePropForQuickInputV3({
@@ -527,7 +527,7 @@ export class SchemaLookupProvider implements ILookupProviderV3 {
     // get prior
     const querystring = PickerUtilsV2.slashToDot(pickerValue);
     const queryOrig = PickerUtilsV2.slashToDot(picker.value);
-    const ws = getWSV2();
+    const ws = getDWorkspace();
     let profile: number;
 
     const engine = ws.engine;
@@ -544,7 +544,7 @@ export class SchemaLookupProvider implements ILookupProviderV3 {
         );
         picker.items = nodes.map((ent) => {
           return DNodeUtils.enhancePropForQuickInputV3({
-            wsRoot: getWSV2().wsRoot,
+            wsRoot: getDWorkspace().wsRoot,
             props: ent,
             schemas: engine.schemas,
             vaults: ws.vaults,

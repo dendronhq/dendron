@@ -37,7 +37,7 @@ import { CodeConfigKeys, DateTimeFormat } from "../types";
 import { VSCodeUtils } from "../utils";
 import { containsNonDendronUri } from "../utils/md";
 import { getFrontmatterTags, parseFrontmatter } from "../utils/yaml";
-import { getConfigValue, getWSV2 } from "../workspace";
+import { getConfigValue, getDWorkspace } from "../workspace";
 import {
   warnBadFrontmatterContents,
   warnMissingFrontmatter,
@@ -303,7 +303,7 @@ function decorateTag({
 }): [TextEditorDecorationType, DecorationOptions] {
   const { color: backgroundColor } = NoteUtils.color({
     fname,
-    notes: getWSV2().engine.notes,
+    notes: getDWorkspace().engine.notes,
   });
 
   const type = doesLinkedNoteExist({ fname })
@@ -347,7 +347,7 @@ function doesLinkedNoteExist({
   fname: string;
   vaultName?: string;
 }) {
-  const { notes, vaults } = getWSV2().engine;
+  const { notes, vaults } = getDWorkspace().engine;
   const vault = vaultName
     ? VaultUtils.getVaultByName({ vname: vaultName, vaults })
     : undefined;

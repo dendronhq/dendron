@@ -13,7 +13,7 @@ import { Uri, window } from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { UNKNOWN_ERROR_MSG } from "../logger";
 import { VSCodeUtils } from "../utils";
-import { getWSV2 } from "../workspace";
+import { getDWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandOpts = { direction: "next" | "prev" };
@@ -44,7 +44,7 @@ export class GoToSiblingCommand extends BasicCommand<
     value = path.basename(maybeTextEditor.document.uri.fsPath, ".md");
     let respNodes: NoteProps[];
 
-    const { vaults, engine, wsRoot } = getWSV2();
+    const { vaults, engine, wsRoot } = getDWorkspace();
     if (value === "root") {
       const vault = VaultUtils.getVaultByNotePath({
         vaults,
@@ -129,7 +129,7 @@ export class GoToSiblingCommand extends BasicCommand<
     }
     const vpath = vault2Path({
       vault: siblingNote.vault,
-      wsRoot: getWSV2().wsRoot,
+      wsRoot: getDWorkspace().wsRoot,
     });
     await VSCodeUtils.openFileInEditor(
       VSCodeUtils.joinPath(Uri.file(vpath), siblingNote.fname + ".md")

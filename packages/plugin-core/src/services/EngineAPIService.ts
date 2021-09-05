@@ -7,7 +7,7 @@ import {
 } from "@dendronhq/common-all";
 import { DendronEngineClient, HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
-import { getWSV2 } from "../workspace";
+import { getDWorkspace } from "../workspace";
 
 export class EngineAPIService extends DendronEngineClient {
   private _trustedWorkspace: boolean = true;
@@ -26,7 +26,7 @@ export class EngineAPIService extends DendronEngineClient {
     port: number | string;
     enableWorkspaceTrust?: boolean | undefined;
   }) {
-    const { vaults, wsRoot } = getWSV2();
+    const { vaults, wsRoot } = getDWorkspace();
     const history = HistoryService.instance();
 
     const api = new DendronAPI({

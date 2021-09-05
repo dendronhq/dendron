@@ -50,7 +50,7 @@ import {
 import { DENDRON_COMMANDS } from "../constants";
 import { Logger } from "../logger";
 import { AnalyticsUtils } from "../utils/analytics";
-import { getEngine, getWSV2 } from "../workspace";
+import { getEngine, getDWorkspace } from "../workspace";
 import { BaseCommand } from "./base";
 
 export type CommandRunOpts = {
@@ -137,7 +137,7 @@ export class NoteLookupCommand extends BaseCommand<
 
   async gatherInputs(opts?: CommandRunOpts): Promise<CommandGatherOutput> {
     const start = process.hrtime();
-    const ws = getWSV2();
+    const ws = getDWorkspace();
     const noteLookupConfig: NoteLookupConfig = DConfig.getProp(
       ws.config,
       "lookup"
@@ -423,7 +423,7 @@ export class NoteLookupCommand extends BaseCommand<
     }
     const uri = NoteUtils.getURI({
       note: nodeNew,
-      wsRoot: getWSV2().wsRoot,
+      wsRoot: getDWorkspace().wsRoot,
     });
     return { uri, node: nodeNew, resp };
   }

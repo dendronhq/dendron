@@ -14,7 +14,7 @@ import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { clipboard, DendronClientUtilsV2, VSCodeUtils } from "../utils";
 import { getSelectionAnchors } from "../utils/editor";
-import { getEngine, getWSV2 } from "../workspace";
+import { getEngine, getDWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandOpts = {};
@@ -106,7 +106,7 @@ export class CopyNoteRefCommand extends BasicCommand<
   async execute(_opts: CommandOpts) {
     const editor = VSCodeUtils.getActiveTextEditor() as TextEditor;
     const fname = NoteUtils.uri2Fname(editor.document.uri);
-    const wsRoot = getWSV2().wsRoot;
+    const wsRoot = getDWorkspace().wsRoot;
     const vault = PickerUtilsV2.getVaultForOpenEditor();
     const engine = getEngine();
     const note: NoteProps = NoteUtils.getNoteOrThrow({

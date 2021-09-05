@@ -49,7 +49,7 @@ import { FileItem } from "./external/fileutils/FileItem";
 import { Logger } from "./logger";
 import { EngineAPIService } from "./services/EngineAPIService";
 import { AnalyticsUtils } from "./utils/analytics";
-import { getExtension, getWSV2 } from "./workspace";
+import { getExtension, getDWorkspace } from "./workspace";
 import { TutorialInitializer } from "./workspace/tutorialInitializer";
 
 export class DisposableStore {
@@ -253,10 +253,12 @@ export class VSCodeUtils {
 
   static getOrCreateMockContext(): vscode.ExtensionContext {
     if (!_MOCK_CONTEXT) {
+      const logPath = tmpDir().name;
       const pkgRoot = goUpTo({ base: __dirname, fname: "package.json" });
       _MOCK_CONTEXT = {
         extensionMode: vscode.ExtensionMode.Development,
-        logPath: tmpDir().name,
+        logPath,
+        logUri: vscode.Uri.file(logPath),
         subscriptions: [],
         extensionPath: pkgRoot,
         globalState: VSCodeUtils.createMockState({
@@ -274,7 +276,7 @@ export class VSCodeUtils {
   }
 
   static getNoteFromDocument(document: vscode.TextDocument) {
-    const { engine, wsRoot } = getWSV2();
+    const { engine, wsRoot } = getDWorkspace();
     const txtPath = document.uri.fsPath;
     const fname = path.basename(txtPath, ".md");
     let vault: DVault;
@@ -294,7 +296,7 @@ export class VSCodeUtils {
 
   static getVaultFromDocument(document: vscode.TextDocument) {
     const txtPath = document.uri.fsPath;
-    const { wsRoot, vaults } = getWSV2();
+    const { wsRoot, vaults } = getDWorkspace();
     const vault = VaultUtils.getVaultByNotePath({
       wsRoot,
       vaults,
@@ -347,7 +349,7 @@ export class VSCodeUtils {
     vault: DVault;
     fname: string;
   }) {
-    const { wsRoot } = getWSV2();
+    const { wsRoot } = getDWorkspace();
     const vpath = vault2Path({ vault, wsRoot });
     const notePath = path.join(vpath, `${fname}.md`);
     const editor = await VSCodeUtils.openFileInEditor(
@@ -358,7 +360,7 @@ export class VSCodeUtils {
 
   static async openNote(note: NoteProps) {
     const { vault, fname } = note;
-    const wsRoot = getWSV2().wsRoot;
+    const wsRoot = getDWorkspace().wsRoot;
     const vpath = vault2Path({ vault, wsRoot });
     const notePath = path.join(vpath, `${fname}.md`);
     const editor = await VSCodeUtils.openFileInEditor(
@@ -630,7 +632,7 @@ export class WSUtils {
       );
       return out;
     } catch (err) {
-      Logger.error({ error: err });
+      Logger.error({ error: err as any });
     }
   }
 
@@ -738,7 +740,7 @@ export class DendronClientUtilsV2 {
           fname,
           notes: opts.engine.notes,
           vault,
-          wsRoot: getWSV2().wsRoot,
+          wsRoot: getDWorkspace().wsRoot,
         });
         if (domain && domain.schema) {
           const smod = opts.engine.schemas[domain.schema.moduleId];
@@ -785,7 +787,7 @@ export class DendronClientUtilsV2 {
             wsConfigKey: "dendron.defaultScratchDateFormat",
             dendronConfigKey: "scratch.dateFormat",
           })
-        : getWSV2().config.journal.dateFormat;
+        : getDWorkspace().config.journal.dateFormat;
 
     const addBehavior: NoteAddBehavior =
       type === "SCRATCH"
@@ -793,7 +795,7 @@ export class DendronClientUtilsV2 {
             wsConfigKey: "dendron.defaultScratchAddBehavior",
             dendronConfigKey: "scratch.addBehavior",
           })
-        : getWSV2().config.journal.addBehavior;
+        : getDWorkspace().config.journal.addBehavior;
 
     const name: string =
       type === "SCRATCH"
@@ -801,7 +803,7 @@ export class DendronClientUtilsV2 {
             wsConfigKey: "dendron.defaultScratchName",
             dendronConfigKey: "scratch.name",
           })
-        : getWSV2().config.journal.name;
+        : getDWorkspace().config.journal.name;
 
     if (!_.includes(_noteAddBehaviorEnum, addBehavior)) {
       const actual = addBehavior;
@@ -817,7 +819,7 @@ export class DendronClientUtilsV2 {
       throw Error("Must be run from within a note");
     }
 
-    const engine = getWSV2().engine;
+    const engine = getDWorkspace().engine;
     const prefix = DendronClientUtilsV2.genNotePrefix(
       currentNoteFname,
       addBehavior as AddBehavior,
@@ -848,7 +850,7 @@ export class DendronClientUtilsV2 {
   };
 
   static shouldUseVaultPrefix(engine: DEngineClient) {
-    const noXVaultLink = getWSV2().config.noXVaultWikiLink;
+    const noXVaultLink = getDWorkspace().config.noXVaultWikiLink;
     const useVaultPrefix =
       _.size(engine.vaults) > 1 &&
       (_.isBoolean(noXVaultLink) ? !noXVaultLink : true);

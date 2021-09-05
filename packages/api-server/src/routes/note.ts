@@ -18,21 +18,21 @@ import { ExpressUtils } from "@dendronhq/common-server";
 import { Request, Response, Router } from "express";
 import { getLogger } from "../core";
 import { NoteController } from "../modules/notes";
-import { getWS } from "../utils";
+import { getWSEngine } from "../utils";
 
 const router = Router();
 const L = getLogger();
 
 router.post("/delete", async (req: Request, res: Response) => {
   const { ws, id, opts } = req.body as EngineDeleteRequest;
-  const engine = await getWS({ ws: ws || "" });
+  const engine = await getWSEngine({ ws: ws || "" });
   const { error, data } = await engine.deleteNote(id, opts);
   res.json({ error, data });
 });
 
 router.post("/getByPath", async (req: Request, res: Response) => {
   const { ws, ...opts } = req.body as EngineGetNoteByPathRequest;
-  const engine = await getWS({ ws: ws || "" });
+  const engine = await getWSEngine({ ws: ws || "" });
   const resp = await engine.getNoteByPath(opts);
   res.json(resp);
 });
@@ -82,7 +82,7 @@ router.post("/update", async (req: Request, res: Response) => {
 
 router.post("/write", async (req: Request, res: Response<WriteNoteResp>) => {
   const { ws, node, opts } = req.body as EngineWriteRequest;
-  const engine = await getWS({ ws: ws || "" });
+  const engine = await getWSEngine({ ws: ws || "" });
   try {
     const out = await engine.writeNote(node, opts);
     if (!ExpressUtils.handleError(res, out)) {
@@ -100,7 +100,7 @@ router.post("/write", async (req: Request, res: Response<WriteNoteResp>) => {
 
 router.post("/bulkAdd", async (req: Request, res: Response<WriteNoteResp>) => {
   const { ws, opts } = req.body as EngineBulkAddRequest;
-  const engine = await getWS({ ws: ws || "" });
+  const engine = await getWSEngine({ ws: ws || "" });
   try {
     const out = await engine.bulkAddNotes(opts);
     res.json(out);
@@ -116,7 +116,7 @@ router.get(
   "/blocks",
   async (req: Request, res: Response<GetNoteBlocksPayload>) => {
     const { id, ws, filterByAnchorType } = req.query as GetNoteBlocksRequest;
-    const engine = await getWS({ ws: ws || "" });
+    const engine = await getWSEngine({ ws: ws || "" });
     try {
       const out = await engine.getNoteBlocks({ id, filterByAnchorType });
       if (out.error instanceof DendronError)

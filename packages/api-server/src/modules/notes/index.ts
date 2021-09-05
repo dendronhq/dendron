@@ -19,7 +19,7 @@ import {
 import { NodeJSUtils } from "@dendronhq/common-server";
 import { getLogger } from "../../core";
 import { MemoryStore } from "../../store/memoryStore";
-import { getWS } from "../../utils";
+import { getWSEngine } from "../../utils";
 
 export class NoteController {
   static singleton?: NoteController;
@@ -36,7 +36,7 @@ export class NoteController {
     id,
     opts,
   }: EngineDeleteRequest): Promise<EngineDeletePayload> {
-    const engine = await getWS({ ws });
+    const engine = await getWSEngine({ ws });
     try {
       const data = await engine.deleteNote(id, opts);
       return data;
@@ -52,7 +52,7 @@ export class NoteController {
     ws,
     ...opts
   }: EngineGetNoteByPathRequest): Promise<EngineGetNoteByPathPayload> {
-    const engine = await getWS({ ws });
+    const engine = await getWSEngine({ ws });
     try {
       const data = await engine.getNoteByPath(opts);
       return data;
@@ -68,14 +68,14 @@ export class NoteController {
     ws,
     ...opts
   }: RenderNoteOpts & { ws: string }): Promise<RespV2<RenderNotePayload>> {
-    const engine = await getWS({ ws });
+    const engine = await getWSEngine({ ws });
     const data = await engine.renderNote(opts);
     return data;
   }
 
   async query({ ws, ...opts }: NoteQueryRequest): Promise<NoteQueryResp> {
     const engine = ws
-      ? await getWS({ ws })
+      ? await getWSEngine({ ws })
       : MemoryStore.instance().getEngine();
     try {
       const data = await engine.queryNotes(opts);
@@ -116,7 +116,7 @@ export class NoteController {
     ws,
     ...opts
   }: EngineRenameNoteRequest): Promise<EngineRenameNotePayload> {
-    const engine = await getWS({ ws });
+    const engine = await getWSEngine({ ws });
     const ctx = "NoteController:rename";
     try {
       getLogger().info({ ctx, msg: "enter" });
@@ -139,7 +139,7 @@ export class NoteController {
     note,
     opts,
   }: EngineUpdateNoteRequest): Promise<EngineUpdateNotePayload> {
-    const engine = await getWS({ ws });
+    const engine = await getWSEngine({ ws });
     try {
       const data = await engine.updateNote(note, opts);
       return { error: null, data };

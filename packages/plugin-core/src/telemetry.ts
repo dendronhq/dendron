@@ -1,10 +1,10 @@
+import { DWorkspaceV2, VSCodeEvents } from "@dendronhq/common-all";
 import { SegmentClient, TelemetryStatus } from "@dendronhq/common-server";
+import _ from "lodash";
 import * as vscode from "vscode";
 import { Logger } from "./logger";
-import { DendronWorkspace } from "./workspace";
-import _ from "lodash";
 import { AnalyticsUtils } from "./utils/analytics";
-import { VSCodeEvents } from "@dendronhq/common-all";
+import { getExtension } from "./workspace";
 
 export function isVSCodeTelemetryEnabled(): boolean | undefined {
   // `isTelemetryEnabled` only seems to be available on VSCode 1.55 and above.
@@ -18,7 +18,7 @@ export function isVSCodeTelemetryEnabled(): boolean | undefined {
 }
 
 /** Creates a SegmentClient for telemetry, if enabled, and listens for vscode telemetry settings to disable it when requested. */
-export function setupSegmentClient(ws: DendronWorkspace) {
+export function setupSegmentClient(ws: DWorkspaceV2) {
   function instantiateSegmentClient() {
     // if the current status was set by configuration, and that configuration has changed, we should update it and report the change
     const status = SegmentClient.getStatus();
@@ -75,7 +75,7 @@ export function setupSegmentClient(ws: DendronWorkspace) {
       const disposable = onDidChangeTelemetryEnabled(() =>
         instantiateSegmentClient()
       );
-      ws.addDisposable(disposable);
+      getExtension().addDisposable(disposable);
     }
   } catch (err) {
     Logger.error({

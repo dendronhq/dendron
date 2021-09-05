@@ -29,7 +29,7 @@ import { FileItem } from "../external/fileutils/FileItem";
 import { UNKNOWN_ERROR_MSG } from "../logger";
 import { VSCodeUtils } from "../utils";
 import { ProceedCancel, QuickPickUtil } from "../utils/quickPick";
-import { getExtension, getWSV2 } from "../workspace";
+import { getExtension, getDWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandInput = any;
@@ -82,7 +82,7 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
   }
 
   async gatherInputs(opts?: CommandOpts): Promise<CommandInput | undefined> {
-    const engine = getWSV2().engine;
+    const engine = getDWorkspace().engine;
     const vault = opts?.vaultName
       ? VaultUtils.getVaultByName({
           vaults: engine.vaults,
@@ -191,7 +191,7 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
   async execute(opts: CommandOpts): Promise<{ changed: NoteChangeEntry[] }> {
     const ctx = "MoveNoteCommand:execute";
     opts = _.defaults(opts, { closeAndOpenFile: true });
-    const { engine } = getWSV2();
+    const { engine } = getDWorkspace();
     const ext = getExtension();
 
     if (ext.fileWatcher && !opts.noPauseWatcher) {
@@ -310,7 +310,7 @@ async function closeCurrentFileOpenMovedFile(
   engine: DEngineClient,
   moveOpts: RenameNoteOpts
 ) {
-  const wsRoot = getWSV2().wsRoot;
+  const wsRoot = getDWorkspace().wsRoot;
 
   const vault = VaultUtils.getVaultByName({
     vaults: engine.vaults,

@@ -4,7 +4,7 @@ import { Snippets } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import path from "path";
 import { VSCodeUtils } from "../utils";
-import { getExtension } from "../workspace";
+import { getDWorkspace } from "../workspace";
 import { WorkspaceInitializer } from "./workspaceInitializer";
 
 /**
@@ -20,12 +20,13 @@ export class BlankInitializer implements WorkspaceInitializer {
     vaults: DVault[];
     wsRoot: string;
   }): Promise<void> {
-    const ws = getExtension();
-
     const vpath = vault2Path({ vault: opts.vaults[0], wsRoot: opts.wsRoot });
 
     // copy over jekyll config
-    const dendronJekyll = VSCodeUtils.joinPath(ws.extensionAssetsDir, "jekyll");
+    const dendronJekyll = VSCodeUtils.joinPath(
+      getDWorkspace().assetUri,
+      "jekyll"
+    );
     fs.copySync(
       path.join(dendronJekyll.fsPath),
       path.join(opts.wsRoot, "docs")

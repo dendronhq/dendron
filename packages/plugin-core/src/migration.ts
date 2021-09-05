@@ -7,7 +7,7 @@ import { DConfig } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
 import { Logger } from "./logger";
-import { DendronWorkspace } from "./workspace";
+import { DendronExtension } from "./workspace";
 
 /**
  * Migrate dendron.yml if necessary
@@ -21,7 +21,7 @@ export function migrateConfig({
   // if no config, write it in
   if (_.isEmpty(config.vaults)) {
     Logger.info({ ctx, msg: "config.vaults empty" });
-    const wsFolders = DendronWorkspace.workspaceFolders();
+    const wsFolders = DendronExtension.workspaceFolders();
     if (_.isUndefined(wsFolders)) {
       throw new DendronError({ message: "no vaults detected" });
     }

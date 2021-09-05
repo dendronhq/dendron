@@ -8,7 +8,7 @@ import {
   TransportKind,
 } from "vscode-languageclient";
 import { Logger } from "./logger";
-import { DendronWorkspace } from "./workspace";
+import { DendronExtension } from "./workspace";
 
 export function startClient(opts: { context: ExtensionContext; port: number }) {
   const { context, port } = opts;
@@ -64,7 +64,7 @@ export function startClient(opts: { context: ExtensionContext; port: number }) {
       fileEvents: workspace.createFileSystemWatcher("dendron.yml"),
     },
     initializationOptions: {
-      wsRoot: path.dirname(DendronWorkspace.workspaceFile().fsPath),
+      wsRoot: path.dirname(DendronExtension.workspaceFile().fsPath),
       port,
     },
   };

@@ -5,7 +5,7 @@ import { commands, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { Logger } from "../logger";
 import { VSCodeUtils } from "../utils";
-import { getWSV2 } from "../workspace";
+import { getDWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandOpts = {
@@ -22,7 +22,7 @@ export class VaultRemoveCommand extends BasicCommand<
 > {
   key = DENDRON_COMMANDS.VAULT_REMOVE.key;
   async gatherInputs(): Promise<any> {
-    const { vaults } = getWSV2();
+    const { vaults } = getDWorkspace();
     const vaultQuickPick = await VSCodeUtils.showQuickPick(
       vaults.map((ent) => ({
         label: VaultUtils.getName(ent),
@@ -40,7 +40,7 @@ export class VaultRemoveCommand extends BasicCommand<
     const ctx = "VaultRemove";
     // NOTE: relative vault
     const { vault } = opts;
-    const wsRoot = getWSV2().wsRoot as string;
+    const wsRoot = getDWorkspace().wsRoot as string;
     const wsService = new WorkspaceService({ wsRoot });
     Logger.info({ ctx, msg: "preRemoveVault", vault });
     await wsService.removeVault({ vault, updateWorkspace: true });

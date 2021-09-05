@@ -17,7 +17,7 @@ import { StateService } from "../services/stateService";
 import { VSCodeUtils } from "../utils";
 import { AnalyticsUtils } from "../utils/analytics";
 import { MarkdownUtils } from "../utils/md";
-import { getExtension } from "../workspace";
+import { getDWorkspace, getExtension } from "../workspace";
 import { BlankInitializer } from "./blankInitializer";
 import { WorkspaceInitializer } from "./workspaceInitializer";
 
@@ -36,14 +36,12 @@ export class TutorialInitializer
     const ctx = "TutorialInitializer.onWorkspaceCreation";
     super.onWorkspaceCreation(opts);
 
-    const ws = getExtension();
-
     StateService.instance().setActivationContext(
       WORKSPACE_ACTIVATION_CONTEXT.TUTORIAL
     );
 
     const dendronWSTemplate = VSCodeUtils.joinPath(
-      ws.extensionAssetsDir,
+      getDWorkspace().assetUri,
       "dendron-ws"
     );
 
@@ -78,7 +76,9 @@ export class TutorialInitializer
 
     const { wsRoot, vaults } = opts.ws;
     const vaultRelPath = VaultUtils.getRelPath(vaults[0]);
-    const rootUri = vscode.Uri.file(path.join(wsRoot, vaultRelPath));
+    const rootUri = vscode.Uri.file(
+      path.join(wsRoot, vaultRelPath, "tutorial.md")
+    );
     if (fs.pathExistsSync(rootUri.fsPath)) {
       // Set the view to have the tutorial page showing with the preview opened to the side.
       await vscode.window.showTextDocument(rootUri);

@@ -58,6 +58,7 @@ site:
     usePrettyRefs: true
     title: Dendron
     description: Personal knowledge space
+    siteLastModified: true
     duplicateNoteBehavior:
         action: useVault
         payload:
@@ -146,6 +147,7 @@ site:
     usePrettyRefs: true
     title: Dendron
     description: Personal knowledge space
+    siteLastModified: true
     duplicateNoteBehavior:
         action: useVault
         payload:
@@ -224,6 +226,7 @@ site:
     usePrettyRefs: true
     title: Dendron
     description: Personal knowledge space
+    siteLastModified: true
 initializeRemoteVaults: true
 "
 `;
@@ -269,6 +272,7 @@ site:
     usePrettyRefs: true
     title: Dendron
     description: Personal knowledge space
+    siteLastModified: true
     duplicateNoteBehavior:
         action: useVault
         payload:
@@ -331,6 +335,7 @@ site:
     usePrettyRefs: true
     title: Dendron
     description: Personal knowledge space
+    siteLastModified: true
     duplicateNoteBehavior:
         action: useVault
         payload:

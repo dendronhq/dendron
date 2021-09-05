@@ -55,7 +55,7 @@ import {
 } from "../../components/lookup/utils";
 import { CONFIG } from "../../constants";
 import { clipboard, VSCodeUtils } from "../../utils";
-import { DendronWorkspace } from "../../workspace";
+import { DendronExtension } from "../../workspace";
 import { createMockQuickPick, getActiveEditorBasename } from "../testUtils";
 import { expect } from "../testUtilsv2";
 import {
@@ -145,7 +145,7 @@ suite("NoteLookupCommand", function () {
   const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {});
 
   const getTodayInScratchDateFormat = () => {
-    const dateFormat = DendronWorkspace.configuration().get<string>(
+    const dateFormat = DendronExtension.configuration().get<string>(
       CONFIG["DEFAULT_SCRATCH_DATE_FORMAT"].key
     ) as string;
     const today = Time.now().toFormat(dateFormat);
@@ -725,7 +725,7 @@ suite("NoteLookupCommand", function () {
           })) as CommandOutput;
 
           // quickpick value should be `scratch.yyyy.mm.dd.ts`
-          const dateFormat = DendronWorkspace.configuration().get<string>(
+          const dateFormat = DendronExtension.configuration().get<string>(
             CONFIG["DEFAULT_SCRATCH_DATE_FORMAT"].key
           ) as string;
           const today = Time.now().toFormat(dateFormat);
@@ -1427,7 +1427,7 @@ suite("NoteLookupCommand", function () {
           expect(selection2linkBtn.pressed).toBeTruthy();
 
           await controller.onTriggerButton(scratchBtn);
-          const dateFormat = DendronWorkspace.configuration().get<string>(
+          const dateFormat = DendronExtension.configuration().get<string>(
             CONFIG["DEFAULT_SCRATCH_DATE_FORMAT"].key
           ) as string;
           const today = Time.now().toFormat(dateFormat);

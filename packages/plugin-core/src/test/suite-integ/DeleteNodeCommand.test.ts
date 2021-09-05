@@ -10,7 +10,7 @@ import path from "path";
 import * as vscode from "vscode";
 import { DeleteNodeCommand } from "../../commands/DeleteNodeCommand";
 import { VSCodeUtils } from "../../utils";
-import { getWSV2 } from "../../workspace";
+import { getDWorkspace } from "../../workspace";
 import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
@@ -107,7 +107,7 @@ suite("schemas", function () {
         const noteFiles = vaultFiles.filter((ent) =>
           ent.endsWith(".schema.yml")
         );
-        const { engine } = getWSV2();
+        const { engine } = getDWorkspace();
         expect(engine.notes["foo"].schema).toEqual(undefined);
         expect(noteFiles.length).toEqual(1);
         expect(noteFiles.sort()).toEqual(["root.schema.yml"]);

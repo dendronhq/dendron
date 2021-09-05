@@ -9,7 +9,7 @@ import {
   SchemaWritePayload,
   SchemaWriteRequest,
 } from "@dendronhq/common-all";
-import { getWS } from "../../utils";
+import { getWSEngine } from "../../utils";
 
 export class SchemaController {
   static singleton?: SchemaController;
@@ -23,7 +23,7 @@ export class SchemaController {
 
   async create(req: SchemaWriteRequest): Promise<SchemaWritePayload> {
     const { ws, schema } = req;
-    const engine = await getWS({ ws });
+    const engine = await getWSEngine({ ws });
     try {
       await engine.writeSchema(schema);
       return { error: null, data: undefined };
@@ -40,7 +40,7 @@ export class SchemaController {
     id,
     opts,
   }: SchemaDeleteRequest): Promise<SchemaDeletePayload> {
-    const engine = await getWS({ ws: ws || "" });
+    const engine = await getWSEngine({ ws: ws || "" });
     try {
       const data = await engine.deleteSchema(id, opts);
       return data;
@@ -53,7 +53,7 @@ export class SchemaController {
   }
 
   async query({ ws, qs }: SchemaQueryRequest): Promise<SchemaQueryPayload> {
-    const engine = await getWS({ ws: ws || "" });
+    const engine = await getWSEngine({ ws: ws || "" });
     return await engine.querySchema(qs);
   }
 
@@ -61,7 +61,7 @@ export class SchemaController {
     ws,
     schema,
   }: SchemaUpdateRequest): Promise<SchemaUpdatePayload> {
-    const engine = await getWS({ ws: ws || "" });
+    const engine = await getWSEngine({ ws: ws || "" });
     try {
       await engine.updateSchema(schema);
       return { error: null };

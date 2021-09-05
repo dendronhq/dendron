@@ -16,7 +16,7 @@ import * as vscode from "vscode";
 import { VaultAddCommand } from "../../commands/VaultAddCommand";
 import { VaultRemoveCommand } from "../../commands/VaultRemoveCommand";
 import { VSCodeUtils } from "../../utils";
-import { DendronWorkspace, getWSV2 } from "../../workspace";
+import { DendronExtension, getDWorkspace } from "../../workspace";
 import { expect, runMultiVaultTest, runSingleVaultTest } from "../testUtilsv2";
 import {
   runLegacyMultiWorkspaceTest,
@@ -56,14 +56,14 @@ const stubQuickPick = (vault: DVault) => {
 };
 
 const getConfig = () => {
-  const configPath = DConfig.configPath(getWSV2().wsRoot as string);
+  const configPath = DConfig.configPath(getDWorkspace().wsRoot as string);
   const config = readYAML(configPath) as DendronConfig;
   return config;
 };
 
 const getWorkspaceFile = () => {
   const settings = fs.readJSONSync(
-    DendronWorkspace.workspaceFile().fsPath
+    DendronExtension.workspaceFile().fsPath
   ) as WorkspaceSettings;
   return settings;
 };
@@ -128,7 +128,9 @@ suite("VaultRemoveCommand", function () {
           ).toBeTruthy();
 
           // check config updated
-          const configPath = DConfig.configPath(getWSV2().wsRoot as string);
+          const configPath = DConfig.configPath(
+            getDWorkspace().wsRoot as string
+          );
           const config = readYAML(configPath) as DendronConfig;
           expect(config.vaults.map((ent) => ent.fsPath)).toEqual([
             vaults[0].fsPath,
@@ -136,7 +138,7 @@ suite("VaultRemoveCommand", function () {
 
           // check vscode settings updated
           const settings = fs.readJSONSync(
-            DendronWorkspace.workspaceFile().fsPath
+            DendronExtension.workspaceFile().fsPath
           ) as WorkspaceSettings;
           expect(settings.folders).toEqual([{ path: vaults[0].fsPath }]);
           done();
@@ -148,7 +150,9 @@ suite("VaultRemoveCommand", function () {
       runSingleVaultTest({
         ctx,
         onInit: async ({ wsRoot }) => {
-          const configPath = DConfig.configPath(getWSV2().wsRoot as string);
+          const configPath = DConfig.configPath(
+            getDWorkspace().wsRoot as string
+          );
 
           // add a second vault
           const vpath2 = path.join(wsRoot, "vault2");
@@ -160,7 +164,7 @@ suite("VaultRemoveCommand", function () {
           // confirm that duplicateNoteBehavior option exists
           expect(config.site.duplicateNoteBehavior).toBeTruthy();
 
-          const { vaults } = getWSV2();
+          const { vaults } = getDWorkspace();
 
           // @ts-ignore
           VSCodeUtils.showQuickPick = () => {
@@ -192,9 +196,11 @@ suite("VaultRemoveCommand", function () {
           stubVaultInput({ sourceType: "local", sourcePath: vpath3 });
           await new VaultAddCommand().run();
 
-          const { vaults } = getWSV2();
+          const { vaults } = getDWorkspace();
 
-          const configPathOrig = DConfig.configPath(getWSV2().wsRoot as string);
+          const configPathOrig = DConfig.configPath(
+            getDWorkspace().wsRoot as string
+          );
           const configOrig = readYAML(configPathOrig) as DendronConfig;
           // check what we are starting from.
           expect(configOrig.vaults.map((ent) => ent.fsPath)).toEqual([
@@ -209,7 +215,9 @@ suite("VaultRemoveCommand", function () {
           };
           await new VaultRemoveCommand().run();
 
-          const configPath = DConfig.configPath(getWSV2().wsRoot as string);
+          const configPath = DConfig.configPath(
+            getDWorkspace().wsRoot as string
+          );
           const config = readYAML(configPath) as DendronConfig;
 
           // check that "vault2" is gone from payload

@@ -24,7 +24,7 @@ import {
   getReferenceAtPosition,
   isUncPath,
 } from "../utils/md";
-import { getEngine, getWSV2 } from "../workspace";
+import { getEngine, getDWorkspace } from "../workspace";
 
 const HOVER_IMAGE_MAX_HEIGHT = Math.max(200, 10);
 
@@ -36,7 +36,7 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
   }): Promise<string> {
     const vpath = vault2Path({
       vault: PickerUtilsV2.getVaultForOpenEditor(),
-      wsRoot: getWSV2().wsRoot,
+      wsRoot: getDWorkspace().wsRoot,
     });
     const fullPath = path.join(vpath, refAtPos.ref);
     const foundUri = Uri.file(fullPath);
@@ -68,7 +68,7 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
       ? ` in vault "${refAtPos.vaultName}"`
       : "";
     const ctrlClickToCreate =
-      getWSV2().config.noAutoCreateOnDefinition === false
+      getDWorkspace().config.noAutoCreateOnDefinition === false
         ? "Ctrl+Click or "
         : "";
     return `Note ${refAtPos.ref}${vaultName} is missing, ${ctrlClickToCreate}use "Dendron: Goto Note" command to create it.`;

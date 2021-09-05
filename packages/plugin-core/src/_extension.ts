@@ -44,10 +44,10 @@ import { KeybindingUtils, VSCodeUtils, WSUtils } from "./utils";
 import { AnalyticsUtils } from "./utils/analytics";
 import { DendronTreeView } from "./views/DendronTreeView";
 import {
-  DendronWorkspace,
+  DendronExtension,
+  getDWorkspace,
   getEngine,
   getExtension,
-  getWSV2,
 } from "./workspace";
 import { DendronCodeWorkspace } from "./workspace/codeWorkspace";
 import { DendronNativeWorkspace } from "./workspace/nativeWorkspace";
@@ -79,7 +79,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 async function reloadWorkspace() {
   const ctx = "reloadWorkspace";
-  const ws = getWSV2();
+  const ws = getDWorkspace();
   const maybeEngine = await WSUtils.reloadWorkspace();
   if (!maybeEngine) {
     return maybeEngine;
@@ -118,10 +118,10 @@ async function postReloadWorkspace() {
         Logger.info({ ctx, msg: "postUpgrade: new wsVersion", changes });
       });
     await StateService.instance().setWorkspaceVersion(
-      DendronWorkspace.version()
+      DendronExtension.version()
     );
   } else {
-    const newVersion = DendronWorkspace.version();
+    const newVersion = DendronExtension.version();
     if (semver.lt(previousWsVersion, newVersion)) {
       let changes: any;
       Logger.info({ ctx, msg: "preUpgrade: new wsVersion" });
@@ -137,7 +137,7 @@ async function postReloadWorkspace() {
           newVersion,
         });
         await StateService.instance().setWorkspaceVersion(
-          DendronWorkspace.version()
+          DendronExtension.version()
         );
       } catch (err) {
         Logger.error({
@@ -163,10 +163,10 @@ async function startServerProcess(): Promise<{
   subprocess?: ExecaChildProcess;
 }> {
   const { nextServerUrl, nextStaticRoot, engineServerPort } =
-    getWSV2().config.dev || {};
+    getDWorkspace().config.dev || {};
   // const ctx = "startServer";
   const maybePort =
-    DendronWorkspace.configuration().get<number | undefined>(
+    DendronExtension.configuration().get<number | undefined>(
       CONFIG.SERVER_PORT.key
     ) || engineServerPort;
   const port = maybePort;
@@ -185,7 +185,7 @@ async function startServerProcess(): Promise<{
   }
 
   // start server is separate process
-  const logPath = getWSV2().logUri.fsPath;
+  const logPath = getDWorkspace().logUri.fsPath;
   const out = await ServerUtils.execServerNode({
     scriptPath: path.join(__dirname, "server.js"),
     logPath,
@@ -207,7 +207,7 @@ export async function _activate(
   const stage = getStage();
   const { workspaceFile, workspaceFolders } = vscode.workspace;
   const logLevel = process.env["LOG_LEVEL"];
-  const { logPath, extensionPath, extensionUri, storagePath } = context;
+  const { extensionPath, extensionUri, logUri } = context;
   const stateService = new StateService({
     globalState: context.globalState,
     workspaceState: context.workspaceState,
@@ -217,13 +217,12 @@ export async function _activate(
     ctx,
     stage,
     isDebug,
-    logPath,
     logLevel,
+    logPath: logUri.fsPath,
     extensionPath,
-    extensionUri,
-    storagePath,
-    workspaceFile,
-    workspaceFolders,
+    extensionUri: extensionUri.fsPath,
+    workspaceFile: workspaceFile?.fsPath,
+    workspaceFolders: workspaceFolders?.map((fd) => fd.uri.fsPath),
   });
 
   // Setup the workspace trust callback to detect changes from the user's workspace trust settings
@@ -232,16 +231,11 @@ export async function _activate(
   });
 
   //  needs to be initialized to setup commands
-  const ws = DendronWorkspace.getOrCreate(context, {
+  const ws = DendronExtension.getOrCreate(context, {
     skipSetup: stage === "test",
   });
-  Logger.info({
-    ctx,
-    msg: "initializeWorkspace",
-    wsType: ws.type,
-  });
 
-  const currentVersion = DendronWorkspace.version();
+  const currentVersion = DendronExtension.version();
   const previousWorkspaceVersion = stateService.getWorkspaceVersion();
   const previousGlobalVersion = stateService.getGlobalVersion();
   const extensionInstallStatus = VSCodeUtils.getInstallStatusForExtension({
@@ -250,10 +244,20 @@ export async function _activate(
   });
   const assetUri = WSUtils.getAssetUri(context);
 
-  if (DendronWorkspace.isActive(context)) {
+  Logger.info({
+    ctx,
+    msg: "initializeWorkspace",
+    wsType: ws.type,
+    currentVersion,
+    previousWorkspaceVersion,
+    previousGlobalVersion,
+    extensionInstallStatus,
+  });
+
+  if (DendronExtension.isActive(context)) {
     if (ws.type === WorkspaceType.NATIVE) {
       const workspaceFolder = WorkspaceUtils.findWSRootInWorkspaceFolders(
-        DendronWorkspace.workspaceFolders()!
+        DendronExtension.workspaceFolders()!
       );
       if (!workspaceFolder) {
         Logger.error({ msg: "No dendron.yml found in any workspace folder" });
@@ -266,14 +270,14 @@ export async function _activate(
       });
     } else {
       ws.workspaceImpl = new DendronCodeWorkspace({
-        wsRoot: DendronWorkspace.wsRoot(),
+        wsRoot: path.dirname(DendronExtension.workspaceFile().fsPath),
         logUri: context.logUri,
         assetUri,
       });
     }
-    const wsImpl = getWSV2();
+    const wsImpl = getDWorkspace();
     const start = process.hrtime();
-    const dendronConfig = ws.config;
+    const dendronConfig = wsImpl.config;
 
     // --- Get Version State
     const workspaceInstallStatus = VSCodeUtils.getInstallStatusForWorkspace({
@@ -288,9 +292,10 @@ export async function _activate(
       previousVersion: previousWorkspaceVersion,
       dendronConfig,
       workspaceInstallStatus,
+      wsConfig: await DendronExtension.instanceV2().getWorkspaceSettings(),
     });
     // initialize client
-    setupSegmentClient(ws);
+    setupSegmentClient(wsImpl);
     const didClone = await wsService.initialize({
       onSyncVaultsProgress: () => {
         vscode.window.showInformationMessage(
@@ -340,7 +345,7 @@ export async function _activate(
         });
       return false;
     }
-    wsService.writeMeta({ version: DendronWorkspace.version() });
+    wsService.writeMeta({ version: DendronExtension.version() });
 
     // stats
     const platform = getOS();
@@ -362,7 +367,7 @@ export async function _activate(
       previousGlobalVersion,
       platform,
       extensions,
-      vaults: ws.vaultsv4,
+      vaults: wsImpl.vaults,
     });
 
     // --- Start Initializating the Engine
@@ -482,12 +487,12 @@ export async function _activate(
 
   return showWelcomeOrWhatsNew({
     extensionInstallStatus,
-    version: DendronWorkspace.version(),
+    version: DendronExtension.version(),
     previousExtensionVersion: previousWorkspaceVersion,
     start: startActivate,
     assetUri,
   }).then(() => {
-    if (DendronWorkspace.isActive(context)) {
+    if (DendronExtension.isActive(context)) {
       HistoryService.instance().add({
         source: "extension",
         action: "activate",
@@ -505,7 +510,7 @@ function toggleViews(enabled: boolean) {
 
 // this method is called when your extension is deactivated
 export function deactivate() {
-  const ws = getWSV2();
+  const ws = getDWorkspace();
   if (!WorkspaceUtils.isNativeWorkspace(ws)) {
     getExtension().deactivate();
   }

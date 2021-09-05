@@ -7,7 +7,7 @@ import * as vscode from "vscode";
 import { DisableTelemetryCommand } from "../../commands/DisableTelemetry";
 import { EnableTelemetryCommand } from "../../commands/EnableTelemetry";
 import { setupSegmentClient } from "../../telemetry";
-import { getExtension } from "../../workspace";
+import { getDWorkspace } from "../../workspace";
 import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
@@ -37,10 +37,9 @@ suite("telemetry", function () {
       runLegacyMultiWorkspaceTest({
         ctx,
         onInit: async () => {
-          const ext = getExtension();
+          const ws = getDWorkspace();
           sinon.stub(vscode.env as any, "isTelemetryEnabled").value(true);
-
-          setupSegmentClient(ext);
+          setupSegmentClient(ws);
           expect(SegmentClient.instance().hasOptedOut).toBeFalsy();
 
           done();
@@ -52,10 +51,9 @@ suite("telemetry", function () {
       runLegacyMultiWorkspaceTest({
         ctx,
         onInit: async () => {
-          const ext = getExtension();
+          const ws = getDWorkspace();
           sinon.stub(vscode.env as any, "isTelemetryEnabled").value(false);
-
-          setupSegmentClient(ext);
+          setupSegmentClient(ws);
           expect(SegmentClient.instance().hasOptedOut).toBeTruthy();
 
           done();
@@ -68,10 +66,9 @@ suite("telemetry", function () {
         ctx,
         preSetupHook: setNoTelemetry(true),
         onInit: async () => {
-          const ext = getExtension();
+          const ws = getDWorkspace();
           sinon.stub(vscode.env as any, "isTelemetryEnabled").value(true);
-
-          setupSegmentClient(ext);
+          setupSegmentClient(ws);
           expect(SegmentClient.instance().hasOptedOut).toBeTruthy();
 
           done();
@@ -84,10 +81,9 @@ suite("telemetry", function () {
         ctx,
         preSetupHook: setNoTelemetry(true),
         onInit: async () => {
-          const ext = getExtension();
+          const ws = getDWorkspace();
           sinon.stub(vscode.env as any, "isTelemetryEnabled").value(true);
-
-          setupSegmentClient(ext);
+          setupSegmentClient(ws);
           expect(SegmentClient.instance().hasOptedOut).toBeTruthy();
 
           done();
@@ -99,13 +95,13 @@ suite("telemetry", function () {
       runLegacyMultiWorkspaceTest({
         ctx,
         onInit: async () => {
-          const ext = getExtension();
+          const ws = getDWorkspace();
           sinon.stub(vscode.env as any, "isTelemetryEnabled").value(true);
 
           const cmd = new DisableTelemetryCommand();
           await cmd.run();
 
-          setupSegmentClient(ext);
+          setupSegmentClient(ws);
           expect(SegmentClient.instance().hasOptedOut).toBeTruthy();
 
           done();
@@ -118,13 +114,13 @@ suite("telemetry", function () {
         ctx,
         preSetupHook: setNoTelemetry(true),
         onInit: async () => {
-          const ext = getExtension();
+          const ws = getDWorkspace();
           sinon.stub(vscode.env as any, "isTelemetryEnabled").value(false);
 
           const cmd = new EnableTelemetryCommand();
           await cmd.run();
 
-          setupSegmentClient(ext);
+          setupSegmentClient(ws);
           expect(SegmentClient.instance().hasOptedOut).toBeFalsy();
 
           done();
@@ -136,15 +132,15 @@ suite("telemetry", function () {
       runLegacyMultiWorkspaceTest({
         ctx,
         onInit: async () => {
-          const ext = getExtension();
+          const ws = getDWorkspace();
           const stub = sinon.stub(vscode.env as any, "isTelemetryEnabled");
 
           stub.value(false); // telemetry is disabled
-          setupSegmentClient(ext);
+          setupSegmentClient(ws);
           expect(SegmentClient.instance().hasOptedOut).toBeTruthy();
 
           stub.value(true); // telemetry is enabled
-          setupSegmentClient(ext);
+          setupSegmentClient(ws);
           expect(SegmentClient.instance().hasOptedOut).toBeFalsy();
 
           done();
@@ -156,15 +152,15 @@ suite("telemetry", function () {
       runLegacyMultiWorkspaceTest({
         ctx,
         onInit: async () => {
-          const ext = getExtension();
+          const ws = getDWorkspace();
           const stub = sinon.stub(vscode.env as any, "isTelemetryEnabled");
 
           stub.value(true); // telemetry is enabled
-          setupSegmentClient(ext);
+          setupSegmentClient(ws);
           expect(SegmentClient.instance().hasOptedOut).toBeFalsy();
 
           stub.value(false); // telemetry is disabled
-          setupSegmentClient(ext);
+          setupSegmentClient(ws);
           expect(SegmentClient.instance().hasOptedOut).toBeTruthy();
 
           done();

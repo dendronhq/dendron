@@ -2,7 +2,7 @@ import { DConfig } from "@dendronhq/engine-server";
 import { Uri } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../utils";
-import { getWSV2 } from "../workspace";
+import { getDWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandOpts = {};
@@ -15,7 +15,7 @@ export class ConfigureCommand extends BasicCommand<CommandOpts, CommandOutput> {
     return {};
   }
   async execute() {
-    const dendronRoot = getWSV2().wsRoot;
+    const dendronRoot = getDWorkspace().wsRoot;
     const configPath = DConfig.configPath(dendronRoot);
     const uri = Uri.file(configPath);
     await VSCodeUtils.openFileInEditor(uri);

@@ -86,7 +86,7 @@ export type DWorkspaceV2 = {
   vaults: DVault[];
   engine: DEngineClient;
   /**
-   * Where are assets stored
+   * Where are assets stored (eg. tutorial workspace)
    */
   assetUri: URI;
   /**

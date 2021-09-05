@@ -21,6 +21,7 @@ type CommandCLIOpts = {
 export enum DevCommands {
   GENERATE_JSON_SCHEMA_FROM_CONFIG = "generate_json_schema_from_config",
   BUILD = "build",
+  BUMP_VERSION = "bump_version",
   PUBLISH = "publish",
   SYNC_ASSETS = "sync_assets",
   PREP_PLUGIN = "prep_plugin",
@@ -33,8 +34,11 @@ type CommandOpts = CommandCLIOpts & Partial<BuildCmdOpts>; //& SetupEngineOpts &
 type CommandOutput = Partial<{ error: DendronError; data: any }>;
 
 type BuildCmdOpts = {
-  upgradeType: SemverVersion;
   publishEndpoint: PublishEndpoint;
+} & BumpVersionOpts;
+
+type BumpVersionOpts = {
+  upgradeType: SemverVersion;
 } & CommandCLIOpts;
 
 export { CommandOpts as DevCLICommandOpts };
@@ -138,6 +142,17 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           await this.build(opts);
           return { error: null };
         }
+        case DevCommands.BUMP_VERSION: {
+          if (!this.validateBumpVersionArgs(opts)) {
+            return {
+              error: new DendronError({
+                message: "missing options for build command",
+              }),
+            };
+          }
+          await this.bumpVersion(opts);
+          return { error: null };
+        }
         case DevCommands.SYNC_ASSETS: {
           await this.syncAssets();
           return { error: null };
@@ -179,6 +194,19 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     }
   }
 
+  async bumpVersion(opts: BumpVersionOpts) {
+    const currentVersion = BuildUtils.getCurrentVersion();
+    const nextVersion = BuildUtils.genNextVersion({
+      currentVersion,
+      upgradeType: opts.upgradeType,
+    });
+    this.print("bump 11ty...");
+    BuildUtils.bump11ty({ currentVersion, nextVersion });
+
+    this.print("bump version...");
+    LernaUtils.bumpVersion(opts.upgradeType);
+  }
+
   async build(opts: BuildCmdOpts) {
     const ctx = "build";
     // get package version
@@ -197,14 +225,10 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       await BuildUtils.prepPublishRemote();
     }
 
-    this.print("bump 11ty...");
-    BuildUtils.bump11ty({ currentVersion, nextVersion });
-
     this.print("run type-check...");
     BuildUtils.runTypeCheck();
 
-    this.print("bump version...");
-    LernaUtils.bumpVersion(opts.upgradeType);
+    this.bumpVersion(opts);
 
     this.print("publish version...");
     LernaUtils.publishVersion();
@@ -240,6 +264,13 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
 
   validateBuildArgs(opts: CommandOpts): opts is BuildCmdOpts {
     if (!opts.upgradeType || !opts.publishEndpoint) {
+      return false;
+    }
+    return true;
+  }
+
+  validateBumpVersionArgs(opts: CommandOpts): opts is BumpVersionOpts {
+    if (!opts.upgradeType) {
       return false;
     }
     return true;

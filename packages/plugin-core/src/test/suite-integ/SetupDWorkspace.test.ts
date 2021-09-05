@@ -5,7 +5,7 @@ import _ from "lodash";
 import { beforeEach, describe, it } from "mocha";
 import { ExtensionContext } from "vscode";
 import { VSCodeUtils } from "../../utils";
-import { DendronWorkspace } from "../../workspace";
+import { DendronExtension } from "../../workspace";
 import { _activate } from "../../_extension";
 import { onExtension } from "../testUtils";
 import { expect, setupCodeWorkspaceV2 } from "../testUtilsv2";
@@ -21,7 +21,7 @@ suite.skip("startup", function () {
   describe("basic", () => {
     beforeEach(async () => {
       ctx = VSCodeUtils.getOrCreateMockContext();
-      DendronWorkspace.getOrCreate(ctx);
+      DendronExtension.getOrCreate(ctx);
       wsRoot = FileTestUtils.tmpDir().name;
       ({} = await setupCodeWorkspaceV2({
         ctx,

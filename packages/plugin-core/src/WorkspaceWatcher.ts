@@ -13,7 +13,7 @@ import {
 } from "vscode";
 import { Logger } from "./logger";
 import { NoteSyncService } from "./services/NoteSyncService";
-import { getExtension, getWSV2 } from "./workspace";
+import { getExtension, getDWorkspace } from "./workspace";
 
 interface DebouncedFunc<T extends (...args: any[]) => any> {
   /**
@@ -128,19 +128,19 @@ export class WorkspaceWatcher {
       return { changes: [] };
     }
 
-    const eclient = getWSV2().engine;
+    const eclient = getDWorkspace().engine;
     const fname = path.basename(uri.fsPath, ".md");
     const now = Time.now().toMillis();
     const vault = VaultUtils.getVaultByNotePath({
       fsPath: uri.fsPath,
       vaults: eclient.vaults,
-      wsRoot: getWSV2().wsRoot,
+      wsRoot: getDWorkspace().wsRoot,
     });
     const note = NoteUtils.getNoteByFnameV5({
       fname,
       vault,
       notes: eclient.notes,
-      wsRoot: getWSV2().wsRoot,
+      wsRoot: getDWorkspace().wsRoot,
     }) as NoteProps;
 
     const content = ev.document.getText();

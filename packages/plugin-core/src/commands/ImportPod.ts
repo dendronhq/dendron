@@ -19,7 +19,7 @@ import {
   showPodQuickPickItemsV4,
   updateGlobalState,
 } from "../utils/pods";
-import { getExtension, getWSV2 } from "../workspace";
+import { getExtension, getDWorkspace } from "../workspace";
 import { BaseCommand } from "./base";
 import { ReloadIndexCommand } from "./ReloadIndex";
 
@@ -105,7 +105,7 @@ export class ImportPodCommand extends BaseCommand<
   async execute(opts: CommandOpts) {
     const ctx = { ctx: "ImportPod" };
     this.L.info({ ctx, opts });
-    const wsRoot = getWSV2().wsRoot;
+    const wsRoot = getDWorkspace().wsRoot;
     const utilityMethods = {
       getGlobalState,
       updateGlobalState,
@@ -116,7 +116,7 @@ export class ImportPodCommand extends BaseCommand<
     if (!wsRoot) {
       throw Error("ws root not defined");
     }
-    const { engine, vaults } = getWSV2();
+    const { engine, vaults } = getDWorkspace();
     const pod = new opts.podChoice.podClass() as ImportPod; // eslint-disable-line new-cap
     const fileWatcher = getExtension().fileWatcher;
     if (fileWatcher) {

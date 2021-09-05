@@ -47,7 +47,7 @@ import { Logger } from "../logger";
 import { StateService } from "../services/stateService";
 import { WorkspaceConfig } from "../settings";
 import { VSCodeUtils } from "../utils";
-import { DendronWorkspace, getWSV2 } from "../workspace";
+import { DendronExtension, getDWorkspace } from "../workspace";
 import { BlankInitializer } from "../workspace/blankInitializer";
 import { WorkspaceInitFactory } from "../workspace/workspaceInitializer";
 import { _activate } from "../_extension";
@@ -199,8 +199,8 @@ export async function setupLegacyWorkspaceMulti(
   setupCodeConfiguration(opts);
   // setup workspace file
   stubWorkspace({ wsRoot, vaults });
-  const workspaceFile = DendronWorkspace.workspaceFile();
-  const workspaceFolders = DendronWorkspace.workspaceFolders();
+  const workspaceFile = DendronExtension.workspaceFile();
+  const workspaceFolders = DendronExtension.workspaceFolders();
 
   // setup
   WorkspaceConfig.write(wsRoot, vaults, {
@@ -211,14 +211,8 @@ export async function setupLegacyWorkspaceMulti(
     wsRoot,
     vaults,
   });
-  // await new SetupWorkspaceCommand().execute({
-  //   rootDirRaw: wsRoot,
-  //   skipOpenWs: true,
-  //   ...copts.setupWsOverride,
-  // });
-
   // update vscode settings
-  await DendronWorkspace.updateWorkspaceFile({
+  await DendronExtension.updateWorkspaceFile({
     updateCb: (settings) => {
       const folders: WorkspaceFolderRaw[] = vaults.map((ent) => ({
         path: ent.fsPath,
@@ -250,7 +244,7 @@ export async function runLegacySingleWorkspaceTest(
 ) {
   const { wsRoot, vaults } = await setupLegacyWorkspace(opts);
   onWSInit(async () => {
-    const engine = getWSV2().engine;
+    const engine = getDWorkspace().engine;
     await opts.onInit({ wsRoot, vaults, engine });
   });
   await _activate(opts.ctx);
@@ -265,7 +259,7 @@ export async function runLegacyMultiWorkspaceTest(
 ) {
   const { wsRoot, vaults } = await setupLegacyWorkspaceMulti(opts);
   onWSInit(async () => {
-    const engine = getWSV2().engine;
+    const engine = getDWorkspace().engine;
     await opts.onInit({ wsRoot, vaults, engine });
   });
   await _activate(opts.ctx);
@@ -339,10 +333,10 @@ export function stubSetupWorkspace({ wsRoot }: { wsRoot: string }) {
 
 class FakeEngine {
   get notes() {
-    return getWSV2().engine.notes;
+    return getDWorkspace().engine.notes;
   }
   get schemas() {
-    return getWSV2().engine.schemas;
+    return getDWorkspace().engine.schemas;
   }
 }
 

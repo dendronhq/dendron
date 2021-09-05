@@ -8,7 +8,7 @@ import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { Logger } from "../logger";
 import { clipboard, VSCodeUtils } from "../utils";
-import { getExtension, getWSV2 } from "../workspace";
+import { getExtension, getDWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandInput = {
@@ -59,7 +59,7 @@ export class PasteFileCommand extends BasicCommand<CommandOpts, CommandOutput> {
 
     const uri = editor.document.uri;
     const ext = getExtension();
-    const { vaults, wsRoot } = getWSV2();
+    const { vaults, wsRoot } = getDWorkspace();
     if (!ext.workspaceService?.isPathInWorkspace(uri.fsPath)) {
       const error = DendronError.createFromStatus({
         status: ERROR_STATUS.INVALID_STATE,

@@ -39,7 +39,7 @@ import {
 import { StateService } from "../../services/stateService";
 import * as telemetry from "../../telemetry";
 import { KeybindingUtils, VSCodeUtils } from "../../utils";
-import { DendronWorkspace } from "../../workspace";
+import { DendronExtension } from "../../workspace";
 import { BlankInitializer } from "../../workspace/blankInitializer";
 import { TemplateInitializer } from "../../workspace/templateInitializer";
 import { shouldDisplayLapsedUserMsg, _activate } from "../../_extension";
@@ -193,6 +193,7 @@ suite("Extension", function () {
             copyAssets: true,
             siteHierarchies: ["root"],
             siteRootDir: "docs",
+            siteLastModified: true,
             usePrettyRefs: true,
             title: "Dendron",
             description: "Personal knowledge space",
@@ -256,7 +257,7 @@ suite("Extension", function () {
       });
 
       it("ok", (done) => {
-        DendronWorkspace.version = () => "0.0.1";
+        DendronExtension.version = () => "0.0.1";
         runLegacySingleWorkspaceTest({
           ctx,
           onInit: async ({ wsRoot, vaults, engine }) => {
@@ -284,7 +285,7 @@ suite("Extension", function () {
         });
       });
       it("ok: missing root.schema", (done) => {
-        DendronWorkspace.version = () => "0.0.1";
+        DendronExtension.version = () => "0.0.1";
         runLegacySingleWorkspaceTest({
           ctx,
           onInit: async ({ vaults, wsRoot }) => {

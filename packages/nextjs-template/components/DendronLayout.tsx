@@ -92,14 +92,34 @@ export default function DendronLayout(
           width: "100%",
           borderBottom: "1px solid #d4dadf",
           height: HEADER.HEIGHT,
-          padding: `0 ${LAYOUT.PADDING}px`,
+          padding: `0 ${LAYOUT.PADDING}px 0 2`,
         }}
       >
-        <Row style={{ height: "100%" }}>
-          <Col xs={{ span: 4 }} md={{ span: 4 }} style={{ height: "100%" }}>
+        <Row
+          style={{
+            flex: "0 0 auto",
+            paddingLeft: `calc((100% - ${LAYOUT.BREAKPOINTS.lg}) / 2)`,
+            height: HEADER.HEIGHT,
+          }}
+        >
+          <Col
+            xs={{ span: 4 }}
+            md={{ span: 4 }}
+            style={{
+              width: `calc((100% - ${LAYOUT.BREAKPOINTS.lg}) / 2 + ${
+                isCollapsed ? SIDER.COLLAPSED_WIDTH : SIDER.WIDTH
+              }px)`,
+              minWidth: isCollapsed ? SIDER.COLLAPSED_WIDTH : SIDER.WIDTH,
+            }}
+          >
             <DendronLogoOrTitle />
           </Col>
-          <Col xs={18} md={{ span: 16 }}>
+          <Col
+            xs={12}
+            sm={18}
+            md={{ span: 16, push: 2 }}
+            style={{ paddingLeft: "4px" }}
+          >
             <DendronLookup {...props} />
           </Col>
         </Row>

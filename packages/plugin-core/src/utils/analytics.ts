@@ -1,5 +1,5 @@
 import { getOS, SegmentClient } from "@dendronhq/common-server";
-import { DendronWorkspace } from "../workspace";
+import { DendronExtension } from "../workspace";
 import * as vscode from "vscode";
 
 export type SegmentContext = Partial<{
@@ -44,7 +44,7 @@ export class AnalyticsUtils {
   static getContext(): Partial<SegmentContext> {
     return {
       app: {
-        version: DendronWorkspace.version(),
+        version: DendronExtension.version(),
       },
       os: {
         name: getOS(),

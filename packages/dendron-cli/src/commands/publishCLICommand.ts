@@ -21,6 +21,7 @@ const $ = (cmd: string, opts?: any) => {
 type CommandCLIOpts = {
   cmd: PublishCommands;
   wsRoot: string;
+  dest?: string;
 };
 
 export enum PublishCommands {
@@ -64,6 +65,10 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       choices: Object.values(PublishCommands),
       type: "string",
     });
+    args.option("dest", {
+      describe: "override where nextjs-template is located",
+      type: "string",
+    });
   }
 
   async enrichArgs(args: CommandCLIOpts): Promise<CommandOpts> {
@@ -97,13 +102,21 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     }
   }
 
-  async _buildNextData({ wsRoot, stage }: { wsRoot: string; stage: Stage }) {
+  async _buildNextData({
+    wsRoot,
+    stage,
+    dest,
+  }: {
+    wsRoot: string;
+    stage: Stage;
+    dest?: string;
+  }) {
     const cli = new ExportPodCLICommand();
     const opts = await cli.enrichArgs({
       podId: NextjsExportPod.id,
       podSource: PodSource.BUILTIN,
       wsRoot,
-      config: `dest=${getNextRoot(wsRoot)}`,
+      config: `dest=${dest || getNextRoot(wsRoot)}`,
     });
     // if no siteUrl set, override with localhost
     if (stage !== "prod") {
@@ -127,9 +140,9 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     return { error: null };
   }
 
-  async build({ wsRoot }: { wsRoot: string }) {
+  async build({ wsRoot, dest }: { wsRoot: string; dest?: string }) {
     this.print(`generating metadata for publishing...`);
-    await this._buildNextData({ wsRoot, stage: getStage() });
+    await this._buildNextData({ wsRoot, stage: getStage(), dest });
     this.print(
       `to preview changes, run "cd ${getNextRoot(wsRoot)} && npx dev"`
     );

@@ -14,7 +14,7 @@ import * as vscode from "vscode";
 import { ShowPreviewV2Command } from "../commands/ShowPreviewV2";
 import { Logger } from "../logger";
 import { VSCodeUtils } from "../utils";
-import { getExtension, getWSV2 } from "../workspace";
+import { getExtension, getDWorkspace } from "../workspace";
 
 let NOTE_SERVICE: NoteSyncService | undefined;
 
@@ -69,7 +69,7 @@ export class NoteSyncService {
   ) {
     const ctx = "NoteSyncService:onDidChange";
     const uri = editor.document.uri;
-    const { engine } = getWSV2();
+    const { engine } = getDWorkspace();
     const fname = path.basename(uri.fsPath, ".md");
 
     if (!getExtension().workspaceService?.isPathInWorkspace(uri.fsPath)) {
@@ -97,14 +97,14 @@ export class NoteSyncService {
     this.L.debug({ ctx, uri: uri.fsPath });
     const vault = VaultUtils.getVaultByNotePath({
       vaults: engine.vaults,
-      wsRoot: getWSV2().wsRoot,
+      wsRoot: getDWorkspace().wsRoot,
       fsPath: uri.fsPath,
     });
     const noteHydrated = NoteUtils.getNoteByFnameV5({
       fname,
       vault,
       notes: engine.notes,
-      wsRoot: getWSV2().wsRoot,
+      wsRoot: getDWorkspace().wsRoot,
     }) as NoteProps;
 
     // NOTE: it might be worthwile to only do this after checking that the current note is still active
@@ -150,7 +150,7 @@ export class NoteSyncService {
       });
       note.anchors = anchors;
 
-      if (getWSV2().config.dev?.enableLinkCandidates) {
+      if (getDWorkspace().config.dev?.enableLinkCandidates) {
         const linkCandidates = LinkUtils.findLinkCandidates({
           note,
           notesMap,

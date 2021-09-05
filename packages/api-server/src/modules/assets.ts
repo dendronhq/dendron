@@ -9,7 +9,7 @@ import {
   ThemeType,
 } from "@dendronhq/common-all";
 import { WorkspaceUtils } from "@dendronhq/engine-server";
-import { getWS } from "../utils";
+import { getWSEngine } from "../utils";
 import fs from "fs-extra";
 import path from "path";
 import { getLogger } from "../core";
@@ -25,7 +25,7 @@ export class AssetsController {
   }
 
   async get({ fpath, ws }: AssetGetRequest): Promise<RespV2<string>> {
-    const engine = await getWS({ ws });
+    const engine = await getWSEngine({ ws });
     const { wsRoot, vaults } = engine;
     if (!WorkspaceUtils.isPathInWorkspace({ wsRoot, vaults, fpath })) {
       return {

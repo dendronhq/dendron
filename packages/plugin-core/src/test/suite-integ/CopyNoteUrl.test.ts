@@ -7,7 +7,7 @@ import * as vscode from "vscode";
 import { CopyNoteURLCommand } from "../../commands/CopyNoteURL";
 import { CONFIG } from "../../constants";
 import { VSCodeUtils } from "../../utils";
-import { getWSV2 } from "../../workspace";
+import { getDWorkspace } from "../../workspace";
 import { expect } from "../testUtilsv2";
 import {
   runLegacyMultiWorkspaceTest,
@@ -87,7 +87,7 @@ suite("CopyNoteUrl", function () {
           },
         });
         const seedId = TestSeedUtils.defaultSeedId();
-        engine.config = getWSV2().config;
+        engine.config = getDWorkspace().config;
         engine.vaults = engine.config.vaults;
         sinon.stub(VSCodeUtils, "getNoteFromDocument").returns(
           await NoteTestUtilsV4.createNote({
@@ -98,7 +98,7 @@ suite("CopyNoteUrl", function () {
         );
 
         const vault = VaultUtils.getVaultByName({
-          vaults: getWSV2().config.vaults,
+          vaults: getDWorkspace().config.vaults,
           vname: seedId,
         })!;
         await VSCodeUtils.openNoteByPath({ vault, fname: "root" });
@@ -130,7 +130,7 @@ suite("CopyNoteUrl", function () {
           },
         });
         const seedId = TestSeedUtils.defaultSeedId();
-        engine.config = getWSV2().config;
+        engine.config = getDWorkspace().config;
         engine.vaults = engine.config.vaults;
         // TODO: ugly temporary hack. can be removed when [[Unify Runenginetest and Runworkspacetest|scratch.2021.06.17.164102.unify-runenginetest-and-runworkspacetest]] is implemented
         sinon.stub(VSCodeUtils, "getNoteFromDocument").returns(
@@ -141,7 +141,7 @@ suite("CopyNoteUrl", function () {
           })
         );
         const vault = VaultUtils.getVaultByName({
-          vaults: getWSV2().config.vaults,
+          vaults: getDWorkspace().config.vaults,
           vname: seedId,
         })!;
         await VSCodeUtils.openNoteByPath({ vault, fname: "root" });

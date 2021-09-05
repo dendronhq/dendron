@@ -211,12 +211,6 @@ export async function setupLegacyWorkspaceMulti(
     wsRoot,
     vaults,
   });
-  // await new SetupWorkspaceCommand().execute({
-  //   rootDirRaw: wsRoot,
-  //   skipOpenWs: true,
-  //   ...copts.setupWsOverride,
-  // });
-
   // update vscode settings
   await DendronWorkspace.updateWorkspaceFile({
     updateCb: (settings) => {

@@ -253,10 +253,12 @@ export class VSCodeUtils {
 
   static getOrCreateMockContext(): vscode.ExtensionContext {
     if (!_MOCK_CONTEXT) {
+      const logPath = tmpDir().name;
       const pkgRoot = goUpTo({ base: __dirname, fname: "package.json" });
       _MOCK_CONTEXT = {
         extensionMode: vscode.ExtensionMode.Development,
-        logPath: tmpDir().name,
+        logPath,
+        logUri: vscode.Uri.file(logPath),
         subscriptions: [],
         extensionPath: pkgRoot,
         globalState: VSCodeUtils.createMockState({
@@ -630,7 +632,7 @@ export class WSUtils {
       );
       return out;
     } catch (err) {
-      Logger.error({ error: err });
+      Logger.error({ error: err as any });
     }
   }
 

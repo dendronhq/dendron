@@ -193,6 +193,7 @@ suite("Extension", function () {
             copyAssets: true,
             siteHierarchies: ["root"],
             siteRootDir: "docs",
+            siteLastModified: true,
             usePrettyRefs: true,
             title: "Dendron",
             description: "Personal knowledge space",

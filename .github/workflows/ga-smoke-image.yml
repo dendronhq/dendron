@@ -8,7 +8,7 @@ on:
   push:
     branches:
       # - release/*
-      - chore/nightly-build
+      - chore/ga-build-automation
 
 jobs:
   build:

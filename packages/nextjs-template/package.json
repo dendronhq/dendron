@@ -28,7 +28,8 @@
     "react": "17.0.1",
     "react-css-theme-switcher": "0.2.3",
     "react-dom": "17.0.1",
-    "sass": "^1.39.0"
+    "sass": "^1.39.0",
+    "react-ga": "^3.3.0"
   },
   "devDependencies": {
     "@types/fs-extra": "^9.0.12",

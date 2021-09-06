@@ -603,7 +603,11 @@ export class DendronExtension {
       vscode.commands.registerCommand(
         DENDRON_COMMANDS.RENAME_NOTE.key,
         async (args: any) => {
-          await new MoveNoteCommand().run({ useSameVault: true, ...args });
+          await new MoveNoteCommand().run({
+            allowMultiselect: false,
+            useSameVault: true,
+            ...args,
+          });
         }
       )
     );

@@ -218,7 +218,9 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
             assetBaseNew = `${cleanFileName(name)}-${uuid}${ext}`;
           }
           const assetPathFull = path.join(assetDir, assetBaseNew);
-          const assetPathRel = path.join(assetDirName, assetBaseNew);
+          const assetPathRel = path
+            .join(assetDirName, assetBaseNew)
+            .replace(/[\\]/g, "/");
           const key = _.replace(_item.path as string, /[\\|\/]/g, ""); // eslint-disable-line
           assetHashMap = {
             ...assetHashMap,

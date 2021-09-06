@@ -46,7 +46,7 @@ const SELECTION_BEHAVIORS: {
   },
   link: {
     value: NoteLookupSelectionBehaviorEnum.link,
-    label: "selection 2 link",
+    label: "selection to link",
     desc: "Use selection of active editor for the basename of the lookup value.",
   },
   none: {

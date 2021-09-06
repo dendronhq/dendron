@@ -59,7 +59,7 @@ const ADD_BEHAVIOR: {
   },
 };
 
-// const assertion to tell the compiler that we only want these as dayOfWeekNymber.
+// const assertion to tell the compiler that we only want these as dayOfWeekNumber.
 const possibleDayOfWeekNumber = [0, 1, 2, 3, 4, 5, 6] as const;
 export type dayOfWeekNumber = typeof possibleDayOfWeekNumber[number];
 

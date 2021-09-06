@@ -158,7 +158,7 @@ export class DendronBtn implements IDendronQuickInputButton {
     this.type = type;
     this.pressed = pressed || false;
     this.title = title;
-    this.canToggle = opts.canToggle || true;
+    this.canToggle = _.isUndefined(opts.canToggle) ? true : opts.canToggle;
     this.opts = opts;
   }
 
@@ -185,7 +185,9 @@ export class DendronBtn implements IDendronQuickInputButton {
   }
 
   toggle() {
-    this.pressed = !this.pressed;
+    if (this.canToggle) {
+      this.pressed = !this.pressed;
+    }
   }
 }
 
@@ -405,7 +407,10 @@ export class CopyNoteLinkBtn extends DendronBtn {
       iconOn: "menu-selection",
       type: "copyNoteLink" as LookupEffectType,
       pressed,
-      canToggle: false,
+      // Setting this to TRUE to retain any previous behavior. Previously DendronBtn
+      // would always overwrite the canToggle to TRUE. Even though this code branch
+      // used to set it to FALSE.
+      canToggle: true,
     });
   }
 
@@ -429,14 +434,14 @@ export class CopyNoteLinkBtn extends DendronBtn {
 }
 
 export class VaultSelectButton extends DendronBtn {
-  static create(pressed?: boolean) {
+  static create(opts: { pressed?: boolean; canToggle?: boolean }) {
     return new VaultSelectButton({
       title: "Select Vault",
       iconOff: "package",
       iconOn: "menu-selection",
       type: "other" as LookupEffectType,
-      pressed,
-      canToggle: false,
+      pressed: opts.pressed,
+      canToggle: opts.canToggle,
     });
   }
 

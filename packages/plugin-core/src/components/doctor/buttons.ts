@@ -35,6 +35,11 @@ export class DoctorBtn implements IDoctorQuickInputButton {
     this.type = type;
     this.pressed = pressed || false;
     this.title = title;
+
+    // TODO: examine whether this is the behavior we actually want since
+    // ths expression (opts.canToggle || true) will always return true
+    // (as long as 'opts' is not undefined). Secondly 'this.canToggle'
+    // does not appear to be used.
     this.canToggle = opts.canToggle || true;
     this.opts = opts;
   }

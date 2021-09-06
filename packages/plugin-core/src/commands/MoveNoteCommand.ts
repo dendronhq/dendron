@@ -92,6 +92,9 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     const lookupCreateOpts: LookupControllerV3CreateOpts = {
       nodeType: "note",
       disableVaultSelection: opts?.useSameVault,
+      // If vault selection is enabled we alwaysPrompt selection mode,
+      // hence disable toggling.
+      vaultSelectCanToggle: false,
       extraButtons: [MultiSelectBtn.create(false)],
     };
     if (vault) {

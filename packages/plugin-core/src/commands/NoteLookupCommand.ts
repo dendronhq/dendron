@@ -50,7 +50,7 @@ import {
 import { DENDRON_COMMANDS } from "../constants";
 import { Logger } from "../logger";
 import { AnalyticsUtils } from "../utils/analytics";
-import { getEngine, getDWorkspace } from "../workspace";
+import { getDWorkspace, getEngine } from "../workspace";
 import { BaseCommand } from "./base";
 
 export type CommandRunOpts = {
@@ -181,6 +181,7 @@ export class NoteLookupCommand extends BaseCommand<
     this._provider = new NoteLookupProvider("lookup", {
       allowNewNote: true,
       noHidePickerOnAccept: false,
+      forceAsIsPickerValueUsage: copts.noteType === LookupNoteTypeEnum.scratch,
     });
     const lc = this.controller;
     if (copts.fuzzThreshold) {

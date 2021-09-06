@@ -10,7 +10,7 @@ import { HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
 import _md from "markdown-it";
 import path from "path";
-import { Uri, ViewColumn, window } from "vscode";
+import { ProgressLocation, Uri, ViewColumn, window } from "vscode";
 import { MultiSelectBtn } from "../components/lookup/buttons";
 import {
   LookupControllerV3,
@@ -227,9 +227,18 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
           return { changed: [] };
         }
       }
-      window.showInformationMessage("refactoring...");
 
-      const changed = await this.moveNotes(engine, opts.moves);
+      const changed = await window.withProgress(
+        {
+          location: ProgressLocation.Notification,
+          title: "Refactoring...",
+          cancellable: false,
+        },
+        async () => {
+          const allChanges = await this.moveNotes(engine, opts.moves);
+          return allChanges;
+        }
+      );
 
       if (opts.closeAndOpenFile) {
         // During bulk move we will only open a single file that was moved to avoid

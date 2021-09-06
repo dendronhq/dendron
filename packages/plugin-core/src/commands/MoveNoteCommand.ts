@@ -29,7 +29,7 @@ import { FileItem } from "../external/fileutils/FileItem";
 import { UNKNOWN_ERROR_MSG } from "../logger";
 import { VSCodeUtils } from "../utils";
 import { ProceedCancel, QuickPickUtil } from "../utils/quickPick";
-import { getExtension, getDWorkspace } from "../workspace";
+import { getDWorkspace, getExtension } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandInput = any;
@@ -54,6 +54,8 @@ type CommandOpts = {
   initialValue?: string;
   vaultName?: string;
   useSameVault?: boolean;
+  /** Defaults to true. */
+  allowMultiselect?: boolean;
 };
 
 type CommandOutput = {
@@ -89,10 +91,11 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
           vname: opts.vaultName,
         })
       : undefined;
+
     const lookupCreateOpts: LookupControllerV3CreateOpts = {
       nodeType: "note",
       disableVaultSelection: opts?.useSameVault,
-      extraButtons: [MultiSelectBtn.create(false)],
+      extraButtons: MoveNoteCommand.gatherExtraButtons(opts),
     };
     if (vault) {
       lookupCreateOpts.buttons = [];
@@ -153,6 +156,16 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     });
   }
 
+  private static gatherExtraButtons(opts?: CommandOpts) {
+    const shouldAllowMultiSelect =
+      opts?.allowMultiselect !== undefined ? opts?.allowMultiselect : true;
+    const extraButtons = [];
+    if (shouldAllowMultiSelect) {
+      extraButtons.push(MultiSelectBtn.create(false));
+    }
+    return extraButtons;
+  }
+
   private getDesiredMoves(
     data: NoteLookupProviderSuccessResp<OldNewLocation>
   ): RenameNoteOpts[] {
@@ -190,7 +203,12 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
 
   async execute(opts: CommandOpts): Promise<{ changed: NoteChangeEntry[] }> {
     const ctx = "MoveNoteCommand:execute";
-    opts = _.defaults(opts, { closeAndOpenFile: true });
+
+    opts = _.defaults(opts, {
+      closeAndOpenFile: true,
+      allowMultiselect: true,
+    });
+
     const { engine } = getDWorkspace();
     const ext = getExtension();
 

@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/nextjs-template",
-  "version": "0.57.3",
+  "version": "0.58.0",
   "license": "Apache-2.0",
   "private": true,
   "repository": {
@@ -18,8 +18,8 @@
     "proto": "echo `pwd`"
   },
   "dependencies": {
-    "@dendronhq/common-all": "^0.57.3",
-    "@dendronhq/common-frontend": "^0.57.3",
+    "@dendronhq/common-all": "^0.58.0",
+    "@dendronhq/common-frontend": "^0.58.0",
     "html-react-parser": "^1.2.8",
     "lodash": "^4.17.21",
     "next": "10.2.0",

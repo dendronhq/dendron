@@ -595,6 +595,7 @@ export enum GraphViewMessageType {
 export enum CalendarViewMessageType {
   "onSelect" = "onSelect",
   "onGetActiveEditor" = "onGetActiveEditor",
+  "messageDispatcherReady" = "messageDispatcherReady",
 }
 
 export enum NoteViewMessageType {

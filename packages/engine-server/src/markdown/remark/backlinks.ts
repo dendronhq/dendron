@@ -1,4 +1,4 @@
-import { NoteUtils, VaultUtils } from "@dendronhq/common-all";
+import { DVaultVisibility, NoteUtils, VaultUtils } from "@dendronhq/common-all";
 import _ from "lodash";
 import { Content, Root } from "mdast";
 import { list, listItem, paragraph } from "mdast-builder";
@@ -37,7 +37,16 @@ const plugin: Plugin = function (this: Unified.Processor) {
       (ent) => ent.from.fname + (ent.from.vaultName || "")
     );
 
-    if (!_.isEmpty(backlinks)) {
+    const backlinksToPublish = _.filter(backlinks, (backlink) => {
+      const vaultName = backlink.from.vaultName!;
+      const vault = VaultUtils.getVaultByName({
+        vaults: engine.vaults,
+        vname: vaultName
+      });
+      return vault?.visibility !== DVaultVisibility.PRIVATE;
+    });
+
+    if (!_.isEmpty(backlinksToPublish)) {
       root.children.push({
         type: "thematicBreak",
       });
@@ -47,7 +56,7 @@ const plugin: Plugin = function (this: Unified.Processor) {
       root.children.push(
         list(
           "unordered",
-          backlinks.map((mdLink) => {
+          backlinksToPublish.map((mdLink) => {
             return listItem(
               paragraph({
                 type: DendronASTTypes.WIKI_LINK,

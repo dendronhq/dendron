@@ -4,12 +4,12 @@
 # a Github Artifact.
 name: Generate GA Smoke Testing Image
 
-on:
-  push:
-    branches:
-      - release/*
-      - chore/ga-build-automation
-  workflow_dispatch
+on: workflow_dispatch
+  # push:
+  #   branches:
+  #     - release/*
+  #     - chore/ga-build-automation
+  
 
 jobs:
   build:

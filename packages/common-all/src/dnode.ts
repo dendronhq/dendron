@@ -240,10 +240,14 @@ export class DNodeUtils {
   }
 
   static getDepth(node: DNodeProps): number {
-    if (node.fname === "root") {
+    return this.getFNameDepth(node.fname);
+  }
+
+  static getFNameDepth(fname: string) {
+    if (fname === "root") {
       return 0;
     }
-    return node.fname.split(".").length;
+    return fname.split(".").length;
   }
 
   static getDomain(
@@ -504,7 +508,7 @@ export class NoteUtils {
       mode: "snippet" | "title" | "value" | "none";
       value?: string;
       tabStopIndex?: number;
-    }
+    };
     useVaultPrefix?: boolean;
   }): string {
     const { note, anchor, useVaultPrefix, alias } = opts;
@@ -527,16 +531,16 @@ export class NoteUtils {
     const vaultPrefix = useVaultPrefix
       ? `${CONSTANTS.DENDRON_DELIMETER}${VaultUtils.getName(vault)}/`
       : "";
-    
+
     let aliasPrefix = "";
 
-    switch(aliasMode) {
+    switch (aliasMode) {
       case "snippet": {
         aliasPrefix = `\${${tabStopIndex}:alias}|`;
         break;
       }
       case "title": {
-        aliasPrefix = `${title}|`
+        aliasPrefix = `${title}|`;
         break;
       }
       case "value": {

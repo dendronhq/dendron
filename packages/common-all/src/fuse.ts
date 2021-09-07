@@ -23,6 +23,11 @@ export type NoteIndexProps = {
   stub?: boolean;
 };
 
+/** https://fusejs.io/examples.html#extended-search */
+const FuseExtendedSearchConstants = {
+  PrefixExactMatch: "^",
+};
+
 /**
  * Experimentally set.
  *
@@ -133,10 +138,18 @@ export class FuseEngine {
   /**
    * If qs = "", return root note
    * @param qs query string.
+   * @param onlyDirectChildren query for direct children only.
    * @returns
    */
-  queryNote({ qs }: { qs: string }): NoteIndexProps[] {
+  queryNote({
+    qs,
+    onlyDirectChildren,
+  }: {
+    qs: string;
+    onlyDirectChildren?: boolean;
+  }): NoteIndexProps[] {
     let items: NoteIndexProps[];
+
     if (qs === "") {
       const results = this.notesIndex.search("root");
       items = _.map(
@@ -147,12 +160,18 @@ export class FuseEngine {
       // @ts-ignore
       items = this.notesIndex._docs as NoteProps[];
     } else {
-      const fuseQueryString = FuseEngine.formatQueryForFuse({
+      const formattedQS = FuseEngine.formatQueryForFuse({
         qs,
+        onlyDirectChildren,
       });
-      let results = this.notesIndex.search(fuseQueryString);
 
-      results = this.postQueryFilter(results, fuseQueryString);
+      let results = this.notesIndex.search(formattedQS);
+
+      results = this.postQueryFilter({
+        results,
+        queryString: formattedQS,
+        onlyDirectChildren,
+      });
 
       results = FuseEngine.sortMatchingScores(results);
 
@@ -219,20 +238,34 @@ export class FuseEngine {
     });
   }
 
-  /**
-   * Fuse does not appear to see [*] as anything special.
-   * For example:
-   * `dev*vs` matches `dendron.dev.ref.vscode` with score of 0.5
-   *
-   * To compare with
-   * `dev vs` matches `dendron.dev.ref.vscode` with score of 0.001
-   *
-   * Fuse extended search https://fusejs.io/examples.html#extended-search
-   * uses spaces for AND and '|' for OR hence this function will replace '*' with spaces.
-   * We do this replacement since VSCode quick pick actually appears to respect '*'.
-   * */
-  static formatQueryForFuse({ qs }: { qs: string }): string {
-    return qs.split("*").join(" ");
+  static formatQueryForFuse({
+    qs,
+    onlyDirectChildren,
+  }: {
+    qs: string;
+    onlyDirectChildren?: boolean;
+  }): string {
+    // Fuse does not appear to see [*] as anything special.
+    // For example:
+    // `dev*vs` matches `dendron.dev.ref.vscode` with score of 0.5
+    //
+    // To compare with
+    // `dev vs` matches `dendron.dev.ref.vscode` with score of 0.001
+    //
+    // Fuse extended search https://fusejs.io/examples.html#extended-search
+    // uses spaces for AND and '|' for OR hence this function will replace '*' with spaces.
+    // We do this replacement since VSCode quick pick actually appears to respect '*'.
+    let result = qs.split("*").join(" ");
+
+    // When querying for direct children the prefix should match exactly.
+    if (
+      onlyDirectChildren &&
+      !result.startsWith(FuseExtendedSearchConstants.PrefixExactMatch)
+    ) {
+      result = FuseExtendedSearchConstants.PrefixExactMatch + result;
+    }
+
+    return result;
   }
 
   /**
@@ -273,10 +306,15 @@ export class FuseEngine {
     return scores.map((score) => groupedByScore[score.key]).flat();
   }
 
-  private postQueryFilter(
-    results: Fuse.FuseResult<NoteIndexProps>[],
-    queryString: string
-  ) {
+  private postQueryFilter({
+    results,
+    queryString,
+    onlyDirectChildren,
+  }: {
+    results: Fuse.FuseResult<NoteIndexProps>[];
+    queryString: string;
+    onlyDirectChildren?: boolean;
+  }) {
     // Filter by threshold due to what appears to be a FuseJS bug
     results = this.filterByThreshold(results);
 
@@ -287,12 +325,21 @@ export class FuseEngine {
     // matches
     // 'user.nickolay.journal.2021.09.02'
     // with a super low score of '0.03' but we don't want to display all the journal
-    // dates with the same length, whenever the length of our query is equal or more than
-    // the query results, we want to create a new note, not show those results.
+    // dates with the same length. Hence whenever the length of our query is equal
+    // or longer than the query results, we want to create a new note, not show those results.
     results = results.filter(
       (r) =>
         r.item.fname.length > queryString.length || r.item.fname === queryString
     );
+
+    if (onlyDirectChildren) {
+      const depth = queryString.split(".").length;
+      results = results
+        .filter((ent) => {
+          return DNodeUtils.getFNameDepth(ent.item.fname) === depth;
+        })
+        .filter((ent) => !ent.item.stub);
+    }
 
     return results;
   }
@@ -340,18 +387,12 @@ export class NoteLookupUtils {
     if (_.isEmpty(qsClean)) {
       return NoteLookupUtils.fetchRootResults(notes);
     }
-    const resp = await engine.queryNotes({ qs });
-    let nodes: NoteProps[];
-    if (showDirectChildrenOnly) {
-      const depth = qs.split(".").length;
-      nodes = resp.data
-        .filter((ent) => {
-          return DNodeUtils.getDepth(ent) === depth;
-        })
-        .filter((ent) => !ent.stub);
-    } else {
-      nodes = resp.data;
-    }
+    const resp = await engine.queryNotes({
+      qs,
+      onlyDirectChildren: showDirectChildrenOnly,
+    });
+    let nodes = resp.data;
+
     if (nodes.length > PAGINATE_LIMIT) {
       nodes = nodes.slice(0, PAGINATE_LIMIT);
     }

@@ -7,8 +7,9 @@ name: Generate GA Smoke Testing Image
 on:
   push:
     branches:
-      # - release/*
+      - release/*
       - chore/ga-build-automation
+  workflow_dispatch
 
 jobs:
   build:
@@ -50,7 +51,7 @@ jobs:
         run: npm set registry http://localhost:4873/
       
       - name: Build the VSIX
-        env: 
+        env:
           GOOGLE_OAUTH_CLIENT_SECRET: ${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}
           GOOGLE_OAUTH_CLIENT_ID: ${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}
         run: yarn build:minor:local:ci

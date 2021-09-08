@@ -8,7 +8,7 @@
     "sourceMap": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-    "strict": false,
+    "strict": true,
     "declaration": true,
     "types": ["node", "jest"],
     // --- checks
@@ -19,7 +19,8 @@
     "noFallthroughCasesInSwitch": true,
     // --- language features
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
+    "emitDecoratorMetadata": true,
+    "jsx": "react-jsx"
   },
   "exclude": ["node_modules", "**/*-spec.ts"]
 }

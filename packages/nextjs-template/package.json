@@ -18,6 +18,7 @@
     "proto": "echo `pwd`"
   },
   "dependencies": {
+    "@chakra-ui/react": "^1.6.7",
     "@dendronhq/common-all": "^0.58.0",
     "@dendronhq/common-frontend": "^0.58.0",
     "html-react-parser": "^1.2.8",

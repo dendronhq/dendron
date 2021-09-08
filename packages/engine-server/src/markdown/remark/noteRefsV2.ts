@@ -411,10 +411,8 @@ export function convertNoteRefASTV2(
 
   const { wikiLinkOpts } = compilerOpts;
 
-  const sitePrettyRefConfig = DConfig.getProp(
-    procOpts.config,
-    "site"
-  ).usePrettyRefs;
+  const siteConfig = DConfig.getProp(procOpts.config, "site");
+  const sitePrettyRefConfig = siteConfig.usePrettyRefs;
   const prettyRefConfig = DConfig.getProp(procOpts.config, "usePrettyRefs");
 
   if (MDUtilsV5.isV5Active(proc)) {
@@ -431,6 +429,7 @@ export function convertNoteRefASTV2(
     prettyRefs = false;
   }
 
+  const duplicateNoteConfig = siteConfig.duplicateNoteBehavior;
   // process note references.
   let noteRefs: DNoteLoc[] = [];
   if (link.from.fname.endsWith("*")) {
@@ -497,9 +496,27 @@ export function convertNoteRefASTV2(
       } else if (maybeNotes.length === 0) {
         const msg = `Error rendering note reference. No note found with name ${link.from.fname}`;
         markdownErrorMessage = MDUtilsV4.genMDErrorMsg(msg);
-      } else {
-        const msg = `Error rendering note reference. There are multiple notes with the name ${link.from.fname}. Please specify the vault prefix.`;
-        markdownErrorMessage = MDUtilsV4.genMDErrorMsg(msg);
+      } else if (maybeNotes.length > 1) {
+        if (_.isUndefined(duplicateNoteConfig)) {
+          const msg = `Error rendering note reference. There are multiple notes with the name ${link.from.fname}. Please specify the vault prefix.`;
+          markdownErrorMessage = MDUtilsV4.genMDErrorMsg(msg);
+        } else {
+          const maybeNote = SiteUtils.handleDup({
+            allowStubs: false,
+            dupBehavior: duplicateNoteConfig,
+            engine,
+            config,
+            fname: link.from.fname,
+            noteCandidates: maybeNotes,
+            noteDict: engine.notes,
+          });
+          if (maybeNote) {
+            note = maybeNote;
+          } else {
+            const msg = `Error rendering note reference for ${link.from.fname}`;
+            markdownErrorMessage = MDUtilsV4.genMDErrorMsg(msg);
+          }
+        }
       }
     }
     if (!markdownErrorMessage) {

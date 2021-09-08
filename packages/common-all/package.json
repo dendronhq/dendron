@@ -58,6 +58,7 @@
     "minimatch": "^3.0.4",
     "nanoid": "^3.1.23",
     "nanoid-dictionary": "^4.3.0",
+    "qs": "^6.10.1",
     "semver": "^7.3.2",
     "title": "^3.4.2",
     "vscode-uri": "^2.1.2",

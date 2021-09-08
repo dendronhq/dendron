@@ -425,9 +425,50 @@ describe("dendronPub", () => {
       );
     });
 
+    test("ok: ambiguous but duplicateNoteBehavior set", async () => {
+      await runEngineTestV5(
+        async ({ engine, vaults }) => {
+          const out = await proc(engine, {
+            fname: "ref",
+            dest: DendronASTDest.HTML,
+            vault: vaults[0],
+            config: engine.config,
+          }).process("![[dupe]]");
+          const dupNoteVaultPayload = engine.config.site.duplicateNoteBehavior
+            ?.payload as string[];
+          await checkVFile(out, `dupe in ${dupNoteVaultPayload[0]}`);
+        },
+        {
+          preSetupHook: async ({ wsRoot, vaults }) => {
+            await NoteTestUtilsV4.createNote({
+              fname: "ref",
+              wsRoot,
+              vault: vaults[0],
+            });
+            await NoteTestUtilsV4.createNote({
+              fname: "dupe",
+              genRandomId: true,
+              body: "dupe in vault1",
+              wsRoot,
+              vault: vaults[0],
+            });
+            await NoteTestUtilsV4.createNote({
+              fname: "dupe",
+              genRandomId: true,
+              body: "dupe in vault2",
+              wsRoot,
+              vault: vaults[1],
+            });
+          },
+          expect,
+        }
+      );
+    });
+
     test("fail: ambiguous", async () => {
       await runEngineTestV5(
         async ({ engine, vaults }) => {
+          delete engine.config.site["duplicateNoteBehavior"];
           const out = await proc(engine, {
             fname: "ref",
             dest: DendronASTDest.HTML,

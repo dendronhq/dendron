@@ -184,7 +184,7 @@ describe("dendronPub", () => {
     });
   });
 
-  describe.only("note reference", () => {
+  describe("note reference", () => {
     test("basic", async () => {
       await runEngineTestV5(
         async ({ engine, vaults }) => {

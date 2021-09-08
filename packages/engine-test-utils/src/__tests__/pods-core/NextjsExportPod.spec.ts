@@ -46,7 +46,7 @@ describe("nextjs export", () => {
         const dest = await setupExport({ engine, wsRoot, vaults });
         await verifyExport(dest);
         await checkFile(
-          { fpath: path.join(dest, "data", "dendron.json"), snapshot: true },
+          { fpath: path.join(dest, "data", "dendron.json") },
           `"siteUrl": "https://foo.com"`,
           `"usePrettyLinks": true`
         );
@@ -54,7 +54,6 @@ describe("nextjs export", () => {
         await checkFile(
           {
             fpath: path.join(dest, "data", "notes", "foo.html"),
-            snapshot: true,
             nomatch: [`href="/notes/foo.ch1.html"`],
           },
           `href="/notes/foo.ch1"`

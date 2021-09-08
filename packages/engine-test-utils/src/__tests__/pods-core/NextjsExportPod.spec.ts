@@ -27,11 +27,11 @@ describe("nextjs export", () => {
           "meta",
           "notes",
           "notes.json"
-        ),
-          await checkFile(
-            { fpath: path.join(dest, "data", "dendron.json") },
-            `"siteUrl": "https://foo.com"`
-          );
+        );
+        await checkFile(
+          { fpath: path.join(dest, "data", "dendron.json") },
+          `"siteUrl": "https://foo.com"`
+        );
       },
       {
         expect,
@@ -70,11 +70,11 @@ describe("nextjs export", () => {
           "meta",
           "notes",
           "notes.json"
-        ),
-          await checkFile(
-            { fpath: path.join(dest, "data", "dendron.json") },
-            `"siteUrl": "https://bar.com"`
-          );
+        );
+        await checkFile(
+          { fpath: path.join(dest, "data", "dendron.json") },
+          `"siteUrl": "https://bar.com"`
+        );
       },
       {
         expect,
@@ -113,11 +113,11 @@ describe("nextjs export", () => {
           "meta",
           "notes",
           "notes.json"
-        ),
-          await checkFile(
-            { fpath: path.join(dest, "data", "dendron.json") },
-            `"canonicalBaseUrl": "https://foobar.com"`
-          );
+        );
+        await checkFile(
+          { fpath: path.join(dest, "data", "dendron.json") },
+          `"canonicalBaseUrl": "https://foobar.com"`
+        );
       },
       {
         expect,
@@ -126,6 +126,43 @@ describe("nextjs export", () => {
           TestConfigUtils.withConfig(
             (config) => {
               config.site.siteUrl = "https://foo.com";
+              return config;
+            },
+            { wsRoot: opts.wsRoot }
+          );
+        },
+      }
+    );
+  });
+
+  test("ok, create githubCname", async () => {
+    await runEngineTestV5(
+      async ({ engine, vaults, wsRoot }) => {
+        const dest = tmpDir().name;
+        const pod = new NextjsExportPod();
+        await pod.execute({
+          engine,
+          vaults,
+          wsRoot,
+          config: {
+            dest,
+            siteUrl: "https://bar.com",
+          },
+        });
+        await checkDir({ fpath: dest }, "data", "public");
+        await checkDir({ fpath: path.join(dest, "public") }, "CNAME");
+        await checkFile(
+          { fpath: path.join(dest, "public", "CNAME") },
+          `11ty.dendron.so`
+        );
+      },
+      {
+        expect,
+        preSetupHook: async (opts) => {
+          await ENGINE_HOOKS.setupBasic(opts);
+          TestConfigUtils.withConfig(
+            (config) => {
+              config.site.githubCname = "11ty.dendron";
               return config;
             },
             { wsRoot: opts.wsRoot }

@@ -21051,6 +21051,11 @@ rxjs@^6.4.0, rxjs@^6.6.0, rxjs@^6.6.7:
   dependencies:
     tslib "^1.9.0"
 
+saas@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.npmjs.org/saas/-/saas-1.0.0.tgz#0091274f26664300bbca5e9893bc4bb88709e677"
+  integrity sha1-AJEnTyZmQwC7yl6Yk7xLuIcJ5nc=
+
 safe-buffer@5.1.2, safe-buffer@~5.1.0, safe-buffer@~5.1.1:
   version "5.1.2"
   resolved "https://registry.npmjs.org/safe-buffer/-/safe-buffer-5.1.2.tgz#991ec69d296e0313747d59bdfd2b745c35f8828d"

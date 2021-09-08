@@ -27,7 +27,8 @@
     "next-seo": "^4.26.0",
     "react": "17.0.1",
     "react-css-theme-switcher": "0.2.3",
-    "react-dom": "17.0.1"
+    "react-dom": "17.0.1",
+    "saas": "^1.0.0"
   },
   "devDependencies": {
     "@types/fs-extra": "^9.0.12",

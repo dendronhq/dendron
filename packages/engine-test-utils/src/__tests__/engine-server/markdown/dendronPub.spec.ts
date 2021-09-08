@@ -184,6 +184,289 @@ describe("dendronPub", () => {
     });
   });
 
+  describe.only("note reference", () => {
+    test("basic", async () => {
+      await runEngineTestV5(
+        async ({ engine, vaults }) => {
+          const out = await proc(engine, {
+            fname: "ref",
+            dest: DendronASTDest.HTML,
+            vault: vaults[0],
+            config: engine.config,
+          }).process("![[foo]]");
+          await checkVFile(out, 'a href="foo.html');
+        },
+        {
+          preSetupHook: async ({ wsRoot, vaults }) => {
+            await NoteTestUtilsV4.createNote({
+              fname: "ref",
+              wsRoot,
+              vault: vaults[0],
+            });
+            await NoteTestUtilsV4.createNote({
+              fname: "foo",
+              wsRoot,
+              vault: vaults[0],
+            });
+          },
+          expect,
+        }
+      );
+    });
+
+    test("nonexistent", async () => {
+      await runEngineTestV5(
+        async ({ engine, vaults }) => {
+          const out = await proc(engine, {
+            fname: "ref",
+            dest: DendronASTDest.HTML,
+            vault: vaults[0],
+            config: engine.config,
+          }).process("![[bar]]");
+          await checkVFile(
+            out,
+            "Error rendering note reference. No note found with name bar"
+          );
+        },
+        {
+          preSetupHook: async ({ wsRoot, vaults }) => {
+            await NoteTestUtilsV4.createNote({
+              fname: "ref",
+              wsRoot,
+              vault: vaults[0],
+            });
+            await NoteTestUtilsV4.createNote({
+              fname: "foo",
+              wsRoot,
+              vault: vaults[0],
+            });
+          },
+          expect,
+        }
+      );
+    });
+
+    test("assume vault", async () => {
+      await runEngineTestV5(
+        async ({ engine, vaults }) => {
+          const out = await proc(engine, {
+            fname: "ref",
+            dest: DendronASTDest.HTML,
+            vault: vaults[0],
+            config: engine.config,
+          }).process("![[foo]]");
+          await checkVFile(out, "foo in vault2");
+        },
+        {
+          preSetupHook: async ({ wsRoot, vaults }) => {
+            await NoteTestUtilsV4.createNote({
+              fname: "ref",
+              wsRoot,
+              vault: vaults[0],
+            });
+            await NoteTestUtilsV4.createNote({
+              fname: "foo",
+              body: "foo in vault2",
+              wsRoot,
+              vault: vaults[1],
+            });
+          },
+          expect,
+        }
+      );
+    });
+
+    test("ok: with vault prefix", async () => {
+      await runEngineTestV5(
+        async ({ engine, vaults }) => {
+          const out = await proc(engine, {
+            fname: "ref",
+            dest: DendronASTDest.HTML,
+            vault: vaults[0],
+            config: engine.config,
+          }).process("![[dendron://vault2/foo]]");
+          await checkVFile(out, "foo in vault2");
+          await checkNotInVFile(out, "foo in vault1");
+        },
+        {
+          preSetupHook: async ({ wsRoot, vaults }) => {
+            await NoteTestUtilsV4.createNote({
+              fname: "ref",
+              wsRoot,
+              vault: vaults[0],
+            });
+            await NoteTestUtilsV4.createNote({
+              fname: "foo",
+              body: "foo in vault1",
+              wsRoot,
+              vault: vaults[0],
+            });
+            await NoteTestUtilsV4.createNote({
+              fname: "foo",
+              body: "foo in vault2",
+              wsRoot,
+              vault: vaults[1],
+            });
+          },
+          expect,
+        }
+      );
+    });
+
+    test("fail: with vault prefix", async () => {
+      await runEngineTestV5(
+        async ({ engine, vaults }) => {
+          const out = await proc(engine, {
+            fname: "ref",
+            dest: DendronASTDest.HTML,
+            vault: vaults[0],
+            config: engine.config,
+          }).process("![[dendron://vault2/bar]]");
+          await checkVFile(out, "Error rendering note reference for bar");
+        },
+        {
+          preSetupHook: async ({ wsRoot, vaults }) => {
+            await NoteTestUtilsV4.createNote({
+              fname: "ref",
+              wsRoot,
+              vault: vaults[0],
+            });
+            await NoteTestUtilsV4.createNote({
+              fname: "foo",
+              body: "foo in vault1",
+              wsRoot,
+              vault: vaults[0],
+            });
+            await NoteTestUtilsV4.createNote({
+              fname: "foo",
+              body: "foo in vault2",
+              wsRoot,
+              vault: vaults[1],
+            });
+          },
+          expect,
+        }
+      );
+    });
+
+    test("ok: wildcard", async () => {
+      await runEngineTestV5(
+        async ({ engine, vaults }) => {
+          const out = await proc(engine, {
+            fname: "ref",
+            dest: DendronASTDest.HTML,
+            vault: vaults[0],
+            config: engine.config,
+          }).process("![[bar.*]]");
+          await checkVFile(out, 'a href="bar.one.html');
+          await checkVFile(out, 'a href="bar.two.html');
+        },
+        {
+          preSetupHook: async ({ wsRoot, vaults }) => {
+            await NoteTestUtilsV4.createNote({
+              fname: "ref",
+              wsRoot,
+              vault: vaults[0],
+            });
+            await NoteTestUtilsV4.createNote({
+              fname: "bar.one",
+              body: "bar one",
+              wsRoot,
+              vault: vaults[0],
+            });
+            await NoteTestUtilsV4.createNote({
+              fname: "bar.two",
+              body: "bar two",
+              wsRoot,
+              vault: vaults[0],
+            });
+          },
+          expect,
+        }
+      );
+    });
+
+    test("fail: wildcard no match", async () => {
+      await runEngineTestV5(
+        async ({ engine, vaults }) => {
+          const out = await proc(engine, {
+            fname: "ref",
+            dest: DendronASTDest.HTML,
+            vault: vaults[0],
+            config: engine.config,
+          }).process("![[baz.*]]");
+          await checkVFile(
+            out,
+            "Error rendering note reference. There are no matches for"
+          );
+        },
+        {
+          preSetupHook: async ({ wsRoot, vaults }) => {
+            await NoteTestUtilsV4.createNote({
+              fname: "ref",
+              wsRoot,
+              vault: vaults[0],
+            });
+            await NoteTestUtilsV4.createNote({
+              fname: "bar.one",
+              body: "bar one",
+              wsRoot,
+              vault: vaults[0],
+            });
+            await NoteTestUtilsV4.createNote({
+              fname: "bar.two",
+              body: "bar two",
+              wsRoot,
+              vault: vaults[0],
+            });
+          },
+          expect,
+        }
+      );
+    });
+
+    test("fail: ambiguous", async () => {
+      await runEngineTestV5(
+        async ({ engine, vaults }) => {
+          const out = await proc(engine, {
+            fname: "ref",
+            dest: DendronASTDest.HTML,
+            vault: vaults[0],
+            config: engine.config,
+          }).process("![[dupe]]");
+          await checkVFile(
+            out,
+            "Error rendering note reference. There are multiple notes with the name"
+          );
+        },
+        {
+          preSetupHook: async ({ wsRoot, vaults }) => {
+            await NoteTestUtilsV4.createNote({
+              fname: "ref",
+              wsRoot,
+              vault: vaults[0],
+            });
+            await NoteTestUtilsV4.createNote({
+              fname: "dupe",
+              genRandomId: true,
+              body: "dupe in vault1",
+              wsRoot,
+              vault: vaults[0],
+            });
+            await NoteTestUtilsV4.createNote({
+              fname: "dupe",
+              genRandomId: true,
+              body: "dupe in vault2",
+              wsRoot,
+              vault: vaults[1],
+            });
+          },
+          expect,
+        }
+      );
+    });
+  });
+
   describe("no publish", () => {
     testWithEngine(
       "basic",
@@ -273,7 +556,7 @@ describe("dendronPub", () => {
         config.site = {
           siteHierarchies: ["foo"],
           siteRootDir: "foo",
-          usePrettyRefs: true
+          usePrettyRefs: true,
         };
         const resp = await MDUtilsV4.procRehype({
           proc: proc(
@@ -317,14 +600,14 @@ describe("dendronPub", () => {
         config.site = {
           siteHierarchies: ["foo"],
           siteRootDir: "foo",
-          usePrettyRefs: true
+          usePrettyRefs: true,
         };
         const resp = await MDUtilsV5.procRehypeFull(
           {
             engine,
             fname: "foo",
             vault: vaults[0],
-            config
+            config,
           },
           { flavor: ProcFlavor.PUBLISHING }
         ).process(`![[bar]]`);
@@ -347,14 +630,14 @@ describe("dendronPub", () => {
         config.site = {
           siteHierarchies: ["foo"],
           siteRootDir: "foo",
-          usePrettyRefs: false
+          usePrettyRefs: false,
         };
         const resp = await MDUtilsV5.procRehypeFull(
           {
             engine,
             fname: "foo",
             vault: vaults[0],
-            config
+            config,
           },
           { flavor: ProcFlavor.PUBLISHING }
         ).process(`![[bar]]`);
@@ -377,14 +660,14 @@ describe("dendronPub", () => {
         config.site = {
           siteHierarchies: ["foo"],
           siteRootDir: "foo",
-          usePrettyRefs: false
+          usePrettyRefs: false,
         };
         const resp = await MDUtilsV5.procRehypeFull(
           {
             engine,
             fname: "foo",
             vault: vaults[0],
-            config
+            config,
           },
           { flavor: ProcFlavor.PREVIEW }
         ).process(`![[bar]]`);
@@ -407,14 +690,14 @@ describe("dendronPub", () => {
         config.site = {
           siteHierarchies: ["foo"],
           siteRootDir: "foo",
-          usePrettyRefs: false
+          usePrettyRefs: false,
         };
         const resp = await MDUtilsV5.procRehypeFull(
           {
             engine,
             fname: "foo",
             vault: vaults[0],
-            config
+            config,
           },
           { flavor: ProcFlavor.PREVIEW }
         ).process(`![[bar]]`);
@@ -438,7 +721,7 @@ describe("dendronPub", () => {
             engine,
             fname: "foo",
             vault: vaults[0],
-            config
+            config,
           },
           { flavor: ProcFlavor.PREVIEW }
         ).process(`![[bar]]`);
@@ -455,7 +738,7 @@ describe("dendronPub", () => {
             engine,
             fname: "foo",
             vault: vaults[0],
-            config
+            config,
           },
           { flavor: ProcFlavor.PUBLISHING }
         ).process(`![[bar]]`);

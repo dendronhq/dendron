@@ -497,24 +497,39 @@ export function convertNoteRefASTV2(
         const msg = `Error rendering note reference. No note found with name ${link.from.fname}`;
         markdownErrorMessage = MDUtilsV4.genMDErrorMsg(msg);
       } else if (maybeNotes.length > 1) {
-        if (_.isUndefined(duplicateNoteConfig)) {
-          const msg = `Error rendering note reference. There are multiple notes with the name ${link.from.fname}. Please specify the vault prefix.`;
-          markdownErrorMessage = MDUtilsV4.genMDErrorMsg(msg);
-        } else {
-          const maybeNote = SiteUtils.handleDup({
-            allowStubs: false,
-            dupBehavior: duplicateNoteConfig,
-            engine,
-            config,
-            fname: link.from.fname,
-            noteCandidates: maybeNotes,
-            noteDict: engine.notes,
-          });
-          if (maybeNote) {
-            note = maybeNote;
+        if (shouldApplyPublishRules) {
+          if (_.isUndefined(duplicateNoteConfig)) {
+            const msg = `Error rendering note reference. There are multiple notes with the name ${link.from.fname}. Please specify the vault prefix.`;
+            markdownErrorMessage = MDUtilsV4.genMDErrorMsg(msg);
           } else {
+            const maybeNote = SiteUtils.handleDup({
+              allowStubs: false,
+              dupBehavior: duplicateNoteConfig,
+              engine,
+              config,
+              fname: link.from.fname,
+              noteCandidates: maybeNotes,
+              noteDict: engine.notes,
+            });
+            if (maybeNote) {
+              note = maybeNote;
+            } else {
+              const msg = `Error rendering note reference for ${link.from.fname}`;
+              markdownErrorMessage = MDUtilsV4.genMDErrorMsg(msg);
+            }
+          }
+        } else {
+          // reference hover provider assumes same vault. use vault provided in proc data.
+          const maybeNotes = NoteUtils.getNotesByFname({
+            fname: link.from.fname,
+            notes: engine.notes,
+            vault: dendronData.vault,
+          });
+          if (maybeNotes.length !== 1) {
             const msg = `Error rendering note reference for ${link.from.fname}`;
             markdownErrorMessage = MDUtilsV4.genMDErrorMsg(msg);
+          } else {
+            note = maybeNotes[0];
           }
         }
       }

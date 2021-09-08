@@ -1,0 +1,94 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`nextjs export ok 1`] = `
+"{
+  \\"version\\": 1,
+  \\"maxPreviewsCached\\": 10,
+  \\"vaults\\": [
+    {
+      \\"fsPath\\": \\"vault1\\"
+    },
+    {
+      \\"fsPath\\": \\"vault2\\"
+    },
+    {
+      \\"fsPath\\": \\"vault3\\",
+      \\"name\\": \\"vaultThree\\"
+    }
+  ],
+  \\"useFMTitle\\": true,
+  \\"useNoteTitleForLink\\": true,
+  \\"noAutoCreateOnDefinition\\": true,
+  \\"noLegacyNoteRef\\": true,
+  \\"noXVaultWikiLink\\": true,
+  \\"lookupConfirmVaultOnCreate\\": false,
+  \\"mermaid\\": true,
+  \\"useKatex\\": true,
+  \\"autoFoldFrontmatter\\": true,
+  \\"usePrettyRefs\\": true,
+  \\"dev\\": {
+    \\"enablePreviewV2\\": true
+  },
+  \\"lookup\\": {
+    \\"note\\": {
+      \\"selectionType\\": \\"selectionExtract\\"
+    }
+  },
+  \\"journal\\": {
+    \\"dailyDomain\\": \\"daily\\",
+    \\"name\\": \\"journal\\",
+    \\"dateFormat\\": \\"y.MM.dd\\",
+    \\"addBehavior\\": \\"childOfDomain\\",
+    \\"firstDayOfWeek\\": 1
+  },
+  \\"scratch\\": {
+    \\"name\\": \\"scratch\\",
+    \\"dateFormat\\": \\"y.MM.dd.HHmmss\\",
+    \\"addBehavior\\": \\"asOwnDomain\\"
+  },
+  \\"site\\": {
+    \\"copyAssets\\": true,
+    \\"siteHierarchies\\": [
+      \\"root\\"
+    ],
+    \\"siteRootDir\\": \\"docs\\",
+    \\"usePrettyRefs\\": true,
+    \\"title\\": \\"Dendron\\",
+    \\"description\\": \\"Personal knowledge space\\",
+    \\"siteLastModified\\": true,
+    \\"duplicateNoteBehavior\\": {
+      \\"action\\": \\"useVault\\",
+      \\"payload\\": [
+        \\"vault1\\",
+        \\"vault2\\",
+        \\"vaultThree\\"
+      ]
+    },
+    \\"siteUrl\\": \\"https://foo.com\\",
+    \\"dest\\": \\"<TEMP_DIR>/tmp-28390-eFXGw2o1uNqY\\",
+    \\"includeBody\\": true,
+    \\"usePrettyLinks\\": true,
+    \\"siteNotesDir\\": \\"notes\\",
+    \\"siteFaviconPath\\": \\"favicon.ico\\",
+    \\"gh_edit_link\\": true,
+    \\"gh_edit_link_text\\": \\"Edit this page on GitHub\\",
+    \\"gh_edit_branch\\": \\"master\\",
+    \\"gh_root\\": \\"docs/\\",
+    \\"gh_edit_view_mode\\": \\"edit\\",
+    \\"writeStubs\\": true,
+    \\"siteIndex\\": \\"root\\"
+  },
+  \\"initializeRemoteVaults\\": true
+}
+"
+`;
+
+exports[`nextjs export ok 2`] = `
+"<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
+<p>foo body</p>
+<hr>
+<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<ol>
+<li><a href=\\"/notes/foo.ch1\\">Ch1</a></li>
+</ol>"
+`;

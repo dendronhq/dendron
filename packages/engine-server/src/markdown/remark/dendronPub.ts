@@ -51,10 +51,10 @@ type PluginOpts = NoteRefsOpts & {
 
 function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
   const proc = this;
-  const procData = MDUtilsV4.getDendronData(proc);
+  let { overrides, vault } = MDUtilsV4.getDendronData(proc);
   const { mode } = MDUtilsV5.getProcOpts(proc);
-  const { dest, fname, config, overrides, insideNoteRef } = procData;
-  let vault = procData.vault;
+
+  const { dest, fname, config, insideNoteRef } = MDUtilsV5.getProcData(proc);
 
   function transformer(tree: Node, _file: VFile) {
     const root = tree as Root;
@@ -182,7 +182,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
           }
         }
         const alias = data.alias ? data.alias : value;
-        const usePrettyLinks = engine.config.site.usePrettyLinks;
+        const usePrettyLinks = config.site.usePrettyLinks;
         const maybeFileExtension =
           _.isBoolean(usePrettyLinks) && usePrettyLinks ? "" : ".html";
         const href = `${copts?.prefix || ""}${value}${maybeFileExtension}${

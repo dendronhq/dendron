@@ -124,13 +124,15 @@ export type ProcDataFullOptsV5 = {
  * Data from the processor
  */
 export type ProcDataFullV5 = {
+  // main properties that are configured when processor is created
   engine: DEngineClient;
   vault: DVault;
   fname: string;
   dest: DendronASTDest;
   wsRoot: string;
 
-  // derived
+  // derived: unless passed in, these come from engine or are set by
+  // other unified plugins
   config: DendronConfig;
   notes?: NotePropsDict;
   insideNoteRef?: boolean;

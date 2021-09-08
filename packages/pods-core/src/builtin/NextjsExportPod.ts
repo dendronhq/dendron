@@ -32,6 +32,7 @@ function getSiteConfig({
   return {
     ...siteConfig,
     ...overrides,
+    usePrettyLinks: true,
   };
 }
 
@@ -251,8 +252,8 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     fs.ensureDirSync(notesMetaDir);
     this.L.info({ ctx, msg: "writing notes..." });
     await Promise.all(
-      _.values(publishedNotes).flatMap(async (note) => {
-        return [
+      _.map(_.values(publishedNotes), async (note) => {
+        return Promise.all([
           this.renderBodyToHTML({
             engine,
             note,
@@ -261,7 +262,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
             engineConfig,
           }),
           this.renderMetaToJSON({ note, notesDir: notesMetaDir }),
-        ];
+        ]);
       })
     );
     const podDstPath = path.join(podDstDir, "notes.json");

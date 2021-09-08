@@ -15,7 +15,7 @@ export class SampleView implements vscode.WebviewViewProvider {
     this._view?.webview.postMessage(msg);
   }
 
-  public resolveWebviewView(
+  public async resolveWebviewView(
     webviewView: vscode.WebviewView,
     _context: vscode.WebviewViewResolveContext,
     _token: vscode.CancellationToken
@@ -25,7 +25,9 @@ export class SampleView implements vscode.WebviewViewProvider {
       enableScripts: true,
       localResourceRoots: [],
     };
-    webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
+    webviewView.webview.html = await this._getHtmlForWebview(
+      webviewView.webview
+    );
   }
 
   private _getHtmlForWebview(_webview: vscode.Webview) {

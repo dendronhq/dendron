@@ -20,7 +20,7 @@ suite("OpenLink", function () {
       onInit: async ({}) => {
         const cmd = new OpenLinkCommand();
         const { error } = await cmd.execute();
-        expect(error!.message).toEqual("nothing selected");
+        expect(error!.message).toEqual("no valid path or URL selected");
         done();
       },
     });

@@ -1,12 +1,14 @@
 import {
   DefaultMap,
   isNotUndefined,
+  NoteProps,
   NoteUtils,
   Position,
   TAGS_HIERARCHY,
   VaultUtils,
 } from "@dendronhq/common-all";
 import {
+  AnchorUtils,
   BlockAnchor,
   DendronASTDest,
   DendronASTTypes,
@@ -278,30 +280,67 @@ function decorateTag({
 
 function linkedNoteType({
   fname,
+  anchorStart,
+  anchorEnd,
   vaultName,
+  document,
 }: {
   fname: string;
+  anchorStart?: string;
+  anchorEnd?: string;
   vaultName?: string;
+  document?: TextDocument;
 }) {
+  const ctx = "linkedNoteType";
   const { notes, vaults } = getDWorkspace().engine;
   const vault = vaultName
     ? VaultUtils.getVaultByName({ vname: vaultName, vaults })
     : undefined;
   // Vault specified, but can't find it.
   if (vaultName && !vault) return DECORATION_TYPE.brokenWikilink;
-  let exists: boolean;
-  try {
-    exists =
-      NoteUtils.getNotesByFname({
+
+  let matchingNotes: NoteProps[];
+  // Same-file links have `fname` undefined or empty string
+  if (!fname && document) {
+    const documentNote = VSCodeUtils.getNoteFromDocument(document);
+    matchingNotes = documentNote ? [documentNote] : [];
+  } else {
+    try {
+      matchingNotes = NoteUtils.getNotesByFname({
         fname,
         vault,
         notes,
-      }).length > 0;
-  } catch (err) {
-    Logger.info({ ctx: "doesLinkedNoteExist", err });
-    exists = false;
+      });
+    } catch (err) {
+      Logger.info({
+        ctx,
+        msg: "error when looking for note",
+        fname,
+        vaultName,
+        err,
+      });
+      return DECORATION_TYPE.brokenWikilink;
+    }
   }
-  if (exists || containsNonDendronUri(fname)) return DECORATION_TYPE.wikiLink;
+
+  if (anchorStart || anchorEnd) {
+    const allAnchors = _.flatMap(matchingNotes, (note) =>
+      Object.values(note.anchors)
+    )
+      .filter(isNotUndefined)
+      .map(AnchorUtils.anchor2string);
+    if (anchorStart && anchorStart !== "*" && !allAnchors.includes(anchorStart))
+      return DECORATION_TYPE.brokenWikilink;
+    if (anchorEnd && anchorEnd !== "*" && !allAnchors.includes(anchorEnd))
+      return DECORATION_TYPE.brokenWikilink;
+  }
+
+  if (
+    matchingNotes.length > 0 ||
+    containsNonDendronUri(fname) ||
+    fname.endsWith("*")
+  )
+    return DECORATION_TYPE.wikiLink;
   else return DECORATION_TYPE.brokenWikilink;
 }
 
@@ -313,7 +352,9 @@ function decorateWikiLink(wikiLink: WikiLinkNoteV4, document: TextDocument) {
 
   const type = linkedNoteType({
     fname: wikiLink.value,
+    anchorStart: wikiLink.data.anchorHeader,
     vaultName: wikiLink.data.vaultName,
+    document,
   });
   const wikiLinkrange = VSCodeUtils.position2VSCodeRange(position);
   const options: DecorationOptions = {
@@ -361,13 +402,16 @@ function decorateUserTag(userTag: UserTag) {
   ];
 }
 
-function decorateReference(reference: NoteRefNoteV4) {
+function decorateReference(reference: NoteRefNoteV4, document: TextDocument) {
   const position = reference.position as Position;
   if (_.isUndefined(position)) return [];
 
   const type = linkedNoteType({
     fname: reference.data.link.from.fname,
+    anchorStart: reference.data.link.data.anchorStart,
+    anchorEnd: reference.data.link.data.anchorEnd,
     vaultName: reference.data.link.data.vaultName,
+    document,
   });
   const decoration: DecorationOptions = {
     range: VSCodeUtils.position2VSCodeRange(position),

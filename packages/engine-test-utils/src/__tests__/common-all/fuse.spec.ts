@@ -73,6 +73,30 @@ const queryTestV1 = ({
 };
 
 describe("Fuse utility function tests", () => {
+  describe(`doesContainSpecialQueryChars`, () => {
+    test.each([
+      // Fuse doesn't treat * specially but we map * to ' ' hence we treat it as special character.
+      ["dev*ts", true],
+      ["dev vs", true],
+      ["^vs", true],
+      ["vs$", true],
+      ["vs$", true],
+      ["dev|vs", true],
+      ["!vs", true],
+      ["=vs", true],
+      ["'vs", true],
+      ["dev-vs", false],
+      ["dev_vs", false],
+    ])(
+      `WHEN input="%s" THEN result is expected to be %s`,
+      (input: string, expected: boolean) => {
+        expect(FuseEngine.doesContainSpecialQueryChars(input)).toEqual(
+          expected
+        );
+      }
+    );
+  });
+
   describe("formatQueryForFuse", () => {
     test.each([
       ["dev*vs", "dev vs"],
@@ -331,6 +355,30 @@ describe("FuseEngine tests with extracted data.", () => {
         ["devapi", ["dendron.dev.api", "dendron.dev.api.seeds"]],
         ["dendron rename", ["dendron.dev.design.commands.rename"]],
         ["rename dendron", ["dendron.dev.design.commands.rename"]],
+        [
+          "dendron.dev design.commands.rename",
+          ["dendron.dev.design.commands.rename"],
+        ],
+        [
+          "^dendron.dev.design.commands.rename",
+          ["dendron.dev.design.commands.rename"],
+        ],
+        [
+          "dendron.dev.design.commands.rename$",
+          ["dendron.dev.design.commands.rename"],
+        ],
+        [
+          "=dendron.dev.design.commands.rename",
+          ["dendron.dev.design.commands.rename"],
+        ],
+        [
+          "dendron.dev.design.commands.rename !git",
+          ["dendron.dev.design.commands.rename"],
+        ],
+        [
+          "'dendron.dev.design 'commands.rename",
+          ["dendron.dev.design.commands.rename"],
+        ],
       ])(
         "WHEN query for '%s' THEN results to contain %s",
         (qs: string, expectedFNames: string[]) => {

@@ -1,7 +1,7 @@
-import { DEngineClient } from "@dendronhq/common-all";
+import { DEngineClient, DVaultVisibility } from "@dendronhq/common-all";
 import { tmpDir } from "@dendronhq/common-server";
 import { AssertUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
-import { ENGINE_HOOKS } from "../../../presets";
+import { ENGINE_HOOKS, ENGINE_HOOKS_MULTI } from "../../../presets";
 import {
   DendronASTData,
   DendronASTDest,
@@ -151,6 +151,76 @@ describe("backlinks", () => {
       }
     );
   });
+
+  test("backlinks to private vaults not added", async () => {
+    await runEngineTestV5(
+      async ({ engine, vaults }) => {
+        const vault = vaults[0];
+        const resp = await MDUtilsV4.procRehype({
+          proc: proc(engine, {
+            fname: "one",
+            vault,
+            dest,
+            config: engine.config,
+          }),
+        }).process("");
+        expect(
+          await AssertUtils.assertInString({
+            body: resp.contents as string,
+            nomatch: [
+              `<a href="secret1.html">Secret1 (vault2)</a>`,
+              `<a href="secret2.html">Secret2 (vault2)</a>`
+            ],
+            match: [
+              `<a href="not-secret.html">Not Secret (vaultThree)</a>`
+            ]
+          })
+        ).toBeTruthy();
+      },
+      {
+        expect,
+        preSetupHook: async (opts: any) => {
+          await ENGINE_HOOKS_MULTI.setupBasicMulti(opts);
+          TestConfigUtils.withConfig(
+              (config) => {
+              const bvault = config.vaults.find(
+                (ent: any) => ent.fsPath === "vault2"
+              );
+              bvault!.visibility = DVaultVisibility.PRIVATE;
+              return config;
+            },
+            { wsRoot: opts.wsRoot }
+          );
+
+          const { wsRoot, vaults } = opts;
+          await NoteTestUtilsV4.createNote({
+            fname: "one",
+            vault: vaults[0],
+            wsRoot,
+            body: "one"
+          });
+          await NoteTestUtilsV4.createNote({
+            fname: "secret1",
+            vault: vaults[1],
+            wsRoot,
+            body: "[[one]]"
+          });
+          await NoteTestUtilsV4.createNote({
+            fname: "secret2",
+            vault: vaults[1],
+            wsRoot,
+            body: "[[one]]"
+          });
+          await NoteTestUtilsV4.createNote({
+            fname: "not-secret",
+            vault: vaults[2],
+            wsRoot,
+            body: "[[one]]"
+          })
+        },
+      }
+    ); 
+  })
 
   describe("frontmatter tags", () => {
     test("single", async () => {

@@ -472,6 +472,7 @@ describe("dendronPub", () => {
           const out = await proc(engine, {
             fname: "ref",
             dest: DendronASTDest.HTML,
+            shouldApplyPublishRules: true,
             vault: vaults[0],
             config: engine.config,
           }).process("![[dupe]]");

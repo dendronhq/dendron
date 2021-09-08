@@ -1,7 +1,8 @@
-import { DVaultVisibility, NoteUtils, VaultUtils } from "@dendronhq/common-all";
+import { NoteUtils, VaultUtils } from "@dendronhq/common-all";
 import _ from "lodash";
 import { Content, Root } from "mdast";
 import { list, listItem, paragraph } from "mdast-builder";
+import { SiteUtils } from "../../topics/site";
 import Unified, { Plugin } from "unified";
 import { Node } from "unist";
 import u from "unist-builder";
@@ -41,9 +42,24 @@ const plugin: Plugin = function (this: Unified.Processor) {
       const vaultName = backlink.from.vaultName!;
       const vault = VaultUtils.getVaultByName({
         vaults: engine.vaults,
-        vname: vaultName
+        vname: vaultName,
+      })!;
+      const note = NoteUtils.getNoteByFnameV5({
+        fname: backlink.from.fname!,
+        notes: engine.notes,
+        vault,
+        wsRoot: engine.wsRoot,
       });
-      return vault?.visibility !== DVaultVisibility.PRIVATE;
+
+      if (!note) {
+        return false;
+      }
+      const out = SiteUtils.canPublish({
+        note,
+        engine,
+        config: engine.config,
+      });
+      return out;
     });
 
     if (!_.isEmpty(backlinksToPublish)) {

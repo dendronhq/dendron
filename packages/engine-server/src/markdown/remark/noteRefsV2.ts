@@ -5,6 +5,7 @@ import {
   DNodeUtils,
   DNoteLoc,
   DNoteRefLink,
+  DVault,
   DUtils,
   getSlugger,
   isBlockAnchor,
@@ -301,76 +302,14 @@ function convertNoteRef(opts: ConvertNoteRefOpts): {
 export function convertNoteRefASTV2(
   opts: ConvertNoteRefOpts & { procOpts: any }
 ): { error: DendronError | undefined; data: Parent[] | undefined } {
-  let errors: DendronError[] = [];
-  const { link, proc, compilerOpts, procOpts } = opts;
-  const { error, engine } = MDUtilsV4.getEngineFromProc(proc);
-  const refLvl = MDUtilsV4.getNoteRefLvl(proc());
-  let { dest, vault, config, shouldApplyPublishRules } =
-    MDUtilsV4.getDendronData(proc);
-  if (MDUtilsV5.isV5Active(proc)) {
-    shouldApplyPublishRules = MDUtilsV5.shouldApplyPublishingRules(proc);
-  }
-  if (link.data.vaultName) {
-    vault = VaultUtils.getVaultByNameOrThrow({
-      vaults: engine.vaults,
-      vname: link.data.vaultName,
-    })!;
-  }
-  if (!vault) {
-    return {
-      error: new DendronError({ message: "no vault specified" }),
-      data: [],
-    };
-  }
-  const { wikiLinkOpts } = compilerOpts;
-  const sitePrettyRefConfig = DConfig.getProp(procOpts.config, "site").usePrettyRefs;
-  const prettyRefConfig = DConfig.getProp(procOpts.config, "usePrettyRefs");
-  let prettyRefs = shouldApplyPublishRules
-    ? sitePrettyRefConfig
-    : prettyRefConfig
-  if (
-    prettyRefs && _.includes(
-      [DendronASTDest.MD_DENDRON, DendronASTDest.MD_REGULAR], 
-      dest
-    )
-  ) {
-    prettyRefs = false;
-  }
-  if (refLvl >= MAX_REF_LVL) {
-    return {
-      error: new DendronError({ message: "too many nested note refs" }),
-      data: [MDUtilsV4.genMDMsg("too many nested note refs")],
-    };
-  }
-  let noteRefs: DNoteLoc[] = [];
-  if (link.from.fname.endsWith("*")) {
-    const resp = engine.queryNotesSync({ qs: link.from.fname, vault });
-    const out = _.filter(resp.data, (ent) =>
-      DUtils.minimatch(ent.fname, link.from.fname)
-    );
-    noteRefs = _.sortBy(
-      out.map((ent) => NoteUtils.toNoteLoc(ent)),
-      "fname"
-    );
-  } else {
-    noteRefs.push(link.from);
-  }
-  const out: Parent[] = noteRefs.map((ref) => {
-    const fname = ref.fname;
-    // TODO: find first unit with path
-    const npath = DNodeUtils.getFullPath({
-      wsRoot: engine.wsRoot,
-      vault,
-      basename: fname + ".md",
-    });
-    let note: NoteProps;
-    try {
-      note = file2Note(npath, vault);
-    } catch (err) {
-      const msg = `error reading file, ${npath}`;
-      return MDUtilsV4.genMDMsg(msg);
-    }
-
+  /**
+   * Takes a note ref and processes it
+   * @param ref DNoteLoc (note reference) to process
+   * @param note actual note at the reference
+   * @param fname fname (either from the actual note ref, or inferred.)
+   * @returns process note references
+   */
+  function processRef(ref: DNoteLoc, note: NoteProps, fname: string) {
     try {
       if (
         shouldApplyPublishRules &&
@@ -447,11 +386,133 @@ export function convertNoteRefASTV2(
         return paragraph(data);
       }
     } catch (err) {
-      const msg = `Error rendering note ${note?.fname}`;
-      return MDUtilsV4.genMDMsg(msg);
+      const msg = `Error rendering note reference for ${note?.fname}`;
+      return MDUtilsV4.genMDErrorMsg(msg);
     }
-  });
-  return { error, data: out };
+  }
+
+  const errors: DendronError[] = [];
+  const { link, proc, compilerOpts, procOpts } = opts;
+  const { error, engine } = MDUtilsV4.getEngineFromProc(proc);
+  const refLvl = MDUtilsV4.getNoteRefLvl(proc());
+
+  // prevent infinite nesting.
+  if (refLvl >= MAX_REF_LVL) {
+    return {
+      error: new DendronError({ message: "too many nested note refs" }),
+      data: [MDUtilsV4.genMDErrorMsg("too many nested note refs")],
+    };
+  }
+
+  // figure out configs that change how we process the note reference
+  const dendronData = MDUtilsV4.getDendronData(proc);
+  const { dest, config } = dendronData;
+  let { shouldApplyPublishRules } = dendronData;
+
+  const { wikiLinkOpts } = compilerOpts;
+
+  const sitePrettyRefConfig = DConfig.getProp(
+    procOpts.config,
+    "site"
+  ).usePrettyRefs;
+  const prettyRefConfig = DConfig.getProp(procOpts.config, "usePrettyRefs");
+
+  if (MDUtilsV5.isV5Active(proc)) {
+    shouldApplyPublishRules = MDUtilsV5.shouldApplyPublishingRules(proc);
+  }
+
+  let prettyRefs = shouldApplyPublishRules
+    ? sitePrettyRefConfig
+    : prettyRefConfig;
+  if (
+    prettyRefs &&
+    _.includes([DendronASTDest.MD_DENDRON, DendronASTDest.MD_REGULAR], dest)
+  ) {
+    prettyRefs = false;
+  }
+
+  // process note references.
+  let noteRefs: DNoteLoc[] = [];
+  if (link.from.fname.endsWith("*")) {
+    // wildcard reference case
+    const vault = dendronData.vault;
+    const resp = engine.queryNotesSync({ qs: link.from.fname, vault });
+    const out = _.filter(resp.data, (ent) =>
+      DUtils.minimatch(ent.fname, link.from.fname)
+    );
+    noteRefs = _.sortBy(
+      out.map((ent) => NoteUtils.toNoteLoc(ent)),
+      "fname"
+    );
+    if (noteRefs.length === 0) {
+      const msg = `Error rendering note reference. There are no matches for \`${link.from.fname}\`.`;
+      return { error, data: [MDUtilsV4.genMDErrorMsg(msg)] };
+    }
+
+    const processedRefs = noteRefs.map((ref) => {
+      const fname = ref.fname;
+      const npath = DNodeUtils.getFullPath({
+        wsRoot: engine.wsRoot,
+        vault: vault as DVault,
+        basename: fname + ".md",
+      });
+      let note: NoteProps;
+      try {
+        note = file2Note(npath, vault as DVault);
+      } catch (err) {
+        const msg = `error reading file, ${npath}`;
+        return MDUtilsV4.genMDMsg(msg);
+      }
+      return processRef(ref, note, fname);
+    });
+    return { error, data: processedRefs };
+  } else {
+    // single reference case.
+    let note: NoteProps;
+    let markdownErrorMessage: Parent | undefined;
+    if (link.data.vaultName) {
+      const maybeVault = VaultUtils.getVaultByNameOrThrow({
+        vaults: engine.vaults,
+        vname: link.data.vaultName,
+      })!;
+      const maybeNotes = NoteUtils.getNotesByFname({
+        fname: link.from.fname,
+        notes: engine.notes,
+        vault: maybeVault,
+      });
+      if (maybeNotes.length !== 1) {
+        const msg = `Error rendering note reference for ${link.from.fname}`;
+        markdownErrorMessage = MDUtilsV4.genMDErrorMsg(msg);
+      } else {
+        note = maybeNotes[0];
+      }
+    } else {
+      const maybeNotes = NoteUtils.getNotesByFname({
+        fname: link.from.fname,
+        notes: engine.notes,
+      });
+
+      if (maybeNotes.length === 1) {
+        note = maybeNotes[0];
+      } else if (maybeNotes.length === 0) {
+        const msg = `Error rendering note reference. No note found with name ${link.from.fname}`;
+        markdownErrorMessage = MDUtilsV4.genMDErrorMsg(msg);
+      } else {
+        const msg = `Error rendering note reference. There are multiple notes with the name ${link.from.fname}. Please specify the vault prefix.`;
+        markdownErrorMessage = MDUtilsV4.genMDErrorMsg(msg);
+      }
+    }
+    if (!markdownErrorMessage) {
+      noteRefs.push(link.from);
+      const processedRefs = noteRefs.map((ref) => {
+        const fname = note.fname;
+        return processRef(ref, note, fname);
+      });
+      return { error, data: processedRefs };
+    } else {
+      return { error, data: [markdownErrorMessage] };
+    }
+  }
 }
 
 /** For any List in `nodes`, removes the children before or after the index of the following ListItem in `nodes`. */

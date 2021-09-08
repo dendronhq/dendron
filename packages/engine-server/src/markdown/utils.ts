@@ -18,7 +18,7 @@ import mermaid from "@dendronhq/remark-mermaid";
 import rehypePrism from "@mapbox/rehype-prism";
 import _ from "lodash";
 import { Heading } from "mdast";
-import { paragraph, root, text } from "mdast-builder";
+import { blockquote, paragraph, root, text } from "mdast-builder";
 import nunjucks from "nunjucks";
 import path from "path";
 import link from "rehype-autolink-headings";
@@ -207,6 +207,10 @@ export class MDUtilsV4 {
 
   static genMDMsg(msg: string): Parent {
     return root(paragraph(text(msg)));
+  }
+
+  static genMDErrorMsg(msg: string): Parent {
+    return root(blockquote(text(msg)));
   }
 
   static getDendronData(proc: Processor) {

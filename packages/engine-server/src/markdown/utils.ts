@@ -59,6 +59,7 @@ import {
 } from "./types";
 import { hashtags } from "./remark/hashtag";
 import { userTags } from "./remark/userTags";
+import { extendedImage } from "./remark/extendedImage";
 
 const toString = require("mdast-util-to-string");
 export { nunjucks };
@@ -335,6 +336,7 @@ export class MDUtilsV4 {
       .use(blockAnchors)
       .use(hashtags)
       .use(userTags)
+      .use(extendedImage)
       .data("errors", errors);
     this.setDendronData(_proc, { dest: opts.dest, fname: opts.fname });
     this.setEngine(_proc, opts.engine);
@@ -404,6 +406,7 @@ export class MDUtilsV4 {
       .use(blockAnchors, _.merge(opts.blockAnchorsOpts))
       .use(hashtags)
       .use(userTags)
+      .use(extendedImage)
       .use(noteRefsV2, {
         ...opts.noteRefOpts,
         wikiLinkOpts: opts.wikiLinksOpts,

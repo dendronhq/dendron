@@ -56,6 +56,7 @@ import { WorkspaceUtils } from "../../workspace";
 import {
   Anchor,
   BlockAnchor,
+  ExtendedImage,
   DendronASTDest,
   DendronASTNode,
   DendronASTRoot,
@@ -905,6 +906,10 @@ export class RemarkUtils {
 
   static isImage(node: Node): node is Image {
     return node.type === DendronASTTypes.IMAGE;
+  }
+
+  static isExtendedImage(node: Node): node is ExtendedImage {
+    return node.type === DendronASTTypes.EXTENDED_IMAGE;
   }
 
   static isText(node: Node): node is Text {

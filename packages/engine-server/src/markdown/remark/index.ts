@@ -35,3 +35,9 @@ export {
   userTags,
   matchUserTag,
 } from "./userTags";
+export {
+  extendedImage,
+  ExtendedImageOpts,
+  extendedImage2html,
+  extendedImage2htmlRaw,
+} from "./extendedImage";

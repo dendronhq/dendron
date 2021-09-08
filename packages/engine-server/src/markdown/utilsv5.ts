@@ -38,6 +38,7 @@ import { hashtags } from "./remark/hashtag";
 import { userTags } from "./remark/userTags";
 import { backlinks } from "./remark/backlinks";
 import { hierarchies } from "./remark";
+import { extendedImage } from "./remark/extendedImage";
 
 /**
  * What mode a processor should run in
@@ -235,6 +236,7 @@ export class MDUtilsV5 {
       .use(blockAnchors)
       .use(hashtags)
       .use(userTags)
+      .use(extendedImage)
       .use(footnotes)
       .data("errors", errors);
 
@@ -278,6 +280,14 @@ export class MDUtilsV5 {
           if (data.dest === DendronASTDest.HTML) {
             proc = proc.use(backlinks).use(hierarchies);
           }
+          // Add flavor specific plugins. These need to come before `dendronPub`
+          // to fix extended image URLs before they get converted to HTML
+          if (opts.flavor === ProcFlavor.PREVIEW) {
+            proc = proc.use(dendronPreview);
+          }
+          if (opts.flavor === ProcFlavor.HOVER_PREVIEW) {
+            proc = proc.use(dendronHoverPreview);
+          }
           // add additional plugins
           proc = proc.use(dendronPub, {
             insertTitle: shouldInsertTitle,
@@ -288,13 +298,7 @@ export class MDUtilsV5 {
           if (data.config?.mermaid) {
             proc = proc.use(mermaid, { simple: true });
           }
-          // add flavor specific plugins
-          if (opts.flavor === ProcFlavor.PREVIEW) {
-            proc = proc.use(dendronPreview);
-          }
-          if (opts.flavor === ProcFlavor.HOVER_PREVIEW) {
-            proc = proc.use(dendronHoverPreview);
-          }
+          // Add remaining flavor specific plugins
           if (opts.flavor === ProcFlavor.PUBLISHING) {
             proc = proc.use(dendronPub, {
               wikiLinkOpts: {

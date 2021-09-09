@@ -109,6 +109,7 @@ const ALLOWED_STYLE_PROPS = new Set<string>([
   "min-height",
   "max-width",
   "max-height",
+  "display",
   "opacity",
   "outline",
   "rotate",

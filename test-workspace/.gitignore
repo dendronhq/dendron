@@ -4,3 +4,4 @@ docs/*
 .dendron.*
 docs
 vault-generated/
+pods/*

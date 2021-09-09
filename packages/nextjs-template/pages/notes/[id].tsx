@@ -28,12 +28,18 @@ import {
   getNotes,
 } from "../../utils/build";
 import { DendronCommonProps, NoteRouterQuery } from "../../utils/types";
-import { NoteProps } from "@dendronhq/common-all";
+import {
+  DendronError,
+  error2PlainObject,
+  NoteProps,
+} from "@dendronhq/common-all";
 
 export type NotePageProps = InferGetStaticPropsType<typeof getStaticProps> &
-  DendronCommonProps & { // `InferGetStaticPropsType` doesn't get right types for some reason, hence the manual override here
+  DendronCommonProps & {
+    // `InferGetStaticPropsType` doesn't get right types for some reason, hence the manual override here
     customHeadContent: string | null;
     noteIndex: NoteProps;
+    note: NoteProps;
   };
 
 export default function Note({
@@ -88,7 +94,7 @@ export default function Note({
     return <DendronSpinner />;
   }
 
-  const maybeCollection = note.custom.has_collection
+  const maybeCollection = note.custom?.has_collection
     ? collectionChildren.map((child: NoteProps) =>
         DendronCollectionItem({ note: child, noteIndex })
       )
@@ -113,6 +119,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
   };
 };
 
+// @ts-ignore
 export const getStaticProps: GetStaticProps = async (
   context: GetStaticPropsContext
 ) => {
@@ -125,22 +132,27 @@ export const getStaticProps: GetStaticProps = async (
     throw Error("id required");
   }
 
-  const [body, note] = await Promise.all([getNoteBody(id), getNoteMeta(id)]);
-  const noteData = getNotes();
-  const customHeadContent: string | null = await getCustomHead();
-  const { notes, noteIndex } = noteData;
+  try {
+    const [body, note] = await Promise.all([getNoteBody(id), getNoteMeta(id)]);
+    const noteData = getNotes();
+    const customHeadContent: string | null = await getCustomHead();
+    const { notes, noteIndex } = noteData;
 
-  const collectionChildren = note.custom.has_collection
-    ? prepChildrenForCollection(note, notes, noteIndex)
-    : null;
+    const collectionChildren = note.custom?.has_collection
+      ? prepChildrenForCollection(note, notes, noteIndex)
+      : null;
 
-  return {
-    props: {
-      note,
-      body,
-      noteIndex,
-      collectionChildren,
-      customHeadContent,
-    },
-  };
+    return {
+      props: {
+        note,
+        body,
+        noteIndex,
+        collectionChildren,
+        customHeadContent,
+      },
+    };
+  } catch (err) {
+    console.log("BOND");
+    console.log(error2PlainObject(err as DendronError));
+  }
 };

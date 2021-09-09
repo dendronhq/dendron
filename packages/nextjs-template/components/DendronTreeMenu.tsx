@@ -1,25 +1,13 @@
-import {
-  createLogger,
-  ThemeUtils,
-  TreeViewUtils,
-} from "@dendronhq/common-frontend";
-import {
-  Tree,
-  TreeProps,
-  Menu,
-  MenuProps,
-  MenuItemProps,
-  SubMenuProps,
-} from "antd";
-import { UpOutlined, DownOutlined, RightOutlined } from "@ant-design/icons";
+import { DownOutlined, RightOutlined, UpOutlined } from "@ant-design/icons";
+import { createLogger, TreeViewUtils } from "@dendronhq/common-frontend";
+import { Menu } from "antd";
 import _ from "lodash";
 import { DataNode } from "rc-tree/lib/interface";
-import React, { useState, useEffect, useCallback } from "react";
-import { useThemeSwitcher } from "react-css-theme-switcher";
-import { useDendronRouter } from "../utils/hooks";
-import { DendronCommonProps, NoteData, verifyNoteData } from "../utils/types";
-import DendronSpinner from "./DendronSpinner";
+import React, { useCallback, useEffect, useState } from "react";
 import { DENDRON_STYLE_CONSTANTS } from "../styles/constants";
+import { useDendronRouter } from "../utils/hooks";
+import { NoteData, verifyNoteData } from "../utils/types";
+import DendronSpinner from "./DendronSpinner";
 
 const { SubMenu } = Menu;
 
@@ -187,7 +175,7 @@ function MenuView({
         openKeys: expandKeys,
         selectedKeys: expandKeys,
       })}
-      onClick={({ key }) => onSelect(key)}
+      onClick={({ key }) => onSelect(key as string)}
       inlineIndent={DENDRON_STYLE_CONSTANTS.SIDER.INDENT}
       expandIcon={ExpandIcon}
       inlineCollapsed={collapsed}

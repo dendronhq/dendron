@@ -31,12 +31,14 @@ import {
   UserTag,
   VaultMissingBehavior,
   WikiLinkNoteV4,
+  ExtendedImage,
 } from "../types";
 import { MDUtilsV4 } from "../utils";
 import { MDUtilsV5, ProcMode } from "../utilsv5";
 import { blockAnchor2html } from "./blockAnchors";
 import { NoteRefsOpts } from "./noteRefs";
 import { convertNoteRefASTV2 } from "./noteRefsV2";
+import { extendedImage2html } from "./extendedImage";
 
 type PluginOpts = NoteRefsOpts & {
   assetsPrefix?: string;
@@ -343,7 +345,12 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
           return index;
         }
       }
-      if (node.type === "image" && dest === DendronASTDest.HTML) {
+      // The url correction needs to happen for both regular and extended images
+      if (
+        (node.type === DendronASTTypes.IMAGE ||
+          node.type === DendronASTTypes.EXTENDED_IMAGE) &&
+        dest === DendronASTDest.HTML
+      ) {
         const imageNode = node as Image;
         if (opts?.assetsPrefix) {
           imageNode.url =
@@ -352,6 +359,18 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
             "/" +
             _.trim(imageNode.url, "/");
         }
+      }
+      if (
+        node.type === DendronASTTypes.EXTENDED_IMAGE &&
+        dest === DendronASTDest.HTML
+      ) {
+        const index = _.indexOf(parent.children, node);
+        // Replace with the HTML containing the image including custom properties
+        parent.children.splice(
+          index,
+          1,
+          extendedImage2html(node as ExtendedImage)
+        );
       }
       return; // continue traversal
     });

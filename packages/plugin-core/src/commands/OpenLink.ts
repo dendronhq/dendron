@@ -16,7 +16,7 @@ type CommandOpts = {};
 
 type CommandInput = {};
 
-type CommandOutput = { error?: DendronError; fsPath?: string } | null;
+type CommandOutput = { error?: DendronError; fsPath?: string };
 
 export class OpenLinkCommand extends BasicCommand<CommandOpts, CommandOutput> {
   key = DENDRON_COMMANDS.OPEN_LINK.key;
@@ -93,15 +93,15 @@ export class OpenLinkCommand extends BasicCommand<CommandOpts, CommandOutput> {
       return { error };
     }
 
+    let assetPath: string;
     if (text.indexOf("://") !== -1) {
       window.showInformationMessage(
         "the selection reads as a full URI so an attempt will be made to open it"
       );
       env.openExternal(Uri.parse(text));
-      return;
+      assetPath = resolvePath(text, getExtension().rootWorkspace.uri.fsPath);
     } else {
       const wsRoot = getDWorkspace().wsRoot;
-      let assetPath: string;
 
       if (text.startsWith("asset")) {
         const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
@@ -125,8 +125,7 @@ export class OpenLinkCommand extends BasicCommand<CommandOpts, CommandOutput> {
         this.L.error({ error });
         return { error };
       });
-
-      return { filePath: assetPath };
     }
+    return { filePath: assetPath };
   }
 }

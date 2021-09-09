@@ -182,7 +182,7 @@ export class DendronExtension {
       const out = await cb();
       return out;
     } catch (err) {
-      Logger.error({ ctx, error: err });
+      Logger.error({ ctx, error: err as DendronError });
       throw err;
     } finally {
       if (this.fileWatcher) {

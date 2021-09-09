@@ -130,7 +130,7 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
   init(opts: { wsRoot: string }) {
     const cwd = opts.wsRoot;
     this.print(`initializing publishing at ${cwd}...`);
-    const cmd = `git clone git@github.com:dendronhq/nextjs-template.git .next`;
+    const cmd = `git clone https://github.com/dendronhq/nextjs-template.git .next`;
     $(cmd, { cwd });
     this.print(
       `run "cd ${getNextRoot(

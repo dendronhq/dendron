@@ -152,7 +152,7 @@ export const getStaticProps: GetStaticProps = async (
       },
     };
   } catch (err) {
-    console.log("BOND");
     console.log(error2PlainObject(err as DendronError));
+    throw err;
   }
 };

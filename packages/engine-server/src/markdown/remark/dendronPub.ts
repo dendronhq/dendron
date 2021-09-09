@@ -190,7 +190,6 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         }${value}${maybeFileExtension}${
           data.anchorHeader ? "#" + data.anchorHeader : ""
         }`;
-        debugger;
         const exists = true;
         // for rehype
         //_node.value = newValue;

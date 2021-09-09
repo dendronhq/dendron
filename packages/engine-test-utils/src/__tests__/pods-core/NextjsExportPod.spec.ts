@@ -172,4 +172,41 @@ describe("nextjs export", () => {
       }
     );
   });
+
+  test("ok, create githubCname", async () => {
+    await runEngineTestV5(
+      async ({ engine, vaults, wsRoot }) => {
+        const dest = tmpDir().name;
+        const pod = new NextjsExportPod();
+        await pod.execute({
+          engine,
+          vaults,
+          wsRoot,
+          config: {
+            dest,
+            siteUrl: "https://bar.com",
+          },
+        });
+        await checkDir({ fpath: dest }, "data", "public");
+        await checkDir({ fpath: path.join(dest, "public") }, "CNAME");
+        await checkFile(
+          { fpath: path.join(dest, "public", "CNAME") },
+          `11ty.dendron.so`
+        );
+      },
+      {
+        expect,
+        preSetupHook: async (opts) => {
+          await ENGINE_HOOKS.setupBasic(opts);
+          TestConfigUtils.withConfig(
+            (config) => {
+              config.site.githubCname = "11ty.dendron";
+              return config;
+            },
+            { wsRoot: opts.wsRoot }
+          );
+        },
+      }
+    );
+  });
 });

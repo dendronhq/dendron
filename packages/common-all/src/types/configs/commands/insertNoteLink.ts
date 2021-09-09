@@ -90,11 +90,10 @@ export const INSERT_NOTE_LINK = {
 
 /**
  * Generates default {@link InsertNoteLinkConfig}
- * @returns InsertNoteLinkConfig
+ * @returns InsertNoteLinkConfig or undefined
  */
-export function genDefaultInsertNoteLinkConfig(): InsertNoteLinkConfig {
-  return {
-    aliasMode: InsertNoteLinkAliasModeEnum.none,
-    multiSelect: false,
-  };
+export function genDefaultInsertNoteLinkConfig():
+  | InsertNoteLinkConfig
+  | undefined {
+  return;
 }

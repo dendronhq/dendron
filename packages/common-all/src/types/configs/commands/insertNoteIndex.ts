@@ -35,10 +35,10 @@ export const INSERT_NOTE_INDEX = {
 
 /**
  * Generates default {@link InsertNoteIndexConfig}
- * @returns InsertNoteIndexConfig
+ * @returns InsertNoteIndexConfig or undefined
  */
-export function genDefaultInsertNoteIndexConfig(): InsertNoteIndexConfig {
-  return {
-    marker: false,
-  };
+export function genDefaultInsertNoteIndexConfig():
+  | InsertNoteIndexConfig
+  | undefined {
+  return;
 }

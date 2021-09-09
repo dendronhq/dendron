@@ -27,6 +27,7 @@ export type LookupConfig = {
  */
 type NoteLookupConfig = {
   selectionBehavior: NoteLookupSelectionBehavior;
+  confirmVaultOnCreate?: boolean;
 };
 
 /**
@@ -56,6 +57,16 @@ const SELECTION_BEHAVIORS: {
   },
 };
 
+const CONFIRM_VAULT_ON_CREATE = (
+  value: boolean
+): DendronConfigEntry<boolean> => {
+  return {
+    value,
+    label: `${value ? "enable" : "disable"} confirm vault on create.`,
+    desc: `${value ? "" : "Do not "}pick valut when creating new note.`,
+  };
+};
+
 /**
  * Constants / functions that produce
  * constants for possible lookup configurations
@@ -63,6 +74,7 @@ const SELECTION_BEHAVIORS: {
 export const LOOKUP = {
   NOTE: {
     SELECTION: SELECTION_BEHAVIORS,
+    CONFIRM_VAULT_ON_CREATE,
   },
 };
 
@@ -74,6 +86,7 @@ export function genDefaultLookupConfig(): LookupConfig {
   return {
     note: {
       selectionBehavior: NoteLookupSelectionBehaviorEnum.extract,
+      confirmVaultOnCreate: false,
     },
   };
 }

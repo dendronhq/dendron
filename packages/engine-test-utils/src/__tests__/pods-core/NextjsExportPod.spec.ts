@@ -116,6 +116,12 @@ describe("nextjs export", () => {
           { fpath: path.join(dest, ".env.production") },
           "NEXT_PUBLIC_ASSET_PREFIX=/customPrefix"
         );
+        await checkFile(
+          {
+            fpath: path.join(dest, "data", "notes", "foo.html"),
+          },
+          `href="/customPrefix/notes/foo.ch1"`
+        );
       },
       {
         expect,

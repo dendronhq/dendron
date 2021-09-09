@@ -185,11 +185,12 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         const usePrettyLinks = config.site.usePrettyLinks;
         const maybeFileExtension =
           _.isBoolean(usePrettyLinks) && usePrettyLinks ? "" : ".html";
-        const href = `${
-          copts?.prefix || config.site.assetsPrefix || ""
+        const href = `${config.site.assetsPrefix || ""}${
+          copts?.prefix || ""
         }${value}${maybeFileExtension}${
           data.anchorHeader ? "#" + data.anchorHeader : ""
         }`;
+        debugger;
         const exists = true;
         // for rehype
         //_node.value = newValue;

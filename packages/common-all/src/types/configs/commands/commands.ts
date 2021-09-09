@@ -4,6 +4,11 @@ import {
   INSERT_NOTE_LINK,
 } from "./insertNoteLink";
 import { genDefaultLookupConfig, LookupConfig, LOOKUP } from "./lookup";
+import {
+  genDefaultInsertNoteIndexConfig,
+  InsertNoteIndexConfig,
+  INSERT_NOTE_INDEX,
+} from "./insertNoteIndex";
 
 /**
  * Namespace for all command related configurations
@@ -11,6 +16,7 @@ import { genDefaultLookupConfig, LookupConfig, LOOKUP } from "./lookup";
 export type DendronCommandConfig = {
   lookup: LookupConfig;
   insertNoteLink: InsertNoteLinkConfig;
+  insertNoteIndex: InsertNoteIndexConfig;
 };
 
 /**
@@ -19,6 +25,7 @@ export type DendronCommandConfig = {
 export const COMMANDS = {
   LOOKUP,
   INSERT_NOTE_LINK,
+  INSERT_NOTE_INDEX,
 };
 
 /**
@@ -30,5 +37,6 @@ export function genDefaultCommandConfig(): DendronCommandConfig {
   return {
     lookup: genDefaultLookupConfig(),
     insertNoteLink: genDefaultInsertNoteLinkConfig(),
+    insertNoteIndex: genDefaultInsertNoteIndexConfig(),
   };
 }

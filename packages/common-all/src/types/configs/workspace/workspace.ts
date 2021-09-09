@@ -1,10 +1,12 @@
 import { genDefaultJournalConfig, JournalConfig, JOURNAL } from "./journal";
+import { genDefaultScratcnConfig, ScratchConfig, SCRATCH } from "./scratch";
 
 /**
  * Namespace for configurations that affect the workspace
  */
 export type DendronWorkspaceConfig = {
   journal: JournalConfig;
+  scratch: ScratchConfig;
 };
 
 /**
@@ -12,10 +14,12 @@ export type DendronWorkspaceConfig = {
  */
 export const WORKSPACE = {
   JOURNAL,
+  SCRATCH,
 };
 
 export function genDefaultWorkspaceConfig(): DendronWorkspaceConfig {
   return {
     journal: genDefaultJournalConfig(),
+    scratch: genDefaultScratcnConfig(),
   };
 }

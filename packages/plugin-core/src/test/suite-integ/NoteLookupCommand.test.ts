@@ -141,6 +141,14 @@ function getSplitTypeButtons(
   return { horizontalSplitBtn };
 }
 
+async function wait1Second(): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve();
+    }, 1000);
+  });
+}
+
 suite("NoteLookupCommand", function () {
   const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {});
 
@@ -733,6 +741,39 @@ suite("NoteLookupCommand", function () {
           expect(
             out.quickpick.value.startsWith(`scratch.${todayFormatted}.`)
           ).toBeTruthy();
+
+          done();
+        },
+      });
+    });
+
+    test("Scratch notes created at different times are differently named", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+        },
+        onInit: async ({ vaults, engine }) => {
+          const cmd = new NoteLookupCommand();
+          stubVaultPick(vaults);
+
+          // with scratch note modifier enabled,
+          await VSCodeUtils.openNote(engine.notes["foo"]);
+
+          const createScratch = async () => {
+            const out = (await cmd.run({
+              noteType: LookupNoteTypeEnum.scratch,
+              noConfirm: true,
+            })) as CommandOutput;
+
+            return out.quickpick.value;
+          };
+
+          const scratch1Name = await createScratch();
+          await wait1Second();
+          const scratch2Name = await createScratch();
+
+          expect(scratch1Name).toNotEqual(scratch2Name);
 
           done();
         },

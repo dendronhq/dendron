@@ -2,7 +2,7 @@
 id: 73eb67ea-0291-45e7-8f2f-193fd6f00643
 title: Links
 desc: ""
-updated: 1630474118518
+updated: 1631101424735
 created: 1608518909864
 ---
 
@@ -65,3 +65,17 @@ Vault2
    1.  second-a ^AKRCeAVwwIX2
 
 ![[#^0NFOQ4Hi4frn:#^0NFOQ4Hi4frn]]
+
+## note reference error messages
+
+### no file
+
+![[void]]
+
+### wildcard no match
+
+![[void.*]]
+
+### ambiguous
+
+![[bar]]

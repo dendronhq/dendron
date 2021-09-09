@@ -11,6 +11,7 @@ import { JSONSchemaType } from "ajv";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
+import { URI } from "vscode-uri";
 import { ExportPod, ExportPodConfig, ExportPodPlantOpts } from "../basev3";
 import { PodUtils } from "../utils";
 
@@ -31,6 +32,7 @@ function getSiteConfig({
   return {
     ...siteConfig,
     ...overrides,
+    usePrettyLinks: true,
   };
 }
 
@@ -84,6 +86,23 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     return payload.toString();
   }
 
+  _writeEnvFile({
+    siteConfig,
+    dest,
+  }: {
+    siteConfig: DendronSiteConfig;
+    dest: URI;
+  }) {
+    // add .env.production if necessary
+    // TODO: don't overwrite if somethign exists
+    if (siteConfig.assetsPrefix) {
+      fs.writeFileSync(
+        path.join(dest.fsPath, ".env.production"),
+        `NEXT_PUBLIC_ASSET_PREFIX=${siteConfig.assetsPrefix}`
+      );
+    }
+  }
+
   async copyAssets({
     wsRoot,
     config,
@@ -109,7 +128,6 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     let deleteSiteAssetsDir = true;
     await vaults.reduce(async (resp, vault) => {
       await resp;
-      console.log("copying assets from...", vault);
       if (vault.visibility === "private") {
         console.log(`skipping copy assets from private vault ${vault.fsPath}`);
         return Promise.resolve({});
@@ -194,16 +212,17 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
 
     const podDstDir = path.join(dest.fsPath, "data");
     fs.ensureDirSync(podDstDir);
+    const siteConfig = getSiteConfig({
+      siteConfig: engine.config.site,
+      overrides: podConfig,
+    });
 
     await this.copyAssets({ wsRoot, config: engine.config, dest: dest.fsPath });
 
     this.L.info({ ctx, msg: "filtering notes..." });
     const engineConfig: DendronConfig = {
       ...engine.config,
-      site: getSiteConfig({
-        siteConfig: engine.config.site,
-        overrides: podConfig,
-      }),
+      site: siteConfig,
     };
 
     const { notes: publishedNotes, domains } = await SiteUtils.filterByConfig({
@@ -233,8 +252,8 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     fs.ensureDirSync(notesMetaDir);
     this.L.info({ ctx, msg: "writing notes..." });
     await Promise.all(
-      _.values(publishedNotes).flatMap(async (note) => {
-        return [
+      _.map(_.values(publishedNotes), async (note) => {
+        return Promise.all([
           this.renderBodyToHTML({
             engine,
             note,
@@ -243,7 +262,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
             engineConfig,
           }),
           this.renderMetaToJSON({ note, notesDir: notesMetaDir }),
-        ];
+        ]);
       })
     );
     const podDstPath = path.join(podDstDir, "notes.json");
@@ -253,6 +272,8 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
       encoding: "utf8",
       spaces: 2,
     });
+
+    this._writeEnvFile({ siteConfig, dest });
 
     const publicPath = path.join(podDstDir, "..", "public");
     const publicDataPath = path.join(publicPath, "data");

@@ -2,7 +2,7 @@ import {
   batch,
   createLogger,
   Provider,
-  setLogLevel
+  setLogLevel,
 } from "@dendronhq/common-frontend";
 import "antd/dist/antd.css";
 import type { AppProps } from "next/app";
@@ -15,11 +15,12 @@ import "../public/light-theme.css";
 import "../styles/scss/main.scss";
 import { fetchConfig, fetchNotes } from "../utils/fetchers";
 import { useDendronRouter } from "../utils/hooks";
+import { getAssetUrl } from "../utils/links";
 import { NoteData } from "../utils/types";
 
 const themes = {
-  dark: `/dark-theme.css`,
-  light: `/light-theme.css`,
+  dark: getAssetUrl(`/dark-theme.css`),
+  light: getAssetUrl(`/light-theme.css`),
 };
 
 function AppContainer({ Component, pageProps, router }: AppProps) {

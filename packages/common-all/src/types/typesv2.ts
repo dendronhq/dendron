@@ -415,6 +415,7 @@ export type GetNotePayload = {
 };
 export type QueryNotesOpts = {
   qs: string;
+  onlyDirectChildren?: boolean;
   vault?: DVault;
   createIfNew?: boolean;
 };
@@ -595,6 +596,7 @@ export enum GraphViewMessageType {
 export enum CalendarViewMessageType {
   "onSelect" = "onSelect",
   "onGetActiveEditor" = "onGetActiveEditor",
+  "messageDispatcherReady" = "messageDispatcherReady",
 }
 
 export enum NoteViewMessageType {

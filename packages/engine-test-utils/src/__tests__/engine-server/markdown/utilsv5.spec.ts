@@ -158,7 +158,7 @@ describe("MDUtils.proc", () => {
           await checkString(
             resp.contents,
             // should have id for link
-            `<a href="/notes/alpha-id.html"`,
+            `<a href="/notes/alpha-id.html"`
           );
         },
       },
@@ -186,7 +186,36 @@ describe("MDUtils.proc", () => {
       [DendronASTDest.HTML]: {
         [ProcFlavor.REGULAR]: async ({ extra }) => {
           const { resp } = extra;
-          await checkString(resp.contents, "error reading file");
+          await checkString(
+            resp.contents,
+            "Error rendering note reference. No note found with name"
+          );
+        },
+        [ProcFlavor.PREVIEW]: ProcFlavor.REGULAR,
+        [ProcFlavor.PUBLISHING]: ProcFlavor.REGULAR,
+      },
+    },
+    preSetupHook: async (opts) => {
+      await ENGINE_HOOKS.setupBasic({ ...opts, extra: { idv2: true } });
+    },
+  });
+
+  const WILDCARD_NOTE_REF_MISSING = createProcCompileTests({
+    name: "WILDCARD_NOTE_REF_MISSING",
+    setup: async (opts) => {
+      const { proc } = getOpts(opts);
+      const txt = `![[alpha.*]]`;
+      const resp = await proc.process(txt);
+      return { resp, proc };
+    },
+    verify: {
+      [DendronASTDest.HTML]: {
+        [ProcFlavor.REGULAR]: async ({ extra }) => {
+          const { resp } = extra;
+          await checkString(
+            resp.contents,
+            "Error rendering note reference. There are no matches for"
+          );
         },
         [ProcFlavor.PREVIEW]: ProcFlavor.REGULAR,
         [ProcFlavor.PUBLISHING]: ProcFlavor.REGULAR,
@@ -233,6 +262,7 @@ describe("MDUtils.proc", () => {
     ...IMAGE_WITH_LEAD_FORWARD_SLASH,
     ...NOTE_REF_BASIC_WITH_REHYPE,
     ...NOTE_REF_MISSING,
+    ...WILDCARD_NOTE_REF_MISSING,
   ];
 
   test.each(

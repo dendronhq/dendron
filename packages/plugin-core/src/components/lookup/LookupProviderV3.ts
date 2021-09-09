@@ -55,6 +55,8 @@ export type ILookupProviderV3 = {
 export type ILookupProviderOptsV3 = {
   allowNewNote: boolean;
   noHidePickerOnAccept?: boolean;
+  /** Forces to use picker value as is when constructing the query string. */
+  forceAsIsPickerValueUsage?: boolean;
 };
 
 export type NoteLookupProviderSuccessResp<T = never> = {
@@ -211,7 +213,11 @@ export class NoteLookupProvider implements ILookupProviderV3 {
     const start = process.hrtime();
 
     // just activated picker's have special behavior
-    if (picker._justActivated && !picker.nonInteractive) {
+    if (
+      picker._justActivated &&
+      !picker.nonInteractive &&
+      !this.opts.forceAsIsPickerValueUsage
+    ) {
       pickerValue = NoteLookupUtils.getQsForCurrentLevel(pickerValue);
     }
 
@@ -259,9 +265,7 @@ export class NoteLookupProvider implements ILookupProviderV3 {
       updatedItems = await NotePickerUtils.fetchPickerResults({
         picker,
         qs: querystring,
-        depth: picker.showDirectChildrenOnly
-          ? queryOrig.split(".").length
-          : undefined,
+        onlyDirectChildren: picker.showDirectChildrenOnly,
       });
       if (token.isCancellationRequested) {
         return;

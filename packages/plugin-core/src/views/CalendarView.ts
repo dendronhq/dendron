@@ -110,6 +110,10 @@ export class CalendarView implements vscode.WebviewViewProvider {
         this.onActiveTextEditorChangeHandler(); // initial call
         break;
       }
+      case CalendarViewMessageType.messageDispatcherReady:
+        // Exception was thrown on this event, hence including it in the case statement
+        // but as far as it seems there isn't much we need to do for Calendar to work.
+        break;
       default:
         assertUnreachable(msg.type);
         break;
@@ -142,7 +146,11 @@ export class CalendarView implements vscode.WebviewViewProvider {
 
   public refresh(note?: NoteProps) {
     if (this._view) {
-      this._view.show?.(true); // `show` is not implemented in 1.49 but is for 1.50 insiders
+      // When the last note is closed the note will be undefined and we do not
+      // want to auto expand the calendar if there are no notes.
+      if (note) {
+        this._view.show?.(true);
+      }
       this._view.webview.postMessage({
         type: DMessageType.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR,
         data: {

@@ -9,14 +9,20 @@ import {
   InsertNoteIndexConfig,
   INSERT_NOTE_INDEX,
 } from "./insertNoteIndex";
+import {
+  genDefaultRandomNoteConfig,
+  RandomNoteConfig,
+  RANDOM_NOTE,
+} from "./randomNote";
 
 /**
  * Namespace for all command related configurations
  */
 export type DendronCommandConfig = {
   lookup: LookupConfig;
-  insertNoteLink: InsertNoteLinkConfig;
-  insertNoteIndex: InsertNoteIndexConfig;
+  insertNoteLink?: InsertNoteLinkConfig;
+  insertNoteIndex?: InsertNoteIndexConfig;
+  randomNote?: RandomNoteConfig;
 };
 
 /**
@@ -26,6 +32,7 @@ export const COMMANDS = {
   LOOKUP,
   INSERT_NOTE_LINK,
   INSERT_NOTE_INDEX,
+  RANDOM_NOTE,
 };
 
 /**
@@ -38,5 +45,6 @@ export function genDefaultCommandConfig(): DendronCommandConfig {
     lookup: genDefaultLookupConfig(),
     insertNoteLink: genDefaultInsertNoteLinkConfig(),
     insertNoteIndex: genDefaultInsertNoteIndexConfig(),
+    randomNote: genDefaultRandomNoteConfig(),
   };
 }

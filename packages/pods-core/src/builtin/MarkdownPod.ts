@@ -55,11 +55,6 @@ type DItem = Item & {
 
 type HierarichalDict = { [k: string]: NoteProps[] };
 
-/**
- * Hash Map for assets
- */
-type assetHashMap = { [k: string]: string };
-
 const toMarkdownLink = (assetPath: string, opts?: { name?: string }) => {
   const name = opts?.name ? opts.name : path.parse(assetPath).name;
   return `- [${name}](${assetPath})`;
@@ -175,7 +170,7 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
   }) {
     const { files, src, vault, wsRoot, config } = opts;
     const out: HierarichalDict = {};
-    let assetHashMap: assetHashMap = {};
+    const assetHashMap = new Map<string, string>();
     _.forEach(files, (item) => {
       const fname = cleanFileName(item.path, {
         isDir: item.stats.isDirectory(),
@@ -221,11 +216,9 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
           const assetPathRel = path
             .join(assetDirName, assetBaseNew)
             .replace(/[\\]/g, "/");
-          const key = _.replace(_item.path as string, /[\\|\/]/g, ""); // eslint-disable-line
-          assetHashMap = {
-            ...assetHashMap,
-            [key]: `/${assetPathRel}`,
-          };
+          const key = _.replace(_item.path as string, /[\\|/]/g, "");
+          assetHashMap.set(key, `/${assetPathRel}`);
+
           fs.copyFileSync(path.join(src, _item.path), assetPathFull);
           mdLinks.push(
             toMarkdownLink(`/${assetPathRel}`, { name: `${name}${ext}` })

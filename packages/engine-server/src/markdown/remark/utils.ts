@@ -934,7 +934,7 @@ export class RemarkUtils {
   }
   static convertAssetReferences(
     note: NoteProps,
-    assetHashMap: any,
+    assetHashMap: Map<string, string>,
     changes: NoteChangeEntry[]
   ) {
     return function (this: Processor) {
@@ -945,8 +945,9 @@ export class RemarkUtils {
           ...selectAll(DendronASTTypes.LINK, root),
         ];
         assetReferences.forEach((asset) => {
-          const key = _.replace(asset.url as string, /[\\|\/]/g, "");
-          if (assetHashMap[key]) asset.url = assetHashMap[key];
+          const key = _.replace(asset.url as string, /[\\|/]/g, "");
+          const value = assetHashMap.get(key);
+          if (value) asset.url = value;
           changes.push({
             note,
             status: "update",

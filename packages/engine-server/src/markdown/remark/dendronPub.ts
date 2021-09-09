@@ -185,7 +185,9 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         const usePrettyLinks = config.site.usePrettyLinks;
         const maybeFileExtension =
           _.isBoolean(usePrettyLinks) && usePrettyLinks ? "" : ".html";
-        const href = `${copts?.prefix || ""}${value}${maybeFileExtension}${
+        const href = `${
+          copts?.prefix || config.site.assetsPrefix || ""
+        }${value}${maybeFileExtension}${
           data.anchorHeader ? "#" + data.anchorHeader : ""
         }`;
         const exists = true;

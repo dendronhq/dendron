@@ -21051,11 +21051,6 @@ rxjs@^6.4.0, rxjs@^6.6.0, rxjs@^6.6.7:
   dependencies:
     tslib "^1.9.0"
 
-saas@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.npmjs.org/saas/-/saas-1.0.0.tgz#0091274f26664300bbca5e9893bc4bb88709e677"
-  integrity sha1-AJEnTyZmQwC7yl6Yk7xLuIcJ5nc=
-
 safe-buffer@5.1.2, safe-buffer@~5.1.0, safe-buffer@~5.1.1:
   version "5.1.2"
   resolved "https://registry.npmjs.org/safe-buffer/-/safe-buffer-5.1.2.tgz#991ec69d296e0313747d59bdfd2b745c35f8828d"
@@ -21120,6 +21115,13 @@ sass@^1.35.1:
   version "1.35.1"
   resolved "https://registry.npmjs.org/sass/-/sass-1.35.1.tgz#90ecf774dfe68f07b6193077e3b42fb154b9e1cd"
   integrity sha512-oCisuQJstxMcacOPmxLNiLlj4cUyN2+8xJnG7VanRoh2GOLr9RqkvI4AxA4a6LHVg/rsu+PmxXeGhrdSF9jCiQ==
+  dependencies:
+    chokidar ">=3.0.0 <4.0.0"
+
+sass@^1.39.0:
+  version "1.39.1"
+  resolved "https://registry.npmjs.org/sass/-/sass-1.39.1.tgz#98d3d3b356f9f4c34ccc7210c282037de1da1a35"
+  integrity sha512-IGIP3DtAFmrNCBDdq4Zxw8kodWeNjYCuykz37tu6LEoOH8AzqT6z8o6udeNZgzoLOkvd4nejVyK2U9o3/0pPJw==
   dependencies:
     chokidar ">=3.0.0 <4.0.0"
 

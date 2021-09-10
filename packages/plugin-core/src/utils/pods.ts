@@ -112,3 +112,21 @@ export const openFileInEditor = async (note: NoteProps): Promise<void> => {
   const uri = Uri.file(npath);
   await VSCodeUtils.openFileInEditor(uri);
 };
+
+export const getSelectionFromQuickpick = async (pagesMap: string[]) => {
+  const pickItems = pagesMap.map((page) => {
+    return {
+      label: page,
+    };
+  });
+  const selected = await window.showQuickPick(pickItems, {
+    placeHolder: "Choose a Page",
+    ignoreFocusOut: false,
+    matchOnDescription: true,
+    canPickMany: false,
+  });
+  if (!selected) {
+    return;
+  }
+  return selected.label;
+};

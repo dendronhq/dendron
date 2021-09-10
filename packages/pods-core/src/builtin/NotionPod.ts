@@ -1,0 +1,142 @@
+import { DendronError, ERROR_SEVERITY, NoteProps } from "@dendronhq/common-all";
+import { markdownToBlocks } from "@instantish/martian";
+import type {
+  Page,
+  TitlePropertyValue,
+} from "@notionhq/client/build/src/api-types";
+import { Client } from "@notionhq/client";
+import _ from "lodash";
+import { ExportPod, ExportPodPlantOpts, ExportPodConfig } from "../basev3";
+import { JSONSchemaType } from "ajv";
+import { PodUtils } from "../utils";
+import { RateLimiter } from "limiter";
+
+const ID = "dendron.notion";
+
+// Allow 3 req/sec. Also understands 'hour', 'minute', 'day', or a no. of ms
+// @ts-ignore
+const limiter = new RateLimiter({ tokensPerInterval: 3, interval: "second" });
+
+type NotionExportPodCustomOpts = {
+  apiKey: string;
+  vault: string;
+};
+
+export type NotionExportConfig = ExportPodConfig & NotionExportPodCustomOpts;
+
+export class NotionExportPod extends ExportPod<NotionExportConfig> {
+  static id: string = ID;
+  static description: string = "export notes to notion";
+
+  get config(): JSONSchemaType<NotionExportConfig> {
+    return PodUtils.createExportConfig({
+      required: ["apiKey", "vault"],
+      properties: {
+        apiKey: {
+          type: "string",
+          description: "Api key for Notion",
+        },
+        vault: {
+          type: "string",
+          description: "vault to export from",
+        },
+      },
+    }) as JSONSchemaType<NotionExportConfig>;
+  }
+
+  processNote = async (blockPagesArray: any, notion: Client) => {
+    // rate limiter method
+    const sendRequest = async () => {
+      blockPagesArray.forEach(async (block: any) => {
+        // @ts-ignore
+        await limiter.removeTokens(1);
+        try {
+          await notion.pages.create(block);
+        } catch (error) {
+          this.L.error({
+            msg: "failed to export all the notes.",
+            payload: error,
+          });
+          throw new DendronError({
+            message: JSON.stringify(error),
+            severity: ERROR_SEVERITY.MINOR,
+          });
+        }
+      });
+    };
+    sendRequest();
+  };
+
+  convertMdToNotionBlock = (notes: NoteProps[], pageId: string) => {
+    const notionBlock = notes.map((note) => {
+      const children = markdownToBlocks(note.body);
+      return {
+        parent: {
+          page_id: pageId,
+        },
+        properties: {
+          title: {
+            title: [{ type: "text", text: { content: note.title } }],
+          },
+        },
+        children,
+      };
+    });
+    console.log("notionBlock", notionBlock);
+    return notionBlock;
+  };
+
+  getPageName = (page: Page) => {
+    const { title } =
+      page.parent.type !== "database_id"
+        ? (page.properties.title as TitlePropertyValue)
+        : (page.properties.Name as TitlePropertyValue);
+    return title[0] ? title[0].plain_text : "Untitled";
+  };
+
+  getAllNotionPages = async (notion: Client) => {
+    const allDocs = await notion.search({
+      sort: { direction: "descending", timestamp: "last_edited_time" },
+      filter: { value: "page", property: "object" },
+    });
+    const pagesMap: any = {};
+    const pages = allDocs.results as Page[];
+    pages.forEach((page: Page) => {
+      const key = this.getPageName(page);
+      const value = page.id;
+      pagesMap[key] = value;
+    });
+    return pagesMap;
+  };
+
+  async plant(opts: ExportPodPlantOpts) {
+    const { config, utilityMethods } = opts;
+    const { apiKey, vault } = config as NotionExportConfig;
+    let { notes } = opts;
+    console.log("notes", notes);
+
+    notes = notes.filter((note) => note.vault.fsPath === vault);
+    console.log("notes", notes);
+    // Initializing a client
+    const notion = new Client({
+      auth: apiKey,
+    });
+
+    const pagesMap = await this.getAllNotionPages(notion);
+    let selectedPage: string | undefined;
+    if (!_.isUndefined(utilityMethods?.getSelectionFromQuickpick)) {
+      selectedPage = await utilityMethods?.getSelectionFromQuickpick(
+        Object.keys(pagesMap)
+      );
+    }
+    if (_.isUndefined(selectedPage)) {
+      return { notes: [] };
+    }
+    const pageId = pagesMap[selectedPage];
+    console.log("pageId", pageId);
+    const blockPagesArray = this.convertMdToNotionBlock(notes, pageId);
+    console.log("blockPagesArray", blockPagesArray);
+    await this.processNote(blockPagesArray, notion);
+    return { notes };
+  }
+}

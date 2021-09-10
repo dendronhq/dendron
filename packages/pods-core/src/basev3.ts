@@ -31,6 +31,7 @@ export type PodOpts<T> = {
     ) => Promise<{ label: string } | undefined>;
     getGlobalState: (arg0: any) => Promise<string | undefined> | undefined;
     updateGlobalState: (arg0: any) => Promise<void>;
+    getSelectionFromQuickpick?: (arg0: string[]) => Promise<string | undefined>;
   };
 } & WorkspaceOpts;
 

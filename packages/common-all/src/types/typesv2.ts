@@ -565,6 +565,9 @@ export type BasePodExecuteOpts<TConfig> = {
   engine: DEngineClient;
   wsRoot: string;
   vaults: DVault[];
+  utilityMethods?: {
+    getSelectionFromQuickpick: (arg0: string[]) => Promise<string | undefined>;
+  };
 };
 
 // --- Messages

@@ -10,3 +10,16 @@ export type DendronConfigEntry<T> = {
   label: string;
   desc: string;
 };
+
+/**
+ * DendronConfigEntryCollection
+ * type for an object that has the same properties of T
+ * mapped to it, that can have any value for each key.
+ * Any optional properties are required here.
+ *
+ * This is used as the type signature of the object that
+ * maps config properties to their respective DendronConfigEntry
+ */
+export type DendronConfigEntryCollection<T> = {
+  [Property in keyof T]-?: any;
+};

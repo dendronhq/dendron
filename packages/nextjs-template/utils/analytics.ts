@@ -1,7 +1,7 @@
 import ReactGA from "react-ga";
 
-export const initGA = async (id: string) => {
-  ReactGA.initialize(id);
+export const initGA = async (gaTrackingId: string) => {
+  ReactGA.initialize(gaTrackingId, {gaOptions: {cookieDomain: "none"}});
 };
 
 export const logPageView = () => {

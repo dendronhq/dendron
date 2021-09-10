@@ -63,9 +63,3 @@ export async function getCustomHead() {
   const headPath = path.join(publicDir, customHeadPathConfig);
   return fs.readFileSync(headPath, { encoding: "utf-8" });
 }
-
-export async function getGaTracking() {
-  const config = await getConfig();
-  const gaTracking = config.site.ga_tracking;
-  return gaTracking;
-}

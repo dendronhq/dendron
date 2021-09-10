@@ -9,6 +9,56 @@ export type DendronGlobalConfig = {
   hierarchyDisplay: boolean; // TODO: split
   hierarchyDisplayTitle: string; // TODO: split
   useNoteTitleForLink: boolean; // TODO: split
+  mermaid: boolean; // TODO: split
+  useNunjucks: boolean; // TODO: split
+  usePrettyRefs: boolean; // TODO: split
+  useKatex: boolean; // TODO: split
+  noLegacyNoteRef: boolean; // TODO: split
+};
+
+export const MERMAID = (
+  namespace: TopLevelDendronConfig
+): DendronConfigEntry<boolean> => {
+  return {
+    label: `use mermaid (${namespace})`,
+    desc: `Enable the use of mermaid for rendering diagrams. (${namespace})`,
+  };
+};
+
+export const USE_NUNJUCKS = (
+  namespace: TopLevelDendronConfig
+): DendronConfigEntry<boolean> => {
+  return {
+    label: `use nunjucks (${namespace})`,
+    desc: `Enable the use of nunjucks templates in the note body. (${namespace})`,
+  };
+};
+
+export const USE_PRETTY_REFS = (
+  namespace: TopLevelDendronConfig
+): DendronConfigEntry<boolean> => {
+  return {
+    label: `use pretty refs (${namespace})`,
+    desc: `Render note references as pretty refs. (${namespace})`,
+  };
+};
+
+export const USE_KATEX = (
+  namespace: TopLevelDendronConfig
+): DendronConfigEntry<boolean> => {
+  return {
+    label: `use katex (${namespace})`,
+    desc: `Enable the use of katex for rendering math. (${namespace})`,
+  };
+};
+
+export const NO_LEGACY_NOTE_REF = (
+  namespace: TopLevelDendronConfig
+): DendronConfigEntry<boolean> => {
+  return {
+    label: `no legacy note ref (${namespace})`,
+    desc: `Disable legacy note references. (${namespace})`,
+  };
 };
 
 /**
@@ -93,6 +143,11 @@ export const GLOBAL = {
   HIERARCHY_DISPLAY: HIERARCHY_DISPLAY("global"), // TODO: split
   HIERARCHY_DISPLAY_TITLE: HIERARCHY_DISPLAY_TITLE("global"), //TODO: split
   USE_NOTE_TITLE_FOR_LINK: USE_NOTE_TITLE_FOR_LINK("global"), // TODO: split
+  MERMAID: MERMAID("global"),
+  USE_NUNJUCKS: USE_NUNJUCKS("global"),
+  USE_PRETTY_REFS: USE_PRETTY_REFS("global"),
+  USE_KATEX: USE_KATEX("global"),
+  NO_LEGACY_NOTE_REF: NO_LEGACY_NOTE_REF("global"),
 };
 
 export function genDefaultGlobalConfig(): DendronGlobalConfig {
@@ -101,5 +156,10 @@ export function genDefaultGlobalConfig(): DendronGlobalConfig {
     hierarchyDisplay: true, // TODO: split
     hierarchyDisplayTitle: "children", // TODO: split
     useNoteTitleForLink: true, // TODO: split
+    mermaid: true,
+    useKatex: true,
+    useNunjucks: false,
+    usePrettyRefs: true,
+    noLegacyNoteRef: true,
   };
 }

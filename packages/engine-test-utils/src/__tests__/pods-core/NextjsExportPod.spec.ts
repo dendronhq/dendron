@@ -200,7 +200,7 @@ describe("nextjs export", () => {
           await ENGINE_HOOKS.setupBasic(opts);
           TestConfigUtils.withConfig(
             (config) => {
-              config.site.githubCname = "11ty.dendron";
+              config.site.githubCname = "11ty.dendron.so";
               return config;
             },
             { wsRoot: opts.wsRoot }

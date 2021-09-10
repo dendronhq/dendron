@@ -945,6 +945,30 @@ export class RemarkUtils {
       };
     };
   }
+  static convertAssetReferences(
+    note: NoteProps,
+    assetHashMap: Map<string, string>,
+    changes: NoteChangeEntry[]
+  ) {
+    return function (this: Processor) {
+      return (tree: Node, _vfile: VFile) => {
+        const root = tree as DendronASTRoot;
+        const assetReferences = [
+          ...selectAll(DendronASTTypes.IMAGE, root),
+          ...selectAll(DendronASTTypes.LINK, root),
+        ];
+        assetReferences.forEach((asset) => {
+          const key = _.replace(asset.url as string, /[\\|/]/g, "");
+          const value = assetHashMap.get(key);
+          if (value) asset.url = value;
+          changes.push({
+            note,
+            status: "update",
+          });
+        });
+      };
+    };
+  }
 
   static convertLinksFromDotNotation(
     note: NoteProps,

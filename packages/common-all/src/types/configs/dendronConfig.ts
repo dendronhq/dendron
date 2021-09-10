@@ -23,6 +23,7 @@ import {
   genDefaultGlobalConfig,
   GLOBAL,
 } from "./global/global";
+import { DendronDevConfig, genDefaultDevConfig, DEV } from "./dev/dev";
 
 /**
  * DendronConfig
@@ -34,6 +35,7 @@ export type DendronConfig = {
   workspace: DendronWorkspaceConfig;
   preview: DendronPreviewConfig;
   publishing: DendronPublishingConfig;
+  dev?: DendronDevConfig;
 };
 
 export type TopLevelDendronConfig = keyof DendronConfig;
@@ -47,6 +49,7 @@ export const DENDRON_CONFIG = {
   WORKSPACE,
   PREVIEW,
   PUBLISHING,
+  DEV,
 };
 
 /**
@@ -61,5 +64,6 @@ export function genDefaultDendronConfig(): DendronConfig {
     workspace: genDefaultWorkspaceConfig(),
     preview: genDefaultPreviewConfig(),
     publishing: genDefaultPublishingConfig(),
+    dev: genDefaultDevConfig(),
   };
 }

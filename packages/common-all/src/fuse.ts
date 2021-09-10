@@ -92,6 +92,22 @@ function createFuse<T>(
   return fuse;
 }
 
+export function createSerializedFuseNoteIndex(
+  publishedNotes: NotePropsDict | NoteProps[],
+  overrideOpts?: Partial<Parameters<typeof createFuse>[1]>
+) {
+  let notes: NoteProps[];
+  if (_.isArray(publishedNotes)) notes = publishedNotes;
+  else notes = Object.values(publishedNotes);
+  return createFuse(notes, {
+    preset: "note",
+    keys: ["title", "body"],
+    ...overrideOpts,
+  })
+    .getIndex()
+    .toJSON();
+}
+
 type FuseEngineOpts = {
   mode?: DEngineMode;
 };

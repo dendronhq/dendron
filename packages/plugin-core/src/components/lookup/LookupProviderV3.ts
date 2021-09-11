@@ -1,5 +1,6 @@
 import {
   DNodeUtils,
+  FuseEngine,
   NoteLookupUtils,
   NoteProps,
   NoteQuickInput,
@@ -345,15 +346,34 @@ export class NoteLookupProvider implements ILookupProviderV3 {
       // to picker results
       // NOTE: order matters. we always pick the first item in single select mode
       Logger.debug({ ctx, msg: "active != qs" });
-      updatedItems =
+
+      const shouldAddCreateNew =
         this.opts.allowNewNote &&
         !queryEndsWithDot &&
         !picker.canSelectMany &&
-        !perfectMatch
-          ? updatedItems.concat([
-              NotePickerUtils.createNoActiveItem({ fname: querystring }),
-            ])
-          : updatedItems;
+        !perfectMatch;
+
+      if (shouldAddCreateNew) {
+        const entryCreateNew = NotePickerUtils.createNoActiveItem({
+          fname: querystring,
+        });
+
+        // Whether CreateNew should be the top entry in look up results.
+        //
+        // Note: one of the special characters is space/' ' which for now we want to allow
+        // users to make the files with ' ' in them but we won't bubble up the create new
+        // option for the special characters, including space. The more contentious part
+        // about previous/current behavior is that we allow creation of files with
+        // characters like '$' which FuseJS will not match (Meaning '$' will NOT match 'hi$world').
+        const shouldBubbleUpCreateNew =
+          !FuseEngine.doesContainSpecialQueryChars(querystring);
+
+        if (shouldBubbleUpCreateNew) {
+          updatedItems = [entryCreateNew, ...updatedItems];
+        } else {
+          updatedItems = [...updatedItems, entryCreateNew];
+        }
+      }
 
       // check fuzz threshold. tune fuzzyness. currently hardcoded
       // TODO: in the future this should be done in the engine

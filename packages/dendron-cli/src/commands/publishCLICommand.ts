@@ -134,7 +134,11 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
         (opts.config as DendronSiteConfig).siteUrl = "localhost:3000";
       }
     }
-    return cli.execute(opts);
+    await cli.execute(opts);
+    return new Promise((resolve) => {
+      console.log("BOND-CLOSING");
+      opts.server.close(resolve);
+    });
   }
 
   init(opts: { wsRoot: string }) {

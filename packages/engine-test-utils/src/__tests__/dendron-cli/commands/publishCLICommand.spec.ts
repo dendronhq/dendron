@@ -44,10 +44,10 @@ describe("build", () => {
   afterEach(() => {
     sinon.restore();
   });
+
   test("ok", async () => {
     await runEngineTestV5(
       async ({ wsRoot }) => {
-        // const cli = new PublishCLICommand();
         await runPublishCmd({ cmd, wsRoot });
         const dataDir = path.join(wsRoot, ".next", "data");
         expect(fs.existsSync(dataDir)).toBeTruthy();

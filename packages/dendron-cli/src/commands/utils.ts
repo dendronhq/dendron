@@ -32,9 +32,24 @@ export type SetupEngineOpts = {
   server: any;
 };
 
-const createDummyServer = () => ({
-  close: (cb: any) => cb(),
-});
+/**
+ * used by {@link setupEngine}.
+ * Depending on options passed, we create a mock {@link Server}
+ * with a compatible API
+ * @param closeServer
+ * @returns
+ */
+const createDummyServer = (closeServer?: () => Promise<void>) =>
+  ({
+    close: (cb: () => void) => {
+      if (closeServer) {
+        closeServer().then(cb);
+        return;
+      } else {
+        return cb();
+      }
+    },
+  } as Server);
 /**
  * Setup an engine based on CLI args
  */
@@ -60,6 +75,7 @@ export async function setupEngine(
       ctx: "setupEngine",
       msg: "connecting to engine",
       enginePort,
+      attach: opts.attach,
     });
     const engineConnector = EngineConnector.getOrCreate({
       wsRoot,
@@ -72,7 +88,15 @@ export async function setupEngine(
       // TODO: don't use type assertion
       port = engineConnector.port!;
     }
-    server = createDummyServer();
+    if (engineConnector.serverPortWatcher) {
+      // a file watcher is created when engine port is undefined
+      // needs to be cleaned up on server closing
+      server = createDummyServer(async () => {
+        engineConnector.serverPortWatcher?.close();
+      });
+    } else {
+      server = createDummyServer();
+    }
   } else {
     logger.info({ ctx: "setupEngine", msg: "initialize new engine" });
     ({ engine, port, server } =

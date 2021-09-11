@@ -69,8 +69,23 @@ router.post("/write", asyncHandler(async (req: Request, res: Response<WriteNoteR
   const { ws, node, opts } = req.body as EngineWriteRequest;
   const engine = await getWSEngine({ ws: ws || "" });
     const out = await engine.writeNote(node, opts);
+<<<<<<< HEAD
     ExpressUtils.setResponse(res, out);
 }));
+=======
+    if (!ExpressUtils.handleError(res, out)) {
+      res.json(out);
+    }
+  } catch (err: any) {
+    ExpressUtils.handleError(res, {
+      error: DendronError.createPlainError({
+        message: err.message,
+        payload: stringifyError(err),
+      }),
+    });
+  }
+});
+>>>>>>> 954e8c31c (enhance(cli): add attach option to dendron-cli)
 
 router.post("/bulkAdd", asyncHandler(async (req: Request, res: Response<WriteNoteResp>) => {
   const { ws, opts } = req.body as EngineBulkAddRequest;

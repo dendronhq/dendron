@@ -15,9 +15,16 @@ type LaunchOpts = {
   googleOauthClientSecret?: string;
 };
 
+export type ServerClose = ReturnType<
+  typeof express["application"]["listen"]
+>["close"];
+export type Server = {
+  close: ServerClose;
+};
+
 function launchv2(
   opts?: {} & LaunchOpts
-): Promise<{ port: number; server: any }> {
+): Promise<{ port: number; server: Server }> {
   const ctx = "launch";
 
   const listenPort = opts?.port || 0;

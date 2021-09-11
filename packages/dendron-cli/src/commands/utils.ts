@@ -1,3 +1,4 @@
+import { Server } from "@dendronhq/api-server";
 import { createLogger, resolvePath } from "@dendronhq/common-server";
 import {
   DendronEngineV2,
@@ -14,13 +15,14 @@ import {
 export type SetupEngineCLIOpts = {
   enginePort?: number;
   useLocalEngine?: boolean;
+  attach?: boolean;
 } & LaunchEngineServerCLIOpts;
 
 export type SetupEngineResp = {
   wsRoot: string;
   engine: DEngineClient;
   port: number;
-  server: any;
+  server: Server;
 };
 
 export type SetupEngineOpts = {
@@ -31,7 +33,7 @@ export type SetupEngineOpts = {
 };
 
 const createDummyServer = () => ({
-  close: () => {},
+  close: (cb: any) => cb(),
 });
 /**
  * Setup an engine based on CLI args
@@ -46,14 +48,14 @@ export async function setupEngine(
   });
   let engine: DEngineClient;
   let port: number;
-  let server: any;
+  let server: Server;
   wsRoot = resolvePath(wsRoot, process.cwd());
   if (useLocalEngine) {
     const engine = DendronEngineV2.create({ wsRoot, logger });
     await engine.init();
     return { wsRoot, engine, port: -1, server: createDummyServer() };
   }
-  if (enginePort) {
+  if (enginePort || opts.attach) {
     logger.info({
       ctx: "setupEngine",
       msg: "connecting to engine",
@@ -64,7 +66,12 @@ export async function setupEngine(
     });
     await engineConnector.init({ portOverride: enginePort });
     engine = engineConnector.engine;
-    port = enginePort;
+    if (enginePort) {
+      port = enginePort;
+    } else {
+      // TODO: don't use type assertion
+      port = engineConnector.port!;
+    }
     server = createDummyServer();
   } else {
     logger.info({ ctx: "setupEngine", msg: "initialize new engine" });
@@ -84,6 +91,9 @@ export function setupEngineArgs(args: yargs.Argv) {
   args.option("enginePort", {
     describe:
       "If set, connect to to running engine. If not set, create new instance of Dendron Engine",
+  });
+  args.option("attach", {
+    describe: "Use existing engine instead of spwaning a new one",
   });
   args.option("useLocalEngine", {
     type: "boolean",

@@ -85,6 +85,7 @@ function createFuse<T>(
     location: 0,
     ignoreLocation: true,
     ignoreFieldNorm: true,
+    ...opts,
   };
   if (opts.preset === "schema") {
     options.keys = ["fname", "id"];

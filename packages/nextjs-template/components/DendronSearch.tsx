@@ -49,6 +49,7 @@ function DendronSearchComponent(props: DendronPageWithNoteDataProps) {
           dispatch(
             browserEngineSlice.actions.setLoadingStatus(LoadingStatus.PENDING)
           );
+          setValue("");
         }}
         placeholder="Search"
       >

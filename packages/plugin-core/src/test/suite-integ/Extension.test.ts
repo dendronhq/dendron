@@ -194,6 +194,7 @@ suite("Extension", function () {
             siteHierarchies: ["root"],
             siteRootDir: "docs",
             siteLastModified: true,
+            gh_edit_branch: "main",
             usePrettyRefs: true,
             title: "Dendron",
             description: "Personal knowledge space",

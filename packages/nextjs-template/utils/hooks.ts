@@ -1,16 +1,11 @@
-import {
-  FuseEngine,
-  getStage,
-  NoteProps,
-  NotePropsDict,
-} from "@dendronhq/common-all";
+import { FuseEngine, NoteProps, NotePropsDict } from "@dendronhq/common-all";
+import { verifyEngineSliceState } from "@dendronhq/common-frontend";
 import _ from "lodash";
 import { useRouter } from "next/router";
 import React from "react";
-import { verifyEngineSliceState } from "@dendronhq/common-frontend";
 import { useEngineAppSelector } from "../features/engine/hooks";
 import { getNoteRouterQuery } from "./etc";
-import { NoteData } from "./types";
+import { fetchNotes } from "./fetchers";
 
 export type DendronRouterProps = ReturnType<typeof useDendronRouter>;
 export type DendronLookupProps = ReturnType<typeof useDendronLookup>;
@@ -59,8 +54,8 @@ export function useDendronLookup() {
   const [noteIndex, setNoteIndex] =
     React.useState<FuseEngine | undefined>(undefined);
   React.useEffect(() => {
-    fetch("/data/notes.json").then(async (resp) => {
-      const { notes } = (await resp.json()) as NoteData;
+    fetchNotes().then(async (noteData) => {
+      const { notes } = noteData;
       const noteIndex = new FuseEngine({ mode: "fuzzy" });
       noteIndex.updateNotesIndex(notes);
       setNoteIndex(noteIndex);

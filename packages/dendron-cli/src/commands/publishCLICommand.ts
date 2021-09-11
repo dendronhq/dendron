@@ -90,7 +90,7 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
         default:
           return assertUnreachable();
       }
-    } catch (err) {
+    } catch (err: any) {
       this.L.error(err);
       if (err instanceof DendronError) {
         this.print(["status:", err.status, err.message].join(" "));

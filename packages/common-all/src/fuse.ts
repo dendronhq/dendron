@@ -67,11 +67,12 @@ const THRESHOLD_VALUE = 0.2;
 
 function createFuse<T>(
   initList: T[],
-  opts: Fuse.IFuseOptions<any> & {
+  opts: Fuse.IFuseOptions<T> & {
     preset: "schema" | "note";
-  }
+  },
+  index?: Fuse.FuseIndex<T>
 ) {
-  const options: Fuse.IFuseOptions<any> = {
+  const options: Fuse.IFuseOptions<T> = {
     shouldSort: true,
     threshold: opts.threshold,
     distance: 15,
@@ -88,25 +89,41 @@ function createFuse<T>(
   if (opts.preset === "schema") {
     options.keys = ["fname", "id"];
   }
-  const fuse = new Fuse(initList, options);
+  const fuse = new Fuse(initList, options, index);
   return fuse;
+}
+
+export function createFuseNote(
+  publishedNotes: NotePropsDict | NoteProps[],
+  overrideOpts?: Partial<Fuse.IFuseOptions<NoteProps>>,
+  index?: Fuse.FuseIndex<NoteProps>
+) {
+  let notes: NoteProps[];
+  if (_.isArray(publishedNotes)) notes = publishedNotes;
+  else notes = Object.values(publishedNotes);
+  return createFuse(
+    notes,
+    {
+      preset: "note",
+      keys: ["title", "body"],
+      ...overrideOpts,
+    },
+    index
+  );
 }
 
 export function createSerializedFuseNoteIndex(
   publishedNotes: NotePropsDict | NoteProps[],
   overrideOpts?: Partial<Parameters<typeof createFuse>[1]>
 ) {
-  let notes: NoteProps[];
-  if (_.isArray(publishedNotes)) notes = publishedNotes;
-  else notes = Object.values(publishedNotes);
-  return createFuse(notes, {
-    preset: "note",
-    keys: ["title", "body"],
-    ...overrideOpts,
-  })
-    .getIndex()
-    .toJSON();
+  return createFuseNote(publishedNotes, overrideOpts).getIndex().toJSON();
 }
+
+export type FuseNote = Fuse<NoteProps>;
+export type FuseNoteIndex = Fuse.FuseIndex<NoteProps>;
+export type SerializedFuseIndex = ReturnType<
+  typeof createSerializedFuseNoteIndex
+>;
 
 type FuseEngineOpts = {
   mode?: DEngineMode;

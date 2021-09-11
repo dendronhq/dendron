@@ -8,6 +8,7 @@ import DendronLogoOrTitle from "./DendronLogoOrTitle";
 import { DendronLookup } from "./DendronLookup";
 import { FooterText } from "./DendronNoteFooter";
 import DendronTreeMenu from "./DendronTreeMenu";
+import { DendronSearch } from "./DendronSearch";
 
 const { Header, Content, Sider, Footer } = Layout;
 const { LAYOUT, HEADER, SIDER } = DENDRON_STYLE_CONSTANTS;
@@ -45,7 +46,7 @@ export default function DendronLayout(
             className="ant-trigger"
             style={{
               backgroundColor:
-                "#43B02A" /* color copied from packages/dendron-next-server/assets/themes/light-theme.less TODO make dependent on active theme */,
+                "#43B02A" /* color copied from dendron-next-server / assets/themes/light-theme.less TODO make dependent on active theme */,
             }}
           >
             {isCollapsed ? <RightOutlined /> : <LeftOutlined />}
@@ -121,6 +122,14 @@ export default function DendronLayout(
             style={{ paddingLeft: "4px" }}
           >
             <DendronLookup {...props} />
+          </Col>
+          <Col
+            xs={10}
+            sm={12}
+            md={{ span: 16, push: 2 }}
+            style={{ marginLeft: "4px", marginRight: "4px" }}
+          >
+            <DendronSearch {...props} />
           </Col>
         </Row>
       </Header>

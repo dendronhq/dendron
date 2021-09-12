@@ -192,6 +192,9 @@ export function isDendronResp<T = any>(args: any): args is RespV2<T> {
   return args?.error instanceof DendronError;
 }
 
+/**
+ * @deprecated - use RespV2<T> instead.
+ */
 export type RespRequired<T> =
   | {
       error: null | undefined;

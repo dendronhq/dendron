@@ -13,6 +13,7 @@ import {
   NodeJSUtils,
   readJSONWithComments,
   readJSONWithCommentsSync,
+  sentryReportingCallback,
   writeJSONWithComments,
 } from "@dendronhq/common-server";
 import {
@@ -58,6 +59,7 @@ import { SampleView } from "./views/SampleView";
 import { SchemaWatcher } from "./watchers/schemaWatcher";
 import { WindowWatcher } from "./windowWatcher";
 import { WorkspaceWatcher } from "./WorkspaceWatcher";
+import * as Sentry from "@sentry/node";
 
 let _DendronWorkspace: DendronExtension | null;
 
@@ -501,33 +503,36 @@ export class DendronExtension {
       }
     );
 
-    vscode.commands.registerCommand("dendron.backlinks.expandAll", async () => {
-      function expand(backlink: Backlink) {
-        backlinkTreeView.reveal(backlink, {
-          expand: true,
-          focus: false,
-          select: false,
-        });
-      }
-
-      const children = await backlinksTreeDataProvider.getChildren();
-      children?.forEach((backlink) => {
-        expand(backlink);
-
-        if (backlink.refs) {
-          const childBacklinks = secondLevelRefsToBacklinks(
-            backlink.refs,
-            backlinksTreeDataProvider.isLinkCandidateEnabled
-          );
-
-          if (childBacklinks) {
-            childBacklinks.forEach((b) => {
-              expand(b);
-            });
-          }
+    vscode.commands.registerCommand(
+      "dendron.backlinks.expandAll",
+      sentryReportingCallback(async () => {
+        function expand(backlink: Backlink) {
+          backlinkTreeView.reveal(backlink, {
+            expand: true,
+            focus: false,
+            select: false,
+          });
         }
-      });
-    });
+
+        const children = await backlinksTreeDataProvider.getChildren();
+        children?.forEach((backlink) => {
+          expand(backlink);
+
+          if (backlink.refs) {
+            const childBacklinks = secondLevelRefsToBacklinks(
+              backlink.refs,
+              backlinksTreeDataProvider.isLinkCandidateEnabled
+            );
+
+            if (childBacklinks) {
+              childBacklinks.forEach((b) => {
+                expand(b);
+              });
+            }
+          }
+        });
+      })
+    );
 
     return backlinkTreeView;
   }
@@ -559,22 +564,27 @@ export class DendronExtension {
       const cmd = new Cmd();
 
       this.context.subscriptions.push(
-        vscode.commands.registerCommand(cmd.key, async (args: any) => {
-          await cmd.run(args);
-        })
+        vscode.commands.registerCommand(
+          cmd.key,
+          sentryReportingCallback(async (args: any) => {
+            await cmd.run(args);
+          })
+        )
       );
     });
 
     this.context.subscriptions.push(
       vscode.commands.registerCommand(
         DENDRON_COMMANDS.RELOAD_INDEX.key,
-        async (silent?: boolean) => {
-          const out = await new ReloadIndexCommand().run({ silent });
-          if (!silent) {
-            vscode.window.showInformationMessage(`finish reload`);
+        sentryReportingCallback(
+          async (silent?: boolean) => {
+            const out = await new ReloadIndexCommand().run({ silent });
+            if (!silent) {
+              vscode.window.showInformationMessage(`finish reload`);
+            }
+            return out;
           }
-          return out;
-        }
+        )
       )
     );
 
@@ -583,18 +593,18 @@ export class DendronExtension {
     this.context.subscriptions.push(
       vscode.commands.registerCommand(
         DENDRON_COMMANDS.GO_NEXT_HIERARCHY.key,
-        async () => {
+        sentryReportingCallback(async () => {
           await new GoToSiblingCommand().execute({ direction: "next" });
-        }
+        })
       )
     );
 
     this.context.subscriptions.push(
       vscode.commands.registerCommand(
         DENDRON_COMMANDS.GO_PREV_HIERARCHY.key,
-        async () => {
+        sentryReportingCallback(async () => {
           await new GoToSiblingCommand().execute({ direction: "prev" });
-        }
+        })
       )
     );
 
@@ -602,13 +612,13 @@ export class DendronExtension {
     this.context.subscriptions.push(
       vscode.commands.registerCommand(
         DENDRON_COMMANDS.RENAME_NOTE.key,
-        async (args: any) => {
+        sentryReportingCallback(async (args: any) => {
           await new MoveNoteCommand().run({
             allowMultiselect: false,
             useSameVault: true,
             ...args,
           });
-        }
+        })
       )
     );
   }

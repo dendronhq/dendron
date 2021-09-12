@@ -1,8 +1,10 @@
+import { sentryReportingCallback } from "@dendronhq/common-server";
 import { DoctorActions } from "@dendronhq/dendron-cli";
 import _ from "lodash";
 import { FrontmatterContent } from "mdast";
 import {
   CodeAction,
+  CodeActionContext,
   CodeActionKind,
   CodeActionProvider,
   Diagnostic,
@@ -10,9 +12,11 @@ import {
   ExtensionContext,
   languages,
   Range,
+  Selection,
   TextDocument,
-  Uri,
+  Uri
 } from "vscode";
+import { CancellationToken } from "vscode-jsonrpc";
 import YAML from "yamljs";
 import { DoctorCommand } from "../commands/Doctor";
 import { Logger } from "../logger";
@@ -111,23 +115,30 @@ export const codeActionProvider = {
 };
 
 export const doctorFrontmatterProvider: CodeActionProvider = {
-  provideCodeActions: (_document, _range, context, _token) => {
-    // Only provide fix frontmatter action if the diagnostic is correct
-    const diagnostics = context.diagnostics.filter(
-      (item) => item.code === BAD_FRONTMATTER_CODE
-    );
-    if (diagnostics.length === 0) return undefined;
-    const action: CodeAction = {
-      title: "Fix the frontmatter",
-      diagnostics,
-      isPreferred: true,
-      kind: CodeActionKind.QuickFix,
-      command: {
-        command: new DoctorCommand().key,
+  provideCodeActions: sentryReportingCallback(
+    (
+      _document: TextDocument,
+      _range: Range | Selection,
+      context: CodeActionContext,
+      _token: CancellationToken
+    ) => {
+      // Only provide fix frontmatter action if the diagnostic is correct
+      const diagnostics = context.diagnostics.filter(
+        (item) => item.code === BAD_FRONTMATTER_CODE
+      );
+      if (diagnostics.length === 0) return undefined;
+      const action: CodeAction = {
         title: "Fix the frontmatter",
-        arguments: [{ scope: "file", action: DoctorActions.FIX_FRONTMATTER }],
-      },
-    };
-    return [action];
-  },
+        diagnostics,
+        isPreferred: true,
+        kind: CodeActionKind.QuickFix,
+        command: {
+          command: new DoctorCommand().key,
+          title: "Fix the frontmatter",
+          arguments: [{ scope: "file", action: DoctorActions.FIX_FRONTMATTER }],
+        },
+      };
+      return [action];
+    }
+  ),
 };

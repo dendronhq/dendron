@@ -3,15 +3,15 @@ import {
   NoteProps,
   NoteUtils,
   VaultUtils,
-  WorkspaceOpts,
+  WorkspaceOpts
 } from "@dendronhq/common-all";
-import { file2Note } from "@dendronhq/common-server";
+import { file2Note, sentryReportingCallback } from "@dendronhq/common-server";
 import { HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
 import { Logger } from "./logger";
-import { getExtension, getDWorkspace } from "./workspace";
+import { getDWorkspace, getExtension } from "./workspace";
 
 export class FileWatcher {
   public watchers: { vault: DVault; watcher: vscode.FileSystemWatcher }[];
@@ -43,8 +43,12 @@ export class FileWatcher {
 
   activate(context: vscode.ExtensionContext) {
     this.watchers.forEach(({ watcher }) => {
-      context.subscriptions.push(watcher.onDidCreate(this.onDidCreate, this));
-      context.subscriptions.push(watcher.onDidDelete(this.onDidDelete, this));
+      context.subscriptions.push(
+        watcher.onDidCreate(sentryReportingCallback(this.onDidCreate), this)
+      );
+      context.subscriptions.push(
+        watcher.onDidDelete(sentryReportingCallback(this.onDidDelete), this)
+      );
     });
   }
 

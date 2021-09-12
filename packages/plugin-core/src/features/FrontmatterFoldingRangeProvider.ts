@@ -1,4 +1,5 @@
 import { DendronASTDest, MDUtilsV5, UnistNode } from "@dendronhq/engine-server";
+import * as Sentry from "@sentry/node";
 import _ from "lodash";
 // @ts-ignore
 import visit from "unist-util-visit";
@@ -16,26 +17,31 @@ export default class FrontmatterFoldingRangeProvider
   public async provideFoldingRanges(
     document: vscode.TextDocument
   ): Promise<vscode.FoldingRange[]> {
-    const proc = MDUtilsV5.procRemarkParseNoData(
-      {},
-      { dest: DendronASTDest.MD_DENDRON }
-    );
-    const parsed = proc.parse(document.getText());
-    let range: vscode.FoldingRange | undefined;
-    // @ts-ignore
-    visit(parsed, ["yaml"], (node: UnistNode) => {
-      if (_.isUndefined(node.position)) return false; // Should never happen
-      range = new vscode.FoldingRange(
-        VSCodeUtils.point2VSCodePosition(node.position.start).line,
-        VSCodeUtils.point2VSCodePosition(node.position.end).line,
-        FoldingRangeKind.Region
+    try {
+      const proc = MDUtilsV5.procRemarkParseNoData(
+        {},
+        { dest: DendronASTDest.MD_DENDRON }
       );
+      const parsed = proc.parse(document.getText());
+      let range: vscode.FoldingRange | undefined;
+      // @ts-ignore
+      visit(parsed, ["yaml"], (node: UnistNode) => {
+        if (_.isUndefined(node.position)) return false; // Should never happen
+        range = new vscode.FoldingRange(
+          VSCodeUtils.point2VSCodePosition(node.position.start).line,
+          VSCodeUtils.point2VSCodePosition(node.position.end).line,
+          FoldingRangeKind.Region
+        );
 
-      // Found the frontmatter already, stop traversing
-      return false;
-    });
+        // Found the frontmatter already, stop traversing
+        return false;
+      });
 
-    if (_.isUndefined(range)) return [];
-    return [range];
+      if (_.isUndefined(range)) return [];
+      return [range];
+    } catch (error) {
+      Sentry.captureException(error);
+      throw error;
+    }
   }
 }

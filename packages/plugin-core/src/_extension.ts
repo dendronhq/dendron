@@ -17,6 +17,7 @@ import {
 import {
   getDurationMilliseconds,
   getOS,
+  initializeSentry,
   SegmentClient,
   writeJSONWithComments,
 } from "@dendronhq/common-server";
@@ -26,6 +27,7 @@ import {
   WorkspaceService,
   WorkspaceUtils,
 } from "@dendronhq/engine-server";
+import * as Sentry from "@sentry/node";
 import { ExecaChildProcess } from "execa";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -225,281 +227,292 @@ export async function _activate(
     workspaceFolders: workspaceFolders?.map((fd) => fd.uri.fsPath),
   });
 
-  // Setup the workspace trust callback to detect changes from the user's workspace trust settings
-  vscode.workspace.onDidGrantWorkspaceTrust(() => {
-    getExtension().getEngine().trustedWorkspace = vscode.workspace.isTrusted;
-  });
+  initializeSentry(getStage());
 
-  //  needs to be initialized to setup commands
-  const ws = DendronExtension.getOrCreate(context, {
-    skipSetup: stage === "test",
-  });
+  try {
+    // Setup the workspace trust callback to detect changes from the user's workspace trust settings
+    vscode.workspace.onDidGrantWorkspaceTrust(() => {
+      getExtension().getEngine().trustedWorkspace = vscode.workspace.isTrusted;
+    });
 
-  const currentVersion = DendronExtension.version();
-  const previousWorkspaceVersion = stateService.getWorkspaceVersion();
-  const previousGlobalVersion = stateService.getGlobalVersion();
-  const extensionInstallStatus = VSCodeUtils.getInstallStatusForExtension({
-    previousGlobalVersion,
-    currentVersion,
-  });
-  const assetUri = WSUtils.getAssetUri(context);
+    //  needs to be initialized to setup commands
+    const ws = DendronExtension.getOrCreate(context, {
+      skipSetup: stage === "test",
+    });
 
-  Logger.info({
-    ctx,
-    msg: "initializeWorkspace",
-    wsType: ws.type,
-    currentVersion,
-    previousWorkspaceVersion,
-    previousGlobalVersion,
-    extensionInstallStatus,
-  });
-
-  if (DendronExtension.isActive(context)) {
-    if (ws.type === WorkspaceType.NATIVE) {
-      const workspaceFolder = WorkspaceUtils.findWSRootInWorkspaceFolders(
-        DendronExtension.workspaceFolders()!
-      );
-      if (!workspaceFolder) {
-        Logger.error({ msg: "No dendron.yml found in any workspace folder" });
-        return false;
-      }
-      ws.workspaceImpl = new DendronNativeWorkspace({
-        wsRoot: workspaceFolder?.uri.fsPath,
-        logUri: context.logUri,
-        assetUri,
-      });
-    } else {
-      ws.workspaceImpl = new DendronCodeWorkspace({
-        wsRoot: path.dirname(DendronExtension.workspaceFile().fsPath),
-        logUri: context.logUri,
-        assetUri,
-      });
-    }
-    const wsImpl = getDWorkspace();
-    const start = process.hrtime();
-    const dendronConfig = wsImpl.config;
-
-    // --- Get Version State
-    const workspaceInstallStatus = VSCodeUtils.getInstallStatusForWorkspace({
-      previousWorkspaceVersion,
+    const currentVersion = DendronExtension.version();
+    const previousWorkspaceVersion = stateService.getWorkspaceVersion();
+    const previousGlobalVersion = stateService.getGlobalVersion();
+    const extensionInstallStatus = VSCodeUtils.getInstallStatusForExtension({
+      previousGlobalVersion,
       currentVersion,
     });
-    const wsRoot = wsImpl.wsRoot;
-    const wsService = new WorkspaceService({ wsRoot });
-
-    await wsService.runMigrationsIfNecessary({
-      currentVersion,
-      previousVersion: previousWorkspaceVersion,
-      dendronConfig,
-      workspaceInstallStatus,
-      wsConfig: await DendronExtension.instanceV2().getWorkspaceSettings(),
-    });
-    // initialize client
-    setupSegmentClient(wsImpl);
-    const didClone = await wsService.initialize({
-      onSyncVaultsProgress: () => {
-        vscode.window.showInformationMessage(
-          "found empty remote vaults that need initializing"
-        );
-      },
-      onSyncVaultsEnd: () => {
-        vscode.window.showInformationMessage(
-          "finish initializing remote vaults. reloading workspace"
-        );
-        setTimeout(VSCodeUtils.reloadWindow, 200);
-      },
-    });
-    if (didClone) {
-      return false;
-    }
-
-    ws.workspaceService = wsService;
-    const configMigrated = migrateConfig({ config: dendronConfig, wsRoot });
-    Logger.info({
-      ctx,
-      config: dendronConfig,
-      configMigrated,
-      msg: "read dendron config",
-    });
-
-    // check for vaults with same name
-    const uniqVaults = _.uniqBy(dendronConfig.vaults, (vault) =>
-      VaultUtils.getName(vault)
-    );
-    if (_.size(uniqVaults) < _.size(dendronConfig.vaults)) {
-      const txt = "Fix it";
-      await vscode.window
-        .showErrorMessage(
-          "Multiple Vaults with the same name. See https://dendron.so/notes/a6c03f9b-8959-4d67-8394-4d204ab69bfe.html#multiple-vaults-with-the-same-name to fix",
-          txt
-        )
-        .then((resp) => {
-          if (resp === txt) {
-            vscode.commands.executeCommand(
-              "vscode.open",
-              vscode.Uri.parse(
-                "https://dendron.so/notes/a6c03f9b-8959-4d67-8394-4d204ab69bfe.html#multiple-vaults-with-the-same-name"
-              )
-            );
-          }
-        });
-      return false;
-    }
-    wsService.writeMeta({ version: DendronExtension.version() });
-
-    // stats
-    const platform = getOS();
-    const extensions = Extensions.getVSCodeExtnsion().map(
-      ({ id, extension: ext }) => {
-        return {
-          id,
-          version: ext?.packageJSON?.version,
-          active: ext?.isActive,
-        };
-      }
-    );
+    const assetUri = WSUtils.getAssetUri(context);
 
     Logger.info({
       ctx,
-      installStatus: workspaceInstallStatus,
+      msg: "initializeWorkspace",
+      wsType: ws.type,
       currentVersion,
       previousWorkspaceVersion,
       previousGlobalVersion,
-      platform,
-      extensions,
-      vaults: wsImpl.vaults,
+      extensionInstallStatus,
     });
 
-    // --- Start Initializating the Engine
-    WSUtils.showInitProgress();
-
-    const { port, subprocess } = await startServerProcess();
-    if (subprocess) {
-      WSUtils.handleServerProcess({
-        subprocess,
-        context,
-        onExit: (type: SubProcessExitType) => {
-          const txt = "Restart Dendron";
-          vscode.window
-            .showErrorMessage("Dendron engine encountered an error", txt)
-            .then(async (resp) => {
-              if (resp === txt) {
-                AnalyticsUtils.track(VSCodeEvents.ServerCrashed, {
-                  code: type,
-                });
-                _activate(context);
-              }
-            });
-        },
-      });
-    }
-    const durationStartServer = getDurationMilliseconds(start);
-    Logger.info({ ctx, msg: "post-start-server", port, durationStartServer });
-    WSUtils.updateEngineAPI(port);
-    wsService.writePort(port);
-    const reloadSuccess = await reloadWorkspace();
-    const durationReloadWorkspace = getDurationMilliseconds(start);
-
-    if (!reloadSuccess) {
-      HistoryService.instance().add({
-        source: "extension",
-        action: "not_initialized",
-      });
-      return false;
-    }
-
-    if (VSCodeUtils.isDevMode()) {
-      vscode.commands.executeCommand(
-        "setContext",
-        DendronContext.DEV_MODE,
-        true
-      );
-    }
-
-    // round to nearest 10th
-    let numNotes = _.size(getEngine().notes);
-    if (numNotes > 10) {
-      numNotes = Math.round(numNotes / 10) * 10;
-    }
-
-    MetadataService.instance().setDendronWorkspaceActivated();
-
-    AnalyticsUtils.identify();
-    AnalyticsUtils.track(VSCodeEvents.InitializeWorkspace, {
-      duration: durationReloadWorkspace,
-      noCaching: dendronConfig.noCaching || false,
-      numNotes,
-      numVaults: _.size(getEngine().vaults),
-    });
-    if (stage !== "test") {
-      await ws.activateWatchers();
-      toggleViews(true);
-    }
-    Logger.info({ ctx, msg: "fin startClient", durationReloadWorkspace });
-  } else {
-    // ws not active
-    Logger.info({ ctx: "dendron not active" });
-    toggleViews(false);
-  }
-
-  if (extensionInstallStatus === InstallStatus.INITIAL_INSTALL) {
-    const vimInstalled = VSCodeUtils.isExtensionInstalled("vscodevim.vim");
-    if (vimInstalled) {
-      AnalyticsUtils.track(ExtensionEvents.VimExtensionInstalled);
-      const { keybindingConfigPath, newKeybindings: resolvedKeybindings } =
-        KeybindingUtils.checkAndApplyVimKeybindingOverrideIfExists();
-      if (!_.isUndefined(resolvedKeybindings)) {
-        if (!fs.existsSync(keybindingConfigPath)) {
-          fs.ensureFileSync(keybindingConfigPath);
-          fs.writeFileSync(keybindingConfigPath, "[]");
+    if (DendronExtension.isActive(context)) {
+      if (ws.type === WorkspaceType.NATIVE) {
+        const workspaceFolder = WorkspaceUtils.findWSRootInWorkspaceFolders(
+          DendronExtension.workspaceFolders()!
+        );
+        if (!workspaceFolder) {
+          Logger.error({ msg: "No dendron.yml found in any workspace folder" });
+          return false;
         }
-        writeJSONWithComments(keybindingConfigPath, resolvedKeybindings);
-        AnalyticsUtils.track(ExtensionEvents.VimExtensionInstalled, {
-          fixApplied: true,
+        ws.workspaceImpl = new DendronNativeWorkspace({
+          wsRoot: workspaceFolder?.uri.fsPath,
+          logUri: context.logUri,
+          assetUri,
+        });
+      } else {
+        ws.workspaceImpl = new DendronCodeWorkspace({
+          wsRoot: path.dirname(DendronExtension.workspaceFile().fsPath),
+          logUri: context.logUri,
+          assetUri,
         });
       }
-    }
-  }
+      const wsImpl = getDWorkspace();
+      const start = process.hrtime();
+      const dendronConfig = wsImpl.config;
 
-  if (extensionInstallStatus === InstallStatus.UPGRADED) {
-    const { keybindingConfigPath, migratedKeybindings } =
-      KeybindingUtils.checkAndMigrateLookupKeybindingIfExists();
-    if (!_.isUndefined(migratedKeybindings)) {
-      fs.copyFileSync(keybindingConfigPath, `${keybindingConfigPath}.old`);
-      writeJSONWithComments(keybindingConfigPath, migratedKeybindings);
-      vscode.window
-        .showInformationMessage(
-          "Keybindings for lookup has been updated. Click the button below to see changes.",
-          ...["Open changes"]
-        )
-        .then(async (selection) => {
-          if (selection) {
-            const uri = vscode.Uri.file(keybindingConfigPath);
-            const backupUri = vscode.Uri.file(`${keybindingConfigPath}.old`);
-            await VSCodeUtils.openFileInEditor(uri);
-            await VSCodeUtils.openFileInEditor(backupUri, {
-              column: vscode.ViewColumn.Beside,
-            });
-          }
-        });
-    }
-  }
-
-  return showWelcomeOrWhatsNew({
-    extensionInstallStatus,
-    version: DendronExtension.version(),
-    previousExtensionVersion: previousWorkspaceVersion,
-    start: startActivate,
-    assetUri,
-  }).then(() => {
-    if (DendronExtension.isActive(context)) {
-      HistoryService.instance().add({
-        source: "extension",
-        action: "activate",
+      // --- Get Version State
+      const workspaceInstallStatus = VSCodeUtils.getInstallStatusForWorkspace({
+        previousWorkspaceVersion,
+        currentVersion,
       });
+      const wsRoot = wsImpl.wsRoot;
+      const wsService = new WorkspaceService({ wsRoot });
+
+      await wsService.runMigrationsIfNecessary({
+        currentVersion,
+        previousVersion: previousWorkspaceVersion,
+        dendronConfig,
+        workspaceInstallStatus,
+        wsConfig: await DendronExtension.instanceV2().getWorkspaceSettings(),
+      });
+      // initialize client
+      setupSegmentClient(wsImpl);
+
+      // Re-use the id for error reporting too:
+      Sentry.setUser({ id: SegmentClient.instance().anonymousId });
+
+      const didClone = await wsService.initialize({
+        onSyncVaultsProgress: () => {
+          vscode.window.showInformationMessage(
+            "found empty remote vaults that need initializing"
+          );
+        },
+        onSyncVaultsEnd: () => {
+          vscode.window.showInformationMessage(
+            "finish initializing remote vaults. reloading workspace"
+          );
+          setTimeout(VSCodeUtils.reloadWindow, 200);
+        },
+      });
+      if (didClone) {
+        return false;
+      }
+
+      ws.workspaceService = wsService;
+      const configMigrated = migrateConfig({ config: dendronConfig, wsRoot });
+      Logger.info({
+        ctx,
+        config: dendronConfig,
+        configMigrated,
+        msg: "read dendron config",
+      });
+
+      // check for vaults with same name
+      const uniqVaults = _.uniqBy(dendronConfig.vaults, (vault) =>
+        VaultUtils.getName(vault)
+      );
+      if (_.size(uniqVaults) < _.size(dendronConfig.vaults)) {
+        const txt = "Fix it";
+        await vscode.window
+          .showErrorMessage(
+            "Multiple Vaults with the same name. See https://dendron.so/notes/a6c03f9b-8959-4d67-8394-4d204ab69bfe.html#multiple-vaults-with-the-same-name to fix",
+            txt
+          )
+          .then((resp) => {
+            if (resp === txt) {
+              vscode.commands.executeCommand(
+                "vscode.open",
+                vscode.Uri.parse(
+                  "https://dendron.so/notes/a6c03f9b-8959-4d67-8394-4d204ab69bfe.html#multiple-vaults-with-the-same-name"
+                )
+              );
+            }
+          });
+        return false;
+      }
+      wsService.writeMeta({ version: DendronExtension.version() });
+
+      // stats
+      const platform = getOS();
+      const extensions = Extensions.getVSCodeExtnsion().map(
+        ({ id, extension: ext }) => {
+          return {
+            id,
+            version: ext?.packageJSON?.version,
+            active: ext?.isActive,
+          };
+        }
+      );
+
+      Logger.info({
+        ctx,
+        installStatus: workspaceInstallStatus,
+        currentVersion,
+        previousWorkspaceVersion,
+        previousGlobalVersion,
+        platform,
+        extensions,
+        vaults: wsImpl.vaults,
+      });
+
+      // --- Start Initializating the Engine
+      WSUtils.showInitProgress();
+
+      const { port, subprocess } = await startServerProcess();
+      if (subprocess) {
+        WSUtils.handleServerProcess({
+          subprocess,
+          context,
+          onExit: (type: SubProcessExitType) => {
+            const txt = "Restart Dendron";
+            vscode.window
+              .showErrorMessage("Dendron engine encountered an error", txt)
+              .then(async (resp) => {
+                if (resp === txt) {
+                  AnalyticsUtils.track(VSCodeEvents.ServerCrashed, {
+                    code: type,
+                  });
+                  _activate(context);
+                }
+              });
+          },
+        });
+      }
+      const durationStartServer = getDurationMilliseconds(start);
+      Logger.info({ ctx, msg: "post-start-server", port, durationStartServer });
+      WSUtils.updateEngineAPI(port);
+      wsService.writePort(port);
+      const reloadSuccess = await reloadWorkspace();
+      const durationReloadWorkspace = getDurationMilliseconds(start);
+
+      if (!reloadSuccess) {
+        HistoryService.instance().add({
+          source: "extension",
+          action: "not_initialized",
+        });
+        return false;
+      }
+
+      if (VSCodeUtils.isDevMode()) {
+        vscode.commands.executeCommand(
+          "setContext",
+          DendronContext.DEV_MODE,
+          true
+        );
+      }
+
+      // round to nearest 10th
+      let numNotes = _.size(getEngine().notes);
+      if (numNotes > 10) {
+        numNotes = Math.round(numNotes / 10) * 10;
+      }
+
+      MetadataService.instance().setDendronWorkspaceActivated();
+
+      AnalyticsUtils.identify();
+      AnalyticsUtils.track(VSCodeEvents.InitializeWorkspace, {
+        duration: durationReloadWorkspace,
+        noCaching: dendronConfig.noCaching || false,
+        numNotes,
+        numVaults: _.size(getEngine().vaults),
+      });
+      if (stage !== "test") {
+        await ws.activateWatchers();
+        toggleViews(true);
+      }
+      Logger.info({ ctx, msg: "fin startClient", durationReloadWorkspace });
+    } else {
+      // ws not active
+      Logger.info({ ctx: "dendron not active" });
+      toggleViews(false);
     }
-    return false;
-  });
+
+    if (extensionInstallStatus === InstallStatus.INITIAL_INSTALL) {
+      const vimInstalled = VSCodeUtils.isExtensionInstalled("vscodevim.vim");
+      if (vimInstalled) {
+        AnalyticsUtils.track(ExtensionEvents.VimExtensionInstalled);
+        const { keybindingConfigPath, newKeybindings: resolvedKeybindings } =
+          KeybindingUtils.checkAndApplyVimKeybindingOverrideIfExists();
+        if (!_.isUndefined(resolvedKeybindings)) {
+          if (!fs.existsSync(keybindingConfigPath)) {
+            fs.ensureFileSync(keybindingConfigPath);
+            fs.writeFileSync(keybindingConfigPath, "[]");
+          }
+          writeJSONWithComments(keybindingConfigPath, resolvedKeybindings);
+          AnalyticsUtils.track(ExtensionEvents.VimExtensionInstalled, {
+            fixApplied: true,
+          });
+        }
+      }
+    }
+
+    if (extensionInstallStatus === InstallStatus.UPGRADED) {
+      const { keybindingConfigPath, migratedKeybindings } =
+        KeybindingUtils.checkAndMigrateLookupKeybindingIfExists();
+      if (!_.isUndefined(migratedKeybindings)) {
+        fs.copyFileSync(keybindingConfigPath, `${keybindingConfigPath}.old`);
+        writeJSONWithComments(keybindingConfigPath, migratedKeybindings);
+        vscode.window
+          .showInformationMessage(
+            "Keybindings for lookup has been updated. Click the button below to see changes.",
+            ...["Open changes"]
+          )
+          .then(async (selection) => {
+            if (selection) {
+              const uri = vscode.Uri.file(keybindingConfigPath);
+              const backupUri = vscode.Uri.file(`${keybindingConfigPath}.old`);
+              await VSCodeUtils.openFileInEditor(uri);
+              await VSCodeUtils.openFileInEditor(backupUri, {
+                column: vscode.ViewColumn.Beside,
+              });
+            }
+          });
+      }
+    }
+
+    return showWelcomeOrWhatsNew({
+      extensionInstallStatus,
+      version: DendronExtension.version(),
+      previousExtensionVersion: previousWorkspaceVersion,
+      start: startActivate,
+      assetUri,
+    }).then(() => {
+      if (DendronExtension.isActive(context)) {
+        HistoryService.instance().add({
+          source: "extension",
+          action: "activate",
+        });
+      }
+      return false;
+    });
+  } catch (error) {
+    Sentry.captureException(error);
+    throw error;
+  }
 }
 
 function toggleViews(enabled: boolean) {

@@ -1,9 +1,11 @@
 import { getStage } from "@dendronhq/common-all";
-import { findInParent } from "@dendronhq/common-server";
+import { findInParent, initializeSentry, SegmentClient } from "@dendronhq/common-server";
+import * as Sentry from "@sentry/node";
 import cors from "cors";
 import express, { NextFunction, Request, Response } from "express";
+import asyncHandler from "express-async-handler";
 import fs from "fs-extra";
-import { BAD_REQUEST } from "http-status-codes";
+import { StatusCodes } from "http-status-codes";
 import morgan from "morgan";
 import path from "path";
 import querystring from "querystring";
@@ -13,10 +15,8 @@ import { baseRouter } from "./routes";
 import {
   oauthRouter,
   OauthService,
-  registerOauthHandler,
+  registerOauthHandler
 } from "./routes/oauth";
-import * as Sentry from "@sentry/node";
-import * as Tracing from "@sentry/tracing";
 
 export function appModule({
   logPath,
@@ -54,28 +54,11 @@ export function appModule({
   const staticDir = path.join(__dirname, "static");
   app.use(express.static(staticDir));
 
-  // Setup Sentry:
-
-  Sentry.init({
-    dsn: "https://bc206b31a30a4595a2efb31e8cc0c04e@o949501.ingest.sentry.io/5898219",
-    integrations: [
-      // enable HTTP calls tracing
-      new Sentry.Integrations.Http({ tracing: true }),
-      // enable Express.js middleware tracing
-      new Tracing.Integrations.Express({ app }),
-    ],
-
-    // Set tracesSampleRate to 1.0 to capture 100%
-    // of transactions for performance monitoring.
-    // We recommend adjusting this value in production
-    tracesSampleRate: 1.0,
-  });
-
-  // RequestHandler creates a separate execution context using domains, so that every
-  // transaction/span/breadcrumb is attached to its own Hub instance
-  app.use(Sentry.Handlers.requestHandler());
-  // TracingHandler creates a trace for every incoming request
-  app.use(Sentry.Handlers.tracingHandler());
+  initializeSentry(getStage());
+  // Re-use the id for error reporting too:
+  Sentry.setUser({ id: SegmentClient.instance().anonymousId });
+        
+  app.use(Sentry.Handlers.requestHandler() as express.RequestHandler);
 
   // for dev environment, get preview from next-server in monorepo
   if (getStage() !== "prod") {
@@ -113,14 +96,17 @@ export function appModule({
     return res.json({ ok: 1 });
   });
 
-  app.get("/version", async (_req: Request, res: Response) => {
-    const pkg = findInParent(__dirname, "package.json");
-    if (!pkg) {
-      throw Error("no pkg found");
-    }
-    const version = fs.readJSONSync(path.join(pkg, "package.json")).version;
-    return res.json({ version });
-  });
+  app.get(
+    "/version",
+    asyncHandler(async (_req: Request, res: Response) => {
+      const pkg = findInParent(__dirname, "package.json");
+      if (!pkg) {
+        throw Error("no pkg found");
+      }
+      const version = fs.readJSONSync(path.join(pkg, "package.json")).version;
+      return res.json({ version });
+    })
+  );
 
   registerOauthHandler(
     OauthService.GOOGLE,
@@ -130,18 +116,23 @@ export function appModule({
 
   app.use("/api", baseRouter);
 
-  app.get("/debug-sentry", (req, res) => {
-    throw new Error("My first Sentry error!");
-  });
-
   // The error handler must be before any other error middleware and after all controllers
-  app.use(Sentry.Handlers.errorHandler());
+  // app.use(Sentry.Handlers.errorHandler() as express.ErrorRequestHandler);
+  app.use(
+    Sentry.Handlers.errorHandler({
+      shouldHandleError() {
+        // Upload all exceptions
+        return true;
+      },
+    }) as express.ErrorRequestHandler
+  );
 
   app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
     console.error(err.message, err);
-    return res.status(BAD_REQUEST).json({
-      error: err.message,
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      error: JSON.stringify(err),
     });
   });
+
   return app;
 }

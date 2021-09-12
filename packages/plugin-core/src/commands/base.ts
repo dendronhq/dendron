@@ -1,6 +1,6 @@
 import { DendronError } from "@dendronhq/common-all";
-import { getDurationMilliseconds, DLogger } from "@dendronhq/common-server";
-
+import { DLogger, getDurationMilliseconds } from "@dendronhq/common-server";
+import * as Sentry from "@sentry/node";
 import _ from "lodash";
 import { window } from "vscode";
 import { Logger } from "../logger";
@@ -119,6 +119,8 @@ export abstract class BaseCommand<
         ctx,
         error: cerror,
       });
+
+      Sentry.captureException(error);
 
       isError = true;
       return;

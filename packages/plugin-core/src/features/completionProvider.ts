@@ -10,9 +10,9 @@ import {
   NoteUtils,
   TAGS_HIERARCHY,
   USERS_HIERARCHY,
-  VaultUtils,
+  VaultUtils
 } from "@dendronhq/common-all";
-import { getDurationMilliseconds } from "@dendronhq/common-server";
+import { getDurationMilliseconds, sentryReportingCallback } from "@dendronhq/common-server";
 import {
   AnchorUtils,
   DendronASTDest,
@@ -21,7 +21,7 @@ import {
   LinkUtils,
   MDUtilsV5,
   ProcFlavor,
-  USERTAG_REGEX_LOOSE,
+  USERTAG_REGEX_LOOSE
 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import {
@@ -34,11 +34,11 @@ import {
   Position,
   Range,
   TextDocument,
-  TextEdit,
+  TextEdit
 } from "vscode";
 import { Logger } from "../logger";
 import { VSCodeUtils } from "../utils";
-import { getExtension, getDWorkspace } from "../workspace";
+import { getDWorkspace, getExtension } from "../workspace";
 
 function padWithZero(n: number): string {
   if (n > 99) return String(n);
@@ -76,7 +76,7 @@ const NOTE_AUTOCOMPLETEABLE_REGEX = new RegExp("" +
   "g"
 );
 
-export const provideCompletionItems = (
+export const provideCompletionItems = sentryReportingCallback((
   document: TextDocument,
   position: Position
 ) => {
@@ -186,9 +186,9 @@ export const provideCompletionItems = (
   });
   Logger.info({ ctx, completionItemsLength: completionItems.length });
   return completionItems;
-};
+});
 
-export const resolveCompletionItem = async (
+export const resolveCompletionItem = sentryReportingCallback(async (
   item: CompletionItem,
   token: CancellationToken
 ): Promise<CompletionItem | undefined> => {
@@ -241,7 +241,7 @@ export const resolveCompletionItem = async (
   }
 
   return item;
-};
+});
 
 // prettier-ignore
 const PARTIAL_WIKILINK_WITH_ANCHOR_REGEX = new RegExp("" +

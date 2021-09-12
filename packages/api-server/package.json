@@ -62,6 +62,7 @@
     "@dendronhq/engine-server": "^0.58.4-alpha.3",
     "cors": "^2.8.5",
     "express": "^4.17.1",
+    "express-async-handler": "^1.1.4",
     "fs-extra": "^9.0.1",
     "http-status-codes": "^2.1.4",
     "klaw": "^3.0.0",

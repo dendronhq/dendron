@@ -4,6 +4,7 @@ import fs from "fs-extra";
 import path from "path";
 import { ExtensionContext, OutputChannel, window, workspace } from "vscode";
 import { CONFIG, DENDRON_CHANNEL_NAME } from "./constants";
+import * as Sentry from "@sentry/node";
 
 export type TraceLevel = "debug" | "info" | "warn" | "error" | "fatal";
 const levels = ["debug", "info", "warn", "error", "fatal"];
@@ -77,10 +78,16 @@ export class Logger {
 
   static error(payload: LogPayload) {
     Logger.log(payload, "error");
+    Sentry.captureMessage(customStringify(payload));
   }
 
   static info(payload: any, show?: boolean) {
     Logger.log(payload, "info", { show });
+    Sentry.addBreadcrumb({
+      category: "plugin",
+      message: customStringify(payload),
+      level: Sentry.Severity.Info
+    });
   }
 
   static debug(payload: any) {

@@ -778,6 +778,7 @@
   "devDependencies": {
     "@dendronhq/common-test-utils": "^0.58.4-alpha.3",
     "@dendronhq/engine-test-utils": "^0.58.4-alpha.3",
+    "@sentry/webpack-plugin": "^1.17.1",
     "@types/execa": "^2.0.0",
     "@types/fs-extra": "^9.0.1",
     "@types/glob": "^7.1.1",
@@ -806,6 +807,8 @@
     "@dendronhq/dendron-cli": "^0.58.4-alpha.3",
     "@dendronhq/engine-server": "^0.58.4-alpha.3",
     "@dendronhq/pods-core": "^0.58.4-alpha.3",
+    "@sentry/node": "^6.12.0",
+    "@sentry/tracing": "^6.12.0",
     "@types/vscode": "1.58",
     "cross-path-sort": "^1.0.0",
     "execa": "^4.0.2",

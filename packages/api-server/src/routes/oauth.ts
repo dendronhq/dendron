@@ -1,5 +1,6 @@
 import { DendronError } from "@dendronhq/common-all";
 import { Request, Response, Router } from "express";
+import asyncHandler from 'express-async-handler';
 import { getLogger } from "../core";
 import { TokenMethods } from "../modules/oauth";
 
@@ -17,7 +18,7 @@ function registerOauthHandler(type: OauthService, handler: TokenMethods) {
   oauthHandlers[type.toString()] = handler;
 }
 
-router.get("/getToken", async (req: Request, res: Response) => {
+router.get("/getToken", asyncHandler(async (req: Request, res: Response) => {
   L.info({ ctx, msg: "get:enter" });
 
   let resp;
@@ -36,9 +37,9 @@ router.get("/getToken", async (req: Request, res: Response) => {
   }
 
   res.send(resp);
-});
+}));
 
-router.get("/refreshToken", async (req: Request, res: Response) => {
+router.get("/refreshToken", asyncHandler(async (req: Request, res: Response) => {
   L.info({ ctx, msg: "get:enter" });
   let resp;
 
@@ -56,6 +57,6 @@ router.get("/refreshToken", async (req: Request, res: Response) => {
   }
 
   res.send(resp);
-});
+}));
 
 export { router as oauthRouter, registerOauthHandler };

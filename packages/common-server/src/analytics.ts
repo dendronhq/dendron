@@ -6,6 +6,8 @@ import os from "os";
 import path from "path";
 import { createLogger, DLogger } from "./logger";
 
+import * as Sentry from "@sentry/node";
+
 enum SiteEvents {
   PUBLISH_CLICKED = "sitePublishClick",
   SOURCE_INFO_ENTER = "sitePublishInfoEnter",
@@ -270,4 +272,50 @@ export class SegmentClient {
   get hasOptedOut(): boolean {
     return this._hasOptedOut;
   }
+
+  get anonymousId(): string {
+    return this._anonymousId;
+  }
+}
+
+export function initializeSentry(environment: string): void {
+  // Setting an undefined dsn will stop uploads.
+  const dsn =
+    environment === "prod"
+      ? "https://bc206b31a30a4595a2efb31e8cc0c04e@o949501.ingest.sentry.io/5898219"
+      : undefined;
+
+  Sentry.init({
+    dsn,
+    defaultIntegrations: false,
+    tracesSampleRate: 1.0,
+    //TODO: respect user's telemetry settings on enabled.
+    // enabled
+    // release: populate?
+    environment,
+    //TODO: Add more context prior to sending.
+    // beforeSend
+    // beforeBreadcrumb
+  });
+  return;
+}
+
+/**
+ * Wraps a callback function with a try/catch block.  In the catch, any
+ * exceptions that were encountered will be uploaded to Sentry and then
+ * rethrown.
+ * @param callback the function to wrap
+ * @returns the wrapped callback function
+ */
+export function sentryReportingCallback(
+  callback: (...args: any[]) => any
+): (...args: any[]) => any {
+  return (args) => {
+    try {
+      return callback(args);
+    } catch (error) {
+      Sentry.captureException(error);
+      throw error;
+    }
+  };
 }

@@ -104,6 +104,9 @@ interface IDoRequestArgs {
   json?: boolean;
 }
 
+/**
+ @deprecated - use RespV2 instead
+  */
 type APIPayload<T = any> = {
   error: DendronError | null;
   data?: T;

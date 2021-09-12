@@ -14,6 +14,7 @@ import _ from "lodash";
 import path from "path";
 export * from "./git";
 export * from "./seed";
+export * from "./unified";
 
 export async function checkString(body: string, ...match: string[]) {
   return expect(

@@ -10,7 +10,8 @@ import path from "path";
 import { TestConfigUtils } from "../../config";
 import { runEngineTestV5 } from "../../engine";
 import { ENGINE_HOOKS, ENGINE_HOOKS_MULTI } from "../../presets";
-import { checkDir, checkFile } from "../../utils";
+import { checkDir, checkFile, TestUnifiedUtils } from "../../utils";
+import fs from "fs-extra";
 
 async function setupExport(
   opts: WorkspaceOpts & {
@@ -51,10 +52,14 @@ describe("GIVEN NextExport pod", () => {
         await runEngineTestV5(
           async ({ engine, vaults, wsRoot }) => {
             const dest = await setupExport({ engine, wsRoot, vaults });
-            checkFile(
-              { fpath: path.join(dest, "data", "notes", "foo.html") },
-              "This page has not yet sprouted"
+            const contents = fs.readFileSync(
+              path.join(dest, "data", "notes", "foo.html"),
+              { encoding: "utf8" }
             );
+            await TestUnifiedUtils.verifyPrivateLink({
+              contents,
+              value: "bar",
+            });
             await verifyExport(dest);
           },
           {

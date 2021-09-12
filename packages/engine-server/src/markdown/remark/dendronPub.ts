@@ -152,13 +152,16 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         }
 
         const copts = opts?.wikiLinkOpts;
-        if (note && opts?.transformNoPublish) {
+        if (!note && opts?.transformNoPublish) {
+          value = "403";
+          addError(proc, new DendronError({ message: "no note" }));
+        } else if (note && opts?.transformNoPublish) {
           if (error) {
             value = "403";
             addError(proc, error);
-          } else if (!note || !config) {
+          } else if (!config) {
             value = "403";
-            addError(proc, new DendronError({ message: "no note or config" }));
+            addError(proc, new DendronError({ message: "no config" }));
           } else {
             isPublished = SiteUtils.isPublished({
               note,

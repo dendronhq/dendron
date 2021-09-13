@@ -2,7 +2,7 @@
  * Namespace for configuring {@link InsertNoteIndexCommand}
  */
 export type InsertNoteIndexConfig = {
-  useMarker: boolean;
+  enableMarker: boolean;
 };
 
 /**
@@ -11,6 +11,6 @@ export type InsertNoteIndexConfig = {
  */
 export function genDefaultInsertNoteIndexConfig(): InsertNoteIndexConfig {
   return {
-    useMarker: false,
+    enableMarker: false,
   };
 }

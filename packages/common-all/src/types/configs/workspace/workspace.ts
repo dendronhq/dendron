@@ -30,6 +30,9 @@ export type DendronWorkspaceConfig = {
   enableCaching: boolean;
   maxPreviewsCached: number;
   maxNoteLength: number;
+  //
+  feedback?: boolean;
+  apiEndpoint?: string;
 };
 
 export type DendronWorkspace = {

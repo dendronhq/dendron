@@ -432,12 +432,12 @@ export type DendronSiteConfig = {
   logo?: string;
 
   /**
-   * By default, the domain of your `siteHiearchies` page
+   * By default, the domain of your `siteHierarchies` page
    */
   siteIndex?: string;
 
   /**
-   * Hiearchies to publish
+   * Hierarchies to publish
    */
   siteHierarchies: string[];
 

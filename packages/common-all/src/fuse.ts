@@ -12,7 +12,7 @@ import {
   DNodeUtils,
   DEngineClient,
 } from ".";
-import { DendronConfig, DVault } from "./types";
+import { DVault } from "./types";
 
 export type NoteIndexProps = {
   id: string;
@@ -392,19 +392,12 @@ export class NoteLookupUtils {
     return lastDotIndex < 0 ? "" : qs.slice(0, lastDotIndex + 1);
   };
 
-  static fetchRootResults = (
-    notes: NotePropsDict,
-    opts?: Partial<{ config: DendronConfig }>
-  ) => {
-    const roots: NoteProps[] =
-      opts?.config?.site.siteHierarchies === ["root"]
-        ? NoteUtils.getRoots(notes)
-        : opts!.config!.site.siteHierarchies.flatMap((fname) =>
-            NoteUtils.getNotesByFname({ fname, notes })
-          );
+  static fetchRootResults = (notes: NotePropsDict) => {
+    const roots: NoteProps[] = NoteUtils.getRoots(notes);
+
     const childrenOfRoot = roots.flatMap((ent) => ent.children);
-    const nodes = _.map(childrenOfRoot, (ent) => notes[ent]).concat(roots);
-    return nodes;
+    const childrenOfRootNotes = _.map(childrenOfRoot, (ent) => notes[ent]);
+    return roots.concat(childrenOfRootNotes);
   };
 
   static async lookup({

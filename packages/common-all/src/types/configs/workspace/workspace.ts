@@ -4,6 +4,7 @@ import { genDefaultScratchConfig, ScratchConfig } from "./scratch";
 import { genDefaultGraphConfig, DendronGraphConfig } from "../workspace/graph";
 import { SeedSite } from "../../seed";
 import { DHookDict } from "../../hooks";
+import { VaultSyncBehavior, VaultSyncBehaviorEnum } from "../base";
 
 /**
  * Namespace for configurations that affect the workspace
@@ -43,15 +44,6 @@ export type DendronSeedEntry = {
   branch?: string;
   site?: SeedSite;
 };
-
-export enum VaultSyncBehaviorEnum {
-  skip = "skip",
-  noPush = "noPush",
-  noCommit = "noCommit",
-  sync = "sync",
-}
-
-export type VaultSyncBehavior = keyof typeof VaultSyncBehaviorEnum;
 
 /**
  * Generates default {@link DendronWorkspaceConfig}

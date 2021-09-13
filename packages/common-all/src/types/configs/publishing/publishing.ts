@@ -45,74 +45,22 @@ export type DendronPublishingConfig = {
   gh_edit_branch?: string;
   gh_edit_view_mode?: GithubEditViewMode;
   gh_edit_repository?: string;
-
-  /** Whether frontmatter tags should be rendered in published websites. Defaults to true. */
   showFrontMatterTags?: boolean;
-
-  /**
-   * Do not display the randomly generated colors for tags. Only color tag links
-   * if it has been configured in the frontmatter. False by default.
-   */
   noRandomlyColoredTags?: boolean;
-
-  /**
-   * Control publication on a per hierarchy basis
-   */
   config?: { [key: string]: HierarchyConfig };
-
-  /**
-   * When publishing in multi-vault scenario,
-   * how to handle duplicate notes
-   */
   duplicateNoteBehavior?: DuplicateNoteBehavior;
-
-  /**
-   * When publishing, should stubs be written to disk?
-   * Default: true
-   * NOTE: if this isn't set to true, will cause
-   * stub notes to be published with different ids each time
-   */
   writeStubs?: boolean;
-
-  /**
-   * SEO related values
-   */
   title?: string;
   description?: string;
   author?: string;
   twitter?: string;
   image?: string;
-
-  /**
-   * Use {@link https://github.com/Nevenall/remark-containers} in published site
-   */
   useContainers?: boolean;
-
-  /**
-   * Generate changelog for published site
-   * Default: false
-   */
   generateChangelog?: boolean;
-  /**
-   * Set alternate port for preview
-   * Default: 8080
-   */
   previewPort?: boolean;
-
-  /**
-   * If set, value of your segment key
-   */
   segmentKey?: string;
-
-  /**
-   * Required for auth
-   */
   cognitoUserPoolId?: string;
   cognitoClientId?: string;
-
-  /**
-   * notes are published without the .html file extension
-   */
   usePrettyLinks?: boolean;
 };
 

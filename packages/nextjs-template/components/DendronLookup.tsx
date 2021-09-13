@@ -63,7 +63,7 @@ function AntDAutoComplete(
     logger.info({ state: "onSearch:enter", qs });
     const out =
       qs === ""
-        ? NoteLookupUtils.fetchRootResults(notes, { config: engine.config })
+        ? NoteLookupUtils.fetchRootResults(notes)
         : lookup?.queryNote({ qs });
     setResult(_.isUndefined(out) ? [] : out);
   };

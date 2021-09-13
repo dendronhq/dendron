@@ -215,6 +215,11 @@ suite("NoteLookupCommand", function () {
               _.find(opts.quickpick.selectedItems, { fname: "root" })
             )
           ).toBeTruthy();
+          expect(
+            !_.isUndefined(
+              _.find(opts.quickpick.selectedItems, { fname: "foo" })
+            )
+          ).toBeTruthy();
           done();
         },
       });

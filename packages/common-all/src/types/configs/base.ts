@@ -21,5 +21,9 @@ export type DendronConfigEntry<T> = {
  * maps config properties to their respective DendronConfigEntry
  */
 export type DendronConfigEntryCollection<T> = {
-  [Property in keyof T]-?: any;
+  [Property in keyof T]-?:
+    | DendronConfigEntryCollection<any>
+    | Record<any, DendronConfigEntry<any>>
+    | DendronConfigEntry<any>
+    | ((...args: any[]) => DendronConfigEntry<any>);
 };

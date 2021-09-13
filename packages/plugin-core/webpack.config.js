@@ -1,9 +1,7 @@
-//@ts-check
-import SentryWebpackPlugin from "@sentry/webpack-plugin";
-
 const path = require("path");
 const CopyPlugin = require("copy-webpack-plugin");
 const { IgnorePlugin } = require("webpack");
+const SentryWebpackPlugin = require("@sentry/webpack-plugin");
 
 /**@type {import('webpack').Configuration}*/
 const config = {
@@ -65,6 +63,7 @@ const config = {
         { from: "webpack-require-hack.js", to: "webpack-require-hack.js" },
       ],
     }),
+    // @ts-ignore
     new SentryWebpackPlugin({
       authToken: process.env.SENTRY_AUTH_TOKEN,
       org: "dendron",

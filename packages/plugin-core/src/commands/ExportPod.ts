@@ -11,6 +11,7 @@ import { VSCodeUtils } from "../utils";
 import {
   getSelectionFromQuickpick,
   showPodQuickPickItemsV4,
+  withProgressOpts,
 } from "../utils/pods";
 import { getExtension, getDWorkspace } from "../workspace";
 import { BaseCommand } from "./base";
@@ -69,6 +70,7 @@ export class ExportPodCommand extends BaseCommand<
     }
     const utilityMethods = {
       getSelectionFromQuickpick,
+      withProgressOpts,
     };
     const pod = new opts.podChoice.podClass(); // eslint-disable-line new-cap
     const engine = getExtension().getEngine();

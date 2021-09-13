@@ -8,7 +8,7 @@ import { Client } from "@notionhq/client";
 import _ from "lodash";
 import { ExportPod, ExportPodPlantOpts, ExportPodConfig } from "../basev3";
 import { JSONSchemaType } from "ajv";
-import { PodUtils } from "../utils";
+import { NotionUtilMethods, PodUtils } from "../utils";
 import { RateLimiter } from "limiter";
 
 const ID = "dendron.notion";
@@ -44,7 +44,10 @@ export class NotionExportPod extends ExportPod<NotionExportConfig> {
     }) as JSONSchemaType<NotionExportConfig>;
   }
 
-  processNote = async (blockPagesArray: any, notion: Client) => {
+  /**
+   * Method to create pages in Notion
+   */
+  createPagesInNotion = async (blockPagesArray: any, notion: Client) => {
     // rate limiter method
     const sendRequest = async () => {
       blockPagesArray.forEach(async (block: any) => {
@@ -67,6 +70,9 @@ export class NotionExportPod extends ExportPod<NotionExportConfig> {
     sendRequest();
   };
 
+  /**
+   * Method to convert markdown to Notion Block
+   */
   convertMdToNotionBlock = (notes: NoteProps[], pageId: string) => {
     const notionBlock = notes.map((note) => {
       const children = markdownToBlocks(note.body);
@@ -82,10 +88,12 @@ export class NotionExportPod extends ExportPod<NotionExportConfig> {
         children,
       };
     });
-    console.log("notionBlock", notionBlock);
     return notionBlock;
   };
 
+  /**
+   * Method to get page name of a Notion Page
+   */
   getPageName = (page: Page) => {
     const { title } =
       page.parent.type !== "database_id"
@@ -94,6 +102,9 @@ export class NotionExportPod extends ExportPod<NotionExportConfig> {
     return title[0] ? title[0].plain_text : "Untitled";
   };
 
+  /**
+   * Method to get all the pages from Notion
+   */
   getAllNotionPages = async (notion: Client) => {
     const allDocs = await notion.search({
       sort: { direction: "descending", timestamp: "last_edited_time" },
@@ -111,32 +122,35 @@ export class NotionExportPod extends ExportPod<NotionExportConfig> {
 
   async plant(opts: ExportPodPlantOpts) {
     const { config, utilityMethods } = opts;
+    const { getSelectionFromQuickpick, withProgressOpts } =
+      utilityMethods as NotionUtilMethods;
     const { apiKey, vault } = config as NotionExportConfig;
     let { notes } = opts;
-    console.log("notes", notes);
 
     notes = notes.filter((note) => note.vault.fsPath === vault);
-    console.log("notes", notes);
     // Initializing a client
     const notion = new Client({
       auth: apiKey,
     });
 
-    const pagesMap = await this.getAllNotionPages(notion);
-    let selectedPage: string | undefined;
-    if (!_.isUndefined(utilityMethods?.getSelectionFromQuickpick)) {
-      selectedPage = await utilityMethods?.getSelectionFromQuickpick(
-        Object.keys(pagesMap)
-      );
-    }
+    const pagesMap = await withProgressOpts.withProgress(
+      {
+        location: withProgressOpts.location,
+        title: "importing parent pages",
+        cancellable: false,
+      },
+      async () => {
+        return this.getAllNotionPages(notion);
+      }
+    );
+
+    const selectedPage = await getSelectionFromQuickpick(Object.keys(pagesMap));
     if (_.isUndefined(selectedPage)) {
       return { notes: [] };
     }
     const pageId = pagesMap[selectedPage];
-    console.log("pageId", pageId);
     const blockPagesArray = this.convertMdToNotionBlock(notes, pageId);
-    console.log("blockPagesArray", blockPagesArray);
-    await this.processNote(blockPagesArray, notion);
+    await this.createPagesInNotion(blockPagesArray, notion);
     return { notes };
   }
 }

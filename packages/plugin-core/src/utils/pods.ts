@@ -5,7 +5,7 @@ import _ from "lodash";
 import open from "open";
 import path from "path";
 import * as queryString from "query-string";
-import { QuickPickItem, Uri, window } from "vscode";
+import { ProgressLocation, QuickPickItem, Uri, window } from "vscode";
 import { gdocRequiredScopes, GLOBAL_STATE } from "../constants";
 import { StateService } from "../services/stateService";
 import { GOOGLE_OAUTH_ID } from "../types/global";
@@ -120,7 +120,7 @@ export const getSelectionFromQuickpick = async (pagesMap: string[]) => {
     };
   });
   const selected = await window.showQuickPick(pickItems, {
-    placeHolder: "Choose a Page",
+    placeHolder: "Choose the Parent Page",
     ignoreFocusOut: false,
     matchOnDescription: true,
     canPickMany: false,
@@ -129,4 +129,9 @@ export const getSelectionFromQuickpick = async (pagesMap: string[]) => {
     return;
   }
   return selected.label;
+};
+
+export const withProgressOpts = {
+  withProgress: window.withProgress,
+  location: ProgressLocation.Notification,
 };

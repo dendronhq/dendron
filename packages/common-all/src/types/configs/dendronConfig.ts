@@ -1,4 +1,3 @@
-import { DendronConfigEntryCollection } from "./base";
 import {
   DendronCommandConfig,
   genDefaultCommandConfig,
@@ -17,12 +16,6 @@ import {
 } from "./publishing/publishing";
 import { DendronGlobalConfig, genDefaultGlobalConfig } from "./global/global";
 import { DendronDevConfig, genDefaultDevConfig } from "./dev/dev";
-import { GLOBAL } from "../../constants/configs/global";
-import { COMMANDS } from "../../constants/configs/commands";
-import { WORKSPACE } from "../../constants/configs/workspace";
-import { PREVIEW } from "../../constants/configs/preview";
-import { PUBLISHING } from "../../constants/configs/publishing";
-import { DEV } from "../../constants/configs/dev";
 
 /**
  * DendronConfig
@@ -38,18 +31,6 @@ export type DendronConfig = {
 };
 
 export type TopLevelDendronConfig = keyof DendronConfig;
-
-/**
- * Constants holding all {@link DendronConfigEntry}
- */
-export const DENDRON_CONFIG: DendronConfigEntryCollection<DendronConfig> = {
-  global: GLOBAL,
-  commands: COMMANDS,
-  workspace: WORKSPACE,
-  preview: PREVIEW,
-  publishing: PUBLISHING,
-  dev: DEV,
-};
 
 /**
  * Generates a default DendronConfig using

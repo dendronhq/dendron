@@ -19,7 +19,7 @@ export type InsertNoteLinkAliasMode = keyof typeof InsertNoteLinkAliasModeEnum;
  */
 export type InsertNoteLinkConfig = {
   aliasMode: InsertNoteLinkAliasModeEnum;
-  useMultiSelect: boolean;
+  enableMultiSelect: boolean;
 };
 
 /**
@@ -29,6 +29,6 @@ export type InsertNoteLinkConfig = {
 export function genDefaultInsertNoteLinkConfig(): InsertNoteLinkConfig {
   return {
     aliasMode: InsertNoteLinkAliasModeEnum.none,
-    useMultiSelect: false,
+    enableMultiSelect: false,
   };
 }

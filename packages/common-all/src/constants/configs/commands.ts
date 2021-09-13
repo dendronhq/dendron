@@ -137,7 +137,7 @@ const ALIAS_MODES: Record<
  */
 const INSERT_NOTE_LINK: DendronConfigEntryCollection<InsertNoteLinkConfig> = {
   aliasMode: ALIAS_MODES,
-  useMultiSelect: {
+  enableMultiSelect: {
     label: "Use Multi-select",
     desc: "Use multi-select when inserting note links",
   },

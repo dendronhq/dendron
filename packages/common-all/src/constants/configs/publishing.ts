@@ -72,23 +72,23 @@ const GA: DendronConfigEntryCollection<GoogleAnalyticsConfig> = {
 
 const SEO: DendronConfigEntryCollection<SEOConfig> = {
   title: {
-    label: "title",
+    label: "Title",
     desc: "Set SEO title.",
   },
   description: {
-    label: "description",
+    label: "Description",
     desc: "Set SEO description.",
   },
   author: {
-    label: "author",
+    label: "Author",
     desc: "Set SEO author.",
   },
   twitter: {
-    label: "twitter",
+    label: "Twitter",
     desc: "set SEO twitter.",
   },
   image: {
-    label: "image",
+    label: "Image",
     desc: "Set SEO image.",
   },
 };

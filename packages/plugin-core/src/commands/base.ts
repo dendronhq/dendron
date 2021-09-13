@@ -120,8 +120,6 @@ export abstract class BaseCommand<
         error: cerror,
       });
 
-      Sentry.captureException(error);
-
       isError = true;
       return;
     } finally {

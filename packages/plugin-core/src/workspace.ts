@@ -59,7 +59,6 @@ import { SampleView } from "./views/SampleView";
 import { SchemaWatcher } from "./watchers/schemaWatcher";
 import { WindowWatcher } from "./windowWatcher";
 import { WorkspaceWatcher } from "./WorkspaceWatcher";
-import * as Sentry from "@sentry/node";
 
 let _DendronWorkspace: DendronExtension | null;
 

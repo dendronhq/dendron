@@ -78,7 +78,28 @@ export class Logger {
 
   static error(payload: LogPayload) {
     Logger.log(payload, "error");
-    Sentry.captureMessage(customStringify(payload));
+
+    Sentry.withScope(scope => {
+      scope.setExtra("ctx", payload.ctx);
+      if (payload.error) {
+        scope.setExtra("name", payload.error.name);
+        scope.setExtra("message", payload.error.message);
+        scope.setExtra("payload", payload.error.payload);
+        scope.setExtra("severity", payload.error.severity?.toString());
+        scope.setExtra("code", payload.error.code);
+        scope.setExtra("status", payload.error.status);
+        scope.setExtra("isComposite", payload.error.isComposite);
+      }
+      const cleanMsg =
+      (payload.error ? payload.error.message : payload.msg) || customStringify(payload);
+
+      if (payload.error?.error) {
+        Sentry.captureException(payload.error?.error);
+      }
+      else {
+        Sentry.captureMessage(cleanMsg);
+      }
+    })
   }
 
   static info(payload: any, show?: boolean) {

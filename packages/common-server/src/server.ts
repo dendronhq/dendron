@@ -33,7 +33,6 @@ export class ExpressUtils {
         .status(dendronResponse.error.code || StatusCodes.INTERNAL_SERVER_ERROR)
         .json({ error: error2PlainObject(dendronResponse.error) });
     } else {
-      //TODO: double check that this will convert properly.
       expressResponse.json(dendronResponse);
     }
   }

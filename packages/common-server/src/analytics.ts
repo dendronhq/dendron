@@ -1,4 +1,4 @@
-import { CONSTANTS, env, genUUID } from "@dendronhq/common-all";
+import { CONSTANTS, DendronError, env, genUUID } from "@dendronhq/common-all";
 import Analytics from "analytics-node";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -285,17 +285,30 @@ export function initializeSentry(environment: string): void {
       ? "https://bc206b31a30a4595a2efb31e8cc0c04e@o949501.ingest.sentry.io/5898219"
       : undefined;
 
+  // Respect user's telemetry settings for error reporting too.
+  const enabled = !SegmentClient.instance().hasOptedOut;
+
   Sentry.init({
     dsn,
     defaultIntegrations: false,
     tracesSampleRate: 1.0,
-    //TODO: respect user's telemetry settings on enabled.
-    // enabled
-    // release: populate?
+    enabled,
     environment,
-    //TODO: Add more context prior to sending.
-    // beforeSend
-    // beforeBreadcrumb
+    beforeSend(event, hint) {
+      const error = hint?.originalException;
+      if (error && error instanceof DendronError) {
+        event.extra = {
+          name: error.name,
+          message: error.message,
+          payload: error.payload,
+          severity: error.severity?.toString(),
+          code: error.code,
+          status: error.status,
+          isComposite: error.isComposite,
+        };
+      }
+      return event;
+    },
   });
   return;
 }

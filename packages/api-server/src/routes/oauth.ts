@@ -1,6 +1,7 @@
 import { DendronError } from "@dendronhq/common-all";
 import { Request, Response, Router } from "express";
 import asyncHandler from 'express-async-handler';
+import { StatusCodes } from "http-status-codes";
 import { getLogger } from "../core";
 import { TokenMethods } from "../modules/oauth";
 
@@ -33,6 +34,7 @@ router.get("/getToken", asyncHandler(async (req: Request, res: Response) => {
   } else {
     throw new DendronError({
       message: "unsupported oauth client: " + req.query.service,
+      code: StatusCodes.BAD_REQUEST
     });
   }
 
@@ -53,6 +55,7 @@ router.get("/refreshToken", asyncHandler(async (req: Request, res: Response) => 
   } else {
     throw new DendronError({
       message: "unsupported oauth client: " + req.query.service,
+      code: StatusCodes.BAD_REQUEST
     });
   }
 

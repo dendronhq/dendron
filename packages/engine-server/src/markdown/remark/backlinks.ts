@@ -2,6 +2,7 @@ import { NoteUtils, VaultUtils } from "@dendronhq/common-all";
 import _ from "lodash";
 import { Content, Root } from "mdast";
 import { list, listItem, paragraph } from "mdast-builder";
+import { SiteUtils } from "../../topics/site";
 import Unified, { Plugin } from "unified";
 import { Node } from "unist";
 import u from "unist-builder";
@@ -37,7 +38,31 @@ const plugin: Plugin = function (this: Unified.Processor) {
       (ent) => ent.from.fname + (ent.from.vaultName || "")
     );
 
-    if (!_.isEmpty(backlinks)) {
+    const backlinksToPublish = _.filter(backlinks, (backlink) => {
+      const vaultName = backlink.from.vaultName!;
+      const vault = VaultUtils.getVaultByName({
+        vaults: engine.vaults,
+        vname: vaultName,
+      })!;
+      const note = NoteUtils.getNoteByFnameV5({
+        fname: backlink.from.fname!,
+        notes: engine.notes,
+        vault,
+        wsRoot: engine.wsRoot,
+      });
+
+      if (!note) {
+        return false;
+      }
+      const out = SiteUtils.canPublish({
+        note,
+        engine,
+        config: engine.config,
+      });
+      return out;
+    });
+
+    if (!_.isEmpty(backlinksToPublish)) {
       root.children.push({
         type: "thematicBreak",
       });
@@ -47,7 +72,7 @@ const plugin: Plugin = function (this: Unified.Processor) {
       root.children.push(
         list(
           "unordered",
-          backlinks.map((mdLink) => {
+          backlinksToPublish.map((mdLink) => {
             return listItem(
               paragraph({
                 type: DendronASTTypes.WIKI_LINK,

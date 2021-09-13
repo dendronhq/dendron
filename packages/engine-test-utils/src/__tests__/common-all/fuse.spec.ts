@@ -9,6 +9,7 @@ import Fuse from "fuse.js";
 type TestData = {
   fname: string;
   updated: number;
+  stub?: boolean;
 };
 
 async function testDataToNotePropsDict(
@@ -24,6 +25,7 @@ async function testDataToNotePropsDict(
       noWrite: true,
     });
 
+    note.stub = td.stub;
     note.updated = td.updated;
 
     dict[note.id] = note;
@@ -51,22 +53,50 @@ async function initializeFuseEngine(testData: TestData[]): Promise<FuseEngine> {
   return fuseEngine;
 }
 
-const queryTestV1 = (opts: {
+const queryTestV1 = ({
+  fuseEngine,
+  qs,
+  expectedFNames,
+}: {
   fuseEngine: FuseEngine;
   qs: string;
   expectedFNames: string[];
 }) => {
-  const notes = opts.fuseEngine.queryNote({ qs: opts.qs });
+  const notes = fuseEngine.queryNote({ qs });
 
-  opts.expectedFNames.forEach((expectedFname) => {
+  expectedFNames.forEach((expectedFname) => {
     const wasFound = notes.some((n) => n.fname === expectedFname);
     if (!wasFound) {
-      fail(`Did not find '${expectedFname}' when querying for '${opts.qs}'`);
+      fail(`Did not find '${expectedFname}' when querying for '${qs}'`);
     }
   });
 };
 
 describe("Fuse utility function tests", () => {
+  describe(`doesContainSpecialQueryChars`, () => {
+    test.each([
+      // Fuse doesn't treat * specially but we map * to ' ' hence we treat it as special character.
+      ["dev*ts", true],
+      ["dev vs", true],
+      ["^vs", true],
+      ["vs$", true],
+      ["vs$", true],
+      ["dev|vs", true],
+      ["!vs", true],
+      ["=vs", true],
+      ["'vs", true],
+      ["dev-vs", false],
+      ["dev_vs", false],
+    ])(
+      `WHEN input="%s" THEN result is expected to be %s`,
+      (input: string, expected: boolean) => {
+        expect(FuseEngine.doesContainSpecialQueryChars(input)).toEqual(
+          expected
+        );
+      }
+    );
+  });
+
   describe("formatQueryForFuse", () => {
     test.each([
       ["dev*vs", "dev vs"],
@@ -77,6 +107,23 @@ describe("Fuse utility function tests", () => {
         expect(FuseEngine.formatQueryForFuse({ qs: input })).toEqual(expected);
       }
     );
+
+    describe(`GIVEN that onlyDirectChildren is set`, () => {
+      test.each([
+        ["dev.vs.", "^dev.vs."],
+        ["^dev.vs.", "^dev.vs."],
+      ])(
+        'WHEN input="%s" THEN output is "%s"',
+        (input: string, expected: string) => {
+          expect(
+            FuseEngine.formatQueryForFuse({
+              qs: input,
+              onlyDirectChildren: true,
+            })
+          ).toEqual(expected);
+        }
+      );
+    });
   });
 
   describe("sortMatchingScores", () => {
@@ -282,34 +329,89 @@ describe("FuseEngine tests with extracted data.", () => {
 
     let fuseEngine: FuseEngine;
     beforeAll(async () => {
-      fuseEngine = await initializeFuseEngine(DATA_FILES_WITH_DEV);
+      fuseEngine = await initializeFuseEngine(
+        DATA_FILES_WITH_DEV.concat({
+          fname: "dendron.dev.i-am-a-stub",
+          updated: 1,
+          stub: true,
+        })
+      );
     });
 
-    test.each([
-      [
-        "dev*vs",
-        ["dendron.dev.design.files-vs-folders", "dendron.dev.ref.vscode"],
-      ],
-      [
-        "dev vs",
-        ["dendron.dev.design.files-vs-folders", "dendron.dev.ref.vscode"],
-      ],
-      [
-        "vs dev",
-        ["dendron.dev.design.files-vs-folders", "dendron.dev.ref.vscode"],
-      ],
-      ["devapi", ["dendron.dev.api", "dendron.dev.api.seeds"]],
-      ["dendron rename", ["dendron.dev.design.commands.rename"]],
-      ["rename dendron", ["dendron.dev.design.commands.rename"]],
-    ])(
-      "WHEN query for '%s' THEN results to contain %s",
-      (qs: string, expectedFNames: string[]) => {
-        queryTestV1({
-          fuseEngine,
-          qs: qs,
-          expectedFNames: expectedFNames,
+    describe(`AND using default query parameters`, () => {
+      test.each([
+        [
+          "dev*vs",
+          ["dendron.dev.design.files-vs-folders", "dendron.dev.ref.vscode"],
+        ],
+        [
+          "dev vs",
+          ["dendron.dev.design.files-vs-folders", "dendron.dev.ref.vscode"],
+        ],
+        [
+          "vs dev",
+          ["dendron.dev.design.files-vs-folders", "dendron.dev.ref.vscode"],
+        ],
+        ["devapi", ["dendron.dev.api", "dendron.dev.api.seeds"]],
+        ["dendron rename", ["dendron.dev.design.commands.rename"]],
+        ["rename dendron", ["dendron.dev.design.commands.rename"]],
+        [
+          "dendron.dev design.commands.rename",
+          ["dendron.dev.design.commands.rename"],
+        ],
+        [
+          "^dendron.dev.design.commands.rename",
+          ["dendron.dev.design.commands.rename"],
+        ],
+        [
+          "dendron.dev.design.commands.rename$",
+          ["dendron.dev.design.commands.rename"],
+        ],
+        [
+          "=dendron.dev.design.commands.rename",
+          ["dendron.dev.design.commands.rename"],
+        ],
+        [
+          "dendron.dev.design.commands.rename !git",
+          ["dendron.dev.design.commands.rename"],
+        ],
+        [
+          "'dendron.dev.design 'commands.rename",
+          ["dendron.dev.design.commands.rename"],
+        ],
+      ])(
+        "WHEN query for '%s' THEN results to contain %s",
+        (qs: string, expectedFNames: string[]) => {
+          queryTestV1({
+            fuseEngine,
+            qs: qs,
+            expectedFNames: expectedFNames,
+          });
+        }
+      );
+    });
+
+    describe(`WHEN querying for 'dendron.dev' AND onlyDirectChildren is set.'`, () => {
+      let notes: NoteIndexProps[];
+
+      beforeEach(() => {
+        notes = fuseEngine.queryNote({
+          qs: "dendron.dev.",
+          onlyDirectChildren: true,
         });
-      }
-    );
+      });
+
+      it(`THEN match direct child 'dendron.dev.design'`, () => {
+        assertHasFName(notes, "dendron.dev.design");
+      });
+
+      it(`THEN do NOT match grandchild 'dendron.dev.design.commands'`, () => {
+        assertDoesNotHaveFName(notes, "dendron.dev.design.commands");
+      });
+
+      it(`THEN do NOT match stub child 'dendron.dev.i-am-a-stub'`, () => {
+        assertDoesNotHaveFName(notes, "dendron.dev.i-am-a-stub");
+      });
+    });
   });
 });

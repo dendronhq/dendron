@@ -18,7 +18,7 @@ import mermaid from "@dendronhq/remark-mermaid";
 import rehypePrism from "@mapbox/rehype-prism";
 import _ from "lodash";
 import { Heading } from "mdast";
-import { paragraph, root, text } from "mdast-builder";
+import { blockquote, paragraph, root, text } from "mdast-builder";
 import nunjucks from "nunjucks";
 import path from "path";
 import link from "rehype-autolink-headings";
@@ -59,6 +59,7 @@ import {
 } from "./types";
 import { hashtags } from "./remark/hashtag";
 import { userTags } from "./remark/userTags";
+import { extendedImage } from "./remark/extendedImage";
 
 const toString = require("mdast-util-to-string");
 export { nunjucks };
@@ -209,6 +210,10 @@ export class MDUtilsV4 {
     return root(paragraph(text(msg)));
   }
 
+  static genMDErrorMsg(msg: string): Parent {
+    return root(blockquote(text(msg)));
+  }
+
   static getDendronData(proc: Processor) {
     return proc.data("dendron") as DendronASTData;
   }
@@ -335,6 +340,7 @@ export class MDUtilsV4 {
       .use(blockAnchors)
       .use(hashtags)
       .use(userTags)
+      .use(extendedImage)
       .data("errors", errors);
     this.setDendronData(_proc, { dest: opts.dest, fname: opts.fname });
     this.setEngine(_proc, opts.engine);
@@ -404,6 +410,7 @@ export class MDUtilsV4 {
       .use(blockAnchors, _.merge(opts.blockAnchorsOpts))
       .use(hashtags)
       .use(userTags)
+      .use(extendedImage)
       .use(noteRefsV2, {
         ...opts.noteRefOpts,
         wikiLinkOpts: opts.wikiLinksOpts,

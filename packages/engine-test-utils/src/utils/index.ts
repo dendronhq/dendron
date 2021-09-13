@@ -16,7 +16,7 @@ export * from "./git";
 export * from "./seed";
 
 export async function checkString(body: string, ...match: string[]) {
-  expect(
+  return expect(
     await AssertUtils.assertInString({
       body,
       match,
@@ -59,8 +59,8 @@ export async function checkFile(
     expect(body).toMatchSnapshot();
   }
   return (
-    checkString(body, ...match) &&
-    (!nomatch || checkNotInString(body, ...nomatch))
+    (await checkString(body, ...match)) &&
+    (!nomatch || (await checkNotInString(body, ...nomatch)))
   );
 }
 

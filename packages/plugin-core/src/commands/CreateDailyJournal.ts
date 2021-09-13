@@ -1,5 +1,6 @@
 import { NoteUtils, VaultUtils } from "@dendronhq/common-all";
 import { cleanName } from "@dendronhq/common-server";
+import _ from "lodash";
 import * as vscode from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
@@ -49,7 +50,10 @@ export class CreateDailyJournalCommand extends BaseCommand<
     });
     const { config, engine } = getDWorkspace();
     let vault;
-    if (config.lookupConfirmVaultOnCreate) {
+    if (
+      _.isUndefined(config.journal.dailyVault) &&
+      config.lookupConfirmVaultOnCreate
+    ) {
       vault = await PickerUtilsV2.promptVault(engine.vaults);
       if (vault === undefined) {
         vscode.window.showInformationMessage(

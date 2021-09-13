@@ -770,25 +770,18 @@ export class NotePickerUtils {
   static async fetchPickerResults(opts: {
     picker: DendronQuickPickerV2;
     qs: string;
-    depth?: number;
+    onlyDirectChildren?: boolean;
   }) {
     const ctx = "createPickerItemsFromEngine";
     const start = process.hrtime();
-    const { picker, qs } = opts;
+    const { picker, qs, onlyDirectChildren } = opts;
     const { engine, wsRoot, vaults } = getDWorkspace();
-    let nodes: NoteProps[];
     // if we are doing a query, reset pagination options
     PickerUtilsV2.resetPaginationOpts(picker);
-    const resp = await engine.queryNotes({ qs });
-    if (opts.depth) {
-      nodes = resp.data
-        .filter((ent) => {
-          return DNodeUtils.getDepth(ent) === opts.depth!;
-        })
-        .filter((ent) => !ent.stub);
-    } else {
-      nodes = resp.data;
-    }
+
+    const resp = await engine.queryNotes({ qs, onlyDirectChildren });
+    let nodes: NoteProps[] = resp.data;
+
     Logger.info({ ctx, msg: "post:queryNotes" });
     if (nodes.length > PAGINATE_LIMIT) {
       picker.allResults = nodes;

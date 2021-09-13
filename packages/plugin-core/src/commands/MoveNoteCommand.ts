@@ -10,7 +10,7 @@ import { HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
 import _md from "markdown-it";
 import path from "path";
-import { Uri, ViewColumn, window } from "vscode";
+import { ProgressLocation, Uri, ViewColumn, window } from "vscode";
 import { MultiSelectBtn } from "../components/lookup/buttons";
 import {
   LookupControllerV3,
@@ -29,7 +29,7 @@ import { FileItem } from "../external/fileutils/FileItem";
 import { UNKNOWN_ERROR_MSG } from "../logger";
 import { VSCodeUtils } from "../utils";
 import { ProceedCancel, QuickPickUtil } from "../utils/quickPick";
-import { getExtension, getDWorkspace } from "../workspace";
+import { getDWorkspace, getExtension } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandInput = any;
@@ -54,6 +54,8 @@ type CommandOpts = {
   initialValue?: string;
   vaultName?: string;
   useSameVault?: boolean;
+  /** Defaults to true. */
+  allowMultiselect?: boolean;
 };
 
 type CommandOutput = {
@@ -89,13 +91,14 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
           vname: opts.vaultName,
         })
       : undefined;
+
     const lookupCreateOpts: LookupControllerV3CreateOpts = {
       nodeType: "note",
       disableVaultSelection: opts?.useSameVault,
       // If vault selection is enabled we alwaysPrompt selection mode,
       // hence disable toggling.
       vaultSelectCanToggle: false,
-      extraButtons: [MultiSelectBtn.create(false)],
+      extraButtons: [MultiSelectBtn.create(false)]
     };
     if (vault) {
       lookupCreateOpts.buttons = [];
@@ -156,6 +159,16 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     });
   }
 
+  private static gatherExtraButtons(opts?: CommandOpts) {
+    const shouldAllowMultiSelect =
+      opts?.allowMultiselect !== undefined ? opts?.allowMultiselect : true;
+    const extraButtons = [];
+    if (shouldAllowMultiSelect) {
+      extraButtons.push(MultiSelectBtn.create(false));
+    }
+    return extraButtons;
+  }
+
   private getDesiredMoves(
     data: NoteLookupProviderSuccessResp<OldNewLocation>
   ): RenameNoteOpts[] {
@@ -193,7 +206,12 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
 
   async execute(opts: CommandOpts): Promise<{ changed: NoteChangeEntry[] }> {
     const ctx = "MoveNoteCommand:execute";
-    opts = _.defaults(opts, { closeAndOpenFile: true });
+
+    opts = _.defaults(opts, {
+      closeAndOpenFile: true,
+      allowMultiselect: true,
+    });
+
     const { engine } = getDWorkspace();
     const ext = getExtension();
 
@@ -212,9 +230,18 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
           return { changed: [] };
         }
       }
-      window.showInformationMessage("refactoring...");
 
-      const changed = await this.moveNotes(engine, opts.moves);
+      const changed = await window.withProgress(
+        {
+          location: ProgressLocation.Notification,
+          title: "Refactoring...",
+          cancellable: false,
+        },
+        async () => {
+          const allChanges = await this.moveNotes(engine, opts.moves);
+          return allChanges;
+        }
+      );
 
       if (opts.closeAndOpenFile) {
         // During bulk move we will only open a single file that was moved to avoid

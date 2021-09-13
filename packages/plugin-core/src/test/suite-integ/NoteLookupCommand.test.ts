@@ -63,6 +63,7 @@ import {
   setupBeforeAfter,
   withConfig,
 } from "../testUtilsV3";
+import { CREATE_NEW_LABEL } from "../../components/lookup/constants";
 
 const stubVaultPick = (vaults: DVault[]) => {
   const vault = _.find(vaults, { fsPath: "vault1" });
@@ -71,7 +72,6 @@ const stubVaultPick = (vaults: DVault[]) => {
     .returns(Promise.resolve(vault));
 };
 
-// @ts-ignore
 function expectCreateNew({
   item,
   fname,
@@ -79,7 +79,13 @@ function expectCreateNew({
   item: DNodePropsQuickInputV2;
   fname?: string;
 }) {
-  expect(item.title).toEqual("Create New");
+  if (item.label !== CREATE_NEW_LABEL) {
+    throw new Error(
+      `Actual item='${JSON.stringify(
+        item
+      )}' did NOT have label='${CREATE_NEW_LABEL}'`
+    );
+  }
   if (fname) {
     expect(item.fname).toEqual(fname);
   }
@@ -139,6 +145,14 @@ function getSplitTypeButtons(
     buttons
   ) as vscode.QuickInputButton[] & DendronBtn[];
   return { horizontalSplitBtn };
+}
+
+async function wait1Second(): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve();
+    }, 1000);
+  });
 }
 
 suite("NoteLookupCommand", function () {
@@ -220,6 +234,29 @@ suite("NoteLookupCommand", function () {
             initialValue: "*",
           }))!;
           expect(opts.quickpick.selectedItems.length).toEqual(6);
+          done();
+        },
+      });
+    });
+
+    test(`WHEN partial match but not exact match THEN bubble up 'Create New'`, (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+        },
+        onInit: async ({ vaults }) => {
+          const cmd = new NoteLookupCommand();
+          stubVaultPick(vaults);
+          const opts = (await cmd.run({
+            noConfirm: true,
+            initialValue: "foo.ch",
+          }))!;
+          // Check that Create New comes first.
+          expectCreateNew({ item: opts.quickpick.selectedItems[0] });
+
+          // Check that its not just create new in the quick pick.
+          expect(opts.quickpick.selectedItems.length > 1).toBeTruthy();
           done();
         },
       });
@@ -733,6 +770,39 @@ suite("NoteLookupCommand", function () {
           expect(
             out.quickpick.value.startsWith(`scratch.${todayFormatted}.`)
           ).toBeTruthy();
+
+          done();
+        },
+      });
+    });
+
+    test("Scratch notes created at different times are differently named", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+        },
+        onInit: async ({ vaults, engine }) => {
+          const cmd = new NoteLookupCommand();
+          stubVaultPick(vaults);
+
+          // with scratch note modifier enabled,
+          await VSCodeUtils.openNote(engine.notes["foo"]);
+
+          const createScratch = async () => {
+            const out = (await cmd.run({
+              noteType: LookupNoteTypeEnum.scratch,
+              noConfirm: true,
+            })) as CommandOutput;
+
+            return out.quickpick.value;
+          };
+
+          const scratch1Name = await createScratch();
+          await wait1Second();
+          const scratch2Name = await createScratch();
+
+          expect(scratch1Name).toNotEqual(scratch2Name);
 
           done();
         },

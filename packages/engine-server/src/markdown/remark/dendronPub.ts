@@ -31,12 +31,14 @@ import {
   UserTag,
   VaultMissingBehavior,
   WikiLinkNoteV4,
+  ExtendedImage,
 } from "../types";
 import { MDUtilsV4 } from "../utils";
 import { MDUtilsV5, ProcMode } from "../utilsv5";
 import { blockAnchor2html } from "./blockAnchors";
 import { NoteRefsOpts } from "./noteRefs";
 import { convertNoteRefASTV2 } from "./noteRefsV2";
+import { extendedImage2html } from "./extendedImage";
 
 type PluginOpts = NoteRefsOpts & {
   assetsPrefix?: string;
@@ -51,10 +53,10 @@ type PluginOpts = NoteRefsOpts & {
 
 function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
   const proc = this;
-  const procData = MDUtilsV4.getDendronData(proc);
+  let { overrides, vault } = MDUtilsV4.getDendronData(proc);
   const { mode } = MDUtilsV5.getProcOpts(proc);
-  const { dest, fname, config, overrides, insideNoteRef } = procData;
-  let vault = procData.vault;
+
+  const { dest, fname, config, insideNoteRef } = MDUtilsV5.getProcData(proc);
 
   function transformer(tree: Node, _file: VFile) {
     const root = tree as Root;
@@ -182,10 +184,12 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
           }
         }
         const alias = data.alias ? data.alias : value;
-        const usePrettyLinks = engine.config.site.usePrettyLinks;
+        const usePrettyLinks = config.site.usePrettyLinks;
         const maybeFileExtension =
           _.isBoolean(usePrettyLinks) && usePrettyLinks ? "" : ".html";
-        const href = `${copts?.prefix || ""}${value}${maybeFileExtension}${
+        const href = `${config.site.assetsPrefix || ""}${
+          copts?.prefix || ""
+        }${value}${maybeFileExtension}${
           data.anchorHeader ? "#" + data.anchorHeader : ""
         }`;
         const exists = true;
@@ -341,7 +345,12 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
           return index;
         }
       }
-      if (node.type === "image" && dest === DendronASTDest.HTML) {
+      // The url correction needs to happen for both regular and extended images
+      if (
+        (node.type === DendronASTTypes.IMAGE ||
+          node.type === DendronASTTypes.EXTENDED_IMAGE) &&
+        dest === DendronASTDest.HTML
+      ) {
         const imageNode = node as Image;
         if (opts?.assetsPrefix) {
           imageNode.url =
@@ -350,6 +359,18 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
             "/" +
             _.trim(imageNode.url, "/");
         }
+      }
+      if (
+        node.type === DendronASTTypes.EXTENDED_IMAGE &&
+        dest === DendronASTDest.HTML
+      ) {
+        const index = _.indexOf(parent.children, node);
+        // Replace with the HTML containing the image including custom properties
+        parent.children.splice(
+          index,
+          1,
+          extendedImage2html(node as ExtendedImage)
+        );
       }
       return; // continue traversal
     });

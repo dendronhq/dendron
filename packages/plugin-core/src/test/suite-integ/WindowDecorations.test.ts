@@ -5,13 +5,7 @@ import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
 import {
-  DECORATION_TYPE_ALIAS,
-  DECORATION_TYPE_BLOCK_ANCHOR,
-  DECORATION_TYPE_BROKEN_TAG,
-  DECORATION_TYPE_BROKEN_WIKILINK,
-  DECORATION_TYPE_TAG,
-  DECORATION_TYPE_TIMESTAMP,
-  DECORATION_TYPE_WIKILINK,
+  DECORATION_TYPE,
   updateDecorations,
 } from "../../features/windowDecorations";
 import { VSCodeUtils } from "../../utils";
@@ -87,7 +81,7 @@ suite("windowDecorations", function () {
         },
         onInit: async ({ vaults, engine, wsRoot }) => {
           const note = NoteUtils.getNoteByFnameV5({
-            fname: "bar",
+            fname: FNAME,
             notes: engine.notes,
             vault: vaults[0],
             wsRoot,
@@ -97,7 +91,7 @@ suite("windowDecorations", function () {
           const { allDecorations } = updateDecorations(editor);
 
           const timestampDecorations = allDecorations!.get(
-            DECORATION_TYPE_TIMESTAMP
+            DECORATION_TYPE.timestamp
           );
           expect(timestampDecorations.length).toEqual(2);
           // check that the decorations are at the right locations
@@ -109,7 +103,7 @@ suite("windowDecorations", function () {
           ).toBeTruthy();
 
           const blockAnchorDecorations = allDecorations!.get(
-            DECORATION_TYPE_BLOCK_ANCHOR
+            DECORATION_TYPE.blockAnchor
           );
           expect(blockAnchorDecorations.length).toEqual(3);
           // check that the decorations are at the right locations
@@ -124,9 +118,9 @@ suite("windowDecorations", function () {
           ).toBeTruthy();
 
           const wikilinkDecorations = allDecorations!.get(
-            DECORATION_TYPE_WIKILINK
+            DECORATION_TYPE.wikiLink
           );
-          expect(wikilinkDecorations.length).toEqual(2);
+          expect(wikilinkDecorations.length).toEqual(3);
           expect(
             isTextDecorated("[[root]]", wikilinkDecorations!, document)
           ).toBeTruthy();
@@ -137,31 +131,20 @@ suite("windowDecorations", function () {
               document
             )
           ).toBeTruthy();
-
-          const tagDecorations = allDecorations!.get(DECORATION_TYPE_TAG);
-          expect(tagDecorations.length).toEqual(1);
           expect(
-            isTextDecorated("#bar", tagDecorations!, document)
+            isTextDecorated("#bar", wikilinkDecorations!, document)
           ).toBeTruthy();
 
-          const brokenTagDecorations = allDecorations!.get(
-            DECORATION_TYPE_BROKEN_TAG
-          );
-          expect(brokenTagDecorations.length).toEqual(2);
-          expect(
-            isTextDecorated("#foo", brokenTagDecorations!, document)
-          ).toBeTruthy();
-
-          const aliasDecorations = allDecorations!.get(DECORATION_TYPE_ALIAS);
+          const aliasDecorations = allDecorations!.get(DECORATION_TYPE.alias);
           expect(aliasDecorations.length).toEqual(1);
           expect(
             isTextDecorated("with alias", aliasDecorations!, document)
           ).toBeTruthy();
 
           const brokenWikilinkDecorations = allDecorations!.get(
-            DECORATION_TYPE_BROKEN_WIKILINK
+            DECORATION_TYPE.brokenWikilink
           );
-          expect(brokenWikilinkDecorations.length).toEqual(2);
+          expect(brokenWikilinkDecorations.length).toEqual(4);
           expect(
             isTextDecorated(
               "[[does.not.exist]]",
@@ -176,6 +159,129 @@ suite("windowDecorations", function () {
               document
             )
           ).toBeTruthy();
+          expect(
+            isTextDecorated("#foo", brokenWikilinkDecorations!, document)
+          ).toBeTruthy();
+
+          done();
+        },
+      });
+    });
+
+    test("highlighting same file wikilinks", (done) => {
+      const FNAME = "bar";
+
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ vaults, wsRoot }) => {
+          await NoteTestUtilsV4.createNote({
+            fname: FNAME,
+            body: [
+              "Ut incidunt id commodi. ^anchor-1",
+              "",
+              "[[#^anchor-1]]",
+              "[[#^anchor-not-exists]]",
+              "![[#^anchor-1]]",
+              "![[#^anchor-not-exists]]",
+              "![[#^anchor-1:#*]]",
+              "![[#^anchor-not-exists]]",
+            ].join("\n"),
+            vault: vaults[0],
+            wsRoot,
+          });
+        },
+        onInit: async ({ vaults, engine, wsRoot }) => {
+          const note = NoteUtils.getNoteByFnameV5({
+            fname: FNAME,
+            notes: engine.notes,
+            vault: vaults[0],
+            wsRoot,
+          });
+          const editor = await VSCodeUtils.openNote(note!);
+          const document = editor.document;
+          const { allDecorations } = updateDecorations(editor);
+
+          const wikilinkDecorations = allDecorations!.get(
+            DECORATION_TYPE.wikiLink
+          );
+          expect(wikilinkDecorations.length).toEqual(3);
+          expect(
+            isTextDecorated("[[#^anchor-1]]", wikilinkDecorations!, document)
+          ).toBeTruthy();
+          expect(
+            isTextDecorated("![[#^anchor-1]]", wikilinkDecorations!, document)
+          ).toBeTruthy();
+          expect(
+            isTextDecorated(
+              "![[#^anchor-1:#*]]",
+              wikilinkDecorations!,
+              document
+            )
+          ).toBeTruthy();
+
+          const brokenWikilinkDecorations = allDecorations!.get(
+            DECORATION_TYPE.brokenWikilink
+          );
+          expect(brokenWikilinkDecorations.length).toEqual(3);
+          expect(
+            isTextDecorated(
+              "[[#^anchor-not-exists]]",
+              brokenWikilinkDecorations!,
+              document
+            )
+          ).toBeTruthy();
+          expect(
+            isTextDecorated(
+              "![[#^anchor-not-exists]]",
+              brokenWikilinkDecorations!,
+              document
+            )
+          ).toBeTruthy();
+          expect(
+            isTextDecorated(
+              "![[#^anchor-not-exists]]",
+              brokenWikilinkDecorations!,
+              document
+            )
+          ).toBeTruthy();
+
+          done();
+        },
+      });
+    });
+
+    test("highlighting wildcard references", (done) => {
+      const FNAME = "bar";
+
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ vaults, wsRoot }) => {
+          await NoteTestUtilsV4.createNote({
+            fname: FNAME,
+            body: ["![[foo.bar.*]]"].join("\n"),
+            vault: vaults[0],
+            wsRoot,
+          });
+        },
+        onInit: async ({ vaults, engine, wsRoot }) => {
+          const note = NoteUtils.getNoteByFnameV5({
+            fname: FNAME,
+            notes: engine.notes,
+            vault: vaults[0],
+            wsRoot,
+          });
+          const editor = await VSCodeUtils.openNote(note!);
+          const document = editor.document;
+          const { allDecorations } = updateDecorations(editor);
+
+          const wikilinkDecorations = allDecorations!.get(
+            DECORATION_TYPE.wikiLink
+          );
+          expect(wikilinkDecorations.length).toEqual(1);
+          expect(
+            isTextDecorated("![[foo.bar.*]]", wikilinkDecorations!, document)
+          ).toBeTruthy();
+
           done();
         },
       });

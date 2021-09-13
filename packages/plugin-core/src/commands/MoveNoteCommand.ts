@@ -104,7 +104,11 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
       lookupCreateOpts.buttons = [];
     }
     const lc = LookupControllerV3.create(lookupCreateOpts);
-    const provider = new NoteLookupProvider("move", { allowNewNote: true });
+
+    const provider = new NoteLookupProvider("move", {
+      allowNewNote: true,
+      forceAsIsPickerValueUsage: true,
+    });
     provider.registerOnAcceptHook(ProviderAcceptHooks.oldNewLocationHook);
     const initialValue = path.basename(
       VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath || "",

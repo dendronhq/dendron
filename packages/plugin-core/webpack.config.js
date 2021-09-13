@@ -1,8 +1,10 @@
 //@ts-check
+import SentryWebpackPlugin from "@sentry/webpack-plugin";
 
 const path = require("path");
 const CopyPlugin = require("copy-webpack-plugin");
-const { IgnorePlugin, DefinePlugin } = require("webpack");
+const { IgnorePlugin } = require("webpack");
+
 /**@type {import('webpack').Configuration}*/
 const config = {
   target: "node",
@@ -46,7 +48,15 @@ const config = {
     }),
     new CopyPlugin({
       patterns: [
-        { from: path.join("..", "common-all", "data", "dendron-yml.validator.json"), to: "dendron-yml.validator.json" },
+        {
+          from: path.join(
+            "..",
+            "common-all",
+            "data",
+            "dendron-yml.validator.json"
+          ),
+          to: "dendron-yml.validator.json",
+        },
       ],
     }),
     // @ts-ignore
@@ -54,6 +64,16 @@ const config = {
       patterns: [
         { from: "webpack-require-hack.js", to: "webpack-require-hack.js" },
       ],
+    }),
+    new SentryWebpackPlugin({
+      authToken: process.env.SENTRY_AUTH_TOKEN,
+      org: "dendron",
+      project: "dendron",
+      release: process.env.DENDRON_RELEASE_VERSION,
+
+      // other SentryWebpackPlugin configuration
+      include: ".",
+      ignore: ["node_modules", "webpack.config.js"],
     }),
   ],
   module: {

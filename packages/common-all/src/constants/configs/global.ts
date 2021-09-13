@@ -82,9 +82,6 @@ export const ENABLE_NOTE_TITLE_FOR_LINK = (
   };
 };
 
-/**
- * Constants holding all global config related {@link DendronConfigEntry}
- */
 export const GLOBAL: DendronConfigEntryCollection<DendronGlobalConfig> = {
   enableFMTitle: ENABLE_FM_TITLE("global"), // TODO: split implementation to respect non-global config
   enableHierarchyDisplay: ENABLE_HIERARCHY_DISPLAY("global"), // TODO: split

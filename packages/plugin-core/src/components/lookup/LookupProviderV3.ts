@@ -213,7 +213,10 @@ export class NoteLookupProvider implements ILookupProviderV3 {
     let pickerValue = picker.value;
     const start = process.hrtime();
 
-    // just activated picker's have special behavior
+    // Just activated picker's have special behavior:
+    //
+    // We slice the postfix off until the first dot to show all results at the same
+    // level so that when a user types `foo.one`, they will see all results in `foo.*`
     if (
       picker._justActivated &&
       !picker.nonInteractive &&

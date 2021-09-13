@@ -33,37 +33,9 @@ export type DendronDevConfig = {
 };
 
 /**
- * Constants holding all dev config related {@link DendronConfigEntry}
- *
- * Try to keep these simple until going out of beta.
+ * Generates defaults for {@link DendronDevConfig}
+ * @returns DendronDevConfig
  */
-export const DEV = {
-  NEXT_SERVER_URL: {
-    label: "next server url",
-    desc: "custom url for the nextjs server",
-  },
-  NEXT_STATIC_ROOT: {
-    label: "next static root",
-    desc: "Root directory for the static assets of the nextjs server",
-  },
-  ENGINE_SERVER_PORT: {
-    label: "engine server port",
-    desc: "What port to use for the engine server. Defaults to creating on startup.",
-  },
-  ENABLE_WEB_UI: {
-    label: "Enable web UI",
-    desc: "Enable experimental web ui. Defaults to false.",
-  },
-  ENABLE_LINK_CANDIDATES: {
-    label: "Enable link candidates",
-    desc: "Enable displaying and indexing link candidates. Defaults to false.",
-  },
-  ENABLE_PREVIEW_V2: {
-    label: "Enable Preview V2",
-    desc: "Use preview V2 as the default preview.",
-  },
-};
-
 export function genDefaultDevConfig(): DendronDevConfig | undefined {
   return;
 }

@@ -13,6 +13,10 @@ export type DendronGlobalConfig = {
   enableLegacyNoteRef: boolean; // TODO: split
 };
 
+/**
+ * Generates default for {@link DendronGlobalConfig}
+ * @returns DendronGlobalConfig
+ */
 export function genDefaultGlobalConfig(): DendronGlobalConfig {
   return {
     enableFMTitle: true, // TODO: split implementation to respect non-global config

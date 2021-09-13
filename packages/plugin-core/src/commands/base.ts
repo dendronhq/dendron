@@ -1,6 +1,5 @@
 import { DendronError } from "@dendronhq/common-all";
 import { DLogger, getDurationMilliseconds } from "@dendronhq/common-server";
-import * as Sentry from "@sentry/node";
 import _ from "lodash";
 import { window } from "vscode";
 import { Logger } from "../logger";

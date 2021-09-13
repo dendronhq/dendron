@@ -98,7 +98,7 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
       // If vault selection is enabled we alwaysPrompt selection mode,
       // hence disable toggling.
       vaultSelectCanToggle: false,
-      extraButtons: [MultiSelectBtn.create(false)]
+      extraButtons: [MultiSelectBtn.create(false)],
     };
     if (vault) {
       lookupCreateOpts.buttons = [];
@@ -161,16 +161,6 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
         },
       });
     });
-  }
-
-  private static gatherExtraButtons(opts?: CommandOpts) {
-    const shouldAllowMultiSelect =
-      opts?.allowMultiselect !== undefined ? opts?.allowMultiselect : true;
-    const extraButtons = [];
-    if (shouldAllowMultiSelect) {
-      extraButtons.push(MultiSelectBtn.create(false));
-    }
-    return extraButtons;
   }
 
   private getDesiredMoves(

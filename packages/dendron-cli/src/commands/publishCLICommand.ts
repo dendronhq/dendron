@@ -134,10 +134,7 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
         (opts.config as DendronSiteConfig).siteUrl = "localhost:3000";
       }
     }
-    await cli.execute(opts);
-    return new Promise((resolve) => {
-      opts.server.close(resolve);
-    });
+    return cli.execute(opts);
   }
 
   init(opts: { wsRoot: string }) {

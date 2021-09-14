@@ -149,7 +149,7 @@ export class EngineConnector {
     ).toMillis();
     this.logger.info({ ctx, portCreated, wsActivation });
     // if port is created after workspace activated, we have a good port file
-    if (portCreated > wsActivation) {
+    if (portCreated >= wsActivation) {
       const port = openPortFile({ fpath: portFilePath });
       this.logger.info({ ctx, msg: "initFromExistingFile", port });
       const maybeEngine = await this.tryToConnect({ port });

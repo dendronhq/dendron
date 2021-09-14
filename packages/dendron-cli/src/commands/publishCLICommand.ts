@@ -136,7 +136,6 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     }
     await cli.execute(opts);
     return new Promise((resolve) => {
-      console.log("BOND-CLOSING");
       opts.server.close(resolve);
     });
   }

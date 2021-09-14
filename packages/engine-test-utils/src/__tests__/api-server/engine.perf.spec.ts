@@ -30,7 +30,6 @@ describe("engine perf", () => {
       async ({ engineInitDuration }) => {
         expect(engineInitDuration).toMatchSnapshot();
         // expect(engineInitDuration < 2100).toBeTruthy();
-        // expect(engineInitDuration).toMatchSnapshot("BOND");
         // const vpath = vault2Path({ wsRoot, vault: vaults[0] });
         // expect(fs.readdirSync(vpath)).toMatchSnapshot();
       },

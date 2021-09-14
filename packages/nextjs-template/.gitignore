@@ -38,3 +38,7 @@ public/assets
 public/CNAME
 public/logo.*
 local
+
+# generated
+robots.txt
+sitemap.xml

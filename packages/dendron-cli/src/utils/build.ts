@@ -26,7 +26,7 @@ export enum SemverVersion {
   MAJOR = "major",
   MINOR = "minor",
   PATCH = "patch",
-  PREPATCH = "prepatch",
+  PRERELEASE = "prerelease",
 }
 
 export enum PublishEndpoint {

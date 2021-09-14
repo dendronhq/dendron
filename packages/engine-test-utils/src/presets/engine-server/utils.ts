@@ -66,6 +66,23 @@ export const setupJournals: PreSetupHookFunction = async ({
   );
 };
 
+// Workspace will look like:
+// .
+// ├── dendron.code-workspace
+// ├── dendron.yml
+// ├── vault1
+// │   ├── foo.ch1.md
+// │   ├── foo.md
+// │   ├── foo.schema.yml
+// │   ├── root.md
+// │   └── root.schema.yml
+// ├── vault2
+// │   ├── bar.md
+// │   ├── root.md
+// │   └── root.schema.yml
+// └── vault3
+//     ├── root.md
+//     └── root.schema.yml
 export const setupBasicMulti: PreSetupHookFunction = async ({
   vaults,
   wsRoot,

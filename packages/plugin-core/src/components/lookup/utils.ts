@@ -716,9 +716,7 @@ export class NotePickerUtils {
     engine: DEngineClient;
   }) => {
     const { wsRoot, vaults } = getDWorkspace();
-    const nodes = NoteLookupUtils.fetchRootResults(engine.notes, {
-      config: engine.config,
-    });
+    const nodes = NoteLookupUtils.fetchRootResults(engine.notes);
     return nodes.map((ent) => {
       return DNodeUtils.enhancePropForQuickInput({
         wsRoot,

@@ -12,7 +12,7 @@ import {
   DNodeUtils,
   DEngineClient,
 } from ".";
-import { DendronConfig, DVault } from "./types";
+import { DVault } from "./types";
 
 export type NoteIndexProps = {
   id: string;
@@ -131,6 +131,24 @@ type FuseEngineOpts = {
 };
 
 export class FuseEngine {
+  /**
+   * Characters that are specially treated by FuseJS search
+   * Reference https://fusejs.io/examples.html#extended-search
+   *
+   * Includes '*' which is not specially treated by FuseJS but we currently
+   * map '*' to ' ' which specially treated by FuseJS.
+   */
+  private static readonly SPECIAL_QUERY_CHARACTERS = [
+    "*",
+    " ",
+    "|",
+    "^",
+    "$",
+    "!",
+    "=",
+    "'",
+  ];
+
   public notesIndex: Fuse<NoteIndexProps>;
   public schemaIndex: Fuse<SchemaProps>;
 
@@ -352,19 +370,28 @@ export class FuseEngine {
     // Filter by threshold due to what appears to be a FuseJS bug
     results = this.filterByThreshold(results);
 
-    // Filter out matches that are same length as query string but are not exact.
-    //
-    // For example
-    // 'user.nickolay.journal.2021.09.03'
-    // matches
-    // 'user.nickolay.journal.2021.09.02'
-    // with a super low score of '0.03' but we don't want to display all the journal
-    // dates with the same length. Hence whenever the length of our query is equal
-    // or longer than the query results, we want to create a new note, not show those results.
-    results = results.filter(
-      (r) =>
-        r.item.fname.length > queryString.length || r.item.fname === queryString
-    );
+    if (!FuseEngine.doesContainSpecialQueryChars(queryString)) {
+      // When we use query language operators this filtering does not apply
+      // since we can query the entry with a much longer query than file name length.
+      // For example query fname="hi-world" with query="^hi world$ !bye".
+      //
+      // For cases of simple file names (do not contain special query chars):
+      // Filter out matches that are same length or less as query string but
+      // are not exact.
+      //
+      // For example
+      // 'user.nickolay.journal.2021.09.03'
+      // matches
+      // 'user.nickolay.journal.2021.09.02'
+      // with a super low score of '0.03' but we don't want to display all the journal
+      // dates with the same length. Hence whenever the length of our query is equal
+      // or longer than the query results, we want to create a new note, not show those results.
+      results = results.filter(
+        (r) =>
+          r.item.fname.length > queryString.length ||
+          r.item.fname === queryString
+      );
+    }
 
     if (onlyDirectChildren) {
       const depth = queryString.split(".").length;
@@ -376,6 +403,13 @@ export class FuseEngine {
     }
 
     return results;
+  }
+
+  /**
+   * Returns true when string contains characters that FuseJS treats as special characters.
+   * */
+  static doesContainSpecialQueryChars(str: string) {
+    return this.SPECIAL_QUERY_CHARACTERS.some((char) => str.includes(char));
   }
 }
 
@@ -392,19 +426,12 @@ export class NoteLookupUtils {
     return lastDotIndex < 0 ? "" : qs.slice(0, lastDotIndex + 1);
   };
 
-  static fetchRootResults = (
-    notes: NotePropsDict,
-    opts?: Partial<{ config: DendronConfig }>
-  ) => {
-    const roots: NoteProps[] =
-      opts?.config?.site.siteHierarchies === ["root"]
-        ? NoteUtils.getRoots(notes)
-        : opts!.config!.site.siteHierarchies.flatMap((fname) =>
-            NoteUtils.getNotesByFname({ fname, notes })
-          );
+  static fetchRootResults = (notes: NotePropsDict) => {
+    const roots: NoteProps[] = NoteUtils.getRoots(notes);
+
     const childrenOfRoot = roots.flatMap((ent) => ent.children);
-    const nodes = _.map(childrenOfRoot, (ent) => notes[ent]).concat(roots);
-    return nodes;
+    const childrenOfRootNotes = _.map(childrenOfRoot, (ent) => notes[ent]);
+    return roots.concat(childrenOfRootNotes);
   };
 
   static async lookup({

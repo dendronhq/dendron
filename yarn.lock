@@ -2836,6 +2836,11 @@
     exec-sh "^0.3.2"
     minimist "^1.2.0"
 
+"@corex/deepmerge@^2.6.34":
+  version "2.6.34"
+  resolved "https://registry.npmjs.org/@corex/deepmerge/-/deepmerge-2.6.34.tgz#8dd084f2bcc9cf54f6b1210a1aebd25206de2a84"
+  integrity sha512-5l3bQRGOoCJ1nYTxEaOW/MRuwNDq32KYatWO5rwOlOzxY4beVCrxDBaDBX5wpDn0PYm0QAul/vAC9GDHShEbTw==
+
 "@ctrl/tinycolor@^3.4.0":
   version "3.4.0"
   resolved "https://registry.npmjs.org/@ctrl/tinycolor/-/tinycolor-3.4.0.tgz#c3c5ae543c897caa9c2a68630bed355be5f9990f"
@@ -16522,6 +16527,13 @@ matcher@^3.0.0:
   dependencies:
     escape-string-regexp "^4.0.0"
 
+matcher@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.npmjs.org/matcher/-/matcher-4.0.0.tgz#a42a05a09aaed92e2d241eb91fddac689461ea51"
+  integrity sha512-S6x5wmcDmsDRRU/c2dkccDwQPXoFczc5+HpQ2lON8pnvHlnvHAHj5WlLVvw6n6vNyHuVugYrFohYxbS+pvFpKQ==
+  dependencies:
+    escape-string-regexp "^4.0.0"
+
 math-random@^1.0.1:
   version "1.0.4"
   resolved "https://registry.npmjs.org/math-random/-/math-random-1.0.4.tgz#5dd6943c938548267016d4e34f057583080c514c"
@@ -17334,6 +17346,15 @@ next-seo@^4.26.0:
   version "4.26.0"
   resolved "https://registry.npmjs.org/next-seo/-/next-seo-4.26.0.tgz#4218cfae5651fdc2e330dcdf1cc1b34ce199d41c"
   integrity sha512-5TqywQ3XAwqdmEU1AyNZjR7WdDKFTkDD8aBtgQelPvzBUEy8i0mTjtiw+09jhiHFNik6FqS8uPKCaYcY6jRgSQ==
+
+next-sitemap@^1.6.168:
+  version "1.6.168"
+  resolved "https://registry.npmjs.org/next-sitemap/-/next-sitemap-1.6.168.tgz#5d184b7713edf03c16e6d9064c9a00b2339ec78c"
+  integrity sha512-zzveI/1tjyvdTHd9qoxzH1JyK+wNqW3L+AxHf7Ppa7FbmcLb9Gj30b2pBLTK9wSiRVuSYAjOGxsPliL+daxspQ==
+  dependencies:
+    "@corex/deepmerge" "^2.6.34"
+    matcher "^4.0.0"
+    minimist "^1.2.5"
 
 next-tick@1, next-tick@^1.1.0:
   version "1.1.0"
@@ -21051,11 +21072,6 @@ rxjs@^6.4.0, rxjs@^6.6.0, rxjs@^6.6.7:
   dependencies:
     tslib "^1.9.0"
 
-saas@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.npmjs.org/saas/-/saas-1.0.0.tgz#0091274f26664300bbca5e9893bc4bb88709e677"
-  integrity sha1-AJEnTyZmQwC7yl6Yk7xLuIcJ5nc=
-
 safe-buffer@5.1.2, safe-buffer@~5.1.0, safe-buffer@~5.1.1:
   version "5.1.2"
   resolved "https://registry.npmjs.org/safe-buffer/-/safe-buffer-5.1.2.tgz#991ec69d296e0313747d59bdfd2b745c35f8828d"
@@ -21120,6 +21136,13 @@ sass@^1.35.1:
   version "1.35.1"
   resolved "https://registry.npmjs.org/sass/-/sass-1.35.1.tgz#90ecf774dfe68f07b6193077e3b42fb154b9e1cd"
   integrity sha512-oCisuQJstxMcacOPmxLNiLlj4cUyN2+8xJnG7VanRoh2GOLr9RqkvI4AxA4a6LHVg/rsu+PmxXeGhrdSF9jCiQ==
+  dependencies:
+    chokidar ">=3.0.0 <4.0.0"
+
+sass@^1.39.0:
+  version "1.39.1"
+  resolved "https://registry.npmjs.org/sass/-/sass-1.39.1.tgz#98d3d3b356f9f4c34ccc7210c282037de1da1a35"
+  integrity sha512-IGIP3DtAFmrNCBDdq4Zxw8kodWeNjYCuykz37tu6LEoOH8AzqT6z8o6udeNZgzoLOkvd4nejVyK2U9o3/0pPJw==
   dependencies:
     chokidar ">=3.0.0 <4.0.0"
 

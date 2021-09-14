@@ -9,7 +9,7 @@ export type JournalConfig = {
   name: string;
   dateFormat: string;
   addBehavior: NoteAddBehaviorEnum;
-  firstDayOfWeek: number;
+  // firstDayOfWeek: number;
 };
 
 // const assertion to tell the compiler that we only want these as dayOfWeekNumber.
@@ -26,6 +26,6 @@ export function genDefaultJournalConfig(): JournalConfig {
     name: "journal",
     dateFormat: "y.MM.dd",
     addBehavior: NoteAddBehaviorEnum.childOfDomain,
-    firstDayOfWeek: 1,
+    // firstDayOfWeek: 1,
   };
 }

@@ -125,8 +125,8 @@ export const PUBLISHING: DendronConfigEntryCollection<DendronPublishingConfig> =
       label: "Site Favicon Path",
       desc: "Path to favicon relative to the workspace.",
     },
-    logo: {
-      label: "Logo",
+    logoPath: {
+      label: "Logo Path",
       desc: "Path to the site logo.",
     },
     siteIndex: {
@@ -137,7 +137,7 @@ export const PUBLISHING: DendronConfigEntryCollection<DendronPublishingConfig> =
       label: "Site Hierarchies",
       desc: "List of hierarchies to publish.",
     },
-    displaySiteLastModified: {
+    enableSiteLastModified: {
       label: "Site Last Modified",
       desc: "Show last modified timestamp on the site",
     },
@@ -153,7 +153,7 @@ export const PUBLISHING: DendronConfigEntryCollection<DendronPublishingConfig> =
       label: "Site URL",
       desc: "URL of the site without trailing slash.",
     },
-    enableFrontMatterTags: {
+    enableFrontmatterTags: {
       label: "Enable Frontmatter Tags",
       desc: "Show Frontmatter tags in published site.",
     },
@@ -161,8 +161,8 @@ export const PUBLISHING: DendronConfigEntryCollection<DendronPublishingConfig> =
       label: "Enable Randomly Colored Tags",
       desc: "Display randomly generated colors for tags.",
     },
-    config: {
-      label: "Config",
+    hierarchy: {
+      label: "Hierarchy",
       desc: "Control publication on a per-hierarchy basis",
     },
     duplicateNoteBehavior: {

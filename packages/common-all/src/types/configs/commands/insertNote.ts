@@ -2,7 +2,7 @@
  * Namespace for configuring {@link InsertNoteCommand}
  */
 export type InsertNoteConfig = {
-  initialValue: string;
+  initialValue?: string;
 };
 
 /**

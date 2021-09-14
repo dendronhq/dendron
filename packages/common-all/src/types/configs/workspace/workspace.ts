@@ -4,7 +4,7 @@ import { genDefaultScratchConfig, ScratchConfig } from "./scratch";
 import { genDefaultGraphConfig, DendronGraphConfig } from "../workspace/graph";
 import { SeedSite } from "../../seed";
 import { DHookDict } from "../../hooks";
-import { VaultSyncBehavior, VaultSyncBehaviorEnum } from "../base";
+import { VaultSyncMode, VaultSyncModeEnum } from "../base";
 
 /**
  * Namespace for configurations that affect the workspace
@@ -24,7 +24,7 @@ export type DendronWorkspaceConfig = {
   enableAutoCreateOnDefinition: boolean;
   enableXVaultWikiLink: boolean;
   initializeRemoteVaults: boolean;
-  workspaceVaultSync: VaultSyncBehavior;
+  workspaceVaultSyncMode: VaultSyncMode;
   enableAutoFoldFrontmatter: boolean;
   // performance related
   enableCaching: boolean;
@@ -62,8 +62,8 @@ export function genDefaultWorkspaceConfig(): DendronWorkspaceConfig {
     enableAutoCreateOnDefinition: false,
     enableXVaultWikiLink: false,
     initializeRemoteVaults: true,
-    workspaceVaultSync: VaultSyncBehaviorEnum.sync,
-    enableAutoFoldFrontmatter: false,
+    workspaceVaultSyncMode: VaultSyncModeEnum.noCommit,
+    enableAutoFoldFrontmatter: true,
     enableCaching: true,
     maxPreviewsCached: 10,
     maxNoteLength: 204800,

@@ -4,13 +4,13 @@ import {
 } from "../../types/configs/base";
 import { NoteAddBehaviorEnum } from "../../types/configs/workspace/types";
 import {
-  dayOfWeekNumber,
+  // dayOfWeekNumber,
   JournalConfig,
 } from "../../types/configs/workspace/journal";
 import { DendronWorkspaceConfig } from "../../types/configs/workspace/workspace";
 import { DendronGraphConfig } from "../../types/configs/workspace/graph";
 import { ScratchConfig } from "../../types/configs/workspace/scratch";
-import { VAULT_SYNC_BEHAVIORS } from "./base";
+import { VAULT_SYNC_MODES } from "./base";
 
 const ADD_BEHAVIOR: Record<NoteAddBehaviorEnum, DendronConfigEntry<string>> = {
   [NoteAddBehaviorEnum.childOfDomain]: {
@@ -49,25 +49,25 @@ const GRAPH: DendronConfigEntryCollection<DendronGraphConfig> = {
  * @param value {@link dayOfWeekNumber}
  * @returns DendronConfigEntry
  */
-const FIRST_DAY_OF_WEEK = (
-  value: dayOfWeekNumber
-): DendronConfigEntry<dayOfWeekNumber> => {
-  const dayOfWeek = [
-    "Sunday",
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-  ];
-  const valueToDay = dayOfWeek[value];
-  return {
-    value,
-    label: valueToDay,
-    desc: `Set start of the week to ${valueToDay}`,
-  };
-};
+// const FIRST_DAY_OF_WEEK = (
+//   value: dayOfWeekNumber
+// ): DendronConfigEntry<dayOfWeekNumber> => {
+//   const dayOfWeek = [
+//     "Sunday",
+//     "Monday",
+//     "Tuesday",
+//     "Wednesday",
+//     "Thursday",
+//     "Friday",
+//     "Saturday",
+//   ];
+//   const valueToDay = dayOfWeek[value];
+//   return {
+//     value,
+//     label: valueToDay,
+//     desc: `Set start of the week to ${valueToDay}`,
+//   };
+// };
 
 const JOURNAL: DendronConfigEntryCollection<JournalConfig> = {
   dailyDomain: {
@@ -87,7 +87,7 @@ const JOURNAL: DendronConfigEntryCollection<JournalConfig> = {
     desc: "Date format used for journal notes",
   },
   addBehavior: ADD_BEHAVIOR,
-  firstDayOfWeek: FIRST_DAY_OF_WEEK,
+  // firstDayOfWeek: FIRST_DAY_OF_WEEK,
 };
 
 const SCRATCH: DendronConfigEntryCollection<ScratchConfig> = {
@@ -142,7 +142,7 @@ export const WORKSPACE: DendronConfigEntryCollection<DendronWorkspaceConfig> = {
     label: "Initialize Remote Vaults",
     desc: "Initialize remote vaults on startup.",
   },
-  workspaceVaultSync: VAULT_SYNC_BEHAVIORS,
+  workspaceVaultSyncMode: VAULT_SYNC_MODES,
   enableAutoFoldFrontmatter: {
     label: "Enable Auto Fold Frontmatter",
     desc: "Enable Automatically folding frontmatter block when opening a new note.",

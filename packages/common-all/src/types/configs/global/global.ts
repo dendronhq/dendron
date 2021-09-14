@@ -4,7 +4,7 @@
 export type DendronGlobalConfig = {
   enableFMTitle: boolean; // TODO: split implementation to respect non-global config
   enableHierarchyDisplay: boolean; // TODO: split
-  hierarchyDisplayTitle: string; // TODO: split
+  hierarchyDisplayTitle?: string; // TODO: split
   enableNoteTitleForLink: boolean; // TODO: split
   enableMermaid: boolean; // TODO: split
   enableNunjucks: boolean; // TODO: split

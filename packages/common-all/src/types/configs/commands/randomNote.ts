@@ -2,8 +2,8 @@
  * Namespace for configuring {@link RandomNoteCommand}
  */
 export type RandomNoteConfig = {
-  include: string[];
-  exclude: string[];
+  include?: string[];
+  exclude?: string[];
 };
 
 /**
@@ -11,8 +11,5 @@ export type RandomNoteConfig = {
  * @returns RandomNoteConfig
  */
 export function genDefaultRandomNoteConfig(): RandomNoteConfig {
-  return {
-    include: [],
-    exclude: [],
-  };
+  return {};
 }

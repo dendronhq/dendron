@@ -28,11 +28,11 @@ export type DendronConfigEntryCollection<T> = {
     | ((...args: any[]) => DendronConfigEntry<any>);
 };
 
-export enum VaultSyncBehaviorEnum {
+export enum VaultSyncModeEnum {
   skip = "skip",
   noPush = "noPush",
   noCommit = "noCommit",
   sync = "sync",
 }
 
-export type VaultSyncBehavior = keyof typeof VaultSyncBehaviorEnum;
+export type VaultSyncMode = keyof typeof VaultSyncModeEnum;

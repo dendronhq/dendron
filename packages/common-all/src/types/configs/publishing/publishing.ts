@@ -6,15 +6,15 @@ import { SEOConfig, genDefaultSEOConfig } from "./seo";
  * Namespace for all publishing related configurations
  */
 export type DendronPublishingConfig = {
-  enableFMTitle: boolean; // TODO: split implementation to respect non-global config
-  enableHierarchyDisplay: boolean; // TODO: split
-  hierarchyDisplayTitle: string; // TODO: split
-  enableNoteTitleForLink: boolean; // TODO: split
-  enableMermaid: boolean;
-  enableNunjucks: boolean;
-  enablePrettyRefs: boolean;
-  enableKatex: boolean;
-  enableLegacyNoteRef: boolean;
+  enableFMTitle?: boolean; // TODO: split implementation to respect non-global config
+  enableHierarchyDisplay?: boolean; // TODO: split
+  hierarchyDisplayTitle?: string; // TODO: split
+  enableNoteTitleForLink?: boolean; // TODO: split
+  enableMermaid?: boolean;
+  enableNunjucks?: boolean;
+  enablePrettyRefs?: boolean;
+  enableKatex?: boolean;
+  enableLegacyNoteRef?: boolean;
 
   assetsPrefix?: string;
   copyAssets: boolean;
@@ -22,17 +22,17 @@ export type DendronPublishingConfig = {
   canonicalBaseUrl?: string;
   customHeaderPath?: string;
   ga?: GoogleAnalyticsConfig;
-  logo?: string;
+  logoPath?: string;
   siteFaviconPath?: string;
   siteIndex?: string;
   siteHierarchies: string[];
-  displaySiteLastModified: boolean;
+  enableSiteLastModified: boolean;
   siteRootDir: string;
   siteRepoDir?: string;
   siteUrl?: string;
-  enableFrontMatterTags: boolean;
+  enableFrontmatterTags: boolean;
   enableRandomlyColoredTags?: boolean;
-  config?: { [key: string]: HierarchyConfig };
+  hierarchy?: { [key: string]: HierarchyConfig };
   duplicateNoteBehavior?: DuplicateNoteBehavior;
   writeStubs: boolean;
   seo: SEOConfig;
@@ -83,15 +83,6 @@ export type GoogleAnalyticsConfig = {
  */
 export function genDefaultPublishingConfig(): DendronPublishingConfig {
   return {
-    enableFMTitle: true,
-    enableHierarchyDisplay: true,
-    hierarchyDisplayTitle: "children",
-    enableNoteTitleForLink: true,
-    enableMermaid: true,
-    enableKatex: true,
-    enableNunjucks: false,
-    enablePrettyRefs: true,
-    enableLegacyNoteRef: false,
     copyAssets: true,
     siteHierarchies: ["root"],
     writeStubs: false,
@@ -100,8 +91,8 @@ export function genDefaultPublishingConfig(): DendronPublishingConfig {
     siteRootDir: "docs",
     seo: genDefaultSEOConfig(),
     github: genDefaultGithubConfig(),
-    displaySiteLastModified: true,
-    enableFrontMatterTags: true,
+    enableSiteLastModified: true,
+    enableFrontmatterTags: true,
     enableRandomlyColoredTags: true,
     enablePrettyLinks: true,
   };

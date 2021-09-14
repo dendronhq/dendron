@@ -65,9 +65,9 @@ export class AnalyticsUtils {
 export function sentryReportingCallback(
   callback: (...args: any[]) => any
 ): (...args: any[]) => any {
-  return (args) => {
+  return (...args) => {
     try {
-      return callback(args);
+      return callback(...args);
     } catch (error) {
       Sentry.captureException(error);
       throw error;

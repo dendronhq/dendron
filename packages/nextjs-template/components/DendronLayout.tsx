@@ -104,8 +104,8 @@ export default function DendronLayout(
           }}
         >
           <Col
-            xs={{ span: 4 }}
-            md={{ span: 4 }}
+            xs={4}
+            md={4}
             style={{
               width: `calc((100% - ${LAYOUT.BREAKPOINTS.lg}) / 2 + ${
                 isCollapsed ? SIDER.COLLAPSED_WIDTH : SIDER.WIDTH
@@ -115,18 +115,14 @@ export default function DendronLayout(
           >
             <DendronLogoOrTitle />
           </Col>
-          <Col
-            xs={12}
-            sm={18}
-            md={{ span: 16, push: 2 }}
-            style={{ paddingLeft: "4px" }}
-          >
+          <Col xs={8} sm={10} md={10} lg={10} style={{ paddingLeft: "4px" }}>
             <DendronLookup {...props} />
           </Col>
           <Col
-            xs={10}
-            sm={12}
-            md={{ span: 16, push: 2 }}
+            xs={6}
+            sm={8}
+            md={8}
+            lg={6}
             style={{ marginLeft: "4px", marginRight: "4px" }}
           >
             <DendronSearch {...props} />

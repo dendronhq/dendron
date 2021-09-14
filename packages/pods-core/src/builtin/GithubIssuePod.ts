@@ -296,7 +296,7 @@ export class GithubImportPod extends ImportPod<GithubImportPodConfig> {
   }
 
   async plant(opts: GithubImportPodPlantOpts) {
-    const ctx = "GithubPod";
+    const ctx = "GithubIssuePod";
     this.L.info({ ctx, opts, msg: "enter" });
     const { wsRoot, engine, vault, config } = opts;
     const {

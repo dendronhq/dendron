@@ -4,7 +4,7 @@ import { GithubImportPod, GithubPublishPod } from "@dendronhq/pods-core";
 import { NoteProps, NoteUtils, VaultUtils } from "@dendronhq/common-all";
 import _ from "lodash";
 
-describe("GithubPod import pod", () => {
+describe("GithubIssuePod import pod", () => {
   let result: any;
   let fname: string;
   beforeEach(() => {

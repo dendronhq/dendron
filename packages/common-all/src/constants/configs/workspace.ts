@@ -159,4 +159,12 @@ export const WORKSPACE: DendronConfigEntryCollection<DendronWorkspaceConfig> = {
     label: "Max Note Length",
     desc: "Maximum number of characters in a note. Notes with characters exceeding this number will have some Dendron features disabled.",
   },
+  feedback: {
+    label: "Feedback",
+    desc: "Enable feedback widget.",
+  },
+  apiEndpoint: {
+    label: "API Endpoint",
+    desc: "Endpoint for backend API functionality.",
+  },
 };

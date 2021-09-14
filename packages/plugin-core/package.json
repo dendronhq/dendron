@@ -806,6 +806,7 @@
     "@dendronhq/dendron-cli": "^0.58.4",
     "@dendronhq/engine-server": "^0.58.4",
     "@dendronhq/pods-core": "^0.58.4",
+    "@sentry/webpack-plugin": "^1.17.1",
     "@types/vscode": "1.58",
     "cross-path-sort": "^1.0.0",
     "execa": "^4.0.2",

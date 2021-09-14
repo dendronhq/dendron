@@ -1,12 +1,10 @@
-import { CONSTANTS, DendronError, env, genUUID } from "@dendronhq/common-all";
+import { CONSTANTS, env, genUUID } from "@dendronhq/common-all";
 import Analytics from "analytics-node";
 import fs from "fs-extra";
 import _ from "lodash";
 import os from "os";
 import path from "path";
 import { createLogger, DLogger } from "./logger";
-
-import * as Sentry from "@sentry/node";
 
 enum SiteEvents {
   PUBLISH_CLICKED = "sitePublishClick",
@@ -276,59 +274,4 @@ export class SegmentClient {
   get anonymousId(): string {
     return this._anonymousId;
   }
-}
-
-export function initializeSentry(environment: string): void {
-  // Setting an undefined dsn will stop uploads.
-  const dsn =
-    environment === "prod"
-      ? "https://bc206b31a30a4595a2efb31e8cc0c04e@o949501.ingest.sentry.io/5898219"
-      : undefined;
-
-  // Respect user's telemetry settings for error reporting too.
-  const enabled = !SegmentClient.instance().hasOptedOut;
-
-  Sentry.init({
-    dsn,
-    defaultIntegrations: false,
-    tracesSampleRate: 1.0,
-    enabled,
-    environment,
-    beforeSend(event, hint) {
-      const error = hint?.originalException;
-      if (error && error instanceof DendronError) {
-        event.extra = {
-          name: error.name,
-          message: error.message,
-          payload: error.payload,
-          severity: error.severity?.toString(),
-          code: error.code,
-          status: error.status,
-          isComposite: error.isComposite,
-        };
-      }
-      return event;
-    },
-  });
-  return;
-}
-
-/**
- * Wraps a callback function with a try/catch block.  In the catch, any
- * exceptions that were encountered will be uploaded to Sentry and then
- * rethrown.
- * @param callback the function to wrap
- * @returns the wrapped callback function
- */
-export function sentryReportingCallback(
-  callback: (...args: any[]) => any
-): (...args: any[]) => any {
-  return (args) => {
-    try {
-      return callback(args);
-    } catch (error) {
-      Sentry.captureException(error);
-      throw error;
-    }
-  };
 }

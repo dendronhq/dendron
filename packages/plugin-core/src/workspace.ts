@@ -13,7 +13,6 @@ import {
   NodeJSUtils,
   readJSONWithComments,
   readJSONWithCommentsSync,
-  sentryReportingCallback,
   writeJSONWithComments,
 } from "@dendronhq/common-server";
 import {
@@ -52,6 +51,7 @@ import { Logger } from "./logger";
 import { EngineAPIService } from "./services/EngineAPIService";
 import { CodeConfigKeys } from "./types";
 import { DisposableStore, resolvePath, VSCodeUtils } from "./utils";
+import { sentryReportingCallback } from "./utils/analytics";
 import { CalendarView } from "./views/CalendarView";
 import { DendronTreeView } from "./views/DendronTreeView";
 import { DendronTreeViewV2 } from "./views/DendronTreeViewV2";
@@ -575,15 +575,13 @@ export class DendronExtension {
     this.context.subscriptions.push(
       vscode.commands.registerCommand(
         DENDRON_COMMANDS.RELOAD_INDEX.key,
-        sentryReportingCallback(
-          async (silent?: boolean) => {
-            const out = await new ReloadIndexCommand().run({ silent });
-            if (!silent) {
-              vscode.window.showInformationMessage(`finish reload`);
-            }
-            return out;
+        sentryReportingCallback(async (silent?: boolean) => {
+          const out = await new ReloadIndexCommand().run({ silent });
+          if (!silent) {
+            vscode.window.showInformationMessage(`finish reload`);
           }
-        )
+          return out;
+        })
       )
     );
 

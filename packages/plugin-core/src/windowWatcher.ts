@@ -2,9 +2,8 @@ import {
   DendronWebViewKey,
   DMessageType,
   NoteUtils,
-  OnDidChangeActiveTextEditorMsg
+  OnDidChangeActiveTextEditorMsg,
 } from "@dendronhq/common-all";
-import { sentryReportingCallback } from "@dendronhq/common-server";
 import { DendronASTDest, MDUtilsV5 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import visit from "unist-util-visit";
@@ -13,6 +12,7 @@ import { ShowPreviewV2Command } from "./commands/ShowPreviewV2";
 import { updateDecorations } from "./features/windowDecorations";
 import { Logger } from "./logger";
 import { VSCodeUtils } from "./utils";
+import { sentryReportingCallback } from "./utils/analytics";
 import { getDWorkspace, getExtension } from "./workspace";
 
 export class WindowWatcher {

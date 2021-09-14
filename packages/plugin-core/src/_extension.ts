@@ -17,7 +17,6 @@ import {
 import {
   getDurationMilliseconds,
   getOS,
-  initializeSentry,
   SegmentClient,
   writeJSONWithComments,
 } from "@dendronhq/common-server";
@@ -657,4 +656,39 @@ export function shouldDisplayLapsedUserMsg(): boolean {
     !metaData.firstWsInitialize &&
     refreshMsg
   );
+}
+
+function initializeSentry(environment: string): void {
+  // Setting an undefined dsn will stop uploads.
+  const dsn =
+    environment === "prod"
+      ? "https://bc206b31a30a4595a2efb31e8cc0c04e@o949501.ingest.sentry.io/5898219"
+      : undefined;
+
+  // Respect user's telemetry settings for error reporting too.
+  const enabled = !SegmentClient.instance().hasOptedOut;
+
+  Sentry.init({
+    dsn,
+    defaultIntegrations: false,
+    tracesSampleRate: 1.0,
+    enabled,
+    environment,
+    beforeSend(event, hint) {
+      const error = hint?.originalException;
+      if (error && error instanceof DendronError) {
+        event.extra = {
+          name: error.name,
+          message: error.message,
+          payload: error.payload,
+          severity: error.severity?.toString(),
+          code: error.code,
+          status: error.status,
+          isComposite: error.isComposite,
+        };
+      }
+      return event;
+    },
+  });
+  return;
 }

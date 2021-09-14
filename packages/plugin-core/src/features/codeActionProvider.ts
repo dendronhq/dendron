@@ -1,4 +1,3 @@
-import { sentryReportingCallback } from "@dendronhq/common-server";
 import { DoctorActions } from "@dendronhq/dendron-cli";
 import _ from "lodash";
 import { FrontmatterContent } from "mdast";
@@ -14,13 +13,14 @@ import {
   Range,
   Selection,
   TextDocument,
-  Uri
+  Uri,
 } from "vscode";
 import { CancellationToken } from "vscode-jsonrpc";
 import YAML from "yamljs";
 import { DoctorCommand } from "../commands/Doctor";
 import { Logger } from "../logger";
 import { VSCodeUtils } from "../utils";
+import { sentryReportingCallback } from "../utils/analytics";
 
 /** Used to match the warnings to code actions. Also displayed for users along with the warning message. */
 const BAD_FRONTMATTER_CODE = "bad frontmatter";

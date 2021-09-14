@@ -3,14 +3,15 @@ import {
   NoteProps,
   NoteUtils,
   VaultUtils,
-  WorkspaceOpts
+  WorkspaceOpts,
 } from "@dendronhq/common-all";
-import { file2Note, sentryReportingCallback } from "@dendronhq/common-server";
+import { file2Note } from "@dendronhq/common-server";
 import { HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
 import { Logger } from "./logger";
+import { sentryReportingCallback } from "./utils/analytics";
 import { getDWorkspace, getExtension } from "./workspace";
 
 export class FileWatcher {

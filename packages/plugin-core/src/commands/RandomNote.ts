@@ -1,9 +1,7 @@
-import { DendronError, ERROR_SEVERITY, NoteProps, NoteUtils } from "@dendronhq/common-all";
-// import { Logger } from "@dendronhq/common-server";
+import { NoteProps, NoteUtils } from "@dendronhq/common-all";
 import _ from "lodash";
 import { Uri, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
-import { Logger } from "../logger";
 import { VSCodeUtils } from "../utils";
 import { getDWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
@@ -25,20 +23,6 @@ export class RandomNoteCommand extends BasicCommand<
   }
 
   async execute(_opts: CommandOpts): Promise<CommandOutput> {
-    
-    const ctx = "Test_RandomNoteCommand";
-
-    Logger.error({ ctx, msg: "error test in random note command", error:  new DendronError({ message: "inner error" })});
-
-    throw new DendronError({
-      message: "Test Show Help Error",
-      status: "404",
-      severity: ERROR_SEVERITY.MINOR,
-      code: 500
-    });
-
-    // Logger.error("This is a test error in Random Note");
-
     const { engine, config } = getDWorkspace();
 
     // If no pattern is specified for include, then include all notes for the search set.

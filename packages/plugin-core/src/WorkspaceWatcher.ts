@@ -14,6 +14,7 @@ import {
 import { Logger } from "./logger";
 import { NoteSyncService } from "./services/NoteSyncService";
 import { getExtension, getDWorkspace } from "./workspace";
+import * as Sentry from "@sentry/node";
 
 interface DebouncedFunc<T extends (...args: any[]) => any> {
   /**
@@ -81,93 +82,115 @@ export class WorkspaceWatcher {
   }
 
   async onDidChangeTextDocument(event: TextDocumentChangeEvent) {
-    // `workspace.onDidChangeTextDocument` fires 2 events for eveyr change
+    // `workspace.onDidChangeTextDocument` fires 2 events for every change
     // the second one changing the dirty state of the page from `true` to `false`
-    if (event.document.isDirty === false) {
-      return;
-    }
-    const ctx = {
-      ctx: "WorkspaceWatcher:onDidChangeTextDocument",
-      uri: event.document.uri.fsPath,
-    };
-    Logger.debug({ ...ctx, state: "enter" });
-    const activeEditor = window.activeTextEditor;
-    this._debouncedOnDidChangeTextDocument.cancel();
-    if (activeEditor && event.document === activeEditor.document) {
-      const uri = activeEditor.document.uri;
-      if (!getExtension().workspaceService?.isPathInWorkspace(uri.fsPath)) {
-        Logger.debug({ ...ctx, state: "uri not in workspace" });
+    try {
+      if (event.document.isDirty === false) {
         return;
       }
-      Logger.debug({ ...ctx, state: "trigger change handlers" });
-      const contentChanges = event.contentChanges;
-      getExtension().windowWatcher?.triggerUpdateDecorations();
-      NoteSyncService.instance().onDidChange(activeEditor, { contentChanges });
+
+      const ctx = {
+        ctx: "WorkspaceWatcher:onDidChangeTextDocument",
+        uri: event.document.uri.fsPath,
+      };
+      Logger.debug({ ...ctx, state: "enter" });
+      const activeEditor = window.activeTextEditor;
+      this._debouncedOnDidChangeTextDocument.cancel();
+      if (activeEditor && event.document === activeEditor.document) {
+        const uri = activeEditor.document.uri;
+        if (!getExtension().workspaceService?.isPathInWorkspace(uri.fsPath)) {
+          Logger.debug({ ...ctx, state: "uri not in workspace" });
+          return;
+        }
+        Logger.debug({ ...ctx, state: "trigger change handlers" });
+        const contentChanges = event.contentChanges;
+        getExtension().windowWatcher?.triggerUpdateDecorations();
+        NoteSyncService.instance().onDidChange(activeEditor, {
+          contentChanges,
+        });
+      }
+      Logger.debug({ ...ctx, state: "exit" });
+      return;
+    } catch (error) {
+      Sentry.captureException(error);
+      throw error;
     }
-    Logger.debug({ ...ctx, state: "exit" });
-    return;
   }
 
   onDidOpenTextDocument(document: TextDocument) {
-    this._openedDocuments.set(document.uri.fsPath, document);
-    Logger.debug({
-      msg: "Note opened",
-      fname: NoteUtils.uri2Fname(document.uri),
-    });
+    try {
+      this._openedDocuments.set(document.uri.fsPath, document);
+      Logger.debug({
+        msg: "Note opened",
+        fname: NoteUtils.uri2Fname(document.uri),
+      });
+    } catch (error) {
+      Sentry.captureException(error);
+      throw error;
+    }
   }
 
   async onWillSaveTextDocument(
     ev: TextDocumentWillSaveEvent
   ): Promise<{ changes: TextEdit[] }> {
-    const ctx = "WorkspaceWatcher:onWillSaveTextDocument";
-    const uri = ev.document.uri;
-    const reason = ev.reason;
-    Logger.info({ ctx, url: uri.fsPath, reason, msg: "enter" });
-    if (!getExtension().workspaceService?.isPathInWorkspace(uri.fsPath)) {
-      Logger.debug({ ctx, uri: uri.fsPath, msg: "not in workspace, ignoring" });
-      return { changes: [] };
-    }
+    try {
+      const ctx = "WorkspaceWatcher:onWillSaveTextDocument";
+      const uri = ev.document.uri;
+      const reason = ev.reason;
+      Logger.info({ ctx, url: uri.fsPath, reason, msg: "enter" });
+      if (!getExtension().workspaceService?.isPathInWorkspace(uri.fsPath)) {
+        Logger.debug({
+          ctx,
+          uri: uri.fsPath,
+          msg: "not in workspace, ignoring",
+        });
+        return { changes: [] };
+      }
 
-    const eclient = getDWorkspace().engine;
-    const fname = path.basename(uri.fsPath, ".md");
-    const now = Time.now().toMillis();
-    const vault = VaultUtils.getVaultByNotePath({
-      fsPath: uri.fsPath,
-      vaults: eclient.vaults,
-      wsRoot: getDWorkspace().wsRoot,
-    });
-    const note = NoteUtils.getNoteByFnameV5({
-      fname,
-      vault,
-      notes: eclient.notes,
-      wsRoot: getDWorkspace().wsRoot,
-    }) as NoteProps;
-
-    const content = ev.document.getText();
-    const matchFM = NoteUtils.RE_FM;
-    const matchOuter = content.match(matchFM);
-    if (!matchOuter) {
-      return { changes: [] };
-    }
-    const match = NoteUtils.RE_FM_UPDATED.exec(content);
-    let changes: TextEdit[] = [];
-
-    if (match && parseInt(match[1], 10) !== note.updated) {
-      Logger.info({ ctx, match, msg: "update activeText editor" });
-      const startPos = ev.document.positionAt(match.index);
-      const endPos = ev.document.positionAt(match.index + match[0].length);
-      changes = [
-        TextEdit.replace(new Range(startPos, endPos), `updated: ${now}`),
-      ];
-      // eslint-disable-next-line  no-async-promise-executor
-      const p = new Promise(async (resolve) => {
-        note.updated = now;
-        await eclient.updateNote(note);
-        return resolve(changes);
+      const eclient = getDWorkspace().engine;
+      const fname = path.basename(uri.fsPath, ".md");
+      const now = Time.now().toMillis();
+      const vault = VaultUtils.getVaultByNotePath({
+        fsPath: uri.fsPath,
+        vaults: eclient.vaults,
+        wsRoot: getDWorkspace().wsRoot,
       });
-      ev.waitUntil(p);
+      const note = NoteUtils.getNoteByFnameV5({
+        fname,
+        vault,
+        notes: eclient.notes,
+        wsRoot: getDWorkspace().wsRoot,
+      }) as NoteProps;
+
+      const content = ev.document.getText();
+      const matchFM = NoteUtils.RE_FM;
+      const matchOuter = content.match(matchFM);
+      if (!matchOuter) {
+        return { changes: [] };
+      }
+      const match = NoteUtils.RE_FM_UPDATED.exec(content);
+      let changes: TextEdit[] = [];
+
+      if (match && parseInt(match[1], 10) !== note.updated) {
+        Logger.info({ ctx, match, msg: "update activeText editor" });
+        const startPos = ev.document.positionAt(match.index);
+        const endPos = ev.document.positionAt(match.index + match[0].length);
+        changes = [
+          TextEdit.replace(new Range(startPos, endPos), `updated: ${now}`),
+        ];
+        // eslint-disable-next-line  no-async-promise-executor
+        const p = new Promise(async (resolve) => {
+          note.updated = now;
+          await eclient.updateNote(note);
+          return resolve(changes);
+        });
+        ev.waitUntil(p);
+      }
+      return { changes };
+    } catch (error) {
+      Sentry.captureException(error);
+      throw error;
     }
-    return { changes };
   }
 
   /** Do not use this function, please go to `WindowWatcher.onFirstOpen() instead.`

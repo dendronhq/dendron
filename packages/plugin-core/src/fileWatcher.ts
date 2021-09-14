@@ -11,7 +11,8 @@ import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
 import { Logger } from "./logger";
-import { getExtension, getDWorkspace } from "./workspace";
+import { sentryReportingCallback } from "./utils/analytics";
+import { getDWorkspace, getExtension } from "./workspace";
 
 export class FileWatcher {
   public watchers: { vault: DVault; watcher: vscode.FileSystemWatcher }[];
@@ -43,8 +44,12 @@ export class FileWatcher {
 
   activate(context: vscode.ExtensionContext) {
     this.watchers.forEach(({ watcher }) => {
-      context.subscriptions.push(watcher.onDidCreate(this.onDidCreate, this));
-      context.subscriptions.push(watcher.onDidDelete(this.onDidDelete, this));
+      context.subscriptions.push(
+        watcher.onDidCreate(sentryReportingCallback(this.onDidCreate), this)
+      );
+      context.subscriptions.push(
+        watcher.onDidDelete(sentryReportingCallback(this.onDidDelete), this)
+      );
     });
   }
 

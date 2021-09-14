@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - prerelease/*
+      - feat/error-reporting
 
 jobs:
   build:
@@ -48,7 +49,10 @@ jobs:
         env: 
           GOOGLE_OAUTH_CLIENT_SECRET: ${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}
           GOOGLE_OAUTH_CLIENT_ID: ${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}
-        run: yarn build:patch:local:ci
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+        run: |
+          echo "DENDRON_RELEASE_VERSION=`cat meta.json | jq -r '.["@dendronhq/plugin-core"]' | awk -F. -v OFS=. 'NF==1{print ++$NF}; NF>1{$NF=sprintf("%0*d", length($NF), ($NF+1)); print}'`" >> $GITHUB_ENV
+          yarn build:patch:local:ci
 
       - name: Upload VSIX Artifact
         uses: actions/upload-artifact@v2

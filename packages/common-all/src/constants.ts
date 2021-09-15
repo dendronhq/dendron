@@ -1,3 +1,9 @@
+export {
+  ReasonPhrases,
+  StatusCodes,
+  getReasonPhrase,
+  getStatusCode,
+} from "http-status-codes";
 const ROOT_PATH = "/doc/root";
 
 export enum ThemeType {

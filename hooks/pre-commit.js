@@ -23,7 +23,7 @@ function main() {
       ".localhost": { rgx: /localhost:/, fileRgx: /\.lock$/ },
 
       [ErrorMessages.AVOID_DIRECT_IMPORT_FROM_PACKAGES]: {
-        rgx: /((common-frontend|common-all|common-server|engine-server|dendron-cli|pods-core|api-server|common-test-utils|engine-test-utils|dendron-next-server)\/)/,
+        rgx: /import.*((common-frontend|common-all|common-server|engine-server|dendron-cli|pods-core|api-server|common-test-utils|engine-test-utils|dendron-next-server)\/)/,
         fileRgx: /\.ts[x]?$/ },
     }
   });

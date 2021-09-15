@@ -3,6 +3,7 @@ import {
   isNotUndefined,
   NoteProps,
   NoteUtils,
+  StatusCodes,
   TAGS_HIERARCHY,
 } from "@dendronhq/common-all";
 import _ from "lodash";
@@ -153,14 +154,14 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
 
         const copts = opts?.wikiLinkOpts;
         if (!note && opts?.transformNoPublish) {
-          value = "403";
+          value = _.toString(StatusCodes.FORBIDDEN);
           addError(proc, new DendronError({ message: "no note" }));
         } else if (note && opts?.transformNoPublish) {
           if (error) {
-            value = "403";
+            value = _.toString(StatusCodes.FORBIDDEN);
             addError(proc, error);
           } else if (!config) {
-            value = "403";
+            value = _.toString(StatusCodes.FORBIDDEN);
             addError(proc, new DendronError({ message: "no config" }));
           } else {
             isPublished = SiteUtils.isPublished({
@@ -169,7 +170,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
               engine,
             });
             if (!isPublished) {
-              value = "403";
+              value = _.toString(StatusCodes.FORBIDDEN);
             }
           }
         }

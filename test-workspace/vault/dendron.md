@@ -10,7 +10,6 @@ foo: dendron.ref.figure
 
 Welcome to Dendron! This guide will help get you started with your knowledge base.
 Test2
-BOND234567890
 
 ## Summary
 

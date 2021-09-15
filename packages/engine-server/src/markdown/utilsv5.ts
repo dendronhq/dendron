@@ -293,6 +293,8 @@ export class MDUtilsV5 {
           // add additional plugins
           proc = proc.use(dendronPub, {
             insertTitle: shouldInsertTitle,
+            transformNoPublish:
+              opts.flavor === ProcFlavor.PUBLISHING ? true : false,
           });
           if (data.config?.useKatex) {
             proc = proc.use(math);

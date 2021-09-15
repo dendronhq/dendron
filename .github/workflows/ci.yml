@@ -8,6 +8,7 @@ on:
       - integ-publish
       - release/*
       - prerelease/*
+      - kevin-*/*
   pull_request:
     branches:
       - "*"

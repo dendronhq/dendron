@@ -152,13 +152,16 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         }
 
         const copts = opts?.wikiLinkOpts;
-        if (note && opts?.transformNoPublish) {
+        if (!note && opts?.transformNoPublish) {
+          value = "403";
+          addError(proc, new DendronError({ message: "no note" }));
+        } else if (note && opts?.transformNoPublish) {
           if (error) {
             value = "403";
             addError(proc, error);
-          } else if (!note || !config) {
+          } else if (!config) {
             value = "403";
-            addError(proc, new DendronError({ message: "no note or config" }));
+            addError(proc, new DendronError({ message: "no config" }));
           } else {
             isPublished = SiteUtils.isPublished({
               note,
@@ -219,19 +222,15 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
             alias,
             hName: "a",
             hProperties: {
-              "data-toggle": "popover",
-              title: "This page has not yet sprouted",
-              style: "cursor: pointer",
-              "data-content": [
-                `<a href="https://dendron.so/">Dendron</a> (the tool used to generate this site) lets authors selective publish content. You will see this page whenever you click on a link to an unpublished page`,
-                "",
-                "<img src='https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/not-sprouted.png'></img>",
-              ].join("\n"),
+              title: "Private",
+              style: "color: brown",
+              href: "https://wiki.dendron.so/notes/hfyvYGJZQiUwQaaxQO27q.html",
+              target: "_blank",
             },
             hChildren: [
               {
                 type: "text",
-                value: alias,
+                value: `${alias} (Private)`,
               },
             ],
           } as RehypeLinkData;

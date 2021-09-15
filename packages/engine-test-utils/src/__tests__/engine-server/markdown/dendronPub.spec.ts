@@ -1,6 +1,5 @@
 import { DEngineClient } from "@dendronhq/common-all";
 import { AssertUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
-import { ENGINE_HOOKS } from "../../../presets";
 import {
   DConfig,
   DendronASTData,
@@ -10,10 +9,13 @@ import {
   MDUtilsV5,
   ProcFlavor,
   ProcMode,
+  VFile,
 } from "@dendronhq/engine-server";
-import { runEngineTestV5, testWithEngine } from "../../../engine";
-import { checkNotInVFile, checkVFile } from "./utils";
 import { TestConfigUtils } from "../../../config";
+import { runEngineTestV5, testWithEngine } from "../../../engine";
+import { ENGINE_HOOKS } from "../../../presets";
+import { TestUnifiedUtils } from "../../../utils";
+import { checkNotInVFile, checkVFile } from "./utils";
 
 function proc(
   engine: DEngineClient,
@@ -26,6 +28,136 @@ function proc(
     publishOpts: opts,
   });
 }
+
+const verifyPrivateLink = async (vfile: VFile, value: string) => {
+  return TestUnifiedUtils.verifyPrivateLink({
+    contents: vfile.contents as string,
+    value,
+  });
+};
+
+describe("GIVEN dendronPub", () => {
+  describe("WHEN link is private", () => {
+    test("THEN show private link", async () => {
+      await runEngineTestV5(
+        async ({ engine, vaults }) => {
+          const config = DConfig.genDefaultConfig();
+          config.site = {
+            siteHierarchies: ["foo"],
+            siteRootDir: "foo",
+          };
+          const resp = await MDUtilsV4.procRehype({
+            proc: proc(
+              engine,
+              {
+                fname: "foo",
+                dest: DendronASTDest.HTML,
+                vault: vaults[0],
+                config,
+              },
+              {
+                wikiLinkOpts: { useId: true },
+                transformNoPublish: true,
+              }
+            ),
+          }).process(`[[an alias|bar]]`);
+          await verifyPrivateLink(resp, "an alias");
+        },
+        {
+          preSetupHook: ENGINE_HOOKS.setupBasic,
+          expect,
+        }
+      );
+    });
+  });
+  describe("WHEN inside note ref", () => {
+    test("THEN show private link", async () => {
+      await runEngineTestV5(
+        async ({ engine, vaults }) => {
+          const vault = vaults[0];
+          const config = DConfig.genDefaultConfig();
+          config.site = {
+            siteHierarchies: ["foo"],
+            siteRootDir: "foo",
+          };
+          const resp = await MDUtilsV4.procRehype({
+            proc: proc(
+              engine,
+              {
+                dest: DendronASTDest.HTML,
+                config,
+                vault,
+                fname: "gamma",
+                shouldApplyPublishRules: true,
+              },
+              {
+                wikiLinkOpts: { useId: true },
+                transformNoPublish: true,
+              }
+            ),
+          }).process("[[alpha]]");
+          await verifyPrivateLink(resp, "Alpha");
+        },
+        {
+          preSetupHook: async (opts) => {
+            await ENGINE_HOOKS.setupLinks(opts);
+            await NoteTestUtilsV4.createNote({
+              fname: "gamma",
+              body: `![[alpha]]`,
+              vault: opts.vaults[0],
+              wsRoot: opts.wsRoot,
+            });
+          },
+          expect,
+        }
+      );
+    });
+    describe("AND noteRef link", () => {
+      test("THEN noteRef link is blank", async () => {
+        await runEngineTestV5(
+          async ({ engine, vaults }) => {
+            const vault = vaults[0];
+            const config = DConfig.genDefaultConfig();
+            config.site = {
+              siteHierarchies: ["foo"],
+              siteRootDir: "foo",
+              usePrettyRefs: true,
+            };
+            const resp = await MDUtilsV4.procRehype({
+              proc: proc(
+                engine,
+                {
+                  dest: DendronASTDest.HTML,
+                  config,
+                  vault,
+                  fname: "gamma",
+                  shouldApplyPublishRules: true,
+                },
+                {
+                  wikiLinkOpts: { useId: true },
+                  transformNoPublish: true,
+                }
+              ),
+            }).process("![[alpha]]");
+            await checkVFile(resp, "<p></p><p></p>");
+          },
+          {
+            preSetupHook: async (opts) => {
+              await ENGINE_HOOKS.setupLinks(opts);
+              await NoteTestUtilsV4.createNote({
+                fname: "gamma",
+                body: `![[alpha]]`,
+                vault: opts.vaults[0],
+                wsRoot: opts.wsRoot,
+              });
+            },
+            expect,
+          }
+        );
+      });
+    });
+  });
+});
 
 describe("dendronPub", () => {
   describe("prefix", () => {
@@ -507,130 +639,6 @@ describe("dendronPub", () => {
         }
       );
     });
-  });
-
-  describe("no publish", () => {
-    testWithEngine(
-      "basic",
-      async ({ engine, vaults }) => {
-        const config = DConfig.genDefaultConfig();
-        config.site = {
-          siteHierarchies: ["foo"],
-          siteRootDir: "foo",
-        };
-        const resp = await MDUtilsV4.procRehype({
-          proc: proc(
-            engine,
-            {
-              fname: "foo",
-              dest: DendronASTDest.HTML,
-              vault: vaults[0],
-              config,
-            },
-            {
-              wikiLinkOpts: { useId: true },
-              transformNoPublish: true,
-            }
-          ),
-        }).process(`[[an alias|bar]]`);
-        expect(resp).toMatchSnapshot();
-        expect(
-          await AssertUtils.assertInString({
-            body: resp.contents as string,
-            match: ["a data-toggle="],
-          })
-        ).toBeTruthy();
-      },
-      { preSetupHook: ENGINE_HOOKS.setupBasic }
-    );
-
-    testWithEngine(
-      "inside note ref, wikilink",
-      async ({ engine, vaults }) => {
-        const vault = vaults[0];
-        const config = DConfig.genDefaultConfig();
-        config.site = {
-          siteHierarchies: ["foo"],
-          siteRootDir: "foo",
-        };
-        const resp = await MDUtilsV4.procRehype({
-          proc: proc(
-            engine,
-            {
-              dest: DendronASTDest.HTML,
-              config,
-              vault,
-              fname: "gamma",
-              shouldApplyPublishRules: true,
-            },
-            {
-              wikiLinkOpts: { useId: true },
-              transformNoPublish: true,
-            }
-          ),
-        }).process("[[alpha]]");
-        expect(resp).toMatchSnapshot();
-        expect(
-          await AssertUtils.assertInString({
-            body: resp.contents as string,
-            match: ["This page has not yet sprouted"],
-          })
-        ).toBeTruthy();
-      },
-      {
-        preSetupHook: async (opts) => {
-          await ENGINE_HOOKS.setupLinks(opts);
-          await NoteTestUtilsV4.createNote({
-            fname: "gamma",
-            body: `![[alpha]]`,
-            vault: opts.vaults[0],
-            wsRoot: opts.wsRoot,
-          });
-        },
-      }
-    );
-
-    testWithEngine(
-      "inside note ref, note ref link",
-      async ({ engine, vaults }) => {
-        const vault = vaults[0];
-        const config = DConfig.genDefaultConfig();
-        config.site = {
-          siteHierarchies: ["foo"],
-          siteRootDir: "foo",
-          usePrettyRefs: true,
-        };
-        const resp = await MDUtilsV4.procRehype({
-          proc: proc(
-            engine,
-            {
-              dest: DendronASTDest.HTML,
-              config,
-              vault,
-              fname: "gamma",
-              shouldApplyPublishRules: true,
-            },
-            {
-              wikiLinkOpts: { useId: true },
-              transformNoPublish: true,
-            }
-          ),
-        }).process("![[alpha]]");
-        expect(resp).toMatchSnapshot();
-        await checkVFile(resp, "<p></p><p></p>");
-      },
-      {
-        preSetupHook: async (opts) => {
-          await ENGINE_HOOKS.setupLinks(opts);
-          await NoteTestUtilsV4.createNote({
-            fname: "gamma",
-            body: `![[alpha]]`,
-            vault: opts.vaults[0],
-            wsRoot: opts.wsRoot,
-          });
-        },
-      }
-    );
   });
 
   describe("usePrettyRefs", () => {

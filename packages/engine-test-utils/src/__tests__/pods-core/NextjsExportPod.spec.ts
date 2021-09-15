@@ -1,11 +1,17 @@
-import { DEngineClient, WorkspaceOpts } from "@dendronhq/common-all";
+import {
+  DEngineClient,
+  DVaultVisibility,
+  WorkspaceOpts,
+} from "@dendronhq/common-all";
 import { tmpDir } from "@dendronhq/common-server";
+import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { NextjsExportConfig, NextjsExportPod } from "@dendronhq/pods-core";
 import path from "path";
 import { TestConfigUtils } from "../../config";
 import { runEngineTestV5 } from "../../engine";
-import { ENGINE_HOOKS } from "../../presets";
-import { checkDir, checkFile } from "../../utils";
+import { ENGINE_HOOKS, ENGINE_HOOKS_MULTI } from "../../presets";
+import { checkDir, checkFile, TestUnifiedUtils } from "../../utils";
+import fs from "fs-extra";
 
 async function setupExport(
   opts: WorkspaceOpts & {
@@ -38,6 +44,54 @@ async function verifyExport(dest: string) {
     "notes.json"
   );
 }
+
+describe("GIVEN NextExport pod", () => {
+  describe("WHEN execute", () => {
+    describe("WHEN private link", () => {
+      test("THEN override private link with 403 page", async () => {
+        await runEngineTestV5(
+          async ({ engine, vaults, wsRoot }) => {
+            const dest = await setupExport({ engine, wsRoot, vaults });
+            const contents = fs.readFileSync(
+              path.join(dest, "data", "notes", "foo.html"),
+              { encoding: "utf8" }
+            );
+            await TestUnifiedUtils.verifyPrivateLink({
+              contents,
+              value: "bar",
+            });
+            await verifyExport(dest);
+          },
+          {
+            expect,
+            preSetupHook: async (opts) => {
+              await ENGINE_HOOKS_MULTI.setupBasicMulti(opts);
+              await NoteTestUtilsV4.modifyNoteByPath(
+                { ...opts, vault: opts.vaults[0], fname: "foo" },
+                (note) => {
+                  note.id = "foo";
+                  note.body = "Link to private note: [[bar]]";
+                  return note;
+                }
+              );
+              TestConfigUtils.withConfig(
+                (config) => {
+                  const vault2 = config.vaults.find(
+                    (ent) => ent.fsPath === "vault2"
+                  );
+                  vault2!.visibility = DVaultVisibility.PRIVATE;
+                  config.site.siteUrl = "https://foo.com";
+                  return config;
+                },
+                { wsRoot: opts.wsRoot }
+              );
+            },
+          }
+        );
+      });
+    });
+  });
+});
 
 describe("nextjs export", () => {
   test("ok", async () => {

@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/pods-core",
-  "version": "0.59.2-alpha.4",
+  "version": "0.59.2-alpha.5",
   "description": "pods-core",
   "license": "GPLv3",
   "repository": {
@@ -58,9 +58,9 @@
     "preset": "ts-jest"
   },
   "dependencies": {
-    "@dendronhq/common-all": "^0.59.2-alpha.4",
-    "@dendronhq/common-server": "^0.59.2-alpha.4",
-    "@dendronhq/engine-server": "^0.59.2-alpha.4",
+    "@dendronhq/common-all": "^0.59.2-alpha.5",
+    "@dendronhq/common-server": "^0.59.2-alpha.5",
+    "@dendronhq/engine-server": "^0.59.2-alpha.5",
     "@octokit/graphql": "^4.6.4",
     "ajv": "^8.6.0",
     "ajv-formats": "^2.1.0",

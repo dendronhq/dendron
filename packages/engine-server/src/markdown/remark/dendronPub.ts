@@ -1,5 +1,6 @@
 import {
   DendronError,
+  ERROR_SEVERITY,
   isNotUndefined,
   NoteProps,
   NoteUtils,
@@ -154,15 +155,31 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
 
         const copts = opts?.wikiLinkOpts;
         if (!note && opts?.transformNoPublish) {
-          value = _.toString(StatusCodes.FORBIDDEN);
-          addError(proc, new DendronError({ message: "no note" }));
+          const code = StatusCodes.FORBIDDEN;
+          value = _.toString(code);
+          addError(
+            proc,
+            new DendronError({
+              message: "no note",
+              code,
+              severity: ERROR_SEVERITY.MINOR,
+            })
+          );
         } else if (note && opts?.transformNoPublish) {
           if (error) {
             value = _.toString(StatusCodes.FORBIDDEN);
             addError(proc, error);
           } else if (!config) {
-            value = _.toString(StatusCodes.FORBIDDEN);
-            addError(proc, new DendronError({ message: "no config" }));
+            const code = StatusCodes.FORBIDDEN;
+            value = _.toString(code);
+            addError(
+              proc,
+              new DendronError({
+                message: "no config",
+                code,
+                severity: ERROR_SEVERITY.MINOR,
+              })
+            );
           } else {
             isPublished = SiteUtils.isPublished({
               note,

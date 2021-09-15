@@ -3,6 +3,49 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.59.2-alpha.4](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.59.2-alpha.4) (2021-09-15)
+
+
+### Bug Fixes
+
+* closing server 2x ([4fe1d21](https://github.com/dendronhq/dendron/commit/4fe1d218f2ecc0e99dbde5a61a735b16df46cb0d))
+* issue with webpack devCLI ([a4ff4c9](https://github.com/dendronhq/dendron/commit/a4ff4c9ae28ff31ab6f9483c339ae78b5144e185))
+* remove check for timestamp when connecting to engine ([dac1465](https://github.com/dendronhq/dendron/commit/dac14656b807163404bcc1abaf6456ca84fd1a05))
+
+
+### Features Dendron
+
+* dendron publishing with nextjs commands ([#1266](https://github.com/dendronhq/dendron/issues/1266)) ([fb90e98](https://github.com/dendronhq/dendron/commit/fb90e98999c1073b58480eb7364f6a70e31a6903))
+* seed browser initial revision ([#1166](https://github.com/dendronhq/dendron/issues/1166)) ([588fba0](https://github.com/dendronhq/dendron/commit/588fba05bbd9e3dabadd5e02d9fde72d80ed8148))
+
+
+
+## 0.55.2 (2021-08-21)
+
+
+
+## 0.55.1 (2021-08-17)
+
+
+
+## 0.54.1 (2021-08-13)
+
+
+### Bug Fixes
+
+* add new vaults from CLI to code workspace ([#1094](https://github.com/dendronhq/dendron/issues/1094)) ([2cde108](https://github.com/dendronhq/dendron/commit/2cde108b4c88a5c9d13b8eb6370f69879d6c9a62))
+* Doctor `regenerateNoteId` action error ([#1097](https://github.com/dendronhq/dendron/issues/1097)) ([f0480c7](https://github.com/dendronhq/dendron/commit/f0480c7306eb07a2d40ea2b4278757d6c8dd26bb))
+
+
+### Features Dendron
+
+* generate json schema from config ([#1100](https://github.com/dendronhq/dendron/issues/1100)) ([53b189e](https://github.com/dendronhq/dendron/commit/53b189ec973a8d3d3ccf300a0e59908197f4efb1))
+* seed cmds in plugin ([#1080](https://github.com/dendronhq/dendron/issues/1080)) ([e07a092](https://github.com/dendronhq/dendron/commit/e07a092b1a75548574f2ea45f1b465490b2091f3))
+
+
+
+
+
 ## [0.59.2-alpha.3](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.59.2-alpha.3) (2021-09-15)
 
 

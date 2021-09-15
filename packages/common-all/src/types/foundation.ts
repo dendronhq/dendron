@@ -183,6 +183,7 @@ export type NoteSEOProps = {
   updated: number;
   created: number;
   excerpt?: string;
+  image?: string;
   /**
    * Use as root canonical url for all published notes
    */

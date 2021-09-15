@@ -823,7 +823,8 @@ export class NoteUtils {
 
   static getSEOProps(note: NoteProps): NoteSEOProps {
     const { title, created, updated } = note;
-    const { excerpt, canonicalUrl, noindex, canonicalBaseUrl } = note.custom;
+    const { excerpt, canonicalUrl, noindex, canonicalBaseUrl, image } =
+      note.custom;
     return {
       title,
       excerpt,
@@ -832,6 +833,7 @@ export class NoteUtils {
       canonicalBaseUrl,
       canonicalUrl,
       noindex,
+      image,
     };
   }
 

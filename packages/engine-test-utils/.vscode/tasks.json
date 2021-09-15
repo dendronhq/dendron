@@ -8,8 +8,8 @@
       "problemMatcher": [],
       "options": {
         "env": {
-          "LOG_LEVEL": "error",
-          "LOG_DST": "/tmp/engine-test-utils.log"
+          "LOG_LEVEL": "info",
+          "LOG_DST": "${workspaceFolder}/engine-test-utils.log",
         }
       }
     },

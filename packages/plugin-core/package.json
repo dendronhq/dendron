@@ -4,7 +4,7 @@
   "displayName": "dendron",
   "description": "Dendron is a hierarchal note taking tool that grows as you do. ",
   "publisher": "dendron",
-  "version": "0.58.4-alpha.3",
+  "version": "0.59.2-alpha.5",
   "engines": {
     "vscode": "^1.54.0"
   },
@@ -776,9 +776,8 @@
     "vscode:uninstall": "node ./out/src/scripts/uninstallHook.js"
   },
   "devDependencies": {
-    "@dendronhq/common-test-utils": "^0.58.4-alpha.3",
-    "@dendronhq/engine-test-utils": "^0.58.4-alpha.3",
-    "@sentry/webpack-plugin": "^1.17.1",
+    "@dendronhq/common-test-utils": "^0.59.2-alpha.5",
+    "@dendronhq/engine-test-utils": "^0.59.2-alpha.5",
     "@types/execa": "^2.0.0",
     "@types/fs-extra": "^9.0.1",
     "@types/glob": "^7.1.1",
@@ -801,14 +800,13 @@
     "webpack-cli": "^3.3.12"
   },
   "dependencies": {
-    "@dendronhq/api-server": "^0.58.4-alpha.3",
-    "@dendronhq/common-all": "^0.58.4-alpha.1",
-    "@dendronhq/common-server": "^0.58.4-alpha.1",
-    "@dendronhq/dendron-cli": "^0.58.4-alpha.3",
-    "@dendronhq/engine-server": "^0.58.4-alpha.3",
-    "@dendronhq/pods-core": "^0.58.4-alpha.3",
-    "@sentry/node": "^6.12.0",
-    "@sentry/tracing": "^6.12.0",
+    "@dendronhq/api-server": "^0.59.2-alpha.5",
+    "@dendronhq/common-all": "^0.59.2-alpha.5",
+    "@dendronhq/common-server": "^0.59.2-alpha.5",
+    "@dendronhq/dendron-cli": "^0.59.2-alpha.5",
+    "@dendronhq/engine-server": "^0.59.2-alpha.5",
+    "@dendronhq/pods-core": "^0.59.2-alpha.5",
+    "@sentry/webpack-plugin": "^1.17.1",
     "@types/vscode": "1.58",
     "cross-path-sort": "^1.0.0",
     "execa": "^4.0.2",

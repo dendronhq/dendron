@@ -117,7 +117,7 @@ export function setupEngineArgs(args: yargs.Argv) {
       "If set, connect to to running engine. If not set, create new instance of Dendron Engine",
   });
   args.option("attach", {
-    describe: "Use existing engine instead of spwaning a new one",
+    describe: "Use existing engine instead of spawning a new one",
   });
   args.option("useLocalEngine", {
     type: "boolean",

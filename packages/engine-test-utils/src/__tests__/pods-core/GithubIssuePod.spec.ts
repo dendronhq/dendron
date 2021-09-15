@@ -21,6 +21,9 @@ describe("GithubIssuePod import pod", () => {
               number: 902,
               state: "OPEN",
               id: "sddsnjdek",
+              author: {
+                url: "https://github.com/xyzuser",
+              },
               labels: {
                 edges: [
                   {
@@ -68,6 +71,7 @@ describe("GithubIssuePod import pod", () => {
           wsRoot,
         });
         expect(note.custom.status).toEqual("OPEN");
+        expect(note.custom.author).toEqual("https://github.com/xyzuser");
       },
       {
         expect,

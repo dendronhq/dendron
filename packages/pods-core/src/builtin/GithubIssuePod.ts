@@ -138,6 +138,9 @@ export class GithubImportPod extends ImportPod<GithubImportPodConfig> {
               url
               number
               state
+              author {
+                url
+              }
               labels(first:5) {
                 edges {
                   node {
@@ -238,6 +241,7 @@ export class GithubImportPod extends ImportPod<GithubImportPodConfig> {
           url: d.node.url,
           status: d.node.state,
           issueID: d.node.id,
+          author: d.node.author.url,
         },
         tags,
       };
@@ -402,6 +406,47 @@ export class GithubPublishPod extends PublishPod<GithubPublishPodConfig> {
   }
 
   /**
+   * method to get all the milestones of a repository in key value pair
+   *
+   */
+  getMilestonesFromGithub = async (opts: Partial<GithubPublishPodConfig>) => {
+    const { owner, repository, token } = opts;
+    let milestonesHashMap: any;
+    const query = `query repository($name: String!, $owner: String!)
+      {
+        repository(owner: $owner , name: $name) { 
+          milestones(first: 100,
+            orderBy: {field: CREATED_AT, direction: DESC},
+            ){
+             edges {
+               node {
+                 id,
+                 title
+                }
+              }
+            }
+        }
+      }`;
+    try {
+      const result: any = await graphql(query, {
+        headers: { authorization: `token ${token}` },
+        owner,
+        name: repository,
+      });
+      const allMilestones = result.repository.milestones.edges;
+      allMilestones.forEach((milestone: any) => {
+        milestonesHashMap = {
+          ...milestonesHashMap,
+          [milestone.node.title]: milestone.node.id,
+        };
+      });
+    } catch (error: any) {
+      throw new DendronError({ message: stringifyError(error) });
+    }
+    return milestonesHashMap;
+  };
+
+  /**
    * method to get all the labels of a repository in key value pair
    *
    */
@@ -448,11 +493,16 @@ export class GithubPublishPod extends PublishPod<GithubPublishPodConfig> {
     token: string;
     status: string;
     labelIDs: string[];
+    milestoneId: string;
   }) => {
-    const { issueID, token, status, labelIDs } = opts;
+    const { issueID, token, status, labelIDs, milestoneId } = opts;
     let resp: string = "";
-    const mutation = `mutation updateIssue($id: ID!, $state: IssueState, $labelIDs: [ID!]){
-          updateIssue(input: {id : $id , state: $state, labelIds: $labelIDs}){
+    const mutation = `mutation updateIssue($id: ID!, $state: IssueState, $labelIDs: [ID!], ${
+      milestoneId ? `$milestoneId: ID` : ""
+    }){
+          updateIssue(input: {id : $id , state: $state, labelIds: $labelIDs, ${
+            milestoneId ? `milestoneId: $milestoneId` : ""
+          }}){
             issue {
                   id
                 }
@@ -464,6 +514,7 @@ export class GithubPublishPod extends PublishPod<GithubPublishPodConfig> {
         id: issueID,
         state: status,
         labelIDs,
+        milestoneId,
       });
       if (!_.isUndefined(result.updateIssue.issue.id)) {
         resp = "Issue Updated";
@@ -514,8 +565,10 @@ export class GithubPublishPod extends PublishPod<GithubPublishPodConfig> {
     repository: string;
     note: NoteProps;
     engine: DEngineClient;
+    milestoneId: string;
   }) => {
-    const { token, labelIDs, owner, repository, note, engine } = opts;
+    const { token, labelIDs, owner, repository, note, engine, milestoneId } =
+      opts;
     const { title, body } = note;
     let resp: string = "";
     const repositoryId = await this.getRepositoryId({
@@ -523,8 +576,12 @@ export class GithubPublishPod extends PublishPod<GithubPublishPodConfig> {
       owner,
       repository,
     });
-    const mutation = `mutation createIssue($repositoryId: ID!, $title: String!, $body: String, $labelIDs: [ID!]){
-      createIssue(input: {repositoryId : $repositoryId , title: $title, body: $body, labelIds: $labelIDs}){
+    const mutation = `mutation createIssue($repositoryId: ID!, $title: String!, $body: String, $labelIDs: [ID!], ${
+      milestoneId ? `$milestoneId: ID` : ""
+    } ){
+      createIssue(input: {repositoryId : $repositoryId , title: $title, body: $body, labelIds: $labelIDs, ${
+        milestoneId ? `milestoneId: $milestoneId` : ""
+      }}){
                 issue {
                       id
                       url
@@ -539,6 +596,7 @@ export class GithubPublishPod extends PublishPod<GithubPublishPodConfig> {
         title,
         body,
         labelIDs,
+        milestoneId,
       });
       const issue = result.createIssue.issue;
       if (!_.isUndefined(result.createIssue.issue.id)) {
@@ -566,9 +624,21 @@ export class GithubPublishPod extends PublishPod<GithubPublishPodConfig> {
       repository,
       token,
     });
+    let milestoneId;
     const note = opts.note;
     const tags = opts.note.tags;
-    const { issueID, status } = note.custom;
+    const { issueID, status, milestone } = note.custom;
+    if (!_.isUndefined(milestone)) {
+      const milestonesHashMap = await this.getMilestonesFromGithub({
+        owner,
+        repository,
+        token,
+      });
+      milestoneId = milestonesHashMap[milestone];
+      if (_.isUndefined(milestoneId)) {
+        return "Github: Invalid milestone provided";
+      }
+    }
     const labelIDs: string[] = [];
     if (_.isString(tags)) {
       if (labelsHashMap[tags]) labelIDs.push(labelsHashMap[tags]);
@@ -590,12 +660,14 @@ export class GithubPublishPod extends PublishPod<GithubPublishPodConfig> {
             labelIDs,
             note,
             engine,
+            milestoneId,
           })
         : await this.updateIssue({
             issueID,
             token,
             status: status.toUpperCase(),
             labelIDs,
+            milestoneId,
           });
 
     return "Github: ".concat(resp);

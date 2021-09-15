@@ -34,6 +34,11 @@ export enum PublishEndpoint {
   REMOTE = "remote",
 }
 
+export enum ExtensionTarget {
+  DENDRON = "dendron",
+  NIGHTLY = "nightly",
+}
+
 const $ = (cmd: string, opts?: any) => {
   return execa.commandSync(cmd, { shell: true, ...opts });
 };
@@ -155,10 +160,13 @@ export class BuildUtils {
   }
 
   static prepPluginPkg() {
+    // static prepPluginPkg(target: ExtensionTarget) {
     const pkgPath = path.join(this.getPluginRootPath(), "package.json");
     this.updatePkgMeta({
       pkgPath,
-      name: "dendron",
+      //TODO: Make this configurable:
+      // name: target,
+      name: "nightly",
       main: "./dist/extension.js",
       repository: {
         url: "https://github.com/dendronhq/dendron.git",

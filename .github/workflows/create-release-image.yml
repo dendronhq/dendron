@@ -1,14 +1,12 @@
-# Generates an image representing the General Release build. This is intenteded
-# for smoke-testing and will not publish the actual binaries into production. It
-# only has access to the plugin-development environment. Images are available as
-# a Github Artifact.
-name: Generate GA Smoke Testing Image
+# Generates an image for the General Release build. This will only generate an
+# image as a pipeline artifact and will not publish the actual binaries into
+# production. It only has access to the plugin-development environment.
+name: Create Release Image
 
 on: workflow_dispatch
   # push:
   #   branches:
   #     - release/*
-  #     - chore/ga-build-automation
   
 
 jobs:
@@ -51,10 +49,13 @@ jobs:
         run: npm set registry http://localhost:4873/
       
       - name: Build the VSIX
-        env:
+        env: 
           GOOGLE_OAUTH_CLIENT_SECRET: ${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}
           GOOGLE_OAUTH_CLIENT_ID: ${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}
-        run: yarn build:minor:local:ci
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+        run: |
+          echo "DENDRON_RELEASE_VERSION=`cat meta.json | jq -r '.["@dendronhq/plugin-core"]' | awk -F. -v OFS=. 'NF>1{$(NF-1)=sprintf("%0*d", length($(NF-1)), ($(NF-1)+1)); $NF=0; print}'`" >> $GITHUB_ENV
+          yarn build:patch:minor:ci
 
       - name: Upload VSIX Artifact
         uses: actions/upload-artifact@v2

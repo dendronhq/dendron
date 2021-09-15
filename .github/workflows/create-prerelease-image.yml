@@ -1,0 +1,77 @@
+name: Create Prerelease Image
+
+on:
+  push:
+    branches:
+      - prerelease/*
+
+jobs:
+  build:
+    environment: plugin
+    strategy:
+      fail-fast: true
+
+    timeout-minutes: 30
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Gather environment data
+        run: |
+          node --version
+          npm --version
+          yarn --version
+
+      - name: Configure Git user
+        run: |
+          git config --global user.name CI
+          git config --global user.email ci@dendron.so
+
+      - name: Checkout source
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version:  14.x
+
+      - name: Yarn Setup
+        run: yarn setup
+
+      - name: Set Up Yarn Local Registry
+        run: yarn config set registry http://localhost:4873
+      
+      - name: Set Up NPM Local Registry
+        run: npm set registry http://localhost:4873/
+      
+      - name: Build the VSIX
+        env: 
+          GOOGLE_OAUTH_CLIENT_SECRET: ${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}
+          GOOGLE_OAUTH_CLIENT_ID: ${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+        run: |
+          echo "DENDRON_RELEASE_VERSION=`cat meta.json | jq -r '.["@dendronhq/plugin-core"]' | awk -F. -v OFS=. 'NF==1{print ++$NF}; NF>1{$NF=sprintf("%0*d", length($NF), ($NF+1)); print}'`" >> $GITHUB_ENV
+          yarn build:patch:local:ci
+
+      - name: Upload VSIX Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: vsix
+          path: ./packages/plugin-core/*.vsix
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.DENDRON_BOT_S3_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.DENDRON_BOT_S3_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Publish VSIX to S3
+        run: |
+          version=`cat ./packages/plugin-core/package.json | jq ".version" -r`
+          name=`cat ./packages/plugin-core/package.json | jq ".displayName" -r`
+          package="$name-$version.vsix"
+          echo $package
+          BUCKET=org-dendron-public-assets
+          aws s3 cp --acl public-read ./packages/plugin-core/$package s3://$BUCKET/publish/$package
+          echo https://$BUCKET.s3.amazonaws.com/publish/$package

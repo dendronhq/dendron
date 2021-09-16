@@ -66,7 +66,6 @@ const runRename = async ({
   });
   const barChange = _.find(changed.data, (ent) => ent.note.fname === "bar")!;
   const out = cb({ barChange, allChanged: changed.data! });
-  debugger;
   return out.concat([
     {
       actual: changed.data!.length,
@@ -760,7 +759,6 @@ const NOTES = {
         match: ["baz"],
         nomatch: ["foo"],
       });
-      debugger;
 
       return [
         {

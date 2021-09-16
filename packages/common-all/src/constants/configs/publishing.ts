@@ -20,7 +20,6 @@ import {
   ENABLE_NUNJUCKS,
   ENABLE_KATEX,
   ENABLE_PRETTY_REFS,
-  ENABLE_LEGACY_NOTE_REF,
 } from "./global";
 
 const GITHUB_EDIT_VIEW_MODE: Record<
@@ -103,7 +102,6 @@ export const PUBLISHING: DendronConfigEntryCollection<DendronPublishingConfig> =
     enableNunjucks: ENABLE_NUNJUCKS("publishing"),
     enablePrettyRefs: ENABLE_PRETTY_REFS("publishing"),
     enableKatex: ENABLE_KATEX("publishing"),
-    enableLegacyNoteRef: ENABLE_LEGACY_NOTE_REF("publishing"),
     assetsPrefix: {
       label: "Assets Prefix",
       desc: "Prefix for assets for publishing.",

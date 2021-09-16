@@ -14,7 +14,6 @@ export type DendronPublishingConfig = {
   enableNunjucks?: boolean;
   enablePrettyRefs?: boolean;
   enableKatex?: boolean;
-  enableLegacyNoteRef?: boolean;
 
   assetsPrefix?: string;
   copyAssets: boolean;

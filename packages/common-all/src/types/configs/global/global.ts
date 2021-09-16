@@ -10,7 +10,6 @@ export type DendronGlobalConfig = {
   enableNunjucks: boolean; // TODO: split
   enablePrettyRefs: boolean; // TODO: split
   enableKatex: boolean; // TODO: split
-  enableLegacyNoteRef: boolean; // TODO: split
 };
 
 /**
@@ -27,6 +26,5 @@ export function genDefaultGlobalConfig(): DendronGlobalConfig {
     enableKatex: true,
     enableNunjucks: false,
     enablePrettyRefs: true,
-    enableLegacyNoteRef: false,
   };
 }

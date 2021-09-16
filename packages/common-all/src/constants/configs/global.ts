@@ -41,15 +41,6 @@ export const ENABLE_KATEX = (
   };
 };
 
-export const ENABLE_LEGACY_NOTE_REF = (
-  namespace: TopLevelDendronConfig
-): DendronConfigEntry<boolean> => {
-  return {
-    label: `Enable Legacy Note Ref (${namespace})`,
-    desc: `Enable legacy note references. (${namespace})`,
-  };
-};
-
 export const ENABLE_FM_TITLE = (namespace: TopLevelDendronConfig) => {
   return {
     label: `Enable Frontmatter Title (${namespace})`,
@@ -91,5 +82,4 @@ export const GLOBAL: DendronConfigEntryCollection<DendronGlobalConfig> = {
   enableNunjucks: ENABLE_NUNJUCKS("global"),
   enablePrettyRefs: ENABLE_PRETTY_REFS("global"),
   enableKatex: ENABLE_KATEX("global"),
-  enableLegacyNoteRef: ENABLE_LEGACY_NOTE_REF("global"),
 };

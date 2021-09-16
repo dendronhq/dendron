@@ -10,7 +10,6 @@ export type DendronPreviewConfig = {
   enableNunjucks?: boolean;
   enablePrettyRefs?: boolean;
   enableKatex?: boolean;
-  enableLegacyNoteRef?: boolean;
 };
 
 /**

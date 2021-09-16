@@ -20,10 +20,10 @@ export type DendronWorkspaceConfig = {
   journal: JournalConfig;
   scratch: ScratchConfig;
   graph: DendronGraphConfig;
-  enableTelemetry: boolean;
+  disableTelemetry?: boolean;
   enableAutoCreateOnDefinition: boolean;
   enableXVaultWikiLink: boolean;
-  initializeRemoteVaults: boolean;
+  enableRemoteVaultInit: boolean;
   workspaceVaultSyncMode: VaultSyncMode;
   enableAutoFoldFrontmatter: boolean;
   // performance related
@@ -57,12 +57,11 @@ export function genDefaultWorkspaceConfig(): DendronWorkspaceConfig {
     journal: genDefaultJournalConfig(),
     scratch: genDefaultScratchConfig(),
     graph: genDefaultGraphConfig(),
-    enableTelemetry: true,
     enableAutoCreateOnDefinition: false,
     enableXVaultWikiLink: false,
-    initializeRemoteVaults: true,
+    enableRemoteVaultInit: true,
     workspaceVaultSyncMode: VaultSyncModeEnum.noCommit,
-    enableAutoFoldFrontmatter: true,
+    enableAutoFoldFrontmatter: false,
     maxPreviewsCached: 10,
     maxNoteLength: 204800,
   };

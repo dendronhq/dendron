@@ -126,9 +126,9 @@ export const WORKSPACE: DendronConfigEntryCollection<DendronWorkspaceConfig> = {
   journal: JOURNAL,
   scratch: SCRATCH,
   graph: GRAPH,
-  enableTelemetry: {
-    label: `Enable Telemetry`,
-    desc: `Enable telemetry that collects usage data to help improve Dendron.`,
+  disableTelemetry: {
+    label: `Disable Telemetry`,
+    desc: `Disable telemetry that collects usage data to help improve Dendron.`,
   },
   enableAutoCreateOnDefinition: {
     label: "Enable auto create on definition",
@@ -138,9 +138,9 @@ export const WORKSPACE: DendronConfigEntryCollection<DendronWorkspaceConfig> = {
     label: "Enable cross-vault wikilink",
     desc: "Enable cross-vault wikilinks",
   },
-  initializeRemoteVaults: {
-    label: "Initialize Remote Vaults",
-    desc: "Initialize remote vaults on startup.",
+  enableRemoteVaultInit: {
+    label: "Enable Remote Vault Init",
+    desc: "Enable initializing remote vaults on startup.",
   },
   workspaceVaultSyncMode: VAULT_SYNC_MODES,
   enableAutoFoldFrontmatter: {

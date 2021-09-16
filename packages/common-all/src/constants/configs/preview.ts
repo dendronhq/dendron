@@ -9,7 +9,6 @@ import {
   ENABLE_NUNJUCKS,
   ENABLE_KATEX,
   ENABLE_PRETTY_REFS,
-  ENABLE_LEGACY_NOTE_REF,
 } from "./global";
 
 export const PREVIEW: DendronConfigEntryCollection<DendronPreviewConfig> = {
@@ -21,5 +20,4 @@ export const PREVIEW: DendronConfigEntryCollection<DendronPreviewConfig> = {
   enableNunjucks: ENABLE_NUNJUCKS("preview"),
   enablePrettyRefs: ENABLE_PRETTY_REFS("preview"),
   enableKatex: ENABLE_KATEX("preview"),
-  enableLegacyNoteRef: ENABLE_LEGACY_NOTE_REF("preview"),
 };

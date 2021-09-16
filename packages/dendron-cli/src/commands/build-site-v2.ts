@@ -159,14 +159,21 @@ export class BuildSiteV2CLICommand extends CLICommand<
     );
     this.L.info("running post-compile");
     await Promise.all([buildStyles(), buildSearch()]);
+
     if (!opts.serve) {
       this.L.info({ msg: "done compiling" });
       setTimeout(() => {
+        // in case server doesn't close, force close
+        const maxTimeout = setTimeout(() => {
+          console.log("closing via timeout");
+          process.exit(0);
+        }, 1000);
         server.close((err: any) => {
           this.L.info({ msg: "closing server" });
           if (err) {
             this.L.error({ msg: "error closing", payload: err });
           }
+          clearTimeout(maxTimeout);
         });
       }, 5000);
     }

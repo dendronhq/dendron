@@ -174,6 +174,10 @@ export class BuildSiteV2CLICommand extends CLICommand<
             this.L.error({ msg: "error closing", payload: err });
           }
           clearTimeout(maxTimeout);
+          if (process.env.GITHUB_ACTIONS) {
+            console.log("closing via github action");
+            process.exit(0);
+          }
         });
       }, 5000);
     }

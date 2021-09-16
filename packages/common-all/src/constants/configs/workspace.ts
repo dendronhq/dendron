@@ -147,10 +147,6 @@ export const WORKSPACE: DendronConfigEntryCollection<DendronWorkspaceConfig> = {
     label: "Enable Auto Fold Frontmatter",
     desc: "Enable Automatically folding frontmatter block when opening a new note.",
   },
-  enableCaching: {
-    label: "Enable Caching",
-    desc: "Enable Caching Behavior",
-  },
   maxPreviewsCached: {
     label: "Max Preview Cached",
     desc: "Maximum number of rendered previews to cache.",

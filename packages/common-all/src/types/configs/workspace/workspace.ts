@@ -27,7 +27,6 @@ export type DendronWorkspaceConfig = {
   workspaceVaultSyncMode: VaultSyncMode;
   enableAutoFoldFrontmatter: boolean;
   // performance related
-  enableCaching: boolean;
   maxPreviewsCached: number;
   maxNoteLength: number;
   //
@@ -64,7 +63,6 @@ export function genDefaultWorkspaceConfig(): DendronWorkspaceConfig {
     initializeRemoteVaults: true,
     workspaceVaultSyncMode: VaultSyncModeEnum.noCommit,
     enableAutoFoldFrontmatter: true,
-    enableCaching: true,
     maxPreviewsCached: 10,
     maxNoteLength: 204800,
   };

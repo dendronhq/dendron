@@ -1,16 +1,17 @@
 import { tmpDir } from "@dendronhq/common-server";
 import {
-  BuildUtils, DevCLICommand,
+  BuildUtils,
+  DevCLICommand,
   DevCLICommandOpts,
-  DevCommands, LernaUtils,
+  DevCommands,
+  LernaUtils,
   PublishEndpoint,
-  SemverVersion
+  SemverVersion,
 } from "@dendronhq/dendron-cli";
 import fs from "fs-extra";
 import path from "path";
 import { stub } from "sinon";
 import { runEngineTestV5 } from "../../../engine";
-
 
 export const runDevCmd = ({
   cmd,
@@ -25,10 +26,9 @@ describe("build", () => {
   test("ok, build local", async () => {
     await runEngineTestV5(
       async ({}) => {
-
         // stub lerna.json
         const root = tmpDir().name;
-        fs.writeJsonSync(path.join(root, "lerna.json"), {version: "1.0.0"})
+        fs.writeJsonSync(path.join(root, "lerna.json"), { version: "1.0.0" });
         stub(process, "cwd").returns(root);
 
         const prepPublishLocalStub = stub(
@@ -36,7 +36,6 @@ describe("build", () => {
           "prepPublishLocal"
         ).returns(Promise.resolve());
 
-        const bump11tyStub = stub(BuildUtils, "bump11ty").returns();
         const typecheckStub = stub(BuildUtils, "runTypeCheck").returns();
         const bumpVersionStub = stub(LernaUtils, "bumpVersion").returns();
         const publishVersionStub = stub(LernaUtils, "publishVersion").returns();
@@ -65,12 +64,11 @@ describe("build", () => {
 
         await runDevCmd({
           cmd,
-					publishEndpoint: PublishEndpoint.LOCAL,
-					upgradeType: SemverVersion.PATCH
+          publishEndpoint: PublishEndpoint.LOCAL,
+          upgradeType: SemverVersion.PATCH,
         });
         [
           prepPublishLocalStub,
-          bump11tyStub,
           typecheckStub,
           bumpVersionStub,
           publishVersionStub,

@@ -63,17 +63,21 @@ const config = {
         { from: "webpack-require-hack.js", to: "webpack-require-hack.js" },
       ],
     }),
-    // @ts-ignore
-    new SentryWebpackPlugin({
-      authToken: process.env.SENTRY_AUTH_TOKEN,
-      org: "dendron",
-      project: "dendron",
-      release: process.env.DENDRON_RELEASE_VERSION,
+    ...(process.env.SKIP_SENTRY
+      ? []
+      : [
+          // @ts-ignore
+          new SentryWebpackPlugin({
+            authToken: process.env.SENTRY_AUTH_TOKEN,
+            org: "dendron",
+            project: "dendron",
+            release: process.env.DENDRON_RELEASE_VERSION,
 
-      // other SentryWebpackPlugin configuration
-      include: ".",
-      ignore: ["node_modules", "webpack.config.js"],
-    }),
+            // other SentryWebpackPlugin configuration
+            include: ".",
+            ignore: ["node_modules", "webpack.config.js"],
+          }),
+        ]),
   ],
   module: {
     rules: [

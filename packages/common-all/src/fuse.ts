@@ -107,6 +107,10 @@ export function createFuseNote(
     {
       preset: "note",
       keys: ["title", "body"],
+      includeMatches: true,
+      includeScore: true,
+      findAllMatches: true,
+      useExtendedSearch: true,
       ...overrideOpts,
     },
     index

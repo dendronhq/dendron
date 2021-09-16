@@ -5,7 +5,7 @@
  * For config entries that can be an arbitrary value, only specify the label and description.
  * For config entries that have pre-defined choices, provide the value as well as label and description specific to that value.
  */
-export type DendronConfigEntry<T> = {
+export type DendronConfigEntry<T = any> = {
   value?: T;
   label: string;
   desc: string;
@@ -23,9 +23,9 @@ export type DendronConfigEntry<T> = {
 export type DendronConfigEntryCollection<T> = {
   [Property in keyof T]-?:
     | DendronConfigEntryCollection<any>
-    | Record<any, DendronConfigEntry<any>>
-    | DendronConfigEntry<any>
-    | ((...args: any[]) => DendronConfigEntry<any>);
+    | Record<any, DendronConfigEntry>
+    | DendronConfigEntry
+    | ((...args: any[]) => DendronConfigEntry);
 };
 
 export enum VaultSyncModeEnum {

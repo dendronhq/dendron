@@ -7,7 +7,7 @@ import { DendronGlobalConfig } from "../../types/configs/global/global";
 
 export const ENABLE_MERMAID = (
   namespace: TopLevelDendronConfig
-): DendronConfigEntry<boolean> => {
+): DendronConfigEntry => {
   return {
     label: `Enable Mermaid (${namespace})`,
     desc: `Enable the use of mermaid for rendering diagrams. (${namespace})`,
@@ -16,7 +16,7 @@ export const ENABLE_MERMAID = (
 
 export const ENABLE_NUNJUCKS = (
   namespace: TopLevelDendronConfig
-): DendronConfigEntry<boolean> => {
+): DendronConfigEntry => {
   return {
     label: `Enable Nunjucks (${namespace})`,
     desc: `Enable the use of nunjucks templates in the note body. (${namespace})`,
@@ -25,7 +25,7 @@ export const ENABLE_NUNJUCKS = (
 
 export const ENABLE_PRETTY_REFS = (
   namespace: TopLevelDendronConfig
-): DendronConfigEntry<boolean> => {
+): DendronConfigEntry => {
   return {
     label: `Enable Pretty Refs (${namespace})`,
     desc: `Enable rendering note references as pretty refs. (${namespace})`,
@@ -34,21 +34,25 @@ export const ENABLE_PRETTY_REFS = (
 
 export const ENABLE_KATEX = (
   namespace: TopLevelDendronConfig
-): DendronConfigEntry<boolean> => {
+): DendronConfigEntry => {
   return {
     label: `Enable Katex (${namespace})`,
     desc: `Enable the use of katex for rendering math. (${namespace})`,
   };
 };
 
-export const ENABLE_FM_TITLE = (namespace: TopLevelDendronConfig) => {
+export const ENABLE_FM_TITLE = (
+  namespace: TopLevelDendronConfig
+): DendronConfigEntry => {
   return {
     label: `Enable Frontmatter Title (${namespace})`,
     desc: `Insert frontmatter title of note to the body (${namespace})`,
   };
 };
 
-export const ENABLE_HIERARCHY_DISPLAY = (namespace: TopLevelDendronConfig) => {
+export const ENABLE_HIERARCHY_DISPLAY = (
+  namespace: TopLevelDendronConfig
+): DendronConfigEntry => {
   return {
     label: `Enable Hierarchy Display (${namespace})`,
     desc: `Enable rendering of children link block at the end of the note. (${namespace})`,
@@ -57,7 +61,7 @@ export const ENABLE_HIERARCHY_DISPLAY = (namespace: TopLevelDendronConfig) => {
 
 export const HIERARCHY_DISPLAY_TITLE = (
   namespace: TopLevelDendronConfig
-): DendronConfigEntry<string> => {
+): DendronConfigEntry => {
   return {
     label: `Hierarhcy Display Title ${namespace}`,
     desc: `Title to display for the children links block. ${namespace}`,
@@ -66,7 +70,7 @@ export const HIERARCHY_DISPLAY_TITLE = (
 
 export const ENABLE_NOTE_TITLE_FOR_LINK = (
   namespace: TopLevelDendronConfig
-) => {
+): DendronConfigEntry => {
   return {
     label: `Enable Note Title for Links (${namespace})`,
     desc: `Enable rendering of naked links as the title of the note. (${namespace})`,

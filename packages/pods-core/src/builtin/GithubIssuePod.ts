@@ -22,9 +22,9 @@ import {
   getSlugger,
 } from "@dendronhq/common-all";
 
-const ID = "dendron.github";
+const ID = "dendron.githubissue";
 
-type GithubImportPodCustomOpts = {
+type GithubIssueImportPodCustomOpts = {
   /**
    * owner of the repository
    */
@@ -61,20 +61,21 @@ type GithubImportPodCustomOpts = {
   fname: string;
 };
 
-type GithubAPIOpts = GithubImportPodCustomOpts & {
+type GithubAPIOpts = GithubIssueImportPodCustomOpts & {
   created?: string;
   afterCursor?: string;
 };
 
-type GithubImportPodConfig = ImportPodConfig & GithubImportPodCustomOpts;
+type GithubIssueImportPodConfig = ImportPodConfig &
+  GithubIssueImportPodCustomOpts;
 
-export type GithubImportPodPlantOpts = ImportPodPlantOpts;
+export type GithubIssueImportPodPlantOpts = ImportPodPlantOpts;
 
-export class GithubIssueImportPod extends ImportPod<GithubImportPodConfig> {
+export class GithubIssueImportPod extends ImportPod<GithubIssueImportPodConfig> {
   static id: string = ID;
   static description: string = "import github issues";
 
-  get config(): JSONSchemaType<GithubImportPodConfig> {
+  get config(): JSONSchemaType<GithubIssueImportPodConfig> {
     return PodUtils.createImportConfig({
       required: ["repository", "owner", "status", "token", "fname"],
       properties: {
@@ -113,7 +114,7 @@ export class GithubIssueImportPod extends ImportPod<GithubImportPodConfig> {
           description: "name of hierarchy to import into",
         },
       },
-    }) as JSONSchemaType<GithubImportPodConfig>;
+    }) as JSONSchemaType<GithubIssueImportPodConfig>;
   }
 
   /**
@@ -299,7 +300,7 @@ export class GithubIssueImportPod extends ImportPod<GithubImportPodConfig> {
     return updatedNotes;
   }
 
-  async plant(opts: GithubImportPodPlantOpts) {
+  async plant(opts: GithubIssueImportPodPlantOpts) {
     const ctx = "GithubIssuePod";
     this.L.info({ ctx, opts, msg: "enter" });
     const { wsRoot, engine, vault, config } = opts;
@@ -314,7 +315,7 @@ export class GithubIssueImportPod extends ImportPod<GithubImportPodConfig> {
       concatenate,
       fname,
       fnameAsId,
-    } = config as GithubImportPodConfig;
+    } = config as GithubIssueImportPodConfig;
     let hasNextPage: boolean = true;
     let afterCursor = null;
     let created: string;
@@ -363,7 +364,7 @@ export class GithubIssueImportPod extends ImportPod<GithubImportPodConfig> {
   }
 }
 
-type GithubPublishPodCustomOpts = {
+type GithubIssuePublishPodCustomOpts = {
   /**
    * owner of the repository
    */
@@ -380,12 +381,13 @@ type GithubPublishPodCustomOpts = {
   token: string;
 };
 
-type GithubPublishPodConfig = PublishPodConfig & GithubPublishPodCustomOpts;
-export class GithubIssuePublishPod extends PublishPod<GithubPublishPodConfig> {
+type GithubIssuePublishPodConfig = PublishPodConfig &
+  GithubIssuePublishPodCustomOpts;
+export class GithubIssuePublishPod extends PublishPod<GithubIssuePublishPodConfig> {
   static id: string = ID;
   static description: string = "publish github issues";
 
-  get config(): JSONSchemaType<GithubPublishPodConfig> {
+  get config(): JSONSchemaType<GithubIssuePublishPodConfig> {
     return PodUtils.createPublishConfig({
       required: ["token", "owner", "repository"],
       properties: {
@@ -402,14 +404,16 @@ export class GithubIssuePublishPod extends PublishPod<GithubPublishPodConfig> {
           description: "github personal access token",
         },
       },
-    }) as JSONSchemaType<GithubPublishPodConfig>;
+    }) as JSONSchemaType<GithubIssuePublishPodConfig>;
   }
 
   /**
    * method to get all the milestones of a repository in key value pair
    *
    */
-  getMilestonesFromGithub = async (opts: Partial<GithubPublishPodConfig>) => {
+  getMilestonesFromGithub = async (
+    opts: Partial<GithubIssuePublishPodConfig>
+  ) => {
     const { owner, repository, token } = opts;
     let milestonesHashMap: any;
     const query = `query repository($name: String!, $owner: String!)
@@ -450,7 +454,7 @@ export class GithubIssuePublishPod extends PublishPod<GithubPublishPodConfig> {
    * method to get all the labels of a repository in key value pair
    *
    */
-  getLabelsFromGithub = async (opts: Partial<GithubPublishPodConfig>) => {
+  getLabelsFromGithub = async (opts: Partial<GithubIssuePublishPodConfig>) => {
     const { owner, repository, token } = opts;
     let labelsHashMap: any;
     const query = `query repository($name: String!, $owner: String!)
@@ -488,6 +492,33 @@ export class GithubIssuePublishPod extends PublishPod<GithubPublishPodConfig> {
   /**
    * method to update the issue in github
    */
+  updateMilestone = async (opts: {
+    issueID: string;
+    token: string;
+    milestoneId: string;
+  }) => {
+    const { issueID, token, milestoneId } = opts;
+    const mutation = `mutation updateIssue($id: ID!, $milestoneId: ID){
+      updateIssue(input: {id : $id , milestoneId: $milestoneId}){
+        issue {
+              id
+            }
+        }
+      }`;
+    try {
+      await graphql(mutation, {
+        headers: { authorization: `token ${token}` },
+        id: issueID,
+        milestoneId,
+      });
+    } catch (error: any) {
+      throw new DendronError({ message: stringifyError(error) });
+    }
+  };
+
+  /**
+   * method to update the issue in github
+   */
   updateIssue = async (opts: {
     issueID: string;
     token: string;
@@ -496,13 +527,16 @@ export class GithubIssuePublishPod extends PublishPod<GithubPublishPodConfig> {
     milestoneId: string;
   }) => {
     const { issueID, token, status, labelIDs, milestoneId } = opts;
+    if (milestoneId) {
+      /**
+       * While regression it was observed that milestone is not updated if the issue
+       * state remains same, hence creating a new method to update milestone
+       */
+      this.updateMilestone({ issueID, token, milestoneId });
+    }
     let resp: string = "";
-    const mutation = `mutation updateIssue($id: ID!, $state: IssueState, $labelIDs: [ID!], ${
-      milestoneId ? `$milestoneId: ID` : ""
-    }){
-          updateIssue(input: {id : $id , state: $state, labelIds: $labelIDs, ${
-            milestoneId ? `milestoneId: $milestoneId` : ""
-          }}){
+    const mutation = `mutation updateIssue($id: ID!, $state: IssueState, $labelIDs: [ID!]){
+          updateIssue(input: {id : $id , state: $state, labelIds: $labelIDs}){
             issue {
                   id
                 }
@@ -514,7 +548,6 @@ export class GithubIssuePublishPod extends PublishPod<GithubPublishPodConfig> {
         id: issueID,
         state: status,
         labelIDs,
-        milestoneId,
       });
       if (!_.isUndefined(result.updateIssue.issue.id)) {
         resp = "Issue Updated";
@@ -530,7 +563,7 @@ export class GithubIssuePublishPod extends PublishPod<GithubPublishPodConfig> {
   /**
    * method to get the repository id
    */
-  getRepositoryId = async (opts: Partial<GithubPublishPodConfig>) => {
+  getRepositoryId = async (opts: Partial<GithubIssuePublishPodConfig>) => {
     let repositoryId: string;
     const { owner, repository, token } = opts;
     const query = `query repository($name: String!, $owner: String!)
@@ -618,7 +651,7 @@ export class GithubIssuePublishPod extends PublishPod<GithubPublishPodConfig> {
 
   async plant(opts: PublishPodPlantOpts) {
     const { config, engine } = opts;
-    const { owner, repository, token } = config as GithubPublishPodConfig;
+    const { owner, repository, token } = config as GithubIssuePublishPodConfig;
     const labelsHashMap = await this.getLabelsFromGithub({
       owner,
       repository,

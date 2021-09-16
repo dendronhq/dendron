@@ -6,7 +6,10 @@ import {
 } from "./builtin";
 import { AirtableExportPod } from "./builtin/AirtablePod";
 import { GDocImportPod } from "./builtin/GDocPod";
-import { GithubImportPod, GithubPublishPod } from "./builtin/GithubIssuePod";
+import {
+  GithubIssueImportPod,
+  GithubIssuePublishPod,
+} from "./builtin/GithubIssuePod";
 import { GraphvizExportPod } from "./builtin/GraphvizPod";
 import { HTMLPublishPod } from "./builtin/HTMLPod";
 import {
@@ -32,8 +35,18 @@ export function getAllExportPods(): PodClassEntryV4[] {
   ];
 }
 export function getAllPublishPods(): PodClassEntryV4[] {
-  return [JSONPublishPod, MarkdownPublishPod, HTMLPublishPod, GithubPublishPod];
+  return [
+    JSONPublishPod,
+    MarkdownPublishPod,
+    HTMLPublishPod,
+    GithubIssuePublishPod,
+  ];
 }
 export function getAllImportPods(): PodClassEntryV4[] {
-  return [JSONImportPod, MarkdownImportPod, GithubImportPod, GDocImportPod];
+  return [
+    JSONImportPod,
+    MarkdownImportPod,
+    GithubIssueImportPod,
+    GDocImportPod,
+  ];
 }

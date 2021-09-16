@@ -70,7 +70,7 @@ type GithubImportPodConfig = ImportPodConfig & GithubImportPodCustomOpts;
 
 export type GithubImportPodPlantOpts = ImportPodPlantOpts;
 
-export class GithubImportPod extends ImportPod<GithubImportPodConfig> {
+export class GithubIssueImportPod extends ImportPod<GithubImportPodConfig> {
   static id: string = ID;
   static description: string = "import github issues";
 
@@ -381,7 +381,7 @@ type GithubPublishPodCustomOpts = {
 };
 
 type GithubPublishPodConfig = PublishPodConfig & GithubPublishPodCustomOpts;
-export class GithubPublishPod extends PublishPod<GithubPublishPodConfig> {
+export class GithubIssuePublishPod extends PublishPod<GithubPublishPodConfig> {
   static id: string = ID;
   static description: string = "publish github issues";
 

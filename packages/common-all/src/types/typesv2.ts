@@ -24,7 +24,7 @@ export type EngineDeleteOpts = {
    */
   metaOnly?: boolean;
   /**
-   * If node is deleted and parents are stubs, default behavior is to alsod elete parents
+   * If node is deleted and parents are stubs, default behavior is to alsod delete parents
    */
   noDeleteParentStub?: boolean;
 };
@@ -408,6 +408,12 @@ export type EngineDeleteNoteResp = Required<RespV2<EngineDeleteNotePayload>>;
 export type NoteQueryResp = Required<RespV2<NoteProps[]>>;
 export type SchemaQueryResp = Required<RespV2<SchemaModuleProps[]>>;
 export type StoreDeleteNoteResp = EngineDeleteNotePayload;
+/**
+ * Changed notes come from the following sources:
+ * - notes that were deleted (eg. note being renamed had parent that was a stub)
+ * - notes that were created (eg. note being created had no existing parents)
+ * - notes that have had their links re-written
+ */
 export type RenameNotePayload = NoteChangeEntry[];
 export type RenderNotePayload = string | undefined;
 export type GetNoteBlocksPayload = RespV2<NoteBlock[]>;

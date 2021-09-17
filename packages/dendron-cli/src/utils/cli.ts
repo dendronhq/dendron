@@ -11,11 +11,15 @@ export class CLIUtils {
    * @param ent: config object
    * @returns
    */
-  static objectConfig2StringConfig = (ent: any) => {
-    return _.map(ent, (v, k) => {
-      return `${k}=${v}`;
-    })
-      .filter((ent) => !_.isUndefined(ent))
-      .join(",");
+  static objectConfig2StringConfig = (ent: any): string => {
+    return (
+      _.map(ent, (v, k) => {
+        if (_.isUndefined(v)) {
+          return undefined;
+        } else {
+          return `${k}=${v}`;
+        }
+      }).filter((ent) => !_.isUndefined(ent)) as string[]
+    ).join(",");
   };
 }

@@ -1,12 +1,16 @@
+import { DendronConfig, URI } from "@dendronhq/common-all";
 import {
   PublishCLICommand,
+  PublishCLICommandCLIOpts,
   PublishCLICommandOpts,
   PublishCommands,
 } from "@dendronhq/dendron-cli";
+import { NextjsExportPodUtils } from "@dendronhq/pods-core";
+import fs from "fs-extra";
 import path from "path";
 import sinon, { stub } from "sinon";
+import { ENGINE_HOOKS } from "../../..";
 import { runEngineTestV5 } from "../../../engine";
-import fs from "fs-extra";
 
 export const runPublishCmd = ({
   cmd,
@@ -19,12 +23,23 @@ export const runPublishCmd = ({
   return cli.execute({ cmd, ...opts });
 };
 
-describe("init", () => {
+export const evalPublishCmd = ({
+  cmd,
+  ...opts
+}: {
+  cmd: PublishCommands;
+  cli?: PublishCLICommand;
+} & PublishCLICommandCLIOpts) => {
+  const cli = opts.cli ? opts.cli : new PublishCLICommand();
+  return cli.eval({ cmd, ...opts });
+};
+
+describe("WHEN run `dendron publish init`", () => {
   const cmd = PublishCommands.INIT;
   afterEach(() => {
     sinon.restore();
   });
-  test("ok", async () => {
+  test("THEN succeed", async () => {
     await runEngineTestV5(
       async ({ wsRoot }) => {
         const cli = new PublishCLICommand();
@@ -39,13 +54,13 @@ describe("init", () => {
   });
 });
 
-describe("build", () => {
+describe("WHEN run `dendron publish build`", () => {
   const cmd = PublishCommands.BUILD;
   afterEach(() => {
     sinon.restore();
   });
 
-  test("ok", async () => {
+  test("THEN succeed", async () => {
     jest.setTimeout(10000);
     await runEngineTestV5(
       async ({ wsRoot }) => {
@@ -57,5 +72,52 @@ describe("build", () => {
         expect,
       }
     );
+  });
+
+  describe("AND with invalid override key", () => {
+    test("THEN show error", async () => {
+      await runEngineTestV5(
+        async ({ wsRoot }) => {
+          const out = await evalPublishCmd({
+            cmd,
+            wsRoot,
+            overrides: "foo=bar",
+          });
+          expect(out?.error?.message).toEqual(
+            "bad key for override. foo is not a valid key"
+          );
+        },
+        {
+          expect,
+          preSetupHook: ENGINE_HOOKS.setupBasic,
+        }
+      );
+    });
+  });
+
+  describe("AND with siteUrl override", () => {
+    test.only("THEN update siteUrl", async () => {
+      await runEngineTestV5(
+        async ({ wsRoot }) => {
+          const siteUrlOverride = "http://foo.com";
+          await evalPublishCmd({
+            cmd,
+            wsRoot,
+            overrides: `siteUrl=${siteUrlOverride}`,
+          });
+          const dest = URI.file(path.join(wsRoot, ".next"));
+          const dataDir = path.join(wsRoot, ".next", "data");
+          expect(fs.existsSync(dataDir)).toBeTruthy();
+
+          const cpath = NextjsExportPodUtils.getDendronConfigPath(dest);
+          const config = fs.readJSONSync(cpath) as DendronConfig;
+          expect(config.site.siteUrl).toEqual(siteUrlOverride);
+        },
+        {
+          expect,
+          preSetupHook: ENGINE_HOOKS.setupBasic,
+        }
+      );
+    });
   });
 });

@@ -161,6 +161,7 @@ export class BuildUtils {
 
   // TODO: Change default back to Dendron
   static prepPluginPkg(target: ExtensionTarget = ExtensionTarget.NIGHTLY) {
+    console.log("Extension Target is " + target.toString());
     const pkgPath = path.join(this.getPluginRootPath(), "package.json");
     this.updatePkgMeta({
       pkgPath,

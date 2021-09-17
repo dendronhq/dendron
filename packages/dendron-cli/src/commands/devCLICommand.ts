@@ -36,11 +36,15 @@ type CommandOutput = Partial<{ error: DendronError; data: any }>;
 
 type BuildCmdOpts = {
   publishEndpoint: PublishEndpoint;
-  extensionTarget: ExtensionTarget;
-} & BumpVersionOpts;
+} & BumpVersionOpts
+  & PrepPluginOpts;
 
 type BumpVersionOpts = {
   upgradeType: SemverVersion;
+} & CommandCLIOpts;
+
+type PrepPluginOpts = {
+  extensionTarget: ExtensionTarget;
 } & CommandCLIOpts;
 
 export { CommandOpts as DevCLICommandOpts };
@@ -72,7 +76,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       describe: "where to publish",
       choices: Object.values(PublishEndpoint),
     });
-    args.option("extension target", {
+    args.option("extensionTarget", {
       describe: "extension name to publish in the marketplace",
       choices: Object.values(ExtensionTarget),
     });
@@ -169,6 +173,14 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           return { error: null };
         }
         case DevCommands.PREP_PLUGIN: {
+          if (!this.validatePrepPluginArgs(opts)) {
+            return {
+              error: new DendronError({
+                message: "missing options for prep_plugin command",
+              }),
+            };
+          }
+
           BuildUtils.prepPluginPkg(opts.extensionTarget);
           return { error: null };
         }
@@ -196,7 +208,6 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
         this.print("unknown error " + error2PlainObject(err));
       }
       return { error: err };
-    } finally {
     }
   }
 
@@ -278,6 +289,13 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
   validateBumpVersionArgs(opts: CommandOpts): opts is BumpVersionOpts {
     if (!opts.upgradeType) {
       return false;
+    }
+    return true;
+  }
+
+  validatePrepPluginArgs(opts: CommandOpts): opts is PrepPluginOpts {
+    if (opts.extensionTarget) {
+      return Object.values(ExtensionTarget).includes(opts.extensionTarget);
     }
     return true;
   }

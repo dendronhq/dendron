@@ -399,7 +399,7 @@ export class FileStorage implements DStore {
             });
           }
         });
-      } catch (err) {
+      } catch (err: any) {
         const error = error2PlainObject(err);
         this.logger.error({ error, noteFrom, message: "issue with backlinks" });
       }
@@ -422,7 +422,7 @@ export class FileStorage implements DStore {
           });
           noteFrom.links = noteFrom.links.concat(linkCandidates);
         }
-      } catch (err) {
+      } catch (err: any) {
         const error = error2PlainObject(err);
         this.logger.error({
           error,
@@ -508,7 +508,7 @@ export class FileStorage implements DStore {
             });
             cacheUpdates[n.fname].data.links = links;
             n.links = links;
-          } catch (err) {
+          } catch (err: any) {
             let error = err;
             if (!(err instanceof DendronError)) {
               error = new DendronError({
@@ -527,7 +527,7 @@ export class FileStorage implements DStore {
             });
             cacheUpdates[n.fname].data.anchors = anchors;
             n.anchors = anchors;
-          } catch (err) {
+          } catch (err: any) {
             let error = err;
             if (!(err instanceof DendronError)) {
               error = new DendronError({

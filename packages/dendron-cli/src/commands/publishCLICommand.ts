@@ -69,7 +69,10 @@ const getNextRoot = (wsRoot: string) => {
 };
 
 const isBuildOverrideKey = (key: string): key is keyof BuildOverrides => {
-  const allowedKeys = ["siteUrl"] as (keyof DendronSiteConfig)[];
+  const allowedKeys = [
+    "siteUrl",
+    "assetsPrefix",
+  ] as (keyof DendronSiteConfig)[];
   return allowedKeys.includes(key as any);
 };
 

@@ -66,7 +66,6 @@
     "express": "^4.17.1",
     "express-async-handler": "^1.1.4",
     "fs-extra": "^9.0.1",
-    "http-status-codes": "^2.1.4",
     "klaw": "^3.0.0",
     "lodash": "^4.17.20",
     "morgan": "^1.10.0",

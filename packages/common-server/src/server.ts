@@ -1,6 +1,5 @@
-import { error2PlainObject, RespV2 } from "@dendronhq/common-all";
+import { error2PlainObject, RespV2, StatusCodes } from "@dendronhq/common-all";
 import { Response } from "express";
-import { StatusCodes } from "http-status-codes";
 
 export class ExpressUtils {
   /**
@@ -21,8 +20,8 @@ export class ExpressUtils {
 
   /**
    * Set a standard response format to express rest clients based on RespV2
-   * @param expressResponse 
-   * @param dendronResponse 
+   * @param expressResponse
+   * @param dendronResponse
    */
   static setResponse(
     expressResponse: Response,

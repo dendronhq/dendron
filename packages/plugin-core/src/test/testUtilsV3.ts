@@ -71,7 +71,7 @@ export const DENDRON_REMOTE_VAULT = {
   },
 };
 
-type OnInitHook = (opts: WorkspaceOpts & EngineOpt) => Promise<void>;
+export type OnInitHook = (opts: WorkspaceOpts & EngineOpt) => Promise<void>;
 
 type PostSetupWorkspaceHook = (opts: WorkspaceOpts) => Promise<void>;
 

@@ -12,7 +12,6 @@ This should stay
 # Header to move
 this is getting moved
 
-also has an anchor that will get moved with it ^SuO3c4AZXUTl
 
 # Leave this alone
 

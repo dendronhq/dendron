@@ -67,8 +67,8 @@ suite("MoveHeader", function () {
           onInit: onInitFunc(async () => {
             const cmd = new MoveHeaderCommand();
             const out = await cmd.run({ dest: destNote });
-            expect(out!.origin.body).toContain("## Foo header");
-            expect(out!.dest!.body).toContain("## Foo header");
+            expect(out!.origin.body.includes("## Foo header")).toBeFalsy();
+            expect(out!.dest!.body.includes("## Foo header")).toBeTruthy();
             done();
           }),
         });
@@ -82,7 +82,9 @@ suite("MoveHeader", function () {
             const cmd = new MoveHeaderCommand();
             const out = await cmd.run({ dest: destNote });
             await new Promise((res) => setTimeout(res, 100));
-            expect(out!.updated[0].body).toContain("[[Foo|dest#foo-header]]");
+            expect(
+              out!.updated[0].body.includes("[[Foo|dest#foo-header]]")
+            ).toBeTruthy();
             done();
           }),
         });

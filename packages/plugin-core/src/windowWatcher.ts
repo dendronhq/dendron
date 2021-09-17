@@ -15,6 +15,10 @@ import { VSCodeUtils } from "./utils";
 import { sentryReportingCallback } from "./utils/analytics";
 import { getDWorkspace, getExtension } from "./workspace";
 
+const context = (scope: string) => {
+  const ROOT_CTX = "WindowWatcher";
+  return ROOT_CTX + ":" + scope;
+};
 export class WindowWatcher {
   private onDidChangeActiveTextEditorHandlers: ((
     e: TextEditor | undefined
@@ -155,13 +159,19 @@ export class WindowWatcher {
 
   private async onFirstOpen(editor: TextEditor) {
     Logger.info({
-      msg: "First open of note",
+      ctx: context("onFirstOpen"),
+      msg: "enter",
       fname: NoteUtils.uri2Fname(editor.document.uri),
     });
     this.moveCursorPastFrontmatter(editor);
     if (getDWorkspace().config.autoFoldFrontmatter) {
       await this.foldFrontmatter();
     }
+    Logger.info({
+      ctx: context("onFirstOpen"),
+      msg: "exit",
+      fname: NoteUtils.uri2Fname(editor.document.uri),
+    });
   }
 
   private moveCursorPastFrontmatter(editor: TextEditor) {

@@ -121,7 +121,7 @@ function MatchTitle(props: {
 
 /** Removes repeating newlines from the text. */
 function cleanWhitespace(text: string) {
-  return text.replaceAll(/\n\n/g, "");
+  return _.trim(text, "\n").replaceAll(/\n\n/g, "");
 }
 
 /** For a fuse.js match on a note, renders snippets from the note **body** with the matched parts highlighted.  */
@@ -135,56 +135,33 @@ function MatchBody(props: {
   const bodyMatches = props.matches
     .filter((match) => match.key === "body")
     .flatMap((match) => match.indices);
+  if (bodyMatches.length === 0)
+    return <>{body.slice(undefined, MAX_NOTE_SNIPPET_LENGTH)}</>;
 
-  let addedLength = 0;
-  let lastIndex = 0;
   const renderedBody: (String | JSX.Element)[] = [];
-  bodyMatches.forEach(([startIndex, endIndex], matchIndex) => {
-    // Avoid making this snippet part too long in case there are a lot of matches
-    if (addedLength > MAX_NOTE_SNIPPET_LENGTH) return;
-    // Add the part before the match as regular text
-    // Don't go further back than last part to avoid duplicating it
-    const beforeStart = _.max([
-      lastIndex,
-      startIndex - NOTE_SNIPPET_BEFORE_AFTER,
-    ]);
+  const [startIndex, endIndex] = bodyMatches[0];
 
-    renderedBody.push(cleanWhitespace(body.slice(beforeStart, startIndex)));
-    // Add the matched part as bold
-    renderedBody.push(
-      <span style={{ fontWeight: "bold" }}>
-        {cleanWhitespace(body.slice(startIndex, endIndex + 1))}
-      </span>
-    );
-    // Add the part after the match as regular text
-    // Don't go further than next part to avoid duplicating it
-    let afterEnd = endIndex + 1 + NOTE_SNIPPET_BEFORE_AFTER;
-    const next = bodyMatches[matchIndex + 1];
-    if (next && next[0] < afterEnd) afterEnd = next[0];
-    renderedBody.push(cleanWhitespace(body.slice(endIndex + 1, afterEnd)));
+  const beforeStart = _.max([0, startIndex - NOTE_SNIPPET_BEFORE_AFTER])!;
 
-    lastIndex = afterEnd + 1;
-    addedLength += lastIndex - startIndex;
+  // Add a ... part at the start, if we are not at the start of the note
+  renderedBody.push(<OmittedText after={0} before={beforeStart} body={body} />);
+  // Add the part before the match as regular text
+  renderedBody.push(cleanWhitespace(body.slice(beforeStart, startIndex)));
 
-    // Avoid making this snippet part too long in case there are a lot of matches
-    if (addedLength > MAX_NOTE_SNIPPET_LENGTH) return;
-
-    // Add a " ... " if:
-    // - there's a following match we're going to add
-    // - there's a gap between this and next match
-    if (next && next[0] !== afterEnd) {
-      renderedBody.push(
-        <OmittedText
-          after={lastIndex}
-          before={next[0] - NOTE_SNIPPET_BEFORE_AFTER}
-          body={body}
-        />
-      );
-    }
-  });
-
+  // Add the matched part as bold
   renderedBody.push(
-    <OmittedText after={lastIndex} before={body.length} body={body} />
+    <span style={{ fontWeight: "bold" }}>
+      {cleanWhitespace(body.slice(startIndex, endIndex + 1))}
+    </span>
+  );
+
+  // Add the part after the match as regular text
+  const afterEnd = endIndex + 1 + NOTE_SNIPPET_BEFORE_AFTER;
+  renderedBody.push(cleanWhitespace(body.slice(endIndex + 1, afterEnd)));
+
+  // Add a ... part at the end, if we're not at the end of the note
+  renderedBody.push(
+    <OmittedText after={afterEnd} before={body.length} body={body} />
   );
 
   return (
@@ -193,6 +170,7 @@ function MatchBody(props: {
         wordWrap: "break-word",
         whiteSpace: "pre-wrap",
         fontSize: "0.8rem",
+        marginLeft: "8px",
       }}
     >
       {renderedBody}

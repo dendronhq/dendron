@@ -59,7 +59,7 @@ suite("RefactorHiearchy", function () {
           return "proceed";
         };
         const resp = await new RefactorHierarchyCommandV2().run();
-        expect(resp.changed.length).toEqual(6);
+        expect(resp.changed.length).toEqual(7);
         const vault = vaults[0];
         const vpath = vault2Path({ vault, wsRoot });
         const notes = fs.readdirSync(vpath).join("");

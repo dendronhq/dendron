@@ -12,6 +12,7 @@ import { ENGINE_BULK_ADD_NOTES_PRESETS } from "./bulkAddNotes";
 import { ENGINE_RENDER_PRESETS } from "./render";
 import { ENGINE_WRITE_PRESETS, ENGINE_WRITE_PRESETS_MULTI } from "./write";
 import _ from "lodash";
+import { TestPresetEntryV4 } from "@dendronhq/common-test-utils";
 export { ENGINE_HOOKS, ENGINE_HOOKS_BASE, ENGINE_HOOKS_MULTI } from "./utils";
 export { ENGINE_RENAME_PRESETS };
 export { ENGINE_QUERY_PRESETS };
@@ -32,6 +33,9 @@ export const ENGINE_SERVER = {
   ENGINE_BULK_ADD_NOTES_PRESETS,
   ENGINE_RENDER_PRESETS,
 };
+
+type TestPresetEntry = TestPresetEntryV4;
+type TestPresetDict = { [key: string]: TestPresetEntry };
 
 /**
  * 
@@ -62,6 +66,20 @@ export const getPreset = ({
     throw Error(`no key ${key} found in ${presetName}`);
   }
   return out;
+};
+
+export const getPresetGroup = ({
+  presets,
+  presetName,
+  nodeType,
+}: {
+  presets: typeof ENGINE_PRESETS;
+  presetName: string;
+  nodeType: "SCHEMAS" | "NOTES";
+}) => {
+  const ent = _.find(presets, { name: presetName })!;
+  // @ts-ignore
+  return ent.presets[nodeType] as TestPresetDict;
 };
 
 export const ENGINE_PRESETS = [

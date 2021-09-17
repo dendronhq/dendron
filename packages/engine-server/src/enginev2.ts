@@ -590,7 +590,7 @@ export class DendronEngineV2 implements DEngine {
         error: null,
         data: resp,
       };
-    } catch (err) {
+    } catch (err: any) {
       let error = err;
       if (err instanceof DendronError) error = error2PlainObject(err);
       if (_.isUndefined(err.message)) err.message = "rename error";

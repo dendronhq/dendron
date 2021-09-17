@@ -8,6 +8,7 @@ import "antd/dist/antd.css";
 import type { AppProps } from "next/app";
 import React, { useState } from "react";
 import { ThemeSwitcherProvider } from "react-css-theme-switcher";
+import DendronGATracking from "../components/DendronGATracking";
 import DendronLayout from "../components/DendronLayout";
 import { combinedStore, useCombinedDispatch } from "../features";
 import { browserEngineSlice } from "../features/engine";
@@ -64,13 +65,15 @@ function DendronApp({ Component, pageProps }: AppProps) {
   logger.info({ ctx: "render" });
 
   return (
-    <DendronLayout {...noteData} dendronRouter={dendronRouter}>
-      <Component
-        {...pageProps}
-        notes={noteData}
-        dendronRouter={dendronRouter}
-      />
-    </DendronLayout>
+    <DendronGATracking>
+      <DendronLayout {...noteData} dendronRouter={dendronRouter}>
+        <Component
+          {...pageProps}
+          notes={noteData}
+          dendronRouter={dendronRouter}
+        />
+      </DendronLayout>
+    </DendronGATracking>
   );
 }
 

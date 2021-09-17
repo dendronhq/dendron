@@ -195,14 +195,6 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
   }
 
   async bumpVersion(opts: BumpVersionOpts) {
-    const currentVersion = BuildUtils.getCurrentVersion();
-    const nextVersion = BuildUtils.genNextVersion({
-      currentVersion,
-      upgradeType: opts.upgradeType,
-    });
-    this.print("bump 11ty...");
-    BuildUtils.bump11ty({ currentVersion, nextVersion });
-
     this.print("bump version...");
     LernaUtils.bumpVersion(opts.upgradeType);
   }

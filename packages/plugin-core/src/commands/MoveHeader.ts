@@ -33,16 +33,21 @@ import { EngineAPIService } from "../services/EngineAPIService";
 import { delayedUpdateDecorations } from "../features/windowDecorations";
 import { findReferences } from "../utils/md";
 
-type CommandInput = {} | undefined;
+type CommandInput =
+  | {
+      dest?: NoteProps;
+    }
+  | undefined;
 type CommandOpts = {
-  dest: NoteProps;
   origin: NoteProps;
   nodesToMove: Node[];
   modifiedOriginTree: Node;
   originProc: Processor;
   engine: EngineAPIService;
 } & CommandInput;
-type CommandOutput = CommandOpts;
+type CommandOutput = {
+  updated: NoteProps[];
+} & CommandOpts;
 
 export class MoveHeaderCommand extends BasicCommand<
   CommandOpts,
@@ -98,10 +103,11 @@ export class MoveHeaderCommand extends BasicCommand<
     }
   };
 
-  async gatherInputs(_opts: CommandInput): Promise<CommandOpts | undefined> {
+  async gatherInputs(opts: CommandInput): Promise<CommandOpts | undefined> {
     const engine = getEngine();
     const { editor, selection } = VSCodeUtils.getSelection();
-    if (!editor || !selection) throw this.headerNotSelectedError;
+    if (!editor) throw this.noActiveNoteError;
+    if (!selection) throw this.headerNotSelectedError;
 
     // const text = editor.document.getText();
     const line = editor.document.lineAt(selection.start.line).text;
@@ -167,6 +173,8 @@ export class MoveHeaderCommand extends BasicCommand<
       title: "Select note to move header to",
       placeholder: "note",
       provider: lookupProvider,
+      initialValue: opts?.dest ? opts.dest.fname : undefined,
+      nonInteractive: !_.isUndefined(opts?.dest),
     });
 
     return new Promise((resolve) => {
@@ -232,12 +240,12 @@ export class MoveHeaderCommand extends BasicCommand<
     });
 
     // append header to destination
-    const destProc = this.getProc(engine, dest);
-    const destTree = destProc.parse(dest.body);
+    const destProc = this.getProc(engine, dest!);
+    const destTree = destProc.parse(dest!.body);
     destTree.children = (destTree.children as Node[]).concat(nodesToMove);
     const modifiedDestContent = destProc.stringify(destTree);
-    dest.body = modifiedDestContent;
-    await engine.writeNote(dest, {
+    dest!.body = modifiedDestContent;
+    await engine.writeNote(dest!, {
       updateExisting: true,
     });
 
@@ -259,6 +267,7 @@ export class MoveHeaderCommand extends BasicCommand<
 
     const foundReferences = await findReferences(origin.fname);
     const { vaults, wsRoot, notes } = engine;
+    const updated: NoteProps[] = [];
     _.forEach(foundReferences, async (reference) => {
       const { location, isCandidate } = reference;
       // ignore candidate refs.
@@ -288,14 +297,15 @@ export class MoveHeaderCommand extends BasicCommand<
             node.value === origin.fname &&
             _.includes(anchorsToUpdateNames, node.data!.anchorHeader)
           ) {
-            node.value = dest.fname;
+            node.value = dest!.fname;
           }
         }
       });
       note.body = proc.stringify(tree);
-      await engine.writeNote(note, { updateExisting: true });
+      const writeResp = await engine.writeNote(note, { updateExisting: true });
+      updated.push(writeResp.data[0].note);
       return;
     });
-    return opts;
+    return { ...opts, updated };
   }
 }

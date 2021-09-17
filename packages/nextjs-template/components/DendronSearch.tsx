@@ -12,7 +12,7 @@ import {
   verifyNoteData,
 } from "../utils/types";
 import DendronSpinner from "./DendronSpinner";
-import _ from "lodash";
+import _, { before } from "lodash";
 
 /** For matching notes, only show this many characters for the note body snippet. */
 const MAX_NOTE_SNIPPET_LENGTH = 80;
@@ -79,9 +79,7 @@ function DendronSearchComponent(props: DendronPageWithNoteDataProps) {
                   >
                     {note.item.fname}
                   </span>
-                  <div className="search-summary">
-                    <MatchBody matches={note.matches} note={note.item} />
-                  </div>
+                  <MatchBody matches={note.matches} note={note.item} />
                 </div>
               </AutoComplete.Option>
             );
@@ -109,7 +107,7 @@ function MatchTitle(props: {
     renderedTitle.push(title.slice(lastIndex, startIndex));
     // Add the matched part as bold
     renderedTitle.push(
-      <span style={{ fontWeight: "bold" }}>
+      <span style={{ fontWeight: "bolder" }}>
         {title.slice(startIndex, endIndex + 1)}
       </span>
     );
@@ -119,6 +117,11 @@ function MatchTitle(props: {
   renderedTitle.push(title.slice(lastIndex, undefined));
 
   return <>{renderedTitle}</>;
+}
+
+/** Removes repeating newlines from the text. */
+function cleanWhitespace(text: string) {
+  return text.replaceAll(/\n\n/g, "");
 }
 
 /** For a fuse.js match on a note, renders snippets from the note **body** with the matched parts highlighted.  */
@@ -133,20 +136,24 @@ function MatchBody(props: {
     .filter((match) => match.key === "body")
     .flatMap((match) => match.indices);
 
+  let addedLength = 0;
   let lastIndex = 0;
   const renderedBody: (String | JSX.Element)[] = [];
   bodyMatches.forEach(([startIndex, endIndex], matchIndex) => {
+    // Avoid making this snippet part too long in case there are a lot of matches
+    if (addedLength > MAX_NOTE_SNIPPET_LENGTH) return;
     // Add the part before the match as regular text
     // Don't go further back than last part to avoid duplicating it
     const beforeStart = _.max([
       lastIndex,
       startIndex - NOTE_SNIPPET_BEFORE_AFTER,
     ]);
-    renderedBody.push(body.slice(beforeStart, startIndex));
+
+    renderedBody.push(cleanWhitespace(body.slice(beforeStart, startIndex)));
     // Add the matched part as bold
     renderedBody.push(
       <span style={{ fontWeight: "bold" }}>
-        {body.slice(startIndex, endIndex + 1)}
+        {cleanWhitespace(body.slice(startIndex, endIndex + 1))}
       </span>
     );
     // Add the part after the match as regular text
@@ -154,31 +161,54 @@ function MatchBody(props: {
     let afterEnd = endIndex + 1 + NOTE_SNIPPET_BEFORE_AFTER;
     const next = bodyMatches[matchIndex + 1];
     if (next && next[0] < afterEnd) afterEnd = next[0];
-    renderedBody.push(body.slice(endIndex + 1, afterEnd));
+    renderedBody.push(cleanWhitespace(body.slice(endIndex + 1, afterEnd)));
 
     lastIndex = afterEnd + 1;
+    addedLength += lastIndex - startIndex;
+
+    // Avoid making this snippet part too long in case there are a lot of matches
+    if (addedLength > MAX_NOTE_SNIPPET_LENGTH) return;
 
     // Add a " ... " if:
     // - there's a following match we're going to add
     // - there's a gap between this and next match
     if (next && next[0] !== afterEnd) {
-      if (
-        next[0] - NOTE_SNIPPET_BEFORE_AFTER - afterEnd - 1 >
-        OMITTED_PART_TEXT.length
-      ) {
-        // Only add " ... " if the gap is longer than the text of " ... "
-        renderedBody.push(
-          <span style={{ fontWeight: "lighter" }}>{OMITTED_PART_TEXT}</span>
-        );
-      } else {
-        // Otherwise, add the actual text since it's shorter to just add that
-        renderedBody.push(
-          body.slice(afterEnd + 1, next[0] - NOTE_SNIPPET_BEFORE_AFTER)
-        );
-        lastIndex = next[0] - NOTE_SNIPPET_BEFORE_AFTER + 1;
-      }
+      renderedBody.push(
+        <OmittedText
+          after={lastIndex}
+          before={next[0] - NOTE_SNIPPET_BEFORE_AFTER}
+          body={body}
+        />
+      );
     }
   });
 
-  return <>{renderedBody}</>;
+  renderedBody.push(
+    <OmittedText after={lastIndex} before={body.length} body={body} />
+  );
+
+  return (
+    <div
+      style={{
+        wordWrap: "break-word",
+        whiteSpace: "pre-wrap",
+        fontSize: "0.8rem",
+      }}
+    >
+      {renderedBody}
+    </div>
+  );
+}
+
+/** Shows a "..." part that replaces the part of text after `after` and before `before`. */
+function OmittedText(props: { after: number; before: number; body: string }) {
+  const { after, before, body } = props;
+  if (before <= after) return null; // sanity check
+  if (OMITTED_PART_TEXT.length >= before - after) {
+    // If the gap is smaller than the "..." text, just show the text in that gap instead
+    return <>{cleanWhitespace(body.slice(before, after))}</>;
+  } else {
+    // If the gap is bigger, then show the "..." text
+    return <span style={{ fontWeight: "lighter" }}>{OMITTED_PART_TEXT}</span>;
+  }
 }

@@ -83,10 +83,10 @@ export { DEngineClient, DVault, WorkspaceOpts };
  * @param opts
  * @returns
  */
-// @ts-ignore
-export async function createServer(opts: WorkspaceOpts) {
+export async function createServer(opts: WorkspaceOpts & { port?: number }) {
   return await new LaunchEngineServerCommand().enrichArgs({
     wsRoot: opts.wsRoot,
+    port: opts.port,
   });
 }
 
@@ -97,6 +97,16 @@ export async function createEngineFromServer(
   opts: WorkspaceOpts
 ): Promise<any> {
   const { engine, port } = await createServer(opts);
+  await engine.init();
+  return { engine, port };
+}
+
+export async function createEngineByConnectingToDebugServer(
+  opts: WorkspaceOpts
+): Promise<any> {
+  // debug port used by launch:engine-server:debug
+  const port = 3005;
+  const { engine } = await createServer({ ...opts, port });
   await engine.init();
   return { engine, port };
 }

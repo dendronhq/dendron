@@ -13,6 +13,7 @@ import yargs from "yargs";
 import { CLICommand } from "./base";
 import { ExportPodCLICommand } from "./exportPod";
 import { PodSource } from "./pod";
+import { SetupEngineCLIOpts } from "./utils";
 
 const $ = (cmd: string, opts?: any) => {
   return execa.commandSync(cmd, { shell: true, ...opts });
@@ -22,7 +23,7 @@ type CommandCLIOpts = {
   cmd: PublishCommands;
   wsRoot: string;
   dest?: string;
-};
+} & Pick<SetupEngineCLIOpts, "attach">;
 
 export enum PublishCommands {
   /**
@@ -39,7 +40,12 @@ type CommandOpts = CommandCLIOpts & Partial<BuildCmdOpts>;
 
 type CommandOutput = Partial<{ error: DendronError; data: any }>;
 
-type BuildCmdOpts = {} & CommandCLIOpts;
+type BuildCmdOpts = {
+  /**
+   * Use existing engine instead of spwaning a new one
+   */
+  attach?: boolean;
+} & CommandCLIOpts;
 
 export { CommandOpts as PublishCLICommandOpts };
 
@@ -69,6 +75,10 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       describe: "override where nextjs-template is located",
       type: "string",
     });
+    args.option("attach", {
+      describe: "use existing dendron engine instead of spawning a new one",
+      type: "boolean",
+    });
   }
 
   async enrichArgs(args: CommandCLIOpts): Promise<CommandOpts> {
@@ -90,7 +100,7 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
         default:
           return assertUnreachable();
       }
-    } catch (err) {
+    } catch (err: any) {
       this.L.error(err);
       if (err instanceof DendronError) {
         this.print(["status:", err.status, err.message].join(" "));
@@ -106,17 +116,17 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     wsRoot,
     stage,
     dest,
+    attach,
   }: {
-    wsRoot: string;
     stage: Stage;
-    dest?: string;
-  }) {
+  } & Pick<CommandOpts, "attach" | "dest" | "wsRoot">) {
     const cli = new ExportPodCLICommand();
     const opts = await cli.enrichArgs({
       podId: NextjsExportPod.id,
       podSource: PodSource.BUILTIN,
       wsRoot,
       config: `dest=${dest || getNextRoot(wsRoot)}`,
+      attach,
     });
     // if no siteUrl set, override with localhost
     if (stage !== "prod") {
@@ -140,9 +150,9 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     return { error: null };
   }
 
-  async build({ wsRoot, dest }: { wsRoot: string; dest?: string }) {
+  async build({ wsRoot, dest, attach }: BuildCmdOpts) {
     this.print(`generating metadata for publishing...`);
-    await this._buildNextData({ wsRoot, stage: getStage(), dest });
+    await this._buildNextData({ wsRoot, stage: getStage(), dest, attach });
     this.print(
       `to preview changes, run "cd ${getNextRoot(wsRoot)} && npx dev"`
     );

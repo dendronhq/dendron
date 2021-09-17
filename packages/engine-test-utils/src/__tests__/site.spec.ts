@@ -32,7 +32,7 @@ import {
   ENGINE_HOOKS_MULTI,
   SETUP_HOOK_KEYS,
 } from "../presets";
-import { checkString } from "../utils";
+import { checkString, TestUnifiedUtils } from "../utils";
 
 const basicSetup = (preSetupHook?: SetupHookFunction) => ({
   createEngine: createEngineFromEngine,
@@ -180,10 +180,11 @@ describe("SiteUtils", () => {
           vault: vaults[0],
           noteIndex,
         }).process(alpha.body);
-        await checkString(
-          resp.contents as string,
-          'images/not-sprouted.png&#x27;></img>">Beta</a></p>'
-        );
+        // beta not published
+        await TestUnifiedUtils.verifyPrivateLink({
+          contents: resp.contents as string,
+          value: "Beta",
+        });
       },
       {
         preSetupHook: (opts) =>

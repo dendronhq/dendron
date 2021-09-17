@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/nextjs-template",
-  "version": "0.58.4-alpha.1",
+  "version": "0.59.1",
   "license": "Apache-2.0",
   "private": true,
   "repository": {
@@ -16,12 +16,11 @@
     "export": "next build && next export",
     "sync:theme": "cp ../dendron-next-server/public/*theme.css public/",
     "postbuild": "next-sitemap --config sitemap.js"
-
   },
   "dependencies": {
     "@chakra-ui/react": "^1.6.7",
-    "@dendronhq/common-all": "^0.58.4-alpha.1",
-    "@dendronhq/common-frontend": "^0.58.4-alpha.1",
+    "@dendronhq/common-all": "^0.59.1",
+    "@dendronhq/common-frontend": "^0.59.1",
     "html-react-parser": "^1.2.8",
     "lodash": "^4.17.21",
     "next": "10.2.0",
@@ -30,6 +29,7 @@
     "react": "17.0.1",
     "react-css-theme-switcher": "0.2.3",
     "react-dom": "17.0.1",
+    "react-ga": "^3.3.0",
     "sass": "^1.39.0"
   },
   "devDependencies": {

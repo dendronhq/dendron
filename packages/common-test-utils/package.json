@@ -1,7 +1,7 @@
 {
   "name": "@dendronhq/common-test-utils",
   "private": true,
-  "version": "0.58.4-alpha.3",
+  "version": "0.59.1",
   "description": "",
   "license": "GPLv3",
   "repository": {
@@ -55,9 +55,9 @@
     "preset": "ts-jest"
   },
   "dependencies": {
-    "@dendronhq/common-all": "^0.58.4-alpha.1",
-    "@dendronhq/common-server": "^0.58.4-alpha.1",
-    "@dendronhq/pods-core": "^0.58.4-alpha.3",
+    "@dendronhq/common-all": "^0.59.1",
+    "@dendronhq/common-server": "^0.59.1",
+    "@dendronhq/pods-core": "^0.59.1",
     "@types/sinon": "^9.0.9",
     "fs-extra": "^9.0.1",
     "lodash": "^4.17.20",

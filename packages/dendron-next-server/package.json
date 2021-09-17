@@ -1,7 +1,7 @@
 {
   "name": "@dendronhq/dendron-next-server",
   "private": true,
-  "version": "0.58.4-alpha.3",
+  "version": "0.59.1",
   "license": "GPLv3",
   "repository": {
     "type": "git",
@@ -34,9 +34,9 @@
   "dependencies": {
     "@ant-design/icons": "^4.6.2",
     "@chakra-ui/react": "^1.0.0",
-    "@dendronhq/common-all": "^0.58.4-alpha.1",
-    "@dendronhq/common-frontend": "^0.58.4-alpha.1",
-    "@dendronhq/engine-server": "^0.58.4-alpha.3",
+    "@dendronhq/common-all": "^0.59.1",
+    "@dendronhq/common-frontend": "^0.59.1",
+    "@dendronhq/engine-server": "^0.59.1",
     "@emotion/react": "^11.1.1",
     "@emotion/styled": "^11.0.0",
     "@reduxjs/toolkit": "^1.5.1",

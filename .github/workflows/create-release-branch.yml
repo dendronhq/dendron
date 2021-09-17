@@ -1,4 +1,4 @@
-# Creates a release branch off of master every Thursday, 7 PM UTC
+# Creates a release branch off of master every Monday, 7 PM UTC
 name: Create Release Branch
 
 # See documentation on POSIX cron syntax here: https://docs.github.com/en/actions/reference/events-that-trigger-workflows#scheduled-events

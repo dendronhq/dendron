@@ -1,18 +1,19 @@
 import {
   assertUnreachable,
   DendronError,
-  error2PlainObject,
+  error2PlainObject
 } from "@dendronhq/common-all";
-import yargs from "yargs";
-import { CLICommand } from "./base";
-import path from "path";
 import fs from "fs-extra";
+import path from "path";
+import yargs from "yargs";
 import {
   BuildUtils,
+  ExtensionTarget,
   LernaUtils,
   PublishEndpoint,
-  SemverVersion,
+  SemverVersion
 } from "../utils/build";
+import { CLICommand } from "./base";
 
 type CommandCLIOpts = {
   cmd: DevCommands;
@@ -35,6 +36,7 @@ type CommandOutput = Partial<{ error: DendronError; data: any }>;
 
 type BuildCmdOpts = {
   publishEndpoint: PublishEndpoint;
+  extensionTarget: ExtensionTarget;
 } & BumpVersionOpts;
 
 type BumpVersionOpts = {
@@ -69,6 +71,10 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     args.option("publish endpoint", {
       describe: "where to publish",
       choices: Object.values(PublishEndpoint),
+    });
+    args.option("extension target", {
+      describe: "extension name to publish in the marketplace",
+      choices: Object.values(ExtensionTarget),
     });
   }
 
@@ -163,7 +169,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           return { error: null };
         }
         case DevCommands.PREP_PLUGIN: {
-          BuildUtils.prepPluginPkg();
+          BuildUtils.prepPluginPkg(opts.extensionTarget);
           return { error: null };
         }
         case DevCommands.PACKAGE_PLUGIN: {

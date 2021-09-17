@@ -159,14 +159,13 @@ export class BuildUtils {
     return $(`vsce package --yarn`, { cwd: this.getPluginRootPath() });
   }
 
-  static prepPluginPkg() {
-    // static prepPluginPkg(target: ExtensionTarget) {
+  // TODO: Change default back to Dendron
+  static prepPluginPkg(target: ExtensionTarget = ExtensionTarget.NIGHTLY) {
     const pkgPath = path.join(this.getPluginRootPath(), "package.json");
     this.updatePkgMeta({
       pkgPath,
-      //TODO: Make this configurable:
-      // name: target,
-      name: "nightly",
+      name: target.toString(),
+      displayName: target.toString(),
       main: "./dist/extension.js",
       repository: {
         url: "https://github.com/dendronhq/dendron.git",

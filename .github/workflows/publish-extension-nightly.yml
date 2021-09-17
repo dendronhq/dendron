@@ -1,13 +1,17 @@
-name: Create Prerelease Image
+# This workflow will build the prerelease plugin and publish it to the VS Code
+# Marketplace. This will NOT publish any packages to NPM. The plugin is also
+# uploaded to AWS S3
+name: Publish Extension - Nightly
 
-on:
-  push:
-    branches:
-      - prerelease/*
-
+# TODO: Switch to on push once testing is done.
+on: workflow_dispatch
+  # push:
+  #   branches:
+  #     - prerelease/*
+  
 jobs:
   build:
-    environment: plugin
+    environment: plugin # TODO: Switch to plugin-prod when that environment is ready.
     strategy:
       fail-fast: true
 
@@ -37,12 +41,13 @@ jobs:
 
       - name: Yarn Setup
         run: yarn setup
-
-      - name: Set Up Yarn Local Registry
-        run: yarn config set registry http://localhost:4873
       
-      - name: Set Up NPM Local Registry
-        run: npm set registry http://localhost:4873/
+      # TODO - verify it works fine without this (as it's already set in yarn build:patch:local:ci) and then delete
+      # - name: Set Up Yarn Local Registry
+      #   run: yarn config set registry http://localhost:4873
+      
+      # - name: Set Up NPM Local Registry
+      #   run: npm set registry http://localhost:4873/
       
       - name: Build the VSIX
         env: 
@@ -75,3 +80,22 @@ jobs:
           BUCKET=org-dendron-public-assets
           aws s3 cp --acl public-read ./packages/plugin-core/$package s3://$BUCKET/publish/$package
           echo https://$BUCKET.s3.amazonaws.com/publish/$package
+
+      - name: Create Package
+        run: |
+          DENDRON_CLI=./packages/dendron-cli/lib/bin/dendron-cli.js
+          LOG_LEVEL=info $DENDRON_CLI dev prep_plugin --extensionTarget nightly
+          LOG_LEVEL=info $DENDRON_CLI dev package_plugin
+
+      - name: Publish to VS Code Marketplace
+        env: 
+          VSCE_PAT: ${{ secrets.VSCODE_PUBLISH_PWD }}
+        run: yarn deploy:vscode
+
+      ## TODO: Check if additional setup is necessary on secrets.GITHUB_TOKEN; Check PR Title formatting
+      - name: Raise Pull Request back to master
+        uses: repo-sync/pull-request@v2
+        with:
+          destination_branch: "master"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          pr_title: "chore: Pulling prerelease/${{ env.DENDRON_RELEASE_VERSION }} into master"

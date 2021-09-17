@@ -54,6 +54,9 @@ const DECORATION_UPDATE_DELAY = 100;
  */
 const DEFAULT_EXPENSIVE_DECORATIONS_LIMIT = 4096;
 
+/** Notes that we warned the user about expensive decorations being disabled. Tracked to avoid repeatedly warning. */
+const WARNED_LONG_NOTE = new Set<string>();
+
 export const DECORATION_TYPE = {
   timestamp: window.createTextEditorDecorationType({}),
   blockAnchor: window.createTextEditorDecorationType({
@@ -117,13 +120,25 @@ export function delayedUpdateDecorations(
   }, updateDelay);
 }
 
+/** Warn the user that this note is too long for some expensive decorations. */
+function warnExpensiveDecorationsDisabled(note: NoteProps) {
+  if (WARNED_LONG_NOTE.has(note.id)) return;
+  WARNED_LONG_NOTE.add(note.id);
+  return window.showWarningMessage(
+    "This note is too long for some editor decorations, like tag colors. " +
+      "These have been disabled in the editor only. " +
+      "They will continue to function everywhere else."
+  );
+}
+
 export function updateDecorations(activeEditor: TextEditor) {
   const ctx = "updateDecorations";
   const text = activeEditor.document.getText();
   // Only show decorations & warnings for notes
+  let note: NoteProps | undefined;
   try {
-    if (_.isUndefined(VSCodeUtils.getNoteFromDocument(activeEditor.document)))
-      return {};
+    note = VSCodeUtils.getNoteFromDocument(activeEditor.document);
+    if (_.isUndefined(note)) return {};
   } catch (error) {
     Logger.info({
       ctx,
@@ -191,7 +206,17 @@ export function updateDecorations(activeEditor: TextEditor) {
       activeEditor.setDecorations(type, []);
     }
   }
-  return { allDecorations: activeDecorations, allWarnings };
+
+  let expensiveDecorationWarning: ReturnType<
+    typeof warnExpensiveDecorationsDisabled
+  >;
+  if (!doExpensiveDecorations)
+    expensiveDecorationWarning = warnExpensiveDecorationsDisabled(note);
+  return {
+    allDecorations: activeDecorations,
+    allWarnings,
+    expensiveDecorationWarning,
+  };
 }
 
 function decorateFrontmatter(

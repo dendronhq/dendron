@@ -138,8 +138,11 @@ export default function DendronLayout(
         }}
       >
         <DendronNotice show={getStage() === "dev"}>
-          [Development] Static generation occurs on every navigation. It might
-          be slow
+          NOTE: Pages are{" "}
+          <a href="https://wiki.dendron.so/notes/yYMuhi2TmTC63MysmtwqH.html#navigating-pages-is-slow-for-local-preview">
+            dynamically compiled in local preview
+          </a>{" "}
+          and will take a second to load.
         </DendronNotice>
         <Layout className="site-layout" style={{ flexDirection: "row" }}>
           <Layout

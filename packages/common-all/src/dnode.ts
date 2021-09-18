@@ -61,6 +61,7 @@ export class DNodeUtils {
       data,
       contentHash,
       vault,
+      image,
     } = _.defaults(opts, {
       updated: Time.now().toMillis(),
       created: Time.now().toMillis(),
@@ -73,6 +74,7 @@ export class DNodeUtils {
       body: "",
       data: {},
       fname: null,
+      image: null,
     });
     const title = opts.title || NoteUtils.genTitle(fname);
     const cleanProps: DNodeProps = {
@@ -91,6 +93,7 @@ export class DNodeUtils {
       body,
       data,
       contentHash,
+      image,
     };
 
     // don't include optional props
@@ -235,6 +238,7 @@ export class DNodeUtils {
       "schemaStub",
       "type",
       "tags",
+      "image",
     ];
     return _.omit(props, blacklist);
   }
@@ -822,15 +826,8 @@ export class NoteUtils {
   }
 
   static getSEOProps(note: NoteProps): NoteSEOProps {
-    const { title, created, updated } = note;
-    const {
-      excerpt,
-      canonicalUrl,
-      noindex,
-      canonicalBaseUrl,
-      image,
-      imageAlt,
-    } = note.custom;
+    const { title, created, updated, image } = note;
+    const { excerpt, canonicalUrl, noindex, canonicalBaseUrl } = note.custom;
     return {
       title,
       excerpt,
@@ -840,7 +837,6 @@ export class NoteUtils {
       canonicalUrl,
       noindex,
       image,
-      imageAlt,
     };
   }
 
@@ -958,6 +954,7 @@ export class NoteUtils {
       "children",
       "color",
       "tags",
+      "image",
     ]);
     const { custom: customProps } = cleanProps;
     const meta = { ...builtinProps, ...customProps };

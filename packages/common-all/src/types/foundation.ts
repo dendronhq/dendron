@@ -61,6 +61,7 @@ export type DLink = {
 
 export type DNodeType = "note" | "schema";
 export type DNodePointer = string;
+export type DNodeImage = { url: string; alt: string };
 
 export const REQUIRED_DNODEPROPS: (keyof DNodeProps)[] = [
   "id",
@@ -163,6 +164,9 @@ export type DNodeProps<T = any, TCustom = any> = {
 
   /** One or more frontmatter tags attached to this note. */
   tags?: string | string[];
+
+  /** To be used by social media platforms as a thumbnail/preview. */
+  image?: DNodeImage;
 };
 
 export type SchemaData = {
@@ -183,8 +187,7 @@ export type NoteSEOProps = {
   updated: number;
   created: number;
   excerpt?: string;
-  image?: string;
-  imageAlt?: string;
+  image?: DNodeImage;
   /**
    * Use as root canonical url for all published notes
    */

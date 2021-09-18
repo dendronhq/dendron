@@ -61,7 +61,7 @@ describe("WHEN run `dendron publish build`", () => {
   });
 
   test("THEN succeed", async () => {
-    jest.setTimeout(10000);
+    jest.setTimeout(15000);
     await runEngineTestV5(
       async ({ wsRoot }) => {
         await runPublishCmd({ cmd, wsRoot });
@@ -96,7 +96,7 @@ describe("WHEN run `dendron publish build`", () => {
   });
 
   describe("AND with siteUrl override", () => {
-    test.only("THEN update siteUrl", async () => {
+    test("THEN update siteUrl", async () => {
       await runEngineTestV5(
         async ({ wsRoot }) => {
           const siteUrlOverride = "http://foo.com";

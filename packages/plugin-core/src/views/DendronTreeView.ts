@@ -105,8 +105,7 @@ export class EngineNoteProvider implements vscode.TreeDataProvider<string> {
     return this.tree[id];
   }
 
-  // eslint-disable-next-line no-undef -- eslint does not recognize `Thenable`
-  getChildren(id?: string): Thenable<string[]> {
+  async getChildren(id?: string) {
     const ctx = "TreeView:getChildren";
     Logger.debug({ ctx, id });
     const { engine } = getDWorkspace();
@@ -120,12 +119,14 @@ export class EngineNoteProvider implements vscode.TreeDataProvider<string> {
       this.sortChildren(children, engine.notes);
       return Promise.resolve(children);
     } else {
-      Logger.info({ ctx, msg: "reconstructing tree" });
-      return Promise.all(
+      Logger.info({ ctx, msg: "reconstructing tree: enter" });
+      const out = await Promise.all(
         roots.flatMap(
           async (root) => (await this.parseTree(root, engine.notes)).id
         )
       );
+      Logger.info({ ctx, msg: "reconstructing tree: exit" });
+      return out;
     }
   }
 

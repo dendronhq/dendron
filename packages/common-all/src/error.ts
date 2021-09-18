@@ -1,3 +1,4 @@
+import { StatusCodes } from "http-status-codes";
 import _ from "lodash";
 import { ERROR_SEVERITY, ERROR_STATUS } from "./constants";
 
@@ -18,7 +19,7 @@ export type DendronErrorProps = {
   /**
    * Optional HTTP status code for error
    */
-  code?: number;
+  code?: StatusCodes;
   /**
    * Custom status errors
    */

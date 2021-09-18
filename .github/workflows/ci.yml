@@ -11,7 +11,7 @@ on:
       - kevin-*/*
   pull_request:
     branches:
-      - master
+      - "*"
 
 jobs:
   test:

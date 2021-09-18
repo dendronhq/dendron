@@ -48,6 +48,7 @@ import {
   NullCache,
   LruCache,
   milliseconds,
+  StatusCodes,
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -62,7 +63,6 @@ import { FileStorage } from "./drivers/file/storev2";
 import { LinkUtils, MDUtilsV5, ProcFlavor } from "./markdown";
 import { AnchorUtils, RemarkUtils } from "./markdown/remark/utils";
 import { HookUtils } from "./topics/hooks";
-import { StatusCodes } from "http-status-codes";
 
 type CreateStoreFunc = (engine: DEngineClient) => DStore;
 type DendronEngineOptsV2 = {
@@ -487,7 +487,7 @@ export class DendronEngineV2 implements DEngine {
         error: DendronError.createFromStatus({
           status: ERROR_STATUS.INVALID_STATE,
           message: `${id} does not exist`,
-          code: StatusCodes.BAD_REQUEST
+          code: StatusCodes.BAD_REQUEST,
         }),
       });
     }
@@ -590,7 +590,7 @@ export class DendronEngineV2 implements DEngine {
         error: null,
         data: resp,
       };
-    } catch (err) {
+    } catch (err: any) {
       let error = err;
       if (err instanceof DendronError) error = error2PlainObject(err);
       if (_.isUndefined(err.message)) err.message = "rename error";

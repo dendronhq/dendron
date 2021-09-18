@@ -5,6 +5,7 @@ import {
   NoteProps,
   NotePropsDict,
   NoteUtils,
+  createSerializedFuseNoteIndex,
 } from "@dendronhq/common-all";
 import { MDUtilsV5, ProcFlavor, SiteUtils } from "@dendronhq/engine-server";
 import { JSONSchemaType } from "ajv";
@@ -272,6 +273,11 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
       encoding: "utf8",
       spaces: 2,
     });
+
+    // Generate full text search data
+    const fuseDstPath = path.join(podDstDir, "fuse.json");
+    const fuseIndex = createSerializedFuseNoteIndex(publishedNotes);
+    fs.writeJsonSync(fuseDstPath, fuseIndex);
 
     this._writeEnvFile({ siteConfig, dest });
 

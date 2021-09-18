@@ -236,7 +236,7 @@ const getLinks = ({
       type: LinkUtils.astType2DLinkType(noteRef.type),
       from: NoteUtils.toNoteLoc(note),
       value: noteRef.data.link.from.fname,
-      // not sure why typescript doesn't recognize the position, but I can confirm it exists in the debugger
+      // not sure why typescript doesn't recognize the position, but I can confirm it exists
       position: noteRef.position as Position,
       xvault: !_.isUndefined(noteRef.data.link.data.vaultName),
       // TODO: error if vault not found

@@ -9,6 +9,8 @@ import { DendronLookup } from "./DendronLookup";
 import { FooterText } from "./DendronNoteFooter";
 import DendronTreeMenu from "./DendronTreeMenu";
 import { DendronSearch } from "./DendronSearch";
+import { DendronNotice } from "./DendronNotice";
+import { getStage } from "@dendronhq/common-all";
 
 const { Header, Content, Sider, Footer } = Layout;
 const { LAYOUT, HEADER, SIDER } = DENDRON_STYLE_CONSTANTS;
@@ -133,27 +135,32 @@ export default function DendronLayout(
         className="site-layout"
         style={{
           marginTop: 64,
-          flexDirection: "row",
         }}
       >
-        <Layout
-          className="site-layout-sidebar"
-          style={{
-            flex: "0 0 auto",
-            width: `calc((100% - ${LAYOUT.BREAKPOINTS.lg}) / 2 + ${
-              isCollapsed ? SIDER.COLLAPSED_WIDTH : SIDER.WIDTH
-            }px)`,
-            paddingLeft: `calc((100% - ${LAYOUT.BREAKPOINTS.lg}) / 2)`,
-            minWidth: isCollapsed ? SIDER.COLLAPSED_WIDTH : SIDER.WIDTH,
-          }}
-        >
-          {sidebar}
-        </Layout>
-        <Layout
-          className="side-layout-main"
-          style={{ maxWidth: LAYOUT.CONTENT_MAX_WIDTH }}
-        >
-          {content}
+        <DendronNotice show={getStage() === "dev"}>
+          [Development] Static generation occurs on every navigation. It might
+          be slow
+        </DendronNotice>
+        <Layout className="site-layout" style={{ flexDirection: "row" }}>
+          <Layout
+            className="site-layout-sidebar"
+            style={{
+              flex: "0 0 auto",
+              width: `calc((100% - ${LAYOUT.BREAKPOINTS.lg}) / 2 + ${
+                isCollapsed ? SIDER.COLLAPSED_WIDTH : SIDER.WIDTH
+              }px)`,
+              paddingLeft: `calc((100% - ${LAYOUT.BREAKPOINTS.lg}) / 2)`,
+              minWidth: isCollapsed ? SIDER.COLLAPSED_WIDTH : SIDER.WIDTH,
+            }}
+          >
+            {sidebar}
+          </Layout>
+          <Layout
+            className="side-layout-main"
+            style={{ maxWidth: LAYOUT.CONTENT_MAX_WIDTH }}
+          >
+            {content}
+          </Layout>
         </Layout>
       </Layout>
     </Layout>

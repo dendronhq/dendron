@@ -6,9 +6,9 @@ import {
 } from "@dendronhq/common-frontend";
 import "antd/dist/antd.css";
 import type { AppProps } from "next/app";
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
 import { ThemeSwitcherProvider } from "react-css-theme-switcher";
-import DendronGATracking from "../components/DendronGATracking";
+import { useDendronGATracking } from "../components/DendronGATracking";
 import DendronLayout from "../components/DendronLayout";
 import { combinedStore, useCombinedDispatch } from "../features";
 import { browserEngineSlice } from "../features/engine";
@@ -24,16 +24,12 @@ const themes = {
   light: getAssetUrl(`/light-theme.css`),
 };
 
-function AppContainer({ Component, pageProps, router }: AppProps) {
+function AppContainer(appProps: AppProps) {
   const defaultTheme = "light";
   return (
     <Provider store={combinedStore}>
       <ThemeSwitcherProvider themeMap={themes} defaultTheme={defaultTheme}>
-        <DendronApp
-          Component={Component}
-          pageProps={pageProps}
-          router={router}
-        />
+        <DendronApp {...appProps} />
       </ThemeSwitcherProvider>
     </Provider>
   );
@@ -44,36 +40,35 @@ function DendronApp({ Component, pageProps }: AppProps) {
   const logger = createLogger("App");
   const dendronRouter = useDendronRouter();
   const dispatch = useCombinedDispatch();
+  useDendronGATracking();
 
-  React.useEffect(() => {
-    setLogLevel("INFO");
-    logger.info({ ctx: "fetchNotes:pre" });
-    fetchNotes().then((data) => {
+  useEffect(() => {
+    (async () => {
+      setLogLevel("INFO");
+      logger.info({ ctx: "fetchNotes:pre" });
+      const data = await fetchNotes();
       logger.info({ ctx: "fetchNotes:got-data" });
       setNoteData(data);
       batch(() => {
         dispatch(browserEngineSlice.actions.setNotes(data.notes));
         dispatch(browserEngineSlice.actions.setNoteIndex(data.noteIndex));
       });
-    });
-    fetchConfig().then((data) => {
+      const config = await fetchConfig();
       logger.info({ ctx: "fetchConfig:got-data" });
-      dispatch(browserEngineSlice.actions.setConfig(data));
-    });
+      dispatch(browserEngineSlice.actions.setConfig(config));
+    })();
   }, []);
 
   logger.info({ ctx: "render" });
 
   return (
-    <DendronGATracking>
-      <DendronLayout {...noteData} dendronRouter={dendronRouter}>
-        <Component
-          {...pageProps}
-          notes={noteData}
-          dendronRouter={dendronRouter}
-        />
-      </DendronLayout>
-    </DendronGATracking>
+    <DendronLayout {...noteData} dendronRouter={dendronRouter}>
+      <Component
+        {...pageProps}
+        notes={noteData}
+        dendronRouter={dendronRouter}
+      />
+    </DendronLayout>
   );
 }
 

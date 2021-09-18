@@ -46,6 +46,7 @@ describe("build", () => {
   });
 
   test("ok", async () => {
+    jest.setTimeout(10000);
     await runEngineTestV5(
       async ({ wsRoot }) => {
         await runPublishCmd({ cmd, wsRoot });

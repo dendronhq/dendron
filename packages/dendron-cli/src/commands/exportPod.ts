@@ -1,6 +1,7 @@
+import { DendronError } from "@dendronhq/common-all";
 import { getAllExportPods } from "@dendronhq/pods-core";
 import yargs from "yargs";
-import { CLICommand } from "./base";
+import { CLICommand, CommandCommonProps } from "./base";
 import { enrichPodArgs, PodCLIOpts, setupPodArgs } from "./pod";
 import { setupEngineArgs, SetupEngineCLIOpts, SetupEngineResp } from "./utils";
 
@@ -11,9 +12,10 @@ type CommandCLIOpts = {} & SetupEngineCLIOpts & PodCLIOpts;
 type CommandOpts = CommandCLIOpts & {
   podClass: any;
   config: any;
-} & SetupEngineResp;
+} & SetupEngineResp &
+  CommandCommonProps;
 
-type CommandOutput = void;
+type CommandOutput = CommandCommonProps;
 
 export class ExportPodCLICommand extends CLICommand<
   CommandOpts,
@@ -40,19 +42,31 @@ export class ExportPodCLICommand extends CLICommand<
     return getAllExportPods();
   }
 
-  async execute(opts: CommandOpts) {
-    const { podClass: PodClass, config, wsRoot, engine, server } = opts;
+  async execute(opts: CommandOpts): Promise<CommandOutput> {
+    const {
+      podClass: PodClass,
+      config,
+      wsRoot,
+      engine,
+      server,
+      serverSockets,
+    } = opts;
     const vaults = engine.vaults;
     const pod = new PodClass();
     // eslint-disable-next-line no-console
     console.log("running pod...");
     await pod.execute({ wsRoot, config, engine, vaults });
-    server.close((err: any) => {
-      if (err) {
-        this.L.error({ msg: "error closing", payload: err });
-      }
+    return new Promise((resolve) => {
+      server.close((err: any) => {
+        // close outstanding connections
+        serverSockets?.forEach((socket) => socket.destroy());
+        if (err) {
+          return resolve({
+            error: new DendronError({ message: "error closing", payload: err }),
+          });
+        }
+        resolve({ error: undefined });
+      });
     });
-    // eslint-disable-next-line no-console
-    console.log("done");
   }
 }

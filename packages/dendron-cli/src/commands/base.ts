@@ -6,12 +6,18 @@ import yargs from "yargs";
 
 type BaseCommandOpts = { quiet?: boolean };
 
-type CommandCommonProps = {
+export type CommandCommonProps = {
   error?: DendronError;
 };
 
 export abstract class BaseCommand<
+  /**
+   * These are options that are passed to `command.execute`
+   */
   TOpts extends CommandCommonProps = CommandCommonProps,
+  /**
+   * This is the output returned by `command.execute`
+   */
   TOut extends CommandCommonProps = CommandCommonProps
 > {
   public L: ReturnType<typeof createLogger>;
@@ -55,6 +61,10 @@ export abstract class CLICommand<
     return yargs.command(this.name, this.desc, this.buildArgs, this.eval);
   }
 
+  /**
+   * Converts CLI flags into {@link TOpts}
+   * @param args
+   */
   abstract enrichArgs(args: any): Promise<TOpts>;
 
   eval = async (args: any) => {

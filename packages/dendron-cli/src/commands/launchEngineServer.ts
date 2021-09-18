@@ -5,13 +5,15 @@ import {
   WorkspaceService,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
+import { Socket } from "net";
 import yargs from "yargs";
-import { CLICommand } from "./base";
+import { CLICommand, CommandCommonProps } from "./base";
 
-type CommandOutput = { port: number; server: any };
+type CommandOutput = { port: number; server: any } & CommandCommonProps;
 type CommandOpts = Required<Omit<CommandCLIOpts, keyof CommandCLIOnlyOpts>> & {
   server: any;
-};
+  serverSockets?: Set<Socket>;
+} & CommandCommonProps;
 type CommandCLIOnlyOpts = {
   /**
    *
@@ -64,7 +66,11 @@ export class LaunchEngineServerCommand extends CLICommand<
     const ws = new WorkspaceService({ wsRoot });
     const { vaults, dev } = ws.config;
     const vaultPaths = vaults.map((v) => resolvePath(v.fsPath, wsRoot));
-    const { port: _port, server } = await launchv2({
+    const {
+      port: _port,
+      server,
+      serverSockets,
+    } = await launchv2({
       port,
       logPath: process.env["LOG_DST"],
       logLevel: (process.env["LOG_LEVEL"] as LogLvl) || "error",
@@ -93,6 +99,7 @@ export class LaunchEngineServerCommand extends CLICommand<
       vaults: vaultPaths,
       port: _port,
       server,
+      serverSockets,
     };
   }
 

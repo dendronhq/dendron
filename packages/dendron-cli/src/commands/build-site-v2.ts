@@ -5,7 +5,7 @@ import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import yargs from "yargs";
-import { CLICommand } from "./base";
+import { CLICommand, CommandCommonProps } from "./base";
 import { setupEngine, setupEngineArgs } from "./utils";
 
 type CommandCLIOpts = {
@@ -25,8 +25,8 @@ type CommandOpts = CommandCLIOpts & {
   compile?: any;
   server: any;
   eleventy?: any;
-};
-type CommandOutput = {};
+} & CommandCommonProps;
+type CommandOutput = CommandCommonProps;
 
 export { CommandOpts as BuildSiteV2CLICommandOpts };
 export { CommandCLIOpts as BuildSiteV2CLICommandCliOpts };

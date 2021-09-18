@@ -4,6 +4,7 @@ import {
 } from "@dendronhq/common-test-utils";
 import {
   DendronASTDest,
+  MDUtilsV5,
   Processor,
   ProcFlavor,
 } from "@dendronhq/engine-server";
@@ -276,5 +277,14 @@ describe("MDUtils.proc", () => {
       preSetupHook: testCase.preSetupHook,
       createEngine: createEngineFromServer,
     });
+  });
+
+  test("MDUtilsV5 can get logger from proc", () => {
+    const proc = MDUtilsV5.procRemarkParseNoData(
+      { flavor: ProcFlavor.REGULAR },
+      { dest: DendronASTDest.MD_REGULAR }
+    );
+    const logger = MDUtilsV5.getLogger(proc);
+    expect(logger).toBeTruthy();
   });
 });

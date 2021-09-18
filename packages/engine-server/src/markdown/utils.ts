@@ -60,6 +60,7 @@ import {
 import { hashtags } from "./remark/hashtag";
 import { userTags } from "./remark/userTags";
 import { extendedImage } from "./remark/extendedImage";
+import { createLogger } from "@dendronhq/common-server";
 
 const toString = require("mdast-util-to-string");
 export { nunjucks };
@@ -252,8 +253,10 @@ export class MDUtilsV4 {
   }
 
   static setDendronData(proc: Processor, data: Partial<DendronASTData>) {
-    const _data = proc.data("dendron") as DendronASTData;
-    return proc.data("dendron", { ..._data, ...data });
+    const _data = { ...(proc.data("dendron") as DendronASTData), ...data };
+    if (_.isUndefined(_data.logger))
+      _data.logger = createLogger("processor V4");
+    return proc.data("dendron", _data);
   }
 
   static getEngineFromProc(proc: Unified.Processor) {

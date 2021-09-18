@@ -8,6 +8,7 @@ import {
   NotePropsDict,
   NoteUtils,
 } from "@dendronhq/common-all";
+import { DLogger, createLogger } from "@dendronhq/common-server";
 // @ts-ignore
 import rehypePrism from "@mapbox/rehype-prism";
 // @ts-ignore
@@ -141,6 +142,8 @@ export type ProcDataFullV5 = {
    * Keep track of current note ref level
    */
   noteRefLvl: number;
+  /** Some plugins can use this to log things. Automatically created if one is not provided. */
+  logger: DLogger;
 };
 
 function checkProps({
@@ -184,6 +187,16 @@ export class MDUtilsV5 {
     return note;
   }
 
+  /** Get a logger to output logs to. The logger may not always be available depending on the setup.
+   *
+   * ```ts
+   * MDUtilsV5.getLogger(proc)?.error({ctx, msg: "Problem when parsing!"})
+   * ```
+   */
+  static getLogger(proc: Processor) {
+    return this.getProcData(proc).logger;
+  }
+
   static getProcData(proc: Processor): ProcDataFullV5 {
     let _data = proc.data("dendronProcDatav5") as ProcDataFullV5;
 
@@ -198,12 +211,14 @@ export class MDUtilsV5 {
   }
 
   static setProcData(proc: Processor, opts: Partial<ProcDataFullV5>) {
-    const _data = proc.data("dendronProcDatav5") as ProcDataFullV5;
+    let _data = proc.data("dendronProcDatav5") as ProcDataFullV5;
     // TODO: for backwards compatibility
     MDUtilsV4.setProcOpts(proc, opts);
     MDUtilsV4.setDendronData(proc, opts);
     const notes = _.isUndefined(opts.notes) ? opts?.engine?.notes : opts.notes;
-    return proc.data("dendronProcDatav5", { ..._data, ...opts, notes });
+    _data = { ..._data, ...opts, notes };
+    if (_.isUndefined(_data.logger)) _data.logger = createLogger("processor");
+    return proc.data("dendronProcDatav5", _data);
   }
 
   static setProcOpts(proc: Processor, opts: ProcOptsV5) {
@@ -293,8 +308,7 @@ export class MDUtilsV5 {
           // add additional plugins
           proc = proc.use(dendronPub, {
             insertTitle: shouldInsertTitle,
-            transformNoPublish:
-              opts.flavor === ProcFlavor.PUBLISHING ? true : false,
+            transformNoPublish: opts.flavor === ProcFlavor.PUBLISHING,
           });
           if (data.config?.useKatex) {
             proc = proc.use(math);
@@ -345,6 +359,13 @@ export class MDUtilsV5 {
         break;
       }
       case ProcMode.NO_DATA:
+        // There is no guarantee that data exists, but set it anyway if we have it.
+        if (data) {
+          // backwards compatibility, default to v4 values
+          data = _.defaults(MDUtilsV4.getDendronData(proc), data);
+          this.setProcData(proc, data as ProcDataFullV5);
+          if (data.engine) MDUtilsV4.setEngine(proc, data.engine);
+        }
         break;
       default:
         assertUnreachable();

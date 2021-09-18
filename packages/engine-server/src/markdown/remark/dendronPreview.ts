@@ -1,5 +1,5 @@
 import { APIUtils, AssetGetRequest } from "@dendronhq/common-all";
-import { createLogger, vault2Path } from "@dendronhq/common-server";
+import { vault2Path } from "@dendronhq/common-server";
 import _ from "lodash";
 import { Image } from "mdast";
 import path from "path";
@@ -30,17 +30,23 @@ function handleImage({
   useFullPathUrl?: boolean;
 }) {
   const ctx = "handleImage";
-  const logger = createLogger("handleImage");
   // ignore web images
   if (_.some(["http://", "https://"], (ent) => node.url.startsWith(ent))) {
-    logger.info({ ctx, url: node.url });
+    MDUtilsV5.getLogger(proc).info({ ctx, url: node.url });
     return;
   }
   // assume that the path is relative to vault
   const { wsRoot, vault } = MDUtilsV5.getProcData(proc);
   const fpath = path.join(vault2Path({ vault, wsRoot }), node.url);
   if (useFullPathUrl === true) {
-    logger.info({ ctx, wsRoot, vault, url: node.url, fpath, useFullPathUrl });
+    MDUtilsV5.getLogger(proc).info({
+      ctx,
+      wsRoot,
+      vault,
+      url: node.url,
+      fpath,
+      useFullPathUrl,
+    });
     node.url = fpath;
     return;
   }
@@ -51,7 +57,7 @@ function handleImage({
     ws: wsRoot,
   };
   node.url = APIUtils.genUrlWithQS({ url, params });
-  logger.info({
+  MDUtilsV5.getLogger(proc).info({
     ctx,
     url: node.url,
     useFullPathUrl,

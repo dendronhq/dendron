@@ -5,6 +5,7 @@ import {
   DVault,
   NoteProps,
 } from "@dendronhq/common-all";
+import { DLogger } from "@dendronhq/common-server";
 import { Heading, Image, Parent, Root } from "mdast";
 import { Processor } from "unified";
 import { DendronPubOpts } from "./remark/dendronPub";
@@ -74,6 +75,7 @@ export type DendronASTData = {
   config: DendronConfig;
   overrides?: Partial<DendronPubOpts>;
   shouldApplyPublishRules?: boolean;
+  logger?: DLogger;
   /**
    * Inidicate that we are currently inside a note ref
    */

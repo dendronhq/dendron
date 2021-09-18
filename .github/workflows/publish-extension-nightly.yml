@@ -4,9 +4,10 @@
 name: Publish Extension - Nightly
 
 # TODO: Switch to on push once testing is done.
-on: workflow_dispatch
-  # push:
-  #   branches:
+# on: workflow_dispatch
+  push:
+    branches:
+      - jy-test-branch
   #     - prerelease/*
   
 jobs:

@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/nextjs-template",
-  "version": "0.59.2",
+  "version": "0.59.3-alpha.0",
   "license": "Apache-2.0",
   "private": true,
   "repository": {
@@ -19,8 +19,8 @@
   },
   "dependencies": {
     "@chakra-ui/react": "^1.6.7",
-    "@dendronhq/common-all": "^0.59.2",
-    "@dendronhq/common-frontend": "^0.59.2",
+    "@dendronhq/common-all": "^0.59.3-alpha.0",
+    "@dendronhq/common-frontend": "^0.59.3-alpha.0",
     "html-react-parser": "^1.2.8",
     "lodash": "^4.17.21",
     "next": "10.2.0",

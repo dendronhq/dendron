@@ -1,7 +1,8 @@
-const _ = require("lodash");
-const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer");
+const withBundleAnalyzer = require("@next/bundle-analyzer")({
+  enabled: process.env.ANALYZE === "true",
+});
 
-module.exports = (phase) => {
+module.exports = (phase, defaultConfig) => {
   const env = {
     STAGE: process.env.STAGE || "dev",
     LOCAL: JSON.stringify(process.env["LOCAL"] === "true"),
@@ -12,6 +13,7 @@ module.exports = (phase) => {
    * @type {import('next').NextConfig}
    */
   const nextConfig = {
+    ...defaultConfig,
     env,
     // support the dev server to allow CORS
     async headers() {
@@ -36,25 +38,16 @@ module.exports = (phase) => {
       // your project has ESLint errors.
       ignoreDuringBuilds: true,
     },
-    // webpack5: false,
     webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
-      config.plugins.push(new webpack.IgnorePlugin(/\/__tests__\//));
-      if (env.STAGE === "dev") {
-        config.optimization.minimize = false;
-      }
-      // config.node = {
-      //   ...config.node,
-      //   fs: "empty",
-      //   tls: "empty",
-      //   net: "empty",
-      //   "cross-spawn": "empty",
-      //   child_process: "empty",
-      // };
-      // Important: return the modified config
-
-      return config;
+      return {
+        ...config,
+        plugins: [...config.plugins, new webpack.IgnorePlugin(/\/__tests__\//)],
+        optimization: {
+          minimize: env.STAGE === "dev" ? false : config.optimization.minimize,
+        },
+      };
     },
   };
 
-  return nextConfig;
+  return withBundleAnalyzer(nextConfig);
 };

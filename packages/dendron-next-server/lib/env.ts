@@ -17,5 +17,5 @@ export const getWsAndPort = () => {
   const { port, ws } = querystring.parse(
       window.location.search.slice(1)
   ) as { port: string; ws: string };
-  return {port: parseInt(port), ws}
+  return {port: parseInt(port, 10), ws}
 }

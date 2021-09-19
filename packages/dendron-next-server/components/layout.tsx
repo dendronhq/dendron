@@ -16,9 +16,7 @@ export default function Layout({ children }: Props) {
         <meta name="description" content="Dendron" />
         <meta
           property="og:image"
-          content={
-            "https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/logo-256.png"
-          }
+          content="https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/logo-256.png"
         />
         <meta name="og:title" content={siteTitle} />
         <meta name="twitter:card" content="summary_large_image" />

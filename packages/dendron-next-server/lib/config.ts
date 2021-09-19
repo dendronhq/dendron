@@ -20,7 +20,7 @@ type API_REMOTE_KEY =  keyof typeof API_REMOTE_PATH_MAP;;
 
 export function api(key: keyof DEngineClient): string {
   const port = process.env.ENGINE_ENDPOINT_PORT;
-  const suffix = port ? APIUtils.getLocalEndpoint(parseInt(port)): ``;
+  const suffix = port ? APIUtils.getLocalEndpoint(parseInt(port, 10)): ``;
   return suffix + API_PATH_MAP[key]
 }
 

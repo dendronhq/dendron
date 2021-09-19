@@ -61,7 +61,6 @@ export class DNodeUtils {
       data,
       contentHash,
       vault,
-      image,
     } = _.defaults(opts, {
       updated: Time.now().toMillis(),
       created: Time.now().toMillis(),
@@ -74,7 +73,6 @@ export class DNodeUtils {
       body: "",
       data: {},
       fname: null,
-      image: null,
     });
     const title = opts.title || NoteUtils.genTitle(fname);
     const cleanProps: DNodeProps = {
@@ -93,7 +91,6 @@ export class DNodeUtils {
       body,
       data,
       contentHash,
-      image,
     };
 
     // don't include optional props
@@ -104,6 +101,7 @@ export class DNodeUtils {
       "custom",
       "color",
       "tags",
+      "image",
     ];
     _.forEach(optionalProps, (op) => {
       if (opts[op]) {

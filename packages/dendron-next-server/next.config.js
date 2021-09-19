@@ -7,7 +7,11 @@ module.exports = (phase) => {
     LOCAL: JSON.stringify(process.env["LOCAL"] === "true"),
   };
   console.log("build env:", env);
-  return {
+
+  /**
+   * @type {import('next').NextConfig}
+   */
+  const nextConfig = {
     env,
     // support the dev server to allow CORS
     async headers() {
@@ -27,31 +31,30 @@ module.exports = (phase) => {
         },
       ];
     },
-    webpack5: false,
+    eslint: {
+      // Warning: This allows production builds to successfully complete even if
+      // your project has ESLint errors.
+      ignoreDuringBuilds: true,
+    },
+    // webpack5: false,
     webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
       config.plugins.push(new webpack.IgnorePlugin(/\/__tests__\//));
       if (env.STAGE === "dev") {
         config.optimization.minimize = false;
       }
-      config.node = {
-        ...config.node,
-        fs: "empty",
-        tls: "empty",
-        net: "empty",
-        "cross-spawn": "empty",
-        child_process: "empty",
-      };
-      if (process.env.ANALYZE) {
-        config.plugins.push(
-          new BundleAnalyzerPlugin({
-            analyzerMode: "server",
-            analyzerPort: isServer ? 8888 : 8889,
-            openAnalyzer: true,
-          })
-        );
-      }
+      // config.node = {
+      //   ...config.node,
+      //   fs: "empty",
+      //   tls: "empty",
+      //   net: "empty",
+      //   "cross-spawn": "empty",
+      //   child_process: "empty",
+      // };
       // Important: return the modified config
+
       return config;
     },
   };
+
+  return nextConfig;
 };

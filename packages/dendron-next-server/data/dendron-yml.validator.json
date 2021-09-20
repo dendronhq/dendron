@@ -545,6 +545,9 @@
       "properties": {
         "selectionType": {
           "$ref": "#/definitions/LookupSelectionType"
+        },
+        "leaveTrace": {
+          "type": "boolean"
         }
       },
       "required": [

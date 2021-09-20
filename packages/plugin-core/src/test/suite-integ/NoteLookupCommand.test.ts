@@ -1120,7 +1120,14 @@ suite("NoteLookupCommand", function () {
         preSetupHook: async ({ wsRoot, vaults }) => {
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
         },
-        onInit: async ({ vaults, engine }) => {
+        onInit: async ({ wsRoot, vaults, engine }) => {
+          withConfig(
+            (config) => {
+              config.lookup.note.leaveTrace = true;
+              return config;
+            },
+            { wsRoot }
+          );
           const cmd = new NoteLookupCommand();
           stubVaultPick(vaults);
           const fooNoteEditor = await VSCodeUtils.openNote(engine.notes["foo"]);
@@ -1143,9 +1150,9 @@ suite("NoteLookupCommand", function () {
             newNoteEditor.document
           );
           expect(newNote?.body.trim()).toEqual("foo body");
-
           // should remove selection
           const changedText = fooNoteEditor.document.getText();
+          expect(changedText.includes(`![[${newNote?.fname}]]`)).toBeTruthy();
           expect(changedText.includes("foo body")).toBeFalsy();
           done();
         },

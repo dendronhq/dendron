@@ -130,6 +130,7 @@ export enum LookupSelectionType {
 
 export type NoteLookupConfig = {
   selectionType: LookupSelectionType;
+  leaveTrace?: boolean;
 };
 
 export type LookupConfig = {

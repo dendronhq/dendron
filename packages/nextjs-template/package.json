@@ -33,6 +33,7 @@
     "sass": "^1.39.0"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^11.1.2",
     "@types/fs-extra": "^9.0.12",
     "@types/react": "17.0.14",
     "eslint": "7.30.0",

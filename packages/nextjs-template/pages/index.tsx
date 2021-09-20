@@ -6,14 +6,16 @@ import {
 } from "next";
 import React from "react";
 import DendronSEO from "../components/DendronSEO";
-import { getNoteBody, getNotes } from "../utils/build";
+import { getConfig, getNoteBody, getNotes } from "../utils/build";
 
 export default function Home({
   body,
+  note,
+  config,
 }: InferGetStaticPropsType<typeof getStaticProps>) {
   return (
     <>
-      <DendronSEO />
+      <DendronSEO note={note} config={config} />
       <DendronNote noteContent={body} />
     </>
   );
@@ -24,10 +26,12 @@ export const getStaticProps: GetStaticProps = async (
 ) => {
   const note = getNotes().noteIndex;
   const body = await getNoteBody(note.id);
+  const config = await getConfig();
   return {
     props: {
       body,
       note,
+      config,
     },
   };
 };

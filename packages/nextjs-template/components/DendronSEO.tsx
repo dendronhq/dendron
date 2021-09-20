@@ -58,7 +58,7 @@ export default function DendronSEO({
   const seoProps = NoteUtils.getSEOProps(note);
   const title = seoProps.title;
   const description = seoProps.excerpt || config.site.description;
-  const images = seoProps.image ? [seoProps.image] : [];
+  const images = seoProps?.image ? [seoProps.image] : [];
   const canonical = getCanonicalUrl({
     sitePath: path,
     seoProps,

@@ -4,7 +4,7 @@ import {
   error2PlainObject,
 } from "@dendronhq/common-all";
 import yargs from "yargs";
-import { CLICommand } from "./base";
+import { CLICommand, CommandCommonProps } from "./base";
 import path from "path";
 import fs from "fs-extra";
 import {
@@ -29,7 +29,7 @@ export enum DevCommands {
   INSTALL_PLUGIN = "install_plugin",
 }
 
-type CommandOpts = CommandCLIOpts & Partial<BuildCmdOpts>; //& SetupEngineOpts & {};
+type CommandOpts = CommandCLIOpts & CommandCommonProps & Partial<BuildCmdOpts>;
 
 type CommandOutput = Partial<{ error: DendronError; data: any }>;
 

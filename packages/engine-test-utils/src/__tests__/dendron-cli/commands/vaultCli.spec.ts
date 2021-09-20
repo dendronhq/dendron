@@ -17,7 +17,7 @@ describe("VaultCLICommand", () => {
 
     await runEngineTestV5(
       async ({ engine, wsRoot, vaults }) => {
-        const vault = await runCmd({
+        const { vault } = await runCmd({
           wsRoot,
           vaultPath: "testVault",
           engine,

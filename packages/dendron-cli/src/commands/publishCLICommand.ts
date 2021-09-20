@@ -10,7 +10,7 @@ import { execa } from "@dendronhq/engine-server";
 import { NextjsExportPod } from "@dendronhq/pods-core";
 import path from "path";
 import yargs from "yargs";
-import { CLICommand } from "./base";
+import { CLICommand, CommandCommonProps } from "./base";
 import { ExportPodCLICommand } from "./exportPod";
 import { PodSource } from "./pod";
 import { SetupEngineCLIOpts } from "./utils";
@@ -36,7 +36,7 @@ export enum PublishCommands {
   BUILD = "build",
 }
 
-type CommandOpts = CommandCLIOpts & Partial<BuildCmdOpts>;
+type CommandOpts = CommandCLIOpts & CommandCommonProps & Partial<BuildCmdOpts>;
 
 type CommandOutput = Partial<{ error: DendronError; data: any }>;
 

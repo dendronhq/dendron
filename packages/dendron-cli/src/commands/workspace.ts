@@ -2,7 +2,7 @@ import { DendronError } from "@dendronhq/common-all";
 import { WorkspaceService } from "@dendronhq/engine-server";
 import _ from "lodash";
 import yargs from "yargs";
-import { CLICommand } from "./base";
+import { CLICommand, CommandCommonProps } from "./base";
 import { setupEngine } from "./utils";
 
 type CommandCLIOpts = {
@@ -13,17 +13,13 @@ type CommandCLIOpts = {
   useGithubAccessToken?: boolean;
 };
 
-type CommandOpts = CommandCLIOpts;
-type CommandOutput = void;
+type CommandOpts = CommandCLIOpts & CommandCommonProps;
 
 export enum Action {
   INIT = "init",
 }
 
-export class WorkspaceCLICommand extends CLICommand<
-  CommandOpts,
-  CommandOutput
-> {
+export class WorkspaceCLICommand extends CLICommand<CommandOpts> {
   constructor() {
     super({ name: "workspace", desc: "workspace related methods" });
   }
@@ -51,7 +47,7 @@ export class WorkspaceCLICommand extends CLICommand<
       case Action.INIT: {
         if (fromConfig) {
           await WorkspaceService.createFromConfig({ wsRoot });
-          process.exit();
+          return {};
         } else {
           throw Error("this command is not supported yet");
         }

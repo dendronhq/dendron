@@ -1,7 +1,7 @@
 import { WorkspaceService } from "@dendronhq/engine-server";
 import { DVault } from "@dendronhq/common-all";
 import yargs from "yargs";
-import { CLICommand } from "./base";
+import { CLICommand, CommandCommonProps } from "./base";
 import { setupEngine, setupEngineArgs, SetupEngineResp } from "./utils";
 
 type CommandCLIOpts = {
@@ -13,9 +13,7 @@ type CommandCLIOpts = {
   cmd: VaultCommands;
 };
 
-type CommandOpts = CommandCLIOpts & SetupEngineResp & {};
-
-type CommandOutput = any;
+type CommandOpts = CommandCLIOpts & SetupEngineResp & CommandCommonProps;
 
 export enum VaultCommands {
   CREATE = "create",
@@ -23,7 +21,7 @@ export enum VaultCommands {
 
 export { CommandOpts as VaultCLICommandOpts };
 
-export class VaultCLICommand extends CLICommand<CommandOpts, CommandOutput> {
+export class VaultCLICommand extends CLICommand<CommandOpts> {
   constructor() {
     super({ name: "vault <cmd>", desc: "vault related commands" });
   }
@@ -69,7 +67,7 @@ export class VaultCLICommand extends CLICommand<CommandOpts, CommandOutput> {
             addToCodeWorkspace: true,
           });
           this.print(`${vaultPath} created`);
-          return resp;
+          return { vault: resp, error: undefined };
         }
         default: {
           throw Error("bad option");

@@ -58,13 +58,13 @@ export default function DendronSEO({
   const seoProps = NoteUtils.getSEOProps(note);
   const title = seoProps.title;
   const description = seoProps.excerpt || config.site.description;
+  const images = seoProps.image ? [seoProps.image] : [];
+  const path = dendronRouter.router.asPath;
   const canonical = getCanonicalUrl({
     sitePath: path,
     seoProps,
     siteConfig: config.site,
   });
-
-  console.log("BOND canonical", canonical);
   // @ts-ignore
   const unix2SEOTime = (ts: number) =>
     Time.DateTime.fromMillis(_.toInteger(ts))
@@ -100,7 +100,7 @@ export default function DendronSEO({
         title,
         description,
         url: canonical,
-        images: [],
+        images,
       }}
     />
   );

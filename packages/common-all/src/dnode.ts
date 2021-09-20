@@ -101,6 +101,7 @@ export class DNodeUtils {
       "custom",
       "color",
       "tags",
+      "image",
     ];
     _.forEach(optionalProps, (op) => {
       if (opts[op]) {
@@ -235,6 +236,7 @@ export class DNodeUtils {
       "schemaStub",
       "type",
       "tags",
+      "image",
     ];
     return _.omit(props, blacklist);
   }
@@ -822,7 +824,7 @@ export class NoteUtils {
   }
 
   static getSEOProps(note: NoteProps): NoteSEOProps {
-    const { title, created, updated } = note;
+    const { title, created, updated, image } = note;
     const { excerpt, canonicalUrl, noindex, canonicalBaseUrl } = note.custom;
     return {
       title,
@@ -832,6 +834,7 @@ export class NoteUtils {
       canonicalBaseUrl,
       canonicalUrl,
       noindex,
+      image,
     };
   }
 
@@ -949,6 +952,7 @@ export class NoteUtils {
       "children",
       "color",
       "tags",
+      "image",
     ]);
     const { custom: customProps } = cleanProps;
     const meta = { ...builtinProps, ...customProps };

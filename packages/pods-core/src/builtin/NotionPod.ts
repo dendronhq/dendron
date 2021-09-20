@@ -13,7 +13,7 @@ import { RateLimiter } from "limiter";
 
 const ID = "dendron.notion";
 
-// Allow 3 req/sec. Also understands 'hour', 'minute', 'day', or a no. of ms
+// Allow 3 req/sec (the Notion API limit). Also understands 'hour', 'minute', 'day', or a no. of ms
 // @ts-ignore
 const limiter = new RateLimiter({ tokensPerInterval: 3, interval: "second" });
 
@@ -48,26 +48,18 @@ export class NotionExportPod extends ExportPod<NotionExportConfig> {
    * Method to create pages in Notion
    */
   createPagesInNotion = async (blockPagesArray: any, notion: Client) => {
-    // rate limiter method
-    const sendRequest = async () => {
-      blockPagesArray.forEach(async (block: any) => {
-        // @ts-ignore
-        await limiter.removeTokens(1);
-        try {
-          await notion.pages.create(block);
-        } catch (error) {
-          this.L.error({
-            msg: "failed to export all the notes.",
-            payload: error,
-          });
-          throw new DendronError({
-            message: JSON.stringify(error),
-            severity: ERROR_SEVERITY.MINOR,
-          });
-        }
-      });
-    };
-    sendRequest();
+    blockPagesArray.forEach(async (block: any) => {
+      // @ts-ignore
+      await limiter.removeTokens(1);
+      try {
+        await notion.pages.create(block);
+      } catch (error) {
+        throw new DendronError({
+          message: "Failed to export all the notes. " + JSON.stringify(error),
+          severity: ERROR_SEVERITY.MINOR,
+        });
+      }
+    });
   };
 
   /**
@@ -105,7 +97,12 @@ export class NotionExportPod extends ExportPod<NotionExportConfig> {
   /**
    * Method to get all the pages from Notion
    */
-  getAllNotionPages = async (notion: Client) => {
+  getAllNotionPages = async (notion: Client, progressOpts: any) => {
+    const { token, showMessage } = progressOpts;
+    token.onCancellationRequested(() => {
+      showMessage("Cancelled..");
+      return;
+    });
     const allDocs = await notion.search({
       sort: { direction: "descending", timestamp: "last_edited_time" },
       filter: { value: "page", property: "object" },
@@ -137,13 +134,19 @@ export class NotionExportPod extends ExportPod<NotionExportConfig> {
       {
         location: withProgressOpts.location,
         title: "importing parent pages",
-        cancellable: false,
+        cancellable: true,
       },
-      async () => {
-        return this.getAllNotionPages(notion);
+      async (progress: any, token: any) => {
+        return this.getAllNotionPages(notion, {
+          progress,
+          token,
+          showMessage: withProgressOpts.showMessage,
+        });
       }
     );
-
+    if (_.isUndefined(pagesMap)) {
+      return { notes: [] };
+    }
     const selectedPage = await getSelectionFromQuickpick(Object.keys(pagesMap));
     if (_.isUndefined(selectedPage)) {
       return { notes: [] };

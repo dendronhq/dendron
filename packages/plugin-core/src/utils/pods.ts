@@ -134,4 +134,5 @@ export const getSelectionFromQuickpick = async (pagesMap: string[]) => {
 export const withProgressOpts = {
   withProgress: window.withProgress,
   location: ProgressLocation.Notification,
+  showMessage: window.showInformationMessage,
 };

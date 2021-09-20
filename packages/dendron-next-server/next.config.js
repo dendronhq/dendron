@@ -43,6 +43,7 @@ module.exports = (phase, defaultConfig) => {
         ...config,
         plugins: [...config.plugins, new webpack.IgnorePlugin(/\/__tests__\//)],
         optimization: {
+          ...config.optimization,
           minimize: env.STAGE === "dev" ? false : config.optimization.minimize,
         },
       };

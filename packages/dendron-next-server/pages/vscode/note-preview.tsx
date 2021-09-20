@@ -76,7 +76,7 @@ function AntLayout(props: React.PropsWithChildren<any>) {
       <br />
       <Layout id="main-content-wrap" className="main-content-wrap">
         <Row gutter={16}>
-          <Col className="gutter-row" span={2}></Col>
+          <Col className="gutter-row" span={2} />
           <Col className="gutter-row" span={20}>
             <Layout.Content
               id="main-content"
@@ -86,7 +86,7 @@ function AntLayout(props: React.PropsWithChildren<any>) {
               {props.children}
             </Layout.Content>
           </Col>
-          <Col className="gutter-row" span={2}></Col>
+          <Col className="gutter-row" span={2} />
         </Row>
       </Layout>
     </Layout>
@@ -155,7 +155,7 @@ function Note({ engine, ide, ws, port }: DendronProps & WorkspaceProps) {
   const { noteActive } = ide;
   const { id: noteId = "9eae08fb-5e3f-4a7e-a989-3f206825d490", contentHash } =
     noteActive || {};
-  let noteContent = engine.notesRendered[noteId || ""];
+  const noteContent = engine.notesRendered[noteId || ""];
 
   // remember note contentHash from last "render to markdown"
   const renderedNoteContentHash = React.useRef<string>();

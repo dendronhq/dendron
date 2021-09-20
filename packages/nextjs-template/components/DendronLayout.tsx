@@ -8,6 +8,9 @@ import DendronLogoOrTitle from "./DendronLogoOrTitle";
 import { DendronLookup } from "./DendronLookup";
 import { FooterText } from "./DendronNoteFooter";
 import DendronTreeMenu from "./DendronTreeMenu";
+import { DendronSearch } from "./DendronSearch";
+import { DendronNotice } from "./DendronNotice";
+import { getStage } from "@dendronhq/common-all";
 
 const { Header, Content, Sider, Footer } = Layout;
 const { LAYOUT, HEADER, SIDER } = DENDRON_STYLE_CONSTANTS;
@@ -45,7 +48,7 @@ export default function DendronLayout(
             className="ant-trigger"
             style={{
               backgroundColor:
-                "#43B02A" /* color copied from packages/dendron-next-server/assets/themes/light-theme.less TODO make dependent on active theme */,
+                "#43B02A" /* color copied from dendron-next-server / assets/themes/light-theme.less TODO make dependent on active theme */,
             }}
           >
             {isCollapsed ? <RightOutlined /> : <LeftOutlined />}
@@ -103,8 +106,8 @@ export default function DendronLayout(
           }}
         >
           <Col
-            xs={{ span: 4 }}
-            md={{ span: 4 }}
+            xs={4}
+            md={4}
             style={{
               width: `calc((100% - ${LAYOUT.BREAKPOINTS.lg}) / 2 + ${
                 isCollapsed ? SIDER.COLLAPSED_WIDTH : SIDER.WIDTH
@@ -114,13 +117,17 @@ export default function DendronLayout(
           >
             <DendronLogoOrTitle />
           </Col>
-          <Col
-            xs={12}
-            sm={18}
-            md={{ span: 16, push: 2 }}
-            style={{ paddingLeft: "4px" }}
-          >
+          <Col xs={8} sm={10} md={10} lg={10} style={{ paddingLeft: "4px" }}>
             <DendronLookup {...props} />
+          </Col>
+          <Col
+            xs={6}
+            sm={8}
+            md={8}
+            lg={6}
+            style={{ marginLeft: "4px", marginRight: "4px" }}
+          >
+            <DendronSearch {...props} />
           </Col>
         </Row>
       </Header>
@@ -128,27 +135,35 @@ export default function DendronLayout(
         className="site-layout"
         style={{
           marginTop: 64,
-          flexDirection: "row",
         }}
       >
-        <Layout
-          className="site-layout-sidebar"
-          style={{
-            flex: "0 0 auto",
-            width: `calc((100% - ${LAYOUT.BREAKPOINTS.lg}) / 2 + ${
-              isCollapsed ? SIDER.COLLAPSED_WIDTH : SIDER.WIDTH
-            }px)`,
-            paddingLeft: `calc((100% - ${LAYOUT.BREAKPOINTS.lg}) / 2)`,
-            minWidth: isCollapsed ? SIDER.COLLAPSED_WIDTH : SIDER.WIDTH,
-          }}
-        >
-          {sidebar}
-        </Layout>
-        <Layout
-          className="side-layout-main"
-          style={{ maxWidth: LAYOUT.CONTENT_MAX_WIDTH }}
-        >
-          {content}
+        <DendronNotice show={getStage() === "dev"}>
+          NOTE: Pages are{" "}
+          <a href="https://wiki.dendron.so/notes/yYMuhi2TmTC63MysmtwqH.html#navigating-pages-is-slow-for-local-preview">
+            dynamically compiled in local preview
+          </a>{" "}
+          and will take a second to load.
+        </DendronNotice>
+        <Layout className="site-layout" style={{ flexDirection: "row" }}>
+          <Layout
+            className="site-layout-sidebar"
+            style={{
+              flex: "0 0 auto",
+              width: `calc((100% - ${LAYOUT.BREAKPOINTS.lg}) / 2 + ${
+                isCollapsed ? SIDER.COLLAPSED_WIDTH : SIDER.WIDTH
+              }px)`,
+              paddingLeft: `calc((100% - ${LAYOUT.BREAKPOINTS.lg}) / 2)`,
+              minWidth: isCollapsed ? SIDER.COLLAPSED_WIDTH : SIDER.WIDTH,
+            }}
+          >
+            {sidebar}
+          </Layout>
+          <Layout
+            className="side-layout-main"
+            style={{ maxWidth: LAYOUT.CONTENT_MAX_WIDTH }}
+          >
+            {content}
+          </Layout>
         </Layout>
       </Layout>
     </Layout>

@@ -136,7 +136,7 @@ describe("nextjs export", () => {
           engine,
           wsRoot,
           vaults,
-          podConfig: { siteUrl: "https://bar.com" },
+          podConfig: { overrides: { siteUrl: "https://bar.com" } },
         });
         verifyExport(dest);
 
@@ -202,7 +202,9 @@ describe("nextjs export", () => {
           wsRoot,
           vaults,
           podConfig: {
-            canonicalBaseUrl: "https://foobar.com",
+            overrides: {
+              canonicalBaseUrl: "https://foobar.com",
+            },
           },
         });
         await verifyExport(dest);
@@ -238,7 +240,9 @@ describe("nextjs export", () => {
           wsRoot,
           config: {
             dest,
-            siteUrl: "https://bar.com",
+            overrides: {
+              siteUrl: "https://bar.com",
+            },
           },
         });
         await checkDir({ fpath: dest }, "data", "public");

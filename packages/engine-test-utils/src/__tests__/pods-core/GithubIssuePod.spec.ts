@@ -1,10 +1,13 @@
 import { ENGINE_HOOKS } from "../../presets";
 import { runEngineTestV5 } from "../../engine";
-import { GithubImportPod, GithubPublishPod } from "@dendronhq/pods-core";
+import {
+  GithubIssueImportPod,
+  GithubIssuePublishPod,
+} from "@dendronhq/pods-core";
 import { NoteProps, NoteUtils, VaultUtils } from "@dendronhq/common-all";
 import _ from "lodash";
 
-describe("GithubPod import pod", () => {
+describe("GithubIssuePod import pod", () => {
   let result: any;
   let fname: string;
   beforeEach(() => {
@@ -21,6 +24,9 @@ describe("GithubPod import pod", () => {
               number: 902,
               state: "OPEN",
               id: "sddsnjdek",
+              author: {
+                url: "https://github.com/xyzuser",
+              },
               labels: {
                 edges: [
                   {
@@ -41,7 +47,7 @@ describe("GithubPod import pod", () => {
   test("Import Issue with status: open", async () => {
     await runEngineTestV5(
       async ({ engine, vaults, wsRoot }) => {
-        const pod = new GithubImportPod();
+        const pod = new GithubIssueImportPod();
         const vaultName = VaultUtils.getName(vaults[0]);
 
         pod.getDataFromGithub = jest.fn().mockReturnValue(result);
@@ -68,6 +74,7 @@ describe("GithubPod import pod", () => {
           wsRoot,
         });
         expect(note.custom.status).toEqual("OPEN");
+        expect(note.custom.author).toEqual("https://github.com/xyzuser");
       },
       {
         expect,
@@ -79,7 +86,7 @@ describe("GithubPod import pod", () => {
   test("fname as id", async () => {
     await runEngineTestV5(
       async ({ engine, vaults, wsRoot }) => {
-        const pod = new GithubImportPod();
+        const pod = new GithubIssueImportPod();
         const vaultName = VaultUtils.getName(vaults[0]);
 
         pod.getDataFromGithub = jest.fn().mockReturnValue(result);
@@ -117,7 +124,7 @@ describe("GithubPod import pod", () => {
   test("with frontmatter", async () => {
     await runEngineTestV5(
       async ({ engine, vaults, wsRoot }) => {
-        const pod = new GithubImportPod();
+        const pod = new GithubIssueImportPod();
         const vaultName = VaultUtils.getName(vaults[0]);
 
         pod.getDataFromGithub = jest.fn().mockReturnValue(result);
@@ -185,7 +192,7 @@ describe("github publish pod", () => {
   test("basic", async () => {
     await runEngineTestV5(
       async ({ engine, vaults, wsRoot }) => {
-        const pod = new GithubPublishPod();
+        const pod = new GithubIssuePublishPod();
         const vaultName = VaultUtils.getName(vaults[0]);
         pod.getLabelsFromGithub = jest
           .fn()
@@ -214,7 +221,7 @@ describe("github publish pod", () => {
   test("with invalid tags", async () => {
     await runEngineTestV5(
       async ({ engine, vaults, wsRoot }) => {
-        const pod = new GithubPublishPod();
+        const pod = new GithubIssuePublishPod();
         const vaultName = VaultUtils.getName(vaults[0]);
         pod.getLabelsFromGithub = jest
           .fn()
@@ -246,7 +253,7 @@ describe("github publish pod", () => {
   test("create Issue", async () => {
     await runEngineTestV5(
       async ({ engine, vaults, wsRoot }) => {
-        const pod = new GithubPublishPod();
+        const pod = new GithubIssuePublishPod();
         const vaultName = VaultUtils.getName(vaults[0]);
         pod.getLabelsFromGithub = jest
           .fn()

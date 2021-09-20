@@ -1,6 +1,6 @@
 import { WorkspaceService } from "@dendronhq/engine-server";
 import yargs from "yargs";
-import { CLICommand } from "./base";
+import { CLICommand, CommandCommonProps } from "./base";
 import {
   setupEngine,
   setupEngineArgs,
@@ -15,7 +15,7 @@ type CommandCLIOpts = {
   cmd: WorkspaceCommands;
 };
 
-type CommandOpts = CommandCLIOpts & SetupEngineResp & {};
+type CommandOpts = CommandCLIOpts & SetupEngineResp & CommandCommonProps;
 
 type CommandOutput = any;
 
@@ -94,7 +94,7 @@ export class WorkspaceCLICommand extends CLICommand<
           throw Error("bad option");
         }
       }
-    } catch (err) {
+    } catch (err: any) {
       this.L.error(err);
     } finally {
       if (opts.server.close) {

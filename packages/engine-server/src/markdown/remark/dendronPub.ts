@@ -1,8 +1,10 @@
 import {
   DendronError,
+  ERROR_SEVERITY,
   isNotUndefined,
   NoteProps,
   NoteUtils,
+  StatusCodes,
   TAGS_HIERARCHY,
 } from "@dendronhq/common-all";
 import _ from "lodash";
@@ -153,15 +155,31 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
 
         const copts = opts?.wikiLinkOpts;
         if (!note && opts?.transformNoPublish) {
-          value = "403";
-          addError(proc, new DendronError({ message: "no note" }));
+          const code = StatusCodes.FORBIDDEN;
+          value = _.toString(code);
+          addError(
+            proc,
+            new DendronError({
+              message: "no note",
+              code,
+              severity: ERROR_SEVERITY.MINOR,
+            })
+          );
         } else if (note && opts?.transformNoPublish) {
           if (error) {
-            value = "403";
+            value = _.toString(StatusCodes.FORBIDDEN);
             addError(proc, error);
           } else if (!config) {
-            value = "403";
-            addError(proc, new DendronError({ message: "no config" }));
+            const code = StatusCodes.FORBIDDEN;
+            value = _.toString(code);
+            addError(
+              proc,
+              new DendronError({
+                message: "no config",
+                code,
+                severity: ERROR_SEVERITY.MINOR,
+              })
+            );
           } else {
             isPublished = SiteUtils.isPublished({
               note,
@@ -169,7 +187,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
               engine,
             });
             if (!isPublished) {
-              value = "403";
+              value = _.toString(StatusCodes.FORBIDDEN);
             }
           }
         }
@@ -190,11 +208,20 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         const usePrettyLinks = config.site.usePrettyLinks;
         const maybeFileExtension =
           _.isBoolean(usePrettyLinks) && usePrettyLinks ? "" : ".html";
-        const href = `${config.site.assetsPrefix || ""}${
-          copts?.prefix || ""
-        }${value}${maybeFileExtension}${
-          data.anchorHeader ? "#" + data.anchorHeader : ""
-        }`;
+        // in v4, copts.prefix = absUrl + "/" + siteNotesDir + "/";
+        // if v5, copts.prefix = ""
+        let href: string;
+        if (MDUtilsV5.isV5Active(proc)) {
+          href = `${config.site.assetsPrefix || ""}${
+            copts?.prefix || ""
+          }${value}${maybeFileExtension}${
+            data.anchorHeader ? "#" + data.anchorHeader : ""
+          }`;
+        } else {
+          href = `${copts?.prefix || ""}${value}${maybeFileExtension}${
+            data.anchorHeader ? "#" + data.anchorHeader : ""
+          }`;
+        }
         const exists = true;
         // for rehype
         //_node.value = newValue;

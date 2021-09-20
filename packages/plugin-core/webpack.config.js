@@ -26,7 +26,7 @@ const config = {
       vscode: "commonjs vscode", // the vscode-module is created on-the-fly and must be excluded. Add other modules that cannot be webpack'ed, 📖 -> https://webpack.js.org/configuration/externals/
       "pino-pretty": "pino-pretty",
     },
-    /(@dendronhq|packages)\/dendron-11ty$/,
+    /(@dendronhq|packages)\/dendron-11ty-legacy$/,
     /\.\/webpack-require-hack/,
   ],
   resolve: {
@@ -63,17 +63,21 @@ const config = {
         { from: "webpack-require-hack.js", to: "webpack-require-hack.js" },
       ],
     }),
-    // @ts-ignore
-    new SentryWebpackPlugin({
-      authToken: process.env.SENTRY_AUTH_TOKEN,
-      org: "dendron",
-      project: "dendron",
-      release: process.env.DENDRON_RELEASE_VERSION,
+    ...(process.env.SKIP_SENTRY
+      ? []
+      : [
+          // @ts-ignore
+          new SentryWebpackPlugin({
+            authToken: process.env.SENTRY_AUTH_TOKEN,
+            org: "dendron",
+            project: "dendron",
+            release: process.env.DENDRON_RELEASE_VERSION,
 
-      // other SentryWebpackPlugin configuration
-      include: ".",
-      ignore: ["node_modules", "webpack.config.js"],
-    }),
+            // other SentryWebpackPlugin configuration
+            include: ".",
+            ignore: ["node_modules", "webpack.config.js"],
+          }),
+        ]),
   ],
   module: {
     rules: [

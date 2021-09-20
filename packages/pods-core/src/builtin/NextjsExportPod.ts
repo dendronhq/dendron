@@ -19,8 +19,7 @@ import { PodUtils } from "../utils";
 const ID = "dendron.nextjs";
 
 type NextjsExportPodCustomOpts = {
-  siteUrl?: string;
-  canonicalBaseUrl?: string;
+  overrides?: Partial<DendronSiteConfig>;
 };
 
 function getSiteConfig({
@@ -28,7 +27,7 @@ function getSiteConfig({
   overrides,
 }: {
   siteConfig: DendronSiteConfig;
-  overrides: Partial<DendronSiteConfig>;
+  overrides?: Partial<DendronSiteConfig>;
 }): DendronSiteConfig {
   return {
     ...siteConfig,
@@ -41,6 +40,14 @@ export type NextjsExportConfig = ExportPodConfig & NextjsExportPodCustomOpts;
 
 type NextjsExportPlantOpts = ExportPodPlantOpts<NextjsExportConfig>;
 
+export class NextjsExportPodUtils {
+  static getDendronConfigPath = (dest: URI) => {
+    const podDstDir = path.join(dest.fsPath, "data");
+    const podConfigDstPath = path.join(podDstDir, "dendron.json");
+    return podConfigDstPath;
+  };
+}
+
 export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
   static id: string = ID;
   static description: string = "export notes to Nextjs";
@@ -49,14 +56,9 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     return PodUtils.createExportConfig({
       required: [],
       properties: {
-        siteUrl: {
-          type: "string",
-          description: "url of published site. eg. https://foo.com",
-        },
-        canonicalBaseUrl: {
-          type: "string",
-          description:
-            "the base url used for generating canonical urls from each page",
+        overrides: {
+          type: "object",
+          description: "options from site config you want to override",
         },
       },
     }) as JSONSchemaType<NextjsExportConfig>;
@@ -215,7 +217,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     fs.ensureDirSync(podDstDir);
     const siteConfig = getSiteConfig({
       siteConfig: engine.config.site,
-      overrides: podConfig,
+      overrides: podConfig.overrides,
     });
 
     await this.copyAssets({ wsRoot, config: engine.config, dest: dest.fsPath });

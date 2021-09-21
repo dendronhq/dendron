@@ -1,7 +1,7 @@
 ![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/logo-256.png)
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-66-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-67-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 # Welcome to Dendron!
@@ -146,6 +146,7 @@ Dendron wouldn't be what it is today without help from these wonderful gardeners
     <td align="center"><a href="https://github.com/CyberFoxar"><img src="https://avatars.githubusercontent.com/u/1347036?v=4?s=100" width="100px;" alt=""/><br /><sub><b>CyberFoxar</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3ACyberFoxar" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://bri.tt"><img src="https://avatars.githubusercontent.com/u/68?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Britt Selvitelle</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Abs" title="Bug reports">🐛</a> <a href="#financial-bs" title="Financial">💵</a> <a href="https://github.com/dendronhq/dendron/commits?author=bs" title="Documentation">📖</a> <a href="https://github.com/dendronhq/dendron/commits?author=bs" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/lenamio"><img src="https://avatars.githubusercontent.com/u/20296489?v=4?s=100" width="100px;" alt=""/><br /><sub><b>lenamio</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=lenamio" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://github.com/santosh898"><img src="https://avatars.githubusercontent.com/u/25878108?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Sai Santosh</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=santosh898" title="Code">💻</a></td>
   </tr>
 </table>
 

@@ -22,6 +22,15 @@ type CommandOutput = any;
 
 const title = "Dendron Preview";
 
+export const extractAnchorIfExists = (link: string) => {
+  if (link.indexOf("#") === -1) {
+    return undefined;
+  } else {
+    const tokens = link.split("#");
+    return tokens[tokens.length - 1];
+  }
+};
+
 const tryGetNoteFromDocument = (
   document: vscode.TextDocument
 ): NoteProps | undefined => {
@@ -44,6 +53,39 @@ const tryGetNoteFromDocument = (
     });
   }
   return;
+};
+
+/** Returns true when we are attempting to reference a place within the same note.
+ *  Such as a different header section.*/
+const isLinkingWithinSameNote = (opts: {
+  data: { id?: string; href?: string };
+}) => {
+  const linkToNoteId = extractNoteId(opts.data);
+  return linkToNoteId === opts.data.id;
+};
+
+const extractNoteId = (data: {
+  id?: string;
+  href?: string;
+}): string | undefined => {
+  if (data.href === undefined) {
+    return undefined;
+  }
+
+  // In normal cases such as markdown value='[[#head2]]' with
+  // href='http://localhost:3005/vscode/0TDNEYgYvCs3ooZEuknNZ.html#head2' we will
+  // parse the href and extract the note id.
+  const { path } = vscode.Uri.parse(data.href);
+  const noteId = path.match(/.*\/(.*).html/)?.[1];
+
+  // However, for some cases such as markdown value='[head2](#head2)' the href isn't as nice
+  // and looks like href='http://localhost:3005/vscode/note-preview.html?ws=WS-VALUE&port=3005#head2'
+  // which currently happens when linking within the same note so we will consider it a special
+  // case of parsing for now and return the id of the current note.
+  if (noteId === "note-preview") {
+    return data.id;
+  }
+  return noteId;
 };
 
 export class ShowPreviewV2Command extends BasicCommand<
@@ -132,11 +174,23 @@ export class ShowPreviewV2Command extends BasicCommand<
           if (data.href) {
             // TODO find a better way to differentiate local files from web links (`data-` attribute)
             if (data.href.includes("localhost")) {
-              const { path } = vscode.Uri.parse(data.href);
-              const noteId = path.match(/.*\/(.*).html/)?.[1];
-              let note: NoteProps | undefined;
-              // eslint-disable-next-line no-cond-assign
-              if (noteId && (note = getEngine().notes[noteId])) {
+              const noteId = extractNoteId(data);
+
+              const note: NoteProps | undefined = this.getNote(noteId);
+              if (isLinkingWithinSameNote({ data }) && note) {
+                const anchor = extractAnchorIfExists(data.href);
+                if (anchor) {
+                  await new GotoNoteCommand().execute({
+                    qs: note.fname,
+                    vault: note.vault,
+                    column: vscode.ViewColumn.One,
+                    anchor: {
+                      type: "header",
+                      value: anchor,
+                    },
+                  });
+                }
+              } else if (noteId && note) {
                 await new GotoNoteCommand().execute({
                   qs: note.fname,
                   vault: note.vault,
@@ -176,5 +230,12 @@ export class ShowPreviewV2Command extends BasicCommand<
       Logger.debug({ ctx, state: "dispose preview" });
       ext.setWebView(DendronWebViewKey.NOTE_PREVIEW, undefined);
     });
+  }
+
+  private getNote(noteId: string | undefined) {
+    if (noteId === undefined) {
+      return undefined;
+    }
+    return getEngine().notes[noteId];
   }
 }

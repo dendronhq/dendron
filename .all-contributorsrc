@@ -641,6 +641,16 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "viztor",
+      "name": "viz",
+      "avatar_url": "https://avatars.githubusercontent.com/u/3511050?v=4",
+      "profile": "https://github.com/viztor",
+      "contributions": [
+        "code",
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,

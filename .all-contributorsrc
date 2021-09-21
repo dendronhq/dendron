@@ -623,6 +623,15 @@
         "doc",
         "code"
       ]
+    },
+    {
+      "login": "lenamio",
+      "name": "lenamio",
+      "avatar_url": "https://avatars.githubusercontent.com/u/20296489?v=4",
+      "profile": "https://github.com/lenamio",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,

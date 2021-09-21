@@ -82,6 +82,11 @@ const config = {
   module: {
     rules: [
       {
+        include: /node_modules/,
+        test: /\.mjs$/,
+        type: "javascript/auto",
+      },
+      {
         test: /\.ts$/,
         exclude: /node_modules/,
         use: [

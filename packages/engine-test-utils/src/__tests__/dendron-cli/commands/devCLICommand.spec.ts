@@ -34,7 +34,7 @@ describe("build", () => {
         const prepPublishLocalStub = stub(
           BuildUtils,
           "prepPublishLocal"
-        ).returns(Promise.resolve());
+        ).returns(undefined);
 
         const typecheckStub = stub(BuildUtils, "runTypeCheck").returns();
         const bumpVersionStub = stub(LernaUtils, "bumpVersion").returns();

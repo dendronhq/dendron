@@ -26,6 +26,7 @@ import {
   WorkspaceService,
   WorkspaceUtils,
 } from "@dendronhq/engine-server";
+import { RewriteFrames } from "@sentry/integrations";
 import * as Sentry from "@sentry/node";
 import { ExecaChildProcess } from "execa";
 import fs from "fs-extra";
@@ -674,6 +675,7 @@ function initializeSentry(environment: string): void {
     tracesSampleRate: 1.0,
     enabled,
     environment,
+    attachStacktrace: true,
     beforeSend(event, hint) {
       const error = hint?.originalException;
       if (error && error instanceof DendronError) {
@@ -689,6 +691,11 @@ function initializeSentry(environment: string): void {
       }
       return event;
     },
+    integrations: [
+      new RewriteFrames({
+        prefix: "app:///dist/",
+      }),
+    ],
   });
   return;
 }

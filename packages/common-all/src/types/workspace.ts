@@ -354,6 +354,13 @@ export type DendronConfig = {
    * Defaults to 4096 characters, which is about 4 KiB.
    */
   maxNoteDecoratedLength?: number;
+
+  /**
+   * Do not display the randomly generated colors for tags in the **editor**. Only
+   * color tag links if it has been configured in the frontmatter. False by
+   * default.
+   */
+  noRandomlyColoredTags?: boolean;
 };
 
 export type RandomNoteConfig = {

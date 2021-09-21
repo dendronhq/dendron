@@ -22,6 +22,7 @@ import {
   createProcTests,
   ProcTests,
 } from "./utils";
+import { TestConfigUtils } from "../../..";
 
 function proc() {
   return MDUtilsV5.procRehypeParse({
@@ -198,6 +199,48 @@ describe("hashtag", () => {
                 vault: vaults[0],
                 props: { color: "#FF0033" },
               });
+            },
+          }
+        );
+      });
+
+      test("when configured with noRandomlyGeneratedColors, only uses explicit colors", async () => {
+        let note: NoteProps;
+        await runEngineTestV5(
+          async ({ engine }) => {
+            const proc = createProcForTest({
+              engine,
+              dest: DendronASTDest.HTML,
+              vault: note.vault,
+            });
+            const resp = await proc.process(`#color #uncolored`);
+            await checkVFile(
+              resp,
+              '<a class="color-tag" style="--tag-color: #FF0033;" href="tags.color.html">#color</a>',
+              '<a href="tags.uncolored.html">#uncolored</a>'
+            );
+          },
+          {
+            expect,
+            preSetupHook: async ({ wsRoot, vaults }) => {
+              note = await NoteTestUtilsV4.createNote({
+                fname: "tags.color",
+                wsRoot,
+                vault: vaults[0],
+                props: { color: "#FF0033" },
+              });
+              note = await NoteTestUtilsV4.createNote({
+                fname: "tags.uncolored",
+                wsRoot,
+                vault: vaults[0],
+              });
+              TestConfigUtils.withConfig(
+                (config) => {
+                  config.site.noRandomlyColoredTags = true;
+                  return config;
+                },
+                { wsRoot }
+              );
             },
           }
         );

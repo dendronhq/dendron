@@ -1,7 +1,7 @@
 import {
   launchv2,
   ServerUtils,
-  SubProcessExitType,
+  SubProcessExitType
 } from "@dendronhq/api-server";
 import {
   CONSTANTS,
@@ -12,20 +12,21 @@ import {
   Time,
   VaultUtils,
   VSCodeEvents,
-  WorkspaceType,
+  WorkspaceType
 } from "@dendronhq/common-all";
 import {
   getDurationMilliseconds,
   getOS,
   SegmentClient,
-  writeJSONWithComments,
+  writeJSONWithComments
 } from "@dendronhq/common-server";
 import {
   HistoryService,
   MetadataService,
   WorkspaceService,
-  WorkspaceUtils,
+  WorkspaceUtils
 } from "@dendronhq/engine-server";
+import { RewriteFrames } from "@sentry/integrations";
 import * as Sentry from "@sentry/node";
 import { ExecaChildProcess } from "execa";
 import fs from "fs-extra";
@@ -48,7 +49,7 @@ import {
   DendronExtension,
   getDWorkspace,
   getEngine,
-  getExtension,
+  getExtension
 } from "./workspace";
 import { DendronCodeWorkspace } from "./workspace/codeWorkspace";
 import { DendronNativeWorkspace } from "./workspace/nativeWorkspace";
@@ -674,6 +675,7 @@ function initializeSentry(environment: string): void {
     tracesSampleRate: 1.0,
     enabled,
     environment,
+    attachStacktrace: true,
     beforeSend(event, hint) {
       const error = hint?.originalException;
       if (error && error instanceof DendronError) {
@@ -689,6 +691,11 @@ function initializeSentry(environment: string): void {
       }
       return event;
     },
+    integrations: [
+      new RewriteFrames({
+        prefix: "app:///dist/",
+      }),
+    ],
   });
   return;
 }

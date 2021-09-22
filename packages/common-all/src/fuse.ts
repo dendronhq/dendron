@@ -76,7 +76,7 @@ function createFuse<T>(
     shouldSort: true,
     threshold: opts.threshold,
     distance: 15,
-    minMatchCharLength: 2,
+    minMatchCharLength: 1,
     keys: ["fname"],
     useExtendedSearch: true,
     includeScore: true,

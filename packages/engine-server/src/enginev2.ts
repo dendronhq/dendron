@@ -1,5 +1,6 @@
 import {
   BulkAddNoteOpts,
+  Cache,
   ConfigWriteOpts,
   CONSTANTS,
   DendronCompositeError,
@@ -27,10 +28,13 @@ import {
   GetNoteOptsV2,
   GetNotePayload,
   IDendronError,
+  LruCache,
+  milliseconds,
   NoteChangeEntry,
   NoteProps,
   NotePropsDict,
   NoteUtils,
+  NullCache,
   QueryNotesOpts,
   RenameNoteOpts,
   RenameNotePayload,
@@ -41,14 +45,10 @@ import {
   SchemaModuleDict,
   SchemaModuleProps,
   SchemaQueryResp,
+  StatusCodes,
   VaultUtils,
   WorkspaceOpts,
   WriteNoteResp,
-  Cache,
-  NullCache,
-  LruCache,
-  milliseconds,
-  StatusCodes,
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -493,35 +493,50 @@ export class DendronEngineV2 implements DEngine {
     }
 
     const cachedPreview = this.renderedCache.get(id);
-    if (cachedPreview && cachedPreview.updated === note.updated) {
-      this.logger.info({ ctx, id, msg: `Will use cached rendered preview.` });
+    if (cachedPreview) {
+      if (this.isCachedPreviewUpToDate(cachedPreview, note)) {
+        this.logger.info({ ctx, id, msg: `Will use cached rendered preview.` });
 
-      // Cached preview updated time is the same as note.updated time.
-      // Hence we can skip re-rendering and return the cached version of preview.
-      return ResponseUtil.createHappyResponse({ data: cachedPreview.data });
-    } else {
-      this.logger.info({
-        ctx,
-        id,
-        msg: `Did not find usable cached rendered preview. Starting to render.`,
-      });
-
-      const beforeRenderMillis = milliseconds();
-
-      // Either we don't have have the cached preview or the version that is
-      // cached has gotten stale, hence we will re-render the note and cache
-      // the new value.
-      const data = await this._renderNote(note);
-
-      this.renderedCache.set(id, {
-        updated: note.updated,
-        data: data,
-      });
-
-      const duration = milliseconds() - beforeRenderMillis;
-      this.logger.info({ ctx, id, duration, msg: `Render preview finished.` });
-      return ResponseUtil.createHappyResponse({ data });
+        // Cached preview updated time is the same as note.updated time.
+        // Hence we can skip re-rendering and return the cached version of preview.
+        return ResponseUtil.createHappyResponse({ data: cachedPreview.data });
+      }
     }
+
+    this.logger.info({
+      ctx,
+      id,
+      msg: `Did not find usable cached rendered preview. Starting to render.`,
+    });
+
+    const beforeRenderMillis = milliseconds();
+
+    // Either we don't have have the cached preview or the version that is
+    // cached has gotten stale, hence we will re-render the note and cache
+    // the new value.
+    const data = await this._renderNote(note);
+
+    this.renderedCache.set(id, {
+      updated: note.updated,
+      data: data,
+    });
+
+    const duration = milliseconds() - beforeRenderMillis;
+    this.logger.info({ ctx, id, duration, msg: `Render preview finished.` });
+    return ResponseUtil.createHappyResponse({ data });
+  }
+
+  private isCachedPreviewUpToDate(
+    cachedPreview: CachedPreview,
+    note: NoteProps
+  ) {
+    return (
+      cachedPreview.updated >=
+      NoteUtils.getLatestUpdateTimeOfPreviewNoteTree({
+        rootNote: note,
+        notes: this.notes,
+      })
+    );
   }
 
   private async _renderNote(note: NoteProps): Promise<string> {
@@ -547,15 +562,10 @@ export class DendronEngineV2 implements DEngine {
     await Promise.all(
       notes.map(async (ent: NoteChangeEntry) => {
         const { id } = ent.note;
-        //const uri = NoteUtils.getURI({ note: ent.note, wsRoot: this.wsRoot });
         if (ent.status === "delete") {
           delete this.notes[id];
-          // this.history &&
-          //   this.history.add({ source: "engine", action: "delete", uri });
         } else {
           if (ent.status === "create") {
-            // this.history &&
-            //   this.history.add({ source: "engine", action: "create", uri });
           }
           if (
             ent.note.body.length <

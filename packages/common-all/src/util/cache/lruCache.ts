@@ -33,4 +33,8 @@ export class LruCache<K, T> implements Cache<K, T> {
   set(key: K, data: T): void {
     this.cache.set(key, data);
   }
+
+  drop(key: K): void {
+    this.cache.del(key);
+  }
 }

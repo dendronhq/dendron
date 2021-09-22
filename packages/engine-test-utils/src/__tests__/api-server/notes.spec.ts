@@ -1,7 +1,14 @@
-import { APIUtils, DendronAPI, DVault } from "@dendronhq/common-all";
+import {
+  APIUtils,
+  DendronAPI,
+  DendronError,
+  DVault,
+  RenderNotePayload,
+  NoteProps,
+  NoteUtils,
+} from "@dendronhq/common-all";
 import { createServer, runEngineTestV5 } from "../../engine";
 import { ENGINE_HOOKS } from "../../presets";
-import { NoteProps, NoteUtils } from "@dendronhq/common-all/src";
 
 async function getApiWithInitializedWS(wsRoot: string, vaults: DVault[]) {
   const { port } = await createServer({ wsRoot, vaults });
@@ -21,50 +28,157 @@ async function getApiWithInitializedWS(wsRoot: string, vaults: DVault[]) {
 }
 
 describe("api/note/render tests", () => {
-  test("WHEN calling /render on non existent file THEN get payload with error.", async () => {
-    await runEngineTestV5(
-      async ({ wsRoot, vaults }) => {
-        const api = await getApiWithInitializedWS(wsRoot, vaults);
+  describe(`WHEN calling /render on non existent file`, () => {
+    let rendered: { data: RenderNotePayload; error: DendronError | null };
 
-        const rendered = await api.noteRender({
-          ws: wsRoot,
-          id: `i-dont-exist-id`,
-        });
+    beforeAll(async () => {
+      await runEngineTestV5(
+        async ({ wsRoot, vaults }) => {
+          const api = await getApiWithInitializedWS(wsRoot, vaults);
 
-        expect(rendered.data).toBeUndefined();
-        expect(rendered.error).toBeDefined();
-      },
-      { expect, preSetupHook: ENGINE_HOOKS.setupBasic }
-    );
+          rendered = await api.noteRender({
+            ws: wsRoot,
+            id: `i-dont-exist-id`,
+          });
+        },
+        { expect, preSetupHook: ENGINE_HOOKS.setupBasic }
+      );
+    });
+
+    it(`THEN data in payload is undefined`, () => {
+      expect(rendered.data).toBeUndefined();
+    });
+
+    it(`THEN error to be defined`, () => {
+      expect(rendered.error).toBeDefined();
+    });
   });
 
-  test("WHEN calling /render on valid file THEN get rendered preview.", async () => {
+  describe(`WHEN calling /render on valid file`, () => {
     const EXPECTED_FOO_RENDERED =
       '<h1 id="foo">Foo</h1>\n<p>foo body</p>\n<hr>\n<h2 id="children">Children</h2>\n<ol>\n<li><a href="foo.ch1.html">Ch1</a></li>\n</ol>';
 
-    await runEngineTestV5(
-      async ({ wsRoot, vaults, engine }) => {
-        const notes = engine.notes;
-        const vault1 = vaults[0];
+    let rendered: { data: RenderNotePayload; error: DendronError | null };
 
-        const fooNote = NoteUtils.getNoteByFnameV5({
-          fname: "foo",
-          notes,
-          vault: vault1,
-          wsRoot,
-        }) as NoteProps;
+    beforeAll(async () => {
+      await runEngineTestV5(
+        async ({ wsRoot, vaults, engine }) => {
+          const notes = engine.notes;
+          const vault1 = vaults[0];
 
-        const api = await getApiWithInitializedWS(wsRoot, vaults);
+          const fooNote = NoteUtils.getNoteByFnameV5({
+            fname: "foo",
+            notes,
+            vault: vault1,
+            wsRoot,
+          }) as NoteProps;
 
-        const rendered = await api.noteRender({
+          const api = await getApiWithInitializedWS(wsRoot, vaults);
+
+          rendered = await api.noteRender({
+            ws: wsRoot,
+            id: fooNote.id,
+          });
+        },
+        { expect, preSetupHook: ENGINE_HOOKS.setupBasic }
+      );
+    });
+
+    it(`THEN data has expected rendered HTML.`, () => {
+      expect(rendered.data).toEqual(EXPECTED_FOO_RENDERED);
+    });
+
+    it(`THEN error is null.`, () => {
+      expect(rendered.error).toBeNull();
+    });
+  });
+
+  describe(`GIVEN notes with recursive reference relationship: foo-->![[foo.one]]-->![[foo.two]]`, () => {
+    let fooNote: NoteProps;
+    let fooTwo: NoteProps;
+    let api: DendronAPI;
+    let wsRoot: string;
+    beforeAll(async () => {
+      await runEngineTestV5(
+        async ({ wsRoot: _wsRoot, vaults, engine }) => {
+          wsRoot = _wsRoot;
+          const notes = engine.notes;
+          const vault1 = vaults[0];
+
+          fooNote = NoteUtils.getNoteByFnameV5({
+            fname: "foo",
+            notes,
+            vault: vault1,
+            wsRoot,
+          }) as NoteProps;
+
+          fooTwo = NoteUtils.getNoteByFnameV5({
+            fname: "foo.two",
+            notes,
+            vault: vault1,
+            wsRoot,
+          }) as NoteProps;
+
+          api = await getApiWithInitializedWS(wsRoot, vaults);
+        },
+        { expect, preSetupHook: ENGINE_HOOKS.setupNoteRefRecursive }
+      );
+    });
+
+    describe(`WHEN top level foo is rendered`, () => {
+      let rendered: { data: RenderNotePayload; error: DendronError | null };
+
+      beforeAll(async () => {
+        rendered = await api.noteRender({
           ws: wsRoot,
           id: fooNote.id,
         });
+      });
 
+      it(`THEN it should be error free`, () => {
         expect(rendered.error).toBeNull();
-        expect(rendered.data).toEqual(EXPECTED_FOO_RENDERED);
-      },
-      { expect, preSetupHook: ENGINE_HOOKS.setupBasic }
-    );
+      });
+
+      it(`THEN it should contain content from nested foo.two`, () => {
+        // From second level reference foo.two contains 'blah' in its body
+        // prior to making any updates 'blah' should be rendered within our top level foo note.
+        expect(rendered.data?.includes("blah")).toBeTruthy();
+      });
+    });
+
+    describe(`WHEN foo.two is updated AND foo is rendered`, () => {
+      let rendered: { data: RenderNotePayload; error: DendronError | null };
+
+      beforeAll(async () => {
+        // Modify the value of foo-two
+        await api.engineUpdateNote({
+          ws: wsRoot,
+          opts: { newNode: false },
+          note: {
+            ...fooTwo,
+            updated: 2,
+            body: "modified-val",
+          },
+        });
+
+        rendered = await api.noteRender({
+          ws: wsRoot,
+          id: fooNote.id,
+        });
+      });
+
+      it(`THEN rendered should be error free`, () => {
+        expect(rendered.error).toBeNull();
+      });
+
+      it(`THEN rendered to not contain previous foo.two value`, () => {
+        // Now that we have modified foo.two it should not contain blah anymore
+        expect(rendered.data?.includes("blah")).toBeFalsy();
+      });
+
+      it(`THEN rendered foo to contain newly modified value from foo.two.`, () => {
+        expect(rendered.data?.includes("modified-val")).toBeTruthy();
+      });
+    });
   });
 });

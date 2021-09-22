@@ -61,6 +61,22 @@ describe("lruCache.spec.ts", () => {
           });
         });
       });
+
+      describe(`AND dropped first element`, () => {
+        beforeEach(() => {
+          lruCache.drop(0);
+        });
+
+        it(`THEN first element (dropped) should NOT be in the cache`, () => {
+          expect(lruCache.get(0)).toBeUndefined();
+        });
+
+        it(`THEN the other 4 elements should be in the cache`, () => {
+          for (let i = 1; i < 5; i++) {
+            expect(lruCache.get(i)).toEqual(`'${i}'`);
+          }
+        });
+      });
     });
   });
 

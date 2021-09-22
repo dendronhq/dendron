@@ -637,6 +637,111 @@ export class NoteUtils {
     return now;
   }
 
+  /**
+   * Retrieve the latest update time of the preview note tree.
+   *
+   * Preview note tree includes links whose content is rendered in the rootNote preview,
+   * particularly the reference links (![[ref-link-example]]). */
+  static getLatestUpdateTimeOfPreviewNoteTree({
+    rootNote,
+    notes,
+  }: {
+    rootNote: NoteProps;
+    notes: NotePropsDict;
+  }) {
+    // When there is a vault specified in the link we want to respect that
+    // specification, otherwise we will map by just the file name.
+    // Map by lowercase fname.
+    const mapByFName: { [fname: string]: NoteProps } = {};
+    // Map vault fspath to map which maps by lowercase fname.
+    const mapWithVaultByFName: {
+      [vault: string]: { [fname: string]: NoteProps };
+    } = {};
+
+    // Populate the lookup maps, we will use maps to avoid having to loop over the
+    // the notes to find the notes by file names for each fname in the tree.
+    // In the future if we start keeping these values cached centrally we should
+    // replace these adhoc created maps with centrally cached values.
+    _.values(notes).forEach((note) => {
+      const lowercaseFName = note.fname.toLowerCase();
+      // We are going to follow the current behavior of vault-less file name resolution:
+      // The first matching file name that is met should win.
+      if (!mapByFName[lowercaseFName]) {
+        mapByFName[lowercaseFName] = note;
+      }
+
+      if (mapWithVaultByFName[note.vault.fsPath] === undefined) {
+        mapWithVaultByFName[note.vault.fsPath] = {};
+      }
+      mapWithVaultByFName[note.vault.fsPath][lowercaseFName] = note;
+    });
+
+    const visited: { [id: string]: NoteProps } = {};
+
+    return this._getLatestUpdateTimeOfPreviewNoteTree({
+      note: rootNote,
+      mapByFName,
+      mapWithVaultByFName,
+      visited,
+      latestUpdated: rootNote.updated,
+    });
+  }
+
+  private static _getLatestUpdateTimeOfPreviewNoteTree({
+    note,
+    latestUpdated,
+    mapWithVaultByFName,
+    mapByFName,
+    visited,
+  }: {
+    note: NoteProps;
+    latestUpdated: number;
+    mapByFName: { [lowercaseFname: string]: NoteProps };
+    visited: { [id: string]: NoteProps };
+    mapWithVaultByFName: {
+      [vaultName: string]: { [lowercaseFname: string]: NoteProps };
+    };
+  }): number {
+    if (note.updated > latestUpdated) {
+      latestUpdated = note.updated;
+    }
+
+    // Mark the visited nodes so we don't end up recursively spinning if there
+    // are cycles in our preview tree such as [[foo]] -> [[!bar]] -> [[!foo]]
+    if (visited[note.id]) {
+      return latestUpdated;
+    } else {
+      visited[note.id] = note;
+    }
+
+    const linkedRefNotes = note.links
+      .filter((link) => link.type === "ref")
+      .filter((link) => link.to && link.to.fname)
+      .map((link) => {
+        const pointTo = link.to!;
+        const lowercaseFname = pointTo.fname!.toLowerCase();
+
+        if (pointTo.vaultName) {
+          return mapWithVaultByFName[pointTo.vaultName][lowercaseFname];
+        } else {
+          return mapByFName[lowercaseFname];
+        }
+      });
+
+    for (const linkedNote of linkedRefNotes) {
+      // Recurse into each child reference linked note.
+      latestUpdated = this._getLatestUpdateTimeOfPreviewNoteTree({
+        note: linkedNote,
+        mapByFName,
+        mapWithVaultByFName,
+        visited,
+        latestUpdated,
+      });
+    }
+
+    return latestUpdated;
+  }
+
   static getNotesByFname({
     fname,
     notes,

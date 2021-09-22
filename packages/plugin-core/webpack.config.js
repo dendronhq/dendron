@@ -26,7 +26,7 @@ const config = {
       vscode: "commonjs vscode", // the vscode-module is created on-the-fly and must be excluded. Add other modules that cannot be webpack'ed, 📖 -> https://webpack.js.org/configuration/externals/
       "pino-pretty": "pino-pretty",
     },
-    /(@dendronhq|packages)\/dendron-11ty$/,
+    /(@dendronhq|packages)\/dendron-11ty-legacy$/,
     /\.\/webpack-require-hack/,
   ],
   resolve: {
@@ -81,6 +81,11 @@ const config = {
   ],
   module: {
     rules: [
+      {
+        include: /node_modules/,
+        test: /\.mjs$/,
+        type: "javascript/auto",
+      },
       {
         test: /\.ts$/,
         exclude: /node_modules/,

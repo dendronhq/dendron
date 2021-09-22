@@ -22,6 +22,7 @@ import {
 import { useCombinedDispatch, useCombinedSelector } from "../../features";
 import { browserEngineSlice } from "../../features/engine";
 import {
+  getConfig,
   getCustomHead,
   getNoteBody,
   getNoteMeta,
@@ -48,6 +49,7 @@ export default function Note({
   collectionChildren,
   noteIndex,
   customHeadContent,
+  config,
   ...rest
 }: NotePageProps) {
   const logger = createLogger("Note");
@@ -102,7 +104,7 @@ export default function Note({
 
   return (
     <>
-      <DendronSEO />
+      <DendronSEO note={note} config={config} />
       {customHeadContent && <DendronCustomHead content={customHeadContent} />}
       <DendronNote noteContent={noteBody} />
       {maybeCollection}
@@ -110,9 +112,10 @@ export default function Note({
   );
 }
 export const getStaticPaths: GetStaticPaths = async () => {
-  const { notes } = getNotes();
+  const { notes, noteIndex } = getNotes();
+  const ids = _.reject(_.keys(notes), (id) => id === noteIndex.id);
   return {
-    paths: _.map(notes, (_note, id) => {
+    paths: _.map(ids, (id) => {
       return { params: { id } };
     }),
     fallback: false,
@@ -137,7 +140,6 @@ export const getStaticProps: GetStaticProps = async (
     const noteData = getNotes();
     const customHeadContent: string | null = await getCustomHead();
     const { notes, noteIndex } = noteData;
-
     const collectionChildren = note.custom?.has_collection
       ? prepChildrenForCollection(note, notes, noteIndex)
       : null;
@@ -149,6 +151,7 @@ export const getStaticProps: GetStaticProps = async (
         noteIndex,
         collectionChildren,
         customHeadContent,
+        config: await getConfig(),
       },
     };
   } catch (err) {

@@ -14,8 +14,10 @@ import {
   Spin,
   Button,
   Divider,
+  Badge,
+  ConfigProvider,
 } from "antd";
-import { Badge, ConfigProvider } from "antd";
+
 import generateCalendar from "antd/lib/calendar/generateCalendar";
 import classNames from "classnames";
 import _ from "lodash";
@@ -203,7 +205,7 @@ function CalendarView({ engine, ide }: DendronProps) {
         // will only show up when `noteActive` is `undefined`. this happens when opening vscode with no document open
         dailyNotes.map((note, index) => {
           const amount = _.clamp(
-            !!wordsPerDot
+            wordsPerDot
               ? Math.floor(note.body.split(/\n| /).length / wordsPerDot) // TODO create test
               : 0,
             0,

@@ -1,7 +1,7 @@
 import {
   assertUnreachable,
   DendronError,
-  error2PlainObject
+  error2PlainObject,
 } from "@dendronhq/common-all";
 import fs from "fs-extra";
 import path from "path";
@@ -11,9 +11,9 @@ import {
   ExtensionTarget,
   LernaUtils,
   PublishEndpoint,
-  SemverVersion
+  SemverVersion,
 } from "../utils/build";
-import { CLICommand } from "./base";
+import { CLICommand, CommandCommonProps } from "./base";
 
 type CommandCLIOpts = {
   cmd: DevCommands;
@@ -30,14 +30,14 @@ export enum DevCommands {
   INSTALL_PLUGIN = "install_plugin",
 }
 
-type CommandOpts = CommandCLIOpts & Partial<BuildCmdOpts>; //& SetupEngineOpts & {};
+type CommandOpts = CommandCLIOpts & CommandCommonProps & Partial<BuildCmdOpts>;
 
 type CommandOutput = Partial<{ error: DendronError; data: any }>;
 
 type BuildCmdOpts = {
   publishEndpoint: PublishEndpoint;
-} & BumpVersionOpts
-  & PrepPluginOpts;
+} & BumpVersionOpts &
+  PrepPluginOpts;
 
 type BumpVersionOpts = {
   upgradeType: SemverVersion;
@@ -61,6 +61,15 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     this.wsRootOptional = true;
   }
 
+  private setEndpoint(publishEndpoint: PublishEndpoint) {
+    this.print(`setting endpoint to ${publishEndpoint}...`);
+    if (publishEndpoint === PublishEndpoint.LOCAL) {
+      BuildUtils.prepPublishLocal();
+    } else {
+      BuildUtils.prepPublishRemote();
+    }
+  }
+
   buildArgs(args: yargs.Argv) {
     super.buildArgs(args);
     args.positional("cmd", {
@@ -72,7 +81,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       describe: "how to do upgrade",
       choices: Object.values(SemverVersion),
     });
-    args.option("publish endpoint", {
+    args.option("publishEndpoint", {
       describe: "where to publish",
       choices: Object.values(PublishEndpoint),
     });
@@ -168,8 +177,21 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           return { error: null };
         }
         case DevCommands.PUBLISH: {
-          await BuildUtils.prepPublishRemote();
-          LernaUtils.publishVersion();
+          if (!opts.publishEndpoint) {
+            return {
+              error: new DendronError({
+                message: "missing options for cmd",
+              }),
+            };
+          }
+          try {
+            this.setEndpoint(opts.publishEndpoint);
+            LernaUtils.publishVersion();
+          } finally {
+            if (opts.publishEndpoint === PublishEndpoint.LOCAL) {
+              BuildUtils.setRegRemote();
+            }
+          }
           return { error: null };
         }
         case DevCommands.PREP_PLUGIN: {

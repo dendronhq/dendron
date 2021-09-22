@@ -2,5 +2,5 @@ const jestConfig = require("../../jest.config");
 
 module.exports = {
   ...jestConfig,
-  testEnvironment: "jsdom",
+  testEnvironment: "jest-environment-jsdom-sixteen",
 };

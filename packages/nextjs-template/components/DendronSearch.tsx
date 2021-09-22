@@ -68,7 +68,7 @@ function DendronSearchComponent(props: DendronPageWithNoteDataProps) {
         </AutoComplete.Option>
       ) : undefined}
       {fuse
-        ? fuse.search(value).map((note) => {
+        ? fuse.search(value).map((note: any) => {
             return (
               <AutoComplete.Option key={note.item.id} value={note.item.fname}>
                 <div className="search-option">

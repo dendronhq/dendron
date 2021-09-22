@@ -208,11 +208,20 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         const usePrettyLinks = config.site.usePrettyLinks;
         const maybeFileExtension =
           _.isBoolean(usePrettyLinks) && usePrettyLinks ? "" : ".html";
-        const href = `${config.site.assetsPrefix || ""}${
-          copts?.prefix || ""
-        }${value}${maybeFileExtension}${
-          data.anchorHeader ? "#" + data.anchorHeader : ""
-        }`;
+        // in v4, copts.prefix = absUrl + "/" + siteNotesDir + "/";
+        // if v5, copts.prefix = ""
+        let href: string;
+        if (MDUtilsV5.isV5Active(proc)) {
+          href = `${config.site.assetsPrefix || ""}${
+            copts?.prefix || ""
+          }${value}${maybeFileExtension}${
+            data.anchorHeader ? "#" + data.anchorHeader : ""
+          }`;
+        } else {
+          href = `${copts?.prefix || ""}${value}${maybeFileExtension}${
+            data.anchorHeader ? "#" + data.anchorHeader : ""
+          }`;
+        }
         const exists = true;
         // for rehype
         //_node.value = newValue;

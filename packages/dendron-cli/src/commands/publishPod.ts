@@ -1,10 +1,11 @@
+import { DendronError } from "@dendronhq/common-all";
 import {
   getAllPublishPods,
   PublishPodConfig,
   PublishPod,
 } from "@dendronhq/pods-core";
 import yargs from "yargs";
-import { CLICommand } from "./base";
+import { CLICommand, CommandCommonProps } from "./base";
 import { enrichPodArgs, PodCLIOpts, setupPodArgs } from "./pod";
 import { setupEngineArgs, SetupEngineCLIOpts, SetupEngineResp } from "./utils";
 
@@ -13,9 +14,10 @@ type CommandCLIOpts = {} & SetupEngineCLIOpts & PodCLIOpts;
 type CommandOpts = CommandCLIOpts & {
   podClass: any;
   config: PublishPodConfig;
-} & SetupEngineResp;
+} & SetupEngineResp &
+  CommandCommonProps;
 
-type CommandOutput = void;
+type CommandOutput = CommandCommonProps;
 
 export class PublishPodCLICommand extends CLICommand<
   CommandOpts,
@@ -40,7 +42,7 @@ export class PublishPodCLICommand extends CLICommand<
     );
   }
 
-  async execute(opts: CommandOpts) {
+  async execute(opts: CommandOpts): Promise<CommandOutput> {
     const { podClass: PodClass, config, wsRoot, engine, server } = opts;
     const vaults = engine.vaults;
     const pod = new PodClass() as PublishPod;
@@ -48,10 +50,15 @@ export class PublishPodCLICommand extends CLICommand<
     if (config.dest === "stdout") {
       console.log(resp);
     }
-    server.close((err: any) => {
-      if (err) {
-        this.L.error({ msg: "error closing", payload: err });
-      }
+    return new Promise((resolve) => {
+      server.close((err: any) => {
+        if (err) {
+          resolve({
+            error: new DendronError({ message: "error closing", payload: err }),
+          });
+        }
+        resolve({});
+      });
     });
   }
 }

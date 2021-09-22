@@ -1,5 +1,5 @@
 import { BookOutlined, PlusOutlined, NumberOutlined } from "@ant-design/icons";
-import { Spin } from "antd";
+import { Spin, Tree, TreeProps } from "antd";
 import {
   DendronTreeViewKey,
   DMessageSource,
@@ -21,7 +21,7 @@ import {
   ideHooks,
   postVSCodeMessage,
 } from "@dendronhq/common-frontend";
-import { Tree, TreeProps } from "antd";
+
 import _ from "lodash";
 import { DataNode } from "rc-tree/lib/interface";
 import React, { useState } from "react";
@@ -46,7 +46,7 @@ class TreeViewUtils {
     noteId: string;
   }) => {
     let pNote: NoteProps = notes[noteId];
-    let activeNoteIds: string[] = [];
+    const activeNoteIds: string[] = [];
     do {
       activeNoteIds.unshift(pNote.id);
       pNote = notes[pNote.parent as string];
@@ -264,7 +264,7 @@ function TreeView({
           onExpand={onExpand}
           onSelect={onSelect}
           treeData={treeData}
-        ></Tree>
+        />
       ) : (
         <Spin />
       )}

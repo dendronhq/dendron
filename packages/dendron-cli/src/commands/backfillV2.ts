@@ -6,21 +6,22 @@ import {
   NoteUtils,
 } from "@dendronhq/common-all";
 import _ from "lodash";
-import { BaseCommand } from "./base";
+import { BaseCommand, CommandCommonProps } from "./base";
 
 type CommandOpts = {
   engine: DEngineClient;
   note?: NoteProps;
-} & CommonOpts;
+} & CommonOpts &
+  CommandCommonProps;
 
 type CommonOpts = {
   overwriteFields?: string[];
 };
 
-type CommandOutput = void;
+type CommandOutput = CommandCommonProps;
 
 export class BackfillV2Command extends BaseCommand<CommandOpts, CommandOutput> {
-  async execute(opts: CommandOpts) {
+  async execute(opts: CommandOpts): Promise<CommandCommonProps> {
     const { engine, note, overwriteFields } = _.defaults(opts, {
       overwriteFields: [],
     });
@@ -48,6 +49,6 @@ export class BackfillV2Command extends BaseCommand<CommandOpts, CommandOutput> {
     );
     // @ts-ignore
     await engine.store.bulkAddNotes({ notes });
-    return;
+    return {};
   }
 }

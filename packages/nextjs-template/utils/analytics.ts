@@ -1,22 +1,26 @@
-import ReactGA from "react-ga";
+import { initialize, set, pageview, event, exception } from "react-ga";
+import ReactGA from "react-ga4";
+import { GAType } from "../components/DendronGATracking";
 
-export const initGA = async (gaTrackingId: string) => {
-  ReactGA.initialize(gaTrackingId);
-};
-
-export const logPageView = () => {
-  ReactGA.set({ page: window.location.pathname });
-  ReactGA.pageview(window.location.pathname);
-};
-
-export const logEvent = (category = "", action = "") => {
-  if (category && action) {
-    ReactGA.event({ category, action });
+export const initGA = async (gaTrackingId: string, gaType: GAType) => {
+  if (gaType === GAType.UNIVERSAL_ANALYTICS) {
+    initialize(gaTrackingId);
+  } else {
+    ReactGA.initialize(gaTrackingId);
   }
 };
 
-export const logException = (description = "", fatal = false) => {
-  if (description) {
-    ReactGA.exception({ description, fatal });
+export const logPageView = (gaType: GAType) => {
+  if (gaType === GAType.UNIVERSAL_ANALYTICS) {
+    set({ page: window.location.pathname });
+    pageview(window.location.pathname);
+  } else {
+    ReactGA.send("pageview");
   }
 };
+
+export const logEvent = (category = "", action = "") =>
+  event({ category, action });
+
+export const logException = (description = "", fatal = false) =>
+  exception({ description, fatal });

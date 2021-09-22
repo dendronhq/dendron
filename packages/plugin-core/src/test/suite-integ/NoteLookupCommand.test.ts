@@ -1068,6 +1068,11 @@ suite("NoteLookupCommand", function () {
           // should change selection to link with alais.
           const changedText = fooNoteEditor.document.getText();
           expect(changedText.endsWith("[[foo body|foo.foo-body]]\n"));
+
+          // Note should have its links updated, since selection2link put a link in it
+          const oldNote = engine.notes["foo"];
+          expect(oldNote.links.length).toEqual(1);
+          expect(oldNote.links[0].value).toEqual("foo.foo-body");
           done();
         },
       });

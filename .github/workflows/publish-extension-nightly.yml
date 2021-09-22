@@ -97,6 +97,7 @@ jobs:
         env: 
           VSCE_PAT: ${{ secrets.VSCODE_PUBLISH_PWD }}
           NODE_OPTIONS: --max_old_space_size=4096
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
         working-directory: ./packages/plugin-core
         run: yarn deploy:vscode
 

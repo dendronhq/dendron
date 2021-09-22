@@ -2,6 +2,7 @@ import {
   DendronError,
   DVault,
   ERROR_STATUS,
+  ErrorFactory,
   SchemaModuleProps,
   SchemaQuickInput,
   SchemaUtils,
@@ -147,10 +148,19 @@ export class SchemaLookupCommand extends BaseCommand<
             const error = event.data.error as DendronError;
             this.L.error({ error });
             resolve(undefined);
-          } else {
-            const error = new DendronError({
-              message: `unexpected event: ${event}`,
+          } else if (
+            event.data &&
+            event.action === "changeState" &&
+            event.data.action === "hide"
+          ) {
+            // changeState/hide is triggered when user cancels schema lookup
+            this.L.info({
+              ctx: `SchemaLookupCommand`,
+              msg: `changeState.hide event received.`,
             });
+            resolve(undefined);
+          } else {
+            const error = ErrorFactory.createUnexpectedEventError({ event });
             this.L.error({ error });
           }
           HistoryService.instance().remove("schemaLookup", "lookupProvider");

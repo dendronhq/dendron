@@ -1,4 +1,4 @@
-import { DendronError, NoteQuickInput } from "@dendronhq/common-all";
+import { ErrorFactory, NoteQuickInput } from "@dendronhq/common-all";
 import { HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { Selection, SnippetString } from "vscode";
@@ -57,7 +57,7 @@ export class InsertNoteCommand extends BasicCommand<
           } else if (event.action === "error") {
             return;
           } else {
-            throw new DendronError({ message: `unexpected event: ${event}` });
+            throw ErrorFactory.createUnexpectedEventError({ event });
           }
         },
       });

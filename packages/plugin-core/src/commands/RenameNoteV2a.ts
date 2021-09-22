@@ -1,6 +1,6 @@
 import {
-  DendronError,
   DNodeUtils,
+  ErrorFactory,
   NoteChangeEntry,
   VaultUtils,
 } from "@dendronhq/common-all";
@@ -75,7 +75,7 @@ export class RenameNoteV2aCommand extends BaseCommand<
           } else if (event.action === "error") {
             return;
           } else {
-            throw new DendronError({ message: `unexpected event: ${event}` });
+            throw ErrorFactory.createUnexpectedEventError({ event });
           }
         },
       });

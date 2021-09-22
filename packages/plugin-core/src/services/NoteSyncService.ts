@@ -1,4 +1,9 @@
-import { NoteProps, NoteUtils, VaultUtils } from "@dendronhq/common-all";
+import {
+  DVault,
+  NoteProps,
+  NoteUtils,
+  VaultUtils,
+} from "@dendronhq/common-all";
 import { DLogger, string2Note } from "@dendronhq/common-server";
 import {
   AnchorUtils,
@@ -123,15 +128,34 @@ export class NoteSyncService {
       return;
     }
 
+    return this.updateNoteContents({
+      oldNote: noteHydrated,
+      content,
+      fmChangeOnly,
+      fname,
+      vault,
+    });
+  }
+
+  async updateNoteContents(opts: {
+    oldNote: NoteProps;
+    content: string;
+    fmChangeOnly: boolean;
+    fname: string;
+    vault: DVault;
+  }) {
+    const ctx = "NoteSyncService:updateNoteContents";
+    const { content, fmChangeOnly, fname, vault, oldNote } = opts;
+    const { engine } = getDWorkspace();
     // note is considered dirty, apply any necessary changes here
     // call `doc.getText` to get latest note
     let note = string2Note({
-      content: doc.getText(),
+      content,
       fname,
       vault,
       calculateHash: true,
     });
-    note = NoteUtils.hydrate({ noteRaw: note, noteHydrated });
+    note = NoteUtils.hydrate({ noteRaw: note, noteHydrated: oldNote });
 
     // Links have to be updated even with frontmatter only changes
     // because `tags` in frontmatter adds new links

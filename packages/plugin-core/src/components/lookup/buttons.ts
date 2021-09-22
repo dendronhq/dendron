@@ -7,6 +7,7 @@ import {
 import _ from "lodash";
 import * as vscode from "vscode";
 import { QuickInputButton, ThemeIcon } from "vscode";
+import { NoteSyncService } from "../../services/NoteSyncService";
 import { clipboard, DendronClientUtilsV2, VSCodeUtils } from "../../utils";
 import { getExtension } from "../../workspace";
 import {
@@ -109,12 +110,28 @@ const selectionToNoteProps = async (opts: {
     case "selection2link": {
       if (!_.isUndefined(document)) {
         const editor = VSCodeUtils.getActiveTextEditor();
-        await editor?.edit((builder) => {
-          const link = note.fname;
-          if (!_.isUndefined(selection) && !selection.isEmpty) {
-            builder.replace(selection, `[[${text}|${link}]]`);
+        if (editor) {
+          await editor.edit((builder) => {
+            const link = note.fname;
+            if (!_.isUndefined(selection) && !selection.isEmpty) {
+              builder.replace(selection, `[[${text}|${link}]]`);
+            }
+          });
+          // Because the window switches too quickly, note sync service
+          // sometimes can't update the current note with the link fast enough.
+          // So we manually force the update here instead.
+
+          const currentNote = VSCodeUtils.getNoteFromDocument(editor.document);
+          if (currentNote) {
+            await NoteSyncService.instance().updateNoteContents({
+              oldNote: currentNote,
+              content: editor.document.getText(),
+              fmChangeOnly: false,
+              fname: currentNote.fname,
+              vault: currentNote.vault,
+            });
           }
-        });
+        }
       }
       return note;
     }

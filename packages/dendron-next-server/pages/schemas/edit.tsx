@@ -75,7 +75,7 @@ export default function Edit() {
 
       <Box height="100%">
         <Tree
-          orientation={"vertical"}
+          orientation="vertical"
           data={myTreeData}
           translate={treeViewState.translate}
         />

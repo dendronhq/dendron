@@ -6,6 +6,7 @@ import {
   EngineConnector,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
+import { Socket } from "net";
 import yargs from "yargs";
 import {
   LaunchEngineServerCLIOpts,
@@ -23,6 +24,7 @@ export type SetupEngineResp = {
   engine: DEngineClient;
   port: number;
   server: Server;
+  serverSockets?: Set<Socket>;
 };
 
 export type SetupEngineOpts = {
@@ -64,11 +66,18 @@ export async function setupEngine(
   let engine: DEngineClient;
   let port: number;
   let server: Server;
+  let serverSockets = new Set<Socket>();
   wsRoot = resolvePath(wsRoot, process.cwd());
   if (useLocalEngine) {
     const engine = DendronEngineV2.create({ wsRoot, logger });
     await engine.init();
-    return { wsRoot, engine, port: -1, server: createDummyServer() };
+    return {
+      wsRoot,
+      engine,
+      port: -1,
+      server: createDummyServer(),
+      serverSockets: new Set(),
+    };
   }
   if (enginePort || opts.attach) {
     logger.info({
@@ -99,13 +108,13 @@ export async function setupEngine(
     }
   } else {
     logger.info({ ctx: "setupEngine", msg: "initialize new engine" });
-    ({ engine, port, server } =
+    ({ engine, port, server, serverSockets } =
       await new LaunchEngineServerCommand().enrichArgs(opts));
     if (init) {
       await engine.init();
     }
   }
-  return { wsRoot, engine, port, server };
+  return { wsRoot, engine, port, server, serverSockets };
 }
 
 /**

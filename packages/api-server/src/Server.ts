@@ -1,5 +1,6 @@
 import { DendronError, getStage, StatusCodes } from "@dendronhq/common-all";
 import { findInParent, SegmentClient } from "@dendronhq/common-server";
+import { RewriteFrames } from "@sentry/integrations";
 import * as Sentry from "@sentry/node";
 import cors from "cors";
 import express, { NextFunction, Request, Response } from "express";
@@ -70,6 +71,7 @@ export function appModule({
     tracesSampleRate: 1.0,
     enabled,
     environment,
+    attachStacktrace: true,
     beforeSend(event, hint) {
       const error = hint?.originalException;
       if (error && error instanceof DendronError) {
@@ -85,6 +87,11 @@ export function appModule({
       }
       return event;
     },
+    integrations: [
+      new RewriteFrames({
+        prefix: "app:///dist/",
+      }),
+    ],
   });
 
   // Re-use the id for error reporting too:

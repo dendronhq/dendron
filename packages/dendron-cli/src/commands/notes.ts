@@ -1,7 +1,7 @@
 import { DVault, NoteUtils, VaultUtils } from "@dendronhq/common-all";
 import _ from "lodash";
 import yargs from "yargs";
-import { CLICommand } from "./base";
+import { CLICommand, CommandCommonProps } from "./base";
 import { setupEngine, setupEngineArgs, SetupEngineResp } from "./utils";
 
 type CommandCLIOpts = {
@@ -12,7 +12,7 @@ type CommandCLIOpts = {
   cmd: NoteCommands;
 };
 
-type CommandOpts = CommandCLIOpts & SetupEngineResp & {};
+type CommandOpts = CommandCLIOpts & SetupEngineResp & CommandCommonProps;
 
 type CommandOutput = any;
 

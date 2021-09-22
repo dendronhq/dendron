@@ -28,7 +28,7 @@ export default function Home() {
             <Heading mb={4}>Welcome to Dendron</Heading>
           </Center>
           <Text fontSize="xl">
-            If you haven't already done so, you can install Dendron by following
+            If you haven&apos;t already done so, you can install Dendron by following
             the instructions &nbsp;
             <Link
               href="https://dendron.so/notes/678c77d9-ef2c-4537-97b5-64556d6337f1.html"
@@ -47,7 +47,7 @@ export default function Home() {
       <Head>
         <title>Dendron</title>
         <link rel="icon" href="/favicon.ico" />
-        <script type="text/javascript" src="/static/memberful.js"></script>
+        <script type="text/javascript" src="/static/memberful.js" />
       </Head>
 
       <Grid justifyContent="center">{extra}</Grid>

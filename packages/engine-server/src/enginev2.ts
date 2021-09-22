@@ -530,6 +530,14 @@ export class DendronEngineV2 implements DEngine {
     cachedPreview: CachedPreview,
     note: NoteProps
   ) {
+    // Most of the times the preview is going to be invalidated by users making changes to
+    // the note itself, hence before going through the trouble of checking whether linked
+    // reference notes have been updated we should do the super cheap check to see
+    // whether the note itself has invalidated the preview.
+    if (note.updated > cachedPreview.updated) {
+      return false;
+    }
+
     return (
       cachedPreview.updated >=
       NoteUtils.getLatestUpdateTimeOfPreviewNoteTree({

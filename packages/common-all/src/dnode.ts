@@ -637,6 +637,11 @@ export class NoteUtils {
     return now;
   }
 
+  /** Returns true when the note has reference links (Eg. ![[ref-link]]); false otherwise. */
+  static hasRefLinks(note: NoteProps) {
+    return note.links.some((link) => link.type === "ref");
+  }
+
   /**
    * Retrieve the latest update time of the preview note tree.
    *
@@ -649,6 +654,13 @@ export class NoteUtils {
     rootNote: NoteProps;
     notes: NotePropsDict;
   }) {
+    // If the note does not have reference links than the last updated time of
+    // the preview tree is the last updated time of the note itself. Hence, we
+    // can avoid all heavier logic of getting ready to traverse notes.
+    if (!this.hasRefLinks(rootNote)) {
+      return rootNote.updated;
+    }
+
     // When there is a vault specified in the link we want to respect that
     // specification, otherwise we will map by just the file name.
     // Map by lowercase fname.

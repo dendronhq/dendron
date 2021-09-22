@@ -88,10 +88,10 @@ jobs:
           LOG_LEVEL=info $DENDRON_CLI dev prep_plugin --extensionTarget nightly
           LOG_LEVEL=info $DENDRON_CLI dev package_plugin
 
-      - name: Publish to VS Code Marketplace
-        env: 
-          VSCE_PAT: ${{ secrets.VSCODE_PUBLISH_PWD }}
-        run: yarn deploy:vscode
+      # - name: Publish to VS Code Marketplace
+      #   env: 
+      #     VSCE_PAT: ${{ secrets.VSCODE_PUBLISH_PWD }}
+      #   run: yarn deploy:vscode
 
       ## TODO: Check if additional setup is necessary on secrets.GITHUB_TOKEN; Check PR Title formatting
       - name: Raise Pull Request back to master

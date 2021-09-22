@@ -48,16 +48,19 @@ jobs:
         run: yarn config set registry http://localhost:4873
       
       - name: Set Up NPM Local Registry
-        run: npm set registry http://localhost:4873/
+        run: | 
+          npm set registry http://localhost:4873/
+          echo $NODE_OPTIONS
       
       - name: Build the VSIX
         env: 
           GOOGLE_OAUTH_CLIENT_SECRET: ${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}
           GOOGLE_OAUTH_CLIENT_ID: ${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          NODE_OPTIONS: --max_old_space_size=4096
         run: |
           echo "DENDRON_RELEASE_VERSION=`cat meta.json | jq -r '.["@dendronhq/plugin-core"]' | awk -F. -v OFS=. 'NF==1{print ++$NF}; NF>1{$NF=sprintf("%0*d", length($NF), ($NF+1)); print}'`" >> $GITHUB_ENV
-          echo "NODE_OPTIONS=--max_old_space_size=4096"  >> $GITHUB_ENV
+          echo $NODE_OPTIONS
           yarn build:patch:local:ci
 
       - name: Upload VSIX Artifact

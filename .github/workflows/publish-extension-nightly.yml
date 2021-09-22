@@ -86,6 +86,8 @@ jobs:
           echo https://$BUCKET.s3.amazonaws.com/publish/$package
 
       - name: Create Package
+        env: 
+          NODE_OPTIONS: --max_old_space_size=4096
         run: |
           DENDRON_CLI=./packages/dendron-cli/lib/bin/dendron-cli.js
           LOG_LEVEL=info $DENDRON_CLI dev prep_plugin --extensionTarget nightly
@@ -94,6 +96,7 @@ jobs:
       - name: Publish to VS Code Marketplace
         env: 
           VSCE_PAT: ${{ secrets.VSCODE_PUBLISH_PWD }}
+          NODE_OPTIONS: --max_old_space_size=4096
         working-directory: ./packages/plugin-core
         run: yarn deploy:vscode
 

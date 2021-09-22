@@ -22,6 +22,11 @@ type NextjsExportPodCustomOpts = {
   overrides?: Partial<DendronSiteConfig>;
 };
 
+export const mapObject = (
+  obj: { [k: string]: any },
+  fn: (k: string, v: any) => any
+) => Object.fromEntries(Object.entries(obj).map(([k, v]) => [k, fn(k, v)]));
+
 function getSiteConfig({
   siteConfig,
   overrides,
@@ -274,14 +279,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
       podDstPath,
       {
         ...payload,
-        notes: Object.fromEntries(
-          Object.entries(payload.notes).map(([idx, { body: _body, ...note }]) => [
-            idx,
-            {
-              ...note,
-            },
-          ])
-        ),
+        notes: mapObject(payload.notes, (_idx, { body: _body, ...note }) => note),
       },
       { encoding: "utf8", spaces: 2 }
     );

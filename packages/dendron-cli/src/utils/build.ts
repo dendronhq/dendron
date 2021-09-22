@@ -284,17 +284,22 @@ export class BuildUtils {
   static updatePkgMeta({
     pkgPath,
     name,
+    displayName,
     description,
     main,
     repository,
   }: {
     pkgPath: string;
     name: string;
+    displayName: string;
   } & Partial<PkgJson>) {
     const pkg = fs.readJSONSync(pkgPath) as PkgJson;
     pkg.name = name;
     if (description) {
       pkg.description = description;
+    }
+    if (displayName) {
+      pkg.displayName = displayName;
     }
     if (main) {
       pkg.main = main;

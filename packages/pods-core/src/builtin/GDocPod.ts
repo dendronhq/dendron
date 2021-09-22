@@ -5,7 +5,7 @@ import {
   PROMPT,
 } from "../basev3";
 import { JSONSchemaType } from "ajv";
-import { PodUtils } from "../utils";
+import { GDocUtilMethods, PodUtils } from "../utils";
 import axios from "axios";
 import { googleDocsToMarkdown } from "docs-markdown";
 import _ from "lodash";
@@ -376,6 +376,13 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
 
     this.L.info({ ctx, opts, msg: "enter" });
     const { wsRoot, engine, vault, config, onPrompt, utilityMethods } = opts;
+    const {
+      showDocumentQuickPick,
+      openFileInEditor,
+      getGlobalState,
+      updateGlobalState,
+      showInputBox,
+    } = utilityMethods as GDocUtilMethods;
 
     const {
       refreshToken,
@@ -430,8 +437,8 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
 
     /** document selected by user */
     const documentChoice = _.isUndefined(error)
-      ? await utilityMethods?.showDocumentQuickPick(Object.keys(docIdsHashMap))
-      : await utilityMethods?.showInputBox(documentIdOptions);
+      ? await showDocumentQuickPick(Object.keys(docIdsHashMap))
+      : await showInputBox(documentIdOptions);
     if (_.isUndefined(documentChoice)) {
       return { importedNotes: [] };
     }
@@ -451,13 +458,13 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
       typeof documentChoice !== "string"
         ? documentChoice.label
         : documentChoice;
-    const cachedLabel = await utilityMethods?.getGlobalState(cacheOption);
+    const cachedLabel = await getGlobalState(cacheOption);
     const defaultChoice = _.isUndefined(cachedLabel)
       ? cacheOption
       : cachedLabel;
 
     /**hierarchy destination entered by user */
-    const hierarchyDestination = await utilityMethods?.showInputBox(
+    const hierarchyDestination = await showInputBox(
       hierarchyDestOptions,
       defaultChoice
     );
@@ -467,7 +474,7 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
     }
 
     /**updates global state with key as document name and value as latest hierarchy selected by user */
-    await utilityMethods?.updateGlobalState({
+    await updateGlobalState({
       key: cacheOption,
       value: hierarchyDestination,
     });
@@ -497,8 +504,7 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
 
     const importedNotes: NoteProps[] =
       createdNotes === undefined ? [] : [createdNotes];
-    if (importedNotes.length > 0)
-      utilityMethods?.openFileInEditor(importedNotes[0]);
+    if (importedNotes.length > 0) openFileInEditor(importedNotes[0]);
     return { importedNotes };
   }
 }

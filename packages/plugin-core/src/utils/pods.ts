@@ -5,7 +5,7 @@ import _ from "lodash";
 import open from "open";
 import path from "path";
 import * as queryString from "query-string";
-import { QuickPickItem, Uri, window } from "vscode";
+import { ProgressLocation, QuickPickItem, Uri, window } from "vscode";
 import { gdocRequiredScopes, GLOBAL_STATE } from "../constants";
 import { StateService } from "../services/stateService";
 import { GOOGLE_OAUTH_ID } from "../types/global";
@@ -111,4 +111,28 @@ export const openFileInEditor = async (note: NoteProps): Promise<void> => {
   });
   const uri = Uri.file(npath);
   await VSCodeUtils.openFileInEditor(uri);
+};
+
+export const getSelectionFromQuickpick = async (pagesMap: string[]) => {
+  const pickItems = pagesMap.map((page) => {
+    return {
+      label: page,
+    };
+  });
+  const selected = await window.showQuickPick(pickItems, {
+    placeHolder: "Choose the Parent Page",
+    ignoreFocusOut: false,
+    matchOnDescription: true,
+    canPickMany: false,
+  });
+  if (!selected) {
+    return;
+  }
+  return selected.label;
+};
+
+export const withProgressOpts = {
+  withProgress: window.withProgress,
+  location: ProgressLocation.Notification,
+  showMessage: window.showInformationMessage,
 };

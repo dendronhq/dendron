@@ -565,6 +565,7 @@ export type BasePodExecuteOpts<TConfig> = {
   engine: DEngineClient;
   wsRoot: string;
   vaults: DVault[];
+  utilityMethods?: any;
 };
 
 // --- Messages

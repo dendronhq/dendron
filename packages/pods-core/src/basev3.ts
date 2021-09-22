@@ -11,7 +11,7 @@ import { createLogger, DLogger, resolvePath } from "@dendronhq/common-server";
 import { Item } from "klaw";
 import _ from "lodash";
 import { URI } from "vscode-uri";
-import { PodKind } from "./types";
+import { GDocUtilMethods, NotionUtilMethods, PodKind } from "./types";
 import { JSONSchemaType } from "ajv";
 import { PodUtils } from "./utils";
 
@@ -23,15 +23,7 @@ export type PodOpts<T> = {
   engine: DEngineClient;
   config: T;
   onPrompt?: (arg0?: PROMPT) => Promise<any | undefined>;
-  utilityMethods?: {
-    showInputBox: (arg0: any, arg1?: string) => Promise<string | undefined>;
-    openFileInEditor: (arg0: NoteProps) => Promise<void>;
-    showDocumentQuickPick: (
-      arg0: string[]
-    ) => Promise<{ label: string } | undefined>;
-    getGlobalState: (arg0: any) => Promise<string | undefined> | undefined;
-    updateGlobalState: (arg0: any) => Promise<void>;
-  };
+  utilityMethods?: GDocUtilMethods | NotionUtilMethods;
 } & WorkspaceOpts;
 
 // === Publish Pod

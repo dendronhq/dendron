@@ -19,6 +19,7 @@ import {
 } from "./builtin/MarkdownPod";
 import { NextjsExportPod } from "./builtin/NextjsExportPod";
 import { PodClassEntryV4 } from "./types";
+import { NotionExportPod } from "./builtin/NotionPod";
 
 export * from "./basev3";
 export * from "./builtin";
@@ -32,6 +33,7 @@ export function getAllExportPods(): PodClassEntryV4[] {
     GraphvizExportPod,
     AirtableExportPod,
     NextjsExportPod,
+    NotionExportPod,
   ];
 }
 export function getAllPublishPods(): PodClassEntryV4[] {

@@ -43,12 +43,11 @@ jobs:
       - name: Yarn Setup
         run: yarn setup
       
-      # TODO - verify it works fine without this (as it's already set in yarn build:patch:local:ci) and then delete
-      # - name: Set Up Yarn Local Registry
-      #   run: yarn config set registry http://localhost:4873
+      - name: Set Up Yarn Local Registry
+        run: yarn config set registry http://localhost:4873
       
-      # - name: Set Up NPM Local Registry
-      #   run: npm set registry http://localhost:4873/
+      - name: Set Up NPM Local Registry
+        run: npm set registry http://localhost:4873/
       
       - name: Build the VSIX
         env: 

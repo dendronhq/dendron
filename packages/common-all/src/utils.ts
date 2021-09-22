@@ -1,10 +1,11 @@
-import minimatch from "minimatch";
-import semver from "semver";
 import GithubSlugger from "github-slugger";
-import querystring from "querystring";
 import _ from "lodash";
+import minimatch from "minimatch";
+import querystring from "querystring";
+import semver from "semver";
 import { COLORS_LIST } from "./colors";
-import { NoteProps } from "./types";
+import { NoteProps, SEOProps } from "./types";
+import { DendronConfig } from "./types/workspace";
 
 export class DUtils {
   static minimatch = minimatch;
@@ -192,5 +193,32 @@ export class TagUtils {
         _.pull(note.tags, oldTag);
       }
     }
+  }
+}
+
+export class PublishUtils {
+  static getSEOPropsFromConfig(config: DendronConfig): Partial<SEOProps> {
+    const { title, twitter, description: excerpt } = config.site;
+    return {
+      title,
+      twitter,
+      excerpt,
+    };
+  }
+  static getSEOPropsFromNote(note: NoteProps): SEOProps {
+    const { title, created, updated, image } = note;
+    const { excerpt, canonicalUrl, noindex, canonicalBaseUrl, twitter } =
+      note.custom;
+    return {
+      title,
+      excerpt,
+      updated,
+      created,
+      canonicalBaseUrl,
+      canonicalUrl,
+      noindex,
+      image,
+      twitter,
+    };
   }
 }

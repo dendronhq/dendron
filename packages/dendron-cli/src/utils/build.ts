@@ -294,6 +294,7 @@ export class BuildUtils {
     displayName: string;
   } & Partial<PkgJson>) {
     const pkg = fs.readJSONSync(pkgPath) as PkgJson;
+    pkg.version = "0.60.2";
     pkg.name = name;
     if (description) {
       pkg.description = description;

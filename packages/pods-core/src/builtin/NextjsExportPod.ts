@@ -270,7 +270,21 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     );
     const podDstPath = path.join(podDstDir, "notes.json");
     const podConfigDstPath = path.join(podDstDir, "dendron.json");
-    fs.writeJSONSync(podDstPath, payload, { encoding: "utf8", spaces: 2 });
+    fs.writeJSONSync(
+      podDstPath,
+      {
+        ...payload,
+        notes: Object.fromEntries(
+          Object.entries(payload.notes).map(([idx, { body: _body, ...note }]) => [
+            idx,
+            {
+              ...note,
+            },
+          ])
+        ),
+      },
+      { encoding: "utf8", spaces: 2 }
+    );
     fs.writeJSONSync(podConfigDstPath, engineConfig, {
       encoding: "utf8",
       spaces: 2,

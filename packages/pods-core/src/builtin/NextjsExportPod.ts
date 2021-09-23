@@ -27,6 +27,10 @@ export const mapObject = (
   fn: (k: string, v: any) => any
 ) => Object.fromEntries(Object.entries(obj).map(([k, v]) => [k, fn(k, v)]));
 
+export const removeBodyFromNote = ({ body, ...note }: Record<string, any>) => note
+
+export const removeBodyFromNotesDict = (notes: NotePropsDict) => mapObject(notes, (_k, note: NotePropsDict) => removeBodyFromNote(note))
+
 function getSiteConfig({
   siteConfig,
   overrides,
@@ -279,7 +283,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
       podDstPath,
       {
         ...payload,
-        notes: mapObject(payload.notes, (_idx, { body: _body, ...note }) => note),
+        notes: removeBodyFromNotesDict(payload.notes),
       },
       { encoding: "utf8", spaces: 2 }
     );

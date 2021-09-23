@@ -23686,6 +23686,34 @@ void-elements@^2.0.1:
   resolved "https://registry.npmjs.org/void-elements/-/void-elements-2.0.1.tgz#c066afb582bb1cb4128d60ea92392e94d5e9dbec"
   integrity sha1-wGavtYK7HLQSjWDqkjkulNXp2+w=
 
+vsce@^1.100.0:
+  version "1.100.0"
+  resolved "https://registry.npmjs.org/vsce/-/vsce-1.100.0.tgz#82818b69fbfc8697e087b6bc7c5084306cdee7ea"
+  integrity sha512-sY1NVSZkesioir/1w04igdSPKKHb4QAn7AngOQIKvNTvtFUFuEE/KrcURcld9Gai9W5167zaeifW5rWUsX3rLg==
+  dependencies:
+    azure-devops-node-api "^11.0.1"
+    chalk "^2.4.2"
+    cheerio "^1.0.0-rc.9"
+    commander "^6.1.0"
+    denodeify "^1.2.1"
+    glob "^7.0.6"
+    hosted-git-info "^4.0.2"
+    leven "^3.1.0"
+    lodash "^4.17.15"
+    markdown-it "^10.0.0"
+    mime "^1.3.4"
+    minimatch "^3.0.3"
+    osenv "^0.1.3"
+    parse-semver "^1.1.1"
+    read "^1.0.7"
+    semver "^5.1.0"
+    tmp "^0.2.1"
+    typed-rest-client "^1.8.4"
+    url-join "^1.1.0"
+    xml2js "^0.4.23"
+    yauzl "^2.3.1"
+    yazl "^2.2.2"
+
 vsce@^1.96.1:
   version "1.96.1"
   resolved "https://registry.npmjs.org/vsce/-/vsce-1.96.1.tgz#782eb094001f14ce9abecb5d3a1d8586a14bac4b"

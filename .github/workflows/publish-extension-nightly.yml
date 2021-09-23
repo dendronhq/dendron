@@ -1,15 +1,13 @@
-# This workflow will build the prerelease plugin and publish it to the VS Code
-# Marketplace under the 'nightly' extension target. This will NOT publish any
-# packages to NPM.
+# This workflow will build the plugin vsix every week night at 12:00 AM PST and
+# publish it to the VS Code Marketplace under the 'nightly' extension target.
+# This will NOT publish any packages to NPM.
 name: Publish Extension - Nightly
 
-# TODO: Switch to on push once testing is done.
-# on: workflow_dispatch
+# See documentation on POSIX cron syntax here: https://docs.github.com/en/actions/reference/events-that-trigger-workflows#scheduled-events
+# Scheduled to run every weekday at 12:00 AM PST, which is 7:00 AM UTC Tuesday-Saturday
 on:
-  push:
-    branches:
-      - chore/ga-build-automation
-  #     - master with chron schedule.
+  schedule:
+    - cron:  '0 7 * * 2-6'
 
 jobs:
   build:

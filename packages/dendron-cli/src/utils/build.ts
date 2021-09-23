@@ -203,9 +203,10 @@ export class BuildUtils {
     console.log("package.json manifest version is " + packageJsonVersion);
 
     try {
-      const extMetadata = await $$(`npx vsce show dendron.nightly --json`, { cwd: this.getPluginRootPath() });
+      const extMetadata = await $$(`npx vsce show dendron.nightly --json`, {
+        cwd: this.getPluginRootPath(),
+      });
       const result = extMetadata.stdout;
-      console.log(result);
       const formatted = result.replace("\t", "").replace("\n", "");
       const json = JSON.parse(formatted);
 
@@ -215,9 +216,10 @@ export class BuildUtils {
         ? packageJsonVersion
         : semver.inc(marketplaceVersion, "patch");
       return verToUse ?? undefined;
-    } catch(e: any) {
+    } catch (e: any) {
       console.error(
-        "Unable to fetch current version for nightly ext from VS Code marketplace. Attempting to use version in package.json. Error " + e
+        "Unable to fetch current version for nightly ext from VS Code marketplace. Attempting to use version in package.json. Error " +
+          e
       );
       return version;
     }

@@ -513,7 +513,29 @@
           "when": "view == dendron.backlinks",
           "group": "navigation"
         }
-      ]
+      ],
+      "explorer/context": [
+        {
+          "when": "explorerResourceIsFolder && dendron:pluginActive && workspaceFolderCount > 1",
+          "command": "dendron.vaultAdd",
+          "group": "2_workspace"
+        },
+        {
+          "when": "explorerResourceIsFolder && dendron:pluginActive",
+          "command": "dendron.vaultRemove",
+          "group": "2_workspace"
+        },
+        {
+          "when": "resourceExtname == .md && dendron:pluginActive",
+          "command": "dendron.deleteNode",
+          "group": "2_workspace"
+        },
+        {
+          "when": "resourceExtname == .md && dendron:pluginActive",
+          "command": "dendron.renameNote",
+          "group": "2_workspace"
+        }
+      ]  
     },
     "configuration": {
       "title": "dendron",

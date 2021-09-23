@@ -21,19 +21,30 @@ export class VaultRemoveCommand extends BasicCommand<
   CommandOutput
 > {
   key = DENDRON_COMMANDS.VAULT_REMOVE.key;
-  async gatherInputs(): Promise<any> {
+  async gatherInputs(opts: any): Promise<any> {
     const { vaults } = getDWorkspace();
-    const vaultQuickPick = await VSCodeUtils.showQuickPick(
-      vaults.map((ent) => ({
-        label: VaultUtils.getName(ent),
-        detail: ent.fsPath,
-        data: ent,
-      }))
-    );
-    if (_.isUndefined(vaultQuickPick)) {
-      return;
+    // added for contextual-ui
+    if (!_.isUndefined(opts.path)) {
+      const path: string = opts.path;
+      const vname = path.substring(path.lastIndexOf("/") + 1);
+      const vault = VaultUtils.getVaultByName({
+        vaults,
+        vname,
+      });
+      return { vault };
+    } else {
+      const vaultQuickPick = await VSCodeUtils.showQuickPick(
+        vaults.map((ent) => ({
+          label: VaultUtils.getName(ent),
+          detail: ent.fsPath,
+          data: ent,
+        }))
+      );
+      if (_.isUndefined(vaultQuickPick)) {
+        return;
+      }
+      return { vault: vaultQuickPick?.data };
     }
-    return { vault: vaultQuickPick?.data };
   }
 
   async execute(opts: CommandOpts) {

@@ -191,6 +191,16 @@ export class ErrorFactory {
       message: `unexpected event: '${this.safeStringify(event)}'`,
     });
   }
+  static createInvalidStateError({
+    message,
+  }: {
+    message: string;
+  }): DendronError {
+    return new DendronError({
+      status: ERROR_STATUS.INVALID_STATE,
+      message,
+    });
+  }
 
   /** Stringify that will not throw if it fails to stringify
    * (for example: due to circular references)  */

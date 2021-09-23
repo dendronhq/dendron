@@ -188,7 +188,7 @@ exports[`dendronPub note reference fail: with vault prefix 1`] = `
 VFile {
   "contents": "# Ref
 
-> Error rendering note reference for bar
+> No note with name bar found in vault vault2
 
 
 ",
@@ -203,7 +203,7 @@ exports[`dendronPub note reference nonexistent 1`] = `
 VFile {
   "contents": "# Ref
 
-> Error rendering note reference. No note found with name bar
+> No note with name bar found
 
 
 ",

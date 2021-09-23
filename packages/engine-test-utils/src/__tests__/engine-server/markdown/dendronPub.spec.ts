@@ -355,10 +355,7 @@ describe("dendronPub", () => {
             vault: vaults[0],
             config: engine.config,
           }).process("![[bar]]");
-          await checkVFile(
-            out,
-            "Error rendering note reference. No note found with name bar"
-          );
+          await checkVFile(out, "No note with name bar found");
         },
         {
           preSetupHook: async ({ wsRoot, vaults }) => {
@@ -454,7 +451,7 @@ describe("dendronPub", () => {
             vault: vaults[0],
             config: engine.config,
           }).process("![[dendron://vault2/bar]]");
-          await checkVFile(out, "Error rendering note reference for bar");
+          await checkVFile(out, "No note with name bar found in vault vault2");
         },
         {
           preSetupHook: async ({ wsRoot, vaults }) => {

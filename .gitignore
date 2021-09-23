@@ -39,3 +39,5 @@ test-workspace-*-profile
 Session.vim
 *.log
 *.log.old
+dendron-main.code-workspace
+pkgjson.code-search

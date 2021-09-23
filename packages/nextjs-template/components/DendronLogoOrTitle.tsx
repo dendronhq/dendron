@@ -25,7 +25,9 @@ export default function DendronLogoOrTitle() {
       >
         {engine.config?.site.logo ? (
           <Logo
-            logoUrl={"/assets/" + path.basename(engine.config?.site.logo)}
+            logoUrl={
+              "/assets/images/" + path.basename(engine.config?.site.logo)
+            }
           />
         ) : (
           <Title data={title} />

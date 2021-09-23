@@ -216,7 +216,7 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
           const assetPathRel = path
             .join(assetDirName, assetBaseNew)
             .replace(/[\\]/g, "/");
-          const key = _.replace(_item.path as string, /[\\|/]/g, "");
+          const key = _.replace(_item.path as string, /[\\|/|.]/g, "");
           assetHashMap.set(key, `/${assetPathRel}`);
 
           fs.copyFileSync(path.join(src, _item.path), assetPathFull);

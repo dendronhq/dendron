@@ -450,9 +450,16 @@ describe("markdown import pod", () => {
             encoding: "utf8",
           }
         );
+        const fileBody2Content = fs.readFileSync(
+          path.join(vpath, "project.p4.n1.md"),
+          {
+            encoding: "utf8",
+          }
+        );
         expect(fileBody.match("test.txt")).toBeTruthy();
         const assetPath = path.join("assets", "test.txt").replace(/[\\]/g, "/");
         expect(fileBodyContent).toContain(`[test-pdf](/${assetPath})`);
+        expect(fileBody2Content).toContain(`[test-pdf](/${assetPath})`);
         expect(assetsDir.length).toEqual(3);
       },
       {
@@ -462,6 +469,10 @@ describe("markdown import pod", () => {
           fs.writeFileSync(
             path.join(importSrc, "project", "p2", "n1.md"),
             "[test-pdf](/project/p4/test.txt)"
+          );
+          fs.writeFileSync(
+            path.join(importSrc, "project", "p4", "n1.md"),
+            "[test-pdf](./test.txt)"
           );
         },
       }

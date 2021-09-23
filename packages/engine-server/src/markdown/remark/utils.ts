@@ -958,9 +958,20 @@ export class RemarkUtils {
           ...selectAll(DendronASTTypes.LINK, root),
         ];
         assetReferences.forEach((asset) => {
-          const key = _.replace(asset.url as string, /[\\|/]/g, "");
+          const key = _.replace(asset.url as string, /[\\|/|.]/g, "");
           const value = assetHashMap.get(key);
-          if (value) asset.url = value;
+          if (value) {
+            asset.url = value;
+          } else {
+            // for realative links
+            const prefix = _.replace(
+              note.fname.substring(0, note.fname.lastIndexOf(".")),
+              /[\\|/|.]/g,
+              ""
+            );
+            const value = assetHashMap.get(prefix.concat(key));
+            if (value) asset.url = value;
+          }
           changes.push({
             note,
             status: "update",

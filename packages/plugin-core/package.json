@@ -535,6 +535,13 @@
           "command": "dendron.renameNote",
           "group": "2_workspace"
         }
+      ] ,
+      "editor/context": [
+        {
+          "when": "editorHasSelection && dendron:pluginActive",
+          "command": "dendron.renameHeader",
+          "group": "2_workspace"
+        } 
       ]  
     },
     "configuration": {

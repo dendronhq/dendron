@@ -53,6 +53,14 @@ export class GitTestUtils {
     await git.commit({ msg: "init" });
   }
 
+  /**
+   * Create a git backed remote
+   * /{root}
+   *   - .git
+   *   - README.md
+   * @param root
+   * @param opts
+   */
   static async createRepoWithReadme(
     root: string,
     opts?: { remote?: boolean; branchName?: string }

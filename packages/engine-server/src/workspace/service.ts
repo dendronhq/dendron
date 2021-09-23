@@ -363,7 +363,7 @@ export class WorkspaceService {
             await git.addAll();
             await git.commit({ msg: "update" });
             return { repo, vaults, status: SyncActionStatus.DONE };
-          } catch (err) {
+          } catch (err: any) {
             const stderr = err.stderr ? `: ${err.stderr}` : "";
             throw new DendronError({
               message: `error adding and committing vault${stderr}`,
@@ -381,8 +381,11 @@ export class WorkspaceService {
    * @param opts
    * @returns
    */
-  async initialize(opts: { onSyncVaultsProgress: any; onSyncVaultsEnd: any }) {
-    const { onSyncVaultsProgress, onSyncVaultsEnd } = opts;
+  async initialize(opts?: { onSyncVaultsProgress: any; onSyncVaultsEnd: any }) {
+    const { onSyncVaultsProgress, onSyncVaultsEnd } = _.defaults(opts, {
+      onSyncVaultsProgress: () => {},
+      onSyncVaultsEnd: () => {},
+    });
     if (this.config.initializeRemoteVaults) {
       const { didClone } = await this.syncVaults({
         config: this.config,
@@ -675,7 +678,7 @@ export class WorkspaceService {
           try {
             await git.pull();
             return { repo, vaults, status: SyncActionStatus.DONE };
-          } catch (err) {
+          } catch (err: any) {
             const stderr = err.stderr ? `: ${err.stderr}` : "";
             throw new DendronError({
               message: `error pulling vault${stderr}`,
@@ -718,7 +721,7 @@ export class WorkspaceService {
           try {
             await git.push();
             return { repo, vaults, status: SyncActionStatus.DONE };
-          } catch (err) {
+          } catch (err: any) {
             const stderr = err.stderr ? `: ${err.stderr}` : "";
             throw new DendronError({
               message: `error pushing vault${stderr}`,

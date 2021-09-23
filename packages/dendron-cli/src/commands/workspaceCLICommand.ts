@@ -1,4 +1,4 @@
-import { WorkspaceService } from "@dendronhq/engine-server";
+import { DEngineClient, WorkspaceService } from "@dendronhq/engine-server";
 import yargs from "yargs";
 import { CLICommand, CommandCommonProps } from "./base";
 import {
@@ -15,9 +15,12 @@ type CommandCLIOpts = {
   cmd: WorkspaceCommands;
 };
 
-type CommandOpts = CommandCLIOpts & SetupEngineResp & CommandCommonProps;
+type CommandOpts = CommandCLIOpts &
+  Omit<SetupEngineResp, "engine"> & {
+    engine?: DEngineClient;
+  } & CommandCommonProps;
 
-type CommandOutput = any;
+type CommandOutput = CommandCommonProps & { data?: any };
 
 export enum WorkspaceCommands {
   PULL = "pull",
@@ -25,6 +28,7 @@ export enum WorkspaceCommands {
   ADD_AND_COMMIT = "addAndCommit",
   SYNC = "sync",
   REMOVE_CACHE = "removeCache",
+  INIT = "init",
 }
 
 export { CommandOpts as WorkspaceCLICommandOpts };
@@ -53,7 +57,7 @@ export class WorkspaceCLICommand extends CLICommand<
     return { ...args, ...engineArgs };
   }
 
-  async execute(opts: CommandOpts) {
+  async execute(opts: CommandOpts): Promise<CommandOutput> {
     const { cmd, wsRoot } = opts;
 
     try {
@@ -62,6 +66,11 @@ export class WorkspaceCLICommand extends CLICommand<
           const ws = new WorkspaceService({ wsRoot });
           await ws.pullVaults();
           break;
+        }
+        case WorkspaceCommands.INIT: {
+          const ws = new WorkspaceService({ wsRoot });
+          const out = await ws.initialize();
+          return { data: out };
         }
         case WorkspaceCommands.ADD_AND_COMMIT: {
           const ws = new WorkspaceService({ wsRoot });
@@ -94,8 +103,10 @@ export class WorkspaceCLICommand extends CLICommand<
           throw Error("bad option");
         }
       }
+      return { error: undefined };
     } catch (err: any) {
       this.L.error(err);
+      return { error: err };
     } finally {
       if (opts.server.close) {
         opts.server.close();

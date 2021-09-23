@@ -23,13 +23,13 @@ export class VaultRemoveCommand extends BasicCommand<
   key = DENDRON_COMMANDS.VAULT_REMOVE.key;
   async gatherInputs(opts: any): Promise<any> {
     const { vaults } = getDWorkspace();
+    const wsRoot = getDWorkspace().wsRoot as string;
     // added for contextual-ui
-    if (!_.isUndefined(opts.path)) {
-      const path: string = opts.path;
-      const vname = path.substring(path.lastIndexOf("/") + 1);
-      const vault = VaultUtils.getVaultByName({
+    if (!_.isUndefined(opts?.path)) {
+      const vault = VaultUtils.getVaultByDirPath({
+        fsPath: opts?.fsPath,
         vaults,
-        vname,
+        wsRoot,
       });
       return { vault };
     } else {

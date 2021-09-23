@@ -159,10 +159,16 @@ export class BuildUtils {
     return $(`vsce package --yarn`, { cwd: this.getPluginRootPath() });
   }
 
-  // TODO: Change default back to Dendron
-  static prepPluginPkg(target: ExtensionTarget = ExtensionTarget.NIGHTLY) {
-    console.log("Extension Target is " + target.toString());
+  static async prepPluginPkg(
+    target: ExtensionTarget = ExtensionTarget.DENDRON
+  ) {
     const pkgPath = path.join(this.getPluginRootPath(), "package.json");
+
+    const version =
+      target === ExtensionTarget.NIGHTLY
+        ? await this.getIncrementedVerForNightly()
+        : undefined;
+
     this.updatePkgMeta({
       pkgPath,
       name: target.toString(),
@@ -172,6 +178,7 @@ export class BuildUtils {
         url: "https://github.com/dendronhq/dendron.git",
         type: "git",
       },
+      version,
     });
     this.removeDevDepsFromPkgJson({
       pkgPath,
@@ -180,6 +187,39 @@ export class BuildUtils {
         "@dendronhq/engine-test-utils",
       ],
     });
+  }
+
+  /**
+   * Gets the appropriate version to use for nightly ext. Published versions in
+   * the marketplace must be monotonically increasing. If current package.json
+   * version is greated than the marketplace, use that. Otherwise, just bump the
+   * patch version.
+   * @returns
+   */
+  static async getIncrementedVerForNightly() {
+    const pkgPath = path.join(this.getPluginRootPath(), "package.json");
+    const { version } = this.getPkgMeta({ pkgPath });
+    const packageJsonVersion = version;
+    console.log("package.json manifest version is " + packageJsonVersion);
+
+    try {
+      const extMetadata = await $$(`vsce show dendron.nightly --json`);
+      const result = extMetadata.stdout;
+      const formatted = result.replace("\t", "").replace("\n", "");
+      const json = JSON.parse(formatted);
+
+      const marketplaceVersion = json.versions[0]["version"];
+      console.log("Marketplace Version is " + marketplaceVersion);
+      const verToUse = semver.lt(marketplaceVersion, packageJsonVersion)
+        ? packageJsonVersion
+        : semver.inc(marketplaceVersion, "patch");
+      return verToUse ?? undefined;
+    } catch {
+      console.error(
+        "Unable to fetch current version for nightly ext from VS Code marketplace. Attempting to use version in package.json"
+      );
+      return version;
+    }
   }
 
   /**
@@ -288,6 +328,7 @@ export class BuildUtils {
     description,
     main,
     repository,
+    version,
   }: {
     pkgPath: string;
     name: string;
@@ -307,6 +348,9 @@ export class BuildUtils {
     }
     if (repository) {
       pkg.repository = repository;
+    }
+    if (version) {
+      pkg.version = version;
     }
     pkg.main = "dist/extension.js";
     fs.writeJSONSync(pkgPath, pkg, { spaces: 4 });

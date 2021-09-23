@@ -203,7 +203,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
             };
           }
 
-          BuildUtils.prepPluginPkg(opts.extensionTarget);
+          await BuildUtils.prepPluginPkg(opts.extensionTarget);
           return { error: null };
         }
         case DevCommands.PACKAGE_PLUGIN: {
@@ -268,7 +268,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     await this.syncAssets();
 
     this.print("prep repo...");
-    BuildUtils.prepPluginPkg();
+    await BuildUtils.prepPluginPkg();
 
     this.print("install deps...");
     BuildUtils.installPluginDependencies();

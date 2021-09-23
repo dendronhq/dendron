@@ -28,8 +28,8 @@ export default function Home() {
             <Heading mb={4}>Welcome to Dendron</Heading>
           </Center>
           <Text fontSize="xl">
-            If you haven&apos;t already done so, you can install Dendron by
-            following the instructions &nbsp;
+            If you haven&apos;t already done so, you can install Dendron by following
+            the instructions &nbsp;
             <Link
               href="https://dendron.so/notes/678c77d9-ef2c-4537-97b5-64556d6337f1.html"
               isExternal

@@ -14,9 +14,7 @@ import {
   Spin,
   Button,
   Divider,
-  Badge,
-  ConfigProvider,
-} from "antd";
+ Badge, ConfigProvider } from "antd";
 
 import generateCalendar from "antd/lib/calendar/generateCalendar";
 import classNames from "classnames";

@@ -1,5 +1,5 @@
 import { BookOutlined, PlusOutlined, NumberOutlined } from "@ant-design/icons";
-import { Spin, Tree, TreeProps } from "antd";
+import { Spin , Tree, TreeProps } from "antd";
 import {
   DendronTreeViewKey,
   DMessageSource,
@@ -264,7 +264,7 @@ function TreeView({
           onExpand={onExpand}
           onSelect={onSelect}
           treeData={treeData}
-        />
+         />
       ) : (
         <Spin />
       )}

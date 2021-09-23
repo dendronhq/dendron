@@ -1,11 +1,11 @@
-# Creates a prerelease branch off of master every weeknight
+# Creates a prerelease branch off of master every Thursday, 7 PM UTC
 name: Create Prerelease Branch
 
 # See documentation on POSIX cron syntax here: https://docs.github.com/en/actions/reference/events-that-trigger-workflows#scheduled-events
-# Scheduled to run every weekday at 12:00 AM PST, which is 7:00 AM UTC Tuesday-Saturday
+# Scheduled to run at 7 PM UTC on Thursdays
 on:
   schedule:
-    - cron:  '0 7 * * 2-6'
+    - cron:  '0 19 * * 4'
 
 jobs:
   build:
@@ -26,7 +26,7 @@ jobs:
           ref: master
           ssh-key: "${{ secrets.COMMIT_KEY }}"
 
-      # Bump the patch version number from what's in package.json for the plugin
+      # Bump the version number from what's in package.json for the plugin
       - name: Checkout Branch
         run: |
           git config user.name github-actions

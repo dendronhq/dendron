@@ -47,7 +47,9 @@ describe("build", () => {
           BuildUtils,
           "syncStaticAssets"
         ).returns(Promise.resolve());
-        const prepPluginPkgStub = stub(BuildUtils, "prepPluginPkg").returns();
+        const prepPluginPkgStub = stub(BuildUtils, "prepPluginPkg").returns(
+          Promise.resolve()
+        );
         const installPluginDependenciesStub = stub(
           BuildUtils,
           "installPluginDependencies"

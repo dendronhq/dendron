@@ -203,7 +203,7 @@ export class BuildUtils {
     console.log("package.json manifest version is " + packageJsonVersion);
 
     try {
-      const extMetadata = await $$(`vsce show dendron.nightly --json`, { cwd: this.getPluginRootPath() });
+      const extMetadata = await $$(`npx vsce show dendron.nightly --json`, { cwd: this.getPluginRootPath() });
       const result = extMetadata.stdout;
       console.log(result);
       const formatted = result.replace("\t", "").replace("\n", "");

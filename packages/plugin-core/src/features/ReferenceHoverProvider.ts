@@ -25,7 +25,7 @@ import {
   getReferenceAtPosition,
   isUncPath
 } from "../utils/md";
-import { getDWorkspace, getEngine } from "../workspace";
+import { DendronExtension, getDWorkspace, getEngine } from "../workspace";
 
 const HOVER_IMAGE_MAX_HEIGHT = Math.max(200, 10);
 
@@ -92,6 +92,12 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
   ): Promise<vscode.Hover | null> {
     try {
       const ctx = "provideHover";
+
+      // No-op if we're not in a Dendron Workspace
+      if (!DendronExtension.isActive()) {
+        return null;
+      }
+
       const refAtPos = getReferenceAtPosition(document, position);
       if (!refAtPos) return null;
       const { range } = refAtPos;

@@ -1,4 +1,4 @@
-import { DendronError } from "@dendronhq/common-all";
+import { DendronError, error2PlainObject } from "@dendronhq/common-all";
 import { createLogger, findUpTo } from "@dendronhq/common-server";
 import execa from "execa";
 import fs from "fs-extra";
@@ -169,10 +169,16 @@ export class BuildUtils {
         ? await this.getIncrementedVerForNightly()
         : undefined;
 
+    const description = 
+      target === ExtensionTarget.NIGHTLY
+      ? "This is a prerelease version of Dendron that may be unstable. Please install the main dendron extension instead."
+      : undefined;
+
     this.updatePkgMeta({
       pkgPath,
       name: target.toString(),
       displayName: target.toString(),
+      description,
       main: "./dist/extension.js",
       repository: {
         url: "https://github.com/dendronhq/dendron.git",
@@ -216,10 +222,10 @@ export class BuildUtils {
         ? packageJsonVersion
         : semver.inc(marketplaceVersion, "patch");
       return verToUse ?? undefined;
-    } catch (e: any) {
+    } catch (err: any) {
       console.error(
         "Unable to fetch current version for nightly ext from VS Code marketplace. Attempting to use version in package.json. Error " +
-          e
+        error2PlainObject(err)
       );
       return version;
     }
@@ -338,7 +344,6 @@ export class BuildUtils {
     displayName: string;
   } & Partial<PkgJson>) {
     const pkg = fs.readJSONSync(pkgPath) as PkgJson;
-    pkg.version = "0.60.2";
     pkg.name = name;
     if (description) {
       pkg.description = description;

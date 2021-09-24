@@ -147,7 +147,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
           });
           if (
             colorType === "configured" ||
-            opts?.noRandomlyColoredTags !== false
+            (!config.site.noRandomlyColoredTags && !opts?.noRandomlyColoredTags)
           ) {
             color = maybeColor;
           }

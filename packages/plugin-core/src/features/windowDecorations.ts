@@ -31,6 +31,7 @@ import {
   TextDocument,
   TextEditor,
   TextEditorDecorationType,
+  ThemableDecorationAttachmentRenderOptions,
   ThemeColor,
   window,
 } from "vscode";
@@ -311,23 +312,18 @@ function decorateTag({
   lineOffset?: number;
   doExpensiveDecorations: boolean;
 }) {
-  // fully transparent, effectively no background if the note is too long
-  let backgroundColor = "#00000000";
-
+  let before: ThemableDecorationAttachmentRenderOptions | undefined;
   if (doExpensiveDecorations) {
     // Getting the color requires a lot of lookups by fname, and can be very expensive
-    const { color } = NoteUtils.color({
+    const { color: backgroundColor, type } = NoteUtils.color({
       fname,
       notes: getDWorkspace().engine.notes,
     });
-    backgroundColor = color;
-  }
-
-  const type = linkedNoteType({ fname, doExpensiveDecorations });
-  const decoration: DecorationOptions = {
-    range: VSCodeUtils.position2VSCodeRange(position, { line: lineOffset }),
-    renderOptions: {
-      before: {
+    if (
+      type === "configured" ||
+      !getDWorkspace().config.noRandomlyColoredTags
+    ) {
+      before = {
         contentText: " ",
         width: "0.8rem",
         height: "0.8rem",
@@ -335,7 +331,15 @@ function decorateTag({
         border: "1px solid",
         borderColor: new ThemeColor("foreground"),
         backgroundColor,
-      },
+      };
+    }
+  }
+
+  const type = linkedNoteType({ fname, doExpensiveDecorations });
+  const decoration: DecorationOptions = {
+    range: VSCodeUtils.position2VSCodeRange(position, { line: lineOffset }),
+    renderOptions: {
+      before,
     },
   };
 

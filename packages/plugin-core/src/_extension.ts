@@ -18,7 +18,6 @@ import {
   getDurationMilliseconds,
   getOS,
   SegmentClient,
-  writeJSONWithComments,
 } from "@dendronhq/common-server";
 import {
   HistoryService,
@@ -29,7 +28,6 @@ import {
 import { RewriteFrames } from "@sentry/integrations";
 import * as Sentry from "@sentry/node";
 import { ExecaChildProcess } from "execa";
-import fs from "fs-extra";
 import _ from "lodash";
 import { Duration } from "luxon";
 import path from "path";
@@ -42,7 +40,7 @@ import { StateService } from "./services/stateService";
 import { Extensions } from "./settings";
 import { setupSegmentClient } from "./telemetry";
 import { GOOGLE_OAUTH_ID, GOOGLE_OAUTH_SECRET } from "./types/global";
-import { KeybindingUtils, VSCodeUtils, WSUtils } from "./utils";
+import { VSCodeUtils, WSUtils } from "./utils";
 import { AnalyticsUtils } from "./utils/analytics";
 import { DendronTreeView } from "./views/DendronTreeView";
 import {
@@ -455,42 +453,6 @@ export async function _activate(
       const vimInstalled = VSCodeUtils.isExtensionInstalled("vscodevim.vim");
       if (vimInstalled) {
         AnalyticsUtils.track(ExtensionEvents.VimExtensionInstalled);
-        const { keybindingConfigPath, newKeybindings: resolvedKeybindings } =
-          KeybindingUtils.checkAndApplyVimKeybindingOverrideIfExists();
-        if (!_.isUndefined(resolvedKeybindings)) {
-          if (!fs.existsSync(keybindingConfigPath)) {
-            fs.ensureFileSync(keybindingConfigPath);
-            fs.writeFileSync(keybindingConfigPath, "[]");
-          }
-          writeJSONWithComments(keybindingConfigPath, resolvedKeybindings);
-          AnalyticsUtils.track(ExtensionEvents.VimExtensionInstalled, {
-            fixApplied: true,
-          });
-        }
-      }
-    }
-
-    if (extensionInstallStatus === InstallStatus.UPGRADED) {
-      const { keybindingConfigPath, migratedKeybindings } =
-        KeybindingUtils.checkAndMigrateLookupKeybindingIfExists();
-      if (!_.isUndefined(migratedKeybindings)) {
-        fs.copyFileSync(keybindingConfigPath, `${keybindingConfigPath}.old`);
-        writeJSONWithComments(keybindingConfigPath, migratedKeybindings);
-        vscode.window
-          .showInformationMessage(
-            "Keybindings for lookup has been updated. Click the button below to see changes.",
-            ...["Open changes"]
-          )
-          .then(async (selection) => {
-            if (selection) {
-              const uri = vscode.Uri.file(keybindingConfigPath);
-              const backupUri = vscode.Uri.file(`${keybindingConfigPath}.old`);
-              await VSCodeUtils.openFileInEditor(uri);
-              await VSCodeUtils.openFileInEditor(backupUri, {
-                column: vscode.ViewColumn.Beside,
-              });
-            }
-          });
       }
     }
 

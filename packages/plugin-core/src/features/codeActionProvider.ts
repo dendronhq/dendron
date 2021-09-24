@@ -21,6 +21,7 @@ import { DoctorCommand } from "../commands/Doctor";
 import { Logger } from "../logger";
 import { VSCodeUtils } from "../utils";
 import { sentryReportingCallback } from "../utils/analytics";
+import { DendronExtension } from "../workspace";
 
 /** Used to match the warnings to code actions. Also displayed for users along with the warning message. */
 const BAD_FRONTMATTER_CODE = "bad frontmatter";
@@ -122,6 +123,11 @@ export const doctorFrontmatterProvider: CodeActionProvider = {
       context: CodeActionContext,
       _token: CancellationToken
     ) => {
+      // No-op if we're not in a Dendron Workspace
+      if (!DendronExtension.isActive()) {
+        return;
+      }
+
       // Only provide fix frontmatter action if the diagnostic is correct
       const diagnostics = context.diagnostics.filter(
         (item) => item.code === BAD_FRONTMATTER_CODE

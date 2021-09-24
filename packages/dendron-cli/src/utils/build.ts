@@ -1,4 +1,4 @@
-import { DendronError } from "@dendronhq/common-all";
+import { DendronError, error2PlainObject } from "@dendronhq/common-all";
 import { createLogger, findUpTo } from "@dendronhq/common-server";
 import execa from "execa";
 import fs from "fs-extra";
@@ -14,6 +14,7 @@ type PkgJson = {
   version: string;
   repository: PkgRepository;
   devDependencies: { [key: string]: string };
+  icon: string;
 };
 
 type PkgRepository = {
@@ -32,6 +33,11 @@ export enum SemverVersion {
 export enum PublishEndpoint {
   LOCAL = "local",
   REMOTE = "remote",
+}
+
+export enum ExtensionTarget {
+  DENDRON = "dendron",
+  NIGHTLY = "nightly",
 }
 
 const $ = (cmd: string, opts?: any) => {
@@ -154,16 +160,33 @@ export class BuildUtils {
     return $(`vsce package --yarn`, { cwd: this.getPluginRootPath() });
   }
 
-  static prepPluginPkg() {
+  static async prepPluginPkg(
+    target: ExtensionTarget = ExtensionTarget.DENDRON
+  ) {
     const pkgPath = path.join(this.getPluginRootPath(), "package.json");
+
+    let version;
+    let description;
+    let icon;
+
+    if (target === ExtensionTarget.NIGHTLY) {
+      version = await this.getIncrementedVerForNightly();
+      description = "This is a prerelease version of Dendron that may be unstable. Please install the main dendron extension instead.";
+      icon = "assets/images/logo-bw.png";
+    }
+
     this.updatePkgMeta({
       pkgPath,
-      name: "dendron",
+      name: target.toString(),
+      displayName: target.toString(),
+      description,
       main: "./dist/extension.js",
       repository: {
         url: "https://github.com/dendronhq/dendron.git",
         type: "git",
       },
+      version,
+      icon
     });
     this.removeDevDepsFromPkgJson({
       pkgPath,
@@ -172,6 +195,42 @@ export class BuildUtils {
         "@dendronhq/engine-test-utils",
       ],
     });
+  }
+
+  /**
+   * Gets the appropriate version to use for nightly ext. Published versions in
+   * the marketplace must be monotonically increasing. If current package.json
+   * version is greated than the marketplace, use that. Otherwise, just bump the
+   * patch version.
+   * @returns
+   */
+  static async getIncrementedVerForNightly() {
+    const pkgPath = path.join(this.getPluginRootPath(), "package.json");
+    const { version } = this.getPkgMeta({ pkgPath });
+    const packageJsonVersion = version;
+    console.log("package.json manifest version is " + packageJsonVersion);
+
+    try {
+      const extMetadata = await $$(`npx vsce show dendron.nightly --json`, {
+        cwd: this.getPluginRootPath(),
+      });
+      const result = extMetadata.stdout;
+      const formatted = result.replace("\t", "").replace("\n", "");
+      const json = JSON.parse(formatted);
+
+      const marketplaceVersion = json.versions[0]["version"];
+      console.log("Marketplace Version is " + marketplaceVersion);
+      const verToUse = semver.lt(marketplaceVersion, packageJsonVersion)
+        ? packageJsonVersion
+        : semver.inc(marketplaceVersion, "patch");
+      return verToUse ?? undefined;
+    } catch (err: any) {
+      console.error(
+        "Unable to fetch current version for nightly ext from VS Code marketplace. Attempting to use version in package.json. Error " +
+        error2PlainObject(err)
+      );
+      return version;
+    }
   }
 
   /**
@@ -276,23 +335,36 @@ export class BuildUtils {
   static updatePkgMeta({
     pkgPath,
     name,
+    displayName,
     description,
     main,
     repository,
+    version,
+    icon
   }: {
     pkgPath: string;
     name: string;
+    displayName: string;
   } & Partial<PkgJson>) {
     const pkg = fs.readJSONSync(pkgPath) as PkgJson;
     pkg.name = name;
     if (description) {
       pkg.description = description;
     }
+    if (displayName) {
+      pkg.displayName = displayName;
+    }
     if (main) {
       pkg.main = main;
     }
     if (repository) {
       pkg.repository = repository;
+    }
+    if (version) {
+      pkg.version = version;
+    }
+    if (icon) {
+      pkg.icon = icon;
     }
     pkg.main = "dist/extension.js";
     fs.writeJSONSync(pkgPath, pkg, { spaces: 4 });

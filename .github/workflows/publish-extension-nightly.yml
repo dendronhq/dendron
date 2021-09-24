@@ -1,13 +1,17 @@
-name: Early Seed Build
+# This workflow will build the plugin vsix every week night at 12:00 AM PST and
+# publish it to the VS Code Marketplace under the 'nightly' extension target.
+# This will NOT publish any packages to NPM.
+name: Publish Extension - Nightly
 
+# See documentation on POSIX cron syntax here: https://docs.github.com/en/actions/reference/events-that-trigger-workflows#scheduled-events
+# Scheduled to run every weekday at 12:00 AM PST, which is 7:00 AM UTC Tuesday-Saturday
 on:
-  push:
-    branches:
-      - prerelease/*
+  schedule:
+    - cron:  '0 7 * * 2-6'
 
 jobs:
   build:
-    environment: plugin
+    environment: plugin-production
     strategy:
       fail-fast: true
 
@@ -37,20 +41,24 @@ jobs:
 
       - name: Yarn Setup
         run: yarn setup
-
+      
       - name: Set Up Yarn Local Registry
         run: yarn config set registry http://localhost:4873
       
       - name: Set Up NPM Local Registry
-        run: npm set registry http://localhost:4873/
+        run: | 
+          npm set registry http://localhost:4873/
+          echo $NODE_OPTIONS
       
       - name: Build the VSIX
         env: 
           GOOGLE_OAUTH_CLIENT_SECRET: ${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}
           GOOGLE_OAUTH_CLIENT_ID: ${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          NODE_OPTIONS: --max_old_space_size=4096
         run: |
           echo "DENDRON_RELEASE_VERSION=`cat meta.json | jq -r '.["@dendronhq/plugin-core"]' | awk -F. -v OFS=. 'NF==1{print ++$NF}; NF>1{$NF=sprintf("%0*d", length($NF), ($NF+1)); print}'`" >> $GITHUB_ENV
+          echo $NODE_OPTIONS
           yarn build:patch:local:ci
 
       - name: Upload VSIX Artifact
@@ -59,19 +67,17 @@ jobs:
           name: vsix
           path: ./packages/plugin-core/*.vsix
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.DENDRON_BOT_S3_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.DENDRON_BOT_S3_ACCESS_KEY }}
-          aws-region: us-east-1
-
-      - name: Publish VSIX to S3
+      - name: Prepare Package Manifest
+        env: 
+          NODE_OPTIONS: --max_old_space_size=4096
         run: |
-          version=`cat ./packages/plugin-core/package.json | jq ".version" -r`
-          name=`cat ./packages/plugin-core/package.json | jq ".displayName" -r`
-          package="$name-$version.vsix"
-          echo $package
-          BUCKET=org-dendron-public-assets
-          aws s3 cp --acl public-read ./packages/plugin-core/$package s3://$BUCKET/publish/$package
-          echo https://$BUCKET.s3.amazonaws.com/publish/$package
+          DENDRON_CLI=./packages/dendron-cli/lib/bin/dendron-cli.js
+          LOG_LEVEL=info $DENDRON_CLI dev prep_plugin --extensionTarget nightly
+
+      - name: Publish to VS Code Marketplace
+        env: 
+          VSCE_PAT: ${{ secrets.VSCODE_PUBLISH_PWD }}
+          NODE_OPTIONS: --max_old_space_size=4096
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+        working-directory: ./packages/plugin-core
+        run: yarn deploy:vscode

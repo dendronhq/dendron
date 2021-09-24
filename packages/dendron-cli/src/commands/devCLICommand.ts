@@ -3,16 +3,17 @@ import {
   DendronError,
   error2PlainObject,
 } from "@dendronhq/common-all";
-import yargs from "yargs";
-import { CLICommand, CommandCommonProps } from "./base";
-import path from "path";
 import fs from "fs-extra";
+import path from "path";
+import yargs from "yargs";
 import {
   BuildUtils,
+  ExtensionTarget,
   LernaUtils,
   PublishEndpoint,
   SemverVersion,
 } from "../utils/build";
+import { CLICommand, CommandCommonProps } from "./base";
 
 type CommandCLIOpts = {
   cmd: DevCommands;
@@ -35,10 +36,15 @@ type CommandOutput = Partial<{ error: DendronError; data: any }>;
 
 type BuildCmdOpts = {
   publishEndpoint: PublishEndpoint;
-} & BumpVersionOpts;
+} & BumpVersionOpts &
+  PrepPluginOpts;
 
 type BumpVersionOpts = {
   upgradeType: SemverVersion;
+} & CommandCLIOpts;
+
+type PrepPluginOpts = {
+  extensionTarget: ExtensionTarget;
 } & CommandCLIOpts;
 
 export { CommandOpts as DevCLICommandOpts };
@@ -78,6 +84,10 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     args.option("publishEndpoint", {
       describe: "where to publish",
       choices: Object.values(PublishEndpoint),
+    });
+    args.option("extensionTarget", {
+      describe: "extension name to publish in the marketplace",
+      choices: Object.values(ExtensionTarget),
     });
   }
 
@@ -185,7 +195,15 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           return { error: null };
         }
         case DevCommands.PREP_PLUGIN: {
-          BuildUtils.prepPluginPkg();
+          if (!this.validatePrepPluginArgs(opts)) {
+            return {
+              error: new DendronError({
+                message: "missing options for prep_plugin command",
+              }),
+            };
+          }
+
+          await BuildUtils.prepPluginPkg(opts.extensionTarget);
           return { error: null };
         }
         case DevCommands.PACKAGE_PLUGIN: {
@@ -212,7 +230,6 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
         this.print("unknown error " + error2PlainObject(err));
       }
       return { error: err };
-    } finally {
     }
   }
 
@@ -251,7 +268,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     await this.syncAssets();
 
     this.print("prep repo...");
-    BuildUtils.prepPluginPkg();
+    await BuildUtils.prepPluginPkg();
 
     this.print("install deps...");
     BuildUtils.installPluginDependencies();
@@ -286,6 +303,13 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
   validateBumpVersionArgs(opts: CommandOpts): opts is BumpVersionOpts {
     if (!opts.upgradeType) {
       return false;
+    }
+    return true;
+  }
+
+  validatePrepPluginArgs(opts: CommandOpts): opts is PrepPluginOpts {
+    if (opts.extensionTarget) {
+      return Object.values(ExtensionTarget).includes(opts.extensionTarget);
     }
     return true;
   }

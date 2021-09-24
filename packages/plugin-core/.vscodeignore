@@ -1,6 +1,6 @@
 .vscode/**
 .vscode-test/**
-out/test/**
+out/**
 src/**
 .gitignore
 vsc-extension-quickstart.md
@@ -10,3 +10,5 @@ vsc-extension-quickstart.md
 **/*.ts
 node_modules
 build
+scripts/**
+fixtures/**

@@ -773,7 +773,9 @@
     "compile": "tsc -p tsconfig.build.json",
     "test": "node ./out/src/test/runTestInteg.js",
     "format": "echo nop",
-    "vscode:uninstall": "node ./out/src/scripts/uninstallHook.js"
+    "vscode:uninstall": "node ./out/src/scripts/uninstallHook.js",
+    "deploy:vscode": "vsce publish --yarn",
+    "deploy:ovsx": "ovsx publish --yarn"
   },
   "devDependencies": {
     "@dendronhq/common-test-utils": "^0.60.1-alpha.3",
@@ -795,6 +797,7 @@
     "mocha": "^7.1.2",
     "ts-loader": "^8.0.0",
     "ts-node": "^8.10.2",
+    "vsce": "^1.100.0",
     "vscode-test": "^1.3.0",
     "webpack": "^4.43.0",
     "webpack-bundle-analyzer": "^4.4.2",

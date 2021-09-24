@@ -52,7 +52,7 @@ suite("ReferenceProvider", function () {
         onInit: async () => {
           const editor = await VSCodeUtils.openNote(noteWithTarget1);
           const links = await provide(editor);
-          expect(links.map((l) => l.uri.fsPath)).toEqual(
+          expect(links!.map((l) => l.uri.fsPath)).toEqual(
             [noteWithTarget1, noteWithTarget2].map((note) =>
               NoteUtils.getFullPath({ note, wsRoot: getDWorkspace().wsRoot })
             )
@@ -82,7 +82,7 @@ suite("ReferenceProvider", function () {
         onInit: async () => {
           const editor = await VSCodeUtils.openNote(noteWithTarget1);
           const links = await provide(editor);
-          expect(links.map((l) => l.uri.fsPath)).toEqual(
+          expect(links!.map((l) => l.uri.fsPath)).toEqual(
             [noteWithTarget1, noteWithTarget2].map((note) =>
               NoteUtils.getFullPath({ note, wsRoot: getDWorkspace().wsRoot })
             )
@@ -110,7 +110,7 @@ suite("ReferenceProvider", function () {
         onInit: async () => {
           const editor = await VSCodeUtils.openNote(noteWithLink);
           const links = await provide(editor);
-          expect(links.map((l) => l.uri.fsPath)).toEqual(
+          expect(links!.map((l) => l.uri.fsPath)).toEqual(
             [noteWithLink].map((note) =>
               NoteUtils.getFullPath({ note, wsRoot: getDWorkspace().wsRoot })
             )
@@ -139,7 +139,7 @@ suite("ReferenceProvider", function () {
         onInit: async () => {
           const editor = await VSCodeUtils.openNote(noteWithLink);
           const links = await provide(editor);
-          expect(links.map((l) => l.uri.fsPath)).toEqual(
+          expect(links!.map((l) => l.uri.fsPath)).toEqual(
             [noteWithLink].map((note) =>
               NoteUtils.getFullPath({ note, wsRoot: getDWorkspace().wsRoot })
             )

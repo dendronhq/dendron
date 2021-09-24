@@ -123,15 +123,11 @@ describe("noteRefV2", () => {
         [DendronASTDest.HTML]: async ({ extra }) => {
           const { resp } = extra;
           expect(resp).toMatchSnapshot();
-          return [
-            {
-              actual: await AssertUtils.assertInString({
-                body: resp.toString(),
-                match: ["foo body", "portal"],
-              }),
-              expected: true,
-            },
-          ];
+          await checkVFile(
+            resp,
+            `<a href="foo.html" class="portal-arrow">Go to text <span class="right-arrow">`
+          );
+          return [];
         },
         [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
           const { resp } = extra;

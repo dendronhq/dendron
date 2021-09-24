@@ -23,7 +23,7 @@ export class AssertUtils {
     await Promise.all(
       (match || []).map((m) => {
         if (body.indexOf(m) < 0) {
-          throw `${m} not found in ${body}`;
+          throw `${m} not found\n. Original text:\n ${body}`;
         }
         return true;
       })

@@ -42,3 +42,4 @@ local
 # generated
 robots.txt
 sitemap.xml
+public/*.html

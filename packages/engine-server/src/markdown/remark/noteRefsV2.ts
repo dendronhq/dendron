@@ -313,7 +313,9 @@ function convertNoteRef(opts: ConvertNoteRefOpts): {
             vault,
             wsRoot: engine.wsRoot,
           });
-          suffix = ".html";
+          if (!MDUtilsV5.isV5Active(proc)) {
+            suffix = ".html";
+          }
           if (maybeNote?.custom.permalink === "/") {
             href = "";
             suffix = "";
@@ -388,7 +390,9 @@ export function convertNoteRefASTV2(
         let href = useId ? note.id : fname;
         const title = getTitle({ config, note, loc: ref });
         if (dest === DendronASTDest.HTML) {
-          suffix = ".html";
+          if (!MDUtilsV5.isV5Active(proc)) {
+            suffix = ".html";
+          }
           if (note.custom.permalink === "/") {
             href = "";
             suffix = "";

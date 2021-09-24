@@ -11,7 +11,7 @@ import os from "os";
 import path from "path";
 import { ENGINE_HOOKS } from "../../../presets";
 import { checkNotInString, checkString } from "../../../utils";
-import { cleanVerifyOpts, createProcCompileTests } from "./utils";
+import { checkVFile, cleanVerifyOpts, createProcCompileTests } from "./utils";
 import { createEngineFromServer, runEngineTestV5 } from "../../../engine";
 
 const getOpts = (opts: any) => {
@@ -138,10 +138,10 @@ describe("MDUtils.proc", () => {
         [ProcFlavor.REGULAR]: async ({ extra }) => {
           const { resp } = extra;
           expect(resp).toMatchSnapshot();
-          await checkString(
-            resp.contents,
+          await checkVFile(
+            resp,
             // should have id for link
-            `<a href="alpha-id.html"`,
+            `<a href="alpha-id"`,
             // html quoted
             `<p><a href="bar.html">Bar</a></p>`
           );
@@ -158,7 +158,7 @@ describe("MDUtils.proc", () => {
           await checkString(
             resp.contents,
             // should have id for link
-            `<a href="/notes/alpha-id.html"`
+            `<a href="/notes/alpha-id"`
           );
         },
       },

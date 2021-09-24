@@ -9,3 +9,4 @@ export * from "./AirtablePod";
 export * from "./GithubIssuePod";
 export * from "./GDocPod";
 export * from "./NextjsExportPod";
+export * from "./NotionPod";

@@ -1,6 +1,7 @@
 import {
   DendronError,
   DEngineClient,
+  ErrorFactory,
   NoteChangeEntry,
   RenameNoteOpts,
   VaultUtils,
@@ -154,9 +155,7 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
               msg: `changeState.hide event received.`,
             });
           } else {
-            throw new DendronError({
-              message: `unexpected event: ${JSON.stringify(event)}`,
-            });
+            throw ErrorFactory.createUnexpectedEventError({ event });
           }
         },
       });

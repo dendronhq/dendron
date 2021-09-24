@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/dendron-11ty-legacy",
-  "version": "0.60.1-alpha.1",
+  "version": "0.60.1-alpha.3",
   "main": "index.js",
   "license": "AGPLv3",
   "files": [
@@ -26,10 +26,10 @@
   "dependencies": {
     "@11ty/eleventy": "^0.11.1",
     "@11ty/eleventy-plugin-syntaxhighlight": "^3.0.4",
-    "@dendronhq/common-all": "^0.60.1-alpha.1",
-    "@dendronhq/common-server": "^0.60.1-alpha.1",
+    "@dendronhq/common-all": "^0.60.1-alpha.3",
+    "@dendronhq/common-server": "^0.60.1-alpha.3",
     "@dendronhq/eleventy-plugin-seo": "^0.6.0",
-    "@dendronhq/engine-server": "^0.60.1-alpha.1",
+    "@dendronhq/engine-server": "^0.60.1-alpha.3",
     "@fec/eleventy-plugin-remark": "^2.1.0",
     "eleventy-xml-plugin": "^0.1.0",
     "fs-extra": "^9.0.1",

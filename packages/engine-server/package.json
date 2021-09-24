@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/engine-server",
-  "version": "0.60.1-alpha.1",
+  "version": "0.60.1-alpha.3",
   "description": "dendron-engine",
   "license": "GPLv3",
   "repository": {
@@ -37,8 +37,8 @@
     "test:unit:debug": "echo nop"
   },
   "dependencies": {
-    "@dendronhq/common-all": "^0.60.1-alpha.1",
-    "@dendronhq/common-server": "^0.60.1-alpha.1",
+    "@dendronhq/common-all": "^0.60.1-alpha.3",
+    "@dendronhq/common-server": "^0.60.1-alpha.3",
     "@dendronhq/remark-mermaid": "^0.2.0",
     "@mapbox/rehype-prism": "^0.5.0",
     "@types/fs-extra": "^9.0.1",

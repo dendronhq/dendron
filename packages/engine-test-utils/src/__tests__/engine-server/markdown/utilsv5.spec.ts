@@ -186,10 +186,7 @@ describe("MDUtils.proc", () => {
       [DendronASTDest.HTML]: {
         [ProcFlavor.REGULAR]: async ({ extra }) => {
           const { resp } = extra;
-          await checkString(
-            resp.contents,
-            "Error rendering note reference. No note found with name"
-          );
+          await checkString(resp.contents, "No note with name alpha found");
         },
         [ProcFlavor.PREVIEW]: ProcFlavor.REGULAR,
         [ProcFlavor.PUBLISHING]: ProcFlavor.REGULAR,

@@ -182,7 +182,7 @@ export type SchemaTemplate = {
 
 export type SchemaProps = DNodeProps<SchemaData>;
 export type NoteProps = DNodeProps<any, any>;
-export type NoteSEOProps = {
+export type SEOProps = {
   title: string;
   updated: number;
   created: number;
@@ -194,4 +194,5 @@ export type NoteSEOProps = {
   canonicalBaseUrl?: string;
   canonicalUrl?: string;
   noindex?: boolean;
+  twitter?: string;
 };

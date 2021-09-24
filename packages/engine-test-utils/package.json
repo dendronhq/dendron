@@ -1,7 +1,7 @@
 {
   "name": "@dendronhq/engine-test-utils",
   "private": true,
-  "version": "0.60.1-alpha.1",
+  "version": "0.60.1-alpha.3",
   "description": "",
   "license": "GPLv3",
   "repository": {
@@ -37,6 +37,8 @@
     "test:watch": "jest --watch"
   },
   "devDependencies": {
+    "@testing-library/react": "12.1.0",
+    "@testing-library/react-hooks": "7.0.2",
     "@types/fs-extra": "^9.0.1",
     "@types/lodash": "^4.14.161",
     "@types/node": "13.11.0",
@@ -45,8 +47,6 @@
     "jest-serializer-path": "^0.1.15",
     "rimraf": "^2.6.2",
     "ts-jest": "^23.10.3",
-    "@testing-library/react": "12.1.0",
-    "@testing-library/react-hooks": "7.0.2",
     "ts-node": "^8.10.2"
   },
   "engines": {
@@ -59,14 +59,14 @@
     "preset": "ts-jest"
   },
   "dependencies": {
-    "@dendronhq/api-server": "^0.60.1-alpha.1",
-    "@dendronhq/common-all": "^0.60.1-alpha.1",
-    "@dendronhq/common-frontend": "^0.60.1-alpha.1",
-    "@dendronhq/common-server": "^0.60.1-alpha.1",
-    "@dendronhq/common-test-utils": "^0.60.1-alpha.1",
-    "@dendronhq/dendron-cli": "^0.60.1-alpha.1",
-    "@dendronhq/engine-server": "^0.60.1-alpha.1",
-    "@dendronhq/pods-core": "^0.60.1-alpha.1",
+    "@dendronhq/api-server": "^0.60.1-alpha.3",
+    "@dendronhq/common-all": "^0.60.1-alpha.3",
+    "@dendronhq/common-frontend": "^0.60.1-alpha.3",
+    "@dendronhq/common-server": "^0.60.1-alpha.3",
+    "@dendronhq/common-test-utils": "^0.60.1-alpha.3",
+    "@dendronhq/dendron-cli": "^0.60.1-alpha.3",
+    "@dendronhq/engine-server": "^0.60.1-alpha.3",
+    "@dendronhq/pods-core": "^0.60.1-alpha.3",
     "@reduxjs/toolkit": "^1.6.0",
     "@types/sinon": "^9.0.9",
     "cross-env": "^7.0.3",

@@ -206,6 +206,7 @@ describe("Fuse Engine tests with dummy data", () => {
     { fname: "note-3", updated: 4 },
     { fname: "user.tim.test", updated: 1 },
     { fname: "parent.new-note-1", updated: 1 },
+    { fname: "some.note.name.with.big-o", updated: 1 },
   ];
 
   describe(`GIVEN engine with notes: '${DATA_1.map((n) => n.fname)}'`, () => {
@@ -261,6 +262,18 @@ describe("Fuse Engine tests with dummy data", () => {
 
       it("THEN string with same size but not exact match is excluded.", () => {
         assertDoesNotHaveFName(queryResults, "note-2");
+      });
+    });
+
+    describe(`WHEN querying for 'big o'`, () => {
+      let queryResults: NoteIndexProps[];
+
+      beforeAll(() => {
+        queryResults = fuseEngine.queryNote({ qs: "big o" });
+      });
+
+      it(`THEN should match 'some.note.name.with.big-o'`, () => {
+        assertHasFName(queryResults, "some.note.name.with.big-o");
       });
     });
   });

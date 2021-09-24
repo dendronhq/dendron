@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/pods-core",
-  "version": "0.60.1-alpha.1",
+  "version": "0.60.1-alpha.3",
   "description": "pods-core",
   "license": "GPLv3",
   "repository": {
@@ -49,9 +49,11 @@
     "access": "public"
   },
   "dependencies": {
-    "@dendronhq/common-all": "^0.60.1-alpha.1",
-    "@dendronhq/common-server": "^0.60.1-alpha.1",
-    "@dendronhq/engine-server": "^0.60.1-alpha.1",
+    "@dendronhq/common-all": "^0.60.1-alpha.3",
+    "@dendronhq/common-server": "^0.60.1-alpha.3",
+    "@dendronhq/engine-server": "^0.60.1-alpha.3",
+    "@instantish/martian": "^1.0.3",
+    "@notionhq/client": "^0.1.9",
     "@octokit/graphql": "^4.6.4",
     "ajv": "^8.6.0",
     "ajv-formats": "^2.1.0",
@@ -64,5 +66,6 @@
     "lodash": "^4.17.20",
     "through2": "^4.0.2",
     "vscode-uri": "^2.1.2"
-  }
+  },
+  "gitHead": "d2e0e1c5ada1ac4a507e2da387cf761316de76de"
 }

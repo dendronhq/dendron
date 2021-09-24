@@ -8,7 +8,11 @@ import {
 import { Uri, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../utils";
-import { showPodQuickPickItemsV4 } from "../utils/pods";
+import {
+  getSelectionFromQuickpick,
+  showPodQuickPickItemsV4,
+  withProgressOpts,
+} from "../utils/pods";
 import { getExtension, getDWorkspace } from "../workspace";
 import { BaseCommand } from "./base";
 
@@ -64,9 +68,19 @@ export class ExportPodCommand extends BaseCommand<
     if (!wsRoot) {
       throw Error("ws root not defined");
     }
+    const utilityMethods = {
+      getSelectionFromQuickpick,
+      withProgressOpts,
+    };
     const pod = new opts.podChoice.podClass(); // eslint-disable-line new-cap
     const engine = getExtension().getEngine();
-    await pod.execute({ config: opts.config, engine, wsRoot, vaults });
+    await pod.execute({
+      config: opts.config,
+      engine,
+      wsRoot,
+      vaults,
+      utilityMethods,
+    });
     const dest = opts.config.dest;
     window.showInformationMessage(`done exporting. destination: ${dest}`);
   }

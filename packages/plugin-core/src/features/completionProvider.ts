@@ -39,7 +39,7 @@ import {
 import { Logger } from "../logger";
 import { VSCodeUtils } from "../utils";
 import { sentryReportingCallback } from "../utils/analytics";
-import { getDWorkspace, getExtension } from "../workspace";
+import { DendronExtension, getDWorkspace, getExtension } from "../workspace";
 
 function padWithZero(n: number): string {
   if (n > 99) return String(n);
@@ -80,6 +80,12 @@ const NOTE_AUTOCOMPLETEABLE_REGEX = new RegExp("" +
 export const provideCompletionItems = sentryReportingCallback(
   (document: TextDocument, position: Position) => {
     const ctx = "provideCompletionItems";
+
+    // No-op if we're not in a Dendron Workspace
+    if (!DendronExtension.isActive()) {
+      return;
+    }
+
     const line = document.lineAt(position).text;
     Logger.debug({ ctx, position, msg: "enter" });
 
@@ -290,6 +296,12 @@ export async function provideBlockCompletionItems(
   token?: CancellationToken
 ): Promise<CompletionItem[] | undefined> {
   const ctx = "provideBlockCompletionItems";
+
+  // No-op if we're not in a Dendron Workspace
+  if (!DendronExtension.isActive()) {
+    return;
+  }
+
   let found: RegExpMatchArray | undefined;
   // This gets triggered when the user types ^, which won't necessarily happen inside a wikilink.
   // So check that the user is actually in a wikilink before we try.

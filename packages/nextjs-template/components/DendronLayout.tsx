@@ -43,7 +43,7 @@ export default function DendronLayout(
     >
       <DendronTreeMenu
         {...props}
-        collapsed={isCollapsed}
+        collapsed={isCollapsed && isResponsive}
         setCollapsed={setCollapsed}
       />
     </Sider>
@@ -114,12 +114,23 @@ export default function DendronLayout(
             sm={4}
             md={0}
             lg={0}
-            style={{ marginLeft: "4px", display: isResponsive ? "flex" : "none", alignItems: "center", justifyContent: "center" }}
+            style={{
+              marginLeft: "4px",
+              display: isResponsive ? "flex" : "none",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
           >
             {isCollapsed ? (
-              <MenuOutlined size={32} onClick={() => setCollapsed(!isCollapsed)} />
+              <MenuOutlined
+                size={32}
+                onClick={() => setCollapsed(!isCollapsed)}
+              />
             ) : (
-              <MenuUnfoldOutlined size={32} onClick={() => setCollapsed(!isCollapsed)} />
+              <MenuUnfoldOutlined
+                size={32}
+                onClick={() => setCollapsed(!isCollapsed)}
+              />
             )}
           </Col>
         </Row>
@@ -144,19 +155,14 @@ export default function DendronLayout(
               flex: "0 0 auto",
               width: `calc((100% - ${LAYOUT.BREAKPOINTS.lg}) / 2 + ${
                 // eslint-disable-next-line no-nested-ternary
-                isCollapsed
-                  ? SIDER.COLLAPSED_WIDTH
-                  : isResponsive
-                  ? "100%"
+                isResponsive
+                  ? isCollapsed
+                    ? SIDER.WIDTH
+                    : "100%"
                   : SIDER.WIDTH
               }px)`,
               paddingLeft: `calc((100% - ${LAYOUT.BREAKPOINTS.lg}) / 2)`,
               // eslint-disable-next-line no-nested-ternary
-              minWidth: isCollapsed
-                ? SIDER.COLLAPSED_WIDTH
-                : isResponsive
-                ? "100%"
-                : SIDER.WIDTH,
             }}
           >
             {sidebar}

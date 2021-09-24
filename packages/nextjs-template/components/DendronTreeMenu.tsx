@@ -12,8 +12,11 @@ import DendronSpinner from "./DendronSpinner";
 const { SubMenu } = Menu;
 
 export default function DendronTreeMenu(
-  props: Partial<NoteData> & { collapsed: boolean, setCollapsed: (collapsed: boolean) => void }
-) { 
+  props: Partial<NoteData> & {
+    collapsed: boolean;
+    setCollapsed: (collapsed: boolean) => void;
+  }
+) {
   const logger = createLogger("DendronTreeView");
   const dendronRouter = useDendronRouter();
   const { changeActiveNote } = dendronRouter;

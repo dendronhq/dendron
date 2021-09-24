@@ -9,7 +9,7 @@ import _ from "lodash";
 import * as vscode from "vscode";
 import { QuickInputButton, ThemeIcon } from "vscode";
 import { clipboard, DendronClientUtilsV2, VSCodeUtils } from "../../utils";
-import { getDWorkspace, getExtension } from "../../workspace";
+import { getDWorkspace, getEngine, getExtension } from "../../workspace";
 import {
   DendronQuickPickerV2,
   LookupEffectType,
@@ -108,10 +108,16 @@ const selectionToNoteProps = async (opts: {
         }
         if (leaveTrace) {
           const editor = VSCodeUtils.getActiveTextEditor();
+          const link = NoteUtils.createWikiLink({
+            note,
+            useVaultPrefix: DendronClientUtilsV2.shouldUseVaultPrefix(
+              getEngine()
+            ),
+            alias: { mode: "title" },
+          });
           await editor?.edit((builder) => {
-            const link = note.fname;
             if (!_.isUndefined(selection) && !selection.isEmpty) {
-              builder.replace(selection, `![[${link}]]`);
+              builder.replace(selection, `!${link}`);
             }
           });
         } else {

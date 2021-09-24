@@ -69,8 +69,7 @@ const getWorkspaceFile = () => {
 };
 
 suite("VaultRemoveCommand", function () {
-  let ctx: vscode.ExtensionContext;
-  ctx = setupBeforeAfter(this, {
+  const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {
     beforeHook: () => {
       sinon
         .stub(vscode.commands, "executeCommand")
@@ -227,6 +226,59 @@ suite("VaultRemoveCommand", function () {
           ]);
           done();
         },
+      });
+    });
+  });
+
+  describe("Contextual-UI", () => {
+    describe("WHEN Dendron: Vault Remove is clicked for local vault `vault1` from the context menu", () => {
+      test("THEN vault1 should be removed from workspace and config", (done) => {
+        runLegacyMultiWorkspaceTest({
+          ctx,
+          onInit: async ({ vaults, wsRoot }) => {
+            const args = {
+              fsPath: path.join(wsRoot, vaults[1].fsPath),
+            };
+            await new VaultRemoveCommand().run(args);
+            const config = getConfig();
+            expect(config.vaults).toNotEqual(vaults);
+            expect(
+              _.find(getWorkspaceFile().folders, {
+                path: path.join(vaults[1].fsPath),
+              })
+            ).toEqual(undefined);
+            done();
+          },
+        });
+      });
+    });
+    describe("WHEN Dendron: Vault Remove is clicked for remote vault `remoteWs` from the context menu", () => {
+      test("THEN vault `remoteWs` should be removed from workspace and config", (done) => {
+        runLegacyMultiWorkspaceTest({
+          ctx,
+          onInit: async ({ vaults, wsRoot }) => {
+            const remoteVaultName = "remoteVault";
+            const remoteWsName = "remoteWs";
+            const vaultsRemote = [{ fsPath: remoteVaultName }];
+            await addWorkspaceVault({
+              vaults: vaultsRemote,
+              wsName: remoteWsName,
+            });
+            const args = {
+              fsPath: path.join(wsRoot, remoteWsName, remoteVaultName),
+            };
+            await new VaultRemoveCommand().run(args);
+            const config = getConfig();
+            expect(config.vaults).toEqual(vaults);
+            expect(config.workspaces).toEqual({});
+            expect(
+              _.find(getWorkspaceFile().folders, {
+                path: path.join(remoteWsName, remoteVaultName),
+              })
+            ).toEqual(undefined);
+            done();
+          },
+        });
       });
     });
   });

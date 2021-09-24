@@ -10,6 +10,10 @@ import { BasicCommand } from "./base";
 
 type CommandOpts = {
   vault: DVault;
+  /**
+   * added for contextual-ui check
+   */
+  fsPath?: string;
 };
 
 type CommandOutput = { vault: DVault };
@@ -21,13 +25,16 @@ export class VaultRemoveCommand extends BasicCommand<
   CommandOutput
 > {
   key = DENDRON_COMMANDS.VAULT_REMOVE.key;
-  async gatherInputs(opts: any): Promise<any> {
+  async gatherInputs(opts?: CommandOpts): Promise<any> {
     const { vaults } = getDWorkspace();
     const wsRoot = getDWorkspace().wsRoot as string;
-    // added for contextual-ui
-    if (!_.isUndefined(opts?.path)) {
+    /**
+     * check added for contextual-ui. If the args are passed to the gather inputs,
+     * there is no need to show quickpick to select a vault
+     */
+    if (opts && opts.fsPath) {
       const vault = VaultUtils.getVaultByDirPath({
-        fsPath: opts?.fsPath,
+        fsPath: opts.fsPath,
         vaults,
         wsRoot,
       });

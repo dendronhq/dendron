@@ -62,9 +62,9 @@ export class AnalyticsUtils {
  * @param callback the function to wrap
  * @returns the wrapped callback function
  */
-export function sentryReportingCallback(
-  callback: (...args: any[]) => any
-): (...args: any[]) => any {
+export function sentryReportingCallback<A extends any[], R>(
+  callback: (...args: A) => R
+): (...args: A) => R {
   return (...args) => {
     try {
       return callback(...args);

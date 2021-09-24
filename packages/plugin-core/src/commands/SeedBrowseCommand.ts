@@ -50,7 +50,7 @@ export class SeedBrowseCommand extends SeedCommandBase<
       }
     );
 
-    const resp = WebViewUtils.genHTMLForWebView({
+    const resp = await WebViewUtils.genHTMLForWebView({
       title: "Seed Browser",
       view: DendronWebViewKey.SEED_BROWSER,
     });

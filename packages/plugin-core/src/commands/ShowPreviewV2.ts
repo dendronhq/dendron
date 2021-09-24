@@ -117,7 +117,7 @@ export class ShowPreviewV2Command extends BasicCommand<
       }
     );
 
-    const resp = WebViewUtils.genHTMLForWebView({
+    const resp = await WebViewUtils.genHTMLForWebView({
       title,
       view: DendronWebViewKey.NOTE_PREVIEW,
     });

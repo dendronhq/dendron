@@ -195,14 +195,19 @@ export class DendronExtension {
     }
   }
 
-  getClientAPIRootUrl() {
+  async getClientAPIRootUrl() {
     const port = this.port;
     if (!port) {
       throw DendronError.createFromStatus({
         status: ERROR_STATUS.ENGINE_NOT_SET,
       });
     }
-    return APIUtils.getLocalEndpoint(port);
+    // asExternalUri forwards the port when working remotely
+    const externalUri = await vscode.env.asExternalUri(
+      vscode.Uri.parse(APIUtils.getLocalEndpoint(port))
+    );
+    const uri = externalUri.toString();
+    return uri;
   }
 
   /**

@@ -52,7 +52,7 @@ export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
     }
   }
 
-  public resolveWebviewView(
+  public async resolveWebviewView(
     webviewView: vscode.WebviewView,
     _context: vscode.WebviewViewResolveContext,
     _token: vscode.CancellationToken
@@ -66,7 +66,9 @@ export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
       enableCommandUris: true,
       localResourceRoots: [],
     };
-    webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
+    webviewView.webview.html = await this._getHtmlForWebview(
+      webviewView.webview
+    );
     webviewView.webview.onDidReceiveMessage(async (msg: TreeViewMessage) => {
       Logger.info({ ctx: "onDidReceiveMessage", data: msg });
       switch (msg.type) {

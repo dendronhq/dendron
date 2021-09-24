@@ -7,7 +7,7 @@ import { Logger } from "../logger";
 import { getExtension, getDWorkspace } from "../workspace";
 
 export class WebViewUtils {
-  static genHTMLForView = ({
+  static genHTMLForView = async ({
     title,
     view,
   }: {
@@ -25,7 +25,7 @@ export class WebViewUtils {
     // View is `dendron.{camelCase}`
     // we want to remove `dendron` and transform camelCase to snake case
     // In addition, if we are serving using a live nextjs server, don't append .html at the end
-    const src = `${ext.getClientAPIRootUrl()}/vscode/${view.replace(
+    const src = `${await ext.getClientAPIRootUrl()}vscode/${view.replace(
       /^dendron\./,
       ""
     )}${config.dev?.nextServerUrl ? "" : ".html"}?${qs}`;

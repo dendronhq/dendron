@@ -129,7 +129,7 @@ export class MarkdownUtils {
       }
       return this.showLegacyPreview();
     } else {
-      new ShowPreviewV2Command().execute();
+      return new ShowPreviewV2Command().execute();
     }
   }
 

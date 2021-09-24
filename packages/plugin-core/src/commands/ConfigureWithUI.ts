@@ -1,6 +1,6 @@
 import { DendronWebViewKey, getStage } from "@dendronhq/common-all";
 import _ from "lodash";
-import { ViewColumn, window } from "vscode";
+import { env, Uri, ViewColumn, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { EngineAPIService } from "../services/EngineAPIService";
 import { WebViewUtils } from "../views/utils";
@@ -20,11 +20,17 @@ export async function getWebviewContent(): Promise<string> {
   return resp.data as string;
 }
 
-function getWebviewContent2(opts: { title: string }) {
+async function getWebviewContent2(opts: { title: string }) {
   const port = getExtension().port;
   if (_.isUndefined(port)) {
     return `<head> Still starting up </head>`;
   }
+  // Makes sure ports are forwarded for remote usage
+  const fullUri = (
+    await env.asExternalUri(
+      Uri.parse(`http://localhost:${port}/workspace/config.html`)
+    )
+  ).toString();
   return `<!DOCTYPE html>
   <html lang="en">
   <head>
@@ -42,7 +48,7 @@ function getWebviewContent2(opts: { title: string }) {
     </style>
   </head>
   <body>
-    <iframe width="100%" height="100%" src="http://localhost:${port}/workspace/config.html"></iframe>
+    <iframe width="100%" height="100%" src="${fullUri}"></iframe>
   </body>
   </html>`;
 }
@@ -72,7 +78,7 @@ export class ConfigureWithUICommand extends BasicCommand<
 
     let resp: string;
     if (getStage() === "dev") {
-      resp = WebViewUtils.genHTMLForWebView({
+      resp = await WebViewUtils.genHTMLForWebView({
         title: "Dendron Config",
         view: DendronWebViewKey.CONFIGURE,
       });

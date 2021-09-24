@@ -59,6 +59,18 @@ export class AnalyticsUtils {
  * Wraps a callback function with a try/catch block.  In the catch, any
  * exceptions that were encountered will be uploaded to Sentry and then
  * rethrown.
+ *
+ * Warning! This function will cause the callback function to lose its `this` value.
+ * If you are passing a method to this function, you must bind the `this` value:
+ *
+ * ```ts
+ * const wrappedCallback = sentryReportingCallback(
+ *   this.callback.bind(this)
+ * );
+ * ```
+ *
+ * Otherwise, when the function is called the `this` value will be undefined.
+ *
  * @param callback the function to wrap
  * @returns the wrapped callback function
  */

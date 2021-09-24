@@ -448,7 +448,7 @@ export function convertNoteRefASTV2(
 
   // figure out configs that change how we process the note reference
   const dendronData = MDUtilsV4.getDendronData(proc);
-  const { dest, config } = dendronData;
+  const { dest, config, vault: vaultFromProc } = dendronData;
   let { shouldApplyPublishRules } = dendronData;
 
   const { wikiLinkOpts } = compilerOpts;
@@ -561,8 +561,16 @@ export function convertNoteRefASTV2(
         }
         note = maybeNote;
       } else {
-        // no need to apply publish rules, by defaut pick first note
-        note = resp.data[0];
+        // no need to apply publish rules, try to pick the one that is in same vault
+
+        const _note = _.find(resp.data, (note) =>
+          VaultUtils.isEqual(note.vault, vaultFromProc, engine.wsRoot)
+        );
+        if (_note) {
+          note = _note;
+        } else {
+          note = resp.data[0];
+        }
       }
     } else {
       note = resp.data[0];

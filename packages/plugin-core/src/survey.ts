@@ -1,6 +1,7 @@
 import { SurveyEvents } from "@dendronhq/common-all";
 import { AnalyticsUtils } from "./utils/analytics";
 import * as vscode from "vscode";
+import _ from "lodash";
 
 export class DendronSurvey {
   choices: readonly vscode.QuickPickItem[];
@@ -126,5 +127,47 @@ export class PriorToolsSurvey extends DendronSurvey {
       { label: "Google Keep" },
     ];
     return new PriorToolsSurvey({ title, choices, canPickMany: true });
+  }
+}
+
+export class SurveyUtils {
+  /**
+   * Flip a coin to randomly prompt initial survey.
+   * Asks three questions about background, use case, and prior tools used.
+   * @param forcePrompt skip flipping a coin and force prompting.
+   */
+  static async maybePromptInitialSurvey(forcePrompt?: boolean) {
+    const shouldPrompt = forcePrompt ? true : !!Math.floor(Math.random() * 2);
+    if (shouldPrompt) {
+      AnalyticsUtils.track(SurveyEvents.InitialSurveyPrompted);
+      vscode.window
+        .showInformationMessage(
+          "Would you like to tell us about yourself so that we can provide a better onboarding experience?",
+          { modal: true },
+          { title: "Proceed" }
+        )
+        .then(async (resp) => {
+          if (resp?.title === "Proceed") {
+            const backgroundSurvey = BackgroundSurvey.create();
+            const useCaseSurvey = UseCaseSurvey.create();
+            const priorToolSurvey = PriorToolsSurvey.create();
+
+            const backgroundResults = await backgroundSurvey.show();
+            const useCaseResults = await useCaseSurvey.show();
+            const priorToolsResults = await priorToolSurvey.show();
+
+            const answerCount = [
+              backgroundResults,
+              useCaseResults,
+              priorToolsResults,
+            ].filter((value) => !_.isUndefined(value)).length;
+            AnalyticsUtils.track(SurveyEvents.InitialSurveyAccepted, {
+              answerCount,
+            });
+          } else {
+            AnalyticsUtils.track(SurveyEvents.InitialSurveyRejected);
+          }
+        });
+    }
   }
 }

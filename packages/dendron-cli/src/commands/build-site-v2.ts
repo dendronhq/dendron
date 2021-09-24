@@ -5,7 +5,7 @@ import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import yargs from "yargs";
-import { CLICommand } from "./base";
+import { CLICommand, CommandCommonProps } from "./base";
 import { setupEngine, setupEngineArgs } from "./utils";
 
 type CommandCLIOpts = {
@@ -25,8 +25,8 @@ type CommandOpts = CommandCLIOpts & {
   compile?: any;
   server: any;
   eleventy?: any;
-};
-type CommandOutput = {};
+} & CommandCommonProps;
+type CommandOutput = CommandCommonProps;
 
 export { CommandOpts as BuildSiteV2CLICommandOpts };
 export { CommandCLIOpts as BuildSiteV2CLICommandCliOpts };
@@ -81,19 +81,29 @@ export class BuildSiteV2CLICommand extends CLICommand<
   }
 
   async execute(opts: CommandOpts) {
-    const{ wsRoot, port, stage, output, server, engine } = _.defaults(opts);
+    const { wsRoot, port, stage, output, server, engine } = _.defaults(opts);
     let cwd = opts.cwd;
     if (!cwd) {
       // need to be inside
       let nmPath = goUpTo({ base: __dirname, fname: "node_modules" });
-      cwd = path.join(nmPath, "node_modules", "@dendronhq", "dendron-11ty");
-      // fix for /home/runner/work/dendron-site/dendron-site/node_modules/@dendronhq/dendron-cli/node_modules/@dendronhq/dendron-11ty'
+      cwd = path.join(
+        nmPath,
+        "node_modules",
+        "@dendronhq",
+        "dendron-11ty-legacy"
+      );
+      // fix for /home/runner/work/dendron-site/dendron-site/node_modules/@dendronhq/dendron-cli/node_modules/@dendronhq/...
       if (!fs.existsSync(cwd)) {
         nmPath = goUpTo({
           base: path.join(nmPath, ".."),
           fname: "node_modules",
         });
-        cwd = path.join(nmPath, "node_modules", "@dendronhq", "dendron-11ty");
+        cwd = path.join(
+          nmPath,
+          "node_modules",
+          "@dendronhq",
+          "dendron-11ty-legacy"
+        );
       }
     }
     process.env["ENGINE_PORT"] = _.toString(port);
@@ -129,7 +139,7 @@ export class BuildSiteV2CLICommand extends CLICommand<
           buildStyles,
           buildSearch,
           getEngine,
-        } = require("@dendronhq/dendron-11ty"));
+        } = require("@dendronhq/dendron-11ty-legacy"));
       }
     }
     // introduced in version 0.41
@@ -149,13 +159,24 @@ export class BuildSiteV2CLICommand extends CLICommand<
     );
     this.L.info("running post-compile");
     await Promise.all([buildStyles(), buildSearch()]);
+
     if (!opts.serve) {
       this.L.info({ msg: "done compiling" });
       setTimeout(() => {
+        // in case server doesn't close, force close
+        const maxTimeout = setTimeout(() => {
+          console.log("closing via timeout");
+          process.exit(0);
+        }, 1000);
         server.close((err: any) => {
           this.L.info({ msg: "closing server" });
           if (err) {
             this.L.error({ msg: "error closing", payload: err });
+          }
+          clearTimeout(maxTimeout);
+          if (process.env.GITHUB_ACTIONS) {
+            console.log("closing via github action");
+            process.exit(0);
           }
         });
       }, 5000);

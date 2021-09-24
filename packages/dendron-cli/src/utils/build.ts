@@ -26,6 +26,7 @@ export enum SemverVersion {
   MAJOR = "major",
   MINOR = "minor",
   PATCH = "patch",
+  PRERELEASE = "prerelease",
 }
 
 export enum PublishEndpoint {
@@ -176,18 +177,14 @@ export class BuildUtils {
   /**
    * Set NPM to publish locally
    */
-  static async prepPublishLocal() {
+  static prepPublishLocal() {
     this.setRegLocal();
-    // this.startVerdaccio();
-    // // HACK: give verdaccio chance to start
-    // await this.sleep(3000);
-    return;
   }
 
   /**
    * Set NPM to publish remotely
    */
-  static async prepPublishRemote() {
+  static prepPublishRemote() {
     this.setRegRemote();
   }
 

@@ -871,14 +871,17 @@ export class KeybindingUtils {
     keybindingConfigPath: string;
     newKeybindings?: any;
   } {
+    const ctx = "checkAndApplyVimKeybindingOverrideIfExists";
     // check where the keyboard shortcut is configured
     const { keybindingConfigPath, osName } = this.getKeybindingConfigPath();
+    Logger.info({ ctx, keybindingConfigPath });
 
     // read keybindings.json
     // create if it doesn't exist
     if (!fs.existsSync(keybindingConfigPath)) {
       fs.ensureFileSync(keybindingConfigPath);
       fs.writeFileSync(keybindingConfigPath, "[]");
+      Logger.info({ ctx, keybindingConfigPath, msg: "creating keybindings" });
     }
     const keybindings = readJSONWithCommentsSync(keybindingConfigPath);
 

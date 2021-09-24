@@ -1,8 +1,8 @@
-//@ts-check
-
 const path = require("path");
 const CopyPlugin = require("copy-webpack-plugin");
-const { IgnorePlugin, DefinePlugin } = require("webpack");
+const { IgnorePlugin } = require("webpack");
+const SentryWebpackPlugin = require("@sentry/webpack-plugin");
+
 /**@type {import('webpack').Configuration}*/
 const config = {
   target: "node",
@@ -26,7 +26,7 @@ const config = {
       vscode: "commonjs vscode", // the vscode-module is created on-the-fly and must be excluded. Add other modules that cannot be webpack'ed, 📖 -> https://webpack.js.org/configuration/externals/
       "pino-pretty": "pino-pretty",
     },
-    /(@dendronhq|packages)\/dendron-11ty$/,
+    /(@dendronhq|packages)\/dendron-11ty-legacy$/,
     /\.\/webpack-require-hack/,
   ],
   resolve: {
@@ -46,7 +46,15 @@ const config = {
     }),
     new CopyPlugin({
       patterns: [
-        { from: path.join("..", "common-all", "data", "dendron-yml.validator.json"), to: "dendron-yml.validator.json" },
+        {
+          from: path.join(
+            "..",
+            "common-all",
+            "data",
+            "dendron-yml.validator.json"
+          ),
+          to: "dendron-yml.validator.json",
+        },
       ],
     }),
     // @ts-ignore
@@ -55,9 +63,29 @@ const config = {
         { from: "webpack-require-hack.js", to: "webpack-require-hack.js" },
       ],
     }),
+    ...(process.env.SKIP_SENTRY
+      ? []
+      : [
+          // @ts-ignore
+          new SentryWebpackPlugin({
+            authToken: process.env.SENTRY_AUTH_TOKEN,
+            org: "dendron",
+            project: "dendron",
+            release: process.env.DENDRON_RELEASE_VERSION,
+
+            // other SentryWebpackPlugin configuration
+            include: ".",
+            ignore: ["node_modules", "webpack.config.js"],
+          }),
+        ]),
   ],
   module: {
     rules: [
+      {
+        include: /node_modules/,
+        test: /\.mjs$/,
+        type: "javascript/auto",
+      },
       {
         test: /\.ts$/,
         exclude: /node_modules/,

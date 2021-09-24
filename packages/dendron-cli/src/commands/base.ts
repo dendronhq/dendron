@@ -1,4 +1,4 @@
-import { isDendronResp } from "@dendronhq/common-all";
+import { DendronError, isDendronResp } from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-server";
 import { WorkspaceUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
@@ -6,7 +6,20 @@ import yargs from "yargs";
 
 type BaseCommandOpts = { quiet?: boolean };
 
-export abstract class BaseCommand<TOpts, TOut = any> {
+export type CommandCommonProps = {
+  error?: DendronError;
+};
+
+export abstract class BaseCommand<
+  /**
+   * These are options that are passed to `command.execute`
+   */
+  TOpts extends CommandCommonProps = CommandCommonProps,
+  /**
+   * This is the output returned by `command.execute`
+   */
+  TOut extends CommandCommonProps = CommandCommonProps
+> {
   public L: ReturnType<typeof createLogger>;
   public opts: BaseCommandOpts;
 
@@ -17,7 +30,10 @@ export abstract class BaseCommand<TOpts, TOut = any> {
   abstract execute(opts?: TOpts): Promise<TOut>;
 }
 
-export abstract class CLICommand<TOpts, TOut> extends BaseCommand<TOpts, TOut> {
+export abstract class CLICommand<
+  TOpts extends CommandCommonProps = CommandCommonProps,
+  TOut extends CommandCommonProps = CommandCommonProps
+> extends BaseCommand<TOpts, TOut> {
   public name: string;
   public desc: string;
   // TODO: hackish
@@ -45,6 +61,10 @@ export abstract class CLICommand<TOpts, TOut> extends BaseCommand<TOpts, TOut> {
     return yargs.command(this.name, this.desc, this.buildArgs, this.eval);
   }
 
+  /**
+   * Converts CLI flags into {@link TOpts}
+   * @param args
+   */
   abstract enrichArgs(args: any): Promise<TOpts>;
 
   eval = async (args: any) => {
@@ -62,6 +82,10 @@ export abstract class CLICommand<TOpts, TOut> extends BaseCommand<TOpts, TOut> {
       this.opts.quiet = true;
     }
     const opts = await this.enrichArgs(args);
+    if (opts.error) {
+      this.L.error(opts.error);
+      return { error: opts.error };
+    }
     const out = await this.execute(opts);
     if (isDendronResp(out) && out.error) {
       this.L.error(out.error);

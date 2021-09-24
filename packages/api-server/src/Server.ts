@@ -1,9 +1,11 @@
-import { getStage } from "@dendronhq/common-all";
-import { findInParent } from "@dendronhq/common-server";
+import { DendronError, getStage, StatusCodes } from "@dendronhq/common-all";
+import { findInParent, SegmentClient } from "@dendronhq/common-server";
+import { RewriteFrames } from "@sentry/integrations";
+import * as Sentry from "@sentry/node";
 import cors from "cors";
 import express, { NextFunction, Request, Response } from "express";
+import asyncHandler from "express-async-handler";
 import fs from "fs-extra";
-import { BAD_REQUEST } from "http-status-codes";
 import morgan from "morgan";
 import path from "path";
 import querystring from "querystring";
@@ -52,6 +54,51 @@ export function appModule({
   const staticDir = path.join(__dirname, "static");
   app.use(express.static(staticDir));
 
+  const environment = getStage();
+
+  // TODO: Consolidate with Sentry Init logic in _extension once webpack issues are diagnosed.
+  const dsn =
+    environment === "prod"
+      ? "https://bc206b31a30a4595a2efb31e8cc0c04e@o949501.ingest.sentry.io/5898219"
+      : undefined;
+
+  // Respect user's telemetry settings for error reporting too.
+  const enabled = !SegmentClient.instance().hasOptedOut;
+
+  Sentry.init({
+    dsn,
+    defaultIntegrations: false,
+    tracesSampleRate: 1.0,
+    enabled,
+    environment,
+    attachStacktrace: true,
+    beforeSend(event, hint) {
+      const error = hint?.originalException;
+      if (error && error instanceof DendronError) {
+        event.extra = {
+          name: error.name,
+          message: error.message,
+          payload: error.payload,
+          severity: error.severity?.toString(),
+          code: error.code,
+          status: error.status,
+          isComposite: error.isComposite,
+        };
+      }
+      return event;
+    },
+    integrations: [
+      new RewriteFrames({
+        prefix: "app:///dist/",
+      }),
+    ],
+  });
+
+  // Re-use the id for error reporting too:
+  Sentry.setUser({ id: SegmentClient.instance().anonymousId });
+
+  app.use(Sentry.Handlers.requestHandler() as express.RequestHandler);
+
   // for dev environment, get preview from next-server in monorepo
   if (getStage() !== "prod") {
     // packages/api-server/lib/Server.ts
@@ -88,14 +135,17 @@ export function appModule({
     return res.json({ ok: 1 });
   });
 
-  app.get("/version", async (_req: Request, res: Response) => {
-    const pkg = findInParent(__dirname, "package.json");
-    if (!pkg) {
-      throw Error("no pkg found");
-    }
-    const version = fs.readJSONSync(path.join(pkg, "package.json")).version;
-    return res.json({ version });
-  });
+  app.get(
+    "/version",
+    asyncHandler(async (_req: Request, res: Response) => {
+      const pkg = findInParent(__dirname, "package.json");
+      if (!pkg) {
+        throw Error("no pkg found");
+      }
+      const version = fs.readJSONSync(path.join(pkg, "package.json")).version;
+      return res.json({ version });
+    })
+  );
 
   registerOauthHandler(
     OauthService.GOOGLE,
@@ -105,11 +155,23 @@ export function appModule({
 
   app.use("/api", baseRouter);
 
+  // The error handler must be before any other error middleware and after all controllers
+  // app.use(Sentry.Handlers.errorHandler() as express.ErrorRequestHandler);
+  app.use(
+    Sentry.Handlers.errorHandler({
+      shouldHandleError() {
+        // Upload all exceptions
+        return true;
+      },
+    }) as express.ErrorRequestHandler
+  );
+
   app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
     console.error(err.message, err);
-    return res.status(BAD_REQUEST).json({
-      error: err.message,
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      error: JSON.stringify(err),
     });
   });
+
   return app;
 }

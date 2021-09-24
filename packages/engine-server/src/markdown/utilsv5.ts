@@ -38,6 +38,7 @@ import { hashtags } from "./remark/hashtag";
 import { userTags } from "./remark/userTags";
 import { backlinks } from "./remark/backlinks";
 import { hierarchies } from "./remark";
+import { extendedImage } from "./remark/extendedImage";
 
 /**
  * What mode a processor should run in
@@ -124,13 +125,15 @@ export type ProcDataFullOptsV5 = {
  * Data from the processor
  */
 export type ProcDataFullV5 = {
+  // main properties that are configured when processor is created
   engine: DEngineClient;
   vault: DVault;
   fname: string;
   dest: DendronASTDest;
   wsRoot: string;
 
-  // derived
+  // derived: unless passed in, these come from engine or are set by
+  // other unified plugins
   config: DendronConfig;
   notes?: NotePropsDict;
   insideNoteRef?: boolean;
@@ -235,6 +238,7 @@ export class MDUtilsV5 {
       .use(blockAnchors)
       .use(hashtags)
       .use(userTags)
+      .use(extendedImage)
       .use(footnotes)
       .data("errors", errors);
 
@@ -278,9 +282,19 @@ export class MDUtilsV5 {
           if (data.dest === DendronASTDest.HTML) {
             proc = proc.use(backlinks).use(hierarchies);
           }
+          // Add flavor specific plugins. These need to come before `dendronPub`
+          // to fix extended image URLs before they get converted to HTML
+          if (opts.flavor === ProcFlavor.PREVIEW) {
+            proc = proc.use(dendronPreview);
+          }
+          if (opts.flavor === ProcFlavor.HOVER_PREVIEW) {
+            proc = proc.use(dendronHoverPreview);
+          }
           // add additional plugins
           proc = proc.use(dendronPub, {
             insertTitle: shouldInsertTitle,
+            transformNoPublish:
+              opts.flavor === ProcFlavor.PUBLISHING ? true : false,
           });
           if (data.config?.useKatex) {
             proc = proc.use(math);
@@ -288,13 +302,7 @@ export class MDUtilsV5 {
           if (data.config?.mermaid) {
             proc = proc.use(mermaid, { simple: true });
           }
-          // add flavor specific plugins
-          if (opts.flavor === ProcFlavor.PREVIEW) {
-            proc = proc.use(dendronPreview);
-          }
-          if (opts.flavor === ProcFlavor.HOVER_PREVIEW) {
-            proc = proc.use(dendronHoverPreview);
-          }
+          // Add remaining flavor specific plugins
           if (opts.flavor === ProcFlavor.PUBLISHING) {
             proc = proc.use(dendronPub, {
               wikiLinkOpts: {

@@ -38,7 +38,8 @@ import {
 } from "vscode";
 import { Logger } from "../logger";
 import { VSCodeUtils } from "../utils";
-import { getExtension, getDWorkspace } from "../workspace";
+import { sentryReportingCallback } from "../utils/analytics";
+import { DendronExtension, getDWorkspace, getExtension } from "../workspace";
 
 function padWithZero(n: number): string {
   if (n > 99) return String(n);
@@ -76,172 +77,192 @@ const NOTE_AUTOCOMPLETEABLE_REGEX = new RegExp("" +
   "g"
 );
 
-export const provideCompletionItems = (
-  document: TextDocument,
-  position: Position
-) => {
-  const ctx = "provideCompletionItems";
-  const line = document.lineAt(position).text;
-  Logger.debug({ ctx, position, msg: "enter" });
+export const provideCompletionItems = sentryReportingCallback(
+  (document: TextDocument, position: Position) => {
+    const ctx = "provideCompletionItems";
 
-  let found: RegExpMatchArray | undefined;
-  const matches = line.matchAll(NOTE_AUTOCOMPLETEABLE_REGEX);
-  for (const match of matches) {
-    if (_.isUndefined(match.groups) || _.isUndefined(match.index)) continue;
-    const { entireLink } = match.groups;
+    // No-op if we're not in a Dendron Workspace
+    if (!DendronExtension.isActive()) {
+      return;
+    }
+
+    const line = document.lineAt(position).text;
+    Logger.debug({ ctx, position, msg: "enter" });
+
+    let found: RegExpMatchArray | undefined;
+    const matches = line.matchAll(NOTE_AUTOCOMPLETEABLE_REGEX);
+    for (const match of matches) {
+      if (_.isUndefined(match.groups) || _.isUndefined(match.index)) continue;
+      const { entireLink } = match.groups;
+      if (
+        match.index <= position.character &&
+        position.character <= match.index + entireLink.length
+      ) {
+        found = match;
+      }
+    }
     if (
-      match.index <= position.character &&
-      position.character <= match.index + entireLink.length
+      _.isUndefined(found) ||
+      _.isUndefined(found.index) ||
+      _.isUndefined(found.groups)
+    )
+      return;
+    Logger.debug({ ctx, found });
+
+    if (
+      found.groups.hash &&
+      found.index + (found.groups.beforeAnchor?.length || 0) >
+        position.character
     ) {
-      found = match;
+      Logger.info({ ctx, msg: "letting block autocomplete take over" });
+      return;
     }
-  }
-  if (
-    _.isUndefined(found) ||
-    _.isUndefined(found.index) ||
-    _.isUndefined(found.groups)
-  )
-    return;
-  Logger.debug({ ctx, found });
 
-  if (
-    found.groups.hash &&
-    found.index + (found.groups.beforeAnchor?.length || 0) > position.character
-  ) {
-    Logger.info({ ctx, msg: "letting block autocomplete take over" });
-    return;
-  }
+    let start: number;
+    let end: number;
+    if (found.groups.hashTag || found.groups.userTag) {
+      // This is a hashtag or user tag
+      start = found.index + 1 /* for the # or @ symbol */;
+      end =
+        start +
+        (found.groups.tagContents?.length ||
+          found.groups.userTagContents?.length ||
+          0);
+    } else {
+      // This is a wikilink or a reference
+      start = found.index + (found.groups.beforeNote?.length || 0);
+      end = start + (found.groups.note?.length || 0);
+    }
+    const range = new Range(position.line, start, position.line, end);
 
-  let start: number;
-  let end: number;
-  if (found.groups.hashTag || found.groups.userTag) {
-    // This is a hashtag or user tag
-    start = found.index + 1 /* for the # or @ symbol */;
-    end =
-      start +
-      (found.groups.tagContents?.length ||
-        found.groups.userTagContents?.length ||
-        0);
-  } else {
-    // This is a wikilink or a reference
-    start = found.index + (found.groups.beforeNote?.length || 0);
-    end = start + (found.groups.note?.length || 0);
-  }
-  const range = new Range(position.line, start, position.line, end);
-
-  const { engine } = getDWorkspace();
-  const notes = engine.notes;
-  const completionItems: CompletionItem[] = [];
-  const currentVault = VSCodeUtils.getNoteFromDocument(document)?.vault;
-  const wsRoot = engine.wsRoot;
-  Logger.debug({ ctx, range, notesLength: notes.length, currentVault, wsRoot });
-
-  const notesByFname = new DefaultMap<string, number>(() => 0);
-  _.values(notes).forEach((note) => {
-    notesByFname.set(note.fname, notesByFname.get(note.fname) + 1);
-  });
-
-  _.values(notes).map((note, index) => {
-    const item: CompletionItem = {
-      label: note.fname,
-      insertText: note.fname,
-      kind: CompletionItemKind.File,
-      sortText: padWithZero(index),
-      detail: VaultUtils.getName(note.vault),
+    const { engine } = getDWorkspace();
+    const notes = engine.notes;
+    const completionItems: CompletionItem[] = [];
+    const currentVault = VSCodeUtils.getNoteFromDocument(document)?.vault;
+    const wsRoot = engine.wsRoot;
+    Logger.debug({
+      ctx,
       range,
-    };
+      notesLength: notes.length,
+      currentVault,
+      wsRoot,
+    });
 
-    if (found?.groups?.hashTag) {
-      // We are completing a hashtag, so only do completion for tag notes.
-      if (!note.fname.startsWith(TAGS_HIERARCHY)) return;
-      // Since this is a hashtag, `tags.foo` becomes `#foo`.
-      item.label = `${note.fname.slice(TAGS_HIERARCHY.length)}`;
-      item.insertText = item.label;
-      // hashtags don't support xvault links, so we skip any special xvault handling
-    } else if (found?.groups?.userTag) {
-      // We are completing a user tag, so only do completion for user notes.
-      if (!note.fname.startsWith(USERS_HIERARCHY)) return;
-      // Since this is a hashtag, `tags.foo` becomes `#foo`.
-      item.label = `${note.fname.slice(USERS_HIERARCHY.length)}`;
-      item.insertText = item.label;
-      // user tags don't support xvault links, so we skip any special xvault handling
-    } else if (
-      currentVault &&
-      !VaultUtils.isEqual(currentVault, note.vault, wsRoot)
-    ) {
-      // For notes from other vaults than the current note, sort them after notes from the current vault.
-      // x will get sorted after numbers, so these will appear after notes without x
-      item.sortText = "x" + item.sortText;
+    const notesByFname = new DefaultMap<string, number>(() => 0);
+    _.values(notes).forEach((note) => {
+      notesByFname.set(note.fname, notesByFname.get(note.fname) + 1);
+    });
 
-      const sameNameNotes = notesByFname.get(note.fname);
-      if (sameNameNotes > 1) {
-        // There are multiple notes with the same name in multiple vaults,
-        // and this note is in a different vault than the current note.
-        // To generate a link to this note, we have to do an xvault link.
-        item.insertText = `${VaultUtils.toURIPrefix(note.vault)}/${note.fname}`;
+    _.values(notes).map((note, index) => {
+      const item: CompletionItem = {
+        label: note.fname,
+        insertText: note.fname,
+        kind: CompletionItemKind.File,
+        sortText: padWithZero(index),
+        detail: VaultUtils.getName(note.vault),
+        range,
+      };
+
+      if (found?.groups?.hashTag) {
+        // We are completing a hashtag, so only do completion for tag notes.
+        if (!note.fname.startsWith(TAGS_HIERARCHY)) return;
+        // Since this is a hashtag, `tags.foo` becomes `#foo`.
+        item.label = `${note.fname.slice(TAGS_HIERARCHY.length)}`;
+        item.insertText = item.label;
+        // hashtags don't support xvault links, so we skip any special xvault handling
+      } else if (found?.groups?.userTag) {
+        // We are completing a user tag, so only do completion for user notes.
+        if (!note.fname.startsWith(USERS_HIERARCHY)) return;
+        // Since this is a hashtag, `tags.foo` becomes `#foo`.
+        item.label = `${note.fname.slice(USERS_HIERARCHY.length)}`;
+        item.insertText = item.label;
+        // user tags don't support xvault links, so we skip any special xvault handling
+      } else if (
+        currentVault &&
+        !VaultUtils.isEqual(currentVault, note.vault, wsRoot)
+      ) {
+        // For notes from other vaults than the current note, sort them after notes from the current vault.
+        // x will get sorted after numbers, so these will appear after notes without x
+        item.sortText = "x" + item.sortText;
+
+        const sameNameNotes = notesByFname.get(note.fname);
+        if (sameNameNotes > 1) {
+          // There are multiple notes with the same name in multiple vaults,
+          // and this note is in a different vault than the current note.
+          // To generate a link to this note, we have to do an xvault link.
+          item.insertText = `${VaultUtils.toURIPrefix(note.vault)}/${
+            note.fname
+          }`;
+        }
       }
+
+      completionItems.push(item);
+    });
+    Logger.info({ ctx, completionItemsLength: completionItems.length });
+    return completionItems;
+  }
+);
+
+export const resolveCompletionItem = sentryReportingCallback(
+  async (
+    item: CompletionItem,
+    token: CancellationToken
+  ): Promise<CompletionItem | undefined> => {
+    const ctx = "resolveCompletionItem";
+    const { label: fname, detail: vname } = item;
+    if (
+      !_.isString(fname) ||
+      !_.isString(vname) ||
+      token.isCancellationRequested
+    )
+      return;
+
+    const engine = getDWorkspace().engine;
+    const { vaults, notes, wsRoot } = engine;
+    const vault = VaultUtils.getVaultByName({ vname, vaults });
+    if (_.isUndefined(vault)) {
+      Logger.info({ ctx, msg: "vault not found", fname, vault, wsRoot });
+      return;
+    }
+    const note = NoteUtils.getNoteByFnameV5({
+      fname,
+      vault,
+      notes,
+      wsRoot,
+    });
+    if (_.isUndefined(note)) {
+      Logger.info({ ctx, msg: "note not found", fname, vault, wsRoot });
+      return;
     }
 
-    completionItems.push(item);
-  });
-  Logger.info({ ctx, completionItemsLength: completionItems.length });
-  return completionItems;
-};
+    try {
+      // Render a preview of this note
+      const proc = MDUtilsV5.procRemarkFull(
+        {
+          dest: DendronASTDest.MD_REGULAR,
+          engine,
+          vault: note.vault,
+          fname: note.fname,
+        },
+        {
+          flavor: ProcFlavor.HOVER_PREVIEW,
+        }
+      );
+      const rendered = await proc.process(
+        `![[${VaultUtils.toURIPrefix(note.vault)}/${note.fname}]]`
+      );
+      if (token.isCancellationRequested) return;
+      item.documentation = new MarkdownString(rendered.toString());
+      Logger.debug({ ctx, msg: "rendered note" });
+    } catch (err) {
+      // Failed creating preview of the note
+      Logger.info({ ctx, err, msg: "failed to render note" });
+      return;
+    }
 
-export const resolveCompletionItem = async (
-  item: CompletionItem,
-  token: CancellationToken
-): Promise<CompletionItem | undefined> => {
-  const ctx = "resolveCompletionItem";
-  const { label: fname, detail: vname } = item;
-  if (!_.isString(fname) || !_.isString(vname) || token.isCancellationRequested)
-    return;
-
-  const engine = getDWorkspace().engine;
-  const { vaults, notes, wsRoot } = engine;
-  const vault = VaultUtils.getVaultByName({ vname, vaults });
-  if (_.isUndefined(vault)) {
-    Logger.info({ ctx, msg: "vault not found", fname, vault, wsRoot });
-    return;
+    return item;
   }
-  const note = NoteUtils.getNoteByFnameV5({
-    fname,
-    vault,
-    notes,
-    wsRoot,
-  });
-  if (_.isUndefined(note)) {
-    Logger.info({ ctx, msg: "note not found", fname, vault, wsRoot });
-    return;
-  }
-
-  try {
-    // Render a preview of this note
-    const proc = MDUtilsV5.procRemarkFull(
-      {
-        dest: DendronASTDest.MD_REGULAR,
-        engine,
-        vault: note.vault,
-        fname: note.fname,
-      },
-      {
-        flavor: ProcFlavor.HOVER_PREVIEW,
-      }
-    );
-    const rendered = await proc.process(
-      `![[${VaultUtils.toURIPrefix(note.vault)}/${note.fname}]]`
-    );
-    if (token.isCancellationRequested) return;
-    item.documentation = new MarkdownString(rendered.toString());
-    Logger.debug({ ctx, msg: "rendered note" });
-  } catch (err) {
-    // Failed creating preview of the note
-    Logger.info({ ctx, err, msg: "failed to render note" });
-    return;
-  }
-
-  return item;
-};
+);
 
 // prettier-ignore
 const PARTIAL_WIKILINK_WITH_ANCHOR_REGEX = new RegExp("" +
@@ -275,6 +296,12 @@ export async function provideBlockCompletionItems(
   token?: CancellationToken
 ): Promise<CompletionItem[] | undefined> {
   const ctx = "provideBlockCompletionItems";
+
+  // No-op if we're not in a Dendron Workspace
+  if (!DendronExtension.isActive()) {
+    return;
+  }
+
   let found: RegExpMatchArray | undefined;
   // This gets triggered when the user types ^, which won't necessarily happen inside a wikilink.
   // So check that the user is actually in a wikilink before we try.

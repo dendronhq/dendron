@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/nextjs-template",
-  "version": "0.58.0",
+  "version": "0.60.1-alpha.3",
   "license": "Apache-2.0",
   "private": true,
   "repository": {
@@ -15,25 +15,33 @@
     "lint": "next lint",
     "export": "next build && next export",
     "sync:theme": "cp ../dendron-next-server/public/*theme.css public/",
-    "proto": "echo `pwd`"
+    "postbuild": "next-sitemap --config sitemap.js"
   },
   "dependencies": {
-    "@dendronhq/common-all": "^0.58.0",
-    "@dendronhq/common-frontend": "^0.58.0",
-    "html-react-parser": "^1.2.8",
+    "@chakra-ui/react": "^1.6.7",
+    "@dendronhq/common-all": "^0.60.1-alpha.3",
+    "@dendronhq/common-frontend": "^0.60.1-alpha.3",
+    "antd": "^4.15.5",
+    "html-react-parser": "^1.3.0",
     "lodash": "^4.17.21",
-    "next": "10.2.0",
-    "next-seo": "^4.26.0",
-    "react": "17.0.1",
-    "react-css-theme-switcher": "0.2.3",
-    "react-dom": "17.0.1"
+    "next": "^11.1.2",
+    "next-seo": "^4.27.0",
+    "next-sitemap": "^1.6.168",
+    "react": "^17.0.2",
+    "react-css-theme-switcher": "^0.3.0",
+    "react-dom": "^17.0.2",
+    "react-ga": "^3.3.0",
+    "react-ga4": "^1.0.6",
+    "react-redux": "^7.2.3",
+    "sass": "^1.41.1"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^11.1.2",
     "@types/fs-extra": "^9.0.12",
-    "@types/react": "17.0.14",
-    "eslint": "7.30.0",
-    "eslint-config-next": "11.0.1",
+    "@types/react": "^17.0.21",
+    "eslint": "^7.32.0",
+    "eslint-config-next": "^11.1.2",
     "fs-extra": "^10.0.0",
-    "typescript": "4.3.5"
+    "typescript": "^4.4.3"
   }
 }

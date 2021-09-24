@@ -79,6 +79,7 @@ export class DConfig {
         title: "Dendron",
         description: "Personal knowledge space",
         siteLastModified: true,
+        gh_edit_branch: "main",
       },
     };
   }
@@ -141,7 +142,7 @@ export class DConfig {
       siteFaviconPath: "favicon.ico",
       gh_edit_link: true,
       gh_edit_link_text: "Edit this page on GitHub",
-      gh_edit_branch: "master",
+      gh_edit_branch: "main",
       gh_root: "docs/",
       gh_edit_view_mode: "edit",
       writeStubs: true,

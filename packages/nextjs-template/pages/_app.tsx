@@ -2,12 +2,13 @@ import {
   batch,
   createLogger,
   Provider,
-  setLogLevel
+  setLogLevel,
 } from "@dendronhq/common-frontend";
 import "antd/dist/antd.css";
 import type { AppProps } from "next/app";
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
 import { ThemeSwitcherProvider } from "react-css-theme-switcher";
+import { useDendronGATracking } from "../components/DendronGATracking";
 import DendronLayout from "../components/DendronLayout";
 import { combinedStore, useCombinedDispatch } from "../features";
 import { browserEngineSlice } from "../features/engine";
@@ -15,23 +16,20 @@ import "../public/light-theme.css";
 import "../styles/scss/main.scss";
 import { fetchConfig, fetchNotes } from "../utils/fetchers";
 import { useDendronRouter } from "../utils/hooks";
+import { getAssetUrl } from "../utils/links";
 import { NoteData } from "../utils/types";
 
 const themes = {
-  dark: `/dark-theme.css`,
-  light: `/light-theme.css`,
+  dark: getAssetUrl(`/dark-theme.css`),
+  light: getAssetUrl(`/light-theme.css`),
 };
 
-function AppContainer({ Component, pageProps, router }: AppProps) {
+function AppContainer(appProps: AppProps) {
   const defaultTheme = "light";
   return (
     <Provider store={combinedStore}>
       <ThemeSwitcherProvider themeMap={themes} defaultTheme={defaultTheme}>
-        <DendronApp
-          Component={Component}
-          pageProps={pageProps}
-          router={router}
-        />
+        <DendronApp {...appProps} />
       </ThemeSwitcherProvider>
     </Provider>
   );
@@ -42,22 +40,23 @@ function DendronApp({ Component, pageProps }: AppProps) {
   const logger = createLogger("App");
   const dendronRouter = useDendronRouter();
   const dispatch = useCombinedDispatch();
+  useDendronGATracking();
 
-  React.useEffect(() => {
-    setLogLevel("INFO");
-    logger.info({ ctx: "fetchNotes:pre" });
-    fetchNotes().then((data) => {
+  useEffect(() => {
+    (async () => {
+      setLogLevel("INFO");
+      logger.info({ ctx: "fetchNotes:pre" });
+      const data = await fetchNotes();
       logger.info({ ctx: "fetchNotes:got-data" });
       setNoteData(data);
       batch(() => {
         dispatch(browserEngineSlice.actions.setNotes(data.notes));
         dispatch(browserEngineSlice.actions.setNoteIndex(data.noteIndex));
       });
-    });
-    fetchConfig().then((data) => {
+      const config = await fetchConfig();
       logger.info({ ctx: "fetchConfig:got-data" });
-      dispatch(browserEngineSlice.actions.setConfig(data));
-    });
+      dispatch(browserEngineSlice.actions.setConfig(config));
+    })();
   }, []);
 
   logger.info({ ctx: "render" });

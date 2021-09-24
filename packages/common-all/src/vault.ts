@@ -54,7 +54,7 @@ export class VaultUtils {
   }: {
     vname: string;
     vaults: DVault[];
-  }) {
+  }): DVault | undefined {
     const vault = _.find(vaults, (vault) => {
       return vname === VaultUtils.getName(vault);
     });

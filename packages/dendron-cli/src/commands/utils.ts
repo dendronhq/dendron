@@ -1,3 +1,4 @@
+import { Server } from "@dendronhq/api-server";
 import { createLogger, resolvePath } from "@dendronhq/common-server";
 import {
   DendronEngineV2,
@@ -5,6 +6,7 @@ import {
   EngineConnector,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
+import { Socket } from "net";
 import yargs from "yargs";
 import {
   LaunchEngineServerCLIOpts,
@@ -14,13 +16,15 @@ import {
 export type SetupEngineCLIOpts = {
   enginePort?: number;
   useLocalEngine?: boolean;
+  attach?: boolean;
 } & LaunchEngineServerCLIOpts;
 
 export type SetupEngineResp = {
   wsRoot: string;
   engine: DEngineClient;
   port: number;
-  server: any;
+  server: Server;
+  serverSockets?: Set<Socket>;
 };
 
 export type SetupEngineOpts = {
@@ -30,9 +34,24 @@ export type SetupEngineOpts = {
   server: any;
 };
 
-const createDummyServer = () => ({
-  close: () => {},
-});
+/**
+ * used by {@link setupEngine}.
+ * Depending on options passed, we create a mock {@link Server}
+ * with a compatible API
+ * @param closeServer
+ * @returns
+ */
+const createDummyServer = (closeServer?: () => Promise<void>) =>
+  ({
+    close: (cb: () => void) => {
+      if (closeServer) {
+        closeServer().then(cb);
+        return;
+      } else {
+        return cb();
+      }
+    },
+  } as Server);
 /**
  * Setup an engine based on CLI args
  */
@@ -46,35 +65,56 @@ export async function setupEngine(
   });
   let engine: DEngineClient;
   let port: number;
-  let server: any;
+  let server: Server;
+  let serverSockets = new Set<Socket>();
   wsRoot = resolvePath(wsRoot, process.cwd());
   if (useLocalEngine) {
     const engine = DendronEngineV2.create({ wsRoot, logger });
     await engine.init();
-    return { wsRoot, engine, port: -1, server: createDummyServer() };
+    return {
+      wsRoot,
+      engine,
+      port: -1,
+      server: createDummyServer(),
+      serverSockets: new Set(),
+    };
   }
-  if (enginePort) {
+  if (enginePort || opts.attach) {
     logger.info({
       ctx: "setupEngine",
       msg: "connecting to engine",
       enginePort,
+      attach: opts.attach,
     });
     const engineConnector = EngineConnector.getOrCreate({
       wsRoot,
     });
     await engineConnector.init({ portOverride: enginePort });
     engine = engineConnector.engine;
-    port = enginePort;
-    server = createDummyServer();
+    if (enginePort) {
+      port = enginePort;
+    } else {
+      // TODO: don't use type assertion
+      port = engineConnector.port!;
+    }
+    if (engineConnector.serverPortWatcher) {
+      // a file watcher is created when engine port is undefined
+      // needs to be cleaned up on server closing
+      server = createDummyServer(async () => {
+        engineConnector.serverPortWatcher?.close();
+      });
+    } else {
+      server = createDummyServer();
+    }
   } else {
     logger.info({ ctx: "setupEngine", msg: "initialize new engine" });
-    ({ engine, port, server } =
+    ({ engine, port, server, serverSockets } =
       await new LaunchEngineServerCommand().enrichArgs(opts));
     if (init) {
       await engine.init();
     }
   }
-  return { wsRoot, engine, port, server };
+  return { wsRoot, engine, port, server, serverSockets };
 }
 
 /**
@@ -84,6 +124,9 @@ export function setupEngineArgs(args: yargs.Argv) {
   args.option("enginePort", {
     describe:
       "If set, connect to to running engine. If not set, create new instance of Dendron Engine",
+  });
+  args.option("attach", {
+    describe: "Use existing engine instead of spwaning a new one",
   });
   args.option("useLocalEngine", {
     type: "boolean",

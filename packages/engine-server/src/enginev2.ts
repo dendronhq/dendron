@@ -48,6 +48,7 @@ import {
   NullCache,
   LruCache,
   milliseconds,
+  StatusCodes,
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -486,6 +487,7 @@ export class DendronEngineV2 implements DEngine {
         error: DendronError.createFromStatus({
           status: ERROR_STATUS.INVALID_STATE,
           message: `${id} does not exist`,
+          code: StatusCodes.BAD_REQUEST,
         }),
       });
     }
@@ -588,7 +590,7 @@ export class DendronEngineV2 implements DEngine {
         error: null,
         data: resp,
       };
-    } catch (err) {
+    } catch (err: any) {
       let error = err;
       if (err instanceof DendronError) error = error2PlainObject(err);
       if (_.isUndefined(err.message)) err.message = "rename error";

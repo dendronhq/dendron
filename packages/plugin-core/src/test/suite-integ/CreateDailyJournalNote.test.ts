@@ -63,7 +63,7 @@ suite("Create Daily Journal Suite", function () {
     });
   });
 
-  test("default journal vault with lookup Confirm", (done) => {
+  test("default journal vault set with lookup Confirm", (done) => {
     runLegacyMultiWorkspaceTest({
       ctx,
       onInit: async ({ wsRoot, vaults }) => {
@@ -71,6 +71,28 @@ suite("Create Daily Journal Suite", function () {
           (config) => {
             config.lookupConfirmVaultOnCreate = true;
             config.journal.dailyVault = VaultUtils.getName(vaults[0]);
+            return config;
+          },
+          { wsRoot }
+        );
+        await new CreateDailyJournalCommand().run();
+        expect(
+          (await EditorUtils.getURIForActiveEditor()).fsPath.includes(
+            vaults[0].fsPath
+          )
+        ).toBeTruthy();
+        done();
+      },
+    });
+  });
+
+  test("default journal vault not set with lookup Confirm", (done) => {
+    runLegacyMultiWorkspaceTest({
+      ctx,
+      onInit: async ({ wsRoot, vaults }) => {
+        withConfig(
+          (config) => {
+            config.lookupConfirmVaultOnCreate = true;
             return config;
           },
           { wsRoot }

@@ -345,6 +345,15 @@ export type DendronConfig = {
    * Defaults to 204800 characters, which is about 200 KiB.
    */
   maxNoteLength?: number;
+
+  /** Notes that are too large can cause slowdowns when editing them. For notes
+   * longer than this many characters, some editor decorations like tag colors
+   * and broken link highlighting will be disabled. Other decorations will
+   * continue to function.
+   *
+   * Defaults to 4096 characters, which is about 4 KiB.
+   */
+  maxNoteDecoratedLength?: number;
 };
 
 export type RandomNoteConfig = {
@@ -432,12 +441,12 @@ export type DendronSiteConfig = {
   logo?: string;
 
   /**
-   * By default, the domain of your `siteHiearchies` page
+   * By default, the domain of your `siteHierarchies` page
    */
   siteIndex?: string;
 
   /**
-   * Hiearchies to publish
+   * Hierarchies to publish
    */
   siteHierarchies: string[];
 

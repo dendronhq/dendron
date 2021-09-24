@@ -1,4 +1,4 @@
-import { error2PlainObject, RespV2 } from "@dendronhq/common-all";
+import { error2PlainObject, RespV2, StatusCodes } from "@dendronhq/common-all";
 import { Response } from "express";
 
 export class ExpressUtils {
@@ -11,10 +11,28 @@ export class ExpressUtils {
   static handleError(expressResponse: Response, dendronResponse: RespV2<any>) {
     if (dendronResponse.error) {
       expressResponse
-        .status(dendronResponse.error.code || 500)
+        .status(dendronResponse.error.code || StatusCodes.INTERNAL_SERVER_ERROR)
         .json({ error: error2PlainObject(dendronResponse.error) });
       return true;
     }
     return false;
+  }
+
+  /**
+   * Set a standard response format to express rest clients based on RespV2
+   * @param expressResponse
+   * @param dendronResponse
+   */
+  static setResponse(
+    expressResponse: Response,
+    dendronResponse: RespV2<any>
+  ): void {
+    if (dendronResponse.error) {
+      expressResponse
+        .status(dendronResponse.error.code || StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ error: error2PlainObject(dendronResponse.error) });
+    } else {
+      expressResponse.json(dendronResponse);
+    }
   }
 }

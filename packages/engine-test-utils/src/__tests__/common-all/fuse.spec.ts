@@ -73,6 +73,30 @@ const queryTestV1 = ({
 };
 
 describe("Fuse utility function tests", () => {
+  describe(`doesContainSpecialQueryChars`, () => {
+    test.each([
+      // Fuse doesn't treat * specially but we map * to ' ' hence we treat it as special character.
+      ["dev*ts", true],
+      ["dev vs", true],
+      ["^vs", true],
+      ["vs$", true],
+      ["vs$", true],
+      ["dev|vs", true],
+      ["!vs", true],
+      ["=vs", true],
+      ["'vs", true],
+      ["dev-vs", false],
+      ["dev_vs", false],
+    ])(
+      `WHEN input="%s" THEN result is expected to be %s`,
+      (input: string, expected: boolean) => {
+        expect(FuseEngine.doesContainSpecialQueryChars(input)).toEqual(
+          expected
+        );
+      }
+    );
+  });
+
   describe("formatQueryForFuse", () => {
     test.each([
       ["dev*vs", "dev vs"],
@@ -182,6 +206,7 @@ describe("Fuse Engine tests with dummy data", () => {
     { fname: "note-3", updated: 4 },
     { fname: "user.tim.test", updated: 1 },
     { fname: "parent.new-note-1", updated: 1 },
+    { fname: "some.note.name.with.big-o", updated: 1 },
   ];
 
   describe(`GIVEN engine with notes: '${DATA_1.map((n) => n.fname)}'`, () => {
@@ -237,6 +262,18 @@ describe("Fuse Engine tests with dummy data", () => {
 
       it("THEN string with same size but not exact match is excluded.", () => {
         assertDoesNotHaveFName(queryResults, "note-2");
+      });
+    });
+
+    describe(`WHEN querying for 'big o'`, () => {
+      let queryResults: NoteIndexProps[];
+
+      beforeAll(() => {
+        queryResults = fuseEngine.queryNote({ qs: "big o" });
+      });
+
+      it(`THEN should match 'some.note.name.with.big-o'`, () => {
+        assertHasFName(queryResults, "some.note.name.with.big-o");
       });
     });
   });
@@ -331,6 +368,30 @@ describe("FuseEngine tests with extracted data.", () => {
         ["devapi", ["dendron.dev.api", "dendron.dev.api.seeds"]],
         ["dendron rename", ["dendron.dev.design.commands.rename"]],
         ["rename dendron", ["dendron.dev.design.commands.rename"]],
+        [
+          "dendron.dev design.commands.rename",
+          ["dendron.dev.design.commands.rename"],
+        ],
+        [
+          "^dendron.dev.design.commands.rename",
+          ["dendron.dev.design.commands.rename"],
+        ],
+        [
+          "dendron.dev.design.commands.rename$",
+          ["dendron.dev.design.commands.rename"],
+        ],
+        [
+          "=dendron.dev.design.commands.rename",
+          ["dendron.dev.design.commands.rename"],
+        ],
+        [
+          "dendron.dev.design.commands.rename !git",
+          ["dendron.dev.design.commands.rename"],
+        ],
+        [
+          "'dendron.dev.design 'commands.rename",
+          ["dendron.dev.design.commands.rename"],
+        ],
       ])(
         "WHEN query for '%s' THEN results to contain %s",
         (qs: string, expectedFNames: string[]) => {

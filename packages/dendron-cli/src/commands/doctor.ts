@@ -19,7 +19,7 @@ import {
 import throttle from "@jcoreio/async-throttle";
 import _ from "lodash";
 import yargs from "yargs";
-import { CLICommand } from "./base";
+import { CLICommand, CommandCommonProps } from "./base";
 import {
   setupEngine,
   setupEngineArgs,
@@ -47,8 +47,8 @@ type CommandCLIOpts = {
   exit?: boolean;
 } & SetupEngineCLIOpts;
 
-type CommandOpts = CommandCLIOpts & SetupEngineOpts;
-type CommandOutput = void;
+type CommandOpts = CommandCLIOpts & SetupEngineOpts & CommandCommonProps;
+type CommandOutput = CommandCommonProps;
 
 export enum DoctorActions {
   FIX_FRONTMATTER = "fixFrontmatter",
@@ -158,7 +158,7 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     return { ...args, ...engineArgs };
   }
 
-  async execute(opts: CommandOpts) {
+  async execute(opts: CommandOpts): Promise<CommandCommonProps> {
     const { action, engine, query, candidates, limit, dryRun, exit } =
       _.defaults(opts, {
         limit: 99999,
@@ -341,6 +341,6 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     if (exit) {
       process.exit();
     }
-    return;
+    return {};
   }
 }

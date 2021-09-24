@@ -9,7 +9,7 @@ import { SeedInitMode, SeedService, SeedUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
 import yargs from "yargs";
-import { CLICommand } from "./base";
+import { CLICommand, CommandCommonProps } from "./base";
 import {
   setupEngine,
   setupEngineArgs,
@@ -28,9 +28,9 @@ type CommandCLIOpts = {
   registryFile?: string;
 };
 
-type CommandOpts = CommandCLIOpts & SetupEngineOpts & {};
+type CommandOpts = CommandCLIOpts & SetupEngineOpts & CommandCommonProps;
 
-type CommandOutput = Partial<{ error: DendronError; data: any }>;
+type CommandOutput = Partial<{ error?: DendronError; data: any }>;
 
 export { CommandOpts as SeedCLICommandOpts };
 
@@ -75,7 +75,7 @@ export class SeedCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     return { ...args, ...engineArgs };
   }
 
-  async execute(opts: CommandOpts) {
+  async execute(opts: CommandOpts): Promise<CommandOutput> {
     const { cmd, id, wsRoot, config, mode, registryFile } = opts;
     const seedService = new SeedService({ wsRoot, registryFile });
     const ctx = "execute";
@@ -142,7 +142,7 @@ export class SeedCLICommand extends CLICommand<CommandOpts, CommandOutput> {
         default:
           return assertUnreachable();
       }
-    } catch (err) {
+    } catch (err: any) {
       this.L.error(err);
       if (err instanceof DendronError) {
         this.print(["status:", err.status, err.message].join(" "));

@@ -4,7 +4,7 @@ import {
   postVSCodeMessage,
 } from "@dendronhq/common-frontend";
 import _ from "lodash";
-import React, { useEffect, useRef, useState } from "react";
+import React, { Children, useEffect, useRef, useState } from "react";
 import cytoscape, { Core, EdgeDefinition, EventHandler } from "cytoscape";
 import euler from "cytoscape-euler";
 import { useThemeSwitcher } from "react-css-theme-switcher";
@@ -21,7 +21,7 @@ import {
 import useApplyGraphConfig from "../hooks/useApplyGraphConfig";
 import { DendronProps } from "../lib/types";
 import useSyncGraphWithIDE from "../hooks/useSyncGraphWithIDE";
-import { Button, Space, Spin, Typography } from "antd";
+import { Button, Space, Spin, Typography, Select, Switch } from "antd";
 
 export class GraphUtils {
   static isLocalGraph(config: GraphConfig) {
@@ -157,6 +157,15 @@ export default function Graph({
   const { nodes, edges } = elements;
   const isLargeGraph = nodes.length + Object.values(edges).flat().length > 1000;
 
+  const SwitchButton = ({
+    children,
+    val,
+    update,
+  }: {
+    children: (val: boolean | undefined) => React.ReactNode;
+    val: boolean | undefined;
+    update: (val: boolean) => void;
+  }) => <Button onClick={() => update(!val)}>{children(val)}</Button>;
   const renderGraph = () => {
     if (graphRef.current && nodes && edges) {
       logger.log("Rendering graph...");
@@ -356,6 +365,29 @@ export default function Graph({
           isGraphReady={isReady}
           updateConfigField={updateConfigField}
         />
+        {type === "note" && (
+          <div
+            style={{
+              position: "fixed",
+              top: 0,
+              right: 0,
+              margin: 10,
+              zIndex: 10,
+            }}
+          >
+            <SwitchButton
+              val={config?.["options.show-local-graph"]?.value}
+              update={() =>
+                updateConfigField(
+                  "options.show-local-graph",
+                  !config?.["options.show-local-graph"]?.value
+                )
+              }
+            >
+              {(val) => (val ? "Show Full Graph" : "Show Local Graph")}
+            </SwitchButton>
+          </div>
+        )}
         <div
           ref={graphRef}
           style={{

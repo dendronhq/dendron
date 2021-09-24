@@ -40,6 +40,9 @@ export type LookupControllerV3CreateOpts = {
    * press button on init if true
    */
   vaultButtonPressed?: boolean;
+  /** If vault selection isn't disabled, allow choosing the mode of selection.
+   *  Defaults to true. */
+  vaultSelectCanToggle?: boolean;
   /**
    * Additional buttons
    */
@@ -73,7 +76,12 @@ export class LookupControllerV3 {
       : isMultiVault && opts!.vaultButtonPressed;
     const maybeVaultSelectButton =
       opts?.nodeType === "note" && isMultiVault
-        ? [VaultSelectButton.create(maybeVaultSelectButtonPressed)]
+        ? [
+            VaultSelectButton.create({
+              pressed: maybeVaultSelectButtonPressed,
+              canToggle: opts?.vaultSelectCanToggle,
+            }),
+          ]
         : [];
     const buttons = opts?.buttons || maybeVaultSelectButton;
     const extraButtons = opts?.extraButtons || [];
@@ -232,7 +240,7 @@ export class LookupControllerV3 {
     const btnTriggered = _.find(this.state.buttons, {
       type: btnType,
     }) as DendronBtn;
-    btnTriggered.pressed = !btnTriggered.pressed;
+    btnTriggered.toggle();
     const btnCategory = getButtonCategory(btnTriggered);
     let btnsToRefresh: DendronBtn[] = [];
     if (!_.includes(["effect"] as ButtonCategory[], btnCategory)) {

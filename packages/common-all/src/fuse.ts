@@ -12,7 +12,7 @@ import {
   DNodeUtils,
   DEngineClient,
 } from ".";
-import { DendronConfig, DVault } from "./types";
+import { DVault } from "./types";
 
 export type NoteIndexProps = {
   id: string;
@@ -67,15 +67,16 @@ const THRESHOLD_VALUE = 0.2;
 
 function createFuse<T>(
   initList: T[],
-  opts: Fuse.IFuseOptions<any> & {
+  opts: Fuse.IFuseOptions<T> & {
     preset: "schema" | "note";
-  }
+  },
+  index?: Fuse.FuseIndex<T>
 ) {
-  const options: Fuse.IFuseOptions<any> = {
+  const options: Fuse.IFuseOptions<T> = {
     shouldSort: true,
     threshold: opts.threshold,
     distance: 15,
-    minMatchCharLength: 2,
+    minMatchCharLength: 1,
     keys: ["fname"],
     useExtendedSearch: true,
     includeScore: true,
@@ -84,19 +85,74 @@ function createFuse<T>(
     location: 0,
     ignoreLocation: true,
     ignoreFieldNorm: true,
+    ...opts,
   };
   if (opts.preset === "schema") {
     options.keys = ["fname", "id"];
   }
-  const fuse = new Fuse(initList, options);
+  const fuse = new Fuse(initList, options, index);
   return fuse;
 }
+
+export function createFuseNote(
+  publishedNotes: NotePropsDict | NoteProps[],
+  overrideOpts?: Partial<Fuse.IFuseOptions<NoteProps>>,
+  index?: Fuse.FuseIndex<NoteProps>
+) {
+  let notes: NoteProps[];
+  if (_.isArray(publishedNotes)) notes = publishedNotes;
+  else notes = Object.values(publishedNotes);
+  return createFuse(
+    notes,
+    {
+      preset: "note",
+      keys: ["title", "body"],
+      includeMatches: true,
+      includeScore: true,
+      findAllMatches: true,
+      useExtendedSearch: true,
+      ...overrideOpts,
+    },
+    index
+  );
+}
+
+export function createSerializedFuseNoteIndex(
+  publishedNotes: NotePropsDict | NoteProps[],
+  overrideOpts?: Partial<Parameters<typeof createFuse>[1]>
+) {
+  return createFuseNote(publishedNotes, overrideOpts).getIndex().toJSON();
+}
+
+export type FuseNote = Fuse<NoteProps>;
+export type FuseNoteIndex = Fuse.FuseIndex<NoteProps>;
+export type SerializedFuseIndex = ReturnType<
+  typeof createSerializedFuseNoteIndex
+>;
 
 type FuseEngineOpts = {
   mode?: DEngineMode;
 };
 
 export class FuseEngine {
+  /**
+   * Characters that are specially treated by FuseJS search
+   * Reference https://fusejs.io/examples.html#extended-search
+   *
+   * Includes '*' which is not specially treated by FuseJS but we currently
+   * map '*' to ' ' which specially treated by FuseJS.
+   */
+  private static readonly SPECIAL_QUERY_CHARACTERS = [
+    "*",
+    " ",
+    "|",
+    "^",
+    "$",
+    "!",
+    "=",
+    "'",
+  ];
+
   public notesIndex: Fuse<NoteIndexProps>;
   public schemaIndex: Fuse<SchemaProps>;
 
@@ -318,19 +374,28 @@ export class FuseEngine {
     // Filter by threshold due to what appears to be a FuseJS bug
     results = this.filterByThreshold(results);
 
-    // Filter out matches that are same length as query string but are not exact.
-    //
-    // For example
-    // 'user.nickolay.journal.2021.09.03'
-    // matches
-    // 'user.nickolay.journal.2021.09.02'
-    // with a super low score of '0.03' but we don't want to display all the journal
-    // dates with the same length. Hence whenever the length of our query is equal
-    // or longer than the query results, we want to create a new note, not show those results.
-    results = results.filter(
-      (r) =>
-        r.item.fname.length > queryString.length || r.item.fname === queryString
-    );
+    if (!FuseEngine.doesContainSpecialQueryChars(queryString)) {
+      // When we use query language operators this filtering does not apply
+      // since we can query the entry with a much longer query than file name length.
+      // For example query fname="hi-world" with query="^hi world$ !bye".
+      //
+      // For cases of simple file names (do not contain special query chars):
+      // Filter out matches that are same length or less as query string but
+      // are not exact.
+      //
+      // For example
+      // 'user.nickolay.journal.2021.09.03'
+      // matches
+      // 'user.nickolay.journal.2021.09.02'
+      // with a super low score of '0.03' but we don't want to display all the journal
+      // dates with the same length. Hence whenever the length of our query is equal
+      // or longer than the query results, we want to create a new note, not show those results.
+      results = results.filter(
+        (r) =>
+          r.item.fname.length > queryString.length ||
+          r.item.fname === queryString
+      );
+    }
 
     if (onlyDirectChildren) {
       const depth = queryString.split(".").length;
@@ -342,6 +407,13 @@ export class FuseEngine {
     }
 
     return results;
+  }
+
+  /**
+   * Returns true when string contains characters that FuseJS treats as special characters.
+   * */
+  static doesContainSpecialQueryChars(str: string) {
+    return this.SPECIAL_QUERY_CHARACTERS.some((char) => str.includes(char));
   }
 }
 
@@ -358,19 +430,12 @@ export class NoteLookupUtils {
     return lastDotIndex < 0 ? "" : qs.slice(0, lastDotIndex + 1);
   };
 
-  static fetchRootResults = (
-    notes: NotePropsDict,
-    opts?: Partial<{ config: DendronConfig }>
-  ) => {
-    const roots: NoteProps[] =
-      opts?.config?.site.siteHierarchies === ["root"]
-        ? NoteUtils.getRoots(notes)
-        : opts!.config!.site.siteHierarchies.flatMap((fname) =>
-            NoteUtils.getNotesByFname({ fname, notes })
-          );
+  static fetchRootResults = (notes: NotePropsDict) => {
+    const roots: NoteProps[] = NoteUtils.getRoots(notes);
+
     const childrenOfRoot = roots.flatMap((ent) => ent.children);
-    const nodes = _.map(childrenOfRoot, (ent) => notes[ent]).concat(roots);
-    return nodes;
+    const childrenOfRootNotes = _.map(childrenOfRoot, (ent) => notes[ent]);
+    return roots.concat(childrenOfRootNotes);
   };
 
   static async lookup({

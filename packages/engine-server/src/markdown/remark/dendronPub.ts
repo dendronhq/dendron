@@ -1,8 +1,10 @@
 import {
   DendronError,
+  ERROR_SEVERITY,
   isNotUndefined,
   NoteProps,
   NoteUtils,
+  StatusCodes,
   TAGS_HIERARCHY,
 } from "@dendronhq/common-all";
 import _ from "lodash";
@@ -31,12 +33,14 @@ import {
   UserTag,
   VaultMissingBehavior,
   WikiLinkNoteV4,
+  ExtendedImage,
 } from "../types";
 import { MDUtilsV4 } from "../utils";
 import { MDUtilsV5, ProcMode } from "../utilsv5";
 import { blockAnchor2html } from "./blockAnchors";
 import { NoteRefsOpts } from "./noteRefs";
 import { convertNoteRefASTV2 } from "./noteRefsV2";
+import { extendedImage2html } from "./extendedImage";
 
 type PluginOpts = NoteRefsOpts & {
   assetsPrefix?: string;
@@ -51,10 +55,10 @@ type PluginOpts = NoteRefsOpts & {
 
 function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
   const proc = this;
-  const procData = MDUtilsV4.getDendronData(proc);
+  let { overrides, vault } = MDUtilsV4.getDendronData(proc);
   const { mode } = MDUtilsV5.getProcOpts(proc);
-  const { dest, fname, config, overrides, insideNoteRef } = procData;
-  let vault = procData.vault;
+
+  const { dest, fname, config, insideNoteRef } = MDUtilsV5.getProcData(proc);
 
   function transformer(tree: Node, _file: VFile) {
     const root = tree as Root;
@@ -150,13 +154,32 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         }
 
         const copts = opts?.wikiLinkOpts;
-        if (note && opts?.transformNoPublish) {
+        if (!note && opts?.transformNoPublish) {
+          const code = StatusCodes.FORBIDDEN;
+          value = _.toString(code);
+          addError(
+            proc,
+            new DendronError({
+              message: "no note",
+              code,
+              severity: ERROR_SEVERITY.MINOR,
+            })
+          );
+        } else if (note && opts?.transformNoPublish) {
           if (error) {
-            value = "403";
+            value = _.toString(StatusCodes.FORBIDDEN);
             addError(proc, error);
-          } else if (!note || !config) {
-            value = "403";
-            addError(proc, new DendronError({ message: "no note or config" }));
+          } else if (!config) {
+            const code = StatusCodes.FORBIDDEN;
+            value = _.toString(code);
+            addError(
+              proc,
+              new DendronError({
+                message: "no config",
+                code,
+                severity: ERROR_SEVERITY.MINOR,
+              })
+            );
           } else {
             isPublished = SiteUtils.isPublished({
               note,
@@ -164,7 +187,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
               engine,
             });
             if (!isPublished) {
-              value = "403";
+              value = _.toString(StatusCodes.FORBIDDEN);
             }
           }
         }
@@ -182,12 +205,23 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
           }
         }
         const alias = data.alias ? data.alias : value;
-        const usePrettyLinks = engine.config.site.usePrettyLinks;
+        const usePrettyLinks = config.site.usePrettyLinks;
         const maybeFileExtension =
           _.isBoolean(usePrettyLinks) && usePrettyLinks ? "" : ".html";
-        const href = `${copts?.prefix || ""}${value}${maybeFileExtension}${
-          data.anchorHeader ? "#" + data.anchorHeader : ""
-        }`;
+        // in v4, copts.prefix = absUrl + "/" + siteNotesDir + "/";
+        // if v5, copts.prefix = ""
+        let href: string;
+        if (MDUtilsV5.isV5Active(proc)) {
+          href = `${config.site.assetsPrefix || ""}${
+            copts?.prefix || ""
+          }${value}${maybeFileExtension}${
+            data.anchorHeader ? "#" + data.anchorHeader : ""
+          }`;
+        } else {
+          href = `${copts?.prefix || ""}${value}${maybeFileExtension}${
+            data.anchorHeader ? "#" + data.anchorHeader : ""
+          }`;
+        }
         const exists = true;
         // for rehype
         //_node.value = newValue;
@@ -215,19 +249,15 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
             alias,
             hName: "a",
             hProperties: {
-              "data-toggle": "popover",
-              title: "This page has not yet sprouted",
-              style: "cursor: pointer",
-              "data-content": [
-                `<a href="https://dendron.so/">Dendron</a> (the tool used to generate this site) lets authors selective publish content. You will see this page whenever you click on a link to an unpublished page`,
-                "",
-                "<img src='https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/not-sprouted.png'></img>",
-              ].join("\n"),
+              title: "Private",
+              style: "color: brown",
+              href: "https://wiki.dendron.so/notes/hfyvYGJZQiUwQaaxQO27q.html",
+              target: "_blank",
             },
             hChildren: [
               {
                 type: "text",
-                value: alias,
+                value: `${alias} (Private)`,
               },
             ],
           } as RehypeLinkData;
@@ -341,7 +371,12 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
           return index;
         }
       }
-      if (node.type === "image" && dest === DendronASTDest.HTML) {
+      // The url correction needs to happen for both regular and extended images
+      if (
+        (node.type === DendronASTTypes.IMAGE ||
+          node.type === DendronASTTypes.EXTENDED_IMAGE) &&
+        dest === DendronASTDest.HTML
+      ) {
         const imageNode = node as Image;
         if (opts?.assetsPrefix) {
           imageNode.url =
@@ -350,6 +385,18 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
             "/" +
             _.trim(imageNode.url, "/");
         }
+      }
+      if (
+        node.type === DendronASTTypes.EXTENDED_IMAGE &&
+        dest === DendronASTDest.HTML
+      ) {
+        const index = _.indexOf(parent.children, node);
+        // Replace with the HTML containing the image including custom properties
+        parent.children.splice(
+          index,
+          1,
+          extendedImage2html(node as ExtendedImage)
+        );
       }
       return; // continue traversal
     });

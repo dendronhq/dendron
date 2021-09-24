@@ -16,15 +16,14 @@ const packageJson = {
   main: "index.js",
   license: "MIT",
   dependencies: {
-    "@dendronhq/dendron-11ty": "^1.58.0",
+    "@dendronhq/dendron-11ty-legacy": "^0.59.1",
   },
 };
-
-type NPMDep = { pkg: string; version: string };
 
 export const pkgCreate = (pkgPath: string) => {
   return fs.writeJSONSync(pkgPath, packageJson);
 };
+
 const pkgInstall = async () => {
   await execa("npm", ["install"], {
     cwd: getDWorkspace().wsRoot,
@@ -32,11 +31,7 @@ const pkgInstall = async () => {
 };
 
 const pkgUpgrade = async (pkg: string, version: string) => {
-  const cmdInstall: string[] = `install --save ${pkg}${_.replace(
-    version,
-    "^",
-    "@"
-  )}`.split(" ");
+  const cmdInstall: string[] = `install --save ${pkg}@${version}`.split(" ");
   await execa("npm", cmdInstall, {
     cwd: getDWorkspace().wsRoot,
   });
@@ -47,7 +42,7 @@ export const buildSite = async (opts: BuildSiteV2CLICommandCliOpts) => {
     getDWorkspace().wsRoot,
     "node_modules",
     "@dendronhq",
-    "dendron-11ty"
+    "dendron-11ty-legacy"
   );
   let importEleventy: any;
   try {
@@ -96,17 +91,12 @@ export const checkPreReq = async () => {
   } else {
     // check dependencies
     const pkgContents = fs.readJSONSync(pkgPath);
-    const pkgDeps = pkgContents.dependencies;
-    const outOfDate: NPMDep[] = _.filter<NPMDep | undefined>(
-      _.map(packageJson.dependencies, (v, k) => {
-        if (pkgDeps[k] !== v) {
-          return { pkg: k, version: v };
-        }
-        return undefined;
-      }),
-      (ent) => !_.isUndefined(ent)
-    ) as NPMDep[];
-    if (!_.isEmpty(outOfDate)) {
+    const pkgDeps = pkgContents.dependencies as { [key: string]: string };
+
+    const outOfDate = _.find(Object.keys(pkgDeps), (ent) =>
+      ent.match(/@dendronhq\/dendron-11ty$/)
+    );
+    if (outOfDate) {
       const resp = await window.showInformationMessage(
         "Dependencies are out of date",
         "Update",
@@ -115,6 +105,8 @@ export const checkPreReq = async () => {
       if (resp !== "Update") {
         return undefined;
       }
+      delete pkgDeps["@dendronhq/dendron-11ty"];
+      fs.writeJSONSync(pkgPath, pkgContents, { spaces: 4 });
       await window.withProgress(
         {
           location: ProgressLocation.Notification,
@@ -122,15 +114,7 @@ export const checkPreReq = async () => {
           cancellable: false,
         },
         async (_progress, _token) => {
-          await _.reduce(
-            outOfDate,
-            async (prev, opts) => {
-              await prev;
-              const { pkg, version } = opts;
-              return pkgUpgrade(pkg, version);
-            },
-            Promise.resolve()
-          );
+          return pkgUpgrade("@dendronhq/dendron-11ty-legacy", "0.59.1");
         }
       );
       window.showInformationMessage("finish updating dependencies");

@@ -3,6 +3,7 @@ import { AssertUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { writeFile } from "fs-extra";
 import _ from "lodash";
 import path from "path";
+import sinon from "sinon";
 import * as vscode from "vscode";
 import {
   DECORATION_TYPE,
@@ -81,7 +82,7 @@ suite("windowDecorations", function () {
         },
         onInit: async ({ vaults, engine, wsRoot }) => {
           const note = NoteUtils.getNoteByFnameV5({
-            fname: "bar",
+            fname: FNAME,
             notes: engine.notes,
             vault: vaults[0],
             wsRoot,
@@ -162,6 +163,189 @@ suite("windowDecorations", function () {
           expect(
             isTextDecorated("#foo", brokenWikilinkDecorations!, document)
           ).toBeTruthy();
+
+          done();
+        },
+      });
+    });
+
+    test("highlighting same file wikilinks", (done) => {
+      const FNAME = "bar";
+
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ vaults, wsRoot }) => {
+          await NoteTestUtilsV4.createNote({
+            fname: FNAME,
+            body: [
+              "Ut incidunt id commodi. ^anchor-1",
+              "",
+              "[[#^anchor-1]]",
+              "[[#^anchor-not-exists]]",
+              "![[#^anchor-1]]",
+              "![[#^anchor-not-exists]]",
+              "![[#^anchor-1:#*]]",
+              "![[#^anchor-not-exists]]",
+            ].join("\n"),
+            vault: vaults[0],
+            wsRoot,
+          });
+        },
+        onInit: async ({ vaults, engine, wsRoot }) => {
+          const note = NoteUtils.getNoteByFnameV5({
+            fname: FNAME,
+            notes: engine.notes,
+            vault: vaults[0],
+            wsRoot,
+          });
+          const editor = await VSCodeUtils.openNote(note!);
+          const document = editor.document;
+          const { allDecorations } = updateDecorations(editor);
+
+          const wikilinkDecorations = allDecorations!.get(
+            DECORATION_TYPE.wikiLink
+          );
+          expect(wikilinkDecorations.length).toEqual(3);
+          expect(
+            isTextDecorated("[[#^anchor-1]]", wikilinkDecorations!, document)
+          ).toBeTruthy();
+          expect(
+            isTextDecorated("![[#^anchor-1]]", wikilinkDecorations!, document)
+          ).toBeTruthy();
+          expect(
+            isTextDecorated(
+              "![[#^anchor-1:#*]]",
+              wikilinkDecorations!,
+              document
+            )
+          ).toBeTruthy();
+
+          const brokenWikilinkDecorations = allDecorations!.get(
+            DECORATION_TYPE.brokenWikilink
+          );
+          expect(brokenWikilinkDecorations.length).toEqual(3);
+          expect(
+            isTextDecorated(
+              "[[#^anchor-not-exists]]",
+              brokenWikilinkDecorations!,
+              document
+            )
+          ).toBeTruthy();
+          expect(
+            isTextDecorated(
+              "![[#^anchor-not-exists]]",
+              brokenWikilinkDecorations!,
+              document
+            )
+          ).toBeTruthy();
+          expect(
+            isTextDecorated(
+              "![[#^anchor-not-exists]]",
+              brokenWikilinkDecorations!,
+              document
+            )
+          ).toBeTruthy();
+
+          done();
+        },
+      });
+    });
+
+    test("highlighting wildcard references", (done) => {
+      const FNAME = "bar";
+
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ vaults, wsRoot }) => {
+          await NoteTestUtilsV4.createNote({
+            fname: FNAME,
+            body: ["![[foo.bar.*]]"].join("\n"),
+            vault: vaults[0],
+            wsRoot,
+          });
+        },
+        onInit: async ({ vaults, engine, wsRoot }) => {
+          const note = NoteUtils.getNoteByFnameV5({
+            fname: FNAME,
+            notes: engine.notes,
+            vault: vaults[0],
+            wsRoot,
+          });
+          const editor = await VSCodeUtils.openNote(note!);
+          const document = editor.document;
+          const { allDecorations } = updateDecorations(editor);
+
+          const wikilinkDecorations = allDecorations!.get(
+            DECORATION_TYPE.wikiLink
+          );
+          expect(wikilinkDecorations.length).toEqual(1);
+          expect(
+            isTextDecorated("![[foo.bar.*]]", wikilinkDecorations!, document)
+          ).toBeTruthy();
+
+          done();
+        },
+      });
+    });
+
+    test("for long notes, disables expensive decorations & warns the user", (done) => {
+      const FNAME = "test.note";
+      const repeat = 228;
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ vaults, wsRoot }) => {
+          await NoteTestUtilsV4.createNote({
+            fname: FNAME,
+            body: _.repeat("[[does.not.exist]] #does.not.exist\n", repeat),
+            vault: vaults[0],
+            wsRoot,
+          });
+        },
+        onInit: async ({ vaults, engine, wsRoot }) => {
+          const note = NoteUtils.getNoteByFnameV5({
+            fname: FNAME,
+            notes: engine.notes,
+            vault: vaults[0],
+            wsRoot,
+          });
+          const editor = await VSCodeUtils.openNote(note!);
+          const document = editor.document;
+
+          const showInfo = sinon.stub(vscode.window, "showWarningMessage");
+
+          const { allDecorations, expensiveDecorationWarning } =
+            updateDecorations(editor);
+
+          // Checking if notes exist is expensive, so we shouldn't have done that
+          const brokenWikilinkDecorations = allDecorations!.get(
+            DECORATION_TYPE.brokenWikilink
+          );
+          expect(brokenWikilinkDecorations.length).toEqual(0);
+          // Instead, all wikilinks will appear as existing even if they are missing
+          const wikilinkDecorations = allDecorations!.get(
+            DECORATION_TYPE.wikiLink
+          );
+          expect(wikilinkDecorations.length).toEqual(repeat * 2);
+          expect(
+            isTextDecorated(
+              "[[does.not.exist]]",
+              wikilinkDecorations!,
+              document
+            )
+          ).toBeTruthy();
+          expect(
+            isTextDecorated("#does.not.exist", wikilinkDecorations!, document)
+          ).toBeTruthy();
+
+          // The user should only have been warned once
+          await expensiveDecorationWarning;
+          expect(showInfo.calledOnce).toBeTruthy();
+
+          // The user should not get warned a second time
+          const { expensiveDecorationWarning: expensiveDecorationWarning2 } =
+            updateDecorations(editor);
+          await expensiveDecorationWarning2;
+          expect(showInfo.calledOnce).toBeTruthy();
 
           done();
         },

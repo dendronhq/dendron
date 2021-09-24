@@ -20,7 +20,6 @@ import {
   NoteOpts,
   NoteProps,
   NotePropsDict,
-  NoteSEOProps,
   REQUIRED_DNODEPROPS,
   SchemaData,
   SchemaModuleDict,
@@ -101,6 +100,7 @@ export class DNodeUtils {
       "custom",
       "color",
       "tags",
+      "image",
     ];
     _.forEach(optionalProps, (op) => {
       if (opts[op]) {
@@ -235,6 +235,7 @@ export class DNodeUtils {
       "schemaStub",
       "type",
       "tags",
+      "image",
     ];
     return _.omit(props, blacklist);
   }
@@ -821,20 +822,6 @@ export class NoteUtils {
     }
   }
 
-  static getSEOProps(note: NoteProps): NoteSEOProps {
-    const { title, created, updated } = note;
-    const { excerpt, canonicalUrl, noindex, canonicalBaseUrl } = note.custom;
-    return {
-      title,
-      excerpt,
-      updated,
-      created,
-      canonicalBaseUrl,
-      canonicalUrl,
-      noindex,
-    };
-  }
-
   static getURI({ note, wsRoot }: { note: NoteProps; wsRoot: string }): URI {
     return URI.file(this.getFullPath({ note, wsRoot }));
   }
@@ -949,6 +936,7 @@ export class NoteUtils {
       "children",
       "color",
       "tags",
+      "image",
     ]);
     const { custom: customProps } = cleanProps;
     const meta = { ...builtinProps, ...customProps };

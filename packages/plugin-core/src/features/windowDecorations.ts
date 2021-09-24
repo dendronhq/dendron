@@ -1,12 +1,14 @@
 import {
   DefaultMap,
   isNotUndefined,
+  NoteProps,
   NoteUtils,
   Position,
   TAGS_HIERARCHY,
   VaultUtils,
 } from "@dendronhq/common-all";
 import {
+  AnchorUtils,
   BlockAnchor,
   DendronASTDest,
   DendronASTTypes,
@@ -43,7 +45,17 @@ import {
   warnMissingFrontmatter,
 } from "./codeActionProvider";
 
+/** Wait this long in miliseconds before trying to update decorations. */
 const DECORATION_UPDATE_DELAY = 100;
+/** Some decorations are expensive. If a note is longer than this many characters, avoid the expensive decorations.
+ *
+ * This is just a workaround because `getNotesByFname` is too expensive right now, because it scans through all notes.
+ * If you are reading this comment in the future and that's no longer the case, feel free to remove this workaround!
+ */
+const DEFAULT_EXPENSIVE_DECORATIONS_LIMIT = 4096;
+
+/** Notes that we warned the user about expensive decorations being disabled. Tracked to avoid repeatedly warning. */
+const WARNED_LONG_NOTE = new Set<string>();
 
 export const DECORATION_TYPE = {
   timestamp: window.createTextEditorDecorationType({}),
@@ -70,7 +82,11 @@ export const DECORATION_TYPE = {
 
 export const DECORATOR = new Map<
   string,
-  (node: any, document: TextDocument) => DecorationAndType[]
+  (
+    node: any,
+    document: TextDocument,
+    doExpensiveDecorations: boolean
+  ) => DecorationAndType[]
 >([
   [DendronASTTypes.FRONTMATTER, decorateFrontmatter],
   [DendronASTTypes.BLOCK_ANCHOR, decorateBlockAnchor],
@@ -104,13 +120,25 @@ export function delayedUpdateDecorations(
   }, updateDelay);
 }
 
+/** Warn the user that this note is too long for some expensive decorations. */
+function warnExpensiveDecorationsDisabled(note: NoteProps) {
+  if (WARNED_LONG_NOTE.has(note.id)) return;
+  WARNED_LONG_NOTE.add(note.id);
+  return window.showWarningMessage(
+    "This note is too long for some editor decorations, like tag colors. " +
+      "These have been disabled in the editor only. " +
+      "They will continue to function everywhere else."
+  );
+}
+
 export function updateDecorations(activeEditor: TextEditor) {
   const ctx = "updateDecorations";
   const text = activeEditor.document.getText();
   // Only show decorations & warnings for notes
+  let note: NoteProps | undefined;
   try {
-    if (_.isUndefined(VSCodeUtils.getNoteFromDocument(activeEditor.document)))
-      return {};
+    note = VSCodeUtils.getNoteFromDocument(activeEditor.document);
+    if (_.isUndefined(note)) return {};
   } catch (error) {
     Logger.info({
       ctx,
@@ -132,11 +160,19 @@ export function updateDecorations(activeEditor: TextEditor) {
     DecorationOptions[]
   >(() => []);
   let frontmatter: FrontmatterContent | undefined;
+  const doExpensiveDecorations =
+    text.length <
+    (getDWorkspace().config.maxNoteDecoratedLength ||
+      DEFAULT_EXPENSIVE_DECORATIONS_LIMIT);
 
   visit(tree, (node) => {
     const decorator = DECORATOR.get(node.type);
     if (decorator) {
-      const decorations = decorator(node, activeEditor.document);
+      const decorations = decorator(
+        node,
+        activeEditor.document,
+        doExpensiveDecorations
+      );
       for (const { type, decoration } of decorations) {
         activeDecorations.get(type).push(decoration);
       }
@@ -170,11 +206,23 @@ export function updateDecorations(activeEditor: TextEditor) {
       activeEditor.setDecorations(type, []);
     }
   }
-  return { allDecorations: activeDecorations, allWarnings };
+
+  let expensiveDecorationWarning: ReturnType<
+    typeof warnExpensiveDecorationsDisabled
+  >;
+  if (!doExpensiveDecorations)
+    expensiveDecorationWarning = warnExpensiveDecorationsDisabled(note);
+  return {
+    allDecorations: activeDecorations,
+    allWarnings,
+    expensiveDecorationWarning,
+  };
 }
 
 function decorateFrontmatter(
-  frontmatter: FrontmatterContent
+  frontmatter: FrontmatterContent,
+  _document: TextDocument,
+  doExpensiveDecorations: boolean
 ): DecorationAndType[] {
   const { value: contents, position } = frontmatter;
   if (_.isUndefined(position)) return []; // should never happen
@@ -221,6 +269,7 @@ function decorateFrontmatter(
       fname: `${TAGS_HIERARCHY}${tag.value}`,
       position: tag.position,
       lineOffset,
+      doExpensiveDecorations,
     })
   );
   return _.concat(timestampDecorations, fmTagDecorations);
@@ -236,28 +285,45 @@ function decorateBlockAnchor(blockAnchor: BlockAnchor) {
   return [{ type: DECORATION_TYPE.blockAnchor, decoration }];
 }
 
-function decorateHashTag(hashtag: HashTag) {
+function decorateHashTag(
+  hashtag: HashTag,
+  _document: TextDocument,
+  doExpensiveDecorations: boolean
+) {
   const position = hashtag.position;
   if (_.isUndefined(position)) return []; // should never happen
 
-  return decorateTag({ fname: hashtag.fname, position });
+  return decorateTag({
+    fname: hashtag.fname,
+    position,
+    doExpensiveDecorations,
+  });
 }
 
 function decorateTag({
   fname,
   position,
   lineOffset,
+  doExpensiveDecorations,
 }: {
   fname: string;
   position: Position;
   lineOffset?: number;
+  doExpensiveDecorations: boolean;
 }) {
-  const { color: backgroundColor } = NoteUtils.color({
-    fname,
-    notes: getDWorkspace().engine.notes,
-  });
+  // fully transparent, effectively no background if the note is too long
+  let backgroundColor = "#00000000";
 
-  const type = linkedNoteType({ fname });
+  if (doExpensiveDecorations) {
+    // Getting the color requires a lot of lookups by fname, and can be very expensive
+    const { color } = NoteUtils.color({
+      fname,
+      notes: getDWorkspace().engine.notes,
+    });
+    backgroundColor = color;
+  }
+
+  const type = linkedNoteType({ fname, doExpensiveDecorations });
   const decoration: DecorationOptions = {
     range: VSCodeUtils.position2VSCodeRange(position, { line: lineOffset }),
     renderOptions: {
@@ -278,42 +344,90 @@ function decorateTag({
 
 function linkedNoteType({
   fname,
+  anchorStart,
+  anchorEnd,
   vaultName,
+  document,
+  doExpensiveDecorations,
 }: {
   fname: string;
+  anchorStart?: string;
+  anchorEnd?: string;
   vaultName?: string;
+  document?: TextDocument;
+  doExpensiveDecorations: boolean;
 }) {
+  // Doing lookups to check if a note exists is expensive
+  if (!doExpensiveDecorations) return DECORATION_TYPE.wikiLink;
+  const ctx = "linkedNoteType";
   const { notes, vaults } = getDWorkspace().engine;
   const vault = vaultName
     ? VaultUtils.getVaultByName({ vname: vaultName, vaults })
     : undefined;
   // Vault specified, but can't find it.
   if (vaultName && !vault) return DECORATION_TYPE.brokenWikilink;
-  let exists: boolean;
-  try {
-    exists =
-      NoteUtils.getNotesByFname({
+
+  let matchingNotes: NoteProps[];
+  // Same-file links have `fname` undefined or empty string
+  if (!fname && document) {
+    const documentNote = VSCodeUtils.getNoteFromDocument(document);
+    matchingNotes = documentNote ? [documentNote] : [];
+  } else {
+    try {
+      matchingNotes = NoteUtils.getNotesByFname({
         fname,
         vault,
         notes,
-      }).length > 0;
-  } catch (err) {
-    Logger.info({ ctx: "doesLinkedNoteExist", err });
-    exists = false;
+      });
+    } catch (err) {
+      Logger.info({
+        ctx,
+        msg: "error when looking for note",
+        fname,
+        vaultName,
+        err,
+      });
+      return DECORATION_TYPE.brokenWikilink;
+    }
   }
-  if (exists || containsNonDendronUri(fname)) return DECORATION_TYPE.wikiLink;
+
+  if (anchorStart || anchorEnd) {
+    const allAnchors = _.flatMap(matchingNotes, (note) =>
+      Object.values(note.anchors)
+    )
+      .filter(isNotUndefined)
+      .map(AnchorUtils.anchor2string);
+    if (anchorStart && anchorStart !== "*" && !allAnchors.includes(anchorStart))
+      return DECORATION_TYPE.brokenWikilink;
+    if (anchorEnd && anchorEnd !== "*" && !allAnchors.includes(anchorEnd))
+      return DECORATION_TYPE.brokenWikilink;
+  }
+
+  if (
+    matchingNotes.length > 0 ||
+    containsNonDendronUri(fname) ||
+    fname.endsWith("*")
+  )
+    return DECORATION_TYPE.wikiLink;
   else return DECORATION_TYPE.brokenWikilink;
 }
 
 const RE_ALIAS = /(?<beforeAlias>\[\[)(?<alias>[^|]+)\|/;
 
-function decorateWikiLink(wikiLink: WikiLinkNoteV4, document: TextDocument) {
+function decorateWikiLink(
+  wikiLink: WikiLinkNoteV4,
+  document: TextDocument,
+  doExpensiveDecorations: boolean
+) {
   const position = wikiLink.position as Position | undefined;
   if (_.isUndefined(position)) return []; // should never happen
 
   const type = linkedNoteType({
     fname: wikiLink.value,
+    anchorStart: wikiLink.data.anchorHeader,
     vaultName: wikiLink.data.vaultName,
+    document,
+    doExpensiveDecorations,
   });
   const wikiLinkrange = VSCodeUtils.position2VSCodeRange(position);
   const options: DecorationOptions = {
@@ -348,12 +462,17 @@ function decorateWikiLink(wikiLink: WikiLinkNoteV4, document: TextDocument) {
   return decorations;
 }
 
-function decorateUserTag(userTag: UserTag) {
+function decorateUserTag(
+  userTag: UserTag,
+  _document: TextDocument,
+  doExpensiveDecorations: boolean
+) {
   const position = userTag.position as Position;
   if (_.isUndefined(position)) return [];
 
   const type = linkedNoteType({
     fname: userTag.fname,
+    doExpensiveDecorations,
   });
 
   return [
@@ -361,13 +480,21 @@ function decorateUserTag(userTag: UserTag) {
   ];
 }
 
-function decorateReference(reference: NoteRefNoteV4) {
+function decorateReference(
+  reference: NoteRefNoteV4,
+  document: TextDocument,
+  doExpensiveDecorations: boolean
+) {
   const position = reference.position as Position;
   if (_.isUndefined(position)) return [];
 
   const type = linkedNoteType({
     fname: reference.data.link.from.fname,
+    anchorStart: reference.data.link.data.anchorStart,
+    anchorEnd: reference.data.link.data.anchorEnd,
     vaultName: reference.data.link.data.vaultName,
+    document,
+    doExpensiveDecorations,
   });
   const decoration: DecorationOptions = {
     range: VSCodeUtils.position2VSCodeRange(position),

@@ -1,6 +1,7 @@
 import {
   DendronError,
   DEngineClient,
+  ErrorFactory,
   NoteChangeEntry,
   RenameNoteOpts,
   VaultUtils,
@@ -95,13 +96,20 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     const lookupCreateOpts: LookupControllerV3CreateOpts = {
       nodeType: "note",
       disableVaultSelection: opts?.useSameVault,
-      extraButtons: MoveNoteCommand.gatherExtraButtons(opts),
+      // If vault selection is enabled we alwaysPrompt selection mode,
+      // hence disable toggling.
+      vaultSelectCanToggle: false,
+      extraButtons: [MultiSelectBtn.create(false)],
     };
     if (vault) {
       lookupCreateOpts.buttons = [];
     }
     const lc = LookupControllerV3.create(lookupCreateOpts);
-    const provider = new NoteLookupProvider("move", { allowNewNote: true });
+
+    const provider = new NoteLookupProvider("move", {
+      allowNewNote: true,
+      forceAsIsPickerValueUsage: true,
+    });
     provider.registerOnAcceptHook(ProviderAcceptHooks.oldNewLocationHook);
     const initialValue = path.basename(
       VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath || "",
@@ -147,23 +155,11 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
               msg: `changeState.hide event received.`,
             });
           } else {
-            throw new DendronError({
-              message: `unexpected event: ${JSON.stringify(event)}`,
-            });
+            throw ErrorFactory.createUnexpectedEventError({ event });
           }
         },
       });
     });
-  }
-
-  private static gatherExtraButtons(opts?: CommandOpts) {
-    const shouldAllowMultiSelect =
-      opts?.allowMultiselect !== undefined ? opts?.allowMultiselect : true;
-    const extraButtons = [];
-    if (shouldAllowMultiSelect) {
-      extraButtons.push(MultiSelectBtn.create(false));
-    }
-    return extraButtons;
   }
 
   private getDesiredMoves(

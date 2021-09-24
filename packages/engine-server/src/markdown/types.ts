@@ -5,7 +5,7 @@ import {
   DVault,
   NoteProps,
 } from "@dendronhq/common-all";
-import { Heading, Parent, Root } from "mdast";
+import { Heading, Image, Parent, Root } from "mdast";
 import { Processor } from "unified";
 import { DendronPubOpts } from "./remark/dendronPub";
 import { WikiLinksOpts } from "./remark/wikiLinks";
@@ -38,6 +38,7 @@ export enum DendronASTTypes {
   BLOCK_ANCHOR = "blockAnchor",
   HASHTAG = "hashtag",
   USERTAG = "usertag",
+  EXTENDED_IMAGE = "extendedImage",
   // Not dendron-specific, included here for convenience
   ROOT = "root",
   HEADING = "heading",
@@ -50,6 +51,7 @@ export enum DendronASTTypes {
   TABLE_CELL = "tableCell",
   IMAGE = "image",
   FRONTMATTER = "yaml",
+  LINK = "link",
 }
 
 export enum DendronASTDest {
@@ -155,3 +157,9 @@ export type UserTag = DendronASTNode & {
 };
 
 export type Anchor = BlockAnchor | Heading;
+
+export type ExtendedImage = DendronASTNode &
+  Image & {
+    /** User provided props, to set things like width and height. */
+    props: { [key: string]: any };
+  };

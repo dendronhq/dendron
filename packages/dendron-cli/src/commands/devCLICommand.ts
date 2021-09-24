@@ -4,7 +4,7 @@ import {
   error2PlainObject,
 } from "@dendronhq/common-all";
 import yargs from "yargs";
-import { CLICommand } from "./base";
+import { CLICommand, CommandCommonProps } from "./base";
 import path from "path";
 import fs from "fs-extra";
 import {
@@ -29,7 +29,7 @@ export enum DevCommands {
   INSTALL_PLUGIN = "install_plugin",
 }
 
-type CommandOpts = CommandCLIOpts & Partial<BuildCmdOpts>; //& SetupEngineOpts & {};
+type CommandOpts = CommandCLIOpts & CommandCommonProps & Partial<BuildCmdOpts>;
 
 type CommandOutput = Partial<{ error: DendronError; data: any }>;
 
@@ -55,6 +55,15 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     this.wsRootOptional = true;
   }
 
+  private setEndpoint(publishEndpoint: PublishEndpoint) {
+    this.print(`setting endpoint to ${publishEndpoint}...`);
+    if (publishEndpoint === PublishEndpoint.LOCAL) {
+      BuildUtils.prepPublishLocal();
+    } else {
+      BuildUtils.prepPublishRemote();
+    }
+  }
+
   buildArgs(args: yargs.Argv) {
     super.buildArgs(args);
     args.positional("cmd", {
@@ -66,7 +75,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       describe: "how to do upgrade",
       choices: Object.values(SemverVersion),
     });
-    args.option("publish endpoint", {
+    args.option("publishEndpoint", {
       describe: "where to publish",
       choices: Object.values(PublishEndpoint),
     });
@@ -158,8 +167,21 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           return { error: null };
         }
         case DevCommands.PUBLISH: {
-          await BuildUtils.prepPublishRemote();
-          LernaUtils.publishVersion();
+          if (!opts.publishEndpoint) {
+            return {
+              error: new DendronError({
+                message: "missing options for cmd",
+              }),
+            };
+          }
+          try {
+            this.setEndpoint(opts.publishEndpoint);
+            LernaUtils.publishVersion();
+          } finally {
+            if (opts.publishEndpoint === PublishEndpoint.LOCAL) {
+              BuildUtils.setRegRemote();
+            }
+          }
           return { error: null };
         }
         case DevCommands.PREP_PLUGIN: {
@@ -182,7 +204,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
         default:
           return assertUnreachable();
       }
-    } catch (err) {
+    } catch (err: any) {
       this.L.error(err);
       if (err instanceof DendronError) {
         this.print(["status:", err.status, err.message].join(" "));
@@ -195,14 +217,6 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
   }
 
   async bumpVersion(opts: BumpVersionOpts) {
-    const currentVersion = BuildUtils.getCurrentVersion();
-    const nextVersion = BuildUtils.genNextVersion({
-      currentVersion,
-      upgradeType: opts.upgradeType,
-    });
-    this.print("bump 11ty...");
-    BuildUtils.bump11ty({ currentVersion, nextVersion });
-
     this.print("bump version...");
     LernaUtils.bumpVersion(opts.upgradeType);
   }

@@ -22,18 +22,25 @@ import {
 import { useCombinedDispatch, useCombinedSelector } from "../../features";
 import { browserEngineSlice } from "../../features/engine";
 import {
+  getConfig,
   getCustomHead,
   getNoteBody,
   getNoteMeta,
   getNotes,
 } from "../../utils/build";
 import { DendronCommonProps, NoteRouterQuery } from "../../utils/types";
-import { NoteProps } from "@dendronhq/common-all";
+import {
+  DendronError,
+  error2PlainObject,
+  NoteProps,
+} from "@dendronhq/common-all";
 
 export type NotePageProps = InferGetStaticPropsType<typeof getStaticProps> &
-  DendronCommonProps & { // `InferGetStaticPropsType` doesn't get right types for some reason, hence the manual override here
+  DendronCommonProps & {
+    // `InferGetStaticPropsType` doesn't get right types for some reason, hence the manual override here
     customHeadContent: string | null;
     noteIndex: NoteProps;
+    note: NoteProps;
   };
 
 export default function Note({
@@ -42,6 +49,7 @@ export default function Note({
   collectionChildren,
   noteIndex,
   customHeadContent,
+  config,
   ...rest
 }: NotePageProps) {
   const logger = createLogger("Note");
@@ -88,7 +96,7 @@ export default function Note({
     return <DendronSpinner />;
   }
 
-  const maybeCollection = note.custom.has_collection
+  const maybeCollection = note.custom?.has_collection
     ? collectionChildren.map((child: NoteProps) =>
         DendronCollectionItem({ note: child, noteIndex })
       )
@@ -96,7 +104,7 @@ export default function Note({
 
   return (
     <>
-      <DendronSEO />
+      <DendronSEO note={note} config={config} />
       {customHeadContent && <DendronCustomHead content={customHeadContent} />}
       <DendronNote noteContent={noteBody} />
       {maybeCollection}
@@ -104,15 +112,17 @@ export default function Note({
   );
 }
 export const getStaticPaths: GetStaticPaths = async () => {
-  const { notes } = getNotes();
+  const { notes, noteIndex } = getNotes();
+  const ids = _.reject(_.keys(notes), (id) => id === noteIndex.id);
   return {
-    paths: _.map(notes, (_note, id) => {
+    paths: _.map(ids, (id) => {
       return { params: { id } };
     }),
     fallback: false,
   };
 };
 
+// @ts-ignore
 export const getStaticProps: GetStaticProps = async (
   context: GetStaticPropsContext
 ) => {
@@ -125,22 +135,27 @@ export const getStaticProps: GetStaticProps = async (
     throw Error("id required");
   }
 
-  const [body, note] = await Promise.all([getNoteBody(id), getNoteMeta(id)]);
-  const noteData = getNotes();
-  const customHeadContent: string | null = await getCustomHead();
-  const { notes, noteIndex } = noteData;
+  try {
+    const [body, note] = await Promise.all([getNoteBody(id), getNoteMeta(id)]);
+    const noteData = getNotes();
+    const customHeadContent: string | null = await getCustomHead();
+    const { notes, noteIndex } = noteData;
+    const collectionChildren = note.custom?.has_collection
+      ? prepChildrenForCollection(note, notes, noteIndex)
+      : null;
 
-  const collectionChildren = note.custom.has_collection
-    ? prepChildrenForCollection(note, notes, noteIndex)
-    : null;
-
-  return {
-    props: {
-      note,
-      body,
-      noteIndex,
-      collectionChildren,
-      customHeadContent,
-    },
-  };
+    return {
+      props: {
+        note,
+        body,
+        noteIndex,
+        collectionChildren,
+        customHeadContent,
+        config: await getConfig(),
+      },
+    };
+  } catch (err) {
+    console.log(error2PlainObject(err as DendronError));
+    throw err;
+  }
 };

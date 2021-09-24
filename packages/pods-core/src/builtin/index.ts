@@ -6,6 +6,7 @@ export * from "./GitPod";
 export * from "./GraphvizPod";
 export * from "./HTMLPod";
 export * from "./AirtablePod";
-export * from "./GithubPod";
+export * from "./GithubIssuePod";
 export * from "./GDocPod";
 export * from "./NextjsExportPod";
+export * from "./NotionPod";

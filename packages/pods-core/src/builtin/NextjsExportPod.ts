@@ -5,20 +5,21 @@ import {
   NoteProps,
   NotePropsDict,
   NoteUtils,
+  createSerializedFuseNoteIndex,
 } from "@dendronhq/common-all";
 import { MDUtilsV5, ProcFlavor, SiteUtils } from "@dendronhq/engine-server";
 import { JSONSchemaType } from "ajv";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
+import { URI } from "vscode-uri";
 import { ExportPod, ExportPodConfig, ExportPodPlantOpts } from "../basev3";
 import { PodUtils } from "../utils";
 
 const ID = "dendron.nextjs";
 
 type NextjsExportPodCustomOpts = {
-  siteUrl?: string;
-  canonicalBaseUrl?: string;
+  overrides?: Partial<DendronSiteConfig>;
 };
 
 function getSiteConfig({
@@ -26,17 +27,26 @@ function getSiteConfig({
   overrides,
 }: {
   siteConfig: DendronSiteConfig;
-  overrides: Partial<DendronSiteConfig>;
+  overrides?: Partial<DendronSiteConfig>;
 }): DendronSiteConfig {
   return {
     ...siteConfig,
     ...overrides,
+    usePrettyLinks: true,
   };
 }
 
 export type NextjsExportConfig = ExportPodConfig & NextjsExportPodCustomOpts;
 
 type NextjsExportPlantOpts = ExportPodPlantOpts<NextjsExportConfig>;
+
+export class NextjsExportPodUtils {
+  static getDendronConfigPath = (dest: URI) => {
+    const podDstDir = path.join(dest.fsPath, "data");
+    const podConfigDstPath = path.join(podDstDir, "dendron.json");
+    return podConfigDstPath;
+  };
+}
 
 export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
   static id: string = ID;
@@ -46,14 +56,9 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     return PodUtils.createExportConfig({
       required: [],
       properties: {
-        siteUrl: {
-          type: "string",
-          description: "url of published site. eg. https://foo.com",
-        },
-        canonicalBaseUrl: {
-          type: "string",
-          description:
-            "the base url used for generating canonical urls from each page",
+        overrides: {
+          type: "object",
+          description: "options from site config you want to override",
         },
       },
     }) as JSONSchemaType<NextjsExportConfig>;
@@ -84,6 +89,23 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     return payload.toString();
   }
 
+  _writeEnvFile({
+    siteConfig,
+    dest,
+  }: {
+    siteConfig: DendronSiteConfig;
+    dest: URI;
+  }) {
+    // add .env.production if necessary
+    // TODO: don't overwrite if somethign exists
+    if (siteConfig.assetsPrefix) {
+      fs.writeFileSync(
+        path.join(dest.fsPath, ".env.production"),
+        `NEXT_PUBLIC_ASSET_PREFIX=${siteConfig.assetsPrefix}`
+      );
+    }
+  }
+
   async copyAssets({
     wsRoot,
     config,
@@ -109,7 +131,6 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     let deleteSiteAssetsDir = true;
     await vaults.reduce(async (resp, vault) => {
       await resp;
-      console.log("copying assets from...", vault);
       if (vault.visibility === "private") {
         console.log(`skipping copy assets from private vault ${vault.fsPath}`);
         return Promise.resolve({});
@@ -194,16 +215,17 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
 
     const podDstDir = path.join(dest.fsPath, "data");
     fs.ensureDirSync(podDstDir);
+    const siteConfig = getSiteConfig({
+      siteConfig: engine.config.site,
+      overrides: podConfig.overrides,
+    });
 
     await this.copyAssets({ wsRoot, config: engine.config, dest: dest.fsPath });
 
     this.L.info({ ctx, msg: "filtering notes..." });
     const engineConfig: DendronConfig = {
       ...engine.config,
-      site: getSiteConfig({
-        siteConfig: engine.config.site,
-        overrides: podConfig,
-      }),
+      site: siteConfig,
     };
 
     const { notes: publishedNotes, domains } = await SiteUtils.filterByConfig({
@@ -233,8 +255,8 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     fs.ensureDirSync(notesMetaDir);
     this.L.info({ ctx, msg: "writing notes..." });
     await Promise.all(
-      _.values(publishedNotes).flatMap(async (note) => {
-        return [
+      _.map(_.values(publishedNotes), async (note) => {
+        return Promise.all([
           this.renderBodyToHTML({
             engine,
             note,
@@ -243,7 +265,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
             engineConfig,
           }),
           this.renderMetaToJSON({ note, notesDir: notesMetaDir }),
-        ];
+        ]);
       })
     );
     const podDstPath = path.join(podDstDir, "notes.json");
@@ -253,6 +275,13 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
       encoding: "utf8",
       spaces: 2,
     });
+
+    // Generate full text search data
+    const fuseDstPath = path.join(podDstDir, "fuse.json");
+    const fuseIndex = createSerializedFuseNoteIndex(publishedNotes);
+    fs.writeJsonSync(fuseDstPath, fuseIndex);
+
+    this._writeEnvFile({ siteConfig, dest });
 
     const publicPath = path.join(podDstDir, "..", "public");
     const publicDataPath = path.join(publicPath, "data");

@@ -56,6 +56,7 @@ import { WorkspaceUtils } from "../../workspace";
 import {
   Anchor,
   BlockAnchor,
+  ExtendedImage,
   DendronASTDest,
   DendronASTNode,
   DendronASTRoot,
@@ -235,7 +236,7 @@ const getLinks = ({
       type: LinkUtils.astType2DLinkType(noteRef.type),
       from: NoteUtils.toNoteLoc(note),
       value: noteRef.data.link.from.fname,
-      // not sure why typescript doesn't recognize the position, but I can confirm it exists in the debugger
+      // not sure why typescript doesn't recognize the position, but I can confirm it exists
       position: noteRef.position as Position,
       xvault: !_.isUndefined(noteRef.data.link.data.vaultName),
       // TODO: error if vault not found
@@ -907,6 +908,10 @@ export class RemarkUtils {
     return node.type === DendronASTTypes.IMAGE;
   }
 
+  static isExtendedImage(node: Node): node is ExtendedImage {
+    return node.type === DendronASTTypes.EXTENDED_IMAGE;
+  }
+
   static isText(node: Node): node is Text {
     return node.type === DendronASTTypes.TEXT;
   }
@@ -936,6 +941,41 @@ export class RemarkUtils {
               status: "update",
             });
           }
+        });
+      };
+    };
+  }
+  static convertAssetReferences(
+    note: NoteProps,
+    assetHashMap: Map<string, string>,
+    changes: NoteChangeEntry[]
+  ) {
+    return function (this: Processor) {
+      return (tree: Node, _vfile: VFile) => {
+        const root = tree as DendronASTRoot;
+        const assetReferences = [
+          ...selectAll(DendronASTTypes.IMAGE, root),
+          ...selectAll(DendronASTTypes.LINK, root),
+        ];
+        assetReferences.forEach((asset) => {
+          const key = _.replace(asset.url as string, /[\\|/|.]/g, "");
+          const value = assetHashMap.get(key);
+          if (value) {
+            asset.url = value;
+          } else {
+            // for realative links
+            const prefix = _.replace(
+              note.fname.substring(0, note.fname.lastIndexOf(".")),
+              /[\\|/|.]/g,
+              ""
+            );
+            const value = assetHashMap.get(prefix.concat(key));
+            if (value) asset.url = value;
+          }
+          changes.push({
+            note,
+            status: "update",
+          });
         });
       };
     };

@@ -1,3 +1,4 @@
+import { StatusCodes } from "http-status-codes";
 import _ from "lodash";
 import { ERROR_SEVERITY, ERROR_STATUS } from "./constants";
 
@@ -18,7 +19,7 @@ export type DendronErrorProps = {
   /**
    * Optional HTTP status code for error
    */
-  code?: number;
+  code?: StatusCodes;
   /**
    * Custom status errors
    */
@@ -181,4 +182,33 @@ export function assertInvalidState(msg: string): never {
     status: ERROR_STATUS.INVALID_STATE,
     message: msg,
   });
+}
+
+/** Utility class for helping to correctly construct common errors. */
+export class ErrorFactory {
+  static createUnexpectedEventError({ event }: { event: any }): DendronError {
+    return new DendronError({
+      message: `unexpected event: '${this.safeStringify(event)}'`,
+    });
+  }
+  static createInvalidStateError({
+    message,
+  }: {
+    message: string;
+  }): DendronError {
+    return new DendronError({
+      status: ERROR_STATUS.INVALID_STATE,
+      message,
+    });
+  }
+
+  /** Stringify that will not throw if it fails to stringify
+   * (for example: due to circular references)  */
+  private static safeStringify(obj: any) {
+    try {
+      return JSON.stringify(obj);
+    } catch (exc) {
+      return `Failed to stringify the given object. Due to '${exc.message}'`;
+    }
+  }
 }

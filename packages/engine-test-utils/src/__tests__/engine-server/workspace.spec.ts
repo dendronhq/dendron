@@ -10,14 +10,7 @@ import {
 } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import path from "path";
-import { TestConfigUtils } from "../../config";
-import {
-  runEngineTestV5,
-  setupWS,
-  TestEngineUtils,
-  testWithEngine,
-} from "../../engine";
-import { ENGINE_HOOKS } from "../../presets";
+import { runEngineTestV5, TestEngineUtils, testWithEngine } from "../../engine";
 import {
   checkDir,
   checkFile,
@@ -104,89 +97,8 @@ describe("WorkspaceService", () => {
     });
   });
 
+  // TODO: migrate test to src/__tests__/dendron-cli/commands/workspaceCli.spec.ts
   describe("initialize", () => {
-    testWithEngine("remoteVaults present", async ({ wsRoot, engine }) => {
-      const root = tmpDir().name;
-      await GitTestUtils.createRepoWithReadme(root);
-
-      engine.config.vaults.push({
-        fsPath: "remoteVault",
-        remote: {
-          type: "git",
-          url: root,
-        },
-      });
-      DConfig.writeConfig({ wsRoot, config: engine.config });
-
-      const ws = new WorkspaceService({ wsRoot });
-      const didClone = await ws.initialize({
-        onSyncVaultsProgress: () => {},
-        onSyncVaultsEnd: () => {},
-      });
-      expect(didClone).toEqual(true);
-      expect(
-        fs.existsSync(path.join(wsRoot, "remoteVault", "README.md"))
-      ).toBeTruthy();
-    });
-
-    test("remote workspace present", async () => {
-      await runEngineTestV5(
-        async ({ wsRoot, vaults }) => {
-          const { wsRoot: remoteDir } = await setupWS({
-            vaults: [{ fsPath: "vault1" }],
-            asRemote: true,
-          });
-          TestConfigUtils.withConfig(
-            (config) => {
-              config.workspaces = {
-                remoteVault: {
-                  remote: {
-                    type: "git",
-                    url: remoteDir,
-                  },
-                },
-              };
-              return config;
-            },
-            { wsRoot }
-          );
-          await new WorkspaceService({ wsRoot }).addVault({
-            vault: { fsPath: "vault1", workspace: "remoteVault" },
-            updateWorkspace: true,
-            updateConfig: true,
-          });
-          const ws = new WorkspaceService({ wsRoot });
-          const didClone = await ws.initialize({
-            onSyncVaultsProgress: () => {},
-            onSyncVaultsEnd: () => {},
-          });
-          expect(didClone).toEqual(true);
-          expect(
-            fs.existsSync(path.join(wsRoot, "remoteVault", "vault1", "root.md"))
-          ).toBeTruthy();
-          checkVaults(
-            {
-              wsRoot,
-              vaults: [
-                {
-                  fsPath: "vault1",
-                  workspace: "remoteVault",
-                } as DVault,
-              ].concat(vaults),
-            },
-            expect
-          );
-        },
-        {
-          expect,
-          preSetupHook: async (opts) => {
-            await ENGINE_HOOKS.setupBasic(opts);
-          },
-          addVSWorkspace: true,
-        }
-      );
-    });
-
     test("remote seed present", async () => {
       await runEngineTestV5(
         async ({ engine, wsRoot, vaults }) => {
@@ -249,36 +161,6 @@ describe("WorkspaceService", () => {
         }
       );
     });
-
-    // testWithEngine(
-    //   "remoteVaults present as workspace vault",
-    //   async ({ wsRoot, engine }) => {
-    //     const {wsRoot: wsRootRemote} = await runEngineTestV5(async ()=>{}, {
-    //       vaults: [{
-    //         fsPath: "gamma"
-    //       }],
-    //       expect, setupOnly: true, initGit: true})
-
-    //     engine.config.vaults.push({
-    //       fsPath: "repos/gamma",
-    //       remote: {
-    //         type: "git",
-    //         url: wsRootRemote,
-    //       },
-    //     });
-    //     DConfig.writeConfig({ wsRoot, config: engine.config });
-    //     expect(engine.config).toMatchSnapshot();
-    //     const ws = new WorkspaceService({ wsRoot });
-    //     const didClone = await ws.initialize({
-    //       onSyncVaultsProgress: () => { },
-    //       onSyncVaultsEnd: () => { },
-    //     });
-    //     expect(didClone).toEqual(true);
-    //     expect(
-    //       fs.existsSync(path.join(wsRoot, "repos", "gamma", "dendron.yml"))
-    //     ).toBeTruthy();
-    //   }, {only: true }
-    // );
 
     testWithEngine(
       "remoteVaults present, no initializeRemoteVaults",

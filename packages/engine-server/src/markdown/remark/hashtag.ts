@@ -48,7 +48,7 @@ export const HASHTAG_REGEX = new RegExp(
 );
 /** Same as `HASHTAG_REGEX`, except that that it doesn't have to be at the start of the string. */
 export const HASHTAG_REGEX_LOOSE = new RegExp(
-  `^(?<hashTag>#)(?<tagContents>` +
+  `(?<hashTag>#)(?<tagContents>` +
     // 2 or more characters, like #a1x or #a.x. This MUST come before 1 character case, or regex will match 1 character and stop.
     `${GOOD_FIRST_CHARACTER}${GOOD_MIDDLE_CHARACTER}*${GOOD_END_CHARACTER}` +
     // or

@@ -8,10 +8,8 @@ import {
   DoctorActions,
   DoctorCLICommand,
 } from "@dendronhq/dendron-cli";
-import fs from "fs-extra";
 import _ from "lodash";
 import _md from "markdown-it";
-import path from "path";
 import { QuickPick, ViewColumn, window } from "vscode";
 import {
   ChangeScopeBtn,
@@ -22,7 +20,7 @@ import { DoctorScopeType } from "../components/doctor/types";
 import { DENDRON_COMMANDS } from "../constants";
 import { delayedUpdateDecorations } from "../features/windowDecorations";
 import { VSCodeUtils } from "../utils";
-import { getExtension, getDWorkspace } from "../workspace";
+import { getDWorkspace, getExtension } from "../workspace";
 import { BasicCommand } from "./base";
 import { ReloadIndexCommand } from "./ReloadIndex";
 
@@ -158,7 +156,6 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
       throw Error("no config found");
     }
 
-    const siteRoot = path.join(wsRoot, config.site.siteRootDir);
     if (ext.fileWatcher) {
       ext.fileWatcher.pause = true;
     }
@@ -261,18 +258,6 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     // do so after a delay so that VSCode can update the file contents. Not a
     // perfect solution, but the simplest.
     delayedUpdateDecorations();
-
-    // create site root, used for publication
-    if (!fs.existsSync(siteRoot)) {
-      const f: Finding = { issue: "no siteRoot found" };
-      const dendronJekyll = VSCodeUtils.joinPath(
-        getDWorkspace().assetUri,
-        "jekyll"
-      );
-      fs.copySync(dendronJekyll.fsPath, siteRoot);
-      f.fix = `created siteRoot at ${siteRoot}`;
-      findings.push(f);
-    }
     return { data: findings };
   }
   async showResponse(findings: CommandOutput) {

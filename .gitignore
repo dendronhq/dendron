@@ -37,3 +37,7 @@ dendron.server
 dendron.server.log.old
 test-workspace-*-profile
 Session.vim
+*.log
+*.log.old
+dendron-main.code-workspace
+pkgjson.code-search

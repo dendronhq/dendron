@@ -63,7 +63,7 @@ function plugin(this: Unified.Processor, _opts?: PluginOpts): Transformer {
   const proc = this;
   function transformer(tree: Node, _file: VFile) {
     visit(tree, (node, _index, _parent) => {
-      if (RemarkUtils.isImage(node)) {
+      if (RemarkUtils.isImage(node) || RemarkUtils.isExtendedImage(node)) {
         return handleImage({ proc, node });
       }
     });
@@ -78,7 +78,7 @@ export function dendronHoverPreview(
   const proc = this;
   function transformer(tree: Node, _file: VFile) {
     visit(tree, (node, _index, _parent) => {
-      if (RemarkUtils.isImage(node)) {
+      if (RemarkUtils.isImage(node) || RemarkUtils.isExtendedImage(node)) {
         // Hover preview can't use API URL's because they are http not https, so we instead have to get the image from disk.
         return handleImage({ proc, node, useFullPathUrl: true });
       }

@@ -59,6 +59,7 @@ site:
     title: Dendron
     description: Personal knowledge space
     siteLastModified: true
+    gh_edit_branch: main
     duplicateNoteBehavior:
         action: useVault
         payload:
@@ -148,6 +149,7 @@ site:
     title: Dendron
     description: Personal knowledge space
     siteLastModified: true
+    gh_edit_branch: main
     duplicateNoteBehavior:
         action: useVault
         payload:
@@ -227,6 +229,7 @@ site:
     title: Dendron
     description: Personal knowledge space
     siteLastModified: true
+    gh_edit_branch: main
 initializeRemoteVaults: true
 "
 `;
@@ -273,6 +276,7 @@ site:
     title: Dendron
     description: Personal knowledge space
     siteLastModified: true
+    gh_edit_branch: main
     duplicateNoteBehavior:
         action: useVault
         payload:
@@ -336,6 +340,7 @@ site:
     title: Dendron
     description: Personal knowledge space
     siteLastModified: true
+    gh_edit_branch: main
     duplicateNoteBehavior:
         action: useVault
         payload:

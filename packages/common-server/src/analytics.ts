@@ -270,4 +270,8 @@ export class SegmentClient {
   get hasOptedOut(): boolean {
     return this._hasOptedOut;
   }
+
+  get anonymousId(): string {
+    return this._anonymousId;
+  }
 }

@@ -14,10 +14,10 @@ import * as vscode from "vscode";
 import { WORKSPACE_ACTIVATION_CONTEXT } from "../constants";
 import { Logger } from "../logger";
 import { StateService } from "../services/stateService";
-import { VSCodeUtils } from "../utils";
+import { VSCodeUtils, WSUtils } from "../utils";
 import { AnalyticsUtils } from "../utils/analytics";
 import { MarkdownUtils } from "../utils/md";
-import { getDWorkspace, getExtension } from "../workspace";
+import { getExtension } from "../workspace";
 import { BlankInitializer } from "./blankInitializer";
 import { WorkspaceInitializer } from "./workspaceInitializer";
 
@@ -40,10 +40,8 @@ export class TutorialInitializer
       WORKSPACE_ACTIVATION_CONTEXT.TUTORIAL
     );
 
-    const dendronWSTemplate = VSCodeUtils.joinPath(
-      getDWorkspace().assetUri,
-      "dendron-ws"
-    );
+    const assetUri = WSUtils.getAssetUri(getExtension().context);
+    const dendronWSTemplate = VSCodeUtils.joinPath(assetUri, "dendron-ws");
 
     const vpath = vault2Path({ vault: opts.vaults[0], wsRoot: opts.wsRoot });
 

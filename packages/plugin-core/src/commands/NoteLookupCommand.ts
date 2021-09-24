@@ -1,6 +1,7 @@
 import {
   DendronError,
   ERROR_STATUS,
+  ErrorFactory,
   NoteLookupConfig,
   NoteProps,
   NoteQuickInput,
@@ -265,9 +266,7 @@ export class NoteLookupCommand extends BaseCommand<
           this.cleanUp();
           promiseResolve(undefined);
         } else {
-          const error = new DendronError({
-            message: `unexpected event: ${event}`,
-          });
+          const error = ErrorFactory.createUnexpectedEventError({ event });
           this.L.error({ error });
           this.cleanUp();
         }

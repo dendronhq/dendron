@@ -12,21 +12,28 @@ import { ShowPreviewV2Command } from "./commands/ShowPreviewV2";
 import { updateDecorations } from "./features/windowDecorations";
 import { Logger } from "./logger";
 import { VSCodeUtils } from "./utils";
-import { getExtension, getDWorkspace } from "./workspace";
+import { sentryReportingCallback } from "./utils/analytics";
+import { getDWorkspace, getExtension } from "./workspace";
 
+const context = (scope: string) => {
+  const ROOT_CTX = "WindowWatcher";
+  return ROOT_CTX + ":" + scope;
+};
 export class WindowWatcher {
   private onDidChangeActiveTextEditorHandlers: ((
     e: TextEditor | undefined
   ) => void)[] = [];
 
   activate(context: ExtensionContext) {
-    window.onDidChangeVisibleTextEditors((editors) => {
-      const ctx = "WindowWatcher:onDidChangeVisibleTextEditors";
-      const editorPaths = editors.map((editor) => {
-        return editor.document.uri.fsPath;
-      });
-      Logger.info({ ctx, editorPaths });
-    });
+    window.onDidChangeVisibleTextEditors(
+      sentryReportingCallback((editors: TextEditor[]) => {
+        const ctx = "WindowWatcher:onDidChangeVisibleTextEditors";
+        const editorPaths = editors.map((editor) => {
+          return editor.document.uri.fsPath;
+        });
+        Logger.info({ ctx, editorPaths });
+      })
+    );
     window.onDidChangeActiveTextEditor(
       this.onDidChangeActiveTextEditor,
       this,
@@ -40,37 +47,41 @@ export class WindowWatcher {
     this.onDidChangeActiveTextEditorHandlers.push(handler);
   }
 
-  private onDidChangeActiveTextEditor = (editor: TextEditor | undefined) => {
-    const ctx = "WindowWatcher:onDidChangeActiveTextEditor";
-    if (
-      editor &&
-      editor.document.uri.fsPath ===
-        window.activeTextEditor?.document.uri.fsPath
-    ) {
-      const uri = editor.document.uri;
-      Logger.info({ ctx, editor: uri.fsPath });
-      if (!getExtension().workspaceService?.isPathInWorkspace(uri.fsPath)) {
-        Logger.info({ ctx, uri: uri.fsPath, msg: "not in workspace" });
-        return;
-      }
-      this.triggerUpdateDecorations();
-      this.triggerNoteGraphViewUpdate();
-      this.triggerSchemaGraphViewUpdate();
-      this.triggerNotePreviewUpdate(editor);
-
-      this.onDidChangeActiveTextEditorHandlers.forEach((value) =>
-        value.call(this, editor)
-      );
-
+  private onDidChangeActiveTextEditor = sentryReportingCallback(
+    (editor: TextEditor | undefined) => {
+      const ctx = "WindowWatcher:onDidChangeActiveTextEditor";
       if (
-        getExtension().workspaceWatcher?.getNewlyOpenedDocument(editor.document)
+        editor &&
+        editor.document.uri.fsPath ===
+          window.activeTextEditor?.document.uri.fsPath
       ) {
-        this.onFirstOpen(editor);
+        const uri = editor.document.uri;
+        Logger.info({ ctx, editor: uri.fsPath });
+        if (!getExtension().workspaceService?.isPathInWorkspace(uri.fsPath)) {
+          Logger.info({ ctx, uri: uri.fsPath, msg: "not in workspace" });
+          return;
+        }
+        this.triggerUpdateDecorations();
+        this.triggerNoteGraphViewUpdate();
+        this.triggerSchemaGraphViewUpdate();
+        this.triggerNotePreviewUpdate(editor);
+
+        this.onDidChangeActiveTextEditorHandlers.forEach((value) =>
+          value.call(this, editor)
+        );
+
+        if (
+          getExtension().workspaceWatcher?.getNewlyOpenedDocument(
+            editor.document
+          )
+        ) {
+          this.onFirstOpen(editor);
+        }
+      } else {
+        Logger.info({ ctx, editor: "undefined" });
       }
-    } else {
-      Logger.info({ ctx, editor: "undefined" });
     }
-  };
+  );
 
   /**
    * Add text decorator to frontmatter
@@ -148,13 +159,19 @@ export class WindowWatcher {
 
   private async onFirstOpen(editor: TextEditor) {
     Logger.info({
-      msg: "First open of note",
+      ctx: context("onFirstOpen"),
+      msg: "enter",
       fname: NoteUtils.uri2Fname(editor.document.uri),
     });
     this.moveCursorPastFrontmatter(editor);
     if (getDWorkspace().config.autoFoldFrontmatter) {
       await this.foldFrontmatter();
     }
+    Logger.info({
+      ctx: context("onFirstOpen"),
+      msg: "exit",
+      fname: NoteUtils.uri2Fname(editor.document.uri),
+    });
   }
 
   private moveCursorPastFrontmatter(editor: TextEditor) {

@@ -30,7 +30,7 @@ export default function DendronLayout(
       onCollapse={(collapsed) => {
         setCollapsed(collapsed);
       }}
-      breakpoint="md"
+      breakpoint="sm"
       onBreakpoint={(broken) => {
         setResponsive(broken);
       }}
@@ -157,10 +157,13 @@ export default function DendronLayout(
                 // eslint-disable-next-line no-nested-ternary
                 isResponsive
                   ? isCollapsed
-                    ? SIDER.WIDTH
+                    ? SIDER.COLLAPSED_WIDTH
                     : "100%"
                   : SIDER.WIDTH
               }px)`,
+              minWidth: isResponsive || isCollapsed
+                  ? 0
+                  : SIDER.WIDTH,
               paddingLeft: `calc((100% - ${LAYOUT.BREAKPOINTS.lg}) / 2)`,
               // eslint-disable-next-line no-nested-ternary
             }}

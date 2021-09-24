@@ -1,6 +1,6 @@
 import { DownOutlined, RightOutlined, UpOutlined } from "@ant-design/icons";
 import { createLogger, TreeViewUtils } from "@dendronhq/common-frontend";
-import { Menu } from "antd";
+import { Menu, Typography } from "antd";
 import _ from "lodash";
 import { DataNode } from "rc-tree/lib/interface";
 import React, { useCallback, useEffect, useState } from "react";
@@ -138,7 +138,14 @@ function MenuView({
             menu.key === activeNote ? "dendron-ant-menu-submenu-selected" : ""
           }
           key={menu.key}
-          title={menu.title}
+          title={
+            <Typography.Text
+              style={{ width: "100%" }}
+              ellipsis={{ tooltip: menu.title }}
+            >
+              {menu.title}
+            </Typography.Text>
+          }
           onTitleClick={(event) => {
             const target = event.domEvent.target as HTMLElement;
             const isArrow = target.dataset.expandedicon;
@@ -157,7 +164,12 @@ function MenuView({
     }
     return (
       <Menu.Item key={menu.key} icon={menu.icon}>
-        {menu.title}
+        <Typography.Text
+          style={{ width: "100%" }}
+          ellipsis={{ tooltip: menu.title }}
+        >
+          {menu.title}
+        </Typography.Text>
       </Menu.Item>
     );
   };

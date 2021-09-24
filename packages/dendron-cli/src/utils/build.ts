@@ -14,6 +14,7 @@ type PkgJson = {
   version: string;
   repository: PkgRepository;
   devDependencies: { [key: string]: string };
+  icon: string;
 };
 
 type PkgRepository = {
@@ -164,15 +165,15 @@ export class BuildUtils {
   ) {
     const pkgPath = path.join(this.getPluginRootPath(), "package.json");
 
-    const version =
-      target === ExtensionTarget.NIGHTLY
-        ? await this.getIncrementedVerForNightly()
-        : undefined;
+    let version;
+    let description;
+    let icon;
 
-    const description = 
-      target === ExtensionTarget.NIGHTLY
-      ? "This is a prerelease version of Dendron that may be unstable. Please install the main dendron extension instead."
-      : undefined;
+    if (target === ExtensionTarget.NIGHTLY) {
+      version = await this.getIncrementedVerForNightly();
+      description = "This is a prerelease version of Dendron that may be unstable. Please install the main dendron extension instead.";
+      icon = "assets/images/logo-bw.png";
+    }
 
     this.updatePkgMeta({
       pkgPath,
@@ -185,6 +186,7 @@ export class BuildUtils {
         type: "git",
       },
       version,
+      icon
     });
     this.removeDevDepsFromPkgJson({
       pkgPath,
@@ -338,6 +340,7 @@ export class BuildUtils {
     main,
     repository,
     version,
+    icon
   }: {
     pkgPath: string;
     name: string;
@@ -359,6 +362,9 @@ export class BuildUtils {
     }
     if (version) {
       pkg.version = version;
+    }
+    if (icon) {
+      pkg.icon = icon;
     }
     pkg.main = "dist/extension.js";
     fs.writeJSONSync(pkgPath, pkg, { spaces: 4 });

@@ -4,7 +4,7 @@ import vscode, { Location, Position, Uri } from "vscode";
 import { findAnchorPos, GotoNoteCommand } from "../commands/GotoNote";
 import { Logger } from "../logger";
 import { getReferenceAtPosition } from "../utils/md";
-import { getDWorkspace } from "../workspace";
+import { DendronExtension, getDWorkspace } from "../workspace";
 import * as Sentry from "@sentry/node";
 
 export default class DefinitionProvider implements vscode.DefinitionProvider {
@@ -14,6 +14,10 @@ export default class DefinitionProvider implements vscode.DefinitionProvider {
     _token: vscode.CancellationToken
   ): Promise<vscode.Location | vscode.Location[] | undefined> {
     try {
+      // No-op if we're not in a Dendron Workspace
+      if (!DendronExtension.isActive()) {
+        return;
+      }
       const refAtPos = getReferenceAtPosition(document, position);
       if (!refAtPos) {
         return;

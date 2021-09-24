@@ -203,11 +203,10 @@ export class DendronExtension {
       });
     }
     // asExternalUri forwards the port when working remotely
-    const uri = (
-      await vscode.env.asExternalUri(
-        vscode.Uri.parse(APIUtils.getLocalEndpoint(port))
-      )
-    ).toString();
+    const externalUri = await vscode.env.asExternalUri(
+      vscode.Uri.parse(APIUtils.getLocalEndpoint(port))
+    );
+    const uri = externalUri.toString();
     return uri;
   }
 

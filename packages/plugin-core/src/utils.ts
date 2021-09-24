@@ -18,7 +18,6 @@ import {
   VaultUtils,
 } from "@dendronhq/common-all";
 import {
-  assignJSONWithComment,
   goUpTo,
   readJSONWithCommentsSync,
   readMD,
@@ -907,7 +906,7 @@ export class KeybindingUtils {
       when: "textInputFocus",
     };
 
-    const newKeybindings = assignJSONWithComment(
+    const newKeybindings = assign(
       keybindings,
       keybindings.concat(OVERRIDE_EXPAND_LINE_SELECTION)
     );

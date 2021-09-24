@@ -13,6 +13,7 @@ import {
   VaultUtils,
   VSCodeEvents,
   WorkspaceType,
+  SurveyEvents,
 } from "@dendronhq/common-all";
 import {
   getDurationMilliseconds,
@@ -40,6 +41,7 @@ import { Logger } from "./logger";
 import { migrateConfig } from "./migration";
 import { StateService } from "./services/stateService";
 import { Extensions } from "./settings";
+import { BackgroundSurvey, PriorToolsSurvey, UseCaseSurvey } from "./survey";
 import { setupSegmentClient } from "./telemetry";
 import { GOOGLE_OAUTH_ID, GOOGLE_OAUTH_SECRET } from "./types/global";
 import { KeybindingUtils, VSCodeUtils, WSUtils } from "./utils";
@@ -511,6 +513,9 @@ export async function _activate(
         });
     }
 
+    if (extensionInstallStatus === InstallStatus.INITIAL_INSTALL)
+      maybePromptInitialSurvey();
+
     return showWelcomeOrWhatsNew({
       extensionInstallStatus,
       version: DendronExtension.version(),
@@ -545,6 +550,45 @@ export function deactivate() {
     getExtension().deactivate();
   }
   toggleViews(false);
+}
+
+/**
+ * Flip a coin to randomly prompt initial survey.
+ * Asks three questions about background, use case, and prior tools used.
+ */
+async function maybePromptInitialSurvey() {
+  const shouldPrompt = !!Math.floor(Math.random() * 2);
+  if (shouldPrompt) {
+    AnalyticsUtils.track(SurveyEvents.InitialSurveyPrompted);
+    vscode.window
+      .showInformationMessage(
+        "Would you like to tell us about yourself so that we can provide a better onboarding experience?",
+        { modal: true },
+        { title: "Proceed" }
+      )
+      .then(async (resp) => {
+        if (resp?.title === "Proceed") {
+          const backgroundSurvey = BackgroundSurvey.create();
+          const useCaseSurvey = UseCaseSurvey.create();
+          const priorToolSurvey = PriorToolsSurvey.create();
+
+          const backgroundResults = await backgroundSurvey.show();
+          const useCaseResults = await useCaseSurvey.show();
+          const priorToolsResults = await priorToolSurvey.show();
+
+          const answerCount = [
+            backgroundResults,
+            useCaseResults,
+            priorToolsResults,
+          ].filter((value) => !_.isUndefined(value)).length;
+          AnalyticsUtils.track(SurveyEvents.InitialSurveyAccepted, {
+            answerCount,
+          });
+        } else {
+          AnalyticsUtils.track(SurveyEvents.InitialSurveyRejected);
+        }
+      });
+  }
 }
 
 async function showWelcomeOrWhatsNew({

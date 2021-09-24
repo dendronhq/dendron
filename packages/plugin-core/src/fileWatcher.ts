@@ -45,10 +45,16 @@ export class FileWatcher {
   activate(context: vscode.ExtensionContext) {
     this.watchers.forEach(({ watcher }) => {
       context.subscriptions.push(
-        watcher.onDidCreate(sentryReportingCallback(this.onDidCreate), this)
+        watcher.onDidCreate(
+          sentryReportingCallback(this.onDidCreate.bind(this)),
+          this
+        )
       );
       context.subscriptions.push(
-        watcher.onDidDelete(sentryReportingCallback(this.onDidDelete), this)
+        watcher.onDidDelete(
+          sentryReportingCallback(this.onDidDelete.bind(this)),
+          this
+        )
       );
     });
   }

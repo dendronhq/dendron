@@ -451,16 +451,25 @@ export async function _activate(
       toggleViews(false);
     }
 
+    const backupPaths: string[] = [];
+    let keybindingPath: string;
+
     if (extensionInstallStatus === InstallStatus.INITIAL_INSTALL) {
       const vimInstalled = VSCodeUtils.isExtensionInstalled("vscodevim.vim");
       if (vimInstalled) {
         AnalyticsUtils.track(ExtensionEvents.VimExtensionInstalled);
         const { keybindingConfigPath, newKeybindings: resolvedKeybindings } =
           KeybindingUtils.checkAndApplyVimKeybindingOverrideIfExists();
+        keybindingPath = keybindingConfigPath;
         if (!_.isUndefined(resolvedKeybindings)) {
+          const today = Time.now().toFormat("yyyy.MM.dd.HHmmssS");
+          const maybeBackupPath = `${keybindingConfigPath}.${today}.vim.old`;
           if (!fs.existsSync(keybindingConfigPath)) {
             fs.ensureFileSync(keybindingConfigPath);
             fs.writeFileSync(keybindingConfigPath, "[]");
+          } else {
+            fs.copyFileSync(keybindingConfigPath, maybeBackupPath);
+            backupPaths.push(maybeBackupPath);
           }
           writeJSONWithComments(keybindingConfigPath, resolvedKeybindings);
           AnalyticsUtils.track(ExtensionEvents.VimExtensionInstalled, {
@@ -473,25 +482,33 @@ export async function _activate(
     if (extensionInstallStatus === InstallStatus.UPGRADED) {
       const { keybindingConfigPath, migratedKeybindings } =
         KeybindingUtils.checkAndMigrateLookupKeybindingIfExists();
+      keybindingPath = keybindingConfigPath;
       if (!_.isUndefined(migratedKeybindings)) {
-        fs.copyFileSync(keybindingConfigPath, `${keybindingConfigPath}.old`);
+        const today = Time.now().toFormat("yyyy.MM.dd.HHmmssS");
+        const maybeBackupPath = `${keybindingConfigPath}.${today}.lookup.old`
+        fs.copyFileSync(keybindingConfigPath, maybeBackupPath);
+        backupPaths.push(maybeBackupPath);
         writeJSONWithComments(keybindingConfigPath, migratedKeybindings);
-        vscode.window
-          .showInformationMessage(
-            "Keybindings for lookup has been updated. Click the button below to see changes.",
-            ...["Open changes"]
-          )
-          .then(async (selection) => {
-            if (selection) {
-              const uri = vscode.Uri.file(keybindingConfigPath);
-              const backupUri = vscode.Uri.file(`${keybindingConfigPath}.old`);
-              await VSCodeUtils.openFileInEditor(uri);
+      }
+    }
+
+    if (backupPaths.length > 0) {
+      vscode.window
+        .showInformationMessage(
+          "Conflicting or outdated keybindings have been updated. Click the button below to see changes.",
+          ...["Open changes"]
+        ).then(async (selection) => {
+          if (selection) {
+            const uri = vscode.Uri.file(keybindingPath);
+            await VSCodeUtils.openFileInEditor(uri);
+            backupPaths.forEach(async (backupPath) => {
+              const backupUri = vscode.Uri.file(backupPath);
               await VSCodeUtils.openFileInEditor(backupUri, {
                 column: vscode.ViewColumn.Beside,
               });
-            }
-          });
-      }
+            });
+          }
+        });
     }
 
     return showWelcomeOrWhatsNew({

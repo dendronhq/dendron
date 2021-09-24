@@ -405,7 +405,7 @@ suite("keybindings", function () {
       const { newKeybindings } =
         KeybindingUtils.checkAndApplyVimKeybindingOverrideIfExists();
       const override = newKeybindings[1];
-
+      expect(_.isArray(newKeybindings)).toBeTruthy();
       // override config exists after migration
       expect(override).toEqual({
         key: `${metaKey}+l`,

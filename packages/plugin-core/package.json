@@ -51,7 +51,7 @@
         },
         {
           "id": "dendron.calendar-view",
-          "name": "Calendar",
+          "name": "Calendar View",
           "type": "webview"
         },
         {
@@ -76,11 +76,6 @@
       "Other"
     ],
     "commands": [
-      {
-        "command": "dendron.backlinks.expandAll",
-        "title": "Expand All",
-        "icon": "$(expand-all)"
-      },
       {
         "command": "dendron.browseNote",
         "title": "Dendron: Browse Note",
@@ -139,7 +134,8 @@
       {
         "command": "dendron.insertNoteIndex",
         "title": "Dendron: Insert Note Index",
-        "desc": "Insert note index"
+        "desc": "Insert note index",
+        "when": "editorFocus && dendron:pluginActive"
       },
       {
         "command": "dendron.moveNote",
@@ -164,16 +160,22 @@
         "desc": "Rename a header, and update all links to it."
       },
       {
+        "command": "dendron.convertLink",
+        "title": "Dendron: Convert Link",
+        "desc": "Convert link candidate into backlink"
+      },
+      {
         "command": "dendron.lookupNote",
-        "title": "Dendron: Lookup Note",
+        "title": "Dendron: Lookup",
         "desc": "Initiate note lookup",
+        "docLink": "dendron.topic.lookup.md",
+        "docPreview": "",
         "when": "dendron:pluginActive"
       },
       {
         "command": "dendron.lookupSchema",
         "title": "Dendron: Lookup Schema",
         "desc": "Initiate schema lookup",
-        "when": "dendron:pluginActive",
         "docLink": "dendron.topic.lookup.md",
         "docPreview": "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/schema-lookup.gif)"
       },
@@ -448,6 +450,46 @@
         "docPreview": ""
       },
       {
+        "command": "dendron.customizeTheme",
+        "title": "Dendron: Customize Theme",
+        "desc": "Customize the theme for preview or publishing",
+        "docs": "",
+        "docLink": "",
+        "docPreview": ""
+      },
+      {
+        "command": "dendron.applyTheme",
+        "title": "Dendron: Apply Theme",
+        "desc": "Apply the custom theme",
+        "docs": "",
+        "docLink": "",
+        "docPreview": ""
+      },
+      {
+        "command": "dendron.seedAdd",
+        "title": "Dendron: Add Seed to Workspace",
+        "desc": "Add a seed to the current workspace",
+        "docs": "",
+        "docLink": "",
+        "docPreview": ""
+      },
+      {
+        "command": "dendron.seedRemove",
+        "title": "Dendron: Remove Seed from Workspace",
+        "desc": "Remove a seed from the current workspace",
+        "docs": "",
+        "docLink": "",
+        "docPreview": ""
+      },
+      {
+        "command": "dendron.seedBrowse",
+        "title": "Dendron: Browse the Seed Registry",
+        "desc": "Browse and Add seeds from the Registry to the current workspace",
+        "docs": "",
+        "docLink": "",
+        "docPreview": ""
+      },
+      {
         "command": "dendron.dev.doctor",
         "title": "Dendron: Doctor",
         "desc": "Auto fix issues with frontmatter",
@@ -489,32 +531,8 @@
         "command": "dendron.launchTutorial",
         "title": "Dendron: Launch Tutorial",
         "desc": "Launch the Tutorial"
-      },
-      {
-        "command": "dendron.seedAdd",
-        "title": "Dendron: Seed Add",
-        "desc": "Add Seed to Current Workspace"
-      },
-      {
-        "command": "dendron.seedRemove",
-        "title": "Dendron: Seed Remove",
-        "desc": "Remove Seed from Current Workspace"
-      },
-      {
-        "command": "dendron.seedBrowse",
-        "title": "Dendron: Seed Browse",
-        "desc": "Browse the Seed Registry and Add Seeds to Current Workspace"
       }
     ],
-    "menus": {
-      "view/title": [
-        {
-          "command": "dendron.backlinks.expandAll",
-          "when": "view == dendron.backlinks",
-          "group": "navigation"
-        }
-      ]
-    },
     "configuration": {
       "title": "dendron",
       "properties": {
@@ -754,12 +772,6 @@
     "markdown.previewStyles": [
       "./media/fontello/css/fontello.css",
       "./media/markdown.css"
-    ],
-    "yamlValidation": [
-      {
-        "fileMatch": "dendron.yml",
-        "url": "./dist/dendron-yml.validator.json"
-      }
     ]
   },
   "icon": "assets/images/logo.png",
@@ -784,6 +796,7 @@
     "@types/execa": "^2.0.0",
     "@types/fs-extra": "^9.0.1",
     "@types/glob": "^7.1.1",
+    "@types/gulp": "^4.0.9",
     "@types/lodash": "^4.14.155",
     "@types/luxon": "^1.25.0",
     "@types/markdown-it": "^10.0.2",
@@ -812,10 +825,18 @@
     "@dendronhq/pods-core": "^0.60.2",
     "@sentry/integrations": "^6.13.1",
     "@sentry/node": "^6.13.1",
+    "@types/gulp": "^4.0.9",
     "@types/vscode": "1.58",
+    "autoprefixer": "^10.3.5",
     "cross-path-sort": "^1.0.0",
     "execa": "^4.0.2",
     "fs-extra": "^9.0.1",
+    "gulp": "^4.0.2",
+    "gulp-csso": "^4.0.1",
+    "gulp-debug": "^4.0.0",
+    "gulp-less": "^5.0.0",
+    "gulp-postcss": "^9.0.1",
+    "less-plugin-npm-import": "^2.1.0",
     "lodash": "^4.17.15",
     "luxon": "^1.25.0",
     "markdown-it": "^11.0.0",

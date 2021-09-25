@@ -241,7 +241,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX} Insert Note Index`,
     group: "notes",
     desc: "Insert note index",
-    when: `editorFocus && ${DendronContext.PLUGIN_ACTIVE}`
+    when: `editorFocus && ${DendronContext.PLUGIN_ACTIVE}`,
   },
   MOVE_NOTE: {
     key: "dendron.moveNote",
@@ -736,6 +736,24 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX} Configure Graph Style (css)`,
     group: "workspace",
     desc: "Modify Dendron Graph styles as raw CSS",
+    docs: [""].join("\n"),
+    docLink: "",
+    docPreview: ``,
+  },
+  CUSTOMIZE_THEME: {
+    key: "dendron.customizeTheme",
+    title: `${CMD_PREFIX} Customize Theme`,
+    group: "workspace",
+    desc: "Customize the theme for preview or publishing",
+    docs: [""].join("\n"),
+    docLink: "",
+    docPreview: ``,
+  },
+  APPLY_THEME: {
+    key: "dendron.applyTheme",
+    title: `${CMD_PREFIX} Apply Theme`,
+    group: "workspace",
+    desc: "Apply the custom theme",
     docs: [""].join("\n"),
     docLink: "",
     docPreview: ``,

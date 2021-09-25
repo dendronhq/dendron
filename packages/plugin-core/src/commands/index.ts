@@ -62,6 +62,8 @@ import { SeedAddCommand } from "./SeedAddCommand";
 import { SeedRemoveCommand } from "./SeedRemoveCommand";
 import { RunMigrationCommand } from "./RunMigrationCommand";
 import { SeedBrowseCommand } from "./SeedBrowseCommand";
+import { CustomizeTheme } from "./CustomizeTheme";
+import { ApplyTheme } from "./ApplyTheme";
 
 const ALL_COMMANDS = [
   AddAndCommit,
@@ -127,6 +129,8 @@ const ALL_COMMANDS = [
   SeedRemoveCommand,
   RunMigrationCommand,
   SeedBrowseCommand,
+  CustomizeTheme,
+  ApplyTheme,
 ] as CodeCommandConstructor[];
 
 // when("betaFeatures", ()=> {

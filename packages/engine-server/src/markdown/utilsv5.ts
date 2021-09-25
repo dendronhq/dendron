@@ -3,17 +3,20 @@ import {
   DendronConfig,
   DendronError,
   DEngineClient,
+  DNoteRefLink,
   DVault,
   ERROR_STATUS,
+  getSlugger,
   NotePropsDict,
   NoteUtils,
 } from "@dendronhq/common-all";
 // @ts-ignore
-import rehypePrism from "@mapbox/rehype-prism";
-// @ts-ignore
 import mermaid from "@dendronhq/remark-mermaid";
+// @ts-ignore
+import rehypePrism from "@mapbox/rehype-prism";
+import fs from "fs-extra";
 import _ from "lodash";
-import math from "remark-math";
+import path from "path";
 import link from "rehype-autolink-headings";
 // @ts-ignore
 import katex from "rehype-katex";
@@ -24,21 +27,31 @@ import remark from "remark";
 import abbrPlugin from "remark-abbr";
 import footnotes from "remark-footnotes";
 import frontmatterPlugin from "remark-frontmatter";
+import math from "remark-math";
 import remarkParse from "remark-parse";
 import remark2rehype from "remark-rehype";
 import { Processor } from "unified";
-import { blockAnchors } from "./remark/blockAnchors";
-import { dendronPreview, dendronHoverPreview } from "./remark/dendronPreview";
-import { dendronPub } from "./remark/dendronPub";
-import { noteRefsV2 } from "./remark/noteRefsV2";
-import { wikiLinks } from "./remark/wikiLinks";
-import { DendronASTDest } from "./types";
-import { MDUtilsV4 } from "./utils";
-import { hashtags } from "./remark/hashtag";
-import { userTags } from "./remark/userTags";
-import { backlinks } from "./remark/backlinks";
+import { Parent } from "unist";
 import { hierarchies } from "./remark";
+import { backlinks } from "./remark/backlinks";
+import { blockAnchors } from "./remark/blockAnchors";
+import { dendronHoverPreview, dendronPreview } from "./remark/dendronPreview";
+import { dendronPub } from "./remark/dendronPub";
 import { extendedImage } from "./remark/extendedImage";
+import { hashtags } from "./remark/hashtag";
+import { noteRefsV2 } from "./remark/noteRefsV2";
+import { userTags } from "./remark/userTags";
+import { wikiLinks } from "./remark/wikiLinks";
+import { DendronASTDest, UnistNode } from "./types";
+import { MDUtilsV4 } from "./utils";
+
+export const getRefId = ({ link, id }: { link: DNoteRefLink; id: string }) => {
+  const { anchorStart, anchorEnd, anchorStartOffset } = _.defaults(link.data, {
+    anchorStartOffset: 0,
+  });
+  const slug = getSlugger();
+  return slug.slug([id, anchorStart, anchorEnd, anchorStartOffset].join("-"));
+};
 
 /**
  * What mode a processor should run in
@@ -143,6 +156,9 @@ export type ProcDataFullV5 = {
   noteRefLvl: number;
 };
 
+export type NoteRefId = { id: string; link: DNoteRefLink };
+export type SerializedNoteRef = { node: UnistNode; refId: NoteRefId };
+
 function checkProps({
   requiredProps,
   data,
@@ -166,6 +182,10 @@ function checkProps({
 }
 
 export class MDUtilsV5 {
+  static getRefsRoot = (wsRoot: string) => {
+    return path.join(wsRoot, "build", "refs");
+  };
+
   static getProcOpts(proc: Processor): ProcOptsV5 {
     const _data = proc.data("dendronProcOptsv5") as ProcOptsV5;
     return _data || {};
@@ -209,6 +229,18 @@ export class MDUtilsV5 {
   static setProcOpts(proc: Processor, opts: ProcOptsV5) {
     const _data = proc.data("dendronProcOptsv5") as ProcOptsV5;
     return proc.data("dendronProcOptsv5", { ..._data, ...opts });
+  }
+
+  static addRefId(
+    proc: Processor,
+    { refId, content }: { refId: NoteRefId; content: Parent }
+  ) {
+    const data = this.getProcData(proc);
+    const tmpDir = this.getRefsRoot(data.wsRoot);
+    fs.ensureDirSync(tmpDir);
+    const idString = getRefId(refId);
+    const payload: SerializedNoteRef = { node: content, refId };
+    fs.writeJSONSync(path.join(tmpDir, idString + ".json"), payload);
   }
 
   static isV5Active(proc: Processor) {

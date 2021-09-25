@@ -26,6 +26,9 @@ export type NoteData = {
    * The note for the home page
    */
   noteIndex: NoteProps;
+  /**
+   * All vaults in the workspace
+   */
   vaults: DVault[];
 };
 

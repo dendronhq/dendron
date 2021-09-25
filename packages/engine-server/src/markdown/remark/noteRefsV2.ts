@@ -33,7 +33,7 @@ import {
   NoteRefNoteV4_LEGACY,
 } from "../types";
 import { MDUtilsV4, ParentWithIndex, renderFromNoteProps } from "../utils";
-import { MDUtilsV5, ProcMode } from "../utilsv5";
+import { getRefId, MDUtilsV5, ProcFlavor, ProcMode } from "../utilsv5";
 import { LinkUtils } from "./utils";
 import { WikiLinksOpts } from "./wikiLinks";
 
@@ -95,6 +95,22 @@ const tryGetNotes = ({
     };
   }
   return { error: undefined, data: maybeNotes };
+};
+
+const genRefAsIFrame = ({
+  proc,
+  link,
+  noteId,
+  content,
+}: {
+  proc: Unified.Processor;
+  link: DNoteRefLink;
+  noteId: string;
+  content: Parent;
+}) => {
+  const refId = getRefId({ id: noteId, link });
+  MDUtilsV5.addRefId(proc, { refId: { id: noteId, link }, content });
+  return paragraph(html(`<iframe src="/data/refs/${refId}.html"/>`));
 };
 
 const plugin: Plugin = function (this: Unified.Processor, opts?: PluginOpts) {
@@ -346,6 +362,10 @@ function convertNoteRef(opts: ConvertNoteRefOpts): {
 export function convertNoteRefASTV2(
   opts: ConvertNoteRefOpts & { procOpts: any }
 ): { error: DendronError | undefined; data: Parent[] | undefined } {
+  const errors: DendronError[] = [];
+  const { link, proc, compilerOpts, procOpts } = opts;
+  const { error, engine } = MDUtilsV4.getEngineFromProc(proc);
+  const refLvl = MDUtilsV4.getNoteRefLvl(proc());
   /**
    * Takes a note ref and processes it
    * @param ref DNoteLoc (note reference) to process
@@ -420,13 +440,22 @@ export function convertNoteRefASTV2(
             });
           }
         }
-        const link = isPublished
+        const linkString = isPublished
           ? `"${wikiLinkOpts?.prefix || ""}${href}${suffix}"`
           : undefined;
+
+        // publishing
+        if (
+          MDUtilsV5.getProcOpts(proc).flavor === ProcFlavor.PUBLISHING &&
+          !_.isUndefined(linkString)
+        ) {
+          return genRefAsIFrame({ proc, link, noteId: note.id, content: data });
+        }
+
         return renderPrettyAST({
           content: data,
           title,
-          link,
+          link: linkString,
         });
       } else {
         return paragraph(data);
@@ -436,11 +465,6 @@ export function convertNoteRefASTV2(
       return MDUtilsV4.genMDErrorMsg(msg);
     }
   }
-
-  const errors: DendronError[] = [];
-  const { link, proc, compilerOpts, procOpts } = opts;
-  const { error, engine } = MDUtilsV4.getEngineFromProc(proc);
-  const refLvl = MDUtilsV4.getNoteRefLvl(proc());
 
   // prevent infinite nesting.
   if (refLvl >= MAX_REF_LVL) {

@@ -6,6 +6,7 @@ import {
 } from "@dendronhq/common-frontend";
 import "antd/dist/antd.css";
 import type { AppProps } from "next/app";
+import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { ThemeSwitcherProvider } from "react-css-theme-switcher";
 import { useDendronGATracking } from "../components/DendronGATracking";
@@ -25,6 +26,10 @@ const themes = {
 };
 
 function AppContainer(appProps: AppProps) {
+  const router = useRouter();
+  if (router.pathname.startsWith("/refs")) {
+    return <DendronRef {...appProps} />;
+  }
   const defaultTheme = "light";
   return (
     <Provider store={combinedStore}>
@@ -33,6 +38,10 @@ function AppContainer(appProps: AppProps) {
       </ThemeSwitcherProvider>
     </Provider>
   );
+}
+
+function DendronRef({ Component, pageProps }: AppProps) {
+  return <Component {...pageProps} />;
 }
 
 function DendronApp({ Component, pageProps }: AppProps) {

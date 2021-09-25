@@ -8,6 +8,7 @@ export * from "./fetchers";
 
 const NOTE_META_DIR = "meta";
 const NOTE_BODY_DIR = "notes";
+const NOTE_REF_DIR = "refs";
 
 export function getDataDir(): string {
   const dataDir = process.env.DATA_DIR;
@@ -25,7 +26,16 @@ export function getNoteBody(id: string) {
   return body;
 }
 
+export function getRefBody(id: string) {
+  const dataDir = getDataDir();
+  const body = fs.readFile(path.join(dataDir, NOTE_REF_DIR, `${id}.html`), {
+    encoding: "utf8",
+  });
+  return body;
+}
+
 let _NOTES_CACHE: NoteData | undefined;
+let _REFS_CACHE: string[] | undefined;
 
 export function getNotes() {
   if (_.isUndefined(_NOTES_CACHE)) {
@@ -35,6 +45,14 @@ export function getNotes() {
     ) as NoteData;
   }
   return _NOTES_CACHE;
+}
+
+export function getNoteRefs() {
+  if (_.isUndefined(_REFS_CACHE)) {
+    const dataDir = getDataDir();
+    _REFS_CACHE = fs.readJSONSync(path.join(dataDir, "refs.json")) as string[];
+  }
+  return _REFS_CACHE;
 }
 
 export function getNoteMeta(id: string) {

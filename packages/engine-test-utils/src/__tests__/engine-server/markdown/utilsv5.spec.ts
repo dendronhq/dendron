@@ -4,15 +4,21 @@ import {
 } from "@dendronhq/common-test-utils";
 import {
   DendronASTDest,
+  MDUtilsV5,
   Processor,
   ProcFlavor,
 } from "@dendronhq/engine-server";
 import os from "os";
 import path from "path";
-import { ENGINE_HOOKS } from "../../../presets";
-import { checkNotInString, checkString } from "../../../utils";
-import { checkVFile, cleanVerifyOpts, createProcCompileTests } from "./utils";
 import { createEngineFromServer, runEngineTestV5 } from "../../../engine";
+import { ENGINE_HOOKS } from "../../../presets";
+import {
+  checkDir,
+  checkFile,
+  checkNotInString,
+  checkString,
+} from "../../../utils";
+import { checkVFile, cleanVerifyOpts, createProcCompileTests } from "./utils";
 
 const getOpts = (opts: any) => {
   const _copts = opts.extra as { proc: Processor; dest: DendronASTDest };
@@ -152,14 +158,14 @@ describe("MDUtils.proc", () => {
           );
         },
         [ProcFlavor.PREVIEW]: ProcFlavor.REGULAR,
-        [ProcFlavor.PUBLISHING]: async ({ extra }) => {
+        [ProcFlavor.PUBLISHING]: async ({ extra, wsRoot }) => {
           const { resp } = extra;
           expect(resp).toMatchSnapshot();
-          await checkString(
-            resp.contents,
-            // should have id for link
-            `<a href="/notes/alpha-id"`
-          );
+          const refsDir = MDUtilsV5.getRefsRoot(wsRoot);
+          await checkDir({ fpath: refsDir, snapshot: true });
+          const refFile = path.join(refsDir, "alpha-id---0.json");
+          await checkFile({ fpath: refFile, snapshot: true });
+          await checkString(resp.contents, `<iframe src="/refs/alpha-id---0">`);
         },
       },
     },
@@ -262,7 +268,7 @@ describe("MDUtils.proc", () => {
     ...WILDCARD_NOTE_REF_MISSING,
   ];
 
-  test.each(
+  test.only.each(
     ALL_TEST_CASES.map((ent) => [
       `${ent.dest}: ${ent.name}: ${ent.flavor}`,
       ent.testCase,

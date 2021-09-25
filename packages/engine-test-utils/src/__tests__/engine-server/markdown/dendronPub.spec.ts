@@ -829,7 +829,7 @@ describe("dendronPub", () => {
         expect(
           await AssertUtils.assertInString({
             body: publishResp.contents as string,
-            match: ["portal-container"],
+            match: ["iframe"],
           })
         ).toBeTruthy();
       },

@@ -55,7 +55,7 @@ VFile {
 exports[`MDUtils.proc "HTML: NOTE_REF_WITH_REHYPE: PUBLISHING" 1`] = `
 VFile {
   "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<p></p><p><iframe src=\\"/data/refs/alpha-id---0.html\\"></iframe></p>
+<p></p><p><iframe src=\\"/refs/alpha-id---0\\"></iframe></p>
 <hr>
 <h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
 <ol>

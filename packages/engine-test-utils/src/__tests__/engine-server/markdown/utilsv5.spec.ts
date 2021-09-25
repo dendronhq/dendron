@@ -268,7 +268,7 @@ describe("MDUtils.proc", () => {
     ...WILDCARD_NOTE_REF_MISSING,
   ];
 
-  test.only.each(
+  test.each(
     ALL_TEST_CASES.map((ent) => [
       `${ent.dest}: ${ent.name}: ${ent.flavor}`,
       ent.testCase,

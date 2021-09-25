@@ -110,7 +110,7 @@ const genRefAsIFrame = ({
 }) => {
   const refId = getRefId({ id: noteId, link });
   MDUtilsV5.addRefId(proc, { refId: { id: noteId, link }, content });
-  return paragraph(html(`<iframe src="/data/refs/${refId}.html"/>`));
+  return paragraph(html(`<iframe src="/refs/${refId}">`));
 };
 
 const plugin: Plugin = function (this: Unified.Processor, opts?: PluginOpts) {

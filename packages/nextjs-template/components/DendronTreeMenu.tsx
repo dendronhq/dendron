@@ -12,7 +12,10 @@ import DendronSpinner from "./DendronSpinner";
 const { SubMenu } = Menu;
 
 export default function DendronTreeMenu(
-  props: Partial<NoteData> & { collapsed: boolean }
+  props: Partial<NoteData> & {
+    collapsed: boolean;
+    setCollapsed: (collapsed: boolean) => void;
+  }
 ) {
   const logger = createLogger("DendronTreeView");
   const dendronRouter = useDendronRouter();
@@ -48,7 +51,7 @@ export default function DendronTreeMenu(
     return <DendronSpinner />;
   }
 
-  const { notes, domains, noteIndex, collapsed } = props;
+  const { notes, domains, noteIndex, collapsed, setCollapsed } = props;
 
   const expandKeys = _.isEmpty(activeNoteIds) ? [] : activeNoteIds;
 
@@ -64,6 +67,7 @@ export default function DendronTreeMenu(
 
   // --- Methods
   const onSelect = (noteId: string) => {
+    setCollapsed(true);
     logger.info({ ctx: "onSelect", id: noteId });
     changeActiveNote(noteId, { noteIndex: props.noteIndex });
   };

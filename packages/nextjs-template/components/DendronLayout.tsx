@@ -1,5 +1,5 @@
 import { Layout, Row, Col, Divider } from "antd";
-import { LeftOutlined, RightOutlined } from "@ant-design/icons";
+import { MenuOutlined, MenuUnfoldOutlined } from "@ant-design/icons";
 import * as React from "react";
 import { DENDRON_STYLE_CONSTANTS } from "../styles/constants";
 import { DendronCommonProps } from "../utils/types";
@@ -23,40 +23,29 @@ export default function DendronLayout(
 
   const sidebar = (
     <Sider
-      width={SIDER.WIDTH}
+      width={isResponsive ? "100%" : SIDER.WIDTH}
       collapsible
-      collapsed={isCollapsed}
+      collapsed={isCollapsed && isResponsive}
       collapsedWidth={SIDER.COLLAPSED_WIDTH}
-      onCollapse={(collapsed, type) => {
+      onCollapse={(collapsed) => {
         setCollapsed(collapsed);
-        if (type === "responsive") {
-          setResponsive(collapsed);
-        }
       }}
-      breakpoint="lg"
+      breakpoint="sm"
+      onBreakpoint={(broken) => {
+        setResponsive(broken);
+      }}
       style={{
         position: "fixed",
         overflow: "auto",
         height: `calc(100vh - ${HEADER.HEIGHT}px)`,
       }}
-      trigger={
-        isResponsive ? (
-          // eslint-disable-next-line jsx-a11y/click-events-have-key-events -- role indicates that it is a button and therefore interactive
-          <div
-            role="button"
-            tabIndex={0}
-            className="ant-trigger"
-            style={{
-              backgroundColor:
-                "#43B02A" /* color copied from dendron-next-server / assets/themes/light-theme.less TODO make dependent on active theme */,
-            }}
-          >
-            {isCollapsed ? <RightOutlined /> : <LeftOutlined />}
-          </div>
-        ) : null
-      }
+      trigger={null}
     >
-      <DendronTreeMenu {...props} collapsed={isCollapsed} />
+      <DendronTreeMenu
+        {...props}
+        collapsed={isCollapsed && isResponsive}
+        setCollapsed={setCollapsed}
+      />
     </Sider>
   );
 
@@ -105,29 +94,44 @@ export default function DendronLayout(
             height: HEADER.HEIGHT,
           }}
         >
-          <Col
-            xs={4}
-            md={4}
-            style={{
-              width: `calc((100% - ${LAYOUT.BREAKPOINTS.lg}) / 2 + ${
-                isCollapsed ? SIDER.COLLAPSED_WIDTH : SIDER.WIDTH
-              }px)`,
-              minWidth: isCollapsed ? SIDER.COLLAPSED_WIDTH : SIDER.WIDTH,
-            }}
-          >
+          <Col xs={5} md={5} lg={6}>
             <DendronLogoOrTitle />
           </Col>
-          <Col xs={8} sm={10} md={10} lg={10} style={{ paddingLeft: "4px" }}>
+          <Col xs={14} sm={14} md={10} lg={10} style={{ paddingLeft: "4px" }}>
             <DendronLookup {...props} />
           </Col>
           <Col
-            xs={6}
-            sm={8}
+            xs={0}
+            sm={0}
             md={8}
             lg={6}
             style={{ marginLeft: "4px", marginRight: "4px" }}
           >
             <DendronSearch {...props} />
+          </Col>
+          <Col
+            xs={4}
+            sm={4}
+            md={0}
+            lg={0}
+            style={{
+              marginLeft: "4px",
+              display: isResponsive ? "flex" : "none",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            {isCollapsed ? (
+              <MenuOutlined
+                size={32}
+                onClick={() => setCollapsed(!isCollapsed)}
+              />
+            ) : (
+              <MenuUnfoldOutlined
+                size={32}
+                onClick={() => setCollapsed(!isCollapsed)}
+              />
+            )}
           </Col>
         </Row>
       </Header>
@@ -150,17 +154,28 @@ export default function DendronLayout(
             style={{
               flex: "0 0 auto",
               width: `calc((100% - ${LAYOUT.BREAKPOINTS.lg}) / 2 + ${
-                isCollapsed ? SIDER.COLLAPSED_WIDTH : SIDER.WIDTH
+                // eslint-disable-next-line no-nested-ternary
+                isResponsive
+                  ? isCollapsed
+                    ? SIDER.COLLAPSED_WIDTH
+                    : "100%"
+                  : SIDER.WIDTH
               }px)`,
+              minWidth: isResponsive || isCollapsed
+                  ? 0
+                  : SIDER.WIDTH,
               paddingLeft: `calc((100% - ${LAYOUT.BREAKPOINTS.lg}) / 2)`,
-              minWidth: isCollapsed ? SIDER.COLLAPSED_WIDTH : SIDER.WIDTH,
+              // eslint-disable-next-line no-nested-ternary
             }}
           >
             {sidebar}
           </Layout>
           <Layout
             className="side-layout-main"
-            style={{ maxWidth: LAYOUT.CONTENT_MAX_WIDTH }}
+            style={{
+              maxWidth: LAYOUT.CONTENT_MAX_WIDTH,
+              display: !isCollapsed && isResponsive ? "none" : "initial",
+            }}
           >
             {content}
           </Layout>

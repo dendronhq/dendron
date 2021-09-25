@@ -86,6 +86,6 @@ export function useNoteActive(id: string | undefined): DendronNotesHookProps {
     // TODO: in the future, we want to fetch this  dynamically
     const note = engine.notes[id];
     setNoteActive(note);
-  }, [id, engine.noteIndex]);
+  }, [id, engine.noteIndex, engine]);
   return { noteActive };
 }

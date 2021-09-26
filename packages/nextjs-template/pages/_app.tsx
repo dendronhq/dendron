@@ -25,7 +25,7 @@ const themes = {
 };
 
 function AppContainer(appProps: AppProps) {
-  const defaultTheme = "light";
+  const defaultTheme = process.env.THEME ?? "light";
   return (
     <Provider store={combinedStore}>
       <ThemeSwitcherProvider themeMap={themes} defaultTheme={defaultTheme}>

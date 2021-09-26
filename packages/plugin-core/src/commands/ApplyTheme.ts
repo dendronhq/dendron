@@ -44,7 +44,7 @@ export class ApplyTheme extends BasicCommand<CommandOpts, CommandOutput> {
 
       if (fs.pathExistsSync(styleFilePath)) {
         await convertLessFile(styleFilePath, workspaceRoot);
-        this.showInfo(path.join(workspaceRoot, "style.css"));
+        this.showInfo(path.join(workspaceRoot, "build", "style.css"));
       } else {
         this.showError(styleFilePath);
       }

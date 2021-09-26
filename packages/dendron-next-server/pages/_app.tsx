@@ -32,6 +32,7 @@ import "../styles/scss/main.scss";
 const themes = {
   dark: `/dark-theme.css`,
   light: `/light-theme.css`,
+  custom: `/style.css`,
 };
 
 const { useEngineAppSelector, useEngine } = engineHooks;

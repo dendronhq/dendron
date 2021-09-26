@@ -22,6 +22,7 @@ import { NoteData } from "../utils/types";
 const themes = {
   dark: getAssetUrl(`/dark-theme.css`),
   light: getAssetUrl(`/light-theme.css`),
+  custom: getAssetUrl(`/style.css`),
 };
 
 function AppContainer(appProps: AppProps) {

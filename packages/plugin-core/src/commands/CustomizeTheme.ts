@@ -7,8 +7,13 @@ import { VSCodeUtils } from "../utils";
 import { getExtension } from "../workspace";
 import { BasicCommand } from "./base";
 
+enum Customization {
+  Preview,
+  Publishing,
+}
+
 type CommandOpts = {
-  type: string;
+  type: Customization;
 };
 
 type CommandOutput = void;
@@ -18,48 +23,63 @@ export class CustomizeTheme extends BasicCommand<CommandOpts, CommandOutput> {
 
   async gatherInputs(): Promise<CommandOpts | undefined> {
     const themeType = await VSCodeUtils.showQuickPick([
-      { label: "preview" },
-      { label: "publishing" },
+      { label: "Preview", value: Customization.Preview },
+      { label: "Publishing", value: Customization.Publishing },
     ]);
-    if (themeType) return { type: themeType.label };
+    if (themeType) return { type: themeType.value };
     return undefined;
   }
 
-  async showInfo(message: string) {
+  showInfo(message: string) {
     window.showInformationMessage(message);
   }
 
-  async showError(message: string) {
+  showError(message: string) {
     window.showErrorMessage(message);
+  }
+
+  onFileGenerated(styleFilePath: string) {
+    this.showInfo(`Creating custom style file at ${styleFilePath}`);
+  }
+
+  onFileOpened(styleFilePath: string) {
+    this.showInfo(`Opening existing custom style file at ${styleFilePath}`);
   }
 
   async execute({ type }: CommandOpts) {
     const workspaceRoot = getExtension().rootWorkspace.uri.fsPath;
 
-    if (type === "preview") {
+    if (type === Customization.Preview) {
       const styleFilePath = path.join(workspaceRoot, "style.less");
 
-      if (!fs.pathExistsSync(styleFilePath)) {
+      const isStyleFileCrated = await fs.pathExists(styleFilePath);
+
+      if (!isStyleFileCrated) {
         fs.writeFile(styleFilePath, "");
 
-        this.showInfo(`Generating custom style file at ${styleFilePath}`);
+        this.onFileGenerated(styleFilePath);
       } else {
-        this.showInfo(`Opening existing custom style file at ${styleFilePath}`);
+        this.onFileOpened(styleFilePath);
       }
       const uri = Uri.file(styleFilePath);
       VSCodeUtils.openFileInEditor(uri);
-    } else if (type === "publishing") {
+    } else if (type === Customization.Publishing) {
       const nextJSPublishPath = path.join(workspaceRoot, ".next");
-      if (fs.pathExistsSync(nextJSPublishPath)) {
+
+      const isPublishingInitialized = await fs.pathExists(nextJSPublishPath);
+
+      if (isPublishingInitialized) {
         const styleFilePath = path.join(nextJSPublishPath, "style.less");
-        if (!fs.pathExistsSync(styleFilePath)) {
+
+        const isStyleFileCrated = await fs.pathExists(styleFilePath);
+
+        if (!isStyleFileCrated) {
           fs.writeFile(styleFilePath, "");
-          this.showInfo(`Generating custom style file at ${styleFilePath}`);
+          this.onFileGenerated(styleFilePath);
         } else {
-          this.showInfo(
-            `Opening existing custom style file at ${styleFilePath}`
-          );
+          this.onFileOpened(styleFilePath);
         }
+        // open the generated file
         const uri = Uri.file(styleFilePath);
         VSCodeUtils.openFileInEditor(uri);
       } else {

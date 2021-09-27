@@ -581,6 +581,29 @@ suite("NoteLookupCommand", function () {
       });
     });
 
+    test("new node matching schema prefix defaults to first matching schema child name", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        postSetupHook: async ({ wsRoot, vaults }) => {
+          await ENGINE_HOOKS.setupSchemaPreseet({ wsRoot, vaults });
+        },
+
+        onInit: async ({ vaults }) => {
+          const cmd = new NoteLookupCommand();
+          stubVaultPick(vaults);
+          await cmd.run({
+            initialValue: "foo.",
+            noConfirm: true,
+          });
+          const document = VSCodeUtils.getActiveTextEditor()?.document;
+          const newNote = VSCodeUtils.getNoteFromDocument(document!);
+          expect(newNote?.fname).toEqual("foo.ch1");
+
+          done();
+        },
+      });
+    });
+
     test("new node with schema template on namespace", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,

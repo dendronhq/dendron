@@ -204,7 +204,9 @@ export class SurveyUtils {
             AnalyticsUtils.track(SurveyEvents.InitialSurveyAccepted, {
               answerCount,
             });
+            vscode.window.showInformationMessage("Survey submitted.");
           } else {
+            vscode.window.showInformationMessage("Survey cancelled.");
             AnalyticsUtils.track(SurveyEvents.InitialSurveyRejected);
           }
         })

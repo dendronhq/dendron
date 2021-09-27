@@ -2,13 +2,17 @@
 # publish the release extension to the VS Code and Open VSX Marketplaces. This
 # is manually triggered once the release build is smoke-tested and ready for
 # release.
-name: Publish Extension - Dendron
+name: Temp Testing Publish Extension - Dendron
 
-on: workflow_dispatch
+# on: workflow_dispatch
+on:
+  push:
+    branches:
+      - tmp-release-workflows
 
 jobs:
   build:
-    environment: plugin-production
+    environment: plugin-development
     strategy:
       fail-fast: true
 
@@ -47,7 +51,7 @@ jobs:
           NODE_OPTIONS: --max_old_space_size=4096
         run: |
           echo "DENDRON_RELEASE_VERSION=`cat meta.json | jq -r '.["@dendronhq/plugin-core"]' | awk -F. -v OFS=. 'NF>1{$(NF-1)=sprintf("%0*d", length($(NF-1)), ($(NF-1)+1)); $NF=0; print}'`" >> $GITHUB_ENV
-          yarn build:minor:remote:ci
+          yarn build:minor:local:ci
 
       - name: Upload VSIX Artifact
         uses: actions/upload-artifact@v2
@@ -65,21 +69,21 @@ jobs:
       - name: Push Branch Commits to Github
         run: push -u origin HEAD
 
-      - name: Publish to VS Code Marketplace
-        env:
-          VSCE_PAT: ${{ secrets.VSCODE_PUBLISH_PWD }}
-          NODE_OPTIONS: --max_old_space_size=4096
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-        working-directory: ./packages/plugin-core
-        run: yarn deploy:vscode
+      # - name: Publish to VS Code Marketplace
+      #   env:
+      #     VSCE_PAT: ${{ secrets.VSCODE_PUBLISH_PWD }}
+      #     NODE_OPTIONS: --max_old_space_size=4096
+      #     SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+      #   working-directory: ./packages/plugin-core
+      #   run: yarn deploy:vscode
 
-      - name: Publish to Open VSX Marketplace
-        env:
-          OVSX_PAT: ${{ secrets.VSCODIUM_PUBLISH_PWD }}
-          NODE_OPTIONS: --max_old_space_size=4096
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-        working-directory: ./packages/plugin-core
-        run: yarn deploy:ovsx
+      # - name: Publish to Open VSX Marketplace
+      #   env:
+      #     OVSX_PAT: ${{ secrets.VSCODIUM_PUBLISH_PWD }}
+      #     NODE_OPTIONS: --max_old_space_size=4096
+      #     SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+      #   working-directory: ./packages/plugin-core
+      #   run: yarn deploy:ovsx
 
       - name: Raise Pull Request back to master
         uses: repo-sync/pull-request@v2

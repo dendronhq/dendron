@@ -40,7 +40,6 @@ import { Logger } from "./logger";
 import { migrateConfig } from "./migration";
 import { StateService } from "./services/stateService";
 import { Extensions } from "./settings";
-import { SurveyUtils } from "./survey";
 import { setupSegmentClient } from "./telemetry";
 import { GOOGLE_OAUTH_ID, GOOGLE_OAUTH_SECRET } from "./types/global";
 import { KeybindingUtils, VSCodeUtils, WSUtils } from "./utils";

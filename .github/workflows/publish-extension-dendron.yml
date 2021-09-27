@@ -67,7 +67,7 @@ jobs:
           LOG_LEVEL=info $DENDRON_CLI dev prep_plugin --extensionTarget dendron
 
       - name: Push Branch Commits to Github
-        run: push -u origin HEAD
+        run: git push -u origin HEAD
 
       # - name: Publish to VS Code Marketplace
       #   env:

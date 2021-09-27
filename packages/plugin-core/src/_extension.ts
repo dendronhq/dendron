@@ -6,7 +6,6 @@ import {
 import {
   CONSTANTS,
   DendronError,
-  ExtensionEvents,
   getStage,
   InstallStatus,
   Time,
@@ -231,8 +230,8 @@ export async function _activate(
 
   try {
     // Setup the workspace trust callback to detect changes from the user's
-    // workspace trust settings 
-    
+    // workspace trust settings
+
     // This version check is a temporary, one-release patch to try to unblock
     // users who are on old versions of VS Code.
     let userOnOldVSCodeVer = false;
@@ -240,13 +239,12 @@ export async function _activate(
     // compat version in package.json to ^1.58.0
     if (semver.gte(vscode.version, "1.57.0")) {
       vscode.workspace.onDidGrantWorkspaceTrust(() => {
-        getExtension().getEngine().trustedWorkspace = vscode.workspace.isTrusted;
+        getExtension().getEngine().trustedWorkspace =
+          vscode.workspace.isTrusted;
       });
-    }
-    else {
+    } else {
       userOnOldVSCodeVer = true;
     }
-
 
     //  needs to be initialized to setup commands
     const ws = DendronExtension.getOrCreate(context, {
@@ -467,38 +465,13 @@ export async function _activate(
     const backupPaths: string[] = [];
     let keybindingPath: string;
 
-    if (extensionInstallStatus === InstallStatus.INITIAL_INSTALL) {
-      const vimInstalled = VSCodeUtils.isExtensionInstalled("vscodevim.vim");
-      if (vimInstalled) {
-        AnalyticsUtils.track(ExtensionEvents.VimExtensionInstalled);
-        const { keybindingConfigPath, newKeybindings: resolvedKeybindings } =
-          KeybindingUtils.checkAndApplyVimKeybindingOverrideIfExists();
-        keybindingPath = keybindingConfigPath;
-        if (!_.isUndefined(resolvedKeybindings)) {
-          const today = Time.now().toFormat("yyyy.MM.dd.HHmmssS");
-          const maybeBackupPath = `${keybindingConfigPath}.${today}.vim.old`;
-          if (!fs.existsSync(keybindingConfigPath)) {
-            fs.ensureFileSync(keybindingConfigPath);
-            fs.writeFileSync(keybindingConfigPath, "[]");
-          } else {
-            fs.copyFileSync(keybindingConfigPath, maybeBackupPath);
-            backupPaths.push(maybeBackupPath);
-          }
-          writeJSONWithComments(keybindingConfigPath, resolvedKeybindings);
-          AnalyticsUtils.track(ExtensionEvents.VimExtensionInstalled, {
-            fixApplied: true,
-          });
-        }
-      }
-    }
-
     if (extensionInstallStatus === InstallStatus.UPGRADED) {
       const { keybindingConfigPath, migratedKeybindings } =
         KeybindingUtils.checkAndMigrateLookupKeybindingIfExists();
       keybindingPath = keybindingConfigPath;
       if (!_.isUndefined(migratedKeybindings)) {
         const today = Time.now().toFormat("yyyy.MM.dd.HHmmssS");
-        const maybeBackupPath = `${keybindingConfigPath}.${today}.lookup.old`
+        const maybeBackupPath = `${keybindingConfigPath}.${today}.lookup.old`;
         fs.copyFileSync(keybindingConfigPath, maybeBackupPath);
         backupPaths.push(maybeBackupPath);
         writeJSONWithComments(keybindingConfigPath, migratedKeybindings);
@@ -510,7 +483,8 @@ export async function _activate(
         .showInformationMessage(
           "Conflicting or outdated keybindings have been updated. Click the button below to see changes.",
           ...["Open changes"]
-        ).then(async (selection) => {
+        )
+        .then(async (selection) => {
           if (selection) {
             const uri = vscode.Uri.file(keybindingPath);
             await VSCodeUtils.openFileInEditor(uri);
@@ -523,7 +497,6 @@ export async function _activate(
           }
         });
     }
-
 
     if (userOnOldVSCodeVer) {
       AnalyticsUtils.track(VSCodeEvents.UserOnOldVSCodeVerUnblocked);

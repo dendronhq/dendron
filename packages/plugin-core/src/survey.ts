@@ -184,9 +184,10 @@ export class SurveyUtils {
       AnalyticsUtils.track(SurveyEvents.InitialSurveyPrompted);
       vscode.window
         .showInformationMessage(
-          "Welcome to Dendron!",
-          { modal: true , detail: "Would you like to tell us a bit about yourself? This info will be used to provide a better onboarding experience. This will take less than a minute to complete."},
-          { title: "Proceed" }
+          "Welcome to Dendron! 🌱",
+          { modal: true , detail: "Would you like to tell us a bit about yourself? This info will be used to provide a better onboarding experience. It will take less than a minute to complete."},
+          { title: "Proceed" },
+          { title: "Skip Survey"},
         )
         .then(async (resp) => {
           if (resp?.title === "Proceed") {

@@ -28,8 +28,8 @@ jobs:
 
       - name: Configure Git user
         run: |
-          git config --global user.name CI
-          git config --global user.email ci@dendron.so
+          git config --global user.name github.actions
+          git config --global user.email github-actions@github.com
 
       - name: Checkout source
         uses: actions/checkout@v2

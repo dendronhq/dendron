@@ -3,7 +3,6 @@ import {
   DendronSiteConfig,
   NoteProps,
   SEOProps,
-  NoteUtils,
   Time,
   PublishUtils,
 } from "@dendronhq/common-all";
@@ -37,6 +36,13 @@ const getCanonicalUrl = ({
   return [base, sitePath].join("");
 };
 
+// Export so we can test
+export const unix2SEOTime = (ts: number) =>
+  Time.DateTime.fromMillis(_.toInteger(ts))
+    .setZone("utc")
+    // @ts-ignore
+    .toLocaleString("yyyy-LL-dd");
+
 export default function DendronSEO({
   note,
   config,
@@ -68,12 +74,6 @@ export default function DendronSEO({
     seoProps: cleanSeoProps,
     siteConfig: config.site,
   });
-  // @ts-ignore
-  const unix2SEOTime = (ts: number) =>
-    Time.DateTime.fromMillis(_.toInteger(ts))
-      .setZone("utc")
-      // @ts-ignore
-      .toLocaleString("yyyy-LL-dd");
   const maybeTwitter: NextSeoProps["twitter"] = cleanSeoProps.twitter
     ? {
         handle: cleanSeoProps.twitter,
@@ -81,6 +81,17 @@ export default function DendronSEO({
         cardType: "summary_large_image",
       }
     : undefined;
+  const getTags = (note: NoteProps): string[] => {
+    if (note.tags) {
+      if (Array.isArray(note.tags)) {
+        return note.tags;
+      } else {
+        return [note.tags];
+      }
+    } else {
+      return [];
+    }
+  };
   return (
     <NextSeo
       title={title}
@@ -93,6 +104,12 @@ export default function DendronSEO({
         description,
         url: canonical,
         images,
+        type: `article`,
+        article: {
+          publishedTime: unix2SEOTime(cleanSeoProps.created),
+          modifiedTime: unix2SEOTime(cleanSeoProps.updated),
+          tags: getTags(note),
+        },
       }}
     />
   );

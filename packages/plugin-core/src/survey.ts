@@ -3,6 +3,8 @@ import { AnalyticsUtils } from "./utils/analytics";
 import * as vscode from "vscode";
 import _ from "lodash";
 import { Logger } from "./logger";
+import { StateService } from "./services/stateService";
+import { GLOBAL_STATE } from "./constants";
 
 export class DendronSurvey {
   choices: readonly vscode.QuickPickItem[];
@@ -204,6 +206,10 @@ export class SurveyUtils {
             AnalyticsUtils.track(SurveyEvents.InitialSurveyAccepted, {
               answerCount,
             });
+            StateService.instance().updateGlobalState(
+              GLOBAL_STATE.INITIAL_SURVEY_SUBMITTED,
+              true
+            );
             vscode.window.showInformationMessage("Survey submitted! Thanks for helping us make Dendron better 🌱");
           } else {
             vscode.window.showInformationMessage("Survey cancelled.");

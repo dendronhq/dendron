@@ -847,6 +847,10 @@ export enum GLOBAL_STATE {
    * Most Recently Imported Doc
    */
   MRUDocs = "MRUDocs",
+  /**
+   * Checks if initial survey was prompted and submitted.
+   */
+  INITIAL_SURVEY_SUBMITTED = "dendron.initial_survey_submitted"
 }
 
 export enum WORKSPACE_ACTIVATION_CONTEXT {

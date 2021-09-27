@@ -369,7 +369,8 @@ export class NoteLookupCommand extends BaseCommand<
   ): Promise<OnDidAcceptReturn | undefined> {
     const ctx = "acceptNewItem";
     const picker = this.controller.quickpick;
-    const fname = PickerUtilsV2.getValue(picker);
+    const fname = item.fname;
+
     const engine = getEngine();
     let nodeNew: NoteProps;
     if (item.stub) {

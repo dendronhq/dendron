@@ -1,0 +1,25 @@
+import { NoteProps } from "@dendronhq/common-all";
+import { Anchor } from "antd";
+import { ComponentProps } from "react";
+
+const Link = Anchor.Link;
+export const DendronTOC = ({
+  note,
+  ...rest
+}: {
+  note: NoteProps;
+} & ComponentProps<typeof Anchor>) => (
+  <>
+    <Anchor style={{ zIndex: 1 }} {...rest}>
+      {Object.entries(note?.anchors).map(([key, entry]) =>
+        entry?.type === "header" ? (
+          <Link href={`#${key}`} title={entry?.text ?? entry?.value} />
+        ) : (
+          <></>
+        )
+      )}
+    </Anchor>
+  </>
+);
+
+export default DendronTOC;

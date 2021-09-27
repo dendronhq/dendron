@@ -34,6 +34,10 @@ import {
   error2PlainObject,
   NoteProps,
 } from "@dendronhq/common-all";
+import { DendronTOC } from "../../components/DendronTOC";
+import { DENDRON_STYLE_CONSTANTS } from "../../styles/constants";
+
+const { HEADER } = DENDRON_STYLE_CONSTANTS;
 
 export type NotePageProps = InferGetStaticPropsType<typeof getStaticProps> &
   DendronCommonProps & {
@@ -105,6 +109,9 @@ export default function Note({
   return (
     <>
       <DendronSEO note={note} config={config} />
+      <div style={{ float: "right" }}>
+        <DendronTOC note={note} offsetTop={HEADER.HEIGHT} />
+      </div>
       {customHeadContent && <DendronCustomHead content={customHeadContent} />}
       <DendronNote noteContent={noteBody} />
       {maybeCollection}

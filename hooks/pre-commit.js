@@ -37,7 +37,7 @@ function checkVSCodeCompatibilityVersion() {
 }
 
 function main() {
-  checkVSCodeCompatibilityVersion();
+  // checkVSCodeCompatibilityVersion();
 
   const gitCommand = `git diff --staged --name-only`;
   const stagedFiles = exec(gitCommand).stdout.split("\n");

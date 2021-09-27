@@ -1,11 +1,11 @@
-# Creates a prerelease branch off of master every Thursday, 7 PM UTC
-name: Create Prerelease Branch
+# Creates a release branch off of master every Monday, 7 PM UTC
+name: Create Release Branch
 
 # See documentation on POSIX cron syntax here: https://docs.github.com/en/actions/reference/events-that-trigger-workflows#scheduled-events
-# Scheduled to run at 7 PM UTC on Thursdays
+# Scheduled to run at 7 PM UTC on Mondays
 on:
   schedule:
-    - cron:  '0 19 * * 4'
+    - cron:  '0 19 * * 1'
 
 jobs:
   build:
@@ -31,8 +31,8 @@ jobs:
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
-          version=`cat ./packages/plugin-core/package.json | jq ".version" -r | awk -F. -v OFS=. 'NF==1{print ++$NF}; NF>1{$NF=sprintf("%0*d", length($NF), ($NF+1)); print}'`
-          branchName="prerelease/${version}" 
+          version=`cat ./packages/plugin-core/package.json | jq ".version" -r |  awk -F. -v OFS=. 'NF>1{$(NF-1)=sprintf("%0*d", length($(NF-1)), ($(NF-1)+1)); $NF=0; print}'`
+          branchName="release/${version}" 
           echo $branchName
           git checkout -b $branchName
           git push origin $branchName

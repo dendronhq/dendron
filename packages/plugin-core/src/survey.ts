@@ -2,6 +2,7 @@ import { SurveyEvents } from "@dendronhq/common-all";
 import { AnalyticsUtils } from "./utils/analytics";
 import * as vscode from "vscode";
 import _ from "lodash";
+import { Logger } from "./logger";
 
 export class DendronSurvey {
   choices: readonly vscode.QuickPickItem[];
@@ -142,8 +143,8 @@ export class SurveyUtils {
       AnalyticsUtils.track(SurveyEvents.InitialSurveyPrompted);
       vscode.window
         .showInformationMessage(
-          "Would you like to tell us about yourself so that we can provide a better onboarding experience?",
-          { modal: true },
+          "Would you like to tell us a bit about yourself?",
+          { modal: true , detail: "This info will be used to provide a better onboarding experience"},
           { title: "Proceed" }
         )
         .then(async (resp) => {
@@ -167,6 +168,10 @@ export class SurveyUtils {
           } else {
             AnalyticsUtils.track(SurveyEvents.InitialSurveyRejected);
           }
+        })
+        // @ts-ignore
+        .catch((error: any) => {
+          Logger.error({msg: error});
         });
     }
   }

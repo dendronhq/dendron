@@ -31,7 +31,8 @@ import path from "path";
 import { getEngine } from "../workspace";
 import { EngineAPIService } from "../services/EngineAPIService";
 import { delayedUpdateDecorations } from "../features/windowDecorations";
-import { findReferences } from "../utils/md";
+import { findReferences, FoundRefT } from "../utils/md";
+import { Location } from "vscode";
 
 type CommandInput =
   | {
@@ -55,15 +56,15 @@ export class MoveHeaderCommand extends BasicCommand<
 > {
   key = DENDRON_COMMANDS.MOVE_HEADER.key;
 
-  headerNotSelectedError = new DendronError({
+  private headerNotSelectedError = new DendronError({
     message: "You must first select the header you want to move.",
   });
 
-  noActiveNoteError = new DendronError({
+  private noActiveNoteError = new DendronError({
     message: "No note open.",
   });
 
-  getProc = (engine: EngineAPIService, note: NoteProps) => {
+  private getProc = (engine: EngineAPIService, note: NoteProps) => {
     return MDUtilsV5.procRemarkParse(
       { mode: ProcMode.FULL },
       {
@@ -76,49 +77,34 @@ export class MoveHeaderCommand extends BasicCommand<
   };
 
   /**
-   * Recursively check if two given node is identical.
-   * At each level _position_ is omitted as this can change if
-   * you are comparing from two different trees.
-   * @param a first {@link Node} to compare
-   * @param b second {@link Node} to compare
-   * @returns boolean
+   * Helper for {@link MoveHeaderCommand.gatherInputs}
+   * Validates and processes inputs to be passed for further action
+   * @param engine 
+   * @returns {}
    */
-  hasIdenticalChildren = (a: Node, b: Node): boolean => {
-    if (_.isEqual(Object.keys(a).sort(), Object.keys(b).sort())) {
-      const aOmit = _.omit(a, ["position", "children"]);
-      const bOmit = _.omit(b, ["position", "children"]);
-      if (_.isEqual(aOmit, bOmit)) {
-        if (_.has(a, "children")) {
-          return _.every(a.children as Node[], (aChild, aIndex) => {
-            const bChild = (b.children as Node[])[aIndex];
-            return this.hasIdenticalChildren(aChild, bChild);
-          });
-        }
-        return true;
-      } else {
-        return false;
-      }
-    } else {
-      return false;
-    }
-  };
-
-  async gatherInputs(opts: CommandInput): Promise<CommandOpts | undefined> {
-    const engine = getEngine();
+  private validateAndProcessInput(engine: EngineAPIService): {
+    proc: Processor,
+    origin: NoteProps,
+    targetHeader: Heading,
+  } {
     const { editor, selection } = VSCodeUtils.getSelection();
+
+    // basic input validation
     if (!editor) throw this.noActiveNoteError;
     if (!selection) throw this.headerNotSelectedError;
 
-    // const text = editor.document.getText();
     const line = editor.document.lineAt(selection.start.line).text;
     const maybeNote = VSCodeUtils.getNoteFromDocument(editor.document);
     if (!maybeNote) {
       throw this.noActiveNoteError;
     }
 
+    // parse selection and get the target header node
     const proc = this.getProc(engine, maybeNote);
     const parsedLine = proc.parse(line);
     let targetHeader: Heading | undefined;
+    // Find the first occurring heading node in selected line.
+    // This should be our target.
     visit(parsedLine, [DendronASTTypes.HEADING], (heading: Heading) => {
       targetHeader = heading;
       return false;
@@ -126,40 +112,16 @@ export class MoveHeaderCommand extends BasicCommand<
     if (!targetHeader) {
       throw this.headerNotSelectedError;
     }
-    const tree = proc.parse(maybeNote.body);
-    let headerFound = false;
-    let foundHeaderIndex: number | undefined;
-    let nextHeaderIndex: number | undefined;
-    visit(tree, (node, index) => {
-      if (nextHeaderIndex) {
-        return;
-      }
-      const depth = node.depth as Heading["depth"];
-      if (!headerFound) {
-        if (node.type === DendronASTTypes.HEADING) {
-          if (
-            depth === targetHeader!.depth &&
-            this.hasIdenticalChildren(node, targetHeader!)
-          ) {
-            headerFound = true;
-            foundHeaderIndex = index;
-            return;
-          }
-        }
-      } else if (node.type === DendronASTTypes.HEADING) {
-        if (foundHeaderIndex) {
-          if (depth <= targetHeader!.depth) nextHeaderIndex = index;
-        }
-      }
-    });
+    return { proc, origin: maybeNote, targetHeader }
+  }
 
-    const nodesToMove = nextHeaderIndex
-      ? (tree.children as any[]).splice(
-          foundHeaderIndex!,
-          nextHeaderIndex! - foundHeaderIndex!
-        )
-      : (tree.children as any[]).splice(foundHeaderIndex!);
-
+  /**
+   * Helper for {@link MoveHeaderCommand.gatherInputs}
+   * Prompts user to do a lookup on the desired destination.
+   * @param opts 
+   * @returns 
+   */
+  private promptForDestination(opts: CommandInput) {
     const lookupController = LookupControllerV3.create({
       nodeType: "note",
       disableVaultSelection: true,
@@ -176,7 +138,21 @@ export class MoveHeaderCommand extends BasicCommand<
       initialValue: opts?.dest ? opts.dest.fname : undefined,
       nonInteractive: !_.isUndefined(opts?.dest),
     });
+    return lookupController;
+  }
 
+  async gatherInputs(opts: CommandInput): Promise<CommandOpts | undefined> {
+    // validate and process input
+    const engine = getEngine();
+    const { proc, origin, targetHeader } = this.validateAndProcessInput(engine);
+
+    // extract nodes that need to be moved
+    const originTree = proc.parse(origin.body);
+    const nodesToMove = RemarkUtils.extractHeaderBlock(originTree, targetHeader);
+
+    const lc = this.promptForDestination(opts);
+
+    // Wait for provider
     return new Promise((resolve) => {
       HistoryService.instance().subscribev2("lookupProvider", {
         id: this.key,
@@ -186,13 +162,13 @@ export class MoveHeaderCommand extends BasicCommand<
             const cdata = event.data as NoteLookupProviderSuccessResp;
             resolve({
               dest: cdata.selectedItems[0],
-              origin: maybeNote,
+              origin,
               nodesToMove,
-              modifiedOriginTree: tree,
+              modifiedOriginTree: originTree,
               originProc: proc,
               engine,
             });
-            lookupController.onHide();
+            lc.onHide();
           } else if (event.action === "error") {
             this.L.error({ msg: `error: ${event.data}` });
             resolve(undefined);
@@ -208,14 +184,126 @@ export class MoveHeaderCommand extends BasicCommand<
     });
   }
 
-  removePosition = (nodes: Node[]) => {
-    return _.map(nodes, (node) => {
-      visit(node, (n) => {
-        delete n["position"];
-      });
-      return node;
+  /**
+   * Helper for {@link MoveHeaderCommand.execute}
+   * Given a list of nodes to move, appends them to the destination
+   * @param engine 
+   * @param dest 
+   * @param nodesToMove 
+   */
+  private async appendHeaderToDestination(
+    engine: EngineAPIService, 
+    dest: NoteProps, 
+    nodesToMove: Node[],
+  ): Promise<void> {
+    const destProc = this.getProc(engine, dest!);
+    const destTree = destProc.parse(dest!.body);
+    destTree.children = (destTree.children as Node[]).concat(nodesToMove);
+    const modifiedDestContent = destProc.stringify(destTree);
+    dest!.body = modifiedDestContent;
+    await engine.writeNote(dest!, {
+      updateExisting: true,
     });
   };
+
+  /**
+   * Helper for {@link MoveHeaderCommand.execute}
+   * given a copy of origin, and the modified content of origin,
+   * find the difference and return the updated anchor names
+   * @param originDeepCopy 
+   * @param modifiedOriginContent 
+   * @returns anchorNamesToUpdate
+   */
+  private findAnchorNamesToUpdate(
+    originDeepCopy: NoteProps, 
+    modifiedOriginContent: string
+  ): string[] {
+    const anchorsBefore = RemarkUtils.findAnchors(originDeepCopy.body);
+    const anchorsAfter = RemarkUtils.findAnchors(modifiedOriginContent);
+    const anchorsToUpdate = _.differenceWith(
+      anchorsBefore,
+      anchorsAfter,
+      RemarkUtils.hasIdenticalChildren
+    );
+    const anchorNamesToUpdate = _.map(anchorsToUpdate, (anchor) => {
+      const slugger = getSlugger();
+      const payload = AnchorUtils.anchorNode2anchor(anchor, slugger);
+      return payload![0];
+    });
+    return anchorNamesToUpdate;
+  };
+
+  /**
+   * Helper for {@link MoveHeaderCommand.updateReferences}
+   * Given a {@link Location}, find the respective note.
+   * @param location 
+   * @param engine 
+   * @returns note
+   */
+  private getNoteByLocation(
+    location: Location,
+    engine: EngineAPIService,
+  ): NoteProps | undefined {
+    const { wsRoot, vaults, notes } = engine;
+    const fsPath = location.uri.fsPath;
+    const fname = NoteUtils.normalizeFname(path.basename(fsPath));
+    const vault = VaultUtils.getVaultByNotePath({
+      fsPath,
+      wsRoot,
+      vaults,
+    });
+    const note = NoteUtils.getNoteByFnameV5({
+      fname,
+      notes,
+      vault,
+      wsRoot,
+    });
+    return note;
+  }
+
+  /**
+   * Helper for {@link MoveHeaderCommand.execute}
+   * Given a list of found references, update those references
+   * so that they point to the correct header in a destination note.
+   * @param foundReferences 
+   * @param anchorNamesToUpdate 
+   * @param engine 
+   * @param origin 
+   * @param dest 
+   * @returns updated
+   */
+  async updateReferences(
+    foundReferences: FoundRefT[], 
+    anchorNamesToUpdate: string[],
+    engine: EngineAPIService, 
+    origin: NoteProps,
+    dest: NoteProps,
+  ): Promise<NoteProps[]> {
+    const updated: NoteProps[] = [];
+    foundReferences
+      .filter(ref => !ref.isCandidate)
+      .map(ref => this.getNoteByLocation(ref.location, engine))
+      .filter(note => note !== undefined)
+      .forEach(async (note) => {
+        // find match text in note and modify the node
+        const proc = this.getProc(engine, note!);
+        const tree = proc.parse(note!.body);
+        visit(tree, (node: Node) => {
+          if (node.type === DendronASTTypes.WIKI_LINK) {
+            if (
+              node.value === origin.fname &&
+              _.includes(anchorNamesToUpdate, node.data!.anchorHeader)
+            ) {
+              node.value = dest!.fname;
+            }
+          }
+        });
+        note!.body = proc.stringify(tree);
+        const writeResp = await engine.writeNote(note!, { updateExisting: true });
+        updated.push(writeResp.data[0].note);
+      });
+    return updated;
+  }
 
   async execute(opts: CommandOpts): Promise<CommandOutput> {
     const ctx = "MoveHeaderCommand";
@@ -233,79 +321,29 @@ export class MoveHeaderCommand extends BasicCommand<
     const originDeepCopy = _.cloneDeep(origin);
     // remove header from origin
     const modifiedOriginContent = originProc.stringify(modifiedOriginTree);
-
     origin.body = modifiedOriginContent;
     await engine.writeNote(origin, {
       updateExisting: true,
     });
 
     // append header to destination
-    const destProc = this.getProc(engine, dest!);
-    const destTree = destProc.parse(dest!.body);
-    destTree.children = (destTree.children as Node[]).concat(nodesToMove);
-    const modifiedDestContent = destProc.stringify(destTree);
-    dest!.body = modifiedDestContent;
-    await engine.writeNote(dest!, {
-      updateExisting: true,
-    });
+    await this.appendHeaderToDestination(engine, dest!, nodesToMove);
 
     delayedUpdateDecorations();
 
     // update reference
-    const anchorsBefore = RemarkUtils.findAnchors(originDeepCopy.body);
-    const anchorsAfter = RemarkUtils.findAnchors(modifiedOriginContent);
-    const anchorsToUpdate = _.differenceWith(
-      anchorsBefore,
-      anchorsAfter,
-      this.hasIdenticalChildren
-    );
-    const anchorsToUpdateNames = _.map(anchorsToUpdate, (anchor) => {
-      const slugger = getSlugger();
-      const payload = AnchorUtils.anchorNode2anchor(anchor, slugger);
-      return payload![0];
-    });
-
+    const anchorNamesToUpdate = this.findAnchorNamesToUpdate(
+      originDeepCopy, 
+      modifiedOriginContent
+    ); 
     const foundReferences = await findReferences(origin.fname);
-    const { vaults, wsRoot, notes } = engine;
-    const updated: NoteProps[] = [];
-    _.forEach(foundReferences, async (reference) => {
-      const { location, isCandidate } = reference;
-      // ignore candidate refs.
-      if (isCandidate) return false;
-      // get note from location
-      const fsPath = location.uri.fsPath;
-      const fname = NoteUtils.normalizeFname(path.basename(fsPath));
-      const vault = VaultUtils.getVaultByNotePath({
-        fsPath,
-        wsRoot,
-        vaults,
-      });
-      const note = NoteUtils.getNoteByFnameV5({
-        fname,
-        notes,
-        vault,
-        wsRoot,
-      });
-      if (!note) return false;
-
-      // find match text in note and modify the node
-      const proc = this.getProc(engine, note);
-      const tree = proc.parse(note.body);
-      visit(tree, (node: Node) => {
-        if (node.type === DendronASTTypes.WIKI_LINK) {
-          if (
-            node.value === origin.fname &&
-            _.includes(anchorsToUpdateNames, node.data!.anchorHeader)
-          ) {
-            node.value = dest!.fname;
-          }
-        }
-      });
-      note.body = proc.stringify(tree);
-      const writeResp = await engine.writeNote(note, { updateExisting: true });
-      updated.push(writeResp.data[0].note);
-      return;
-    });
+    const updated = await this.updateReferences(
+      foundReferences,
+      anchorNamesToUpdate,
+      engine,
+      origin,
+      dest!
+    );
     return { ...opts, updated };
   }
 }

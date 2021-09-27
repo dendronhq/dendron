@@ -1172,6 +1172,82 @@ export class RemarkUtils {
     };
   }
 
+  /**
+   * Recursively check if two given node has identical children.
+   * At each level _position_ is omitted as this can change if
+   * you are comparing from two different trees.
+   * @param a first {@link Node} to compare
+   * @param b second {@link Node} to compare
+   * @returns boolean
+   */
+  static hasIdenticalChildren = (a: Node, b: Node): boolean => {
+    if (_.isEqual(Object.keys(a).sort(), Object.keys(b).sort())) {
+      const aOmit = _.omit(a, ["position", "children"]);
+      const bOmit = _.omit(b, ["position", "children"]);
+      if (_.isEqual(aOmit, bOmit)) {
+        if (_.has(a, "children")) {
+          return _.every(a.children as Node[], (aChild: Node, aIndex: number) => {
+            const bChild = (b.children as Node[])[aIndex];
+            return RemarkUtils.hasIdenticalChildren(aChild, bChild);
+          });
+        }
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      return false;
+    }
+  };
+
+  /**
+   * Given a markdown AST and a target heading node,
+   * Find all the node that belongs under the heading.
+   * This will extract all nodes until it hits the next heading
+   * with the same depth of the target heading.
+   * @param tree Abstract syntax tree
+   * @param targetHeader Heading to target
+   * @returns nodes to extract
+   */
+  static extractHeaderBlock(
+    tree: Node,
+    targetHeader: Heading,
+  ) {
+    let headerFound = false;
+    let foundHeaderIndex: number | undefined;
+    let nextHeaderIndex: number | undefined;
+    visit(tree, (node, index) => {
+      if (nextHeaderIndex) {
+        return;
+      }
+      const depth = node.depth as Heading["depth"];
+      if (!headerFound) {
+        if (node.type === DendronASTTypes.HEADING) {
+          if (
+            depth === targetHeader!.depth &&
+            RemarkUtils.hasIdenticalChildren(node, targetHeader!)
+          ) {
+            headerFound = true;
+            foundHeaderIndex = index;
+            return;
+          }
+        }
+      } else if (node.type === DendronASTTypes.HEADING) {
+        if (foundHeaderIndex) {
+          if (depth <= targetHeader!.depth) nextHeaderIndex = index;
+        }
+      }
+    });
+
+    const nodesToExtract = nextHeaderIndex
+      ? (tree.children as Node[]).splice(
+          foundHeaderIndex!,
+          nextHeaderIndex! - foundHeaderIndex!
+        )
+      : (tree.children as Node[]).splice(foundHeaderIndex!);
+    return nodesToExtract;
+  }
+
   /** Extract all blocks from the note which could be referenced by a block anchor.
    *
    * If those blocks already have anchors (or if they are a header), this will also find that anchor.

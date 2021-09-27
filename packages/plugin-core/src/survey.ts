@@ -204,7 +204,7 @@ export class SurveyUtils {
             AnalyticsUtils.track(SurveyEvents.InitialSurveyAccepted, {
               answerCount,
             });
-            vscode.window.showInformationMessage("Survey submitted.");
+            vscode.window.showInformationMessage("Survey submitted! Thanks for helping us make Dendron better 🌱");
           } else {
             vscode.window.showInformationMessage("Survey cancelled.");
             AnalyticsUtils.track(SurveyEvents.InitialSurveyRejected);

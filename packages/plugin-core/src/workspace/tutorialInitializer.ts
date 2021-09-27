@@ -104,9 +104,9 @@ export class TutorialInitializer
       currentVersion: DendronExtension.version(),
     });
 
-    // if (extensionInstallStatus === InstallStatus.INITIAL_INSTALL) {
+    if (extensionInstallStatus === InstallStatus.INITIAL_INSTALL) {
       await SurveyUtils.maybePromptInitialSurvey();
-    // }
+    }
 
     // Register a special analytics handler for the tutorial:
     const extension = getExtension();

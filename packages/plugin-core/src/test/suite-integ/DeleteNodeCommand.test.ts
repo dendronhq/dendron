@@ -15,10 +15,7 @@ import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
 suite("notes", function () {
-  let ctx: vscode.ExtensionContext;
-
-  ctx = setupBeforeAfter(this);
-
+  const ctx: vscode.ExtensionContext = setupBeforeAfter(this);
   test("basic", (done) => {
     runLegacyMultiWorkspaceTest({
       ctx,
@@ -89,9 +86,7 @@ suite("notes", function () {
 });
 
 suite("schemas", function () {
-  let ctx: vscode.ExtensionContext;
-
-  ctx = setupBeforeAfter(this, {});
+  const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {});
 
   test("basic", (done) => {
     runLegacyMultiWorkspaceTest({
@@ -113,6 +108,64 @@ suite("schemas", function () {
         expect(noteFiles.sort()).toEqual(["root.schema.yml"]);
         done();
       },
+    });
+  });
+});
+
+suite("Contextual-UI", function () {
+  const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {});
+
+  suite(
+    "WHEN Delete Note is clicked from Context Menu for `foo.schema.yml`",
+    () => {
+      test("THEN `foo.schema.yml` must be deleted", (done) => {
+        runLegacyMultiWorkspaceTest({
+          ctx,
+          preSetupHook: ENGINE_HOOKS.setupBasic,
+          onInit: async ({ vaults, wsRoot }) => {
+            const vaultRoot = path.join(
+              wsRoot,
+              VaultUtils.getRelPath(vaults[0])
+            );
+            const opts = {
+              _fsPath: path.join(vaultRoot, "foo.schema.yml"),
+            };
+            await new DeleteNodeCommand().execute(opts);
+
+            const vaultFiles = fs.readdirSync(vaultRoot);
+            const noteFiles = vaultFiles.filter((ent) =>
+              ent.endsWith(".schema.yml")
+            );
+            const { engine } = getDWorkspace();
+            expect(engine.notes["foo"].schema).toEqual(undefined);
+            expect(noteFiles.length).toEqual(1);
+            expect(noteFiles.sort()).toEqual(["root.schema.yml"]);
+            done();
+          },
+        });
+      });
+    }
+  );
+  suite("WHEN Delete Note is clicked from Context Menu for `foo.md`", () => {
+    test("THEN the `foo.md` must be deleted from the engine", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: ENGINE_HOOKS.setupBasic,
+        onInit: async ({ vaults, wsRoot }) => {
+          const vaultRoot = path.join(wsRoot, VaultUtils.getRelPath(vaults[0]));
+          const opts = {
+            _fsPath: path.join(vaultRoot, "foo.md"),
+          };
+          await new DeleteNodeCommand().execute(opts);
+
+          const vaultFiles = fs.readdirSync(
+            path.join(wsRoot, VaultUtils.getRelPath(vaults[0]))
+          );
+          const noteFiles = vaultFiles.filter((ent) => ent.endsWith(".md"));
+          expect(noteFiles.sort()).toEqual(["bar.md", "foo.ch1.md", "root.md"]);
+          done();
+        },
+      });
     });
   });
 });

@@ -4,6 +4,7 @@ import {
   NoteUtils,
   VaultUtils,
   getSlugger,
+  ERROR_SEVERITY,
 } from "@dendronhq/common-all";
 import {
   HistoryService,
@@ -58,10 +59,12 @@ export class MoveHeaderCommand extends BasicCommand<
 
   private headerNotSelectedError = new DendronError({
     message: "You must first select the header you want to move.",
+    severity: ERROR_SEVERITY.MINOR
   });
 
   private noActiveNoteError = new DendronError({
     message: "No note open.",
+    severity: ERROR_SEVERITY.MINOR
   });
 
   private getProc = (engine: EngineAPIService, note: NoteProps) => {

@@ -230,10 +230,23 @@ export async function _activate(
   initializeSentry(getStage());
 
   try {
-    // Setup the workspace trust callback to detect changes from the user's workspace trust settings
-    vscode.workspace.onDidGrantWorkspaceTrust(() => {
-      getExtension().getEngine().trustedWorkspace = vscode.workspace.isTrusted;
-    });
+    // Setup the workspace trust callback to detect changes from the user's
+    // workspace trust settings 
+    
+    // This version check is a temporary, one-release patch to try to unblock
+    // users who are on old versions of VS Code.
+    let userOnOldVSCodeVer = false;
+    // TODO: After temporary release, remove the version check and bump up our vs code
+    // compat version in package.json to ^1.58.0
+    if (semver.gte(vscode.version, "1.57.0")) {
+      vscode.workspace.onDidGrantWorkspaceTrust(() => {
+        getExtension().getEngine().trustedWorkspace = vscode.workspace.isTrusted;
+      });
+    }
+    else {
+      userOnOldVSCodeVer = true;
+    }
+
 
     //  needs to be initialized to setup commands
     const ws = DendronExtension.getOrCreate(context, {
@@ -509,6 +522,11 @@ export async function _activate(
             });
           }
         });
+    }
+
+
+    if (userOnOldVSCodeVer) {
+      AnalyticsUtils.track(VSCodeEvents.UserOnOldVSCodeVerUnblocked);
     }
 
     return showWelcomeOrWhatsNew({

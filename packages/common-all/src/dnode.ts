@@ -32,7 +32,7 @@ import {
   SchemaRaw,
   SchemaTemplate,
 } from "./types";
-import { getSlugger, isNotUndefined, randomColor } from "./utils";
+import { DefaultMap, getSlugger, isNotUndefined, randomColor } from "./utils";
 import { genUUID } from "./uuid";
 import { VaultUtils } from "./vault";
 
@@ -661,40 +661,25 @@ export class NoteUtils {
       return rootNote.updated;
     }
 
-    // When there is a vault specified in the link we want to respect that
-    // specification, otherwise we will map by just the file name.
-    // Map by lowercase fname.
-    const mapByFName: { [fname: string]: NoteProps } = {};
-    // Map vault fspath to map which maps by lowercase fname.
-    const mapWithVaultByFName: {
-      [vault: string]: { [fname: string]: NoteProps };
-    } = {};
-
-    // Populate the lookup maps, we will use maps to avoid having to loop over the
-    // the notes to find the notes by file names for each fname in the tree.
-    // In the future if we start keeping these values cached centrally we should
-    // replace these adhoc created maps with centrally cached values.
+    // Maps lowercase file names to list of note props with matching file name.
+    // We will use a map to avoid having to loop over the the notes to find the notes
+    // by file names for each fname in the tree. In the future if we start keeping these
+    // values cached centrally we should replace these adhoc created maps with centrally cached values.
+    const mapByFName = new DefaultMap<string, NoteProps[]>(() => []);
     _.values(notes).forEach((note) => {
       const lowercaseFName = note.fname.toLowerCase();
+
       // We are going to follow the current behavior of vault-less file name resolution:
       // The first matching file name that is met should win.
-      if (!mapByFName[lowercaseFName]) {
-        mapByFName[lowercaseFName] = note;
-      }
-
-      if (mapWithVaultByFName[note.vault.fsPath] === undefined) {
-        mapWithVaultByFName[note.vault.fsPath] = {};
-      }
-      mapWithVaultByFName[note.vault.fsPath][lowercaseFName] = note;
+      mapByFName.get(lowercaseFName).push(note);
     });
 
-    const visited: { [id: string]: NoteProps } = {};
+    const visitedIds = new Set<string>();
 
     return this._getLatestUpdateTimeOfPreviewNoteTree({
       note: rootNote,
       mapByFName,
-      mapWithVaultByFName,
-      visited,
+      visitedIds,
       latestUpdated: rootNote.updated,
     });
   }
@@ -702,17 +687,13 @@ export class NoteUtils {
   private static _getLatestUpdateTimeOfPreviewNoteTree({
     note,
     latestUpdated,
-    mapWithVaultByFName,
     mapByFName,
-    visited,
+    visitedIds,
   }: {
     note: NoteProps;
     latestUpdated: number;
-    mapByFName: { [lowercaseFname: string]: NoteProps };
-    visited: { [id: string]: NoteProps };
-    mapWithVaultByFName: {
-      [vaultName: string]: { [lowercaseFname: string]: NoteProps };
-    };
+    mapByFName: DefaultMap<string, NoteProps[]>;
+    visitedIds: Set<string>;
   }): number {
     if (note.updated > latestUpdated) {
       latestUpdated = note.updated;
@@ -720,10 +701,10 @@ export class NoteUtils {
 
     // Mark the visited nodes so we don't end up recursively spinning if there
     // are cycles in our preview tree such as [[foo]] -> [[!bar]] -> [[!foo]]
-    if (visited[note.id]) {
+    if (visitedIds.has(note.id)) {
       return latestUpdated;
     } else {
-      visited[note.id] = note;
+      visitedIds.add(note.id);
     }
 
     const linkedRefNotes = note.links
@@ -733,10 +714,16 @@ export class NoteUtils {
         const pointTo = link.to!;
         const lowercaseFname = pointTo.fname!.toLowerCase();
 
+        const matchingList: NoteProps[] = mapByFName.get(lowercaseFname);
+
+        // When there is a vault specified in the link we want to respect that
+        // specification, otherwise we will map by just the file name.
         if (pointTo.vaultName) {
-          return mapWithVaultByFName[pointTo.vaultName][lowercaseFname];
+          return matchingList.filter(
+            (n) => n.vault.fsPath == pointTo.vaultName
+          )[0];
         } else {
-          return mapByFName[lowercaseFname];
+          return matchingList[0];
         }
       });
 
@@ -745,8 +732,7 @@ export class NoteUtils {
       latestUpdated = this._getLatestUpdateTimeOfPreviewNoteTree({
         note: linkedNote,
         mapByFName,
-        mapWithVaultByFName,
-        visited,
+        visitedIds,
         latestUpdated,
       });
     }

@@ -7,10 +7,11 @@ import { Logger } from "./logger";
 export class DendronSurvey {
   choices: readonly vscode.QuickPickItem[];
   opts: {
-    placeHolder: string;
     canPickMany: boolean;
     title: string;
     ignoreFocusOut: boolean;
+    progress?: string;
+    placeHolder?: string;
   };
 
   constructor(opts: {
@@ -34,17 +35,23 @@ export class DendronSurvey {
     return this.choices;
   }
 
-  onAnswer(_opts: any): void {
+  async onAnswer(_opts: any): Promise<void> {
     return undefined;
   }
   onReject(_opts?: any): void {
     return undefined;
   }
 
-  async show() {
-    const results = await vscode.window.showQuickPick(this.choices, this.opts);
+  async show(step: number, total: number) {
+    const progress = `Step ${step} of ${total}`;
+    const title = this.opts.title;
+    const showOpts = {
+      ...this.opts,
+      title: `${title} : ${progress}`,
+    }
+    const results = await vscode.window.showQuickPick(this.choices, showOpts);
     if (results) {
-      this.onAnswer(results);
+      await this.onAnswer(results);
     } else {
       this.onReject();
     }
@@ -54,9 +61,20 @@ export class DendronSurvey {
 }
 
 export class BackgroundSurvey extends DendronSurvey {
-  onAnswer(results: vscode.QuickPickItem[]) {
+  async onAnswer(results: vscode.QuickPickItem[]) {
+    let maybeOtherResult: string | undefined;
+    if (results.some(result => result.label === "Other" )) {
+      maybeOtherResult = await vscode.window.showInputBox({
+        ignoreFocusOut: true,
+        placeHolder: "Type anything that applies.",
+        prompt: "You have checked \"Other\". Please describe what other backgrounds you have.",
+        title: "What is your background? - Others",
+      });
+    }
+
     AnalyticsUtils.track(SurveyEvents.BackgroundAnswered, {
       results: results.map((result) => result.label),
+      other: maybeOtherResult,
     });
   }
 
@@ -79,9 +97,19 @@ export class BackgroundSurvey extends DendronSurvey {
 }
 
 export class UseCaseSurvey extends DendronSurvey {
-  onAnswer(results: vscode.QuickPickItem[]) {
+  async onAnswer(results: vscode.QuickPickItem[]) {
+    let maybeOtherResult: string | undefined;
+    if (results.some(result => result.label === "Other" )) {
+      maybeOtherResult = await vscode.window.showInputBox({
+        ignoreFocusOut: true,
+        placeHolder: "Type anything that applies.",
+        prompt: "You have checked \"Other\". Please describe what other use cases you have.",
+        title: "What do you want to use Dendron for? - Other",
+      });
+    }
     AnalyticsUtils.track(SurveyEvents.UseCaseAnswered, {
       results: results.map((result) => result.label),
+      other: maybeOtherResult,
     });
   }
 
@@ -90,7 +118,7 @@ export class UseCaseSurvey extends DendronSurvey {
   }
 
   static create() {
-    const title = "Tell us what you want to use Dendron for";
+    const title = "What do you want to use Dendron for?";
     const choices = [
       { label: "Team knowledge base" },
       { label: "Todos and Agenda" },
@@ -104,9 +132,19 @@ export class UseCaseSurvey extends DendronSurvey {
 }
 
 export class PriorToolsSurvey extends DendronSurvey {
-  onAnswer(results: vscode.QuickPickItem[]) {
+  async onAnswer(results: vscode.QuickPickItem[]) {
+    let maybeOtherResult: string | undefined;
+    if (results.some(result => result.label === "Other" )) {
+      maybeOtherResult = await vscode.window.showInputBox({
+        ignoreFocusOut: true,
+        placeHolder: "Type anything that applies.",
+        prompt: "You have checked \"Other\". Please describe what other tools you have used.",
+        title: "Are you coming from an existing tool? - Others",
+      });
+    }
     AnalyticsUtils.track(SurveyEvents.PriorToolsAnswered, {
       results: results.map((result) => result.label),
+      other: maybeOtherResult,
     });
   }
 
@@ -115,7 +153,7 @@ export class PriorToolsSurvey extends DendronSurvey {
   }
 
   static create() {
-    const title = "Are you coming from an existing tool(s)?";
+    const title = "Are you coming from an existing tool?";
     const choices = [
       { label: "No" },
       { label: "Foam" },
@@ -126,6 +164,7 @@ export class PriorToolsSurvey extends DendronSurvey {
       { label: "Obsidian" },
       { label: "Evernote" },
       { label: "Google Keep" },
+      { label: "Other" },
     ];
     return new PriorToolsSurvey({ title, choices, canPickMany: true });
   }
@@ -144,7 +183,7 @@ export class SurveyUtils {
       vscode.window
         .showInformationMessage(
           "Would you like to tell us a bit about yourself?",
-          { modal: true , detail: "This info will be used to provide a better onboarding experience"},
+          { modal: true , detail: "This info will be used to provide a better onboarding experience. This will take less than a minute to complete."},
           { title: "Proceed" }
         )
         .then(async (resp) => {
@@ -153,9 +192,9 @@ export class SurveyUtils {
             const useCaseSurvey = UseCaseSurvey.create();
             const priorToolSurvey = PriorToolsSurvey.create();
 
-            const backgroundResults = await backgroundSurvey.show();
-            const useCaseResults = await useCaseSurvey.show();
-            const priorToolsResults = await priorToolSurvey.show();
+            const backgroundResults = await backgroundSurvey.show(1, 3);
+            const useCaseResults = await useCaseSurvey.show(2, 3);
+            const priorToolsResults = await priorToolSurvey.show(3, 3);
 
             const answerCount = [
               backgroundResults,

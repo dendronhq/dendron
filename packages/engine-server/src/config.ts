@@ -57,6 +57,7 @@ export class DConfig {
       lookup: {
         note: {
           selectionType: LookupSelectionType.selectionExtract,
+          leaveTrace: false,
         },
       },
       journal: {

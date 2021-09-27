@@ -164,6 +164,7 @@ suite("Extension", function () {
           lookup: {
             note: {
               selectionType: "selectionExtract",
+              leaveTrace: false,
             },
           },
           journal: {

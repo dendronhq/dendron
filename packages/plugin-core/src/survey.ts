@@ -68,7 +68,7 @@ export class BackgroundSurvey extends DendronSurvey {
         ignoreFocusOut: true,
         placeHolder: "Type anything that applies.",
         prompt: "You have checked \"Other\". Please describe what other backgrounds you have.",
-        title: "What is your background? - Others",
+        title: "What is your background? - Other",
       });
     }
 
@@ -139,7 +139,7 @@ export class PriorToolsSurvey extends DendronSurvey {
         ignoreFocusOut: true,
         placeHolder: "Type anything that applies.",
         prompt: "You have checked \"Other\". Please describe what other tools you have used.",
-        title: "Are you coming from an existing tool? - Others",
+        title: "Are you coming from an existing tool? - Other",
       });
     }
     AnalyticsUtils.track(SurveyEvents.PriorToolsAnswered, {

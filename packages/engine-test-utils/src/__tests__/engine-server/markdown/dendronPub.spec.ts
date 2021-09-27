@@ -218,6 +218,7 @@ describe("dendronPub", () => {
               config: engine.config,
             }).process("has fm tags");
             await checkVFile(out, "Tags", "first");
+            await checkNotInVFile(out, "#first");
           },
           {
             preSetupHook: async ({ wsRoot, vaults }) => {
@@ -243,6 +244,7 @@ describe("dendronPub", () => {
               config: engine.config,
             }).process("has fm tags");
             await checkVFile(out, "Tags", "first", "second");
+            await checkNotInVFile(out, "#first", "#second");
           },
           {
             preSetupHook: async ({ wsRoot, vaults }) => {
@@ -313,6 +315,40 @@ describe("dendronPub", () => {
           expect,
         }
       );
+    });
+
+    describe("WHEN configured with useHashesForFMTags option", () => {
+      test("THEN tags are rendered with a # symbol", async () => {
+        await runEngineTestV5(
+          async ({ engine, vaults }) => {
+            const out = await proc(engine, {
+              fname: "has.fmtags",
+              dest: DendronASTDest.HTML,
+              vault: vaults[0],
+              config: engine.config,
+            }).process("has fm tags");
+            await checkVFile(out, "Tags", "#first", "#second");
+          },
+          {
+            preSetupHook: async ({ wsRoot, vaults }) => {
+              await NoteTestUtilsV4.createNote({
+                fname: "has.fmtags",
+                wsRoot,
+                vault: vaults[0],
+                props: { tags: ["first", "second"] },
+              });
+              TestConfigUtils.withConfig(
+                (config) => {
+                  config.site.useHashesForFMTags = true;
+                  return config;
+                },
+                { wsRoot }
+              );
+            },
+            expect,
+          }
+        );
+      });
     });
   });
 

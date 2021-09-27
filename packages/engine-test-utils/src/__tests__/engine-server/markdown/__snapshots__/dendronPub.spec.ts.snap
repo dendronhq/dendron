@@ -21,6 +21,27 @@ VFile {
 }
 `;
 
+exports[`dendronPub frontmatter tags WHEN configured with useHashesForFMTags option THEN tags are rendered with a # symbol 1`] = `
+VFile {
+  "contents": "# Fmtags
+
+has fm tags
+
+* * *
+
+## Tags
+
+1. [#first](tags.first.html)
+2. [#second](tags.second.html)
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
 exports[`dendronPub frontmatter tags are not rendered when disabled 1`] = `
 VFile {
   "contents": "# Fmtags
@@ -70,7 +91,48 @@ has fm tags
 }
 `;
 
+exports[`dendronPub frontmatter tags are rendered when available multiple tags 2`] = `
+VFile {
+  "contents": "# Fmtags
+
+has fm tags
+
+* * *
+
+## Tags
+
+1. [first](tags.first.html)
+2. [second](tags.second.html)
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
 exports[`dendronPub frontmatter tags are rendered when available single tag 1`] = `
+VFile {
+  "contents": "# Fmtags
+
+has fm tags
+
+* * *
+
+## Tags
+
+1. [first](tags.first.html)
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`dendronPub frontmatter tags are rendered when available single tag 2`] = `
 VFile {
   "contents": "# Fmtags
 

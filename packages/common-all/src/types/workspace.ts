@@ -578,6 +578,9 @@ export type DendronSiteConfig = {
    * notes are published without the .html file extension
    */
   usePrettyLinks?: boolean;
+
+  /** Display a `#` symbol in front of frontmatter tags in the tags listing. False by default. */
+  useHashesForFMTags?: boolean;
 };
 
 export type DendronGraphConfig = {

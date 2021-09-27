@@ -512,10 +512,6 @@ export async function _activate(
         });
     }
 
-    if (extensionInstallStatus === InstallStatus.INITIAL_INSTALL) {
-      await SurveyUtils.maybePromptInitialSurvey(true);
-    }
-
     return showWelcomeOrWhatsNew({
       extensionInstallStatus,
       version: DendronExtension.version(),

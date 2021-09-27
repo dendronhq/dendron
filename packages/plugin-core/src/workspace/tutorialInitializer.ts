@@ -5,6 +5,7 @@ import {
   getStage,
   TutorialEvents,
   VaultUtils,
+  InstallStatus,
 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -17,9 +18,10 @@ import { StateService } from "../services/stateService";
 import { VSCodeUtils, WSUtils } from "../utils";
 import { AnalyticsUtils } from "../utils/analytics";
 import { MarkdownUtils } from "../utils/md";
-import { getExtension } from "../workspace";
+import { DendronExtension, getExtension } from "../workspace";
 import { BlankInitializer } from "./blankInitializer";
 import { WorkspaceInitializer } from "./workspaceInitializer";
+import { SurveyUtils } from "../survey";
 
 /**
  * Workspace Initializer for the Tutorial Experience. Copies tutorial notes and
@@ -96,6 +98,15 @@ export class TutorialInitializer
     StateService.instance().setActivationContext(
       WORKSPACE_ACTIVATION_CONTEXT.NORMAL
     );
+
+    const extensionInstallStatus = VSCodeUtils.getInstallStatusForExtension({
+      previousGlobalVersion: StateService.instance().getGlobalVersion(),
+      currentVersion: DendronExtension.version(),
+    });
+
+    // if (extensionInstallStatus === InstallStatus.INITIAL_INSTALL) {
+      await SurveyUtils.maybePromptInitialSurvey();
+    // }
 
     // Register a special analytics handler for the tutorial:
     const extension = getExtension();

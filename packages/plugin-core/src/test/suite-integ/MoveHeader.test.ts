@@ -12,7 +12,7 @@ import { MoveHeaderCommand } from "../../commands/MoveHeader";
 import _ from "lodash";
 
 suite("MoveHeader", function () {
-  const ctx = setupBeforeAfter(this, {});
+  const ctx = setupBeforeAfter(this);
 
   describe("GIVEN a note with a simple header", () => {
     let originNote: NoteProps;
@@ -146,6 +146,4 @@ suite("MoveHeader", function () {
       });
     });
   });
-
-  // describe("GIVEN ")
 });

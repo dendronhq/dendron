@@ -4,15 +4,16 @@ import {
   GetStaticPropsContext,
   InferGetStaticPropsType,
 } from "next";
-import React from "react";
+import React, { ReactElement } from "react";
+import DendronLayout from "../components/DendronLayout";
 import DendronSEO from "../components/DendronSEO";
 import { getConfig, getNoteBody, getNotes } from "../utils/build";
 
-export default function Home({
+export const Home = ({
   body,
   note,
   config,
-}: InferGetStaticPropsType<typeof getStaticProps>) {
+}: InferGetStaticPropsType<typeof getStaticProps>) => {
   return (
     <>
       <DendronSEO note={note} config={config} />
@@ -20,6 +21,8 @@ export default function Home({
     </>
   );
 }
+
+Home.getLayout = (page: ReactElement, props: any = {} ) => (<DendronLayout {...props}>{page}</DendronLayout>);
 
 export const getStaticProps: GetStaticProps = async (
   context: GetStaticPropsContext
@@ -35,3 +38,5 @@ export const getStaticProps: GetStaticProps = async (
     },
   };
 };
+
+export default Home;

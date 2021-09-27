@@ -67,7 +67,14 @@ const plugin: Plugin = function (this: Unified.Processor, opts?: PluginOpts) {
         const tags = _.isString(note.tags) ? [note.tags] : note.tags;
         const tagLinks = _.sortBy(
           _.map(tags, (tag) =>
-            listItem(paragraph(frontmatterTag2WikiLinkNoteV4(tag)))
+            listItem(
+              paragraph(
+                frontmatterTag2WikiLinkNoteV4(
+                  tag,
+                  config?.site?.useHashesForFMTags
+                )
+              )
+            )
           ),
           ["custom.nav_order", "title"]
         );

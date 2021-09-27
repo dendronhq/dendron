@@ -135,12 +135,15 @@ export function userTag2WikiLinkNoteV4(userTag: UserTag): WikiLinkNoteV4 {
   };
 }
 
-export function frontmatterTag2WikiLinkNoteV4(tag: string): WikiLinkNoteV4 {
+export function frontmatterTag2WikiLinkNoteV4(
+  tag: string,
+  useHashSymbol?: boolean
+): WikiLinkNoteV4 {
   return {
     type: DendronASTTypes.WIKI_LINK,
     value: `${TAGS_HIERARCHY}${tag}`,
     data: {
-      alias: tag,
+      alias: useHashSymbol ? `#${tag}` : tag,
     },
   };
 }

@@ -9,9 +9,10 @@ import {
   GetStaticProps,
   GetStaticPropsContext,
   InferGetStaticPropsType,
+  NextPage,
 } from "next";
 import { useRouter } from "next/router";
-import React from "react";
+import React, { ReactChildren, ReactElement } from "react";
 import DendronSEO from "../../components/DendronSEO";
 import DendronCustomHead from "../../components/DendronCustomHead";
 import DendronSpinner from "../../components/DendronSpinner";
@@ -34,6 +35,7 @@ import {
   error2PlainObject,
   NoteProps,
 } from "@dendronhq/common-all";
+import DendronLayout from "../../components/DendronLayout";
 
 export type NotePageProps = InferGetStaticPropsType<typeof getStaticProps> &
   DendronCommonProps & {
@@ -43,7 +45,7 @@ export type NotePageProps = InferGetStaticPropsType<typeof getStaticProps> &
     note: NoteProps;
   };
 
-export default function Note({
+export const Note = ({
   note,
   body,
   collectionChildren,
@@ -51,7 +53,7 @@ export default function Note({
   customHeadContent,
   config,
   ...rest
-}: NotePageProps) {
+}: NotePageProps) => {
   const logger = createLogger("Note");
   const router = useRouter();
   const [bodyFromState, setBody] =
@@ -122,7 +124,6 @@ export const getStaticPaths: GetStaticPaths = async () => {
   };
 };
 
-// @ts-ignore
 export const getStaticProps: GetStaticProps = async (
   context: GetStaticPropsContext
 ) => {
@@ -159,3 +160,7 @@ export const getStaticProps: GetStaticProps = async (
     throw err;
   }
 };
+
+Note.getLayout = (page: ReactElement, props: any = {} ) => (<DendronLayout {...props}>{page}</DendronLayout>);
+
+export default Note;

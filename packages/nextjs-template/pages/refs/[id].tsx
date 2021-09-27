@@ -24,7 +24,7 @@ export type NotePageProps = InferGetStaticPropsType<typeof getStaticProps> &
     note: NoteProps;
   };
 
-export default function NoteRef({
+export const NoteRef = ({
   note,
   body,
   collectionChildren,
@@ -32,7 +32,7 @@ export default function NoteRef({
   customHeadContent,
   config,
   ...rest
-}: NotePageProps) {
+}: NotePageProps) => {
   return (
     <>
       {customHeadContent && <DendronCustomHead content={customHeadContent} />}
@@ -50,7 +50,6 @@ export const getStaticPaths: GetStaticPaths = async () => {
   };
 };
 
-// @ts-ignore
 export const getStaticProps: GetStaticProps = async (
   context: GetStaticPropsContext
 ) => {
@@ -77,3 +76,5 @@ export const getStaticProps: GetStaticProps = async (
     throw err;
   }
 };
+
+export default NoteRef

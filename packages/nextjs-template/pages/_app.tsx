@@ -5,12 +5,11 @@ import {
   setLogLevel,
 } from "@dendronhq/common-frontend";
 import "antd/dist/antd.css";
+import { NextPage } from "next";
 import type { AppProps } from "next/app";
-import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { ReactElement, useEffect, useState } from "react";
 import { ThemeSwitcherProvider } from "react-css-theme-switcher";
 import { useDendronGATracking } from "../components/DendronGATracking";
-import DendronLayout from "../components/DendronLayout";
 import { combinedStore, useCombinedDispatch } from "../features";
 import { browserEngineSlice } from "../features/engine";
 import "../public/light-theme.css";
@@ -25,11 +24,7 @@ const themes = {
   light: getAssetUrl(`/light-theme.css`),
 };
 
-function AppContainer(appProps: AppProps) {
-  const router = useRouter();
-  if (router.pathname.startsWith("/refs")) {
-    return <DendronRef {...appProps} />;
-  }
+function AppContainer(appProps: AppPropsWithLayout) {
   const defaultTheme = "light";
   return (
     <Provider store={combinedStore}>
@@ -40,11 +35,16 @@ function AppContainer(appProps: AppProps) {
   );
 }
 
-function DendronRef({ Component, pageProps }: AppProps) {
-  return <Component {...pageProps} />;
+type NextPageWithLayout = NextPage & {
+  getLayout?: (page: ReactElement, props: any) => ReactElement
 }
 
-function DendronApp({ Component, pageProps }: AppProps) {
+type AppPropsWithLayout = AppProps & {
+  Component: NextPageWithLayout
+}
+
+
+function DendronApp({ Component, pageProps }: AppPropsWithLayout) {
   const [noteData, setNoteData] = useState<NoteData>();
   const logger = createLogger("App");
   const dendronRouter = useDendronRouter();
@@ -69,15 +69,13 @@ function DendronApp({ Component, pageProps }: AppProps) {
   }, []);
 
   logger.info({ ctx: "render" });
-
-  return (
-    <DendronLayout {...noteData} dendronRouter={dendronRouter}>
-      <Component
-        {...pageProps}
-        notes={noteData}
-        dendronRouter={dendronRouter}
-      />
-    </DendronLayout>
+  const getLayout = Component.getLayout ?? ((page) => page)
+  return getLayout(
+    <Component {...pageProps} notes={noteData} dendronRouter={dendronRouter} />,
+    {
+      ...noteData,
+      dendronRouter,
+    }
   );
 }
 

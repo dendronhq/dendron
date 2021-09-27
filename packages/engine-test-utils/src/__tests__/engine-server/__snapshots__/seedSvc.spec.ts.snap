@@ -34,6 +34,7 @@ dev:
 lookup:
     note:
         selectionType: selectionExtract
+        leaveTrace: false
 journal:
     dailyDomain: daily
     name: journal
@@ -124,6 +125,7 @@ dev:
 lookup:
     note:
         selectionType: selectionExtract
+        leaveTrace: false
 journal:
     dailyDomain: daily
     name: journal
@@ -204,6 +206,7 @@ dev:
 lookup:
     note:
         selectionType: selectionExtract
+        leaveTrace: false
 journal:
     dailyDomain: daily
     name: journal
@@ -251,6 +254,7 @@ dev:
 lookup:
     note:
         selectionType: selectionExtract
+        leaveTrace: false
 journal:
     dailyDomain: daily
     name: journal
@@ -315,6 +319,7 @@ dev:
 lookup:
     note:
         selectionType: selectionExtract
+        leaveTrace: false
 journal:
     dailyDomain: daily
     name: journal
@@ -386,6 +391,7 @@ dev:
 lookup:
     note:
         selectionType: selectionExtract
+        leaveTrace: false
 journal:
     dailyDomain: daily
     name: journal
@@ -444,6 +450,7 @@ dev:
 lookup:
     note:
         selectionType: selectionExtract
+        leaveTrace: false
 journal:
     dailyDomain: daily
     name: journal

@@ -648,9 +648,11 @@ export class NoteUtils {
     if (!_.isArray(notes)) {
       notes = _.values(notes);
     }
+    const lowercaseFName = fname.toLowerCase();
+
     const out = _.filter(notes, (ent) => {
       return (
-        ent.fname.toLowerCase() === fname.toLowerCase() &&
+        ent.fname.toLowerCase() === lowercaseFName &&
         (vault ? ent.vault.fsPath === vault.fsPath : true)
       );
     });

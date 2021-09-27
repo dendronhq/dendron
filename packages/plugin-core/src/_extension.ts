@@ -513,7 +513,7 @@ export async function _activate(
     }
 
     if (extensionInstallStatus === InstallStatus.INITIAL_INSTALL) {
-      SurveyUtils.maybePromptInitialSurvey();
+      await SurveyUtils.maybePromptInitialSurvey();
     }
 
     return showWelcomeOrWhatsNew({
@@ -532,6 +532,7 @@ export async function _activate(
       return false;
     });
   } catch (error) {
+    console.log("asdf");
     Sentry.captureException(error);
     throw error;
   }
@@ -683,20 +684,22 @@ export function shouldDisplayLapsedUserMsg(): boolean {
 
 function initializeSentry(environment: string): void {
   // Setting an undefined dsn will stop uploads.
-  const dsn =
-    environment === "prod"
-      ? "https://bc206b31a30a4595a2efb31e8cc0c04e@o949501.ingest.sentry.io/5898219"
-      : undefined;
+  // const dsn =
+  //   environment === "prod"
+  //     ? "https://bc206b31a30a4595a2efb31e8cc0c04e@o949501.ingest.sentry.io/5898219"
+  //     : undefined;
+  console.log(environment);
 
   // Respect user's telemetry settings for error reporting too.
   const enabled = !SegmentClient.instance().hasOptedOut;
 
   Sentry.init({
-    dsn,
+    dsn: "https://bc206b31a30a4595a2efb31e8cc0c04e@o949501.ingest.sentry.io/5898219",
     defaultIntegrations: false,
     tracesSampleRate: 1.0,
     enabled,
-    environment,
+    environment: "hikchoi_test",
+    release: "hikchoi_local",
     attachStacktrace: true,
     beforeSend(event, hint) {
       const error = hint?.originalException;

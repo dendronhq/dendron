@@ -22,7 +22,7 @@ import {
 import { TestEngineUtils } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
 import _ from "lodash";
-import { describe, it } from "mocha";
+import { describe, beforeEach, it } from "mocha";
 import os from "os";
 import path from "path";
 import sinon, { SinonStub } from "sinon";
@@ -54,6 +54,8 @@ import {
   setupBeforeAfter,
   stubSetupWorkspace,
 } from "../testUtilsV3";
+import semver from "semver";
+import * as vscode from "vscode";
 
 function mockUserConfigDir() {
   const dir = tmpDir().name;
@@ -695,6 +697,40 @@ suite("keybindings", function () {
             done();
           });
         });
+      });
+    });
+  });
+});
+
+suite("temporary testing of Dendron version compatibility downgrade sequence", () => {
+  describe(`GIVEN the activation sequence of Dendron`, () => {
+    describe(`WHEN VS Code Version is up to date`, () => {
+      let invokedWorkspaceTrustFn: boolean = false;
+
+      beforeEach(() => {
+        invokedWorkspaceTrustFn = semver.gte(vscode.version, "1.57.0");
+      });
+
+      it(`THEN onDidGrantWorkspaceTrust will get invoked.`, () => {
+        expect(invokedWorkspaceTrustFn).toEqual(true);
+      });
+
+      it(`AND onDidGrantWorkspaceTrust can be found in the API.`, () => {
+        vscode.workspace.onDidGrantWorkspaceTrust(() => {
+          //no-op for testing
+        });
+      });
+    });
+
+    describe(`WHEN VS Code Version is on a version less than 1.57.0`, () => {
+      let invokedWorkspaceTrustFn: boolean = false;
+      const userVersion = "1.56.1";
+      beforeEach(() => {
+        invokedWorkspaceTrustFn = semver.gte(userVersion, "1.57.0");
+      });
+
+      it(`THEN onDidGrantWorkspaceTrust will not get invoked.`, () => {
+        expect(invokedWorkspaceTrustFn).toEqual(false);
       });
     });
   });

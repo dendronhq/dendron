@@ -6,7 +6,7 @@
   "publisher": "dendron",
   "version": "0.60.2",
   "engines": {
-    "vscode": "^1.58.0"
+    "vscode": "^1.54.0"
   },
   "categories": [
     "Other"

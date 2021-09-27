@@ -1,0 +1,222 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`GIVEN NextExport pod WHEN execute THEN create expected data files: BOND 1`] = `
+"{
+  \\"notes\\": {
+    \\"403\\": {
+      \\"id\\": \\"403\\",
+      \\"title\\": \\"This page has not yet sprouted\\",
+      \\"vault\\": {
+        \\"fsPath\\": \\"vault1\\"
+      },
+      \\"type\\": \\"note\\",
+      \\"desc\\": \\"\\",
+      \\"links\\": [],
+      \\"anchors\\": {},
+      \\"fname\\": \\"403\\",
+      \\"updated\\": 1632775330132,
+      \\"created\\": 1632775330132,
+      \\"parent\\": null,
+      \\"children\\": [],
+      \\"data\\": {}
+    },
+    \\"t26bc2ZFzG0zgPKyooKl0\\": {
+      \\"id\\": \\"t26bc2ZFzG0zgPKyooKl0\\",
+      \\"title\\": \\"Root\\",
+      \\"vault\\": {
+        \\"fsPath\\": \\"vault1\\"
+      },
+      \\"type\\": \\"note\\",
+      \\"desc\\": \\"\\",
+      \\"links\\": [],
+      \\"anchors\\": {
+        \\"welcome-to-dendron\\": {
+          \\"type\\": \\"header\\",
+          \\"value\\": \\"welcome-to-dendron\\",
+          \\"line\\": 7,
+          \\"column\\": 0
+        }
+      },
+      \\"fname\\": \\"root\\",
+      \\"updated\\": 1632775330073,
+      \\"created\\": 1632775330081,
+      \\"parent\\": null,
+      \\"children\\": [
+        \\"bar\\",
+        \\"foo\\"
+      ],
+      \\"data\\": {},
+      \\"contentHash\\": \\"c198a4f7a2ab7c6eea193d0e5c947ac9\\",
+      \\"custom\\": {
+        \\"nav_order\\": 0,
+        \\"permalink\\": \\"/\\"
+      }
+    },
+    \\"foo\\": {
+      \\"id\\": \\"foo\\",
+      \\"title\\": \\"Foo\\",
+      \\"vault\\": {
+        \\"fsPath\\": \\"vault1\\"
+      },
+      \\"type\\": \\"note\\",
+      \\"desc\\": \\"\\",
+      \\"links\\": [],
+      \\"anchors\\": {},
+      \\"fname\\": \\"foo\\",
+      \\"updated\\": 1,
+      \\"created\\": 1,
+      \\"parent\\": \\"t26bc2ZFzG0zgPKyooKl0\\",
+      \\"children\\": [
+        \\"foo.ch1\\"
+      ],
+      \\"data\\": {},
+      \\"contentHash\\": \\"664ac8773804ef0eac60e141f4da51cb\\",
+      \\"custom\\": {},
+      \\"schema\\": {
+        \\"schemaId\\": \\"foo\\",
+        \\"moduleId\\": \\"foo\\"
+      }
+    },
+    \\"foo.ch1\\": {
+      \\"id\\": \\"foo.ch1\\",
+      \\"title\\": \\"Ch1\\",
+      \\"vault\\": {
+        \\"fsPath\\": \\"vault1\\"
+      },
+      \\"type\\": \\"note\\",
+      \\"desc\\": \\"\\",
+      \\"links\\": [],
+      \\"anchors\\": {},
+      \\"fname\\": \\"foo.ch1\\",
+      \\"updated\\": 1,
+      \\"created\\": 1,
+      \\"parent\\": \\"foo\\",
+      \\"children\\": [],
+      \\"data\\": {},
+      \\"contentHash\\": \\"0e984be1c58e3d9bd63d02cfdc83c978\\",
+      \\"custom\\": {},
+      \\"schema\\": {
+        \\"schemaId\\": \\"ch1\\",
+        \\"moduleId\\": \\"foo\\"
+      }
+    },
+    \\"bar\\": {
+      \\"id\\": \\"bar\\",
+      \\"title\\": \\"Bar\\",
+      \\"vault\\": {
+        \\"fsPath\\": \\"vault1\\"
+      },
+      \\"type\\": \\"note\\",
+      \\"desc\\": \\"\\",
+      \\"links\\": [],
+      \\"anchors\\": {},
+      \\"fname\\": \\"bar\\",
+      \\"updated\\": 1,
+      \\"created\\": 1,
+      \\"parent\\": \\"t26bc2ZFzG0zgPKyooKl0\\",
+      \\"children\\": [],
+      \\"data\\": {},
+      \\"contentHash\\": \\"6657f8cf533cd621d3f4219eb0f642b7\\",
+      \\"custom\\": {}
+    },
+    \\"changelog\\": {
+      \\"id\\": \\"changelog\\",
+      \\"title\\": \\"Changelog\\",
+      \\"vault\\": {
+        \\"fsPath\\": \\"vault1\\"
+      },
+      \\"type\\": \\"note\\",
+      \\"desc\\": \\"\\",
+      \\"links\\": [],
+      \\"anchors\\": {},
+      \\"fname\\": \\"root.changelog\\",
+      \\"updated\\": 1632775330132,
+      \\"created\\": 1632775330132,
+      \\"parent\\": null,
+      \\"children\\": [],
+      \\"data\\": {}
+    }
+  },
+  \\"domains\\": [
+    {
+      \\"id\\": \\"t26bc2ZFzG0zgPKyooKl0\\",
+      \\"title\\": \\"Root\\",
+      \\"vault\\": {
+        \\"fsPath\\": \\"vault1\\"
+      },
+      \\"type\\": \\"note\\",
+      \\"desc\\": \\"\\",
+      \\"links\\": [],
+      \\"anchors\\": {
+        \\"welcome-to-dendron\\": {
+          \\"type\\": \\"header\\",
+          \\"value\\": \\"welcome-to-dendron\\",
+          \\"line\\": 7,
+          \\"column\\": 0
+        }
+      },
+      \\"fname\\": \\"root\\",
+      \\"updated\\": 1632775330073,
+      \\"created\\": 1632775330081,
+      \\"parent\\": null,
+      \\"children\\": [
+        \\"bar\\",
+        \\"foo\\"
+      ],
+      \\"body\\": \\"# Welcome to Dendron/n/nThis is the root of your dendron vault. If you decide to publish your entire vault, this will be your landing page. You are free to customize any part of this page except the frontmatter on top. /n\\",
+      \\"data\\": {},
+      \\"contentHash\\": \\"c198a4f7a2ab7c6eea193d0e5c947ac9\\",
+      \\"custom\\": {
+        \\"nav_order\\": 0,
+        \\"permalink\\": \\"/\\"
+      }
+    }
+  ],
+  \\"noteIndex\\": {
+    \\"id\\": \\"t26bc2ZFzG0zgPKyooKl0\\",
+    \\"title\\": \\"Root\\",
+    \\"vault\\": {
+      \\"fsPath\\": \\"vault1\\"
+    },
+    \\"type\\": \\"note\\",
+    \\"desc\\": \\"\\",
+    \\"links\\": [],
+    \\"anchors\\": {
+      \\"welcome-to-dendron\\": {
+        \\"type\\": \\"header\\",
+        \\"value\\": \\"welcome-to-dendron\\",
+        \\"line\\": 7,
+        \\"column\\": 0
+      }
+    },
+    \\"fname\\": \\"root\\",
+    \\"updated\\": 1632775330073,
+    \\"created\\": 1632775330081,
+    \\"parent\\": null,
+    \\"children\\": [
+      \\"bar\\",
+      \\"foo\\"
+    ],
+    \\"body\\": \\"# Welcome to Dendron/n/nThis is the root of your dendron vault. If you decide to publish your entire vault, this will be your landing page. You are free to customize any part of this page except the frontmatter on top. /n\\",
+    \\"data\\": {},
+    \\"contentHash\\": \\"c198a4f7a2ab7c6eea193d0e5c947ac9\\",
+    \\"custom\\": {
+      \\"nav_order\\": 0,
+      \\"permalink\\": \\"/\\"
+    }
+  },
+  \\"vaults\\": [
+    {
+      \\"fsPath\\": \\"vault1\\"
+    },
+    {
+      \\"fsPath\\": \\"vault2\\"
+    },
+    {
+      \\"fsPath\\": \\"vault3\\",
+      \\"name\\": \\"vaultThree\\"
+    }
+  ]
+}
+"
+`;

@@ -98,7 +98,7 @@ export class TutorialInitializer
       WORKSPACE_ACTIVATION_CONTEXT.NORMAL
     );
 
-    const initialSurveySubmitted = StateService.instance().getGlobalState(
+    const initialSurveySubmitted = await StateService.instance().getGlobalState(
       GLOBAL_STATE.INITIAL_SURVEY_SUBMITTED
     );
 

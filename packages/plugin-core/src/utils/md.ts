@@ -30,6 +30,7 @@ import vscode, {
   Range,
   TextDocument,
   window,
+  Selection,
 } from "vscode";
 import { ShowPreviewV2Command } from "../commands/ShowPreviewV2";
 import { VSCodeUtils } from "../utils";
@@ -152,6 +153,49 @@ export const isInFencedCodeBlock = (
     .replace(/<!--[\W\w]+?-->/g, "");
   // So far `textBefore` should contain no valid fenced code block or comment
   return /^( {0,3}|\t)```[^`\r\n]*$[\w\W]*$/gm.test(textBefore);
+};
+
+export const getURLAt = (editor: vscode.TextEditor | undefined): string => {
+  if (editor) {
+    const docText = editor.document.getText();
+    const offsetStart = editor.document.offsetAt(editor.selection.start);
+    const offsetEnd = editor.document.offsetAt(editor.selection.end);
+    const selectedText = docText.substring(offsetStart, offsetEnd);
+    const selectUri = true;
+    const validUriChars = "A-Za-z0-9-._~:/?#@!$&'*+,;%=";
+    const invalidUriChars = ["[^", validUriChars, "]"].join("");
+    const regex = new RegExp(invalidUriChars);
+
+    if (selectedText !== "" && regex.test(selectedText)) {
+      return "";
+    }
+
+    const leftSplit = docText.substring(0, offsetStart).split(regex);
+    const leftText = leftSplit[leftSplit.length - 1];
+    const selectStart = offsetStart - leftText.length;
+
+    const rightSplit = docText.substring(offsetEnd, docText.length - 1);
+    const rightText = rightSplit.substring(0, regex.exec(rightSplit)?.index);
+    const selectEnd = offsetEnd + rightText.length;
+
+    if (selectEnd && selectStart) {
+      if (
+        selectStart >= 0 &&
+        selectStart < selectEnd &&
+        selectEnd <= docText.length - 1
+      ) {
+        if (selectUri) {
+          editor.selection = new Selection(
+            editor.document.positionAt(selectStart),
+            editor.document.positionAt(selectEnd)
+          );
+          editor.revealRange(editor.selection);
+        }
+        return [leftText, rightText].join("");
+      }
+    }
+  }
+  return "";
 };
 
 export const positionToOffset = (

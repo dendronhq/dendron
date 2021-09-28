@@ -7,10 +7,11 @@ import path from "path";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { resolvePath, VSCodeUtils } from "../utils";
+import { getURLAt } from "../utils/md";
 import { isAnythingSelected } from "../utils/editor";
 import { getExtension, getDWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
-import { Selection, env, Uri, window } from "vscode";
+import { env, Uri, window } from "vscode";
 
 type CommandOpts = {};
 
@@ -35,54 +36,7 @@ export class OpenLinkCommand extends BasicCommand<CommandOpts, CommandOutput> {
       );
     }
 
-    const editor = VSCodeUtils.getActiveTextEditor();
-
-    if (editor) {
-      const docText = editor.document.getText();
-      const offsetStart = editor.document.offsetAt(editor.selection.start);
-      const offsetEnd = editor.document.offsetAt(editor.selection.end);
-
-      const selectUri = true;
-      const validUriChars = "A-Za-z0-9-._~:/?#@!$&'*+,;%=";
-      const invalidUriChars = ["[^", validUriChars, "]"].join("");
-      const regex = new RegExp(invalidUriChars);
-
-      const selectedText = docText.substring(offsetStart, offsetEnd);
-
-      if (selectedText !== "" && regex.test(selectedText)) {
-        const error = DendronError.createFromStatus({
-          status: ERROR_STATUS.INVALID_STATE,
-          message: `invalid character found in selection`,
-        });
-        this.L.error({ error });
-        return { error };
-      }
-
-      const leftSplit = docText.substring(0, offsetStart).split(regex);
-      const leftText = leftSplit[leftSplit.length - 1];
-      const selectStart = offsetStart - leftText.length;
-
-      const rightSplit = docText.substring(offsetEnd, docText.length - 1);
-      const rightText = rightSplit.substring(0, regex.exec(rightSplit)?.index);
-      const selectEnd = offsetEnd + rightText.length;
-
-      if (selectEnd && selectStart) {
-        if (
-          selectStart >= 0 &&
-          selectStart < selectEnd &&
-          selectEnd <= docText.length - 1
-        ) {
-          if (selectUri) {
-            editor.selection = new Selection(
-              editor.document.positionAt(selectStart),
-              editor.document.positionAt(selectEnd)
-            );
-            editor.revealRange(editor.selection);
-          }
-          text = [leftText, rightText].join("");
-        }
-      }
-    }
+    text = getURLAt(VSCodeUtils.getActiveTextEditor());
 
     if (_.isUndefined(text) || text === "") {
       const error = DendronError.createFromStatus({
@@ -99,7 +53,7 @@ export class OpenLinkCommand extends BasicCommand<CommandOpts, CommandOutput> {
         "the selection reads as a full URI so an attempt will be made to open it"
       );
       env.openExternal(Uri.parse(text));
-      assetPath = resolvePath(text, getExtension().rootWorkspace.uri.fsPath);
+      assetPath = text;
     } else {
       const wsRoot = getDWorkspace().wsRoot;
 
@@ -126,6 +80,6 @@ export class OpenLinkCommand extends BasicCommand<CommandOpts, CommandOutput> {
         return { error };
       });
     }
-    return { filePath: assetPath };
+    return { String: assetPath };
   }
 }

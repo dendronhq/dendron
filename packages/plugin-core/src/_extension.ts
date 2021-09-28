@@ -471,6 +471,10 @@ export async function _activate(
       const vimInstalled = VSCodeUtils.isExtensionInstalled("vscodevim.vim");
       // only need to run this for non-mac
       if (vimInstalled && os.type() !== "Darwin") {
+        Logger.info({
+          ctx,
+          msg: "checkAndApplyVimKeybindingOverrideIfExists:pre",
+        });
         AnalyticsUtils.track(ExtensionEvents.VimExtensionInstalled);
         const { keybindingConfigPath, newKeybindings: resolvedKeybindings } =
           KeybindingUtils.checkAndApplyVimKeybindingOverrideIfExists();

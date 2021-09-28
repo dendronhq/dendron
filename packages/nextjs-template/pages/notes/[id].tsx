@@ -109,10 +109,10 @@ export default function Note({
   return (
     <>
       <DendronSEO note={note} config={config} />
-      <div style={{ float: "right" }}>
+      {customHeadContent && <DendronCustomHead content={customHeadContent} />}
+      <div style={{ position: 'absolute', top: HEADER.HEIGHT + 40, right: 20, marginTop: 20, marginRight: 20}}>
         <DendronTOC note={note} offsetTop={HEADER.HEIGHT} />
       </div>
-      {customHeadContent && <DendronCustomHead content={customHeadContent} />}
       <DendronNote noteContent={noteBody} />
       {maybeCollection}
     </>

@@ -332,7 +332,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   },
   LOOKUP_NOTE: {
     key: "dendron.lookupNote",
-    title: `${CMD_PREFIX} Lookup`,
+    title: `${CMD_PREFIX} Lookup Note`,
     group: "navigation",
     keybindings: {
       mac: "cmd+L",
@@ -347,7 +347,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   // windows user override
   LOOKUP_NOTE_VIM: {
     key: "dendron.lookupNote",
-    title: `${CMD_PREFIX} Lookup`,
+    title: `${CMD_PREFIX} Lookup Note`,
     group: "navigation",
     keybindings: {
       key: "ctrl+l",

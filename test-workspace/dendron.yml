@@ -59,7 +59,7 @@ site:
 dev:
     enableWebUI: true
     enablePreviewV2: true
-    # nextServerUrl: 'http://localhost:3000'
+    nextServerUrl: 'http://localhost:3000'
     engineServerPort: 3005
 graph:
     zoomSpeed: 1

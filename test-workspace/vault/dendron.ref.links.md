@@ -2,7 +2,7 @@
 id: 73eb67ea-0291-45e7-8f2f-193fd6f00643
 title: Links
 desc: ""
-updated: 1631101424735
+updated: 1632816595838
 created: 1608518909864
 ---
 
@@ -71,6 +71,7 @@ Vault2
 ### no file
 
 ![[void]]
+![[dendron://vault/void]]
 
 ### wildcard no match
 

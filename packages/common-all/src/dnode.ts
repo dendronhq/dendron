@@ -719,13 +719,16 @@ export class NoteUtils {
         // When there is a vault specified in the link we want to respect that
         // specification, otherwise we will map by just the file name.
         if (pointTo.vaultName) {
-          return matchingList.filter(
-            (n) => n.vault.fsPath == pointTo.vaultName
-          )[0];
+          const filteredByVault = matchingList.filter(
+            (n) => VaultUtils.getName(n.vault) == pointTo.vaultName
+          );
+          return filteredByVault[0];
         } else {
           return matchingList[0];
         }
-      });
+      })
+      // Filter out broken links (pointing to non existent files)
+      .filter((refNote) => refNote !== undefined);
 
     for (const linkedNote of linkedRefNotes) {
       // Recurse into each child reference linked note.

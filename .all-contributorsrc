@@ -660,6 +660,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "lukors",
+      "name": "Lukas Orsvärn",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1719884?v=4",
+      "profile": "http://orsvarn.com",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

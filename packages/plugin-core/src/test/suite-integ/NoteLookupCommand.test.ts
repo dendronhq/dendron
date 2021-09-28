@@ -1179,6 +1179,52 @@ suite("NoteLookupCommand", function () {
         },
       });
     });
+    test("leave trace on selectionExtract", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+        },
+        onInit: async ({ wsRoot, vaults, engine }) => {
+          withConfig(
+            (config) => {
+              config.lookup.note.leaveTrace = true;
+              return config;
+            },
+            { wsRoot }
+          );
+          const cmd = new NoteLookupCommand();
+          stubVaultPick(vaults);
+          const fooNoteEditor = await VSCodeUtils.openNote(engine.notes["foo"]);
+
+          // selects "foo body"
+          fooNoteEditor.selection = new vscode.Selection(7, 0, 7, 12);
+          const { text } = VSCodeUtils.getSelection();
+          expect(text).toEqual("foo body");
+
+          await cmd.run({
+            selectionType: "selectionExtract",
+            initialValue: "foo.extracted",
+            noConfirm: true,
+          });
+
+          // should create foo.extracted.md with an selected text as body.
+          expect(getActiveEditorBasename().endsWith("foo.extracted.md"));
+          const newNoteEditor = VSCodeUtils.getActiveTextEditorOrThrow();
+          const newNote = VSCodeUtils.getNoteFromDocument(
+            newNoteEditor.document
+          );
+          expect(newNote?.body.trim()).toEqual("foo body");
+          // should remove selection
+          const changedText = fooNoteEditor.document.getText();
+          expect(
+            changedText.includes(`![[${newNote?.title}|${newNote?.fname}]]`)
+          ).toBeTruthy();
+          expect(changedText.includes("foo body")).toBeFalsy();
+          done();
+        },
+      });
+    });
 
     test("selectionExtract from file not in known vault", (done) => {
       runLegacyMultiWorkspaceTest({

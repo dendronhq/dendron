@@ -4,12 +4,13 @@ import {
   NoteQuickInput,
   NoteUtils,
 } from "@dendronhq/common-all";
+import { DConfig } from "@dendronhq/engine-server";
 import _ from "lodash";
 import * as vscode from "vscode";
 import { QuickInputButton, ThemeIcon } from "vscode";
 import { NoteSyncService } from "../../services/NoteSyncService";
 import { clipboard, DendronClientUtilsV2, VSCodeUtils } from "../../utils";
-import { getExtension } from "../../workspace";
+import { getDWorkspace, getEngine, getExtension } from "../../workspace";
 import {
   DendronQuickPickerV2,
   LookupEffectType,
@@ -97,13 +98,32 @@ const selectionToNoteProps = async (opts: {
   switch (selectionType) {
     case "selectionExtract": {
       if (!_.isUndefined(document)) {
+        const ws = getDWorkspace();
+        const leaveTrace =
+          DConfig.getProp(ws.config, "lookup").note.leaveTrace || false;
         const body = "\n" + document.getText(range).trim();
         note.body = body;
         // don't delete if original file is not in workspace
         if (!ext.workspaceService?.isPathInWorkspace(document.uri.fsPath)) {
           return note;
         }
-        await VSCodeUtils.deleteRange(document, range as vscode.Range);
+        if (leaveTrace) {
+          const editor = VSCodeUtils.getActiveTextEditor();
+          const link = NoteUtils.createWikiLink({
+            note,
+            useVaultPrefix: DendronClientUtilsV2.shouldUseVaultPrefix(
+              getEngine()
+            ),
+            alias: { mode: "title" },
+          });
+          await editor?.edit((builder) => {
+            if (!_.isUndefined(selection) && !selection.isEmpty) {
+              builder.replace(selection, `!${link}`);
+            }
+          });
+        } else {
+          await VSCodeUtils.deleteRange(document, range as vscode.Range);
+        }
       }
       return note;
     }

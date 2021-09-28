@@ -15,7 +15,11 @@ import {
   Switch,
   useToast,
 } from "@chakra-ui/react";
-import { NoteAddBehavior, DendronConfig, LookupSelectionType } from "@dendronhq/common-all";
+import {
+  NoteAddBehavior,
+  DendronConfig,
+  LookupSelectionType,
+} from "@dendronhq/common-all";
 import { Field, FieldArray, Form, Formik } from "formik";
 import _, { get } from "lodash";
 import Head from "next/head";
@@ -37,7 +41,8 @@ const genDefaultConfig = (): DendronConfig => ({
   lookup: {
     note: {
       selectionType: LookupSelectionType.selectionExtract,
-    }
+      leaveTrace: false,
+    },
   },
   journal: {
     dailyDomain: "daily",

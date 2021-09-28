@@ -18,3 +18,4 @@ export * from "./seed";
 export * from "./migrations";
 export * from "./metadata";
 export { execa };
+export * from "./util/inMemoryNoteCache";

@@ -61,11 +61,6 @@ describe("GIVEN NextExport pod", () => {
       await runEngineTestV5(
         async ({ engine, vaults, wsRoot }) => {
           const dest = await setupExport({ engine, wsRoot, vaults });
-          const contents = fs.readFileSync(
-            path.join(dest, "data", "notes.json"),
-            { encoding: "utf8" }
-          );
-          expect(contents).toMatchSnapshot("BOND");
           await verifyExport(dest);
           await checkDir(
             { fpath: path.join(dest, "data", "notes") },

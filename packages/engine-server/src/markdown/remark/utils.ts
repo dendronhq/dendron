@@ -745,11 +745,13 @@ export class AnchorUtils {
 
     const { line, column } = node.position.start;
     if (node.type === DendronASTTypes.HEADING) {
+      const text = this.headerText(node as Heading);
       const value = slugger.slug(this.headerText(node as Heading));
       return [
         value,
         {
           type: "header",
+          text,
           value,
           line: line - 1,
           column: column - 1,

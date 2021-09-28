@@ -27,9 +27,11 @@ export const mapObject = (
   fn: (k: string, v: any) => any
 ) => Object.fromEntries(Object.entries(obj).map(([k, v]) => [k, fn(k, v)]));
 
-export const removeBodyFromNote = ({ body, ...note }: Record<string, any>) => note
+export const removeBodyFromNote = ({ body, ...note }: Record<string, any>) =>
+  note;
 
-export const removeBodyFromNotesDict = (notes: NotePropsDict) => mapObject(notes, (_k, note: NotePropsDict) => removeBodyFromNote(note))
+export const removeBodyFromNotesDict = (notes: NotePropsDict) =>
+  mapObject(notes, (_k, note: NotePropsDict) => removeBodyFromNote(note));
 
 function getSiteConfig({
   siteConfig,
@@ -185,6 +187,21 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     }
   }
 
+  async renderBodyAsMD({
+    note,
+    notesDir,
+  }: {
+    note: NoteProps;
+    notesDir: string;
+  }) {
+    const ctx = `${ID}:renderBodyToHTML`;
+    this.L.debug({ ctx, msg: "renderNote:pre", note: note.id });
+    const out = note.body;
+    const dst = path.join(notesDir, note.id + ".md");
+    this.L.debug({ ctx, dst, msg: "writeNote" });
+    return fs.writeFile(dst, out);
+  }
+
   async renderBodyToHTML({
     engine,
     note,
@@ -274,6 +291,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
             engineConfig,
           }),
           this.renderMetaToJSON({ note, notesDir: notesMetaDir }),
+          this.renderBodyAsMD({ note, notesDir: notesBodyDir }),
         ]);
       })
     );

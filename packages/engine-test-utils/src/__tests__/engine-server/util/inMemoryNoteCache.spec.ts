@@ -1,5 +1,5 @@
 import { NoteProps } from "@dendronhq/common-all";
-import { InMemoryNoteCache } from "@dendronhq/engine-server/lib/util/inMemoryNoteCache";
+import { InMemoryNoteCache } from "@dendronhq/engine-server";
 import {
   CreateNoteOptsV4,
   NoteTestUtilsV4,

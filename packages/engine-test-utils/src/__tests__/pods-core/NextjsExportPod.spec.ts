@@ -45,8 +45,38 @@ async function verifyExport(dest: string) {
   );
 }
 
+const setupConfig = ({ wsRoot }: { wsRoot: string }) => {
+  TestConfigUtils.withConfig(
+    (config) => {
+      config.site.siteUrl = "https://foo.com";
+      return config;
+    },
+    { wsRoot }
+  );
+};
+
 describe("GIVEN NextExport pod", () => {
   describe("WHEN execute", () => {
+    test("THEN create expected data files", async () => {
+      await runEngineTestV5(
+        async ({ engine, vaults, wsRoot }) => {
+          const dest = await setupExport({ engine, wsRoot, vaults });
+          await verifyExport(dest);
+          await checkDir(
+            { fpath: path.join(dest, "data", "notes") },
+            "foo.md",
+            "foo.html"
+          );
+        },
+        {
+          expect,
+          preSetupHook: async (opts) => {
+            await ENGINE_HOOKS.setupBasic(opts);
+            setupConfig(opts);
+          },
+        }
+      );
+    });
     describe("WHEN private link", () => {
       test("THEN override private link with 403 page", async () => {
         await runEngineTestV5(

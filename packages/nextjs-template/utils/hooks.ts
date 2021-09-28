@@ -5,7 +5,7 @@ import { useRouter } from "next/router";
 import React from "react";
 import { useEngineAppSelector } from "../features/engine/hooks";
 import { getNoteRouterQuery } from "./etc";
-import { fetchNotes } from "./fetchers";
+import { fetchNoteBody, fetchNotes } from "./fetchers";
 
 export type DendronRouterProps = ReturnType<typeof useDendronRouter>;
 export type DendronLookupProps = ReturnType<typeof useDendronLookup>;
@@ -88,4 +88,62 @@ export function useNoteActive(id: string | undefined): DendronNotesHookProps {
     setNoteActive(note);
   }, [id, engine.noteIndex, engine]);
   return { noteActive };
+}
+
+async function fetchNoteBodyWithId(id: string) {
+  return { id, body: await fetchNoteBody(id) };
+}
+
+/** Fetch note bodies (markdown), caching them once fetched.
+ *
+ * @returns A map of note bodies, and a callback to request more notes.
+ *
+ * Once the requested note bodies are fetched, the hook should cause an automatic
+ * re-render.
+ */
+export function useNoteBodies() {
+  // Using this as a set, because React doesn't seem to like actual sets. Tracks all notes requested so far.
+  const [requestedIds, setRequestedIds] = React.useState<
+    Readonly<{ [noteId: string]: true }>
+  >({});
+  // All note bodies fetched so far.
+  const [noteBodies, setNoteBodies] = React.useState<
+    Readonly<{ [noteId: string]: string }>
+  >({});
+
+  React.useEffect(() => {
+    // Fetch all requested notes we don't already have
+    const fetches: Promise<{ id: string; body: string }>[] = [];
+    Object.keys(requestedIds).forEach((id) => {
+      if (noteBodies[id] !== undefined) return;
+      fetches.push(fetchNoteBodyWithId(id));
+    });
+    // Avoid resetting noteBodies if we are not fetching anything
+    if (fetches.length === 0) return;
+
+    // Once all fetches are done, update the note bodies
+    Promise.all(fetches).then((notes) => {
+      const newNoteBodies = { ...noteBodies };
+      notes.forEach(({ id, body }) => {
+        newNoteBodies[id] = body;
+      });
+      // force a re-render
+      setNoteBodies(newNoteBodies);
+    });
+  }, [requestedIds]);
+
+  // The callback to request more notes to be feched.
+  function requestNotes(ids: string[]) {
+    const newRequestedIds = { ...requestedIds };
+    let changed = false;
+    for (const id of ids) {
+      if (requestedIds[id] === true) continue;
+      newRequestedIds[id] = true;
+      changed = true;
+    }
+    // re-run the effect to fetch these notes, if any new notes have been requested
+    if (changed) setRequestedIds(newRequestedIds);
+  }
+
+  return { noteBodies, requestNotes };
 }

@@ -19,3 +19,9 @@ export async function fetchFuseIndex() {
   const serializedIndex = (await resp.json()) as SerializedFuseIndex;
   return Fuse.parseIndex(serializedIndex);
 }
+
+/** Fetches a note body in markdown. See hook in `utils/hooks.ts` for convenient integration. */
+export async function fetchNoteBody(id: string) {
+  const resp = await fetch(getAssetUrl(`/data/notes/${id}.md`));
+  return resp.text();
+}

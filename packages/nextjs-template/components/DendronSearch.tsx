@@ -1,7 +1,7 @@
 import type { NoteProps } from "@dendronhq/common-all";
 import { LoadingStatus } from "@dendronhq/common-frontend";
 import { AutoComplete, Alert } from "antd";
-import React from "react";
+import React, { useEffect } from "react";
 import { useCombinedDispatch } from "../features";
 import { browserEngineSlice } from "../features/engine";
 import { useFetchFuse } from "../utils/fuse";
@@ -13,6 +13,7 @@ import {
 } from "../utils/types";
 import DendronSpinner from "./DendronSpinner";
 import _ from "lodash";
+import { useNoteBodies } from "../utils/hooks";
 
 /** For notes where nothing in the note body matches, only show this many characters for the note body snippet. */
 const MAX_NOTE_SNIPPET_LENGTH = 30;
@@ -34,9 +35,15 @@ export function DendronSearch(props: DendronCommonProps) {
 
 function DendronSearchComponent(props: DendronPageWithNoteDataProps) {
   const dispatch = useCombinedDispatch();
+  const { noteBodies, requestNotes } = useNoteBodies();
   const { noteIndex, dendronRouter } = props;
   const [value, setValue] = React.useState("");
   const { ensureIndexReady, fuse, error, loading } = useFetchFuse(props.notes);
+  const results = fuse?.search(value);
+  useEffect(() => {
+    requestNotes(results?.map(({ item: note }) => note.id) || []);
+  }, [results]);
+
   if (error) {
     return (
       <Alert
@@ -46,6 +53,7 @@ function DendronSearchComponent(props: DendronPageWithNoteDataProps) {
       />
     );
   }
+
   return (
     <AutoComplete
       onClick={ensureIndexReady}
@@ -60,31 +68,28 @@ function DendronSearchComponent(props: DendronPageWithNoteDataProps) {
         );
         setValue("");
       }}
-      placeholder="Search"
+      placeholder={loading ? "Loading Search" : "Search"}
     >
-      {loading ? (
-        <AutoComplete.Option key={LOADING_KEY} value={LOADING_MESSAGE} disabled>
-          <div>{LOADING_MESSAGE}</div>
-        </AutoComplete.Option>
-      ) : undefined}
-      {fuse
-        ? fuse.search(value).map((note: any) => {
-            return (
-              <AutoComplete.Option key={note.item.id} value={note.item.fname}>
-                <div className="search-option">
-                  <MatchTitle matches={note.matches} note={note.item} />
-                  <span
-                    className="search-fname"
-                    style={{ marginLeft: "10px", opacity: 0.7 }}
-                  >
-                    {note.item.fname}
-                  </span>
-                  <MatchBody matches={note.matches} note={note.item} />
-                </div>
-              </AutoComplete.Option>
-            );
-          })
-        : undefined}
+      {results?.map(({ item: note, matches }) => {
+        return (
+          <AutoComplete.Option key={note.id} value={note.fname}>
+            <div className="search-option">
+              <MatchTitle matches={matches} note={note} />
+              <span
+                className="search-fname"
+                style={{ marginLeft: "10px", opacity: 0.7 }}
+              >
+                {note.fname}
+              </span>
+              <MatchBody
+                matches={matches}
+                id={note.id}
+                noteBodies={noteBodies}
+              />
+            </div>
+          </AutoComplete.Option>
+        );
+      })}
     </AutoComplete>
   );
 }
@@ -107,7 +112,10 @@ function MatchTitle(props: {
     renderedTitle.push(title.slice(lastIndex, startIndex));
     // Add the matched part as bold
     renderedTitle.push(
-      <span style={{ fontWeight: "bolder" }}>
+      <span
+        key={`${props.note.id}-${startIndex}-${endIndex}`}
+        style={{ fontWeight: "bolder" }}
+      >
         {title.slice(startIndex, endIndex + 1)}
       </span>
     );
@@ -127,18 +135,27 @@ function cleanWhitespace(text: string) {
 /** For a fuse.js match on a note, renders snippets from the note **body** with the matched parts highlighted.  */
 function MatchBody(props: {
   matches: readonly Fuse.FuseResultMatch[] | undefined;
-  note: NoteProps;
+  id: string;
+  noteBodies: { [noteId: string]: string };
 }) {
-  const { body } = props.note;
+  const body = props.noteBodies[props.id];
+  // May happen when note bodies are still loading
+  if (_.isUndefined(body))
+    return <span style={{ fontWeight: "lighter" }}>{OMITTED_PART_TEXT}</span>;
+  // Map happen if the note only matches with title
   if (_.isUndefined(props.matches))
     return <>{body.slice(undefined, MAX_NOTE_SNIPPET_LENGTH)}</>;
   const bodyMatches = props.matches
+    // Extract the ranges of body matches
     .filter((match) => match.key === "body")
-    .flatMap((match) => match.indices);
+    .flatMap((match) => match.indices)
+    // Sort from longest range to the shortest
+    .sort(([lStart, lEnd], [rStart, rEnd]) => rEnd - rStart - (lEnd - lStart));
   if (bodyMatches.length === 0)
     return <>{body.slice(undefined, MAX_NOTE_SNIPPET_LENGTH)}</>;
 
   const renderedBody: (String | JSX.Element)[] = [];
+  // For simplicity, we highlight the longest range only. Otherwise output looks too complicated.
   const [startIndex, endIndex] = bodyMatches[0];
 
   const beforeStart = _.max([0, startIndex - NOTE_SNIPPET_BEFORE_AFTER])!;
@@ -150,7 +167,10 @@ function MatchBody(props: {
 
   // Add the matched part as bold
   renderedBody.push(
-    <span style={{ fontWeight: "bold" }}>
+    <span
+      key={`${props.id}-${startIndex}-${endIndex}`}
+      style={{ fontWeight: "bold" }}
+    >
       {cleanWhitespace(body.slice(startIndex, endIndex + 1))}
     </span>
   );

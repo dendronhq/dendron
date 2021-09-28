@@ -21,9 +21,11 @@ type FuseIndexProvider = () => Promise<FuseNoteIndex | FuseNote>;
  */
 function useFuse(notes: NotePropsDict, provider: FuseIndexProvider) {
   const [error, setError] = useState<any>();
+  const [loading, setLoading] = useState<boolean>(false);
   const [fuse, setFuse] = useState<FuseNote>();
   const ensureIndexReady = () => {
     if (!_.isUndefined(fuse)) return; // Avoid unnecessarily reloading index
+    setLoading(true);
     provider()
       .then((value) => {
         if (value instanceof Fuse) {
@@ -31,6 +33,7 @@ function useFuse(notes: NotePropsDict, provider: FuseIndexProvider) {
         } else {
           setFuse(createFuseNote(notes, {}, value));
         }
+        setLoading(false);
         if (_.isUndefined(value)) {
           // Sanity check, should never happen unless `provider` typecasts an undefined
           setError(new DendronError({ message: "loaded index is undefined" }));
@@ -38,13 +41,14 @@ function useFuse(notes: NotePropsDict, provider: FuseIndexProvider) {
       })
       .catch((error) => {
         setError(error);
+        setLoading(false);
       });
   };
   return {
     ensureIndexReady,
     error,
     fuse,
-    loading: _.isUndefined(fuse) && _.isUndefined(error),
+    loading,
   };
 }
 

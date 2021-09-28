@@ -34,8 +34,21 @@ export enum ExtensionEvents {
   VimExtensionInstalled = "Vim_Extension_Installed",
 }
 
+export enum SurveyEvents {
+  InitialSurveyPrompted = "Initial_Survey_Prompted",
+  InitialSurveyAccepted = "Initial_Survey_Accepted",
+  InitialSurveyRejected = "Initial_Survey_Rejected",
+  BackgroundAnswered = "Background_Answered",
+  BackgroundRejected = "Background_Rejected",
+  UseCaseAnswered = "Use_Case_Answered",
+  UseCaseRejected = "Use_Case_Rejected",
+  PriorToolsAnswered = "Prior_Tools_Answered",
+  PriorToolsRejected = "Prior_Tools_Rejected",
+}
+
 export const DendronEvents = {
   VSCodeEvents,
   TutorialEvents,
   ExtensionEvents,
+  SurveyEvents,
 };

@@ -11,7 +11,7 @@ import fs from "fs-extra";
 import path from "path";
 import rif from "replace-in-file";
 import * as vscode from "vscode";
-import { WORKSPACE_ACTIVATION_CONTEXT } from "../constants";
+import { GLOBAL_STATE, WORKSPACE_ACTIVATION_CONTEXT } from "../constants";
 import { Logger } from "../logger";
 import { StateService } from "../services/stateService";
 import { VSCodeUtils, WSUtils } from "../utils";
@@ -20,6 +20,7 @@ import { MarkdownUtils } from "../utils/md";
 import { getExtension } from "../workspace";
 import { BlankInitializer } from "./blankInitializer";
 import { WorkspaceInitializer } from "./workspaceInitializer";
+import { SurveyUtils } from "../survey";
 
 /**
  * Workspace Initializer for the Tutorial Experience. Copies tutorial notes and
@@ -96,6 +97,14 @@ export class TutorialInitializer
     StateService.instance().setActivationContext(
       WORKSPACE_ACTIVATION_CONTEXT.NORMAL
     );
+
+    const initialSurveySubmitted = await StateService.instance().getGlobalState(
+      GLOBAL_STATE.INITIAL_SURVEY_SUBMITTED
+    );
+
+    if (!initialSurveySubmitted) {
+      await SurveyUtils.maybePromptInitialSurvey();
+    }
 
     // Register a special analytics handler for the tutorial:
     const extension = getExtension();

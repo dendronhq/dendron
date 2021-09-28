@@ -81,6 +81,11 @@ jobs:
         working-directory: ./packages/plugin-core
         run: yarn deploy:ovsx
 
+      - name: Tag Release on Github
+        run: | 
+          git tag $DENDRON_RELEASE_VERSION
+          git push origin $DENDRON_RELEASE_VERSION
+
       - name: Raise Pull Request back to master
         uses: repo-sync/pull-request@v2
         with:

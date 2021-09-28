@@ -1,6 +1,11 @@
 import fs from "fs-extra";
 import _ from "lodash";
-import { CONFIG, DENDRON_COMMANDS, DENDRON_VIEWS } from "../src/constants";
+import {
+  CONFIG,
+  DENDRON_COMMANDS,
+  DENDRON_VIEWS,
+  DENDRON_MENUS,
+} from "../src/constants";
 
 function genEntry(entryDict: any) {
   const configGenerated: any = {};
@@ -20,6 +25,11 @@ function updateConfig() {
   const config = genEntry(CONFIG);
   configuration["properties"] = config;
   return configuration;
+}
+
+function updateMenus() {
+  console.log("update menus...");
+  return DENDRON_MENUS;
 }
 
 function updateCommands() {
@@ -74,6 +84,7 @@ function main() {
   const pkg = fs.readJSONSync("package.json");
   const configuration = updateConfig();
   const commands = updateCommands();
+  const menus = updateMenus();
   const keybindings = updateKeybindings();
   const views = updateViews();
   const languages = [
@@ -88,15 +99,23 @@ function main() {
     "./media/fontello/css/fontello.css",
     "./media/markdown.css",
   ];
+  const yamlValidation = [
+    {
+      fileMatch: "dendron.yml",
+      url: "./dist/dendron-yml.validator.json",
+    },
+  ];
   const categories = ["Other"];
   const contributes = {
     languages,
     views,
     categories,
     commands,
+    menus,
     configuration,
     keybindings,
     "markdown.previewStyles": previewStyles,
+    yamlValidation,
   };
   if (dryRun) {
     // console.log(JSON.stringify(pkg, null, 44));

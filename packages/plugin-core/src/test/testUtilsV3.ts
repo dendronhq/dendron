@@ -288,7 +288,7 @@ export function addDebugServerOverride() {
 export function setupBeforeAfter(
   _this: any,
   opts?: {
-    beforeHook?: any;
+    beforeHook?: (ctx: ExtensionContext) => any;
     afterHook?: any;
     noSetInstallStatus?: boolean;
   }
@@ -310,7 +310,7 @@ export function setupBeforeAfter(
     sinon.stub(WorkspaceInitFactory, "create").returns(new BlankInitializer());
 
     if (opts?.beforeHook) {
-      await opts.beforeHook();
+      await opts.beforeHook(ctx);
     }
     Logger.configure(ctx, "info");
   });

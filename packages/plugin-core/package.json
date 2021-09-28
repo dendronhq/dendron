@@ -4,7 +4,7 @@
   "displayName": "dendron",
   "description": "Dendron is a hierarchal note taking tool that grows as you do. ",
   "publisher": "dendron",
-  "version": "0.60.2",
+  "version": "0.60.3-alpha.0",
   "engines": {
     "vscode": "^1.54.0"
   },
@@ -51,7 +51,7 @@
         },
         {
           "id": "dendron.calendar-view",
-          "name": "Calendar",
+          "name": "Calendar View",
           "type": "webview"
         },
         {
@@ -79,7 +79,8 @@
       {
         "command": "dendron.backlinks.expandAll",
         "title": "Expand All",
-        "icon": "$(expand-all)"
+        "icon": "$(expand-all)",
+        "desc": "Expand all backlinks"
       },
       {
         "command": "dendron.browseNote",
@@ -139,7 +140,8 @@
       {
         "command": "dendron.insertNoteIndex",
         "title": "Dendron: Insert Note Index",
-        "desc": "Insert note index"
+        "desc": "Insert note index",
+        "when": "editorFocus && dendron:pluginActive"
       },
       {
         "command": "dendron.moveNote",
@@ -164,16 +166,22 @@
         "desc": "Rename a header, and update all links to it."
       },
       {
+        "command": "dendron.convertLink",
+        "title": "Dendron: Convert Link",
+        "desc": "Convert link candidate into backlink"
+      },
+      {
         "command": "dendron.lookupNote",
         "title": "Dendron: Lookup Note",
         "desc": "Initiate note lookup",
+        "docLink": "dendron.topic.lookup.md",
+        "docPreview": "",
         "when": "dendron:pluginActive"
       },
       {
         "command": "dendron.lookupSchema",
         "title": "Dendron: Lookup Schema",
         "desc": "Initiate schema lookup",
-        "when": "dendron:pluginActive",
         "docLink": "dendron.topic.lookup.md",
         "docPreview": "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/schema-lookup.gif)"
       },
@@ -448,6 +456,30 @@
         "docPreview": ""
       },
       {
+        "command": "dendron.seedAdd",
+        "title": "Dendron: Add Seed to Workspace",
+        "desc": "Add a seed to the current workspace",
+        "docs": "",
+        "docLink": "",
+        "docPreview": ""
+      },
+      {
+        "command": "dendron.seedRemove",
+        "title": "Dendron: Remove Seed from Workspace",
+        "desc": "Remove a seed from the current workspace",
+        "docs": "",
+        "docLink": "",
+        "docPreview": ""
+      },
+      {
+        "command": "dendron.seedBrowse",
+        "title": "Dendron: Browse the Seed Registry",
+        "desc": "Browse and Add seeds from the Registry to the current workspace",
+        "docs": "",
+        "docLink": "",
+        "docPreview": ""
+      },
+      {
         "command": "dendron.dev.doctor",
         "title": "Dendron: Doctor",
         "desc": "Auto fix issues with frontmatter",
@@ -489,21 +521,6 @@
         "command": "dendron.launchTutorial",
         "title": "Dendron: Launch Tutorial",
         "desc": "Launch the Tutorial"
-      },
-      {
-        "command": "dendron.seedAdd",
-        "title": "Dendron: Seed Add",
-        "desc": "Add Seed to Current Workspace"
-      },
-      {
-        "command": "dendron.seedRemove",
-        "title": "Dendron: Seed Remove",
-        "desc": "Remove Seed from Current Workspace"
-      },
-      {
-        "command": "dendron.seedBrowse",
-        "title": "Dendron: Seed Browse",
-        "desc": "Browse the Seed Registry and Add Seeds to Current Workspace"
       }
     ],
     "menus": {
@@ -540,14 +557,14 @@
           "command": "dendron.moveNote",
           "group": "2_workspace"
         }
-      ] ,
+      ],
       "editor/context": [
         {
           "when": "editorHasSelection && dendron:pluginActive",
           "command": "dendron.renameHeader",
           "group": "2_workspace"
-        } 
-      ]  
+        }
+      ]
     },
     "configuration": {
       "title": "dendron",
@@ -812,8 +829,8 @@
     "deploy:ovsx": "ovsx publish --yarn"
   },
   "devDependencies": {
-    "@dendronhq/common-test-utils": "^0.60.2",
-    "@dendronhq/engine-test-utils": "^0.60.2",
+    "@dendronhq/common-test-utils": "^0.60.3-alpha.0",
+    "@dendronhq/engine-test-utils": "^0.60.3-alpha.0",
     "@sentry/webpack-plugin": "^1.17.1",
     "@types/execa": "^2.0.0",
     "@types/fs-extra": "^9.0.1",
@@ -838,12 +855,12 @@
     "webpack-cli": "^3.3.12"
   },
   "dependencies": {
-    "@dendronhq/api-server": "^0.60.2",
-    "@dendronhq/common-all": "^0.60.2",
-    "@dendronhq/common-server": "^0.60.2",
-    "@dendronhq/dendron-cli": "^0.60.2",
-    "@dendronhq/engine-server": "^0.60.2",
-    "@dendronhq/pods-core": "^0.60.2",
+    "@dendronhq/api-server": "^0.60.3-alpha.0",
+    "@dendronhq/common-all": "^0.60.3-alpha.0",
+    "@dendronhq/common-server": "^0.60.3-alpha.0",
+    "@dendronhq/dendron-cli": "^0.60.3-alpha.0",
+    "@dendronhq/engine-server": "^0.60.3-alpha.0",
+    "@dendronhq/pods-core": "^0.60.3-alpha.0",
     "@sentry/integrations": "^6.13.1",
     "@sentry/node": "^6.13.1",
     "@types/vscode": "1.58",

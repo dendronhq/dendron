@@ -72,6 +72,7 @@ type CommandEntry = {
   key: string;
   title: string;
   keybindings?: KeyBinding;
+  icon?: string;
   shortcut?: boolean;
   group:
     | "notes"
@@ -129,7 +130,60 @@ export const DENDRON_REMOTE_VAULTS: Entry[] = [
   },
 ];
 
+// TODO: fomarlize
+export const DENDRON_MENUS = {
+  "view/title": [
+    {
+      command: "dendron.backlinks.expandAll",
+      when: "view == dendron.backlinks",
+      group: "navigation",
+    },
+  ],
+  "explorer/context": [
+    {
+      when: "explorerResourceIsFolder && dendron:pluginActive && workspaceFolderCount > 1",
+      command: "dendron.vaultAdd",
+      group: "2_workspace",
+    },
+    {
+      when: "explorerResourceIsFolder && dendron:pluginActive",
+      command: "dendron.vaultRemove",
+      group: "2_workspace",
+    },
+    {
+      when: "resourceExtname == .md || resourceExtname == .yml && dendron:pluginActive",
+      command: "dendron.deleteNode",
+      group: "2_workspace",
+    },
+    {
+      when: "resourceExtname == .md && dendron:pluginActive",
+      command: "dendron.renameNote",
+      group: "2_workspace",
+    },
+    {
+      when: "resourceExtname == .md && dendron:pluginActive",
+      command: "dendron.moveNote",
+      group: "2_workspace",
+    },
+  ],
+  "editor/context": [
+    {
+      when: "editorHasSelection && dendron:pluginActive",
+      command: "dendron.renameHeader",
+      group: "2_workspace",
+    },
+  ],
+};
+
 export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
+  // ---
+  BACKLINK_EXPAND_ALL: {
+    key: "dendron.backlinks.expandAll",
+    title: "Expand All",
+    icon: "$(expand-all)",
+    desc: "Expand all backlinks",
+    group: "workspace",
+  },
   // --- Notes
   BROWSE_NOTE: {
     key: "dendron.browseNote",
@@ -241,7 +295,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX} Insert Note Index`,
     group: "notes",
     desc: "Insert note index",
-    when: `editorFocus && ${DendronContext.PLUGIN_ACTIVE}`
+    when: `editorFocus && ${DendronContext.PLUGIN_ACTIVE}`,
   },
   MOVE_NOTE: {
     key: "dendron.moveNote",
@@ -278,7 +332,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   },
   LOOKUP_NOTE: {
     key: "dendron.lookupNote",
-    title: `${CMD_PREFIX} Lookup`,
+    title: `${CMD_PREFIX} Lookup Note`,
     group: "navigation",
     keybindings: {
       mac: "cmd+L",
@@ -850,7 +904,7 @@ export enum GLOBAL_STATE {
   /**
    * Checks if initial survey was prompted and submitted.
    */
-  INITIAL_SURVEY_SUBMITTED = "dendron.initial_survey_submitted"
+  INITIAL_SURVEY_SUBMITTED = "dendron.initial_survey_submitted",
 }
 
 export enum WORKSPACE_ACTIVATION_CONTEXT {

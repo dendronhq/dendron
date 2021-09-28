@@ -1,4 +1,4 @@
-import { DendronError } from "@dendronhq/common-all";
+import { DendronError, isTSError } from "@dendronhq/common-all";
 import { DLogger, getDurationMilliseconds } from "@dendronhq/common-server";
 import _ from "lodash";
 import { window } from "vscode";
@@ -106,14 +106,22 @@ export abstract class BaseCommand<
         return resp;
       }
       return;
-    } catch (error) {
-      const cerror: DendronError =
-        error instanceof DendronError
-          ? error
-          : new DendronError({
-              message: `error running command: ${error.message}`,
-              error,
-            });
+    } catch (error: any) {
+      let cerror: DendronError;
+
+      if (error instanceof DendronError) {
+        cerror = error;
+      } else if (isTSError(error)) {
+        cerror = new DendronError({
+          message: `error while running command: ${error.message}`,
+          innerError: error,
+        });
+      } else {
+        cerror = new DendronError({
+          message: `unknown error while running command`,
+        });
+      }
+
       Logger.error({
         ctx,
         error: cerror,

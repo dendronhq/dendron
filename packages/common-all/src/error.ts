@@ -3,12 +3,18 @@ import _ from "lodash";
 import { AxiosError } from "axios";
 import { ERROR_SEVERITY, ERROR_STATUS } from "./constants";
 
-export type DendronErrorProps = {
-  name: string;
-  /**
-   * General message
-   */
-  message: string;
+
+// type NonPiiErrorData = {
+//   nonPiiMessage: string;
+//   nonPiiStackTrace?: string
+// }
+
+/**
+ * TODO: Additional desireable features
+ * - Get a unique hash code for bucketing
+ * - Sensitive Data Scrubbed
+ */
+type DendronErrorProps = {
   /**
    * Arbitrary payload
    */
@@ -22,21 +28,40 @@ export type DendronErrorProps = {
    */
   code?: StatusCodes;
   /**
+   * TODO: Deprecate
    * Custom status errors
    */
   status?: string;
+
   /**
-   * Raw Error object
+   * Inner Error object
    */
-  error?: Error;
-};
+  innerError?: Error;
 
-export type DendronErrorPlainObj = {
-  isComposite: boolean;
-  severity?: ERROR_SEVERITY;
-} & DendronErrorProps;
+  /**
+   * For bucketing purposes
+   */
+  uniqueId?: number;
+} & Error;
 
-export type IDendronError = DendronErrorPlainObj;
+type ServerErrorProps = {
+  /**
+   * TODO: Deprecate
+   * Custom status errors
+   */
+  status?: string;
+
+  /**
+   * Optional HTTP status code for error
+   */
+  code?: StatusCodes;
+}
+
+// export type DendronErrorPlainObj = {
+//   isComposite: boolean;
+// } & DendronErrorProps;
+
+export type IDendronError = DendronErrorProps;
 
 export class DendronError extends Error implements IDendronError {
   public status?: string;
@@ -44,13 +69,22 @@ export class DendronError extends Error implements IDendronError {
   public severity?: ERROR_SEVERITY;
   public code?: number;
   public error?: Error;
-  public message: string;
-  isComposite = false;
+  public uniqueId?: number;
+  // public message: string;
+  // isComposite = false;
 
+  // static wrapExistingError(props: Omit<DendronErrorProps, "name">) {
+  //   return new DendronError({
+  //     name: "DendronError",
+  //     message: props.message,
+  //     stack: props.stack, 
+  //     ...props,
+  //   });
+  // }
   static createPlainError(props: Omit<DendronErrorProps, "name">) {
     return error2PlainObject({
       ...props,
-      isComposite: false,
+      // isComposite: false,
       name: "DendronError",
     });
   }
@@ -58,7 +92,7 @@ export class DendronError extends Error implements IDendronError {
   static createFromStatus({
     status,
     ...rest
-  }: { status: ERROR_STATUS } & Partial<DendronErrorProps>) {
+  }: { status: ERROR_STATUS } & Partial<DendronErrorProps>): DendronError {
     return new DendronError({
       name: "DendronError",
       message: status,
@@ -73,7 +107,8 @@ export class DendronError extends Error implements IDendronError {
     payload,
     severity,
     code,
-    error,
+    innerError,
+    uniqueId,
   }: Omit<DendronErrorProps, "name">) {
     super(message);
     this.name = "DendronError";
@@ -89,18 +124,20 @@ export class DendronError extends Error implements IDendronError {
       this.payload = JSON.stringify(payload || {});
     }
     this.code = code;
-    this.error = error;
-    if (error) {
-      this.stack = error.stack;
+    this.error = innerError;
+    if (innerError) {
+      this.stack = innerError.stack;
     }
+    this.uniqueId = uniqueId;
   }
 }
 
+
 export class DendronCompositeError extends Error implements IDendronError {
-  public payload: DendronErrorPlainObj[];
+  public payload: DendronErrorProps[];
   public message: string;
   public severity?: ERROR_SEVERITY;
-  isComposite = true;
+  // isComposite = true;
 
   constructor(errors: IDendronError[]) {
     super("multiple errors");
@@ -131,19 +168,37 @@ export class DendronCompositeError extends Error implements IDendronError {
   }
 }
 
+export class DendronServerError extends DendronError implements IDendronError, ServerErrorProps  {
+  
+  /**
+  * Optional HTTP status code for error
+  */
+   public code?: StatusCodes;
+
+ /**
+  * TODO: Deprecate
+  * Custom status errors
+  */
+  public status?: string;
+}
+
+// export function decorateNonPiiProps(error: DendronError): IDendronError & NonPiiErrorData {
+//   error.nonPiiMessage = "hello";
+// }
+
 export class IllegalOperationError extends DendronError {}
 
 export function stringifyError(err: Error) {
   return JSON.stringify(err, Object.getOwnPropertyNames(err));
 }
 
-export const error2PlainObject = (err: IDendronError): DendronErrorPlainObj => {
-  const out: Partial<DendronErrorPlainObj> = {};
+export const error2PlainObject = (err: IDendronError): DendronErrorProps => {
+  const out: Partial<DendronErrorProps> = {};
   Object.getOwnPropertyNames(err).forEach((k) => {
     // @ts-ignore
     out[k] = err[k];
   });
-  return out as DendronErrorPlainObj;
+  return out as DendronErrorProps;
 };
 
 export class ErrorMessages {
@@ -230,4 +285,7 @@ export class ErrorUtils {
   static isDendronError(error: unknown): error is DendronError {
     return _.get(error, "name", "") === "DendronError";
   }
+}
+export function isTSError(err: any): err is Error {
+  return (err as Error).message !== undefined && (err as Error).name !== undefined;
 }

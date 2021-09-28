@@ -82,7 +82,7 @@ export function appModule({
           severity: error.severity?.toString(),
           code: error.code,
           status: error.status,
-          isComposite: error.isComposite,
+          // isComposite: error.isComposite,
         };
       }
       return event;
@@ -132,6 +132,7 @@ export function appModule({
   }
 
   app.get("/health", async (_req: Request, res: Response) => {
+    debugger;
     return res.json({ ok: 1 });
   });
 

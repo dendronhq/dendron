@@ -761,6 +761,8 @@ function initializeSentry(environment: string): void {
     beforeSend(event, hint) {
       const error = hint?.originalException;
       if (error && error instanceof DendronError) {
+
+        event.tags
         event.extra = {
           name: error.name,
           message: error.message,
@@ -768,7 +770,7 @@ function initializeSentry(environment: string): void {
           severity: error.severity?.toString(),
           code: error.code,
           status: error.status,
-          isComposite: error.isComposite,
+          // isComposite: error.isComposite,
         };
       }
       return event;

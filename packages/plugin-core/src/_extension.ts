@@ -383,7 +383,7 @@ export async function _activate(
 
       Logger.info({
         ctx,
-        installStatus: workspaceInstallStatus,
+        workspaceInstallStatus,
         currentVersion,
         previousWorkspaceVersion,
         previousGlobalVersion,

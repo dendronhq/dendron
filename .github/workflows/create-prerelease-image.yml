@@ -1,4 +1,7 @@
-name: Early Seed Build
+# Generates an image for the Early Seed build. This will generate an image as a
+# pipeline artifact and upload it to S3. It will not publish any binaries to
+# NPM. It only has access to the plugin-development environment.
+name: Create Prerelease Image
 
 on:
   push:
@@ -7,7 +10,7 @@ on:
 
 jobs:
   build:
-    environment: plugin
+    environment: plugin-development
     strategy:
       fail-fast: true
 
@@ -24,8 +27,8 @@ jobs:
 
       - name: Configure Git user
         run: |
-          git config --global user.name CI
-          git config --global user.email ci@dendron.so
+          git config --global user.name github.actions
+          git config --global user.email github-actions@github.com
 
       - name: Checkout source
         uses: actions/checkout@v2

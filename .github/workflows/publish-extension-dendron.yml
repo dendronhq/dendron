@@ -1,13 +1,10 @@
-# This workflow will build the plugin vsix every week night at 12:00 AM PST and
-# publish it to the VS Code Marketplace under the 'nightly' extension target.
-# This will NOT publish any packages to NPM.
-name: Publish Extension - Nightly
+# Builds and publishes the release. This will publish packages to npm and
+# publish the release extension to the VS Code and Open VSX Marketplaces. This
+# is manually triggered once the release build is smoke-tested and ready for
+# release.
+name: Publish Extension - Dendron
 
-# See documentation on POSIX cron syntax here: https://docs.github.com/en/actions/reference/events-that-trigger-workflows#scheduled-events
-# Scheduled to run every weekday at 12:00 AM PST, which is 7:00 AM UTC Tuesday-Saturday
-on:
-  schedule:
-    - cron:  '0 7 * * 2-6'
+on: workflow_dispatch
 
 jobs:
   build:
@@ -42,14 +39,6 @@ jobs:
       - name: Yarn Setup
         run: yarn setup
 
-      - name: Set Up Yarn Local Registry
-        run: yarn config set registry http://localhost:4873
-
-      - name: Set Up NPM Local Registry
-        run: |
-          npm set registry http://localhost:4873/
-          echo $NODE_OPTIONS
-
       - name: Build the VSIX
         env:
           GOOGLE_OAUTH_CLIENT_SECRET: ${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}
@@ -57,8 +46,8 @@ jobs:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           NODE_OPTIONS: --max_old_space_size=4096
         run: |
-          echo "DENDRON_RELEASE_VERSION=`cat meta.json | jq -r '.["@dendronhq/plugin-core"]' | awk -F. -v OFS=. 'NF==1{print ++$NF}; NF>1{$NF=sprintf("%0*d", length($NF), ($NF+1)); print}'`" >> $GITHUB_ENV
-          yarn build:patch:local:ci
+          echo "DENDRON_RELEASE_VERSION=`cat meta.json | jq -r '.["@dendronhq/plugin-core"]' | awk -F. -v OFS=. 'NF>1{$(NF-1)=sprintf("%0*d", length($(NF-1)), ($(NF-1)+1)); $NF=0; print}'`" >> $GITHUB_ENV
+          yarn build:minor:remote:ci
 
       - name: Upload VSIX Artifact
         uses: actions/upload-artifact@v2
@@ -71,7 +60,10 @@ jobs:
           NODE_OPTIONS: --max_old_space_size=4096
         run: |
           DENDRON_CLI=./packages/dendron-cli/lib/bin/dendron-cli.js
-          LOG_LEVEL=info $DENDRON_CLI dev prep_plugin --extensionTarget nightly
+          LOG_LEVEL=info $DENDRON_CLI dev prep_plugin --extensionTarget dendron
+
+      - name: Push Branch Commits to Github
+        run: git push -u origin HEAD
 
       - name: Publish to VS Code Marketplace
         env:
@@ -88,3 +80,15 @@ jobs:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
         working-directory: ./packages/plugin-core
         run: yarn deploy:ovsx
+
+      - name: Tag Release on Github
+        run: | 
+          git tag $DENDRON_RELEASE_VERSION
+          git push origin $DENDRON_RELEASE_VERSION
+
+      - name: Raise Pull Request back to master
+        uses: repo-sync/pull-request@v2
+        with:
+          destination_branch: "master"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          pr_title: "chore: Pulling release/${{ env.DENDRON_RELEASE_VERSION }} into master"

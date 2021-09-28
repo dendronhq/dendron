@@ -146,12 +146,16 @@ function MatchBody(props: {
   if (_.isUndefined(props.matches))
     return <>{body.slice(undefined, MAX_NOTE_SNIPPET_LENGTH)}</>;
   const bodyMatches = props.matches
+    // Extract the ranges of body matches
     .filter((match) => match.key === "body")
-    .flatMap((match) => match.indices);
+    .flatMap((match) => match.indices)
+    // Sort from longest range to the shortest
+    .sort(([lStart, lEnd], [rStart, rEnd]) => rEnd - rStart - (lEnd - lStart));
   if (bodyMatches.length === 0)
     return <>{body.slice(undefined, MAX_NOTE_SNIPPET_LENGTH)}</>;
 
   const renderedBody: (String | JSX.Element)[] = [];
+  // For simplicity, we highlight the longest range only. Otherwise output looks too complicated.
   const [startIndex, endIndex] = bodyMatches[0];
 
   const beforeStart = _.max([0, startIndex - NOTE_SNIPPET_BEFORE_AFTER])!;
@@ -163,7 +167,10 @@ function MatchBody(props: {
 
   // Add the matched part as bold
   renderedBody.push(
-    <span style={{ fontWeight: "bold" }}>
+    <span
+      key={`${props.id}-${startIndex}-${endIndex}`}
+      style={{ fontWeight: "bold" }}
+    >
       {cleanWhitespace(body.slice(startIndex, endIndex + 1))}
     </span>
   );

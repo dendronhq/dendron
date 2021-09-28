@@ -207,9 +207,9 @@ export class SurveyUtils {
             AnalyticsUtils.track(SurveyEvents.InitialSurveyAccepted, {
               answerCount,
             });
-            StateService.instance().updateGlobalState(
+            await StateService.instance().updateGlobalState(
               GLOBAL_STATE.INITIAL_SURVEY_SUBMITTED,
-              true
+              "submitted"
             );
             vscode.window.showInformationMessage("Survey submitted! Thanks for helping us make Dendron better 🌱");
           } else {

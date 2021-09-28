@@ -17,7 +17,7 @@ export enum VSCodeEvents {
   ShowLapsedUserMessage = "Show_Lapsed_User_Msg",
   LapsedUserMessageAccepted = "Lapsed_User_Msg_Accepted",
   LapsedUserMessageRejected = "Show_Lapsed_User_Rejected",
-  UserOnOldVSCodeVerUnblocked = "User_On_Old_VSCode_Ver_Unblocked",
+  UserOnOldVSCodeVerUnblocked = "User_On_Old_VSCode_Ver_Unblocked"
 }
 
 export enum TutorialEvents {
@@ -30,7 +30,12 @@ export enum TutorialEvents {
   Tutorial_5_Show = "Tutorial_5_Show",
 }
 
+export enum ExtensionEvents {
+  VimExtensionInstalled = "Vim_Extension_Installed",
+}
+
 export const DendronEvents = {
   VSCodeEvents,
   TutorialEvents,
+  ExtensionEvents,
 };

@@ -383,6 +383,48 @@ suite("keybindings", function () {
   });
 
   describe("keyboard shortcut conflict resolution", () => {
+    test("vim extension expandLineSelection override", (done) => {
+      const { keybindingConfigPath } =
+        KeybindingUtils.getKeybindingConfigPath();
+      fs.ensureFileSync(keybindingConfigPath);
+      const metaKey = os.type() === "Darwin" ? "cmd" : "ctrl";
+      const config = `// This is my awesome Dendron Keybinding
+      [
+        { // look up note to the side
+          "key": "${metaKey}+k l",
+          "command": "dendron.lookupNote",
+          "args": {
+            "splitType": "horizontal"
+          }
+        }
+      ]`;
+      fs.writeFileSync(keybindingConfigPath, config);
+      const existingConfig = readJSONWithCommentsSync(keybindingConfigPath);
+      const beforeAllSymbol = Object.getOwnPropertySymbols(existingConfig)[0];
+      const beforeKeySymbol = Object.getOwnPropertySymbols(
+        existingConfig[0]
+      )[0];
+      const { newKeybindings } =
+        KeybindingUtils.checkAndApplyVimKeybindingOverrideIfExists();
+      const override = newKeybindings[1];
+      expect(_.isArray(newKeybindings)).toBeTruthy();
+      // override config exists after migration
+      expect(override).toEqual({
+        key: `${metaKey}+l`,
+        command: "-expandLineSelection",
+        when: "textInputFocus",
+      });
+
+      // existing comments are preserved
+      expect(Object.getOwnPropertySymbols(newKeybindings)[0]).toEqual(
+        beforeAllSymbol
+      );
+      expect(Object.getOwnPropertySymbols(newKeybindings[0])[0]).toEqual(
+        beforeKeySymbol
+      );
+      done();
+    });
+
     // this test only works if you don't pass --disable-extensions when testing.
     test.skip("with vim extension installed, resolve keyboard shortcut conflict.", (done) => {
       const wsRoot = tmpDir().name;
@@ -660,39 +702,36 @@ suite("keybindings", function () {
   });
 });
 
-suite(
-  "temporary testing of Dendron version compatibility downgrade sequence",
-  () => {
-    describe(`GIVEN the activation sequence of Dendron`, () => {
-      describe(`WHEN VS Code Version is up to date`, () => {
-        let invokedWorkspaceTrustFn: boolean = false;
+suite("temporary testing of Dendron version compatibility downgrade sequence", () => {
+  describe(`GIVEN the activation sequence of Dendron`, () => {
+    describe(`WHEN VS Code Version is up to date`, () => {
+      let invokedWorkspaceTrustFn: boolean = false;
 
-        beforeEach(() => {
-          invokedWorkspaceTrustFn = semver.gte(vscode.version, "1.57.0");
-        });
-
-        it(`THEN onDidGrantWorkspaceTrust will get invoked.`, () => {
-          expect(invokedWorkspaceTrustFn).toEqual(true);
-        });
-
-        it(`AND onDidGrantWorkspaceTrust can be found in the API.`, () => {
-          vscode.workspace.onDidGrantWorkspaceTrust(() => {
-            //no-op for testing
-          });
-        });
+      beforeEach(() => {
+        invokedWorkspaceTrustFn = semver.gte(vscode.version, "1.57.0");
       });
 
-      describe(`WHEN VS Code Version is on a version less than 1.57.0`, () => {
-        let invokedWorkspaceTrustFn: boolean = false;
-        const userVersion = "1.56.1";
-        beforeEach(() => {
-          invokedWorkspaceTrustFn = semver.gte(userVersion, "1.57.0");
-        });
+      it(`THEN onDidGrantWorkspaceTrust will get invoked.`, () => {
+        expect(invokedWorkspaceTrustFn).toEqual(true);
+      });
 
-        it(`THEN onDidGrantWorkspaceTrust will not get invoked.`, () => {
-          expect(invokedWorkspaceTrustFn).toEqual(false);
+      it(`AND onDidGrantWorkspaceTrust can be found in the API.`, () => {
+        vscode.workspace.onDidGrantWorkspaceTrust(() => {
+          //no-op for testing
         });
       });
     });
-  }
-);
+
+    describe(`WHEN VS Code Version is on a version less than 1.57.0`, () => {
+      let invokedWorkspaceTrustFn: boolean = false;
+      const userVersion = "1.56.1";
+      beforeEach(() => {
+        invokedWorkspaceTrustFn = semver.gte(userVersion, "1.57.0");
+      });
+
+      it(`THEN onDidGrantWorkspaceTrust will not get invoked.`, () => {
+        expect(invokedWorkspaceTrustFn).toEqual(false);
+      });
+    });
+  });
+});

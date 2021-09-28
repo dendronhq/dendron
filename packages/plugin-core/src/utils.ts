@@ -866,6 +866,53 @@ export class KeybindingUtils {
     };
   };
 
+  static checkAndApplyVimKeybindingOverrideIfExists(): {
+    keybindingConfigPath: string;
+    newKeybindings?: any;
+  } {
+    const ctx = "checkAndApplyVimKeybindingOverrideIfExists";
+    // check where the keyboard shortcut is configured
+    const { keybindingConfigPath, osName } = this.getKeybindingConfigPath();
+    Logger.info({ ctx, keybindingConfigPath });
+
+    // read keybindings.json
+    // create if it doesn't exist
+    if (!fs.existsSync(keybindingConfigPath)) {
+      fs.ensureFileSync(keybindingConfigPath);
+      fs.writeFileSync(keybindingConfigPath, "[]");
+      Logger.info({ ctx, keybindingConfigPath, msg: "creating keybindings" });
+    }
+    const keybindings = readJSONWithCommentsSync(keybindingConfigPath);
+
+    // check if override is already there
+    const alreadyHasOverride =
+      keybindings.filter((entry: any) => {
+        if (!_.isUndefined(entry.command)) {
+          return entry.command === "-expandLineSelection";
+        } else {
+          return false;
+        }
+      }).length > 0;
+
+    if (alreadyHasOverride) {
+      return { keybindingConfigPath };
+    }
+
+    // add override if there isn't.
+    const metaKey = osName === "Darwin" ? "cmd" : "ctrl";
+    const OVERRIDE_EXPAND_LINE_SELECTION = {
+      key: `${metaKey}+l`,
+      command: "-expandLineSelection",
+      when: "textInputFocus",
+    };
+
+    const newKeybindings = assign(
+      keybindings,
+      keybindings.concat(OVERRIDE_EXPAND_LINE_SELECTION)
+    );
+    return { keybindingConfigPath, newKeybindings };
+  }
+
   static checkAndMigrateLookupKeybindingIfExists(): {
     keybindingConfigPath: string;
     migratedKeybindings?: any;

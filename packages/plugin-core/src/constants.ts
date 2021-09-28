@@ -344,20 +344,6 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docPreview: "",
     when: DendronContext.PLUGIN_ACTIVE,
   },
-  // windows user override
-  LOOKUP_NOTE_VIM: {
-    key: "dendron.lookupNote",
-    title: `${CMD_PREFIX} Lookup Note`,
-    group: "navigation",
-    keybindings: {
-      key: "ctrl+l",
-      when: `${DendronContext.PLUGIN_ACTIVE} && editorTextFocus && vim.active`,
-    },
-    desc: "Initiate note lookup",
-    docLink: "dendron.topic.lookup.md",
-    docPreview: "",
-    when: DendronContext.PLUGIN_ACTIVE,
-  },
   LOOKUP_JOURNAL: {
     key: "dendron.lookupNote",
     shortcut: true,

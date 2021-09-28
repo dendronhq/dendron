@@ -872,7 +872,7 @@ export class KeybindingUtils {
   } {
     const ctx = "checkAndApplyVimKeybindingOverrideIfExists";
     // check where the keyboard shortcut is configured
-    const { keybindingConfigPath, osName } = this.getKeybindingConfigPath();
+    const { keybindingConfigPath } = this.getKeybindingConfigPath();
     Logger.info({ ctx, keybindingConfigPath });
 
     // read keybindings.json
@@ -888,7 +888,7 @@ export class KeybindingUtils {
     const alreadyHasOverride =
       keybindings.filter((entry: any) => {
         if (!_.isUndefined(entry.command)) {
-          return entry.command === "-expandLineSelection";
+          return entry.command === "-extension.vim_navigateCtrlL";
         } else {
           return false;
         }
@@ -899,11 +899,9 @@ export class KeybindingUtils {
     }
 
     // add override if there isn't.
-    const metaKey = osName === "Darwin" ? "cmd" : "ctrl";
     const OVERRIDE_EXPAND_LINE_SELECTION = {
-      key: `${metaKey}+l`,
-      command: "-expandLineSelection",
-      when: "textInputFocus",
+      key: `ctrl+l`,
+      command: "-extension.vim_navigateCtrlL",
     };
 
     const newKeybindings = assign(

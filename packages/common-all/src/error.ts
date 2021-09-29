@@ -1,5 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import _ from "lodash";
+import { AxiosError } from "axios";
 import { ERROR_SEVERITY, ERROR_STATUS } from "./constants";
 
 export type DendronErrorProps = {
@@ -44,6 +45,7 @@ export class DendronError extends Error implements IDendronError {
   public code?: number;
   public error?: Error;
   public message: string;
+  public isDendronError: boolean = true;
   isComposite = false;
 
   static createPlainError(props: Omit<DendronErrorProps, "name">) {
@@ -214,8 +216,18 @@ export class ErrorFactory {
   private static safeStringify(obj: any) {
     try {
       return JSON.stringify(obj);
-    } catch (exc) {
+    } catch (exc: any) {
       return `Failed to stringify the given object. Due to '${exc.message}'`;
     }
+  }
+}
+
+export class ErrorUtils {
+  static isAxiosError(error: unknown): error is AxiosError {
+    return _.has(error, "isAxiosError");
+  }
+
+  static isDendronError(error: unknown): error is DendronError {
+    return _.has(error, "isDendronError");
   }
 }

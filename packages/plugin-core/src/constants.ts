@@ -324,6 +324,12 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     group: "notes",
     desc: "Rename a header, and update all links to it.",
   },
+  MOVE_HEADER: {
+    key: "dendron.moveHeader",
+    title: `${CMD_PREFIX} Move Header`,
+    group: "notes",
+    desc: "Move a header, and update all links to it.",
+  },
   CONVERT_LINK: {
     key: "dendron.convertLink",
     title: `${CMD_PREFIX} Convert Link`,

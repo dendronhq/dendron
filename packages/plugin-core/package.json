@@ -171,6 +171,11 @@
         "desc": "Convert link candidate into backlink"
       },
       {
+        "command": "dendron.moveHeader",
+        "title": "Dendron: Move Header",
+        "desc": "Move a header, and update all links to it."
+      },
+      {
         "command": "dendron.lookupNote",
         "title": "Dendron: Lookup Note",
         "desc": "Initiate note lookup",

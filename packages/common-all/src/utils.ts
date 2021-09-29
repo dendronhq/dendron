@@ -208,7 +208,7 @@ export class PublishUtils {
   static getSEOPropsFromNote(note: NoteProps): SEOProps {
     const { title, created, updated, image } = note;
     const { excerpt, canonicalUrl, noindex, canonicalBaseUrl, twitter } =
-      note.custom;
+      note.custom ? note.custom : ({} as any);
     return {
       title,
       excerpt,

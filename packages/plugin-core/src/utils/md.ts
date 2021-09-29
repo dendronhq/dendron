@@ -191,7 +191,7 @@ export const getURLAt = (editor: vscode.TextEditor | undefined): string => {
           );
           editor.revealRange(editor.selection);
         }
-        return [leftText, rightText].join("");
+        return [leftText, selectedText, rightText].join("");
       }
     }
   }

@@ -3,6 +3,92 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.61.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.61.1-alpha.0) (2021-09-29)
+
+
+### Bug Fixes
+
+* **publish:** nextjs search note snippets ([#1433](https://github.com/dendronhq/dendron/issues/1433)) ([0cb8f38](https://github.com/dendronhq/dendron/commit/0cb8f38fc9cb5e45af682fc5524ff5eb7ba44ce7))
+
+
+
+# 0.61.0 (2021-09-28)
+
+
+### Bug Fixes
+
+* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
+
+
+
+## 0.60.2 (2021-09-25)
+
+
+### Bug Fixes
+
+* **publish:** footer show on first load ([#1413](https://github.com/dendronhq/dendron/issues/1413)) ([00d32cc](https://github.com/dendronhq/dendron/commit/00d32cc830ca6da3160a9cee86386e50b3a35fd6))
+
+
+### Features Dendron
+
+* **publish:** add popover for long title in menu ([#1408](https://github.com/dendronhq/dendron/issues/1408)) ([b94b223](https://github.com/dendronhq/dendron/commit/b94b2235f337b2e54bcbf8658e5f4f371804c5f9))
+* **publish:** mobile navigation ([#1407](https://github.com/dendronhq/dendron/issues/1407)) ([3487213](https://github.com/dendronhq/dendron/commit/34872138131f030f460dc4cd8e81c65fe7654524))
+
+
+
+## 0.60.2-alpha.0 (2021-09-24)
+
+
+
+## 0.60.1 (2021-09-24)
+
+
+
+# 0.60.0 (2021-09-21)
+
+
+### Bug Fixes
+
+* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
+* handle single domain hierarchies gracefully ([10dc5ec](https://github.com/dendronhq/dendron/commit/10dc5ec2ab3ebf767ae7e913cb90ba48e9651447))
+* links at top/bottom of reference aren't clickable ([#1282](https://github.com/dendronhq/dendron/issues/1282)) ([b2a00cc](https://github.com/dendronhq/dendron/commit/b2a00cc564299cdb17ae6060154b7616c04e630c))
+* show all root results and their children on empty query ([#1333](https://github.com/dendronhq/dendron/issues/1333)) ([6ad6fd8](https://github.com/dendronhq/dendron/commit/6ad6fd87d7a8a6fd7791cf7d2166ea59dc3b0982))
+
+
+### Features Dendron
+
+* **publish:** notice for dev mode ([#1354](https://github.com/dendronhq/dendron/issues/1354)) ([e3f9fc9](https://github.com/dendronhq/dendron/commit/e3f9fc9d81dc51fbaec5f4bbccb2f6c1dffb1afb))
+* additional styling for nextjs ([f8e7972](https://github.com/dendronhq/dendron/commit/f8e797231b586c20ac4d2e1fa1813982cc282375))
+* nextjs publishing fulltext search ([#1334](https://github.com/dendronhq/dendron/issues/1334)) ([68f8473](https://github.com/dendronhq/dendron/commit/68f8473badf22494c8d0758f8195e377235321f6))
+* support canonicalBaseURL ([f64e97c](https://github.com/dendronhq/dendron/commit/f64e97ca4afa8b953a410874089630c29152863a))
+* support collection options in nextjs publishing ([#1277](https://github.com/dendronhq/dendron/issues/1277)) ([ddaedd4](https://github.com/dendronhq/dendron/commit/ddaedd40cfa9490a752d1d45e9680cf55d76c51f))
+
+
+
+## 0.55.2 (2021-08-21)
+
+
+### Features Dendron
+
+* make breadcrumbs clickable ([#1164](https://github.com/dendronhq/dendron/issues/1164)) ([a386fc3](https://github.com/dendronhq/dendron/commit/a386fc3dd42769207f58259f292216be51f0a15b))
+
+
+
+## 0.55.1 (2021-08-17)
+
+
+### Features Dendron
+
+* **pubv3:** add more features to new publishing ([28a8a4f](https://github.com/dendronhq/dendron/commit/28a8a4f0ec8a02e6d6946833dec11c0117a3f783))
+
+
+
+## 0.54.1 (2021-08-13)
+
+
+
+
+
 # [0.61.0](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.61.0) (2021-09-28)
 
 

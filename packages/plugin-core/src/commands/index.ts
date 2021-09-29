@@ -58,6 +58,7 @@ import { LaunchTutorialCommand } from "./LaunchTutorialCommand";
 import { ConvertLinkCommand } from "./ConvertLink";
 import { ConfigureGraphStylesCommand } from "./ConfigureGraphStyles";
 import { RenameHeaderCommand } from "./RenameHeader";
+import { MoveHeaderCommand } from "./MoveHeader";
 import { SeedAddCommand } from "./SeedAddCommand";
 import { SeedRemoveCommand } from "./SeedRemoveCommand";
 import { RunMigrationCommand } from "./RunMigrationCommand";
@@ -101,6 +102,7 @@ const ALL_COMMANDS = [
   PublishPodCommand,
   MoveNoteCommand,
   RenameHeaderCommand,
+  MoveHeaderCommand,
   RefactorHierarchyCommandV2,
   RandomNoteCommand,
   ResetConfigCommand,

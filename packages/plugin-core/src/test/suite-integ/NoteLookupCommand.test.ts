@@ -497,9 +497,7 @@ suite("NoteLookupCommand", function () {
         onInit: async ({ vaults, wsRoot }) => {
           const vault = _.find(vaults, { fsPath: "vault2" });
           const cmd = new NoteLookupCommand();
-          sinon
-            .stub(PickerUtilsV2, "getOrPromptVaultForOpenEditor")
-            .returns(vault!);
+          sinon.stub(PickerUtilsV2, "getVaultForOpenEditor").returns(vault!);
 
           const opts = (await cmd.run({
             noConfirm: true,
@@ -548,8 +546,9 @@ suite("NoteLookupCommand", function () {
           }))!;
           // should have next pick
           expect(_.isUndefined(quickpick?.nextPicker)).toBeFalsy();
-          // selected items shoudl equal
-          expect(quickpick.selectedItems.length).toEqual(1);
+          // One item for our file name and the other for 'CreateNew' since there
+          // are multiple vaults in this test.
+          expect(quickpick.selectedItems.length).toEqual(2);
           expect(_.pick(quickpick.selectedItems[0], ["id", "vault"])).toEqual({
             id: fname,
             vault,

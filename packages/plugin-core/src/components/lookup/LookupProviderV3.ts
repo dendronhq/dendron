@@ -75,6 +75,31 @@ export type SchemaLookupProviderSuccessResp<T = never> = {
   cancel?: boolean;
 };
 
+/** This function presumes that 'CreateNew' should be shown and determines whether
+ *  CreateNew should be at the top of the look up results or not. */
+function shouldBubbleUpCreateNew({
+  numberOfExactMatches,
+  querystring,
+}: {
+  numberOfExactMatches: number;
+  querystring: string;
+}) {
+  // We don't want to bubble up create new if there is an exact match since
+  // vast majority of times if there is an exact match user wants to navigate to it
+  // rather than create a new file with exact same file name in different vault.
+  const noExactMatches = numberOfExactMatches === 0;
+
+  // Note: one of the special characters is space/' ' which for now we want to allow
+  // users to make the files with ' ' in them but we won't bubble up the create new
+  // option for the special characters, including space. The more contentious part
+  // about previous/current behavior is that we allow creation of files with
+  // characters like '$' which FuseJS will not match (Meaning '$' will NOT match 'hi$world').
+  const noSpecialQueryChars =
+    !FuseEngine.doesContainSpecialQueryChars(querystring);
+
+  return noSpecialQueryChars && noExactMatches;
+}
+
 export class NoteLookupProvider implements ILookupProviderV3 {
   private _onAcceptHooks: OnAcceptHook[];
   public opts: ILookupProviderOptsV3;
@@ -230,7 +255,6 @@ export class NoteLookupProvider implements ILookupProviderV3 {
     const queryOrig = PickerUtilsV2.slashToDot(picker.value);
     const ws = getDWorkspace();
     let profile: number;
-    const queryEndsWithDot = queryOrig.endsWith(".");
     const queryUpToLastDot =
       queryOrig.lastIndexOf(".") >= 0
         ? queryOrig.slice(0, queryOrig.lastIndexOf("."))
@@ -274,11 +298,6 @@ export class NoteLookupProvider implements ILookupProviderV3 {
       if (token.isCancellationRequested) {
         return;
       }
-
-      // check if we have an exact match in the results and keep track for later
-      const perfectMatch: boolean = !_.isUndefined(
-        _.find(updatedItems, { fname: queryOrig })
-      );
 
       // check if single item query, vscode doesn't surface single letter queries
       // we need this so that suggestions will show up
@@ -350,28 +369,27 @@ export class NoteLookupProvider implements ILookupProviderV3 {
       // NOTE: order matters. we always pick the first item in single select mode
       Logger.debug({ ctx, msg: "active != qs" });
 
+      // If each of the vaults in the workspace already have exact match of the file name
+      // then we should not allow create new option.
+      const queryOrigLowerCase = queryOrig.toLowerCase();
+      const numberOfExactMatches = updatedItems.filter(
+        (item) => item.fname.toLowerCase() === queryOrigLowerCase
+      ).length;
+      const vaultsHaveSpaceForExactMatch =
+        getDWorkspace().engine.vaults.length > numberOfExactMatches;
+
       const shouldAddCreateNew =
         this.opts.allowNewNote &&
-        !queryEndsWithDot &&
+        !queryOrig.endsWith(".") &&
         !picker.canSelectMany &&
-        !perfectMatch;
+        vaultsHaveSpaceForExactMatch;
 
       if (shouldAddCreateNew) {
         const entryCreateNew = NotePickerUtils.createNoActiveItem({
           fname: querystring,
         });
 
-        // Whether CreateNew should be the top entry in look up results.
-        //
-        // Note: one of the special characters is space/' ' which for now we want to allow
-        // users to make the files with ' ' in them but we won't bubble up the create new
-        // option for the special characters, including space. The more contentious part
-        // about previous/current behavior is that we allow creation of files with
-        // characters like '$' which FuseJS will not match (Meaning '$' will NOT match 'hi$world').
-        const shouldBubbleUpCreateNew =
-          !FuseEngine.doesContainSpecialQueryChars(querystring);
-
-        if (shouldBubbleUpCreateNew) {
+        if (shouldBubbleUpCreateNew({ numberOfExactMatches, querystring })) {
           updatedItems = [entryCreateNew, ...updatedItems];
         } else {
           updatedItems = [...updatedItems, entryCreateNew];

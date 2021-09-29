@@ -46,7 +46,6 @@ export class OpenLinkCommand extends BasicCommand<CommandOpts, CommandOutput> {
       this.L.error({ error });
       return { error };
     }
-
     let assetPath: string;
     if (text.indexOf("://") !== -1) {
       window.showInformationMessage(
@@ -80,6 +79,6 @@ export class OpenLinkCommand extends BasicCommand<CommandOpts, CommandOutput> {
         return { error };
       });
     }
-    return { String: assetPath };
+    return { filepath: assetPath };
   }
 }

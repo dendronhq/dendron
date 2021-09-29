@@ -5,7 +5,7 @@ import fs from "fs-extra";
 import path from "path";
 import * as vscode from "vscode";
 import { OpenLinkCommand } from "../../commands/OpenLink";
-import { expect, runSingleVaultTest } from "../testUtilsv2";
+import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 import { VSCodeUtils } from "../../utils";
 import { NoteProps } from "@dendronhq/common-all";
@@ -28,10 +28,9 @@ suite("OpenLink", function () {
     });
   });
 
-  //TODO
-  test.skip("With an invalid character in the selection.", (done) => {
+  test("With an invalid character in the selection.", (done) => {
     let noteWithLink: NoteProps;
-    runSingleVaultTest({
+    runLegacyMultiWorkspaceTest({
       ctx,
       preSetupHook: async ({ wsRoot, vaults }) => {
         noteWithLink = await NoteTestUtilsV4.createNote({
@@ -44,8 +43,7 @@ suite("OpenLink", function () {
       onInit: async () => {
         // Open and select some text
         const editor = await VSCodeUtils.openNote(noteWithLink);
-        editor.selection = new vscode.Selection(8, 1, 8, 10);
-
+        editor.selection = new vscode.Selection(7, 1, 7, 10);
         const cmd = new OpenLinkCommand();
         const { error } = await cmd.execute();
         expect(error!.message).toEqual("no valid path or URL selected");
@@ -54,10 +52,9 @@ suite("OpenLink", function () {
     });
   });
 
-  //TODO
   test.skip("grab a URL under the cursor.", (done) => {
     let noteWithLink: NoteProps;
-    runSingleVaultTest({
+    runLegacyMultiWorkspaceTest({
       ctx,
       preSetupHook: async ({ wsRoot, vaults }) => {
         noteWithLink = await NoteTestUtilsV4.createNote({
@@ -72,22 +69,33 @@ suite("OpenLink", function () {
       onInit: async () => {
         // Open and select some text
         const editor = await VSCodeUtils.openNote(noteWithLink);
-        editor.selection = new vscode.Selection(9, 1, 9, 5);
+        editor.selection = new vscode.Selection(8, 1, 8, 5);
         const cmd = new OpenLinkCommand();
         const text = await cmd.run();
-        expect(text).toEqual("https://www.dendron.so/");
+        expect(text).toEqual({ filepath: "https://www.dendron.so/" });
         done();
       },
     });
   });
-  //TODO
-  test.skip("With a partially selected URL.", (done) => {
+
+  test("with a partially selected URL", (done) => {
+    let noteWithLink: NoteProps;
     runLegacyMultiWorkspaceTest({
       ctx,
       preSetupHook: async ({ wsRoot, vaults }) => {
-        ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+        noteWithLink = await NoteTestUtilsV4.createNote({
+          fname: "OpenLinkTest",
+          vault: vaults[0],
+          wsRoot,
+          body:
+            "Here we have some example text to search for URLs within\n" +
+            "check out [dendron](https://www.dendron.so/)",
+        });
       },
       onInit: async () => {
+        // Open and select some text
+        const editor = await VSCodeUtils.openNote(noteWithLink);
+        editor.selection = new vscode.Selection(8, 15, 8, 25);
         const cmd = new OpenLinkCommand();
         const { error } = await cmd.execute();
         expect(error!.message).toEqual("no valid path or URL selected");
@@ -95,6 +103,7 @@ suite("OpenLink", function () {
       },
     });
   });
+
   // TODO
   test.skip("open in diff vault", (done) => {
     runLegacyMultiWorkspaceTest({

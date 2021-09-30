@@ -18,7 +18,6 @@ import {
   writeJSON,
   writeJSONSync,
   removeSync,
-  readFileSync,
 } from "fs-extra";
 import _ from "lodash";
 import path from "path";

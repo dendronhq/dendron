@@ -18,6 +18,7 @@ import {
   writeJSON,
   writeJSONSync,
   removeSync,
+  readFileSync,
 } from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -55,6 +56,67 @@ function getSiteConfig({
     usePrettyLinks: true,
   };
 }
+
+const _determineLogoPath = (
+  logoPath: string | undefined,
+  fsPath: string,
+  assetsPrefix: string | undefined
+): string | null => {
+  if (logoPath && logoPath.length > 0) {
+    // Ensure the logo actually exists at the specified path, starting from `/assets/`
+    const siteAssetsDir = assetsPrefix
+      ? path.join(fsPath, "public", assetsPrefix, "assets")
+      : path.join(fsPath, "public", "assets");
+    const originalLogoPath = path.join(siteAssetsDir, logoPath);
+    // Also check in the `/images/` subdirectory
+    const subDirLogoPath = path.join(siteAssetsDir, "images", logoPath);
+
+    if (existsSync(originalLogoPath)) {
+      return originalLogoPath;
+    } else if (existsSync(subDirLogoPath)) {
+      return subDirLogoPath;
+    } else {
+      // The logo can't be found
+      return null;
+    }
+  } else {
+    return null;
+  }
+};
+
+// Set "a" flag to append data to the end of any existing file
+// which prevents us from overwriting any existing .env.production file
+const _writeToEnvFile = (
+  filePath: string,
+  fsPath: string,
+  assetsPrefix: string | undefined,
+  logoPath: string | undefined
+): void => {
+  if (assetsPrefix && _determineLogoPath(logoPath, fsPath, assetsPrefix)) {
+    const realLogoPath: string = _determineLogoPath(
+      logoPath,
+      fsPath,
+      assetsPrefix
+    ) as string;
+    writeFileSync(
+      filePath,
+      `NEXT_PUBLIC_ASSET_PREFIX=${assetsPrefix}\n
+			DENDRON_LOGO_PATH=${realLogoPath}`,
+      { flag: "a" }
+    );
+  } else if (assetsPrefix) {
+    writeFileSync(filePath, `NEXT_PUBLIC_ASSET_PREFIX=${assetsPrefix}`, {
+      flag: "a",
+    });
+  } else if (_determineLogoPath(logoPath, fsPath, assetsPrefix)) {
+    const realLogoPath: string = _determineLogoPath(
+      logoPath,
+      fsPath,
+      assetsPrefix
+    ) as string;
+    writeFileSync(filePath, `DENDRON_LOGO_PATH=${realLogoPath}`, { flag: "a" });
+  }
+};
 
 export type NextjsExportConfig = ExportPodConfig & NextjsExportPodCustomOpts;
 
@@ -117,13 +179,13 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     dest: URI;
   }) {
     // add .env.production if necessary
-    // TODO: don't overwrite if somethign exists
-    if (siteConfig.assetsPrefix) {
-      writeFileSync(
-        path.join(dest.fsPath, ".env.production"),
-        `NEXT_PUBLIC_ASSET_PREFIX=${siteConfig.assetsPrefix}`
-      );
-    }
+    const envPath: string = path.join(dest.fsPath, ".env.production");
+    _writeToEnvFile(
+      envPath,
+      dest.fsPath,
+      siteConfig.assetsPrefix,
+      siteConfig.logo
+    );
   }
 
   async copyAssets({

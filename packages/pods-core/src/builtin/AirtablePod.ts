@@ -132,7 +132,6 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
             let _error: DendronError;
             if (ErrorUtils.isAxiosError(error)) {
               payload = error.toJSON();
-              debugger;
               if (
                 error.response?.data &&
                 error.response.status === StatusCodes.UNPROCESSABLE_ENTITY

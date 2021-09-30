@@ -35,7 +35,7 @@ import { Duration } from "luxon";
 import path from "path";
 import semver from "semver";
 import * as vscode from "vscode";
-import { CONFIG, DendronContext, DENDRON_COMMANDS } from "./constants";
+import { CONFIG, DendronContext, DENDRON_COMMANDS, GLOBAL_STATE } from "./constants";
 import { Logger } from "./logger";
 import { migrateConfig } from "./migration";
 import { StateService } from "./services/stateService";
@@ -55,6 +55,7 @@ import { DendronCodeWorkspace } from "./workspace/codeWorkspace";
 import { DendronNativeWorkspace } from "./workspace/nativeWorkspace";
 import { WorkspaceInitFactory } from "./workspace/workspaceInitializer";
 import os from "os";
+import { SurveyUtils } from "./survey";
 
 const MARKDOWN_WORD_PATTERN = new RegExp("([\\w\\.\\#]+)");
 // === Main
@@ -639,28 +640,31 @@ async function showWelcomeOrWhatsNew({
   // Show lapsed users (users who have installed Dendron but haven't initialied
   // a workspace) a reminder prompt to re-engage them.
   if (shouldDisplayLapsedUserMsg()) {
-    showLapsedUserMessage(assetUri);
+    await showLapsedUserMessage(assetUri);
   }
 }
 
-function showLapsedUserMessage(assetUri: vscode.Uri) {
+export async function showLapsedUserMessage(assetUri: vscode.Uri) {
   const START_TITLE = "Get Started";
 
   AnalyticsUtils.track(VSCodeEvents.ShowLapsedUserMessage);
   MetadataService.instance().setLapsedUserMsgSendTime();
-
   vscode.window
     .showInformationMessage(
-      "Get started with Dendron.",
+      "Hey, we noticed you haven't started using Dendron yet. Would you like to get started?",
       { modal: true },
       { title: START_TITLE }
     )
-    .then((resp) => {
+    .then(async (resp) => {
       if (resp?.title === START_TITLE) {
         AnalyticsUtils.track(VSCodeEvents.LapsedUserMessageAccepted);
         WSUtils.showWelcome(assetUri);
       } else {
         AnalyticsUtils.track(VSCodeEvents.LapsedUserMessageRejected);
+        const lapsedSurveySubmitted = await StateService.instance().getGlobalState(GLOBAL_STATE.LAPSED_USER_SURVEY_SUBMITTED);
+        if (lapsedSurveySubmitted === undefined) {
+          SurveyUtils.showLapsedUserSurvey();
+        }
         return;
       }
     });

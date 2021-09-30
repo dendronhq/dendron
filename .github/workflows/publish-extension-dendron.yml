@@ -39,7 +39,7 @@ jobs:
       - name: Yarn Setup
         run: yarn setup
 
-      - name: Build the VSIX
+      - name: Build the VSIX and Publish to NPM Registry
         env:
           GOOGLE_OAUTH_CLIENT_SECRET: ${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}
           GOOGLE_OAUTH_CLIENT_ID: ${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}

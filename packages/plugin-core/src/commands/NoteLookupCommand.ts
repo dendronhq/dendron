@@ -1,7 +1,9 @@
 import {
   DendronError,
+  DVault,
   ERROR_STATUS,
   ErrorFactory,
+  ErrorMessages,
   NoteLookupConfig,
   NoteProps,
   NoteQuickInput,
@@ -292,11 +294,7 @@ export class NoteLookupCommand extends BaseCommand<
     CommandOpts,
     "selectedItems" | "quickpick"
   >): readonly NoteQuickInput[] {
-    const maybeCreateNew = PickerUtilsV2.getCreateNewItem(selectedItems);
-    const { nonInteractive, canSelectMany } = quickpick;
-    if (nonInteractive && maybeCreateNew) {
-      return [maybeCreateNew];
-    }
+    const { canSelectMany } = quickpick;
     return canSelectMany ? selectedItems : selectedItems.slice(0, 1);
   }
 
@@ -377,9 +375,13 @@ export class NoteLookupCommand extends BaseCommand<
       Logger.info({ ctx, msg: "create stub" });
       nodeNew = engine.notes[item.id];
     } else {
-      const vault = picker.vault
-        ? picker.vault
-        : PickerUtilsV2.getOrPromptVaultForOpenEditor();
+      const vault = await this.getVaultForNewNote({ fname, picker });
+      if (vault === undefined) {
+        // Vault will be undefined when user cancelled vault selection, so we
+        // are going to cancel the creation of the note.
+        return;
+      }
+
       nodeNew = NoteUtils.create({ fname, vault });
       if (picker.selectionProcessFunc !== undefined) {
         nodeNew = (await picker.selectionProcessFunc(nodeNew)) as NoteProps;
@@ -427,6 +429,59 @@ export class NoteLookupCommand extends BaseCommand<
       wsRoot: getDWorkspace().wsRoot,
     });
     return { uri, node: nodeNew, resp };
+  }
+
+  private async getVaultForNewNote({
+    fname,
+    picker,
+  }: {
+    fname: string;
+    picker: DendronQuickPickerV2;
+  }) {
+    const engine = getEngine();
+
+    const vaultsWithMatchingFile = new Set(
+      NoteUtils.getNotesByFname({ fname, notes: engine.notes }).map(
+        (n) => n.vault.fsPath
+      )
+    );
+
+    // Try to get the default vault value.
+    let vault: DVault | undefined = picker.vault
+      ? picker.vault
+      : PickerUtilsV2.getVaultForOpenEditor();
+
+    // If our current context does not have vault or if our current context vault
+    // already has a matching file name we want to ask the user for a different vault.
+    if (vault === undefined || vaultsWithMatchingFile.has(vault.fsPath)) {
+      // Available vaults are vaults that do not have the desired file name.
+      const availVaults = engine.vaults.filter(
+        (v) => !vaultsWithMatchingFile.has(v.fsPath)
+      );
+
+      if (availVaults.length > 1) {
+        const promptedVault = await PickerUtilsV2.promptVault(availVaults);
+        if (promptedVault === undefined) {
+          // User must have cancelled vault selection.
+          vault = undefined;
+        } else {
+          vault = promptedVault;
+        }
+      } else if (availVaults.length === 1) {
+        // There is only a single vault that is available so we dont have to ask the user.
+        vault = availVaults[0];
+      } else {
+        // We should never reach this as "Create New" should not be available as option
+        // to the user when there are no available vaults.
+        throw ErrorFactory.createInvalidStateError({
+          message: ErrorMessages.formatShouldNeverOccurMsg(
+            `No available vaults for file name.`
+          ),
+        });
+      }
+    }
+
+    return vault;
   }
 
   /**

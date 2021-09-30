@@ -39,11 +39,14 @@ jobs:
       - name: Yarn Setup
         run: yarn setup
 
-      - name: Build the VSIX
+      - name: Build the VSIX and Publish to NPM Registry
         env:
           GOOGLE_OAUTH_CLIENT_SECRET: ${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}
           GOOGLE_OAUTH_CLIENT_ID: ${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          NPM_EMAIL: ${{ secrets.NPM_EMAIL }}
+          NPM_USERNAME: ${{ secrets.NPM_USERNAME }}
+          NPM_PWD: ${{ secrets.NPM_PWD }}
           NODE_OPTIONS: --max_old_space_size=4096
         run: |
           echo "DENDRON_RELEASE_VERSION=`cat meta.json | jq -r '.["@dendronhq/plugin-core"]' | awk -F. -v OFS=. 'NF>1{$(NF-1)=sprintf("%0*d", length($(NF-1)), ($(NF-1)+1)); $NF=0; print}'`" >> $GITHUB_ENV

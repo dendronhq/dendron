@@ -42,7 +42,7 @@ export class FileWatcher {
       if (FileWatcher.watcherType(opts) === "plugin") {
         watcher = new PluginFileWatcher(pattern);
       } else {
-        watcher = new EngineFileWatcher(`${pattern.base}/${pattern.pattern}`);
+        watcher = new EngineFileWatcher(pattern.base, pattern.pattern);
       }
 
       return { vault, watcher };

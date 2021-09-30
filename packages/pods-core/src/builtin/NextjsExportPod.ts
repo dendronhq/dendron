@@ -9,7 +9,16 @@ import {
 } from "@dendronhq/common-all";
 import { MDUtilsV5, ProcFlavor, SiteUtils } from "@dendronhq/engine-server";
 import { JSONSchemaType } from "ajv";
-import fs from "fs-extra";
+import {
+  writeFile,
+  writeFileSync,
+  existsSync,
+  copySync,
+  ensureDirSync,
+  writeJSON,
+  writeJSONSync,
+  removeSync,
+} from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { URI } from "vscode-uri";
@@ -110,7 +119,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     // add .env.production if necessary
     // TODO: don't overwrite if somethign exists
     if (siteConfig.assetsPrefix) {
-      fs.writeFileSync(
+      writeFileSync(
         path.join(dest.fsPath, ".env.production"),
         `NEXT_PUBLIC_ASSET_PREFIX=${siteConfig.assetsPrefix}`
       );
@@ -129,7 +138,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     const ctx = "copyAssets";
     const vaults = config.vaults;
     const destPublicPath = path.join(dest, "public");
-    fs.ensureDirSync(destPublicPath);
+    ensureDirSync(destPublicPath);
     const siteAssetsDir = path.join(destPublicPath, "assets");
     const siteConfig = config.site;
     this.L;
@@ -161,25 +170,25 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     // custom headers
     if (siteConfig.customHeaderPath) {
       const headerPath = path.join(wsRoot, siteConfig.customHeaderPath);
-      if (fs.existsSync(headerPath)) {
-        fs.copySync(headerPath, path.join(destPublicPath, "header.html"));
+      if (existsSync(headerPath)) {
+        copySync(headerPath, path.join(destPublicPath, "header.html"));
       }
     }
     // get favicon
     if (siteConfig.siteFaviconPath) {
       const faviconPath = path.join(wsRoot, siteConfig.siteFaviconPath);
-      if (fs.existsSync(faviconPath)) {
-        fs.copySync(faviconPath, path.join(destPublicPath, "favicon.ico"));
+      if (existsSync(faviconPath)) {
+        copySync(faviconPath, path.join(destPublicPath, "favicon.ico"));
       }
     }
     // get logo
     if (siteConfig.logo) {
       const logoPath = path.join(wsRoot, siteConfig.logo);
-      fs.copySync(logoPath, path.join(siteAssetsDir, path.basename(logoPath)));
+      copySync(logoPath, path.join(siteAssetsDir, path.basename(logoPath)));
     }
     // /get cname
     if (siteConfig.githubCname) {
-      fs.writeFileSync(
+      writeFileSync(
         path.join(destPublicPath, "CNAME"),
         siteConfig.githubCname,
         { encoding: "utf8" }
@@ -199,7 +208,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     const out = note.body;
     const dst = path.join(notesDir, note.id + ".md");
     this.L.debug({ ctx, dst, msg: "writeNote" });
-    return fs.writeFile(dst, out);
+    return writeFile(dst, out);
   }
 
   async renderBodyToHTML({
@@ -217,7 +226,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     const out = await this._renderNote({ engine, note, notes, engineConfig });
     const dst = path.join(notesDir, note.id + ".html");
     this.L.debug({ ctx, dst, msg: "writeNote" });
-    return fs.writeFile(dst, out);
+    return writeFile(dst, out);
   }
 
   async renderMetaToJSON({
@@ -232,7 +241,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     const out = _.omit(note, "body");
     const dst = path.join(notesDir, note.id + ".json");
     this.L.debug({ ctx, dst, msg: "writeNote" });
-    return fs.writeJSON(dst, out);
+    return writeJSON(dst, out);
   }
 
   async plant(opts: NextjsExportPlantOpts) {
@@ -240,7 +249,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     const { dest, engine, wsRoot, config: podConfig } = opts;
 
     const podDstDir = path.join(dest.fsPath, "data");
-    fs.ensureDirSync(podDstDir);
+    ensureDirSync(podDstDir);
     const siteConfig = getSiteConfig({
       siteConfig: engine.config.site,
       overrides: podConfig.overrides,
@@ -277,8 +286,8 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     const notesBodyDir = path.join(podDstDir, "notes");
     const notesMetaDir = path.join(podDstDir, "meta");
     this.L.info({ ctx, msg: "ensuring notesDir...", notesDir: notesBodyDir });
-    fs.ensureDirSync(notesBodyDir);
-    fs.ensureDirSync(notesMetaDir);
+    ensureDirSync(notesBodyDir);
+    ensureDirSync(notesMetaDir);
     this.L.info({ ctx, msg: "writing notes..." });
     await Promise.all(
       _.map(_.values(publishedNotes), async (note) => {
@@ -297,7 +306,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     );
     const podDstPath = path.join(podDstDir, "notes.json");
     const podConfigDstPath = path.join(podDstDir, "dendron.json");
-    fs.writeJSONSync(
+    writeJSONSync(
       podDstPath,
       {
         ...payload,
@@ -305,7 +314,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
       },
       { encoding: "utf8", spaces: 2 }
     );
-    fs.writeJSONSync(podConfigDstPath, engineConfig, {
+    writeJSONSync(podConfigDstPath, engineConfig, {
       encoding: "utf8",
       spaces: 2,
     });
@@ -313,19 +322,19 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     // Generate full text search data
     const fuseDstPath = path.join(podDstDir, "fuse.json");
     const fuseIndex = createSerializedFuseNoteIndex(publishedNotes);
-    fs.writeJsonSync(fuseDstPath, fuseIndex);
+    writeJSONSync(fuseDstPath, fuseIndex);
 
     this._writeEnvFile({ siteConfig, dest });
 
     const publicPath = path.join(podDstDir, "..", "public");
     const publicDataPath = path.join(publicPath, "data");
 
-    if (fs.existsSync(publicDataPath)) {
+    if (existsSync(publicDataPath)) {
       this.L.info("removing existing 'public/data");
-      fs.removeSync(publicDataPath);
+      removeSync(publicDataPath);
     }
     this.L.info("moving data");
-    fs.copySync(podDstDir, publicDataPath);
+    copySync(podDstDir, publicDataPath);
     return { notes: _.values(publishedNotes) };
   }
 }

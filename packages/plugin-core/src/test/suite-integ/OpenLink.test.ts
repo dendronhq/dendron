@@ -4,6 +4,7 @@ import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import fs from "fs-extra";
 import path from "path";
 import * as vscode from "vscode";
+import sinon from "sinon";
 import { OpenLinkCommand } from "../../commands/OpenLink";
 import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
@@ -52,7 +53,7 @@ suite("OpenLink", function () {
     });
   });
 
-  test.skip("grab a URL under the cursor.", (done) => {
+  test("grab a URL under the cursor.", (done) => {
     let noteWithLink: NoteProps;
     runLegacyMultiWorkspaceTest({
       ctx,
@@ -71,8 +72,10 @@ suite("OpenLink", function () {
         const editor = await VSCodeUtils.openNote(noteWithLink);
         editor.selection = new vscode.Selection(8, 1, 8, 5);
         const cmd = new OpenLinkCommand();
+        const avoidPopUp = sinon.stub(vscode.env, "openExternal");
         const text = await cmd.run();
         expect(text).toEqual({ filepath: "https://www.dendron.so/" });
+        avoidPopUp.restore();
         done();
       },
     });

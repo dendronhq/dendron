@@ -290,6 +290,7 @@ export type ConfigWriteOpts = {
 // === Engine and Store Main
 
 export type DCommonProps = {
+  /** Dictionary where key is the note id. */
   notes: NotePropsDict;
   schemas: SchemaModuleDict;
   wsRoot: string;

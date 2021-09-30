@@ -31,7 +31,7 @@ import {
   SchemaRaw,
   SchemaTemplate,
 } from "./types";
-import { getSlugger, isNotUndefined, randomColor } from "./utils";
+import { DefaultMap, getSlugger, isNotUndefined, randomColor } from "./utils";
 import { genUUID } from "./uuid";
 import { VaultUtils } from "./vault";
 
@@ -634,6 +634,112 @@ export class NoteUtils {
   static genUpdateTime() {
     const now = Time.now().toMillis();
     return now;
+  }
+
+  /** Returns true when the note has reference links (Eg. ![[ref-link]]); false otherwise. */
+  static hasRefLinks(note: NoteProps) {
+    return note.links.some((link) => link.type === "ref");
+  }
+
+  /**
+   * Retrieve the latest update time of the preview note tree.
+   *
+   * Preview note tree includes links whose content is rendered in the rootNote preview,
+   * particularly the reference links (![[ref-link-example]]). */
+  static getLatestUpdateTimeOfPreviewNoteTree({
+    rootNote,
+    notes,
+  }: {
+    rootNote: NoteProps;
+    notes: NotePropsDict;
+  }) {
+    // If the note does not have reference links than the last updated time of
+    // the preview tree is the last updated time of the note itself. Hence, we
+    // can avoid all heavier logic of getting ready to traverse notes.
+    if (!this.hasRefLinks(rootNote)) {
+      return rootNote.updated;
+    }
+
+    // Maps lowercase file names to list of note props with matching file name.
+    // We will use a map to avoid having to loop over the the notes to find the notes
+    // by file names for each fname in the tree. In the future if we start keeping these
+    // values cached centrally we should replace these adhoc created maps with centrally cached values.
+    const mapByFName = new DefaultMap<string, NoteProps[]>(() => []);
+    _.values(notes).forEach((note) => {
+      const lowercaseFName = note.fname.toLowerCase();
+
+      // We are going to follow the current behavior of vault-less file name resolution:
+      // The first matching file name that is met should win.
+      mapByFName.get(lowercaseFName).push(note);
+    });
+
+    const visitedIds = new Set<string>();
+
+    return this._getLatestUpdateTimeOfPreviewNoteTree({
+      note: rootNote,
+      mapByFName,
+      visitedIds,
+      latestUpdated: rootNote.updated,
+    });
+  }
+
+  private static _getLatestUpdateTimeOfPreviewNoteTree({
+    note,
+    latestUpdated,
+    mapByFName,
+    visitedIds,
+  }: {
+    note: NoteProps;
+    latestUpdated: number;
+    mapByFName: DefaultMap<string, NoteProps[]>;
+    visitedIds: Set<string>;
+  }): number {
+    if (note.updated > latestUpdated) {
+      latestUpdated = note.updated;
+    }
+
+    // Mark the visited nodes so we don't end up recursively spinning if there
+    // are cycles in our preview tree such as [[foo]] -> [[!bar]] -> [[!foo]]
+    if (visitedIds.has(note.id)) {
+      return latestUpdated;
+    } else {
+      visitedIds.add(note.id);
+    }
+
+    const linkedRefNotes = note.links
+      .filter((link) => link.type === "ref")
+      .filter((link) => link.to && link.to.fname)
+      .map((link) => {
+        const pointTo = link.to!;
+        const lowercaseFname = pointTo.fname!.toLowerCase();
+
+        const matchingList: NoteProps[] = mapByFName.get(lowercaseFname);
+
+        // When there is a vault specified in the link we want to respect that
+        // specification, otherwise we will map by just the file name.
+        if (pointTo.vaultName) {
+          const filteredByVault = matchingList.filter(
+            (n) => VaultUtils.getName(n.vault) == pointTo.vaultName
+          );
+          return filteredByVault[0];
+        } else {
+          return matchingList[0];
+        }
+      })
+      // Filter out broken links (pointing to non existent files)
+      .filter((refNote) => refNote !== undefined);
+
+    for (const linkedNote of linkedRefNotes) {
+      // Recurse into each child reference linked note.
+      latestUpdated = this._getLatestUpdateTimeOfPreviewNoteTree({
+        note: linkedNote,
+        mapByFName,
+        visitedIds,
+        latestUpdated,
+      });
+    }
+
+    return latestUpdated;
   }
 
   static getNotesByFname({

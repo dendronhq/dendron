@@ -6,6 +6,10 @@ export interface Cache<K, T> {
   /** Set the given data, potentially removing a different item depending
    *  on cache implementation and cache state. */
   set(key: K, data: T): void;
+
+  /** Drops the element if it exists in the cache.
+   *  NO-OP if the element does not exist. */
+  drop(key: K): void;
 }
 
 /** Null object implementation of {@link Cache} to be used when we
@@ -16,6 +20,10 @@ export class NullCache<K, T> implements Cache<K, T> {
   }
 
   set(_key: K, _data: T): void {
+    // Empty since this is null object implementation
+  }
+
+  drop(_key: K): void {
     // Empty since this is null object implementation
   }
 }

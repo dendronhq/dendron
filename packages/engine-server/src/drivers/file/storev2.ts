@@ -71,6 +71,11 @@ export type FileMetaDict = { [key: string]: FileMeta[] };
 
 export class FileStorage implements DStore {
   public vaults: DVault[];
+  /**
+   * Warning: currently this note dictionary contains backlink data that gets
+   * populated upon initialization. However, the update note operations do not change
+   * the backlink data in this dictionary hence it starts to contain stale backlink data.
+   *  */
   public notes: NotePropsDict;
   public schemas: SchemaModuleDict;
   public notesCache: NotesCache;
@@ -831,7 +836,7 @@ export class FileStorage implements DStore {
    * Update a note. If note exists, call {@link NoteUtils.hydrate} to populate new note with parent/children properties
    * of the existing note
    *
-   * If {@link newNode} is set, set the {@link NoteProps["parent"]} property and create stubs as neccessary
+   * If {@link newNode} is set, set the {@link NoteProps["parent"]} property and create stubs as necessary
    *
    * @param note
    * @param opts

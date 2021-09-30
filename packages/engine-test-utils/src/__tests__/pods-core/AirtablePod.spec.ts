@@ -63,7 +63,9 @@ describe("GIVEN airtable export", () => {
       await runEngineTestV5(
         async (opts) => {
           try {
-            sinon.stub(axios, "post").rejects(new Error(""));
+            sinon
+              .stub(axios, "post")
+              .rejects(new DendronError({ message: "foo" }));
             await runExport(opts);
           } catch (err) {
             expect(ErrorUtils.isDendronError(err)).toBeTruthy();
@@ -188,7 +190,7 @@ describe("checkpointing ", () => {
         fs.writeFileSync(checkpoint, timestamp.toString(), {
           encoding: "utf8",
         });
-        // pod.processNote = jest.fn();
+        pod.processNote = jest.fn();
         const resp = await pod.execute({
           engine,
           vaults,
@@ -207,7 +209,7 @@ describe("checkpointing ", () => {
           },
         });
         expect(resp.notes).not.toBeNull();
-        // expect(pod.processNote).toHaveBeenCalledTimes(1);
+        expect(pod.processNote).toHaveBeenCalledTimes(1);
       },
       {
         expect,

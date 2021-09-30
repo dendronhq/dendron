@@ -7,15 +7,18 @@ import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
+import sinon from "sinon";
 import * as vscode from "vscode";
 import { DeleteNodeCommand } from "../../commands/DeleteNodeCommand";
 import { VSCodeUtils } from "../../utils";
 import { getDWorkspace } from "../../workspace";
 import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
+import { window } from "vscode";
 
 suite("notes", function () {
   const ctx: vscode.ExtensionContext = setupBeforeAfter(this);
+
   test("basic", (done) => {
     runLegacyMultiWorkspaceTest({
       ctx,
@@ -30,6 +33,27 @@ suite("notes", function () {
         );
         const noteFiles = vaultFiles.filter((ent) => ent.endsWith(".md"));
         expect(noteFiles.sort()).toEqual(["bar.md", "foo.ch1.md", "root.md"]);
+        done();
+      },
+    });
+  });
+
+  test("WHEN note is deleted THEN correct message is shown.", (done) => {
+    runLegacyMultiWorkspaceTest({
+      ctx,
+      preSetupHook: ENGINE_HOOKS.setupBasic,
+      onInit: async ({ engine }) => {
+        const sinonSandbox = sinon.createSandbox();
+        const windowSpy = sinonSandbox.spy(window, "showInformationMessage");
+
+        const note = engine.notes["foo"];
+        await VSCodeUtils.openNote(note);
+        await new DeleteNodeCommand().execute();
+
+        const infoMsg = windowSpy.getCall(0).args[0];
+        expect(infoMsg).toEqual("foo.md (vault1) deleted");
+
+        sinonSandbox.restore();
         done();
       },
     });

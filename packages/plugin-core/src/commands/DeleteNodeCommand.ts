@@ -1,10 +1,11 @@
 import {
+  DVault,
   EngineDeletePayload,
   NoteProps,
   NoteUtils,
   SchemaUtils,
+  VaultUtils,
 } from "@dendronhq/common-all";
-import _ from "lodash";
 import path from "path";
 import { TextEditor, window } from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
@@ -19,6 +20,16 @@ type CommandOpts = {
 };
 
 type CommandOutput = EngineDeletePayload | void;
+
+function formatDeletedMsg({
+  fsPath,
+  vault,
+}: {
+  fsPath: string;
+  vault: DVault;
+}) {
+  return `${path.basename(fsPath)} (${VaultUtils.getName(vault)}) deleted`;
+}
 
 export class DeleteNodeCommand extends BasicCommand<
   CommandOpts,
@@ -54,7 +65,9 @@ export class DeleteNodeCommand extends BasicCommand<
           Logger.error({ ctx, msg: "error deleting node", error: out.error });
           return;
         }
-        window.showInformationMessage(`${path.basename(fsPath)} deleted`);
+        window.showInformationMessage(
+          formatDeletedMsg({ fsPath, vault: note.vault })
+        );
         return out;
       } else {
         const smod = await DendronClientUtilsV2.getSchemaModByFname({
@@ -62,9 +75,11 @@ export class DeleteNodeCommand extends BasicCommand<
           client,
         });
         await client.deleteSchema(SchemaUtils.getModuleRoot(smod).id);
+        window.showInformationMessage(
+          formatDeletedMsg({ fsPath, vault: smod.vault })
+        );
+        return;
       }
-      window.showInformationMessage(`${path.basename(fsPath)} deleted`);
-      return;
     } else {
       window.showErrorMessage("no active text editor");
       return;

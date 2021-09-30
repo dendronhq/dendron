@@ -1,4 +1,5 @@
 import chokidar from "chokidar";
+import path from "path";
 
 /** Mimicks VSCode's disposable for cross-compatibility. */
 type Disposable = {
@@ -15,8 +16,14 @@ export type FileWatcherAdapter = {
 
 export class EngineFileWatcher implements FileWatcherAdapter {
   private watcher: chokidar.FSWatcher;
-  constructor(paths: string | string[]) {
-    this.watcher = chokidar.watch(paths, { disableGlobbing: false });
+  constructor(base: string, pattern: string, onReady?: () => void) {
+    // Chokidar requires paths with globs to use POSIX `/` separators, even on Windows
+    const patternWithBase = `${path.posix.normalize(base)}/${pattern}`;
+    this.watcher = chokidar.watch(patternWithBase, {
+      disableGlobbing: false,
+      ignoreInitial: true,
+    });
+    if (onReady) this.watcher.on("ready", onReady);
   }
 
   private onEvent(

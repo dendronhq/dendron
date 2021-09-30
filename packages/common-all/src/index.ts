@@ -17,3 +17,5 @@ export * from "./themes";
 export * from "./fuse";
 export * from "./util";
 export * from "./timing";
+import axios, { AxiosError } from "axios";
+export { axios, AxiosError };

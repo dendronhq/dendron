@@ -1,13 +1,18 @@
+import {
+  DendronError,
+  ErrorUtils,
+  ERROR_SEVERITY,
+  NoteProps,
+  StatusCodes,
+  axios,
+} from "@dendronhq/common-all";
+import { JSONSchemaType } from "ajv";
 import fs from "fs-extra";
+import { RateLimiter } from "limiter";
 import _ from "lodash";
-import { ExportPod, ExportPodPlantOpts } from "../basev3";
-import { ExportPodConfig } from "../basev3";
-import { NoteProps, DendronError } from "@dendronhq/common-all";
 import path from "path";
 import { URI } from "vscode-uri";
-import { RateLimiter } from "limiter";
-import axios from "axios";
-import { JSONSchemaType } from "ajv";
+import { ExportPod, ExportPodConfig, ExportPodPlantOpts } from "../basev3";
 import { PodUtils } from "../utils";
 
 const ID = "dendron.airtable";
@@ -104,33 +109,57 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
     // rate limiter method
     const sendRequest = async () => {
       let total: number = 0;
-      chunks.forEach(async (record) => {
-        // @ts-ignore
-        await limiter.removeTokens(1);
-        const data = JSON.stringify({ records: record });
-        try {
-          const result = await axios.post(
-            `https://api.airtable.com/v0/${baseId}/${tableName}`,
-            data,
-            { headers: headers }
-          );
-          total = total + result.data.records.length;
-          if (total === filteredNotes.length) {
-            const timestamp = filteredNotes[filteredNotes.length - 1].created;
-            fs.writeFileSync(checkpoint, timestamp.toString(), {
-              encoding: "utf8",
+      return Promise.all(
+        chunks.map(async (record) => {
+          // @ts-ignore
+          await limiter.removeTokens(1);
+          const data = JSON.stringify({ records: record });
+          try {
+            const result = await axios.post(
+              `https://api.airtable.com/v0/${baseId}/${tableName}`,
+              data,
+              { headers: headers }
+            );
+            total = total + result.data.records.length;
+            if (total === filteredNotes.length) {
+              const timestamp = filteredNotes[filteredNotes.length - 1].created;
+              fs.writeFileSync(checkpoint, timestamp.toString(), {
+                encoding: "utf8",
+              });
+            }
+          } catch (error) {
+            let payload: any;
+            let _error: DendronError;
+            if (ErrorUtils.isAxiosError(error)) {
+              payload = error.toJSON();
+              debugger;
+              if (
+                error.response?.data &&
+                error.response.status === StatusCodes.UNPROCESSABLE_ENTITY
+              ) {
+                payload = error.response.data;
+                _error = new DendronError({
+                  message: error.response.data.message,
+                  payload,
+                  severity: ERROR_SEVERITY.MINOR,
+                });
+              } else {
+                _error = new DendronError({ message: "axios error", payload });
+              }
+            } else {
+              payload = error;
+              _error = new DendronError({ message: "general error", payload });
+            }
+            this.L.error({
+              msg: "failed to export all the notes.",
+              payload,
             });
+            throw _error;
           }
-        } catch (error) {
-          this.L.error({
-            msg: "failed to export all the notes.",
-            payload: error,
-          });
-          throw new DendronError({ message: JSON.stringify(error) });
-        }
-      });
+        })
+      );
     };
-    sendRequest();
+    await sendRequest();
   }
 
   verifyDir(dest: URI) {

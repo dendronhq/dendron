@@ -8,7 +8,6 @@ import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { resolvePath, VSCodeUtils } from "../utils";
 import { getURLAt } from "../utils/md";
-import { isAnythingSelected } from "../utils/editor";
 import { getExtension, getDWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 import { env, Uri, window } from "vscode";
@@ -29,12 +28,6 @@ export class OpenLinkCommand extends BasicCommand<CommandOpts, CommandOutput> {
     this.L.info({ ctx });
 
     let text = "";
-
-    if (!isAnythingSelected()) {
-      window.showInformationMessage(
-        "nothing selected, searching for valid link"
-      );
-    }
 
     text = getURLAt(VSCodeUtils.getActiveTextEditor());
 

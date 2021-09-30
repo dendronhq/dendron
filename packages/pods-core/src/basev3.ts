@@ -1,4 +1,5 @@
 import {
+  DendronError,
   DEngineClient,
   DVault,
   NoteProps,
@@ -204,8 +205,8 @@ export abstract class ExportPod<
     });
 
     try {
-      return this.plant({ ...opts, dest: destURL, notes });
-    } catch (err) {
+      return await this.plant({ ...opts, dest: destURL, notes });
+    } catch (err: any) {
       console.log("error", stringifyError(err));
       throw err;
     }

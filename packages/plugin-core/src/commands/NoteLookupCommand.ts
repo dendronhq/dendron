@@ -3,6 +3,7 @@ import {
   DVault,
   ERROR_STATUS,
   ErrorFactory,
+  ErrorMessages,
   NoteLookupConfig,
   NoteProps,
   NoteQuickInput,
@@ -472,8 +473,10 @@ export class NoteLookupCommand extends BaseCommand<
       } else {
         // We should never reach this as "Create New" should not be available as option
         // to the user when there are no available vaults.
-        ErrorFactory.createInvalidStateError({
-          message: `No available vaults for file name.`,
+        throw ErrorFactory.createInvalidStateError({
+          message: ErrorMessages.formatShouldNeverOccurMsg(
+            `No available vaults for file name.`
+          ),
         });
       }
     }

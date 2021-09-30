@@ -144,6 +144,14 @@ export const error2PlainObject = (err: IDendronError): DendronErrorPlainObj => {
   return out as DendronErrorPlainObj;
 };
 
+export class ErrorMessages {
+  static formatShouldNeverOccurMsg(description?: string) {
+    return `${
+      description === undefined ? "" : description + " "
+    }This error should never occur! Please report a bug if you have encountered this.`;
+  }
+}
+
 /** Statically ensure that a code path is unreachable using a variable that has been exhaustively used.
  *
  * The use case for this function is that when using a switch or a chain of if/else if statements,
@@ -169,8 +177,7 @@ export const error2PlainObject = (err: IDendronError): DendronErrorPlainObj => {
  */
 export function assertUnreachable(_never?: never): never {
   throw new DendronError({
-    message:
-      "This error should never occur! Please report a bug if you have encountered this.",
+    message: ErrorMessages.formatShouldNeverOccurMsg(),
   });
 }
 

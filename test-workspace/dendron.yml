@@ -32,7 +32,7 @@ site:
     siteUrl: 'https://foo.dev.dendron.so'
     usePrettyRefs: true
     githubCname: 11ty.dendron.so
-    usePrettyLinks: true 
+    usePrettyLinks: true
     siteLastModified: true
     title: Dendron
     description: >-

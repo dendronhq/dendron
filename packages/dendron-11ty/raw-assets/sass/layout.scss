@@ -1,3 +1,4 @@
+@use "sass:math";
 //
 // The basic two column layout
 //
@@ -19,7 +20,7 @@
   }
 
   @include mq(lg) {
-    width: calc((100% - #{$nav-width + $content-width}) / 2 + #{$nav-width});
+    width: calc( math.div( (100% - #{$nav-width + $content-width}), 2) + #{$nav-width});
     min-width: $nav-width;
   }
 }
@@ -33,7 +34,7 @@
 
   @include mq(lg) {
     margin-left: calc(
-      (100% - #{$nav-width + $content-width}) / 2 + #{$nav-width}
+      math.div((100% - #{$nav-width + $content-width}), 2) + #{$nav-width}
     );
   }
 }

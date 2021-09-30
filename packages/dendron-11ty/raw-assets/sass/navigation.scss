@@ -1,3 +1,4 @@
+@use "sass:math";
 //
 // Main nav, breadcrumb, etc...
 //
@@ -67,19 +68,19 @@
       }
       width: $nav-list-item-height-sm;
       height: $nav-list-item-height-sm;
-      padding-top: #{$nav-list-item-height-sm / 4};
-      padding-right: #{$nav-list-item-height-sm / 4};
-      padding-bottom: #{$nav-list-item-height-sm / 4};
-      padding-left: #{$nav-list-item-height-sm / 4};
+      padding-top: #{ math.div( $nav-list-item-height-sm, 4)};
+      padding-right: #{ math.div($nav-list-item-height-sm, 4)};
+      padding-bottom: #{ math.div($nav-list-item-height-sm, 4)};
+      padding-left: #{ math.div($nav-list-item-height-sm, 4)};
       color: $link-color;
 
       @include mq(md) {
         width: $nav-list-item-height;
         height: $nav-list-item-height;
-        padding-top: #{$nav-list-item-height / 4};
-        padding-right: #{$nav-list-item-height / 4};
-        padding-bottom: #{$nav-list-item-height / 4};
-        padding-left: #{$nav-list-item-height / 4};
+        padding-top: #{ math.div($nav-list-item-height, 4)};
+        padding-right: #{ math.div($nav-list-item-height, 4)};
+        padding-bottom: #{ math.div($nav-list-item-height, 4)};
+        padding-left: #{ math.div($nav-list-item-height, 4)};
       }
 
       &:hover {

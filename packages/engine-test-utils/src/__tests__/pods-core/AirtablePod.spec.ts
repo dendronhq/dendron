@@ -54,7 +54,7 @@ const createAxiosError = ({
   return err;
 };
 
-describe.only("GIVEN airtable export", () => {
+describe("GIVEN airtable export", () => {
   describe("WHEN error from post", () => {
     afterEach(() => {
       sinon.restore();

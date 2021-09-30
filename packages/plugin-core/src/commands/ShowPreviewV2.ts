@@ -2,6 +2,7 @@ import {
   assertUnreachable,
   DendronWebViewKey,
   DMessageType,
+  DNoteAnchor,
   NoteProps,
   NoteViewMessage,
   NoteViewMessageType,
@@ -21,6 +22,21 @@ type CommandOpts = {};
 type CommandOutput = any;
 
 const title = "Dendron Preview";
+
+export const extractHeaderAnchorIfExists = (
+  link: string
+): DNoteAnchor | undefined => {
+  if (link.indexOf("#") === -1) {
+    return undefined;
+  } else {
+    const tokens = link.split("#");
+    const anchorValue = tokens[tokens.length - 1];
+    return {
+      type: "header",
+      value: anchorValue,
+    };
+  }
+};
 
 const tryGetNoteFromDocument = (
   document: vscode.TextDocument
@@ -44,6 +60,45 @@ const tryGetNoteFromDocument = (
     });
   }
   return;
+};
+
+/** Returns true when we are attempting to reference a place within the same note.
+ *  Such as a different header section.*/
+const isLinkingWithinSameNote = (opts: {
+  data: { id?: string; href?: string };
+}) => {
+  const linkToNoteId = extractNoteIdFromHref(opts.data);
+
+  return linkToNoteId === opts.data.id;
+};
+
+export const extractNoteIdFromHref = (data: {
+  id?: string;
+  href?: string;
+}): string | undefined => {
+  if (data.href === undefined) {
+    return undefined;
+  }
+  // For some cases such as markdown value='[head2](#head2)' the href isn't as nice
+  // and looks like href='http://localhost:3005/vscode/note-preview.html?ws=WS-VALUE&port=3005#head2'
+  // which currently happens when linking within the same note so we will consider it a special
+  // case of parsing for now and return the id of the current note.
+  if (data.href.includes("vscode/note-preview")) {
+    return data.id;
+  }
+
+  // In normal cases such as markdown value='[[#head2]]' with
+  // href='http://localhost:3005/vscode/0TDNEYgYvCs3ooZEuknNZ.html#head2' we will
+  // parse the href and extract the note id.
+  // The id within href can be without html suffix such as:
+  // * http://localhost:3005/vscode/0TDNEYgYvCs3ooZEuknNZ#head2
+  // * http://localhost:3005/vscode/0TDNEYgYvCs3ooZEuknNZ
+  //
+  // Regex: https://regex101.com/r/Ql3h3t/1
+  const { path } = vscode.Uri.parse(data.href);
+  const noteId = path.match(/vscode\/([a-zA-Z0-9-]*)/)?.[1];
+
+  return noteId;
 };
 
 export class ShowPreviewV2Command extends BasicCommand<
@@ -132,15 +187,23 @@ export class ShowPreviewV2Command extends BasicCommand<
           if (data.href) {
             // TODO find a better way to differentiate local files from web links (`data-` attribute)
             if (data.href.includes("localhost")) {
-              const { path } = vscode.Uri.parse(data.href);
-              const noteId = path.match(/.*\/(.*).html/)?.[1];
-              let note: NoteProps | undefined;
-              // eslint-disable-next-line no-cond-assign
-              if (noteId && (note = getEngine().notes[noteId])) {
+              const noteId = extractNoteIdFromHref(data);
+              const anchor = extractHeaderAnchorIfExists(data.href);
+
+              const note: NoteProps | undefined = this.getNote(noteId);
+              if (isLinkingWithinSameNote({ data }) && note && anchor) {
                 await new GotoNoteCommand().execute({
                   qs: note.fname,
                   vault: note.vault,
                   column: vscode.ViewColumn.One,
+                  anchor,
+                });
+              } else if (noteId && note) {
+                await new GotoNoteCommand().execute({
+                  qs: note.fname,
+                  vault: note.vault,
+                  column: vscode.ViewColumn.One,
+                  anchor,
                 });
               }
             } else {
@@ -161,6 +224,8 @@ export class ShowPreviewV2Command extends BasicCommand<
             ShowPreviewV2Command.refresh(maybeNote);
           break;
         }
+        case NoteViewMessageType.messageDispatcherReady:
+          break;
         default:
           assertUnreachable(msg.type);
       }
@@ -176,5 +241,12 @@ export class ShowPreviewV2Command extends BasicCommand<
       Logger.debug({ ctx, state: "dispose preview" });
       ext.setWebView(DendronWebViewKey.NOTE_PREVIEW, undefined);
     });
+  }
+
+  private getNote(noteId: string | undefined) {
+    if (noteId === undefined) {
+      return undefined;
+    }
+    return getEngine().notes[noteId];
   }
 }

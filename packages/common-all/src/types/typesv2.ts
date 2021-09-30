@@ -614,6 +614,7 @@ export enum CalendarViewMessageType {
 export enum NoteViewMessageType {
   "onClick" = "onClick",
   "onGetActiveEditor" = "onGetActiveEditor",
+  "messageDispatcherReady" = "messageDispatcherReady",
 }
 
 export enum ThemeMessageType {

@@ -85,6 +85,25 @@ export class PodUtils {
           nullable: true,
         },
         ignore: { type: "array", items: { type: "string" }, nullable: true },
+        vaults: {
+          type: "object",
+          description: "include or exclude certain vaults",
+          nullable: true,
+          properties: {
+            include: {
+              type: "array",
+              items: {
+                type: "string",
+              },
+            },
+            exclude: {
+              type: "array",
+              items: {
+                type: "string",
+              },
+            },
+          },
+        },
         ...opts.properties,
       },
     };

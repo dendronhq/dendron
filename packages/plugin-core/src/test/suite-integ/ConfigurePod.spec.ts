@@ -75,7 +75,7 @@ suite("ConfigurePod", function () {
         expect(
           activePath?.endsWith("pods/dendron.json/config.export.yml")
         ).toBeTruthy();
-        done();
+        //done();
       },
     });
   });

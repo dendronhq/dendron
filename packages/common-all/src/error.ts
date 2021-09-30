@@ -45,7 +45,6 @@ export class DendronError extends Error implements IDendronError {
   public code?: number;
   public error?: Error;
   public message: string;
-  public isDendronError: boolean = true;
   isComposite = false;
 
   static createPlainError(props: Omit<DendronErrorProps, "name">) {
@@ -77,6 +76,7 @@ export class DendronError extends Error implements IDendronError {
     error,
   }: Omit<DendronErrorProps, "name">) {
     super(message);
+    this.name = "DendronError";
     this.status = status || "unknown";
     this.severity = severity;
     this.message = message || "";
@@ -228,6 +228,6 @@ export class ErrorUtils {
   }
 
   static isDendronError(error: unknown): error is DendronError {
-    return _.has(error, "isDendronError");
+    return _.get(error, "name", "") === "DendronError";
   }
 }

@@ -40,11 +40,15 @@ export class OpenLinkCommand extends BasicCommand<CommandOpts, CommandOutput> {
       return { error };
     }
     let assetPath: string;
-    if (text.indexOf("://") !== -1) {
+    if (
+      text.indexOf(":/") !== -1 ||
+      text.indexOf("/") === 0 ||
+      text.indexOf(":\\") !== -1
+    ) {
       window.showInformationMessage(
-        "the selection reads as a full URI so an attempt will be made to open it"
+        "the selection reads as a full URI or filepath so an attempt will be made to open it"
       );
-      env.openExternal(Uri.parse(text));
+      env.openExternal(Uri.parse(text.replace("\\", "/"))); // make sure vscode doesn't choke on "\"s
       assetPath = text;
     } else {
       const wsRoot = getDWorkspace().wsRoot;

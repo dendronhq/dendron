@@ -162,7 +162,7 @@ export const getURLAt = (editor: vscode.TextEditor | undefined): string => {
     const offsetEnd = editor.document.offsetAt(editor.selection.end);
     const selectedText = docText.substring(offsetStart, offsetEnd);
     const selectUri = true;
-    const validUriChars = "A-Za-z0-9-._~:/?#@!$&'*+,;%=";
+    const validUriChars = "A-Za-z0-9-._~:/?#@!$&'*+,;%=\\\\";
     const invalidUriChars = ["[^", validUriChars, "]"].join("");
     const regex = new RegExp(invalidUriChars);
 
@@ -174,7 +174,7 @@ export const getURLAt = (editor: vscode.TextEditor | undefined): string => {
     const leftText = leftSplit[leftSplit.length - 1];
     const selectStart = offsetStart - leftText.length;
 
-    const rightSplit = docText.substring(offsetEnd, docText.length - 1);
+    const rightSplit = docText.substring(offsetEnd, docText.length);
     const rightText = rightSplit.substring(0, regex.exec(rightSplit)?.index);
     const selectEnd = offsetEnd + rightText.length;
 
@@ -182,7 +182,7 @@ export const getURLAt = (editor: vscode.TextEditor | undefined): string => {
       if (
         selectStart >= 0 &&
         selectStart < selectEnd &&
-        selectEnd <= docText.length - 1
+        selectEnd <= docText.length
       ) {
         if (selectUri) {
           editor.selection = new Selection(

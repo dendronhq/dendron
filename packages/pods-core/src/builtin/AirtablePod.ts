@@ -6,6 +6,7 @@ import {
   ERROR_SEVERITY,
   minimatch,
   NoteProps,
+  NoteUtils,
   StatusCodes,
 } from "@dendronhq/common-all";
 import { LinkUtils } from "@dendronhq/engine-server";
@@ -152,6 +153,7 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
     notes: NoteProps[],
     srcFieldMapping: { [key: string]: SrcFieldMapping }
   ) {
+    const ctx = "notesToSrc";
     const recordSets: {
       create: AirtableFieldsMap[];
       update: (AirtableFieldsMap & { id: string })[];
@@ -167,19 +169,19 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
       // TODO: optimize, don't parse if no hashtags
       let hashtags = LinkUtils.findHashTags({ links: note.links });
       let fields = {};
+      this.L.debug({ ctx, note: NoteUtils.toLogObj(note), msg: "enter" });
       for (const [key, fieldMapping] of Object.entries<SrcFieldMapping>(
         srcFieldMapping
       )) {
         // handle legacy mapping
         if (_.isString(fieldMapping)) {
           const val = _.get(note, `${fieldMapping}`);
-          if (_.isUndefined(val)) {
-            return;
+          if (!_.isUndefined(val)) {
+            fields = {
+              ...fields,
+              [key]: val.toString(),
+            };
           }
-          fields = {
-            ...fields,
-            [key]: val.toString(),
-          };
         } else {
           let val = _.get(note, fieldMapping.to);
           if (fieldMapping.type === "date") {
@@ -202,29 +204,32 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
                 )}`,
               });
             }
-            if (hashtags.length === 0) {
-              return;
+            if (hashtags.length !== 0) {
+              val = hashtags[0].value.replace(/^tags./, "");
             }
-            val = hashtags[0].value.replace(/^tags./, "");
           } else {
             // no value found
-            if (!val) {
-              return;
+            if (val) {
+              val = val.toString();
             }
-            val = val.toString();
           }
-          fields = {
-            ...fields,
-            [key]: val,
-          };
+
+          if (val) {
+            fields = {
+              ...fields,
+              [key]: val,
+            };
+          }
         }
       }
       if (AirtableUtils.checkNoteHasAirtableId(note)) {
+        this.L.debug({ ctx, noteId: note.id, msg: "updating" });
         recordSets.update.push({
           fields,
           id: AirtableUtils.getAirtableIdFromNote(note),
         });
       } else {
+        this.L.debug({ ctx, noteId: note.id, msg: "creating" });
         recordSets.create.push({ fields });
       }
       if (note.created > recordSets.lastCreated) {
@@ -233,6 +238,7 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
       if (note.updated > recordSets.lastUpdated) {
         recordSets.lastCreated = note.updated;
       }
+      this.L.debug({ ctx, noteId: note.id, msg: "exit" });
       return;
     });
     return recordSets;
@@ -366,7 +372,6 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
             ...note,
             custom: { ...note.custom, airtableId },
           };
-          console.log(updatedNote);
           const out = await engine.writeNote(updatedNote, {
             updateExisting: true,
           });

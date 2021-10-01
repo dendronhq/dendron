@@ -1,5 +1,5 @@
 import {
-  DendronConfig,
+  IntermediateDendronConfig,
   DVault,
   NoteUtils,
   SchemaUtils,
@@ -278,7 +278,7 @@ suite("VaultAddCommand", function () {
           // check config
           const config = readYAML(
             path.join(wsRoot, "dendron.yml")
-          ) as DendronConfig;
+          ) as IntermediateDendronConfig;
           expect(config.site.duplicateNoteBehavior).toEqual({
             action: "useVault",
             payload: [VaultUtils.getName(vault), "vault2"],

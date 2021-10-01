@@ -1,4 +1,7 @@
-import { InstallStatus, LookupSelectionType } from "@dendronhq/common-all";
+import {
+  InstallStatus,
+  LegacyLookupSelectionType
+} from "@dendronhq/common-all";
 import {
   ALL_MIGRATIONS,
   DConfig,
@@ -265,7 +268,7 @@ suite("Migration", function () {
           const wsService = new WorkspaceService({ wsRoot });
           expect(
             wsConfig?.settings[CONFIG.DEFAULT_LOOKUP_CREATE_BEHAVIOR.key]
-          ).toEqual(LookupSelectionType.selection2link);
+          ).toEqual(LegacyLookupSelectionType.selection2link);
           expect(_.isUndefined(dendronConfig.lookup)).toBeTruthy();
           await MigrationServce.applyMigrationRules({
             currentVersion: "0.55.2",
@@ -277,14 +280,14 @@ suite("Migration", function () {
             migrations: getMigration({ from: "0.55.0", to: "0.55.2" }),
           });
           expect(getDWorkspace().config.lookup.note.selectionType).toEqual(
-            LookupSelectionType.selection2link
+            LegacyLookupSelectionType.selection2link
           );
           done();
         },
         wsSettingsOverride: {
           settings: {
             [CONFIG.DEFAULT_LOOKUP_CREATE_BEHAVIOR.key]:
-              LookupSelectionType.selection2link,
+              LegacyLookupSelectionType.selection2link,
           },
         },
       });

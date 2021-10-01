@@ -1,9 +1,9 @@
 import {
-  DendronConfig,
+  IntermediateDendronConfig,
   DNodePropsQuickInputV2,
   DNodeUtils,
   DVault,
-  LookupSelectionType,
+  LegacyLookupSelectionType,
   NoteQuickInput,
   NoteUtils,
   Time,
@@ -666,7 +666,7 @@ suite("NoteLookupCommand", function () {
   });
 
   describe("onAccept with lookupConfirmVaultOnCreate", () => {
-    const modConfigCb = (config: DendronConfig) => {
+    const modConfigCb = (config: IntermediateDendronConfig) => {
       config.lookupConfirmVaultOnCreate = true;
       return config;
     };
@@ -998,8 +998,8 @@ suite("NoteLookupCommand", function () {
     test("selection modifier set to none in configs", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
-        modConfigCb: (config: DendronConfig) => {
-          config.lookup.note.selectionType = LookupSelectionType.none;
+        modConfigCb: (config: IntermediateDendronConfig) => {
+          config.lookup.note.selectionType = LegacyLookupSelectionType.none;
           return config;
         },
         preSetupHook: async ({ wsRoot, vaults }) => {
@@ -1028,7 +1028,7 @@ suite("NoteLookupCommand", function () {
           const cmd = new NoteLookupCommand();
           stubVaultPick(vaults);
           const gatherOut = await cmd.gatherInputs({
-            selectionType: LookupSelectionType.none,
+            selectionType: LookupSelectionTypeEnum.none,
           });
           const { selection2linkBtn, selectionExtractBtn } =
             getSelectionTypeButtons(gatherOut.quickpick.buttons);

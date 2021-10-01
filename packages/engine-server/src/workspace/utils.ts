@@ -1,5 +1,5 @@
 import {
-  DendronConfig,
+  IntermediateDendronConfig,
   DendronError,
   DNodeUtils,
   DVault,
@@ -119,7 +119,7 @@ export class WorkspaceUtils {
    *
    */
   static getNoteUrl(opts: {
-    config: DendronConfig;
+    config: IntermediateDendronConfig;
     note: NoteProps;
     vault: DVault;
     urlRoot?: string;

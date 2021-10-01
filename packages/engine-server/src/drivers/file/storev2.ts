@@ -3,7 +3,7 @@ import {
   BulkAddNoteOpts,
   CONSTANTS,
   DendronCompositeError,
-  DendronConfig,
+  IntermediateDendronConfig,
   DendronError,
   DEngineClient,
   DEngineDeleteSchemaResp,
@@ -84,7 +84,7 @@ export class FileStorage implements DStore {
   public anchors: DNoteAnchorPositioned[];
   public wsRoot: string;
   public configRoot: string;
-  public config: DendronConfig;
+  public config: IntermediateDendronConfig;
   private engine: DEngineClient;
 
   constructor(props: { engine: DEngineClient; logger: DLogger }) {

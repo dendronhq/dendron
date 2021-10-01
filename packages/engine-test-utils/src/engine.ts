@@ -1,7 +1,7 @@
 import {
   CleanDendronSiteConfig,
   CONSTANTS,
-  DendronConfig,
+  IntermediateDendronConfig,
   DEngineClient,
   DVault,
   DWorkspace,
@@ -26,11 +26,11 @@ import {
   TestResult,
 } from "@dendronhq/common-test-utils";
 import { LaunchEngineServerCommand } from "@dendronhq/dendron-cli";
-import { WorkspaceConfig } from "@dendronhq/engine-server";
 import {
   createEngine as engineServerCreateEngine,
   DConfig,
   WorkspaceService,
+  WorkspaceConfig
 } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -55,7 +55,9 @@ export type TestSetupWorkspaceOpts = {
   /**
    * Modify dendron config before initialization
    */
-  modConfigCb?: (config: DendronConfig) => DendronConfig;
+  modConfigCb?: (
+    config: IntermediateDendronConfig
+  ) => IntermediateDendronConfig;
   git?: {
     initVaultWithRemote?: boolean;
     branchName?: string;

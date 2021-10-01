@@ -1,7 +1,7 @@
 import {
   APIUtils,
   AssetGetThemeRequest,
-  DendronConfig,
+  IntermediateDendronConfig,
   DMessageSource,
   NoteViewMessageType,
   ThemeTarget,
@@ -121,7 +121,7 @@ const useMermaid = ({
   config,
   themeType,
 }: {
-  config?: DendronConfig;
+  config?: IntermediateDendronConfig;
   themeType: ThemeType;
 }) => {
   React.useEffect(() => {

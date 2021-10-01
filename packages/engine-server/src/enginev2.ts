@@ -4,7 +4,7 @@ import {
   ConfigWriteOpts,
   CONSTANTS,
   DendronCompositeError,
-  DendronConfig,
+  IntermediateDendronConfig,
   DendronError,
   DEngine,
   DEngineClient,
@@ -72,7 +72,7 @@ type DendronEngineOptsV2 = {
   createStore?: CreateStoreFunc;
   mode?: DEngineMode;
   logger?: DLogger;
-  config: DendronConfig;
+  config: IntermediateDendronConfig;
 };
 type DendronEnginePropsV2 = Required<DendronEngineOptsV2>;
 
@@ -82,7 +82,7 @@ type CachedPreview = {
 };
 
 function createRenderedCache(
-  config: DendronConfig,
+  config: IntermediateDendronConfig,
   logger: DLogger
 ): Cache<string, CachedPreview> {
   const ctx = "createRenderedCache";
@@ -127,7 +127,7 @@ export class DendronEngineV2 implements DEngine {
   public fuseEngine: FuseEngine;
   public links: DLink[];
   public configRoot: string;
-  public config: DendronConfig;
+  public config: IntermediateDendronConfig;
   public hooks: DHookDict;
   private _vaults: DVault[];
   private renderedCache: Cache<string, CachedPreview>;
@@ -155,7 +155,7 @@ export class DendronEngineV2 implements DEngine {
     const LOGGER = logger || createLogger();
     const cpath = DConfig.configPath(wsRoot);
     const config = _.defaultsDeep(
-      readYAML(cpath) as DendronConfig,
+      readYAML(cpath) as IntermediateDendronConfig,
       DConfig.genDefaultConfig()
     );
 
@@ -377,7 +377,7 @@ export class DendronEngineV2 implements DEngine {
   async getConfig() {
     const cpath = DConfig.configPath(this.configRoot);
     const config = _.defaultsDeep(
-      readYAML(cpath) as DendronConfig,
+      readYAML(cpath) as IntermediateDendronConfig,
       DConfig.genDefaultConfig()
     );
 

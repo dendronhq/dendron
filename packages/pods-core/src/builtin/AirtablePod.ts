@@ -9,6 +9,7 @@ import {
   NoteUtils,
   StatusCodes,
 } from "@dendronhq/common-all";
+import { createLogger, DLogger } from "@dendronhq/common-server";
 import { LinkUtils } from "@dendronhq/engine-server";
 import Airtable, { FieldSet, Records } from "airtable";
 import { JSONSchemaType } from "ajv";
@@ -17,7 +18,14 @@ import { RateLimiter } from "limiter";
 import _ from "lodash";
 import path from "path";
 import { URI } from "vscode-uri";
-import { ExportPod, ExportPodConfig, ExportPodPlantOpts } from "../basev3";
+import {
+  ExportPod,
+  ExportPodConfig,
+  ExportPodPlantOpts,
+  PublishPod,
+  PublishPodConfig,
+  PublishPodPlantOpts,
+} from "../basev3";
 import { PodUtils } from "../utils";
 
 const ID = "dendron.airtable";
@@ -26,14 +34,18 @@ const ID = "dendron.airtable";
 // @ts-ignore
 const limiter = new RateLimiter({ tokensPerInterval: 5, interval: "second" });
 
-type AirtableExportPodCustomOpts = {
+type AirtablePodCustomOptsCommon = {
   tableName: string;
-  srcHierarchy: string;
   apiKey: string;
   baseId: string;
+};
+
+type AirtableExportPodCustomOpts = AirtablePodCustomOptsCommon & {
+  srcHierarchy: string;
   srcFieldMapping: { [key: string]: SrcFieldMapping };
   noCheckpointing?: boolean;
 };
+type AirtablePublishPodCustomOpts = AirtablePodCustomOptsCommon & {};
 
 type SrcFieldMapping =
   | {
@@ -48,6 +60,9 @@ type AirtableFieldsMap = { fields: { [key: string]: string | number } };
 export type AirtableExportConfig = ExportPodConfig &
   AirtableExportPodCustomOpts;
 
+export type AirtablePublishConfig = PublishPodConfig &
+  AirtablePublishPodCustomOpts;
+
 type AirtableExportPodProcessProps = AirtableExportPodCustomOpts & {
   filteredNotes: NoteProps[];
   checkpoint: string;
@@ -58,6 +73,9 @@ class AirtableUtils {
     return !_.isUndefined(_.get(note.custom, "airtableId"));
   }
 
+  static filterNotes(notes: NoteProps[], srcHierarchy: string) {
+    return notes.filter((note) => note.fname.includes(srcHierarchy));
+  }
   static getAirtableIdFromNote(note: NoteProps): string {
     return _.get(note.custom, "airtableId");
   }
@@ -106,53 +124,13 @@ class AirtableUtils {
     );
     return _.flatten(out);
   }
-}
 
-export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
-  static id: string = ID;
-  static description: string = "export notes to airtable";
-
-  get config(): JSONSchemaType<AirtableExportConfig> {
-    return PodUtils.createExportConfig({
-      required: [
-        "tableName",
-        "srcHierarchy",
-        "baseId",
-        "apiKey",
-        "srcFieldMapping",
-      ],
-      properties: {
-        tableName: { type: "string", description: "Name of the airtable" },
-        srcHierarchy: {
-          type: "string",
-          description: "The src .md file from where to start the sync",
-        },
-        apiKey: {
-          type: "string",
-          description: "Api key for airtable",
-        },
-        baseId: {
-          type: "string",
-          description: " base Id of airtable base",
-        },
-        noCheckpointing: {
-          type: "boolean",
-          description: "turn off checkpointing",
-        },
-        srcFieldMapping: {
-          type: "object",
-          description:
-            "mapping of airtable fields with the note eg: {Created On: created, Notes: body}",
-        },
-      },
-    }) as JSONSchemaType<AirtableExportConfig>;
-  }
-
-  //filters the note's property as per srcFieldMapping provided
-  notesToSrcFieldMap(
-    notes: NoteProps[],
-    srcFieldMapping: { [key: string]: SrcFieldMapping }
-  ) {
+  static notesToSrcFieldMap(opts: {
+    notes: NoteProps[];
+    srcFieldMapping: { [key: string]: SrcFieldMapping };
+    logger: DLogger;
+  }) {
+    const { notes, srcFieldMapping, logger } = opts;
     const ctx = "notesToSrc";
     const recordSets: {
       create: AirtableFieldsMap[];
@@ -169,7 +147,7 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
       // TODO: optimize, don't parse if no hashtags
       let hashtags = LinkUtils.findHashTags({ links: note.links });
       let fields = {};
-      this.L.debug({ ctx, note: NoteUtils.toLogObj(note), msg: "enter" });
+      logger.debug({ ctx, note: NoteUtils.toLogObj(note), msg: "enter" });
       for (const [key, fieldMapping] of Object.entries<SrcFieldMapping>(
         srcFieldMapping
       )) {
@@ -223,13 +201,13 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
         }
       }
       if (AirtableUtils.checkNoteHasAirtableId(note)) {
-        this.L.debug({ ctx, noteId: note.id, msg: "updating" });
+        logger.debug({ ctx, noteId: note.id, msg: "updating" });
         recordSets.update.push({
           fields,
           id: AirtableUtils.getAirtableIdFromNote(note),
         });
       } else {
-        this.L.debug({ ctx, noteId: note.id, msg: "creating" });
+        logger.debug({ ctx, noteId: note.id, msg: "creating" });
         recordSets.create.push({ fields });
       }
       if (note.created > recordSets.lastCreated) {
@@ -238,10 +216,93 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
       if (note.updated > recordSets.lastUpdated) {
         recordSets.lastCreated = note.updated;
       }
-      this.L.debug({ ctx, noteId: note.id, msg: "exit" });
+      logger.debug({ ctx, noteId: note.id, msg: "exit" });
       return;
     });
     return recordSets;
+  }
+}
+
+export class AirtablePublishPod extends PublishPod<AirtablePublishConfig> {
+  static id: string = ID;
+  static description: string = "publish json";
+
+  get config(): JSONSchemaType<AirtablePublishConfig> {
+    return PodUtils.createPublishConfig({
+      required: ["tableName", "baseId", "apiKey", "srcFieldMapping"],
+      properties: {
+        tableName: { type: "string", description: "Name of the airtable" },
+        apiKey: {
+          type: "string",
+          description: "Api key for airtable",
+        },
+        baseId: {
+          type: "string",
+          description: " base Id of airtable base",
+        },
+        srcFieldMapping: {
+          type: "object",
+          description:
+            "mapping of airtable fields with the note eg: {Created On: created, Notes: body}",
+        },
+      },
+    }) as JSONSchemaType<AirtablePublishConfig>;
+  }
+
+  async plant(opts: PublishPodPlantOpts) {
+    const { config, note } = opts;
+    const { apiKey, baseId, tableName, srcFieldMapping } =
+      config as AirtableExportConfig;
+
+    const { update } = AirtableUtils.notesToSrcFieldMap({
+      notes: [note],
+      srcFieldMapping,
+      logger: createLogger("AirtablePod"),
+    });
+    const base = new Airtable({ apiKey }).base(baseId);
+    const out = await base(tableName).update(update);
+    return out[0].getId();
+  }
+}
+
+export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
+  static id: string = ID;
+  static description: string = "export notes to airtable";
+
+  get config(): JSONSchemaType<AirtableExportConfig> {
+    return PodUtils.createExportConfig({
+      required: [
+        "tableName",
+        "srcHierarchy",
+        "baseId",
+        "apiKey",
+        "srcFieldMapping",
+      ],
+      properties: {
+        tableName: { type: "string", description: "Name of the airtable" },
+        srcHierarchy: {
+          type: "string",
+          description: "The src .md file from where to start the sync",
+        },
+        apiKey: {
+          type: "string",
+          description: "Api key for airtable",
+        },
+        baseId: {
+          type: "string",
+          description: " base Id of airtable base",
+        },
+        noCheckpointing: {
+          type: "boolean",
+          description: "turn off checkpointing",
+        },
+        srcFieldMapping: {
+          type: "object",
+          description:
+            "mapping of airtable fields with the note eg: {Created On: created, Notes: body}",
+        },
+      },
+    }) as JSONSchemaType<AirtableExportConfig>;
   }
 
   async processNote(opts: AirtableExportPodProcessProps) {
@@ -254,10 +315,11 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
       srcFieldMapping,
     } = opts;
 
-    const { create, update, lastCreated } = this.notesToSrcFieldMap(
-      filteredNotes,
-      srcFieldMapping
-    );
+    const { create, update, lastCreated } = AirtableUtils.notesToSrcFieldMap({
+      notes: filteredNotes,
+      srcFieldMapping,
+      logger: this.L,
+    });
 
     const base = new Airtable({ apiKey }).base(baseId);
     const createRequest = _.isEmpty(create)
@@ -309,7 +371,9 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
     const checkpoint: string = this.verifyDir(dest);
 
     let filteredNotes: NoteProps[] =
-      srcHierarchy === "root" ? notes : this.filterNotes(notes, srcHierarchy);
+      srcHierarchy === "root"
+        ? notes
+        : AirtableUtils.filterNotes(notes, srcHierarchy);
     filteredNotes = _.orderBy(filteredNotes, ["created"], ["asc"]);
 
     // unless disabled, only process notes that haven't already been processed

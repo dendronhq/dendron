@@ -2,6 +2,7 @@ import {
   axios,
   DateTime,
   DendronError,
+  DEngineClient,
   ErrorUtils,
   ERROR_SEVERITY,
   NoteProps,
@@ -44,6 +45,12 @@ export type AirtableExportConfig = ExportPodConfig &
 type AirtableExportPodProcessProps = AirtableExportPodCustomOpts & {
   filteredNotes: NoteProps[];
   checkpoint: string;
+};
+
+type AirtableRecord = {
+  id: string;
+  fields: any;
+  createdTime: string;
 };
 
 export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
@@ -125,7 +132,9 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
     return data;
   }
 
-  async processNote(opts: AirtableExportPodProcessProps) {
+  async processNote(
+    opts: AirtableExportPodProcessProps
+  ): Promise<AirtableRecord[]> {
     const {
       filteredNotes,
       apiKey,
@@ -147,7 +156,7 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
     const sendRequest = async () => {
       let total: number = 0;
       return Promise.all(
-        chunks.map(async (record) => {
+        chunks.flatMap(async (record) => {
           // @ts-ignore
           await limiter.removeTokens(1);
           const data = JSON.stringify({ records: record });
@@ -157,13 +166,15 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
               data,
               { headers: headers }
             );
-            total = total + result.data.records.length;
+            const records = result.data.records as AirtableRecord[];
+            total = total + records.length;
             if (total === filteredNotes.length) {
               const timestamp = filteredNotes[filteredNotes.length - 1].created;
               fs.writeFileSync(checkpoint, timestamp.toString(), {
                 encoding: "utf8",
               });
             }
+            return records;
           } catch (error) {
             let payload: any = { data };
             let _error: DendronError;
@@ -195,7 +206,7 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
         })
       );
     };
-    await sendRequest();
+    return _.flatten(await sendRequest());
   }
 
   verifyDir(dest: URI) {
@@ -217,7 +228,7 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
   }
 
   async plant(opts: ExportPodPlantOpts) {
-    const { notes, config, dest } = opts;
+    const { notes, config, dest, engine } = opts;
     const {
       apiKey,
       baseId,
@@ -246,7 +257,7 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
     }
 
     if (filteredNotes.length > 0) {
-      await this.processNote({
+      const records = await this.processNote({
         filteredNotes,
         apiKey,
         baseId,
@@ -255,6 +266,7 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
         srcHierarchy,
         checkpoint,
       });
+      await this._updateNotes({ records, engine });
     } else {
       throw new DendronError({
         message:
@@ -263,5 +275,38 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
     }
 
     return { notes };
+  }
+
+  async _updateNotes({
+    records,
+    engine,
+  }: {
+    records: AirtableRecord[];
+    engine: DEngineClient;
+  }) {
+    const out = await Promise.all(
+      records.map(async (ent) => {
+        const airtableId = ent.id;
+        const dendronId = ent.fields["DendronId"];
+        const note = engine.notes[dendronId];
+        const noteAirtableId = _.get(note.custom, "airtableId");
+        if (!noteAirtableId) {
+          const updatedNote = {
+            ...note,
+            custom: { ...note.custom, airtableId },
+          };
+          console.log(updatedNote);
+          const out = await engine.writeNote(updatedNote, {
+            updateExisting: true,
+          });
+          return out;
+        }
+        return undefined;
+      })
+    );
+
+    this.L.info({
+      msg: `${out.filter((n) => !_.isUndefined(n)).length} notes updated`,
+    });
   }
 }

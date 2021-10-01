@@ -43,6 +43,7 @@ export class ExportPodCLICommand extends CLICommand<
   }
 
   async execute(opts: CommandOpts): Promise<CommandOutput> {
+    const ctx = "execute";
     const {
       podClass: PodClass,
       config,
@@ -56,8 +57,10 @@ export class ExportPodCLICommand extends CLICommand<
     // eslint-disable-next-line no-console
     console.log("running pod...");
     await pod.execute({ wsRoot, config, engine, vaults });
+    this.L.info({ ctx, msg: "done execute" });
     return new Promise((resolve) => {
       server.close((err: any) => {
+        this.L.info({ ctx, msg: "closing server" });
         // close outstanding connections
         serverSockets?.forEach((socket) => socket.destroy());
         if (err) {

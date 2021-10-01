@@ -173,9 +173,13 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
       )) {
         // handle legacy mapping
         if (_.isString(fieldMapping)) {
+          const val = _.get(note, `${fieldMapping}`);
+          if (_.isUndefined(val)) {
+            return;
+          }
           fields = {
             ...fields,
-            [key]: _.get(note, `${fieldMapping}`).toString(),
+            [key]: val.toString(),
           };
         } else {
           let val = _.get(note, fieldMapping.to);
@@ -204,6 +208,10 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
             }
             val = hashtags[0].value.replace(/^tags./, "");
           } else {
+            // no value found
+            if (!val) {
+              return;
+            }
             val = val.toString();
           }
           fields = {

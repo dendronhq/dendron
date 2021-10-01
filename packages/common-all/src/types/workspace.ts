@@ -2,6 +2,7 @@ import { URI } from "vscode-uri";
 import { DHookDict } from "./hooks";
 import { SeedSite } from "./seed";
 import { DEngineClient } from "./typesv2";
+import { IntermediateDendronConfig } from "./intermediateConfigs";
 
 // === Primitives
 export type DPermission = {
@@ -82,7 +83,7 @@ export type DWorkspaceV2 = {
    */
   wsRoot: string;
   type: WorkspaceType;
-  config: DendronConfig;
+  config: IntermediateDendronConfig;
   vaults: DVault[];
   engine: DEngineClient;
   /**
@@ -122,22 +123,22 @@ export enum NoteAddBehavior {
   "asOwnDomain" = "asOwnDomain",
 }
 
-export enum LookupSelectionType {
+export enum LegacyLookupSelectionType {
   "selection2link" = "selection2link",
   "selectionExtract" = "selectionExtract",
   "none" = "none",
 }
 
-export type NoteLookupConfig = {
-  selectionType: LookupSelectionType;
+export type LegacyNoteLookupConfig = {
+  selectionType: LegacyLookupSelectionType;
   leaveTrace: boolean;
 };
 
-export type LookupConfig = {
-  note: NoteLookupConfig;
+export type LegacyLookupConfig = {
+  note: LegacyNoteLookupConfig;
 };
 
-export enum InsertNoteLinkAliasMode {
+export enum LegacyInsertNoteLinkAliasMode {
   "snippet" = "snippet",
   "selection" = "selection",
   "title" = "title",
@@ -145,8 +146,8 @@ export enum InsertNoteLinkAliasMode {
   "none" = "none",
 }
 
-export type InsertNoteLinkConfig = {
-  aliasMode: InsertNoteLinkAliasMode;
+export type LegacyInsertNoteLinkConfig = {
+  aliasMode: LegacyInsertNoteLinkAliasMode;
   multiSelect: boolean;
 };
 
@@ -200,13 +201,13 @@ export type DendronConfig = {
   /**
    * Configuration related to lookup v3.
    */
-  lookup: LookupConfig;
+  lookup: LegacyLookupConfig;
 
   journal: JournalConfig;
 
   scratch?: ScratchConfig;
 
-  insertNoteLink?: InsertNoteLinkConfig;
+  insertNoteLink?: LegacyInsertNoteLinkConfig;
 
   /**
    * Workspaces
@@ -328,7 +329,7 @@ export type DendronConfig = {
   /**
    * Configuration for Random Note Lookup Command
    */
-  randomNote?: RandomNoteConfig;
+  randomNote?: LegacyRandomNoteConfig;
 
   /** Automatically fold frontmatter when opening a new note. False by default. */
   autoFoldFrontmatter?: boolean;
@@ -336,7 +337,7 @@ export type DendronConfig = {
   /**
    * Configuration for Insert Note Index Command
    */
-  insertNoteIndex?: InsertNoteIndexConfig;
+  insertNoteIndex?: LegacyInsertNoteIndexConfig;
 
   /** Notes that are too large can cause serious slowdowns for Dendron. For
    * notes longer than this many characters, some features like backlinks will
@@ -364,7 +365,7 @@ export type DendronConfig = {
   noRandomlyColoredTags?: boolean;
 };
 
-export type RandomNoteConfig = {
+export type LegacyRandomNoteConfig = {
   /**
    * Hiearchies to include
    */
@@ -376,7 +377,7 @@ export type RandomNoteConfig = {
   exclude?: string[];
 };
 
-export type InsertNoteIndexConfig = {
+export type LegacyInsertNoteIndexConfig = {
   /**
    * Include marker when inserting note index.
    */

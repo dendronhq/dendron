@@ -4,7 +4,7 @@ import {
   ERROR_STATUS,
   ErrorFactory,
   ErrorMessages,
-  NoteLookupConfig,
+  LegacyNoteLookupConfig,
   NoteProps,
   NoteQuickInput,
   NoteUtils,
@@ -141,7 +141,7 @@ export class NoteLookupCommand extends BaseCommand<
   async gatherInputs(opts?: CommandRunOpts): Promise<CommandGatherOutput> {
     const start = process.hrtime();
     const ws = getDWorkspace();
-    const noteLookupConfig: NoteLookupConfig = DConfig.getProp(
+    const noteLookupConfig: LegacyNoteLookupConfig = DConfig.getProp(
       ws.config,
       "lookup"
     ).note;

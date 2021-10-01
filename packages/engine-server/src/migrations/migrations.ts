@@ -1,4 +1,8 @@
-import { LookupConfig, LookupSelectionType, ScratchConfig } from "@dendronhq/common-all";
+import { 
+  LegacyLookupConfig, 
+  LegacyLookupSelectionType, 
+  ScratchConfig 
+} from "@dendronhq/common-all";
 import {
   SegmentClient,
   TelemetryStatus,
@@ -19,12 +23,12 @@ export const ALL_MIGRATIONS: Migrations[] = [
       {
         name: "migrate note lookup config",
         func: async ({ dendronConfig, wsConfig }) => {
-          dendronConfig.lookup = DConfig.genDefaultConfig().lookup as LookupConfig;
+          dendronConfig.lookup = DConfig.genDefaultConfig().lookup as LegacyLookupConfig;
           const oldLookupCreateBehavior = _.get(
             wsConfig.settings, 
             "dendron.defaultLookupCreateBehavior",
             undefined,
-          ) as LookupSelectionType;
+          ) as LegacyLookupSelectionType;
           if (oldLookupCreateBehavior !== undefined) {
             dendronConfig.lookup.note.selectionType = oldLookupCreateBehavior;
           }

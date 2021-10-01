@@ -1,12 +1,13 @@
 import {
   CleanDendronSiteConfig,
   CONSTANTS,
-  DendronConfig,
+  IntermediateDendronConfig,
+  IntermediateDendronConfigUtils,
   DendronError,
   DendronSiteConfig,
   ERROR_STATUS,
   getStage,
-  LookupSelectionType,
+  LegacyLookupSelectionType,
   NoteAddBehavior,
 } from "@dendronhq/common-all";
 import { readYAML, writeYAML } from "@dendronhq/common-server";
@@ -15,7 +16,7 @@ import _ from "lodash";
 import path from "path";
 
 export class ConfigUtils {
-  static usePrettyRef(config: DendronConfig) {
+  static usePrettyRef(config: IntermediateDendronConfig) {
     let usePrettyRefs: boolean | undefined = _.find(
       [config?.usePrettyRefs, config?.site?.usePrettyRefs],
       (ent) => !_.isUndefined(ent)
@@ -32,11 +33,13 @@ export class DConfig {
     return path.join(configRoot, CONSTANTS.DENDRON_CONFIG_FILE);
   }
 
-  static defaults(config: DendronConfig): DendronConfig {
+  static defaults(
+    config: IntermediateDendronConfig
+  ): IntermediateDendronConfig {
     return _.defaults(config, { initializeRemoteVaults: true });
   }
 
-  static genDefaultConfig(): DendronConfig {
+  static genDefaultConfig(): IntermediateDendronConfig {
     return {
       version: 1,
       maxPreviewsCached: 10,
@@ -56,7 +59,7 @@ export class DConfig {
       },
       lookup: {
         note: {
-          selectionType: LookupSelectionType.selectionExtract,
+          selectionType: LegacyLookupSelectionType.selectionExtract,
           leaveTrace: false,
         },
       },
@@ -82,6 +85,7 @@ export class DConfig {
         siteLastModified: true,
         gh_edit_branch: "main",
       },
+      commands: IntermediateDendronConfigUtils.genDefaultCommandConfig()
     };
   }
 
@@ -91,23 +95,28 @@ export class DConfig {
    */
   static getRaw(wsRoot: string) {
     const configPath = DConfig.configPath(wsRoot);
-    const config = readYAML(configPath) as Partial<DendronConfig>;
+    const config = readYAML(configPath) as Partial<
+      IntermediateDendronConfig
+    >;
     return config;
   }
 
   static getOrCreate(
     dendronRoot: string,
-    defaults?: Partial<DendronConfig>
-  ): DendronConfig {
+    defaults?: Partial<IntermediateDendronConfig>
+  ): IntermediateDendronConfig {
     const configPath = DConfig.configPath(dendronRoot);
-    let config: DendronConfig = { ...defaults, ...DConfig.genDefaultConfig() };
+    let config: IntermediateDendronConfig = { 
+      ...defaults, 
+      ...DConfig.genDefaultConfig() 
+    };
     if (!fs.existsSync(configPath)) {
       writeYAML(configPath, config);
     } else {
       config = {
         ...config,
         ...readYAML(configPath),
-      } as DendronConfig;
+      } as IntermediateDendronConfig;
     }
     return config;
   }
@@ -116,14 +125,14 @@ export class DConfig {
    * Get config value with consideration for defaults
    * @param config
    */
-  static getProp<K extends keyof DendronConfig>(
-    config: DendronConfig,
+  static getProp<K extends keyof IntermediateDendronConfig>(
+    config: IntermediateDendronConfig,
     key: K
-  ): DendronConfig[K] {
+  ): IntermediateDendronConfig[K] {
     const cConfig = _.defaults(
       config,
       this.genDefaultConfig()
-    ) as Required<DendronConfig>;
+    ) as Required<IntermediateDendronConfig>;
     return cConfig[key];
   }
 
@@ -186,7 +195,7 @@ export class DConfig {
     config,
   }: {
     wsRoot: string;
-    config: DendronConfig;
+    config: IntermediateDendronConfig;
   }) {
     const configPath = DConfig.configPath(wsRoot);
     return writeYAML(configPath, config);

@@ -1,5 +1,5 @@
 import {
-  InsertNoteLinkAliasMode,
+  LegacyInsertNoteLinkAliasMode,
   NoteProps,
   NoteUtils,
 } from "@dendronhq/common-all";
@@ -19,7 +19,7 @@ import { BasicCommand } from "./base";
 
 type CommandInput = {
   multiSelect?: boolean;
-  aliasMode?: keyof typeof InsertNoteLinkAliasMode;
+  aliasMode?: keyof typeof LegacyInsertNoteLinkAliasMode;
 };
 
 type CommandOpts = {

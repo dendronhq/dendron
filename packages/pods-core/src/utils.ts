@@ -224,7 +224,7 @@ export class PodUtils {
       const errors = ajv.errorsText(validateConfig.errors);
       throw new DendronError({
         message: `validation errors: ${errors}`,
-        payload: `error: ${errors}`,
+        payload: `error: ${JSON.stringify(validateConfig.errors)}`,
       });
     }
   }

@@ -4,7 +4,7 @@ import {
   JSONImportPod,
   JSONPublishPod,
 } from "./builtin";
-import { AirtableExportPod } from "./builtin/AirtablePod";
+import { AirtableExportPod, AirtablePublishPod } from "./builtin/AirtablePod";
 import { GDocImportPod } from "./builtin/GDocPod";
 import {
   GithubIssueImportPod,
@@ -43,6 +43,7 @@ export function getAllPublishPods(): PodClassEntryV4[] {
     MarkdownPublishPod,
     HTMLPublishPod,
     GithubIssuePublishPod,
+    AirtablePublishPod,
   ];
 }
 export function getAllImportPods(): PodClassEntryV4[] {

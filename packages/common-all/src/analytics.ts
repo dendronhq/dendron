@@ -44,6 +44,17 @@ export enum SurveyEvents {
   UseCaseRejected = "Use_Case_Rejected",
   PriorToolsAnswered = "Prior_Tools_Answered",
   PriorToolsRejected = "Prior_Tools_Rejected",
+  LapsedUserSurveyPrompted = "Lapsed_User_Survey_Prompted",
+  LapsedUserSurveyAccepted = "Lapsed_User_Survey_Accepted",
+  LapsedUserSurveyRejected = "Lapsed_User_Survey_Rejected",
+  LapsedUserReasonAnswered = "Lapsed_User_Reason_Answered",
+  LapsedUserReasonRejected = "Lapsed_User_Reason_Rejected",
+  LapsedUserGettingStartedHelpAnswered = "Lapsed_User_Getting_Started_Help_Answered",
+  LapsedUserGettingStartedHelpRejected = "Lapsed_User_Getting_Started_Help_Rejected",
+  LapsedUserAdditionalCommentAnswered = "Lapsed_User_Additional_Comment_Answered",
+  LapsedUserAdditionalCommentRejected = "Lapsed_User_Additional_Comment_Rejected",
+  LapsedUserDiscordPlugAnswered = "Lapsed_User_Discord_Plug_Answered",
+  LapsedUserDiscordPlugRejected = "Lapsed_User_Discord_Plug_Rejected",
 }
 
 export const DendronEvents = {

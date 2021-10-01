@@ -5,14 +5,55 @@ import _ from "lodash";
 import { Logger } from "./logger";
 import { StateService } from "./services/stateService";
 import { GLOBAL_STATE } from "./constants";
+import { resolve } from "path";
 
-export class DendronSurvey {
+export class DendronQuickInputSurvey {
+  opts: {
+    title: string;
+    ignoreFocusOut: boolean;
+    placeHolder?: string;
+    prompt?: string;
+  }
+
+  constructor(opts: {
+    title: string;
+    placeHolder?: string;
+    prompt?: string;
+  }) {
+    this.opts = {...opts, ignoreFocusOut: true}; 
+  }
+
+  async onAnswer(_opts: any): Promise<void> {
+    return undefined;
+  }
+
+  onReject(_opts?: any): void {
+    return undefined;
+  }
+
+  async show(step: number, total: number) {
+    const progress = `Step ${step} of ${total}`;
+    const title = this.opts.title;
+    const showOpts = {
+      ...this.opts,
+      title: `${title} : ${progress}`,
+    }
+    const result = await vscode.window.showInputBox(showOpts);
+    if (result) {
+      await this.onAnswer(result);
+    } else {
+      this.onReject();
+    }
+
+    return result;
+  }
+}
+export class DendronQuickPickSurvey {
   choices: readonly vscode.QuickPickItem[];
   opts: {
     canPickMany: boolean;
     title: string;
     ignoreFocusOut: boolean;
-    progress?: string;
     placeHolder?: string;
   };
 
@@ -40,6 +81,7 @@ export class DendronSurvey {
   async onAnswer(_opts: any): Promise<void> {
     return undefined;
   }
+
   onReject(_opts?: any): void {
     return undefined;
   }
@@ -62,7 +104,7 @@ export class DendronSurvey {
   }
 }
 
-export class BackgroundSurvey extends DendronSurvey {
+export class BackgroundSurvey extends DendronQuickPickSurvey {
   async onAnswer(results: vscode.QuickPickItem[]) {
     let maybeOtherResult: string | undefined;
     if (results.some(result => result.label === "Other" )) {
@@ -98,7 +140,7 @@ export class BackgroundSurvey extends DendronSurvey {
   }
 }
 
-export class UseCaseSurvey extends DendronSurvey {
+export class UseCaseSurvey extends DendronQuickPickSurvey {
   async onAnswer(results: vscode.QuickPickItem[]) {
     let maybeOtherResult: string | undefined;
     if (results.some(result => result.label === "Other" )) {
@@ -133,7 +175,7 @@ export class UseCaseSurvey extends DendronSurvey {
   }
 }
 
-export class PriorToolsSurvey extends DendronSurvey {
+export class PriorToolsSurvey extends DendronQuickPickSurvey {
   async onAnswer(results: vscode.QuickPickItem[]) {
     let maybeOtherResult: string | undefined;
     if (results.some(result => result.label === "Other" )) {
@@ -169,6 +211,157 @@ export class PriorToolsSurvey extends DendronSurvey {
       { label: "Other" },
     ];
     return new PriorToolsSurvey({ title, choices, canPickMany: true });
+  }
+}
+
+export class LapsedUserReasonSurvey extends DendronQuickPickSurvey {
+  async onAnswer(result: vscode.QuickPickItem) {
+    const label = result.label
+    let extra: string | undefined;
+    let reason: string | undefined;
+    switch(label) {
+      case "I haven't had time to start, but still want to.": {
+        reason = "time";
+        break;
+      }
+      case "I am not sure how to get started.": {
+        reason = "stuck";
+        break;
+      }
+      case "I've encountered a bug which stopped me from using Dendron.": {
+        reason = "bug";
+        extra = await vscode.window.showInputBox({
+          ignoreFocusOut: true,
+          placeHolder: "Type here",
+          prompt: "Could you describe, in simple words, what happened?",
+          title: label
+        });
+        break;
+      }
+      case "I found a different tool that suits me better.": {
+        reason = "tool";
+        extra = await vscode.window.showInputBox({
+          ignoreFocusOut: true,
+          placeHolder: "Type here",
+          prompt: "What feature was missing in Dendron for your use case?",
+          title: label
+        });
+        break;
+      }
+      case "Other": { // "Other"
+        reason = "other"
+        extra = await vscode.window.showInputBox({
+          ignoreFocusOut: true,
+          placeHolder: "Type here",
+          prompt: "Please freely type your reasons here.",
+          title: label,
+        });
+        break;
+      }
+      default: {
+        break;
+      }
+    }
+    
+    AnalyticsUtils.track(SurveyEvents.LapsedUserReasonAnswered, {
+      reason,
+      extra
+    });
+  }
+
+  onReject() {
+    AnalyticsUtils.track(SurveyEvents.LapsedUserReasonRejected);
+  }
+
+  static create() {
+    const title = "What is the reason you haven't started using Dendron yet?";
+    const choices = [
+      { label: "I haven't had time to start, but I still want to." },
+      { label: "I am not sure how to get started." },
+      { label: "I've encountered a bug which stopped me from using Dendron." },
+      { label: "I found a different tool that suits me better." },
+      { label: "Other" },
+    ];
+    return new LapsedUserReasonSurvey({ title, choices, canPickMany: false });
+  } 
+}
+
+export class LapsedUserOnboardingSurvey extends DendronQuickPickSurvey {
+  CALENDLY_URL = "https://calendly.com/d/mqtk-rf7q/onboard";
+  openOnboardingLink: boolean = false;
+
+  async onAnswer(result: vscode.QuickPickItem) {
+    if (result.label === "Yes") {
+      // await this.openUrl(this.CALENDLY_URL);
+      this.openOnboardingLink = true;
+      vscode.window.showInformationMessage(
+        "Thank you for considering an onboarding session.",
+        { modal: true, detail: "We will take you to the link after the survey." },
+        { title: "Proceed with Survey" }
+      )
+    };
+
+    AnalyticsUtils.track(SurveyEvents.LapsedUserGettingStartedHelpAnswered, {
+      result: result.label
+    });
+  };
+
+  onReject() {
+    AnalyticsUtils.track(SurveyEvents.LapsedUserGettingStartedHelpRejected); 
+  };
+
+  static create() {
+    const title = "We offer one-on-one onboarding sessions the help new users get started."
+    const choices = [
+      { label: "Yes" },
+      { label: "No" }
+    ]
+    return new LapsedUserOnboardingSurvey({ title, choices, canPickMany: false, placeHolder: "Would you like to schedule a 30 minute session?" });
+  };
+}
+
+export class LapsedUserAdditionalCommentSurvey extends DendronQuickInputSurvey {
+  async onAnswer(result: string) {
+    AnalyticsUtils.track(SurveyEvents.LapsedUserAdditionalCommentAnswered, {
+      result
+    });
+    resolve();
+  }
+
+  onReject() {
+    AnalyticsUtils.track(SurveyEvents.LapsedUserAdditionalCommentRejected);
+  }
+  
+  static create() {
+    const title = "Do you have any other comments to leave about your experience?";
+    return new LapsedUserAdditionalCommentSurvey({ title });
+  }
+}
+
+export class LapsedUserPlugDiscordSurvey extends DendronQuickPickSurvey {
+  DISCORD_URL = "https://discord.gg/AE3NRw9";
+  openDiscordLink: boolean = false;
+  
+  async onAnswer(result: vscode.QuickPickItem) {
+    if (result.label === "Sure, take me to Discord.") {
+      this.openDiscordLink = true;
+    }
+    AnalyticsUtils.track(SurveyEvents.LapsedUserDiscordPlugAnswered);
+  }
+
+  onReject() {
+    AnalyticsUtils.track(SurveyEvents.LapsedUserDiscordPlugRejected);
+  }
+
+  static create() {
+    const title = "Thanks for sharing feedback. One last thing!";
+    const placeHolder = "We have a Discord community to help new users get started. Would you want an invite?"
+    const choices = [
+      { label: "Sure, take me to Discord." },
+      { label: "I'm already there." },
+      { label: "No thanks."}
+    ];
+    return new LapsedUserPlugDiscordSurvey({ title, choices, placeHolder, canPickMany: false });
   }
 }
 
@@ -222,5 +415,64 @@ export class SurveyUtils {
           Logger.error({msg: error});
         });
     }
+  }
+
+  static async showLapsedUserSurvey() {
+    AnalyticsUtils.track(SurveyEvents.InitialSurveyPrompted);
+    await vscode.window
+      .showInformationMessage(
+        "Could you share some feedback to help us improve?",
+        { modal: true },
+        { title: "Proceed" },
+      ).then(async (resp) => {
+        if (resp?.title === "Proceed") {
+          const reasonSurvey = LapsedUserReasonSurvey.create();
+          const onboardingSurvey = LapsedUserOnboardingSurvey.create();
+          const additionalCommentSurvey = LapsedUserAdditionalCommentSurvey.create();
+          const discordPlugSurvey = LapsedUserPlugDiscordSurvey.create();
+
+          const reasonResults = await reasonSurvey.show(1, 4);
+          const onboardingResults = await onboardingSurvey.show(2, 4);
+          const additionCommentResult = await additionalCommentSurvey.show(3, 4);
+          const discordPlugResult = await discordPlugSurvey.show(4, 4);
+
+          if (onboardingSurvey.openOnboardingLink) {
+            await vscode.commands.executeCommand(
+              "vscode.open",
+              vscode.Uri.parse(onboardingSurvey.CALENDLY_URL)
+            );
+          }
+
+          if (discordPlugSurvey.openDiscordLink) {
+            await vscode.commands.executeCommand(
+              "vscode.open",
+              vscode.Uri.parse(discordPlugSurvey.DISCORD_URL)
+            );
+          }
+
+          const answerCount = [
+            reasonResults,
+            onboardingResults,
+            additionCommentResult,
+            discordPlugResult,
+          ].filter((value) => !_.isUndefined(value)).length;
+          AnalyticsUtils.track(SurveyEvents.LapsedUserSurveyAccepted, {
+            answerCount,
+          });
+
+          await StateService.instance().updateGlobalState(
+            GLOBAL_STATE.LAPSED_USER_SURVEY_SUBMITTED,
+            "submitted"
+          );
+          vscode.window.showInformationMessage("Survey submitted! Thanks for helping us make Dendron better 🌱");
+        } else {
+          vscode.window.showInformationMessage("Survey cancelled.");
+          AnalyticsUtils.track(SurveyEvents.LapsedUserSurveyRejected);
+        }
+      })
+      // @ts-ignore
+      .catch((error: any) => {
+        Logger.error({msg: error});
+      }); 
   }
 }

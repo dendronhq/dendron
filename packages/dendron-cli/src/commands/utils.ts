@@ -85,11 +85,12 @@ export async function setupEngine(
       msg: "connecting to engine",
       enginePort,
       attach: opts.attach,
+      init,
     });
     const engineConnector = EngineConnector.getOrCreate({
       wsRoot,
     });
-    await engineConnector.init({ portOverride: enginePort });
+    await engineConnector.init({ portOverride: enginePort, init });
     engine = engineConnector.engine;
     if (enginePort) {
       port = enginePort;

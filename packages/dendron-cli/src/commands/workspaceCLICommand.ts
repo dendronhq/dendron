@@ -1,4 +1,5 @@
 import { DEngineClient, WorkspaceService } from "@dendronhq/engine-server";
+import _ from "lodash";
 import yargs from "yargs";
 import { CLICommand, CommandCommonProps } from "./base";
 import {
@@ -29,6 +30,7 @@ export enum WorkspaceCommands {
   SYNC = "sync",
   REMOVE_CACHE = "removeCache",
   INIT = "init",
+  INFO = "info",
 }
 
 export { CommandOpts as WorkspaceCLICommandOpts };
@@ -52,13 +54,13 @@ export class WorkspaceCLICommand extends CLICommand<
   }
 
   async enrichArgs(args: CommandCLIOpts): Promise<CommandOpts> {
-    const engineOpts: SetupEngineCLIOpts = { ...args, init: false };
+    const engineOpts: SetupEngineCLIOpts = _.defaults(args, { init: false });
     const engineArgs = await setupEngine(engineOpts);
     return { ...args, ...engineArgs };
   }
 
   async execute(opts: CommandOpts): Promise<CommandOutput> {
-    const { cmd, wsRoot } = opts;
+    const { cmd, wsRoot, engine } = opts;
 
     try {
       switch (cmd) {
@@ -70,7 +72,17 @@ export class WorkspaceCLICommand extends CLICommand<
         case WorkspaceCommands.INIT: {
           const ws = new WorkspaceService({ wsRoot });
           const out = await ws.initialize();
+          await engine?.init();
           return { data: out };
+        }
+        case WorkspaceCommands.INFO: {
+          const resp = await engine?.info();
+          this.L.info({ info: resp });
+          await engine?.sync({ metaOnly: true });
+          const notes = engine?.notes;
+          this.L.info({ notes });
+          this.L.info({ msg: "exit" });
+          return {};
         }
         case WorkspaceCommands.ADD_AND_COMMIT: {
           const ws = new WorkspaceService({ wsRoot });

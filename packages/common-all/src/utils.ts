@@ -7,10 +7,28 @@ import { COLORS_LIST } from "./colors";
 import { NoteProps, SEOProps } from "./types";
 import { DendronConfig } from "./types/workspace";
 
+/**
+ * Dendron utilities
+ */
 export class DUtils {
   static minimatch = minimatch;
   static semver = semver;
   static querystring = querystring;
+
+  /**
+   * Check if string is numeric
+   * Credit to https://stackoverflow.com/questions/175739/built-in-way-in-javascript-to-check-if-a-string-is-a-valid-number
+   * @param str
+   * @returns
+   */
+  static isNumeric(str: string) {
+    if (typeof str != "string") return false; // we only process strings!
+    return (
+      // @ts-ignore
+      !isNaN(str) && // use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
+      !isNaN(parseFloat(str))
+    ); // ...and ensure strings of whitespace fail
+  }
 }
 
 export const getSlugger = () => {

@@ -345,9 +345,17 @@ export class DendronExtension {
     return this.workspaceImpl;
   }
 
-  async getWorkspaceSettings(): Promise<WorkspaceSettings> {
+  /** For Native workspaces (without .code-workspace file) this will return undefined. */
+  async getWorkspaceSettings(): Promise<WorkspaceSettings | undefined> {
+    let workspaceFile: vscode.Uri;
+    try {
+      workspaceFile = DendronExtension.workspaceFile();
+    } catch {
+      // No workspace file exists (or some other disk issue)
+      return undefined;
+    }
     return (await readJSONWithComments(
-      DendronExtension.workspaceFile().fsPath
+      workspaceFile.fsPath
     )) as WorkspaceSettings;
   }
 

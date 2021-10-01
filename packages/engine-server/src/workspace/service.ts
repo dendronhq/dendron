@@ -761,7 +761,7 @@ export class WorkspaceService {
     currentVersion: string;
     previousVersion: string;
     dendronConfig: DendronConfig;
-    wsConfig: WorkspaceSettings;
+    wsConfig?: WorkspaceSettings;
   }) {
     // check if we need to force a migration
     try {

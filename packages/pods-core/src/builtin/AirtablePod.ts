@@ -1,12 +1,11 @@
 import {
+  axios,
+  DateTime,
   DendronError,
   ErrorUtils,
   ERROR_SEVERITY,
   NoteProps,
   StatusCodes,
-  axios,
-  DateTime,
-  DUtils,
 } from "@dendronhq/common-all";
 import { JSONSchemaType } from "ajv";
 import fs from "fs-extra";
@@ -29,6 +28,7 @@ type AirtableExportPodCustomOpts = {
   apiKey: string;
   baseId: string;
   srcFieldMapping: { [key: string]: SrcFieldMapping };
+  noCheckpointing?: boolean;
 };
 
 type SrcFieldMapping =
@@ -72,6 +72,10 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
         baseId: {
           type: "string",
           description: " base Id of airtable base",
+        },
+        noCheckpointing: {
+          type: "boolean",
+          description: "turn off checkpointing",
         },
         srcFieldMapping: {
           type: "object",
@@ -214,20 +218,31 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
 
   async plant(opts: ExportPodPlantOpts) {
     const { notes, config, dest } = opts;
-    const { apiKey, baseId, tableName, srcFieldMapping, srcHierarchy } =
-      config as AirtableExportConfig;
+    const {
+      apiKey,
+      baseId,
+      tableName,
+      srcFieldMapping,
+      srcHierarchy,
+      noCheckpointing,
+    } = config as AirtableExportConfig;
+
     const checkpoint: string = this.verifyDir(dest);
 
     let filteredNotes: NoteProps[] =
       srcHierarchy === "root" ? notes : this.filterNotes(notes, srcHierarchy);
     filteredNotes = _.orderBy(filteredNotes, ["created"], ["asc"]);
-    if (fs.existsSync(checkpoint)) {
-      const lastUpdatedTimestamp: number = Number(
-        fs.readFileSync(checkpoint, { encoding: "utf8" })
-      );
-      filteredNotes = filteredNotes.filter(
-        (note) => note.created > lastUpdatedTimestamp
-      );
+
+    // unless disabled, only process notes that haven't already been processed
+    if (!noCheckpointing) {
+      if (fs.existsSync(checkpoint)) {
+        const lastUpdatedTimestamp: number = Number(
+          fs.readFileSync(checkpoint, { encoding: "utf8" })
+        );
+        filteredNotes = filteredNotes.filter(
+          (note) => note.created > lastUpdatedTimestamp
+        );
+      }
     }
 
     if (filteredNotes.length > 0) {

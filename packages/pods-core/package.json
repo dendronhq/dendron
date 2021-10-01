@@ -55,6 +55,7 @@
     "@instantish/martian": "^1.0.3",
     "@notionhq/client": "^0.1.9",
     "@octokit/graphql": "^4.6.4",
+    "@types/airtable": "^0.10.1",
     "airtable": "^0.11.1",
     "ajv": "^8.6.0",
     "ajv-formats": "^2.1.0",

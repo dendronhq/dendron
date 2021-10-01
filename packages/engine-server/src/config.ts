@@ -9,6 +9,7 @@ import {
   getStage,
   LegacyLookupSelectionType,
   NoteAddBehavior,
+  Time,
 } from "@dendronhq/common-all";
 import { readYAML, writeYAML } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -199,5 +200,24 @@ export class DConfig {
   }) {
     const configPath = DConfig.configPath(wsRoot);
     return writeYAML(configPath, config);
+  }
+
+  /**
+   * Create a backup of dendron.yml with an optional custom infix string.
+   * e.g.) createBackup(wsRoot, "foo") will result in a backup file name
+   * `dendron.yyyy.MM.dd.HHmmssS.foo.yml`
+   * @param wsRoot workspace root
+   * @param infix custom string used in the backup name
+   */
+  static createBackup(wsRoot: string, infix: string): string {
+    const configPath = DConfig.configPath(wsRoot);
+    const today = Time.now().toFormat("yyyy.MM.dd.HHmmssS");
+    const prefix = `dendron.${today}.`;
+    const suffix = `yml`
+    const maybeInfix = infix ? `${infix}.` : "";
+    const backupName = `${prefix}${maybeInfix}${suffix}`;
+    const backupPath = path.join(wsRoot, backupName);
+    fs.copyFileSync(configPath, backupPath);
+    return backupPath;
   }
 }

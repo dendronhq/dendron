@@ -54,6 +54,7 @@
     "@types/unist": "^2.0.3",
     "@types/yamljs": "^0.2.31",
     "axios": "^0.21.1",
+    "chokidar": "^3.5.2",
     "cross-path-sort": "^1.0.0",
     "diff2html": "^3.2.0",
     "execa": "^4.0.3",

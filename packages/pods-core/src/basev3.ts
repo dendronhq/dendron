@@ -1,6 +1,7 @@
 import {
   DEngineClient,
   DVault,
+  minimatch,
   NoteProps,
   NoteUtils,
   stringifyError,
@@ -201,6 +202,11 @@ export abstract class ExportPod<
       notes = _.filter(notes, (ent) =>
         config.vaults?.include?.includes(VaultUtils.getName(ent.vault))
       ) as NoteProps[];
+    }
+    if (config.ignore) {
+      notes = _.reject(notes, (ent) => {
+        return _.some(config.ignore, (pat) => minimatch(ent.fname, pat));
+      });
     }
     return notes;
   }

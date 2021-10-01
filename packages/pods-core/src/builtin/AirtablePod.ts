@@ -200,7 +200,7 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
             if (hashtags.length > 1) {
               throw new DendronError({
                 message: `singleTag field has multiple values: ${JSON.stringify(
-                  hashtags
+                  _.pick(hashtags, "value")
                 )}`,
               });
             }

@@ -1,5 +1,4 @@
 import {
-  axios,
   DateTime,
   DendronError,
   DEngineClient,
@@ -8,6 +7,8 @@ import {
   NoteProps,
   StatusCodes,
 } from "@dendronhq/common-all";
+import Airtable, { FieldSet } from "airtable";
+import { Records } from "airtable/lib/records";
 import { JSONSchemaType } from "ajv";
 import fs from "fs-extra";
 import { RateLimiter } from "limiter";
@@ -39,6 +40,8 @@ type SrcFieldMapping =
     }
   | string;
 
+type AirtableFieldsMap = { fields: { [key: string]: string | number } };
+
 export type AirtableExportConfig = ExportPodConfig &
   AirtableExportPodCustomOpts;
 
@@ -47,11 +50,66 @@ type AirtableExportPodProcessProps = AirtableExportPodCustomOpts & {
   checkpoint: string;
 };
 
-type AirtableRecord = {
-  id: string;
-  fields: any;
-  createdTime: string;
-};
+class AirtableUtils {
+  static checkNoteHasAirtableId(note: NoteProps): boolean {
+    return !_.isUndefined(_.get(note.custom, "airtableId"));
+  }
+
+  static getAirtableIdFromNote(note: NoteProps): string {
+    return _.get(note.custom, "airtableId");
+  }
+
+  static async chunkAndCall(
+    allRecords: AirtableFieldsMap[],
+    func: (record: any[]) => Promise<Records<FieldSet>>
+  ) {
+    const chunks = _.chunk(allRecords, 10);
+
+    let total: number = 0;
+    const out = await Promise.all(
+      chunks.flatMap(async (record) => {
+        // @ts-ignore
+        await limiter.removeTokens(1);
+        const data = JSON.stringify({ records: record });
+        try {
+          const _records = await func(record);
+          total = total + _records.length;
+          // if (total === filteredNotes.length) {
+          //   const timestamp = filteredNotes[filteredNotes.length - 1].created;
+          //   fs.writeFileSync(checkpoint, timestamp.toString(), {
+          //     encoding: "utf8",
+          //   });
+          // }
+          return _records;
+        } catch (error) {
+          let payload: any = { data };
+          let _error: DendronError;
+          if (ErrorUtils.isAxiosError(error)) {
+            payload = error.toJSON();
+            if (
+              error.response?.data &&
+              error.response.status === StatusCodes.UNPROCESSABLE_ENTITY
+            ) {
+              payload = _.merge(payload, error.response.data);
+              _error = new DendronError({
+                message: error.response.data.message,
+                payload,
+                severity: ERROR_SEVERITY.MINOR,
+              });
+            } else {
+              _error = new DendronError({ message: "axios error", payload });
+            }
+          } else {
+            payload = _.merge(payload, error);
+            _error = new DendronError({ message: "general error", payload });
+          }
+          throw _error;
+        }
+      })
+    );
+    return _.flatten(out);
+  }
+}
 
 export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
   static id: string = ID;
@@ -98,7 +156,18 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
     notes: NoteProps[],
     srcFieldMapping: { [key: string]: SrcFieldMapping }
   ) {
-    const data: any[] = notes.map((note) => {
+    const recordSets: {
+      create: AirtableFieldsMap[];
+      update: (AirtableFieldsMap & { id: string })[];
+      lastCreated: number;
+      lastUpdated: number;
+    } = {
+      create: [],
+      update: [],
+      lastCreated: -1,
+      lastUpdated: -1,
+    };
+    notes.map((note) => {
       let fields = {};
       for (const [key, fieldMapping] of Object.entries<SrcFieldMapping>(
         srcFieldMapping
@@ -110,12 +179,9 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
             [key]: _.get(note, `${fieldMapping}`).toString(),
           };
         } else {
-          console.log("parse fieldMapping");
           let val = _.get(note, fieldMapping.to);
           if (fieldMapping.type === "date") {
-            console.log("parse date");
             if (_.isNumber(val)) {
-              console.log("parse numeric date");
               val = DateTime.fromMillis(val).toLocaleString(
                 DateTime.DATETIME_FULL
               );
@@ -127,14 +193,26 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
           };
         }
       }
-      return { fields };
+      if (AirtableUtils.checkNoteHasAirtableId(note)) {
+        recordSets.update.push({
+          fields,
+          id: AirtableUtils.getAirtableIdFromNote(note),
+        });
+      } else {
+        recordSets.create.push({ fields });
+      }
+      if (note.created > recordSets.lastCreated) {
+        recordSets.lastCreated = note.created;
+      }
+      if (note.updated > recordSets.lastUpdated) {
+        recordSets.lastCreated = note.updated;
+      }
+      return;
     });
-    return data;
+    return recordSets;
   }
 
-  async processNote(
-    opts: AirtableExportPodProcessProps
-  ): Promise<AirtableRecord[]> {
+  async processNote(opts: AirtableExportPodProcessProps) {
     const {
       filteredNotes,
       apiKey,
@@ -144,69 +222,26 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
       srcFieldMapping,
     } = opts;
 
-    const headers = {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    };
+    const { create, update, lastCreated } = this.notesToSrcFieldMap(
+      filteredNotes,
+      srcFieldMapping
+    );
 
-    const records = this.notesToSrcFieldMap(filteredNotes, srcFieldMapping);
-    const chunks = _.chunk(records, 10);
+    const base = new Airtable({ apiKey }).base(baseId);
+    const createRequest = _.isEmpty(create)
+      ? []
+      : await AirtableUtils.chunkAndCall(create, base(tableName).create);
+    const updateRequest = _.isEmpty(update)
+      ? []
+      : await AirtableUtils.chunkAndCall(update, base(tableName).update);
 
-    // rate limiter method
-    const sendRequest = async () => {
-      let total: number = 0;
-      return Promise.all(
-        chunks.flatMap(async (record) => {
-          // @ts-ignore
-          await limiter.removeTokens(1);
-          const data = JSON.stringify({ records: record });
-          try {
-            const result = await axios.post(
-              `https://api.airtable.com/v0/${baseId}/${tableName}`,
-              data,
-              { headers: headers }
-            );
-            const records = result.data.records as AirtableRecord[];
-            total = total + records.length;
-            if (total === filteredNotes.length) {
-              const timestamp = filteredNotes[filteredNotes.length - 1].created;
-              fs.writeFileSync(checkpoint, timestamp.toString(), {
-                encoding: "utf8",
-              });
-            }
-            return records;
-          } catch (error) {
-            let payload: any = { data };
-            let _error: DendronError;
-            if (ErrorUtils.isAxiosError(error)) {
-              payload = error.toJSON();
-              if (
-                error.response?.data &&
-                error.response.status === StatusCodes.UNPROCESSABLE_ENTITY
-              ) {
-                payload = _.merge(payload, error.response.data);
-                _error = new DendronError({
-                  message: error.response.data.message,
-                  payload,
-                  severity: ERROR_SEVERITY.MINOR,
-                });
-              } else {
-                _error = new DendronError({ message: "axios error", payload });
-              }
-            } else {
-              payload = _.merge(payload, error);
-              _error = new DendronError({ message: "general error", payload });
-            }
-            this.L.error({
-              msg: "failed to export all the notes.",
-              payload,
-            });
-            throw _error;
-          }
-        })
-      );
-    };
-    return _.flatten(await sendRequest());
+    if (checkpoint) {
+      fs.writeFileSync(checkpoint, lastCreated.toString(), {
+        encoding: "utf8",
+      });
+    }
+
+    return { created: createRequest, updated: updateRequest };
   }
 
   verifyDir(dest: URI) {
@@ -238,6 +273,7 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
       noCheckpointing,
     } = config as AirtableExportConfig;
 
+    const ctx = "plant";
     const checkpoint: string = this.verifyDir(dest);
 
     let filteredNotes: NoteProps[] =
@@ -257,7 +293,7 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
     }
 
     if (filteredNotes.length > 0) {
-      const records = await this.processNote({
+      const { created, updated } = await this.processNote({
         filteredNotes,
         apiKey,
         baseId,
@@ -266,7 +302,16 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
         srcHierarchy,
         checkpoint,
       });
-      await this._updateNotes({ records, engine });
+      await this.updateAirtableIdForNewlySyncedNotes({
+        records: created,
+        engine,
+      });
+      this.L.info({
+        ctx,
+        created: created.length,
+        updated: updated.length,
+        msg: "finish export",
+      });
     } else {
       throw new DendronError({
         message:
@@ -277,17 +322,17 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
     return { notes };
   }
 
-  async _updateNotes({
+  async updateAirtableIdForNewlySyncedNotes({
     records,
     engine,
   }: {
-    records: AirtableRecord[];
+    records: Records<FieldSet>;
     engine: DEngineClient;
   }) {
     const out = await Promise.all(
       records.map(async (ent) => {
         const airtableId = ent.id;
-        const dendronId = ent.fields["DendronId"];
+        const dendronId = ent.fields["DendronId"] as string;
         const note = engine.notes[dendronId];
         const noteAirtableId = _.get(note.custom, "airtableId");
         if (!noteAirtableId) {
@@ -304,7 +349,6 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
         return undefined;
       })
     );
-
     this.L.info({
       msg: `${out.filter((n) => !_.isUndefined(n)).length} notes updated`,
     });

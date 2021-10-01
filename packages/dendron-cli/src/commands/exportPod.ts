@@ -54,8 +54,7 @@ export class ExportPodCLICommand extends CLICommand<
     } = opts;
     const vaults = engine.vaults;
     const pod = new PodClass();
-    // eslint-disable-next-line no-console
-    console.log("running pod...");
+    this.L.info({ ctx, msg: "running pod..." });
     await pod.execute({ wsRoot, config, engine, vaults });
     this.L.info({ ctx, msg: "done execute" });
     return new Promise((resolve) => {

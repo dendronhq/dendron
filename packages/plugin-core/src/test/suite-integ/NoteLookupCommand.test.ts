@@ -1356,7 +1356,7 @@ suite("NoteLookupCommand", function () {
       });
     });
 
-    test("horizontal split basic", (done) => {
+    test.skip("horizontal split basic", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
         preSetupHook: async ({ wsRoot, vaults }) => {
@@ -1862,7 +1862,7 @@ suite("NoteLookupCommand", function () {
       return { cmd };
     };
 
-    test("split + multiselect: should have n+1 columns", (done) => {
+    test.skip("split + multiselect: should have n+1 columns", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
         preSetupHook: async ({ wsRoot, vaults }) => {

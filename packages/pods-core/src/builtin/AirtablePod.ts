@@ -9,8 +9,7 @@ import {
   StatusCodes,
 } from "@dendronhq/common-all";
 import { LinkUtils } from "@dendronhq/engine-server";
-import Airtable, { FieldSet } from "airtable";
-import { Records } from "airtable/lib/records";
+import Airtable, { FieldSet, Records } from "airtable";
 import { JSONSchemaType } from "ajv";
 import fs from "fs-extra";
 import { RateLimiter } from "limiter";

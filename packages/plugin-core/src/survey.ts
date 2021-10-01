@@ -229,7 +229,6 @@ export class LapsedUserReasonSurvey extends DendronQuickPickSurvey {
         break;
       }
       case "I've encountered a bug which stopped me from using Dendron.": {
-        // could you describe what happened?
         reason = "bug";
         extra = await vscode.window.showInputBox({
           ignoreFocusOut: true,
@@ -425,7 +424,6 @@ export class SurveyUtils {
         "Could you share some feedback to help us improve?",
         { modal: true },
         { title: "Proceed" },
-        { title: "Skip Survey"},
       ).then(async (resp) => {
         if (resp?.title === "Proceed") {
           const reasonSurvey = LapsedUserReasonSurvey.create();

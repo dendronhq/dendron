@@ -4,9 +4,11 @@ import {
   DEngineClient,
   ErrorUtils,
   ERROR_SEVERITY,
+  minimatch,
   NoteProps,
   StatusCodes,
 } from "@dendronhq/common-all";
+import { LinkUtils } from "@dendronhq/engine-server";
 import Airtable, { FieldSet } from "airtable";
 import { Records } from "airtable/lib/records";
 import { JSONSchemaType } from "ajv";
@@ -36,7 +38,8 @@ type AirtableExportPodCustomOpts = {
 type SrcFieldMapping =
   | {
       to: string;
-      type: "string" | "date";
+      type: "string" | "date" | "singleTag";
+      filter?: string;
     }
   | string;
 
@@ -74,12 +77,6 @@ class AirtableUtils {
         try {
           const _records = await func(record);
           total = total + _records.length;
-          // if (total === filteredNotes.length) {
-          //   const timestamp = filteredNotes[filteredNotes.length - 1].created;
-          //   fs.writeFileSync(checkpoint, timestamp.toString(), {
-          //     encoding: "utf8",
-          //   });
-          // }
           return _records;
         } catch (error) {
           let payload: any = { data };
@@ -168,6 +165,8 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
       lastUpdated: -1,
     };
     notes.map((note) => {
+      // TODO: optimize, don't parse if no hashtags
+      let hashtags = LinkUtils.findHashTags({ links: note.links });
       let fields = {};
       for (const [key, fieldMapping] of Object.entries<SrcFieldMapping>(
         srcFieldMapping
@@ -187,9 +186,29 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
               );
             }
           }
+          if (fieldMapping.type === "singleTag") {
+            if (!_.isUndefined(fieldMapping.filter)) {
+              hashtags = hashtags.filter((t) =>
+                minimatch(t.value, fieldMapping.filter!)
+              );
+            }
+            if (hashtags.length > 1) {
+              throw new DendronError({
+                message: `singleTag field has multiple values: ${JSON.stringify(
+                  hashtags
+                )}`,
+              });
+            }
+            if (hashtags.length === 0) {
+              return;
+            }
+            val = hashtags[0].value.replace(/^tags./, "");
+          } else {
+            val = val.toString();
+          }
           fields = {
             ...fields,
-            [key]: val.toString(),
+            [key]: val,
           };
         }
       }

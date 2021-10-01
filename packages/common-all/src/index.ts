@@ -21,3 +21,5 @@ import axios, { AxiosError } from "axios";
 export { axios, AxiosError };
 import { DateTime } from "luxon";
 export { DateTime };
+import minimatch from "minimatch";
+export { minimatch };

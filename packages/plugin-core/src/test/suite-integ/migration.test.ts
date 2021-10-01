@@ -10,7 +10,6 @@ import _ from "lodash";
 import { describe, test } from "mocha";
 import semver from "semver";
 import sinon from "sinon";
-import { ExtensionContext } from "vscode";
 import { CONFIG, GLOBAL_STATE, WORKSPACE_STATE } from "../../constants";
 import { Logger } from "../../logger";
 import { VSCodeUtils } from "../../utils";
@@ -48,14 +47,13 @@ const getMigration = ({
 };
 
 suite("Migration", function () {
-  let ctx: ExtensionContext;
-  ctx = setupBeforeAfter(this);
+  const ctx = setupBeforeAfter(this);
 
   describe.skip("runMigration from activate", () => {
     test("global version ahead of workspace version", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
-        onInit: async ({}) => {
+        onInit: async () => {
           await ctx.globalState.update(GLOBAL_STATE.VERSION, "0.46.0");
           await ctx.workspaceState.update(WORKSPACE_STATE.VERSION, "0.45.0");
           await _activate(ctx);
@@ -101,7 +99,7 @@ suite("Migration", function () {
       });
     });
 
-    describe("migrate to 47.1", function () {
+    describe("migrate to 47.1", () => {
       test("apply journal config, default settings", (done) => {
         runLegacyMultiWorkspaceTest({
           ctx,
@@ -266,7 +264,7 @@ suite("Migration", function () {
           const wsConfig = await getExtension().getWorkspaceSettings();
           const wsService = new WorkspaceService({ wsRoot });
           expect(
-            wsConfig.settings[CONFIG.DEFAULT_LOOKUP_CREATE_BEHAVIOR.key]
+            wsConfig?.settings[CONFIG.DEFAULT_LOOKUP_CREATE_BEHAVIOR.key]
           ).toEqual(LookupSelectionType.selection2link);
           expect(_.isUndefined(dendronConfig.lookup)).toBeTruthy();
           await MigrationServce.applyMigrationRules({
@@ -306,7 +304,7 @@ suite("Migration", function () {
           const wsService = new WorkspaceService({ wsRoot });
           expect(
             _.isUndefined(
-              wsConfig.settings[CONFIG.DEFAULT_LOOKUP_CREATE_BEHAVIOR.key]
+              wsConfig?.settings[CONFIG.DEFAULT_LOOKUP_CREATE_BEHAVIOR.key]
             )
           ).toBeTruthy();
           expect(_.isUndefined(dendronConfig.lookup)).toBeTruthy();

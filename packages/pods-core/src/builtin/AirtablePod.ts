@@ -5,6 +5,8 @@ import {
   NoteProps,
   StatusCodes,
   axios,
+  DateTime,
+  DUtils,
 } from "@dendronhq/common-all";
 import { JSONSchemaType } from "ajv";
 import fs from "fs-extra";
@@ -26,8 +28,15 @@ type AirtableExportPodCustomOpts = {
   srcHierarchy: string;
   apiKey: string;
   baseId: string;
-  srcFieldMapping: any;
+  srcFieldMapping: { [key: string]: SrcFieldMapping };
 };
+
+type SrcFieldMapping =
+  | {
+      to: string;
+      type: "string" | "date";
+    }
+  | string;
 
 export type AirtableExportConfig = ExportPodConfig &
   AirtableExportPodCustomOpts;
@@ -74,14 +83,38 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
   }
 
   //filters the note's property as per srcFieldMapping provided
-  notesToSrcFieldMap(notes: NoteProps[], srcFieldMapping: any) {
+  notesToSrcFieldMap(
+    notes: NoteProps[],
+    srcFieldMapping: { [key: string]: SrcFieldMapping }
+  ) {
     const data: any[] = notes.map((note) => {
       let fields = {};
-      for (const [key, value] of Object.entries(srcFieldMapping)) {
-        fields = {
-          ...fields,
-          [key]: _.get(note, `${value}`).toString(),
-        };
+      for (const [key, fieldMapping] of Object.entries<SrcFieldMapping>(
+        srcFieldMapping
+      )) {
+        // handle legacy mapping
+        if (_.isString(fieldMapping)) {
+          fields = {
+            ...fields,
+            [key]: _.get(note, `${fieldMapping}`).toString(),
+          };
+        } else {
+          console.log("parse fieldMapping");
+          let val = _.get(note, fieldMapping.to);
+          if (fieldMapping.type === "date") {
+            console.log("parse date");
+            if (_.isNumber(val)) {
+              console.log("parse numeric date");
+              val = DateTime.fromMillis(val).toLocaleString(
+                DateTime.DATETIME_FULL
+              );
+            }
+          }
+          fields = {
+            ...fields,
+            [key]: val.toString(),
+          };
+        }
       }
       return { fields };
     });
@@ -128,7 +161,7 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
               });
             }
           } catch (error) {
-            let payload: any;
+            let payload: any = { data };
             let _error: DendronError;
             if (ErrorUtils.isAxiosError(error)) {
               payload = error.toJSON();
@@ -136,7 +169,7 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
                 error.response?.data &&
                 error.response.status === StatusCodes.UNPROCESSABLE_ENTITY
               ) {
-                payload = error.response.data;
+                payload = _.merge(payload, error.response.data);
                 _error = new DendronError({
                   message: error.response.data.message,
                   payload,
@@ -146,7 +179,7 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
                 _error = new DendronError({ message: "axios error", payload });
               }
             } else {
-              payload = error;
+              payload = _.merge(payload, error);
               _error = new DendronError({ message: "general error", payload });
             }
             this.L.error({

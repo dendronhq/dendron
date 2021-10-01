@@ -844,6 +844,7 @@ export class FileStorage implements DStore {
    */
   async updateNote(note: NoteProps, opts?: EngineUpdateNodesOptsV2) {
     const ctx = "updateNote";
+    this.logger.debug({ ctx, note: NoteUtils.toLogObj(note), msg: "enter" });
     const maybeNote = this.notes[note.id];
     if (maybeNote) {
       note = NoteUtils.hydrate({ noteRaw: note, noteHydrated: maybeNote });

@@ -40,13 +40,18 @@ export enum PublishCommands {
   BUILD = "build",
 }
 
-type CommandOpts = Omit<CommandCLIOpts, "overrides"> & Partial<BuildCmdOpts>;
+type CommandOpts = Omit<CommandCLIOpts, "overrides"> &
+  Partial<BuildCmdOpts> &
+  Partial<InitCmdOpts>;
 
 type CommandOutput = Partial<{ error: DendronError; data: any }>;
 
 type BuildOverrides = Pick<DendronSiteConfig, "siteUrl">;
 
-type BuildCmdOpts = Omit<CommandCLIOpts, keyof CommandCLIOnlyOpts> & {
+type BuildCmdOpts = Omit<
+  CommandCLIOpts,
+  keyof CommandCLIOnlyOpts | "template"
+> & {
   /**
    * Use existing engine instead of spwaning a new one
    */
@@ -55,6 +60,10 @@ type BuildCmdOpts = Omit<CommandCLIOpts, keyof CommandCLIOnlyOpts> & {
    * Override site config with custom values
    */
   overrides?: BuildOverrides;
+};
+
+type InitCmdOpts = Pick<CommandCLIOpts, "wsRoot"> & {
+  template: string;
 };
 
 export { CommandOpts as PublishCLICommandOpts };
@@ -94,6 +103,11 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       describe: "override where nextjs-template is located",
       type: "string",
     });
+    args.option("template", {
+      describe: "bring your own nextjs-template",
+      type: "string",
+      default: "https://github.com/dendronhq/nextjs-template.git",
+    });
     args.option("attach", {
       describe: "use existing dendron engine instead of spawning a new one",
       type: "boolean",
@@ -129,10 +143,10 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     try {
       switch (cmd) {
         case PublishCommands.INIT: {
-          return this.init(opts);
+          return this.init(opts as InitCmdOpts);
         }
         case PublishCommands.BUILD: {
-          return this.build(opts);
+          return this.build(opts as BuildCmdOpts);
         }
         default:
           return assertUnreachable();
@@ -184,9 +198,8 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     return cli.execute(opts);
   }
 
-  init(opts: { wsRoot: string }) {
-    const cwd = opts.wsRoot;
-    const template = "https://github.com/dendronhq/nextjs-template.git";
+  init({ template, wsRoot }: InitCmdOpts) {
+    const cwd = wsRoot;
     const nextRoot = getNextRoot(cwd);
     this.print(`initializing publishing at ${cwd}...`);
     execa.sync("git", ["clone", template, nextRoot], { cwd });

@@ -17,10 +17,6 @@ import { ExportPodCLICommand } from "./exportPod";
 import { PodSource } from "./pod";
 import { SetupEngineCLIOpts } from "./utils";
 
-const $ = (cmd: string, opts?: any) => {
-  return execa.commandSync(cmd, { shell: true, ...opts });
-};
-
 type CommandCLIOpts = {
   cmd: PublishCommands;
   wsRoot: string;
@@ -190,13 +186,12 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
 
   init(opts: { wsRoot: string }) {
     const cwd = opts.wsRoot;
+    const template = "https://github.com/dendronhq/nextjs-template.git";
+    const nextRoot = getNextRoot(cwd);
     this.print(`initializing publishing at ${cwd}...`);
-    const cmd = `git clone https://github.com/dendronhq/nextjs-template.git .next`;
-    $(cmd, { cwd });
+    execa.sync("git", ["clone", template, nextRoot], { cwd });
     this.print(
-      `run "cd ${getNextRoot(
-        cwd
-      )} && npm install" to finish the install process`
+      `run "cd ${nextRoot} && npm install" to finish the install process`
     );
     return { error: null };
   }
@@ -211,7 +206,9 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       overrides,
     });
     this.print(
-      `to preview changes, run "cd ${getNextRoot(wsRoot)} && npm install && npx next dev"`
+      `to preview changes, run "cd ${getNextRoot(
+        wsRoot
+      )} && npm install && npx next dev"`
     );
     return { error: null };
   }

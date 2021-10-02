@@ -11,7 +11,7 @@ import {
 } from "@dendronhq/common-all";
 import { createLogger, DLogger } from "@dendronhq/common-server";
 import { LinkUtils } from "@dendronhq/engine-server";
-import Airtable, { FieldSet, Records } from "airtable";
+import Airtable, { FieldSet, Records } from "@dendronhq/airtable";
 import { JSONSchemaType } from "ajv";
 import fs from "fs-extra";
 import { RateLimiter } from "limiter";

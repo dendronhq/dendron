@@ -11,7 +11,6 @@ const config = {
     server: "./src/server.ts",
   },
   output: {
-    // the bundle is stored in the 'dist' folder (check package.json), 📖 -> https://webpack.js.org/configuration/output/
     path: path.resolve(__dirname, "dist"),
     filename: "[name].js",
     libraryTarget: "commonjs2",
@@ -23,15 +22,14 @@ const config = {
   devtool: "source-map",
   externals: [
     {
-      vscode: "commonjs vscode", // the vscode-module is created on-the-fly and must be excluded. Add other modules that cannot be webpack'ed, 📖 -> https://webpack.js.org/configuration/externals/
+      vscode: "commonjs vscode", // the vscode-module is created on-the-fly and must be excluded
       "pino-pretty": "pino-pretty",
     },
     /(@dendronhq|packages)\/dendron-11ty-legacy$/,
     /\.\/webpack-require-hack/,
   ],
   resolve: {
-    // support reading TypeScript and JavaScript files, 📖 -> https://github.com/TypeStrong/ts-loader
-    extensions: [".ts", ".js"],
+    extensions: [".tsx", ".ts", ".js"],
   },
   plugins: [
     new CopyPlugin({
@@ -87,7 +85,13 @@ const config = {
         type: "javascript/auto",
       },
       {
-        test: /\.ts$/,
+        test: /\.node$/,
+        loader: "node-loader",
+      },
+      { test: /\.d\.ts$/, loader: 'ignore-loader' },
+      { test: /\.js\.map$/, loader: 'ignore-loader' },
+      {
+        test: /\.tsx?$/,
         exclude: /node_modules/,
         use: [
           {
@@ -102,7 +106,12 @@ const config = {
                 // cannot find namespace jest
                 2503,
               ],
+              configFile: "tsconfig.build.json",
               transpileOnly: true,
+              compilerOptions: {
+                module: "es6", // override `tsconfig.json` so that TypeScript emits native JavaScript modules.
+              },
+              exclude: /\.d\.ts/,
             },
           },
         ],

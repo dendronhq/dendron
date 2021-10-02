@@ -40,9 +40,6 @@ const config = {
     new IgnorePlugin({
       resourceRegExp: /fsevents/,
     }),
-    new IgnorePlugin({
-      resourceRegExp: /\.d\.ts/,
-    }),
     // @ts-ignore
     new CopyPlugin({
       patterns: [{ from: path.join("assets", "dendron-ws"), to: "dendron-ws" }],
@@ -93,6 +90,8 @@ const config = {
         test: /\.node$/,
         loader: "node-loader",
       },
+      { test: /\.d\.ts$/, loader: 'ignore-loader' },
+      { test: /\.js\.map$/, loader: 'ignore-loader' },
       {
         test: /\.tsx?$/,
         exclude: /node_modules/,
@@ -117,11 +116,6 @@ const config = {
             },
           },
         ],
-      },
-      {
-        test: /\.js.map$/,
-        enforce: "pre",
-        use: ["source-map-loader"],
       },
     ],
   },

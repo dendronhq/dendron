@@ -54,6 +54,33 @@ describe("WHEN run `dendron publish init`", () => {
   });
 });
 
+describe("AND with custom template", () => {
+  const cmd = PublishCommands.INIT;
+  afterEach(() => {
+    sinon.restore();
+  });
+
+  test("THEN clone custom template", async () => {
+    jest.setTimeout(15000);
+
+    await runEngineTestV5(
+      async ({ wsRoot }) => {
+        // TODO: use a fork of nextjs-template under the dendronhq org.
+        const template = "https://github.com/dendronhq/handbook.git";
+        const dendronConfig = path.join(wsRoot, ".next", "dendron.yml");
+        const cli = new PublishCLICommand();
+        await runPublishCmd({ cli, cmd, wsRoot, template });
+        expect(fs.existsSync(dendronConfig)).toBeTruthy();
+      },
+      {
+        expect,
+      }
+    );
+  });
+
+  //test("AND with invalid template URL")
+});
+
 describe("WHEN run `dendron publish build`", () => {
   const cmd = PublishCommands.BUILD;
   afterEach(() => {

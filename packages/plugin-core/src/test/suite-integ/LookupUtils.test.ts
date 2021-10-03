@@ -1,4 +1,4 @@
-import { DVault } from "@dendronhq/common-all";
+import { DVault, VaultUtils } from "@dendronhq/common-all";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { TestEngineUtils } from "@dendronhq/engine-test-utils";
 import { describe } from "mocha";
@@ -130,9 +130,11 @@ suite("Lookup Utils Test", function runSuite() {
 
           expect(recs![0].vault.fsPath).toEqual(vaults[0].fsPath);
           expect(recs![0].detail).toEqual(HIERARCHY_MATCH_DETAIL);
+          expect(recs![0].label).toEqual(VaultUtils.getName(vaults[0]));
 
           expect(recs![1].vault.fsPath).toEqual(vaultCtx.fsPath);
           expect(recs![1].detail).toEqual(CONTEXT_DETAIL);
+          expect(recs![1].label).toEqual(VaultUtils.getName(vaults[1]));
 
           done();
         },

@@ -538,7 +538,7 @@ export class PickerUtilsV2 {
           return {
             vault: value,
             detail: HIERARCHY_MATCH_DETAIL,
-            label: VaultUtils.getName(vault),
+            label: VaultUtils.getName(value),
           };
         });
 

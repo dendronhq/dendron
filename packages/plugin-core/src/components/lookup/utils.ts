@@ -538,7 +538,7 @@ export class PickerUtilsV2 {
           return {
             vault: value,
             detail: HIERARCHY_MATCH_DETAIL,
-            label: VaultUtils.getName(vault),
+            label: VaultUtils.getName(value),
           };
         });
 
@@ -581,7 +581,7 @@ export class PickerUtilsV2 {
           vaultSuggestions.push({
             vault: ent.vault,
             detail: HIERARCHY_MATCH_DETAIL,
-            label: VaultUtils.getName(vault),
+            label: VaultUtils.getName(ent.vault),
           });
         }
       });

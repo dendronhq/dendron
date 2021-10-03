@@ -14,7 +14,6 @@ import {
   Processor,
   RemarkUtils,
   MDUtilsV5,
-  ProcMode,
   visit,
   Heading,
   Node,
@@ -59,36 +58,33 @@ export class MoveHeaderCommand extends BasicCommand<
 
   private headerNotSelectedError = new DendronError({
     message: "You must first select the header you want to move.",
-    severity: ERROR_SEVERITY.MINOR
+    severity: ERROR_SEVERITY.MINOR,
   });
 
   private noActiveNoteError = new DendronError({
     message: "No note open.",
-    severity: ERROR_SEVERITY.MINOR
+    severity: ERROR_SEVERITY.MINOR,
   });
 
   private getProc = (engine: EngineAPIService, note: NoteProps) => {
-    return MDUtilsV5.procRemarkParse(
-      { mode: ProcMode.FULL },
-      {
-        engine,
-        fname: note.fname,
-        vault: note.vault,
-        dest: DendronASTDest.MD_DENDRON,
-      }
-    );
+    return MDUtilsV5.procRemarkFull({
+      engine,
+      fname: note.fname,
+      vault: note.vault,
+      dest: DendronASTDest.MD_DENDRON,
+    });
   };
 
   /**
    * Helper for {@link MoveHeaderCommand.gatherInputs}
    * Validates and processes inputs to be passed for further action
-   * @param engine 
+   * @param engine
    * @returns {}
    */
   private validateAndProcessInput(engine: EngineAPIService): {
-    proc: Processor,
-    origin: NoteProps,
-    targetHeader: Heading,
+    proc: Processor;
+    origin: NoteProps;
+    targetHeader: Heading;
   } {
     const { editor, selection } = VSCodeUtils.getSelection();
 
@@ -115,14 +111,14 @@ export class MoveHeaderCommand extends BasicCommand<
     if (!targetHeader) {
       throw this.headerNotSelectedError;
     }
-    return { proc, origin: maybeNote, targetHeader }
+    return { proc, origin: maybeNote, targetHeader };
   }
 
   /**
    * Helper for {@link MoveHeaderCommand.gatherInputs}
    * Prompts user to do a lookup on the desired destination.
-   * @param opts 
-   * @returns 
+   * @param opts
+   * @returns
    */
   private promptForDestination(opts: CommandInput) {
     const lookupController = LookupControllerV3.create({
@@ -151,7 +147,10 @@ export class MoveHeaderCommand extends BasicCommand<
 
     // extract nodes that need to be moved
     const originTree = proc.parse(origin.body);
-    const nodesToMove = RemarkUtils.extractHeaderBlock(originTree, targetHeader);
+    const nodesToMove = RemarkUtils.extractHeaderBlock(
+      originTree,
+      targetHeader
+    );
 
     const lc = this.promptForDestination(opts);
 
@@ -190,14 +189,14 @@ export class MoveHeaderCommand extends BasicCommand<
   /**
    * Helper for {@link MoveHeaderCommand.execute}
    * Given a list of nodes to move, appends them to the destination
-   * @param engine 
-   * @param dest 
-   * @param nodesToMove 
+   * @param engine
+   * @param dest
+   * @param nodesToMove
    */
   private async appendHeaderToDestination(
-    engine: EngineAPIService, 
-    dest: NoteProps, 
-    nodesToMove: Node[],
+    engine: EngineAPIService,
+    dest: NoteProps,
+    nodesToMove: Node[]
   ): Promise<void> {
     const destProc = this.getProc(engine, dest!);
     const destTree = destProc.parse(dest!.body);
@@ -207,18 +206,18 @@ export class MoveHeaderCommand extends BasicCommand<
     await engine.writeNote(dest!, {
       updateExisting: true,
     });
-  };
+  }
 
   /**
    * Helper for {@link MoveHeaderCommand.execute}
    * given a copy of origin, and the modified content of origin,
    * find the difference and return the updated anchor names
-   * @param originDeepCopy 
-   * @param modifiedOriginContent 
+   * @param originDeepCopy
+   * @param modifiedOriginContent
    * @returns anchorNamesToUpdate
    */
   private findAnchorNamesToUpdate(
-    originDeepCopy: NoteProps, 
+    originDeepCopy: NoteProps,
     modifiedOriginContent: string
   ): string[] {
     const anchorsBefore = RemarkUtils.findAnchors(originDeepCopy.body);
@@ -234,18 +233,18 @@ export class MoveHeaderCommand extends BasicCommand<
       return payload![0];
     });
     return anchorNamesToUpdate;
-  };
+  }
 
   /**
    * Helper for {@link MoveHeaderCommand.updateReferences}
    * Given a {@link Location}, find the respective note.
-   * @param location 
-   * @param engine 
+   * @param location
+   * @param engine
    * @returns note
    */
   private getNoteByLocation(
     location: Location,
-    engine: EngineAPIService,
+    engine: EngineAPIService
   ): NoteProps | undefined {
     const { wsRoot, vaults, notes } = engine;
     const fsPath = location.uri.fsPath;
@@ -268,25 +267,25 @@ export class MoveHeaderCommand extends BasicCommand<
    * Helper for {@link MoveHeaderCommand.execute}
    * Given a list of found references, update those references
    * so that they point to the correct header in a destination note.
-   * @param foundReferences 
-   * @param anchorNamesToUpdate 
-   * @param engine 
-   * @param origin 
-   * @param dest 
+   * @param foundReferences
+   * @param anchorNamesToUpdate
+   * @param engine
+   * @param origin
+   * @param dest
    * @returns updated
    */
   async updateReferences(
-    foundReferences: FoundRefT[], 
+    foundReferences: FoundRefT[],
     anchorNamesToUpdate: string[],
-    engine: EngineAPIService, 
+    engine: EngineAPIService,
     origin: NoteProps,
-    dest: NoteProps,
+    dest: NoteProps
   ): Promise<NoteProps[]> {
     const updated: NoteProps[] = [];
     foundReferences
-      .filter(ref => !ref.isCandidate)
-      .map(ref => this.getNoteByLocation(ref.location, engine))
-      .filter(note => note !== undefined)
+      .filter((ref) => !ref.isCandidate)
+      .map((ref) => this.getNoteByLocation(ref.location, engine))
+      .filter((note) => note !== undefined)
       .forEach(async (note) => {
         // find match text in note and modify the node
         const proc = this.getProc(engine, note!);
@@ -302,7 +301,9 @@ export class MoveHeaderCommand extends BasicCommand<
           }
         });
         note!.body = proc.stringify(tree);
-        const writeResp = await engine.writeNote(note!, { updateExisting: true });
+        const writeResp = await engine.writeNote(note!, {
+          updateExisting: true,
+        });
         updated.push(writeResp.data[0].note);
       });
     return updated;
@@ -336,9 +337,9 @@ export class MoveHeaderCommand extends BasicCommand<
 
     // update reference
     const anchorNamesToUpdate = this.findAnchorNamesToUpdate(
-      originDeepCopy, 
+      originDeepCopy,
       modifiedOriginContent
-    ); 
+    );
     const foundReferences = await findReferences(origin.fname);
     const updated = await this.updateReferences(
       foundReferences,

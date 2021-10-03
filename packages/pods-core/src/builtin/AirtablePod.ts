@@ -221,6 +221,39 @@ class AirtableUtils {
     });
     return recordSets;
   }
+
+  static async updateAirtableIdForNewlySyncedNotes({
+    records,
+    engine,
+    logger,
+  }: {
+    records: Records<FieldSet>;
+    engine: DEngineClient;
+    logger: DLogger;
+  }) {
+    const out = await Promise.all(
+      records.map(async (ent) => {
+        const airtableId = ent.id;
+        const dendronId = ent.fields["DendronId"] as string;
+        const note = engine.notes[dendronId];
+        const noteAirtableId = _.get(note.custom, "airtableId");
+        if (!noteAirtableId) {
+          const updatedNote = {
+            ...note,
+            custom: { ...note.custom, airtableId },
+          };
+          const out = await engine.writeNote(updatedNote, {
+            updateExisting: true,
+          });
+          return out;
+        }
+        return undefined;
+      })
+    );
+    logger.info({
+      msg: `${out.filter((n) => !_.isUndefined(n)).length} notes updated`,
+    });
+  }
 }
 
 export class AirtablePublishPod extends PublishPod<AirtablePublishConfig> {
@@ -250,18 +283,29 @@ export class AirtablePublishPod extends PublishPod<AirtablePublishConfig> {
   }
 
   async plant(opts: PublishPodPlantOpts) {
-    const { config, note } = opts;
+    const { config, note, engine } = opts;
     const { apiKey, baseId, tableName, srcFieldMapping } =
       config as AirtableExportConfig;
+    const logger = createLogger("AirtablePublishPod");
 
-    const { update } = AirtableUtils.notesToSrcFieldMap({
+    const { update, create } = AirtableUtils.notesToSrcFieldMap({
       notes: [note],
       srcFieldMapping,
-      logger: createLogger("AirtablePod"),
+      logger,
     });
     const base = new Airtable({ apiKey }).base(baseId);
-    const out = await base(tableName).update(update);
-    return out[0].getId();
+    if (!_.isEmpty(update)) {
+      const out = await base(tableName).update(update);
+      return out[0].getId();
+    } else {
+      const created = await base(tableName).create(create);
+      await AirtableUtils.updateAirtableIdForNewlySyncedNotes({
+        records: created,
+        engine,
+        logger,
+      });
+      return created[0].getId();
+    }
   }
 }
 
@@ -398,9 +442,10 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
         srcHierarchy,
         checkpoint,
       });
-      await this.updateAirtableIdForNewlySyncedNotes({
+      await AirtableUtils.updateAirtableIdForNewlySyncedNotes({
         records: created,
         engine,
+        logger: this.L,
       });
       this.L.info({
         ctx,
@@ -416,36 +461,5 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
     }
 
     return { notes };
-  }
-
-  async updateAirtableIdForNewlySyncedNotes({
-    records,
-    engine,
-  }: {
-    records: Records<FieldSet>;
-    engine: DEngineClient;
-  }) {
-    const out = await Promise.all(
-      records.map(async (ent) => {
-        const airtableId = ent.id;
-        const dendronId = ent.fields["DendronId"] as string;
-        const note = engine.notes[dendronId];
-        const noteAirtableId = _.get(note.custom, "airtableId");
-        if (!noteAirtableId) {
-          const updatedNote = {
-            ...note,
-            custom: { ...note.custom, airtableId },
-          };
-          const out = await engine.writeNote(updatedNote, {
-            updateExisting: true,
-          });
-          return out;
-        }
-        return undefined;
-      })
-    );
-    this.L.info({
-      msg: `${out.filter((n) => !_.isUndefined(n)).length} notes updated`,
-    });
   }
 }

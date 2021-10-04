@@ -16,7 +16,7 @@ Example: [[tutorial]]
 
 To navigate to the note in the link, you can just click on the link in the preview pane. In the editor pane, you can move the cursor into the link and hit `%KEYBINDING%+Enter`.
 
-You can switch back to the previous note by pressing `%KEYBINDING%+Tab`
+You can switch back to the previous note with the tab switching shortcut (`Ctrl+Tab` on most systems).
 
 #### Backlinks
 
@@ -42,4 +42,5 @@ You can explore the hierarchical organization of your notes and how your notes a
   - Note References - Add a section from another note with its content inlined into the current note. [References Docs](https://wiki.dendron.so/notes/f1af56bb-db27-47ae-8406-61a98de6c78c.html#note-reference)
 
 ---
+
 [[Tutorial Home Page| tutorial]]

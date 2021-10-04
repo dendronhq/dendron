@@ -60,6 +60,47 @@ suite("MoveHeader", function () {
         };
       });
 
+      describe("AND WHEN note reference exists in destination", () => {
+        test("THEN selected header is moved from origin to dest", (done) => {
+          runLegacyMultiWorkspaceTest({
+            ctx,
+            preSetupHook: async ({
+              wsRoot,
+              vaults,
+            }: {
+              wsRoot: string;
+              vaults: DVault[];
+            }) => {
+              originNote = await NoteTestUtilsV4.createNote({
+                fname: "origin",
+                wsRoot,
+                vault: vaults[0],
+                body: "## Foo header\n\n",
+              });
+              destNote = await NoteTestUtilsV4.createNote({
+                fname: "dest",
+                wsRoot,
+                vault: vaults[0],
+                body: "![[ref-note]] ",
+              });
+              await NoteTestUtilsV4.createNote({
+                fname: "ref-note",
+                wsRoot,
+                vault: vaults[0],
+                body: "[[Foo|origin#foo-header]]",
+              });
+            },
+            onInit: onInitFunc(async () => {
+              const cmd = new MoveHeaderCommand();
+              const out = await cmd.run({ dest: destNote });
+              expect(out!.origin.body.includes("## Foo header")).toBeFalsy();
+              expect(out!.dest!.body.includes("## Foo header")).toBeTruthy();
+              done();
+            }),
+          });
+        });
+      });
+
       test("THEN selected header is moved from origin to dest", (done) => {
         runLegacyMultiWorkspaceTest({
           ctx,

@@ -354,7 +354,7 @@ function linkedNoteType({
   document,
   doExpensiveDecorations,
 }: {
-  fname: string;
+  fname?: string;
   anchorStart?: string;
   anchorEnd?: string;
   vaultName?: string;
@@ -376,7 +376,7 @@ function linkedNoteType({
   if (!fname && document) {
     const documentNote = VSCodeUtils.getNoteFromDocument(document);
     matchingNotes = documentNote ? [documentNote] : [];
-  } else {
+  } else if (fname) {
     try {
       matchingNotes = NoteUtils.getNotesByFname({
         fname,
@@ -393,7 +393,14 @@ function linkedNoteType({
       });
       return DECORATION_TYPE.brokenWikilink;
     }
+  } else {
+    matchingNotes = [VSCodeUtils.getNoteFromDocument(document!)!];
   }
+
+  // Checking web URLs is not feasible, and checking wildcard references would be hard.
+  // Let's just highlight them as existing for now.
+  if (fname && (containsNonDendronUri(fname) || fname.endsWith("*")))
+    return DECORATION_TYPE.wikiLink;
 
   if (anchorStart || anchorEnd) {
     const allAnchors = _.flatMap(matchingNotes, (note) =>
@@ -407,12 +414,7 @@ function linkedNoteType({
       return DECORATION_TYPE.brokenWikilink;
   }
 
-  if (
-    matchingNotes.length > 0 ||
-    containsNonDendronUri(fname) ||
-    fname.endsWith("*")
-  )
-    return DECORATION_TYPE.wikiLink;
+  if (matchingNotes.length > 0) return DECORATION_TYPE.wikiLink;
   else return DECORATION_TYPE.brokenWikilink;
 }
 

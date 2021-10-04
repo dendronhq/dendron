@@ -70,6 +70,8 @@ suite("windowDecorations", function () {
               "",
               "[[with alias|root]]",
               "",
+              "![[root.*#head]]",
+              "",
               "[[does.not.exist]]",
             ].join("\n"),
             props: {
@@ -121,7 +123,7 @@ suite("windowDecorations", function () {
           const wikilinkDecorations = allDecorations!.get(
             DECORATION_TYPE.wikiLink
           );
-          expect(wikilinkDecorations.length).toEqual(3);
+          expect(wikilinkDecorations.length).toEqual(4);
           expect(
             isTextDecorated("[[root]]", wikilinkDecorations!, document)
           ).toBeTruthy();
@@ -134,6 +136,9 @@ suite("windowDecorations", function () {
           ).toBeTruthy();
           expect(
             isTextDecorated("#bar", wikilinkDecorations!, document)
+          ).toBeTruthy();
+          expect(
+            isTextDecorated("![[root.*#head]]", wikilinkDecorations!, document)
           ).toBeTruthy();
 
           const aliasDecorations = allDecorations!.get(DECORATION_TYPE.alias);

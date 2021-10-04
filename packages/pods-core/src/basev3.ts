@@ -1,6 +1,7 @@
 import {
   DEngineClient,
   DVault,
+  minimatch,
   NoteProps,
   NoteUtils,
   stringifyError,
@@ -8,11 +9,11 @@ import {
   WorkspaceOpts,
 } from "@dendronhq/common-all";
 import { createLogger, DLogger, resolvePath } from "@dendronhq/common-server";
+import { JSONSchemaType } from "ajv";
 import { Item } from "klaw";
 import _ from "lodash";
 import { URI } from "vscode-uri";
 import { GDocUtilMethods, NotionUtilMethods, PodKind } from "./types";
-import { JSONSchemaType } from "ajv";
 import { PodUtils } from "./utils";
 
 export enum PROMPT {
@@ -135,6 +136,11 @@ export abstract class ImportPod<T extends ImportPodConfig = ImportPodConfig> {
 
 // === Export Pod
 
+export type PodVaultConfig = {
+  include?: string[];
+  exclude?: string[];
+};
+
 export type ExportPodConfig = {
   /**
    * Where to export to
@@ -143,6 +149,7 @@ export type ExportPodConfig = {
   includeBody?: boolean;
   includeStubs?: boolean;
   ignore?: string[];
+  vaults?: PodVaultConfig;
 };
 export type ExportPodExecuteOpts<T extends ExportPodConfig = ExportPodConfig> =
   PodOpts<T>;
@@ -186,6 +193,21 @@ export abstract class ExportPod<
     if (!includeBody) {
       notes = notes.map((ent) => ({ ...ent, body: "" }));
     }
+    if (config.vaults?.exclude) {
+      notes = _.reject(notes, (ent) =>
+        config.vaults?.exclude?.includes(VaultUtils.getName(ent.vault))
+      ) as NoteProps[];
+    }
+    if (config.vaults?.include) {
+      notes = _.filter(notes, (ent) =>
+        config.vaults?.include?.includes(VaultUtils.getName(ent.vault))
+      ) as NoteProps[];
+    }
+    if (config.ignore) {
+      notes = _.reject(notes, (ent) => {
+        return _.some(config.ignore, (pat) => minimatch(ent.fname, pat));
+      });
+    }
     return notes;
   }
 
@@ -204,8 +226,8 @@ export abstract class ExportPod<
     });
 
     try {
-      return this.plant({ ...opts, dest: destURL, notes });
-    } catch (err) {
+      return await this.plant({ ...opts, dest: destURL, notes });
+    } catch (err: any) {
       console.log("error", stringifyError(err));
       throw err;
     }

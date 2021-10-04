@@ -126,23 +126,20 @@ export const enrichPodArgs = (opts: {
     }
     const podsDir = path.join(wsRoot, "pods");
 
-    let cleanConfig: any;
-
+    let cleanConfig = PodUtils.getConfig({ podsDir, podClass }) || {};
+    // add additional config
     if (config) {
-      cleanConfig = {};
       config.split(",").map((ent) => {
         const [k, v] = ent.split("=");
         cleanConfig[k] = v;
       });
-    } else {
-      cleanConfig = PodUtils.getConfig({ podsDir, podClass });
-      if (!cleanConfig) {
-        const podConfigPath = PodUtils.getConfigPath({ podsDir, podClass });
-        throw new DendronError({
-          status: "no-config",
-          message: `no config found. please create a config at ${podConfigPath}`,
-        });
-      }
+    }
+    if (_.isEmpty(cleanConfig)) {
+      const podConfigPath = PodUtils.getConfigPath({ podsDir, podClass });
+      throw new DendronError({
+        status: "no-config",
+        message: `no config found. please create a config at ${podConfigPath}`,
+      });
     }
     return { ...args, ...engineArgs, podClass, config: cleanConfig };
   };

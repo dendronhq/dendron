@@ -85,6 +85,25 @@ export class PodUtils {
           nullable: true,
         },
         ignore: { type: "array", items: { type: "string" }, nullable: true },
+        vaults: {
+          type: "object",
+          description: "include or exclude certain vaults",
+          nullable: true,
+          properties: {
+            include: {
+              type: "array",
+              items: {
+                type: "string",
+              },
+            },
+            exclude: {
+              type: "array",
+              items: {
+                type: "string",
+              },
+            },
+          },
+        },
         ...opts.properties,
       },
     };
@@ -205,7 +224,7 @@ export class PodUtils {
       const errors = ajv.errorsText(validateConfig.errors);
       throw new DendronError({
         message: `validation errors: ${errors}`,
-        payload: `error: ${errors}`,
+        payload: `error: ${JSON.stringify(validateConfig.errors)}`,
       });
     }
   }

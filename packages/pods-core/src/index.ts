@@ -4,7 +4,7 @@ import {
   JSONImportPod,
   JSONPublishPod,
 } from "./builtin";
-import { AirtableExportPod } from "./builtin/AirtablePod";
+import { AirtableExportPod, AirtablePublishPod } from "./builtin/AirtablePod";
 import { GDocImportPod } from "./builtin/GDocPod";
 import {
   GithubIssueImportPod,
@@ -20,6 +20,7 @@ import {
 import { NextjsExportPod } from "./builtin/NextjsExportPod";
 import { PodClassEntryV4 } from "./types";
 import { NotionExportPod } from "./builtin/NotionPod";
+import { JSONSchemaType } from "ajv";
 
 export * from "./basev3";
 export * from "./builtin";
@@ -42,6 +43,7 @@ export function getAllPublishPods(): PodClassEntryV4[] {
     MarkdownPublishPod,
     HTMLPublishPod,
     GithubIssuePublishPod,
+    AirtablePublishPod,
   ];
 }
 export function getAllImportPods(): PodClassEntryV4[] {
@@ -52,3 +54,5 @@ export function getAllImportPods(): PodClassEntryV4[] {
     GDocImportPod,
   ];
 }
+
+export { JSONSchemaType };

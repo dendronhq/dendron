@@ -2,7 +2,7 @@
 
 exports[`add error: does not exist 1`] = `
 Object {
-  "error": [Error: seed dendron.no-exist does not exist],
+  "error": [DendronError: seed dendron.no-exist does not exist],
 }
 `;
 
@@ -369,6 +369,6 @@ repository:
 
 exports[`remove error: nothing to remove 1`] = `
 Object {
-  "error": [Error: seed with id dendron.no-exist not in dendron.yml],
+  "error": [DendronError: seed with id dendron.no-exist not in dendron.yml],
 }
 `;

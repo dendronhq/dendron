@@ -25,6 +25,10 @@ export type EngineConnectorInitOpts = {
   onReady?: ({}: { ws: EngineConnector }) => Promise<void>;
   numRetries?: number;
   portOverride?: number;
+  /**
+   * Should initialize engine before sync?
+   */
+  init?: boolean;
 };
 
 export class EngineConnector {
@@ -80,6 +84,11 @@ export class EngineConnector {
     return this.config.vaults;
   }
 
+  /**
+   * Connect with engine
+   * @param opts
+   * @returns
+   */
   async init(opts?: EngineConnectorInitOpts) {
     const ctx = "EngineConnector:init";
     // init engine
@@ -90,18 +99,34 @@ export class EngineConnector {
       if (!engine) {
         throw new DendronError({ message: "error connecting" });
       }
-      await this.initEngine({ engine, port: opts.portOverride });
+      await this.initEngine({
+        engine,
+        port: opts.portOverride,
+        init: opts.init,
+      });
     } else {
-      return this.createServerWatcher({ numRetries: opts?.numRetries });
+      return this.createServerWatcher({
+        numRetries: opts?.numRetries,
+        init: opts?.init,
+      });
     }
   }
 
-  async initEngine(opts: { engine: DendronEngineClient; port: number }) {
+  async initEngine(opts: {
+    engine: DendronEngineClient;
+    port: number;
+    init?: boolean;
+  }) {
     const ctx = "EngineConnector:initEngine";
-    const { engine, port } = opts;
-    this.logger.info({ ctx, msg: "enter", port });
+    const { engine, port, init } = opts;
+    this.logger.info({ ctx, msg: "enter", port, init });
     this.port = port;
-    await engine.sync();
+
+    if (init) {
+      await engine.init();
+    } else {
+      await engine.sync();
+    }
     this._engine = engine;
     this.initialized = true;
     return engine;
@@ -158,7 +183,7 @@ export class EngineConnector {
     }
   }
 
-  async connectAndInit(opts: { wsRoot: string }) {
+  async connectAndInit(opts: { wsRoot: string; init?: boolean }) {
     const ctx = "EngineConnector:connectAndInit";
     return new Promise((resolve) => {
       setTimeout(async () => {
@@ -166,7 +191,7 @@ export class EngineConnector {
         this.logger.info({ ctx, msg: "checking for engine" });
         if (maybeEngine) {
           this.logger.info({ ctx, msg: "found engine" });
-          await this.initEngine(maybeEngine);
+          await this.initEngine({ ...maybeEngine, init: opts.init });
           await (!_.isUndefined(this.onReady) && this.onReady({ ws: this }));
           resolve(undefined);
         }
@@ -174,7 +199,7 @@ export class EngineConnector {
     });
   }
 
-  async createServerWatcher(opts?: { numRetries?: number }) {
+  async createServerWatcher(opts?: { numRetries?: number; init?: boolean }) {
     const ctx = "EngineConnector:createServerWatcher";
     const { wsRoot } = this;
     const portFilePath = getPortFilePath({ wsRoot });
@@ -182,7 +207,7 @@ export class EngineConnector {
 
     // try to connect to file
     while (!this.initialized) {
-      await this.connectAndInit({ wsRoot });
+      await this.connectAndInit({ wsRoot, init: opts?.init });
     }
 
     // create file watcher in case file changes

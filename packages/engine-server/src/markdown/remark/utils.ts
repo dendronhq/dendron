@@ -374,6 +374,16 @@ export class LinkUtils {
     });
     return links;
   }
+
+  static findHashTags({ links }: { links: DLink[] }) {
+    return links.filter((l) => {
+      if (l.to as DNoteLoc) {
+        return l.value.startsWith("tags.");
+      }
+      return false;
+    });
+  }
+
   static isAlias(link: string) {
     return link.indexOf("|") !== -1;
   }
@@ -1186,10 +1196,13 @@ export class RemarkUtils {
       const bOmit = _.omit(b, ["position", "children"]);
       if (_.isEqual(aOmit, bOmit)) {
         if (_.has(a, "children")) {
-          return _.every(a.children as Node[], (aChild: Node, aIndex: number) => {
-            const bChild = (b.children as Node[])[aIndex];
-            return RemarkUtils.hasIdenticalChildren(aChild, bChild);
-          });
+          return _.every(
+            a.children as Node[],
+            (aChild: Node, aIndex: number) => {
+              const bChild = (b.children as Node[])[aIndex];
+              return RemarkUtils.hasIdenticalChildren(aChild, bChild);
+            }
+          );
         }
         return true;
       } else {
@@ -1209,10 +1222,7 @@ export class RemarkUtils {
    * @param targetHeader Heading to target
    * @returns nodes to extract
    */
-  static extractHeaderBlock(
-    tree: Node,
-    targetHeader: Heading,
-  ) {
+  static extractHeaderBlock(tree: Node, targetHeader: Heading) {
     let headerFound = false;
     let foundHeaderIndex: number | undefined;
     let nextHeaderIndex: number | undefined;

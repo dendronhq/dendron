@@ -18,7 +18,7 @@ import {
   userTag2WikiLinkNoteV4,
 } from "./utils";
 import Unified, { Transformer } from "unified";
-import { Node } from "unist";
+import { Node, Parent } from "unist";
 import u from "unist-builder";
 import visitParents from "unist-util-visit-parents";
 import { VFile } from "vfile";
@@ -27,13 +27,13 @@ import {
   BlockAnchor,
   DendronASTDest,
   DendronASTTypes,
+  ExtendedImage,
   HashTag,
   NoteRefDataV4,
   RehypeLinkData,
   UserTag,
   VaultMissingBehavior,
   WikiLinkNoteV4,
-  ExtendedImage,
 } from "../types";
 import { MDUtilsV4 } from "../utils";
 import { MDUtilsV5, ProcMode } from "../utilsv5";
@@ -52,6 +52,25 @@ type PluginOpts = NoteRefsOpts & {
   /** Don't display randomly generated colors for tags, only display color if it's explicitly set by the user. */
   noRandomlyColoredTags?: boolean;
 };
+
+/**
+ * Returns a new copy of children array where the first un-rendered
+ * reference ![[ref]] in children array is replaced with the given `data`. */
+function replacedUnrenderedRefWithConvertedData(
+  data: Parent[],
+  children: Node[]
+) {
+  if (children.length > 1) {
+    const idx = _.findIndex(children, RemarkUtils.isNoteRefV2);
+    const processedChildren = children
+      .slice(0, idx)
+      .concat(data)
+      .concat(children.slice(idx + 1));
+    return processedChildren;
+  } else {
+    return data;
+  }
+}
 
 function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
   const proc = this;
@@ -276,17 +295,12 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
           compilerOpts: copts,
           procOpts,
         });
+
         if (data) {
-          if (parent!.children.length > 1) {
-            const children = parent!.children;
-            const idx = _.findIndex(children, RemarkUtils.isNoteRefV2);
-            parent!.children = children
-              .slice(0, idx)
-              .concat(data)
-              .concat(children.slice(idx + 1, -1));
-          } else {
-            parent!.children = data;
-          }
+          parent.children = replacedUnrenderedRefWithConvertedData(
+            data,
+            parent.children
+          );
         }
       }
       if (node.type === DendronASTTypes.BLOCK_ANCHOR) {

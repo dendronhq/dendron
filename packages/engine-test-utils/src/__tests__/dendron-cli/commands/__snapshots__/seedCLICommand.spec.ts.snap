@@ -68,20 +68,6 @@ site:
             - vault2
             - vaultThree
             - dendron.foo
-commands:
-    lookup:
-        note:
-            selectionMode: extract
-            confirmVaultOnCreate: false
-            leaveTrace: false
-    randomNote: {}
-    insertNote:
-        initialValue: templates
-    insertNoteLink:
-        aliasMode: none
-        enableMultiSelect: false
-    insertNoteIndex:
-        enableMarker: false
 initializeRemoteVaults: true
 seeds:
     dendron.foo: {}
@@ -173,20 +159,6 @@ site:
             - vault2
             - vaultThree
             - dendron.foo
-commands:
-    lookup:
-        note:
-            selectionMode: extract
-            confirmVaultOnCreate: false
-            leaveTrace: false
-    randomNote: {}
-    insertNote:
-        initialValue: templates
-    insertNoteLink:
-        aliasMode: none
-        enableMultiSelect: false
-    insertNoteIndex:
-        enableMarker: false
 initializeRemoteVaults: true
 seeds:
     dendron.foo:
@@ -261,20 +233,6 @@ site:
     description: Personal knowledge space
     siteLastModified: true
     gh_edit_branch: main
-commands:
-    lookup:
-        note:
-            selectionMode: extract
-            confirmVaultOnCreate: false
-            leaveTrace: false
-    randomNote: {}
-    insertNote:
-        initialValue: templates
-    insertNoteLink:
-        aliasMode: none
-        enableMultiSelect: false
-    insertNoteIndex:
-        enableMarker: false
 initializeRemoteVaults: true
 "
 `;
@@ -327,20 +285,6 @@ site:
         action: useVault
         payload:
             - fooVault
-commands:
-    lookup:
-        note:
-            selectionMode: extract
-            confirmVaultOnCreate: false
-            leaveTrace: false
-    randomNote: {}
-    insertNote:
-        initialValue: templates
-    insertNoteLink:
-        aliasMode: none
-        enableMultiSelect: false
-    insertNoteIndex:
-        enableMarker: false
 initializeRemoteVaults: true
 "
 `;
@@ -406,20 +350,6 @@ site:
         action: useVault
         payload:
             - vault
-commands:
-    lookup:
-        note:
-            selectionMode: extract
-            confirmVaultOnCreate: false
-            leaveTrace: false
-    randomNote: {}
-    insertNote:
-        initialValue: templates
-    insertNoteLink:
-        aliasMode: none
-        enableMultiSelect: false
-    insertNoteIndex:
-        enableMarker: false
 initializeRemoteVaults: true
 "
 `;

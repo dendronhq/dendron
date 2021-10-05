@@ -89,7 +89,7 @@ export const ALL_MIGRATIONS: Migrations[] = [
           }
 
           // migrate lookup
-          const oldLookup = dendronConfig.lookup;
+          const oldLookup = dendronConfig.lookup!;
           let selectionMode = LookupSelectionModeEnum.extract;
           switch(oldLookup.note.selectionType) {
             case "selection2link": {

@@ -168,6 +168,7 @@ export class NoteLookupCommand extends BaseCommand<
     } else {
       selectionType = noteLookupConfig.selectionType;
     }
+
     const copts: CommandRunOpts = _.defaults(opts || {}, {
       multiSelect: false,
       filterMiddleware: [],
@@ -177,12 +178,15 @@ export class NoteLookupCommand extends BaseCommand<
     const ctx = "NoteLookupCommand:gatherInput";
     Logger.info({ ctx, opts, msg: "enter" });
     // initialize controller and provider
-    this._controller = LookupControllerV3.create({
-      nodeType: "note",
-      disableVaultSelection: !DConfig.getProp(
+    const disableVaultSelection = "confirmVaultOnCreate" in noteLookupConfig
+      ? !noteLookupConfig.confirmVaultOnCreate
+      : !DConfig.getProp(
         ws.config,
         "lookupConfirmVaultOnCreate"
-      ),
+      );
+    this._controller = LookupControllerV3.create({
+      nodeType: "note",
+      disableVaultSelection, 
       vaultButtonPressed:
         copts.vaultSelectionMode === VaultSelectionMode.alwaysPrompt,
       extraButtons: [

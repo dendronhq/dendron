@@ -4,9 +4,12 @@ import {
   InsertNoteLinkAliasModeEnum,
   InsertNoteLinkConfig,
   InsertNoteIndexConfig,
+  LookupConfig,
+  NoteLookupConfig,
   LookupSelectionModeEnum,
   ScratchConfig,
   DendronError,
+  DendronCommandConfig,
 } from "@dendronhq/common-all";
 import {
   SegmentClient,
@@ -30,7 +33,7 @@ export const ALL_MIGRATIONS: Migrations[] = [
         name: "migrate command config",
         func: async ({ dendronConfig, wsConfig, wsService }) => {
           // back up existing config
-          const backupPath = DConfig.createBackup(wsService.wsRoot, "migration");
+          const backupPath = DConfig.createBackup(wsService.wsRoot, "migrate-command-config");
           if (!fs.existsSync(backupPath)) {
             return {
               error: new DendronError({ message: "Backup failed during config migration. Exiting without migration." }),
@@ -40,18 +43,23 @@ export const ALL_MIGRATIONS: Migrations[] = [
               }
             }
           }
+          
+          // command namespace
+          const commands = {
+            
+          } as DendronCommandConfig;
      
           // migrate randomNote
           const maybeOldRandomNote = dendronConfig.randomNote;
           if (!_.isUndefined(maybeOldRandomNote)) {
-            dendronConfig.commands.randomNote = maybeOldRandomNote;
+            commands.randomNote = maybeOldRandomNote;
             delete dendronConfig.randomNote;
           }
       
           // migrate insertNote
           const maybeOldDefaultInsertHierarchy = dendronConfig.defaultInsertHierarchy;
           if (!_.isUndefined(maybeOldDefaultInsertHierarchy)) {
-            dendronConfig.commands.insertNote = {
+            commands.insertNote = {
               initialValue: maybeOldDefaultInsertHierarchy
             };
             delete dendronConfig.defaultInsertHierarchy;
@@ -60,7 +68,7 @@ export const ALL_MIGRATIONS: Migrations[] = [
           // migrate insertNoteLink
           const maybeOldInsertNoteLink = dendronConfig.insertNoteLink;
           if (!_.isUndefined(maybeOldInsertNoteLink)) {
-            dendronConfig.commands.insertNoteLink = {
+            commands.insertNoteLink = {
               aliasMode: ( 
                 maybeOldInsertNoteLink.aliasMode as unknown 
               ) as InsertNoteLinkAliasModeEnum,
@@ -73,7 +81,7 @@ export const ALL_MIGRATIONS: Migrations[] = [
           const maybeOldInsertNoteIndex = dendronConfig.insertNoteIndex;
           if (!_.isUndefined(maybeOldInsertNoteIndex)) {
             if (!_.isUndefined(maybeOldInsertNoteIndex.marker)) {
-              dendronConfig.commands.insertNoteIndex = {
+              commands.insertNoteIndex = {
                 enableMarker: maybeOldInsertNoteIndex.marker
               } as InsertNoteIndexConfig;
               delete dendronConfig.insertNoteIndex;
@@ -94,18 +102,24 @@ export const ALL_MIGRATIONS: Migrations[] = [
             }
             default: break;
           }
+          const leaveTrace = oldLookup.note.leaveTrace 
+            ? oldLookup.note.leaveTrace
+            : false;
+
           const maybeOldLookupConfirmVaultOnCreate = dendronConfig.lookupConfirmVaultOnCreate;
           const confirmVaultOnCreate = _.isUndefined(maybeOldLookupConfirmVaultOnCreate)
             ? false
             : maybeOldLookupConfirmVaultOnCreate;
-          dendronConfig.commands.lookup.note = {
-            selectionMode,
-            confirmVaultOnCreate,
-            
-          }
-          
-          
-          
+          commands.lookup = {
+            note: {
+              selectionMode,
+              confirmVaultOnCreate,
+              leaveTrace,
+            } as NoteLookupConfig
+          } as LookupConfig;
+
+          dendronConfig.commands = commands;
+
           return { data: { dendronConfig, wsConfig }};
         }
       }

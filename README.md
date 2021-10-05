@@ -1,7 +1,7 @@
 ![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/logo-256.png)
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-72-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-73-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 # Welcome to Dendron!
@@ -154,6 +154,7 @@ Dendron wouldn't be what it is today without help from these wonderful gardeners
   <tr>
     <td align="center"><a href="https://github.com/sotn3m"><img src="https://avatars.githubusercontent.com/u/11821473?v=4?s=100" width="100px;" alt=""/><br /><sub><b>sotn3m</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Asotn3m" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/codeluggage"><img src="https://avatars.githubusercontent.com/u/1154150?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Matias Forbord</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=codeluggage" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://github.com/Tycholiz"><img src="https://avatars.githubusercontent.com/u/39745457?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Kyle Tycholiz</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3ATycholiz" title="Bug reports">🐛</a></td>
   </tr>
 </table>
 

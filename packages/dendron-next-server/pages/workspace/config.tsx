@@ -65,7 +65,6 @@ const genDefaultConfig = (): IntermediateDendronConfig => ({
     title: "Dendron",
     description: "Personal knowledge space",
   },
-  commands: IntermediateDendronConfigUtils.genDefaultCommandConfig()
 });
 
 type InputControlProps = {

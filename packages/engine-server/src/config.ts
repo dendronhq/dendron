@@ -86,7 +86,6 @@ export class DConfig {
         siteLastModified: true,
         gh_edit_branch: "main",
       },
-      commands: IntermediateDendronConfigUtils.genDefaultCommandConfig()
     };
   }
 

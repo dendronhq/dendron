@@ -15,7 +15,7 @@ import {
   NOTE_PRESETS_V4,
   EngineTestUtilsV4,
 } from "@dendronhq/common-test-utils";
-import { HistoryService } from "@dendronhq/engine-server";
+import { HistoryService, DConfig } from "@dendronhq/engine-server";
 import {
   ENGINE_HOOKS,
   ENGINE_HOOKS_MULTI,
@@ -999,6 +999,7 @@ suite("NoteLookupCommand", function () {
       runLegacyMultiWorkspaceTest({
         ctx,
         modConfigCb: (config: IntermediateDendronConfig) => {
+          config.lookup = DConfig.genDefaultConfig().lookup!;
           config.lookup.note.selectionType = LegacyLookupSelectionType.none;
           return config;
         },
@@ -1187,6 +1188,7 @@ suite("NoteLookupCommand", function () {
         onInit: async ({ wsRoot, vaults, engine }) => {
           withConfig(
             (config) => {
+              config.lookup = DConfig.genDefaultConfig().lookup!;
               config.lookup.note.leaveTrace = true;
               return config;
             },

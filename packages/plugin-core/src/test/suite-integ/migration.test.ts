@@ -286,7 +286,7 @@ suite("Migration", function () {
             logger: Logger,
             migrations: getMigration({ from: "0.55.0", to: "0.55.2" }),
           });
-          expect(getDWorkspace().config.lookup.note.selectionType).toEqual(
+          expect(getDWorkspace().config.lookup!.note.selectionType).toEqual(
             LegacyLookupSelectionType.selection2link
           );
           done();
@@ -327,8 +327,8 @@ suite("Migration", function () {
             logger: Logger,
             migrations: getMigration({ from: "0.55.0", to: "0.55.2" }),
           });
-          expect(getDWorkspace().config.lookup.note.selectionType).toEqual(
-            DConfig.genDefaultConfig().lookup.note.selectionType
+          expect(getDWorkspace().config.lookup!.note.selectionType).toEqual(
+            DConfig.genDefaultConfig().lookup!.note.selectionType
           );
           done();
         },

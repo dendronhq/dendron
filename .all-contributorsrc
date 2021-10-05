@@ -687,6 +687,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "Stedag",
+      "name": "Stedag",
+      "avatar_url": "https://avatars.githubusercontent.com/u/5147273?v=4",
+      "profile": "https://github.com/Stedag",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,

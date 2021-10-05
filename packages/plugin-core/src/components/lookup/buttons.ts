@@ -2,9 +2,9 @@ import {
   getSlugger,
   NoteProps,
   NoteQuickInput,
+  IntermediateDendronConfigUtils,
   NoteUtils,
 } from "@dendronhq/common-all";
-import { DConfig } from "@dendronhq/engine-server";
 import _ from "lodash";
 import * as vscode from "vscode";
 import { QuickInputButton, ThemeIcon } from "vscode";
@@ -99,8 +99,9 @@ const selectionToNoteProps = async (opts: {
     case "selectionExtract": {
       if (!_.isUndefined(document)) {
         const ws = getDWorkspace();
-        const leaveTrace =
-          DConfig.getProp(ws.config, "lookup").note.leaveTrace || false;
+        const noteLookupConfig = IntermediateDendronConfigUtils
+          .getLookupConfig(ws.config).note;
+        const leaveTrace = noteLookupConfig.leaveTrace || false;
         const body = "\n" + document.getText(range).trim();
         note.body = body;
         // don't delete if original file is not in workspace

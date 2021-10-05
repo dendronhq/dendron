@@ -5,13 +5,15 @@
  */
 import { 
   DendronConfig as DendronConfigV1,
+  LegacyLookupConfig,
+  LegacyLookupSelectionType,
   LegacyRandomNoteConfig,
   LegacyInsertNoteLinkConfig,
   LegacyInsertNoteIndexConfig,
 } from "./workspace";
 import { DendronConfig as DendronConfigV2 } from "./configs/dendronConfig";
 import { genDefaultCommandConfig } from "./configs/commands/commands";
-import { RandomNoteConfig, InsertNoteLinkConfig, InsertNoteIndexConfig } from "./configs/commands";
+import { LookupConfig, RandomNoteConfig, InsertNoteLinkConfig, InsertNoteIndexConfig } from "./configs/commands";
 
 export * from "./configs";
 export type IntermediateDendronConfig = IntermediateOldConfig & IntermediateNewConfig;
@@ -26,7 +28,6 @@ type IntermediateOldConfig = Partial<DendronConfigV1>
   | "site"
   | "journal"
   | "vaults"
-  | "lookup"
 >>;
 
 /**
@@ -107,8 +108,29 @@ function getInsertNoteIndexConfig(
   return;
 }
 
+function getLookupConfig(
+  config: IntermediateDendronConfig
+): LookupConfig | LegacyLookupConfig {
+  const keys = Object.keys(config);
+  if(keys.includes("commands")) {
+    return config["commands"]!["lookup"];
+  }
+
+  if(keys.includes("lookup")) {
+    return config["lookup"]!;
+  }
+
+  return {
+    note: {
+      selectionType: LegacyLookupSelectionType.selectionExtract,
+      leaveTrace: false,
+    }
+  } as LegacyLookupConfig;
+}
+
 export const IntermediateDendronConfigUtils = {
   genDefaultCommandConfig,
+  getLookupConfig,
   getRandomNoteConfig,
   getDefaultInsertHierarchy,
   getInsertNoteLinkConfig,

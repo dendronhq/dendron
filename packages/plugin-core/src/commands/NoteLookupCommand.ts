@@ -4,7 +4,8 @@ import {
   ERROR_STATUS,
   ErrorFactory,
   ErrorMessages,
-  LegacyNoteLookupConfig,
+  // LegacyNoteLookupConfig,
+  IntermediateDendronConfigUtils,
   NoteProps,
   NoteQuickInput,
   NoteUtils,
@@ -141,15 +142,37 @@ export class NoteLookupCommand extends BaseCommand<
   async gatherInputs(opts?: CommandRunOpts): Promise<CommandGatherOutput> {
     const start = process.hrtime();
     const ws = getDWorkspace();
-    const noteLookupConfig: LegacyNoteLookupConfig = DConfig.getProp(
-      ws.config,
-      "lookup"
-    ).note;
+    const noteLookupConfig = IntermediateDendronConfigUtils
+      .getLookupConfig(ws.config).note;
+    
+    let selectionType: LookupSelectionType = LookupSelectionTypeEnum.selectionExtract;
+    if ("selectionMode" in noteLookupConfig) {
+      const selectionMode = noteLookupConfig.selectionMode;
+      switch(selectionMode) {
+        case "extract": {
+          selectionType = LookupSelectionTypeEnum.selectionExtract
+          break;
+        }
+        case "link": {
+          selectionType = LookupSelectionTypeEnum.selection2link;
+          break;
+        }
+        case "none": {
+          selectionType = LookupSelectionTypeEnum.none;
+          break;
+        }
+        default: {
+          throw new DendronError({ message: "unsupported selection type."});
+        }
+      }
+    } else {
+      selectionType = noteLookupConfig.selectionType;
+    }
     const copts: CommandRunOpts = _.defaults(opts || {}, {
       multiSelect: false,
       filterMiddleware: [],
       initialValue: NotePickerUtils.getInitialValueFromOpenEditor(),
-      selectionType: noteLookupConfig.selectionType,
+      selectionType,
     } as CommandRunOpts);
     const ctx = "NoteLookupCommand:gatherInput";
     Logger.info({ ctx, opts, msg: "enter" });

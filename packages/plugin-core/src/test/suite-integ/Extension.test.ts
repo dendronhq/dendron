@@ -1,7 +1,6 @@
 import {
   CONSTANTS,
   IntermediateDendronConfig,
-  IntermediateDendronConfigUtils,
   InstallStatus,
   isNotUndefined,
   Time,
@@ -207,7 +206,6 @@ suite("Extension", function () {
               payload: ["vault"],
             },
           },
-          commands: IntermediateDendronConfigUtils.genDefaultCommandConfig()
         } as IntermediateDendronConfig);
         const dendronState = MetadataService.instance().getMeta();
         expect(isNotUndefined(dendronState.firstInstall)).toBeTruthy();

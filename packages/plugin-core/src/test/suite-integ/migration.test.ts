@@ -335,7 +335,7 @@ suite("Migration", function () {
       });
     });
 
-    test.only("migrate to 0.62 (dendron config command namespace)", (done) => {
+    test("migrate to 0.62 (dendron config command namespace)", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
         modConfigCb: (config) => {

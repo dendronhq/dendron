@@ -1,0 +1,44 @@
+# Builds and publishes the release. This will publish packages to npm and
+# publish the release extension to the VS Code and Open VSX Marketplaces. This
+# is manually triggered once the release build is smoke-tested and ready for
+# release.
+name: Proto
+
+on: workflow_dispatch
+
+jobs:
+  build:
+    environment: plugin-production
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Gather environment data
+        run: |
+          node --version
+          npm --version
+          yarn --version
+
+      - name: Configure Git user
+        run: |
+          git config --global user.name github.actions
+          git config --global user.email github-actions@github.com
+
+      - name: Checkout source
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version:  14.x
+
+      - name: Init workspace
+        run: yarn -W
+
+      # - name: Yarn Setup
+      #   run: yarn setup
+
+      - name: Login to NPM
+        run: |
+          yarn setup:npmlogin:remote
+      

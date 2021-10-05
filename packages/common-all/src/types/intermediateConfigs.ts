@@ -14,14 +14,10 @@ import { RandomNoteConfig } from "./configs/commands";
 export * from "./configs";
 export type IntermediateDendronConfig = IntermediateOldConfig & IntermediateNewConfig;
 
-// omit all command related legacy configs
-// type IntermediateOldConfig = Omit<DendronConfigV1, 
-//   | "lookup"
-//   | "lookupConfirmVaultOnCreate"
-//   | "insertNoteLink"
-//   | "insertNoteIndex"
-//   | "randomNote"
-// >;
+/**
+ * Partial of the old config, but respect the required keys
+ * that are not yet in the process of migration.
+ */
 type IntermediateOldConfig = Partial<DendronConfigV1> 
   & Required<Pick<DendronConfigV1, 
   | "version"
@@ -31,7 +27,10 @@ type IntermediateOldConfig = Partial<DendronConfigV1>
   | "lookup"
 >>;
 
-// 
+/**
+ * Partial of the new config, may only contain keys
+ * that are currently in the process of, or completed migration.
+ */
 type IntermediateNewConfig = Partial<Pick<DendronConfigV2,
   | "commands"
 >>

@@ -18,7 +18,6 @@ import {
 import {
   NoteAddBehavior,
   IntermediateDendronConfig,
-  IntermediateDendronConfigUtils,
   LegacyLookupSelectionType,
 } from "@dendronhq/common-all";
 import { Field, FieldArray, Form, Formik } from "formik";

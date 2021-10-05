@@ -2,7 +2,6 @@ import {
   CleanDendronSiteConfig,
   CONSTANTS,
   IntermediateDendronConfig,
-  IntermediateDendronConfigUtils,
   DendronError,
   DendronSiteConfig,
   ERROR_STATUS,

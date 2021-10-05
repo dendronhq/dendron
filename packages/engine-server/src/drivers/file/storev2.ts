@@ -594,8 +594,14 @@ export class FileStorage implements DStore {
     }
     const vpath = vault2Path({ wsRoot, vault: oldVault });
     const oldLocPath = path.join(vpath, oldLoc.fname + ".md");
+    const fname = path.basename(oldLocPath, ".md");
     // read from disk since contents migh have changed
-    const noteRaw = file2Note(oldLocPath, oldVault);
+    let noteRaw: any;
+    try {
+      noteRaw = file2Note(oldLocPath, oldVault);
+    } catch (err: any) {
+      noteRaw = _.find(this.engine.notes, { fname });
+    }
     const oldNote = NoteUtils.hydrate({
       noteRaw,
       noteHydrated: this.notes[noteRaw.id],
@@ -742,6 +748,18 @@ export class FileStorage implements DStore {
       this.logger.error({ err });
       throw new DendronError({ message: " error rename note", payload: err });
     });
+    /**
+     * If the event source is not engine(ie: vscode rename context menu), we do not want to
+     * delete the original files. We update the references on onWillRenameFiles and return.
+     */
+    if (!opts.isEventSouceEngine) {
+      notesChangedEntries = await this.updateNewNotes(
+        notesChanged,
+        ctx,
+        notesChangedEntries
+      );
+      return notesChangedEntries;
+    }
     const newNote: NoteProps = {
       ...oldNote,
       fname: newLoc.fname,
@@ -800,6 +818,35 @@ export class FileStorage implements DStore {
     }
     this.logger.info({ ctx, msg: "updateAllNotes:pre" });
     // update all new notes
+    notesChangedEntries = await this.updateNewNotes(
+      notesChanged,
+      ctx,
+      notesChangedEntries
+    );
+
+    // remove old note only when rename is success
+    if (deleteOldFile) fs.removeSync(oldLocPath);
+
+    // create needs to be very last element added
+    notesChangedEntries = changedFromDelete
+      .concat(changeFromWrite)
+      .concat(notesChangedEntries);
+    // remove duplicate updates
+    notesChangedEntries = _.uniqBy(notesChangedEntries, (ent) => {
+      return [ent.status, ent.note.id, ent.note.fname].join("");
+    });
+    this.logger.info({ ctx, msg: "exit", opts, out: notesChangedEntries });
+    return notesChangedEntries;
+  }
+
+  /**
+   *  method to update new notes
+   */
+  private async updateNewNotes(
+    notesChanged: NoteProps[],
+    ctx: string,
+    notesChangedEntries: NoteChangeEntry[]
+  ) {
     await Promise.all(
       notesChanged.map(async (n) => {
         this.logger.info({
@@ -816,19 +863,6 @@ export class FileStorage implements DStore {
         note,
       }))
     );
-
-    // remove old note only when rename is success
-    if (deleteOldFile) fs.removeSync(oldLocPath);
-
-    // create needs to be very last element added
-    notesChangedEntries = changedFromDelete
-      .concat(changeFromWrite)
-      .concat(notesChangedEntries);
-    // remove duplicate updates
-    notesChangedEntries = _.uniqBy(notesChangedEntries, (ent) => {
-      return [ent.status, ent.note.id, ent.note.fname].join("");
-    });
-    this.logger.info({ ctx, msg: "exit", opts, out: notesChangedEntries });
     return notesChangedEntries;
   }
 

@@ -277,6 +277,10 @@ export type DEngineInitPayload = {
 export type RenameNoteOpts = {
   oldLoc: DNoteLoc;
   newLoc: DNoteLoc;
+  /**
+   * added for dendron to recognise vscode `rename` menu option
+   */
+  isEventSouceEngine?: boolean;
 };
 
 export type RenderNoteOpts = {

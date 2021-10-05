@@ -1,8 +1,15 @@
-import { NoteProps, NoteUtils, Time, VaultUtils } from "@dendronhq/common-all";
+import {
+  DNodeUtils,
+  NoteProps,
+  NoteUtils,
+  Time,
+  VaultUtils,
+} from "@dendronhq/common-all";
 import _ from "lodash";
 import path from "path";
 import {
   ExtensionContext,
+  FileWillRenameEvent,
   Range,
   TextDocument,
   TextDocumentChangeEvent,
@@ -79,6 +86,12 @@ export class WorkspaceWatcher {
         context.subscriptions
       );
     }
+
+    workspace.onWillRenameFiles(
+      this.onWillRenameFiles,
+      this,
+      context.subscriptions
+    );
   }
 
   async onDidChangeTextDocument(event: TextDocumentChangeEvent) {
@@ -216,5 +229,43 @@ export class WorkspaceWatcher {
       return true;
     }
     return false;
+  }
+
+  async onWillRenameFiles(args: FileWillRenameEvent) {
+    try {
+      const files = args.files[0];
+      const { vaults, wsRoot } = getDWorkspace();
+      const { oldUri, newUri } = files;
+      const oldVault = VaultUtils.getVaultByNotePath({
+        vaults,
+        wsRoot,
+        fsPath: oldUri.fsPath,
+      });
+      const oldFname = DNodeUtils.fname(oldUri.fsPath);
+
+      const newVault = VaultUtils.getVaultByNotePath({
+        vaults,
+        wsRoot,
+        fsPath: newUri.fsPath,
+      });
+      const newFname = DNodeUtils.fname(newUri.fsPath);
+      const opts = {
+        oldLoc: {
+          fname: oldFname,
+          vaultName: VaultUtils.getName(oldVault),
+        },
+        newLoc: {
+          fname: newFname,
+          vaultName: VaultUtils.getName(newVault),
+        },
+        isEventSouceEngine: false,
+      };
+
+      const engine = getExtension().getEngine();
+      await engine.renameNote(opts);
+    } catch (error: any) {
+      Sentry.captureException(error);
+      throw error;
+    }
   }
 }

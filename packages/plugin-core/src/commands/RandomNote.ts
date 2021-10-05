@@ -1,4 +1,4 @@
-import { NoteProps, NoteUtils } from "@dendronhq/common-all";
+import { NoteProps, NoteUtils, IntermediateDendronConfigUtils } from "@dendronhq/common-all";
 import _ from "lodash";
 import { Uri, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
@@ -26,7 +26,8 @@ export class RandomNoteCommand extends BasicCommand<
     const { engine, config } = getDWorkspace();
 
     // If no pattern is specified for include, then include all notes for the search set.
-    const includeSet: string[] = config.randomNote?.include ?? [""];
+    const randomNoteConfig = IntermediateDendronConfigUtils.getRandomNoteConfig(config);
+    const includeSet: string[] = randomNoteConfig?.include ?? [""];
 
     const searchPredicate = function (note: NoteProps) {
       if (note.stub === true) {
@@ -44,9 +45,9 @@ export class RandomNoteCommand extends BasicCommand<
       }
 
       // Remove Exclude Paths, if specified:
-      if (config.randomNote?.exclude) {
+      if (randomNoteConfig?.exclude) {
         // eslint-disable-next-line no-restricted-syntax
-        for (const pattern of config.randomNote?.exclude) {
+        for (const pattern of randomNoteConfig?.exclude) {
           if (note.fname.toLowerCase().startsWith(pattern.toLowerCase())) {
             isMatch = false;
             break;

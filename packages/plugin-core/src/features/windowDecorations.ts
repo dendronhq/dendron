@@ -42,7 +42,9 @@ import { containsNonDendronUri } from "../utils/md";
 import { getFrontmatterTags, parseFrontmatter } from "../utils/yaml";
 import { getConfigValue, getDWorkspace } from "../workspace";
 import {
+  delayedBrokenWikilinkWarning,
   warnBadFrontmatterContents,
+  warnBrokenWikiLink,
   warnMissingFrontmatter,
 } from "./codeActionProvider";
 
@@ -135,6 +137,8 @@ function warnExpensiveDecorationsDisabled(note: NoteProps) {
 export function updateDecorations(activeEditor: TextEditor) {
   const ctx = "updateDecorations";
   const text = activeEditor.document.getText();
+  // Warn for missing or bad frontmatter and broken wikilinks
+  const allWarnings: Diagnostic[] = [];
   // Only show decorations & warnings for notes
   let note: NoteProps | undefined;
   try {
@@ -176,14 +180,20 @@ export function updateDecorations(activeEditor: TextEditor) {
       );
       for (const { type, decoration } of decorations) {
         activeDecorations.get(type).push(decoration);
+        if (type === DECORATION_TYPE.brokenWikilink) {
+          allWarnings.push(
+            warnBrokenWikiLink(activeEditor.document, decoration.range)
+          );
+        }
+        if (allWarnings.length === 0) {
+          delayedBrokenWikilinkWarning(activeEditor.document.uri, []);
+        }
       }
     }
     if (node.type === DendronASTTypes.FRONTMATTER)
       frontmatter = node as FrontmatterContent;
   });
 
-  // Warn for missing or bad frontmatter
-  const allWarnings: Diagnostic[] = [];
   if (_.isUndefined(frontmatter)) {
     allWarnings.push(warnMissingFrontmatter(activeEditor.document));
   } else {

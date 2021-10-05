@@ -149,10 +149,11 @@ export class WorkspaceWatcher {
 
       const eclient = getDWorkspace().engine;
       const fname = path.basename(uri.fsPath, ".md");
+      const { vaults } = getDWorkspace();
       const now = Time.now().toMillis();
       const vault = VaultUtils.getVaultByNotePath({
         fsPath: uri.fsPath,
-        vaults: eclient.vaults,
+        vaults,
         wsRoot: getDWorkspace().wsRoot,
       });
       const note = NoteUtils.getNoteByFnameV5({

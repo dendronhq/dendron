@@ -168,8 +168,8 @@ export const DENDRON_MENUS = {
   ],
   "editor/context": [
     {
-      when: "editorHasSelection && dendron:pluginActive",
-      command: "dendron.renameHeader",
+      when: "resourceExtname == .md && dendron:pluginActive",
+      command: "dendron.copyNoteLink",
       group: "2_workspace",
     },
   ],

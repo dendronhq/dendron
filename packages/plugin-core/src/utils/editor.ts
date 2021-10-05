@@ -8,6 +8,7 @@ import {
   MDUtilsV5,
   ProcMode,
   AnchorUtils,
+  visit,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import vscode, {
@@ -16,6 +17,7 @@ import vscode, {
   TextEditor,
   TextEditorEdit,
 } from "vscode";
+import { VSCodeUtils } from "../utils";
 
 export function isAnythingSelected(): boolean {
   return !vscode.window?.activeTextEditor?.selection?.isEmpty;
@@ -177,4 +179,24 @@ export async function getSelectionAnchors(opts: {
       });
   });
   return { startAnchor, endAnchor };
+}
+
+/**
+ * Utility method to check if the selected text is header
+ */
+export function isHeader() {
+  const { editor, selection } = VSCodeUtils.getSelection();
+  if (!editor || !selection) return false;
+  const line = editor.document.lineAt(selection.start.line).text;
+  const proc = MDUtilsV5.procRemarkParseNoData(
+    {},
+    { dest: DendronASTDest.MD_DENDRON }
+  );
+  const parsedLine = proc.parse(line);
+  let header: Heading | undefined;
+  visit(parsedLine, [DendronASTTypes.HEADING], (heading: Heading) => {
+    header = heading;
+    return false;
+  });
+  return !!header;
 }

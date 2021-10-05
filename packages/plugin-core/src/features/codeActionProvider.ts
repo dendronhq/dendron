@@ -18,9 +18,14 @@ import {
 import { CancellationToken } from "vscode-jsonrpc";
 import YAML from "yamljs";
 import { DoctorCommand } from "../commands/Doctor";
+import { GotoNoteCommand } from "../commands/GotoNote";
+import { NoteLookupCommand } from "../commands/NoteLookupCommand";
+import { RenameHeaderCommand } from "../commands/RenameHeader";
+import { LookupSelectionTypeEnum } from "../components/lookup/types";
 import { Logger } from "../logger";
 import { VSCodeUtils } from "../utils";
 import { sentryReportingCallback } from "../utils/analytics";
+import { isHeader } from "../utils/editor";
 import { DendronExtension } from "../workspace";
 
 /** Used to match the warnings to code actions. Also displayed for users along with the warning message. */
@@ -30,6 +35,8 @@ const RESOLVE_MESSAGE_AUTO_ONLY =
   "Please use the lightbulb, or run the Dendron: Doctor command.";
 const RESOLVE_MESSAGE =
   "Please use the lightbulb, run the Dendron: Doctor command, or manually correct it.";
+const BROKEN_WIKILINK = "broken wikilink";
+const BROKEN_WIKILINK_WARNING = languages.createDiagnosticCollection();
 
 /** Delay displaying any warnings while the user is still typing.
  *
@@ -42,11 +49,26 @@ const delayedFrontmatterWarning = _.debounce(
   500
 );
 
+export const delayedBrokenWikilinkWarning = _.debounce(
+  (uri: Uri, diagnostics: Diagnostic[]) => {
+    BROKEN_WIKILINK_WARNING.set(uri, diagnostics);
+  },
+  500
+);
 function badFrontmatter(props: Omit<Diagnostic, "source" | "code">) {
   return {
     /** Displayed to the user next to the warning message. */
     source: "Dendron",
     code: BAD_FRONTMATTER_CODE,
+    ...props,
+  };
+}
+
+function brokenWikilink(props: Omit<Diagnostic, "source" | "code">) {
+  return {
+    /** Displayed to the user next to the warning message. */
+    source: "Dendron",
+    code: BROKEN_WIKILINK,
     ...props,
   };
 }
@@ -106,9 +128,24 @@ export function warnBadFrontmatterContents(
   return diagnostics;
 }
 
+export function warnBrokenWikiLink(document: TextDocument, range: Range) {
+  const diagnostic: Diagnostic = brokenWikilink({
+    message: `The note is missing. ${RESOLVE_MESSAGE}`,
+    range,
+    severity: DiagnosticSeverity.Error,
+  });
+  delayedBrokenWikilinkWarning(document.uri, [diagnostic]);
+  return diagnostic;
+}
+
 function activate(context: ExtensionContext) {
   context.subscriptions.push(
-    languages.registerCodeActionsProvider("markdown", doctorFrontmatterProvider)
+    languages.registerCodeActionsProvider(
+      "markdown",
+      doctorFrontmatterProvider
+    ),
+    languages.registerCodeActionsProvider("markdown", refactorProvider),
+    languages.registerCodeActionsProvider("markdown", brokenWikiLinkProvider)
   );
 }
 export const codeActionProvider = {
@@ -142,6 +179,89 @@ export const doctorFrontmatterProvider: CodeActionProvider = {
           command: new DoctorCommand().key,
           title: "Fix the frontmatter",
           arguments: [{ scope: "file", action: DoctorActions.FIX_FRONTMATTER }],
+        },
+      };
+      return [action];
+    }
+  ),
+};
+
+/**
+ * Code action to extract highlighted text from the note and move it to a new note.
+ * Similar to the current functionality of creating a new note in 'Selection Extract' mode.
+ */
+export const refactorProvider: CodeActionProvider = {
+  provideCodeActions: sentryReportingCallback(
+    (
+      _document: TextDocument,
+      _range: Range | Selection,
+      context: CodeActionContext,
+      _token: CancellationToken
+    ) => {
+      // No-op if we're not in a Dendron Workspace
+      if (!DendronExtension.isActive()) {
+        return;
+      }
+      if (isHeader()) {
+        return [
+          {
+            title: "Rename Header",
+            isPreferred: true,
+            kind: CodeActionKind.RefactorInline,
+            command: {
+              command: new RenameHeaderCommand().key,
+              title: "Rename Header",
+            },
+          },
+        ];
+      }
+
+      if (_range.isEmpty) {
+        return;
+      }
+      const action: CodeAction = {
+        title: "Create New Note",
+        isPreferred: true,
+        kind: CodeActionKind.RefactorExtract,
+        command: {
+          command: new NoteLookupCommand().key,
+          title: "Create New Note",
+          arguments: [
+            {
+              selectionType: LookupSelectionTypeEnum.selectionExtract,
+            },
+          ],
+        },
+      };
+      return [action];
+    }
+  ),
+};
+
+export const brokenWikiLinkProvider: CodeActionProvider = {
+  provideCodeActions: sentryReportingCallback(
+    (
+      _document: TextDocument,
+      _range: Range | Selection,
+      context: CodeActionContext,
+      _token: CancellationToken
+    ) => {
+      // No-op if we're not in a Dendron Workspace
+      if (!DendronExtension.isActive()) {
+        return;
+      }
+      const diagnostics = context.diagnostics.filter(
+        (item) => item.code === BROKEN_WIKILINK
+      );
+      if (diagnostics.length === 0) return undefined;
+      const action: CodeAction = {
+        title: "Create Note",
+        diagnostics,
+        isPreferred: true,
+        kind: CodeActionKind.QuickFix,
+        command: {
+          command: new GotoNoteCommand().key,
+          title: "Create Note",
         },
       };
       return [action];

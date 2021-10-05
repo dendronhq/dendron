@@ -367,7 +367,7 @@ export class NoteLookupCommand extends BaseCommand<
   ): Promise<OnDidAcceptReturn | undefined> {
     const ctx = "acceptNewItem";
     const picker = this.controller.quickpick;
-    const fname = item.fname;
+    const fname = this.getFNameForNewItem(item);
 
     const engine = getEngine();
     let nodeNew: NoteProps;
@@ -429,6 +429,19 @@ export class NoteLookupCommand extends BaseCommand<
       wsRoot: getDWorkspace().wsRoot,
     });
     return { uri, node: nodeNew, resp };
+  }
+
+  /**
+   * TODO: align note creation file name choosing for follow a single path when accepting new item.
+   *
+   * Added to quickly fix the journal names not being created properly.
+   */
+  private getFNameForNewItem(item: NoteQuickInput) {
+    if (this.isJournalButtonPressed()) {
+      return PickerUtilsV2.getValue(this.controller.quickpick);
+    } else {
+      return item.fname;
+    }
   }
 
   private async getVaultForNewNote({
@@ -493,10 +506,7 @@ export class NoteLookupCommand extends BaseCommand<
    * e.g.) if the picker value is journal.2021.08.13.some-stuff, we don't override (title is some-stuff)
    */
   journalTitleOverride(): string | undefined {
-    const journalBtn = _.find(this.controller.state.buttons, (btn) => {
-      return btn.type === LookupNoteTypeEnum.journal;
-    });
-    if (journalBtn?.pressed) {
+    if (this.isJournalButtonPressed()) {
       const quickpick = this.controller.quickpick;
 
       // note modifier value exists, and nothing else after that.
@@ -515,5 +525,13 @@ export class NoteLookupCommand extends BaseCommand<
       }
     }
     return;
+  }
+
+  private isJournalButtonPressed() {
+    const journalBtn = _.find(this.controller.state.buttons, (btn) => {
+      return btn.type === LookupNoteTypeEnum.journal;
+    });
+    const isPressed = journalBtn?.pressed;
+    return isPressed;
   }
 }

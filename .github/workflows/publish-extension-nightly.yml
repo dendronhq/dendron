@@ -6,14 +6,13 @@ name: Publish Extension - Nightly
 # See documentation on POSIX cron syntax here: https://docs.github.com/en/actions/reference/events-that-trigger-workflows#scheduled-events
 # Scheduled to run every weekday at 12:00 AM PST, which is 7:00 AM UTC Tuesday-Saturday
 on:
+  workflow_dispatch:
   schedule:
     - cron:  '0 7 * * 2-6'
 
 jobs:
   build:
     environment: plugin-production
-    strategy:
-      fail-fast: true
 
     timeout-minutes: 30
 

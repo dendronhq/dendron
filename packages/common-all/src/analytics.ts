@@ -57,9 +57,14 @@ export enum SurveyEvents {
   LapsedUserDiscordPlugRejected = "Lapsed_User_Discord_Plug_Rejected",
 }
 
+export enum ConfigEvents {
+  ConfigNotMigrated = "Config_Not_Migrated",
+}
+
 export const DendronEvents = {
   VSCodeEvents,
   TutorialEvents,
   ExtensionEvents,
   SurveyEvents,
+  ConfigEvents,
 };

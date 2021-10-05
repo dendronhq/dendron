@@ -12,7 +12,9 @@ import {
   Time,
   VaultUtils,
   VSCodeEvents,
+  ConfigEvents,
   WorkspaceType,
+  IntermediateDendronConfig,
 } from "@dendronhq/common-all";
 import {
   getDurationMilliseconds,
@@ -25,6 +27,7 @@ import {
   MetadataService,
   WorkspaceService,
   WorkspaceUtils,
+  DConfig,
 } from "@dendronhq/engine-server";
 import { RewriteFrames } from "@sentry/integrations";
 import * as Sentry from "@sentry/node";
@@ -344,6 +347,10 @@ export async function _activate(
         configMigrated,
         msg: "read dendron config",
       });
+
+      // check raw config if user is still on legacy config
+      const rawConfig = DConfig.getRaw(wsImpl.wsRoot);
+      checkLegacy(rawConfig);
 
       // check for vaults with same name
       const uniqVaults = _.uniqBy(dendronConfig.vaults, (vault) =>
@@ -742,4 +749,38 @@ function initializeSentry(environment: string): void {
     ],
   });
   return;
+}
+
+function checkLegacy(
+  config: Partial<IntermediateDendronConfig>
+): void {
+  // check that command namespace is there
+  if (_.isUndefined(config.commands)) {
+    AnalyticsUtils.track(ConfigEvents.ConfigNotMigrated, {
+      key: "config.commands"
+    });
+  } else {
+    const requiredKeys = [
+      "lookup",
+      "randomNote",
+      "insertNote",
+      "insertNoteLink",
+      "insertNoteIndex"
+    ];
+
+    if (config.commands === null) {
+      AnalyticsUtils.track(ConfigEvents.ConfigNotMigrated, {
+        key: "config.commands.*"
+      });
+    }
+
+    const existingKeys = Object.keys(config.commands);
+    requiredKeys.forEach((requiredKey) => {
+      if (!existingKeys.includes(requiredKey)) {
+        AnalyticsUtils.track(ConfigEvents.ConfigNotMigrated, {
+          key: `config.commands.${requiredKey}`
+        });
+      }
+    });
+  }
 }

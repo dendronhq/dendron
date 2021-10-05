@@ -1,4 +1,4 @@
-import { DNodeUtils, NoteProps, NoteUtils } from "@dendronhq/common-all";
+import { DNodeUtils, NoteProps, NoteUtils, IntermediateDendronConfigUtils } from "@dendronhq/common-all";
 import _ from "lodash";
 import { window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
@@ -71,7 +71,18 @@ export class InsertNoteIndexCommand extends BasicCommand<
       window.showInformationMessage("This note does not have any child notes.");
       return opts;
     }
-    const maybeMarker = getDWorkspace().config.insertNoteIndex?.marker;
+    const config = getDWorkspace().config;
+    const insertNoteIndexConfig = IntermediateDendronConfigUtils.getInsertNoteIndexConfig(config)!;
+    let maybeMarker: boolean | undefined;
+    
+    if (_.isUndefined(insertNoteIndexConfig)) {
+      maybeMarker = undefined;
+    } else {
+      maybeMarker = "enableMarker" in insertNoteIndexConfig 
+        ? insertNoteIndexConfig.enableMarker
+        : insertNoteIndexConfig.marker;
+    }
+    
     const noteIndex = this.genNoteIndex(children, {
       marker: _.isBoolean(maybeMarker) ? maybeMarker : opts.marker,
     });

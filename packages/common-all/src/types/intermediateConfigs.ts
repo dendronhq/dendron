@@ -6,10 +6,12 @@
 import { 
   DendronConfig as DendronConfigV1,
   LegacyRandomNoteConfig,
+  LegacyInsertNoteLinkConfig,
+  LegacyInsertNoteIndexConfig,
 } from "./workspace";
 import { DendronConfig as DendronConfigV2 } from "./configs/dendronConfig";
 import { genDefaultCommandConfig } from "./configs/commands/commands";
-import { RandomNoteConfig } from "./configs/commands";
+import { RandomNoteConfig, InsertNoteLinkConfig, InsertNoteIndexConfig } from "./configs/commands";
 
 export * from "./configs";
 export type IntermediateDendronConfig = IntermediateOldConfig & IntermediateNewConfig;
@@ -60,7 +62,55 @@ function getRandomNoteConfig(
   return;
 }
 
+function getDefaultInsertHierarchy(
+  config: IntermediateDendronConfig
+): string | undefined {
+  const keys = Object.keys(config);
+  if (keys.includes("commands")) {
+    return config["commands"]!["insertNote"].initialValue;
+  }
+
+  if (keys.includes("defaultInsertHierarchy")) {
+    return config["defaultInsertHierarchy"];
+  }
+
+  return;
+}
+
+function getInsertNoteLinkConfig(
+  config: IntermediateDendronConfig
+): InsertNoteLinkConfig | LegacyInsertNoteLinkConfig | undefined {
+  const keys = Object.keys(config);
+  if (keys.includes("commands")) {
+    return config["commands"]!["insertNoteLink"];
+  }
+
+  if (keys.includes("insertNoteLink")) {
+    return config["insertNoteLink"];
+  }
+
+  return;
+}
+
+function getInsertNoteIndexConfig(
+  config: IntermediateDendronConfig
+): InsertNoteIndexConfig | LegacyInsertNoteIndexConfig | undefined {
+  const keys = Object.keys(config);
+  if(keys.includes("commands")) {
+    return config["commands"]!["insertNoteIndex"];
+  }
+
+  if (keys.includes("insertNoteIndex")) {
+    return config["insertNoteIndex"];
+  }
+
+  return;
+}
+
 export const IntermediateDendronConfigUtils = {
   genDefaultCommandConfig,
   getRandomNoteConfig,
+  getDefaultInsertHierarchy,
+  getInsertNoteLinkConfig,
+  getInsertNoteIndexConfig,
 };

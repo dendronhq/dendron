@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/common-server",
-  "version": "0.61.2",
+  "version": "0.62.0",
   "description": "common-server",
   "license": "GPLv3",
   "repository": {
@@ -36,7 +36,7 @@
     "test:watch": "echo nop"
   },
   "dependencies": {
-    "@dendronhq/common-all": "^0.61.2",
+    "@dendronhq/common-all": "^0.62.0",
     "@types/analytics-node": "^3.1.4",
     "@types/execa": "^2.0.0",
     "@types/express": "^4.17.11",

@@ -35,9 +35,6 @@ const config = {
     new CopyPlugin({
       patterns: [{ from: path.join("assets", "static"), to: "static" }],
     }),
-    new IgnorePlugin({
-      resourceRegExp: /fsevents/,
-    }),
     // @ts-ignore
     new CopyPlugin({
       patterns: [{ from: path.join("assets", "dendron-ws"), to: "dendron-ws" }],
@@ -84,10 +81,7 @@ const config = {
         test: /\.mjs$/,
         type: "javascript/auto",
       },
-      {
-        test: /\.node$/,
-        loader: "node-loader",
-      },
+      { test: /\.node$/, loader: 'ignore-loader' },
       { test: /\.d\.ts$/, loader: 'ignore-loader' },
       { test: /\.js\.map$/, loader: 'ignore-loader' },
       {
@@ -110,8 +104,7 @@ const config = {
               transpileOnly: true,
               compilerOptions: {
                 module: "es6", // override `tsconfig.json` so that TypeScript emits native JavaScript modules.
-              },
-              exclude: /\.d\.ts/,
+              }
             },
           },
         ],

@@ -11,11 +11,7 @@ on:
 jobs:
   build:
     environment: plugin-development
-    strategy:
-      fail-fast: true
-
     timeout-minutes: 30
-
     runs-on: ubuntu-latest
 
     steps:
@@ -78,3 +74,28 @@ jobs:
           BUCKET=org-dendron-public-assets
           aws s3 cp --acl public-read ./packages/plugin-core/$package s3://$BUCKET/publish/$package
           echo https://$BUCKET.s3.amazonaws.com/publish/$package
+        if: ${{ !endswith(github.ref, 'publish') }}
+
+      - name: Publish
+        if: ${{ endswith(github.ref, 'publish') }}
+        run: |
+          DENDRON_CLI=./packages/dendron-cli/lib/bin/dendron-cli.js
+          LOG_LEVEL=info $DENDRON_CLI dev prep_plugin --extensionTarget dendron
+
+      - name: Publish to VS Code Marketplace
+        if: ${{ endswith(github.ref, 'publish') }}
+        env:
+          VSCE_PAT: ${{ secrets.VSCODE_PUBLISH_PWD }}
+          OVSX_PAT: ${{ secrets.VSCODIUM_PUBLISH_PWD }}
+        working-directory: ./packages/plugin-core
+        run: |
+          yarn deploy:vscode
+          yarn deploy:ovsx
+
+      - name: Tag Release on Github
+        run: | 
+          git reset --hard
+          git clean -f
+          git tag $DENDRON_RELEASE_VERSION
+          git push --tags
+          git push

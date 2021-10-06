@@ -251,10 +251,10 @@ export async function setupCodeWorkspaceV2(opts: SetupCodeWorkspaceV2) {
   DendronExtension.workspaceFile = () => {
     return Uri.file(path.join(wsRoot, "dendron.code-workspace"));
   };
-  DendronExtension.workspaceFolders = () => {
-    const uri = Uri.file(path.join(wsRoot, "vault"));
-    return [{ uri, name: "vault", index: 0 }];
-  };
+  stubWorkspace({
+    wsRoot,
+    vaults: [{ fsPath: path.join(wsRoot, "vault"), name: "vault" }],
+  });
   const workspaceFile = DendronExtension.workspaceFile();
   const workspaceFolders = DendronExtension.workspaceFolders();
   await preSetupHook({

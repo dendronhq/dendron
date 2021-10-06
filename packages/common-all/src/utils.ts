@@ -240,3 +240,16 @@ export class PublishUtils {
     };
   }
 }
+
+/** Makes a single property within a type optional.
+ *
+ * Example:
+ * ```ts
+ * function foo(note: Optional<NoteProps, "title">) {
+ *   let title = note.title;
+ *   if (title === undefined) title = "default title";
+ *   // ...
+ * }
+ * ```
+ */
+export type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;

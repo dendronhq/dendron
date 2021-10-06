@@ -35,7 +35,12 @@ import { Duration } from "luxon";
 import path from "path";
 import semver from "semver";
 import * as vscode from "vscode";
-import { CONFIG, DendronContext, DENDRON_COMMANDS, GLOBAL_STATE } from "./constants";
+import {
+  CONFIG,
+  DendronContext,
+  DENDRON_COMMANDS,
+  GLOBAL_STATE,
+} from "./constants";
 import { Logger } from "./logger";
 import { migrateConfig } from "./migration";
 import { StateService } from "./services/stateService";
@@ -252,6 +257,12 @@ export async function _activate(
     //  needs to be initialized to setup commands
     const ws = DendronExtension.getOrCreate(context, {
       skipSetup: stage === "test",
+    });
+    // Need to recompute this for tests, because the instance of DendronExtension doesn't get re-created.
+    // Probably also needed if the user switches from one workspace to the other.
+    ws.type = WorkspaceUtils.getWorkspaceType({
+      workspaceFile: vscode.workspace.workspaceFile,
+      workspaceFolders: vscode.workspace.workspaceFolders,
     });
 
     const currentVersion = DendronExtension.version();
@@ -661,7 +672,10 @@ export async function showLapsedUserMessage(assetUri: vscode.Uri) {
         WSUtils.showWelcome(assetUri);
       } else {
         AnalyticsUtils.track(VSCodeEvents.LapsedUserMessageRejected);
-        const lapsedSurveySubmitted = await StateService.instance().getGlobalState(GLOBAL_STATE.LAPSED_USER_SURVEY_SUBMITTED);
+        const lapsedSurveySubmitted =
+          await StateService.instance().getGlobalState(
+            GLOBAL_STATE.LAPSED_USER_SURVEY_SUBMITTED
+          );
         if (lapsedSurveySubmitted === undefined) {
           SurveyUtils.showLapsedUserSurvey();
         }

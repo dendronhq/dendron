@@ -1,4 +1,4 @@
-import { CONSTANTS, DVault } from "@dendronhq/common-all";
+import { CONSTANTS, DVault, WorkspaceType } from "@dendronhq/common-all";
 import { WorkspaceService } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -23,6 +23,7 @@ type CommandOpts = {
    */
   skipConfirmation?: boolean;
   workspaceInitializer?: WorkspaceInitializer;
+  workspaceType?: WorkspaceType;
 };
 
 type CommandInput = {
@@ -153,10 +154,14 @@ export class SetupWorkspaceCommand extends BasicCommand<
       ? opts.workspaceInitializer.createVaults(opts.vault)
       : [];
 
+    // Default to CODE workspace, otherwise create a NATIVE one
+    const createCodeWorkspace =
+      opts.workspaceType === WorkspaceType.CODE ||
+      opts.workspaceType === undefined;
     await WorkspaceService.createWorkspace({
       vaults,
       wsRoot: rootDir,
-      createCodeWorkspace: true,
+      createCodeWorkspace,
     }).then(async (svc) => {
       if (opts?.workspaceInitializer?.onWorkspaceCreation) {
         await opts.workspaceInitializer.onWorkspaceCreation({

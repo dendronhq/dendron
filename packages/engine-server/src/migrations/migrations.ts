@@ -27,7 +27,7 @@ import { Migrations } from "./types";
  */
 export const ALL_MIGRATIONS: Migrations[] = [
   {
-    version: "0.62.0",
+    version: "0.63.0",
     changes: [
       {
         name: "migrate command config",
@@ -92,6 +92,10 @@ export const ALL_MIGRATIONS: Migrations[] = [
           const oldLookup = dendronConfig.lookup!;
           let selectionMode = LookupSelectionModeEnum.extract;
           switch(oldLookup.note.selectionType) {
+            case "selectionExtract": {
+              selectionMode = LookupSelectionModeEnum.extract;
+              break;
+            }
             case "selection2link": {
               selectionMode = LookupSelectionModeEnum.link;
               break;

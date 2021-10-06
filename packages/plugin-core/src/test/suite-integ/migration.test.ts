@@ -335,7 +335,7 @@ suite("Migration", function () {
       });
     });
 
-    test("migrate to 0.62 (dendron config command namespace)", (done) => {
+    test("migrate to 0.63 (dendron config command namespace)", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
         modConfigCb: (config) => {
@@ -398,13 +398,13 @@ suite("Migration", function () {
           });
 
           await MigrationServce.applyMigrationRules({
-            currentVersion: "0.62.0",
-            previousVersion: "0.61.0",
+            currentVersion: "0.63.0",
+            previousVersion: "0.62.0",
             dendronConfig,
             wsConfig,
             wsService,
             logger: Logger,
-            migrations: getMigration({ from: "0.61.0", to: "0.62.0" }),
+            migrations: getMigration({ from: "0.62.0", to: "0.63.0" }),
           });
 
           // backup of the original should exist.

@@ -763,6 +763,9 @@ suite("NoteLookupCommand", function () {
           const note = VSCodeUtils.getNoteFromDocument(
             VSCodeUtils.getActiveTextEditor()!.document
           );
+
+          expect(note?.fname).toEqual(noteName);
+
           const titleOverride = today.split(".").join("-");
           expect(note!.title).toEqual(titleOverride);
 

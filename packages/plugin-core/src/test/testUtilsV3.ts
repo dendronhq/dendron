@@ -198,8 +198,8 @@ export async function setupLegacyWorkspaceMulti(
     setupWsOverride: {
       skipConfirmation: true,
       emptyWs: true,
-      workspaceType: WorkspaceType.CODE,
     },
+    workspaceType: WorkspaceType.CODE,
     preSetupHook: async () => {},
     postSetupHook: async () => {},
     wsSettingsOverride: {},

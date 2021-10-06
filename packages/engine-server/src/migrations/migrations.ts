@@ -52,7 +52,7 @@ export const ALL_MIGRATIONS: Migrations[] = [
           // migrate randomNote
           const maybeOldRandomNote = dendronConfig.randomNote;
           if (!_.isUndefined(maybeOldRandomNote)) {
-            commands.randomNote = maybeOldRandomNote;
+            commands.randomNote = maybeOldRandomNote!;
             delete dendronConfig.randomNote;
           }
       

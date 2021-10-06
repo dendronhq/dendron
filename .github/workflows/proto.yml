@@ -41,4 +41,18 @@ jobs:
       - name: Login to NPM
         run: |
           yarn setup:npmlogin:remote
+          npm whoami
       
+      - name: Set Environment Variables
+        run: |
+          echo "GOOGLE_OAUTH_CLIENT_SECRET=${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}" >> $GITHUB_ENV
+          echo "GOOGLE_OAUTH_CLIENT_ID=${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}" >> $GITHUB_ENV
+          echo "SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}" >> $GITHUB_ENV
+          echo "NODE_OPTIONS=--max_old_space_size=4096" >> $GITHUB_ENV
+
+      - name: Test Environment Variables
+        run: |
+          echo $GOOGLE_OAUTH_CLIENT_SECRET;
+          echo $GOOGLE_OAUTH_CLIENT_ID;
+          echo $SENTRY_AUTH_TOKEN;
+          echo $NODE_OPTIONS;

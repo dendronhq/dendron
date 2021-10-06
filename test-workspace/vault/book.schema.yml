@@ -2,11 +2,15 @@ version: 1
 imports: []
 schemas:
   - id: book
-    children: []
+    children: 
+      - characters
     namespace: true
     title: book
     parent: root
     template:
       id: templates.book
       type: note
-
+  - id: characters
+    template:
+      id: templates.book.characters
+      type: note

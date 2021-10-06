@@ -42,9 +42,7 @@ import { containsNonDendronUri } from "../utils/md";
 import { getFrontmatterTags, parseFrontmatter } from "../utils/yaml";
 import { getConfigValue, getDWorkspace } from "../workspace";
 import {
-  delayedBrokenWikilinkWarning,
   warnBadFrontmatterContents,
-  warnBrokenWikiLink,
   warnMissingFrontmatter,
 } from "./codeActionProvider";
 
@@ -180,14 +178,6 @@ export function updateDecorations(activeEditor: TextEditor) {
       );
       for (const { type, decoration } of decorations) {
         activeDecorations.get(type).push(decoration);
-        if (type === DECORATION_TYPE.brokenWikilink) {
-          allWarnings.push(
-            warnBrokenWikiLink(activeEditor.document, decoration.range)
-          );
-        }
-        if (allWarnings.length === 0) {
-          delayedBrokenWikilinkWarning(activeEditor.document.uri, []);
-        }
       }
     }
     if (node.type === DendronASTTypes.FRONTMATTER)
@@ -356,7 +346,7 @@ function decorateTag({
   return [{ type, decoration }];
 }
 
-function linkedNoteType({
+export function linkedNoteType({
   fname,
   anchorStart,
   anchorEnd,

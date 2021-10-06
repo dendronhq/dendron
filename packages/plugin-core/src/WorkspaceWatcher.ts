@@ -9,6 +9,7 @@ import _ from "lodash";
 import path from "path";
 import {
   ExtensionContext,
+  FileRenameEvent,
   FileWillRenameEvent,
   Range,
   TextDocument,
@@ -20,8 +21,10 @@ import {
 } from "vscode";
 import { Logger } from "./logger";
 import { NoteSyncService } from "./services/NoteSyncService";
-import { getExtension, getDWorkspace } from "./workspace";
+import { getExtension, getDWorkspace, DendronExtension } from "./workspace";
 import * as Sentry from "@sentry/node";
+import { FileWatcher } from "./fileWatcher";
+import { file2Note, vault2Path } from "@dendronhq/common-server";
 
 interface DebouncedFunc<T extends (...args: any[]) => any> {
   /**
@@ -89,6 +92,12 @@ export class WorkspaceWatcher {
 
     workspace.onWillRenameFiles(
       this.onWillRenameFiles,
+      this,
+      context.subscriptions
+    );
+
+    workspace.onDidRenameFiles(
+      this.onDidRenameFiles,
       this,
       context.subscriptions
     );
@@ -231,7 +240,15 @@ export class WorkspaceWatcher {
     return false;
   }
 
+  /**
+   * method to make modifications to the workspace before the file is renamed.
+   * It updates all the references to the oldUri
+   */
   async onWillRenameFiles(args: FileWillRenameEvent) {
+    // No-op if we're not in a Dendron Workspace
+    if (!DendronExtension.isActive()) {
+      return;
+    }
     try {
       const files = args.files[0];
       const { vaults, wsRoot } = getDWorkspace();
@@ -262,10 +279,48 @@ export class WorkspaceWatcher {
       };
 
       const engine = getExtension().getEngine();
-      await engine.renameNote(opts);
+      const updateNoteReferences = engine.renameNote(opts);
+      args.waitUntil(updateNoteReferences);
     } catch (error: any) {
       Sentry.captureException(error);
       throw error;
+    }
+  }
+
+  /**
+   * method to make modifications to the workspace after the file is renamed.
+   * It updates the title of the note with the new fname and refreshes tree view
+   */
+  async onDidRenameFiles(args: FileRenameEvent) {
+    // No-op if we're not in a Dendron Workspace
+    if (!DendronExtension.isActive()) {
+      return;
+    }
+    try {
+      const files = args.files[0];
+      const { newUri } = files;
+      const fname = DNodeUtils.fname(newUri.fsPath);
+      const engine = getExtension().getEngine();
+      const { vaults, wsRoot } = getDWorkspace();
+      const newVault = VaultUtils.getVaultByNotePath({
+        vaults,
+        wsRoot,
+        fsPath: newUri.fsPath,
+      });
+      const vpath = vault2Path({ wsRoot, vault: newVault });
+      const newLocPath = path.join(vpath, fname + ".md");
+      const noteRaw = file2Note(newLocPath, newVault);
+      const newNote = NoteUtils.hydrate({
+        noteRaw,
+        noteHydrated: engine.notes[noteRaw.id],
+      });
+      newNote.title = NoteUtils.genTitle(fname);
+      await engine.writeNote(newNote, { updateExisting: true });
+    } catch (error: any) {
+      Sentry.captureException(error);
+      throw error;
+    } finally {
+      FileWatcher.refreshTree();
     }
   }
 }

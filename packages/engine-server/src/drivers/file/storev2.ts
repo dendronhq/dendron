@@ -748,12 +748,13 @@ export class FileStorage implements DStore {
       this.logger.error({ err });
       throw new DendronError({ message: " error rename note", payload: err });
     });
+
     /**
      * If the event source is not engine(ie: vscode rename context menu), we do not want to
      * delete the original files. We update the references on onWillRenameFiles and return.
      */
-    if (!opts.isEventSouceEngine) {
-      notesChangedEntries = await this.updateNewNotes(
+    if (!_.isUndefined(opts.isEventSouceEngine)) {
+      notesChangedEntries = await this.updateOldNoteReferences(
         notesChanged,
         ctx,
         notesChangedEntries
@@ -818,12 +819,11 @@ export class FileStorage implements DStore {
     }
     this.logger.info({ ctx, msg: "updateAllNotes:pre" });
     // update all new notes
-    notesChangedEntries = await this.updateNewNotes(
+    notesChangedEntries = await this.updateOldNoteReferences(
       notesChanged,
       ctx,
       notesChangedEntries
     );
-
     // remove old note only when rename is success
     if (deleteOldFile) fs.removeSync(oldLocPath);
 
@@ -840,9 +840,9 @@ export class FileStorage implements DStore {
   }
 
   /**
-   *  method to update new notes
+   *  method to update references of old note
    */
-  private async updateNewNotes(
+  private async updateOldNoteReferences(
     notesChanged: NoteProps[],
     ctx: string,
     notesChangedEntries: NoteChangeEntry[]

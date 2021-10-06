@@ -38,10 +38,10 @@ jobs:
       # - name: Yarn Setup
       #   run: yarn setup
 
-      - name: Login to NPM
-        run: |
-          yarn setup:npmlogin:remote
-          npm whoami
+      # - name: Login to NPM
+      #   run: |
+      #     yarn setup:npmlogin:remote
+      #     npm whoami
       
       - name: Set Environment Variables
         run: |

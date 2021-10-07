@@ -3,7 +3,7 @@ import {
   DNodePropsQuickInputV2,
   DNodeUtils,
   DVault,
-  LegacyLookupSelectionType,
+  LookupSelectionModeEnum,
   NoteQuickInput,
   NoteUtils,
   Time,
@@ -999,8 +999,8 @@ suite("NoteLookupCommand", function () {
       runLegacyMultiWorkspaceTest({
         ctx,
         modConfigCb: (config: IntermediateDendronConfig) => {
-          config.lookup = DConfig.genDefaultConfig().lookup!;
-          config.lookup.note.selectionType = LegacyLookupSelectionType.none;
+          config.commands = DConfig.genDefaultConfig().commands!;
+          config.commands.lookup.note.selectionMode = LookupSelectionModeEnum.none;
           return config;
         },
         preSetupHook: async ({ wsRoot, vaults }) => {
@@ -1188,8 +1188,8 @@ suite("NoteLookupCommand", function () {
         onInit: async ({ wsRoot, vaults, engine }) => {
           withConfig(
             (config) => {
-              config.lookup = DConfig.genDefaultConfig().lookup!;
-              config.lookup.note.leaveTrace = true;
+              config.commands = DConfig.genDefaultConfig().commands!;
+              config.commands.lookup.note.leaveTrace = true;
               return config;
             },
             { wsRoot }
@@ -1358,7 +1358,7 @@ suite("NoteLookupCommand", function () {
       });
     });
 
-    test.skip("horizontal split basic", (done) => {
+    test("horizontal split basic", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
         preSetupHook: async ({ wsRoot, vaults }) => {
@@ -1864,7 +1864,7 @@ suite("NoteLookupCommand", function () {
       return { cmd };
     };
 
-    test.skip("split + multiselect: should have n+1 columns", (done) => {
+    test("split + multiselect: should have n+1 columns", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
         preSetupHook: async ({ wsRoot, vaults }) => {

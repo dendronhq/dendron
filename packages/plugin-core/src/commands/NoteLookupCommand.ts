@@ -9,7 +9,6 @@ import {
   NoteUtils,
   SchemaUtils,
   VSCodeEvents,
-  IntermediateDendronConfig,
 } from "@dendronhq/common-all";
 import { getDurationMilliseconds } from "@dendronhq/common-server";
 import { DConfig, HistoryService } from "@dendronhq/engine-server";

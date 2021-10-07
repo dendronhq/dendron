@@ -244,7 +244,7 @@ export class WorkspaceWatcher {
    * method to make modifications to the workspace before the file is renamed.
    * It updates all the references to the oldUri
    */
-  async onWillRenameFiles(args: FileWillRenameEvent) {
+  onWillRenameFiles(args: FileWillRenameEvent) {
     // No-op if we're not in a Dendron Workspace
     if (!DendronExtension.isActive()) {
       return;

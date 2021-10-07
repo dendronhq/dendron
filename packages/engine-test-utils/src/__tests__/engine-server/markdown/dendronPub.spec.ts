@@ -382,6 +382,84 @@ describe("dendronPub", () => {
       );
     });
 
+    test("WHEN refs are right on the next line THEN render all", async () => {
+      await runEngineTestV5(
+        async ({ engine, vaults }) => {
+          const out = await proc(engine, {
+            fname: "ref",
+            dest: DendronASTDest.HTML,
+            vault: vaults[0],
+            config: engine.config,
+          }).process("![[foo1]]\n![[foo2]]\n![[foo3]]");
+          await checkVFile(
+            out,
+            'a href="foo1.html',
+            'a href="foo2.html',
+            'a href="foo3.html'
+          );
+        },
+        {
+          preSetupHook: async ({ wsRoot, vaults }) => {
+            await NoteTestUtilsV4.createNote({
+              fname: "ref",
+              wsRoot,
+              vault: vaults[0],
+            });
+            await NoteTestUtilsV4.createNote({
+              fname: "foo1",
+              wsRoot,
+              vault: vaults[0],
+            });
+            await NoteTestUtilsV4.createNote({
+              fname: "foo2",
+              wsRoot,
+              vault: vaults[0],
+            });
+            await NoteTestUtilsV4.createNote({
+              fname: "foo3",
+              wsRoot,
+              vault: vaults[0],
+            });
+          },
+          expect,
+        }
+      );
+    });
+
+    test("WHEN refs are back to back THEN render all", async () => {
+      await runEngineTestV5(
+        async ({ engine, vaults }) => {
+          const out = await proc(engine, {
+            fname: "ref",
+            dest: DendronASTDest.HTML,
+            vault: vaults[0],
+            config: engine.config,
+          }).process("![[foo1]] ![[foo2]]");
+          await checkVFile(out, 'a href="foo1.html', 'a href="foo2.html');
+        },
+        {
+          preSetupHook: async ({ wsRoot, vaults }) => {
+            await NoteTestUtilsV4.createNote({
+              fname: "ref",
+              wsRoot,
+              vault: vaults[0],
+            });
+            await NoteTestUtilsV4.createNote({
+              fname: "foo1",
+              wsRoot,
+              vault: vaults[0],
+            });
+            await NoteTestUtilsV4.createNote({
+              fname: "foo2",
+              wsRoot,
+              vault: vaults[0],
+            });
+          },
+          expect,
+        }
+      );
+    });
+
     test("nonexistent", async () => {
       await runEngineTestV5(
         async ({ engine, vaults }) => {

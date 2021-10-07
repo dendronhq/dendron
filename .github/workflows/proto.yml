@@ -5,6 +5,7 @@
 name: Proto
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - proto/*

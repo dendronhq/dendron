@@ -233,7 +233,7 @@ export const refactorProvider: CodeActionProvider = {
         return;
       } else {
         return !_.isUndefined(header)
-          ? [renameHeaderAction, createNewNoteAction]
+          ? [createNewNoteAction, renameHeaderAction]
           : [createNewNoteAction];
       }
     }

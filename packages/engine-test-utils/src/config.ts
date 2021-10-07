@@ -1,16 +1,18 @@
 import { DConfig } from "@dendronhq/engine-server";
 import { readYAML, writeYAML } from "@dendronhq/common-server";
-import { DendronConfig } from "@dendronhq/common-all";
+import { IntermediateDendronConfig } from "@dendronhq/common-all";
 
 export class TestConfigUtils {
   static getConfig = (opts: { wsRoot: string }) => {
     const configPath = DConfig.configPath(opts.wsRoot);
-    const config = readYAML(configPath) as DendronConfig;
+    const config = readYAML(configPath) as IntermediateDendronConfig;
     return config;
   };
 
   static withConfig = (
-    func: (config: DendronConfig) => DendronConfig,
+    func: (
+      config: IntermediateDendronConfig
+    ) => IntermediateDendronConfig,
     opts: { wsRoot: string }
   ) => {
     const config = TestConfigUtils.getConfig(opts);
@@ -20,7 +22,10 @@ export class TestConfigUtils {
     return newConfig;
   };
 
-  static writeConfig = (opts: { config: DendronConfig; wsRoot: string }) => {
+  static writeConfig = (opts: {
+    config: IntermediateDendronConfig;
+    wsRoot: string
+  }) => {
     const configPath = DConfig.configPath(opts.wsRoot);
     return writeYAML(configPath, opts.config);
   };

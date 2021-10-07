@@ -1,7 +1,9 @@
-import { DendronConfig } from "@dendronhq/common-all";
+import { IntermediateDendronConfig } from "@dendronhq/common-all";
 import { api } from "./config";
 
-export const configWrite = (config: DendronConfig) => {
+export const configWrite = (
+  config: IntermediateDendronConfig
+) => {
   const body = JSON.stringify({ config });
   return fetch(api("writeConfig"), {
     headers: {

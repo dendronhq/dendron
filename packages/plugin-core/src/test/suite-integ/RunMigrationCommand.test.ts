@@ -30,7 +30,7 @@ suite("RunMigrationCommand", function () {
         const out = await cmd.run();
         expect(out!.length).toEqual(1);
         expect(out![0].data.version === "0.55.2");
-        expect(getDWorkspace().config.lookup.note.selectionType).toEqual(
+        expect(getDWorkspace().config.lookup!.note.selectionType).toEqual(
           "selection2link"
         );
         done();

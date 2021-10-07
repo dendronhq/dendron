@@ -1,5 +1,5 @@
 import {
-  DendronConfig,
+  IntermediateDendronConfig,
   DendronError,
   DEngineClient,
   DVault,
@@ -31,7 +31,7 @@ export abstract class DendronBaseWorkspace implements DWorkspaceV2 {
   }
 
   // TODO: optimize to not read every time
-  get config(): DendronConfig {
+  get config(): IntermediateDendronConfig {
     return DConfig.defaults(DConfig.getOrCreate(this.wsRoot));
   }
 

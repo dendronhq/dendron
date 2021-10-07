@@ -53,6 +53,10 @@ const NOTE: DendronConfigEntryCollection<NoteLookupConfig> = {
     label: "Confirm Vault on Create.",
     desc: "Prompt for vault selection when creating new note.",
   },
+  leaveTrace: {
+    label: "Leave Trace",
+    desc: "Leaves a reference of the destination note in the source note while using selectionExtract"
+  }
 };
 
 /**

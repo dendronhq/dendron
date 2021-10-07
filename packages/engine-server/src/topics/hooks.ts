@@ -1,6 +1,6 @@
 import {
   CONSTANTS,
-  DendronConfig,
+  IntermediateDendronConfig,
   DendronError,
   DHookEntry,
   DHookType,
@@ -25,7 +25,7 @@ export class HookUtils {
     hookType,
     hookEntry,
   }: {
-    config: DendronConfig;
+    config: IntermediateDendronConfig;
     hookType: DHookType;
     hookEntry: DHookEntry;
   }) {
@@ -58,7 +58,7 @@ export class HookUtils {
     hookType,
     hookId,
   }: {
-    config: DendronConfig;
+    config: IntermediateDendronConfig;
     hookType: DHookType;
     hookId: string;
   }) {

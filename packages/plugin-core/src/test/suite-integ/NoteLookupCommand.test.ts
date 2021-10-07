@@ -1,9 +1,9 @@
 import {
-  DendronConfig,
+  IntermediateDendronConfig,
   DNodePropsQuickInputV2,
   DNodeUtils,
   DVault,
-  LookupSelectionType,
+  LookupSelectionModeEnum,
   NoteQuickInput,
   NoteUtils,
   Time,
@@ -15,7 +15,7 @@ import {
   NOTE_PRESETS_V4,
   EngineTestUtilsV4,
 } from "@dendronhq/common-test-utils";
-import { HistoryService } from "@dendronhq/engine-server";
+import { HistoryService, DConfig } from "@dendronhq/engine-server";
 import {
   ENGINE_HOOKS,
   ENGINE_HOOKS_MULTI,
@@ -666,7 +666,7 @@ suite("NoteLookupCommand", function () {
   });
 
   describe("onAccept with lookupConfirmVaultOnCreate", () => {
-    const modConfigCb = (config: DendronConfig) => {
+    const modConfigCb = (config: IntermediateDendronConfig) => {
       config.lookupConfirmVaultOnCreate = true;
       return config;
     };
@@ -1001,8 +1001,9 @@ suite("NoteLookupCommand", function () {
     test("selection modifier set to none in configs", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
-        modConfigCb: (config: DendronConfig) => {
-          config.lookup.note.selectionType = LookupSelectionType.none;
+        modConfigCb: (config: IntermediateDendronConfig) => {
+          config.commands = DConfig.genDefaultConfig(true).commands!;
+          config.commands.lookup.note.selectionMode = LookupSelectionModeEnum.none;
           return config;
         },
         preSetupHook: async ({ wsRoot, vaults }) => {
@@ -1031,7 +1032,7 @@ suite("NoteLookupCommand", function () {
           const cmd = new NoteLookupCommand();
           stubVaultPick(vaults);
           const gatherOut = await cmd.gatherInputs({
-            selectionType: LookupSelectionType.none,
+            selectionType: LookupSelectionTypeEnum.none,
           });
           const { selection2linkBtn, selectionExtractBtn } =
             getSelectionTypeButtons(gatherOut.quickpick.buttons);
@@ -1190,7 +1191,8 @@ suite("NoteLookupCommand", function () {
         onInit: async ({ wsRoot, vaults, engine }) => {
           withConfig(
             (config) => {
-              config.lookup.note.leaveTrace = true;
+              config.commands = DConfig.genDefaultConfig(true).commands!;
+              config.commands.lookup.note.leaveTrace = true;
               return config;
             },
             { wsRoot }

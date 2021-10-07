@@ -12,7 +12,10 @@ import {
   Time,
   VaultUtils,
   VSCodeEvents,
+  ConfigEvents,
   WorkspaceType,
+  IntermediateDendronConfig,
+  StrictIntermediateDendronConfig,
 } from "@dendronhq/common-all";
 import {
   getDurationMilliseconds,
@@ -25,6 +28,7 @@ import {
   MetadataService,
   WorkspaceService,
   WorkspaceUtils,
+  DConfig,
 } from "@dendronhq/engine-server";
 import { RewriteFrames } from "@sentry/integrations";
 import * as Sentry from "@sentry/node";
@@ -355,6 +359,9 @@ export async function _activate(
         configMigrated,
         msg: "read dendron config",
       });
+
+      const rawConfig = DConfig.getRaw(wsImpl.wsRoot);
+      checkLegacy(rawConfig);
 
       // check for vaults with same name
       const uniqVaults = _.uniqBy(dendronConfig.vaults, (vault) =>
@@ -756,4 +763,50 @@ function initializeSentry(environment: string): void {
     ],
   });
   return;
+}
+
+function checkLegacy(
+  config: Partial<IntermediateDendronConfig>
+): void {
+  // check that command namespace is there
+  if (
+    DConfig.isCurrentConfig(
+      config as StrictIntermediateDendronConfig
+    )
+  ) {
+    if (_.isUndefined(config.commands)) {
+      AnalyticsUtils.track(ConfigEvents.ConfigNotMigrated, {
+        key: "config.commands",
+        version: config.version
+      });
+    } else {
+      const requiredKeys = [
+        "lookup",
+        "randomNote",
+        "insertNote",
+        "insertNoteLink",
+        "insertNoteIndex"
+      ];
+  
+      if (config.commands === null) {
+        AnalyticsUtils.track(ConfigEvents.ConfigNotMigrated, {
+          key: "config.commands.*"
+        });
+        return;
+      }
+  
+      const existingKeys = Object.keys(config.commands);
+      requiredKeys.forEach((requiredKey) => {
+        if (!existingKeys.includes(requiredKey)) {
+          AnalyticsUtils.track(ConfigEvents.ConfigNotMigrated, {
+            key: `config.commands.${requiredKey}`
+          });
+        }
+      });
+    }
+  } else {
+    AnalyticsUtils.track(ConfigEvents.ConfigNotMigrated, {
+      version: config.version
+    });
+  };
 }

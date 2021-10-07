@@ -1,4 +1,8 @@
-import { DendronConfig, NoteProps, NotePropsDict } from "@dendronhq/common-all";
+import {
+  IntermediateDendronConfig,
+  NoteProps,
+  NotePropsDict
+} from "@dendronhq/common-all";
 import {
   createSlice,
   EngineSliceState,
@@ -25,7 +29,7 @@ export const slice = createSlice({
     },
     setConfig: (
       state: BrowserEngineSliceState,
-      action: PayloadAction<DendronConfig>
+      action: PayloadAction<IntermediateDendronConfig>
     ) => {
       state.config = action.payload;
     },

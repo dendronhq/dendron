@@ -1,6 +1,6 @@
 import {
   assert,
-  DendronConfig,
+  IntermediateDendronConfig,
   DendronError,
   DendronSiteConfig,
   DendronSiteFM,
@@ -27,16 +27,17 @@ import path from "path";
 import { DConfig } from "../config";
 import { DEngineClient } from "../types";
 import { HierarchyUtils, stripLocalOnlyTags } from "../utils";
+
 const logger = createLogger();
 
 export class SiteUtils {
   static canPublish(opts: {
     note: NoteProps;
-    config: DendronConfig;
+    config: IntermediateDendronConfig;
     engine: DEngineClient;
   }) {
     const { note, config, engine } = opts;
-    const { wsRoot, vaults: vaults } = engine;
+    const { wsRoot, vaults } = engine;
 
     // not private note
     if (note.custom?.published === false) {
@@ -79,7 +80,7 @@ export class SiteUtils {
 
   static isPublished(opts: {
     note: NoteProps;
-    config: DendronConfig;
+    config: IntermediateDendronConfig;
     engine: DEngineClient;
   }) {
     const { note, config } = opts;
@@ -145,7 +146,7 @@ export class SiteUtils {
 
   static async filterByConfig(opts: {
     engine: DEngineClient;
-    config: DendronConfig;
+    config: IntermediateDendronConfig;
     noExpandSingleDomain?: boolean;
   }): Promise<{ notes: NotePropsDict; domains: NoteProps[] }> {
     const { engine, config } = opts;
@@ -216,7 +217,7 @@ export class SiteUtils {
    */
   static async filterByHiearchy(opts: {
     domain: string;
-    config: DendronConfig;
+    config: IntermediateDendronConfig;
     engine: DEngineClient;
     navOrder: number;
   }): Promise<{ notes: NotePropsDict; domain: NoteProps } | undefined> {
@@ -410,7 +411,7 @@ export class SiteUtils {
   }
 
   static getSiteOutputPath(opts: {
-    config: DendronConfig;
+    config: IntermediateDendronConfig;
     wsRoot: string;
     stage: "dev" | "prod";
   }) {
@@ -430,7 +431,7 @@ export class SiteUtils {
     allowStubs?: boolean;
     engine: DEngineClient;
     fname: string;
-    config: DendronConfig;
+    config: IntermediateDendronConfig;
     noteCandidates: NoteProps[];
     noteDict: NotePropsDict;
   }) {

@@ -5,7 +5,7 @@ import querystring from "querystring";
 import semver from "semver";
 import { COLORS_LIST } from "./colors";
 import { NoteProps, SEOProps } from "./types";
-import { DendronConfig } from "./types/workspace";
+import { IntermediateDendronConfig } from "./types/intermediateConfigs";
 
 /**
  * Dendron utilities
@@ -215,7 +215,9 @@ export class TagUtils {
 }
 
 export class PublishUtils {
-  static getSEOPropsFromConfig(config: DendronConfig): Partial<SEOProps> {
+  static getSEOPropsFromConfig(
+    config: IntermediateDendronConfig
+  ): Partial<SEOProps> {
     const { title, twitter, description: excerpt } = config.site;
     return {
       title,

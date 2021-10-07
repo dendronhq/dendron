@@ -1,5 +1,5 @@
 import {
-  DendronConfig,
+  IntermediateDendronConfig,
   DEngineClient,
   InstallStatus,
   isNotUndefined,
@@ -129,12 +129,12 @@ export class EditorUtils {
 
 export const getConfig = (opts: { wsRoot: string }) => {
   const configPath = DConfig.configPath(opts.wsRoot);
-  const config = readYAML(configPath) as DendronConfig;
+  const config = readYAML(configPath) as IntermediateDendronConfig;
   return config;
 };
 
 export const withConfig = (
-  func: (config: DendronConfig) => DendronConfig,
+  func: (config: IntermediateDendronConfig) => IntermediateDendronConfig,
   opts: { wsRoot: string }
 ) => {
   const config = getConfig(opts);
@@ -145,7 +145,7 @@ export const withConfig = (
 };
 
 export const writeConfig = (opts: {
-  config: DendronConfig;
+  config: IntermediateDendronConfig;
   wsRoot: string;
 }) => {
   const configPath = DConfig.configPath(opts.wsRoot);

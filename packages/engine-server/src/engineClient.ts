@@ -4,7 +4,7 @@ import {
   ConfigGetPayload,
   ConfigWriteOpts,
   DendronAPI,
-  DendronConfig,
+  IntermediateDendronConfig,
   DendronError,
   DEngine,
   DEngineClient,
@@ -68,7 +68,7 @@ export class DendronEngineClient implements DEngineClient {
   public history?: HistoryService;
   public logger: DLogger;
   public store: FileStorage;
-  public config: DendronConfig;
+  public config: IntermediateDendronConfig;
   public hooks: DHookDict;
 
   static create({
@@ -123,7 +123,7 @@ export class DendronEngineClient implements DEngineClient {
     this.history = history;
     this.logger = logger || createLogger();
     const cpath = DConfig.configPath(ws);
-    this.config = readYAML(cpath) as DendronConfig;
+    this.config = readYAML(cpath) as IntermediateDendronConfig;
     this.store = new FileStorage({
       engine: this,
       logger: this.logger,

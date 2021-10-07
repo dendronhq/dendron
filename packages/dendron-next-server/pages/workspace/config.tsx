@@ -17,8 +17,8 @@ import {
 } from "@chakra-ui/react";
 import {
   NoteAddBehavior,
-  DendronConfig,
-  LookupSelectionType,
+  IntermediateDendronConfig,
+  LegacyLookupSelectionType,
 } from "@dendronhq/common-all";
 import { Field, FieldArray, Form, Formik } from "formik";
 import _, { get } from "lodash";
@@ -29,7 +29,7 @@ import { useDendronConfig } from "../../lib/hooks";
 
 // TODO Temporarily copied here from engine-server/src/config.ts to use default
 // values for input placeholders.
-const genDefaultConfig = (): DendronConfig => ({
+const genDefaultConfig = (): IntermediateDendronConfig => ({
   version: 1,
   vaults: [],
   useFMTitle: true,
@@ -40,7 +40,7 @@ const genDefaultConfig = (): DendronConfig => ({
   lookupConfirmVaultOnCreate: false,
   lookup: {
     note: {
-      selectionType: LookupSelectionType.selectionExtract,
+      selectionType: LegacyLookupSelectionType.selectionExtract,
       leaveTrace: false,
     },
   },
@@ -120,7 +120,9 @@ function InputControl({
 
 const PAGE_TITLE = "Dendron Configuration";
 
-const saveConfigData = async (config: DendronConfig) => {
+const saveConfigData = async (
+  config: IntermediateDendronConfig
+) => {
   console.log("saving", config);
   // FIXME: hack
   // empty string is different from undefined

@@ -22,6 +22,7 @@ import { DendronDevConfig, genDefaultDevConfig } from "./dev/dev";
  * This is the top level config that will hold everything.
  */
 export type DendronConfig = {
+  version?: number;
   global: DendronGlobalConfig;
   commands: DendronCommandConfig;
   workspace: DendronWorkspaceConfig;

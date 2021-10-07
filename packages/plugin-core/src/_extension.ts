@@ -15,6 +15,7 @@ import {
   ConfigEvents,
   WorkspaceType,
   IntermediateDendronConfig,
+  StrictIntermediateDendronConfig,
 } from "@dendronhq/common-all";
 import {
   getDurationMilliseconds,
@@ -348,7 +349,6 @@ export async function _activate(
         msg: "read dendron config",
       });
 
-      // check raw config if user is still on legacy config
       const rawConfig = DConfig.getRaw(wsImpl.wsRoot);
       checkLegacy(rawConfig);
 
@@ -755,32 +755,44 @@ function checkLegacy(
   config: Partial<IntermediateDendronConfig>
 ): void {
   // check that command namespace is there
-  if (_.isUndefined(config.commands)) {
-    AnalyticsUtils.track(ConfigEvents.ConfigNotMigrated, {
-      key: "config.commands"
-    });
-  } else {
-    const requiredKeys = [
-      "lookup",
-      "randomNote",
-      "insertNote",
-      "insertNoteLink",
-      "insertNoteIndex"
-    ];
-
-    if (config.commands === null) {
+  if (
+    DConfig.isCurrentConfig(
+      config as StrictIntermediateDendronConfig
+    )
+  ) {
+    if (_.isUndefined(config.commands)) {
       AnalyticsUtils.track(ConfigEvents.ConfigNotMigrated, {
-        key: "config.commands.*"
+        key: "config.commands",
+        version: config.version
+      });
+    } else {
+      const requiredKeys = [
+        "lookup",
+        "randomNote",
+        "insertNote",
+        "insertNoteLink",
+        "insertNoteIndex"
+      ];
+  
+      if (config.commands === null) {
+        AnalyticsUtils.track(ConfigEvents.ConfigNotMigrated, {
+          key: "config.commands.*"
+        });
+        return;
+      }
+  
+      const existingKeys = Object.keys(config.commands);
+      requiredKeys.forEach((requiredKey) => {
+        if (!existingKeys.includes(requiredKey)) {
+          AnalyticsUtils.track(ConfigEvents.ConfigNotMigrated, {
+            key: `config.commands.${requiredKey}`
+          });
+        }
       });
     }
-
-    const existingKeys = Object.keys(config.commands);
-    requiredKeys.forEach((requiredKey) => {
-      if (!existingKeys.includes(requiredKey)) {
-        AnalyticsUtils.track(ConfigEvents.ConfigNotMigrated, {
-          key: `config.commands.${requiredKey}`
-        });
-      }
+  } else {
+    AnalyticsUtils.track(ConfigEvents.ConfigNotMigrated, {
+      version: config.version
     });
-  }
+  };
 }

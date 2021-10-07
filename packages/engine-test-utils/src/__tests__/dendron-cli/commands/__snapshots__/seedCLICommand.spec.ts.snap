@@ -11,8 +11,7 @@ exports[`add ok: exists 1`] = `".git .gitignore dendron.code-workspace dendron.y
 exports[`add ok: exists 2`] = `"dendron.code-workspace dendron.yml hooks seeds vault1 vault2 vault3"`;
 
 exports[`add ok: exists 3`] = `
-"version: 1
-maxPreviewsCached: 10
+"maxPreviewsCached: 10
 vaults:
     -
         fsPath: vault
@@ -30,17 +29,12 @@ useNoteTitleForLink: true
 noAutoCreateOnDefinition: true
 noLegacyNoteRef: true
 noXVaultWikiLink: true
-lookupConfirmVaultOnCreate: false
 mermaid: true
 useKatex: true
 autoFoldFrontmatter: true
 usePrettyRefs: true
 dev:
     enablePreviewV2: true
-lookup:
-    note:
-        selectionType: selectionExtract
-        leaveTrace: false
 journal:
     dailyDomain: daily
     name: journal
@@ -68,6 +62,12 @@ site:
             - vault2
             - vaultThree
             - dendron.foo
+version: 1
+lookupConfirmVaultOnCreate: false
+lookup:
+    note:
+        selectionType: selectionExtract
+        leaveTrace: false
 initializeRemoteVaults: true
 seeds:
     dendron.foo: {}
@@ -102,8 +102,7 @@ exports[`add ok: seed with site 1`] = `".git .gitignore dendron.code-workspace d
 exports[`add ok: seed with site 2`] = `"dendron.code-workspace dendron.yml hooks seeds vault1 vault2 vault3"`;
 
 exports[`add ok: seed with site 3`] = `
-"version: 1
-maxPreviewsCached: 10
+"maxPreviewsCached: 10
 vaults:
     -
         fsPath: vault
@@ -121,17 +120,12 @@ useNoteTitleForLink: true
 noAutoCreateOnDefinition: true
 noLegacyNoteRef: true
 noXVaultWikiLink: true
-lookupConfirmVaultOnCreate: false
 mermaid: true
 useKatex: true
 autoFoldFrontmatter: true
 usePrettyRefs: true
 dev:
     enablePreviewV2: true
-lookup:
-    note:
-        selectionType: selectionExtract
-        leaveTrace: false
 journal:
     dailyDomain: daily
     name: journal
@@ -159,6 +153,12 @@ site:
             - vault2
             - vaultThree
             - dendron.foo
+version: 1
+lookupConfirmVaultOnCreate: false
+lookup:
+    note:
+        selectionType: selectionExtract
+        leaveTrace: false
 initializeRemoteVaults: true
 seeds:
     dendron.foo:
@@ -194,25 +194,19 @@ exports[`add ok: seed with site 4`] = `
 exports[`init convert workspace error: no vaults 1`] = `"dendron.code-workspace dendron.yml hooks"`;
 
 exports[`init convert workspace error: no vaults 2`] = `
-"version: 1
-maxPreviewsCached: 10
+"maxPreviewsCached: 10
 vaults: []
 useFMTitle: true
 useNoteTitleForLink: true
 noAutoCreateOnDefinition: true
 noLegacyNoteRef: true
 noXVaultWikiLink: true
-lookupConfirmVaultOnCreate: false
 mermaid: true
 useKatex: true
 autoFoldFrontmatter: true
 usePrettyRefs: true
 dev:
     enablePreviewV2: true
-lookup:
-    note:
-        selectionType: selectionExtract
-        leaveTrace: false
 journal:
     dailyDomain: daily
     name: journal
@@ -233,6 +227,12 @@ site:
     description: Personal knowledge space
     siteLastModified: true
     gh_edit_branch: main
+version: 1
+lookupConfirmVaultOnCreate: false
+lookup:
+    note:
+        selectionType: selectionExtract
+        leaveTrace: false
 initializeRemoteVaults: true
 "
 `;
@@ -240,8 +240,7 @@ initializeRemoteVaults: true
 exports[`init convert workspace ok: diff root name 1`] = `"dendron.code-workspace dendron.yml fooVault hooks seed.yml"`;
 
 exports[`init convert workspace ok: diff root name 2`] = `
-"version: 1
-maxPreviewsCached: 10
+"maxPreviewsCached: 10
 vaults:
     -
         fsPath: fooVault
@@ -250,17 +249,12 @@ useNoteTitleForLink: true
 noAutoCreateOnDefinition: true
 noLegacyNoteRef: true
 noXVaultWikiLink: true
-lookupConfirmVaultOnCreate: false
 mermaid: true
 useKatex: true
 autoFoldFrontmatter: true
 usePrettyRefs: true
 dev:
     enablePreviewV2: true
-lookup:
-    note:
-        selectionType: selectionExtract
-        leaveTrace: false
 journal:
     dailyDomain: daily
     name: journal
@@ -285,6 +279,12 @@ site:
         action: useVault
         payload:
             - fooVault
+version: 1
+lookupConfirmVaultOnCreate: false
+lookup:
+    note:
+        selectionType: selectionExtract
+        leaveTrace: false
 initializeRemoteVaults: true
 "
 `;
@@ -305,8 +305,7 @@ repository:
 exports[`init create workspace basic 1`] = `".gitignore dendron.code-workspace dendron.yml hooks seed.yml vault"`;
 
 exports[`init create workspace basic 2`] = `
-"version: 1
-maxPreviewsCached: 10
+"maxPreviewsCached: 10
 vaults:
     -
         fsPath: vault
@@ -315,17 +314,12 @@ useNoteTitleForLink: true
 noAutoCreateOnDefinition: true
 noLegacyNoteRef: true
 noXVaultWikiLink: true
-lookupConfirmVaultOnCreate: false
 mermaid: true
 useKatex: true
 autoFoldFrontmatter: true
 usePrettyRefs: true
 dev:
     enablePreviewV2: true
-lookup:
-    note:
-        selectionType: selectionExtract
-        leaveTrace: false
 journal:
     dailyDomain: daily
     name: journal
@@ -350,6 +344,12 @@ site:
         action: useVault
         payload:
             - vault
+version: 1
+lookupConfirmVaultOnCreate: false
+lookup:
+    note:
+        selectionType: selectionExtract
+        leaveTrace: false
 initializeRemoteVaults: true
 "
 `;

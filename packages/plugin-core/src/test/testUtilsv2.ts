@@ -251,10 +251,10 @@ export async function setupCodeWorkspaceV2(opts: SetupCodeWorkspaceV2) {
   DendronExtension.workspaceFile = () => {
     return Uri.file(path.join(wsRoot, "dendron.code-workspace"));
   };
-  DendronExtension.workspaceFolders = () => {
-    const uri = Uri.file(path.join(wsRoot, "vault"));
-    return [{ uri, name: "vault", index: 0 }];
-  };
+  stubWorkspace({
+    wsRoot,
+    vaults: [{ fsPath: path.join(wsRoot, "vault"), name: "vault" }],
+  });
   const workspaceFile = DendronExtension.workspaceFile();
   const workspaceFolders = DendronExtension.workspaceFolders();
   await preSetupHook({
@@ -433,28 +433,29 @@ export class LocationTestUtils {
 export const stubWorkspaceFile = (wsRoot: string) => {
   const wsPath = path.join(wsRoot, "dendron.code-workspace");
   fs.writeJSONSync(wsPath, {});
-  sinon.stub(workspace, "workspaceFile").returns(Uri.file(wsPath));
+  sinon.stub(workspace, "workspaceFile").value(Uri.file(wsPath));
   DendronExtension.workspaceFile = () => {
     return Uri.file(wsPath);
   };
 };
 
 export const stubWorkspaceFolders = (wsRoot: string, vaults: DVault[]) => {
-  sinon.stub(workspace, "workspaceFolders").returns(
-    vaults.map((v) => ({
+  const folders = vaults
+    .map((v) => ({
       name: VaultUtils.getName(v),
       index: 1,
       uri: Uri.file(path.join(wsRoot, VaultUtils.getRelPath(v))),
     }))
-  );
+    .concat([
+      {
+        name: "root",
+        index: 0,
+        uri: Uri.parse(wsRoot),
+      },
+    ]);
 
-  DendronExtension.workspaceFolders = () => {
-    return vaults.map((v) => ({
-      name: VaultUtils.getName(v),
-      index: 1,
-      uri: Uri.file(path.join(wsRoot, VaultUtils.getRelPath(v))),
-    }));
-  };
+  sinon.stub(workspace, "workspaceFolders").value(folders);
+  DendronExtension.workspaceFolders = () => folders;
 };
 
 export const stubWorkspace = ({ wsRoot, vaults }: WorkspaceOpts) => {

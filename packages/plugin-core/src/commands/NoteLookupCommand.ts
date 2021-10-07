@@ -4,13 +4,12 @@ import {
   ERROR_STATUS,
   ErrorFactory,
   ErrorMessages,
-  // LegacyNoteLookupConfig,
-  IntermediateDendronConfigUtils,
   NoteProps,
   NoteQuickInput,
   NoteUtils,
   SchemaUtils,
   VSCodeEvents,
+  IntermediateDendronConfig,
 } from "@dendronhq/common-all";
 import { getDurationMilliseconds } from "@dendronhq/common-server";
 import { DConfig, HistoryService } from "@dendronhq/engine-server";
@@ -142,10 +141,10 @@ export class NoteLookupCommand extends BaseCommand<
   async gatherInputs(opts?: CommandRunOpts): Promise<CommandGatherOutput> {
     const start = process.hrtime();
     const ws = getDWorkspace();
-    const noteLookupConfig = IntermediateDendronConfigUtils
-      .getLookupConfig(ws.config).note;
-    
+    const lookupConfig = DConfig.getConfig(ws.config, "commands.lookup");
+    const noteLookupConfig = lookupConfig.note;
     let selectionType: LookupSelectionType = LookupSelectionTypeEnum.selectionExtract;
+    let confirmVaultOnCreate;
     if ("selectionMode" in noteLookupConfig) {
       const selectionMode = noteLookupConfig.selectionMode;
       switch(selectionMode) {
@@ -165,8 +164,10 @@ export class NoteLookupCommand extends BaseCommand<
           throw new DendronError({ message: "unsupported selection type."});
         }
       }
+      confirmVaultOnCreate = noteLookupConfig.confirmVaultOnCreate;
     } else {
       selectionType = noteLookupConfig.selectionType;
+      confirmVaultOnCreate = DConfig.getProp(ws.config, "lookupConfirmVaultOnCreate")
     }
 
     const copts: CommandRunOpts = _.defaults(opts || {}, {
@@ -178,12 +179,7 @@ export class NoteLookupCommand extends BaseCommand<
     const ctx = "NoteLookupCommand:gatherInput";
     Logger.info({ ctx, opts, msg: "enter" });
     // initialize controller and provider
-    const disableVaultSelection = "confirmVaultOnCreate" in noteLookupConfig
-      ? !noteLookupConfig.confirmVaultOnCreate
-      : !DConfig.getProp(
-        ws.config,
-        "lookupConfirmVaultOnCreate"
-      );
+    const disableVaultSelection = !confirmVaultOnCreate;
     this._controller = LookupControllerV3.create({
       nodeType: "note",
       disableVaultSelection, 

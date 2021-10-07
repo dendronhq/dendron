@@ -1,5 +1,6 @@
-import { DNodeUtils, NoteProps, NoteUtils, IntermediateDendronConfigUtils } from "@dendronhq/common-all";
+import { DNodeUtils, NoteProps, NoteUtils } from "@dendronhq/common-all";
 import _ from "lodash";
+import { DConfig } from "@dendronhq/engine-server";
 import { window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { DendronClientUtilsV2, VSCodeUtils } from "../utils";
@@ -72,7 +73,7 @@ export class InsertNoteIndexCommand extends BasicCommand<
       return opts;
     }
     const config = getDWorkspace().config;
-    const insertNoteIndexConfig = IntermediateDendronConfigUtils.getInsertNoteIndexConfig(config)!;
+    const insertNoteIndexConfig = DConfig.getConfig(config, "commands.insertNoteIndex")
     let maybeMarker: boolean | undefined;
     
     if (_.isUndefined(insertNoteIndexConfig)) {

@@ -594,14 +594,8 @@ export class FileStorage implements DStore {
     }
     const vpath = vault2Path({ wsRoot, vault: oldVault });
     const oldLocPath = path.join(vpath, oldLoc.fname + ".md");
-    const fname = path.basename(oldLocPath, ".md");
     // read from disk since contents migh have changed
-    let noteRaw: any;
-    try {
-      noteRaw = file2Note(oldLocPath, oldVault);
-    } catch (err: any) {
-      noteRaw = _.find(this.engine.notes, { fname });
-    }
+    const noteRaw = file2Note(oldLocPath, oldVault);
     const oldNote = NoteUtils.hydrate({
       noteRaw,
       noteHydrated: this.notes[noteRaw.id],
@@ -751,7 +745,7 @@ export class FileStorage implements DStore {
 
     /**
      * If the event source is not engine(ie: vscode rename context menu), we do not want to
-     * delete the original files. We update the references on onWillRenameFiles and return.
+     * delete the original files. We just update the references on onWillRenameFiles and return.
      */
     if (!_.isUndefined(opts.isEventSouceEngine)) {
       notesChangedEntries = await this.updateOldNoteReferences(

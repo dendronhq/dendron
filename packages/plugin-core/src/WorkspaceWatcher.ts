@@ -289,7 +289,7 @@ export class WorkspaceWatcher {
 
   /**
    * method to make modifications to the workspace after the file is renamed.
-   * It updates the title of the note with the new fname and refreshes tree view
+   * It updates the title of the note wrt the new fname and refreshes tree view
    */
   async onDidRenameFiles(args: FileRenameEvent) {
     // No-op if we're not in a Dendron Workspace

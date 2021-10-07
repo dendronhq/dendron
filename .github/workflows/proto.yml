@@ -11,7 +11,7 @@ on:
 
 jobs:
   build:
-    environment: plugin-development
+    environment: plugin-production
     timeout-minutes: 30
     runs-on: ubuntu-latest
 

@@ -1249,6 +1249,9 @@ export class RemarkUtils {
       }
     });
 
+    if (!headerFound) {
+      return [];
+    }
     const nodesToExtract = nextHeaderIndex
       ? (tree.children as Node[]).splice(
           foundHeaderIndex!,

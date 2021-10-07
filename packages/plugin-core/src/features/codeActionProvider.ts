@@ -185,38 +185,26 @@ export const refactorProvider: CodeActionProvider = {
         position: selection.start,
       });
 
-      if (!_.isUndefined(header)) {
-        return [
-          {
-            title: "Rename Header",
-            isPreferred: true,
-            kind: CodeActionKind.RefactorInline,
-            command: {
-              command: new RenameHeaderCommand().key,
-              title: "Rename Header",
-            },
-          },
-        ];
-      }
-
-      if (isBrokenWikilink()) {
-        return [
-          {
-            title: "Create Note",
-            isPreferred: true,
-            kind: CodeActionKind.RefactorExtract,
-            command: {
-              command: new GotoNoteCommand().key,
-              title: "Create Note",
-            },
-          },
-        ];
-      }
-
-      if (_range.isEmpty) {
-        return;
-      }
-      const action: CodeAction = {
+      // action declaration
+      const renameHeaderAction = {
+        title: "Rename Header",
+        isPreferred: true,
+        kind: CodeActionKind.RefactorInline,
+        command: {
+          command: new RenameHeaderCommand().key,
+          title: "Rename Header",
+        },
+      };
+      const brokenWikilinkAction = {
+        title: "Create Note",
+        isPreferred: true,
+        kind: CodeActionKind.RefactorExtract,
+        command: {
+          command: new GotoNoteCommand().key,
+          title: "Create Note",
+        },
+      };
+      const createNewNoteAction = {
         title: "Create New Note",
         isPreferred: true,
         kind: CodeActionKind.RefactorExtract,
@@ -230,7 +218,24 @@ export const refactorProvider: CodeActionProvider = {
           ],
         },
       };
-      return [action];
+
+      if (_range.isEmpty) {
+        //return a code action for create note if user clicked next to a broken wikilink
+        if (isBrokenWikilink()) {
+          return [brokenWikilinkAction];
+        }
+
+        //return a code action for rename header if user clicks next to a header
+        if (!_.isUndefined(header)) {
+          return [renameHeaderAction];
+        }
+        // return if none
+        return;
+      } else {
+        return !_.isUndefined(header)
+          ? [renameHeaderAction, createNewNoteAction]
+          : [createNewNoteAction];
+      }
     }
   ),
 };

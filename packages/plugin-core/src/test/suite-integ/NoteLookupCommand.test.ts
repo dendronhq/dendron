@@ -574,6 +574,7 @@ suite("NoteLookupCommand", function () {
           const document = VSCodeUtils.getActiveTextEditor()?.document;
           const newNote = VSCodeUtils.getNoteFromDocument(document!);
           expect(_.trim(newNote!.body)).toEqual("ch1 template");
+          expect(newNote?.tags).toEqual("tag-foo");
 
           done();
         },
@@ -1003,7 +1004,8 @@ suite("NoteLookupCommand", function () {
         ctx,
         modConfigCb: (config: IntermediateDendronConfig) => {
           config.commands = DConfig.genDefaultConfig(true).commands!;
-          config.commands.lookup.note.selectionMode = LookupSelectionModeEnum.none;
+          config.commands.lookup.note.selectionMode =
+            LookupSelectionModeEnum.none;
           return config;
         },
         preSetupHook: async ({ wsRoot, vaults }) => {

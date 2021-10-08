@@ -9,13 +9,13 @@ export * from "./service";
 
 export type MigrateFunction = (opts: {
   dendronConfig: IntermediateDendronConfig;
-  wsConfig: WorkspaceSettings;
+  wsConfig?: WorkspaceSettings;
   wsService: WorkspaceService;
 }) => Promise<{
   error?: DendronError;
   data: { 
     dendronConfig: IntermediateDendronConfig; 
-    wsConfig: WorkspaceSettings 
+    wsConfig?: WorkspaceSettings 
   };
 }>;
 
@@ -36,6 +36,6 @@ export type MigrationChangeSetStatus = {
     changeName: string;
     status: "ok" | "error";
     dendronConfig: IntermediateDendronConfig;
-    wsConfig: WorkspaceSettings;
+    wsConfig?: WorkspaceSettings;
   };
 };

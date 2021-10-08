@@ -1,4 +1,5 @@
 import _ from "lodash";
+import { WorkspaceType } from "@dendronhq/common-all";
 import sinon from "sinon";
 import * as vscode from "vscode";
 import { RunMigrationCommand } from "../../commands/RunMigrationCommand";
@@ -35,6 +36,7 @@ suite("RunMigrationCommand", function () {
         );
         done();
       },
+      workspaceType: WorkspaceType.CODE,
     });
   });
 });

@@ -5,6 +5,7 @@ import {
   LegacyRandomNoteConfig,
   LegacyInsertNoteLinkConfig,
   LegacyInsertNoteIndexConfig,
+  WorkspaceType,
 } from "@dendronhq/common-all";
 import {
   ALL_MIGRATIONS,
@@ -175,6 +176,7 @@ suite("Migration", function () {
               [CONFIG.DEFAULT_JOURNAL_NAME.key]: "foo",
             },
           },
+          workspaceType: WorkspaceType.CODE,
         });
       });
     });
@@ -206,6 +208,7 @@ suite("Migration", function () {
             [CONFIG.DEFAULT_SCRATCH_NAME.key]: "foo",
           },
         },
+        workspaceType: WorkspaceType.CODE,
       });
     });
 
@@ -297,6 +300,7 @@ suite("Migration", function () {
               LegacyLookupSelectionType.selection2link,
           },
         },
+        workspaceType: WorkspaceType.CODE,
       });
     });
 
@@ -332,6 +336,7 @@ suite("Migration", function () {
           );
           done();
         },
+        workspaceType: WorkspaceType.CODE,
       });
     });
 

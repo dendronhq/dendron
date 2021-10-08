@@ -4,6 +4,7 @@ import fs from "fs-extra";
 import _ from "lodash";
 import os from "os";
 import path from "path";
+import { getOS } from "./system";
 import { createLogger, DLogger } from "./logger";
 
 enum SiteEvents {
@@ -70,6 +71,12 @@ type SegmentExtraArg = {
   context?: any;
 };
 
+export type SegmentContext = Partial<{
+  app: Partial<{ name: string; version: string; build: string }>;
+  os: Partial<{ name: string; version: string }>;
+  userAgent: string;
+}>
+
 export enum TelemetryStatus {
   /** The user set that telemetry should be disabled in the workspace config. */
   DISABLED_BY_WS_CONFIG = "disabled by ws config",
@@ -77,12 +84,16 @@ export enum TelemetryStatus {
   DISABLED_BY_VSCODE_CONFIG = "disabled by vscode config",
   /** The user used the Disable Telemetry command to disable telemetry. */
   DISABLED_BY_COMMAND = "disabled by command",
+  /** The user disabled telemetry using dendron-cli */
+  DISABLED_BY_CLI_COMMAND = "disabled by cli command",
   /** The user disabled telemetry in configuration, but used the Enable Telemetry command to give permission. */
   ENABLED_BY_COMMAND = "enabled by command",
   /** The user allowed telemetry by configuration. */
   ENABLED_BY_CONFIG = "enabled by config",
   /** The user did not opt out of telemetry prior to 0.46.0 update */
   ENABLED_BY_MIGRATION = "enabled by migration",
+  /** The user enabled telemetry using dendron-cli */
+  ENABLED_BY_CLI_COMMAND = "enabled by cli command",
 }
 
 export type TelemetryConfig = {
@@ -153,18 +164,19 @@ export class SegmentClient {
   static setByConfig(status?: TelemetryStatus) {
     if (_.isUndefined(status)) status = this.getStatus();
     switch (status) {
-      case TelemetryStatus.DISABLED_BY_COMMAND:
-      case TelemetryStatus.ENABLED_BY_COMMAND:
-      case TelemetryStatus.ENABLED_BY_MIGRATION:
-        return false;
+      case TelemetryStatus.DISABLED_BY_WS_CONFIG:
+      case TelemetryStatus.DISABLED_BY_VSCODE_CONFIG:
+      case TelemetryStatus.ENABLED_BY_CONFIG:
+        return true
       default:
-        return true;
+        return false;
     }
   }
 
   static enable(
     why:
       | TelemetryStatus.ENABLED_BY_COMMAND
+      | TelemetryStatus.ENABLED_BY_CLI_COMMAND
       | TelemetryStatus.ENABLED_BY_CONFIG
       | TelemetryStatus.ENABLED_BY_MIGRATION
   ) {
@@ -180,6 +192,7 @@ export class SegmentClient {
   static disable(
     why:
       | TelemetryStatus.DISABLED_BY_COMMAND
+      | TelemetryStatus.DISABLED_BY_CLI_COMMAND
       | TelemetryStatus.DISABLED_BY_VSCODE_CONFIG
       | TelemetryStatus.DISABLED_BY_WS_CONFIG
   ) {
@@ -273,5 +286,97 @@ export class SegmentClient {
 
   get anonymousId(): string {
     return this._anonymousId;
+  }
+}
+
+// platform props
+type VSCodeProps = {
+  type: "vscode"
+  ideVersion: string;
+  ideFlavor: string;
+}
+
+type CLIProps = {
+  type: "cli"
+  cliVersion: string;
+}
+
+// platform identify props
+export type VSCodeIdentifyProps = {
+  appVersion: string;
+  userAgent: string;
+} & VSCodeProps;
+
+export type CLIIdentifyProps = {} & CLIProps;
+
+export class SegmentUtils {
+  static track(
+    event: string, 
+    platformProps: VSCodeProps | CLIProps,
+    props?: any
+  ) {
+    const { type, ...rest } = platformProps;
+    SegmentClient.instance().track(
+      event,
+      {
+        ...props,
+        ...SegmentUtils.getCommonProps(),
+        ...rest,
+      },
+    )
+  }
+
+  static identify(
+    identifyProps: VSCodeIdentifyProps | CLIIdentifyProps
+  ) {
+    if (identifyProps.type === "vscode") {
+      const { ideVersion, ideFlavor, appVersion, userAgent } = identifyProps;
+      SegmentClient.instance().identifyAnonymous(
+        {
+          ...SegmentUtils.getCommonProps(),
+          ideVersion,
+          ideFlavor,
+        },
+        {
+          context: {
+            app: {
+              version: appVersion,
+            },
+            os: {
+              name: getOS(),
+            },
+            userAgent,
+          }
+        }
+      );
+    }
+
+    if (identifyProps.type === "cli") {
+      const { cliVersion } = identifyProps;
+      SegmentClient.instance().identifyAnonymous(
+        {
+          ...SegmentUtils.getCommonProps(),
+          cliVersion,
+        },
+        {
+          context: {
+            app: {
+              name: "dendron-cli",
+              version: cliVersion,
+            },
+            os: {
+              name: getOS(),
+            },
+          }
+        }
+      )
+    }
+  }
+
+  static getCommonProps() {
+    return {
+      arch: process.arch,
+      nodeVerson: process.version,
+    }
   }
 }

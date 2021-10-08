@@ -196,12 +196,12 @@ export const refactorProvider: CodeActionProvider = {
         },
       };
       const brokenWikilinkAction = {
-        title: "Create Note",
+        title: "Fix Broken Link",
         isPreferred: true,
         kind: CodeActionKind.RefactorExtract,
         command: {
           command: new GotoNoteCommand().key,
-          title: "Create Note",
+          title: "Fix Broken Link",
         },
       };
       const createNewNoteAction = {

@@ -201,7 +201,7 @@ export class WorkspaceService {
    * @param opts.vault - {@link DVault} to add to workspace
    * @param opts.config - if passed it, make modifications on passed in config instead of {wsRoot}/dendron.yml
    * @param opts.writeConfig - default: true, add to dendron.yml
-   * @param opts.addToWorkspace - default: false, add to dendron.code-workspace
+   * @param opts.addToWorkspace - default: false, add to dendron.code-workspace. Make sure to keep false for Native workspaces.
    * @returns
    */
   async addVault(
@@ -247,6 +247,14 @@ export class WorkspaceService {
           await opts.onUpdatedWorkspace();
         }
       }
+    } else {
+      // Run the hooks even if not updating the workspace file (native workspace), because other code depends on it.
+      if (opts.onUpdatingWorkspace) {
+        await opts.onUpdatingWorkspace();
+      }
+      if (opts.onUpdatedWorkspace) {
+        await opts.onUpdatedWorkspace();
+      }
     }
     return vault;
   }
@@ -290,7 +298,7 @@ export class WorkspaceService {
     }
 
     if (!noAddToConfig) {
-      await this.addVault({ ...opts });
+      await this.addVault({ ...opts, updateWorkspace: false });
     }
     if (opts.addToCodeWorkspace) {
       await this.addVaultToCodeWorkspace(vault);
@@ -459,6 +467,14 @@ export class WorkspaceService {
 
       writeJSONWithComments(wsPath, settings);
 
+      if (opts.onUpdatedWorkspace) {
+        await opts.onUpdatedWorkspace();
+      }
+    } else {
+      // Run the hooks even if not updating the workspace file (native workspace), because other code depends on it.
+      if (opts.onUpdatingWorkspace) {
+        opts.onUpdatingWorkspace();
+      }
       if (opts.onUpdatedWorkspace) {
         await opts.onUpdatedWorkspace();
       }

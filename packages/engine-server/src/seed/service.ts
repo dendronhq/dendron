@@ -6,12 +6,13 @@ import {
   SeedConfig,
   SeedEntry,
   VaultUtils,
+  WorkspaceType,
 } from "@dendronhq/common-all";
 import { simpleGit, writeYAML } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { WorkspaceService } from "../workspace";
+import { WorkspaceService, WorkspaceUtils } from "../workspace";
 import { SeedRegistry } from "./registry";
 import { SeedUtils } from "./utils";
 
@@ -126,11 +127,13 @@ export class SeedService {
     }
     config.seeds[id] = seedEntry;
 
+    const updateWorkspace =
+      WorkspaceUtils.getWorkspaceTypeFromDir(wsRoot) === WorkspaceType.CODE;
     await ws.addVault({
       vault: SeedUtils.seed2Vault({ seed }),
-      updateWorkspace: true,
       config,
       updateConfig: true,
+      updateWorkspace,
       onUpdatingWorkspace,
       onUpdatedWorkspace,
     });
@@ -266,9 +269,12 @@ export class SeedService {
     delete (config.seeds || {})[SeedUtils.getSeedId(seed)];
     ws.setConfig(config);
 
+    const updateWorkspace =
+      WorkspaceUtils.getWorkspaceTypeFromDir(this.wsRoot) ===
+      WorkspaceType.CODE;
     await ws.removeVault({
       vault: SeedUtils.seed2Vault({ seed }),
-      updateWorkspace: true,
+      updateWorkspace,
       onUpdatingWorkspace,
       onUpdatedWorkspace,
     });

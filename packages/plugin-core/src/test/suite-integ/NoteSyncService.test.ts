@@ -42,7 +42,9 @@ suite("NoteSyncService", function testSuite() {
             const selection = new vscode.Selection(pos, pos);
             builder.replace(selection, `Hello`);
           });
-          const resp = await NoteSyncService.instance().onDidChange(editor);
+          const resp = await NoteSyncService.instance().onDidChange(
+            editor.document
+          );
           expect(resp?.contentHash).toEqual("465a4f4ebf83fbea836eb7b8e8e040ec");
           expect(resp?.updated).toEqual(newUpdatedTime);
           expect(
@@ -74,7 +76,7 @@ suite("NoteSyncService", function testSuite() {
             const pos = new vscode.Position(6, 0);
             builder.insert(pos, `tags: test\n`);
           });
-          await NoteSyncService.instance().onDidChange(editor);
+          await NoteSyncService.instance().onDidChange(editor.document);
 
           // "foo" should have the frontmatter link to "tags.test"
           const updatedFoo = engine.notes["foo"];
@@ -93,7 +95,9 @@ suite("NoteSyncService", function testSuite() {
         onInit: async ({ engine }) => {
           const foo = engine.notes["foo"];
           const editor = await VSCodeUtils.openNote(foo);
-          const resp = await NoteSyncService.instance().onDidChange(editor);
+          const resp = await NoteSyncService.instance().onDidChange(
+            editor.document
+          );
           expect(_.isUndefined(resp)).toBeTruthy();
           done();
         },

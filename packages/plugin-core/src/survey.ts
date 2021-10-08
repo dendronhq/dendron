@@ -371,8 +371,8 @@ export class SurveyUtils {
    * Asks three questions about background, use case, and prior tools used.
    * @param forcePrompt skip flipping a coin and force prompting.
    */
-  static async maybePromptInitialSurvey(forcePrompt?: boolean) {
-    const shouldPrompt = forcePrompt ? true : !!Math.floor(Math.random() * 2);
+  static async maybePromptInitialSurvey(opts: { forcePrompt?: boolean }) {
+    const shouldPrompt = opts.forcePrompt ? true : !!Math.floor(Math.random() * 2);
     if (shouldPrompt) {
       AnalyticsUtils.track(SurveyEvents.InitialSurveyPrompted);
       vscode.window

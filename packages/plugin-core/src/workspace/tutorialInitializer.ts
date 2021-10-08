@@ -103,7 +103,7 @@ export class TutorialInitializer
     );
 
     if (!initialSurveySubmitted) {
-      await SurveyUtils.maybePromptInitialSurvey();
+      await SurveyUtils.maybePromptInitialSurvey({forcePrompt: true});
     }
 
     // Register a special analytics handler for the tutorial:

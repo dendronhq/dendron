@@ -379,6 +379,10 @@ type GithubIssuePublishPodCustomOpts = {
    * github personal access token
    */
   token: string;
+  /**
+   * if set to false, starts a discussion without the contents of note body
+   */
+  includeNoteBodyInDiscussion?: boolean;
 };
 
 type GithubIssuePublishPodConfig = PublishPodConfig &
@@ -402,6 +406,12 @@ export class GithubIssuePublishPod extends PublishPod<GithubIssuePublishPodConfi
         token: {
           type: "string",
           description: "github personal access token",
+        },
+        includeNoteBodyInDiscussion: {
+          type: "boolean",
+          description:
+            "if set to false, starts a discussion without the contents of note body",
+          default: true,
         },
       },
     }) as JSONSchemaType<GithubIssuePublishPodConfig>;
@@ -702,11 +712,20 @@ export class GithubIssuePublishPod extends PublishPod<GithubIssuePublishPodConfi
     note: NoteProps;
     engine: DEngineClient;
     categoryId: string;
+    includeNoteBodyInDiscussion: boolean;
   }) => {
-    const { token, owner, repository, note, engine, categoryId } = opts;
+    const {
+      token,
+      owner,
+      repository,
+      note,
+      engine,
+      categoryId,
+      includeNoteBodyInDiscussion,
+    } = opts;
     const { title } = note;
     let { body } = note;
-    if (!body.trim()) {
+    if (!includeNoteBodyInDiscussion || !body.trim()) {
       body = `Discussion for ${title}`;
     }
     let resp: string = "";
@@ -757,7 +776,12 @@ export class GithubIssuePublishPod extends PublishPod<GithubIssuePublishPodConfi
 
   async plant(opts: PublishPodPlantOpts) {
     const { config, engine } = opts;
-    const { owner, repository, token } = config as GithubIssuePublishPodConfig;
+    const {
+      owner,
+      repository,
+      token,
+      includeNoteBodyInDiscussion = true,
+    } = config as GithubIssuePublishPodConfig;
     const labelsHashMap = await this.getLabelsFromGithub({
       owner,
       repository,
@@ -785,6 +809,7 @@ export class GithubIssuePublishPod extends PublishPod<GithubIssuePublishPodConfi
         note,
         engine,
         categoryId,
+        includeNoteBodyInDiscussion,
       });
       return "Github: ".concat(resp);
     }

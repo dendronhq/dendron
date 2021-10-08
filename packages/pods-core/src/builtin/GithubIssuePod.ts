@@ -704,7 +704,11 @@ export class GithubIssuePublishPod extends PublishPod<GithubIssuePublishPodConfi
     categoryId: string;
   }) => {
     const { token, owner, repository, note, engine, categoryId } = opts;
-    const { title, body } = note;
+    const { title } = note;
+    let { body } = note;
+    if (!body.trim()) {
+      body = `Discussion for ${title}`;
+    }
     let resp: string = "";
     const repositoryId = await this.getRepositoryId({
       token,

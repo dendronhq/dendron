@@ -240,6 +240,13 @@ export class DendronExtension {
    * Currently, this is a check to see if rootDir is defined in settings
    */
   static isActive(context?: vscode.ExtensionContext) {
+    // code workspace takes precedence, if code workspace, return
+    const hasCodeWorkspaceFiile =
+      path.basename(DendronExtension.workspaceFile().fsPath) ===
+      this.DENDRON_WORKSPACE_FILE;
+    if (hasCodeWorkspaceFiile) {
+      return hasCodeWorkspaceFiile;
+    }
     /**
      * we do a try catch because `DendronWorkspace.workspaceFile` throws an error if workspace file doesn't exist
      * the reason we don't use `vscode.*` method is because we need to stub this value during tests
@@ -250,11 +257,8 @@ export class DendronExtension {
       if (context && workspaceFolders && getStage() !== "prod") {
         return WorkspaceUtils.findWSRootInWorkspaceFolders(workspaceFolders);
       }
-      return (
-        path.basename(DendronExtension.workspaceFile().fsPath) ===
-        this.DENDRON_WORKSPACE_FILE
-      );
-    } catch (err) {
+    } finally {
+      // eslint-disable-next-line
       return false;
     }
   }

@@ -1199,6 +1199,16 @@ type SchemaMatchResult = {
 };
 
 export class SchemaUtils {
+  /** The props of a template note that will get copied over when the template is applied. */
+  static TEMPLATE_COPY_PROPS: readonly (keyof NoteProps)[] = [
+    "body",
+    "desc",
+    "custom",
+    "color",
+    "tags",
+    "image",
+  ];
+
   static applyTemplate(opts: {
     template: SchemaTemplate;
     note: NoteProps;
@@ -1210,7 +1220,7 @@ export class SchemaUtils {
       if (_.isUndefined(tempNote)) {
         throw Error(`no template found for ${template.id}`);
       }
-      const tempNoteProps = _.pick(tempNote, ["body", "desc", "custom"]);
+      const tempNoteProps = _.pick(tempNote, this.TEMPLATE_COPY_PROPS);
       _.forEach(tempNoteProps, (v, k) => {
         // @ts-ignore
         note[k] = v;

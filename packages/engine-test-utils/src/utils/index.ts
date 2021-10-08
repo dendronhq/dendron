@@ -5,10 +5,11 @@ import {
   WorkspaceFolderRaw,
   WorkspaceOpts,
   WorkspaceSettings,
+  WorkspaceType,
 } from "@dendronhq/common-all";
 import { readYAML } from "@dendronhq/common-server";
 import { AssertUtils } from "@dendronhq/common-test-utils";
-import { DConfig } from "@dendronhq/engine-server";
+import { DConfig, WorkspaceUtils } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -102,14 +103,16 @@ export function checkVaults(opts: WorkspaceOpts, expect: any) {
   expect(_.sortBy(config.vaults, ["fsPath", "workspace"])).toEqual(
     _.sortBy(vaults, ["fsPath", "workspace"])
   );
-  const wsFolders = getWorkspaceFolders(wsRoot);
-  expect(wsFolders).toEqual(
-    vaults.map((ent) => {
-      const out: WorkspaceFolderRaw = { path: VaultUtils.getRelPath(ent) };
-      if (ent.name) {
-        out.name = ent.name;
-      }
-      return out;
-    })
-  );
+  if (WorkspaceUtils.getWorkspaceTypeFromDir(wsRoot) === WorkspaceType.CODE) {
+    const wsFolders = getWorkspaceFolders(wsRoot);
+    expect(wsFolders).toEqual(
+      vaults.map((ent) => {
+        const out: WorkspaceFolderRaw = { path: VaultUtils.getRelPath(ent) };
+        if (ent.name) {
+          out.name = ent.name;
+        }
+        return out;
+      })
+    );
+  }
 }

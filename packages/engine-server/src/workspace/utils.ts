@@ -6,7 +6,6 @@ import {
   DVault,
   DWorkspaceV2,
   getSlugger,
-  getStage,
   isBlockAnchor,
   NoteProps,
   VaultUtils,

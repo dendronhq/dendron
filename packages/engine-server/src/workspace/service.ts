@@ -300,7 +300,7 @@ export class WorkspaceService {
     if (!noAddToConfig) {
       await this.addVault({ ...opts, updateWorkspace: false });
     }
-    if (opts.addToCodeWorkspace) {
+    if (opts.addToCodeWorkspace || opts.updateWorkspace) {
       await this.addVaultToCodeWorkspace(vault);
     }
     return vault;

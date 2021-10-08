@@ -35,7 +35,7 @@ export class WorkspaceUtils {
     ) {
       return WorkspaceType.CODE;
     }
-    if (!_.isUndefined(workspaceFolders) && getStage() !== "prod") {
+    if (!_.isUndefined(workspaceFolders)) {
       const rootFolder = this.findWSRootInWorkspaceFolders(workspaceFolders);
       if (rootFolder) return WorkspaceType.NATIVE;
     }

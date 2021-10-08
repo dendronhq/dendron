@@ -254,8 +254,7 @@ export class DendronExtension {
       }
 
       const workspaceFolders = DendronExtension.workspaceFolders();
-      // ground work for standalone vaults. only activate in dev mode
-      if (context && workspaceFolders && getStage() !== "prod") {
+      if (context && workspaceFolders) {
         return WorkspaceUtils.findWSRootInWorkspaceFolders(workspaceFolders);
       }
       return hasCodeWorkspaceFiile;

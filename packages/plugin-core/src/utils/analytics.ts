@@ -1,4 +1,4 @@
-import { getOS, SegmentClient } from "@dendronhq/common-server";
+import { SegmentUtils, VSCodeIdentifyProps } from "@dendronhq/common-server";
 import * as Sentry from "@sentry/node";
 import * as vscode from "vscode";
 import { DendronExtension } from "../workspace";
@@ -10,48 +10,24 @@ export type SegmentContext = Partial<{
 }>;
 
 export class AnalyticsUtils {
+  static getVSCodeIdentifyProps() {
+    return {
+      type: "vscode" as const,
+      ideVersion: vscode.version,
+      ideFlavor: vscode.env.appName,
+      appVersion: DendronExtension.version(),
+      userAgent: vscode.env.appName,
+    }
+  }
+
   static track(event: string, props?: any) {
-    SegmentClient.instance().track(
-      event,
-      {
-        ...props,
-        ...AnalyticsUtils.getCommonProps(),
-      },
-      {
-        context: AnalyticsUtils.getContext(),
-      }
-    );
+    const { ideVersion, ideFlavor } = AnalyticsUtils.getVSCodeIdentifyProps();
+    SegmentUtils.track(event, { type: "vscode", ideVersion, ideFlavor }, props); 
   }
 
   static identify() {
-    SegmentClient.instance().identifyAnonymous(
-      {
-        ...AnalyticsUtils.getCommonProps(),
-      },
-      {
-        context: AnalyticsUtils.getContext(),
-      }
-    );
-  }
-
-  static getCommonProps() {
-    return {
-      arch: process.arch,
-      nodeVersion: process.version,
-      ideVersion: vscode.version,
-      ideFlavor: vscode.env.appName,
-    };
-  }
-  static getContext(): Partial<SegmentContext> {
-    return {
-      app: {
-        version: DendronExtension.version(),
-      },
-      os: {
-        name: getOS(),
-      },
-      userAgent: vscode.env.appName,
-    };
+    const props: VSCodeIdentifyProps = AnalyticsUtils.getVSCodeIdentifyProps();
+    SegmentUtils.identify(props);
   }
 }
 

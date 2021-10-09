@@ -211,7 +211,9 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       overrides,
     });
     this.print(
-      `to preview changes, run "cd ${getNextRoot(wsRoot)} && npm install && npx next dev"`
+      `to preview changes, run "cd ${getNextRoot(
+        wsRoot
+      )} && npm install && npm run dev"`
     );
     return { error: null };
   }

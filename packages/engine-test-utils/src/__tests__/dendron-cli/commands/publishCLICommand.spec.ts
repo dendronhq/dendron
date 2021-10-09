@@ -9,8 +9,9 @@ import { NextjsExportPodUtils } from "@dendronhq/pods-core";
 import fs from "fs-extra";
 import path from "path";
 import sinon, { stub } from "sinon";
-import { ENGINE_HOOKS } from "../../..";
+import { ENGINE_HOOKS, TestConfigUtils } from "../../..";
 import { runEngineTestV5 } from "../../../engine";
+import { checkString } from "../../../utils";
 
 export const runPublishCmd = ({
   cmd,
@@ -86,6 +87,35 @@ describe("WHEN run `dendron publish build`", () => {
           expect(out?.error?.message).toEqual(
             "bad key for override. foo is not a valid key"
           );
+        },
+        {
+          expect,
+          preSetupHook: ENGINE_HOOKS.setupBasic,
+        }
+      );
+    });
+  });
+
+  describe("AND with asset prefix without forward slash", () => {
+    test("THEN show error", async () => {
+      await runEngineTestV5(
+        async ({ wsRoot }) => {
+          TestConfigUtils.withConfig(
+            (config) => {
+              config.site.assetsPrefix = "foo";
+              return config;
+            },
+            { wsRoot }
+          );
+          await evalPublishCmd({
+            cmd,
+            wsRoot,
+          });
+          const out = await evalPublishCmd({
+            cmd,
+            wsRoot,
+          });
+          await checkString(out.error!.message, "assetsPrefix requires a '/");
         },
         {
           expect,

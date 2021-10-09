@@ -15,6 +15,7 @@ import {
   NoteUtils,
   UseVaultBehavior,
   VaultUtils,
+  BooleanResp,
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -534,6 +535,21 @@ export class SiteUtils {
       children: domainNote.children,
     });
     return domainNote;
+  }
+
+  static validateConfig(sconfig: DendronSiteConfig): BooleanResp {
+    // asset prefix needs one slash
+    if (!_.isUndefined(sconfig.assetsPrefix)) {
+      if (!sconfig.assetsPrefix.startsWith("/")) {
+        return {
+          data: false,
+          error: new DendronError({
+            message: "assetsPrefix requires a '/' in front of the path",
+          }),
+        };
+      }
+    }
+    return { data: true, error: null };
   }
 }
 

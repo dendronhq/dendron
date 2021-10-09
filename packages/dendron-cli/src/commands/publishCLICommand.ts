@@ -6,7 +6,7 @@ import {
   getStage,
   Stage,
 } from "@dendronhq/common-all";
-import { execa } from "@dendronhq/engine-server";
+import { execa, SiteUtils } from "@dendronhq/engine-server";
 import { NextjsExportConfig, NextjsExportPod } from "@dendronhq/pods-core";
 import _ from "lodash";
 import path from "path";
@@ -185,7 +185,12 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
         );
       }
     }
-    return cli.execute(opts);
+    debugger;
+    const { data, error } = SiteUtils.validateConfig(opts.engine.config.site);
+    if (!data) {
+      return { data, error };
+    }
+    return { data: await cli.execute(opts), error: null };
   }
 
   init(opts: { wsRoot: string }) {
@@ -203,13 +208,17 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
 
   async build({ wsRoot, dest, attach, overrides }: BuildCmdOpts) {
     this.print(`generating metadata for publishing...`);
-    await this._buildNextData({
+    const { error } = await this._buildNextData({
       wsRoot,
       stage: getStage(),
       dest,
       attach,
       overrides,
     });
+    if (error) {
+      this.print("ERROR: " + error.message);
+      return { error };
+    }
     this.print(
       `to preview changes, run "cd ${getNextRoot(
         wsRoot

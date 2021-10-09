@@ -190,6 +190,10 @@ export interface RespV2<T> {
   error: IDendronError | null;
 }
 
+export type BooleanResp =
+  | { data: true; error: null }
+  | { data: false; error: DendronError };
+
 export function isDendronResp<T = any>(args: any): args is RespV2<T> {
   return args?.error instanceof DendronError;
 }

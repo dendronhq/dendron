@@ -29,7 +29,7 @@ import { DConfig } from "../config";
 import { DEngineClient } from "../types";
 import { HierarchyUtils, stripLocalOnlyTags } from "../utils";
 
-const logger = createLogger();
+const LOGGER_NAME = "SiteUtils";
 
 export class SiteUtils {
   static canPublish(opts: {
@@ -150,6 +150,7 @@ export class SiteUtils {
     config: IntermediateDendronConfig;
     noExpandSingleDomain?: boolean;
   }): Promise<{ notes: NotePropsDict; domains: NoteProps[] }> {
+    const logger = createLogger(LOGGER_NAME);
     const { engine, config } = opts;
     const notes = _.clone(engine.notes);
     config.site = DConfig.cleanSiteConfig(config.site);
@@ -223,6 +224,7 @@ export class SiteUtils {
     navOrder: number;
   }): Promise<{ notes: NotePropsDict; domain: NoteProps } | undefined> {
     const { domain, engine, navOrder, config } = opts;
+    const logger = createLogger(LOGGER_NAME);
     logger.info({ ctx: "filterByHiearchy:enter", domain, config });
     const sconfig = config.site;
     let hConfig = this.getConfigForHierarchy({
@@ -482,6 +484,7 @@ export class SiteUtils {
           })
         ) {
           domainNote = maybeNote;
+          const logger = createLogger(LOGGER_NAME);
           logger.info({
             ctx,
             status: "found",
@@ -499,6 +502,7 @@ export class SiteUtils {
       let maybeDomainNotes = noteCandidates.filter((n) =>
         VaultUtils.isEqual(n.vault, vault, engine.wsRoot)
       );
+      const logger = createLogger(LOGGER_NAME);
       if (maybeDomainNotes.length < 1) {
         logger.error({
           ctx: "filterByHiearchy",
@@ -528,6 +532,7 @@ export class SiteUtils {
       const maybeNote = noteDict[id];
       maybeNote.parent = domainId;
     });
+    const logger = createLogger(LOGGER_NAME);
     logger.info({
       ctx: "filterByHiearchy",
       msg: "dup-resolution: resolving dup",

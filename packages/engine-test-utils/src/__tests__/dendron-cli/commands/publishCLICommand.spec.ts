@@ -44,7 +44,7 @@ describe("WHEN run `dendron publish init`", () => {
     await runEngineTestV5(
       async ({ wsRoot }) => {
         const cli = new PublishCLICommand();
-        const initStub = stub(cli, "init").returns({ error: null });
+        const initStub = stub(cli, "init").resolves({ error: null });
         await runPublishCmd({ cli, cmd, wsRoot });
         expect(initStub.calledOnce).toBeTruthy();
       },

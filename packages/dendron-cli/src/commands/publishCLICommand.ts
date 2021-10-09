@@ -16,9 +16,14 @@ import { CLICommand } from "./base";
 import { ExportPodCLICommand } from "./exportPod";
 import { PodSource } from "./pod";
 import { SetupEngineCLIOpts } from "./utils";
+import ora from "ora";
 
 const $ = (cmd: string, opts?: any) => {
   return execa.commandSync(cmd, { shell: true, ...opts });
+};
+
+const $$ = (cmd: string, opts?: any) => {
+  return execa.command(cmd, { shell: true, ...opts });
 };
 
 type CommandCLIOpts = {
@@ -133,7 +138,7 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     try {
       switch (cmd) {
         case PublishCommands.INIT: {
-          return this.init(opts);
+          return await this.init(opts);
         }
         case PublishCommands.BUILD: {
           return this.build(opts);
@@ -185,7 +190,6 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
         );
       }
     }
-    debugger;
     const { data, error } = SiteUtils.validateConfig(opts.engine.config.site);
     if (!data) {
       return { data, error };
@@ -193,16 +197,16 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     return { data: await cli.execute(opts), error: null };
   }
 
-  init(opts: { wsRoot: string }) {
+  async init(opts: { wsRoot: string }) {
     const cwd = opts.wsRoot;
     this.print(`initializing publishing at ${cwd}...`);
     const cmd = `git clone https://github.com/dendronhq/nextjs-template.git .next`;
     $(cmd, { cwd });
-    this.print(
-      `run "cd ${getNextRoot(
-        cwd
-      )} && npm install" to finish the install process`
-    );
+    const cmdInstall = `npm install`;
+    const spinner = ora("Installing dependencies....").start();
+    await $$(cmdInstall, { cwd: path.join(cwd, ".next") });
+    spinner.stop();
+    this.print(`Your Dendron Next Template is now initialized in ".next"`);
     return { error: null };
   }
 

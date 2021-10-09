@@ -151,3 +151,25 @@ describe("WHEN run `dendron publish build`", () => {
     });
   });
 });
+
+describe("WHEN run `dendron publish dev`", () => {
+  const cmd = PublishCommands.DEV;
+  afterEach(() => {
+    sinon.restore();
+  });
+  test("THEN run build ", async () => {
+    await runEngineTestV5(
+      async ({ wsRoot }) => {
+        const cli = new PublishCLICommand();
+        const buildStub = stub(cli, "build").resolves({ error: null });
+        const nextStub = stub(cli, "_startNextDev").resolves({ error: null });
+        await runPublishCmd({ cli, cmd, wsRoot });
+        expect(buildStub.calledOnce).toBeTruthy();
+        expect(nextStub.calledOnce).toBeTruthy();
+      },
+      {
+        expect,
+      }
+    );
+  });
+});

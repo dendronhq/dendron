@@ -9,6 +9,7 @@ import {
 import { execa, SiteUtils } from "@dendronhq/engine-server";
 import { NextjsExportConfig, NextjsExportPod } from "@dendronhq/pods-core";
 import _ from "lodash";
+import ora from "ora";
 import path from "path";
 import yargs from "yargs";
 import { CLIUtils } from "../utils/cli";
@@ -16,7 +17,6 @@ import { CLICommand } from "./base";
 import { ExportPodCLICommand } from "./exportPod";
 import { PodSource } from "./pod";
 import { SetupEngineCLIOpts } from "./utils";
-import ora from "ora";
 
 const $ = (cmd: string, opts?: any) => {
   return execa.commandSync(cmd, { shell: true, ...opts });
@@ -47,9 +47,13 @@ export enum PublishCommands {
    * Create metadata needed to builid dendron nextjs template
    */
   BUILD = "build",
+  /**
+   * Builds the website
+   */
+  DEV = "dev",
 }
 
-type CommandOpts = Omit<CommandCLIOpts, "overrides"> & Partial<BuildCmdOpts>;
+type CommandOpts = Omit<CommandCLIOpts, "overrides"> & Partial<DevCmdOpts>;
 
 type CommandOutput = Partial<{ error: DendronError; data: any }>;
 
@@ -65,6 +69,7 @@ type BuildCmdOpts = Omit<CommandCLIOpts, keyof CommandCLIOnlyOpts> & {
    */
   overrides?: BuildOverrides;
 };
+type DevCmdOpts = BuildCmdOpts & { noBuild?: boolean };
 
 export { CommandOpts as PublishCLICommandOpts };
 export { CommandCLIOpts as PublishCLICommandCLIOpts };
@@ -107,6 +112,11 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       describe: "use existing dendron engine instead of spawning a new one",
       type: "boolean",
     });
+    args.option("noBuild", {
+      describe: "skip building notes",
+      type: "boolean",
+      default: false,
+    });
     args.option("overrides", {
       describe: "override existing siteConfig properties",
       type: "string",
@@ -142,6 +152,10 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
         }
         case PublishCommands.BUILD: {
           return this.build(opts);
+        }
+        case PublishCommands.DEV: {
+          await this.dev(opts);
+          return { error: null };
         }
         default:
           return assertUnreachable();
@@ -197,6 +211,12 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     return { data: await cli.execute(opts), error: null };
   }
 
+  _startNextDev(opts: { wsRoot: string }) {
+    const cwd = opts.wsRoot;
+    const cmdDev = "npm run dev";
+    $$(cmdDev, { cwd: path.join(cwd, ".next") }).stdout?.pipe(process.stdout);
+  }
+
   async init(opts: { wsRoot: string }) {
     const cwd = opts.wsRoot;
     this.print(`initializing publishing at ${cwd}...`);
@@ -223,11 +243,14 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       this.print("ERROR: " + error.message);
       return { error };
     }
-    this.print(
-      `to preview changes, run "cd ${getNextRoot(
-        wsRoot
-      )} && npm install && npm run dev"`
-    );
     return { error: null };
+  }
+  async dev(opts: DevCmdOpts) {
+    if (opts.noBuild) {
+      this.print("skipping build...");
+    } else {
+      await this.build(opts);
+    }
+    this._startNextDev(opts);
   }
 }

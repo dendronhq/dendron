@@ -3,7 +3,7 @@ import { createLogger, SegmentClient } from "@dendronhq/common-server";
 import { WorkspaceUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
 import yargs from "yargs";
-import { showTelemetryMessage } from "./utils";
+import { showTelemetryMessage } from "../utils/analytics";
 
 type BaseCommandOpts = { quiet?: boolean };
 

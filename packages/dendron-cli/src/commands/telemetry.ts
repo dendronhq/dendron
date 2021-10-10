@@ -1,9 +1,9 @@
 import { CLIEvents } from "@dendronhq/common-all";
 import { SegmentClient, TelemetryStatus } from "@dendronhq/common-server";
 import yargs from "yargs";
-import { CLIAnalyticsUtils } from "../utils/analytics";
+import { CLIAnalyticsUtils, showTelemetryMessage } from "../utils/analytics";
 import { CLICommand, CommandCommonProps } from "./base";
-import { showTelemetryMessage } from "./utils";
+
 
 type CommandCLIOpts = {
   cmd: TelemetryCommands;

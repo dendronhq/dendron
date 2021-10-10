@@ -67,6 +67,7 @@ import { DendronNativeWorkspace } from "./workspace/nativeWorkspace";
 import { WorkspaceInitFactory } from "./workspace/workspaceInitializer";
 import os from "os";
 import { SurveyUtils } from "./survey";
+import { RunMigrationCommand } from "./commands/RunMigrationCommand";
 
 const MARKDOWN_WORD_PATTERN = new RegExp("([\\w\\.\\#]+)");
 // === Main
@@ -376,7 +377,7 @@ export async function _activate(
       });
 
       const rawConfig = DConfig.getRaw(wsImpl.wsRoot);
-      checkLegacy(rawConfig);
+      await checkLegacy(rawConfig, wsRoot);
 
       // check for vaults with same name
       const uniqVaults = _.uniqBy(dendronConfig.vaults, (vault) =>
@@ -780,9 +781,11 @@ function initializeSentry(environment: string): void {
   return;
 }
 
-function checkLegacy(
-  config: Partial<IntermediateDendronConfig>
-): void {
+async function checkLegacy(
+  config: Partial<IntermediateDendronConfig>,
+  wsRoot: string,
+): Promise<void> {
+  let shouldRun = false;
   // check that command namespace is there
   if (
     DConfig.isCurrentConfig(
@@ -794,6 +797,7 @@ function checkLegacy(
         key: "config.commands",
         version: config.version
       });
+      shouldRun = true;
     } else {
       const requiredKeys = [
         "lookup",
@@ -807,21 +811,48 @@ function checkLegacy(
         AnalyticsUtils.track(ConfigEvents.ConfigNotMigrated, {
           key: "config.commands.*"
         });
-        return;
+        shouldRun = true;
+      } else {
+        const existingKeys = Object.keys(config.commands);
+        requiredKeys.forEach((requiredKey) => {
+          if (!existingKeys.includes(requiredKey)) {
+            shouldRun = true;
+            AnalyticsUtils.track(ConfigEvents.ConfigNotMigrated, {
+              key: `config.commands.${requiredKey}`
+            });
+          }
+        });
       }
-  
-      const existingKeys = Object.keys(config.commands);
-      requiredKeys.forEach((requiredKey) => {
-        if (!existingKeys.includes(requiredKey)) {
-          AnalyticsUtils.track(ConfigEvents.ConfigNotMigrated, {
-            key: `config.commands.${requiredKey}`
-          });
-        }
-      });
     }
   } else {
+    shouldRun = true;
     AnalyticsUtils.track(ConfigEvents.ConfigNotMigrated, {
       version: config.version
     });
   };
+  if (shouldRun) {
+    const cmd = new RunMigrationCommand();
+    const maybeChanges = await cmd.run({ version: "0.63.0" });
+    maybeChanges?.forEach((change) => {
+      const event = _.isUndefined(change.error)
+        ? MigrationEvents.MigrationSucceeded
+        : MigrationEvents.MigrationFailed
+      AnalyticsUtils.track(event, {
+        data: change.data
+      });
+    });
+    vscode.window.showInformationMessage(
+      "We found some legacy configuration and migrated them to new ones.",
+      { title: "Open dendron.yml" },
+    )
+    .then(async (resp) => {
+      if (resp?.title === "Open dendron.yml") {
+        const configFilePath = vscode.Uri.file(path.join(wsRoot, "dendron.yml"));
+        await vscode.commands.executeCommand(
+          "vscode.open", 
+          configFilePath
+        )
+      }
+    })
+  }
 }

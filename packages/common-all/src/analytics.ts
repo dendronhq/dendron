@@ -61,6 +61,11 @@ export enum ConfigEvents {
   ConfigNotMigrated = "Config_Not_Migrated",
 }
 
+export enum MigrationEvents {
+  MigrationSucceeded = "Migration_Succeeded",
+  MigrationFailed = "Migration_Failed",
+}
+
 export const DendronEvents = {
   VSCodeEvents,
   TutorialEvents,

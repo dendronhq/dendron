@@ -16,6 +16,7 @@ import {
   WorkspaceType,
   IntermediateDendronConfig,
   StrictIntermediateDendronConfig,
+  MigrationEvents,
 } from "@dendronhq/common-all";
 import {
   getDurationMilliseconds,
@@ -29,6 +30,7 @@ import {
   WorkspaceService,
   WorkspaceUtils,
   DConfig,
+  MigrationChangeSetStatus,
 } from "@dendronhq/engine-server";
 import { RewriteFrames } from "@sentry/integrations";
 import * as Sentry from "@sentry/node";
@@ -321,15 +323,28 @@ export async function _activate(
       const wsRoot = wsImpl.wsRoot;
       const wsService = new WorkspaceService({ wsRoot });
 
-      await wsService.runMigrationsIfNecessary({
+      // initialize client
+      setupSegmentClient(wsImpl);
+      
+      const changes = await wsService.runMigrationsIfNecessary({
         currentVersion,
         previousVersion: previousWorkspaceVersion,
         dendronConfig,
         workspaceInstallStatus,
         wsConfig: await DendronExtension.instanceV2().getWorkspaceSettings(),
       });
-      // initialize client
-      setupSegmentClient(wsImpl);
+
+      if (changes.length > 0) {
+        changes.forEach((change: MigrationChangeSetStatus) => {
+          const event = _.isUndefined(change.error)
+            ? MigrationEvents.MigrationSucceeded
+            : MigrationEvents.MigrationFailed;
+  
+          AnalyticsUtils.track(event, {
+            data: change.data
+          });
+        });
+      }
 
       // Re-use the id for error reporting too:
       Sentry.setUser({ id: SegmentClient.instance().anonymousId });

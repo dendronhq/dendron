@@ -9,7 +9,6 @@ import {
 import { DendronConfig as DendronConfigV2 } from "./configs/dendronConfig";
 
 export * from "./configs";
-export type IntermediateDendronConfig = IntermediateOldConfig & IntermediateNewConfig;
 
 export const CURRENT_CONFIG_VERSION = 2;
 /**
@@ -32,8 +31,10 @@ type IntermediateNewConfig = Partial<Pick<DendronConfigV2,
   | "commands"
 >>
 
-export type StrictV1 = IntermediateOldConfig & { version: 1 } & IntermediateNewConfig;
-export type StrictV2 = IntermediateOldConfig & IntermediateNewConfig & { version: 2 };
+export type IntermediateDendronConfig = IntermediateOldConfig & IntermediateNewConfig;
+
+export type StrictV1 = IntermediateDendronConfig & { version: 1 };
+export type StrictV2 = IntermediateDendronConfig & { version: 2 };
 
 export type StrictIntermediateDendronConfig = StrictV1 | StrictV2;
 

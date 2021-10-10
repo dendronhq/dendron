@@ -4,10 +4,12 @@ import {
   PublishCLICommandCLIOpts,
   PublishCLICommandOpts,
   PublishCommands,
+  PublishTarget,
 } from "@dendronhq/dendron-cli";
 import { NextjsExportPodUtils } from "@dendronhq/pods-core";
 import fs from "fs-extra";
 import path from "path";
+import prompts from "prompts";
 import sinon, { stub } from "sinon";
 import { ENGINE_HOOKS, TestConfigUtils } from "../../..";
 import { runEngineTestV5 } from "../../../engine";
@@ -171,5 +173,97 @@ describe("WHEN run `dendron publish dev`", () => {
         expect,
       }
     );
+  });
+});
+
+describe.only("WHEN run `dendron publish export`", () => {
+  const cmd = PublishCommands.EXPORT;
+  afterEach(() => {
+    sinon.restore();
+  });
+  describe("AND WHEN github target", () => {
+    describe("AND docs folder exists", () => {
+      test("THEN delete when confirm", async () => {
+        await runEngineTestV5(
+          async ({ wsRoot }) => {
+            const cli = new PublishCLICommand();
+            const docsPath = path.join(wsRoot, "docs");
+            fs.ensureDirSync(docsPath);
+            fs.ensureFileSync(path.join(docsPath, "canary-fail"));
+            fs.ensureFileSync(
+              path.join(wsRoot, ".next", "out", "canary-success")
+            );
+            const buildStub = stub(cli, "build").resolves({ error: null });
+            const nextStub = stub(cli, "_startNextExport").resolves({} as any);
+            prompts.inject(["y"]);
+            await runPublishCmd({
+              cli,
+              cmd,
+              wsRoot,
+              target: PublishTarget.GITHUB,
+            });
+            // build and export called
+            expect(buildStub.calledOnce).toBeTruthy();
+            expect(nextStub.calledOnce).toBeTruthy();
+            // old docs removed
+            expect(
+              fs.pathExistsSync(path.join(docsPath, "canary-fail"))
+            ).toBeFalsy();
+            // contents of out moved over
+            expect(
+              fs.pathExistsSync(path.join(docsPath, "canary-success"))
+            ).toBeTruthy();
+            // no jekyll file generated
+            expect(
+              fs.pathExistsSync(path.join(docsPath, ".nojekyll"))
+            ).toBeTruthy();
+          },
+          {
+            expect,
+          }
+        );
+      });
+
+      test("THEN cancel when no confirm", async () => {
+        await runEngineTestV5(
+          async ({ wsRoot }) => {
+            const cli = new PublishCLICommand();
+            const docsPath = path.join(wsRoot, "docs");
+            fs.ensureDirSync(docsPath);
+            fs.ensureFileSync(path.join(docsPath, "canary-fail"));
+            fs.ensureFileSync(
+              path.join(wsRoot, ".next", "out", "canary-success")
+            );
+            const buildStub = stub(cli, "build").resolves({ error: null });
+            const nextStub = stub(cli, "_startNextExport").resolves({} as any);
+            prompts.inject(["n"]);
+            await runPublishCmd({
+              cli,
+              cmd,
+              wsRoot,
+              target: PublishTarget.GITHUB,
+            });
+            // build and export called
+            expect(buildStub.calledOnce).toBeTruthy();
+            expect(nextStub.calledOnce).toBeTruthy();
+            // old docs removed
+            expect(
+              fs.pathExistsSync(path.join(docsPath, "canary-fail"))
+            ).toBeTruthy();
+            // contents of out moved over
+            expect(
+              fs.pathExistsSync(path.join(docsPath, "canary-success"))
+            ).toBeFalsy();
+            // no jekyll file generated
+            expect(
+              fs.pathExistsSync(path.join(docsPath, ".nojekyll"))
+            ).toBeFalsy();
+          },
+          {
+            expect,
+          }
+        );
+      });
+    });
   });
 });

@@ -17,6 +17,8 @@ import { CLICommand } from "./base";
 import { ExportPodCLICommand } from "./exportPod";
 import { PodSource } from "./pod";
 import { SetupEngineCLIOpts } from "./utils";
+import prompts from "prompts";
+import fs from "fs-extra";
 
 const $ = (cmd: string, opts?: any) => {
   return execa.commandSync(cmd, { shell: true, ...opts });
@@ -51,9 +53,16 @@ export enum PublishCommands {
    * Builds the website
    */
   DEV = "dev",
+  /**
+   * Export website
+   */
+  EXPORT = "export",
+}
+export enum PublishTarget {
+  GITHUB = "github",
 }
 
-type CommandOpts = Omit<CommandCLIOpts, "overrides"> & Partial<DevCmdOpts>;
+type CommandOpts = Omit<CommandCLIOpts, "overrides"> & Partial<ExportCmdOpts>;
 
 type CommandOutput = Partial<{ error: DendronError; data: any }>;
 
@@ -70,6 +79,7 @@ type BuildCmdOpts = Omit<CommandCLIOpts, keyof CommandCLIOnlyOpts> & {
   overrides?: BuildOverrides;
 };
 type DevCmdOpts = BuildCmdOpts & { noBuild?: boolean };
+type ExportCmdOpts = DevCmdOpts & { target?: PublishTarget };
 
 export { CommandOpts as PublishCLICommandOpts };
 export { CommandCLIOpts as PublishCLICommandCLIOpts };
@@ -157,8 +167,12 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           await this.dev(opts);
           return { error: null };
         }
+        case PublishCommands.EXPORT: {
+          await this.export(opts);
+          return { error: null };
+        }
         default:
-          return assertUnreachable();
+          assertUnreachable();
       }
     } catch (err: any) {
       this.L.error(err);
@@ -214,7 +228,57 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
   _startNextDev(opts: { wsRoot: string }) {
     const cwd = opts.wsRoot;
     const cmdDev = "npm run dev";
-    $$(cmdDev, { cwd: path.join(cwd, ".next") }).stdout?.pipe(process.stdout);
+    return $$(cmdDev, { cwd: path.join(cwd, ".next") }).stdout?.pipe(
+      process.stdout
+    );
+  }
+
+  _startNextExport(opts: { wsRoot: string }) {
+    const cwd = opts.wsRoot;
+    const cmdDev = "npm run export";
+    const out = $$(cmdDev, { cwd: path.join(cwd, ".next") });
+    out.stdout?.pipe(process.stdout);
+    return out;
+  }
+
+  async _handlePublishTarget(target: PublishTarget, opts: ExportCmdOpts) {
+    const { wsRoot } = opts;
+    switch (target) {
+      case PublishTarget.GITHUB:
+        const docsPath = path.join(wsRoot, "docs");
+        const outPath = path.join(wsRoot, ".next", "out");
+        this.print("building github target...");
+
+        // if `out` no exist, exit
+        if (!fs.pathExistsSync(outPath)) {
+          this.print(`${outPath} does not exist. exiting`);
+          return;
+        }
+
+        // if docs exist, remove
+        const docsExist = fs.pathExistsSync(docsPath);
+        if (docsExist) {
+          const response = await prompts({
+            type: "confirm",
+            name: "value",
+            message: "Docs folder exists. Delete?",
+            initial: false,
+          });
+          if (response.value !== "y") {
+            this.print("exiting");
+            return;
+          }
+          fs.removeSync(docsPath);
+        }
+
+        // build docs
+        fs.moveSync(outPath, docsPath);
+        fs.ensureFileSync(path.join(docsPath, ".nojekyll"));
+
+        return;
+      default:
+        assertUnreachable();
+    }
   }
 
   async init(opts: { wsRoot: string }) {
@@ -245,6 +309,7 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     }
     return { error: null };
   }
+
   async dev(opts: DevCmdOpts) {
     if (opts.noBuild) {
       this.print("skipping build...");
@@ -252,5 +317,17 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       await this.build(opts);
     }
     this._startNextDev(opts);
+  }
+
+  async export(opts: ExportCmdOpts) {
+    if (opts.noBuild) {
+      this.print("skipping build...");
+    } else {
+      await this.build(opts);
+    }
+    await this._startNextExport(opts);
+    if (opts.target) {
+      await this._handlePublishTarget(opts.target, opts);
+    }
   }
 }

@@ -1,5 +1,6 @@
 import { FuseEngine, NoteProps, NotePropsDict } from "@dendronhq/common-all";
 import { verifyEngineSliceState } from "@dendronhq/common-frontend";
+import { Grid } from "antd";
 import _ from "lodash";
 import { useRouter } from "next/router";
 import React from "react";
@@ -28,6 +29,7 @@ export function useDendronRouter() {
     const maybeIdByQuery = query?.id;
     return !_.isUndefined(maybeIdByQuery) ? notes[maybeIdByQuery] : undefined;
   };
+
   const getActiveNoteId = () => {
     // assume home page
     if (!router.asPath.startsWith("/notes")) {
@@ -146,4 +148,10 @@ export function useNoteBodies() {
   }
 
   return { noteBodies, requestNotes };
+}
+
+export function useIsMobile() {
+  const screens = Grid.useBreakpoint();
+  const isMobile = !_.some([screens.md, screens.lg, screens.xl, screens.xxl]);
+  return { isMobile, screens };
 }

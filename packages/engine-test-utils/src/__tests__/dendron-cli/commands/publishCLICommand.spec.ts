@@ -176,7 +176,7 @@ describe("WHEN run `dendron publish dev`", () => {
   });
 });
 
-describe.only("WHEN run `dendron publish export`", () => {
+describe("WHEN run `dendron publish export`", () => {
   const cmd = PublishCommands.EXPORT;
   afterEach(() => {
     sinon.restore();
@@ -195,7 +195,7 @@ describe.only("WHEN run `dendron publish export`", () => {
             );
             const buildStub = stub(cli, "build").resolves({ error: null });
             const nextStub = stub(cli, "_startNextExport").resolves({} as any);
-            prompts.inject(["y"]);
+            prompts.inject([true]);
             await runPublishCmd({
               cli,
               cmd,
@@ -236,7 +236,7 @@ describe.only("WHEN run `dendron publish export`", () => {
             );
             const buildStub = stub(cli, "build").resolves({ error: null });
             const nextStub = stub(cli, "_startNextExport").resolves({} as any);
-            prompts.inject(["n"]);
+            prompts.inject([false]);
             await runPublishCmd({
               cli,
               cmd,

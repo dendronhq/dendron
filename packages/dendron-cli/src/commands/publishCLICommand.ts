@@ -79,7 +79,7 @@ type BuildCmdOpts = Omit<CommandCLIOpts, keyof CommandCLIOnlyOpts> & {
   overrides?: BuildOverrides;
 };
 type DevCmdOpts = BuildCmdOpts & { noBuild?: boolean };
-type ExportCmdOpts = DevCmdOpts & { target?: PublishTarget };
+type ExportCmdOpts = DevCmdOpts & { target?: PublishTarget; yes?: boolean };
 
 export { CommandOpts as PublishCLICommandOpts };
 export { CommandCLIOpts as PublishCLICommandCLIOpts };
@@ -258,15 +258,17 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
         // if docs exist, remove
         const docsExist = fs.pathExistsSync(docsPath);
         if (docsExist) {
-          const response = await prompts({
-            type: "confirm",
-            name: "value",
-            message: "Docs folder exists. Delete?",
-            initial: false,
-          });
-          if (response.value !== "y") {
-            this.print("exiting");
-            return;
+          if (!opts.yes) {
+            const response = await prompts({
+              type: "confirm",
+              name: "value",
+              message: "Docs folder exists. Delete?",
+              initial: false,
+            });
+            if (!response.value) {
+              this.print("exiting");
+              return;
+            }
           }
           fs.removeSync(docsPath);
         }
@@ -274,6 +276,7 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
         // build docs
         fs.moveSync(outPath, docsPath);
         fs.ensureFileSync(path.join(docsPath, ".nojekyll"));
+        this.print(`done export. files available at ${docsPath}`);
 
         return;
       default:

@@ -92,23 +92,20 @@ export default function Note({
         )
       : null;
 
-  const tocStyle = isMobile
-    ? { display: "none" }
-    : {
-        position: "absolute" as const,
-        top: HEADER.HEIGHT + 40,
-        right: 20,
-        marginTop: 20,
-        marginRight: 20,
-      };
+  // const tocStyle = isMobile
+  //   ? { display: "none" }
+  //   : {
+  //       position: "absolute" as const,
+  //       top: HEADER.HEIGHT + 40,
+  //       right: 20,
+  //       marginTop: 20,
+  //       marginRight: 20,
+  //     };
 
   return (
     <>
       <DendronSEO note={note} config={config} />
       {customHeadContent && <DendronCustomHead content={customHeadContent} />}
-      <div style={tocStyle}>
-        <DendronTOC note={note} offsetTop={HEADER.HEIGHT} />
-      </div>
       <Row>
         <Col span={24}>
           <DendronNote noteContent={noteBody} />

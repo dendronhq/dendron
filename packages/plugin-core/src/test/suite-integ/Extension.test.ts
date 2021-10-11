@@ -19,13 +19,13 @@ import {
   MetadataService,
   openWSMetaFile,
 } from "@dendronhq/engine-server";
-import { TestEngineUtils } from "@dendronhq/engine-test-utils";
+import { TestEngineUtils, ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
 import _ from "lodash";
 import { describe, beforeEach, it } from "mocha";
 import os from "os";
 import path from "path";
-import sinon, { SinonStub } from "sinon";
+import sinon, { SinonStub, SinonSpy } from "sinon";
 import { ExtensionContext } from "vscode";
 import { ResetConfigCommand } from "../../commands/ResetConfig";
 import {
@@ -38,8 +38,8 @@ import {
 } from "../../constants";
 import { StateService } from "../../services/stateService";
 import * as telemetry from "../../telemetry";
-import { KeybindingUtils, VSCodeUtils } from "../../utils";
-import { DendronExtension } from "../../workspace";
+import { KeybindingUtils, VSCodeUtils, ConfigUtils } from "../../utils";
+import { DendronExtension, getDWorkspace } from "../../workspace";
 import { BlankInitializer } from "../../workspace/blankInitializer";
 import { TemplateInitializer } from "../../workspace/templateInitializer";
 import { shouldDisplayLapsedUserMsg, _activate } from "../../_extension";
@@ -50,6 +50,7 @@ import {
   resetCodeWorkspace,
 } from "../testUtilsv2";
 import {
+  describeMultiWS,
   runLegacySingleWorkspaceTest,
   setupBeforeAfter,
   stubSetupWorkspace,
@@ -738,3 +739,59 @@ suite(
     });
   }
 );
+
+suite.only("Legacy checking logic for configurations during init", function () {
+  let homeDirStub: SinonStub;
+  let checkLegacySpy: SinonSpy;
+  
+  const ctx: ExtensionContext = setupBeforeAfter(this, {
+    beforeHook: async (ctx) => {
+      new StateService(ctx);
+      await resetCodeWorkspace();
+      await new ResetConfigCommand().execute({ scope: "all" });
+      homeDirStub = TestEngineUtils.mockHomeDir();
+      
+    },
+    afterHook: async () => {
+      homeDirStub.restore();
+    },
+    noSetInstallStatus: true,
+  });
+
+  describeMultiWS(
+    "GIVEN: current version is less than 0.63.0",
+    {
+      ctx,
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        DendronExtension.version = () => "0.0.1";
+        ENGINE_HOOKS.setupBasic({ wsRoot, vaults })
+        checkLegacySpy = sinon.spy(ConfigUtils, "checkAndMigrateLegacy");
+      }
+    },
+    () => {
+      test("THEN: checkAndMigrateLegacy not run", (done) => {
+        expect(checkLegacySpy.calledOnce).toBeFalsy();
+        done();
+      })
+    }
+  )
+
+  describeMultiWS(
+    "GIVEN: current version is 0.63.0",
+    {
+      ctx,
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        DendronExtension.version = () => "0.63.0";
+        ENGINE_HOOKS.setupBasic({ wsRoot, vaults })
+        checkLegacySpy = sinon.spy(ConfigUtils, "checkAndMigrateLegacy");
+      }
+    },
+    () => {
+      test("THEN: checkAndMigrateLegacy is called", (done) => {
+        expect(checkLegacySpy.calledOnce).toBeTruthy();
+        done();
+      })
+    }
+  )
+  
+})

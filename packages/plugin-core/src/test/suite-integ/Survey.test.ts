@@ -12,15 +12,15 @@ import * as vscode from "vscode";
 
 suite("SurveyUtils", function () {
   const ctx = setupBeforeAfter(this);
-  describe("maybePromptInitialSurvey", () => {
+  describe("showInitialSurvey", () => {
     describe("GIVEN: INITIAL_SURVEY_SUBMITTED is not set", () => {
-      test("THEN: maybePromptInitialSurvey is called", (done) => {
+      test("THEN: showInitialSurvey is called", (done) => {
         runLegacyMultiWorkspaceTest({
           ctx,
           preSetupHook: async() => {},
           onInit: async () => {
             sinon.stub(StateService.instance(), "getGlobalState").resolves(undefined);
-            const surveySpy = sinon.spy(SurveyUtils, "maybePromptInitialSurvey")
+            const surveySpy = sinon.spy(SurveyUtils, "showInitialSurvey")
             const tutorialInitializer = new TutorialInitializer();
             const ws = getDWorkspace();
             await tutorialInitializer.onWorkspaceOpen({ws});
@@ -32,13 +32,13 @@ suite("SurveyUtils", function () {
     });
 
     describe("GIVEN: INITIAL_SURVEY_SUBMITTED is set", () => {
-      test("THEN: maybePromptInitialSurvey is not called", (done) => {
+      test("THEN: showInitialSurvey is not called", (done) => {
         runLegacyMultiWorkspaceTest({
           ctx,
           preSetupHook: async() => {},
           onInit: async () => {
             sinon.stub(StateService.instance(), "getGlobalState").resolves("submitted");
-            const surveySpy = sinon.spy(SurveyUtils, "maybePromptInitialSurvey")
+            const surveySpy = sinon.spy(SurveyUtils, "showInitialSurvey")
             const tutorialInitializer = new TutorialInitializer();
             const ws = getDWorkspace();
             await tutorialInitializer.onWorkspaceOpen({ws});

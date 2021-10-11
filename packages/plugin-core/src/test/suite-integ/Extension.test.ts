@@ -740,7 +740,7 @@ suite(
   }
 );
 
-suite.only("Legacy checking logic for configurations during init", function () {
+suite("Legacy checking logic for configurations during init", function () {
   let homeDirStub: SinonStub;
   let checkLegacySpy: SinonSpy;
   

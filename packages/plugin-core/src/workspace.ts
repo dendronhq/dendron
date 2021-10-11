@@ -247,8 +247,9 @@ export class DendronExtension {
     try {
       // code workspace takes precedence, if code workspace, return
       const hasCodeWorkspaceFiile =
+        vscode.workspace.workspaceFile &&
         path.basename(DendronExtension.workspaceFile().fsPath) ===
-        this.DENDRON_WORKSPACE_FILE;
+          this.DENDRON_WORKSPACE_FILE;
       if (hasCodeWorkspaceFiile) {
         return hasCodeWorkspaceFiile;
       }

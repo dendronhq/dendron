@@ -43,6 +43,24 @@ suite("LookupProviderV3 utility methods:", () => {
       });
     });
 
+    describe(`WHEN given simple string with space inside and on the side`, () => {
+      let transformed: TransformedQueryString;
+
+      beforeEach(() => {
+        transformed = transformQueryString({
+          pickerValue: " some string.value  ",
+        });
+      });
+
+      it(`THEN trim the side spaces keep the inside space`, () => {
+        expect(transformed.queryString).toEqual("some string.value");
+      });
+
+      it(`THEN wasMadeFromWikiLink is false`, () => {
+        expect(transformed.wasMadeFromWikiLink).toEqual(false);
+      });
+    });
+
     describe(`WHEN given string with OR operator`, () => {
       let transformed: TransformedQueryString;
 
@@ -69,6 +87,24 @@ suite("LookupProviderV3 utility methods:", () => {
       });
 
       it(`THEN strip out wiki link decoration`, () => {
+        expect(transformed.queryString).toEqual("some.string.value");
+      });
+
+      it(`THEN wasMadeFromWikiLink is true`, () => {
+        expect(transformed.wasMadeFromWikiLink).toEqual(true);
+      });
+    });
+
+    describe(`WHEN given string with wiki link with side spaces`, () => {
+      let transformed: TransformedQueryString;
+
+      beforeEach(() => {
+        transformed = transformQueryString({
+          pickerValue: "  [[some.string.value]]   ",
+        });
+      });
+
+      it(`THEN strip out spaces and wiki link decoration`, () => {
         expect(transformed.queryString).toEqual("some.string.value");
       });
 

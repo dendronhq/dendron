@@ -124,11 +124,13 @@ export function transformQueryString({
 }: {
   pickerValue: string;
 }): TransformedQueryString {
+  const trimmed = pickerValue.trim();
+
   // Detect wiki link decoration and apply wiki link processing
-  if (pickerValue.startsWith("[[") && pickerValue.endsWith("]]")) {
+  if (trimmed.startsWith("[[") && trimmed.endsWith("]]")) {
     let vaultName;
     // Remove the '[[' ']]' decoration.
-    let transformed = pickerValue.slice(2, -2);
+    let transformed = trimmed.slice(2, -2);
 
     // Process description such as [[some description|some.note]]
     if (transformed.includes("|")) {
@@ -156,7 +158,7 @@ export function transformQueryString({
   } else {
     // Regular processing:
     return {
-      queryString: PickerUtilsV2.slashToDot(pickerValue),
+      queryString: PickerUtilsV2.slashToDot(trimmed),
       wasMadeFromWikiLink: false,
       vaultName: undefined,
     };

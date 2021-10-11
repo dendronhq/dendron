@@ -1015,7 +1015,6 @@ export class ConfigUtils {
     changes?: MigrationChangeSetStatus[] 
   }> {
     let shouldRun = false;
-    console.log("hit");
     // check that command namespace is there
     if (
       DConfig.isCurrentConfig(

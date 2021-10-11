@@ -83,9 +83,8 @@ export class InsertNoteIndexCommand extends BasicCommand<
         ? insertNoteIndexConfig.enableMarker
         : insertNoteIndexConfig.marker;
     }
-    
     const noteIndex = this.genNoteIndex(children, {
-      marker: _.isBoolean(maybeMarker) ? maybeMarker : opts.marker,
+      marker: opts.marker ? opts.marker : maybeMarker
     });
     const current = maybeEditor.selection;
     await maybeEditor.edit((builder) => {

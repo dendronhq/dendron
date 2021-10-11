@@ -39,7 +39,7 @@ import {
 import { StateService } from "../../services/stateService";
 import * as telemetry from "../../telemetry";
 import { KeybindingUtils, VSCodeUtils, ConfigUtils } from "../../utils";
-import { DendronExtension, getDWorkspace } from "../../workspace";
+import { DendronExtension } from "../../workspace";
 import { BlankInitializer } from "../../workspace/blankInitializer";
 import { TemplateInitializer } from "../../workspace/templateInitializer";
 import { shouldDisplayLapsedUserMsg, _activate } from "../../_extension";

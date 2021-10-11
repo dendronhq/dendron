@@ -23,7 +23,7 @@ import sinon from "sinon";
 import { CONFIG, GLOBAL_STATE, WORKSPACE_STATE } from "../../constants";
 import { Logger } from "../../logger";
 import { VSCodeUtils } from "../../utils";
-import { getExtension, getDWorkspace } from "../../workspace";
+import { getExtension, getDWorkspace, DendronExtension } from "../../workspace";
 import { _activate } from "../../_extension";
 import { expect } from "../testUtilsv2";
 import { describeMultiWS, runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
@@ -338,6 +338,7 @@ suite("Migration", function () {
     });
 
     test("migrate to 0.63 (dendron config command namespace)", (done) => {
+      DendronExtension.version = () => "0.0.1";
       runLegacyMultiWorkspaceTest({
         ctx,
         modConfigCb: (config) => {
@@ -391,8 +392,6 @@ suite("Migration", function () {
             "lookupConfirmVaultOnCreate"
           ];
           const preMigrationKeys = Object.keys(dendronConfig);
-          console.log(preMigrationKeys);
-          expect(preMigrationKeys.includes("commands")).toBeFalsy();
           expect(oldKeys.every((value) => preMigrationKeys.includes(value))).toBeTruthy();
 
 
@@ -429,7 +428,7 @@ suite("Migration", function () {
           expect(postMigrationKeys.includes("commands")).toBeTruthy();
           expect(oldKeys.every((value) => postMigrationKeys.includes(value))).toBeFalsy();
           
-          // done();
+          done();
         }
       })
     })

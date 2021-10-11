@@ -15,7 +15,7 @@ export class CLIAnalyticsUtils {
 /**
  * Show notice about telemetry
  */
- export function showTelemetryMessage() {
+export function showTelemetryMessage() {
   console.log("Dendron collects limited usage data to help improve the quality of our software");
   console.log("You can learn everything about our telemetry policies by visiting the following link: ");
   console.log("https://wiki.dendron.so/notes/84df871b-9442-42fd-b4c3-0024e35b5f3c.html");

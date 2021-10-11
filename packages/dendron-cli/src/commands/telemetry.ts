@@ -80,3 +80,5 @@ export class TelemetryCLICommand extends CLICommand<CommandOpts> {
     }
   }
 }
+
+export { CommandOpts as TelemetryCLICommandOpts }

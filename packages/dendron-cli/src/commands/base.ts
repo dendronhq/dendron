@@ -63,9 +63,9 @@ export abstract class CLICommand<
   }
 
   setUpSegmentClient() {
-    // if running CLI without ever having used dendron plugin, show a notice about telemety and instructions on how to disable
-    const status = SegmentClient.getStatus();
-    if (SegmentClient.isEnabled(status)) {
+    // if running CLI without ever having used dendron plugin, 
+    // show a notice about telemety and instructions on how to disable.
+    if (_.isUndefined(SegmentClient.readConfig())) {
       showTelemetryMessage();
     }
 

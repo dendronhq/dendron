@@ -149,6 +149,7 @@ export class SegmentClient {
     if (_.isUndefined(status)) status = this.getStatus();
     switch (status) {
       case TelemetryStatus.DISABLED_BY_COMMAND:
+      case TelemetryStatus.DISABLED_BY_CLI_COMMAND:
       case TelemetryStatus.DISABLED_BY_VSCODE_CONFIG:
       case TelemetryStatus.DISABLED_BY_WS_CONFIG:
         return true;

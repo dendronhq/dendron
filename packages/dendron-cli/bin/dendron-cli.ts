@@ -3,6 +3,7 @@
 import { env } from "@dendronhq/common-all";
 import _ from "lodash";
 import yargs from "yargs";
+import { TelemetryCLICommand } from "../src/commands/telemetry";
 import { PublishCLICommand } from "../src/commands";
 import { BuildSiteV2CLICommand } from "../src/commands/build-site-v2";
 import { DevCLICommand } from "../src/commands/devCLICommand";
@@ -36,4 +37,5 @@ new WorkspaceCLICommand().buildCmd(buildYargs);
 new SeedCLICommand().buildCmd(buildYargs);
 new DevCLICommand().buildCmd(buildYargs);
 new PublishCLICommand().buildCmd(buildYargs);
+new TelemetryCLICommand().buildCmd(buildYargs);
 buildYargs.demandCommand(1).help().argv;

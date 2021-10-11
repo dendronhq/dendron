@@ -13,3 +13,5 @@ export * from "./workspaceCLICommand";
 export * from "./seedCLICommand";
 export * from "./devCLICommand";
 export * from "./publishCLICommand";
+export * from "./telemetry";
+export * from "./base";

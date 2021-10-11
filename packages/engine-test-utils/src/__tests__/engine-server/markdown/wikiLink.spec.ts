@@ -348,6 +348,48 @@ describe("wikiLinks", () => {
       preSetupHook: ENGINE_HOOKS.setupBasic,
     });
 
+    const linkWithAliasApostrophe = `[[Coulomb's Constant|kb.note.20211011124050]]`;
+    const WITH_ALIAS_APOSTROPHE = createProcTests({
+      name: "WITH_ALIAS_APOSTROPHE",
+      setupFunc: async ({ engine, vaults, extra }) => {
+        const proc = createProcForTest({
+          engine,
+          dest: extra.dest,
+          vault: vaults[0],
+        });
+        const resp = await proc.process(linkWithAliasApostrophe);
+        return { resp, proc };
+      },
+      verifyFuncDict: {
+        [DendronASTDest.MD_DENDRON]: async ({ extra }) => {
+          const { resp } = extra;
+          await checkVFile(resp, linkWithAliasApostrophe);
+        },
+        [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
+          const { resp } = extra;
+          await checkVFile(
+            resp,
+            "[Coulomb's Constant](kb.note.20211011124050)"
+          );
+        },
+        [DendronASTDest.HTML]: async ({ extra }) => {
+          const { resp } = extra;
+          await checkVFile(
+            resp,
+            '<a href="kb.note.20211011124050.html">Coulomb\'s Constant</a>'
+          );
+        },
+        [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
+          const { resp } = extra;
+          await checkVFile(
+            resp,
+            "[Coulomb's Constant](kb.note.20211011124050.md)"
+          );
+        },
+      },
+      preSetupHook: ENGINE_HOOKS.setupBasic,
+    });
+
     const WITH_ID_AS_LINK = createProcTests({
       name: "WITH_ID_AS_LINK",
       setupFunc: async ({ engine, vaults, extra }) => {
@@ -528,6 +570,7 @@ describe("wikiLinks", () => {
       ...WITH_EXTENSION,
       ...WITH_ALIAS,
       ...WITH_ALIAS_HASH,
+      ...WITH_ALIAS_APOSTROPHE,
       ...WITH_ID_AS_LINK,
       ...WITH_SPACE_AND_ALIAS,
       ...WITH_XVAULT_LINK_TO_SAME_VAULT,

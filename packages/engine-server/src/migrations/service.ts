@@ -33,7 +33,7 @@ export class MigrationServce {
     // run migrations from oldest to newest
     const migrationsToRun = _.reverse(
       _.takeWhile(migrations || ALL_MIGRATIONS, (ent) => {
-        const out = semver.lte(previousVersion, ent.version);
+        const out = semver.lte(previousVersion, ent.version) && semver.gte(currentVersion, ent.version)
         return out;
       })
     );

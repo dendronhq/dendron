@@ -164,6 +164,96 @@ VFile {
 }
 `;
 
+exports[`dendronPub note reference WHEN refs are back to back THEN render all 1`] = `
+VFile {
+  "contents": "# Ref
+
+<div class=\\"portal-container\\">
+<div class=\\"portal-head\\">
+<div class=\\"portal-backlink\\" >
+<div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Foo1</span></div>
+<a href=\\"foo1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+</div>
+</div>
+<div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
+<div class=\\"portal-parent-fader-top\\"></div>
+<div class=\\"portal-parent-fader-bottom\\"></div>
+
+
+</div></div> <div class=\\"portal-container\\">
+<div class=\\"portal-head\\">
+<div class=\\"portal-backlink\\" >
+<div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Foo2</span></div>
+<a href=\\"foo2.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+</div>
+</div>
+<div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
+<div class=\\"portal-parent-fader-top\\"></div>
+<div class=\\"portal-parent-fader-bottom\\"></div>
+
+
+</div></div>
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`dendronPub note reference WHEN refs are right on the next line THEN render all 1`] = `
+VFile {
+  "contents": "# Ref
+
+<div class=\\"portal-container\\">
+<div class=\\"portal-head\\">
+<div class=\\"portal-backlink\\" >
+<div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Foo1</span></div>
+<a href=\\"foo1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+</div>
+</div>
+<div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
+<div class=\\"portal-parent-fader-top\\"></div>
+<div class=\\"portal-parent-fader-bottom\\"></div>
+
+
+</div></div>
+<div class=\\"portal-container\\">
+<div class=\\"portal-head\\">
+<div class=\\"portal-backlink\\" >
+<div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Foo2</span></div>
+<a href=\\"foo2.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+</div>
+</div>
+<div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
+<div class=\\"portal-parent-fader-top\\"></div>
+<div class=\\"portal-parent-fader-bottom\\"></div>
+
+
+</div></div>
+<div class=\\"portal-container\\">
+<div class=\\"portal-head\\">
+<div class=\\"portal-backlink\\" >
+<div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Foo3</span></div>
+<a href=\\"foo3.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+</div>
+</div>
+<div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
+<div class=\\"portal-parent-fader-top\\"></div>
+<div class=\\"portal-parent-fader-bottom\\"></div>
+
+
+</div></div>
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
 exports[`dendronPub note reference assume vault 1`] = `
 VFile {
   "contents": "# Ref

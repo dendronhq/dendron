@@ -1,5 +1,5 @@
 import {
-  DendronConfig,
+  IntermediateDendronConfig,
   DEngineClient,
   DVault,
   NotePropsDict,
@@ -19,7 +19,7 @@ export class WebEngine implements DEngineClient {
   // public api: DendronAPI;
   // public history?: HistoryService;
   // public logger: DLogger;
-  public config: DendronConfig;
+  public config: IntermediateDendronConfig;
   // public hooks: DHookDict;
 
   static create(state: Required<EngineState>) {

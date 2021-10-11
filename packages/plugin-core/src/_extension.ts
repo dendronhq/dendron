@@ -12,7 +12,10 @@ import {
   Time,
   VaultUtils,
   VSCodeEvents,
+  ConfigEvents,
   WorkspaceType,
+  IntermediateDendronConfig,
+  StrictIntermediateDendronConfig,
 } from "@dendronhq/common-all";
 import {
   getDurationMilliseconds,
@@ -25,6 +28,7 @@ import {
   MetadataService,
   WorkspaceService,
   WorkspaceUtils,
+  DConfig,
 } from "@dendronhq/engine-server";
 import { RewriteFrames } from "@sentry/integrations";
 import * as Sentry from "@sentry/node";
@@ -35,7 +39,12 @@ import { Duration } from "luxon";
 import path from "path";
 import semver from "semver";
 import * as vscode from "vscode";
-import { CONFIG, DendronContext, DENDRON_COMMANDS, GLOBAL_STATE } from "./constants";
+import {
+  CONFIG,
+  DendronContext,
+  DENDRON_COMMANDS,
+  GLOBAL_STATE,
+} from "./constants";
 import { Logger } from "./logger";
 import { migrateConfig } from "./migration";
 import { StateService } from "./services/stateService";
@@ -253,6 +262,12 @@ export async function _activate(
     const ws = DendronExtension.getOrCreate(context, {
       skipSetup: stage === "test",
     });
+    // Need to recompute this for tests, because the instance of DendronExtension doesn't get re-created.
+    // Probably also needed if the user switches from one workspace to the other.
+    ws.type = WorkspaceUtils.getWorkspaceType({
+      workspaceFile: vscode.workspace.workspaceFile,
+      workspaceFolders: vscode.workspace.workspaceFolders,
+    });
 
     const currentVersion = DendronExtension.version();
     const previousWorkspaceVersion = stateService.getWorkspaceVersion();
@@ -344,6 +359,9 @@ export async function _activate(
         configMigrated,
         msg: "read dendron config",
       });
+
+      const rawConfig = DConfig.getRaw(wsImpl.wsRoot);
+      checkLegacy(rawConfig);
 
       // check for vaults with same name
       const uniqVaults = _.uniqBy(dendronConfig.vaults, (vault) =>
@@ -661,7 +679,10 @@ export async function showLapsedUserMessage(assetUri: vscode.Uri) {
         WSUtils.showWelcome(assetUri);
       } else {
         AnalyticsUtils.track(VSCodeEvents.LapsedUserMessageRejected);
-        const lapsedSurveySubmitted = await StateService.instance().getGlobalState(GLOBAL_STATE.LAPSED_USER_SURVEY_SUBMITTED);
+        const lapsedSurveySubmitted =
+          await StateService.instance().getGlobalState(
+            GLOBAL_STATE.LAPSED_USER_SURVEY_SUBMITTED
+          );
         if (lapsedSurveySubmitted === undefined) {
           SurveyUtils.showLapsedUserSurvey();
         }
@@ -742,4 +763,50 @@ function initializeSentry(environment: string): void {
     ],
   });
   return;
+}
+
+function checkLegacy(
+  config: Partial<IntermediateDendronConfig>
+): void {
+  // check that command namespace is there
+  if (
+    DConfig.isCurrentConfig(
+      config as StrictIntermediateDendronConfig
+    )
+  ) {
+    if (_.isUndefined(config.commands)) {
+      AnalyticsUtils.track(ConfigEvents.ConfigNotMigrated, {
+        key: "config.commands",
+        version: config.version
+      });
+    } else {
+      const requiredKeys = [
+        "lookup",
+        "randomNote",
+        "insertNote",
+        "insertNoteLink",
+        "insertNoteIndex"
+      ];
+  
+      if (config.commands === null) {
+        AnalyticsUtils.track(ConfigEvents.ConfigNotMigrated, {
+          key: "config.commands.*"
+        });
+        return;
+      }
+  
+      const existingKeys = Object.keys(config.commands);
+      requiredKeys.forEach((requiredKey) => {
+        if (!existingKeys.includes(requiredKey)) {
+          AnalyticsUtils.track(ConfigEvents.ConfigNotMigrated, {
+            key: `config.commands.${requiredKey}`
+          });
+        }
+      });
+    }
+  } else {
+    AnalyticsUtils.track(ConfigEvents.ConfigNotMigrated, {
+      version: config.version
+    });
+  };
 }

@@ -1,6 +1,6 @@
 import {
   CONSTANTS,
-  DendronConfig,
+  IntermediateDendronConfig,
   DendronError,
   DuplicateNoteAction,
   DUser,
@@ -141,7 +141,7 @@ export class WorkspaceService {
     }
   }
 
-  get config(): DendronConfig {
+  get config(): IntermediateDendronConfig {
     return DConfig.defaults(DConfig.getOrCreate(this.wsRoot));
   }
 
@@ -153,7 +153,7 @@ export class WorkspaceService {
     return this._seedService;
   }
 
-  async setConfig(config: DendronConfig) {
+  async setConfig(config: IntermediateDendronConfig) {
     const wsRoot = this.wsRoot;
     return DConfig.writeConfig({ wsRoot, config });
   }
@@ -207,7 +207,7 @@ export class WorkspaceService {
   async addVault(
     opts: {
       vault: DVault;
-      config?: DendronConfig;
+      config?: IntermediateDendronConfig;
     } & AddRemoveCommonOpts
   ) {
     const { vault, config, updateConfig, updateWorkspace } = _.defaults(opts, {
@@ -760,7 +760,7 @@ export class WorkspaceService {
     workspaceInstallStatus: InstallStatus;
     currentVersion: string;
     previousVersion: string;
-    dendronConfig: DendronConfig;
+    dendronConfig: IntermediateDendronConfig;
     wsConfig?: WorkspaceSettings;
   }) {
     // check if we need to force a migration
@@ -801,7 +801,7 @@ export class WorkspaceService {
    * @param skipPrivate skip cloning and pulling of private vaults. default: false
    */
   async syncVaults(opts: {
-    config: DendronConfig;
+    config: IntermediateDendronConfig;
     progressIndicator?: () => void;
     urlTransformer?: UrlTransformerFunc;
     fetchAndPull?: boolean;

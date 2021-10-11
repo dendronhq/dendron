@@ -1,4 +1,7 @@
-import { DendronConfig, NoteProps } from "@dendronhq/common-all";
+import {
+  IntermediateDendronConfig,
+  NoteProps
+} from "@dendronhq/common-all";
 import {
   NoteTestUtilsV4,
   TestPresetEntryV4,
@@ -49,7 +52,7 @@ describe("hierarchies", () => {
   const NO_HIERARCHY = createProcTests({
     name: "NO_HIERARCHY",
     setupFunc: async ({ engine, vaults, extra }) => {
-      const configOverride: DendronConfig = {
+      const configOverride: IntermediateDendronConfig = {
         ...engine.config,
         hierarchyDisplay: false,
       };
@@ -136,7 +139,7 @@ describe("hierarchies", () => {
   const DIFF_HIERARCHY_TITLE = createProcTests({
     name: "DIFF_HIERARCHY_TITLE",
     setupFunc: async ({ engine, vaults, extra }) => {
-      const configOverride: DendronConfig = {
+      const configOverride: IntermediateDendronConfig = {
         ...engine.config,
         hierarchyDisplayTitle: "Better Children",
       };

@@ -1,6 +1,6 @@
 import {
   CONSTANTS,
-  DendronConfig,
+  IntermediateDendronConfig,
   DendronError,
   DVault,
   DWorkspace,
@@ -16,6 +16,7 @@ import simpleGit, { SimpleGit } from "simple-git";
 import { parse } from "url";
 import { readYAML } from "./files";
 import { vault2Path } from "./filesv2";
+
 export { simpleGit, SimpleGit };
 
 const formatString = (opts: { txt: string; note: NoteProps }) => {
@@ -33,7 +34,10 @@ const formatString = (opts: { txt: string; note: NoteProps }) => {
  * Utilities for working with git urls
  */
 export class GitUtils {
-  static canShowGitLink(opts: { config: DendronConfig; note: NoteProps }) {
+  static canShowGitLink(opts: {
+    config: IntermediateDendronConfig; 
+    note: NoteProps
+  }) {
     const { config, note } = opts;
 
     if (
@@ -77,7 +81,7 @@ export class GitUtils {
 
   static getGithubEditUrl(opts: {
     note: NoteProps;
-    config: DendronConfig;
+    config: IntermediateDendronConfig;
     wsRoot: string;
   }) {
     const { note, config, wsRoot } = opts;
@@ -152,7 +156,7 @@ export class GitUtils {
     if (fs.existsSync(path.join(repoPath, CONSTANTS.DENDRON_CONFIG_FILE))) {
       const config = readYAML(
         path.join(repoPath, CONSTANTS.DENDRON_CONFIG_FILE)
-      ) as DendronConfig;
+      ) as IntermediateDendronConfig;
       const workspace = path.basename(repoPath);
       const vaults = config.vaults.map((ent) => {
         const vpath = vault2Path({ vault: ent, wsRoot: repoPath });

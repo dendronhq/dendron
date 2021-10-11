@@ -6,14 +6,13 @@ name: Publish Extension - Nightly
 # See documentation on POSIX cron syntax here: https://docs.github.com/en/actions/reference/events-that-trigger-workflows#scheduled-events
 # Scheduled to run every weekday at 12:00 AM PST, which is 7:00 AM UTC Tuesday-Saturday
 on:
+  workflow_dispatch:
   schedule:
     - cron:  '0 7 * * 2-6'
 
 jobs:
   build:
     environment: plugin-production
-    strategy:
-      fail-fast: true
 
     timeout-minutes: 30
 
@@ -48,16 +47,17 @@ jobs:
       - name: Set Up NPM Local Registry
         run: |
           npm set registry http://localhost:4873/
-          echo $NODE_OPTIONS
 
-      - name: Build the VSIX
-        env:
-          GOOGLE_OAUTH_CLIENT_SECRET: ${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}
-          GOOGLE_OAUTH_CLIENT_ID: ${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-          NODE_OPTIONS: --max_old_space_size=4096
+      - name: Set Environment Variables
         run: |
           echo "DENDRON_RELEASE_VERSION=`cat meta.json | jq -r '.["@dendronhq/plugin-core"]' | awk -F. -v OFS=. 'NF==1{print ++$NF}; NF>1{$NF=sprintf("%0*d", length($NF), ($NF+1)); print}'`" >> $GITHUB_ENV
+          echo "GOOGLE_OAUTH_CLIENT_SECRET=${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}" >> $GITHUB_ENV
+          echo "GOOGLE_OAUTH_CLIENT_ID=${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}" >> $GITHUB_ENV
+          echo "SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}" >> $GITHUB_ENV
+          echo "NODE_OPTIONS=--max_old_space_size=4096" >> $GITHUB_ENV
+
+      - name: Build the VSIX
+        run: |
           yarn build:patch:local:ci
 
       - name: Upload VSIX Artifact
@@ -67,8 +67,6 @@ jobs:
           path: ./packages/plugin-core/*.vsix
 
       - name: Prepare Package Manifest
-        env:
-          NODE_OPTIONS: --max_old_space_size=4096
         run: |
           DENDRON_CLI=./packages/dendron-cli/lib/bin/dendron-cli.js
           LOG_LEVEL=info $DENDRON_CLI dev prep_plugin --extensionTarget nightly
@@ -76,15 +74,11 @@ jobs:
       - name: Publish to VS Code Marketplace
         env:
           VSCE_PAT: ${{ secrets.VSCODE_PUBLISH_PWD }}
-          NODE_OPTIONS: --max_old_space_size=4096
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
         working-directory: ./packages/plugin-core
         run: yarn deploy:vscode
 
       - name: Publish to Open VSX Marketplace
         env:
           OVSX_PAT: ${{ secrets.VSCODIUM_PUBLISH_PWD }}
-          NODE_OPTIONS: --max_old_space_size=4096
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
         working-directory: ./packages/plugin-core
         run: yarn deploy:ovsx

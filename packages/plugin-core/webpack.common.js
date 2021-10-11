@@ -1,7 +1,9 @@
 const path = require("path");
 const CopyPlugin = require("copy-webpack-plugin");
-const { IgnorePlugin } = require("webpack");
 const SentryWebpackPlugin = require("@sentry/webpack-plugin");
+const TerserPlugin = require("terser-webpack-plugin");
+const BundleAnalyzerPlugin =
+  require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 
 /**@type {import('webpack').Configuration}*/
 const config = {
@@ -34,9 +36,6 @@ const config = {
   plugins: [
     new CopyPlugin({
       patterns: [{ from: path.join("assets", "static"), to: "static" }],
-    }),
-    new IgnorePlugin({
-      resourceRegExp: /fsevents/,
     }),
     // @ts-ignore
     new CopyPlugin({
@@ -73,9 +72,14 @@ const config = {
 
             // other SentryWebpackPlugin configuration
             include: ".",
-            ignore: ["node_modules", "webpack.config.js"],
+            ignore: ["node_modules", "webpack.*.js"],
           }),
         ]),
+    new BundleAnalyzerPlugin({
+      analyzerMode: "static",
+      openAnalyzer: false,
+      generateStatsFile: true,
+    }),
   ],
   module: {
     rules: [
@@ -84,12 +88,9 @@ const config = {
         test: /\.mjs$/,
         type: "javascript/auto",
       },
-      {
-        test: /\.node$/,
-        loader: "node-loader",
-      },
-      { test: /\.d\.ts$/, loader: 'ignore-loader' },
-      { test: /\.js\.map$/, loader: 'ignore-loader' },
+      { test: /\.node$/, loader: "ignore-loader" },
+      { test: /\.d\.ts$/, loader: "ignore-loader" },
+      { test: /\.js\.map$/, loader: "ignore-loader" },
       {
         test: /\.tsx?$/,
         exclude: /node_modules/,
@@ -111,7 +112,6 @@ const config = {
               compilerOptions: {
                 module: "es6", // override `tsconfig.json` so that TypeScript emits native JavaScript modules.
               },
-              exclude: /\.d\.ts/,
             },
           },
         ],

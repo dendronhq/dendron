@@ -1,6 +1,6 @@
 import {
   assert,
-  DendronConfig,
+  IntermediateDendronConfig,
   DendronError,
   DendronSiteConfig,
   DendronSiteFM,
@@ -15,6 +15,7 @@ import {
   NoteUtils,
   UseVaultBehavior,
   VaultUtils,
+  BooleanResp,
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -27,16 +28,17 @@ import path from "path";
 import { DConfig } from "../config";
 import { DEngineClient } from "../types";
 import { HierarchyUtils, stripLocalOnlyTags } from "../utils";
-const logger = createLogger();
+
+const LOGGER_NAME = "SiteUtils";
 
 export class SiteUtils {
   static canPublish(opts: {
     note: NoteProps;
-    config: DendronConfig;
+    config: IntermediateDendronConfig;
     engine: DEngineClient;
   }) {
     const { note, config, engine } = opts;
-    const { wsRoot, vaults: vaults } = engine;
+    const { wsRoot, vaults } = engine;
 
     // not private note
     if (note.custom?.published === false) {
@@ -79,7 +81,7 @@ export class SiteUtils {
 
   static isPublished(opts: {
     note: NoteProps;
-    config: DendronConfig;
+    config: IntermediateDendronConfig;
     engine: DEngineClient;
   }) {
     const { note, config } = opts;
@@ -145,9 +147,10 @@ export class SiteUtils {
 
   static async filterByConfig(opts: {
     engine: DEngineClient;
-    config: DendronConfig;
+    config: IntermediateDendronConfig;
     noExpandSingleDomain?: boolean;
   }): Promise<{ notes: NotePropsDict; domains: NoteProps[] }> {
+    const logger = createLogger(LOGGER_NAME);
     const { engine, config } = opts;
     const notes = _.clone(engine.notes);
     config.site = DConfig.cleanSiteConfig(config.site);
@@ -216,11 +219,12 @@ export class SiteUtils {
    */
   static async filterByHiearchy(opts: {
     domain: string;
-    config: DendronConfig;
+    config: IntermediateDendronConfig;
     engine: DEngineClient;
     navOrder: number;
   }): Promise<{ notes: NotePropsDict; domain: NoteProps } | undefined> {
     const { domain, engine, navOrder, config } = opts;
+    const logger = createLogger(LOGGER_NAME);
     logger.info({ ctx: "filterByHiearchy:enter", domain, config });
     const sconfig = config.site;
     let hConfig = this.getConfigForHierarchy({
@@ -410,7 +414,7 @@ export class SiteUtils {
   }
 
   static getSiteOutputPath(opts: {
-    config: DendronConfig;
+    config: IntermediateDendronConfig;
     wsRoot: string;
     stage: "dev" | "prod";
   }) {
@@ -430,7 +434,7 @@ export class SiteUtils {
     allowStubs?: boolean;
     engine: DEngineClient;
     fname: string;
-    config: DendronConfig;
+    config: IntermediateDendronConfig;
     noteCandidates: NoteProps[];
     noteDict: NotePropsDict;
   }) {
@@ -480,6 +484,7 @@ export class SiteUtils {
           })
         ) {
           domainNote = maybeNote;
+          const logger = createLogger(LOGGER_NAME);
           logger.info({
             ctx,
             status: "found",
@@ -497,6 +502,7 @@ export class SiteUtils {
       let maybeDomainNotes = noteCandidates.filter((n) =>
         VaultUtils.isEqual(n.vault, vault, engine.wsRoot)
       );
+      const logger = createLogger(LOGGER_NAME);
       if (maybeDomainNotes.length < 1) {
         logger.error({
           ctx: "filterByHiearchy",
@@ -526,6 +532,7 @@ export class SiteUtils {
       const maybeNote = noteDict[id];
       maybeNote.parent = domainId;
     });
+    const logger = createLogger(LOGGER_NAME);
     logger.info({
       ctx: "filterByHiearchy",
       msg: "dup-resolution: resolving dup",
@@ -533,6 +540,21 @@ export class SiteUtils {
       children: domainNote.children,
     });
     return domainNote;
+  }
+
+  static validateConfig(sconfig: DendronSiteConfig): BooleanResp {
+    // asset prefix needs one slash
+    if (!_.isUndefined(sconfig.assetsPrefix)) {
+      if (!sconfig.assetsPrefix.startsWith("/")) {
+        return {
+          data: false,
+          error: new DendronError({
+            message: "assetsPrefix requires a '/' in front of the path",
+          }),
+        };
+      }
+    }
+    return { data: true, error: null };
   }
 }
 

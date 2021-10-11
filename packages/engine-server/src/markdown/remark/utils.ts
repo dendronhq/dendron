@@ -26,7 +26,7 @@ import {
   LINK_CONTENTS,
   LINK_NAME,
   ALIAS_NAME,
-  DendronConfig,
+  IntermediateDendronConfig,
   DVault,
   USERS_HIERARCHY_BASE,
   TAGS_HIERARCHY_BASE,
@@ -1046,7 +1046,7 @@ export class RemarkUtils {
     note: NoteProps,
     changes: NoteChangeEntry[],
     engine: DEngineClient,
-    dendronConfig: DendronConfig
+    dendronConfig: IntermediateDendronConfig
   ) {
     return function (this: Processor) {
       return (tree: Node, _vfile: VFile) => {
@@ -1249,6 +1249,9 @@ export class RemarkUtils {
       }
     });
 
+    if (!headerFound) {
+      return [];
+    }
     const nodesToExtract = nextHeaderIndex
       ? (tree.children as Node[]).splice(
           foundHeaderIndex!,

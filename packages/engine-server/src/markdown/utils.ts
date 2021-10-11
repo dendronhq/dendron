@@ -1,5 +1,5 @@
 import {
-  DendronConfig,
+  IntermediateDendronConfig,
   DendronError,
   DEngineClient,
   DNoteLoc,
@@ -78,7 +78,7 @@ type ProcOptsFull = ProcOpts & {
   shouldApplyPublishRules?: boolean;
   vault: DVault;
   fname: string;
-  config?: DendronConfig;
+  config?: IntermediateDendronConfig;
   mathOpts?: {
     katex?: boolean;
   };
@@ -96,7 +96,7 @@ type ProcDendron = ProcOpts & {
   dest: DendronASTDest;
   vault: DVault;
   fname: string;
-  configOverride?: DendronConfig;
+  configOverride?: IntermediateDendronConfig;
 };
 
 enum DendronProcDataKeys {
@@ -597,7 +597,10 @@ export class MDUtilsV4 {
 }
 
 export class PublishUtils {
-  static getAbsUrlForAsset(opts: { suffix?: string; config: DendronConfig }) {
+  static getAbsUrlForAsset(opts: {
+    suffix?: string; 
+    config: IntermediateDendronConfig 
+  }) {
     const suffix = opts.suffix || "";
     const { config } = opts;
     const { assetsPrefix } = config.site;
@@ -613,7 +616,7 @@ export class PublishUtils {
     return out;
   }
 
-  static getSiteUrl = (config: DendronConfig) => {
+  static getSiteUrl = (config: IntermediateDendronConfig) => {
     if (getStage() !== "dev") {
       const siteUrl = process.env["SITE_URL"] || config.site.siteUrl;
       return siteUrl;

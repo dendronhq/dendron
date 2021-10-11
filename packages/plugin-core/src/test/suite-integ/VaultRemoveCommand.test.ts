@@ -1,5 +1,5 @@
 import {
-  DendronConfig,
+  IntermediateDendronConfig,
   DVault,
   WorkspaceSettings,
 } from "@dendronhq/common-all";
@@ -57,7 +57,7 @@ const stubQuickPick = (vault: DVault) => {
 
 const getConfig = () => {
   const configPath = DConfig.configPath(getDWorkspace().wsRoot as string);
-  const config = readYAML(configPath) as DendronConfig;
+  const config = readYAML(configPath) as IntermediateDendronConfig;
   return config;
 };
 
@@ -130,7 +130,7 @@ suite("VaultRemoveCommand", function () {
           const configPath = DConfig.configPath(
             getDWorkspace().wsRoot as string
           );
-          const config = readYAML(configPath) as DendronConfig;
+          const config = readYAML(configPath) as IntermediateDendronConfig;
           expect(config.vaults.map((ent) => ent.fsPath)).toEqual([
             vaults[0].fsPath,
           ]);
@@ -159,7 +159,7 @@ suite("VaultRemoveCommand", function () {
           stubVaultInput({ sourceType: "local", sourcePath: vpath2 });
           await new VaultAddCommand().run();
 
-          const config = readYAML(configPath) as DendronConfig;
+          const config = readYAML(configPath) as IntermediateDendronConfig;
           // confirm that duplicateNoteBehavior option exists
           expect(config.site.duplicateNoteBehavior).toBeTruthy();
 
@@ -171,7 +171,7 @@ suite("VaultRemoveCommand", function () {
           };
           await new VaultRemoveCommand().run();
 
-          const configNew = readYAML(configPath) as DendronConfig;
+          const configNew = readYAML(configPath) as IntermediateDendronConfig;
           // confirm that duplicateNoteBehavior setting is gone
           expect(configNew.site.duplicateNoteBehavior).toBeFalsy();
 
@@ -200,7 +200,7 @@ suite("VaultRemoveCommand", function () {
           const configPathOrig = DConfig.configPath(
             getDWorkspace().wsRoot as string
           );
-          const configOrig = readYAML(configPathOrig) as DendronConfig;
+          const configOrig = readYAML(configPathOrig) as IntermediateDendronConfig;
           // check what we are starting from.
           expect(configOrig.vaults.map((ent) => ent.fsPath)).toEqual([
             vaults[0].fsPath,
@@ -217,7 +217,7 @@ suite("VaultRemoveCommand", function () {
           const configPath = DConfig.configPath(
             getDWorkspace().wsRoot as string
           );
-          const config = readYAML(configPath) as DendronConfig;
+          const config = readYAML(configPath) as IntermediateDendronConfig;
 
           // check that "vault2" is gone from payload
           expect(config.site.duplicateNoteBehavior!.payload).toEqual([

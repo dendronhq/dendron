@@ -4,7 +4,6 @@ import {
   ERROR_STATUS,
   ErrorFactory,
   ErrorMessages,
-  NoteLookupConfig,
   NoteProps,
   NoteQuickInput,
   NoteUtils,
@@ -141,25 +140,48 @@ export class NoteLookupCommand extends BaseCommand<
   async gatherInputs(opts?: CommandRunOpts): Promise<CommandGatherOutput> {
     const start = process.hrtime();
     const ws = getDWorkspace();
-    const noteLookupConfig: NoteLookupConfig = DConfig.getProp(
-      ws.config,
-      "lookup"
-    ).note;
+    const lookupConfig = DConfig.getConfig(ws.config, "commands.lookup");
+    const noteLookupConfig = lookupConfig.note;
+    let selectionType: LookupSelectionType = LookupSelectionTypeEnum.selectionExtract;
+    let confirmVaultOnCreate;
+    if ("selectionMode" in noteLookupConfig) {
+      const selectionMode = noteLookupConfig.selectionMode;
+      switch(selectionMode) {
+        case "extract": {
+          selectionType = LookupSelectionTypeEnum.selectionExtract
+          break;
+        }
+        case "link": {
+          selectionType = LookupSelectionTypeEnum.selection2link;
+          break;
+        }
+        case "none": {
+          selectionType = LookupSelectionTypeEnum.none;
+          break;
+        }
+        default: {
+          throw new DendronError({ message: "unsupported selection type."});
+        }
+      }
+      confirmVaultOnCreate = noteLookupConfig.confirmVaultOnCreate;
+    } else {
+      selectionType = noteLookupConfig.selectionType;
+      confirmVaultOnCreate = DConfig.getProp(ws.config, "lookupConfirmVaultOnCreate")
+    }
+
     const copts: CommandRunOpts = _.defaults(opts || {}, {
       multiSelect: false,
       filterMiddleware: [],
       initialValue: NotePickerUtils.getInitialValueFromOpenEditor(),
-      selectionType: noteLookupConfig.selectionType,
+      selectionType,
     } as CommandRunOpts);
     const ctx = "NoteLookupCommand:gatherInput";
     Logger.info({ ctx, opts, msg: "enter" });
     // initialize controller and provider
+    const disableVaultSelection = !confirmVaultOnCreate;
     this._controller = LookupControllerV3.create({
       nodeType: "note",
-      disableVaultSelection: !DConfig.getProp(
-        ws.config,
-        "lookupConfirmVaultOnCreate"
-      ),
+      disableVaultSelection, 
       vaultButtonPressed:
         copts.vaultSelectionMode === VaultSelectionMode.alwaysPrompt,
       extraButtons: [
@@ -367,7 +389,7 @@ export class NoteLookupCommand extends BaseCommand<
   ): Promise<OnDidAcceptReturn | undefined> {
     const ctx = "acceptNewItem";
     const picker = this.controller.quickpick;
-    const fname = item.fname;
+    const fname = this.getFNameForNewItem(item);
 
     const engine = getEngine();
     let nodeNew: NoteProps;
@@ -429,6 +451,19 @@ export class NoteLookupCommand extends BaseCommand<
       wsRoot: getDWorkspace().wsRoot,
     });
     return { uri, node: nodeNew, resp };
+  }
+
+  /**
+   * TODO: align note creation file name choosing for follow a single path when accepting new item.
+   *
+   * Added to quickly fix the journal names not being created properly.
+   */
+  private getFNameForNewItem(item: NoteQuickInput) {
+    if (this.isJournalButtonPressed()) {
+      return PickerUtilsV2.getValue(this.controller.quickpick);
+    } else {
+      return item.fname;
+    }
   }
 
   private async getVaultForNewNote({
@@ -493,10 +528,7 @@ export class NoteLookupCommand extends BaseCommand<
    * e.g.) if the picker value is journal.2021.08.13.some-stuff, we don't override (title is some-stuff)
    */
   journalTitleOverride(): string | undefined {
-    const journalBtn = _.find(this.controller.state.buttons, (btn) => {
-      return btn.type === LookupNoteTypeEnum.journal;
-    });
-    if (journalBtn?.pressed) {
+    if (this.isJournalButtonPressed()) {
       const quickpick = this.controller.quickpick;
 
       // note modifier value exists, and nothing else after that.
@@ -515,5 +547,13 @@ export class NoteLookupCommand extends BaseCommand<
       }
     }
     return;
+  }
+
+  private isJournalButtonPressed() {
+    const journalBtn = _.find(this.controller.state.buttons, (btn) => {
+      return btn.type === LookupNoteTypeEnum.journal;
+    });
+    const isPressed = journalBtn?.pressed;
+    return isPressed;
   }
 }

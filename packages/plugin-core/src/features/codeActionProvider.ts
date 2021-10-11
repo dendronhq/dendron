@@ -159,7 +159,7 @@ export const doctorFrontmatterProvider: CodeActionProvider = {
 };
 
 /**
- * Code Action Provider for Refractor.
+ * Code Action Provider for Refactor.
  * 1. Refactor Code Action for Rename Header
  * 2. Refactor Code Action for Broken Wikilinks
  * 3. Refactor Extract for highlighted text
@@ -196,21 +196,21 @@ export const refactorProvider: CodeActionProvider = {
         },
       };
       const brokenWikilinkAction = {
-        title: "Fix Broken Link",
+        title: "Add missing note for wikilink declaration",
         isPreferred: true,
         kind: CodeActionKind.RefactorExtract,
         command: {
           command: new GotoNoteCommand().key,
-          title: "Fix Broken Link",
+          title: "Add missing note for wikilink declaration",
         },
       };
       const createNewNoteAction = {
-        title: "Create New Note",
+        title: "Extract text to new note",
         isPreferred: true,
         kind: CodeActionKind.RefactorExtract,
         command: {
           command: new NoteLookupCommand().key,
-          title: "Create New Note",
+          title: "Extract text to new note",
           arguments: [
             {
               selectionType: LookupSelectionTypeEnum.selectionExtract,

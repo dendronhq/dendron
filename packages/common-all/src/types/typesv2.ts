@@ -280,7 +280,7 @@ export type RenameNoteOpts = {
   /**
    * added for dendron to recognise vscode `rename` menu option
    */
-  isEventSouceEngine?: boolean;
+  isEventSourceEngine?: boolean;
 };
 
 export type RenderNoteOpts = {

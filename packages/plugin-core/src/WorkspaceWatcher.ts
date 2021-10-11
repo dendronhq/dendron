@@ -275,7 +275,7 @@ export class WorkspaceWatcher {
           fname: newFname,
           vaultName: VaultUtils.getName(newVault),
         },
-        isEventSouceEngine: false,
+        isEventSourceEngine: false,
       };
 
       const engine = getExtension().getEngine();

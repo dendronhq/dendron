@@ -189,7 +189,7 @@ export async function getSelectionAnchors(opts: {
 /**
  * Utility method to check if the selected text is a broken wikilink
  */
-export function isBrokenWikilink() {
+export function isBrokenWikilink(): boolean {
   const { editor, selection } = VSCodeUtils.getSelection();
   if (!editor || !selection) return false;
   const line = editor.document.lineAt(selection.start.line).text;
@@ -210,7 +210,7 @@ export function isBrokenWikilink() {
     ],
     (linkvalue: WikiLinkNoteV4 | UserTag | HashTag) => {
       link = linkvalue;
-      if (!link) return;
+      if (!link) return false;
       fname = link.type === DendronASTTypes.WIKI_LINK ? link.value : link.fname;
       /**
        * doExpensiveDecorations is set to true here because even if the note is too big, this function is only

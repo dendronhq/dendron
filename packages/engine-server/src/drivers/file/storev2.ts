@@ -747,7 +747,7 @@ export class FileStorage implements DStore {
      * If the event source is not engine(ie: vscode rename context menu), we do not want to
      * delete the original files. We just update the references on onWillRenameFiles and return.
      */
-    if (!_.isUndefined(opts.isEventSouceEngine)) {
+    if (!_.isUndefined(opts.isEventSourceEngine)) {
       notesChangedEntries = await this.updateOldNoteReferences(
         notesChanged,
         ctx,

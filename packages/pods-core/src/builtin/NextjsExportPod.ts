@@ -1,5 +1,5 @@
 import {
-  DendronConfig,
+  IntermediateDendronConfig,
   DendronSiteConfig,
   DEngineClient,
   NoteProps,
@@ -84,7 +84,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     engine: DEngineClient;
     note: NoteProps;
     notes: NotePropsDict;
-    engineConfig: DendronConfig;
+    engineConfig: IntermediateDendronConfig;
   }) {
     const proc = MDUtilsV5.procRehypeFull(
       {
@@ -123,7 +123,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     dest,
   }: {
     wsRoot: string;
-    config: DendronConfig;
+    config: IntermediateDendronConfig;
     dest: string;
   }) {
     const ctx = "copyAssets";
@@ -210,7 +210,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     engineConfig,
   }: Parameters<NextjsExportPod["_renderNote"]>[0] & {
     notesDir: string;
-    engineConfig: DendronConfig;
+    engineConfig: IntermediateDendronConfig;
   }) {
     const ctx = `${ID}:renderBodyToHTML`;
     this.L.debug({ ctx, msg: "renderNote:pre", note: note.id });
@@ -249,7 +249,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     await this.copyAssets({ wsRoot, config: engine.config, dest: dest.fsPath });
 
     this.L.info({ ctx, msg: "filtering notes..." });
-    const engineConfig: DendronConfig = {
+    const engineConfig: IntermediateDendronConfig = {
       ...engine.config,
       site: siteConfig,
     };

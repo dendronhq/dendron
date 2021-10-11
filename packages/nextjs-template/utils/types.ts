@@ -1,5 +1,4 @@
 import {
-  DendronConfig,
   DVault,
   NoteProps,
   NotePropsDict,

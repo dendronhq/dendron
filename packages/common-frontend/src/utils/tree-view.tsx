@@ -106,15 +106,14 @@ export class TreeViewUtils {
     noteIds: string[];
     noteDict: NotePropsDict;
   }): string[] => {
-    return _.sortBy(noteIds, (id: string) => {
-      const note = noteDict[id];
-      if (note.custom?.nav_order) {
-        return `0${note.custom?.nav_order}`;
-      }
-      if (note.fname.startsWith(TAGS_HIERARCHY)) {
-        return `9${note.fname}`;
-      }
-      return `1${note.title}`;
-    });
+    return _.sortBy(
+      noteIds,
+      // Put tags first
+      (noteId) => !noteDict[noteId]?.fname?.startsWith(TAGS_HIERARCHY_BASE),
+      // Sort by titles
+      (noteId) => noteDict[noteId]?.title,
+      // If titles are identical, sort by last updated date
+      (noteId) => noteDict[noteId]?.updated
+    );
   };
 }

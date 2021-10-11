@@ -696,6 +696,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "doctorboyMP",
+      "name": "Miguel Pereira",
+      "avatar_url": "https://avatars.githubusercontent.com/u/24513363?v=4",
+      "profile": "https://github.com/doctorboyMP",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,

@@ -1,5 +1,5 @@
 import {
-  DendronConfig,
+  IntermediateDendronConfig,
   DendronError,
   DNodeUtils,
   DVault,
@@ -34,13 +34,8 @@ export class WorkspaceUtils {
       return WorkspaceType.CODE;
     }
     if (!_.isUndefined(workspaceFolders) && getStage() !== "prod") {
-      const dendronWorkspaceFolders =
-        workspaceFolders.filter((ent) => {
-          return fs.pathExistsSync(path.join(ent.uri.fsPath, "dendron.yml"));
-        }) || [];
-      if (dendronWorkspaceFolders.length > 0) {
-        return WorkspaceType.NATIVE;
-      }
+      const rootFolder = this.findWSRootInWorkspaceFolders(workspaceFolders);
+      if (rootFolder) return WorkspaceType.NATIVE;
     }
     return WorkspaceType.NONE;
   }
@@ -119,7 +114,7 @@ export class WorkspaceUtils {
    *
    */
   static getNoteUrl(opts: {
-    config: DendronConfig;
+    config: IntermediateDendronConfig;
     note: NoteProps;
     vault: DVault;
     urlRoot?: string;

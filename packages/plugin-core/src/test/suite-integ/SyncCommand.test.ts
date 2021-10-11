@@ -1,4 +1,7 @@
-import { DendronConfig, DVaultSync } from "@dendronhq/common-all";
+import {
+  IntermediateDendronConfig,
+  DVaultSync
+} from "@dendronhq/common-all";
 import { tmpDir } from "@dendronhq/common-server";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { Git, SyncActionStatus } from "@dendronhq/engine-server";
@@ -360,7 +363,7 @@ async function checkoutNewBranch(wsRoot: string, branch: string) {
 /** Override the config option in `dendron.yml`, then add commit that change. */
 async function changeConfig(
   wsRoot: string,
-  overrideConfig: PartialShallow<DendronConfig>
+  overrideConfig: PartialShallow<IntermediateDendronConfig>
 ) {
   // Get old config, and override it with the new config
   const serv = getExtension().workspaceService!;

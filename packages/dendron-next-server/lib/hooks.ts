@@ -1,4 +1,4 @@
-import { DendronConfig } from "@dendronhq/common-all";
+import { IntermediateDendronConfig } from "@dendronhq/common-all";
 import useSWR from "swr";
 import { api } from "./config";
 
@@ -8,7 +8,7 @@ const fetcher = (...args) => fetch(...args).then((res) => res.json());
 export function useDendronConfig() {
   const { data, error } = useSWR(api("getConfig"), fetcher);
   return {
-    config: data?.data as DendronConfig,
+    config: data?.data as IntermediateDendronConfig,
     isLoading: !error && !data,
     isError: error || data?.error,
     error

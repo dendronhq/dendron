@@ -154,6 +154,7 @@ Dendron wouldn't be what it is today without help from these wonderful gardeners
   <tr>
     <td align="center"><a href="https://github.com/sotn3m"><img src="https://avatars.githubusercontent.com/u/11821473?v=4?s=100" width="100px;" alt=""/><br /><sub><b>sotn3m</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Asotn3m" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/codeluggage"><img src="https://avatars.githubusercontent.com/u/1154150?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Matias Forbord</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=codeluggage" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://github.com/Stedag"><img src="https://avatars.githubusercontent.com/u/5147273?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Stedag</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=Stedag" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/doctorboyMP"><img src="https://avatars.githubusercontent.com/u/24513363?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Miguel Pereira</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=doctorboyMP" title="Documentation">📖</a></td>
   </tr>
 </table>

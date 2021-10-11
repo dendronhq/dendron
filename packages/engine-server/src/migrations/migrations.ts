@@ -182,7 +182,7 @@ export const ALL_MIGRATIONS: Migrations[] = [
         func: async ({ dendronConfig, wsConfig }) => {
           dendronConfig.lookup = DConfig.genDefaultConfig().lookup as LegacyLookupConfig;
           const oldLookupCreateBehavior = _.get(
-            wsConfig.settings, 
+            wsConfig?.settings,
             "dendron.defaultLookupCreateBehavior",
             undefined,
           ) as LegacyLookupSelectionType;
@@ -190,7 +190,7 @@ export const ALL_MIGRATIONS: Migrations[] = [
             dendronConfig.lookup.note.selectionType = oldLookupCreateBehavior;
           }
 
-          return { data: { dendronConfig, wsConfig }};
+          return { data: { dendronConfig, wsConfig } };
         },
       },
     ],
@@ -203,21 +203,21 @@ export const ALL_MIGRATIONS: Migrations[] = [
         func: async ({ dendronConfig, wsConfig }) => {
           dendronConfig.scratch = DConfig.genDefaultConfig()
             .scratch as ScratchConfig;
-          if (_.get(wsConfig.settings, "dendron.defaultScratchName")) {
+          if (_.get(wsConfig?.settings, "dendron.defaultScratchName")) {
             dendronConfig.scratch.name = _.get(
-              wsConfig.settings,
+              wsConfig?.settings,
               "dendron.defaultScratchName"
             );
           }
-          if (_.get(wsConfig.settings, "dendron.defaultScratchDateFormat")) {
+          if (_.get(wsConfig?.settings, "dendron.defaultScratchDateFormat")) {
             dendronConfig.scratch.dateFormat = _.get(
-              wsConfig.settings,
+              wsConfig?.settings,
               "dendron.defaultScratchDateFormat"
             );
           }
-          if (_.get(wsConfig.settings, "dendron.defaultScratchAddBehavior")) {
+          if (_.get(wsConfig?.settings, "dendron.defaultScratchAddBehavior")) {
             dendronConfig.scratch.addBehavior = _.get(
-              wsConfig.settings,
+              wsConfig?.settings,
               "dendron.defaultScratchAddBehavior"
             );
           }
@@ -248,27 +248,27 @@ export const ALL_MIGRATIONS: Migrations[] = [
         name: "migrate journal config",
         func: async ({ dendronConfig, wsConfig }) => {
           dendronConfig.journal = DConfig.genDefaultConfig().journal;
-          if (_.get(wsConfig.settings, "dendron.dailyJournalDomain")) {
+          if (_.get(wsConfig?.settings, "dendron.dailyJournalDomain")) {
             dendronConfig.journal.dailyDomain = _.get(
-              wsConfig.settings,
+              wsConfig?.settings,
               "dendron.dailyJournalDomain"
             );
           }
-          if (_.get(wsConfig.settings, "dendron.defaultJournalName")) {
+          if (_.get(wsConfig?.settings, "dendron.defaultJournalName")) {
             dendronConfig.journal.name = _.get(
-              wsConfig.settings,
+              wsConfig?.settings,
               "dendron.defaultJournalName"
             );
           }
-          if (_.get(wsConfig.settings, "dendron.defaultJournalDateFormat")) {
+          if (_.get(wsConfig?.settings, "dendron.defaultJournalDateFormat")) {
             dendronConfig.journal.dateFormat = _.get(
-              wsConfig.settings,
+              wsConfig?.settings,
               "dendron.defaultJournalDateFormat"
             );
           }
-          if (_.get(wsConfig.settings, "dendron.defaultJournalAddBehavior")) {
+          if (_.get(wsConfig?.settings, "dendron.defaultJournalAddBehavior")) {
             dendronConfig.journal.addBehavior = _.get(
-              wsConfig.settings,
+              wsConfig?.settings,
               "dendron.defaultJournalAddBehavior"
             );
           }

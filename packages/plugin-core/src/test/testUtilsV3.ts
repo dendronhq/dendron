@@ -211,8 +211,8 @@ export async function setupLegacyWorkspaceMulti(
 
   const { wsRoot, vaults } = await EngineTestUtilsV4.setupWS();
   new StateService(opts.ctx); // eslint-disable-line no-new
+  setupCodeConfiguration(opts);
   if (copts.workspaceType === WorkspaceType.CODE) {
-    setupCodeConfiguration(opts);
     stubWorkspace({ wsRoot, vaults });
 
     workspaceFile = DendronExtension.workspaceFile();

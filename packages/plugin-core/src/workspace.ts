@@ -254,8 +254,7 @@ export class DendronExtension {
       }
 
       const workspaceFolders = DendronExtension.workspaceFolders();
-      // ground work for standalone vaults. only activate in dev mode
-      if (context && workspaceFolders && getStage() !== "prod") {
+      if (context && workspaceFolders) {
         return WorkspaceUtils.findWSRootInWorkspaceFolders(workspaceFolders);
       }
       return hasCodeWorkspaceFiile;
@@ -361,6 +360,7 @@ export class DendronExtension {
     let workspaceFile: vscode.Uri;
     try {
       workspaceFile = DendronExtension.workspaceFile();
+      if (workspaceFile === undefined) return undefined;
     } catch {
       // No workspace file exists (or some other disk issue)
       return undefined;
@@ -370,14 +370,19 @@ export class DendronExtension {
     )) as WorkspaceSettings;
   }
 
-  getWorkspaceSettingsSync(): WorkspaceSettings {
-    return readJSONWithCommentsSync(
-      DendronExtension.workspaceFile().fsPath
-    ) as WorkspaceSettings;
+  getWorkspaceSettingsSync(): WorkspaceSettings | undefined {
+    let workspaceFile: vscode.Uri;
+    try {
+      workspaceFile = DendronExtension.workspaceFile();
+    } catch {
+      // No workspace file exists (or some other disk issue)
+      return undefined;
+    }
+    return readJSONWithCommentsSync(workspaceFile.fsPath) as WorkspaceSettings;
   }
 
-  getDendronWorkspaceSettingsSync(): DendronWorkspaceSettings {
-    const settings = this.getWorkspaceSettingsSync().settings;
+  getDendronWorkspaceSettingsSync(): DendronWorkspaceSettings | undefined {
+    const settings = this.getWorkspaceSettingsSync()?.settings;
     return settings;
   }
 

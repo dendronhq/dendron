@@ -157,11 +157,6 @@ export const DENDRON_MENUS = {
     },
     {
       when: "resourceExtname == .md && dendron:pluginActive",
-      command: "dendron.renameNote",
-      group: "2_workspace",
-    },
-    {
-      when: "resourceExtname == .md && dendron:pluginActive",
       command: "dendron.moveNote",
       group: "2_workspace",
     },

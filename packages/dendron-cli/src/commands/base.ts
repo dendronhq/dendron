@@ -1,8 +1,9 @@
-import { DendronError, isDendronResp } from "@dendronhq/common-all";
-import { createLogger } from "@dendronhq/common-server";
+import { DendronError, isDendronResp, CLIEvents } from "@dendronhq/common-all";
+import { createLogger, SegmentClient, TelemetryStatus } from "@dendronhq/common-server";
 import { WorkspaceUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
 import yargs from "yargs";
+import { CLIAnalyticsUtils } from "../utils/analytics";
 
 type BaseCommandOpts = { quiet?: boolean };
 
@@ -61,6 +62,20 @@ export abstract class CLICommand<
     return yargs.command(this.name, this.desc, this.buildArgs, this.eval);
   }
 
+  setUpSegmentClient() {
+    // if running CLI without ever having used dendron plugin, 
+    // show a notice about telemety and instructions on how to disable.
+    if (_.isUndefined(SegmentClient.readConfig())) {
+      CLIAnalyticsUtils.showTelemetryMessage();
+      const reason = TelemetryStatus.ENABLED_BY_CLI_DEFAULT;
+      SegmentClient.enable(reason);
+      CLIAnalyticsUtils.track(CLIEvents.CLITelemetryEnabled, { reason });
+    }
+
+    const segment = SegmentClient.instance({ forceNew: true, });
+    this.L.info({ msg: `Telemetry is disabled? ${ segment.hasOptedOut }`});
+  }
+
   /**
    * Converts CLI flags into {@link TOpts}
    * @param args
@@ -69,6 +84,7 @@ export abstract class CLICommand<
 
   eval = async (args: any) => {
     this.L.info({ args });
+    this.setUpSegmentClient();
     if (!args.wsRoot) {
       const configPath = WorkspaceUtils.findWSRoot();
       if (_.isUndefined(configPath) && !this.wsRootOptional) {

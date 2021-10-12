@@ -20,6 +20,11 @@ export enum VSCodeEvents {
   UserOnOldVSCodeVerUnblocked = "User_On_Old_VSCode_Ver_Unblocked"
 }
 
+export enum CLIEvents {
+  CLITelemetryEnabled = "CLI_Telemetry_Enabled",
+  CLITelemetryDisabled = "CLI_Telemetry_Disabled",
+}
+
 export enum TutorialEvents {
   WelcomeShow = "WelcomeShow",
   Tutorial_0_Show = "Tutorial_0_Show",
@@ -68,6 +73,7 @@ export enum MigrationEvents {
 
 export const DendronEvents = {
   VSCodeEvents,
+  CLIEvents,
   TutorialEvents,
   ExtensionEvents,
   SurveyEvents,

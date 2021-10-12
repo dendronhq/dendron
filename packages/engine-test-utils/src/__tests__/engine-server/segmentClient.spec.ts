@@ -119,4 +119,34 @@ describe("SegmentClient", () => {
 
     done();
   });
+
+  describe("WHEN: Enabled by CLI command", () => {
+    test("THEN: recognized as enabled", (done) => {
+      TestEngineUtils.mockHomeDir();
+      SegmentClient.enable(TelemetryStatus.ENABLED_BY_CLI_COMMAND);
+      const instance = SegmentClient.instance({ forceNew: true });
+      expect(instance.hasOptedOut).toBeFalsy();
+      done();
+    });
+  });
+
+  describe("WHEN: Disabled by CLI command", () => {
+    test("THEN: recognized as disabled", (done) => {
+      TestEngineUtils.mockHomeDir();
+      SegmentClient.disable(TelemetryStatus.DISABLED_BY_CLI_COMMAND);
+      const instance = SegmentClient.instance({ forceNew: true });
+      expect(instance.hasOptedOut).toBeTruthy();
+      done();
+    });
+  });
+
+  describe("WHEN: Enabled by CLI as default", () => {
+    test("THEN: recognized as enabled", (done) => {
+      TestEngineUtils.mockHomeDir();
+      SegmentClient.enable(TelemetryStatus.ENABLED_BY_CLI_DEFAULT);
+      const instance = SegmentClient.instance({ forceNew: true });
+      expect(instance.hasOptedOut).toBeFalsy();
+      done();
+    })
+  })
 });

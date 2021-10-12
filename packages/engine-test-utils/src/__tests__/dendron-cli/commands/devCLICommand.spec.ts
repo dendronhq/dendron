@@ -1,4 +1,4 @@
-import { tmpDir } from "@dendronhq/common-server";
+import { SegmentClient, TelemetryStatus, tmpDir } from "@dendronhq/common-server";
 import {
   BuildUtils,
   DevCLICommand,
@@ -10,7 +10,8 @@ import {
 } from "@dendronhq/dendron-cli";
 import fs from "fs-extra";
 import path from "path";
-import { stub } from "sinon";
+import Sinon, { stub } from "sinon";
+import { TestEngineUtils } from "../../..";
 import { runEngineTestV5 } from "../../../engine";
 
 export const runDevCmd = ({
@@ -90,5 +91,37 @@ describe("build", () => {
         expect,
       }
     );
+  });
+});
+
+describe("GIVEN dendron dev enable_telemetry", () => {
+  beforeEach(() => {
+    TestEngineUtils.mockHomeDir();
+  });
+
+  afterEach(() => {
+    Sinon.restore();
+  });
+
+  const cmd = DevCommands.ENABLE_TELEMETRY;
+  test("THEN sets telemetry status to ENABLED_BY_CLI_COMMAND", async () => {
+    await runDevCmd({ cmd });
+    expect(SegmentClient.getStatus()).toEqual(TelemetryStatus.ENABLED_BY_CLI_COMMAND);
+  });
+});
+
+describe("GIVEN dendron dev disable_telemetry", () => {
+  beforeEach(() => {
+    TestEngineUtils.mockHomeDir();
+  });
+
+  afterEach(() => {
+    Sinon.restore();
+  });
+
+  const cmd = DevCommands.DISABLE_TELEMETRY;
+  test("THEN sets telemetry status to DISABLED_BY_CLI_COMMAND", async () => {
+    await runDevCmd({ cmd });
+    expect(SegmentClient.getStatus()).toEqual(TelemetryStatus.DISABLED_BY_CLI_COMMAND);
   });
 });

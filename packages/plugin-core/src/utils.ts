@@ -552,6 +552,14 @@ export class VSCodeUtils {
   static isExtensionInstalled(extensionId: string) {
     return !_.isUndefined(vscode.extensions.getExtension(extensionId));
   }
+
+  static isTextDocument(obj: any): obj is vscode.TextDocument {
+    return (
+      obj.uri !== undefined &&
+      _.isString(obj.fileName) &&
+      _.isNumber(obj.lineCount)
+    );
+  }
 }
 
 export class WSUtils {

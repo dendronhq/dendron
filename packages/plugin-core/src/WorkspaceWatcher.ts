@@ -16,7 +16,6 @@ import {
   TextDocumentChangeEvent,
   TextDocumentWillSaveEvent,
   TextEdit,
-  window,
   workspace,
 } from "vscode";
 import { Logger } from "./logger";
@@ -116,21 +115,18 @@ export class WorkspaceWatcher {
         uri: event.document.uri.fsPath,
       };
       Logger.debug({ ...ctx, state: "enter" });
-      const activeEditor = window.activeTextEditor;
       this._debouncedOnDidChangeTextDocument.cancel();
-      if (activeEditor && event.document === activeEditor.document) {
-        const uri = activeEditor.document.uri;
-        if (!getExtension().workspaceService?.isPathInWorkspace(uri.fsPath)) {
-          Logger.debug({ ...ctx, state: "uri not in workspace" });
-          return;
-        }
-        Logger.debug({ ...ctx, state: "trigger change handlers" });
-        const contentChanges = event.contentChanges;
-        getExtension().windowWatcher?.triggerUpdateDecorations();
-        NoteSyncService.instance().onDidChange(activeEditor, {
-          contentChanges,
-        });
+      const uri = event.document.uri;
+      if (!getExtension().workspaceService?.isPathInWorkspace(uri.fsPath)) {
+        Logger.debug({ ...ctx, state: "uri not in workspace" });
+        return;
       }
+      Logger.debug({ ...ctx, state: "trigger change handlers" });
+      const contentChanges = event.contentChanges;
+      getExtension().windowWatcher?.triggerUpdateDecorations();
+      NoteSyncService.instance().onDidChange(event.document, {
+        contentChanges,
+      });
       Logger.debug({ ...ctx, state: "exit" });
       return;
     } catch (error) {

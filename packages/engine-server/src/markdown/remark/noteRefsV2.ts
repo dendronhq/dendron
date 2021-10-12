@@ -36,6 +36,7 @@ import { MDUtilsV4, ParentWithIndex, renderFromNoteProps } from "../utils";
 import { MDUtilsV5, ProcMode } from "../utilsv5";
 import { LinkUtils } from "./utils";
 import { WikiLinksOpts } from "./wikiLinks";
+import { Content, Heading } from "mdast";
 
 const LINK_REGEX = /^\!\[\[(.+?)\]\]/;
 
@@ -674,7 +675,7 @@ function prepareNoteRefIndices<T>({
 }): {
   start: FindAnchorResult;
   end: FindAnchorResult;
-  data: T | null;
+  errorData: T | null;
   error: any;
 } {
   // TODO: can i just strip frontmatter when reading?
@@ -691,7 +692,7 @@ function prepareNoteRefIndices<T>({
     });
     if (_.isNull(start)) {
       return {
-        data: makeErrorData(anchorStart, "Start"),
+        errorData: makeErrorData(anchorStart, "Start"),
         start: null,
         end: null,
         error: null,
@@ -714,7 +715,7 @@ function prepareNoteRefIndices<T>({
     }
     if (_.isNull(end)) {
       return {
-        data: makeErrorData(anchorEnd, "End"),
+        errorData: makeErrorData(anchorEnd, "End"),
         start: null,
         end: null,
         error: null,
@@ -760,7 +761,102 @@ function prepareNoteRefIndices<T>({
     removeSingleItemNestedLists(start.ancestors);
   }
 
-  return { start, end, data: null, error: null };
+  return { start, end, errorData: null, error: null };
+}
+
+function createErrorProcessingRefPayload(err: Error) {
+  console.log(
+    JSON.stringify({
+      ctx: "convertNoteRefHelperAST",
+      msg: "Failed to render note reference",
+      err: JSON.stringify(err),
+    })
+  );
+
+  return {
+    error: new DendronError({
+      message: "error processing note ref",
+      payload: err,
+    }),
+    data: MDUtilsV4.genMDMsg(`error processing ref`),
+  };
+}
+
+function findAnchorEndForStartHeader(
+  startAnchor: FindAnchorResult,
+  astChildren: Content[]
+) {
+  if (startAnchor == null || startAnchor.type != "header") return undefined;
+
+  const startHeading = astChildren[startAnchor.index] as Heading;
+
+  for (let i = startAnchor.index + 1; i < astChildren.length; i++) {
+    const element = astChildren[i];
+    if (element.type == "heading" && element.depth <= startHeading.depth) {
+      return element;
+    }
+  }
+
+  return undefined;
+}
+
+/**
+ * This function finds the matching header end anchor for the given
+ * anchorStart string when the following are true:
+ * * anchorStart is a header anchor
+ * * end header anchor exists
+ * Else it will return undefined for matchingHeaderAnchor (not an error).
+ *
+ * Note: anchorStart is assumed to always be present in the AST if its NOT present then
+ * its considered a rendering error. If the given anchorStart is not a header
+ * then `undefined` is returned for matchingHeaderAnchor (not an error)
+ *
+ * Example:
+ * |---------------------------------------------|
+ * | Headers              | matching end headers |
+ * |---------------------------------------------|
+ * | ## header-1          | header-2             |
+ * | ### sub-header-1     | sub-header-2         |
+ * | ### sub-header-2     | header-2             |
+ * | ## header-2          | `undefined`          |
+ * |---------------------------------------------|
+ * */
+function findMatchingHeaderEndAnchor(
+  bodyAST: DendronASTNode,
+  anchorStart: string,
+  anchorNotFoundErrorDataMaker: (
+    anchorName: string,
+    anchorType: "Start" | "End"
+  ) => Parent
+) {
+  const anchorStartObj = findAnchor({
+    nodes: bodyAST.children,
+    match: anchorStart,
+  });
+  if (!anchorStartObj) {
+    return { errorData: anchorNotFoundErrorDataMaker(anchorStart, "Start") };
+  }
+
+  let matchingEndAnchor: string | undefined = undefined;
+
+  if (anchorStartObj.type == "header") {
+    const anchorEndObj = findAnchorEndForStartHeader(
+      anchorStartObj,
+      bodyAST.children
+    );
+    if (anchorEndObj) {
+      if (
+        anchorEndObj.children &&
+        anchorEndObj.children.length > 0 &&
+        anchorEndObj.children[0].type == "text"
+      ) {
+        // Note: we are getting a new slugger instance to process the anchor over here.
+        matchingEndAnchor = getSlugger().slug(anchorEndObj.children[0].value);
+      }
+    }
+  }
+
+  return { matchingEndAnchor };
 }
 
 function convertNoteRefHelperAST(
@@ -788,19 +884,37 @@ function convertNoteRefHelperAST(
   } else {
     bodyAST = noteRefProc.parse(note.body) as DendronASTNode;
   }
-  const { anchorStart, anchorEnd, anchorStartOffset } = _.defaults(link.data, {
+  let { anchorStart, anchorEnd, anchorStartOffset } = _.defaults(link.data, {
     anchorStartOffset: 0,
   });
 
-  const { start, end, data, error } = prepareNoteRefIndices({
+  const anchorNotFoundErrorMaker = (
+    anchorName: string,
+    anchorType: "Start" | "End"
+  ) => {
+    return MDUtilsV4.genMDMsg(`${anchorType} anchor ${anchorName} not found`);
+  };
+
+  if (anchorStart && !anchorEnd) {
+    // See if we can find a matching anchorEnd if the anchorStart is a header type.
+    const { matchingEndAnchor, errorData } = findMatchingHeaderEndAnchor(
+      bodyAST,
+      anchorStart,
+      anchorNotFoundErrorMaker
+    );
+    if (errorData) {
+      return { data: errorData, error: null };
+    }
+    anchorEnd = matchingEndAnchor;
+  }
+
+  const { start, end, errorData, error } = prepareNoteRefIndices({
     anchorStart,
     anchorEnd,
     bodyAST,
-    makeErrorData: (anchorName, anchorType) => {
-      return MDUtilsV4.genMDMsg(`${anchorType} anchor ${anchorName} not found`);
-    },
+    makeErrorData: anchorNotFoundErrorMaker,
   });
-  if (data) return { data, error };
+  if (errorData) return { data: errorData, error };
 
   // slice of interested range
   try {
@@ -839,20 +953,7 @@ function convertNoteRefHelperAST(
       return { error: null, data: out };
     }
   } catch (err) {
-    console.log(
-      JSON.stringify({
-        ctx: "convertNoteRefHelperAST",
-        msg: "Failed to render note reference",
-        err,
-      })
-    );
-    return {
-      error: new DendronError({
-        message: "error processing note ref",
-        payload: err,
-      }),
-      data: MDUtilsV4.genMDMsg("error processing ref"),
-    };
+    return createErrorProcessingRefPayload(err);
   }
 }
 
@@ -867,7 +968,7 @@ function convertNoteRefHelper(
   const bodyAST = noteRefProc.parse(body) as DendronASTNode;
   const { anchorStart, anchorEnd, anchorStartOffset } = link.data;
 
-  let { start, end, data, error } = prepareNoteRefIndices({
+  let { start, end, errorData, error } = prepareNoteRefIndices({
     anchorStart,
     anchorEnd,
     bodyAST,
@@ -875,7 +976,7 @@ function convertNoteRefHelper(
       return `${anchorType} anchor ${anchorName} not found`;
     },
   });
-  if (data) return { data, error };
+  if (errorData) return { data: errorData, error };
 
   // slice of interested range
   try {
@@ -920,7 +1021,7 @@ type FindAnchorResult =
  * @param match The block anchor string, like "header-anchor" or "^block-anchor"
  * @returns The index of the top-level ancestor node in the list where the anchor was found, or -1 if not found.
  */
-function findAnchor({
+export function findAnchor({
   nodes,
   match,
 }: {
@@ -944,12 +1045,13 @@ function findHeader({
   match: string;
   slugger: ReturnType<typeof getSlugger>;
 }): FindAnchorResult {
-  let foundIndex = MDUtilsV4.findIndex(nodes, (node: Node, idx: number) => {
+  const foundIndex = MDUtilsV4.findIndex(nodes, (node: Node, idx: number) => {
     if (idx === 0 && match === "*") {
       return false;
     }
     return MDUtilsV4.matchHeading(node, match, { slugger });
   });
+
   if (foundIndex < 0) return null;
   return { type: "header", index: foundIndex, anchorType: "header" };
 }
@@ -1019,11 +1121,11 @@ function renderPretty(opts: { content: string; title: string; link: string }) {
 </div>
 <div id="portal-parent-anchor" class="portal-parent" markdown="1">
 <div class="portal-parent-fader-top"></div>
-<div class="portal-parent-fader-bottom"></div>        
+<div class="portal-parent-fader-bottom"></div>
 
 ${_.trim(content)}
 
-</div>    
+</div>
 </div>`;
 }
 

@@ -104,6 +104,41 @@ export const setupBasicMulti: PreSetupHookFunction = async ({
   await SCHEMA_PRESETS_V4.SCHEMA_SIMPLE.create({ vault: vault1, wsRoot });
 };
 
+export const setupNoteRefHeader: PreSetupHookFunction = async ({
+  vaults,
+  wsRoot,
+  extra,
+}) => {
+  const vault = vaults[0];
+  let props;
+
+  if (extra?.idv2) {
+    props = { id: "foo-id" };
+  }
+  await NOTE_PRESETS_V4.NOTE_SIMPLE.create({
+    vault,
+    wsRoot,
+    body: "![[foo.one#sub-header--1a]]",
+    props,
+  });
+  await NoteTestUtilsV4.createNote({
+    vault,
+    fname: "foo.one",
+    body: [
+      "# header-🌲-1",
+      `header-1-content`,
+      `## sub-header-🌲-1a`,
+      `sub-header-1a-content`,
+      `# header-🌲-2`,
+      `header-2-content`,
+    ].join("\n"),
+    wsRoot,
+    props: {
+      id: "foo.one-id",
+    },
+  });
+};
+
 /**
  *
  * - foo
@@ -437,6 +472,7 @@ export const ENGINE_HOOKS = {
   setupSchemaPreseet,
   setupSchemaPresetWithNamespaceTemplate,
   setupNoteRefRecursive,
+  setupNoteRefHeader,
   setupJournals,
   setupEmpty,
   setupLinks,

@@ -181,4 +181,60 @@ describe("api/note/render tests", () => {
       });
     });
   });
+
+  describe(`GIVEN reference pointing at special char header. foo content: ![[foo.one#sub-header--1a]]`, () => {
+    let fooNote: NoteProps;
+    let api: DendronAPI;
+    let wsRoot: string;
+    beforeAll(async () => {
+      await runEngineTestV5(
+        async ({ wsRoot: _wsRoot, vaults, engine }) => {
+          wsRoot = _wsRoot;
+          const notes = engine.notes;
+          const vault1 = vaults[0];
+
+          fooNote = NoteUtils.getNoteByFnameV5({
+            fname: "foo",
+            notes,
+            vault: vault1,
+            wsRoot,
+          }) as NoteProps;
+
+          api = await getApiWithInitializedWS(wsRoot, vaults);
+        },
+        { expect, preSetupHook: ENGINE_HOOKS.setupNoteRefHeader }
+      );
+    });
+
+    describe(`WHEN top level 'foo' is rendered`, () => {
+      let rendered: { data: RenderNotePayload; error: DendronError | null };
+
+      beforeAll(async () => {
+        rendered = await api.noteRender({
+          ws: wsRoot,
+          id: fooNote.id,
+        });
+      });
+
+      it(`THEN it should have null error object`, () => {
+        expect(rendered.error).toBeNull();
+      });
+
+      it(`THEN it should NOT contain error message in the data`, () => {
+        expect(rendered.data?.toLowerCase().includes("error")).toBeFalsy();
+      });
+
+      it(`THEN it should contain content from sub-header-🌲-1a`, () => {
+        expect(rendered.data?.includes("sub-header-1a-content")).toBeTruthy();
+      });
+
+      it(`THEN it should NOT contain content from header-🌲-1`, () => {
+        expect(rendered.data?.includes("header-1-content")).toBeFalsy();
+      });
+
+      it(`THEN it should NOT contain content from header-🌲-2`, () => {
+        expect(rendered.data?.includes("header-2-content")).toBeFalsy();
+      });
+    });
+  });
 });

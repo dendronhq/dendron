@@ -31,6 +31,18 @@ export class DUtils {
   }
 }
 
+/**
+ * Special characters get completely removed when slug(str) gets called,
+ * includes removal of characters such as parenthesis () and UTF8 trees 🌲.
+ * --------------------------------------------------------------------------------
+ * Note when using GithubSlugger/BananaSlug each time that slug('value') is called
+ * on the same instance of slugger with duplicate value a new postfix with incrementing
+ * value will be assigned and returned:
+ *
+ * slugger.slug('val') -> 'val'
+ * slugger.slug('val') -> 'val-1'
+ * slugger.slug('val') -> 'val-2'
+ * */
 export const getSlugger = () => {
   return new GithubSlugger();
 };

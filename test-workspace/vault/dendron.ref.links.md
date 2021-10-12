@@ -2,7 +2,7 @@
 id: 73eb67ea-0291-45e7-8f2f-193fd6f00643
 title: Links
 desc: ""
-updated: 1633435266305
+updated: 1634031703026
 created: 1608518909864
 ---
 
@@ -49,7 +49,11 @@ Vault2
 
 ![[dendron.welcome#header-special-chars]]
 
-***
+### Sub header: just the subheader content should be rendered.
+![[dendron.ref.links.target-with-headers#sub-header-1]]
+
+### Sub header with special chars: just the subheader content should be rendered.
+![[dendron.ref.links.target-with-headers#sub-header--2]]
 
 ## Block References
 

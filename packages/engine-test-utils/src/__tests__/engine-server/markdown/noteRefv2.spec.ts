@@ -1,7 +1,7 @@
 import {
   IntermediateDendronConfig,
   NoteProps,
-  WorkspaceOpts
+  WorkspaceOpts,
 } from "@dendronhq/common-all";
 import {
   AssertUtils,

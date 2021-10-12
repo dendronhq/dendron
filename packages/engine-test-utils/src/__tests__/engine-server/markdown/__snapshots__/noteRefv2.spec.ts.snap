@@ -761,7 +761,7 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div>        
+<div class=\\"portal-parent-fader-bottom\\"></div>
 
 # Foo.One
 
@@ -774,17 +774,17 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div>        
+<div class=\\"portal-parent-fader-bottom\\"></div>
 
 # Foo.Two
 
 blah
 
-</div>    
+</div>
 </div>
 Regular wikilink: [Two](foo.two.md)
 
-</div>    
+</div>
 </div>
 
 
@@ -1039,7 +1039,7 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div>        
+<div class=\\"portal-parent-fader-bottom\\"></div>
 
 # Foo.One
 
@@ -1052,17 +1052,17 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div>        
+<div class=\\"portal-parent-fader-bottom\\"></div>
 
 # Foo.Two
 
 blah
 
-</div>    
+</div>
 </div>
 Regular wikilink: [Two](foo.two)
 
-</div>    
+</div>
 </div>
 
 

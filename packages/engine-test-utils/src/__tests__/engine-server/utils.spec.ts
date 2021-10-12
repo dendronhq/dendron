@@ -1,11 +1,13 @@
-import { DNoteRefData, DNoteRefLink } from "@dendronhq/common-all";
+import { DNoteRefData, DNoteRefLink, getSlugger } from "@dendronhq/common-all";
 import {
   matchRefMarker,
+  MDUtilsV4,
   parseDendronRef,
   parseFileLink,
   refLink2String,
   stripLocalOnlyTags,
 } from "@dendronhq/engine-server";
+import { Node } from "unist";
 import _ from "lodash";
 function createFileLink(data?: Partial<DNoteRefData>): DNoteRefLink {
   let cleanData: DNoteRefData = _.defaults(data, { type: "file" });
@@ -17,6 +19,49 @@ function createFileLink(data?: Partial<DNoteRefData>): DNoteRefLink {
     data: cleanData,
   };
 }
+
+describe(`matchHeading`, () => {
+  const makeHeadingNode = (headingValue: string): Node => {
+    const nodeUnparsed = `{
+                            "type": "heading",
+                            "depth": 1,
+                            "children": [
+                              {
+                                "type": "text",
+                                "value": "${headingValue}"
+                              }
+                            ]
+                          }`;
+    return JSON.parse(nodeUnparsed) as Node;
+  };
+
+  function matchHeadingTest(nodeHeadingValue: string, matchingValue: string) {
+    const node = makeHeadingNode(nodeHeadingValue);
+    return MDUtilsV4.matchHeading(node, matchingValue, {
+      slugger: getSlugger(),
+    });
+  }
+
+  describe(`GIVEN node made from ASCII characters`, () => {
+    it(`WHEN match text fully matches heading value THEN return truthy`, () => {
+      expect(matchHeadingTest("head-val-1", "head-val-1")).toBeTruthy();
+    });
+
+    it(`WHEN match partially matches heading value THEN return falsy`, () => {
+      expect(matchHeadingTest("head-val-1", "head-val")).toBeFalsy();
+    });
+
+    it(`WHEN match text does not match heading value THEN return falsy`, () => {
+      expect(matchHeadingTest("head-val-1", "head-val-2")).toBeFalsy();
+    });
+  });
+
+  describe(`GIVEN node made from special characters`, () => {
+    it(`WHEN match text with special char removed matches heading value THEN return truthy`, () => {
+      expect(matchHeadingTest("head-val-🌲-1", "head-val--1")).toBeTruthy();
+    });
+  });
+});
 
 describe("matchEmbedMarker", () => {
   test("basic", () => {

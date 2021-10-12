@@ -557,7 +557,8 @@ export class DendronEngineV2 implements DEngine {
       },
       { flavor: ProcFlavor.PREVIEW }
     );
-    const payload = await proc.process(NoteUtils.serialize(note));
+    const serialized = NoteUtils.serialize(note);
+    const payload = await proc.process(serialized);
     return payload.toString();
   }
   async sync() {

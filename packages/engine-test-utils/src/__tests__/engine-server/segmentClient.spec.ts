@@ -139,4 +139,14 @@ describe("SegmentClient", () => {
       done();
     });
   });
+
+  describe("WHEN: Enabled by CLI as default", () => {
+    test("THEN: recognized as enabled", (done) => {
+      TestEngineUtils.mockHomeDir();
+      SegmentClient.enable(TelemetryStatus.ENABLED_BY_CLI_DEFAULT);
+      const instance = SegmentClient.instance({ forceNew: true });
+      expect(instance.hasOptedOut).toBeFalsy();
+      done();
+    })
+  })
 });

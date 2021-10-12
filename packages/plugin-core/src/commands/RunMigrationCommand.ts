@@ -25,7 +25,7 @@ export class RunMigrationCommand extends BasicCommand<
 > {
   key = DENDRON_COMMANDS.RUN_MIGRATION.key;
 
-  async gatherInputs(): Promise<CommandInput | undefined> {
+  async gatherInputs(opts?: CommandInput): Promise<CommandInput | undefined> {
     const migrationItems: vscode.QuickPickItem[] = _.map(
       ALL_MIGRATIONS,
       (migration) => {
@@ -41,17 +41,20 @@ export class RunMigrationCommand extends BasicCommand<
         };
       }
     );
-
-    const selected = await vscode.window
-      .showQuickPick(migrationItems)
-      .then((value) => {
-        if (!value) {
-          return;
-        }
-        return { version: value.label };
-      });
-
-    return selected;
+    
+    if (_.isUndefined(opts)) {
+      const selected = await vscode.window
+        .showQuickPick(migrationItems)
+        .then((value) => {
+          if (!value) {
+            return;
+          }
+          return { version: value.label };
+        });
+      return selected;
+    } else {
+      return opts;
+    }
   }
 
   async execute(opts: CommandOpts): Promise<CommandOutput> {

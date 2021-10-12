@@ -34,7 +34,7 @@ import _ from "lodash";
 import path from "path";
 import { DConfig } from "../config";
 import { MetadataService } from "../metadata";
-import { MigrationServce } from "../migrations";
+import { MigrationServce, MigrationChangeSetStatus } from "../migrations";
 import { SeedService, SeedUtils } from "../seed";
 import { Git } from "../topics/git";
 import {
@@ -45,6 +45,7 @@ import {
 } from "../utils";
 import { WorkspaceUtils } from "./utils";
 import { WorkspaceConfig } from "./vscode";
+
 const DENDRON_WS_NAME = CONSTANTS.DENDRON_WS_NAME;
 
 export type PathExistBehavior = "delete" | "abort" | "continue";
@@ -789,13 +790,15 @@ export class WorkspaceService {
       this.logger.error(error);
     }
 
+    let changes: MigrationChangeSetStatus[] = [];
+
     if (
       MigrationServce.shouldRunMigration({
         force: forceUpgrade,
         workspaceInstallStatus,
       })
     ) {
-      const changes = await MigrationServce.applyMigrationRules({
+      changes = await MigrationServce.applyMigrationRules({
         currentVersion,
         previousVersion,
         dendronConfig,
@@ -809,6 +812,8 @@ export class WorkspaceService {
         dendronConfig = data.dendronConfig;
       }
     }
+
+    return changes;
   }
 
   /**

@@ -93,6 +93,9 @@ export const ALL_MIGRATIONS: Migrations[] = [
             delete rawDendronConfig.insertNoteLink;
             delete dendronConfig.insertNoteLink;
           }
+          if (!commands.insertNoteLink) {
+            commands.insertNoteLink = defaultCommandConfig.insertNoteLink;
+          }
 
           // migrate insertNoteIndex
           const maybeOldInsertNoteIndex = rawDendronConfig.insertNoteIndex;
@@ -105,21 +108,32 @@ export const ALL_MIGRATIONS: Migrations[] = [
               delete dendronConfig.insertNoteIndex;
             }
           }
+          if (!commands.insertNoteIndex) {
+            commands.insertNoteIndex = defaultCommandConfig.insertNoteIndex;
+          }
 
           // migrate lookup
           const maybeOldLookup = rawDendronConfig.lookup;
           let selectionMode = LookupSelectionModeEnum.extract as LookupSelectionMode;
-          let leaveTrace: boolean;
+          let leaveTrace: boolean = false;
           if(_.isUndefined(maybeOldLookup)) {
-            if(commands.lookup.note.selectionMode) {
-              selectionMode = commands.lookup.note.selectionMode
+            if (commands.lookup) {
+              if (commands.lookup.note) {
+                if(commands.lookup.note.selectionMode) {
+                  selectionMode = commands.lookup.note.selectionMode
+                } else {
+                  selectionMode = defaultCommandConfig.lookup.note.selectionMode;
+                }
+                if(commands.lookup.note.leaveTrace) {
+                  leaveTrace = commands.lookup.note.leaveTrace;
+                } else {
+                  leaveTrace = defaultCommandConfig.lookup.note.leaveTrace;
+                }
+              } else {
+                commands.lookup.note = defaultCommandConfig.lookup.note;
+              }
             } else {
-              selectionMode = defaultCommandConfig.lookup.note.selectionMode;
-            }
-            if(commands.lookup.note.leaveTrace) {
-              leaveTrace = commands.lookup.note.leaveTrace;
-            } else {
-              leaveTrace = defaultCommandConfig.lookup.note.leaveTrace;
+              commands.lookup = defaultCommandConfig.lookup;
             }
           } else {
             switch(maybeOldLookup.note.selectionType) {
@@ -147,7 +161,7 @@ export const ALL_MIGRATIONS: Migrations[] = [
             if (commands.lookup.note.confirmVaultOnCreate) {
               confirmVaultOnCreate = commands.lookup.note.confirmVaultOnCreate;
             } else {
-              confirmVaultOnCreate = genDefaultCommandConfig().lookup.note.confirmVaultOnCreate;
+              confirmVaultOnCreate = defaultCommandConfig.lookup.note.confirmVaultOnCreate;
             }
           } else {
             confirmVaultOnCreate = maybeOldLookupConfirmVaultOnCreate;

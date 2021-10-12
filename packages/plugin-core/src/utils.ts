@@ -1,5 +1,6 @@
 import { ServerUtils } from "@dendronhq/api-server";
 import {
+  ConfigEvents,
   CONSTANTS,
   DendronError,
   DEngineClient,
@@ -7,12 +8,15 @@ import {
   DVault,
   getStage,
   InstallStatus,
+  IntermediateDendronConfig,
+  MigrationEvents,
   NoteAddBehavior,
   NoteProps,
   NoteUtils,
   Point,
   Position,
   SchemaModuleProps,
+  StrictIntermediateDendronConfig,
   Time,
   TutorialEvents,
   VaultUtils,
@@ -25,7 +29,7 @@ import {
   tmpDir,
   vault2Path,
 } from "@dendronhq/common-server";
-import { HistoryEvent, HistoryService } from "@dendronhq/engine-server";
+import { DConfig, HistoryEvent, HistoryService, MigrationChangeSetStatus } from "@dendronhq/engine-server";
 import { assign } from "comment-json";
 import { ExecaChildProcess } from "execa";
 import fs from "fs-extra";
@@ -36,6 +40,7 @@ import os from "os";
 import path from "path";
 import * as vscode from "vscode";
 import { CancellationTokenSource } from "vscode-languageclient";
+import { RunMigrationCommand } from "./commands/RunMigrationCommand";
 import { SetupWorkspaceCommand } from "./commands/SetupWorkspace";
 import { PickerUtilsV2 } from "./components/lookup/utils";
 import {
@@ -1000,3 +1005,91 @@ export const clipboard = vscode.env.clipboard;
 export const getOpenGraphMetadata = (opts: ogs.Options) => {
   return ogs(opts);
 };
+
+export class ConfigUtils {
+  static async checkAndMigrateLegacy(
+    config: Partial<IntermediateDendronConfig>,
+    wsRoot: string,
+  ): Promise<{
+    status: "no legacy" | "ran migration"
+    changes?: MigrationChangeSetStatus[] 
+  }> {
+    let shouldRun = false;
+    // check that command namespace is there
+    if (
+      DConfig.isCurrentConfig(
+        config as StrictIntermediateDendronConfig
+      )
+    ) {
+      if (_.isUndefined(config.commands)) {
+        AnalyticsUtils.track(ConfigEvents.ConfigNotMigrated, {
+          key: "config.commands",
+          version: config.version
+        });
+        shouldRun = true;
+      } else {
+        const requiredKeys = [
+          "lookup",
+          "randomNote",
+          "insertNote",
+          "insertNoteLink",
+          "insertNoteIndex"
+        ];
+    
+        if (config.commands === null) {
+          AnalyticsUtils.track(ConfigEvents.ConfigNotMigrated, {
+            key: "config.commands.*"
+          });
+          shouldRun = true;
+        } else {
+          const existingKeys = Object.keys(config.commands);
+          requiredKeys.forEach((requiredKey) => {
+            if (!existingKeys.includes(requiredKey)) {
+              shouldRun = true;
+              AnalyticsUtils.track(ConfigEvents.ConfigNotMigrated, {
+                key: `config.commands.${requiredKey}`
+              });
+            }
+          });
+        }
+      }
+    } else {
+      shouldRun = true;
+      AnalyticsUtils.track(ConfigEvents.ConfigNotMigrated, {
+        version: config.version
+      });
+    };
+    if (shouldRun) {
+      const cmd = new RunMigrationCommand();
+      const maybeChanges = await cmd.run({ version: "0.63.0" });
+      maybeChanges?.forEach((change) => {
+        const event = _.isUndefined(change.error)
+          ? MigrationEvents.MigrationSucceeded
+          : MigrationEvents.MigrationFailed
+        AnalyticsUtils.track(event, {
+          data: change.data
+        });
+      });
+      vscode.window.showInformationMessage(
+        "We found some legacy configuration and migrated them to new ones.",
+        { title: "Open dendron.yml" },
+      )
+      .then(async (resp) => {
+        if (resp?.title === "Open dendron.yml") {
+          const configFilePath = vscode.Uri.file(path.join(wsRoot, "dendron.yml"));
+          await vscode.commands.executeCommand(
+            "vscode.open", 
+            configFilePath
+          )
+        }
+      })
+      return {
+        status: "ran migration",
+        changes: maybeChanges,
+      }
+    }
+    return {
+      status: "no legacy"
+    }
+  }
+}

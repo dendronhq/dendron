@@ -11,6 +11,7 @@ import {
   ALL_MIGRATIONS,
   DConfig,
   Migrations,
+  MigrateFunction,
   MigrationServce,
   WorkspaceService,
 } from "@dendronhq/engine-server";
@@ -23,11 +24,12 @@ import sinon from "sinon";
 import { CONFIG, GLOBAL_STATE, WORKSPACE_STATE } from "../../constants";
 import { Logger } from "../../logger";
 import { VSCodeUtils } from "../../utils";
-import { getExtension, getDWorkspace } from "../../workspace";
+import { getExtension, getDWorkspace, DendronExtension } from "../../workspace";
 import { _activate } from "../../_extension";
 import { expect } from "../testUtilsv2";
-import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
+import { describeMultiWS, runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 import { readYAML } from "@dendronhq/common-server";
+import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 
 const getMigration = ({
   exact,
@@ -341,6 +343,7 @@ suite("Migration", function () {
     });
 
     test("migrate to 0.63 (dendron config command namespace)", (done) => {
+      DendronExtension.version = () => "0.0.1";
       runLegacyMultiWorkspaceTest({
         ctx,
         modConfigCb: (config) => {
@@ -394,7 +397,6 @@ suite("Migration", function () {
             "lookupConfirmVaultOnCreate"
           ];
           const preMigrationKeys = Object.keys(dendronConfig);
-          expect(preMigrationKeys.includes("commands")).toBeFalsy();
           expect(oldKeys.every((value) => preMigrationKeys.includes(value))).toBeTruthy();
 
 
@@ -436,4 +438,82 @@ suite("Migration", function () {
       })
     })
   });
+});
+
+suite("MigrationService", function () {
+  const ctx = setupBeforeAfter(this);
+
+  async function ranMigration(
+    currentVersion: string,
+    migrations: Migrations[]
+  ) {
+    const { wsRoot, config } = getDWorkspace();
+    const wsService = new WorkspaceService({ wsRoot });
+    const out = await MigrationServce.applyMigrationRules({
+      currentVersion,
+      previousVersion: "0.62.2",
+      migrations,
+      dendronConfig: config,
+      wsService,
+      wsConfig: await getExtension().getWorkspaceSettings(),
+      logger: Logger
+    });
+    return out.length !== 0;
+  }
+
+  describeMultiWS(
+    "GIVEN migration of semver 0.63.0", 
+    {
+      ctx,
+      preSetupHook: ENGINE_HOOKS.setupBasic,
+    },
+    async () => {
+      const dummyFunc: MigrateFunction = async ({dendronConfig, wsConfig}) => {
+        return { data: { dendronConfig, wsConfig } }
+      };
+      const migrations = [
+        {
+          version: "0.63.0",
+          changes: [
+            {
+              name: "test",
+              func: dummyFunc,
+            }
+          ]
+        }
+      ] as Migrations[];
+      describe("WHEN current version is smaller than 0.63.0", () => {
+        const currentVersion = "0.62.3"
+        test("THEN migration should not run", async () => {
+          const result = await ranMigration(
+            currentVersion,
+            migrations,
+          )
+          expect(result).toBeFalsy()
+        })
+      })
+
+      describe("WHEN current version is 0.63.0", () => {
+        const currentVersion = "0.63.0"
+        test("THEN migration should run", async () => {
+          const result = await ranMigration(
+            currentVersion,
+            migrations,
+          )
+          expect(result).toBeTruthy();
+        })
+      })
+
+      describe("WHEN current version is larger than 0.63.0", () => {
+        const currentVersion = "0.63.1"
+        test("THEN migration should run", async () => {
+          const result = await ranMigration(
+            currentVersion,
+            migrations,
+          ) 
+          expect(result).toBeTruthy();
+        })
+      })
+    }
+  )
 });

@@ -12,10 +12,8 @@ import {
   Time,
   VaultUtils,
   VSCodeEvents,
-  ConfigEvents,
   WorkspaceType,
-  IntermediateDendronConfig,
-  StrictIntermediateDendronConfig,
+  MigrationEvents,
 } from "@dendronhq/common-all";
 import {
   getDurationMilliseconds,
@@ -29,6 +27,7 @@ import {
   WorkspaceService,
   WorkspaceUtils,
   DConfig,
+  MigrationChangeSetStatus,
 } from "@dendronhq/engine-server";
 import { RewriteFrames } from "@sentry/integrations";
 import * as Sentry from "@sentry/node";
@@ -51,7 +50,7 @@ import { StateService } from "./services/stateService";
 import { Extensions } from "./settings";
 import { setupSegmentClient } from "./telemetry";
 import { GOOGLE_OAUTH_ID, GOOGLE_OAUTH_SECRET } from "./types/global";
-import { KeybindingUtils, VSCodeUtils, WSUtils } from "./utils";
+import { KeybindingUtils, VSCodeUtils, WSUtils, ConfigUtils } from "./utils";
 import { AnalyticsUtils } from "./utils/analytics";
 import { DendronTreeView } from "./views/DendronTreeView";
 import {
@@ -321,15 +320,28 @@ export async function _activate(
       const wsRoot = wsImpl.wsRoot;
       const wsService = new WorkspaceService({ wsRoot });
 
-      await wsService.runMigrationsIfNecessary({
+      // initialize client
+      setupSegmentClient(wsImpl);
+      
+      const changes = await wsService.runMigrationsIfNecessary({
         currentVersion,
         previousVersion: previousWorkspaceVersion,
         dendronConfig,
         workspaceInstallStatus,
         wsConfig: await DendronExtension.instanceV2().getWorkspaceSettings(),
       });
-      // initialize client
-      setupSegmentClient(wsImpl);
+
+      if (changes.length > 0) {
+        changes.forEach((change: MigrationChangeSetStatus) => {
+          const event = _.isUndefined(change.error)
+            ? MigrationEvents.MigrationSucceeded
+            : MigrationEvents.MigrationFailed;
+  
+          AnalyticsUtils.track(event, {
+            data: change.data
+          });
+        });
+      }
 
       // Re-use the id for error reporting too:
       Sentry.setUser({ id: SegmentClient.instance().anonymousId });
@@ -360,9 +372,15 @@ export async function _activate(
         msg: "read dendron config",
       });
 
-      const rawConfig = DConfig.getRaw(wsImpl.wsRoot);
-      checkLegacy(rawConfig);
-
+      try {
+        if (semver.gte(currentVersion, "0.63.0")) {
+          const rawConfig = DConfig.getRaw(wsImpl.wsRoot);
+          await ConfigUtils.checkAndMigrateLegacy(rawConfig, wsRoot);
+        }
+      } catch (error) {
+        Sentry.captureException(error);
+      }
+      
       // check for vaults with same name
       const uniqVaults = _.uniqBy(dendronConfig.vaults, (vault) =>
         VaultUtils.getName(vault)
@@ -765,48 +783,3 @@ function initializeSentry(environment: string): void {
   return;
 }
 
-function checkLegacy(
-  config: Partial<IntermediateDendronConfig>
-): void {
-  // check that command namespace is there
-  if (
-    DConfig.isCurrentConfig(
-      config as StrictIntermediateDendronConfig
-    )
-  ) {
-    if (_.isUndefined(config.commands)) {
-      AnalyticsUtils.track(ConfigEvents.ConfigNotMigrated, {
-        key: "config.commands",
-        version: config.version
-      });
-    } else {
-      const requiredKeys = [
-        "lookup",
-        "randomNote",
-        "insertNote",
-        "insertNoteLink",
-        "insertNoteIndex"
-      ];
-  
-      if (config.commands === null) {
-        AnalyticsUtils.track(ConfigEvents.ConfigNotMigrated, {
-          key: "config.commands.*"
-        });
-        return;
-      }
-  
-      const existingKeys = Object.keys(config.commands);
-      requiredKeys.forEach((requiredKey) => {
-        if (!existingKeys.includes(requiredKey)) {
-          AnalyticsUtils.track(ConfigEvents.ConfigNotMigrated, {
-            key: `config.commands.${requiredKey}`
-          });
-        }
-      });
-    }
-  } else {
-    AnalyticsUtils.track(ConfigEvents.ConfigNotMigrated, {
-      version: config.version
-    });
-  };
-}

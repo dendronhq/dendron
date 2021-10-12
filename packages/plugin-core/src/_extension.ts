@@ -26,7 +26,6 @@ import {
   MetadataService,
   WorkspaceService,
   WorkspaceUtils,
-  DConfig,
   MigrationChangeSetStatus,
 } from "@dendronhq/engine-server";
 import { RewriteFrames } from "@sentry/integrations";
@@ -50,7 +49,7 @@ import { StateService } from "./services/stateService";
 import { Extensions } from "./settings";
 import { setupSegmentClient } from "./telemetry";
 import { GOOGLE_OAUTH_ID, GOOGLE_OAUTH_SECRET } from "./types/global";
-import { KeybindingUtils, VSCodeUtils, WSUtils, ConfigUtils } from "./utils";
+import { KeybindingUtils, VSCodeUtils, WSUtils } from "./utils";
 import { AnalyticsUtils } from "./utils/analytics";
 import { DendronTreeView } from "./views/DendronTreeView";
 import {
@@ -322,7 +321,7 @@ export async function _activate(
 
       // initialize client
       setupSegmentClient(wsImpl);
-      
+
       const changes = await wsService.runMigrationsIfNecessary({
         currentVersion,
         previousVersion: previousWorkspaceVersion,
@@ -336,9 +335,9 @@ export async function _activate(
           const event = _.isUndefined(change.error)
             ? MigrationEvents.MigrationSucceeded
             : MigrationEvents.MigrationFailed;
-  
+
           AnalyticsUtils.track(event, {
-            data: change.data
+            data: change.data,
           });
         });
       }
@@ -372,15 +371,15 @@ export async function _activate(
         msg: "read dendron config",
       });
 
-      try {
-        if (semver.gte(currentVersion, "0.63.0")) {
-          const rawConfig = DConfig.getRaw(wsImpl.wsRoot);
-          await ConfigUtils.checkAndMigrateLegacy(rawConfig, wsRoot);
-        }
-      } catch (error) {
-        Sentry.captureException(error);
-      }
-      
+      // try {
+      //   if (semver.gte(currentVersion, "0.63.0")) {
+      //     const rawConfig = DConfig.getRaw(wsImpl.wsRoot);
+      //     await ConfigUtils.checkAndMigrateLegacy(rawConfig, wsRoot);
+      //   }
+      // } catch (error) {
+      //   Sentry.captureException(error);
+      // }
+
       // check for vaults with same name
       const uniqVaults = _.uniqBy(dendronConfig.vaults, (vault) =>
         VaultUtils.getName(vault)
@@ -782,4 +781,3 @@ function initializeSentry(environment: string): void {
   });
   return;
 }
-

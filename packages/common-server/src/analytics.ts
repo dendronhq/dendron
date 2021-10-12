@@ -94,6 +94,8 @@ export enum TelemetryStatus {
   ENABLED_BY_MIGRATION = "enabled by migration",
   /** The user enabled telemetry using dendron-cli */
   ENABLED_BY_CLI_COMMAND = "enabled by cli command",
+  /** The user used dendron-cli before setting telemetry with vscode or plugin */
+  ENABLED_BY_CLI_DEFAULT = "enabled by cli default",
 }
 
 export type TelemetryConfig = {
@@ -178,6 +180,7 @@ export class SegmentClient {
     why:
       | TelemetryStatus.ENABLED_BY_COMMAND
       | TelemetryStatus.ENABLED_BY_CLI_COMMAND
+      | TelemetryStatus.ENABLED_BY_CLI_DEFAULT
       | TelemetryStatus.ENABLED_BY_CONFIG
       | TelemetryStatus.ENABLED_BY_MIGRATION
   ) {

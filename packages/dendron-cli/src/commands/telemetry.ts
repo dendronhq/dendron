@@ -1,7 +1,7 @@
 import { CLIEvents } from "@dendronhq/common-all";
 import { SegmentClient, TelemetryStatus } from "@dendronhq/common-server";
 import yargs from "yargs";
-import { CLIAnalyticsUtils, showTelemetryMessage } from "../utils/analytics";
+import { CLIAnalyticsUtils } from "../utils/analytics";
 import { CLICommand, CommandCommonProps } from "./base";
 
 
@@ -66,7 +66,7 @@ export class TelemetryCLICommand extends CLICommand<CommandOpts> {
           break;
         }
         case TelemetryCommands.SHOW: {
-          showTelemetryMessage();
+          CLIAnalyticsUtils.showTelemetryMessage();
           break;
         }
         default: {

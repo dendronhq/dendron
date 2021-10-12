@@ -372,11 +372,15 @@ export async function _activate(
         msg: "read dendron config",
       });
 
-      if (semver.gte(currentVersion, "0.63.0")) {
-        const rawConfig = DConfig.getRaw(wsImpl.wsRoot);
-        await ConfigUtils.checkAndMigrateLegacy(rawConfig, wsRoot);
+      try {
+        if (semver.gte(currentVersion, "0.63.0")) {
+          const rawConfig = DConfig.getRaw(wsImpl.wsRoot);
+          await ConfigUtils.checkAndMigrateLegacy(rawConfig, wsRoot);
+        }
+      } catch (error) {
+        Sentry.captureException(error);
       }
-
+      
       // check for vaults with same name
       const uniqVaults = _.uniqBy(dendronConfig.vaults, (vault) =>
         VaultUtils.getName(vault)

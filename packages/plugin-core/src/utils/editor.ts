@@ -8,14 +8,21 @@ import {
   MDUtilsV5,
   ProcMode,
   AnchorUtils,
+  visit,
+  WikiLinkNoteV4,
+  UserTag,
+  HashTag,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import vscode, {
   Position,
   Selection,
   TextEditor,
+  TextEditorDecorationType,
   TextEditorEdit,
 } from "vscode";
+import { DECORATION_TYPE, linkedNoteType } from "../features/windowDecorations";
+import { VSCodeUtils } from "../utils";
 
 export function isAnythingSelected(): boolean {
   return !vscode.window?.activeTextEditor?.selection?.isEmpty;
@@ -177,4 +184,41 @@ export async function getSelectionAnchors(opts: {
       });
   });
   return { startAnchor, endAnchor };
+}
+
+/**
+ * Utility method to check if the selected text is a broken wikilink
+ */
+export function isBrokenWikilink(): boolean {
+  const { editor, selection } = VSCodeUtils.getSelection();
+  if (!editor || !selection) return false;
+  const line = editor.document.lineAt(selection.start.line).text;
+  const proc = MDUtilsV5.procRemarkParseNoData(
+    {},
+    { dest: DendronASTDest.MD_DENDRON }
+  );
+  const parsedLine = proc.parse(line);
+  let link: WikiLinkNoteV4 | UserTag | HashTag | undefined;
+  let type: TextEditorDecorationType | undefined;
+  let fname: string;
+  visit(
+    parsedLine,
+    [
+      DendronASTTypes.WIKI_LINK,
+      DendronASTTypes.USERTAG,
+      DendronASTTypes.HASHTAG,
+    ],
+    (linkvalue: WikiLinkNoteV4 | UserTag | HashTag) => {
+      link = linkvalue;
+      if (!link) return false;
+      fname = link.type === DendronASTTypes.WIKI_LINK ? link.value : link.fname;
+      /**
+       * doExpensiveDecorations is set to true here because even if the note is too big, this function is only
+       * called if the user selected a wikilink.
+       */
+      type = linkedNoteType({ fname, doExpensiveDecorations: true });
+      return false;
+    }
+  );
+  return type === DECORATION_TYPE.brokenWikilink;
 }

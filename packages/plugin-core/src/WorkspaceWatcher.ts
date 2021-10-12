@@ -1,8 +1,16 @@
-import { NoteProps, NoteUtils, Time, VaultUtils } from "@dendronhq/common-all";
+import {
+  DNodeUtils,
+  NoteProps,
+  NoteUtils,
+  Time,
+  VaultUtils,
+} from "@dendronhq/common-all";
 import _ from "lodash";
 import path from "path";
 import {
   ExtensionContext,
+  FileRenameEvent,
+  FileWillRenameEvent,
   Range,
   TextDocument,
   TextDocumentChangeEvent,
@@ -13,8 +21,10 @@ import {
 } from "vscode";
 import { Logger } from "./logger";
 import { NoteSyncService } from "./services/NoteSyncService";
-import { getExtension, getDWorkspace } from "./workspace";
+import { getExtension, getDWorkspace, DendronExtension } from "./workspace";
 import * as Sentry from "@sentry/node";
+import { FileWatcher } from "./fileWatcher";
+import { file2Note, vault2Path } from "@dendronhq/common-server";
 
 interface DebouncedFunc<T extends (...args: any[]) => any> {
   /**
@@ -79,6 +89,18 @@ export class WorkspaceWatcher {
         context.subscriptions
       );
     }
+
+    workspace.onWillRenameFiles(
+      this.onWillRenameFiles,
+      this,
+      context.subscriptions
+    );
+
+    workspace.onDidRenameFiles(
+      this.onDidRenameFiles,
+      this,
+      context.subscriptions
+    );
   }
 
   async onDidChangeTextDocument(event: TextDocumentChangeEvent) {
@@ -149,10 +171,11 @@ export class WorkspaceWatcher {
 
       const eclient = getDWorkspace().engine;
       const fname = path.basename(uri.fsPath, ".md");
+      const { vaults } = getDWorkspace();
       const now = Time.now().toMillis();
       const vault = VaultUtils.getVaultByNotePath({
         fsPath: uri.fsPath,
-        vaults: eclient.vaults,
+        vaults,
         wsRoot: getDWorkspace().wsRoot,
       });
       const note = NoteUtils.getNoteByFnameV5({
@@ -215,5 +238,89 @@ export class WorkspaceWatcher {
       return true;
     }
     return false;
+  }
+
+  /**
+   * method to make modifications to the workspace before the file is renamed.
+   * It updates all the references to the oldUri
+   */
+  onWillRenameFiles(args: FileWillRenameEvent) {
+    // No-op if we're not in a Dendron Workspace
+    if (!DendronExtension.isActive()) {
+      return;
+    }
+    try {
+      const files = args.files[0];
+      const { vaults, wsRoot } = getDWorkspace();
+      const { oldUri, newUri } = files;
+      const oldVault = VaultUtils.getVaultByNotePath({
+        vaults,
+        wsRoot,
+        fsPath: oldUri.fsPath,
+      });
+      const oldFname = DNodeUtils.fname(oldUri.fsPath);
+
+      const newVault = VaultUtils.getVaultByNotePath({
+        vaults,
+        wsRoot,
+        fsPath: newUri.fsPath,
+      });
+      const newFname = DNodeUtils.fname(newUri.fsPath);
+      const opts = {
+        oldLoc: {
+          fname: oldFname,
+          vaultName: VaultUtils.getName(oldVault),
+        },
+        newLoc: {
+          fname: newFname,
+          vaultName: VaultUtils.getName(newVault),
+        },
+        isEventSourceEngine: false,
+      };
+
+      const engine = getExtension().getEngine();
+      const updateNoteReferences = engine.renameNote(opts);
+      args.waitUntil(updateNoteReferences);
+    } catch (error: any) {
+      Sentry.captureException(error);
+      throw error;
+    }
+  }
+
+  /**
+   * method to make modifications to the workspace after the file is renamed.
+   * It updates the title of the note wrt the new fname and refreshes tree view
+   */
+  async onDidRenameFiles(args: FileRenameEvent) {
+    // No-op if we're not in a Dendron Workspace
+    if (!DendronExtension.isActive()) {
+      return;
+    }
+    try {
+      const files = args.files[0];
+      const { newUri } = files;
+      const fname = DNodeUtils.fname(newUri.fsPath);
+      const engine = getExtension().getEngine();
+      const { vaults, wsRoot } = getDWorkspace();
+      const newVault = VaultUtils.getVaultByNotePath({
+        vaults,
+        wsRoot,
+        fsPath: newUri.fsPath,
+      });
+      const vpath = vault2Path({ wsRoot, vault: newVault });
+      const newLocPath = path.join(vpath, fname + ".md");
+      const noteRaw = file2Note(newLocPath, newVault);
+      const newNote = NoteUtils.hydrate({
+        noteRaw,
+        noteHydrated: engine.notes[noteRaw.id],
+      });
+      newNote.title = NoteUtils.genTitle(fname);
+      await engine.writeNote(newNote, { updateExisting: true });
+    } catch (error: any) {
+      Sentry.captureException(error);
+      throw error;
+    } finally {
+      FileWatcher.refreshTree();
+    }
   }
 }

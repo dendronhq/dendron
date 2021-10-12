@@ -94,9 +94,10 @@ export const extractNoteIdFromHref = (data: {
   // * http://localhost:3005/vscode/0TDNEYgYvCs3ooZEuknNZ#head2
   // * http://localhost:3005/vscode/0TDNEYgYvCs3ooZEuknNZ
   //
-  // Regex: https://regex101.com/r/Ql3h3t/1
+  // Regex is in reference to uuid.ts/genUUID() to match the note id.
+  // Regex: https://regex101.com/r/7pDj6G/1
   const { path } = vscode.Uri.parse(data.href);
-  const noteId = path.match(/vscode\/([a-zA-Z0-9-]*)/)?.[1];
+  const noteId = path.match(/vscode\/([a-zA-Z0-9-_]*)/)?.[1];
 
   return noteId;
 };

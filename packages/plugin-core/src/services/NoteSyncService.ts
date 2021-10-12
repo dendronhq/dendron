@@ -24,11 +24,8 @@ import { getExtension, getDWorkspace } from "../workspace";
 let NOTE_SERVICE: NoteSyncService | undefined;
 
 const getFrontmatterPosition = (
-  editorOrDocument: vscode.TextEditor | vscode.TextDocument
+  document: vscode.TextDocument
 ): Promise<vscode.Position | false> => {
-  const document = VSCodeUtils.isTextDocument(editorOrDocument)
-    ? editorOrDocument
-    : editorOrDocument.document;
   return new Promise((resolve) => {
     const proc = MDUtilsV5.procRemarkParseNoData(
       {},

@@ -199,7 +199,10 @@ export const ALL_MIGRATIONS: Migrations[] = [
 
           const maybeOldLookupConfirmVaultOnCreate = rawDendronConfig.lookupConfirmVaultOnCreate;
           let confirmVaultOnCreate;
-          if (_.isUndefined(maybeOldLookupConfirmVaultOnCreate)) {
+          if (
+            _.isUndefined(maybeOldLookupConfirmVaultOnCreate) || 
+            maybeOldLookupConfirmVaultOnCreate === null
+          ) {
             if (commands.lookup.note.confirmVaultOnCreate) {
               confirmVaultOnCreate = commands.lookup.note.confirmVaultOnCreate;
             } else {

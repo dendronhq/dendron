@@ -5,6 +5,7 @@ import {
   InsertNoteIndexConfig,
   LookupConfig,
   NoteLookupConfig,
+  RandomNoteConfig,
   LookupSelectionMode,
   LookupSelectionModeEnum,
   ScratchConfig,
@@ -58,10 +59,32 @@ export const ALL_MIGRATIONS: Migrations[] = [
      
           // migrate randomNote
           const maybeOldRandomNote = rawDendronConfig.randomNote;
-          if (!_.isUndefined(maybeOldRandomNote)) {
-            commands.randomNote = maybeOldRandomNote === null
-              ? defaultCommandConfig.randomNote
-              : maybeOldRandomNote;
+          if (!_.isUndefined(maybeOldRandomNote) && maybeOldRandomNote !== null) {
+            let include;
+            let exclude;
+            if (
+              !_.isUndefined(maybeOldRandomNote.include) &&
+              maybeOldRandomNote.include !== null
+            ) {
+              include = maybeOldRandomNote.include;
+            }
+            if(
+              !_.isUndefined(maybeOldRandomNote.exclude) &&
+              maybeOldRandomNote.exclude !== null
+            ) {
+              exclude = maybeOldRandomNote.exclude;
+            }
+
+            const randomNote = {} as RandomNoteConfig;
+            if (!_.isUndefined(include)) {
+              randomNote["include"] = include;
+            }
+
+            if (!_.isUndefined(exclude)) {
+              randomNote["exclude"] = exclude;
+            }
+
+            commands.randomNote = randomNote;            
             delete rawDendronConfig.randomNote;
             delete dendronConfig.randomNote;
           }

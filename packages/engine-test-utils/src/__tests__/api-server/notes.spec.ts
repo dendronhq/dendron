@@ -3,9 +3,9 @@ import {
   DendronAPI,
   DendronError,
   DVault,
-  RenderNotePayload,
   NoteProps,
   NoteUtils,
+  RenderNotePayload,
 } from "@dendronhq/common-all";
 import { createServer, runEngineTestV5 } from "../../engine";
 import { ENGINE_HOOKS } from "../../presets";
@@ -58,7 +58,11 @@ describe("api/note/render tests", () => {
     const EXPECTED_FOO_RENDERED =
       '<h1 id="foo">Foo</h1>\n<p>foo body</p>\n<hr>\n<h2 id="children">Children</h2>\n<ol>\n<li><a href="foo.ch1.html">Ch1</a></li>\n</ol>';
 
-    let rendered: { data: RenderNotePayload; error: DendronError | null };
+    let renderFoo: () => Promise<{
+      data: RenderNotePayload;
+      error: DendronError | null;
+    }>;
+    let updateFoo: (noteUpdateValues: any) => Promise<void>;
 
     beforeAll(async () => {
       await runEngineTestV5(
@@ -75,21 +79,53 @@ describe("api/note/render tests", () => {
 
           const api = await getApiWithInitializedWS(wsRoot, vaults);
 
-          rendered = await api.noteRender({
-            ws: wsRoot,
-            id: fooNote.id,
-          });
+          renderFoo = async () => {
+            return await api.noteRender({
+              ws: wsRoot,
+              id: fooNote.id,
+            });
+          };
+
+          updateFoo = async (noteUpdateValues: any) => {
+            // Modify the value of foo
+            await api.engineUpdateNote({
+              ws: wsRoot,
+              opts: { newNode: false },
+              note: {
+                ...fooNote,
+                updated: fooNote.updated + 1,
+                ...noteUpdateValues,
+              },
+            });
+          };
         },
+
         { expect, preSetupHook: ENGINE_HOOKS.setupBasic }
       );
     });
 
-    it(`THEN data has expected rendered HTML.`, () => {
-      expect(rendered.data).toEqual(EXPECTED_FOO_RENDERED);
+    it(`THEN data has expected rendered HTML.`, async () => {
+      expect((await renderFoo()).data).toEqual(EXPECTED_FOO_RENDERED);
     });
 
-    it(`THEN error is null.`, () => {
-      expect(rendered.error).toBeNull();
+    it(`THEN error is null.`, async () => {
+      expect((await renderFoo()).error).toBeNull();
+    });
+
+    describe(`AND body is updated`, () => {
+      beforeAll(async () => {
+        await updateFoo({ body: "updated-body-val" });
+      });
+
+      it(`THEN old body content is NOT present in rendered note.`, async () => {
+        expect(!(await renderFoo()).data!.includes("foo body")).toBeTruthy();
+      });
+
+      it(`THEN updated body content is present in rendered note.`, async () => {
+        expect(
+          (await renderFoo()).data!.includes("updated-body-val")
+        ).toBeTruthy();
+      });
     });
   });
 

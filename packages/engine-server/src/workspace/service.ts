@@ -149,6 +149,7 @@ export class WorkspaceService {
   }
 
   get config(): IntermediateDendronConfig {
+    // `createConfig` function relies on this creating a config. If revising the code, make sure to update that function as well.
     return DConfig.getOrCreate(this.wsRoot);
   }
 
@@ -316,6 +317,93 @@ export class WorkspaceService {
       await this.addVaultToCodeWorkspace(vault);
     }
     return vault;
+  }
+
+  /** Converts a local vault to a remote vault, with `remoteUrl` as the upstream URL. */
+  async convertVaultRemote({
+    wsRoot,
+    vault: targetVault,
+    remoteUrl,
+  }: {
+    wsRoot: string;
+    vault: DVault;
+    remoteUrl: string;
+  }) {
+    // Add the vault to the gitignore of root, so that it doesn't show up as part of root anymore
+    const gitignore = path.join(wsRoot, ".gitignore");
+    const contents = await fs.readFile(gitignore, { encoding: "utf-8" });
+    if (!contents.match(new RegExp(`^${targetVault.fsPath}$`, "g"))) {
+      // Avoid duplicating the gitignore line if it was already there
+      await fs.appendFile(gitignore, `\n${targetVault.fsPath}\n`);
+    }
+    // Now, initialize a repository in it
+    const git = new Git({ localUrl: targetVault.fsPath, remoteUrl });
+    if (
+      !fs.access(
+        path.join(wsRoot, targetVault.fsPath, ".git"),
+        fs.constants.F_OK
+      )
+    ) {
+      // Avoid initializing if a git folder already exists
+      await git.init();
+    }
+    let remote = await git.getUpstream();
+    if (remote === undefined) {
+      remote = await git.remoteAdd();
+    }
+    const branch = await git.getCurrentBranch();
+    // Add the contents of the vault and push to initialize the upstream
+    await git.addAll();
+    await git.push({ remote, branch });
+    // Update `dendron.yml`, adding the remote to the converted vault
+    const config = this.config;
+    config.vaults = config.vaults.map((vault) => {
+      if (VaultUtils.isEqualV2(vault, targetVault)) {
+        vault.remote = { type: "git", url: remoteUrl };
+      }
+      return vault;
+    });
+    await this.setConfig(config);
+    return { remote, branch };
+  }
+
+  /** Converts a remote vault to a local vault. */
+  async convertVaultLocal({
+    wsRoot,
+    vault: targetVault,
+  }: {
+    wsRoot: string;
+    vault: DVault;
+  }) {
+    // Remove vault from gitignore of root, if it's there
+    try {
+      const gitignore = path.join(wsRoot, ".gitignore");
+      const contents = await fs.readFile(gitignore, { encoding: "utf-8" });
+
+      const newContents = contents.replace(
+        new RegExp(`^${targetVault.fsPath}$`, "g"),
+        ""
+      );
+      if (newContents !== contents) await fs.writeFile(gitignore, newContents);
+    } catch (err: any) {
+      // Ignore it if the `.gitignore` was missing
+      if (err?.code !== "ENOENT") throw err;
+    }
+    // Remove the .git folder from the vault
+    const gitFolder = path.join(wsRoot, targetVault.fsPath, ".git");
+    await fs.rm(gitFolder, {
+      recursive: true,
+      force: true /* It's OK if dir doesn't exist */,
+    });
+    // Update `dendron.yml`, removing the remote from the converted vault
+    const config = this.config;
+    config.vaults = config.vaults.map((vault) => {
+      if (VaultUtils.isEqualV2(vault, targetVault)) {
+        vault.remote = undefined;
+      }
+      return vault;
+    });
+    await this.setConfig(config);
   }
 
   /** For vaults in the same repository, ensure that their sync configurations do not conflict. Returns the coordinated sync config. */
@@ -513,6 +601,8 @@ export class WorkspaceService {
   }
 
   createConfig() {
+    // This line actually does something: it will create a config if one doesn't exist.
+    // eslint-disable-next-line no-unused-expressions
     this.config;
   }
 

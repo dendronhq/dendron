@@ -59,7 +59,9 @@ export class Git {
   /** Adds the `remoteUrl` set in the constructor as a remote. */
   async remoteAdd() {
     const { remoteUrl } = this.opts;
-    await this._execute(`git remote add origin ${remoteUrl}`);
+    const remoteName = "origin";
+    await this._execute(`git remote add ${remoteName} ${remoteUrl}`);
+    return remoteName;
   }
 
   async init() {
@@ -77,6 +79,23 @@ export class Git {
       if (opts.m.oldBranch) args.push(opts.m.oldBranch);
       args.push(opts.m.newBranch);
     }
+    await this._execute(args.join(" "));
+  }
+
+  /** Set the upstream (remote tracking) branch of `branch`.
+   *
+   * @param opts.branch The branch to configure, defaults to current branch.
+   * @param opts.origin The remote that will be set as upstream.
+   * @param opts.upstreamBranch The remote branch in `origin` that will be the upstream branch.
+   */
+  async setUpsteamTo(opts: {
+    branch?: string;
+    origin: string;
+    upsteamBranch: string;
+  }) {
+    const args = ["git", "branch"];
+    if (opts.branch) args.push(opts.branch);
+    args.push(`${opts.origin}/${opts.upsteamBranch}`);
     await this._execute(args.join(" "));
   }
 
@@ -125,14 +144,26 @@ export class Git {
 
   async getCurrentBranch() {
     const { localUrl: cwd } = this.opts;
-    const { stdout } = await execa(
-      "git",
-      [`rev-parse`, `--abbrev-ref`, `HEAD`],
-      {
-        cwd,
-      }
-    );
-    return stdout.trim();
+    try {
+      const { stdout } = await execa(
+        "git",
+        [`rev-parse`, `--abbrev-ref`, `HEAD`],
+        {
+          cwd,
+        }
+      );
+      return stdout.trim();
+    } catch (err) {
+      // rev-parse fails if there are no commits, let's try a fallback in that case
+      const { stdout } = await execa(
+        "git",
+        ["symbolic-ref", "-q", "--short", "HEAD"],
+        {
+          cwd,
+        }
+      );
+      return stdout.trim();
+    }
   }
 
   async hasChanges(opts?: { untrackedFiles?: "all" | "no" | "normal" }) {

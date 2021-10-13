@@ -1,11 +1,11 @@
 import {
-  DendronConfig,
+  CONSTANTS,
+  IntermediateDendronConfig,
   DendronError,
   DNodeUtils,
   DVault,
   DWorkspaceV2,
   getSlugger,
-  getStage,
   isBlockAnchor,
   NoteProps,
   VaultUtils,
@@ -20,6 +20,7 @@ import path from "path";
 import { URI } from "vscode-uri";
 
 export class WorkspaceUtils {
+  /** Finds the workspace type using the VSCode plugin workspace variables. */
   static getWorkspaceType({
     workspaceFolders,
     workspaceFile,
@@ -29,21 +30,28 @@ export class WorkspaceUtils {
   }): WorkspaceType {
     if (
       !_.isUndefined(workspaceFile) &&
-      path.basename(workspaceFile.fsPath) === "dendron.code-workspace"
+      path.basename(workspaceFile.fsPath) === CONSTANTS.DENDRON_WS_NAME
     ) {
       return WorkspaceType.CODE;
     }
-    if (!_.isUndefined(workspaceFolders) && getStage() !== "prod") {
-      const dendronWorkspaceFolders =
-        workspaceFolders.filter((ent) => {
-          return fs.pathExistsSync(path.join(ent.uri.fsPath, "dendron.yml"));
-        }) || [];
-      if (dendronWorkspaceFolders.length > 0) {
-        return WorkspaceType.NATIVE;
-      }
+    if (!_.isUndefined(workspaceFolders)) {
+      const rootFolder = this.findWSRootInWorkspaceFolders(workspaceFolders);
+      if (rootFolder) return WorkspaceType.NATIVE;
     }
     return WorkspaceType.NONE;
   }
+
+  /** Finds the workspace type by analyzing the given directory. Use if plugin is not available. */
+  static getWorkspaceTypeFromDir(dir: string) {
+    if (fs.pathExistsSync(path.join(dir, CONSTANTS.DENDRON_WS_NAME))) {
+      return WorkspaceType.CODE;
+    }
+    if (fs.pathExistsSync(path.join(dir, CONSTANTS.DENDRON_CONFIG_FILE))) {
+      return WorkspaceType.NATIVE;
+    }
+    return WorkspaceType.NONE;
+  }
+
   /**
    * Find wsRoot if exists
    * @returns
@@ -119,7 +127,7 @@ export class WorkspaceUtils {
    *
    */
   static getNoteUrl(opts: {
-    config: DendronConfig;
+    config: IntermediateDendronConfig;
     note: NoteProps;
     vault: DVault;
     urlRoot?: string;

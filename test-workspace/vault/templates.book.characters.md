@@ -1,10 +1,11 @@
 ---
-id: vJtdB9wgSvotJHwvt76EY
+id: 7HNjtDynBZxJiO9fOlAoZ
 title: Characters
 desc: ''
-updated: 1633502732226
-created: 1633502700953
+updated: 1634097351594
+created: 1634097336682
 ---
 
-## Main Character
-- 
+## Main characters:
+
+## Side characters:

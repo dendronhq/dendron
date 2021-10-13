@@ -1,4 +1,8 @@
-import { DendronConfig, NoteProps, WorkspaceOpts } from "@dendronhq/common-all";
+import {
+  IntermediateDendronConfig,
+  NoteProps,
+  WorkspaceOpts
+} from "@dendronhq/common-all";
 import {
   AssertUtils,
   NoteTestUtilsV4,
@@ -222,7 +226,7 @@ describe("noteRefV2", () => {
       name: "WITH_FM_TITLE",
       setupFunc: async (opts) => {
         const { engine, vaults } = opts;
-        const configOverride: DendronConfig = {
+        const configOverride: IntermediateDendronConfig = {
           ...opts.engine.config,
           useFMTitle: true,
         };
@@ -255,7 +259,7 @@ describe("noteRefV2", () => {
       name: "WITH_NOTE_LINK_TITLE",
       setupFunc: async (opts) => {
         const { engine, vaults } = opts;
-        const configOverride: DendronConfig = {
+        const configOverride: IntermediateDendronConfig = {
           ...opts.engine.config,
           useNoteTitleForLink: true,
         };

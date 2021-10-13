@@ -10,7 +10,8 @@ import {
   SchemaProps,
 } from "./foundation";
 import { DHookDict } from "./hooks";
-import { DendronConfig, DVault } from "./workspace";
+import { DVault } from "./workspace";
+import { IntermediateDendronConfig } from "./intermediateConfigs";
 
 export enum ResponseCode {
   OK = 200,
@@ -189,6 +190,10 @@ export interface RespV2<T> {
   error: IDendronError | null;
 }
 
+export type BooleanResp =
+  | { data: true; error: null }
+  | { data: false; error: DendronError };
+
 export function isDendronResp<T = any>(args: any): args is RespV2<T> {
   return args?.error instanceof DendronError;
 }
@@ -267,11 +272,15 @@ export type DEngineInitPayload = {
   schemas: SchemaModuleDict;
   wsRoot: string;
   vaults: DVault[];
-  config: DendronConfig;
+  config: IntermediateDendronConfig;
 };
 export type RenameNoteOpts = {
   oldLoc: DNoteLoc;
   newLoc: DNoteLoc;
+  /**
+   * added for dendron to recognise vscode `rename` menu option
+   */
+  isEventSourceEngine?: boolean;
 };
 
 export type RenderNoteOpts = {
@@ -284,7 +293,7 @@ export type GetNoteBlocksOpts = {
 };
 
 export type ConfigWriteOpts = {
-  config: DendronConfig;
+  config: IntermediateDendronConfig;
 };
 
 // === Engine and Store Main
@@ -300,7 +309,7 @@ export type DCommonProps = {
   configRoot: string;
   vaults: DVault[];
   links: DLink[];
-  config: DendronConfig;
+  config: IntermediateDendronConfig;
 };
 
 export type NoteChangeEntry = {
@@ -326,7 +335,7 @@ export type NoteBlock = {
 export type WriteNoteResp = Required<RespV2<NoteChangeEntry[]>>;
 
 // --- Common
-export type ConfigGetPayload = DendronConfig;
+export type ConfigGetPayload = IntermediateDendronConfig;
 
 export type DCommonMethods = {
   bulkAddNotes: (
@@ -537,7 +546,7 @@ export type WorkspaceVault = {
 export type WorkspaceOpts = {
   wsRoot: string;
   vaults: DVault[];
-  dendronConfig?: DendronConfig;
+  dendronConfig?: IntermediateDendronConfig;
 };
 
 /**

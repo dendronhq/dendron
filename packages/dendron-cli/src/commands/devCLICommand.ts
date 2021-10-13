@@ -2,10 +2,13 @@ import {
   assertUnreachable,
   DendronError,
   error2PlainObject,
+  CLIEvents,
 } from "@dendronhq/common-all";
 import fs from "fs-extra";
+import { SegmentClient, TelemetryStatus } from "@dendronhq/common-server";
 import path from "path";
 import yargs from "yargs";
+import { CLIAnalyticsUtils } from "..";
 import {
   BuildUtils,
   ExtensionTarget,
@@ -28,6 +31,9 @@ export enum DevCommands {
   PREP_PLUGIN = "prep_plugin",
   PACKAGE_PLUGIN = "package_plugin",
   INSTALL_PLUGIN = "install_plugin",
+  ENABLE_TELEMETRY = "enable_telemetry",
+  DISABLE_TELEMETRY = "disable_telemetry",
+  SHOW_TELEMETRY = "show_telemetry",
 }
 
 type CommandOpts = CommandCLIOpts & CommandCommonProps & Partial<BuildCmdOpts>;
@@ -219,6 +225,18 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           await BuildUtils.installPluginLocally(currentVersion);
           return { error: null };
         }
+        case DevCommands.ENABLE_TELEMETRY: {
+          this.enableTelemetry();
+          return { error: null };
+        }
+        case DevCommands.DISABLE_TELEMETRY: {
+          this.disableTelemetry();
+          return { error: null };
+        }
+        case DevCommands.SHOW_TELEMETRY: {
+          CLIAnalyticsUtils.showTelemetryMessage();
+          return { error: null};
+        }
         default:
           return assertUnreachable();
       }
@@ -312,5 +330,24 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       return Object.values(ExtensionTarget).includes(opts.extensionTarget);
     }
     return true;
+  }
+  
+  enableTelemetry() {
+    const reason = TelemetryStatus.ENABLED_BY_CLI_COMMAND;
+    SegmentClient.enable(reason);
+    CLIAnalyticsUtils.track(CLIEvents.CLITelemetryEnabled, { reason });
+    const message = [
+      "Telemetry is enabled.",
+      "Thank you for helping us improve Dendron 🌱"
+    ].join("\n");
+    this.print(message);
+  }
+
+  disableTelemetry() {
+    const reason = TelemetryStatus.DISABLED_BY_CLI_COMMAND;
+    CLIAnalyticsUtils.track(CLIEvents.CLITelemetryDisabled, { reason });
+    SegmentClient.disable(reason);
+    const message = "Telemetry is disabled."
+    this.print(message);
   }
 }

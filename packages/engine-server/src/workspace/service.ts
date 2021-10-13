@@ -1,6 +1,6 @@
 import {
   CONSTANTS,
-  DendronConfig,
+  IntermediateDendronConfig,
   DendronError,
   DuplicateNoteAction,
   DUser,
@@ -34,7 +34,7 @@ import _ from "lodash";
 import path from "path";
 import { DConfig } from "../config";
 import { MetadataService } from "../metadata";
-import { MigrationServce } from "../migrations";
+import { MigrationServce, MigrationChangeSetStatus } from "../migrations";
 import { SeedService, SeedUtils } from "../seed";
 import { Git } from "../topics/git";
 import {
@@ -45,6 +45,7 @@ import {
 } from "../utils";
 import { WorkspaceUtils } from "./utils";
 import { WorkspaceConfig } from "./vscode";
+
 const DENDRON_WS_NAME = CONSTANTS.DENDRON_WS_NAME;
 
 export type PathExistBehavior = "delete" | "abort" | "continue";
@@ -141,7 +142,7 @@ export class WorkspaceService {
     }
   }
 
-  get config(): DendronConfig {
+  get config(): IntermediateDendronConfig {
     return DConfig.defaults(DConfig.getOrCreate(this.wsRoot));
   }
 
@@ -153,7 +154,7 @@ export class WorkspaceService {
     return this._seedService;
   }
 
-  async setConfig(config: DendronConfig) {
+  async setConfig(config: IntermediateDendronConfig) {
     const wsRoot = this.wsRoot;
     return DConfig.writeConfig({ wsRoot, config });
   }
@@ -201,13 +202,13 @@ export class WorkspaceService {
    * @param opts.vault - {@link DVault} to add to workspace
    * @param opts.config - if passed it, make modifications on passed in config instead of {wsRoot}/dendron.yml
    * @param opts.writeConfig - default: true, add to dendron.yml
-   * @param opts.addToWorkspace - default: false, add to dendron.code-workspace
+   * @param opts.addToWorkspace - default: false, add to dendron.code-workspace. Make sure to keep false for Native workspaces.
    * @returns
    */
   async addVault(
     opts: {
       vault: DVault;
-      config?: DendronConfig;
+      config?: IntermediateDendronConfig;
     } & AddRemoveCommonOpts
   ) {
     const { vault, config, updateConfig, updateWorkspace } = _.defaults(opts, {
@@ -246,6 +247,14 @@ export class WorkspaceService {
         if (opts.onUpdatedWorkspace) {
           await opts.onUpdatedWorkspace();
         }
+      }
+    } else {
+      // Run the hooks even if not updating the workspace file (native workspace), because other code depends on it.
+      if (opts.onUpdatingWorkspace) {
+        await opts.onUpdatingWorkspace();
+      }
+      if (opts.onUpdatedWorkspace) {
+        await opts.onUpdatedWorkspace();
       }
     }
     return vault;
@@ -290,9 +299,9 @@ export class WorkspaceService {
     }
 
     if (!noAddToConfig) {
-      await this.addVault({ ...opts });
+      await this.addVault({ ...opts, updateWorkspace: false });
     }
-    if (opts.addToCodeWorkspace) {
+    if (opts.addToCodeWorkspace || opts.updateWorkspace) {
       await this.addVaultToCodeWorkspace(vault);
     }
     return vault;
@@ -459,6 +468,14 @@ export class WorkspaceService {
 
       writeJSONWithComments(wsPath, settings);
 
+      if (opts.onUpdatedWorkspace) {
+        await opts.onUpdatedWorkspace();
+      }
+    } else {
+      // Run the hooks even if not updating the workspace file (native workspace), because other code depends on it.
+      if (opts.onUpdatingWorkspace) {
+        opts.onUpdatingWorkspace();
+      }
       if (opts.onUpdatedWorkspace) {
         await opts.onUpdatedWorkspace();
       }
@@ -760,7 +777,7 @@ export class WorkspaceService {
     workspaceInstallStatus: InstallStatus;
     currentVersion: string;
     previousVersion: string;
-    dendronConfig: DendronConfig;
+    dendronConfig: IntermediateDendronConfig;
     wsConfig?: WorkspaceSettings;
   }) {
     // check if we need to force a migration
@@ -773,13 +790,15 @@ export class WorkspaceService {
       this.logger.error(error);
     }
 
+    let changes: MigrationChangeSetStatus[] = [];
+
     if (
       MigrationServce.shouldRunMigration({
         force: forceUpgrade,
         workspaceInstallStatus,
       })
     ) {
-      const changes = await MigrationServce.applyMigrationRules({
+      changes = await MigrationServce.applyMigrationRules({
         currentVersion,
         previousVersion,
         dendronConfig,
@@ -793,6 +812,8 @@ export class WorkspaceService {
         dendronConfig = data.dendronConfig;
       }
     }
+
+    return changes;
   }
 
   /**
@@ -801,7 +822,7 @@ export class WorkspaceService {
    * @param skipPrivate skip cloning and pulling of private vaults. default: false
    */
   async syncVaults(opts: {
-    config: DendronConfig;
+    config: IntermediateDendronConfig;
     progressIndicator?: () => void;
     urlTransformer?: UrlTransformerFunc;
     fetchAndPull?: boolean;

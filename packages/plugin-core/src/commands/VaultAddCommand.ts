@@ -3,6 +3,7 @@ import {
   DWorkspace,
   VaultUtils,
   WorkspaceSettings,
+  WorkspaceType,
 } from "@dendronhq/common-all";
 import {
   assignJSONWithComment,
@@ -216,6 +217,7 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
   }
 
   async addVaultToWorkspace(vault: DVault) {
+    if (getDWorkspace().type === WorkspaceType.NATIVE) return;
     const wsRoot = getDWorkspace().wsRoot;
 
     // workspace file

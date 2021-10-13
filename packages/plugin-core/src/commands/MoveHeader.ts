@@ -17,6 +17,7 @@ import {
   visit,
   Heading,
   Node,
+  Anchor,
 } from "@dendronhq/engine-server";
 import { LookupControllerV3 } from "../components/lookup/LookupControllerV3";
 import {
@@ -63,6 +64,11 @@ export class MoveHeaderCommand extends BasicCommand<
 
   private noActiveNoteError = new DendronError({
     message: "No note open.",
+    severity: ERROR_SEVERITY.MINOR,
+  });
+
+  private noNodesToMoveError = new DendronError({
+    message: "There are no nodes to move. If your selection is valid, try again after reloading VSCode.",
     severity: ERROR_SEVERITY.MINOR,
   });
 
@@ -152,6 +158,10 @@ export class MoveHeaderCommand extends BasicCommand<
       targetHeader
     );
 
+    if (nodesToMove.length === 0) {
+      throw this.noNodesToMoveError;
+    }
+
     const lc = this.promptForDestination(opts);
 
     // Wait for provider
@@ -227,7 +237,7 @@ export class MoveHeaderCommand extends BasicCommand<
       anchorsAfter,
       RemarkUtils.hasIdenticalChildren
     );
-    const anchorNamesToUpdate = _.map(anchorsToUpdate, (anchor) => {
+    const anchorNamesToUpdate = _.map(anchorsToUpdate, (anchor: Anchor) => {
       const slugger = getSlugger();
       const payload = AnchorUtils.anchorNode2anchor(anchor, slugger);
       return payload![0];
@@ -263,6 +273,33 @@ export class MoveHeaderCommand extends BasicCommand<
     return note;
   }
 
+  private hasAnchorsToUpdate(
+    ref: FoundRefT,
+    anchorNamesToUpdate: string[],
+  ) {
+    const matchText = ref.matchText;
+    const wikiLinkRegEx = /\[\[(?<text>.+?)\]\]/;
+        
+    const wikiLinkMatch = wikiLinkRegEx.exec(matchText);
+
+    if (wikiLinkMatch && wikiLinkMatch.groups?.text) {
+      let processed = wikiLinkMatch.groups.text;
+      if (processed.includes("|")) {
+        const [ _alias, link ] = processed.split("|");
+        processed = link;
+      }
+
+      if (processed.includes("#")) {
+        const [ _fname, anchor ] = processed.split("#");
+        return anchorNamesToUpdate.includes(anchor);
+      } else {
+        return false;
+      }
+    } else {
+      return false;
+    }
+  }
+
   /**
    * Helper for {@link MoveHeaderCommand.execute}
    * Given a list of found references, update those references
@@ -284,6 +321,7 @@ export class MoveHeaderCommand extends BasicCommand<
     const updated: NoteProps[] = [];
     foundReferences
       .filter((ref) => !ref.isCandidate)
+      .filter((ref) => this.hasAnchorsToUpdate(ref, anchorNamesToUpdate))
       .map((ref) => this.getNoteByLocation(ref.location, engine))
       .filter((note) => note !== undefined)
       .forEach(async (note) => {
@@ -320,7 +358,6 @@ export class MoveHeaderCommand extends BasicCommand<
       originProc,
       engine,
     } = opts;
-
     // deep copy the origin before mutating it
     const originDeepCopy = _.cloneDeep(origin);
     // remove header from origin
@@ -332,7 +369,6 @@ export class MoveHeaderCommand extends BasicCommand<
 
     // append header to destination
     await this.appendHeaderToDestination(engine, dest!, nodesToMove);
-
     delayedUpdateDecorations();
 
     // update reference

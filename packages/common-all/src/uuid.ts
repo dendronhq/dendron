@@ -1,5 +1,4 @@
 import { customAlphabet as nanoid } from "nanoid";
-import { customAlphabet as nanoidAsync } from "nanoid/async";
 import { customAlphabet as nanoidInsecure } from "nanoid/non-secure";
 import { alphanumeric } from "nanoid-dictionary";
 
@@ -11,19 +10,22 @@ const SHORT_ID_LENGTH = 12;
 /** Default length for nanoids. */
 const LONG_ID_LENGTH = 21;
 
-/** Generates a random identifier.
+/**
+ * Generates a random identifier.
+ *
+ * Backward compatibility notes:
+ * Previously this id has been generated differently including using
+ * ------------------------------
+ * * uuidv4(); from "uuid/v4";
+ * * { v4 } from "uuid";
+ * * nanoid(); from "nanoid";  uses: [A-Za-z0-9_-]
+ * ------------------------------
+ * Hence even though right now we only have alphanumeric ids, previously there
+ * has been ids with `-` and `_` around, that still exist in our users notes.
  *
  * @returns A url-safe, random identifier.
  */
 export const genUUID = nanoid(alphanumeric, LONG_ID_LENGTH);
-
-/** Generates a random identifier asynchronously.
- *
- * The entropy collection is performed asynchronously, allowing other code to run in the meantime.
- *
- * @returns A url-safe, random identifier.
- */
-export const genUUIDasync = nanoidAsync(alphanumeric, LONG_ID_LENGTH);
 
 /** Generates a shorter random identifier, faster but with potential cryptographic risks.
  *

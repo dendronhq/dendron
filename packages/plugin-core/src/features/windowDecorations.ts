@@ -135,6 +135,8 @@ function warnExpensiveDecorationsDisabled(note: NoteProps) {
 export function updateDecorations(activeEditor: TextEditor) {
   const ctx = "updateDecorations";
   const text = activeEditor.document.getText();
+  // Warn for missing or bad frontmatter and broken wikilinks
+  const allWarnings: Diagnostic[] = [];
   // Only show decorations & warnings for notes
   let note: NoteProps | undefined;
   try {
@@ -182,8 +184,6 @@ export function updateDecorations(activeEditor: TextEditor) {
       frontmatter = node as FrontmatterContent;
   });
 
-  // Warn for missing or bad frontmatter
-  const allWarnings: Diagnostic[] = [];
   if (_.isUndefined(frontmatter)) {
     allWarnings.push(warnMissingFrontmatter(activeEditor.document));
   } else {
@@ -346,7 +346,7 @@ function decorateTag({
   return [{ type, decoration }];
 }
 
-function linkedNoteType({
+export function linkedNoteType({
   fname,
   anchorStart,
   anchorEnd,

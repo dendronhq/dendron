@@ -24,14 +24,14 @@ import { getExtension, getDWorkspace } from "../workspace";
 let NOTE_SERVICE: NoteSyncService | undefined;
 
 const getFrontmatterPosition = (
-  editor: vscode.TextEditor
+  document: vscode.TextDocument
 ): Promise<vscode.Position | false> => {
   return new Promise((resolve) => {
     const proc = MDUtilsV5.procRemarkParseNoData(
       {},
       { dest: DendronASTDest.MD_DENDRON }
     );
-    const parsed = proc.parse(editor.document.getText());
+    const parsed = proc.parse(document.getText());
     visit(parsed, ["yaml"], (node) => {
       if (_.isUndefined(node.position)) return resolve(false); // Should never happen
       const position = VSCodeUtils.point2VSCodePosition(node.position.end, {
@@ -69,11 +69,11 @@ export class NoteSyncService {
    * @returns
    */
   async onDidChange(
-    editor: vscode.TextEditor,
+    document: vscode.TextDocument,
     hints?: { contentChanges: readonly vscode.TextDocumentContentChangeEvent[] }
   ) {
     const ctx = "NoteSyncService:onDidChange";
-    const uri = editor.document.uri;
+    const uri = document.uri;
     const { engine } = getDWorkspace();
     const fname = path.basename(uri.fsPath, ".md");
 
@@ -82,7 +82,7 @@ export class NoteSyncService {
       return;
     }
 
-    const maybePos = await getFrontmatterPosition(editor);
+    const maybePos = await getFrontmatterPosition(document);
     let fmChangeOnly = false;
     if (!maybePos) {
       this.L.debug({ ctx, uri: uri.fsPath, msg: "no frontmatter found" });
@@ -112,13 +112,7 @@ export class NoteSyncService {
       wsRoot: getDWorkspace().wsRoot,
     }) as NoteProps;
 
-    // NOTE: it might be worthwile to only do this after checking that the current note is still active
-    //
-    // we have this logic currently and it doesn't seem to be causing issues
-    // this could lead to thrashing if user makes a change and quickly changes to a dififerent active window
-    // in practice, this has never been reported
-    const doc = editor.document;
-    const content = doc.getText();
+    const content = document.getText();
     if (!WorkspaceUtils.noteContentChanged({ content, note: noteHydrated })) {
       this.L.debug({
         ctx,

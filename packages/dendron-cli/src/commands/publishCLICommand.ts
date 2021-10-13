@@ -6,9 +6,10 @@ import {
   getStage,
   Stage,
 } from "@dendronhq/common-all";
-import { execa } from "@dendronhq/engine-server";
+import { execa, SiteUtils } from "@dendronhq/engine-server";
 import { NextjsExportConfig, NextjsExportPod } from "@dendronhq/pods-core";
 import _ from "lodash";
+import ora from "ora";
 import path from "path";
 import yargs from "yargs";
 import { CLIUtils } from "../utils/cli";
@@ -16,9 +17,15 @@ import { CLICommand } from "./base";
 import { ExportPodCLICommand } from "./exportPod";
 import { PodSource } from "./pod";
 import { SetupEngineCLIOpts } from "./utils";
+import prompts from "prompts";
+import fs from "fs-extra";
 
 const $ = (cmd: string, opts?: any) => {
   return execa.commandSync(cmd, { shell: true, ...opts });
+};
+
+const $$ = (cmd: string, opts?: any) => {
+  return execa.command(cmd, { shell: true, ...opts });
 };
 
 type CommandCLIOpts = {
@@ -42,9 +49,20 @@ export enum PublishCommands {
    * Create metadata needed to builid dendron nextjs template
    */
   BUILD = "build",
+  /**
+   * Builds the website
+   */
+  DEV = "dev",
+  /**
+   * Export website
+   */
+  EXPORT = "export",
+}
+export enum PublishTarget {
+  GITHUB = "github",
 }
 
-type CommandOpts = Omit<CommandCLIOpts, "overrides"> & Partial<BuildCmdOpts>;
+type CommandOpts = Omit<CommandCLIOpts, "overrides"> & Partial<ExportCmdOpts>;
 
 type CommandOutput = Partial<{ error: DendronError; data: any }>;
 
@@ -60,6 +78,8 @@ type BuildCmdOpts = Omit<CommandCLIOpts, keyof CommandCLIOnlyOpts> & {
    */
   overrides?: BuildOverrides;
 };
+type DevCmdOpts = BuildCmdOpts & { noBuild?: boolean };
+type ExportCmdOpts = DevCmdOpts & { target?: PublishTarget; yes?: boolean };
 
 export { CommandOpts as PublishCLICommandOpts };
 export { CommandCLIOpts as PublishCLICommandCLIOpts };
@@ -102,6 +122,11 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       describe: "use existing dendron engine instead of spawning a new one",
       type: "boolean",
     });
+    args.option("noBuild", {
+      describe: "skip building notes",
+      type: "boolean",
+      default: false,
+    });
     args.option("overrides", {
       describe: "override existing siteConfig properties",
       type: "string",
@@ -133,13 +158,21 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     try {
       switch (cmd) {
         case PublishCommands.INIT: {
-          return this.init(opts);
+          return await this.init(opts);
         }
         case PublishCommands.BUILD: {
           return this.build(opts);
         }
+        case PublishCommands.DEV: {
+          await this.dev(opts);
+          return { error: null };
+        }
+        case PublishCommands.EXPORT: {
+          await this.export(opts);
+          return { error: null };
+        }
         default:
-          return assertUnreachable();
+          assertUnreachable();
       }
     } catch (err: any) {
       this.L.error(err);
@@ -185,34 +218,119 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
         );
       }
     }
-    return cli.execute(opts);
+    const { data, error } = SiteUtils.validateConfig(opts.engine.config.site);
+    if (!data) {
+      return { data, error };
+    }
+    return { data: await cli.execute(opts), error: null };
   }
 
-  init(opts: { wsRoot: string }) {
+  _startNextDev(opts: { wsRoot: string }) {
+    const cwd = opts.wsRoot;
+    const cmdDev = "npm run dev";
+    return $$(cmdDev, { cwd: path.join(cwd, ".next") }).stdout?.pipe(
+      process.stdout
+    );
+  }
+
+  _startNextExport(opts: { wsRoot: string }) {
+    const cwd = opts.wsRoot;
+    const cmdDev = "npm run export";
+    const out = $$(cmdDev, { cwd: path.join(cwd, ".next") });
+    out.stdout?.pipe(process.stdout);
+    return out;
+  }
+
+  async _handlePublishTarget(target: PublishTarget, opts: ExportCmdOpts) {
+    const { wsRoot } = opts;
+    switch (target) {
+      case PublishTarget.GITHUB:
+        const docsPath = path.join(wsRoot, "docs");
+        const outPath = path.join(wsRoot, ".next", "out");
+        this.print("building github target...");
+
+        // if `out` no exist, exit
+        if (!fs.pathExistsSync(outPath)) {
+          this.print(`${outPath} does not exist. exiting`);
+          return;
+        }
+
+        // if docs exist, remove
+        const docsExist = fs.pathExistsSync(docsPath);
+        if (docsExist) {
+          if (!opts.yes) {
+            const response = await prompts({
+              type: "confirm",
+              name: "value",
+              message: "Docs folder exists. Delete?",
+              initial: false,
+            });
+            if (!response.value) {
+              this.print("exiting");
+              return;
+            }
+          }
+          fs.removeSync(docsPath);
+        }
+
+        // build docs
+        fs.moveSync(outPath, docsPath);
+        fs.ensureFileSync(path.join(docsPath, ".nojekyll"));
+        this.print(`done export. files available at ${docsPath}`);
+
+        return;
+      default:
+        assertUnreachable();
+    }
+  }
+
+  async init(opts: { wsRoot: string }) {
     const cwd = opts.wsRoot;
     this.print(`initializing publishing at ${cwd}...`);
     const cmd = `git clone https://github.com/dendronhq/nextjs-template.git .next`;
     $(cmd, { cwd });
-    this.print(
-      `run "cd ${getNextRoot(
-        cwd
-      )} && npm install" to finish the install process`
-    );
+    const cmdInstall = `npm install`;
+    const spinner = ora("Installing dependencies....").start();
+    await $$(cmdInstall, { cwd: path.join(cwd, ".next") });
+    spinner.stop();
+    this.print(`Your Dendron Next Template is now initialized in ".next"`);
     return { error: null };
   }
 
   async build({ wsRoot, dest, attach, overrides }: BuildCmdOpts) {
     this.print(`generating metadata for publishing...`);
-    await this._buildNextData({
+    const { error } = await this._buildNextData({
       wsRoot,
       stage: getStage(),
       dest,
       attach,
       overrides,
     });
-    this.print(
-      `to preview changes, run "cd ${getNextRoot(wsRoot)} && npm install && npx next dev"`
-    );
+    if (error) {
+      this.print("ERROR: " + error.message);
+      return { error };
+    }
     return { error: null };
+  }
+
+  async dev(opts: DevCmdOpts) {
+    if (opts.noBuild) {
+      this.print("skipping build...");
+    } else {
+      await this.build(opts);
+    }
+    this._startNextDev(opts);
+  }
+
+  async export(opts: ExportCmdOpts) {
+    if (opts.noBuild) {
+      this.print("skipping build...");
+    } else {
+      await this.build(opts);
+    }
+    await this._startNextExport(opts);
+    if (opts.target) {
+      await this._handlePublishTarget(opts.target, opts);
+    }
   }
 }

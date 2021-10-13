@@ -1,5 +1,5 @@
 import {
-  DendronConfig,
+  IntermediateDendronConfig,
   getStage,
   InstallStatus,
   WorkspaceSettings,
@@ -14,7 +14,7 @@ import { MigrationChangeSetStatus, Migrations } from "./types";
 type ApplyMigrationRuleOpts = {
   currentVersion: string;
   previousVersion: string;
-  dendronConfig: DendronConfig;
+  dendronConfig: IntermediateDendronConfig;
   wsConfig?: WorkspaceSettings;
   wsService: WorkspaceService;
   migrations?: Migrations[];
@@ -33,7 +33,7 @@ export class MigrationServce {
     // run migrations from oldest to newest
     const migrationsToRun = _.reverse(
       _.takeWhile(migrations || ALL_MIGRATIONS, (ent) => {
-        const out = semver.lte(previousVersion, ent.version);
+        const out = semver.lte(previousVersion, ent.version) && semver.gte(currentVersion, ent.version)
         return out;
       })
     );
@@ -65,7 +65,8 @@ export class MigrationServce {
       const { data } = _.last(changes)!;
       data.dendronConfig.dendronVersion = currentVersion;
       wsService.setConfig(data.dendronConfig);
-      wsService.setWorkspaceConfig(data.wsConfig);
+      // wsConfig is undefined for native workspaces
+      if (data.wsConfig) wsService.setWorkspaceConfig(data.wsConfig);
     }
     return changes;
   }

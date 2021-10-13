@@ -40,7 +40,7 @@ export function prepChildrenForCollection(
   noteIndex: NoteProps
 ) {
   if (note.children.length <= 0) {
-    return;
+    return null;
   }
   // console.log({note, notes, noteIndex});
   let children = note.children.map((id) => notes[id]);

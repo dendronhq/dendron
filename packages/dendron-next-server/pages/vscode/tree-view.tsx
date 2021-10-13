@@ -1,5 +1,5 @@
 import { BookOutlined, PlusOutlined, NumberOutlined } from "@ant-design/icons";
-import { Spin , Tree, TreeProps } from "antd";
+import { Spin, Tree, TreeProps } from "antd";
 import {
   DendronTreeViewKey,
   DMessageSource,
@@ -20,13 +20,14 @@ import {
   engineSlice,
   ideHooks,
   postVSCodeMessage,
+  TreeViewUtils as CommonTreeViewUtils,
+  ideSlice,
 } from "@dendronhq/common-frontend";
 
 import _ from "lodash";
 import { DataNode } from "rc-tree/lib/interface";
 import React, { useState } from "react";
 import { DendronProps } from "../../lib/types";
-import { ideSlice } from "@dendronhq/common-frontend/lib/features/ide/slice";
 
 type OnExpandFunc = TreeProps["onExpand"];
 type OnSelectFunc = TreeProps["onSelect"];
@@ -99,10 +100,10 @@ class TreeViewUtils {
       key: note.id,
       title,
       icon,
-      children: _.sortBy(
-        note.children,
-        (noteId) => !noteDict[noteId]?.fname?.startsWith(TAGS_HIERARCHY)
-      )
+      children: CommonTreeViewUtils.sortNotesAtLevel({
+        noteIds: note.children,
+        noteDict,
+      })
         .map((noteId) => TreeViewUtils.note2TreeDatanote({ noteId, noteDict }))
         .filter(isNotUndefined),
     };
@@ -264,7 +265,7 @@ function TreeView({
           onExpand={onExpand}
           onSelect={onSelect}
           treeData={treeData}
-         />
+        />
       ) : (
         <Spin />
       )}

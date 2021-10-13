@@ -13,6 +13,7 @@ import {
   VaultUtils,
   VSCodeEvents,
   WorkspaceType,
+  MigrationEvents,
 } from "@dendronhq/common-all";
 import {
   getDurationMilliseconds,
@@ -25,6 +26,7 @@ import {
   MetadataService,
   WorkspaceService,
   WorkspaceUtils,
+  MigrationChangeSetStatus,
 } from "@dendronhq/engine-server";
 import { RewriteFrames } from "@sentry/integrations";
 import * as Sentry from "@sentry/node";
@@ -35,7 +37,12 @@ import { Duration } from "luxon";
 import path from "path";
 import semver from "semver";
 import * as vscode from "vscode";
-import { CONFIG, DendronContext, DENDRON_COMMANDS, GLOBAL_STATE } from "./constants";
+import {
+  CONFIG,
+  DendronContext,
+  DENDRON_COMMANDS,
+  GLOBAL_STATE,
+} from "./constants";
 import { Logger } from "./logger";
 import { migrateConfig } from "./migration";
 import { StateService } from "./services/stateService";
@@ -253,6 +260,12 @@ export async function _activate(
     const ws = DendronExtension.getOrCreate(context, {
       skipSetup: stage === "test",
     });
+    // Need to recompute this for tests, because the instance of DendronExtension doesn't get re-created.
+    // Probably also needed if the user switches from one workspace to the other.
+    ws.type = WorkspaceUtils.getWorkspaceType({
+      workspaceFile: vscode.workspace.workspaceFile,
+      workspaceFolders: vscode.workspace.workspaceFolders,
+    });
 
     const currentVersion = DendronExtension.version();
     const previousWorkspaceVersion = stateService.getWorkspaceVersion();
@@ -306,15 +319,28 @@ export async function _activate(
       const wsRoot = wsImpl.wsRoot;
       const wsService = new WorkspaceService({ wsRoot });
 
-      await wsService.runMigrationsIfNecessary({
+      // initialize client
+      setupSegmentClient(wsImpl);
+
+      const changes = await wsService.runMigrationsIfNecessary({
         currentVersion,
         previousVersion: previousWorkspaceVersion,
         dendronConfig,
         workspaceInstallStatus,
         wsConfig: await DendronExtension.instanceV2().getWorkspaceSettings(),
       });
-      // initialize client
-      setupSegmentClient(wsImpl);
+
+      if (changes.length > 0) {
+        changes.forEach((change: MigrationChangeSetStatus) => {
+          const event = _.isUndefined(change.error)
+            ? MigrationEvents.MigrationSucceeded
+            : MigrationEvents.MigrationFailed;
+
+          AnalyticsUtils.track(event, {
+            data: change.data,
+          });
+        });
+      }
 
       // Re-use the id for error reporting too:
       Sentry.setUser({ id: SegmentClient.instance().anonymousId });
@@ -344,6 +370,15 @@ export async function _activate(
         configMigrated,
         msg: "read dendron config",
       });
+
+      // try {
+      //   if (semver.gte(currentVersion, "0.63.0")) {
+      //     const rawConfig = DConfig.getRaw(wsImpl.wsRoot);
+      //     await ConfigUtils.checkAndMigrateLegacy(rawConfig, wsRoot);
+      //   }
+      // } catch (error) {
+      //   Sentry.captureException(error);
+      // }
 
       // check for vaults with same name
       const uniqVaults = _.uniqBy(dendronConfig.vaults, (vault) =>
@@ -661,7 +696,10 @@ export async function showLapsedUserMessage(assetUri: vscode.Uri) {
         WSUtils.showWelcome(assetUri);
       } else {
         AnalyticsUtils.track(VSCodeEvents.LapsedUserMessageRejected);
-        const lapsedSurveySubmitted = await StateService.instance().getGlobalState(GLOBAL_STATE.LAPSED_USER_SURVEY_SUBMITTED);
+        const lapsedSurveySubmitted =
+          await StateService.instance().getGlobalState(
+            GLOBAL_STATE.LAPSED_USER_SURVEY_SUBMITTED
+          );
         if (lapsedSurveySubmitted === undefined) {
           SurveyUtils.showLapsedUserSurvey();
         }

@@ -18,9 +18,14 @@ import {
 import { CancellationToken } from "vscode-jsonrpc";
 import YAML from "yamljs";
 import { DoctorCommand } from "../commands/Doctor";
+import { GotoNoteCommand } from "../commands/GotoNote";
+import { NoteLookupCommand } from "../commands/NoteLookupCommand";
+import { RenameHeaderCommand } from "../commands/RenameHeader";
+import { LookupSelectionTypeEnum } from "../components/lookup/types";
 import { Logger } from "../logger";
 import { VSCodeUtils } from "../utils";
 import { sentryReportingCallback } from "../utils/analytics";
+import { getHeaderAt, isBrokenWikilink } from "../utils/editor";
 import { DendronExtension } from "../workspace";
 
 /** Used to match the warnings to code actions. Also displayed for users along with the warning message. */
@@ -108,7 +113,11 @@ export function warnBadFrontmatterContents(
 
 function activate(context: ExtensionContext) {
   context.subscriptions.push(
-    languages.registerCodeActionsProvider("markdown", doctorFrontmatterProvider)
+    languages.registerCodeActionsProvider(
+      "markdown",
+      doctorFrontmatterProvider
+    ),
+    languages.registerCodeActionsProvider("markdown", refactorProvider)
   );
 }
 export const codeActionProvider = {
@@ -145,6 +154,88 @@ export const doctorFrontmatterProvider: CodeActionProvider = {
         },
       };
       return [action];
+    }
+  ),
+};
+
+/**
+ * Code Action Provider for Refactor.
+ * 1. Refactor Code Action for Rename Header
+ * 2. Refactor Code Action for Broken Wikilinks
+ * 3. Refactor Extract for highlighted text
+ * (Similar to the current functionality of creating a new note in 'Selection Extract' mode)
+ */
+export const refactorProvider: CodeActionProvider = {
+  provideCodeActions: sentryReportingCallback(
+    (
+      _document: TextDocument,
+      _range: Range | Selection,
+      _context: CodeActionContext,
+      _token: CancellationToken
+    ) => {
+      // No-op if we're not in a Dendron Workspace
+      if (!DendronExtension.isActive()) {
+        return;
+      }
+      const { editor, selection } = VSCodeUtils.getSelection();
+      if (!editor || !selection) return;
+
+      const header = getHeaderAt({
+        editor,
+        position: selection.start,
+      });
+
+      // action declaration
+      const renameHeaderAction = {
+        title: "Rename Header",
+        isPreferred: true,
+        kind: CodeActionKind.RefactorInline,
+        command: {
+          command: new RenameHeaderCommand().key,
+          title: "Rename Header",
+        },
+      };
+      const brokenWikilinkAction = {
+        title: "Add missing note for wikilink declaration",
+        isPreferred: true,
+        kind: CodeActionKind.RefactorExtract,
+        command: {
+          command: new GotoNoteCommand().key,
+          title: "Add missing note for wikilink declaration",
+        },
+      };
+      const createNewNoteAction = {
+        title: "Extract text to new note",
+        isPreferred: true,
+        kind: CodeActionKind.RefactorExtract,
+        command: {
+          command: new NoteLookupCommand().key,
+          title: "Extract text to new note",
+          arguments: [
+            {
+              selectionType: LookupSelectionTypeEnum.selectionExtract,
+            },
+          ],
+        },
+      };
+
+      if (_range.isEmpty) {
+        //return a code action for create note if user clicked next to a broken wikilink
+        if (isBrokenWikilink()) {
+          return [brokenWikilinkAction];
+        }
+
+        //return a code action for rename header if user clicks next to a header
+        if (!_.isUndefined(header)) {
+          return [renameHeaderAction];
+        }
+        // return if none
+        return;
+      } else {
+        return !_.isUndefined(header)
+          ? [createNewNoteAction, renameHeaderAction]
+          : [createNewNoteAction];
+      }
     }
   ),
 };

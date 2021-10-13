@@ -224,6 +224,18 @@ export class DendronExtension {
     return vscode.workspace.workspaceFolders;
   }
 
+  static workspaceRoot(): string | undefined {
+    try {
+      return path.dirname(this.workspaceFile().fsPath);
+    } catch {
+      const workspaceFolders = this.workspaceFolders();
+      if (workspaceFolders)
+        return WorkspaceUtils.findWSRootInWorkspaceFolders(workspaceFolders)
+          ?.uri.fsPath;
+    }
+    return undefined;
+  }
+
   /**
    * Currently, this is a check to see if rootDir is defined in settings
    */
@@ -233,21 +245,20 @@ export class DendronExtension {
      * the reason we don't use `vscode.*` method is because we need to stub this value during tests
      */
     try {
-      // ground work for standalone vaults. only activate in dev mode
-      if (context && getStage() !== "prod") {
-        const { workspaceFolders } = vscode.workspace;
-        const dendronWorkspaceFolders =
-          workspaceFolders?.filter((ent) => {
-            return fs.pathExistsSync(path.join(ent.uri.fsPath, "dendron.yml"));
-          }) || [];
-        if (dendronWorkspaceFolders.length > 0) {
-          return dendronWorkspaceFolders[0];
-        }
-      }
-      return (
+      // code workspace takes precedence, if code workspace, return
+      const hasCodeWorkspaceFiile =
+        vscode.workspace.workspaceFile &&
         path.basename(DendronExtension.workspaceFile().fsPath) ===
-        this.DENDRON_WORKSPACE_FILE
-      );
+          this.DENDRON_WORKSPACE_FILE;
+      if (hasCodeWorkspaceFiile) {
+        return hasCodeWorkspaceFiile;
+      }
+
+      const workspaceFolders = DendronExtension.workspaceFolders();
+      if (context && workspaceFolders) {
+        return WorkspaceUtils.findWSRootInWorkspaceFolders(workspaceFolders);
+      }
+      return hasCodeWorkspaceFiile;
     } catch (err) {
       return false;
     }
@@ -350,6 +361,7 @@ export class DendronExtension {
     let workspaceFile: vscode.Uri;
     try {
       workspaceFile = DendronExtension.workspaceFile();
+      if (workspaceFile === undefined) return undefined;
     } catch {
       // No workspace file exists (or some other disk issue)
       return undefined;
@@ -359,14 +371,19 @@ export class DendronExtension {
     )) as WorkspaceSettings;
   }
 
-  getWorkspaceSettingsSync(): WorkspaceSettings {
-    return readJSONWithCommentsSync(
-      DendronExtension.workspaceFile().fsPath
-    ) as WorkspaceSettings;
+  getWorkspaceSettingsSync(): WorkspaceSettings | undefined {
+    let workspaceFile: vscode.Uri;
+    try {
+      workspaceFile = DendronExtension.workspaceFile();
+    } catch {
+      // No workspace file exists (or some other disk issue)
+      return undefined;
+    }
+    return readJSONWithCommentsSync(workspaceFile.fsPath) as WorkspaceSettings;
   }
 
-  getDendronWorkspaceSettingsSync(): DendronWorkspaceSettings {
-    const settings = this.getWorkspaceSettingsSync().settings;
+  getDendronWorkspaceSettingsSync(): DendronWorkspaceSettings | undefined {
+    const settings = this.getWorkspaceSettingsSync()?.settings;
     return settings;
   }
 

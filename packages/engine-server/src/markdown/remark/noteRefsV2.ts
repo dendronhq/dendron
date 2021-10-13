@@ -1,6 +1,6 @@
 import {
   CONSTANTS,
-  DendronConfig,
+  IntermediateDendronConfig,
   DendronError,
   DNodeUtils,
   DNoteLoc,
@@ -1028,7 +1028,7 @@ ${_.trim(content)}
 }
 
 function getTitle(opts: {
-  config: DendronConfig;
+  config: IntermediateDendronConfig;
   note: NoteProps;
   loc: DNoteLoc;
 }) {

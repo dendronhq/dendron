@@ -1,5 +1,5 @@
 import {
-  DendronConfig,
+  IntermediateDendronConfig,
   DendronError,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
@@ -15,7 +15,9 @@ import { DendronExtension } from "./workspace";
 export function migrateConfig({
   config,
   wsRoot,
-}: { config: DendronConfig } & Omit<WorkspaceOpts, "vaults">) {
+}: {
+  config: IntermediateDendronConfig
+} & Omit<WorkspaceOpts, "vaults">) {
   const ctx = "migrateConfig";
   let changed = false;
   // if no config, write it in

@@ -43,7 +43,7 @@ suite("MoveHeader", function () {
           fname: "ref-note",
           wsRoot,
           vault: vaults[0],
-          body: "[[Foo|origin#foo-header]]",
+          body: "[[Origin|origin]]\n\n[[Foo|origin#foo-header]]",
         });
       };
     });
@@ -115,7 +115,7 @@ suite("MoveHeader", function () {
         });
       });
 
-      test("THEN reference to moved header is updated", (done) => {
+      test("THEN only reference to moved header is updated", (done) => {
         runLegacyMultiWorkspaceTest({
           ctx,
           preSetupHook,
@@ -126,6 +126,9 @@ suite("MoveHeader", function () {
             expect(
               out!.updated[0].body.includes("[[Foo|dest#foo-header]]")
             ).toBeTruthy();
+            expect(
+              out!.updated[0].body.includes("[[Origin|dest]]")
+            ).toBeFalsy();
             done();
           }),
         });

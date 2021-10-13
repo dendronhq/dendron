@@ -1,13 +1,19 @@
 import {
   CleanDendronSiteConfig,
   CONSTANTS,
-  DendronConfig,
+  IntermediateDendronConfig,
+  StrictIntermediateDendronConfig,
+  CURRENT_CONFIG_VERSION,
+  StrictV1,
+  StrictV2,
+  genDefaultCommandConfig,
   DendronError,
   DendronSiteConfig,
   ERROR_STATUS,
   getStage,
-  LookupSelectionType,
+  LegacyLookupSelectionType,
   NoteAddBehavior,
+  Time,
 } from "@dendronhq/common-all";
 import { readYAML, writeYAML } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -15,7 +21,7 @@ import _ from "lodash";
 import path from "path";
 
 export class ConfigUtils {
-  static usePrettyRef(config: DendronConfig) {
+  static usePrettyRef(config: IntermediateDendronConfig) {
     let usePrettyRefs: boolean | undefined = _.find(
       [config?.usePrettyRefs, config?.site?.usePrettyRefs],
       (ent) => !_.isUndefined(ent)
@@ -27,18 +33,26 @@ export class ConfigUtils {
   }
 }
 
+const requiredPathsMap = new Map<string, string>([
+  ["commands.insertNote.initialValue", "defaultInsertHierarchy"],
+  ["commands.insertNoteLink", "insertNoteLink"],
+  ["commands.insertNoteIndex", "insertNoteIndex"],
+  ["commands.randomNote", "randomNote"],
+  ["commands.lookup", "lookup"],
+]);
 export class DConfig {
   static configPath(configRoot: string): string {
     return path.join(configRoot, CONSTANTS.DENDRON_CONFIG_FILE);
   }
 
-  static defaults(config: DendronConfig): DendronConfig {
+  static defaults(
+    config: IntermediateDendronConfig
+  ): IntermediateDendronConfig {
     return _.defaults(config, { initializeRemoteVaults: true });
   }
 
-  static genDefaultConfig(): DendronConfig {
-    return {
-      version: 1,
+  static genDefaultConfig(current?: boolean): StrictIntermediateDendronConfig {
+    const common = {
       maxPreviewsCached: 10,
       vaults: [],
       useFMTitle: true,
@@ -46,19 +60,12 @@ export class DConfig {
       noAutoCreateOnDefinition: true,
       noLegacyNoteRef: true,
       noXVaultWikiLink: true,
-      lookupConfirmVaultOnCreate: false,
       mermaid: true,
       useKatex: true,
       autoFoldFrontmatter: true,
       usePrettyRefs: true,
       dev: {
         enablePreviewV2: true,
-      },
-      lookup: {
-        note: {
-          selectionType: LookupSelectionType.selectionExtract,
-          leaveTrace: false,
-        },
       },
       journal: {
         dailyDomain: "daily",
@@ -83,6 +90,26 @@ export class DConfig {
         gh_edit_branch: "main",
       },
     };
+
+    if (current) {
+      return { 
+        ...common,
+        version: 2,
+        commands: genDefaultCommandConfig(),
+      } as StrictV2;
+    } else {
+      return {
+        ...common,
+        version: 1,
+        lookupConfirmVaultOnCreate: false,
+        lookup: {
+          note: {
+            selectionType: LegacyLookupSelectionType.selectionExtract,
+            leaveTrace: false,
+          },
+        },
+      } as StrictV1;
+    }
   }
 
   /**
@@ -91,23 +118,28 @@ export class DConfig {
    */
   static getRaw(wsRoot: string) {
     const configPath = DConfig.configPath(wsRoot);
-    const config = readYAML(configPath) as Partial<DendronConfig>;
+    const config = readYAML(configPath) as Partial<
+      IntermediateDendronConfig
+    >;
     return config;
   }
 
   static getOrCreate(
     dendronRoot: string,
-    defaults?: Partial<DendronConfig>
-  ): DendronConfig {
+    defaults?: Partial<IntermediateDendronConfig>
+  ): IntermediateDendronConfig {
     const configPath = DConfig.configPath(dendronRoot);
-    let config: DendronConfig = { ...defaults, ...DConfig.genDefaultConfig() };
+    let config: IntermediateDendronConfig = { 
+      ...defaults, 
+      ...DConfig.genDefaultConfig() 
+    };
     if (!fs.existsSync(configPath)) {
       writeYAML(configPath, config);
     } else {
       config = {
         ...config,
         ...readYAML(configPath),
-      } as DendronConfig;
+      } as IntermediateDendronConfig;
     }
     return config;
   }
@@ -116,14 +148,14 @@ export class DConfig {
    * Get config value with consideration for defaults
    * @param config
    */
-  static getProp<K extends keyof DendronConfig>(
-    config: DendronConfig,
+  static getProp<K extends keyof IntermediateDendronConfig>(
+    config: IntermediateDendronConfig,
     key: K
-  ): DendronConfig[K] {
+  ): IntermediateDendronConfig[K] {
     const cConfig = _.defaults(
       config,
       this.genDefaultConfig()
-    ) as Required<DendronConfig>;
+    ) as Required<IntermediateDendronConfig>;
     return cConfig[key];
   }
 
@@ -186,9 +218,65 @@ export class DConfig {
     config,
   }: {
     wsRoot: string;
-    config: DendronConfig;
+    config: IntermediateDendronConfig;
   }) {
     const configPath = DConfig.configPath(wsRoot);
     return writeYAML(configPath, config);
+  }
+
+  /**
+   * Create a backup of dendron.yml with an optional custom infix string.
+   * e.g.) createBackup(wsRoot, "foo") will result in a backup file name
+   * `dendron.yyyy.MM.dd.HHmmssS.foo.yml`
+   * @param wsRoot workspace root
+   * @param infix custom string used in the backup name
+   */
+  static createBackup(wsRoot: string, infix: string): string {
+    const configPath = DConfig.configPath(wsRoot);
+    const today = Time.now().toFormat("yyyy.MM.dd.HHmmssS");
+    const prefix = `dendron.${today}.`;
+    const suffix = `yml`
+    const maybeInfix = infix ? `${infix}.` : "";
+    const backupName = `${prefix}${maybeInfix}${suffix}`;
+    const backupPath = path.join(wsRoot, backupName);
+    fs.copyFileSync(configPath, backupPath);
+    return backupPath;
+  }
+
+  static getLegacyConfig(config: IntermediateDendronConfig, path: string) {
+    const mappedLegacyConfigKey = requiredPathsMap.get(path) as keyof IntermediateDendronConfig;
+    return DConfig.getProp(config, mappedLegacyConfigKey);
+  }
+
+  static isRequired(path: string) {
+    return requiredPathsMap.has(path);
+  }
+
+  
+  static isCurrentConfig(config: StrictIntermediateDendronConfig): config is StrictV2 {
+    return (config as StrictV2).version === CURRENT_CONFIG_VERSION;
+  }
+
+  static getConfig(config: IntermediateDendronConfig, path: string) {
+    const value = _.get(config, path);
+    if (value) {
+      // is v2
+      return value;
+    }
+    if (
+      _.isUndefined(value) && 
+      !DConfig.isCurrentConfig(
+        config as StrictIntermediateDendronConfig
+      )
+    ) {
+      // config is v1. fall back to legacy config
+      return DConfig.getLegacyConfig(config, path);
+    }
+
+    if (_.isUndefined(value) && this.isRequired(path)) {
+      // config is v2, but it isn't there. Grab v2's default value.
+      return _.get(DConfig.genDefaultConfig(true), path);
+    }
+    return;
   }
 }

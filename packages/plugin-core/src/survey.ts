@@ -367,54 +367,49 @@ export class LapsedUserPlugDiscordSurvey extends DendronQuickPickSurvey {
 
 export class SurveyUtils {
   /**
-   * Flip a coin to randomly prompt initial survey.
    * Asks three questions about background, use case, and prior tools used.
-   * @param forcePrompt skip flipping a coin and force prompting.
    */
-  static async maybePromptInitialSurvey(forcePrompt?: boolean) {
-    const shouldPrompt = forcePrompt ? true : !!Math.floor(Math.random() * 2);
-    if (shouldPrompt) {
-      AnalyticsUtils.track(SurveyEvents.InitialSurveyPrompted);
-      vscode.window
-        .showInformationMessage(
-          "Welcome to Dendron! 🌱",
-          { modal: true , detail: "Would you like to tell us a bit about yourself? This info will be used to provide a better onboarding experience. It will take less than a minute to complete."},
-          { title: "Proceed" },
-          { title: "Skip Survey"},
-        )
-        .then(async (resp) => {
-          if (resp?.title === "Proceed") {
-            const backgroundSurvey = BackgroundSurvey.create();
-            const useCaseSurvey = UseCaseSurvey.create();
-            const priorToolSurvey = PriorToolsSurvey.create();
+  static async showInitialSurvey() {
+    AnalyticsUtils.track(SurveyEvents.InitialSurveyPrompted);
+    vscode.window
+      .showInformationMessage(
+        "Welcome to Dendron! 🌱",
+        { modal: true , detail: "Would you like to tell us a bit about yourself? This info will be used to provide a better onboarding experience. It will take less than a minute to complete."},
+        { title: "Proceed" },
+        { title: "Skip Survey"},
+      )
+      .then(async (resp) => {
+        if (resp?.title === "Proceed") {
+          const backgroundSurvey = BackgroundSurvey.create();
+          const useCaseSurvey = UseCaseSurvey.create();
+          const priorToolSurvey = PriorToolsSurvey.create();
 
-            const backgroundResults = await backgroundSurvey.show(1, 3);
-            const useCaseResults = await useCaseSurvey.show(2, 3);
-            const priorToolsResults = await priorToolSurvey.show(3, 3);
+          const backgroundResults = await backgroundSurvey.show(1, 3);
+          const useCaseResults = await useCaseSurvey.show(2, 3);
+          const priorToolsResults = await priorToolSurvey.show(3, 3);
 
-            const answerCount = [
-              backgroundResults,
-              useCaseResults,
-              priorToolsResults,
-            ].filter((value) => !_.isUndefined(value)).length;
-            AnalyticsUtils.track(SurveyEvents.InitialSurveyAccepted, {
-              answerCount,
-            });
-            await StateService.instance().updateGlobalState(
-              GLOBAL_STATE.INITIAL_SURVEY_SUBMITTED,
-              "submitted"
-            );
-            vscode.window.showInformationMessage("Survey submitted! Thanks for helping us make Dendron better 🌱");
-          } else {
-            vscode.window.showInformationMessage("Survey cancelled.");
-            AnalyticsUtils.track(SurveyEvents.InitialSurveyRejected);
-          }
-        })
-        // @ts-ignore
-        .catch((error: any) => {
-          Logger.error({msg: error});
-        });
-    }
+          const answerCount = [
+            backgroundResults,
+            useCaseResults,
+            priorToolsResults,
+          ].filter((value) => !_.isUndefined(value)).length;
+          AnalyticsUtils.track(SurveyEvents.InitialSurveyAccepted, {
+            answerCount,
+          });
+          await StateService.instance().updateGlobalState(
+            GLOBAL_STATE.INITIAL_SURVEY_SUBMITTED,
+            "submitted"
+          );
+          vscode.window.showInformationMessage("Survey submitted! Thanks for helping us make Dendron better 🌱");
+        } else {
+          vscode.window.showInformationMessage("Survey cancelled.");
+          AnalyticsUtils.track(SurveyEvents.InitialSurveyRejected);
+        }
+      })
+      // @ts-ignore
+      .catch((error: any) => {
+        Logger.error({msg: error});
+      });
   }
 
   static async showLapsedUserSurvey() {

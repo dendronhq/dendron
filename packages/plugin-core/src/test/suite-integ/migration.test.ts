@@ -1,22 +1,35 @@
-import { InstallStatus, LookupSelectionType } from "@dendronhq/common-all";
+import {
+  InstallStatus,
+  LegacyLookupConfig,
+  LegacyLookupSelectionType,
+  LegacyRandomNoteConfig,
+  LegacyInsertNoteLinkConfig,
+  LegacyInsertNoteIndexConfig,
+  WorkspaceType,
+} from "@dendronhq/common-all";
 import {
   ALL_MIGRATIONS,
   DConfig,
   Migrations,
+  MigrateFunction,
   MigrationServce,
   WorkspaceService,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
+import fs from "fs-extra";
+import path from "path";
 import { describe, test } from "mocha";
 import semver from "semver";
 import sinon from "sinon";
 import { CONFIG, GLOBAL_STATE, WORKSPACE_STATE } from "../../constants";
 import { Logger } from "../../logger";
 import { VSCodeUtils } from "../../utils";
-import { getExtension, getDWorkspace } from "../../workspace";
+import { getExtension, getDWorkspace, DendronExtension } from "../../workspace";
 import { _activate } from "../../_extension";
 import { expect } from "../testUtilsv2";
-import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
+import { describeMultiWS, runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
+import { readYAML } from "@dendronhq/common-server";
+import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 
 const getMigration = ({
   exact,
@@ -165,6 +178,7 @@ suite("Migration", function () {
               [CONFIG.DEFAULT_JOURNAL_NAME.key]: "foo",
             },
           },
+          workspaceType: WorkspaceType.CODE,
         });
       });
     });
@@ -196,6 +210,7 @@ suite("Migration", function () {
             [CONFIG.DEFAULT_SCRATCH_NAME.key]: "foo",
           },
         },
+        workspaceType: WorkspaceType.CODE,
       });
     });
 
@@ -265,7 +280,7 @@ suite("Migration", function () {
           const wsService = new WorkspaceService({ wsRoot });
           expect(
             wsConfig?.settings[CONFIG.DEFAULT_LOOKUP_CREATE_BEHAVIOR.key]
-          ).toEqual(LookupSelectionType.selection2link);
+          ).toEqual(LegacyLookupSelectionType.selection2link);
           expect(_.isUndefined(dendronConfig.lookup)).toBeTruthy();
           await MigrationServce.applyMigrationRules({
             currentVersion: "0.55.2",
@@ -276,17 +291,18 @@ suite("Migration", function () {
             logger: Logger,
             migrations: getMigration({ from: "0.55.0", to: "0.55.2" }),
           });
-          expect(getDWorkspace().config.lookup.note.selectionType).toEqual(
-            LookupSelectionType.selection2link
+          expect(getDWorkspace().config.lookup!.note.selectionType).toEqual(
+            LegacyLookupSelectionType.selection2link
           );
           done();
         },
         wsSettingsOverride: {
           settings: {
             [CONFIG.DEFAULT_LOOKUP_CREATE_BEHAVIOR.key]:
-              LookupSelectionType.selection2link,
+              LegacyLookupSelectionType.selection2link,
           },
         },
+        workspaceType: WorkspaceType.CODE,
       });
     });
 
@@ -317,12 +333,187 @@ suite("Migration", function () {
             logger: Logger,
             migrations: getMigration({ from: "0.55.0", to: "0.55.2" }),
           });
-          expect(getDWorkspace().config.lookup.note.selectionType).toEqual(
-            DConfig.genDefaultConfig().lookup.note.selectionType
+          expect(getDWorkspace().config.lookup!.note.selectionType).toEqual(
+            DConfig.genDefaultConfig().lookup!.note.selectionType
           );
           done();
         },
+        workspaceType: WorkspaceType.CODE,
       });
     });
+
+    test("migrate to 0.63 (dendron config command namespace)", (done) => {
+      DendronExtension.version = () => "0.0.1";
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        modConfigCb: (config) => {
+          config["randomNote"] = {
+            include: ["foo", "bar"],
+            exclude: ["lorem"]
+          } as LegacyRandomNoteConfig;
+          config["defaultInsertHierarchy"] = "user.foo";
+          config["insertNoteLink"] = {
+            aliasMode: "none",
+            multiSelect: true,
+          } as LegacyInsertNoteLinkConfig;
+          config["insertNoteIndex"] = {
+            marker: true,
+          } as LegacyInsertNoteIndexConfig;
+          config["lookup"] = {
+            note: {
+              selectionType: "none",
+              leaveTrace: true,
+            }
+          } as LegacyLookupConfig;
+          config["lookupConfirmVaultOnCreate"] = false;
+
+          // @ts-ignore
+          delete config["commands"];
+          return config;
+        },
+        onInit: async ({ engine, wsRoot }) => {
+          const dendronConfig = engine.config;
+          const originalDeepCopy = _.cloneDeep(dendronConfig);
+          const wsConfig = await getExtension().getWorkspaceSettings();
+          const wsService = new WorkspaceService({ wsRoot });
+
+          // all command related old configs should exist prior to migration
+          const preMigrationCheckItems = [
+            _.isUndefined(dendronConfig["commands"]),
+            !_.isUndefined(dendronConfig["randomNote"]),
+            !_.isUndefined(dendronConfig["defaultInsertHierarchy"]),
+            !_.isUndefined(dendronConfig["insertNoteLink"]),
+            !_.isUndefined(dendronConfig["insertNoteIndex"]),
+            !_.isUndefined(dendronConfig["lookup"]),
+            !_.isUndefined(dendronConfig["lookupConfirmVaultOnCreate"])
+          ];
+
+          const oldKeys = [
+            "randomNote",
+            "defaultInsertHierarchy",
+            "insertNoteLink",
+            "insertNoteIndex",
+            "lookup",
+            "lookupConfirmVaultOnCreate"
+          ];
+          const preMigrationKeys = Object.keys(dendronConfig);
+          expect(oldKeys.every((value) => preMigrationKeys.includes(value))).toBeTruthy();
+
+
+          preMigrationCheckItems.forEach((item) => {
+            expect(item).toBeTruthy();
+          });
+
+          await MigrationServce.applyMigrationRules({
+            currentVersion: "0.63.0",
+            previousVersion: "0.62.0",
+            dendronConfig,
+            wsConfig,
+            wsService,
+            logger: Logger,
+            migrations: getMigration({ from: "0.62.0", to: "0.63.0" }),
+          });
+
+          // backup of the original should exist.
+          const allWSRootFiles = fs.readdirSync(wsRoot, { withFileTypes: true});
+          const maybeBackupFileName = allWSRootFiles.filter(
+            (ent) => ent.isFile()
+          ).filter(
+            (fileEnt) => fileEnt.name.includes("migrate-command-config")
+          )[0].name;
+          expect(!_.isUndefined(maybeBackupFileName)).toBeTruthy();
+          
+          const backupContent = readYAML(path.join(wsRoot, maybeBackupFileName));
+          expect(_.isEqual(backupContent, originalDeepCopy)).toBeTruthy();
+
+          // all command related old configs shouldn't exist after migration
+          // they should all be in the command namespace instead.
+          const postMigrationDendronConfig = (await engine.getConfig()).data!;
+          const postMigrationKeys = Object.keys(postMigrationDendronConfig);
+          expect(postMigrationKeys.includes("commands")).toBeTruthy();
+          expect(oldKeys.every((value) => postMigrationKeys.includes(value))).toBeFalsy();
+          
+          done();
+        }
+      })
+    })
   });
+});
+
+suite("MigrationService", function () {
+  const ctx = setupBeforeAfter(this);
+
+  async function ranMigration(
+    currentVersion: string,
+    migrations: Migrations[]
+  ) {
+    const { wsRoot, config } = getDWorkspace();
+    const wsService = new WorkspaceService({ wsRoot });
+    const out = await MigrationServce.applyMigrationRules({
+      currentVersion,
+      previousVersion: "0.62.2",
+      migrations,
+      dendronConfig: config,
+      wsService,
+      wsConfig: await getExtension().getWorkspaceSettings(),
+      logger: Logger
+    });
+    return out.length !== 0;
+  }
+
+  describeMultiWS(
+    "GIVEN migration of semver 0.63.0", 
+    {
+      ctx,
+      preSetupHook: ENGINE_HOOKS.setupBasic,
+    },
+    async () => {
+      const dummyFunc: MigrateFunction = async ({dendronConfig, wsConfig}) => {
+        return { data: { dendronConfig, wsConfig } }
+      };
+      const migrations = [
+        {
+          version: "0.63.0",
+          changes: [
+            {
+              name: "test",
+              func: dummyFunc,
+            }
+          ]
+        }
+      ] as Migrations[];
+      describe("WHEN current version is smaller than 0.63.0", () => {
+        const currentVersion = "0.62.3"
+        test("THEN migration should not run", async () => {
+          const result = await ranMigration(
+            currentVersion,
+            migrations,
+          )
+          expect(result).toBeFalsy()
+        })
+      })
+
+      describe("WHEN current version is 0.63.0", () => {
+        const currentVersion = "0.63.0"
+        test("THEN migration should run", async () => {
+          const result = await ranMigration(
+            currentVersion,
+            migrations,
+          )
+          expect(result).toBeTruthy();
+        })
+      })
+
+      describe("WHEN current version is larger than 0.63.0", () => {
+        const currentVersion = "0.63.1"
+        test("THEN migration should run", async () => {
+          const result = await ranMigration(
+            currentVersion,
+            migrations,
+          ) 
+          expect(result).toBeTruthy();
+        })
+      })
+    }
+  )
 });

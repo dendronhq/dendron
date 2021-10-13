@@ -4,7 +4,6 @@ import {
   ERROR_STATUS,
   ErrorFactory,
   ErrorMessages,
-  NoteLookupConfig,
   NoteProps,
   NoteQuickInput,
   NoteUtils,
@@ -141,25 +140,48 @@ export class NoteLookupCommand extends BaseCommand<
   async gatherInputs(opts?: CommandRunOpts): Promise<CommandGatherOutput> {
     const start = process.hrtime();
     const ws = getDWorkspace();
-    const noteLookupConfig: NoteLookupConfig = DConfig.getProp(
-      ws.config,
-      "lookup"
-    ).note;
+    const lookupConfig = DConfig.getConfig(ws.config, "commands.lookup");
+    const noteLookupConfig = lookupConfig.note;
+    let selectionType: LookupSelectionType = LookupSelectionTypeEnum.selectionExtract;
+    let confirmVaultOnCreate;
+    if ("selectionMode" in noteLookupConfig) {
+      const selectionMode = noteLookupConfig.selectionMode;
+      switch(selectionMode) {
+        case "extract": {
+          selectionType = LookupSelectionTypeEnum.selectionExtract
+          break;
+        }
+        case "link": {
+          selectionType = LookupSelectionTypeEnum.selection2link;
+          break;
+        }
+        case "none": {
+          selectionType = LookupSelectionTypeEnum.none;
+          break;
+        }
+        default: {
+          throw new DendronError({ message: "unsupported selection type."});
+        }
+      }
+      confirmVaultOnCreate = noteLookupConfig.confirmVaultOnCreate;
+    } else {
+      selectionType = noteLookupConfig.selectionType;
+      confirmVaultOnCreate = DConfig.getProp(ws.config, "lookupConfirmVaultOnCreate")
+    }
+
     const copts: CommandRunOpts = _.defaults(opts || {}, {
       multiSelect: false,
       filterMiddleware: [],
       initialValue: NotePickerUtils.getInitialValueFromOpenEditor(),
-      selectionType: noteLookupConfig.selectionType,
+      selectionType,
     } as CommandRunOpts);
     const ctx = "NoteLookupCommand:gatherInput";
     Logger.info({ ctx, opts, msg: "enter" });
     // initialize controller and provider
+    const disableVaultSelection = !confirmVaultOnCreate;
     this._controller = LookupControllerV3.create({
       nodeType: "note",
-      disableVaultSelection: !DConfig.getProp(
-        ws.config,
-        "lookupConfirmVaultOnCreate"
-      ),
+      disableVaultSelection, 
       vaultButtonPressed:
         copts.vaultSelectionMode === VaultSelectionMode.alwaysPrompt,
       extraButtons: [

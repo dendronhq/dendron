@@ -2,7 +2,7 @@
 id: 73eb67ea-0291-45e7-8f2f-193fd6f00643
 title: Links
 desc: ""
-updated: 1633501710089
+updated: 1633435266305
 created: 1608518909864
 ---
 
@@ -84,3 +84,15 @@ Vault2
 ### ambiguous
 
 ![[bar]]
+
+## Recursive refs
+![[dendron.ref.links.recursive-lvl-1]]
+
+## Multiple refs in a row without list delineation
+### Refs on each line
+![[dendron.ref.links.target-1]]
+![[dendron.ref.links.target-2]]
+![[dendron.ref.links.target-3]]
+
+### Back to back refs
+![[dendron.ref.links.target-1]]![[dendron.ref.links.target-2]] ![[dendron.ref.links.target-3]]

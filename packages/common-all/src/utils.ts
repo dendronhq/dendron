@@ -5,7 +5,7 @@ import querystring from "querystring";
 import semver from "semver";
 import { COLORS_LIST } from "./colors";
 import { NoteProps, SEOProps } from "./types";
-import { DendronConfig } from "./types/workspace";
+import { IntermediateDendronConfig } from "./types/intermediateConfigs";
 
 /**
  * Dendron utilities
@@ -215,7 +215,9 @@ export class TagUtils {
 }
 
 export class PublishUtils {
-  static getSEOPropsFromConfig(config: DendronConfig): Partial<SEOProps> {
+  static getSEOPropsFromConfig(
+    config: IntermediateDendronConfig
+  ): Partial<SEOProps> {
     const { title, twitter, description: excerpt } = config.site;
     return {
       title,
@@ -240,3 +242,16 @@ export class PublishUtils {
     };
   }
 }
+
+/** Makes a single property within a type optional.
+ *
+ * Example:
+ * ```ts
+ * function foo(note: Optional<NoteProps, "title">) {
+ *   let title = note.title;
+ *   if (title === undefined) title = "default title";
+ *   // ...
+ * }
+ * ```
+ */
+export type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;

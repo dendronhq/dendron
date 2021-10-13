@@ -35,6 +35,15 @@ suite("ShowPreviewV2 utility methods", () => {
         expect(actual).toEqual("0TDNEYgYvCs3ooZEuknNZ");
       });
 
+      it("AND has underscore THEN extract id", () => {
+        const actual = extractNoteIdFromHref({
+          id: "id1",
+          href: "http://localhost:3000/vscode/DO_RXSlAbwNwbz-ILKoQa.html",
+        });
+
+        expect(actual).toEqual("DO_RXSlAbwNwbz-ILKoQa");
+      });
+
       it("AND does not have header anchor THEN extract id", () => {
         const actual = extractNoteIdFromHref({
           id: "id1",

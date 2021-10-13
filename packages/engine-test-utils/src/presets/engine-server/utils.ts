@@ -200,6 +200,7 @@ export const setupSchemaPreseet: PreSetupHookFunction = async (opts) => {
     wsRoot,
     body: "ch1 template",
     fname: "bar.template.ch1",
+    props: { tags: "tag-foo" },
     vault,
   });
   await NoteTestUtilsV4.createNote({

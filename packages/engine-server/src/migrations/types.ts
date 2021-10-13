@@ -1,18 +1,22 @@
 import {
-  DendronConfig,
+  IntermediateDendronConfig,
   DendronError,
   WorkspaceSettings,
 } from "@dendronhq/common-all";
 import { WorkspaceService } from "../workspace";
+
 export * from "./service";
 
 export type MigrateFunction = (opts: {
-  dendronConfig: DendronConfig;
-  wsConfig: WorkspaceSettings;
+  dendronConfig: IntermediateDendronConfig;
+  wsConfig?: WorkspaceSettings;
   wsService: WorkspaceService;
 }) => Promise<{
   error?: DendronError;
-  data: { dendronConfig: DendronConfig; wsConfig: WorkspaceSettings };
+  data: { 
+    dendronConfig: IntermediateDendronConfig; 
+    wsConfig?: WorkspaceSettings 
+  };
 }>;
 
 export type MigrationChangeSet = {
@@ -31,7 +35,7 @@ export type MigrationChangeSetStatus = {
     version: string;
     changeName: string;
     status: "ok" | "error";
-    dendronConfig: DendronConfig;
-    wsConfig: WorkspaceSettings;
+    dendronConfig: IntermediateDendronConfig;
+    wsConfig?: WorkspaceSettings;
   };
 };

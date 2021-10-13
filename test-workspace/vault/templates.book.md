@@ -4,6 +4,7 @@ title: Book
 desc: ''
 updated: 1628572976529
 created: 1628572852436
+tags: to-read
 ---
 
 ## Info

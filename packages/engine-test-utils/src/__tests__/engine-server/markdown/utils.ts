@@ -1,5 +1,5 @@
 import {
-  DendronConfig,
+  IntermediateDendronConfig,
   DEngineClient,
   DuplicateNoteAction,
   DVault,
@@ -290,7 +290,7 @@ type ProcessTextV2Opts = {
   engine: DEngineClient;
   fname: string;
   vault: DVault;
-  configOverride?: DendronConfig;
+  configOverride?: IntermediateDendronConfig;
 };
 
 export const processTextV2 = async (opts: ProcessTextV2Opts) => {

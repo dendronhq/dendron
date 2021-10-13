@@ -1,4 +1,5 @@
 import _ from "lodash";
+import { WorkspaceType } from "@dendronhq/common-all";
 import sinon from "sinon";
 import * as vscode from "vscode";
 import { RunMigrationCommand } from "../../commands/RunMigrationCommand";
@@ -30,11 +31,12 @@ suite("RunMigrationCommand", function () {
         const out = await cmd.run();
         expect(out!.length).toEqual(1);
         expect(out![0].data.version === "0.55.2");
-        expect(getDWorkspace().config.lookup.note.selectionType).toEqual(
+        expect(getDWorkspace().config.lookup!.note.selectionType).toEqual(
           "selection2link"
         );
         done();
       },
+      workspaceType: WorkspaceType.CODE,
     });
   });
 });

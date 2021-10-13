@@ -1,11 +1,12 @@
 import {
-  DendronConfig,
+  IntermediateDendronConfig,
   DEngineClient,
   InstallStatus,
   isNotUndefined,
   WorkspaceFolderRaw,
   WorkspaceOpts,
   WorkspaceSettings,
+  WorkspaceType,
 } from "@dendronhq/common-all";
 import {
   assignJSONWithComment,
@@ -31,10 +32,10 @@ import {
 } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
 import _ from "lodash";
-import { afterEach, beforeEach, describe } from "mocha";
+import { afterEach, beforeEach, before, describe } from "mocha";
 import os from "os";
 import sinon from "sinon";
-import { ExtensionContext, Uri } from "vscode";
+import { ExtensionContext, Uri, WorkspaceFolder } from "vscode";
 import {
   SetupWorkspaceCommand,
   SetupWorkspaceOpts,
@@ -59,6 +60,7 @@ import {
   stubWorkspaceFile,
   stubWorkspaceFolders,
 } from "./testUtilsv2";
+
 const TIMEOUT = 60 * 1000 * 5;
 
 export const DENDRON_REMOTE =
@@ -75,42 +77,49 @@ export type OnInitHook = (opts: WorkspaceOpts & EngineOpt) => Promise<void>;
 
 type PostSetupWorkspaceHook = (opts: WorkspaceOpts) => Promise<void>;
 
-export type SetupLegacyWorkspaceOpts = SetupCodeConfigurationV2 & {
-  ctx: ExtensionContext;
-  preActivateHook?: any;
-  postActivateHook?: any;
-  preSetupHook?: PreSetupCmdHookFunction;
-  postSetupHook?: PostSetupWorkspaceHook;
-  setupWsOverride?: Partial<SetupWorkspaceOpts>;
+type SetupWorkspaceType = {
+  /** The type of workspace to create for the test, Native (w/o dendron.code-worksace) or Code (w/ dendron.code-workspace) */
+  workspaceType?: WorkspaceType;
 };
 
-export type SetupLegacyWorkspaceMultiOpts = SetupCodeConfigurationV2 & {
-  ctx: ExtensionContext;
-  /**
-   * Runs before the workspace is initialized
-   */
-  preSetupHook?: PreSetupHookFunction;
-  /**
-   * Runs after the workspace is initialized
-   */
-  postSetupHook?: PostSetupWorkspaceHook;
-  /**
-   * Runs before the workspace is activated
-   */
-  preActivateHook?: any;
-  /**
-   * Run after workspace is activated
-   */
-  postActivateHook?: any;
-  /**
-   * By default, create workspace and vaults in a random temporary dir.
-   */
-  setupWsOverride?: Partial<SetupWorkspaceOpts>;
-  /**
-   * Overrid default Dendron settings (https://dendron.so/notes/eea2b078-1acc-4071-a14e-18299fc28f48.html)
-   */
-  wsSettingsOverride?: Partial<WorkspaceSettings>;
-} & TestSetupWorkspaceOpts;
+export type SetupLegacyWorkspaceOpts = SetupCodeConfigurationV2 &
+  SetupWorkspaceType & {
+    ctx: ExtensionContext;
+    preActivateHook?: any;
+    postActivateHook?: any;
+    preSetupHook?: PreSetupCmdHookFunction;
+    postSetupHook?: PostSetupWorkspaceHook;
+    setupWsOverride?: Omit<Partial<SetupWorkspaceOpts>, "workspaceType">;
+  };
+
+export type SetupLegacyWorkspaceMultiOpts = SetupCodeConfigurationV2 &
+  SetupWorkspaceType & {
+    ctx: ExtensionContext;
+    /**
+     * Runs before the workspace is initialized
+     */
+    preSetupHook?: PreSetupHookFunction;
+    /**
+     * Runs after the workspace is initialized
+     */
+    postSetupHook?: PostSetupWorkspaceHook;
+    /**
+     * Runs before the workspace is activated
+     */
+    preActivateHook?: any;
+    /**
+     * Run after workspace is activated
+     */
+    postActivateHook?: any;
+    /**
+     * By default, create workspace and vaults in a random temporary dir.
+     */
+    setupWsOverride?: Omit<Partial<SetupWorkspaceOpts>, "workspaceType">;
+    /**
+     * Overrid default Dendron settings (https://dendron.so/notes/eea2b078-1acc-4071-a14e-18299fc28f48.html)
+     */
+    wsSettingsOverride?: Partial<WorkspaceSettings>;
+  } & TestSetupWorkspaceOpts;
 
 export class EditorUtils {
   static async getURIForActiveEditor(): Promise<Uri> {
@@ -120,12 +129,12 @@ export class EditorUtils {
 
 export const getConfig = (opts: { wsRoot: string }) => {
   const configPath = DConfig.configPath(opts.wsRoot);
-  const config = readYAML(configPath) as DendronConfig;
+  const config = readYAML(configPath) as IntermediateDendronConfig;
   return config;
 };
 
 export const withConfig = (
-  func: (config: DendronConfig) => DendronConfig,
+  func: (config: IntermediateDendronConfig) => IntermediateDendronConfig,
   opts: { wsRoot: string }
 ) => {
   const config = getConfig(opts);
@@ -136,7 +145,7 @@ export const withConfig = (
 };
 
 export const writeConfig = (opts: {
-  config: DendronConfig;
+  config: IntermediateDendronConfig;
   wsRoot: string;
 }) => {
   const configPath = DConfig.configPath(opts.wsRoot);
@@ -153,12 +162,13 @@ export async function setupLegacyWorkspace(
       skipConfirmation: true,
       emptyWs: true,
     },
+    workspaceType: WorkspaceType.CODE,
     preSetupHook: async () => {},
     postSetupHook: async () => {},
   });
   const wsRoot = tmpDir().name;
   fs.ensureDirSync(wsRoot);
-  stubWorkspaceFile(wsRoot);
+  if (copts.workspaceType === WorkspaceType.CODE) stubWorkspaceFile(wsRoot);
   setupCodeConfiguration(opts);
 
   await copts.preSetupHook({
@@ -170,6 +180,7 @@ export async function setupLegacyWorkspace(
     skipOpenWs: true,
     ...copts.setupWsOverride,
     workspaceInitializer: new BlankInitializer(),
+    workspaceType: copts.workspaceType,
   });
   stubWorkspaceFolders(wsRoot, vaults);
 
@@ -182,45 +193,55 @@ export async function setupLegacyWorkspace(
 
 export async function setupLegacyWorkspaceMulti(
   opts: SetupLegacyWorkspaceMultiOpts
-): Promise<any> {
+) {
   const copts = _.defaults(opts, {
     setupWsOverride: {
       skipConfirmation: true,
       emptyWs: true,
     },
+    workspaceType: WorkspaceType.CODE,
     preSetupHook: async () => {},
     postSetupHook: async () => {},
     wsSettingsOverride: {},
   });
   const { preSetupHook, postSetupHook, wsSettingsOverride } = copts;
 
+  let workspaceFile: Uri | undefined;
+  let workspaceFolders: readonly WorkspaceFolder[] | undefined;
+
   const { wsRoot, vaults } = await EngineTestUtilsV4.setupWS();
   new StateService(opts.ctx); // eslint-disable-line no-new
   setupCodeConfiguration(opts);
-  // setup workspace file
-  stubWorkspace({ wsRoot, vaults });
-  const workspaceFile = DendronExtension.workspaceFile();
-  const workspaceFolders = DendronExtension.workspaceFolders();
+  if (copts.workspaceType === WorkspaceType.CODE) {
+    stubWorkspace({ wsRoot, vaults });
 
-  // setup
-  WorkspaceConfig.write(wsRoot, vaults, {
-    overrides: wsSettingsOverride,
-    vaults,
-  });
+    workspaceFile = DendronExtension.workspaceFile();
+    workspaceFolders = DendronExtension.workspaceFolders();
+
+    WorkspaceConfig.write(wsRoot, vaults, {
+      overrides: wsSettingsOverride,
+      vaults,
+    });
+  } else {
+    stubWorkspaceFolders(wsRoot, vaults);
+  }
+
   await preSetupHook({
     wsRoot,
     vaults,
   });
   // update vscode settings
-  await DendronExtension.updateWorkspaceFile({
-    updateCb: (settings) => {
-      const folders: WorkspaceFolderRaw[] = vaults.map((ent) => ({
-        path: ent.fsPath,
-      }));
-      settings = assignJSONWithComment({ folders }, settings);
-      return settings;
-    },
-  });
+  if (copts.workspaceType === WorkspaceType.CODE) {
+    await DendronExtension.updateWorkspaceFile({
+      updateCb: (settings) => {
+        const folders: WorkspaceFolderRaw[] = vaults.map((ent) => ({
+          path: ent.fsPath,
+        }));
+        settings = assignJSONWithComment({ folders }, settings);
+        return settings;
+      },
+    });
+  }
 
   // update config
   let config = DConfig.getOrCreate(wsRoot);
@@ -266,10 +287,6 @@ export async function runLegacyMultiWorkspaceTest(
   return;
 }
 
-export function runSingleWorkspaceTest() {}
-
-export function runMultiWorkspaceTest() {}
-
 export function addDebugServerOverride() {
   return {
     configOverride: {
@@ -293,10 +310,9 @@ export function setupBeforeAfter(
     noSetInstallStatus?: boolean;
   }
 ) {
-  let ctx: ExtensionContext;
   // allows for
   _this.timeout(TIMEOUT);
-  ctx = VSCodeUtils.getOrCreateMockContext();
+  const ctx = VSCodeUtils.getOrCreateMockContext();
   beforeEach(async () => {
     // DendronWorkspace.getOrCreate(ctx);
 
@@ -399,4 +415,63 @@ export const stubVaultInput = (opts: {
 export function runTestButSkipForWindows() {
   const runTest = os.platform() === "win32" ? describe.skip : describe;
   return runTest;
+}
+
+/** Use to run tests with a multi-vault workspace. Used in the same way as regular `describe`.
+ *
+ * For example:
+ * ```ts
+ * describeMultiWS(
+ *   "WHEN workspace type is not specified",
+ *   {
+ *     preSetupHook: ENGINE_HOOKS.setupBasic,
+ *   },
+ *   () => {
+ *     test("THEN initializes correctly", (done) => {
+ *       const { engine, _wsRoot, _vaults } = getDWorkspace();
+ *       const testNote = engine.notes["foo"];
+ *       expect(testNote).toBeTruthy();
+ *       done();
+ *     });
+ *   }
+ * );
+ * ```
+ */
+export function describeMultiWS(
+  title: string,
+  opts: SetupLegacyWorkspaceMultiOpts,
+  fn: () => any
+) {
+  describe(title, () => {
+    before((done) => {
+      setupLegacyWorkspaceMulti(opts).then(() => {
+        _activate(opts.ctx);
+      });
+      onWSInit(() => {
+        done();
+      });
+    });
+
+    fn();
+  });
+}
+
+export function describeSingleWS(
+  _this: any,
+  title: string,
+  opts: SetupLegacyWorkspaceOpts,
+  fn: () => any
+) {
+  describe(title, () => {
+    before((done) => {
+      setupLegacyWorkspace(opts).then(() => {
+        _activate(opts.ctx);
+      });
+      onWSInit(() => {
+        done();
+      });
+    });
+
+    fn();
+  });
 }

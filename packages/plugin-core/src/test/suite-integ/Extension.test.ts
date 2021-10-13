@@ -740,7 +740,7 @@ suite(
   }
 );
 
-suite("Legacy checking logic for configurations during init", function () {
+suite.skip("Legacy checking logic for configurations during init", function () {
   let homeDirStub: SinonStub;
   let checkLegacySpy: SinonSpy;
   
@@ -769,7 +769,7 @@ suite("Legacy checking logic for configurations during init", function () {
       }
     },
     () => {
-      test("THEN: checkAndMigrateLegacy not run", (done) => {
+      test("THEN: checkAndMigrateLegacy does not run", (done) => {
         expect(checkLegacySpy.calledOnce).toBeFalsy();
         done();
       })

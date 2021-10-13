@@ -18,7 +18,7 @@ export function isVSCodeTelemetryEnabled(): boolean | undefined {
 }
 
 /** Creates a SegmentClient for telemetry, if enabled, and listens for vscode telemetry settings to disable it when requested. */
-export function setupSegmentClient(ws: DWorkspaceV2) {
+export function setupSegmentClient(ws: DWorkspaceV2, cachePath?: string) {
   function instantiateSegmentClient() {
     // if the current status was set by configuration, and that configuration has changed, we should update it and report the change
     const status = SegmentClient.getStatus();
@@ -57,8 +57,10 @@ export function setupSegmentClient(ws: DWorkspaceV2) {
 
     const segment = SegmentClient.instance({
       forceNew: true,
+      cachePath
     });
     Logger.info({ msg: `Telemetry is disabled? ${segment.hasOptedOut}` });
+    Logger.info({ msg: "Segment Residual Cache Path is at " + cachePath});
   }
 
   try {

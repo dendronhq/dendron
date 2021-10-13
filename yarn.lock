@@ -4813,6 +4813,11 @@
   resolved "https://registry.npmjs.org/@types/analytics-node/-/analytics-node-3.1.4.tgz#35b25a721b46cbf6964098dae7dc785a4386e7ab"
   integrity sha512-i6cqjFotMq1dEwXxyXRqnzp/HmWPCskptrVUQ1UzRIGs/zICFWM2bIJyLt6f9A9/+qE98wls1AHWPQ4WXYS0HA==
 
+"@types/analytics-node@^3.1.6":
+  version "3.1.6"
+  resolved "https://registry.npmjs.org/@types/analytics-node/-/analytics-node-3.1.6.tgz#50864b5945c194207bb00c695c9639e1614afb0b"
+  integrity sha512-l4w6ipThuzxcjm9S+1BmvYI2kkCdy3G+ed+IO2NVFno73T6pSambl7OSH4j8BPTYsrekFDfDVTmm8XutLB+DZA==
+
 "@types/aria-query@^4.2.0":
   version "4.2.2"
   resolved "https://registry.npmjs.org/@types/aria-query/-/aria-query-4.2.2.tgz#ed4e0ad92306a704f9fb132a0cfcf77486dbe2bc"
@@ -6243,6 +6248,20 @@ analytics-node@^4.0.0:
     ms "^2.0.0"
     remove-trailing-slash "^0.1.0"
     uuid "^3.2.1"
+
+analytics-node@^5.1.0:
+  version "5.1.0"
+  resolved "https://registry.npmjs.org/analytics-node/-/analytics-node-5.1.0.tgz#69f2183af07b7e9aeef129232c6c1e44ef2f28d9"
+  integrity sha512-qojiIIQs+ruKS4BEb7+nLIim0TpmifMnYQYYQWBHcYBurv/IXRs3bL28wCuv1aKpRKpyDjAvugYSA7V7pw8t8g==
+  dependencies:
+    "@segment/loosely-validate-event" "^2.0.0"
+    axios "^0.21.4"
+    axios-retry "^3.0.2"
+    lodash.isstring "^4.0.1"
+    md5 "^2.2.1"
+    ms "^2.0.0"
+    remove-trailing-slash "^0.1.0"
+    uuid "^8.3.2"
 
 anser@1.4.9:
   version "1.4.9"

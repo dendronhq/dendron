@@ -1,4 +1,10 @@
-import { DendronError } from "@dendronhq/common-all";
+import {
+  DendronError,
+  getSlugger,
+  genUUIDInsecure,
+  ERROR_SEVERITY,
+  stringifyError,
+} from "@dendronhq/common-all";
 import { readYAML } from "@dendronhq/common-server";
 import Ajv, { JSONSchemaType } from "ajv";
 import addFormats from "ajv-formats";
@@ -6,6 +12,8 @@ import fs, { ensureDirSync, writeFileSync } from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { PodClassEntryV4, PodItemV4 } from "./types";
+import { docs_v1 as docsV1 } from "googleapis";
+import download from "image-downloader";
 
 export * from "./builtin";
 export * from "./types";
@@ -191,6 +199,7 @@ export class PodUtils {
   }) {
     const podConfigPath = PodUtils.getConfigPath({ podsDir, podClass });
     ensureDirSync(path.dirname(podConfigPath));
+    // eslint-disable-next-line new-cap
     const pod = new podClass();
     const required = pod.config.required;
     const podConfig = pod.config.properties;
@@ -258,4 +267,238 @@ export class PodUtils {
       podId: opts.podChoice.id,
     };
   }
+
+  /**
+   *
+   * helper method to parse doc to md
+   */
+  static googleDocsToMarkdown = (
+    file: docsV1.Schema$Document,
+    assetDir: string
+  ) => {
+    let text = "";
+    //map of all embedded images
+    const imagesMap = new Map<string, string>();
+
+    /**
+     * inline and positioned objects contains image properties.
+     */
+    const inlineObjects = file.inlineObjects;
+    const positionedObjects = file.positionedObjects;
+
+    if (inlineObjects) {
+      const keys = Object.keys(inlineObjects);
+      keys.forEach((key) => {
+        const contentUri =
+          inlineObjects[key].inlineObjectProperties?.embeddedObject
+            ?.imageProperties?.contentUri;
+        const id = inlineObjects[key].objectId;
+        if (contentUri && id && id !== null) {
+          imagesMap.set(id, contentUri);
+        }
+      });
+    }
+    if (positionedObjects) {
+      const keys = Object.keys(positionedObjects);
+      keys.forEach((key) => {
+        const contentUri =
+          positionedObjects[key].positionedObjectProperties?.embeddedObject
+            ?.imageProperties?.contentUri;
+        const id = positionedObjects[key].objectId;
+        if (contentUri && id && id !== null) {
+          imagesMap.set(id, contentUri);
+        }
+      });
+    }
+
+    //iterates over each element of document
+    file.body?.content?.forEach((item) => {
+      /**
+       * Tables
+       */
+      if (item.table?.tableRows) {
+        const cells = item.table.tableRows[0]?.tableCells;
+        // Make a blank header
+        text += `|${cells?.map(() => "").join("|")}|\n|${cells
+          ?.map(() => "-")
+          .join("|")}|\n`;
+        item.table.tableRows.forEach(({ tableCells }) => {
+          const textRows: any[] = [];
+          tableCells?.forEach(({ content }) => {
+            content?.forEach(({ paragraph }) => {
+              const styleType =
+                paragraph?.paragraphStyle?.namedStyleType || undefined;
+              textRows.push(
+                paragraph?.elements?.map((element: any) =>
+                  PodUtils.styleElement(element, styleType)
+                    ?.replace(/\s+/g, "")
+                    .trim()
+                )
+              );
+            });
+          });
+          text += `| ${textRows.join(" | ")} |\n`;
+        });
+      }
+
+      /**
+       * Paragraphs, lists, horizontal line, images(inline and positioned) and user mentions
+       */
+      if (item.paragraph && item.paragraph.elements) {
+        const styleType =
+          item?.paragraph?.paragraphStyle?.namedStyleType || undefined;
+
+        //for bullet
+        const bullet = item.paragraph?.bullet;
+        if (bullet?.listId) {
+          const listDetails = file.lists?.[bullet.listId];
+          const glyphFormat =
+            listDetails?.listProperties?.nestingLevels?.[0].glyphFormat || "";
+          const padding = "  ".repeat(bullet.nestingLevel || 0);
+          if (["[%0]", "%0."].includes(glyphFormat)) {
+            text += `${padding}1. `;
+          } else {
+            text += `${padding}- `;
+          }
+        }
+        //for positioned images
+        if (item.paragraph.positionedObjectIds) {
+          item.paragraph.positionedObjectIds.forEach((id) => {
+            const imageUrl = imagesMap.get(id);
+            text = PodUtils.downloadImage(imageUrl, assetDir, text);
+          });
+        }
+
+        item.paragraph.elements.forEach((element: any) => {
+          //for paragraph text
+          if (
+            element.textRun &&
+            PodUtils.content(element) &&
+            PodUtils.content(element) !== "\n"
+          ) {
+            text += PodUtils.styleElement(element, styleType);
+          }
+          //for user mentions
+          if (element.person) {
+            const slugger = getSlugger();
+            const name = slugger.slug(element.person.personProperties.name);
+            text += `@${name}`;
+          }
+          //for horizontal lines
+          if (element.horizontalRule) {
+            text += "* * *\n";
+          }
+          // for inline images
+          if (element.inlineObjectElement) {
+            const imageUrl = imagesMap.get(
+              element.inlineObjectElement.inlineObjectId
+            );
+            text = PodUtils.downloadImage(imageUrl, assetDir, text);
+          }
+        });
+        // eslint-disable-next-line no-nested-ternary
+        text += bullet?.listId
+          ? (text.split("\n").pop() || "").trim().endsWith("\n")
+            ? ""
+            : "\n"
+          : "\n\n";
+      }
+    });
+
+    const lines = text.split("\n");
+    const linesToDelete: number[] = [];
+    lines.forEach((line, index) => {
+      if (index > 2) {
+        if (
+          !line.trim() &&
+          ((lines[index - 1] || "").trim().startsWith("1. ") ||
+            (lines[index - 1] || "").trim().startsWith("- ")) &&
+          ((lines[index + 1] || "").trim().startsWith("1. ") ||
+            (lines[index + 1] || "").trim().startsWith("- "))
+        )
+          linesToDelete.push(index);
+      }
+    });
+    text = text
+      .split("\n")
+      .filter((_, i) => !linesToDelete.includes(i))
+      .join("\n");
+    return text.replace(/\n\s*\n\s*\n/g, "\n\n") + "\n";
+  };
+
+  /**
+   * styles the element: heading, bold and italics
+   */
+  static styleElement = (
+    element: docsV1.Schema$ParagraphElement,
+    styleType?: string
+  ): string | undefined => {
+    if (styleType === "TITLE") {
+      return `# ${PodUtils.content(element)}`;
+    } else if (styleType === "SUBTITLE") {
+      return `_${(PodUtils.content(element) || "").trim()}_`;
+    } else if (styleType === "HEADING_1") {
+      return `## ${PodUtils.content(element)}`;
+    } else if (styleType === "HEADING_2") {
+      return `### ${PodUtils.content(element)}`;
+    } else if (styleType === "HEADING_3") {
+      return `#### ${PodUtils.content(element)}`;
+    } else if (styleType === "HEADING_4") {
+      return `##### ${PodUtils.content(element)}`;
+    } else if (styleType === "HEADING_5") {
+      return `###### ${PodUtils.content(element)}`;
+    } else if (styleType === "HEADING_6") {
+      return `####### ${PodUtils.content(element)}`;
+    } else if (
+      element.textRun?.textStyle?.bold &&
+      element.textRun?.textStyle?.italic
+    ) {
+      return `**_${PodUtils.content(element)}_**`;
+    } else if (element.textRun?.textStyle?.italic) {
+      return `_${PodUtils.content(element)}_`;
+    } else if (element.textRun?.textStyle?.bold) {
+      return `**${PodUtils.content(element)}**`;
+    }
+
+    return PodUtils.content(element);
+  };
+
+  static content = (
+    element: docsV1.Schema$ParagraphElement
+  ): string | undefined => {
+    const textRun = element?.textRun;
+    const text = textRun?.content;
+    if (textRun?.textStyle?.link?.url)
+      return `[${text}](${textRun.textStyle.link.url})`;
+    return text || undefined;
+  };
+
+  /**
+   * downloads the image from cdn url and stores them in the assets directory inside vault
+   */
+  static downloadImage = (
+    imageUrl: string | undefined,
+    assetDir: string,
+    text: string
+  ): string => {
+    fs.ensureDirSync(assetDir);
+    if (imageUrl) {
+      const uuid = genUUIDInsecure();
+      const dest = path.join(assetDir, `image-${uuid}.png`);
+      const options = {
+        url: imageUrl,
+        dest,
+      };
+      try {
+        text += `![image](${path.join("assets", `image-${uuid}.png`)})\n`;
+        download.image(options);
+      } catch (err: any) {
+        throw new DendronError({
+          message: stringifyError(err),
+          severity: ERROR_SEVERITY.MINOR,
+        });
+      }
+    }
+    return text;
+  };
 }

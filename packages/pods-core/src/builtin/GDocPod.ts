@@ -7,7 +7,7 @@ import {
 import { JSONSchemaType } from "ajv";
 import { GDocUtilMethods, PodUtils } from "../utils";
 import axios from "axios";
-import { googleDocsToMarkdown } from "docs-markdown";
+//import { googleDocsToMarkdown } from "docs-markdown";
 import _ from "lodash";
 import {
   DendronError,
@@ -20,6 +20,7 @@ import {
 } from "@dendronhq/common-all";
 import fs from "fs-extra";
 import path from "path";
+import { vault2Path } from "@dendronhq/common-server";
 
 const ID = "dendron.gdoc";
 
@@ -198,7 +199,8 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
       hierarchyDestination: string;
       accessToken: string;
     },
-    config: ImportPodConfig
+    config: ImportPodConfig,
+    assetDir: string
   ): Promise<Partial<NoteProps>> => {
     let response: Partial<NoteProps>;
     const { documentId, accessToken, hierarchyDestination } = opts;
@@ -211,14 +213,10 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
         `https://docs.googleapis.com/v1/documents/${documentId}`,
         { headers }
       );
-      const markdown = googleDocsToMarkdown(result.data);
+      const markdown = PodUtils.googleDocsToMarkdown(result.data, assetDir);
 
-      /*
-       * to get index of the string after 2nd occurrence of ---
-       */
-      const index = markdown.indexOf("---", markdown.indexOf("---") + 3) + 3;
       response = {
-        body: markdown.substring(index),
+        body: markdown,
         fname: `${hierarchyDestination}`,
         custom: {
           documentId: result.data.documentId,
@@ -393,6 +391,9 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
     } = config as GDocImportPodConfig;
 
     let { accessToken } = config as GDocImportPodConfig;
+    const assetDirName = "assets";
+    const vpath = vault2Path({ vault, wsRoot });
+    const assetDir = path.join(vpath, assetDirName);
 
     /** refreshes token if token has already expired */
     if (Time.now().toSeconds() > expirationTime) {
@@ -481,7 +482,8 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
 
     let response = await this.getDataFromGDoc(
       { documentId, accessToken, hierarchyDestination },
-      config
+      config,
+      assetDir
     );
     if (importComments?.enable) {
       response = await this.getCommentsFromDoc(

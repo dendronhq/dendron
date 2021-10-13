@@ -725,6 +725,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "emarthinsen",
+      "name": "Eric Marthinsen",
+      "avatar_url": "https://avatars.githubusercontent.com/u/135033?v=4",
+      "profile": "http://www.ericmarthinsen.com",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

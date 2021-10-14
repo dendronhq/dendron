@@ -25,9 +25,8 @@ const genSiteMap = async () => {
     const suffix = getNoteUrl({ note, noteIndex });
     const out = {
       loc: suffix,
-      lastmod: DateTime.fromMillis(note.updated).toISODate(),
+      lastmod: DateTime.fromMillis(note.updated).toISO(),
     };
-    console.log(out);
     return out;
   });
   return fields;

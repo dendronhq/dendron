@@ -1,6 +1,11 @@
 import { DendronSiteConfig, NoteProps } from "@dendronhq/common-all";
 import _ from "lodash";
 
+/**
+ * Get the relative note url
+ * @param opts
+ * @returns
+ */
 export function getNoteUrl(opts: { note: NoteProps; noteIndex: NoteProps }) {
   const { note, noteIndex } = opts;
   return note.id === noteIndex.id ? "/" : `/notes/${note.id}`;
@@ -16,7 +21,7 @@ export function getAssetUrl(url: string) {
 }
 
 /**
- * Returns root url of page
+ * Returns root url of page. If asset prefix is set, also return that
  * @param url
  * @returns
  */

@@ -14,8 +14,9 @@
     "start": "next start",
     "lint": "next lint",
     "export": "next build && next export",
-    "sync:theme": "cp ../dendron-next-server/public/*theme.css public/",
-    "postbuild": "next-sitemap --config sitemap.js"
+    "build:sitemap:ts": "tsc -p tsconfig.sitemap.json",
+    "build:sitemap": "next-sitemap --config dist/scripts/sitemap.js",
+    "sync:theme": "cp ../dendron-next-server/public/*theme.css public/"
   },
   "dependencies": {
     "@chakra-ui/react": "^1.6.7",

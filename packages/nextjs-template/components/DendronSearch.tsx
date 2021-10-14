@@ -1,4 +1,4 @@
-import type { NoteProps } from "@dendronhq/common-all";
+import type { FuseNote, NoteProps } from "@dendronhq/common-all";
 import { LoadingStatus } from "@dendronhq/common-frontend";
 import { AutoComplete, Alert } from "antd";
 import React, { useEffect } from "react";
@@ -21,25 +21,58 @@ const MAX_NOTE_SNIPPET_LENGTH = 30;
 const NOTE_SNIPPET_BEFORE_AFTER = 10;
 /** Place this in place of omitted text in between snippet parts. */
 const OMITTED_PART_TEXT = " ... ";
-
-const LOADING_KEY = "__loading";
-const LOADING_MESSAGE = "Loading...";
+/** How long to wait for before triggering fuse search, in ms. Required for performance reasons since fuse search is expensive. */
+const SEARCH_DELAY = 100;
 
 export function DendronSearch(props: DendronCommonProps) {
   if (!verifyNoteData(props)) {
     return <DendronSpinner />;
   }
 
-  return <DendronSearchComponent {...props} />;
+  return <DebouncedDendronSearchComponent {...props} />;
 }
 
-function DendronSearchComponent(props: DendronPageWithNoteDataProps) {
+type SearchResults = Fuse.FuseResult<NoteProps>[] | undefined;
+type SearchFunction = (
+  query: string,
+  setResults: (results: SearchResults) => void
+) => void;
+
+function DebouncedDendronSearchComponent(props: DendronPageWithNoteDataProps) {
+  // Splitting this part from DendronSearchComponent so that the debounced
+  // function doesn't get reset every time value changes.
+  const results = useFetchFuse(props.notes);
+  const { fuse } = results;
+  // debounce returns stale results until the timeout runs out, which means
+  // search would always show stale results. Having the debounced function set
+  // state allows the component the update when the function finally runs and
+  // gets fresh results.
+  const debouncedSearch: SearchFunction | undefined = fuse
+    ? _.debounce<SearchFunction>((query, setResults) => {
+        setResults(fuse.search(query));
+      }, SEARCH_DELAY)
+    : undefined;
+  return (
+    <DendronSearchComponent {...props} {...results} search={debouncedSearch} />
+  );
+}
+
+type SearchProps = Omit<ReturnType<typeof useFetchFuse>, "fuse"> & {
+  search: SearchFunction | undefined;
+};
+
+function DendronSearchComponent(
+  props: DendronPageWithNoteDataProps & SearchProps
+) {
   const dispatch = useCombinedDispatch();
   const { noteBodies, requestNotes } = useNoteBodies();
-  const { noteIndex, dendronRouter } = props;
+  const { noteIndex, dendronRouter, search, error, loading, ensureIndexReady } =
+    props;
   const [value, setValue] = React.useState("");
-  const { ensureIndexReady, fuse, error, loading } = useFetchFuse(props.notes);
-  const results = fuse?.search(value);
+  const [results, setResults] = React.useState<SearchResults>(undefined);
+  useEffect(() => {
+    if (search) search(value, setResults);
+  }, [value, search]);
   useEffect(() => {
     requestNotes(results?.map(({ item: note }) => note.id) || []);
   }, [results]);

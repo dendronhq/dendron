@@ -2,7 +2,7 @@ import { DateTime } from "@dendronhq/common-all";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { getConfig, getNotes } from "../utils/build";
+import { getNotes } from "../utils/build";
 import { getNoteUrl } from "../utils/links";
 
 process.env.DATA_DIR = "data";
@@ -19,8 +19,6 @@ function getRootUrlStatic() {
 
 const genSiteMap = async () => {
   const { notes, noteIndex } = getNotes();
-  const config = await getConfig();
-  const rootUrl = getRootUrlStatic();
   const fields = _.values(notes).map((note) => {
     const suffix = getNoteUrl({ note, noteIndex });
     const out = {

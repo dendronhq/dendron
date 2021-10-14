@@ -14,4 +14,3 @@ schemas:
     template:
       id: templates.book.characters
       type: note
-

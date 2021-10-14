@@ -26,6 +26,7 @@ export type CreateNoteOptsV4 = {
   props?: Partial<Omit<NoteProps, "vault|fname|body">>;
   genRandomId?: boolean;
   noWrite?: boolean;
+  custom?: any;
 };
 
 export type CreateNoteInputOpts = {
@@ -94,7 +95,7 @@ export class NoteTestUtilsV4 {
    * @returns
    */
   static createNote = async (opts: CreateNoteOptsV4) => {
-    const { fname, vault, props, body, genRandomId, noWrite, wsRoot } =
+    const { fname, vault, props, body, genRandomId, noWrite, wsRoot, custom } =
       _.defaults(opts, { noWrite: false });
     /**
      * Make sure snapshots stay consistent
@@ -108,6 +109,7 @@ export class NoteTestUtilsV4 {
     const note = NoteUtils.create({
       ...defaultOpts,
       ...props,
+      custom,
       fname,
       vault,
       body,

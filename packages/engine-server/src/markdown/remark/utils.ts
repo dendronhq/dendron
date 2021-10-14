@@ -44,6 +44,7 @@ import type {
   TableRow,
   Image,
   Text,
+  FootnoteDefinition,
 } from "mdast";
 import * as mdastBuilder from "mdast-builder";
 import { Processor } from "unified";
@@ -929,6 +930,10 @@ export class RemarkUtils {
 
   static isText(node: Node): node is Text {
     return node.type === DendronASTTypes.TEXT;
+  }
+
+  static isFootnoteDefinition(node: Node): node is FootnoteDefinition {
+    return node.type === DendronASTTypes.FOOTNOTE_DEFINITION;
   }
 
   // --- conversion

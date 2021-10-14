@@ -17,7 +17,9 @@ import {
   VaultUtils,
 } from "@dendronhq/common-all";
 import { file2Note } from "@dendronhq/common-server";
+import { RemarkUtils, selectAll } from "../remark";
 import _ from "lodash";
+import { FootnoteDefinition } from "mdast";
 import { brk, html, paragraph, root } from "mdast-builder";
 import { Eat } from "remark-parse";
 import Unified, { Plugin } from "unified";
@@ -763,6 +765,12 @@ function prepareNoteRefIndices<T>({
   return { start, end, data: null, error: null };
 }
 
+function extractFootnoteDefs(root: Parent): FootnoteDefinition[] {
+  return selectAll(DendronASTTypes.FOOTNOTE_DEFINITION, root).filter(
+    RemarkUtils.isFootnoteDefinition
+  );
+}
+
 function convertNoteRefHelperAST(
   opts: ConvertNoteRefHelperOpts & { procOpts: any }
 ): Required<RespV2<Parent>> {
@@ -788,6 +796,8 @@ function convertNoteRefHelperAST(
   } else {
     bodyAST = noteRefProc.parse(note.body) as DendronASTNode;
   }
+  // Make sure to get all footnote definitions, including ones not within the range, in case they are used inside the range
+  const footnotes = extractFootnoteDefs(bodyAST);
   const { anchorStart, anchorEnd, anchorStartOffset } = _.defaults(link.data, {
     anchorStartOffset: 0,
   });
@@ -828,6 +838,9 @@ function convertNoteRefHelperAST(
         });
       }
     }
+    // Add all footnote definitions back. We might be adding duplicates if the definition was already in range, but rendering handles this correctly.
+    // We also might be adding definitions that weren't used in this range, but rendering will simply ignore those.
+    out.children.push(...footnotes);
 
     const { dest } = MDUtilsV4.getDendronData(tmpProc);
     if (dest === DendronASTDest.HTML) {

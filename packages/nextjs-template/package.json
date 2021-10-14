@@ -16,7 +16,9 @@
     "export": "next build && next export",
     "build:sitemap:ts": "tsc -p tsconfig.sitemap.json",
     "build:sitemap": "next-sitemap --config dist/scripts/sitemap.js",
-    "sync:theme": "cp ../dendron-next-server/public/*theme.css public/"
+    "sync:theme": "cp ../dendron-next-server/public/*theme.css public/",
+    "postinstall": "yarn build:sitemap:ts",
+    "postbuild": "yarn build:sitemap"
   },
   "dependencies": {
     "@chakra-ui/react": "^1.6.7",

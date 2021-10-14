@@ -345,20 +345,21 @@ export async function _activate(
         });
       }
       // initialize client
-      
-      const segmentResidualCacheDir = context.globalStorageUri.fsPath;
-      fs.ensureDir(segmentResidualCacheDir);
-      setupSegmentClient(wsImpl, path.join(segmentResidualCacheDir, "segmentresidualcache.log"));
-
-      // Try to flush the Segment residual cache every hour:
-      (function tryFlushSegmentCache() {
-        SegmentClient.instance().tryFlushResidualCache().then((result) => {
-          Logger.info(`Segment Residual Cache flush attempted. ${JSON.stringify(result)}`);
-        });
-
-        // Repeat once an hour:
-        setTimeout(tryFlushSegmentCache, 3600000);
-      })();
+      if (getStage() === "prod") {
+        const segmentResidualCacheDir = context.globalStorageUri.fsPath;
+        fs.ensureDir(segmentResidualCacheDir);
+        setupSegmentClient(wsImpl, path.join(segmentResidualCacheDir, "segmentresidualcache.log"));
+  
+        // Try to flush the Segment residual cache every hour:
+        (function tryFlushSegmentCache() {
+          SegmentClient.instance().tryFlushResidualCache().then((result) => {
+            Logger.info(`Segment Residual Cache flush attempted. ${JSON.stringify(result)}`);
+          });
+  
+          // Repeat once an hour:
+          setTimeout(tryFlushSegmentCache, 3600000);
+        })();
+      }
 
       // Re-use the id for error reporting too:
       Sentry.setUser({ id: SegmentClient.instance().anonymousId });

@@ -306,7 +306,7 @@ export class SegmentClient {
   ): Promise<void> {
     return new Promise<void>((resolve) => {
       if (this._hasOptedOut || this._segmentInstance == null) {
-        resolve();
+        return resolve();
       }
 
       const payload: { [key: string]: any } = { ...data };
@@ -401,7 +401,7 @@ export class SegmentClient {
         fs.pathExistsSync(filename) &&
         fs.statSync(filename).size / (1024 * 1024) > 5
       ) {
-        resolve();
+        return resolve();
       }
       const stream = fs.createWriteStream(filename, { flags: "as" });
       stream.write(JSON.stringify(data) + "\n");

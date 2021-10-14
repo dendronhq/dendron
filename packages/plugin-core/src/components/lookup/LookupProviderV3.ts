@@ -9,6 +9,7 @@ import {
   SchemaModuleProps,
   SchemaQuickInput,
   SchemaUtils,
+  VaultUtils,
   VSCodeEvents,
 } from "@dendronhq/common-all";
 import { getDurationMilliseconds } from "@dendronhq/common-server";
@@ -98,6 +99,70 @@ function shouldBubbleUpCreateNew({
     !FuseEngine.doesContainSpecialQueryChars(querystring);
 
   return noSpecialQueryChars && noExactMatches;
+}
+
+export type TransformedQueryString = {
+  /** Transformed query string value.   */
+  queryString: string;
+
+  /**
+   * This will be set to true when the query string had wiki link decoration
+   * (Eg. [[some.note]]) and that decoration has been stripped out to be able
+   * to query for the content of the wiki link.
+   * */
+  wasMadeFromWikiLink: boolean;
+
+  /**
+   * If there is clear vault name within the query will be set to such vault name
+   * otherwise it will be undefined.
+   * */
+  vaultName: string | undefined;
+};
+
+export function transformQueryString({
+  pickerValue,
+}: {
+  pickerValue: string;
+}): TransformedQueryString {
+  const trimmed = pickerValue.trim();
+
+  // Detect wiki link decoration and apply wiki link processing
+  if (trimmed.startsWith("[[") && trimmed.endsWith("]]")) {
+    let vaultName;
+    // Remove the '[[' ']]' decoration.
+    let transformed = trimmed.slice(2, -2);
+
+    // Process description such as [[some description|some.note]]
+    if (transformed.includes("|")) {
+      transformed = transformed.slice(transformed.indexOf("|") + 1);
+    }
+
+    // Process header value. For now we will remove the header since its
+    // not yet indexed within our look up engine.
+    if (transformed.includes("#")) {
+      transformed = transformed.slice(0, transformed.indexOf("#"));
+    }
+
+    if (transformed.includes("dendron://")) {
+      // https://regex101.com/r/ICcyK6/1/
+      vaultName = transformed.match(/dendron:\/\/(.*?)\//)?.[1];
+
+      transformed = transformed.slice(transformed.lastIndexOf("/") + 1);
+    }
+
+    return {
+      queryString: transformed,
+      wasMadeFromWikiLink: true,
+      vaultName,
+    };
+  } else {
+    // Regular processing:
+    return {
+      queryString: PickerUtilsV2.slashToDot(trimmed),
+      wasMadeFromWikiLink: false,
+      vaultName: undefined,
+    };
+  }
 }
 
 export class NoteLookupProvider implements ILookupProviderV3 {
@@ -251,7 +316,7 @@ export class NoteLookupProvider implements ILookupProviderV3 {
     }
 
     // get prior
-    const querystring = PickerUtilsV2.slashToDot(pickerValue);
+    const transformedQuery = transformQueryString({ pickerValue });
     const queryOrig = PickerUtilsV2.slashToDot(picker.value);
     const ws = getDWorkspace();
     let profile: number;
@@ -277,7 +342,7 @@ export class NoteLookupProvider implements ILookupProviderV3 {
         }
       }
       // if empty string, show all 1st level results
-      if (querystring === "") {
+      if (transformedQuery.queryString === "") {
         Logger.debug({ ctx, msg: "empty qs" });
         picker.items = NotePickerUtils.fetchRootQuickPickResults({ engine });
         return;
@@ -292,9 +357,27 @@ export class NoteLookupProvider implements ILookupProviderV3 {
 
       updatedItems = await NotePickerUtils.fetchPickerResults({
         picker,
-        qs: querystring,
+        qs: transformedQuery.queryString,
         onlyDirectChildren: picker.showDirectChildrenOnly,
       });
+
+      // If we have specific vault name within the query then keep only those results
+      // that match the specific vault name.
+      if (transformedQuery.vaultName) {
+        updatedItems = updatedItems.filter(
+          (item) =>
+            VaultUtils.getName(item.vault) === transformedQuery.vaultName
+        );
+      }
+
+      if (transformedQuery.wasMadeFromWikiLink) {
+        // If we are dealing with a wiki link we want to show only the exact matches
+        // for the link instead some fuzzy/partial matches.
+        updatedItems = updatedItems.filter(
+          (item) => item.fname === transformedQuery.queryString
+        );
+      }
+
       if (token.isCancellationRequested) {
         return;
       }
@@ -302,14 +385,20 @@ export class NoteLookupProvider implements ILookupProviderV3 {
       // check if single item query, vscode doesn't surface single letter queries
       // we need this so that suggestions will show up
       // TODO: this might be buggy since we don't apply filter middleware
-      if (picker.activeItems.length === 0 && querystring.length === 1) {
+      if (
+        picker.activeItems.length === 0 &&
+        transformedQuery.queryString.length === 1
+      ) {
         picker.items = updatedItems;
         picker.activeItems = picker.items;
         return;
       }
 
       // add schema completions
-      if (!_.isUndefined(queryUpToLastDot)) {
+      if (
+        !_.isUndefined(queryUpToLastDot) &&
+        !transformedQuery.wasMadeFromWikiLink
+      ) {
         const results = SchemaUtils.matchPath({
           notePath: queryUpToLastDot,
           schemaModDict: engine.schemas,
@@ -382,14 +471,20 @@ export class NoteLookupProvider implements ILookupProviderV3 {
         this.opts.allowNewNote &&
         !queryOrig.endsWith(".") &&
         !picker.canSelectMany &&
+        !transformedQuery.wasMadeFromWikiLink &&
         vaultsHaveSpaceForExactMatch;
 
       if (shouldAddCreateNew) {
         const entryCreateNew = NotePickerUtils.createNoActiveItem({
-          fname: querystring,
+          fname: transformedQuery.queryString,
         });
 
-        if (shouldBubbleUpCreateNew({ numberOfExactMatches, querystring })) {
+        if (
+          shouldBubbleUpCreateNew({
+            numberOfExactMatches,
+            querystring: transformedQuery.queryString,
+          })
+        ) {
           updatedItems = [entryCreateNew, ...updatedItems];
         } else {
           updatedItems = [...updatedItems, entryCreateNew];

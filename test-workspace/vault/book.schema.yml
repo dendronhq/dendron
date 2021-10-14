@@ -2,7 +2,7 @@ version: 1
 imports: []
 schemas:
   - id: book
-    children: 
+    children:
       - characters
     namespace: true
     title: book
@@ -14,4 +14,3 @@ schemas:
     template:
       id: templates.book.characters
       type: note
-

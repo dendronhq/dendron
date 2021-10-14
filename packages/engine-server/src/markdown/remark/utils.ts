@@ -1376,4 +1376,10 @@ export class RemarkUtils {
 
     return blocks;
   }
+
+  static extractFootnoteDefs(root: Node): FootnoteDefinition[] {
+    return selectAll(DendronASTTypes.FOOTNOTE_DEFINITION, root).filter(
+      RemarkUtils.isFootnoteDefinition
+    );
+  }
 }

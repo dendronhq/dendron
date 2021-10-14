@@ -53,6 +53,7 @@ export enum DendronASTTypes {
   FRONTMATTER = "yaml",
   LINK = "link",
   FOOTNOTE_DEFINITION = "footnoteDefinition",
+  FOOTNOTE_REFERENCE = "footnoteReference",
 }
 
 export enum DendronASTDest {

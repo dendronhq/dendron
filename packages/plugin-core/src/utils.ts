@@ -29,7 +29,12 @@ import {
   tmpDir,
   vault2Path,
 } from "@dendronhq/common-server";
-import { DConfig, HistoryEvent, HistoryService, MigrationChangeSetStatus } from "@dendronhq/engine-server";
+import {
+  DConfig,
+  HistoryEvent,
+  HistoryService,
+  MigrationChangeSetStatus,
+} from "@dendronhq/engine-server";
 import { assign } from "comment-json";
 import { ExecaChildProcess } from "execa";
 import fs from "fs-extra";
@@ -1008,6 +1013,11 @@ export class KeybindingUtils {
 
 export const clipboard = vscode.env.clipboard;
 
+export const showMessage = {
+  info: vscode.window.showInformationMessage,
+  warning: vscode.window.showWarningMessage,
+};
+
 // This layer of indirection is only here enable stubbing a top level function that's the default export of a module // https://github.com/sinonjs/sinon/issues/562#issuecomment-399090111
 // Otherwise, we can't mock it for testing.
 export const getOpenGraphMetadata = (opts: ogs.Options) => {
@@ -1017,22 +1027,18 @@ export const getOpenGraphMetadata = (opts: ogs.Options) => {
 export class ConfigUtils {
   static async checkAndMigrateLegacy(
     config: Partial<IntermediateDendronConfig>,
-    wsRoot: string,
+    wsRoot: string
   ): Promise<{
-    status: "no legacy" | "ran migration"
-    changes?: MigrationChangeSetStatus[] 
+    status: "no legacy" | "ran migration";
+    changes?: MigrationChangeSetStatus[];
   }> {
     let shouldRun = false;
     // check that command namespace is there
-    if (
-      DConfig.isCurrentConfig(
-        config as StrictIntermediateDendronConfig
-      )
-    ) {
+    if (DConfig.isCurrentConfig(config as StrictIntermediateDendronConfig)) {
       if (_.isUndefined(config.commands)) {
         AnalyticsUtils.track(ConfigEvents.ConfigNotMigrated, {
           key: "config.commands",
-          version: config.version
+          version: config.version,
         });
         shouldRun = true;
       } else {
@@ -1041,12 +1047,12 @@ export class ConfigUtils {
           "randomNote",
           "insertNote",
           "insertNoteLink",
-          "insertNoteIndex"
+          "insertNoteIndex",
         ];
-    
+
         if (config.commands === null) {
           AnalyticsUtils.track(ConfigEvents.ConfigNotMigrated, {
-            key: "config.commands.*"
+            key: "config.commands.*",
           });
           shouldRun = true;
         } else {
@@ -1055,7 +1061,7 @@ export class ConfigUtils {
             if (!existingKeys.includes(requiredKey)) {
               shouldRun = true;
               AnalyticsUtils.track(ConfigEvents.ConfigNotMigrated, {
-                key: `config.commands.${requiredKey}`
+                key: `config.commands.${requiredKey}`,
               });
             }
           });
@@ -1064,40 +1070,40 @@ export class ConfigUtils {
     } else {
       shouldRun = true;
       AnalyticsUtils.track(ConfigEvents.ConfigNotMigrated, {
-        version: config.version
+        version: config.version,
       });
-    };
+    }
     if (shouldRun) {
       const cmd = new RunMigrationCommand();
       const maybeChanges = await cmd.run({ version: "0.63.0" });
       maybeChanges?.forEach((change) => {
         const event = _.isUndefined(change.error)
           ? MigrationEvents.MigrationSucceeded
-          : MigrationEvents.MigrationFailed
+          : MigrationEvents.MigrationFailed;
         AnalyticsUtils.track(event, {
-          data: change.data
+          data: change.data,
         });
       });
-      vscode.window.showInformationMessage(
-        "We found some legacy configuration and migrated them to new ones.",
-        { title: "Open dendron.yml" },
-      )
-      .then(async (resp) => {
-        if (resp?.title === "Open dendron.yml") {
-          const configFilePath = vscode.Uri.file(path.join(wsRoot, "dendron.yml"));
-          await vscode.commands.executeCommand(
-            "vscode.open", 
-            configFilePath
-          )
-        }
-      })
+      vscode.window
+        .showInformationMessage(
+          "We found some legacy configuration and migrated them to new ones.",
+          { title: "Open dendron.yml" }
+        )
+        .then(async (resp) => {
+          if (resp?.title === "Open dendron.yml") {
+            const configFilePath = vscode.Uri.file(
+              path.join(wsRoot, "dendron.yml")
+            );
+            await vscode.commands.executeCommand("vscode.open", configFilePath);
+          }
+        });
       return {
         status: "ran migration",
         changes: maybeChanges,
-      }
+      };
     }
     return {
-      status: "no legacy"
-    }
+      status: "no legacy",
+    };
   }
 }

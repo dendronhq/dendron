@@ -7,7 +7,7 @@ import {
   PublishPodPlantOpts,
 } from "../basev3";
 import { JSONSchemaType } from "ajv";
-import { PodUtils } from "../utils";
+import { GithubIssueUtilMethods, PodUtils, ShowMessageTypes } from "../utils";
 import { graphql } from "@octokit/graphql";
 import _ from "lodash";
 import {
@@ -364,6 +364,15 @@ export class GithubIssueImportPod extends ImportPod<GithubIssueImportPodConfig> 
   }
 }
 
+enum GITHUBMESSAGE {
+  INVALID_TAG = "Github: The labels in the tag does not belong to selected repository",
+  INVALID_CATEGORY = "Github: Invalid category",
+  INVALID_MILESTONE = "Github: Invalid milestone",
+  ISSUE_CREATED = "Github: Issue Created",
+  ISSUE_UPDATED = "Github: Issue Updated",
+  DISCUSSION_CREATED = "Github: Discussion Created",
+}
+
 type GithubIssuePublishPodCustomOpts = {
   /**
    * owner of the repository
@@ -575,8 +584,9 @@ export class GithubIssuePublishPod extends PublishPod<GithubIssuePublishPodConfi
     status: string;
     labelIDs: string[];
     milestoneId: string;
+    showMessage: ShowMessageTypes;
   }) => {
-    const { issueID, token, status, labelIDs, milestoneId } = opts;
+    const { issueID, token, status, labelIDs, milestoneId, showMessage } = opts;
     if (milestoneId) {
       /**
        * While regression it was observed that milestone is not updated if the issue
@@ -589,6 +599,7 @@ export class GithubIssuePublishPod extends PublishPod<GithubIssuePublishPodConfi
           updateIssue(input: {id : $id , state: $state, labelIds: $labelIDs}){
             issue {
                   id
+                  url
                 }
             }
           }`;
@@ -600,7 +611,8 @@ export class GithubIssuePublishPod extends PublishPod<GithubIssuePublishPodConfi
         labelIDs,
       });
       if (!_.isUndefined(result.updateIssue.issue.id)) {
-        resp = "Issue Updated";
+        showMessage.info(GITHUBMESSAGE.ISSUE_UPDATED);
+        resp = result.updateIssue.issue.url;
       }
     } catch (error: any) {
       resp = stringifyError(error);
@@ -650,9 +662,18 @@ export class GithubIssuePublishPod extends PublishPod<GithubIssuePublishPodConfi
     note: NoteProps;
     engine: DEngineClient;
     milestoneId: string;
+    showMessage: ShowMessageTypes;
   }) => {
-    const { token, labelIDs, owner, repository, note, engine, milestoneId } =
-      opts;
+    const {
+      token,
+      labelIDs,
+      owner,
+      repository,
+      note,
+      engine,
+      milestoneId,
+      showMessage,
+    } = opts;
     const { title, body } = note;
     let resp: string = "";
     const length = labelIDs.length;
@@ -690,7 +711,8 @@ export class GithubIssuePublishPod extends PublishPod<GithubIssuePublishPodConfi
         note.custom.url = issue.url;
         note.custom.status = issue.state;
         await engine.writeNote(note, { updateExisting: true });
-        resp = "Issue Created";
+        showMessage.info(GITHUBMESSAGE.ISSUE_CREATED);
+        resp = issue.url;
       }
     } catch (error: any) {
       resp = stringifyError(error);
@@ -713,6 +735,7 @@ export class GithubIssuePublishPod extends PublishPod<GithubIssuePublishPodConfi
     engine: DEngineClient;
     categoryId: string;
     includeNoteBodyInDiscussion: boolean;
+    showMessage: ShowMessageTypes;
   }) => {
     const {
       token,
@@ -722,6 +745,7 @@ export class GithubIssuePublishPod extends PublishPod<GithubIssuePublishPodConfi
       engine,
       categoryId,
       includeNoteBodyInDiscussion,
+      showMessage,
     } = opts;
     const { title } = note;
     let { body } = note;
@@ -762,7 +786,8 @@ export class GithubIssuePublishPod extends PublishPod<GithubIssuePublishPodConfi
         note.custom.url = discussion.url;
         note.custom.author = discussion.author.url;
         await engine.writeNote(note, { updateExisting: true });
-        resp = "Discussion Created";
+        showMessage.info(GITHUBMESSAGE.DISCUSSION_CREATED);
+        resp = discussion.url;
       }
     } catch (error: any) {
       resp = stringifyError(error);
@@ -775,13 +800,14 @@ export class GithubIssuePublishPod extends PublishPod<GithubIssuePublishPodConfi
   };
 
   async plant(opts: PublishPodPlantOpts) {
-    const { config, engine } = opts;
+    const { config, engine, utilityMethods } = opts;
     const {
       owner,
       repository,
       token,
       includeNoteBodyInDiscussion = true,
     } = config as GithubIssuePublishPodConfig;
+    const { showMessage } = utilityMethods as GithubIssueUtilMethods;
     const labelsHashMap = await this.getLabelsFromGithub({
       owner,
       repository,
@@ -800,7 +826,8 @@ export class GithubIssuePublishPod extends PublishPod<GithubIssuePublishPodConfi
       });
       const categoryId = discussionCategoriesHashMap[category];
       if (_.isUndefined(categoryId)) {
-        return "Github: Invalid category";
+        showMessage.warning(GITHUBMESSAGE.INVALID_CATEGORY);
+        return "";
       }
       const resp = await this.createDiscussion({
         token,
@@ -810,8 +837,9 @@ export class GithubIssuePublishPod extends PublishPod<GithubIssuePublishPodConfi
         engine,
         categoryId,
         includeNoteBodyInDiscussion,
+        showMessage,
       });
-      return "Github: ".concat(resp);
+      return resp;
     }
 
     if (!_.isUndefined(milestone)) {
@@ -822,7 +850,8 @@ export class GithubIssuePublishPod extends PublishPod<GithubIssuePublishPodConfi
       });
       milestoneId = milestonesHashMap[milestone];
       if (_.isUndefined(milestoneId)) {
-        return "Github: Invalid milestone";
+        showMessage.warning(GITHUBMESSAGE.INVALID_MILESTONE);
+        return "";
       }
     }
     const labelIDs: string[] = [];
@@ -835,7 +864,8 @@ export class GithubIssuePublishPod extends PublishPod<GithubIssuePublishPodConfi
     }
 
     if (!_.isUndefined(tags) && labelIDs.length === 0) {
-      return "Github: The labels in the tag does not belong to selected repository";
+      showMessage.warning(GITHUBMESSAGE.INVALID_TAG);
+      return "";
     }
     const resp =
       _.isUndefined(issueID) && _.isUndefined(status)
@@ -847,6 +877,7 @@ export class GithubIssuePublishPod extends PublishPod<GithubIssuePublishPodConfi
             note,
             engine,
             milestoneId,
+            showMessage,
           })
         : await this.updateIssue({
             issueID,
@@ -854,8 +885,9 @@ export class GithubIssuePublishPod extends PublishPod<GithubIssuePublishPodConfi
             status: status.toUpperCase(),
             labelIDs,
             milestoneId,
+            showMessage,
           });
 
-    return "Github: ".concat(resp);
+    return resp;
   }
 }

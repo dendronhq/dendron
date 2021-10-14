@@ -189,6 +189,13 @@ describe("github publish pod", () => {
     };
   });
 
+  const utilityMethods = {
+    showMessage: {
+      info: jest.fn(),
+      warning: jest.fn(),
+    },
+  };
+
   test("basic", async () => {
     await runEngineTestV5(
       async ({ engine, vaults, wsRoot }) => {
@@ -197,7 +204,7 @@ describe("github publish pod", () => {
         pod.getLabelsFromGithub = jest
           .fn()
           .mockReturnValue({ "area.misc": "sfgdjio", "type.bug": "gsfahhj" });
-        pod.updateIssue = jest.fn().mockReturnValue("Issue Updated");
+        pod.updateIssue = jest.fn().mockReturnValue("https://github.com/foo");
         await engine.writeNote(issue, { newNode: true });
         const resp = await pod.execute({
           engine,
@@ -211,8 +218,9 @@ describe("github publish pod", () => {
             repository: "dendron",
             owner: "dendronhq",
           },
+          utilityMethods,
         });
-        expect(resp).toEqual("Github: Issue Updated");
+        expect(resp).toEqual("https://github.com/foo");
       },
       { expect, preSetupHook: ENGINE_HOOKS.setupBasic }
     );
@@ -240,10 +248,9 @@ describe("github publish pod", () => {
             repository: "dendron",
             owner: "dendronhq",
           },
+          utilityMethods,
         });
-        expect(resp).toEqual(
-          "Github: The labels in the tag does not belong to selected repository"
-        );
+        expect(resp).toEqual("");
       },
 
       { expect, preSetupHook: ENGINE_HOOKS.setupBasic }
@@ -258,7 +265,7 @@ describe("github publish pod", () => {
         pod.getLabelsFromGithub = jest
           .fn()
           .mockReturnValue({ "area.misc": "sfgdjio", "type.bug": "gsfahhj" });
-        pod.createIssue = jest.fn().mockReturnValue("Issue Created");
+        pod.createIssue = jest.fn().mockReturnValue("https://github.com/foo");
         const scratchIssue: NoteProps = _.omit(issue, "custom");
         scratchIssue.custom = {};
         await engine.writeNote(scratchIssue, { newNode: true });
@@ -274,8 +281,9 @@ describe("github publish pod", () => {
             repository: "dendron",
             owner: "dendronhq",
           },
+          utilityMethods,
         });
-        expect(resp).toEqual("Github: Issue Created");
+        expect(resp).toEqual("https://github.com/foo");
       },
 
       { expect, preSetupHook: ENGINE_HOOKS.setupBasic }

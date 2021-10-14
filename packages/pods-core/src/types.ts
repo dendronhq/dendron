@@ -29,3 +29,12 @@ export type NotionUtilMethods = {
   getSelectionFromQuickpick: (arg0: string[]) => Promise<string | undefined>;
   withProgressOpts: any;
 };
+
+export type GithubIssueUtilMethods = {
+  showMessage: ShowMessageTypes;
+};
+
+export type ShowMessageTypes = {
+  info: (message: string) => void;
+  warning: (message: string) => void;
+};

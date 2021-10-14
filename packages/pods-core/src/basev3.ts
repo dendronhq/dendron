@@ -13,7 +13,12 @@ import { JSONSchemaType } from "ajv";
 import { Item } from "klaw";
 import _ from "lodash";
 import { URI } from "vscode-uri";
-import { GDocUtilMethods, NotionUtilMethods, PodKind } from "./types";
+import {
+  GDocUtilMethods,
+  NotionUtilMethods,
+  PodKind,
+  GithubIssueUtilMethods,
+} from "./types";
 import { PodUtils } from "./utils";
 
 export enum PROMPT {
@@ -24,7 +29,7 @@ export type PodOpts<T> = {
   engine: DEngineClient;
   config: T;
   onPrompt?: (arg0?: PROMPT) => Promise<any | undefined>;
-  utilityMethods?: GDocUtilMethods | NotionUtilMethods;
+  utilityMethods?: GDocUtilMethods | NotionUtilMethods | GithubIssueUtilMethods;
 } & WorkspaceOpts;
 
 // === Publish Pod

@@ -1,7 +1,7 @@
 import {
   IntermediateDendronConfig,
   NoteProps,
-  WorkspaceOpts
+  WorkspaceOpts,
 } from "@dendronhq/common-all";
 import {
   AssertUtils,
@@ -2113,6 +2113,62 @@ describe("noteRefV2", () => {
       },
     });
 
+    /** Tests both that the footnotes are only rendered when referenced, and also that they get rendered even if they get sliced out in the note reference. */
+    const WITH_FOOTNOTES = createProcTests({
+      name: "with footnotes",
+      setupFunc: async (opts) => {
+        const { engine, vaults } = opts;
+        return processTextV2({
+          text: [
+            "# Illum Nostrum",
+            "",
+            "Illum in aut eos voluptas nostrum possimus commodi. [^quo]",
+            "",
+            "![[foo.ch1#start:#end]]",
+            "",
+            "[^quo]: Id et velit ducimus quo ut.",
+          ].join("\n"),
+          dest: opts.extra.dest,
+          engine,
+          vault: vaults[0],
+          fname: "foo",
+        });
+      },
+      preSetupHook: async (opts) => {
+        await ENGINE_HOOKS.setupBasic(opts);
+        await modifyNote(opts, "foo.ch1", (note: NoteProps) => {
+          const txt = [
+            "# start",
+            "",
+            "Laborum libero quia ducimus.",
+            "",
+            "Iure neque alias dolorem. [^minus]",
+            "",
+            "# end",
+            "",
+            "[^minus]: Et porro minus facilis qui.",
+            "[^eos]: In eos et aperiam hic necessitatibus aperiam.",
+          ];
+          note.body = txt.join("\n");
+          return note;
+        });
+      },
+      verifyFuncDict: {
+        [DendronASTDest.HTML]: async ({ extra }) => {
+          const { resp } = extra;
+          await checkVFile(
+            resp,
+            "Id et velit ducimus quo ut.",
+            "Et porro minus facilis qui."
+          );
+          await checkNotInVFile(
+            resp,
+            "In eos et aperiam hic necessitatibus aperiam."
+          );
+        },
+      },
+    });
+
     runAllTests({
       name: "compile",
       testCases: [
@@ -2139,6 +2195,7 @@ describe("noteRefV2", () => {
         ...HEADER_TO_BLOCK_ANCHOR,
         ...BLOCK_ANCHOR_TO_HEADER,
         ...SINGLE_TOP_LEVEL_LIST,
+        ...WITH_FOOTNOTES,
       ],
     });
   });

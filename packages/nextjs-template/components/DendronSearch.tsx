@@ -18,7 +18,7 @@ import { useNoteBodies } from "../utils/hooks";
 /** For notes where nothing in the note body matches, only show this many characters for the note body snippet. */
 const MAX_NOTE_SNIPPET_LENGTH = 30;
 /** For each matching part in the note body, show this many characters before and after the matching part in each snippet. */
-const NOTE_SNIPPET_BEFORE_AFTER = 10;
+const NOTE_SNIPPET_BEFORE_AFTER = 100;
 /** Place this in place of omitted text in between snippet parts. */
 const OMITTED_PART_TEXT = " ... ";
 /** How long to wait for before triggering fuse search, in ms. Required for performance reasons since fuse search is expensive. */

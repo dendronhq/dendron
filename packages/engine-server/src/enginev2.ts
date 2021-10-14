@@ -443,9 +443,9 @@ export class DendronEngineV2 implements DEngine {
     opts: QueryNotesOpts
   ): ReturnType<DEngineClient["queryNotes"]> {
     const ctx = "Engine:queryNotes";
-    const { qs, vault, createIfNew, onlyDirectChildren } = opts;
+    const { qs, vault, createIfNew } = opts;
 
-    let items = await this.fuseEngine.queryNote({ qs, onlyDirectChildren });
+    let items = await this.fuseEngine.queryNote({ qs });
     let item = this.notes[items[0].id];
     if (createIfNew) {
       let noteNew: NoteProps;

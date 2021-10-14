@@ -107,23 +107,6 @@ describe("Fuse utility function tests", () => {
         expect(FuseEngine.formatQueryForFuse({ qs: input })).toEqual(expected);
       }
     );
-
-    describe(`GIVEN that onlyDirectChildren is set`, () => {
-      test.each([
-        ["dev.vs.", "^dev.vs."],
-        ["^dev.vs.", "^dev.vs."],
-      ])(
-        'WHEN input="%s" THEN output is "%s"',
-        (input: string, expected: string) => {
-          expect(
-            FuseEngine.formatQueryForFuse({
-              qs: input,
-              onlyDirectChildren: true,
-            })
-          ).toEqual(expected);
-        }
-      );
-    });
   });
 
   describe("sortMatchingScores", () => {

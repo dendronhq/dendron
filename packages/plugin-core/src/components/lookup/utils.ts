@@ -11,6 +11,7 @@ import {
   NoteProps,
   NoteQuickInput,
   NoteUtils,
+  OrderedMatcher,
   RenameNoteOpts,
   RespV2,
   SchemaUtils,
@@ -33,6 +34,7 @@ import { ILookupProviderV3, OnAcceptHook } from "./LookupProviderV3";
 import {
   DendronQuickPickerV2,
   DendronQuickPickState,
+  TransformedQueryString,
   VaultSelectionMode,
 } from "./types";
 
@@ -767,18 +769,24 @@ export class NotePickerUtils {
 
   static async fetchPickerResults(opts: {
     picker: DendronQuickPickerV2;
-    qs: string;
-    onlyDirectChildren?: boolean;
+    transformedQuery: TransformedQueryString;
   }) {
     const ctx = "createPickerItemsFromEngine";
     const start = process.hrtime();
-    const { picker, qs, onlyDirectChildren } = opts;
+    const { picker, transformedQuery } = opts;
     const { engine, wsRoot, vaults } = getDWorkspace();
     // if we are doing a query, reset pagination options
     PickerUtilsV2.resetPaginationOpts(picker);
 
-    const resp = await engine.queryNotes({ qs, onlyDirectChildren });
+    const resp = await engine.queryNotes({
+      qs: transformedQuery.queryString,
+      onlyDirectChildren: transformedQuery.onlyDirectChildren,
+    });
     let nodes: NoteProps[] = resp.data;
+
+    // We need to filter our results to abide by different variations of our
+    // transformed query. We should do filtering prior to doing pagination cut off.
+    nodes = filterPickerResults({ itemsToFilter: nodes, transformedQuery });
 
     Logger.info({ ctx, msg: "post:queryNotes" });
     if (nodes.length > PAGINATE_LIMIT) {
@@ -800,6 +808,7 @@ export class NotePickerUtils {
         })
       )
     );
+
     const profile = getDurationMilliseconds(start);
     Logger.info({ ctx, msg: "engine.query", profile });
     return updatedItems;
@@ -815,6 +824,38 @@ export class NotePickerUtils {
       .join(".");
   }
 }
+
+export const filterPickerResults = ({
+  itemsToFilter,
+  transformedQuery,
+}: {
+  itemsToFilter: NoteProps[];
+  transformedQuery: TransformedQueryString;
+}): NoteProps[] => {
+  // If we have specific vault name within the query then keep only those results
+  // that match the specific vault name.
+  if (transformedQuery.vaultName) {
+    itemsToFilter = itemsToFilter.filter(
+      (item) => VaultUtils.getName(item.vault) === transformedQuery.vaultName
+    );
+  }
+
+  if (transformedQuery.splitByDots && transformedQuery.splitByDots.length > 0) {
+    const matcher = new OrderedMatcher(transformedQuery.splitByDots);
+
+    itemsToFilter = itemsToFilter.filter((item) => matcher.isMatch(item.fname));
+  }
+
+  if (transformedQuery.wasMadeFromWikiLink) {
+    // If we are dealing with a wiki link we want to show only the exact matches
+    // for the link instead some fuzzy/partial matches.
+    itemsToFilter = itemsToFilter.filter(
+      (item) => item.fname === transformedQuery.queryString
+    );
+  }
+
+  return itemsToFilter;
+};
 
 export class SchemaPickerUtils {
   static async fetchPickerResultsWithCurrentValue({

@@ -24,7 +24,7 @@ export type NoteIndexProps = {
 };
 
 /** https://fusejs.io/examples.html#extended-search */
-const FuseExtendedSearchConstants = {
+export const FuseExtendedSearchConstants = {
   PrefixExactMatch: "^",
 };
 
@@ -216,10 +216,7 @@ export class FuseEngine {
       // @ts-ignore
       items = this.notesIndex._docs as NoteProps[];
     } else {
-      const formattedQS = FuseEngine.formatQueryForFuse({
-        qs,
-        onlyDirectChildren,
-      });
+      const formattedQS = FuseEngine.formatQueryForFuse({ qs });
 
       let results = this.notesIndex.search(formattedQS);
 
@@ -294,13 +291,7 @@ export class FuseEngine {
     });
   }
 
-  static formatQueryForFuse({
-    qs,
-    onlyDirectChildren,
-  }: {
-    qs: string;
-    onlyDirectChildren?: boolean;
-  }): string {
+  static formatQueryForFuse({ qs }: { qs: string }): string {
     // Fuse does not appear to see [*] as anything special.
     // For example:
     // `dev*vs` matches `dendron.dev.ref.vscode` with score of 0.5
@@ -312,14 +303,6 @@ export class FuseEngine {
     // uses spaces for AND and '|' for OR hence this function will replace '*' with spaces.
     // We do this replacement since VSCode quick pick actually appears to respect '*'.
     let result = qs.split("*").join(" ");
-
-    // When querying for direct children the prefix should match exactly.
-    if (
-      onlyDirectChildren &&
-      !result.startsWith(FuseExtendedSearchConstants.PrefixExactMatch)
-    ) {
-      result = FuseExtendedSearchConstants.PrefixExactMatch + result;
-    }
 
     return result;
   }

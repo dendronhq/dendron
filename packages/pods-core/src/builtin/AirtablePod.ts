@@ -177,9 +177,9 @@ class AirtableUtils {
             }
             if (hashtags.length > 1) {
               throw new DendronError({
-                message: `singleTag field has multiple values: ${JSON.stringify(
-                  _.pick(hashtags, "value")
-                )}`,
+                message: `singleTag field has multiple values. note: ${JSON.stringify(
+                  NoteUtils.toLogObj(note)
+                )}, tags: ${JSON.stringify(_.pick(hashtags, "value"))}`,
               });
             }
             if (hashtags.length !== 0) {

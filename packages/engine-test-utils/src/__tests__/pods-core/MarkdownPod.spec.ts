@@ -204,7 +204,7 @@ describe("markdown publish pod", () => {
         });
         const seedId = TestSeedUtils.defaultSeedId();
         engine.config = TestConfigUtils.getConfig({ wsRoot });
-        engine.vaults = engine.config.vaults;
+        engine.vaults = engine.config.vaults!;
         const vault = VaultUtils.getVaultByName({
           vaults: engine.vaults,
           vname: seedId,

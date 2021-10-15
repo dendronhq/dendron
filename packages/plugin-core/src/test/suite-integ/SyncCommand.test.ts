@@ -1,6 +1,7 @@
 import {
   IntermediateDendronConfig,
-  DVaultSync
+  DVaultSync,
+  DVault,
 } from "@dendronhq/common-all";
 import { tmpDir } from "@dendronhq/common-server";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
@@ -216,7 +217,7 @@ suite("workspace sync command", function () {
           const remoteDir = tmpDir().name;
           await GitTestUtils.createRepoForRemoteWorkspace(wsRoot, remoteDir);
           await changeConfig(wsRoot, {
-            vaults: [{ sync: DVaultSync.NO_COMMIT }],
+            vaults: [{ sync: DVaultSync.NO_COMMIT }] as DVault[],
           });
           // Create a new note so there are some changes
           await NoteTestUtilsV4.createNote({
@@ -245,7 +246,7 @@ suite("workspace sync command", function () {
           const remoteDir = tmpDir().name;
           await GitTestUtils.createRepoForRemoteWorkspace(wsRoot, remoteDir);
           await changeConfig(wsRoot, {
-            vaults: [{ sync: DVaultSync.NO_PUSH }],
+            vaults: [{ sync: DVaultSync.NO_PUSH }] as DVault[],
           });
           // Create a new note so there are some changes
           await NoteTestUtilsV4.createNote({
@@ -274,7 +275,9 @@ suite("workspace sync command", function () {
         onInit: async ({ wsRoot, vaults }) => {
           const remoteDir = tmpDir().name;
           await GitTestUtils.createRepoForRemoteWorkspace(wsRoot, remoteDir);
-          await changeConfig(wsRoot, { vaults: [{ sync: DVaultSync.SKIP }] });
+          await changeConfig(wsRoot, {
+            vaults: [{ sync: DVaultSync.SKIP }] as DVault[],
+          });
           // Create a new note so there are some changes
           await NoteTestUtilsV4.createNote({
             fname: "my-new-note",
@@ -300,7 +303,9 @@ suite("workspace sync command", function () {
         onInit: async ({ wsRoot, vaults }) => {
           const remoteDir = tmpDir().name;
           await GitTestUtils.createRepoForRemoteWorkspace(wsRoot, remoteDir);
-          await changeConfig(wsRoot, { vaults: [{ sync: DVaultSync.SYNC }] });
+          await changeConfig(wsRoot, {
+            vaults: [{ sync: DVaultSync.SYNC }] as DVault[],
+          });
           // Create a new note so there are some changes
           await NoteTestUtilsV4.createNote({
             fname: "my-new-note",
@@ -329,7 +334,9 @@ suite("workspace sync command", function () {
           const remoteDir = tmpDir().name;
           await GitTestUtils.createRepoForRemoteWorkspace(wsRoot, remoteDir);
           await checkoutNewBranch(wsRoot, "test-branch");
-          await changeConfig(wsRoot, { vaults: [{ sync: DVaultSync.SYNC }] });
+          await changeConfig(wsRoot, {
+            vaults: [{ sync: DVaultSync.SYNC }] as DVault[],
+          });
           // Create a new note so there are some changes
           await NoteTestUtilsV4.createNote({
             fname: "my-new-note",

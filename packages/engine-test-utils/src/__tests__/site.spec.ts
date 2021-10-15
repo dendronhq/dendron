@@ -717,7 +717,7 @@ describe("SiteUtils", () => {
             await ENGINE_HOOKS_MULTI.setupBasicMulti(opts);
             TestConfigUtils.withConfig(
               (config) => {
-                const bvault = config.vaults.find(
+                const bvault = config.vaults!.find(
                   (ent) => ent.fsPath === "vault2"
                 );
                 bvault!.visibility = DVaultVisibility.PRIVATE;

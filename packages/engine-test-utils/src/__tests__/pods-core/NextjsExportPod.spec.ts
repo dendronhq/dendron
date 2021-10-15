@@ -106,7 +106,7 @@ describe("GIVEN NextExport pod", () => {
               );
               TestConfigUtils.withConfig(
                 (config) => {
-                  const vault2 = config.vaults.find(
+                  const vault2 = config.vaults!.find(
                     (ent) => ent.fsPath === "vault2"
                   );
                   vault2!.visibility = DVaultVisibility.PRIVATE;

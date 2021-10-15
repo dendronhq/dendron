@@ -168,7 +168,7 @@ describe("WorkspaceService", () => {
         const root = tmpDir().name;
         await GitTestUtils.createRepoWithReadme(root);
 
-        engine.config.vaults.push({
+        engine.config.vaults!.push({
           fsPath: "remoteVault",
           remote: {
             type: "git",

@@ -1,6 +1,5 @@
 import { ServerUtils } from "@dendronhq/api-server";
 import {
-  ConfigEvents,
   CONSTANTS,
   DendronError,
   DEngineClient,
@@ -8,15 +7,12 @@ import {
   DVault,
   getStage,
   InstallStatus,
-  IntermediateDendronConfig,
-  MigrationEvents,
   LegacyNoteAddBehavior,
   NoteProps,
   NoteUtils,
   Point,
   Position,
   SchemaModuleProps,
-  StrictIntermediateDendronConfig,
   Time,
   TutorialEvents,
   VaultUtils,
@@ -33,7 +29,6 @@ import {
   DConfig,
   HistoryEvent,
   HistoryService,
-  MigrationChangeSetStatus,
 } from "@dendronhq/engine-server";
 import { assign } from "comment-json";
 import { ExecaChildProcess } from "execa";
@@ -45,7 +40,6 @@ import os from "os";
 import path from "path";
 import * as vscode from "vscode";
 import { CancellationTokenSource } from "vscode-languageclient";
-import { RunMigrationCommand } from "./commands/RunMigrationCommand";
 import { SetupWorkspaceCommand } from "./commands/SetupWorkspace";
 import { PickerUtilsV2 } from "./components/lookup/utils";
 import {

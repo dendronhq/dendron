@@ -19,13 +19,13 @@ import {
   MetadataService,
   openWSMetaFile,
 } from "@dendronhq/engine-server";
-import { TestEngineUtils, ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
+import { TestEngineUtils } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
 import _ from "lodash";
 import { describe, beforeEach, it } from "mocha";
 import os from "os";
 import path from "path";
-import sinon, { SinonStub, SinonSpy } from "sinon";
+import sinon, { SinonStub } from "sinon";
 import { ExtensionContext } from "vscode";
 import { ResetConfigCommand } from "../../commands/ResetConfig";
 import {
@@ -50,7 +50,6 @@ import {
   resetCodeWorkspace,
 } from "../testUtilsv2";
 import {
-  describeMultiWS,
   runLegacySingleWorkspaceTest,
   setupBeforeAfter,
   stubSetupWorkspace,

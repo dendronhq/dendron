@@ -88,7 +88,7 @@ suite("CopyNoteUrl", function () {
         });
         const seedId = TestSeedUtils.defaultSeedId();
         engine.config = getDWorkspace().config;
-        engine.vaults = engine.config.vaults;
+        engine.vaults = engine.config.vaults!;
         sinon.stub(VSCodeUtils, "getNoteFromDocument").returns(
           await NoteTestUtilsV4.createNote({
             fname: "root",
@@ -98,7 +98,7 @@ suite("CopyNoteUrl", function () {
         );
 
         const vault = VaultUtils.getVaultByName({
-          vaults: getDWorkspace().config.vaults,
+          vaults: getDWorkspace().config.vaults!,
           vname: seedId,
         })!;
         await VSCodeUtils.openNoteByPath({ vault, fname: "root" });
@@ -131,7 +131,7 @@ suite("CopyNoteUrl", function () {
         });
         const seedId = TestSeedUtils.defaultSeedId();
         engine.config = getDWorkspace().config;
-        engine.vaults = engine.config.vaults;
+        engine.vaults = engine.config.vaults!;
         // TODO: ugly temporary hack. can be removed when [[Unify Runenginetest and Runworkspacetest|scratch.2021.06.17.164102.unify-runenginetest-and-runworkspacetest]] is implemented
         sinon.stub(VSCodeUtils, "getNoteFromDocument").returns(
           await NoteTestUtilsV4.createNote({
@@ -141,7 +141,7 @@ suite("CopyNoteUrl", function () {
           })
         );
         const vault = VaultUtils.getVaultByName({
-          vaults: getDWorkspace().config.vaults,
+          vaults: getDWorkspace().config.vaults!,
           vname: seedId,
         })!;
         await VSCodeUtils.openNoteByPath({ vault, fname: "root" });

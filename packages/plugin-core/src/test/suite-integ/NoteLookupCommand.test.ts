@@ -754,9 +754,9 @@ suite("NoteLookupCommand", function () {
             noConfirm: true,
           })) as CommandOutput;
 
-          expect(engine.config.journal.dateFormat).toEqual("y.MM.dd");
+          expect(engine.config.journal!.dateFormat).toEqual("y.MM.dd");
           // quickpick value should be `foo.journal.yyyy.mm.dd`
-          const today = Time.now().toFormat(engine.config.journal.dateFormat);
+          const today = Time.now().toFormat(engine.config.journal!.dateFormat);
           const noteName = `foo.journal.${today}`;
           expect(out.quickpick.value).toEqual(noteName);
 
@@ -858,9 +858,9 @@ suite("NoteLookupCommand", function () {
             noConfirm: true,
           })) as CommandOutput;
 
-          expect(engine.config.journal.dateFormat).toEqual("y.MM.dd");
+          expect(engine.config.journal!.dateFormat).toEqual("y.MM.dd");
           // quickpick value should be `foo.journal.yyyy.mm.dd`
-          const today = Time.now().toFormat(engine.config.journal.dateFormat);
+          const today = Time.now().toFormat(engine.config.journal!.dateFormat);
           const noteName = `gamma.journal.${today}`;
           expect(out.quickpick.value).toEqual(noteName);
 
@@ -1492,7 +1492,7 @@ suite("NoteLookupCommand", function () {
           expect(journalBtn.pressed).toBeTruthy();
           expect(selection2linkBtn.pressed).toBeTruthy();
 
-          const today = Time.now().toFormat(engine.config.journal.dateFormat);
+          const today = Time.now().toFormat(engine.config.journal!.dateFormat);
           expect(controller.quickpick.value).toEqual(
             `foo.journal.${today}.foo-body`
           );
@@ -1551,7 +1551,7 @@ suite("NoteLookupCommand", function () {
           expect(selection2linkBtn.pressed).toBeTruthy();
 
           await controller.onTriggerButton(selection2linkBtn);
-          const today = Time.now().toFormat(engine.config.journal.dateFormat);
+          const today = Time.now().toFormat(engine.config.journal!.dateFormat);
           expect(controller.quickpick.value).toEqual(`foo.journal.${today}`);
 
           done();
@@ -1730,7 +1730,7 @@ suite("NoteLookupCommand", function () {
           expect(selection2linkBtn.pressed).toBeTruthy();
 
           await controller.onTriggerButton(journalBtn);
-          const today = Time.now().toFormat(engine.config.journal.dateFormat);
+          const today = Time.now().toFormat(engine.config.journal!.dateFormat);
           const quickpickValue = controller.quickpick.value;
           expect(quickpickValue).toEqual(`foo.journal.${today}.foo-body`);
 
@@ -1773,7 +1773,7 @@ suite("NoteLookupCommand", function () {
             noteType: LookupNoteTypeEnum.journal,
           });
 
-          const today = Time.now().toFormat(engine.config.journal.dateFormat);
+          const today = Time.now().toFormat(engine.config.journal!.dateFormat);
           const newNote = NoteUtils.getNoteOrThrow({
             fname: `foo.journal.${today}`,
             notes: engine.notes,

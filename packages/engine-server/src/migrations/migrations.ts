@@ -8,11 +8,12 @@ import {
   RandomNoteConfig,
   LookupSelectionMode,
   LookupSelectionModeEnum,
-  ScratchConfig,
+  LegacyScratchConfig,
   DendronError,
   genDefaultCommandConfig,
   CURRENT_CONFIG_VERSION,
   DVault,
+  StrictV1,
 } from "@dendronhq/common-all";
 import {
   SegmentClient,
@@ -308,7 +309,7 @@ export const ALL_MIGRATIONS: Migrations[] = [
         name: "migrate scratch config",
         func: async ({ dendronConfig, wsConfig }) => {
           dendronConfig.scratch = DConfig.genDefaultConfig()
-            .scratch as ScratchConfig;
+            .scratch as LegacyScratchConfig;
           if (_.get(wsConfig?.settings, "dendron.defaultScratchName")) {
             dendronConfig.scratch.name = _.get(
               wsConfig?.settings,
@@ -353,7 +354,9 @@ export const ALL_MIGRATIONS: Migrations[] = [
       {
         name: "migrate journal config",
         func: async ({ dendronConfig, wsConfig }) => {
-          dendronConfig.journal = DConfig.genDefaultConfig().journal;
+          dendronConfig.journal = (
+            DConfig.genDefaultConfig() as StrictV1
+          ).journal;
           if (_.get(wsConfig?.settings, "dendron.dailyJournalDomain")) {
             dendronConfig.journal.dailyDomain = _.get(
               wsConfig?.settings,

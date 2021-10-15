@@ -47,7 +47,7 @@ suite("Create Daily Journal Suite", function () {
         withConfig(
           (config) => {
             config.lookupConfirmVaultOnCreate = false;
-            config.journal.dailyVault = VaultUtils.getName(vaults[0]);
+            config.journal!.dailyVault = VaultUtils.getName(vaults[0]);
             return config;
           },
           { wsRoot }
@@ -70,7 +70,7 @@ suite("Create Daily Journal Suite", function () {
         withConfig(
           (config) => {
             config.lookupConfirmVaultOnCreate = true;
-            config.journal.dailyVault = VaultUtils.getName(vaults[0]);
+            config.journal!.dailyVault = VaultUtils.getName(vaults[0]);
             return config;
           },
           { wsRoot }
@@ -113,7 +113,7 @@ suite("Create Daily Journal Suite", function () {
     runLegacyMultiWorkspaceTest({
       ctx,
       modConfigCb: (config) => {
-        config.journal.dailyDomain = "bar";
+        config.journal!.dailyDomain = "bar";
         return config;
       },
       onInit: async () => {
@@ -138,9 +138,9 @@ suite("Create Daily Journal Suite", function () {
         },
       },
       modConfigCb: (config) => {
-        config.journal.dateFormat = "dd";
-        config.journal.dailyDomain = "daisy";
-        config.journal.name = "journey";
+        config.journal!.dateFormat = "dd";
+        config.journal!.dailyDomain = "daisy";
+        config.journal!.name = "journey";
         return config;
       },
       onInit: async ({ wsRoot, vaults }) => {

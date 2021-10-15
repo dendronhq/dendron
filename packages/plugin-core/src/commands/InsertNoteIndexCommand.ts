@@ -73,18 +73,24 @@ export class InsertNoteIndexCommand extends BasicCommand<
       return opts;
     }
     const config = getDWorkspace().config;
-    const insertNoteIndexConfig = DConfig.getConfig(config, "commands.insertNoteIndex")
+
+    const insertNoteIndexConfig = DConfig.getConfig({
+      config,
+      path: "commands.insertNoteIndex",
+      required: true,
+    });
     let maybeMarker: boolean | undefined;
-    
+
     if (_.isUndefined(insertNoteIndexConfig)) {
       maybeMarker = undefined;
     } else {
-      maybeMarker = "enableMarker" in insertNoteIndexConfig 
-        ? insertNoteIndexConfig.enableMarker
-        : insertNoteIndexConfig.marker;
+      maybeMarker =
+        "enableMarker" in insertNoteIndexConfig
+          ? insertNoteIndexConfig.enableMarker
+          : insertNoteIndexConfig.marker;
     }
     const noteIndex = this.genNoteIndex(children, {
-      marker: opts.marker ? opts.marker : maybeMarker
+      marker: opts.marker ? opts.marker : maybeMarker,
     });
     const current = maybeEditor.selection;
     await maybeEditor.edit((builder) => {

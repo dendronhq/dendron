@@ -140,15 +140,20 @@ export class NoteLookupCommand extends BaseCommand<
   async gatherInputs(opts?: CommandRunOpts): Promise<CommandGatherOutput> {
     const start = process.hrtime();
     const ws = getDWorkspace();
-    const lookupConfig = DConfig.getConfig(ws.config, "commands.lookup");
+    const lookupConfig = DConfig.getConfig({
+      config: ws.config,
+      path: "commands.lookup",
+      required: true,
+    });
     const noteLookupConfig = lookupConfig.note;
-    let selectionType: LookupSelectionType = LookupSelectionTypeEnum.selectionExtract;
+    let selectionType: LookupSelectionType =
+      LookupSelectionTypeEnum.selectionExtract;
     let confirmVaultOnCreate;
     if ("selectionMode" in noteLookupConfig) {
       const selectionMode = noteLookupConfig.selectionMode;
-      switch(selectionMode) {
+      switch (selectionMode) {
         case "extract": {
-          selectionType = LookupSelectionTypeEnum.selectionExtract
+          selectionType = LookupSelectionTypeEnum.selectionExtract;
           break;
         }
         case "link": {
@@ -160,13 +165,16 @@ export class NoteLookupCommand extends BaseCommand<
           break;
         }
         default: {
-          throw new DendronError({ message: "unsupported selection type."});
+          throw new DendronError({ message: "unsupported selection type." });
         }
       }
       confirmVaultOnCreate = noteLookupConfig.confirmVaultOnCreate;
     } else {
       selectionType = noteLookupConfig.selectionType;
-      confirmVaultOnCreate = DConfig.getProp(ws.config, "lookupConfirmVaultOnCreate")
+      confirmVaultOnCreate = DConfig.getProp(
+        ws.config,
+        "lookupConfirmVaultOnCreate"
+      );
     }
 
     const copts: CommandRunOpts = _.defaults(opts || {}, {
@@ -181,7 +189,7 @@ export class NoteLookupCommand extends BaseCommand<
     const disableVaultSelection = !confirmVaultOnCreate;
     this._controller = LookupControllerV3.create({
       nodeType: "note",
-      disableVaultSelection, 
+      disableVaultSelection,
       vaultButtonPressed:
         copts.vaultSelectionMode === VaultSelectionMode.alwaysPrompt,
       extraButtons: [

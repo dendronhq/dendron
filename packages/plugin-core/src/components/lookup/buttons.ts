@@ -99,7 +99,11 @@ const selectionToNoteProps = async (opts: {
     case "selectionExtract": {
       if (!_.isUndefined(document)) {
         const ws = getDWorkspace();
-        const lookupConfig = DConfig.getConfig(ws.config, "commands.lookup");
+        const lookupConfig = DConfig.getConfig({
+          config: ws.config,
+          path: "commands.lookup",
+          required: true,
+        });
         const noteLookupConfig = lookupConfig.note;
         const leaveTrace = noteLookupConfig.leaveTrace || false;
         const body = "\n" + document.getText(range).trim();

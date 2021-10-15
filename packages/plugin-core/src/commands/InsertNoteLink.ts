@@ -36,15 +36,20 @@ export class InsertNoteLinkCommand extends BasicCommand<
 
   async gatherInputs(opts: CommandInput): Promise<CommandOpts | undefined> {
     const config = getDWorkspace().config;
-    const insertNoteLinkConfig = DConfig.getConfig(config, "commands.insertNoteLink");
+    const insertNoteLinkConfig = DConfig.getConfig({
+      config,
+      path: "commands.insertNoteLink",
+      required: true,
+    });
     const aliasModeConfig = insertNoteLinkConfig?.aliasMode;
     let multiSelectConfig;
     if (!_.isUndefined(insertNoteLinkConfig)) {
-      multiSelectConfig = "multiSelect" in insertNoteLinkConfig
-        ? insertNoteLinkConfig.multiSelect
-        : insertNoteLinkConfig?.enableMultiSelect;
+      multiSelectConfig =
+        "multiSelect" in insertNoteLinkConfig
+          ? insertNoteLinkConfig.multiSelect
+          : insertNoteLinkConfig?.enableMultiSelect;
     }
-    
+
     const copts: CommandInput = _.defaults(opts || {}, {
       multiSelect: multiSelectConfig || false,
       aliasMode: aliasModeConfig || "none",

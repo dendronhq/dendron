@@ -26,6 +26,7 @@ const FOOTNOTE_RETURN_SYMBOL = "˄";
 function footnote2html(reference: FootnoteReference) {
   return html(
     `<a id="${FOOTNOTE_REF_ID_PREFIX}${reference.identifier}"` +
+      `class="fnref"` +
       `href="#${FOOTNOTE_DEF_ID_PREFIX}${reference.identifier}">` +
       (reference.label || reference.identifier) +
       `</a>`
@@ -37,7 +38,7 @@ function footnoteDef2html(definition: FootnoteDefinition) {
   // footnote reference. We have to inject the back arrow into the text inside
   // the definition, otherwise it renders in a different line than the definition.
   const backArrow = html(
-    `<a href="${FOOTNOTE_REF_ID_PREFIX}${definition.identifier}" style="margin-left: 1rem;">${FOOTNOTE_RETURN_SYMBOL}</a>`
+    `<a class="fn" href="#${FOOTNOTE_REF_ID_PREFIX}${definition.identifier}">${FOOTNOTE_RETURN_SYMBOL}</a>`
   );
   let lastParent: Parent | undefined;
   visit(definition, (node) => {

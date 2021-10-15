@@ -231,3 +231,15 @@ blockquote {
     }
   }
 }
+
+
+// Footnotes
+a.fnref {
+	vertical-align: super;
+	font-size: 0.7rem;
+}
+
+a.fn {
+	text-decoration: none;
+  margin-left: 1rem;
+}

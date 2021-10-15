@@ -267,7 +267,7 @@ export class DConfig {
   }
 
   static getConfig(opts: {
-    config: StrictIntermediateDendronConfig;
+    config: IntermediateDendronConfig;
     path: string;
     required?: boolean;
     currentVersion?: number;
@@ -300,15 +300,12 @@ export class DConfig {
 
       if (required) {
         // it is a new config that is required, but doesn't have a mapping to old config (a new namespace).
-        // grab it from the the default of currentVersion, throw an error with it as a payload.
-        // catch it where it's used and handle it accordingly.
-        throw new DendronError({
-          message: "Required config path doesn't have a mapping.",
-          payload: _.get(DConfig.genDefaultConfig(currentVersion), path),
-        });
+        // grab the default of currentVersion.
+        return _.get(DConfig.genDefaultConfig(currentVersion), path);
       } else {
         // it's an optional config that we don't have a mapping for.
-        // either you didn't map it, or something is wrong.
+        // something went wrong,
+        // or we didn't map it when we should (which is also wrong.)
         throw new DendronError({
           message: "Optional config path doesn't have a mapping.",
           severity: ERROR_SEVERITY.FATAL,
@@ -317,9 +314,16 @@ export class DConfig {
     }
 
     // we have a mapping
-    const { target } = mappedConfigPath;
-    const maybeValue = _.get(config, target);
+    const { target, version } = mappedConfigPath;
 
+    if (config.version === version) {
+      // if config's version matches when the target was mapped,
+      // we don't want to get the mapped version (it's legacy).
+      // get the config version's default using given path.
+      return _.get(DConfig.genDefaultConfig(config.version), path);
+    }
+
+    const maybeValue = _.get(config, target);
     // we found a value there.
     if (maybeValue) {
       return maybeValue;
@@ -328,12 +332,13 @@ export class DConfig {
     // we couldn't find it there either.
     if (required) {
       // required mapped target doesn't have a value.
-      // get default of mapped target on given config's version
-      return _.get(DConfig.genDefaultConfig(config.version), target);
+      // get the default from version just prior to
+      // when target was mapped.
+      return _.get(DConfig.genDefaultConfig(version - 1), target);
     } else {
       // optional mapped target doesn't have a value.
-      // mapped target may have a default value, but
-      // to conform to the given config's version,
+      // mapped target may have a default value in mapped location, but
+      // to conform with the given config's version,
       // return default at _path_ (not mapped) of config.version
       return _.get(DConfig.genDefaultConfig(config.version), path);
     }

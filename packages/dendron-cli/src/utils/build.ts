@@ -326,7 +326,7 @@ export class BuildUtils {
       ),
       fs.copy(path.join(apiRoot, "assets", "static"), pluginStaticPath),
     ]);
-    return;
+    return { staticPath: pluginStaticPath };
   }
 
   static removeDevDepsFromPkgJson({

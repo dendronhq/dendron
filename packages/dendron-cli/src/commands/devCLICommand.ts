@@ -321,7 +321,9 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     this.print("build next server...");
     BuildUtils.buildNextServer();
     this.print("sync static...");
-    await BuildUtils.syncStaticAssets();
+    const { staticPath } = await BuildUtils.syncStaticAssets();
+    const files = fs.readdirSync(staticPath).map((ent) => ent);
+    this.print(`static files: ${JSON.stringify(files)}`);
     this.print("done");
   }
 

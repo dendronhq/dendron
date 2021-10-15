@@ -20,6 +20,8 @@ type PluginOpts = {
 // These are the HTML IDs for footnotes. This replicates what the footnotes plugin was doing.
 const FOOTNOTE_DEF_ID_PREFIX = "fn-";
 const FOOTNOTE_REF_ID_PREFIX = "fnref-";
+/** The symbol that will be shown as the "return to reference" button. */
+const FOOTNOTE_RETURN_SYMBOL = "˄";
 
 function footnote2html(reference: FootnoteReference) {
   return html(
@@ -35,7 +37,7 @@ function footnoteDef2html(definition: FootnoteDefinition) {
   // footnote reference. We have to inject the back arrow into the text inside
   // the definition, otherwise it renders in a different line than the definition.
   const backArrow = html(
-    `<a href="${FOOTNOTE_REF_ID_PREFIX}${definition.identifier}" style="margin-left: 1rem;">↩</a>`
+    `<a href="${FOOTNOTE_REF_ID_PREFIX}${definition.identifier}" style="margin-left: 1rem;">${FOOTNOTE_RETURN_SYMBOL}</a>`
   );
   let lastParent: Parent | undefined;
   visit(definition, (node) => {

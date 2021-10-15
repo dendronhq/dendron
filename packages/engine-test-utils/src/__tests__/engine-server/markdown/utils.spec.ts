@@ -232,7 +232,7 @@ const WITH_FOOTNOTES = createProcTests({
         await AssertUtils.assertInString({
           body: respRehype.contents,
           match: [
-            `Here is the footnote.<a href="#fnref-1" class="footnote-backref">↩</a>`,
+            `Here is the footnote.<a href="fnref-1" style="margin-left: 1rem;">˄</a>`,
           ],
         })
       ).toBeTruthy();

@@ -3,13 +3,15 @@ import {
   DMessageSource,
   NoteProps,
   Time,
+  configIsAtLeastV3,
+  JournalConfig,
+  LegacyJournalConfig,
 } from "@dendronhq/common-all";
 import {
   createLogger,
   engineSlice,
   postVSCodeMessage,
 } from "@dendronhq/common-frontend";
-import { DConfig } from "@dendronhq/engine-server";
 import {
   CalendarProps as AntdCalendarProps,
   Spin,
@@ -84,16 +86,16 @@ function CalendarView({ engine, ide }: DendronProps) {
 
   const maxDots: number = 5;
   const wordsPerDot: number = 250;
-  const journalConfig = DConfig.getConfig({
-    config,
-    path: "workspace.journal",
-    required: true,
-  });
-  const journalDailyDomain = journalConfig.dailyDomain;
-  const journalName = journalConfig.name;
+
+  const journalConfig =
+    config?.version! >= 3 && config?.workspace
+      ? config?.workspace.journal
+      : config?.journal;
+  const journalDailyDomain = journalConfig?.dailyDomain;
+  const journalName = journalConfig?.name;
 
   // luxon token format lookup https://github.com/moment/luxon/blob/master/docs/formatting.md#table-of-tokens
-  let journalDateFormat = journalConfig.dateFormat;
+  let journalDateFormat = journalConfig?.dateFormat;
   const journalMonthDateFormat = "y.MM"; // TODO compute format for currentMode="year" from config
 
   // Currently luxon does not support setting first day of the week (https://github.com/moment/luxon/issues/373)

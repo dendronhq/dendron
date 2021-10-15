@@ -11,3 +11,9 @@ created: 1
 foo body
 "
 `;
+
+exports[`WHEN run 'dendron note lookup' AND WHEN lookup note with no vault specified and --output = md_gfm THEN get note in first vault 1`] = `
+"# Foo
+
+foo.ch1 body"
+`;

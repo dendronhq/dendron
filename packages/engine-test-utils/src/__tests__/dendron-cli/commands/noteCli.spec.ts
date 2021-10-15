@@ -8,6 +8,7 @@ import {
 } from "@dendronhq/dendron-cli";
 import { createEngineFromServer, runEngineTestV5 } from "../../../engine";
 import { checkString } from "../../../utils";
+import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 
 const runCmd = (opts: Omit<NoteCLICommandOpts, "port" | "server">) => {
   const cmd = new NoteCLICommand();
@@ -66,7 +67,43 @@ describe("WHEN run 'dendron note lookup'", () => {
         },
         {
           expect,
+          createEngine: createEngineFromServer,
           preSetupHook: ENGINE_HOOKS.setupBasic,
+        }
+      );
+    });
+  });
+
+  describe("AND WHEN lookup note with no vault specified and --output = md_gfm", () => {
+    test("THEN get note in first vault", async () => {
+      await runEngineTestV5(
+        async ({ engine, wsRoot, vaults }) => {
+          const vault = vaults[0];
+          const { data } = await runCmd({
+            wsRoot,
+            vault: VaultUtils.getName(vault),
+            engine,
+            cmd,
+            query: "foo",
+            output: NoteCLIOutput.MARKDOWN_GFM,
+          });
+          expect(data.payload).toMatchSnapshot();
+          await checkString(data.payload, "foo.ch1 body");
+        },
+        {
+          expect,
+          createEngine: createEngineFromServer,
+          preSetupHook: async (opts) => {
+            const { wsRoot, vaults } = opts;
+            await ENGINE_HOOKS.setupBasic(opts);
+            NoteTestUtilsV4.modifyNoteByPath(
+              { wsRoot, vault: vaults[0], fname: "foo" },
+              (note) => {
+                note.body = "![[foo.ch1]]";
+                return note;
+              }
+            );
+          },
         }
       );
     });

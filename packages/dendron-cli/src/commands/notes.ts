@@ -5,6 +5,7 @@ import {
   NoteUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
+import { MarkdownPublishPod } from "@dendronhq/pods-core";
 import _ from "lodash";
 import yargs from "yargs";
 import { CLICommand, CommandCommonProps } from "./base";
@@ -21,8 +22,8 @@ type CommandCLIOpts = {
 
 export enum NoteCLIOutput {
   JSON = "json",
-  MARKDOWN_GFM = "markdown_gfm",
-  MARKDOWN_DENDRON = "markdown_dendron",
+  MARKDOWN_GFM = "md_gfm",
+  MARKDOWN_DENDRON = "md_dendron",
 }
 
 type CommandOpts = CommandCLIOpts & SetupEngineResp & CommandCommonProps;
@@ -104,7 +105,17 @@ export class NoteCLICommand extends CLICommand<CommandOpts, CommandOutput> {
               payload = NoteUtils.serialize(data?.note!);
               break;
             case NoteCLIOutput.MARKDOWN_GFM:
-              throw new DendronError({ message: "NOT_IMPLEMENTED" });
+              payload = await new MarkdownPublishPod().execute({
+                engine,
+                vaults: engine.vaults,
+                wsRoot,
+                config: {
+                  fname: data?.note?.fname!,
+                  vaultName: VaultUtils.getName(vault),
+                  dest: "stdout",
+                },
+              });
+              break;
             default:
               assertUnreachable(output);
           }

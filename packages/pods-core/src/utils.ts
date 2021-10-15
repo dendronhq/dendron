@@ -453,11 +453,11 @@ export class PodUtils {
       element.textRun?.textStyle?.bold &&
       element.textRun?.textStyle?.italic
     ) {
-      return `**_${PodUtils.content(element)}_**`;
+      return `**_${PodUtils.content(element)?.trim()}_**`;
     } else if (element.textRun?.textStyle?.italic) {
-      return `_${PodUtils.content(element)}_`;
+      return `_${PodUtils.content(element)?.trim()}_`;
     } else if (element.textRun?.textStyle?.bold) {
-      return `**${PodUtils.content(element)}**`;
+      return `**${PodUtils.content(element)?.trim()}**`;
     }
 
     return PodUtils.content(element);

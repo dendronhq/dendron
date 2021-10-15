@@ -61,7 +61,6 @@
     "ajv": "^8.6.0",
     "ajv-formats": "^2.1.0",
     "csv-writer": "^1.6.0",
-    "docs-markdown": "^1.2.0",
     "emailjs": "^3.4.0",
     "fs-extra": "^9.0.1",
     "googleapis": "^88.2.0",

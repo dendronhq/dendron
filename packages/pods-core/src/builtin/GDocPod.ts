@@ -7,7 +7,6 @@ import {
 import { JSONSchemaType } from "ajv";
 import { GDocUtilMethods, PodUtils } from "../utils";
 import axios from "axios";
-//import { googleDocsToMarkdown } from "docs-markdown";
 import _ from "lodash";
 import {
   DendronError,

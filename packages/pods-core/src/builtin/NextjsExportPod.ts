@@ -6,8 +6,14 @@ import {
   NotePropsDict,
   NoteUtils,
   createSerializedFuseNoteIndex,
+  DVault,
 } from "@dendronhq/common-all";
-import { MDUtilsV5, ProcFlavor, SiteUtils } from "@dendronhq/engine-server";
+import {
+  DConfig,
+  MDUtilsV5,
+  ProcFlavor,
+  SiteUtils,
+} from "@dendronhq/engine-server";
 import { JSONSchemaType } from "ajv";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -127,7 +133,11 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     dest: string;
   }) {
     const ctx = "copyAssets";
-    const vaults = config.vaults;
+    const vaults = DConfig.getConfig({
+      config,
+      path: "workspace.vaults",
+      required: true,
+    }) as DVault[];
     const destPublicPath = path.join(dest, "public");
     fs.ensureDirSync(destPublicPath);
     const siteAssetsDir = path.join(destPublicPath, "assets");

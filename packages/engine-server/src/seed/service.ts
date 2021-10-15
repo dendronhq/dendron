@@ -2,6 +2,7 @@ import {
   assertUnreachable,
   CONSTANTS,
   DendronError,
+  DVault,
   ERROR_STATUS,
   SeedConfig,
   SeedEntry,
@@ -12,6 +13,7 @@ import { simpleGit, writeYAML } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
+import { DConfig } from "../config";
 import { WorkspaceService, WorkspaceUtils } from "../workspace";
 import { SeedRegistry } from "./registry";
 import { SeedUtils } from "./utils";
@@ -191,7 +193,12 @@ export class SeedService {
           };
         }
         const ws = new WorkspaceService({ wsRoot });
-        const vaultPath = VaultUtils.getRelPath(ws.config.vaults[0]);
+        const vaults = DConfig.getConfig({
+          config: ws.config,
+          path: "workspace.vaults",
+          required: true,
+        }) as DVault[];
+        const vaultPath = VaultUtils.getRelPath(vaults[0]);
         seed.root = vaultPath;
         writeYAML(cpath, seed);
         // validate
@@ -282,13 +289,24 @@ export class SeedService {
 
   isSeedInWorkspace(id: string): boolean {
     const ws = new WorkspaceService({ wsRoot: this.wsRoot });
-    return undefined !== ws.config.vaults.find((vault) => vault.seed === id);
+    const config = ws.config;
+    const vaults = DConfig.getConfig({
+      config,
+      path: "workspace.vaults",
+      required: true,
+    }) as DVault[];
+    return undefined !== vaults.find((vault) => vault.seed === id);
   }
 
   getSeedsInWorkspace(): string[] {
     const ws = new WorkspaceService({ wsRoot: this.wsRoot });
-
-    return ws.config.vaults
+    const config = ws.config;
+    const vaults = DConfig.getConfig({
+      config,
+      path: "workspace.vaults",
+      required: true,
+    }) as DVault[];
+    return vaults
       .filter((vault) => vault.seed !== undefined)
       .map((vault) => vault.seed!);
   }

@@ -12,6 +12,7 @@ import {
   DendronError,
   genDefaultCommandConfig,
   CURRENT_CONFIG_VERSION,
+  DVault,
 } from "@dendronhq/common-all";
 import {
   SegmentClient,
@@ -389,8 +390,13 @@ export const ALL_MIGRATIONS: Migrations[] = [
         name: "update cache",
         func: async ({ dendronConfig, wsConfig, wsService }) => {
           const { wsRoot, config } = wsService;
+          const vaults = DConfig.getConfig({
+            config,
+            path: "workspace.vaults",
+            required: true,
+          }) as DVault[];
           await Promise.all(
-            wsService.config.vaults.map((vault) => {
+            vaults.map((vault) => {
               return removeCache(vault2Path({ wsRoot, vault }));
             })
           );

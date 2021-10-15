@@ -9,11 +9,12 @@ import {
   ExtensionEvents,
   getStage,
   InstallStatus,
-  MigrationEvents,
   Time,
   VaultUtils,
   VSCodeEvents,
   WorkspaceType,
+  MigrationEvents,
+  DVault,
 } from "@dendronhq/common-all";
 import {
   getDurationMilliseconds,
@@ -25,9 +26,10 @@ import {
 import {
   HistoryService,
   MetadataService,
-  MigrationChangeSetStatus,
   WorkspaceService,
   WorkspaceUtils,
+  MigrationChangeSetStatus,
+  DConfig,
 } from "@dendronhq/engine-server";
 import * as Sentry from "@sentry/node";
 import { ExecaChildProcess } from "execa";
@@ -376,10 +378,13 @@ export async function _activate(
       // }
 
       // check for vaults with same name
-      const uniqVaults = _.uniqBy(dendronConfig.vaults, (vault) =>
-        VaultUtils.getName(vault)
-      );
-      if (_.size(uniqVaults) < _.size(dendronConfig.vaults)) {
+      const vaults = DConfig.getConfig({
+        config: dendronConfig,
+        path: "workspace.vaults",
+        required: true,
+      }) as DVault[];
+      const uniqVaults = _.uniqBy(vaults, (vault) => VaultUtils.getName(vault));
+      if (_.size(uniqVaults) < _.size(vaults)) {
         const txt = "Fix it";
         await vscode.window
           .showErrorMessage(

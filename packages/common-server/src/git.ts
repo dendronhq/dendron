@@ -7,6 +7,7 @@ import {
   NoteProps,
   RESERVED_KEYS,
   VaultUtils,
+  configIsAtLeastV3,
 } from "@dendronhq/common-all";
 import execa from "execa";
 import fs from "fs-extra";
@@ -35,8 +36,8 @@ const formatString = (opts: { txt: string; note: NoteProps }) => {
  */
 export class GitUtils {
   static canShowGitLink(opts: {
-    config: IntermediateDendronConfig; 
-    note: NoteProps
+    config: IntermediateDendronConfig;
+    note: NoteProps;
   }) {
     const { config, note } = opts;
 
@@ -86,7 +87,9 @@ export class GitUtils {
   }) {
     const { note, config, wsRoot } = opts;
     const vault = note.vault;
-    const vaults = config.vaults;
+    const vaults = configIsAtLeastV3({ config })
+      ? (config.workspace!.vaults as DVault[])
+      : (config.vaults as DVault[]);
     const mvault = VaultUtils.matchVault({ wsRoot, vault, vaults });
     const vaultUrl = _.get(mvault, "remote.url", false);
     const gitRepoUrl = config.site.gh_edit_repository;
@@ -158,7 +161,10 @@ export class GitUtils {
         path.join(repoPath, CONSTANTS.DENDRON_CONFIG_FILE)
       ) as IntermediateDendronConfig;
       const workspace = path.basename(repoPath);
-      const vaults = config.vaults.map((ent) => {
+      const vaultsConfig = configIsAtLeastV3({ config })
+        ? (config.workspace!.vaults as DVault[])
+        : (config.vaults as DVault[]);
+      const vaults = vaultsConfig.map((ent) => {
         const vpath = vault2Path({ vault: ent, wsRoot: repoPath });
         return {
           ...ent,

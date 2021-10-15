@@ -16,6 +16,7 @@ import {
   Time,
   VaultUtils,
   WorkspaceSettings,
+  configIsAtLeastV3,
 } from "@dendronhq/common-all";
 import {
   assignJSONWithComment,
@@ -216,12 +217,22 @@ export class WorkspaceService {
       updateConfig: true,
       updateWorkspace: false,
     });
-    config.vaults.unshift(vault);
+
+    if (configIsAtLeastV3({ config })) {
+      config.workspace!.vaults.unshift(vault);
+    } else {
+      config.vaults!.unshift(vault);
+    }
     // update dup note behavior
     if (!config.site.duplicateNoteBehavior) {
+      const vaults = DConfig.getConfig({
+        config,
+        path: "workspace.vaults",
+        required: true,
+      }) as DVault[];
       config.site.duplicateNoteBehavior = {
         action: DuplicateNoteAction.USE_VAULT,
-        payload: config.vaults.map((v) => VaultUtils.getName(v)),
+        payload: vaults.map((v) => VaultUtils.getName(v)),
       };
     } else if (_.isArray(config.site.duplicateNoteBehavior.payload)) {
       config.site.duplicateNoteBehavior.payload.push(VaultUtils.getName(vault));
@@ -418,16 +429,35 @@ export class WorkspaceService {
       updateConfig: true,
       updateWorkspace: false,
     });
-    config.vaults = _.reject(config.vaults, (ent) => {
-      const checks = [
-        VaultUtils.getRelPath(ent) === VaultUtils.getRelPath(vault),
-      ];
-      if (vault.workspace) {
-        checks.push(ent.workspace === vault.workspace);
+
+    const rejectVault = (from: DVault[]) => {
+      return _.reject(from, (ent: DVault) => {
+        const checks = [
+          VaultUtils.getRelPath(ent) === VaultUtils.getRelPath(vault),
+        ];
+        if (vault.workspace) {
+          checks.push(ent.workspace === vault.workspace);
+        }
+        return _.every(checks);
+      });
+    };
+
+    if (configIsAtLeastV3({ config })) {
+      config.workspace!.vaults = rejectVault(config.workspace!.vaults);
+    } else {
+      config.vaults = rejectVault(config.vaults!);
+    }
+
+    if (configIsAtLeastV3({ config })) {
+      if (vault.workspace && config.workspace!.workspaces) {
+        const vaultWorkspace = _.find(config.workspace!.vaults, {
+          workspace: vault.workspace,
+        });
+        if (_.isUndefined(vaultWorkspace)) {
+          delete config.workspace!.workspaces![vault.workspace!];
+        }
       }
-      return _.every(checks);
-    });
-    if (vault.workspace && config.workspaces) {
+    } else if (vault.workspace && config.workspaces) {
       const vaultWorkspace = _.find(config.vaults, {
         workspace: vault.workspace,
       });
@@ -435,11 +465,21 @@ export class WorkspaceService {
         delete config.workspaces[vault.workspace];
       }
     }
+
     if (
       config.site.duplicateNoteBehavior &&
       _.isArray(config.site.duplicateNoteBehavior.payload)
     ) {
-      if (config.vaults.length === 1) {
+      let shouldCleanUpDup = false;
+      if (configIsAtLeastV3({ config })) {
+        if (config.workspace!.vaults.length === 1) {
+          shouldCleanUpDup = true;
+        }
+      } else if (config.vaults!.length === 1) {
+        shouldCleanUpDup = true;
+      }
+
+      if (shouldCleanUpDup) {
         // if there is only one vault left, remove duplicateNoteBehavior setting
         config.site = _.omit(config.site, ["duplicateNoteBehavior"]);
       } else {
@@ -535,8 +575,13 @@ export class WorkspaceService {
     const { wsRoot } = opts;
     const config = DConfig.getOrCreate(wsRoot);
     const ws = new WorkspaceService({ wsRoot });
+    const vaults = DConfig.getConfig({
+      config,
+      path: "workspace.vaults",
+      required: true,
+    }) as DVault[];
     await Promise.all(
-      config.vaults.map(async (vault) => {
+      vaults.map(async (vault) => {
         return ws.cloneVaultWithAccessToken({ vault });
       })
     );
@@ -628,8 +673,13 @@ export class WorkspaceService {
 
   async getAllReposVaults(): Promise<Map<string, DVault[]>> {
     const reposVaults = new Map<string, DVault[]>();
+    const vaults = DConfig.getConfig({
+      config: this.config,
+      path: "workspace.vaults",
+      required: true,
+    }) as DVault[];
     await Promise.all(
-      this.config.vaults.map(async (vault) => {
+      vaults.map(async (vault) => {
         const repo = await this.getVaultRepo(vault);
         if (_.isUndefined(repo)) return;
         const vaultsForRepo = reposVaults.get(repo) || [];
@@ -649,7 +699,11 @@ export class WorkspaceService {
    @deprecated - use {@link WorkspaceUtils.isPathInWorkspace}
    */
   isPathInWorkspace(fpath: string) {
-    const { vaults } = this.config;
+    const vaults = DConfig.getConfig({
+      config: this.config,
+      path: "workspace.vaults",
+      required: true,
+    }) as DVault[];
     const wsRoot = this.wsRoot;
     return WorkspaceUtils.isPathInWorkspace({ fpath, vaults, wsRoot });
   }
@@ -755,8 +809,13 @@ export class WorkspaceService {
    * Remove all vault caches in workspace
    */
   async removeVaultCaches() {
+    const vaults = DConfig.getConfig({
+      config: this.config,
+      path: "workspace.vaults",
+      required: true,
+    }) as DVault[];
     await Promise.all(
-      this.config.vaults.map((vault) => {
+      vaults.map((vault) => {
         return removeCache(vault2Path({ wsRoot: this.wsRoot, vault }));
       })
     );
@@ -890,7 +949,12 @@ export class WorkspaceService {
     );
 
     // clone all missing vaults
-    const emptyRemoteVaults = config.vaults.filter(
+    const vaults = DConfig.getConfig({
+      config,
+      path: "workspace.vaults",
+      required: true,
+    }) as DVault[];
+    const emptyRemoteVaults = vaults.filter(
       (vault) =>
         !_.isUndefined(vault.remote) &&
         !fs.existsSync(vault2Path({ vault, wsRoot }))
@@ -914,8 +978,13 @@ export class WorkspaceService {
       })
     );
     if (fetchAndPull) {
+      const vaults = DConfig.getConfig({
+        config,
+        path: "workspace.vaults",
+        required: true,
+      }) as DVault[];
       const vaultsToFetch = _.difference(
-        config.vaults.filter((vault) => !_.isUndefined(vault.remote)),
+        vaults.filter((vault) => !_.isUndefined(vault.remote)),
         emptyRemoteVaults
       );
       this.logger.info({ ctx, msg: "fetching vaults", vaultsToFetch });

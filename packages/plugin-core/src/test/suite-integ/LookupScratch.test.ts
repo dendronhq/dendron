@@ -1,4 +1,4 @@
-import { NoteAddBehavior, NoteUtils } from "@dendronhq/common-all";
+import { LegacyNoteAddBehavior, NoteUtils } from "@dendronhq/common-all";
 import { NOTE_PRESETS_V4 } from "@dendronhq/common-test-utils";
 import { describe } from "mocha";
 import * as vscode from "vscode";
@@ -58,7 +58,8 @@ suite("Scratch Notes", function () {
       runLegacyMultiWorkspaceTest({
         ctx,
         modConfigCb: (config) => {
-          config.scratch!.addBehavior = NoteAddBehavior.childOfDomainNamespace;
+          config.scratch!.addBehavior =
+            LegacyNoteAddBehavior.childOfDomainNamespace;
           return config;
         },
         postSetupHook: async ({ wsRoot, vaults }) => {
@@ -125,7 +126,8 @@ suite("Scratch Notes", function () {
       runLegacyMultiWorkspaceTest({
         ctx,
         modConfigCb: (config) => {
-          config.scratch!.addBehavior = NoteAddBehavior.childOfDomainNamespace;
+          config.scratch!.addBehavior =
+            LegacyNoteAddBehavior.childOfDomainNamespace;
           return config;
         },
         postSetupHook: async ({ wsRoot, vaults }) => {

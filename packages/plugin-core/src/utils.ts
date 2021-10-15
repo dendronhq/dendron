@@ -10,7 +10,7 @@ import {
   InstallStatus,
   IntermediateDendronConfig,
   MigrationEvents,
-  NoteAddBehavior,
+  LegacyNoteAddBehavior,
   NoteProps,
   NoteUtils,
   Point,
@@ -806,7 +806,7 @@ export class DendronClientUtilsV2 {
           })
         : getDWorkspace().config.journal.dateFormat;
 
-    const addBehavior: NoteAddBehavior =
+    const addBehavior: LegacyNoteAddBehavior =
       type === "SCRATCH"
         ? getExtension().getWorkspaceSettingOrDefault({
             wsConfigKey: "dendron.defaultScratchAddBehavior",
@@ -824,7 +824,7 @@ export class DendronClientUtilsV2 {
 
     if (!_.includes(_noteAddBehaviorEnum, addBehavior)) {
       const actual = addBehavior;
-      const choices = Object.keys(NoteAddBehavior).join(", ");
+      const choices = Object.keys(LegacyNoteAddBehavior).join(", ");
       throw Error(`${actual} must be one of: ${choices}`);
     }
 

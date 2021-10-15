@@ -16,7 +16,7 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import {
-  NoteAddBehavior,
+  LegacyNoteAddBehavior,
   IntermediateDendronConfig,
   LegacyLookupSelectionType,
 } from "@dendronhq/common-all";
@@ -48,13 +48,13 @@ const genDefaultConfig = (): IntermediateDendronConfig => ({
     dailyDomain: "daily",
     name: "journal",
     dateFormat: "y.MM.dd",
-    addBehavior: NoteAddBehavior.childOfDomain,
+    addBehavior: LegacyNoteAddBehavior.childOfDomain,
     firstDayOfWeek: 1,
   },
   scratch: {
     name: "scratch",
     dateFormat: "y.MM.dd.HHmmss",
-    addBehavior: NoteAddBehavior.asOwnDomain,
+    addBehavior: LegacyNoteAddBehavior.asOwnDomain,
   },
   site: {
     copyAssets: true,
@@ -120,9 +120,7 @@ function InputControl({
 
 const PAGE_TITLE = "Dendron Configuration";
 
-const saveConfigData = async (
-  config: IntermediateDendronConfig
-) => {
+const saveConfigData = async (config: IntermediateDendronConfig) => {
   console.log("saving", config);
   // FIXME: hack
   // empty string is different from undefined

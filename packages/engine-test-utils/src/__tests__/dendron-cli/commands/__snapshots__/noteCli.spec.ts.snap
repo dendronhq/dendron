@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`WHEN run 'dendron note lookup' AND WHEN lookup note with no vault specified and --output = markdown_dendron THEN get note in first vault 1`] = `
+"---
+id: foo
+title: Foo
+desc: ''
+updated: 1
+created: 1
+---
+foo body
+"
+`;

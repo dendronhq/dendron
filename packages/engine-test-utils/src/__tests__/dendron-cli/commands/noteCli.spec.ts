@@ -3,9 +3,11 @@ import { ENGINE_HOOKS, ENGINE_HOOKS_MULTI } from "../../../presets";
 import {
   NoteCLICommand,
   NoteCLICommandOpts,
+  NoteCLIOutput,
   NoteCommands,
 } from "@dendronhq/dendron-cli";
 import { createEngineFromServer, runEngineTestV5 } from "../../../engine";
+import { checkString } from "../../../utils";
 
 const runCmd = (opts: Omit<NoteCLICommandOpts, "port" | "server">) => {
   const cmd = new NoteCLICommand();
@@ -15,6 +17,7 @@ const runCmd = (opts: Omit<NoteCLICommandOpts, "port" | "server">) => {
 
 describe("WHEN run 'dendron note lookup'", () => {
   const cmd = NoteCommands.LOOKUP;
+
   describe("AND WHEN lookup note with no vault specified", () => {
     test("THEN get note in first vault", async () => {
       await runEngineTestV5(
@@ -26,6 +29,7 @@ describe("WHEN run 'dendron note lookup'", () => {
             engine,
             cmd,
             query: "gamma",
+            output: NoteCLIOutput.JSON,
           });
           expect(
             NoteUtils.getNoteOrThrow({
@@ -44,6 +48,30 @@ describe("WHEN run 'dendron note lookup'", () => {
     });
   });
 
+  describe("AND WHEN lookup note with no vault specified and --output = markdown_dendron", () => {
+    test("THEN get note in first vault", async () => {
+      await runEngineTestV5(
+        async ({ engine, wsRoot, vaults }) => {
+          const vault = vaults[0];
+          const { data } = await runCmd({
+            wsRoot,
+            vault: VaultUtils.getName(vault),
+            engine,
+            cmd,
+            query: "foo",
+            output: NoteCLIOutput.MARKDOWN_DENDRON,
+          });
+          expect(data.payload).toMatchSnapshot();
+          await checkString(data.payload, "---\nfoo body");
+        },
+        {
+          expect,
+          preSetupHook: ENGINE_HOOKS.setupBasic,
+        }
+      );
+    });
+  });
+
   describe("WHEN specify vault", () => {
     test("THEN get note in specified vault", async () => {
       await runEngineTestV5(
@@ -55,6 +83,7 @@ describe("WHEN run 'dendron note lookup'", () => {
             engine,
             cmd,
             query: "gamma",
+            output: NoteCLIOutput.JSON,
           });
           expect(
             NoteUtils.getNoteOrThrow({

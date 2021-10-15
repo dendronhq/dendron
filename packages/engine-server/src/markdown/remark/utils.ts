@@ -44,6 +44,7 @@ import type {
   TableRow,
   Image,
   Text,
+  Link,
 } from "mdast";
 import * as mdastBuilder from "mdast-builder";
 import { Processor } from "unified";
@@ -929,6 +930,10 @@ export class RemarkUtils {
 
   static isText(node: Node): node is Text {
     return node.type === DendronASTTypes.TEXT;
+  }
+
+  static isLink(node: Node): node is Link {
+    return node.type === DendronASTTypes.LINK;
   }
 
   // --- conversion

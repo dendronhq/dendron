@@ -2,7 +2,7 @@
 id: 73eb67ea-0291-45e7-8f2f-193fd6f00643
 title: Links
 desc: ""
-updated: 1633435266305
+updated: 1634284041898
 created: 1608518909864
 ---
 
@@ -96,3 +96,11 @@ Vault2
 
 ### Back to back refs
 ![[dendron.ref.links.target-1]]![[dendron.ref.links.target-2]] ![[dendron.ref.links.target-3]]
+
+## Link to a Website
+
+### Confuses hashtag/usertags
+
+[@dendronhq](https://twitter.com/dendronhq)
+
+[#dendron](https://twitter.com/hashtag/dendron)

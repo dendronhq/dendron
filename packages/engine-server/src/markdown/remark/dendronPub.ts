@@ -9,7 +9,7 @@ import {
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import type { Image, Root } from "mdast";
-import { paragraph } from "mdast-builder";
+import { paragraph, text } from "mdast-builder";
 import {
   addError,
   getNoteOrError,
@@ -113,18 +113,29 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
       if (_.isUndefined(parent) || !RemarkUtils.isParent(parent)) return; // root node
       if (node.type === DendronASTTypes.HASHTAG) {
         const hashtag = node as HashTag;
-        // For hashtags, convert them to regular links for rendering
         const parentIndex = _.findIndex(parent.children, node);
         if (parentIndex === -1) return;
-        node = hashTag2WikiLinkNoteV4(hashtag);
+        // For hashtags, convert them to regular links for rendering
+        // but not if they are inside of a link, otherwise they break link rendering.
+        if (!ancestors.some((node) => RemarkUtils.isLink(node))) {
+          node = hashTag2WikiLinkNoteV4(hashtag);
+        } else {
+          // If they are inside a link, rendering them as wikilinks will break the link rendering. Convert them to regular text.
+          node = text(hashtag.value);
+        }
         parent.children[parentIndex] = node;
       }
       if (node.type === DendronASTTypes.USERTAG) {
         const userTag = node as UserTag;
-        // Convert user tags to regular links for rendering
         const parentIndex = _.findIndex(parent.children, node);
         if (parentIndex === -1) return;
-        node = userTag2WikiLinkNoteV4(userTag);
+        // Convert user tags to regular links for rendering
+        // but not if they are inside of a link, otherwise they break link rendering.
+        if (!ancestors.some((node) => RemarkUtils.isLink(node))) {
+          node = userTag2WikiLinkNoteV4(userTag);
+        } else {
+          node = text(userTag.value);
+        }
         parent.children[parentIndex] = node;
       }
       if (

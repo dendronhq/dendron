@@ -17,6 +17,7 @@ import { NoteProps } from "@dendronhq/common-all";
 import { runEngineTestV5 } from "../../../engine";
 import { ENGINE_HOOKS } from "../../../presets";
 import {
+  checkNotInVFile,
   checkVFile,
   createProcForTest,
   createProcTests,
@@ -345,7 +346,33 @@ describe("hashtag", () => {
       });
     });
 
-    const ALL_TEST_CASES = [...SIMPLE];
+    const INSIDE_LINK = createProcTests({
+      name: "inside a link",
+      setupFunc: async ({ engine, vaults, extra }) => {
+        const proc2 = createProcForTest({
+          engine,
+          dest: extra.dest,
+          vault: vaults[0],
+        });
+        const resp = await proc2.process(
+          "[#dendron](https://twitter.com/hashtag/dendron)"
+        );
+        return { resp };
+      },
+      verifyFuncDict: {
+        [DendronASTDest.HTML]: async ({ extra }) => {
+          const { resp } = extra;
+          await checkVFile(
+            resp,
+            '<a href="https://twitter.com/hashtag/dendron">#dendron</a>'
+          );
+          await checkNotInVFile(resp, `Private`);
+        },
+      },
+      preSetupHook: ENGINE_HOOKS.setupBasic,
+    });
+
+    const ALL_TEST_CASES = [...SIMPLE, ...INSIDE_LINK];
     runAllTests({ name: "compile", testCases: ALL_TEST_CASES });
   });
 });

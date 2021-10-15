@@ -7,6 +7,3 @@ created: 1628572997008
 ---
 
 Hierarchy with book instance template.
-
-![[book.the-dispossessed#info:#*]]
-

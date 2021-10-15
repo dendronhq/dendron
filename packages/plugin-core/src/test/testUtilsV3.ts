@@ -417,6 +417,11 @@ export function runTestButSkipForWindows() {
   return runTest;
 }
 
+export function runSuiteButSkipForWindows() {
+  const runTest = os.platform() === "win32" ? suite.skip : suite;
+  return runTest;
+}
+
 /** Use to run tests with a multi-vault workspace. Used in the same way as regular `describe`.
  *
  * For example:

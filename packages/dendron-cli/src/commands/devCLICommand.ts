@@ -192,7 +192,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           }
           try {
             this.setEndpoint(opts.publishEndpoint);
-            LernaUtils.publishVersion();
+            LernaUtils.publishVersion(opts.publishEndpoint);
           } finally {
             if (opts.publishEndpoint === PublishEndpoint.LOCAL) {
               BuildUtils.setRegRemote();
@@ -235,7 +235,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
         }
         case DevCommands.SHOW_TELEMETRY: {
           CLIAnalyticsUtils.showTelemetryMessage();
-          return { error: null};
+          return { error: null };
         }
         default:
           return assertUnreachable();
@@ -269,8 +269,10 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
 
     this.print(`prep publish ${opts.publishEndpoint}...`);
     if (shouldPublishLocal) {
+      this.print("setting endpoint to local");
       await BuildUtils.prepPublishLocal();
     } else {
+      this.print("setting endpoint to remote");
       await BuildUtils.prepPublishRemote();
     }
 
@@ -280,7 +282,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     this.bumpVersion(opts);
 
     this.print("publish version...");
-    LernaUtils.publishVersion();
+    LernaUtils.publishVersion(opts.publishEndpoint);
 
     this.print("sync assets...");
     await this.syncAssets();
@@ -331,14 +333,14 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     }
     return true;
   }
-  
+
   enableTelemetry() {
     const reason = TelemetryStatus.ENABLED_BY_CLI_COMMAND;
     SegmentClient.enable(reason);
     CLIAnalyticsUtils.track(CLIEvents.CLITelemetryEnabled, { reason });
     const message = [
       "Telemetry is enabled.",
-      "Thank you for helping us improve Dendron 🌱"
+      "Thank you for helping us improve Dendron 🌱",
     ].join("\n");
     this.print(message);
   }
@@ -347,7 +349,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     const reason = TelemetryStatus.DISABLED_BY_CLI_COMMAND;
     CLIAnalyticsUtils.track(CLIEvents.CLITelemetryDisabled, { reason });
     SegmentClient.disable(reason);
-    const message = "Telemetry is disabled."
+    const message = "Telemetry is disabled.";
     this.print(message);
   }
 }

@@ -820,12 +820,15 @@ function convertNoteRefHelperAST(
     });
     if (isV5Active) {
       if (procOpts.dest === DendronASTDest.HTML) {
-        tmpProc = MDUtilsV5.procRemarkFull({
-          ...MDUtilsV5.getProcData(proc),
-          insideNoteRef: true,
-          fname: note.fname,
-          vault: note.vault,
-        });
+        tmpProc = MDUtilsV5.procRemarkFull(
+          {
+            ...MDUtilsV5.getProcData(proc),
+            insideNoteRef: true,
+            fname: note.fname,
+            vault: note.vault,
+          },
+          MDUtilsV5.getProcOpts(proc)
+        );
       }
     }
 

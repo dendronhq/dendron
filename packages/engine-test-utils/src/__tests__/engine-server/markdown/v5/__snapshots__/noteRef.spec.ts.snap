@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`MDUtils.proc "HTML: NOTE_REF_WITH_REHYPE: PREVIEW" 1`] = `
+exports[`GIVEN noteRef plugin WHEN note ref to html AND prettyLinks = true "HTML: NOTE_REF_WITH_REHYPE: PREVIEW" 1`] = `
 VFile {
   "contents": "<h1 id=\\"foo\\">Foo</h1>
 <p></p><p></p><div class=\\"portal-container\\">
@@ -12,12 +12,12 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div><p><a href=\\"bar.html\\">Bar</a></p>
+<div class=\\"portal-parent-fader-bottom\\"></div><p><a href=\\"bar\\">Bar</a></p>
 </div></div><p></p><p></p>
 <hr>
 <h2 id=\\"children\\">Children</h2>
 <ol>
-<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -26,7 +26,7 @@ VFile {
 }
 `;
 
-exports[`MDUtils.proc "HTML: NOTE_REF_WITH_REHYPE: PREVIEW" 2`] = `
+exports[`GIVEN noteRef plugin WHEN note ref to html AND prettyLinks = true "HTML: NOTE_REF_WITH_REHYPE: PREVIEW" 2`] = `
 VFile {
   "contents": "<h1 id=\\"foo\\">Foo</h1>
 <p></p><p></p><div class=\\"portal-container\\">
@@ -38,12 +38,12 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div><p><a href=\\"bar.html\\">Bar</a></p>
+<div class=\\"portal-parent-fader-bottom\\"></div><p><a href=\\"bar\\">Bar</a></p>
 </div></div><p></p><p></p>
 <hr>
 <h2 id=\\"children\\">Children</h2>
 <ol>
-<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -52,7 +52,7 @@ VFile {
 }
 `;
 
-exports[`MDUtils.proc "HTML: NOTE_REF_WITH_REHYPE: PUBLISHING" 1`] = `
+exports[`GIVEN noteRef plugin WHEN note ref to html AND prettyLinks = true "HTML: NOTE_REF_WITH_REHYPE: PUBLISHING" 1`] = `
 VFile {
   "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
 <p></p><p></p><div class=\\"portal-container\\">
@@ -64,12 +64,12 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div><p><a href=\\"bar.html\\">Bar</a></p>
+<div class=\\"portal-parent-fader-bottom\\"></div><p><a href=\\"/notes/bar\\">Bar</a></p>
 </div></div><p></p><p></p>
 <hr>
 <h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
 <ol>
-<li><a href=\\"/notes/foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"/notes/foo.ch1\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -78,7 +78,7 @@ VFile {
 }
 `;
 
-exports[`MDUtils.proc "HTML: NOTE_REF_WITH_REHYPE: REGULAR" 1`] = `
+exports[`GIVEN noteRef plugin WHEN note ref to html AND prettyLinks = true "HTML: NOTE_REF_WITH_REHYPE: REGULAR" 1`] = `
 VFile {
   "contents": "<h1 id=\\"foo\\">Foo</h1>
 <p></p><p></p><div class=\\"portal-container\\">
@@ -90,12 +90,12 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div><p><a href=\\"bar.html\\">Bar</a></p>
+<div class=\\"portal-parent-fader-bottom\\"></div><p><a href=\\"bar\\">Bar</a></p>
 </div></div><p></p><p></p>
 <hr>
 <h2 id=\\"children\\">Children</h2>
 <ol>
-<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -104,7 +104,7 @@ VFile {
 }
 `;
 
-exports[`MDUtils.proc "HTML: NOTE_REF_WITH_REHYPE: REGULAR" 2`] = `
+exports[`GIVEN noteRef plugin WHEN note ref to html AND prettyLinks = true "HTML: NOTE_REF_WITH_REHYPE: REGULAR" 2`] = `
 VFile {
   "contents": "<h1 id=\\"foo\\">Foo</h1>
 <p></p><p></p><div class=\\"portal-container\\">
@@ -116,12 +116,12 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div><p><a href=\\"bar.html\\">Bar</a></p>
+<div class=\\"portal-parent-fader-bottom\\"></div><p><a href=\\"bar\\">Bar</a></p>
 </div></div><p></p><p></p>
 <hr>
 <h2 id=\\"children\\">Children</h2>
 <ol>
-<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},

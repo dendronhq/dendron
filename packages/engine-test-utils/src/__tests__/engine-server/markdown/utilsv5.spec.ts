@@ -167,7 +167,7 @@ describe("MDUtils.proc", () => {
           const { resp } = extra;
           await checkString(
             resp.contents,
-            `Here is the footnote.<a href="#fnref-1" class="footnote-backref">↩</a>`
+            `Here is the footnote.<a class="fn" href="#fnref-1">˄</a>`
           );
         },
         [ProcFlavor.PREVIEW]: ProcFlavor.REGULAR,

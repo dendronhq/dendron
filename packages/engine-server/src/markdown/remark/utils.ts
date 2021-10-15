@@ -44,6 +44,7 @@ import type {
   TableRow,
   Image,
   Text,
+  FootnoteDefinition,
 } from "mdast";
 import * as mdastBuilder from "mdast-builder";
 import { Processor } from "unified";
@@ -931,6 +932,10 @@ export class RemarkUtils {
     return node.type === DendronASTTypes.TEXT;
   }
 
+  static isFootnoteDefinition(node: Node): node is FootnoteDefinition {
+    return node.type === DendronASTTypes.FOOTNOTE_DEFINITION;
+  }
+
   // --- conversion
 
   static convertLinksToDotNotation(
@@ -1370,5 +1375,11 @@ export class RemarkUtils {
     }
 
     return blocks;
+  }
+
+  static extractFootnoteDefs(root: Node): FootnoteDefinition[] {
+    return selectAll(DendronASTTypes.FOOTNOTE_DEFINITION, root).filter(
+      RemarkUtils.isFootnoteDefinition
+    );
   }
 }

@@ -1,22 +1,60 @@
 import { NoteUtils, VaultUtils } from "@dendronhq/common-all";
+import visit from "unist-util-visit";
 import _ from "lodash";
-import { Content, Root } from "mdast";
-import { heading, list, listItem, paragraph, text } from "mdast-builder";
+import { Content, FootnoteDefinition, FootnoteReference, Root } from "mdast";
+import { heading, html, list, listItem, paragraph, text } from "mdast-builder";
 import Unified, { Plugin } from "unified";
-import { Node } from "unist";
+import { Node, Parent } from "unist";
 import u from "unist-builder";
 import { SiteUtils } from "../../topics/site";
 import { HierarchyUtils } from "../../utils";
 import { DendronASTDest, WikiLinkNoteV4, DendronASTTypes } from "../types";
 import { MDUtilsV4 } from "../utils";
-import { frontmatterTag2WikiLinkNoteV4 } from "./utils";
+import { frontmatterTag2WikiLinkNoteV4, RemarkUtils } from "./utils";
 
 type PluginOpts = {
   hierarchyDisplayTitle?: string;
   hierarchyDisplay?: boolean;
 };
 
-/** Adds the "Children" and "Tags" items to the end of the note. */
+// These are the HTML IDs for footnotes. This replicates what the footnotes plugin was doing.
+const FOOTNOTE_DEF_ID_PREFIX = "fn-";
+const FOOTNOTE_REF_ID_PREFIX = "fnref-";
+/** The symbol that will be shown as the "return to reference" button. */
+const FOOTNOTE_RETURN_SYMBOL = "˄";
+
+function footnote2html(reference: FootnoteReference) {
+  return html(
+    `<a id="${FOOTNOTE_REF_ID_PREFIX}${reference.identifier}"` +
+      `class="fnref"` +
+      `href="#${FOOTNOTE_DEF_ID_PREFIX}${reference.identifier}">` +
+      (reference.label || reference.identifier) +
+      `</a>`
+  );
+}
+
+function footnoteDef2html(definition: FootnoteDefinition) {
+  // Add a back arrow to the end of the definition that takes user to the
+  // footnote reference. We have to inject the back arrow into the text inside
+  // the definition, otherwise it renders in a different line than the definition.
+  const backArrow = html(
+    `<a class="fn" href="#${FOOTNOTE_REF_ID_PREFIX}${definition.identifier}">${FOOTNOTE_RETURN_SYMBOL}</a>`
+  );
+  let lastParent: Parent | undefined;
+  visit(definition, (node) => {
+    if (RemarkUtils.isParent(node)) lastParent = node;
+  });
+  if (lastParent) lastParent.children.push(backArrow);
+  return paragraph([
+    // Put the ID target first, so even if the footnote is multiple lines long, it jumps to the start
+    html(
+      `<span id="${FOOTNOTE_DEF_ID_PREFIX}${definition.identifier}" style="display: none;"></span>`
+    ),
+    ...definition.children,
+  ]);
+}
+
+/** Adds the "Children", "Tags", and "Footnotes" items to the end of the note. Also renders footnotes. */
 const plugin: Plugin = function (this: Unified.Processor, opts?: PluginOpts) {
   const proc = this;
   const hierarchyDisplayTitle = opts?.hierarchyDisplayTitle || "Children";
@@ -25,26 +63,9 @@ const plugin: Plugin = function (this: Unified.Processor, opts?: PluginOpts) {
     : opts?.hierarchyDisplay;
 
   function transformer(tree: Node): void {
-    let root = tree as Root;
+    const root = tree as Root;
     const { fname, vault, dest, config, insideNoteRef } =
       MDUtilsV4.getDendronData(proc);
-    if (!fname || insideNoteRef) {
-      return;
-    }
-    if (dest !== DendronASTDest.HTML) {
-      return;
-    }
-    if (!hierarchyDisplay) {
-      return;
-    }
-
-    const { engine } = MDUtilsV4.getEngineFromProc(proc);
-    const note = NoteUtils.getNoteByFnameV5({
-      fname: fname,
-      notes: engine.notes,
-      vault: vault!,
-      wsRoot: engine.wsRoot,
-    });
 
     let addedBreak = false;
     function addBreak() {
@@ -54,6 +75,58 @@ const plugin: Plugin = function (this: Unified.Processor, opts?: PluginOpts) {
       });
       addedBreak = true;
     }
+
+    function addFootnotes() {
+      /** Maps footnote identifiers to their definitions. */
+      const footnotes = new Map(
+        RemarkUtils.extractFootnoteDefs(root).map((definition) => [
+          definition.identifier,
+          definition,
+        ])
+      );
+      /** All footnote definitions that have been referenced in this document. */
+      const usedFootnotes = new Set<FootnoteDefinition>();
+      visit(
+        root,
+        [DendronASTTypes.FOOTNOTE_REFERENCE],
+        (reference: FootnoteReference, index, parent) => {
+          const definition = footnotes.get(reference.identifier);
+          if (definition && parent) {
+            parent.children[index] = footnote2html(reference);
+            usedFootnotes.add(definition);
+          }
+        }
+      );
+      if (usedFootnotes.size > 0) {
+        addBreak();
+        root.children.push(heading(2, text("Footnotes")) as Content);
+        const footnoteItems: Node[] = [];
+        for (const definition of usedFootnotes) {
+          footnoteItems.push(listItem(footnoteDef2html(definition)));
+        }
+        root.children.push(list("ordered", footnoteItems) as Content);
+      }
+    }
+
+    if (dest !== DendronASTDest.HTML) {
+      return;
+    }
+    if (!hierarchyDisplay) {
+      return;
+    }
+    if (!fname || insideNoteRef) {
+      // Even inside a note ref, render footnotes because we want them in there too
+      addFootnotes();
+      return;
+    }
+
+    const { engine } = MDUtilsV4.getEngineFromProc(proc);
+    const note = NoteUtils.getNoteByFnameV5({
+      fname,
+      notes: engine.notes,
+      vault: vault!,
+      wsRoot: engine.wsRoot,
+    });
 
     /** Add frontmatter tags, if any, ahead of time. This way wikilink compiler will pick them up and render them. */
     function addTags() {
@@ -135,6 +208,7 @@ const plugin: Plugin = function (this: Unified.Processor, opts?: PluginOpts) {
     // Will appear on page in this order
     addChildren();
     addTags();
+    addFootnotes();
 
     // end transformer
   }

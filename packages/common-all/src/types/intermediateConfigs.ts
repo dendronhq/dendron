@@ -5,6 +5,7 @@
  */
 import { DendronConfig as DendronConfigV1 } from "./workspace";
 import { DendronConfig as DendronConfigV2 } from "./configs/dendronConfig";
+import _ from "lodash";
 
 export * from "./configs";
 
@@ -51,3 +52,42 @@ export type StrictV3 = IntermediateDendronConfig &
  * Union type of all strict config types discriminated by version number.
  */
 export type StrictIntermediateDendronConfig = StrictV1 | StrictV2 | StrictV3;
+
+/**
+ * Type guards
+ */
+export function configIsV1(
+  config: IntermediateDendronConfig
+): config is StrictV1 {
+  return config.version === 1;
+}
+
+export function configIsV2(
+  config: IntermediateDendronConfig
+): config is StrictV2 {
+  return config.version === 2;
+}
+
+export function configIsV3(
+  config: IntermediateDendronConfig
+): config is StrictV3 {
+  return config.version === 3;
+}
+
+export function configIsAtLeastV3(opts: {
+  config: IntermediateDendronConfig;
+  strict?: boolean;
+}) {
+  const { config, strict } = _.defaults(opts, { strict: true });
+  const hasWorkspace = strict ? "workspace" in config : true;
+  return config.version >= 3 && hasWorkspace;
+}
+
+export function configIsAtLeastV2(opts: {
+  config: IntermediateDendronConfig;
+  strict?: boolean;
+}) {
+  const { config, strict } = _.defaults(opts, { strict: true });
+  const hasCommands = strict ? "commands" in config : true;
+  return config.version >= 2 && hasCommands;
+}

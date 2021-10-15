@@ -42,6 +42,7 @@ type CommandOutput = Partial<{ error: DendronError; data: any }>;
 
 type BuildCmdOpts = {
   publishEndpoint: PublishEndpoint;
+  fast?: boolean;
 } & BumpVersionOpts &
   PrepPluginOpts;
 
@@ -94,6 +95,9 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     args.option("extensionTarget", {
       describe: "extension name to publish in the marketplace",
       choices: Object.values(ExtensionTarget),
+    });
+    args.option("fast", {
+      describe: "skip some checks",
     });
   }
 
@@ -276,8 +280,12 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       await BuildUtils.prepPublishRemote();
     }
 
-    this.print("run type-check...");
-    BuildUtils.runTypeCheck();
+    if (!opts.fast) {
+      this.print("run type-check...");
+      BuildUtils.runTypeCheck();
+    } else {
+      this.print("skipping type-check...");
+    }
 
     this.bumpVersion(opts);
 
@@ -299,8 +307,12 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     this.print("setRegRemote...");
     BuildUtils.setRegRemote();
 
-    this.print("restore package.json...");
-    BuildUtils.restorePluginPkgJson();
+    if (!opts.fast) {
+      this.print("restore package.json...");
+      BuildUtils.restorePluginPkgJson();
+    } else {
+      this.print("skip restore package.json...");
+    }
 
     this.L.info("done");
   }

@@ -23,7 +23,12 @@ if [ $SCRIPT_BUILD_ENV = "ci" ]; then
   DENDRON_CLI=./packages/dendron-cli/lib/bin/dendron-cli.js
 fi
 
-LOG_LEVEL=info $DENDRON_CLI dev build --upgradeType $UPGRADE_TYPE --publishEndpoint $PUBLISH_ENDPOINT
+if [ -z $FAST ]; then
+	LOG_LEVEL=info $DENDRON_CLI dev build --upgradeType $UPGRADE_TYPE --publishEndpoint $PUBLISH_ENDPOINT
+else
+	echo "running fast mode..."
+	SKIP_SENTRY=1 LOG_LEVEL=info $DENDRON_CLI dev build --upgradeType $UPGRADE_TYPE --publishEndpoint $PUBLISH_ENDPOINT --fast
+fi
 
 if [ $PUBLISH_ENDPOINT = "local" ]; then
 	echo "killing "

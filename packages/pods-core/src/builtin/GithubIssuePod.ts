@@ -364,13 +364,14 @@ export class GithubIssueImportPod extends ImportPod<GithubIssueImportPodConfig> 
   }
 }
 
-enum GITHUBMESSAGE {
+export enum GITHUBMESSAGE {
   INVALID_TAG = "Github: The labels in the tag does not belong to selected repository",
   INVALID_CATEGORY = "Github: Invalid category",
   INVALID_MILESTONE = "Github: Invalid milestone",
   ISSUE_CREATED = "Github: Issue Created",
   ISSUE_UPDATED = "Github: Issue Updated",
   DISCUSSION_CREATED = "Github: Discussion Created",
+  INVALID_ASSIGNEE = "Github: Invalid assignee username",
 }
 
 type GithubIssuePublishPodCustomOpts = {
@@ -392,6 +393,10 @@ type GithubIssuePublishPodCustomOpts = {
    * if set to false, starts a discussion without the contents of note body
    */
   includeNoteBodyInDiscussion?: boolean;
+};
+
+type HashMap = {
+  [key: string]: string;
 };
 
 type GithubIssuePublishPodConfig = PublishPodConfig &
@@ -427,97 +432,21 @@ export class GithubIssuePublishPod extends PublishPod<GithubIssuePublishPodConfi
   }
 
   /**
-   * method to get all the discussion categories of a repository in a key value pair
-   */
-  getDiscussionCategories = async (
-    opts: Partial<GithubIssuePublishPodConfig>
-  ) => {
-    const { owner, repository, token } = opts;
-    let discussionCategoriesHashMap: any;
-    const query = `query repository($name: String!, $owner: String!)
-      {
-        repository(owner: $owner , name: $name) { 
-          discussionCategories(last:10){
-            edges{
-              node {
-                id
-                name
-              }
-            }
-          }
-        }
-      }`;
-    try {
-      const result: any = await graphql(query, {
-        headers: { authorization: `token ${token}` },
-        owner,
-        name: repository,
-      });
-      const allCategories = result.repository.discussionCategories.edges;
-      allCategories.forEach((category: any) => {
-        discussionCategoriesHashMap = {
-          ...discussionCategoriesHashMap,
-          [category.node.name]: category.node.id,
-        };
-      });
-    } catch (error: any) {
-      throw new DendronError({ message: stringifyError(error) });
-    }
-    return discussionCategoriesHashMap;
-  };
-
-  /**
-   * method to get all the milestones of a repository in key value pair
-   */
-  getMilestonesFromGithub = async (
-    opts: Partial<GithubIssuePublishPodConfig>
-  ) => {
-    const { owner, repository, token } = opts;
-    let milestonesHashMap: any;
-    const query = `query repository($name: String!, $owner: String!)
-      {
-        repository(owner: $owner , name: $name) { 
-          milestones(first: 100,
-            orderBy: {field: CREATED_AT, direction: DESC},
-            ){
-             edges {
-               node {
-                 id,
-                 title
-                }
-              }
-            }
-        }
-      }`;
-    try {
-      const result: any = await graphql(query, {
-        headers: { authorization: `token ${token}` },
-        owner,
-        name: repository,
-      });
-      const allMilestones = result.repository.milestones.edges;
-      allMilestones.forEach((milestone: any) => {
-        milestonesHashMap = {
-          ...milestonesHashMap,
-          [milestone.node.title]: milestone.node.id,
-        };
-      });
-    } catch (error: any) {
-      throw new DendronError({ message: stringifyError(error) });
-    }
-    return milestonesHashMap;
-  };
-
-  /**
-   * method to get all the labels of a repository in key value pair
+   * method to get data of a repository from github.
    *
    */
-  getLabelsFromGithub = async (opts: Partial<GithubIssuePublishPodConfig>) => {
+  getDataFromGithub = async (opts: Partial<GithubIssuePublishPodConfig>) => {
     const { owner, repository, token } = opts;
-    let labelsHashMap: any;
+    let labelsHashMap: HashMap = {};
+    let assigneesHashMap: HashMap = {};
+    let discussionCategoriesHashMap: HashMap = {};
+    let milestonesHashMap: HashMap = {};
+    let githubDataHashMap: any;
+
     const query = `query repository($name: String!, $owner: String!)
     {
       repository(owner: $owner , name: $name) { 
+        id
         labels(last: 100) {
           edges{
             node {
@@ -526,6 +455,32 @@ export class GithubIssuePublishPod extends PublishPod<GithubIssuePublishPodConfi
             }
           }
         }
+        assignableUsers(first: 100){
+          edges {
+            node {
+              id,
+              login
+            }
+          }
+        }
+        discussionCategories(last:10){
+          edges{
+            node {
+              id
+              name
+            }
+          }
+        }
+        milestones(first: 100,
+          orderBy: {field: CREATED_AT, direction: DESC},
+          ){
+           edges {
+             node {
+               id,
+               title
+              }
+            }
+          }
     }
     }`;
     try {
@@ -534,6 +489,7 @@ export class GithubIssuePublishPod extends PublishPod<GithubIssuePublishPodConfi
         owner,
         name: repository,
       });
+      const repositoryId = result.repository.id;
       const allLabels = result.repository.labels.edges;
       allLabels.forEach((label: any) => {
         labelsHashMap = {
@@ -541,23 +497,62 @@ export class GithubIssuePublishPod extends PublishPod<GithubIssuePublishPodConfi
           [label.node.name]: label.node.id,
         };
       });
+
+      const assignees = result.repository.assignableUsers.edges;
+      assignees.forEach((assignee: any) => {
+        assigneesHashMap = {
+          ...assigneesHashMap,
+          [assignee.node.login]: assignee.node.id,
+        };
+      });
+
+      const allCategories = result.repository.discussionCategories.edges;
+      allCategories.forEach((category: any) => {
+        discussionCategoriesHashMap = {
+          ...discussionCategoriesHashMap,
+          [category.node.name]: category.node.id,
+        };
+      });
+
+      const allMilestones = result.repository.milestones.edges;
+      allMilestones.forEach((milestone: any) => {
+        milestonesHashMap = {
+          ...milestonesHashMap,
+          [milestone.node.title]: milestone.node.id,
+        };
+      });
+
+      githubDataHashMap = {
+        repositoryId,
+        labelsHashMap,
+        assigneesHashMap,
+        discussionCategoriesHashMap,
+        milestonesHashMap,
+      };
     } catch (error: any) {
       throw new DendronError({ message: stringifyError(error) });
     }
-    return labelsHashMap;
+    return githubDataHashMap;
   };
 
   /**
-   * method to update the milestone of issue in github
+   * method to update the milestone and assignee of issue in github
    */
-  updateMilestone = async (opts: {
+  updateMilestoneAndAssignee = async (opts: {
     issueID: string;
     token: string;
     milestoneId: string;
+    assigneeIds: string[];
   }) => {
-    const { issueID, token, milestoneId } = opts;
-    const mutation = `mutation updateIssue($id: ID!, $milestoneId: ID){
-      updateIssue(input: {id : $id , milestoneId: $milestoneId}){
+    const { issueID, token, milestoneId, assigneeIds } = opts;
+    const assigneesSize = assigneeIds.length;
+
+    const mutation = `mutation updateIssue($id: ID!, ${
+      milestoneId ? `$milestoneId: ID` : ""
+    }, ${assigneesSize > 0 ? `$assigneeIds: [ID!]` : ""}){
+      updateIssue(input: {id : $id , ${
+        milestoneId ? `milestoneId: $milestoneId` : ""
+      }, ${assigneesSize > 0 ? `assigneeIds: $assigneeIds` : ""}}){
         issue {
               id
             }
@@ -568,6 +563,7 @@ export class GithubIssuePublishPod extends PublishPod<GithubIssuePublishPodConfi
         headers: { authorization: `token ${token}` },
         id: issueID,
         milestoneId,
+        assigneeIds,
       });
     } catch (error: any) {
       throw new DendronError({ message: stringifyError(error) });
@@ -576,7 +572,7 @@ export class GithubIssuePublishPod extends PublishPod<GithubIssuePublishPodConfi
 
   /**
    * method to update the issue in github
-   * Only users with push access can set labels, milestone for issues. Labels and Milestone are dropped otherwise.
+   * Only users with push access can set labels, assignees and milestone for issues. Otherwise dropped silently.
    */
   updateIssue = async (opts: {
     issueID: string;
@@ -585,14 +581,28 @@ export class GithubIssuePublishPod extends PublishPod<GithubIssuePublishPodConfi
     labelIDs: string[];
     milestoneId: string;
     showMessage: ShowMessageTypes;
+    assigneeIds: string[];
   }) => {
-    const { issueID, token, status, labelIDs, milestoneId, showMessage } = opts;
-    if (milestoneId) {
+    const {
+      issueID,
+      token,
+      status,
+      labelIDs,
+      milestoneId,
+      showMessage,
+      assigneeIds,
+    } = opts;
+    if (milestoneId || assigneeIds.length > 0) {
       /**
-       * While regression it was observed that milestone is not updated if the issue
-       * state remains same, hence creating a new method to update milestone
+       * While regression it was observed that milestone and assignee is not updated if the issue
+       * state remains same, hence creating a new method to update
        */
-      this.updateMilestone({ issueID, token, milestoneId });
+      this.updateMilestoneAndAssignee({
+        issueID,
+        token,
+        milestoneId,
+        assigneeIds,
+      });
     }
     let resp: string = "";
     const mutation = `mutation updateIssue($id: ID!, $state: IssueState, $labelIDs: [ID!]){
@@ -623,72 +633,44 @@ export class GithubIssuePublishPod extends PublishPod<GithubIssuePublishPodConfi
   };
 
   /**
-   * method to get the repository id
-   */
-  getRepositoryId = async (opts: Partial<GithubIssuePublishPodConfig>) => {
-    let repositoryId: string;
-    const { owner, repository, token } = opts;
-    const query = `query repository($name: String!, $owner: String!)
-    {
-      repository(owner: $owner , name: $name) { 
-      id
-    }
-    }`;
-    try {
-      const result: any = await graphql(query, {
-        headers: { authorization: `token ${token}` },
-        owner,
-        name: repository,
-      });
-      repositoryId = result.repository.id;
-    } catch (error: any) {
-      throw new DendronError({
-        message: stringifyError(error),
-        severity: ERROR_SEVERITY.MINOR,
-      });
-    }
-    return repositoryId;
-  };
-
-  /**
    * method to create an issue in github
-   * Only users with push access can set labels, milestone for new issues. Labels and Milestone are not dropped silently in Graphql createIssue.
+   * Only users with push access can set labels, milestone and assignees for new issues. Labels, Assignees and Milestone are not dropped silently in Graphql createIssue.
    */
   createIssue = async (opts: {
     token: string;
     labelIDs: string[];
-    owner: string;
-    repository: string;
     note: NoteProps;
     engine: DEngineClient;
     milestoneId: string;
     showMessage: ShowMessageTypes;
+    assigneeIds: string[];
+    repositoryId: string;
   }) => {
     const {
       token,
       labelIDs,
-      owner,
-      repository,
       note,
       engine,
       milestoneId,
       showMessage,
+      assigneeIds,
+      repositoryId,
     } = opts;
     const { title, body } = note;
     let resp: string = "";
-    const length = labelIDs.length;
-    const repositoryId = await this.getRepositoryId({
-      token,
-      owner,
-      repository,
-    });
+    const labelSize = labelIDs.length;
+    const assigneesSize = assigneeIds.length;
 
     const mutation = `mutation createIssue($repositoryId: ID!, $title: String!, $body: String, ${
-      length > 0 ? `$labelIDs: [ID!]` : ""
-    }, ${milestoneId ? `$milestoneId: ID` : ""} ){
+      labelSize > 0 ? `$labelIDs: [ID!]` : ""
+    }, ${milestoneId ? `$milestoneId: ID` : ""}, ${
+      assigneesSize > 0 ? `$assigneeIds: [ID!]` : ""
+    } ){
       createIssue(input: {repositoryId : $repositoryId , title: $title, body: $body, ${
-        length > 0 ? `labelIds: $labelIDs` : ""
-      }, ${milestoneId ? `milestoneId: $milestoneId` : ""}}){
+        labelSize > 0 ? `labelIds: $labelIDs` : ""
+      }, ${milestoneId ? `milestoneId: $milestoneId` : ""}, ${
+      assigneesSize > 0 ? `assigneeIds: $assigneeIds` : ""
+    }}){
                 issue {
                       id
                       url
@@ -704,6 +686,7 @@ export class GithubIssuePublishPod extends PublishPod<GithubIssuePublishPodConfi
         body,
         labelIDs,
         milestoneId,
+        assigneeIds,
       });
       const issue = result.createIssue.issue;
       if (!_.isUndefined(result.createIssue.issue.id)) {
@@ -729,23 +712,21 @@ export class GithubIssuePublishPod extends PublishPod<GithubIssuePublishPodConfi
    */
   createDiscussion = async (opts: {
     token: string;
-    owner: string;
-    repository: string;
     note: NoteProps;
     engine: DEngineClient;
     categoryId: string;
     includeNoteBodyInDiscussion: boolean;
     showMessage: ShowMessageTypes;
+    repositoryId: string;
   }) => {
     const {
       token,
-      owner,
-      repository,
       note,
       engine,
       categoryId,
       includeNoteBodyInDiscussion,
       showMessage,
+      repositoryId,
     } = opts;
     const { title } = note;
     let { body } = note;
@@ -753,11 +734,6 @@ export class GithubIssuePublishPod extends PublishPod<GithubIssuePublishPodConfi
       body = `Discussion for ${title}`;
     }
     let resp: string = "";
-    const repositoryId = await this.getRepositoryId({
-      token,
-      owner,
-      repository,
-    });
     const mutation = `mutation createDiscussion($repositoryId: ID!, $title: String!, $body: String, $categoryId: ID! ){
         createDiscussion(input: {repositoryId : $repositoryId , title: $title, body: $body, categoryId: $categoryId})
 		      {
@@ -808,22 +784,30 @@ export class GithubIssuePublishPod extends PublishPod<GithubIssuePublishPodConfi
       includeNoteBodyInDiscussion = true,
     } = config as GithubIssuePublishPodConfig;
     const { showMessage } = utilityMethods as GithubIssueUtilMethods;
-    const labelsHashMap = await this.getLabelsFromGithub({
+
+    let milestoneId;
+    const note = opts.note;
+    const tags = opts.note.tags;
+    if (_.isUndefined(note.custom)) {
+      note.custom = {};
+    }
+    const { issueID, status, milestone, category, assignees } = note.custom;
+
+    const githubDataHashMap = await this.getDataFromGithub({
       owner,
       repository,
       token,
     });
-    let milestoneId;
-    const note = opts.note;
-    const tags = opts.note.tags;
-    const { issueID, status, milestone, category } = note.custom;
+
+    const {
+      repositoryId,
+      discussionCategoriesHashMap,
+      labelsHashMap,
+      milestonesHashMap,
+      assigneesHashMap,
+    } = githubDataHashMap;
 
     if (!_.isUndefined(category)) {
-      const discussionCategoriesHashMap = await this.getDiscussionCategories({
-        owner,
-        repository,
-        token,
-      });
       const categoryId = discussionCategoriesHashMap[category];
       if (_.isUndefined(categoryId)) {
         showMessage.warning(GITHUBMESSAGE.INVALID_CATEGORY);
@@ -831,36 +815,50 @@ export class GithubIssuePublishPod extends PublishPod<GithubIssuePublishPodConfi
       }
       const resp = await this.createDiscussion({
         token,
-        owner,
-        repository,
         note,
         engine,
         categoryId,
         includeNoteBodyInDiscussion,
         showMessage,
+        repositoryId,
       });
       return resp;
     }
 
     if (!_.isUndefined(milestone)) {
-      const milestonesHashMap = await this.getMilestonesFromGithub({
-        owner,
-        repository,
-        token,
-      });
       milestoneId = milestonesHashMap[milestone];
       if (_.isUndefined(milestoneId)) {
         showMessage.warning(GITHUBMESSAGE.INVALID_MILESTONE);
         return "";
       }
     }
+
+    const assigneeIds: string[] = [];
+    if (!_.isUndefined(assignees)) {
+      if (_.isString(assignees)) {
+        if (assigneesHashMap[assignees])
+          assigneeIds.push(assigneesHashMap[assignees]);
+      } else {
+        assignees?.forEach((assignee: string) => {
+          const id = assigneesHashMap[assignee];
+          if (id) assigneeIds.push(id);
+        });
+      }
+    }
+    if (!_.isUndefined(assignees) && assigneeIds.length === 0) {
+      showMessage.warning(GITHUBMESSAGE.INVALID_ASSIGNEE);
+      return "";
+    }
+
     const labelIDs: string[] = [];
-    if (_.isString(tags)) {
-      if (labelsHashMap[tags]) labelIDs.push(labelsHashMap[tags]);
-    } else {
-      tags?.forEach((tag: string) => {
-        if (labelsHashMap[tag]) labelIDs.push(labelsHashMap[tag]);
-      });
+    if (!_.isUndefined(tags)) {
+      if (_.isString(tags)) {
+        if (labelsHashMap[tags]) labelIDs.push(labelsHashMap[tags]);
+      } else {
+        tags?.forEach((tag: string) => {
+          if (labelsHashMap[tag]) labelIDs.push(labelsHashMap[tag]);
+        });
+      }
     }
 
     if (!_.isUndefined(tags) && labelIDs.length === 0) {
@@ -871,13 +869,13 @@ export class GithubIssuePublishPod extends PublishPod<GithubIssuePublishPodConfi
       _.isUndefined(issueID) && _.isUndefined(status)
         ? await this.createIssue({
             token,
-            owner,
-            repository,
             labelIDs,
             note,
             engine,
             milestoneId,
             showMessage,
+            assigneeIds,
+            repositoryId,
           })
         : await this.updateIssue({
             issueID,
@@ -886,6 +884,7 @@ export class GithubIssuePublishPod extends PublishPod<GithubIssuePublishPodConfi
             labelIDs,
             milestoneId,
             showMessage,
+            assigneeIds,
           });
 
     return resp;

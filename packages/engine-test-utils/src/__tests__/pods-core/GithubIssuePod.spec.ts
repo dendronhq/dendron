@@ -3,6 +3,7 @@ import { runEngineTestV5 } from "../../engine";
 import {
   GithubIssueImportPod,
   GithubIssuePublishPod,
+  GITHUBMESSAGE,
 } from "@dendronhq/pods-core";
 import { NoteProps, NoteUtils, VaultUtils } from "@dendronhq/common-all";
 import _ from "lodash";
@@ -162,8 +163,9 @@ describe("GithubIssuePod import pod", () => {
   });
 });
 
-describe("github publish pod", () => {
+describe("GIVEN: Github publish pod is run for a note", () => {
   let issue: NoteProps;
+  let pod: GithubIssuePublishPod;
   beforeEach(() => {
     issue = {
       id: "nCobWD86N10jWq6r",
@@ -183,10 +185,21 @@ describe("github publish pod", () => {
       contentHash: undefined,
       tags: ["area.misc", "type.bug"],
       custom: {
-        status: "OPEN",
+        status: "CLOSED",
         issueID: "hsahdla",
       },
     };
+    pod = new GithubIssuePublishPod();
+    pod.createDiscussion = jest.fn();
+    pod.createIssue = jest.fn();
+    pod.updateIssue = jest.fn();
+    pod.getDataFromGithub = jest
+      .fn()
+      .mockReturnValue({
+        labelsHashMap: { "area.misc": "sfgdjio", "type.bug": "gsfahhj" },
+        discussionCategoriesHashMap: { Ideas: "sfgdjio", General: "gsfahhj" },
+        assigneesHashMap: { john: "dhdjdj", doe: "dhdjdk" },
+      });
   });
 
   const utilityMethods = {
@@ -195,98 +208,212 @@ describe("github publish pod", () => {
       warning: jest.fn(),
     },
   };
-
-  test("basic", async () => {
-    await runEngineTestV5(
-      async ({ engine, vaults, wsRoot }) => {
-        const pod = new GithubIssuePublishPod();
-        const vaultName = VaultUtils.getName(vaults[0]);
-        pod.getLabelsFromGithub = jest
-          .fn()
-          .mockReturnValue({ "area.misc": "sfgdjio", "type.bug": "gsfahhj" });
-        pod.updateIssue = jest.fn().mockReturnValue("https://github.com/foo");
-        await engine.writeNote(issue, { newNode: true });
-        const resp = await pod.execute({
-          engine,
-          vaults,
-          wsRoot,
-          config: {
-            fname: "foo",
-            vaultName,
-            dest: "stdout",
-            token: "asjska",
-            repository: "dendron",
-            owner: "dendronhq",
-          },
-          utilityMethods,
-        });
-        expect(resp).toEqual("https://github.com/foo");
-      },
-      { expect, preSetupHook: ENGINE_HOOKS.setupBasic }
-    );
+  describe("WHEN a note has issueID and status in FM", () => {
+    test("THEN issue status is updated and response is issue URL", async () => {
+      await runEngineTestV5(
+        async ({ engine, vaults, wsRoot }) => {
+          const vaultName = VaultUtils.getName(vaults[0]);
+          pod.updateIssue = jest.fn().mockReturnValue("https://github.com/foo");
+          await engine.writeNote(issue, { newNode: true });
+          const resp = await pod.execute({
+            engine,
+            vaults,
+            wsRoot,
+            config: {
+              fname: "foo",
+              vaultName,
+              dest: "stdout",
+              token: "asjska",
+              repository: "dendron",
+              owner: "dendronhq",
+            },
+            utilityMethods,
+          });
+          expect(resp).toEqual("https://github.com/foo");
+          expect(pod.updateIssue).toHaveBeenCalledTimes(1);
+          expect(pod.createDiscussion).toHaveBeenCalledTimes(0);
+          expect(pod.createIssue).toHaveBeenCalledTimes(0);
+        },
+        { expect, preSetupHook: ENGINE_HOOKS.setupBasic }
+      );
+    });
   });
 
-  test("with invalid tags", async () => {
-    await runEngineTestV5(
-      async ({ engine, vaults, wsRoot }) => {
-        const pod = new GithubIssuePublishPod();
-        const vaultName = VaultUtils.getName(vaults[0]);
-        pod.getLabelsFromGithub = jest
-          .fn()
-          .mockReturnValue({ question: "abcdwe", enhancement: "kighxx" });
-        pod.updateIssue = jest.fn().mockReturnValue("Issue Updated");
-        await engine.writeNote(issue, { newNode: true });
-        const resp = await pod.execute({
-          engine,
-          vaults,
-          wsRoot,
-          config: {
-            fname: "foo",
-            vaultName,
-            dest: "stdout",
-            token: "asjska",
-            repository: "dendron",
-            owner: "dendronhq",
-          },
-          utilityMethods,
-        });
-        expect(resp).toEqual("");
-      },
+  describe("WHEN note has invalid tags", () => {
+    test("THEN warning message is sent and response is empty", async () => {
+      await runEngineTestV5(
+        async ({ engine, vaults, wsRoot }) => {
+          const vaultName = VaultUtils.getName(vaults[0]);
+          const scratchIssue: NoteProps = _.omit(issue, "tags");
+          scratchIssue.tags = "documentation";
+          await engine.writeNote(scratchIssue, { newNode: true });
+          const resp = await pod.execute({
+            engine,
+            vaults,
+            wsRoot,
+            config: {
+              fname: "foo",
+              vaultName,
+              dest: "stdout",
+              token: "asjska",
+              repository: "dendron",
+              owner: "dendronhq",
+            },
+            utilityMethods,
+          });
+          expect(utilityMethods.showMessage.warning).toHaveBeenCalledTimes(1);
+          expect(utilityMethods.showMessage.warning).toHaveBeenCalledWith(
+            GITHUBMESSAGE.INVALID_TAG
+          );
+          expect(pod.createDiscussion).toHaveBeenCalledTimes(0);
+          expect(pod.createIssue).toHaveBeenCalledTimes(0);
+          expect(pod.updateIssue).toHaveBeenCalledTimes(0);
+          expect(resp).toEqual("");
+        },
 
-      { expect, preSetupHook: ENGINE_HOOKS.setupBasic }
-    );
+        { expect, preSetupHook: ENGINE_HOOKS.setupBasic }
+      );
+    });
   });
 
-  test("create Issue", async () => {
-    await runEngineTestV5(
-      async ({ engine, vaults, wsRoot }) => {
-        const pod = new GithubIssuePublishPod();
-        const vaultName = VaultUtils.getName(vaults[0]);
-        pod.getLabelsFromGithub = jest
-          .fn()
-          .mockReturnValue({ "area.misc": "sfgdjio", "type.bug": "gsfahhj" });
-        pod.createIssue = jest.fn().mockReturnValue("https://github.com/foo");
-        const scratchIssue: NoteProps = _.omit(issue, "custom");
-        scratchIssue.custom = {};
-        await engine.writeNote(scratchIssue, { newNode: true });
-        const resp = await pod.execute({
-          engine,
-          vaults,
-          wsRoot,
-          config: {
-            fname: "foo",
-            vaultName,
-            dest: "stdout",
-            token: "asjska",
-            repository: "dendron",
-            owner: "dendronhq",
-          },
-          utilityMethods,
-        });
-        expect(resp).toEqual("https://github.com/foo");
-      },
+  describe("WHEN Note does not have any custom FM", () => {
+    test("THEN new issue is created and issue url is returned", async () => {
+      await runEngineTestV5(
+        async ({ engine, vaults, wsRoot }) => {
+          const vaultName = VaultUtils.getName(vaults[0]);
+          pod.createIssue = jest.fn().mockReturnValue("https://github.com/foo");
+          const scratchIssue: NoteProps = _.omit(issue, "custom");
+          scratchIssue.custom = {};
+          await engine.writeNote(scratchIssue, { newNode: true });
+          const resp = await pod.execute({
+            engine,
+            vaults,
+            wsRoot,
+            config: {
+              fname: "foo",
+              vaultName,
+              dest: "stdout",
+              token: "asjska",
+              repository: "dendron",
+              owner: "dendronhq",
+            },
+            utilityMethods,
+          });
+          expect(resp).toEqual("https://github.com/foo");
+          expect(utilityMethods.showMessage.warning).toHaveBeenCalledTimes(0);
+          expect(pod.createIssue).toHaveBeenCalledTimes(1);
+          expect(pod.createDiscussion).toHaveBeenCalledTimes(0);
+          expect(pod.updateIssue).toHaveBeenCalledTimes(0);
+        },
 
-      { expect, preSetupHook: ENGINE_HOOKS.setupBasic }
-    );
+        { expect, preSetupHook: ENGINE_HOOKS.setupBasic }
+      );
+    });
+  });
+
+  describe("WHEN Note has category in FM", () => {
+    test("THEN discussion is created and response is discussion URL", async () => {
+      await runEngineTestV5(
+        async ({ engine, vaults, wsRoot }) => {
+          const vaultName = VaultUtils.getName(vaults[0]);
+          pod.createDiscussion = jest
+            .fn()
+            .mockReturnValue("https://github.com/foo");
+          issue.custom.category = "Ideas";
+          await engine.writeNote(issue, { newNode: true });
+          const resp = await pod.execute({
+            engine,
+            vaults,
+            wsRoot,
+            config: {
+              fname: "foo",
+              vaultName,
+              dest: "stdout",
+              token: "asjska",
+              repository: "dendron",
+              owner: "dendronhq",
+            },
+            utilityMethods,
+          });
+          expect(resp).toEqual("https://github.com/foo");
+          expect(utilityMethods.showMessage.warning).toHaveBeenCalledTimes(0);
+          expect(pod.createDiscussion).toHaveBeenCalledTimes(1);
+          expect(pod.createIssue).toHaveBeenCalledTimes(0);
+          expect(pod.updateIssue).toHaveBeenCalledTimes(0);
+        },
+        { expect, preSetupHook: ENGINE_HOOKS.setupBasic }
+      );
+    });
+  });
+
+  describe("WHEN Note has invalid category in FM", () => {
+    test("THEN warning message is shown and response is empty", async () => {
+      await runEngineTestV5(
+        async ({ engine, vaults, wsRoot }) => {
+          const vaultName = VaultUtils.getName(vaults[0]);
+          pod.createDiscussion = jest
+            .fn()
+            .mockReturnValue("https://github.com/foo");
+          issue.custom.category = "abcd";
+          await engine.writeNote(issue, { newNode: true });
+          const resp = await pod.execute({
+            engine,
+            vaults,
+            wsRoot,
+            config: {
+              fname: "foo",
+              vaultName,
+              dest: "stdout",
+              token: "asjska",
+              repository: "dendron",
+              owner: "dendronhq",
+            },
+            utilityMethods,
+          });
+          expect(resp).toEqual("");
+          expect(utilityMethods.showMessage.warning).toHaveBeenCalledTimes(1);
+          expect(utilityMethods.showMessage.warning).toHaveBeenCalledWith(
+            GITHUBMESSAGE.INVALID_CATEGORY
+          );
+          expect(pod.createDiscussion).toHaveBeenCalledTimes(0);
+          expect(pod.createIssue).toHaveBeenCalledTimes(0);
+          expect(pod.updateIssue).toHaveBeenCalledTimes(0);
+        },
+        { expect, preSetupHook: ENGINE_HOOKS.setupBasic }
+      );
+    });
+  });
+
+  describe("WHEN Note is updated with assignees in FM", () => {
+    test("THEN issue is updated and response is issue URL", async () => {
+      await runEngineTestV5(
+        async ({ engine, vaults, wsRoot }) => {
+          const vaultName = VaultUtils.getName(vaults[0]);
+          pod.updateIssue = jest.fn().mockReturnValue("https://github.com/foo");
+          issue.custom.assignees = ["john", "doe"];
+          await engine.writeNote(issue, { newNode: true });
+          const resp = await pod.execute({
+            engine,
+            vaults,
+            wsRoot,
+            config: {
+              fname: "foo",
+              vaultName,
+              dest: "stdout",
+              token: "asjska",
+              repository: "dendron",
+              owner: "dendronhq",
+            },
+            utilityMethods,
+          });
+          expect(resp).toEqual("https://github.com/foo");
+          expect(utilityMethods.showMessage.warning).toHaveBeenCalledTimes(0);
+          expect(pod.createDiscussion).toHaveBeenCalledTimes(0);
+          expect(pod.createIssue).toHaveBeenCalledTimes(0);
+          expect(pod.updateIssue).toHaveBeenCalledTimes(1);
+        },
+        { expect, preSetupHook: ENGINE_HOOKS.setupBasic }
+      );
+    });
   });
 });

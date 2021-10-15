@@ -798,13 +798,19 @@ export class DendronClientUtilsV2 {
     prefix: string;
   } {
     // gather inputs
+    const config = getDWorkspace().config;
+    const journalConfig = DConfig.getConfig({
+      config,
+      path: "workspace.journal",
+      required: true,
+    });
     const dateFormat: string =
       type === "SCRATCH"
         ? getExtension().getWorkspaceSettingOrDefault({
             wsConfigKey: "dendron.defaultScratchDateFormat",
             dendronConfigKey: "scratch.dateFormat",
           })
-        : getDWorkspace().config.journal.dateFormat;
+        : journalConfig.dateFormat;
 
     const addBehavior: LegacyNoteAddBehavior =
       type === "SCRATCH"
@@ -812,7 +818,7 @@ export class DendronClientUtilsV2 {
             wsConfigKey: "dendron.defaultScratchAddBehavior",
             dendronConfigKey: "scratch.addBehavior",
           })
-        : getDWorkspace().config.journal.addBehavior;
+        : journalConfig.addBehavior;
 
     const name: string =
       type === "SCRATCH"
@@ -820,7 +826,7 @@ export class DendronClientUtilsV2 {
             wsConfigKey: "dendron.defaultScratchName",
             dendronConfigKey: "scratch.name",
           })
-        : getDWorkspace().config.journal.name;
+        : journalConfig.name;
 
     if (!_.includes(_noteAddBehaviorEnum, addBehavior)) {
       const actual = addBehavior;

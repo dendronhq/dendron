@@ -435,6 +435,12 @@ export type GetNotePayload = {
 };
 export type QueryNotesOpts = {
   qs: string;
+
+  /**
+   * Original query string (which can contain minor modifications such as mapping '/'->'.')
+   * This string is added for sorting the lookup results when there is exact match with
+   * original query. */
+  originalQS?: string;
   onlyDirectChildren?: boolean;
   vault?: DVault;
   createIfNew?: boolean;

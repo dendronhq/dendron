@@ -770,10 +770,11 @@ export class NotePickerUtils {
   static async fetchPickerResults(opts: {
     picker: DendronQuickPickerV2;
     transformedQuery: TransformedQueryString;
+    originalQS: string;
   }) {
     const ctx = "createPickerItemsFromEngine";
     const start = process.hrtime();
-    const { picker, transformedQuery } = opts;
+    const { picker, transformedQuery, originalQS } = opts;
     const { engine, wsRoot, vaults } = getDWorkspace();
     // if we are doing a query, reset pagination options
     PickerUtilsV2.resetPaginationOpts(picker);
@@ -781,6 +782,7 @@ export class NotePickerUtils {
     const resp = await engine.queryNotes({
       qs: transformedQuery.queryString,
       onlyDirectChildren: transformedQuery.onlyDirectChildren,
+      originalQS,
     });
     let nodes: NoteProps[] = resp.data;
 

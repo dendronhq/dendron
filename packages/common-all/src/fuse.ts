@@ -200,9 +200,11 @@ export class FuseEngine {
   queryNote({
     qs,
     onlyDirectChildren,
+    originalQS,
   }: {
     qs: string;
     onlyDirectChildren?: boolean;
+    originalQS?: string;
   }): NoteIndexProps[] {
     let items: NoteIndexProps[];
 
@@ -226,7 +228,7 @@ export class FuseEngine {
         onlyDirectChildren,
       });
 
-      results = FuseEngine.sortMatchingScores(results);
+      results = FuseEngine.sortResults({ results, originalQS });
 
       items = _.map(results, (resp) => resp.item);
     }
@@ -312,9 +314,13 @@ export class FuseEngine {
    * within that group of elements. (The items with better match scores
    * should still come before elements with worse match scores).
    * */
-  static sortMatchingScores(
-    results: Fuse.FuseResult<NoteIndexProps>[]
-  ): Fuse.FuseResult<NoteIndexProps>[] {
+  static sortResults({
+    results,
+    originalQS,
+  }: {
+    results: Fuse.FuseResult<NoteIndexProps>[];
+    originalQS?: string;
+  }): Fuse.FuseResult<NoteIndexProps>[] {
     const groupedByScore = _.groupBy(results, (r) => r.score);
 
     // lodash group by makes strings out of number hence to sort scores
@@ -342,7 +348,18 @@ export class FuseEngine {
       groupedByScore[score.key] = [...notes, ...stubs];
     }
 
-    return scores.map((score) => groupedByScore[score.key]).flat();
+    let sorted = scores.map((score) => groupedByScore[score.key]).flat();
+
+    // Pull up exact match if it exists.
+    if (originalQS) {
+      const idx = sorted.findIndex((res) => res.item.fname === originalQS);
+      if (idx !== -1) {
+        const [spliced] = sorted.splice(idx, 1);
+        sorted.unshift(spliced);
+      }
+    }
+
+    return sorted;
   }
 
   private postQueryFilter({

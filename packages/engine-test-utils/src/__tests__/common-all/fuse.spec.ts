@@ -109,7 +109,7 @@ describe("Fuse utility function tests", () => {
     );
   });
 
-  describe("sortMatchingScores", () => {
+  describe("Fuse.sortResults", () => {
     function createIndexItem(opts: {
       fname: string;
       updated: number;
@@ -139,24 +139,59 @@ describe("Fuse utility function tests", () => {
       };
     };
 
+    const assertContainsFName = (
+      results: Fuse.FuseResult<NoteIndexProps>[],
+      fname: string
+    ) => {
+      expect(results.some((res) => res.item.fname === fname)).toBeTruthy();
+    };
+
+    describe("WHEN sorting fuse results with originalQS match", () => {
+      let sortedResults: Fuse.FuseResult<NoteIndexProps>[];
+
+      beforeAll(() => {
+        sortedResults = FuseEngine.sortResults({
+          results: [
+            createFoundItem({ fname: "match.a1.hi-1", updated: 2, score: 0.1 }),
+            createFoundItem({ fname: "match.a1.hi-2", updated: 2, score: 0.1 }),
+            createFoundItem({ fname: "match.a1", updated: 3, score: 0.2 }),
+          ],
+          originalQS: "match.a1",
+        });
+      });
+
+      it("THEN originalQS match should come first even when score is lower", () => {
+        expect(sortedResults[0].item.fname).toEqual("match.a1");
+      });
+
+      it(`THEN keep all other results`, () => {
+        expect(sortedResults.length).toEqual(3);
+        assertContainsFName(sortedResults, "match.a1.hi-1");
+        assertContainsFName(sortedResults, "match.a1.hi-2");
+        assertContainsFName(sortedResults, "match.a1");
+      });
+    });
+
     describe("WHEN sorting fuse results", () => {
       let sortResults: Fuse.FuseResult<NoteIndexProps>[];
 
       beforeAll(() => {
-        sortResults = FuseEngine.sortMatchingScores([
-          createFoundItem({ fname: "match-a1", updated: 2, score: 0.1 }),
-          createFoundItem({ fname: "match-a2", updated: 3, score: 0.1 }),
-          // Stubs are going to have a latest update time but should come
-          // after real matches in search results (when stubs have matching score with real result).
-          createFoundItem({
-            fname: "stub-a2",
-            updated: 999,
-            score: 0.1,
-            stub: true,
-          }),
-          createFoundItem({ fname: "best-match", updated: 1, score: 0.01 }),
-          createFoundItem({ fname: "worst-match", updated: 1, score: 0.99 }),
-        ]);
+        sortResults = FuseEngine.sortResults({
+          results: [
+            createFoundItem({ fname: "match-a1", updated: 2, score: 0.1 }),
+            createFoundItem({ fname: "match-a2", updated: 3, score: 0.1 }),
+            // Stubs are going to have a latest update time but should come
+            // after real matches in search results (when stubs have matching score with real result).
+            createFoundItem({
+              fname: "stub-a2",
+              updated: 999,
+              score: 0.1,
+              stub: true,
+            }),
+            createFoundItem({ fname: "best-match", updated: 1, score: 0.01 }),
+            createFoundItem({ fname: "worst-match", updated: 1, score: 0.99 }),
+          ],
+        });
       });
 
       it("THEN best matched score should be first, regardless of update time", () => {

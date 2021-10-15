@@ -2,7 +2,7 @@ import { TransformedQueryString } from "./types";
 import { PickerUtilsV2 } from "./utils";
 import { FuseExtendedSearchConstants } from "@dendronhq/common-all";
 
-function wikiTransform(trimmedQuery: string) {
+function wikiTransform(trimmedQuery: string): TransformedQueryString {
   let vaultName;
   // Remove the '[[' ']]' decoration.
   let transformed = trimmedQuery.slice(2, -2);

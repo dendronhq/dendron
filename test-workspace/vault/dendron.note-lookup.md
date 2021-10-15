@@ -2,7 +2,7 @@
 id: bNkYI2WWK6Jhm2eeVwqrh
 title: Note Lookup
 desc: ''
-updated: 1634226739177
+updated: 1634279966914
 created: 1633501913732
 ---
 
@@ -13,8 +13,6 @@ Note look up `cmd+l`:
 * exact match: `dendron.welcome`
 * by tokens (space works as AND): `dendron welcome`
 * by tokens (| is OR): `bar | foo`
-
-
 
 ### Hierarchy with omitted path match
 * `dendron.multi` should match among others:

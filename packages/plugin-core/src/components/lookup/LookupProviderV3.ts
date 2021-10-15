@@ -297,6 +297,7 @@ export class NoteLookupProvider implements ILookupProviderV3 {
       updatedItems = await NotePickerUtils.fetchPickerResults({
         picker,
         transformedQuery,
+        originalQS: queryOrig,
       });
 
       if (token.isCancellationRequested) {

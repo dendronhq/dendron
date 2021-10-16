@@ -60,6 +60,7 @@ import { readNotesFromCache, writeNotesToCache } from "../../utils";
 import { NoteParser } from "./noteParser";
 import { SchemaParser } from "./schemaParser";
 import { InMemoryNoteCache } from "../../util/inMemoryNoteCache";
+import { DConfig } from "../../config";
 
 export type FileMeta = {
   // file name: eg. foo.md, name = foo
@@ -415,10 +416,14 @@ export class FileStorage implements DStore {
     const notesMap = NoteUtils.createFnameNoteMap(allNotes, true);
     return _.map(allNotes, (noteFrom: NoteProps) => {
       try {
+        const maxNoteLength = DConfig.getConfig({
+          config: this.config,
+          path: "workspace.maxNoteLength",
+          required: true,
+        });
         if (
           noteFrom.body.length <
-          (this.config.maxNoteLength ||
-            CONSTANTS.DENDRON_DEFAULT_MAX_NOTE_LENGTH)
+          (maxNoteLength || CONSTANTS.DENDRON_DEFAULT_MAX_NOTE_LENGTH)
         ) {
           const linkCandidates = LinkUtils.findLinkCandidates({
             note: noteFrom,
@@ -477,10 +482,14 @@ export class FileStorage implements DStore {
         if (n.stub) {
           return;
         }
+        const maxNoteLength = DConfig.getConfig({
+          config: this.config,
+          path: "workspace.maxNoteLength",
+          required: true,
+        });
         if (
           n.body.length >=
-          (this.config.maxNoteLength ||
-            CONSTANTS.DENDRON_DEFAULT_MAX_NOTE_LENGTH)
+          (maxNoteLength || CONSTANTS.DENDRON_DEFAULT_MAX_NOTE_LENGTH)
         ) {
           this.logger.info({
             ctx,
@@ -494,8 +503,7 @@ export class FileStorage implements DStore {
                 `Note "${n.fname}" in vault "${VaultUtils.getName(
                   n.vault
                 )}" is longer than ${
-                  this.config.maxNoteLength ||
-                  CONSTANTS.DENDRON_DEFAULT_MAX_NOTE_LENGTH
+                  maxNoteLength || CONSTANTS.DENDRON_DEFAULT_MAX_NOTE_LENGTH
                 } characters, some features like backlinks may not work correctly for it. ` +
                 `You may increase "maxNoteLength" in "dendron.yml" to override this warning.`,
               severity: ERROR_SEVERITY.MINOR,

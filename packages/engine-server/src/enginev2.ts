@@ -97,13 +97,18 @@ function createRenderedCache(
 
     return new NullCache();
   } else {
-    if (config.maxPreviewsCached && config.maxPreviewsCached > 0) {
+    const maxPreviewsCached = DConfig.getConfig({
+      config,
+      path: "workspace.maxPreviewsCached",
+      required: true,
+    });
+    if (maxPreviewsCached && maxPreviewsCached > 0) {
       logger.info({
         ctx,
         msg: `Creating rendered preview cache set to hold maximum of '${config.maxPreviewsCached}' items.`,
       });
 
-      return new LruCache({ maxItems: config.maxPreviewsCached });
+      return new LruCache({ maxItems: maxPreviewsCached });
     } else {
       // This is most likely to happen if the user were to set incorrect configuration
       // value for maxPreviewsCached, we don't want to crash initialization due to
@@ -111,7 +116,7 @@ function createRenderedCache(
       // the preview cache.
       logger.error({
         ctx,
-        msg: `Did not find valid maxPreviewsCached (value was '${config.maxPreviewsCached}')
+        msg: `Did not find valid maxPreviewsCached (value was '${maxPreviewsCached}')
         in configuration. When specified th value must be a number greater than 0. Using null cache.`,
       });
       return new NullCache();
@@ -577,12 +582,14 @@ export class DendronEngineV2 implements DEngine {
         if (ent.status === "delete") {
           delete this.notes[id];
         } else {
-          if (ent.status === "create") {
-          }
+          const maxNoteLength = DConfig.getConfig({
+            config: this.config,
+            path: "workspace.maxNoteLength",
+            required: true,
+          });
           if (
             ent.note.body.length <
-            (this.config.maxNoteLength ||
-              CONSTANTS.DENDRON_DEFAULT_MAX_NOTE_LENGTH)
+            (maxNoteLength || CONSTANTS.DENDRON_DEFAULT_MAX_NOTE_LENGTH)
           ) {
             const links = LinkUtils.findLinks({ note: ent.note, engine: this });
             const linkCandidates = LinkUtils.findLinkCandidates({

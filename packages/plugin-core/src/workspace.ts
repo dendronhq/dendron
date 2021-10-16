@@ -589,17 +589,23 @@ export class DendronExtension {
   }
 
   _setupCommands() {
+    let prevCommand: any;
     ALL_COMMANDS.map((Cmd) => {
-      const cmd = new Cmd();
+      try {
+        const cmd = new Cmd();
+        prevCommand = cmd;
+        this.context.subscriptions.push(
+          vscode.commands.registerCommand(
+            cmd.key,
+            sentryReportingCallback(async (args: any) => {
+              await cmd.run(args);
+            })
+          )
+        );
+      } catch (err) {
+        debugger;
 
-      this.context.subscriptions.push(
-        vscode.commands.registerCommand(
-          cmd.key,
-          sentryReportingCallback(async (args: any) => {
-            await cmd.run(args);
-          })
-        )
-      );
+      }
     });
 
     this.context.subscriptions.push(

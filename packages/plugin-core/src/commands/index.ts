@@ -107,12 +107,12 @@ const ALL_COMMANDS = [
   RandomNoteCommand,
   ResetConfigCommand,
   RestoreVaultCommand,
-  SetupWorkspaceCommand,
+  // SetupWorkspaceCommand,
   ShowHelpCommand,
   ShowNoteGraphCommand,
   ShowSchemaGraphCommand,
   ShowPreviewCommand,
-  ShowPreviewV2Command,
+  // ShowPreviewV2Command,
   SignInCommand,
   SignUpCommand,
   SiteBuildCommand,
@@ -127,7 +127,6 @@ const ALL_COMMANDS = [
   ConvertLinkCommand,
   SeedAddCommand,
   SeedRemoveCommand,
-  RunMigrationCommand,
   SeedBrowseCommand,
 ] as CodeCommandConstructor[];
 

@@ -17,7 +17,6 @@ import {
   SemverVersion,
 } from "../utils/build";
 import { CLICommand, CommandCommonProps } from "./base";
-import _ from "lodash";
 
 type CommandCLIOpts = {
   cmd: DevCommands;
@@ -44,8 +43,6 @@ type CommandOutput = Partial<{ error: DendronError; data: any }>;
 type BuildCmdOpts = {
   publishEndpoint: PublishEndpoint;
   fast?: boolean;
-  part1?: boolean;
-  part2?: boolean;
 } & BumpVersionOpts &
   PrepPluginOpts;
 
@@ -101,12 +98,6 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     });
     args.option("fast", {
       describe: "skip some checks",
-    });
-    args.option("part1", {
-      describe: "",
-    });
-    args.option("part2", {
-      describe: "",
     });
   }
 
@@ -269,8 +260,8 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     LernaUtils.bumpVersion(opts.upgradeType);
   }
 
-  async _checkBumpAndPublish(opts: BuildCmdOpts) {
-    const ctx = "_buildPublish";
+  async build(opts: BuildCmdOpts) {
+    const ctx = "build";
     // get package version
     const currentVersion = BuildUtils.getCurrentVersion();
     const nextVersion = BuildUtils.genNextVersion({
@@ -300,14 +291,18 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
 
     this.print("publish version...");
     LernaUtils.publishVersion(opts.publishEndpoint);
-  }
 
-  async _prepInstallAndPackage(opts: BuildCmdOpts) {
+    this.print("sync assets...");
+    const { staticPath } = await this.syncAssets();
+
     this.print("prep repo...");
     await BuildUtils.prepPluginPkg();
 
     this.print("install deps...");
     BuildUtils.installPluginDependencies();
+
+    const files = fs.readdirSync(staticPath).map((ent) => ent);
+    this.print(`static files: ${JSON.stringify(files)}`);
 
     this.print("package deps...");
     BuildUtils.packagePluginDependencies();
@@ -321,32 +316,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     } else {
       this.print("skip restore package.json...");
     }
-  }
 
-  async _buildWithParts(opts: BuildCmdOpts) {
-    if (opts.part1) {
-      this.print("running part1, skipping part2");
-      await this._checkBumpAndPublish(opts);
-      this.print("sync assets...");
-      await this.syncAssets();
-    }
-
-    if (opts.part2) {
-      this.print("running part2, skipping part 1");
-      await this._prepInstallAndPackage(opts);
-    }
-  }
-
-  async build(opts: BuildCmdOpts) {
-    const partsDefined = _.some([opts.part1, opts.part2]);
-    if (partsDefined) {
-      return this._buildWithParts(opts);
-    }
-
-    await this._checkBumpAndPublish(opts);
-    this.print("sync assets...");
-    await this.syncAssets();
-    await this._prepInstallAndPackage(opts);
     this.L.info("done");
   }
 

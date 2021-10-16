@@ -400,7 +400,7 @@ type mappedConfigPath = {
  * newly introduced namespace path (i.e. "commands", or "workspace") is not here
  * because they don't have a mapping to the old version.
  */
-const pathMap = new Map<string, mappedConfigPath>([
+export const pathMap = new Map<string, mappedConfigPath>([
   // commands namespace
 
   // lookup namespace
@@ -462,7 +462,10 @@ const pathMap = new Map<string, mappedConfigPath>([
     "workspace.journal.dailyDomain",
     { target: "journal.dailyDomain", version: 3 },
   ],
-  ["workspace.journal.dailyVault", { target: "journal", version: 3 }],
+  [
+    "workspace.journal.dailyVault",
+    { target: "journal.dailyVault", version: 3 },
+  ],
   ["workspace.journal.name", { target: "journal.name", version: 3 }],
   [
     "workspace.journal.dateFormat",
@@ -487,6 +490,7 @@ const pathMap = new Map<string, mappedConfigPath>([
 
   // graph namespace
   ["workspace.graph", { target: "graph", version: 3 }],
+  ["workspace.graph.zoomSpeed", { target: "graph.zoomSpeed", version: 3 }],
 
   ["workspace.disableTelemetry", { target: "noTelemetry", version: 3 }],
   [

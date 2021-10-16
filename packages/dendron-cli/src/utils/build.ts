@@ -319,13 +319,11 @@ export class BuildUtils {
     fs.emptyDirSync(pluginStaticPath);
 
     fs.copySync(path.join(nextServerRoot, "out"), pluginStaticPath);
-    await Promise.all([
-      fs.copy(
-        path.join(this.getNextServerRootPath(), "assets", "js"),
-        pluginStaticPath
-      ),
-      fs.copy(path.join(apiRoot, "assets", "static"), pluginStaticPath),
-    ]);
+    fs.copySync(
+      path.join(this.getNextServerRootPath(), "assets", "js"),
+      path.join(pluginStaticPath, "js")
+    );
+    fs.copySync(path.join(apiRoot, "assets", "static"), pluginStaticPath);
     return { staticPath: pluginStaticPath };
   }
 

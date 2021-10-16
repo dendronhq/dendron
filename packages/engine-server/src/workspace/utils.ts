@@ -18,6 +18,7 @@ import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { URI } from "vscode-uri";
+import { DConfig } from "../config";
 
 export class WorkspaceUtils {
   /** Finds the workspace type using the VSCode plugin workspace variables. */
@@ -141,9 +142,13 @@ export class WorkspaceUtils {
      */
     let isIndex: boolean = false;
 
+    const seeds = DConfig.getConfig({
+      config,
+      path: "workspace.seeds",
+    });
     if (vault.seed) {
-      if (config.seeds && config.seeds[vault.seed]) {
-        const maybeSite = config.seeds[vault.seed]?.site;
+      if (seeds && seeds[vault.seed]) {
+        const maybeSite = seeds[vault.seed]?.site;
         if (maybeSite) {
           urlRoot = maybeSite.url;
           if (!_.isUndefined(note)) {

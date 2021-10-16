@@ -919,10 +919,14 @@ export class WorkspaceService {
 
     // const seedService = new SeedService({wsRoot});
     // check seeds
+    const seeds = DConfig.getConfig({
+      config,
+      path: "workspace.seeds",
+    });
     const seedResults: { id: string; status: SyncActionStatus; data: any }[] =
       [];
     await Promise.all(
-      _.map(config.seeds, async (entry: SeedEntry, id: string) => {
+      _.map(seeds, async (entry: SeedEntry, id: string) => {
         if (!(await SeedUtils.exists({ id, wsRoot }))) {
           const resp = await this._seedService.info({ id });
           if (_.isUndefined(resp)) {

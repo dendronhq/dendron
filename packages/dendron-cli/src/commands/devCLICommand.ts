@@ -293,13 +293,16 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     LernaUtils.publishVersion(opts.publishEndpoint);
 
     this.print("sync assets...");
-    await this.syncAssets();
+    const { staticPath } = await this.syncAssets();
 
     this.print("prep repo...");
     await BuildUtils.prepPluginPkg();
 
     this.print("install deps...");
     BuildUtils.installPluginDependencies();
+
+    const files = fs.readdirSync(staticPath).map((ent) => ent);
+    this.print(`static files: ${JSON.stringify(files)}`);
 
     this.print("package deps...");
     BuildUtils.packagePluginDependencies();
@@ -325,6 +328,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     const files = fs.readdirSync(staticPath).map((ent) => ent);
     this.print(`static files: ${JSON.stringify(files)}`);
     this.print("done");
+    return { staticPath };
   }
 
   validateBuildArgs(opts: CommandOpts): opts is BuildCmdOpts {

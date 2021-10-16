@@ -839,16 +839,6 @@ export class WorkspaceService {
     dendronConfig: IntermediateDendronConfig;
     wsConfig?: WorkspaceSettings;
   }) {
-    // check if we need to force a migration
-    try {
-      const maybeRaw = DConfig.getRaw(this.wsRoot);
-      if (_.isUndefined(maybeRaw.journal)) {
-        forceUpgrade = true;
-      }
-    } catch (error) {
-      this.logger.error(error);
-    }
-
     let changes: MigrationChangeSetStatus[] = [];
 
     if (

@@ -270,7 +270,6 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     });
     const shouldPublishLocal = opts.publishEndpoint === PublishEndpoint.LOCAL;
     this.L.info({ ctx, currentVersion, nextVersion });
-    debugger;
 
     this.print(`prep publish ${opts.publishEndpoint}...`);
     if (shouldPublishLocal) {
@@ -290,7 +289,6 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
 
     this.bumpVersion(opts);
 
-    debugger;
     this.print("publish version...");
     LernaUtils.publishVersion(opts.publishEndpoint);
 

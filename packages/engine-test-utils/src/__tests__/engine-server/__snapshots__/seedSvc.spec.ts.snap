@@ -5,40 +5,15 @@ exports[`add ok: exists 1`] = `".git .gitignore dendron.code-workspace dendron.y
 exports[`add ok: exists 2`] = `"dendron.code-workspace dendron.yml hooks seeds vault1 vault2 vault3"`;
 
 exports[`add ok: exists 3`] = `
-"maxPreviewsCached: 10
-vaults:
-    -
-        fsPath: vault
-        seed: dendron.foo
-        name: dendron.foo
-    -
-        fsPath: vault1
-    -
-        fsPath: vault2
-    -
-        fsPath: vault3
-        name: vaultThree
+"version: 1
 useFMTitle: true
 useNoteTitleForLink: true
-noAutoCreateOnDefinition: true
 noLegacyNoteRef: true
-noXVaultWikiLink: true
 mermaid: true
 useKatex: true
-autoFoldFrontmatter: true
 usePrettyRefs: true
 dev:
     enablePreviewV2: true
-journal:
-    dailyDomain: daily
-    name: journal
-    dateFormat: y.MM.dd
-    addBehavior: childOfDomain
-    firstDayOfWeek: 1
-scratch:
-    name: scratch
-    dateFormat: y.MM.dd.HHmmss
-    addBehavior: asOwnDomain
 site:
     copyAssets: true
     siteHierarchies:
@@ -56,7 +31,32 @@ site:
             - vault2
             - vaultThree
             - dendron.foo
-version: 1
+vaults:
+    -
+        fsPath: vault
+        seed: dendron.foo
+        name: dendron.foo
+    -
+        fsPath: vault1
+    -
+        fsPath: vault2
+    -
+        fsPath: vault3
+        name: vaultThree
+journal:
+    dailyDomain: daily
+    name: journal
+    dateFormat: y.MM.dd
+    addBehavior: childOfDomain
+    firstDayOfWeek: 1
+scratch:
+    name: scratch
+    dateFormat: y.MM.dd.HHmmss
+    addBehavior: asOwnDomain
+noAutoCreateOnDefinition: true
+noXVaultWikiLink: true
+autoFoldFrontmatter: true
+maxPreviewsCached: 10
 lookupConfirmVaultOnCreate: false
 lookup:
     note:
@@ -96,40 +96,15 @@ exports[`add ok: seed with site 1`] = `".git .gitignore dendron.code-workspace d
 exports[`add ok: seed with site 2`] = `"dendron.code-workspace dendron.yml hooks seeds vault1 vault2 vault3"`;
 
 exports[`add ok: seed with site 3`] = `
-"maxPreviewsCached: 10
-vaults:
-    -
-        fsPath: vault
-        seed: dendron.foo
-        name: dendron.foo
-    -
-        fsPath: vault1
-    -
-        fsPath: vault2
-    -
-        fsPath: vault3
-        name: vaultThree
+"version: 1
 useFMTitle: true
 useNoteTitleForLink: true
-noAutoCreateOnDefinition: true
 noLegacyNoteRef: true
-noXVaultWikiLink: true
 mermaid: true
 useKatex: true
-autoFoldFrontmatter: true
 usePrettyRefs: true
 dev:
     enablePreviewV2: true
-journal:
-    dailyDomain: daily
-    name: journal
-    dateFormat: y.MM.dd
-    addBehavior: childOfDomain
-    firstDayOfWeek: 1
-scratch:
-    name: scratch
-    dateFormat: y.MM.dd.HHmmss
-    addBehavior: asOwnDomain
 site:
     copyAssets: true
     siteHierarchies:
@@ -147,7 +122,32 @@ site:
             - vault2
             - vaultThree
             - dendron.foo
-version: 1
+vaults:
+    -
+        fsPath: vault
+        seed: dendron.foo
+        name: dendron.foo
+    -
+        fsPath: vault1
+    -
+        fsPath: vault2
+    -
+        fsPath: vault3
+        name: vaultThree
+journal:
+    dailyDomain: daily
+    name: journal
+    dateFormat: y.MM.dd
+    addBehavior: childOfDomain
+    firstDayOfWeek: 1
+scratch:
+    name: scratch
+    dateFormat: y.MM.dd.HHmmss
+    addBehavior: asOwnDomain
+noAutoCreateOnDefinition: true
+noXVaultWikiLink: true
+autoFoldFrontmatter: true
+maxPreviewsCached: 10
 lookupConfirmVaultOnCreate: false
 lookup:
     note:
@@ -188,29 +188,15 @@ exports[`add ok: seed with site 4`] = `
 exports[`init convert workspace error: no vaults 1`] = `"dendron.code-workspace dendron.yml hooks"`;
 
 exports[`init convert workspace error: no vaults 2`] = `
-"maxPreviewsCached: 10
-vaults: []
+"version: 1
 useFMTitle: true
 useNoteTitleForLink: true
-noAutoCreateOnDefinition: true
 noLegacyNoteRef: true
-noXVaultWikiLink: true
 mermaid: true
 useKatex: true
-autoFoldFrontmatter: true
 usePrettyRefs: true
 dev:
     enablePreviewV2: true
-journal:
-    dailyDomain: daily
-    name: journal
-    dateFormat: y.MM.dd
-    addBehavior: childOfDomain
-    firstDayOfWeek: 1
-scratch:
-    name: scratch
-    dateFormat: y.MM.dd.HHmmss
-    addBehavior: asOwnDomain
 site:
     copyAssets: true
     siteHierarchies:
@@ -221,7 +207,21 @@ site:
     description: Personal knowledge space
     siteLastModified: true
     gh_edit_branch: main
-version: 1
+vaults: []
+journal:
+    dailyDomain: daily
+    name: journal
+    dateFormat: y.MM.dd
+    addBehavior: childOfDomain
+    firstDayOfWeek: 1
+scratch:
+    name: scratch
+    dateFormat: y.MM.dd.HHmmss
+    addBehavior: asOwnDomain
+noAutoCreateOnDefinition: true
+noXVaultWikiLink: true
+autoFoldFrontmatter: true
+maxPreviewsCached: 10
 lookupConfirmVaultOnCreate: false
 lookup:
     note:
@@ -234,31 +234,15 @@ initializeRemoteVaults: true
 exports[`init convert workspace ok: diff root name 1`] = `"dendron.code-workspace dendron.yml fooVault hooks seed.yml"`;
 
 exports[`init convert workspace ok: diff root name 2`] = `
-"maxPreviewsCached: 10
-vaults:
-    -
-        fsPath: fooVault
+"version: 1
 useFMTitle: true
 useNoteTitleForLink: true
-noAutoCreateOnDefinition: true
 noLegacyNoteRef: true
-noXVaultWikiLink: true
 mermaid: true
 useKatex: true
-autoFoldFrontmatter: true
 usePrettyRefs: true
 dev:
     enablePreviewV2: true
-journal:
-    dailyDomain: daily
-    name: journal
-    dateFormat: y.MM.dd
-    addBehavior: childOfDomain
-    firstDayOfWeek: 1
-scratch:
-    name: scratch
-    dateFormat: y.MM.dd.HHmmss
-    addBehavior: asOwnDomain
 site:
     copyAssets: true
     siteHierarchies:
@@ -273,7 +257,23 @@ site:
         action: useVault
         payload:
             - fooVault
-version: 1
+vaults:
+    -
+        fsPath: fooVault
+journal:
+    dailyDomain: daily
+    name: journal
+    dateFormat: y.MM.dd
+    addBehavior: childOfDomain
+    firstDayOfWeek: 1
+scratch:
+    name: scratch
+    dateFormat: y.MM.dd.HHmmss
+    addBehavior: asOwnDomain
+noAutoCreateOnDefinition: true
+noXVaultWikiLink: true
+autoFoldFrontmatter: true
+maxPreviewsCached: 10
 lookupConfirmVaultOnCreate: false
 lookup:
     note:
@@ -299,31 +299,15 @@ repository:
 exports[`init create workspace basic 1`] = `".gitignore dendron.code-workspace dendron.yml hooks seed.yml vault"`;
 
 exports[`init create workspace basic 2`] = `
-"maxPreviewsCached: 10
-vaults:
-    -
-        fsPath: vault
+"version: 1
 useFMTitle: true
 useNoteTitleForLink: true
-noAutoCreateOnDefinition: true
 noLegacyNoteRef: true
-noXVaultWikiLink: true
 mermaid: true
 useKatex: true
-autoFoldFrontmatter: true
 usePrettyRefs: true
 dev:
     enablePreviewV2: true
-journal:
-    dailyDomain: daily
-    name: journal
-    dateFormat: y.MM.dd
-    addBehavior: childOfDomain
-    firstDayOfWeek: 1
-scratch:
-    name: scratch
-    dateFormat: y.MM.dd.HHmmss
-    addBehavior: asOwnDomain
 site:
     copyAssets: true
     siteHierarchies:
@@ -338,7 +322,23 @@ site:
         action: useVault
         payload:
             - vault
-version: 1
+vaults:
+    -
+        fsPath: vault
+journal:
+    dailyDomain: daily
+    name: journal
+    dateFormat: y.MM.dd
+    addBehavior: childOfDomain
+    firstDayOfWeek: 1
+scratch:
+    name: scratch
+    dateFormat: y.MM.dd.HHmmss
+    addBehavior: asOwnDomain
+noAutoCreateOnDefinition: true
+noXVaultWikiLink: true
+autoFoldFrontmatter: true
+maxPreviewsCached: 10
 lookupConfirmVaultOnCreate: false
 lookup:
     note:
@@ -366,36 +366,15 @@ exports[`remove ok: remove initialized seed 1`] = `""`;
 exports[`remove ok: remove initialized seed 2`] = `"dendron.foo"`;
 
 exports[`remove ok: remove initialized seed 3`] = `
-"maxPreviewsCached: 10
-vaults:
-    -
-        fsPath: vault1
-    -
-        fsPath: vault2
-    -
-        fsPath: vault3
-        name: vaultThree
+"version: 1
 useFMTitle: true
 useNoteTitleForLink: true
-noAutoCreateOnDefinition: true
 noLegacyNoteRef: true
-noXVaultWikiLink: true
 mermaid: true
 useKatex: true
-autoFoldFrontmatter: true
 usePrettyRefs: true
 dev:
     enablePreviewV2: true
-journal:
-    dailyDomain: daily
-    name: journal
-    dateFormat: y.MM.dd
-    addBehavior: childOfDomain
-    firstDayOfWeek: 1
-scratch:
-    name: scratch
-    dateFormat: y.MM.dd.HHmmss
-    addBehavior: asOwnDomain
 site:
     copyAssets: true
     siteHierarchies:
@@ -413,7 +392,28 @@ site:
             - vault2
             - vaultThree
             - dendron.foo
-version: 1
+vaults:
+    -
+        fsPath: vault1
+    -
+        fsPath: vault2
+    -
+        fsPath: vault3
+        name: vaultThree
+journal:
+    dailyDomain: daily
+    name: journal
+    dateFormat: y.MM.dd
+    addBehavior: childOfDomain
+    firstDayOfWeek: 1
+scratch:
+    name: scratch
+    dateFormat: y.MM.dd.HHmmss
+    addBehavior: asOwnDomain
+noAutoCreateOnDefinition: true
+noXVaultWikiLink: true
+autoFoldFrontmatter: true
+maxPreviewsCached: 10
 lookupConfirmVaultOnCreate: false
 lookup:
     note:
@@ -425,36 +425,15 @@ seeds: {}
 `;
 
 exports[`remove ok: remove non-initialized seed 1`] = `
-"maxPreviewsCached: 10
-vaults:
-    -
-        fsPath: vault1
-    -
-        fsPath: vault2
-    -
-        fsPath: vault3
-        name: vaultThree
+"version: 1
 useFMTitle: true
 useNoteTitleForLink: true
-noAutoCreateOnDefinition: true
 noLegacyNoteRef: true
-noXVaultWikiLink: true
 mermaid: true
 useKatex: true
-autoFoldFrontmatter: true
 usePrettyRefs: true
 dev:
     enablePreviewV2: true
-journal:
-    dailyDomain: daily
-    name: journal
-    dateFormat: y.MM.dd
-    addBehavior: childOfDomain
-    firstDayOfWeek: 1
-scratch:
-    name: scratch
-    dateFormat: y.MM.dd.HHmmss
-    addBehavior: asOwnDomain
 site:
     copyAssets: true
     siteHierarchies:
@@ -472,7 +451,28 @@ site:
             - vault2
             - vaultThree
             - dendron.foo
-version: 1
+vaults:
+    -
+        fsPath: vault1
+    -
+        fsPath: vault2
+    -
+        fsPath: vault3
+        name: vaultThree
+journal:
+    dailyDomain: daily
+    name: journal
+    dateFormat: y.MM.dd
+    addBehavior: childOfDomain
+    firstDayOfWeek: 1
+scratch:
+    name: scratch
+    dateFormat: y.MM.dd.HHmmss
+    addBehavior: asOwnDomain
+noAutoCreateOnDefinition: true
+noXVaultWikiLink: true
+autoFoldFrontmatter: true
+maxPreviewsCached: 10
 lookupConfirmVaultOnCreate: false
 lookup:
     note:

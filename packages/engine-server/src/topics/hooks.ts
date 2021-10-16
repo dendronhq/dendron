@@ -7,11 +7,13 @@ import {
   ERROR_SEVERITY,
   NoteProps,
   NoteUtils,
+  configIsAtLeastV3,
 } from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-server";
 import execa from "execa";
 import fs from "fs-extra";
 import _ from "lodash";
+import { DConfig } from "../config";
 import path from "path";
 
 export type RequireHookResp = {
@@ -29,13 +31,22 @@ export class HookUtils {
     hookType: DHookType;
     hookEntry: DHookEntry;
   }) {
-    let onCreate: DHookEntry[] = _.get(
-      config.hooks,
+    const hooks = DConfig.getConfig({
+      config,
+      path: "workspace.hooks",
+    });
+    const onCreate: DHookEntry[] = _.get(
+      hooks,
       hookType,
       [] as DHookEntry[]
     ).concat([hookEntry]);
-    config.hooks = config.hooks || { onCreate: [] };
-    config.hooks.onCreate = onCreate;
+    if (configIsAtLeastV3({ config })) {
+      config.workspace!.hooks = config.workspace!.hooks || { onCreate: [] };
+      config.workspace!.hooks.onCreate = onCreate;
+    } else {
+      config.hooks = config.hooks || { onCreate: [] };
+      config.hooks.onCreate = onCreate;
+    }
     return config;
   }
 
@@ -62,16 +73,23 @@ export class HookUtils {
     hookType: DHookType;
     hookId: string;
   }) {
-    let onCreate: DHookEntry[] = _.get(
-      config.hooks,
-      hookType,
-      [] as DHookEntry[]
-    );
-    config.hooks = config.hooks || { onCreate: [] };
+    const hooks = DConfig.getConfig({
+      config,
+      path: "workspace.hooks",
+    });
+    let onCreate: DHookEntry[] = _.get(hooks, hookType, [] as DHookEntry[]);
     onCreate = _.remove(onCreate, { id: hookId });
     const idx = _.findIndex(onCreate, { id: hookId });
     onCreate.splice(idx, 1);
-    config.hooks.onCreate = onCreate;
+
+    if (configIsAtLeastV3({ config })) {
+      config.workspace!.hooks = config.workspace!.hooks || { onCreate: [] };
+      config.workspace!.hooks.onCreate = onCreate;
+    } else {
+      config.hooks = config.hooks || { onCreate: [] };
+      config.hooks.onCreate = onCreate;
+    }
+
     return config;
   }
 

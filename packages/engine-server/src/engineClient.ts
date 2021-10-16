@@ -128,7 +128,11 @@ export class DendronEngineClient implements DEngineClient {
       engine: this,
       logger: this.logger,
     });
-    this.hooks = this.config.hooks || { onCreate: [] };
+    const hooks = DConfig.getConfig({
+      config: this.config,
+      path: "workspace.hooks",
+    });
+    this.hooks = hooks || { onCreate: [] };
   }
 
   /**

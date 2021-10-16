@@ -325,20 +325,20 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
 
   async _buildWithParts(opts: BuildCmdOpts) {
     if (opts.part1) {
+      this.print("running part1, skipping part2");
       await this._checkBumpAndPublish(opts);
       this.print("sync assets...");
       await this.syncAssets();
-      this.print("skipping part 2");
     }
 
     if (opts.part2) {
-      this.print("skipping part 1");
+      this.print("running part2, skipping part 1");
       await this._prepInstallAndPackage(opts);
     }
   }
 
   async build(opts: BuildCmdOpts) {
-    const partsDefined = _.every([opts.part1, opts.part2]);
+    const partsDefined = _.some([opts.part1, opts.part2]);
     if (partsDefined) {
       return this._buildWithParts(opts);
     }

@@ -3,6 +3,7 @@ import {
   getStage,
   InstallStatus,
   WorkspaceSettings,
+  configIsAtLeastV3,
 } from "@dendronhq/common-all";
 import { createLogger, DLogger } from "@dendronhq/common-server";
 import _ from "lodash";
@@ -33,7 +34,9 @@ export class MigrationServce {
     // run migrations from oldest to newest
     const migrationsToRun = _.reverse(
       _.takeWhile(migrations || ALL_MIGRATIONS, (ent) => {
-        const out = semver.lte(previousVersion, ent.version) && semver.gte(currentVersion, ent.version)
+        const out =
+          semver.lte(previousVersion, ent.version) &&
+          semver.gte(currentVersion, ent.version);
         return out;
       })
     );
@@ -63,7 +66,11 @@ export class MigrationServce {
     const changes = _.flatten(results);
     if (!_.isEmpty(changes)) {
       const { data } = _.last(changes)!;
-      data.dendronConfig.dendronVersion = currentVersion;
+      if (configIsAtLeastV3({ config: data.dendronConfig })) {
+        data.dendronConfig.workspace!.dendronVersion = currentVersion;
+      } else {
+        data.dendronConfig.dendronVersion = currentVersion;
+      }
       wsService.setConfig(data.dendronConfig);
       // wsConfig is undefined for native workspaces
       if (data.wsConfig) wsService.setWorkspaceConfig(data.wsConfig);

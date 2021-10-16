@@ -11,7 +11,6 @@ import {
   LegacyScratchConfig,
   DendronError,
   genDefaultCommandConfig,
-  CURRENT_CONFIG_VERSION,
   DVault,
   StrictV1,
 } from "@dendronhq/common-all";
@@ -22,14 +21,100 @@ import {
 } from "@dendronhq/common-server";
 import _ from "lodash";
 import fs from "fs-extra";
-import { DConfig } from "../config";
+import { DConfig, pathMap } from "../config";
 import { removeCache } from "../utils";
 import { Migrations } from "./types";
+import { MigrationUtils } from "./utils";
 
 /**
  * Migrations are sorted by version numbers, from greatest to least
  */
 export const ALL_MIGRATIONS: Migrations[] = [
+  {
+    version: "0.64.0",
+    changes: [
+      {
+        name: "migrate workspace config",
+        func: async ({ dendronConfig, wsConfig, wsService }) => {
+          // back up existing config
+          const backupPath = DConfig.createBackup(
+            wsService.wsRoot,
+            "migrate-workspace-config"
+          );
+          if (!fs.existsSync(backupPath)) {
+            return {
+              error: new DendronError({
+                message:
+                  "Backup failed during config migration. Exiting without migration.",
+              }),
+              data: {
+                dendronConfig,
+                wsConfig,
+              },
+            };
+          }
+
+          const defaultV3Config = DConfig.genDefaultConfig(3);
+          const rawDendronConfig = DConfig.getRaw(wsService.wsRoot);
+
+          // remove all null properties
+          const cleanDendronConfig = MigrationUtils.deepCleanObjBy(
+            rawDendronConfig,
+            _.isNull
+          );
+
+          // start with defaults filled in
+          if (_.isUndefined(cleanDendronConfig.workspace)) {
+            cleanDendronConfig.workspace = {};
+          }
+
+          // mapping how we want each keys to be migrated.
+          const flip = (value: boolean): boolean => !value;
+          const migrationIterateeMap = new Map<string, Function>([
+            ["workspace.enableAutoCreateOnDefinition", flip],
+            ["workspace.enableXVaultWikiLink", flip],
+            [
+              "workspace.journal",
+              (value: any): any => _.omit(value, "firstDayOfWeek"),
+            ],
+          ]);
+          // migrate each path mapped in current config version
+          pathMap.forEach((value, key) => {
+            if (value.version === 3) {
+              const legacyPath = value.target;
+              const maybeLegacyConfig = _.get(cleanDendronConfig, legacyPath);
+              const alreadyFilled = _.has(cleanDendronConfig, key);
+              let valueToFill;
+              if (_.isUndefined(maybeLegacyConfig)) {
+                // legacy property doesn't have a value.
+                valueToFill = _.get(defaultV3Config, key);
+              } else {
+                // there is a legacy value.
+                // check if this mapping needs special treatment.
+                let iteratee = migrationIterateeMap.get(key);
+                if (_.isUndefined(iteratee)) {
+                  // otherwise, move it as is.
+                  iteratee = _.identity;
+                }
+                valueToFill = iteratee(maybeLegacyConfig);
+              }
+              if (!alreadyFilled && !_.isUndefined(valueToFill)) {
+                // if the property isn't already filled, fill it with determined value.
+                _.set(cleanDendronConfig, key, valueToFill);
+              }
+              // remove legacy property from config after migration.
+              _.unset(cleanDendronConfig, legacyPath);
+            }
+          });
+
+          // set config version.
+          _.set(cleanDendronConfig, "version", 3);
+
+          return { data: { dendronConfig: cleanDendronConfig, wsConfig } };
+        },
+      },
+    ],
+  },
   {
     version: "0.63.0",
     changes: [
@@ -271,7 +356,7 @@ export const ALL_MIGRATIONS: Migrations[] = [
           delete dendronConfig.lookup;
           delete dendronConfig.lookupConfirmVaultOnCreate;
           rawDendronConfig.commands = commands;
-          rawDendronConfig.version = CURRENT_CONFIG_VERSION;
+          rawDendronConfig.version = 2;
 
           Object.assign(dendronConfig, rawDendronConfig);
 

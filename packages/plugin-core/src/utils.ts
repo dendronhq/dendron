@@ -40,7 +40,6 @@ import os from "os";
 import path from "path";
 import * as vscode from "vscode";
 import { CancellationTokenSource } from "vscode-languageclient";
-import { SetupWorkspaceCommand } from "./commands/SetupWorkspace";
 import { PickerUtilsV2 } from "./components/lookup/utils";
 import {
   DendronContext,
@@ -602,6 +601,7 @@ export class WSUtils {
       },
       (_progress, _token) => {
         _token.onCancellationRequested(() => {
+          // eslint-disable-next-line no-console
           console.log("Cancelled");
         });
 
@@ -694,6 +694,10 @@ export class WSUtils {
                 wsPath = wsPathBackup;
               }
 
+              // This is a workaround to resolve circular dependency.
+              // TODO: fix importing around the package so that we have control over module loading sequence.
+              // eslint-disable-next-line global-require
+              const { SetupWorkspaceCommand } = require("./commands/SetupWorkspaceCommand");
               if (!wsPath) {
                 await new SetupWorkspaceCommand().run({
                   workspaceInitializer: new TutorialInitializer(),

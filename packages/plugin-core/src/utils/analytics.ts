@@ -1,6 +1,7 @@
 import { SegmentUtils, VSCodeIdentifyProps } from "@dendronhq/common-server";
 import * as Sentry from "@sentry/node";
 import * as vscode from "vscode";
+import { DendronExtension } from "../workspace";
 
 export type SegmentContext = Partial<{
   app: Partial<{ name: string; version: string; build: string }>;
@@ -14,7 +15,7 @@ export class AnalyticsUtils {
       type: "vscode" as const,
       ideVersion: vscode.version,
       ideFlavor: vscode.env.appName,
-      appVersion: "1",
+      appVersion: DendronExtension.version(),
       userAgent: vscode.env.appName,
     }
   }

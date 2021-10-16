@@ -357,21 +357,31 @@ export class WorkspaceService {
     command: "commit" | "push" | "pull",
     [root, vaults]: [string, DVault[]]
   ): Promise<boolean> {
-    let config = this.verifyVaultSyncConfigs(vaults);
-    if (_.isUndefined(config)) {
+    let workspaceVaultSyncConfig = this.verifyVaultSyncConfigs(vaults);
+    if (_.isUndefined(workspaceVaultSyncConfig)) {
       if (await WorkspaceService.isWorkspaceVault(root)) {
-        config = this.config.workspaceVaultSync;
+        workspaceVaultSyncConfig = DConfig.getConfig({
+          config: this.config,
+          path: "workspace.workspaceVaultSyncMode",
+        });
         // default for workspace vaults
-        if (_.isUndefined(config)) config = DVaultSync.NO_COMMIT;
+        if (_.isUndefined(workspaceVaultSyncConfig)) {
+          workspaceVaultSyncConfig = DVaultSync.NO_COMMIT;
+        }
       }
       // default for regular vaults
-      else config = DVaultSync.SYNC;
+      else workspaceVaultSyncConfig = DVaultSync.SYNC;
     }
 
-    if (config === DVaultSync.SKIP) return false;
-    if (config === DVaultSync.SYNC) return true;
-    if (config === DVaultSync.NO_COMMIT && command === "commit") return false;
-    if (config === DVaultSync.NO_PUSH && command === "push") return false;
+    if (workspaceVaultSyncConfig === DVaultSync.SKIP) return false;
+    if (workspaceVaultSyncConfig === DVaultSync.SYNC) return true;
+    if (
+      workspaceVaultSyncConfig === DVaultSync.NO_COMMIT &&
+      command === "commit"
+    )
+      return false;
+    if (workspaceVaultSyncConfig === DVaultSync.NO_PUSH && command === "push")
+      return false;
     return true;
   }
 

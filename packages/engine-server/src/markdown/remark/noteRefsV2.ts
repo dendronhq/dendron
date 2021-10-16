@@ -17,6 +17,7 @@ import {
   VaultUtils,
 } from "@dendronhq/common-all";
 import { file2Note } from "@dendronhq/common-server";
+import { RemarkUtils } from "../remark";
 import _ from "lodash";
 import { brk, html, paragraph, root } from "mdast-builder";
 import { Eat } from "remark-parse";
@@ -788,6 +789,8 @@ function convertNoteRefHelperAST(
   } else {
     bodyAST = noteRefProc.parse(note.body) as DendronASTNode;
   }
+  // Make sure to get all footnote definitions, including ones not within the range, in case they are used inside the range
+  const footnotes = RemarkUtils.extractFootnoteDefs(bodyAST);
   const { anchorStart, anchorEnd, anchorStartOffset } = _.defaults(link.data, {
     anchorStartOffset: 0,
   });
@@ -820,14 +823,20 @@ function convertNoteRefHelperAST(
     });
     if (isV5Active) {
       if (procOpts.dest === DendronASTDest.HTML) {
-        tmpProc = MDUtilsV5.procRemarkFull({
-          ...MDUtilsV5.getProcData(proc),
-          insideNoteRef: true,
-          fname: note.fname,
-          vault: note.vault,
-        });
+        tmpProc = MDUtilsV5.procRemarkFull(
+          {
+            ...MDUtilsV5.getProcData(proc),
+            insideNoteRef: true,
+            fname: note.fname,
+            vault: note.vault,
+          },
+          MDUtilsV5.getProcOpts(proc)
+        );
       }
     }
+    // Add all footnote definitions back. We might be adding duplicates if the definition was already in range, but rendering handles this correctly.
+    // We also might be adding definitions that weren't used in this range, but rendering will simply ignore those.
+    out.children.push(...footnotes);
 
     const { dest } = MDUtilsV4.getDendronData(tmpProc);
     if (dest === DendronASTDest.HTML) {
@@ -867,7 +876,9 @@ function convertNoteRefHelper(
   const bodyAST = noteRefProc.parse(body) as DendronASTNode;
   const { anchorStart, anchorEnd, anchorStartOffset } = link.data;
 
-  let { start, end, data, error } = prepareNoteRefIndices({
+  // Make sure to get all footnote definitions, including ones not within the range, in case they are used inside the range
+  const footnotes = RemarkUtils.extractFootnoteDefs(bodyAST);
+  const { start, end, data, error } = prepareNoteRefIndices({
     anchorStart,
     anchorEnd,
     bodyAST,
@@ -880,12 +891,16 @@ function convertNoteRefHelper(
   // slice of interested range
   try {
     bodyAST.children = bodyAST.children.slice(start?.index, end?.index);
+    // Add all footnote definitions back. We might be adding duplicates if the definition was already in range, but rendering handles this correctly.
+    // We also might be adding definitions that weren't used in this range, but rendering will simply ignore those.
+    bodyAST.children.push(...footnotes);
     let out = noteRefProc
       .processSync(noteRefProc.stringify(bodyAST))
       .toString();
     if (anchorStartOffset) {
       out = out.split("\n").slice(anchorStartOffset).join("\n");
     }
+
     return { error: null, data: out };
   } catch (err) {
     console.log("ERROR WITH REF");

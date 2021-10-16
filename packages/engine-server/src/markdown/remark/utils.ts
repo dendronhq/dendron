@@ -45,6 +45,7 @@ import type {
   Image,
   Text,
   Link,
+  FootnoteDefinition,
 } from "mdast";
 import * as mdastBuilder from "mdast-builder";
 import { Processor } from "unified";
@@ -934,6 +935,9 @@ export class RemarkUtils {
 
   static isLink(node: Node): node is Link {
     return node.type === DendronASTTypes.LINK;
+
+  static isFootnoteDefinition(node: Node): node is FootnoteDefinition {
+    return node.type === DendronASTTypes.FOOTNOTE_DEFINITION;
   }
 
   // --- conversion
@@ -1375,5 +1379,11 @@ export class RemarkUtils {
     }
 
     return blocks;
+  }
+
+  static extractFootnoteDefs(root: Node): FootnoteDefinition[] {
+    return selectAll(DendronASTTypes.FOOTNOTE_DEFINITION, root).filter(
+      RemarkUtils.isFootnoteDefinition
+    );
   }
 }

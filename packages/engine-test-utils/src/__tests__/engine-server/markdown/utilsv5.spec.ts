@@ -1,7 +1,4 @@
-import {
-  NoteTestUtilsV4,
-  TestPresetEntryV4,
-} from "@dendronhq/common-test-utils";
+import { TestPresetEntryV4 } from "@dendronhq/common-test-utils";
 import {
   DendronASTDest,
   Processor,
@@ -9,10 +6,10 @@ import {
 } from "@dendronhq/engine-server";
 import os from "os";
 import path from "path";
-import { ENGINE_HOOKS } from "../../../presets";
-import { checkNotInString, checkString } from "../../../utils";
-import { checkVFile, cleanVerifyOpts, createProcCompileTests } from "./utils";
 import { createEngineFromServer, runEngineTestV5 } from "../../../engine";
+import { ENGINE_HOOKS } from "../../../presets";
+import { checkString } from "../../../utils";
+import { cleanVerifyOpts, createProcCompileTests } from "./utils";
 
 const getOpts = (opts: any) => {
   const _copts = opts.extra as { proc: Processor; dest: DendronASTDest };
@@ -125,77 +122,6 @@ describe("MDUtils.proc", () => {
       await ENGINE_HOOKS.setupBasic(opts);
     },
   });
-  const NOTE_REF_BASIC_WITH_REHYPE = createProcCompileTests({
-    name: "NOTE_REF_WITH_REHYPE",
-    setup: async (opts) => {
-      const { proc } = getOpts(opts);
-      const txt = `![[alpha.md]]`;
-      const resp = await proc.process(txt);
-      return { resp, proc };
-    },
-    verify: {
-      [DendronASTDest.HTML]: {
-        [ProcFlavor.REGULAR]: async ({ extra }) => {
-          const { resp } = extra;
-          expect(resp).toMatchSnapshot();
-          await checkVFile(
-            resp,
-            // should have id for link
-            `<a href="alpha-id"`,
-            // html quoted
-            `<p><a href="bar.html">Bar</a></p>`
-          );
-          await checkNotInString(
-            resp.contents,
-            // should not have title
-            `Alpha<h1>`
-          );
-        },
-        [ProcFlavor.PREVIEW]: ProcFlavor.REGULAR,
-        [ProcFlavor.PUBLISHING]: async ({ extra }) => {
-          const { resp } = extra;
-          expect(resp).toMatchSnapshot();
-          await checkString(
-            resp.contents,
-            // should have id for link
-            `<a href="/notes/alpha-id"`
-          );
-        },
-      },
-    },
-    preSetupHook: async (opts) => {
-      await ENGINE_HOOKS.setupBasic({ ...opts, extra: { idv2: true } });
-      await NoteTestUtilsV4.createNote({
-        fname: "alpha",
-        body: "[[bar]]",
-        vault: opts.vaults[0],
-        wsRoot: opts.wsRoot,
-        props: { id: "alpha-id" },
-      });
-    },
-  });
-  const NOTE_REF_MISSING = createProcCompileTests({
-    name: "NOTE_REF_MISSING",
-    setup: async (opts) => {
-      const { proc } = getOpts(opts);
-      const txt = `![[alpha.md]]`;
-      const resp = await proc.process(txt);
-      return { resp, proc };
-    },
-    verify: {
-      [DendronASTDest.HTML]: {
-        [ProcFlavor.REGULAR]: async ({ extra }) => {
-          const { resp } = extra;
-          await checkString(resp.contents, "No note with name alpha found");
-        },
-        [ProcFlavor.PREVIEW]: ProcFlavor.REGULAR,
-        [ProcFlavor.PUBLISHING]: ProcFlavor.REGULAR,
-      },
-    },
-    preSetupHook: async (opts) => {
-      await ENGINE_HOOKS.setupBasic({ ...opts, extra: { idv2: true } });
-    },
-  });
 
   const WILDCARD_NOTE_REF_MISSING = createProcCompileTests({
     name: "WILDCARD_NOTE_REF_MISSING",
@@ -241,7 +167,7 @@ describe("MDUtils.proc", () => {
           const { resp } = extra;
           await checkString(
             resp.contents,
-            `Here is the footnote.<a href="#fnref-1" class="footnote-backref">↩</a>`
+            `Here is the footnote.<a class="fn" href="#fnref-1">˄</a>`
           );
         },
         [ProcFlavor.PREVIEW]: ProcFlavor.REGULAR,
@@ -257,8 +183,6 @@ describe("MDUtils.proc", () => {
     ...WITH_FOOTNOTES,
     ...IMAGE_NO_LEAD_FORWARD_SLASH,
     ...IMAGE_WITH_LEAD_FORWARD_SLASH,
-    ...NOTE_REF_BASIC_WITH_REHYPE,
-    ...NOTE_REF_MISSING,
     ...WILDCARD_NOTE_REF_MISSING,
   ];
 

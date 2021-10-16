@@ -2654,3 +2654,81 @@ VFile {
   "messages": Array [],
 }
 `;
+
+exports[`noteRefV2 with block anchors compile "HTML: with footnotes" 1`] = `
+VFile {
+  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
+<h1 id=\\"illum-nostrum\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#illum-nostrum\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Illum Nostrum</h1>
+<p>Illum in aut eos voluptas nostrum possimus commodi. <a id=\\"fnref-quo\\" class=\\"fnref\\" href=\\"#fn-quo\\">quo</a></p>
+<p></p><p></p><div class=\\"portal-container\\">
+<div class=\\"portal-head\\">
+<div class=\\"portal-backlink\\">
+<div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
+<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+</div>
+</div>
+<div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
+<div class=\\"portal-parent-fader-top\\"></div>
+<div class=\\"portal-parent-fader-bottom\\"></div><h1 id=\\"start\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#start\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>start</h1>
+<p>Laborum libero quia ducimus.</p>
+<p>Iure neque alias dolorem. <a id=\\"fnref-minus\\" class=\\"fnref\\" href=\\"#fn-minus\\">minus</a></p>
+<hr>
+<h2 id=\\"footnotes\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#footnotes\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Footnotes</h2>
+<ol>
+<li><span id=\\"fn-minus\\" style=\\"display: none;\\"></span><p>Et porro minus facilis qui.<a class=\\"fn\\" href=\\"#fnref-minus\\">˄</a></p></li>
+</ol>
+</div></div><p></p><p></p>
+<hr>
+<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<ol>
+<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+</ol>
+<h2 id=\\"footnotes-1\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#footnotes-1\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Footnotes</h2>
+<ol>
+<li><span id=\\"fn-quo\\" style=\\"display: none;\\"></span><p>Id et velit ducimus quo ut.<a class=\\"fn\\" href=\\"#fnref-quo\\">˄</a></p></li>
+</ol>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`noteRefV2 with block anchors compile "HTML: with footnotes" 2`] = `
+VFile {
+  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
+<h1 id=\\"illum-nostrum\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#illum-nostrum\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Illum Nostrum</h1>
+<p>Illum in aut eos voluptas nostrum possimus commodi. <a id=\\"fnref-quo\\" class=\\"fnref\\" href=\\"#fn-quo\\">quo</a></p>
+<p></p><p></p><div class=\\"portal-container\\">
+<div class=\\"portal-head\\">
+<div class=\\"portal-backlink\\">
+<div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
+<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+</div>
+</div>
+<div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
+<div class=\\"portal-parent-fader-top\\"></div>
+<div class=\\"portal-parent-fader-bottom\\"></div><h1 id=\\"start\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#start\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>start</h1>
+<p>Laborum libero quia ducimus.</p>
+<p>Iure neque alias dolorem. <a id=\\"fnref-minus\\" class=\\"fnref\\" href=\\"#fn-minus\\">minus</a></p>
+<hr>
+<h2 id=\\"footnotes\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#footnotes\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Footnotes</h2>
+<ol>
+<li><span id=\\"fn-minus\\" style=\\"display: none;\\"></span><p>Et porro minus facilis qui.<a class=\\"fn\\" href=\\"#fnref-minus\\">˄</a></p></li>
+</ol>
+</div></div><p></p><p></p>
+<hr>
+<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<ol>
+<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+</ol>
+<h2 id=\\"footnotes-1\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#footnotes-1\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Footnotes</h2>
+<ol>
+<li><span id=\\"fn-quo\\" style=\\"display: none;\\"></span><p>Id et velit ducimus quo ut.<a class=\\"fn\\" href=\\"#fnref-quo\\">˄</a></p></li>
+</ol>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;

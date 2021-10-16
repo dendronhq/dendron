@@ -32,7 +32,7 @@ import vscode, {
   window,
   Selection,
 } from "vscode";
-import { ShowPreviewV2Command } from "../commands/ShowPreviewV2";
+
 import { VSCodeUtils } from "../utils";
 import { getDWorkspace } from "../workspace";
 import { getFrontmatterTags, parseFrontmatter } from "./yaml";
@@ -130,6 +130,7 @@ export class MarkdownUtils {
       }
       return this.showLegacyPreview();
     } else {
+      const {ShowPreviewV2Command} = require("../commands/ShowPreviewV2");
       return new ShowPreviewV2Command().execute();
     }
   }

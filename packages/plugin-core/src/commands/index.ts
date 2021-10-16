@@ -112,7 +112,7 @@ const ALL_COMMANDS = [
   ShowNoteGraphCommand,
   ShowSchemaGraphCommand,
   ShowPreviewCommand,
-  // ShowPreviewV2Command,
+  ShowPreviewV2Command,
   SignInCommand,
   SignUpCommand,
   SiteBuildCommand,

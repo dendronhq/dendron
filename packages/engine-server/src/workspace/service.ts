@@ -173,9 +173,13 @@ export class WorkspaceService {
    * @returns `{vaults}` that have been added
    */
   async addWorkspace({ workspace }: { workspace: DWorkspace }) {
-    const allWorkspaces = this.config.workspaces || {};
-    allWorkspaces[workspace.name] = _.omit(workspace, ["name", "vaults"]);
     const config = this.config;
+    const allWorkspaces =
+      DConfig.getConfig({
+        config,
+        path: "workspace.workspaces",
+      }) || {};
+    allWorkspaces[workspace.name] = _.omit(workspace, ["name", "vaults"]);
     // update vault
     const newVaults = await _.reduce(
       workspace.vaults,
@@ -192,7 +196,11 @@ export class WorkspaceService {
       },
       Promise.resolve([] as DVault[])
     );
-    config.workspaces = allWorkspaces;
+    if (configIsAtLeastV3({ config })) {
+      config.workspace!.workspaces = allWorkspaces;
+    } else {
+      config.workspaces! = allWorkspaces;
+    }
     this.setConfig(config);
     return { vaults: newVaults };
   }
@@ -882,10 +890,14 @@ export class WorkspaceService {
       _.defaults(opts, { fetchAndPull: false, skipPrivate: false });
     const { wsRoot } = this;
 
+    const workspaces = DConfig.getConfig({
+      config,
+      path: "workspace.workspaces",
+    });
     // check workspaces
     const workspacePaths: { wsPath: string; wsUrl: string }[] = (
       await Promise.all(
-        _.map(config.workspaces, async (wsEntry, wsName) => {
+        _.map(workspaces, async (wsEntry, wsName) => {
           const wsPath = path.join(wsRoot, wsName);
           if (!fs.existsSync(wsPath)) {
             return {

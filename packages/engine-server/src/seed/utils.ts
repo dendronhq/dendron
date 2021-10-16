@@ -77,7 +77,11 @@ export class SeedUtils {
         }),
       };
     }
-    if (!_.isEmpty(ws.config.workspaces)) {
+    const workspaces = DConfig.getConfig({
+      config,
+      path: "workspace.workspaces",
+    });
+    if (!_.isEmpty(workspaces)) {
       return {
         error: DendronError.createFromStatus({
           status: ERROR_STATUS.INVALID_STATE,

@@ -1,6 +1,6 @@
 if [ $PUBLISH_ENDPOINT = "local" ]; then
 	echo "start verdaccio"
-	verdaccio &
+	verdaccio > verdaccio.log 2>&1 &
 	FOO_PID=$!
 	echo "$FOO_PID"
 	sleep 3

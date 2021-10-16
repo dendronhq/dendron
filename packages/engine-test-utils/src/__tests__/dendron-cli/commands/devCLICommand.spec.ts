@@ -1,4 +1,8 @@
-import { SegmentClient, TelemetryStatus, tmpDir } from "@dendronhq/common-server";
+import {
+  SegmentClient,
+  TelemetryStatus,
+  tmpDir,
+} from "@dendronhq/common-server";
 import {
   BuildUtils,
   DevCLICommand,
@@ -25,6 +29,7 @@ export const runDevCmd = ({
 describe("build", () => {
   const cmd = DevCommands.BUILD;
   test("ok, build local", async () => {
+    jest.setTimeout(1000000);
     await runEngineTestV5(
       async ({}) => {
         // stub lerna.json
@@ -47,7 +52,7 @@ describe("build", () => {
         const syncStaticAssetsStub = stub(
           BuildUtils,
           "syncStaticAssets"
-        ).returns(Promise.resolve());
+        ).returns(Promise.resolve({ staticPath: "" }));
         const prepPluginPkgStub = stub(BuildUtils, "prepPluginPkg").returns(
           Promise.resolve()
         );
@@ -85,6 +90,7 @@ describe("build", () => {
         ].map((_stub) => {
           console.log(_stub);
           expect(_stub.calledOnce).toBeTruthy();
+          console.log(_stub, "ok");
         });
       },
       {
@@ -106,7 +112,9 @@ describe("GIVEN dendron dev enable_telemetry", () => {
   const cmd = DevCommands.ENABLE_TELEMETRY;
   test("THEN sets telemetry status to ENABLED_BY_CLI_COMMAND", async () => {
     await runDevCmd({ cmd });
-    expect(SegmentClient.getStatus()).toEqual(TelemetryStatus.ENABLED_BY_CLI_COMMAND);
+    expect(SegmentClient.getStatus()).toEqual(
+      TelemetryStatus.ENABLED_BY_CLI_COMMAND
+    );
   });
 });
 
@@ -122,6 +130,8 @@ describe("GIVEN dendron dev disable_telemetry", () => {
   const cmd = DevCommands.DISABLE_TELEMETRY;
   test("THEN sets telemetry status to DISABLED_BY_CLI_COMMAND", async () => {
     await runDevCmd({ cmd });
-    expect(SegmentClient.getStatus()).toEqual(TelemetryStatus.DISABLED_BY_CLI_COMMAND);
+    expect(SegmentClient.getStatus()).toEqual(
+      TelemetryStatus.DISABLED_BY_CLI_COMMAND
+    );
   });
 });

@@ -36,13 +36,6 @@ export class ConfigUtils {
   }
 }
 
-// const requiredPathsMap = new Map<string, string>([
-//   ["commands.insertNote.initialValue", "defaultInsertHierarchy"],
-//   ["commands.insertNoteLink", "insertNoteLink"],
-//   ["commands.insertNoteIndex", "insertNoteIndex"],
-//   ["commands.randomNote", "randomNote"],
-//   ["commands.lookup", "lookup"],
-// ]);
 export class DConfig {
   static configPath(configRoot: string): string {
     return path.join(configRoot, CONSTANTS.DENDRON_CONFIG_FILE);
@@ -343,42 +336,6 @@ export class DConfig {
       return _.get(DConfig.genDefaultConfig(config.version), path);
     }
   }
-
-  // static getLegacyConfig(config: IntermediateDendronConfig, path: string) {
-  //   const mappedLegacyConfigKey = requiredPathsMap.get(path) as keyof IntermediateDendronConfig;
-  //   return DConfig.getProp(config, mappedLegacyConfigKey);
-  // }
-
-  // static isRequired(path: string) {
-  //   return requiredPathsMap.has(path);
-  // }
-
-  // static isCurrentConfig(config: StrictIntermediateDendronConfig): config is StrictV2 {
-  //   return (config as StrictV2).version === CURRENT_CONFIG_VERSION;
-  // }
-
-  // static getConfig(config: IntermediateDendronConfig, path: string) {
-  //   const value = _.get(config, path);
-  //   if (value) {
-  //     // is v2
-  //     return value;
-  //   }
-  //   if (
-  //     _.isUndefined(value) &&
-  //     !DConfig.isCurrentConfig(
-  //       config as StrictIntermediateDendronConfig
-  //     )
-  //   ) {
-  //     // config is v1. fall back to legacy config
-  //     return DConfig.getLegacyConfig(config, path);
-  //   }
-
-  //   if (_.isUndefined(value) && this.isRequired(path)) {
-  //     // config is v2, but it isn't there. Grab v2's default value.
-  //     return _.get(DConfig.genDefaultConfig(true), path);
-  //   }
-  //   return;
-  // }
 }
 
 type mappedConfigPath = {

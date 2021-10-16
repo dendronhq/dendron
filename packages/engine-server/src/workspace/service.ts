@@ -35,7 +35,7 @@ import _ from "lodash";
 import path from "path";
 import { DConfig } from "../config";
 import { MetadataService } from "../metadata";
-import { MigrationServce, MigrationChangeSetStatus } from "../migrations";
+import { MigrationServce, MigrationChangeSetStatus, ALL_MIGRATIONS, Migrations } from "../migrations";
 import { SeedService, SeedUtils } from "../seed";
 import { Git } from "../topics/git";
 import {
@@ -882,6 +882,43 @@ export class WorkspaceService {
       if (!_.isEmpty(changes)) {
         const { data } = _.last(changes)!;
         dendronConfig = data.dendronConfig;
+      }
+    }
+
+    if (_.isEmpty(changes))  {
+      // if we didn't run a migration above,
+      // we might want to check if we should run config migration
+      const rawConfig = DConfig.getRaw(this.wsRoot);
+      const configVersion = rawConfig.version;
+      const force = _.isUndefined(configVersion);
+      if (MigrationServce.shouldRunConfigMigration({
+        force,
+        configVersion,
+        workspaceInstallStatus,
+      })) {
+        const V2 = ALL_MIGRATIONS.find((value) => {
+          return value.version === "0.63.0";
+        }) as Migrations;
+        const V3 = ALL_MIGRATIONS.find((value) => {
+          return value.version === "0.64.0";
+        }) as Migrations;
+
+        let migrations: Migrations[] = [];
+        if (configVersion === 1) {
+          migrations = [V2, V3];
+        } else if (configVersion === 2) {
+          migrations = [V3];
+        }
+        changes = await MigrationServce.applyMigrationRules({
+          currentVersion,
+          previousVersion: "0.0.0",
+          dendronConfig,
+          wsConfig,
+          wsService: this,
+          logger: this.logger,
+          migrations,
+          runAll: true,
+        })
       }
     }
 

@@ -368,15 +368,6 @@ export async function _activate(
 
       ws.workspaceService = wsService;
 
-      // try {
-      //   if (semver.gte(currentVersion, "0.63.0")) {
-      //     const rawConfig = DConfig.getRaw(wsImpl.wsRoot);
-      //     await ConfigUtils.checkAndMigrateLegacy(rawConfig, wsRoot);
-      //   }
-      // } catch (error) {
-      //   Sentry.captureException(error);
-      // }
-
       // check for vaults with same name
       const vaults = DConfig.getConfig({
         config: dendronConfig,

@@ -270,6 +270,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     });
     const shouldPublishLocal = opts.publishEndpoint === PublishEndpoint.LOCAL;
     this.L.info({ ctx, currentVersion, nextVersion });
+    debugger;
 
     this.print(`prep publish ${opts.publishEndpoint}...`);
     if (shouldPublishLocal) {
@@ -289,20 +290,18 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
 
     this.bumpVersion(opts);
 
+    debugger;
     this.print("publish version...");
     LernaUtils.publishVersion(opts.publishEndpoint);
 
     this.print("sync assets...");
-    const { staticPath } = await this.syncAssets();
+    await this.syncAssets();
 
     this.print("prep repo...");
     await BuildUtils.prepPluginPkg();
 
     this.print("install deps...");
     BuildUtils.installPluginDependencies();
-
-    const files = fs.readdirSync(staticPath).map((ent) => ent);
-    this.print(`static files: ${JSON.stringify(files)}`);
 
     this.print("package deps...");
     BuildUtils.packagePluginDependencies();
@@ -325,9 +324,6 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     BuildUtils.buildNextServer();
     this.print("sync static...");
     const { staticPath } = await BuildUtils.syncStaticAssets();
-    const files = fs.readdirSync(staticPath).map((ent) => ent);
-    this.print(`static files: ${JSON.stringify(files)}`);
-    this.print("done");
     return { staticPath };
   }
 

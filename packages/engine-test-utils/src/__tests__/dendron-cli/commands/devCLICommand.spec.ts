@@ -29,6 +29,7 @@ export const runDevCmd = ({
 describe("build", () => {
   const cmd = DevCommands.BUILD;
   test("ok, build local", async () => {
+    jest.setTimeout(1000000);
     await runEngineTestV5(
       async ({}) => {
         // stub lerna.json
@@ -89,6 +90,7 @@ describe("build", () => {
         ].map((_stub) => {
           console.log(_stub);
           expect(_stub.calledOnce).toBeTruthy();
+          console.log(_stub, "ok");
         });
       },
       {

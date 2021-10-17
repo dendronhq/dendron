@@ -9,7 +9,9 @@ import { DendronLookup } from "./DendronLookup";
 import { FooterText } from "./DendronNoteFooter";
 import DendronTreeMenu from "./DendronTreeMenu";
 import { DendronSearch } from "./DendronSearch";
-import { DendronNotice } from "./DendronNotice";
+import Script from "next/script";
+import { useEngineAppSelector } from "../features/engine/hooks";
+import DendronNotice from "./DendronNotice";
 import { getStage } from "@dendronhq/common-all";
 
 const { Header, Content, Sider, Footer } = Layout;
@@ -70,6 +72,9 @@ export default function DendronLayout(
     </>
   );
 
+  const engine = useEngineAppSelector((state) => state.engine);
+  const enableMermaid = engine.config?.mermaid;
+
   return (
     <Layout
       style={{
@@ -77,6 +82,15 @@ export default function DendronLayout(
         minHeight: "100%",
       }}
     >
+      {enableMermaid && (
+        <Script
+          id="initmermaid"
+          src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"
+          onLoad={() => {
+            (window as any).mermaid.init();
+          }}
+        />
+      )}
       <Header
         style={{
           position: "fixed",
@@ -161,9 +175,7 @@ export default function DendronLayout(
                     : "100%"
                   : SIDER.WIDTH
               }px)`,
-              minWidth: isResponsive || isCollapsed
-                  ? 0
-                  : SIDER.WIDTH,
+              minWidth: isResponsive || isCollapsed ? 0 : SIDER.WIDTH,
               paddingLeft: `calc((100% - ${LAYOUT.BREAKPOINTS.lg}) / 2)`,
               // eslint-disable-next-line no-nested-ternary
             }}

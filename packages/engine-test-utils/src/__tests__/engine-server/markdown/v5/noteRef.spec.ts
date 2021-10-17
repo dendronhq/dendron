@@ -1,37 +1,14 @@
 import {
-  NoteTestUtilsV4,
-  TestPresetEntryV4,
+  NoteTestUtilsV4
 } from "@dendronhq/common-test-utils";
 import {
-  DendronASTDest,
-  Processor,
-  ProcFlavor,
+  DendronASTDest, ProcFlavor
 } from "@dendronhq/engine-server";
 import { TestConfigUtils } from "../../../..";
-import { createEngineFromServer, runEngineTestV5 } from "../../../../engine";
 import { ENGINE_HOOKS } from "../../../../presets";
 import { checkNotInString, checkString } from "../../../../utils";
-import { checkVFile, createProcCompileTests, ProcTests } from "../utils";
-
-const getOpts = (opts: any) => {
-  const _copts = opts.extra as { proc: Processor; dest: DendronASTDest };
-  return _copts;
-};
-
-const runTestCases = (testCases: ProcTests[]) => {
-  test.each(
-    testCases.map((ent) => [
-      `${ent.dest}: ${ent.name}: ${ent.flavor}`,
-      ent.testCase,
-    ])
-  )("%p", async (_key, testCase: TestPresetEntryV4) => {
-    await runEngineTestV5(testCase.testFunc, {
-      expect,
-      preSetupHook: testCase.preSetupHook,
-      createEngine: createEngineFromServer,
-    });
-  });
-};
+import { checkVFile, createProcCompileTests } from "../utils";
+import { getOpts, runTestCases } from "./utils";
 
 describe("GIVEN noteRef plugin", () => {
   describe("WHEN note ref missing", () => {

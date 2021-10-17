@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/common-frontend",
-  "version": "0.63.1",
+  "version": "0.63.4-alpha.0",
   "description": "common-frontend",
   "license": "GPLv3",
   "repository": {
@@ -38,7 +38,7 @@
   },
   "dependencies": {
     "@aws-amplify/core": "^4.0.2",
-    "@dendronhq/common-all": "^0.63.1",
+    "@dendronhq/common-all": "^0.63.4-alpha.0",
     "@reduxjs/toolkit": "^1.5.1",
     "@types/lodash": "^4.14.161",
     "@types/node": "^14.11.2",
@@ -64,5 +64,6 @@
   },
   "jest": {
     "preset": "ts-jest"
-  }
+  },
+  "gitHead": "b9b209acf808ad7a581bf98b1d0f90ef2bf4b833"
 }

@@ -31,19 +31,19 @@ export type IntermediateDendronConfig = IntermediateOldConfig &
 /**
  * Strict v1 intermediate config,
  */
-export type StrictV1 = IntermediateDendronConfig &
+export type StrictConfigV1 = IntermediateDendronConfig &
   Required<Pick<IntermediateOldConfig, "journal" | "vaults">> & { version: 1 };
 
 /**
  * Strict v2 intermediate config,
  */
-export type StrictV2 = IntermediateDendronConfig &
+export type StrictConfigV2 = IntermediateDendronConfig &
   Required<Pick<IntermediateNewConfig, "commands">> & { version: 2 };
 
 /**
  * Strict v3 intermediate config.
  */
-export type StrictV3 = IntermediateDendronConfig &
+export type StrictConfigV3 = IntermediateDendronConfig &
   Required<Pick<IntermediateNewConfig, "commands" | "workspace">> & {
     version: 3;
   };
@@ -51,26 +51,29 @@ export type StrictV3 = IntermediateDendronConfig &
 /**
  * Union type of all strict config types discriminated by version number.
  */
-export type StrictIntermediateDendronConfig = StrictV1 | StrictV2 | StrictV3;
+export type StrictIntermediateDendronConfig =
+  | StrictConfigV1
+  | StrictConfigV2
+  | StrictConfigV3;
 
 /**
  * Type guards
  */
 export function configIsV1(
   config: IntermediateDendronConfig
-): config is StrictV1 {
+): config is StrictConfigV1 {
   return config.version === 1;
 }
 
 export function configIsV2(
   config: IntermediateDendronConfig
-): config is StrictV2 {
+): config is StrictConfigV2 {
   return config.version === 2;
 }
 
 export function configIsV3(
   config: IntermediateDendronConfig
-): config is StrictV3 {
+): config is StrictConfigV3 {
   return config.version === 3;
 }
 

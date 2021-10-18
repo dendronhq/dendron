@@ -2,39 +2,17 @@ import {
   CleanDendronSiteConfig,
   CONSTANTS,
   IntermediateDendronConfig,
-  StrictIntermediateDendronConfig,
-  CURRENT_CONFIG_VERSION,
-  StrictV1,
-  StrictV2,
-  StrictV3,
-  genDefaultCommandConfig,
-  genDefaultWorkspaceConfig,
   DendronError,
   DendronSiteConfig,
   ERROR_STATUS,
-  ERROR_SEVERITY,
   getStage,
-  LegacyLookupSelectionType,
-  LegacyNoteAddBehavior,
   Time,
+  ConfigUtils,
 } from "@dendronhq/common-all";
 import { readYAML, writeYAML } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-
-export class ConfigUtils {
-  static usePrettyRef(config: IntermediateDendronConfig) {
-    let usePrettyRefs: boolean | undefined = _.find(
-      [config?.usePrettyRefs, config?.site?.usePrettyRefs],
-      (ent) => !_.isUndefined(ent)
-    );
-    if (_.isUndefined(usePrettyRefs)) {
-      usePrettyRefs = true;
-    }
-    return usePrettyRefs;
-  }
-}
 
 export class DConfig {
   static configPath(configRoot: string): string {
@@ -45,89 +23,6 @@ export class DConfig {
     config: IntermediateDendronConfig
   ): IntermediateDendronConfig {
     return _.defaults(config, { initializeRemoteVaults: true });
-  }
-
-  static genDefaultConfig(version?: number): StrictIntermediateDendronConfig {
-    const common = {
-      useFMTitle: true,
-      useNoteTitleForLink: true,
-      noLegacyNoteRef: true,
-      mermaid: true,
-      useKatex: true,
-      usePrettyRefs: true,
-      dev: {
-        enablePreviewV2: true,
-      },
-      site: {
-        copyAssets: true,
-        siteHierarchies: ["root"],
-        siteRootDir: "docs",
-        usePrettyRefs: true,
-        title: "Dendron",
-        description: "Personal knowledge space",
-        siteLastModified: true,
-        gh_edit_branch: "main",
-      },
-    };
-
-    const omittedFromV2 = {
-      lookupConfirmVaultOnCreate: false,
-      lookup: {
-        note: {
-          selectionType: LegacyLookupSelectionType.selectionExtract,
-          leaveTrace: false,
-        },
-      },
-    };
-
-    const omittedFromV3 = {
-      vaults: [],
-      journal: {
-        dailyDomain: "daily",
-        name: "journal",
-        dateFormat: "y.MM.dd",
-        addBehavior: LegacyNoteAddBehavior.childOfDomain,
-        firstDayOfWeek: 1,
-      },
-      scratch: {
-        name: "scratch",
-        dateFormat: "y.MM.dd.HHmmss",
-        addBehavior: LegacyNoteAddBehavior.asOwnDomain,
-      },
-      noAutoCreateOnDefinition: true,
-      noXVaultWikiLink: true,
-      autoFoldFrontmatter: true,
-      maxPreviewsCached: 10,
-    };
-
-    if (_.isUndefined(version)) version = 1;
-    switch (version) {
-      case 3: {
-        return {
-          version: 3,
-          ...common,
-          commands: genDefaultCommandConfig(),
-          workspace: genDefaultWorkspaceConfig(),
-        } as StrictV3;
-      }
-      case 2: {
-        return {
-          version: 2,
-          ...common,
-          ...omittedFromV3,
-          commands: genDefaultCommandConfig(),
-        } as StrictV2;
-      }
-      case 1:
-      default: {
-        return {
-          version: 1,
-          ...common,
-          ...omittedFromV3,
-          ...omittedFromV2,
-        } as StrictV1;
-      }
-    }
   }
 
   /**
@@ -147,7 +42,7 @@ export class DConfig {
     const configPath = DConfig.configPath(dendronRoot);
     let config: IntermediateDendronConfig = {
       ...defaults,
-      ...DConfig.genDefaultConfig(),
+      ...ConfigUtils.genDefaultConfig(),
     };
     if (!fs.existsSync(configPath)) {
       writeYAML(configPath, config);
@@ -170,7 +65,7 @@ export class DConfig {
   ): IntermediateDendronConfig[K] {
     const cConfig = _.defaults(
       config,
-      this.genDefaultConfig()
+      ConfigUtils.genDefaultConfig()
     ) as Required<IntermediateDendronConfig>;
     return cConfig[key];
   }
@@ -257,84 +152,6 @@ export class DConfig {
     const backupPath = path.join(wsRoot, backupName);
     fs.copyFileSync(configPath, backupPath);
     return backupPath;
-  }
-
-  static getConfig(opts: {
-    config: IntermediateDendronConfig;
-    path: string;
-    required?: boolean;
-    currentVersion?: number;
-  }) {
-    const { config, path, required, currentVersion } = _.defaults(opts, {
-      currentVersion: CURRENT_CONFIG_VERSION,
-    });
-
-    const value = _.get(config, path);
-    // if it exists, return no matter what config version we are in.
-    if (!_.isUndefined(value)) {
-      return value;
-    }
-
-    // we failed to grab it.
-
-    // let's see if we can resolve it by looking at how it was configured in the past.
-    if (config.version === currentVersion) {
-      // config version is up to date.
-      // grab from default because it will either
-      // 1. be undefined
-      // 2. or have an optional but default value.
-      return _.get(DConfig.genDefaultConfig(config.version), path);
-    }
-
-    const mappedConfigPath = pathMap.get(path);
-
-    if (_.isUndefined(mappedConfigPath)) {
-      // it wasn't mapped.
-
-      if (required) {
-        // it is a new config that is required, but doesn't have a mapping to old config (a new namespace).
-        // grab the default of currentVersion.
-        return _.get(DConfig.genDefaultConfig(currentVersion), path);
-      } else {
-        // it's an optional config that we don't have a mapping for.
-        // something went wrong,
-        // or we didn't map it when we should (which is also wrong.)
-        throw new DendronError({
-          message: "Optional config path doesn't have a mapping.",
-          severity: ERROR_SEVERITY.FATAL,
-        });
-      }
-    }
-
-    // we have a mapping
-    const { target, version } = mappedConfigPath;
-
-    if (config.version === version) {
-      // if config's version matches when the target was mapped,
-      // we don't want to get the mapped version (it's legacy).
-      // get the config version's default using given path.
-      return _.get(DConfig.genDefaultConfig(config.version), path);
-    }
-
-    const maybeValue = _.get(config, target);
-    // we found a value there.
-    if (maybeValue) {
-      return maybeValue;
-    }
-
-    // we couldn't find it there either.
-    if (required) {
-      // required mapped target doesn't have a value.
-      // get the default from version just prior to
-      // when target was mapped.
-      return _.get(DConfig.genDefaultConfig(version - 1), target);
-    } else {
-      // optional mapped target doesn't have a value.
-      // mapped target may have a default value in mapped location, but
-      // to conform with the given config's version,
-      // return default at _path_ (not mapped) of config.version
-      return _.get(DConfig.genDefaultConfig(config.version), path);
-    }
   }
 }
 

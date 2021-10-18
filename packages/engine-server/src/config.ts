@@ -55,21 +55,6 @@ export class DConfig {
     return config;
   }
 
-  /**
-   * Get config value with consideration for defaults
-   * @param config
-   */
-  static getProp<K extends keyof IntermediateDendronConfig>(
-    config: IntermediateDendronConfig,
-    key: K
-  ): IntermediateDendronConfig[K] {
-    const cConfig = _.defaults(
-      config,
-      ConfigUtils.genDefaultConfig()
-    ) as Required<IntermediateDendronConfig>;
-    return cConfig[key];
-  }
-
   static getSiteIndex(sconfig: DendronSiteConfig) {
     let { siteIndex, siteHierarchies } = sconfig;
     return siteIndex || siteHierarchies[0];

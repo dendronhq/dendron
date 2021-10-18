@@ -15,6 +15,7 @@ import {
   NoteUtils,
   RespV2,
   VaultUtils,
+  ConfigUtils,
 } from "@dendronhq/common-all";
 import { file2Note } from "@dendronhq/common-server";
 import { RemarkUtils } from "../remark";
@@ -23,7 +24,6 @@ import { brk, html, paragraph, root } from "mdast-builder";
 import { Eat } from "remark-parse";
 import Unified, { Plugin } from "unified";
 import { Node, Parent } from "unist";
-import { DConfig } from "../../config";
 import { SiteUtils } from "../../topics/site";
 import {
   DendronASTDest,
@@ -458,9 +458,9 @@ export function convertNoteRefASTV2(
 
   const { wikiLinkOpts } = compilerOpts;
 
-  const siteConfig = DConfig.getProp(procOpts.config, "site");
+  const siteConfig = ConfigUtils.getProp(procOpts.config, "site");
   const sitePrettyRefConfig = siteConfig.usePrettyRefs;
-  const prettyRefConfig = DConfig.getProp(procOpts.config, "usePrettyRefs");
+  const prettyRefConfig = ConfigUtils.getProp(procOpts.config, "usePrettyRefs");
 
   if (MDUtilsV5.isV5Active(proc)) {
     shouldApplyPublishRules = MDUtilsV5.shouldApplyPublishingRules(proc);

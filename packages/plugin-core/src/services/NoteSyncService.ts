@@ -156,7 +156,7 @@ export class NoteSyncService {
     const links = LinkUtils.findLinks({ note, engine });
     note.links = links;
 
-    // iif frontmatter changed, don't bother with heavy updates
+    // if only frontmatter changed, don't bother with heavy updates
     if (!fmChangeOnly) {
       const notesMap = NoteUtils.createFnameNoteMap(
         _.values(engine.notes),
@@ -176,10 +176,10 @@ export class NoteSyncService {
         });
         note.links = links.concat(linkCandidates);
       }
-
-      const now = NoteUtils.genUpdateTime();
-      note.updated = now;
     }
+
+    const now = NoteUtils.genUpdateTime();
+    note.updated = now;
 
     this.L.debug({ ctx, fname, msg: "exit" });
     const noteClean = await engine.updateNote(note);

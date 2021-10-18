@@ -1,4 +1,4 @@
-import { Time } from "@dendronhq/common-all";
+import { milliseconds, Time } from "@dendronhq/common-all";
 import { AssertUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { ENGINE_HOOKS_MULTI } from "@dendronhq/engine-test-utils";
 import _ from "lodash";
@@ -10,6 +10,83 @@ import { NoteSyncService } from "../../services/NoteSyncService";
 import { VSCodeUtils } from "../../utils";
 import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
+
+async function wait1Millisecond(): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve();
+    }, 1);
+  });
+}
+
+/**
+ * Returns current milliseconds and waits 1 millisecond to ensure
+ * subsequent calls to this function will return different milliseconds. */
+async function millisNowAndWait1Milli(): Promise<number> {
+  const millis = milliseconds();
+  await wait1Millisecond();
+  return millis;
+}
+
+suite("NoteSyncService tests without time stubbing", function testSuite() {
+  const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {});
+
+  describe(`GIVEN NoteSyncService`, () => {
+    test("WHEN only fontmatter title changes THEN updated stamp should be changed.", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        postSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti,
+        onInit: async ({ engine }) => {
+          const foo = engine.notes["foo"];
+          const editor = await VSCodeUtils.openNote(foo);
+          let changeSelection: vscode.Selection;
+          const offset = `title: `.length;
+          await editor?.edit((builder) => {
+            const startTitlePos = new vscode.Position(2, offset);
+            const endTitlePos = new vscode.Position(
+              2,
+              `title: ${foo.title}`.length
+            );
+            changeSelection = new vscode.Selection(startTitlePos, endTitlePos);
+            builder.replace(changeSelection, `bar`);
+          });
+
+          const beforeStamp = await millisNowAndWait1Milli();
+          const resp = await NoteSyncService.instance().onDidChange(
+            editor.document,
+            {
+              contentChanges: [
+                {
+                  range: new vscode.Range(
+                    changeSelection!.start.line,
+                    changeSelection!.start.character,
+                    changeSelection!.end.line,
+                    changeSelection!.end.character
+                  ),
+                  text: "bar",
+                  rangeLength: 3,
+                  rangeOffset: offset,
+                },
+              ],
+            }
+          );
+
+          expect(resp!.updated > beforeStamp).toBeTruthy();
+
+          expect(
+            await AssertUtils.assertInString({
+              body: engine.notes["foo"].title,
+              match: ["bar"],
+              nomatch: ["foo"],
+            })
+          ).toBeTruthy();
+
+          done();
+        },
+      });
+    });
+  });
+});
 
 suite("NoteSyncService", function testSuite() {
   let newUpdatedTime: number;

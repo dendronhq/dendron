@@ -17,6 +17,7 @@ import {
   VaultUtils,
   WorkspaceSettings,
   ConfigUtils,
+  CURRENT_CONFIG_VERSION,
 } from "@dendronhq/common-all";
 import {
   assignJSONWithComment,
@@ -35,7 +36,11 @@ import _ from "lodash";
 import path from "path";
 import { DConfig } from "../config";
 import { MetadataService } from "../metadata";
-import { MigrationServce, MigrationChangeSetStatus } from "../migrations";
+import {
+  MigrationServce,
+  MigrationChangeSetStatus,
+  CONFIG_MIGRATIONS,
+} from "../migrations";
 import { SeedService, SeedUtils } from "../seed";
 import { Git } from "../topics/git";
 import {
@@ -831,6 +836,34 @@ export class WorkspaceService {
         wsConfig,
         wsService: this,
         logger: this.logger,
+      });
+      // if changes were made, use updated changes in subsequent configuration
+      if (!_.isEmpty(changes)) {
+        const { data } = _.last(changes)!;
+        dendronConfig = data.dendronConfig;
+      }
+    }
+
+    return changes;
+  }
+
+  async runConfigMigrationIfNecessary({
+    currentVersion,
+    dendronConfig,
+  }: {
+    currentVersion: string;
+    dendronConfig: IntermediateDendronConfig;
+  }) {
+    let changes: MigrationChangeSetStatus[] = [];
+    if (dendronConfig.version !== CURRENT_CONFIG_VERSION) {
+      // we are on a legacy config.
+      changes = await MigrationServce.applyMigrationRules({
+        currentVersion,
+        previousVersion: "0.0.0", // to force apply
+        dendronConfig,
+        wsService: this,
+        logger: this.logger,
+        migrations: [CONFIG_MIGRATIONS],
       });
       // if changes were made, use updated changes in subsequent configuration
       if (!_.isEmpty(changes)) {

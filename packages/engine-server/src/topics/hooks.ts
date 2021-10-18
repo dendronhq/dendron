@@ -7,7 +7,6 @@ import {
   ERROR_SEVERITY,
   NoteProps,
   NoteUtils,
-  ConfigUtils,
 } from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-server";
 import execa from "execa";

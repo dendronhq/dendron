@@ -344,6 +344,26 @@ export async function _activate(
             data: change.data,
           });
         });
+      } else {
+        // no migration changes.
+        // see if we need to force a config migration.
+        const configMigrationChanges =
+          await wsService.runConfigMigrationIfNecessary({
+            currentVersion,
+            dendronConfig,
+          });
+
+        if (configMigrationChanges.length > 0) {
+          configMigrationChanges.forEach((change: MigrationChangeSetStatus) => {
+            const event = _.isUndefined(change.error)
+              ? MigrationEvents.MigrationSucceeded
+              : MigrationEvents.MigrationFailed;
+            console.log({ bond: change.data });
+            AnalyticsUtils.track(event, {
+              data: change.data,
+            });
+          });
+        }
       }
 
       // Re-use the id for error reporting too:
@@ -369,7 +389,10 @@ export async function _activate(
       ws.workspaceService = wsService;
 
       // check for vaults with same name
-      const vaults = ConfigUtils.getProp(dendronConfig, "workspace.vaults") as DVault[];
+      const vaults = ConfigUtils.getProp(
+        dendronConfig,
+        "workspace.vaults"
+      ) as DVault[];
       const uniqVaults = _.uniqBy(vaults, (vault) => VaultUtils.getName(vault));
       if (_.size(uniqVaults) < _.size(vaults)) {
         const txt = "Fix it";

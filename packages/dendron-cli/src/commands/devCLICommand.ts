@@ -42,6 +42,7 @@ type CommandOutput = Partial<{ error: DendronError; data: any }>;
 
 type BuildCmdOpts = {
   publishEndpoint: PublishEndpoint;
+  fast?: boolean;
 } & BumpVersionOpts &
   PrepPluginOpts;
 
@@ -94,6 +95,9 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     args.option("extensionTarget", {
       describe: "extension name to publish in the marketplace",
       choices: Object.values(ExtensionTarget),
+    });
+    args.option("fast", {
+      describe: "skip some checks",
     });
   }
 
@@ -192,7 +196,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           }
           try {
             this.setEndpoint(opts.publishEndpoint);
-            LernaUtils.publishVersion();
+            LernaUtils.publishVersion(opts.publishEndpoint);
           } finally {
             if (opts.publishEndpoint === PublishEndpoint.LOCAL) {
               BuildUtils.setRegRemote();
@@ -235,7 +239,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
         }
         case DevCommands.SHOW_TELEMETRY: {
           CLIAnalyticsUtils.showTelemetryMessage();
-          return { error: null};
+          return { error: null };
         }
         default:
           return assertUnreachable();
@@ -269,18 +273,24 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
 
     this.print(`prep publish ${opts.publishEndpoint}...`);
     if (shouldPublishLocal) {
+      this.print("setting endpoint to local");
       await BuildUtils.prepPublishLocal();
     } else {
+      this.print("setting endpoint to remote");
       await BuildUtils.prepPublishRemote();
     }
 
-    this.print("run type-check...");
-    BuildUtils.runTypeCheck();
+    if (!opts.fast) {
+      this.print("run type-check...");
+      BuildUtils.runTypeCheck();
+    } else {
+      this.print("skipping type-check...");
+    }
 
     this.bumpVersion(opts);
 
     this.print("publish version...");
-    LernaUtils.publishVersion();
+    LernaUtils.publishVersion(opts.publishEndpoint);
 
     this.print("sync assets...");
     await this.syncAssets();
@@ -297,8 +307,12 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     this.print("setRegRemote...");
     BuildUtils.setRegRemote();
 
-    this.print("restore package.json...");
-    BuildUtils.restorePluginPkgJson();
+    if (!opts.fast) {
+      this.print("restore package.json...");
+      BuildUtils.restorePluginPkgJson();
+    } else {
+      this.print("skip restore package.json...");
+    }
 
     this.L.info("done");
   }
@@ -307,8 +321,8 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     this.print("build next server...");
     BuildUtils.buildNextServer();
     this.print("sync static...");
-    await BuildUtils.syncStaticAssets();
-    this.print("done");
+    const { staticPath } = await BuildUtils.syncStaticAssets();
+    return { staticPath };
   }
 
   validateBuildArgs(opts: CommandOpts): opts is BuildCmdOpts {
@@ -331,14 +345,14 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     }
     return true;
   }
-  
+
   enableTelemetry() {
     const reason = TelemetryStatus.ENABLED_BY_CLI_COMMAND;
     SegmentClient.enable(reason);
     CLIAnalyticsUtils.track(CLIEvents.CLITelemetryEnabled, { reason });
     const message = [
       "Telemetry is enabled.",
-      "Thank you for helping us improve Dendron 🌱"
+      "Thank you for helping us improve Dendron 🌱",
     ].join("\n");
     this.print(message);
   }
@@ -347,7 +361,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     const reason = TelemetryStatus.DISABLED_BY_CLI_COMMAND;
     CLIAnalyticsUtils.track(CLIEvents.CLITelemetryDisabled, { reason });
     SegmentClient.disable(reason);
-    const message = "Telemetry is disabled."
+    const message = "Telemetry is disabled.";
     this.print(message);
   }
 }

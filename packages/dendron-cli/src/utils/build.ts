@@ -40,6 +40,9 @@ export enum ExtensionTarget {
   NIGHTLY = "nightly",
 }
 
+const LOCAL_NPM_ENDPOINT = "http://localhost:4873";
+const REMOTE_NPM_ENDPOINT = "https://registry.npmjs.org";
+
 const $ = (cmd: string, opts?: any) => {
   return execa.commandSync(cmd, { shell: true, ...opts });
 };
@@ -54,10 +57,19 @@ export class LernaUtils {
     $(`git commit -m "chore: publish ${version}"`);
   }
 
-  static publishVersion() {
-    $(`lerna publish from-package --ignore-scripts`);
+  static publishVersion(endpoint: PublishEndpoint) {
+    const url =
+      endpoint === PublishEndpoint.LOCAL
+        ? LOCAL_NPM_ENDPOINT
+        : REMOTE_NPM_ENDPOINT;
+    const cmd = $(
+      `lerna publish from-package --ignore-scripts --registry ${url}`
+    );
+    console.log("---");
+    console.log(cmd.stdout);
+    console.log(cmd.stderr);
+    console.log("---");
     $(`node bootstrap/scripts/genMeta.js`);
-    $(`bootstrap/scripts/patch11tyVersion.sh`);
   }
 }
 
@@ -100,13 +112,13 @@ export class BuildUtils {
   }
 
   static setRegLocal() {
-    $(`yarn config set registry http://localhost:4873`);
-    $(`npm set registry http://localhost:4873/`);
+    $(`yarn config set registry ${LOCAL_NPM_ENDPOINT}`);
+    $(`npm set registry ${LOCAL_NPM_ENDPOINT}`);
   }
 
   static setRegRemote() {
-    $(`yarn config set registry https://registry.npmjs.org/`);
-    $(`npm set registry https://registry.npmjs.org/`);
+    $(`yarn config set registry ${REMOTE_NPM_ENDPOINT}`);
+    $(`npm set registry ${REMOTE_NPM_ENDPOINT}`);
   }
 
   static genNextVersion(opts: {
@@ -171,7 +183,8 @@ export class BuildUtils {
 
     if (target === ExtensionTarget.NIGHTLY) {
       version = await this.getIncrementedVerForNightly();
-      description = "This is a prerelease version of Dendron that may be unstable. Please install the main dendron extension instead.";
+      description =
+        "This is a prerelease version of Dendron that may be unstable. Please install the main dendron extension instead.";
       icon = "assets/images/logo-bw.png";
     }
 
@@ -186,7 +199,7 @@ export class BuildUtils {
         type: "git",
       },
       version,
-      icon
+      icon,
     });
     this.removeDevDepsFromPkgJson({
       pkgPath,
@@ -227,7 +240,7 @@ export class BuildUtils {
     } catch (err: any) {
       console.error(
         "Unable to fetch current version for nightly ext from VS Code marketplace. Attempting to use version in package.json. Error " +
-        error2PlainObject(err)
+          error2PlainObject(err)
       );
       return version;
     }
@@ -306,14 +319,12 @@ export class BuildUtils {
     fs.emptyDirSync(pluginStaticPath);
 
     fs.copySync(path.join(nextServerRoot, "out"), pluginStaticPath);
-    await Promise.all([
-      fs.copy(
-        path.join(this.getNextServerRootPath(), "assets", "js"),
-        pluginStaticPath
-      ),
-      fs.copy(path.join(apiRoot, "assets", "static"), pluginStaticPath),
-    ]);
-    return;
+    fs.copySync(
+      path.join(this.getNextServerRootPath(), "assets", "js"),
+      path.join(pluginStaticPath, "js")
+    );
+    fs.copySync(path.join(apiRoot, "assets", "static"), pluginStaticPath);
+    return { staticPath: pluginStaticPath };
   }
 
   static removeDevDepsFromPkgJson({
@@ -340,7 +351,7 @@ export class BuildUtils {
     main,
     repository,
     version,
-    icon
+    icon,
   }: {
     pkgPath: string;
     name: string;

@@ -32,9 +32,6 @@ const readAndProcess = (opts: { npath: string; proc: Processor }) => {
   const respRehype = MDUtilsV4.procRehype({ proc: proc() }).processSync(
     noteRaw
   );
-  // expect(respParse).toMatchSnapshot("respParse");
-  // expect(respProcess).toMatchSnapshot("respProcess");
-  // expect(respRehype).toMatchSnapshot("respRehype");
   return { proc, respProcess, respParse, respRehype };
 };
 

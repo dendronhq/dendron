@@ -16,6 +16,7 @@ import {
 } from "@dendronhq/common-server";
 import _ from "lodash";
 import path from "path";
+import { DNodePropsQuickInputV2 } from "@dendronhq/common-all";
 
 export type CreateNoteOptsV4 = {
   vault: DVault;
@@ -26,6 +27,10 @@ export type CreateNoteOptsV4 = {
   genRandomId?: boolean;
   noWrite?: boolean;
 };
+
+export type CreateNoteInputOpts = {
+  label?: string;
+} & CreateNoteOptsV4;
 
 export type CreateSchemaOptsV4 = {
   vault: DVault;
@@ -57,8 +62,8 @@ export class NoteTestUtilsV4 {
    *  - created & updated = 1
    *  - id = note.fname
    *  - body = ""
-   * @param opts 
-   * @returns 
+   * @param opts
+   * @returns
    */
   static createNote = async (opts: CreateNoteOptsV4) => {
     const { fname, vault, props, body, genRandomId, noWrite, wsRoot } =
@@ -84,6 +89,20 @@ export class NoteTestUtilsV4 {
     }
     return note;
   };
+
+  static async createNotePropsInput(
+    opts: CreateNoteInputOpts
+  ): Promise<DNodePropsQuickInputV2> {
+    const noteProps = await this.createNote(opts);
+    const props = {
+      label: "default-label-val",
+      ...opts,
+      ...noteProps,
+    };
+    return {
+      ...props,
+    };
+  }
 
   static async modifyNoteByPath(
     opts: { wsRoot: string; vault: DVault; fname: string },

@@ -269,7 +269,7 @@ const NOTES = {
         console.log(wsRoot);
         TestConfigUtils.withConfig(
           (c) => {
-            c.maxNoteLength = 10;
+            c.workspace!.maxNoteLength = 10;
             return c;
           },
           { wsRoot }

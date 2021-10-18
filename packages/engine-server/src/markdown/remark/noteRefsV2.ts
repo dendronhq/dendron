@@ -457,10 +457,9 @@ export function convertNoteRefASTV2(
   let { shouldApplyPublishRules } = dendronData;
 
   const { wikiLinkOpts } = compilerOpts;
-
-  const siteConfig = ConfigUtils.getProp(procOpts.config, "site");
+  const siteConfig = ConfigUtils.getProp(config, "site");
   const sitePrettyRefConfig = siteConfig.usePrettyRefs;
-  const prettyRefConfig = ConfigUtils.getProp(procOpts.config, "usePrettyRefs");
+  const prettyRefConfig = ConfigUtils.getProp(config, "usePrettyRefs");
 
   if (MDUtilsV5.isV5Active(proc)) {
     shouldApplyPublishRules = MDUtilsV5.shouldApplyPublishingRules(proc);

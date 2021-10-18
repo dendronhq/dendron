@@ -139,7 +139,6 @@ export const provideCompletionItems = sentryReportingCallback(
     const notes = engine.notes;
     const completionItems: CompletionItem[] = [];
     const currentVault = VSCodeUtils.getNoteFromDocument(document)?.vault;
-    console.log({ currentVault });
     const wsRoot = engine.wsRoot;
     Logger.debug({
       ctx,

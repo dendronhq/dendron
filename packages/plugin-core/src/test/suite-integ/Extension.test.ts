@@ -772,7 +772,7 @@ suite("per-init config migration logic", function () {
   });
 
   describeMultiWS(
-    "GIVEN: current version is less than 0.64.0 and config is not legacy",
+    "GIVEN: current version is less than 0.64.0 and config is legacy",
     {
       ctx,
       modConfigCb: (config) => {

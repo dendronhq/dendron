@@ -451,7 +451,7 @@ suite("Migration", function () {
       });
     });
 
-    test.only("migrate to 0.64.0 (workspace namespace migration)", (done) => {
+    test("migrate to 0.64.0 (workspace namespace migration)", (done) => {
       DendronExtension.version = () => "0.0.1";
       runLegacyMultiWorkspaceTest({
         ctx,

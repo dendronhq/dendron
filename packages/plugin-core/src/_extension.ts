@@ -362,6 +362,9 @@ export async function _activate(
               data: change.data,
             });
           });
+          vscode.window.showInformationMessage(
+            "We have detected a legacy configuration in dendron.yml and migrated to the newest configurations. You can find a backup of the original file in your root directory."
+          );
         }
       }
 

@@ -3,7 +3,6 @@ import {
   getStage,
   InstallStatus,
   WorkspaceSettings,
-  CURRENT_CONFIG_VERSION,
 } from "@dendronhq/common-all";
 import { createLogger, DLogger } from "@dendronhq/common-server";
 import _ from "lodash";
@@ -29,22 +28,18 @@ export class MigrationServce {
     previousVersion,
     migrations,
     wsService,
-    runAll,
     ...rest
   }: ApplyMigrationRuleOpts): Promise<MigrationChangeSetStatus[]> {
     const results: MigrationChangeSetStatus[][] = [];
     // run migrations from oldest to newest
-    const migrationsToRun =
-      runAll && !_.isUndefined(migrations)
-        ? migrations
-        : _.reverse(
-            _.takeWhile(migrations || ALL_MIGRATIONS, (ent) => {
-              const out =
-                semver.lte(previousVersion, ent.version) &&
-                semver.gte(currentVersion, ent.version);
-              return out;
-            })
-          );
+    const migrationsToRun = _.reverse(
+      _.takeWhile(migrations || ALL_MIGRATIONS, (ent) => {
+        const out =
+          semver.lte(previousVersion, ent.version) &&
+          semver.gte(currentVersion, ent.version);
+        return out;
+      })
+    );
     const logger = createLogger("migration");
     logger.info({
       migrations: migrationsToRun.map((m) => [
@@ -133,22 +128,6 @@ export class MigrationServce {
     return (
       (workspaceInstallStatus === InstallStatus.UPGRADED || force) &&
       getStage() === "prod"
-    );
-  }
-
-  static shouldRunConfigMigration({
-    force,
-    configVersion,
-    workspaceInstallStatus,
-  }: {
-    force?: boolean;
-    configVersion?: number;
-    workspaceInstallStatus: InstallStatus;
-  }) {
-    return (
-      workspaceInstallStatus === InstallStatus.NO_CHANGE &&
-      ((configVersion && configVersion <= CURRENT_CONFIG_VERSION) || force)
-      // getStage() === "prod"
     );
   }
 }

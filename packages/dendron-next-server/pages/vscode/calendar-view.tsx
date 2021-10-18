@@ -3,9 +3,6 @@ import {
   DMessageSource,
   NoteProps,
   Time,
-  configIsAtLeastV3,
-  JournalConfig,
-  LegacyJournalConfig,
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -87,10 +84,7 @@ function CalendarView({ engine, ide }: DendronProps) {
   const maxDots: number = 5;
   const wordsPerDot: number = 250;
 
-  const journalConfig =
-    config?.version! >= 3 && config?.workspace
-      ? config?.workspace.journal
-      : config?.journal;
+  const journalConfig = config?.workspace?.journal;
   const journalDailyDomain = journalConfig?.dailyDomain;
   const journalName = journalConfig?.name;
 

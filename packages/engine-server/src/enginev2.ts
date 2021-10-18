@@ -166,7 +166,7 @@ export class DendronEngineV2 implements DEngine {
 
     return new DendronEngineV2({
       wsRoot,
-      vaults: config.vaults,
+      vaults: config.workspace.vaults,
       forceNew: true,
       createStore: (engine) =>
         new FileStorage({

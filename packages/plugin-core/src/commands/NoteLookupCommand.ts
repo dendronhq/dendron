@@ -10,9 +10,10 @@ import {
   SchemaUtils,
   VSCodeEvents,
   ConfigUtils,
+  LookupConfig,
 } from "@dendronhq/common-all";
 import { getDurationMilliseconds } from "@dendronhq/common-server";
-import { DConfig, HistoryService } from "@dendronhq/engine-server";
+import { HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { Uri } from "vscode";
 import {
@@ -141,38 +142,13 @@ export class NoteLookupCommand extends BaseCommand<
   async gatherInputs(opts?: CommandRunOpts): Promise<CommandGatherOutput> {
     const start = process.hrtime();
     const ws = getDWorkspace();
-    const lookupConfig = ConfigUtils.getProp(ws.config, "commands.lookup");
+    const lookupConfig = ConfigUtils.getProp(
+      ws.config,
+      "commands.lookup"
+    ) as LookupConfig;
     const noteLookupConfig = lookupConfig.note;
-    let selectionType: LookupSelectionType =
-      LookupSelectionTypeEnum.selectionExtract;
-    let confirmVaultOnCreate;
-    if ("selectionMode" in noteLookupConfig) {
-      const selectionMode = noteLookupConfig.selectionMode;
-      switch (selectionMode) {
-        case "extract": {
-          selectionType = LookupSelectionTypeEnum.selectionExtract;
-          break;
-        }
-        case "link": {
-          selectionType = LookupSelectionTypeEnum.selection2link;
-          break;
-        }
-        case "none": {
-          selectionType = LookupSelectionTypeEnum.none;
-          break;
-        }
-        default: {
-          throw new DendronError({ message: "unsupported selection type." });
-        }
-      }
-      confirmVaultOnCreate = noteLookupConfig.confirmVaultOnCreate;
-    } else {
-      selectionType = noteLookupConfig.selectionType;
-      confirmVaultOnCreate = DConfig.getProp(
-        ws.config,
-        "lookupConfirmVaultOnCreate"
-      );
-    }
+    const selectionType = noteLookupConfig.selectionMode;
+    const confirmVaultOnCreate = noteLookupConfig.confirmVaultOnCreate;
 
     const copts: CommandRunOpts = _.defaults(opts || {}, {
       multiSelect: false,

@@ -33,7 +33,7 @@ suite(DENDRON_COMMANDS.CREATE_HOOK.key, function () {
           await new CreateHookCommand().run();
           const editor = VSCodeUtils.getActiveTextEditorOrThrow();
           const config = DConfig.getOrCreate(wsRoot);
-          expect(config.hooks).toEqual({
+          expect(config.workspace!.hooks).toEqual({
             onCreate: [{ id: hook, pattern: "*", type: "js" }],
           });
           expect(editor.document.uri.fsPath.toLowerCase()).toEqual(

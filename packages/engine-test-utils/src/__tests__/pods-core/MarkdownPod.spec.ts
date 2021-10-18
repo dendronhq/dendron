@@ -157,7 +157,7 @@ describe("markdown publish pod", () => {
         const vaultName = VaultUtils.getName(vaults[0]);
         const config = TestConfigUtils.withConfig(
           (config) => {
-            config.noXVaultWikiLink = false;
+            config.workspace!.enableXVaultWikiLink = true;
             config.site = createSiteConfig({
               siteHierarchies: ["test-wikilink-to-url"],
               siteRootDir: "docs",
@@ -204,7 +204,7 @@ describe("markdown publish pod", () => {
         });
         const seedId = TestSeedUtils.defaultSeedId();
         engine.config = TestConfigUtils.getConfig({ wsRoot });
-        engine.vaults = engine.config.vaults!;
+        engine.vaults = engine.config.workspace!.vaults;
         const vault = VaultUtils.getVaultByName({
           vaults: engine.vaults,
           vname: seedId,

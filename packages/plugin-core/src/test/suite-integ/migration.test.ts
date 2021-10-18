@@ -9,6 +9,7 @@ import {
   DVaultSync,
   LegacyNoteAddBehavior,
   ConfigUtils,
+  LookupSelectionModeEnum,
 } from "@dendronhq/common-all";
 import {
   ALL_MIGRATIONS,
@@ -111,7 +112,7 @@ suite("Migration", function () {
           });
           const { dendronConfig: newDendronConfig, changeName } = out[0].data;
           expect(changeName).toEqual("update cache");
-          expect(newDendronConfig.dendronVersion).toEqual("0.46.0");
+          expect(newDendronConfig.workspace!.dendronVersion).toEqual("0.46.0");
           expect(out.length).toEqual(1);
           done();
         },
@@ -125,7 +126,7 @@ suite("Migration", function () {
           modConfigCb: (config) => {
             // we are deleting a field that was optional before migraiton, hence the ignore
             // @ts-ignore
-            delete config["journal"];
+            delete config.workspace["journal"];
             return config;
           },
           onInit: async ({ engine, wsRoot }) => {
@@ -142,8 +143,8 @@ suite("Migration", function () {
               migrations: getMigration({ from: "0.46.0", to: "0.47.1" }),
             });
             expect(out.length).toEqual(1);
-            expect(getDWorkspace().config.journal).toEqual(
-              ConfigUtils.genDefaultConfig().journal
+            expect(getDWorkspace().config.workspace!.journal).toEqual(
+              ConfigUtils.genDefaultConfig().workspace!.journal
             );
             done();
           },
@@ -173,8 +174,8 @@ suite("Migration", function () {
               migrations: getMigration({ from: "0.46.0", to: "0.47.1" }),
             });
             expect(out.length).toEqual(1);
-            expect(getDWorkspace().config.journal).toEqual({
-              ...ConfigUtils.genDefaultConfig().journal,
+            expect(getDWorkspace().config.workspace!.journal).toEqual({
+              ...ConfigUtils.genDefaultConfig().workspace!.journal,
               name: "foo",
             });
             done();
@@ -205,8 +206,8 @@ suite("Migration", function () {
             logger: Logger,
             migrations: getMigration({ from: "0.51.0", to: "0.52.0" }),
           });
-          expect(getDWorkspace().config.scratch).toEqual({
-            ...ConfigUtils.genDefaultConfig().scratch,
+          expect(getDWorkspace().config.workspace!.scratch).toEqual({
+            ...ConfigUtils.genDefaultConfig().workspace!.scratch,
             name: "foo",
           });
           done();
@@ -287,7 +288,7 @@ suite("Migration", function () {
           expect(
             wsConfig?.settings[CONFIG.DEFAULT_LOOKUP_CREATE_BEHAVIOR.key]
           ).toEqual(LegacyLookupSelectionType.selection2link);
-          expect(_.isUndefined(dendronConfig.lookup)).toBeTruthy();
+          expect(_.isUndefined(dendronConfig.commands!.lookup)).toBeTruthy();
           await MigrationServce.applyMigrationRules({
             currentVersion: "0.55.2",
             previousVersion: "0.55.1",
@@ -297,9 +298,9 @@ suite("Migration", function () {
             logger: Logger,
             migrations: getMigration({ from: "0.55.0", to: "0.55.2" }),
           });
-          expect(getDWorkspace().config.lookup!.note.selectionType).toEqual(
-            LegacyLookupSelectionType.selection2link
-          );
+          expect(
+            getDWorkspace().config.commands!.lookup.note.selectionMode
+          ).toEqual(LookupSelectionModeEnum.link);
           done();
         },
         wsSettingsOverride: {
@@ -329,7 +330,7 @@ suite("Migration", function () {
               wsConfig?.settings[CONFIG.DEFAULT_LOOKUP_CREATE_BEHAVIOR.key]
             )
           ).toBeTruthy();
-          expect(_.isUndefined(dendronConfig.lookup)).toBeTruthy();
+          expect(_.isUndefined(dendronConfig.commands!.lookup)).toBeTruthy();
           await MigrationServce.applyMigrationRules({
             currentVersion: "0.55.2",
             previousVersion: "0.55.1",
@@ -339,8 +340,10 @@ suite("Migration", function () {
             logger: Logger,
             migrations: getMigration({ from: "0.55.0", to: "0.55.2" }),
           });
-          expect(getDWorkspace().config.lookup!.note.selectionType).toEqual(
-            ConfigUtils.genDefaultConfig().lookup!.note.selectionType
+          expect(
+            getDWorkspace().config.commands!.lookup.note.selectionMode
+          ).toEqual(
+            ConfigUtils.genDefaultConfig().commands!.lookup.note.selectionMode
           );
           done();
         },

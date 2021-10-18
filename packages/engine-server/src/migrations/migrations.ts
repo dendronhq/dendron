@@ -1,5 +1,4 @@
 import {
-  LegacyLookupConfig,
   LegacyLookupSelectionType,
   InsertNoteLinkConfig,
   InsertNoteIndexConfig,
@@ -8,12 +7,12 @@ import {
   RandomNoteConfig,
   LookupSelectionMode,
   LookupSelectionModeEnum,
-  LegacyScratchConfig,
   DendronError,
   genDefaultCommandConfig,
   DVault,
-  StrictConfigV1,
   ConfigUtils,
+  ScratchConfig,
+  JournalConfig,
 } from "@dendronhq/common-all";
 import {
   SegmentClient,
@@ -372,15 +371,31 @@ export const ALL_MIGRATIONS: Migrations[] = [
       {
         name: "migrate note lookup config",
         func: async ({ dendronConfig, wsConfig }) => {
-          dendronConfig.lookup = ConfigUtils.genDefaultConfig()
-            .lookup as LegacyLookupConfig;
+          dendronConfig.commands!.lookup = ConfigUtils.genDefaultConfig()
+            .commands!.lookup as LookupConfig;
           const oldLookupCreateBehavior = _.get(
             wsConfig?.settings,
             "dendron.defaultLookupCreateBehavior",
             undefined
           ) as LegacyLookupSelectionType;
           if (oldLookupCreateBehavior !== undefined) {
-            dendronConfig.lookup.note.selectionType = oldLookupCreateBehavior;
+            let newValue;
+            switch (oldLookupCreateBehavior) {
+              case "selection2link": {
+                newValue = LookupSelectionModeEnum.link;
+                break;
+              }
+              case "none": {
+                newValue = LookupSelectionModeEnum.none;
+                break;
+              }
+              case "selectionExtract":
+              default: {
+                newValue = LookupSelectionModeEnum.extract;
+                break;
+              }
+            }
+            dendronConfig.commands!.lookup.note.selectionMode = newValue;
           }
 
           return { data: { dendronConfig, wsConfig } };
@@ -394,22 +409,23 @@ export const ALL_MIGRATIONS: Migrations[] = [
       {
         name: "migrate scratch config",
         func: async ({ dendronConfig, wsConfig }) => {
-          dendronConfig.scratch = ConfigUtils.genDefaultConfig()
-            .scratch as LegacyScratchConfig;
+          const defaultConfig = ConfigUtils.genDefaultConfig();
+          dendronConfig.workspace!.scratch = defaultConfig.workspace!
+            .scratch as ScratchConfig;
           if (_.get(wsConfig?.settings, "dendron.defaultScratchName")) {
-            dendronConfig.scratch.name = _.get(
+            dendronConfig.workspace!.scratch.name = _.get(
               wsConfig?.settings,
               "dendron.defaultScratchName"
             );
           }
           if (_.get(wsConfig?.settings, "dendron.defaultScratchDateFormat")) {
-            dendronConfig.scratch.dateFormat = _.get(
+            dendronConfig.workspace!.scratch.dateFormat = _.get(
               wsConfig?.settings,
               "dendron.defaultScratchDateFormat"
             );
           }
           if (_.get(wsConfig?.settings, "dendron.defaultScratchAddBehavior")) {
-            dendronConfig.scratch.addBehavior = _.get(
+            dendronConfig.workspace!.scratch.addBehavior = _.get(
               wsConfig?.settings,
               "dendron.defaultScratchAddBehavior"
             );
@@ -440,29 +456,29 @@ export const ALL_MIGRATIONS: Migrations[] = [
       {
         name: "migrate journal config",
         func: async ({ dendronConfig, wsConfig }) => {
-          dendronConfig.journal = (
-            ConfigUtils.genDefaultConfig() as StrictConfigV1
-          ).journal;
+          const defaultConfig = ConfigUtils.genDefaultConfig();
+          dendronConfig.workspace!.journal = defaultConfig.workspace!
+            .journal as JournalConfig;
           if (_.get(wsConfig?.settings, "dendron.dailyJournalDomain")) {
-            dendronConfig.journal.dailyDomain = _.get(
+            dendronConfig.workspace!.journal.dailyDomain = _.get(
               wsConfig?.settings,
               "dendron.dailyJournalDomain"
             );
           }
           if (_.get(wsConfig?.settings, "dendron.defaultJournalName")) {
-            dendronConfig.journal.name = _.get(
+            dendronConfig.workspace!.journal.name = _.get(
               wsConfig?.settings,
               "dendron.defaultJournalName"
             );
           }
           if (_.get(wsConfig?.settings, "dendron.defaultJournalDateFormat")) {
-            dendronConfig.journal.dateFormat = _.get(
+            dendronConfig.workspace!.journal.dateFormat = _.get(
               wsConfig?.settings,
               "dendron.defaultJournalDateFormat"
             );
           }
           if (_.get(wsConfig?.settings, "dendron.defaultJournalAddBehavior")) {
-            dendronConfig.journal.addBehavior = _.get(
+            dendronConfig.workspace!.journal.addBehavior = _.get(
               wsConfig?.settings,
               "dendron.defaultJournalAddBehavior"
             );
@@ -492,7 +508,7 @@ export const ALL_MIGRATIONS: Migrations[] = [
           // use has not disabled telemetry prior to upgrade
           if (
             segStatus !== TelemetryStatus.DISABLED_BY_COMMAND &&
-            !config.noTelemetry
+            !config.workspace!.disableTelemetry
           ) {
             SegmentClient.enable(TelemetryStatus.ENABLED_BY_MIGRATION);
           }

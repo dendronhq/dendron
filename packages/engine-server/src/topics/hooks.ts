@@ -7,7 +7,6 @@ import {
   ERROR_SEVERITY,
   NoteProps,
   NoteUtils,
-  configIsAtLeastV3,
   ConfigUtils,
 } from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-server";
@@ -31,22 +30,14 @@ export class HookUtils {
     hookType: DHookType;
     hookEntry: DHookEntry;
   }) {
-    const hooks = ConfigUtils.getProp(
-      config,
-      "workspace.hooks",
-    );
+    const hooks = ConfigUtils.getProp(config, "workspace.hooks");
     const onCreate: DHookEntry[] = _.get(
       hooks,
       hookType,
       [] as DHookEntry[]
     ).concat([hookEntry]);
-    if (configIsAtLeastV3({ config })) {
-      config.workspace!.hooks = config.workspace!.hooks || { onCreate: [] };
-      config.workspace!.hooks.onCreate = onCreate;
-    } else {
-      config.hooks = config.hooks || { onCreate: [] };
-      config.hooks.onCreate = onCreate;
-    }
+    config.workspace!.hooks = config.workspace!.hooks || { onCreate: [] };
+    config.workspace!.hooks.onCreate = onCreate;
     return config;
   }
 
@@ -73,22 +64,14 @@ export class HookUtils {
     hookType: DHookType;
     hookId: string;
   }) {
-    const hooks = ConfigUtils.getProp(
-      config,
-      "workspace.hooks",
-    );
+    const hooks = ConfigUtils.getProp(config, "workspace.hooks");
     let onCreate: DHookEntry[] = _.get(hooks, hookType, [] as DHookEntry[]);
     onCreate = _.remove(onCreate, { id: hookId });
     const idx = _.findIndex(onCreate, { id: hookId });
     onCreate.splice(idx, 1);
 
-    if (configIsAtLeastV3({ config })) {
-      config.workspace!.hooks = config.workspace!.hooks || { onCreate: [] };
-      config.workspace!.hooks.onCreate = onCreate;
-    } else {
-      config.hooks = config.hooks || { onCreate: [] };
-      config.hooks.onCreate = onCreate;
-    }
+    config.workspace!.hooks = config.workspace!.hooks || { onCreate: [] };
+    config.workspace!.hooks.onCreate = onCreate;
 
     return config;
   }

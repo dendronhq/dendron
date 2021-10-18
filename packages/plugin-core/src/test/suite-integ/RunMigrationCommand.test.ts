@@ -16,7 +16,7 @@ suite("RunMigrationCommand", function () {
       ctx,
       modConfigCb: (config) => {
         // @ts-ignore
-        delete config.lookup;
+        delete config.commands!.lookup;
         return config;
       },
       wsSettingsOverride: {
@@ -26,14 +26,14 @@ suite("RunMigrationCommand", function () {
       },
       onInit: async ({ engine }) => {
         const cmd = new RunMigrationCommand();
-        expect(_.isUndefined(engine.config.lookup)).toBeTruthy();
+        expect(_.isUndefined(engine.config.commands!.lookup)).toBeTruthy();
         sinon.stub(cmd, "gatherInputs").resolves({ version: "0.55.2" });
         const out = await cmd.run();
         expect(out!.length).toEqual(1);
         expect(out![0].data.version === "0.55.2");
-        expect(getDWorkspace().config.lookup!.note.selectionType).toEqual(
-          "selection2link"
-        );
+        expect(
+          getDWorkspace().config.commands!.lookup.note.selectionMode
+        ).toEqual("link");
         done();
       },
       workspaceType: WorkspaceType.CODE,

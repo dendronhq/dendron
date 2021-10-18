@@ -1,5 +1,5 @@
 import {
-  configIsAtLeastV3,
+  ConfigUtils,
   DVault,
   NoteProps,
   NoteUtils,
@@ -71,9 +71,10 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
       : "";
 
     const config = getDWorkspace().config;
-    const noAutoCreateOnDefinition = configIsAtLeastV3({ config })
-      ? !config.workspace!.enableAutoCreateOnDefinition
-      : config.noAutoCreateOnDefinition;
+    const noAutoCreateOnDefinition = ConfigUtils.getProp(
+      config,
+      "workspace.enableAutoCreateOnDefinition"
+    );
     const ctrlClickToCreate =
       noAutoCreateOnDefinition === false ? "Ctrl+Click or " : "";
     return `Note ${refAtPos.ref}${vaultName} is missing, ${ctrlClickToCreate}use "Dendron: Goto Note" command to create it.`;

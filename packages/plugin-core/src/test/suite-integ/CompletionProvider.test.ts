@@ -26,7 +26,7 @@ suite("completionProvider", function () {
   const ctx = setupBeforeAfter(this, {});
 
   describe("wikilink", () => {
-    test("basic", (done) => {
+    test.only("basic", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
         onInit: async ({ wsRoot, vaults, engine }) => {
@@ -64,6 +64,7 @@ suite("completionProvider", function () {
             items,
             (item) => item.sortText || item.label
           );
+          console.log({ sortedItems });
           const testIndex = _.findIndex(
             sortedItems,
             (item) => item.label === "test"

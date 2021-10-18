@@ -163,19 +163,19 @@ describe("WorkspaceService", () => {
     });
 
     testWithEngine(
-      "remoteVaults present, no initializeRemoteVaults",
+      "remoteVaults present, no enableRemoteVaultInit",
       async ({ wsRoot, engine }) => {
         const root = tmpDir().name;
         await GitTestUtils.createRepoWithReadme(root);
 
-        engine.config.vaults!.push({
+        engine.config.workspace!.vaults.push({
           fsPath: "remoteVault",
           remote: {
             type: "git",
             url: root,
           },
         });
-        engine.config.initializeRemoteVaults = false;
+        engine.config.workspace!.enableRemoteVaultInit = false;
         DConfig.writeConfig({ wsRoot, config: engine.config });
         const ws = new WorkspaceService({ wsRoot });
         const didClone = await ws.initialize({

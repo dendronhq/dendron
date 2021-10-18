@@ -181,7 +181,7 @@ describe("backlinks", () => {
           await ENGINE_HOOKS_MULTI.setupBasicMulti(opts);
           TestConfigUtils.withConfig(
             (config) => {
-              const bvault = config.vaults!.find(
+              const bvault = config.workspace!.vaults.find(
                 (ent: any) => ent.fsPath === "vault2"
               );
               bvault!.visibility = DVaultVisibility.PRIVATE;

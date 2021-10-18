@@ -1,6 +1,7 @@
 import {
   ConfigUtils,
   getSlugger,
+  LookupConfig,
   NoteProps,
   NoteQuickInput,
   NoteUtils,
@@ -99,7 +100,10 @@ const selectionToNoteProps = async (opts: {
     case "selectionExtract": {
       if (!_.isUndefined(document)) {
         const ws = getDWorkspace();
-        const lookupConfig = ConfigUtils.getProp(ws.config, "commands.lookup");
+        const lookupConfig = ConfigUtils.getProp(
+          ws.config,
+          "commands.lookup"
+        ) as LookupConfig;
         const noteLookupConfig = lookupConfig.note;
         const leaveTrace = noteLookupConfig.leaveTrace || false;
         const body = "\n" + document.getText(range).trim();

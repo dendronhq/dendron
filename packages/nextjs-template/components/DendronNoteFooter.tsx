@@ -6,7 +6,6 @@ import {
   RESERVED_KEYS,
   Time,
   VaultUtils,
-  configIsAtLeastV3,
 } from "@dendronhq/common-all";
 import { Row, Col, Typography } from "antd";
 import _ from "lodash";
@@ -64,9 +63,7 @@ class GitUtils {
   }) {
     const { note, config } = opts;
     const vault = note.vault;
-    const vaults = configIsAtLeastV3({ config })
-      ? (config.workspace!.vaults as DVault[])
-      : (config.vaults as DVault[]);
+    const vaults = config.workspace!.vaults as DVault[];
     const mvault = VaultUtils.matchVaultV2({ vault, vaults });
     const vaultUrl = _.get(mvault, "remote.url", false);
     const gitRepoUrl = config.site.gh_edit_repository;

@@ -339,7 +339,7 @@ export async function setupCodeWorkspaceMultiVaultV2(
 
   // update config
   const config = DConfig.getOrCreate(wsRoot);
-  config.vaults = vaults;
+  config.workspace!.vaults = vaults;
   DConfig.writeConfig({ wsRoot, config });
 
   await postSetupHook({

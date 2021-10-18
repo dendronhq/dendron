@@ -8,7 +8,6 @@ import {
   SeedEntry,
   VaultUtils,
   WorkspaceType,
-  configIsAtLeastV3,
   ConfigUtils,
 } from "@dendronhq/common-all";
 import { simpleGit, writeYAML } from "@dendronhq/common-server";
@@ -121,12 +120,8 @@ export class SeedService {
     const ws = new WorkspaceService({ wsRoot });
     const config = ws.config;
     const id = SeedUtils.getSeedId({ ...seed });
-    if (configIsAtLeastV3({ config })) {
-      if (!config.workspace!.seeds) {
-        config.workspace!.seeds = {};
-      }
-    } else if (!config.seeds) {
-      config.seeds = {};
+    if (!config.workspace!.seeds) {
+      config.workspace!.seeds = {};
     }
 
     const seedEntry: SeedEntry = {};
@@ -134,11 +129,7 @@ export class SeedService {
       seedEntry.site = seed.site;
     }
 
-    if (configIsAtLeastV3({ config })) {
-      config.workspace!.seeds![id] = seedEntry;
-    } else {
-      config.seeds![id] = seedEntry;
-    }
+    config.workspace!.seeds![id] = seedEntry;
 
     const updateWorkspace =
       WorkspaceUtils.getWorkspaceTypeFromDir(wsRoot) === WorkspaceType.CODE;
@@ -206,7 +197,7 @@ export class SeedService {
         const ws = new WorkspaceService({ wsRoot });
         const vaults = ConfigUtils.getProp(
           ws.config,
-          "workspace.vaults",
+          "workspace.vaults"
         ) as DVault[];
         const vaultPath = VaultUtils.getRelPath(vaults[0]);
         seed.root = vaultPath;
@@ -242,11 +233,7 @@ export class SeedService {
     const config = ws.config;
 
     const seedExistById = (id: string) => {
-      if (configIsAtLeastV3({ config })) {
-        return _.has(config.workspace!.seeds, id);
-      } else {
-        return _.has(config.seeds, id);
-      }
+      return _.has(config.workspace!.seeds, id);
     };
 
     if (!seedExistById(id)) {
@@ -292,11 +279,7 @@ export class SeedService {
 
     // remove seed entry
     const config = ws.config;
-    if (configIsAtLeastV3({ config })) {
-      delete (config.workspace!.seeds || {})[SeedUtils.getSeedId(seed)];
-    } else {
-      delete (config.seeds || {})[SeedUtils.getSeedId(seed)];
-    }
+    delete (config.workspace!.seeds || {})[SeedUtils.getSeedId(seed)];
     ws.setConfig(config);
 
     const updateWorkspace =
@@ -313,20 +296,14 @@ export class SeedService {
   isSeedInWorkspace(id: string): boolean {
     const ws = new WorkspaceService({ wsRoot: this.wsRoot });
     const config = ws.config;
-    const vaults = ConfigUtils.getProp(
-      config,
-      "workspace.vaults",
-    ) as DVault[];
+    const vaults = ConfigUtils.getProp(config, "workspace.vaults") as DVault[];
     return undefined !== vaults.find((vault) => vault.seed === id);
   }
 
   getSeedsInWorkspace(): string[] {
     const ws = new WorkspaceService({ wsRoot: this.wsRoot });
     const config = ws.config;
-    const vaults = ConfigUtils.getProp(
-      config,
-      "workspace.vaults",
-    ) as DVault[];
+    const vaults = ConfigUtils.getProp(config, "workspace.vaults") as DVault[];
     return vaults
       .filter((vault) => vault.seed !== undefined)
       .map((vault) => vault.seed!);

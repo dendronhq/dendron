@@ -46,8 +46,10 @@ suite("Create Daily Journal Suite", function () {
       onInit: async ({ wsRoot, vaults }) => {
         withConfig(
           (config) => {
-            config.lookupConfirmVaultOnCreate = false;
-            config.journal!.dailyVault = VaultUtils.getName(vaults[0]);
+            config.commands!.lookup.note.confirmVaultOnCreate = false;
+            config.workspace!.journal.dailyVault = VaultUtils.getName(
+              vaults[0]
+            );
             return config;
           },
           { wsRoot }
@@ -69,8 +71,10 @@ suite("Create Daily Journal Suite", function () {
       onInit: async ({ wsRoot, vaults }) => {
         withConfig(
           (config) => {
-            config.lookupConfirmVaultOnCreate = true;
-            config.journal!.dailyVault = VaultUtils.getName(vaults[0]);
+            config.commands!.lookup.note.confirmVaultOnCreate = true;
+            config.workspace!.journal.dailyVault = VaultUtils.getName(
+              vaults[0]
+            );
             return config;
           },
           { wsRoot }
@@ -92,7 +96,7 @@ suite("Create Daily Journal Suite", function () {
       onInit: async ({ wsRoot, vaults }) => {
         withConfig(
           (config) => {
-            config.lookupConfirmVaultOnCreate = true;
+            config.commands!.lookup.note.confirmVaultOnCreate = true;
             return config;
           },
           { wsRoot }
@@ -113,7 +117,7 @@ suite("Create Daily Journal Suite", function () {
     runLegacyMultiWorkspaceTest({
       ctx,
       modConfigCb: (config) => {
-        config.journal!.dailyDomain = "bar";
+        config.workspace!.journal.dailyDomain = "bar";
         return config;
       },
       onInit: async () => {
@@ -138,9 +142,9 @@ suite("Create Daily Journal Suite", function () {
         },
       },
       modConfigCb: (config) => {
-        config.journal!.dateFormat = "dd";
-        config.journal!.dailyDomain = "daisy";
-        config.journal!.name = "journey";
+        config.workspace!.journal.dateFormat = "dd";
+        config.workspace!.journal.dailyDomain = "daisy";
+        config.workspace!.journal.name = "journey";
         return config;
       },
       onInit: async ({ wsRoot, vaults }) => {

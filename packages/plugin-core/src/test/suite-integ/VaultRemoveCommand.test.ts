@@ -92,8 +92,8 @@ suite("VaultRemoveCommand", function () {
           stubQuickPick({ fsPath: remoteVaultName, workspace: remoteWsName });
           await new VaultRemoveCommand().run();
           const config = getConfig();
-          expect(config.vaults).toEqual(vaults);
-          expect(config.workspaces).toEqual({});
+          expect(config.workspace!.vaults).toEqual(vaults);
+          expect(config.workspace!.workspaces).toEqual({});
           expect(
             _.find(getWorkspaceFile().folders, {
               path: path.join(remoteWsName, remoteVaultName),
@@ -131,7 +131,7 @@ suite("VaultRemoveCommand", function () {
             getDWorkspace().wsRoot as string
           );
           const config = readYAML(configPath) as IntermediateDendronConfig;
-          expect(config.vaults!.map((ent) => ent.fsPath)).toEqual([
+          expect(config.workspace!.vaults!.map((ent) => ent.fsPath)).toEqual([
             vaults[0].fsPath,
           ]);
 
@@ -243,7 +243,7 @@ suite("VaultRemoveCommand", function () {
             };
             await new VaultRemoveCommand().run(args);
             const config = getConfig();
-            expect(config.vaults).toNotEqual(vaults);
+            expect(config.workspace!.vaults).toNotEqual(vaults);
             expect(
               _.find(getWorkspaceFile().folders, {
                 path: path.join(vaults[1].fsPath),
@@ -271,8 +271,8 @@ suite("VaultRemoveCommand", function () {
             };
             await new VaultRemoveCommand().run(args);
             const config = getConfig();
-            expect(config.vaults).toEqual(vaults);
-            expect(config.workspaces).toEqual({});
+            expect(config.workspace!.vaults).toEqual(vaults);
+            expect(config.workspace!.workspaces).toEqual({});
             expect(
               _.find(getWorkspaceFile().folders, {
                 path: path.join(remoteWsName, remoteVaultName),

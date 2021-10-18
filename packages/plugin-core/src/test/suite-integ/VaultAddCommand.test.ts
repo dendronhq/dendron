@@ -122,7 +122,7 @@ suite("VaultAddCommand", function () {
           await cmd.run();
           const gitIgnoreInsideVault = path.join(wsRoot, wsName, ".gitignore");
 
-          expect(DConfig.getOrCreate(wsRoot).workspaces).toEqual({
+          expect(DConfig.getOrCreate(wsRoot).workspace!.workspaces).toEqual({
             [wsName]: {
               remote: {
                 type: "git",
@@ -188,7 +188,7 @@ suite("VaultAddCommand", function () {
           });
           await cmd.run();
 
-          expect(DConfig.getOrCreate(wsRoot).workspaces).toEqual({
+          expect(DConfig.getOrCreate(wsRoot).workspace!.workspaces).toEqual({
             [wsName]: {
               remote: {
                 type: "git",

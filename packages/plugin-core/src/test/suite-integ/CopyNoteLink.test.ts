@@ -255,7 +255,7 @@ suite("CopyNoteLink", function () {
         onInit: async ({ wsRoot, vaults }) => {
           TestConfigUtils.withConfig(
             (config) => {
-              config.noXVaultWikiLink = false;
+              config.workspace!.enableXVaultWikiLink = true;
               return config;
             },
             { wsRoot }
@@ -294,7 +294,7 @@ suite("CopyNoteLink", function () {
         onInit: async ({ wsRoot }) => {
           TestConfigUtils.withConfig(
             (config) => {
-              config.noXVaultWikiLink = false;
+              config.workspace!.enableXVaultWikiLink = true;
               return config;
             },
             { wsRoot }
@@ -343,7 +343,7 @@ suite("CopyNoteLink", function () {
         onInit: async ({ wsRoot }) => {
           TestConfigUtils.withConfig(
             (config) => {
-              config.noXVaultWikiLink = false;
+              config.workspace!.enableXVaultWikiLink = true;
               return config;
             },
             { wsRoot }
@@ -387,7 +387,7 @@ suite("CopyNoteLink", function () {
         onInit: async ({ wsRoot }) => {
           TestConfigUtils.withConfig(
             (config) => {
-              config.noXVaultWikiLink = false;
+              config.workspace!.enableXVaultWikiLink = true;
               return config;
             },
             { wsRoot }

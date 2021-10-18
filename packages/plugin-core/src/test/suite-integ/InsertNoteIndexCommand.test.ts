@@ -6,7 +6,6 @@ import { InsertNoteIndexCommand } from "../../commands/InsertNoteIndexCommand";
 import { VSCodeUtils } from "../../utils";
 import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
-import { genDefaultCommandConfig } from "@dendronhq/common-all";
 
 suite("InsertNoteIndex", function () {
   const ctx: vscode.ExtensionContext = setupBeforeAfter(this);
@@ -82,7 +81,7 @@ suite("InsertNoteIndex", function () {
         onInit: async ({ wsRoot, engine }) => {
           TestConfigUtils.withConfig(
             (config) => {
-              config.noXVaultWikiLink = false;
+              config.workspace!.enableXVaultWikiLink = true;
               return config;
             },
             { wsRoot }
@@ -118,8 +117,7 @@ suite("InsertNoteIndex", function () {
         onInit: async ({ wsRoot, engine }) => {
           TestConfigUtils.withConfig(
             (config) => {
-              config.commands = genDefaultCommandConfig();
-              config.commands.insertNoteIndex = {
+              config.commands!.insertNoteIndex = {
                 enableMarker: true,
               };
               return config;
@@ -129,7 +127,7 @@ suite("InsertNoteIndex", function () {
 
           const notes = engine.notes;
           const cmd = new InsertNoteIndexCommand();
-          
+
           await VSCodeUtils.openNote(notes["foo"]);
           const editor = VSCodeUtils.getActiveTextEditorOrThrow();
           editor.selection = new vscode.Selection(9, 0, 9, 0);

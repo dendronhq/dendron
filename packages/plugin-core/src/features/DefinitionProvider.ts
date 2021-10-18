@@ -1,8 +1,4 @@
-import {
-  configIsAtLeastV3,
-  NoteUtils,
-  VaultUtils,
-} from "@dendronhq/common-all";
+import { ConfigUtils, NoteUtils, VaultUtils } from "@dendronhq/common-all";
 import _ from "lodash";
 import vscode, { Location, Position, Uri } from "vscode";
 import { findAnchorPos, GotoNoteCommand } from "../commands/GotoNote";
@@ -64,9 +60,10 @@ export default class DefinitionProvider implements vscode.DefinitionProvider {
       } else {
         const config = getDWorkspace().config;
 
-        const noAutoCreateOnDefinition = configIsAtLeastV3({ config })
-          ? !config.workspace!.enableAutoCreateOnDefinition
-          : config.noAutoCreateOnDefinition;
+        const noAutoCreateOnDefinition = !ConfigUtils.getProp(
+          config,
+          "workspace.enableAutoCreateOnDefinition"
+        );
         if (noAutoCreateOnDefinition) {
           return;
         }

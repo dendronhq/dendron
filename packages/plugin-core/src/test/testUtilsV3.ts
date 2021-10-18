@@ -248,7 +248,7 @@ export async function setupLegacyWorkspaceMulti(
   if (isNotUndefined(copts.modConfigCb)) {
     config = TestConfigUtils.withConfig(copts.modConfigCb, { wsRoot });
   }
-  config.vaults = vaults;
+  config.workspace!.vaults = vaults;
   DConfig.writeConfig({ wsRoot, config });
   await postSetupHook({
     wsRoot,

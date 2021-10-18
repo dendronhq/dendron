@@ -89,7 +89,7 @@ describe("engine", () => {
         writeJSHook({ wsRoot, fname: "hello", canary: "hello" });
         TestConfigUtils.withConfig(
           (config) => {
-            config.hooks = {
+            config.workspace!.hooks = {
               onCreate: [
                 {
                   id: "hello",
@@ -132,7 +132,7 @@ describe("engine", () => {
         writeJSHook({ wsRoot, fname: "goodbye", canary: "goodbye" });
         TestConfigUtils.withConfig(
           (config) => {
-            config.hooks = {
+            config.workspace!.hooks = {
               onCreate: [
                 {
                   id: "hello",
@@ -182,7 +182,7 @@ describe("engine", () => {
         );
         TestConfigUtils.withConfig(
           (config) => {
-            config.hooks = {
+            config.workspace!.hooks = {
               onCreate: [
                 {
                   id: "hello",
@@ -234,7 +234,7 @@ describe("engine", () => {
           );
           TestConfigUtils.withConfig(
             (config) => {
-              config.hooks = {
+              config.workspace!.hooks = {
                 onCreate: [
                   {
                     id: "hello",
@@ -279,7 +279,7 @@ describe("engine", () => {
           writeJSHook({ wsRoot, fname: "hello", canary: "hello" });
           TestConfigUtils.withConfig(
             (config) => {
-              config.hooks = {
+              config.workspace!.hooks = {
                 onCreate: [
                   {
                     id: "hello",
@@ -313,7 +313,7 @@ describe("remote engine", () => {
         preSetupHook: async ({ wsRoot }) => {
           TestConfigUtils.withConfig(
             (config) => {
-              config.hooks = {
+              config.workspace!.hooks = {
                 onCreate: [
                   {
                     id: "hello",
@@ -358,7 +358,7 @@ describe("remote engine", () => {
           });
           TestConfigUtils.withConfig(
             (config) => {
-              config.hooks = {
+              config.workspace!.hooks = {
                 onCreate: [
                   {
                     id: "hello",

@@ -30,7 +30,7 @@ import {
   createEngine as engineServerCreateEngine,
   DConfig,
   WorkspaceService,
-  WorkspaceConfig
+  WorkspaceConfig,
 } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -153,7 +153,7 @@ export async function setupWS(opts: {
       return vault;
     })
   );
-  config.vaults = _.sortBy(config.vaults, "fsPath");
+  config.workspace!.vaults = _.sortBy(config.workspace!.vaults, "fsPath");
   if (config.site.duplicateNoteBehavior) {
     config.site.duplicateNoteBehavior.payload = (
       config.site.duplicateNoteBehavior.payload as string[]

@@ -17,7 +17,6 @@ import {
   GraphViewMessage,
   GraphViewMessageType,
   VaultUtils,
-  configIsAtLeastV3,
 } from "@dendronhq/common-all";
 import useApplyGraphConfig from "../hooks/useApplyGraphConfig";
 import { DendronProps } from "../lib/types";
@@ -201,10 +200,7 @@ export default function Graph({
           edges: parsedEdges,
         },
         style,
-        wheelSensitivity:
-          engine.config?.version! >= 3 && engine.config?.workspace
-            ? engine.config.workspace.graph.zoomSpeed || 1
-            : engine.config?.graph?.zoomSpeed || 1,
+        wheelSensitivity: engine.config?.workspace?.graph.zoomSpeed || 1,
 
         // Zoom levels
         minZoom: 0.1,

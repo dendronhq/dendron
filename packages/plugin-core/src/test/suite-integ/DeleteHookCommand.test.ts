@@ -29,7 +29,7 @@ suite(DENDRON_COMMANDS.DELETE_HOOK.key, function () {
             shouldDeleteScript: true,
           });
           const config = DConfig.getOrCreate(wsRoot);
-          expect(config.hooks).toEqual({
+          expect(config.workspace!.hooks).toEqual({
             onCreate: [],
           });
 
@@ -63,7 +63,7 @@ suite(DENDRON_COMMANDS.DELETE_HOOK.key, function () {
             shouldDeleteScript: false,
           });
           const config = DConfig.getOrCreate(wsRoot);
-          expect(config.hooks).toEqual({
+          expect(config.workspace!.hooks).toEqual({
             onCreate: [],
           });
 

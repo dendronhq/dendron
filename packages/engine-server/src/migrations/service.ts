@@ -3,7 +3,6 @@ import {
   getStage,
   InstallStatus,
   WorkspaceSettings,
-  configIsAtLeastV3,
   CURRENT_CONFIG_VERSION,
 } from "@dendronhq/common-all";
 import { createLogger, DLogger } from "@dendronhq/common-server";
@@ -35,16 +34,17 @@ export class MigrationServce {
   }: ApplyMigrationRuleOpts): Promise<MigrationChangeSetStatus[]> {
     const results: MigrationChangeSetStatus[][] = [];
     // run migrations from oldest to newest
-    const migrationsToRun = runAll && !_.isUndefined(migrations)
-      ? migrations
-      : _.reverse(
-          _.takeWhile(migrations || ALL_MIGRATIONS, (ent) => {
-            const out =
-              semver.lte(previousVersion, ent.version) &&
-              semver.gte(currentVersion, ent.version);
-            return out;
-          })
-        );
+    const migrationsToRun =
+      runAll && !_.isUndefined(migrations)
+        ? migrations
+        : _.reverse(
+            _.takeWhile(migrations || ALL_MIGRATIONS, (ent) => {
+              const out =
+                semver.lte(previousVersion, ent.version) &&
+                semver.gte(currentVersion, ent.version);
+              return out;
+            })
+          );
     const logger = createLogger("migration");
     logger.info({
       migrations: migrationsToRun.map((m) => [
@@ -71,11 +71,7 @@ export class MigrationServce {
     const changes = _.flatten(results);
     if (!_.isEmpty(changes)) {
       const { data } = _.last(changes)!;
-      if (configIsAtLeastV3({ config: data.dendronConfig })) {
-        data.dendronConfig.workspace!.dendronVersion = currentVersion;
-      } else {
-        data.dendronConfig.dendronVersion = currentVersion;
-      }
+      data.dendronConfig.workspace!.dendronVersion = currentVersion;
       wsService.setConfig(data.dendronConfig);
       // wsConfig is undefined for native workspaces
       if (data.wsConfig) wsService.setWorkspaceConfig(data.wsConfig);
@@ -151,7 +147,7 @@ export class MigrationServce {
   }) {
     return (
       workspaceInstallStatus === InstallStatus.NO_CHANGE &&
-      (configVersion && configVersion <= CURRENT_CONFIG_VERSION || force)
+      ((configVersion && configVersion <= CURRENT_CONFIG_VERSION) || force)
       // getStage() === "prod"
     );
   }

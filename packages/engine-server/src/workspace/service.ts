@@ -16,7 +16,6 @@ import {
   Time,
   VaultUtils,
   WorkspaceSettings,
-  configIsAtLeastV3,
   ConfigUtils,
 } from "@dendronhq/common-all";
 import {
@@ -36,7 +35,12 @@ import _ from "lodash";
 import path from "path";
 import { DConfig } from "../config";
 import { MetadataService } from "../metadata";
-import { MigrationServce, MigrationChangeSetStatus, ALL_MIGRATIONS, Migrations } from "../migrations";
+import {
+  MigrationServce,
+  MigrationChangeSetStatus,
+  ALL_MIGRATIONS,
+  Migrations,
+} from "../migrations";
 import { SeedService, SeedUtils } from "../seed";
 import { Git } from "../topics/git";
 import {
@@ -194,11 +198,7 @@ export class WorkspaceService {
       },
       Promise.resolve([] as DVault[])
     );
-    if (configIsAtLeastV3({ config })) {
-      config.workspace!.workspaces = allWorkspaces;
-    } else {
-      config.workspaces! = allWorkspaces;
-    }
+    config.workspace!.workspaces = allWorkspaces;
     this.setConfig(config);
     return { vaults: newVaults };
   }
@@ -224,11 +224,7 @@ export class WorkspaceService {
       updateWorkspace: false,
     });
 
-    if (configIsAtLeastV3({ config })) {
-      config.workspace!.vaults.unshift(vault);
-    } else {
-      config.vaults!.unshift(vault);
-    }
+    config.workspace!.vaults.unshift(vault);
     // update dup note behavior
     if (!config.site.duplicateNoteBehavior) {
       const vaults = ConfigUtils.getProp(
@@ -423,7 +419,7 @@ export class WorkspaceService {
     });
     const initializeRemoteVaults = ConfigUtils.getProp(
       this.config,
-      "workspace.enableRemoteVaultInit",
+      "workspace.enableRemoteVaultInit"
     );
     if (initializeRemoteVaults) {
       const { didClone } = await this.syncVaults({
@@ -449,39 +445,22 @@ export class WorkspaceService {
       updateWorkspace: false,
     });
 
-    const rejectVault = (from: DVault[]) => {
-      return _.reject(from, (ent: DVault) => {
-        const checks = [
-          VaultUtils.getRelPath(ent) === VaultUtils.getRelPath(vault),
-        ];
-        if (vault.workspace) {
-          checks.push(ent.workspace === vault.workspace);
-        }
-        return _.every(checks);
-      });
-    };
-
-    if (configIsAtLeastV3({ config })) {
-      config.workspace!.vaults = rejectVault(config.workspace!.vaults);
-    } else {
-      config.vaults = rejectVault(config.vaults!);
-    }
-
-    if (configIsAtLeastV3({ config })) {
-      if (vault.workspace && config.workspace!.workspaces) {
-        const vaultWorkspace = _.find(config.workspace!.vaults, {
-          workspace: vault.workspace,
-        });
-        if (_.isUndefined(vaultWorkspace)) {
-          delete config.workspace!.workspaces![vault.workspace!];
-        }
+    config.workspace!.vaults = _.reject(config.workspace!.vaults, (ent) => {
+      const checks = [
+        VaultUtils.getRelPath(ent) === VaultUtils.getRelPath(vault),
+      ];
+      if (vault.workspace) {
+        checks.push(ent.workspace === vault.workspace);
       }
-    } else if (vault.workspace && config.workspaces) {
-      const vaultWorkspace = _.find(config.vaults, {
+      return _.every(checks);
+    });
+
+    if (vault.workspace && config.workspace!.workspaces) {
+      const vaultWorkspace = _.find(config.workspace!.vaults, {
         workspace: vault.workspace,
       });
       if (_.isUndefined(vaultWorkspace)) {
-        delete config.workspaces[vault.workspace];
+        delete config.workspace!.workspaces![vault.workspace!];
       }
     }
 
@@ -489,16 +468,7 @@ export class WorkspaceService {
       config.site.duplicateNoteBehavior &&
       _.isArray(config.site.duplicateNoteBehavior.payload)
     ) {
-      let shouldCleanUpDup = false;
-      if (configIsAtLeastV3({ config })) {
-        if (config.workspace!.vaults.length === 1) {
-          shouldCleanUpDup = true;
-        }
-      } else if (config.vaults!.length === 1) {
-        shouldCleanUpDup = true;
-      }
-
-      if (shouldCleanUpDup) {
+      if (config.workspace!.vaults.length === 1) {
         // if there is only one vault left, remove duplicateNoteBehavior setting
         config.site = _.omit(config.site, ["duplicateNoteBehavior"]);
       } else {
@@ -594,10 +564,7 @@ export class WorkspaceService {
     const { wsRoot } = opts;
     const config = DConfig.getOrCreate(wsRoot);
     const ws = new WorkspaceService({ wsRoot });
-    const vaults = ConfigUtils.getProp(
-      config,
-      "workspace.vaults",
-    ) as DVault[];
+    const vaults = ConfigUtils.getProp(config, "workspace.vaults") as DVault[];
     await Promise.all(
       vaults.map(async (vault) => {
         return ws.cloneVaultWithAccessToken({ vault });
@@ -827,7 +794,7 @@ export class WorkspaceService {
   async removeVaultCaches() {
     const vaults = ConfigUtils.getProp(
       this.config,
-      "workspace.vaults",
+      "workspace.vaults"
     ) as DVault[];
     await Promise.all(
       vaults.map((vault) => {
@@ -877,17 +844,19 @@ export class WorkspaceService {
       }
     }
 
-    if (_.isEmpty(changes))  {
+    if (_.isEmpty(changes)) {
       // if we didn't run a migration above,
       // we might want to check if we should run config migration
       const rawConfig = DConfig.getRaw(this.wsRoot);
       const configVersion = rawConfig.version;
       const force = _.isUndefined(configVersion);
-      if (MigrationServce.shouldRunConfigMigration({
-        force,
-        configVersion,
-        workspaceInstallStatus,
-      })) {
+      if (
+        MigrationServce.shouldRunConfigMigration({
+          force,
+          configVersion,
+          workspaceInstallStatus,
+        })
+      ) {
         const V2 = ALL_MIGRATIONS.find((value) => {
           return value.version === "0.63.0";
         }) as Migrations;
@@ -910,7 +879,7 @@ export class WorkspaceService {
           logger: this.logger,
           migrations,
           runAll: true,
-        })
+        });
       }
     }
 
@@ -934,10 +903,7 @@ export class WorkspaceService {
       _.defaults(opts, { fetchAndPull: false, skipPrivate: false });
     const { wsRoot } = this;
 
-    const workspaces = ConfigUtils.getProp(
-      config,
-      "workspace.workspaces",
-    );
+    const workspaces = ConfigUtils.getProp(config, "workspace.workspaces");
     // check workspaces
     const workspacePaths: { wsPath: string; wsUrl: string }[] = (
       await Promise.all(
@@ -963,10 +929,7 @@ export class WorkspaceService {
 
     // const seedService = new SeedService({wsRoot});
     // check seeds
-    const seeds = ConfigUtils.getProp(
-      config,
-      "workspace.seeds",
-    );
+    const seeds = ConfigUtils.getProp(config, "workspace.seeds");
     const seedResults: { id: string; status: SyncActionStatus; data: any }[] =
       [];
     await Promise.all(

@@ -46,7 +46,7 @@ function basicTest({
           const randomCfg: RandomNoteConfig = {};
           if (includePattern) randomCfg.include = includePattern;
           if (excludePattern) randomCfg.exclude = excludePattern;
-          config.randomNote = randomCfg;
+          config.commands!.randomNote = randomCfg;
           return config;
         },
         { wsRoot }

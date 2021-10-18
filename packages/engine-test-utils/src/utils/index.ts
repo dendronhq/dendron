@@ -100,7 +100,7 @@ export function checkVaults(opts: WorkspaceOpts, expect: any) {
   const { wsRoot, vaults } = opts;
   const configPath = DConfig.configPath(opts.wsRoot);
   const config = readYAML(configPath) as IntermediateDendronConfig;
-  expect(_.sortBy(config.vaults, ["fsPath", "workspace"])).toEqual(
+  expect(_.sortBy(config.workspace!.vaults, ["fsPath", "workspace"])).toEqual(
     _.sortBy(vaults, ["fsPath", "workspace"])
   );
   if (WorkspaceUtils.getWorkspaceTypeFromDir(wsRoot) === WorkspaceType.CODE) {

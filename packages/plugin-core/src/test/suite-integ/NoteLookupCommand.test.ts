@@ -3,10 +3,10 @@ import {
   DNodePropsQuickInputV2,
   DNodeUtils,
   DVault,
-  LegacyLookupSelectionType,
   NoteQuickInput,
   NoteUtils,
   Time,
+  LookupSelectionModeEnum,
 } from "@dendronhq/common-all";
 import { tmpDir, vault2Path } from "@dendronhq/common-server";
 import {
@@ -527,7 +527,7 @@ suite("NoteLookupCommand", function () {
         onInit: async ({ wsRoot, vaults }) => {
           withConfig(
             (config) => {
-              config.lookupConfirmVaultOnCreate = true;
+              config.commands!.lookup.note.confirmVaultOnCreate = true;
               return config;
             },
             { wsRoot }
@@ -668,7 +668,7 @@ suite("NoteLookupCommand", function () {
 
   describe("onAccept with lookupConfirmVaultOnCreate", () => {
     const modConfigCb = (config: IntermediateDendronConfig) => {
-      config.lookupConfirmVaultOnCreate = true;
+      config.commands!.lookup.note.confirmVaultOnCreate = true;
       return config;
     };
     test("turned off, existing note", (done) => {
@@ -754,9 +754,13 @@ suite("NoteLookupCommand", function () {
             noConfirm: true,
           })) as CommandOutput;
 
-          expect(engine.config.journal!.dateFormat).toEqual("y.MM.dd");
+          expect(engine.config.workspace!.journal.dateFormat).toEqual(
+            "y.MM.dd"
+          );
           // quickpick value should be `foo.journal.yyyy.mm.dd`
-          const today = Time.now().toFormat(engine.config.journal!.dateFormat);
+          const today = Time.now().toFormat(
+            engine.config.workspace!.journal.dateFormat
+          );
           const noteName = `foo.journal.${today}`;
           expect(out.quickpick.value).toEqual(noteName);
 
@@ -858,9 +862,13 @@ suite("NoteLookupCommand", function () {
             noConfirm: true,
           })) as CommandOutput;
 
-          expect(engine.config.journal!.dateFormat).toEqual("y.MM.dd");
+          expect(engine.config.workspace!.journal.dateFormat).toEqual(
+            "y.MM.dd"
+          );
           // quickpick value should be `foo.journal.yyyy.mm.dd`
-          const today = Time.now().toFormat(engine.config.journal!.dateFormat);
+          const today = Time.now().toFormat(
+            engine.config.workspace!.journal.dateFormat
+          );
           const noteName = `gamma.journal.${today}`;
           expect(out.quickpick.value).toEqual(noteName);
 
@@ -1003,8 +1011,8 @@ suite("NoteLookupCommand", function () {
       runLegacyMultiWorkspaceTest({
         ctx,
         modConfigCb: (config: IntermediateDendronConfig) => {
-          config.lookup!.note.selectionType =
-            "none" as LegacyLookupSelectionType;
+          config.commands!.lookup.note.selectionMode =
+            LookupSelectionModeEnum.none;
           return config;
         },
         preSetupHook: async ({ wsRoot, vaults }) => {
@@ -1192,7 +1200,7 @@ suite("NoteLookupCommand", function () {
         onInit: async ({ wsRoot, vaults, engine }) => {
           withConfig(
             (config) => {
-              config.lookup!.note.leaveTrace = true;
+              config.commands!.lookup.note.leaveTrace = true;
               return config;
             },
             { wsRoot }
@@ -1492,7 +1500,9 @@ suite("NoteLookupCommand", function () {
           expect(journalBtn.pressed).toBeTruthy();
           expect(selection2linkBtn.pressed).toBeTruthy();
 
-          const today = Time.now().toFormat(engine.config.journal!.dateFormat);
+          const today = Time.now().toFormat(
+            engine.config.workspace!.journal.dateFormat
+          );
           expect(controller.quickpick.value).toEqual(
             `foo.journal.${today}.foo-body`
           );
@@ -1551,7 +1561,9 @@ suite("NoteLookupCommand", function () {
           expect(selection2linkBtn.pressed).toBeTruthy();
 
           await controller.onTriggerButton(selection2linkBtn);
-          const today = Time.now().toFormat(engine.config.journal!.dateFormat);
+          const today = Time.now().toFormat(
+            engine.config.workspace!.journal.dateFormat
+          );
           expect(controller.quickpick.value).toEqual(`foo.journal.${today}`);
 
           done();
@@ -1730,7 +1742,9 @@ suite("NoteLookupCommand", function () {
           expect(selection2linkBtn.pressed).toBeTruthy();
 
           await controller.onTriggerButton(journalBtn);
-          const today = Time.now().toFormat(engine.config.journal!.dateFormat);
+          const today = Time.now().toFormat(
+            engine.config.workspace!.journal.dateFormat
+          );
           const quickpickValue = controller.quickpick.value;
           expect(quickpickValue).toEqual(`foo.journal.${today}.foo-body`);
 
@@ -1773,7 +1787,9 @@ suite("NoteLookupCommand", function () {
             noteType: LookupNoteTypeEnum.journal,
           });
 
-          const today = Time.now().toFormat(engine.config.journal!.dateFormat);
+          const today = Time.now().toFormat(
+            engine.config.workspace!.journal.dateFormat
+          );
           const newNote = NoteUtils.getNoteOrThrow({
             fname: `foo.journal.${today}`,
             notes: engine.notes,
@@ -1867,7 +1883,7 @@ suite("NoteLookupCommand", function () {
       return { cmd };
     };
 
-    test("split + multiselect: should have n+1 columns", (done) => {
+    test.skip("split + multiselect: should have n+1 columns", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
         preSetupHook: async ({ wsRoot, vaults }) => {

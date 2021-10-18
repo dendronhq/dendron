@@ -20,7 +20,7 @@ suite("CopyNoteRef", function () {
         onInit: async ({ wsRoot, vaults }) => {
           TestConfigUtils.withConfig(
             (config) => {
-              config.noXVaultWikiLink = false;
+              config.workspace!.enableXVaultWikiLink = true;
               return config;
             },
             { wsRoot }
@@ -44,7 +44,7 @@ suite("CopyNoteRef", function () {
         onInit: async ({ wsRoot, vaults }) => {
           TestConfigUtils.withConfig(
             (config) => {
-              config.noXVaultWikiLink = true;
+              config.workspace!.enableXVaultWikiLink = false;
               return config;
             },
             { wsRoot }

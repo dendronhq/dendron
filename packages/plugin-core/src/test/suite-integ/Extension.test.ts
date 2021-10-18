@@ -18,7 +18,7 @@ import {
   MetadataService,
   openWSMetaFile,
 } from "@dendronhq/engine-server";
-import { TestEngineUtils } from "@dendronhq/engine-test-utils";
+import { TestEngineUtils, ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
 import _ from "lodash";
 import { describe, beforeEach, it } from "mocha";
@@ -38,7 +38,7 @@ import {
 import { StateService } from "../../services/stateService";
 import * as telemetry from "../../telemetry";
 import { KeybindingUtils, VSCodeUtils } from "../../utils";
-import { DendronExtension } from "../../workspace";
+import { DendronExtension, getDWorkspace } from "../../workspace";
 import { BlankInitializer } from "../../workspace/blankInitializer";
 import { TemplateInitializer } from "../../workspace/templateInitializer";
 import { shouldDisplayLapsedUserMsg, _activate } from "../../_extension";
@@ -49,6 +49,7 @@ import {
   resetCodeWorkspace,
 } from "../testUtilsv2";
 import {
+  describeMultiWS,
   runLegacySingleWorkspaceTest,
   setupBeforeAfter,
   stubSetupWorkspace,
@@ -754,58 +755,176 @@ suite(
   }
 );
 
-// suite.skip("Legacy checking logic for configurations during init", function () {
-//   let homeDirStub: SinonStub;
-//   let checkLegacySpy: SinonSpy;
+suite("per-init config migration logic", function () {
+  let homeDirStub: SinonStub;
 
-//   const ctx: ExtensionContext = setupBeforeAfter(this, {
-//     beforeHook: async (ctx) => {
-//       new StateService(ctx);
-//       await resetCodeWorkspace();
-//       await new ResetConfigCommand().execute({ scope: "all" });
-//       homeDirStub = TestEngineUtils.mockHomeDir();
+  const ctx: ExtensionContext = setupBeforeAfter(this, {
+    beforeHook: async (ctx) => {
+      new StateService(ctx);
+      await resetCodeWorkspace();
+      await new ResetConfigCommand().execute({ scope: "all" });
+      homeDirStub = TestEngineUtils.mockHomeDir();
+    },
+    afterHook: async () => {
+      homeDirStub.restore();
+    },
+    noSetInstallStatus: true,
+  });
 
-//     },
-//     afterHook: async () => {
-//       homeDirStub.restore();
-//     },
-//     noSetInstallStatus: true,
-//   });
+  describeMultiWS(
+    "GIVEN: current version is less than 0.64.0 and config is not legacy",
+    {
+      ctx,
+      modConfigCb: (config) => {
+        config.version = 2;
+        return config;
+      },
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        DendronExtension.version = () => "0.63.6";
+        ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+      },
+    },
+    () => {
+      test("THEN: config migration is not forced on init", (done) => {
+        const ws = getDWorkspace();
+        const config = ws.config;
+        expect(config.version).toEqual(2);
 
-//   describeMultiWS(
-//     "GIVEN: current version is less than 0.63.0",
-//     {
-//       ctx,
-//       preSetupHook: async ({ wsRoot, vaults }) => {
-//         DendronExtension.version = () => "0.0.1";
-//         ENGINE_HOOKS.setupBasic({ wsRoot, vaults })
-//         checkLegacySpy = sinon.spy(ConfigUtils, "checkAndMigrateLegacy");
-//       }
-//     },
-//     () => {
-//       test("THEN: checkAndMigrateLegacy does not run", (done) => {
-//         expect(checkLegacySpy.calledOnce).toBeFalsy();
-//         done();
-//       })
-//     }
-//   )
+        const allWSRootFiles = fs.readdirSync(ws.wsRoot, {
+          withFileTypes: true,
+        });
+        const maybeBackupFile = allWSRootFiles
+          .filter((ent) => ent.isFile())
+          .filter((fileEnt) => fileEnt.name.includes("migrate-config"));
+        expect(maybeBackupFile.length === 0).toBeTruthy();
+        done();
+      });
+    }
+  );
 
-//   describeMultiWS(
-//     "GIVEN: current version is 0.63.0",
-//     {
-//       ctx,
-//       preSetupHook: async ({ wsRoot, vaults }) => {
-//         DendronExtension.version = () => "0.63.0";
-//         ENGINE_HOOKS.setupBasic({ wsRoot, vaults })
-//         checkLegacySpy = sinon.spy(ConfigUtils, "checkAndMigrateLegacy");
-//       }
-//     },
-//     () => {
-//       test("THEN: checkAndMigrateLegacy is called", (done) => {
-//         expect(checkLegacySpy.calledOnce).toBeTruthy();
-//         done();
-//       })
-//     }
-//   )
+  describeMultiWS(
+    "GIVEN: current version is 0.64.0 and config is legacy",
+    {
+      ctx,
+      modConfigCb: (config) => {
+        config.version = 2;
+        return config;
+      },
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        DendronExtension.version = () => "0.64.0";
+        ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+      },
+    },
+    () => {
+      test("THEN: config migration is forced on init", (done) => {
+        const ws = getDWorkspace();
+        const config = ws.config;
+        expect(config.version).toEqual(3);
 
-// })
+        const allWSRootFiles = fs.readdirSync(ws.wsRoot, {
+          withFileTypes: true,
+        });
+        const maybeBackupFileName = allWSRootFiles
+          .filter((ent) => ent.isFile())
+          .filter((fileEnt) => fileEnt.name.includes("migrate-config"))[0].name;
+        expect(!_.isUndefined(maybeBackupFileName)).toBeTruthy();
+        done();
+      });
+    }
+  );
+
+  describeMultiWS(
+    "GIVEN: current version is 0.64.0 and config is not legacy",
+    {
+      ctx,
+      modConfigCb: (config) => {
+        config.version = 3;
+        return config;
+      },
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        DendronExtension.version = () => "0.64.0";
+        ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+      },
+    },
+    () => {
+      test("THEN: config migration is not forced on init", (done) => {
+        const ws = getDWorkspace();
+        const config = ws.config;
+        expect(config.version).toEqual(3);
+
+        const allWSRootFiles = fs.readdirSync(ws.wsRoot, {
+          withFileTypes: true,
+        });
+        const maybeBackupFiles = allWSRootFiles
+          .filter((ent) => ent.isFile())
+          .filter((fileEnt) => fileEnt.name.includes("migrate-config"));
+
+        expect(maybeBackupFiles.length === 0).toBeTruthy();
+        done();
+      });
+    }
+  );
+
+  describeMultiWS(
+    "GIVEN: current version is larger than 0.64.0 and config is legacy",
+    {
+      ctx,
+      modConfigCb: (config) => {
+        config.version = 2;
+        return config;
+      },
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        DendronExtension.version = () => "0.64.1";
+        ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+      },
+    },
+    () => {
+      test("THEN: config migration is forced on init", (done) => {
+        const ws = getDWorkspace();
+        const config = ws.config;
+        expect(config.version).toEqual(3);
+
+        const allWSRootFiles = fs.readdirSync(ws.wsRoot, {
+          withFileTypes: true,
+        });
+        const maybeBackupFileName = allWSRootFiles
+          .filter((ent) => ent.isFile())
+          .filter((fileEnt) => fileEnt.name.includes("migrate-config"))[0].name;
+        expect(!_.isUndefined(maybeBackupFileName)).toBeTruthy();
+        done();
+      });
+    }
+  );
+
+  describeMultiWS(
+    "GIVEN: current version is larger than 0.64.0 and config is not legacy",
+    {
+      ctx,
+      modConfigCb: (config) => {
+        config.version = 3;
+        return config;
+      },
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        DendronExtension.version = () => "0.64.1";
+        ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+      },
+    },
+    () => {
+      test("THEN: config migration is not forced on init", (done) => {
+        const ws = getDWorkspace();
+        const config = ws.config;
+        expect(config.version).toEqual(3);
+
+        const allWSRootFiles = fs.readdirSync(ws.wsRoot, {
+          withFileTypes: true,
+        });
+        const maybeBackupFiles = allWSRootFiles
+          .filter((ent) => ent.isFile())
+          .filter((fileEnt) => fileEnt.name.includes("migrate-config"));
+
+        expect(maybeBackupFiles.length === 0).toBeTruthy();
+        done();
+      });
+    }
+  );
+});

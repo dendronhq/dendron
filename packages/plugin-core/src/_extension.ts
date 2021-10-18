@@ -358,7 +358,6 @@ export async function _activate(
             const event = _.isUndefined(change.error)
               ? MigrationEvents.MigrationSucceeded
               : MigrationEvents.MigrationFailed;
-            console.log({ bond: change.data });
             AnalyticsUtils.track(event, {
               data: change.data,
             });

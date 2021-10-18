@@ -19,12 +19,6 @@ export class DConfig {
     return path.join(configRoot, CONSTANTS.DENDRON_CONFIG_FILE);
   }
 
-  static defaults(
-    config: IntermediateDendronConfig
-  ): IntermediateDendronConfig {
-    return _.defaults(config, { initializeRemoteVaults: true });
-  }
-
   /**
    * Get without filling in defaults
    * @param wsRoot

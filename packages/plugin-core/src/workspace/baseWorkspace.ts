@@ -33,7 +33,7 @@ export abstract class DendronBaseWorkspace implements DWorkspaceV2 {
 
   // TODO: optimize to not read every time
   get config(): IntermediateDendronConfig {
-    return DConfig.defaults(DConfig.getOrCreate(this.wsRoot));
+    return DConfig.getOrCreate(this.wsRoot);
   }
 
   // TODO: optimize to not read every time

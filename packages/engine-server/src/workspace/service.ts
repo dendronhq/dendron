@@ -149,7 +149,7 @@ export class WorkspaceService {
   }
 
   get config(): IntermediateDendronConfig {
-    return DConfig.defaults(DConfig.getOrCreate(this.wsRoot));
+    return DConfig.getOrCreate(this.wsRoot);
   }
 
   get dendronRoot(): string {

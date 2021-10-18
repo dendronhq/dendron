@@ -1,6 +1,5 @@
 import {
   ConfigUtils,
-  InsertNoteLinkConfig,
   LegacyInsertNoteLinkAliasMode,
   NoteProps,
   NoteUtils,
@@ -38,10 +37,7 @@ export class InsertNoteLinkCommand extends BasicCommand<
 
   async gatherInputs(opts: CommandInput): Promise<CommandOpts | undefined> {
     const config = getDWorkspace().config;
-    const insertNoteLinkConfig = ConfigUtils.getProp(
-      config,
-      "commands.insertNoteLink"
-    ) as InsertNoteLinkConfig;
+    const insertNoteLinkConfig = ConfigUtils.getCommands(config).insertNoteLink;
     const aliasModeConfig = insertNoteLinkConfig.aliasMode;
     const multiSelectConfig = insertNoteLinkConfig.enableMultiSelect;
 

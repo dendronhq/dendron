@@ -797,7 +797,7 @@ export class DendronClientUtilsV2 {
   } {
     // gather inputs
     const config = getDWorkspace().config;
-    const journalConfig = ConfigUtils.getProp(config, "workspace.journal");
+    const journalConfig = ConfigUtils.getJournal(config);
     const dateFormat: string =
       type === "SCRATCH"
         ? getExtension().getWorkspaceSettingOrDefault({
@@ -868,7 +868,7 @@ export class DendronClientUtilsV2 {
 
   static shouldUseVaultPrefix(engine: DEngineClient) {
     const config = getDWorkspace().config;
-    const enableXVaultWikiLink = ConfigUtils.getProp(config, "workspace.enableXVaultWikiLink");
+    const enableXVaultWikiLink = ConfigUtils.getWorkspace(config).enableXVaultWikiLink;
     const useVaultPrefix = 
       _.size(engine.vaults) > 1 &&
       _.isBoolean(enableXVaultWikiLink) &&

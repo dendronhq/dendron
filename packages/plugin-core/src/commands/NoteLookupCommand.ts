@@ -10,7 +10,6 @@ import {
   SchemaUtils,
   VSCodeEvents,
   ConfigUtils,
-  LookupConfig,
 } from "@dendronhq/common-all";
 import { getDurationMilliseconds } from "@dendronhq/common-server";
 import { HistoryService } from "@dendronhq/engine-server";
@@ -142,10 +141,7 @@ export class NoteLookupCommand extends BaseCommand<
   async gatherInputs(opts?: CommandRunOpts): Promise<CommandGatherOutput> {
     const start = process.hrtime();
     const ws = getDWorkspace();
-    const lookupConfig = ConfigUtils.getProp(
-      ws.config,
-      "commands.lookup"
-    ) as LookupConfig;
+    const lookupConfig = ConfigUtils.getCommands(ws.config).lookup;
     const noteLookupConfig = lookupConfig.note;
     let selectionType;
     switch (noteLookupConfig.selectionMode) {

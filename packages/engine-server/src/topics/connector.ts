@@ -82,11 +82,7 @@ export class EngineConnector {
   }
 
   get vaults(): DVault[] {
-    const vaults = ConfigUtils.getProp(
-      this.config,
-      "workspace.vaults",
-    ) as DVault[];
-    return vaults;
+    return ConfigUtils.getVaults(this.config);
   }
 
   /**

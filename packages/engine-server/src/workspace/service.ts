@@ -180,7 +180,7 @@ export class WorkspaceService {
   async addWorkspace({ workspace }: { workspace: DWorkspace }) {
     const config = this.config;
     const allWorkspaces =
-      ConfigUtils.getProp(config, "workspace.workspaces") || {};
+      ConfigUtils.getWorkspace(config).workspaces || {};
     allWorkspaces[workspace.name] = _.omit(workspace, ["name", "vaults"]);
     // update vault
     const newVaults = await _.reduce(
@@ -227,10 +227,7 @@ export class WorkspaceService {
     config.workspace!.vaults.unshift(vault);
     // update dup note behavior
     if (!config.site.duplicateNoteBehavior) {
-      const vaults = ConfigUtils.getProp(
-        config,
-        "workspace.vaults"
-      ) as DVault[];
+      const vaults = ConfigUtils.getVaults(config);
       config.site.duplicateNoteBehavior = {
         action: DuplicateNoteAction.USE_VAULT,
         payload: vaults.map((v) => VaultUtils.getName(v)),
@@ -353,10 +350,8 @@ export class WorkspaceService {
     let workspaceVaultSyncConfig = this.verifyVaultSyncConfigs(vaults);
     if (_.isUndefined(workspaceVaultSyncConfig)) {
       if (await WorkspaceService.isWorkspaceVault(root)) {
-        workspaceVaultSyncConfig = ConfigUtils.getProp(
-          this.config,
-          "workspace.workspaceVaultSyncMode"
-        );
+        workspaceVaultSyncConfig = ConfigUtils.getWorkspace(this.config)
+          .workspaceVaultSyncMode as DVaultSync;
         // default for workspace vaults
         if (_.isUndefined(workspaceVaultSyncConfig)) {
           workspaceVaultSyncConfig = DVaultSync.NO_COMMIT;
@@ -417,10 +412,9 @@ export class WorkspaceService {
       onSyncVaultsProgress: () => {},
       onSyncVaultsEnd: () => {},
     });
-    const initializeRemoteVaults = ConfigUtils.getProp(
-      this.config,
-      "workspace.enableRemoteVaultInit"
-    );
+    const initializeRemoteVaults = ConfigUtils.getWorkspace(
+      this.config
+    ).enableRemoteVaultInit;
     if (initializeRemoteVaults) {
       const { didClone } = await this.syncVaults({
         config: this.config,
@@ -564,7 +558,7 @@ export class WorkspaceService {
     const { wsRoot } = opts;
     const config = DConfig.getOrCreate(wsRoot);
     const ws = new WorkspaceService({ wsRoot });
-    const vaults = ConfigUtils.getProp(config, "workspace.vaults") as DVault[];
+    const vaults = ConfigUtils.getVaults(config);
     await Promise.all(
       vaults.map(async (vault) => {
         return ws.cloneVaultWithAccessToken({ vault });
@@ -658,10 +652,7 @@ export class WorkspaceService {
 
   async getAllReposVaults(): Promise<Map<string, DVault[]>> {
     const reposVaults = new Map<string, DVault[]>();
-    const vaults = ConfigUtils.getProp(
-      this.config,
-      "workspace.vaults"
-    ) as DVault[];
+    const vaults = ConfigUtils.getVaults(this.config);
     await Promise.all(
       vaults.map(async (vault) => {
         const repo = await this.getVaultRepo(vault);
@@ -683,10 +674,7 @@ export class WorkspaceService {
    @deprecated - use {@link WorkspaceUtils.isPathInWorkspace}
    */
   isPathInWorkspace(fpath: string) {
-    const vaults = ConfigUtils.getProp(
-      this.config,
-      "workspace.vaults"
-    ) as DVault[];
+    const vaults = ConfigUtils.getVaults(this.config);
     const wsRoot = this.wsRoot;
     return WorkspaceUtils.isPathInWorkspace({ fpath, vaults, wsRoot });
   }
@@ -792,10 +780,7 @@ export class WorkspaceService {
    * Remove all vault caches in workspace
    */
   async removeVaultCaches() {
-    const vaults = ConfigUtils.getProp(
-      this.config,
-      "workspace.vaults"
-    ) as DVault[];
+    const vaults = ConfigUtils.getVaults(this.config);
     await Promise.all(
       vaults.map((vault) => {
         return removeCache(vault2Path({ wsRoot: this.wsRoot, vault }));
@@ -892,7 +877,7 @@ export class WorkspaceService {
       _.defaults(opts, { fetchAndPull: false, skipPrivate: false });
     const { wsRoot } = this;
 
-    const workspaces = ConfigUtils.getProp(config, "workspace.workspaces");
+    const workspaces = ConfigUtils.getWorkspace(config).workspaces;
     // check workspaces
     const workspacePaths: { wsPath: string; wsUrl: string }[] = (
       await Promise.all(
@@ -918,7 +903,7 @@ export class WorkspaceService {
 
     // const seedService = new SeedService({wsRoot});
     // check seeds
-    const seeds = ConfigUtils.getProp(config, "workspace.seeds");
+    const seeds = ConfigUtils.getWorkspace(config).seeds;
     const seedResults: { id: string; status: SyncActionStatus; data: any }[] =
       [];
     await Promise.all(
@@ -951,7 +936,7 @@ export class WorkspaceService {
     );
 
     // clone all missing vaults
-    const vaults = ConfigUtils.getProp(config, "workspace.vaults") as DVault[];
+    const vaults = ConfigUtils.getVaults(config);
     const emptyRemoteVaults = vaults.filter(
       (vault) =>
         !_.isUndefined(vault.remote) &&
@@ -976,10 +961,7 @@ export class WorkspaceService {
       })
     );
     if (fetchAndPull) {
-      const vaults = ConfigUtils.getProp(
-        config,
-        "workspace.vaults"
-      ) as DVault[];
+      const vaults = ConfigUtils.getVaults(config);
       const vaultsToFetch = _.difference(
         vaults.filter((vault) => !_.isUndefined(vault.remote)),
         emptyRemoteVaults

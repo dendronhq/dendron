@@ -2,7 +2,6 @@ import {
   assertUnreachable,
   CONSTANTS,
   DendronError,
-  DVault,
   ERROR_STATUS,
   SeedConfig,
   SeedEntry,
@@ -195,10 +194,7 @@ export class SeedService {
           };
         }
         const ws = new WorkspaceService({ wsRoot });
-        const vaults = ConfigUtils.getProp(
-          ws.config,
-          "workspace.vaults"
-        ) as DVault[];
+        const vaults = ConfigUtils.getVaults(ws.config);
         const vaultPath = VaultUtils.getRelPath(vaults[0]);
         seed.root = vaultPath;
         writeYAML(cpath, seed);
@@ -296,14 +292,14 @@ export class SeedService {
   isSeedInWorkspace(id: string): boolean {
     const ws = new WorkspaceService({ wsRoot: this.wsRoot });
     const config = ws.config;
-    const vaults = ConfigUtils.getProp(config, "workspace.vaults") as DVault[];
+    const vaults = ConfigUtils.getVaults(config);
     return undefined !== vaults.find((vault) => vault.seed === id);
   }
 
   getSeedsInWorkspace(): string[] {
     const ws = new WorkspaceService({ wsRoot: this.wsRoot });
     const config = ws.config;
-    const vaults = ConfigUtils.getProp(config, "workspace.vaults") as DVault[];
+    const vaults = ConfigUtils.getVaults(config);
     return vaults
       .filter((vault) => vault.seed !== undefined)
       .map((vault) => vault.seed!);

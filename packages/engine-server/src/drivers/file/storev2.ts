@@ -416,10 +416,7 @@ export class FileStorage implements DStore {
     const notesMap = NoteUtils.createFnameNoteMap(allNotes, true);
     return _.map(allNotes, (noteFrom: NoteProps) => {
       try {
-        const maxNoteLength = ConfigUtils.getProp(
-          this.config,
-          "workspace.maxNoteLength"
-        );
+        const maxNoteLength = ConfigUtils.getWorkspace(this.config).maxNoteLength;
         if (
           noteFrom.body.length <
           (maxNoteLength || CONSTANTS.DENDRON_DEFAULT_MAX_NOTE_LENGTH)
@@ -481,10 +478,7 @@ export class FileStorage implements DStore {
         if (n.stub) {
           return;
         }
-        const maxNoteLength = ConfigUtils.getProp(
-          this.config,
-          "workspace.maxNoteLength"
-        );
+        const maxNoteLength = ConfigUtils.getWorkspace(this.config).maxNoteLength;
         if (
           n.body.length >=
           (maxNoteLength || CONSTANTS.DENDRON_DEFAULT_MAX_NOTE_LENGTH)

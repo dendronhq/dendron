@@ -15,7 +15,7 @@ async function copyAssets() {
   const ctx = "copyAssets";
   const wsRoot = env().wsRoot;
   const config = getDendronConfig();
-  const vaults = ConfigUtils.getProp(config, "workspace.vaults");
+  const vaults = ConfigUtils.getVaults(config);
   const siteAssetsDir = path.join(getSiteOutputPath(), "assets");
   // copy site assets
   if (!config.site.copyAssets) {

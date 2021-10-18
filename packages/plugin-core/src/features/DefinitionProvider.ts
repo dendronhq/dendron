@@ -60,10 +60,8 @@ export default class DefinitionProvider implements vscode.DefinitionProvider {
       } else {
         const config = getDWorkspace().config;
 
-        const noAutoCreateOnDefinition = !ConfigUtils.getProp(
-          config,
-          "workspace.enableAutoCreateOnDefinition"
-        );
+        const noAutoCreateOnDefinition =
+          !ConfigUtils.getWorkspace(config).enableAutoCreateOnDefinition;
         if (noAutoCreateOnDefinition) {
           return;
         }

@@ -1,7 +1,6 @@
 import {
   ConfigUtils,
   DNodeUtils,
-  InsertNoteIndexConfig,
   NoteProps,
   NoteUtils,
 } from "@dendronhq/common-all";
@@ -79,10 +78,7 @@ export class InsertNoteIndexCommand extends BasicCommand<
     }
     const config = getDWorkspace().config;
 
-    const insertNoteIndexConfig = ConfigUtils.getProp(
-      config,
-      "commands.insertNoteIndex"
-    ) as InsertNoteIndexConfig;
+    const insertNoteIndexConfig = ConfigUtils.getCommands(config).insertNoteIndex;
     const maybeMarker = insertNoteIndexConfig.enableMarker;
 
     const noteIndex = this.genNoteIndex(children, {

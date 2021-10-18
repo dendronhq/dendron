@@ -40,7 +40,7 @@ export class InsertNoteCommand extends BasicCommand<
     const lc = this.createLookup();
     const provider = new NoteLookupProvider("insert", { allowNewNote: false });
     const config = getDWorkspace().config;
-    const tempPrefix = ConfigUtils.getProp(config, "commands.insertNote.initialValue");
+    const tempPrefix = ConfigUtils.getCommands(config).insertNote.initialValue;
     const initialValue = tempPrefix ? `${tempPrefix}.` : undefined;
     lc.show({
       title: "Insert note",

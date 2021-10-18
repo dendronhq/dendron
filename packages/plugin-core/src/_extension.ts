@@ -14,7 +14,6 @@ import {
   VSCodeEvents,
   WorkspaceType,
   MigrationEvents,
-  DVault,
   ConfigUtils,
 } from "@dendronhq/common-all";
 import {
@@ -391,10 +390,7 @@ export async function _activate(
       ws.workspaceService = wsService;
 
       // check for vaults with same name
-      const vaults = ConfigUtils.getProp(
-        dendronConfig,
-        "workspace.vaults"
-      ) as DVault[];
+      const vaults = ConfigUtils.getVaults(dendronConfig);
       const uniqVaults = _.uniqBy(vaults, (vault) => VaultUtils.getName(vault));
       if (_.size(uniqVaults) < _.size(vaults)) {
         const txt = "Fix it";

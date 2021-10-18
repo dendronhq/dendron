@@ -26,7 +26,7 @@ export class RandomNoteCommand extends BasicCommand<
     const { engine, config } = getDWorkspace();
 
     // If no pattern is specified for include, then include all notes for the search set.
-    const randomNoteConfig = ConfigUtils.getProp(config, "commands.randomNote");
+    const randomNoteConfig = ConfigUtils.getCommands(config).randomNote;
     const includeSet: string[] = randomNoteConfig?.include ?? [""];
 
     const searchPredicate = function (note: NoteProps) {

@@ -4,14 +4,16 @@ import minimatch from "minimatch";
 import querystring from "querystring";
 import semver from "semver";
 import { COLORS_LIST } from "./colors";
-import { NoteProps, SEOProps } from "./types";
+import { NoteProps, SEOProps, DVault } from "./types";
 import {
-  configIsV3,
+  DendronCommandConfig,
+  DendronWorkspaceConfig,
   genDefaultCommandConfig,
   genDefaultWorkspaceConfig,
   IntermediateDendronConfig,
+  JournalConfig,
+  LookupConfig,
   StrictConfigV3,
-  StrictIntermediateDendronConfig,
 } from "./types/intermediateConfigs";
 
 /**
@@ -275,7 +277,7 @@ export class ConfigUtils {
     return usePrettyRefs;
   }
 
-  static genDefaultConfig(): StrictIntermediateDendronConfig {
+  static genDefaultConfig(): StrictConfigV3 {
     const common = {
       useFMTitle: true,
       useNoteTitleForLink: true,
@@ -306,23 +308,32 @@ export class ConfigUtils {
     } as StrictConfigV3;
   }
 
-  static getProp(config: IntermediateDendronConfig, path: string) {
-    const currentDefaultConfig = ConfigUtils.genDefaultConfig();
-    const defaultValue = _.get(currentDefaultConfig, path);
-    if (!configIsV3(config)) {
-      // if config.version isn't up to date,
-      // return current config's default regardless of the existence
-      // of a value at the path.
-      return defaultValue;
-    } else {
-      const value = _.get(config, path);
-      if (!_.isUndefined(value)) {
-        // return what we got.
-        return value;
-      } else {
-        // return default if value doesn't exist.
-        return defaultValue;
-      }
-    }
+  static getProp<K extends keyof StrictConfigV3>(
+    config: IntermediateDendronConfig,
+    key: K
+  ): StrictConfigV3[K] {
+    const defaultConfig = ConfigUtils.genDefaultConfig();
+    const configWithDefaults = _.defaultsDeep(config, defaultConfig);
+    return configWithDefaults[key];
+  }
+
+  static getCommands(config: IntermediateDendronConfig): DendronCommandConfig {
+    return ConfigUtils.getProp(config, "commands");
+  }
+
+  static getWorkspace(config: IntermediateDendronConfig): DendronWorkspaceConfig {
+    return ConfigUtils.getProp(config, "workspace");
+  }
+
+  static getVaults(config: IntermediateDendronConfig): DVault[] {
+    return ConfigUtils.getWorkspace(config).vaults;
+  }
+
+  static getJournal(config: IntermediateDendronConfig): JournalConfig {
+    return ConfigUtils.getWorkspace(config).journal;
+  }
+
+  static getLookup(config: IntermediateDendronConfig): LookupConfig {
+    return ConfigUtils.getCommands(config).lookup;
   }
 }

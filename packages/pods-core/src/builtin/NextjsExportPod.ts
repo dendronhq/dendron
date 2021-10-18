@@ -7,7 +7,6 @@ import {
   NoteUtils,
   createSerializedFuseNoteIndex,
   ConfigUtils,
-  DVault,
 } from "@dendronhq/common-all";
 import {
   MDUtilsV5,
@@ -133,10 +132,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     dest: string;
   }) {
     const ctx = "copyAssets";
-    const vaults = ConfigUtils.getProp(
-      config,
-      "workspace.vaults",
-    ) as DVault[];
+    const vaults = ConfigUtils.getVaults(config);
     const destPublicPath = path.join(dest, "public");
     fs.ensureDirSync(destPublicPath);
     const siteAssetsDir = path.join(destPublicPath, "assets");

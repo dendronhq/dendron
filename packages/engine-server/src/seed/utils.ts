@@ -62,10 +62,7 @@ export class SeedUtils {
   static validateWorkspaceSeedConversion({ wsRoot }: { wsRoot: string }) {
     const ws = new WorkspaceService({ wsRoot });
     const config = ws.config;
-    const vaults = ConfigUtils.getProp(
-      config,
-      "workspace.vaults",
-    ) as DVault[];
+    const vaults = ConfigUtils.getVaults(config);
     if (vaults.length !== 1) {
       return {
         error: DendronError.createFromStatus({
@@ -76,10 +73,7 @@ export class SeedUtils {
         }),
       };
     }
-    const workspaces = ConfigUtils.getProp(
-      config,
-      "workspace.workspaces",
-    );;
+    const workspaces = ConfigUtils.getWorkspace(config).workspaces;
     if (!_.isEmpty(workspaces)) {
       return {
         error: DendronError.createFromStatus({

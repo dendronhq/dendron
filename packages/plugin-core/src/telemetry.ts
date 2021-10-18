@@ -23,7 +23,7 @@ export function setupSegmentClient(ws: DWorkspaceV2) {
     // if the current status was set by configuration, and that configuration has changed, we should update it and report the change
     const status = SegmentClient.getStatus();
     if (SegmentClient.setByConfig(status)) {
-      const disableTelemetry = ConfigUtils.getProp(ws.config, "workspace.disableTelemetry")
+      const disableTelemetry = ConfigUtils.getWorkspace(ws.config).disableTelemetry;
       if (
         SegmentClient.isDisabled(status) &&
         !disableTelemetry &&

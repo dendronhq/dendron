@@ -29,18 +29,6 @@ export type IntermediateDendronConfig = IntermediateOldConfig &
   IntermediateNewConfig;
 
 /**
- * Strict v1 intermediate config,
- */
-export type StrictConfigV1 = IntermediateDendronConfig &
-  Required<Pick<IntermediateOldConfig, "journal" | "vaults">> & { version: 1 };
-
-/**
- * Strict v2 intermediate config,
- */
-export type StrictConfigV2 = IntermediateDendronConfig &
-  Required<Pick<IntermediateNewConfig, "commands">> & { version: 2 };
-
-/**
  * Strict v3 intermediate config.
  */
 export type StrictConfigV3 = IntermediateDendronConfig &
@@ -49,48 +37,11 @@ export type StrictConfigV3 = IntermediateDendronConfig &
   };
 
 /**
- * Union type of all strict config types discriminated by version number.
- */
-export type StrictIntermediateDendronConfig =
-  | StrictConfigV1
-  | StrictConfigV2
-  | StrictConfigV3;
-
-/**
  * Type guards
  */
-export function configIsV1(
-  config: IntermediateDendronConfig
-): config is StrictConfigV1 {
-  return config.version === 1;
-}
-
-export function configIsV2(
-  config: IntermediateDendronConfig
-): config is StrictConfigV2 {
-  return config.version === 2;
-}
 
 export function configIsV3(
   config: IntermediateDendronConfig
 ): config is StrictConfigV3 {
   return config.version === 3;
-}
-
-export function configIsAtLeastV3(opts: {
-  config: IntermediateDendronConfig;
-  strict?: boolean;
-}) {
-  const { config, strict } = _.defaults(opts, { strict: true });
-  const hasWorkspace = strict ? "workspace" in config : true;
-  return config.version >= 3 && hasWorkspace;
-}
-
-export function configIsAtLeastV2(opts: {
-  config: IntermediateDendronConfig;
-  strict?: boolean;
-}) {
-  const { config, strict } = _.defaults(opts, { strict: true });
-  const hasCommands = strict ? "commands" in config : true;
-  return config.version >= 2 && hasCommands;
 }

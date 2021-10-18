@@ -87,7 +87,7 @@ export class GitUtils {
   }) {
     const { note, config, wsRoot } = opts;
     const vault = note.vault;
-    const vaults = ConfigUtils.getProp(config, "workspace.vaults") as DVault[];
+    const vaults = ConfigUtils.getVaults(config);
     const mvault = VaultUtils.matchVault({ wsRoot, vault, vaults });
     const vaultUrl = _.get(mvault, "remote.url", false);
     const gitRepoUrl = config.site.gh_edit_repository;
@@ -159,10 +159,7 @@ export class GitUtils {
         path.join(repoPath, CONSTANTS.DENDRON_CONFIG_FILE)
       ) as IntermediateDendronConfig;
       const workspace = path.basename(repoPath);
-      const vaultsConfig = ConfigUtils.getProp(
-        config,
-        "workspace.vaults"
-      ) as DVault[];
+      const vaultsConfig = ConfigUtils.getVaults(config);
       const vaults = vaultsConfig.map((ent) => {
         const vpath = vault2Path({ vault: ent, wsRoot: repoPath });
         return {

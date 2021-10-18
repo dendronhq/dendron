@@ -142,7 +142,7 @@ export class WorkspaceUtils {
      */
     let isIndex: boolean = false;
 
-    const seeds = ConfigUtils.getProp(config, "workspace.seeds");
+    const seeds = ConfigUtils.getWorkspace(config).seeds;
     if (vault.seed) {
       if (seeds && seeds[vault.seed]) {
         const maybeSite = seeds[vault.seed]?.site;

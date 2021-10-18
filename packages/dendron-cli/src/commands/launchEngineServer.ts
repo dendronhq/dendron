@@ -1,4 +1,4 @@
-import { ConfigUtils, DVault } from "@dendronhq/common-all";
+import { ConfigUtils } from "@dendronhq/common-all";
 import { launchv2 } from "@dendronhq/api-server";
 import { LogLvl, resolvePath } from "@dendronhq/common-server";
 import {
@@ -66,10 +66,7 @@ export class LaunchEngineServerCommand extends CLICommand<
     wsRoot = resolvePath(wsRoot, process.cwd());
     const ws = new WorkspaceService({ wsRoot });
     const { dev } = ws.config;
-    const vaults = ConfigUtils.getProp(
-      ws.config,
-      "workspace.vaults",
-    ) as DVault[];
+    const vaults = ConfigUtils.getVaults(ws.config);
     const vaultPaths = vaults.map((v) => resolvePath(v.fsPath, wsRoot));
     const {
       port: _port,

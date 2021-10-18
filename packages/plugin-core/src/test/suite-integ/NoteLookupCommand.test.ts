@@ -1883,7 +1883,7 @@ suite("NoteLookupCommand", function () {
       return { cmd };
     };
 
-    test("split + multiselect: should have n+1 columns", (done) => {
+    test.skip("split + multiselect: should have n+1 columns", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
         preSetupHook: async ({ wsRoot, vaults }) => {

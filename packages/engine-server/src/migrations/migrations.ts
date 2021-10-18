@@ -3,7 +3,6 @@ import {
   LookupConfig,
   LookupSelectionModeEnum,
   DendronError,
-  DVault,
   ConfigUtils,
   ScratchConfig,
   JournalConfig,
@@ -275,10 +274,7 @@ export const ALL_MIGRATIONS: Migrations[] = [
         name: "update cache",
         func: async ({ dendronConfig, wsConfig, wsService }) => {
           const { wsRoot, config } = wsService;
-          const vaults = ConfigUtils.getProp(
-            config,
-            "workspace.vaults"
-          ) as DVault[];
+          const vaults = ConfigUtils.getVaults(config);
           await Promise.all(
             vaults.map((vault) => {
               return removeCache(vault2Path({ wsRoot, vault }));

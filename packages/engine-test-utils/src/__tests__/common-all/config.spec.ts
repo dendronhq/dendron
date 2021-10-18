@@ -21,8 +21,8 @@ describe("ConfigUtils", () => {
 
         const vaults = ConfigUtils.getProp(
           config as IntermediateDendronConfig,
-          "workspace.vaults"
-        );
+          "workspace"
+        ).vaults;
 
         expect(vaults).toEqual(expected);
       });
@@ -36,8 +36,8 @@ describe("ConfigUtils", () => {
 
         const journalConfig = ConfigUtils.getProp(
           config as IntermediateDendronConfig,
-          "workspace.journal"
-        );
+          "workspace"
+        ).journal;
 
         expect(journalConfig).toEqual(expected);
       });

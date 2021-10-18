@@ -1,39 +1,34 @@
 import {
   launchv2,
   ServerUtils,
-  SubProcessExitType,
+  SubProcessExitType
 } from "@dendronhq/api-server";
 import {
   CONSTANTS,
   DendronError,
   ExtensionEvents,
-  getStage,
-  InstallStatus,
-  Time,
+  getStage, initializeSentry, InstallStatus, MigrationEvents, Time,
   VaultUtils,
   VSCodeEvents,
-  WorkspaceType,
-  MigrationEvents,
+  WorkspaceType
 } from "@dendronhq/common-all";
 import {
   getDurationMilliseconds,
   getOS,
   SegmentClient,
-  writeJSONWithComments,
+  writeJSONWithComments
 } from "@dendronhq/common-server";
 import {
   HistoryService,
-  MetadataService,
-  WorkspaceService,
-  WorkspaceUtils,
-  MigrationChangeSetStatus,
+  MetadataService, MigrationChangeSetStatus, WorkspaceService,
+  WorkspaceUtils
 } from "@dendronhq/engine-server";
-import { RewriteFrames } from "@sentry/integrations";
 import * as Sentry from "@sentry/node";
 import { ExecaChildProcess } from "execa";
 import fs from "fs-extra";
 import _ from "lodash";
 import { Duration } from "luxon";
+import os from "os";
 import path from "path";
 import semver from "semver";
 import * as vscode from "vscode";
@@ -41,12 +36,13 @@ import {
   CONFIG,
   DendronContext,
   DENDRON_COMMANDS,
-  GLOBAL_STATE,
+  GLOBAL_STATE
 } from "./constants";
 import { Logger } from "./logger";
 import { migrateConfig } from "./migration";
 import { StateService } from "./services/stateService";
 import { Extensions } from "./settings";
+import { SurveyUtils } from "./survey";
 import { setupSegmentClient } from "./telemetry";
 import { GOOGLE_OAUTH_ID, GOOGLE_OAUTH_SECRET } from "./types/global";
 import { KeybindingUtils, VSCodeUtils, WSUtils } from "./utils";
@@ -56,13 +52,11 @@ import {
   DendronExtension,
   getDWorkspace,
   getEngine,
-  getExtension,
+  getExtension
 } from "./workspace";
 import { DendronCodeWorkspace } from "./workspace/codeWorkspace";
 import { DendronNativeWorkspace } from "./workspace/nativeWorkspace";
 import { WorkspaceInitFactory } from "./workspace/workspaceInitializer";
-import os from "os";
-import { SurveyUtils } from "./survey";
 
 const MARKDOWN_WORD_PATTERN = new RegExp("([\\w\\.\\#]+)");
 // === Main
@@ -236,7 +230,10 @@ export async function _activate(
     workspaceFolders: workspaceFolders?.map((fd) => fd.uri.fsPath),
   });
 
-  initializeSentry(getStage());
+  // Respect user's telemetry settings for error reporting too.
+  if(!SegmentClient.instance().hasOptedOut && getStage() === "prod") {
+    initializeSentry(getStage());
+  }
 
   try {
     // Setup the workspace trust callback to detect changes from the user's
@@ -739,47 +736,4 @@ export function shouldDisplayLapsedUserMsg(): boolean {
     !metaData.firstWsInitialize &&
     refreshMsg
   );
-}
-
-function initializeSentry(environment: string): void {
-  // Setting an undefined dsn will stop uploads.
-  const dsn =
-    environment === "prod"
-      ? "https://bc206b31a30a4595a2efb31e8cc0c04e@o949501.ingest.sentry.io/5898219"
-      : undefined;
-
-  // Respect user's telemetry settings for error reporting too.
-  const enabled = !SegmentClient.instance().hasOptedOut;
-
-  Sentry.init({
-    dsn,
-    defaultIntegrations: false,
-    tracesSampleRate: 1.0,
-    enabled,
-    environment,
-    attachStacktrace: true,
-    beforeSend(event, hint) {
-      const error = hint?.originalException;
-      if (error && error instanceof DendronError) {
-
-        event.tags
-        event.extra = {
-          name: error.name,
-          message: error.message,
-          payload: error.payload,
-          severity: error.severity?.toString(),
-          code: error.code,
-          status: error.status,
-          // isComposite: error.isComposite,
-        };
-      }
-      return event;
-    },
-    integrations: [
-      new RewriteFrames({
-        prefix: "app:///dist/",
-      }),
-    ],
-  });
-  return;
 }

@@ -3,17 +3,6 @@ import _ from "lodash";
 import { AxiosError } from "axios";
 import { ERROR_SEVERITY, ERROR_STATUS } from "./constants";
 
-
-// type NonPiiErrorData = {
-//   nonPiiMessage: string;
-//   nonPiiStackTrace?: string
-// }
-
-/**
- * TODO: Additional desireable features
- * - Get a unique hash code for bucketing
- * - Sensitive Data Scrubbed
- */
 type DendronErrorProps = {
   /**
    * Arbitrary payload
@@ -24,11 +13,12 @@ type DendronErrorProps = {
    */
   severity?: ERROR_SEVERITY;
   /**
+   * @deprecated - should only used in DendronServerError
    * Optional HTTP status code for error
    */
   code?: StatusCodes;
   /**
-   * TODO: Deprecate
+   * @deprecated - should only used in DendronServerError
    * Custom status errors
    */
   status?: string;
@@ -57,10 +47,6 @@ type ServerErrorProps = {
   code?: StatusCodes;
 }
 
-// export type DendronErrorPlainObj = {
-//   isComposite: boolean;
-// } & DendronErrorProps;
-
 export type IDendronError = DendronErrorProps;
 
 export class DendronError extends Error implements IDendronError {
@@ -68,19 +54,9 @@ export class DendronError extends Error implements IDendronError {
   public payload?: string;
   public severity?: ERROR_SEVERITY;
   public code?: number;
-  public error?: Error;
+  public innerError?: Error;
   public uniqueId?: number;
-  // public message: string;
-  // isComposite = false;
 
-  // static wrapExistingError(props: Omit<DendronErrorProps, "name">) {
-  //   return new DendronError({
-  //     name: "DendronError",
-  //     message: props.message,
-  //     stack: props.stack, 
-  //     ...props,
-  //   });
-  // }
   static createPlainError(props: Omit<DendronErrorProps, "name">) {
     return error2PlainObject({
       ...props,
@@ -124,7 +100,7 @@ export class DendronError extends Error implements IDendronError {
       this.payload = JSON.stringify(payload || {});
     }
     this.code = code;
-    this.error = innerError;
+    this.innerError = innerError;
     if (innerError) {
       this.stack = innerError.stack;
     }
@@ -137,7 +113,6 @@ export class DendronCompositeError extends Error implements IDendronError {
   public payload: DendronErrorProps[];
   public message: string;
   public severity?: ERROR_SEVERITY;
-  // isComposite = true;
 
   constructor(errors: IDendronError[]) {
     super("multiple errors");
@@ -176,7 +151,6 @@ export class DendronServerError extends DendronError implements IDendronError, S
    public code?: StatusCodes;
 
  /**
-  * TODO: Deprecate
   * Custom status errors
   */
   public status?: string;

@@ -93,8 +93,8 @@ export class Logger {
       const cleanMsg =
       (payload.error ? payload.error.message : payload.msg) || customStringify(payload);
 
-      if (payload.error?.error) {
-        Sentry.captureException(payload.error?.error);
+      if (payload.error) {
+        Sentry.captureException(payload.error);
       }
       else {
         Sentry.captureMessage(cleanMsg);

@@ -1,6 +1,5 @@
-import { DendronError, getStage, StatusCodes } from "@dendronhq/common-all";
+import { getStage, initializeSentry, StatusCodes } from "@dendronhq/common-all";
 import { findInParent, SegmentClient } from "@dendronhq/common-server";
-import { RewriteFrames } from "@sentry/integrations";
 import * as Sentry from "@sentry/node";
 import cors from "cors";
 import express, { NextFunction, Request, Response } from "express";
@@ -15,7 +14,7 @@ import { baseRouter } from "./routes";
 import {
   oauthRouter,
   OauthService,
-  registerOauthHandler,
+  registerOauthHandler
 } from "./routes/oauth";
 
 export function appModule({
@@ -54,45 +53,9 @@ export function appModule({
   const staticDir = path.join(__dirname, "static");
   app.use(express.static(staticDir));
 
-  const environment = getStage();
-
-  // TODO: Consolidate with Sentry Init logic in _extension once webpack issues are diagnosed.
-  const dsn =
-    environment === "prod"
-      ? "https://bc206b31a30a4595a2efb31e8cc0c04e@o949501.ingest.sentry.io/5898219"
-      : undefined;
-
-  // Respect user's telemetry settings for error reporting too.
-  const enabled = !SegmentClient.instance().hasOptedOut;
-
-  Sentry.init({
-    dsn,
-    defaultIntegrations: false,
-    tracesSampleRate: 1.0,
-    enabled,
-    environment,
-    attachStacktrace: true,
-    beforeSend(event, hint) {
-      const error = hint?.originalException;
-      if (error && error instanceof DendronError) {
-        event.extra = {
-          name: error.name,
-          message: error.message,
-          payload: error.payload,
-          severity: error.severity?.toString(),
-          code: error.code,
-          status: error.status,
-          // isComposite: error.isComposite,
-        };
-      }
-      return event;
-    },
-    integrations: [
-      new RewriteFrames({
-        prefix: "app:///dist/",
-      }),
-    ],
-  });
+  if(!SegmentClient.instance().hasOptedOut && getStage() === "prod") {
+    initializeSentry(getStage());
+  }
 
   // Re-use the id for error reporting too:
   Sentry.setUser({ id: SegmentClient.instance().anonymousId });

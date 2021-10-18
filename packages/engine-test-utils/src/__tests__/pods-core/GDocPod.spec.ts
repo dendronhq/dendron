@@ -338,7 +338,10 @@ describe("GDoc import pod", () => {
           },
         });
         expect(importedNotes[0].body).toMatch(
-          `\n\n## Testing GDoc Pod\n\nThis is the first line\n\n![image](assets\\image.png)`
+          `\n\n## Testing GDoc Pod\n\nThis is the first line\n\n![image](${path.join(
+            "assets",
+            `image.png`
+          )})`
         );
       },
       {

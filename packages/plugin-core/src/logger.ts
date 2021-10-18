@@ -1,10 +1,10 @@
 import { DendronError, error2PlainObject, setEnv } from "@dendronhq/common-all";
-import { createLogger, genHash } from "@dendronhq/common-server";
+import { createLogger } from "@dendronhq/common-server";
+import * as Sentry from "@sentry/node";
 import fs from "fs-extra";
 import path from "path";
 import { ExtensionContext, OutputChannel, window, workspace } from "vscode";
 import { CONFIG, DENDRON_CHANNEL_NAME } from "./constants";
-import * as Sentry from "@sentry/node";
 
 export type TraceLevel = "debug" | "info" | "warn" | "error" | "fatal";
 const levels = ["debug", "info", "warn", "error", "fatal"];
@@ -88,7 +88,6 @@ export class Logger {
         scope.setExtra("severity", payload.error.severity?.toString());
         scope.setExtra("code", payload.error.code);
         scope.setExtra("status", payload.error.status);
-        // scope.setExtra("isComposite", payload.error.isComposite);
       }
       const cleanMsg =
       (payload.error ? payload.error.message : payload.msg) || customStringify(payload);
@@ -105,36 +104,12 @@ export class Logger {
   static info(payload: any, show?: boolean): void {
     Logger.log(payload, "info", { show });
 
-    // TODO: Expand on common PII fields. Move to common function
-    if (payload.editor) {
-      payload.editor = genHash(payload.editor);
-    }
-
     Sentry.addBreadcrumb({
       category: "plugin",
       message: customStringify(payload),
       level: Sentry.Severity.Info
     });
   }
-
-  static infoSensitive(payload: any, nonPiiPayload: any, show?: boolean) {
-    Logger.log(payload, "info", { show });
-    Sentry.addBreadcrumb({
-      category: "plugin",
-      message: customStringify(nonPiiPayload),
-      level: Sentry.Severity.Info
-    });
-  }
-
-//   function makeDate(timestamp: number): Date;
-// function makeDate(m: number, d: number, y: number): Date;
-// function makeDate(mOrTimestamp: number, d?: number, y?: number): Date {
-//   if (d !== undefined && y !== undefined) {
-//     return new Date(y, mOrTimestamp, d);
-//   } else {
-//     return new Date(mOrTimestamp);
-//   }
-// }
 
   static debug(payload: any) {
     Logger.log(payload, "debug");

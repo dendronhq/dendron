@@ -944,7 +944,6 @@ const NOTES = {
       }
       // Renaming a note without a frontmatter fails.
       // Make sure we fail gracefully.
-      //TODO: Fix Tests
       return [
         {
           actual: _.pick(error, "severity"),

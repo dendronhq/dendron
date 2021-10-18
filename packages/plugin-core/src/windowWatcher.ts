@@ -57,7 +57,6 @@ export class WindowWatcher {
       ) {
         const uri = editor.document.uri;
         Logger.info({ ctx, editor: uri.fsPath });
-        Logger.infoSensitive({ctx, editor: uri.fsPath}, {ctx, editor: uri.fsPath});
         if (!getExtension().workspaceService?.isPathInWorkspace(uri.fsPath)) {
           Logger.info({ ctx, uri: uri.fsPath, msg: "not in workspace" });
           return;

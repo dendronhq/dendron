@@ -8,15 +8,18 @@ type DendronErrorProps = {
    * Arbitrary payload
    */
   payload?: any;
+
   /**
    * See {@link ERROR_SEVERITY}
    */
   severity?: ERROR_SEVERITY;
+
   /**
    * @deprecated - should only used in DendronServerError
    * Optional HTTP status code for error
    */
   code?: StatusCodes;
+
   /**
    * @deprecated - should only used in DendronServerError
    * Custom status errors
@@ -27,16 +30,10 @@ type DendronErrorProps = {
    * Inner Error object
    */
   innerError?: Error;
-
-  /**
-   * For bucketing purposes
-   */
-  uniqueId?: number;
 } & Error;
 
 type ServerErrorProps = {
   /**
-   * TODO: Deprecate
    * Custom status errors
    */
   status?: string;
@@ -55,7 +52,6 @@ export class DendronError extends Error implements IDendronError {
   public severity?: ERROR_SEVERITY;
   public code?: number;
   public innerError?: Error;
-  public uniqueId?: number;
 
   static createPlainError(props: Omit<DendronErrorProps, "name">) {
     return error2PlainObject({
@@ -84,7 +80,6 @@ export class DendronError extends Error implements IDendronError {
     severity,
     code,
     innerError,
-    uniqueId,
   }: Omit<DendronErrorProps, "name">) {
     super(message);
     this.name = "DendronError";
@@ -104,7 +99,6 @@ export class DendronError extends Error implements IDendronError {
     if (innerError) {
       this.stack = innerError.stack;
     }
-    this.uniqueId = uniqueId;
   }
 }
 
@@ -144,7 +138,6 @@ export class DendronCompositeError extends Error implements IDendronError {
 }
 
 export class DendronServerError extends DendronError implements IDendronError, ServerErrorProps  {
-  
   /**
   * Optional HTTP status code for error
   */
@@ -155,10 +148,6 @@ export class DendronServerError extends DendronError implements IDendronError, S
   */
   public status?: string;
 }
-
-// export function decorateNonPiiProps(error: DendronError): IDendronError & NonPiiErrorData {
-//   error.nonPiiMessage = "hello";
-// }
 
 export class IllegalOperationError extends DendronError {}
 

@@ -1,6 +1,5 @@
-import { NoteUtils, VaultUtils } from "@dendronhq/common-all";
+import { ConfigUtils, NoteUtils, VaultUtils } from "@dendronhq/common-all";
 import { cleanName } from "@dendronhq/common-server";
-import { DConfig } from "@dendronhq/engine-server";
 import _ from "lodash";
 import * as vscode from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
@@ -26,11 +25,7 @@ export class CreateDailyJournalCommand extends BaseCommand<
   key = DENDRON_COMMANDS.CREATE_DAILY_JOURNAL_NOTE.key;
   async gatherInputs(): Promise<CommandInput | undefined> {
     const config = getDWorkspace().config;
-    const journalConfig = DConfig.getConfig({
-      config,
-      path: "workspace.journal",
-      required: true,
-    });
+    const journalConfig = ConfigUtils.getProp(config, "workspace.journal");
     const dailyJournalDomain = journalConfig.dailyDomain;
     const { noteName: fname } = DendronClientUtilsV2.genNoteName("JOURNAL", {
       overrides: { domain: dailyJournalDomain },
@@ -50,11 +45,7 @@ export class CreateDailyJournalCommand extends BaseCommand<
     const { fname } = opts;
     const ctx = "CreateDailyJournal";
     const config = getDWorkspace().config;
-    const journalConfig = DConfig.getConfig({
-      config,
-      path: "workspace.journal",
-      required: true,
-    });
+    const journalConfig = ConfigUtils.getProp(config, "workspace.journal");
     const journalName = journalConfig.name;
     this.L.info({ ctx, journalName, fname });
     const title = NoteUtils.genJournalNoteTitle({
@@ -62,11 +53,7 @@ export class CreateDailyJournalCommand extends BaseCommand<
       journalName,
     });
 
-    const confirmVaultOnCreate = DConfig.getConfig({
-      config,
-      path: "commands.lookup.note.confirmVaultOnCreate",
-      required: true,
-    });
+    const confirmVaultOnCreate = ConfigUtils.getProp(config, "commands.lookup.note.confirmVaultOnCreate");
     const { engine } = getDWorkspace();
     let vault;
     if (_.isUndefined(journalConfig.dailyVault) && confirmVaultOnCreate) {

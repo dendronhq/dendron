@@ -8,12 +8,12 @@ import {
   NoteProps,
   NoteUtils,
   configIsAtLeastV3,
+  ConfigUtils,
 } from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-server";
 import execa from "execa";
 import fs from "fs-extra";
 import _ from "lodash";
-import { DConfig } from "../config";
 import path from "path";
 
 export type RequireHookResp = {
@@ -31,10 +31,10 @@ export class HookUtils {
     hookType: DHookType;
     hookEntry: DHookEntry;
   }) {
-    const hooks = DConfig.getConfig({
+    const hooks = ConfigUtils.getProp(
       config,
-      path: "workspace.hooks",
-    });
+      "workspace.hooks",
+    );
     const onCreate: DHookEntry[] = _.get(
       hooks,
       hookType,
@@ -73,10 +73,10 @@ export class HookUtils {
     hookType: DHookType;
     hookId: string;
   }) {
-    const hooks = DConfig.getConfig({
+    const hooks = ConfigUtils.getProp(
       config,
-      path: "workspace.hooks",
-    });
+      "workspace.hooks",
+    );
     let onCreate: DHookEntry[] = _.get(hooks, hookType, [] as DHookEntry[]);
     onCreate = _.remove(onCreate, { id: hookId });
     const idx = _.findIndex(onCreate, { id: hookId });

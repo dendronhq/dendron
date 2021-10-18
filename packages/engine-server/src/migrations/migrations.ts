@@ -12,7 +12,8 @@ import {
   DendronError,
   genDefaultCommandConfig,
   DVault,
-  StrictV1,
+  StrictConfigV1,
+  ConfigUtils,
 } from "@dendronhq/common-all";
 import {
   SegmentClient,
@@ -54,7 +55,7 @@ export const ALL_MIGRATIONS: Migrations[] = [
             };
           }
 
-          const defaultV3Config = DConfig.genDefaultConfig(3);
+          const defaultV3Config = ConfigUtils.genDefaultConfig();
           const rawDendronConfig = DConfig.getRaw(wsService.wsRoot);
 
           // remove all null properties
@@ -371,7 +372,7 @@ export const ALL_MIGRATIONS: Migrations[] = [
       {
         name: "migrate note lookup config",
         func: async ({ dendronConfig, wsConfig }) => {
-          dendronConfig.lookup = DConfig.genDefaultConfig()
+          dendronConfig.lookup = ConfigUtils.genDefaultConfig()
             .lookup as LegacyLookupConfig;
           const oldLookupCreateBehavior = _.get(
             wsConfig?.settings,
@@ -393,7 +394,7 @@ export const ALL_MIGRATIONS: Migrations[] = [
       {
         name: "migrate scratch config",
         func: async ({ dendronConfig, wsConfig }) => {
-          dendronConfig.scratch = DConfig.genDefaultConfig()
+          dendronConfig.scratch = ConfigUtils.genDefaultConfig()
             .scratch as LegacyScratchConfig;
           if (_.get(wsConfig?.settings, "dendron.defaultScratchName")) {
             dendronConfig.scratch.name = _.get(
@@ -440,7 +441,7 @@ export const ALL_MIGRATIONS: Migrations[] = [
         name: "migrate journal config",
         func: async ({ dendronConfig, wsConfig }) => {
           dendronConfig.journal = (
-            DConfig.genDefaultConfig() as StrictV1
+            ConfigUtils.genDefaultConfig() as StrictConfigV1
           ).journal;
           if (_.get(wsConfig?.settings, "dendron.dailyJournalDomain")) {
             dendronConfig.journal.dailyDomain = _.get(
@@ -478,11 +479,10 @@ export const ALL_MIGRATIONS: Migrations[] = [
         name: "update cache",
         func: async ({ dendronConfig, wsConfig, wsService }) => {
           const { wsRoot, config } = wsService;
-          const vaults = DConfig.getConfig({
+          const vaults = ConfigUtils.getProp(
             config,
-            path: "workspace.vaults",
-            required: true,
-          }) as DVault[];
+            "workspace.vaults"
+          ) as DVault[];
           await Promise.all(
             vaults.map((vault) => {
               return removeCache(vault2Path({ wsRoot, vault }));

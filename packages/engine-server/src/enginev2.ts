@@ -49,6 +49,7 @@ import {
   VaultUtils,
   WorkspaceOpts,
   WriteNoteResp,
+  ConfigUtils,
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -97,11 +98,10 @@ function createRenderedCache(
 
     return new NullCache();
   } else {
-    const maxPreviewsCached = DConfig.getConfig({
+    const maxPreviewsCached = ConfigUtils.getProp(
       config,
-      path: "workspace.maxPreviewsCached",
-      required: true,
-    });
+      "workspace.maxPreviewsCached"
+    );
     if (maxPreviewsCached && maxPreviewsCached > 0) {
       logger.info({
         ctx,
@@ -161,7 +161,7 @@ export class DendronEngineV2 implements DEngine {
     const cpath = DConfig.configPath(wsRoot);
     const config = _.defaultsDeep(
       readYAML(cpath) as IntermediateDendronConfig,
-      DConfig.genDefaultConfig()
+      ConfigUtils.genDefaultConfig()
     );
 
     return new DendronEngineV2({
@@ -383,7 +383,7 @@ export class DendronEngineV2 implements DEngine {
     const cpath = DConfig.configPath(this.configRoot);
     const config = _.defaultsDeep(
       readYAML(cpath) as IntermediateDendronConfig,
-      DConfig.genDefaultConfig()
+      ConfigUtils.genDefaultConfig()
     );
 
     return {
@@ -527,7 +527,7 @@ export class DendronEngineV2 implements DEngine {
 
     this.renderedCache.set(id, {
       updated: note.updated,
-      data: data,
+      data,
     });
 
     const duration = milliseconds() - beforeRenderMillis;
@@ -582,11 +582,10 @@ export class DendronEngineV2 implements DEngine {
         if (ent.status === "delete") {
           delete this.notes[id];
         } else {
-          const maxNoteLength = DConfig.getConfig({
-            config: this.config,
-            path: "workspace.maxNoteLength",
-            required: true,
-          });
+          const maxNoteLength = ConfigUtils.getProp(
+            this.config,
+            "workspace.maxNoteLength"
+          );
           if (
             ent.note.body.length <
             (maxNoteLength || CONSTANTS.DENDRON_DEFAULT_MAX_NOTE_LENGTH)

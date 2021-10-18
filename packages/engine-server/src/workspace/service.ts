@@ -17,6 +17,7 @@ import {
   VaultUtils,
   WorkspaceSettings,
   configIsAtLeastV3,
+  ConfigUtils,
 } from "@dendronhq/common-all";
 import {
   assignJSONWithComment,
@@ -175,10 +176,7 @@ export class WorkspaceService {
   async addWorkspace({ workspace }: { workspace: DWorkspace }) {
     const config = this.config;
     const allWorkspaces =
-      DConfig.getConfig({
-        config,
-        path: "workspace.workspaces",
-      }) || {};
+      ConfigUtils.getProp(config, "workspace.workspaces") || {};
     allWorkspaces[workspace.name] = _.omit(workspace, ["name", "vaults"]);
     // update vault
     const newVaults = await _.reduce(
@@ -233,11 +231,10 @@ export class WorkspaceService {
     }
     // update dup note behavior
     if (!config.site.duplicateNoteBehavior) {
-      const vaults = DConfig.getConfig({
+      const vaults = ConfigUtils.getProp(
         config,
-        path: "workspace.vaults",
-        required: true,
-      }) as DVault[];
+        "workspace.vaults"
+      ) as DVault[];
       config.site.duplicateNoteBehavior = {
         action: DuplicateNoteAction.USE_VAULT,
         payload: vaults.map((v) => VaultUtils.getName(v)),
@@ -360,10 +357,10 @@ export class WorkspaceService {
     let workspaceVaultSyncConfig = this.verifyVaultSyncConfigs(vaults);
     if (_.isUndefined(workspaceVaultSyncConfig)) {
       if (await WorkspaceService.isWorkspaceVault(root)) {
-        workspaceVaultSyncConfig = DConfig.getConfig({
-          config: this.config,
-          path: "workspace.workspaceVaultSyncMode",
-        });
+        workspaceVaultSyncConfig = ConfigUtils.getProp(
+          this.config,
+          "workspace.workspaceVaultSyncMode"
+        );
         // default for workspace vaults
         if (_.isUndefined(workspaceVaultSyncConfig)) {
           workspaceVaultSyncConfig = DVaultSync.NO_COMMIT;
@@ -424,11 +421,10 @@ export class WorkspaceService {
       onSyncVaultsProgress: () => {},
       onSyncVaultsEnd: () => {},
     });
-    const initializeRemoteVaults = DConfig.getConfig({
-      config: this.config,
-      path: "workspace.enableRemoteVaultInit",
-      required: true,
-    });
+    const initializeRemoteVaults = ConfigUtils.getProp(
+      this.config,
+      "workspace.enableRemoteVaultInit",
+    );
     if (initializeRemoteVaults) {
       const { didClone } = await this.syncVaults({
         config: this.config,
@@ -598,11 +594,10 @@ export class WorkspaceService {
     const { wsRoot } = opts;
     const config = DConfig.getOrCreate(wsRoot);
     const ws = new WorkspaceService({ wsRoot });
-    const vaults = DConfig.getConfig({
+    const vaults = ConfigUtils.getProp(
       config,
-      path: "workspace.vaults",
-      required: true,
-    }) as DVault[];
+      "workspace.vaults",
+    ) as DVault[];
     await Promise.all(
       vaults.map(async (vault) => {
         return ws.cloneVaultWithAccessToken({ vault });
@@ -696,11 +691,10 @@ export class WorkspaceService {
 
   async getAllReposVaults(): Promise<Map<string, DVault[]>> {
     const reposVaults = new Map<string, DVault[]>();
-    const vaults = DConfig.getConfig({
-      config: this.config,
-      path: "workspace.vaults",
-      required: true,
-    }) as DVault[];
+    const vaults = ConfigUtils.getProp(
+      this.config,
+      "workspace.vaults"
+    ) as DVault[];
     await Promise.all(
       vaults.map(async (vault) => {
         const repo = await this.getVaultRepo(vault);
@@ -722,11 +716,10 @@ export class WorkspaceService {
    @deprecated - use {@link WorkspaceUtils.isPathInWorkspace}
    */
   isPathInWorkspace(fpath: string) {
-    const vaults = DConfig.getConfig({
-      config: this.config,
-      path: "workspace.vaults",
-      required: true,
-    }) as DVault[];
+    const vaults = ConfigUtils.getProp(
+      this.config,
+      "workspace.vaults"
+    ) as DVault[];
     const wsRoot = this.wsRoot;
     return WorkspaceUtils.isPathInWorkspace({ fpath, vaults, wsRoot });
   }
@@ -832,11 +825,10 @@ export class WorkspaceService {
    * Remove all vault caches in workspace
    */
   async removeVaultCaches() {
-    const vaults = DConfig.getConfig({
-      config: this.config,
-      path: "workspace.vaults",
-      required: true,
-    }) as DVault[];
+    const vaults = ConfigUtils.getProp(
+      this.config,
+      "workspace.vaults",
+    ) as DVault[];
     await Promise.all(
       vaults.map((vault) => {
         return removeCache(vault2Path({ wsRoot: this.wsRoot, vault }));
@@ -942,10 +934,10 @@ export class WorkspaceService {
       _.defaults(opts, { fetchAndPull: false, skipPrivate: false });
     const { wsRoot } = this;
 
-    const workspaces = DConfig.getConfig({
+    const workspaces = ConfigUtils.getProp(
       config,
-      path: "workspace.workspaces",
-    });
+      "workspace.workspaces",
+    );
     // check workspaces
     const workspacePaths: { wsPath: string; wsUrl: string }[] = (
       await Promise.all(
@@ -971,10 +963,10 @@ export class WorkspaceService {
 
     // const seedService = new SeedService({wsRoot});
     // check seeds
-    const seeds = DConfig.getConfig({
+    const seeds = ConfigUtils.getProp(
       config,
-      path: "workspace.seeds",
-    });
+      "workspace.seeds",
+    );
     const seedResults: { id: string; status: SyncActionStatus; data: any }[] =
       [];
     await Promise.all(
@@ -1007,11 +999,7 @@ export class WorkspaceService {
     );
 
     // clone all missing vaults
-    const vaults = DConfig.getConfig({
-      config,
-      path: "workspace.vaults",
-      required: true,
-    }) as DVault[];
+    const vaults = ConfigUtils.getProp(config, "workspace.vaults") as DVault[];
     const emptyRemoteVaults = vaults.filter(
       (vault) =>
         !_.isUndefined(vault.remote) &&
@@ -1036,11 +1024,10 @@ export class WorkspaceService {
       })
     );
     if (fetchAndPull) {
-      const vaults = DConfig.getConfig({
+      const vaults = ConfigUtils.getProp(
         config,
-        path: "workspace.vaults",
-        required: true,
-      }) as DVault[];
+        "workspace.vaults"
+      ) as DVault[];
       const vaultsToFetch = _.difference(
         vaults.filter((vault) => !_.isUndefined(vault.remote)),
         emptyRemoteVaults

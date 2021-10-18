@@ -1,6 +1,5 @@
-import { NoteProps, NoteUtils } from "@dendronhq/common-all";
+import { ConfigUtils, NoteProps, NoteUtils } from "@dendronhq/common-all";
 import _ from "lodash";
-import { DConfig } from "@dendronhq/engine-server";
 import { Uri, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../utils";
@@ -27,10 +26,7 @@ export class RandomNoteCommand extends BasicCommand<
     const { engine, config } = getDWorkspace();
 
     // If no pattern is specified for include, then include all notes for the search set.
-    const randomNoteConfig = DConfig.getConfig({
-      config,
-      path: "commands.randomNote",
-    });
+    const randomNoteConfig = ConfigUtils.getProp(config, "commands.randomNote");
     const includeSet: string[] = randomNoteConfig?.include ?? [""];
 
     const searchPredicate = function (note: NoteProps) {

@@ -1,11 +1,11 @@
 import {
+  ConfigUtils,
   getSlugger,
   NoteProps,
   NoteQuickInput,
   NoteUtils,
 } from "@dendronhq/common-all";
 import _ from "lodash";
-import { DConfig } from "@dendronhq/engine-server";
 import * as vscode from "vscode";
 import { QuickInputButton, ThemeIcon } from "vscode";
 import { NoteSyncService } from "../../services/NoteSyncService";
@@ -99,11 +99,7 @@ const selectionToNoteProps = async (opts: {
     case "selectionExtract": {
       if (!_.isUndefined(document)) {
         const ws = getDWorkspace();
-        const lookupConfig = DConfig.getConfig({
-          config: ws.config,
-          path: "commands.lookup",
-          required: true,
-        });
+        const lookupConfig = ConfigUtils.getProp(ws.config, "commands.lookup");
         const noteLookupConfig = lookupConfig.note;
         const leaveTrace = noteLookupConfig.leaveTrace || false;
         const body = "\n" + document.getText(range).trim();

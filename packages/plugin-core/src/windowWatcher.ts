@@ -1,10 +1,11 @@
 import {
+  ConfigUtils,
   DendronWebViewKey,
   DMessageType,
   NoteUtils,
   OnDidChangeActiveTextEditorMsg,
 } from "@dendronhq/common-all";
-import { DConfig, DendronASTDest, MDUtilsV5 } from "@dendronhq/engine-server";
+import { DendronASTDest, MDUtilsV5 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import visit from "unist-util-visit";
 import { ExtensionContext, Selection, TextEditor, window } from "vscode";
@@ -165,11 +166,7 @@ export class WindowWatcher {
     });
     this.moveCursorPastFrontmatter(editor);
     const config = getDWorkspace().config;
-    const autoFoldFrontmatter = DConfig.getConfig({
-      config,
-      path: "workspace.enableAutoFoldFrontmatter",
-      required: true,
-    });
+    const autoFoldFrontmatter = ConfigUtils.getProp(config, "workspace.enableAutoFoldFrontmatter");
     if (autoFoldFrontmatter) {
       await this.foldFrontmatter();
     }

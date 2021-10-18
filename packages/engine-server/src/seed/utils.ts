@@ -1,4 +1,5 @@
 import {
+  ConfigUtils,
   DendronError,
   DVault,
   ERROR_STATUS,
@@ -7,7 +8,6 @@ import {
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { DConfig } from "../config";
 import { WorkspaceService } from "../workspace";
 import { DEFAULT_SEED_PUBLISHER } from "./constants";
 
@@ -62,11 +62,10 @@ export class SeedUtils {
   static validateWorkspaceSeedConversion({ wsRoot }: { wsRoot: string }) {
     const ws = new WorkspaceService({ wsRoot });
     const config = ws.config;
-    const vaults = DConfig.getConfig({
+    const vaults = ConfigUtils.getProp(
       config,
-      path: "workspace.vaults",
-      required: true,
-    }) as DVault[];
+      "workspace.vaults",
+    ) as DVault[];
     if (vaults.length !== 1) {
       return {
         error: DendronError.createFromStatus({
@@ -77,10 +76,10 @@ export class SeedUtils {
         }),
       };
     }
-    const workspaces = DConfig.getConfig({
+    const workspaces = ConfigUtils.getProp(
       config,
-      path: "workspace.workspaces",
-    });
+      "workspace.workspaces",
+    );;
     if (!_.isEmpty(workspaces)) {
       return {
         error: DendronError.createFromStatus({

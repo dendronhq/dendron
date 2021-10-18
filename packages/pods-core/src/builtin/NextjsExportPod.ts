@@ -6,10 +6,10 @@ import {
   NotePropsDict,
   NoteUtils,
   createSerializedFuseNoteIndex,
+  ConfigUtils,
   DVault,
 } from "@dendronhq/common-all";
 import {
-  DConfig,
   MDUtilsV5,
   ProcFlavor,
   SiteUtils,
@@ -133,11 +133,10 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     dest: string;
   }) {
     const ctx = "copyAssets";
-    const vaults = DConfig.getConfig({
+    const vaults = ConfigUtils.getProp(
       config,
-      path: "workspace.vaults",
-      required: true,
-    }) as DVault[];
+      "workspace.vaults",
+    ) as DVault[];
     const destPublicPath = path.join(dest, "public");
     fs.ensureDirSync(destPublicPath);
     const siteAssetsDir = path.join(destPublicPath, "assets");

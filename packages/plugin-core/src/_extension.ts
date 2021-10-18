@@ -15,6 +15,7 @@ import {
   WorkspaceType,
   MigrationEvents,
   DVault,
+  ConfigUtils,
 } from "@dendronhq/common-all";
 import {
   getDurationMilliseconds,
@@ -29,7 +30,6 @@ import {
   WorkspaceService,
   WorkspaceUtils,
   MigrationChangeSetStatus,
-  DConfig,
 } from "@dendronhq/engine-server";
 import * as Sentry from "@sentry/node";
 import { ExecaChildProcess } from "execa";
@@ -369,11 +369,7 @@ export async function _activate(
       ws.workspaceService = wsService;
 
       // check for vaults with same name
-      const vaults = DConfig.getConfig({
-        config: dendronConfig,
-        path: "workspace.vaults",
-        required: true,
-      }) as DVault[];
+      const vaults = ConfigUtils.getProp(dendronConfig, "workspace.vaults") as DVault[];
       const uniqVaults = _.uniqBy(vaults, (vault) => VaultUtils.getName(vault));
       if (_.size(uniqVaults) < _.size(vaults)) {
         const txt = "Fix it";

@@ -1,7 +1,6 @@
-import { DWorkspaceV2, VSCodeEvents } from "@dendronhq/common-all";
+import { ConfigUtils, DWorkspaceV2, VSCodeEvents } from "@dendronhq/common-all";
 import { SegmentClient, TelemetryStatus } from "@dendronhq/common-server";
 import _ from "lodash";
-import { DConfig } from "@dendronhq/engine-server";
 import * as vscode from "vscode";
 import { Logger } from "./logger";
 import { AnalyticsUtils } from "./utils/analytics";
@@ -24,10 +23,7 @@ export function setupSegmentClient(ws: DWorkspaceV2) {
     // if the current status was set by configuration, and that configuration has changed, we should update it and report the change
     const status = SegmentClient.getStatus();
     if (SegmentClient.setByConfig(status)) {
-      const disableTelemetry = DConfig.getConfig({
-        config: ws.config,
-        path: "workspace.disableTelemetry",
-      });
+      const disableTelemetry = ConfigUtils.getProp(ws.config, "workspace.disableTelemetry")
       if (
         SegmentClient.isDisabled(status) &&
         !disableTelemetry &&

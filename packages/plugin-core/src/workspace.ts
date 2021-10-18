@@ -1,5 +1,6 @@
 import {
   APIUtils,
+  ConfigUtils,
   DendronError,
   DendronTreeViewKey,
   DendronWebViewKey,
@@ -16,7 +17,6 @@ import {
   writeJSONWithComments,
 } from "@dendronhq/common-server";
 import {
-  DConfig,
   HistoryService,
   WorkspaceService,
   WorkspaceUtils,
@@ -403,7 +403,7 @@ export class DendronExtension {
     const out = _.get(
       this.getDendronWorkspaceSettingsSync(),
       wsConfigKey,
-      _.get(DConfig.genDefaultConfig(), dendronConfigKey)
+      _.get(ConfigUtils.genDefaultConfig(), dendronConfigKey)
     );
     // this should not happen
     if (_.isUndefined(out)) {

@@ -1,4 +1,5 @@
-const { DConfig, SiteUtils } = require("@dendronhq/engine-server");
+const { ConfigUtils } = require("@dendronhq/common-all");
+const { SiteUtils } = require("@dendronhq/engine-server");
 const fs = require("fs-extra");
 const path = require("path");
 const {
@@ -14,11 +15,7 @@ async function copyAssets() {
   const ctx = "copyAssets";
   const wsRoot = env().wsRoot;
   const config = getDendronConfig();
-  const vaults = DConfig.getConfig({
-    config,
-    path: "workspace.vaults",
-    required: true,
-  });
+  const vaults = ConfigUtils.getProp(config, "workspace.vaults");
   const siteAssetsDir = path.join(getSiteOutputPath(), "assets");
   // copy site assets
   if (!config.site.copyAssets) {

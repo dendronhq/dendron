@@ -1,5 +1,6 @@
 import { ServerUtils } from "@dendronhq/api-server";
 import {
+  ConfigUtils,
   CONSTANTS,
   DendronError,
   DEngineClient,
@@ -26,7 +27,6 @@ import {
   vault2Path,
 } from "@dendronhq/common-server";
 import {
-  DConfig,
   HistoryEvent,
   HistoryService,
 } from "@dendronhq/engine-server";
@@ -797,11 +797,7 @@ export class DendronClientUtilsV2 {
   } {
     // gather inputs
     const config = getDWorkspace().config;
-    const journalConfig = DConfig.getConfig({
-      config,
-      path: "workspace.journal",
-      required: true,
-    });
+    const journalConfig = ConfigUtils.getProp(config, "workspace.journal");
     const dateFormat: string =
       type === "SCRATCH"
         ? getExtension().getWorkspaceSettingOrDefault({

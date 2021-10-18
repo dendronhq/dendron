@@ -1,5 +1,5 @@
-import { ErrorFactory, NoteQuickInput } from "@dendronhq/common-all";
-import { HistoryService, DConfig } from "@dendronhq/engine-server";
+import { ConfigUtils, ErrorFactory, NoteQuickInput } from "@dendronhq/common-all";
+import { HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { Selection, SnippetString } from "vscode";
 import { LookupControllerV3 } from "../components/lookup/LookupControllerV3";
@@ -40,10 +40,7 @@ export class InsertNoteCommand extends BasicCommand<
     const lc = this.createLookup();
     const provider = new NoteLookupProvider("insert", { allowNewNote: false });
     const config = getDWorkspace().config;
-    const tempPrefix = DConfig.getConfig({
-      config,
-      path: "commands.insertNote.initialValue",
-    });
+    const tempPrefix = ConfigUtils.getProp(config, "commands.insertNote.initialValue");
     const initialValue = tempPrefix ? `${tempPrefix}.` : undefined;
     lc.show({
       title: "Insert note",

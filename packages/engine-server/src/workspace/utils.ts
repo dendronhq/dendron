@@ -12,13 +12,13 @@ import {
   WorkspaceFolderCode,
   WorkspaceOpts,
   WorkspaceType,
+  ConfigUtils,
 } from "@dendronhq/common-all";
 import { findUpTo, genHash } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { URI } from "vscode-uri";
-import { DConfig } from "../config";
 
 export class WorkspaceUtils {
   /** Finds the workspace type using the VSCode plugin workspace variables. */
@@ -142,10 +142,7 @@ export class WorkspaceUtils {
      */
     let isIndex: boolean = false;
 
-    const seeds = DConfig.getConfig({
-      config,
-      path: "workspace.seeds",
-    });
+    const seeds = ConfigUtils.getProp(config, "workspace.seeds");
     if (vault.seed) {
       if (seeds && seeds[vault.seed]) {
         const maybeSite = seeds[vault.seed]?.site;

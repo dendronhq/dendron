@@ -5,6 +5,7 @@ import {
   DVault,
   DWorkspaceV2,
   WorkspaceType,
+  ConfigUtils,
 } from "@dendronhq/common-all";
 import { DConfig } from "@dendronhq/engine-server";
 import * as vscode from "vscode";
@@ -37,11 +38,10 @@ export abstract class DendronBaseWorkspace implements DWorkspaceV2 {
 
   // TODO: optimize to not read every time
   get vaults(): DVault[] {
-    const vaults = DConfig.getConfig({
-      config: this.config,
-      path: "workspace.vaults",
-      required: true,
-    }) as DVault[];
+    const vaults = ConfigUtils.getProp(
+      this.config,
+      "workspace.vaults"
+    ) as DVault[];
     return vaults;
   }
 

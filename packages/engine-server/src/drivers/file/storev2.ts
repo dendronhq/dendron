@@ -41,6 +41,7 @@ import {
   USERS_HIERARCHY,
   VaultUtils,
   WriteNoteResp,
+  ConfigUtils,
 } from "@dendronhq/common-all";
 import {
   DLogger,
@@ -60,7 +61,6 @@ import { readNotesFromCache, writeNotesToCache } from "../../utils";
 import { NoteParser } from "./noteParser";
 import { SchemaParser } from "./schemaParser";
 import { InMemoryNoteCache } from "../../util/inMemoryNoteCache";
-import { DConfig } from "../../config";
 
 export type FileMeta = {
   // file name: eg. foo.md, name = foo
@@ -416,11 +416,10 @@ export class FileStorage implements DStore {
     const notesMap = NoteUtils.createFnameNoteMap(allNotes, true);
     return _.map(allNotes, (noteFrom: NoteProps) => {
       try {
-        const maxNoteLength = DConfig.getConfig({
-          config: this.config,
-          path: "workspace.maxNoteLength",
-          required: true,
-        });
+        const maxNoteLength = ConfigUtils.getProp(
+          this.config,
+          "workspace.maxNoteLength"
+        );
         if (
           noteFrom.body.length <
           (maxNoteLength || CONSTANTS.DENDRON_DEFAULT_MAX_NOTE_LENGTH)
@@ -482,11 +481,10 @@ export class FileStorage implements DStore {
         if (n.stub) {
           return;
         }
-        const maxNoteLength = DConfig.getConfig({
-          config: this.config,
-          path: "workspace.maxNoteLength",
-          required: true,
-        });
+        const maxNoteLength = ConfigUtils.getProp(
+          this.config,
+          "workspace.maxNoteLength"
+        );
         if (
           n.body.length >=
           (maxNoteLength || CONSTANTS.DENDRON_DEFAULT_MAX_NOTE_LENGTH)

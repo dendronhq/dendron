@@ -8,10 +8,10 @@ import {
   WorkspaceType,
   DVaultSync,
   LegacyNoteAddBehavior,
+  ConfigUtils,
 } from "@dendronhq/common-all";
 import {
   ALL_MIGRATIONS,
-  DConfig,
   Migrations,
   MigrateFunction,
   MigrationServce,
@@ -143,7 +143,7 @@ suite("Migration", function () {
             });
             expect(out.length).toEqual(1);
             expect(getDWorkspace().config.journal).toEqual(
-              DConfig.genDefaultConfig().journal
+              ConfigUtils.genDefaultConfig().journal
             );
             done();
           },
@@ -174,7 +174,7 @@ suite("Migration", function () {
             });
             expect(out.length).toEqual(1);
             expect(getDWorkspace().config.journal).toEqual({
-              ...DConfig.genDefaultConfig().journal,
+              ...ConfigUtils.genDefaultConfig().journal,
               name: "foo",
             });
             done();
@@ -206,7 +206,7 @@ suite("Migration", function () {
             migrations: getMigration({ from: "0.51.0", to: "0.52.0" }),
           });
           expect(getDWorkspace().config.scratch).toEqual({
-            ...DConfig.genDefaultConfig().scratch,
+            ...ConfigUtils.genDefaultConfig().scratch,
             name: "foo",
           });
           done();
@@ -340,7 +340,7 @@ suite("Migration", function () {
             migrations: getMigration({ from: "0.55.0", to: "0.55.2" }),
           });
           expect(getDWorkspace().config.lookup!.note.selectionType).toEqual(
-            DConfig.genDefaultConfig().lookup!.note.selectionType
+            ConfigUtils.genDefaultConfig().lookup!.note.selectionType
           );
           done();
         },

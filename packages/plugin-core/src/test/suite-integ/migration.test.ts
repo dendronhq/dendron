@@ -10,6 +10,7 @@ import {
   LegacyNoteAddBehavior,
   ConfigUtils,
   LookupSelectionModeEnum,
+  IntermediateDendronConfig,
 } from "@dendronhq/common-all";
 import {
   ALL_MIGRATIONS,
@@ -278,7 +279,7 @@ suite("Migration", function () {
         ctx,
         modConfigCb: (config) => {
           // @ts-ignore
-          delete config["lookup"];
+          delete config.commands["lookup"];
           return config;
         },
         onInit: async ({ engine, wsRoot }) => {
@@ -318,7 +319,7 @@ suite("Migration", function () {
         ctx,
         modConfigCb: (config) => {
           // @ts-ignore
-          delete config["lookup"];
+          delete config.commands["lookup"];
           return config;
         },
         onInit: async ({ engine, wsRoot }) => {
@@ -491,13 +492,11 @@ suite("Migration", function () {
           config["maxNoteLength"] = 3000000;
           config["feedback"] = true;
           config["apiEndpoint"] = "foobar.com";
-          // @ts-ignore
-          delete config["workspace"];
+
           return config;
         },
         onInit: async ({ engine, wsRoot }) => {
           const dendronConfig = engine.config;
-          const originalDeepCopy = _.cloneDeep(dendronConfig);
           const wsConfig = await getExtension().getWorkspaceSettings();
           const wsService = new WorkspaceService({ wsRoot });
 
@@ -517,6 +516,9 @@ suite("Migration", function () {
             "feedback",
             "apiEndpoint",
           ];
+
+          delete dendronConfig["workspace"];
+          const originalDeepCopy = _.cloneDeep(dendronConfig);
 
           // all command related old configs should exist prior to migration
           const preMigrationCheckItems = [
@@ -553,7 +555,8 @@ suite("Migration", function () {
 
           const backupContent = readYAML(
             path.join(wsRoot, maybeBackupFileName)
-          );
+          ) as IntermediateDendronConfig;
+          delete backupContent["workspace"];
           expect(_.isEqual(backupContent, originalDeepCopy)).toBeTruthy();
 
           // all workspace related old configs shouldn't exist after migration

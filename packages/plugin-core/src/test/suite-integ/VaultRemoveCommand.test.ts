@@ -204,11 +204,9 @@ suite("VaultRemoveCommand", function () {
             configPathOrig
           ) as IntermediateDendronConfig;
           // check what we are starting from.
-          expect(configOrig.vaults!.map((ent) => ent.fsPath)).toEqual([
-            vaults[0].fsPath,
-            vaults[1].fsPath,
-            vaults[2].fsPath,
-          ]);
+          expect(
+            configOrig.workspace!.vaults!.map((ent) => ent.fsPath)
+          ).toEqual([vaults[0].fsPath, vaults[1].fsPath, vaults[2].fsPath]);
 
           // @ts-ignore
           VSCodeUtils.showQuickPick = () => {

@@ -1,6 +1,5 @@
 import {
   CONSTANTS,
-  IntermediateDendronConfig,
   InstallStatus,
   isNotUndefined,
   Time,
@@ -153,60 +152,76 @@ suite("Extension", function () {
         });
         const resp = readYAML(path.join(wsRoot, "dendron.yml"));
         expect(resp).toEqual({
-          version: 1,
-          vaults: [
-            {
-              fsPath: "vault",
-            },
-          ],
+          version: 3,
           useFMTitle: true,
-          usePrettyRefs: true,
           useNoteTitleForLink: true,
-          initializeRemoteVaults: true,
-          lookup: {
-            note: {
-              selectionType: "selectionExtract",
-              leaveTrace: false,
-            },
-          },
-          journal: {
-            addBehavior: "childOfDomain",
-            dailyDomain: "daily",
-            dateFormat: "y.MM.dd",
-            name: "journal",
-            firstDayOfWeek: 1,
-          },
-          scratch: {
-            name: "scratch",
-            dateFormat: "y.MM.dd.HHmmss",
-            addBehavior: "asOwnDomain",
-          },
-          noAutoCreateOnDefinition: true,
           noLegacyNoteRef: true,
-          noXVaultWikiLink: true,
-          lookupConfirmVaultOnCreate: false,
-          autoFoldFrontmatter: true,
+          mermaid: true,
+          useKatex: true,
+          usePrettyRefs: true,
           dev: {
             enablePreviewV2: true,
           },
-          maxPreviewsCached: 10,
-          mermaid: true,
-          useKatex: true,
           site: {
             copyAssets: true,
             siteHierarchies: ["root"],
             siteRootDir: "docs",
-            siteLastModified: true,
-            gh_edit_branch: "main",
             usePrettyRefs: true,
             title: "Dendron",
             description: "Personal knowledge space",
+            siteLastModified: true,
+            gh_edit_branch: "main",
             duplicateNoteBehavior: {
               action: "useVault",
               payload: ["vault"],
             },
           },
-        } as IntermediateDendronConfig);
+          commands: {
+            lookup: {
+              note: {
+                selectionMode: "extract",
+                confirmVaultOnCreate: false,
+                leaveTrace: false,
+              },
+            },
+            randomNote: {},
+            insertNote: {
+              initialValue: "templates",
+            },
+            insertNoteLink: {
+              aliasMode: "none",
+              enableMultiSelect: false,
+            },
+            insertNoteIndex: {
+              enableMarker: false,
+            },
+          },
+          workspace: {
+            vaults: [{ fsPath: "vault" }],
+            journal: {
+              dailyDomain: "daily",
+              name: "journal",
+              dateFormat: "y.MM.dd",
+              addBehavior: "childOfDomain",
+            },
+            scratch: {
+              name: "scratch",
+              dateFormat: "y.MM.dd.HHmmss",
+              addBehavior: "asOwnDomain",
+            },
+            graph: {
+              zoomSpeed: 1,
+            },
+            enableAutoCreateOnDefinition: false,
+            enableXVaultWikiLink: false,
+            enableRemoteVaultInit: true,
+            workspaceVaultSyncMode: "noCommit",
+            enableAutoFoldFrontmatter: false,
+            maxPreviewsCached: 10,
+            maxNoteLength: 204800,
+          },
+        });
+
         const dendronState = MetadataService.instance().getMeta();
         expect(isNotUndefined(dendronState.firstInstall)).toBeTruthy();
         expect(isNotUndefined(dendronState.firstWsInitialize)).toBeTruthy();

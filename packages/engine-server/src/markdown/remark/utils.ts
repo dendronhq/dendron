@@ -44,6 +44,7 @@ import type {
   TableRow,
   Image,
   Text,
+  Link,
   FootnoteDefinition,
 } from "mdast";
 import * as mdastBuilder from "mdast-builder";
@@ -930,6 +931,10 @@ export class RemarkUtils {
 
   static isText(node: Node): node is Text {
     return node.type === DendronASTTypes.TEXT;
+  }
+
+  static isLink(node: Node): node is Link {
+    return node.type === DendronASTTypes.LINK;
   }
 
   static isFootnoteDefinition(node: Node): node is FootnoteDefinition {

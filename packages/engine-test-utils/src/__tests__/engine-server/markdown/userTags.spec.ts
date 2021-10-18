@@ -15,6 +15,7 @@ import _ from "lodash";
 import { runEngineTestV5 } from "../../../engine";
 import { ENGINE_HOOKS } from "../../../presets";
 import {
+  checkNotInVFile,
   checkVFile,
   createProcForTest,
   createProcTests,
@@ -176,7 +177,33 @@ describe("user tags", () => {
       preSetupHook: ENGINE_HOOKS.setupBasic,
     });
 
-    const ALL_TEST_CASES = [...SIMPLE];
+    const INSIDE_LINK = createProcTests({
+      name: "inside a link",
+      setupFunc: async ({ engine, vaults, extra }) => {
+        const proc2 = createProcForTest({
+          engine,
+          dest: extra.dest,
+          vault: vaults[0],
+        });
+        const resp = await proc2.process(
+          "[@dendronhq](https://twitter.com/dendronhq)"
+        );
+        return { resp };
+      },
+      verifyFuncDict: {
+        [DendronASTDest.HTML]: async ({ extra }) => {
+          const { resp } = extra;
+          await checkVFile(
+            resp,
+            '<a href="https://twitter.com/dendronhq">@dendronhq</a>'
+          );
+          await checkNotInVFile(resp, `Private`);
+        },
+      },
+      preSetupHook: ENGINE_HOOKS.setupBasic,
+    });
+
+    const ALL_TEST_CASES = [...SIMPLE, ...INSIDE_LINK];
     runAllTests({ name: "compile", testCases: ALL_TEST_CASES });
   });
 });

@@ -128,12 +128,13 @@ export class VaultConvertCommand extends BasicCommand<
    * @returns
    */
   async execute(opts: CommandOpts) {
+    const ctx = "VaultConvertCommand";
     const { vault, type, remoteUrl } = opts;
     const { wsRoot } = getDWorkspace();
-    if (!vault || !type || !remoteUrl)
+    if (!vault || !type)
       throw new DendronError({
         message:
-          "Vault, type, or remote URL has not been specified when converting a vault.",
+          "Vault or type has not been specified when converting a vault.",
         payload: { vault, type, remoteUrl },
       });
     const workspaceService = getExtension().workspaceService;
@@ -144,12 +145,31 @@ export class VaultConvertCommand extends BasicCommand<
       });
 
     if (type === "local") {
+      Logger.info({ ctx, msg: "Converting vault to local", vault, wsRoot });
       await workspaceService.convertVaultLocal({ wsRoot, vault });
       window.showInformationMessage(
         `Converted vault '${VaultUtils.getName(vault)}' to a ${type} vault.`
       );
+      Logger.info({
+        ctx,
+        msg: "Done converting vault to local",
+        vault,
+        wsRoot,
+      });
       return { updatedVault: vault };
     } else if (type === "remote") {
+      if (!remoteUrl)
+        throw new DendronError({
+          message: "Remote URL for remote vault has not been specified.",
+          payload: { vault, type, remoteUrl },
+        });
+      Logger.info({
+        ctx,
+        msg: "Converting vault to remote",
+        vault,
+        wsRoot,
+        remoteUrl,
+      });
       const results = await workspaceService.convertVaultRemote({
         wsRoot,
         vault,
@@ -162,6 +182,13 @@ export class VaultConvertCommand extends BasicCommand<
           results.branch
         }`
       );
+      Logger.info({
+        ctx,
+        msg: "Done converting vault to remote",
+        vault,
+        wsRoot,
+        remoteUrl,
+      });
       return { updatedVault: vault };
     } else {
       assertUnreachable(type);

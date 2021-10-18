@@ -184,10 +184,8 @@ export class Git {
   /** Gets the upstream the current branch is set up to push to, or `undefined` if it is not set up to push anywhere. */
   async getUpstream(): Promise<string | undefined> {
     try {
-      const { stdout } = await this._execute(
-        "git rev-parse --abbrev-ref @{upstream}"
-      );
-      return _.trim(stdout);
+      const { stdout } = await this._execute("git remote");
+      return _.trim(stdout.split("\n")[0]);
     } catch {
       return undefined;
     }

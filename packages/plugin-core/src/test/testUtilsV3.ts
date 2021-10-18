@@ -8,6 +8,7 @@ import {
   WorkspaceSettings,
   WorkspaceType,
   ConfigUtils,
+  VaultRemoteSource,
 } from "@dendronhq/common-all";
 import {
   assignJSONWithComment,
@@ -41,10 +42,7 @@ import {
   SetupWorkspaceCommand,
   SetupWorkspaceOpts,
 } from "../commands/SetupWorkspace";
-import {
-  VaultAddCommand,
-  VaultRemoteSource,
-} from "../commands/VaultAddCommand";
+import { VaultAddCommand } from "../commands/VaultAddCommand";
 import { Logger } from "../logger";
 import { StateService } from "../services/stateService";
 import { WorkspaceConfig } from "../settings";

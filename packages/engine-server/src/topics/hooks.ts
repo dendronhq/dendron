@@ -30,9 +30,8 @@ export class HookUtils {
     hookType: DHookType;
     hookEntry: DHookEntry;
   }) {
-    const hooks = ConfigUtils.getProp(config, "workspace.hooks");
     const onCreate: DHookEntry[] = _.get(
-      hooks,
+      config.workspace!.hooks,
       hookType,
       [] as DHookEntry[]
     ).concat([hookEntry]);
@@ -64,8 +63,11 @@ export class HookUtils {
     hookType: DHookType;
     hookId: string;
   }) {
-    const hooks = ConfigUtils.getProp(config, "workspace.hooks");
-    let onCreate: DHookEntry[] = _.get(hooks, hookType, [] as DHookEntry[]);
+    let onCreate: DHookEntry[] = _.get(
+      config.workspace!.hooks,
+      hookType,
+      [] as DHookEntry[]
+    );
     onCreate = _.remove(onCreate, { id: hookId });
     const idx = _.findIndex(onCreate, { id: hookId });
     onCreate.splice(idx, 1);

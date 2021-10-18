@@ -41,7 +41,6 @@ import {
   SchemaUtils,
   VaultUtils,
   WriteNoteResp,
-  ConfigUtils,
 } from "@dendronhq/common-all";
 import { createLogger, DLogger, readYAML } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -129,8 +128,7 @@ export class DendronEngineClient implements DEngineClient {
       engine: this,
       logger: this.logger,
     });
-    const hooks = ConfigUtils.getProp(this.config, "workspace.hooks");
-    this.hooks = hooks || { onCreate: [] };
+    this.hooks = this.config.workspace!.hooks || { onCreate: [] };
   }
 
   /**

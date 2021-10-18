@@ -5,7 +5,14 @@ import querystring from "querystring";
 import semver from "semver";
 import { COLORS_LIST } from "./colors";
 import { NoteProps, SEOProps } from "./types";
-import { IntermediateDendronConfig } from "./types/intermediateConfigs";
+import {
+  configIsV3,
+  genDefaultCommandConfig,
+  genDefaultWorkspaceConfig,
+  IntermediateDendronConfig,
+  StrictConfigV3,
+  StrictIntermediateDendronConfig,
+} from "./types/intermediateConfigs";
 
 /**
  * Dendron utilities
@@ -255,3 +262,67 @@ export class PublishUtils {
  * ```
  */
 export type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
+
+export class ConfigUtils {
+  static usePrettyRef(config: IntermediateDendronConfig) {
+    let usePrettyRefs: boolean | undefined = _.find(
+      [config?.usePrettyRefs, config?.site?.usePrettyRefs],
+      (ent) => !_.isUndefined(ent)
+    );
+    if (_.isUndefined(usePrettyRefs)) {
+      usePrettyRefs = true;
+    }
+    return usePrettyRefs;
+  }
+
+  static genDefaultConfig(): StrictIntermediateDendronConfig {
+    const common = {
+      useFMTitle: true,
+      useNoteTitleForLink: true,
+      noLegacyNoteRef: true,
+      mermaid: true,
+      useKatex: true,
+      usePrettyRefs: true,
+      dev: {
+        enablePreviewV2: true,
+      },
+      site: {
+        copyAssets: true,
+        siteHierarchies: ["root"],
+        siteRootDir: "docs",
+        usePrettyRefs: true,
+        title: "Dendron",
+        description: "Personal knowledge space",
+        siteLastModified: true,
+        gh_edit_branch: "main",
+      },
+    };
+
+    return {
+      version: 3,
+      ...common,
+      commands: genDefaultCommandConfig(),
+      workspace: genDefaultWorkspaceConfig(),
+    } as StrictConfigV3;
+  }
+
+  static getProp(config: IntermediateDendronConfig, path: string) {
+    const currentDefaultConfig = ConfigUtils.genDefaultConfig();
+    const defaultValue = _.get(currentDefaultConfig, path);
+    if (!configIsV3(config)) {
+      // if config.version isn't up to date,
+      // return current config's default regardless of the existence
+      // of a value at the path.
+      return defaultValue;
+    } else {
+      const value = _.get(config, path);
+      if (!_.isUndefined(value)) {
+        // return what we got.
+        return value;
+      } else {
+        // return default if value doesn't exist.
+        return defaultValue;
+      }
+    }
+  }
+}

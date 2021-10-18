@@ -147,7 +147,23 @@ export class NoteLookupCommand extends BaseCommand<
       "commands.lookup"
     ) as LookupConfig;
     const noteLookupConfig = lookupConfig.note;
-    const selectionType = noteLookupConfig.selectionMode;
+    let selectionType;
+    switch (noteLookupConfig.selectionMode) {
+      case "link": {
+        selectionType = "selection2link";
+        break;
+      }
+      case "none": {
+        selectionType = "none";
+        break;
+      }
+      case "extract":
+      default: {
+        selectionType = "selectionExtract";
+        break;
+      }
+    }
+
     const confirmVaultOnCreate = noteLookupConfig.confirmVaultOnCreate;
 
     const copts: CommandRunOpts = _.defaults(opts || {}, {

@@ -802,7 +802,7 @@ export class DendronClientUtilsV2 {
       type === "SCRATCH"
         ? getExtension().getWorkspaceSettingOrDefault({
             wsConfigKey: "dendron.defaultScratchDateFormat",
-            dendronConfigKey: "scratch.dateFormat",
+            dendronConfigKey: "workspace.scratch.dateFormat",
           })
         : journalConfig.dateFormat;
 
@@ -810,7 +810,7 @@ export class DendronClientUtilsV2 {
       type === "SCRATCH"
         ? getExtension().getWorkspaceSettingOrDefault({
             wsConfigKey: "dendron.defaultScratchAddBehavior",
-            dendronConfigKey: "scratch.addBehavior",
+            dendronConfigKey: "workspace.scratch.addBehavior",
           })
         : journalConfig.addBehavior;
 
@@ -818,7 +818,7 @@ export class DendronClientUtilsV2 {
       type === "SCRATCH"
         ? getExtension().getWorkspaceSettingOrDefault({
             wsConfigKey: "dendron.defaultScratchName",
-            dendronConfigKey: "scratch.name",
+            dendronConfigKey: "workspace.scratch.name",
           })
         : journalConfig.name;
 
@@ -867,10 +867,12 @@ export class DendronClientUtilsV2 {
   };
 
   static shouldUseVaultPrefix(engine: DEngineClient) {
-    const noXVaultLink = getDWorkspace().config.noXVaultWikiLink;
-    const useVaultPrefix =
+    const config = getDWorkspace().config;
+    const enableXVaultWikiLink = ConfigUtils.getProp(config, "workspace.enableXVaultWikiLink");
+    const useVaultPrefix = 
       _.size(engine.vaults) > 1 &&
-      (_.isBoolean(noXVaultLink) ? !noXVaultLink : true);
+      _.isBoolean(enableXVaultWikiLink) &&
+      enableXVaultWikiLink;
     return useVaultPrefix;
   }
 }

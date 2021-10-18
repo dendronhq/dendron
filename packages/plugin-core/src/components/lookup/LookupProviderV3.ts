@@ -78,12 +78,14 @@ export type SchemaLookupProviderSuccessResp<T = never> = {
 
 /** This function presumes that 'CreateNew' should be shown and determines whether
  *  CreateNew should be at the top of the look up results or not. */
-function shouldBubbleUpCreateNew({
+export function shouldBubbleUpCreateNew({
   numberOfExactMatches,
   querystring,
+  dontBubbleUpCreateNew,
 }: {
   numberOfExactMatches: number;
   querystring: string;
+  dontBubbleUpCreateNew?: boolean;
 }) {
   // We don't want to bubble up create new if there is an exact match since
   // vast majority of times if there is an exact match user wants to navigate to it
@@ -98,7 +100,7 @@ function shouldBubbleUpCreateNew({
   const noSpecialQueryChars =
     !FuseEngine.doesContainSpecialQueryChars(querystring);
 
-  return noSpecialQueryChars && noExactMatches;
+  return noSpecialQueryChars && noExactMatches && !dontBubbleUpCreateNew;
 }
 
 export class NoteLookupProvider implements ILookupProviderV3 {
@@ -405,6 +407,7 @@ export class NoteLookupProvider implements ILookupProviderV3 {
           shouldBubbleUpCreateNew({
             numberOfExactMatches,
             querystring: queryOrig,
+            dontBubbleUpCreateNew: ws.config.lookupDontBubbleUpCreateNew,
           })
         ) {
           updatedItems = [entryCreateNew, ...updatedItems];

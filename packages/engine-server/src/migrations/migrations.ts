@@ -1,22 +1,12 @@
 import {
   LegacyLookupSelectionType,
-  InsertNoteLinkConfig,
-  InsertNoteIndexConfig,
   LookupConfig,
-  NoteLookupConfig,
-  RandomNoteConfig,
-  LookupSelectionMode,
   LookupSelectionModeEnum,
   DendronError,
-  genDefaultCommandConfig,
   DVault,
   ConfigUtils,
   ScratchConfig,
   JournalConfig,
-  IntermediateDendronConfig,
-  WorkspaceSettings,
-  configIsV1,
-  configIsV2,
 } from "@dendronhq/common-all";
 import {
   SegmentClient,
@@ -29,7 +19,6 @@ import { DConfig, pathMap } from "../config";
 import { removeCache } from "../utils";
 import { Migrations } from "./types";
 import { MigrationUtils } from "./utils";
-import { WorkspaceService } from "../workspace/service";
 
 /**
  * Migrations are sorted by version numbers, from greatest to least
@@ -41,25 +30,115 @@ export const ALL_MIGRATIONS: Migrations[] = [
       {
         name: "migrate config",
         func: async ({ dendronConfig, wsConfig, wsService }) => {
-          if (configIsV1(dendronConfig)) {
-            const commandsOut = await migrateCommandsConfig({
-              dendronConfig,
-              wsConfig,
-              wsService,
-            });
-            dendronConfig = commandsOut.data.dendronConfig;
+          /**
+           * This migrates both commands and workspace namespace, if legacy property exists.
+           * Doesn't overwrite existing properties.
+           */
+
+          const backupPath = DConfig.createBackup(
+            wsService.wsRoot,
+            "migrate-configs"
+          );
+          if (!fs.existsSync(backupPath)) {
+            return {
+              error: new DendronError({
+                message:
+                  "Backup failed during config migration. Exiting without migration.",
+              }),
+              data: {
+                dendronConfig,
+                wsConfig,
+              },
+            };
           }
 
-          if (configIsV2(dendronConfig)) {
-            const workspaceOut = await migrateWorkspaceConfigs({
-              dendronConfig,
-              wsConfig,
-              wsService,
-            });
-            dendronConfig = workspaceOut.data.dendronConfig;
+          const defaultV3Config = ConfigUtils.genDefaultConfig();
+          const rawDendronConfig = DConfig.getRaw(wsService.wsRoot);
+
+          // remove all null properties
+          const cleanDendronConfig = MigrationUtils.deepCleanObjBy(
+            rawDendronConfig,
+            _.isNull
+          );
+
+          if (_.isUndefined(cleanDendronConfig.commands)) {
+            cleanDendronConfig.commands = {};
           }
 
-          return { data: { dendronConfig, wsConfig } };
+          if (_.isUndefined(cleanDendronConfig.workspace)) {
+            cleanDendronConfig.workspace = {};
+          }
+
+          // mapping how we want each keys to be migrated.
+          const flip = (value: boolean): boolean => !value; // value is flipped during migration.
+          const skip = (_value: any) => undefined; // don't migrate. let other mappings do it.
+          const migrationIterateeMap = new Map<string, Function>([
+            ["commands.lookup", skip],
+            ["commands.lookup.note", skip],
+            [
+              "commands.lookup.note.selectionMode",
+              (value: any) => {
+                switch (value) {
+                  case "selection2link": {
+                    return "link";
+                  }
+                  case "none": {
+                    return "none";
+                  }
+                  case "selectionExtract":
+                  default: {
+                    return "extract";
+                  }
+                }
+              },
+            ],
+            ["commands.insertNoteLink", skip],
+            ["commands.insertNoteIndex", skip],
+            ["commands.randomNote", skip],
+            ["workspace.enableAutoCreateOnDefinition", flip],
+            ["workspace.enableXVaultWikiLink", flip],
+            ["workspace.journal", skip],
+            ["workspace.scratch", skip],
+            ["workspace.graph", skip],
+          ]);
+
+          // legacy paths to remove from config;
+          const legacyPaths: string[] = [];
+          // migrate each path mapped in current config version
+          pathMap.forEach((value, key) => {
+            const legacyPath = value.target;
+            const maybeLegacyConfig = _.get(cleanDendronConfig, legacyPath);
+            const alreadyFilled = _.has(cleanDendronConfig, key);
+            let valueToFill;
+            if (_.isUndefined(maybeLegacyConfig)) {
+              // legacy property doesn't have a value.
+              valueToFill = _.get(defaultV3Config, key);
+            } else {
+              // there is a legacy value.
+              // check if this mapping needs special treatment.
+              let iteratee = migrationIterateeMap.get(key);
+              if (_.isUndefined(iteratee)) {
+                // otherwise, move it as is.
+                iteratee = _.identity;
+              }
+              valueToFill = iteratee(maybeLegacyConfig);
+            }
+            if (!alreadyFilled && !_.isUndefined(valueToFill)) {
+              // if the property isn't already filled, fill it with determined value.
+              _.set(cleanDendronConfig, key, valueToFill);
+            }
+
+            legacyPaths.push(legacyPath);
+          });
+
+          // set config version.
+          _.set(cleanDendronConfig, "version", 3);
+
+          // remove legacy property from config after migration.
+          legacyPaths.forEach((legacyPath) => {
+            _.unset(cleanDendronConfig, legacyPath);
+          });
+          return { data: { dendronConfig: cleanDendronConfig, wsConfig } };
         },
       },
     ],
@@ -217,327 +296,3 @@ export const ALL_MIGRATIONS: Migrations[] = [
     ],
   },
 ];
-
-const migrateWorkspaceConfigs = async ({
-  dendronConfig,
-  wsConfig,
-  wsService,
-}: {
-  dendronConfig: IntermediateDendronConfig;
-  wsConfig?: WorkspaceSettings;
-  wsService: WorkspaceService;
-}) => {
-  const backupPath = DConfig.createBackup(
-    wsService.wsRoot,
-    "migrate-workspace-config"
-  );
-  if (!fs.existsSync(backupPath)) {
-    return {
-      error: new DendronError({
-        message:
-          "Backup failed during config migration. Exiting without migration.",
-      }),
-      data: {
-        dendronConfig,
-        wsConfig,
-      },
-    };
-  }
-
-  const defaultV3Config = ConfigUtils.genDefaultConfig();
-  // const rawDendronConfig = DConfig.getRaw(wsService.wsRoot);
-
-  // remove all null properties
-  const cleanDendronConfig = MigrationUtils.deepCleanObjBy(
-    dendronConfig,
-    _.isNull
-  );
-
-  if (_.isUndefined(cleanDendronConfig.workspace)) {
-    cleanDendronConfig.workspace = {};
-  }
-
-  // mapping how we want each keys to be migrated.
-  const flip = (value: boolean): boolean => !value;
-  const migrationIterateeMap = new Map<string, Function>([
-    ["workspace.enableAutoCreateOnDefinition", flip],
-    ["workspace.enableXVaultWikiLink", flip],
-    ["workspace.journal", (value: any): any => _.omit(value, "firstDayOfWeek")],
-  ]);
-  // migrate each path mapped in current config version
-  pathMap.forEach((value, key) => {
-    if (value.version === 3) {
-      const legacyPath = value.target;
-      const maybeLegacyConfig = _.get(cleanDendronConfig, legacyPath);
-      const alreadyFilled = _.has(cleanDendronConfig, key);
-      let valueToFill;
-      if (_.isUndefined(maybeLegacyConfig)) {
-        // legacy property doesn't have a value.
-        valueToFill = _.get(defaultV3Config, key);
-      } else {
-        // there is a legacy value.
-        // check if this mapping needs special treatment.
-        let iteratee = migrationIterateeMap.get(key);
-        if (_.isUndefined(iteratee)) {
-          // otherwise, move it as is.
-          iteratee = _.identity;
-        }
-        valueToFill = iteratee(maybeLegacyConfig);
-      }
-      if (!alreadyFilled && !_.isUndefined(valueToFill)) {
-        // if the property isn't already filled, fill it with determined value.
-        _.set(cleanDendronConfig, key, valueToFill);
-      }
-      // remove legacy property from config after migration.
-      _.unset(cleanDendronConfig, legacyPath);
-    }
-  });
-
-  // set config version.
-  _.set(cleanDendronConfig, "version", 3);
-  return { data: { dendronConfig: cleanDendronConfig, wsConfig } };
-};
-
-const migrateCommandsConfig = async ({
-  dendronConfig,
-  wsConfig,
-  wsService,
-}: {
-  dendronConfig: IntermediateDendronConfig;
-  wsConfig?: WorkspaceSettings;
-  wsService: WorkspaceService;
-}) => {
-  // back up existing config
-  const backupPath = DConfig.createBackup(
-    wsService.wsRoot,
-    "migrate-command-config"
-  );
-  if (!fs.existsSync(backupPath)) {
-    return {
-      error: new DendronError({
-        message:
-          "Backup failed during config migration. Exiting without migration.",
-      }),
-      data: {
-        dendronConfig,
-        wsConfig,
-      },
-    };
-  }
-
-  // command namespace
-  const defaultCommandConfig = genDefaultCommandConfig();
-  const rawDendronConfig = DConfig.getRaw(wsService.wsRoot);
-  let commands = !_.isUndefined(rawDendronConfig.commands)
-    ? rawDendronConfig.commands
-    : defaultCommandConfig;
-
-  if (commands === null) {
-    commands = defaultCommandConfig;
-  }
-
-  // migrate randomNote
-  const maybeOldRandomNote = rawDendronConfig.randomNote;
-  if (!_.isUndefined(maybeOldRandomNote) && maybeOldRandomNote !== null) {
-    let include;
-    let exclude;
-    if (
-      !_.isUndefined(maybeOldRandomNote.include) &&
-      maybeOldRandomNote.include !== null
-    ) {
-      include = maybeOldRandomNote.include;
-    }
-    if (
-      !_.isUndefined(maybeOldRandomNote.exclude) &&
-      maybeOldRandomNote.exclude !== null
-    ) {
-      exclude = maybeOldRandomNote.exclude;
-    }
-
-    const randomNote = {} as RandomNoteConfig;
-    if (!_.isUndefined(include)) {
-      randomNote["include"] = include;
-    }
-
-    if (!_.isUndefined(exclude)) {
-      randomNote["exclude"] = exclude;
-    }
-
-    commands.randomNote = randomNote;
-    delete rawDendronConfig.randomNote;
-    delete dendronConfig.randomNote;
-  }
-  if (!commands.randomNote) {
-    commands.randomNote = defaultCommandConfig.randomNote;
-  }
-
-  // migrate insertNote
-  const maybeOldDefaultInsertHierarchy = dendronConfig.defaultInsertHierarchy;
-  if (!_.isUndefined(maybeOldDefaultInsertHierarchy)) {
-    commands.insertNote =
-      maybeOldDefaultInsertHierarchy === null
-        ? defaultCommandConfig.insertNote
-        : (commands.insertNote = {
-            initialValue: maybeOldDefaultInsertHierarchy,
-          });
-    delete rawDendronConfig.defaultInsertHierarchy;
-    delete dendronConfig.defaultInsertHierarchy;
-  }
-  if (!commands.insertNote) {
-    commands.insertNote = defaultCommandConfig.insertNote;
-  }
-
-  // migrate insertNoteLink
-  const maybeOldInsertNoteLink = rawDendronConfig.insertNoteLink;
-  if (!_.isUndefined(maybeOldInsertNoteLink)) {
-    let enableMultiSelect;
-    let aliasMode;
-    if (maybeOldInsertNoteLink === null) {
-      enableMultiSelect = defaultCommandConfig.insertNoteLink.enableMultiSelect;
-      aliasMode = defaultCommandConfig.insertNoteLink.aliasMode;
-    } else {
-      if (
-        _.isUndefined(maybeOldInsertNoteLink.multiSelect) ||
-        maybeOldInsertNoteLink.multiSelect === null
-      ) {
-        enableMultiSelect =
-          defaultCommandConfig.insertNoteLink.enableMultiSelect;
-      } else {
-        enableMultiSelect = maybeOldInsertNoteLink.multiSelect;
-      }
-
-      if (
-        _.isUndefined(maybeOldInsertNoteLink.aliasMode) ||
-        maybeOldInsertNoteLink.aliasMode === null
-      ) {
-        aliasMode = defaultCommandConfig.insertNoteLink.aliasMode;
-      } else {
-        aliasMode = maybeOldInsertNoteLink.aliasMode;
-      }
-    }
-    commands.insertNoteLink = {
-      aliasMode,
-      enableMultiSelect,
-    } as InsertNoteLinkConfig;
-    delete rawDendronConfig.insertNoteLink;
-    delete dendronConfig.insertNoteLink;
-  }
-  if (!commands.insertNoteLink) {
-    commands.insertNoteLink = defaultCommandConfig.insertNoteLink;
-  }
-
-  // migrate insertNoteIndex
-  const maybeOldInsertNoteIndex = rawDendronConfig.insertNoteIndex;
-  if (!_.isUndefined(maybeOldInsertNoteIndex)) {
-    if (maybeOldInsertNoteIndex !== null) {
-      if (!_.isUndefined(maybeOldInsertNoteIndex.marker)) {
-        const enableMarker =
-          maybeOldInsertNoteIndex.marker === null
-            ? defaultCommandConfig.insertNoteIndex.enableMarker
-            : maybeOldInsertNoteIndex.marker;
-        commands.insertNoteIndex = {
-          enableMarker,
-        } as InsertNoteIndexConfig;
-        delete rawDendronConfig.insertNoteIndex;
-        delete dendronConfig.insertNoteIndex;
-      }
-    } else {
-      commands.insertNoteIndex = defaultCommandConfig.insertNoteIndex;
-      delete rawDendronConfig.insertNoteIndex;
-      delete dendronConfig.insertNoteIndex;
-    }
-  }
-  if (!commands.insertNoteIndex) {
-    commands.insertNoteIndex = defaultCommandConfig.insertNoteIndex;
-  }
-
-  // migrate lookup
-  const maybeOldLookup = rawDendronConfig.lookup;
-  let selectionMode = LookupSelectionModeEnum.extract as LookupSelectionMode;
-  let leaveTrace: boolean = false;
-  if (_.isUndefined(maybeOldLookup) || maybeOldLookup === null) {
-    if (commands.lookup) {
-      if (commands.lookup.note) {
-        if (commands.lookup.note.selectionMode) {
-          selectionMode = commands.lookup.note.selectionMode;
-        } else {
-          selectionMode = defaultCommandConfig.lookup.note.selectionMode;
-        }
-        if (commands.lookup.note.leaveTrace) {
-          leaveTrace = commands.lookup.note.leaveTrace;
-        } else {
-          leaveTrace = defaultCommandConfig.lookup.note.leaveTrace;
-        }
-      } else {
-        commands.lookup.note = defaultCommandConfig.lookup.note;
-      }
-    } else {
-      commands.lookup = defaultCommandConfig.lookup;
-    }
-  } else if (maybeOldLookup.note === null) {
-    selectionMode = defaultCommandConfig.lookup.note.selectionMode;
-    leaveTrace = defaultCommandConfig.lookup.note.leaveTrace;
-  } else {
-    switch (maybeOldLookup.note.selectionType) {
-      case "selectionExtract": {
-        selectionMode = LookupSelectionModeEnum.extract;
-        break;
-      }
-      case "selection2link": {
-        selectionMode = LookupSelectionModeEnum.link;
-        break;
-      }
-      case "none": {
-        selectionMode = LookupSelectionModeEnum.none;
-        break;
-      }
-      default: {
-        selectionMode = defaultCommandConfig.lookup.note.selectionMode;
-        break;
-      }
-    }
-    if (
-      _.isUndefined(maybeOldLookup.note.leaveTrace) ||
-      maybeOldLookup.note.leaveTrace === null
-    ) {
-      leaveTrace = defaultCommandConfig.lookup.note.leaveTrace;
-    } else {
-      leaveTrace = maybeOldLookup.note.leaveTrace;
-    }
-  }
-
-  const maybeOldLookupConfirmVaultOnCreate =
-    rawDendronConfig.lookupConfirmVaultOnCreate;
-  let confirmVaultOnCreate;
-  if (
-    _.isUndefined(maybeOldLookupConfirmVaultOnCreate) ||
-    maybeOldLookupConfirmVaultOnCreate === null
-  ) {
-    if (commands.lookup.note.confirmVaultOnCreate) {
-      confirmVaultOnCreate = commands.lookup.note.confirmVaultOnCreate;
-    } else {
-      confirmVaultOnCreate =
-        defaultCommandConfig.lookup.note.confirmVaultOnCreate;
-    }
-  } else {
-    confirmVaultOnCreate = maybeOldLookupConfirmVaultOnCreate;
-  }
-  commands.lookup = {
-    note: {
-      selectionMode,
-      confirmVaultOnCreate,
-      leaveTrace,
-    } as NoteLookupConfig,
-  } as LookupConfig;
-  delete rawDendronConfig.lookup;
-  delete rawDendronConfig.lookupConfirmVaultOnCreate;
-
-  delete dendronConfig.lookup;
-  delete dendronConfig.lookupConfirmVaultOnCreate;
-  rawDendronConfig.commands = commands;
-  rawDendronConfig.version = 2;
-
-  Object.assign(dendronConfig, rawDendronConfig);
-
-  return { data: { dendronConfig, wsConfig } };
-};

@@ -352,7 +352,7 @@ suite("Migration", function () {
       });
     });
 
-    test("migrate to 0.63 (dendron config command namespace)", (done) => {
+    test("migrate to 0.64.0 (commands and workspace namespace migration)", (done) => {
       DendronExtension.version = () => "0.0.1";
       runLegacyMultiWorkspaceTest({
         ctx,
@@ -377,89 +377,8 @@ suite("Migration", function () {
           } as LegacyLookupConfig;
           config["lookupConfirmVaultOnCreate"] = false;
 
-          // @ts-ignore
           delete config["commands"];
-          return config;
-        },
-        onInit: async ({ engine, wsRoot }) => {
-          const dendronConfig = engine.config;
-          const originalDeepCopy = _.cloneDeep(dendronConfig);
-          const wsConfig = await getExtension().getWorkspaceSettings();
-          const wsService = new WorkspaceService({ wsRoot });
 
-          // all command related old configs should exist prior to migration
-          const preMigrationCheckItems = [
-            _.isUndefined(dendronConfig["commands"]),
-            !_.isUndefined(dendronConfig["randomNote"]),
-            !_.isUndefined(dendronConfig["defaultInsertHierarchy"]),
-            !_.isUndefined(dendronConfig["insertNoteLink"]),
-            !_.isUndefined(dendronConfig["insertNoteIndex"]),
-            !_.isUndefined(dendronConfig["lookup"]),
-            !_.isUndefined(dendronConfig["lookupConfirmVaultOnCreate"]),
-          ];
-
-          const oldKeys = [
-            "randomNote",
-            "defaultInsertHierarchy",
-            "insertNoteLink",
-            "insertNoteIndex",
-            "lookup",
-            "lookupConfirmVaultOnCreate",
-          ];
-          const preMigrationKeys = Object.keys(dendronConfig);
-          expect(
-            oldKeys.every((value) => preMigrationKeys.includes(value))
-          ).toBeTruthy();
-
-          preMigrationCheckItems.forEach((item) => {
-            expect(item).toBeTruthy();
-          });
-
-          await MigrationServce.applyMigrationRules({
-            currentVersion: "0.63.0",
-            previousVersion: "0.62.0",
-            dendronConfig,
-            wsConfig,
-            wsService,
-            logger: Logger,
-            migrations: getMigration({ from: "0.62.0", to: "0.63.0" }),
-          });
-
-          // backup of the original should exist.
-          const allWSRootFiles = fs.readdirSync(wsRoot, {
-            withFileTypes: true,
-          });
-          const maybeBackupFileName = allWSRootFiles
-            .filter((ent) => ent.isFile())
-            .filter((fileEnt) =>
-              fileEnt.name.includes("migrate-command-config")
-            )[0].name;
-          expect(!_.isUndefined(maybeBackupFileName)).toBeTruthy();
-
-          const backupContent = readYAML(
-            path.join(wsRoot, maybeBackupFileName)
-          );
-          expect(_.isEqual(backupContent, originalDeepCopy)).toBeTruthy();
-
-          // all command related old configs shouldn't exist after migration
-          // they should all be in the command namespace instead.
-          const postMigrationDendronConfig = (await engine.getConfig()).data!;
-          const postMigrationKeys = Object.keys(postMigrationDendronConfig);
-          expect(postMigrationKeys.includes("commands")).toBeTruthy();
-          expect(
-            oldKeys.every((value) => postMigrationKeys.includes(value))
-          ).toBeFalsy();
-
-          done();
-        },
-      });
-    });
-
-    test("migrate to 0.64.0 (workspace namespace migration)", (done) => {
-      DendronExtension.version = () => "0.0.1";
-      runLegacyMultiWorkspaceTest({
-        ctx,
-        modConfigCb: (config) => {
           config["dendronVersion"] = "0.63.0";
           config["vaults"] = [
             {
@@ -500,7 +419,15 @@ suite("Migration", function () {
           const wsConfig = await getExtension().getWorkspaceSettings();
           const wsService = new WorkspaceService({ wsRoot });
 
-          const oldKeys = [
+          const oldCommandKeys = [
+            "randomNote",
+            "defaultInsertHierarchy",
+            "insertNoteLink",
+            "insertNoteIndex",
+            "lookup",
+            "lookupConfirmVaultOnCreate",
+          ];
+          const oldWorkspaceKeys = [
             "dendronVersion",
             "vaults",
             "journal",
@@ -520,10 +447,14 @@ suite("Migration", function () {
           delete dendronConfig["workspace"];
           const originalDeepCopy = _.cloneDeep(dendronConfig);
 
-          // all command related old configs should exist prior to migration
+          // all old configs should exist prior to migration
           const preMigrationCheckItems = [
             _.isUndefined(dendronConfig["workspace"]),
-            oldKeys.every(
+            _.isUndefined(dendronConfig["commands"]),
+            oldCommandKeys.every(
+              (value) => !_.isUndefined(_.get(dendronConfig, value))
+            ),
+            oldWorkspaceKeys.every(
               (value) => !_.isUndefined(_.get(dendronConfig, value))
             ),
           ];
@@ -549,7 +480,7 @@ suite("Migration", function () {
           const maybeBackupFileName = allWSRootFiles
             .filter((ent) => ent.isFile())
             .filter((fileEnt) =>
-              fileEnt.name.includes("migrate-workspace-config")
+              fileEnt.name.includes("migrate-config")
             )[0].name;
           expect(!_.isUndefined(maybeBackupFileName)).toBeTruthy();
 
@@ -559,13 +490,15 @@ suite("Migration", function () {
           delete backupContent["workspace"];
           expect(_.isEqual(backupContent, originalDeepCopy)).toBeTruthy();
 
-          // all workspace related old configs shouldn't exist after migration
-          // they should all be in the command namespace instead.
           const postMigrationDendronConfig = (await engine.getConfig()).data!;
           const postMigrationKeys = Object.keys(postMigrationDendronConfig);
+          expect(postMigrationKeys.includes("commands")).toBeTruthy();
           expect(postMigrationKeys.includes("workspace")).toBeTruthy();
           expect(
-            oldKeys.every((value) => postMigrationKeys.includes(value))
+            oldCommandKeys.every((value) => postMigrationKeys.includes(value))
+          ).toBeFalsy();
+          expect(
+            oldWorkspaceKeys.every((value) => postMigrationKeys.includes(value))
           ).toBeFalsy();
 
           done();

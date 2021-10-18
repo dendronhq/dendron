@@ -381,7 +381,12 @@ export class PodUtils {
           //for user mentions
           if (element.person) {
             const slugger = getSlugger();
-            const name = slugger.slug(element.person.personProperties.name);
+            let person = element.person.personProperties.name;
+            if (person.indexOf("@") > -1) {
+              person = person.split("@")[0];
+            }
+            const name = slugger.slug(person);
+
             text += `@${name}`;
           }
           //for horizontal lines

@@ -197,12 +197,14 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
       documentId: string;
       hierarchyDestination: string;
       accessToken: string;
+      importComments?: ImportComments;
     },
     config: ImportPodConfig,
     assetDir: string
   ): Promise<Partial<NoteProps>> => {
     let response: Partial<NoteProps>;
-    const { documentId, accessToken, hierarchyDestination } = opts;
+    const { documentId, accessToken, hierarchyDestination, importComments } =
+      opts;
     const headers = {
       Authorization: `Bearer ${accessToken}`,
       "Content-Type": "application/json",
@@ -220,6 +222,7 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
         custom: {
           documentId: result.data.documentId,
           revisionId: result.data.revisionId,
+          commentsUpdated: importComments?.enable || false,
           ...config.frontmatter,
         },
       };
@@ -331,8 +334,17 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
     vault: DVault;
     confirmOverwrite?: boolean;
     onPrompt?: (arg0?: PROMPT) => Promise<{ title: string } | undefined>;
+    importComments?: ImportComments;
   }) => {
-    const { note, engine, wsRoot, vault, confirmOverwrite, onPrompt } = opts;
+    const {
+      note,
+      engine,
+      wsRoot,
+      vault,
+      confirmOverwrite,
+      onPrompt,
+      importComments,
+    } = opts;
     const existingNote = NoteUtils.getNoteByFnameV5({
       fname: note.fname,
       notes: engine.notes,
@@ -341,9 +353,14 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
     });
     if (!_.isUndefined(existingNote)) {
       if (
-        existingNote.custom.revisionId &&
-        existingNote.custom.revisionId !== note.custom.revisionId
+        (importComments?.enable &&
+          existingNote.custom.commentsUpdated !== importComments?.enable) ||
+        (existingNote.custom.revisionId &&
+          existingNote.custom.revisionId !== note.custom.revisionId)
       ) {
+        if (importComments?.enable)
+          existingNote.custom.commentsUpdated = importComments?.enable;
+
         existingNote.custom.revisionId = note.custom.revisionId;
         existingNote.body = note.body;
 
@@ -480,7 +497,7 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
     });
 
     let response = await this.getDataFromGDoc(
-      { documentId, accessToken, hierarchyDestination },
+      { documentId, accessToken, hierarchyDestination, importComments },
       config,
       assetDir
     );
@@ -501,6 +518,7 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
       vault,
       confirmOverwrite,
       onPrompt,
+      importComments,
     });
 
     const importedNotes: NoteProps[] =

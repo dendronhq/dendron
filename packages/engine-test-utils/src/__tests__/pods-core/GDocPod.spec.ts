@@ -1,11 +1,12 @@
 import { ENGINE_HOOKS } from "../../presets";
 import { runEngineTestV5 } from "../../engine";
-import { GDocImportPod, PROMPT } from "@dendronhq/pods-core";
+import { GDocImportPod, PodUtils, PROMPT } from "@dendronhq/pods-core";
 import { Time, VaultUtils } from "@dendronhq/common-all";
 import { response, comments, existingNote } from "../../utils/GDocMockResult";
 import axios from "axios";
 import sinon from "sinon";
 import { window } from "../../__mocks__/vscode";
+import path from "path";
 
 jest.mock("axios");
 
@@ -15,6 +16,7 @@ const stubWindow = (resp: any) => {
 
 describe("GDoc import pod", () => {
   let result: any;
+  const text = "\n\n## Testing GDoc Pod\n\nThis is the first line\n\n\n";
   const onPrompt = async (type?: PROMPT) => {
     const resp =
       type === PROMPT.USERPROMPT
@@ -47,6 +49,7 @@ describe("GDoc import pod", () => {
         pod.getAllDocuments = jest.fn().mockReturnValue({ docIdsHashMap });
         const vaultName = VaultUtils.getName(vaults[0]);
         const mockedAxios = axios as jest.Mocked<typeof axios>;
+        PodUtils.downloadImage = jest.fn().mockReturnValue(`${text}`);
         result = response;
         mockedAxios.get.mockResolvedValue(result);
         const { importedNotes } = await pod.execute({
@@ -63,9 +66,7 @@ describe("GDoc import pod", () => {
             vaultName,
           },
         });
-        expect(importedNotes[0].body).toMatch(
-          "\n\n## Testing GDoc Pod\n\nThis is the first line\n\n\n"
-        );
+        expect(importedNotes[0].body).toMatch(text);
       },
       {
         expect,
@@ -85,10 +86,11 @@ describe("GDoc import pod", () => {
             documentId: "sjkakauwu",
             revisionId: "ALm37BXFqAKco_",
           },
-          body: "\n\n## Testing GDoc Pod\n\nThis is the first line\n\n\n",
+          body: text,
         };
         pod.getAllDocuments = jest.fn().mockReturnValue({ docIdsHashMap });
         pod.getDataFromGDoc = jest.fn().mockReturnValue(response);
+        PodUtils.downloadImage = jest.fn();
         const mockedAxios = axios as jest.Mocked<typeof axios>;
         result = comments;
         mockedAxios.get.mockResolvedValue(result);
@@ -130,7 +132,7 @@ describe("GDoc import pod", () => {
             documentId: "sjkakauwu",
             revisionId: "ALm37BXFqAKco_",
           },
-          body: "\n\n## Testing GDoc Pod\n\nThis is the first line\n\n\n",
+          body: text,
         };
         pod.getAllDocuments = jest.fn().mockReturnValue({ docIdsHashMap });
         pod.getDataFromGDoc = jest.fn().mockReturnValue(response);
@@ -299,6 +301,45 @@ describe("GDoc import pod", () => {
         });
         expect.assertions(1);
         expect(importedNotes).toHaveLength(1);
+      },
+      {
+        expect,
+        preSetupHook: ENGINE_HOOKS.setupBasic,
+      }
+    );
+  });
+
+  test("documents containg an image", async () => {
+    await runEngineTestV5(
+      async ({ engine, vaults, wsRoot }) => {
+        const pod = new GDocImportPod();
+        PodUtils.downloadImage = jest
+          .fn()
+          .mockReturnValue(
+            `${text}![image](${path.join("assets", `image.png`)})`
+          );
+        pod.getAllDocuments = jest.fn().mockReturnValue({ docIdsHashMap });
+        const vaultName = VaultUtils.getName(vaults[0]);
+        const mockedAxios = axios as jest.Mocked<typeof axios>;
+        result = response;
+        mockedAxios.get.mockResolvedValue(result);
+        const { importedNotes } = await pod.execute({
+          engine,
+          vaults,
+          wsRoot,
+          utilityMethods,
+          onPrompt,
+          config: {
+            src: "foo",
+            accessToken: "xyzabcd",
+            refreshToken: "dhdjdjs",
+            expirationTime: Time.now().toSeconds() + 500,
+            vaultName,
+          },
+        });
+        expect(importedNotes[0].body).toMatch(
+          `\n\n## Testing GDoc Pod\n\nThis is the first line\n\n![image](assets\\image.png)`
+        );
       },
       {
         expect,

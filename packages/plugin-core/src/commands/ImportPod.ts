@@ -125,7 +125,7 @@ export class ImportPodCommand extends BaseCommand<
     const importedNotes = await window.withProgress(
       {
         location: ProgressLocation.Notification,
-        title: "importing notes",
+        title: "Finding documents...",
         cancellable: false,
       },
       async () => {

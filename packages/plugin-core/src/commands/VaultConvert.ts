@@ -8,10 +8,11 @@ import {
 import _ from "lodash";
 import { DENDRON_COMMANDS } from "../constants";
 import { BasicCommand } from "./base";
-import { window } from "vscode";
+import { ProgressLocation, window } from "vscode";
 import { VSCodeUtils } from "../utils";
 import { getDWorkspace, getExtension } from "../workspace";
 import { Logger } from "../logger";
+import { ReloadIndexCommand } from "./ReloadIndex";
 
 type CommandOpts = {
   type: VaultRemoteSource;
@@ -145,17 +146,30 @@ export class VaultConvertCommand extends BasicCommand<
       });
 
     if (type === "local") {
-      Logger.info({ ctx, msg: "Converting vault to local", vault, wsRoot });
-      await workspaceService.convertVaultLocal({ wsRoot, vault });
-      window.showInformationMessage(
-        `Converted vault '${VaultUtils.getName(vault)}' to a ${type} vault.`
+      await window.withProgress(
+        {
+          location: ProgressLocation.Notification,
+          cancellable: false,
+          title: "Converting vault to local",
+        },
+        async (progress) => {
+          Logger.info({ ctx, msg: "Converting vault to local", vault, wsRoot });
+          await workspaceService.convertVaultLocal({ wsRoot, vault });
+          progress.report({ increment: 50 });
+          // Reload the index to use the updated config
+          await new ReloadIndexCommand().run({ silent: true });
+          progress.report({ increment: 50 });
+          window.showInformationMessage(
+            `Converted vault '${VaultUtils.getName(vault)}' to a ${type} vault.`
+          );
+          Logger.info({
+            ctx,
+            msg: "Done converting vault to local",
+            vault,
+            wsRoot,
+          });
+        }
       );
-      Logger.info({
-        ctx,
-        msg: "Done converting vault to local",
-        vault,
-        wsRoot,
-      });
       return { updatedVault: vault };
     } else if (type === "remote") {
       if (!remoteUrl)
@@ -163,32 +177,47 @@ export class VaultConvertCommand extends BasicCommand<
           message: "Remote URL for remote vault has not been specified.",
           payload: { vault, type, remoteUrl },
         });
-      Logger.info({
-        ctx,
-        msg: "Converting vault to remote",
-        vault,
-        wsRoot,
-        remoteUrl,
-      });
-      const results = await workspaceService.convertVaultRemote({
-        wsRoot,
-        vault,
-        remoteUrl,
-      });
-      window.showInformationMessage(
-        `Converted vault '${VaultUtils.getName(
-          vault
-        )}' to a ${type} vault. Remote set to ${results.remote} on branch ${
-          results.branch
-        }`
+      await window.withProgress(
+        {
+          location: ProgressLocation.Notification,
+          cancellable: false,
+          title: "Converting vault to local",
+        },
+        async (progress) => {
+          Logger.info({
+            ctx,
+            msg: "Converting vault to remote",
+            vault,
+            wsRoot,
+            remoteUrl,
+          });
+          const results = await workspaceService.convertVaultRemote({
+            wsRoot,
+            vault,
+            remoteUrl,
+          });
+          progress.report({ increment: 50 });
+
+          // Reload the index to use the updated config
+          await new ReloadIndexCommand().run({ silent: true });
+          progress.report({ increment: 50 });
+          window.showInformationMessage(
+            `Converted vault '${VaultUtils.getName(
+              vault
+            )}' to a ${type} vault. Remote set to ${results.remote} on branch ${
+              results.branch
+            }`
+          );
+          Logger.info({
+            ctx,
+            msg: "Done converting vault to remote",
+            vault,
+            wsRoot,
+            remoteUrl,
+          });
+        }
       );
-      Logger.info({
-        ctx,
-        msg: "Done converting vault to remote",
-        vault,
-        wsRoot,
-        remoteUrl,
-      });
+
       return { updatedVault: vault };
     } else {
       assertUnreachable(type);

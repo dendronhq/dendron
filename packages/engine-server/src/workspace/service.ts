@@ -362,7 +362,12 @@ export class WorkspaceService {
     const branch = await git.getCurrentBranch();
     // Add the contents of the vault and push to initialize the upstream
     await git.addAll();
-    await git.commit({ msg: "Set up remote vault" });
+    try {
+      await git.commit({ msg: "Set up remote vault" });
+    } catch (err: any) {
+      // Ignore it if commit fails, it might happen if the vault if empty or if it was already a repo
+      if (!_.isNumber(err?.exitCode)) throw err;
+    }
     await git.push({ remote, branch });
     // Update `dendron.yml`, adding the remote to the converted vault
     const config = this.config;

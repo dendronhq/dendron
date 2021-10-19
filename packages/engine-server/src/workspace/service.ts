@@ -332,7 +332,7 @@ export class WorkspaceService {
     // Add the vault to the gitignore of root, so that it doesn't show up as part of root anymore
     const gitignore = path.join(wsRoot, ".gitignore");
     const contents = await fs.readFile(gitignore, { encoding: "utf-8" });
-    if (!contents.match(new RegExp(`^${targetVault.fsPath}$`, "g"))) {
+    if (!contents.match(new RegExp(`^${targetVault.fsPath}/?$`, "g"))) {
       // Avoid duplicating the gitignore line if it was already there
       await fs.appendFile(gitignore, `\n${targetVault.fsPath}\n`);
     }
@@ -380,7 +380,7 @@ export class WorkspaceService {
       const contents = await fs.readFile(gitignore, { encoding: "utf-8" });
 
       const newContents = contents.replace(
-        new RegExp(`^${targetVault.fsPath}$`, "g"),
+        new RegExp(`^${targetVault.fsPath}/?$`, "m"),
         ""
       );
       if (newContents !== contents) await fs.writeFile(gitignore, newContents);

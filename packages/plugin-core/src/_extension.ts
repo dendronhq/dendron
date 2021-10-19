@@ -1,27 +1,33 @@
 import {
   launchv2,
   ServerUtils,
-  SubProcessExitType
+  SubProcessExitType,
 } from "@dendronhq/api-server";
 import {
   CONSTANTS,
   DendronError,
   ExtensionEvents,
-  getStage, initializeSentry, InstallStatus, MigrationEvents, Time,
+  getStage,
+  InstallStatus,
+  MigrationEvents,
+  Time,
   VaultUtils,
   VSCodeEvents,
-  WorkspaceType
+  WorkspaceType,
 } from "@dendronhq/common-all";
 import {
   getDurationMilliseconds,
   getOS,
+  initializeSentry,
   SegmentClient,
-  writeJSONWithComments
+  writeJSONWithComments,
 } from "@dendronhq/common-server";
 import {
   HistoryService,
-  MetadataService, MigrationChangeSetStatus, WorkspaceService,
-  WorkspaceUtils
+  MetadataService,
+  MigrationChangeSetStatus,
+  WorkspaceService,
+  WorkspaceUtils,
 } from "@dendronhq/engine-server";
 import * as Sentry from "@sentry/node";
 import { ExecaChildProcess } from "execa";
@@ -36,7 +42,7 @@ import {
   CONFIG,
   DendronContext,
   DENDRON_COMMANDS,
-  GLOBAL_STATE
+  GLOBAL_STATE,
 } from "./constants";
 import { Logger } from "./logger";
 import { migrateConfig } from "./migration";
@@ -52,7 +58,7 @@ import {
   DendronExtension,
   getDWorkspace,
   getEngine,
-  getExtension
+  getExtension,
 } from "./workspace";
 import { DendronCodeWorkspace } from "./workspace/codeWorkspace";
 import { DendronNativeWorkspace } from "./workspace/nativeWorkspace";
@@ -231,7 +237,7 @@ export async function _activate(
   });
 
   // Respect user's telemetry settings for error reporting too.
-  if(!SegmentClient.instance().hasOptedOut && getStage() === "prod") {
+  if (!SegmentClient.instance().hasOptedOut && getStage() === "prod") {
     initializeSentry(getStage());
   }
 

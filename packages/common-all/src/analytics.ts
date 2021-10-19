@@ -1,8 +1,3 @@
-import { RewriteFrames } from "@sentry/integrations";
-import * as Sentry from "@sentry/node";
-import path from "path";
-import { DendronError } from "./error";
-
 export enum VSCodeEvents {
   ServerCrashed = "ServerCrashed",
   InitializeWorkspace = "InitializeWorkspace",
@@ -22,7 +17,7 @@ export enum VSCodeEvents {
   ShowLapsedUserMessage = "Show_Lapsed_User_Msg",
   LapsedUserMessageAccepted = "Lapsed_User_Msg_Accepted",
   LapsedUserMessageRejected = "Show_Lapsed_User_Rejected",
-  UserOnOldVSCodeVerUnblocked = "User_On_Old_VSCode_Ver_Unblocked"
+  UserOnOldVSCodeVerUnblocked = "User_On_Old_VSCode_Ver_Unblocked",
 }
 
 export enum CLIEvents {
@@ -84,50 +79,3 @@ export const DendronEvents = {
   SurveyEvents,
   ConfigEvents,
 };
-
-
-export function initializeSentry(environment: string): void {
-  const dsn = "https://bc206b31a30a4595a2efb31e8cc0c04e@o949501.ingest.sentry.io/5898219";
-
-  Sentry.init({
-    dsn,
-    defaultIntegrations: false,
-    tracesSampleRate: 1.0,
-    enabled: true,
-    environment,
-    attachStacktrace: true,
-    beforeSend: eventModifier,
-    integrations: [
-      new RewriteFrames({
-        prefix: "app:///dist/",
-        iteratee: (frame) => {
-          if (frame.abs_path) {
-            // Convert backslash to forward slash; Sentry should be able to handle the rest of the formatting:
-            frame.abs_path =  frame.abs_path.split(path.sep).join(path.posix.sep); 
-          }
-          return frame;
-        },
-      }),
-    ],
-  });
-  return;
-}
-
-function eventModifier(event: Sentry.Event, hint: Sentry.EventHint | undefined): Sentry.Event | PromiseLike<Sentry.Event | null> | null {
-  const error = hint?.originalException;
-
-  // Add more information to the event extras payload:
-  if (error && error instanceof DendronError) {
-    event.extra = {
-      name: error.name,
-      message: error.message,
-      payload: error.payload,
-      severity: error.severity?.toString(),
-      code: error.code,
-      status: error.status,
-      innerError: error,
-    };
-  }
-
-  return event;
-}

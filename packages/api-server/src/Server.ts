@@ -1,5 +1,9 @@
-import { getStage, initializeSentry, StatusCodes } from "@dendronhq/common-all";
-import { findInParent, SegmentClient } from "@dendronhq/common-server";
+import { getStage, StatusCodes } from "@dendronhq/common-all";
+import {
+  findInParent,
+  SegmentClient,
+  initializeSentry,
+} from "@dendronhq/common-server";
 import * as Sentry from "@sentry/node";
 import cors from "cors";
 import express, { NextFunction, Request, Response } from "express";
@@ -14,7 +18,7 @@ import { baseRouter } from "./routes";
 import {
   oauthRouter,
   OauthService,
-  registerOauthHandler
+  registerOauthHandler,
 } from "./routes/oauth";
 
 export function appModule({
@@ -53,7 +57,7 @@ export function appModule({
   const staticDir = path.join(__dirname, "static");
   app.use(express.static(staticDir));
 
-  if(!SegmentClient.instance().hasOptedOut && getStage() === "prod") {
+  if (!SegmentClient.instance().hasOptedOut && getStage() === "prod") {
     initializeSentry(getStage());
   }
 
@@ -95,7 +99,6 @@ export function appModule({
   }
 
   app.get("/health", async (_req: Request, res: Response) => {
-    debugger;
     return res.json({ ok: 1 });
   });
 

@@ -851,7 +851,7 @@ export class WorkspaceService {
       // we are on a legacy config.
       changes = await MigrationServce.applyMigrationRules({
         currentVersion,
-        previousVersion: "0.0.0", // to force apply
+        previousVersion: "0.64.0", // to force apply
         dendronConfig,
         wsService: this,
         logger: this.logger,

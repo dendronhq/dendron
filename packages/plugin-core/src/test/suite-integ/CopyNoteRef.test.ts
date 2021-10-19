@@ -52,7 +52,7 @@ suite("CopyNoteRef", function () {
               ConfigUtils.setWorkspaceProp(
                 config,
                 "enableXVaultWikiLink",
-                true
+                false
               );
               return config;
             },

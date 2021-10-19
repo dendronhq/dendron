@@ -166,8 +166,7 @@ export class WindowWatcher {
     });
     this.moveCursorPastFrontmatter(editor);
     const config = getDWorkspace().config;
-    const autoFoldFrontmatter = ConfigUtils.getWorkspace(config).enableAutoFoldFrontmatter;
-    if (autoFoldFrontmatter) {
+    if (ConfigUtils.getWorkspace(config).enableAutoFoldFrontmatter) {
       await this.foldFrontmatter();
     }
     Logger.info({

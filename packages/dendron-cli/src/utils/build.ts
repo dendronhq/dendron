@@ -169,6 +169,7 @@ export class BuildUtils {
   }
 
   static packagePluginDependencies() {
+    $(`yarn build:prod`, { cwd: this.getPluginRootPath() });
     return $(`vsce package --yarn`, { cwd: this.getPluginRootPath() });
   }
 

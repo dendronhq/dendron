@@ -815,12 +815,12 @@
   },
   "icon": "assets/images/logo.png",
   "scripts": {
-    "vscode:prepublish": "yarn webpack:prod && ./scripts/varSub.sh",
     "webpack": "cross-env SKIP_SENTRY=1 webpack --config webpack.dev.js",
     "webpack:dev:watch": "yarn webpack --watch",
     "webpack:prod": "webpack --config webpack.prod.js",
     "watch": "yarn compile --watch",
     "build": "yarn compile",
+    "build:prod": "yarn webpack:prod && ./scripts/varSub.sh",
     "compile": "tsc -p tsconfig.build.json",
     "test": "node ./out/src/test/runTestInteg.js",
     "format": "echo nop",

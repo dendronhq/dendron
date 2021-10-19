@@ -772,7 +772,7 @@ suite("per-init config migration logic", function () {
   });
 
   describeMultiWS(
-    "GIVEN: current version is less than 0.64.0 and config is legacy",
+    "GIVEN: current version is less than 0.64.1 and config is legacy",
     {
       ctx,
       modConfigCb: (config) => {
@@ -803,7 +803,7 @@ suite("per-init config migration logic", function () {
   );
 
   describeMultiWS(
-    "GIVEN: current version is 0.64.0 and config is legacy",
+    "GIVEN: current version is 0.64.1 and config is legacy",
     {
       ctx,
       modConfigCb: (config) => {
@@ -811,7 +811,7 @@ suite("per-init config migration logic", function () {
         return config;
       },
       preSetupHook: async ({ wsRoot, vaults }) => {
-        DendronExtension.version = () => "0.64.0";
+        DendronExtension.version = () => "0.64.1";
         ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
       },
     },
@@ -834,7 +834,7 @@ suite("per-init config migration logic", function () {
   );
 
   describeMultiWS(
-    "GIVEN: current version is 0.64.0 and config is not legacy",
+    "GIVEN: current version is 0.64.1 and config is not legacy",
     {
       ctx,
       modConfigCb: (config) => {
@@ -842,7 +842,7 @@ suite("per-init config migration logic", function () {
         return config;
       },
       preSetupHook: async ({ wsRoot, vaults }) => {
-        DendronExtension.version = () => "0.64.0";
+        DendronExtension.version = () => "0.64.1";
         ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
       },
     },
@@ -866,7 +866,7 @@ suite("per-init config migration logic", function () {
   );
 
   describeMultiWS(
-    "GIVEN: current version is larger than 0.64.0 and config is legacy",
+    "GIVEN: current version is larger than 0.64.1 and config is legacy",
     {
       ctx,
       modConfigCb: (config) => {
@@ -874,7 +874,7 @@ suite("per-init config migration logic", function () {
         return config;
       },
       preSetupHook: async ({ wsRoot, vaults }) => {
-        DendronExtension.version = () => "0.64.1";
+        DendronExtension.version = () => "0.64.2";
         ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
       },
     },
@@ -897,7 +897,7 @@ suite("per-init config migration logic", function () {
   );
 
   describeMultiWS(
-    "GIVEN: current version is larger than 0.64.0 and config is not legacy",
+    "GIVEN: current version is larger than 0.64.1 and config is not legacy",
     {
       ctx,
       modConfigCb: (config) => {
@@ -905,7 +905,7 @@ suite("per-init config migration logic", function () {
         return config;
       },
       preSetupHook: async ({ wsRoot, vaults }) => {
-        DendronExtension.version = () => "0.64.1";
+        DendronExtension.version = () => "0.64.2";
         ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
       },
     },

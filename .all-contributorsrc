@@ -743,6 +743,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "bdefore",
+      "name": "Buck DeFore",
+      "avatar_url": "https://avatars.githubusercontent.com/u/142472?v=4",
+      "profile": "http://bcdef.org",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,

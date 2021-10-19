@@ -803,7 +803,7 @@ export class AnchorUtils {
       const error = DendronError.createFromStatus({
         status: ERROR_STATUS.UNKNOWN,
         payload: { note: NoteUtils.toLogObj(opts.note), wsRoot: opts.wsRoot },
-        error: err as Error,
+        innerError: err as Error,
       });
       createLogger("AnchorUtils").error(error);
       return {};

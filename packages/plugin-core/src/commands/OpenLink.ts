@@ -70,7 +70,7 @@ export class OpenLinkCommand extends BasicCommand<CommandOpts, CommandOutput> {
       await open(assetPath).catch((err) => {
         const error = DendronError.createFromStatus({
           status: ERROR_STATUS.UNKNOWN,
-          error: err,
+          innerError: err,
         });
         this.L.error({ error });
         return { error };

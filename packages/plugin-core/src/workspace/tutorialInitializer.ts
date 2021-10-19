@@ -62,8 +62,8 @@ export class TutorialInitializer
     rif.replaceInFile(options).catch((err: Error) => {
       Logger.error({
         ctx,
-        error: DendronError.createPlainError({
-          error: err,
+        error: new DendronError({
+          innerError: err,
           message: "error replacing tutorial placeholder text",
         }),
       });

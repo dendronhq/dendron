@@ -1,10 +1,10 @@
 import { DendronError, error2PlainObject, setEnv } from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-server";
+import * as Sentry from "@sentry/node";
 import fs from "fs-extra";
 import path from "path";
 import { ExtensionContext, OutputChannel, window, workspace } from "vscode";
 import { CONFIG, DENDRON_CHANNEL_NAME } from "./constants";
-import * as Sentry from "@sentry/node";
 
 export type TraceLevel = "debug" | "info" | "warn" | "error" | "fatal";
 const levels = ["debug", "info", "warn", "error", "fatal"];
@@ -88,13 +88,12 @@ export class Logger {
         scope.setExtra("severity", payload.error.severity?.toString());
         scope.setExtra("code", payload.error.code);
         scope.setExtra("status", payload.error.status);
-        scope.setExtra("isComposite", payload.error.isComposite);
       }
       const cleanMsg =
       (payload.error ? payload.error.message : payload.msg) || customStringify(payload);
 
-      if (payload.error?.error) {
-        Sentry.captureException(payload.error?.error);
+      if (payload.error) {
+        Sentry.captureException(payload.error);
       }
       else {
         Sentry.captureMessage(cleanMsg);
@@ -102,8 +101,9 @@ export class Logger {
     })
   }
 
-  static info(payload: any, show?: boolean) {
+  static info(payload: any, show?: boolean): void {
     Logger.log(payload, "info", { show });
+
     Sentry.addBreadcrumb({
       category: "plugin",
       message: customStringify(payload),

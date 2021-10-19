@@ -944,11 +944,10 @@ const NOTES = {
       }
       // Renaming a note without a frontmatter fails.
       // Make sure we fail gracefully.
-
       return [
         {
-          actual: _.pick(error, "severity", "isComposite"),
-          expected: { severity: "fatal", isComposite: false },
+          actual: _.pick(error, "severity"),
+          expected: { severity: "fatal"},
         },
         {
           actual: error?.message?.includes("Unable to delete"),

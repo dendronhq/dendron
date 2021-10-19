@@ -19,8 +19,8 @@ const runCmd = (opts: Omit<NoteCLICommandOpts, "port" | "server">) => {
 describe("WHEN run 'dendron note lookup'", () => {
   const cmd = NoteCommands.LOOKUP;
 
-  describe("AND WHEN lookup note with no vault specified", () => {
-    test("THEN get note in first vault", async () => {
+  describe("AND WHEN lookup note that doesn't exist in specified vault", () => {
+    test("THEN lookup creates new note in specified vault", async () => {
       await runEngineTestV5(
         async ({ engine, wsRoot, vaults }) => {
           const vault = vaults[0];
@@ -49,8 +49,8 @@ describe("WHEN run 'dendron note lookup'", () => {
     });
   });
 
-  describe("AND WHEN lookup note with no vault specified and --output = markdown_dendron", () => {
-    test("THEN get note in first vault", async () => {
+  describe("AND WHEN lookup note and --output = markdown_dendron", () => {
+    test("THEN get note body in markdown_dendron", async () => {
       await runEngineTestV5(
         async ({ engine, wsRoot, vaults }) => {
           const vault = vaults[0];
@@ -75,7 +75,7 @@ describe("WHEN run 'dendron note lookup'", () => {
   });
 
   describe("AND WHEN lookup note with no vault specified and --output = md_gfm", () => {
-    test("THEN get note in first vault", async () => {
+    test("THEN get note body in mardkown_gfm", async () => {
       await runEngineTestV5(
         async ({ engine, wsRoot, vaults }) => {
           const vault = vaults[0];
@@ -109,7 +109,7 @@ describe("WHEN run 'dendron note lookup'", () => {
     });
   });
 
-  describe("WHEN specify vault", () => {
+  describe("WHEN lookup note that exists in specified vault", () => {
     test("THEN get note in specified vault", async () => {
       await runEngineTestV5(
         async ({ engine, wsRoot, vaults }) => {

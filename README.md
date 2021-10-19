@@ -1,7 +1,7 @@
 ![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/logo-256.png)
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-77-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-78-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 # Welcome to Dendron!
@@ -159,6 +159,9 @@ Dendron wouldn't be what it is today without help from these wonderful gardeners
     <td align="center"><a href="https://github.com/doctorboyMP"><img src="https://avatars.githubusercontent.com/u/24513363?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Miguel Pereira</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=doctorboyMP" title="Documentation">📖</a> <a href="https://github.com/dendronhq/dendron/issues?q=author%3AdoctorboyMP" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://blog.dend.ro/"><img src="https://avatars.githubusercontent.com/u/308347?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Laurențiu Nicola</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Alnicola" title="Bug reports">🐛</a></td>
     <td align="center"><a href="http://www.ericmarthinsen.com"><img src="https://avatars.githubusercontent.com/u/135033?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Eric Marthinsen</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Aemarthinsen" title="Bug reports">🐛</a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://dorety.dev"><img src="https://avatars.githubusercontent.com/u/36145101?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Jonathan Dorety</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=jdorety" title="Documentation">📖</a></td>
   </tr>
 </table>
 

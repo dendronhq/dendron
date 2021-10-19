@@ -10,7 +10,7 @@ import * as vscode from "vscode";
 import { Uri, window } from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
-import { VSCodeUtils } from "../utils";
+import { showMessage, VSCodeUtils } from "../utils";
 import { showPodQuickPickItemsV4 } from "../utils/pods";
 import { getExtension, getDWorkspace } from "../workspace";
 import { BaseCommand } from "./base";
@@ -69,6 +69,9 @@ export class PublishPodCommand extends BaseCommand<
     const { engine, wsRoot, config: dendronConfig, vaults } = getDWorkspace();
     const pod = new podChoice.podClass() as PublishPod; // eslint-disable-line new-cap
     const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
+    const utilityMethods = {
+      showMessage,
+    };
     try {
       const link = await pod.execute({
         config: {
@@ -81,6 +84,7 @@ export class PublishPodCommand extends BaseCommand<
         wsRoot,
         engine,
         dendronConfig,
+        utilityMethods,
       });
       await vscode.env.clipboard.writeText(link);
       return link;
@@ -90,12 +94,15 @@ export class PublishPodCommand extends BaseCommand<
     }
   }
 
-  async showResponse(resp: any) {
-    if (resp.startsWith("Github: ")) {
-      window.showInformationMessage(resp);
-    } else {
+  async showResponse(resp: string) {
+    //do not show this message if resp is empty string or is only a url. Url check ids added for github publish pod.
+    if (
+      resp.trim() &&
+      !resp.match(
+        "^(http://www.|https://www.|http://|https://)?[a-z0-9]+([-.]{1}[a-z0-9]+)*.[a-z]{2,5}(:[0-9]{1,5})?(/.*)?$"
+      )
+    )
       window.showInformationMessage("contents copied to clipboard");
-    }
   }
 
   addAnalyticsPayload(opts?: CommandOpts) {

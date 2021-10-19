@@ -331,11 +331,21 @@ export class WorkspaceService {
   }) {
     // Add the vault to the gitignore of root, so that it doesn't show up as part of root anymore
     const gitignore = path.join(wsRoot, ".gitignore");
-    const contents = await fs.readFile(gitignore, { encoding: "utf-8" });
-    if (!contents.match(new RegExp(`^${targetVault.fsPath}/?$`, "g"))) {
+    let contents: string | undefined;
+    try {
+      contents = await fs.readFile(gitignore, { encoding: "utf-8" });
+    } catch (err: any) {
+      // if the .gitignore was missing, ignore it
+      if (err?.code !== "ENOENT") throw err;
+    }
+    if (
+      !contents ||
+      !contents.match(new RegExp(`^${targetVault.fsPath}/?$`, "g"))
+    ) {
       // Avoid duplicating the gitignore line if it was already there
       await fs.appendFile(gitignore, `\n${targetVault.fsPath}\n`);
     }
+
     // Now, initialize a repository in it
     const git = new Git({
       localUrl: path.join(wsRoot, targetVault.fsPath),
@@ -346,7 +356,7 @@ export class WorkspaceService {
       await git.init();
     }
     let remote = await git.getUpstream();
-    if (remote === undefined) {
+    if (!remote) {
       remote = await git.remoteAdd();
     }
     const branch = await git.getCurrentBranch();

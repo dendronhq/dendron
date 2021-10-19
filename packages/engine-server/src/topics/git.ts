@@ -185,7 +185,9 @@ export class Git {
   async getUpstream(): Promise<string | undefined> {
     try {
       const { stdout } = await this._execute("git remote");
-      return _.trim(stdout.split("\n")[0]);
+      const upstream = _.trim(stdout.split("\n")[0]);
+      if (!upstream) return undefined;
+      return upstream;
     } catch {
       return undefined;
     }

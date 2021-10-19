@@ -16,7 +16,7 @@ suite("RunMigrationCommand", function () {
       ctx,
       modConfigCb: (config) => {
         // @ts-ignore
-        delete config.commands!.lookup;
+        delete config.commands["lookup"];
         return config;
       },
       wsSettingsOverride: {

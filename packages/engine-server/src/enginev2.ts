@@ -147,9 +147,9 @@ export class DendronEngineV2 implements DEngine {
     this.config = props.config;
     this._vaults = props.vaults;
     this.store = props.createStore(this);
-    const hooks: DHookDict = _.get(props.config, "workspace.hooks", {
+    const hooks: DHookDict = ConfigUtils.getWorkspace(props.config).hooks || {
       onCreate: [],
-    });
+    };
     this.hooks = hooks;
     this.renderedCache = createRenderedCache(this.config, this.logger);
   }

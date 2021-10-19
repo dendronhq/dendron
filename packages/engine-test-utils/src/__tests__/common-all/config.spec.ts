@@ -30,7 +30,7 @@ describe("ConfigUtils", () => {
       test("WHEN given v3 path AND value doesn't exists, THEN it returns v3 default", () => {
         const expected = genDefaultJournalConfig();
         // @ts-ignore
-        delete config.workspace.journal;
+        delete config.workspace["journal"];
 
         // testing for explicitly deleted key.
         expect(config.workspace!.journal).toBeUndefined();

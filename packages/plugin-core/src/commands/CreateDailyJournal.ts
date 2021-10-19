@@ -45,7 +45,7 @@ export class CreateDailyJournalCommand extends BaseCommand<
     const { fname } = opts;
     const ctx = "CreateDailyJournal";
     const config = getDWorkspace().config;
-    const journalConfig = ConfigUtils.getJournal(config);;
+    const journalConfig = ConfigUtils.getJournal(config);
     const journalName = journalConfig.name;
     this.L.info({ ctx, journalName, fname });
     const title = NoteUtils.genJournalNoteTitle({
@@ -53,7 +53,8 @@ export class CreateDailyJournalCommand extends BaseCommand<
       journalName,
     });
 
-    const confirmVaultOnCreate = ConfigUtils.getCommands(config).lookup.note.confirmVaultOnCreate;
+    const confirmVaultOnCreate =
+      ConfigUtils.getCommands(config).lookup.note.confirmVaultOnCreate;
     const { engine } = getDWorkspace();
     let vault;
     if (_.isUndefined(journalConfig.dailyVault) && confirmVaultOnCreate) {

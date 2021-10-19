@@ -310,6 +310,7 @@ export class ConfigUtils {
     } as StrictConfigV3;
   }
 
+  // get
   static getProp<K extends keyof StrictConfigV3>(
     config: IntermediateDendronConfig,
     key: K
@@ -317,32 +318,6 @@ export class ConfigUtils {
     const defaultConfig = ConfigUtils.genDefaultConfig();
     const configWithDefaults = _.defaultsDeep(config, defaultConfig);
     return configWithDefaults[key];
-  }
-
-  static setProp<K extends keyof StrictConfigV3>(
-    config: IntermediateDendronConfig,
-    key: K,
-    value: StrictConfigV3[K]
-  ): void {
-    _.set(config, key, value);
-  }
-
-  static setCommandsProp<K extends keyof DendronCommandConfig>(
-    config: IntermediateDendronConfig,
-    key: K,
-    value: DendronCommandConfig[K]
-  ) {
-    const path = `commands.${key}`;
-    _.set(config, path, value);
-  }
-
-  static setWorkspaceProp<K extends keyof DendronWorkspaceConfig>(
-    config: IntermediateDendronConfig,
-    key: K,
-    value: DendronWorkspaceConfig[K]
-  ) {
-    const path = `workspace.${key}`;
-    _.set(config, path, value);
   }
 
   static getCommands(config: IntermediateDendronConfig): DendronCommandConfig {
@@ -373,6 +348,33 @@ export class ConfigUtils {
 
   static getLookup(config: IntermediateDendronConfig): LookupConfig {
     return ConfigUtils.getCommands(config).lookup;
+  }
+
+  // set
+  static setProp<K extends keyof StrictConfigV3>(
+    config: IntermediateDendronConfig,
+    key: K,
+    value: StrictConfigV3[K]
+  ): void {
+    _.set(config, key, value);
+  }
+
+  static setCommandsProp<K extends keyof DendronCommandConfig>(
+    config: IntermediateDendronConfig,
+    key: K,
+    value: DendronCommandConfig[K]
+  ) {
+    const path = `commands.${key}`;
+    _.set(config, path, value);
+  }
+
+  static setWorkspaceProp<K extends keyof DendronWorkspaceConfig>(
+    config: IntermediateDendronConfig,
+    key: K,
+    value: DendronWorkspaceConfig[K]
+  ) {
+    const path = `workspace.${key}`;
+    _.set(config, path, value);
   }
 
   static setVaults(config: IntermediateDendronConfig, value: DVault[]): void {

@@ -13,6 +13,7 @@ import AntThemes from "../styles/theme-antd";
 import GraphFilterView from "./graph-filter-view";
 import { GraphConfig, GraphConfigItem, GraphElements } from "../lib/graph";
 import {
+  ConfigUtils,
   DMessageSource,
   GraphViewMessage,
   GraphViewMessageType,
@@ -193,6 +194,8 @@ export default function Graph({
         ide.graphStyles
       ) as any;
 
+      const defaultConfig = ConfigUtils.genDefaultConfig();
+
       const network = cytoscape({
         container: graphRef.current,
         elements: {
@@ -200,7 +203,9 @@ export default function Graph({
           edges: parsedEdges,
         },
         style,
-        wheelSensitivity: engine.config?.workspace?.graph.zoomSpeed || 1,
+        wheelSensitivity: ConfigUtils.getWorkspace(
+          engine.config || defaultConfig
+        ).graph.zoomSpeed,
 
         // Zoom levels
         minZoom: 0.1,

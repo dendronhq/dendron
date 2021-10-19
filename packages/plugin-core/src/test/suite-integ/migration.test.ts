@@ -369,8 +369,8 @@ suite("Migration", function () {
       });
     });
 
-    test("migrate to 0.64.0 (commands and workspace namespace migration)", (done) => {
-      DendronExtension.version = () => "0.0.1";
+    test("migrate to 0.64.1 (commands and workspace namespace migration)", (done) => {
+      DendronExtension.version = () => "0.64.0";
       runLegacyMultiWorkspaceTest({
         ctx,
         modConfigCb: (config) => {
@@ -396,7 +396,7 @@ suite("Migration", function () {
 
           delete config["commands"];
 
-          config["dendronVersion"] = "0.63.0";
+          config["dendronVersion"] = "0.64.0";
           config["vaults"] = [
             {
               fsPath: "vault",
@@ -481,13 +481,13 @@ suite("Migration", function () {
           });
 
           await MigrationServce.applyMigrationRules({
-            currentVersion: "0.64.0",
-            previousVersion: "0.63.0",
+            currentVersion: "0.64.1",
+            previousVersion: "0.64.0",
             dendronConfig,
             wsConfig,
             wsService,
             logger: Logger,
-            migrations: getMigration({ from: "0.63.0", to: "0.64.0" }),
+            migrations: getMigration({ from: "0.64.0", to: "0.64.1" }),
           });
 
           // backup of the original should exist.

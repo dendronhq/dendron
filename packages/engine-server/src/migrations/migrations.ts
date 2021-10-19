@@ -17,7 +17,7 @@ import { Migrations } from "./types";
 import { MigrationUtils } from "./utils";
 
 export const CONFIG_MIGRATIONS: Migrations = {
-  version: "0.64.0",
+  version: "0.64.1",
   changes: [
     {
       name: "migrate config",

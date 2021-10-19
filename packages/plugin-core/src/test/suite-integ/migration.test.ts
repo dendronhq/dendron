@@ -18,6 +18,7 @@ import {
   MigrateFunction,
   MigrationServce,
   WorkspaceService,
+  DConfig,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import fs from "fs-extra";
@@ -301,8 +302,10 @@ suite("Migration", function () {
             wsConfig?.settings[CONFIG.DEFAULT_LOOKUP_CREATE_BEHAVIOR.key]
           ).toEqual(LegacyLookupSelectionType.selection2link);
 
-          // we explicitly deleted it. don't use ConfigUtils.
-          expect(_.isUndefined(dendronConfig.commands!.lookup)).toBeTruthy();
+          // // we explicitly deleted it. don't use ConfigUtils.
+          const rawConfig = DConfig.getRaw(wsRoot);
+          const lookup = rawConfig.commands?.lookup;
+          expect(_.isUndefined(lookup)).toBeTruthy();
           await MigrationServce.applyMigrationRules({
             currentVersion: "0.55.2",
             previousVersion: "0.55.1",
@@ -348,7 +351,9 @@ suite("Migration", function () {
           ).toBeTruthy();
 
           // testing for explicitly deleted key.
-          expect(_.isUndefined(dendronConfig.commands!.lookup)).toBeTruthy();
+          const rawConfig = DConfig.getRaw(wsRoot);
+          const lookup = rawConfig.commands?.lookup;
+          expect(_.isUndefined(lookup)).toBeTruthy();
           await MigrationServce.applyMigrationRules({
             currentVersion: "0.55.2",
             previousVersion: "0.55.1",
@@ -370,7 +375,7 @@ suite("Migration", function () {
     });
 
     test("migrate to 0.64.1 (commands and workspace namespace migration)", (done) => {
-      DendronExtension.version = () => "0.64.0";
+      DendronExtension.version = () => "0.64.1";
       runLegacyMultiWorkspaceTest({
         ctx,
         modConfigCb: (config) => {
@@ -393,8 +398,6 @@ suite("Migration", function () {
             },
           } as LegacyLookupConfig;
           config["lookupConfirmVaultOnCreate"] = false;
-
-          delete config["commands"];
 
           config["dendronVersion"] = "0.64.0";
           config["vaults"] = [
@@ -429,10 +432,14 @@ suite("Migration", function () {
           config["feedback"] = true;
           config["apiEndpoint"] = "foobar.com";
 
+          delete config.commands;
+
           return config;
         },
         onInit: async ({ engine, wsRoot }) => {
-          const dendronConfig = engine.config;
+          const dendronConfig = DConfig.getRaw(
+            wsRoot
+          ) as IntermediateDendronConfig;
           const wsConfig = await getExtension().getWorkspaceSettings();
           const wsService = new WorkspaceService({ wsRoot });
 
@@ -461,6 +468,7 @@ suite("Migration", function () {
             "apiEndpoint",
           ];
 
+          // deleting here because it's populated during init.
           delete dendronConfig["workspace"];
           const originalDeepCopy = _.cloneDeep(dendronConfig);
 

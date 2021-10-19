@@ -1,5 +1,9 @@
 import _ from "lodash";
-import { ConfigUtils, WorkspaceType } from "@dendronhq/common-all";
+import {
+  ConfigUtils,
+  IntermediateDendronConfig,
+  WorkspaceType,
+} from "@dendronhq/common-all";
 import sinon from "sinon";
 import * as vscode from "vscode";
 import { RunMigrationCommand } from "../../commands/RunMigrationCommand";
@@ -7,6 +11,7 @@ import { CONFIG } from "../../constants";
 import { getDWorkspace } from "../../workspace";
 import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
+import { DConfig } from "@dendronhq/engine-server";
 
 suite("RunMigrationCommand", function () {
   const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {});
@@ -24,10 +29,11 @@ suite("RunMigrationCommand", function () {
           [CONFIG.DEFAULT_LOOKUP_CREATE_BEHAVIOR.key]: "selection2link",
         },
       },
-      onInit: async ({ engine }) => {
+      onInit: async ({ wsRoot }) => {
         const cmd = new RunMigrationCommand();
         // testing for explicitly delete key.
-        expect(_.isUndefined(engine.config.commands!.lookup)).toBeTruthy();
+        const rawConfig = DConfig.getRaw(wsRoot) as IntermediateDendronConfig;
+        expect(_.isUndefined(rawConfig.commands?.lookup)).toBeTruthy();
         sinon.stub(cmd, "gatherInputs").resolves({ version: "0.55.2" });
         const out = await cmd.run();
         expect(out!.length).toEqual(1);

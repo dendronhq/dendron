@@ -7,6 +7,7 @@ import {
   WorkspaceOpts,
   WorkspaceSettings,
   WorkspaceType,
+  ConfigUtils,
 } from "@dendronhq/common-all";
 import {
   assignJSONWithComment,
@@ -248,7 +249,7 @@ export async function setupLegacyWorkspaceMulti(
   if (isNotUndefined(copts.modConfigCb)) {
     config = TestConfigUtils.withConfig(copts.modConfigCb, { wsRoot });
   }
-  config.workspace!.vaults = vaults;
+  ConfigUtils.setVaults(config, vaults);
   DConfig.writeConfig({ wsRoot, config });
   await postSetupHook({
     wsRoot,

@@ -8,6 +8,7 @@ import {
   WorkspaceFolderRaw,
   WorkspaceOpts,
   WorkspaceSettings,
+  ConfigUtils,
 } from "@dendronhq/common-all";
 import {
   getDurationMilliseconds,
@@ -153,7 +154,9 @@ export async function setupWS(opts: {
       return vault;
     })
   );
-  config.workspace!.vaults = _.sortBy(config.workspace!.vaults, "fsPath");
+  const vaultsConfig = ConfigUtils.getVaults(config);
+  const sortedVaultsConfig = _.sortBy(vaultsConfig, "fsPath");
+  ConfigUtils.setVaults(config, sortedVaultsConfig);
   if (config.site.duplicateNoteBehavior) {
     config.site.duplicateNoteBehavior.payload = (
       config.site.duplicateNoteBehavior.payload as string[]

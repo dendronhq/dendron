@@ -3,6 +3,7 @@ import {
   getStage,
   InstallStatus,
   WorkspaceSettings,
+  ConfigUtils,
 } from "@dendronhq/common-all";
 import { createLogger, DLogger } from "@dendronhq/common-server";
 import _ from "lodash";
@@ -66,7 +67,11 @@ export class MigrationServce {
     const changes = _.flatten(results);
     if (!_.isEmpty(changes)) {
       const { data } = _.last(changes)!;
-      data.dendronConfig.workspace!.dendronVersion = currentVersion;
+      ConfigUtils.setWorkspaceProp(
+        data.dendronConfig,
+        "dendronVersion",
+        currentVersion
+      );
       wsService.setConfig(data.dendronConfig);
       // wsConfig is undefined for native workspaces
       if (data.wsConfig) wsService.setWorkspaceConfig(data.wsConfig);

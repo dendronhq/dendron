@@ -1,4 +1,4 @@
-import { DVault, NoteProps } from "@dendronhq/common-all";
+import { ConfigUtils, DVault, NoteProps } from "@dendronhq/common-all";
 import { tmpDir } from "@dendronhq/common-server";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import {
@@ -168,14 +168,21 @@ describe("WorkspaceService", () => {
         const root = tmpDir().name;
         await GitTestUtils.createRepoWithReadme(root);
 
-        engine.config.workspace!.vaults.push({
+        const vaultsConfig = ConfigUtils.getVaults(engine.config);
+
+        vaultsConfig.push({
           fsPath: "remoteVault",
           remote: {
             type: "git",
             url: root,
           },
         });
-        engine.config.workspace!.enableRemoteVaultInit = false;
+        ConfigUtils.setVaults(engine.config, vaultsConfig);
+        ConfigUtils.setWorkspaceProp(
+          engine.config,
+          "enableRemoteVaultInit",
+          false
+        );
         DConfig.writeConfig({ wsRoot, config: engine.config });
         const ws = new WorkspaceService({ wsRoot });
         const didClone = await ws.initialize({

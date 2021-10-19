@@ -113,7 +113,9 @@ suite("Migration", function () {
           });
           const { dendronConfig: newDendronConfig, changeName } = out[0].data;
           expect(changeName).toEqual("update cache");
-          expect(newDendronConfig.workspace!.dendronVersion).toEqual("0.46.0");
+          const dendronVersion =
+            ConfigUtils.getWorkspace(newDendronConfig).dendronVersion;
+          expect(dendronVersion).toEqual("0.46.0");
           expect(out.length).toEqual(1);
           done();
         },
@@ -144,9 +146,12 @@ suite("Migration", function () {
               migrations: getMigration({ from: "0.46.0", to: "0.47.1" }),
             });
             expect(out.length).toEqual(1);
-            expect(getDWorkspace().config.workspace!.journal).toEqual(
-              ConfigUtils.genDefaultConfig().workspace!.journal
+            const config = getDWorkspace().config;
+            const journalConfig = ConfigUtils.getJournal(config);
+            const defaultJournalConfig = ConfigUtils.getJournal(
+              ConfigUtils.genDefaultConfig()
             );
+            expect(journalConfig).toEqual(defaultJournalConfig);
             done();
           },
         });
@@ -175,10 +180,13 @@ suite("Migration", function () {
               migrations: getMigration({ from: "0.46.0", to: "0.47.1" }),
             });
             expect(out.length).toEqual(1);
-            expect(getDWorkspace().config.workspace!.journal).toEqual({
-              ...ConfigUtils.genDefaultConfig().workspace!.journal,
+            const config = getDWorkspace().config;
+            const journalConfig = ConfigUtils.getJournal(config);
+            const expectedJournalConfig = {
+              ...ConfigUtils.getJournal(ConfigUtils.genDefaultConfig()),
               name: "foo",
-            });
+            };
+            expect(journalConfig).toEqual(expectedJournalConfig);
             done();
           },
           wsSettingsOverride: {
@@ -207,10 +215,13 @@ suite("Migration", function () {
             logger: Logger,
             migrations: getMigration({ from: "0.51.0", to: "0.52.0" }),
           });
-          expect(getDWorkspace().config.workspace!.scratch).toEqual({
-            ...ConfigUtils.genDefaultConfig().workspace!.scratch,
+          const config = getDWorkspace().config;
+          const scratchConfig = ConfigUtils.getScratch(config);
+          const expectedScratchConfig = {
+            ...ConfigUtils.getScratch(ConfigUtils.genDefaultConfig()),
             name: "foo",
-          });
+          };
+          expect(scratchConfig).toEqual(expectedScratchConfig);
           done();
         },
         wsSettingsOverride: {
@@ -289,6 +300,8 @@ suite("Migration", function () {
           expect(
             wsConfig?.settings[CONFIG.DEFAULT_LOOKUP_CREATE_BEHAVIOR.key]
           ).toEqual(LegacyLookupSelectionType.selection2link);
+
+          // we explicitly deleted it. don't use ConfigUtils.
           expect(_.isUndefined(dendronConfig.commands!.lookup)).toBeTruthy();
           await MigrationServce.applyMigrationRules({
             currentVersion: "0.55.2",
@@ -299,9 +312,11 @@ suite("Migration", function () {
             logger: Logger,
             migrations: getMigration({ from: "0.55.0", to: "0.55.2" }),
           });
-          expect(
-            getDWorkspace().config.commands!.lookup.note.selectionMode
-          ).toEqual(LookupSelectionModeEnum.link);
+          const config = getDWorkspace().config;
+          const lookupConfig = ConfigUtils.getLookup(config);
+          expect(lookupConfig.note.selectionMode).toEqual(
+            LookupSelectionModeEnum.link
+          );
           done();
         },
         wsSettingsOverride: {
@@ -331,6 +346,8 @@ suite("Migration", function () {
               wsConfig?.settings[CONFIG.DEFAULT_LOOKUP_CREATE_BEHAVIOR.key]
             )
           ).toBeTruthy();
+
+          // testing for explicitly deleted key.
           expect(_.isUndefined(dendronConfig.commands!.lookup)).toBeTruthy();
           await MigrationServce.applyMigrationRules({
             currentVersion: "0.55.2",
@@ -341,9 +358,9 @@ suite("Migration", function () {
             logger: Logger,
             migrations: getMigration({ from: "0.55.0", to: "0.55.2" }),
           });
-          expect(
-            getDWorkspace().config.commands!.lookup.note.selectionMode
-          ).toEqual(
+          const config = getDWorkspace().config;
+          const lookupConfig = ConfigUtils.getLookup(config);
+          expect(lookupConfig.note.selectionMode).toEqual(
             ConfigUtils.genDefaultConfig().commands!.lookup.note.selectionMode
           );
           done();

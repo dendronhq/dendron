@@ -1,4 +1,5 @@
 import {
+  ConfigUtils,
   DNodeUtils,
   DVault,
   NoteProps,
@@ -339,7 +340,7 @@ export async function setupCodeWorkspaceMultiVaultV2(
 
   // update config
   const config = DConfig.getOrCreate(wsRoot);
-  config.workspace!.vaults = vaults;
+  ConfigUtils.setVaults(config, vaults);
   DConfig.writeConfig({ wsRoot, config });
 
   await postSetupHook({

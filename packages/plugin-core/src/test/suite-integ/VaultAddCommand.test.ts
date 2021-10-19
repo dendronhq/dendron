@@ -4,6 +4,7 @@ import {
   NoteUtils,
   SchemaUtils,
   VaultUtils,
+  ConfigUtils,
 } from "@dendronhq/common-all";
 import {
   note2File,
@@ -122,7 +123,9 @@ suite("VaultAddCommand", function () {
           await cmd.run();
           const gitIgnoreInsideVault = path.join(wsRoot, wsName, ".gitignore");
 
-          expect(DConfig.getOrCreate(wsRoot).workspace!.workspaces).toEqual({
+          const config = DConfig.getOrCreate(wsRoot);
+          const workspaces = ConfigUtils.getWorkspace(config).workspaces;
+          expect(workspaces).toEqual({
             [wsName]: {
               remote: {
                 type: "git",
@@ -188,7 +191,9 @@ suite("VaultAddCommand", function () {
           });
           await cmd.run();
 
-          expect(DConfig.getOrCreate(wsRoot).workspace!.workspaces).toEqual({
+          const config = DConfig.getOrCreate(wsRoot);
+          const workspaces = ConfigUtils.getWorkspace(config).workspaces;
+          expect(workspaces).toEqual({
             [wsName]: {
               remote: {
                 type: "git",

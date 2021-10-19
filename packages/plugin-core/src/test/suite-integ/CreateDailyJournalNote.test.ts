@@ -7,7 +7,7 @@ import {
   withConfig,
   EditorUtils,
 } from "../testUtilsV3";
-import { DVault, VaultUtils } from "@dendronhq/common-all";
+import { ConfigUtils, DVault, VaultUtils } from "@dendronhq/common-all";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import _ from "lodash";
 import { PickerUtilsV2 } from "../../components/lookup/utils";
@@ -46,10 +46,13 @@ suite("Create Daily Journal Suite", function () {
       onInit: async ({ wsRoot, vaults }) => {
         withConfig(
           (config) => {
-            config.commands!.lookup.note.confirmVaultOnCreate = false;
-            config.workspace!.journal.dailyVault = VaultUtils.getName(
-              vaults[0]
+            ConfigUtils.setNoteLookupProps(
+              config,
+              "confirmVaultOnCreate",
+              false
             );
+            const dailyVaultName = VaultUtils.getName(vaults[0]);
+            ConfigUtils.setJournalProps(config, "dailyVault", dailyVaultName);
             return config;
           },
           { wsRoot }
@@ -71,10 +74,13 @@ suite("Create Daily Journal Suite", function () {
       onInit: async ({ wsRoot, vaults }) => {
         withConfig(
           (config) => {
-            config.commands!.lookup.note.confirmVaultOnCreate = true;
-            config.workspace!.journal.dailyVault = VaultUtils.getName(
-              vaults[0]
+            ConfigUtils.setNoteLookupProps(
+              config,
+              "confirmVaultOnCreate",
+              true
             );
+            const dailyVaultName = VaultUtils.getName(vaults[0]);
+            ConfigUtils.setJournalProps(config, "dailyVault", dailyVaultName);
             return config;
           },
           { wsRoot }
@@ -96,7 +102,11 @@ suite("Create Daily Journal Suite", function () {
       onInit: async ({ wsRoot, vaults }) => {
         withConfig(
           (config) => {
-            config.commands!.lookup.note.confirmVaultOnCreate = true;
+            ConfigUtils.setNoteLookupProps(
+              config,
+              "confirmVaultOnCreate",
+              true
+            );
             return config;
           },
           { wsRoot }
@@ -117,7 +127,7 @@ suite("Create Daily Journal Suite", function () {
     runLegacyMultiWorkspaceTest({
       ctx,
       modConfigCb: (config) => {
-        config.workspace!.journal.dailyDomain = "bar";
+        ConfigUtils.setJournalProps(config, "dailyDomain", "bar");
         return config;
       },
       onInit: async () => {
@@ -142,9 +152,9 @@ suite("Create Daily Journal Suite", function () {
         },
       },
       modConfigCb: (config) => {
-        config.workspace!.journal.dateFormat = "dd";
-        config.workspace!.journal.dailyDomain = "daisy";
-        config.workspace!.journal.name = "journey";
+        ConfigUtils.setJournalProps(config, "dateFormat", "dd");
+        ConfigUtils.setJournalProps(config, "dailyDomain", "daisy");
+        ConfigUtils.setJournalProps(config, "name", "journey");
         return config;
       },
       onInit: async ({ wsRoot, vaults }) => {

@@ -1,4 +1,5 @@
 import {
+  ConfigUtils,
   ERROR_SEVERITY,
   ERROR_STATUS,
   NoteProps,
@@ -266,11 +267,10 @@ const NOTES = {
     },
     {
       preSetupHook: async ({ wsRoot, vaults }) => {
-        console.log(wsRoot);
         TestConfigUtils.withConfig(
-          (c) => {
-            c.workspace!.maxNoteLength = 10;
-            return c;
+          (config) => {
+            ConfigUtils.setWorkspaceProp(config, "maxNoteLength", 10);
+            return config;
           },
           { wsRoot }
         );

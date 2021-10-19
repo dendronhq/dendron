@@ -98,7 +98,8 @@ function createRenderedCache(
 
     return new NullCache();
   } else {
-    const maxPreviewsCached = ConfigUtils.getWorkspace(config).maxPreviewsCached;
+    const maxPreviewsCached =
+      ConfigUtils.getWorkspace(config).maxPreviewsCached;
     if (maxPreviewsCached && maxPreviewsCached > 0) {
       logger.info({
         ctx,
@@ -163,7 +164,7 @@ export class DendronEngineV2 implements DEngine {
 
     return new DendronEngineV2({
       wsRoot,
-      vaults: config.workspace.vaults,
+      vaults: ConfigUtils.getVaults(config),
       forceNew: true,
       createStore: (engine) =>
         new FileStorage({
@@ -579,7 +580,9 @@ export class DendronEngineV2 implements DEngine {
         if (ent.status === "delete") {
           delete this.notes[id];
         } else {
-          const maxNoteLength = ConfigUtils.getWorkspace(this.config).maxNoteLength;
+          const maxNoteLength = ConfigUtils.getWorkspace(
+            this.config
+          ).maxNoteLength;
           if (
             ent.note.body.length <
             (maxNoteLength || CONSTANTS.DENDRON_DEFAULT_MAX_NOTE_LENGTH)

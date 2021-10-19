@@ -1,4 +1,4 @@
-import { DVaultSync, DVault } from "@dendronhq/common-all";
+import { DVaultSync, DVault, ConfigUtils } from "@dendronhq/common-all";
 import { tmpDir } from "@dendronhq/common-server";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { Git, SyncActionStatus } from "@dendronhq/engine-server";
@@ -101,7 +101,11 @@ suite("workspace sync command", function () {
       runLegacyMultiWorkspaceTest({
         ctx,
         modConfigCb: (config) => {
-          config.workspace!.workspaceVaultSyncMode = DVaultSync.SKIP;
+          ConfigUtils.setWorkspaceProp(
+            config,
+            "workspaceVaultSyncMode",
+            DVaultSync.SKIP
+          );
           return config;
         },
         onInit: async ({ wsRoot, vaults }) => {

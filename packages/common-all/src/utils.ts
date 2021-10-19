@@ -4,7 +4,7 @@ import minimatch from "minimatch";
 import querystring from "querystring";
 import semver from "semver";
 import { COLORS_LIST } from "./colors";
-import { NoteProps, SEOProps, DVault } from "./types";
+import { NoteProps, SEOProps, DVault, DHookDict } from "./types";
 import {
   DendronCommandConfig,
   DendronWorkspaceConfig,
@@ -12,8 +12,10 @@ import {
   genDefaultWorkspaceConfig,
   IntermediateDendronConfig,
   JournalConfig,
+  ScratchConfig,
   LookupConfig,
   StrictConfigV3,
+  NoteLookupConfig,
 } from "./types/intermediateConfigs";
 
 /**
@@ -317,11 +319,39 @@ export class ConfigUtils {
     return configWithDefaults[key];
   }
 
+  static setProp<K extends keyof StrictConfigV3>(
+    config: IntermediateDendronConfig,
+    key: K,
+    value: StrictConfigV3[K]
+  ): void {
+    _.set(config, key, value);
+  }
+
+  static setCommandsProp<K extends keyof DendronCommandConfig>(
+    config: IntermediateDendronConfig,
+    key: K,
+    value: DendronCommandConfig[K]
+  ) {
+    const path = `commands.${key}`;
+    _.set(config, path, value);
+  }
+
+  static setWorkspaceProp<K extends keyof DendronWorkspaceConfig>(
+    config: IntermediateDendronConfig,
+    key: K,
+    value: DendronWorkspaceConfig[K]
+  ) {
+    const path = `workspace.${key}`;
+    _.set(config, path, value);
+  }
+
   static getCommands(config: IntermediateDendronConfig): DendronCommandConfig {
     return ConfigUtils.getProp(config, "commands");
   }
 
-  static getWorkspace(config: IntermediateDendronConfig): DendronWorkspaceConfig {
+  static getWorkspace(
+    config: IntermediateDendronConfig
+  ): DendronWorkspaceConfig {
     return ConfigUtils.getProp(config, "workspace");
   }
 
@@ -329,11 +359,54 @@ export class ConfigUtils {
     return ConfigUtils.getWorkspace(config).vaults;
   }
 
+  static getHooks(config: IntermediateDendronConfig): DHookDict | undefined {
+    return ConfigUtils.getWorkspace(config).hooks;
+  }
+
   static getJournal(config: IntermediateDendronConfig): JournalConfig {
     return ConfigUtils.getWorkspace(config).journal;
   }
 
+  static getScratch(config: IntermediateDendronConfig): ScratchConfig {
+    return ConfigUtils.getWorkspace(config).scratch;
+  }
+
   static getLookup(config: IntermediateDendronConfig): LookupConfig {
     return ConfigUtils.getCommands(config).lookup;
+  }
+
+  static setVaults(config: IntermediateDendronConfig, value: DVault[]): void {
+    ConfigUtils.setWorkspaceProp(config, "vaults", value);
+  }
+
+  static setNoteLookupProps<K extends keyof NoteLookupConfig>(
+    config: IntermediateDendronConfig,
+    key: K,
+    value: NoteLookupConfig[K]
+  ) {
+    const path = `commands.lookup.note.${key}`;
+    _.set(config, path, value);
+  }
+
+  static setJournalProps<K extends keyof JournalConfig>(
+    config: IntermediateDendronConfig,
+    key: K,
+    value: JournalConfig[K]
+  ) {
+    const path = `workspace.journal.${key}`;
+    _.set(config, path, value);
+  }
+
+  static setScratchProps<K extends keyof ScratchConfig>(
+    config: IntermediateDendronConfig,
+    key: K,
+    value: ScratchConfig[K]
+  ) {
+    const path = `workspace.scratch.${key}`;
+    _.set(config, path, value);
+  }
+
+  static setHooks(config: IntermediateDendronConfig, value: DHookDict) {
+    ConfigUtils.setWorkspaceProp(config, "hooks", value);
   }
 }

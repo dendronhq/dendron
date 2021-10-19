@@ -1,4 +1,9 @@
-import { NoteUtils, VaultUtils, WorkspaceOpts } from "@dendronhq/common-all";
+import {
+  ConfigUtils,
+  NoteUtils,
+  VaultUtils,
+  WorkspaceOpts,
+} from "@dendronhq/common-all";
 import { tmpDir, vault2Path } from "@dendronhq/common-server";
 import {
   FileTestUtils,
@@ -157,7 +162,7 @@ describe("markdown publish pod", () => {
         const vaultName = VaultUtils.getName(vaults[0]);
         const config = TestConfigUtils.withConfig(
           (config) => {
-            config.workspace!.enableXVaultWikiLink = true;
+            ConfigUtils.setWorkspaceProp(config, "enableXVaultWikiLink", true);
             config.site = createSiteConfig({
               siteHierarchies: ["test-wikilink-to-url"],
               siteRootDir: "docs",
@@ -204,7 +209,8 @@ describe("markdown publish pod", () => {
         });
         const seedId = TestSeedUtils.defaultSeedId();
         engine.config = TestConfigUtils.getConfig({ wsRoot });
-        engine.vaults = engine.config.workspace!.vaults;
+        const vaultsConfig = ConfigUtils.getVaults(engine.config);
+        engine.vaults = vaultsConfig;
         const vault = VaultUtils.getVaultByName({
           vaults: engine.vaults,
           vname: seedId,

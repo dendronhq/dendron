@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { WorkspaceType } from "@dendronhq/common-all";
+import { ConfigUtils, WorkspaceType } from "@dendronhq/common-all";
 import sinon from "sinon";
 import * as vscode from "vscode";
 import { RunMigrationCommand } from "../../commands/RunMigrationCommand";
@@ -26,14 +26,15 @@ suite("RunMigrationCommand", function () {
       },
       onInit: async ({ engine }) => {
         const cmd = new RunMigrationCommand();
+        // testing for explicitly delete key.
         expect(_.isUndefined(engine.config.commands!.lookup)).toBeTruthy();
         sinon.stub(cmd, "gatherInputs").resolves({ version: "0.55.2" });
         const out = await cmd.run();
         expect(out!.length).toEqual(1);
         expect(out![0].data.version === "0.55.2");
-        expect(
-          getDWorkspace().config.commands!.lookup.note.selectionMode
-        ).toEqual("link");
+        const config = getDWorkspace().config;
+        const lookupConfig = ConfigUtils.getLookup(config);
+        expect(lookupConfig.note.selectionMode).toEqual("link");
         done();
       },
       workspaceType: WorkspaceType.CODE,

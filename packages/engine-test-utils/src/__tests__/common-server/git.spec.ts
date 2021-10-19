@@ -31,7 +31,7 @@ describe("GitUtils", () => {
         (ent) => ent.fsPath === note.vault.fsPath
       )!;
       vault.remote = { url: "git@github.com:kevin/foo.git", type: "git" };
-      config.workspace!.vaults = engine.vaults;
+      ConfigUtils.setVaults(config, engine.vaults);
       expect(GitUtils.getGithubEditUrl({ note, config, wsRoot })).toEqual(
         "https://github.com/kevin/foo/edit/main/foo.md"
       );

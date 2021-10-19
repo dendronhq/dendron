@@ -17,7 +17,7 @@ describe("ConfigUtils", () => {
 
       test("WHEN given a v3 path AND value exists, THEN it returns the correct value", () => {
         const expected = [{ fsPath: "foo" }, { fsPath: "bar" }] as DVault[];
-        config.workspace!.vaults = expected;
+        ConfigUtils.setVaults(config as IntermediateDendronConfig, expected);
 
         const vaults = ConfigUtils.getProp(
           config as IntermediateDendronConfig,
@@ -32,6 +32,7 @@ describe("ConfigUtils", () => {
         // @ts-ignore
         delete config.workspace.journal;
 
+        // testing for explicitly deleted key.
         expect(config.workspace!.journal).toBeUndefined();
 
         const journalConfig = ConfigUtils.getProp(

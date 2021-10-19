@@ -1,4 +1,8 @@
-import { DEngineClient, DVaultVisibility } from "@dendronhq/common-all";
+import {
+  ConfigUtils,
+  DEngineClient,
+  DVaultVisibility,
+} from "@dendronhq/common-all";
 import { tmpDir } from "@dendronhq/common-server";
 import { AssertUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { ENGINE_HOOKS, ENGINE_HOOKS_MULTI } from "../../../presets";
@@ -181,9 +185,8 @@ describe("backlinks", () => {
           await ENGINE_HOOKS_MULTI.setupBasicMulti(opts);
           TestConfigUtils.withConfig(
             (config) => {
-              const bvault = config.workspace!.vaults.find(
-                (ent: any) => ent.fsPath === "vault2"
-              );
+              const vaults = ConfigUtils.getVaults(config);
+              const bvault = vaults.find((ent: any) => ent.fsPath === "vault2");
               bvault!.visibility = DVaultVisibility.PRIVATE;
               return config;
             },

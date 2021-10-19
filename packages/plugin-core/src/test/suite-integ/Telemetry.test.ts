@@ -28,7 +28,7 @@ suite("telemetry", function () {
   function setNoTelemetry(to: boolean) {
     return async ({ wsRoot }: { wsRoot: string }) => {
       const config = ConfigUtils.genDefaultConfig();
-      config.workspace!.disableTelemetry = to;
+      ConfigUtils.setWorkspaceProp(config, "disableTelemetry", to);
       DConfig.writeConfig({ wsRoot, config });
     };
   }

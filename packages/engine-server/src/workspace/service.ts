@@ -179,8 +179,7 @@ export class WorkspaceService {
    */
   async addWorkspace({ workspace }: { workspace: DWorkspace }) {
     const config = this.config;
-    const allWorkspaces =
-      ConfigUtils.getWorkspace(config).workspaces || {};
+    const allWorkspaces = ConfigUtils.getWorkspace(config).workspaces || {};
     allWorkspaces[workspace.name] = _.omit(workspace, ["name", "vaults"]);
     // update vault
     const newVaults = await _.reduce(
@@ -198,7 +197,7 @@ export class WorkspaceService {
       },
       Promise.resolve([] as DVault[])
     );
-    config.workspace!.workspaces = allWorkspaces;
+    ConfigUtils.setWorkspaceProp(config, "workspaces", allWorkspaces);
     this.setConfig(config);
     return { vaults: newVaults };
   }
@@ -224,7 +223,10 @@ export class WorkspaceService {
       updateWorkspace: false,
     });
 
-    config.workspace!.vaults.unshift(vault);
+    const vaults = ConfigUtils.getVaults(config);
+    vaults.unshift(vault);
+    ConfigUtils.setVaults(config, vaults);
+
     // update dup note behavior
     if (!config.site.duplicateNoteBehavior) {
       const vaults = ConfigUtils.getVaults(config);
@@ -439,7 +441,8 @@ export class WorkspaceService {
       updateWorkspace: false,
     });
 
-    config.workspace!.vaults = _.reject(config.workspace!.vaults, (ent) => {
+    const vaults = ConfigUtils.getVaults(config);
+    const vaultsAfterReject = _.reject(vaults, (ent: DVault) => {
       const checks = [
         VaultUtils.getRelPath(ent) === VaultUtils.getRelPath(vault),
       ];
@@ -448,13 +451,16 @@ export class WorkspaceService {
       }
       return _.every(checks);
     });
+    ConfigUtils.setVaults(config, vaultsAfterReject);
 
-    if (vault.workspace && config.workspace!.workspaces) {
-      const vaultWorkspace = _.find(config.workspace!.vaults, {
+    const workspaces = ConfigUtils.getWorkspace(config).workspaces;
+    if (vault.workspace && workspaces) {
+      const vaultWorkspace = _.find(ConfigUtils.getVaults(config), {
         workspace: vault.workspace,
       });
       if (_.isUndefined(vaultWorkspace)) {
-        delete config.workspace!.workspaces![vault.workspace!];
+        delete workspaces[vault.workspace];
+        ConfigUtils.setWorkspaceProp(config, "workspaces", workspaces);
       }
     }
 
@@ -462,7 +468,8 @@ export class WorkspaceService {
       config.site.duplicateNoteBehavior &&
       _.isArray(config.site.duplicateNoteBehavior.payload)
     ) {
-      if (config.workspace!.vaults.length === 1) {
+      const vaults = ConfigUtils.getVaults(config);
+      if (vaults.length === 1) {
         // if there is only one vault left, remove duplicateNoteBehavior setting
         config.site = _.omit(config.site, ["duplicateNoteBehavior"]);
       } else {

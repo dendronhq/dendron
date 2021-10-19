@@ -8,6 +8,7 @@ import {
   NoteProps,
   NoteUtils,
   WorkspaceOpts,
+  ConfigUtils,
 } from "@dendronhq/common-all";
 import { tmpDir, vault2Path } from "@dendronhq/common-server";
 import {
@@ -717,9 +718,8 @@ describe("SiteUtils", () => {
             await ENGINE_HOOKS_MULTI.setupBasicMulti(opts);
             TestConfigUtils.withConfig(
               (config) => {
-                const bvault = config.workspace!.vaults.find(
-                  (ent) => ent.fsPath === "vault2"
-                );
+                const vaults = ConfigUtils.getVaults(config);
+                const bvault = vaults.find((ent) => ent.fsPath === "vault2");
                 bvault!.visibility = DVaultVisibility.PRIVATE;
                 const sconfig: DendronSiteConfig = {
                   siteHierarchies: ["root"],

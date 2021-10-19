@@ -1,5 +1,6 @@
 /* eslint-disable */
 import {
+  ConfigUtils,
   DVault,
   IntermediateDendronConfig,
   NoteProps,
@@ -63,7 +64,7 @@ class GitUtils {
   }) {
     const { note, config } = opts;
     const vault = note.vault;
-    const vaults = config.workspace!.vaults as DVault[];
+    const vaults = ConfigUtils.getVaults(config);
     const mvault = VaultUtils.matchVaultV2({ vault, vaults });
     const vaultUrl = _.get(mvault, "remote.url", false);
     const gitRepoUrl = config.site.gh_edit_repository;

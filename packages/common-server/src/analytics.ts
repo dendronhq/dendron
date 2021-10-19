@@ -82,7 +82,7 @@ export type SegmentContext = Partial<{
   app: Partial<{ name: string; version: string; build: string }>;
   os: Partial<{ name: string; version: string }>;
   userAgent: string;
-}>
+}>;
 
 export type SegmentEventProps = {
   event: string;
@@ -191,7 +191,7 @@ export class SegmentClient {
       case TelemetryStatus.DISABLED_BY_WS_CONFIG:
       case TelemetryStatus.DISABLED_BY_VSCODE_CONFIG:
       case TelemetryStatus.ENABLED_BY_CONFIG:
-        return true
+        return true;
       default:
         return false;
     }
@@ -304,39 +304,31 @@ export class SegmentClient {
     data?: { [key: string]: string | number | boolean },
     opts?: { context: any }
   ): Promise<void> {
-    return new Promise<void>((resolve) => {
-      if (this._hasOptedOut || this._segmentInstance == null) {
-        return resolve();
+    if (this._hasOptedOut || this._segmentInstance == null) {
+      return;
+    }
+
+    const payload: { [key: string]: any } = { ...data };
+    const { context } = opts || {};
+
+    const resp = await this.trackInternal(event, payload, context);
+
+    if (resp.error && this._cachePath) {
+      try {
+        await this.writeToResidualCache(this._cachePath, {
+          event,
+          properties: payload,
+          timestamp: resp.data?.timestamp,
+          context,
+        });
+      } catch (err: any) {
+        this.logger.error(
+          new DendronError({
+            message: "Failed to write to segment residual cache: " + err,
+          })
+        );
       }
-
-      const payload: { [key: string]: any } = { ...data };
-      const { context } = opts || {};
-
-      this.trackInternal(event, payload, context).then(async (resp) => {
-        if (resp.error && this._cachePath) {
-          const writePromise = this.writeToResidualCache(this._cachePath, {
-            event,
-            properties: payload,
-            timestamp: resp.data?.timestamp,
-            context,
-          });
-
-          writePromise
-            .then(() => resolve())
-            .catch((reason) => {
-              this.logger.error(
-                new DendronError({
-                  message:
-                    "Failed to write to segment residual cache: " + reason,
-                })
-              );
-              resolve();
-            });
-        } else {
-          resolve();
-        }
-      });
-    });
+    }
   }
 
   private async trackInternal(
@@ -377,7 +369,7 @@ export class SegmentClient {
             },
             error: new DendronError({
               message: "Failed to send event " + event,
-              error: err,
+              innerError: err,
             }),
           });
         }
@@ -534,15 +526,15 @@ export class SegmentClient {
 
 // platform props
 type VSCodeProps = {
-  type: "vscode"
+  type: "vscode";
   ideVersion: string;
   ideFlavor: string;
-}
+};
 
 type CLIProps = {
-  type: "cli"
+  type: "cli";
   cliVersion: string;
-}
+};
 
 // platform identify props
 export type VSCodeIdentifyProps = {
@@ -554,24 +546,19 @@ export type CLIIdentifyProps = {} & CLIProps;
 
 export class SegmentUtils {
   static track(
-    event: string, 
+    event: string,
     platformProps: VSCodeProps | CLIProps,
     props?: any
   ) {
     const { type, ...rest } = platformProps;
-    SegmentClient.instance().track(
-      event,
-      {
-        ...props,
-        ...SegmentUtils.getCommonProps(),
-        ...rest,
-      },
-    )
+    SegmentClient.instance().track(event, {
+      ...props,
+      ...SegmentUtils.getCommonProps(),
+      ...rest,
+    });
   }
 
-  static identify(
-    identifyProps: VSCodeIdentifyProps | CLIIdentifyProps
-  ) {
+  static identify(identifyProps: VSCodeIdentifyProps | CLIIdentifyProps) {
     if (identifyProps.type === "vscode") {
       const { ideVersion, ideFlavor, appVersion, userAgent } = identifyProps;
       SegmentClient.instance().identifyAnonymous(
@@ -589,7 +576,7 @@ export class SegmentUtils {
               name: getOS(),
             },
             userAgent,
-          }
+          },
         }
       );
     }
@@ -610,9 +597,9 @@ export class SegmentUtils {
             os: {
               name: getOS(),
             },
-          }
+          },
         }
-      )
+      );
     }
   }
 
@@ -620,6 +607,6 @@ export class SegmentUtils {
     return {
       arch: process.arch,
       nodeVerson: process.version,
-    }
+    };
   }
 }

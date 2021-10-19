@@ -9,6 +9,7 @@ import {
 import { createEngineFromServer, runEngineTestV5 } from "../../../engine";
 import { checkString } from "../../../utils";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
+import _ from "lodash";
 
 const runCmd = (opts: Omit<NoteCLICommandOpts, "port" | "server">) => {
   const cmd = new NoteCLICommand();
@@ -32,14 +33,17 @@ describe("WHEN run 'dendron note lookup'", () => {
             query: "gamma",
             output: NoteCLIOutput.JSON,
           });
-          expect(
-            NoteUtils.getNoteOrThrow({
-              fname: "gamma",
-              vault,
-              notes: engine.notes,
-              wsRoot,
-            })
-          ).toBeTruthy();
+          const note = NoteUtils.getNoteOrThrow({
+            fname: "gamma",
+            vault,
+            notes: engine.notes,
+            wsRoot,
+          });
+          expect(note).toBeTruthy();
+          expect(_.pick(note, ["title", "vault"])).toEqual({
+            title: "Gamma",
+            vault: { fsPath: "vault1" },
+          });
         },
         {
           createEngine: createEngineFromServer,

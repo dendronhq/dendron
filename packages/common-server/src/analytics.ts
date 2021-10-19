@@ -1,4 +1,10 @@
-import { CONSTANTS, env, genUUID } from "@dendronhq/common-all";
+import {
+  CONSTANTS,
+  DendronError,
+  env,
+  genUUID,
+  RespV2,
+} from "@dendronhq/common-all";
 import Analytics from "analytics-node";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -60,6 +66,7 @@ enum UserTier {
 export type SegmentClientOpts = {
   key?: string;
   forceNew?: boolean;
+  cachePath?: string;
 };
 
 export const SEGMENT_EVENTS = {
@@ -75,7 +82,14 @@ export type SegmentContext = Partial<{
   app: Partial<{ name: string; version: string; build: string }>;
   os: Partial<{ name: string; version: string }>;
   userAgent: string;
-}>
+}>;
+
+export type SegmentEventProps = {
+  event: string;
+  properties: { [key: string]: any };
+  timestamp?: Date;
+  context?: any;
+};
 
 export enum TelemetryStatus {
   /** The user set that telemetry should be disabled in the workspace config. */
@@ -98,6 +112,12 @@ export enum TelemetryStatus {
   ENABLED_BY_CLI_DEFAULT = "enabled by cli default",
 }
 
+enum SegmentResidualFlushStatus {
+  success,
+  retryableError,
+  nonRetryableError,
+}
+
 export type TelemetryConfig = {
   status: TelemetryStatus;
 };
@@ -107,6 +127,7 @@ export class SegmentClient {
   private _anonymousId: string;
   private _hasOptedOut: boolean;
   private logger: DLogger;
+  private _cachePath?: string;
 
   static _singleton: undefined | SegmentClient;
 
@@ -170,7 +191,7 @@ export class SegmentClient {
       case TelemetryStatus.DISABLED_BY_WS_CONFIG:
       case TelemetryStatus.DISABLED_BY_VSCODE_CONFIG:
       case TelemetryStatus.ENABLED_BY_CONFIG:
-        return true
+        return true;
       default:
         return false;
     }
@@ -207,6 +228,13 @@ export class SegmentClient {
     const key = env("SEGMENT_VSCODE_KEY");
     this.logger = createLogger("SegmentClient");
     this._segmentInstance = new Analytics(key);
+    this._cachePath = _opts?.cachePath;
+
+    if (!_opts?.cachePath) {
+      this.logger.info(
+        "No cache path for Segment specified. Failed event uploads will not be retried."
+      );
+    }
 
     const status = SegmentClient.getStatus();
     this.logger.info({ msg: `user telemetry setting: ${status}` });
@@ -260,11 +288,22 @@ export class SegmentClient {
     }
   }
 
-  track(
+  /**
+   * Track an event with Segment. If the event fails to upload for any reason,
+   * it will be saved to a residual cache file, which will be retried at a later
+   * point.
+   * @param event
+   * @param data
+   * @param opts
+   * @returns a Promise which resolves when either the event has been
+   * successfully uploaded to Segment or has been written to the cache file. It
+   * is not recommended to await this function for metrics tracking.
+   */
+  async track(
     event: string,
     data?: { [key: string]: string | number | boolean },
     opts?: { context: any }
-  ) {
+  ): Promise<void> {
     if (this._hasOptedOut || this._segmentInstance == null) {
       return;
     }
@@ -272,16 +311,208 @@ export class SegmentClient {
     const payload: { [key: string]: any } = { ...data };
     const { context } = opts || {};
 
-    try {
-      this._segmentInstance.track({
-        anonymousId: this._anonymousId,
-        event,
-        properties: payload,
-        context,
-      });
-    } catch (ex) {
-      this.logger.error(ex);
+    const resp = await this.trackInternal(event, payload, context);
+
+    if (resp.error && this._cachePath) {
+      try {
+        await this.writeToResidualCache(this._cachePath, {
+          event,
+          properties: payload,
+          timestamp: resp.data?.timestamp,
+          context,
+        });
+      } catch (err: any) {
+        this.logger.error(
+          new DendronError({
+            message: "Failed to write to segment residual cache: " + err,
+          })
+        );
+      }
     }
+  }
+
+  private async trackInternal(
+    event: string,
+    context: any,
+    properties: { [key: string]: any },
+    timestamp?: Date
+  ): Promise<RespV2<SegmentEventProps>> {
+    return new Promise<RespV2<SegmentEventProps>>((resolve) => {
+      const payload =
+        timestamp !== undefined
+          ? {
+              anonymousId: this._anonymousId,
+              event,
+              properties,
+              timestamp: new Date(timestamp),
+              context,
+            }
+          : { anonymousId: this._anonymousId, event, properties, context };
+
+      this._segmentInstance.track(payload, (err: Error) => {
+        if (err) {
+          this.logger.info("Failed to send event " + event);
+          let eventTime: Date;
+          try {
+            eventTime = new Date(
+              JSON.parse((err as any).config.data).timestamp
+            );
+          } catch (err) {
+            eventTime = new Date();
+          }
+          resolve({
+            data: {
+              event,
+              properties,
+              context,
+              timestamp: eventTime,
+            },
+            error: new DendronError({
+              message: "Failed to send event " + event,
+              innerError: err,
+            }),
+          });
+        }
+
+        resolve({ error: null });
+      });
+    });
+  }
+
+  /**
+   * Writes a tracked data point to the residual cache file. If the file exceeds
+   * 5Mb than the write will fail silently.
+   * @param filename
+   * @param data
+   * @returns
+   */
+  async writeToResidualCache(filename: string, data: SegmentEventProps) {
+    return new Promise<void>((resolve) => {
+      // Stop writing if the file gets more than 5 MB.
+      if (
+        fs.pathExistsSync(filename) &&
+        fs.statSync(filename).size / (1024 * 1024) > 5
+      ) {
+        return resolve();
+      }
+      const stream = fs.createWriteStream(filename, { flags: "as" });
+      stream.write(JSON.stringify(data) + "\n");
+      stream.on("finish", () => {
+        resolve();
+      });
+      stream.end();
+    });
+  }
+
+  /**
+   * Tries to upload data in the residual cache file to Segment. A separate
+   * attempt is made to upload each data point - if any fail due to a retryable
+   * error (such as no network), then it is kept in the cache file for the next
+   * iteration. Any successfully uploaded data points or data deemed as a
+   * non-recoverable error (for example, invalid format) are removed.
+   * @returns
+   */
+  async tryFlushResidualCache(): Promise<{
+    successCount: number;
+    nonRetryableErrorCount: number;
+    retryableErrorCount: number;
+  }> {
+    this.logger.info("Attempting to flush residual segment data from file.");
+    let successCount = 0;
+    let nonRetryableErrorCount = 0;
+    let retryableErrorCount = 0;
+
+    if (!this._cachePath) {
+      return {
+        successCount,
+        nonRetryableErrorCount,
+        retryableErrorCount,
+      };
+    }
+
+    const buff = await fs.readFile(this._cachePath, "utf-8");
+
+    const promises: Promise<SegmentResidualFlushStatus>[] = [];
+
+    // Filter blank or whitespace lines:
+    const eventLines = buff
+      .split(/\r?\n/)
+      .filter((line) => line !== null && line.match(/^ *$/) === null);
+
+    eventLines.forEach((line) => {
+      const singleTry = new Promise<SegmentResidualFlushStatus>((resolve) => {
+        try {
+          const data = JSON.parse(line) as SegmentEventProps;
+          if (data.event === undefined || data.properties === undefined) {
+            resolve(SegmentResidualFlushStatus.nonRetryableError);
+          }
+
+          const promised = this.trackInternal(
+            data.event,
+            data.properties,
+            data.context,
+            data.timestamp
+          );
+
+          promised
+            .then((resp) => {
+              resolve(
+                resp.error
+                  ? SegmentResidualFlushStatus.retryableError
+                  : SegmentResidualFlushStatus.success
+              );
+            })
+            .catch(() => {
+              resolve(SegmentResidualFlushStatus.nonRetryableError);
+            });
+        } catch (err: any) {
+          resolve(SegmentResidualFlushStatus.nonRetryableError);
+        }
+      });
+
+      promises.push(singleTry);
+    }, this);
+
+    const result = await Promise.all(promises);
+
+    const nonRetryIndex: number[] = [];
+
+    result.forEach((value, index) => {
+      switch (value) {
+        case SegmentResidualFlushStatus.success:
+          successCount += 1;
+          nonRetryIndex.push(index);
+          break;
+        case SegmentResidualFlushStatus.nonRetryableError:
+          nonRetryableErrorCount += 1;
+          nonRetryIndex.push(index);
+          break;
+        case SegmentResidualFlushStatus.retryableError:
+          retryableErrorCount += 1;
+          break;
+        default:
+          break;
+      }
+    });
+
+    await fs.writeFile(
+      this._cachePath,
+      eventLines
+        .filter((_value, index) => !nonRetryIndex.includes(index))
+        .join("\n")
+    );
+
+    const stats = {
+      successCount,
+      nonRetryableErrorCount,
+      retryableErrorCount,
+    };
+
+    if (successCount > 0) {
+      this.track("Segment_Residual_Data_Recovered", stats);
+    }
+
+    return stats;
   }
 
   get hasOptedOut(): boolean {
@@ -295,15 +526,15 @@ export class SegmentClient {
 
 // platform props
 type VSCodeProps = {
-  type: "vscode"
+  type: "vscode";
   ideVersion: string;
   ideFlavor: string;
-}
+};
 
 type CLIProps = {
-  type: "cli"
+  type: "cli";
   cliVersion: string;
-}
+};
 
 // platform identify props
 export type VSCodeIdentifyProps = {
@@ -315,24 +546,19 @@ export type CLIIdentifyProps = {} & CLIProps;
 
 export class SegmentUtils {
   static track(
-    event: string, 
+    event: string,
     platformProps: VSCodeProps | CLIProps,
     props?: any
   ) {
     const { type, ...rest } = platformProps;
-    SegmentClient.instance().track(
-      event,
-      {
-        ...props,
-        ...SegmentUtils.getCommonProps(),
-        ...rest,
-      },
-    )
+    SegmentClient.instance().track(event, {
+      ...props,
+      ...SegmentUtils.getCommonProps(),
+      ...rest,
+    });
   }
 
-  static identify(
-    identifyProps: VSCodeIdentifyProps | CLIIdentifyProps
-  ) {
+  static identify(identifyProps: VSCodeIdentifyProps | CLIIdentifyProps) {
     if (identifyProps.type === "vscode") {
       const { ideVersion, ideFlavor, appVersion, userAgent } = identifyProps;
       SegmentClient.instance().identifyAnonymous(
@@ -350,7 +576,7 @@ export class SegmentUtils {
               name: getOS(),
             },
             userAgent,
-          }
+          },
         }
       );
     }
@@ -371,9 +597,9 @@ export class SegmentUtils {
             os: {
               name: getOS(),
             },
-          }
+          },
         }
-      )
+      );
     }
   }
 
@@ -381,6 +607,6 @@ export class SegmentUtils {
     return {
       arch: process.arch,
       nodeVerson: process.version,
-    }
+    };
   }
 }

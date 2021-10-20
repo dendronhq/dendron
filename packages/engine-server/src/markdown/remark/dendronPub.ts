@@ -86,9 +86,16 @@ type DendronUnifiedHandlerHandleOpts<T = any> = {
 
 type DendronUnifiedHandlerNextAction = undefined | number;
 
-class ImageNodeHandler {
-  static match(
-    node: Node,
+abstract class DendronNodeHander {
+  static match: <T>(
+    node: Node | any,
+    { pData }: DendronUnifiedHandlerMatchOpts
+  ) => node is T;
+}
+
+class ImageNodeHandler extends DendronNodeHander {
+  static match<Image>(
+    node: Node | any,
     { pData }: DendronUnifiedHandlerMatchOpts
   ): node is Image {
     return (
@@ -443,6 +450,9 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
       }
       // The url correction needs to happen for both regular and extended images
       if (ImageNodeHandler.match(node, { pData, pOpts })) {
+        // match typeguard should narrow this down to Image node
+        // not quite sure why this isn't working yte
+        // @ts-ignore
         const { nextAction } = ImageNodeHandler.handle(node, {
           proc,
           parent,

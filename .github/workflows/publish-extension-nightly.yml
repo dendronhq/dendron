@@ -56,6 +56,10 @@ jobs:
           echo "SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}" >> $GITHUB_ENV
           echo "NODE_OPTIONS=--max_old_space_size=4096" >> $GITHUB_ENV
 
+      - name: Clear Verdaccio Cache
+        run: |
+          if [ -d ~/.config/verdaccio/storage/@dendronhq ]; then echo "Clearing Existing Verdaccio Cache" && rm -Rf ~/.config/verdaccio/storage/@dendronhq; fi
+
       - name: Build the VSIX
         run: |
           yarn build:patch:local:ci

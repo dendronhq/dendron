@@ -73,6 +73,13 @@ export enum MigrationEvents {
   MigrationFailed = "Migration_Failed",
 }
 
+export enum ContextualUIEvents {
+  ContextualUIRename = "ContextualUI_Rename",
+  ContextualUICreateNewFile = "ContextualUI_CreateNewFile",
+  ContextualUIDelete = "ContextualUI_Delete",
+  ContextualUICodeAction = "ContextualUI_CodeAction",
+}
+
 export const DendronEvents = {
   VSCodeEvents,
   CLIEvents,
@@ -80,4 +87,5 @@ export const DendronEvents = {
   ExtensionEvents,
   SurveyEvents,
   ConfigEvents,
+  ContextualUIEvents,
 };

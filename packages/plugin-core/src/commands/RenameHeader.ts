@@ -12,6 +12,7 @@ import { Range, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { delayedUpdateDecorations } from "../features/windowDecorations";
 import { VSCodeUtils } from "../utils";
+import { getAnalyticsPayload } from "../utils/analytics";
 import { getExtension } from "../workspace";
 import { BasicCommand } from "./base";
 
@@ -26,6 +27,8 @@ type CommandOpts =
       };
       /** The new text for the header. */
       newHeader?: string;
+      /** added for contextual UI analytics. */
+      source?: string;
     }
   | undefined;
 type CommandOutput = {} | undefined;
@@ -39,7 +42,7 @@ export class RenameHeaderCommand extends BasicCommand<
   async gatherInputs(
     opts: CommandOpts
   ): Promise<Required<CommandOpts> | undefined> {
-    let { oldHeader, newHeader } = opts || {};
+    let { oldHeader, newHeader, source } = opts || {};
     if (_.isUndefined(oldHeader)) {
       // parse from current selection
       const { editor, selection } = VSCodeUtils.getSelection();
@@ -80,7 +83,10 @@ export class RenameHeaderCommand extends BasicCommand<
       });
       if (!newHeader) return; // User cancelled the prompt
     }
-    return { oldHeader, newHeader };
+    if (_.isUndefined(source)) {
+      source = "command palette";
+    }
+    return { oldHeader, newHeader, source };
   }
 
   async execute(opts: CommandOpts): Promise<CommandOutput> {
@@ -133,5 +139,9 @@ export class RenameHeaderCommand extends BasicCommand<
       },
     });
     return;
+  }
+
+  addAnalyticsPayload(opts?: CommandOpts) {
+    return getAnalyticsPayload(opts?.source);
   }
 }

@@ -15,13 +15,17 @@ import YAML from "yamljs";
 import { ParserBase } from "./parseBase";
 
 export class SchemaParser extends ParserBase {
-  async parseFile(fpath: string, root: DVault): Promise<SchemaModuleProps> {
+  private async parseFile(
+    fpath: string,
+    root: DVault
+  ): Promise<SchemaModuleProps> {
     const fname = path.basename(fpath, ".schema.yml");
     const wsRoot = this.opts.store.wsRoot;
     const vpath = vault2Path({ vault: root, wsRoot });
     const schemaOpts: any = YAML.parse(
       fs.readFileSync(path.join(vpath, fpath), "utf8")
     );
+
     return await cSchemaParserV2.parseRaw(schemaOpts, { root, fname, wsRoot });
   }
 

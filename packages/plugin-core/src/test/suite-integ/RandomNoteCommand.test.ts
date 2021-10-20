@@ -1,4 +1,4 @@
-import { RandomNoteConfig } from "@dendronhq/common-all";
+import { ConfigUtils, RandomNoteConfig } from "@dendronhq/common-all";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { TestEngineUtils } from "@dendronhq/engine-test-utils";
 import * as vscode from "vscode";
@@ -46,7 +46,7 @@ function basicTest({
           const randomCfg: RandomNoteConfig = {};
           if (includePattern) randomCfg.include = includePattern;
           if (excludePattern) randomCfg.exclude = excludePattern;
-          config.randomNote = randomCfg;
+          ConfigUtils.setCommandsProp(config, "randomNote", randomCfg);
           return config;
         },
         { wsRoot }

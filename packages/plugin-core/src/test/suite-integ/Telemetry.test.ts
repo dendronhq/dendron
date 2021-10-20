@@ -1,3 +1,4 @@
+import { ConfigUtils } from "@dendronhq/common-all";
 import { SegmentClient } from "@dendronhq/common-server";
 import { DConfig } from "@dendronhq/engine-server";
 import { TestEngineUtils } from "@dendronhq/engine-test-utils";
@@ -26,8 +27,8 @@ suite("telemetry", function () {
 
   function setNoTelemetry(to: boolean) {
     return async ({ wsRoot }: { wsRoot: string }) => {
-      const config = DConfig.genDefaultConfig();
-      config.noTelemetry = to;
+      const config = ConfigUtils.genDefaultConfig();
+      ConfigUtils.setWorkspaceProp(config, "disableTelemetry", to);
       DConfig.writeConfig({ wsRoot, config });
     };
   }

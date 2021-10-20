@@ -1,4 +1,4 @@
-import { IDendronError } from "@dendronhq/common-all";
+import { ConfigUtils, IDendronError } from "@dendronhq/common-all";
 import { AssertUtils } from "@dendronhq/common-test-utils";
 import { DConfig, HookUtils } from "@dendronhq/engine-server";
 import { ENGINE_HOOKS, TestHookUtils } from "@dendronhq/engine-test-utils";
@@ -33,7 +33,8 @@ suite(DENDRON_COMMANDS.CREATE_HOOK.key, function () {
           await new CreateHookCommand().run();
           const editor = VSCodeUtils.getActiveTextEditorOrThrow();
           const config = DConfig.getOrCreate(wsRoot);
-          expect(config.hooks).toEqual({
+          const hooksConfig = ConfigUtils.getHooks(config);
+          expect(hooksConfig).toEqual({
             onCreate: [{ id: hook, pattern: "*", type: "js" }],
           });
           expect(editor.document.uri.fsPath.toLowerCase()).toEqual(

@@ -16,6 +16,8 @@ import {
   Time,
   VaultUtils,
   WorkspaceSettings,
+  ConfigUtils,
+  CURRENT_CONFIG_VERSION,
 } from "@dendronhq/common-all";
 import {
   assignJSONWithComment,
@@ -34,7 +36,11 @@ import _ from "lodash";
 import path from "path";
 import { DConfig } from "../config";
 import { MetadataService } from "../metadata";
-import { MigrationServce, MigrationChangeSetStatus } from "../migrations";
+import {
+  MigrationServce,
+  MigrationChangeSetStatus,
+  CONFIG_MIGRATIONS,
+} from "../migrations";
 import { SeedService, SeedUtils } from "../seed";
 import { Git } from "../topics/git";
 import {
@@ -143,7 +149,7 @@ export class WorkspaceService {
   }
 
   get config(): IntermediateDendronConfig {
-    return DConfig.defaults(DConfig.getOrCreate(this.wsRoot));
+    return DConfig.getOrCreate(this.wsRoot);
   }
 
   get dendronRoot(): string {
@@ -172,9 +178,9 @@ export class WorkspaceService {
    * @returns `{vaults}` that have been added
    */
   async addWorkspace({ workspace }: { workspace: DWorkspace }) {
-    const allWorkspaces = this.config.workspaces || {};
-    allWorkspaces[workspace.name] = _.omit(workspace, ["name", "vaults"]);
     const config = this.config;
+    const allWorkspaces = ConfigUtils.getWorkspace(config).workspaces || {};
+    allWorkspaces[workspace.name] = _.omit(workspace, ["name", "vaults"]);
     // update vault
     const newVaults = await _.reduce(
       workspace.vaults,
@@ -191,7 +197,7 @@ export class WorkspaceService {
       },
       Promise.resolve([] as DVault[])
     );
-    config.workspaces = allWorkspaces;
+    ConfigUtils.setWorkspaceProp(config, "workspaces", allWorkspaces);
     this.setConfig(config);
     return { vaults: newVaults };
   }
@@ -216,12 +222,17 @@ export class WorkspaceService {
       updateConfig: true,
       updateWorkspace: false,
     });
-    config.vaults.unshift(vault);
+
+    const vaults = ConfigUtils.getVaults(config);
+    vaults.unshift(vault);
+    ConfigUtils.setVaults(config, vaults);
+
     // update dup note behavior
     if (!config.site.duplicateNoteBehavior) {
+      const vaults = ConfigUtils.getVaults(config);
       config.site.duplicateNoteBehavior = {
         action: DuplicateNoteAction.USE_VAULT,
-        payload: config.vaults.map((v) => VaultUtils.getName(v)),
+        payload: vaults.map((v) => VaultUtils.getName(v)),
       };
     } else if (_.isArray(config.site.duplicateNoteBehavior.payload)) {
       config.site.duplicateNoteBehavior.payload.push(VaultUtils.getName(vault));
@@ -338,21 +349,29 @@ export class WorkspaceService {
     command: "commit" | "push" | "pull",
     [root, vaults]: [string, DVault[]]
   ): Promise<boolean> {
-    let config = this.verifyVaultSyncConfigs(vaults);
-    if (_.isUndefined(config)) {
+    let workspaceVaultSyncConfig = this.verifyVaultSyncConfigs(vaults);
+    if (_.isUndefined(workspaceVaultSyncConfig)) {
       if (await WorkspaceService.isWorkspaceVault(root)) {
-        config = this.config.workspaceVaultSync;
+        workspaceVaultSyncConfig = ConfigUtils.getWorkspace(this.config)
+          .workspaceVaultSyncMode as DVaultSync;
         // default for workspace vaults
-        if (_.isUndefined(config)) config = DVaultSync.NO_COMMIT;
+        if (_.isUndefined(workspaceVaultSyncConfig)) {
+          workspaceVaultSyncConfig = DVaultSync.NO_COMMIT;
+        }
       }
       // default for regular vaults
-      else config = DVaultSync.SYNC;
+      else workspaceVaultSyncConfig = DVaultSync.SYNC;
     }
 
-    if (config === DVaultSync.SKIP) return false;
-    if (config === DVaultSync.SYNC) return true;
-    if (config === DVaultSync.NO_COMMIT && command === "commit") return false;
-    if (config === DVaultSync.NO_PUSH && command === "push") return false;
+    if (workspaceVaultSyncConfig === DVaultSync.SKIP) return false;
+    if (workspaceVaultSyncConfig === DVaultSync.SYNC) return true;
+    if (
+      workspaceVaultSyncConfig === DVaultSync.NO_COMMIT &&
+      command === "commit"
+    )
+      return false;
+    if (workspaceVaultSyncConfig === DVaultSync.NO_PUSH && command === "push")
+      return false;
     return true;
   }
 
@@ -395,7 +414,10 @@ export class WorkspaceService {
       onSyncVaultsProgress: () => {},
       onSyncVaultsEnd: () => {},
     });
-    if (this.config.initializeRemoteVaults) {
+    const initializeRemoteVaults = ConfigUtils.getWorkspace(
+      this.config
+    ).enableRemoteVaultInit;
+    if (initializeRemoteVaults) {
       const { didClone } = await this.syncVaults({
         config: this.config,
         progressIndicator: onSyncVaultsProgress,
@@ -418,7 +440,9 @@ export class WorkspaceService {
       updateConfig: true,
       updateWorkspace: false,
     });
-    config.vaults = _.reject(config.vaults, (ent) => {
+
+    const vaults = ConfigUtils.getVaults(config);
+    const vaultsAfterReject = _.reject(vaults, (ent: DVault) => {
       const checks = [
         VaultUtils.getRelPath(ent) === VaultUtils.getRelPath(vault),
       ];
@@ -427,19 +451,25 @@ export class WorkspaceService {
       }
       return _.every(checks);
     });
-    if (vault.workspace && config.workspaces) {
-      const vaultWorkspace = _.find(config.vaults, {
+    ConfigUtils.setVaults(config, vaultsAfterReject);
+
+    const workspaces = ConfigUtils.getWorkspace(config).workspaces;
+    if (vault.workspace && workspaces) {
+      const vaultWorkspace = _.find(ConfigUtils.getVaults(config), {
         workspace: vault.workspace,
       });
       if (_.isUndefined(vaultWorkspace)) {
-        delete config.workspaces[vault.workspace];
+        delete workspaces[vault.workspace];
+        ConfigUtils.setWorkspaceProp(config, "workspaces", workspaces);
       }
     }
+
     if (
       config.site.duplicateNoteBehavior &&
       _.isArray(config.site.duplicateNoteBehavior.payload)
     ) {
-      if (config.vaults.length === 1) {
+      const vaults = ConfigUtils.getVaults(config);
+      if (vaults.length === 1) {
         // if there is only one vault left, remove duplicateNoteBehavior setting
         config.site = _.omit(config.site, ["duplicateNoteBehavior"]);
       } else {
@@ -535,8 +565,9 @@ export class WorkspaceService {
     const { wsRoot } = opts;
     const config = DConfig.getOrCreate(wsRoot);
     const ws = new WorkspaceService({ wsRoot });
+    const vaults = ConfigUtils.getVaults(config);
     await Promise.all(
-      config.vaults.map(async (vault) => {
+      vaults.map(async (vault) => {
         return ws.cloneVaultWithAccessToken({ vault });
       })
     );
@@ -628,8 +659,9 @@ export class WorkspaceService {
 
   async getAllReposVaults(): Promise<Map<string, DVault[]>> {
     const reposVaults = new Map<string, DVault[]>();
+    const vaults = ConfigUtils.getVaults(this.config);
     await Promise.all(
-      this.config.vaults.map(async (vault) => {
+      vaults.map(async (vault) => {
         const repo = await this.getVaultRepo(vault);
         if (_.isUndefined(repo)) return;
         const vaultsForRepo = reposVaults.get(repo) || [];
@@ -649,7 +681,7 @@ export class WorkspaceService {
    @deprecated - use {@link WorkspaceUtils.isPathInWorkspace}
    */
   isPathInWorkspace(fpath: string) {
-    const { vaults } = this.config;
+    const vaults = ConfigUtils.getVaults(this.config);
     const wsRoot = this.wsRoot;
     return WorkspaceUtils.isPathInWorkspace({ fpath, vaults, wsRoot });
   }
@@ -755,8 +787,9 @@ export class WorkspaceService {
    * Remove all vault caches in workspace
    */
   async removeVaultCaches() {
+    const vaults = ConfigUtils.getVaults(this.config);
     await Promise.all(
-      this.config.vaults.map((vault) => {
+      vaults.map((vault) => {
         return removeCache(vault2Path({ wsRoot: this.wsRoot, vault }));
       })
     );
@@ -780,16 +813,6 @@ export class WorkspaceService {
     dendronConfig: IntermediateDendronConfig;
     wsConfig?: WorkspaceSettings;
   }) {
-    // check if we need to force a migration
-    try {
-      const maybeRaw = DConfig.getRaw(this.wsRoot);
-      if (_.isUndefined(maybeRaw.journal)) {
-        forceUpgrade = true;
-      }
-    } catch (error) {
-      this.logger.error(error);
-    }
-
     let changes: MigrationChangeSetStatus[] = [];
 
     if (
@@ -805,6 +828,34 @@ export class WorkspaceService {
         wsConfig,
         wsService: this,
         logger: this.logger,
+      });
+      // if changes were made, use updated changes in subsequent configuration
+      if (!_.isEmpty(changes)) {
+        const { data } = _.last(changes)!;
+        dendronConfig = data.dendronConfig;
+      }
+    }
+
+    return changes;
+  }
+
+  async runConfigMigrationIfNecessary({
+    currentVersion,
+    dendronConfig,
+  }: {
+    currentVersion: string;
+    dendronConfig: IntermediateDendronConfig;
+  }) {
+    let changes: MigrationChangeSetStatus[] = [];
+    if (dendronConfig.version !== CURRENT_CONFIG_VERSION) {
+      // we are on a legacy config.
+      changes = await MigrationServce.applyMigrationRules({
+        currentVersion,
+        previousVersion: "0.64.1", // to force apply
+        dendronConfig,
+        wsService: this,
+        logger: this.logger,
+        migrations: [CONFIG_MIGRATIONS],
       });
       // if changes were made, use updated changes in subsequent configuration
       if (!_.isEmpty(changes)) {
@@ -833,10 +884,11 @@ export class WorkspaceService {
       _.defaults(opts, { fetchAndPull: false, skipPrivate: false });
     const { wsRoot } = this;
 
+    const workspaces = ConfigUtils.getWorkspace(config).workspaces;
     // check workspaces
     const workspacePaths: { wsPath: string; wsUrl: string }[] = (
       await Promise.all(
-        _.map(config.workspaces, async (wsEntry, wsName) => {
+        _.map(workspaces, async (wsEntry, wsName) => {
           const wsPath = path.join(wsRoot, wsName);
           if (!fs.existsSync(wsPath)) {
             return {
@@ -858,10 +910,11 @@ export class WorkspaceService {
 
     // const seedService = new SeedService({wsRoot});
     // check seeds
+    const seeds = ConfigUtils.getWorkspace(config).seeds;
     const seedResults: { id: string; status: SyncActionStatus; data: any }[] =
       [];
     await Promise.all(
-      _.map(config.seeds, async (entry: SeedEntry, id: string) => {
+      _.map(seeds, async (entry: SeedEntry, id: string) => {
         if (!(await SeedUtils.exists({ id, wsRoot }))) {
           const resp = await this._seedService.info({ id });
           if (_.isUndefined(resp)) {
@@ -890,7 +943,8 @@ export class WorkspaceService {
     );
 
     // clone all missing vaults
-    const emptyRemoteVaults = config.vaults.filter(
+    const vaults = ConfigUtils.getVaults(config);
+    const emptyRemoteVaults = vaults.filter(
       (vault) =>
         !_.isUndefined(vault.remote) &&
         !fs.existsSync(vault2Path({ vault, wsRoot }))
@@ -914,8 +968,9 @@ export class WorkspaceService {
       })
     );
     if (fetchAndPull) {
+      const vaults = ConfigUtils.getVaults(config);
       const vaultsToFetch = _.difference(
-        config.vaults.filter((vault) => !_.isUndefined(vault.remote)),
+        vaults.filter((vault) => !_.isUndefined(vault.remote)),
         emptyRemoteVaults
       );
       this.logger.info({ ctx, msg: "fetching vaults", vaultsToFetch });

@@ -9,9 +9,10 @@ import {
   NoteUtils,
   SchemaUtils,
   VSCodeEvents,
+  ConfigUtils,
 } from "@dendronhq/common-all";
 import { getDurationMilliseconds } from "@dendronhq/common-server";
-import { DConfig, HistoryService } from "@dendronhq/engine-server";
+import { HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { Uri } from "vscode";
 import {
@@ -140,34 +141,26 @@ export class NoteLookupCommand extends BaseCommand<
   async gatherInputs(opts?: CommandRunOpts): Promise<CommandGatherOutput> {
     const start = process.hrtime();
     const ws = getDWorkspace();
-    const lookupConfig = DConfig.getConfig(ws.config, "commands.lookup");
+    const lookupConfig = ConfigUtils.getCommands(ws.config).lookup;
     const noteLookupConfig = lookupConfig.note;
-    let selectionType: LookupSelectionType = LookupSelectionTypeEnum.selectionExtract;
-    let confirmVaultOnCreate;
-    if ("selectionMode" in noteLookupConfig) {
-      const selectionMode = noteLookupConfig.selectionMode;
-      switch(selectionMode) {
-        case "extract": {
-          selectionType = LookupSelectionTypeEnum.selectionExtract
-          break;
-        }
-        case "link": {
-          selectionType = LookupSelectionTypeEnum.selection2link;
-          break;
-        }
-        case "none": {
-          selectionType = LookupSelectionTypeEnum.none;
-          break;
-        }
-        default: {
-          throw new DendronError({ message: "unsupported selection type."});
-        }
+    let selectionType;
+    switch (noteLookupConfig.selectionMode) {
+      case "link": {
+        selectionType = "selection2link";
+        break;
       }
-      confirmVaultOnCreate = noteLookupConfig.confirmVaultOnCreate;
-    } else {
-      selectionType = noteLookupConfig.selectionType;
-      confirmVaultOnCreate = DConfig.getProp(ws.config, "lookupConfirmVaultOnCreate")
+      case "none": {
+        selectionType = "none";
+        break;
+      }
+      case "extract":
+      default: {
+        selectionType = "selectionExtract";
+        break;
+      }
     }
+
+    const confirmVaultOnCreate = noteLookupConfig.confirmVaultOnCreate;
 
     const copts: CommandRunOpts = _.defaults(opts || {}, {
       multiSelect: false,
@@ -181,7 +174,7 @@ export class NoteLookupCommand extends BaseCommand<
     const disableVaultSelection = !confirmVaultOnCreate;
     this._controller = LookupControllerV3.create({
       nodeType: "note",
-      disableVaultSelection, 
+      disableVaultSelection,
       vaultButtonPressed:
         copts.vaultSelectionMode === VaultSelectionMode.alwaysPrompt,
       extraButtons: [

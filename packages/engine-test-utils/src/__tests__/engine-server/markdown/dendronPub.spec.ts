@@ -1,7 +1,6 @@
-import { DEngineClient } from "@dendronhq/common-all";
+import { ConfigUtils, DEngineClient } from "@dendronhq/common-all";
 import { AssertUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import {
-  DConfig,
   DendronASTData,
   DendronASTDest,
   DendronPubOpts,
@@ -41,7 +40,7 @@ describe("GIVEN dendronPub", () => {
     test("THEN show private link", async () => {
       await runEngineTestV5(
         async ({ engine, vaults }) => {
-          const config = DConfig.genDefaultConfig();
+          const config = ConfigUtils.genDefaultConfig();
           config.site = {
             siteHierarchies: ["foo"],
             siteRootDir: "foo",
@@ -75,7 +74,7 @@ describe("GIVEN dendronPub", () => {
       await runEngineTestV5(
         async ({ engine, vaults }) => {
           const vault = vaults[0];
-          const config = DConfig.genDefaultConfig();
+          const config = ConfigUtils.genDefaultConfig();
           config.site = {
             siteHierarchies: ["foo"],
             siteRootDir: "foo",
@@ -117,7 +116,7 @@ describe("GIVEN dendronPub", () => {
         await runEngineTestV5(
           async ({ engine, vaults }) => {
             const vault = vaults[0];
-            const config = DConfig.genDefaultConfig();
+            const config = ConfigUtils.genDefaultConfig();
             config.site = {
               siteHierarchies: ["foo"],
               siteRootDir: "foo",
@@ -756,7 +755,7 @@ describe("dendronPub", () => {
     testWithEngine(
       "config.site.usePrettyRef: true",
       async ({ engine, vaults }) => {
-        const config = DConfig.genDefaultConfig();
+        const config = ConfigUtils.genDefaultConfig();
         config.usePrettyRefs = false;
         config.site = {
           siteHierarchies: ["foo"],
@@ -786,7 +785,7 @@ describe("dendronPub", () => {
     testWithEngine(
       "config.site.usePrettyRef: false",
       async ({ engine, vaults }) => {
-        const config = DConfig.genDefaultConfig();
+        const config = ConfigUtils.genDefaultConfig();
         config.usePrettyRefs = false;
         config.site = {
           siteHierarchies: ["foo"],
@@ -816,7 +815,7 @@ describe("dendronPub", () => {
     testWithEngine(
       "config.usePrettyRef: true",
       async ({ engine, vaults }) => {
-        const config = DConfig.genDefaultConfig();
+        const config = ConfigUtils.genDefaultConfig();
         config.usePrettyRefs = true;
         config.site = {
           siteHierarchies: ["foo"],
@@ -846,7 +845,7 @@ describe("dendronPub", () => {
     testWithEngine(
       "config.usePrettyRef: false",
       async ({ engine, vaults }) => {
-        const config = DConfig.genDefaultConfig();
+        const config = ConfigUtils.genDefaultConfig();
         config.usePrettyRefs = false;
         config.site = {
           siteHierarchies: ["foo"],
@@ -876,7 +875,7 @@ describe("dendronPub", () => {
     testWithEngine(
       "usePrettyRef defaults to true in both cases",
       async ({ engine, vaults }) => {
-        const config = DConfig.genDefaultConfig();
+        const config = ConfigUtils.genDefaultConfig();
         const previewResp = await MDUtilsV5.procRehypeFull(
           {
             engine,

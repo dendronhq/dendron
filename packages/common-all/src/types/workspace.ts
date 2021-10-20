@@ -116,7 +116,7 @@ export enum InstallStatus {
   UPGRADED = "UPGRADED",
 }
 
-export enum NoteAddBehavior {
+export enum LegacyNoteAddBehavior {
   "childOfDomain" = "childOfDomain",
   "childOfDomainNamespace" = "childOfDomainNamespace",
   "childOfCurrent" = "childOfCurrent",
@@ -151,7 +151,7 @@ export type LegacyInsertNoteLinkConfig = {
   multiSelect: boolean;
 };
 
-export type JournalConfig = {
+export type LegacyJournalConfig = {
   dailyDomain: string;
   /**
    * If set, add all daily journals to specified vault
@@ -159,13 +159,13 @@ export type JournalConfig = {
   dailyVault?: string;
   name: string;
   dateFormat: string;
-  addBehavior: NoteAddBehavior;
+  addBehavior: LegacyNoteAddBehavior;
   /** 0 is Sunday, 1 is Monday, ... */
   firstDayOfWeek: number;
 };
 
-export type ScratchConfig = Pick<
-  JournalConfig,
+export type LegacyScratchConfig = Pick<
+  LegacyJournalConfig,
   "name" | "dateFormat" | "addBehavior"
 >;
 
@@ -203,9 +203,9 @@ export type DendronConfig = {
    */
   lookup: LegacyLookupConfig;
 
-  journal: JournalConfig;
+  journal: LegacyJournalConfig;
 
-  scratch?: ScratchConfig;
+  scratch?: LegacyScratchConfig;
 
   insertNoteLink?: LegacyInsertNoteLinkConfig;
 
@@ -278,7 +278,7 @@ export type DendronConfig = {
   /**
    * Configuration for note and schema graphs
    */
-  graph?: DendronGraphConfig;
+  graph?: LegacyDendronGraphConfig;
 
   /**
    * Don't automatically create note when looking up definition
@@ -599,7 +599,7 @@ export type DendronSiteConfig = {
   useHashesForFMTags?: boolean;
 };
 
-export type DendronGraphConfig = {
+export type LegacyDendronGraphConfig = {
   zoomSpeed: number;
 };
 

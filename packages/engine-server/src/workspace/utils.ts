@@ -12,6 +12,7 @@ import {
   WorkspaceFolderCode,
   WorkspaceOpts,
   WorkspaceType,
+  ConfigUtils,
 } from "@dendronhq/common-all";
 import { findUpTo, genHash } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -141,9 +142,10 @@ export class WorkspaceUtils {
      */
     let isIndex: boolean = false;
 
+    const seeds = ConfigUtils.getWorkspace(config).seeds;
     if (vault.seed) {
-      if (config.seeds && config.seeds[vault.seed]) {
-        const maybeSite = config.seeds[vault.seed]?.site;
+      if (seeds && seeds[vault.seed]) {
+        const maybeSite = seeds[vault.seed]?.site;
         if (maybeSite) {
           urlRoot = maybeSite.url;
           if (!_.isUndefined(note)) {

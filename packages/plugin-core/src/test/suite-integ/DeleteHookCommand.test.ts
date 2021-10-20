@@ -1,3 +1,4 @@
+import { ConfigUtils } from "@dendronhq/common-all";
 import { DConfig, HookUtils } from "@dendronhq/engine-server";
 import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
@@ -29,7 +30,8 @@ suite(DENDRON_COMMANDS.DELETE_HOOK.key, function () {
             shouldDeleteScript: true,
           });
           const config = DConfig.getOrCreate(wsRoot);
-          expect(config.hooks).toEqual({
+          const hooks = ConfigUtils.getHooks(config);
+          expect(hooks).toEqual({
             onCreate: [],
           });
 
@@ -63,7 +65,8 @@ suite(DENDRON_COMMANDS.DELETE_HOOK.key, function () {
             shouldDeleteScript: false,
           });
           const config = DConfig.getOrCreate(wsRoot);
-          expect(config.hooks).toEqual({
+          const hooks = ConfigUtils.getHooks(config);
+          expect(hooks).toEqual({
             onCreate: [],
           });
 

@@ -1,4 +1,4 @@
-import { DWorkspaceV2, VSCodeEvents } from "@dendronhq/common-all";
+import { ConfigUtils, DWorkspaceV2, VSCodeEvents } from "@dendronhq/common-all";
 import { SegmentClient, TelemetryStatus } from "@dendronhq/common-server";
 import _ from "lodash";
 import * as vscode from "vscode";
@@ -23,9 +23,10 @@ export function setupSegmentClient(ws: DWorkspaceV2, cachePath?: string) {
     // if the current status was set by configuration, and that configuration has changed, we should update it and report the change
     const status = SegmentClient.getStatus();
     if (SegmentClient.setByConfig(status)) {
+      const disableTelemetry = ConfigUtils.getWorkspace(ws.config).disableTelemetry;
       if (
         SegmentClient.isDisabled(status) &&
-        !ws.config.noTelemetry &&
+        !disableTelemetry &&
         isVSCodeTelemetryEnabled()
       ) {
         // was disabled, now enabled
@@ -37,7 +38,7 @@ export function setupSegmentClient(ws: DWorkspaceV2, cachePath?: string) {
         AnalyticsUtils.track(VSCodeEvents.EnableTelemetry, { reason });
       } else if (SegmentClient.isEnabled(status)) {
         // was enabled, now disabled
-        if (ws.config.noTelemetry) {
+        if (disableTelemetry) {
           Logger.info({
             msg: "The user change workspace settings, so we are now disabling telemetry",
           });

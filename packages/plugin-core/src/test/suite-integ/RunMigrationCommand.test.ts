@@ -1,5 +1,9 @@
 import _ from "lodash";
-import { WorkspaceType } from "@dendronhq/common-all";
+import {
+  ConfigUtils,
+  IntermediateDendronConfig,
+  WorkspaceType,
+} from "@dendronhq/common-all";
 import sinon from "sinon";
 import * as vscode from "vscode";
 import { RunMigrationCommand } from "../../commands/RunMigrationCommand";
@@ -7,6 +11,7 @@ import { CONFIG } from "../../constants";
 import { getDWorkspace } from "../../workspace";
 import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
+import { DConfig } from "@dendronhq/engine-server";
 
 suite("RunMigrationCommand", function () {
   const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {});
@@ -16,7 +21,7 @@ suite("RunMigrationCommand", function () {
       ctx,
       modConfigCb: (config) => {
         // @ts-ignore
-        delete config.lookup;
+        delete config.commands["lookup"];
         return config;
       },
       wsSettingsOverride: {
@@ -24,16 +29,18 @@ suite("RunMigrationCommand", function () {
           [CONFIG.DEFAULT_LOOKUP_CREATE_BEHAVIOR.key]: "selection2link",
         },
       },
-      onInit: async ({ engine }) => {
+      onInit: async ({ wsRoot }) => {
         const cmd = new RunMigrationCommand();
-        expect(_.isUndefined(engine.config.lookup)).toBeTruthy();
+        // testing for explicitly delete key.
+        const rawConfig = DConfig.getRaw(wsRoot) as IntermediateDendronConfig;
+        expect(_.isUndefined(rawConfig.commands?.lookup)).toBeTruthy();
         sinon.stub(cmd, "gatherInputs").resolves({ version: "0.55.2" });
         const out = await cmd.run();
         expect(out!.length).toEqual(1);
         expect(out![0].data.version === "0.55.2");
-        expect(getDWorkspace().config.lookup!.note.selectionType).toEqual(
-          "selection2link"
-        );
+        const config = getDWorkspace().config;
+        const lookupConfig = ConfigUtils.getLookup(config);
+        expect(lookupConfig.note.selectionMode).toEqual("link");
         done();
       },
       workspaceType: WorkspaceType.CODE,

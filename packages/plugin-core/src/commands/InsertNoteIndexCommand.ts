@@ -1,6 +1,10 @@
-import { DNodeUtils, NoteProps, NoteUtils } from "@dendronhq/common-all";
+import {
+  ConfigUtils,
+  DNodeUtils,
+  NoteProps,
+  NoteUtils,
+} from "@dendronhq/common-all";
 import _ from "lodash";
-import { DConfig } from "@dendronhq/engine-server";
 import { window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { DendronClientUtilsV2, VSCodeUtils } from "../utils";
@@ -73,18 +77,12 @@ export class InsertNoteIndexCommand extends BasicCommand<
       return opts;
     }
     const config = getDWorkspace().config;
-    const insertNoteIndexConfig = DConfig.getConfig(config, "commands.insertNoteIndex")
-    let maybeMarker: boolean | undefined;
-    
-    if (_.isUndefined(insertNoteIndexConfig)) {
-      maybeMarker = undefined;
-    } else {
-      maybeMarker = "enableMarker" in insertNoteIndexConfig 
-        ? insertNoteIndexConfig.enableMarker
-        : insertNoteIndexConfig.marker;
-    }
+
+    const insertNoteIndexConfig = ConfigUtils.getCommands(config).insertNoteIndex;
+    const maybeMarker = insertNoteIndexConfig.enableMarker;
+
     const noteIndex = this.genNoteIndex(children, {
-      marker: opts.marker ? opts.marker : maybeMarker
+      marker: opts.marker ? opts.marker : maybeMarker,
     });
     const current = maybeEditor.selection;
     await maybeEditor.edit((builder) => {

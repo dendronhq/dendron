@@ -7,6 +7,7 @@ import {
   ERROR_SEVERITY,
   NoteProps,
   NoteUtils,
+  ConfigUtils,
 } from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-server";
 import execa from "execa";
@@ -29,13 +30,15 @@ export class HookUtils {
     hookType: DHookType;
     hookEntry: DHookEntry;
   }) {
-    let onCreate: DHookEntry[] = _.get(
-      config.hooks,
+    const hooks = ConfigUtils.getHooks(config);
+    const onCreate: DHookEntry[] = _.get(
+      hooks,
       hookType,
       [] as DHookEntry[]
     ).concat([hookEntry]);
-    config.hooks = config.hooks || { onCreate: [] };
-    config.hooks.onCreate = onCreate;
+    const hooksToAdd = hooks || { onCreate: [] };
+    hooksToAdd.onCreate = onCreate;
+    ConfigUtils.setHooks(config, hooksToAdd);
     return config;
   }
 
@@ -62,16 +65,15 @@ export class HookUtils {
     hookType: DHookType;
     hookId: string;
   }) {
-    let onCreate: DHookEntry[] = _.get(
-      config.hooks,
-      hookType,
-      [] as DHookEntry[]
-    );
-    config.hooks = config.hooks || { onCreate: [] };
+    const hooks = ConfigUtils.getHooks(config);
+    let onCreate: DHookEntry[] = _.get(hooks, hookType, [] as DHookEntry[]);
     onCreate = _.remove(onCreate, { id: hookId });
     const idx = _.findIndex(onCreate, { id: hookId });
     onCreate.splice(idx, 1);
-    config.hooks.onCreate = onCreate;
+    const hooksAfterRemove = hooks || { onCreate: [] };
+    hooksAfterRemove.onCreate = onCreate;
+    ConfigUtils.setHooks(config, hooksAfterRemove);
+
     return config;
   }
 

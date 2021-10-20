@@ -1,3 +1,4 @@
+import { ConfigUtils } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import { AssertUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { ENGINE_HOOKS, TestConfigUtils } from "@dendronhq/engine-test-utils";
@@ -20,7 +21,11 @@ suite("CopyNoteRef", function () {
         onInit: async ({ wsRoot, vaults }) => {
           TestConfigUtils.withConfig(
             (config) => {
-              config.noXVaultWikiLink = false;
+              ConfigUtils.setWorkspaceProp(
+                config,
+                "enableXVaultWikiLink",
+                true
+              );
               return config;
             },
             { wsRoot }
@@ -44,7 +49,11 @@ suite("CopyNoteRef", function () {
         onInit: async ({ wsRoot, vaults }) => {
           TestConfigUtils.withConfig(
             (config) => {
-              config.noXVaultWikiLink = true;
+              ConfigUtils.setWorkspaceProp(
+                config,
+                "enableXVaultWikiLink",
+                false
+              );
               return config;
             },
             { wsRoot }

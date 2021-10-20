@@ -1,4 +1,5 @@
 import {
+  ConfigUtils,
   DendronWebViewKey,
   DMessageType,
   NoteUtils,
@@ -164,7 +165,8 @@ export class WindowWatcher {
       fname: NoteUtils.uri2Fname(editor.document.uri),
     });
     this.moveCursorPastFrontmatter(editor);
-    if (getDWorkspace().config.autoFoldFrontmatter) {
+    const config = getDWorkspace().config;
+    if (ConfigUtils.getWorkspace(config).enableAutoFoldFrontmatter) {
       await this.foldFrontmatter();
     }
     Logger.info({

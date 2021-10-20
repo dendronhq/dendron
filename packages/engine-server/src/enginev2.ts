@@ -49,6 +49,7 @@ import {
   VaultUtils,
   WorkspaceOpts,
   WriteNoteResp,
+  ConfigUtils,
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -97,13 +98,15 @@ function createRenderedCache(
 
     return new NullCache();
   } else {
-    if (config.maxPreviewsCached && config.maxPreviewsCached > 0) {
+    const maxPreviewsCached =
+      ConfigUtils.getWorkspace(config).maxPreviewsCached;
+    if (maxPreviewsCached && maxPreviewsCached > 0) {
       logger.info({
         ctx,
         msg: `Creating rendered preview cache set to hold maximum of '${config.maxPreviewsCached}' items.`,
       });
 
-      return new LruCache({ maxItems: config.maxPreviewsCached });
+      return new LruCache({ maxItems: maxPreviewsCached });
     } else {
       // This is most likely to happen if the user were to set incorrect configuration
       // value for maxPreviewsCached, we don't want to crash initialization due to
@@ -111,7 +114,7 @@ function createRenderedCache(
       // the preview cache.
       logger.error({
         ctx,
-        msg: `Did not find valid maxPreviewsCached (value was '${config.maxPreviewsCached}')
+        msg: `Did not find valid maxPreviewsCached (value was '${maxPreviewsCached}')
         in configuration. When specified th value must be a number greater than 0. Using null cache.`,
       });
       return new NullCache();
@@ -144,9 +147,9 @@ export class DendronEngineV2 implements DEngine {
     this.config = props.config;
     this._vaults = props.vaults;
     this.store = props.createStore(this);
-    const hooks: DHookDict = _.get(props.config, "hooks", {
+    const hooks: DHookDict = ConfigUtils.getWorkspace(props.config).hooks || {
       onCreate: [],
-    });
+    };
     this.hooks = hooks;
     this.renderedCache = createRenderedCache(this.config, this.logger);
   }
@@ -156,12 +159,12 @@ export class DendronEngineV2 implements DEngine {
     const cpath = DConfig.configPath(wsRoot);
     const config = _.defaultsDeep(
       readYAML(cpath) as IntermediateDendronConfig,
-      DConfig.genDefaultConfig()
+      ConfigUtils.genDefaultConfig()
     );
 
     return new DendronEngineV2({
       wsRoot,
-      vaults: config.vaults,
+      vaults: ConfigUtils.getVaults(config),
       forceNew: true,
       createStore: (engine) =>
         new FileStorage({
@@ -378,7 +381,7 @@ export class DendronEngineV2 implements DEngine {
     const cpath = DConfig.configPath(this.configRoot);
     const config = _.defaultsDeep(
       readYAML(cpath) as IntermediateDendronConfig,
-      DConfig.genDefaultConfig()
+      ConfigUtils.genDefaultConfig()
     );
 
     return {
@@ -522,7 +525,7 @@ export class DendronEngineV2 implements DEngine {
 
     this.renderedCache.set(id, {
       updated: note.updated,
-      data: data,
+      data,
     });
 
     const duration = milliseconds() - beforeRenderMillis;
@@ -577,12 +580,12 @@ export class DendronEngineV2 implements DEngine {
         if (ent.status === "delete") {
           delete this.notes[id];
         } else {
-          if (ent.status === "create") {
-          }
+          const maxNoteLength = ConfigUtils.getWorkspace(
+            this.config
+          ).maxNoteLength;
           if (
             ent.note.body.length <
-            (this.config.maxNoteLength ||
-              CONSTANTS.DENDRON_DEFAULT_MAX_NOTE_LENGTH)
+            (maxNoteLength || CONSTANTS.DENDRON_DEFAULT_MAX_NOTE_LENGTH)
           ) {
             const links = LinkUtils.findLinks({ note: ent.note, engine: this });
             const linkCandidates = LinkUtils.findLinkCandidates({

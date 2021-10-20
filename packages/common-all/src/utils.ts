@@ -4,8 +4,19 @@ import minimatch from "minimatch";
 import querystring from "querystring";
 import semver from "semver";
 import { COLORS_LIST } from "./colors";
-import { NoteProps, SEOProps } from "./types";
-import { IntermediateDendronConfig } from "./types/intermediateConfigs";
+import { NoteProps, SEOProps, DVault, DHookDict } from "./types";
+import {
+  DendronCommandConfig,
+  DendronWorkspaceConfig,
+  genDefaultCommandConfig,
+  genDefaultWorkspaceConfig,
+  IntermediateDendronConfig,
+  JournalConfig,
+  ScratchConfig,
+  LookupConfig,
+  StrictConfigV3,
+  NoteLookupConfig,
+} from "./types/intermediateConfigs";
 
 /**
  * Dendron utilities
@@ -255,3 +266,149 @@ export class PublishUtils {
  * ```
  */
 export type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
+
+export class ConfigUtils {
+  static usePrettyRef(config: IntermediateDendronConfig) {
+    let usePrettyRefs: boolean | undefined = _.find(
+      [config?.usePrettyRefs, config?.site?.usePrettyRefs],
+      (ent) => !_.isUndefined(ent)
+    );
+    if (_.isUndefined(usePrettyRefs)) {
+      usePrettyRefs = true;
+    }
+    return usePrettyRefs;
+  }
+
+  static genDefaultConfig(): StrictConfigV3 {
+    const common = {
+      useFMTitle: true,
+      useNoteTitleForLink: true,
+      noLegacyNoteRef: true,
+      mermaid: true,
+      useKatex: true,
+      usePrettyRefs: true,
+      dev: {
+        enablePreviewV2: true,
+      },
+      site: {
+        copyAssets: true,
+        siteHierarchies: ["root"],
+        siteRootDir: "docs",
+        usePrettyRefs: true,
+        title: "Dendron",
+        description: "Personal knowledge space",
+        siteLastModified: true,
+        gh_edit_branch: "main",
+      },
+    };
+
+    return {
+      version: 3,
+      ...common,
+      commands: genDefaultCommandConfig(),
+      workspace: genDefaultWorkspaceConfig(),
+    } as StrictConfigV3;
+  }
+
+  // get
+  static getProp<K extends keyof StrictConfigV3>(
+    config: IntermediateDendronConfig,
+    key: K
+  ): StrictConfigV3[K] {
+    const defaultConfig = ConfigUtils.genDefaultConfig();
+    const configWithDefaults = _.defaultsDeep(config, defaultConfig);
+    return configWithDefaults[key];
+  }
+
+  static getCommands(config: IntermediateDendronConfig): DendronCommandConfig {
+    return ConfigUtils.getProp(config, "commands");
+  }
+
+  static getWorkspace(
+    config: IntermediateDendronConfig
+  ): DendronWorkspaceConfig {
+    return ConfigUtils.getProp(config, "workspace");
+  }
+
+  static getVaults(config: IntermediateDendronConfig): DVault[] {
+    return ConfigUtils.getWorkspace(config).vaults;
+  }
+
+  static getHooks(config: IntermediateDendronConfig): DHookDict | undefined {
+    return ConfigUtils.getWorkspace(config).hooks;
+  }
+
+  static getJournal(config: IntermediateDendronConfig): JournalConfig {
+    return ConfigUtils.getWorkspace(config).journal;
+  }
+
+  static getScratch(config: IntermediateDendronConfig): ScratchConfig {
+    return ConfigUtils.getWorkspace(config).scratch;
+  }
+
+  static getLookup(config: IntermediateDendronConfig): LookupConfig {
+    return ConfigUtils.getCommands(config).lookup;
+  }
+
+  // set
+  static setProp<K extends keyof StrictConfigV3>(
+    config: IntermediateDendronConfig,
+    key: K,
+    value: StrictConfigV3[K]
+  ): void {
+    _.set(config, key, value);
+  }
+
+  static setCommandsProp<K extends keyof DendronCommandConfig>(
+    config: IntermediateDendronConfig,
+    key: K,
+    value: DendronCommandConfig[K]
+  ) {
+    const path = `commands.${key}`;
+    _.set(config, path, value);
+  }
+
+  static setWorkspaceProp<K extends keyof DendronWorkspaceConfig>(
+    config: IntermediateDendronConfig,
+    key: K,
+    value: DendronWorkspaceConfig[K]
+  ) {
+    const path = `workspace.${key}`;
+    _.set(config, path, value);
+  }
+
+  static setVaults(config: IntermediateDendronConfig, value: DVault[]): void {
+    ConfigUtils.setWorkspaceProp(config, "vaults", value);
+  }
+
+  static setNoteLookupProps<K extends keyof NoteLookupConfig>(
+    config: IntermediateDendronConfig,
+    key: K,
+    value: NoteLookupConfig[K]
+  ) {
+    const path = `commands.lookup.note.${key}`;
+    _.set(config, path, value);
+  }
+
+  static setJournalProps<K extends keyof JournalConfig>(
+    config: IntermediateDendronConfig,
+    key: K,
+    value: JournalConfig[K]
+  ) {
+    const path = `workspace.journal.${key}`;
+    _.set(config, path, value);
+  }
+
+  static setScratchProps<K extends keyof ScratchConfig>(
+    config: IntermediateDendronConfig,
+    key: K,
+    value: ScratchConfig[K]
+  ) {
+    const path = `workspace.scratch.${key}`;
+    _.set(config, path, value);
+  }
+
+  static setHooks(config: IntermediateDendronConfig, value: DHookDict) {
+    ConfigUtils.setWorkspaceProp(config, "hooks", value);
+  }
+}

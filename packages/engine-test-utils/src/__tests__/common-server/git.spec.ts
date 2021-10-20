@@ -1,6 +1,5 @@
-import { RESERVED_KEYS, VaultUtils } from "@dendronhq/common-all";
+import { ConfigUtils, RESERVED_KEYS, VaultUtils } from "@dendronhq/common-all";
 import { GitUtils } from "@dendronhq/common-server";
-import { DConfig } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
 import { runEngineTestV5, testWithEngine } from "../../engine";
@@ -11,7 +10,7 @@ describe("GitUtils", () => {
     const gitUrl = "https://github.com/dendronhq/dendron-site";
 
     testWithEngine("basic", async ({ engine, wsRoot }) => {
-      const config = DConfig.genDefaultConfig();
+      const config = ConfigUtils.genDefaultConfig();
       config.site.gh_edit_view_mode = "edit";
       config.site.gh_edit_branch = "main";
       config.site.gh_edit_repository = gitUrl;
@@ -22,7 +21,7 @@ describe("GitUtils", () => {
     });
 
     testWithEngine("vault override", async ({ engine, wsRoot }) => {
-      const config = DConfig.genDefaultConfig();
+      const config = ConfigUtils.genDefaultConfig();
       config.site.gh_edit_view_mode = "edit";
       config.site.gh_edit_branch = "main";
       config.site.gh_edit_repository = gitUrl;
@@ -32,14 +31,14 @@ describe("GitUtils", () => {
         (ent) => ent.fsPath === note.vault.fsPath
       )!;
       vault.remote = { url: "git@github.com:kevin/foo.git", type: "git" };
-      config.vaults = engine.vaults;
+      ConfigUtils.setVaults(config, engine.vaults);
       expect(GitUtils.getGithubEditUrl({ note, config, wsRoot })).toEqual(
         "https://github.com/kevin/foo/edit/main/foo.md"
       );
     });
 
     testWithEngine("note override", async ({ engine, wsRoot }) => {
-      const config = DConfig.genDefaultConfig();
+      const config = ConfigUtils.genDefaultConfig();
       config.site.gh_edit_view_mode = "edit";
       config.site.gh_edit_branch = "main";
       config.site.gh_edit_repository = gitUrl;

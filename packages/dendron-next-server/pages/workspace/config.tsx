@@ -16,9 +16,10 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import {
-  NoteAddBehavior,
+  LegacyNoteAddBehavior,
   IntermediateDendronConfig,
   LegacyLookupSelectionType,
+  ConfigUtils,
 } from "@dendronhq/common-all";
 import { Field, FieldArray, Form, Formik } from "formik";
 import _, { get } from "lodash";
@@ -26,45 +27,6 @@ import Head from "next/head";
 import React, { ReactNode } from "react";
 import { configWrite } from "../../lib/effects";
 import { useDendronConfig } from "../../lib/hooks";
-
-// TODO Temporarily copied here from engine-server/src/config.ts to use default
-// values for input placeholders.
-const genDefaultConfig = (): IntermediateDendronConfig => ({
-  version: 1,
-  vaults: [],
-  useFMTitle: true,
-  useNoteTitleForLink: true,
-  noAutoCreateOnDefinition: true,
-  noLegacyNoteRef: true,
-  noXVaultWikiLink: true,
-  lookupConfirmVaultOnCreate: false,
-  lookup: {
-    note: {
-      selectionType: LegacyLookupSelectionType.selectionExtract,
-      leaveTrace: false,
-    },
-  },
-  journal: {
-    dailyDomain: "daily",
-    name: "journal",
-    dateFormat: "y.MM.dd",
-    addBehavior: NoteAddBehavior.childOfDomain,
-    firstDayOfWeek: 1,
-  },
-  scratch: {
-    name: "scratch",
-    dateFormat: "y.MM.dd.HHmmss",
-    addBehavior: NoteAddBehavior.asOwnDomain,
-  },
-  site: {
-    copyAssets: true,
-    siteHierarchies: ["root"],
-    siteRootDir: "docs",
-    usePrettyRefs: true,
-    title: "Dendron",
-    description: "Personal knowledge space",
-  },
-});
 
 type InputControlProps = {
   name: string;
@@ -120,9 +82,7 @@ function InputControl({
 
 const PAGE_TITLE = "Dendron Configuration";
 
-const saveConfigData = async (
-  config: IntermediateDendronConfig
-) => {
+const saveConfigData = async (config: IntermediateDendronConfig) => {
   console.log("saving", config);
   // FIXME: hack
   // empty string is different from undefined
@@ -227,7 +187,9 @@ export default function ConfigSamplePage() {
                       <InputControl
                         label="Site root directory"
                         name="site.siteRootDir"
-                        placeholder={genDefaultConfig().site.siteRootDir}
+                        placeholder={
+                          ConfigUtils.genDefaultConfig().site.siteRootDir
+                        }
                         help="Where your site will be published. Relative to Dendron workspace."
                         required
                       />
@@ -235,21 +197,27 @@ export default function ConfigSamplePage() {
                       <InputControl
                         label="Site notes directory"
                         name="site.siteNotesDir"
-                        placeholder={genDefaultConfig().site.siteNotesDir!}
+                        placeholder={
+                          ConfigUtils.genDefaultConfig().site.siteNotesDir!
+                        }
                         help={`Folder where your notes will be kept. By default, "notes"`}
                       />
 
                       <InputControl
                         label="Assets prefix"
                         name="site.assetsPrefix"
-                        placeholder={genDefaultConfig().site.assetsPrefix!}
+                        placeholder={
+                          ConfigUtils.genDefaultConfig().site.assetsPrefix!
+                        }
                         help="If set, add prefix to all asset links"
                       />
 
                       <InputControl
                         label="Site repo directory"
                         name="site.siteRepoDir"
-                        placeholder={genDefaultConfig().site.siteRepoDir!}
+                        placeholder={
+                          ConfigUtils.genDefaultConfig().site.siteRepoDir!
+                        }
                         help={
                           <>
                             Location of the github repo where your site notes

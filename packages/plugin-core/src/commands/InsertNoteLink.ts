@@ -1,9 +1,10 @@
 import {
+  ConfigUtils,
   LegacyInsertNoteLinkAliasMode,
   NoteProps,
   NoteUtils,
 } from "@dendronhq/common-all";
-import { HistoryService, DConfig } from "@dendronhq/engine-server";
+import { HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
 import * as vscode from "vscode";
 import { MultiSelectBtn } from "../components/lookup/buttons";
@@ -36,15 +37,10 @@ export class InsertNoteLinkCommand extends BasicCommand<
 
   async gatherInputs(opts: CommandInput): Promise<CommandOpts | undefined> {
     const config = getDWorkspace().config;
-    const insertNoteLinkConfig = DConfig.getConfig(config, "commands.insertNoteLink");
-    const aliasModeConfig = insertNoteLinkConfig?.aliasMode;
-    let multiSelectConfig;
-    if (!_.isUndefined(insertNoteLinkConfig)) {
-      multiSelectConfig = "multiSelect" in insertNoteLinkConfig
-        ? insertNoteLinkConfig.multiSelect
-        : insertNoteLinkConfig?.enableMultiSelect;
-    }
-    
+    const insertNoteLinkConfig = ConfigUtils.getCommands(config).insertNoteLink;
+    const aliasModeConfig = insertNoteLinkConfig.aliasMode;
+    const multiSelectConfig = insertNoteLinkConfig.enableMultiSelect;
+
     const copts: CommandInput = _.defaults(opts || {}, {
       multiSelect: multiSelectConfig || false,
       aliasMode: aliasModeConfig || "none",

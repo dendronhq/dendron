@@ -1,5 +1,6 @@
 import {
   CalendarViewMessageType,
+  ConfigUtils,
   DMessageSource,
   NoteProps,
   Time,
@@ -14,7 +15,9 @@ import {
   Spin,
   Button,
   Divider,
- Badge, ConfigProvider } from "antd";
+  Badge,
+  ConfigProvider,
+} from "antd";
 
 import generateCalendar from "antd/lib/calendar/generateCalendar";
 import classNames from "classnames";
@@ -81,11 +84,14 @@ function CalendarView({ engine, ide }: DendronProps) {
 
   const maxDots: number = 5;
   const wordsPerDot: number = 250;
-  const journalDailyDomain = config?.journal.dailyDomain;
-  const journalName = config?.journal.name;
+
+  const defaultConfig = ConfigUtils.genDefaultConfig();
+  const journalConfig = ConfigUtils.getJournal(config || defaultConfig);
+  const journalDailyDomain = journalConfig.dailyDomain;
+  const journalName = journalConfig.name;
 
   // luxon token format lookup https://github.com/moment/luxon/blob/master/docs/formatting.md#table-of-tokens
-  let journalDateFormat = config?.journal.dateFormat;
+  let journalDateFormat = journalConfig.dateFormat;
   const journalMonthDateFormat = "y.MM"; // TODO compute format for currentMode="year" from config
 
   // Currently luxon does not support setting first day of the week (https://github.com/moment/luxon/issues/373)

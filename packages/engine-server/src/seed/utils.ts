@@ -1,4 +1,5 @@
 import {
+  ConfigUtils,
   DendronError,
   DVault,
   ERROR_STATUS,
@@ -60,17 +61,20 @@ export class SeedUtils {
 
   static validateWorkspaceSeedConversion({ wsRoot }: { wsRoot: string }) {
     const ws = new WorkspaceService({ wsRoot });
-    if (ws.config.vaults.length !== 1) {
+    const config = ws.config;
+    const vaults = ConfigUtils.getVaults(config);
+    if (vaults.length !== 1) {
       return {
         error: DendronError.createFromStatus({
           status: ERROR_STATUS.INVALID_STATE,
           message: `workspace must have exactly one vault. found ${JSON.stringify(
-            ws.config.vaults
+            vaults
           )}`,
         }),
       };
     }
-    if (!_.isEmpty(ws.config.workspaces)) {
+    const workspaces = ConfigUtils.getWorkspace(config).workspaces;
+    if (!_.isEmpty(workspaces)) {
       return {
         error: DendronError.createFromStatus({
           status: ERROR_STATUS.INVALID_STATE,

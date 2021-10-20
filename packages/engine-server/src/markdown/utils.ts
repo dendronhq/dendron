@@ -11,6 +11,7 @@ import {
   NoteProps,
   NoteUtils,
   VaultUtils,
+  ConfigUtils,
 } from "@dendronhq/common-all";
 // @ts-ignore
 import mermaid from "@dendronhq/remark-mermaid";
@@ -41,7 +42,6 @@ import remarkStringify from "remark-stringify";
 import variables from "remark-variables";
 import { default as unified, default as Unified, Processor } from "unified";
 import { Node, Parent } from "unist";
-import { ConfigUtils } from "../config";
 import { hierarchies } from "./remark";
 import { backlinks } from "./remark/backlinks";
 import { dendronPub, DendronPubOpts } from "./remark/dendronPub";

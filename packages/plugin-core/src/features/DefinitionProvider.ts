@@ -1,4 +1,4 @@
-import { NoteUtils, VaultUtils } from "@dendronhq/common-all";
+import { ConfigUtils, NoteUtils, VaultUtils } from "@dendronhq/common-all";
 import _ from "lodash";
 import vscode, { Location, Position, Uri } from "vscode";
 import { findAnchorPos, GotoNoteCommand } from "../commands/GotoNote";
@@ -58,7 +58,11 @@ export default class DefinitionProvider implements vscode.DefinitionProvider {
         }
         return loc;
       } else {
-        if (getDWorkspace().config.noAutoCreateOnDefinition) {
+        const config = getDWorkspace().config;
+
+        const noAutoCreateOnDefinition =
+          !ConfigUtils.getWorkspace(config).enableAutoCreateOnDefinition;
+        if (noAutoCreateOnDefinition) {
           return;
         }
         const out = await new GotoNoteCommand().execute({

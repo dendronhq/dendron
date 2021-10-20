@@ -1,6 +1,6 @@
 import { ServerUtils } from "@dendronhq/api-server";
 import {
-  ConfigEvents,
+  ConfigUtils,
   CONSTANTS,
   DendronError,
   DEngineClient,
@@ -8,15 +8,12 @@ import {
   DVault,
   getStage,
   InstallStatus,
-  IntermediateDendronConfig,
-  MigrationEvents,
-  NoteAddBehavior,
+  LegacyNoteAddBehavior,
   NoteProps,
   NoteUtils,
   Point,
   Position,
   SchemaModuleProps,
-  StrictIntermediateDendronConfig,
   Time,
   TutorialEvents,
   VaultUtils,
@@ -30,10 +27,8 @@ import {
   vault2Path,
 } from "@dendronhq/common-server";
 import {
-  DConfig,
   HistoryEvent,
   HistoryService,
-  MigrationChangeSetStatus,
 } from "@dendronhq/engine-server";
 import { assign } from "comment-json";
 import { ExecaChildProcess } from "execa";
@@ -45,8 +40,6 @@ import os from "os";
 import path from "path";
 import * as vscode from "vscode";
 import { CancellationTokenSource } from "vscode-languageclient";
-import { RunMigrationCommand } from "./commands/RunMigrationCommand";
-import { SetupWorkspaceCommand } from "./commands/SetupWorkspace";
 import { PickerUtilsV2 } from "./components/lookup/utils";
 import {
   DendronContext,
@@ -608,6 +601,7 @@ export class WSUtils {
       },
       (_progress, _token) => {
         _token.onCancellationRequested(() => {
+          // eslint-disable-next-line no-console
           console.log("Cancelled");
         });
 
@@ -700,6 +694,10 @@ export class WSUtils {
                 wsPath = wsPathBackup;
               }
 
+              // This is a workaround to resolve circular dependency.
+              // TODO: fix importing around the package so that we have control over module loading sequence.
+              // eslint-disable-next-line global-require
+              const { SetupWorkspaceCommand } = require("./commands/SetupWorkspaceCommand");
               if (!wsPath) {
                 await new SetupWorkspaceCommand().run({
                   workspaceInitializer: new TutorialInitializer(),
@@ -798,33 +796,35 @@ export class DendronClientUtilsV2 {
     prefix: string;
   } {
     // gather inputs
+    const config = getDWorkspace().config;
+    const journalConfig = ConfigUtils.getJournal(config);
     const dateFormat: string =
       type === "SCRATCH"
         ? getExtension().getWorkspaceSettingOrDefault({
             wsConfigKey: "dendron.defaultScratchDateFormat",
-            dendronConfigKey: "scratch.dateFormat",
+            dendronConfigKey: "workspace.scratch.dateFormat",
           })
-        : getDWorkspace().config.journal.dateFormat;
+        : journalConfig.dateFormat;
 
-    const addBehavior: NoteAddBehavior =
+    const addBehavior: LegacyNoteAddBehavior =
       type === "SCRATCH"
         ? getExtension().getWorkspaceSettingOrDefault({
             wsConfigKey: "dendron.defaultScratchAddBehavior",
-            dendronConfigKey: "scratch.addBehavior",
+            dendronConfigKey: "workspace.scratch.addBehavior",
           })
-        : getDWorkspace().config.journal.addBehavior;
+        : journalConfig.addBehavior;
 
     const name: string =
       type === "SCRATCH"
         ? getExtension().getWorkspaceSettingOrDefault({
             wsConfigKey: "dendron.defaultScratchName",
-            dendronConfigKey: "scratch.name",
+            dendronConfigKey: "workspace.scratch.name",
           })
-        : getDWorkspace().config.journal.name;
+        : journalConfig.name;
 
     if (!_.includes(_noteAddBehaviorEnum, addBehavior)) {
       const actual = addBehavior;
-      const choices = Object.keys(NoteAddBehavior).join(", ");
+      const choices = Object.keys(LegacyNoteAddBehavior).join(", ");
       throw Error(`${actual} must be one of: ${choices}`);
     }
 
@@ -867,10 +867,12 @@ export class DendronClientUtilsV2 {
   };
 
   static shouldUseVaultPrefix(engine: DEngineClient) {
-    const noXVaultLink = getDWorkspace().config.noXVaultWikiLink;
-    const useVaultPrefix =
+    const config = getDWorkspace().config;
+    const enableXVaultWikiLink = ConfigUtils.getWorkspace(config).enableXVaultWikiLink;
+    const useVaultPrefix = 
       _.size(engine.vaults) > 1 &&
-      (_.isBoolean(noXVaultLink) ? !noXVaultLink : true);
+      _.isBoolean(enableXVaultWikiLink) &&
+      enableXVaultWikiLink;
     return useVaultPrefix;
   }
 }
@@ -1023,87 +1025,3 @@ export const showMessage = {
 export const getOpenGraphMetadata = (opts: ogs.Options) => {
   return ogs(opts);
 };
-
-export class ConfigUtils {
-  static async checkAndMigrateLegacy(
-    config: Partial<IntermediateDendronConfig>,
-    wsRoot: string
-  ): Promise<{
-    status: "no legacy" | "ran migration";
-    changes?: MigrationChangeSetStatus[];
-  }> {
-    let shouldRun = false;
-    // check that command namespace is there
-    if (DConfig.isCurrentConfig(config as StrictIntermediateDendronConfig)) {
-      if (_.isUndefined(config.commands)) {
-        AnalyticsUtils.track(ConfigEvents.ConfigNotMigrated, {
-          key: "config.commands",
-          version: config.version,
-        });
-        shouldRun = true;
-      } else {
-        const requiredKeys = [
-          "lookup",
-          "randomNote",
-          "insertNote",
-          "insertNoteLink",
-          "insertNoteIndex",
-        ];
-
-        if (config.commands === null) {
-          AnalyticsUtils.track(ConfigEvents.ConfigNotMigrated, {
-            key: "config.commands.*",
-          });
-          shouldRun = true;
-        } else {
-          const existingKeys = Object.keys(config.commands);
-          requiredKeys.forEach((requiredKey) => {
-            if (!existingKeys.includes(requiredKey)) {
-              shouldRun = true;
-              AnalyticsUtils.track(ConfigEvents.ConfigNotMigrated, {
-                key: `config.commands.${requiredKey}`,
-              });
-            }
-          });
-        }
-      }
-    } else {
-      shouldRun = true;
-      AnalyticsUtils.track(ConfigEvents.ConfigNotMigrated, {
-        version: config.version,
-      });
-    }
-    if (shouldRun) {
-      const cmd = new RunMigrationCommand();
-      const maybeChanges = await cmd.run({ version: "0.63.0" });
-      maybeChanges?.forEach((change) => {
-        const event = _.isUndefined(change.error)
-          ? MigrationEvents.MigrationSucceeded
-          : MigrationEvents.MigrationFailed;
-        AnalyticsUtils.track(event, {
-          data: change.data,
-        });
-      });
-      vscode.window
-        .showInformationMessage(
-          "We found some legacy configuration and migrated them to new ones.",
-          { title: "Open dendron.yml" }
-        )
-        .then(async (resp) => {
-          if (resp?.title === "Open dendron.yml") {
-            const configFilePath = vscode.Uri.file(
-              path.join(wsRoot, "dendron.yml")
-            );
-            await vscode.commands.executeCommand("vscode.open", configFilePath);
-          }
-        });
-      return {
-        status: "ran migration",
-        changes: maybeChanges,
-      };
-    }
-    return {
-      status: "no legacy",
-    };
-  }
-}

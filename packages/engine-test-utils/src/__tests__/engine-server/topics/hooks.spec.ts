@@ -1,6 +1,8 @@
 import {
+  ConfigUtils,
   CONSTANTS,
   DEngineClient,
+  DHookDict,
   NoteOpts,
   NoteProps,
   NoteUtils,
@@ -89,7 +91,7 @@ describe("engine", () => {
         writeJSHook({ wsRoot, fname: "hello", canary: "hello" });
         TestConfigUtils.withConfig(
           (config) => {
-            config.hooks = {
+            const hooks: DHookDict = {
               onCreate: [
                 {
                   id: "hello",
@@ -98,6 +100,7 @@ describe("engine", () => {
                 },
               ],
             };
+            ConfigUtils.setHooks(config, hooks);
             return config;
           },
           { wsRoot }
@@ -132,7 +135,7 @@ describe("engine", () => {
         writeJSHook({ wsRoot, fname: "goodbye", canary: "goodbye" });
         TestConfigUtils.withConfig(
           (config) => {
-            config.hooks = {
+            const hooks: DHookDict = {
               onCreate: [
                 {
                   id: "hello",
@@ -146,6 +149,7 @@ describe("engine", () => {
                 },
               ],
             };
+            ConfigUtils.setHooks(config, hooks);
             return config;
           },
           { wsRoot }
@@ -182,7 +186,7 @@ describe("engine", () => {
         );
         TestConfigUtils.withConfig(
           (config) => {
-            config.hooks = {
+            const hooks: DHookDict = {
               onCreate: [
                 {
                   id: "hello",
@@ -191,6 +195,7 @@ describe("engine", () => {
                 },
               ],
             };
+            ConfigUtils.setHooks(config, hooks);
             return config;
           },
           { wsRoot }
@@ -234,7 +239,7 @@ describe("engine", () => {
           );
           TestConfigUtils.withConfig(
             (config) => {
-              config.hooks = {
+              const hooks: DHookDict = {
                 onCreate: [
                   {
                     id: "hello",
@@ -243,6 +248,7 @@ describe("engine", () => {
                   },
                 ],
               };
+              ConfigUtils.setHooks(config, hooks);
               return config;
             },
             { wsRoot }
@@ -279,7 +285,7 @@ describe("engine", () => {
           writeJSHook({ wsRoot, fname: "hello", canary: "hello" });
           TestConfigUtils.withConfig(
             (config) => {
-              config.hooks = {
+              const hooks: DHookDict = {
                 onCreate: [
                   {
                     id: "hello",
@@ -288,6 +294,7 @@ describe("engine", () => {
                   },
                 ],
               };
+              ConfigUtils.setHooks(config, hooks);
               return config;
             },
             { wsRoot }
@@ -313,7 +320,7 @@ describe("remote engine", () => {
         preSetupHook: async ({ wsRoot }) => {
           TestConfigUtils.withConfig(
             (config) => {
-              config.hooks = {
+              const hooks: DHookDict = {
                 onCreate: [
                   {
                     id: "hello",
@@ -322,6 +329,7 @@ describe("remote engine", () => {
                   },
                 ],
               };
+              ConfigUtils.setHooks(config, hooks);
               return config;
             },
             { wsRoot }
@@ -358,7 +366,7 @@ describe("remote engine", () => {
           });
           TestConfigUtils.withConfig(
             (config) => {
-              config.hooks = {
+              const hooks: DHookDict = {
                 onCreate: [
                   {
                     id: "hello",
@@ -367,6 +375,7 @@ describe("remote engine", () => {
                   },
                 ],
               };
+              ConfigUtils.setHooks(config, hooks);
               return config;
             },
             { wsRoot }

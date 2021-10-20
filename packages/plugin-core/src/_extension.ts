@@ -9,11 +9,12 @@ import {
   ExtensionEvents,
   getStage,
   InstallStatus,
-  MigrationEvents,
   Time,
   VaultUtils,
   VSCodeEvents,
   WorkspaceType,
+  MigrationEvents,
+  ConfigUtils,
 } from "@dendronhq/common-all";
 import {
   getDurationMilliseconds,
@@ -25,9 +26,9 @@ import {
 import {
   HistoryService,
   MetadataService,
-  MigrationChangeSetStatus,
   WorkspaceService,
   WorkspaceUtils,
+  MigrationChangeSetStatus,
 } from "@dendronhq/engine-server";
 import * as Sentry from "@sentry/node";
 import { ExecaChildProcess } from "execa";
@@ -45,7 +46,6 @@ import {
   GLOBAL_STATE,
 } from "./constants";
 import { Logger } from "./logger";
-import { migrateConfig } from "./migration";
 import { StateService } from "./services/stateService";
 import { Extensions } from "./settings";
 import { SurveyUtils } from "./survey";
@@ -343,6 +343,28 @@ export async function _activate(
             data: change.data,
           });
         });
+      } else {
+        // no migration changes.
+        // see if we need to force a config migration.
+        const configMigrationChanges =
+          await wsService.runConfigMigrationIfNecessary({
+            currentVersion,
+            dendronConfig,
+          });
+
+        if (configMigrationChanges.length > 0) {
+          configMigrationChanges.forEach((change: MigrationChangeSetStatus) => {
+            const event = _.isUndefined(change.error)
+              ? MigrationEvents.MigrationSucceeded
+              : MigrationEvents.MigrationFailed;
+            AnalyticsUtils.track(event, {
+              data: change.data,
+            });
+          });
+          vscode.window.showInformationMessage(
+            "We have detected a legacy configuration in dendron.yml and migrated to the newest configurations. You can find a backup of the original file in your root directory."
+          );
+        }
       }
       // initialize client
       if (getStage() === "prod") {
@@ -382,28 +404,11 @@ export async function _activate(
       }
 
       ws.workspaceService = wsService;
-      const configMigrated = migrateConfig({ config: dendronConfig, wsRoot });
-      Logger.info({
-        ctx,
-        config: dendronConfig,
-        configMigrated,
-        msg: "read dendron config",
-      });
-
-      // try {
-      //   if (semver.gte(currentVersion, "0.63.0")) {
-      //     const rawConfig = DConfig.getRaw(wsImpl.wsRoot);
-      //     await ConfigUtils.checkAndMigrateLegacy(rawConfig, wsRoot);
-      //   }
-      // } catch (error) {
-      //   Sentry.captureException(error);
-      // }
 
       // check for vaults with same name
-      const uniqVaults = _.uniqBy(dendronConfig.vaults, (vault) =>
-        VaultUtils.getName(vault)
-      );
-      if (_.size(uniqVaults) < _.size(dendronConfig.vaults)) {
+      const vaults = ConfigUtils.getVaults(dendronConfig);
+      const uniqVaults = _.uniqBy(vaults, (vault) => VaultUtils.getName(vault));
+      if (_.size(uniqVaults) < _.size(vaults)) {
         const txt = "Fix it";
         await vscode.window
           .showErrorMessage(

@@ -1,11 +1,10 @@
-import { CONSTANTS } from "@dendronhq/common-all";
-import { DConfig } from "@dendronhq/engine-server";
+import { CONSTANTS, ConfigUtils } from "@dendronhq/common-all";
 import { readYAML, writeYAML } from "@dendronhq/common-server";
 import { TestPresetEntryV4 } from "@dendronhq/common-test-utils";
 import path from "path";
 
 function genDefaultConfig() {
-  return DConfig.genDefaultConfig();
+  return ConfigUtils.genDefaultConfig();
 }
 
 const WRITE = {

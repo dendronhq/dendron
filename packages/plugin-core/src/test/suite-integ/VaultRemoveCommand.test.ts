@@ -2,6 +2,7 @@ import {
   IntermediateDendronConfig,
   DVault,
   WorkspaceSettings,
+  ConfigUtils,
 } from "@dendronhq/common-all";
 import { readYAML } from "@dendronhq/common-server";
 import { FileTestUtils } from "@dendronhq/common-test-utils";
@@ -92,8 +93,8 @@ suite("VaultRemoveCommand", function () {
           stubQuickPick({ fsPath: remoteVaultName, workspace: remoteWsName });
           await new VaultRemoveCommand().run();
           const config = getConfig();
-          expect(config.vaults).toEqual(vaults);
-          expect(config.workspaces).toEqual({});
+          expect(ConfigUtils.getVaults(config)).toEqual(vaults);
+          expect(ConfigUtils.getWorkspace(config).workspaces).toEqual({});
           expect(
             _.find(getWorkspaceFile().folders, {
               path: path.join(remoteWsName, remoteVaultName),
@@ -131,9 +132,9 @@ suite("VaultRemoveCommand", function () {
             getDWorkspace().wsRoot as string
           );
           const config = readYAML(configPath) as IntermediateDendronConfig;
-          expect(config.vaults.map((ent) => ent.fsPath)).toEqual([
-            vaults[0].fsPath,
-          ]);
+          expect(
+            ConfigUtils.getVaults(config).map((ent) => ent.fsPath)
+          ).toEqual([vaults[0].fsPath]);
 
           // check vscode settings updated
           const settings = fs.readJSONSync(
@@ -200,9 +201,12 @@ suite("VaultRemoveCommand", function () {
           const configPathOrig = DConfig.configPath(
             getDWorkspace().wsRoot as string
           );
-          const configOrig = readYAML(configPathOrig) as IntermediateDendronConfig;
+          const configOrig = readYAML(
+            configPathOrig
+          ) as IntermediateDendronConfig;
           // check what we are starting from.
-          expect(configOrig.vaults.map((ent) => ent.fsPath)).toEqual([
+          const origVaults = ConfigUtils.getVaults(configOrig);
+          expect(origVaults.map((ent) => ent.fsPath)).toEqual([
             vaults[0].fsPath,
             vaults[1].fsPath,
             vaults[2].fsPath,
@@ -241,7 +245,7 @@ suite("VaultRemoveCommand", function () {
             };
             await new VaultRemoveCommand().run(args);
             const config = getConfig();
-            expect(config.vaults).toNotEqual(vaults);
+            expect(ConfigUtils.getVaults(config)).toNotEqual(vaults);
             expect(
               _.find(getWorkspaceFile().folders, {
                 path: path.join(vaults[1].fsPath),
@@ -269,8 +273,8 @@ suite("VaultRemoveCommand", function () {
             };
             await new VaultRemoveCommand().run(args);
             const config = getConfig();
-            expect(config.vaults).toEqual(vaults);
-            expect(config.workspaces).toEqual({});
+            expect(ConfigUtils.getVaults(config)).toEqual(vaults);
+            expect(ConfigUtils.getWorkspace(config).workspaces).toEqual({});
             expect(
               _.find(getWorkspaceFile().folders, {
                 path: path.join(remoteWsName, remoteVaultName),

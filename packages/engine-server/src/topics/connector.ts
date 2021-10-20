@@ -4,6 +4,7 @@ import {
   DEngineClient,
   DVault,
   Time,
+  ConfigUtils,
 } from "@dendronhq/common-all";
 import {
   createFileWatcher,
@@ -81,7 +82,7 @@ export class EngineConnector {
   }
 
   get vaults(): DVault[] {
-    return this.config.vaults;
+    return ConfigUtils.getVaults(this.config);
   }
 
   /**

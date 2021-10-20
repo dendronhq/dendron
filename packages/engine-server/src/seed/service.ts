@@ -7,6 +7,7 @@ import {
   SeedEntry,
   VaultUtils,
   WorkspaceType,
+  ConfigUtils,
 } from "@dendronhq/common-all";
 import { simpleGit, writeYAML } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -118,14 +119,16 @@ export class SeedService {
     const ws = new WorkspaceService({ wsRoot });
     const config = ws.config;
     const id = SeedUtils.getSeedId({ ...seed });
-    if (!config.seeds) {
-      config.seeds = {};
-    }
+
+    const seeds = ConfigUtils.getWorkspace(config).seeds || {};
+
     const seedEntry: SeedEntry = {};
     if (seed.site) {
       seedEntry.site = seed.site;
     }
-    config.seeds[id] = seedEntry;
+
+    seeds![id] = seedEntry;
+    ConfigUtils.setWorkspaceProp(config, "seeds", seeds);
 
     const updateWorkspace =
       WorkspaceUtils.getWorkspaceTypeFromDir(wsRoot) === WorkspaceType.CODE;
@@ -191,7 +194,8 @@ export class SeedService {
           };
         }
         const ws = new WorkspaceService({ wsRoot });
-        const vaultPath = VaultUtils.getRelPath(ws.config.vaults[0]);
+        const vaults = ConfigUtils.getVaults(ws.config);
+        const vaultPath = VaultUtils.getRelPath(vaults[0]);
         seed.root = vaultPath;
         writeYAML(cpath, seed);
         // validate
@@ -223,7 +227,9 @@ export class SeedService {
   }): Promise<SeedSvcResp> {
     const ws = new WorkspaceService({ wsRoot: this.wsRoot });
     const config = ws.config;
-    if (!_.has(config.seeds, id)) {
+
+    const seeds = ConfigUtils.getWorkspace(config).seeds;
+    if (!_.has(seeds, id)) {
       return {
         error: new DendronError({
           status: ERROR_STATUS.DOES_NOT_EXIST,
@@ -266,7 +272,9 @@ export class SeedService {
 
     // remove seed entry
     const config = ws.config;
-    delete (config.seeds || {})[SeedUtils.getSeedId(seed)];
+    const seeds = ConfigUtils.getWorkspace(config).seeds || {};
+    delete seeds[SeedUtils.getSeedId(seed)];
+    ConfigUtils.setWorkspaceProp(config, "seeds", seeds);
     ws.setConfig(config);
 
     const updateWorkspace =
@@ -282,13 +290,16 @@ export class SeedService {
 
   isSeedInWorkspace(id: string): boolean {
     const ws = new WorkspaceService({ wsRoot: this.wsRoot });
-    return undefined !== ws.config.vaults.find((vault) => vault.seed === id);
+    const config = ws.config;
+    const vaults = ConfigUtils.getVaults(config);
+    return undefined !== vaults.find((vault) => vault.seed === id);
   }
 
   getSeedsInWorkspace(): string[] {
     const ws = new WorkspaceService({ wsRoot: this.wsRoot });
-
-    return ws.config.vaults
+    const config = ws.config;
+    const vaults = ConfigUtils.getVaults(config);
+    return vaults
       .filter((vault) => vault.seed !== undefined)
       .map((vault) => vault.seed!);
   }

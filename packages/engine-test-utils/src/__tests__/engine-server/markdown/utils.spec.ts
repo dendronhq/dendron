@@ -1,11 +1,10 @@
-import { NoteProps, NoteUtils, WorkspaceOpts } from "@dendronhq/common-all";
+import { ConfigUtils, NoteProps, NoteUtils, WorkspaceOpts } from "@dendronhq/common-all";
 import {
   AssertUtils,
   NoteTestUtilsV4,
   TestPresetEntryV4,
 } from "@dendronhq/common-test-utils";
 import {
-  DConfig,
   DendronASTDest,
   MDUtilsV4,
   Processor,
@@ -358,7 +357,7 @@ const WITH_TITLE_FOR_LINK = createProcTests({
   name: "WITH_TITLE_FOR_LINK",
   setupFunc: async (opts) => {
     let proc = await createProc(opts, {
-      config: { ...DConfig.genDefaultConfig(), useNoteTitleForLink: true },
+      config: { ...ConfigUtils.genDefaultConfig(), useNoteTitleForLink: true },
     });
     const npath = path.join(opts.wsRoot, opts.vaults[0].fsPath, "foo.md");
     return readAndProcess({ npath, proc });
@@ -394,7 +393,7 @@ const WITH_TITLE_FOR_LINK_X_VAULT = createProcTests({
   name: "WITH_TITLE_FOR_LINK_X_VAULT",
   setupFunc: async (opts) => {
     let proc = await createProc(opts, {
-      config: { ...DConfig.genDefaultConfig(), useNoteTitleForLink: true },
+      config: { ...ConfigUtils.genDefaultConfig(), useNoteTitleForLink: true },
     });
     const npath = path.join(opts.wsRoot, opts.vaults[0].fsPath, "foo.md");
     return readAndProcess({ npath, proc });

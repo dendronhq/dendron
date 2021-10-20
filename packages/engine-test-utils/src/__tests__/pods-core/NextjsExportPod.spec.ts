@@ -1,4 +1,5 @@
 import {
+  ConfigUtils,
   DEngineClient,
   DVaultVisibility,
   WorkspaceOpts,
@@ -106,9 +107,8 @@ describe("GIVEN NextExport pod", () => {
               );
               TestConfigUtils.withConfig(
                 (config) => {
-                  const vault2 = config.vaults.find(
-                    (ent) => ent.fsPath === "vault2"
-                  );
+                  const vaults = ConfigUtils.getVaults(config);
+                  const vault2 = vaults.find((ent) => ent.fsPath === "vault2");
                   vault2!.visibility = DVaultVisibility.PRIVATE;
                   config.site.siteUrl = "https://foo.com";
                   return config;

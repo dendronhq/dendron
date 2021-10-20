@@ -10,6 +10,7 @@ import { expect } from "../testUtilsv2";
 import { describeMultiWS, setupBeforeAfter } from "../testUtilsV3";
 import fs from "fs-extra";
 import { before, after, describe } from "mocha";
+import { ConfigUtils, IntermediateDendronConfig } from "@dendronhq/common-all";
 
 suite("GIVEN VaultConvert", function () {
   const ctx = setupBeforeAfter(this, {});
@@ -46,8 +47,8 @@ suite("GIVEN VaultConvert", function () {
 
       test("THEN updates config", async () => {
         const { wsRoot } = getDWorkspace();
-        const config = DConfig.getRaw(wsRoot);
-        expect(config.workspace!.vaults![0].remote).toEqual({
+        const config = DConfig.getRaw(wsRoot) as IntermediateDendronConfig;
+        expect(ConfigUtils.getVaults(config)[0].remote).toEqual({
           type: "git",
           url: remote,
         });
@@ -83,8 +84,8 @@ suite("GIVEN VaultConvert", function () {
 
         test("THEN updates config", async () => {
           const { wsRoot } = getDWorkspace();
-          const config = DConfig.getRaw(wsRoot);
-          expect(config.workspace!.vaults![0].remote).toBeFalsy();
+          const config = DConfig.getRaw(wsRoot) as IntermediateDendronConfig;
+          expect(ConfigUtils.getVaults(config)[0].remote).toBeFalsy();
         });
 
         test("THEN the folder is NOT a git repository", async () => {

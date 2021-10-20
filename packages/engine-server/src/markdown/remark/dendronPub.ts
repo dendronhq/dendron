@@ -7,7 +7,6 @@ import {
   StatusCodes,
   TAGS_HIERARCHY,
 } from "@dendronhq/common-all";
-import { ProcDataFullOptsV5, ProcOptsV5 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import type { Image, Root } from "mdast";
 import { paragraph, text } from "mdast-builder";
@@ -30,7 +29,12 @@ import {
   WikiLinkNoteV4,
 } from "../types";
 import { MDUtilsV4 } from "../utils";
-import { MDUtilsV5, ProcMode } from "../utilsv5";
+import {
+  MDUtilsV5,
+  ProcDataFullOptsV5,
+  ProcMode,
+  ProcOptsV5,
+} from "../utilsv5";
 import { blockAnchor2html } from "./blockAnchors";
 import { extendedImage2html } from "./extendedImage";
 import { NoteRefsOpts } from "./noteRefs";

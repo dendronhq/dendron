@@ -13,7 +13,6 @@ describe("GIVEN image link", () => {
         setup: async (opts) => {
           const { proc } = getOpts(opts);
           const txt = `![some-image](some-image-link.png)`;
-          debugger;
           const resp = await proc.process(txt);
           return { resp, proc };
         },

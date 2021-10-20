@@ -455,7 +455,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
       // The url correction needs to happen for both regular and extended images
       if (ImageNodeHandler.match(node, { pData, pOpts })) {
         // match typeguard should narrow this down to Image node
-        // not quite sure why this isn't working yte
+        // not quite sure why this isn't working yet
         // @ts-ignore
         const { nextAction } = ImageNodeHandler.handle(node, {
           proc,

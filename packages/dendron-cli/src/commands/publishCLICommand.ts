@@ -286,6 +286,11 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
 
   async init(opts: { wsRoot: string }) {
     const cwd = opts.wsRoot;
+    const nextPath = path.join(cwd, ".next");
+    if (fs.pathExistsSync(nextPath)) {
+      this.print(`.next directory already exists at ${cwd}. Removing.`);
+      fs.rmdirSync(nextPath, { recursive: true });
+    }
     this.print(`initializing publishing at ${cwd}...`);
     const cmd = `git clone https://github.com/dendronhq/nextjs-template.git .next`;
     $(cmd, { cwd });

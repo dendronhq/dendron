@@ -47,7 +47,10 @@ suite("GIVEN VaultConvert", function () {
       test("THEN updates config", async () => {
         const { wsRoot } = getDWorkspace();
         const config = DConfig.getRaw(wsRoot);
-        expect(config.vaults![0].remote).toEqual({ type: "git", url: remote });
+        expect(config.workspace!.vaults![0].remote).toEqual({
+          type: "git",
+          url: remote,
+        });
       });
 
       test("THEN the folder is a git repository", async () => {
@@ -81,7 +84,7 @@ suite("GIVEN VaultConvert", function () {
         test("THEN updates config", async () => {
           const { wsRoot } = getDWorkspace();
           const config = DConfig.getRaw(wsRoot);
-          expect(config.vaults![0].remote).toBeFalsy();
+          expect(config.workspace!.vaults![0].remote).toBeFalsy();
         });
 
         test("THEN the folder is NOT a git repository", async () => {

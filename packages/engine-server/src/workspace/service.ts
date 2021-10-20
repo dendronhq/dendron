@@ -371,7 +371,7 @@ export class WorkspaceService {
     await git.push({ remote, branch });
     // Update `dendron.yml`, adding the remote to the converted vault
     const config = this.config;
-    config.vaults = config.vaults!.map((vault) => {
+    config.workspace!.vaults = config.workspace!.vaults!.map((vault) => {
       if (VaultUtils.isEqualV2(vault, targetVault)) {
         vault.remote = { type: "git", url: remoteUrl };
       }
@@ -411,7 +411,7 @@ export class WorkspaceService {
     });
     // Update `dendron.yml`, removing the remote from the converted vault
     const config = this.config;
-    config.vaults = config.vaults!.map((vault) => {
+    config.workspace!.vaults = config.workspace!.vaults!.map((vault) => {
       if (VaultUtils.isEqualV2(vault, targetVault)) {
         delete vault.remote;
       }

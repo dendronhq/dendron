@@ -355,7 +355,7 @@ export class WorkspaceService {
       // Avoid initializing if a git folder already exists
       await git.init();
     }
-    let remote = await git.getUpstream();
+    let remote = await git.getRemote();
     if (!remote) {
       remote = await git.remoteAdd();
     }

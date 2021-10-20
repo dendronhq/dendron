@@ -53,7 +53,7 @@ suite("GIVEN VaultConvert", function () {
       test("THEN the folder is a git repository", async () => {
         const { wsRoot, vaults } = getDWorkspace();
         const git = new Git({ localUrl: path.join(wsRoot, vaults[0].fsPath) });
-        expect(await git.getUpstream()).toEqual("origin");
+        expect(await git.getRemote()).toEqual("origin");
         expect(await git.getCurrentBranch()).toBeTruthy();
       });
 
@@ -89,7 +89,7 @@ suite("GIVEN VaultConvert", function () {
           const git = new Git({
             localUrl: path.join(wsRoot, vaults[0].fsPath),
           });
-          expect(await git.getUpstream()).toBeFalsy();
+          expect(await git.getRemote()).toBeFalsy();
         });
       });
     }

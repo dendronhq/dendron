@@ -129,7 +129,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       "dist",
       "dendron-yml.validator.json"
     );
-    const configType = "DendronConfig";
+    const configType = "StrictConfigV3";
     // NOTE: this is removed by webpack when building plugin which is why we're loading this dynamically
     const tsj = require("ts-json-schema-generator");
     const schema = tsj

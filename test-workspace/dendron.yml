@@ -87,3 +87,5 @@ workspace:
     enableAutoFoldFrontmatter: true
     maxPreviewsCached: 10
     maxNoteLength: 204800
+noLegacyNoteRef: true
+usePrettyRefs: true

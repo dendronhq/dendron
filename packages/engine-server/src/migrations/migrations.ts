@@ -11,10 +11,10 @@ import {
 } from "@dendronhq/common-server";
 import _ from "lodash";
 import fs from "fs-extra";
-import { DConfig, pathMap } from "../config";
+import { DConfig } from "../config";
 import { removeCache } from "../utils";
 import { Migrations } from "./types";
-import { MigrationUtils } from "./utils";
+import { MigrationUtils, PATH_MAP } from "./utils";
 
 export const CONFIG_MIGRATIONS: Migrations = {
   version: "0.64.1",
@@ -61,65 +61,38 @@ export const CONFIG_MIGRATIONS: Migrations = {
           cleanDendronConfig.workspace = {};
         }
 
-        // mapping how we want each keys to be migrated.
-        const flip = (value: boolean): boolean => !value; // value is flipped during migration.
-        const skip = (_value: any) => undefined; // don't migrate. let other mappings do it.
-        const migrationIterateeMap = new Map<string, Function>([
-          ["commands.lookup", skip],
-          ["commands.lookup.note", skip],
-          [
-            "commands.lookup.note.selectionMode",
-            (value: any) => {
-              switch (value) {
-                case "selection2link": {
-                  return "link";
-                }
-                case "none": {
-                  return "none";
-                }
-                case "selectionExtract":
-                default: {
-                  return "extract";
-                }
-              }
-            },
-          ],
-          ["commands.insertNoteLink", skip],
-          ["commands.insertNoteIndex", skip],
-          ["commands.randomNote", skip],
-          ["workspace.enableAutoCreateOnDefinition", flip],
-          ["workspace.enableXVaultWikiLink", flip],
-          ["workspace.journal", skip],
-          ["workspace.scratch", skip],
-          ["workspace.graph", skip],
-        ]);
-
         // legacy paths to remove from config;
         const legacyPaths: string[] = [];
         // migrate each path mapped in current config version
-        pathMap.forEach((value, key) => {
+        PATH_MAP.forEach((value, key) => {
           const legacyPath = value.target;
-          const maybeLegacyConfig = _.get(cleanDendronConfig, legacyPath);
-          const alreadyFilled = _.has(cleanDendronConfig, key);
+          let iteratee = value.iteratee;
           let valueToFill;
-          if (_.isUndefined(maybeLegacyConfig)) {
-            // legacy property doesn't have a value.
-            valueToFill = _.get(defaultV3Config, key);
-          } else {
-            // there is a legacy value.
-            // check if this mapping needs special treatment.
-            let iteratee = migrationIterateeMap.get(key);
-            if (_.isUndefined(iteratee)) {
-              // otherwise, move it as is.
-              iteratee = _.identity;
+          let alreadyFilled;
+          
+          if (iteratee !== "skip") {
+            alreadyFilled = _.has(cleanDendronConfig, key);
+            const maybeLegacyConfig = _.get(cleanDendronConfig, legacyPath);
+            if (_.isUndefined(maybeLegacyConfig)) {
+              // legacy property doesn't have a value.
+              valueToFill = _.get(defaultV3Config, key);
+            } else {
+              // there is a legacy value.
+              // check if this mapping needs special treatment.
+              if (_.isUndefined(iteratee)) {
+                // assume identity mapping.
+                iteratee = _.identity;
+              }
+              valueToFill = iteratee(maybeLegacyConfig);
             }
-            valueToFill = iteratee(maybeLegacyConfig);
           }
+
           if (!alreadyFilled && !_.isUndefined(valueToFill)) {
             // if the property isn't already filled, fill it with determined value.
             _.set(cleanDendronConfig, key, valueToFill);
           }
 
+          // these will later be used to delete.
           legacyPaths.push(legacyPath);
         });
 
@@ -130,7 +103,11 @@ export const CONFIG_MIGRATIONS: Migrations = {
         legacyPaths.forEach((legacyPath) => {
           _.unset(cleanDendronConfig, legacyPath);
         });
-        return { data: { dendronConfig: cleanDendronConfig, wsConfig } };
+
+        // recursively populate missing defaults
+        const migratedConfig = _.defaultsDeep(cleanDendronConfig, defaultV3Config);
+
+        return { data: { dendronConfig: migratedConfig, wsConfig } };
       },
     },
   ],

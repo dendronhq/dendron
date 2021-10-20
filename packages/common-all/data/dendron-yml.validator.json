@@ -1,10 +1,26 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$ref": "#/definitions/DendronConfig",
+  "$ref": "#/definitions/StrictConfigV3",
   "definitions": {
-    "DendronConfig": {
+    "StrictConfigV3": {
       "type": "object",
+      "additionalProperties": false,
       "properties": {
+        "version": {
+          "type": "number",
+          "description": "Dendron version. Setup by plugin",
+          "const": 3
+        },
+        "commands": {
+          "$ref": "#/definitions/DendronCommandConfig"
+        },
+        "workspace": {
+          "$ref": "#/definitions/DendronWorkspaceConfig"
+        },
+        "site": {
+          "$ref": "#/definitions/DendronSiteConfig",
+          "description": "Configuration related to publishing notes"
+        },
         "noCaching": {
           "type": "boolean",
           "description": "Disable caching behavior"
@@ -17,30 +33,22 @@
           "type": "boolean",
           "description": "Disable telemetry"
         },
-        "version": {
-          "type": "number",
-          "description": "Dendron version. Setup by plugin"
-        },
         "dendronVersion": {
           "type": "string",
           "description": "Dendron version"
         },
-        "site": {
-          "$ref": "#/definitions/DendronSiteConfig",
-          "description": "Configuration related to publishing notes"
-        },
         "lookup": {
-          "$ref": "#/definitions/LookupConfig",
+          "$ref": "#/definitions/LegacyLookupConfig",
           "description": "Configuration related to lookup v3."
         },
         "journal": {
-          "$ref": "#/definitions/JournalConfig"
+          "$ref": "#/definitions/LegacyJournalConfig"
         },
         "scratch": {
-          "$ref": "#/definitions/ScratchConfig"
+          "$ref": "#/definitions/LegacyScratchConfig"
         },
         "insertNoteLink": {
-          "$ref": "#/definitions/InsertNoteLinkConfig"
+          "$ref": "#/definitions/LegacyInsertNoteLinkConfig"
         },
         "workspaces": {
           "type": "object",
@@ -79,6 +87,10 @@
         "hooks": {
           "$ref": "#/definitions/DHookDict"
         },
+        "lookupDontBubbleUpCreateNew": {
+          "type": "boolean",
+          "description": "When set to true `Create New` will not bubble up to the top of lookup results.\n\ndefault: false."
+        },
         "lookupConfirmVaultOnCreate": {
           "type": "boolean",
           "description": "Pick vault when creating new note. [Docs](https://dendron.so/notes/24b176f1-685d-44e1-a1b0-1704b1a92ca0.html#specify-vault-location-when-creating-a-note)"
@@ -116,7 +128,7 @@
           "description": "Title used for hiearchies Default: Children"
         },
         "graph": {
-          "$ref": "#/definitions/DendronGraphConfig",
+          "$ref": "#/definitions/LegacyDendronGraphConfig",
           "description": "Configuration for note and schema graphs"
         },
         "noAutoCreateOnDefinition": {
@@ -156,7 +168,7 @@
           "description": "How workspace vaults should be handled when using workspace \"add and commit\" and \"sync\" commands.\n\nOptions are:\n* skip: Skip them entirely. You must manage the repository manually.\n* noPush: Commit any changes and pull updates, but don't push. You can watch the repository and make local changes without sharing them back.\n* noCommit: Pull and push updates if the workspace is clean, but don't commit. You manually commit your local changes, but automatically share them once you committed.\n* sync: Commit changes, and pull and push updates. Treats workspace vaults like regular vaults.\n\nDefaults to `noCommit`."
         },
         "randomNote": {
-          "$ref": "#/definitions/RandomNoteConfig",
+          "$ref": "#/definitions/LegacyRandomNoteConfig",
           "description": "Configuration for Random Note Lookup Command"
         },
         "autoFoldFrontmatter": {
@@ -164,7 +176,7 @@
           "description": "Automatically fold frontmatter when opening a new note. False by default."
         },
         "insertNoteIndex": {
-          "$ref": "#/definitions/InsertNoteIndexConfig",
+          "$ref": "#/definitions/LegacyInsertNoteIndexConfig",
           "description": "Configuration for Insert Note Index Command"
         },
         "maxNoteLength": {
@@ -174,16 +186,505 @@
         "maxNoteDecoratedLength": {
           "type": "number",
           "description": "Notes that are too large can cause slowdowns when editing them. For notes longer than this many characters, some editor decorations like tag colors and broken link highlighting will be disabled. Other decorations will continue to function.\n\nDefaults to 4096 characters, which is about 4 KiB."
+        },
+        "noRandomlyColoredTags": {
+          "type": "boolean",
+          "description": "Do not display the randomly generated colors for tags in the **editor**. Only color tag links if it has been configured in the frontmatter. False by default."
         }
       },
       "required": [
-        "version",
-        "site",
+        "version"
+      ],
+      "description": "Strict v3 intermediate config."
+    },
+    "DendronCommandConfig": {
+      "type": "object",
+      "properties": {
+        "lookup": {
+          "$ref": "#/definitions/LookupConfig"
+        },
+        "randomNote": {
+          "$ref": "#/definitions/RandomNoteConfig"
+        },
+        "insertNote": {
+          "$ref": "#/definitions/InsertNoteConfig"
+        },
+        "insertNoteLink": {
+          "$ref": "#/definitions/InsertNoteLinkConfig"
+        },
+        "insertNoteIndex": {
+          "$ref": "#/definitions/InsertNoteIndexConfig"
+        }
+      },
+      "required": [
         "lookup",
+        "randomNote",
+        "insertNote",
+        "insertNoteLink",
+        "insertNoteIndex"
+      ],
+      "additionalProperties": false,
+      "description": "Namespace for all command related configurations"
+    },
+    "LookupConfig": {
+      "type": "object",
+      "properties": {
+        "note": {
+          "$ref": "#/definitions/NoteLookupConfig"
+        }
+      },
+      "required": [
+        "note"
+      ],
+      "additionalProperties": false,
+      "description": "Namespace for configuring lookup commands"
+    },
+    "NoteLookupConfig": {
+      "type": "object",
+      "properties": {
+        "selectionMode": {
+          "$ref": "#/definitions/LookupSelectionMode"
+        },
+        "confirmVaultOnCreate": {
+          "type": "boolean"
+        },
+        "leaveTrace": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "selectionMode",
+        "confirmVaultOnCreate",
+        "leaveTrace"
+      ],
+      "additionalProperties": false,
+      "description": "Namespace for configuring  {@link  NoteLookupCommand }"
+    },
+    "LookupSelectionMode": {
+      "type": "string",
+      "enum": [
+        "extract",
+        "link",
+        "none"
+      ],
+      "description": "String literal type generated from  {@link  NoteLookupSelectionBehaviorEnum }"
+    },
+    "RandomNoteConfig": {
+      "type": "object",
+      "properties": {
+        "include": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "exclude": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "description": "Namespace for configuring  {@link  RandomNoteCommand }"
+    },
+    "InsertNoteConfig": {
+      "type": "object",
+      "properties": {
+        "initialValue": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "description": "Namespace for configuring  {@link  InsertNoteCommand }"
+    },
+    "InsertNoteLinkConfig": {
+      "type": "object",
+      "properties": {
+        "aliasMode": {
+          "$ref": "#/definitions/InsertNoteLinkAliasModeEnum"
+        },
+        "enableMultiSelect": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "aliasMode",
+        "enableMultiSelect"
+      ],
+      "additionalProperties": false,
+      "description": "Namespace for configuring  {@link  InsertNoteLinkCommand }"
+    },
+    "InsertNoteLinkAliasModeEnum": {
+      "type": "string",
+      "enum": [
+        "snippet",
+        "selection",
+        "title",
+        "prompt",
+        "none"
+      ],
+      "description": "Enum definitions of possible alias mode values"
+    },
+    "InsertNoteIndexConfig": {
+      "type": "object",
+      "properties": {
+        "enableMarker": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "enableMarker"
+      ],
+      "additionalProperties": false,
+      "description": "Namespace for configuring  {@link  InsertNoteIndexCommand }"
+    },
+    "DendronWorkspaceConfig": {
+      "type": "object",
+      "properties": {
+        "dendronVersion": {
+          "type": "string"
+        },
+        "workspaces": {
+          "type": "object",
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "$ref": "#/definitions/DendronWorkspaceEntry"
+              },
+              {
+                "not": {}
+              }
+            ]
+          }
+        },
+        "seeds": {
+          "type": "object",
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "$ref": "#/definitions/DendronSeedEntry"
+              },
+              {
+                "not": {}
+              }
+            ]
+          }
+        },
+        "vaults": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DVault"
+          }
+        },
+        "hooks": {
+          "$ref": "#/definitions/DHookDict"
+        },
+        "journal": {
+          "$ref": "#/definitions/JournalConfig"
+        },
+        "scratch": {
+          "$ref": "#/definitions/ScratchConfig"
+        },
+        "graph": {
+          "$ref": "#/definitions/DendronGraphConfig"
+        },
+        "disableTelemetry": {
+          "type": "boolean"
+        },
+        "enableAutoCreateOnDefinition": {
+          "type": "boolean"
+        },
+        "enableXVaultWikiLink": {
+          "type": "boolean"
+        },
+        "enableRemoteVaultInit": {
+          "type": "boolean"
+        },
+        "workspaceVaultSyncMode": {
+          "$ref": "#/definitions/VaultSyncMode"
+        },
+        "enableAutoFoldFrontmatter": {
+          "type": "boolean"
+        },
+        "maxPreviewsCached": {
+          "type": "number"
+        },
+        "maxNoteLength": {
+          "type": "number"
+        },
+        "feedback": {
+          "type": "boolean"
+        },
+        "apiEndpoint": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "vaults",
         "journal",
-        "vaults"
+        "scratch",
+        "graph",
+        "enableAutoCreateOnDefinition",
+        "enableXVaultWikiLink",
+        "enableRemoteVaultInit",
+        "workspaceVaultSyncMode",
+        "enableAutoFoldFrontmatter",
+        "maxPreviewsCached",
+        "maxNoteLength"
+      ],
+      "additionalProperties": false,
+      "description": "Namespace for configurations that affect the workspace"
+    },
+    "DendronWorkspaceEntry": {
+      "type": "object",
+      "properties": {
+        "remote": {
+          "$ref": "#/definitions/RemoteEndpoint"
+        }
+      },
+      "required": [
+        "remote"
       ],
       "additionalProperties": false
+    },
+    "RemoteEndpoint": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "git"
+        },
+        "url": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "url"
+      ],
+      "additionalProperties": false
+    },
+    "DendronSeedEntry": {
+      "type": "object",
+      "properties": {
+        "branch": {
+          "type": "string"
+        },
+        "site": {
+          "$ref": "#/definitions/SeedSite"
+        }
+      },
+      "additionalProperties": false
+    },
+    "SeedSite": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string"
+        },
+        "index": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "url"
+      ],
+      "additionalProperties": false
+    },
+    "DVault": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of vault"
+        },
+        "visibility": {
+          "$ref": "#/definitions/DVaultVisibility"
+        },
+        "fsPath": {
+          "type": "string",
+          "description": "Filesystem path to fault"
+        },
+        "workspace": {
+          "type": "string",
+          "description": "Indicate the workspace that this vault is part of"
+        },
+        "remote": {
+          "$ref": "#/definitions/RemoteEndpoint"
+        },
+        "userPermission": {
+          "$ref": "#/definitions/DPermission"
+        },
+        "noAutoPush": {
+          "type": "boolean",
+          "description": "If this is enabled, don't apply workspace push commands"
+        },
+        "sync": {
+          "$ref": "#/definitions/DVaultSync",
+          "description": "How the vault should be handled when using \"add and commit\" and \"sync\" commands.\n\nOptions are:\n* skip: Skip them entirely. You must manage the repository manually.\n* noPush: Commit any changes and pull updates, but don't push. You can watch the repository and make local changes without sharing them back.\n* noCommit: Pull and push updates if the workspace is clean, but don't commit. You manually commit your local changes, but automatically share them once you committed.\n* sync: Commit changes, and pull and push updates. Treats workspace vaults like regular vaults.\n\nThis setting overrides the `workspaceVaultSync` setting for the vault, even if the vault is a workspace vault.\n\nDefaults to `sync`."
+        },
+        "seed": {
+          "type": "string",
+          "description": "Id of a seed this vault belongs to"
+        }
+      },
+      "required": [
+        "fsPath"
+      ],
+      "additionalProperties": false
+    },
+    "DVaultVisibility": {
+      "type": "string",
+      "const": "private"
+    },
+    "DPermission": {
+      "type": "object",
+      "properties": {
+        "read": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "write": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "read",
+        "write"
+      ],
+      "additionalProperties": false
+    },
+    "DVaultSync": {
+      "type": "string",
+      "enum": [
+        "skip",
+        "noPush",
+        "noCommit",
+        "sync"
+      ]
+    },
+    "DHookDict": {
+      "type": "object",
+      "properties": {
+        "onCreate": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DHookEntry"
+          }
+        }
+      },
+      "required": [
+        "onCreate"
+      ],
+      "additionalProperties": false
+    },
+    "DHookEntry": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "pattern": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "const": "js"
+        }
+      },
+      "required": [
+        "id",
+        "pattern",
+        "type"
+      ],
+      "additionalProperties": false
+    },
+    "JournalConfig": {
+      "type": "object",
+      "properties": {
+        "dailyDomain": {
+          "type": "string"
+        },
+        "dailyVault": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "dateFormat": {
+          "type": "string"
+        },
+        "addBehavior": {
+          "$ref": "#/definitions/NoteAddBehaviorEnum"
+        }
+      },
+      "required": [
+        "dailyDomain",
+        "name",
+        "dateFormat",
+        "addBehavior"
+      ],
+      "additionalProperties": false,
+      "description": "Namespace for configuring journal note behavior"
+    },
+    "NoteAddBehaviorEnum": {
+      "type": "string",
+      "enum": [
+        "childOfDomain",
+        "childOfDomainNamespace",
+        "childOfCurrent",
+        "asOwnDomain"
+      ],
+      "description": "Enum definition of possible note add behavior values."
+    },
+    "ScratchConfig": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "dateFormat": {
+          "type": "string"
+        },
+        "addBehavior": {
+          "$ref": "#/definitions/NoteAddBehaviorEnum"
+        }
+      },
+      "required": [
+        "name",
+        "dateFormat",
+        "addBehavior"
+      ],
+      "additionalProperties": false,
+      "description": "Namespace for configuring scratch note behavior"
+    },
+    "DendronGraphConfig": {
+      "type": "object",
+      "properties": {
+        "zoomSpeed": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "zoomSpeed"
+      ],
+      "additionalProperties": false,
+      "description": "Namespace for all graph related configurations."
+    },
+    "VaultSyncMode": {
+      "type": "string",
+      "enum": [
+        "skip",
+        "noPush",
+        "noCommit",
+        "sync"
+      ]
     },
     "DendronSiteConfig": {
       "type": "object",
@@ -343,6 +844,10 @@
         "usePrettyLinks": {
           "type": "boolean",
           "description": "notes are published without the .html file extension"
+        },
+        "useHashesForFMTags": {
+          "type": "boolean",
+          "description": "Display a `#` symbol in front of frontmatter tags in the tags listing. False by default."
         }
       },
       "required": [
@@ -438,105 +943,11 @@
         }
       ]
     },
-    "DVault": {
-      "type": "object",
-      "properties": {
-        "name": {
-          "type": "string",
-          "description": "Name of vault"
-        },
-        "visibility": {
-          "$ref": "#/definitions/DVaultVisibility"
-        },
-        "fsPath": {
-          "type": "string",
-          "description": "Filesystem path to fault"
-        },
-        "workspace": {
-          "type": "string",
-          "description": "Indicate the workspace that this vault is part of"
-        },
-        "remote": {
-          "$ref": "#/definitions/RemoteEndpoint"
-        },
-        "userPermission": {
-          "$ref": "#/definitions/DPermission"
-        },
-        "noAutoPush": {
-          "type": "boolean",
-          "description": "If this is enabled, don't apply workspace push commands"
-        },
-        "sync": {
-          "$ref": "#/definitions/DVaultSync",
-          "description": "How the vault should be handled when using \"add and commit\" and \"sync\" commands.\n\nOptions are:\n* skip: Skip them entirely. You must manage the repository manually.\n* noPush: Commit any changes and pull updates, but don't push. You can watch the repository and make local changes without sharing them back.\n* noCommit: Pull and push updates if the workspace is clean, but don't commit. You manually commit your local changes, but automatically share them once you committed.\n* sync: Commit changes, and pull and push updates. Treats workspace vaults like regular vaults.\n\nThis setting overrides the `workspaceVaultSync` setting for the vault, even if the vault is a workspace vault.\n\nDefaults to `sync`."
-        },
-        "seed": {
-          "type": "string",
-          "description": "Id of a seed this vault belongs to"
-        }
-      },
-      "required": [
-        "fsPath"
-      ],
-      "additionalProperties": false
-    },
-    "DVaultVisibility": {
-      "type": "string",
-      "const": "private"
-    },
-    "RemoteEndpoint": {
-      "type": "object",
-      "properties": {
-        "type": {
-          "type": "string",
-          "const": "git"
-        },
-        "url": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "type",
-        "url"
-      ],
-      "additionalProperties": false
-    },
-    "DPermission": {
-      "type": "object",
-      "properties": {
-        "read": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "write": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        }
-      },
-      "required": [
-        "read",
-        "write"
-      ],
-      "additionalProperties": false
-    },
-    "DVaultSync": {
-      "type": "string",
-      "enum": [
-        "skip",
-        "noPush",
-        "noCommit",
-        "sync"
-      ]
-    },
-    "LookupConfig": {
+    "LegacyLookupConfig": {
       "type": "object",
       "properties": {
         "note": {
-          "$ref": "#/definitions/NoteLookupConfig"
+          "$ref": "#/definitions/LegacyNoteLookupConfig"
         }
       },
       "required": [
@@ -544,11 +955,11 @@
       ],
       "additionalProperties": false
     },
-    "NoteLookupConfig": {
+    "LegacyNoteLookupConfig": {
       "type": "object",
       "properties": {
         "selectionType": {
-          "$ref": "#/definitions/LookupSelectionType"
+          "$ref": "#/definitions/LegacyLookupSelectionType"
         },
         "leaveTrace": {
           "type": "boolean"
@@ -560,7 +971,7 @@
       ],
       "additionalProperties": false
     },
-    "LookupSelectionType": {
+    "LegacyLookupSelectionType": {
       "type": "string",
       "enum": [
         "selection2link",
@@ -568,7 +979,7 @@
         "none"
       ]
     },
-    "JournalConfig": {
+    "LegacyJournalConfig": {
       "type": "object",
       "properties": {
         "dailyDomain": {
@@ -585,7 +996,7 @@
           "type": "string"
         },
         "addBehavior": {
-          "$ref": "#/definitions/NoteAddBehavior"
+          "$ref": "#/definitions/LegacyNoteAddBehavior"
         },
         "firstDayOfWeek": {
           "type": "number",
@@ -601,7 +1012,7 @@
       ],
       "additionalProperties": false
     },
-    "NoteAddBehavior": {
+    "LegacyNoteAddBehavior": {
       "type": "string",
       "enum": [
         "childOfDomain",
@@ -610,7 +1021,7 @@
         "asOwnDomain"
       ]
     },
-    "ScratchConfig": {
+    "LegacyScratchConfig": {
       "type": "object",
       "properties": {
         "name": {
@@ -620,7 +1031,7 @@
           "type": "string"
         },
         "addBehavior": {
-          "$ref": "#/definitions/NoteAddBehavior"
+          "$ref": "#/definitions/LegacyNoteAddBehavior"
         }
       },
       "required": [
@@ -630,11 +1041,11 @@
       ],
       "additionalProperties": false
     },
-    "InsertNoteLinkConfig": {
+    "LegacyInsertNoteLinkConfig": {
       "type": "object",
       "properties": {
         "aliasMode": {
-          "$ref": "#/definitions/InsertNoteLinkAliasMode"
+          "$ref": "#/definitions/LegacyInsertNoteLinkAliasMode"
         },
         "multiSelect": {
           "type": "boolean"
@@ -646,7 +1057,7 @@
       ],
       "additionalProperties": false
     },
-    "InsertNoteLinkAliasMode": {
+    "LegacyInsertNoteLinkAliasMode": {
       "type": "string",
       "enum": [
         "snippet",
@@ -682,58 +1093,7 @@
       },
       "additionalProperties": false
     },
-    "SeedSite": {
-      "type": "object",
-      "properties": {
-        "url": {
-          "type": "string"
-        },
-        "index": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "url"
-      ],
-      "additionalProperties": false
-    },
-    "DHookDict": {
-      "type": "object",
-      "properties": {
-        "onCreate": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/DHookEntry"
-          }
-        }
-      },
-      "required": [
-        "onCreate"
-      ],
-      "additionalProperties": false
-    },
-    "DHookEntry": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string"
-        },
-        "pattern": {
-          "type": "string"
-        },
-        "type": {
-          "type": "string",
-          "const": "js"
-        }
-      },
-      "required": [
-        "id",
-        "pattern",
-        "type"
-      ],
-      "additionalProperties": false
-    },
-    "DendronGraphConfig": {
+    "LegacyDendronGraphConfig": {
       "type": "object",
       "properties": {
         "zoomSpeed": {
@@ -771,11 +1131,19 @@
         "enablePreviewV2": {
           "type": "boolean",
           "description": "Enable new preview as default"
+        },
+        "forceWatcherType": {
+          "type": "string",
+          "enum": [
+            "plugin",
+            "engine"
+          ],
+          "description": "Force the use of a specific type of watcher.\n\n- plugin: Uses VSCode's builtin watcher\n- engine: Uses the engine watcher, watching the files directly without VSCode"
         }
       },
       "additionalProperties": false
     },
-    "RandomNoteConfig": {
+    "LegacyRandomNoteConfig": {
       "type": "object",
       "properties": {
         "include": {
@@ -795,7 +1163,7 @@
       },
       "additionalProperties": false
     },
-    "InsertNoteIndexConfig": {
+    "LegacyInsertNoteIndexConfig": {
       "type": "object",
       "properties": {
         "marker": {

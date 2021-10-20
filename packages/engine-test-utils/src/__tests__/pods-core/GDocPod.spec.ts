@@ -309,7 +309,7 @@ describe("GDoc import pod", () => {
     );
   });
 
-  test("documents containg an image", async () => {
+  test("documents containing an image", async () => {
     await runEngineTestV5(
       async ({ engine, vaults, wsRoot }) => {
         const pod = new GDocImportPod();

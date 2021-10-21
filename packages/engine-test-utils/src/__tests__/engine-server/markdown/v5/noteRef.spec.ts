@@ -1,9 +1,5 @@
-import {
-  NoteTestUtilsV4
-} from "@dendronhq/common-test-utils";
-import {
-  DendronASTDest, ProcFlavor
-} from "@dendronhq/engine-server";
+import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
+import { DendronASTDest, ProcFlavor } from "@dendronhq/engine-server";
 import { TestConfigUtils } from "../../../..";
 import { ENGINE_HOOKS } from "../../../../presets";
 import { checkNotInString, checkString } from "../../../../utils";
@@ -33,6 +29,39 @@ describe("GIVEN noteRef plugin", () => {
         },
         preSetupHook: async (opts) => {
           await ENGINE_HOOKS.setupBasic({ ...opts, extra: { idv2: true } });
+        },
+      })
+    );
+  });
+
+  describe("WHEN assetPrefix set", () => {
+    runTestCases(
+      createProcCompileTests({
+        name: "ASSET_PREFIX_SET",
+        setup: async (opts) => {
+          const { proc } = getOpts(opts);
+          const txt = `![[bar.md]]`;
+          const resp = await proc.process(txt);
+          return { resp, proc };
+        },
+        verify: {
+          [DendronASTDest.HTML]: {
+            [ProcFlavor.PUBLISHING]: async ({ extra }) => {
+              const { resp } = extra;
+              expect(resp).toMatchSnapshot();
+              await checkString(resp.contents, "/some-prefix/notes/bar");
+            },
+          },
+        },
+        preSetupHook: async (opts) => {
+          await ENGINE_HOOKS.setupBasic({ ...opts, extra: { idv2: true } });
+          TestConfigUtils.withConfig(
+            (config) => {
+              config.site.assetsPrefix = "/some-prefix";
+              return config;
+            },
+            { wsRoot: opts.wsRoot }
+          );
         },
       })
     );

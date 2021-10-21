@@ -119,9 +119,9 @@ export type ProcDataFullOptsV5 = {
    * Check to see if we are in a note reference.
    */
   insideNoteRef?: boolean;
-} & { 
-  config?: IntermediateDendronConfig; 
-  wsRoot?: string 
+} & {
+  config?: IntermediateDendronConfig;
+  wsRoot?: string;
 };
 
 /**
@@ -307,9 +307,12 @@ export class MDUtilsV5 {
           }
           // Add remaining flavor specific plugins
           if (opts.flavor === ProcFlavor.PUBLISHING) {
+            const prefix = data.config?.site.assetsPrefix
+              ? data.config?.site.assetsPrefix + "/notes/"
+              : "/notes/";
             proc = proc.use(dendronPub, {
               wikiLinkOpts: {
-                prefix: "/notes/",
+                prefix,
               },
             });
           }

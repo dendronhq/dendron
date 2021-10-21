@@ -10,14 +10,7 @@ import {
 import _ from "lodash";
 import type { Image, Root } from "mdast";
 import { paragraph, text } from "mdast-builder";
-import {
-  addError,
-  getNoteOrError,
-  hashTag2WikiLinkNoteV4,
-  RemarkUtils,
-  userTag2WikiLinkNoteV4,
-} from "./utils";
-import Unified, { Transformer } from "unified";
+import Unified, { Processor, Transformer } from "unified";
 import { Node, Parent } from "unist";
 import u from "unist-builder";
 import visitParents from "unist-util-visit-parents";
@@ -36,11 +29,23 @@ import {
   WikiLinkNoteV4,
 } from "../types";
 import { MDUtilsV4 } from "../utils";
-import { MDUtilsV5, ProcMode } from "../utilsv5";
+import {
+  MDUtilsV5,
+  ProcDataFullOptsV5,
+  ProcMode,
+  ProcOptsV5,
+} from "../utilsv5";
 import { blockAnchor2html } from "./blockAnchors";
+import { extendedImage2html } from "./extendedImage";
 import { NoteRefsOpts } from "./noteRefs";
 import { convertNoteRefASTV2 } from "./noteRefsV2";
-import { extendedImage2html } from "./extendedImage";
+import {
+  addError,
+  getNoteOrError,
+  hashTag2WikiLinkNoteV4,
+  RemarkUtils,
+  userTag2WikiLinkNoteV4,
+} from "./utils";
 
 type PluginOpts = NoteRefsOpts & {
   assetsPrefix?: string;
@@ -72,12 +77,60 @@ function replacedUnrenderedRefWithConvertedData(
   }
 }
 
+type DendronUnifiedHandlerMatchOpts = {
+  pOpts: ProcOptsV5;
+  pData: ProcDataFullOptsV5;
+};
+
+type DendronUnifiedHandlerHandleOpts<T = any> = {
+  proc: Processor;
+  parent: Node;
+  cOpts?: T;
+};
+
+type DendronUnifiedHandlerNextAction = undefined | number;
+
+abstract class DendronNodeHander {
+  static match: (
+    node: Node | any,
+    { pData }: DendronUnifiedHandlerMatchOpts
+  ) => boolean;
+}
+
+class ImageNodeHandler extends DendronNodeHander {
+  static match(node: Node | any, { pData }: DendronUnifiedHandlerMatchOpts) {
+    return (
+      (node.type === DendronASTTypes.IMAGE ||
+        node.type === DendronASTTypes.EXTENDED_IMAGE) &&
+      pData.dest === DendronASTDest.HTML
+    );
+  }
+
+  static handle(
+    node: Image,
+    { proc, cOpts }: DendronUnifiedHandlerHandleOpts<PluginOpts>
+  ): { node: Image; nextAction?: DendronUnifiedHandlerNextAction } {
+    const { config } = MDUtilsV5.getProcData(proc);
+    //handle assetPrefix
+    const assetsPrefix = MDUtilsV5.isV5Active(proc)
+      ? config?.site.assetsPrefix
+      : cOpts?.assetsPrefix;
+    const imageNode = node;
+    if (assetsPrefix) {
+      imageNode.url =
+        "/" + _.trim(assetsPrefix, "/") + "/" + _.trim(imageNode.url, "/");
+    }
+    return { node: imageNode };
+  }
+}
+
 function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
   const proc = this;
   let { overrides, vault } = MDUtilsV4.getDendronData(proc);
-  const { mode } = MDUtilsV5.getProcOpts(proc);
-
-  const { dest, fname, config, insideNoteRef } = MDUtilsV5.getProcData(proc);
+  const pOpts = MDUtilsV5.getProcOpts(proc);
+  const { mode } = pOpts;
+  const pData = MDUtilsV5.getProcData(proc);
+  const { dest, fname, config, insideNoteRef } = pData;
 
   function transformer(tree: Node, _file: VFile) {
     const root = tree as Root;
@@ -88,7 +141,6 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
     if (mode !== ProcMode.IMPORT && !insideNoteRef && root.children) {
       if (!fname || !vault) {
         // TODO: tmp
-        console.log(JSON.stringify(engine.notes));
         throw new DendronError({
           message: `dendronPub - no fname or vault for node: ${JSON.stringify(
             tree
@@ -242,9 +294,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         // if v5, copts.prefix = ""
         let href: string;
         if (MDUtilsV5.isV5Active(proc)) {
-          href = `${config.site.assetsPrefix || ""}${
-            copts?.prefix || ""
-          }${value}${maybeFileExtension}${
+          href = `${copts?.prefix || ""}${value}${maybeFileExtension}${
             data.anchorHeader ? "#" + data.anchorHeader : ""
           }`;
         } else {
@@ -397,18 +447,14 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         }
       }
       // The url correction needs to happen for both regular and extended images
-      if (
-        (node.type === DendronASTTypes.IMAGE ||
-          node.type === DendronASTTypes.EXTENDED_IMAGE) &&
-        dest === DendronASTDest.HTML
-      ) {
-        const imageNode = node as Image;
-        if (opts?.assetsPrefix) {
-          imageNode.url =
-            "/" +
-            _.trim(opts.assetsPrefix, "/") +
-            "/" +
-            _.trim(imageNode.url, "/");
+      if (ImageNodeHandler.match(node, { pData, pOpts })) {
+        const { nextAction } = ImageNodeHandler.handle(node as Image, {
+          proc,
+          parent,
+          cOpts: opts,
+        });
+        if (nextAction) {
+          return nextAction;
         }
       }
       if (

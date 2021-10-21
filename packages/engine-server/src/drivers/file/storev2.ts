@@ -416,7 +416,9 @@ export class FileStorage implements DStore {
     const notesMap = NoteUtils.createFnameNoteMap(allNotes, true);
     return _.map(allNotes, (noteFrom: NoteProps) => {
       try {
-        const maxNoteLength = ConfigUtils.getWorkspace(this.config).maxNoteLength;
+        const maxNoteLength = ConfigUtils.getWorkspace(
+          this.config
+        ).maxNoteLength;
         if (
           noteFrom.body.length <
           (maxNoteLength || CONSTANTS.DENDRON_DEFAULT_MAX_NOTE_LENGTH)
@@ -478,7 +480,9 @@ export class FileStorage implements DStore {
         if (n.stub) {
           return;
         }
-        const maxNoteLength = ConfigUtils.getWorkspace(this.config).maxNoteLength;
+        const maxNoteLength = ConfigUtils.getWorkspace(
+          this.config
+        ).maxNoteLength;
         if (
           n.body.length >=
           (maxNoteLength || CONSTANTS.DENDRON_DEFAULT_MAX_NOTE_LENGTH)
@@ -600,6 +604,16 @@ export class FileStorage implements DStore {
       noteRaw,
       noteHydrated: this.notes[noteRaw.id],
     });
+    const newNoteTitle = NoteUtils.isDefaultTitle(oldNote)
+      ? NoteUtils.genTitle(newLoc.fname)
+      : oldNote.title;
+    // If the rename operation is changing the title and the caller did not tell us to use a special alias, calculate the alias change.
+    // The aliases of links to this note will only change if they match the old note's title.
+    if (newNoteTitle !== oldNote.title && !oldLoc.alias && !newLoc.alias) {
+      oldLoc.alias = oldNote.title;
+      newLoc.alias = newNoteTitle;
+    }
+
     let notesChangedEntries: NoteChangeEntry[] = [];
     const notesToChange = await NoteUtils.getNotesWithLinkTo({
       note: oldNote,
@@ -659,8 +673,7 @@ export class FileStorage implements DStore {
             let alias: string | undefined;
             if (
               oldLink.from.alias &&
-              oldLink.from.alias.toLocaleLowerCase() !==
-                oldLink.from.fname.toLocaleLowerCase()
+              oldLink.from.alias !== oldLink.from.fname
             ) {
               alias = oldLink.from.alias;
               // Update the alias if it was using the default alias.
@@ -762,9 +775,7 @@ export class FileStorage implements DStore {
         vaults: this.vaults,
         vname: newLoc.vaultName!,
       })!,
-      title: NoteUtils.isDefaultTitle(oldNote)
-        ? NoteUtils.genTitle(newLoc.fname)
-        : oldNote.title,
+      title: newNoteTitle,
     };
 
     // NOTE: order matters. need to delete old note, otherwise can't write new note

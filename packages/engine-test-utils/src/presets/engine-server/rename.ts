@@ -137,6 +137,26 @@ const NOTES = {
       preSetupHook: (opts) => preSetupHook(opts, { barBody: `[[secret|foo]]` }),
     }
   ),
+  UPDATES_DEFAULT_ALIAS: new TestPresetEntryV4(
+    async ({ wsRoot, vaults, engine }) => {
+      return runRename({
+        wsRoot,
+        vaults,
+        engine,
+        cb: ({ barChange }) => {
+          return [
+            {
+              actual: _.trim(barChange?.note.body),
+              expected: "[[Baz|baz]]",
+            },
+          ];
+        },
+      });
+    },
+    {
+      preSetupHook: (opts) => preSetupHook(opts, { barBody: `[[Foo|foo]]` }),
+    }
+  ),
   MULTIPLE_LINKS: new TestPresetEntryV4(
     async ({ wsRoot, vaults, engine }) => {
       return runRename({
@@ -947,7 +967,7 @@ const NOTES = {
       return [
         {
           actual: _.pick(error, "severity"),
-          expected: { severity: "fatal"},
+          expected: { severity: "fatal" },
         },
         {
           actual: error?.message?.includes("Unable to delete"),

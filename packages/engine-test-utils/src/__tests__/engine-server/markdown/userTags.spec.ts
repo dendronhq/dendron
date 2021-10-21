@@ -113,6 +113,14 @@ describe("user tags", () => {
       );
       expect(getDescendantNode(resp1, 0, 1).value).toEqual("@松本.行弘");
     });
+
+    test("doesn't parse email addresses", () => {
+      const resp1 = proc().parse("user@example.com");
+      expect(getDescendantNode(resp1, 0, 0).type).toEqual(DendronASTTypes.LINK);
+      expect(getDescendantNode(resp1, 0, 0, 0).type).toEqual(
+        DendronASTTypes.TEXT
+      );
+    });
   });
 
   describe("rendering", () => {

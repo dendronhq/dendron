@@ -6,7 +6,6 @@ import { response, comments, existingNote } from "../../utils/GDocMockResult";
 import axios from "axios";
 import sinon from "sinon";
 import { window } from "../../__mocks__/vscode";
-import path from "path";
 
 jest.mock("axios");
 
@@ -315,9 +314,7 @@ describe("GDoc import pod", () => {
         const pod = new GDocImportPod();
         PodUtils.downloadImage = jest
           .fn()
-          .mockReturnValue(
-            `${text}![image](${path.join("assets", `image.png`)})`
-          );
+          .mockReturnValue(`${text}![image](assets/image.png)`);
         pod.getAllDocuments = jest.fn().mockReturnValue({ docIdsHashMap });
         const vaultName = VaultUtils.getName(vaults[0]);
         const mockedAxios = axios as jest.Mocked<typeof axios>;
@@ -338,10 +335,7 @@ describe("GDoc import pod", () => {
           },
         });
         expect(importedNotes[0].body).toMatch(
-          `\n\n## Testing GDoc Pod\n\nThis is the first line\n\n![image](${path.join(
-            "assets",
-            `image.png`
-          )})`
+          `\n\n## Testing GDoc Pod\n\nThis is the first line\n\n![image](assets/image.png)`
         );
       },
       {

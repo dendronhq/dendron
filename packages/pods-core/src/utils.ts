@@ -495,7 +495,7 @@ export class PodUtils {
         dest,
       };
       try {
-        text += `![image](${path.join("assets", `image-${uuid}.png`)})\n`;
+        text += `![image](assets/image-${uuid}.png)\n`;
         download.image(options);
       } catch (err: any) {
         throw new DendronError({

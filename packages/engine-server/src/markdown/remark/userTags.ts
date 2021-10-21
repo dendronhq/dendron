@@ -1,11 +1,16 @@
 import _ from "lodash";
-import { DendronError, USERS_HIERARCHY } from "@dendronhq/common-all";
+import {
+  ConfigUtils,
+  DendronError,
+  USERS_HIERARCHY,
+} from "@dendronhq/common-all";
 import { Eat } from "remark-parse";
 import Unified, { Plugin } from "unified";
 import { DendronASTDest, DendronASTTypes, HashTag } from "../types";
 import { MDUtilsV4 } from "../utils";
 import { Element } from "hast";
 import { PUNCTUATION_MARKS } from "./hashtag";
+import { MDUtilsV5 } from "../../markdown";
 
 /** Can have period in the middle */
 const GOOD_MIDDLE_CHARACTER = `[^#@|\\[\\]\\s${PUNCTUATION_MARKS}]`;
@@ -73,6 +78,10 @@ function attachParser(proc: Unified.Processor) {
   }
 
   function inlineTokenizer(eat: Eat, value: string) {
+    const { enableUserTags } = ConfigUtils.getWorkspace(
+      MDUtilsV5.getProcData(proc).config
+    );
+    if (enableUserTags === false) return;
     const match = USERTAG_REGEX.exec(value);
     if (match && match.groups?.tagContents) {
       return eat(match[0])({

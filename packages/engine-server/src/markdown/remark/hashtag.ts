@@ -1,10 +1,15 @@
 import _ from "lodash";
-import { DendronError, TAGS_HIERARCHY } from "@dendronhq/common-all";
+import {
+  ConfigUtils,
+  DendronError,
+  TAGS_HIERARCHY,
+} from "@dendronhq/common-all";
 import { Eat } from "remark-parse";
 import Unified, { Plugin } from "unified";
 import { DendronASTDest, DendronASTTypes, HashTag } from "../types";
 import { MDUtilsV4 } from "../utils";
 import { Element } from "hast";
+import { MDUtilsV5 } from "../utilsv5";
 
 /** All sorts of punctuation marks and quotation marks from different languages. Please add any that may be missing.
  *
@@ -95,6 +100,10 @@ function attachParser(proc: Unified.Processor) {
   }
 
   function inlineTokenizer(eat: Eat, value: string) {
+    const { enableHashTags } = ConfigUtils.getWorkspace(
+      MDUtilsV5.getProcData(proc).config
+    );
+    if (enableHashTags === false) return;
     const match = HASHTAG_REGEX.exec(value);
     if (match && match.groups?.tagContents) {
       return eat(match[0])({

@@ -407,6 +407,12 @@
         "enableAutoFoldFrontmatter": {
           "type": "boolean"
         },
+        "enableUserTags": {
+          "type": "boolean"
+        },
+        "enableHashTags": {
+          "type": "boolean"
+        },
         "maxPreviewsCached": {
           "type": "number"
         },

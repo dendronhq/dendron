@@ -26,6 +26,8 @@ export type DendronWorkspaceConfig = {
   enableRemoteVaultInit: boolean;
   workspaceVaultSyncMode: VaultSyncMode;
   enableAutoFoldFrontmatter: boolean;
+  enableUserTags?: boolean;
+  enableHashTags?: boolean;
   // performance related
   maxPreviewsCached: number;
   maxNoteLength: number;

@@ -372,6 +372,39 @@ describe("hashtag", () => {
       preSetupHook: ENGINE_HOOKS.setupBasic,
     });
 
+    describe("WHEN disabled in config", () => {
+      test("THEN hashtags don't get parsed or processed", async () => {
+        await runEngineTestV5(
+          async ({ engine, vaults }) => {
+            const proc = MDUtilsV5.procRehypeFull(
+              {
+                engine,
+                vault: vaults[0],
+                config: engine.config,
+                fname: "root",
+              },
+              {}
+            );
+            const out = await proc.process("#test");
+            expect(checkVFile(out, "<p>#test</p>"));
+            expect(checkNotInVFile(out, "<a", "tags.test"));
+          },
+          {
+            expect,
+            preSetupHook: async ({ wsRoot }) => {
+              TestConfigUtils.withConfig(
+                (config) => {
+                  config.workspace!.enableUserTags = false;
+                  return config;
+                },
+                { wsRoot }
+              );
+            },
+          }
+        );
+      });
+    });
+
     const ALL_TEST_CASES = [...SIMPLE, ...INSIDE_LINK];
     runAllTests({ name: "compile", testCases: ALL_TEST_CASES });
   });

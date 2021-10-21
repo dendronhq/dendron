@@ -3,9 +3,10 @@ import {
   DendronError,
   error2PlainObject,
   CLIEvents,
+  CONSTANTS,
 } from "@dendronhq/common-all";
 import fs from "fs-extra";
-import { SegmentClient, TelemetryStatus } from "@dendronhq/common-server";
+import { SegmentClient, TelemetryStatus, readYAML } from "@dendronhq/common-server";
 import path from "path";
 import yargs from "yargs";
 import { CLIAnalyticsUtils } from "..";
@@ -17,6 +18,8 @@ import {
   SemverVersion,
 } from "../utils/build";
 import { CLICommand, CommandCommonProps } from "./base";
+import { ALL_MIGRATIONS, DConfig, MigrationChangeSetStatus, MigrationServce, WorkspaceService } from "@dendronhq/engine-server";
+import _ from "lodash";
 
 type CommandCLIOpts = {
   cmd: DevCommands;
@@ -34,9 +37,14 @@ export enum DevCommands {
   ENABLE_TELEMETRY = "enable_telemetry",
   DISABLE_TELEMETRY = "disable_telemetry",
   SHOW_TELEMETRY = "show_telemetry",
+  SHOW_MIGRATIONS = "show_migrations",
+  RUN_MIGRATION = "run_migration",
 }
 
-type CommandOpts = CommandCLIOpts & CommandCommonProps & Partial<BuildCmdOpts>;
+type CommandOpts = CommandCLIOpts &
+  CommandCommonProps &
+  Partial<BuildCmdOpts> &
+  Partial<RunMigrationOpts>;
 
 type CommandOutput = Partial<{ error: DendronError; data: any }>;
 
@@ -52,6 +60,11 @@ type BumpVersionOpts = {
 
 type PrepPluginOpts = {
   extensionTarget: ExtensionTarget;
+} & CommandCLIOpts;
+
+type RunMigrationOpts = {
+  migrationVersion: string;
+  wsRoot: string;
 } & CommandCLIOpts;
 
 export { CommandOpts as DevCLICommandOpts };
@@ -99,6 +112,13 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     args.option("fast", {
       describe: "skip some checks",
     });
+    args.option("migrationVersion", {
+      describe: "migration version to run",
+      choices: ALL_MIGRATIONS.map((m) => m.version),
+    })
+    args.option("wsRoot", {
+      describe: "root directory of the Dendron workspace"
+    })
   }
 
   async enrichArgs(args: CommandCLIOpts): Promise<CommandOpts> {
@@ -241,6 +261,21 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           CLIAnalyticsUtils.showTelemetryMessage();
           return { error: null };
         }
+        case DevCommands.SHOW_MIGRATIONS: {
+          this.showMigrations();
+          return { error: null };
+        }
+        case DevCommands.RUN_MIGRATION: {
+          if (!this.validateRunMigrationArgs(opts)) {
+            return {
+              error: new DendronError({
+                message: "missing option(s) for run_migration command",
+              }),
+            };
+          }
+          this.runMigration(opts);
+          return { error: null };
+        }
         default:
           return assertUnreachable();
       }
@@ -346,6 +381,16 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     return true;
   }
 
+  validateRunMigrationArgs(opts: CommandOpts): opts is RunMigrationOpts {
+    if (!opts.wsRoot) {
+      return false;
+    }
+    if (opts.migrationVersion) {
+      return ALL_MIGRATIONS.map((m) => m.version).includes(opts.migrationVersion);
+    }
+    return true;
+  }
+
   enableTelemetry() {
     const reason = TelemetryStatus.ENABLED_BY_CLI_COMMAND;
     SegmentClient.enable(reason);
@@ -363,5 +408,83 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     SegmentClient.disable(reason);
     const message = "Telemetry is disabled.";
     this.print(message);
+  }
+
+  showMigrations() {
+    // ALL_MIGRATIONS
+    const headerMessage = [
+      "",
+      "Make note of the version number and use it with the run_migration option",
+      "",
+      "e.g.)",
+      "> dendron dev run_migration --migrationVersion=0.64.1",
+      "",
+    ].join("\n");
+    const body: string[] = [];
+    let maxLength = 0;
+    ALL_MIGRATIONS.forEach((migrations) => {
+      const version = migrations.version.padEnd(17);
+      const changes = migrations.changes.map((set) => set.name).join(", ");
+      const line = `${version}| ${changes}`;
+      if (maxLength < line.length) maxLength = line.length;
+      body.push(line);
+    });
+
+    const divider = "-".repeat(maxLength);
+
+    this.print("======Available Migrations======")
+    this.print(headerMessage);
+    this.print(divider);
+    this.print("version          | description");
+    this.print(divider);
+    this.print(body.join("\n"));
+    this.print(divider);
+  }
+
+  async runMigration(opts: CommandOpts) {
+    // grab the migration we want to run
+    const migrationsToRun = ALL_MIGRATIONS.filter(
+      (m) => m.version === opts.migrationVersion
+    );
+
+    // run it
+    this.print(opts);
+    this.print(migrationsToRun)
+    // const currentVersion = process.env.npm_package_version!
+    const currentVersion = "0.64.1";
+    const wsService = new WorkspaceService({ wsRoot: opts.wsRoot! });
+    const configPath = DConfig.configPath(opts.wsRoot!);
+    const wsConfigPath = path.join(opts.wsRoot!, CONSTANTS.DENDRON_WS_NAME);
+    const dendronConfig = readYAML(configPath);
+    const wsConfig = fs.readJSONSync(wsConfigPath);
+    const changes = await MigrationServce.applyMigrationRules({
+        currentVersion,
+        previousVersion: "0.0.0",
+        migrations: migrationsToRun,
+        wsService,
+        logger: this.L,
+        wsConfig,
+        dendronConfig,
+      });
+    
+    // report
+    if (changes.length > 0) {
+      changes.forEach((change: MigrationChangeSetStatus) => {
+        const event = _.isUndefined(change.error)
+          ? CLIEvents.CLIMigrationSucceeded
+          : CLIEvents.CLIMigrationFailed;
+
+        CLIAnalyticsUtils.track(event, {
+          data: change.data,
+        });
+
+        if (change.error) {
+          this.print("Migration failed.");
+          this.print(change.error.message);
+        } else {
+          this.print("Migration succeeded.");
+        }
+      });
+    }
   }
 }

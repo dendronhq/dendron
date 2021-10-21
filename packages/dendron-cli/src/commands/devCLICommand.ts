@@ -460,7 +460,6 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     );
 
     // run it
-    this.print(opts);
     this.print(migrationsToRun);
     const currentVersion = migrationsToRun[0].version;
     const wsService = new WorkspaceService({ wsRoot: opts.wsRoot! });

@@ -33,8 +33,7 @@ export class Git {
   async commit(opts: { msg: string }) {
     const { msg } = opts;
     const { localUrl: cwd } = this.opts;
-    await execa.command([`git commit -m '${msg}'`].join(" "), {
-      shell: true,
+    await execa("git", ["commit", "-m", msg], {
       cwd,
     });
   }

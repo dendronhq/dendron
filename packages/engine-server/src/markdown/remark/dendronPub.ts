@@ -91,17 +91,14 @@ type DendronUnifiedHandlerHandleOpts<T = any> = {
 type DendronUnifiedHandlerNextAction = undefined | number;
 
 abstract class DendronNodeHander {
-  static match: <T>(
+  static match: (
     node: Node | any,
     { pData }: DendronUnifiedHandlerMatchOpts
-  ) => node is T;
+  ) => boolean;
 }
 
 class ImageNodeHandler extends DendronNodeHander {
-  static match<Image>(
-    node: Node | any,
-    { pData }: DendronUnifiedHandlerMatchOpts
-  ): node is Image {
+  static match(node: Node | any, { pData }: DendronUnifiedHandlerMatchOpts) {
     return (
       (node.type === DendronASTTypes.IMAGE ||
         node.type === DendronASTTypes.EXTENDED_IMAGE) &&
@@ -144,7 +141,6 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
     if (mode !== ProcMode.IMPORT && !insideNoteRef && root.children) {
       if (!fname || !vault) {
         // TODO: tmp
-        console.log(JSON.stringify(engine.notes));
         throw new DendronError({
           message: `dendronPub - no fname or vault for node: ${JSON.stringify(
             tree
@@ -452,10 +448,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
       }
       // The url correction needs to happen for both regular and extended images
       if (ImageNodeHandler.match(node, { pData, pOpts })) {
-        // match typeguard should narrow this down to Image node
-        // not quite sure why this isn't working yet
-        // @ts-ignore
-        const { nextAction } = ImageNodeHandler.handle(node, {
+        const { nextAction } = ImageNodeHandler.handle(node as Image, {
           proc,
           parent,
           cOpts: opts,

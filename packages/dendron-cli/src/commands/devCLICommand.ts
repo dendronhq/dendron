@@ -6,7 +6,11 @@ import {
   CONSTANTS,
 } from "@dendronhq/common-all";
 import fs from "fs-extra";
-import { SegmentClient, TelemetryStatus, readYAML } from "@dendronhq/common-server";
+import {
+  SegmentClient,
+  TelemetryStatus,
+  readYAML,
+} from "@dendronhq/common-server";
 import path from "path";
 import yargs from "yargs";
 import { CLIAnalyticsUtils } from "..";
@@ -18,7 +22,13 @@ import {
   SemverVersion,
 } from "../utils/build";
 import { CLICommand, CommandCommonProps } from "./base";
-import { ALL_MIGRATIONS, DConfig, MigrationChangeSetStatus, MigrationServce, WorkspaceService } from "@dendronhq/engine-server";
+import {
+  ALL_MIGRATIONS,
+  DConfig,
+  MigrationChangeSetStatus,
+  MigrationServce,
+  WorkspaceService,
+} from "@dendronhq/engine-server";
 import _ from "lodash";
 
 type CommandCLIOpts = {
@@ -115,10 +125,10 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     args.option("migrationVersion", {
       describe: "migration version to run",
       choices: ALL_MIGRATIONS.map((m) => m.version),
-    })
+    });
     args.option("wsRoot", {
-      describe: "root directory of the Dendron workspace"
-    })
+      describe: "root directory of the Dendron workspace",
+    });
   }
 
   async enrichArgs(args: CommandCLIOpts): Promise<CommandOpts> {
@@ -386,7 +396,9 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       return false;
     }
     if (opts.migrationVersion) {
-      return ALL_MIGRATIONS.map((m) => m.version).includes(opts.migrationVersion);
+      return ALL_MIGRATIONS.map((m) => m.version).includes(
+        opts.migrationVersion
+      );
     }
     return true;
   }
@@ -414,7 +426,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     // ALL_MIGRATIONS
     const headerMessage = [
       "",
-      "Make note of the version number and use it with the run_migration option",
+      "Make note of the version number and use it in the run_migration command",
       "",
       "e.g.)",
       "> dendron dev run_migration --migrationVersion=0.64.1",
@@ -432,7 +444,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
 
     const divider = "-".repeat(maxLength);
 
-    this.print("======Available Migrations======")
+    this.print("======Available Migrations======");
     this.print(headerMessage);
     this.print(divider);
     this.print("version          | description");
@@ -449,24 +461,23 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
 
     // run it
     this.print(opts);
-    this.print(migrationsToRun)
-    // const currentVersion = process.env.npm_package_version!
-    const currentVersion = "0.64.1";
+    this.print(migrationsToRun);
+    const currentVersion = migrationsToRun[0].version;
     const wsService = new WorkspaceService({ wsRoot: opts.wsRoot! });
     const configPath = DConfig.configPath(opts.wsRoot!);
     const wsConfigPath = path.join(opts.wsRoot!, CONSTANTS.DENDRON_WS_NAME);
     const dendronConfig = readYAML(configPath);
     const wsConfig = fs.readJSONSync(wsConfigPath);
     const changes = await MigrationServce.applyMigrationRules({
-        currentVersion,
-        previousVersion: "0.0.0",
-        migrations: migrationsToRun,
-        wsService,
-        logger: this.L,
-        wsConfig,
-        dendronConfig,
-      });
-    
+      currentVersion,
+      previousVersion: "0.0.0",
+      migrations: migrationsToRun,
+      wsService,
+      logger: this.L,
+      wsConfig,
+      dendronConfig,
+    });
+
     // report
     if (changes.length > 0) {
       changes.forEach((change: MigrationChangeSetStatus) => {

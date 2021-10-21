@@ -1,4 +1,11 @@
-import { DVault, NoteUtils, VaultUtils } from "@dendronhq/common-all";
+import {
+  assertUnreachable,
+  DendronError,
+  DVault,
+  NoteUtils,
+  VaultUtils,
+} from "@dendronhq/common-all";
+import { MarkdownPublishPod } from "@dendronhq/pods-core";
 import _ from "lodash";
 import yargs from "yargs";
 import { CLICommand, CommandCommonProps } from "./base";
@@ -10,11 +17,18 @@ type CommandCLIOpts = {
   enginePort?: number;
   query?: string;
   cmd: NoteCommands;
+  output?: NoteCLIOutput;
 };
+
+export enum NoteCLIOutput {
+  JSON = "json",
+  MARKDOWN_GFM = "md_gfm",
+  MARKDOWN_DENDRON = "md_dendron",
+}
 
 type CommandOpts = CommandCLIOpts & SetupEngineResp & CommandCommonProps;
 
-type CommandOutput = any;
+type CommandOutput = { data: any; error?: DendronError };
 
 export enum NoteCommands {
   LOOKUP = "lookup",
@@ -56,6 +70,12 @@ export class NoteCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       describe: "the query to run",
       type: "string",
     });
+    args.option("output", {
+      describe: "format to output in",
+      type: "string",
+      choices: Object.values(NoteCLIOutput),
+      default: NoteCLIOutput.JSON,
+    });
   }
 
   async enrichArgs(args: CommandCLIOpts): Promise<CommandOpts> {
@@ -64,7 +84,7 @@ export class NoteCLICommand extends CLICommand<CommandOpts, CommandOutput> {
   }
 
   async execute(opts: CommandOpts) {
-    const { cmd, engine, wsRoot } = opts;
+    const { cmd, engine, wsRoot, output } = opts;
 
     try {
       switch (cmd) {
@@ -75,8 +95,33 @@ export class NoteCLICommand extends CLICommand<CommandOpts, CommandOutput> {
             createIfNew: true,
             vault,
           });
-          this.print(JSON.stringify(data, null, 4));
-          return data;
+          let payload: string;
+
+          switch (output) {
+            case NoteCLIOutput.JSON:
+              payload = JSON.stringify(data, null, 4);
+              break;
+            case NoteCLIOutput.MARKDOWN_DENDRON:
+              payload = NoteUtils.serialize(data?.note!);
+              break;
+            case NoteCLIOutput.MARKDOWN_GFM:
+              payload = await new MarkdownPublishPod().execute({
+                engine,
+                vaults: engine.vaults,
+                wsRoot,
+                config: {
+                  fname: data?.note?.fname!,
+                  vaultName: VaultUtils.getName(vault),
+                  dest: "stdout",
+                },
+              });
+              break;
+            default:
+              assertUnreachable(output);
+          }
+
+          this.print(payload);
+          return { data: { payload, rawData: data } };
         }
         case NoteCommands.DELETE: {
           const { query, vault } = checkQueryAndVault(opts);
@@ -88,7 +133,7 @@ export class NoteCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           });
           const resp = await engine.deleteNote(note.id);
           this.print(`deleted ${note.fname}`);
-          return resp;
+          return { data: { payload: note.fname, rawData: resp } };
         }
         default: {
           throw Error("bad option");

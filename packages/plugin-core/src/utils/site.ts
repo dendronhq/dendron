@@ -16,7 +16,7 @@ const packageJson = {
   main: "index.js",
   license: "MIT",
   dependencies: {
-    "@dendronhq/dendron-11ty-legacy": "^0.59.1",
+    "@dendronhq/dendron-11ty-legacy": "^0.64.1",
   },
 };
 

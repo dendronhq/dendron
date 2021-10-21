@@ -57,7 +57,7 @@
     "yargs": "^15.4.1"
   },
   "peerDependencies": {
-    "@dendronhq/dendron-11ty-legacy": "^0.59.1"
+    "@dendronhq/dendron-11ty-legacy": "^0.64.0"
   },
   "devDependencies": {
     "@types/fs-extra": "^9.0.1",

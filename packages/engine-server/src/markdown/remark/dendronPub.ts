@@ -298,9 +298,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         // if v5, copts.prefix = ""
         let href: string;
         if (MDUtilsV5.isV5Active(proc)) {
-          href = `${config.site.assetsPrefix || ""}${
-            copts?.prefix || ""
-          }${value}${maybeFileExtension}${
+          href = `${copts?.prefix || ""}${value}${maybeFileExtension}${
             data.anchorHeader ? "#" + data.anchorHeader : ""
           }`;
         } else {

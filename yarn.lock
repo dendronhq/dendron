@@ -9737,14 +9737,6 @@ dockerfile-ast@0.2.1:
   dependencies:
     vscode-languageserver-types "^3.16.0"
 
-docs-markdown@^1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/docs-markdown/-/docs-markdown-1.2.0.tgz#0fe3c94546fa1d898551d5962479867a6904a8ff"
-  integrity sha512-VYVDx2waWt2PGPq+ggsWUh6eR0LRvxzDOTZ1XzYDfqG2g3h+Q8R3vDvHuPsCa/T9IRhqare64YDFiz0+ZaV8OA==
-  dependencies:
-    dotenv "^8.2.0"
-    googleapis "^49.0.0"
-
 doctrine@^2.1.0:
   version "2.1.0"
   resolved "https://registry.npmjs.org/doctrine/-/doctrine-2.1.0.tgz#5cd01fc101621b42c4cd7f5d1a66243716d3f39d"
@@ -9878,11 +9870,6 @@ dot-prop@^5.1.0, dot-prop@^5.2.0:
   integrity sha512-QM8q3zDe58hqUqjraQOmzZ1LIH9SWQJTlEKCH4kJ2oQvLZk7RbQXvtDM2XEq3fwkV9CCvvH4LA0AV+ogFsBM2Q==
   dependencies:
     is-obj "^2.0.0"
-
-dotenv@^8.2.0:
-  version "8.6.0"
-  resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-8.6.0.tgz#061af664d19f7f4d8fc6e4ff9b584ce237adcb8b"
-  integrity sha512-IrPdXQsk2BbzvCBGBOTmmSH5SodmqZNt4ERAZDmW4CT+tL8VtvinqywuANaFu4bOMWki16nqf0e4oC0QIaDr/g==
 
 dotgitignore@^2.1.0:
   version "2.1.0"
@@ -12116,10 +12103,10 @@ good-listener@^1.2.2:
   dependencies:
     delegate "^3.1.2"
 
-google-auth-library@^6.0.0:
-  version "6.1.6"
-  resolved "https://registry.yarnpkg.com/google-auth-library/-/google-auth-library-6.1.6.tgz#deacdcdb883d9ed6bac78bb5d79a078877fdf572"
-  integrity sha512-Q+ZjUEvLQj/lrVHF/IQwRo6p3s8Nc44Zk/DALsN+ac3T4HY/g/3rrufkgtl+nZ1TW7DNAw5cTChdVp4apUXVgQ==
+google-auth-library@^7.0.2:
+  version "7.10.1"
+  resolved "https://registry.npmjs.org/google-auth-library/-/google-auth-library-7.10.1.tgz#e44ac923bc3540215aaead6e1fd117ee06883f51"
+  integrity sha512-nQxgM1ZopUMcpMnu95kOSzI+9tJl4YDOZJomSTBGlRLpxfBopdwto7WvzoI87HuN0nQqVETgOsHi/C/po1rppA==
   dependencies:
     arrify "^2.0.0"
     base64-js "^1.3.0"
@@ -12138,25 +12125,25 @@ google-p12-pem@^3.0.3:
   dependencies:
     node-forge "^0.10.0"
 
-googleapis-common@^4.0.0:
-  version "4.4.3"
-  resolved "https://registry.yarnpkg.com/googleapis-common/-/googleapis-common-4.4.3.tgz#a2063adf17b14501a5f426b9cb0685496d835b7d"
-  integrity sha512-W46WKCk3QtlCCfmZyQIH5zxmDOyeV5Qj+qs7nr2ox08eRkEJMWp6iwv542R/PsokXaGUSrmif4vCC4+rGzRSsQ==
+googleapis-common@^5.0.2:
+  version "5.0.5"
+  resolved "https://registry.npmjs.org/googleapis-common/-/googleapis-common-5.0.5.tgz#4c7160be1ed7e4cc8cdbcdb6eac8a4b3a61dd782"
+  integrity sha512-o2dgoW4x4fLIAN+IVAOccz3mEH8Lj1LP9c9BSSvkNJEn+U7UZh0WSr4fdH08x5VH7+sstIpd1lOYFZD0g7j4pw==
   dependencies:
     extend "^3.0.2"
     gaxios "^4.0.0"
-    google-auth-library "^6.0.0"
+    google-auth-library "^7.0.2"
     qs "^6.7.0"
     url-template "^2.0.8"
     uuid "^8.0.0"
 
-googleapis@^49.0.0:
-  version "49.0.0"
-  resolved "https://registry.yarnpkg.com/googleapis/-/googleapis-49.0.0.tgz#e2e8bfc070dc1c09aa77fdd842bddd685d9ffb11"
-  integrity sha512-UoUuDbOzLxtU6fZnDyj6IvYvczBYP08RK3Sn0AknssQJceUYiHldaCjEFT1PDcT9MiKSJrbPze6PRdzQDny0Xw==
+googleapis@^88.2.0:
+  version "88.2.0"
+  resolved "https://registry.npmjs.org/googleapis/-/googleapis-88.2.0.tgz#956cdc45ebce82215a246b1069eb475770408c26"
+  integrity sha512-z3iDvGVqaJ+4TZ7YulK530q5vkY0BifvAWqcu2JiUSgpnIHzsA89k005+McoaYB+lAgv7lPY2Y4OPMT6iloWRA==
   dependencies:
-    google-auth-library "^6.0.0"
-    googleapis-common "^4.0.0"
+    google-auth-library "^7.0.2"
+    googleapis-common "^5.0.2"
 
 got@11.8.2, got@^11.7.0, got@^11.8.2:
   version "11.8.2"
@@ -13036,6 +13023,11 @@ ignore@^5.0.0, ignore@^5.1.4, ignore@^5.1.8:
   version "5.1.8"
   resolved "https://registry.npmjs.org/ignore/-/ignore-5.1.8.tgz#f150a8b50a34289b33e22f5889abd4d8016f0e57"
   integrity sha512-BMpfD7PpiETpBl/A6S498BaIJ6Y/ABT93ETbby2fP00v4EbvPBXWEoaR1UBPKs3iR53pJY7EtZk5KACI57i1Uw==
+
+image-downloader@^4.0.3:
+  version "4.0.3"
+  resolved "https://registry.npmjs.org/image-downloader/-/image-downloader-4.0.3.tgz#d28f2e5b3811f47d845b08863359730bed58ae1d"
+  integrity sha512-GGQmD1w41ZsQAHFVV63H2F7wB9l+v6LRbpn84Pi+P3fcxOYdHhzdCki/dhGv5ig0spi8mEiJBOY4yDGn5JTBIA==
 
 image-size@1.0.0:
   version "1.0.0"

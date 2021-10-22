@@ -1,11 +1,14 @@
 import { NoteProps, SchemaUtils } from "@dendronhq/common-all";
 import {
-  PreSetupHookFunction,
   NOTE_PRESETS_V4,
-  SCHEMA_PRESETS_V4,
   NoteTestUtilsV4,
+  PreSetupHookFunction,
+  SCHEMA_PRESETS_V4,
 } from "@dendronhq/common-test-utils";
 import _ from "lodash";
+import { resolvePath } from "@dendronhq/common-server";
+import path from "path";
+import * as fs from "fs";
 
 /**
  * Notes created:
@@ -208,6 +211,52 @@ export const setupSchemaPreseet: PreSetupHookFunction = async (opts) => {
     body: "ch2 template",
     fname: "bar.template.ch2",
     vault,
+  });
+};
+
+export const setupInlineSchema: PreSetupHookFunction = async (opts) => {
+  await setupBasic(opts);
+  const { wsRoot, vaults } = opts;
+  const vault1 = vaults[0];
+
+  const inlineSchemaPath = path.join(
+    resolvePath(vault1.fsPath, wsRoot),
+    "inlined.schema.yml"
+  );
+  fs.writeFileSync(
+    inlineSchemaPath,
+    `
+version: 1
+imports: 
+  - foo
+schemas:
+  - id: daily
+    parent: root
+    children:
+      - id: journal
+        children:
+          - pattern: "[0-2][0-9][0-9][0-9]"
+            title: year
+            id: year_id
+            children:
+              - pattern: "[0-1][0-9]"
+                children:
+                  - pattern: "[0-3][0-9]"
+                    title: day
+                    template:
+                      id: templates.day
+                      type: note
+  - id: foos_parent
+    children:
+      - foo.foo
+`
+  );
+
+  await NoteTestUtilsV4.createNote({
+    wsRoot,
+    body: "Template text",
+    fname: "templates.day",
+    vault: vault1,
   });
 };
 
@@ -436,6 +485,7 @@ export const ENGINE_HOOKS = {
   setupBasic,
   setupSchemaPreseet,
   setupSchemaPresetWithNamespaceTemplate,
+  setupInlineSchema,
   setupNoteRefRecursive,
   setupJournals,
   setupEmpty,

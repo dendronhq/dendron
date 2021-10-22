@@ -1,0 +1,15 @@
+version: 1
+schemas:
+  - id: daily
+    parent: root
+    children:
+      - pattern: journal
+        children:
+          - pattern: "[0-2][0-9][0-9][0-9]"
+            children:
+              - pattern: "[0-1][0-9]"
+                children:
+                  - pattern: "[0-3][0-9]"
+                    template:
+                      id: templates.daily
+                      type: note

@@ -2,7 +2,7 @@
 id: bNkYI2WWK6Jhm2eeVwqrh
 title: Note Lookup
 desc: ''
-updated: 1634279966914
+updated: 1634725877431
 created: 1633501913732
 ---
 
@@ -40,20 +40,8 @@ Note look up `cmd+l`:
 * [[with description|dendron.welcome]]
 * [[dendron.welcome]]
 
-## Create notes
-### Simple case:
-* Type in `delete.me.some.note`
-* Press `Create new`
-* Validate note is created with the given name
-* Delete the note.
+## Create notes look up related
+![[dendron.note-create#simple-case,1:#*]]
 
-### With matching schema
-```md
-In Note look up Type ``
-    EXPECTED `book.book1.characters` schema matched shows up as top result
-    THEN click on `book.book1.characters` 
-        EXPECTED `book.book1.characters` note is created 
-            AND it used template `templates.book.characters`
-```
-AFTER: delete `book.book1.characters`
+![[dendron.note-create#with-matching-simple-schema,1]]
 

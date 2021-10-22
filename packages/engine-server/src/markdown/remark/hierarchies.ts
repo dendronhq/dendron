@@ -1,4 +1,9 @@
-import { NoteUtils, VaultUtils } from "@dendronhq/common-all";
+import {
+  NoteUtils,
+  VaultUtils,
+  FOOTNOTE_DEF_CLASS,
+  FOOTNOTE_REF_CLASS,
+} from "@dendronhq/common-all";
 import visit from "unist-util-visit";
 import _ from "lodash";
 import { Content, FootnoteDefinition, FootnoteReference, Root } from "mdast";
@@ -18,15 +23,15 @@ type PluginOpts = {
 };
 
 // These are the HTML IDs for footnotes. This replicates what the footnotes plugin was doing.
-const FOOTNOTE_DEF_ID_PREFIX = "fn-";
-const FOOTNOTE_REF_ID_PREFIX = "fnref-";
+const FOOTNOTE_DEF_ID_PREFIX = `${FOOTNOTE_DEF_CLASS}-`;
+const FOOTNOTE_REF_ID_PREFIX = `${FOOTNOTE_REF_CLASS}-`;
 /** The symbol that will be shown as the "return to reference" button. */
 const FOOTNOTE_RETURN_SYMBOL = "˄";
 
 function footnote2html(reference: FootnoteReference) {
   return html(
     `<a id="${FOOTNOTE_REF_ID_PREFIX}${reference.identifier}"` +
-      `class="fnref"` +
+      `class="${FOOTNOTE_REF_CLASS}"` +
       `href="#${FOOTNOTE_DEF_ID_PREFIX}${reference.identifier}">` +
       (reference.label || reference.identifier) +
       `</a>`
@@ -38,7 +43,7 @@ function footnoteDef2html(definition: FootnoteDefinition) {
   // footnote reference. We have to inject the back arrow into the text inside
   // the definition, otherwise it renders in a different line than the definition.
   const backArrow = html(
-    `<a class="fn" href="#${FOOTNOTE_REF_ID_PREFIX}${definition.identifier}">${FOOTNOTE_RETURN_SYMBOL}</a>`
+    `<a class="${FOOTNOTE_DEF_CLASS}" href="#${FOOTNOTE_REF_ID_PREFIX}${definition.identifier}">${FOOTNOTE_RETURN_SYMBOL}</a>`
   );
   let lastParent: Parent | undefined;
   visit(definition, (node) => {
@@ -48,7 +53,7 @@ function footnoteDef2html(definition: FootnoteDefinition) {
   return paragraph([
     // Put the ID target first, so even if the footnote is multiple lines long, it jumps to the start
     html(
-      `<span id="${FOOTNOTE_DEF_ID_PREFIX}${definition.identifier}" style="display: none;"></span>`
+      `<span id="${FOOTNOTE_DEF_ID_PREFIX}${definition.identifier}" style="width: 0; height: 0;"></span>`
     ),
     ...definition.children,
   ]);

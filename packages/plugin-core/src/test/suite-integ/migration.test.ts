@@ -19,6 +19,7 @@ import {
   MigrationServce,
   WorkspaceService,
   DConfig,
+  MigrationUtils,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import fs from "fs-extra";
@@ -603,4 +604,25 @@ suite("MigrationService", function () {
       });
     }
   );
+});
+
+suite("MigrationUtils", () => {
+  describe("deepCleanObjBy", () => {
+    describe("GIVEN _.isNull as predicate", () => {
+      describe("WHEN an object has kvp that has null value", () => {
+        test("THEN all kvp that has null value are omitted from object", () => {
+          const obj = { a: { b: null, c: "foo", d: null } };
+          const expected = { a: { c: "foo" } };
+          expect(MigrationUtils.deepCleanObjBy(obj, _.isNull)).toEqual(expected);
+        });
+      });
+
+      describe("WHEN an object has no kvp that has null value", () => {
+        test("THEN nothing is omitted", () => {
+          const obj = { a: { b: "foo", c: "bar", d: "egg" } };
+          expect(MigrationUtils.deepCleanObjBy(obj, _.isNull)).toEqual(obj);
+        });
+      });
+    })
+  })
 });

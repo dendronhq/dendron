@@ -287,7 +287,7 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
   async init(opts: { wsRoot: string }) {
     const cwd = opts.wsRoot;
     this.print(`initializing publishing at ${cwd}...`);
-    const cmd = `git clone https://github.com/dendronhq/nextjs-template.git .next`;
+    const cmd = `git clone git@github.com:dendronhq/nextjs-template.git .next`;
     $(cmd, { cwd });
     const cmdInstall = `npm install`;
     const spinner = ora("Installing dependencies....").start();

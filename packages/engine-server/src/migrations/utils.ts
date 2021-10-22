@@ -26,7 +26,7 @@ const FLIP = (value: boolean): boolean => !value;
  * e.g.
  *    "commands.lookup" is a new config path, that was originally at "lookup".
  *    This mapping should be skipped during migration.
- * 
+ *
  *    "commands.lookup.note.selectionMode" is a new config path
  *    that was originally "lookup.note.selectionType".
  *    This mapping should be done by _iteratee_, which maps to the new enums.
@@ -73,20 +73,14 @@ export const PATH_MAP = new Map<string, mappedConfigPath>([
 
   // insertNoteLink namepsace
   ["commands.insertNoteLink", { target: "insertNoteLink", iteratee: "skip" }],
-  [
-    "commands.insertNoteLink.aliasMode",
-    { target: "insertNoteLink.aliasMode" },
-  ],
+  ["commands.insertNoteLink.aliasMode", { target: "insertNoteLink.aliasMode" }],
   [
     "commands.insertNoteLink.enableMultiSelect",
     { target: "insertNoteLink.multiSelect" },
   ],
 
   // insertNoteIndex namespace
-  [
-    "commands.insertNoteIndex",
-    { target: "insertNoteIndex", iteratee: "skip" },
-  ],
+  ["commands.insertNoteIndex", { target: "insertNoteIndex", iteratee: "skip" }],
   [
     "commands.insertNoteIndex.enableMarker",
     { target: "insertNoteIndex.marker" },
@@ -139,7 +133,7 @@ export const PATH_MAP = new Map<string, mappedConfigPath>([
   ["workspace.feedback", { target: "feedback" }],
   ["workspace.apiEndpoint", { target: "apiEndpoint" }],
 ]);
- 
+
 export class MigrationUtils {
   /**
    * clean up an object recursively with given predicate.
@@ -151,7 +145,7 @@ export class MigrationUtils {
     const out = _.omitBy(obj, pred);
     _.keys(out).forEach((key) => {
       if (_.isPlainObject(obj[key])) {
-        obj[key] = MigrationUtils.deepCleanObjBy(obj[key], pred);
+        out[key] = MigrationUtils.deepCleanObjBy(out[key], pred);
       }
     });
     return out;

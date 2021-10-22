@@ -7,7 +7,6 @@ import {
 import { JSONSchemaType } from "ajv";
 import { GDocUtilMethods, PodUtils } from "../utils";
 import axios from "axios";
-import { googleDocsToMarkdown } from "docs-markdown";
 import _ from "lodash";
 import {
   DendronError,
@@ -20,6 +19,7 @@ import {
 } from "@dendronhq/common-all";
 import fs from "fs-extra";
 import path from "path";
+import { vault2Path } from "@dendronhq/common-server";
 
 const ID = "dendron.gdoc";
 
@@ -197,11 +197,14 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
       documentId: string;
       hierarchyDestination: string;
       accessToken: string;
+      importComments?: ImportComments;
     },
-    config: ImportPodConfig
+    config: ImportPodConfig,
+    assetDir: string
   ): Promise<Partial<NoteProps>> => {
     let response: Partial<NoteProps>;
-    const { documentId, accessToken, hierarchyDestination } = opts;
+    const { documentId, accessToken, hierarchyDestination, importComments } =
+      opts;
     const headers = {
       Authorization: `Bearer ${accessToken}`,
       "Content-Type": "application/json",
@@ -211,18 +214,15 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
         `https://docs.googleapis.com/v1/documents/${documentId}`,
         { headers }
       );
-      const markdown = googleDocsToMarkdown(result.data);
+      const markdown = PodUtils.googleDocsToMarkdown(result.data, assetDir);
 
-      /*
-       * to get index of the string after 2nd occurrence of ---
-       */
-      const index = markdown.indexOf("---", markdown.indexOf("---") + 3) + 3;
       response = {
-        body: markdown.substring(index),
+        body: markdown,
         fname: `${hierarchyDestination}`,
         custom: {
           documentId: result.data.documentId,
           revisionId: result.data.revisionId,
+          commentsUpdated: importComments?.enable || false,
           ...config.frontmatter,
         },
       };
@@ -334,8 +334,17 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
     vault: DVault;
     confirmOverwrite?: boolean;
     onPrompt?: (arg0?: PROMPT) => Promise<{ title: string } | undefined>;
+    importComments?: ImportComments;
   }) => {
-    const { note, engine, wsRoot, vault, confirmOverwrite, onPrompt } = opts;
+    const {
+      note,
+      engine,
+      wsRoot,
+      vault,
+      confirmOverwrite,
+      onPrompt,
+      importComments,
+    } = opts;
     const existingNote = NoteUtils.getNoteByFnameV5({
       fname: note.fname,
       notes: engine.notes,
@@ -344,9 +353,14 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
     });
     if (!_.isUndefined(existingNote)) {
       if (
-        existingNote.custom.revisionId &&
-        existingNote.custom.revisionId !== note.custom.revisionId
+        (importComments?.enable &&
+          existingNote.custom.commentsUpdated !== importComments?.enable) ||
+        (existingNote.custom.revisionId &&
+          existingNote.custom.revisionId !== note.custom.revisionId)
       ) {
+        if (importComments?.enable)
+          existingNote.custom.commentsUpdated = importComments?.enable;
+
         existingNote.custom.revisionId = note.custom.revisionId;
         existingNote.body = note.body;
 
@@ -393,6 +407,9 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
     } = config as GDocImportPodConfig;
 
     let { accessToken } = config as GDocImportPodConfig;
+    const assetDirName = "assets";
+    const vpath = vault2Path({ vault, wsRoot });
+    const assetDir = path.join(vpath, assetDirName);
 
     /** refreshes token if token has already expired */
     if (Time.now().toSeconds() > expirationTime) {
@@ -480,8 +497,9 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
     });
 
     let response = await this.getDataFromGDoc(
-      { documentId, accessToken, hierarchyDestination },
-      config
+      { documentId, accessToken, hierarchyDestination, importComments },
+      config,
+      assetDir
     );
     if (importComments?.enable) {
       response = await this.getCommentsFromDoc(
@@ -500,6 +518,7 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
       vault,
       confirmOverwrite,
       onPrompt,
+      importComments,
     });
 
     const importedNotes: NoteProps[] =

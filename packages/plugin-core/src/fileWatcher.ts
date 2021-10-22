@@ -129,12 +129,12 @@ export class FileWatcher {
           } as NoteProps;
           delete note["stub"];
           delete note["schemaStub"];
-          await engine.updateNote(note as NoteProps, {
-            newNode: true,
-          });
-        } else {
-          await engine.writeNote(note, { newNode: true });
         }
+
+        // add note
+        await engine.updateNote(note as NoteProps, {
+          newNode: true,
+        });
       } catch (err: any) {
         this.L.error({ ctx, error: err });
         throw err;

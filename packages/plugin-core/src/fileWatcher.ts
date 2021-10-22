@@ -1,4 +1,5 @@
 import {
+  ContextualUIEvents,
   DVault,
   NoteProps,
   NoteUtils,
@@ -16,7 +17,7 @@ import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
 import { Logger } from "./logger";
-import { sentryReportingCallback } from "./utils/analytics";
+import { AnalyticsUtils, sentryReportingCallback } from "./utils/analytics";
 import { getDWorkspace, getExtension } from "./workspace";
 
 export class FileWatcher {
@@ -129,6 +130,7 @@ export class FileWatcher {
           } as NoteProps;
           delete note["stub"];
           delete note["schemaStub"];
+          //TODO recognise vscode's create new file menu option to create a note.
         }
 
         // add note
@@ -186,6 +188,7 @@ export class FileWatcher {
           source: "watcher",
           uri: vscode.Uri.parse(fsPath),
         });
+        AnalyticsUtils.track(ContextualUIEvents.ContextualUIDelete);
       } catch (err) {
         this.L.info({ ctx, fsPath, err });
         // NOTE: ignore, many legitimate reasons why this might happen

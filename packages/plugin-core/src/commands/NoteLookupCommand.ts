@@ -52,7 +52,7 @@ import {
 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { Logger } from "../logger";
-import { AnalyticsUtils } from "../utils/analytics";
+import { AnalyticsUtils, getAnalyticsPayload } from "../utils/analytics";
 import { getDWorkspace, getEngine } from "../workspace";
 import { BaseCommand } from "./base";
 
@@ -88,6 +88,8 @@ type CommandGatherOutput = {
  */
 type CommandOpts = {
   selectedItems: readonly NoteQuickInput[];
+  /** source of the command. Added for contextual UI analytics. */
+  source?: string;
 } & CommandGatherOutput;
 
 export type CommandOutput = {
@@ -548,5 +550,10 @@ export class NoteLookupCommand extends BaseCommand<
     });
     const isPressed = journalBtn?.pressed;
     return isPressed;
+  }
+
+  addAnalyticsPayload(opts?: CommandOpts, resp?: CommandOpts) {
+    const { source } = { ...opts, ...resp };
+    return getAnalyticsPayload(source);
   }
 }

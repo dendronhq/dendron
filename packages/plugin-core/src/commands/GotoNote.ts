@@ -13,6 +13,7 @@ import { VaultSelectionMode } from "../components/lookup/types";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../utils";
+import { getAnalyticsPayload } from "../utils/analytics";
 import { getReferenceAtPosition } from "../utils/md";
 import { getExtension, getDWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
@@ -26,10 +27,14 @@ type CommandOpts = {
    * What {@link vscode.ViewColumn} to open note in
    */
   column?: ViewColumn;
+  /** added for contextual UI analytics. */
+  source?: string;
 };
 export { CommandOpts as GotoNoteCommandOpts };
 
-type CommandOutput = { note: NoteProps; pos?: Position } | undefined;
+type CommandOutput =
+  | { note: NoteProps; pos?: Position; source?: string }
+  | undefined;
 
 export const findAnchorPos = (opts: {
   anchor: DNoteAnchor;
@@ -205,8 +210,13 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
         editor.selection = new Selection(pos, pos);
         editor.revealRange(editor.selection);
       }
-      return { note, pos };
+      return { note, pos, source: opts.source };
     });
     return out;
+  }
+
+  addAnalyticsPayload(opts?: CommandOpts, resp?: CommandOutput) {
+    const { source } = { ...opts, ...resp };
+    return getAnalyticsPayload(source);
   }
 }

@@ -1,3 +1,4 @@
+import { ContextualUIEvents } from "@dendronhq/common-all";
 import { SegmentUtils, VSCodeIdentifyProps } from "@dendronhq/common-server";
 import * as Sentry from "@sentry/node";
 import * as vscode from "vscode";
@@ -17,12 +18,12 @@ export class AnalyticsUtils {
       ideFlavor: vscode.env.appName,
       appVersion: DendronExtension.version(),
       userAgent: vscode.env.appName,
-    }
+    };
   }
 
   static track(event: string, props?: any) {
     const { ideVersion, ideFlavor } = AnalyticsUtils.getVSCodeIdentifyProps();
-    SegmentUtils.track(event, { type: "vscode", ideVersion, ideFlavor }, props); 
+    SegmentUtils.track(event, { type: "vscode", ideVersion, ideFlavor }, props);
   }
 
   static identify() {
@@ -61,4 +62,13 @@ export function sentryReportingCallback<A extends any[], R>(
       throw error;
     }
   };
+}
+
+export function getAnalyticsPayload(source?: string) {
+  if (source && source === ContextualUIEvents.ContextualUICodeAction) {
+    return {
+      source,
+    };
+  }
+  return {};
 }

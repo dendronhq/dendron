@@ -1,3 +1,4 @@
+import { ContextualUIEvents } from "@dendronhq/common-all";
 import { DoctorActions } from "@dendronhq/dendron-cli";
 import _ from "lodash";
 import { FrontmatterContent } from "mdast";
@@ -193,6 +194,7 @@ export const refactorProvider: CodeActionProvider = {
         command: {
           command: new RenameHeaderCommand().key,
           title: "Rename Header",
+          arguments: [{ source: ContextualUIEvents.ContextualUICodeAction }],
         },
       };
       const brokenWikilinkAction = {
@@ -202,6 +204,7 @@ export const refactorProvider: CodeActionProvider = {
         command: {
           command: new GotoNoteCommand().key,
           title: "Add missing note for wikilink declaration",
+          arguments: [{ source: ContextualUIEvents.ContextualUICodeAction }],
         },
       };
       const createNewNoteAction = {
@@ -214,6 +217,7 @@ export const refactorProvider: CodeActionProvider = {
           arguments: [
             {
               selectionType: LookupSelectionTypeEnum.selectionExtract,
+              source: ContextualUIEvents.ContextualUICodeAction,
             },
           ],
         },

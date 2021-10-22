@@ -1,4 +1,5 @@
 import {
+  ContextualUIEvents,
   DNodeUtils,
   NoteProps,
   NoteUtils,
@@ -24,6 +25,7 @@ import { getExtension, getDWorkspace, DendronExtension } from "./workspace";
 import * as Sentry from "@sentry/node";
 import { FileWatcher } from "./fileWatcher";
 import { file2Note, vault2Path } from "@dendronhq/common-server";
+import { AnalyticsUtils } from "./utils/analytics";
 
 interface DebouncedFunc<T extends (...args: any[]) => any> {
   /**
@@ -273,7 +275,7 @@ export class WorkspaceWatcher {
         },
         isEventSourceEngine: false,
       };
-
+      AnalyticsUtils.track(ContextualUIEvents.ContextualUIRename);
       const engine = getExtension().getEngine();
       const updateNoteReferences = engine.renameNote(opts);
       args.waitUntil(updateNoteReferences);

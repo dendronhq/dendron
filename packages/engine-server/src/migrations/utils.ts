@@ -144,7 +144,7 @@ export class MigrationUtils {
   static deepCleanObjBy(obj: any, pred: Function): any {
     const out = _.omitBy(obj, pred);
     _.keys(out).forEach((key) => {
-      if (_.isPlainObject(obj[key])) {
+      if (_.isPlainObject(out[key])) {
         out[key] = MigrationUtils.deepCleanObjBy(out[key], pred);
       }
     });

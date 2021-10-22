@@ -23,6 +23,8 @@ export enum VSCodeEvents {
 export enum CLIEvents {
   CLITelemetryEnabled = "CLI_Telemetry_Enabled",
   CLITelemetryDisabled = "CLI_Telemetry_Disabled",
+  CLIMigrationSucceeded = "CLI_Migration_Succeeded",
+  CLIMigrationFailed = "CLI_Migration_Failed",
 }
 
 export enum TutorialEvents {

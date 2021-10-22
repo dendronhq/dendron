@@ -3,6 +3,7 @@ import {
   NoteTestUtilsV4,
   TestPresetEntryV4,
 } from "@dendronhq/common-test-utils";
+import { TestConfigUtils } from "../../config";
 import { ENGINE_HOOKS } from "./utils";
 
 const NOTES = {
@@ -55,6 +56,48 @@ const NOTES = {
       },
     }
   ),
+  CUSTOM_FM: new TestPresetEntryV4(
+    async ({ engine }) => {
+      const { data } = await engine.renderNote({
+        id: "fm",
+      });
+      expect(data).toMatchSnapshot();
+      return [
+        {
+          actual: true,
+          expected: await AssertUtils.assertInString({
+            body: data!,
+            match: [`<p>egg</p>`, `<p>title: Fm</p>`],
+          }),
+          msg: "custom fm render",
+        },
+      ];
+    },
+    {
+      preSetupHook: async (opts) => {
+        TestConfigUtils.withConfig(
+          (config) => {
+            config.useNunjucks = true;
+            return config;
+          },
+          {
+            wsRoot: opts.wsRoot,
+          }
+        );
+        return NoteTestUtilsV4.createNote({
+          ...opts,
+          fname: "fm",
+          props: {
+            custom: {
+              foo: "egg",
+            },
+          },
+          vault: opts.vaults[0],
+          body: "{{fm.foo}}\n\ntitle: {{fm.title}}"
+        })
+      },
+    }
+  )
 };
 
 export const ENGINE_RENDER_PRESETS = {

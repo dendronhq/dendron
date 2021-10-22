@@ -61,7 +61,7 @@ import {
 import _ from "lodash";
 import { DConfig } from "./config";
 import { FileStorage } from "./drivers/file/storev2";
-import { LinkUtils, MDUtilsV5, ProcFlavor } from "./markdown";
+import { LinkUtils, MDUtilsV5, nunjucks, ProcFlavor } from "./markdown";
 import { AnchorUtils, RemarkUtils } from "./markdown/remark/utils";
 import { HookUtils } from "./topics/hooks";
 
@@ -565,11 +565,18 @@ export class DendronEngineV2 implements DEngine {
       { flavor: ProcFlavor.PREVIEW }
     );
     const payload = await proc.process(NoteUtils.serialize(note));
-    return payload.toString();
+    const noteHtml = payload.toString();
+    const renderedNote = ConfigUtils.getProp(this.config, "useNunjucks")
+      ? nunjucks.renderString(noteHtml, {
+        fm: { ...note.custom, title: note.title },
+        fname: note.fname,
+      })
+      : noteHtml;
+    return renderedNote;
   }
-  async sync() {
+
+  async sync(): Promise<never> {
     throw Error("sync not implemented");
-    return {} as any;
   }
 
   async refreshNotesV2(notes: NoteChangeEntry[]) {

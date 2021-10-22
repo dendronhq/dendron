@@ -130,6 +130,7 @@ export class FileWatcher {
           } as NoteProps;
           delete note["stub"];
           delete note["schemaStub"];
+          //TODO recognise vscode's create new file menu option to create a note.
         }
 
         // add note

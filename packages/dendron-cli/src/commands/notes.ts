@@ -79,6 +79,7 @@ export class NoteCLICommand extends CLICommand<CommandOpts, CommandOutput> {
   }
 
   async enrichArgs(args: CommandCLIOpts): Promise<CommandOpts> {
+    this.addToAnalyticsPayload({ cmd: args.cmd, output: args.output }, "args");
     const engineArgs = await setupEngine(args);
     return { ...args, ...engineArgs };
   }

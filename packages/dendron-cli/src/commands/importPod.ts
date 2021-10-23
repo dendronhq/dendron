@@ -39,6 +39,7 @@ export class ImportPodCLICommand extends CLICommand<
   }
 
   async enrichArgs(args: CommandCLIOpts) {
+    this.addToAnalyticsPayload({ podId: args.podId }, "args");
     return enrichPodArgs({ pods: getAllImportPods(), podType: "import" })(args);
   }
 

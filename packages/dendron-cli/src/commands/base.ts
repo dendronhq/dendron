@@ -1,5 +1,10 @@
 import { DendronError, isDendronResp, CLIEvents } from "@dendronhq/common-all";
-import { createLogger, SegmentClient, TelemetryStatus } from "@dendronhq/common-server";
+import {
+  createLogger,
+  getDurationMilliseconds,
+  SegmentClient,
+  TelemetryStatus,
+} from "@dendronhq/common-server";
 import { WorkspaceUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
 import yargs from "yargs";
@@ -39,6 +44,7 @@ export abstract class CLICommand<
   public desc: string;
   // TODO: hackish
   protected wsRootOptional?: boolean;
+  protected _analyticsPayload: any;
 
   constructor(opts: { name: string; desc: string } & BaseCommandOpts) {
     super(opts.name, opts);
@@ -63,7 +69,7 @@ export abstract class CLICommand<
   }
 
   setUpSegmentClient() {
-    // if running CLI without ever having used dendron plugin, 
+    // if running CLI without ever having used dendron plugin,
     // show a notice about telemety and instructions on how to disable.
     if (_.isUndefined(SegmentClient.readConfig())) {
       CLIAnalyticsUtils.showTelemetryMessage();
@@ -72,8 +78,12 @@ export abstract class CLICommand<
       CLIAnalyticsUtils.track(CLIEvents.CLITelemetryEnabled, { reason });
     }
 
-    const segment = SegmentClient.instance({ forceNew: true, });
-    this.L.info({ msg: `Telemetry is disabled? ${ segment.hasOptedOut }`});
+    const segment = SegmentClient.instance({ forceNew: true });
+    this.L.info({ msg: `Telemetry is disabled? ${segment.hasOptedOut}` });
+  }
+
+  addToAnalyticsPayload(data: any, path: string) {
+    _.set(this._analyticsPayload, path, data);
   }
 
   /**
@@ -83,6 +93,7 @@ export abstract class CLICommand<
   abstract enrichArgs(args: any): Promise<TOpts>;
 
   eval = async (args: any) => {
+    const start = process.hrtime();
     this.L.info({ args });
     this.setUpSegmentClient();
     if (!args.wsRoot) {
@@ -102,10 +113,18 @@ export abstract class CLICommand<
       this.L.error(opts.error);
       return { error: opts.error };
     }
+
     const out = await this.execute(opts);
     if (isDendronResp(out) && out.error) {
       this.L.error(out.error);
     }
+
+    const analyticsPayload = this._analyticsPayload || {};
+    CLIAnalyticsUtils.track(this.name, {
+      duration: getDurationMilliseconds(start),
+      ...analyticsPayload,
+    });
+
     return out;
   };
 

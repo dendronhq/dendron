@@ -86,6 +86,10 @@ export abstract class CLICommand<
     _.set(this._analyticsPayload, path, data);
   }
 
+  addArgsToPayload(data: any) {
+    this.addToAnalyticsPayload(data, "args");
+  }
+
   /**
    * Converts CLI flags into {@link TOpts}
    * @param args

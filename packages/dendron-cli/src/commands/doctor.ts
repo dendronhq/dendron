@@ -154,7 +154,7 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
   }
 
   async enrichArgs(args: CommandCLIOpts): Promise<CommandOpts> {
-    this.addToAnalyticsPayload({ action: args.action }, "args");
+    this.addArgsToPayload({ action: args.action });
     const engineArgs = await setupEngine(args);
     return { ...args, ...engineArgs };
   }

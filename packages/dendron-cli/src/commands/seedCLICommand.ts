@@ -64,10 +64,7 @@ export class SeedCLICommand extends CLICommand<CommandOpts, CommandOutput> {
   }
 
   async enrichArgs(args: CommandCLIOpts): Promise<CommandOpts> {
-    this.addToAnalyticsPayload(
-      { cmd: args.cmd, id: args.id, mode: args.mode },
-      "args"
-    );
+    this.addArgsToPayload({ cmd: args.cmd, id: args.id, mode: args.mode });
     const engineOpts: SetupEngineCLIOpts = { ...args, init: false };
     if (
       args.cmd === SeedCommands.INIT &&

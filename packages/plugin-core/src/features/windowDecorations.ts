@@ -155,7 +155,12 @@ export function updateDecorations(activeEditor: TextEditor) {
       mode: ProcMode.FULL,
       parseOnly: true,
     },
-    { dest: DendronASTDest.MD_DENDRON, engine: getDWorkspace().engine }
+    {
+      dest: DendronASTDest.MD_DENDRON,
+      engine: getDWorkspace().engine,
+      vault: note.vault,
+      fname: note.fname,
+    }
   );
   const tree = proc.parse(text);
   const activeDecorations = new DefaultMap<

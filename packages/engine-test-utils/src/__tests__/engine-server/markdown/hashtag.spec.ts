@@ -394,7 +394,7 @@ describe("hashtag", () => {
             preSetupHook: async ({ wsRoot }) => {
               TestConfigUtils.withConfig(
                 (config) => {
-                  config.workspace!.enableUserTags = false;
+                  config.workspace!.enableHashTags = false;
                   return config;
                 },
                 { wsRoot }

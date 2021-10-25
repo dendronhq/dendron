@@ -1240,6 +1240,9 @@ export class SchemaUtils {
     ];
     const optsWithoutData = _.omit(opts, schemaDataOpts);
     const optsData = _.pick(opts, schemaDataOpts);
+
+    this.processUntypedTemplate(optsData);
+
     const vault = opts.vault;
     return DNodeUtils.create({
       vault,
@@ -1250,6 +1253,23 @@ export class SchemaUtils {
       }),
       type: "schema",
     });
+  }
+
+  private static processUntypedTemplate(optsData: any) {
+    // Standard templates have the format of
+    //  `template: {id:'', type:''}`
+    //
+    // However we also want to support shorthand for declaring templates when just
+    // the id of the template is specified with the format of
+    //  `template: ''`
+    if (_.isString(optsData.template)) {
+      const typedTemplate = {
+        id: optsData.template,
+        type: "note",
+      };
+
+      optsData.template = typedTemplate;
+    }
   }
 
   static createModule(opts: SchemaModuleOpts): SchemaModuleOpts {

@@ -5,6 +5,7 @@ import { genDefaultGraphConfig, DendronGraphConfig } from "../workspace/graph";
 import { SeedSite } from "../../seed";
 import { DHookDict } from "../../hooks";
 import { VaultSyncMode, VaultSyncModeEnum } from "../base";
+import { genDefaultTaskConfig, TaskConfig } from "./task";
 
 /**
  * Namespace for configurations that affect the workspace
@@ -19,6 +20,7 @@ export type DendronWorkspaceConfig = {
   // features
   journal: JournalConfig;
   scratch: ScratchConfig;
+  task: TaskConfig;
   graph: DendronGraphConfig;
   disableTelemetry?: boolean;
   enableAutoCreateOnDefinition: boolean;
@@ -56,6 +58,7 @@ export function genDefaultWorkspaceConfig(): DendronWorkspaceConfig {
     vaults: [],
     journal: genDefaultJournalConfig(),
     scratch: genDefaultScratchConfig(),
+    task: genDefaultTaskConfig(),
     graph: genDefaultGraphConfig(),
     enableAutoCreateOnDefinition: false,
     enableXVaultWikiLink: false,

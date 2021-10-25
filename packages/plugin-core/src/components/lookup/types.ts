@@ -120,6 +120,7 @@ export type LookupFilterType = "directChildOnly";
 export enum LookupNoteTypeEnum {
   "journal" = "journal",
   "scratch" = "scratch",
+  "task" = "task",
 }
 export type LookupNoteType = LookupNoteTypeEnum;
 

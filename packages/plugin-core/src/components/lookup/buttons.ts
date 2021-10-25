@@ -4,6 +4,7 @@ import {
   NoteProps,
   NoteQuickInput,
   NoteUtils,
+  genDefaultTaskNoteProps
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import * as vscode from "vscode";
@@ -78,7 +79,7 @@ function isSelectionBtn(button: DendronBtn) {
 }
 
 function isNoteBtn(button: DendronBtn) {
-  return _.includes(["journal", "scratch"], button.type);
+  return _.includes(["journal", "scratch", "task"], button.type);
 }
 
 function isSplitButton(button: DendronBtn) {
@@ -367,6 +368,47 @@ export class ScratchBtn extends DendronBtn {
     quickPick.value = NotePickerUtils.getPickerValue(quickPick);
   }
 }
+
+export class TaskBtn extends DendronBtn {
+  static create(pressed?: boolean) {
+    return new TaskBtn({
+      title: "Create Task Note",
+      iconOff: "diff-add",
+      iconOn: "menu-selection",
+      type: LookupNoteTypeEnum.task,
+      pressed,
+    });
+  }
+
+  async onEnable({ quickPick }: ButtonHandleOpts) {
+    quickPick.modifyPickerValueFunc = () => {
+      return DendronClientUtilsV2.genNoteName(LookupNoteTypeEnum.task);
+    };
+    quickPick.prevValue = quickPick.value;
+    const { noteName, prefix } = quickPick.modifyPickerValueFunc();
+    quickPick.noteModifierValue = _.difference(
+      noteName.split("."),
+      prefix.split(".")
+    ).join(".");
+    quickPick.prefix = prefix;
+    quickPick.value = NotePickerUtils.getPickerValue(quickPick);
+    // Add default task note props to the created note
+    quickPick.onCreate = async (note) => {
+      note.custom = { ...genDefaultTaskNoteProps(note, ConfigUtils.getTask(getDWorkspace().config)), ...note.custom };
+      return note;
+    };
+    return;
+  }
+
+  async onDisable({ quickPick }: ButtonHandleOpts) {
+    quickPick.modifyPickerValueFunc = undefined;
+    quickPick.noteModifierValue = undefined;
+    quickPick.prevValue = quickPick.value;
+    quickPick.prefix = quickPick.rawValue;
+    quickPick.value = NotePickerUtils.getPickerValue(quickPick);
+  }
+}
+
 export class HorizontalSplitBtn extends DendronBtn {
   static create(pressed?: boolean) {
     return new HorizontalSplitBtn({

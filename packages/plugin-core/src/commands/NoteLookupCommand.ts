@@ -24,6 +24,7 @@ import {
   ScratchBtn,
   Selection2LinkBtn,
   SelectionExtractBtn,
+  TaskBtn,
 } from "../components/lookup/buttons";
 import { LookupControllerV3 } from "../components/lookup/LookupControllerV3";
 import {
@@ -193,6 +194,7 @@ export class NoteLookupCommand extends BaseCommand<
         ),
         JournalBtn.create(copts.noteType === LookupNoteTypeEnum.journal),
         ScratchBtn.create(copts.noteType === LookupNoteTypeEnum.scratch),
+        TaskBtn.create(copts.noteType === LookupNoteTypeEnum.task),
         HorizontalSplitBtn.create(
           copts.splitType === LookupSplitTypeEnum.horizontal
         ),
@@ -434,6 +436,10 @@ export class NoteLookupCommand extends BaseCommand<
     if (!_.isUndefined(maybeJournalTitleOverride))
       nodeNew.title = maybeJournalTitleOverride;
 
+    if (picker.onCreate) {
+      const nodeModified = await picker.onCreate(nodeNew);
+      if (nodeModified) nodeNew = nodeModified;
+    }
     const resp = await engine.writeNote(nodeNew, {
       newNode: true,
     });

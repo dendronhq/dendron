@@ -1,5 +1,6 @@
 import { ServerUtils } from "@dendronhq/api-server";
 import {
+  assertUnreachable,
   ConfigUtils,
   CONSTANTS,
   DendronError,
@@ -9,6 +10,7 @@ import {
   getStage,
   InstallStatus,
   LegacyNoteAddBehavior,
+  NoteAddBehavior,
   NoteProps,
   NoteUtils,
   Point,
@@ -40,6 +42,7 @@ import os from "os";
 import path from "path";
 import * as vscode from "vscode";
 import { CancellationTokenSource } from "vscode-languageclient";
+import { LookupNoteTypeEnum } from "./components/lookup/types";
 import { PickerUtilsV2 } from "./components/lookup/utils";
 import {
   DendronContext,
@@ -789,7 +792,7 @@ export class DendronClientUtilsV2 {
    * @returns The file name of the new note
    */
   static genNoteName(
-    type: "JOURNAL" | "SCRATCH",
+    type: "JOURNAL" | "SCRATCH" | LookupNoteTypeEnum.task,
     opts?: CreateFnameOpts
   ): {
     noteName: string;
@@ -797,30 +800,43 @@ export class DendronClientUtilsV2 {
   } {
     // gather inputs
     const config = getDWorkspace().config;
-    const journalConfig = ConfigUtils.getJournal(config);
-    const dateFormat: string =
-      type === "SCRATCH"
-        ? getExtension().getWorkspaceSettingOrDefault({
-            wsConfigKey: "dendron.defaultScratchDateFormat",
-            dendronConfigKey: "workspace.scratch.dateFormat",
-          })
-        : journalConfig.dateFormat;
+    
+    let dateFormat: string;
+    let addBehavior: NoteAddBehavior;
+    let name: string;
 
-    const addBehavior: LegacyNoteAddBehavior =
-      type === "SCRATCH"
-        ? getExtension().getWorkspaceSettingOrDefault({
-            wsConfigKey: "dendron.defaultScratchAddBehavior",
-            dendronConfigKey: "workspace.scratch.addBehavior",
-          })
-        : journalConfig.addBehavior;
-
-    const name: string =
-      type === "SCRATCH"
-        ? getExtension().getWorkspaceSettingOrDefault({
-            wsConfigKey: "dendron.defaultScratchName",
-            dendronConfigKey: "workspace.scratch.name",
-          })
-        : journalConfig.name;
+    switch (type) {
+      case "SCRATCH": {
+        dateFormat = getExtension().getWorkspaceSettingOrDefault({
+          wsConfigKey: "dendron.defaultScratchDateFormat",
+          dendronConfigKey: "workspace.scratch.dateFormat",
+        });
+        addBehavior = getExtension().getWorkspaceSettingOrDefault({
+          wsConfigKey: "dendron.defaultScratchAddBehavior",
+          dendronConfigKey: "workspace.scratch.addBehavior",
+        });
+        name = getExtension().getWorkspaceSettingOrDefault({
+          wsConfigKey: "dendron.defaultScratchName",
+          dendronConfigKey: "workspace.scratch.name",
+        });
+        break;
+      }
+      case "JOURNAL": {
+        const journalConfig = ConfigUtils.getJournal(config);
+        dateFormat = journalConfig.dateFormat;
+        addBehavior = journalConfig.addBehavior;
+        name = journalConfig.name;
+        break;
+      }
+      case LookupNoteTypeEnum.task: {
+        const taskConfig = ConfigUtils.getTask(config);
+        dateFormat = taskConfig.dateFormat;
+        addBehavior = taskConfig.addBehavior;
+        name = taskConfig.name;
+        break;
+      }
+      default: assertUnreachable(type);
+    }
 
     if (!_.includes(_noteAddBehaviorEnum, addBehavior)) {
       const actual = addBehavior;

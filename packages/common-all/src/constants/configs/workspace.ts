@@ -7,6 +7,7 @@ import {
   // dayOfWeekNumber,
   JournalConfig,
 } from "../../types/configs/workspace/journal";
+import { TaskConfig } from "../../types/configs/workspace/task";
 import { DendronWorkspaceConfig } from "../../types/configs/workspace/workspace";
 import { DendronGraphConfig } from "../../types/configs/workspace/graph";
 import { ScratchConfig } from "../../types/configs/workspace/scratch";
@@ -102,6 +103,34 @@ const SCRATCH: DendronConfigEntryCollection<ScratchConfig> = {
   addBehavior: ADD_BEHAVIOR,
 };
 
+const TASK: DendronConfigEntryCollection<TaskConfig> = {
+  name: {
+    label: "Task name",
+    desc: "Name used for task notes",
+  },
+  dateFormat: {
+    label: "Date Format",
+    desc: "Date format used for task notes",
+  },
+  addBehavior: ADD_BEHAVIOR,
+  completedStatus: {
+    label: "Completed task status",
+    desc: "Marking a task note with this status means that the task is completed.",
+  },
+  prioritySymbols: {
+    label: "Priority symbols",
+    desc: "Maps symbols in the \"priority\" frontmatter property to a symbol, word, or sentence. This will be used to display that priority to the users."
+  },
+  statusSymbols: {
+    label: "Status symbols",
+    desc: "Maps symbols in the \"status\" frontmatter property to a symbol, word, or sentence. This will be used to display that status to the users."
+  },
+  todoIntegration: {
+    label: "Todo integration",
+    desc: "Adds a \"TODO: ...\" property to the frontmatter. This allows easier interoperability with other extensions like Todo Tree."
+  }
+}
+
 export const WORKSPACE: DendronConfigEntryCollection<DendronWorkspaceConfig> = {
   dendronVersion: {
     label: "Dendron version",
@@ -125,6 +154,7 @@ export const WORKSPACE: DendronConfigEntryCollection<DendronWorkspaceConfig> = {
   },
   journal: JOURNAL,
   scratch: SCRATCH,
+  task: TASK,
   graph: GRAPH,
   disableTelemetry: {
     label: `Disable Telemetry`,

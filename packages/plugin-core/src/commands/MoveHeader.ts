@@ -1,30 +1,34 @@
 import {
   DendronError,
-  NoteProps,
-  NoteUtils,
-  VaultUtils,
-  getSlugger,
-  ERROR_SEVERITY,
-  DNoteLink,
   DLink,
+  DNoteLink,
   DVault,
+  ERROR_SEVERITY,
+  getSlugger,
+  NoteProps,
   NotePropsDict,
   NoteQuickInput,
+  NoteUtils,
+  VaultUtils,
 } from "@dendronhq/common-all";
+import { file2Note, vault2Path } from "@dendronhq/common-server";
 import {
+  Anchor,
+  AnchorUtils,
   DendronASTDest,
   DendronASTTypes,
-  AnchorUtils,
+  Heading,
+  HistoryEvent,
+  LinkUtils,
+  MDUtilsV5,
+  Node,
   Processor,
   RemarkUtils,
-  MDUtilsV5,
   visit,
-  Heading,
-  Node,
-  Anchor,
-  LinkUtils,
-  HistoryEvent,
 } from "@dendronhq/engine-server";
+import _ from "lodash";
+import path from "path";
+import { Location } from "vscode";
 import {
   LookupControllerV3,
   LookupControllerV3CreateOpts,
@@ -33,23 +37,20 @@ import {
   NoteLookupProvider,
   NoteLookupProviderSuccessResp,
 } from "../components/lookup/LookupProviderV3";
-import { DENDRON_COMMANDS } from "../constants";
-import { VSCodeUtils } from "../vsCodeUtils";
-import { BasicCommand } from "./base";
-import _ from "lodash";
-import path from "path";
-import { getEngine, getVaultFromUri } from "../workspace";
-import { EngineAPIService } from "../services/EngineAPIService";
-import { delayedUpdateDecorations } from "../features/windowDecorations";
-import { findReferences, FoundRefT } from "../utils/md";
-import { Location } from "vscode";
-import { file2Note, vault2Path } from "@dendronhq/common-server";
+import { DendronQuickPickerV2 } from "../components/lookup/types";
 import {
   NoteLookupProviderUtils,
   PickerUtilsV2,
 } from "../components/lookup/utils";
-import { DendronQuickPickerV2 } from "../components/lookup/types";
+import { DENDRON_COMMANDS } from "../constants";
+import { delayedUpdateDecorations } from "../features/windowDecorations";
+import { EngineAPIService } from "../services/EngineAPIService";
+import { EngineAPIServiceV2 } from "../services/EngineAPIServiceV2";
+import { findReferences, FoundRefT } from "../utils/md";
+import { VSCodeUtils } from "../vsCodeUtils";
+import { getEngine, getVaultFromUri } from "../workspace";
 import { WSUtils } from "../WSUtils";
+import { BasicCommand } from "./base";
 
 type CommandInput =
   | {
@@ -62,7 +63,9 @@ type CommandOpts = {
   dest?: NoteProps;
   origin: NoteProps;
   nodesToMove: Node[];
-  engine: EngineAPIService;
+  modifiedOriginTree: Node;
+  originProc: Processor;
+  engine: EngineAPIServiceV2;
 } & CommandInput;
 type CommandOutput = {
   updated: NoteProps[];
@@ -95,7 +98,7 @@ export class MoveHeaderCommand extends BasicCommand<
     severity: ERROR_SEVERITY.MINOR,
   });
 
-  private getProc = (engine: EngineAPIService, note: NoteProps) => {
+  private getProc = (engine: EngineAPIServiceV2, note: NoteProps) => {
     return MDUtilsV5.procRemarkFull({
       engine,
       fname: note.fname,
@@ -110,7 +113,7 @@ export class MoveHeaderCommand extends BasicCommand<
    * @param engine
    * @returns {}
    */
-  private validateAndProcessInput(engine: EngineAPIService): {
+  private validateAndProcessInput(engine: EngineAPIServiceV2): {
     proc: Processor;
     origin: NoteProps;
     targetHeader: Heading;
@@ -265,7 +268,7 @@ export class MoveHeaderCommand extends BasicCommand<
    * @param nodesToMove
    */
   private async appendHeaderToDestination(
-    engine: EngineAPIService,
+    engine: EngineAPIServiceV2,
     dest: NoteProps,
     nodesToMove: Node[]
   ): Promise<void> {
@@ -318,7 +321,7 @@ export class MoveHeaderCommand extends BasicCommand<
    */
   private getNoteByLocation(
     location: Location,
-    engine: EngineAPIService
+    engine: EngineAPIServiceV2
   ): NoteProps | undefined {
     const { wsRoot, notes } = engine;
     const fsPath = location.uri.fsPath;
@@ -467,7 +470,7 @@ export class MoveHeaderCommand extends BasicCommand<
   async updateReferences(
     foundReferences: FoundRefT[],
     anchorNamesToUpdate: string[],
-    engine: EngineAPIService,
+    engine: EngineAPIServiceV2,
     origin: NoteProps,
     dest: NoteProps
   ): Promise<NoteProps[]> {

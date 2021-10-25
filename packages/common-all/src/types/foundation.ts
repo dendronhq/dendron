@@ -1,6 +1,7 @@
 import { DNoteAnchorPositioned } from "./typesv2";
 import { URI } from "vscode-uri";
 import { DVault } from "./workspace";
+import { NoteType } from ".";
 
 export interface Point {
   /**
@@ -167,6 +168,8 @@ export type DNodeProps<T = any, TCustom = any> = {
 
   /** To be used by social media platforms as a thumbnail/preview. */
   image?: DNodeImage;
+
+  types?: NoteType[];
 };
 
 export type SchemaData = {

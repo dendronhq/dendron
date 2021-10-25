@@ -1,10 +1,11 @@
-import { ConfigUtils, NoteUtils, VaultUtils } from "@dendronhq/common-all";
+import { ConfigUtils, VaultUtils } from "@dendronhq/common-all";
 import { cleanName } from "@dendronhq/common-server";
 import _ from "lodash";
 import * as vscode from "vscode";
 import { DendronClientUtilsV2 } from "../clientUtils";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
+import { JournalNote } from "../noteTypes/journal";
 import { getDWorkspace } from "../workspace";
 import { BaseCommand } from "./base";
 import { GotoNoteCommand } from "./GotoNote";
@@ -24,13 +25,10 @@ export class CreateDailyJournalCommand extends BaseCommand<
 > {
   key = DENDRON_COMMANDS.CREATE_DAILY_JOURNAL_NOTE.key;
   async gatherInputs(): Promise<CommandInput | undefined> {
-    const config = getDWorkspace().config;
-    const journalConfig = ConfigUtils.getJournal(config);
-    const dailyJournalDomain = journalConfig.dailyDomain;
-    const { noteName: fname } = DendronClientUtilsV2.genNoteName("JOURNAL", {
-      overrides: { domain: dailyJournalDomain },
-    });
-    return { title: fname };
+    const journalType: JournalNote = new JournalNote();
+
+    const name: string = journalType.onWillCreate.setNameModifier({});
+    return { title: name };
   }
 
   async enrichInputs(inputs: CommandInput) {
@@ -47,11 +45,10 @@ export class CreateDailyJournalCommand extends BaseCommand<
     const config = getDWorkspace().config;
     const journalConfig = ConfigUtils.getJournal(config);
     const journalName = journalConfig.name;
+    const journalType: JournalNote = new JournalNote();
+
     this.L.info({ ctx, journalName, fname });
-    const title = NoteUtils.genJournalNoteTitle({
-      fname,
-      journalName,
-    });
+    const title = journalType.onCreate.setTitle(fname, "", "");
 
     const confirmVaultOnCreate =
       ConfigUtils.getCommands(config).lookup.note.confirmVaultOnCreate;
@@ -78,7 +75,7 @@ export class CreateDailyJournalCommand extends BaseCommand<
     await new GotoNoteCommand().execute({
       qs: fname,
       vault,
-      overrides: { title },
+      overrides: { title, types: [journalType] },
     });
   }
 }

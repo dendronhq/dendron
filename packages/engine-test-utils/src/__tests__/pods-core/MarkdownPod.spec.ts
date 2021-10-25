@@ -68,6 +68,21 @@ const setupBasicMulti = async (opts: WorkspaceOpts) => {
     body: `[[dendron://${VaultUtils.getName(vaults[0])}/target]]`,
   });
 };
+const setupRefWithAnchor = async (opts: WorkspaceOpts) => {
+  const { wsRoot, vaults } = opts;
+  await NoteTestUtilsV4.createNote({
+    wsRoot,
+    vault: vaults[0],
+    fname: "parent",
+    body: "![[child]]",
+  });
+  await NoteTestUtilsV4.createNote({
+    wsRoot,
+    vault: vaults[0],
+    fname: "child",
+    body: "Hello World ^Ddu3OTwrJYvI",
+  });
+};
 
 describe("markdown publish pod", () => {
   test("basic", async () => {
@@ -97,6 +112,7 @@ describe("markdown publish pod", () => {
       async ({ engine, vaults, wsRoot }) => {
         const pod = new MarkdownPublishPod();
         const vaultName = VaultUtils.getName(vaults[0]);
+        console.log("wsRoot", wsRoot);
         const resp = await pod.execute({
           engine,
           vaults,
@@ -112,6 +128,28 @@ describe("markdown publish pod", () => {
         await checkNotInString(resp, "portal");
       },
       { expect, preSetupHook: ENGINE_HOOKS.setupRefs }
+    );
+  });
+
+  test("markdown publish to ignore block anchors in ref content", async () => {
+    await runEngineTestV5(
+      async ({ engine, vaults, wsRoot }) => {
+        const pod = new MarkdownPublishPod();
+        const vaultName = VaultUtils.getName(vaults[0]);
+        const resp = await pod.execute({
+          engine,
+          vaults,
+          wsRoot,
+          config: {
+            fname: "parent",
+            vaultName,
+            dest: "stdout",
+          },
+        });
+        expect(resp).toEqual("# Parent\n\nHello World");
+        await checkNotInString(resp, "Ddu3OTwrJYvI");
+      },
+      { expect, preSetupHook: setupRefWithAnchor }
     );
   });
 

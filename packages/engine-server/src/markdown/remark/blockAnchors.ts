@@ -80,8 +80,9 @@ function attachCompiler(proc: Unified.Processor, _opts?: PluginOpts) {
       const fullId = node.id;
       switch (dest) {
         case DendronASTDest.MD_DENDRON:
-        case DendronASTDest.MD_REGULAR:
           return fullId;
+        case DendronASTDest.MD_REGULAR:
+          return _opts?.hideBlockAnchors ? "" : fullId;
         case DendronASTDest.MD_ENHANCED_PREVIEW:
           return `<a aria-hidden="true" class="block-anchor anchor-heading" id="${fullId}" href="#${fullId}">^${fullId}</a>`;
         default:

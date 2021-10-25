@@ -6,6 +6,8 @@ import {
   NoteViewMessageType,
   ThemeTarget,
   ThemeType,
+  FOOTNOTE_REF_CLASS,
+  FOOTNOTE_DEF_CLASS,
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -15,6 +17,7 @@ import {
   querystring,
 } from "@dendronhq/common-frontend";
 import { Col, Layout, Row } from "antd";
+import _ from "lodash";
 import Head from "next/head";
 import * as React from "react";
 import { useThemeSwitcher } from "react-css-theme-switcher";
@@ -27,6 +30,16 @@ const logger = createLogger("notePreview");
 function isHTMLAnchorElement(element: Element): element is HTMLAnchorElement {
   return element.nodeName === "A";
 }
+
+/** Set of anchor (<a ...>) classes for which the default action should be performed.
+ *
+ * Use this for links that are handled within the frontend, like the links for the footnotes that just move the preview.
+ * This will stop the click from being sent to VSCode, and it will allow the default click action to proceed.
+ */
+const DEFAULT_ACTION_ANCHOR_CLASSES: Set<string> = new Set([
+  FOOTNOTE_REF_CLASS,
+  FOOTNOTE_DEF_CLASS,
+]);
 
 type MermaidInitialzeParams = {
   startOnLoad: boolean;
@@ -175,11 +188,26 @@ function Note({ engine, ide, ws, port }: DendronProps & WorkspaceProps) {
   const onClickHandler = React.useCallback(
     (event: Event) => {
       const target = event.target as Element;
+      // Propogate clicks to wikilinks, but not clicks to elements like footnotes
       if (isHTMLAnchorElement(target)) {
+        if (
+          _.some(target.classList, (class_) =>
+            DEFAULT_ACTION_ANCHOR_CLASSES.has(class_)
+          )
+        ) {
+          logger.info({
+            ctx: `onClickHandler#${target.nodeName}`,
+            event,
+            target,
+            msg: "skipped click on default action anchor",
+          });
+          return;
+        }
         logger.info({
           ctx: `onClickHandler#${target.nodeName}`,
           event,
           target,
+          msg: "propagating click to VSCode",
         });
         event.preventDefault();
         event.stopPropagation();

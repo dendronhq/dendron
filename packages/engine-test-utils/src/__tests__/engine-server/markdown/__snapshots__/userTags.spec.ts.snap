@@ -1,5 +1,27 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`user tags WHEN disabled in config THEN user tags don't get parsed or processed 1`] = `
+VFile {
+  "contents": "<h1 id=\\"root\\">Root</h1>
+<p>@test</p>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`user tags WHEN disabled in config THEN user tags don't get parsed or processed 2`] = `
+VFile {
+  "contents": "<h1 id=\\"root\\">Root</h1>
+<p>@test</p>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
 exports[`user tags rendering compile "HTML: inside a link" 1`] = `
 VFile {
   "contents": "<h1 id=\\"root\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#root\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Root</h1>

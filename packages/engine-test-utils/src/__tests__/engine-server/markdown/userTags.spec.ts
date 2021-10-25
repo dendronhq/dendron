@@ -12,6 +12,7 @@ import {
   UnistNode,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
+import { TestConfigUtils } from "../../..";
 import { runEngineTestV5 } from "../../../engine";
 import { ENGINE_HOOKS } from "../../../presets";
 import {
@@ -113,6 +114,14 @@ describe("user tags", () => {
       );
       expect(getDescendantNode(resp1, 0, 1).value).toEqual("@松本.行弘");
     });
+
+    test("doesn't parse email addresses", () => {
+      const resp1 = proc().parse("user@example.com");
+      expect(getDescendantNode(resp1, 0, 0).type).toEqual(DendronASTTypes.LINK);
+      expect(getDescendantNode(resp1, 0, 0, 0).type).toEqual(
+        DendronASTTypes.TEXT
+      );
+    });
   });
 
   describe("rendering", () => {
@@ -205,5 +214,38 @@ describe("user tags", () => {
 
     const ALL_TEST_CASES = [...SIMPLE, ...INSIDE_LINK];
     runAllTests({ name: "compile", testCases: ALL_TEST_CASES });
+  });
+
+  describe("WHEN disabled in config", () => {
+    test("THEN user tags don't get parsed or processed", async () => {
+      await runEngineTestV5(
+        async ({ engine, vaults }) => {
+          const proc = MDUtilsV5.procRehypeFull(
+            {
+              engine,
+              vault: vaults[0],
+              config: engine.config,
+              fname: "root",
+            },
+            {}
+          );
+          const out = await proc.process("@test");
+          expect(checkVFile(out, "<p>@test</p>"));
+          expect(checkNotInVFile(out, "<a", "user.test"));
+        },
+        {
+          expect,
+          preSetupHook: async ({ wsRoot }) => {
+            TestConfigUtils.withConfig(
+              (config) => {
+                config.workspace!.enableUserTags = false;
+                return config;
+              },
+              { wsRoot }
+            );
+          },
+        }
+      );
+    });
   });
 });

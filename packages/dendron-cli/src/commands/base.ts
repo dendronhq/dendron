@@ -130,6 +130,10 @@ export abstract class CLICommand<
       ...analyticsPayload,
     });
 
+    if (out.exit) {
+      process.exit();
+    }
+
     return out;
   };
 

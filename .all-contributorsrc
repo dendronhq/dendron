@@ -762,6 +762,17 @@
         "doc",
         "test"
       ]
+    },
+    {
+      "login": "simkimsia",
+      "name": "simkimsia",
+      "avatar_url": "https://avatars.githubusercontent.com/u/245021?v=4",
+      "profile": "https://github.com/simkimsia",
+      "contributions": [
+        "bug",
+        "financial",
+        "tutorial"
+      ]
     }
   ],
   "contributorsPerLine": 7,

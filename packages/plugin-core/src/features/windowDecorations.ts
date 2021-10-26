@@ -433,7 +433,7 @@ function decorateWikiLink(
   const position = wikiLink.position as Position | undefined;
   if (_.isUndefined(position)) return []; // should never happen
 
-  const fname = wikiLink.value;
+  const fname: string | undefined = wikiLink.value;
   const vaultName = wikiLink.data.vaultName;
 
   const type = linkedNoteType({
@@ -492,11 +492,11 @@ function decorateTaskNote({
   doExpensiveDecorations,
 }: {
   range: Range;
-  fname: string;
+  fname: string | undefined;
   vaultName?: string;
   doExpensiveDecorations: boolean;
 }) {
-  if (!doExpensiveDecorations) return;
+  if (!doExpensiveDecorations || !fname) return;
   const { notes, vaults, config } = getDWorkspace().engine;
   const taskConfig = ConfigUtils.getTask(config);
   const vault = vaultName

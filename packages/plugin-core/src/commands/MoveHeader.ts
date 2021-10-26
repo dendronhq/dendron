@@ -5,6 +5,8 @@ import {
   VaultUtils,
   getSlugger,
   ERROR_SEVERITY,
+  DNoteLink,
+  DLink,
 } from "@dendronhq/common-all";
 import {
   HistoryService,
@@ -18,6 +20,7 @@ import {
   Heading,
   Node,
   Anchor,
+  LinkUtils,
 } from "@dendronhq/engine-server";
 import { LookupControllerV3 } from "../components/lookup/LookupControllerV3";
 import {
@@ -34,6 +37,7 @@ import { EngineAPIService } from "../services/EngineAPIService";
 import { delayedUpdateDecorations } from "../features/windowDecorations";
 import { findReferences, FoundRefT } from "../utils/md";
 import { Location } from "vscode";
+import { file2Note, vault2Path } from "@dendronhq/common-server";
 
 type CommandInput =
   | {
@@ -43,8 +47,6 @@ type CommandInput =
 type CommandOpts = {
   origin: NoteProps;
   nodesToMove: Node[];
-  modifiedOriginTree: Node;
-  originProc: Processor;
   engine: EngineAPIService;
 } & CommandInput;
 type CommandOutput = {
@@ -68,7 +70,8 @@ export class MoveHeaderCommand extends BasicCommand<
   });
 
   private noNodesToMoveError = new DendronError({
-    message: "There are no nodes to move. If your selection is valid, try again after reloading VSCode.",
+    message:
+      "There are no nodes to move. If your selection is valid, try again after reloading VSCode.",
     severity: ERROR_SEVERITY.MINOR,
   });
 
@@ -176,8 +179,6 @@ export class MoveHeaderCommand extends BasicCommand<
               dest: cdata.selectedItems[0],
               origin,
               nodesToMove,
-              modifiedOriginTree: originTree,
-              originProc: proc,
               engine,
             });
             lc.onHide();
@@ -208,12 +209,15 @@ export class MoveHeaderCommand extends BasicCommand<
     dest: NoteProps,
     nodesToMove: Node[]
   ): Promise<void> {
-    const destProc = this.getProc(engine, dest!);
-    const destTree = destProc.parse(dest!.body);
-    destTree.children = (destTree.children as Node[]).concat(nodesToMove);
-    const modifiedDestContent = destProc.stringify(destTree);
-    dest!.body = modifiedDestContent;
-    await engine.writeNote(dest!, {
+    const destProc = this.getProc(engine, dest);
+
+    // make a fake tree to feed through proc.stringify
+    const fakeTree = { type: "root", children: nodesToMove } as Node;
+    const destContentToAppend = destProc.stringify(fakeTree);
+
+    // add the stringified blocks to destination note body
+    dest.body = `${dest.body}\n\n${destContentToAppend}`;
+    await engine.writeNote(dest, {
       updateExisting: true,
     });
   }
@@ -273,24 +277,29 @@ export class MoveHeaderCommand extends BasicCommand<
     return note;
   }
 
-  private hasAnchorsToUpdate(
-    ref: FoundRefT,
-    anchorNamesToUpdate: string[],
-  ) {
+  /**
+   * Helper for {@link MoveHeaderCommand.updateReferences}
+   * Given a {@link FoundRefT} and a list of anchor names,
+   * check if ref contains an anchor name to update.
+   * @param ref
+   * @param anchorNamesToUpdate
+   * @returns
+   */
+  private hasAnchorsToUpdate(ref: FoundRefT, anchorNamesToUpdate: string[]) {
     const matchText = ref.matchText;
     const wikiLinkRegEx = /\[\[(?<text>.+?)\]\]/;
-        
+
     const wikiLinkMatch = wikiLinkRegEx.exec(matchText);
 
     if (wikiLinkMatch && wikiLinkMatch.groups?.text) {
       let processed = wikiLinkMatch.groups.text;
       if (processed.includes("|")) {
-        const [ _alias, link ] = processed.split("|");
+        const [_alias, link] = processed.split("|");
         processed = link;
       }
 
       if (processed.includes("#")) {
-        const [ _fname, anchor ] = processed.split("#");
+        const [_fname, anchor] = processed.split("#");
         return anchorNamesToUpdate.includes(anchor);
       } else {
         return false;
@@ -298,6 +307,85 @@ export class MoveHeaderCommand extends BasicCommand<
     } else {
       return false;
     }
+  }
+
+  /**
+   * Helper for {@link MoveHeaderCommand.updateReferences}
+   * Given an note, origin note, and a list of anchor names,
+   * return all links that should be updated in {@link note},
+   * is a descending order of location offset.
+   * @param note
+   * @param engine
+   * @param origin
+   * @param anchorNamesToUpdate
+   * @returns
+   */
+  private findLinksToUpdate(
+    note: NoteProps,
+    engine: EngineAPIService,
+    origin: NoteProps,
+    anchorNamesToUpdate: string[]
+  ) {
+    const links = LinkUtils.findLinks({
+      note,
+      engine,
+    }).filter((link) => {
+      return (
+        link.to?.fname === origin.fname &&
+        link.to?.anchorHeader &&
+        anchorNamesToUpdate.includes(link.to.anchorHeader)
+      );
+    });
+
+    // modify it from the bottom
+    // to avoid dealing with offsetting locations
+    const linksToUpdate = _.orderBy(
+      links,
+      (link) => {
+        return link.position?.start.offset;
+      },
+      "desc"
+    );
+
+    return linksToUpdate;
+  }
+
+  /**
+   * Helper for {@link MoveHeaderCommand.updateReferences}
+   * Given a note that has links to update, and a list of links,
+   * modify the note's body to have updated links.
+   * @param note Note that has links to update
+   * @param linksToUpdate list of links to update
+   * @param dest Note that was the destination of move header commnad
+   * @returns
+   */
+  private updateLinksInNote(
+    note: NoteProps,
+    linksToUpdate: DLink[],
+    dest: NoteProps
+  ) {
+    return _.reduce(
+      linksToUpdate,
+      (note: NoteProps, linkToUpdate: DLink) => {
+        const oldLink = LinkUtils.dlink2DNoteLink(linkToUpdate);
+        const newLink = {
+          ...oldLink,
+          from: {
+            ...oldLink.from,
+            fname: dest.fname,
+            vaultName: VaultUtils.getName(dest.vault),
+          },
+        } as DNoteLink;
+        const newBody = LinkUtils.updateLink({
+          note: note!,
+          oldLink,
+          newLink,
+        });
+        note.body = newBody;
+        return note;
+      },
+      note
+    );
   }
 
   /**
@@ -325,20 +413,22 @@ export class MoveHeaderCommand extends BasicCommand<
       .map((ref) => this.getNoteByLocation(ref.location, engine))
       .filter((note) => note !== undefined)
       .forEach(async (note) => {
-        // find match text in note and modify the node
-        const proc = this.getProc(engine, note!);
-        const tree = proc.parse(note!.body);
-        visit(tree, (node: Node) => {
-          if (node.type === DendronASTTypes.WIKI_LINK) {
-            if (
-              node.value === origin.fname &&
-              _.includes(anchorNamesToUpdate, node.data!.anchorHeader)
-            ) {
-              node.value = dest!.fname;
-            }
-          }
+        const vaultPath = vault2Path({
+          vault: note!.vault,
+          wsRoot: engine.wsRoot,
         });
-        note!.body = proc.stringify(tree);
+        const _note = file2Note(
+          path.join(vaultPath, note!.fname + ".md"),
+          note!.vault
+        );
+        const linksToUpdate = this.findLinksToUpdate(
+          _note,
+          engine,
+          origin,
+          anchorNamesToUpdate
+        );
+        const modifiedNote = this.updateLinksInNote(_note, linksToUpdate, dest);
+        note!.body = modifiedNote.body;
         const writeResp = await engine.writeNote(note!, {
           updateExisting: true,
         });
@@ -347,31 +437,63 @@ export class MoveHeaderCommand extends BasicCommand<
     return updated;
   }
 
-  async execute(opts: CommandOpts): Promise<CommandOutput> {
-    const ctx = "MoveHeaderCommand";
-    this.L.info({ ctx, opts });
-    const {
-      dest,
-      origin,
-      nodesToMove,
-      modifiedOriginTree,
-      originProc,
-      engine,
-    } = opts;
-    // deep copy the origin before mutating it
-    const originDeepCopy = _.cloneDeep(origin);
-    // remove header from origin
-    const modifiedOriginContent = originProc.stringify(modifiedOriginTree);
+  /**
+   * Helper for {@link MoveHeaderCommand.execute}
+   * Given a origin note and a list of nodes to move,
+   * remove the nodes from the origin's note body
+   * and return the modified origin content rendered as string
+   * @param origin origin note
+   * @param nodesToMove nodes that will be moved
+   * @param engine
+   * @returns
+   */
+  async removeBlocksFromOrigin(
+    origin: NoteProps,
+    nodesToMove: Node[],
+    engine: EngineAPIService
+  ) {
+    // find where the extracted block starts and ends
+    const startOffset = nodesToMove[0].position?.start.offset;
+    const endOffset = _.last(nodesToMove)!.position?.end.offset;
+
+    // remove extracted blocks
+    const originBody = origin.body;
+    const modifiedOriginContent = [
+      originBody.slice(0, startOffset),
+      originBody.slice(endOffset),
+    ].join("");
+
     origin.body = modifiedOriginContent;
+
     await engine.writeNote(origin, {
       updateExisting: true,
     });
 
+    return modifiedOriginContent;
+  }
+
+  async execute(opts: CommandOpts): Promise<CommandOutput> {
+    const ctx = "MoveHeaderCommand";
+    this.L.info({ ctx, opts });
+    const { origin, nodesToMove, engine } = opts;
+    const dest = opts.dest as NoteProps;
+
+    // deep copy the origin before mutating it
+    const originDeepCopy = _.cloneDeep(origin);
+
+    // remove blocks from origin
+    const modifiedOriginContent = await this.removeBlocksFromOrigin(
+      origin,
+      nodesToMove,
+      engine
+    );
+
     // append header to destination
-    await this.appendHeaderToDestination(engine, dest!, nodesToMove);
+    await this.appendHeaderToDestination(engine, dest, nodesToMove);
+
     delayedUpdateDecorations();
 
-    // update reference
+    // update all references to old block
     const anchorNamesToUpdate = this.findAnchorNamesToUpdate(
       originDeepCopy,
       modifiedOriginContent
@@ -382,7 +504,7 @@ export class MoveHeaderCommand extends BasicCommand<
       anchorNamesToUpdate,
       engine,
       origin,
-      dest!
+      dest
     );
     return { ...opts, updated };
   }

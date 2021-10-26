@@ -773,6 +773,15 @@
         "financial",
         "tutorial"
       ]
+    },
+    {
+      "login": "demorganslaw",
+      "name": "demorganslaw",
+      "avatar_url": "https://avatars.githubusercontent.com/u/88507322?v=4",
+      "profile": "https://github.com/demorganslaw",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

@@ -1,7 +1,7 @@
 ![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/logo-256.png)
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-79-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-80-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 # Welcome to Dendron!
@@ -163,6 +163,7 @@ Dendron wouldn't be what it is today without help from these wonderful gardeners
   <tr>
     <td align="center"><a href="https://dorety.dev"><img src="https://avatars.githubusercontent.com/u/36145101?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Jonathan Dorety</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=jdorety" title="Documentation">📖</a></td>
     <td align="center"><a href="http://bcdef.org"><img src="https://avatars.githubusercontent.com/u/142472?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Buck DeFore</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=bdefore" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://bandism.net/"><img src="https://avatars.githubusercontent.com/u/22633385?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Ikko Ashimine</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=eltociear" title="Documentation">📖</a> <a href="https://github.com/dendronhq/dendron/commits?author=eltociear" title="Tests">⚠️</a></td>
   </tr>
 </table>
 

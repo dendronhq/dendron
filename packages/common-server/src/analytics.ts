@@ -558,6 +558,19 @@ export class SegmentUtils {
     });
   }
 
+  static async trackSync(
+    event: string,
+    platformProps: VSCodeProps | CLIProps,
+    props?: any
+  ) {
+    const { type, ...rest } = platformProps;
+    await SegmentClient.instance().track(event, {
+      ...props,
+      ...SegmentUtils.getCommonProps(),
+      ...rest,
+    });
+  }
+
   static identify(identifyProps: VSCodeIdentifyProps | CLIIdentifyProps) {
     if (identifyProps.type === "vscode") {
       const { ideVersion, ideFlavor, appVersion, userAgent } = identifyProps;

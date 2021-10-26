@@ -159,7 +159,7 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     return { ...args, ...engineArgs };
   }
 
-  async execute(opts: CommandOpts): Promise<CommandCommonProps> {
+  async execute(opts: CommandOpts): Promise<CommandOutput> {
     const { action, engine, query, candidates, limit, dryRun, exit } =
       _.defaults(opts, {
         limit: 99999,
@@ -198,7 +198,7 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
         console.log(
           "the CLI currently doesn't support this action. please run this using the plugin"
         );
-        process.exit();
+        return { exit }
       }
       // eslint-disable-next-line no-fallthrough
       case DoctorActions.H1_TO_TITLE: {
@@ -339,9 +339,6 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       Promise.resolve()
     );
     this.L.info({ msg: "doctor done", numChanges });
-    if (exit) {
-      process.exit();
-    }
-    return {};
+    return { exit };
   }
 }

@@ -1,7 +1,7 @@
 ![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/logo-256.png)
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-82-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-83-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 # Welcome to Dendron!
@@ -166,6 +166,7 @@ Dendron wouldn't be what it is today without help from these wonderful gardeners
     <td align="center"><a href="https://bandism.net/"><img src="https://avatars.githubusercontent.com/u/22633385?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Ikko Ashimine</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=eltociear" title="Documentation">📖</a> <a href="https://github.com/dendronhq/dendron/commits?author=eltociear" title="Tests">⚠️</a></td>
     <td align="center"><a href="https://github.com/simkimsia"><img src="https://avatars.githubusercontent.com/u/245021?v=4?s=100" width="100px;" alt=""/><br /><sub><b>simkimsia</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Asimkimsia" title="Bug reports">🐛</a> <a href="#financial-simkimsia" title="Financial">💵</a> <a href="#tutorial-simkimsia" title="Tutorials">✅</a></td>
     <td align="center"><a href="https://github.com/demorganslaw"><img src="https://avatars.githubusercontent.com/u/88507322?v=4?s=100" width="100px;" alt=""/><br /><sub><b>demorganslaw</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Ademorganslaw" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://github.com/guilhermesfc"><img src="https://avatars.githubusercontent.com/u/10503773?v=4?s=100" width="100px;" alt=""/><br /><sub><b>guilhermesfc</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Aguilhermesfc" title="Bug reports">🐛</a></td>
   </tr>
 </table>
 

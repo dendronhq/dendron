@@ -14,6 +14,7 @@ type BaseCommandOpts = { quiet?: boolean };
 
 export type CommandCommonProps = {
   error?: DendronError;
+  exit?: boolean;
 };
 
 export abstract class BaseCommand<
@@ -44,7 +45,7 @@ export abstract class CLICommand<
   public desc: string;
   // TODO: hackish
   protected wsRootOptional?: boolean;
-  protected _analyticsPayload: any;
+  protected _analyticsPayload: any = {};
 
   constructor(opts: { name: string; desc: string } & BaseCommandOpts) {
     super(opts.name, opts);
@@ -124,7 +125,7 @@ export abstract class CLICommand<
     }
 
     const analyticsPayload = this._analyticsPayload || {};
-    CLIAnalyticsUtils.track(this.name, {
+    CLIAnalyticsUtils.track(this.constructor.name, {
       duration: getDurationMilliseconds(start),
       ...analyticsPayload,
     });

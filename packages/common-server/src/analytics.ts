@@ -545,7 +545,20 @@ export type VSCodeIdentifyProps = {
 export type CLIIdentifyProps = {} & CLIProps;
 
 export class SegmentUtils {
-  static async track(
+  static track(
+    event: string,
+    platformProps: VSCodeProps | CLIProps,
+    props?: any
+  ) {
+    const { type, ...rest } = platformProps;
+    SegmentClient.instance().track(event, {
+      ...props,
+      ...SegmentUtils.getCommonProps(),
+      ...rest,
+    });
+  }
+
+  static async trackSync(
     event: string,
     platformProps: VSCodeProps | CLIProps,
     props?: any

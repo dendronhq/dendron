@@ -87,14 +87,6 @@ export abstract class CLICommand<
     _.set(this._analyticsPayload, "args", data);
   }
 
-  async trackPayload(start: [number, number]) {
-    const analyticsPayload = this._analyticsPayload || {};
-    await CLIAnalyticsUtils.track(this.constructor.name, {
-      duration: getDurationMilliseconds(start),
-      ...analyticsPayload,
-    });
-  }
-
   /**
    * Converts CLI flags into {@link TOpts}
    * @param args
@@ -128,13 +120,19 @@ export abstract class CLICommand<
       this.L.error(out.error);
     }
 
+    const analyticsPayload = this._analyticsPayload || {};
+    const event = this.constructor.name;
+    const props = {
+      duration: getDurationMilliseconds(start),
+      ...analyticsPayload,
+    };
+
     if (out.exit) {
-      // wait for it if we need to force exit.
-      await this.trackPayload(start);
+      await CLIAnalyticsUtils.trackSync(event, props);
       process.exit();
     }
 
-    this.trackPayload(start);
+    CLIAnalyticsUtils.track(event, props);
 
     return out;
   };

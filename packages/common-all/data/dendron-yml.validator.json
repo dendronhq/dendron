@@ -386,6 +386,9 @@
         "scratch": {
           "$ref": "#/definitions/ScratchConfig"
         },
+        "task": {
+          "$ref": "#/definitions/TaskConfig"
+        },
         "graph": {
           "$ref": "#/definitions/DendronGraphConfig"
         },
@@ -424,6 +427,7 @@
         "vaults",
         "journal",
         "scratch",
+        "task",
         "graph",
         "enableAutoCreateOnDefinition",
         "enableXVaultWikiLink",
@@ -662,6 +666,48 @@
         "addBehavior"
       ],
       "additionalProperties": false,
+      "description": "Namespace for configuring scratch note behavior"
+    },
+    "TaskConfig": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "statusSymbols": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Maps each status to a symbol, word, or sentence. This will be displayed for the task."
+        },
+        "prioritySymbols": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Maps each priority to a symbol, word, or sentence. This will be displayed for the task."
+        },
+        "todoIntegration": {
+          "type": "boolean",
+          "description": "Add a \"TODO: <note title>\" entry to the frontmatter of task notes. This helps with integration with various Todo extensions like Todo Tree."
+        },
+        "name": {
+          "type": "string"
+        },
+        "dateFormat": {
+          "type": "string"
+        },
+        "addBehavior": {
+          "$ref": "#/definitions/NoteAddBehaviorEnum"
+        }
+      },
+      "required": [
+        "addBehavior",
+        "dateFormat",
+        "name",
+        "prioritySymbols",
+        "statusSymbols",
+        "todoIntegration"
+      ],
       "description": "Namespace for configuring scratch note behavior"
     },
     "DendronGraphConfig": {

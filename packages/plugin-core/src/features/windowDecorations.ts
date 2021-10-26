@@ -1,10 +1,12 @@
 import {
+  ConfigUtils,
   DefaultMap,
   isNotUndefined,
   NoteProps,
   NoteUtils,
   Position,
   TAGS_HIERARCHY,
+  TaskNoteUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
 import {
@@ -78,6 +80,9 @@ export const DECORATION_TYPE = {
   /** Decoration for the alias part of wikilinks. */
   alias: window.createTextEditorDecorationType({
     fontStyle: "italic",
+  }),
+  taskNote: window.createTextEditorDecorationType({
+    rangeBehavior: DecorationRangeBehavior.ClosedClosed,
   }),
 };
 
@@ -428,10 +433,13 @@ function decorateWikiLink(
   const position = wikiLink.position as Position | undefined;
   if (_.isUndefined(position)) return []; // should never happen
 
+  const fname = wikiLink.value;
+  const vaultName = wikiLink.data.vaultName;
+
   const type = linkedNoteType({
-    fname: wikiLink.value,
+    fname,
     anchorStart: wikiLink.data.anchorHeader,
-    vaultName: wikiLink.data.vaultName,
+    vaultName,
     document,
     doExpensiveDecorations,
   });
@@ -463,9 +471,82 @@ function decorateWikiLink(
     });
   }
 
+  const taskDecoration = decorateTaskNote({
+    range: wikiLinkrange,
+    fname,
+    vaultName,
+    doExpensiveDecorations,
+  });
+  if (taskDecoration) decorations.push(taskDecoration);
+
   // Highlight the wikilink itself
   decorations.push({ type, decoration: options });
   return decorations;
+}
+
+/** Decorates the note `fname` in vault `vaultName` if the note is a task note. */
+function decorateTaskNote({
+  range,
+  fname,
+  vaultName,
+  doExpensiveDecorations,
+}: {
+  range: Range;
+  fname: string;
+  vaultName?: string;
+  doExpensiveDecorations: boolean;
+}) {
+  if (!doExpensiveDecorations) return;
+  const { notes, vaults, config } = getDWorkspace().engine;
+  const taskConfig = ConfigUtils.getTask(config);
+  const vault = vaultName
+    ? VaultUtils.getVaultByName({ vname: vaultName, vaults })
+    : undefined;
+  const note: NoteProps | undefined = NoteUtils.getNotesByFname({
+    fname,
+    vault,
+    notes,
+  })[0];
+  if (!note || !TaskNoteUtils.isTaskNote(note)) return;
+
+  // Determines whether the task link is preceded by an empty or full checkbox
+  const status = TaskNoteUtils.getStatusSymbol({ note, taskConfig });
+
+  const { due, owner, priority } = note.custom;
+  const decorationString: string[] = [];
+  if (due) decorationString.push(`due:${due}`);
+  if (owner) decorationString.push(`@${owner}`);
+  if (priority) {
+    const prioritySymbol = TaskNoteUtils.getPrioritySymbol({
+      note,
+      taskConfig,
+    });
+    if (prioritySymbol) decorationString.push(`prio:${prioritySymbol}`);
+  }
+  if (note.tags) {
+    const tags = _.isString(note.tags) ? [note.tags] : note.tags;
+    decorationString.push(...tags.map((tag) => `#${tag}`));
+  }
+
+  const decoration: DecorationAndType = {
+    type: DECORATION_TYPE.taskNote,
+    decoration: {
+      range,
+      renderOptions: {
+        before: {
+          contentText: status,
+          fontWeight: "lighter",
+          margin: "0 0.5rem 0 0",
+        },
+        after: {
+          contentText: decorationString.join(" "),
+          fontWeight: "lighter",
+          margin: "0 0 0 0.5rem",
+        },
+      },
+    },
+  };
+  return decoration;
 }
 
 function decorateUserTag(

@@ -4,7 +4,7 @@ import {
   NoteProps,
   NoteQuickInput,
   NoteUtils,
-  genDefaultTaskNoteProps
+  TaskNoteUtils,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import * as vscode from "vscode";
@@ -373,7 +373,7 @@ export class TaskBtn extends DendronBtn {
   static create(pressed?: boolean) {
     return new TaskBtn({
       title: "Create Task Note",
-      iconOff: "diff-add",
+      iconOff: "diff-added",
       iconOn: "menu-selection",
       type: LookupNoteTypeEnum.task,
       pressed,
@@ -394,7 +394,13 @@ export class TaskBtn extends DendronBtn {
     quickPick.value = NotePickerUtils.getPickerValue(quickPick);
     // Add default task note props to the created note
     quickPick.onCreate = async (note) => {
-      note.custom = { ...genDefaultTaskNoteProps(note, ConfigUtils.getTask(getDWorkspace().config)), ...note.custom };
+      note.custom = {
+        ...TaskNoteUtils.genDefaultTaskNoteProps(
+          note,
+          ConfigUtils.getTask(getDWorkspace().config)
+        ).custom,
+        ...note.custom,
+      };
       return note;
     };
     return;

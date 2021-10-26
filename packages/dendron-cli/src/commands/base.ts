@@ -83,12 +83,8 @@ export abstract class CLICommand<
     this.L.info({ msg: `Telemetry is disabled? ${segment.hasOptedOut}` });
   }
 
-  addToAnalyticsPayload(data: any, path: string) {
-    _.set(this._analyticsPayload, path, data);
-  }
-
   addArgsToPayload(data: any) {
-    this.addToAnalyticsPayload(data, "args");
+    _.set(this._analyticsPayload, "args", data);
   }
 
   /**

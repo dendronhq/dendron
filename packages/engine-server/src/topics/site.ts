@@ -16,20 +16,29 @@ import {
   UseVaultBehavior,
   VaultUtils,
   BooleanResp,
+  Stage,
 } from "@dendronhq/common-all";
 import {
   createLogger,
   resolvePath,
+  simpleGit,
   vault2Path,
 } from "@dendronhq/common-server";
+import { NextjsExportConfig, NextjsExportPod } from "@dendronhq/pods-core";
 import fs from "fs-extra";
 import _ from "lodash";
+import execa from "execa";
+import ora from "ora";
 import path from "path";
 import { DConfig } from "../config";
 import { DEngineClient } from "../types";
 import { HierarchyUtils, stripLocalOnlyTags } from "../utils";
 
 const LOGGER_NAME = "SiteUtils";
+
+const $$ = (cmd: string, opts?: any) => {
+  return execa.command(cmd, { shell: true, ...opts });
+};
 
 export class SiteUtils {
   static canPublish(opts: {
@@ -555,6 +564,46 @@ export class SiteUtils {
       }
     }
     return { data: true, error: null };
+  }
+
+  /**
+   * Initialize nextjs templates and all dependencies
+   */
+  static async initialize(opts: { wsRoot: string, quiet?: boolean }) {
+    const cwd = opts.wsRoot;
+    
+    const print = opts.quiet ? () => {} : console.log;
+    const SEEDLING = "🌱";
+
+    const spinner = ora({
+      text: "initializing .next",
+      isSilent: opts.quiet,
+    }).start();
+
+    // remove .next if exists already
+    const nextPath = path.join(cwd, ".next");
+    if (fs.pathExistsSync(nextPath)) {
+      spinner.start(`.next directory already exists at ${_.last(cwd.split("/"))}. Removing...`);
+      await fs.rmdir(nextPath, { recursive: true });
+      spinner.succeed("existing .next directory deleted.");
+    }
+
+    // clone template
+    spinner.start(`initializing publishing at ${cwd}...`);
+    const url = "https://github.com/dendronhq/nextjs-template.git"
+    const git = simpleGit({ baseDir: opts.wsRoot });
+    await git.clone(url, nextPath);
+    spinner.succeed("successfully initialized.");
+
+    // install
+    const cmdInstall = `npm install`;
+    spinner.start("Installing dependencies...");
+    await $$(cmdInstall, { cwd: path.join(cwd, ".next") });
+    spinner.succeed("All dependencies installed.");
+
+    // done!
+    print(`Your Dendron Next Template is now initialized in ".next" ${SEEDLING}`);
+    return { error: null };
   }
 }
 

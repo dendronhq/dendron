@@ -9,7 +9,6 @@ import {
 import { execa, SiteUtils } from "@dendronhq/engine-server";
 import { NextjsExportConfig, NextjsExportPod } from "@dendronhq/pods-core";
 import _ from "lodash";
-import ora from "ora";
 import path from "path";
 import yargs from "yargs";
 import { CLIUtils } from "../utils/cli";
@@ -19,10 +18,6 @@ import { PodSource } from "./pod";
 import { SetupEngineCLIOpts } from "./utils";
 import prompts from "prompts";
 import fs from "fs-extra";
-
-const $ = (cmd: string, opts?: any) => {
-  return execa.commandSync(cmd, { shell: true, ...opts });
-};
 
 const $$ = (cmd: string, opts?: any) => {
   return execa.command(cmd, { shell: true, ...opts });
@@ -159,7 +154,8 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     try {
       switch (cmd) {
         case PublishCommands.INIT: {
-          return await this.init(opts);
+          return await SiteUtils.initialize(opts);
+          // return await this.init(opts);
         }
         case PublishCommands.BUILD: {
           return this.build(opts);
@@ -285,23 +281,23 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     }
   }
 
-  async init(opts: { wsRoot: string }) {
-    const cwd = opts.wsRoot;
-    const nextPath = path.join(cwd, ".next");
-    if (fs.pathExistsSync(nextPath)) {
-      this.print(`.next directory already exists at ${cwd}. Removing.`);
-      fs.rmdirSync(nextPath, { recursive: true });
-    }
-    this.print(`initializing publishing at ${cwd}...`);
-    const cmd = `git clone https://github.com/dendronhq/nextjs-template.git .next`;
-    $(cmd, { cwd });
-    const cmdInstall = `npm install`;
-    const spinner = ora("Installing dependencies....").start();
-    await $$(cmdInstall, { cwd: path.join(cwd, ".next") });
-    spinner.stop();
-    this.print(`Your Dendron Next Template is now initialized in ".next"`);
-    return { error: null };
-  }
+  // async init(opts: { wsRoot: string }) {
+  //   const cwd = opts.wsRoot;
+  //   const nextPath = path.join(cwd, ".next");
+  //   if (fs.pathExistsSync(nextPath)) {
+  //     this.print(`.next directory already exists at ${cwd}. Removing.`);
+  //     fs.rmdirSync(nextPath, { recursive: true });
+  //   }
+  //   this.print(`initializing publishing at ${cwd}...`);
+  //   const cmd = `git clone https://github.com/dendronhq/nextjs-template.git .next`;
+  //   $(cmd, { cwd });
+  //   const cmdInstall = `npm install`;
+  //   const spinner = ora("Installing dependencies....").start();
+  //   await $$(cmdInstall, { cwd: path.join(cwd, ".next") });
+  //   spinner.stop();
+  //   this.print(`Your Dendron Next Template is now initialized in ".next"`);
+  //   return { error: null };
+  // }
 
   async build({ wsRoot, dest, attach, overrides }: BuildCmdOpts) {
     this.print(`generating metadata for publishing...`);

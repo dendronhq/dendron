@@ -113,23 +113,19 @@ const TASK: DendronConfigEntryCollection<TaskConfig> = {
     desc: "Date format used for task notes",
   },
   addBehavior: ADD_BEHAVIOR,
-  completedStatus: {
-    label: "Completed task status",
-    desc: "Marking a task note with this status means that the task is completed.",
-  },
   prioritySymbols: {
     label: "Priority symbols",
-    desc: "Maps symbols in the \"priority\" frontmatter property to a symbol, word, or sentence. This will be used to display that priority to the users."
+    desc: 'Maps symbols in the "priority" frontmatter property to a symbol, word, or sentence. This will be used to display that priority to the users.',
   },
   statusSymbols: {
     label: "Status symbols",
-    desc: "Maps symbols in the \"status\" frontmatter property to a symbol, word, or sentence. This will be used to display that status to the users."
+    desc: 'Maps symbols in the "status" frontmatter property to a symbol, word, or sentence. This will be used to display that status to the users.',
   },
   todoIntegration: {
     label: "Todo integration",
-    desc: "Adds a \"TODO: ...\" property to the frontmatter. This allows easier interoperability with other extensions like Todo Tree."
-  }
-}
+    desc: 'Adds a "TODO: ..." property to the frontmatter. This allows easier interoperability with other extensions like Todo Tree.',
+  },
+};
 
 export const WORKSPACE: DendronConfigEntryCollection<DendronWorkspaceConfig> = {
   dendronVersion: {

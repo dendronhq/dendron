@@ -330,21 +330,10 @@ export class WorkspaceService {
     remoteUrl: string;
   }) {
     // Add the vault to the gitignore of root, so that it doesn't show up as part of root anymore
-    const gitignore = path.join(wsRoot, ".gitignore");
-    let contents: string | undefined;
-    try {
-      contents = await fs.readFile(gitignore, { encoding: "utf-8" });
-    } catch (err: any) {
-      // if the .gitignore was missing, ignore it
-      if (err?.code !== "ENOENT") throw err;
-    }
-    if (
-      !contents ||
-      !contents.match(new RegExp(`^${targetVault.fsPath}/?$`, "g"))
-    ) {
-      // Avoid duplicating the gitignore line if it was already there
-      await fs.appendFile(gitignore, `\n${targetVault.fsPath}\n`);
-    }
+    await GitUtils.addToGitignore({
+      addPath: targetVault.fsPath,
+      root: wsRoot,
+    });
 
     // Now, initialize a repository in it
     const git = new Git({
@@ -393,20 +382,12 @@ export class WorkspaceService {
     wsRoot: string;
     vault: DVault;
   }) {
-    // Remove vault from gitignore of root, if it's there
-    try {
-      const gitignore = path.join(wsRoot, ".gitignore");
-      const contents = await fs.readFile(gitignore, { encoding: "utf-8" });
+    // Remove vault from gitignore of root, if it's there, so it's part of root workspace again
+    await GitUtils.removeFromGitignore({
+      removePath: targetVault.fsPath,
+      root: wsRoot,
+    });
 
-      const newContents = contents.replace(
-        new RegExp(`^${targetVault.fsPath}/?$`, "m"),
-        ""
-      );
-      if (newContents !== contents) await fs.writeFile(gitignore, newContents);
-    } catch (err: any) {
-      // Ignore it if the `.gitignore` was missing
-      if (err?.code !== "ENOENT") throw err;
-    }
     // Remove the .git folder from the vault
     const gitFolder = path.join(wsRoot, targetVault.fsPath, ".git");
     await fs.rm(gitFolder, {

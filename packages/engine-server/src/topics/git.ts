@@ -227,4 +227,21 @@ export class Git {
     );
     return _.trim(stdout);
   }
+
+  async rm(opts: {
+    cached?: boolean;
+    recursive?: boolean;
+    force?: boolean;
+    dryRun?: boolean;
+    path: string;
+  }) {
+    const args: string[] = [];
+    if (opts.cached) args.push("--cached");
+    if (opts.recursive) args.push("-r");
+    if (opts.force) args.push("--force");
+    if (opts.dryRun) args.push("--dry-run");
+    args.push("--", opts.path);
+
+    return execa("git", args, { cwd: this.opts.localUrl });
+  }
 }

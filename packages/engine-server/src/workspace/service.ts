@@ -371,6 +371,18 @@ export class WorkspaceService {
       })
     );
     await this.setConfig(config);
+    // Remove the vault folder from the tree of the root repository. Otherwise, the files will be there when
+    // someone else pulls the root repo, which can break remote vault initialization. This doesn't delete the actual files.
+    if (await fs.pathExists(path.join(wsRoot, ".git"))) {
+      // But only if the workspace is in a git repository, otherwise skip this step.
+      const rootGit = new Git({ localUrl: wsRoot });
+      await rootGit.rm({
+        cached: true,
+        recursive: true,
+        path: targetVault.fsPath,
+      });
+    }
+
     return { remote, branch };
   }
 

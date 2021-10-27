@@ -1,6 +1,6 @@
 import type { FuseNote, NoteProps } from "@dendronhq/common-all";
 import { LoadingStatus } from "@dendronhq/common-frontend";
-import { AutoComplete, Alert } from "antd";
+import { AutoComplete, Alert, Row, Col, Typography, Divider } from "antd";
 import React, { useEffect } from "react";
 import { useCombinedDispatch } from "../features";
 import { browserEngineSlice } from "../features/engine";
@@ -14,6 +14,7 @@ import {
 import DendronSpinner from "./DendronSpinner";
 import _ from "lodash";
 import { useNoteBodies } from "../utils/hooks";
+import FileTextOutlined from "@ant-design/icons/lib/icons/FileTextOutlined";
 
 /** For notes where nothing in the note body matches, only show this many characters for the note body snippet. */
 const MAX_NOTE_SNIPPET_LENGTH = 30;
@@ -49,7 +50,9 @@ function DebouncedDendronSearchComponent(props: DendronPageWithNoteDataProps) {
   // gets fresh results.
   const debouncedSearch: SearchFunction | undefined = fuse
     ? _.debounce<SearchFunction>((query, setResults) => {
-        setResults(fuse.search(query));
+        if (query) {
+          setResults(fuse.search(query));
+        }
       }, SEARCH_DELAY)
     : undefined;
   return (
@@ -64,15 +67,21 @@ type SearchProps = Omit<ReturnType<typeof useFetchFuse>, "fuse"> & {
 function DendronSearchComponent(
   props: DendronPageWithNoteDataProps & SearchProps
 ) {
-  const dispatch = useCombinedDispatch();
-  const { noteBodies, requestNotes } = useNoteBodies();
   const { noteIndex, dendronRouter, search, error, loading, ensureIndexReady } =
     props;
+
   const [value, setValue] = React.useState("");
   const [results, setResults] = React.useState<SearchResults>(undefined);
+
+  const dispatch = useCombinedDispatch();
+  const { noteBodies, requestNotes } = useNoteBodies();
+
   useEffect(() => {
-    if (search) search(value, setResults);
+    if (search) {
+      search(value, setResults);
+    }
   }, [value, search]);
+
   useEffect(() => {
     requestNotes(results?.map(({ item: note }) => note.id) || []);
   }, [results]);
@@ -89,6 +98,8 @@ function DendronSearchComponent(
 
   return (
     <AutoComplete
+      size="large"
+      allowClear
       onClick={ensureIndexReady}
       style={{ width: "100%" }}
       value={value}
@@ -106,20 +117,47 @@ function DendronSearchComponent(
       {results?.map(({ item: note, matches }) => {
         return (
           <AutoComplete.Option key={note.id} value={note.fname}>
-            <div className="search-option">
-              <MatchTitle matches={matches} note={note} />
-              <span
-                className="search-fname"
-                style={{ marginLeft: "10px", opacity: 0.7 }}
+            <Row justify="center" align="middle">
+              <Col xs={0} md={1}>
+                <div style={{ position: "relative", top: -12, left: 0 }}>
+                  <FileTextOutlined style={{ color: "#43B02A" }} />
+                </div>
+              </Col>
+              <Col
+                xs={24}
+                sm={24}
+                md={11}
+                lg={11}
+                style={{ borderRight: "1px solid #d4dadf" }}
               >
-                {note.fname}
-              </span>
-              <MatchBody
-                matches={matches}
-                id={note.id}
-                noteBodies={noteBodies}
-              />
-            </div>
+                <Row>
+                  <Typography.Text>
+                    <MatchTitle matches={matches} note={note} />
+                  </Typography.Text>
+                </Row>
+                <Row>
+                  <Typography.Text type="secondary" ellipsis>
+                    {note.fname}
+                  </Typography.Text>
+                </Row>
+              </Col>
+              <Col
+                className="gutter-row"
+                xs={24}
+                sm={24}
+                md={11}
+                lg={11}
+                offset={1}
+              >
+                <Row>
+                  <MatchBody
+                    matches={matches}
+                    id={note.id}
+                    noteBodies={noteBodies}
+                  />
+                </Row>
+              </Col>
+            </Row>
           </AutoComplete.Option>
         );
       })}

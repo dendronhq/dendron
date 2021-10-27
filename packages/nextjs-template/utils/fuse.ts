@@ -54,7 +54,12 @@ function useFuse(notes: NotePropsDict, provider: FuseIndexProvider) {
 
 /** A react hook to fetch the exported fuse index. */
 export function useFetchFuse(notes: NotePropsDict) {
-  return useFuse(notes, fetchFuseIndex);
+  return useFuse(notes, async () => {
+    return createFuseNote(notes, {
+      keys: ["fname", "title", "body"],
+      findAllMatches: false,
+    });
+  });
 }
 
 /** A react hook to generate the fuse index on the client side. */

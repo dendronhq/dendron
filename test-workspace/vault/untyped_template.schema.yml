@@ -1,0 +1,9 @@
+version: 1
+imports: []
+schemas:
+  - id: untyped_template
+    parent: root
+    children:
+      - pattern: one
+        template: templates.untyped
+        

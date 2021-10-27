@@ -865,46 +865,7 @@ suite("NoteLookupCommand", function () {
             noConfirm: true,
           })) as CommandOutput;
 
-          // quickpick value should be `task.yyyy.mm.dd.ts`
-          const { dateFormat } = ConfigUtils.getTask(engine.config);
-          const today = Time.now().toFormat(dateFormat);
-          const todayFormatted = today.split(".").slice(0, -1).join(".");
-          expect(
-            out.quickpick.value.startsWith(`task.${todayFormatted}.`)
-          ).toBeTruthy();
-
-          done();
-        },
-      });
-    });
-
-    test("task notes created at different times are differently named", (done) => {
-      runLegacyMultiWorkspaceTest({
-        ctx,
-        preSetupHook: async ({ wsRoot, vaults }) => {
-          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
-        },
-        onInit: async ({ vaults, engine }) => {
-          const cmd = new NoteLookupCommand();
-          stubVaultPick(vaults);
-
-          // with scratch note modifier enabled,
-          await VSCodeUtils.openNote(engine.notes["foo"]);
-
-          const createTask = async () => {
-            const out = (await cmd.run({
-              noteType: LookupNoteTypeEnum.task,
-              noConfirm: true,
-            })) as CommandOutput;
-
-            return out.quickpick.value;
-          };
-
-          const scratch1Name = await createTask();
-          await wait1Second();
-          const scratch2Name = await createTask();
-
-          expect(scratch1Name).toNotEqual(scratch2Name);
+          expect(out.quickpick.value.startsWith(`foo`)).toBeTruthy();
 
           done();
         },
@@ -1909,7 +1870,7 @@ suite("NoteLookupCommand", function () {
           expect(selection2linkBtn.pressed).toBeTruthy();
 
           const quickpickValue = controller.quickpick.value;
-          expect(quickpickValue.startsWith(`task.`)).toBeTruthy();
+          expect(quickpickValue.startsWith(`foo.`)).toBeTruthy();
           expect(quickpickValue.endsWith(".foo-body")).toBeTruthy();
 
           done();
@@ -1963,8 +1924,8 @@ suite("NoteLookupCommand", function () {
 
           await controller.onTriggerButton(selection2linkBtn);
           const quickpickValue = controller.quickpick.value;
-          expect(quickpickValue.startsWith(`task.`)).toBeTruthy();
-          expect(quickpickValue.endsWith(".foo-body")).toBeFalsy();
+          expect(quickpickValue.startsWith(`foo`)).toBeTruthy();
+          expect(quickpickValue.endsWith("foo-body")).toBeFalsy();
 
           done();
         },

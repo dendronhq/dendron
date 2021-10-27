@@ -211,8 +211,8 @@ suite("Extension", function () {
               addBehavior: "asOwnDomain",
             },
             task: {
-              addBehavior: "asOwnDomain",
-              dateFormat: "y.MM.dd.HHmmss",
+              addBehavior: "childOfCurrent",
+              dateFormat: "",
               name: "task",
               prioritySymbols: {
                 H: "high",

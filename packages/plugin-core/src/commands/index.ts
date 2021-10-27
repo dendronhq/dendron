@@ -46,8 +46,8 @@ import { ShowPreviewCommand } from "./ShowPreview";
 import { ShowPreviewV2Command } from "./ShowPreviewV2";
 import { SignInCommand } from "./SignIn";
 import { SignUpCommand } from "./SignUp";
-import { SiteBuildCommand } from "./SiteBuild";
-import { SitePreviewCommand } from "./SitePreview";
+import { PublishExportCommand } from "./PublishExportCommand";
+import { PublishDevCommand } from "./PublishDevCommand";
 import { SnapshotVaultCommand } from "./SnapshotVault";
 import { SyncCommand } from "./Sync";
 import { UpgradeSettingsCommand } from "./UpgradeSettings";
@@ -117,8 +117,8 @@ const ALL_COMMANDS = [
   ShowPreviewV2Command,
   SignInCommand,
   SignUpCommand,
-  SiteBuildCommand,
-  SitePreviewCommand,
+  PublishExportCommand,
+  PublishDevCommand,
   SnapshotVaultCommand,
   SyncCommand,
   ConfigureWithUICommand,

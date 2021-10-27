@@ -9,8 +9,8 @@ type CommandOpts = Partial<BuildSiteV2CLICommandOpts>;
 
 type CommandOutput = void;
 
-export class SiteBuildCommand extends BasicCommand<CommandOpts, CommandOutput> {
-  key = DENDRON_COMMANDS.SITE_BUILD.key;
+export class PublishExportCommand extends BasicCommand<CommandOpts, CommandOutput> {
+  key = DENDRON_COMMANDS.PUBLISH_EXPORT.key;
 
   async gatherInputs(): Promise<any> {
     return {};

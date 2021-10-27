@@ -13,11 +13,11 @@ type CommandOpts = Partial<BuildSiteV2CLICommandOpts>;
 
 type CommandOutput = void;
 
-export class SitePreviewCommand extends BasicCommand<
+export class PublishDevCommand extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
-  key = DENDRON_COMMANDS.SITE_PREVIEW.key;
+  key = DENDRON_COMMANDS.PUBLISH_DEV.key;
 
   async gatherInputs(): Promise<any> {
     return {};
@@ -32,7 +32,7 @@ export class SitePreviewCommand extends BasicCommand<
   }
 
   async execute(_opts?: CommandOpts) {
-    const ctx = "SitePreviewCommand";
+    const ctx = "PublishDevCommand";
     this.L.info({ ctx, msg: "enter" });
     const wsRoot = getDWorkspace().wsRoot;
     const port = getExtension().port!;

@@ -665,20 +665,20 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     when: DendronContext.PLUGIN_ACTIVE,
   },
   // --- Publishing
-  SITE_BUILD: {
-    key: "dendron.siteBuild",
-    title: `${CMD_PREFIX} Site Build`,
+  PUBLISH_EXPORT: {
+    key: "dendron.publishExport",
+    title: `${CMD_PREFIX} Publish Export`,
     group: "publishing",
-    desc: "Build your notes using publishing v2",
+    desc: "Export your notes for publishing.",
     docs: [
       "This command works by running `dendron-cli` in the background.",
     ].join("\n"),
     docLink: "",
     docPreview: ``,
   },
-  SITE_PREVIEW: {
-    key: "dendron.sitePreview",
-    title: `${CMD_PREFIX} Site Preview`,
+  PUBLISH_DEV: {
+    key: "dendron.publishDev",
+    title: `${CMD_PREFIX} Publish Dev`,
     group: "publishing",
     desc: "Preview your notes on localhost using publishing v2",
     docs: [

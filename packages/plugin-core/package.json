@@ -365,16 +365,16 @@
         "when": "dendron:pluginActive"
       },
       {
-        "command": "dendron.siteBuild",
-        "title": "Dendron: Site Build",
-        "desc": "Build your notes using publishing v2",
+        "command": "dendron.publishExport",
+        "title": "Dendron: Publish Export",
+        "desc": "Export your notes using publishing v2",
         "docs": "This command works by running `dendron-cli` in the background.",
         "docLink": "",
         "docPreview": ""
       },
       {
-        "command": "dendron.sitePreview",
-        "title": "Dendron: Site Preview",
+        "command": "dendron.publishDev",
+        "title": "Dendron: Publish Dev",
         "desc": "Preview your notes on localhost using publishing v2",
         "docs": "This command works by running `dendron-cli` in the background.",
         "docLink": "",

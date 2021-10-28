@@ -50,6 +50,9 @@
             "path": "packages/nextjs-template"
         },
         {
+            "path": "packages/dendron-plugin-views"
+        },
+        {
             "path": "bootstrap"
         },
         {

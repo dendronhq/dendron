@@ -392,6 +392,11 @@ export class TaskBtn extends DendronBtn {
     ).join(".");
     quickPick.prefix = prefix;
     quickPick.value = NotePickerUtils.getPickerValue(quickPick);
+    // If the lookup value ends up being identical to the current note, this will be confusing for the user because
+    // they won't be able to create a new note. This can happen with the default settings of Task notes.
+    // In that case, we add a trailing dot to suggest that they need to type something more.
+    const activeName = VSCodeUtils.getActiveNote()?.fname;
+    if (quickPick.value === activeName) quickPick.value = `${quickPick.value}.`;
     // Add default task note props to the created note
     quickPick.onCreate = async (note) => {
       note.custom = {

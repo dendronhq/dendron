@@ -63,6 +63,7 @@ import { SeedAddCommand } from "./SeedAddCommand";
 import { SeedRemoveCommand } from "./SeedRemoveCommand";
 import { RunMigrationCommand } from "./RunMigrationCommand";
 import { SeedBrowseCommand } from "./SeedBrowseCommand";
+import { TaskCreateCommand } from "./TaskCreate";
 
 const ALL_COMMANDS = [
   AddAndCommit,
@@ -129,6 +130,7 @@ const ALL_COMMANDS = [
   SeedRemoveCommand,
   RunMigrationCommand,
   SeedBrowseCommand,
+  TaskCreateCommand,
 ] as CodeCommandConstructor[];
 
 // when("betaFeatures", ()=> {

@@ -688,7 +688,11 @@
         },
         "todoIntegration": {
           "type": "boolean",
-          "description": "Add a \"TODO: <note title>\" entry to the frontmatter of task notes. This helps with integration with various Todo extensions like Todo Tree."
+          "description": "Add a \"TODO: <note title>\" entry to the frontmatter of task notes. This can simplify integration with various Todo extensions like Todo Tree."
+        },
+        "taskCreateSelectionType": {
+          "$ref": "#/definitions/LegacyLookupSelectionType",
+          "description": "The default selection type to use in Task Create command."
         },
         "name": {
           "type": "string"
@@ -706,9 +710,18 @@
         "name",
         "prioritySymbols",
         "statusSymbols",
+        "taskCreateSelectionType",
         "todoIntegration"
       ],
       "description": "Namespace for configuring scratch note behavior"
+    },
+    "LegacyLookupSelectionType": {
+      "type": "string",
+      "enum": [
+        "selection2link",
+        "selectionExtract",
+        "none"
+      ]
     },
     "DendronGraphConfig": {
       "type": "object",
@@ -1016,14 +1029,6 @@
         "leaveTrace"
       ],
       "additionalProperties": false
-    },
-    "LegacyLookupSelectionType": {
-      "type": "string",
-      "enum": [
-        "selection2link",
-        "selectionExtract",
-        "none"
-      ]
     },
     "LegacyJournalConfig": {
       "type": "object",

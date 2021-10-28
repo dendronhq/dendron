@@ -213,25 +213,16 @@ suite("Extension", function () {
             task: {
               addBehavior: "childOfCurrent",
               dateFormat: "",
-              name: "task",
+              name: "",
               prioritySymbols: {
                 H: "high",
                 L: "low",
                 M: "medium",
               },
               statusSymbols: {
-                "": "not started",
-                ".": "made progress",
-                a: "assigned",
-                b: "blocked",
-                d: "dropped",
-                l: "delegated",
-                m: "moved",
-                n: "moved to next day",
-                w: "work in progress",
-                x: "done",
-                y: "pending deployment/verification",
+                "": " ",
               },
+              taskCreateSelectionType: 'selection2link',
               todoIntegration: false,
             },
             graph: {

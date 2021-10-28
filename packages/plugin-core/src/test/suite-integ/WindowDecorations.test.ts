@@ -262,7 +262,7 @@ suite("windowDecorations", function () {
           ).toBeTruthy();
 
           expect(taskDecorations[0].renderOptions?.before?.contentText).toEqual(
-            "done"
+            "[done]"
           );
           expect(taskDecorations[0].renderOptions?.after?.contentText).toEqual(
             "due:2021.10.29 @grace prio:high #foo"
@@ -274,7 +274,7 @@ suite("windowDecorations", function () {
             "@grace prio:high #foo #bar"
           );
           expect(taskDecorations[2].renderOptions?.before?.contentText).toEqual(
-            "not started"
+            "[ ]"
           );
           expect(taskDecorations[2].renderOptions?.after?.contentText).toEqual(
             "prio:low"

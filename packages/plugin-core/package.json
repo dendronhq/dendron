@@ -166,14 +166,14 @@
         "desc": "Rename a header, and update all links to it."
       },
       {
-        "command": "dendron.convertLink",
-        "title": "Dendron: Convert Link",
-        "desc": "Convert link candidate into backlink"
-      },
-      {
         "command": "dendron.moveHeader",
         "title": "Dendron: Move Header",
         "desc": "Move a header, and update all links to it."
+      },
+      {
+        "command": "dendron.convertLink",
+        "title": "Dendron: Convert Link",
+        "desc": "Convert link candidate into backlink"
       },
       {
         "command": "dendron.lookupNote",
@@ -195,6 +195,13 @@
         "title": "Dendron: Reload Index",
         "desc": "Reload the index. Necessary for Dendron to pick up on schema changes.",
         "docLink": "dendron.topic.commands.md",
+        "docPreview": ""
+      },
+      {
+        "command": "dendron.taskCreate",
+        "title": "Dendron: Task Create",
+        "desc": "Create a task note.",
+        "docLink": "dendron.topic.tasks.md",
         "docPreview": ""
       },
       {

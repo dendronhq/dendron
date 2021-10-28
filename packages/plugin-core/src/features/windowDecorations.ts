@@ -536,12 +536,12 @@ function decorateTaskNote({
         before: {
           contentText: status,
           fontWeight: "lighter",
-          margin: "0 0.5rem 0 0",
+          margin: "0 0.5rem 0 0.15rem",
         },
         after: {
           contentText: decorationString.join(" "),
           fontWeight: "lighter",
-          margin: "0 0 0 0.5rem",
+          margin: "0 0.4rem 0 0.25rem",
         },
       },
     },

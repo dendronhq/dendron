@@ -12,6 +12,7 @@ import { DendronWorkspaceConfig } from "../../types/configs/workspace/workspace"
 import { DendronGraphConfig } from "../../types/configs/workspace/graph";
 import { ScratchConfig } from "../../types/configs/workspace/scratch";
 import { VAULT_SYNC_MODES } from "./base";
+import { SELECTION_MODES } from "./commands";
 
 const ADD_BEHAVIOR: Record<NoteAddBehaviorEnum, DendronConfigEntry<string>> = {
   [NoteAddBehaviorEnum.childOfDomain]: {
@@ -125,6 +126,12 @@ const TASK: DendronConfigEntryCollection<TaskConfig> = {
     label: "Todo integration",
     desc: 'Adds a "TODO: ..." property to the frontmatter. This allows easier interoperability with other extensions like Todo Tree.',
   },
+  taskCreateSelectionType: Object.fromEntries(
+    Object.entries(SELECTION_MODES).map(([key, value]) => {
+      value.desc = `When using Task Create, ${value.desc.toLowerCase()}`;
+      return [key, value];
+    }),
+  ),
 };
 
 export const WORKSPACE: DendronConfigEntryCollection<DendronWorkspaceConfig> = {

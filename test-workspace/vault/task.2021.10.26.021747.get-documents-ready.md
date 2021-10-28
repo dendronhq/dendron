@@ -2,9 +2,9 @@
 id: wrKwawycw9Vyc73qP1LUq
 title: Get Documents Ready
 desc: ''
-updated: 1635229094267
+updated: 1635450664296
 created: 1635229072353
-status: 'done'
+status: 'x'
 due: ''
 priority: ''
 owner: 'kevin'

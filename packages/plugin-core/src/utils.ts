@@ -299,6 +299,12 @@ export class VSCodeUtils {
     });
   }
 
+  static getActiveNote() {
+    const editor = this.getActiveTextEditor();
+    if (editor) return this.getNoteFromDocument(editor.document);
+    return;
+  }
+
   static getVaultFromDocument(document: vscode.TextDocument) {
     const txtPath = document.uri.fsPath;
     const { wsRoot, vaults } = getDWorkspace();

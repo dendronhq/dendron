@@ -23,7 +23,7 @@ import { InsertNoteIndexConfig } from "../../types/configs/commands/insertNoteIn
 /**
  * Selection mode entries
  */
-const SELECTION_MODES: Record<
+export const SELECTION_MODES: Record<
   LookupSelectionModeEnum,
   DendronConfigEntry<string>
 > = {

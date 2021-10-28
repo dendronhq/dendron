@@ -68,26 +68,17 @@ workspace:
         dateFormat: y.MM.dd.HHmmss
         addBehavior: asOwnDomain
     task:
-        name: task
-        dateFormat: y.MM.dd.HHmmss
-        addBehavior: asOwnDomain
+        name: ''
+        dateFormat: ''
+        addBehavior: childOfCurrent
         statusSymbols:
-            '': not started
-            a: assigned
-            w: work in progress
-            'n': moved to next day
-            x: done
-            d: dropped
-            .: made progress
-            'y': pending deployment/verification
-            b: blocked
-            m: moved
-            l: delegated
+            '': ' '
         prioritySymbols:
             H: high
             M: medium
             L: low
         todoIntegration: false
+        taskCreateSelectionType: selection2link
     graph:
         zoomSpeed: 1
     enableAutoCreateOnDefinition: false
@@ -193,26 +184,17 @@ workspace:
         dateFormat: y.MM.dd.HHmmss
         addBehavior: asOwnDomain
     task:
-        name: task
-        dateFormat: y.MM.dd.HHmmss
-        addBehavior: asOwnDomain
+        name: ''
+        dateFormat: ''
+        addBehavior: childOfCurrent
         statusSymbols:
-            '': not started
-            a: assigned
-            w: work in progress
-            'n': moved to next day
-            x: done
-            d: dropped
-            .: made progress
-            'y': pending deployment/verification
-            b: blocked
-            m: moved
-            l: delegated
+            '': ' '
         prioritySymbols:
             H: high
             M: medium
             L: low
         todoIntegration: false
+        taskCreateSelectionType: selection2link
     graph:
         zoomSpeed: 1
     enableAutoCreateOnDefinition: false
@@ -301,26 +283,17 @@ workspace:
         dateFormat: y.MM.dd.HHmmss
         addBehavior: asOwnDomain
     task:
-        name: task
-        dateFormat: y.MM.dd.HHmmss
-        addBehavior: asOwnDomain
+        name: ''
+        dateFormat: ''
+        addBehavior: childOfCurrent
         statusSymbols:
-            '': not started
-            a: assigned
-            w: work in progress
-            'n': moved to next day
-            x: done
-            d: dropped
-            .: made progress
-            'y': pending deployment/verification
-            b: blocked
-            m: moved
-            l: delegated
+            '': ' '
         prioritySymbols:
             H: high
             M: medium
             L: low
         todoIntegration: false
+        taskCreateSelectionType: selection2link
     graph:
         zoomSpeed: 1
     enableAutoCreateOnDefinition: false
@@ -387,26 +360,17 @@ workspace:
         dateFormat: y.MM.dd.HHmmss
         addBehavior: asOwnDomain
     task:
-        name: task
-        dateFormat: y.MM.dd.HHmmss
-        addBehavior: asOwnDomain
+        name: ''
+        dateFormat: ''
+        addBehavior: childOfCurrent
         statusSymbols:
-            '': not started
-            a: assigned
-            w: work in progress
-            'n': moved to next day
-            x: done
-            d: dropped
-            .: made progress
-            'y': pending deployment/verification
-            b: blocked
-            m: moved
-            l: delegated
+            '': ' '
         prioritySymbols:
             H: high
             M: medium
             L: low
         todoIntegration: false
+        taskCreateSelectionType: selection2link
     graph:
         zoomSpeed: 1
     enableAutoCreateOnDefinition: false
@@ -486,26 +450,17 @@ workspace:
         dateFormat: y.MM.dd.HHmmss
         addBehavior: asOwnDomain
     task:
-        name: task
-        dateFormat: y.MM.dd.HHmmss
-        addBehavior: asOwnDomain
+        name: ''
+        dateFormat: ''
+        addBehavior: childOfCurrent
         statusSymbols:
-            '': not started
-            a: assigned
-            w: work in progress
-            'n': moved to next day
-            x: done
-            d: dropped
-            .: made progress
-            'y': pending deployment/verification
-            b: blocked
-            m: moved
-            l: delegated
+            '': ' '
         prioritySymbols:
             H: high
             M: medium
             L: low
         todoIntegration: false
+        taskCreateSelectionType: selection2link
     graph:
         zoomSpeed: 1
     enableAutoCreateOnDefinition: false
@@ -595,26 +550,17 @@ workspace:
         dateFormat: y.MM.dd.HHmmss
         addBehavior: asOwnDomain
     task:
-        name: task
-        dateFormat: y.MM.dd.HHmmss
-        addBehavior: asOwnDomain
+        name: ''
+        dateFormat: ''
+        addBehavior: childOfCurrent
         statusSymbols:
-            '': not started
-            a: assigned
-            w: work in progress
-            'n': moved to next day
-            x: done
-            d: dropped
-            .: made progress
-            'y': pending deployment/verification
-            b: blocked
-            m: moved
-            l: delegated
+            '': ' '
         prioritySymbols:
             H: high
             M: medium
             L: low
         todoIntegration: false
+        taskCreateSelectionType: selection2link
     graph:
         zoomSpeed: 1
     enableAutoCreateOnDefinition: false
@@ -688,26 +634,17 @@ workspace:
         dateFormat: y.MM.dd.HHmmss
         addBehavior: asOwnDomain
     task:
-        name: task
-        dateFormat: y.MM.dd.HHmmss
-        addBehavior: asOwnDomain
+        name: ''
+        dateFormat: ''
+        addBehavior: childOfCurrent
         statusSymbols:
-            '': not started
-            a: assigned
-            w: work in progress
-            'n': moved to next day
-            x: done
-            d: dropped
-            .: made progress
-            'y': pending deployment/verification
-            b: blocked
-            m: moved
-            l: delegated
+            '': ' '
         prioritySymbols:
             H: high
             M: medium
             L: low
         todoIntegration: false
+        taskCreateSelectionType: selection2link
     graph:
         zoomSpeed: 1
     enableAutoCreateOnDefinition: false

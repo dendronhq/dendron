@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { NoteProps } from "../..";
+import { LegacyLookupSelectionType, NoteProps } from "../..";
 import { JournalConfig } from "./journal";
 import { NoteAddBehaviorEnum } from "./types";
 
@@ -14,8 +14,10 @@ export type TaskConfig = Pick<
   statusSymbols: { [status: string]: string };
   /** Maps each priority to a symbol, word, or sentence. This will be displayed for the task. */
   prioritySymbols: { [status: string]: string };
-  /** Add a "TODO: <note title>" entry to the frontmatter of task notes. This helps with integration with various Todo extensions like Todo Tree. */
+  /** Add a "TODO: <note title>" entry to the frontmatter of task notes. This can simplify integration with various Todo extensions like Todo Tree. */
   todoIntegration: boolean;
+  /** The default selection type to use in Task Create command. */
+  taskCreateSelectionType: LegacyLookupSelectionType;
 };
 
 /**
@@ -24,21 +26,11 @@ export type TaskConfig = Pick<
  */
 export function genDefaultTaskConfig(): TaskConfig {
   return {
-    name: "task",
+    name: "",
     dateFormat: "",
     addBehavior: NoteAddBehaviorEnum.childOfCurrent,
     statusSymbols: {
-      "": "not started",
-      a: "assigned",
-      w: "work in progress",
-      n: "moved to next day",
-      x: "done",
-      d: "dropped",
-      ".": "made progress",
-      y: "pending deployment/verification",
-      b: "blocked",
-      m: "moved",
-      l: "delegated",
+      "": " ",
     },
     prioritySymbols: {
       H: "high",
@@ -46,6 +38,7 @@ export function genDefaultTaskConfig(): TaskConfig {
       L: "low",
     },
     todoIntegration: false,
+    taskCreateSelectionType: LegacyLookupSelectionType.selection2link,
   };
 }
 
@@ -97,11 +90,11 @@ export class TaskNoteUtils {
     const { status } = note.custom;
     if (status === undefined) return undefined;
     // If the symbol is not mapped to anything, use the symbol prop directly
-    if (!taskConfig.statusSymbols) return status;
+    if (!taskConfig.statusSymbols) return `[${status}]`;
     const symbol: string | undefined = taskConfig.statusSymbols[status];
-    if (symbol === undefined) return status;
+    if (symbol === undefined) return `[${status}]`;;
     // If it does map to something, then use that
-    return symbol;
+    return `[${symbol}]`;
   }
 
   static getPrioritySymbol({

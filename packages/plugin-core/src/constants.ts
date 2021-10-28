@@ -402,6 +402,14 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docLink: "dendron.topic.commands.md",
     docPreview: "",
   },
+  TASK_CREATE: {
+    key: "dendron.taskCreate",
+    title: `${CMD_PREFIX} Task Create`,
+    group: "notes",
+    desc: "Create a task note.",
+    docLink: "dendron.topic.tasks.md",
+    docPreview: "",
+  },
   // --- Hierarchies
   ARCHIVE_HIERARCHY: {
     key: "dendron.archiveHierarchy",

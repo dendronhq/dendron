@@ -166,14 +166,14 @@
         "desc": "Rename a header, and update all links to it."
       },
       {
-        "command": "dendron.convertLink",
-        "title": "Dendron: Convert Link",
-        "desc": "Convert link candidate into backlink"
-      },
-      {
         "command": "dendron.moveHeader",
         "title": "Dendron: Move Header",
         "desc": "Move a header, and update all links to it."
+      },
+      {
+        "command": "dendron.convertLink",
+        "title": "Dendron: Convert Link",
+        "desc": "Convert link candidate into backlink"
       },
       {
         "command": "dendron.lookupNote",
@@ -266,6 +266,11 @@
         "desc": "Remove a vault",
         "docLink": "",
         "docPreview": "Remove a vault from your workspace. Note that the underlying files wil **not** be deleted - the vault will lose its association with your workspace.\n<div style=\"position: relative; padding-bottom: 62.5%; height: 0;\"><iframe src=\"https://www.loom.com/embed/307effc22b8d4c59a32933529a8393e1\" frameborder=\"0\" webkitallowfullscreen mozallowfullscreen allowfullscreen style=\"position: absolute; top: 0; left: 0; width: 100%; height: 100%;\"></iframe></div>"
+      },
+      {
+        "command": "dendron.vaultConvert",
+        "title": "Dendron: Vault Convert",
+        "desc": "Convert vaults between local and remote vaults."
       },
       {
         "command": "dendron.initWS",

@@ -529,6 +529,12 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
       `<div style="position: relative; padding-bottom: 62.5%; height: 0;"><iframe src="https://www.loom.com/embed/307effc22b8d4c59a32933529a8393e1" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe></div>`,
     ].join("\n"),
   },
+  VAULT_CONVERT: {
+    key: "dendron.vaultConvert",
+    title: `${CMD_PREFIX} Vault Convert`,
+    group: "workspace",
+    desc: "Convert vaults between local and remote vaults.",
+  },
   INIT_WS: {
     key: "dendron.initWS",
     title: `${CMD_PREFIX} Initialize Workspace`,

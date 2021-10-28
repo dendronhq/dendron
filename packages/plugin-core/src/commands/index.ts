@@ -63,6 +63,7 @@ import { SeedAddCommand } from "./SeedAddCommand";
 import { SeedRemoveCommand } from "./SeedRemoveCommand";
 import { RunMigrationCommand } from "./RunMigrationCommand";
 import { SeedBrowseCommand } from "./SeedBrowseCommand";
+import { VaultConvertCommand } from "./VaultConvert";
 
 const ALL_COMMANDS = [
   AddAndCommit,
@@ -123,6 +124,7 @@ const ALL_COMMANDS = [
   UpgradeSettingsCommand,
   VaultAddCommand,
   VaultRemoveCommand,
+  VaultConvertCommand,
   LaunchTutorialCommand,
   ConvertLinkCommand,
   SeedAddCommand,

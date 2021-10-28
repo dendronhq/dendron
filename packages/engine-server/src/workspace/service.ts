@@ -149,6 +149,7 @@ export class WorkspaceService {
   }
 
   get config(): IntermediateDendronConfig {
+    // `createConfig` function relies on this creating a config. If revising the code, make sure to update that function as well.
     return DConfig.getOrCreate(this.wsRoot);
   }
 
@@ -316,6 +317,110 @@ export class WorkspaceService {
       await this.addVaultToCodeWorkspace(vault);
     }
     return vault;
+  }
+
+  /** Converts a local vault to a remote vault, with `remoteUrl` as the upstream URL. */
+  async convertVaultRemote({
+    wsRoot,
+    vault: targetVault,
+    remoteUrl,
+  }: {
+    wsRoot: string;
+    vault: DVault;
+    remoteUrl: string;
+  }) {
+    // Add the vault to the gitignore of root, so that it doesn't show up as part of root anymore
+    await GitUtils.addToGitignore({
+      addPath: targetVault.fsPath,
+      root: wsRoot,
+    });
+
+    // Now, initialize a repository in it
+    const git = new Git({
+      localUrl: path.join(wsRoot, targetVault.fsPath),
+      remoteUrl,
+    });
+    if (!(await fs.pathExists(path.join(wsRoot, targetVault.fsPath, ".git")))) {
+      // Avoid initializing if a git folder already exists
+      await git.init();
+    }
+    let remote = await git.getRemote();
+    if (!remote) {
+      remote = await git.remoteAdd();
+    } else {
+      await git.remoteSet(remote);
+    }
+    const branch = await git.getCurrentBranch();
+    // Add the contents of the vault and push to initialize the upstream
+    await git.addAll();
+    try {
+      await git.commit({ msg: "Set up remote vault" });
+    } catch (err: any) {
+      // Ignore it if commit fails, it might happen if the vault if empty or if it was already a repo
+      if (!_.isNumber(err?.exitCode)) throw err;
+    }
+    await git.push({ remote, branch });
+    // Update `dendron.yml`, adding the remote to the converted vault
+    const config = this.config;
+    const vaults = ConfigUtils.getVaults(config);
+    ConfigUtils.setVaults(
+      config,
+      vaults.map((vault) => {
+        if (VaultUtils.isEqualV2(vault, targetVault)) {
+          vault.remote = { type: "git", url: remoteUrl };
+        }
+        return vault;
+      })
+    );
+    await this.setConfig(config);
+    // Remove the vault folder from the tree of the root repository. Otherwise, the files will be there when
+    // someone else pulls the root repo, which can break remote vault initialization. This doesn't delete the actual files.
+    if (await fs.pathExists(path.join(wsRoot, ".git"))) {
+      // But only if the workspace is in a git repository, otherwise skip this step.
+      const rootGit = new Git({ localUrl: wsRoot });
+      await rootGit.rm({
+        cached: true,
+        recursive: true,
+        path: targetVault.fsPath,
+      });
+    }
+
+    return { remote, branch };
+  }
+
+  /** Converts a remote vault to a local vault. */
+  async convertVaultLocal({
+    wsRoot,
+    vault: targetVault,
+  }: {
+    wsRoot: string;
+    vault: DVault;
+  }) {
+    // Remove vault from gitignore of root, if it's there, so it's part of root workspace again
+    await GitUtils.removeFromGitignore({
+      removePath: targetVault.fsPath,
+      root: wsRoot,
+    });
+
+    // Remove the .git folder from the vault
+    const gitFolder = path.join(wsRoot, targetVault.fsPath, ".git");
+    await fs.rm(gitFolder, {
+      recursive: true,
+      force: true /* It's OK if dir doesn't exist */,
+    });
+    // Update `dendron.yml`, removing the remote from the converted vault
+    const config = this.config;
+    const vaults = ConfigUtils.getVaults(config);
+    ConfigUtils.setVaults(
+      config,
+      vaults.map((vault) => {
+        if (VaultUtils.isEqualV2(vault, targetVault)) {
+          delete vault.remote;
+        }
+        return vault;
+      })
+    );
+    await this.setConfig(config);
   }
 
   /** For vaults in the same repository, ensure that their sync configurations do not conflict. Returns the coordinated sync config. */
@@ -513,6 +618,8 @@ export class WorkspaceService {
   }
 
   createConfig() {
+    // This line actually does something: it will create a config if one doesn't exist.
+    // eslint-disable-next-line no-unused-expressions
     this.config;
   }
 

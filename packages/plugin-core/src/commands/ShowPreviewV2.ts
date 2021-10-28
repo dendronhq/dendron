@@ -139,6 +139,20 @@ export class ShowPreviewV2Command extends BasicCommand<
   }
 
   async execute(_opts?: CommandOpts) {
+    const panel = vscode.window.createWebviewPanel(
+      "catCoding",
+      "Cat Coding",
+      vscode.ViewColumn.One,
+      {}
+    );
+    panel.webview.html = getWebviewContent();
+    // getExtension().context
+    // const onDiskPath = vscode.Uri.file(
+    //   path.join(context.extensionPath, 'media', 'cat.gif')
+    // );
+  }
+
+  async executeOld(_opts?: CommandOpts) {
     // Get workspace information
     const ext = getExtension();
 
@@ -250,4 +264,17 @@ export class ShowPreviewV2Command extends BasicCommand<
     }
     return getEngine().notes[noteId];
   }
+}
+
+function getWebviewContent() {
+  return `<!DOCTYPE html>
+    <html lang="en">
+    <head><meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Cat Coding</title>
+    </head>
+    <body>
+        <img src="https://media.giphy.com/media/JIX9t2j0ZTN9S/giphy.gif" width="300" />
+    </body>
+    </html>`;
 }

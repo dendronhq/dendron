@@ -98,4 +98,59 @@ suite("GIVEN VaultConvert", function () {
       });
     }
   );
+
+  describeMultiWS(
+    "WHEN given a bad remote URL",
+    { ctx, preSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti },
+    () => {
+      before(async () => {
+        const { vaults } = getDWorkspace();
+        const cmd = new VaultConvertCommand();
+        sinon.stub(cmd, "gatherType").resolves("remote");
+        sinon.stub(cmd, "gatherVault").resolves(vaults[0]);
+
+        // Bad remote, not actually a vault
+        const remote = tmpDir().name;
+        sinon.stub(cmd, "gatherRemoteURL").resolves(remote);
+
+        await cmd.run();
+      });
+      after(async () => {
+        sinon.restore();
+      });
+
+      test("THEN conversion fails mid-operation", async () => {
+        // config is updated after the remote is fully set up, so if the config has been updated we know that we were able to set up and push to remote
+        const { wsRoot } = getDWorkspace();
+        const config = DConfig.getRaw(wsRoot) as IntermediateDendronConfig;
+        expect(ConfigUtils.getVaults(config)[0].remote).toBeFalsy();
+      });
+
+      describe("AND running the conversion command again", () => {
+        before(async () => {
+          const { vaults } = getDWorkspace();
+          const cmd = new VaultConvertCommand();
+          sinon.stub(cmd, "gatherType").resolves("remote");
+          sinon.stub(cmd, "gatherVault").resolves(vaults[0]);
+
+          // Create a remote repository to be the upstream
+          const remote = tmpDir().name;
+          await GitTestUtils.remoteCreate(remote);
+          sinon.stub(cmd, "gatherRemoteURL").resolves(remote);
+
+          await cmd.run();
+        });
+        after(async () => {
+          sinon.restore();
+        });
+
+        test("THEN the conversion completes", async () => {
+          // config is updated after the remote is fully set up, so if the config has been updated we know that we were able to set up and push to remote
+          const { wsRoot } = getDWorkspace();
+          const config = DConfig.getRaw(wsRoot) as IntermediateDendronConfig;
+          expect(ConfigUtils.getVaults(config)[0].remote).toBeTruthy();
+        });
+      });
+    }
+  );
 });

@@ -63,6 +63,16 @@ export class Git {
     return remoteName;
   }
 
+  async remoteSet(remoteName: string) {
+    const { remoteUrl } = this.opts;
+    await this._execute(`git remote set-url ${remoteName} ${remoteUrl}`);
+  }
+
+  async remoteGet(remoteName: string) {
+    const { stdout } = await this._execute(`git remote get-url ${remoteName}`);
+    return stdout.trim();
+  }
+
   async init() {
     await this._execute(`git init${this.opts.bare ? " --bare" : ""}`);
   }

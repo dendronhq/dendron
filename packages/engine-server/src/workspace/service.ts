@@ -347,6 +347,8 @@ export class WorkspaceService {
     let remote = await git.getRemote();
     if (!remote) {
       remote = await git.remoteAdd();
+    } else {
+      await git.remoteSet(remote);
     }
     const branch = await git.getCurrentBranch();
     // Add the contents of the vault and push to initialize the upstream

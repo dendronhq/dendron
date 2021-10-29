@@ -1,4 +1,4 @@
-import { NoteProps } from "@dendronhq/common-all";
+import { getStage, NoteProps } from "@dendronhq/common-all";
 import {
 	engineHooks,
 	engineSlice
@@ -8,8 +8,20 @@ import { DendronProps, WorkspaceProps } from "../types";
 
 type DendronPropsWithNoteId = DendronProps & {noteId :string}
 
-export const useWorkspaceProps = () => {
-	return [{} as WorkspaceProps]
+export const useWorkspaceProps = (): [WorkspaceProps] => {
+	const stage = getStage();
+	if (stage === "dev") {
+		return [
+			{
+				port: 3005,
+				// TODO: pass in from env
+				ws: "/Users/kevinlin/code/dendron/test-workspace",
+				browser: true,
+				theme: "light"
+			}
+		]
+	}
+	throw Error("not implemented");
 }
 
 /**
@@ -49,7 +61,9 @@ export const useNoteProps = ({engine, noteId}: DendronProps & {noteId: string}) 
  * Get current note id
  */
 export const useNoteId = () => {
-	return ["foo"];
+	// todo: get from env
+	return ["9eae08fb-5e3f-4a7e-a989-3f206825d490"];
+	throw Error("NOT IMPLEMENTED")
 }
 
 const useDendronNote = (props: DendronPropsWithNoteId) => {

@@ -15,6 +15,7 @@ import {
   useVSCodeMessage,
   engineHooks,
 } from "@dendronhq/common-frontend";
+import _ from "lodash";
 import React from "react";
 import { useWorkspaceProps } from "../hooks";
 import { DendronComponent, WorkspaceProps } from "../types";
@@ -28,7 +29,9 @@ function DendronVSCodeApp({Component}: {Component: DendronComponent}) {
   const engine = useEngineAppSelector((state) => state.engine);
   const ideDispatch = ideHooks.useIDEAppDispatch();
   const [workspace] = useWorkspaceProps()
-  // const [workspaceOpts, setWorkspaceOpts] = React.useState<WorkspaceProps>();
+
+  // used to initialize the engine
+  useEngine({ engineState: engine, opts: workspace});
   const logger = createLogger("DendronApp");
 
   const props = {
@@ -53,6 +56,14 @@ function DendronVSCodeApp({Component}: {Component: DendronComponent}) {
   useVSCodeMessage(async (msg) => {
     const ctx = "useVSCodeMsg";
   });
+
+
+  // don't load until active
+  if (_.isEmpty(engine.notes)) {
+    return <div>Loading...</div>
+  }
+
+
   return <div> 
     Dendron App Wrapper
     <hr/>

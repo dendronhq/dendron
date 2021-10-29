@@ -12,6 +12,7 @@ import {
   NextjsExportPod,
   NextjsExportPodUtils,
   BuildOverrides,
+  PublishTarget,
 } from "@dendronhq/pods-core";
 import _ from "lodash";
 import path from "path";
@@ -21,7 +22,7 @@ import { CLICommand } from "./base";
 import { ExportPodCLICommand } from "./exportPod";
 import { PodSource } from "./pod";
 import { SetupEngineCLIOpts } from "./utils";
-import prompts from "prompts";
+import prompts, { PromptType } from "prompts";
 import fs from "fs-extra";
 
 const $$ = (cmd: string, opts?: any) => {
@@ -57,9 +58,6 @@ export enum PublishCommands {
    * Export website
    */
   EXPORT = "export",
-}
-export enum PublishTarget {
-  GITHUB = "github",
 }
 
 type CommandOpts = Omit<CommandCLIOpts, "overrides"> & Partial<ExportCmdOpts>;
@@ -168,6 +166,9 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
         }
         case PublishCommands.EXPORT: {
           await this.export(opts);
+          if (opts.target) {
+            await this._handlePublishTarget(opts.target, opts);
+          }
           return { error: null };
         }
         default:
@@ -243,7 +244,7 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
   async _handlePublishTarget(target: PublishTarget, opts: ExportCmdOpts) {
     const { wsRoot } = opts;
     switch (target) {
-      case PublishTarget.GITHUB:
+      case PublishTarget.GITHUB: {
         const docsPath = path.join(wsRoot, "docs");
         const outPath = path.join(wsRoot, ".next", "out");
         this.print("building github target...");
@@ -276,15 +277,15 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
         fs.moveSync(outPath, docsPath);
         fs.ensureFileSync(path.join(docsPath, ".nojekyll"));
         this.print(`done export. files available at ${docsPath}`);
-
         return;
+      }
       default:
         assertUnreachable();
     }
   }
 
   async init(opts: { wsRoot: string }) {
-    const nextPath = path.join(opts.wsRoot, ".next");
+    const nextPath = NextjsExportPodUtils.getNextRoot(opts.wsRoot);
     const nextPathExists = await NextjsExportPodUtils.nextPathExists({
       nextPath,
     });
@@ -317,7 +318,8 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     } else {
       await this.build(opts);
     }
-    this._startNextDev(opts);
+    const nextPath = NextjsExportPodUtils.getNextRoot(opts.wsRoot);
+    await NextjsExportPodUtils.startNextDev({ nextPath });
   }
 
   async export(opts: ExportCmdOpts) {
@@ -326,9 +328,7 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     } else {
       await this.build(opts);
     }
-    await this._startNextExport(opts);
-    if (opts.target) {
-      await this._handlePublishTarget(opts.target, opts);
-    }
+    const nextPath = NextjsExportPodUtils.getNextRoot(opts.wsRoot);
+    await NextjsExportPodUtils.startNextExport({ nextPath });
   }
 }

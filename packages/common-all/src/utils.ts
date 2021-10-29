@@ -5,6 +5,7 @@ import querystring from "querystring";
 import semver from "semver";
 import { COLORS_LIST } from "./colors";
 import { NoteProps, SEOProps, DVault, DHookDict } from "./types";
+import { TaskConfig } from "./types/configs/workspace/task";
 import {
   DendronCommandConfig,
   DendronWorkspaceConfig,
@@ -349,6 +350,10 @@ export class ConfigUtils {
 
   static getScratch(config: IntermediateDendronConfig): ScratchConfig {
     return ConfigUtils.getWorkspace(config).scratch;
+  }
+
+  static getTask(config: IntermediateDendronConfig): TaskConfig {
+    return ConfigUtils.getWorkspace(config).task;
   }
 
   static getLookup(config: IntermediateDendronConfig): LookupConfig {

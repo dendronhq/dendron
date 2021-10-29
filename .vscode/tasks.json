@@ -1,0 +1,14 @@
+{
+  // See https://go.microsoft.com/fwlink/?LinkId=733558
+  // for the documentation about the tasks.json format
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "type": "npm",
+      "script": "gen:data",
+      "problemMatcher": [],
+      "label": "generate JSON schema",
+      "detail": "node packages/dendron-cli/lib/bin/dendron-cli.js dev generate_json_schema_from_config"
+    }
+  ]
+}

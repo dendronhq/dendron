@@ -73,6 +73,26 @@ workspace:
         name: scratch
         dateFormat: y.MM.dd.HHmmss
         addBehavior: asOwnDomain
+    task:
+        name: ''
+        dateFormat: ''
+        addBehavior: childOfCurrent
+        statusSymbols:
+            '': ' '
+            wip: w
+            done: x
+            assigned: a
+            moved: m
+            blocked: b
+            delegated: l
+            dropped: d
+            pending: 'y'
+        prioritySymbols:
+            H: high
+            M: medium
+            L: low
+        todoIntegration: false
+        createTaskSelectionType: selection2link
     graph:
         zoomSpeed: 1
     enableAutoCreateOnDefinition: false
@@ -179,6 +199,26 @@ workspace:
         name: scratch
         dateFormat: y.MM.dd.HHmmss
         addBehavior: asOwnDomain
+    task:
+        name: ''
+        dateFormat: ''
+        addBehavior: childOfCurrent
+        statusSymbols:
+            '': ' '
+            wip: w
+            done: x
+            assigned: a
+            moved: m
+            blocked: b
+            delegated: l
+            dropped: d
+            pending: 'y'
+        prioritySymbols:
+            H: high
+            M: medium
+            L: low
+        todoIntegration: false
+        createTaskSelectionType: selection2link
     graph:
         zoomSpeed: 1
     enableAutoCreateOnDefinition: false
@@ -268,6 +308,26 @@ workspace:
         name: scratch
         dateFormat: y.MM.dd.HHmmss
         addBehavior: asOwnDomain
+    task:
+        name: ''
+        dateFormat: ''
+        addBehavior: childOfCurrent
+        statusSymbols:
+            '': ' '
+            wip: w
+            done: x
+            assigned: a
+            moved: m
+            blocked: b
+            delegated: l
+            dropped: d
+            pending: 'y'
+        prioritySymbols:
+            H: high
+            M: medium
+            L: low
+        todoIntegration: false
+        createTaskSelectionType: selection2link
     graph:
         zoomSpeed: 1
     enableAutoCreateOnDefinition: false
@@ -335,6 +395,26 @@ workspace:
         name: scratch
         dateFormat: y.MM.dd.HHmmss
         addBehavior: asOwnDomain
+    task:
+        name: ''
+        dateFormat: ''
+        addBehavior: childOfCurrent
+        statusSymbols:
+            '': ' '
+            wip: w
+            done: x
+            assigned: a
+            moved: m
+            blocked: b
+            delegated: l
+            dropped: d
+            pending: 'y'
+        prioritySymbols:
+            H: high
+            M: medium
+            L: low
+        todoIntegration: false
+        createTaskSelectionType: selection2link
     graph:
         zoomSpeed: 1
     enableAutoCreateOnDefinition: false
@@ -415,6 +495,26 @@ workspace:
         name: scratch
         dateFormat: y.MM.dd.HHmmss
         addBehavior: asOwnDomain
+    task:
+        name: ''
+        dateFormat: ''
+        addBehavior: childOfCurrent
+        statusSymbols:
+            '': ' '
+            wip: w
+            done: x
+            assigned: a
+            moved: m
+            blocked: b
+            delegated: l
+            dropped: d
+            pending: 'y'
+        prioritySymbols:
+            H: high
+            M: medium
+            L: low
+        todoIntegration: false
+        createTaskSelectionType: selection2link
     graph:
         zoomSpeed: 1
     enableAutoCreateOnDefinition: false

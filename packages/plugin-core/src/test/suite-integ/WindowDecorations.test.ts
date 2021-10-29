@@ -174,6 +174,117 @@ suite("windowDecorations", function () {
       });
     });
 
+    test("task notes", (done) => {
+      const FNAME = "bar";
+
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ vaults, wsRoot }) => {
+          await NoteTestUtilsV4.createNote({
+            fname: "with.all",
+            vault: vaults[0],
+            wsRoot,
+            props: {
+              custom: {
+                status: "done",
+                owner: "grace",
+                priority: "H",
+                due: "2021.10.29",
+                tags: "foo",
+              },
+            },
+          });
+          await NoteTestUtilsV4.createNote({
+            fname: "without.status",
+            vault: vaults[0],
+            wsRoot,
+            props: {
+              custom: {
+                owner: "grace",
+                priority: "high",
+                tags: ["foo", "bar"],
+              },
+            },
+          });
+          await NoteTestUtilsV4.createNote({
+            fname: "without.due",
+            vault: vaults[0],
+            wsRoot,
+            props: {
+              custom: {
+                status: "",
+                priority: "low",
+              },
+            },
+          });
+          await NoteTestUtilsV4.createNote({
+            fname: "not.a.task",
+            vault: vaults[0],
+            wsRoot,
+          });
+          await NoteTestUtilsV4.createNote({
+            fname: FNAME,
+            body: [
+              "* [[with.all]]",
+              "* foo [[without.status]] bar",
+              "",
+              "[[without.due]]",
+              "",
+              "[[not.a.task]]",
+              "",
+            ].join("\n"),
+            vault: vaults[0],
+            wsRoot,
+          });
+        },
+        onInit: async ({ vaults, engine, wsRoot }) => {
+          const note = NoteUtils.getNoteByFnameV5({
+            fname: FNAME,
+            notes: engine.notes,
+            vault: vaults[0],
+            wsRoot,
+          });
+          const editor = await VSCodeUtils.openNote(note!);
+          const document = editor.document;
+          const { allDecorations } = updateDecorations(editor);
+
+          const taskDecorations = allDecorations!.get(DECORATION_TYPE.taskNote);
+          expect(taskDecorations.length).toEqual(3);
+          // check that the decorations are at the right locations
+          expect(
+            isTextDecorated("[[with.all]]", taskDecorations!, document)
+          ).toBeTruthy();
+          expect(
+            isTextDecorated("[[without.status]]", taskDecorations!, document)
+          ).toBeTruthy();
+          expect(
+            isTextDecorated("[[without.due]]", taskDecorations!, document)
+          ).toBeTruthy();
+
+          expect(taskDecorations[0].renderOptions?.before?.contentText).toEqual(
+            "[x]"
+          );
+          expect(taskDecorations[0].renderOptions?.after?.contentText).toEqual(
+            "due:2021.10.29 @grace prio:high #foo"
+          );
+          expect(
+            taskDecorations[1].renderOptions?.before?.contentText
+          ).toBeFalsy();
+          expect(taskDecorations[1].renderOptions?.after?.contentText).toEqual(
+            "@grace prio:high #foo #bar"
+          );
+          expect(taskDecorations[2].renderOptions?.before?.contentText).toEqual(
+            "[ ]"
+          );
+          expect(taskDecorations[2].renderOptions?.after?.contentText).toEqual(
+            "prio:low"
+          );
+
+          done();
+        },
+      });
+    });
+
     test("highlighting same file wikilinks", (done) => {
       const FNAME = "bar";
 

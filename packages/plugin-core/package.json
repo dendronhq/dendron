@@ -198,6 +198,13 @@
         "docPreview": ""
       },
       {
+        "command": "dendron.createTask",
+        "title": "Dendron: Create Task Note",
+        "desc": "Create a task note.",
+        "docLink": "dendron.topic.tasks.md",
+        "docPreview": ""
+      },
+      {
         "command": "dendron.archiveHierarchy",
         "title": "Dendron: Archive Hierarchy",
         "desc": "Move current note and all children under the `archive` hierarchy",

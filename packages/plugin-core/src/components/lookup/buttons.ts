@@ -4,6 +4,7 @@ import {
   NoteProps,
   NoteQuickInput,
   NoteUtils,
+  TaskNoteUtils,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import * as vscode from "vscode";
@@ -78,7 +79,7 @@ function isSelectionBtn(button: DendronBtn) {
 }
 
 function isNoteBtn(button: DendronBtn) {
-  return _.includes(["journal", "scratch"], button.type);
+  return _.includes(["journal", "scratch", "task"], button.type);
 }
 
 function isSplitButton(button: DendronBtn) {
@@ -367,6 +368,58 @@ export class ScratchBtn extends DendronBtn {
     quickPick.value = NotePickerUtils.getPickerValue(quickPick);
   }
 }
+
+export class TaskBtn extends DendronBtn {
+  static create(pressed?: boolean) {
+    return new TaskBtn({
+      title: "Create Task Note",
+      iconOff: "diff-added",
+      iconOn: "menu-selection",
+      type: LookupNoteTypeEnum.task,
+      pressed,
+    });
+  }
+
+  async onEnable({ quickPick }: ButtonHandleOpts) {
+    quickPick.modifyPickerValueFunc = () => {
+      return DendronClientUtilsV2.genNoteName(LookupNoteTypeEnum.task);
+    };
+    quickPick.prevValue = quickPick.value;
+    const { noteName, prefix } = quickPick.modifyPickerValueFunc();
+    quickPick.noteModifierValue = _.difference(
+      noteName.split("."),
+      prefix.split(".")
+    ).join(".");
+    quickPick.prefix = prefix;
+    quickPick.value = NotePickerUtils.getPickerValue(quickPick);
+    // If the lookup value ends up being identical to the current note, this will be confusing for the user because
+    // they won't be able to create a new note. This can happen with the default settings of Task notes.
+    // In that case, we add a trailing dot to suggest that they need to type something more.
+    const activeName = VSCodeUtils.getActiveNote()?.fname;
+    if (quickPick.value === activeName) quickPick.value = `${quickPick.value}.`;
+    // Add default task note props to the created note
+    quickPick.onCreate = async (note) => {
+      note.custom = {
+        ...TaskNoteUtils.genDefaultTaskNoteProps(
+          note,
+          ConfigUtils.getTask(getDWorkspace().config)
+        ).custom,
+        ...note.custom,
+      };
+      return note;
+    };
+    return;
+  }
+
+  async onDisable({ quickPick }: ButtonHandleOpts) {
+    quickPick.modifyPickerValueFunc = undefined;
+    quickPick.noteModifierValue = undefined;
+    quickPick.prevValue = quickPick.value;
+    quickPick.prefix = quickPick.rawValue;
+    quickPick.value = NotePickerUtils.getPickerValue(quickPick);
+  }
+}
+
 export class HorizontalSplitBtn extends DendronBtn {
   static create(pressed?: boolean) {
     return new HorizontalSplitBtn({

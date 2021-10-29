@@ -48,6 +48,7 @@ import {
   ScratchBtn,
   Selection2LinkBtn,
   SelectionExtractBtn,
+  TaskBtn,
 } from "../../components/lookup/buttons";
 import {
   createNoActiveItem,
@@ -128,12 +129,13 @@ function getNoteTypeButtons(
 ): {
   journalBtn: JournalBtn;
   scratchBtn: ScratchBtn;
+  taskBtn: TaskBtn;
 } {
-  const [journalBtn, scratchBtn] = getButtonsByTypeArray(
+  const [journalBtn, scratchBtn, taskBtn] = getButtonsByTypeArray(
     _.values(LookupNoteTypeEnum),
     buttons
   ) as vscode.QuickInputButton[] & DendronBtn[];
-  return { journalBtn, scratchBtn };
+  return { journalBtn, scratchBtn, taskBtn };
 }
 
 function getSplitTypeButtons(
@@ -846,6 +848,30 @@ suite("NoteLookupCommand", function () {
       });
     });
 
+    test("task note basic", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+        },
+        onInit: async ({ vaults, engine }) => {
+          const cmd = new NoteLookupCommand();
+          stubVaultPick(vaults);
+
+          // with scratch note modifier enabled,
+          await VSCodeUtils.openNote(engine.notes["foo"]);
+          const out = (await cmd.run({
+            noteType: LookupNoteTypeEnum.task,
+            noConfirm: true,
+          })) as CommandOutput;
+
+          expect(out.quickpick.value.startsWith(`foo`)).toBeTruthy();
+
+          done();
+        },
+      });
+    });
+
     // not working
     test.skip("journal note with initial value override", (done) => {
       runLegacyMultiWorkspaceTest({
@@ -959,7 +985,47 @@ suite("NoteLookupCommand", function () {
       });
     });
 
-    test("scratch and journal modifiers toggle each other off when triggered", (done) => {
+    test("task modifier toggle", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+        },
+        onInit: async ({ vaults, engine }) => {
+          await VSCodeUtils.openNote(engine.notes["foo"]);
+
+          const cmd = new NoteLookupCommand();
+          stubVaultPick(vaults);
+
+          const { controller } = await cmd.gatherInputs({
+            noteType: LookupNoteTypeEnum.task,
+          });
+
+          let { journalBtn, scratchBtn, taskBtn } = getNoteTypeButtons(
+            controller.quickpick.buttons
+          );
+
+          expect(journalBtn.pressed).toBeFalsy();
+          expect(scratchBtn.pressed).toBeFalsy();
+          expect(taskBtn.pressed).toBeTruthy();
+          expect(controller.quickpick.value.startsWith("task."));
+
+          await controller.onTriggerButton(taskBtn);
+
+          ({ journalBtn, scratchBtn, taskBtn } = getNoteTypeButtons(
+            controller.quickpick.buttons
+          ));
+          expect(journalBtn.pressed).toBeFalsy();
+          expect(scratchBtn.pressed).toBeFalsy();
+          expect(taskBtn.pressed).toBeFalsy();
+          expect(controller.quickpick.value).toEqual("foo");
+
+          done();
+        },
+      });
+    });
+
+    test("scratch, journal, and task modifiers toggle each other off when triggered", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
         preSetupHook: async ({ wsRoot, vaults }) => {
@@ -975,30 +1041,43 @@ suite("NoteLookupCommand", function () {
             noteType: LookupNoteTypeEnum.journal,
           });
 
-          let { journalBtn, scratchBtn } = getNoteTypeButtons(
+          let { journalBtn, scratchBtn, taskBtn } = getNoteTypeButtons(
             controller.quickpick.buttons
           );
 
           expect(journalBtn.pressed).toBeTruthy();
           expect(scratchBtn.pressed).toBeFalsy();
+          expect(taskBtn.pressed).toBeFalsy();
           expect(controller.quickpick.value.startsWith("foo.journal."));
 
           await controller.onTriggerButton(scratchBtn);
 
-          ({ journalBtn, scratchBtn } = getNoteTypeButtons(
+          ({ journalBtn, scratchBtn, taskBtn } = getNoteTypeButtons(
             controller.quickpick.buttons
           ));
           expect(journalBtn.pressed).toBeFalsy();
           expect(scratchBtn.pressed).toBeTruthy();
+          expect(taskBtn.pressed).toBeFalsy();
           expect(controller.quickpick.value.startsWith("scratch."));
 
-          await controller.onTriggerButton(scratchBtn);
+          await controller.onTriggerButton(taskBtn);
 
-          ({ journalBtn, scratchBtn } = getNoteTypeButtons(
+          ({ journalBtn, scratchBtn, taskBtn } = getNoteTypeButtons(
             controller.quickpick.buttons
           ));
           expect(journalBtn.pressed).toBeFalsy();
           expect(scratchBtn.pressed).toBeFalsy();
+          expect(taskBtn.pressed).toBeTruthy();
+          expect(controller.quickpick.value.startsWith("task."));
+
+          await controller.onTriggerButton(taskBtn);
+
+          ({ journalBtn, scratchBtn, taskBtn } = getNoteTypeButtons(
+            controller.quickpick.buttons
+          ));
+          expect(journalBtn.pressed).toBeFalsy();
+          expect(scratchBtn.pressed).toBeFalsy();
+          expect(taskBtn.pressed).toBeFalsy();
           expect(controller.quickpick.value).toEqual("foo");
 
           done();
@@ -1739,6 +1818,138 @@ suite("NoteLookupCommand", function () {
           );
 
           expect(scratchBtn.pressed).toBeTruthy();
+          expect(selection2linkBtn.pressed).toBeTruthy();
+
+          await controller.onTriggerButton(journalBtn);
+          const dateFormat = ConfigUtils.getJournal(engine.config).dateFormat;
+          const today = Time.now().toFormat(dateFormat);
+          const quickpickValue = controller.quickpick.value;
+          expect(quickpickValue).toEqual(`foo.journal.${today}.foo-body`);
+
+          done();
+        },
+      });
+    });
+  });
+
+  describe("task + selection2link interactions", () => {
+    const prepareCommandFunc = async ({ vaults, engine }: any) => {
+      const cmd = new NoteLookupCommand();
+      stubVaultPick(vaults);
+
+      const fooNoteEditor = await VSCodeUtils.openNote(engine.notes["foo"]);
+
+      // selects "foo body"
+      fooNoteEditor.selection = new vscode.Selection(7, 0, 7, 12);
+      const { text } = VSCodeUtils.getSelection();
+      expect(text).toEqual("foo body");
+
+      const { controller } = await cmd.gatherInputs({
+        noteType: LookupNoteTypeEnum.task,
+        selectionType: LookupSelectionTypeEnum.selection2link,
+      });
+      return { controller };
+    };
+
+    test("task and selection2link both applied", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+        },
+        onInit: async ({ vaults, engine }) => {
+          const { controller } = await prepareCommandFunc({ vaults, engine });
+
+          const { taskBtn } = getNoteTypeButtons(controller.quickpick.buttons);
+
+          const { selection2linkBtn } = getSelectionTypeButtons(
+            controller.quickpick.buttons
+          );
+
+          expect(taskBtn.pressed).toBeTruthy();
+          expect(selection2linkBtn.pressed).toBeTruthy();
+
+          const quickpickValue = controller.quickpick.value;
+          expect(quickpickValue.startsWith(`foo.`)).toBeTruthy();
+          expect(quickpickValue.endsWith(".foo-body")).toBeTruthy();
+
+          done();
+        },
+      });
+    });
+
+    test("toggling task modifier off will only leave selection2link applied", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+        },
+        onInit: async ({ vaults, engine }) => {
+          const { controller } = await prepareCommandFunc({ vaults, engine });
+
+          const { taskBtn } = getNoteTypeButtons(controller.quickpick.buttons);
+
+          const { selection2linkBtn } = getSelectionTypeButtons(
+            controller.quickpick.buttons
+          );
+
+          expect(taskBtn.pressed).toBeTruthy();
+          expect(selection2linkBtn.pressed).toBeTruthy();
+
+          await controller.onTriggerButton(taskBtn);
+          expect(controller.quickpick.value).toEqual(`foo.foo-body`);
+
+          done();
+        },
+      });
+    });
+
+    test("toggling selection2link modifier off will only leave task modifier applied", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+        },
+        onInit: async ({ vaults, engine }) => {
+          const { controller } = await prepareCommandFunc({ vaults, engine });
+
+          const { taskBtn } = getNoteTypeButtons(controller.quickpick.buttons);
+
+          const { selection2linkBtn } = getSelectionTypeButtons(
+            controller.quickpick.buttons
+          );
+
+          expect(taskBtn.pressed).toBeTruthy();
+          expect(selection2linkBtn.pressed).toBeTruthy();
+
+          await controller.onTriggerButton(selection2linkBtn);
+          const quickpickValue = controller.quickpick.value;
+          expect(quickpickValue.startsWith(`foo`)).toBeTruthy();
+          expect(quickpickValue.endsWith("foo-body")).toBeFalsy();
+
+          done();
+        },
+      });
+    });
+
+    test("applying journal strips task modifier, and keeps selection2link applied", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+        },
+        onInit: async ({ vaults, engine }) => {
+          const { controller } = await prepareCommandFunc({ vaults, engine });
+
+          const { journalBtn, taskBtn } = getNoteTypeButtons(
+            controller.quickpick.buttons
+          );
+
+          const { selection2linkBtn } = getSelectionTypeButtons(
+            controller.quickpick.buttons
+          );
+
+          expect(taskBtn.pressed).toBeTruthy();
           expect(selection2linkBtn.pressed).toBeTruthy();
 
           await controller.onTriggerButton(journalBtn);

@@ -63,6 +63,7 @@ import { SeedAddCommand } from "./SeedAddCommand";
 import { SeedRemoveCommand } from "./SeedRemoveCommand";
 import { RunMigrationCommand } from "./RunMigrationCommand";
 import { SeedBrowseCommand } from "./SeedBrowseCommand";
+import { CreateTaskCommand } from "./CreateTask";
 import { VaultConvertCommand } from "./VaultConvert";
 
 const ALL_COMMANDS = [
@@ -131,6 +132,7 @@ const ALL_COMMANDS = [
   SeedRemoveCommand,
   RunMigrationCommand,
   SeedBrowseCommand,
+  CreateTaskCommand,
 ] as CodeCommandConstructor[];
 
 // when("betaFeatures", ()=> {

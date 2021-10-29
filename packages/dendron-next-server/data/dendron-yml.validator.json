@@ -386,6 +386,9 @@
         "scratch": {
           "$ref": "#/definitions/ScratchConfig"
         },
+        "task": {
+          "$ref": "#/definitions/TaskConfig"
+        },
         "graph": {
           "$ref": "#/definitions/DendronGraphConfig"
         },
@@ -430,6 +433,7 @@
         "vaults",
         "journal",
         "scratch",
+        "task",
         "graph",
         "enableAutoCreateOnDefinition",
         "enableXVaultWikiLink",
@@ -669,6 +673,61 @@
       ],
       "additionalProperties": false,
       "description": "Namespace for configuring scratch note behavior"
+    },
+    "TaskConfig": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "statusSymbols": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Maps each status to a symbol, word, or sentence. This will be displayed for the task."
+        },
+        "prioritySymbols": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Maps each priority to a symbol, word, or sentence. This will be displayed for the task."
+        },
+        "todoIntegration": {
+          "type": "boolean",
+          "description": "Add a \"TODO: <note title>\" entry to the frontmatter of task notes. This can simplify integration with various Todo extensions like Todo Tree."
+        },
+        "createTaskSelectionType": {
+          "$ref": "#/definitions/LegacyLookupSelectionType",
+          "description": "The default selection type to use in Create Task Note command."
+        },
+        "name": {
+          "type": "string"
+        },
+        "dateFormat": {
+          "type": "string"
+        },
+        "addBehavior": {
+          "$ref": "#/definitions/NoteAddBehaviorEnum"
+        }
+      },
+      "required": [
+        "addBehavior",
+        "dateFormat",
+        "name",
+        "prioritySymbols",
+        "statusSymbols",
+        "createTaskSelectionType",
+        "todoIntegration"
+      ],
+      "description": "Namespace for configuring scratch note behavior"
+    },
+    "LegacyLookupSelectionType": {
+      "type": "string",
+      "enum": [
+        "selection2link",
+        "selectionExtract",
+        "none"
+      ]
     },
     "DendronGraphConfig": {
       "type": "object",
@@ -976,14 +1035,6 @@
         "leaveTrace"
       ],
       "additionalProperties": false
-    },
-    "LegacyLookupSelectionType": {
-      "type": "string",
-      "enum": [
-        "selection2link",
-        "selectionExtract",
-        "none"
-      ]
     },
     "LegacyJournalConfig": {
       "type": "object",

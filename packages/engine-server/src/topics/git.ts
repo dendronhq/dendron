@@ -33,8 +33,7 @@ export class Git {
   async commit(opts: { msg: string }) {
     const { msg } = opts;
     const { localUrl: cwd } = this.opts;
-    await execa.command([`git commit -m '${msg}'`].join(" "), {
-      shell: true,
+    await execa("git", ["commit", "-m", msg], {
       cwd,
     });
   }
@@ -59,7 +58,19 @@ export class Git {
   /** Adds the `remoteUrl` set in the constructor as a remote. */
   async remoteAdd() {
     const { remoteUrl } = this.opts;
-    await this._execute(`git remote add origin ${remoteUrl}`);
+    const remoteName = "origin";
+    await this._execute(`git remote add ${remoteName} ${remoteUrl}`);
+    return remoteName;
+  }
+
+  async remoteSet(remoteName: string) {
+    const { remoteUrl } = this.opts;
+    await this._execute(`git remote set-url ${remoteName} ${remoteUrl}`);
+  }
+
+  async remoteGet(remoteName: string) {
+    const { stdout } = await this._execute(`git remote get-url ${remoteName}`);
+    return stdout.trim();
   }
 
   async init() {
@@ -77,6 +88,23 @@ export class Git {
       if (opts.m.oldBranch) args.push(opts.m.oldBranch);
       args.push(opts.m.newBranch);
     }
+    await this._execute(args.join(" "));
+  }
+
+  /** Set the upstream (remote tracking) branch of `branch`.
+   *
+   * @param opts.branch The branch to configure, defaults to current branch.
+   * @param opts.origin The remote that will be set as upstream.
+   * @param opts.upstreamBranch The remote branch in `origin` that will be the upstream branch.
+   */
+  async setUpsteamTo(opts: {
+    branch?: string;
+    origin: string;
+    upsteamBranch: string;
+  }) {
+    const args = ["git", "branch"];
+    if (opts.branch) args.push(opts.branch);
+    args.push(`${opts.origin}/${opts.upsteamBranch}`);
     await this._execute(args.join(" "));
   }
 
@@ -125,14 +153,26 @@ export class Git {
 
   async getCurrentBranch() {
     const { localUrl: cwd } = this.opts;
-    const { stdout } = await execa(
-      "git",
-      [`rev-parse`, `--abbrev-ref`, `HEAD`],
-      {
-        cwd,
-      }
-    );
-    return stdout.trim();
+    try {
+      const { stdout } = await execa(
+        "git",
+        [`rev-parse`, `--abbrev-ref`, `HEAD`],
+        {
+          cwd,
+        }
+      );
+      return stdout.trim();
+    } catch (err) {
+      // rev-parse fails if there are no commits, let's try a fallback in that case
+      const { stdout } = await execa(
+        "git",
+        ["symbolic-ref", "-q", "--short", "HEAD"],
+        {
+          cwd,
+        }
+      );
+      return stdout.trim();
+    }
   }
 
   async hasChanges(opts?: { untrackedFiles?: "all" | "no" | "normal" }) {
@@ -150,13 +190,24 @@ export class Git {
     return !_.isEmpty(stdout);
   }
 
-  /** Gets the upstream the current branch is set up to push to, or `undefined` if it is not set up to push anywhere. */
+  /** Gets the upstream `origin/branch` the current branch is set up to push to, or `undefined` if it is not set up to push anywhere. */
   async getUpstream(): Promise<string | undefined> {
     try {
       const { stdout } = await this._execute(
         "git rev-parse --abbrev-ref @{upstream}"
       );
       return _.trim(stdout);
+    } catch {
+      return undefined;
+    }
+  }
+
+  async getRemote(): Promise<string | undefined> {
+    try {
+      const { stdout } = await this._execute("git remote");
+      const upstream = _.trim(stdout.split("\n")[0]);
+      if (!upstream) return undefined;
+      return upstream;
     } catch {
       return undefined;
     }
@@ -185,5 +236,22 @@ export class Git {
       `git diff ${nameOnlyOption} ${oldCommit} ${newCommit}`
     );
     return _.trim(stdout);
+  }
+
+  async rm(opts: {
+    cached?: boolean;
+    recursive?: boolean;
+    force?: boolean;
+    dryRun?: boolean;
+    path: string;
+  }) {
+    const args: string[] = [];
+    if (opts.cached) args.push("--cached");
+    if (opts.recursive) args.push("-r");
+    if (opts.force) args.push("--force");
+    if (opts.dryRun) args.push("--dry-run");
+    args.push("--", opts.path);
+
+    return execa("git", args, { cwd: this.opts.localUrl });
   }
 }

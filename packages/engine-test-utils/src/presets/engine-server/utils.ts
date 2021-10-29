@@ -246,9 +246,13 @@ schemas:
                     template:
                       id: templates.day
                       type: note
-  - id: foos_parent
+  - id: id_with_imported_child
     children:
       - foo.foo
+  - id: with_child_that_has_untyped_template
+    children:
+      - pattern: has_untyped_template
+        template: templates.untyped
 `
   );
 
@@ -256,6 +260,13 @@ schemas:
     wsRoot,
     body: "Template text",
     fname: "templates.day",
+    vault: vault1,
+  });
+
+  await NoteTestUtilsV4.createNote({
+    wsRoot,
+    body: "Untyped template",
+    fname: "templates.untyped",
     vault: vault1,
   });
 };

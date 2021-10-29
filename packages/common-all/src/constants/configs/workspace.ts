@@ -196,4 +196,12 @@ export const WORKSPACE: DendronConfigEntryCollection<DendronWorkspaceConfig> = {
     label: "API Endpoint",
     desc: "Endpoint for backend API functionality.",
   },
+  enableUserTags: {
+    label: "Enable user tags",
+    desc: "Enable user tags, which allows @name to link to the note user.name",
+  },
+  enableHashTags: {
+    label: "Enable hashtags",
+    desc: "Enable hashtags, which allows #word to link to the note tags.word",
+  },
 };

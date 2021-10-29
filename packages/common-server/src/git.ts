@@ -356,4 +356,61 @@ export class GitUtils {
     const [git, ...args] = cmd.split(" ");
     return execa(git, args, { cwd: uri });
   }
+
+  /** Add a file or folder to the gitignore, avoiding creating exact duplicate lines.
+   *
+   * Creates the gitignore file if missing.
+   *
+   * @param addPath The path to add to the gitignore
+   * @param root The root folder containing the `.gitignore` file.
+   */
+  static async addToGitignore({
+    addPath,
+    root,
+  }: {
+    addPath: string;
+    root: string;
+  }) {
+    const gitignore = path.join(root, ".gitignore");
+    let contents: string | undefined;
+    try {
+      contents = await fs.readFile(gitignore, { encoding: "utf-8" });
+    } catch (err: any) {
+      // if the .gitignore was missing, ignore it
+      if (err?.code !== "ENOENT") throw err;
+    }
+    if (!contents || !contents.match(new RegExp(`^${addPath}/?$`, "g"))) {
+      // Avoid duplicating the gitignore line if it was already there
+      await fs.appendFile(gitignore, `\n${addPath}\n`);
+    }
+  }
+
+  /** Remove a file or folder from the gitignore.
+   *
+   * Does nothing if the gitignore is missing, or if the file or folder wasn't already in it.
+   *
+   * @param removePath The path to remove from the gitignore
+   * @param root The root folder containing the `.gitignore` file.
+   */
+  static async removeFromGitignore({
+    removePath,
+    root,
+  }: {
+    removePath: string;
+    root: string;
+  }) {
+    try {
+      const gitignore = path.join(root, ".gitignore");
+      const contents = await fs.readFile(gitignore, { encoding: "utf-8" });
+
+      const newContents = contents.replace(
+        new RegExp(`^${removePath}/?$`, "m"),
+        ""
+      );
+      if (newContents !== contents) await fs.writeFile(gitignore, newContents);
+    } catch (err: any) {
+      // Ignore it if the `.gitignore` was missing
+      if (err?.code !== "ENOENT") throw err;
+    }
+  }
 }

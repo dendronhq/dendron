@@ -136,7 +136,11 @@ function MatchTitle(props: {
   if (_.isUndefined(props.matches)) return <>{title}</>;
   const titleMatches = props.matches
     .filter((match) => match.key === "title")
-    .flatMap((match) => match.indices);
+    .flatMap((match) => match.indices)
+    .sort(
+      // Sort from earliest to latest match
+      ([leftStart, _leftEnd], [rightStart, _rightEnd]) => leftStart - rightStart
+    );
 
   let lastIndex = 0;
   const renderedTitle: (String | JSX.Element)[] = [];

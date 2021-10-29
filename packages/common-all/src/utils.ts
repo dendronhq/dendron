@@ -268,6 +268,11 @@ export class PublishUtils {
  */
 export type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
 
+/** Makes a single property within a type required. */
+export type NonOptional<T, K extends keyof T> = Pick<Required<T>, K> &
+  Omit<T, K>;
+
+
 export class ConfigUtils {
   static usePrettyRef(config: IntermediateDendronConfig) {
     let usePrettyRefs: boolean | undefined = _.find(

@@ -35,6 +35,7 @@ export class ExportPodCLICommand extends CLICommand<
   }
 
   async enrichArgs(args: CommandCLIOpts): Promise<CommandOpts> {
+    this.addArgsToPayload({ podId: args.podId });
     return enrichPodArgs({ pods: getAllExportPods(), podType: "export" })(args);
   }
 

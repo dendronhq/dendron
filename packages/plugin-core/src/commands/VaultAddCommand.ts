@@ -1,6 +1,7 @@
 import {
   DVault,
   DWorkspace,
+  VaultRemoteSource,
   VaultUtils,
   WorkspaceSettings,
   WorkspaceType,
@@ -32,7 +33,6 @@ type CommandOpts = {
 };
 
 type CommandOutput = { vaults: DVault[] };
-export type VaultRemoteSource = "local" | "remote";
 
 export { CommandOpts as VaultAddCommandOpts };
 

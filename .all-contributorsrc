@@ -723,7 +723,8 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/308347?v=4",
       "profile": "https://blog.dend.ro/",
       "contributions": [
-        "bug"
+        "bug",
+        "doc"
       ]
     },
     {
@@ -751,6 +752,54 @@
       "profile": "http://bcdef.org",
       "contributions": [
         "doc"
+      ]
+    },
+    {
+      "login": "eltociear",
+      "name": "Ikko Ashimine",
+      "avatar_url": "https://avatars.githubusercontent.com/u/22633385?v=4",
+      "profile": "https://bandism.net/",
+      "contributions": [
+        "doc",
+        "test"
+      ]
+    },
+    {
+      "login": "simkimsia",
+      "name": "simkimsia",
+      "avatar_url": "https://avatars.githubusercontent.com/u/245021?v=4",
+      "profile": "https://github.com/simkimsia",
+      "contributions": [
+        "bug",
+        "financial",
+        "tutorial"
+      ]
+    },
+    {
+      "login": "demorganslaw",
+      "name": "demorganslaw",
+      "avatar_url": "https://avatars.githubusercontent.com/u/88507322?v=4",
+      "profile": "https://github.com/demorganslaw",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "guilhermesfc",
+      "name": "guilhermesfc",
+      "avatar_url": "https://avatars.githubusercontent.com/u/10503773?v=4",
+      "profile": "https://github.com/guilhermesfc",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "idan",
+      "name": "Idan Gazit",
+      "avatar_url": "https://avatars.githubusercontent.com/u/22723?v=4",
+      "profile": "http://gazit.me",
+      "contributions": [
+        "bug"
       ]
     }
   ],

@@ -90,6 +90,8 @@ workspace:
     enableAutoCreateOnDefinition: false
     enableXVaultWikiLink: false
     enableRemoteVaultInit: true
+    enableUserTags: true
+    enableHashTags: true
     workspaceVaultSyncMode: noCommit
     enableAutoFoldFrontmatter: false
     maxPreviewsCached: 10
@@ -206,6 +208,8 @@ workspace:
     enableAutoCreateOnDefinition: false
     enableXVaultWikiLink: false
     enableRemoteVaultInit: true
+    enableUserTags: true
+    enableHashTags: true
     workspaceVaultSyncMode: noCommit
     enableAutoFoldFrontmatter: false
     maxPreviewsCached: 10
@@ -305,6 +309,8 @@ workspace:
     enableAutoCreateOnDefinition: false
     enableXVaultWikiLink: false
     enableRemoteVaultInit: true
+    enableUserTags: true
+    enableHashTags: true
     workspaceVaultSyncMode: noCommit
     enableAutoFoldFrontmatter: false
     maxPreviewsCached: 10
@@ -382,6 +388,8 @@ workspace:
     enableAutoCreateOnDefinition: false
     enableXVaultWikiLink: false
     enableRemoteVaultInit: true
+    enableUserTags: true
+    enableHashTags: true
     workspaceVaultSyncMode: noCommit
     enableAutoFoldFrontmatter: false
     maxPreviewsCached: 10
@@ -472,6 +480,8 @@ workspace:
     enableAutoCreateOnDefinition: false
     enableXVaultWikiLink: false
     enableRemoteVaultInit: true
+    enableUserTags: true
+    enableHashTags: true
     workspaceVaultSyncMode: noCommit
     enableAutoFoldFrontmatter: false
     maxPreviewsCached: 10

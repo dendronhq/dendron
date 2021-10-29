@@ -28,6 +28,8 @@ export type DendronWorkspaceConfig = {
   enableRemoteVaultInit: boolean;
   workspaceVaultSyncMode: VaultSyncMode;
   enableAutoFoldFrontmatter: boolean;
+  enableUserTags: boolean;
+  enableHashTags: boolean;
   // performance related
   maxPreviewsCached: number;
   maxNoteLength: number;
@@ -63,6 +65,8 @@ export function genDefaultWorkspaceConfig(): DendronWorkspaceConfig {
     enableAutoCreateOnDefinition: false,
     enableXVaultWikiLink: false,
     enableRemoteVaultInit: true,
+    enableUserTags: true,
+    enableHashTags: true,
     workspaceVaultSyncMode: VaultSyncModeEnum.noCommit,
     enableAutoFoldFrontmatter: false,
     maxPreviewsCached: 10,

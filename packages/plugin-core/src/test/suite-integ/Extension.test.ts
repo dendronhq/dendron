@@ -233,6 +233,8 @@ suite("Extension", function () {
             enableRemoteVaultInit: true,
             workspaceVaultSyncMode: "noCommit",
             enableAutoFoldFrontmatter: false,
+            enableHashTags: true,
+            enableUserTags: true,
             maxPreviewsCached: 10,
             maxNoteLength: 204800,
           },

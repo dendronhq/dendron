@@ -259,7 +259,7 @@ describe(`schemaParser tests:`, () => {
       let foosParent: SchemaProps;
 
       beforeAll(() => {
-        foosParent = inlined.schemas["foos_parent"];
+        foosParent = inlined.schemas["id_with_imported_child"];
       });
 
       it(`THEN we have id to imported schema within node that used it.`, () => {
@@ -338,6 +338,39 @@ describe(`schemaParser tests:`, () => {
               });
             });
           });
+        });
+      });
+    });
+
+    describe(`AND parsing part which has untyped template`, () => {
+      let parentOfDesired: SchemaProps;
+
+      beforeAll(() => {
+        parentOfDesired =
+          inlined.schemas["with_child_that_has_untyped_template"];
+      });
+
+      describe(`AND parses element which has untyped template`, () => {
+        let withUntypedTemplate: SchemaProps;
+
+        beforeAll(() => {
+          withUntypedTemplate = inlined.schemas[parentOfDesired.children[0]];
+        });
+
+        it(`THEN has expected pattern`, () => {
+          expect(withUntypedTemplate.data.pattern).toEqual(
+            "has_untyped_template"
+          );
+        });
+
+        it(`THEN sets the id of the template`, () => {
+          expect(withUntypedTemplate.data.template?.id).toEqual(
+            "templates.untyped"
+          );
+        });
+
+        it(`THEN defaults to note type for template`, () => {
+          expect(withUntypedTemplate.data.template?.type).toEqual("note");
         });
       });
     });

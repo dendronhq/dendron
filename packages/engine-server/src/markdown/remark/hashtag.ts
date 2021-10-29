@@ -1,10 +1,15 @@
 import _ from "lodash";
-import { DendronError, TAGS_HIERARCHY } from "@dendronhq/common-all";
+import {
+  ConfigUtils,
+  DendronError,
+  TAGS_HIERARCHY,
+} from "@dendronhq/common-all";
 import { Eat } from "remark-parse";
 import Unified, { Plugin } from "unified";
 import { DendronASTDest, DendronASTTypes, HashTag } from "../types";
 import { MDUtilsV4 } from "../utils";
 import { Element } from "hast";
+import { MDUtilsV5 } from "../utilsv5";
 
 /** All sorts of punctuation marks and quotation marks from different languages. Please add any that may be missing.
  *
@@ -37,7 +42,8 @@ const GOOD_END_CHARACTER = `[^@#|\\[\\]\\s.${PUNCTUATION_MARKS}]`;
  * Here, the tag is `#important` without the following comma.
  */
 export const HASHTAG_REGEX = new RegExp(
-  `^(?<hashTag>#)(?<tagContents>` +
+  // Avoid matching it if there's a non-whitespace character before (like ab#cd)
+  `^(?<!\\S)(?<hashTag>#)(?<tagContents>` +
     // 2 or more characters, like #a1x or #a.x. This MUST come before 1 character case, or regex will match 1 character and stop.
     `${GOOD_FIRST_CHARACTER}${GOOD_MIDDLE_CHARACTER}*${GOOD_END_CHARACTER}` +
     // or
@@ -48,7 +54,8 @@ export const HASHTAG_REGEX = new RegExp(
 );
 /** Same as `HASHTAG_REGEX`, except that that it doesn't have to be at the start of the string. */
 export const HASHTAG_REGEX_LOOSE = new RegExp(
-  `(?<hashTag>#)(?<tagContents>` +
+  // Avoid matching it if there's a non-whitespace character before (like ab#cd)
+  `(?<!\\S)(?<hashTag>#)(?<tagContents>` +
     // 2 or more characters, like #a1x or #a.x. This MUST come before 1 character case, or regex will match 1 character and stop.
     `${GOOD_FIRST_CHARACTER}${GOOD_MIDDLE_CHARACTER}*${GOOD_END_CHARACTER}` +
     // or
@@ -93,6 +100,10 @@ function attachParser(proc: Unified.Processor) {
   }
 
   function inlineTokenizer(eat: Eat, value: string) {
+    const { enableHashTags } = ConfigUtils.getWorkspace(
+      MDUtilsV5.getProcData(proc).config
+    );
+    if (enableHashTags === false) return;
     const match = HASHTAG_REGEX.exec(value);
     if (match && match.groups?.tagContents) {
       return eat(match[0])({

@@ -2675,7 +2675,7 @@ VFile {
 <hr>
 <h2 id=\\"footnotes\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#footnotes\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Footnotes</h2>
 <ol>
-<li><span id=\\"fn-minus\\" style=\\"display: none;\\"></span><p>Et porro minus facilis qui.<a class=\\"fn\\" href=\\"#fnref-minus\\">˄</a></p></li>
+<li><span id=\\"fn-minus\\" style=\\"width: 0; height: 0;\\"></span><p>Et porro minus facilis qui.<a class=\\"fn\\" href=\\"#fnref-minus\\">˄</a></p></li>
 </ol>
 </div></div><p></p><p></p>
 <hr>
@@ -2685,7 +2685,7 @@ VFile {
 </ol>
 <h2 id=\\"footnotes-1\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#footnotes-1\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Footnotes</h2>
 <ol>
-<li><span id=\\"fn-quo\\" style=\\"display: none;\\"></span><p>Id et velit ducimus quo ut.<a class=\\"fn\\" href=\\"#fnref-quo\\">˄</a></p></li>
+<li><span id=\\"fn-quo\\" style=\\"width: 0; height: 0;\\"></span><p>Id et velit ducimus quo ut.<a class=\\"fn\\" href=\\"#fnref-quo\\">˄</a></p></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -2714,7 +2714,7 @@ VFile {
 <hr>
 <h2 id=\\"footnotes\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#footnotes\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Footnotes</h2>
 <ol>
-<li><span id=\\"fn-minus\\" style=\\"display: none;\\"></span><p>Et porro minus facilis qui.<a class=\\"fn\\" href=\\"#fnref-minus\\">˄</a></p></li>
+<li><span id=\\"fn-minus\\" style=\\"width: 0; height: 0;\\"></span><p>Et porro minus facilis qui.<a class=\\"fn\\" href=\\"#fnref-minus\\">˄</a></p></li>
 </ol>
 </div></div><p></p><p></p>
 <hr>
@@ -2724,7 +2724,7 @@ VFile {
 </ol>
 <h2 id=\\"footnotes-1\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#footnotes-1\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Footnotes</h2>
 <ol>
-<li><span id=\\"fn-quo\\" style=\\"display: none;\\"></span><p>Id et velit ducimus quo ut.<a class=\\"fn\\" href=\\"#fnref-quo\\">˄</a></p></li>
+<li><span id=\\"fn-quo\\" style=\\"width: 0; height: 0;\\"></span><p>Id et velit ducimus quo ut.<a class=\\"fn\\" href=\\"#fnref-quo\\">˄</a></p></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},

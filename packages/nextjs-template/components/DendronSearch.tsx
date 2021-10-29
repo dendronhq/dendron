@@ -73,7 +73,7 @@ function DendronSearchComponent(props: DendronPageWithNoteDataProps) {
   }, [requestNotes, searchResults]);
 
   useEffect(() => {
-    if (value.startsWith("?")) {
+    if (value?.startsWith("?")) {
       setResults("searchResults");
     } else {
       setResults("lookupResults");
@@ -81,6 +81,9 @@ function DendronSearchComponent(props: DendronPageWithNoteDataProps) {
   }, [value]);
 
   const onLookup = (qs: string) => {
+    if (_.isUndefined(qs)) {
+      return;
+    }
     const out =
       qs === ""
         ? NoteLookupUtils.fetchRootResults(notes)

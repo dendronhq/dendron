@@ -16,8 +16,8 @@ export type TaskConfig = Pick<
   prioritySymbols: { [status: string]: string };
   /** Add a "TODO: <note title>" entry to the frontmatter of task notes. This can simplify integration with various Todo extensions like Todo Tree. */
   todoIntegration: boolean;
-  /** The default selection type to use in Task Create command. */
-  taskCreateSelectionType: LegacyLookupSelectionType;
+  /** The default selection type to use in Create Task Note command. */
+  createTaskSelectionType: LegacyLookupSelectionType;
 };
 
 /**
@@ -31,6 +31,14 @@ export function genDefaultTaskConfig(): TaskConfig {
     addBehavior: NoteAddBehaviorEnum.childOfCurrent,
     statusSymbols: {
       "": " ",
+      wip: "w",
+      done: "x",
+      assigned: "a",
+      moved: "m",
+      blocked: "b",
+      delegated: "l",
+      dropped: "d",
+      pending: "y",
     },
     prioritySymbols: {
       H: "high",
@@ -38,7 +46,7 @@ export function genDefaultTaskConfig(): TaskConfig {
       L: "low",
     },
     todoIntegration: false,
-    taskCreateSelectionType: LegacyLookupSelectionType.selection2link,
+    createTaskSelectionType: LegacyLookupSelectionType.selection2link,
   };
 }
 
@@ -92,7 +100,7 @@ export class TaskNoteUtils {
     // If the symbol is not mapped to anything, use the symbol prop directly
     if (!taskConfig.statusSymbols) return `[${status}]`;
     const symbol: string | undefined = taskConfig.statusSymbols[status];
-    if (symbol === undefined) return `[${status}]`;;
+    if (symbol === undefined) return `[${status}]`;
     // If it does map to something, then use that
     return `[${symbol}]`;
   }

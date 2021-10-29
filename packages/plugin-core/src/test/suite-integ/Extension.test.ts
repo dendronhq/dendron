@@ -221,8 +221,16 @@ suite("Extension", function () {
               },
               statusSymbols: {
                 "": " ",
+                assigned: "a",
+                blocked: "b",
+                delegated: "l",
+                done: "x",
+                dropped: "d",
+                moved: "m",
+                pending: "y",
+                wip: "w",
               },
-              taskCreateSelectionType: 'selection2link',
+              createTaskSelectionType: "selection2link",
               todoIntegration: false,
             },
             graph: {

@@ -262,7 +262,7 @@ suite("windowDecorations", function () {
           ).toBeTruthy();
 
           expect(taskDecorations[0].renderOptions?.before?.contentText).toEqual(
-            "[done]"
+            "[x]"
           );
           expect(taskDecorations[0].renderOptions?.after?.contentText).toEqual(
             "due:2021.10.29 @grace prio:high #foo"

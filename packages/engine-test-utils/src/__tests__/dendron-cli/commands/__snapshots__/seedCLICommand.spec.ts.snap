@@ -79,12 +79,20 @@ workspace:
         addBehavior: childOfCurrent
         statusSymbols:
             '': ' '
+            wip: w
+            done: x
+            assigned: a
+            moved: m
+            blocked: b
+            delegated: l
+            dropped: d
+            pending: 'y'
         prioritySymbols:
             H: high
             M: medium
             L: low
         todoIntegration: false
-        taskCreateSelectionType: selection2link
+        createTaskSelectionType: selection2link
     graph:
         zoomSpeed: 1
     enableAutoCreateOnDefinition: false
@@ -197,12 +205,20 @@ workspace:
         addBehavior: childOfCurrent
         statusSymbols:
             '': ' '
+            wip: w
+            done: x
+            assigned: a
+            moved: m
+            blocked: b
+            delegated: l
+            dropped: d
+            pending: 'y'
         prioritySymbols:
             H: high
             M: medium
             L: low
         todoIntegration: false
-        taskCreateSelectionType: selection2link
+        createTaskSelectionType: selection2link
     graph:
         zoomSpeed: 1
     enableAutoCreateOnDefinition: false
@@ -298,12 +314,20 @@ workspace:
         addBehavior: childOfCurrent
         statusSymbols:
             '': ' '
+            wip: w
+            done: x
+            assigned: a
+            moved: m
+            blocked: b
+            delegated: l
+            dropped: d
+            pending: 'y'
         prioritySymbols:
             H: high
             M: medium
             L: low
         todoIntegration: false
-        taskCreateSelectionType: selection2link
+        createTaskSelectionType: selection2link
     graph:
         zoomSpeed: 1
     enableAutoCreateOnDefinition: false
@@ -377,12 +401,20 @@ workspace:
         addBehavior: childOfCurrent
         statusSymbols:
             '': ' '
+            wip: w
+            done: x
+            assigned: a
+            moved: m
+            blocked: b
+            delegated: l
+            dropped: d
+            pending: 'y'
         prioritySymbols:
             H: high
             M: medium
             L: low
         todoIntegration: false
-        taskCreateSelectionType: selection2link
+        createTaskSelectionType: selection2link
     graph:
         zoomSpeed: 1
     enableAutoCreateOnDefinition: false
@@ -469,12 +501,20 @@ workspace:
         addBehavior: childOfCurrent
         statusSymbols:
             '': ' '
+            wip: w
+            done: x
+            assigned: a
+            moved: m
+            blocked: b
+            delegated: l
+            dropped: d
+            pending: 'y'
         prioritySymbols:
             H: high
             M: medium
             L: low
         todoIntegration: false
-        taskCreateSelectionType: selection2link
+        createTaskSelectionType: selection2link
     graph:
         zoomSpeed: 1
     enableAutoCreateOnDefinition: false

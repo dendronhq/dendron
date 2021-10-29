@@ -403,8 +403,8 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docPreview: "",
   },
   TASK_CREATE: {
-    key: "dendron.taskCreate",
-    title: `${CMD_PREFIX} Task Create`,
+    key: "dendron.createTask",
+    title: `${CMD_PREFIX} Create Task Note`,
     group: "notes",
     desc: "Create a task note.",
     docLink: "dendron.topic.tasks.md",

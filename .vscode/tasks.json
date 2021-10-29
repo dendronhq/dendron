@@ -7,7 +7,7 @@
       "type": "npm",
       "script": "gen:data",
       "problemMatcher": [],
-      "label": "npm: gen:data",
+      "label": "generate JSON schema",
       "detail": "node packages/dendron-cli/lib/bin/dendron-cli.js dev generate_json_schema_from_config"
     }
   ]

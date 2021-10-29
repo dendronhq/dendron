@@ -198,8 +198,8 @@
         "docPreview": ""
       },
       {
-        "command": "dendron.taskCreate",
-        "title": "Dendron: Task Create",
+        "command": "dendron.createTask",
+        "title": "Dendron: Create Task Note",
         "desc": "Create a task note.",
         "docLink": "dendron.topic.tasks.md",
         "docPreview": ""

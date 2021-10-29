@@ -126,11 +126,11 @@ const TASK: DendronConfigEntryCollection<TaskConfig> = {
     label: "Todo integration",
     desc: 'Adds a "TODO: ..." property to the frontmatter. This allows easier interoperability with other extensions like Todo Tree.',
   },
-  taskCreateSelectionType: Object.fromEntries(
+  createTaskSelectionType: Object.fromEntries(
     Object.entries(SELECTION_MODES).map(([key, value]) => {
-      value.desc = `When using Task Create, ${value.desc.toLowerCase()}`;
+      value.desc = `When using Create Task Note, ${value.desc.toLowerCase()}`;
       return [key, value];
-    }),
+    })
   ),
 };
 

@@ -696,9 +696,9 @@
           "type": "boolean",
           "description": "Add a \"TODO: <note title>\" entry to the frontmatter of task notes. This can simplify integration with various Todo extensions like Todo Tree."
         },
-        "taskCreateSelectionType": {
+        "createTaskSelectionType": {
           "$ref": "#/definitions/LegacyLookupSelectionType",
-          "description": "The default selection type to use in Task Create command."
+          "description": "The default selection type to use in Create Task Note command."
         },
         "name": {
           "type": "string"
@@ -716,7 +716,7 @@
         "name",
         "prioritySymbols",
         "statusSymbols",
-        "taskCreateSelectionType",
+        "createTaskSelectionType",
         "todoIntegration"
       ],
       "description": "Namespace for configuring scratch note behavior"

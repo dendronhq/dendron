@@ -4,18 +4,22 @@ import { DENDRON_COMMANDS } from "../constants";
 import { Logger } from "../logger";
 import { getDWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
-import { NoteLookupCommand, CommandOutput as NoteLookupOutput } from "./NoteLookupCommand";
+import {
+  NoteLookupCommand,
+  CommandOutput as NoteLookupOutput,
+} from "./NoteLookupCommand";
 
-type CommandOpts = {
-};
+type CommandOpts = {};
 
 type CommandOutput = NoteLookupOutput | undefined;
 
-export { CommandOpts as TaskCreateOpts };
+export { CommandOpts as CreateTaskOpts };
 
-export class TaskCreateCommand extends BasicCommand<CommandOpts, CommandOutput> {
+export class CreateTaskCommand extends BasicCommand<
+  CommandOpts,
+  CommandOutput
+> {
   key = DENDRON_COMMANDS.TASK_CREATE.key;
-
 
   /**
    * Returns all vaults added
@@ -23,16 +27,16 @@ export class TaskCreateCommand extends BasicCommand<CommandOpts, CommandOutput> 
    * @returns
    */
   async execute(opts: CommandOpts) {
-    const ctx = "TaskCreate";
-    
+    const ctx = "CreateTask";
+
     Logger.info({ ctx, msg: "enter", opts });
     const { config } = getDWorkspace();
-    const { taskCreateSelectionType } = ConfigUtils.getTask(config);
-    
+    const { createTaskSelectionType } = ConfigUtils.getTask(config);
+
     const cmd = new NoteLookupCommand();
     return cmd.run({
       noteType: LookupNoteTypeEnum.task,
-      selectionType: taskCreateSelectionType,
+      selectionType: createTaskSelectionType,
     });
   }
 }

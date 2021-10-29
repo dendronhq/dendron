@@ -599,9 +599,21 @@ export enum DMessageSource {
 }
 
 export enum DMessageType {
+  // --- View Events
+  /**
+   * The view has just rendered
+   */
   INIT = "init",
-  ON_DID_CHANGE_ACTIVE_TEXT_EDITOR = "onDidChangeActiveTextEditor",
+  /**
+   * The view has listener for 
+   */
   MESSAGE_DISPATCHER_READY = "messageDispatcherReady",
+
+  // --- VSCode Events
+  /**
+   * The active text editor just changed
+   */
+  ON_DID_CHANGE_ACTIVE_TEXT_EDITOR = "onDidChangeActiveTextEditor",
 }
 
 export enum TreeViewMessageType {

@@ -7,7 +7,12 @@ import {
   Stage,
 } from "@dendronhq/common-all";
 import { execa, SiteUtils } from "@dendronhq/engine-server";
-import { NextjsExportConfig, NextjsExportPod } from "@dendronhq/pods-core";
+import {
+  NextjsExportConfig,
+  NextjsExportPod,
+  NextjsExportPodUtils,
+  BuildOverrides,
+} from "@dendronhq/pods-core";
 import _ from "lodash";
 import path from "path";
 import yargs from "yargs";
@@ -61,7 +66,7 @@ type CommandOpts = Omit<CommandCLIOpts, "overrides"> & Partial<ExportCmdOpts>;
 
 type CommandOutput = Partial<{ error: DendronError; data: any }>;
 
-type BuildOverrides = Pick<DendronSiteConfig, "siteUrl">;
+// type BuildOverrides = Pick<DendronSiteConfig, "siteUrl">;
 
 type BuildCmdOpts = Omit<CommandCLIOpts, keyof CommandCLIOnlyOpts> & {
   /**
@@ -131,7 +136,7 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
   async enrichArgs(args: CommandCLIOpts): Promise<CommandOpts> {
     this.addArgsToPayload({ cmd: args.cmd });
     let error: DendronError | undefined;
-    let coverrides: BuildOverrides = {};
+    const coverrides: BuildOverrides = {};
     if (!_.isUndefined(args.overrides)) {
       args.overrides.split(",").map((ent) => {
         const [k, v] = _.trim(ent).split("=");
@@ -154,8 +159,7 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     try {
       switch (cmd) {
         case PublishCommands.INIT: {
-          return await SiteUtils.initialize(opts);
-          // return await this.init(opts);
+          return await this.init(opts);
         }
         case PublishCommands.BUILD: {
           return this.build(opts);
@@ -194,7 +198,7 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
   } & Pick<CommandOpts, "attach" | "dest" | "wsRoot" | "overrides">) {
     const cli = new ExportPodCLICommand();
     // create config string
-    let podConfig: NextjsExportConfig = {
+    const podConfig: NextjsExportConfig = {
       dest: dest || getNextRoot(wsRoot),
     };
     const opts = await cli.enrichArgs({
@@ -281,23 +285,17 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     }
   }
 
-  // async init(opts: { wsRoot: string }) {
-  //   const cwd = opts.wsRoot;
-  //   const nextPath = path.join(cwd, ".next");
-  //   if (fs.pathExistsSync(nextPath)) {
-  //     this.print(`.next directory already exists at ${cwd}. Removing.`);
-  //     fs.rmdirSync(nextPath, { recursive: true });
-  //   }
-  //   this.print(`initializing publishing at ${cwd}...`);
-  //   const cmd = `git clone https://github.com/dendronhq/nextjs-template.git .next`;
-  //   $(cmd, { cwd });
-  //   const cmdInstall = `npm install`;
-  //   const spinner = ora("Installing dependencies....").start();
-  //   await $$(cmdInstall, { cwd: path.join(cwd, ".next") });
-  //   spinner.stop();
-  //   this.print(`Your Dendron Next Template is now initialized in ".next"`);
-  //   return { error: null };
-  // }
+  async init(opts: { wsRoot: string }) {
+    const nextPath = path.join(opts.wsRoot, ".next");
+    const nextPathExists = await NextjsExportPodUtils.nextPathExists({
+      nextPath,
+    });
+    if (nextPathExists) {
+      await NextjsExportPodUtils.removeNextPath({ nextPath });
+    }
+    await NextjsExportPodUtils.initialize({ nextPath });
+    return { error: null };
+  }
 
   async build({ wsRoot, dest, attach, overrides }: BuildCmdOpts) {
     this.print(`generating metadata for publishing...`);

@@ -223,7 +223,7 @@ describe("WHEN run `dendron publish export`", () => {
         );
       });
 
-      test.only("THEN cancel when no confirm", async () => {
+      test("THEN cancel when no confirm", async () => {
         await runEngineTestV5(
           async ({ wsRoot }) => {
             const cli = new PublishCLICommand();

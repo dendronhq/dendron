@@ -945,7 +945,9 @@ export class RemarkUtils {
 
   static convertLinksToDotNotation(
     note: NoteProps,
-    changes: NoteChangeEntry[]
+    changes: NoteChangeEntry[],
+    wikilinkPrefix: string,
+    siblingNotes: NoteProps[]
   ) {
     return function (this: Processor) {
       return (tree: Node, _vfile: VFile) => {
@@ -955,17 +957,29 @@ export class RemarkUtils {
           root
         ) as WikiLinkNoteV4[];
         wikiLinks.forEach((linkNode) => {
-          if (linkNode.value.indexOf("/") >= 0) {
-            const newValue = _.replace(linkNode.value, /\//g, ".");
+          //lowercase the wikilink
+          let wikilinkValue = linkNode.value.toLowerCase();
+          //replace /\ in wikilink, if any, with .
+          if (wikilinkValue.indexOf("/") >= 0) {
+            wikilinkValue = _.replace(wikilinkValue, /\//g, ".");
             if (linkNode.data.alias === linkNode.value) {
-              linkNode.data.alias = newValue;
+              linkNode.data.alias = wikilinkValue;
             }
-            linkNode.value = newValue;
-            changes.push({
-              note,
-              status: "update",
-            });
           }
+          // replace spaces in wikilink, if any, with -
+          if (wikilinkValue.indexOf(" ") >= 0) {
+            wikilinkValue = _.replace(wikilinkValue, /\s/g, "-");
+          }
+          const newValue = wikilinkPrefix.concat(wikilinkValue);
+
+          linkNode.value =
+            siblingNotes.filter((note) => note.fname === newValue).length > 0
+              ? newValue
+              : wikilinkValue;
+          changes.push({
+            note,
+            status: "update",
+          });
         });
       };
     };

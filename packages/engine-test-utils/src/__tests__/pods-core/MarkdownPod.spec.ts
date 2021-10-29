@@ -259,6 +259,9 @@ function setupImport(src: string) {
     { path: "project/p1/n1.pdf" },
     { path: "project/p.3/n1.md" },
     { path: "project/p4/test.txt" },
+    { path: "A1/B1.md" },
+    { path: "A1/B2.md" },
+    { path: "A1/B1 B2.md" },
   ]);
 }
 
@@ -479,6 +482,48 @@ describe("markdown import pod", () => {
           fs.writeFileSync(
             path.join(importSrc, "project", "p4", "n1.md"),
             "[test-pdf](./test.txt)"
+          );
+        },
+      }
+    );
+  });
+
+  test("convert obsidian wikilink", async () => {
+    await runEngineTestV5(
+      async ({ engine, vaults, wsRoot }) => {
+        const pod = new MarkdownImportPod();
+        const vaultName = VaultUtils.getName(vaults[0]);
+        const vault = vaults[0];
+        vpath = vault2Path({ wsRoot, vault });
+        await pod.execute({
+          engine,
+          vaults,
+          wsRoot,
+          config: {
+            concatenate: false,
+            src: importSrc,
+            vaultName,
+            noAddUUID: true,
+          },
+        });
+        const B1fileBody = fs.readFileSync(path.join(vpath, "a1.b1.md"), {
+          encoding: "utf8",
+        });
+        const B2fileBody = fs.readFileSync(path.join(vpath, "a1.b2.md"), {
+          encoding: "utf8",
+        });
+        expect(B1fileBody).toContain(`[[B2|a1.b2]]`);
+        expect(B2fileBody).toContain(`[[B1 B2|a1.b1-b2]]`);
+      },
+      {
+        expect,
+        preSetupHook: async () => {
+          await setupImport(importSrc);
+          fs.writeFileSync(path.join(importSrc, "A1", "B1.md"), "[[B2]]");
+          fs.writeFileSync(path.join(importSrc, "A1", "B2.md"), "[[B1 B2]]");
+          fs.writeFileSync(
+            path.join(importSrc, "A1", "B1 B2.md"),
+            "Hello World"
           );
         },
       }

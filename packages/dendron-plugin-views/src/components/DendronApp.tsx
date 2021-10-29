@@ -16,6 +16,7 @@ import {
   engineHooks,
 } from "@dendronhq/common-frontend";
 import React from "react";
+import { useWorkspaceProps } from "../hooks";
 import { DendronComponent, WorkspaceProps } from "../types";
 import { postVSCodeMessage } from "../utils/vscode";
 
@@ -26,8 +27,13 @@ function DendronVSCodeApp({Component}: {Component: DendronComponent}) {
   const ide = ideHooks.useIDEAppSelector((state) => state.ide);
   const engine = useEngineAppSelector((state) => state.engine);
   const ideDispatch = ideHooks.useIDEAppDispatch();
-  const [workspaceOpts, setWorkspaceOpts] = React.useState<WorkspaceProps>();
+  const [workspace] = useWorkspaceProps()
+  // const [workspaceOpts, setWorkspaceOpts] = React.useState<WorkspaceProps>();
   const logger = createLogger("DendronApp");
+
+  const props = {
+    engine, ide, workspace
+  }
 
   // === Hooks
   // run once
@@ -50,7 +56,7 @@ function DendronVSCodeApp({Component}: {Component: DendronComponent}) {
   return <div> 
     Dendron App Wrapper
     <hr/>
-    <Component />
+    <Component {...props} />
   </div>
 }
 

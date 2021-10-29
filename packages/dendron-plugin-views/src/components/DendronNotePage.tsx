@@ -2,22 +2,29 @@ import { IntermediateDendronConfig, NoteProps } from "@dendronhq/common-all";
 import {
   createLogger,
   DendronNote,
+  engineHooks,
+  engineSlice,
   LoadingStatus,
 } from "@dendronhq/common-frontend";
 import { Col, Row } from "antd";
 import _ from "lodash";
 import React from "react";
-import { DendronComponent } from "../types";
+import { useNoteId, useNoteProps, useRenderedNoteBody } from "../hooks";
+import { DendronComponent, DendronProps, WorkspaceProps } from "../types";
 
-const useDendronNoteBody = () => {
-	return [];
-};
 
-const DendronNotePage: DendronComponent = () => {
+
+const DendronNotePage: DendronComponent = (props) => {
   const logger = createLogger("DendronNotePage");
-	const [noteBody, setBody] = useDendronNoteBody();
+	const [noteId] = useNoteId();
+	const [noteProps] = useNoteProps({...props, noteId})
+	const [noteRenderedBody] = useRenderedNoteBody({...props, noteProps})
 
-	return <div>Dendron Note Page</div>;
+	if (!noteRenderedBody) {
+		return null;
+	}
+
+	return <DendronNote noteContent={noteRenderedBody}/>
 }
 
 export default DendronNotePage;

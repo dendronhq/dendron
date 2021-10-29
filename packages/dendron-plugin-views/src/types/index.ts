@@ -1,4 +1,5 @@
 
+import { engineSlice, ideSlice } from "@dendronhq/common-frontend";
 
 export type WorkspaceProps = {
   port: number;
@@ -10,8 +11,10 @@ export type WorkspaceProps = {
   browser?: boolean;
 };
 
+export type DendronComponent = React.FunctionComponent<DendronProps>;
 
-export interface DendronComponentProps {
-}
-
-export type DendronComponent = React.FunctionComponent<DendronComponentProps>;
+export type DendronProps = {
+  engine: engineSlice.EngineState,
+  ide: ideSlice.IDEState;
+  workspace: WorkspaceProps;
+};

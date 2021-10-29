@@ -84,3 +84,7 @@ export const USERS_HIERARCHY_BASE = "user";
 export const USERS_HIERARCHY = `${USERS_HIERARCHY_BASE}.`;
 
 export type VaultRemoteSource = "local" | "remote";
+
+export enum DENDRON_EMOJIS {
+  SEEDLING = "🌱",
+}

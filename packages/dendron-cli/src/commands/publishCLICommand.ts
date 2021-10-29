@@ -22,7 +22,7 @@ import { CLICommand } from "./base";
 import { ExportPodCLICommand } from "./exportPod";
 import { PodSource } from "./pod";
 import { SetupEngineCLIOpts } from "./utils";
-import prompts, { PromptType } from "prompts";
+import prompts from "prompts";
 import fs from "fs-extra";
 
 const $$ = (cmd: string, opts?: any) => {

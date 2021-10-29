@@ -228,21 +228,6 @@ export class NextjsExportPodUtils {
     const out = $$(cmdDev, { cwd: nextPath });
     return out.pid;
   }
-
-  // static async buildNextData({
-  //   wsRoot,
-  //   stage,
-  //   dest,
-  //   overrides,
-
-  // }: {
-  //   wsRoot: string,
-  //   stage: Stage,
-  //   dest?: string,
-  //   overrides: BuildOverrides,
-  // }) {
-
-  // }
 }
 
 export class NextjsExportPod extends ExportPod<NextjsExportConfig> {

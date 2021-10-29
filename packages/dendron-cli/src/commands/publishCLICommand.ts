@@ -66,8 +66,6 @@ type CommandOpts = Omit<CommandCLIOpts, "overrides"> & Partial<ExportCmdOpts>;
 
 type CommandOutput = Partial<{ error: DendronError; data: any }>;
 
-// type BuildOverrides = Pick<DendronSiteConfig, "siteUrl">;
-
 type BuildCmdOpts = Omit<CommandCLIOpts, keyof CommandCLIOnlyOpts> & {
   /**
    * Use existing engine instead of spwaning a new one

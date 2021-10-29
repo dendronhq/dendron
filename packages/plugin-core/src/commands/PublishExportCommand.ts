@@ -25,7 +25,6 @@ export class PublishExportCommand extends BasicCommand<
 
   async sanityCheck() {
     return checkPreReq();
-    // return undefined;
   }
 
   async execute() {

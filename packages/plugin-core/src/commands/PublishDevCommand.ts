@@ -72,7 +72,6 @@ export class PublishDevCommand extends BasicCommand<CommandOutput> {
           );
         } else {
           const { pid } = opts;
-          console.log({ pid });
           kill(pid, "SIGTERM");
         }
       });

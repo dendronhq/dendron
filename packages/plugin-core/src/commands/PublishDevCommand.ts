@@ -1,22 +1,22 @@
-import { express } from "@dendronhq/api-server";
-import { CONSTANTS } from "@dendronhq/common-all";
-import { BuildSiteV2CLICommandOpts } from "@dendronhq/dendron-cli";
-import { SiteUtils } from "@dendronhq/engine-server";
-import fs from "fs-extra";
-import { env, ProgressLocation, Uri, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
-import { buildSite, checkPreReq, getSiteRootDirPath } from "../utils/site";
-import { getEngine, getExtension, getDWorkspace } from "../workspace";
+import {
+  getSiteRootDirPath,
+  checkPreReq,
+  NextJSPublishUtils,
+} from "../utils/site";
 import { BasicCommand } from "./base";
+import fs from "fs-extra";
+import path from "path";
+import _ from "lodash";
+import kill from "tree-kill";
+import { commands, Uri, window } from "vscode";
+import { DENDRON_EMOJIS } from "@dendronhq/common-all";
 
-type CommandOpts = Partial<BuildSiteV2CLICommandOpts>;
+type CommandOutput = {
+  pid: number;
+};
 
-type CommandOutput = void;
-
-export class PublishDevCommand extends BasicCommand<
-  CommandOpts,
-  CommandOutput
-> {
+export class PublishDevCommand extends BasicCommand<CommandOutput> {
   key = DENDRON_COMMANDS.PUBLISH_DEV.key;
 
   async gatherInputs(): Promise<any> {
@@ -31,63 +31,50 @@ export class PublishDevCommand extends BasicCommand<
     return checkPreReq();
   }
 
-  async execute(_opts?: CommandOpts) {
+  async execute() {
     const ctx = "PublishDevCommand";
     this.L.info({ ctx, msg: "enter" });
-    const wsRoot = getDWorkspace().wsRoot;
-    const port = getExtension().port!;
-    await window.withProgress(
-      {
-        location: ProgressLocation.Notification,
-        title: "creating preview",
-        cancellable: true,
-      },
-      async (progress, token) => {
-        // eslint-disable-next-line  no-async-promise-executor
-        return new Promise(async (resolve, reject) => {
-          try {
-            await buildSite({
-              wsRoot,
-              stage: "dev",
-              enginePort: port,
-              serve: false,
-            });
-          } catch (err: any) {
-            window.showErrorMessage(err);
-          }
-          const siteOutput = SiteUtils.getSiteOutputPath({
-            config: getDWorkspace().config,
-            wsRoot,
-            stage: "dev",
-          });
-          const app = express();
-          app.use(express.static(siteOutput));
-          const serverPort =
-            getEngine().config.site.previewPort ||
-            CONSTANTS.DENDRON_LOCAL_SITE_PORT;
-          const server = app.listen(serverPort);
-          server.on("error", (err) => {
-            window.showErrorMessage(JSON.stringify(err));
-            reject(err);
-          });
-          server.on("listening", () => {
-            progress.report({ message: "preview is ready" });
-            env.openExternal(Uri.parse(`http://localhost:${serverPort}`));
-          });
-          token.onCancellationRequested(() => {
-            server.close((err) => {
-              if (err) {
-                window.showErrorMessage(JSON.stringify(err));
-                reject(err);
-              } else {
-                this.L.info("server closed");
-                resolve(undefined);
-              }
-            });
-          });
-        });
-      }
-    );
-    return;
+    const prepareOut = await NextJSPublishUtils.prepareNextJSExportPod();
+
+    const { enrichedOpts, wsRoot, cmd } = prepareOut;
+    let { nextPath } = prepareOut;
+    nextPath = path.join(wsRoot, nextPath);
+    this.L.info({ ctx, msg: "prepare", enrichedOpts, nextPath });
+
+    if (_.isUndefined(enrichedOpts)) {
+      return {};
+    }
+
+    const skipBuild = await NextJSPublishUtils.promptSkipBuild();
+    this.L.info({ ctx, msg: "skipBuild?", skipBuild });
+    if (!skipBuild) {
+      const { podChoice, config } = enrichedOpts;
+      await NextJSPublishUtils.build(cmd, podChoice, config);
+    }
+
+    this.L.info({ ctx, msg: "starting dev" });
+    const pid = await NextJSPublishUtils.dev(nextPath);
+
+    return { pid };
+  }
+
+  async showResponse(opts: CommandOutput) {
+    window
+      .showInformationMessage(
+        `Server is running on localhost:3000 ${DENDRON_EMOJIS.SEEDLING}`,
+        ...["Open in browser", "Stop serving"]
+      )
+      .then(async (resp) => {
+        if (resp === "Open in browser") {
+          await commands.executeCommand(
+            "vscode.open",
+            Uri.parse("localhost:3000")
+          );
+        } else {
+          const { pid } = opts;
+          console.log({ pid });
+          kill(pid, "SIGTERM");
+        }
+      });
   }
 }

@@ -9,7 +9,6 @@ import { getNoteRouterQuery } from "./etc";
 import { fetchNoteBody, fetchNotes } from "./fetchers";
 
 export type DendronRouterProps = ReturnType<typeof useDendronRouter>;
-export type DendronLookupProps = ReturnType<typeof useDendronLookup>;
 
 export function useDendronRouter() {
   const router = useRouter();

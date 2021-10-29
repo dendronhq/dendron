@@ -1,12 +1,11 @@
 import {
-  FuseNote,
   NoteIndexProps,
   NoteLookupUtils,
   NoteProps,
 } from "@dendronhq/common-all";
 import { LoadingStatus } from "@dendronhq/common-frontend";
 import { AutoComplete, Alert, Row, Col, Typography, Divider } from "antd";
-import React, { useCallback, useEffect, useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { useCombinedDispatch } from "../features";
 import { browserEngineSlice } from "../features/engine";
 import { useFetchFuse } from "../utils/fuse";
@@ -60,6 +59,15 @@ function DendronSearchComponent(props: DendronPageWithNoteDataProps) {
 
   const { fuse, error, loading } = result;
 
+  const debouncedValue = useMemo(
+    () =>
+      _.debounce(
+        () => setSearchResults(() => fuse?.search(value.substring(1))),
+        SEARCH_DELAY
+      ),
+    [fuse, value]
+  );
+
   useEffect(() => {
     requestNotes(searchResults?.map(({ item: note }) => note.id) || []);
   }, [requestNotes, searchResults]);
@@ -73,7 +81,6 @@ function DendronSearchComponent(props: DendronPageWithNoteDataProps) {
   }, [value]);
 
   const onLookup = (qs: string) => {
-    // logger.info({ state: "onSearch:enter", qs });
     const out =
       qs === ""
         ? NoteLookupUtils.fetchRootResults(notes)
@@ -90,15 +97,6 @@ function DendronSearchComponent(props: DendronPageWithNoteDataProps) {
     setValue(val);
     onLookup(val);
   };
-
-  const debouncedValue = useMemo(
-    () =>
-      _.debounce(
-        () => setSearchResults(() => fuse?.search(value.substring(1))),
-        SEARCH_DELAY
-      ),
-    [fuse, value]
-  );
 
   const onChangeSearch = (val: string) => {
     setValue(val);

@@ -2040,7 +2040,7 @@ suite("NoteLookupCommand", function () {
     });
   });
 
-  describe.skip("multiselect interactions", () => {
+  describe("multiselect interactions", () => {
     // TODO: there's gotta be a better way to mock this.
     const prepareCommandFunc = async ({
       wsRoot,

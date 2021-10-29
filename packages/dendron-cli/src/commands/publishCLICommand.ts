@@ -182,7 +182,6 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
         this.print("unknown error " + error2PlainObject(err));
       }
       return { error: err };
-    } finally {
     }
   }
 
@@ -223,22 +222,6 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       return { data, error };
     }
     return { data: await cli.execute(opts), error: null };
-  }
-
-  _startNextDev(opts: { wsRoot: string }) {
-    const cwd = opts.wsRoot;
-    const cmdDev = "npm run dev";
-    return $$(cmdDev, { cwd: path.join(cwd, ".next") }).stdout?.pipe(
-      process.stdout
-    );
-  }
-
-  _startNextExport(opts: { wsRoot: string }) {
-    const cwd = opts.wsRoot;
-    const cmdDev = "npm run export";
-    const out = $$(cmdDev, { cwd: path.join(cwd, ".next") });
-    out.stdout?.pipe(process.stdout);
-    return out;
   }
 
   async _handlePublishTarget(target: PublishTarget, opts: ExportCmdOpts) {

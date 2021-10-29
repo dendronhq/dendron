@@ -1,4 +1,5 @@
 import execa from "execa";
+import ora from "ora";
 
 export * from "./changelog/changelog";
 export * from "./config";
@@ -18,5 +19,6 @@ export * from "./seed";
 export * from "./migrations";
 export * from "./metadata";
 export { execa };
+export { ora };
 export * from "./util/inMemoryNoteCache";
 export * from "./drivers";

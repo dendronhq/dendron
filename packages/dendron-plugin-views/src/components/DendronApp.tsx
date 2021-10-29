@@ -22,7 +22,7 @@ import { postVSCodeMessage } from "../utils/vscode";
 const { useEngineAppSelector, useEngine } = engineHooks;
 
 
-function DendronVSCodeApp({ Component, pageProps }: any) {
+function DendronVSCodeApp(props: React.PropsWithChildren<{}>) {
   const ide = ideHooks.useIDEAppSelector((state) => state.ide);
   const engine = useEngineAppSelector((state) => state.engine);
   const ideDispatch = ideHooks.useIDEAppDispatch();
@@ -47,7 +47,11 @@ function DendronVSCodeApp({ Component, pageProps }: any) {
   useVSCodeMessage(async (msg) => {
     const ctx = "useVSCodeMsg";
   });
-  return <div> VSCode App </div>
+  return <div> 
+    Dendron App Wrapper
+    <hr/>
+    {props.children} 
+  </div>
 }
 
 function DendronApp(props: any) {

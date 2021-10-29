@@ -17,8 +17,6 @@ export const postVSCodeMessage = (msg: DMessage) => {
   }
 };
 
-
-
 export const useVSCodeMessage = (setMsgHook: (msg: VSCodeMessage) => void) => {
   const listener = (msg: MessageEvent<DMessage>) => {
     const payload = msg.data || {}; // The JSON data our extension sent

@@ -1,13 +1,20 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import "./index.css";
-import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import DendronApp from "./components/DendronApp";
+import DendronNotePage from "./components/DendronNotePage";
+
+
+function renderWithDendronApp(app: typeof DendronApp, View: any) {
+  return <DendronApp>
+    <View />
+  </DendronApp>
+}
 
 ReactDOM.render(
   <React.StrictMode>
-    <DendronApp />
+    {renderWithDendronApp(DendronApp, DendronNotePage)}
   </React.StrictMode>,
   document.getElementById("root")
 );

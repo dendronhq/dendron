@@ -17,6 +17,7 @@ import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
 import { Logger } from "./logger";
+import { NoteSyncService } from "./services/NoteSyncService";
 import { AnalyticsUtils, sentryReportingCallback } from "./utils/analytics";
 import { getDWorkspace, getExtension } from "./workspace";
 
@@ -134,6 +135,10 @@ export class FileWatcher {
         }
 
         // add note
+        note = await NoteSyncService.updateNoteMeta({
+          note,
+          fmChangeOnly: false,
+        });
         await engine.updateNote(note as NoteProps, {
           newNode: true,
         });
@@ -203,6 +208,7 @@ export class FileWatcher {
     const ctx = "refreshTree";
     Logger.info({ ctx });
     getExtension().dendronTreeView?.treeProvider.refresh();
+    getExtension().backlinksDataProvider?.refresh();
   }, 100);
 }
 

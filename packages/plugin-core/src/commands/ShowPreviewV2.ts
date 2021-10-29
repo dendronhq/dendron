@@ -9,6 +9,7 @@ import {
   OnDidChangeActiveTextEditorMsg,
 } from "@dendronhq/common-all";
 import _ from "lodash";
+import path from "path";
 import * as vscode from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { Logger } from "../logger";
@@ -139,17 +140,29 @@ export class ShowPreviewV2Command extends BasicCommand<
   }
 
   async execute(_opts?: CommandOpts) {
+    const root =
+      "/Users/kevinlin/code/dendron/packages/dendron-plugin-views/build";
     const panel = vscode.window.createWebviewPanel(
       "catCoding",
       "Cat Coding",
       vscode.ViewColumn.One,
-      {}
+      {
+        enableScripts: true,
+        localResourceRoots: [vscode.Uri.file(root)],
+      }
     );
-    panel.webview.html = getWebviewContent();
-    // getExtension().context
-    // const onDiskPath = vscode.Uri.file(
-    //   path.join(context.extensionPath, 'media', 'cat.gif')
-    // );
+
+    const name = "notePreview";
+    const jsSrc = vscode.Uri.file(
+      path.join(root, "static", "js", `${name}.bundle.js`)
+    );
+    const cssSrc = vscode.Uri.file(
+      path.join(root, "static", "css", `${name}.styles.css`)
+    );
+    panel.webview.html = getWebviewContent(
+      panel.webview.asWebviewUri(jsSrc),
+      panel.webview.asWebviewUri(cssSrc)
+    );
   }
 
   async executeOld(_opts?: CommandOpts) {
@@ -266,15 +279,19 @@ export class ShowPreviewV2Command extends BasicCommand<
   }
 }
 
-function getWebviewContent() {
+function getWebviewContent(jsSrc: vscode.Uri, cssSrc: vscode.Uri) {
   return `<!DOCTYPE html>
     <html lang="en">
-    <head><meta charset="UTF-8">
+    <head>
+      <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Cat Coding</title>
+        <link href="${cssSrc}" rel="stylesheet" />
     </head>
     <body>
-        <img src="https://media.giphy.com/media/JIX9t2j0ZTN9S/giphy.gif" width="300" />
+      Cat Coding
+      <div id="root"></div>
+      <script src="${jsSrc}""></script>
     </body>
     </html>`;
 }

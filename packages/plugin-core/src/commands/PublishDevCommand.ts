@@ -6,10 +6,9 @@ import {
 } from "../utils/site";
 import { BasicCommand } from "./base";
 import fs from "fs-extra";
-import path from "path";
 import _ from "lodash";
 import kill from "tree-kill";
-import { commands, Uri, window } from "vscode";
+import { window } from "vscode";
 import { DENDRON_EMOJIS } from "@dendronhq/common-all";
 
 type CommandOutput = {
@@ -34,11 +33,9 @@ export class PublishDevCommand extends BasicCommand<CommandOutput> {
   async execute() {
     const ctx = "PublishDevCommand";
     this.L.info({ ctx, msg: "enter" });
-    const prepareOut = await NextJSPublishUtils.prepareNextJSExportPod();
 
-    const { enrichedOpts, wsRoot, cmd } = prepareOut;
-    let { nextPath } = prepareOut;
-    nextPath = path.join(wsRoot, nextPath);
+    const prepareOut = await NextJSPublishUtils.prepareNextJSExportPod();
+    const { enrichedOpts, cmd, nextPath } = prepareOut;
     this.L.info({ ctx, msg: "prepare", enrichedOpts, nextPath });
 
     if (_.isUndefined(enrichedOpts)) {
@@ -62,15 +59,10 @@ export class PublishDevCommand extends BasicCommand<CommandOutput> {
     window
       .showInformationMessage(
         `Server is running on localhost:3000 ${DENDRON_EMOJIS.SEEDLING}`,
-        ...["Open in browser", "Stop serving"]
+        ...["Stop serving"]
       )
       .then(async (resp) => {
-        if (resp === "Open in browser") {
-          await commands.executeCommand(
-            "vscode.open",
-            Uri.parse("localhost:3000")
-          );
-        } else {
+        if (resp === "Stop serving") {
           const { pid } = opts;
           kill(pid, "SIGTERM");
         }

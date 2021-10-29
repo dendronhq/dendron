@@ -32,9 +32,7 @@ export class PublishExportCommand extends BasicCommand<
     this.L.info({ ctx, msg: "enter" });
 
     const prepareOut = await NextJSPublishUtils.prepareNextJSExportPod();
-
     const { enrichedOpts, wsRoot, cmd, nextPath } = prepareOut;
-    // nextPath = path.join(wsRoot, nextPath);
     this.L.info({ ctx, msg: "prepare", enrichedOpts, nextPath });
 
     if (_.isUndefined(enrichedOpts)) {

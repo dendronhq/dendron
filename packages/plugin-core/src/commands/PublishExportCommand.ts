@@ -1,15 +1,22 @@
-import { BuildSiteV2CLICommandOpts } from "@dendronhq/dendron-cli";
-import { env, Uri, window } from "vscode";
+import { NextjsExportPodUtils } from "@dendronhq/pods-core";
+import _ from "lodash";
+import { DENDRON_EMOJIS } from "@dendronhq/common-all";
+import { window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
-import { buildSite, checkPreReq, getSiteRootDirPath } from "../utils/site";
-import { getExtension, getDWorkspace } from "../workspace";
+import { checkPreReq, NextJSPublishUtils } from "../utils/site";
 import { BasicCommand } from "./base";
+import path from "path";
 
-type CommandOpts = Partial<BuildSiteV2CLICommandOpts>;
+type CommandOpts = void;
 
-type CommandOutput = void;
+type CommandOutput = {
+  nextPath: string;
+};
 
-export class PublishExportCommand extends BasicCommand<CommandOpts, CommandOutput> {
+export class PublishExportCommand extends BasicCommand<
+  CommandOpts,
+  CommandOutput
+> {
   key = DENDRON_COMMANDS.PUBLISH_EXPORT.key;
 
   async gatherInputs(): Promise<any> {
@@ -21,27 +28,51 @@ export class PublishExportCommand extends BasicCommand<CommandOpts, CommandOutpu
     // return undefined;
   }
 
-  async execute(_opts?: CommandOpts) {
-    const wsRoot = getDWorkspace().wsRoot;
-    window.showInformationMessage("building...");
-    const port = getExtension().port!;
-    await buildSite({
-      wsRoot,
-      stage: "prod",
-      enginePort: port,
-      serve: false,
+  async execute() {
+    const ctx = "PublishExportCommand";
+    this.L.info({ ctx, msg: "enter" });
+
+    const prepareOut = await NextJSPublishUtils.prepareNextJSExportPod();
+
+    const { enrichedOpts, wsRoot, cmd } = prepareOut;
+    let { nextPath } = prepareOut;
+    nextPath = path.join(wsRoot, nextPath);
+    this.L.info({ ctx, msg: "prepare", enrichedOpts, nextPath });
+
+    if (_.isUndefined(enrichedOpts)) {
+      return { nextPath };
+    }
+
+    // check if we need to remove .next
+    const nextPathExists = await NextjsExportPodUtils.nextPathExists({
+      nextPath,
+      quiet: true,
     });
+
+    if (nextPathExists) {
+      await NextJSPublishUtils.removeNextPath(nextPath);
+    }
+
+    // init.
+    await NextJSPublishUtils.initialize(nextPath);
+
+    // build
+    const skipBuild = await NextJSPublishUtils.promptSkipBuild();
+    if (!skipBuild) {
+      const { podChoice, config } = enrichedOpts;
+      await NextJSPublishUtils.build(cmd, podChoice, config);
+    }
+
+    // export
+    await NextJSPublishUtils.export(nextPath);
+
+    return { nextPath };
   }
-  async showResponse() {
-    window
-      .showInformationMessage(
-        `build complete. files available at ${getSiteRootDirPath()}`,
-        "Open Folder"
-      )
-      .then((resp) => {
-        if (resp === "Open Folder") {
-          env.openExternal(Uri.parse(getSiteRootDirPath()));
-        }
-      });
+
+  async showResponse(opts: CommandOutput) {
+    const { nextPath } = opts;
+    window.showInformationMessage(
+      `NextJS template initialized at ${nextPath}, and exported to ${nextPath}/out ${DENDRON_EMOJIS.SEEDLING}`
+    );
   }
 }

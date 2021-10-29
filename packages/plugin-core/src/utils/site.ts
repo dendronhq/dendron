@@ -1,13 +1,27 @@
 import {
+  ConfigUtils,
+  DendronSiteConfig,
+  getStage,
+} from "@dendronhq/common-all";
+import {
   BuildSiteV2CLICommand,
   BuildSiteV2CLICommandCliOpts,
 } from "@dendronhq/dendron-cli";
 import { execa } from "@dendronhq/engine-server";
+import {
+  NextjsExportConfig,
+  NextjsExportPod,
+  NextjsExportPodUtils,
+  podClassEntryToPodItemV4,
+  PodItemV4,
+} from "@dendronhq/pods-core";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { ProgressLocation, window } from "vscode";
+import { ExportPodCommand } from "../commands/ExportPod";
 import { Logger } from "../logger";
+import { VSCodeUtils } from "../utils";
 import { getDWorkspace } from "../workspace";
 
 const packageJson = {
@@ -157,3 +171,175 @@ export const getSiteRootDirPath = () => {
   const sitePath = path.join(wsRoot, getDWorkspace().config.site.siteRootDir);
   return sitePath;
 };
+
+export class NextJSPublishUtils {
+  static async prepareNextJSExportPod() {
+    const ws = getDWorkspace();
+    const wsRoot = ws.wsRoot;
+    const engine = ws.engine;
+    const cmd = new ExportPodCommand();
+
+    let nextPath = NextjsExportPodUtils.getNextRoot(wsRoot);
+    const podConfig: NextjsExportConfig = {
+      dest: nextPath,
+    };
+    const podChoice = podClassEntryToPodItemV4(NextjsExportPod);
+
+    // ask if they want to use default config or fill out themselves.
+    const configPromptOut = await VSCodeUtils.showQuickPick(
+      ["Use default", "Use config"],
+      {
+        title:
+          "Would you like to configure the export behavior or use the default behavior?",
+        ignoreFocusOut: true,
+      }
+    );
+    let enrichedOpts:
+      | { podChoice: PodItemV4; config: NextjsExportConfig }
+      | undefined;
+    if (configPromptOut === "Use config") {
+      enrichedOpts = await cmd.enrichInputs({ podChoice });
+      if (enrichedOpts?.config.dest) {
+        nextPath = enrichedOpts.config.dest;
+      }
+    } else {
+      enrichedOpts = { podChoice, config: podConfig };
+    }
+    if (getStage() !== "prod") {
+      const config = engine.config;
+      const siteConfig = ConfigUtils.getProp(config, "site");
+      if (enrichedOpts?.config && !siteConfig.siteUrl) {
+        _.set(
+          enrichedOpts.config.overrides as Partial<DendronSiteConfig>,
+          "siteUrl",
+          "localhost:3000"
+        );
+      }
+    }
+
+    console.log({ enrichedOpts, nextPath });
+
+    return { enrichedOpts, wsRoot, cmd, nextPath };
+  }
+
+  static async removeNextPath(nextPath: string) {
+    await window.withProgress(
+      {
+        location: ProgressLocation.Notification,
+        title: "removing NextJS template directory...",
+        cancellable: false,
+      },
+      async () => {
+        const out = await NextjsExportPodUtils.removeNextPath({
+          nextPath,
+          quiet: true,
+        });
+        return out;
+      }
+    );
+  }
+
+  static async install(nextPath: string) {
+    await window.withProgress(
+      {
+        location: ProgressLocation.Notification,
+        title: "Installing dependencies... This may take a while.",
+        cancellable: false,
+      },
+      async () => {
+        const out = await NextjsExportPodUtils.installDependencies({
+          nextPath,
+          quiet: true,
+        });
+        return out;
+      }
+    );
+  }
+
+  static async clone(nextPath: string) {
+    await window.withProgress(
+      {
+        location: ProgressLocation.Notification,
+        title: "Cloning NextJS template...",
+        cancellable: false,
+      },
+      async () => {
+        const out = await NextjsExportPodUtils.cloneTemplate({
+          nextPath,
+          quiet: true,
+        });
+        return out;
+      }
+    );
+  }
+
+  static async initialize(nextPath: string) {
+    await NextJSPublishUtils.clone(nextPath);
+    await NextJSPublishUtils.install(nextPath);
+  }
+
+  static async build(
+    cmd: ExportPodCommand,
+    podChoice: PodItemV4,
+    podConfig: NextjsExportConfig
+  ) {
+    // todo: handle override.
+    await window.withProgress(
+      {
+        location: ProgressLocation.Notification,
+        title: "Building...",
+        cancellable: false,
+      },
+      async () => {
+        const out = cmd.execute({ podChoice, config: podConfig, quiet: true });
+        return out;
+      }
+    );
+  }
+
+  static async promptSkipBuild() {
+    const skipBuildPromptOut = await VSCodeUtils.showQuickPick(
+      ["Skip", "Don't skip"],
+      {
+        title: "Would you like to skip the build process?",
+        ignoreFocusOut: true,
+      }
+    );
+    return skipBuildPromptOut === "Skip";
+  }
+
+  static async export(nextPath: string) {
+    await window.withProgress(
+      {
+        location: ProgressLocation.Notification,
+        title: "Exporting... this may take a while.",
+        cancellable: false,
+      },
+      async () => {
+        const out = await NextjsExportPodUtils.startNextExport({
+          nextPath,
+          quiet: true,
+        });
+        return out;
+      }
+    );
+  }
+
+  static async dev(nextPath: string) {
+    const out = await window.withProgress(
+      {
+        location: ProgressLocation.Notification,
+        title: "starting server.",
+        cancellable: true,
+      },
+      async () => {
+        const out = await NextjsExportPodUtils.startNextDev({
+          nextPath,
+          quiet: true,
+        });
+        return out;
+      }
+    );
+    return out;
+  }
+}

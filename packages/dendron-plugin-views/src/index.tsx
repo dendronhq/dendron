@@ -3,10 +3,11 @@ import ReactDOM from "react-dom";
 import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
+import DendronApp from "./components/DendronApp";
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <DendronApp />
   </React.StrictMode>,
   document.getElementById("root")
 );

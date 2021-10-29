@@ -6,7 +6,7 @@ import {
   getStage,
   Stage,
 } from "@dendronhq/common-all";
-import { execa, SiteUtils } from "@dendronhq/engine-server";
+import { SiteUtils } from "@dendronhq/engine-server";
 import {
   NextjsExportConfig,
   NextjsExportPod,
@@ -24,10 +24,6 @@ import { PodSource } from "./pod";
 import { SetupEngineCLIOpts } from "./utils";
 import prompts from "prompts";
 import fs from "fs-extra";
-
-const $$ = (cmd: string, opts?: any) => {
-  return execa.command(cmd, { shell: true, ...opts });
-};
 
 type CommandCLIOpts = {
   cmd: PublishCommands;
@@ -303,12 +299,14 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     }
     const nextPath = NextjsExportPodUtils.getNextRoot(opts.wsRoot);
     await NextjsExportPodUtils.startNextDev({ nextPath });
+    return { error: null };
   }
 
   async export(opts: ExportCmdOpts) {
     if (opts.noBuild) {
       this.print("skipping build...");
     } else {
+      this.print("ssdfoiwjeofijweoifj");
       await this.build(opts);
     }
     const nextPath = NextjsExportPodUtils.getNextRoot(opts.wsRoot);

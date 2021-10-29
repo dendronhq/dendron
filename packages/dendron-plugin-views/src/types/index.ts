@@ -9,3 +9,9 @@ export type WorkspaceProps = {
    */
   browser?: boolean;
 };
+
+
+export interface DendronComponentProps {
+}
+
+export type DendronComponent = React.FunctionComponent<DendronComponentProps>;

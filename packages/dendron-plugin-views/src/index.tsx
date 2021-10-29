@@ -4,17 +4,16 @@ import "./index.css";
 import reportWebVitals from "./reportWebVitals";
 import DendronApp from "./components/DendronApp";
 import DendronNotePage from "./components/DendronNotePage";
+import { DendronComponent } from "./types";
 
 
-function renderWithDendronApp(app: typeof DendronApp, View: any) {
-  return <DendronApp>
-    <View />
-  </DendronApp>
+function renderWithDendronApp(app: typeof DendronApp, props:{Component: DendronComponent}) {
+  return <DendronApp {...props} />
 }
 
 ReactDOM.render(
   <React.StrictMode>
-    {renderWithDendronApp(DendronApp, DendronNotePage)}
+    {renderWithDendronApp(DendronApp, {Component: DendronNotePage})}
   </React.StrictMode>,
   document.getElementById("root")
 );

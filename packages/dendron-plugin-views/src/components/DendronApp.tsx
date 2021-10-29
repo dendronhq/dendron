@@ -16,13 +16,13 @@ import {
   engineHooks,
 } from "@dendronhq/common-frontend";
 import React from "react";
-import { WorkspaceProps } from "../types";
+import { DendronComponent, WorkspaceProps } from "../types";
 import { postVSCodeMessage } from "../utils/vscode";
 
 const { useEngineAppSelector, useEngine } = engineHooks;
 
 
-function DendronVSCodeApp(props: React.PropsWithChildren<{}>) {
+function DendronVSCodeApp({Component}: {Component: DendronComponent}) {
   const ide = ideHooks.useIDEAppSelector((state) => state.ide);
   const engine = useEngineAppSelector((state) => state.engine);
   const ideDispatch = ideHooks.useIDEAppDispatch();
@@ -50,11 +50,13 @@ function DendronVSCodeApp(props: React.PropsWithChildren<{}>) {
   return <div> 
     Dendron App Wrapper
     <hr/>
-    {props.children} 
+    <Component />
   </div>
 }
 
-function DendronApp(props: any) {
+function DendronApp(props: {
+  Component: DendronComponent
+}) {
   return (
     <Provider store={combinedStore}>
       <DendronVSCodeApp {...props} />

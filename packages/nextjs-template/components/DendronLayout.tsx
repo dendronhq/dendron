@@ -1,11 +1,10 @@
 import { Layout, Row, Col, Divider } from "antd";
-import { MenuOutlined, MenuUnfoldOutlined } from "@ant-design/icons";
+import { MenuOutlined } from "@ant-design/icons";
 import * as React from "react";
 import { DENDRON_STYLE_CONSTANTS } from "../styles/constants";
 import { DendronCommonProps } from "../utils/types";
 import { DendronBreadCrumb } from "./DendronBreadCrumb";
 import DendronLogoOrTitle from "./DendronLogoOrTitle";
-import { DendronLookup } from "./DendronLookup";
 import { FooterText } from "./DendronNoteFooter";
 import DendronTreeMenu from "./DendronTreeMenu";
 import { DendronSearch } from "./DendronSearch";

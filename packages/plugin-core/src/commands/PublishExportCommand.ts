@@ -1,11 +1,11 @@
-import { NextjsExportPodUtils } from "@dendronhq/pods-core";
+import { NextjsExportPodUtils, PublishTarget } from "@dendronhq/pods-core";
 import _ from "lodash";
 import { DENDRON_EMOJIS } from "@dendronhq/common-all";
 import { window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { checkPreReq, NextJSPublishUtils } from "../utils/site";
 import { BasicCommand } from "./base";
-import path from "path";
+import { VSCodeUtils } from "../utils";
 
 type CommandOpts = void;
 
@@ -33,9 +33,8 @@ export class PublishExportCommand extends BasicCommand<
 
     const prepareOut = await NextJSPublishUtils.prepareNextJSExportPod();
 
-    const { enrichedOpts, wsRoot, cmd } = prepareOut;
-    let { nextPath } = prepareOut;
-    nextPath = path.join(wsRoot, nextPath);
+    const { enrichedOpts, wsRoot, cmd, nextPath } = prepareOut;
+    // nextPath = path.join(wsRoot, nextPath);
     this.L.info({ ctx, msg: "prepare", enrichedOpts, nextPath });
 
     if (_.isUndefined(enrichedOpts)) {
@@ -64,6 +63,18 @@ export class PublishExportCommand extends BasicCommand<
 
     // export
     await NextJSPublishUtils.export(nextPath);
+
+    const target = await VSCodeUtils.showQuickPick(["None", "github"], {
+      title: "Select export target.",
+      ignoreFocusOut: true,
+    });
+    if (target && target !== "None") {
+      await NextJSPublishUtils.handlePublishTarget(
+        target as PublishTarget,
+        nextPath,
+        wsRoot
+      );
+    }
 
     return { nextPath };
   }

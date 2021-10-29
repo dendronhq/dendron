@@ -1,4 +1,5 @@
 import {
+  assertUnreachable,
   ConfigUtils,
   DendronSiteConfig,
   getStage,
@@ -14,6 +15,7 @@ import {
   NextjsExportPodUtils,
   podClassEntryToPodItemV4,
   PodItemV4,
+  PublishTarget,
 } from "@dendronhq/pods-core";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -217,8 +219,6 @@ export class NextJSPublishUtils {
       }
     }
 
-    console.log({ enrichedOpts, nextPath });
-
     return { enrichedOpts, wsRoot, cmd, nextPath };
   }
 
@@ -341,5 +341,51 @@ export class NextJSPublishUtils {
       }
     );
     return out;
+  }
+
+  static async handlePublishTarget(
+    target: PublishTarget,
+    nextPath: string,
+    wsRoot: string
+  ) {
+    switch (target) {
+      case PublishTarget.GITHUB: {
+        const docsPath = path.join(wsRoot, "docs");
+        const outPath = path.join(nextPath, "out");
+        await window.withProgress(
+          {
+            location: ProgressLocation.Notification,
+            title: "Building Github target...",
+            cancellable: false,
+          },
+          async () => {
+            const docsExist = fs.pathExistsSync(docsPath);
+            if (docsExist) {
+              const docsRemovePromptOut = await VSCodeUtils.showQuickPick(
+                ["Don't remove.", "Remove"],
+                {
+                  title: "Docs folder already exists. Remove and continue??",
+                  ignoreFocusOut: true,
+                }
+              );
+              if (docsRemovePromptOut === "Don't remove") {
+                window.showInformationMessage("Exiting.");
+                return;
+              }
+              window.showInformationMessage("Removing /docs");
+              fs.removeSync(docsPath);
+            }
+            fs.moveSync(outPath, docsPath);
+            fs.ensureFileSync(path.join(docsPath, ".nojekyll"));
+          }
+        );
+        window.showInformationMessage(
+          `Done exporting. files available at ${docsPath}`
+        );
+        return;
+      }
+      default:
+        assertUnreachable();
+    }
   }
 }

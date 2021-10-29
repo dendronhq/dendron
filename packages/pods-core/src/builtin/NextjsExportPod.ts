@@ -37,6 +37,10 @@ type NextjsExportPodCustomOpts = {
 
 export type BuildOverrides = Pick<DendronSiteConfig, "siteUrl">;
 
+export enum PublishTarget {
+  GITHUB = "github",
+}
+
 export const mapObject = (
   obj: { [k: string]: any },
   fn: (k: string, v: any) => any
@@ -218,7 +222,13 @@ export class NextjsExportPodUtils {
   static async startNextExport(opts: { nextPath: string; quiet?: boolean }) {
     const { nextPath, quiet } = opts;
     const cmd = quiet ? "npm run --silent export" : "npm run export";
-    const out = await $$(cmd, { cwd: nextPath });
+    let out;
+    if (quiet) {
+      out = await $$(cmd, { cwd: nextPath });
+    } else {
+      out = $$(cmd, { cwd: nextPath });
+      out.stdout?.pipe(process.stdout);
+    }
     return out;
   }
 
@@ -226,6 +236,7 @@ export class NextjsExportPodUtils {
     const { nextPath, quiet } = opts;
     const cmdDev = quiet ? "npm run --silent dev" : "npm run dev";
     const out = $$(cmdDev, { cwd: nextPath });
+    out.stdout?.pipe(process.stdout);
     return out.pid;
   }
 }

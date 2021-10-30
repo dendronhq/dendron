@@ -13,7 +13,6 @@ import {
   setLogLevel,
   combinedStore,
   ideHooks,
-  useVSCodeMessage,
   engineHooks,
   engineSlice,
   ideSlice,
@@ -22,7 +21,7 @@ import _ from "lodash";
 import React from "react";
 import { useWorkspaceProps } from "../hooks";
 import { DendronComponent, WorkspaceProps } from "../types";
-import { postVSCodeMessage } from "../utils/vscode";
+import { postVSCodeMessage, useVSCodeMessage } from "../utils/vscode";
 
 const { useEngineAppSelector, useEngine } = engineHooks;
 

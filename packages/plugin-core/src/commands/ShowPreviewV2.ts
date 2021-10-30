@@ -219,6 +219,17 @@ export class ShowPreviewV2Command extends BasicCommand<
           assertUnreachable(msg.type);
       }
     });
+
+    // Update workspace-wide graph panel
+    ext.setWebView(DendronWebViewKey.NOTE_PREVIEW, panel);
+
+    // remove webview from workspace when user closes it
+    // this prevents throwing `Uncaught Error: Webview is disposed` in `ShowPreviewV2Command#refresh`
+    panel.onDidDispose(() => {
+      const ctx = "ShowPreview:onDidDispose";
+      Logger.debug({ ctx, state: "dispose preview" });
+      ext.setWebView(DendronWebViewKey.NOTE_PREVIEW, undefined);
+    });
   }
 
   async executeOld(_opts?: CommandOpts) {

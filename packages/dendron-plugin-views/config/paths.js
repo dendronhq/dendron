@@ -63,7 +63,7 @@ module.exports = {
   appTsConfig: resolveApp('tsconfig.json'),
   appJsConfig: resolveApp('jsconfig.json'),
   appPages: {
-    notePreview: resolveApp("src/note-preview")
+    notePreview: resolveApp("src/views/DendronNotePageView")
   },
   yarnLockFile: resolveApp('yarn.lock'),
   testsSetup: resolveModule(resolveApp, 'src/setupTests'),

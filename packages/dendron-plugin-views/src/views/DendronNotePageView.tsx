@@ -1,4 +1,4 @@
+import { renderOnDOM } from "../bootstrap";
+import DendronNotePage from "../components/DendronNotePage";
 
-export default function DendronNotePageView() {
-	return null;
-}
+renderOnDOM(DendronNotePage)

@@ -430,18 +430,20 @@
         "desc": "Display the schemas in this workspace as a graph"
       },
       {
+        "command": "dendron.showLegacyPreview",
+        "title": "Dendron: Show Preview (legacy)",
+        "desc": "Show Markdown Preview (legacy)",
+        "docLink": "dendron.topic.commands.md",
+        "docPreview": "",
+        "enablement": "dendron:pluginActive && dendron:hasLegacyPreview"
+      },
+      {
         "command": "dendron.showPreview",
         "title": "Dendron: Show Preview",
         "desc": "Show Markdown Preview",
         "docLink": "dendron.topic.commands.md",
-        "docPreview": ""
-      },
-      {
-        "command": "dendron.showPreviewV2",
-        "title": "Dendron: Show Preview V2",
-        "desc": "Show Markdown Preview",
-        "docLink": "dendron.topic.commands.md",
-        "docPreview": ""
+        "docPreview": "",
+        "enablement": "dendron:pluginActive"
       },
       {
         "command": "dendron.pasteFile",
@@ -804,14 +806,16 @@
         "when": "editorFocus && dendron:pluginActive"
       },
       {
-        "command": "dendron.showPreview",
+        "command": "dendron.showLegacyPreview",
         "windows": "windows+ctrl+p",
-        "mac": "cmd+ctrl+p"
+        "mac": "cmd+ctrl+p",
+        "when": "dendron:pluginActive && dendron:hasLegacyPreview"
       },
       {
-        "command": "dendron.showPreviewV2",
+        "command": "dendron.showPreview",
         "windows": "windows+ctrl+p",
-        "mac": "cmd+ctrl+p"
+        "mac": "cmd+ctrl+p",
+        "when": "dendron:pluginActive"
       }
     ],
     "markdown.previewStyles": [

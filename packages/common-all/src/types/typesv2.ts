@@ -598,6 +598,9 @@ export enum DMessageSource {
   webClient = "webClient",
 }
 
+/**
+ * Basic mesages passed to the tree view
+ */
 export enum DMessageType {
   // --- View Events
   /**

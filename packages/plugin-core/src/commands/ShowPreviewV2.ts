@@ -6,7 +6,7 @@ import {
   NoteProps,
   NoteViewMessage,
   NoteViewMessageType,
-  OnDidChangeActiveTextEditorMsg,
+  OnDidChangeActiveTextEditorMsg
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import path from "path";
@@ -143,8 +143,8 @@ export class ShowPreviewV2Command extends BasicCommand<
     const root =
       "/Users/kevinlin/code/dendron/packages/dendron-plugin-views/build";
     const panel = vscode.window.createWebviewPanel(
-      "catCoding",
-      "Cat Coding",
+      "dendronPreview",
+      "Dendron Preview",
       vscode.ViewColumn.One,
       {
         enableScripts: true,
@@ -159,10 +159,23 @@ export class ShowPreviewV2Command extends BasicCommand<
     const cssSrc = vscode.Uri.file(
       path.join(root, "static", "css", `${name}.styles.css`)
     );
-    panel.webview.html = getWebviewContent(
-      panel.webview.asWebviewUri(jsSrc),
-      panel.webview.asWebviewUri(cssSrc)
-    );
+    const ext = getExtension();
+    const port = getExtension().port!;
+    panel.webview.html = getWebviewContent({
+      jsSrc: panel.webview.asWebviewUri(jsSrc),
+      cssSrc: panel.webview.asWebviewUri(cssSrc),
+      port,
+      wsRoot: ext.getEngine().wsRoot,
+    });
+
+    panel.webview.onDidReceiveMessage(async (msg: NoteViewMessage) => {
+      const ctx = "ShowPreview:onDidReceiveMessage";
+      Logger.info({ctx, msg})
+      switch (msg.type) {
+        default:
+          assertUnreachable(msg.type);
+      }
+    });
   }
 
   async executeOld(_opts?: CommandOpts) {
@@ -279,7 +292,17 @@ export class ShowPreviewV2Command extends BasicCommand<
   }
 }
 
-function getWebviewContent(jsSrc: vscode.Uri, cssSrc: vscode.Uri) {
+function getWebviewContent({
+  jsSrc,
+  cssSrc,
+  port,
+  wsRoot,
+}: {
+  jsSrc: vscode.Uri;
+  cssSrc: vscode.Uri;
+  port: number;
+  wsRoot: string;
+}) {
   return `<!DOCTYPE html>
     <html lang="en">
     <head>
@@ -289,8 +312,7 @@ function getWebviewContent(jsSrc: vscode.Uri, cssSrc: vscode.Uri) {
         <link href="${cssSrc}" rel="stylesheet" />
     </head>
     <body>
-      Cat Coding
-      <div id="root"></div>
+      <div id="root" data-port=${port} data-ws=${wsRoot}></div>
       <script src="${jsSrc}""></script>
     </body>
     </html>`;

@@ -25,14 +25,16 @@ const { useEngineAppSelector, useEngine } = engineHooks;
 
 
 function DendronVSCodeApp({Component}: {Component: DendronComponent}) {
+  const ctx = "DendronVSCodeApp";
   const ide = ideHooks.useIDEAppSelector((state) => state.ide);
   const engine = useEngineAppSelector((state) => state.engine);
   const ideDispatch = ideHooks.useIDEAppDispatch();
   const [workspace] = useWorkspaceProps()
+  const logger = createLogger("DendronApp");
 
+  logger.info({ctx, workspace});
   // used to initialize the engine
   useEngine({ engineState: engine, opts: workspace});
-  const logger = createLogger("DendronApp");
 
   const props = {
     engine, ide, workspace

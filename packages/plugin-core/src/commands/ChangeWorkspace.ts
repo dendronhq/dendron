@@ -5,7 +5,8 @@ import { window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../utils";
 import { BasicCommand } from "./base";
-import { CONSTANTS } from "@dendronhq/common-all";
+import { CONSTANTS, WorkspaceType } from "@dendronhq/common-all";
+import { WorkspaceUtils } from "@dendronhq/engine-server";
 
 const DENDRON_WS_NAME = CONSTANTS.DENDRON_WS_NAME;
 
@@ -36,14 +37,17 @@ export class ChangeWorkspaceCommand extends BasicCommand<
     if (!fs.existsSync(rootDirRaw)) {
       throw Error(`${rootDirRaw} does not exist`);
     }
-    if (!fs.existsSync(path.join(rootDirRaw, DENDRON_WS_NAME))) {
+    const wsType = WorkspaceUtils.getWorkspaceTypeFromDir(rootDirRaw);
+    if (wsType === WorkspaceType.NONE) {
       window.showErrorMessage(
-        `no workspace file found. please run ${DENDRON_COMMANDS.INIT_WS.title} to create a workspace at ${rootDirRaw}`
+        `No Dendron workspace found. Please run ${DENDRON_COMMANDS.INIT_WS.title} to create a workspace at ${rootDirRaw}`
       );
       return;
     }
     if (!skipOpenWS) {
-      VSCodeUtils.openWS(path.join(rootDirRaw, DENDRON_WS_NAME));
+      if (wsType === WorkspaceType.CODE)
+        VSCodeUtils.openWS(path.join(rootDirRaw, DENDRON_WS_NAME));
+      else if (wsType === WorkspaceType.NATIVE) VSCodeUtils.openWS(rootDirRaw);
     }
   }
 }

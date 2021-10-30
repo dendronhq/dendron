@@ -42,18 +42,23 @@ export const useRenderedNoteBody = ({
   engine,
   noteProps,
   workspace,
-}: DendronProps & { noteProps: NoteProps }) => {
-  const { id: noteId, contentHash } = noteProps;
+}: DendronProps & { noteProps?: NoteProps }) => {
+  const { id: noteId, contentHash } = noteProps || {id: undefined, contentHash: undefined};
   const noteContent = engine.notesRendered[noteId || ""];
   const renderedNoteContentHash = React.useRef<string>();
   const dispatch = engineHooks.useEngineAppDispatch();
+
   React.useEffect(() => {
+		if (!noteId) {
+			return;
+		}
     // if no "render to markdown" has happended or the note body changed
     if (!noteContent || contentHash !== renderedNoteContentHash.current) {
       renderedNoteContentHash.current = contentHash;
       dispatch(engineSlice.renderNote({ ...workspace, id: noteId }));
     }
   }, [noteId, contentHash]);
+
   return [noteContent];
 };
 

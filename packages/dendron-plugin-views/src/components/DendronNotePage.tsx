@@ -15,10 +15,12 @@ import { DendronComponent, DendronProps, WorkspaceProps } from "../types";
 
 
 const DendronNotePage: DendronComponent = (props) => {
+	const ctx = "DendronNotePage";
   const logger = createLogger("DendronNotePage");
-	const [noteId] = useNoteId();
-	const [noteProps] = useNoteProps({...props, noteId})
+	const noteProps = props.ide.noteActive;
+	logger.info({ctx, msg: "enter", noteProps: (noteProps ? noteProps.id : "no notes found")})
 	const [noteRenderedBody] = useRenderedNoteBody({...props, noteProps})
+	logger.info({ctx, noteProps: (_.isUndefined(noteProps) ?  "no active note": noteProps.id)})
 
 	if (!noteRenderedBody) {
 		return null;

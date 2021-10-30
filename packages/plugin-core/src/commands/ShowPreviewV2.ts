@@ -170,8 +170,51 @@ export class ShowPreviewV2Command extends BasicCommand<
 
     panel.webview.onDidReceiveMessage(async (msg: NoteViewMessage) => {
       const ctx = "ShowPreview:onDidReceiveMessage";
-      Logger.info({ctx, msg})
       switch (msg.type) {
+        case NoteViewMessageType.onClick: {
+          const { data } = msg;
+          if (data.href) {
+            // TODO find a better way to differentiate local files from web links (`data-` attribute)
+            if (data.href.includes("localhost")) {
+              const noteId = extractNoteIdFromHref(data);
+              const anchor = extractHeaderAnchorIfExists(data.href);
+
+              const note: NoteProps | undefined = this.getNote(noteId);
+              if (isLinkingWithinSameNote({ data }) && note && anchor) {
+                await new GotoNoteCommand().execute({
+                  qs: note.fname,
+                  vault: note.vault,
+                  column: vscode.ViewColumn.One,
+                  anchor,
+                });
+              } else if (noteId && note) {
+                await new GotoNoteCommand().execute({
+                  qs: note.fname,
+                  vault: note.vault,
+                  column: vscode.ViewColumn.One,
+                  anchor,
+                });
+              }
+            } else {
+              VSCodeUtils.openLink(data.href);
+            }
+          }
+
+          break;
+        }
+        case NoteViewMessageType.onGetActiveEditor: {
+          // only entered on "init" in `plugin-core/src/views/utils.ts:87`
+          Logger.debug({ ctx, "msg.type": "onGetActiveEditor" });
+          const activeTextEditor = VSCodeUtils.getActiveTextEditor();
+          const maybeNote = !_.isUndefined(activeTextEditor)
+            ? tryGetNoteFromDocument(activeTextEditor?.document)
+            : undefined;
+          if (!_.isUndefined(maybeNote))
+            ShowPreviewV2Command.refresh(maybeNote);
+          break;
+        }
+        case NoteViewMessageType.messageDispatcherReady:
+          break;
         default:
           assertUnreachable(msg.type);
       }

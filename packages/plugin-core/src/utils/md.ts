@@ -133,8 +133,8 @@ export class MarkdownUtils {
       // This is a workaround to resolve circular dependency.
       // TODO: fix importing around the package so that we have control over module loading sequence.
       // eslint-disable-next-line global-require
-      const { ShowPreviewV2Command } = require("../commands/ShowPreviewV2");
-      return new ShowPreviewV2Command().execute();
+      const { ShowPreviewCommand } = require("../commands/ShowPreview");
+      return new ShowPreviewCommand().execute();
     }
   }
 

@@ -12,9 +12,7 @@ import React from "react";
  * @param msg 
  */
 export const postVSCodeMessage = (msg: DMessage) => {
-  if (window) {
     window.postMessage(msg, "*");
-  }
 };
 
 export const useVSCodeMessage = (setMsgHook: (msg: VSCodeMessage) => void) => {

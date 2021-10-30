@@ -50,7 +50,7 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
     // tell vscode that the client is ready
     postVSCodeMessage({
       type: DMessageType.INIT,
-      data: {},
+      data: {src: ctx},
       source: DMessageSource.webClient,
     });
     // TODO

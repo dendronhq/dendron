@@ -140,14 +140,35 @@ export class ShowPreviewV2Command extends BasicCommand<
   }
 
   async execute(_opts?: CommandOpts) {
+    const ctx = "ShowPreview";
+    const ext = getExtension();
+    const existingPanel = ext.getWebView(DendronWebViewKey.NOTE_PREVIEW);
+    const viewColumn = vscode.ViewColumn.Beside; // Editor column to show the new webview panel in.
+    const preserveFocus = true;
+
+    // show existing panel if exist
+    if (!_.isUndefined(existingPanel)) {
+      Logger.info({ctx, msg: "reveal existing"});
+      try {
+        // If error, panel disposed and needs to be recreated
+        existingPanel.reveal(viewColumn, preserveFocus);
+        return;
+      } catch (error: any) {
+        Logger.error({ctx, error})
+      }
+    }
+    Logger.info({ctx, msg: "creating new"});
+
     const root =
       "/Users/kevinlin/code/dendron/packages/dendron-plugin-views/build";
     const panel = vscode.window.createWebviewPanel(
       "dendronPreview",
       "Dendron Preview",
-      vscode.ViewColumn.One,
+      viewColumn,
       {
         enableScripts: true,
+        retainContextWhenHidden: true,
+        enableFindWidget: true,
         localResourceRoots: [vscode.Uri.file(root)],
       }
     );
@@ -159,7 +180,6 @@ export class ShowPreviewV2Command extends BasicCommand<
     const cssSrc = vscode.Uri.file(
       path.join(root, "static", "css", `${name}.styles.css`)
     );
-    const ext = getExtension();
     const port = getExtension().port!;
     panel.webview.html = getWebviewContent({
       jsSrc: panel.webview.asWebviewUri(jsSrc),
@@ -170,7 +190,17 @@ export class ShowPreviewV2Command extends BasicCommand<
 
     panel.webview.onDidReceiveMessage(async (msg: NoteViewMessage) => {
       const ctx = "ShowPreview:onDidReceiveMessage";
+      Logger.debug({ ctx, msgType: msg.type});
       switch (msg.type) {
+        case NoteViewMessageType.messageDispatcherReady: {
+          // if ready, get current note
+          Logger.info({ctx, msg: "messageDispatcherReady"});
+          const note = VSCodeUtils.getActiveNote();
+          if (note) {
+            ShowPreviewV2Command.refresh(note);
+          }
+          break;
+        };
         case NoteViewMessageType.onClick: {
           const { data } = msg;
           if (data.href) {
@@ -367,6 +397,10 @@ function getWebviewContent({
     </head>
     <body>
       <div id="root" data-port=${port} data-ws=${wsRoot}></div>
+      <script>
+        const vscode = acquireVsCodeApi();
+        window.vscode = vscode;
+      </script>
       <script src="${jsSrc}""></script>
     </body>
     </html>`;

@@ -70,7 +70,7 @@ export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
       webviewView.webview
     );
     webviewView.webview.onDidReceiveMessage(async (msg: TreeViewMessage) => {
-      Logger.info({ ctx: "onDidReceiveMessage", data: msg });
+      Logger.info({ ctx: "DendronTreeViewV2:onDidReceiveMessage", data: msg });
       switch (msg.type) {
         case TreeViewMessageType.onSelect: {
           const note = getEngine().notes[msg.data.id];
@@ -98,7 +98,7 @@ export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
             const note = VSCodeUtils.getNoteFromDocument(document);
             if (note) {
               Logger.info({
-                ctx: "onDidReceiveMessage",
+                ctx: "DendronTreeViewV2:onDidReceiveMessage",
                 msg: "refresh note",
                 note: NoteUtils.toLogObj(note),
               });

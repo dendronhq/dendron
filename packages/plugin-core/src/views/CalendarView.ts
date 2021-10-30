@@ -83,7 +83,7 @@ export class CalendarView implements vscode.WebviewViewProvider {
   }
 
   async onDidReceiveMessageHandler(msg: CalendarViewMessage) {
-    const ctx = "onDidReceiveMessage";
+    const ctx = "CalendarView:onDidReceiveMessage";
     Logger.info({ ctx, data: msg });
     switch (msg.type) {
       case CalendarViewMessageType.onSelect: {

@@ -259,6 +259,13 @@ const getLinks = ({
       return ent.value === filter?.loc?.fname;
     });
   }
+  createLogger("LinkUtils.getLinks").info({
+    ctx: "getLinks",
+    dlinksLength: dlinks.length,
+    noteRefsLength: noteRefs.length,
+    wikiLinksLength: wikiLinks.length,
+    filterLocFname: filter?.loc?.fname,
+  });
   return dlinks;
 };
 

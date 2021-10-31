@@ -9,7 +9,6 @@ import {
   OnDidChangeActiveTextEditorMsg,
 } from "@dendronhq/common-all";
 import _ from "lodash";
-import path from "path";
 import * as vscode from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { Logger } from "../logger";
@@ -140,32 +139,6 @@ export class ShowPreviewV2Command extends BasicCommand<
   }
 
   async execute(_opts?: CommandOpts) {
-    const root =
-      "/Users/kevinlin/code/dendron/packages/dendron-plugin-views/build";
-    const panel = vscode.window.createWebviewPanel(
-      "catCoding",
-      "Cat Coding",
-      vscode.ViewColumn.One,
-      {
-        enableScripts: true,
-        localResourceRoots: [vscode.Uri.file(root)],
-      }
-    );
-
-    const name = "notePreview";
-    const jsSrc = vscode.Uri.file(
-      path.join(root, "static", "js", `${name}.bundle.js`)
-    );
-    const cssSrc = vscode.Uri.file(
-      path.join(root, "static", "css", `${name}.styles.css`)
-    );
-    panel.webview.html = getWebviewContent(
-      panel.webview.asWebviewUri(jsSrc),
-      panel.webview.asWebviewUri(cssSrc)
-    );
-  }
-
-  async executeOld(_opts?: CommandOpts) {
     // Get workspace information
     const ext = getExtension();
 
@@ -277,21 +250,4 @@ export class ShowPreviewV2Command extends BasicCommand<
     }
     return getEngine().notes[noteId];
   }
-}
-
-function getWebviewContent(jsSrc: vscode.Uri, cssSrc: vscode.Uri) {
-  return `<!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Cat Coding</title>
-        <link href="${cssSrc}" rel="stylesheet" />
-    </head>
-    <body>
-      Cat Coding
-      <div id="root"></div>
-      <script src="${jsSrc}""></script>
-    </body>
-    </html>`;
 }

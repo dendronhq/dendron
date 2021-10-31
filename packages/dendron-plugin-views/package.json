@@ -79,7 +79,8 @@
   },
   "scripts": {
     "start": "node scripts/start.js",
-    "build": "node scripts/build.js",
+    "build:prod": "node scripts/build.js",
+    "build:dev": "env BUILD_DEV=1 node scripts/build.js",
     "test": "node scripts/test.js"
   },
   "eslintConfig": {

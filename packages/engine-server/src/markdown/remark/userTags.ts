@@ -86,6 +86,7 @@ function attachParser(proc: Unified.Processor) {
     if (match && match.groups?.tagContents) {
       return eat(match[0])({
         type: DendronASTTypes.USERTAG,
+        // @ts-ignore
         value: match[0],
         fname: `${USERS_HIERARCHY}${match.groups.tagContents}`,
       });

@@ -92,7 +92,7 @@ export class ServerUtils {
       console.log("handle exit");
       try {
         process.kill(subprocess.pid);
-      } catch (err) {
+      } catch (err: any) {
         // this means process was already killed
         if (err.code !== "ESRCH") {
           console.log("process already killed");

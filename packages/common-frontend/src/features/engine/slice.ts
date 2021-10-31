@@ -10,7 +10,8 @@ import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import _ from "lodash";
 import { EngineSliceState, LoadingStatus } from "../../types";
 import { createLogger } from "../../utils";
-
+// @ts-ignore
+import internal from "@reduxjs/toolkit/node_modules/immer/dist/internal"
 /**
  * Equivalent to engine.init
  */

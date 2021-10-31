@@ -3,7 +3,16 @@
   "version": "0.1.0",
   "private": true,
   "workspaces": {
-    "nohoist": ["**"]
+    "nohoist": [
+      "webpack",
+      "webpack/**",
+      "eslint",
+      "eslint/**",
+      "@types/eslint-scope",
+      "@types/eslint-scope/**",
+      "@types/eslint",
+      "@types/eslint/**"
+    ]
   },
   "dependencies": {
     "@babel/core": "7.12.3",

@@ -54,6 +54,7 @@ function attachParser(proc: Unified.Processor) {
 
       return eat(match[0])({
         type: DendronASTTypes.EXTENDED_IMAGE,
+        // @ts-ignore
         value,
         url: match.groups.url,
         alt: match.groups.alt,

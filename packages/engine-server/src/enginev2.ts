@@ -260,7 +260,7 @@ export class DendronEngineV2 implements DEngine {
           config: this.config,
         },
       };
-    } catch (error) {
+    } catch (error: any) {
       const { message, stack, status } = error;
       let payload = { message, stack };
       return {
@@ -298,7 +298,7 @@ export class DendronEngineV2 implements DEngine {
         data: changed,
         error: null,
       };
-    } catch (err) {
+    } catch (err: any) {
       return {
         data: [],
         error: err,
@@ -326,7 +326,7 @@ export class DendronEngineV2 implements DEngine {
       //   data: undefined,
       //   error: null,
       // };
-    } catch (err) {
+    } catch (err: any) {
       return {
         error: err,
       };
@@ -724,7 +724,7 @@ export class DendronEngineV2 implements DEngine {
         );
       }
       return { data: blocks, error: null };
-    } catch (err) {
+    } catch (err: any) {
       return {
         error: err,
         data: undefined,

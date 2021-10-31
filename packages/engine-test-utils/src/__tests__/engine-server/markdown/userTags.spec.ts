@@ -33,6 +33,7 @@ function runAllTests(opts: { name: string; testCases: ProcTests[] }) {
   describe(name, () => {
     test.each(
       testCases.map((ent) => [`${ent.dest}: ${ent.name}`, ent.testCase])
+      // @ts-ignore
     )("%p", async (_key, testCase: TestPresetEntryV4) => {
       await runEngineTestV5(testCase.testFunc, {
         expect,
@@ -75,6 +76,7 @@ describe("user tags", () => {
       expect(getDescendantNode(resp, 0, 1).type).toEqual(
         DendronASTTypes.USERTAG
       );
+      // @ts-ignore
       expect(getDescendantNode(resp, 0, 1).value).toEqual("@Hamilton.Margaret");
     });
 
@@ -91,6 +93,7 @@ describe("user tags", () => {
       expect(getDescendantNode(resp1, 0, 1).type).toEqual(
         DendronASTTypes.USERTAG
       );
+      // @ts-ignore
       expect(getDescendantNode(resp1, 0, 1).value).toEqual(
         "@Hamilton.Margaret"
       );
@@ -101,6 +104,7 @@ describe("user tags", () => {
       expect(getDescendantNode(resp2, 0, 1).type).toEqual(
         DendronASTTypes.USERTAG
       );
+      // @ts-ignore
       expect(getDescendantNode(resp2, 0, 1).value).toEqual(
         "@Hamilton.Margaret"
       );
@@ -111,6 +115,7 @@ describe("user tags", () => {
       expect(getDescendantNode(resp1, 0, 1).type).toEqual(
         DendronASTTypes.USERTAG
       );
+      // @ts-ignore
       expect(getDescendantNode(resp1, 0, 1).value).toEqual("@松本.行弘");
     });
 

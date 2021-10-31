@@ -38,6 +38,7 @@ function runAllTests(opts: { name: string; testCases: ProcTests[] }) {
   describe(name, () => {
     test.each(
       testCases.map((ent) => [`${ent.dest}: ${ent.name}`, ent.testCase])
+      // @ts-ignore
     )("%p", async (_key, testCase: TestPresetEntryV4) => {
       await runEngineTestV5(testCase.testFunc, {
         expect,
@@ -80,6 +81,7 @@ describe("hashtag", () => {
       expect(getDescendantNode(resp, 0, 1).type).toEqual(
         DendronASTTypes.HASHTAG
       );
+      // @ts-ignore
       expect(getDescendantNode(resp, 0, 1).value).toEqual("#my-hash-tag");
     });
 
@@ -95,6 +97,7 @@ describe("hashtag", () => {
       expect(getDescendantNode(resp1, 0, 1).type).toEqual(
         DendronASTTypes.HASHTAG
       );
+      // @ts-ignore
       expect(getDescendantNode(resp1, 0, 1).value).toEqual("#dolores");
 
       const resp2 = proc().parse(
@@ -103,6 +106,7 @@ describe("hashtag", () => {
       expect(getDescendantNode(resp2, 0, 1).type).toEqual(
         DendronASTTypes.HASHTAG
       );
+      // @ts-ignore
       expect(getDescendantNode(resp2, 0, 1).value).toEqual("#dolores");
     });
 
@@ -111,6 +115,7 @@ describe("hashtag", () => {
       expect(getDescendantNode(resp1, 0, 1).type).toEqual(
         DendronASTTypes.HASHTAG
       );
+      // @ts-ignore
       expect(getDescendantNode(resp1, 0, 1).value).toEqual("#よろしく");
     });
   });

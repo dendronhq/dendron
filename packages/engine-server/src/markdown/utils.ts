@@ -193,6 +193,7 @@ export class MDUtilsV4 {
         if (action === false) return false; // stop traversing completely
 
         // visit the children of this node, if any
+        // @ts-ignore
         if (node.children) {
           const parent = node as Parent;
           const newAncestors = [...ancestors, { ancestor: parent, index: i }];
@@ -483,6 +484,7 @@ export class MDUtilsV4 {
         },
         content: {
           type: "element",
+          // @ts-ignore
           tagName: "svg",
           properties: {
             "aria-hidden": "true",

@@ -62,8 +62,8 @@ export async function checkFile(
   if (snapshot) {
     expect(body).toMatchSnapshot();
   }
+  await checkString(body, ...match)
   return (
-    (await checkString(body, ...match)) &&
     (!nomatch || (await checkNotInString(body, ...nomatch)))
   );
 }

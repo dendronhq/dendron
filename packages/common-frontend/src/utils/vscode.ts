@@ -63,8 +63,8 @@ export const useVSCodeMessage = (setMsgHook: (msg: VSCodeMessage) => void) => {
 
 export const postVSCodeMessage = (msg: DMessage) => {
   // @ts-ignore
-  if (window && window.vscode) {
+  if (window) {
     // @ts-ignore
-      window.vscode.postMessage(msg);
-    }
+    window.parent.postMessage(msg, "*");
+  }
 };

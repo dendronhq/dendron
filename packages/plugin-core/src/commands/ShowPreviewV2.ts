@@ -4,8 +4,9 @@ import {
   DMessageType,
   DNoteAnchor,
   NoteProps,
+  NoteUtils,
   NoteViewMessage,
-  NoteViewMessageType,
+  NoteViewMessageEnum,
   OnDidChangeActiveTextEditorMsg
 } from "@dendronhq/common-all";
 import _ from "lodash";
@@ -164,7 +165,10 @@ export class ShowPreviewV2Command extends BasicCommand<
     const panel = vscode.window.createWebviewPanel(
       "dendronPreview",
       "Dendron Preview",
-      viewColumn,
+      {
+        viewColumn,
+        preserveFocus
+      },
       {
         enableScripts: true,
         retainContextWhenHidden: true,
@@ -181,27 +185,25 @@ export class ShowPreviewV2Command extends BasicCommand<
       path.join(root, "static", "css", `${name}.styles.css`)
     );
     const port = getExtension().port!;
-    panel.webview.html = getWebviewContent({
-      jsSrc: panel.webview.asWebviewUri(jsSrc),
-      cssSrc: panel.webview.asWebviewUri(cssSrc),
-      port,
-      wsRoot: ext.getEngine().wsRoot,
-    });
-
     panel.webview.onDidReceiveMessage(async (msg: NoteViewMessage) => {
       const ctx = "ShowPreview:onDidReceiveMessage";
       Logger.debug({ ctx, msgType: msg.type});
       switch (msg.type) {
-        case NoteViewMessageType.messageDispatcherReady: {
+        case DMessageType.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR:
+        case DMessageType.INIT: {
+          // do nothing 
+          break;
+        };
+        case DMessageType.MESSAGE_DISPATCHER_READY: {
           // if ready, get current note
-          Logger.info({ctx, msg: "messageDispatcherReady"});
           const note = VSCodeUtils.getActiveNote();
           if (note) {
+            Logger.debug({ctx, msg: "got active note", note: NoteUtils.toLogObj(note)});
             ShowPreviewV2Command.refresh(note);
           }
           break;
         };
-        case NoteViewMessageType.onClick: {
+        case NoteViewMessageEnum.onClick: {
           const { data } = msg;
           if (data.href) {
             // TODO find a better way to differentiate local files from web links (`data-` attribute)
@@ -232,7 +234,7 @@ export class ShowPreviewV2Command extends BasicCommand<
 
           break;
         }
-        case NoteViewMessageType.onGetActiveEditor: {
+        case NoteViewMessageEnum.onGetActiveEditor: {
           // only entered on "init" in `plugin-core/src/views/utils.ts:87`
           Logger.debug({ ctx, "msg.type": "onGetActiveEditor" });
           const activeTextEditor = VSCodeUtils.getActiveTextEditor();
@@ -243,14 +245,19 @@ export class ShowPreviewV2Command extends BasicCommand<
             ShowPreviewV2Command.refresh(maybeNote);
           break;
         }
-        case NoteViewMessageType.messageDispatcherReady:
-          break;
         default:
           assertUnreachable(msg.type);
       }
     });
 
-    // Update workspace-wide graph panel
+    panel.webview.html = getWebviewContent({
+      jsSrc: panel.webview.asWebviewUri(jsSrc),
+      cssSrc: panel.webview.asWebviewUri(cssSrc),
+      port,
+      wsRoot: ext.getEngine().wsRoot,
+    });
+
+    // Update workspace-wide panel
     ext.setWebView(DendronWebViewKey.NOTE_PREVIEW, panel);
 
     // remove webview from workspace when user closes it
@@ -307,7 +314,7 @@ export class ShowPreviewV2Command extends BasicCommand<
     panel.webview.onDidReceiveMessage(async (msg: NoteViewMessage) => {
       const ctx = "ShowPreview:onDidReceiveMessage";
       switch (msg.type) {
-        case NoteViewMessageType.onClick: {
+        case NoteViewMessageEnum.onClick: {
           const { data } = msg;
           if (data.href) {
             // TODO find a better way to differentiate local files from web links (`data-` attribute)
@@ -338,7 +345,7 @@ export class ShowPreviewV2Command extends BasicCommand<
 
           break;
         }
-        case NoteViewMessageType.onGetActiveEditor: {
+        case NoteViewMessageEnum.onGetActiveEditor: {
           // only entered on "init" in `plugin-core/src/views/utils.ts:87`
           Logger.debug({ ctx, "msg.type": "onGetActiveEditor" });
           const activeTextEditor = VSCodeUtils.getActiveTextEditor();
@@ -349,7 +356,7 @@ export class ShowPreviewV2Command extends BasicCommand<
             ShowPreviewV2Command.refresh(maybeNote);
           break;
         }
-        case NoteViewMessageType.messageDispatcherReady:
+        case DMessageType.MESSAGE_DISPATCHER_READY:
           break;
         default:
           assertUnreachable(msg.type);

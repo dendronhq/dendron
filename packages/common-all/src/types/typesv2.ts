@@ -641,11 +641,13 @@ export enum CalendarViewMessageType {
   "messageDispatcherReady" = "messageDispatcherReady",
 }
 
-export enum NoteViewMessageType {
+export enum NoteViewMessageEnum {
   "onClick" = "onClick",
   "onGetActiveEditor" = "onGetActiveEditor",
-  "messageDispatcherReady" = "messageDispatcherReady",
 }
+
+export type NoteViewMessageType = DMessageType | NoteViewMessageEnum
+
 
 export enum ThemeMessageType {
   "onThemeChange" = "onThemeChange",
@@ -688,7 +690,7 @@ export type CalendarViewMessage = DMessage<
 >;
 
 export type NoteViewMessage = DMessage<
-  NoteViewMessageType,
+NoteViewMessageType,
   { id?: string; href?: string }
 >;
 

@@ -12,7 +12,8 @@ import React from "react";
  * @param msg 
  */
 export const postVSCodeMessage = (msg: DMessage) => {
-    window.postMessage(msg, "*");
+  // @ts-ignore
+    window.vscode.postMessage(msg, "*");
 };
 
 export const useVSCodeMessage = (setMsgHook: (msg: VSCodeMessage) => void) => {

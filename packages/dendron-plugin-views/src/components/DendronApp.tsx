@@ -53,8 +53,7 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
       data: {src: ctx},
       source: DMessageSource.webClient,
     });
-    // TODO
-    logger.info("AppVSCode.init");
+    logger.info({ctx, msg: "postVSCodeMessage"});
   }, []);
 
   // register a listener for vscode messages

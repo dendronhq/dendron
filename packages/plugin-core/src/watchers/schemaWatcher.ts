@@ -66,7 +66,7 @@ export class SchemaWatcher {
         });
         await engine.updateSchema(maybeSchema);
         vscode.window.showInformationMessage("schema updated");
-      } catch (err) {
+      } catch (err: any) {
         if (err.msg) {
           vscode.window.showErrorMessage(err.msg);
         } else {

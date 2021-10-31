@@ -988,6 +988,7 @@ function findBlockAnchor({
     nodes,
     test: DendronASTTypes.BLOCK_ANCHOR,
     visitor: ({ node, index, ancestors }) => {
+      // @ts-ignore
       if (node.id === match) {
         // found anchor!
         foundIndex = ancestors.length > 0 ? ancestors[0].index : index;

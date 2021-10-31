@@ -195,6 +195,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         dest !== DendronASTDest.MD_ENHANCED_PREVIEW
       ) {
         const _node = node as WikiLinkNoteV4;
+        // @ts-ignore
         let value = node.value as string;
         // we change this later
         const valueOrig = value;

@@ -1,3 +1,5 @@
+import _ from "lodash";
+import { Node as UnistNode } from "unist";
 import { checkString } from ".";
 
 export class TestUnifiedUtils {
@@ -10,4 +12,31 @@ export class TestUnifiedUtils {
   }) => {
     return checkString(contents, "color: brown", value + " (Private)");
   };
+
+  /** Gets the descendent (child, or child of child...) node of a given node.
+   *
+   * @param node The root node to start descending from.
+   * @param indices Left-to-right indexes for children, e.g. first index is for the root, second is for the child of the root...
+   * @returns Requested child. Note that this function has no way of checking types, so the child you get might not be of the right type.
+   */
+  static getDescendantNode<Child extends UnistNode>(
+    expect: any,
+    node: UnistNode,
+    ...indices: number[]
+  ): Child {
+    const index = indices.shift();
+    if (_.isUndefined(index)) return node as Child;
+    // TODO: pass in instead of call
+    expect(node).toHaveProperty("children");
+    // @ts-ignore
+    expect(node.children).toHaveProperty("length");
+    // @ts-ignore
+    const children = node.children as UnistNode[];
+    expect(children.length).toBeGreaterThanOrEqual(index);
+    return TestUnifiedUtils.getDescendantNode<Child>(
+      expect,
+      children[index],
+      ...indices
+    );
+  }
 }

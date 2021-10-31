@@ -8,7 +8,7 @@ import { stringifyError } from "@dendronhq/common-all";
   try {
     // run forever
     await ServerUtils.startServerNode(ServerUtils.prepareServerArgs());
-  } catch (err) {
+  } catch (err: any) {
     if (process.send) {
       process.send(stringifyError(err));
     }

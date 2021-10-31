@@ -95,53 +95,6 @@ export class AssertUtils {
     );
     return true;
   }
-
-  static async assertRegexInString({
-    body,
-    match,
-    nomatch,
-  }: {
-    body: string;
-    match?: (string | RegExp)[];
-    nomatch?: (string | RegExp)[];
-  }): Promise<boolean> {
-    return await this.assertTimesInString({
-      body,
-      moreThan: [
-        ...(match?.map((pattern): [number, string | RegExp] => [0, pattern]) ||
-          []),
-      ],
-      fewerThan: [
-        ...(nomatch?.map((pattern): [number, string | RegExp] => [
-          1,
-          pattern,
-        ]) || []),
-      ],
-    });
-  }
-}
-
-export abstract class EngineTest<TPreSetupOut = any, TPostSetupOut = any> {
-  public preSetupHook: SetupHookFunction<TPreSetupOut>;
-  public postSetupHook: SetupHookFunction<TPostSetupOut>;
-  public engine: DEngineClient;
-
-  constructor(opts: {
-    preSetupHook?: SetupHookFunction<TPreSetupOut>;
-    postSetupHook?: SetupHookFunction<TPostSetupOut>;
-    engine: DEngineClient;
-  }) {
-    const { preSetupHook, postSetupHook, engine } = _.defaults(opts, {
-      preSetupHook: async () => {},
-      postSetupHook: async () => {},
-    });
-    this.preSetupHook = preSetupHook;
-    this.postSetupHook = postSetupHook;
-    this.engine = engine;
-  }
-
-  runJest = () => {};
-  runMocha = () => {};
 }
 
 export class TestPresetEntry<TBeforeOpts, TAfterOpts, TResultsOpts> {
@@ -182,16 +135,6 @@ export class TestPresetEntry<TBeforeOpts, TAfterOpts, TResultsOpts> {
 export async function runMochaHarness<TOpts>(results: any, opts?: TOpts) {
   return _.map(await results(opts), (ent) =>
     assert.deepStrictEqual(ent.actual, ent.expected)
-  );
-}
-
-export async function runJestHarness<TOpts>(
-  results: any,
-  expect: jest.Expect,
-  opts?: TOpts
-) {
-  return _.map(await results(opts), (ent) =>
-    expect(ent.actual).toEqual(ent.expected)
   );
 }
 

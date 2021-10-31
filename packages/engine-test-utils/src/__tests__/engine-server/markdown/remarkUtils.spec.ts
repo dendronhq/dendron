@@ -46,6 +46,7 @@ describe("RemarkUtils and LinkUtils", () => {
           const out = RemarkUtils.findAnchors(body);
           expect(out).toMatchSnapshot();
           expect(_.size(out)).toEqual(1);
+          // @ts-ignore
           expect(out[0].depth).toEqual(1);
           expect(out[0].type).toEqual(DendronASTTypes.HEADING);
         },

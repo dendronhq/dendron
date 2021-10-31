@@ -595,6 +595,7 @@ export class WSUtils {
     );
     // if server process has issues, prompt user to restart
     ServerUtils.onProcessExit({
+      // @ts-ignore
       subprocess,
       cb: onExit,
     });

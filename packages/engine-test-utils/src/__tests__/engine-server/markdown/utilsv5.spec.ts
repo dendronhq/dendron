@@ -191,6 +191,7 @@ describe("MDUtils.proc", () => {
       `${ent.dest}: ${ent.name}: ${ent.flavor}`,
       ent.testCase,
     ])
+    // @ts-ignore
   )("%p", async (_key, testCase: TestPresetEntryV4) => {
     await runEngineTestV5(testCase.testFunc, {
       expect,

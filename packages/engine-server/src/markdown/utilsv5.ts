@@ -385,6 +385,7 @@ export class MDUtilsV5 {
         },
         content: {
           type: "element",
+          // @ts-ignore
           tagName: "svg",
           properties: {
             "aria-hidden": "true",

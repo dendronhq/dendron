@@ -283,7 +283,7 @@ abstract class API {
       const resp = await this._doRequest(args);
       payload.data = resp.data.data;
       payload.error = resp.data.error;
-    } catch (err) {
+    } catch (err: any) {
       this._log(payload.error, "error");
       payload.error = err?.response?.data?.error;
     }
@@ -300,7 +300,7 @@ abstract class API {
         return new DendronError({ ...resp.data.error });
       }
       return resp.data;
-    } catch (err) {
+    } catch (err: any) {
       return new DendronError({ ...err.response.data.error });
     }
   }

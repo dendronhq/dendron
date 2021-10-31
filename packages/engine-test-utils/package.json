@@ -42,11 +42,11 @@
     "@types/fs-extra": "^9.0.1",
     "@types/lodash": "^4.14.161",
     "@types/node": "13.11.0",
-    "jest": "^23.6.0",
+    "jest": "26.6.0",
     "jest-environment-jsdom-sixteen": "^2.0.0",
     "jest-serializer-path": "^0.1.15",
     "rimraf": "^2.6.2",
-    "ts-jest": "^23.10.3",
+    "ts-jest": "26.5.6",
     "ts-node": "^8.10.2"
   },
   "engines": {

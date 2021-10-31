@@ -7,7 +7,8 @@ import {
   NoteUtils,
   NoteViewMessage,
   NoteViewMessageEnum,
-  OnDidChangeActiveTextEditorMsg
+  OnDidChangeActiveTextEditorMsg,
+  VaultUtils
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import path from "path";
@@ -87,20 +88,12 @@ export const extractNoteIdFromHref = (data: {
   if (data.href.includes("vscode/note-preview")) {
     return data.id;
   }
-
-  // In normal cases such as markdown value='[[#head2]]' with
-  // href='http://localhost:3005/vscode/0TDNEYgYvCs3ooZEuknNZ.html#head2' we will
-  // parse the href and extract the note id.
-  // The id within href can be without html suffix such as:
-  // * http://localhost:3005/vscode/0TDNEYgYvCs3ooZEuknNZ#head2
-  // * http://localhost:3005/vscode/0TDNEYgYvCs3ooZEuknNZ
-  //
-  // Regex is in reference to uuid.ts/genUUID() to match the note id.
-  // Regex: https://regex101.com/r/7pDj6G/1
+  /**
+   * Will return a link like 'vscode-webview://4e98b9cf-41d8-49eb-b458-fcfda32c6c01/foobar'
+   * The path component includes a `/` (eg. `/foobar`) so we remove it
+   */
   const { path } = vscode.Uri.parse(data.href);
-  const noteId = path.match(/vscode\/([a-zA-Z0-9-_]*)/)?.[1];
-
-  return noteId;
+  return path.slice(1);
 };
 
 export class ShowPreviewV2Command extends BasicCommand<
@@ -148,16 +141,16 @@ export class ShowPreviewV2Command extends BasicCommand<
 
     // show existing panel if exist
     if (!_.isUndefined(existingPanel)) {
-      Logger.info({ctx, msg: "reveal existing"});
+      Logger.info({ ctx, msg: "reveal existing" });
       try {
         // If error, panel disposed and needs to be recreated
         existingPanel.reveal(viewColumn, preserveFocus);
         return;
       } catch (error: any) {
-        Logger.error({ctx, error})
+        Logger.error({ ctx, error });
       }
     }
-    Logger.info({ctx, msg: "creating new"});
+    Logger.info({ ctx, msg: "creating new" });
 
     const root =
       "/Users/kevinlin/code/dendron/packages/dendron-plugin-views/build";
@@ -166,7 +159,7 @@ export class ShowPreviewV2Command extends BasicCommand<
       "Dendron Preview",
       {
         viewColumn,
-        preserveFocus
+        preserveFocus,
       },
       {
         enableScripts: true,
@@ -186,48 +179,61 @@ export class ShowPreviewV2Command extends BasicCommand<
     const port = getExtension().port!;
     panel.webview.onDidReceiveMessage(async (msg: NoteViewMessage) => {
       const ctx = "ShowPreview:onDidReceiveMessage";
-      Logger.debug({ ctx, msgType: msg.type});
+      Logger.debug({ ctx, msgType: msg.type });
       switch (msg.type) {
         case DMessageType.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR:
         case DMessageType.INIT: {
-          // do nothing 
+          // do nothing
           break;
-        };
+        }
         case DMessageType.MESSAGE_DISPATCHER_READY: {
           // if ready, get current note
           const note = VSCodeUtils.getActiveNote();
           if (note) {
-            Logger.debug({ctx, msg: "got active note", note: NoteUtils.toLogObj(note)});
+            Logger.debug({
+              ctx,
+              msg: "got active note",
+              note: NoteUtils.toLogObj(note),
+            });
             ShowPreviewV2Command.refresh(note);
           }
           break;
-        };
+        }
         case NoteViewMessageEnum.onClick: {
           const { data } = msg;
           if (data.href) {
-            // TODO find a better way to differentiate local files from web links (`data-` attribute)
-            if (data.href.includes("localhost")) {
-              const noteId = extractNoteIdFromHref(data);
-              const anchor = extractHeaderAnchorIfExists(data.href);
+            // TODO: assuem local link
 
-              const note: NoteProps | undefined = this.getNote(noteId);
-              if (isLinkingWithinSameNote({ data }) && note && anchor) {
-                await new GotoNoteCommand().execute({
-                  qs: note.fname,
-                  vault: note.vault,
-                  column: vscode.ViewColumn.One,
-                  anchor,
-                });
-              } else if (noteId && note) {
-                await new GotoNoteCommand().execute({
-                  qs: note.fname,
-                  vault: note.vault,
-                  column: vscode.ViewColumn.One,
-                  anchor,
-                });
-              }
-            } else {
-              VSCodeUtils.openLink(data.href);
+            const noteId = extractNoteIdFromHref(data);
+            const anchor = extractHeaderAnchorIfExists(data.href);
+
+            const note: NoteProps | undefined = this.getNote(noteId);
+            if (isLinkingWithinSameNote({ data }) && note && anchor) {
+              await new GotoNoteCommand().execute({
+                qs: note.fname,
+                vault: note.vault,
+                column: vscode.ViewColumn.One,
+                anchor,
+              });
+            } else if (noteId && note) {
+              await new GotoNoteCommand().execute({
+                qs: note.fname,
+                vault: note.vault,
+                column: vscode.ViewColumn.One,
+                anchor,
+              });
+            } else if (noteId && !note && data.id) {
+              // assume local note - open relative to current vault
+              const note = this.getNote(data.id);
+              if (!note) return;
+
+              // noteId in this case is name of file
+              const fullPath = path.join(
+                getEngine().wsRoot,
+                VaultUtils.getRelPath(note.vault),
+                noteId
+              );
+              VSCodeUtils.openLink(fullPath);
             }
           }
 

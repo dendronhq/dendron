@@ -6,11 +6,18 @@ updated: 1634799440754
 created: 1608518909864
 ---
 
+## Regular Markdown
+
+- [Link to non markdown file](./non-markdown-file)
+
+## Publishing
 - This is a link to a [[not published note|bar]]
 
-## Wiki Link
+## Wiki Links
 
-- [[dendron.ref.figure]]
+
+- naked: [[dendron.ref.figure]]
+- relative to page: [[#url]]
 
 ## XVault Link
 

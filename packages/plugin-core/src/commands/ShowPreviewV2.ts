@@ -15,7 +15,6 @@ import * as vscode from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { Logger } from "../logger";
 import { VSCodeUtils } from "../utils";
-import { WebViewUtils } from "../views/utils";
 import { getEngine, getExtension } from "../workspace";
 import { BasicCommand } from "./base";
 import { GotoNoteCommand } from "./GotoNote";
@@ -258,112 +257,6 @@ export class ShowPreviewV2Command extends BasicCommand<
     });
 
     // Update workspace-wide panel
-    ext.setWebView(DendronWebViewKey.NOTE_PREVIEW, panel);
-
-    // remove webview from workspace when user closes it
-    // this prevents throwing `Uncaught Error: Webview is disposed` in `ShowPreviewV2Command#refresh`
-    panel.onDidDispose(() => {
-      const ctx = "ShowPreview:onDidDispose";
-      Logger.debug({ ctx, state: "dispose preview" });
-      ext.setWebView(DendronWebViewKey.NOTE_PREVIEW, undefined);
-    });
-  }
-
-  async executeOld(_opts?: CommandOpts) {
-    // Get workspace information
-    const ext = getExtension();
-
-    // If panel already exists
-    const existingPanel = ext.getWebView(DendronWebViewKey.NOTE_PREVIEW);
-
-    const viewColumn = vscode.ViewColumn.Beside; // Editor column to show the new webview panel in.
-    const preserveFocus = true;
-
-    if (!_.isUndefined(existingPanel)) {
-      try {
-        // If error, panel disposed and needs to be recreated
-        existingPanel.reveal(viewColumn, preserveFocus);
-        return;
-      } catch (error) {
-        console.error(error);
-      }
-    }
-
-    const panel = vscode.window.createWebviewPanel(
-      "dendronIframe", // Identifies the type of the webview. Used internally
-      title, // Title of the panel displayed to the user
-      {
-        viewColumn,
-        preserveFocus,
-      },
-      {
-        enableScripts: true,
-        retainContextWhenHidden: true,
-        enableFindWidget: true,
-        enableCommandUris: true,
-      }
-    );
-
-    const resp = await WebViewUtils.genHTMLForWebView({
-      title,
-      view: DendronWebViewKey.NOTE_PREVIEW,
-    });
-
-    panel.webview.html = resp;
-
-    panel.webview.onDidReceiveMessage(async (msg: NoteViewMessage) => {
-      const ctx = "ShowPreview:onDidReceiveMessage";
-      switch (msg.type) {
-        case NoteViewMessageEnum.onClick: {
-          const { data } = msg;
-          if (data.href) {
-            // TODO find a better way to differentiate local files from web links (`data-` attribute)
-            if (data.href.includes("localhost")) {
-              const noteId = extractNoteIdFromHref(data);
-              const anchor = extractHeaderAnchorIfExists(data.href);
-
-              const note: NoteProps | undefined = this.getNote(noteId);
-              if (isLinkingWithinSameNote({ data }) && note && anchor) {
-                await new GotoNoteCommand().execute({
-                  qs: note.fname,
-                  vault: note.vault,
-                  column: vscode.ViewColumn.One,
-                  anchor,
-                });
-              } else if (noteId && note) {
-                await new GotoNoteCommand().execute({
-                  qs: note.fname,
-                  vault: note.vault,
-                  column: vscode.ViewColumn.One,
-                  anchor,
-                });
-              }
-            } else {
-              VSCodeUtils.openLink(data.href);
-            }
-          }
-
-          break;
-        }
-        case NoteViewMessageEnum.onGetActiveEditor: {
-          // only entered on "init" in `plugin-core/src/views/utils.ts:87`
-          Logger.debug({ ctx, "msg.type": "onGetActiveEditor" });
-          const activeTextEditor = VSCodeUtils.getActiveTextEditor();
-          const maybeNote = !_.isUndefined(activeTextEditor)
-            ? tryGetNoteFromDocument(activeTextEditor?.document)
-            : undefined;
-          if (!_.isUndefined(maybeNote))
-            ShowPreviewV2Command.refresh(maybeNote);
-          break;
-        }
-        case DMessageType.MESSAGE_DISPATCHER_READY:
-          break;
-        default:
-          assertUnreachable(msg.type);
-      }
-    });
-
-    // Update workspace-wide graph panel
     ext.setWebView(DendronWebViewKey.NOTE_PREVIEW, panel);
 
     // remove webview from workspace when user closes it

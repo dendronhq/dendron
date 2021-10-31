@@ -9,7 +9,7 @@ suite("ShowPreviewV2 utility methods", () => {
   describe(`extractHeaderAnchorIfExists`, () => {
     it("WHEN anchor exists THEN return it", () => {
       const anchor = extractHeaderAnchorIfExists(
-        "http://localhost:54442/vscode/FSi3bKWQeQXYTjE1PoTB0#heading-2"
+        "vscode-webview://4e98b9cf-41d8-49eb-b458-fcfda32c6c01/foo#heading-2"
       );
       expect(anchor?.value).toEqual("heading-2");
       expect(anchor?.type).toEqual("header");
@@ -18,47 +18,19 @@ suite("ShowPreviewV2 utility methods", () => {
     it(`WHEN anchor does NOT exist THEN return undefined`, () => {
       expect(
         extractHeaderAnchorIfExists(
-          "http://localhost:54442/vscode/FSi3bKWQeQXYTjE1PoTB0"
+          "vscode-webview://4e98b9cf-41d8-49eb-b458-fcfda32c6c01/foo"
         )
       ).toEqual(undefined);
     });
   });
 
   describe(`extractNoteIdFromHref`, () => {
-    describe(`WHEN id is present with html suffix`, () => {
-      it("AND has header anchor THEN extract id", () => {
-        const actual = extractNoteIdFromHref({
-          id: "id1",
-          href: "http://localhost:3005/vscode/0TDNEYgYvCs3ooZEuknNZ.html#head2",
-        });
 
-        expect(actual).toEqual("0TDNEYgYvCs3ooZEuknNZ");
-      });
-
-      it("AND has underscore THEN extract id", () => {
-        const actual = extractNoteIdFromHref({
-          id: "id1",
-          href: "http://localhost:3000/vscode/DO_RXSlAbwNwbz-ILKoQa.html",
-        });
-
-        expect(actual).toEqual("DO_RXSlAbwNwbz-ILKoQa");
-      });
-
-      it("AND does not have header anchor THEN extract id", () => {
-        const actual = extractNoteIdFromHref({
-          id: "id1",
-          href: "http://localhost:3005/vscode/0TDNEYgYvCs3ooZEuknNZ.html",
-        });
-
-        expect(actual).toEqual("0TDNEYgYvCs3ooZEuknNZ");
-      });
-    });
-
-    describe(`WHEN id is present without html suffix`, () => {
+    describe(`WHEN id is present`, () => {
       it("AND with header anchor THEN extract id", () => {
         const actual = extractNoteIdFromHref({
           id: "id1",
-          href: "http://localhost:3005/vscode/FSi3bKWQeQXYTjE1PoTB0#heading-2",
+          href: "vscode-webview://4e98b9cf-41d8-49eb-b458-fcfda32c6c01/FSi3bKWQeQXYTjE1PoTB0#heading-2",
         });
 
         expect(actual).toEqual("FSi3bKWQeQXYTjE1PoTB0");
@@ -67,7 +39,7 @@ suite("ShowPreviewV2 utility methods", () => {
       it("AND without the header anchor THEN extract id", () => {
         const actual = extractNoteIdFromHref({
           id: "id1",
-          href: "http://localhost:3005/vscode/FSi3bKWQeQXYTjE1PoTB0",
+          href: "vscode-webview://4e98b9cf-41d8-49eb-b458-fcfda32c6c01/FSi3bKWQeQXYTjE1PoTB0",
         });
 
         expect(actual).toEqual("FSi3bKWQeQXYTjE1PoTB0");
@@ -80,7 +52,7 @@ suite("ShowPreviewV2 utility methods", () => {
 
         const actual = extractNoteIdFromHref({
           id: "id1",
-          href: "http://localhost:52361/vscode/56497553-c195-4ec8-bc74-6a76462d9333",
+          href: "vscode-webview://4e98b9cf-41d8-49eb-b458-fcfda32c6c01/56497553-c195-4ec8-bc74-6a76462d9333",
         });
 
         expect(actual).toEqual("56497553-c195-4ec8-bc74-6a76462d9333");

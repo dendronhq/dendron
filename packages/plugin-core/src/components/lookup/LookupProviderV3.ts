@@ -428,7 +428,7 @@ export class NoteLookupProvider implements ILookupProviderV3 {
       });
 
       picker.items = updatedItems;
-    } catch (err) {
+    } catch (err: any) {
       window.showErrorMessage(err);
       throw Error(err);
     } finally {
@@ -654,7 +654,7 @@ export class SchemaLookupProvider implements ILookupProviderV3 {
           : updatedItems;
 
       picker.items = updatedItems;
-    } catch (err) {
+    } catch (err: any) {
       window.showErrorMessage(err);
       throw Error(err);
     } finally {

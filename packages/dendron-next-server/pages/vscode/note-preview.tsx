@@ -8,6 +8,7 @@ import {
   ThemeType,
   FOOTNOTE_REF_CLASS,
   FOOTNOTE_DEF_CLASS,
+  NoteViewMessageEnum,
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -212,7 +213,7 @@ function Note({ engine, ide, ws, port }: DendronProps & WorkspaceProps) {
         event.preventDefault();
         event.stopPropagation();
         postVSCodeMessage({
-          type: NoteViewMessageType.onClick,
+          type: NoteViewMessageEnum.onClick,
           data: {
             href: target.href,
             id: noteId,

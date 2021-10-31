@@ -1,9 +1,11 @@
 {
-  "name": "dendron-plugin-views",
+  "name": "@dendronhq/dendron-plugin-views",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
     "@babel/core": "7.12.3",
+    "@dendronhq/common-all": "^0.65.1",
+    "@dendronhq/common-frontend": "^0.65.1",
     "@pmmmwh/react-refresh-webpack-plugin": "0.4.3",
     "@svgr/webpack": "5.5.0",
     "@testing-library/jest-dom": "^5.11.4",
@@ -15,6 +17,7 @@
     "@types/react-dom": "^17.0.0",
     "@typescript-eslint/eslint-plugin": "^4.5.0",
     "@typescript-eslint/parser": "^4.5.0",
+    "antd": "^4.16.13",
     "babel-eslint": "^10.1.0",
     "babel-jest": "^26.6.0",
     "babel-loader": "8.1.0",
@@ -44,6 +47,7 @@
     "jest-circus": "26.6.0",
     "jest-resolve": "26.6.0",
     "jest-watch-typeahead": "0.6.1",
+    "lodash": "^4.17.21",
     "mini-css-extract-plugin": "0.11.3",
     "optimize-css-assets-webpack-plugin": "5.0.4",
     "pnp-webpack-plugin": "1.6.4",
@@ -75,7 +79,8 @@
   },
   "scripts": {
     "start": "node scripts/start.js",
-    "build": "node scripts/build.js",
+    "build:prod": "node scripts/build.js",
+    "build:dev": "env BUILD_DEV=1 node scripts/build.js",
     "test": "node scripts/test.js"
   },
   "eslintConfig": {
@@ -152,5 +157,8 @@
     "presets": [
       "react-app"
     ]
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.176"
   }
 }

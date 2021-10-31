@@ -82,6 +82,10 @@ const hasJsxRuntime = (() => {
 module.exports = function (webpackEnv) {
   const isEnvDevelopment = webpackEnv === "development";
   const isEnvProduction = webpackEnv === "production";
+  const isBuildDev = process.env.BUILD_DEV;
+  if (isBuildDev) {
+    console.log("building in dev mode");
+  }
 
   // Variable used for enabling profiling in Production
   // passed into alias object. Uses a flag if passed into the build command
@@ -230,7 +234,7 @@ module.exports = function (webpackEnv) {
       globalObject: "this",
     },
     optimization: {
-      minimize: isEnvProduction,
+      minimize: isEnvProduction && !isBuildDev,
       minimizer: [
         // This is only used in production mode
         new TerserPlugin({

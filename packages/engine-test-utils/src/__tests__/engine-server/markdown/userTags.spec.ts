@@ -44,7 +44,7 @@ function runAllTests(opts: { name: string; testCases: ProcTests[] }) {
 }
 
 function getUserTag(node: UnistNode): UserTag {
-  return getDescendantNode<UserTag>(node, 0, 0);
+  return getDescendantNode<UserTag>(expect, node, 0, 0);
 }
 
 describe("user tags", () => {
@@ -73,11 +73,13 @@ describe("user tags", () => {
 
     test("parses a user tag in the middle of a paragraph", () => {
       const resp = proc().parse("Lorem ipsum @Hamilton.Margaret dolor amet.");
-      expect(getDescendantNode(resp, 0, 1).type).toEqual(
+      expect(getDescendantNode(expect, resp, 0, 1).type).toEqual(
         DendronASTTypes.USERTAG
       );
       // @ts-ignore
-      expect(getDescendantNode(resp, 0, 1).value).toEqual("@Hamilton.Margaret");
+      expect(getDescendantNode(expect, resp, 0, 1).value).toEqual(
+        "@Hamilton.Margaret"
+      );
     });
 
     test("parses user tag with numbers", () => {
@@ -90,39 +92,43 @@ describe("user tags", () => {
       const resp1 = proc().parse(
         "Dolorem vero sed sapiente @Hamilton.Margaret. Et quam id maxime et ratione."
       );
-      expect(getDescendantNode(resp1, 0, 1).type).toEqual(
+      expect(getDescendantNode(expect, resp1, 0, 1).type).toEqual(
         DendronASTTypes.USERTAG
       );
       // @ts-ignore
-      expect(getDescendantNode(resp1, 0, 1).value).toEqual(
+      expect(getDescendantNode(expect, resp1, 0, 1).value).toEqual(
         "@Hamilton.Margaret"
       );
 
       const resp2 = proc().parse(
         "Dolorem vero sed sapiente @Hamilton.Margaret, et quam id maxime et ratione."
       );
-      expect(getDescendantNode(resp2, 0, 1).type).toEqual(
+      expect(getDescendantNode(expect, resp2, 0, 1).type).toEqual(
         DendronASTTypes.USERTAG
       );
       // @ts-ignore
-      expect(getDescendantNode(resp2, 0, 1).value).toEqual(
+      expect(getDescendantNode(expect, resp2, 0, 1).value).toEqual(
         "@Hamilton.Margaret"
       );
     });
 
     test("doesn't parse trailing unicode punctuation", () => {
       const resp1 = proc().parse("この人は「@松本.行弘」です。");
-      expect(getDescendantNode(resp1, 0, 1).type).toEqual(
+      expect(getDescendantNode(expect, resp1, 0, 1).type).toEqual(
         DendronASTTypes.USERTAG
       );
       // @ts-ignore
-      expect(getDescendantNode(resp1, 0, 1).value).toEqual("@松本.行弘");
+      expect(getDescendantNode(expect, resp1, 0, 1).value).toEqual(
+        "@松本.行弘"
+      );
     });
 
     test("doesn't parse email addresses", () => {
       const resp1 = proc().parse("user@example.com");
-      expect(getDescendantNode(resp1, 0, 0).type).toEqual(DendronASTTypes.LINK);
-      expect(getDescendantNode(resp1, 0, 0, 0).type).toEqual(
+      expect(getDescendantNode(expect, resp1, 0, 0).type).toEqual(
+        DendronASTTypes.LINK
+      );
+      expect(getDescendantNode(expect, resp1, 0, 0, 0).type).toEqual(
         DendronASTTypes.TEXT
       );
     });

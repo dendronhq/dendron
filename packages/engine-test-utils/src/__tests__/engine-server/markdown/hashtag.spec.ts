@@ -49,7 +49,7 @@ function runAllTests(opts: { name: string; testCases: ProcTests[] }) {
 }
 
 function getHashtag(node: UnistNode): HashTag {
-  return getDescendantNode<HashTag>(node, 0, 0);
+  return getDescendantNode<HashTag>(expect, node, 0, 0);
 }
 
 describe("hashtag", () => {
@@ -78,45 +78,49 @@ describe("hashtag", () => {
 
     test("parses a hashtag in the middle of a paragraph", () => {
       const resp = proc().parse("Lorem ipsum #my-hash-tag dolor amet.");
-      expect(getDescendantNode(resp, 0, 1).type).toEqual(
+      expect(getDescendantNode(expect, resp, 0, 1).type).toEqual(
         DendronASTTypes.HASHTAG
       );
       // @ts-ignore
-      expect(getDescendantNode(resp, 0, 1).value).toEqual("#my-hash-tag");
+      expect(getDescendantNode(expect, resp, 0, 1).value).toEqual(
+        "#my-hash-tag"
+      );
     });
 
     test("doesn't parse hashtag starting with number", () => {
       const resp = proc().parse("#123-hash-tag");
-      expect(getDescendantNode(resp, 0, 0).type).toEqual(DendronASTTypes.TEXT);
+      expect(getDescendantNode(expect, resp, 0, 0).type).toEqual(
+        DendronASTTypes.TEXT
+      );
     });
 
     test("doesn't parse trailing punctuation", () => {
       const resp1 = proc().parse(
         "Dolorem vero sed sapiente #dolores. Et quam id maxime et ratione."
       );
-      expect(getDescendantNode(resp1, 0, 1).type).toEqual(
+      expect(getDescendantNode(expect, resp1, 0, 1).type).toEqual(
         DendronASTTypes.HASHTAG
       );
       // @ts-ignore
-      expect(getDescendantNode(resp1, 0, 1).value).toEqual("#dolores");
+      expect(getDescendantNode(expect, resp1, 0, 1).value).toEqual("#dolores");
 
       const resp2 = proc().parse(
         "Dolorem vero sed sapiente #dolores, et quam id maxime et ratione."
       );
-      expect(getDescendantNode(resp2, 0, 1).type).toEqual(
+      expect(getDescendantNode(expect, resp2, 0, 1).type).toEqual(
         DendronASTTypes.HASHTAG
       );
       // @ts-ignore
-      expect(getDescendantNode(resp2, 0, 1).value).toEqual("#dolores");
+      expect(getDescendantNode(expect, resp2, 0, 1).value).toEqual("#dolores");
     });
 
     test("doesn't parse trailing unicode punctuation", () => {
       const resp1 = proc().parse("彼女に「#よろしく」言って下さい。");
-      expect(getDescendantNode(resp1, 0, 1).type).toEqual(
+      expect(getDescendantNode(expect, resp1, 0, 1).type).toEqual(
         DendronASTTypes.HASHTAG
       );
       // @ts-ignore
-      expect(getDescendantNode(resp1, 0, 1).value).toEqual("#よろしく");
+      expect(getDescendantNode(expect, resp1, 0, 1).value).toEqual("#よろしく");
     });
   });
 

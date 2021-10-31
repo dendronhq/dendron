@@ -1,7 +1,6 @@
 import _ from "lodash";
 import { Node as UnistNode } from "unist";
 import { checkString } from ".";
-import { expect } from "@jest/globals";
 
 export class TestUnifiedUtils {
   static verifyPrivateLink = ({
@@ -21,6 +20,7 @@ export class TestUnifiedUtils {
    * @returns Requested child. Note that this function has no way of checking types, so the child you get might not be of the right type.
    */
   static getDescendantNode<Child extends UnistNode>(
+    expect: any,
     node: UnistNode,
     ...indices: number[]
   ): Child {
@@ -33,6 +33,10 @@ export class TestUnifiedUtils {
     // @ts-ignore
     const children = node.children as UnistNode[];
     expect(children.length).toBeGreaterThanOrEqual(index);
-    return this.getDescendantNode<Child>(children[index], ...indices);
+    return TestUnifiedUtils.getDescendantNode<Child>(
+      expect,
+      children[index],
+      ...indices
+    );
   }
 }

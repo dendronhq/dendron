@@ -1,8 +1,4 @@
-import {
-  AssertUtils,
-  TestPresetEntryV4,
-  getDescendantNode,
-} from "@dendronhq/common-test-utils";
+import { AssertUtils, TestPresetEntryV4 } from "@dendronhq/common-test-utils";
 import {
   DendronASTDest,
   DendronASTTypes,
@@ -15,6 +11,7 @@ import _ from "lodash";
 import { TestConfigUtils } from "../../..";
 import { runEngineTestV5 } from "../../../engine";
 import { ENGINE_HOOKS } from "../../../presets";
+import { TestUnifiedUtils } from "../../../utils";
 import {
   checkNotInVFile,
   checkVFile,
@@ -22,6 +19,8 @@ import {
   createProcTests,
   ProcTests,
 } from "./utils";
+
+const { getDescendantNode } = TestUnifiedUtils;
 
 function proc() {
   return MDUtilsV5.procRehypeParse({

@@ -116,7 +116,6 @@
   },
   "dependencies": {
     "@dendronhq/conventional-changelog-dendron": "^5.0.11",
-    "@types/jest": "^23.3.6",
     "chalk": "^4.1.1",
     "cross-env": "^7.0.3",
     "execa": "^5.0.0",

@@ -2,9 +2,9 @@
   "name": "@dendronhq/dendron-plugin-views",
   "version": "0.1.0",
   "private": true,
-  "nohoist": [
-    "**/*"
-  ],
+  "workspaces": {
+    "nohoist": ["**"]
+  },
   "dependencies": {
     "@babel/core": "7.12.3",
     "@dendronhq/common-all": "^0.65.1",

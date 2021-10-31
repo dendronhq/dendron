@@ -1,7 +1,6 @@
 import {
   AssertUtils,
   TestPresetEntryV4,
-  getDescendantNode,
   NoteTestUtilsV4,
 } from "@dendronhq/common-test-utils";
 import {
@@ -24,6 +23,9 @@ import {
   ProcTests,
 } from "./utils";
 import { TestConfigUtils } from "../../..";
+import { TestUnifiedUtils } from "../../../utils";
+
+const { getDescendantNode } = TestUnifiedUtils;
 
 function proc() {
   return MDUtilsV5.procRehypeParse({

@@ -21,6 +21,6 @@ export class ShowLegacyPreviewCommand extends BasicCommand<
 
   async execute(_opts?: CommandOpts) {
     // eslint-disable-next-line  no-return-await
-    return await MarkdownUtils.openPreview();
+    return await MarkdownUtils.showLegacyPreview();
   }
 }

@@ -1,4 +1,3 @@
-import { DendronWebViewKey } from "@dendronhq/common-all";
 import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import { test } from "mocha";
 import sinon from "sinon";
@@ -6,7 +5,6 @@ import { ExtensionContext } from "vscode";
 import { ShowLegacyPreviewCommand } from "../../commands/ShowLegacyPreview";
 import { VSCodeUtils } from "../../utils";
 import { MarkdownUtils } from "../../utils/md";
-import { getExtension } from "../../workspace";
 import { expect } from "../testUtilsv2";
 import {
   runLegacyMultiWorkspaceTest,
@@ -17,51 +15,6 @@ import {
 suite("ShowLegacyPreview", function () {
   let ctx: ExtensionContext;
   ctx = setupBeforeAfter(this);
-
-  test("ok: show previewv2 by default", (done) => {
-    runLegacyMultiWorkspaceTest({
-      ctx,
-      preSetupHook: ENGINE_HOOKS.setupBasic,
-      onInit: async ({ engine }) => {
-        const note = engine.notes["foo"];
-        await VSCodeUtils.openNote(note);
-        await new ShowLegacyPreviewCommand().execute();
-        const preview = getExtension().getWebView(
-          DendronWebViewKey.NOTE_PREVIEW
-        );
-        expect(preview?.visible).toBeTruthy();
-        done();
-      },
-    });
-  });
-
-  test("ok: prompt install for legacy preview when missing", (done) => {
-    runLegacyMultiWorkspaceTest({
-      ctx,
-      preSetupHook: ENGINE_HOOKS.setupBasic,
-      onInit: async ({ engine, wsRoot }) => {
-        withConfig(
-          (config) => {
-            config.dev = {
-              enablePreviewV2: false,
-            };
-            return config;
-          },
-          { wsRoot }
-        );
-        const note = engine.notes["foo"];
-        await VSCodeUtils.openNote(note);
-        sinon.stub(MarkdownUtils, "hasLegacyPreview").returns(false);
-        const installPrompt = sinon
-          .stub(MarkdownUtils, "promptInstallLegacyPreview")
-          // @ts-ignore
-          .returns(() => {});
-        await new ShowLegacyPreviewCommand().execute();
-        expect(installPrompt.called).toBeTruthy();
-        done();
-      },
-    });
-  });
 
   test("ok: show legacy preview when installed ", (done) => {
     runLegacyMultiWorkspaceTest({

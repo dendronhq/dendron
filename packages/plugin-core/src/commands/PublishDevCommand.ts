@@ -7,7 +7,6 @@ import {
 import { BasicCommand } from "./base";
 import fs from "fs-extra";
 import _ from "lodash";
-import kill from "tree-kill";
 import { window } from "vscode";
 import { DENDRON_EMOJIS } from "@dendronhq/common-all";
 
@@ -64,7 +63,7 @@ export class PublishDevCommand extends BasicCommand<CommandOutput> {
       .then(async (resp) => {
         if (resp === "Stop serving") {
           const { pid } = opts;
-          kill(pid, "SIGTERM");
+          process.kill(pid, "SIGTERM");
         }
       });
   }

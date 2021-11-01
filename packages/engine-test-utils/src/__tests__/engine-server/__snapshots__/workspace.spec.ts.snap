@@ -4,6 +4,7 @@ exports[`WorkspaceService create basic 1`] = `
 "node_modules
 .dendron.*
 build
+seeds
 
 "
 `;

@@ -1,93 +1,98 @@
-import { DendronWebViewKey } from "@dendronhq/common-all";
-import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
-import { test } from "mocha";
-import sinon from "sinon";
-import { ExtensionContext } from "vscode";
-import { ShowPreviewCommand } from "../../commands/ShowPreview";
-import { VSCodeUtils } from "../../utils";
-import { MarkdownUtils } from "../../utils/md";
-import { getExtension } from "../../workspace";
-import { expect } from "../testUtilsv2";
+import { describe, it } from "mocha";
 import {
-  runLegacyMultiWorkspaceTest,
-  setupBeforeAfter,
-  withConfig,
-} from "../testUtilsV3";
+  extractHeaderAnchorIfExists,
+  extractNoteIdFromHref,
+} from "../../commands/ShowPreview";
+import { expect } from "../testUtilsv2";
 
-suite("ShowPreview", function () {
-  let ctx: ExtensionContext;
-  ctx = setupBeforeAfter(this);
+suite("ShowPreview utility methods", () => {
+  describe(`extractHeaderAnchorIfExists`, () => {
+    it("WHEN anchor exists THEN return it", () => {
+      const anchor = extractHeaderAnchorIfExists(
+        "http://localhost:54442/vscode/FSi3bKWQeQXYTjE1PoTB0#heading-2"
+      );
+      expect(anchor?.value).toEqual("heading-2");
+      expect(anchor?.type).toEqual("header");
+    });
 
-  test("ok: show previewv2 by default", (done) => {
-    runLegacyMultiWorkspaceTest({
-      ctx,
-      preSetupHook: ENGINE_HOOKS.setupBasic,
-      onInit: async ({ engine }) => {
-        const note = engine.notes["foo"];
-        await VSCodeUtils.openNote(note);
-        await new ShowPreviewCommand().execute();
-        const preview = getExtension().getWebView(
-          DendronWebViewKey.NOTE_PREVIEW
-        );
-        expect(preview?.visible).toBeTruthy();
-        done();
-      },
+    it(`WHEN anchor does NOT exist THEN return undefined`, () => {
+      expect(
+        extractHeaderAnchorIfExists(
+          "http://localhost:54442/vscode/FSi3bKWQeQXYTjE1PoTB0"
+        )
+      ).toEqual(undefined);
     });
   });
 
-  test("ok: prompt install for legacy preview when missing", (done) => {
-    runLegacyMultiWorkspaceTest({
-      ctx,
-      preSetupHook: ENGINE_HOOKS.setupBasic,
-      onInit: async ({ engine, wsRoot }) => {
-        withConfig(
-          (config) => {
-            config.dev = {
-              enablePreviewV2: false,
-            };
-            return config;
-          },
-          { wsRoot }
-        );
-        const note = engine.notes["foo"];
-        await VSCodeUtils.openNote(note);
-        sinon.stub(MarkdownUtils, "hasLegacyPreview").returns(false);
-        const installPrompt = sinon
-          .stub(MarkdownUtils, "promptInstallLegacyPreview")
-          // @ts-ignore
-          .returns(() => {});
-        await new ShowPreviewCommand().execute();
-        expect(installPrompt.called).toBeTruthy();
-        done();
-      },
-    });
-  });
+  describe(`extractNoteIdFromHref`, () => {
+    describe(`WHEN id is present with html suffix`, () => {
+      it("AND has header anchor THEN extract id", () => {
+        const actual = extractNoteIdFromHref({
+          id: "id1",
+          href: "http://localhost:3005/vscode/0TDNEYgYvCs3ooZEuknNZ.html#head2",
+        });
 
-  test("ok: show legacy preview when installed ", (done) => {
-    runLegacyMultiWorkspaceTest({
-      ctx,
-      preSetupHook: ENGINE_HOOKS.setupBasic,
-      onInit: async ({ engine, wsRoot }) => {
-        withConfig(
-          (config) => {
-            config.dev = {
-              enablePreviewV2: false,
-            };
-            return config;
-          },
-          { wsRoot }
-        );
-        const note = engine.notes["foo"];
-        await VSCodeUtils.openNote(note);
-        sinon.stub(MarkdownUtils, "hasLegacyPreview").returns(true);
-        const showLegacyPreview = sinon.stub(
-          MarkdownUtils,
-          "showLegacyPreview"
-        );
-        await new ShowPreviewCommand().execute();
-        expect(showLegacyPreview.called).toBeTruthy();
-        done();
-      },
+        expect(actual).toEqual("0TDNEYgYvCs3ooZEuknNZ");
+      });
+
+      it("AND has underscore THEN extract id", () => {
+        const actual = extractNoteIdFromHref({
+          id: "id1",
+          href: "http://localhost:3000/vscode/DO_RXSlAbwNwbz-ILKoQa.html",
+        });
+
+        expect(actual).toEqual("DO_RXSlAbwNwbz-ILKoQa");
+      });
+
+      it("AND does not have header anchor THEN extract id", () => {
+        const actual = extractNoteIdFromHref({
+          id: "id1",
+          href: "http://localhost:3005/vscode/0TDNEYgYvCs3ooZEuknNZ.html",
+        });
+
+        expect(actual).toEqual("0TDNEYgYvCs3ooZEuknNZ");
+      });
+    });
+
+    describe(`WHEN id is present without html suffix`, () => {
+      it("AND with header anchor THEN extract id", () => {
+        const actual = extractNoteIdFromHref({
+          id: "id1",
+          href: "http://localhost:3005/vscode/FSi3bKWQeQXYTjE1PoTB0#heading-2",
+        });
+
+        expect(actual).toEqual("FSi3bKWQeQXYTjE1PoTB0");
+      });
+
+      it("AND without the header anchor THEN extract id", () => {
+        const actual = extractNoteIdFromHref({
+          id: "id1",
+          href: "http://localhost:3005/vscode/FSi3bKWQeQXYTjE1PoTB0",
+        });
+
+        expect(actual).toEqual("FSi3bKWQeQXYTjE1PoTB0");
+      });
+
+      it("AND is guid like", () => {
+        // This shouldnt typically happen with the way we currently generate ids but we do
+        // have some guid like ids in our test workspace right now so to make those
+        // notes happy, and in case some older id generation used guid looking identifers.
+
+        const actual = extractNoteIdFromHref({
+          id: "id1",
+          href: "http://localhost:52361/vscode/56497553-c195-4ec8-bc74-6a76462d9333",
+        });
+
+        expect(actual).toEqual("56497553-c195-4ec8-bc74-6a76462d9333");
+      });
+    });
+
+    it(`WHEN id not present in href THEN default onto passed in id`, () => {
+      const actual = extractNoteIdFromHref({
+        id: "id1",
+        href: "http://localhost:3005/vscode/note-preview.html?ws=WS-VALUE&port=3005#head2",
+      });
+      expect(actual).toEqual("id1");
     });
   });
 });

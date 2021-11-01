@@ -29,7 +29,6 @@ import vscode, {
   Position,
   Range,
   TextDocument,
-  window,
   Selection,
 } from "vscode";
 
@@ -106,36 +105,6 @@ export class MarkdownUtils {
     return !_.isUndefined(
       extensions.getExtension("dendron.dendron-markdown-preview-enhanced")
     );
-  }
-
-  static promptInstallLegacyPreview() {
-    return window
-      .showInformationMessage(
-        "You need to have 'Dendron Markdown Preview' installed to use the old preview",
-        "Install Instructions"
-      )
-      .then((resp) => {
-        if (resp === "Install Instructions") {
-          VSCodeUtils.openLink(
-            "https://wiki.dendron.so/notes/8de4209d-84d3-45f8-96a4-34282e34507d.html"
-          );
-        }
-      });
-  }
-  static async openPreview() {
-    if (!getDWorkspace().config.dev?.enablePreviewV2) {
-      const previewEnhanced2 = this.hasLegacyPreview();
-      if (!previewEnhanced2) {
-        return this.promptInstallLegacyPreview();
-      }
-      return this.showLegacyPreview();
-    } else {
-      // This is a workaround to resolve circular dependency.
-      // TODO: fix importing around the package so that we have control over module loading sequence.
-      // eslint-disable-next-line global-require
-      const { ShowPreviewV2Command } = require("../commands/ShowPreviewV2");
-      return new ShowPreviewV2Command().execute();
-    }
   }
 
   static showLegacyPreview() {

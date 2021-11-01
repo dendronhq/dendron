@@ -53,6 +53,7 @@ import { setupSegmentClient } from "./telemetry";
 import { GOOGLE_OAUTH_ID, GOOGLE_OAUTH_SECRET } from "./types/global";
 import { KeybindingUtils, VSCodeUtils, WSUtils } from "./utils";
 import { AnalyticsUtils } from "./utils/analytics";
+import { MarkdownUtils } from "./utils/md";
 import { DendronTreeView } from "./views/DendronTreeView";
 import {
   DendronExtension,
@@ -370,14 +371,23 @@ export async function _activate(
       if (getStage() === "prod") {
         const segmentResidualCacheDir = context.globalStorageUri.fsPath;
         fs.ensureDir(segmentResidualCacheDir);
-        setupSegmentClient(wsImpl, path.join(segmentResidualCacheDir, "segmentresidualcache.log"));
-  
+        setupSegmentClient(
+          wsImpl,
+          path.join(segmentResidualCacheDir, "segmentresidualcache.log")
+        );
+
         // Try to flush the Segment residual cache every hour:
         (function tryFlushSegmentCache() {
-          SegmentClient.instance().tryFlushResidualCache().then((result) => {
-            Logger.info(`Segment Residual Cache flush attempted. ${JSON.stringify(result)}`);
-          });
-  
+          SegmentClient.instance()
+            .tryFlushResidualCache()
+            .then((result) => {
+              Logger.info(
+                `Segment Residual Cache flush attempted. ${JSON.stringify(
+                  result
+                )}`
+              );
+            });
+
           // Repeat once an hour:
           setTimeout(tryFlushSegmentCache, 3600000);
         })();
@@ -497,6 +507,12 @@ export async function _activate(
           true
         );
       }
+
+      // used for enablement of legacy show preview command.
+      VSCodeUtils.setContext(
+        DendronContext.HAS_LEGACY_PREVIEW,
+        MarkdownUtils.hasLegacyPreview()
+      );
 
       // round to nearest 10th
       let numNotes = _.size(getEngine().notes);

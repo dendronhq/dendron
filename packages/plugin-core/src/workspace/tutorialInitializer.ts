@@ -16,11 +16,11 @@ import { Logger } from "../logger";
 import { StateService } from "../services/stateService";
 import { VSCodeUtils, WSUtils } from "../utils";
 import { AnalyticsUtils } from "../utils/analytics";
-import { MarkdownUtils } from "../utils/md";
 import { getExtension } from "../workspace";
 import { BlankInitializer } from "./blankInitializer";
 import { WorkspaceInitializer } from "./workspaceInitializer";
 import { SurveyUtils } from "../survey";
+import { ShowPreviewCommand } from "../commands/ShowPreview";
 
 /**
  * Workspace Initializer for the Tutorial Experience. Copies tutorial notes and
@@ -84,7 +84,7 @@ export class TutorialInitializer
       if (getStage() !== "test") {
         // TODO: HACK to wait for existing preview to be ready
         setTimeout(() => {
-          MarkdownUtils.openPreview();
+          new ShowPreviewCommand().execute();
         }, 1000);
       }
     } else {

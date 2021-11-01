@@ -16,7 +16,7 @@ import _ from "lodash";
 import path from "path";
 import visit from "unist-util-visit";
 import * as vscode from "vscode";
-import { ShowPreviewV2Command } from "../commands/ShowPreviewV2";
+import { ShowPreviewCommand } from "../commands/ShowPreview";
 import { Logger } from "../logger";
 import { VSCodeUtils } from "../utils";
 import { getExtension, getDWorkspace } from "../workspace";

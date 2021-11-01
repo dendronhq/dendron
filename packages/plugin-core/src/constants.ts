@@ -8,6 +8,7 @@ export enum DendronContext {
   PLUGIN_ACTIVE = "dendron:pluginActive",
   WEB_UI_ENABLED = "dendron:webUIEnabled",
   DEV_MODE = "dendron:devMode",
+  HAS_LEGACY_PREVIEW = "dendron:hasLegacyPreview",
 }
 
 export const DENDRON_VIEWS = [
@@ -747,21 +748,21 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     group: "workspace",
     desc: "Display the schemas in this workspace as a graph",
   },
-  SHOW_PREVIEW: {
-    key: "dendron.showPreview",
-    title: `${CMD_PREFIX} Show Preview`,
+  SHOW_LEGACY_PREVIEW: {
+    key: "dendron.showLegacyPreview",
+    title: `${CMD_PREFIX} Show Preview (legacy)`,
     group: "notes",
     keybindings: {
       windows: "windows+ctrl+p",
       mac: "cmd+ctrl+p",
     },
-    desc: "Show Markdown Preview",
+    desc: "Show Markdown Preview (legacy)",
     docLink: "dendron.topic.commands.md",
     docPreview: "",
   },
-  SHOW_PREVIEW_V2: {
-    key: "dendron.showPreviewV2",
-    title: `${CMD_PREFIX} Show Preview V2`,
+  SHOW_PREVIEW: {
+    key: "dendron.showPreview",
+    title: `${CMD_PREFIX} Show Preview`,
     group: "notes",
     keybindings: {
       windows: "windows+ctrl+p",

@@ -6,11 +6,7 @@ import { ShowLegacyPreviewCommand } from "../../commands/ShowLegacyPreview";
 import { VSCodeUtils } from "../../utils";
 import { MarkdownUtils } from "../../utils/md";
 import { expect } from "../testUtilsv2";
-import {
-  runLegacyMultiWorkspaceTest,
-  setupBeforeAfter,
-  withConfig,
-} from "../testUtilsV3";
+import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
 suite("ShowLegacyPreview", function () {
   let ctx: ExtensionContext;

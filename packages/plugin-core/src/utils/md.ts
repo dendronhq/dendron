@@ -1,4 +1,5 @@
 import {
+  ConfigUtils,
   DLink,
   DLinkType,
   DNoteAnchor,
@@ -264,37 +265,44 @@ export const getReferenceAtPosition = (
   const re = partial ? partialRefPattern : refPattern;
   const range = document.getWordRangeAtPosition(position, new RegExp(re));
   if (!range) {
-    // if not, it could be a hashtag
-    const rangeForHashTag = document.getWordRangeAtPosition(
-      position,
-      HASHTAG_REGEX_BASIC
+    const { enableUserTags, enableHashTags } = ConfigUtils.getWorkspace(
+      getDWorkspace().config
     );
-    if (rangeForHashTag) {
-      const docText = document.getText(rangeForHashTag);
-      const match = docText.match(HASHTAG_REGEX_LOOSE);
-      if (_.isNull(match)) return null;
-      return {
-        range: rangeForHashTag,
-        label: match[0],
-        ref: `${TAGS_HIERARCHY}${match.groups!.tagContents}`,
-        refText: docText,
-      };
+    if (enableHashTags) {
+      // if not, it could be a hashtag
+      const rangeForHashTag = document.getWordRangeAtPosition(
+        position,
+        HASHTAG_REGEX_BASIC
+      );
+      if (rangeForHashTag) {
+        const docText = document.getText(rangeForHashTag);
+        const match = docText.match(HASHTAG_REGEX_LOOSE);
+        if (_.isNull(match)) return null;
+        return {
+          range: rangeForHashTag,
+          label: match[0],
+          ref: `${TAGS_HIERARCHY}${match.groups!.tagContents}`,
+          refText: docText,
+        };
+      }
     }
-    // if not, it could be a user tag
-    const rangeForUserTag = document.getWordRangeAtPosition(
-      position,
-      USERTAG_REGEX_LOOSE
-    );
-    if (rangeForUserTag) {
-      const docText = document.getText(rangeForUserTag);
-      const match = docText.match(USERTAG_REGEX_LOOSE);
-      if (_.isNull(match)) return null;
-      return {
-        range: rangeForUserTag,
-        label: match[0],
-        ref: `${USERS_HIERARCHY}${match.groups!.userTagContents}`,
-        refText: docText,
-      };
+    if (enableUserTags) {
+      // if not, it could be a user tag
+      const rangeForUserTag = document.getWordRangeAtPosition(
+        position,
+        USERTAG_REGEX_LOOSE
+      );
+      if (rangeForUserTag) {
+        const docText = document.getText(rangeForUserTag);
+        const match = docText.match(USERTAG_REGEX_LOOSE);
+        if (_.isNull(match)) return null;
+        return {
+          range: rangeForUserTag,
+          label: match[0],
+          ref: `${USERS_HIERARCHY}${match.groups!.userTagContents}`,
+          refText: docText,
+        };
+      }
     }
     // if not, it could be a frontmatter tag
     let parsed: ReturnType<typeof parseFrontmatter> | undefined;

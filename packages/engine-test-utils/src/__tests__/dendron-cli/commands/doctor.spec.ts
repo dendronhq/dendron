@@ -108,6 +108,15 @@ const setupWithXVaultWikilink = async (opts: WorkspaceOpts) => {
   });
 };
 
+const setupWithTags = async ({ wsRoot, vaults }: WorkspaceOpts) => {
+  await NoteTestUtilsV4.createNote({
+    vault: vaults[0],
+    wsRoot,
+    fname: "foo",
+    body: "\n\nSed nulla et aut @nostrum necessitatibus ipsam #reiciendis earum.",
+  });
+};
+
 const runDoctor = (opts: Omit<DoctorCLICommandOpts, "server">) => {
   const cmd = new DoctorCLICommand();
   return cmd.execute({
@@ -611,5 +620,68 @@ describe("CREATE_MISSING_LINKED_NOTES", () => {
         preSetupHook: setupWithXVaultWikilink,
       }
     );
+  });
+
+  test("Creates missing user tags and hashtags", async () => {
+    await runEngineTestV5(
+      async ({ engine, wsRoot, vaults }) => {
+        const vault = vaults[0];
+        await runDoctor({
+          wsRoot,
+          engine,
+          action,
+        });
+        const userTag = await fs.pathExists(
+          path.join(wsRoot, vault.fsPath, "user.nostrum.md")
+        );
+        expect(userTag).toBeTruthy();
+
+        const hashTag = await fs.pathExists(
+          path.join(wsRoot, vault.fsPath, "tags.reiciendis.md")
+        );
+        expect(hashTag).toBeTruthy();
+      },
+      {
+        createEngine: createEngineFromServer,
+        expect,
+        vaults: [{ fsPath: "vault1" }],
+        preSetupHook: setupWithTags,
+      }
+    );
+  });
+
+  describe("WHEN user tags and hashtags are disabled", () => {
+    test("THEN user and tag notes are not created", async () => {
+      await runEngineTestV5(
+        async ({ engine, wsRoot, vaults }) => {
+          const vault = vaults[0];
+          await runDoctor({
+            wsRoot,
+            engine,
+            action,
+          });
+          const userTag = await fs.pathExists(
+            path.join(wsRoot, vault.fsPath, "user.nostrum.md")
+          );
+          expect(userTag).toBeFalsy();
+
+          const hashtag = await fs.pathExists(
+            path.join(wsRoot, vault.fsPath, "tags.reiciendis.md")
+          );
+          expect(hashtag).toBeFalsy();
+        },
+        {
+          createEngine: createEngineFromServer,
+          expect,
+          vaults: [{ fsPath: "vault1" }],
+          preSetupHook: setupWithTags,
+          modConfigCb: (config) => {
+            config.workspace!.enableHashTags = false;
+            config.workspace!.enableUserTags = false;
+            return config;
+          },
+        }
+      );
+    });
   });
 });

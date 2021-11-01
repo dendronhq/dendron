@@ -42,6 +42,10 @@ import { SinonStub } from "sinon";
 import { ENGINE_HOOKS } from "./presets";
 import { GitTestUtils } from "./utils";
 
+export type ModConfigCb = (
+  config: IntermediateDendronConfig
+) => IntermediateDendronConfig;
+
 export type TestSetupWorkspaceOpts = {
   /**
    * Vaults to initialize engine with
@@ -56,9 +60,7 @@ export type TestSetupWorkspaceOpts = {
   /**
    * Modify dendron config before initialization
    */
-  modConfigCb?: (
-    config: IntermediateDendronConfig
-  ) => IntermediateDendronConfig;
+  modConfigCb?: ModConfigCb;
   git?: {
     initVaultWithRemote?: boolean;
     branchName?: string;
@@ -140,6 +142,7 @@ export async function setupWS(opts: {
   workspaces?: DWorkspace[];
   asRemote?: boolean;
   wsRoot?: string;
+  modConfigCb?: ModConfigCb;
 }) {
   const wsRoot = opts.wsRoot || tmpDir().name;
   const ws = new WorkspaceService({ wsRoot });
@@ -147,7 +150,7 @@ export async function setupWS(opts: {
   // create dendron.code-workspace
   WorkspaceConfig.write(wsRoot, opts.vaults);
 
-  const config = ws.config;
+  let config = ws.config;
   let vaults = await Promise.all(
     opts.vaults.map(async (vault) => {
       await ws.createVault({ vault, config, updateConfig: false });
@@ -162,6 +165,7 @@ export async function setupWS(opts: {
       config.site.duplicateNoteBehavior.payload as string[]
     ).sort();
   }
+  if (opts.modConfigCb) config = opts.modConfigCb(config);
   ws.setConfig(config);
   if (opts.workspaces) {
     const vaultsFromWs = await _.reduce(
@@ -305,6 +309,7 @@ export async function runEngineTestV5(
       vaults: vaultsInit,
       workspaces,
       wsRoot: opts.wsRoot,
+      modConfigCb: opts.modConfigCb,
     });
     if ((opts.initHooks, vaults)) {
       fs.ensureDirSync(path.join(wsRoot, CONSTANTS.DENDRON_HOOKS_BASE));

@@ -1004,6 +1004,43 @@ suite("ReferenceProvider", function () {
       });
     });
 
+    test("hashtags are ignored when disabled", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await NoteTestUtilsV4.createNote({
+            vault: vaults[0],
+            wsRoot,
+            fname: "tags.foo.test",
+            body: "this is tag foo.test",
+          });
+          await NoteTestUtilsV4.createNote({
+            vault: vaults[0],
+            wsRoot,
+            fname: "source",
+            body: "#foo.test",
+          });
+        },
+        modConfigCb: (config) => {
+          config.workspace!.enableHashTags = false;
+          return config;
+        },
+        onInit: async ({ vaults }) => {
+          const editor = await VSCodeUtils.openNoteByPath({
+            vault: vaults[0],
+            fname: "source",
+          });
+          const provider = new ReferenceHoverProvider();
+          const hover = await provider.provideHover(
+            editor.document,
+            new vscode.Position(7, 6)
+          );
+          expect(hover).toBeFalsy();
+          done();
+        },
+      });
+    });
+
     test("user tag", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
@@ -1036,6 +1073,43 @@ suite("ReferenceProvider", function () {
             body: hover!.contents.join(""),
             match: ["this is user test.mctestface"],
           });
+          done();
+        },
+      });
+    });
+
+    test("user tags are ignored when disabled", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await NoteTestUtilsV4.createNote({
+            vault: vaults[0],
+            wsRoot,
+            fname: "user.test.mctestface",
+            body: "this is user test.mctestface",
+          });
+          await NoteTestUtilsV4.createNote({
+            vault: vaults[0],
+            wsRoot,
+            fname: "source",
+            body: "@test.mctestface",
+          });
+        },
+        modConfigCb: (config) => {
+          config.workspace!.enableUserTags = false;
+          return config;
+        },
+        onInit: async ({ vaults }) => {
+          const editor = await VSCodeUtils.openNoteByPath({
+            vault: vaults[0],
+            fname: "source",
+          });
+          const provider = new ReferenceHoverProvider();
+          const hover = await provider.provideHover(
+            editor.document,
+            new vscode.Position(7, 6)
+          );
+          expect(hover).toBeFalsy();
           done();
         },
       });

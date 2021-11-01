@@ -20,16 +20,7 @@ suite("ShowLegacyPreview", function () {
     runLegacyMultiWorkspaceTest({
       ctx,
       preSetupHook: ENGINE_HOOKS.setupBasic,
-      onInit: async ({ engine, wsRoot }) => {
-        withConfig(
-          (config) => {
-            config.dev = {
-              enablePreviewV2: false,
-            };
-            return config;
-          },
-          { wsRoot }
-        );
+      onInit: async ({ engine }) => {
         const note = engine.notes["foo"];
         await VSCodeUtils.openNote(note);
         sinon.stub(MarkdownUtils, "hasLegacyPreview").returns(true);

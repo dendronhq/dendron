@@ -101,9 +101,9 @@ export class DendronQuickPickSurvey {
 }
 
 export class BackgroundSurvey extends DendronQuickPickSurvey {
-  async onAnswer(results: vscode.QuickPickItem[]) {
+  async onAnswer(result: vscode.QuickPickItem) {
     let maybeOtherResult: string | undefined;
-    if (results.some((result) => result.label === "Other")) {
+    if (result.label === "Other") {
       maybeOtherResult = await vscode.window.showInputBox({
         ignoreFocusOut: true,
         placeHolder: "Type anything that applies.",
@@ -114,7 +114,7 @@ export class BackgroundSurvey extends DendronQuickPickSurvey {
     }
 
     AnalyticsUtils.track(SurveyEvents.BackgroundAnswered, {
-      results: results.map((result) => result.label),
+      results: [result.label], // passing as array because this used to be a multi-select survey
       other: maybeOtherResult,
     });
   }

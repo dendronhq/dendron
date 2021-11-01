@@ -71,7 +71,7 @@ function attachParser(proc: Unified.Processor) {
   inlineMethods.splice(inlineMethods.indexOf("link"), 0, "blockAnchor");
 }
 
-function attachCompiler(proc: Unified.Processor, _opts?: PluginOpts) {
+function attachCompiler(proc: Unified.Processor, opts?: PluginOpts) {
   const Compiler = proc.Compiler;
   const visitors = Compiler.prototype.visitors;
 
@@ -81,8 +81,9 @@ function attachCompiler(proc: Unified.Processor, _opts?: PluginOpts) {
       const fullId = node.id;
       switch (dest) {
         case DendronASTDest.MD_DENDRON:
-        case DendronASTDest.MD_REGULAR:
           return fullId;
+        case DendronASTDest.MD_REGULAR:
+          return opts?.hideBlockAnchors ? "" : fullId;
         case DendronASTDest.MD_ENHANCED_PREVIEW:
           return `<a aria-hidden="true" class="block-anchor anchor-heading" id="${fullId}" href="#${fullId}">^${fullId}</a>`;
         default:

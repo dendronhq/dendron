@@ -135,6 +135,7 @@ export class DendronExtension {
   static DENDRON_WORKSPACE_FILE: string = "dendron.code-workspace";
   static _SERVER_CONFIGURATION: Partial<ServerConfiguration>;
 
+  public backlinksDataProvider: BacklinksTreeDataProvider | undefined;
   public dendronTreeView: DendronTreeView | undefined;
   public dendronTreeViewV2: DendronTreeViewV2 | undefined;
   public fileWatcher?: FileWatcher;
@@ -531,6 +532,7 @@ export class DendronExtension {
         showCollapseAll: true,
       }
     );
+    getExtension().backlinksDataProvider = backlinksTreeDataProvider;
 
     vscode.commands.registerCommand(
       "dendron.backlinks.expandAll",

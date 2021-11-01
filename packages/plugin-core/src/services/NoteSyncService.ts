@@ -151,6 +151,25 @@ export class NoteSyncService {
     });
     note = NoteUtils.hydrate({ noteRaw: note, noteHydrated: oldNote });
 
+    note = await NoteSyncService.updateNoteMeta({ note, fmChangeOnly });
+
+    const now = NoteUtils.genUpdateTime();
+    note.updated = now;
+
+    this.L.debug({ ctx, fname: note.fname, msg: "exit" });
+    const noteClean = await engine.updateNote(note);
+    ShowPreviewV2Command.refresh(noteClean);
+    return noteClean;
+  }
+
+  static async updateNoteMeta({
+    note,
+    fmChangeOnly,
+  }: {
+    note: NoteProps;
+    fmChangeOnly: boolean;
+  }) {
+    const { engine } = getDWorkspace();
     // Links have to be updated even with frontmatter only changes
     // because `tags` in frontmatter adds new links
     const links = LinkUtils.findLinks({ note, engine });
@@ -178,12 +197,6 @@ export class NoteSyncService {
       }
     }
 
-    const now = NoteUtils.genUpdateTime();
-    note.updated = now;
-
-    this.L.debug({ ctx, fname, msg: "exit" });
-    const noteClean = await engine.updateNote(note);
-    ShowPreviewV2Command.refresh(noteClean);
-    return noteClean;
+    return note;
   }
 }

@@ -18,6 +18,7 @@ import {
   NotionUtilMethods,
   PodKind,
   GithubIssueUtilMethods,
+  ConflictHandler,
 } from "./types";
 import { PodUtils } from "./utils";
 
@@ -29,8 +30,27 @@ export type PodOpts<T> = {
   engine: DEngineClient;
   config: T;
   onPrompt?: (arg0?: PROMPT) => Promise<any | undefined>;
-  utilityMethods?: GDocUtilMethods | NotionUtilMethods | GithubIssueUtilMethods;
+  utilityMethods?:
+    | GDocUtilMethods
+    | NotionUtilMethods
+    | GithubIssueUtilMethods
+    | ConflictHandler;
 } & WorkspaceOpts;
+
+export type Conflict = {
+  /**
+   * Existing note
+   */
+  conflictNote: NoteProps;
+  /**
+   * Newly written note
+   */
+  conflictEntry: NoteProps;
+  /**
+   * Conflicted Data
+   */
+  conflictData: string[];
+};
 
 // === Publish Pod
 

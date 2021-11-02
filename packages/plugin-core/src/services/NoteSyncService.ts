@@ -158,7 +158,7 @@ export class NoteSyncService {
 
     this.L.debug({ ctx, fname: note.fname, msg: "exit" });
     const noteClean = await engine.updateNote(note);
-    ShowPreviewV2Command.refresh(noteClean);
+    ShowPreviewCommand.refresh(noteClean);
     return noteClean;
   }
 

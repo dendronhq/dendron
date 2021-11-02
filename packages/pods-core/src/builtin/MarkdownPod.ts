@@ -294,6 +294,13 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
       notes
         .filter((n) => !n.stub)
         .map(async (n) => {
+          const noteDirlevel = n.fname.split(".").length;
+          //notes in same level with n
+          const siblingNotes = hDict[noteDirlevel];
+          const wikilinkPrefix = n.fname.substring(
+            0,
+            n.fname.lastIndexOf(".") + 1
+          );
           const cBody = await MDUtilsV5.procRemarkFull(
             {
               fname: n.fname,
@@ -303,7 +310,14 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
             },
             { mode: ProcMode.IMPORT }
           )
-            .use(RemarkUtils.convertLinksToDotNotation(n, []))
+            .use(
+              RemarkUtils.convertLinksToDotNotation(
+                n,
+                [],
+                wikilinkPrefix,
+                siblingNotes
+              )
+            )
             .use(RemarkUtils.convertAssetReferences(n, assetHashMap, []))
             .process(n.body);
           n.body = cBody.toString();

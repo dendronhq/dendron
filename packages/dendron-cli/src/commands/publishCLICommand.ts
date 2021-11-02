@@ -157,10 +157,20 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           return this.build(opts);
         }
         case PublishCommands.DEV: {
+          if (opts.noBuild) {
+            this.print("skipping build...");
+          } else {
+            await this.build(opts);
+          }
           await this.dev(opts);
           return { error: null };
         }
         case PublishCommands.EXPORT: {
+          if (opts.noBuild) {
+            this.print("skipping build...");
+          } else {
+            await this.build(opts);
+          }
           await this.export(opts);
           if (opts.target) {
             await this._handlePublishTarget(opts.target, opts);
@@ -292,23 +302,12 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
   }
 
   async dev(opts: DevCmdOpts) {
-    if (opts.noBuild) {
-      this.print("skipping build...");
-    } else {
-      await this.build(opts);
-    }
     const nextPath = NextjsExportPodUtils.getNextRoot(opts.wsRoot);
     await NextjsExportPodUtils.startNextDev({ nextPath });
     return { error: null };
   }
 
   async export(opts: ExportCmdOpts) {
-    if (opts.noBuild) {
-      this.print("skipping build...");
-    } else {
-      this.print("ssdfoiwjeofijweoifj");
-      await this.build(opts);
-    }
     const nextPath = NextjsExportPodUtils.getNextRoot(opts.wsRoot);
     await NextjsExportPodUtils.startNextExport({ nextPath });
   }

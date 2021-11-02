@@ -5,6 +5,7 @@ import {
   SchemaModuleProps,
 } from "@dendronhq/common-all";
 import {
+  DLogger,
   SchemaParserV2 as cSchemaParserV2,
   vault2Path,
 } from "@dendronhq/common-server";
@@ -12,15 +13,22 @@ import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import YAML from "yamljs";
-import { ParserBase } from "./parseBase";
 
-export class SchemaParser extends ParserBase {
+export class SchemaParser {
+  private logger: DLogger;
+  private wsRoot: string;
+
+  constructor({ wsRoot, logger }: { wsRoot: string; logger: DLogger }) {
+    this.wsRoot = wsRoot;
+    this.logger = logger;
+  }
+
   private async parseFile(
     fpath: string,
     root: DVault
   ): Promise<SchemaModuleProps> {
     const fname = path.basename(fpath, ".schema.yml");
-    const wsRoot = this.opts.store.wsRoot;
+    const wsRoot = this.wsRoot;
     const vpath = vault2Path({ vault: root, wsRoot });
     const schemaOpts: any = YAML.parse(
       fs.readFileSync(path.join(vpath, fpath), "utf8")
@@ -46,7 +54,7 @@ export class SchemaParser extends ParserBase {
         } catch (err) {
           return new DendronError({
             message: ERROR_STATUS.BAD_PARSE_FOR_SCHEMA,
-            payload: { fpath },
+            payload: { fpath, cause: err },
           });
         }
       })

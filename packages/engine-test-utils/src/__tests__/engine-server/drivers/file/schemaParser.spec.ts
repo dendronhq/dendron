@@ -25,7 +25,7 @@ async function parseSchemas(
       const engineClient = engine as DendronEngineClient;
 
       const parser: SchemaParser = new SchemaParser({
-        store: engineClient.store,
+        wsRoot: engineClient.store.wsRoot,
         logger: engineClient.logger,
       });
       const vault = vaults[0];

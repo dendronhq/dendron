@@ -306,7 +306,7 @@ export class FileStorage implements DStore {
       });
     }
     const { schemas, errors } = await new SchemaParser({
-      store: this,
+      wsRoot: this.wsRoot,
       logger: this.logger,
     }).parse(schemaFiles, vault);
     return {

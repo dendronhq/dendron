@@ -5,6 +5,7 @@ import {
   NoteUtils,
   Time,
   VaultUtils,
+  SchemaUtils,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import path from "path";
@@ -15,17 +16,24 @@ import {
   Range,
   TextDocument,
   TextDocumentChangeEvent,
+  TextDocumentSaveReason,
   TextDocumentWillSaveEvent,
   TextEdit,
   workspace,
 } from "vscode";
 import { Logger } from "./logger";
 import { NoteSyncService } from "./services/NoteSyncService";
-import { getExtension, getDWorkspace, DendronExtension } from "./workspace";
+import {
+  getExtension,
+  getDWorkspace,
+  DendronExtension,
+  getVaultFromUri,
+} from "./workspace";
 import * as Sentry from "@sentry/node";
 import { FileWatcher } from "./fileWatcher";
 import { file2Note, vault2Path } from "@dendronhq/common-server";
 import { AnalyticsUtils } from "./utils/analytics";
+import { SchemaSyncService } from "./services/SchemaSyncService";
 
 interface DebouncedFunc<T extends (...args: any[]) => any> {
   /**
@@ -82,6 +90,12 @@ export class WorkspaceWatcher {
       context.subscriptions
     );
 
+    workspace.onDidSaveTextDocument(
+      this.onDidSaveTextDocument,
+      this,
+      context.subscriptions
+    );
+
     // NOTE: currently, this is only used for logging purposes
     if (Logger.isDebug()) {
       workspace.onDidOpenTextDocument(
@@ -104,10 +118,16 @@ export class WorkspaceWatcher {
     );
   }
 
+  async onDidSaveTextDocument(document: TextDocument) {
+    if (SchemaUtils.isSchemaUri(document.uri)) {
+      await SchemaSyncService.instance().onDidSave({ document });
+    }
+  }
+
   async onDidChangeTextDocument(event: TextDocumentChangeEvent) {
-    // `workspace.onDidChangeTextDocument` fires 2 events for every change
-    // the second one changing the dirty state of the page from `true` to `false`
     try {
+      // `workspace.onDidChangeTextDocument` fires 2 events for every change
+      // the second one changing the dirty state of the page from `true` to `false`
       if (event.document.isDirty === false) {
         return;
       }
@@ -151,67 +171,81 @@ export class WorkspaceWatcher {
   }
 
   async onWillSaveTextDocument(
-    ev: TextDocumentWillSaveEvent
+    event: TextDocumentWillSaveEvent
   ): Promise<{ changes: TextEdit[] }> {
     try {
       const ctx = "WorkspaceWatcher:onWillSaveTextDocument";
-      const uri = ev.document.uri;
-      const reason = ev.reason;
-      Logger.info({ ctx, url: uri.fsPath, reason, msg: "enter" });
+      const uri = event.document.uri;
+      Logger.info({
+        ctx,
+        url: uri.fsPath,
+        reason: TextDocumentSaveReason[event.reason],
+        msg: "enter",
+      });
       if (!getExtension().workspaceService?.isPathInWorkspace(uri.fsPath)) {
         Logger.debug({
           ctx,
           uri: uri.fsPath,
-          msg: "not in workspace, ignoring",
+          msg: "not in workspace, ignoring.",
         });
         return { changes: [] };
       }
 
-      const eclient = getDWorkspace().engine;
-      const fname = path.basename(uri.fsPath, ".md");
-      const { vaults } = getDWorkspace();
-      const now = Time.now().toMillis();
-      const vault = VaultUtils.getVaultByNotePath({
-        fsPath: uri.fsPath,
-        vaults,
-        wsRoot: getDWorkspace().wsRoot,
-      });
-      const note = NoteUtils.getNoteByFnameV5({
-        fname,
-        vault,
-        notes: eclient.notes,
-        wsRoot: getDWorkspace().wsRoot,
-      }) as NoteProps;
-
-      const content = ev.document.getText();
-      const matchFM = NoteUtils.RE_FM;
-      const matchOuter = content.match(matchFM);
-      if (!matchOuter) {
+      if (uri.fsPath.endsWith(".md")) {
+        return this.onWillSaveNote(event);
+      } else {
+        Logger.debug({
+          ctx,
+          uri: uri.fsPath,
+          msg: "File type is not registered for updates. ignoring.",
+        });
         return { changes: [] };
       }
-      const match = NoteUtils.RE_FM_UPDATED.exec(content);
-      let changes: TextEdit[] = [];
-
-      if (match && parseInt(match[1], 10) !== note.updated) {
-        Logger.info({ ctx, match, msg: "update activeText editor" });
-        const startPos = ev.document.positionAt(match.index);
-        const endPos = ev.document.positionAt(match.index + match[0].length);
-        changes = [
-          TextEdit.replace(new Range(startPos, endPos), `updated: ${now}`),
-        ];
-        // eslint-disable-next-line  no-async-promise-executor
-        const p = new Promise(async (resolve) => {
-          note.updated = now;
-          await eclient.updateNote(note);
-          return resolve(changes);
-        });
-        ev.waitUntil(p);
-      }
-      return { changes };
     } catch (error) {
       Sentry.captureException(error);
       throw error;
     }
+  }
+
+  private onWillSaveNote(event: TextDocumentWillSaveEvent) {
+    const ctx = "WorkspaceWatcher:onWillSaveNote";
+    const uri = event.document.uri;
+    const engineClient = getDWorkspace().engine;
+    const fname = path.basename(uri.fsPath, ".md");
+    const now = Time.now().toMillis();
+
+    const note = NoteUtils.getNoteByFnameV5({
+      fname,
+      vault: getVaultFromUri(uri),
+      notes: engineClient.notes,
+      wsRoot: getDWorkspace().wsRoot,
+    }) as NoteProps;
+
+    const content = event.document.getText();
+    const matchFM = NoteUtils.RE_FM;
+    const matchOuter = content.match(matchFM);
+    if (!matchOuter) {
+      return { changes: [] };
+    }
+    const match = NoteUtils.RE_FM_UPDATED.exec(content);
+    let changes: TextEdit[] = [];
+
+    if (match && parseInt(match[1], 10) !== note.updated) {
+      Logger.info({ ctx, match, msg: "update activeText editor" });
+      const startPos = event.document.positionAt(match.index);
+      const endPos = event.document.positionAt(match.index + match[0].length);
+      changes = [
+        TextEdit.replace(new Range(startPos, endPos), `updated: ${now}`),
+      ];
+      // eslint-disable-next-line  no-async-promise-executor
+      const p = new Promise(async (resolve) => {
+        note.updated = now;
+        await engineClient.updateNote(note);
+        return resolve(changes);
+      });
+      event.waitUntil(p);
+    }
+    return { changes };
   }
 
   /** Do not use this function, please go to `WindowWatcher.onFirstOpen() instead.`

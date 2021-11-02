@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 0.66.0 (2021-11-02)
+
+**Note:** Version bump only for package @dendronhq/api-server
+
+
+
+
+
 ## [0.65.1](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.65.1) (2021-10-29)
 
 

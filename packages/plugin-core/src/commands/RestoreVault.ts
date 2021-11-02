@@ -56,9 +56,6 @@ export class RestoreVaultCommand extends BaseCommand<
       if (ext.fileWatcher) {
         ext.fileWatcher.pause = true;
       }
-      if (ext.schemaWatcher) {
-        ext.schemaWatcher.pause = true;
-      }
       await pod.execute({
         vaults: [vault],
         wsRoot,
@@ -71,9 +68,6 @@ export class RestoreVaultCommand extends BaseCommand<
     } finally {
       if (ext.fileWatcher) {
         ext.fileWatcher.pause = false;
-      }
-      if (ext.schemaWatcher) {
-        ext.schemaWatcher.pause = false;
       }
     }
   }

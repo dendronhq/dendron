@@ -7,6 +7,7 @@ import {
   DWorkspaceV2,
   ERROR_STATUS,
   getStage,
+  VaultUtils,
   WorkspaceSettings,
   WorkspaceType,
 } from "@dendronhq/common-all";
@@ -56,9 +57,9 @@ import { CalendarView } from "./views/CalendarView";
 import { DendronTreeView } from "./views/DendronTreeView";
 import { DendronTreeViewV2 } from "./views/DendronTreeViewV2";
 import { SampleView } from "./views/SampleView";
-import { SchemaWatcher } from "./watchers/schemaWatcher";
 import { WindowWatcher } from "./windowWatcher";
 import { WorkspaceWatcher } from "./WorkspaceWatcher";
+import { Uri } from "vscode";
 
 let _DendronWorkspace: DendronExtension | null;
 
@@ -128,6 +129,17 @@ export function getEngine() {
 
 export function resolveRelToWSRoot(fpath: string): string {
   return resolvePath(fpath, getDWorkspace().wsRoot as string);
+}
+
+/** Given file uri that is within a vault within the current workspace returns the vault. */
+export function getVaultFromUri(fileUri: Uri) {
+  const { vaults } = getDWorkspace();
+  const vault = VaultUtils.getVaultByNotePath({
+    fsPath: fileUri.fsPath,
+    vaults,
+    wsRoot: getDWorkspace().wsRoot,
+  });
+  return vault;
 }
 
 // --- Main
@@ -298,7 +310,6 @@ export class DendronExtension {
   public windowWatcher?: WindowWatcher;
   public workspaceWatcher?: WorkspaceWatcher;
   public serverWatcher?: vscode.FileSystemWatcher;
-  public schemaWatcher?: SchemaWatcher;
   public L: typeof Logger;
   public _enginev2?: EngineAPIService;
   public type: WorkspaceType;
@@ -686,15 +697,11 @@ export class DendronExtension {
       });
       throw Error("no folders set for workspace");
     }
-    const vaults = wsFolders as vscode.WorkspaceFolder[];
     const realVaults = getDWorkspace().vaults;
     const fileWatcher = new FileWatcher({
       wsRoot,
       vaults: realVaults,
     });
-    const schemaWatcher = new SchemaWatcher({ vaults });
-    schemaWatcher.activate(this.context);
-    this.schemaWatcher = schemaWatcher;
 
     fileWatcher.activate(getExtension().context);
     this.fileWatcher = fileWatcher;

@@ -1,9 +1,32 @@
 ---
-id: VSikPUBbpFNUiFe4R8BLy
+id: NnglQKPmmVU766HgYcfAi
 title: Schema
 desc: ''
-updated: 1635138913670
-created: 1635138851300
+updated: 1635325733868
+created: 1635325317566
 ---
 
-For now schema related testing is primarily with note creation which can be found in [[dendron.note-create]] (look for schema related tests).
+## Create new schema
+```md
+1. Run `cmd+shift+l` 
+2. Enter `dvd` (which should not exist)
+3. Create the following schema within dvd.schema.yml:
+`
+version: 1
+imports: []
+schemas:
+  - id: dvd
+    children: 
+      - pattern: h1
+    title: dvd
+    parent: root
+`
+4. Look up note (`cmd+l`) `dvd.` 
+EXPECTED: should see a schema completion `dvd.h1`.
+
+AFTER: delete schema file `dvd.schema.yml`
+```
+
+## Tests related to templates being picked up:
+![[dendron.note-create#with-matching-simple-schema,1:#*]]
+![[dendron.note-create#with-matching-inline-schema,1]]

@@ -1,7 +1,7 @@
 ![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/logo-256.png)
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-84-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-85-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 # Welcome to Dendron!
@@ -168,6 +168,9 @@ Dendron wouldn't be what it is today without help from these wonderful gardeners
     <td align="center"><a href="https://github.com/demorganslaw"><img src="https://avatars.githubusercontent.com/u/88507322?v=4?s=100" width="100px;" alt=""/><br /><sub><b>demorganslaw</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Ademorganslaw" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/guilhermesfc"><img src="https://avatars.githubusercontent.com/u/10503773?v=4?s=100" width="100px;" alt=""/><br /><sub><b>guilhermesfc</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Aguilhermesfc" title="Bug reports">🐛</a></td>
     <td align="center"><a href="http://gazit.me"><img src="https://avatars.githubusercontent.com/u/22723?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Idan Gazit</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Aidan" title="Bug reports">🐛</a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/ragamroll"><img src="https://avatars.githubusercontent.com/u/3618625?v=4?s=100" width="100px;" alt=""/><br /><sub><b>ragamroll</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Aragamroll" title="Bug reports">🐛</a></td>
   </tr>
 </table>
 

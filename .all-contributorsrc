@@ -803,6 +803,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "ragamroll",
+      "name": "ragamroll",
+      "avatar_url": "https://avatars.githubusercontent.com/u/3618625?v=4",
+      "profile": "https://github.com/ragamroll",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

@@ -103,7 +103,7 @@ export class NextjsExportPodUtils {
     } else {
       if (progressCb) {
         progressCb.stopAndPersist({
-          text: ".next directory exists",
+          text: ".next directory does not exist",
           symbol: DENDRON_EMOJIS.SEEDLING,
         });
       }
@@ -166,7 +166,57 @@ export class NextjsExportPodUtils {
     return { error: null };
   }
 
+  static async isInitialized(opts: { wsRoot: string; progressCb?: any }) {
+    const { wsRoot, progressCb } = opts;
+    const nextPath = path.join(wsRoot, ".next");
+
+    if (progressCb) {
+      progressCb.start();
+      progressCb.stopAndPersist({
+        text: "checking if NextJS template is initialized",
+        symbol: DENDRON_EMOJIS.SEEDLING,
+      });
+      progressCb.start();
+    }
+
+    const nextPathExists = await NextjsExportPodUtils.nextPathExists({
+      ...opts,
+      nextPath,
+      progressCb,
+    });
+
+    if (nextPathExists) {
+      const pkgJsonExists = await fs.pathExists(
+        path.join(nextPath, "package.json")
+      );
+      if (pkgJsonExists) {
+        if (progressCb) {
+          progressCb.stopAndPersist({
+            text: "NextJS template already initialized.",
+            symbol: DENDRON_EMOJIS.SEEDLING,
+          });
+        }
+        return true;
+      }
+    }
+    if (progressCb) {
+      progressCb.stopAndPersist({
+        text: "NextJS template is not initialized.",
+        symbol: DENDRON_EMOJIS.SEEDLING,
+      });
+    }
+    return false;
+  }
+
   static async initialize(opts: { nextPath: string; progressCb?: any }) {
+    const { progressCb } = opts;
+    if (progressCb) {
+      progressCb.start();
+      progressCb.stopAndPersist({
+        text: "Initializing NextJS template.",
+        symbol: DENDRON_EMOJIS.SEEDLING,
+      });
+    }
     await NextjsExportPodUtils.cloneTemplate(opts);
     await NextjsExportPodUtils.installDependencies(opts);
   }

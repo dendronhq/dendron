@@ -149,15 +149,23 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     const { cmd } = opts;
     const ctx = "execute";
     this.L.info({ ctx });
+    const spinner = ora();
     try {
       switch (cmd) {
         case PublishCommands.INIT: {
-          return await this.init(opts);
+          return await this.init({ ...opts, spinner });
         }
         case PublishCommands.BUILD: {
           return this.build(opts);
         }
         case PublishCommands.DEV: {
+          const isInitialized = await NextjsExportPodUtils.isInitialized({
+            wsRoot: opts.wsRoot,
+            progressCb: spinner,
+          });
+          if (!isInitialized) {
+            await this.init({ ...opts, spinner });
+          }
           if (opts.noBuild) {
             this.print("skipping build...");
           } else {
@@ -167,6 +175,13 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           return { error: null };
         }
         case PublishCommands.EXPORT: {
+          const isInitialized = await NextjsExportPodUtils.isInitialized({
+            wsRoot: opts.wsRoot,
+            progressCb: spinner,
+          });
+          if (!isInitialized) {
+            await this.init({ ...opts, spinner, skipCheck: true });
+          }
           if (opts.noBuild) {
             this.print("skipping build...");
           } else {
@@ -274,9 +289,9 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     }
   }
 
-  async init(opts: { wsRoot: string }) {
-    const nextPath = NextjsExportPodUtils.getNextRoot(opts.wsRoot);
-    const spinner = ora();
+  async init(opts: { wsRoot: string; spinner: ora.Ora; skipCheck?: boolean }) {
+    const { wsRoot, spinner } = opts;
+    const nextPath = NextjsExportPodUtils.getNextRoot(wsRoot);
 
     const nextPathExists = await NextjsExportPodUtils.nextPathExists({
       nextPath,

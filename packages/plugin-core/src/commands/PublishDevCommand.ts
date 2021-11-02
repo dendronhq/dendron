@@ -34,11 +34,16 @@ export class PublishDevCommand extends BasicCommand<CommandOutput> {
     this.L.info({ ctx, msg: "enter" });
 
     const prepareOut = await NextJSPublishUtils.prepareNextJSExportPod();
-    const { enrichedOpts, cmd, nextPath } = prepareOut;
+    const { enrichedOpts, wsRoot, cmd, nextPath } = prepareOut;
     this.L.info({ ctx, msg: "prepare", enrichedOpts, nextPath });
 
     if (_.isUndefined(enrichedOpts)) {
       return {};
+    }
+
+    const isInitialized = await NextJSPublishUtils.isInitialized(wsRoot);
+    if (!isInitialized) {
+      await NextJSPublishUtils.initialize(nextPath);
     }
 
     const skipBuild = await NextJSPublishUtils.promptSkipBuild();

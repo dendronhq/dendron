@@ -222,6 +222,23 @@ export class NextJSPublishUtils {
     return { enrichedOpts, wsRoot, cmd, nextPath };
   }
 
+  static async isInitialized(wsRoot: string) {
+    const out = await window.withProgress(
+      {
+        location: ProgressLocation.Notification,
+        title: "Checking if NextJS template is initialized",
+        cancellable: false,
+      },
+      async () => {
+        const out = await NextjsExportPodUtils.isInitialized({
+          wsRoot,
+        });
+        return out;
+      }
+    );
+    return out;
+  }
+
   static async removeNextPath(nextPath: string) {
     await window.withProgress(
       {

@@ -51,9 +51,18 @@
       "problemMatcher": []
     },
     {
-      "label": "import-pod",
+      "label": "gdoc-import-pod",
       "type": "shell",
       "command": "node --inspect dendron_setup/dendron/packages/dendron-cli/lib/bin/dendron-cli importPod --wsRoot ~/Dendron --podId dendron.gdoc --podSource builtin",
+      "options": {
+        "cwd": "D:/"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "orbit-import-pod",
+      "type": "shell",
+      "command": "node --inspect dendron_setup/dendron/packages/dendron-cli/lib/bin/dendron-cli importPod --wsRoot ~/Dendron --podId dendron.orbit --podSource builtin",
       "options": {
         "cwd": "D:/"
       },

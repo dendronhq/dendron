@@ -1,5 +1,9 @@
 import { NoteProps, NoteUtils } from "@dendronhq/common-all";
-import { PodItemV4 } from "@dendronhq/pods-core";
+import {
+  Conflict,
+  MergeConflictOptions,
+  PodItemV4,
+} from "@dendronhq/pods-core";
 import fs from "fs-extra";
 import _ from "lodash";
 import open from "open";
@@ -136,4 +140,15 @@ export const withProgressOpts = {
   withProgress: window.withProgress,
   location: ProgressLocation.Notification,
   showMessage: window.showInformationMessage,
+};
+
+export const handleConflict = async (conflict: Conflict) => {
+  const choices = [MergeConflictOptions.OVERWRITE, MergeConflictOptions.SKIP];
+  return window.showQuickPick(choices, {
+    title: `We noticed different fields for user ${conflict.conflictNote.title}`,
+    placeHolder: "What would you like to do?",
+    ignoreFocusOut: false,
+    matchOnDescription: true,
+    canPickMany: false,
+  });
 };

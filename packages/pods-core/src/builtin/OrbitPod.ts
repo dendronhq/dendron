@@ -115,8 +115,12 @@ export class OrbitImportPod extends ImportPod<OrbitImportPodConfig> {
     }
     return members;
   };
+
   /**
-   * method to parse members as notes
+   * method to parse members as notes.
+   * - creates new noteprops if note is not already there in the vault
+   * - writes in a temporary hierarchy if the note is conflicted
+   * - updates previously imported notes if there are no conflicts
    */
   async membersToNotes(opts: {
     members: any;
@@ -156,19 +160,20 @@ export class OrbitImportPod extends ImportPod<OrbitImportPodConfig> {
       });
 
       if (!_.isUndefined(note)) {
-        const conflictData = this.getConflictedData({ note, member });
-
-        if (conflictData.length > 0) {
-          fname = `people.orbit.duplicate.${Time.now().toFormat(
-            "y.MM.dd"
-          )}.${noteName}`;
-          conflicts.push({
-            conflictNote: note,
-            conflictEntry: NoteUtils.create({ ...member, fname, vault }),
-            conflictData,
-          });
-        } else {
-          this.getUpdatedData({ note, member, engine });
+        if (!_.isUndefined(note.custom.orbitId)) {
+          const conflictData = this.getConflictedData({ note, member });
+          if (conflictData.length > 0) {
+            fname = `people.orbit.duplicate.${Time.now().toFormat(
+              "y.MM.dd"
+            )}.${noteName}`;
+            conflicts.push({
+              conflictNote: note,
+              conflictEntry: NoteUtils.create({ ...member, fname, vault }),
+              conflictData,
+            });
+          } else {
+            this.getUpdatedData({ note, member, engine });
+          }
         }
       } else {
         fname = `people.${noteName}`;
@@ -179,6 +184,9 @@ export class OrbitImportPod extends ImportPod<OrbitImportPodConfig> {
     return { create, conflicts };
   }
 
+  /**
+   * returns all the conflicted entries in custom.social FM field of note
+   */
   getConflictedData = (opts: { note: NoteProps; member: any }) => {
     const { note, member } = opts;
     const customKeys = Object.keys(note.custom?.social);
@@ -190,6 +198,9 @@ export class OrbitImportPod extends ImportPod<OrbitImportPodConfig> {
     });
   };
 
+  /**
+   * updates the social fields of a note's FM
+   */
   getUpdatedData = (opts: {
     note: NoteProps;
     member: any;

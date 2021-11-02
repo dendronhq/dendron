@@ -1,8 +1,9 @@
 /* eslint-disable import/no-dynamic-require */
 import { DendronError, RespV3 } from "@dendronhq/common-all";
-import { PodClassEntryV4, PodKind, PodUtils } from "@dendronhq/pods-core";
+import { PodClassEntryV4, PodKind, PodUtils, Conflict, MergeConflictOptions } from "@dendronhq/pods-core";
 import _ from "lodash";
 import path from "path";
+import prompts from "prompts";
 import yargs from "yargs";
 import { setupEngine, SetupEngineCLIOpts, SetupEngineResp } from "./utils";
 
@@ -210,3 +211,25 @@ export enum PodSource {
   CUSTOM = "custom",
   BUILTIN = "builtin",
 }
+
+export const handleConflict = async (conflict: Conflict) => {
+  let conflictentries = "";
+  conflict.conflictData.forEach((key) => {
+    conflictentries = conflictentries.concat(
+      `\n${key}: \nremote: ${conflict.conflictEntry.custom.social[key]}\nlocal: ${conflict.conflictNote.custom.social[key]}\n`
+    );
+  });
+  const resp = await prompts({
+    type: "text",
+    name: "conflict",
+    message: `We noticed different fields for user ${conflict.conflictNote.title}. ${conflictentries}\n
+     What would you like to do? Choose A/B \n\n A: ${MergeConflictOptions.OVERWRITE}\n B: ${MergeConflictOptions.SKIP}`,
+    validate: (conflict) =>
+      ["a", "b"].includes(conflict.toLowerCase())
+        ? true
+        : `Enter either A or B`,
+  });
+  return resp.conflict.toLowerCase() === "a"
+    ? MergeConflictOptions.OVERWRITE
+    : MergeConflictOptions.SKIP;
+};

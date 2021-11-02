@@ -5,7 +5,7 @@ import {
 } from "@dendronhq/common-all";
 import { LoadingStatus } from "@dendronhq/common-frontend";
 import { AutoComplete, Alert, Row, Col, Typography, Divider } from "antd";
-import React, { useEffect, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useCombinedDispatch } from "../features";
 import { browserEngineSlice } from "../features/engine";
 import { useFetchFuse } from "../utils/fuse";
@@ -16,7 +16,7 @@ import {
   verifyNoteData,
 } from "../utils/types";
 import DendronSpinner from "./DendronSpinner";
-import _ from "lodash";
+import _, { keys } from "lodash";
 import { useDendronLookup, useNoteActive, useNoteBodies } from "../utils/hooks";
 import FileTextOutlined from "@ant-design/icons/lib/icons/FileTextOutlined";
 
@@ -27,20 +27,50 @@ const NOTE_SNIPPET_BEFORE_AFTER = 100;
 /** Place this in place of omitted text in between snippet parts. */
 const OMITTED_PART_TEXT = " ... ";
 /** How long to wait for before triggering fuse search, in ms. Required for performance reasons since fuse search is expensive. */
-const SEARCH_DELAY = 300;
+const SEARCH_DELAY = 700;
 
 export function DendronSearch(props: DendronCommonProps) {
   if (!verifyNoteData(props)) {
     return <DendronSpinner />;
   }
 
-  return <DendronSearchComponent {...props} />;
+  return <DebouncedDendronSearchComponent {...props} />;
+}
+
+type SearchFunction = (
+  query: string,
+  setResults: (results: SearchResults) => void
+) => void;
+
+function DebouncedDendronSearchComponent(props: DendronPageWithNoteDataProps) {
+  // Splitting this part from DendronSearchComponent so that the debounced
+  // function doesn't get reset every time value changes.
+  const results = useFetchFuse(props.notes);
+  const { fuse } = results;
+  // debounce returns stale results until the timeout runs out, which means
+  // search would always show stale results. Having the debounced function set
+  // state allows the component the update when the function finally runs and
+  // gets fresh results.
+  const debouncedSearch: SearchFunction | undefined = fuse
+    ? _.debounce<SearchFunction>((query, setResults) => {
+        setResults(fuse.search(query.substring(1)));
+      }, SEARCH_DELAY)
+    : undefined;
+  return (
+    <DendronSearchComponent {...props} {...results} search={debouncedSearch} />
+  );
 }
 
 type SearchResults = Fuse.FuseResult<NoteProps>[] | undefined;
 
-function DendronSearchComponent(props: DendronPageWithNoteDataProps) {
-  const { noteIndex, notes, dendronRouter } = props;
+type SearchProps = Omit<ReturnType<typeof useFetchFuse>, "fuse"> & {
+  search: SearchFunction | undefined;
+};
+
+function DendronSearchComponent(
+  props: DendronPageWithNoteDataProps & SearchProps
+) {
+  const { noteIndex, dendronRouter, search, error, loading, notes } = props;
 
   const [searchResults, setSearchResults] =
     React.useState<SearchResults>(undefined);
@@ -52,21 +82,15 @@ function DendronSearchComponent(props: DendronPageWithNoteDataProps) {
   const dispatch = useCombinedDispatch();
   const { noteBodies, requestNotes } = useNoteBodies();
   const lookup = useDendronLookup();
-  const result = useFetchFuse(props.notes);
   const { noteActive } = useNoteActive(dendronRouter.getActiveNoteId());
   const initValue = noteActive?.fname || "";
   const [value, setValue] = React.useState(initValue);
 
-  const { fuse, error, loading } = result;
-
-  const debouncedValue = useMemo(
-    () =>
-      _.debounce(
-        () => setSearchResults(() => fuse?.search(value.substring(1))),
-        SEARCH_DELAY
-      ),
-    [fuse, value]
-  );
+  useEffect(() => {
+    if (search) {
+      search(value, setSearchResults);
+    }
+  }, [value, search]);
 
   useEffect(() => {
     requestNotes(searchResults?.map(({ item: note }) => note.id) || []);
@@ -103,7 +127,6 @@ function DendronSearchComponent(props: DendronPageWithNoteDataProps) {
 
   const onChangeSearch = (val: string) => {
     setValue(val);
-    debouncedValue();
   };
 
   if (error) {
@@ -275,7 +298,7 @@ function MatchBody(props: {
   // Add the matched part as bold
   renderedBody.push(
     <span
-      key={`${props.id}-${startIndex}-${endIndex}-${beforeStart}`}
+      key={`${props.id}-${startIndex}-${endIndex}`}
       style={{ fontWeight: "bold" }}
     >
       {cleanWhitespace(body.slice(startIndex, endIndex + 1))}

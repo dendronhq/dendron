@@ -175,18 +175,19 @@ export const setupSchemaPreseet: PreSetupHookFunction = async (opts) => {
     vault,
     modifier: (schema) => {
       const schemas = [
-        SchemaUtils.create({
+        SchemaUtils.createFromSchemaOpts({
           id: "bar",
           parent: "root",
+          fname: "bar",
           children: ["ch1", "ch2"],
           vault,
         }),
-        SchemaUtils.create({
+        SchemaUtils.createFromSchemaRaw({
           id: "ch1",
           template: { id: "bar.template.ch1", type: "note" },
           vault,
         }),
-        SchemaUtils.create({
+        SchemaUtils.createFromSchemaRaw({
           id: "ch2",
           template: { id: "bar.template.ch2", type: "note" },
           namespace: true,
@@ -283,30 +284,31 @@ export const setupSchemaPresetWithNamespaceTemplateBase: PreSetupHookFunction =
       vault: vault1,
       modifier: (schema) => {
         const schemas = [
-          SchemaUtils.create({
+          SchemaUtils.createFromSchemaOpts({
             id: "daily",
             parent: "root",
+            fname: "daily",
             children: ["journal"],
             vault: vault1,
           }),
-          SchemaUtils.create({
+          SchemaUtils.createFromSchemaRaw({
             id: "journal",
             children: ["year"],
             vault: vault1,
           }),
-          SchemaUtils.create({
+          SchemaUtils.createFromSchemaRaw({
             id: "year",
             pattern: "[0-2][0-9][0-9][0-9]",
             children: ["month"],
             vault: vault1,
           }),
-          SchemaUtils.create({
+          SchemaUtils.createFromSchemaRaw({
             id: "month",
             pattern: "[0-9][0-9]",
             children: ["day"],
             vault: vault1,
           }),
-          SchemaUtils.create({
+          SchemaUtils.createFromSchemaRaw({
             id: "day",
             pattern: "[0-9][0-9]",
             namespace: true,

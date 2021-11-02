@@ -812,6 +812,16 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "voothi",
+      "name": "Denis Novikov",
+      "avatar_url": "https://avatars.githubusercontent.com/u/9587340?v=4",
+      "profile": "https://github.com/voothi",
+      "contributions": [
+        "bug",
+        "content"
+      ]
     }
   ],
   "contributorsPerLine": 7,

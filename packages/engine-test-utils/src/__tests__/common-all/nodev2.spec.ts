@@ -15,7 +15,7 @@ const preSetupHook: SetupHookFunction = async ({ vaults, wsRoot }) => {
     vault: vaults[0],
     wsRoot,
     modifier: (schema) => {
-      schema.schemas["ch1"] = SchemaUtils.create({
+      schema.schemas["ch1"] = SchemaUtils.createFromSchemaRaw({
         id: "ch1",
         vault: vaults[0],
       });

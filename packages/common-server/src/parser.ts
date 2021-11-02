@@ -12,6 +12,7 @@ import {
   SchemaOpts,
   SchemaProps,
   SchemaPropsDict,
+  SchemaRaw,
   SchemaUtils,
 } from "@dendronhq/common-all";
 import _ from "lodash";
@@ -82,7 +83,7 @@ export class SchemaParserV2 extends ParserBaseV2 {
       // TODO: legacy
       const schemaDict: SchemaPropsDict = {};
       (schemaOpts as unknown as SchemaOpts[]).map((ent) => {
-        const schema = SchemaUtils.create(ent);
+        const schema = SchemaUtils.createFromSchemaOpts(ent);
         schemaDict[schema.id] = schema;
       });
       const maybeRoot = _.find(_.values(schemaDict), {
@@ -111,7 +112,7 @@ export class SchemaParserV2 extends ParserBaseV2 {
       if (this.noInlineChildren(ent)) {
         // Means we are dealing with non-inline schema and can just collect
         // the parsed value.
-        collector.push(SchemaUtils.create({ ...ent, vault }));
+        collector.push(SchemaUtils.createFromSchemaOpts({ ...ent, vault }));
       } else {
         // When we are dealing with inline children we need to process/collect
         // the children bottom up from the inline tree and replace the children
@@ -120,7 +121,7 @@ export class SchemaParserV2 extends ParserBaseV2 {
 
         // No all the entity children objects are collected and they have
         // been replaced with identifiers we can collect the root element itself.
-        collector.push(SchemaUtils.create({ ...ent, vault }));
+        collector.push(SchemaUtils.createFromSchemaOpts({ ...ent, vault }));
       }
     });
 
@@ -145,7 +146,7 @@ export class SchemaParserV2 extends ParserBaseV2 {
 
       this.setIdIfMissing(child);
 
-      collector.push(SchemaUtils.create({ ...child, vault }));
+      collector.push(SchemaUtils.createFromSchemaRaw({ ...child, vault }));
 
       return child.id;
     });
@@ -154,7 +155,7 @@ export class SchemaParserV2 extends ParserBaseV2 {
   /**
    * Ids are optional for inline schemas hence if there isn't an id
    * we will generate the identifier. */
-  private static setIdIfMissing(ent: any) {
+  private static setIdIfMissing(ent: SchemaRaw) {
     if (!ent.id) {
       // When id is missing than we must have a pattern for the schema.
       if (!ent.pattern) {

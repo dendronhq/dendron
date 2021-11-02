@@ -36,7 +36,7 @@ export const SCHEMA_PRESETS_V4 = {
     fname: "foo",
     modifier: (schema) => {
       const vault = schema.root.vault;
-      const child = SchemaUtils.create({ id: "ch1", vault });
+      const child = SchemaUtils.createFromSchemaRaw({ id: "ch1", vault });
       schema.schemas["ch1"] = child;
       DNodeUtils.addChild(schema.root, child);
       return schema;
@@ -46,7 +46,7 @@ export const SCHEMA_PRESETS_V4 = {
     fname: "bar",
     modifier: (schema) => {
       const vault = schema.root.vault;
-      const child = SchemaUtils.create({ id: "ch1", vault });
+      const child = SchemaUtils.createFromSchemaRaw({ id: "ch1", vault });
       schema.schemas["ch1"] = child;
       DNodeUtils.addChild(schema.root, child);
       return schema;

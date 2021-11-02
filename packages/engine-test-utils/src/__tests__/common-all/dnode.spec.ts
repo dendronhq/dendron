@@ -3,7 +3,6 @@ import {
   SchemaUtils,
   DVault,
   SchemaOpts,
-  SchemaRaw,
 } from "@dendronhq/common-all";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 
@@ -13,10 +12,10 @@ describe(`NoteUtils tests:`, () => {
     const SCHEMA_ID = "id-1";
 
     async function test_genSchemaDesc(
-      schemaCreateOpts: (SchemaOpts | SchemaRaw) & { vault: DVault },
+      schemaCreateOpts: SchemaOpts & { vault: DVault },
       expectedDescription: string
     ) {
-      const schema = SchemaUtils.create(schemaCreateOpts);
+      const schema = SchemaUtils.createFromSchemaOpts(schemaCreateOpts);
 
       const wsRoot = "/tmp/ws/";
       const schemaModuleProps = await NoteTestUtilsV4.createSchema({

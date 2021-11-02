@@ -20,7 +20,10 @@ suite("SchemaWatcher", function () {
         ctx,
         onInit: async ({ vaults, wsRoot }) => {
           const vault = vaults[0];
-          const newSchema = SchemaUtils.create({ id: "two", vault });
+          const newSchema = SchemaUtils.createFromSchemaRaw({
+            id: "two",
+            vault,
+          });
           await NoteTestUtilsV4.modifySchemaByPath(
             { wsRoot, vault, fname: "foo" },
             (sm) => {

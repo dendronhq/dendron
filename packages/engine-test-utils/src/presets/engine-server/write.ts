@@ -23,7 +23,7 @@ const SCHEMAS = {
       const schemaModId = SCHEMA_PRESETS_V4.SCHEMA_SIMPLE.fname;
       const module = engine.schemas[schemaModId];
       const vault = vaults[0];
-      const schema = SchemaUtils.create({ id: "ch2", vault });
+      const schema = SchemaUtils.createFromSchemaRaw({ id: "ch2", vault });
       DNodeUtils.addChild(module.root, schema);
       module.schemas[schema.id] = schema;
       await engine.updateSchema(module);
@@ -247,7 +247,7 @@ const NOTES = {
           vault: vaults[0],
           wsRoot,
           modifier: (schema) => {
-            schema.schemas["ch1"] = SchemaUtils.create({
+            schema.schemas["ch1"] = SchemaUtils.createFromSchemaRaw({
               id: "ch1",
               vault: vaults[0],
             });

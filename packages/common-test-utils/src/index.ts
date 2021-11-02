@@ -405,7 +405,7 @@ export class NodeTestUtilsV2 {
   }) => {
     const { vaultDir, rootName, rootOpts } = opts;
     const vault = { fsPath: vaultDir };
-    const schema = SchemaUtils.create({
+    const schema = SchemaUtils.createFromSchemaOpts({
       fname: `${rootName}`,
       id: `${rootName}`,
       parent: "root",
@@ -415,7 +415,7 @@ export class NodeTestUtilsV2 {
       vault,
       ...rootOpts,
     });
-    const ch1 = SchemaUtils.create({
+    const ch1 = SchemaUtils.createFromSchemaOpts({
       fname: `${rootName}`,
       vault,
       id: "ch1",

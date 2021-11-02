@@ -57,7 +57,7 @@ describe("schemaModuleProps2File", () => {
     const vault = { fsPath: root };
     const smp = _su.createModuleProps({ fname, vault });
     const rootNote = smp.schemas["bond"];
-    const ch1 = _su.create({ id: "ch1", fname, vault });
+    const ch1 = _su.createFromSchemaOpts({ id: "ch1", fname, vault });
     smp.schemas["ch1"] = ch1;
     _du.addChild(rootNote, ch1);
 

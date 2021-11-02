@@ -36,6 +36,7 @@ function attachParser(proc: Unified.Processor) {
 
       return eat(match[0])({
         type: "refLink",
+        // @ts-ignore
         value,
         data: {
           alias,

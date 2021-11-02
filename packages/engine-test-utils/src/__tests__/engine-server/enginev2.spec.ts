@@ -9,7 +9,7 @@ import {
   ENGINE_CONFIG_PRESETS,
   ENGINE_HOOKS,
   ENGINE_PRESETS,
-  ENGINE_PRESETS_MULTI
+  ENGINE_PRESETS_MULTI,
 } from "../../presets";
 
 describe("engine, schemas/", () => {
@@ -131,6 +131,7 @@ describe("engine, notes/", () => {
           return [k, v];
         })
       )("%p", async (_key, TestCase) => {
+        // @ts-ignore
         const { testFunc, ...opts } = TestCase;
         await runEngineTestV5(testFunc, { ...opts, expect });
       });
@@ -149,6 +150,7 @@ describe("engine, notes/multi/", () => {
           return [k, v];
         })
       )("%p", async (_key, TestCase) => {
+        // @ts-ignore
         const { testFunc, ...opts } = TestCase;
         await runEngineTestV5(testFunc, { ...opts, expect });
       });
@@ -164,6 +166,7 @@ describe("engine, config/", () => {
           return [k, v];
         })
       )("%p", async (_key, TestCase) => {
+        // @ts-ignore
         const { testFunc, ...opts } = TestCase;
         await runEngineTestV5(testFunc, { ...opts, expect });
       });

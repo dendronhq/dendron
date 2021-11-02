@@ -1,7 +1,4 @@
-import {
-  IntermediateDendronConfig,
-  NoteProps
-} from "@dendronhq/common-all";
+import { IntermediateDendronConfig, NoteProps } from "@dendronhq/common-all";
 import {
   NoteTestUtilsV4,
   TestPresetEntryV4,
@@ -237,6 +234,7 @@ describe("hierarchies", () => {
 
   test.each(
     ALL_TEST_CASES.map((ent) => [`${ent.dest}: ${ent.name}`, ent.testCase])
+    // @ts-ignore
   )("%p", async (_key, testCase: TestPresetEntryV4) => {
     await runEngineTestV5(testCase.testFunc, {
       expect,

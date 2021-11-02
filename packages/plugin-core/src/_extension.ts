@@ -53,6 +53,7 @@ import { setupSegmentClient } from "./telemetry";
 import { GOOGLE_OAUTH_ID, GOOGLE_OAUTH_SECRET } from "./types/global";
 import { KeybindingUtils, VSCodeUtils, WSUtils } from "./utils";
 import { AnalyticsUtils } from "./utils/analytics";
+import { MarkdownUtils } from "./utils/md";
 import { DendronTreeView } from "./views/DendronTreeView";
 import {
   DendronExtension,
@@ -506,6 +507,12 @@ export async function _activate(
           true
         );
       }
+
+      // used for enablement of legacy show preview command.
+      VSCodeUtils.setContext(
+        DendronContext.HAS_LEGACY_PREVIEW,
+        MarkdownUtils.hasLegacyPreview()
+      );
 
       // round to nearest 10th
       let numNotes = _.size(getEngine().notes);

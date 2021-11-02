@@ -957,7 +957,7 @@ const NOTES = {
           },
         });
         error = out.error!;
-      } catch (err) {
+      } catch (err: any) {
         // Need to check both `out.error` and caught error
         // since this runs in both API and engine tests
         error = err;

@@ -52,7 +52,7 @@ export class SitePreviewCommand extends BasicCommand<
               enginePort: port,
               serve: false,
             });
-          } catch (err) {
+          } catch (err: any) {
             window.showErrorMessage(err);
           }
           const siteOutput = SiteUtils.getSiteOutputPath({

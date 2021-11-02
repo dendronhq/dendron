@@ -235,39 +235,9 @@ suite("Migration", function () {
       });
     });
 
-    test("migrate to 0.51.4 (set preview v2), previewv2 not set", (done) => {
-      runLegacyMultiWorkspaceTest({
-        ctx,
-        modConfigCb: (config) => {
-          config.dev = { enablePreviewV2: false };
-          return config;
-        },
-        onInit: async ({ engine, wsRoot }) => {
-          const dendronConfig = engine.config;
-          const wsConfig = await getExtension().getWorkspaceSettings();
-          const wsService = new WorkspaceService({ wsRoot });
-          await MigrationServce.applyMigrationRules({
-            currentVersion: "0.52.0",
-            previousVersion: "0.51.3",
-            dendronConfig,
-            wsConfig,
-            wsService,
-            logger: Logger,
-            migrations: getMigration({ from: "0.51.0", to: "0.52.0" }),
-          });
-          expect(getDWorkspace().config.dev?.enablePreviewV2).toBeFalsy();
-          done();
-        },
-      });
-    });
-
     test("migrate to 0.51.4 (set scratch notes in dendron.yml), non standard settings", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
-        modConfigCb: (config) => {
-          config.dev = { enablePreviewV2: true };
-          return config;
-        },
         onInit: async ({ engine, wsRoot }) => {
           const dendronConfig = engine.config;
           const wsConfig = await getExtension().getWorkspaceSettings();
@@ -281,7 +251,6 @@ suite("Migration", function () {
             logger: Logger,
             migrations: getMigration({ from: "0.51.0", to: "0.51.4" }),
           });
-          expect(getDWorkspace().config.dev?.enablePreviewV2).toBeTruthy();
           done();
         },
       });
@@ -613,7 +582,9 @@ suite("MigrationUtils", () => {
         test("THEN all kvp that has null value are omitted from object", () => {
           const obj = { a: { b: null, c: "foo", d: null } };
           const expected = { a: { c: "foo" } };
-          expect(MigrationUtils.deepCleanObjBy(obj, _.isNull)).toEqual(expected);
+          expect(MigrationUtils.deepCleanObjBy(obj, _.isNull)).toEqual(
+            expected
+          );
         });
       });
 
@@ -623,6 +594,6 @@ suite("MigrationUtils", () => {
           expect(MigrationUtils.deepCleanObjBy(obj, _.isNull)).toEqual(obj);
         });
       });
-    })
-  })
+    });
+  });
 });

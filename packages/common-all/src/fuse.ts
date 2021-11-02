@@ -345,6 +345,7 @@ export class FuseEngine {
         return b.item.updated - a.item.updated;
       });
 
+      // @ts-ignore
       groupedByScore[score.key] = [...notes, ...stubs];
     }
 

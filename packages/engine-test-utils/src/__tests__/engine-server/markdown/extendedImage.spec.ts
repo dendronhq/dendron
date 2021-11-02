@@ -1,8 +1,4 @@
-import {
-  AssertUtils,
-  TestPresetEntryV4,
-  getDescendantNode,
-} from "@dendronhq/common-test-utils";
+import { AssertUtils, TestPresetEntryV4 } from "@dendronhq/common-test-utils";
 import {
   ExtendedImage,
   DendronASTDest,
@@ -14,7 +10,10 @@ import {
 import _ from "lodash";
 import { runEngineTestV5 } from "../../../engine";
 import { ENGINE_HOOKS } from "../../../presets";
+import { TestUnifiedUtils } from "../../../utils";
 import { createProcForTest, createProcTests, ProcTests } from "./utils";
+
+const { getDescendantNode } = TestUnifiedUtils;
 
 function proc() {
   return MDUtilsV5.procRehypeParse({
@@ -27,6 +26,7 @@ function runAllTests(opts: { name: string; testCases: ProcTests[] }) {
   describe(name, () => {
     test.each(
       testCases.map((ent) => [`${ent.dest}: ${ent.name}`, ent.testCase])
+      // @ts-ignore
     )("%p", async (_key, testCase: TestPresetEntryV4) => {
       await runEngineTestV5(testCase.testFunc, {
         expect,
@@ -37,7 +37,7 @@ function runAllTests(opts: { name: string; testCases: ProcTests[] }) {
 }
 
 function getExtendedImage(node: UnistNode): ExtendedImage {
-  return getDescendantNode<ExtendedImage>(node, 0, 0);
+  return getDescendantNode<ExtendedImage>(expect, node, 0, 0);
 }
 
 describe("extendedImage", () => {

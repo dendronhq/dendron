@@ -69,7 +69,7 @@ export const CONFIG_MIGRATIONS: Migrations = {
           let iteratee = value.iteratee;
           let valueToFill;
           let alreadyFilled;
-          
+
           if (iteratee !== "skip") {
             alreadyFilled = _.has(cleanDendronConfig, key);
             const maybeLegacyConfig = _.get(cleanDendronConfig, legacyPath);
@@ -105,7 +105,10 @@ export const CONFIG_MIGRATIONS: Migrations = {
         });
 
         // recursively populate missing defaults
-        const migratedConfig = _.defaultsDeep(cleanDendronConfig, defaultV3Config);
+        const migratedConfig = _.defaultsDeep(
+          cleanDendronConfig,
+          defaultV3Config
+        );
 
         return { data: { dendronConfig: migratedConfig, wsConfig } };
       },
@@ -194,21 +197,6 @@ export const ALL_MIGRATIONS: Migrations[] = [
               "addBehavior",
               wsAddBehavior
             );
-          }
-          return { data: { dendronConfig, wsConfig } };
-        },
-      },
-    ],
-  },
-  {
-    version: "0.51.4",
-    changes: [
-      {
-        name: "don't switch to legacy preview if not currently on it",
-        func: async ({ dendronConfig, wsConfig }) => {
-          const previewV2Enabled = dendronConfig.dev?.enablePreviewV2;
-          if (!previewV2Enabled) {
-            _.set(dendronConfig, "dev.previewV2Enabled", false);
           }
           return { data: { dendronConfig, wsConfig } };
         },

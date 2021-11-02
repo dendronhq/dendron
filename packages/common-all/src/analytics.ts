@@ -49,6 +49,8 @@ export enum SurveyEvents {
   BackgroundRejected = "Background_Rejected",
   UseCaseAnswered = "Use_Case_Answered",
   UseCaseRejected = "Use_Case_Rejected",
+  PublishingUseCaseAnswered = "Publishing_Use_Case_Answered",
+  PublishingUseCaseRejected = "Publishing_Use_Case_Rejected",
   PriorToolsAnswered = "Prior_Tools_Answered",
   PriorToolsRejected = "Prior_Tools_Rejected",
   LapsedUserSurveyPrompted = "Lapsed_User_Survey_Prompted",

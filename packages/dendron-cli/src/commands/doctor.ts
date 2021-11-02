@@ -179,16 +179,19 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     const engineWrite = dryRun
       ? () => {}
       : throttle(_.bind(engine.writeNote, engine), 300, {
+        // @ts-ignore
           leading: true,
         });
     const engineDelete = dryRun
       ? () => {}
       : throttle(_.bind(engine.deleteNote, engine), 300, {
+        // @ts-ignore
           leading: true,
         });
     const engineGetNoteByPath = dryRun
       ? () => {}
       : throttle(_.bind(engine.getNoteByPath, engine), 300, {
+        // @ts-ignore
           leading: true,
         });
 

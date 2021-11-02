@@ -259,6 +259,13 @@ const getLinks = ({
       return ent.value === filter?.loc?.fname;
     });
   }
+  createLogger("LinkUtils.getLinks").info({
+    ctx: "getLinks",
+    dlinksLength: dlinks.length,
+    noteRefsLength: noteRefs.length,
+    wikiLinksLength: wikiLinks.length,
+    filterLocFname: filter?.loc?.fname,
+  });
   return dlinks;
 };
 
@@ -817,10 +824,11 @@ export class AnchorUtils {
   }
 }
 
-function walk(node: Node, fn: any) {
+function walk(node: Parent, fn: any) {
   fn(node);
   if (node.children) {
     (node.children as Node[]).forEach((n) => {
+      // @ts-ignore
       walk(n, fn);
     });
   }
@@ -838,7 +846,7 @@ const NODE_TYPES_TO_EXTRACT = [
 ];
 
 export class RemarkUtils {
-  static bumpHeadings(root: Node, baseDepth: number) {
+  static bumpHeadings(root: Parent, baseDepth: number) {
     const headings: Heading[] = [];
     walk(root, (node: Node) => {
       if (node.type === DendronASTTypes.HEADING) {
@@ -894,6 +902,7 @@ export class RemarkUtils {
   }
 
   static isParent(node: Node): node is Parent {
+    // @ts-ignore
     return _.isArray(node.children);
   }
 
@@ -983,9 +992,11 @@ export class RemarkUtils {
           ...selectAll(DendronASTTypes.LINK, root),
         ];
         assetReferences.forEach((asset) => {
+          // @ts-ignore
           const key = _.replace(asset.url as string, /[\\|/|.]/g, "");
           const value = assetHashMap.get(key);
           if (value) {
+            // @ts-ignore
             asset.url = value;
           } else {
             // for realative links
@@ -995,6 +1006,7 @@ export class RemarkUtils {
               ""
             );
             const value = assetHashMap.get(prefix.concat(key));
+            // @ts-ignore
             if (value) asset.url = value;
           }
           changes.push({
@@ -1207,8 +1219,10 @@ export class RemarkUtils {
       if (_.isEqual(aOmit, bOmit)) {
         if (_.has(a, "children")) {
           return _.every(
+            // @ts-ignore
             a.children as Node[],
             (aChild: Node, aIndex: number) => {
+              // @ts-ignore
               const bChild = (b.children as Node[])[aIndex];
               return RemarkUtils.hasIdenticalChildren(aChild, bChild);
             }
@@ -1240,6 +1254,7 @@ export class RemarkUtils {
       if (nextHeaderIndex) {
         return;
       }
+      // @ts-ignore
       const depth = node.depth as Heading["depth"];
       if (!headerFound) {
         if (node.type === DendronASTTypes.HEADING) {
@@ -1263,10 +1278,12 @@ export class RemarkUtils {
       return [];
     }
     const nodesToExtract = nextHeaderIndex
+      // @ts-ignore
       ? (tree.children as Node[]).splice(
           foundHeaderIndex!,
           nextHeaderIndex! - foundHeaderIndex!
         )
+      // @ts-ignore
       : (tree.children as Node[]).splice(foundHeaderIndex!);
     return nodesToExtract;
   }
@@ -1295,7 +1312,9 @@ export class RemarkUtils {
     // Read and parse the note
     const noteText = NoteUtils.serialize(note);
     const noteAST = proc.parse(noteText);
+    // @ts-ignore
     if (_.isUndefined(noteAST.children)) return [];
+    // @ts-ignore
     const nodesToSearch = _.filter(noteAST.children as Node[], (node) =>
       _.includes(NODE_TYPES_TO_EXTRACT, node.type)
     );

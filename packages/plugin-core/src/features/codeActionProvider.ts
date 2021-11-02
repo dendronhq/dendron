@@ -18,6 +18,7 @@ import {
 } from "vscode";
 import { CancellationToken } from "vscode-jsonrpc";
 import YAML from "yamljs";
+import { CopyNoteRefCommand } from "../commands/CopyNoteRef";
 import { DoctorCommand } from "../commands/Doctor";
 import { GotoNoteCommand } from "../commands/GotoNote";
 import { NoteLookupCommand } from "../commands/NoteLookupCommand";
@@ -223,21 +224,32 @@ export const refactorProvider: CodeActionProvider = {
         },
       };
 
+      const copyHeaderRefAction = {
+        title: "Copy Header Reference",
+        isPreferred: true,
+        kind: CodeActionKind.RefactorInline,
+        command: {
+          command: new CopyNoteRefCommand().key,
+          title: "Copy Header Reference",
+          arguments: [{ source: ContextualUIEvents.ContextualUICodeAction }],
+        },
+      };
+
       if (_range.isEmpty) {
         //return a code action for create note if user clicked next to a broken wikilink
         if (isBrokenWikilink()) {
           return [brokenWikilinkAction];
         }
 
-        //return a code action for rename header if user clicks next to a header
+        //return a code action for rename header and copy header ref if user clicks next to a header
         if (!_.isUndefined(header)) {
-          return [renameHeaderAction];
+          return [renameHeaderAction, copyHeaderRefAction];
         }
         // return if none
         return;
       } else {
         return !_.isUndefined(header)
-          ? [createNewNoteAction, renameHeaderAction]
+          ? [createNewNoteAction, renameHeaderAction, copyHeaderRefAction]
           : [createNewNoteAction];
       }
     }

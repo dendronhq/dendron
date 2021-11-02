@@ -9,7 +9,7 @@ import { DendronASTDest, MDUtilsV5 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import visit from "unist-util-visit";
 import { ExtensionContext, Selection, TextEditor, window } from "vscode";
-import { ShowPreviewV2Command } from "./commands/ShowPreviewV2";
+import { ShowPreviewCommand } from "./commands/ShowPreview";
 import { updateDecorations } from "./features/windowDecorations";
 import { Logger } from "./logger";
 import { VSCodeUtils } from "./utils";
@@ -154,7 +154,7 @@ export class WindowWatcher {
   }
 
   async triggerNotePreviewUpdate({ document }: TextEditor) {
-    ShowPreviewV2Command.onDidChangeHandler(document);
+    ShowPreviewCommand.onDidChangeHandler(document);
     return;
   }
 

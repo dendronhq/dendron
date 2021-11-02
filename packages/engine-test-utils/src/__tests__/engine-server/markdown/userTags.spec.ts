@@ -1,8 +1,4 @@
-import {
-  AssertUtils,
-  TestPresetEntryV4,
-  getDescendantNode,
-} from "@dendronhq/common-test-utils";
+import { AssertUtils, TestPresetEntryV4 } from "@dendronhq/common-test-utils";
 import {
   DendronASTDest,
   DendronASTTypes,
@@ -15,6 +11,7 @@ import _ from "lodash";
 import { TestConfigUtils } from "../../..";
 import { runEngineTestV5 } from "../../../engine";
 import { ENGINE_HOOKS } from "../../../presets";
+import { TestUnifiedUtils } from "../../../utils";
 import {
   checkNotInVFile,
   checkVFile,
@@ -22,6 +19,8 @@ import {
   createProcTests,
   ProcTests,
 } from "./utils";
+
+const { getDescendantNode } = TestUnifiedUtils;
 
 function proc() {
   return MDUtilsV5.procRehypeParse({
@@ -34,6 +33,7 @@ function runAllTests(opts: { name: string; testCases: ProcTests[] }) {
   describe(name, () => {
     test.each(
       testCases.map((ent) => [`${ent.dest}: ${ent.name}`, ent.testCase])
+      // @ts-ignore
     )("%p", async (_key, testCase: TestPresetEntryV4) => {
       await runEngineTestV5(testCase.testFunc, {
         expect,
@@ -44,7 +44,7 @@ function runAllTests(opts: { name: string; testCases: ProcTests[] }) {
 }
 
 function getUserTag(node: UnistNode): UserTag {
-  return getDescendantNode<UserTag>(node, 0, 0);
+  return getDescendantNode<UserTag>(expect, node, 0, 0);
 }
 
 describe("user tags", () => {
@@ -73,10 +73,13 @@ describe("user tags", () => {
 
     test("parses a user tag in the middle of a paragraph", () => {
       const resp = proc().parse("Lorem ipsum @Hamilton.Margaret dolor amet.");
-      expect(getDescendantNode(resp, 0, 1).type).toEqual(
+      expect(getDescendantNode(expect, resp, 0, 1).type).toEqual(
         DendronASTTypes.USERTAG
       );
-      expect(getDescendantNode(resp, 0, 1).value).toEqual("@Hamilton.Margaret");
+      // @ts-ignore
+      expect(getDescendantNode(expect, resp, 0, 1).value).toEqual(
+        "@Hamilton.Margaret"
+      );
     });
 
     test("parses user tag with numbers", () => {
@@ -89,36 +92,43 @@ describe("user tags", () => {
       const resp1 = proc().parse(
         "Dolorem vero sed sapiente @Hamilton.Margaret. Et quam id maxime et ratione."
       );
-      expect(getDescendantNode(resp1, 0, 1).type).toEqual(
+      expect(getDescendantNode(expect, resp1, 0, 1).type).toEqual(
         DendronASTTypes.USERTAG
       );
-      expect(getDescendantNode(resp1, 0, 1).value).toEqual(
+      // @ts-ignore
+      expect(getDescendantNode(expect, resp1, 0, 1).value).toEqual(
         "@Hamilton.Margaret"
       );
 
       const resp2 = proc().parse(
         "Dolorem vero sed sapiente @Hamilton.Margaret, et quam id maxime et ratione."
       );
-      expect(getDescendantNode(resp2, 0, 1).type).toEqual(
+      expect(getDescendantNode(expect, resp2, 0, 1).type).toEqual(
         DendronASTTypes.USERTAG
       );
-      expect(getDescendantNode(resp2, 0, 1).value).toEqual(
+      // @ts-ignore
+      expect(getDescendantNode(expect, resp2, 0, 1).value).toEqual(
         "@Hamilton.Margaret"
       );
     });
 
     test("doesn't parse trailing unicode punctuation", () => {
       const resp1 = proc().parse("この人は「@松本.行弘」です。");
-      expect(getDescendantNode(resp1, 0, 1).type).toEqual(
+      expect(getDescendantNode(expect, resp1, 0, 1).type).toEqual(
         DendronASTTypes.USERTAG
       );
-      expect(getDescendantNode(resp1, 0, 1).value).toEqual("@松本.行弘");
+      // @ts-ignore
+      expect(getDescendantNode(expect, resp1, 0, 1).value).toEqual(
+        "@松本.行弘"
+      );
     });
 
     test("doesn't parse email addresses", () => {
       const resp1 = proc().parse("user@example.com");
-      expect(getDescendantNode(resp1, 0, 0).type).toEqual(DendronASTTypes.LINK);
-      expect(getDescendantNode(resp1, 0, 0, 0).type).toEqual(
+      expect(getDescendantNode(expect, resp1, 0, 0).type).toEqual(
+        DendronASTTypes.LINK
+      );
+      expect(getDescendantNode(expect, resp1, 0, 0, 0).type).toEqual(
         DendronASTTypes.TEXT
       );
     });

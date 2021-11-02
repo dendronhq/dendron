@@ -112,6 +112,7 @@ describe("containers", () => {
   const ALL_TEST_CASES = [...REGULAR_CASE, ...NOT_ENABLED];
   test.each(
     ALL_TEST_CASES.map((ent) => [`${ent.dest}: ${ent.name}`, ent.testCase])
+    // @ts-ignore
   )("%p", async (_key, testCase: TestPresetEntryV4) => {
     await runEngineTestV5(testCase.testFunc, {
       expect,

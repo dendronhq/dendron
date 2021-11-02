@@ -199,7 +199,7 @@ export class GitUtils {
     try {
       const response = await this.execute("git rev-parse --show-toplevel", uri);
       return response.stdout.trim();
-    } catch (err) {
+    } catch (err: any) {
       // Not in a git repository
       if (err.failed) return undefined;
       throw err;

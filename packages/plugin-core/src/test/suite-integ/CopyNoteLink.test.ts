@@ -84,7 +84,7 @@ suite("CopyNoteLink", function () {
           // generate a wikilink for it
           const link = await new CopyNoteLinkCommand().run();
           expect(link).toEqual(
-            `[[Lörem Foo：Bar🙂Baz Ipsum|test#lörem-foo：barbaz-ipsum]]`
+            `[[Lörem Foo：Bar🙂Baz Ipsum|test#lörem-foobarbaz-ipsum]]`
           );
           done();
         },

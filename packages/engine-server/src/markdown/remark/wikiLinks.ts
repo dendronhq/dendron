@@ -256,6 +256,7 @@ function attachParser(proc: Unified.Processor) {
         const { value, alias, anchorHeader, vaultName, sameFile } = parseLink(linkMatch);
         return eat(match[0])({
           type: DendronASTTypes.WIKI_LINK,
+          // @ts-ignore
           value,
           data: {
             alias,

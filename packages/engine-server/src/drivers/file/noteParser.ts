@@ -122,7 +122,7 @@ export class NoteParser extends ParserBase {
             });
           }
           return notes;
-        } catch (err) {
+        } catch (err: any) {
           if (!(err instanceof DendronError)) {
             err = new DendronError({
               message: `Failed to read ${ent.fpath} in ${vault.fsPath}`,
@@ -172,7 +172,7 @@ export class NoteParser extends ParserBase {
               notesById[ent.id] = ent;
             });
             return notes;
-          } catch (err) {
+          } catch (err: any) {
             if (!(err instanceof DendronError)) {
               err = new DendronError({
                 message: `Failed to read ${ent.fpath} in ${vault.fsPath}`,
@@ -247,7 +247,7 @@ export class NoteParser extends ParserBase {
         vault,
         cache: this.cache,
       }));
-    } catch (_err) {
+    } catch (_err: any) {
       const err = DendronError.createFromStatus({
         status: ERROR_STATUS.BAD_PARSE_FOR_NOTE,
         severity: ERROR_SEVERITY.MINOR,

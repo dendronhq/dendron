@@ -772,7 +772,9 @@
       "contributions": [
         "bug",
         "financial",
-        "tutorial"
+        "tutorial",
+        "doc",
+        "example"
       ]
     },
     {

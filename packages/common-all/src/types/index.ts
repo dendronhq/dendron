@@ -1,6 +1,11 @@
 import { DNodeType, NoteProps } from "./foundation";
 
+export * from "./compat";
+export * from "./foundation";
 export * from "./hooks";
+export * from "./intermediateConfigs";
+export * from "./noteType";
+export * from "./seed";
 export * from "./typesv2";
 export * from "./workspace";
 export * from "./foundation";

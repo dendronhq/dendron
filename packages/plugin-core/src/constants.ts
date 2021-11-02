@@ -734,6 +734,18 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     desc: "Delete a hook",
     when: DendronContext.PLUGIN_ACTIVE,
   },
+  REGISTER_NOTE_TYPE: {
+    key: "dendron.registerNoteType",
+    title: `${CMD_PREFIX} Register Note Type`,
+    group: "hooks",
+    desc: "Register a new Note Type in Dendron's Type System",
+  },
+  CREATE_USER_DEFINED_NOTE: {
+    key: "dendron.createCustomTypedNote",
+    title: `${CMD_PREFIX} Create Note with Custom Type`,
+    group: "hooks",
+    desc: "Create a New Note with a User-Defined Type Applied",
+  },
   // --- Publishing
   PUBLISH_EXPORT: {
     key: "dendron.publishExport",

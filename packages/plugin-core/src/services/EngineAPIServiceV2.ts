@@ -107,14 +107,8 @@ export class EngineAPIServiceV2 implements DEngineClient {
     this.wsRoot = this.internalEngine.wsRoot;
     this.schemas = this.internalEngine.schemas;
     this.links = this.internalEngine.links;
-    // this.ws = this.internalEngine.ws;
-    // this.fuseEngine = this.internalEngine.fuseEngine;
-    // this.api = this.internalEngine.api;
     this.vaults = this.internalEngine.vaults;
     this.configRoot = this.internalEngine.configRoot;
-    // this.history = this.internalEngine.history;
-    // this.logger = this.internalEngine.logger;
-    // this.store = this.internalEngine.store;
     this.config = this.internalEngine.config;
     this.hooks = this.internalEngine.hooks;
   }
@@ -150,15 +144,6 @@ export class EngineAPIServiceV2 implements DEngineClient {
       }
     }
 
-    //TODO: how to resolve types[0] here? maybe leave as is
-    if (
-      note.types &&
-      note.types.length > 0 &&
-      note.types[0].onWillCreate &&
-      note.types[0].onWillCreate.setNameModifier
-    ) {
-      note.title = note.types[0].onWillCreate.setNameModifier(note);
-    }
     return this.internalEngine.writeNote(note, opts);
   }
 

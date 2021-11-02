@@ -1,13 +1,9 @@
-import { DNodeProps } from "."
-
+/**
+ * Note Type Interface TODO: this is a work in progress; more properties will be
+ * added as the note type system functionality expands
+ */
 export type NoteType = {
   id: string;
-
-  // Returns a JSON like complex object
-  getTemplateType: any | undefined;
-
-  //TODO
-  //setTemplateType? What if user sets a type for their daily journal note for example?
 
   /**
    * Callback Props that occur prior to the creation of the note
@@ -18,24 +14,54 @@ export type NoteType = {
    * Callback Props that occur during the creation of the note such as modifying frontmatter or contents
    */
   onCreate?: onCreateProps;
+};
 
-  //TODO: Missing Properties
-  // Vault Specifier?
-}
+/**
+ * These properties are available for use when the note is being created.
+ */
+export type OnCreateContext = {
+  /**
+   * The value of this varies on the context.  During onWillCreate, this
+   * contains the name of the Dendron note that is currently in focus. The name
+   * includes the entire hierarchy. Undefined if a Dendron note is not currently
+   * in focus. During onCreate, this will contain the name of the note about to
+   * be created.
+   */
+  currentNoteName?: string;
+
+  /**
+   * Contains any portion of text that is highlighted in the current editor.
+   */
+  selectedText?: string;
+
+  /**
+   * Contains clipboard contents.
+   */
+  clipboard: string;
+};
+
+export type SetNameModifierResp = {
+  /**
+   * The modified name for the note
+   */
+  name: string;
+
+  /**
+   * If true, the user will be prompted with an input box, where they can
+   * further modify the note name. The default value in the input box will be
+   * set to the `name` property.
+   */
+  promptUserForModification: boolean;
+};
 
 export type onWillCreateProps = {
-  // TODO: Add params: selected text; clipboard text
-  //configurable_level_1
-  setNameModifier?(noteProps: Partial<DNodeProps>):string;
-
-  //TODO: Spec this one out better:
-  modifyCurrentNote?(noteProps: DNodeProps, selected: string): string; // idea here is how do we implement selectionextract functionality of scratch notes
-}
+  setNameModifier?(props: OnCreateContext): SetNameModifierResp;
+};
 
 export type onCreateProps = {
   //TODO: Should these be combined into one? Is String the right type for vault, probably not. Should we use DNoteProps for note?
   //configurable_level_1
-  setTitle(noteName: string, hierarchy: string, vault: string): string;
+  setTitle?(props: OnCreateContext): string;
 
   // We shouldn't choose apply template; should be more generic
   // applyTemplate(templateName: string): void;
@@ -46,12 +72,8 @@ export type onCreateProps = {
 
   //TODO: needs to return a prop array of some sort
   setFrontmatter?(): string;
-}
+};
 
-export type onDescendantLifecycleEvent = {
+export type onDescendantLifecycleEvent = {};
 
-}
-
-export type onSiblingLifecycleEvent = {
-
-}
+export type onSiblingLifecycleEvent = {};

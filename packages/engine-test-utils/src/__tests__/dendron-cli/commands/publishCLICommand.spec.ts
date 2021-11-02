@@ -162,9 +162,11 @@ describe("WHEN run `dendron publish dev`", () => {
     await runEngineTestV5(
       async ({ wsRoot }) => {
         const cli = new PublishCLICommand();
+        const initStub = stub(cli, "init").resolves({ error: null });
         const buildStub = stub(cli, "build").resolves({ error: null });
         const devStub = stub(cli, "dev").resolves({ error: null });
         await runPublishCmd({ cli, cmd, wsRoot });
+        expect(initStub.calledOnce).toBeTruthy();
         expect(buildStub.calledOnce).toBeTruthy();
         expect(devStub.calledOnce).toBeTruthy();
       },
@@ -192,6 +194,7 @@ describe("WHEN run `dendron publish export`", () => {
             fs.ensureFileSync(
               path.join(wsRoot, ".next", "out", "canary-success")
             );
+            const initStub = stub(cli, "init").resolves({ error: null });
             const buildStub = stub(cli, "build").resolves({ error: null });
             const exportStub = stub(cli, "export").resolves({} as any);
             prompts.inject([true]);
@@ -202,6 +205,7 @@ describe("WHEN run `dendron publish export`", () => {
               target: PublishTarget.GITHUB,
             });
             // build and export called
+            expect(initStub.calledOnce).toBeTruthy();
             expect(buildStub.calledOnce).toBeTruthy();
             expect(exportStub.calledOnce).toBeTruthy();
             // old docs removed
@@ -233,6 +237,7 @@ describe("WHEN run `dendron publish export`", () => {
             fs.ensureFileSync(
               path.join(wsRoot, ".next", "out", "canary-success")
             );
+            const initStub = stub(cli, "init").resolves({ error: null });
             const buildStub = stub(cli, "build").resolves({ error: null });
             const exportStub = stub(cli, "export").resolves({} as any);
             prompts.inject([false]);
@@ -243,6 +248,7 @@ describe("WHEN run `dendron publish export`", () => {
               target: PublishTarget.GITHUB,
             });
             // build and export called
+            expect(initStub.calledOnce).toBeTruthy();
             expect(buildStub.callCount).toBeTruthy();
             expect(exportStub.calledOnce).toBeTruthy();
             // old docs removed

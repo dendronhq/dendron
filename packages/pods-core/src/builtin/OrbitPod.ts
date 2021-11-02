@@ -33,6 +33,11 @@ type OrbitImportPodCustomOpts = {
   token: string;
 };
 
+export enum MergeConflictOptions {
+  OVERWRITE = "Overwrite local value with remote value",
+  SKIP = "Skip (We will not merge, you'll resolve this manually)",
+}
+
 type OrbitImportPodConfig = ImportPodConfig & OrbitImportPodCustomOpts;
 
 type MembersOpts = {
@@ -219,14 +224,14 @@ export class OrbitImportPod extends ImportPod<OrbitImportPodConfig> {
     const conflict = conflicts[index];
     const resp = await handleConflict(conflict);
     switch (resp) {
-      case "Overwrite local value with remote value": {
+      case MergeConflictOptions.OVERWRITE: {
         conflict.conflictEntry.fname = conflict.conflictNote.fname;
         await engine.writeNote(conflict.conflictEntry, {
           updateExisting: true,
         });
         break;
       }
-      case "Skip (We will not merge, you'll resolve this manually)":
+      case MergeConflictOptions.SKIP:
         break;
       default: {
         break;

@@ -8,6 +8,7 @@ export enum DendronContext {
   PLUGIN_ACTIVE = "dendron:pluginActive",
   WEB_UI_ENABLED = "dendron:webUIEnabled",
   DEV_MODE = "dendron:devMode",
+  HAS_CUSTOM_MARKDOWN_VIEW = "hasCustomMarkdownView",
 }
 
 export const DENDRON_VIEWS = [

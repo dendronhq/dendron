@@ -370,14 +370,23 @@ export async function _activate(
       if (getStage() === "prod") {
         const segmentResidualCacheDir = context.globalStorageUri.fsPath;
         fs.ensureDir(segmentResidualCacheDir);
-        setupSegmentClient(wsImpl, path.join(segmentResidualCacheDir, "segmentresidualcache.log"));
-  
+        setupSegmentClient(
+          wsImpl,
+          path.join(segmentResidualCacheDir, "segmentresidualcache.log")
+        );
+
         // Try to flush the Segment residual cache every hour:
         (function tryFlushSegmentCache() {
-          SegmentClient.instance().tryFlushResidualCache().then((result) => {
-            Logger.info(`Segment Residual Cache flush attempted. ${JSON.stringify(result)}`);
-          });
-  
+          SegmentClient.instance()
+            .tryFlushResidualCache()
+            .then((result) => {
+              Logger.info(
+                `Segment Residual Cache flush attempted. ${JSON.stringify(
+                  result
+                )}`
+              );
+            });
+
           // Repeat once an hour:
           setTimeout(tryFlushSegmentCache, 3600000);
         })();
@@ -619,6 +628,7 @@ function toggleViews(enabled: boolean) {
   const ctx = "toggleViews";
   Logger.info({ ctx, msg: `views enabled: ${enabled}` });
   VSCodeUtils.setContext(DendronContext.PLUGIN_ACTIVE, enabled);
+  VSCodeUtils.setContext(DendronContext.HAS_CUSTOM_MARKDOWN_VIEW, enabled);
 }
 
 // this method is called when your extension is deactivated

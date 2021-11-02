@@ -822,6 +822,15 @@
         "bug",
         "content"
       ]
+    },
+    {
+      "login": "mhijazi1",
+      "name": "Mo",
+      "avatar_url": "https://avatars.githubusercontent.com/u/5711555?v=4",
+      "profile": "https://github.com/mhijazi1",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

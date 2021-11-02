@@ -42,7 +42,6 @@ export class PublishExportCommand extends BasicCommand<
     // check if we need to remove .next
     const nextPathExists = await NextjsExportPodUtils.nextPathExists({
       nextPath,
-      quiet: true,
     });
 
     if (nextPathExists) {

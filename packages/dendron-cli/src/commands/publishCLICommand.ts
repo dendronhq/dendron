@@ -24,6 +24,7 @@ import { PodSource } from "./pod";
 import { SetupEngineCLIOpts } from "./utils";
 import prompts from "prompts";
 import fs from "fs-extra";
+import ora from "ora";
 
 type CommandCLIOpts = {
   cmd: PublishCommands;
@@ -275,13 +276,20 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
 
   async init(opts: { wsRoot: string }) {
     const nextPath = NextjsExportPodUtils.getNextRoot(opts.wsRoot);
+    const spinner = ora();
+
     const nextPathExists = await NextjsExportPodUtils.nextPathExists({
       nextPath,
+      progressCb: spinner,
     });
+
     if (nextPathExists) {
-      await NextjsExportPodUtils.removeNextPath({ nextPath });
+      await NextjsExportPodUtils.removeNextPath({
+        nextPath,
+        progressCb: spinner,
+      });
     }
-    await NextjsExportPodUtils.initialize({ nextPath });
+    await NextjsExportPodUtils.initialize({ nextPath, progressCb: spinner });
     return { error: null };
   }
 

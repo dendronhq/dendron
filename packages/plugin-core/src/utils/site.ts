@@ -232,7 +232,6 @@ export class NextJSPublishUtils {
       async () => {
         const out = await NextjsExportPodUtils.removeNextPath({
           nextPath,
-          quiet: true,
         });
         return out;
       }
@@ -249,7 +248,6 @@ export class NextJSPublishUtils {
       async () => {
         const out = await NextjsExportPodUtils.installDependencies({
           nextPath,
-          quiet: true,
         });
         return out;
       }
@@ -266,7 +264,6 @@ export class NextJSPublishUtils {
       async () => {
         const out = await NextjsExportPodUtils.cloneTemplate({
           nextPath,
-          quiet: true,
         });
         return out;
       }

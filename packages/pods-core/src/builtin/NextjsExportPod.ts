@@ -14,7 +14,6 @@ import {
   MDUtilsV5,
   ProcFlavor,
   SiteUtils,
-  ora,
   execa,
 } from "@dendronhq/engine-server";
 import { JSONSchemaType } from "ajv";
@@ -81,140 +80,93 @@ export class NextjsExportPodUtils {
     return path.join(wsRoot, ".next");
   };
 
-  static async nextPathExists(opts: {
-    nextPath: string;
-    quiet?: boolean;
-    spinner?: ora.Ora;
-  }) {
-    const { nextPath, quiet, spinner } = opts;
-    const text = "checking if .next directory exists.";
-    const _spinner =
-      spinner ||
-      ora({
-        text,
-        isSilent: quiet,
-      });
+  static async nextPathExists(opts: { nextPath: string; progressCb?: any }) {
+    const { nextPath, progressCb } = opts;
 
-    if (opts.spinner) {
-      _spinner.stopAndPersist({
-        text,
+    if (progressCb) {
+      progressCb.start();
+      progressCb.stopAndPersist({
+        text: "checking if .next directory exists.",
         symbol: DENDRON_EMOJIS.SEEDLING,
       });
     }
 
-    _spinner.start();
-
     const exists = await fs.pathExists(nextPath);
     if (exists) {
-      _spinner.stopAndPersist({
-        text: ".next directory exists.",
-        symbol: DENDRON_EMOJIS.SEEDLING,
-      });
+      if (progressCb) {
+        progressCb.stopAndPersist({
+          text: ".next directory exists",
+          symbol: DENDRON_EMOJIS.SEEDLING,
+        });
+      }
       return true;
     } else {
-      _spinner.stopAndPersist({
-        text: ".next directory does not exist.",
-        symbol: DENDRON_EMOJIS.SEEDLING,
-      });
+      if (progressCb) {
+        progressCb.stopAndPersist({
+          text: ".next directory exists",
+          symbol: DENDRON_EMOJIS.SEEDLING,
+        });
+      }
       return false;
     }
   }
 
-  static async isInitialized(opts: {
-    wsRoot: string;
-    quiet?: boolean;
-    spinner?: ora.Ora;
-  }) {
-    const cwd = opts.wsRoot;
-    const nextPath = path.join(cwd, ".next");
-
-    const text = "checking if NextJS template is initialized";
-    const _spinner = opts.spinner
-      ? opts.spinner
-      : ora({
-          text,
-          isSilent: opts.quiet,
-        });
-
-    if (opts.spinner) {
-      _spinner.stopAndPersist({
-        text,
+  static async removeNextPath(opts: { nextPath: string; progressCb?: any }) {
+    const { nextPath, progressCb } = opts;
+    if (progressCb) {
+      progressCb.start();
+      progressCb.text = `directory already exists at ${nextPath}. Removing...`;
+    }
+    await fs.rm(nextPath, { recursive: true });
+    if (progressCb) {
+      progressCb.stopAndPersist({
+        text: `existing ${_.last(nextPath.split("/"))} directory deleted.`,
         symbol: DENDRON_EMOJIS.SEEDLING,
       });
     }
-
-    _spinner.start();
-
-    const nextPathExists = await NextjsExportPodUtils.nextPathExists({
-      ...opts,
-      nextPath,
-      spinner: _spinner,
-    });
-
-    if (nextPathExists) {
-      const pkgJsonExists = await fs.pathExists(
-        path.join(nextPath, "package.json")
-      );
-      if (pkgJsonExists) {
-        _spinner.stopAndPersist({
-          text: "NextJS template already initialized.",
-          symbol: DENDRON_EMOJIS.SEEDLING,
-        });
-        return true;
-      }
-    }
-    _spinner.succeed("NextJS template is not initialized.");
-    return false;
-  }
-
-  static async removeNextPath(opts: { nextPath: string; quiet?: boolean }) {
-    const { nextPath, quiet } = opts;
-    const spinner = ora({ isSilent: quiet });
-    spinner.start(`directory already exists at ${nextPath}. Removing...`);
-    await fs.rmdir(nextPath, { recursive: true });
-    spinner.stopAndPersist({
-      text: `existing ${_.last(nextPath.split("/"))} directory deleted.`,
-      symbol: DENDRON_EMOJIS.SEEDLING,
-    });
   }
 
   static async installDependencies(opts: {
     nextPath: string;
-    quiet?: boolean;
+    progressCb?: any;
   }) {
-    const { nextPath, quiet } = opts;
-    const spinner = ora({ isSilent: quiet });
-    spinner.start("Installing dependencies...");
+    const { nextPath, progressCb } = opts;
+    if (progressCb) {
+      progressCb.start();
+      progressCb.text = "Installing dependencies...";
+    }
     await $$("npm install", { cwd: nextPath });
-    spinner.stopAndPersist({
-      text: "All dependencies installed.",
-      symbol: DENDRON_EMOJIS.SEEDLING,
-    });
+    if (progressCb) {
+      progressCb.stopAndPersist({
+        text: "All dependencies installed.",
+        symbol: DENDRON_EMOJIS.SEEDLING,
+      });
+    }
   }
 
-  static async cloneTemplate(opts: { nextPath: string; quiet?: boolean }) {
-    const { nextPath, quiet } = opts;
+  static async cloneTemplate(opts: { nextPath: string; progressCb?: any }) {
+    const { nextPath, progressCb } = opts;
 
-    const spinner = ora({
-      text: "Cloning NextJS template",
-      isSilent: quiet,
-    }).start();
+    if (progressCb) {
+      progressCb.start();
+      progressCb.text = "Cloning NextJS template...";
+    }
 
-    // clone template
-    spinner.start(`cloning nextjs-template...`);
     const url = "https://github.com/dendronhq/nextjs-template.git";
     await fs.ensureDir(nextPath);
     const git = simpleGit({ baseDir: nextPath });
     await git.clone(url, nextPath);
-    spinner.stopAndPersist({
-      text: "successfully cloned.",
-      symbol: DENDRON_EMOJIS.SEEDLING,
-    });
+    if (progressCb) {
+      progressCb.stopAndPersist({
+        text: "Successfully cloned.",
+        symbol: DENDRON_EMOJIS.SEEDLING,
+      });
+    }
 
     return { error: null };
   }
 
-  static async initialize(opts: { nextPath: string; quiet?: boolean }) {
+  static async initialize(opts: { nextPath: string; progressCb?: any }) {
     await NextjsExportPodUtils.cloneTemplate(opts);
     await NextjsExportPodUtils.installDependencies(opts);
   }

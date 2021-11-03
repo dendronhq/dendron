@@ -1,8 +1,6 @@
 import {
   DendronError,
-  // error2PlainObject,
   ERROR_SEVERITY,
-  // IDendronError,
   RespV2,
   Time,
 } from "@dendronhq/common-all";

@@ -22,7 +22,10 @@ import {
   Anchor,
   LinkUtils,
 } from "@dendronhq/engine-server";
-import { LookupControllerV3 } from "../components/lookup/LookupControllerV3";
+import {
+  LookupControllerV3,
+  LookupControllerV3CreateOpts,
+} from "../components/lookup/LookupControllerV3";
 import {
   NoteLookupProvider,
   NoteLookupProviderSuccessResp,
@@ -32,16 +35,25 @@ import { VSCodeUtils } from "../utils";
 import { BasicCommand } from "./base";
 import _ from "lodash";
 import path from "path";
-import { getEngine } from "../workspace";
+import { getDWorkspace, getEngine, getVaultFromUri } from "../workspace";
 import { EngineAPIService } from "../services/EngineAPIService";
 import { delayedUpdateDecorations } from "../features/windowDecorations";
 import { findReferences, FoundRefT } from "../utils/md";
 import { Location } from "vscode";
 import { file2Note, vault2Path } from "@dendronhq/common-server";
+import {
+  NewLocation,
+  PickerUtilsV2,
+  ProviderAcceptHooks,
+} from "../components/lookup/utils";
 
 type CommandInput =
   | {
       dest?: NoteProps;
+      initialValue?: string;
+      nonInteractive?: boolean;
+      useSameVault?: boolean;
+      vaultName?: string;
     }
   | undefined;
 type CommandOpts = {
@@ -72,6 +84,11 @@ export class MoveHeaderCommand extends BasicCommand<
   private noNodesToMoveError = new DendronError({
     message:
       "There are no nodes to move. If your selection is valid, try again after reloading VSCode.",
+    severity: ERROR_SEVERITY.MINOR,
+  });
+
+  private noDestError = new DendronError({
+    message: "No destination provided. Cancelling move.",
     severity: ERROR_SEVERITY.MINOR,
   });
 
@@ -130,21 +147,34 @@ export class MoveHeaderCommand extends BasicCommand<
    * @returns
    */
   private promptForDestination(opts: CommandInput) {
-    const lookupController = LookupControllerV3.create({
+    const lcOpts: LookupControllerV3CreateOpts = {
       nodeType: "note",
-      disableVaultSelection: true,
-    });
+      disableVaultSelection: opts?.useSameVault,
+      vaultSelectCanToggle: false,
+    };
+    const lookupController = LookupControllerV3.create(lcOpts);
     const lookupProvider = new NoteLookupProvider(this.key, {
-      allowNewNote: false,
+      allowNewNote: true,
       noHidePickerOnAccept: false,
     });
+    lookupProvider.registerOnAcceptHook(ProviderAcceptHooks.NewLocationHook);
+
+    let initialValue: string | undefined;
+    let nonInteractive: boolean = false;
+    if (opts?.dest) {
+      initialValue = opts.dest.fname;
+      nonInteractive = true;
+    } else if (opts?.initialValue) {
+      initialValue = opts.initialValue;
+      nonInteractive = true;
+    }
 
     lookupController.show({
       title: "Select note to move header to",
       placeholder: "note",
       provider: lookupProvider,
-      initialValue: opts?.dest ? opts.dest.fname : undefined,
-      nonInteractive: !_.isUndefined(opts?.dest),
+      initialValue,
+      nonInteractive,
     });
     return lookupController;
   }
@@ -174,9 +204,31 @@ export class MoveHeaderCommand extends BasicCommand<
         listener: async (event) => {
           if (event.action === "done") {
             HistoryService.instance().remove(this.key, "lookupProvider");
-            const cdata = event.data as NoteLookupProviderSuccessResp;
+            const cdata =
+              event.data as NoteLookupProviderSuccessResp<NewLocation>;
+            const newLoc = cdata.onAcceptHookResp[0].newLoc;
+            const selected = cdata.selectedItems[0];
+            const isNew = PickerUtilsV2.isCreateNewNotePick(selected);
+            let dest: NoteProps | undefined;
+            if (isNew) {
+              const fname = newLoc.fname;
+              const vaultName = newLoc.vaultName as string;
+              const engine = getDWorkspace().engine;
+              const vault = VaultUtils.getVaultByName({
+                vaults: engine.vaults,
+                vname: vaultName,
+              });
+              if (_.isUndefined(vault)) {
+                this.L.error({ msg: `error: ${vaultName} not found.` });
+                resolve(undefined);
+              } else {
+                dest = NoteUtils.create({ fname, vault });
+              }
+            } else {
+              dest = selected as NoteProps;
+            }
             resolve({
-              dest: cdata.selectedItems[0],
+              dest,
               origin,
               nodesToMove,
               engine,
@@ -185,9 +237,15 @@ export class MoveHeaderCommand extends BasicCommand<
           } else if (event.action === "error") {
             this.L.error({ msg: `error: ${event.data}` });
             resolve(undefined);
-          } else if (event.action === "changeState") {
-            this.L.info({ msg: "cancelled" });
-            resolve(undefined);
+          } else if (
+            event.data &&
+            event.action === "changeState" &&
+            event.data.action === "hide"
+          ) {
+            this.L.info({
+              ctx: "MoveHeaderCommand",
+              msg: "changeState.hide event received.",
+            });
           } else {
             this.L.error({ msg: `unhandled error: ${event.data}` });
             resolve(undefined);
@@ -260,14 +318,11 @@ export class MoveHeaderCommand extends BasicCommand<
     location: Location,
     engine: EngineAPIService
   ): NoteProps | undefined {
-    const { wsRoot, vaults, notes } = engine;
+    const { wsRoot, notes } = engine;
     const fsPath = location.uri.fsPath;
     const fname = NoteUtils.normalizeFname(path.basename(fsPath));
-    const vault = VaultUtils.getVaultByNotePath({
-      fsPath,
-      wsRoot,
-      vaults,
-    });
+
+    const vault = getVaultFromUri(location.uri);
     const note = NoteUtils.getNoteByFnameV5({
       fname,
       notes,
@@ -477,6 +532,11 @@ export class MoveHeaderCommand extends BasicCommand<
     this.L.info({ ctx, opts });
     const { origin, nodesToMove, engine } = opts;
     const dest = opts.dest as NoteProps;
+
+    if (_.isUndefined(dest)) {
+      // we failed to get a destination. exit.
+      throw this.noDestError;
+    }
 
     // deep copy the origin before mutating it
     const originDeepCopy = _.cloneDeep(origin);

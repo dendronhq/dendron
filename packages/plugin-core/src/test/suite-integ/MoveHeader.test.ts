@@ -1,4 +1,4 @@
-import { DVault, NoteProps } from "@dendronhq/common-all";
+import { DVault, NoteProps, NoteUtils } from "@dendronhq/common-all";
 import {
   NoteTestUtilsV4,
   PreSetupHookFunction,
@@ -10,6 +10,7 @@ import vscode from "vscode";
 import { expect } from "../testUtilsv2";
 import { MoveHeaderCommand } from "../../commands/MoveHeader";
 import _ from "lodash";
+import { getDWorkspace } from "../../workspace";
 
 suite("MoveHeader", function () {
   const ctx = setupBeforeAfter(this);
@@ -60,6 +61,36 @@ suite("MoveHeader", function () {
         };
       });
 
+      describe("AND WHEN move destination note does not exist", () => {
+        test("THEN new note is created and header is appended to new note", (done) => {
+          runLegacyMultiWorkspaceTest({
+            ctx,
+            preSetupHook,
+            onInit: onInitFunc(async () => {
+              const cmd = new MoveHeaderCommand();
+              const out = await cmd.run({
+                useSameVault: true,
+                initialValue: "new-note",
+              });
+
+              const { engine, vaults, wsRoot } = getDWorkspace();
+              const newNote = NoteUtils.getNoteByFnameV5({
+                fname: "new-note",
+                notes: engine.notes,
+                vault: vaults[0],
+                wsRoot,
+              });
+
+              expect(!_.isUndefined(newNote)).toBeTruthy();
+              expect(out!.origin.body.includes("## Foo header")).toBeFalsy();
+              expect(out!.dest!.body.includes("## Foo header")).toBeTruthy();
+
+              done();
+            }),
+          });
+        });
+      });
+
       describe("AND WHEN note reference exists in destination", () => {
         test("THEN selected header is moved from origin to dest", (done) => {
           runLegacyMultiWorkspaceTest({
@@ -92,7 +123,7 @@ suite("MoveHeader", function () {
             },
             onInit: onInitFunc(async () => {
               const cmd = new MoveHeaderCommand();
-              const out = await cmd.run({ dest: destNote });
+              const out = await cmd.run({ dest: destNote, useSameVault: true });
               expect(out!.origin.body.includes("## Foo header")).toBeFalsy();
               expect(out!.dest!.body.includes("## Foo header")).toBeTruthy();
               done();
@@ -107,7 +138,7 @@ suite("MoveHeader", function () {
           preSetupHook,
           onInit: onInitFunc(async () => {
             const cmd = new MoveHeaderCommand();
-            const out = await cmd.run({ dest: destNote });
+            const out = await cmd.run({ dest: destNote, useSameVault: true });
             expect(out!.origin.body.includes("## Foo header")).toBeFalsy();
             expect(out!.dest!.body.includes("## Foo header")).toBeTruthy();
             done();
@@ -121,7 +152,7 @@ suite("MoveHeader", function () {
           preSetupHook,
           onInit: onInitFunc(async () => {
             const cmd = new MoveHeaderCommand();
-            const out = await cmd.run({ dest: destNote });
+            const out = await cmd.run({ dest: destNote, useSameVault: true });
             await new Promise((res) => setTimeout(res, 100));
             expect(
               out!.updated[0].body.includes("[[Foo|dest#foo-header]]")
@@ -151,7 +182,10 @@ suite("MoveHeader", function () {
             const cmd = new MoveHeaderCommand();
             let out;
             try {
-              out = await cmd.gatherInputs({ dest: destNote });
+              out = await cmd.gatherInputs({
+                dest: destNote,
+                useSameVault: true,
+              });
             } catch (error) {
               expect(error).toContain(
                 "You must first select the header you want to move."

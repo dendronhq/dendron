@@ -27,7 +27,7 @@ const NOTE_SNIPPET_BEFORE_AFTER = 100;
 /** Place this in place of omitted text in between snippet parts. */
 const OMITTED_PART_TEXT = " ... ";
 /** How long to wait for before triggering fuse search, in ms. Required for performance reasons since fuse search is expensive. */
-const SEARCH_DELAY = 700;
+const SEARCH_DELAY = 300;
 
 export function DendronSearch(props: DendronCommonProps) {
   if (!verifyNoteData(props)) {

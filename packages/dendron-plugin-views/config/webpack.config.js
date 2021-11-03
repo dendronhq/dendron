@@ -199,7 +199,7 @@ module.exports = function (webpackEnv) {
           ]
         : {
             index: paths.appIndexJs,
-            ...paths.appPages
+            ...paths.appPages,
           },
     output: {
       // The build folder.
@@ -398,7 +398,7 @@ module.exports = function (webpackEnv) {
                     },
                   ],
                 ],
-                
+
                 plugins: [
                   [
                     require.resolve("babel-plugin-named-asset-import"),
@@ -443,7 +443,7 @@ module.exports = function (webpackEnv) {
                 cacheDirectory: true,
                 // See #6846 for context on why cacheCompression is disabled
                 cacheCompression: false,
-                
+
                 // Babel sourcemaps are needed for debugging into node_modules
                 // code.  Without the options below, debuggers like VSCode
                 // show incorrect code and set breakpoints on the wrong lines.
@@ -626,7 +626,7 @@ module.exports = function (webpackEnv) {
         new MiniCssExtractPlugin({
           // Options similar to the same options in webpackOptions.output
           // both options are optional
-          filename: 'static/css/[name].styles.css',
+          filename: "static/css/[name].styles.css",
         }),
       // Generate an asset manifest file with the following content:
       // - "files" key: Mapping of all asset filenames to their corresponding
@@ -634,24 +634,24 @@ module.exports = function (webpackEnv) {
       //   `index.html`
       // - "entrypoints" key: Array of files which are included in `index.html`,
       //   can be used to reconstruct the HTML if necessary
-        // new ManifestPlugin({
-        //   fileName: "asset-manifest.json",
-        //   publicPath: paths.publicUrlOrPath,
-        //   generate: (seed, files, entrypoints) => {
-        //     const manifestFiles = files.reduce((manifest, file) => {
-        //       manifest[file.name] = file.path;
-        //       return manifest;
-        //     }, seed);
-        //     const entrypointFiles = entrypoints.main.filter(
-        //       (fileName) => !fileName.endsWith(".map")
-        //     );
+      // new ManifestPlugin({
+      //   fileName: "asset-manifest.json",
+      //   publicPath: paths.publicUrlOrPath,
+      //   generate: (seed, files, entrypoints) => {
+      //     const manifestFiles = files.reduce((manifest, file) => {
+      //       manifest[file.name] = file.path;
+      //       return manifest;
+      //     }, seed);
+      //     const entrypointFiles = entrypoints.main.filter(
+      //       (fileName) => !fileName.endsWith(".map")
+      //     );
 
-        //     return {
-        //       files: manifestFiles,
-        //       entrypoints: entrypointFiles,
-        //     };
-        //   },
-        // }),
+      //     return {
+      //       files: manifestFiles,
+      //       entrypoints: entrypointFiles,
+      //     };
+      //   },
+      // }),
       // Moment.js is an extremely popular library that bundles large locale files
       // by default due to how webpack interprets its code. This is a practical
       // solution that requires the user to opt into importing specific locales.

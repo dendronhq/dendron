@@ -18,4 +18,3 @@ type.feature:
   - '- \[ ?(?:x|X) ?\] Request of a new feature.'
 status.triage-needed:
   - "(?:.*)"
-

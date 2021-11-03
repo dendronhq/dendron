@@ -1292,13 +1292,13 @@ export class RemarkUtils {
       return [];
     }
     const nodesToExtract = nextHeaderIndex
-      // @ts-ignore
-      ? (tree.children as Node[]).splice(
+      ? // @ts-ignore
+        (tree.children as Node[]).splice(
           foundHeaderIndex!,
           nextHeaderIndex! - foundHeaderIndex!
         )
-      // @ts-ignore
-      : (tree.children as Node[]).splice(foundHeaderIndex!);
+      : // @ts-ignore
+        (tree.children as Node[]).splice(foundHeaderIndex!);
     return nodesToExtract;
   }
 

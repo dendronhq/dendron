@@ -41,7 +41,7 @@ export class RunMigrationCommand extends BasicCommand<
         };
       }
     );
-    
+
     if (_.isUndefined(opts)) {
       const selected = await vscode.window
         .showQuickPick(migrationItems)

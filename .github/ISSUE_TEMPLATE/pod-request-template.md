@@ -15,7 +15,7 @@ assignees: kpathakota
  Needed for Auto labeling:
  issue_labeler_regex_version=3
 
- - [X] Onboard. 
+ - [X] Onboard.
  - [X] Feature Request
  - [ ] IsTriaged
 
@@ -35,7 +35,7 @@ assignees: kpathakota
 
 ## Configuration
 
-<!--What might a configuration file look like to help make sure your data is formatted correctly 
+<!--What might a configuration file look like to help make sure your data is formatted correctly
 
 e.g.
 destinations:

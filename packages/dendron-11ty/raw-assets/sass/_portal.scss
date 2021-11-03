@@ -15,18 +15,18 @@ iframe{
   	-moz-transition: all .20s ease;
   	-ms-transition: all .20s ease;
   	-o-transition: all .20s ease;
-  	transition: all .20s ease;	
+  	transition: all .20s ease;
 
 	&:hover{
 		transform: translateY(-3px);
 		box-shadow: 0px 6px 20px 0px rgba(0,0,0,.15);
 		border: 1px solid #9DB8BF;
 	}
-	
+
 	.portal-head{
 		border-bottom: 1px solid #C2DFE3;
     	padding: 12px;
-		
+
 		.portal-backlink{
 			display: flex;
 			flex-direction: column;
@@ -35,21 +35,21 @@ iframe{
 		  	-moz-transition: all .20s ease;
 		  	-ms-transition: all .20s ease;
 		  	-o-transition: all .20s ease;
-		  	transition: all .20s ease;	
+		  	transition: all .20s ease;
 			// @include align-items($align: left);
 
 			@media(min-width:600px){
 				flex-direction: row;
 				justify-content: space-between;
-				align-items: center;	
-			}			
+				align-items: center;
+			}
 			.portal-title{
 				font-size: 14px;
 				color: #9DB8BF;
 				.portal-text-title{
 					font-weight:700;
 					color: #5C6D73;
-				}				
+				}
 			}
 			.portal-arrow{
 				font-size: 14px;
@@ -87,10 +87,10 @@ iframe{
 			// background-image: linear-gradient(rgba(255,255,255,0), rgba(255,255,255,1));
 			z-index: 50;
 			pointer-events: none;
-		}			
+		}
 		.portal-parent-text{
 			padding:$base-line-height / 2;
-			color: #5C6D73;			
+			color: #5C6D73;
 			z-index: 40;
 		}
 		.portal-iframe{
@@ -103,7 +103,7 @@ iframe{
 // Things that happen in the iframe have to be applied to the whole site,
 // as you can't use css on iframe contents – not a major issue for the time being,
 // considering you have to own the site you're transcluding.
-// Make sure your theme's anchor text styling explicitly hits a:link and not all a tags to avoid 
+// Make sure your theme's anchor text styling explicitly hits a:link and not all a tags to avoid
 // making quoted text look like a link.
 .portal-quote-text {
 	background-color: #C2DFE3;
@@ -113,4 +113,4 @@ iframe{
 	&:hover {
 		text-decoration: none;
 	}
-}			
+}

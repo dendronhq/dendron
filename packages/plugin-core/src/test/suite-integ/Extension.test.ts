@@ -550,7 +550,7 @@ suite("keybindings", function () {
           "key": "${metaKey}+k l",
           "command": "dendron.lookup",
           "args": {
-            /* arg-comment-0 */ 
+            /* arg-comment-0 */
             // arg-comment-1
             "flavor": "note", // arg-comment-2
             // arg-comment-3

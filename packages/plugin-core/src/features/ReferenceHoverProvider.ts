@@ -71,9 +71,9 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
       : "";
 
     const config = getDWorkspace().config;
-    const autoCreateOnDefinition = ConfigUtils.getWorkspace(config).enableAutoCreateOnDefinition;
-    const ctrlClickToCreate =
-      autoCreateOnDefinition ? "Ctrl+Click or " : "";
+    const autoCreateOnDefinition =
+      ConfigUtils.getWorkspace(config).enableAutoCreateOnDefinition;
+    const ctrlClickToCreate = autoCreateOnDefinition ? "Ctrl+Click or " : "";
     return `Note ${refAtPos.ref}${vaultName} is missing, ${ctrlClickToCreate}use "Dendron: Goto Note" command to create it.`;
   }
 

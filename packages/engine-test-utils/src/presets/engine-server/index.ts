@@ -38,15 +38,15 @@ type TestPresetEntry = TestPresetEntryV4;
 type TestPresetDict = { [key: string]: TestPresetEntry };
 
 /**
- * 
+ *
  @example
  *  test("", async () => {
  *    const TestCase= getPreset({presets: ENGINE_PRESETS, nodeType, presetName: "init", key: 'BAD_SCHEMA'})
  *    const { testFunc, ...opts } = TestCase;;
  *    await runEngineTestV5(testFunc, { ...opts, expect });
  *});
- * @param param0 
- * @returns 
+ * @param param0
+ * @returns
  */
 export const getPreset = ({
   presets,

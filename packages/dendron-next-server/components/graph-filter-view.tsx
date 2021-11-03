@@ -131,8 +131,9 @@ const FilterViewStringInput = ({
   updateConfigField: (key: string, value: string | number | boolean) => void;
   nodeCount: number;
 }) => {
-  const [updateTimeout, setUpdateTimeout] =
-    useState<NodeJS.Timeout | null>(null);
+  const [updateTimeout, setUpdateTimeout] = useState<NodeJS.Timeout | null>(
+    null
+  );
 
   // This timeout is designed to maximize filter responsiveness while minimizing hang times
   const handleChange = (newValue: string) => {

@@ -10,18 +10,18 @@ export type DendronTheme = {
 };
 
 const DEFAULT_THEMES = {
-	light: {
-		primaryColor: "#43B02A",
-		bodyBackground: "#ffffff",
-		componentBackground: "#ffffff",
-		layoutBodyBackground: "#ffffff",
-		borderRadiusBase: "4px",
-		layoutHeaderBackground: "#F5F7F9",
-	}
-}
+  light: {
+    primaryColor: "#43B02A",
+    bodyBackground: "#ffffff",
+    componentBackground: "#ffffff",
+    layoutBodyBackground: "#ffffff",
+    borderRadiusBase: "4px",
+    layoutHeaderBackground: "#F5F7F9",
+  },
+};
 
-export class ThemeUtils{
+export class ThemeUtils {
   static getTheme(name: string): DendronTheme | undefined {
-		return _.get(DEFAULT_THEMES, name, undefined);
-	}
+    return _.get(DEFAULT_THEMES, name, undefined);
+  }
 }

@@ -228,7 +228,7 @@ export const setupInlineSchema: PreSetupHookFunction = async (opts) => {
     inlineSchemaPath,
     `
 version: 1
-imports: 
+imports:
   - foo
 schemas:
   - id: daily

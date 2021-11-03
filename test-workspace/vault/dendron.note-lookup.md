@@ -17,15 +17,15 @@ Note look up `cmd+l`:
 ### Hierarchy with omitted path match
 * `dendron.multi` should match among others:
     * `dendron.ref.frontmatter-tags.multi-array`
-    
+
 ### Direct child look up:
-1. Turn on direct child look up 
+1. Turn on direct child look up
 ![](assets/images/Screen_Shot_2021-10-14_at_9.05.21_PM.png)
 
-2. Look up `dendron.blog.` Make sure only its children are shown. 
+2. Look up `dendron.blog.` Make sure only its children are shown.
 
 ### Go Down command
-1. Navigate to `dendron.blog` 
+1. Navigate to `dendron.blog`
 2. Activate `Go Down` command
 3. Make sure only the children of `dendron.blog` are shown.
 
@@ -44,4 +44,3 @@ Note look up `cmd+l`:
 ![[dendron.note-create#simple-case,1:#*]]
 
 ![[dendron.note-create#with-matching-simple-schema,1]]
-

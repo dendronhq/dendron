@@ -39,7 +39,7 @@ async function getWebviewContent2(opts: { title: string }) {
       <title>${opts.title}</title>
       <style>
       *       {margin:0;padding:0;}
-      html, 
+      html,
       body    {height:100%;  width:100%; overflow:hidden;}
       table   {height:100%;  width:100%; table-layout:static; border-collapse:collapse;}
       iframe  {float:left; height:100%; width:100%;}

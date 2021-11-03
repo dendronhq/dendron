@@ -42,7 +42,7 @@ type ServerErrorProps = {
    * Optional HTTP status code for error
    */
   code?: StatusCodes;
-}
+};
 
 export type IDendronError = DendronErrorProps;
 
@@ -102,7 +102,6 @@ export class DendronError extends Error implements IDendronError {
   }
 }
 
-
 export class DendronCompositeError extends Error implements IDendronError {
   public payload: DendronErrorProps[];
   public message: string;
@@ -137,15 +136,18 @@ export class DendronCompositeError extends Error implements IDendronError {
   }
 }
 
-export class DendronServerError extends DendronError implements IDendronError, ServerErrorProps  {
+export class DendronServerError
+  extends DendronError
+  implements IDendronError, ServerErrorProps
+{
   /**
-  * Optional HTTP status code for error
-  */
-   public code?: StatusCodes;
+   * Optional HTTP status code for error
+   */
+  public code?: StatusCodes;
 
- /**
-  * Custom status errors
-  */
+  /**
+   * Custom status errors
+   */
   public status?: string;
 }
 
@@ -250,5 +252,7 @@ export class ErrorUtils {
   }
 }
 export function isTSError(err: any): err is Error {
-  return (err as Error).message !== undefined && (err as Error).name !== undefined;
+  return (
+    (err as Error).message !== undefined && (err as Error).name !== undefined
+  );
 }

@@ -4,14 +4,10 @@ import _ from "lodash";
 import parse from "html-react-parser";
 
 type Props = {
-  content: string
-}
+  content: string;
+};
 
 export default function DendronCustomHead({ content }: Props) {
   const parsedContent = parse(content);
-  return (
-    <Head>
-      {parsedContent}
-    </Head>
-  )
+  return <Head>{parsedContent}</Head>;
 }

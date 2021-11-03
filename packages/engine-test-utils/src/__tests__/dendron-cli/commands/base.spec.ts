@@ -48,6 +48,8 @@ describe("GIVEN any command, no telemetry set before", () => {
 
   test("AND telemetry status is set", async () => {
     await dummy.eval({});
-    expect(SegmentClient.getStatus()).toEqual(TelemetryStatus.ENABLED_BY_CLI_DEFAULT);
+    expect(SegmentClient.getStatus()).toEqual(
+      TelemetryStatus.ENABLED_BY_CLI_DEFAULT
+    );
   });
 });

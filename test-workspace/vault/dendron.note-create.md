@@ -17,8 +17,8 @@ created: 1634725641716
 ```md
 In Note look up Type `book.book1.characters`
     EXPECTED `book.book1.characters` schema matched shows up as top result
-    THEN click on `book.book1.characters` 
-        EXPECTED `book.book1.characters` note is created 
+    THEN click on `book.book1.characters`
+        EXPECTED `book.book1.characters` note is created
             AND it used template `templates.book.characters`
 
 AFTER: delete `book.book1.characters`
@@ -34,13 +34,13 @@ Navigate to `daily` note
 AFTER: delete the created note.
 ```
 
-## Further test cases 
-Refer to [[Main test cases|#main-test-cases]] for primary test cases to run regarding note creation. 
+## Further test cases
+Refer to [[Main test cases|#main-test-cases]] for primary test cases to run regarding note creation.
 
 ### With untyped template schema.
 ```md
-1. Create a new note `untyped_template.one` 
+1. Create a new note `untyped_template.one`
 2. Validate that value in created note matches `templates.untyped.md`
 
-AFTER: delete `untyped_template.one` note. 
+AFTER: delete `untyped_template.one` note.
 ```

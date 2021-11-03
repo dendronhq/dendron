@@ -1,5 +1,5 @@
-const {checkToken} = require("./common");
-const {exec} = require("./exec");
+const { checkToken } = require("./common");
+const { exec } = require("./exec");
 
 function main() {
   // Where we would push if we ran `git push`
@@ -12,15 +12,23 @@ function main() {
     console.log("error", upstream);
   }
   // The files that would get pushed
-  const filesToPush = exec(`git diff --name-only ${upstream}`).stdout.split('\n');
+  const filesToPush = exec(`git diff --name-only ${upstream}`).stdout.split(
+    "\n"
+  );
 
   return checkToken({
     filesToCheck: filesToPush,
     forbiddenTokens: {
-      ".only": { rgx: /(suite|describe|it|test)\.only/, fileRgx: /(\.spec\.ts$)|(\.test\.ts$)/ },
+      ".only": {
+        rgx: /(suite|describe|it|test)\.only/,
+        fileRgx: /(\.spec\.ts$)|(\.test\.ts$)/,
+      },
       "debugger;": { rgx: /(^|\s)debugger/, fileRgx: /\.ts$/ },
-      "rel import of monorepo pkg": { rgx: /(\.\.\/(common-frontend|common-all|common-server|engine-server|dendron-cli|pods-core|api-server|common-test-utils|engine-test-utils|dendron-next-server))/, fileRgx: /\.ts[x]?$/ },
-    }
+      "rel import of monorepo pkg": {
+        rgx: /(\.\.\/(common-frontend|common-all|common-server|engine-server|dendron-cli|pods-core|api-server|common-test-utils|engine-test-utils|dendron-next-server))/,
+        fileRgx: /\.ts[x]?$/,
+      },
+    },
   });
 }
 

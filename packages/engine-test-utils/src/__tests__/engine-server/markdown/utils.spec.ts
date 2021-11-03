@@ -1,4 +1,9 @@
-import { ConfigUtils, NoteProps, NoteUtils, WorkspaceOpts } from "@dendronhq/common-all";
+import {
+  ConfigUtils,
+  NoteProps,
+  NoteUtils,
+  WorkspaceOpts,
+} from "@dendronhq/common-all";
 import {
   AssertUtils,
   NoteTestUtilsV4,

@@ -10,5 +10,5 @@ rsync -avq assets/js ../plugin-core/assets/static/
 popd
 echo "sync server assets..."
 pushd ../api-server
-rsync -avq assets/static/ ../plugin-core/assets/static/ 
+rsync -avq assets/static/ ../plugin-core/assets/static/
 popd

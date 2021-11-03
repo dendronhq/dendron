@@ -6,8 +6,8 @@ updated: 1633004714929
 created: 1632988925249
 ---
 
-## links 
-* Link to self: [[dendron.links.heading-anchors]] 
+## links
+* Link to self: [[dendron.links.heading-anchors]]
 * Link to different note: [[dendron.links.heading-anchors-diff-page]]
 
 ## heading-1

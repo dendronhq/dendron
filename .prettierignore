@@ -1,5 +1,5 @@
 
-# compiled 
+# compiled
 .next
 vendor/**/*
 lib
@@ -12,7 +12,7 @@ raw-assets
 launch.json
 package.json
 settings.json
-public 
+public
 # config
 *.lock
 # tests

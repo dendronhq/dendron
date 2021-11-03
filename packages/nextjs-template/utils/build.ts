@@ -1,9 +1,6 @@
 import fs from "fs-extra";
 import path from "path";
-import {
-  IntermediateDendronConfig,
-  NoteProps,
-} from "@dendronhq/common-all";
+import { IntermediateDendronConfig, NoteProps } from "@dendronhq/common-all";
 import _ from "lodash";
 import { NoteData } from "./types";
 

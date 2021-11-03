@@ -177,13 +177,13 @@ function genTemplate(node) {
   // {% endif %}
   out.push(`</h2>`);
   try {
-  const publishedDate = _.get(node, "custom.date", false)
-    ? jekyllDate2ShortDate(node.custom.date)
-    : ms2ShortDate(node.created);
-  out.push(
-    `<p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> ${publishedDate} </p>`
-  );
-  } catch(err) {
+    const publishedDate = _.get(node, "custom.date", false)
+      ? jekyllDate2ShortDate(node.custom.date)
+      : ms2ShortDate(node.created);
+    out.push(
+      `<p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> ${publishedDate} </p>`
+    );
+  } catch (err) {
     throw Error(`no date found for note ${node.id}`);
   }
   /*

@@ -5,7 +5,7 @@ name: Create Prerelease Branch
 # Scheduled to run at 7 PM UTC on Thursdays
 on:
   schedule:
-    - cron:  '0 19 * * 4'
+    - cron: "0 19 * * 4"
 
 jobs:
   build:
@@ -32,7 +32,7 @@ jobs:
           git config user.name github-actions
           git config user.email github-actions@github.com
           version=`cat ./packages/plugin-core/package.json | jq ".version" -r | awk -F. -v OFS=. 'NF==1{print ++$NF}; NF>1{$NF=sprintf("%0*d", length($NF), ($NF+1)); print}'`
-          branchName="prerelease/${version}" 
+          branchName="prerelease/${version}"
           echo $branchName
           git checkout -b $branchName
           git push origin $branchName

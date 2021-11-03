@@ -1,4 +1,8 @@
-import { ConfigUtils, ErrorFactory, NoteQuickInput } from "@dendronhq/common-all";
+import {
+  ConfigUtils,
+  ErrorFactory,
+  NoteQuickInput,
+} from "@dendronhq/common-all";
 import { HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { Selection, SnippetString } from "vscode";

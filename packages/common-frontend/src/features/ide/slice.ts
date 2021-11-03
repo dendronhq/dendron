@@ -5,7 +5,7 @@ import {
 } from "@dendronhq/common-all";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 // @ts-ignore
-import internal from "@reduxjs/toolkit/node_modules/immer/dist/internal"
+import internal from "@reduxjs/toolkit/node_modules/immer/dist/internal";
 
 type Theme = "light" | "dark" | "unknown";
 

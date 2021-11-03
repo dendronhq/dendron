@@ -23,7 +23,9 @@ export function setupSegmentClient(ws: DWorkspaceV2, cachePath?: string) {
     // if the current status was set by configuration, and that configuration has changed, we should update it and report the change
     const status = SegmentClient.getStatus();
     if (SegmentClient.setByConfig(status)) {
-      const disableTelemetry = ConfigUtils.getWorkspace(ws.config).disableTelemetry;
+      const disableTelemetry = ConfigUtils.getWorkspace(
+        ws.config
+      ).disableTelemetry;
       if (
         SegmentClient.isDisabled(status) &&
         !disableTelemetry &&
@@ -58,10 +60,10 @@ export function setupSegmentClient(ws: DWorkspaceV2, cachePath?: string) {
 
     const segment = SegmentClient.instance({
       forceNew: true,
-      cachePath
+      cachePath,
     });
     Logger.info({ msg: `Telemetry is disabled? ${segment.hasOptedOut}` });
-    Logger.info({ msg: "Segment Residual Cache Path is at " + cachePath});
+    Logger.info({ msg: "Segment Residual Cache Path is at " + cachePath });
   }
 
   try {

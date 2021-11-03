@@ -79,7 +79,7 @@ export class Logger {
   static error(payload: LogPayload) {
     Logger.log(payload, "error");
 
-    Sentry.withScope(scope => {
+    Sentry.withScope((scope) => {
       scope.setExtra("ctx", payload.ctx);
       if (payload.error) {
         scope.setExtra("name", payload.error.name);
@@ -90,15 +90,15 @@ export class Logger {
         scope.setExtra("status", payload.error.status);
       }
       const cleanMsg =
-      (payload.error ? payload.error.message : payload.msg) || customStringify(payload);
+        (payload.error ? payload.error.message : payload.msg) ||
+        customStringify(payload);
 
       if (payload.error) {
         Sentry.captureException(payload.error);
-      }
-      else {
+      } else {
         Sentry.captureMessage(cleanMsg);
       }
-    })
+    });
   }
 
   static info(payload: any, show?: boolean): void {
@@ -107,7 +107,7 @@ export class Logger {
     Sentry.addBreadcrumb({
       category: "plugin",
       message: customStringify(payload),
-      level: Sentry.Severity.Info
+      level: Sentry.Severity.Info,
     });
   }
 

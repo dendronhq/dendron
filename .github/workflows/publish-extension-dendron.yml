@@ -34,7 +34,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version:  14.x
+          node-version: 14.x
 
       - name: Yarn Setup
         run: yarn setup
@@ -82,7 +82,7 @@ jobs:
         run: yarn deploy:ovsx
 
       - name: Tag Release on Github
-        run: | 
+        run: |
           git tag $DENDRON_RELEASE_VERSION
           git push origin $DENDRON_RELEASE_VERSION
 

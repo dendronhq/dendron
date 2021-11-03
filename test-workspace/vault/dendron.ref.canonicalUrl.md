@@ -8,4 +8,3 @@ canonicalUrl: "https://foo.com"
 ---
 
 This should have a canonical url
-

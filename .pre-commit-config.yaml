@@ -1,0 +1,37 @@
+---
+minimum_pre_commit_version: 2.15.0
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.0.1
+    hooks:
+      - id: check-merge-conflict
+        description: Check for files that contain merge conflict strings.
+      - id: trailing-whitespace
+        description: Trims trailing whitespace.
+        args: [--markdown-linebreak-ext=md]
+      - id: mixed-line-ending
+        description: Replaces or checks mixed line ending.
+        args: [--fix=lf]
+        exclude: make.bat
+      - id: fix-byte-order-marker
+        description: Removes UTF-8 BOM if present, generally a Windows problem.
+      - id: end-of-file-fixer
+        description: Makes sure files end in a newline and only a newline.
+        exclude: tests/fake_.*\.key
+      - id: check-yaml
+      - id: check-toml
+      - id: check-xml
+      - id: check-symlinks
+      - id: detect-private-key
+      - id: destroyed-symlinks
+      - id: check-case-conflict
+      - id: sort-simple-yaml
+  #- repo: https://github.com/pre-commit/mirrors-eslint
+  #    rev: 'v8.1.0'
+  #    hooks:
+  #      - id: eslint
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: "v2.4.1"
+    hooks:
+      - id: prettier

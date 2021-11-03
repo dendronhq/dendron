@@ -29,14 +29,12 @@ export function DendronBreadCrumb(props: DendronCommonProps) {
   return (
     <Breadcrumb style={{ margin: "16px 0" }}>
       {_.map(noteParents, (note) => {
-        const dest = getNoteUrl({note, noteIndex: props.noteIndex})
+        const dest = getNoteUrl({ note, noteIndex: props.noteIndex });
         return (
           <Breadcrumb.Item key={note.id}>
-            <Link href={dest}>
-              {note.title}
-            </Link>
+            <Link href={dest}>{note.title}</Link>
           </Breadcrumb.Item>
-        )
+        );
       })}
     </Breadcrumb>
   );

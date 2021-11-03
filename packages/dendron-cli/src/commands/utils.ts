@@ -134,4 +134,3 @@ export function setupEngineArgs(args: yargs.Argv) {
     describe: "If set, use in memory engine instead of connecting to a server",
   });
 }
-

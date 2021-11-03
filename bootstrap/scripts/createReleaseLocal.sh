@@ -4,7 +4,7 @@ git branch -D integ-publish
 git checkout -b integ-publish
 
 version=minor
-lerna version $version --no-git-tag-version 
+lerna version $version --no-git-tag-version
 
 git add .
 git commit -m "chore: publish $version"

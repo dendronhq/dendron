@@ -8,7 +8,7 @@ created: 1635325317566
 
 ## Create new schema
 ```md
-1. Run `cmd+shift+l` 
+1. Run `cmd+shift+l`
 2. Enter `dvd` (which should not exist)
 3. Create the following schema within dvd.schema.yml:
 `
@@ -16,12 +16,12 @@ version: 1
 imports: []
 schemas:
   - id: dvd
-    children: 
+    children:
       - pattern: h1
     title: dvd
     parent: root
 `
-4. Look up note (`cmd+l`) `dvd.` 
+4. Look up note (`cmd+l`) `dvd.`
 EXPECTED: should see a schema completion `dvd.h1`.
 
 AFTER: delete schema file `dvd.schema.yml`

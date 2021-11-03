@@ -35,22 +35,24 @@ module.exports = {
     "prefer-template": "off",
     "consistent-return": "off",
     // less restrictive airbnb
-    'no-restricted-syntax': [
-      'error',
+    "no-restricted-syntax": [
+      "error",
       {
-        selector: 'ForInStatement',
-        message: 'for..in loops iterate over the entire prototype chain, which is virtually never what you want. Use Object.{keys,values,entries}, and iterate over the resulting array.',
+        selector: "ForInStatement",
+        message:
+          "for..in loops iterate over the entire prototype chain, which is virtually never what you want. Use Object.{keys,values,entries}, and iterate over the resulting array.",
       },
       {
-        selector: 'WithStatement',
-        message: '`with` is disallowed in strict mode because it makes code impossible to predict and optimize.',
+        selector: "WithStatement",
+        message:
+          "`with` is disallowed in strict mode because it makes code impossible to predict and optimize.",
       },
     ],
-    'no-continue': 'off',
+    "no-continue": "off",
     // don't agree with
     "dot-notation": "off",
     // Less restrictive version of airbnb
-    'no-labels': ['error', { allowLoop: true, allowSwitch: false }],
+    "no-labels": ["error", { allowLoop: true, allowSwitch: false }],
     // prettier
     indent: "off",
     quotes: "off",
@@ -82,11 +84,14 @@ module.exports = {
     "import/no-cycle": "off",
     // --- React
     "react/prop-types": "off",
-    // we use 'logger' inside of hooks, gets flagged 
+    // we use 'logger' inside of hooks, gets flagged
     "react-hooks/exhaustive-deps": "off",
     // suppress errors for missing 'import React' in files
     "react/react-in-jsx-scope": "off",
-    "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx", ".ts", ".tsx"] }],
+    "react/jsx-filename-extension": [
+      1,
+      { extensions: [".js", ".jsx", ".ts", ".tsx"] },
+    ],
     "react/destructuring-assignment": "off",
     "react/jsx-curly-newline": "off",
     "react/jsx-props-no-spreading": "off",

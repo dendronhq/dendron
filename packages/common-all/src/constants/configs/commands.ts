@@ -55,8 +55,8 @@ const NOTE: DendronConfigEntryCollection<NoteLookupConfig> = {
   },
   leaveTrace: {
     label: "Leave Trace",
-    desc: "Leaves a reference of the destination note in the source note while using selectionExtract"
-  }
+    desc: "Leaves a reference of the destination note in the source note while using selectionExtract",
+  },
 };
 
 /**

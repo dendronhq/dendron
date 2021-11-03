@@ -6,7 +6,7 @@
     "esModuleInterop": true,
     "sourceMap": true,
     "rootDir": "src",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": ["dom", "dom.iterable", "esnext"]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "**/*-spec.ts", "**/*.d.ts"]

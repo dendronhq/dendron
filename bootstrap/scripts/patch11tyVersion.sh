@@ -6,7 +6,7 @@ sed  -ibak "s/\"$VERSION/\"$PUBLISH_VERSION/" packages/dendron-11ty/package.json
 
 echo "create commit..."
 git clean -f
-git add . 
+git add .
 git commit -m "chore: update 11ty"
 
 echo "publish..."

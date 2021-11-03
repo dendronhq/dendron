@@ -1,6 +1,16 @@
      525 text files.
-classified 525 filesDuplicate file check 525 files (436 known unique)Unique:      100 files                                          Unique:      200 files                                          Unique:      300 files                                          Unique:      400 files                                               474 unique files.                              
-Counting:  100Counting:  200Counting:  300Counting:  400     120 files ignored.
+classified 525 files
+Duplicate file check 525 files (436 known unique)
+Unique:      100 files
+Unique:      200 files
+Unique:      300 files
+Unique:      400 files
+     474 unique files.
+Counting:  100
+Counting:  200
+Counting:  300
+Counting:  400
+     120 files ignored.
 
 github.com/AlDanial/cloc v 1.86  T=0.62 s (681.2 files/s, 197902.0 lines/s)
 -------------------------------------------------------------------------------

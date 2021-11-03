@@ -93,11 +93,11 @@ const NOTES = {
             },
           },
           vault: opts.vaults[0],
-          body: "{{fm.foo}}\n\ntitle: {{fm.title}}"
-        })
+          body: "{{fm.foo}}\n\ntitle: {{fm.title}}",
+        });
       },
     }
-  )
+  ),
 };
 
 export const ENGINE_RENDER_PRESETS = {

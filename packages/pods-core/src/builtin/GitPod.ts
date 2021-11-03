@@ -152,7 +152,7 @@ const template = `<!DOCTYPE html>
               "title": "Time"
           },
           }
-        
+
       };
       */
       var vlSpec = {
@@ -164,7 +164,7 @@ const template = `<!DOCTYPE html>
         "encoding": {
           "y": {
             "field": "time",
-            "type": "ordinal", 
+            "type": "ordinal",
             "timeUnit": "day",
             "sort": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
           },
@@ -181,12 +181,12 @@ const template = `<!DOCTYPE html>
             "legend": {
                 "title": null
             }
-        }  
         }
-      
+        }
+
     };
 
-      // Embed the visualization in the container with id 
+      // Embed the visualization in the container with id
       vegaEmbed('#vis', vlSpec);
     </script>
   </body>

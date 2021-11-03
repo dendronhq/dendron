@@ -13875,7 +13875,7 @@ gg
 
 When building your site by running `Dendron: Build Pod`, Dendron will generate a bad links report of all wiki-links that did not resolve. It will also update the links to point to a 404 page instead.
 
-<a href="https://www.loom.com/share/91c4d7b023754b76b4d02519946603e0"> 
+<a href="https://www.loom.com/share/91c4d7b023754b76b4d02519946603e0">
 <img style="" src="https://cdn.loom.com/sessions/thumbnails/91c4d7b023754b76b4d02519946603e0-with-play.gif"> </a>
 
 ### Enhancements
@@ -13910,12 +13910,12 @@ A journal note is a self contained note that is meant to track something over ti
 
 To create a journal note, trigger a lookup and then click on the calendar icon.
 
-<a href="https://www.loom.com/share/3c3ddc1dc63547cea8bf186bec31f71b"> 
+<a href="https://www.loom.com/share/3c3ddc1dc63547cea8bf186bec31f71b">
 <img style="" src="https://cdn.loom.com/sessions/thumbnails/3c3ddc1dc63547cea8bf186bec31f71b-with-play.gif"> </a>
 
 A scratch note is a self contained note that is meant to be used as scratchpad. Use it for thoughts or when you want to expand on a bullet point. Scratch notes are created in the `scratch` domain and have the following format: `{domain}.journal.{Y-MM-DD-HHHHmmss}`.
 
-<a href="https://www.loom.com/share/2fd3042119124df8bb4592d8ffe6d708"> 
+<a href="https://www.loom.com/share/2fd3042119124df8bb4592d8ffe6d708">
 <img style="" src="https://cdn.loom.com/sessions/thumbnails/2fd3042119124df8bb4592d8ffe6d708-with-play.gif"> </a>
 
 - **lookup:** support selection modifiers when creating special notes ([591c55f](https://github.com/dendronhq/dendron/commit/591c55f792ad8121d27af3a1c645ff9a2458f19c))

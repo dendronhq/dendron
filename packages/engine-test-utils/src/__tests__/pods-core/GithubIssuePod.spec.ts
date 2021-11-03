@@ -193,13 +193,11 @@ describe("GIVEN: Github publish pod is run for a note", () => {
     pod.createDiscussion = jest.fn();
     pod.createIssue = jest.fn();
     pod.updateIssue = jest.fn();
-    pod.getDataFromGithub = jest
-      .fn()
-      .mockReturnValue({
-        labelsHashMap: { "area.misc": "sfgdjio", "type.bug": "gsfahhj" },
-        discussionCategoriesHashMap: { Ideas: "sfgdjio", General: "gsfahhj" },
-        assigneesHashMap: { john: "dhdjdj", doe: "dhdjdk" },
-      });
+    pod.getDataFromGithub = jest.fn().mockReturnValue({
+      labelsHashMap: { "area.misc": "sfgdjio", "type.bug": "gsfahhj" },
+      discussionCategoriesHashMap: { Ideas: "sfgdjio", General: "gsfahhj" },
+      assigneesHashMap: { john: "dhdjdj", doe: "dhdjdk" },
+    });
   });
 
   const utilityMethods = {

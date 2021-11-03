@@ -19,7 +19,7 @@ VFile {
 # Tasks
 
 
-</div>    
+</div>
 </div>
 
 * * *
@@ -57,8 +57,8 @@ VFile {
   </div>
   <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
   <div class=\\"portal-parent-fader-top\\"></div>
-  <div class=\\"portal-parent-fader-bottom\\"></div>        
-  
+  <div class=\\"portal-parent-fader-bottom\\"></div>
+
   # Foo.One
 
   <div class=\\"portal-container\\">
@@ -70,8 +70,8 @@ VFile {
   </div>
   <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
   <div class=\\"portal-parent-fader-top\\"></div>
-  <div class=\\"portal-parent-fader-bottom\\"></div>        
-  
+  <div class=\\"portal-parent-fader-bottom\\"></div>
+
   # Foo.Two
 
 blah
@@ -82,7 +82,7 @@ blah
 
 1. [Foo](foo.html)
 
-   </div>    
+   </div>
    </div>
 
 Regular wikilink: [foo.two](foo.two.html)
@@ -93,11 +93,11 @@ Regular wikilink: [foo.two](foo.two.html)
 
 1. [Foo](foo.html)
 
-   </div>    
+   </div>
    </div>
 
 
-</div>    
+</div>
 </div>
 
 * * *
@@ -129,7 +129,7 @@ VFile {
 foo body
 
 
-</div>    
+</div>
 </div>
 
 * * *
@@ -162,7 +162,7 @@ VFile {
 journal1
 
 
-</div>    
+</div>
 </div><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\" >
@@ -176,7 +176,7 @@ journal1
 journal2
 
 
-</div>    
+</div>
 </div><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\" >
@@ -190,7 +190,7 @@ journal2
 journal3
 
 
-</div>    
+</div>
 </div>
 
 * * *
@@ -273,13 +273,13 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div>        
+<div class=\\"portal-parent-fader-bottom\\"></div>
 
 # Foo
 
 # Tasks
 
-</div>    
+</div>
 </div>
 
 ",
@@ -302,7 +302,7 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div>        
+<div class=\\"portal-parent-fader-bottom\\"></div>
 
 <div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
@@ -313,8 +313,8 @@ VFile {
   </div>
   <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
   <div class=\\"portal-parent-fader-top\\"></div>
-  <div class=\\"portal-parent-fader-bottom\\"></div>        
-  
+  <div class=\\"portal-parent-fader-bottom\\"></div>
+
   # Foo.One
 
   <div class=\\"portal-container\\">
@@ -326,21 +326,21 @@ VFile {
   </div>
   <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
   <div class=\\"portal-parent-fader-top\\"></div>
-  <div class=\\"portal-parent-fader-bottom\\"></div>        
-  
+  <div class=\\"portal-parent-fader-bottom\\"></div>
+
   # Foo.Two
 
 blah
 
-  </div>    
   </div>
-  
-Regular wikilink: [foo.two](foo.two.md)
-  
-  </div>    
   </div>
 
-</div>    
+Regular wikilink: [foo.two](foo.two.md)
+
+  </div>
+  </div>
+
+</div>
 </div>
 
 ",
@@ -363,11 +363,11 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div>        
+<div class=\\"portal-parent-fader-bottom\\"></div>
 
 foo body
 
-</div>    
+</div>
 </div>
 
 ",
@@ -390,11 +390,11 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div>        
+<div class=\\"portal-parent-fader-bottom\\"></div>
 
 journal1
 
-</div>    
+</div>
 </div>
 
 
@@ -407,11 +407,11 @@ journal1
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div>        
+<div class=\\"portal-parent-fader-bottom\\"></div>
 
 journal2
 
-</div>    
+</div>
 </div>
 
 
@@ -424,11 +424,11 @@ journal2
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div>        
+<div class=\\"portal-parent-fader-bottom\\"></div>
 
 journal3
 
-</div>    
+</div>
 </div>
 
 ",
@@ -460,8 +460,8 @@ VFile {
   </div>
   <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
   <div class=\\"portal-parent-fader-top\\"></div>
-  <div class=\\"portal-parent-fader-bottom\\"></div>        
-  
+  <div class=\\"portal-parent-fader-bottom\\"></div>
+
   # Foo.One
 
   <div class=\\"portal-container\\">
@@ -473,23 +473,23 @@ VFile {
   </div>
   <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
   <div class=\\"portal-parent-fader-top\\"></div>
-  <div class=\\"portal-parent-fader-bottom\\"></div>        
-  
+  <div class=\\"portal-parent-fader-bottom\\"></div>
+
   # Foo.Two
 
 blah
 
-  </div>    
   </div>
-  
+  </div>
+
 Regular wikilink: [foo.two](foo.two)
-  
-  </div>    
+
   </div>
-  
+  </div>
 
 
-</div>    
+
+</div>
 </div>
 
 ",
@@ -515,7 +515,7 @@ VFile {
 foo body
 
 
-</div>    
+</div>
 </div>
 
 ",
@@ -541,7 +541,7 @@ VFile {
 journal1
 
 
-</div>    
+</div>
 </div><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\" >
@@ -555,7 +555,7 @@ journal1
 journal2
 
 
-</div>    
+</div>
 </div><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\" >
@@ -569,7 +569,7 @@ journal2
 journal3
 
 
-</div>    
+</div>
 </div>
 
 ",

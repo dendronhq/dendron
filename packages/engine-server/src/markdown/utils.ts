@@ -600,8 +600,8 @@ export class MDUtilsV4 {
 
 export class PublishUtils {
   static getAbsUrlForAsset(opts: {
-    suffix?: string; 
-    config: IntermediateDendronConfig 
+    suffix?: string;
+    config: IntermediateDendronConfig;
   }) {
     const suffix = opts.suffix || "";
     const { config } = opts;

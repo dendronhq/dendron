@@ -9,7 +9,7 @@ assignees: ''
 
 # Testimonial
 
-We're always looking for feedback and stories on how our users are using Dendron. 
+We're always looking for feedback and stories on how our users are using Dendron.
 If Dendron has helped you, please consider submitting a testimonial and help us grow 🌱
 
 <!-- Your testimonial goes here -->

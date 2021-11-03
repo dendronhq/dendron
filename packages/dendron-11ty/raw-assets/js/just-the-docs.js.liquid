@@ -3,7 +3,7 @@ permalink: /assets/js/just-the-docs.js
 ---
 (function (jtd, undefined) {
     // Event handling
-  
+
     jtd.addEvent = function (el, type, handler) {
       if (el.attachEvent) el.attachEvent("on" + type, handler);
       else el.addEventListener(type, handler);
@@ -24,9 +24,9 @@ permalink: /assets/js/just-the-docs.js
           if (document.readyState == "complete") ready();
         });
     };
-  
+
     // Show/hide mobile menu
-  
+
     function initNav(activeId) {
       jtd.addEvent(document, "click", function (e) {
         var target = e.target;
@@ -41,14 +41,14 @@ permalink: /assets/js/just-the-docs.js
           target.parentNode.classList.toggle("active");
         }
       });
-  
+
       const siteNav = document.getElementById("site-nav");
       const mainHeader = document.getElementById("main-header");
       const menuButton = document.getElementById("menu-button");
-  
+
       jtd.addEvent(menuButton, "click", function (e) {
         e.preventDefault();
-  
+
         if (menuButton.classList.toggle("nav-open")) {
           siteNav.classList.add("nav-open");
           mainHeader.classList.add("nav-open");
@@ -57,13 +57,13 @@ permalink: /assets/js/just-the-docs.js
           mainHeader.classList.remove("nav-open");
         }
       });
-  
+
       const searchInput = document.getElementById("search-input");
       const searchButton = document.getElementById("search-button");
-  
+
       document.getElementById(activeId).scrollIntoView(true);
     }
-  
+
     function initNavBar() {
       return fetch("{{ 'nav.html' | absolute_url}}").then(function (response) {
         return response.text().then((content) => {
@@ -72,26 +72,26 @@ permalink: /assets/js/just-the-docs.js
         });
       });
     }
-  
+
     function replaceNav(navHtml) {
       var siteNav = document.getElementById("site-nav");
       siteNav.innerHTML = navHtml;
     }
-  
+
     // Site search
-  
+
     function initSearch() {
       var request = new XMLHttpRequest();
       // TODO: CHECK IF THIS WORKS WITHOUT ABSOLUTE_URL
       request.open("GET", "{{ '/assets/js/search-data.json' | absolute_url }}", true);
-  
+
       request.onload = function () {
         if (request.status >= 200 && request.status < 400) {
           var docs = JSON.parse(request.responseText);
-  
+
           // TODO: configurable
           lunr.tokenizer.separator = /[\s\-/]+/;
-  
+
           var index = lunr(function () {
             this.ref("id");
             this.field("hpath", { boost: 200 });
@@ -99,7 +99,7 @@ permalink: /assets/js/just-the-docs.js
             this.field("content", { boost: 2 });
             this.field("relUrl");
             this.metadataWhitelist = ["position"];
-  
+
             for (var i in docs) {
               this.add({
                 id: i,
@@ -110,7 +110,7 @@ permalink: /assets/js/just-the-docs.js
               });
             }
           });
-  
+
           searchLoaded(index, docs);
         } else {
           console.log(
@@ -118,14 +118,14 @@ permalink: /assets/js/just-the-docs.js
           );
         }
       };
-  
+
       request.onerror = function () {
         console.log("There was a connection error");
       };
-  
+
       request.send();
     }
-  
+
     function searchLoaded(index, docs) {
       var index = index;
       var docs = docs;
@@ -134,18 +134,18 @@ permalink: /assets/js/just-the-docs.js
       var mainHeader = document.getElementById("main-header");
       var currentInput;
       var currentSearchIndex = 0;
-  
+
       function showSearch() {
         document.documentElement.classList.add("search-active");
       }
-  
+
       function hideSearch() {
         document.documentElement.classList.remove("search-active");
       }
-  
+
       function update() {
         currentSearchIndex++;
-  
+
         var input = searchInput.value;
         if (input === "") {
           hideSearch();
@@ -165,7 +165,7 @@ permalink: /assets/js/just-the-docs.js
         if (input === "") {
           return;
         }
-  
+
         var results = index.query(function (query) {
           var tokens = lunr.tokenizer(input);
           query.term(tokens, {
@@ -175,7 +175,7 @@ permalink: /assets/js/just-the-docs.js
             wildcard: lunr.Query.wildcard.TRAILING,
           });
         });
-  
+
         if (results.length == 0 && input.length > 2) {
           var tokens = lunr.tokenizer(input).filter(function (token, i) {
             return token.str.length < 20;
@@ -188,7 +188,7 @@ permalink: /assets/js/just-the-docs.js
             });
           }
         }
-  
+
         if (results.length == 0) {
           var noResultsDiv = document.createElement("div");
           noResultsDiv.classList.add("search-no-result");
@@ -198,10 +198,10 @@ permalink: /assets/js/just-the-docs.js
           var resultsList = document.createElement("ul");
           resultsList.classList.add("search-results-list");
           searchResults.appendChild(resultsList);
-  
+
           addResults(resultsList, results, 0, 10, 100, currentSearchIndex);
         }
-  
+
         function addResults(
           resultsList,
           results,
@@ -230,35 +230,35 @@ permalink: /assets/js/just-the-docs.js
             );
           }, batchMillis);
         }
-  
+
         function addResult(resultsList, result) {
           var doc = docs[result.ref];
-  
+
           var resultsListItem = document.createElement("li");
           resultsListItem.classList.add("search-results-list-item");
           resultsList.appendChild(resultsListItem);
-  
+
           var resultLink = document.createElement("a");
           resultLink.classList.add("search-result");
           resultLink.setAttribute("href", doc.url);
           resultsListItem.appendChild(resultLink);
-  
+
           var resultTitle = document.createElement("div");
           resultTitle.classList.add("search-result-title");
           resultLink.appendChild(resultTitle);
-  
+
           var resultDoc = document.createElement("div");
           resultDoc.classList.add("search-result-doc");
           resultDoc.innerHTML =
             '<svg viewBox="0 0 24 24" class="search-result-icon"><use xlink:href="#svg-doc"></use></svg>';
           resultTitle.appendChild(resultDoc);
-  
+
           var resultDocTitle = document.createElement("div");
           resultDocTitle.classList.add("search-result-doc-title");
           resultDocTitle.innerHTML = doc.doc;
           resultDoc.appendChild(resultDocTitle);
           var resultDocOrSection = resultDocTitle;
-  
+
           if (doc.doc != doc.title) {
             resultDoc.classList.add("search-result-doc-parent");
             var resultSection = document.createElement("div");
@@ -267,7 +267,7 @@ permalink: /assets/js/just-the-docs.js
             resultTitle.appendChild(resultSection);
             resultDocOrSection = resultSection;
           }
-  
+
           var metadata = result.matchData.metadata;
           var titlePositions = [];
           var contentPositions = [];
@@ -328,7 +328,7 @@ permalink: /assets/js/just-the-docs.js
               }
             }
           }
-  
+
           if (titlePositions.length > 0) {
             titlePositions.sort(function (p1, p2) {
               return p1[0] - p2[0];
@@ -342,7 +342,7 @@ permalink: /assets/js/just-the-docs.js
               titlePositions
             );
           }
-  
+
           if (contentPositions.length > 0) {
             contentPositions.sort(function (p1, p2) {
               return p1.highlight[0] - p2.highlight[0];
@@ -373,20 +373,20 @@ permalink: /assets/js/just-the-docs.js
                 previewPosition.ellipsesAfter = contentPosition.ellipsesAfter;
               }
             }
-  
+
             var resultPreviews = document.createElement("div");
             resultPreviews.classList.add("search-result-previews");
             resultLink.appendChild(resultPreviews);
-  
+
             var content = doc.content;
             // for (var j = 0; j < Math.min(previewPositions.length, {{ site.search.previews | default: 3 }}); j++) {
             for (var j = 0; j < Math.min(previewPositions.length, 3); j++) {
               var position = previewPositions[j];
-  
+
               var resultPreview = document.createElement("div");
               resultPreview.classList.add("search-result-preview");
               resultPreviews.appendChild(resultPreview);
-  
+
               if (position.ellipsesBefore) {
                 resultPreview.appendChild(document.createTextNode("... "));
               }
@@ -402,13 +402,13 @@ permalink: /assets/js/just-the-docs.js
               }
             }
           }
-  
+
           var resultRelUrl = document.createElement("span");
           resultRelUrl.classList.add("search-result-rel-url");
           resultRelUrl.innerText = doc.hpath;
           resultTitle.appendChild(resultRelUrl);
         }
-  
+
         function addHighlightedText(parent, text, start, end, positions) {
           var index = start;
           for (var i in positions) {
@@ -427,11 +427,11 @@ permalink: /assets/js/just-the-docs.js
           parent.appendChild(span);
         }
       }
-  
+
       jtd.addEvent(searchInput, "focus", function () {
         setTimeout(update, 0);
       });
-  
+
       jtd.addEvent(searchInput, "keyup", function (e) {
         switch (e.keyCode) {
           case 27: // When esc key is pressed, hide the results and clear the field
@@ -445,7 +445,7 @@ permalink: /assets/js/just-the-docs.js
         }
         update();
       });
-  
+
       jtd.addEvent(searchInput, "keydown", function (e) {
         switch (e.keyCode) {
           case 38: // arrow up
@@ -493,16 +493,16 @@ permalink: /assets/js/just-the-docs.js
             return;
         }
       });
-  
+
       jtd.addEvent(document, "click", function (e) {
         if (e.target != searchInput) {
           hideSearch();
         }
       });
     }
-  
+
     // Switch theme
-  
+
     jtd.getTheme = function () {
       var cssFileHref = document
         .querySelector('[rel="stylesheet"]')
@@ -512,7 +512,7 @@ permalink: /assets/js/just-the-docs.js
         cssFileHref.length - 4
       );
     };
-  
+
     jtd.setTheme = function (theme) {
       var cssFile = document.querySelector('[rel="stylesheet"]');
       cssFile.setAttribute(
@@ -520,9 +520,9 @@ permalink: /assets/js/just-the-docs.js
         '{{ "assets/css/just-the-docs-" | absolute_url }}' + theme + ".css"
       );
     };
-  
+
     // Document ready
-  
+
     jtd.onReady(function () {
       initNavBar().then((resp) => {
         var homeOrId = document.getElementById("navId").getAttribute("data");
@@ -543,4 +543,3 @@ permalink: /assets/js/just-the-docs.js
       initSearch();
     });
   })((window.jtd = window.jtd || {}));
-  

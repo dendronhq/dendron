@@ -6,4 +6,3 @@ schemas:
     children:
       - pattern: one
         template: templates.untyped
-        

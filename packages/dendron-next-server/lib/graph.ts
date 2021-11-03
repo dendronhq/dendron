@@ -33,11 +33,11 @@ export type CoreGraphConfig = {
 
 export type NoteGraphConfig = {
   "connections.links"?: GraphConfigItem<boolean>;
-  
+
   "information.edges-links"?: GraphConfigItem<number>;
-  
+
   "filter.show-stubs"?: GraphConfigItem<boolean>;
-  
+
   "options.show-local-graph"?: GraphConfigItem<boolean>;
 };
 

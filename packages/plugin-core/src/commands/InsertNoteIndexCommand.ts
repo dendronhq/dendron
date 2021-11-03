@@ -78,7 +78,8 @@ export class InsertNoteIndexCommand extends BasicCommand<
     }
     const config = getDWorkspace().config;
 
-    const insertNoteIndexConfig = ConfigUtils.getCommands(config).insertNoteIndex;
+    const insertNoteIndexConfig =
+      ConfigUtils.getCommands(config).insertNoteIndex;
     const maybeMarker = insertNoteIndexConfig.enableMarker;
 
     const noteIndex = this.genNoteIndex(children, {

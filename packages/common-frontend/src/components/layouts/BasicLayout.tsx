@@ -8,7 +8,7 @@ export function BasicLayout(props: React.PropsWithChildren<any>) {
       <br />
       <Layout id="main-content-wrap" className="main-content-wrap">
         <Row gutter={16}>
-          <Col className="gutter-row" span={2}/>
+          <Col className="gutter-row" span={2} />
           <Col className="gutter-row" span={20}>
             <Layout.Content
               id="main-content"
@@ -18,7 +18,7 @@ export function BasicLayout(props: React.PropsWithChildren<any>) {
               {props.children}
             </Layout.Content>
           </Col>
-          <Col className="gutter-row" span={2}/>
+          <Col className="gutter-row" span={2} />
         </Row>
       </Layout>
     </Layout>

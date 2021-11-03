@@ -1,24 +1,24 @@
 {
-    "extends": "./tsconfig.build.json",
+  "extends": "./tsconfig.build.json",
 
-    "compilerOptions": {
-        "baseUrl": ".",
-        "strict": true,
-        "noImplicitAny": true,
-        "paths": {
-            //"@dendronhq/*": ["packages/*/src"],
-            "@dendronhq/api-server": ["packages/api-server/src"],
-            "@dendronhq/common-all": ["packages/common-all/src"],
-            "@dendronhq/common-server": ["packages/common-server/src"],
-            "@dendronhq/common-test-utils": ["packages/common-test-utils/src"],
-            "@dendronhq/engine-test-utils": ["packages/engine-test-utils/src"],
-            "@dendronhq/dendron-cli": ["packages/dendron-cli/src"],
-            "@dendronhq/dendron-next-server": ["packages/dendron-next-server/src"],
-            "@dendronhq/engine-server": ["packages/engine-server/src"],
-            "@dendronhq/lsp-client": ["packages/lsp-client/src"],
-            "@dendronhq/lsp-server": ["packages/lsp-server/src"],
-            "@dendronhq/plugin-core": ["packages/plugin-core/src"],
-            "@dendronhq/pods-core": ["packages/pods-core/src"],
-        }
+  "compilerOptions": {
+    "baseUrl": ".",
+    "strict": true,
+    "noImplicitAny": true,
+    "paths": {
+      //"@dendronhq/*": ["packages/*/src"],
+      "@dendronhq/api-server": ["packages/api-server/src"],
+      "@dendronhq/common-all": ["packages/common-all/src"],
+      "@dendronhq/common-server": ["packages/common-server/src"],
+      "@dendronhq/common-test-utils": ["packages/common-test-utils/src"],
+      "@dendronhq/engine-test-utils": ["packages/engine-test-utils/src"],
+      "@dendronhq/dendron-cli": ["packages/dendron-cli/src"],
+      "@dendronhq/dendron-next-server": ["packages/dendron-next-server/src"],
+      "@dendronhq/engine-server": ["packages/engine-server/src"],
+      "@dendronhq/lsp-client": ["packages/lsp-client/src"],
+      "@dendronhq/lsp-server": ["packages/lsp-server/src"],
+      "@dendronhq/plugin-core": ["packages/plugin-core/src"],
+      "@dendronhq/pods-core": ["packages/pods-core/src"]
     }
+  }
 }

@@ -118,7 +118,7 @@ const addPrettierConfig = ({ root }: { root: string }) => {
   fs.writeFileSync(
     path.join(root, ".prettierignore"),
     `
-# compiled 
+# compiled
 .next
 vendor/**/*
 lib
@@ -131,7 +131,7 @@ raw-assets
 launch.json
 package.json
 settings.json
-public 
+public
 # config
 *.lock
 # tests

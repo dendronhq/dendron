@@ -6,4 +6,4 @@ updated: 1634223523979
 created: 1634223523979
 ---
 
-Hijacked blog entry. This file is used for look up tests when we targeting only children of `dendron.blog.` 
+Hijacked blog entry. This file is used for look up tests when we targeting only children of `dendron.blog.`

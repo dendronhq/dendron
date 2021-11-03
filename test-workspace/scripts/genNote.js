@@ -1,3 +1,3 @@
-const {generateNote} = require("./randomNote");
+const { generateNote } = require("./randomNote");
 
 console.log(generateNote());

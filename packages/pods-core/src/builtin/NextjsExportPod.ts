@@ -8,11 +8,7 @@ import {
   createSerializedFuseNoteIndex,
   ConfigUtils,
 } from "@dendronhq/common-all";
-import {
-  MDUtilsV5,
-  ProcFlavor,
-  SiteUtils,
-} from "@dendronhq/engine-server";
+import { MDUtilsV5, ProcFlavor, SiteUtils } from "@dendronhq/engine-server";
 import { JSONSchemaType } from "ajv";
 import fs from "fs-extra";
 import _ from "lodash";

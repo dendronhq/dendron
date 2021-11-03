@@ -3,7 +3,7 @@ import {
   SegmentClient,
   SegmentEventProps,
   TelemetryStatus,
-  tmpDir
+  tmpDir,
 } from "@dendronhq/common-server";
 import fs, { writeFileSync } from "fs-extra";
 import path from "path";
@@ -154,15 +154,15 @@ describe("SegmentClient", () => {
       const instance = SegmentClient.instance({ forceNew: true });
       expect(instance.hasOptedOut).toBeFalsy();
       done();
-    })
-  })
+    });
+  });
 });
 
 type flushResponse = {
-  successCount: number,
-  nonRetryableErrorCount: number,
-  retryableErrorCount: number
-}
+  successCount: number;
+  nonRetryableErrorCount: number;
+  retryableErrorCount: number;
+};
 
 describe("GIVEN a SegmentClient", () => {
   const filepath = path.join(tmpDir().name, "test.log");
@@ -210,7 +210,7 @@ describe("GIVEN a SegmentClient", () => {
   beforeEach(() => {
     sinon.stub(instance, <any>"trackInternal").callsFake(mockedTrackInternal);
   });
-  
+
   afterEach(() => {
     sinon.restore();
   });
@@ -219,7 +219,7 @@ describe("GIVEN a SegmentClient", () => {
     beforeEach(async () => {
       await instance.track("mockWillSend", {
         hello: "world",
-      },);
+      });
     });
 
     afterEach(() => {
@@ -238,7 +238,7 @@ describe("GIVEN a SegmentClient", () => {
     beforeEach(async () => {
       await instance.track("mockFailToSend", {
         hello: "world",
-      },);
+      });
     });
 
     afterEach(() => {
@@ -248,7 +248,7 @@ describe("GIVEN a SegmentClient", () => {
     });
 
     test("THEN residual cache should be non-empty", async (done) => {
-      const fileContents = fs.readFileSync(filepath, 'utf-8');
+      const fileContents = fs.readFileSync(filepath, "utf-8");
       expect(fileContents).toMatchSnapshot();
       done();
     });
@@ -260,7 +260,7 @@ describe("GIVEN a SegmentClient", () => {
     beforeEach(async () => {
       await instance.writeToResidualCache(filepath, payloadThatWillSend);
       results = await instance.tryFlushResidualCache();
-    })
+    });
 
     afterEach(() => {
       if (fs.pathExistsSync(filepath)) {
@@ -276,8 +276,8 @@ describe("GIVEN a SegmentClient", () => {
     });
 
     test("AND the file should be empty afterward", async (done) => {
-      const fileContents = fs.readFileSync(filepath, 'utf-8');
-      expect(fileContents).toEqual('');
+      const fileContents = fs.readFileSync(filepath, "utf-8");
+      expect(fileContents).toEqual("");
       done();
     });
   });
@@ -304,7 +304,7 @@ describe("GIVEN a SegmentClient", () => {
     });
 
     test("AND the file should keep the payload contents (for a later retry)", async (done) => {
-      const fileContents = fs.readFileSync(filepath, 'utf-8');
+      const fileContents = fs.readFileSync(filepath, "utf-8");
       expect(fileContents).toMatchSnapshot();
 
       done();
@@ -337,8 +337,8 @@ describe("GIVEN a SegmentClient", () => {
     });
 
     test("AND the file should still be empty afterward (not worth retrying unparsable data)", (done) => {
-      const fileContents = fs.readFileSync(filepath, 'utf-8');
-      expect(fileContents).toEqual('');
+      const fileContents = fs.readFileSync(filepath, "utf-8");
+      expect(fileContents).toEqual("");
       done();
     });
   });
@@ -356,7 +356,7 @@ describe("GIVEN a SegmentClient", () => {
       await instance.writeToResidualCache(filepath, payloadThatWillNotSend);
 
       results = await instance.tryFlushResidualCache();
-    })
+    });
 
     afterEach(() => {
       if (fs.pathExistsSync(filepath)) {
@@ -372,7 +372,7 @@ describe("GIVEN a SegmentClient", () => {
     });
 
     test("AND the file should keep the payload contents of ONLY data that was not sent", (done) => {
-      const fileContents = fs.readFileSync(filepath, 'utf-8');
+      const fileContents = fs.readFileSync(filepath, "utf-8");
       expect(fileContents).toMatchSnapshot();
       done();
     });

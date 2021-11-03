@@ -1,8 +1,4 @@
-import {
-  DVault,
-  NoteProps,
-  NotePropsDict,
-} from "@dendronhq/common-all";
+import { DVault, NoteProps, NotePropsDict } from "@dendronhq/common-all";
 import _ from "lodash";
 import { DendronRouterProps } from "./hooks";
 

@@ -62,15 +62,15 @@ suite("InsertNoteLink", function () {
           await cmd.run({ multiSelect: true });
           const body = editor.document.getText();
           expect(
-            await AssertUtils.assertInString({ body, match: [
-              "[[foo]]",
-              "[[foo.ch1]]"
-            ] })
+            await AssertUtils.assertInString({
+              body,
+              match: ["[[foo]]", "[[foo.ch1]]"],
+            })
           ).toBeTruthy();
           done();
         },
-      }); 
-    })
+      });
+    });
   });
 
   describe("alias modes", () => {
@@ -117,10 +117,10 @@ suite("InsertNoteLink", function () {
           await cmd.run({ multiSelect: true, aliasMode: "snippet" });
           const body = editor.document.getText();
           expect(
-            await AssertUtils.assertInString({ body, match: [
-              "[[alias|foo]]",
-              "[[alias|foo.ch1]]"
-            ] })
+            await AssertUtils.assertInString({
+              body,
+              match: ["[[alias|foo]]", "[[alias|foo.ch1]]"],
+            })
           ).toBeTruthy();
           const { text } = VSCodeUtils.getSelection();
           expect(text).toEqual("alias");
@@ -147,7 +147,10 @@ suite("InsertNoteLink", function () {
           await cmd.run({ aliasMode: "selection" });
           const body = editor.document.getText();
           expect(
-            await AssertUtils.assertInString({ body, match: ["[[foo.ch1 body|foo]]"] })
+            await AssertUtils.assertInString({
+              body,
+              match: ["[[foo.ch1 body|foo]]"],
+            })
           ).toBeTruthy();
           done();
         },
@@ -172,10 +175,10 @@ suite("InsertNoteLink", function () {
           await cmd.run({ multiSelect: true, aliasMode: "selection" });
           const body = editor.document.getText();
           expect(
-            await AssertUtils.assertInString({ body, match: [
-              "[[foo.ch1 body|foo]]", 
-              "[[foo.ch1 body|foo.ch1]]"
-            ] })
+            await AssertUtils.assertInString({
+              body,
+              match: ["[[foo.ch1 body|foo]]", "[[foo.ch1 body|foo.ch1]]"],
+            })
           ).toBeTruthy();
           done();
         },
@@ -225,10 +228,10 @@ suite("InsertNoteLink", function () {
           await cmd.run({ multiSelect: true, aliasMode: "title" });
           const body = editor.document.getText();
           expect(
-            await AssertUtils.assertInString({ body, match: [
-              "[[Foo|foo]]",
-              "[[Ch1|foo.ch1]]"
-            ] })
+            await AssertUtils.assertInString({
+              body,
+              match: ["[[Foo|foo]]", "[[Ch1|foo.ch1]]"],
+            })
           ).toBeTruthy();
           done();
         },
@@ -254,7 +257,10 @@ suite("InsertNoteLink", function () {
           await cmd.run({ aliasMode: "prompt" });
           const body = editor.document.getText();
           expect(
-            await AssertUtils.assertInString({ body, match: ["[[user input|foo]]"] })
+            await AssertUtils.assertInString({
+              body,
+              match: ["[[user input|foo]]"],
+            })
           ).toBeTruthy();
           done();
         },
@@ -274,18 +280,21 @@ suite("InsertNoteLink", function () {
               notes: [notes["foo"], notes["foo.ch1"]],
             })
           );
-          sinon.stub(cmd, "promptForAlias")
-            .onFirstCall().resolves("input 1")
-            .onSecondCall().resolves("input 2");
+          sinon
+            .stub(cmd, "promptForAlias")
+            .onFirstCall()
+            .resolves("input 1")
+            .onSecondCall()
+            .resolves("input 2");
           const editor = VSCodeUtils.getActiveTextEditorOrThrow();
           editor.selection = new vscode.Selection(10, 0, 10, 12);
           await cmd.run({ multiSelect: true, aliasMode: "prompt" });
           const body = editor.document.getText();
           expect(
-            await AssertUtils.assertInString({ body, match: [
-              "[[input 1|foo]]",
-              "[[input 2|foo.ch1]]"
-            ] })
+            await AssertUtils.assertInString({
+              body,
+              match: ["[[input 1|foo]]", "[[input 2|foo.ch1]]"],
+            })
           ).toBeTruthy();
           done();
         },
@@ -335,10 +344,10 @@ suite("InsertNoteLink", function () {
           await cmd.run({ multiSelect: true, aliasMode: "none" });
           const body = editor.document.getText();
           expect(
-            await AssertUtils.assertInString({ body, match: [
-              "[[foo]]",
-              "[[foo.ch1]]"
-            ] })
+            await AssertUtils.assertInString({
+              body,
+              match: ["[[foo]]", "[[foo.ch1]]"],
+            })
           ).toBeTruthy();
           done();
         },

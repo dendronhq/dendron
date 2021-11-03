@@ -1,7 +1,7 @@
 import {
   IntermediateDendronConfig,
   NoteProps,
-  NotePropsDict
+  NotePropsDict,
 } from "@dendronhq/common-all";
 import {
   createSlice,

@@ -568,9 +568,9 @@ export class DendronEngineV2 implements DEngine {
     const noteHtml = payload.toString();
     const renderedNote = ConfigUtils.getProp(this.config, "useNunjucks")
       ? nunjucks.renderString(noteHtml, {
-        fm: { ...note.custom, title: note.title },
-        fname: note.fname,
-      })
+          fm: { ...note.custom, title: note.title },
+          fname: note.fname,
+        })
       : noteHtml;
     return renderedNote;
   }

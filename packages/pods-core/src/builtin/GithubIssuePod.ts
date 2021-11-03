@@ -445,7 +445,7 @@ export class GithubIssuePublishPod extends PublishPod<GithubIssuePublishPodConfi
 
     const query = `query repository($name: String!, $owner: String!)
     {
-      repository(owner: $owner , name: $name) { 
+      repository(owner: $owner , name: $name) {
         id
         labels(last: 100) {
           edges{
@@ -737,11 +737,11 @@ export class GithubIssuePublishPod extends PublishPod<GithubIssuePublishPodConfi
     const mutation = `mutation createDiscussion($repositoryId: ID!, $title: String!, $body: String, $categoryId: ID! ){
         createDiscussion(input: {repositoryId : $repositoryId , title: $title, body: $body, categoryId: $categoryId})
 		      {
-            discussion 
+            discussion
               {
                 id
                 url
-                author 
+                author
                   {
                     url
                   }

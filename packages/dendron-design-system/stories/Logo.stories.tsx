@@ -1,14 +1,14 @@
-import React from "react";
-import { Meta, Story } from "@storybook/react";
-import { Logo } from "../src/components";
-import { ImgProps } from "@chakra-ui/image";
+import React from 'react';
+import { Meta, Story } from '@storybook/react';
+import { Logo } from '../src/components';
+import { ImgProps } from '@chakra-ui/image';
 
 const meta: Meta = {
-  title: "Logo",
+  title: 'Logo',
   component: Logo,
   argTypes: {
     boxSize: {
-      control: { type: "range", min: 8, max: 80, step: 8 },
+      control: { type: 'range', min: 8, max: 80, step: 8 },
     },
   },
   parameters: {

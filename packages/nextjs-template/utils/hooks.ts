@@ -53,8 +53,9 @@ export function useDendronRouter() {
  * @param setNoteIndex
  */
 export function useDendronLookup() {
-  const [noteIndex, setNoteIndex] =
-    React.useState<FuseEngine | undefined>(undefined);
+  const [noteIndex, setNoteIndex] = React.useState<FuseEngine | undefined>(
+    undefined
+  );
   React.useEffect(() => {
     fetchNotes().then(async (noteData) => {
       const { notes } = noteData;

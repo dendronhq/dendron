@@ -15,7 +15,7 @@ assignees: ''
  Needed for Auto labeling:
  issue_labeler_regex_version=3
 
- - [X] Onboard. 
+ - [X] Onboard.
  - [X] Feature Request
  - [ ] IsTriaged
  -->

@@ -40,7 +40,7 @@
           "LOG_LEVEL": "error"
         }
       },
-      "problemMatcher": [],
+      "problemMatcher": []
     },
     {
       "label": "changelog",

@@ -15,7 +15,7 @@ export class CLIAnalyticsUtils {
     const cliVersion = process.env.npm_package_version!;
     SegmentUtils.identify({ type: "cli", cliVersion });
   }
- 
+
   /**
    * Show notice about telemetry
    */

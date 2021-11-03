@@ -1,10 +1,10 @@
-'use strict';
+"use strict";
 
-const fs = require('fs');
-const path = require('path');
-const crypto = require('crypto');
-const chalk = require('react-dev-utils/chalk');
-const paths = require('./paths');
+const fs = require("fs");
+const path = require("path");
+const crypto = require("crypto");
+const chalk = require("react-dev-utils/chalk");
+const paths = require("./paths");
 
 // Ensure the certificate and key provided are valid and if not
 // throw an easy to debug error
@@ -12,7 +12,7 @@ function validateKeyAndCerts({ cert, key, keyFile, crtFile }) {
   let encrypted;
   try {
     // publicEncrypt will throw an error with an invalid cert
-    encrypted = crypto.publicEncrypt(cert, Buffer.from('test'));
+    encrypted = crypto.publicEncrypt(cert, Buffer.from("test"));
   } catch (err) {
     throw new Error(
       `The certificate "${chalk.yellow(crtFile)}" is invalid.\n${err.message}`
@@ -47,14 +47,14 @@ function readEnvFile(file, type) {
 // Return cert files if provided in env, otherwise just true or false
 function getHttpsConfig() {
   const { SSL_CRT_FILE, SSL_KEY_FILE, HTTPS } = process.env;
-  const isHttps = HTTPS === 'true';
+  const isHttps = HTTPS === "true";
 
   if (isHttps && SSL_CRT_FILE && SSL_KEY_FILE) {
     const crtFile = path.resolve(paths.appPath, SSL_CRT_FILE);
     const keyFile = path.resolve(paths.appPath, SSL_KEY_FILE);
     const config = {
-      cert: readEnvFile(crtFile, 'SSL_CRT_FILE'),
-      key: readEnvFile(keyFile, 'SSL_KEY_FILE'),
+      cert: readEnvFile(crtFile, "SSL_CRT_FILE"),
+      key: readEnvFile(keyFile, "SSL_KEY_FILE"),
     };
 
     validateKeyAndCerts({ ...config, keyFile, crtFile });

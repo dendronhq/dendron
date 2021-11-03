@@ -207,8 +207,6 @@ export class APIUtils {
 
 // === Base
 
-
-
 abstract class API {
   public opts: IAPIOpts;
 
@@ -308,15 +306,14 @@ abstract class API {
 
 // === DendronAPI
 
-let _DendronAPI_INSTANCE: DendronAPI|undefined;
+let _DendronAPI_INSTANCE: DendronAPI | undefined;
 
 export class DendronAPI extends API {
-
   static getOrCreate(opts: IAPIConstructor) {
     if (!_.isUndefined(_DendronAPI_INSTANCE)) {
       return this.instance();
     }
-    return new DendronAPI(opts)
+    return new DendronAPI(opts);
   }
 
   static instance(): DendronAPI {

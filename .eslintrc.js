@@ -4,6 +4,7 @@ module.exports = {
     browser: true,
     es6: true,
     jest: true,
+    "cypress/globals": true
   },
   extends: ["plugin:react/recommended", "airbnb", "airbnb/hooks", "prettier"],
   globals: {
@@ -19,7 +20,7 @@ module.exports = {
     ecmaVersion: 2018,
     sourceType: "module",
   },
-  plugins: ["@typescript-eslint", "jest"],
+  plugins: ["@typescript-eslint", "jest", "cypress"],
   rules: {
     // don't care
     "comma-dangle": "off",
@@ -83,7 +84,7 @@ module.exports = {
     // --- React
     "react/prop-types": "off",
     // we use 'logger' inside of hooks, gets flagged 
-    "react-hooks/exhaustive-deps": "off",
+    "react-hooks/exhaustive-deps": 1,
     // suppress errors for missing 'import React' in files
     "react/react-in-jsx-scope": "off",
     "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx", ".ts", ".tsx"] }],

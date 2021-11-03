@@ -17,7 +17,6 @@ repos:
         description: Removes UTF-8 BOM if present, generally a Windows problem.
       - id: end-of-file-fixer
         description: Makes sure files end in a newline and only a newline.
-        exclude: tests/fake_.*\.key
       - id: check-yaml
       - id: check-xml
       - id: detect-private-key

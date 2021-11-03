@@ -20,13 +20,10 @@ repos:
         description: Makes sure files end in a newline and only a newline.
         exclude: tests/fake_.*\.key
       - id: check-yaml
-      - id: check-toml
       - id: check-xml
-      - id: check-symlinks
       - id: detect-private-key
-      - id: destroyed-symlinks
       - id: check-case-conflict
-      - id: sort-simple-yaml
+  #      - id: sort-simple-yaml
   #- repo: https://github.com/pre-commit/mirrors-eslint
   #    rev: 'v8.1.0'
   #    hooks:

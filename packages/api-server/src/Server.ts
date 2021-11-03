@@ -1,4 +1,8 @@
-import { getStage, StatusCodes } from "@dendronhq/common-all";
+import {
+  error2PlainObject,
+  getStage,
+  StatusCodes,
+} from "@dendronhq/common-all";
 import {
   findInParent,
   SegmentClient,
@@ -135,10 +139,13 @@ export function appModule({
   );
 
   app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
-    console.error(err.message, err);
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      error: JSON.stringify(err),
+    const flattenedError = error2PlainObject(err);
+    logger.error({
+      ctx: "appModule:ErrorHandler",
+      error: flattenedError,
+      nextStaticRoot,
     });
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(flattenedError);
   });
 
   return app;

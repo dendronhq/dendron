@@ -1,11 +1,10 @@
 import { Layout, Row, Col, Divider } from "antd";
-import { MenuOutlined, MenuUnfoldOutlined } from "@ant-design/icons";
+import { MenuOutlined } from "@ant-design/icons";
 import * as React from "react";
 import { DENDRON_STYLE_CONSTANTS } from "../styles/constants";
 import { DendronCommonProps } from "../utils/types";
 import { DendronBreadCrumb } from "./DendronBreadCrumb";
 import DendronLogoOrTitle from "./DendronLogoOrTitle";
-import { DendronLookup } from "./DendronLookup";
 import { FooterText } from "./DendronNoteFooter";
 import DendronTreeMenu from "./DendronTreeMenu";
 import { DendronSearch } from "./DendronSearch";
@@ -43,6 +42,11 @@ export default function DendronLayout(
       }}
       trigger={null}
     >
+      {isResponsive && (
+        <div style={{ padding: 16 }}>
+          <DendronSearch {...props} />
+        </div>
+      )}
       <DendronTreeMenu
         {...props}
         collapsed={isCollapsed && isResponsive}
@@ -94,33 +98,26 @@ export default function DendronLayout(
       <Header
         style={{
           position: "fixed",
+          isolation: "isolate",
           zIndex: 1,
           width: "100%",
           borderBottom: "1px solid #d4dadf",
           height: HEADER.HEIGHT,
-          padding: `0 ${LAYOUT.PADDING}px 0 2`,
+          padding: isResponsive ? 0 : `0 ${LAYOUT.PADDING}px 0 2px`,
         }}
       >
         <Row
+          justify="center"
           style={{
-            flex: "0 0 auto",
-            paddingLeft: `calc((100% - ${LAYOUT.BREAKPOINTS.lg}) / 2)`,
-            height: HEADER.HEIGHT,
+            maxWidth: "992px",
+            justifyContent: "space-between",
+            margin: "0 auto",
           }}
         >
-          <Col xs={5} md={5} lg={6}>
+          <Col>
             <DendronLogoOrTitle />
           </Col>
-          <Col xs={14} sm={14} md={10} lg={10} style={{ paddingLeft: "4px" }}>
-            <DendronLookup {...props} />
-          </Col>
-          <Col
-            xs={0}
-            sm={0}
-            md={8}
-            lg={6}
-            style={{ marginLeft: "4px", marginRight: "4px" }}
-          >
+          <Col xs={0} sm={20} md={20} lg={19} className="gutter-row">
             <DendronSearch {...props} />
           </Col>
           <Col
@@ -135,17 +132,10 @@ export default function DendronLayout(
               justifyContent: "center",
             }}
           >
-            {isCollapsed ? (
-              <MenuOutlined
-                size={32}
-                onClick={() => setCollapsed(!isCollapsed)}
-              />
-            ) : (
-              <MenuUnfoldOutlined
-                size={32}
-                onClick={() => setCollapsed(!isCollapsed)}
-              />
-            )}
+            <MenuOutlined
+              style={{ fontSize: 24 }}
+              onClick={() => setCollapsed(!isCollapsed)}
+            />
           </Col>
         </Row>
       </Header>

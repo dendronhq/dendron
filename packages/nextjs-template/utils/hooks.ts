@@ -9,7 +9,6 @@ import { getNoteRouterQuery } from "./etc";
 import { fetchNoteBody, fetchNotes } from "./fetchers";
 
 export type DendronRouterProps = ReturnType<typeof useDendronRouter>;
-export type DendronLookupProps = ReturnType<typeof useDendronLookup>;
 
 export function useDendronRouter() {
   const router = useRouter();
@@ -132,7 +131,7 @@ export function useNoteBodies() {
       // force a re-render
       setNoteBodies(newNoteBodies);
     });
-  }, [requestedIds]);
+  }, [noteBodies, requestedIds]);
 
   // The callback to request more notes to be feched.
   function requestNotes(ids: string[]) {

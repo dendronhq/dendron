@@ -7,7 +7,7 @@ import {
   NotePropsDict,
 } from "@dendronhq/common-all";
 import { fetchFuseIndex } from "./fetchers";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import _ from "lodash";
 import Fuse from "fuse.js";
 
@@ -23,29 +23,37 @@ function useFuse(notes: NotePropsDict, provider: FuseIndexProvider) {
   const [error, setError] = useState<any>();
   const [loading, setLoading] = useState<boolean>(false);
   const [fuse, setFuse] = useState<FuseNote>();
-  const ensureIndexReady = () => {
-    if (!_.isUndefined(fuse)) return; // Avoid unnecessarily reloading index
-    setLoading(true);
-    provider()
-      .then((value) => {
-        if (value instanceof Fuse) {
-          setFuse(value);
-        } else {
-          setFuse(createFuseNote(notes, {}, value));
+
+  useEffect(() => {
+    if (_.isUndefined(fuse)) {
+      setLoading(true);
+      const req = async () => {
+        try {
+          const value = await provider();
+          if (value instanceof Fuse) {
+            setFuse(value);
+          } else {
+            setFuse(createFuseNote(notes, {}, value));
+          }
+          setLoading(false);
+
+          if (_.isUndefined(value)) {
+            // Sanity check, should never happen unless `provider` typecasts an undefined
+            setError(
+              new DendronError({ message: "loaded index is undefined" })
+            );
+          }
+        } catch (error) {
+          setError(error);
+          setLoading(false);
         }
-        setLoading(false);
-        if (_.isUndefined(value)) {
-          // Sanity check, should never happen unless `provider` typecasts an undefined
-          setError(new DendronError({ message: "loaded index is undefined" }));
-        }
-      })
-      .catch((error) => {
-        setError(error);
-        setLoading(false);
-      });
-  };
+      };
+
+      req();
+    }
+  }, [fuse, notes, provider, setFuse]);
+
   return {
-    ensureIndexReady,
     error,
     fuse,
     loading,

@@ -635,6 +635,7 @@ function toggleViews(enabled: boolean) {
   const ctx = "toggleViews";
   Logger.info({ ctx, msg: `views enabled: ${enabled}` });
   VSCodeUtils.setContext(DendronContext.PLUGIN_ACTIVE, enabled);
+  VSCodeUtils.setContext(DendronContext.HAS_CUSTOM_MARKDOWN_VIEW, enabled);
 }
 
 // this method is called when your extension is deactivated

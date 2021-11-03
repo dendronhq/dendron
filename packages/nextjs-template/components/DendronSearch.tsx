@@ -4,8 +4,8 @@ import {
   NoteProps,
 } from "@dendronhq/common-all";
 import { LoadingStatus } from "@dendronhq/common-frontend";
-import { AutoComplete, Alert, Row, Col, Typography, Divider } from "antd";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { AutoComplete, Alert, Row, Col, Typography } from "antd";
+import React, { useEffect } from "react";
 import { useCombinedDispatch } from "../features";
 import { browserEngineSlice } from "../features/engine";
 import { useFetchFuse } from "../utils/fuse";
@@ -16,9 +16,9 @@ import {
   verifyNoteData,
 } from "../utils/types";
 import DendronSpinner from "./DendronSpinner";
-import _, { keys, last } from "lodash";
 import { useDendronLookup, useNoteActive, useNoteBodies } from "../utils/hooks";
 import FileTextOutlined from "@ant-design/icons/lib/icons/FileTextOutlined";
+import _ from "lodash";
 
 /** For notes where nothing in the note body matches, only show this many characters for the note body snippet. */
 const MAX_NOTE_SNIPPET_LENGTH = 30;
@@ -53,6 +53,9 @@ function DebouncedDendronSearchComponent(props: DendronPageWithNoteDataProps) {
   // gets fresh results.
   const debouncedSearch: SearchFunction | undefined = fuse
     ? _.debounce<SearchFunction>((query, setResults) => {
+        if (_.isUndefined(query)) {
+          return;
+        }
         setResults(fuse.search(query.substring(1)));
       }, SEARCH_DELAY)
     : undefined;

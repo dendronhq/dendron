@@ -50,48 +50,38 @@ export class GoogleAuthController implements TokenMethods {
       encoding: "utf8",
     });
     let resp;
-    try {
-      const { data } = await axios({
-        url: `https://oauth2.googleapis.com/token`,
-        method: "post",
-        data: {
-          client_id: this.clientId,
-          client_secret: this.clientSecret,
-          redirect_uri: `http://localhost:${port}/api/oauth/getToken?service=google`,
-          grant_type: "authorization_code",
-          code,
+    const { data } = await axios({
+      url: `https://oauth2.googleapis.com/token`,
+      method: "post",
+      data: {
+        client_id: this.clientId,
+        client_secret: this.clientSecret,
+        redirect_uri: `http://localhost:${port}/api/oauth/getToken?service=google`,
+        grant_type: "authorization_code",
+        code,
+      },
+    });
+    if (!_.isEmpty(data)) {
+      const opts = {
+        path: configPath,
+        tokens: {
+          accessToken: data.access_token,
+          refreshToken: data.refresh_token,
+          expirationTime: Time.now().toSeconds() + data.expires_in - 300,
         },
-      });
-      if (!_.isEmpty(data)) {
-        const opts = {
-          path: configPath,
-          tokens: {
-            accessToken: data.access_token,
-            refreshToken: data.refresh_token,
-            expirationTime: Time.now().toSeconds() + data.expires_in - 300,
-          },
-        };
-        engine.addAccessTokensToPodConfig(opts);
-        resp =
-          "Authorization completed. Please return to your workspace and specify vaultName in config.import.yml and then run the import pod again. You can now close this window.";
-      } else {
-        throw new DendronError({
-          message:
-            "Failed to get a token response from Google Authentication Service",
-          severity: ERROR_SEVERITY.MINOR,
-        });
-      }
-
-      return resp;
-    } catch (err) {
-      fs.unlink(configPath);
-      return {
-        error: new DendronError({
-          message: `Authorization Failed. ${JSON.stringify(err)}`,
-        }),
-        data: undefined,
       };
+      engine.addAccessTokensToPodConfig(opts);
+      resp =
+        "Authorization completed. Please return to your workspace and specify vaultName in config.import.yml and then run the import pod again. You can now close this window.";
+    } else {
+      throw new DendronError({
+        message:
+          "Failed to get a token response from Google Authentication Service",
+        severity: ERROR_SEVERITY.MINOR,
+      });
     }
+
+    return resp;
   }
 
   async refreshToken(opts: RefreshTokenOpts): Promise<RespV2<string>> {
@@ -102,36 +92,30 @@ export class GoogleAuthController implements TokenMethods {
       encoding: "utf8",
     });
     let resp;
-    try {
-      const { data } = await axios({
-        url: `https://oauth2.googleapis.com/token`,
-        method: "post",
-        data: {
-          client_id: this.clientId,
-          client_secret: this.clientSecret,
-          redirect_uri: `http://localhost:${port}/api/oauth/getToken?service=google`,
-          grant_type: "refresh_token",
-          refresh_token: refreshToken,
+
+    const { data } = await axios({
+      url: `https://oauth2.googleapis.com/token`,
+      method: "post",
+      data: {
+        client_id: this.clientId,
+        client_secret: this.clientSecret,
+        redirect_uri: `http://localhost:${port}/api/oauth/getToken?service=google`,
+        grant_type: "refresh_token",
+        refresh_token: refreshToken,
+      },
+    });
+    if (!_.isEmpty(data)) {
+      const opts = {
+        path: path.join(wsRoot, "pods", "dendron.gdoc", "config.import.yml"),
+        tokens: {
+          accessToken: data.access_token,
+          // expiration time of token is set to 55mins from now.
+          expirationTime: Time.now().toSeconds() + data.expires_in - 300,
         },
-      });
-      if (!_.isEmpty(data)) {
-        const opts = {
-          path: path.join(wsRoot, "pods", "dendron.gdoc", "config.import.yml"),
-          tokens: {
-            accessToken: data.access_token,
-            // expiration time of token is set to 55mins from now.
-            expirationTime: Time.now().toSeconds() + data.expires_in - 300,
-          },
-        };
-        engine.addAccessTokensToPodConfig(opts);
-        resp = data.access_token;
-      }
-      return resp;
-    } catch (err) {
-      return {
-        error: new DendronError({ message: JSON.stringify(err) }),
-        data: undefined,
       };
+      engine.addAccessTokensToPodConfig(opts);
+      resp = data.access_token;
     }
+    return resp;
   }
 }

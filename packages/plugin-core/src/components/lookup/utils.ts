@@ -164,6 +164,10 @@ export type OldNewLocation = {
   newLoc: DNoteLoc & { note?: NoteProps };
 };
 
+export type NewLocation = {
+  newLoc: DNoteLoc & { note?: NoteProps };
+};
+
 export class ProviderAcceptHooks {
   /**
    * Returns current location and new location for note
@@ -216,6 +220,22 @@ export class ProviderAcceptHooks {
         vaultName: VaultUtils.getName(newVault),
       },
     };
+    return { data, error: null };
+  };
+
+  static NewLocationHook: OnAcceptHook = async ({
+    quickpick,
+  }): Promise<RespV2<NewLocation>> => {
+    const activeEditorVault = PickerUtilsV2.getVaultForOpenEditor();
+    const newVault = quickpick.vault ? quickpick.vault : activeEditorVault;
+
+    const data = {
+      newLoc: {
+        fname: quickpick.value,
+        vaultName: VaultUtils.getName(newVault),
+      },
+    };
+
     return { data, error: null };
   };
 }

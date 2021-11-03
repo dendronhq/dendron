@@ -13,7 +13,6 @@ repos:
       - id: mixed-line-ending
         description: Replaces or checks mixed line ending.
         args: [--fix=lf]
-        exclude: make.bat
       - id: fix-byte-order-marker
         description: Removes UTF-8 BOM if present, generally a Windows problem.
       - id: end-of-file-fixer

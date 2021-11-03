@@ -16,7 +16,7 @@ import {
   verifyNoteData,
 } from "../utils/types";
 import DendronSpinner from "./DendronSpinner";
-import _, { keys } from "lodash";
+import _, { keys, last } from "lodash";
 import { useDendronLookup, useNoteActive, useNoteBodies } from "../utils/hooks";
 import FileTextOutlined from "@ant-design/icons/lib/icons/FileTextOutlined";
 
@@ -180,7 +180,12 @@ function DendronSearchComponent(
                   >
                     <Row>
                       <Typography.Text>
-                        <MatchTitle matches={matches} note={note} />
+                        {/* <MatchTitle matches={matches} note={note} /> */}
+                        <TitleHighlight
+                          hit={{ item: note, matches }}
+                          attribute="title"
+                          title={note.title}
+                        />
                       </Typography.Text>
                     </Row>
                     <Row>
@@ -218,43 +223,6 @@ function DendronSearchComponent(
           })}
     </AutoComplete>
   );
-}
-
-/** For a fuse.js match on a note, renders the note **title** with the matched parts highlighted.  */
-function MatchTitle(props: {
-  matches: readonly Fuse.FuseResultMatch[] | undefined;
-  note: NoteProps;
-}) {
-  const { title } = props.note;
-  if (_.isUndefined(props.matches)) return <>{title}</>;
-  const titleMatches = props.matches
-    .filter((match) => match.key === "title")
-    .flatMap((match) => match.indices)
-    .sort(
-      // Sort from earliest to latest match
-      ([leftStart, _leftEnd], [rightStart, _rightEnd]) => leftStart - rightStart
-    );
-
-  let lastIndex = 0;
-  const renderedTitle: (String | JSX.Element)[] = [];
-  for (const [startIndex, endIndex] of titleMatches) {
-    // Add the part before the match as regular text
-    renderedTitle.push(title.slice(lastIndex, startIndex));
-    // Add the matched part as bold
-    renderedTitle.push(
-      <span
-        key={`${props.note.id}-${startIndex}-${endIndex}`}
-        style={{ fontWeight: "bolder" }}
-      >
-        {title.slice(startIndex, endIndex + 1)}
-      </span>
-    );
-    lastIndex = endIndex + 1;
-  }
-  // Add anything after the matches
-  renderedTitle.push(title.slice(lastIndex, undefined));
-
-  return <>{renderedTitle}</>;
 }
 
 /** Removes repeating newlines from the text. */
@@ -340,3 +308,53 @@ function OmittedText(props: { after: number; before: number; body: string }) {
     return <span style={{ fontWeight: "lighter" }}>{OMITTED_PART_TEXT}</span>;
   }
 }
+
+/** For a fuse.js match on a note, renders the note **title** with the matched parts highlighted.  */
+// Recursively builds JSX output adding `<mark>` tags around matches
+const highlight: (
+  i: number,
+  indices?: Fuse.FuseResultMatch["indices"],
+  value?: string
+) => JSX.Element | null = (
+  i: number,
+  indices?: Fuse.FuseResultMatch["indices"],
+  value?: string
+) => {
+  const pair = indices?.[indices.length - i];
+
+  return !pair ? (
+    <>{value}</>
+  ) : (
+    <>
+      {highlight(i + 1, indices, value?.substring(0, pair[0]))}
+      <span style={{ fontWeight: "bolder" }}>
+        {value?.substring(pair[0], pair[1] + 1)}
+      </span>
+      {value?.substring(pair[1] + 1)}
+    </>
+  );
+};
+
+const TitleHighlight = ({
+  hit,
+  attribute,
+  title,
+}: {
+  hit: {
+    item: NoteProps;
+    matches: readonly Fuse.FuseResultMatch[] | undefined;
+  };
+  attribute: string;
+  title: string;
+}): JSX.Element | null => {
+  const matches =
+    typeof hit.item === "string"
+      ? hit.matches?.[0]
+      : hit.matches?.find((m) => m.key === attribute);
+
+  if (_.isUndefined(matches)) {
+    return <>{title}</>;
+  }
+
+  return highlight(1, matches?.indices || [], matches?.value);
+};

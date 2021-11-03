@@ -131,7 +131,7 @@ export function useNoteBodies() {
       // force a re-render
       setNoteBodies(newNoteBodies);
     });
-  }, [requestedIds]);
+  }, [noteBodies, requestedIds]);
 
   // The callback to request more notes to be feched.
   function requestNotes(ids: string[]) {

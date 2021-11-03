@@ -333,8 +333,8 @@ export class SegmentClient {
 
   private async trackInternal(
     event: string,
-    context: any,
     properties: { [key: string]: any },
+    context: any,
     timestamp?: Date
   ): Promise<RespV2<SegmentEventProps>> {
     return new Promise<RespV2<SegmentEventProps>>((resolve) => {
@@ -619,7 +619,7 @@ export class SegmentUtils {
   static getCommonProps() {
     return {
       arch: process.arch,
-      nodeVerson: process.version,
+      nodeVersion: process.version,
     };
   }
 }

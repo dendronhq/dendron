@@ -17,7 +17,7 @@ import {
 import _ from "lodash";
 import path from "path";
 import yargs from "yargs";
-import { CLIUtils } from "../utils/cli";
+import { CLIUtils, SpinnerUtils } from "../utils/cli";
 import { CLICommand } from "./base";
 import { ExportPodCLICommand } from "./exportPod";
 import { PodSource } from "./pod";
@@ -149,42 +149,49 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     const { cmd } = opts;
     const ctx = "execute";
     this.L.info({ ctx });
-    const spinner = ora();
+    const spinner = ora().start();
     try {
       switch (cmd) {
         case PublishCommands.INIT: {
-          return await this.init({ ...opts, spinner });
+          const out = await this.init({ ...opts, spinner });
+          spinner.stop();
+          return out;
         }
         case PublishCommands.BUILD: {
+          spinner.stop();
           return this.build(opts);
         }
         case PublishCommands.DEV: {
-          const isInitialized = await NextjsExportPodUtils.isInitialized({
-            wsRoot: opts.wsRoot,
-            progressCb: spinner,
-          });
+          const { wsRoot } = opts;
+          const isInitialized = await this._isInitialized({ wsRoot, spinner });
           if (!isInitialized) {
             await this.init({ ...opts, spinner });
           }
           if (opts.noBuild) {
-            this.print("skipping build...");
+            SpinnerUtils.renderAndContinue({
+              spinner,
+              text: "skipping build...",
+            });
           } else {
+            spinner.stop();
             await this.build(opts);
           }
           await this.dev(opts);
           return { error: null };
         }
         case PublishCommands.EXPORT: {
-          const isInitialized = await NextjsExportPodUtils.isInitialized({
-            wsRoot: opts.wsRoot,
-            progressCb: spinner,
-          });
+          const { wsRoot } = opts;
+          const isInitialized = await this._isInitialized({ wsRoot, spinner });
           if (!isInitialized) {
-            await this.init({ ...opts, spinner, skipCheck: true });
+            await this.init({ ...opts, spinner });
           }
           if (opts.noBuild) {
-            this.print("skipping build...");
+            SpinnerUtils.renderAndContinue({
+              spinner,
+              text: "skipping build...",
+            });
           } else {
+            spinner.stop();
             await this.build(opts);
           }
           await this.export(opts);
@@ -289,23 +296,108 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     }
   }
 
-  async init(opts: { wsRoot: string; spinner: ora.Ora; skipCheck?: boolean }) {
+  async init(opts: { wsRoot: string; spinner: ora.Ora }) {
     const { wsRoot, spinner } = opts;
     const nextPath = NextjsExportPodUtils.getNextRoot(wsRoot);
 
-    const nextPathExists = await NextjsExportPodUtils.nextPathExists({
+    const nextPathExists = await this._nextPathExists({
       nextPath,
-      progressCb: spinner,
+      spinner,
     });
 
     if (nextPathExists) {
-      await NextjsExportPodUtils.removeNextPath({
+      await this._removeNextPath({
         nextPath,
-        progressCb: spinner,
+        spinner,
       });
     }
-    await NextjsExportPodUtils.initialize({ nextPath, progressCb: spinner });
+
+    await this._initialize({ nextPath, spinner });
+
     return { error: null };
+  }
+
+  async _isInitialized(opts: { wsRoot: string; spinner: ora.Ora }) {
+    const { spinner, wsRoot } = opts;
+    spinner.start();
+    SpinnerUtils.renderAndContinue({
+      spinner,
+      text: "checking if NextJS template is initialized",
+    });
+    const isInitialized = await NextjsExportPodUtils.isInitialized({
+      wsRoot,
+    });
+    SpinnerUtils.renderAndContinue({
+      spinner,
+      text: `NextJS template is ${
+        isInitialized ? "already" : "not"
+      } initialized.`,
+    });
+    return isInitialized;
+  }
+
+  async _nextPathExists(opts: { nextPath: string; spinner: ora.Ora }) {
+    const { spinner, nextPath } = opts;
+    const nextPathBase = path.basename(nextPath);
+    SpinnerUtils.renderAndContinue({
+      spinner,
+      text: `checking if ${nextPathBase}  directory exists.`,
+    });
+    const nextPathExists = await NextjsExportPodUtils.nextPathExists({
+      nextPath,
+    });
+    SpinnerUtils.renderAndContinue({
+      spinner,
+      text: `${nextPathBase} directory ${
+        nextPathExists ? "exists" : "does not exist"
+      }`,
+    });
+    return nextPathExists;
+  }
+
+  async _removeNextPath(opts: { nextPath: string; spinner: ora.Ora }) {
+    const { spinner, nextPath } = opts;
+    const nextPathBase = path.basename(nextPath);
+    await NextjsExportPodUtils.removeNextPath({
+      nextPath,
+    });
+    SpinnerUtils.renderAndContinue({
+      spinner,
+      text: `existing ${nextPathBase} directory deleted.`,
+    });
+  }
+
+  async _initialize(opts: { nextPath: string; spinner: ora.Ora }) {
+    const { spinner } = opts;
+    SpinnerUtils.renderAndContinue({
+      spinner,
+      text: "Initializing NextJS template.",
+    });
+    await this._cloneTemplate(opts);
+    await this._installDependencies(opts);
+  }
+
+  async _cloneTemplate(opts: { nextPath: string; spinner: ora.Ora }) {
+    const { nextPath, spinner } = opts;
+    spinner.stop();
+    spinner.start("Cloning NextJS template...");
+
+    await NextjsExportPodUtils.cloneTemplate({ nextPath });
+    SpinnerUtils.renderAndContinue({
+      spinner,
+      text: "Successfully cloned.",
+    });
+  }
+
+  async _installDependencies(opts: { nextPath: string; spinner: ora.Ora }) {
+    const { nextPath, spinner } = opts;
+    spinner.stop();
+    spinner.start("Installing dependencies... This may take a while.");
+    await NextjsExportPodUtils.installDependencies({ nextPath });
+    SpinnerUtils.renderAndContinue({
+      spinner,
+      text: "All dependencies installed.",
+    });
   }
 
   async build({ wsRoot, dest, attach, overrides }: BuildCmdOpts) {

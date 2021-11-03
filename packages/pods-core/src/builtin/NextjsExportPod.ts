@@ -7,7 +7,6 @@ import {
   NoteUtils,
   createSerializedFuseNoteIndex,
   ConfigUtils,
-  DENDRON_EMOJIS,
 } from "@dendronhq/common-all";
 import { simpleGit } from "@dendronhq/common-server";
 import {
@@ -80,109 +79,40 @@ export class NextjsExportPodUtils {
     return path.join(wsRoot, ".next");
   };
 
-  static async nextPathExists(opts: { nextPath: string; progressCb?: any }) {
-    const { nextPath, progressCb } = opts;
-
-    if (progressCb) {
-      progressCb.start();
-      progressCb.stopAndPersist({
-        text: "checking if .next directory exists.",
-        symbol: DENDRON_EMOJIS.SEEDLING,
-      });
-    }
-
+  static async nextPathExists(opts: { nextPath: string }) {
+    const { nextPath } = opts;
     const exists = await fs.pathExists(nextPath);
-    if (exists) {
-      if (progressCb) {
-        progressCb.stopAndPersist({
-          text: ".next directory exists",
-          symbol: DENDRON_EMOJIS.SEEDLING,
-        });
-      }
-      return true;
-    } else {
-      if (progressCb) {
-        progressCb.stopAndPersist({
-          text: ".next directory does not exist",
-          symbol: DENDRON_EMOJIS.SEEDLING,
-        });
-      }
-      return false;
-    }
+    return exists;
   }
 
-  static async removeNextPath(opts: { nextPath: string; progressCb?: any }) {
-    const { nextPath, progressCb } = opts;
-    if (progressCb) {
-      progressCb.start();
-      progressCb.text = `directory already exists at ${nextPath}. Removing...`;
-    }
+  static async removeNextPath(opts: { nextPath: string }) {
+    const { nextPath } = opts;
     await fs.rm(nextPath, { recursive: true });
-    if (progressCb) {
-      progressCb.stopAndPersist({
-        text: `existing ${_.last(nextPath.split("/"))} directory deleted.`,
-        symbol: DENDRON_EMOJIS.SEEDLING,
-      });
-    }
   }
 
-  static async installDependencies(opts: {
-    nextPath: string;
-    progressCb?: any;
-  }) {
-    const { nextPath, progressCb } = opts;
-    if (progressCb) {
-      progressCb.start();
-      progressCb.text = "Installing dependencies...";
-    }
+  static async installDependencies(opts: { nextPath: string }) {
+    const { nextPath } = opts;
     await $$("npm install", { cwd: nextPath });
-    if (progressCb) {
-      progressCb.stopAndPersist({
-        text: "All dependencies installed.",
-        symbol: DENDRON_EMOJIS.SEEDLING,
-      });
-    }
   }
 
-  static async cloneTemplate(opts: { nextPath: string; progressCb?: any }) {
-    const { nextPath, progressCb } = opts;
-
-    if (progressCb) {
-      progressCb.start();
-      progressCb.text = "Cloning NextJS template...";
-    }
+  static async cloneTemplate(opts: { nextPath: string }) {
+    const { nextPath } = opts;
 
     const url = "https://github.com/dendronhq/nextjs-template.git";
     await fs.ensureDir(nextPath);
     const git = simpleGit({ baseDir: nextPath });
     await git.clone(url, nextPath);
-    if (progressCb) {
-      progressCb.stopAndPersist({
-        text: "Successfully cloned.",
-        symbol: DENDRON_EMOJIS.SEEDLING,
-      });
-    }
 
     return { error: null };
   }
 
-  static async isInitialized(opts: { wsRoot: string; progressCb?: any }) {
-    const { wsRoot, progressCb } = opts;
+  static async isInitialized(opts: { wsRoot: string }) {
+    const { wsRoot } = opts;
     const nextPath = path.join(wsRoot, ".next");
-
-    if (progressCb) {
-      progressCb.start();
-      progressCb.stopAndPersist({
-        text: "checking if NextJS template is initialized",
-        symbol: DENDRON_EMOJIS.SEEDLING,
-      });
-      progressCb.start();
-    }
 
     const nextPathExists = await NextjsExportPodUtils.nextPathExists({
       ...opts,
       nextPath,
-      progressCb,
     });
 
     if (nextPathExists) {
@@ -190,35 +120,10 @@ export class NextjsExportPodUtils {
         path.join(nextPath, "package.json")
       );
       if (pkgJsonExists) {
-        if (progressCb) {
-          progressCb.stopAndPersist({
-            text: "NextJS template already initialized.",
-            symbol: DENDRON_EMOJIS.SEEDLING,
-          });
-        }
         return true;
       }
     }
-    if (progressCb) {
-      progressCb.stopAndPersist({
-        text: "NextJS template is not initialized.",
-        symbol: DENDRON_EMOJIS.SEEDLING,
-      });
-    }
     return false;
-  }
-
-  static async initialize(opts: { nextPath: string; progressCb?: any }) {
-    const { progressCb } = opts;
-    if (progressCb) {
-      progressCb.start();
-      progressCb.stopAndPersist({
-        text: "Initializing NextJS template.",
-        symbol: DENDRON_EMOJIS.SEEDLING,
-      });
-    }
-    await NextjsExportPodUtils.cloneTemplate(opts);
-    await NextjsExportPodUtils.installDependencies(opts);
   }
 
   static async startNextExport(opts: { nextPath: string; quiet?: boolean }) {

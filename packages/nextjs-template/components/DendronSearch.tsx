@@ -70,6 +70,11 @@ type SearchProps = Omit<ReturnType<typeof useFetchFuse>, "fuse"> & {
   search: SearchFunction | undefined;
 };
 
+enum SearchMode {
+  LOOKUP_MODE = "lookupMode",
+  SEARCH_MODE = "searchMode",
+}
+
 function DendronSearchComponent(
   props: DendronPageWithNoteDataProps & SearchProps
 ) {
@@ -80,32 +85,31 @@ function DendronSearchComponent(
   const [lookupResults, setLookupResults] = React.useState<NoteIndexProps[]>(
     []
   );
-  const [results, setResults] =
-    React.useState<"searchResults" | "lookupResults">();
+  const [results, setResults] = React.useState<SearchMode>();
   const dispatch = useCombinedDispatch();
   const { noteBodies, requestNotes } = useNoteBodies();
   const lookup = useDendronLookup();
   const { noteActive } = useNoteActive(dendronRouter.getActiveNoteId());
   const initValue = noteActive?.fname || "";
-  const [value, setValue] = React.useState(initValue);
+  const [searchQueryValue, setSearchQueryValue] = React.useState(initValue);
 
   useEffect(() => {
     if (search) {
-      search(value, setSearchResults);
+      search(searchQueryValue, setSearchResults);
     }
-  }, [value, search]);
+  }, [searchQueryValue, search]);
 
   useEffect(() => {
     requestNotes(searchResults?.map(({ item: note }) => note.id) || []);
   }, [requestNotes, searchResults]);
 
   useEffect(() => {
-    if (value?.startsWith("?")) {
-      setResults("searchResults");
+    if (searchQueryValue?.startsWith("?")) {
+      setResults(SearchMode.SEARCH_MODE);
     } else {
-      setResults("lookupResults");
+      setResults(SearchMode.LOOKUP_MODE);
     }
-  }, [value]);
+  }, [searchQueryValue]);
 
   const onLookup = (qs: string) => {
     if (_.isUndefined(qs)) {
@@ -124,12 +128,12 @@ function DendronSearchComponent(
   };
 
   const onChangeLookup = (val: string) => {
-    setValue(val);
+    setSearchQueryValue(val);
     onLookup(val);
   };
 
   const onChangeSearch = (val: string) => {
-    setValue(val);
+    setSearchQueryValue(val);
   };
 
   if (error) {
@@ -147,16 +151,18 @@ function DendronSearchComponent(
       size="large"
       allowClear
       style={{ width: "100%" }}
-      value={value}
-      onClick={results === "searchResults" ? () => null : onClickLookup}
-      onChange={results === "searchResults" ? onChangeSearch : onChangeLookup}
+      value={searchQueryValue}
+      onClick={results === SearchMode.SEARCH_MODE ? () => null : onClickLookup}
+      onChange={
+        results === SearchMode.SEARCH_MODE ? onChangeSearch : onChangeLookup
+      }
       onSelect={(_selection, option) => {
         const id = option.key?.toString()!;
         dendronRouter.changeActiveNote(id, { noteIndex });
         dispatch(
           browserEngineSlice.actions.setLoadingStatus(LoadingStatus.PENDING)
         );
-        setValue("");
+        setSearchQueryValue("");
       }}
       placeholder={
         loading
@@ -164,7 +170,7 @@ function DendronSearchComponent(
           : "For full text search please use the '?' prefix. e.g. ? Onboarding"
       }
     >
-      {results === "searchResults"
+      {results === SearchMode.SEARCH_MODE
         ? searchResults?.map(({ item: note, matches }) => {
             return (
               <AutoComplete.Option key={note.id} value={note.fname}>
@@ -183,7 +189,6 @@ function DendronSearchComponent(
                   >
                     <Row>
                       <Typography.Text>
-                        {/* <MatchTitle matches={matches} note={note} /> */}
                         <TitleHighlight
                           hit={{ item: note, matches }}
                           attribute="title"

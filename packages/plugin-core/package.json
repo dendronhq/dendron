@@ -367,7 +367,7 @@
       {
         "command": "dendron.publishExport",
         "title": "Dendron: Publish Export",
-        "desc": "Export your notes using publishing v2",
+        "desc": "Export your notes for NextJS publishing",
         "docs": "This command works by running `dendron-cli` in the background.",
         "docLink": "",
         "docPreview": ""
@@ -375,7 +375,7 @@
       {
         "command": "dendron.publishDev",
         "title": "Dendron: Publish Dev",
-        "desc": "Preview your notes on localhost using publishing v2",
+        "desc": "Preview your notes on localhost using NextJS publishing",
         "docs": "This command works by running `dendron-cli` in the background.",
         "docLink": "",
         "docPreview": ""

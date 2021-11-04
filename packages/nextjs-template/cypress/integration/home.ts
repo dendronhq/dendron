@@ -3,5 +3,3 @@ describe("Index", () => {
     cy.visit("/");
   });
 });
-
-export {}

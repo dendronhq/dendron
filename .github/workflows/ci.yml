@@ -127,6 +127,7 @@ jobs:
         with:
           build: "yarn run template:export"
           start: "yarn run template:start" 
+          project: ./packages/nextjs-template
 
       - name: Run tests
         run: yarn ci:test:${{ matrix.suite }}

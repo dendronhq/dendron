@@ -164,6 +164,10 @@ export type OldNewLocation = {
   newLoc: DNoteLoc & { note?: NoteProps };
 };
 
+export type NewLocation = {
+  newLoc: DNoteLoc & { note?: NoteProps };
+};
+
 export class ProviderAcceptHooks {
   /**
    * Returns current location and new location for note
@@ -216,6 +220,22 @@ export class ProviderAcceptHooks {
         vaultName: VaultUtils.getName(newVault),
       },
     };
+    return { data, error: null };
+  };
+
+  static NewLocationHook: OnAcceptHook = async ({
+    quickpick,
+  }): Promise<RespV2<NewLocation>> => {
+    const activeEditorVault = PickerUtilsV2.getVaultForOpenEditor();
+    const newVault = quickpick.vault ? quickpick.vault : activeEditorVault;
+
+    const data = {
+      newLoc: {
+        fname: quickpick.value,
+        vaultName: VaultUtils.getName(newVault),
+      },
+    };
+
     return { data, error: null };
   };
 }
@@ -393,8 +413,10 @@ export class PickerUtilsV2 {
     const { selectedItems, providerId } = opts;
     const nextPicker = quickpick.nextPicker;
     const isNewPick = PickerUtilsV2.isCreateNewNotePick(selectedItems[0]);
+    const isNewPickAllowed = ["lookup", "dendron.moveHeader"];
     return (
-      !_.isUndefined(nextPicker) && (providerId === "lookup" ? isNewPick : true)
+      !_.isUndefined(nextPicker) &&
+      (isNewPickAllowed.includes(providerId) ? isNewPick : true)
     );
   };
 

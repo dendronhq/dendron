@@ -42,6 +42,7 @@ import {
   VaultUtils,
   WriteNoteResp,
   ConfigUtils,
+  USER_MESSAGES,
 } from "@dendronhq/common-all";
 import {
   DLogger,
@@ -146,9 +147,27 @@ export class FileStorage implements DStore {
     }
   }
 
-  private static createMalformedSchemaError(resp: DEngineInitSchemaResp) {
+  static createMalformedSchemaError(resp: DEngineInitSchemaResp) {
+    let filePath = USER_MESSAGES.UNKNOWN;
+    try {
+      if (resp.error && resp.error.payload) {
+        filePath = JSON.parse(JSON.parse(resp.error.payload)[0].payload).fpath;
+      }
+    } catch (parseErr) {
+      filePath = USER_MESSAGES.UNKNOWN;
+    }
+
+    let reason = USER_MESSAGES.UNKNOWN;
+    try {
+      if (resp.error && resp.error.payload) {
+        reason = JSON.parse(JSON.parse(resp.error.payload)[0].payload).message;
+      }
+    } catch (parseErr) {
+      reason = USER_MESSAGES.UNKNOWN;
+    }
+
     return new DendronError({
-      message: "schema malformed",
+      message: `Schema '${filePath}' is malformed. Reason: ${reason}. Use 'Go to File...' command to resolve malformed schema.`,
       severity: ERROR_SEVERITY.MINOR,
       payload: { schema: resp.error },
     });

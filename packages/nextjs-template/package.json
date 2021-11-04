@@ -16,7 +16,8 @@
     "export": "next build && next export",
     "sync:theme": "cp ../dendron-next-server/public/*theme.css public/",
     "postbuild": "next-sitemap --config sitemap.js",
-    "cypress:open": "cypress open"
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run"
   },
   "dependencies": {
     "@chakra-ui/react": "^1.6.7",

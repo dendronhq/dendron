@@ -108,14 +108,13 @@ jobs:
         run: |
           Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
           echo 'DISPLAY=:99.0' >>$GITHUB_ENV
-
-      - name: Run tests
-        run: yarn ci:test:${{ matrix.suite }}
-        timeout-minutes: 30
-
+      
       - name: Run cypress 
         if: runner.os == 'Linux'
         uses: cypress-io/github-action@v2
         with:
-            build: yarn run cypress-build
-            start: yarn cypress-start 
+          start: "yarn run cypress:run"
+
+      - name: Run tests
+        run: yarn ci:test:${{ matrix.suite }}
+        timeout-minutes: 30

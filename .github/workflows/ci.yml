@@ -113,7 +113,8 @@ jobs:
         if: runner.os == 'Linux'
         uses: cypress-io/github-action@v2
         with:
-          start: "yarn run cypress:run"
+          build: "yarn run template:build"
+          start: "yarn run template:start" 
 
       - name: Run tests
         run: yarn ci:test:${{ matrix.suite }}

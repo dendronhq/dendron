@@ -109,10 +109,6 @@ jobs:
           Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
           echo 'DISPLAY=:99.0' >>$GITHUB_ENV
 
-      - name: Go to packages/next-template
-        if: runner.os == 'Linux'
-        run: cd packages/nextjs-template
-      
       - name: Download notes.zip
         if: runner.os == 'Linux'
         uses: wei/curl@master
@@ -122,12 +118,8 @@ jobs:
       - name: Unzip notes.zip
         if: runner.os == 'Linux'
         run: |
-          unzip dendron-site.zip
+          unzip dendron-site.zip -d packages/nextjs-template
           pwd
-
-      - name: Go back to root folder
-        if: runner.os == 'Linux'
-        run: cd ../../
 
       - name: Run cypress
         if: runner.os == 'Linux'

@@ -112,3 +112,10 @@ jobs:
       - name: Run tests
         run: yarn ci:test:${{ matrix.suite }}
         timeout-minutes: 30
+
+      - name: Run cypress 
+        if: runner.os == 'Linux'
+        uses: cypress-io/github-action@v2
+        with:
+            build: yarn run cypress-build
+            start: yarn cypress-start 

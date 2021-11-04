@@ -109,11 +109,25 @@ jobs:
           Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
           echo 'DISPLAY=:99.0' >>$GITHUB_ENV
       
+      - name: Download notes.zip
+        if: runner.os == 'Linux'
+        run: cd packages/nextjs-template
+        uses: wei/curl@master
+        with:
+          args: -LO https://artifacts-prod-artifactb7980f61-19orqnnuurvwy.s3.us-west-2.amazonaws.com/artifacts/dendron-site.zip
+
+      - name: Unzip notes.zip
+        if: runner.os == 'Linux'
+        run: |
+          unzip dendron-site.zip
+          pwd
+
       - name: Run cypress 
         if: runner.os == 'Linux'
+        run: cd ../../
         uses: cypress-io/github-action@v2
         with:
-          build: "yarn run template:build"
+          build: "yarn run template:export"
           start: "yarn run template:start" 
 
       - name: Run tests

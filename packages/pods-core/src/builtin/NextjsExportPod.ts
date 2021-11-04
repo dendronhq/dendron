@@ -8,10 +8,12 @@ import {
   createSerializedFuseNoteIndex,
   ConfigUtils,
 } from "@dendronhq/common-all";
+import { simpleGit } from "@dendronhq/common-server";
 import {
   MDUtilsV5,
   ProcFlavor,
   SiteUtils,
+  execa,
 } from "@dendronhq/engine-server";
 import { JSONSchemaType } from "ajv";
 import fs from "fs-extra";
@@ -23,9 +25,19 @@ import { PodUtils } from "../utils";
 
 const ID = "dendron.nextjs";
 
+const $$ = (cmd: string, opts?: any) => {
+  return execa.command(cmd, { ...opts });
+};
+
 type NextjsExportPodCustomOpts = {
   overrides?: Partial<DendronSiteConfig>;
 };
+
+export type BuildOverrides = Pick<DendronSiteConfig, "siteUrl">;
+
+export enum PublishTarget {
+  GITHUB = "github",
+}
 
 export const mapObject = (
   obj: { [k: string]: any },
@@ -62,6 +74,78 @@ export class NextjsExportPodUtils {
     const podConfigDstPath = path.join(podDstDir, "dendron.json");
     return podConfigDstPath;
   };
+
+  static getNextRoot = (wsRoot: string) => {
+    return path.join(wsRoot, ".next");
+  };
+
+  static async nextPathExists(opts: { nextPath: string }) {
+    const { nextPath } = opts;
+    const exists = await fs.pathExists(nextPath);
+    return exists;
+  }
+
+  static async removeNextPath(opts: { nextPath: string }) {
+    const { nextPath } = opts;
+    await fs.rm(nextPath, { recursive: true });
+  }
+
+  static async installDependencies(opts: { nextPath: string }) {
+    const { nextPath } = opts;
+    await $$("npm install", { cwd: nextPath });
+  }
+
+  static async cloneTemplate(opts: { nextPath: string }) {
+    const { nextPath } = opts;
+
+    const url = "https://github.com/dendronhq/nextjs-template.git";
+    await fs.ensureDir(nextPath);
+    const git = simpleGit({ baseDir: nextPath });
+    await git.clone(url, nextPath);
+
+    return { error: null };
+  }
+
+  static async isInitialized(opts: { wsRoot: string }) {
+    const { wsRoot } = opts;
+    const nextPath = path.join(wsRoot, ".next");
+
+    const nextPathExists = await NextjsExportPodUtils.nextPathExists({
+      ...opts,
+      nextPath,
+    });
+
+    if (nextPathExists) {
+      const pkgJsonExists = await fs.pathExists(
+        path.join(nextPath, "package.json")
+      );
+      if (pkgJsonExists) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  static async startNextExport(opts: { nextPath: string; quiet?: boolean }) {
+    const { nextPath, quiet } = opts;
+    const cmd = quiet ? "npm run --silent export" : "npm run export";
+    let out;
+    if (quiet) {
+      out = await $$(cmd, { cwd: nextPath });
+    } else {
+      out = $$(cmd, { cwd: nextPath });
+      out.stdout?.pipe(process.stdout);
+    }
+    return out;
+  }
+
+  static async startNextDev(opts: { nextPath: string; quiet?: boolean }) {
+    const { nextPath, quiet } = opts;
+    const cmdDev = quiet ? "npm run --silent dev" : "npm run dev";
+    const out = $$(cmdDev, { cwd: nextPath });
+    out.stdout?.pipe(process.stdout);
+    return out.pid;
+  }
 }
 
 export class NextjsExportPod extends ExportPod<NextjsExportConfig> {

@@ -6,27 +6,25 @@ import {
   getStage,
   Stage,
 } from "@dendronhq/common-all";
-import { execa, SiteUtils } from "@dendronhq/engine-server";
-import { NextjsExportConfig, NextjsExportPod } from "@dendronhq/pods-core";
+import { SiteUtils } from "@dendronhq/engine-server";
+import {
+  NextjsExportConfig,
+  NextjsExportPod,
+  NextjsExportPodUtils,
+  BuildOverrides,
+  PublishTarget,
+} from "@dendronhq/pods-core";
 import _ from "lodash";
-import ora from "ora";
 import path from "path";
 import yargs from "yargs";
-import { CLIUtils } from "../utils/cli";
+import { CLIUtils, SpinnerUtils } from "../utils/cli";
 import { CLICommand } from "./base";
 import { ExportPodCLICommand } from "./exportPod";
 import { PodSource } from "./pod";
 import { SetupEngineCLIOpts } from "./utils";
 import prompts from "prompts";
 import fs from "fs-extra";
-
-const $ = (cmd: string, opts?: any) => {
-  return execa.commandSync(cmd, { shell: true, ...opts });
-};
-
-const $$ = (cmd: string, opts?: any) => {
-  return execa.command(cmd, { shell: true, ...opts });
-};
+import ora from "ora";
 
 type CommandCLIOpts = {
   cmd: PublishCommands;
@@ -58,15 +56,10 @@ export enum PublishCommands {
    */
   EXPORT = "export",
 }
-export enum PublishTarget {
-  GITHUB = "github",
-}
 
 type CommandOpts = Omit<CommandCLIOpts, "overrides"> & Partial<ExportCmdOpts>;
 
 type CommandOutput = Partial<{ error: DendronError; data: any }>;
-
-type BuildOverrides = Pick<DendronSiteConfig, "siteUrl">;
 
 type BuildCmdOpts = Omit<CommandCLIOpts, keyof CommandCLIOnlyOpts> & {
   /**
@@ -136,7 +129,7 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
   async enrichArgs(args: CommandCLIOpts): Promise<CommandOpts> {
     this.addArgsToPayload({ cmd: args.cmd });
     let error: DendronError | undefined;
-    let coverrides: BuildOverrides = {};
+    const coverrides: BuildOverrides = {};
     if (!_.isUndefined(args.overrides)) {
       args.overrides.split(",").map((ent) => {
         const [k, v] = _.trim(ent).split("=");
@@ -156,20 +149,55 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     const { cmd } = opts;
     const ctx = "execute";
     this.L.info({ ctx });
+    const spinner = ora().start();
     try {
       switch (cmd) {
         case PublishCommands.INIT: {
-          return await this.init(opts);
+          const out = await this.init({ ...opts, spinner });
+          spinner.stop();
+          return out;
         }
         case PublishCommands.BUILD: {
+          spinner.stop();
           return this.build(opts);
         }
         case PublishCommands.DEV: {
+          const { wsRoot } = opts;
+          const isInitialized = await this._isInitialized({ wsRoot, spinner });
+          if (!isInitialized) {
+            await this.init({ ...opts, spinner });
+          }
+          if (opts.noBuild) {
+            SpinnerUtils.renderAndContinue({
+              spinner,
+              text: "skipping build...",
+            });
+          } else {
+            spinner.stop();
+            await this.build(opts);
+          }
           await this.dev(opts);
           return { error: null };
         }
         case PublishCommands.EXPORT: {
+          const { wsRoot } = opts;
+          const isInitialized = await this._isInitialized({ wsRoot, spinner });
+          if (!isInitialized) {
+            await this.init({ ...opts, spinner });
+          }
+          if (opts.noBuild) {
+            SpinnerUtils.renderAndContinue({
+              spinner,
+              text: "skipping build...",
+            });
+          } else {
+            spinner.stop();
+            await this.build(opts);
+          }
           await this.export(opts);
+          if (opts.target) {
+            await this._handlePublishTarget(opts.target, opts);
+          }
           return { error: null };
         }
         default:
@@ -183,7 +211,6 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
         this.print("unknown error " + error2PlainObject(err));
       }
       return { error: err };
-    } finally {
     }
   }
 
@@ -198,7 +225,7 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
   } & Pick<CommandOpts, "attach" | "dest" | "wsRoot" | "overrides">) {
     const cli = new ExportPodCLICommand();
     // create config string
-    let podConfig: NextjsExportConfig = {
+    const podConfig: NextjsExportConfig = {
       dest: dest || getNextRoot(wsRoot),
     };
     const opts = await cli.enrichArgs({
@@ -226,26 +253,10 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     return { data: await cli.execute(opts), error: null };
   }
 
-  _startNextDev(opts: { wsRoot: string }) {
-    const cwd = opts.wsRoot;
-    const cmdDev = "npm run dev";
-    return $$(cmdDev, { cwd: path.join(cwd, ".next") }).stdout?.pipe(
-      process.stdout
-    );
-  }
-
-  _startNextExport(opts: { wsRoot: string }) {
-    const cwd = opts.wsRoot;
-    const cmdDev = "npm run export";
-    const out = $$(cmdDev, { cwd: path.join(cwd, ".next") });
-    out.stdout?.pipe(process.stdout);
-    return out;
-  }
-
   async _handlePublishTarget(target: PublishTarget, opts: ExportCmdOpts) {
     const { wsRoot } = opts;
     switch (target) {
-      case PublishTarget.GITHUB:
+      case PublishTarget.GITHUB: {
         const docsPath = path.join(wsRoot, "docs");
         const outPath = path.join(wsRoot, ".next", "out");
         this.print("building github target...");
@@ -278,29 +289,115 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
         fs.moveSync(outPath, docsPath);
         fs.ensureFileSync(path.join(docsPath, ".nojekyll"));
         this.print(`done export. files available at ${docsPath}`);
-
         return;
+      }
       default:
         assertUnreachable();
     }
   }
 
-  async init(opts: { wsRoot: string }) {
-    const cwd = opts.wsRoot;
-    const nextPath = path.join(cwd, ".next");
-    if (fs.pathExistsSync(nextPath)) {
-      this.print(`.next directory already exists at ${cwd}. Removing.`);
-      fs.rmdirSync(nextPath, { recursive: true });
+  async init(opts: { wsRoot: string; spinner: ora.Ora }) {
+    const { wsRoot, spinner } = opts;
+    const nextPath = NextjsExportPodUtils.getNextRoot(wsRoot);
+
+    const nextPathExists = await this._nextPathExists({
+      nextPath,
+      spinner,
+    });
+
+    if (nextPathExists) {
+      await this._removeNextPath({
+        nextPath,
+        spinner,
+      });
     }
-    this.print(`initializing publishing at ${cwd}...`);
-    const cmd = `git clone https://github.com/dendronhq/nextjs-template.git .next`;
-    $(cmd, { cwd });
-    const cmdInstall = `npm install`;
-    const spinner = ora("Installing dependencies....").start();
-    await $$(cmdInstall, { cwd: path.join(cwd, ".next") });
-    spinner.stop();
-    this.print(`Your Dendron Next Template is now initialized in ".next"`);
+
+    await this._initialize({ nextPath, spinner });
+
     return { error: null };
+  }
+
+  async _isInitialized(opts: { wsRoot: string; spinner: ora.Ora }) {
+    const { spinner, wsRoot } = opts;
+    spinner.start();
+    SpinnerUtils.renderAndContinue({
+      spinner,
+      text: "checking if NextJS template is initialized",
+    });
+    const isInitialized = await NextjsExportPodUtils.isInitialized({
+      wsRoot,
+    });
+    SpinnerUtils.renderAndContinue({
+      spinner,
+      text: `NextJS template is ${
+        isInitialized ? "already" : "not"
+      } initialized.`,
+    });
+    return isInitialized;
+  }
+
+  async _nextPathExists(opts: { nextPath: string; spinner: ora.Ora }) {
+    const { spinner, nextPath } = opts;
+    const nextPathBase = path.basename(nextPath);
+    SpinnerUtils.renderAndContinue({
+      spinner,
+      text: `checking if ${nextPathBase}  directory exists.`,
+    });
+    const nextPathExists = await NextjsExportPodUtils.nextPathExists({
+      nextPath,
+    });
+    SpinnerUtils.renderAndContinue({
+      spinner,
+      text: `${nextPathBase} directory ${
+        nextPathExists ? "exists" : "does not exist"
+      }`,
+    });
+    return nextPathExists;
+  }
+
+  async _removeNextPath(opts: { nextPath: string; spinner: ora.Ora }) {
+    const { spinner, nextPath } = opts;
+    const nextPathBase = path.basename(nextPath);
+    await NextjsExportPodUtils.removeNextPath({
+      nextPath,
+    });
+    SpinnerUtils.renderAndContinue({
+      spinner,
+      text: `existing ${nextPathBase} directory deleted.`,
+    });
+  }
+
+  async _initialize(opts: { nextPath: string; spinner: ora.Ora }) {
+    const { spinner } = opts;
+    SpinnerUtils.renderAndContinue({
+      spinner,
+      text: "Initializing NextJS template.",
+    });
+    await this._cloneTemplate(opts);
+    await this._installDependencies(opts);
+  }
+
+  async _cloneTemplate(opts: { nextPath: string; spinner: ora.Ora }) {
+    const { nextPath, spinner } = opts;
+    spinner.stop();
+    spinner.start("Cloning NextJS template...");
+
+    await NextjsExportPodUtils.cloneTemplate({ nextPath });
+    SpinnerUtils.renderAndContinue({
+      spinner,
+      text: "Successfully cloned.",
+    });
+  }
+
+  async _installDependencies(opts: { nextPath: string; spinner: ora.Ora }) {
+    const { nextPath, spinner } = opts;
+    spinner.stop();
+    spinner.start("Installing dependencies... This may take a while.");
+    await NextjsExportPodUtils.installDependencies({ nextPath });
+    SpinnerUtils.renderAndContinue({
+      spinner,
+      text: "All dependencies installed.",
+    });
   }
 
   async build({ wsRoot, dest, attach, overrides }: BuildCmdOpts) {
@@ -320,23 +417,13 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
   }
 
   async dev(opts: DevCmdOpts) {
-    if (opts.noBuild) {
-      this.print("skipping build...");
-    } else {
-      await this.build(opts);
-    }
-    this._startNextDev(opts);
+    const nextPath = NextjsExportPodUtils.getNextRoot(opts.wsRoot);
+    await NextjsExportPodUtils.startNextDev({ nextPath });
+    return { error: null };
   }
 
   async export(opts: ExportCmdOpts) {
-    if (opts.noBuild) {
-      this.print("skipping build...");
-    } else {
-      await this.build(opts);
-    }
-    await this._startNextExport(opts);
-    if (opts.target) {
-      await this._handlePublishTarget(opts.target, opts);
-    }
+    const nextPath = NextjsExportPodUtils.getNextRoot(opts.wsRoot);
+    await NextjsExportPodUtils.startNextExport({ nextPath });
   }
 }

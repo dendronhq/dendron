@@ -1,4 +1,6 @@
 import _ from "lodash";
+import ora from "ora";
+import { DENDRON_EMOJIS } from "@dendronhq/common-all";
 
 export class CLIUtils {
   /**
@@ -22,4 +24,24 @@ export class CLIUtils {
       }).filter((ent) => !_.isUndefined(ent)) as string[]
     ).join(",");
   };
+}
+
+export class SpinnerUtils {
+  /**
+   * Given a Ora spinner, render given text with optional symbol
+   * Continue spinning.
+   * @param opts
+   */
+  static renderAndContinue(opts: {
+    spinner: ora.Ora;
+    text?: string;
+    symbol?: string;
+  }) {
+    const { spinner, text, symbol } = opts;
+    spinner.stopAndPersist({
+      text: text || undefined,
+      symbol: symbol || DENDRON_EMOJIS.SEEDLING,
+    });
+    spinner.start();
+  }
 }

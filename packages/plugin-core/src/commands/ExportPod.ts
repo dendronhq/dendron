@@ -18,7 +18,7 @@ import { BaseCommand } from "./base";
 
 type CommandOutput = void;
 
-type CommandInput = { podChoice: PodItemV4 };
+type CommandInput = { podChoice: PodItemV4; quiet?: boolean };
 
 type CommandOpts = CommandInput & { config: any };
 
@@ -82,7 +82,9 @@ export class ExportPodCommand extends BaseCommand<
       utilityMethods,
     });
     const dest = opts.config.dest;
-    window.showInformationMessage(`done exporting. destination: ${dest}`);
+    if (!opts.quiet) {
+      window.showInformationMessage(`done exporting. destination: ${dest}`);
+    }
   }
 
   addAnalyticsPayload(opts?: CommandOpts) {

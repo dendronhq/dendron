@@ -4,9 +4,8 @@ import {
   PublishCLICommandCLIOpts,
   PublishCLICommandOpts,
   PublishCommands,
-  PublishTarget,
 } from "@dendronhq/dendron-cli";
-import { NextjsExportPodUtils } from "@dendronhq/pods-core";
+import { NextjsExportPodUtils, PublishTarget } from "@dendronhq/pods-core";
 import fs from "fs-extra";
 import path from "path";
 import prompts from "prompts";
@@ -163,11 +162,13 @@ describe("WHEN run `dendron publish dev`", () => {
     await runEngineTestV5(
       async ({ wsRoot }) => {
         const cli = new PublishCLICommand();
+        const initStub = stub(cli, "init").resolves({ error: null });
         const buildStub = stub(cli, "build").resolves({ error: null });
-        const nextStub = stub(cli, "_startNextDev").resolves({ error: null });
+        const devStub = stub(cli, "dev").resolves({ error: null });
         await runPublishCmd({ cli, cmd, wsRoot });
+        expect(initStub.calledOnce).toBeTruthy();
         expect(buildStub.calledOnce).toBeTruthy();
-        expect(nextStub.calledOnce).toBeTruthy();
+        expect(devStub.calledOnce).toBeTruthy();
       },
       {
         expect,
@@ -193,8 +194,9 @@ describe("WHEN run `dendron publish export`", () => {
             fs.ensureFileSync(
               path.join(wsRoot, ".next", "out", "canary-success")
             );
+            const initStub = stub(cli, "init").resolves({ error: null });
             const buildStub = stub(cli, "build").resolves({ error: null });
-            const nextStub = stub(cli, "_startNextExport").resolves({} as any);
+            const exportStub = stub(cli, "export").resolves({} as any);
             prompts.inject([true]);
             await runPublishCmd({
               cli,
@@ -203,8 +205,9 @@ describe("WHEN run `dendron publish export`", () => {
               target: PublishTarget.GITHUB,
             });
             // build and export called
+            expect(initStub.calledOnce).toBeTruthy();
             expect(buildStub.calledOnce).toBeTruthy();
-            expect(nextStub.calledOnce).toBeTruthy();
+            expect(exportStub.calledOnce).toBeTruthy();
             // old docs removed
             expect(
               fs.pathExistsSync(path.join(docsPath, "canary-fail"))
@@ -234,8 +237,9 @@ describe("WHEN run `dendron publish export`", () => {
             fs.ensureFileSync(
               path.join(wsRoot, ".next", "out", "canary-success")
             );
+            const initStub = stub(cli, "init").resolves({ error: null });
             const buildStub = stub(cli, "build").resolves({ error: null });
-            const nextStub = stub(cli, "_startNextExport").resolves({} as any);
+            const exportStub = stub(cli, "export").resolves({} as any);
             prompts.inject([false]);
             await runPublishCmd({
               cli,
@@ -244,8 +248,9 @@ describe("WHEN run `dendron publish export`", () => {
               target: PublishTarget.GITHUB,
             });
             // build and export called
-            expect(buildStub.calledOnce).toBeTruthy();
-            expect(nextStub.calledOnce).toBeTruthy();
+            expect(initStub.calledOnce).toBeTruthy();
+            expect(buildStub.callCount).toBeTruthy();
+            expect(exportStub.calledOnce).toBeTruthy();
             // old docs removed
             expect(
               fs.pathExistsSync(path.join(docsPath, "canary-fail"))

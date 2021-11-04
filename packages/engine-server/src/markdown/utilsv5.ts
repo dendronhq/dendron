@@ -7,6 +7,7 @@ import {
   ERROR_STATUS,
   NotePropsDict,
   NoteUtils,
+  NoteProps,
 } from "@dendronhq/common-all";
 // @ts-ignore
 import rehypePrism from "@mapbox/rehype-prism";
@@ -15,6 +16,8 @@ import mermaid from "@dendronhq/remark-mermaid";
 import _ from "lodash";
 import math from "remark-math";
 import link from "rehype-autolink-headings";
+// @ts-ignore
+import variables from "remark-variables";
 // @ts-ignore
 import katex from "rehype-katex";
 import raw from "rehype-raw";
@@ -119,6 +122,10 @@ export type ProcDataFullOptsV5 = {
    * Check to see if we are in a note reference.
    */
   insideNoteRef?: boolean;
+  /**
+   * frontmatter variables exposed for substitution
+   */
+  fm?: any;
 } & {
   config?: IntermediateDendronConfig;
   wsRoot?: string;
@@ -140,6 +147,8 @@ export type ProcDataFullV5 = {
   config: IntermediateDendronConfig;
   notes?: NotePropsDict;
   insideNoteRef?: boolean;
+
+  fm?: any;
   /**
    * Keep track of current note ref level
    */
@@ -225,6 +234,18 @@ export class MDUtilsV5 {
     );
   }
 
+  static getFM(opts: { note: NoteProps }) {
+    const { note } = opts;
+    const custom = note.custom ? note.custom : undefined;
+    return {
+      ...custom,
+      id: note.id,
+      title: note.title,
+      created: note.created,
+      updated: note.updated,
+    };
+  }
+
   /**
    * Used for processing a Dendron markdown note
    */
@@ -243,6 +264,7 @@ export class MDUtilsV5 {
       .use(userTags)
       .use(extendedImage)
       .use(footnotes)
+      .use(variables)
       .data("errors", errors);
 
     // set options and do validation
@@ -271,6 +293,16 @@ export class MDUtilsV5 {
           }
           if (!data.wsRoot) {
             data.wsRoot = data.engine!.wsRoot;
+          }
+
+          const note = NoteUtils.getNoteByFnameV5({
+            fname: data.fname!,
+            notes: data.engine!.notes,
+            vault: data.vault!,
+            wsRoot: data.wsRoot,
+          }) as NoteProps;
+          if (!_.isUndefined(note)) {
+            proc = proc.data("fm", this.getFM({ note }));
           }
 
           // backwards compatibility, default to v4 values

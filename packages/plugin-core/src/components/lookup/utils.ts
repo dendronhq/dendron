@@ -413,8 +413,10 @@ export class PickerUtilsV2 {
     const { selectedItems, providerId } = opts;
     const nextPicker = quickpick.nextPicker;
     const isNewPick = PickerUtilsV2.isCreateNewNotePick(selectedItems[0]);
+    const isNewPickAllowed = ["lookup", "dendron.moveHeader"];
     return (
-      !_.isUndefined(nextPicker) && (providerId === "lookup" ? isNewPick : true)
+      !_.isUndefined(nextPicker) &&
+      (isNewPickAllowed.includes(providerId) ? isNewPick : true)
     );
   };
 

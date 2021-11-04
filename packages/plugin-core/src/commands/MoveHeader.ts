@@ -7,6 +7,8 @@ import {
   ERROR_SEVERITY,
   DNoteLink,
   DLink,
+  DVault,
+  NotePropsDict,
 } from "@dendronhq/common-all";
 import {
   HistoryService,
@@ -35,17 +37,14 @@ import { VSCodeUtils } from "../utils";
 import { BasicCommand } from "./base";
 import _ from "lodash";
 import path from "path";
-import { getDWorkspace, getEngine, getVaultFromUri } from "../workspace";
+import { getEngine, getVaultFromUri } from "../workspace";
 import { EngineAPIService } from "../services/EngineAPIService";
 import { delayedUpdateDecorations } from "../features/windowDecorations";
 import { findReferences, FoundRefT } from "../utils/md";
 import { Location } from "vscode";
 import { file2Note, vault2Path } from "@dendronhq/common-server";
-import {
-  NewLocation,
-  PickerUtilsV2,
-  ProviderAcceptHooks,
-} from "../components/lookup/utils";
+import { PickerUtilsV2 } from "../components/lookup/utils";
+import { DendronQuickPickerV2 } from "../components/lookup/types";
 
 type CommandInput =
   | {
@@ -88,7 +87,7 @@ export class MoveHeaderCommand extends BasicCommand<
   });
 
   private noDestError = new DendronError({
-    message: "No destination provided. Cancelling move.",
+    message: "No destination provided.",
     severity: ERROR_SEVERITY.MINOR,
   });
 
@@ -157,7 +156,6 @@ export class MoveHeaderCommand extends BasicCommand<
       allowNewNote: true,
       noHidePickerOnAccept: false,
     });
-    lookupProvider.registerOnAcceptHook(ProviderAcceptHooks.NewLocationHook);
 
     let initialValue: string | undefined;
     let nonInteractive: boolean = false;
@@ -204,28 +202,34 @@ export class MoveHeaderCommand extends BasicCommand<
         listener: async (event) => {
           if (event.action === "done") {
             HistoryService.instance().remove(this.key, "lookupProvider");
-            const cdata =
-              event.data as NoteLookupProviderSuccessResp<NewLocation>;
-            const newLoc = cdata.onAcceptHookResp[0].newLoc;
-            const selected = cdata.selectedItems[0];
-            const isNew = PickerUtilsV2.isCreateNewNotePick(selected);
+            const cdata = event.data as NoteLookupProviderSuccessResp;
+            const quickpick: DendronQuickPickerV2 = lc.quickpick;
+            const vault = quickpick.vault as DVault;
             let dest: NoteProps | undefined;
-            if (isNew) {
-              const fname = newLoc.fname;
-              const vaultName = newLoc.vaultName as string;
-              const engine = getDWorkspace().engine;
-              const vault = VaultUtils.getVaultByName({
-                vaults: engine.vaults,
-                vname: vaultName,
-              });
-              if (_.isUndefined(vault)) {
-                this.L.error({ msg: `error: ${vaultName} not found.` });
-                resolve(undefined);
-              } else {
-                dest = NoteUtils.create({ fname, vault });
-              }
+            if (_.isUndefined(cdata.selectedItems)) {
+              dest = undefined;
             } else {
-              dest = selected as NoteProps;
+              const selected = cdata.selectedItems[0];
+              const isCreateNew = PickerUtilsV2.isCreateNewNotePick(selected);
+              if (isCreateNew) {
+                // check if we really want to create a new note.
+                // if a user selects a vault in the picker that
+                // already has the note, we should not create a new one.
+                const fname = selected.fname;
+                const maybeNote = NoteUtils.getNoteByFnameV5({
+                  fname,
+                  notes: engine.notes,
+                  vault, // this is the vault selected from the vault picker
+                  wsRoot: engine.wsRoot,
+                });
+                if (_.isUndefined(maybeNote)) {
+                  dest = NoteUtils.create({ fname, vault });
+                } else {
+                  dest = maybeNote;
+                }
+              } else {
+                dest = selected as NoteProps;
+              }
             }
             resolve({
               dest,
@@ -396,7 +400,7 @@ export class MoveHeaderCommand extends BasicCommand<
     // to avoid dealing with offsetting locations
     const linksToUpdate = _.orderBy(
       links,
-      (link) => {
+      (link: DLink) => {
         return link.position?.start.offset;
       },
       "desc"
@@ -415,6 +419,7 @@ export class MoveHeaderCommand extends BasicCommand<
    * @returns
    */
   private updateLinksInNote(
+    notes: NotePropsDict,
     note: NoteProps,
     linksToUpdate: DLink[],
     dest: NoteProps
@@ -423,12 +428,19 @@ export class MoveHeaderCommand extends BasicCommand<
       linksToUpdate,
       (note: NoteProps, linkToUpdate: DLink) => {
         const oldLink = LinkUtils.dlink2DNoteLink(linkToUpdate);
+        const notesWithSameName = NoteUtils.getNotesByFname({
+          fname: dest.fname,
+          notes,
+        });
         const newLink = {
           ...oldLink,
           from: {
             ...oldLink.from,
             fname: dest.fname,
             vaultName: VaultUtils.getName(dest.vault),
+          },
+          data: {
+            xvault: notesWithSameName.length > 1,
           },
         } as DNoteLink;
         const newBody = LinkUtils.updateLink({
@@ -482,7 +494,12 @@ export class MoveHeaderCommand extends BasicCommand<
           origin,
           anchorNamesToUpdate
         );
-        const modifiedNote = this.updateLinksInNote(_note, linksToUpdate, dest);
+        const modifiedNote = this.updateLinksInNote(
+          engine.notes,
+          _note,
+          linksToUpdate,
+          dest
+        );
         note!.body = modifiedNote.body;
         const writeResp = await engine.writeNote(note!, {
           updateExisting: true,

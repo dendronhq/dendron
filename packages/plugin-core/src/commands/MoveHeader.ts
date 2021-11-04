@@ -48,14 +48,13 @@ import { DendronQuickPickerV2 } from "../components/lookup/types";
 
 type CommandInput =
   | {
-      dest?: NoteProps;
       initialValue?: string;
       nonInteractive?: boolean;
       useSameVault?: boolean;
-      vaultName?: string;
     }
   | undefined;
 type CommandOpts = {
+  dest?: NoteProps;
   origin: NoteProps;
   nodesToMove: Node[];
   engine: EngineAPIService;
@@ -157,22 +156,12 @@ export class MoveHeaderCommand extends BasicCommand<
       noHidePickerOnAccept: false,
     });
 
-    let initialValue: string | undefined;
-    let nonInteractive: boolean = false;
-    if (opts?.dest) {
-      initialValue = opts.dest.fname;
-      nonInteractive = true;
-    } else if (opts?.initialValue) {
-      initialValue = opts.initialValue;
-      nonInteractive = true;
-    }
-
     lookupController.show({
       title: "Select note to move header to",
       placeholder: "note",
       provider: lookupProvider,
-      initialValue,
-      nonInteractive,
+      initialValue: opts?.initialValue,
+      nonInteractive: opts?.nonInteractive,
     });
     return lookupController;
   }
@@ -204,7 +193,9 @@ export class MoveHeaderCommand extends BasicCommand<
             HistoryService.instance().remove(this.key, "lookupProvider");
             const cdata = event.data as NoteLookupProviderSuccessResp;
             const quickpick: DendronQuickPickerV2 = lc.quickpick;
-            const vault = quickpick.vault as DVault;
+            const vault =
+              (quickpick.vault as DVault) ||
+              PickerUtilsV2.getVaultForOpenEditor();
             let dest: NoteProps | undefined;
             if (_.isUndefined(cdata.selectedItems)) {
               dest = undefined;

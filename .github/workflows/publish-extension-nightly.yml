@@ -75,6 +75,10 @@ jobs:
           DENDRON_CLI=./packages/dendron-cli/lib/bin/dendron-cli.js
           LOG_LEVEL=info $DENDRON_CLI dev prep_plugin --extensionTarget nightly
 
+      - name: Wait for Verdaccio Cache to Update
+        run: |
+          sleep 60
+
       - name: Publish to VS Code Marketplace
         env:
           VSCE_PAT: ${{ secrets.VSCODE_PUBLISH_PWD }}

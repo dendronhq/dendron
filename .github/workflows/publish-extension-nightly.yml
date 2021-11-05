@@ -87,11 +87,13 @@ jobs:
         env:
           VSCE_PAT: ${{ secrets.VSCODE_PUBLISH_PWD }}
         working-directory: ./packages/plugin-core
-        run:
+        run: |
           yarn config get registry
           npm get registry
           verdaccio > verdaccio.log 2>&1 &
           sleep 30
+          yarn config set registry http://localhost:4873
+          npm set registry http://localhost:4873/
           yarn deploy:vscode
 
       - name: Publish to Open VSX Marketplace

@@ -90,7 +90,7 @@ jobs:
         run: |
           yarn config get registry
           npm get registry
-          npx verdaccio > verdaccio.log
+          npx verdaccio > verdaccio.log  2>&1 &
           sleep 30
           echo "checking log"
           cat verdaccio.log

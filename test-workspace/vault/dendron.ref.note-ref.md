@@ -2,7 +2,7 @@
 id: id-note-ref
 title: Note Refs
 desc: ""
-updated: 1608147857388
+updated: 1636092856974
 created: 1608147795766
 ---
 
@@ -41,3 +41,7 @@ created: 1608147795766
 # Note Ref with wildcard link and header offset
 
 ![[dendron.blog.*#chap1]]
+
+# Note Ref that has variable substitution
+
+![[dendron.ref.variables]]

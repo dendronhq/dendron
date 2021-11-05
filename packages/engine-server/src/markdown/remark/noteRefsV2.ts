@@ -767,10 +767,12 @@ function convertNoteRefHelperAST(
   opts: ConvertNoteRefHelperOpts & { procOpts: any }
 ): Required<RespV2<Parent>> {
   const { proc, refLvl, link, note } = opts;
-  const noteRefProc = proc();
+  let noteRefProc = proc();
   // proc is the parser that was parsing the note the reference was in, so need to update fname to reflect that we are parsing the referred note
   MDUtilsV4.setDendronData(noteRefProc, { fname: link.from.fname });
+  noteRefProc = noteRefProc.data("fm", MDUtilsV5.getFM({ note }));
   MDUtilsV4.setNoteRefLvl(noteRefProc, refLvl);
+
   const procOpts = MDUtilsV4.getProcOpts(noteRefProc);
 
   const isV5Active = MDUtilsV5.isV5Active(proc);

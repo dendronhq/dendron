@@ -15,6 +15,7 @@ import {
   WorkspaceType,
   MigrationEvents,
   ConfigUtils,
+  NativeWorkspaceEvents,
 } from "@dendronhq/common-all";
 import {
   getDurationMilliseconds,
@@ -29,6 +30,7 @@ import {
   WorkspaceService,
   WorkspaceUtils,
   MigrationChangeSetStatus,
+  FileAddWatcher,
 } from "@dendronhq/engine-server";
 import * as Sentry from "@sentry/node";
 import { ExecaChildProcess } from "execa";
@@ -46,7 +48,6 @@ import {
   GLOBAL_STATE,
 } from "./constants";
 import { Logger } from "./logger";
-import { AutoInitService } from "./services/AutoInitService";
 import { StateService } from "./services/stateService";
 import { Extensions } from "./settings";
 import { SurveyUtils } from "./survey";
@@ -538,17 +539,37 @@ export async function _activate(
       Logger.info({ ctx, msg: "fin startClient", durationReloadWorkspace });
     } else {
       // ws not active
-      Logger.info({ ctx: "dendron not active, waiting for a workspace" });
-      toggleViews(false);
-      const autoInit = new AutoInitService(async () => {
+      Logger.info({ ctx, msg: "dendron not active" });
+
+      const watchForNativeWorkspace = vscode.workspace
+        .getConfiguration()
+        .get<boolean>(CONFIG.WATCH_FOR_NATIVE_WS.key);
+      if (watchForNativeWorkspace) {
         Logger.info({
           ctx,
-          msg: "New `dendron.yml` file has been created, re-activating dendron",
+          msg: "watching for a native workspace to be created",
         });
-        await ws.deactivate();
-        activate(context);
-      });
-      ws.addDisposable(autoInit);
+
+        toggleViews(false);
+        const autoInit = new FileAddWatcher(
+          vscode.workspace.workspaceFolders?.map(
+            (vscodeFolder) => vscodeFolder.uri.fsPath
+          ) || [],
+          CONSTANTS.DENDRON_CONFIG_FILE,
+          async (filePath) => {
+            Logger.info({
+              ctx,
+              msg: "New `dendron.yml` file has been created, re-activating dendron",
+            });
+            AnalyticsUtils.track(NativeWorkspaceEvents.DetectedInNonDendronWS, {
+              filePath,
+            });
+            await ws.deactivate();
+            activate(context);
+          }
+        );
+        ws.addDisposable(autoInit);
+      }
     }
 
     const backupPaths: string[] = [];

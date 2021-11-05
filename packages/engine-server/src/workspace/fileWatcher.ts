@@ -14,6 +14,14 @@ export type FileWatcherAdapter = {
   onDidChange(callback: (filePath: string) => void): Disposable;
 };
 
+/** Engine file watcher ignores any of these folders. These folders are unlikely to contain anything Dendron would like to find, so we can ignore them. */
+export const ENGINE_WATCHER_IGNORES: readonly string[] = [
+  "**/.*/**", // Any folder starting with .
+  "**/node_modules/**", // nodejs
+  "**/.git/**", // git
+  "**/__pycache__/**", // python
+];
+
 export class EngineFileWatcher implements FileWatcherAdapter {
   private watcher: chokidar.FSWatcher;
   constructor(
@@ -27,7 +35,7 @@ export class EngineFileWatcher implements FileWatcherAdapter {
     this.watcher = chokidar.watch(patternWithBase, {
       disableGlobbing: false,
       ignoreInitial: true,
-      ignored: "**/.*/**", // Skip folders like `.git`
+      ignored: ENGINE_WATCHER_IGNORES,
       ...chokidarOpts,
     });
     if (onReady) this.watcher.on("ready", onReady);

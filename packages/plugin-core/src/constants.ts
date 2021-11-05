@@ -1104,6 +1104,13 @@ export const CONFIG: { [key: string]: ConfigEntry } = {
     description:
       "port for server. If not set, will be randomly generated at startup.",
   },
+  WATCH_FOR_NATIVE_WS: {
+    key: "dendron.watchForNativeWorkspace",
+    type: "boolean",
+    default: true,
+    description:
+      "When enabled, Dendron will watch non-Dendron workspaces to detect when one is created, and will automatically initialize itself. Otherwise, you may need to reload VSCode after creating a native workspace.",
+  },
 };
 
 export const gdocRequiredScopes = [

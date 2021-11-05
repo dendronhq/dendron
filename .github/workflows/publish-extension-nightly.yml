@@ -75,6 +75,10 @@ jobs:
           DENDRON_CLI=./packages/dendron-cli/lib/bin/dendron-cli.js
           LOG_LEVEL=info $DENDRON_CLI dev prep_plugin --extensionTarget nightly
 
+      - name: Start Verdaccio Again
+        run: |
+          verdaccio > verdaccio.log 2>&1 &
+
       - name: Wait for Verdaccio Cache to Update
         run: |
           sleep 60

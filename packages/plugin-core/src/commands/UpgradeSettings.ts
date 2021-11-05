@@ -23,7 +23,7 @@ export class UpgradeSettingsCommand extends BasicCommand<
     const ctx = "Upgrade:execute";
     L.info({ ctx });
 
-    const wsRoot = DendronExtension.workspaceRoot();
+    const wsRoot = await DendronExtension.workspaceRoot();
 
     const newConfig = await WorkspaceConfig.update(wsRoot!);
     this.L.info({ ctx, newConfig });

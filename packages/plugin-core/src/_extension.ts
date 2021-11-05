@@ -46,6 +46,7 @@ import {
   GLOBAL_STATE,
 } from "./constants";
 import { Logger } from "./logger";
+import { AutoInitService } from "./services/AutoInitService";
 import { StateService } from "./services/stateService";
 import { Extensions } from "./settings";
 import { SurveyUtils } from "./survey";
@@ -261,12 +262,12 @@ export async function _activate(
     }
 
     //  needs to be initialized to setup commands
-    const ws = DendronExtension.getOrCreate(context, {
+    const ws = await DendronExtension.getOrCreate(context, {
       skipSetup: stage === "test",
     });
     // Need to recompute this for tests, because the instance of DendronExtension doesn't get re-created.
     // Probably also needed if the user switches from one workspace to the other.
-    ws.type = WorkspaceUtils.getWorkspaceType({
+    ws.type = await WorkspaceUtils.getWorkspaceType({
       workspaceFile: vscode.workspace.workspaceFile,
       workspaceFolders: vscode.workspace.workspaceFolders,
     });
@@ -292,15 +293,16 @@ export async function _activate(
 
     if (DendronExtension.isActive(context)) {
       if (ws.type === WorkspaceType.NATIVE) {
-        const workspaceFolder = WorkspaceUtils.findWSRootInWorkspaceFolders(
-          DendronExtension.workspaceFolders()!
-        );
+        const workspaceFolder =
+          await WorkspaceUtils.findWSRootInWorkspaceFolders(
+            DendronExtension.workspaceFolders()!
+          );
         if (!workspaceFolder) {
           Logger.error({ msg: "No dendron.yml found in any workspace folder" });
           return false;
         }
         ws.workspaceImpl = new DendronNativeWorkspace({
-          wsRoot: workspaceFolder?.uri.fsPath,
+          wsRoot: workspaceFolder,
           logUri: context.logUri,
           assetUri,
         });
@@ -536,8 +538,17 @@ export async function _activate(
       Logger.info({ ctx, msg: "fin startClient", durationReloadWorkspace });
     } else {
       // ws not active
-      Logger.info({ ctx: "dendron not active" });
+      Logger.info({ ctx: "dendron not active, waiting for a workspace" });
       toggleViews(false);
+      const autoInit = new AutoInitService(async () => {
+        Logger.info({
+          ctx,
+          msg: "New `dendron.yml` file has been created, re-activating dendron",
+        });
+        await ws.deactivate();
+        activate(context);
+      });
+      ws.addDisposable(autoInit);
     }
 
     const backupPaths: string[] = [];

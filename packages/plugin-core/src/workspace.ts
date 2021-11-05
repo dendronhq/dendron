@@ -237,14 +237,13 @@ export class DendronExtension {
     return vscode.workspace.workspaceFolders;
   }
 
-  static workspaceRoot(): string | undefined {
+  static async workspaceRoot(): Promise<string | undefined> {
     try {
       return path.dirname(this.workspaceFile().fsPath);
     } catch {
       const workspaceFolders = this.workspaceFolders();
       if (workspaceFolders)
-        return WorkspaceUtils.findWSRootInWorkspaceFolders(workspaceFolders)
-          ?.uri.fsPath;
+        return WorkspaceUtils.findWSRootInWorkspaceFolders(workspaceFolders);
     }
     return undefined;
   }
@@ -316,12 +315,16 @@ export class DendronExtension {
   private disposableStore: DisposableStore;
   public workspaceImpl?: DWorkspaceV2;
 
-  static getOrCreate(
+  static async getOrCreate(
     context: vscode.ExtensionContext,
     opts?: { skipSetup?: boolean }
   ) {
     if (!_DendronWorkspace) {
       _DendronWorkspace = new DendronExtension(context, opts);
+      _DendronWorkspace.type = await WorkspaceUtils.getWorkspaceType({
+        workspaceFile: vscode.workspace.workspaceFile,
+        workspaceFolders: vscode.workspace.workspaceFolders,
+      });
     }
     return _DendronWorkspace;
   }
@@ -345,10 +348,6 @@ export class DendronExtension {
     this.context = context;
     // set the default
     this.type = WorkspaceType.CODE;
-    this.type = WorkspaceUtils.getWorkspaceType({
-      workspaceFile: vscode.workspace.workspaceFile,
-      workspaceFolders: vscode.workspace.workspaceFolders,
-    });
     _DendronWorkspace = this;
     this.L = Logger;
     this.disposableStore = new DisposableStore();

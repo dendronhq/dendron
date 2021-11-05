@@ -16,12 +16,19 @@ export type FileWatcherAdapter = {
 
 export class EngineFileWatcher implements FileWatcherAdapter {
   private watcher: chokidar.FSWatcher;
-  constructor(base: string, pattern: string, onReady?: () => void) {
+  constructor(
+    base: string,
+    pattern: string,
+    chokidarOpts?: chokidar.WatchOptions,
+    onReady?: () => void
+  ) {
     // Chokidar requires paths with globs to use POSIX `/` separators, even on Windows
     const patternWithBase = `${path.posix.normalize(base)}/${pattern}`;
     this.watcher = chokidar.watch(patternWithBase, {
       disableGlobbing: false,
       ignoreInitial: true,
+      ignored: "**/.*/**", // Skip folders like `.git`
+      ...chokidarOpts,
     });
     if (onReady) this.watcher.on("ready", onReady);
   }

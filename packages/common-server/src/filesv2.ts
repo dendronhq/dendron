@@ -2,6 +2,7 @@ import {
   DendronError,
   DNodeUtils,
   DVault,
+  isNotUndefined,
   NoteProps,
   NotesCache,
   NoteUtils,
@@ -255,8 +256,8 @@ export function goUpTo(opts: {
 }
 
 /**
- * Go to dirname that {fname} is contained in
- * @param maxLvl - default: 10
+ * Go to dirname that {fname} is contained in, going out (up the tree) from base.
+ * @param maxLvl - default: 3
  * @param returnDirPath - return path to directory, default: false
  */
 export function findUpTo(opts: {
@@ -280,6 +281,71 @@ export function findUpTo(opts: {
     lvls.push("..");
   }
   return undefined;
+}
+
+export const WS_FILE_MAX_SEARCH_DEPTH = 3;
+
+/**
+ * Go to dirname that {fname} is contained in, going in (deeper into tree) from base.
+ * @param maxLvl Default 3, how deep to go down in the file tree. Keep in mind that the tree gets wider and this search becomes exponentially more expensive the deeper we go.
+ * @param returnDirPath - return path to directory, default: false
+ *
+ * One warning: this will not search into folders starting with `.` to avoid searching through things like the `.git` folder.
+ */
+export async function findDownTo(opts: {
+  base: string;
+  fname: string;
+  maxLvl?: number;
+  returnDirPath?: boolean;
+}): Promise<string | undefined> {
+  const { fname, base, maxLvl, returnDirPath } = {
+    maxLvl: WS_FILE_MAX_SEARCH_DEPTH,
+    returnDirPath: false,
+    ...opts,
+  };
+  const contents = await fs.readdir(base);
+  let found = contents.filter((foundFile) => foundFile === fname)[0];
+  if (found) {
+    found = path.join(base, found);
+    return returnDirPath ? path.dirname(found) : found;
+  }
+  if (maxLvl > 1) {
+    // Keep searching recursively
+    return (
+      await Promise.all(
+        contents.map(async (folder) => {
+          // Find the folders in the current folder
+          const subfolder = await fs.stat(path.join(base, folder));
+          if (!subfolder.isDirectory()) return;
+          // Exclude folders starting with . to skip stuff like `.git`
+          if (folder.startsWith(".")) return;
+          return findDownTo({
+            ...opts,
+            base: path.join(base, folder),
+            maxLvl: maxLvl - 1,
+          });
+        })
+      )
+    ).filter(isNotUndefined)[0];
+  }
+  return undefined;
+}
+
+/** Returns the list of unique, outermost folders. No two folders returned are nested within each other. */
+export function uniqueOutermostFolders(folders: string[]) {
+  // Avoid duplicates
+  folders = _.uniq(folders);
+  if (folders.length === 1) return folders;
+  return folders.filter((currentFolder) =>
+    folders.every((otherFolder) => {
+      // When going from the other folder to this folder
+      const relPath = path.relative(otherFolder, currentFolder);
+      // If we have to leave otherFolder, or if we have to switch to a
+      // different drive with an absolute path, then currentFolder can't be
+      // inside otherFolder
+      return relPath.startsWith("..") || path.isAbsolute(relPath);
+    })
+  );
 }
 
 export function note2File({

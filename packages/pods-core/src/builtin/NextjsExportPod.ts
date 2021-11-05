@@ -50,6 +50,25 @@ export const removeBodyFromNote = ({ body, ...note }: Record<string, any>) =>
 export const removeBodyFromNotesDict = (notes: NotePropsDict) =>
   mapObject(notes, (_k, note: NotePropsDict) => removeBodyFromNote(note));
 
+export const filterNav = ({
+  id,
+  title,
+  children,
+  custom,
+}: Record<string, any>):
+  | Pick<NoteProps, "id" | "title" | "children" | "custom">
+  | undefined => {
+  if (!custom?.nav_bar) {
+    return undefined;
+  }
+
+  return { id, title, children, custom };
+};
+
+export const filterNavItemsFromNotes = (notes: NotePropsDict) => {
+  return mapObject(notes, (_k, note: NotePropsDict) => filterNav(note));
+};
+
 function getSiteConfig({
   siteConfig,
   overrides,
@@ -362,6 +381,8 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
       vaults: engine.vaults,
     };
 
+    console.log("published notes => ", publishedNotes);
+
     // render notes
     const notesBodyDir = path.join(podDstDir, "notes");
     const notesMetaDir = path.join(podDstDir, "meta");
@@ -386,6 +407,8 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     );
     const podDstPath = path.join(podDstDir, "notes.json");
     const podConfigDstPath = path.join(podDstDir, "dendron.json");
+    const sectionsDstPath = path.join(podDstDir, "sections.json");
+
     fs.writeJSONSync(
       podDstPath,
       {
@@ -394,10 +417,19 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
       },
       { encoding: "utf8", spaces: 2 }
     );
+
     fs.writeJSONSync(podConfigDstPath, engineConfig, {
       encoding: "utf8",
       spaces: 2,
     });
+
+    fs.writeJSONSync(
+      sectionsDstPath,
+      {
+        sections: filterNavItemsFromNotes(payload.notes),
+      },
+      { encoding: "utf-8", spaces: 2 }
+    );
 
     // Generate full text search data
     const fuseDstPath = path.join(podDstDir, "fuse.json");

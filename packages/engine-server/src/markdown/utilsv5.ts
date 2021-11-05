@@ -8,6 +8,7 @@ import {
   NotePropsDict,
   NoteUtils,
   NoteProps,
+  DateTime,
 } from "@dendronhq/common-all";
 // @ts-ignore
 import rehypePrism from "@mapbox/rehype-prism";
@@ -42,6 +43,8 @@ import { userTags } from "./remark/userTags";
 import { backlinks } from "./remark/backlinks";
 import { hierarchies } from "./remark";
 import { extendedImage } from "./remark/extendedImage";
+import { WorkspaceService } from "../workspace";
+import { DateTimeFormatOptions } from "luxon";
 
 /**
  * What mode a processor should run in
@@ -234,15 +237,24 @@ export class MDUtilsV5 {
     );
   }
 
-  static getFM(opts: { note: NoteProps }) {
-    const { note } = opts;
+  static getFM(opts: { note: NoteProps; wsRoot: string }) {
+    const { note, wsRoot } = opts;
+
     const custom = note.custom ? note.custom : undefined;
+
+    const wsConfig = new WorkspaceService({ wsRoot }).getWorkspaceConfig();
+    const timestampConfig: keyof typeof DateTime =
+      wsConfig.settings["dendron.defaultTimestampDecorationFormat"];
+    const formatOption = DateTime[timestampConfig] as DateTimeFormatOptions;
+    const created = DateTime.fromMillis(_.toInteger(note.created));
+    const updated = DateTime.fromMillis(_.toInteger(note.updated));
+
     return {
       ...custom,
       id: note.id,
       title: note.title,
-      created: note.created,
-      updated: note.updated,
+      created: created.toLocaleString(formatOption),
+      updated: updated.toLocaleString(formatOption),
     };
   }
 
@@ -301,8 +313,9 @@ export class MDUtilsV5 {
             vault: data.vault!,
             wsRoot: data.wsRoot,
           }) as NoteProps;
+
           if (!_.isUndefined(note)) {
-            proc = proc.data("fm", this.getFM({ note }));
+            proc = proc.data("fm", this.getFM({ note, wsRoot: data.wsRoot }));
           }
 
           // backwards compatibility, default to v4 values

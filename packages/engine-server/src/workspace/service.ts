@@ -26,6 +26,7 @@ import {
   GitUtils,
   note2File,
   readJSONWithComments,
+  readJSONWithCommentsSync,
   schemaModuleOpts2File,
   simpleGit,
   vault2Path,
@@ -171,6 +172,13 @@ export class WorkspaceService {
       path.join(this.wsRoot, "dendron.code-workspace"),
       config
     );
+  }
+
+  getWorkspaceConfig() {
+    const wsConfig = readJSONWithCommentsSync(
+      path.join(this.wsRoot, CONSTANTS.DENDRON_WS_NAME)
+    );
+    return wsConfig;
   }
 
   /**

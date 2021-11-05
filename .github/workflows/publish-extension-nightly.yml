@@ -90,8 +90,9 @@ jobs:
         run: |
           yarn config get registry
           npm get registry
-          verdaccio > verdaccio.log 2>&1 &
+          verdaccio > verdaccio.log
           sleep 30
+          cat verdaccio.log
           yarn config set registry http://localhost:4873
           npm set registry http://localhost:4873/
           yarn deploy:vscode

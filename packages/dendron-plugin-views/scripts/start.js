@@ -38,9 +38,25 @@ const react = require(require.resolve('react', { paths: [paths.appPath] }));
 const env = getClientEnvironment(paths.publicUrlOrPath.slice(0, -1));
 const useYarn = fs.existsSync(paths.yarnLockFile);
 const isInteractive = process.stdout.isTTY;
+const {WebViewCommonUtils} = require("@dendronhq/common-server")
 
 const _ = require('lodash');
 const path = require("path");
+
+// Compile Dendron `index.html` template
+let theme = process.env.THEME || "light";
+const out = WebViewCommonUtils.genVSCodeHTMLIndex({
+  cssSrc: `${theme}.css`,
+  port: 3005,
+  wsRoot: path.resolve(path.join("..", "..", "test-workspace")),
+  // dummy, not used
+  jsSrc: "",
+  browser: true,
+  acquireVsCodeApi: `window.vscode = {postMessage: ()=>{}};`,
+  theme,
+});
+fs.writeFileSync(path.join("public/index.html"), out);
+
 
 // Warn and crash if required files are missing
 if (!checkRequiredFiles([paths.appHtml, paths.appIndexJs])) {
@@ -67,22 +83,6 @@ if (process.env.HOST) {
   );
   console.log();
 }
-
-// Compile Dendron `index.html` template
-const indexTemplate = fs.readFileSync(path.join("assets", "index.html.temp"), {encoding: "utf-8"});
-const compiled = _.template(indexTemplate);
-let theme = "dark";
-const out = compiled({
-  cssSrc: `${theme}.css`,
-  port: 3005,
-  wsRoot: path.resolve(path.join("..", "..", "test-workspace")),
-  // dummy, not used
-  jsSrc: "",
-  browser: true,
-  acquireVsCodeApi: `window.vscode = {postMessage: ()=>{}};`,
-  theme,
-});
-fs.writeFileSync(path.join("public/index.html"), out);
 
 // We require that you explicitly set browsers and do not fall back to
 // browserslist defaults.

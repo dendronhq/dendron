@@ -43,10 +43,8 @@ const buildAll = async () => {
 	const cssRoot = path.join("assets", "css");
 	const isProd = process.env.NODE_ENV === "production";
 	const dstRoots =[
-		// path.join("build", "static", "css", "themes"),
-		// path.join("public", "static", "css", "themes"),
-		"build",
-		"public"
+		path.join("build", "static", "css", "themes"),
+		path.join("public", "static", "css", "themes"),
 	]
 	const mainThemeMap = filesToThemeMap(path.join(cssRoot, "main"));
 	const prismThemeMap = filesToThemeMap(path.join(cssRoot, "prism"));

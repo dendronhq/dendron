@@ -18,6 +18,7 @@
     "@babel/core": "7.12.3",
     "@dendronhq/common-all": "^0.67.2",
     "@dendronhq/common-frontend": "^0.67.2",
+    "@dendronhq/common-server": "^0.67.2",
     "@pmmmwh/react-refresh-webpack-plugin": "0.4.3",
     "@svgr/webpack": "5.5.0",
     "@testing-library/jest-dom": "^5.11.4",

@@ -10,12 +10,13 @@ import {
   OnDidChangeActiveTextEditorMsg,
   VaultUtils
 } from "@dendronhq/common-all";
+import { WebViewCommonUtils } from "@dendronhq/common-server";
 import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { Logger } from "../logger";
-import { VSCodeUtils } from "../utils";
+import { VSCodeUtils, WSUtils } from "../utils";
 import { getEngine, getExtension } from "../workspace";
 import { BasicCommand } from "./base";
 import { GotoNoteCommand } from "./GotoNote";
@@ -152,8 +153,10 @@ export class ShowPreviewCommand extends BasicCommand<
     }
     Logger.info({ ctx, msg: "creating new" });
 
+    // TODO: change based on dev/prod
     const root =
       "/Users/kevinlin/code/dendron/packages/dendron-plugin-views/build";
+    const assetUri = WSUtils.getAssetUri(getExtension().context);
     const panel = vscode.window.createWebviewPanel(
       "dendronPreview",
       "Dendron Preview",
@@ -165,16 +168,20 @@ export class ShowPreviewCommand extends BasicCommand<
         enableScripts: true,
         retainContextWhenHidden: true,
         enableFindWidget: true,
-        localResourceRoots: [vscode.Uri.file(root)],
+        localResourceRoots: [assetUri, vscode.Uri.file(root)],
       }
     );
 
     const name = "notePreview";
+    const theme = "light";
     const jsSrc = vscode.Uri.file(
       path.join(root, "static", "js", `${name}.bundle.js`)
     );
+    // const cssSrc = vscode.Uri.file(
+    //   path.join(root, "static", "css", `${name}.styles.css`)
+    // );
     const cssSrc = vscode.Uri.file(
-      path.join(root, "static", "css", `${name}.styles.css`)
+      path.join(root, "static", "css", "themes", `${theme}.css`)
     );
     const port = getExtension().port!;
     panel.webview.onDidReceiveMessage(async (msg: NoteViewMessage) => {
@@ -246,8 +253,7 @@ export class ShowPreviewCommand extends BasicCommand<
           const maybeNote = !_.isUndefined(activeTextEditor)
             ? tryGetNoteFromDocument(activeTextEditor?.document)
             : undefined;
-          if (!_.isUndefined(maybeNote))
-            ShowPreviewCommand.refresh(maybeNote);
+          if (!_.isUndefined(maybeNote)) ShowPreviewCommand.refresh(maybeNote);
           break;
         }
         case DMessageEnum.INIT: {
@@ -259,12 +265,15 @@ export class ShowPreviewCommand extends BasicCommand<
       }
     });
 
-    panel.webview.html = getWebviewContent({
+    const html = getWebviewContent({
       jsSrc: panel.webview.asWebviewUri(jsSrc),
       cssSrc: panel.webview.asWebviewUri(cssSrc),
       port,
       wsRoot: ext.getEngine().wsRoot,
+      theme
     });
+
+    panel.webview.html = html;
 
     // Update workspace-wide panel
     ext.setWebView(DendronWebViewKey.NOTE_PREVIEW, panel);
@@ -291,27 +300,22 @@ function getWebviewContent({
   cssSrc,
   port,
   wsRoot,
+  theme,
 }: {
   jsSrc: vscode.Uri;
   cssSrc: vscode.Uri;
   port: number;
   wsRoot: string;
+  theme: string,
 }) {
-  return `<!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Cat Coding</title>
-        <link href="${cssSrc}" rel="stylesheet" />
-    </head>
-    <body>
-      <div id="root" data-port=${port} data-ws=${wsRoot}></div>
-      <script>
-        const vscode = acquireVsCodeApi();
-        window.vscode = vscode;
-      </script>
-      <script src="${jsSrc}""></script>
-    </body>
-    </html>`;
+  const out = WebViewCommonUtils.genVSCodeHTMLIndex({
+    cssSrc: cssSrc,
+    jsSrc: jsSrc,
+    port,
+    wsRoot,
+    browser: false,
+    acquireVsCodeApi: `const vscode = acquireVsCodeApi(); window.vscode = vscode;`,
+    theme,
+  });
+  return out;
 }

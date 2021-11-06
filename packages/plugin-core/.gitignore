@@ -13,3 +13,6 @@ dist
 fixtures/fake-workspace
 stats.json
 stats.*.json
+
+assets/css
+assets/js

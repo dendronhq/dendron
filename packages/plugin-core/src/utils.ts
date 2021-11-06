@@ -581,6 +581,12 @@ export class VSCodeUtils {
 }
 
 export class WSUtils {
+  /**
+   * In development, this is `packages/plugin-core/assets`
+   * In production, this is `$HOME/$VSCODE_DIR/{path-to-app}/assets
+   * @param context 
+   * @returns 
+   */
   static getAssetUri(context: vscode.ExtensionContext) {
     return VSCodeUtils.joinPath(context.extensionUri, "assets");
   }

@@ -11,6 +11,15 @@ const filesToThemeMap = (root) => {
 	return out;
 }
 
+const fetchStyles = (dst) => {
+	const themes = ["light", "dark"];
+	const nextRoot = path.join("..", "dendron-next-server", "public");
+	const tgtRoot = path.join("..", )
+	themes.map(th => {
+		fs.copyFileSync(path.join(nextRoot, `${th}-theme.css`), path.join(dst, `${th}.css`));
+	});
+};
+
 /**
  * Concatenates themes 
  * @param {*} themeMaps 
@@ -46,8 +55,15 @@ const buildAll = async () => {
 		path.join("build", "static", "css", "themes"),
 		path.join("public", "static", "css", "themes"),
 	]
+
+	console.log("fetching...");
+	fetchStyles(path.join(cssRoot, "main"));
+
+	console.log("reading...");
 	const mainThemeMap = filesToThemeMap(path.join(cssRoot, "main"));
 	const prismThemeMap = filesToThemeMap(path.join(cssRoot, "prism"));
+
+	console.log("concating...");
 	const themeMaps = concatStyles([mainThemeMap, prismThemeMap]);
 	await Promise.all(dstRoots.map(async dstRoot => {
 		fs.ensureDirSync(dstRoot);

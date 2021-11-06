@@ -44,7 +44,7 @@ const _ = require('lodash');
 const path = require("path");
 
 // Compile Dendron `index.html` template
-let theme = process.env.THEME || "light";
+let theme = process.env.THEME || "";
 const out = WebViewCommonUtils.genVSCodeHTMLIndex({
   cssSrc: `${theme}.css`,
   port: 3005,

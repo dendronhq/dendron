@@ -173,15 +173,11 @@ export class ShowPreviewCommand extends BasicCommand<
     );
 
     const name = "notePreview";
-    const theme = "light";
     const jsSrc = vscode.Uri.file(
       path.join(root, "static", "js", `${name}.bundle.js`)
     );
-    // const cssSrc = vscode.Uri.file(
-    //   path.join(root, "static", "css", `${name}.styles.css`)
-    // );
     const cssSrc = vscode.Uri.file(
-      path.join(root, "static", "css", "themes", `${theme}.css`)
+      path.join(root, "static", "css", `${name}.styles.css`)
     );
     const port = getExtension().port!;
     panel.webview.onDidReceiveMessage(async (msg: NoteViewMessage) => {
@@ -266,11 +262,11 @@ export class ShowPreviewCommand extends BasicCommand<
     });
 
     const html = getWebviewContent({
-      jsSrc: panel.webview.asWebviewUri(jsSrc),
-      cssSrc: panel.webview.asWebviewUri(cssSrc),
+      jsSrc,
+      cssSrc,
       port,
       wsRoot: ext.getEngine().wsRoot,
-      theme
+      panel,
     });
 
     panel.webview.html = html;
@@ -300,22 +296,30 @@ function getWebviewContent({
   cssSrc,
   port,
   wsRoot,
-  theme,
+  panel,
 }: {
   jsSrc: vscode.Uri;
   cssSrc: vscode.Uri;
   port: number;
   wsRoot: string;
-  theme: string,
+  panel: vscode.WebviewPanel,
 }) {
+  const root = WSUtils.getAssetUri(getExtension().context);
+  const themes = ["light", "dark"];
+  const themeMap: any = {
+  }
+  themes.map(th => {
+    themeMap[th] = panel.webview.asWebviewUri(
+      vscode.Uri.joinPath(root, "css", "themes", `${th}.css`)
+  ).toString()})
   const out = WebViewCommonUtils.genVSCodeHTMLIndex({
-    cssSrc: cssSrc,
-    jsSrc: jsSrc,
+    jsSrc: panel.webview.asWebviewUri(jsSrc),
+    cssSrc: panel.webview.asWebviewUri(cssSrc),
     port,
     wsRoot,
     browser: false,
     acquireVsCodeApi: `const vscode = acquireVsCodeApi(); window.vscode = vscode;`,
-    theme,
+    themeMap,
   });
   return out;
 }

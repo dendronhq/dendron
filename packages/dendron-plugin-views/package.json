@@ -95,6 +95,7 @@
     "start": "node scripts/start.js",
     "build:prod": "node scripts/build.js",
     "build:dev": "env BUILD_DEV=1 node scripts/build.js",
+    "build:styles": "node scripts/buildStyles.js",
     "test": "echo 0",
     "test-local": "node scripts/test.js"
   },

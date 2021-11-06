@@ -28,16 +28,16 @@
 
 
     <!-- VSCODE_START  -->
-    <link href="dark.css" rel="stylesheet" />
+    <link href="${cssSrc}" rel="stylesheet" />
 
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root" data-port="3005" data-ws="/Users/kevinlin/code/dendron/test-workspace" data-browser="true" data-theme="dark"></div>
+    <div id="root" data-port="${port}" data-ws="${wsRoot}" data-browser="${browser}" data-theme="${theme}"></div>
 
     <script>
-      window.vscode = {postMessage: ()=>{}};
+      <%= acquireVsCodeApi %>
     </script>
-    <script src=""></script>
+    <script src="${jsSrc}"></script>
   </body>
 </html>

@@ -17,30 +17,19 @@ type DendronPropsWithNoteId = DendronProps & { noteId: string };
 
 export const useWorkspaceProps = (): [WorkspaceProps] => {
   const stage = getStage();
-  if (stage === "dev") {
-    return [
-      {
-        port: 3005,
-        // TODO: pass in from env
-        ws: "/Users/kevinlin/code/dendron/test-workspace",
-        browser: true,
-        theme: "light",
-      },
-    ];
-  }
   const elem = window.document.getElementById("root")!;
   const port = parseInt(elem.getAttribute("data-port")!, 10);
   const ws = elem.getAttribute("data-ws")!;
+  const isBrowser = elem.getAttribute("data-browser")! === "true";
+  const theme = elem.getAttribute("data-browser")!;
   return [
     {
       port,
       ws,
-      browser: false,
-      // TODO: get
-      theme: "light",
+      browser: isBrowser,
+      theme,
     },
   ];
-  throw Error("not implemented");
 };
 
 /**

@@ -2,8 +2,6 @@ const fs = require("fs-extra");
 const path = require("path");
 const _ = require("lodash");
 
-
-
 const filesToThemeMap = (root) => {
 	const dir = fs.readdirSync(root);
 	const out = {};
@@ -24,7 +22,6 @@ const concatStyles = (themeMaps) => {
 		dark: [],
 	};
 	themeMaps.map(themeMap => {
-		console.log(themeMap);
 		const keys = ["light", "dark"];
 		keys.map(k => {
 			const themeContents = fs.readFileSync(themeMap[k], {encoding: "utf-8"});
@@ -37,18 +34,28 @@ const concatStyles = (themeMaps) => {
 const writeStyles = ({themeMaps, dest}) => {
 	_.map(themeMaps, (v, k) => {
 		const themeContentString = v.join("\n");
+		// write to build
 		fs.writeFileSync(path.join(dest, `${k}.css`), themeContentString);
 	});
 }
 
-const buildAll = () => {
+const buildAll = async () => {
 	const cssRoot = path.join("assets", "css");
-	const dstRoot = path.join("build", "static", "css", "themes");
+	const isProd = process.env.NODE_ENV === "production";
+	const dstRoots =[
+		// path.join("build", "static", "css", "themes"),
+		// path.join("public", "static", "css", "themes"),
+		"build",
+		"public"
+	]
 	const mainThemeMap = filesToThemeMap(path.join(cssRoot, "main"));
 	const prismThemeMap = filesToThemeMap(path.join(cssRoot, "prism"));
 	const themeMaps = concatStyles([mainThemeMap, prismThemeMap]);
-	fs.ensureDirSync(dstRoot);
-	writeStyles({themeMaps, dest: dstRoot})
+	await Promise.all(dstRoots.map(async dstRoot => {
+		fs.ensureDirSync(dstRoot);
+		writeStyles({themeMaps, dest: dstRoot})
+	}));
+	console.log("done");
 };
 
 buildAll();

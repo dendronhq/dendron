@@ -97,8 +97,10 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
 }
 
 const themes = {
-  dark: `/dark-theme.css`,
-  light: `/light-theme.css`,
+  // dark: `/static/css/themes/dark.css`,
+  // light: `/static/css/themes/light.css`,
+  light: `light.css`,
+  dark: `dark.css`,
 };
 
 function DendronApp(props: { Component: DendronComponent }) {

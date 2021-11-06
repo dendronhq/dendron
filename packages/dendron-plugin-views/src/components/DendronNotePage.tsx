@@ -7,9 +7,13 @@ import {
 } from "@dendronhq/common-frontend";
 import _ from "lodash";
 import React from "react";
-import { useRenderedNoteBody } from "../hooks";
+import { useMermaid, useRenderedNoteBody } from "../hooks";
 import { DendronComponent } from "../types";
 import { postVSCodeMessage } from "../utils/vscode";
+import { useThemeSwitcher } from "react-css-theme-switcher";
+import { getThemeType } from "../styles/theme";
+import mermaid from "mermaid";
+
 
 function isHTMLAnchorElement(element: Element): element is HTMLAnchorElement {
   return element.nodeName === "A";
@@ -78,11 +82,16 @@ const DendronNotePage: DendronComponent = (props) => {
   const ctx = "DendronNotePage";
   const logger = createLogger("DendronNotePage");
   const noteProps = props.ide.noteActive;
+  const config = props.engine.config;
+  const { currentTheme } = useThemeSwitcher();
+  const themeType = getThemeType(currentTheme);
+
   logger.info({
     ctx,
     msg: "enter",
     noteProps: noteProps ? noteProps.id : "no notes found",
   });
+
   const [noteRenderedBody] = useRenderedNoteBody({ ...props, noteProps });
   logger.info({
     ctx,
@@ -90,6 +99,7 @@ const DendronNotePage: DendronComponent = (props) => {
   });
 
   useClickHandler(noteProps?.id);
+  useMermaid({ config, themeType, mermaid, noteRenderedBody });
 
   if (!noteRenderedBody) {
     return null;

@@ -1,5 +1,15 @@
-import { getStage, NoteProps } from "@dendronhq/common-all";
-import { engineHooks, engineSlice } from "@dendronhq/common-frontend";
+import {
+  getStage,
+  IntermediateDendronConfig,
+  NoteProps,
+  ThemeType,
+} from "@dendronhq/common-all";
+import {
+  createLogger,
+  engineHooks,
+  engineSlice,
+} from "@dendronhq/common-frontend";
+import { Mermaid } from "mermaid";
 import React from "react";
 import { DendronProps, WorkspaceProps } from "../types";
 
@@ -43,15 +53,18 @@ export const useRenderedNoteBody = ({
   noteProps,
   workspace,
 }: DendronProps & { noteProps?: NoteProps }) => {
-  const { id: noteId, contentHash } = noteProps || {id: undefined, contentHash: undefined};
+  const { id: noteId, contentHash } = noteProps || {
+    id: undefined,
+    contentHash: undefined,
+  };
   const noteContent = engine.notesRendered[noteId || ""];
   const renderedNoteContentHash = React.useRef<string>();
   const dispatch = engineHooks.useEngineAppDispatch();
 
   React.useEffect(() => {
-		if (!noteId) {
-			return;
-		}
+    if (!noteId) {
+      return;
+    }
     // if no "render to markdown" has happended or the note body changed
     if (!noteContent || contentHash !== renderedNoteContentHash.current) {
       renderedNoteContentHash.current = contentHash;
@@ -60,6 +73,85 @@ export const useRenderedNoteBody = ({
   }, [noteId, contentHash]);
 
   return [noteContent];
+};
+
+type MermaidInitialzeParams = {
+  startOnLoad: boolean;
+  cloneCssStyles: boolean;
+  theme: string;
+};
+
+// type Mermaid = {
+//   init: () => undefined;
+//   initialize: (opts: Partial<MermaidInitialzeParams>) => {};
+//   parse: (content: string) => undefined;
+//   startOnLoad?: boolean;
+//   render: (
+//     svgId: string,
+//     code: string,
+//     cb: (svgCode: string) => void
+//   ) => undefined;
+// };
+
+function getMermaid(window: Window): Mermaid | undefined {
+  // NOTE: a mermaid h3 header will result in window.mermaid being defined
+  // @ts-ignore
+  if (window.mermaid && window.mermaid.initialize) {
+    // @ts-ignore
+    return window.mermaid as Mermaid;
+  }
+}
+
+/**
+ *
+ * @param fn
+ * @param opts.initiialized - check if mermaid has already been initialized
+ */
+function mermaidReady(fn: () => any, opts?: { checkInit?: boolean }) {
+  // see if DOM is already available
+  if (
+    getMermaid(window) &&
+    // @ts-ignore
+    (opts?.checkInit ? window.MERMAID_INITIALIZED : true)
+  ) {
+    // call on next available tick
+    setTimeout(fn, 1);
+  } else {
+    setTimeout(() => {
+      mermaidReady(fn, opts);
+    }, 100);
+  }
+}
+
+/**
+ * Initialize mermaid if it is enabled
+ */
+export const useMermaid = ({
+  config,
+  themeType,
+  mermaid,
+  noteRenderedBody
+}: {
+  config?: IntermediateDendronConfig;
+  themeType: ThemeType;
+  mermaid: Mermaid;
+  noteRenderedBody?: string
+}) => {
+  React.useEffect(() => {
+    if (config?.mermaid) {
+      const logger = createLogger("useMermaid");
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: themeType === ThemeType.LIGHT ? "forest" : "dark",
+      });
+      // use for debugging
+      // @ts-ignore
+      window._mermaid = mermaid;
+      // @ts-ignore
+      mermaid.init();
+      logger.info("init mermaid");
+    }
+  }, [config, noteRenderedBody]);
 };
 
 /**

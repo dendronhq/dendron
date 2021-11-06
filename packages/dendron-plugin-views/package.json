@@ -60,6 +60,7 @@
     "jest-resolve": "26.6.0",
     "jest-watch-typeahead": "0.6.1",
     "lodash": "^4.17.21",
+    "mermaid": "^8.13.3",
     "mini-css-extract-plugin": "0.11.3",
     "optimize-css-assets-webpack-plugin": "5.0.4",
     "pnp-webpack-plugin": "1.6.4",
@@ -173,6 +174,7 @@
     ]
   },
   "devDependencies": {
-    "@types/lodash": "^4.14.176"
+    "@types/lodash": "^4.14.176",
+    "@types/mermaid": "^8.2.7"
   }
 }

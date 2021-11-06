@@ -1,18 +1,24 @@
 import {
   DMessageEnum,
   DMessageSource,
-  OnDidChangeActiveTextEditorMsg
+  OnDidChangeActiveTextEditorMsg,
 } from "@dendronhq/common-all";
 import {
-  combinedStore, createLogger, engineHooks,
-  engineSlice, ideHooks, ideSlice, Provider,
-  setLogLevel
+  combinedStore,
+  createLogger,
+  engineHooks,
+  engineSlice,
+  ideHooks,
+  ideSlice,
+  Provider,
+  setLogLevel,
 } from "@dendronhq/common-frontend";
 import _ from "lodash";
 import React from "react";
 import { useWorkspaceProps } from "../hooks";
 import { DendronComponent } from "../types";
 import { postVSCodeMessage, useVSCodeMessage } from "../utils/vscode";
+import { ThemeSwitcherProvider } from "react-css-theme-switcher";
 
 const { useEngineAppSelector, useEngine } = engineHooks;
 
@@ -34,6 +40,8 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
     workspace,
   };
 
+  const defaultTheme = workspace.theme || "light";
+
   // === Hooks
   // run once
   React.useEffect(() => {
@@ -41,16 +49,16 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
     // tell vscode that the client is ready
     postVSCodeMessage({
       type: DMessageEnum.INIT,
-      data: {src: ctx},
+      data: { src: ctx },
       source: DMessageSource.webClient,
     });
-    logger.info({ctx, msg: "postVSCodeMessage"});
+    logger.info({ ctx, msg: "postVSCodeMessage" });
   }, []);
 
   // register a listener for vscode messages
   useVSCodeMessage(async (msg) => {
     const ctx = "useVSCodeMsg";
-    logger.info({ctx, msgType: msg.type});
+    logger.info({ ctx, msgType: msg.type });
     switch (msg.type) {
       case DMessageEnum.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR:
         const cmsg = msg as OnDidChangeActiveTextEditorMsg;
@@ -71,7 +79,7 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
         logger.info({ ctx, msg: "setNote:post" });
         break;
       default:
-        logger.error({ ctx, msg: "unknown message", payload: msg});
+        logger.error({ ctx, msg: "unknown message", payload: msg });
         break;
     }
   });
@@ -82,13 +90,16 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
   }
 
   return (
-    <div>
-      Dendron App Wrapper
-      <hr />
+    <ThemeSwitcherProvider themeMap={themes} defaultTheme={defaultTheme}>
       <Component {...props} />
-    </div>
+    </ThemeSwitcherProvider>
   );
 }
+
+const themes = {
+  dark: `/dark-theme.css`,
+  light: `/light-theme.css`,
+};
 
 function DendronApp(props: { Component: DendronComponent }) {
   return (

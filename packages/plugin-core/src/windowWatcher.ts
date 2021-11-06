@@ -1,7 +1,7 @@
 import {
   ConfigUtils,
   DendronWebViewKey,
-  DMessageType,
+  DMessageEnum,
   NoteUtils,
   OnDidChangeActiveTextEditorMsg,
 } from "@dendronhq/common-all";
@@ -114,7 +114,7 @@ export class WindowWatcher {
         const note = VSCodeUtils.getNoteFromDocument(activeEditor.document);
 
         noteGraphPanel.webview.postMessage({
-          type: DMessageType.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR,
+          type: DMessageEnum.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR,
           data: {
             note,
             sync: true,
@@ -141,7 +141,7 @@ export class WindowWatcher {
         const note = VSCodeUtils.getNoteFromDocument(activeEditor.document);
 
         schemaGraphPanel.webview.postMessage({
-          type: DMessageType.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR,
+          type: DMessageEnum.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR,
           data: {
             note,
             sync: true,

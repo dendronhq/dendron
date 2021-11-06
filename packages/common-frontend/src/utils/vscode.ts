@@ -1,7 +1,7 @@
 import {
   DMessage,
   DMessageSource,
-  DMessageType,
+  DMessageEnum,
   VSCodeMessage,
 } from "@dendronhq/common-all";
 import { useEffect } from "react";
@@ -48,7 +48,7 @@ export const useVSCodeMessage = (setMsgHook: (msg: VSCodeMessage) => void) => {
     }
 
     postVSCodeMessage({
-      type: DMessageType.MESSAGE_DISPATCHER_READY,
+      type: DMessageEnum.MESSAGE_DISPATCHER_READY,
       data: {},
       source: DMessageSource.webClient,
     });

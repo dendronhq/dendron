@@ -214,7 +214,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           return { error: null };
         }
         case DevCommands.SYNC_ASSETS: {
-          await this.syncAssets();
+          await this.syncAssets(opts);
           return { error: null };
         }
         case DevCommands.PUBLISH: {
@@ -363,9 +363,11 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     this.L.info("done");
   }
 
-  async syncAssets() {
-    this.print("build next server...");
-    BuildUtils.buildNextServer();
+  async syncAssets({fast}:{fast?: boolean}) {
+    if (!fast) {
+      this.print("build next server...");
+      BuildUtils.buildNextServer();
+    }
     this.print("sync static...");
     const { staticPath } = await BuildUtils.syncStaticAssets();
     return { staticPath };

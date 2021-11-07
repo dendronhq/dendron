@@ -313,8 +313,8 @@ function getWebviewContent({
       vscode.Uri.joinPath(root, "css", "themes", `${th}.css`)
   ).toString()})
   const out = WebViewCommonUtils.genVSCodeHTMLIndex({
-    jsSrc: panel.webview.asWebviewUri(jsSrc),
-    cssSrc: panel.webview.asWebviewUri(cssSrc),
+    jsSrc: panel.webview.asWebviewUri(jsSrc).toString(),
+    cssSrc: panel.webview.asWebviewUri(cssSrc).toString(),
     port,
     wsRoot,
     browser: false,

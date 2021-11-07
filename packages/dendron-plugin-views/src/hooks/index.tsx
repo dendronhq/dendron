@@ -64,23 +64,6 @@ export const useRenderedNoteBody = ({
   return [noteContent];
 };
 
-type MermaidInitialzeParams = {
-  startOnLoad: boolean;
-  cloneCssStyles: boolean;
-  theme: string;
-};
-
-// type Mermaid = {
-//   init: () => undefined;
-//   initialize: (opts: Partial<MermaidInitialzeParams>) => {};
-//   parse: (content: string) => undefined;
-//   startOnLoad?: boolean;
-//   render: (
-//     svgId: string,
-//     code: string,
-//     cb: (svgCode: string) => void
-//   ) => undefined;
-// };
 
 function getMermaid(window: Window): Mermaid | undefined {
   // NOTE: a mermaid h3 header will result in window.mermaid being defined

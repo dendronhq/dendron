@@ -1,8 +1,6 @@
 import fs from "fs-extra";
 import path from "path";
 import { goUpTo } from "./filesv2";
-import {URI} from "@dendronhq/common-all"
-import _ from "lodash";
 
 export class NodeJSUtils {
   static getVersionFromPkg(): string {
@@ -29,18 +27,20 @@ export class WebViewCommonUtils {
     wsRoot,
     browser,
     acquireVsCodeApi,
-    themeMap
+    themeMap,
+    initialTheme
   }: {
-    jsSrc: URI;
-    cssSrc: URI;
+    jsSrc: string;
+    cssSrc: string;
     port: number;
     wsRoot: string;
     browser: boolean;
     acquireVsCodeApi: string
     themeMap: {
-      light: URI,
-      dark: URI
+      light: string,
+      dark: string 
     }
+    initialTheme?: string
   }) => {
     return `<!DOCTYPE html>
   <html lang="en">
@@ -102,7 +102,7 @@ export class WebViewCommonUtils {
       ${acquireVsCodeApi}
     </script>
 
-    <body onload="onload()" class="vscode-light">
+    <body onload="onload()" class="vscode-${initialTheme || "light"}">
       <div id="root" data-port="${port}" data-ws="${wsRoot}" data-browser="${browser}"></div>
 
       <!-- Source code for javascript bundle. Not used in browser mode-->

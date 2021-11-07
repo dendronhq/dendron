@@ -43,7 +43,7 @@ export enum ExtensionTarget {
 const LOCAL_NPM_ENDPOINT = "http://localhost:4873";
 const REMOTE_NPM_ENDPOINT = "https://registry.npmjs.org";
 
-const $ = (cmd: string, opts?: any) => {
+const $ = (cmd: string, opts?: execa.CommonOptions<any>) => {
   return execa.commandSync(cmd, { shell: true, ...opts });
 };
 const $$ = (cmd: string, opts?: any) => {
@@ -168,9 +168,16 @@ export class BuildUtils {
     ]);
   }
 
-  static packagePluginDependencies() {
+  /**
+   * @param param0
+   * @returns
+   */
+  static packagePluginDependencies({ fast }: { fast?: boolean }) {
     $(`yarn build:prod`, { cwd: this.getPluginRootPath() });
-    return $(`vsce package --yarn`, { cwd: this.getPluginRootPath() });
+    return $(`vsce package --yarn`, {
+      cwd: this.getPluginRootPath(),
+      env: fast ? { SKIP_SENTRY: "true" } : {},
+    });
   }
 
   static async prepPluginPkg(
@@ -315,7 +322,11 @@ export class BuildUtils {
     const pluginStaticPath = path.join(pluginAssetPath, "static");
     const apiRoot = path.join(this.getLernaRoot(), "packages", "api-server");
     const nextServerRoot = this.getNextServerRootPath();
-    const pluginViewsRoot = path.join(this.getLernaRoot(), "packages", "dendron-plugin-views");
+    const pluginViewsRoot = path.join(
+      this.getLernaRoot(),
+      "packages",
+      "dendron-plugin-views"
+    );
 
     fs.ensureDirSync(pluginStaticPath);
     fs.emptyDirSync(pluginStaticPath);
@@ -328,8 +339,14 @@ export class BuildUtils {
     fs.copySync(path.join(apiRoot, "assets", "static"), pluginStaticPath);
 
     // plugin view assets
-    fs.copySync(path.join(pluginViewsRoot, "build", "static", "css"), path.join(pluginStaticPath, "css"));
-    fs.copySync(path.join(pluginViewsRoot, "build", "static", "js"), path.join(pluginStaticPath, "js"));
+    fs.copySync(
+      path.join(pluginViewsRoot, "build", "static", "css"),
+      path.join(pluginStaticPath, "css")
+    );
+    fs.copySync(
+      path.join(pluginViewsRoot, "build", "static", "js"),
+      path.join(pluginStaticPath, "js")
+    );
     return { staticPath: pluginStaticPath };
   }
 

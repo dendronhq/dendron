@@ -252,7 +252,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           BuildUtils.installPluginDependencies();
 
           this.print("package deps...");
-          BuildUtils.packagePluginDependencies();
+          BuildUtils.packagePluginDependencies(opts);
           return { error: null };
         }
         case DevCommands.INSTALL_PLUGIN: {
@@ -348,7 +348,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     BuildUtils.installPluginDependencies();
 
     this.print("package deps...");
-    BuildUtils.packagePluginDependencies();
+    BuildUtils.packagePluginDependencies(opts);
 
     this.print("setRegRemote...");
     BuildUtils.setRegRemote();
@@ -363,7 +363,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     this.L.info("done");
   }
 
-  async syncAssets({fast}:{fast?: boolean}) {
+  async syncAssets({ fast }: { fast?: boolean }) {
     if (!fast) {
       this.print("build next server...");
       BuildUtils.buildNextServer();

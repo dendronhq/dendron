@@ -4,7 +4,7 @@
   "displayName": "dendron",
   "description": "Dendron is a hierarchal note taking tool that grows as you do. ",
   "publisher": "dendron",
-  "version": "0.66.1",
+  "version": "0.67.2",
   "engines": {
     "vscode": "^1.54.0"
   },
@@ -854,8 +854,8 @@
     "deploy:ovsx": "ovsx publish --yarn"
   },
   "devDependencies": {
-    "@dendronhq/common-test-utils": "^0.66.1",
-    "@dendronhq/engine-test-utils": "^0.66.1",
+    "@dendronhq/common-test-utils": "^0.67.2",
+    "@dendronhq/engine-test-utils": "^0.67.2",
     "@sentry/webpack-plugin": "^1.17.1",
     "@types/execa": "^2.0.0",
     "@types/fs-extra": "^9.0.1",
@@ -887,12 +887,12 @@
     "webpack-merge": "^5.8.0"
   },
   "dependencies": {
-    "@dendronhq/api-server": "^0.66.1",
-    "@dendronhq/common-all": "^0.66.1",
-    "@dendronhq/common-server": "^0.66.1",
-    "@dendronhq/dendron-cli": "^0.66.1",
-    "@dendronhq/engine-server": "^0.66.1",
-    "@dendronhq/pods-core": "^0.66.1",
+    "@dendronhq/api-server": "^0.67.2",
+    "@dendronhq/common-all": "^0.67.2",
+    "@dendronhq/common-server": "^0.67.2",
+    "@dendronhq/dendron-cli": "^0.67.2",
+    "@dendronhq/engine-server": "^0.67.2",
+    "@dendronhq/pods-core": "^0.67.2",
     "@sentry/integrations": "^6.13.1",
     "@sentry/node": "^6.13.1",
     "@types/vscode": "1.58",

@@ -242,7 +242,8 @@ export class GithubIssueImportPod extends ImportPod<GithubIssueImportPodConfig> 
           url: d.node.url,
           status: d.node.state,
           issueID: d.node.id,
-          author: d.node.author.url,
+          // can be null if user deleted their github account
+          author: d.node.author?.url,
         },
         tags,
       };

@@ -1,5 +1,5 @@
 import {
-  DMessageSource, FOOTNOTE_DEF_CLASS, FOOTNOTE_REF_CLASS, NoteViewMessageEnum
+  DMessageSource, FOOTNOTE_DEF_CLASS, FOOTNOTE_REF_CLASS, NoteViewMessageEnum, ThemeType
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -10,8 +10,6 @@ import React from "react";
 import { useMermaid, useRenderedNoteBody } from "../hooks";
 import { DendronComponent } from "../types";
 import { postVSCodeMessage } from "../utils/vscode";
-import { useThemeSwitcher } from "react-css-theme-switcher";
-import { getThemeType } from "../styles/theme";
 import mermaid from "mermaid";
 
 
@@ -83,8 +81,6 @@ const DendronNotePage: DendronComponent = (props) => {
   const logger = createLogger("DendronNotePage");
   const noteProps = props.ide.noteActive;
   const config = props.engine.config;
-  const { currentTheme } = useThemeSwitcher();
-  const themeType = getThemeType(currentTheme);
 
   logger.info({
     ctx,
@@ -99,7 +95,8 @@ const DendronNotePage: DendronComponent = (props) => {
   });
 
   useClickHandler(noteProps?.id);
-  useMermaid({ config, themeType, mermaid, noteRenderedBody });
+  // TODO: dynamiclally set
+  useMermaid({ config, themeType: ThemeType.LIGHT, mermaid, noteRenderedBody });
 
   if (!noteRenderedBody) {
     return null;

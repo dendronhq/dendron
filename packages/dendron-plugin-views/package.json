@@ -95,11 +95,14 @@
   },
   "scripts": {
     "start": "node scripts/start.js",
-    "build:prod": "node scripts/build.js",
-    "build:dev": "env BUILD_DEV=1 node scripts/build.js",
+    "build:prod": "yarn build:index && node scripts/build.js",
+    "build:dev": "yarn build:index && env BUILD_DEV=1 node scripts/build.js",
     "build:styles": "node scripts/buildStyles.js",
+    "build:index": "node scripts/buildIndex.js",
     "test": "echo 0",
-    "test-local": "node scripts/test.js"
+    "test-local": "node scripts/test.js",
+    "postinstall": "yarn build:dev && yarn build:styles",
+    "clean": "rimraf build && rimraf public/static && rimraf public/*.css && rimraf public/index.html"
   },
   "eslintConfig": {
     "extends": [

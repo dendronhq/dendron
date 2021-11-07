@@ -103,7 +103,8 @@
     "build:index": "node scripts/buildIndex.js",
     "test": "echo 0",
     "test-local": "node scripts/test.js",
-    "clean": "rimraf build && rimraf public/static && rimraf public/*.css && rimraf public/index.html"
+    "clean": "yarn rimraf build public/static public/*.css public/index.html",
+    "rimraf": "npx rimraf"
   },
   "eslintConfig": {
     "extends": [

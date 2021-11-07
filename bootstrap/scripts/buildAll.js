@@ -14,5 +14,5 @@ $(`npx lerna run build --parallel --scope "@dendronhq/{common-test-utils,api-ser
 $(`npx lerna run build --parallel --scope "@dendronhq/{common-frontend,dendron-cli}"`);
 $(`npx lerna run build --scope "@dendronhq/{engine-test-utils,dendron-next-server}" `);
 $(`npx lerna run build --scope "@dendronhq/dendron-plugin-views"`);
-$(`npx lerna run build --parallel --scope "@dendronhq/{plugin-core}"`);
+$(`npx lerna run build --scope "@dendronhq/plugin-core"`);
 console.log("done")

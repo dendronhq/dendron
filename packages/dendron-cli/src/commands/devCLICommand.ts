@@ -339,7 +339,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     LernaUtils.publishVersion(opts.publishEndpoint);
 
     this.print("sync assets...");
-    await this.syncAssets();
+    await this.syncAssets(opts);
 
     this.print("prep repo...");
     await BuildUtils.prepPluginPkg();

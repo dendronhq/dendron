@@ -328,8 +328,8 @@ export class BuildUtils {
     fs.copySync(path.join(apiRoot, "assets", "static"), pluginStaticPath);
 
     // plugin view assets
-    fs.copySync(path.join(pluginViewsRoot, "build", "static", "css"), path.join(pluginAssetPath, "css"));
-    fs.copySync(path.join(pluginViewsRoot, "build", "static", "js"), path.join(pluginAssetPath, "js"));
+    fs.copySync(path.join(pluginViewsRoot, "build", "static", "css"), path.join(pluginStaticPath, "css"));
+    fs.copySync(path.join(pluginViewsRoot, "build", "static", "js"), path.join(pluginStaticPath, "js"));
     return { staticPath: pluginStaticPath };
   }
 

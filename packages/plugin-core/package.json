@@ -847,7 +847,8 @@
     "vscode:uninstall": "node ./out/src/scripts/uninstallHook.js",
     "deploy:vscode": "vsce publish --yarn",
     "deploy:ovsx": "ovsx publish --yarn",
-    "clean": "rimraf out && rimraf dist"
+    "clean": "rimraf out && rimraf dist && yarn clean:assets",
+    "clean:assets": "rimraf assets/{static}"
   },
   "devDependencies": {
     "@dendronhq/common-test-utils": "^0.67.2",

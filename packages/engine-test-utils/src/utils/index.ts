@@ -62,10 +62,8 @@ export async function checkFile(
   if (snapshot) {
     expect(body).toMatchSnapshot();
   }
-  await checkString(body, ...match)
-  return (
-    (!nomatch || (await checkNotInString(body, ...nomatch)))
-  );
+  await checkString(body, ...match);
+  return !nomatch || (await checkNotInString(body, ...nomatch));
 }
 
 export async function checkNotInString(body: string, ...nomatch: string[]) {
@@ -97,7 +95,7 @@ const getWorkspaceFolders = (wsRoot: string) => {
   return _.toArray(settings.folders);
 };
 
-export function checkVaults(opts: WorkspaceOpts, expect: any) {
+export async function checkVaults(opts: WorkspaceOpts, expect: any) {
   const { wsRoot, vaults } = opts;
   const configPath = DConfig.configPath(opts.wsRoot);
   const config = readYAML(configPath) as IntermediateDendronConfig;
@@ -105,7 +103,10 @@ export function checkVaults(opts: WorkspaceOpts, expect: any) {
   expect(_.sortBy(vaultsConfig, ["fsPath", "workspace"])).toEqual(
     _.sortBy(vaults, ["fsPath", "workspace"])
   );
-  if (WorkspaceUtils.getWorkspaceTypeFromDir(wsRoot) === WorkspaceType.CODE) {
+  if (
+    (await WorkspaceUtils.getWorkspaceTypeFromDir(wsRoot)) ===
+    WorkspaceType.CODE
+  ) {
     const wsFolders = getWorkspaceFolders(wsRoot);
     expect(wsFolders).toEqual(
       vaults.map((ent) => {

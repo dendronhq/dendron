@@ -68,7 +68,7 @@ suite("VaultAddCommand", function () {
           });
           await cmd.run();
 
-          checkVaults(
+          await checkVaults(
             {
               wsRoot,
               vaults: [
@@ -133,7 +133,7 @@ suite("VaultAddCommand", function () {
               },
             },
           });
-          checkVaults(
+          await checkVaults(
             {
               wsRoot,
               vaults: [
@@ -201,7 +201,7 @@ suite("VaultAddCommand", function () {
               },
             },
           });
-          checkVaults(
+          await checkVaults(
             {
               wsRoot,
               vaults: [
@@ -259,7 +259,7 @@ suite("VaultAddCommand", function () {
               encoding: "utf8",
             })
           ).toEqual("\n.dendron.cache.*");
-          checkVaults(
+          await checkVaults(
             {
               wsRoot,
               vaults: [
@@ -313,7 +313,7 @@ suite("VaultAddCommand", function () {
             "root.md",
             "root.schema.yml",
           ]);
-          checkVaults(
+          await checkVaults(
             {
               wsRoot,
               vaults: [
@@ -343,7 +343,7 @@ suite("VaultAddCommand", function () {
             "root.md",
             "root.schema.yml",
           ]);
-          checkVaults(
+          await checkVaults(
             {
               wsRoot,
               vaults: [
@@ -374,7 +374,7 @@ suite("VaultAddCommand", function () {
             "root.schema.yml",
           ]);
 
-          checkVaults(
+          await checkVaults(
             {
               wsRoot,
               vaults: [

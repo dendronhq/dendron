@@ -145,7 +145,7 @@ describe("WorkspaceService", () => {
             // Necessary for windows test-compat:
             path.join(`seeds`, `${id}`, `vault`).replace(/\\/g, "\\\\")
           );
-          checkVaults(
+          await checkVaults(
             {
               wsRoot,
               vaults: [

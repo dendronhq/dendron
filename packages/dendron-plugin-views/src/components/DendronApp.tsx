@@ -19,6 +19,7 @@ import { useWorkspaceProps } from "../hooks";
 import { DendronComponent } from "../types";
 import { postVSCodeMessage, useVSCodeMessage } from "../utils/vscode";
 import { ThemeSwitcherProvider } from "react-css-theme-switcher";
+import "../styles/scss/main.scss";
 
 const { useEngineAppSelector, useEngine } = engineHooks;
 
@@ -97,6 +98,8 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
 }
 
 const themes = {
+  // dark: `/static/css/themes/dark.css`,
+  // light: `/static/css/themes/light.css`,
   light: `light.css`,
   dark: `dark.css`,
 };

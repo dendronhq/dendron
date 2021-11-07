@@ -24,3 +24,5 @@ yarn-error.log*
 public/static
 public/*.css
 public/index.html
+# migrated from scripts/buildStyles.js
+src/styles/scss/

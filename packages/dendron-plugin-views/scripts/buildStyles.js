@@ -11,10 +11,24 @@ const filesToThemeMap = (root) => {
 	return out;
 }
 
-const fetchStyles = (dst) => {
+/**
+ * Copy scss styles from dendron-next-server
+ * This is all Dendron customizations
+ * - how blockquotes are rendered
+ * - table borders
+ * - etc
+ */
+const fetchCoreStyles = (dst) => {
+	const nextRoot = path.join("..", "dendron-next-server", "styles", "scss");
+	fs.copySync(nextRoot, dst);
+};
+
+/**
+ * Copy ant theme styles
+ */
+const fetchThemeStyles = (dst) => {
 	const themes = ["light", "dark"];
 	const nextRoot = path.join("..", "dendron-next-server", "public");
-	const tgtRoot = path.join("..", )
 	themes.map(th => {
 		fs.copyFileSync(path.join(nextRoot, `${th}-theme.css`), path.join(dst, `${th}.css`));
 	});
@@ -50,14 +64,18 @@ const writeStyles = ({themeMaps, dest}) => {
 
 const buildAll = async () => {
 	const cssRoot = path.join("assets", "css");
-	const isProd = process.env.NODE_ENV === "production";
 	const dstRoots =[
-		path.join("build", "static", "css", "themes"),
+		// required for browser mode
 		path.join("public", "static", "css", "themes"),
+		// required when exporting to plugin-core
+		path.join("build", "static", "css", "themes"),
 	]
 
 	console.log("fetching...");
-	fetchStyles(path.join(cssRoot, "main"));
+	// NOTE: we copy styles directly into the `src/` directory because 
+	// it gets imported in the `DendronAppComponent`
+	fetchCoreStyles(path.join("src", "styles", "scss"))
+	fetchThemeStyles(path.join(cssRoot, "main"));
 
 	console.log("reading...");
 	const mainThemeMap = filesToThemeMap(path.join(cssRoot, "main"));

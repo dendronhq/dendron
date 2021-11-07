@@ -98,6 +98,10 @@ export class BuildUtils {
     return path.join(this.getLernaRoot(), "packages", "plugin-core");
   }
 
+  static getPluginViewsRootPath() {
+    return path.join(this.getLernaRoot(), "packages", "dendron-plugin-views");
+  }
+
   static getNextServerRootPath() {
     return path.join(this.getLernaRoot(), "packages", "dendron-next-server");
   }
@@ -130,9 +134,14 @@ export class BuildUtils {
 
   static buildNextServer() {
     const root = this.getNextServerRootPath();
-    $(`yarn  --ignore-lockfile`, { cwd: root });
-    $(`yarn build`, { cwd: root });
-    $(`yarn gen:theme`, { cwd: root });
+    $(`yarn`, { cwd: root });
+    $(`yarn setup`, { cwd: root });
+    $(`yarn build:prod`, { cwd: root });
+  }
+
+  static buildPluginViews() {
+    const root = this.getPluginViewsRootPath();
+    $(`yarn build:prod`, { cwd: root });
   }
 
   static bump11ty(opts: { currentVersion: string; nextVersion: string }) {
@@ -317,6 +326,10 @@ export class BuildUtils {
     return subprocess;
   }
 
+  /**
+   * Migrate assets from next-server, plugin-views, and api-server to plugin-core
+   * @returns 
+   */
   static async syncStaticAssets() {
     const pluginAssetPath = path.join(this.getPluginRootPath(), "assets");
     const pluginStaticPath = path.join(pluginAssetPath, "static");

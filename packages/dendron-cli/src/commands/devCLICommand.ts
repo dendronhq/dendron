@@ -367,6 +367,8 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     if (!fast) {
       this.print("build next server...");
       BuildUtils.buildNextServer();
+      this.print("build plugin views...");
+      BuildUtils.buildPluginViews();
     }
     this.print("sync static...");
     const { staticPath } = await BuildUtils.syncStaticAssets();

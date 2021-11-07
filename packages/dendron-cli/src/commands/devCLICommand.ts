@@ -365,9 +365,9 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
 
   async syncAssets({ fast }: { fast?: boolean }) {
     if (!fast) {
-      this.print("build next server...");
+      this.print("build next server for prod...");
       BuildUtils.buildNextServer();
-      this.print("build plugin views...");
+      this.print("build plugin views for prod...");
       BuildUtils.buildPluginViews();
     }
     this.print("sync static...");

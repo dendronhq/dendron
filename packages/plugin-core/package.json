@@ -840,6 +840,7 @@
     "webpack:prod": "webpack --config webpack.prod.js",
     "watch": "yarn compile --watch",
     "build": "yarn compile",
+    "build:dev": "yarn webpack",
     "build:prod": "yarn webpack:prod && ./scripts/varSub.sh",
     "compile": "tsc -p tsconfig.build.json",
     "test": "node ./out/src/test/runTestInteg.js",

@@ -94,7 +94,7 @@
     "workbox-webpack-plugin": "5.1.4"
   },
   "scripts": {
-    "start": "node scripts/start.js",
+    "start": "yarn build:index && node scripts/start.js",
     "setup": "yarn build:index && yarn build:styles",
     "build": "yarn build:dev && yarn build:styles",
     "build:dev": "yarn setup && env BUILD_DEV=1 node scripts/build.js",

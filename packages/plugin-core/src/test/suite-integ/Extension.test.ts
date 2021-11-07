@@ -4,12 +4,14 @@ import {
   isNotUndefined,
   Time,
   VaultUtils,
+  ConfigUtils,
 } from "@dendronhq/common-all";
 import {
   readJSONWithCommentsSync,
   readYAML,
   tmpDir,
   writeJSONWithComments,
+  writeYAML,
 } from "@dendronhq/common-server";
 import { toPlainObject } from "@dendronhq/common-test-utils";
 import {
@@ -401,6 +403,107 @@ suite("Extension", function () {
             shouldDisplayMessage: false,
           });
         });
+      });
+    });
+  });
+});
+
+suite("GIVEN a native workspace", function () {
+  describe("AND `dendron.yml` is nested in a folder", () => {
+    let homeDirStub: SinonStub;
+    let userConfigDirStub: SinonStub;
+    const ctx: ExtensionContext = setupBeforeAfter(this, {
+      beforeHook: async () => {
+        // Required for StateService Singleton Init at the moment.
+        // eslint-disable-next-line no-new
+        new StateService({
+          globalState: ctx.globalState,
+          workspaceState: ctx.workspaceState,
+        });
+        await resetCodeWorkspace();
+        await new ResetConfigCommand().execute({ scope: "all" });
+        homeDirStub = TestEngineUtils.mockHomeDir();
+        userConfigDirStub = mockUserConfigDir();
+        const wsRoot = tmpDir().name;
+        const docsRoot = path.join(wsRoot, "docs");
+        await fs.ensureDir(docsRoot);
+        // Initializing with the wsRoot, but `dendron.yml` is under `wsRoot/docs` like it may be in some native workspace setups
+        writeYAML(
+          path.join(docsRoot, CONSTANTS.DENDRON_CONFIG_FILE),
+          ConfigUtils.genDefaultConfig()
+        );
+        const wsFolders = [
+          {
+            name: "root",
+            index: 0,
+            uri: vscode.Uri.parse(wsRoot),
+          },
+        ];
+        sinon.stub(vscode.workspace, "workspaceFolders").value(wsFolders);
+        DendronExtension.workspaceFolders = () => wsFolders;
+      },
+      afterHook: async () => {
+        homeDirStub.restore();
+        userConfigDirStub.restore();
+      },
+      noSetInstallStatus: true,
+    });
+
+    test("THEN it activates correctly", (done) => {
+      _activate(ctx).then((resp) => {
+        expect(resp).toBeTruthy();
+        const dendronState = MetadataService.instance().getMeta();
+        expect(isNotUndefined(dendronState.firstInstall)).toBeTruthy();
+        expect(isNotUndefined(dendronState.firstWsInitialize)).toBeFalsy();
+        done();
+      });
+    });
+  });
+
+  describe("AND `dendron.yml` is in the root", () => {
+    let homeDirStub: SinonStub;
+    let userConfigDirStub: SinonStub;
+    const ctx: ExtensionContext = setupBeforeAfter(this, {
+      beforeHook: async () => {
+        // Required for StateService Singleton Init at the moment.
+        // eslint-disable-next-line no-new
+        new StateService({
+          globalState: ctx.globalState,
+          workspaceState: ctx.workspaceState,
+        });
+        await resetCodeWorkspace();
+        await new ResetConfigCommand().execute({ scope: "all" });
+        homeDirStub = TestEngineUtils.mockHomeDir();
+        userConfigDirStub = mockUserConfigDir();
+        const wsRoot = tmpDir().name;
+        writeYAML(
+          path.join(wsRoot, CONSTANTS.DENDRON_CONFIG_FILE),
+          ConfigUtils.genDefaultConfig()
+        );
+        const wsFolders = [
+          {
+            name: "root",
+            index: 0,
+            uri: vscode.Uri.parse(wsRoot),
+          },
+        ];
+        sinon.stub(vscode.workspace, "workspaceFolders").value(wsFolders);
+        DendronExtension.workspaceFolders = () => wsFolders;
+      },
+      afterHook: async () => {
+        homeDirStub.restore();
+        userConfigDirStub.restore();
+      },
+      noSetInstallStatus: true,
+    });
+
+    test("THEN it activates correctly", (done) => {
+      _activate(ctx).then((resp) => {
+        expect(resp).toBeTruthy();
+        const dendronState = MetadataService.instance().getMeta();
+        expect(isNotUndefined(dendronState.firstInstall)).toBeTruthy();
+        expect(isNotUndefined(dendronState.firstWsInitialize)).toBeFalsy();
+        done();
       });
     });
   });

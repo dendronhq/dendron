@@ -292,7 +292,7 @@ export async function _activate(
       extensionInstallStatus,
     });
 
-    if (DendronExtension.isActive(context)) {
+    if (await DendronExtension.isValid()) {
       if (ws.type === WorkspaceType.NATIVE) {
         const workspaceFolder =
           await WorkspaceUtils.findWSRootInWorkspaceFolders(
@@ -642,21 +642,21 @@ export async function _activate(
       AnalyticsUtils.track(VSCodeEvents.UserOnOldVSCodeVerUnblocked);
     }
 
-    return showWelcomeOrWhatsNew({
+    await showWelcomeOrWhatsNew({
       extensionInstallStatus,
       version: DendronExtension.version(),
       previousExtensionVersion: previousWorkspaceVersion,
       start: startActivate,
       assetUri,
-    }).then(() => {
-      if (DendronExtension.isActive(context)) {
-        HistoryService.instance().add({
-          source: "extension",
-          action: "activate",
-        });
-      }
-      return false;
     });
+    if (DendronExtension.isActive(context)) {
+      HistoryService.instance().add({
+        source: "extension",
+        action: "activate",
+      });
+      return true;
+    }
+    return false;
   } catch (error) {
     Sentry.captureException(error);
     throw error;

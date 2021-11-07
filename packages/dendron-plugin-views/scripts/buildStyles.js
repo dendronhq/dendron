@@ -12,26 +12,27 @@ const filesToThemeMap = (root) => {
 }
 
 /**
+ * Copy ant theme styles
+ */
+const fetchBaseStyles = (dst) => {
+	const themes = ["light", "dark"];
+	const nextRoot = path.join("..", "dendron-next-server", "public");
+	themes.map(th => {
+		fs.copyFileSync(path.join(nextRoot, `${th}-theme.css`), path.join(dst, `${th}.css`));
+	});
+};
+
+
+/**
  * Copy scss styles from dendron-next-server
  * This is all Dendron customizations
  * - how blockquotes are rendered
  * - table borders
  * - etc
  */
-const fetchCoreStyles = (dst) => {
+const fetchCustomStyles = (dst) => {
 	const nextRoot = path.join("..", "dendron-next-server", "styles", "scss");
 	fs.copySync(nextRoot, dst);
-};
-
-/**
- * Copy ant theme styles
- */
-const fetchThemeStyles = (dst) => {
-	const themes = ["light", "dark"];
-	const nextRoot = path.join("..", "dendron-next-server", "public");
-	themes.map(th => {
-		fs.copyFileSync(path.join(nextRoot, `${th}-theme.css`), path.join(dst, `${th}.css`));
-	});
 };
 
 /**
@@ -71,22 +72,33 @@ const buildAll = async () => {
 		path.join("build", "static", "css", "themes"),
 	]
 
+	// --- Fetch
+	// We re-use style sheets from other packages, this fetches them all
+	// into this package
 	console.log("fetching...");
+	// these are the main style. ant.d styles 
+	fetchBaseStyles(path.join(cssRoot, "main"));
+
+	// these are our custom styles
 	// NOTE: we copy styles directly into the `src/` directory because 
 	// it gets imported in the `DendronAppComponent`
-	fetchCoreStyles(path.join("src", "styles", "scss"))
-	fetchThemeStyles(path.join(cssRoot, "main"));
+	fetchCustomStyles(path.join("src", "styles", "scss"))
 
+	// --- Read
+	// Read all stylesheets and builds theme map
 	console.log("reading...");
 	const mainThemeMap = filesToThemeMap(path.join(cssRoot, "main"));
 	const prismThemeMap = filesToThemeMap(path.join(cssRoot, "prism"));
 
-	console.log("concating...");
+	// --- Compile
+	// Concat and writes all styling into final style sheets
+	console.log("compile...");
 	const themeMaps = concatStyles([mainThemeMap, prismThemeMap]);
 	await Promise.all(dstRoots.map(async dstRoot => {
 		fs.ensureDirSync(dstRoot);
 		writeStyles({themeMaps, dest: dstRoot})
 	}));
+
 	console.log("done");
 };
 

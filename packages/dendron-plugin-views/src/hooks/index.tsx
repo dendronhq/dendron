@@ -55,7 +55,9 @@ export const useRenderedNoteBody = ({
       renderedNoteContentHash.current = contentHash;
       dispatch(engineSlice.renderNote({ ...workspace, id: noteId }));
     }
-  }, [noteId, contentHash, dispatch, noteContent, workspace]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [noteId, contentHash]);
+  // }, [noteId, contentHash, dispatch, noteContent, workspace]);
 
   return [noteContent];
 };
@@ -88,7 +90,9 @@ export const useMermaid = ({
       mermaid.init();
       logger.info("init mermaid");
     }
-  }, [config, noteRenderedBody, mermaid, themeType]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [config, noteRenderedBody]);
+  // }, [config, noteRenderedBody, mermaid, themeType]);
 };
 
 /**

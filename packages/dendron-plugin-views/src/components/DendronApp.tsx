@@ -51,7 +51,8 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
       source: DMessageSource.webClient,
     });
     logger.info({ ctx, msg: "postVSCodeMessage" });
-  }, [logger]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // register a listener for vscode messages
   useVSCodeMessage(async (msg) => {

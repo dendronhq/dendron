@@ -306,7 +306,7 @@ function getWebviewContent({
   }
   themes.map(th => {
     themeMap[th] = panel.webview.asWebviewUri(
-      vscode.Uri.joinPath(root, "css", "themes", `${th}.css`)
+      vscode.Uri.joinPath(root, "static", "css", "themes", `${th}.css`)
   ).toString()})
   const out = WebViewCommonUtils.genVSCodeHTMLIndex({
     jsSrc: panel.webview.asWebviewUri(jsSrc).toString(),

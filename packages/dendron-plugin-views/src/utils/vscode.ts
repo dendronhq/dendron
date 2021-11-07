@@ -19,13 +19,14 @@ export const postVSCodeMessage = (msg: DMessage) => {
 };
 
 export const useVSCodeMessage = (setMsgHook: (msg: VSCodeMessage) => void) => {
-  React.useEffect(() => {
-    const listener = (msg: MessageEvent<DMessage>) => {
+  const listener = React.useCallback((msg: MessageEvent<DMessage>)=> {
       const payload = msg.data || {}; // The JSON data our extension sent
       if (payload.source === "vscode") {
         setMsgHook(payload);
       }
-    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  React.useEffect(() => {
     // set listener for all messages
     window.addEventListener("message", listener);
 
@@ -38,5 +39,5 @@ export const useVSCodeMessage = (setMsgHook: (msg: VSCodeMessage) => void) => {
     return () => {
       window.removeEventListener("message", listener);
     };
-  }, [setMsgHook]);
+  }, [listener]);
 };

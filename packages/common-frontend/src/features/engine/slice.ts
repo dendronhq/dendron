@@ -55,7 +55,7 @@ export const syncNote = createAsyncThunk(
     });
     logger.info({ state: "pre:query" });
     const resp = await api.noteQuery({ qs: note.fname, ws, vault: note.vault });
-    logger.info({ state: "post:iquery" });
+    logger.info({ state: "post:query" });
     if (resp.error) {
       dispatch(setError(stringifyError(resp.error)));
       return resp;

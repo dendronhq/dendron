@@ -16,7 +16,7 @@
     "dev": "next dev",
     "prod": "env STAGE=prod next dev",
     "watch": "echo 0",
-    "build": "yarn build:prod && yarn gen:theme",
+    "build": "yarn build:prod && yarn setup",
     "build:dev": "cross-env CDN_BUILD=1 STAGE=dev next build && next export",
     "build:prod": "cross-env CDN_BUILD=1 STAGE=prod next build && next export",
     "start": "next start",
@@ -25,7 +25,8 @@
     "deploy:prod": "env STAGE=prod amplify publish",
     "gen:theme": "gulp less",
     "build:js": "gulp js",
-    "format": "echo nop"
+    "format": "echo nop",
+    "clean": "rimraf public/*.css && rimraf public/js && rimraf out"
   },
   "nohoist": [
     "**/common-all",
@@ -84,6 +85,7 @@
     "gulp-less": "^4.0.1",
     "gulp-postcss": "^9.0.0",
     "less-plugin-npm-import": "^2.1.0",
-    "nodemon": "^2.0.4"
+    "nodemon": "^2.0.4",
+    "rimraf": "^3.0.2"
   }
 }

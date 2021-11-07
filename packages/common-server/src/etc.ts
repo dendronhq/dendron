@@ -103,7 +103,9 @@ export class WebViewCommonUtils {
     </script>
 
     <body onload="onload()" class="vscode-${initialTheme || "light"}">
-      <div id="root" data-port="${port}" data-ws="${wsRoot}" data-browser="${browser}"></div>
+      <div id="main-content">
+        <div id="root" data-port="${port}" data-ws="${wsRoot}" data-browser="${browser}"></div>
+      </div>
 
       <!-- Source code for javascript bundle. Not used in browser mode-->
       <script src="${jsSrc}"></script>

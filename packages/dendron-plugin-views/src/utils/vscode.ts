@@ -6,27 +6,26 @@ import {
 } from "@dendronhq/common-all";
 import React from "react";
 
-
 /**
  * Post message to VSCode process
- * @param msg 
+ * @param msg
  */
 export const postVSCodeMessage = (msg: DMessage) => {
   // @ts-ignore
-	if (window.vscode) {
-		// @ts-ignore
+  if (window.vscode) {
+    // @ts-ignore
     window.vscode.postMessage(msg, "*");
-	}
+  }
 };
 
 export const useVSCodeMessage = (setMsgHook: (msg: VSCodeMessage) => void) => {
-  const listener = (msg: MessageEvent<DMessage>) => {
-    const payload = msg.data || {}; // The JSON data our extension sent
-    if (payload.source === "vscode") {
-      setMsgHook(payload);
-    }
-  };
   React.useEffect(() => {
+    const listener = (msg: MessageEvent<DMessage>) => {
+      const payload = msg.data || {}; // The JSON data our extension sent
+      if (payload.source === "vscode") {
+        setMsgHook(payload);
+      }
+    };
     // set listener for all messages
     window.addEventListener("message", listener);
 
@@ -39,5 +38,5 @@ export const useVSCodeMessage = (setMsgHook: (msg: VSCodeMessage) => void) => {
     return () => {
       window.removeEventListener("message", listener);
     };
-  }, []);
+  }, [setMsgHook]);
 };

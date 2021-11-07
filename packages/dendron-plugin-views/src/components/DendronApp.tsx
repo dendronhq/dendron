@@ -51,7 +51,7 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
       source: DMessageSource.webClient,
     });
     logger.info({ ctx, msg: "postVSCodeMessage" });
-  }, []);
+  }, [logger]);
 
   // register a listener for vscode messages
   useVSCodeMessage(async (msg) => {
@@ -87,9 +87,7 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
     return <div>Loading...</div>;
   }
 
-  return (
-    <Component {...props} />
-  );
+  return <Component {...props} />;
 }
 
 function DendronApp(props: { Component: DendronComponent }) {

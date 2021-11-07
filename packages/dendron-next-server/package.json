@@ -16,7 +16,7 @@
     "dev": "next dev",
     "prod": "env STAGE=prod next dev",
     "watch": "echo 0",
-    "build": "yarn build:prod && yarn setup",
+    "build": "yarn setup && yarn build:prod",
     "build:dev": "cross-env CDN_BUILD=1 STAGE=dev next build && next export",
     "build:prod": "cross-env CDN_BUILD=1 STAGE=prod next build && next export",
     "start": "next start",

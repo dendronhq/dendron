@@ -846,7 +846,8 @@
     "format": "echo nop",
     "vscode:uninstall": "node ./out/src/scripts/uninstallHook.js",
     "deploy:vscode": "vsce publish --yarn",
-    "deploy:ovsx": "ovsx publish --yarn"
+    "deploy:ovsx": "ovsx publish --yarn",
+    "clean": "rimraf out && rimraf dist"
   },
   "devDependencies": {
     "@dendronhq/common-test-utils": "^0.67.2",
@@ -870,6 +871,7 @@
     "mocha": "^7.1.2",
     "node-loader": "^2.0.0",
     "ovsx": "^0.2.1",
+    "rimraf": "^3.0.2",
     "source-map-loader": "^3.0.0",
     "terser-webpack-plugin": "^5.2.4",
     "ts-loader": "^8.0.0",

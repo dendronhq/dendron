@@ -95,8 +95,10 @@
   },
   "scripts": {
     "start": "node scripts/start.js",
-    "build:prod": "yarn build:index && node scripts/build.js",
-    "build:dev": "yarn build:index && env BUILD_DEV=1 node scripts/build.js",
+    "setup": "yarn build:index && yarn build:styles",
+    "build": "yarn build:prod",
+    "build:dev": "yarn setup && env BUILD_DEV=1 node scripts/build.js",
+    "build:prod": "yarn setup && node scripts/build.js",
     "build:styles": "node scripts/buildStyles.js",
     "build:index": "node scripts/buildIndex.js",
     "test": "echo 0",

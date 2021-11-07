@@ -3,6 +3,7 @@ import {
   DendronWebViewKey,
   DMessageEnum,
   DNoteAnchor,
+  getStage,
   NoteProps,
   NoteUtils,
   NoteViewMessage,
@@ -10,7 +11,7 @@ import {
   OnDidChangeActiveTextEditorMsg,
   VaultUtils
 } from "@dendronhq/common-all";
-import { WebViewCommonUtils } from "@dendronhq/common-server";
+import { findUpTo, WebViewCommonUtils } from "@dendronhq/common-server";
 import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
@@ -153,10 +154,9 @@ export class ShowPreviewCommand extends BasicCommand<
     }
     Logger.info({ ctx, msg: "creating new" });
 
-    // TODO: change based on dev/prod
-    const root =
-      "/Users/kevinlin/code/dendron/packages/dendron-plugin-views/build";
     const assetUri = WSUtils.getAssetUri(getExtension().context);
+    const pkgRoot = path.dirname(findUpTo({base: __dirname, fname: "package.json", maxLvl: 5})!);
+    const pluginViewsRoot: vscode.Uri = getStage() === "dev" ?  vscode.Uri.file(path.join(pkgRoot, "..", "dendron-plugin-views", "build")): assetUri
     const panel = vscode.window.createWebviewPanel(
       "dendronPreview",
       "Dendron Preview",
@@ -168,17 +168,13 @@ export class ShowPreviewCommand extends BasicCommand<
         enableScripts: true,
         retainContextWhenHidden: true,
         enableFindWidget: true,
-        localResourceRoots: [assetUri, vscode.Uri.file(root)],
+        localResourceRoots: [assetUri, pluginViewsRoot],
       }
     );
 
     const name = "notePreview";
-    const jsSrc = vscode.Uri.file(
-      path.join(root, "static", "js", `${name}.bundle.js`)
-    );
-    const cssSrc = vscode.Uri.file(
-      path.join(root, "static", "css", `${name}.styles.css`)
-    );
+    const jsSrc = vscode.Uri.joinPath(pluginViewsRoot, "static", "js", `${name}.bundle.js`);
+    const cssSrc = vscode.Uri.joinPath(pluginViewsRoot, "static", "css", `${name}.styles.css`)
     const port = getExtension().port!;
     panel.webview.onDidReceiveMessage(async (msg: NoteViewMessage) => {
       const ctx = "ShowPreview:onDidReceiveMessage";

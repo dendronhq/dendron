@@ -69,7 +69,7 @@ const buildAll = async () => {
 		// required for browser mode
 		path.join("public", "static", "css", "themes"),
 		// required when exporting to plugin-core
-		path.join("build", "static", "css", "themes"),
+		// path.join("build", "static", "css", "themes"),
 	]
 
 	// --- Fetch

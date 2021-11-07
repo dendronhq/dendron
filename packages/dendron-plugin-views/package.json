@@ -96,14 +96,13 @@
   "scripts": {
     "start": "node scripts/start.js",
     "setup": "yarn build:index && yarn build:styles",
-    "build": "yarn build:prod",
+    "build": "yarn build:dev && yarn build:styles",
     "build:dev": "yarn setup && env BUILD_DEV=1 node scripts/build.js",
     "build:prod": "yarn setup && node scripts/build.js",
     "build:styles": "node scripts/buildStyles.js",
     "build:index": "node scripts/buildIndex.js",
     "test": "echo 0",
     "test-local": "node scripts/test.js",
-    "postinstall": "yarn build:dev && yarn build:styles",
     "clean": "rimraf build && rimraf public/static && rimraf public/*.css && rimraf public/index.html"
   },
   "eslintConfig": {

@@ -33,6 +33,7 @@ import { DendronExtension } from "../workspace";
 /** Used to match the warnings to code actions. Also displayed for users along with the warning message. */
 const BAD_FRONTMATTER_CODE = "bad frontmatter";
 const FRONTMATTER_WARNING = languages.createDiagnosticCollection();
+const NOT_A_STUB = "not a stub";
 const RESOLVE_MESSAGE_AUTO_ONLY =
   "Please use the lightbulb, or run the Dendron: Doctor command.";
 const RESOLVE_MESSAGE =
@@ -49,11 +50,10 @@ const delayedFrontmatterWarning = _.debounce(
   500
 );
 
-function badFrontmatter(props: Omit<Diagnostic, "source" | "code">) {
+function badFrontmatter(props: Omit<Diagnostic, "source">) {
   return {
     /** Displayed to the user next to the warning message. */
     source: "Dendron",
-    code: BAD_FRONTMATTER_CODE,
     ...props,
   };
 }
@@ -79,6 +79,7 @@ export function warnBadFrontmatterContents(
   const ctx = "warnBadFrontmatterContents";
   const diagnostics: Diagnostic[] = [];
   const range = VSCodeUtils.position2VSCodeRange(frontmatter.position!);
+  const note = VSCodeUtils.getNoteFromDocument(document);
   try {
     const frontmatterData = YAML.parse(frontmatter.value);
     if (!_.isString(frontmatterData.id)) {
@@ -87,6 +88,7 @@ export function warnBadFrontmatterContents(
         badFrontmatter({
           message: `Note id is missing. ${RESOLVE_MESSAGE_AUTO_ONLY}`,
           range,
+          code: BAD_FRONTMATTER_CODE,
           severity: DiagnosticSeverity.Error,
         })
       );
@@ -95,6 +97,16 @@ export function warnBadFrontmatterContents(
         badFrontmatter({
           message: `Note id is bad, it will not work in Github publishing. ${RESOLVE_MESSAGE}`,
           range,
+          code: BAD_FRONTMATTER_CODE,
+          severity: DiagnosticSeverity.Warning,
+        })
+      );
+    } else if (note && frontmatterData.stub && _.trim(note.body) !== "") {
+      diagnostics.push(
+        badFrontmatter({
+          message: `This note is not a stub, Please remove the stub property or update it to false`,
+          range,
+          code: NOT_A_STUB,
           severity: DiagnosticSeverity.Warning,
         })
       );
@@ -138,24 +150,27 @@ export const doctorFrontmatterProvider: CodeActionProvider = {
       if (!DendronExtension.isActive()) {
         return;
       }
-
       // Only provide fix frontmatter action if the diagnostic is correct
       const diagnostics = context.diagnostics.filter(
         (item) => item.code === BAD_FRONTMATTER_CODE
       );
-      if (diagnostics.length === 0) return undefined;
-      const action: CodeAction = {
-        title: "Fix the frontmatter",
-        diagnostics,
-        isPreferred: true,
-        kind: CodeActionKind.QuickFix,
-        command: {
-          command: new DoctorCommand().key,
+      if (diagnostics.length !== 0) {
+        const action: CodeAction = {
           title: "Fix the frontmatter",
-          arguments: [{ scope: "file", action: DoctorActions.FIX_FRONTMATTER }],
-        },
-      };
-      return [action];
+          diagnostics,
+          isPreferred: true,
+          kind: CodeActionKind.QuickFix,
+          command: {
+            command: new DoctorCommand().key,
+            title: "Fix the frontmatter",
+            arguments: [
+              { scope: "file", action: DoctorActions.FIX_FRONTMATTER },
+            ],
+          },
+        };
+        return [action];
+      }
+      return undefined;
     }
   ),
 };

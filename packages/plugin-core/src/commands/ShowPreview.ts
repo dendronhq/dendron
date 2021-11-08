@@ -9,7 +9,7 @@ import {
   NoteViewMessage,
   NoteViewMessageEnum,
   OnDidChangeActiveTextEditorMsg,
-  VaultUtils
+  VaultUtils,
 } from "@dendronhq/common-all";
 import { findUpTo, WebViewCommonUtils } from "@dendronhq/common-server";
 import _ from "lodash";
@@ -66,16 +66,11 @@ const tryGetNoteFromDocument = (
   return;
 };
 
-/** Returns true when we are attempting to reference a place within the same note.
- *  Such as a different header section.*/
-const isLinkingWithinSameNote = (opts: {
-  data: { id?: string; href?: string };
-}) => {
-  const linkToNoteId = extractNoteIdFromHref(opts.data);
-
-  return linkToNoteId === opts.data.id;
-};
-
+/**
+ * Extract the last part of the path component
+ * @param data
+ * @returns
+ */
 export const extractNoteIdFromHref = (data: {
   id?: string;
   href?: string;
@@ -94,8 +89,73 @@ export const extractNoteIdFromHref = (data: {
    * Will return a link like 'vscode-webview://4e98b9cf-41d8-49eb-b458-fcfda32c6c01/foobar'
    * The path component includes a `/` (eg. `/foobar`) so we remove it
    */
-  const { path } = vscode.Uri.parse(data.href);
-  return path.slice(1);
+  const { path: hrefPath } = vscode.Uri.parse(data.href);
+  const out = path.basename(hrefPath, ".html");
+  return out;
+};
+
+enum LinkType {
+  WIKI = "WIKI",
+  WEBSITE = "WEBSITE",
+  MARKDOWN = "MARKDOWN",
+  UNKNOWN = "UNKNOWN",
+}
+
+const classifyLink = ({ href }: NoteViewMessage["data"]): LinkType => {
+  if (href && href.startsWith("vscode-webview")) {
+    return LinkType.WIKI;
+  }
+  if (href && (href.startsWith("http://") || href.startsWith("https://"))) {
+    return LinkType.WEBSITE;
+  }
+  return LinkType.UNKNOWN;
+};
+
+const handleLink = async ({
+  linkType,
+  data,
+}: {
+  linkType: LinkType;
+  data: NoteViewMessage["data"];
+}) => {
+  switch (linkType) {
+    case LinkType.WIKI: {
+      // TODO: should be error
+      if (!data.href) return;
+      const noteId = extractNoteIdFromHref(data);
+      // TODO: should be error
+      if (!noteId) return;
+
+      const anchor = extractHeaderAnchorIfExists(data.href);
+      const note: NoteProps | undefined = getEngine().notes[noteId];
+      return new GotoNoteCommand().execute({
+        qs: note.fname,
+        vault: note.vault,
+        column: vscode.ViewColumn.One,
+        anchor,
+      });
+    }
+    case LinkType.WEBSITE: {
+      return VSCodeUtils.openLink(data.href!);
+    }
+    case LinkType.MARKDOWN: {
+      // assume local note - open relative to current vault
+      const note = getEngine().notes[data.id!];
+      if (!note) return;
+
+      // noteId in this case is name of file
+      const fullPath = path.join(
+        getEngine().wsRoot,
+        VaultUtils.getRelPath(note.vault),
+        note.id
+      );
+      return VSCodeUtils.openLink(fullPath);
+    }
+    default: {
+      // default, do nothing. let vscode link handler handle it
+      return;
+    }
+  }
 };
 
 export class ShowPreviewCommand extends BasicCommand<
@@ -155,8 +215,15 @@ export class ShowPreviewCommand extends BasicCommand<
     Logger.info({ ctx, msg: "creating new" });
 
     const assetUri = WSUtils.getAssetUri(getExtension().context);
-    const pkgRoot = path.dirname(findUpTo({base: __dirname, fname: "package.json", maxLvl: 5})!);
-    const pluginViewsRoot: vscode.Uri = getStage() === "dev" ?  vscode.Uri.file(path.join(pkgRoot, "..", "dendron-plugin-views", "build")): assetUri
+    const pkgRoot = path.dirname(
+      findUpTo({ base: __dirname, fname: "package.json", maxLvl: 5 })!
+    );
+    const pluginViewsRoot: vscode.Uri =
+      getStage() === "dev"
+        ? vscode.Uri.file(
+            path.join(pkgRoot, "..", "dendron-plugin-views", "build")
+          )
+        : assetUri;
     const panel = vscode.window.createWebviewPanel(
       "dendronPreview",
       "Dendron Preview",
@@ -173,8 +240,18 @@ export class ShowPreviewCommand extends BasicCommand<
     );
 
     const name = "notePreview";
-    const jsSrc = vscode.Uri.joinPath(pluginViewsRoot, "static", "js", `${name}.bundle.js`);
-    const cssSrc = vscode.Uri.joinPath(pluginViewsRoot, "static", "css", `${name}.styles.css`)
+    const jsSrc = vscode.Uri.joinPath(
+      pluginViewsRoot,
+      "static",
+      "js",
+      `${name}.bundle.js`
+    );
+    const cssSrc = vscode.Uri.joinPath(
+      pluginViewsRoot,
+      "static",
+      "css",
+      `${name}.styles.css`
+    );
     const port = getExtension().port!;
     panel.webview.onDidReceiveMessage(async (msg: NoteViewMessage) => {
       const ctx = "ShowPreview:onDidReceiveMessage";
@@ -200,42 +277,8 @@ export class ShowPreviewCommand extends BasicCommand<
         }
         case NoteViewMessageEnum.onClick: {
           const { data } = msg;
-          if (data.href) {
-            // TODO: assuem local link
-
-            const noteId = extractNoteIdFromHref(data);
-            const anchor = extractHeaderAnchorIfExists(data.href);
-
-            const note: NoteProps | undefined = this.getNote(noteId);
-            if (isLinkingWithinSameNote({ data }) && note && anchor) {
-              await new GotoNoteCommand().execute({
-                qs: note.fname,
-                vault: note.vault,
-                column: vscode.ViewColumn.One,
-                anchor,
-              });
-            } else if (noteId && note) {
-              await new GotoNoteCommand().execute({
-                qs: note.fname,
-                vault: note.vault,
-                column: vscode.ViewColumn.One,
-                anchor,
-              });
-            } else if (noteId && !note && data.id) {
-              // assume local note - open relative to current vault
-              const note = this.getNote(data.id);
-              if (!note) return;
-
-              // noteId in this case is name of file
-              const fullPath = path.join(
-                getEngine().wsRoot,
-                VaultUtils.getRelPath(note.vault),
-                noteId
-              );
-              VSCodeUtils.openLink(fullPath);
-            }
-          }
-
+          const linkType = classifyLink(data);
+          await handleLink({ linkType, data });
           break;
         }
         case NoteViewMessageEnum.onGetActiveEditor: {
@@ -274,13 +317,6 @@ export class ShowPreviewCommand extends BasicCommand<
       ext.setWebView(DendronWebViewKey.NOTE_PREVIEW, undefined);
     });
   }
-
-  private getNote(noteId: string | undefined) {
-    if (noteId === undefined) {
-      return undefined;
-    }
-    return getEngine().notes[noteId];
-  }
 }
 
 function getWebviewContent({
@@ -294,16 +330,18 @@ function getWebviewContent({
   cssSrc: vscode.Uri;
   port: number;
   wsRoot: string;
-  panel: vscode.WebviewPanel,
+  panel: vscode.WebviewPanel;
 }) {
   const root = WSUtils.getAssetUri(getExtension().context);
   const themes = ["light", "dark"];
-  const themeMap: any = {
-  }
-  themes.map(th => {
-    themeMap[th] = panel.webview.asWebviewUri(
-      vscode.Uri.joinPath(root, "static", "css", "themes", `${th}.css`)
-  ).toString()})
+  const themeMap: any = {};
+  themes.map((th) => {
+    themeMap[th] = panel.webview
+      .asWebviewUri(
+        vscode.Uri.joinPath(root, "static", "css", "themes", `${th}.css`)
+      )
+      .toString();
+  });
   const out = WebViewCommonUtils.genVSCodeHTMLIndex({
     jsSrc: panel.webview.asWebviewUri(jsSrc).toString(),
     cssSrc: panel.webview.asWebviewUri(cssSrc).toString(),

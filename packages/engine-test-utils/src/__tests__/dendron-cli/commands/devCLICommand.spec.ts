@@ -31,7 +31,7 @@ describe("build", () => {
   test("ok, build local", async () => {
     jest.setTimeout(1000000);
     await runEngineTestV5(
-      async ({}) => {
+      async () => {
         // stub lerna.json
         const root = tmpDir().name;
         fs.writeJsonSync(path.join(root, "lerna.json"), { version: "1.0.0" });
@@ -48,6 +48,10 @@ describe("build", () => {
         const buildNextServerStub = stub(
           BuildUtils,
           "buildNextServer"
+        ).returns();
+        const buildPluginViewsStub = stub(
+          BuildUtils,
+          "buildPluginViews"
         ).returns();
         const syncStaticAssetsStub = stub(
           BuildUtils,
@@ -81,6 +85,7 @@ describe("build", () => {
           bumpVersionStub,
           publishVersionStub,
           buildNextServerStub,
+          buildPluginViewsStub,
           syncStaticAssetsStub,
           prepPluginPkgStub,
           installPluginDependenciesStub,
@@ -88,9 +93,9 @@ describe("build", () => {
           setRegRemoteStub,
           restorePluginPkgJsonStub,
         ].map((_stub) => {
-          console.log(_stub);
+          // uncomment to figure out which stub is failing
+          // console.log(_stub);
           expect(_stub.calledOnce).toBeTruthy();
-          console.log(_stub, "ok");
         });
       },
       {

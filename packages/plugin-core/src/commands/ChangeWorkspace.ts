@@ -37,7 +37,7 @@ export class ChangeWorkspaceCommand extends BasicCommand<
     if (!fs.existsSync(rootDirRaw)) {
       throw Error(`${rootDirRaw} does not exist`);
     }
-    const wsType = WorkspaceUtils.getWorkspaceTypeFromDir(rootDirRaw);
+    const wsType = await WorkspaceUtils.getWorkspaceTypeFromDir(rootDirRaw);
     if (wsType === WorkspaceType.NONE) {
       window.showErrorMessage(
         `No Dendron workspace found. Please run ${DENDRON_COMMANDS.INIT_WS.title} to create a workspace at ${rootDirRaw}`

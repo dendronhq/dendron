@@ -278,7 +278,7 @@ export class WorkspaceWatcher {
    */
   onWillRenameFiles(args: FileWillRenameEvent) {
     // No-op if we're not in a Dendron Workspace
-    if (DendronExtension.isActive()) {
+    if (!DendronExtension.isActive()) {
       return;
     }
     try {

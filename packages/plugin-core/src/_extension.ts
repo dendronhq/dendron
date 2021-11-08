@@ -272,6 +272,10 @@ export async function _activate(
       workspaceFile: vscode.workspace.workspaceFile,
       workspaceFolders: vscode.workspace.workspaceFolders,
     });
+    // Also need to reset the implementation here for testing. Doing it in all
+    // cases because if the extension is activated, we'll recreate it while
+    // activating the workspace
+    ws.workspaceImpl = undefined;
 
     const currentVersion = DendronExtension.version();
     const previousWorkspaceVersion = stateService.getWorkspaceVersion();

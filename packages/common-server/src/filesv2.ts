@@ -342,8 +342,10 @@ export function uniqueOutermostFolders(folders: string[]) {
       const relPath = path.relative(otherFolder, currentFolder);
       // If we have to leave otherFolder, or if we have to switch to a
       // different drive with an absolute path, then currentFolder can't be
-      // inside otherFolder
-      return relPath.startsWith("..") || path.isAbsolute(relPath);
+      // inside otherFolder (or current and other folder are identical)
+      return (
+        relPath.startsWith("..") || path.isAbsolute(relPath) || relPath === ""
+      );
     })
   );
 }

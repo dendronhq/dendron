@@ -14,7 +14,7 @@ jobs:
   build:
     environment: plugin-production
 
-    timeout-minutes: 60
+    timeout-minutes: 30
 
     runs-on: ubuntu-latest
 
@@ -75,26 +75,16 @@ jobs:
           DENDRON_CLI=./packages/dendron-cli/lib/bin/dendron-cli.js
           LOG_LEVEL=info $DENDRON_CLI dev prep_plugin --extensionTarget nightly
 
-      # - name: Start Verdaccio Again
-      #   run: |
-      #     verdaccio > verdaccio.log 2>&1 &
-
-      # - name: Wait for Verdaccio Cache to Update
-      #   run: |
-      #     sleep 60
-
       - name: Publish to VS Code Marketplace
         env:
           VSCE_PAT: ${{ secrets.VSCODE_PUBLISH_PWD }}
         working-directory: ./packages/plugin-core
         run: |
-          yarn config get registry
-          npm get registry
           npx verdaccio > verdaccio.log  2>&1 &
           sleep 30
-          echo "checking log"
+          echo "checking verdaccio log"
           cat verdaccio.log
-          echo "setting registry to local"
+          echo "Setting registry to local"
           yarn config set registry http://localhost:4873
           npm set registry http://localhost:4873/
           echo "running deploy:vscode"

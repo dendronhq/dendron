@@ -248,10 +248,6 @@ export class ShowPreviewCommand extends BasicCommand<
           if (!_.isUndefined(maybeNote)) ShowPreviewCommand.refresh(maybeNote);
           break;
         }
-        case DMessageEnum.INIT: {
-          // noop
-          break;
-        }
         default:
           assertUnreachable(msg.type);
       }

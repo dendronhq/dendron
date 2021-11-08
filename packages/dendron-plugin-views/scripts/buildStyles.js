@@ -55,9 +55,10 @@ const concatStyles = (themeMaps) => {
 	return finalOutput;
 }
 
-const writeStyles = ({themeMaps, dest}) => {
+const writeStyles = ({themeMaps, dest, common}) => {
 	_.map(themeMaps, (v, k) => {
-		const themeContentString = v.join("\n");
+		// const themeContentString = v.join("\n");
+		const themeContentString = v.concat(common).join("\n")
 		// write to build
 		fs.writeFileSync(path.join(dest, `${k}.css`), themeContentString);
 	});
@@ -89,6 +90,7 @@ const buildAll = async () => {
 	console.log("reading...");
 	const mainThemeMap = filesToThemeMap(path.join(cssRoot, "main"));
 	const prismThemeMap = filesToThemeMap(path.join(cssRoot, "prism"));
+	const katex = fs.readFileSync(path.join(cssRoot, "katex.min.css"), {encoding: "utf-8"});
 
 	// --- Compile
 	// Concat and writes all styling into final style sheets
@@ -96,7 +98,7 @@ const buildAll = async () => {
 	const themeMaps = concatStyles([mainThemeMap, prismThemeMap]);
 	await Promise.all(dstRoots.map(async dstRoot => {
 		fs.ensureDirSync(dstRoot);
-		writeStyles({themeMaps, dest: dstRoot})
+		writeStyles({themeMaps, common: [katex], dest: dstRoot})
 	}));
 
 	console.log("done");

@@ -296,7 +296,7 @@ export async function _activate(
       extensionInstallStatus,
     });
 
-    if (await DendronExtension.isValid()) {
+    if (await DendronExtension.isDendronWorkspace()) {
       if (ws.type === WorkspaceType.NATIVE) {
         const workspaceFolder =
           await WorkspaceUtils.findWSRootInWorkspaceFolders(

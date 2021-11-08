@@ -252,8 +252,8 @@ export class DendronExtension {
     return undefined;
   }
 
-  /** Checks if  */
-  static async isValid(): Promise<boolean | undefined> {
+  /** Checks if the current workspace open in VSCode is a Dendron workspace or not. */
+  static async isDendronWorkspace(): Promise<boolean | undefined> {
     // we do a try catch because `DendronWorkspace.workspaceFile` throws an error if workspace file doesn't exist
     try {
       // code workspace takes precedence, if code workspace, return
@@ -278,9 +278,9 @@ export class DendronExtension {
   }
 
   /**
-   * Currently, checks if `wsRoot` in `getDWorkspace()` points to a valid Dendron workspace.
+   * Checks if a Dendron workspace is currently active.
    */
-  static isActive(_context?: vscode.ExtensionContext): boolean | undefined {
+  static isActive(_context?: vscode.ExtensionContext): boolean {
     const ctx = "DendronExtension.isActive";
     try {
       //

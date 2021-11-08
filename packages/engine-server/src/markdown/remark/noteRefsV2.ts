@@ -33,7 +33,7 @@ import {
   NoteRefNoteV4,
   NoteRefNoteV4_LEGACY,
 } from "../types";
-import { MDUtilsV4, ParentWithIndex, renderFromNoteProps } from "../utils";
+import { MDUtilsV4, ParentWithIndex } from "../utils";
 import { MDUtilsV5, ProcMode } from "../utilsv5";
 import { LinkUtils } from "./utils";
 import { WikiLinksOpts } from "./wikiLinks";
@@ -767,27 +767,22 @@ function convertNoteRefHelperAST(
   opts: ConvertNoteRefHelperOpts & { procOpts: any }
 ): Required<RespV2<Parent>> {
   const { proc, refLvl, link, note } = opts;
-  const noteRefProc = proc();
+  let noteRefProc = proc();
   // proc is the parser that was parsing the note the reference was in, so need to update fname to reflect that we are parsing the referred note
   MDUtilsV4.setDendronData(noteRefProc, { fname: link.from.fname });
-  const engine = MDUtilsV4.getEngineFromProc(noteRefProc);
+
+  const engine = MDUtilsV4.getEngineFromProc(noteRefProc).engine;
+  const wsRoot = engine.wsRoot;
+  noteRefProc = noteRefProc.data("fm", MDUtilsV5.getFM({ note, wsRoot }));
   MDUtilsV4.setNoteRefLvl(noteRefProc, refLvl);
+
   const procOpts = MDUtilsV4.getProcOpts(noteRefProc);
 
   const isV5Active = MDUtilsV5.isV5Active(proc);
 
-  let bodyAST: DendronASTNode;
-  if (MDUtilsV4.getProcOpts(proc).config?.useNunjucks) {
-    const contentsClean = renderFromNoteProps({
-      fname: note.fname,
-      vault: note.vault,
-      wsRoot: engine!.engine.wsRoot,
-      notes: engine!.engine.notes,
-    });
-    bodyAST = noteRefProc.parse(contentsClean) as DendronASTNode;
-  } else {
-    bodyAST = noteRefProc.parse(note.body) as DendronASTNode;
-  }
+  const bodyAST: DendronASTNode = noteRefProc.parse(
+    note.body
+  ) as DendronASTNode;
   // Make sure to get all footnote definitions, including ones not within the range, in case they are used inside the range
   const footnotes = RemarkUtils.extractFootnoteDefs(bodyAST);
   const { anchorStart, anchorEnd, anchorStartOffset } = _.defaults(link.data, {

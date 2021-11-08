@@ -7,6 +7,8 @@ import {
   ERROR_STATUS,
   NotePropsDict,
   NoteUtils,
+  NoteProps,
+  DateTime,
 } from "@dendronhq/common-all";
 // @ts-ignore
 import rehypePrism from "@mapbox/rehype-prism";
@@ -15,6 +17,8 @@ import mermaid from "@dendronhq/remark-mermaid";
 import _ from "lodash";
 import math from "remark-math";
 import link from "rehype-autolink-headings";
+// @ts-ignore
+import variables from "remark-variables";
 // @ts-ignore
 import katex from "rehype-katex";
 import raw from "rehype-raw";
@@ -39,6 +43,8 @@ import { userTags } from "./remark/userTags";
 import { backlinks } from "./remark/backlinks";
 import { hierarchies } from "./remark";
 import { extendedImage } from "./remark/extendedImage";
+import { WorkspaceService } from "../workspace";
+import { DateTimeFormatOptions } from "luxon";
 
 /**
  * What mode a processor should run in
@@ -119,6 +125,10 @@ export type ProcDataFullOptsV5 = {
    * Check to see if we are in a note reference.
    */
   insideNoteRef?: boolean;
+  /**
+   * frontmatter variables exposed for substitution
+   */
+  fm?: any;
 } & {
   config?: IntermediateDendronConfig;
   wsRoot?: string;
@@ -140,6 +150,8 @@ export type ProcDataFullV5 = {
   config: IntermediateDendronConfig;
   notes?: NotePropsDict;
   insideNoteRef?: boolean;
+
+  fm?: any;
   /**
    * Keep track of current note ref level
    */
@@ -225,6 +237,27 @@ export class MDUtilsV5 {
     );
   }
 
+  static getFM(opts: { note: NoteProps; wsRoot: string }) {
+    const { note, wsRoot } = opts;
+
+    const custom = note.custom ? note.custom : undefined;
+
+    const wsConfig = new WorkspaceService({ wsRoot }).getWorkspaceConfig();
+    const timestampConfig: keyof typeof DateTime =
+      wsConfig.settings["dendron.defaultTimestampDecorationFormat"];
+    const formatOption = DateTime[timestampConfig] as DateTimeFormatOptions;
+    const created = DateTime.fromMillis(_.toInteger(note.created));
+    const updated = DateTime.fromMillis(_.toInteger(note.updated));
+
+    return {
+      ...custom,
+      id: note.id,
+      title: note.title,
+      created: created.toLocaleString(formatOption),
+      updated: updated.toLocaleString(formatOption),
+    };
+  }
+
   /**
    * Used for processing a Dendron markdown note
    */
@@ -243,6 +276,7 @@ export class MDUtilsV5 {
       .use(userTags)
       .use(extendedImage)
       .use(footnotes)
+      .use(variables)
       .data("errors", errors);
 
     // set options and do validation
@@ -271,6 +305,17 @@ export class MDUtilsV5 {
           }
           if (!data.wsRoot) {
             data.wsRoot = data.engine!.wsRoot;
+          }
+
+          const note = NoteUtils.getNoteByFnameV5({
+            fname: data.fname!,
+            notes: data.engine!.notes,
+            vault: data.vault!,
+            wsRoot: data.wsRoot,
+          }) as NoteProps;
+
+          if (!_.isUndefined(note)) {
+            proc = proc.data("fm", this.getFM({ note, wsRoot: data.wsRoot }));
           }
 
           // backwards compatibility, default to v4 values

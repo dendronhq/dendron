@@ -103,6 +103,12 @@
         "desc": "Go to a note"
       },
       {
+        "command": "dendron.createSchemaFromHierarchy",
+        "title": "Dendron: Create Schema From Note Hierarchy",
+        "desc": "Create Schema from existing note hierarchy",
+        "docLink": "dendron.topic.schema.create-from-hierarchy.md"
+      },
+      {
         "command": "dendron.createDailyJournalNote",
         "title": "Dendron: Create Daily Journal Note",
         "desc": "Create a global journal note",
@@ -725,6 +731,10 @@
         "command": "dendron.gotoNote",
         "key": "ctrl+enter",
         "when": "editorFocus"
+      },
+      {
+        "command": "dendron.createSchemaFromHierarchy",
+        "when": "editorFocus && dendron:pluginActive"
       },
       {
         "command": "dendron.createDailyJournalNote",

@@ -35,9 +35,6 @@ async function parseSchemas(
         include: ["*.schema.yml"],
       }) as string[];
 
-      console.log(`vpath`);
-      console.log(`Schema files: '${JSON.stringify(schemaFiles)}'`);
-
       payload = await parser.parse(schemaFiles, vault);
     },
     { expect, preSetupHook: preSetupHook }

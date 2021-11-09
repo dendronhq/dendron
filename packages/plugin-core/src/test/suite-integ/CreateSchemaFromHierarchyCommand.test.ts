@@ -217,7 +217,7 @@ schemas:
             .onFirstCall()
             .returns(Promise.resolve("happy"));
 
-          const actual = await UserQueries.haveUserPickSchemaFileName(
+          const actual = await UserQueries.promptUserForSchemaFileName(
             new HierarchyLevel(1, ["languages", "python", "data"]),
             vault
           );
@@ -236,7 +236,7 @@ schemas:
             .returns(Promise.resolve("inlined"))
             .returns(Promise.resolve("happy"));
 
-          const actual = await UserQueries.haveUserPickSchemaFileName(
+          const actual = await UserQueries.promptUserForSchemaFileName(
             TEST_HIERARCHY_LVL,
             vault
           );
@@ -255,7 +255,7 @@ schemas:
 
       it(`WHEN happy input THEN return user picked hierarchy level`, () => {
         runTestWithInlineSchemaSetup(async () => {
-          const actual = await UserQueries.haveUserSelectHierarchyLevel(
+          const actual = await UserQueries.promptUserToSelectHierarchyLevel(
             "/tmp/languages.python.data.md"
           );
 
@@ -265,7 +265,7 @@ schemas:
 
       it(`WHEN hierarchy depth of current file is too small THEN undefined`, () => {
         runTestWithInlineSchemaSetup(async () => {
-          const actual = await UserQueries.haveUserSelectHierarchyLevel(
+          const actual = await UserQueries.promptUserToSelectHierarchyLevel(
             "/tmp/languages.data.md"
           );
 
@@ -275,7 +275,7 @@ schemas:
 
       it(`WHEN top id is already used by existing schema THEN undefined`, () => {
         runTestWithInlineSchemaSetup(async () => {
-          const actual = await UserQueries.haveUserSelectHierarchyLevel(
+          const actual = await UserQueries.promptUserToSelectHierarchyLevel(
             "/tmp/daily.python.data.md"
           );
 

@@ -151,7 +151,7 @@ function getSchemaUri(vault: DVault, schemaName: string) {
  * asking user for input data.
  * */
 export class UserQueries {
-  static async haveUserPickSchemaFileName(
+  static async promptUserForSchemaFileName(
     hierarchyLevel: HierarchyLevel,
     vault: DVault
   ): Promise<string | undefined> {
@@ -172,7 +172,7 @@ export class UserQueries {
       alreadyExists = fs.existsSync(getSchemaUri(vault, schemaName).fsPath);
       if (alreadyExists) {
         vscode.window.showInformationMessage(
-          `Schema with name '${schemaName}' already exists. Pick a different name or cancel.`
+          `Schema with name '${schemaName}' already exists. Please choose a different name.`
         );
       }
     } while (alreadyExists);
@@ -180,14 +180,14 @@ export class UserQueries {
     return schemaName;
   }
 
-  static async haveUserSelectHierarchyLevel(currDocFsPath: string) {
+  static async promptUserToSelectHierarchyLevel(currDocFsPath: string) {
     const hierarchy = new Hierarchy(path.basename(currDocFsPath, ".md"));
 
     if (hierarchy.depth() <= 2) {
       // We require some depth to the hierarchy to be able to choose a variance
       // pattern within in it. More info within Hierarchy object.
       await vscode.window.showErrorMessage(
-        `Pick a note deeper within the note hierarchy.`
+        `Pick a note with note depth greater than 2.`
       );
 
       return undefined;
@@ -219,7 +219,7 @@ export class UserQueries {
     return hierarchyLevel;
   }
 
-  static haveUserPickPatternsFromCandidates(
+  static promptUserToPickPatternsFromCandidates(
     labeledCandidates: SchemaCandidate[]
   ): Promise<readonly SchemaCandidate[]> {
     return new Promise((resolve) => {
@@ -438,7 +438,7 @@ export class CreateSchemaFromHierarchyCommand extends BasicCommand<
     const vault = PluginVaultUtils.getVaultByNotePath({
       fsPath: currDocumentFSPath,
     });
-    const hierarchyLevel = await UserQueries.haveUserSelectHierarchyLevel(
+    const hierarchyLevel = await UserQueries.promptUserToSelectHierarchyLevel(
       currDocumentFSPath
     );
     if (hierarchyLevel === undefined) {
@@ -448,9 +448,9 @@ export class CreateSchemaFromHierarchyCommand extends BasicCommand<
 
     const candidates = this.getHierarchyCandidates(hierarchyLevel);
     const pickedCandidates =
-      await UserQueries.haveUserPickPatternsFromCandidates(candidates);
+      await UserQueries.promptUserToPickPatternsFromCandidates(candidates);
 
-    const schemaName = await UserQueries.haveUserPickSchemaFileName(
+    const schemaName = await UserQueries.promptUserForSchemaFileName(
       hierarchyLevel,
       vault
     );

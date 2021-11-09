@@ -17,6 +17,7 @@ import {
 } from "@dendronhq/engine-server";
 import { JSONSchemaType } from "ajv";
 import fs from "fs-extra";
+import { accesscontextmanager } from "googleapis/build/src/apis/accesscontextmanager";
 import _ from "lodash";
 import path from "path";
 import { URI } from "vscode-uri";
@@ -58,15 +59,29 @@ export const filterNav = ({
 }: Record<string, any>):
   | Pick<NoteProps, "id" | "title" | "children" | "custom">
   | undefined => {
-  if (!custom?.nav_bar) {
-    return undefined;
-  }
-
   return { id, title, children, custom };
 };
 
-export const filterNavItemsFromNotes = (notes: NotePropsDict) => {
-  return mapObject(notes, (_k, note: NotePropsDict) => filterNav(note));
+export const filterNavItemsFromNotes = (
+  notes: NotePropsDict,
+  domainsProps: NoteProps[]
+) => {
+  const notesObj = (obj: NoteProps[]) =>
+    obj.reduce((acc, curr) => {
+      const { id, title, children, custom } = curr;
+      acc[id] = { id, title, children, custom };
+
+      return acc;
+    }, {} as Partial<NotePropsDict>);
+
+  const domains = mapObject(notesObj(domainsProps), (_k, note: NotePropsDict) =>
+    filterNav(note)
+  );
+
+  const notesResult = mapObject(notes, (_k, note: NotePropsDict) =>
+    filterNav(note)
+  );
+  return { domains, notes: notesResult };
 };
 
 function getSiteConfig({
@@ -345,6 +360,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
 
   async plant(opts: NextjsExportPlantOpts) {
     const ctx = `${ID}:plant`;
+    console.log("planting ======>");
     const { dest, engine, wsRoot, config: podConfig } = opts;
 
     const podDstDir = path.join(dest.fsPath, "data");
@@ -381,7 +397,10 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
       vaults: engine.vaults,
     };
 
-    console.log("published notes => ", publishedNotes);
+    // console.log(
+    //   "published notes => ",
+    //   filterNavItemsFromNotes(publishedNotes, domains)
+    // );
 
     // render notes
     const notesBodyDir = path.join(podDstDir, "notes");
@@ -426,7 +445,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     fs.writeJSONSync(
       sectionsDstPath,
       {
-        sections: filterNavItemsFromNotes(payload.notes),
+        sections: filterNavItemsFromNotes(payload.notes, payload.domains),
       },
       { encoding: "utf-8", spaces: 2 }
     );

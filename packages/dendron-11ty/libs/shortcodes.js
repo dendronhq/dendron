@@ -121,20 +121,18 @@ async function toMarkdown2(contents, vault, fname) {
     engine,
     vault,
     fname,
-    config: config,
+    config,
     mermaid: config.mermaid,
     noteIndex,
   });
   const navHintElem = `<span id="navId" data="${navParent.id}"></span>`;
-  if (config.useNunjucks) {
-    contents = renderFromNoteProps({
-      fname,
-      vault,
-      wsRoot: engine.wsRoot,
-      notes: engine.notes,
-    });
-  }
-  let out = await proc.process(contents);
+  contents = renderFromNoteProps({
+    fname,
+    vault,
+    wsRoot: engine.wsRoot,
+    notes: engine.notes,
+  });
+  const out = await proc.process(contents);
   return out.contents + navHintElem;
 }
 

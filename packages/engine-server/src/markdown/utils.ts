@@ -20,7 +20,6 @@ import rehypePrism from "@mapbox/rehype-prism";
 import _ from "lodash";
 import { Heading } from "mdast";
 import { blockquote, paragraph, root, text } from "mdast-builder";
-import nunjucks from "nunjucks";
 import path from "path";
 import link from "rehype-autolink-headings";
 // @ts-ignore
@@ -62,7 +61,6 @@ import { userTags } from "./remark/userTags";
 import { extendedImage } from "./remark/extendedImage";
 
 const toString = require("mdast-util-to-string");
-export { nunjucks };
 
 type ProcOpts = {
   engine: DEngineClient;
@@ -117,19 +115,7 @@ export const renderFromNoteProps = (
 
 export const renderFromNote = (opts: { note: NoteProps }) => {
   const { note } = opts;
-  const contents = nunjucks.renderString(note.body, {
-    fm: { ...note.custom, title: note.title },
-    fname: note.fname,
-  });
-  return contents;
-};
-
-export const renderFromNoteWithCustomBody = (opts: {
-  note: NoteProps;
-  body: string;
-}) => {
-  const { note, body } = opts;
-  const contents = nunjucks.renderString(body, { fm: note.custom });
+  const contents = note.body;
   return contents;
 };
 
@@ -600,8 +586,8 @@ export class MDUtilsV4 {
 
 export class PublishUtils {
   static getAbsUrlForAsset(opts: {
-    suffix?: string; 
-    config: IntermediateDendronConfig 
+    suffix?: string;
+    config: IntermediateDendronConfig;
   }) {
     const suffix = opts.suffix || "";
     const { config } = opts;

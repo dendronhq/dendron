@@ -3,7 +3,6 @@ import {
   NoteTestUtilsV4,
   TestPresetEntryV4,
 } from "@dendronhq/common-test-utils";
-import { TestConfigUtils } from "../../config";
 import { ENGINE_HOOKS } from "./utils";
 
 const NOTES = {
@@ -75,15 +74,6 @@ const NOTES = {
     },
     {
       preSetupHook: async (opts) => {
-        TestConfigUtils.withConfig(
-          (config) => {
-            config.useNunjucks = true;
-            return config;
-          },
-          {
-            wsRoot: opts.wsRoot,
-          }
-        );
         return NoteTestUtilsV4.createNote({
           ...opts,
           fname: "fm",
@@ -93,11 +83,11 @@ const NOTES = {
             },
           },
           vault: opts.vaults[0],
-          body: "{{fm.foo}}\n\ntitle: {{fm.title}}"
-        })
+          body: "{{ fm.foo }}\n\ntitle: {{ fm.title }}",
+        });
       },
     }
-  )
+  ),
 };
 
 export const ENGINE_RENDER_PRESETS = {

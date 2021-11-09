@@ -120,6 +120,15 @@ const handleLink = async ({
 }) => {
   switch (linkType) {
     case LinkType.WIKI: {
+      // wiki links will have the following format
+      //
+      // with `prettyLinks` set to false
+      //    with anchor: vscode-webview://4e98b9cf-41d8-49eb-b458-fcfda32c6c01/foo.html'
+      //
+      // with `prettyLinks` set to true
+      //    with anchor: vscode-webview://4e98b9cf-41d8-49eb-b458-fcfda32c6c01/foo'
+      //    without anchor: vscode-webview://4e98b9cf-41d8-49eb-b458-fcfda32c6c01/foo#foobar'
+      //
       // TODO: should be error
       if (!data.href) return;
       const noteId = extractNoteIdFromHref(data);

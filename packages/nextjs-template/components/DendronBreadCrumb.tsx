@@ -14,8 +14,8 @@ import Link from "next/link";
 
 export function DendronBreadCrumb(props: { notes: SectionsData["notes"] }) {
   const { getActiveNoteId } = useDendronRouter();
-  // const { noteActive } = useNoteActive(getActiveNoteId());
   const noteActive = useMemo(() => getActiveNoteId(), [getActiveNoteId]);
+  // const { noteActive } = useNoteActive(getActiveNoteId());
   // no breadcrumb for home page
   // if (!verifyNoteData(props)) {
   //   return null;
@@ -28,11 +28,11 @@ export function DendronBreadCrumb(props: { notes: SectionsData["notes"] }) {
   //   return null;
   // }
 
-  console.log("NOTE ACTIVE =======>", noteActive);
   if (!noteActive) {
     return null;
   }
 
+  // TODO: noteActive should be an string always
   const noteParents = NoteUtils.getNoteWithParents({
     note: props.notes[noteActive] as NoteProps,
     notes: props.notes as NotePropsDict,

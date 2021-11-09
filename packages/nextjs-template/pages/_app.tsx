@@ -46,24 +46,22 @@ function DendronApp({ Component, pageProps }: AppProps) {
   useEffect(() => {
     (async () => {
       setLogLevel("INFO");
-      logger.info({ ctx: "fetchNotes:pre" });
+      // logger.info({ ctx: "fetchNotes:pre" });
       // Every time a new page is rendered this logic is executed.
       const data = await fetchSections();
-      logger.info({ ctx: "fetchNotes:got-data" });
-      console.log(data);
+      // logger.info({ ctx: "fetchNotes:got-data" });
       setNoteData(data);
       // batch(() => {
       //   dispatch(browserEngineSlice.actions.setNotes(data.notes));
       //   dispatch(browserEngineSlice.actions.setNoteIndex(data.noteIndex));
       // });
       const config = await fetchConfig();
-      logger.info({ ctx: "fetchConfig:got-data" });
-      dispatch(browserEngineSlice.actions.setConfig(config));
+      // logger.info({ ctx: "fetchConfig:got-data" });
+      // dispatch(browserEngineSlice.actions.setConfig(config));
     })();
   }, []);
 
   logger.info({ ctx: "render" });
-  console.log(noteData);
   if (!noteData) {
     return <span>loading</span>;
   }

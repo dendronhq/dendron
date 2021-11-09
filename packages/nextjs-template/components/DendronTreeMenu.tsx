@@ -1,6 +1,6 @@
 import { DownOutlined, RightOutlined, UpOutlined } from "@ant-design/icons";
 import { root } from "@chakra-ui/color-mode/dist/types/color-mode.utils";
-import { NoteProps, NotePropsDict } from "@dendronhq/common-all";
+import { NoteProps, NotePropsDict, NoteUtils } from "@dendronhq/common-all";
 import { createLogger, TreeViewUtils } from "@dendronhq/common-frontend";
 import { Menu, Typography } from "antd";
 import _ from "lodash";
@@ -58,21 +58,11 @@ export default function DendronTreeMenu(
 
   const expandKeys = _.isEmpty(activeNoteIds) ? [] : activeNoteIds;
 
-  // --- Calc
-  // const roots = notes.domains.map((note) => {
-  //   return TreeViewUtils.note2TreeDatanote({
-  //     noteId: note.id,
-  //     noteDict: notes,
-  //     showVaultName: false,
-  //     applyNavExclude: true,
-  //   });
-  // }) as DataNode[];
-
   // --- Methods
   const onSelect = (noteId: string) => {
     setCollapsed(true);
     logger.info({ ctx: "onSelect", id: noteId });
-    // changeActiveNote(noteId);
+    changeActiveNote(noteId);
   };
 
   // const onExpand = (noteId: string) => {
@@ -133,24 +123,33 @@ function MenuView({
   collapsed: boolean;
   activeNote: string | undefined;
 }) {
-  
-  // const ExpandIcon = useCallback(
-  //   ({ isOpen, ...rest }: { isOpen: boolean }) => {
-  //     const UncollapsedIcon = isOpen ? UpOutlined : DownOutlined;
-  //     const Icon = collapsed ? RightOutlined : UncollapsedIcon;
-  //     return (
-  //       <i data-expandedicon="true">
-  //         <Icon
-  //           style={{
-  //             pointerEvents: "none", // only allow custom element to be gesture target
-  //             margin: 0,
-  //           }}
-  //         />
-  //       </i>
-  //     );
-  //   },
-  //   [collapsed]
-  // );
+  const [current, setCurrent] = useState<string[]>([""]);
+  const { getActiveNoteId } = useDendronRouter();
+  const noteActive = useMemo(() => getActiveNoteId(), [getActiveNoteId]);
+
+  useEffect(() => {
+    if (noteActive) {
+      setCurrent([noteActive]);
+    }
+  }, []);
+  const ExpandIcon = useCallback(
+    // eslint-disable-next-line react/no-unused-prop-types
+    ({ isOpen }: { isOpen: boolean }) => {
+      const UncollapsedIcon = isOpen ? UpOutlined : DownOutlined;
+      const Icon = collapsed ? RightOutlined : UncollapsedIcon;
+      return (
+        <i data-expandedicon="true">
+          <Icon
+            style={{
+              pointerEvents: "none", // only allow custom element to be gesture target
+              margin: 0,
+            }}
+          />
+        </i>
+      );
+    },
+    [collapsed]
+  );
 
   const createMenu = useMemo(
     () => (menu: Partial<NoteProps>) => {
@@ -192,7 +191,7 @@ function MenuView({
             style={{ width: "100%" }}
             ellipsis={{ tooltip: menu.title }}
           >
-            <Link href={`/notes/${menu.id}`}>{menu.title}</Link>
+            {menu.title}
           </Typography.Text>
         </Menu.Item>
       );
@@ -204,6 +203,20 @@ function MenuView({
   //   expandKeys.push(activeNote);
   // }
 
+  const noteParents = useCallback(
+    () =>
+      NoteUtils.getNoteWithParents({
+        note: submenu[noteActive as string] as NoteProps,
+        notes: submenu as NotePropsDict,
+      }),
+    [noteActive, submenu]
+  );
+
+  const parentsArray = useMemo(
+    () => noteParents().map((parents) => parents.id),
+    [noteParents]
+  );
+
   return (
     <Menu
       key={String(collapsed)}
@@ -212,10 +225,14 @@ function MenuView({
       // {...(!collapsed && {
       //   openKeys: expandKeys,
       // })}
-      // selectedKeys={[current]}
-      onClick={({ key }) => onSelect(key)}
+      selectedKeys={current}
+      defaultOpenKeys={parentsArray}
+      onClick={({ key }) => {
+        setCurrent([key]);
+        onSelect(key);
+      }}
       inlineIndent={DENDRON_STYLE_CONSTANTS.SIDER.INDENT}
-      // expandIcon={ExpandIcon}
+      expandIcon={ExpandIcon}
       // inlineCollapsed
     >
       {roots.map((menu) => {

@@ -14,10 +14,10 @@ export function useDendronRouter() {
   const router = useRouter();
   const query = getNoteRouterQuery(router);
   const changeActiveNote = (id: string) => {
-    // if (id === opts?.noteIndex.id) {
-    //   return router.push(`/`);
-    // }
-    console.log("entra al id", id);
+    // TODO: Adjust the index here
+    if (id === "b0fe6ef7-1553-4280-bc45-a71824c2ce36") {
+      return router.push(`/`);
+    }
     router.push(`/notes/${id}`);
   };
 

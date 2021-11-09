@@ -1,6 +1,6 @@
 import {
   DendronWebViewKey,
-  DMessageType,
+  DMessageEnum,
   SeedBrowserMessage,
   SeedBrowserMessageType,
 } from "@dendronhq/common-all";
@@ -74,7 +74,7 @@ export class SeedBrowseCommand extends SeedCommandBase<
           vscode.env.openExternal(vscode.Uri.parse(msg.data.data));
           break;
         }
-        case DMessageType.MESSAGE_DISPATCHER_READY: {
+        case DMessageEnum.MESSAGE_DISPATCHER_READY: {
           this.postSeedStateToWebview();
           break;
         }

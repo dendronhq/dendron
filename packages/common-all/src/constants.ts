@@ -7,8 +7,8 @@ export {
 const ROOT_PATH = "/doc/root";
 
 export enum ThemeType {
-  LIGHT = "LIGHT",
-  DARK = "DARK",
+  LIGHT = "light",
+  DARK = "dark",
 }
 
 export enum ThemeTarget {

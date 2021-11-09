@@ -19,3 +19,21 @@ $spacing-unit: 30px !default;
 $text-color: #111 !default;
 // Portal end
 @import "portal.scss";
+
+// TODO_START: hardcoded
+.vscode-light {
+	table,
+	td,
+	th {
+		border: 1px solid black; padding:10px;
+	}
+}
+
+.vscode-dark{
+	table,
+	td,
+	th {
+		border: 1px solid white; padding:10px;
+	}
+}
+// TODO_END

@@ -43,7 +43,7 @@ export enum ExtensionTarget {
 const LOCAL_NPM_ENDPOINT = "http://localhost:4873";
 const REMOTE_NPM_ENDPOINT = "https://registry.npmjs.org";
 
-const $ = (cmd: string, opts?: any) => {
+const $ = (cmd: string, opts?: execa.CommonOptions<any>) => {
   return execa.commandSync(cmd, { shell: true, ...opts });
 };
 const $$ = (cmd: string, opts?: any) => {
@@ -98,6 +98,10 @@ export class BuildUtils {
     return path.join(this.getLernaRoot(), "packages", "plugin-core");
   }
 
+  static getPluginViewsRootPath() {
+    return path.join(this.getLernaRoot(), "packages", "dendron-plugin-views");
+  }
+
   static getNextServerRootPath() {
     return path.join(this.getLernaRoot(), "packages", "dendron-next-server");
   }
@@ -130,9 +134,14 @@ export class BuildUtils {
 
   static buildNextServer() {
     const root = this.getNextServerRootPath();
-    $(`yarn  --ignore-lockfile`, { cwd: root });
-    $(`yarn build`, { cwd: root });
-    $(`yarn gen:theme`, { cwd: root });
+    $(`yarn`, { cwd: root });
+    $(`yarn setup`, { cwd: root });
+    $(`yarn build:prod`, { cwd: root });
+  }
+
+  static buildPluginViews() {
+    const root = this.getPluginViewsRootPath();
+    $(`yarn build:prod`, { cwd: root });
   }
 
   static bump11ty(opts: { currentVersion: string; nextVersion: string }) {
@@ -168,9 +177,16 @@ export class BuildUtils {
     ]);
   }
 
-  static packagePluginDependencies() {
+  /**
+   * @param param0
+   * @returns
+   */
+  static packagePluginDependencies({ fast }: { fast?: boolean }) {
     $(`yarn build:prod`, { cwd: this.getPluginRootPath() });
-    return $(`vsce package --yarn`, { cwd: this.getPluginRootPath() });
+    return $(`vsce package --yarn`, {
+      cwd: this.getPluginRootPath(),
+      env: fast ? { SKIP_SENTRY: "true" } : {},
+    });
   }
 
   static async prepPluginPkg(
@@ -310,11 +326,20 @@ export class BuildUtils {
     return subprocess;
   }
 
+  /**
+   * Migrate assets from next-server, plugin-views, and api-server to plugin-core
+   * @returns 
+   */
   static async syncStaticAssets() {
     const pluginAssetPath = path.join(this.getPluginRootPath(), "assets");
     const pluginStaticPath = path.join(pluginAssetPath, "static");
     const apiRoot = path.join(this.getLernaRoot(), "packages", "api-server");
     const nextServerRoot = this.getNextServerRootPath();
+    const pluginViewsRoot = path.join(
+      this.getLernaRoot(),
+      "packages",
+      "dendron-plugin-views"
+    );
 
     fs.ensureDirSync(pluginStaticPath);
     fs.emptyDirSync(pluginStaticPath);
@@ -325,6 +350,16 @@ export class BuildUtils {
       path.join(pluginStaticPath, "js")
     );
     fs.copySync(path.join(apiRoot, "assets", "static"), pluginStaticPath);
+
+    // plugin view assets
+    fs.copySync(
+      path.join(pluginViewsRoot, "build", "static", "css"),
+      path.join(pluginStaticPath, "css")
+    );
+    fs.copySync(
+      path.join(pluginViewsRoot, "build", "static", "js"),
+      path.join(pluginStaticPath, "js")
+    );
     return { staticPath: pluginStaticPath };
   }
 

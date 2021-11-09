@@ -1,7 +1,7 @@
 {
   "name": "@dendronhq/dendron-next-server",
   "private": true,
-  "version": "0.67.2",
+  "version": "0.67.3-alpha.3",
   "license": "GPLv3",
   "repository": {
     "type": "git",
@@ -16,7 +16,7 @@
     "dev": "next dev",
     "prod": "env STAGE=prod next dev",
     "watch": "echo 0",
-    "build": "yarn build:prod && yarn gen:theme",
+    "build": "yarn setup && yarn build:dev",
     "build:dev": "cross-env CDN_BUILD=1 STAGE=dev next build && next export",
     "build:prod": "cross-env CDN_BUILD=1 STAGE=prod next build && next export",
     "start": "next start",
@@ -25,7 +25,9 @@
     "deploy:prod": "env STAGE=prod amplify publish",
     "gen:theme": "gulp less",
     "build:js": "gulp js",
-    "format": "echo nop"
+    "format": "echo nop",
+    "clean": "yarn rimraf public/*.css public/js  out",
+    "rimraf": "npx rimraf"
   },
   "nohoist": [
     "**/common-all",
@@ -34,9 +36,9 @@
   "dependencies": {
     "@ant-design/icons": "^4.6.2",
     "@chakra-ui/react": "^1.0.0",
-    "@dendronhq/common-all": "^0.67.2",
-    "@dendronhq/common-frontend": "^0.67.2",
-    "@dendronhq/engine-server": "^0.67.2",
+    "@dendronhq/common-all": "^0.67.3-alpha.3",
+    "@dendronhq/common-frontend": "^0.67.3-alpha.3",
+    "@dendronhq/engine-server": "^0.67.3-alpha.3",
     "@emotion/react": "^11.1.1",
     "@emotion/styled": "^11.0.0",
     "@next/bundle-analyzer": "^11.1.2",
@@ -84,6 +86,7 @@
     "gulp-less": "^4.0.1",
     "gulp-postcss": "^9.0.0",
     "less-plugin-npm-import": "^2.1.0",
-    "nodemon": "^2.0.4"
+    "nodemon": "^2.0.4",
+    "rimraf": "^3.0.2"
   }
 }

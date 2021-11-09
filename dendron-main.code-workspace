@@ -94,6 +94,13 @@
             "editor.defaultFormatter": "esbenp.prettier-vscode"
         },
         "editor.tabSize": 2,
+        "dendron.rootDir": ".",
+        "files.autoSave": "onFocusChange",
+        "pasteImage.path": "${currentFileDir}/assets/images",
+        "pasteImage.prefix": "/",
+        "editor.suggest.snippetsPreventQuickSuggestions": false,
+        "editor.suggest.showSnippets": true,
+        "editor.tabCompletion": "on",
     },
     "extensions": {
         "recommendations": [

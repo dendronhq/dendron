@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/common-server",
-  "version": "0.67.3-alpha.3",
+  "version": "0.68.0",
   "description": "common-server",
   "license": "GPLv3",
   "repository": {
@@ -36,7 +36,7 @@
     "test:watch": "echo nop"
   },
   "dependencies": {
-    "@dendronhq/common-all": "^0.67.3-alpha.3",
+    "@dendronhq/common-all": "^0.68.0",
     "@sentry/integrations": "^6.13.3",
     "@sentry/node": "^6.13.3",
     "@types/analytics-node": "^3.1.6",
@@ -50,9 +50,9 @@
     "@types/pino": "^6.3.0",
     "@types/spark-md5": "^3.0.2",
     "@types/tmp": "^0.2.0",
-    "analytics-node": "^5.1.0",
     "ajv": "^8.6.0",
     "ajv-errors": "^3.0.0",
+    "analytics-node": "^5.1.0",
     "comment-json": "^4.1.0",
     "execa": "^5.0.0",
     "fs-extra": "^9.0.1",

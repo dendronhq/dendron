@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.68.0](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.68.0) (2021-11-09)
+
+
+### Features Dendron
+
+* **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
+
+
+
+
+
 ## [0.67.3-alpha.3](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.67.3-alpha.3) (2021-11-09)
 
 **Note:** Version bump only for package @dendronhq/dendron-plugin-views

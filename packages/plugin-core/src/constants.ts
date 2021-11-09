@@ -87,7 +87,8 @@ type CommandEntry = {
     | "navigation"
     | "misc"
     | "publishing"
-    | "seeds";
+    | "seeds"
+    | "schemas";
   /**
    * Skip doc generation
    */
@@ -213,6 +214,16 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
       key: "ctrl+enter",
       when: "editorFocus",
     },
+  },
+  CREATE_SCHEMA_FROM_HIERARCHY: {
+    key: "dendron.createSchemaFromHierarchy",
+    title: `${CMD_PREFIX} Create Schema From Note Hierarchy`,
+    group: "schemas",
+    keybindings: {
+      when: `editorFocus && ${DendronContext.PLUGIN_ACTIVE}`,
+    },
+    desc: "Create Schema from existing note hierarchy",
+    docLink: "dendron.topic.schema.create-from-hierarchy.md",
   },
   CREATE_DAILY_JOURNAL_NOTE: {
     key: "dendron.createDailyJournalNote",

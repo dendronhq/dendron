@@ -1,6 +1,6 @@
 import _ from "lodash";
 import { Logger } from "../logger";
-import vscode from "vscode";
+import vscode, { Uri } from "vscode";
 import { SchemaParser } from "@dendronhq/engine-server";
 import { getDWorkspace, getVaultFromUri } from "../workspace";
 import path from "path";
@@ -18,16 +18,27 @@ export class SchemaSyncService {
   }
 
   async onDidSave({ document }: { document: vscode.TextDocument }) {
+    const uri = document.uri;
+
     Logger.info({
       ctx: "SchemaSyncService:onDidChange",
       msg: "updating schema.",
     });
 
+    await this.saveSchema({ uri });
+  }
+
+  async saveSchema({
+    uri,
+    isBrandNewFile,
+  }: {
+    uri: Uri;
+    isBrandNewFile?: boolean;
+  }) {
     const schemaParser = new SchemaParser({
       wsRoot: getDWorkspace().wsRoot,
       logger: Logger,
     });
-    const uri = document.uri;
     const engineClient = getDWorkspace().engine;
 
     const parsedSchema = await schemaParser.parse(
@@ -43,7 +54,9 @@ export class SchemaSyncService {
       );
 
       vscode.window.showInformationMessage(
-        `Updated schemas in '${path.basename(document.fileName)}'`
+        `${isBrandNewFile ? "Created" : "Updated"} schemas in '${path.basename(
+          uri.fsPath
+        )}'`
       );
     } else {
       // TODO: will need 2nd pass once https://github.com/dendronhq/dendron/pull/1631 is merged
@@ -51,7 +64,7 @@ export class SchemaSyncService {
       // error, which is still could be helpful to the user but it will not be formatted very nice.
       vscode.window.showErrorMessage(
         `Failed to update '${path.basename(
-          document.fileName
+          uri.fsPath
         )}'. Details: '${JSON.stringify(parsedSchema.errors)}'`
       );
     }

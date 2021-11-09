@@ -17,7 +17,6 @@ import {
 } from "@dendronhq/engine-server";
 import { JSONSchemaType } from "ajv";
 import fs from "fs-extra";
-import { accesscontextmanager } from "googleapis/build/src/apis/accesscontextmanager";
 import _ from "lodash";
 import path from "path";
 import { URI } from "vscode-uri";
@@ -56,10 +55,11 @@ export const filterNav = ({
   title,
   children,
   custom,
+  parent,
 }: Record<string, any>):
-  | Pick<NoteProps, "id" | "title" | "children" | "custom">
+  | Pick<NoteProps, "id" | "title" | "children" | "custom" | "parent">
   | undefined => {
-  return { id, title, children, custom };
+  return { id, title, children, custom, parent };
 };
 
 export const filterNavItemsFromNotes = (
@@ -68,8 +68,8 @@ export const filterNavItemsFromNotes = (
 ) => {
   const notesObj = (obj: NoteProps[]) =>
     obj.reduce((acc, curr) => {
-      const { id, title, children, custom } = curr;
-      acc[id] = { id, title, children, custom };
+      const { id, title, children, custom, parent } = curr;
+      acc[id] = { id, title, children, custom, parent };
 
       return acc;
     }, {} as Partial<NotePropsDict>);
@@ -445,7 +445,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     fs.writeJSONSync(
       sectionsDstPath,
       {
-        sections: filterNavItemsFromNotes(payload.notes, payload.domains),
+        ...filterNavItemsFromNotes(payload.notes, payload.domains),
       },
       { encoding: "utf-8", spaces: 2 }
     );

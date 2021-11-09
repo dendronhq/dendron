@@ -9,7 +9,7 @@ export function DendronCollectionItem(props: {
   noteIndex: NoteProps;
 }) {
   const { note, noteIndex } = props;
-  const href = getNoteUrl({ note, noteIndex });
+  const href = getNoteUrl({ note, id: noteIndex.id });
   let publishedDate: string | undefined;
   try {
     publishedDate = _.get(note, "custom.date", false)

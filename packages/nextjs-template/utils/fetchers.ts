@@ -1,14 +1,19 @@
 import {
   IntermediateDendronConfig,
-  SerializedFuseIndex
+  SerializedFuseIndex,
 } from "@dendronhq/common-all";
 import { getAssetUrl } from "./links";
-import { NoteData } from "./types";
+import { NoteData, SectionsData } from "./types";
 import Fuse from "fuse.js";
 
 export async function fetchNotes() {
   const resp = await fetch(getAssetUrl("/data/notes.json"));
   return (await resp.json()) as NoteData;
+}
+
+export async function fetchSections() {
+  const resp = await fetch(getAssetUrl("/data/sections.json"));
+  return (await resp.json()) as SectionsData;
 }
 
 export async function fetchConfig() {

@@ -13,10 +13,11 @@ export type DendronRouterProps = ReturnType<typeof useDendronRouter>;
 export function useDendronRouter() {
   const router = useRouter();
   const query = getNoteRouterQuery(router);
-  const changeActiveNote = (id: string, opts: { noteIndex: NoteProps }) => {
-    if (id === opts.noteIndex.id) {
-      return router.push(`/`);
-    }
+  const changeActiveNote = (id: string) => {
+    // if (id === opts?.noteIndex.id) {
+    //   return router.push(`/`);
+    // }
+    console.log("entra al id", id);
     router.push(`/notes/${id}`);
   };
 
@@ -31,6 +32,7 @@ export function useDendronRouter() {
 
   const getActiveNoteId = () => {
     // assume home page
+    console.log("query id ", query.id);
     if (!router.asPath.startsWith("/notes")) {
       return "root";
     } else {
@@ -52,8 +54,9 @@ export function useDendronRouter() {
  * @param setNoteIndex
  */
 export function useDendronLookup() {
-  const [noteIndex, setNoteIndex] =
-    React.useState<FuseEngine | undefined>(undefined);
+  const [noteIndex, setNoteIndex] = React.useState<FuseEngine | undefined>(
+    undefined
+  );
   React.useEffect(() => {
     fetchNotes().then(async (noteData) => {
       const { notes } = noteData;

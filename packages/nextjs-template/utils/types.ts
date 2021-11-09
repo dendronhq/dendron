@@ -1,8 +1,4 @@
-import {
-  DVault,
-  NoteProps,
-  NotePropsDict,
-} from "@dendronhq/common-all";
+import { DVault, NoteProps, NotePropsDict } from "@dendronhq/common-all";
 import _ from "lodash";
 import { DendronRouterProps } from "./hooks";
 
@@ -11,6 +7,15 @@ declare global {
     CommandBar: any;
   }
 }
+
+export type SectionsData = {
+  domains: {
+    [key: string]: Pick<NoteProps, "children" | "title" | "id" | "custom">;
+  };
+  notes: {
+    [key: string]: Pick<NoteProps, "children" | "title" | "id" | "custom" | "parent">;
+  };
+};
 
 export type NoteData = {
   /**
@@ -38,8 +43,8 @@ export type DendronCommonProps = Partial<NoteData> & {
 export type DendronPageWithNoteDataProps = NoteData & DendronCommonProps;
 
 export function verifyNoteData(
-  noteData: Partial<NoteData>
-): noteData is NoteData {
+  noteData: NotePropsDict
+): noteData is NotePropsDict {
   const { notes } = noteData;
   return !(_.isUndefined(notes) || _.isEmpty(notes) || _.isUndefined(notes));
 }

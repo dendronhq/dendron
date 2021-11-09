@@ -2,6 +2,7 @@ import {
   NoteIndexProps,
   NoteLookupUtils,
   NoteProps,
+  NotePropsDict,
 } from "@dendronhq/common-all";
 import { LoadingStatus } from "@dendronhq/common-frontend";
 import { AutoComplete, Alert, Row, Col, Typography } from "antd";
@@ -13,10 +14,16 @@ import type Fuse from "fuse.js";
 import {
   DendronCommonProps,
   DendronPageWithNoteDataProps,
+  SectionsData,
   verifyNoteData,
 } from "../utils/types";
 import DendronSpinner from "./DendronSpinner";
-import { useDendronLookup, useNoteActive, useNoteBodies } from "../utils/hooks";
+import {
+  useDendronLookup,
+  useDendronRouter,
+  useNoteActive,
+  useNoteBodies,
+} from "../utils/hooks";
 import FileTextOutlined from "@ant-design/icons/lib/icons/FileTextOutlined";
 import _ from "lodash";
 
@@ -29,10 +36,10 @@ const OMITTED_PART_TEXT = " ... ";
 /** How long to wait for before triggering fuse search, in ms. Required for performance reasons since fuse search is expensive. */
 const SEARCH_DELAY = 300;
 
-export function DendronSearch(props: DendronCommonProps) {
-  if (!verifyNoteData(props)) {
-    return <DendronSpinner />;
-  }
+export function DendronSearch(props: { notes: SectionsData["notes"] }) {
+  // if (!verifyNoteData(props)) {
+  //   return <DendronSpinner />;
+  // }
 
   return <DebouncedDendronSearchComponent {...props} />;
 }
@@ -42,10 +49,12 @@ type SearchFunction = (
   setResults: (results: SearchResults) => void
 ) => void;
 
-function DebouncedDendronSearchComponent(props: DendronPageWithNoteDataProps) {
+function DebouncedDendronSearchComponent(props: {
+  notes: SectionsData["notes"];
+}) {
   // Splitting this part from DendronSearchComponent so that the debounced
   // function doesn't get reset every time value changes.
-  const results = useFetchFuse(props.notes);
+  const results = useFetchFuse(props.notes as NotePropsDict);
   const { fuse } = results;
   // debounce returns stale results until the timeout runs out, which means
   // search would always show stale results. Having the debounced function set
@@ -76,15 +85,15 @@ enum SearchMode {
 }
 
 function DendronSearchComponent(
-  props: DendronPageWithNoteDataProps & SearchProps
+  props: { notes: SectionsData["notes"] } & SearchProps
 ) {
-  const { noteIndex, dendronRouter, search, error, loading, notes } = props;
-
+  const { search, error, loading, notes } = props;
   const [searchResults, setSearchResults] =
     React.useState<SearchResults>(undefined);
   const [lookupResults, setLookupResults] = React.useState<NoteIndexProps[]>(
     []
   );
+  const dendronRouter = useDendronRouter();
   const [results, setResults] = React.useState<SearchMode>();
   const dispatch = useCombinedDispatch();
   const { noteBodies, requestNotes } = useNoteBodies();
@@ -117,7 +126,7 @@ function DendronSearchComponent(
     }
     const out =
       qs === ""
-        ? NoteLookupUtils.fetchRootResults(notes)
+        ? NoteLookupUtils.fetchRootResults(notes as NotePropsDict)
         : lookup?.queryNote({ qs });
     setLookupResults(_.isUndefined(out) ? [] : out);
   };
@@ -158,7 +167,7 @@ function DendronSearchComponent(
       }
       onSelect={(_selection, option) => {
         const id = option.key?.toString()!;
-        dendronRouter.changeActiveNote(id, { noteIndex });
+        dendronRouter.changeActiveNote(id);
         dispatch(
           browserEngineSlice.actions.setLoadingStatus(LoadingStatus.PENDING)
         );

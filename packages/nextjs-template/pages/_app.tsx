@@ -1,3 +1,4 @@
+import { NotePropsDict } from "@dendronhq/common-all";
 import {
   batch,
   createLogger,
@@ -14,10 +15,10 @@ import { combinedStore, useCombinedDispatch } from "../features";
 import { browserEngineSlice } from "../features/engine";
 import "../public/light-theme.css";
 import "../styles/scss/main.scss";
-import { fetchConfig, fetchNotes } from "../utils/fetchers";
+import { fetchConfig, fetchNotes, fetchSections } from "../utils/fetchers";
 import { useDendronRouter } from "../utils/hooks";
 import { getAssetUrl } from "../utils/links";
-import { NoteData } from "../utils/types";
+import { NoteData, SectionsData } from "../utils/types";
 
 const themes = {
   dark: getAssetUrl(`/dark-theme.css`),
@@ -36,7 +37,7 @@ function AppContainer(appProps: AppProps) {
 }
 
 function DendronApp({ Component, pageProps }: AppProps) {
-  const [noteData, setNoteData] = useState<NoteData>();
+  const [noteData, setNoteData] = useState<SectionsData>();
   const logger = createLogger("App");
   const dendronRouter = useDendronRouter();
   const dispatch = useCombinedDispatch();
@@ -46,13 +47,15 @@ function DendronApp({ Component, pageProps }: AppProps) {
     (async () => {
       setLogLevel("INFO");
       logger.info({ ctx: "fetchNotes:pre" });
-      const data = await fetchNotes();
+      // Every time a new page is rendered this logic is executed.
+      const data = await fetchSections();
       logger.info({ ctx: "fetchNotes:got-data" });
+      console.log(data);
       setNoteData(data);
-      batch(() => {
-        dispatch(browserEngineSlice.actions.setNotes(data.notes));
-        dispatch(browserEngineSlice.actions.setNoteIndex(data.noteIndex));
-      });
+      // batch(() => {
+      //   dispatch(browserEngineSlice.actions.setNotes(data.notes));
+      //   dispatch(browserEngineSlice.actions.setNoteIndex(data.noteIndex));
+      // });
       const config = await fetchConfig();
       logger.info({ ctx: "fetchConfig:got-data" });
       dispatch(browserEngineSlice.actions.setConfig(config));
@@ -60,9 +63,12 @@ function DendronApp({ Component, pageProps }: AppProps) {
   }, []);
 
   logger.info({ ctx: "render" });
-
+  console.log(noteData);
+  if (!noteData) {
+    return <span>loading</span>;
+  }
   return (
-    <DendronLayout {...noteData} dendronRouter={dendronRouter}>
+    <DendronLayout notes={noteData}>
       <Component
         {...pageProps}
         notes={noteData}

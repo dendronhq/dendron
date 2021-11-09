@@ -2,7 +2,7 @@ import { Layout, Row, Col, Divider } from "antd";
 import { MenuOutlined } from "@ant-design/icons";
 import * as React from "react";
 import { DENDRON_STYLE_CONSTANTS } from "../styles/constants";
-import { DendronCommonProps } from "../utils/types";
+import { DendronCommonProps, SectionsData } from "../utils/types";
 import { DendronBreadCrumb } from "./DendronBreadCrumb";
 import DendronLogoOrTitle from "./DendronLogoOrTitle";
 import { FooterText } from "./DendronNoteFooter";
@@ -12,15 +12,27 @@ import Script from "next/script";
 import { useEngineAppSelector } from "../features/engine/hooks";
 import DendronNotice from "./DendronNotice";
 import { getStage } from "@dendronhq/common-all";
+import { useMemo } from "react";
 
 const { Header, Content, Sider, Footer } = Layout;
 const { LAYOUT, HEADER, SIDER } = DENDRON_STYLE_CONSTANTS;
 
 export default function DendronLayout(
-  props: React.PropsWithChildren<DendronCommonProps>
+  props: React.PropsWithChildren<{ notes: SectionsData }>
 ) {
   const [isCollapsed, setCollapsed] = React.useState(false);
   const [isResponsive, setResponsive] = React.useState(false);
+
+  const menu = useMemo(
+    () => (
+      <DendronTreeMenu
+        notes={props.notes}
+        collapsed={isCollapsed && isResponsive}
+        setCollapsed={setCollapsed}
+      />
+    ),
+    [isCollapsed, isResponsive, props.notes]
+  );
 
   const sidebar = (
     <Sider
@@ -42,16 +54,10 @@ export default function DendronLayout(
       }}
       trigger={null}
     >
-      {isResponsive && (
-        <div style={{ padding: 16 }}>
-          <DendronSearch {...props} />
-        </div>
-      )}
-      <DendronTreeMenu
-        {...props}
-        collapsed={isCollapsed && isResponsive}
-        setCollapsed={setCollapsed}
-      />
+      {/* {isResponsive && (
+        <div style={{ padding: 16 }}><DendronSearch {...props} /></div>
+      )} */}
+      {props.notes && menu}
     </Sider>
   );
 
@@ -62,7 +68,7 @@ export default function DendronLayout(
         role="main"
         style={{ padding: `0 ${LAYOUT.PADDING}px` }}
       >
-        <DendronBreadCrumb {...props} />
+        <DendronBreadCrumb notes={props.notes.notes} />
         {props.children}
       </Content>
       <Divider />
@@ -118,7 +124,7 @@ export default function DendronLayout(
             <DendronLogoOrTitle />
           </Col>
           <Col xs={0} sm={20} md={20} lg={19} className="gutter-row">
-            <DendronSearch {...props} />
+            <DendronSearch notes={props.notes.notes} />
           </Col>
           <Col
             xs={4}

@@ -17,6 +17,7 @@ import {
 } from "@dendronhq/engine-server";
 import { JSONSchemaType } from "ajv";
 import fs from "fs-extra";
+import { accesscontextmanager } from "googleapis/build/src/apis/accesscontextmanager";
 import _ from "lodash";
 import path from "path";
 import { URI } from "vscode-uri";

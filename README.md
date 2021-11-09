@@ -1,7 +1,7 @@
 ![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/logo-256.png)
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-87-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-88-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 # Welcome to Dendron!
@@ -173,6 +173,7 @@ Dendron wouldn't be what it is today without help from these wonderful gardeners
     <td align="center"><a href="https://github.com/ragamroll"><img src="https://avatars.githubusercontent.com/u/3618625?v=4?s=100" width="100px;" alt=""/><br /><sub><b>ragamroll</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Aragamroll" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/voothi"><img src="https://avatars.githubusercontent.com/u/9587340?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Denis Novikov</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Avoothi" title="Bug reports">🐛</a> <a href="#content-voothi" title="Content">🖋</a></td>
     <td align="center"><a href="https://github.com/mhijazi1"><img src="https://avatars.githubusercontent.com/u/5711555?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Mo</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Amhijazi1" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://github.com/cconrad"><img src="https://avatars.githubusercontent.com/u/584491?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Claus Conrad</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Acconrad" title="Bug reports">🐛</a></td>
   </tr>
 </table>
 

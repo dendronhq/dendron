@@ -148,13 +148,24 @@ export class FileStorage implements DStore {
   }
 
   static createMalformedSchemaError(resp: DEngineInitSchemaResp) {
-    let filePath = USER_MESSAGES.UNKNOWN;
+    let fileName = USER_MESSAGES.UNKNOWN;
     try {
       if (resp.error && resp.error.payload) {
-        filePath = JSON.parse(JSON.parse(resp.error.payload)[0].payload).fpath;
+        fileName = JSON.parse(JSON.parse(resp.error.payload)[0].payload).fpath;
       }
     } catch (parseErr) {
-      filePath = USER_MESSAGES.UNKNOWN;
+      fileName = USER_MESSAGES.UNKNOWN;
+    }
+
+    let fullPath = undefined;
+    try {
+      if (resp.error && resp.error.payload) {
+        fullPath = JSON.parse(
+          JSON.parse(resp.error.payload)[0].payload
+        ).fullPath;
+      }
+    } catch (parseErr) {
+      fullPath = undefined;
     }
 
     let reason = USER_MESSAGES.UNKNOWN;
@@ -167,9 +178,9 @@ export class FileStorage implements DStore {
     }
 
     return new DendronError({
-      message: `Schema '${filePath}' is malformed. Reason: ${reason}. Use 'Go to File...' command to resolve malformed schema.`,
+      message: `Schema '${fileName}' is malformed. Reason: ${reason}`,
       severity: ERROR_SEVERITY.MINOR,
-      payload: { schema: resp.error },
+      payload: { schema: resp.error, fullPath },
     });
   }
 
@@ -300,12 +311,14 @@ export class FileStorage implements DStore {
       { data: [], errors: [] }
     );
     const { data, errors } = _out;
-    return {
+
+    const result = {
       data,
       error: _.isEmpty(errors)
         ? null
         : new DendronError({ message: "multiple errors", payload: errors }),
     };
+    return result;
   }
 
   async _initSchema(

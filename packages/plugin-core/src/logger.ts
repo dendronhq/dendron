@@ -3,8 +3,15 @@ import { createLogger } from "@dendronhq/common-server";
 import * as Sentry from "@sentry/node";
 import fs from "fs-extra";
 import path from "path";
-import { ExtensionContext, OutputChannel, window, workspace } from "vscode";
+import {
+  ExtensionContext,
+  OutputChannel,
+  Uri,
+  window,
+  workspace,
+} from "vscode";
 import { CONFIG, DENDRON_CHANNEL_NAME } from "./constants";
+import { VSCodeUtils } from "./utils";
 
 export type TraceLevel = "debug" | "info" | "warn" | "error" | "fatal";
 const levels = ["debug", "info", "warn", "error", "fatal"];
@@ -45,6 +52,7 @@ export class Logger {
     this.level = level;
     Logger.info({ ctx, msg: "exit", logLevel });
   }
+
   private static _level: TraceLevel = "debug";
 
   /**
@@ -70,6 +78,7 @@ export class Logger {
   static get level() {
     return this._level;
   }
+
   static set level(value: TraceLevel) {
     this._level = value;
     this.output =
@@ -79,7 +88,7 @@ export class Logger {
   static error(payload: LogPayload) {
     Logger.log(payload, "error");
 
-    Sentry.withScope(scope => {
+    Sentry.withScope((scope) => {
       scope.setExtra("ctx", payload.ctx);
       if (payload.error) {
         scope.setExtra("name", payload.error.name);
@@ -90,15 +99,15 @@ export class Logger {
         scope.setExtra("status", payload.error.status);
       }
       const cleanMsg =
-      (payload.error ? payload.error.message : payload.msg) || customStringify(payload);
+        (payload.error ? payload.error.message : payload.msg) ||
+        customStringify(payload);
 
       if (payload.error) {
         Sentry.captureException(payload.error);
-      }
-      else {
+      } else {
         Sentry.captureMessage(cleanMsg);
       }
-    })
+    });
   }
 
   static info(payload: any, show?: boolean): void {
@@ -107,7 +116,7 @@ export class Logger {
     Sentry.addBreadcrumb({
       category: "plugin",
       message: customStringify(payload),
-      level: Sentry.Severity.Info
+      level: Sentry.Severity.Info,
     });
   }
 
@@ -132,14 +141,48 @@ export class Logger {
       if (shouldShow || Logger.cmpLevels(lvl, "error")) {
         const cleanMsg =
           (payload.error ? payload.error.message : payload.msg) || stringMsg;
+        const fullPath = this.tryExtractFullPath(payload);
+
         if (Logger.cmpLevels(lvl, "error")) {
-          window.showErrorMessage(cleanMsg);
+          if (fullPath) {
+            // Currently when the user clicks on the action of 'Go to file.' We navigate
+            // to the file but the message explaining the error auto closes. For now we will
+            // at least set the status bar message to what went wrong.
+            window.setStatusBarMessage(cleanMsg);
+
+            const navigateMsg = "Go to file.";
+            window.showErrorMessage(cleanMsg, {}, navigateMsg).then((value) => {
+              if (value === navigateMsg) {
+                VSCodeUtils.openFileInEditor(Uri.file(fullPath));
+              }
+            });
+          } else {
+            window.showErrorMessage(cleanMsg);
+          }
         } else if (Logger.cmpLevels(lvl, "info")) {
           window.showInformationMessage(cleanMsg);
         }
       }
     }
   };
+
+  /**
+   * Extract full path from the payload when it exists in the error
+   * otherwise return undefined. This path is meant to be used for user to be
+   * able to navigate to the file at fault.
+   *   */
+  static tryExtractFullPath(payload: LogPayload): string | undefined {
+    let fullPath;
+    try {
+      if (payload.error?.payload) {
+        fullPath = JSON.parse(JSON.parse(payload.error?.payload)).fullPath;
+      }
+    } catch (err) {
+      fullPath = undefined;
+    }
+
+    return fullPath;
+  }
 }
 
 const customStringify = function (v: any) {

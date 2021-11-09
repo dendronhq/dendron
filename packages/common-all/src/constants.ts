@@ -62,6 +62,10 @@ export enum ERROR_STATUS {
   UNKNOWN = "unknown",
 }
 
+export enum USER_MESSAGES {
+  UNKNOWN = "unknown",
+}
+
 /**
  * Labels whether error is recoverable or not
  */

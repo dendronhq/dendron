@@ -42,7 +42,7 @@ type ServerErrorProps = {
    * Optional HTTP status code for error
    */
   code?: StatusCodes;
-}
+};
 
 export type IDendronError = DendronErrorProps;
 
@@ -102,7 +102,6 @@ export class DendronError extends Error implements IDendronError {
   }
 }
 
-
 export class DendronCompositeError extends Error implements IDendronError {
   public payload: DendronErrorProps[];
   public message: string;
@@ -137,15 +136,18 @@ export class DendronCompositeError extends Error implements IDendronError {
   }
 }
 
-export class DendronServerError extends DendronError implements IDendronError, ServerErrorProps  {
+export class DendronServerError
+  extends DendronError
+  implements IDendronError, ServerErrorProps
+{
   /**
-  * Optional HTTP status code for error
-  */
-   public code?: StatusCodes;
+   * Optional HTTP status code for error
+   */
+  public code?: StatusCodes;
 
- /**
-  * Custom status errors
-  */
+  /**
+   * Custom status errors
+   */
   public status?: string;
 }
 
@@ -229,6 +231,20 @@ export class ErrorFactory {
     });
   }
 
+  static createSchemaValidationError({
+    message,
+  }: {
+    message: string;
+  }): DendronError {
+    return new DendronError({
+      message,
+
+      // Setting severity as minor since Dendron could still be functional even
+      // if some particular schema is malformed.
+      severity: ERROR_SEVERITY.MINOR,
+    });
+  }
+
   /** Stringify that will not throw if it fails to stringify
    * (for example: due to circular references)  */
   private static safeStringify(obj: any) {
@@ -250,5 +266,7 @@ export class ErrorUtils {
   }
 }
 export function isTSError(err: any): err is Error {
-  return (err as Error).message !== undefined && (err as Error).name !== undefined;
+  return (
+    (err as Error).message !== undefined && (err as Error).name !== undefined
+  );
 }

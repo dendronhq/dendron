@@ -81,6 +81,26 @@ export class FileTestUtils {
     return AssertUtils.assertInString({ body, match, nomatch });
   };
 
+  static assertTimesInFile = ({
+    fpath,
+    match,
+    fewerThan,
+    moreThan,
+  }: {
+    match?: [number, string | RegExp][];
+    fewerThan?: [number, string | RegExp][];
+    moreThan?: [number, string | RegExp][];
+    fpath: string;
+  }) => {
+    const body = fs.readFileSync(fpath, { encoding: "utf8" });
+    return AssertUtils.assertTimesInString({
+      body,
+      match,
+      fewerThan,
+      moreThan,
+    });
+  };
+
   static assertInVault = ({
     vault,
     wsRoot,

@@ -14,7 +14,6 @@ import {
   writeJSONWithComments,
 } from "@dendronhq/common-server";
 import { WorkspaceService } from "@dendronhq/engine-server";
-import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { commands, ProgressLocation, QuickPickItem, window } from "vscode";
@@ -24,6 +23,7 @@ import { Logger } from "../logger";
 import { VSCodeUtils } from "../utils";
 import { DendronExtension, getDWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
+import fs from "fs-extra";
 
 type CommandOpts = {
   type: VaultRemoteSource;
@@ -169,15 +169,13 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
           await wsService.addWorkspace({ workspace });
           await this.addWorkspaceToWorkspace(workspace);
         } else {
-          await _.reduce(
-            vaults,
-            async (resp: any, vault: DVault) => {
-              await resp;
-              await wsService.createVault({ vault });
-              return this.addVaultToWorkspace(vault);
-            },
-            Promise.resolve()
-          );
+          // Some things, like updating config, can't be parallelized so needs to be done one at a time
+          for (const vault of vaults) {
+            // eslint-disable-next-line no-await-in-loop
+            await wsService.createVault({ vault });
+            // eslint-disable-next-line no-await-in-loop
+            await this.addVaultToWorkspace(vault);
+          }
         }
         return { vaults, workspace };
       }
@@ -188,37 +186,29 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
   async addWorkspaceToWorkspace(workspace: DWorkspace) {
     const wsRoot = getDWorkspace().wsRoot;
     const vaults = workspace.vaults;
-
-    await _.reduce(
-      vaults,
-      async (resp: any, vault: DVault) => {
-        await resp;
-        return this.addVaultToWorkspace(vault);
-      },
-      Promise.resolve()
-    );
-    // add to gitignore
-    const gitIgnore = path.join(wsRoot, ".gitignore");
-    if (fs.existsSync(gitIgnore)) {
-      fs.appendFileSync(gitIgnore, "\n" + workspace.name + "\n", {
-        encoding: "utf8",
-      });
+    // Some things, like updating workspace file, can't be parallelized so needs to be done one at a time
+    for (const vault of vaults) {
+      // eslint-disable-next-line no-await-in-loop
+      await this.addVaultToWorkspace(vault);
     }
+    // add to gitignore
+    await GitUtils.addToGitignore({
+      addPath: workspace.name,
+      root: wsRoot,
+      noCreateIfMissing: true,
+    });
 
-    const gitIgnoreInsideVault = path.join(
-      wsRoot,
-      workspace.name,
-      ".gitignore"
-    );
-    fs.ensureFileSync(gitIgnoreInsideVault);
-    fs.appendFileSync(gitIgnoreInsideVault, "\n.dendron.cache.*", {
-      encoding: "utf8",
+    const workspaceDir = path.join(wsRoot, workspace.name);
+    fs.ensureDir(workspaceDir);
+    await GitUtils.addToGitignore({
+      addPath: ".dendron.cache.*",
+      root: workspaceDir,
     });
   }
 
   async addVaultToWorkspace(vault: DVault) {
     if (getDWorkspace().type === WorkspaceType.NATIVE) return;
-    const wsRoot = getDWorkspace().wsRoot;
+    const { wsRoot } = getDWorkspace();
 
     // workspace file
     const wsPath = DendronExtension.workspaceFile().fsPath;
@@ -233,17 +223,17 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
     }
 
     // check for .gitignore
-    const gitIgnore = path.join(wsRoot, ".gitignore");
-    if (fs.existsSync(gitIgnore)) {
-      fs.appendFileSync(gitIgnore, "\n" + vault.fsPath + "\n", {
-        encoding: "utf8",
-      });
-    }
-    //check for .gitignore inside vault
-    const gitIgnoreInsideVault = path.join(wsRoot, vault.fsPath, ".gitignore");
-    fs.ensureFileSync(gitIgnoreInsideVault);
-    fs.appendFileSync(gitIgnoreInsideVault, "\n.dendron.cache.*", {
-      encoding: "utf8",
+    await GitUtils.addToGitignore({
+      addPath: vault.fsPath,
+      root: wsRoot,
+      noCreateIfMissing: true,
+    });
+
+    const vaultDir = path.join(wsRoot, vault.fsPath);
+    fs.ensureDir(vaultDir);
+    await GitUtils.addToGitignore({
+      addPath: ".dendron.cache.*",
+      root: vaultDir,
     });
     return;
   }

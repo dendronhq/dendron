@@ -615,6 +615,10 @@ export class WorkspaceService {
         await opts.onUpdatedWorkspace();
       }
     }
+    await GitUtils.removeFromGitignore({
+      removePath: vault.fsPath,
+      root: this.wsRoot,
+    });
   }
 
   createConfig() {

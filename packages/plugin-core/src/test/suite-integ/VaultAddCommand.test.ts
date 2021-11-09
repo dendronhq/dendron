@@ -20,13 +20,15 @@ import {
   setupWS,
 } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
-import { describe } from "mocha";
+import { describe, before } from "mocha";
 import path from "path";
 import sinon from "sinon";
 import * as vscode from "vscode";
 import { VaultAddCommand } from "../../commands/VaultAddCommand";
+import { getDWorkspace } from "../../workspace";
 import { expect, runSingleVaultTest } from "../testUtilsv2";
 import {
+  describeSingleWS,
   runLegacySingleWorkspaceTest,
   setupBeforeAfter,
   stubVaultInput,
@@ -223,6 +225,38 @@ suite("VaultAddCommand", function () {
           ).toBeTruthy();
           done();
         },
+      });
+    });
+
+    describeSingleWS("WHEN vault was already in .gitignore", { ctx }, () => {
+      const vaultPath = "vaultRemote";
+      let gitIgnore: string;
+      before(async () => {
+        const { wsRoot } = getDWorkspace();
+        const remoteDir = tmpDir().name;
+
+        await GitTestUtils.createRepoForRemoteWorkspace(wsRoot, remoteDir);
+        gitIgnore = path.join(wsRoot, ".gitignore");
+        await fs.writeFile(gitIgnore, vaultPath);
+
+        const cmd = new VaultAddCommand();
+        stubVaultInput({
+          cmd,
+          sourceType: "remote",
+          sourcePath: vaultPath,
+          sourcePathRemote: remoteDir,
+          sourceName: "dendron",
+        });
+        await cmd.run();
+      });
+
+      test("THEN vault is not duplicated", () => {
+        expect(
+          FileTestUtils.assertTimesInFile({
+            fpath: gitIgnore,
+            match: [[1, vaultPath]],
+          })
+        ).toBeTruthy();
       });
     });
   });

@@ -1,10 +1,16 @@
-import { DendronError, DNodeType, ERROR_STATUS } from "@dendronhq/common-all";
+import {
+  DendronError,
+  DNodeType,
+  ERROR_STATUS,
+  LookupEvents,
+} from "@dendronhq/common-all";
 import { HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { QuickInputButton } from "vscode";
 import { CancellationTokenSource } from "vscode-languageclient";
 import { Logger } from "../../logger";
 import { VSCodeUtils } from "../../utils";
+import { AnalyticsUtils } from "../../utils/analytics";
 import { DendronExtension, getDWorkspace } from "../../workspace";
 import {
   ButtonCategory,
@@ -174,6 +180,14 @@ export class LookupControllerV3 {
       `Lookup (${this.nodeType})`,
       `- version: ${DendronExtension.version()}`,
     ].join(" ");
+
+    quickpick.buttons.forEach((button: DendronBtn) => {
+      AnalyticsUtils.track(LookupEvents.LookupModifierSetByController, {
+        command: opts.provider.id,
+        button,
+      });
+    });
+
     Logger.info({ ctx, msg: "exit" });
     return { quickpick };
   }
@@ -271,5 +285,10 @@ export class LookupControllerV3 {
         forceUpdate: true,
       });
     }
+
+    AnalyticsUtils.track(LookupEvents.LookupModifierToggledByUser, {
+      command: this.provider.id,
+      button: btnsToRefresh,
+    });
   };
 }

@@ -23,7 +23,7 @@ export class ShowNoteGraphCommand extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
-  key = DENDRON_COMMANDS.SHOW_NOTE_GRAPH_V2.key;
+  key = DENDRON_COMMANDS.SHOW_NOTE_GRAPH.key;
   async gatherInputs(): Promise<any> {
     return {};
   }

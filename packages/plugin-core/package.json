@@ -430,13 +430,13 @@
         "docPreview": "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/workbench.help.gif)"
       },
       {
-        "command": "dendron.showNoteGraphV2",
-        "title": "Dendron: Show Note Graph V2",
+        "command": "dendron.showNoteGraph",
+        "title": "Dendron: Show Note Graph",
         "desc": "Display the notes in this workspace as a graph"
       },
       {
-        "command": "dendron.showSchemaGraphV2",
-        "title": "Dendron: Show Schema Graph V2",
+        "command": "dendron.showSchemaGraph",
+        "title": "Dendron: Show Schema Graph",
         "desc": "Display the schemas in this workspace as a graph"
       },
       {

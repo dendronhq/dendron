@@ -41,9 +41,9 @@ export class HierarchyLevel {
   constructor(idx: number, tokens: string[]) {
     this.hierarchyTokens = tokens;
     this.idx = idx;
-    // https://regex101.com/r/VLrXxC/1
+    // https://regex101.com/r/kmOBbq/1
     this.noteMatchRegex = new RegExp(
-      "^" + this.hierarchyTokens.slice(0, this.idx).join(".") + "\\..*\\..*.*"
+      "^" + this.hierarchyTokens.slice(0, this.idx).join(".") + "\\..*"
     );
     this.label =
       [...tokens.slice(0, idx), "*", ...tokens.slice(idx + 1)].join(".") +
@@ -99,11 +99,9 @@ export class Hierarchy {
    * We remove the first level since having something like `*.h1.h2` with `*` at the
    * beginning will match all hierarchies. Therefore we slice off the first level.
    *
-   * We also slice off the last level since we need child notes to exist to
-   * create a meaningful hierarchy.
    * */
   getSchemaebleLevels() {
-    return this.levels.slice(1, this.levels.length - 1);
+    return this.levels.slice(1);
   }
 }
 
@@ -183,11 +181,11 @@ export class UserQueries {
   static async promptUserToSelectHierarchyLevel(currDocFsPath: string) {
     const hierarchy = new Hierarchy(path.basename(currDocFsPath, ".md"));
 
-    if (hierarchy.depth() <= 2) {
+    if (hierarchy.depth() <= 1) {
       // We require some depth to the hierarchy to be able to choose a variance
       // pattern within in it. More info within Hierarchy object.
       await vscode.window.showErrorMessage(
-        `Pick a note with note depth greater than 2.`
+        `Pick a note with note depth greater than 1.`
       );
 
       return undefined;
@@ -479,7 +477,21 @@ export class CreateSchemaFromHierarchyCommand extends BasicCommand<
       hierarchyLevel.isCandidateNote(n.fname)
     );
 
-    return this.formatSchemaCandidates(noteCandidates, hierarchyLevel);
+    const candidates: SchemaCandidate[] = this.formatSchemaCandidates(
+      noteCandidates,
+      hierarchyLevel
+    );
+
+    return this.filterDistinctLabel(candidates);
+  }
+
+  private filterDistinctLabel(candidates: SchemaCandidate[]) {
+    const distinct: SchemaCandidate[] = [];
+    new Map(candidates.map((cand) => [cand.label, cand])).forEach((value) => {
+      distinct.push(value);
+    });
+
+    return distinct;
   }
 
   formatSchemaCandidates(

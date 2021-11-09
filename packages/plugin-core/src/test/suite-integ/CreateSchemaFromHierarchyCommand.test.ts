@@ -69,6 +69,28 @@ suite("CreateSchemaFromHierarchyCommand tests", () => {
   }
 
   describe(`HierarchyLevel tests:`, () => {
+    describe(`GIVEN 'languages.python.*' hierarchy level`, () => {
+      let level: HierarchyLevel;
+      beforeEach(() => {
+        level = new HierarchyLevel(2, ["languages", "python", "data"]);
+      });
+
+      describe(`isCandidateNote tests`, () => {
+        [
+          { in: "languages", out: false },
+          { in: "languages.python", out: false },
+          { in: "languages.python.data", out: true },
+          { in: "languages.python.data.integer", out: true },
+          { in: "languages.python.machine-learning", out: true },
+        ].forEach((input) =>
+          it(`WHEN testing '${input.in}' note THEN ${
+            input.out ? "do match" : "do NOT match"
+          }.`, () => {
+            expect(level.isCandidateNote(input.in)).toEqual(input.out);
+          })
+        );
+      });
+    });
     describe(`GIVEN 'languages.*.data' hierarchy level`, () => {
       let level: HierarchyLevel;
       beforeEach(() => {
@@ -113,7 +135,7 @@ suite("CreateSchemaFromHierarchyCommand tests", () => {
       describe(`isCandidateNote tests`, () => {
         [
           { in: "languages", out: false },
-          { in: "languages.python", out: false },
+          { in: "languages.python", out: true },
           { in: "languages.python.data", out: true },
           { in: "languages.python.data.integer", out: true },
           { in: "languages.python.machine-learning", out: true },

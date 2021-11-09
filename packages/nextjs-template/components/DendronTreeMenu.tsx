@@ -143,11 +143,25 @@ function MenuView({
               pointerEvents: "none", // only allow custom element to be gesture target
               margin: 0,
             }}
-          />
-        </i>
+          >
+            {menu.children.map((childMenu) => {
+              return createMenu(submenu[childMenu]);
+            })}
+          </SubMenu>
+        );
+      }
+      return (
+        <Menu.Item key={menu.id}>
+          <Typography.Text
+            style={{ width: "100%" }}
+            ellipsis={{ tooltip: menu.title }}
+          >
+            <Link href={`/notes/${menu.id}`}>{menu.title}</Link>
+          </Typography.Text>
+        </Menu.Item>
       );
     },
-    [collapsed]
+    [activeNote, onExpand, onSelect, submenu]
   );
 
   const createMenu = useMemo(

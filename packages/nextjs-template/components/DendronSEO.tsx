@@ -55,7 +55,7 @@ export default function DendronSEO({
 
   // don't generate for following pages
   if (
-    _.some(["403", "changelog"], (ent) => {
+    _.some(["403"], (ent) => {
       return path === `/notes/${ent}/`;
     })
   ) {

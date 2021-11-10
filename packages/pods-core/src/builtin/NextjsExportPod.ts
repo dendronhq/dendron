@@ -221,7 +221,6 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     fs.ensureDirSync(destPublicPath);
     const siteAssetsDir = path.join(destPublicPath, "assets");
     const siteConfig = config.site;
-    this.L;
     // copy site assets
     if (!config.site.copyAssets) {
       this.L.info({ ctx, msg: "skip copying" });

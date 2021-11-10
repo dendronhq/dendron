@@ -1,17 +1,13 @@
-import {
-  DNodeUtils,
-  ErrorFactory,
-  NoteChangeEntry,
-  VaultUtils,
-} from "@dendronhq/common-all";
+import { DNodeUtils, NoteChangeEntry, VaultUtils } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
-import { HistoryService } from "@dendronhq/engine-server";
+import { HistoryEvent } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
 import { TextEditor, Uri, window } from "vscode";
 import { LookupControllerV3 } from "../components/lookup/LookupControllerV3";
 import { NoteLookupProvider } from "../components/lookup/LookupProviderV3";
 import {
+  NoteLookupProviderUtils,
   OldNewLocation,
   PickerUtilsV2,
   ProviderAcceptHooks,
@@ -64,21 +60,13 @@ export class RenameNoteV2aCommand extends BaseCommand<
       provider,
       initialValue,
     });
-    return new Promise((resolve) => {
-      HistoryService.instance().subscribev2("lookupProvider", {
-        id: "rename",
-        listener: async (event) => {
-          if (event.action === "done") {
-            HistoryService.instance().remove("rename", "lookupProvider");
-            resolve({ move: event.data.onAcceptHookResp });
-            lc.onHide();
-          } else if (event.action === "error") {
-            return;
-          } else {
-            throw ErrorFactory.createUnexpectedEventError({ event });
-          }
-        },
-      });
+    return NoteLookupProviderUtils.subscribe({
+      id: "rename",
+      controller: lc,
+      logger: this.L,
+      onDone: (event: HistoryEvent) => {
+        return { move: event.data.onAcceptHookResp };
+      },
     });
   }
 

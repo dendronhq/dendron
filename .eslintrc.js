@@ -84,7 +84,7 @@ module.exports = {
     // --- React
     "react/prop-types": "off",
     // we use 'logger' inside of hooks, gets flagged 
-    "react-hooks/exhaustive-deps": "off",
+    "react-hooks/exhaustive-deps": 1,
     // suppress errors for missing 'import React' in files
     "react/react-in-jsx-scope": "off",
     "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx", ".ts", ".tsx"] }],

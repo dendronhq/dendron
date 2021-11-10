@@ -81,7 +81,6 @@ export default function DendronTreeMenu(
       submenu={notes.notes}
       onSelect={onSelect}
       collapsed={collapsed}
-      activeNote="123"
     />
   );
 }
@@ -91,13 +90,11 @@ function MenuView({
   submenu,
   onSelect,
   collapsed,
-  activeNote,
 }: {
   roots: Partial<NoteProps>[];
   submenu: SectionsData["notes"];
   onSelect: (noteId: string) => void;
   collapsed: boolean;
-  activeNote: string | undefined;
 }) {
   const [current, setCurrent] = useState<string[]>([""]);
   const [expandedKeys, setExpandedKeys] = useState<string[]>();
@@ -157,7 +154,7 @@ function MenuView({
           <SubMenu
             icon={<MenuIcon note={menu} notes={submenu as NotePropsDict} />}
             className={
-              menu.id === activeNote ? "dendron-ant-menu-submenu-selected" : ""
+              menu.id === noteActive ? "dendron-ant-menu-submenu-selected" : ""
             }
             key={menu.id}
             title={
@@ -196,7 +193,7 @@ function MenuView({
         </Menu.Item>
       );
     },
-    [activeNote, onSelect, submenu]
+    [noteActive, onSelect, submenu]
   );
 
   const rootSubmenuKeys = roots.map((root) => root.id);

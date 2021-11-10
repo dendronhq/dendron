@@ -390,7 +390,7 @@ export class GitUtils {
       (contents !== undefined &&
         !contents.match(new RegExp(`^${addPath}/?$`, "g")))
     ) {
-      await fs.appendFile(gitignore, `\n${addPath}\n`);
+      await fs.appendFile(gitignore, `\n${addPath}`);
     }
   }
 

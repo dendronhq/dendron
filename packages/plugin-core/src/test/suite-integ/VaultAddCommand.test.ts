@@ -20,7 +20,7 @@ import {
   setupWS,
 } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
-import { describe, before } from "mocha";
+import { describe } from "mocha";
 import path from "path";
 import sinon from "sinon";
 import * as vscode from "vscode";
@@ -229,34 +229,33 @@ suite("VaultAddCommand", function () {
     });
 
     describeSingleWS("WHEN vault was already in .gitignore", { ctx }, () => {
-      const vaultPath = "vaultRemote";
-      let gitIgnore: string;
-      before(async () => {
-        const { wsRoot } = getDWorkspace();
-        const remoteDir = tmpDir().name;
+      describe("AND vaultAddCommand is run", () => {
+        test("THEN vault is not duplicated", async () => {
+          const vaultPath = "vaultRemote";
+          const { wsRoot } = getDWorkspace();
+          const gitIgnore = path.join(wsRoot, ".gitignore");
+          const remoteDir = tmpDir().name;
 
-        await GitTestUtils.createRepoForRemoteWorkspace(wsRoot, remoteDir);
-        gitIgnore = path.join(wsRoot, ".gitignore");
-        await fs.writeFile(gitIgnore, vaultPath);
+          await GitTestUtils.createRepoForRemoteWorkspace(wsRoot, remoteDir);
+          await fs.writeFile(gitIgnore, vaultPath);
 
-        const cmd = new VaultAddCommand();
-        stubVaultInput({
-          cmd,
-          sourceType: "remote",
-          sourcePath: vaultPath,
-          sourcePathRemote: remoteDir,
-          sourceName: "dendron",
+          const cmd = new VaultAddCommand();
+          stubVaultInput({
+            cmd,
+            sourceType: "remote",
+            sourcePath: vaultPath,
+            sourcePathRemote: remoteDir,
+            sourceName: "dendron",
+          });
+          await cmd.run();
+
+          expect(
+            FileTestUtils.assertTimesInFile({
+              fpath: gitIgnore,
+              match: [[1, vaultPath]],
+            })
+          ).toBeTruthy();
         });
-        await cmd.run();
-      });
-
-      test("THEN vault is not duplicated", () => {
-        expect(
-          FileTestUtils.assertTimesInFile({
-            fpath: gitIgnore,
-            match: [[1, vaultPath]],
-          })
-        ).toBeTruthy();
       });
     });
   });

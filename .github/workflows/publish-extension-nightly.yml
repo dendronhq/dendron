@@ -76,14 +76,15 @@ jobs:
           LOG_LEVEL=info $DENDRON_CLI dev prep_plugin --extensionTarget nightly
 
       # yarn deploy:vscode (vsce publish) attempts to pull dependencies, so
-      # verdaccio must be running
+      # verdaccio must be running. Verdaccio starts up slowly in the build
+      # environment, so give it time to start up.
       - name: Publish to VS Code Marketplace
         env:
           VSCE_PAT: ${{ secrets.VSCODE_PUBLISH_PWD }}
         working-directory: ./packages/plugin-core
         run: |
           npx verdaccio > verdaccio.log  2>&1 &
-          sleep 15
+          sleep 60
           echo "checking verdaccio log"
           cat verdaccio.log
           echo "Setting registry to local"

@@ -56,23 +56,48 @@ export const filterNav = ({
   children,
   custom,
   parent,
+  schema,
+  fname,
+  stub,
 }: Record<string, any>):
-  | Pick<NoteProps, "id" | "title" | "children" | "custom" | "parent">
+  | Pick<
+      NoteProps,
+      | "id"
+      | "title"
+      | "children"
+      | "custom"
+      | "parent"
+      | "schema"
+      | "fname"
+      | "stub"
+    >
   | undefined => {
-  return { id, title, children, custom, parent };
+  return { id, title, children, custom, parent, schema, fname, stub };
 };
 
 export const filterNavItemsFromNotes = (
   notes: NotePropsDict,
   domainsProps: NoteProps[]
 ) => {
-  const notesObj = (obj: NoteProps[]) =>
+  const notesObj = (
+    obj: Pick<
+      NoteProps,
+      | "id"
+      | "title"
+      | "children"
+      | "custom"
+      | "parent"
+      | "schema"
+      | "fname"
+      | "stub"
+    >[]
+  ) =>
     obj.reduce((acc, curr) => {
-      const { id, title, children, custom, parent } = curr;
-      acc[id] = { id, title, children, custom, parent };
+      const { id, title, children, custom, parent, schema, fname, stub } = curr;
+      acc[id] = { id, title, children, custom, parent, schema, fname, stub };
 
       return acc;
-    }, {} as Partial<NotePropsDict>);
+    }, {} as { [key: string]: Partial<NoteProps> });
 
   const domains = mapObject(notesObj(domainsProps), (_k, note: NotePropsDict) =>
     filterNav(note)

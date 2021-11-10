@@ -1,18 +1,48 @@
 import { DownOutlined, RightOutlined, UpOutlined } from "@ant-design/icons";
-import { root } from "@chakra-ui/color-mode/dist/types/color-mode.utils";
-import { NoteProps, NotePropsDict, NoteUtils } from "@dendronhq/common-all";
-import { createLogger, TreeViewUtils } from "@dendronhq/common-frontend";
+import BookOutlined from "@ant-design/icons/lib/icons/BookOutlined";
+import NumberOutlined from "@ant-design/icons/lib/icons/NumberOutlined";
+import PlusOutlined from "@ant-design/icons/lib/icons/PlusOutlined";
+import {
+  NoteProps,
+  NotePropsDict,
+  NoteUtils,
+  TAGS_HIERARCHY_BASE,
+} from "@dendronhq/common-all";
+import { createLogger } from "@dendronhq/common-frontend";
 import { Menu, Typography } from "antd";
 import _ from "lodash";
-import Link from "next/link";
-import { DataNode } from "rc-tree/lib/interface";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { DENDRON_STYLE_CONSTANTS } from "../styles/constants";
 import { useDendronRouter } from "../utils/hooks";
-import { NoteData, SectionsData, verifyNoteData } from "../utils/types";
-import DendronSpinner from "./DendronSpinner";
+import { SectionsData } from "../utils/types";
 
 const { SubMenu } = Menu;
+
+function MenuIcon(props: { note: Partial<NoteProps>; notes: NotePropsDict }) {
+  const { note, notes } = props;
+  let icon;
+  if (note.schema) {
+    icon = <BookOutlined />;
+  } else if (note.fname === TAGS_HIERARCHY_BASE) {
+    icon = <NumberOutlined />;
+  } else if (note.stub) {
+    icon = <PlusOutlined />;
+  } else {
+    icon = null;
+  }
+
+  if (note.fname?.startsWith(TAGS_HIERARCHY_BASE)) {
+    icon = (
+      <NumberOutlined
+        style={{
+          color: NoteUtils.color({ fname: note.fname, notes }).color,
+        }}
+      />
+    );
+  }
+
+  return icon;
+}
 
 export default function DendronTreeMenu(
   props: { notes: SectionsData } & {
@@ -24,36 +54,6 @@ export default function DendronTreeMenu(
   const dendronRouter = useDendronRouter();
   const { changeActiveNote } = dendronRouter;
   const [activeNoteIds, setActiveNoteIds] = useState<string[]>([]);
-  // const noteActiveId = _.isUndefined(dendronRouter.query.id)
-  //   ? props.noteIndex?.id
-  //   : dendronRouter.query.id;
-
-  // set `activeNoteIds`
-  // useEffect(() => {
-  //   if (!verifyNoteData(props) || !noteActiveId) {
-  //     return undefined;
-  //   }
-
-  // logger.info({
-  //   state: "useEffect:preCalculateTree",
-  // });
-
-  //   const activeNoteIds = TreeViewUtils.getAllParents({
-  //     notes: props.notes,
-  //     noteId: noteActiveId,
-  //   });
-
-  //   setActiveNoteIds(activeNoteIds);
-  // }, [props.notes, props.noteIndex, dendronRouter.query.id, noteActiveId]);
-
-  // --- Verify
-  // if (!verifyNoteData(props)) {
-  //   logger.info({
-  //     state: "exit:notes not initialized",
-  //   });
-  //   return <DendronSpinner />;
-  // }
-
   const { notes, collapsed, setCollapsed } = props;
 
   const expandKeys = _.isEmpty(activeNoteIds) ? [] : activeNoteIds;
@@ -64,24 +64,6 @@ export default function DendronTreeMenu(
     logger.info({ ctx: "onSelect", id: noteId });
     changeActiveNote(noteId);
   };
-
-  // const onExpand = (noteId: string) => {
-  //   logger.info({ ctx: "onExpand", id: noteId });
-  //   if (_.isUndefined(notes)) {
-  //     return;
-  //   }
-  //   const expanded = expandKeys.includes(noteId);
-  //   // open up
-  //   if (expanded) {
-  //     setActiveNoteIds(
-  //       TreeViewUtils.getAllParents({ notes, noteId }).slice(0, -1)
-  //     );
-  //   } else {
-  //     setActiveNoteIds(TreeViewUtils.getAllParents({ notes, noteId }));
-  //   }
-  // };
-
-  const noop = () => console.log("foo");
 
   const roots = useMemo(
     () => Object.keys(notes?.domains).map((x: string) => notes.domains[x]),
@@ -97,9 +79,7 @@ export default function DendronTreeMenu(
     <MenuView
       roots={roots}
       submenu={notes.notes}
-      expandKeys={expandKeys}
       onSelect={onSelect}
-      onExpand={noop}
       collapsed={collapsed}
       activeNote="123"
     />
@@ -109,29 +89,48 @@ export default function DendronTreeMenu(
 function MenuView({
   roots,
   submenu,
-  expandKeys,
   onSelect,
-  onExpand,
   collapsed,
   activeNote,
 }: {
   roots: Partial<NoteProps>[];
   submenu: SectionsData["notes"];
-  expandKeys: string[];
   onSelect: (noteId: string) => void;
-  onExpand: (noteId: string) => void;
   collapsed: boolean;
   activeNote: string | undefined;
 }) {
   const [current, setCurrent] = useState<string[]>([""]);
+  const [expandedKeys, setExpandedKeys] = useState<string[]>();
+  const [openKeys, setOpenKeys] = useState<string[]>([]);
+
   const { getActiveNoteId } = useDendronRouter();
   const noteActive = useMemo(() => getActiveNoteId(), [getActiveNoteId]);
+
+  const noteParents = useCallback(
+    () =>
+      NoteUtils.getNoteWithParents({
+        note: submenu[noteActive as string] as NoteProps,
+        notes: submenu as NotePropsDict,
+      }),
+    [noteActive, submenu]
+  );
+
+  const parentsArray = useMemo(
+    () => noteParents().map((parents) => parents.id),
+    [noteParents]
+  );
 
   useEffect(() => {
     if (noteActive) {
       setCurrent([noteActive]);
+      setOpenKeys(parentsArray);
     }
-  }, []);
+  }, [noteActive, parentsArray]);
+
+  useEffect(() => {
+    setExpandedKeys(parentsArray);
+  }, [parentsArray]);
+
   const ExpandIcon = useCallback(
     // eslint-disable-next-line react/no-unused-prop-types
     ({ isOpen }: { isOpen: boolean }) => {
@@ -156,7 +155,7 @@ function MenuView({
       if (menu?.children && menu?.children?.length > 0) {
         return (
           <SubMenu
-            // icon={menu.icon}
+            icon={<MenuIcon note={menu} notes={submenu as NotePropsDict} />}
             className={
               menu.id === activeNote ? "dendron-ant-menu-submenu-selected" : ""
             }
@@ -174,8 +173,6 @@ function MenuView({
               const isArrow = target.dataset.expandedicon;
               if (!isArrow) {
                 onSelect(event.key);
-              } else {
-                onExpand(event.key);
               }
             }}
           >
@@ -186,7 +183,10 @@ function MenuView({
         );
       }
       return (
-        <Menu.Item key={menu.id}>
+        <Menu.Item
+          key={menu.id}
+          icon={<MenuIcon note={menu} notes={submenu as NotePropsDict} />}
+        >
           <Typography.Text
             style={{ width: "100%" }}
             ellipsis={{ tooltip: menu.title }}
@@ -196,48 +196,41 @@ function MenuView({
         </Menu.Item>
       );
     },
-    [activeNote, onExpand, onSelect, submenu]
+    [activeNote, onSelect, submenu]
   );
 
-  // if (activeNote) {
-  //   expandKeys.push(activeNote);
-  // }
+  const rootSubmenuKeys = roots.map((root) => root.id);
 
-  const noteParents = useCallback(
-    () =>
-      NoteUtils.getNoteWithParents({
-        note: submenu[noteActive as string] as NoteProps,
-        notes: submenu as NotePropsDict,
-      }),
-    [noteActive, submenu]
-  );
+  const onOpenChange = (keys: string[]) => {
+    const latestOpenKey = keys.find(
+      (key: string) => openKeys.indexOf(key) === -1
+    );
+    if (rootSubmenuKeys.indexOf(latestOpenKey) === -1) {
+      setOpenKeys(keys);
+    } else {
+      setOpenKeys(latestOpenKey ? [latestOpenKey] : []);
+    }
+  };
 
-  const parentsArray = useMemo(
-    () => noteParents().map((parents) => parents.id),
-    [noteParents]
-  );
-
-  return (
+  return expandedKeys ? (
     <Menu
       key={String(collapsed)}
       className="dendron-tree-menu"
       mode="inline"
-      // {...(!collapsed && {
-      //   openKeys: expandKeys,
-      // })}
       selectedKeys={current}
-      defaultOpenKeys={parentsArray}
+      openKeys={openKeys.length ? openKeys : undefined}
+      defaultOpenKeys={expandedKeys}
+      onOpenChange={onOpenChange}
       onClick={({ key }) => {
         setCurrent([key]);
         onSelect(key);
       }}
       inlineIndent={DENDRON_STYLE_CONSTANTS.SIDER.INDENT}
       expandIcon={ExpandIcon}
-      // inlineCollapsed
     >
       {roots.map((menu) => {
         return createMenu(menu);
       })}
     </Menu>
-  );
+  ) : null;
 }

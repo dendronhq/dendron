@@ -55,7 +55,7 @@ function DendronApp({ Component, pageProps }: AppProps) {
       //   dispatch(browserEngineSlice.actions.setNotes(data.notes));
       //   dispatch(browserEngineSlice.actions.setNoteIndex(data.noteIndex));
       // });
-      const config = await fetchConfig();
+      // const config = await fetchConfig();
       // logger.info({ ctx: "fetchConfig:got-data" });
       // dispatch(browserEngineSlice.actions.setConfig(config));
     })();
@@ -66,7 +66,11 @@ function DendronApp({ Component, pageProps }: AppProps) {
     return <span>loading</span>;
   }
   return (
-    <DendronLayout notes={noteData}>
+    <DendronLayout
+      domains={noteData.domains}
+      notes={noteData.notes}
+      noteIndex={noteData.noteIndex}
+    >
       <Component
         {...pageProps}
         notes={noteData}

@@ -36,7 +36,10 @@ const OMITTED_PART_TEXT = " ... ";
 /** How long to wait for before triggering fuse search, in ms. Required for performance reasons since fuse search is expensive. */
 const SEARCH_DELAY = 300;
 
-export function DendronSearch(props: { notes: SectionsData["notes"] }) {
+export function DendronSearch(props: {
+  notes: SectionsData["notes"];
+  indexId: string;
+}) {
   // if (!verifyNoteData(props)) {
   //   return <DendronSpinner />;
   // }
@@ -51,6 +54,7 @@ type SearchFunction = (
 
 function DebouncedDendronSearchComponent(props: {
   notes: SectionsData["notes"];
+  indexId: string;
 }) {
   // Splitting this part from DendronSearchComponent so that the debounced
   // function doesn't get reset every time value changes.
@@ -85,7 +89,7 @@ enum SearchMode {
 }
 
 function DendronSearchComponent(
-  props: { notes: SectionsData["notes"] } & SearchProps
+  props: { notes: SectionsData["notes"]; indexId: string } & SearchProps
 ) {
   const { search, error, loading, notes } = props;
   const [searchResults, setSearchResults] =
@@ -167,7 +171,7 @@ function DendronSearchComponent(
       }
       onSelect={(_selection, option) => {
         const id = option.key?.toString()!;
-        dendronRouter.changeActiveNote(id);
+        dendronRouter.changeActiveNote(id, props.indexId);
         dispatch(
           browserEngineSlice.actions.setLoadingStatus(LoadingStatus.PENDING)
         );

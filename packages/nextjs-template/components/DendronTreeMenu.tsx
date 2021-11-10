@@ -48,21 +48,19 @@ export default function DendronTreeMenu(
   props: { notes: SectionsData } & {
     collapsed: boolean;
     setCollapsed: (collapsed: boolean) => void;
+    indexId: string;
   }
 ) {
   const logger = createLogger("DendronTreeView");
   const dendronRouter = useDendronRouter();
   const { changeActiveNote } = dendronRouter;
-  const [activeNoteIds, setActiveNoteIds] = useState<string[]>([]);
   const { notes, collapsed, setCollapsed } = props;
-
-  const expandKeys = _.isEmpty(activeNoteIds) ? [] : activeNoteIds;
 
   // --- Methods
   const onSelect = (noteId: string) => {
     setCollapsed(true);
     logger.info({ ctx: "onSelect", id: noteId });
-    changeActiveNote(noteId);
+    changeActiveNote(noteId, props.indexId);
   };
 
   const roots = useMemo(

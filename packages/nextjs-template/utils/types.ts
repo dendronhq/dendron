@@ -10,11 +10,32 @@ declare global {
 
 export type SectionsData = {
   domains: {
-    [key: string]: Pick<NoteProps, "children" | "title" | "id" | "custom">;
+    [key: string]: Pick<
+      NoteProps,
+      | "id"
+      | "title"
+      | "children"
+      | "custom"
+      | "parent"
+      | "schema"
+      | "fname"
+      | "stub"
+    >;
   };
   notes: {
-    [key: string]: Pick<NoteProps, "children" | "title" | "id" | "custom" | "parent">;
+    [key: string]: Pick<
+      NoteProps,
+      | "id"
+      | "title"
+      | "children"
+      | "custom"
+      | "parent"
+      | "schema"
+      | "fname"
+      | "stub"
+    >;
   };
+  noteIndex: NoteProps | undefined;
 };
 
 export type NoteData = {

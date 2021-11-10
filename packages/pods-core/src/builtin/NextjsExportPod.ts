@@ -77,7 +77,8 @@ export const filterNav = ({
 
 export const filterNavItemsFromNotes = (
   notes: NotePropsDict,
-  domainsProps: NoteProps[]
+  domainsProps: NoteProps[],
+  noteIndex: NoteProps | undefined
 ) => {
   const notesObj = (
     obj: Pick<
@@ -106,7 +107,7 @@ export const filterNavItemsFromNotes = (
   const notesResult = mapObject(notes, (_k, note: NotePropsDict) =>
     filterNav(note)
   );
-  return { domains, notes: notesResult };
+  return { domains, notes: notesResult, noteIndex };
 };
 
 function getSiteConfig({
@@ -422,11 +423,6 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
       vaults: engine.vaults,
     };
 
-    // console.log(
-    //   "published notes => ",
-    //   filterNavItemsFromNotes(publishedNotes, domains)
-    // );
-
     // render notes
     const notesBodyDir = path.join(podDstDir, "notes");
     const notesMetaDir = path.join(podDstDir, "meta");
@@ -470,7 +466,11 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     fs.writeJSONSync(
       sectionsDstPath,
       {
-        ...filterNavItemsFromNotes(payload.notes, payload.domains),
+        ...filterNavItemsFromNotes(
+          payload.notes,
+          payload.domains,
+          payload.noteIndex
+        ),
       },
       { encoding: "utf-8", spaces: 2 }
     );

@@ -1,9 +1,9 @@
 import { DendronSiteConfig, NoteProps } from "@dendronhq/common-all";
 import _ from "lodash";
 
-export function getNoteUrl(opts: { note: NoteProps; id: NoteProps["id"] }) {
-  const { note, id } = opts;
-  return note.id === id ? "/" : `/notes/${note.id}`;
+export function getNoteUrl(opts: { note: NoteProps; indexId: string }) {
+  const { note, indexId } = opts;
+  return note.id === indexId ? "/" : `/notes/${note.id}`;
 }
 
 export function getAssetUrl(url: string) {

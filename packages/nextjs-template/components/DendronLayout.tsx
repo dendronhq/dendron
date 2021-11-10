@@ -18,20 +18,22 @@ const { Header, Content, Sider, Footer } = Layout;
 const { LAYOUT, HEADER, SIDER } = DENDRON_STYLE_CONSTANTS;
 
 export default function DendronLayout(
-  props: React.PropsWithChildren<{ notes: SectionsData }>
+  props: React.PropsWithChildren<SectionsData>
 ) {
   const [isCollapsed, setCollapsed] = React.useState(false);
   const [isResponsive, setResponsive] = React.useState(false);
+  const id = props.noteIndex?.id || "";
 
   const menu = useMemo(
     () => (
       <DendronTreeMenu
-        notes={props.notes}
+        notes={props}
+        indexId={id}
         collapsed={isCollapsed && isResponsive}
         setCollapsed={setCollapsed}
       />
     ),
-    [isCollapsed, isResponsive, props.notes]
+    [isCollapsed, isResponsive, props]
   );
 
   const sidebar = (
@@ -54,9 +56,11 @@ export default function DendronLayout(
       }}
       trigger={null}
     >
-      {/* {isResponsive && (
-        <div style={{ padding: 16 }}><DendronSearch {...props} /></div>
-      )} */}
+      {isResponsive && (
+        <div style={{ padding: 16 }}>
+          <DendronSearch notes={props.notes} indexId={id} />
+        </div>
+      )}
       {props.notes && menu}
     </Sider>
   );
@@ -68,7 +72,7 @@ export default function DendronLayout(
         role="main"
         style={{ padding: `0 ${LAYOUT.PADDING}px` }}
       >
-        <DendronBreadCrumb notes={props.notes.notes} />
+        <DendronBreadCrumb notes={props.notes} indexId={id} />
         {props.children}
       </Content>
       <Divider />
@@ -124,7 +128,7 @@ export default function DendronLayout(
             <DendronLogoOrTitle />
           </Col>
           <Col xs={0} sm={20} md={20} lg={19} className="gutter-row">
-            <DendronSearch notes={props.notes.notes} />
+            <DendronSearch notes={props.notes} indexId={id} />
           </Col>
           <Col
             xs={4}

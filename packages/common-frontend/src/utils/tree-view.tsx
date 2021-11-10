@@ -82,11 +82,16 @@ export class TreeViewUtils {
         </span>
       );
     }
+
     return {
       key: note.id,
       title,
       icon,
-      children: this.sortNotesAtLevel({ noteIds: note.children, noteDict })
+      children: this.sortNotesAtLevel({
+        noteIds: note.children,
+        noteDict,
+        reverse: note.custom?.sort_order === "reverse",
+      })
         .map((noteId) =>
           TreeViewUtils.note2TreeDatanote({
             noteId,
@@ -102,11 +107,13 @@ export class TreeViewUtils {
   static sortNotesAtLevel = ({
     noteIds,
     noteDict,
+    reverse,
   }: {
     noteIds: string[];
     noteDict: NotePropsDict;
+    reverse?: boolean;
   }): string[] => {
-    return _.sortBy(
+    const out = _.sortBy(
       noteIds,
       // Sort by nav order if set
       (noteId) => noteDict[noteId]?.custom?.nav_order,
@@ -117,5 +124,9 @@ export class TreeViewUtils {
       // Put tags last
       (noteId) => !noteDict[noteId]?.fname?.startsWith(TAGS_HIERARCHY_BASE)
     );
+    if (reverse) {
+      return _.reverse(out);
+    }
+    return out;
   };
 }

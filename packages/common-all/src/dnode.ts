@@ -5,7 +5,7 @@ import minimatch from "minimatch";
 import path from "path";
 import title from "title";
 import { URI } from "vscode-uri";
-import { CONSTANTS, ERROR_STATUS } from "./constants";
+import { CONSTANTS, ERROR_STATUS, TAGS_HIERARCHY, TAGS_HIERARCHY_BASE } from "./constants";
 import { DendronError } from "./error";
 import { Time } from "./time";
 import {
@@ -524,6 +524,12 @@ export class NoteUtils {
     const aliasValue = alias?.value;
     const tabStopIndex = alias?.tabStopIndex;
     let { title, fname, vault } = note;
+
+    if(note.fname.startsWith(TAGS_HIERARCHY_BASE)) {
+      const tag = note.fname.split(TAGS_HIERARCHY)[1]
+      return `#${tag}`
+    }
+    
     let suffix = "";
     if (anchor) {
       const { value: id, type } = anchor;

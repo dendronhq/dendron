@@ -108,12 +108,14 @@ export class TreeViewUtils {
   }): string[] => {
     return _.sortBy(
       noteIds,
-      // Put tags first
-      (noteId) => !noteDict[noteId]?.fname?.startsWith(TAGS_HIERARCHY_BASE),
+      // Sort by nav order if set
+      (noteId) => noteDict[noteId]?.custom?.nav_order,
       // Sort by titles
       (noteId) => noteDict[noteId]?.title,
       // If titles are identical, sort by last updated date
-      (noteId) => noteDict[noteId]?.updated
+      (noteId) => noteDict[noteId]?.updated,
+      // Put tags last
+      (noteId) => !noteDict[noteId]?.fname?.startsWith(TAGS_HIERARCHY_BASE)
     );
   };
 }

@@ -9,6 +9,7 @@ import {
   DLink,
   DVault,
   NotePropsDict,
+  NoteQuickInput,
 } from "@dendronhq/common-all";
 import {
   HistoryService,
@@ -23,6 +24,7 @@ import {
   Node,
   Anchor,
   LinkUtils,
+  HistoryEvent,
 } from "@dendronhq/engine-server";
 import {
   LookupControllerV3,
@@ -43,7 +45,10 @@ import { delayedUpdateDecorations } from "../features/windowDecorations";
 import { findReferences, FoundRefT } from "../utils/md";
 import { Location } from "vscode";
 import { file2Note, vault2Path } from "@dendronhq/common-server";
-import { PickerUtilsV2 } from "../components/lookup/utils";
+import {
+  NoteLookupProviderUtils,
+  PickerUtilsV2,
+} from "../components/lookup/utils";
 import { DendronQuickPickerV2 } from "../components/lookup/types";
 
 type CommandInput =
@@ -166,6 +171,48 @@ export class MoveHeaderCommand extends BasicCommand<
     return lookupController;
   }
 
+  /**
+   * Get the destination note given a quickpick and the selected item.
+   * @param opts
+   * @returns
+   */
+  prepareDestination(opts: {
+    engine: EngineAPIService;
+    quickpick: DendronQuickPickerV2;
+    selectedItems: readonly NoteQuickInput[];
+  }) {
+    const { engine, quickpick, selectedItems } = opts;
+    const vault =
+      (quickpick.vault as DVault) || PickerUtilsV2.getVaultForOpenEditor();
+    let dest: NoteProps | undefined;
+    if (_.isUndefined(selectedItems)) {
+      dest = undefined;
+    } else {
+      const selected = selectedItems[0];
+      const isCreateNew = PickerUtilsV2.isCreateNewNotePick(selected);
+      if (isCreateNew) {
+        // check if we really want to create a new note.
+        // if a user selects a vault in the picker that
+        // already has the note, we should not create a new one.
+        const fname = selected.fname;
+        const maybeNote = NoteUtils.getNoteByFnameV5({
+          fname,
+          notes: engine.notes,
+          vault, // this is the vault selected from the vault picker
+          wsRoot: engine.wsRoot,
+        });
+        if (_.isUndefined(maybeNote)) {
+          dest = NoteUtils.create({ fname, vault });
+        } else {
+          dest = maybeNote;
+        }
+      } else {
+        dest = selected as NoteProps;
+      }
+    }
+    return dest;
+  }
+
   async gatherInputs(opts: CommandInput): Promise<CommandOpts | undefined> {
     // validate and process input
     const engine = getEngine();
@@ -184,69 +231,25 @@ export class MoveHeaderCommand extends BasicCommand<
 
     const lc = this.promptForDestination(opts);
 
-    // Wait for provider
-    return new Promise((resolve) => {
-      HistoryService.instance().subscribev2("lookupProvider", {
-        id: this.key,
-        listener: async (event) => {
-          if (event.action === "done") {
-            HistoryService.instance().remove(this.key, "lookupProvider");
-            const cdata = event.data as NoteLookupProviderSuccessResp;
-            const quickpick: DendronQuickPickerV2 = lc.quickpick;
-            const vault =
-              (quickpick.vault as DVault) ||
-              PickerUtilsV2.getVaultForOpenEditor();
-            let dest: NoteProps | undefined;
-            if (_.isUndefined(cdata.selectedItems)) {
-              dest = undefined;
-            } else {
-              const selected = cdata.selectedItems[0];
-              const isCreateNew = PickerUtilsV2.isCreateNewNotePick(selected);
-              if (isCreateNew) {
-                // check if we really want to create a new note.
-                // if a user selects a vault in the picker that
-                // already has the note, we should not create a new one.
-                const fname = selected.fname;
-                const maybeNote = NoteUtils.getNoteByFnameV5({
-                  fname,
-                  notes: engine.notes,
-                  vault, // this is the vault selected from the vault picker
-                  wsRoot: engine.wsRoot,
-                });
-                if (_.isUndefined(maybeNote)) {
-                  dest = NoteUtils.create({ fname, vault });
-                } else {
-                  dest = maybeNote;
-                }
-              } else {
-                dest = selected as NoteProps;
-              }
-            }
-            resolve({
-              dest,
-              origin,
-              nodesToMove,
-              engine,
-            });
-            lc.onHide();
-          } else if (event.action === "error") {
-            this.L.error({ msg: `error: ${event.data}` });
-            resolve(undefined);
-          } else if (
-            event.data &&
-            event.action === "changeState" &&
-            event.data.action === "hide"
-          ) {
-            this.L.info({
-              ctx: "MoveHeaderCommand",
-              msg: "changeState.hide event received.",
-            });
-          } else {
-            this.L.error({ msg: `unhandled error: ${event.data}` });
-            resolve(undefined);
-          }
-        },
-      });
+    return NoteLookupProviderUtils.subscribe({
+      id: this.key,
+      controller: lc,
+      logger: this.L,
+      onDone: (event: HistoryEvent) => {
+        const data = event.data as NoteLookupProviderSuccessResp;
+        const quickpick: DendronQuickPickerV2 = lc.quickpick;
+        const dest = this.prepareDestination({
+          engine,
+          quickpick,
+          selectedItems: data.selectedItems,
+        });
+        return {
+          dest,
+          origin,
+          nodesToMove,
+          engine,
+        };
+      },
     });
   }
 

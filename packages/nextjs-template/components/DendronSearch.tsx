@@ -40,10 +40,6 @@ export function DendronSearch(props: {
   notes: SectionsData["notes"];
   indexId: string;
 }) {
-  // if (!verifyNoteData(props)) {
-  //   return <DendronSpinner />;
-  // }
-
   return <DebouncedDendronSearchComponent {...props} />;
 }
 

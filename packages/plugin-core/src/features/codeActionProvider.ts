@@ -258,9 +258,13 @@ export const refactorProvider: CodeActionProvider = {
         command: {
           command: new PasteLinkCommand().key,
           title: "Wrap as Markdown Link",
-          arguments: [{ source: ContextualUIEvents.ContextualUICodeAction,
-          link: text,
-          selection }],
+          arguments: [
+            {
+              source: ContextualUIEvents.ContextualUICodeAction,
+              link: text,
+              selection,
+            },
+          ],
         },
       };
 
@@ -278,10 +282,11 @@ export const refactorProvider: CodeActionProvider = {
         return;
       } else {
         //regex for url
-        const regex = "^(http://www.|https://www.|http://|https://)?[a-z0-9]+([-.]{1}[a-z0-9]+)*.[a-z]{2,5}(:[0-9]{1,5})?(/.*| [^ ]*)?$";
-        if(!_.isUndefined(text) && text.match(regex)) {
-        return [WrapAsMarkdownLink]
-      }
+        const regex =
+          "^(http://www.|https://www.|http://|https://)?[a-z0-9]+([-.]{1}[a-z0-9]+)*.[a-z]{2,5}(:[0-9]{1,5})?(/.[^s]*)?$";
+        if (!_.isUndefined(text) && text.match(regex)) {
+          return [WrapAsMarkdownLink];
+        }
         return !_.isUndefined(header)
           ? [createNewNoteAction, renameHeaderAction, copyHeaderRefAction]
           : [createNewNoteAction];

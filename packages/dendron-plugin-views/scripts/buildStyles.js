@@ -5,7 +5,7 @@ const _ = require("lodash");
 const filesToThemeMap = (root) => {
 	const dir = fs.readdirSync(root);
 	const out = {};
-	dir.map(ent=> {
+	dir.forEach(ent => {
 		out[path.basename(ent, ".css")] = path.join(root, ent);
 	});
 	return out;
@@ -17,7 +17,7 @@ const filesToThemeMap = (root) => {
 const fetchBaseStyles = (dst) => {
 	const themes = ["light", "dark"];
 	const nextRoot = path.join("..", "dendron-next-server", "public");
-	themes.map(th => {
+	themes.forEach(th => {
 		fs.copyFileSync(path.join(nextRoot, `${th}-theme.css`), path.join(dst, `${th}.css`));
 	});
 };
@@ -45,9 +45,9 @@ const concatStyles = (themeMaps) => {
 		light: [],
 		dark: [],
 	};
-	themeMaps.map(themeMap => {
+	themeMaps.forEach(themeMap => {
 		const keys = ["light", "dark"];
-		keys.map(k => {
+		keys.forEach(k => {
 			const themeContents = fs.readFileSync(themeMap[k], {encoding: "utf-8"});
 			finalOutput[k].push(themeContents)
 		});

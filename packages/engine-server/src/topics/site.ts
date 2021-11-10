@@ -135,14 +135,7 @@ export class SiteUtils {
         "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/not-sprouted.png)",
       ].join("\n"),
     });
-    const changelog = NoteUtils.create({
-      vault: vaults[0],
-      fname: "root.changelog",
-      id: "changelog",
-      title: "Changelog",
-      body: [].join("\n"),
-    });
-    return [note, changelog];
+    return [note];
   }
 
   static async filterByConfig(opts: {
@@ -227,14 +220,14 @@ export class SiteUtils {
     const logger = createLogger(LOGGER_NAME);
     logger.info({ ctx: "filterByHiearchy:enter", domain, config });
     const sconfig = config.site;
-    let hConfig = this.getConfigForHierarchy({
+    const hConfig = this.getConfigForHierarchy({
       config: sconfig,
       noteOrName: domain,
     });
     const notesForHiearchy = _.clone(engine.notes);
 
     // get the domain note
-    let notes = NoteUtils.getNotesByFname({
+    const notes = NoteUtils.getNotesByFname({
       fname: domain,
       notes: notesForHiearchy,
     });
@@ -257,7 +250,13 @@ export class SiteUtils {
         noteDict: notesForHiearchy,
       });
     } else if (notes.length < 1) {
-      logger.error({ ctx: "filterByHiearchy", msg: "note not found", domain });
+      logger.error({
+        ctx: "filterByHiearchy",
+        msg: "note not found",
+        domain,
+        notesForHiearchy,
+      });
+      console.log("BOND");
       // TODO: add warning
       return;
     } else {

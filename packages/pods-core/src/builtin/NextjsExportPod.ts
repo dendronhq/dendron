@@ -50,6 +50,20 @@ export const removeBodyFromNote = ({ body, ...note }: Record<string, any>) =>
 export const removeBodyFromNotesDict = (notes: NotePropsDict) =>
   mapObject(notes, (_k, note: NotePropsDict) => removeBodyFromNote(note));
 
+type NotesSectionsData = Pick<
+  NoteProps,
+  | "id"
+  | "title"
+  | "children"
+  | "custom"
+  | "parent"
+  | "schema"
+  | "fname"
+  | "stub"
+  | "updated"
+  | "vault"
+>;
+
 export const filterNav = ({
   id,
   title,
@@ -59,20 +73,21 @@ export const filterNav = ({
   schema,
   fname,
   stub,
-}: Record<string, any>):
-  | Pick<
-      NoteProps,
-      | "id"
-      | "title"
-      | "children"
-      | "custom"
-      | "parent"
-      | "schema"
-      | "fname"
-      | "stub"
-    >
-  | undefined => {
-  return { id, title, children, custom, parent, schema, fname, stub };
+  updated,
+  vault,
+}: Record<string, any>): NotesSectionsData | undefined => {
+  return {
+    id,
+    title,
+    children,
+    custom,
+    parent,
+    schema,
+    fname,
+    stub,
+    updated,
+    vault,
+  };
 };
 
 export const filterNavItemsFromNotes = (
@@ -80,22 +95,32 @@ export const filterNavItemsFromNotes = (
   domainsProps: NoteProps[],
   noteIndex: NoteProps | undefined
 ) => {
-  const notesObj = (
-    obj: Pick<
-      NoteProps,
-      | "id"
-      | "title"
-      | "children"
-      | "custom"
-      | "parent"
-      | "schema"
-      | "fname"
-      | "stub"
-    >[]
-  ) =>
+  const notesObj = (obj: NotesSectionsData[]) =>
     obj.reduce((acc, curr) => {
-      const { id, title, children, custom, parent, schema, fname, stub } = curr;
-      acc[id] = { id, title, children, custom, parent, schema, fname, stub };
+      const {
+        id,
+        title,
+        children,
+        custom,
+        parent,
+        schema,
+        fname,
+        stub,
+        updated,
+        vault,
+      } = curr;
+      acc[id] = {
+        id,
+        title,
+        children,
+        custom,
+        parent,
+        schema,
+        fname,
+        stub,
+        updated,
+        vault,
+      };
 
       return acc;
     }, {} as { [key: string]: Partial<NoteProps> });

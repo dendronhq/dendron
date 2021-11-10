@@ -15,7 +15,7 @@ import { combinedStore, useCombinedDispatch } from "../features";
 import { browserEngineSlice } from "../features/engine";
 import "../public/light-theme.css";
 import "../styles/scss/main.scss";
-import { fetchConfig, fetchNotes, fetchSections } from "../utils/fetchers";
+import { fetchConfig, fetchSections } from "../utils/fetchers";
 import { useDendronRouter } from "../utils/hooks";
 import { getAssetUrl } from "../utils/links";
 import { NoteData, SectionsData } from "../utils/types";
@@ -46,18 +46,16 @@ function DendronApp({ Component, pageProps }: AppProps) {
   useEffect(() => {
     (async () => {
       setLogLevel("INFO");
-      // logger.info({ ctx: "fetchNotes:pre" });
-      // Every time a new page is rendered this logic is executed.
       const data = await fetchSections();
-      // logger.info({ ctx: "fetchNotes:got-data" });
       setNoteData(data);
-      // batch(() => {
-      //   dispatch(browserEngineSlice.actions.setNotes(data.notes));
-      //   dispatch(browserEngineSlice.actions.setNoteIndex(data.noteIndex));
-      // });
-      // const config = await fetchConfig();
-      // logger.info({ ctx: "fetchConfig:got-data" });
-      // dispatch(browserEngineSlice.actions.setConfig(config));
+      batch(() => {
+        dispatch(
+          browserEngineSlice.actions.setNotes(data.notes as NotePropsDict)
+        );
+        dispatch(browserEngineSlice.actions.setNoteIndex(data.noteIndex));
+      });
+      const config = await fetchConfig();
+      dispatch(browserEngineSlice.actions.setConfig(config));
     })();
   }, []);
 

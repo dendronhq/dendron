@@ -35,7 +35,7 @@ export type SectionsData = {
       | "stub"
     >;
   };
-  noteIndex: NoteProps | undefined;
+  noteIndex: NoteProps;
 };
 
 export type NoteData = {

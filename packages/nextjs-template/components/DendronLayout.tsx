@@ -22,7 +22,7 @@ export default function DendronLayout(
 ) {
   const [isCollapsed, setCollapsed] = React.useState(false);
   const [isResponsive, setResponsive] = React.useState(false);
-  const id = props.noteIndex?.id || "";
+  const { id } = props.noteIndex;
 
   const menu = useMemo(
     () => (

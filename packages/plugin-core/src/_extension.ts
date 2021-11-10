@@ -535,6 +535,7 @@ export async function _activate(
         noCaching: dendronConfig.noCaching || false,
         numNotes,
         numVaults: _.size(getEngine().vaults),
+        workspaceType: ws.type,
       });
       if (stage !== "test") {
         await ws.activateWatchers();

@@ -598,7 +598,7 @@ export enum DMessageSource {
   webClient = "webClient",
 }
 
-export enum DMessageType {
+export enum DMessageEnum {
   INIT = "init",
   ON_DID_CHANGE_ACTIVE_TEXT_EDITOR = "onDidChangeActiveTextEditor",
   MESSAGE_DISPATCHER_READY = "messageDispatcherReady",
@@ -626,10 +626,9 @@ export enum CalendarViewMessageType {
   "messageDispatcherReady" = "messageDispatcherReady",
 }
 
-export enum NoteViewMessageType {
+export enum NoteViewMessageEnum {
   "onClick" = "onClick",
   "onGetActiveEditor" = "onGetActiveEditor",
-  "messageDispatcherReady" = "messageDispatcherReady",
 }
 
 export enum ThemeMessageType {
@@ -677,8 +676,10 @@ export type NoteViewMessage = DMessage<
   { id?: string; href?: string }
 >;
 
+export type NoteViewMessageType = DMessageEnum | NoteViewMessageEnum
+
 export type SeedBrowserMessage = DMessage<
-  SeedBrowserMessageType | DMessageType,
+  SeedBrowserMessageType | DMessageEnum,
   { data: any }
 >;
 

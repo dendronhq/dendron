@@ -162,6 +162,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     );
     const configType = "StrictConfigV3";
     // NOTE: this is removed by webpack when building plugin which is why we're loading this dynamically
+    // eslint-disable-next-line global-require
     const tsj = require("ts-json-schema-generator");
     const schema = tsj
       .createGenerator({
@@ -214,7 +215,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           return { error: null };
         }
         case DevCommands.SYNC_ASSETS: {
-          await this.syncAssets();
+          await this.syncAssets(opts);
           return { error: null };
         }
         case DevCommands.PUBLISH: {
@@ -252,7 +253,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           BuildUtils.installPluginDependencies();
 
           this.print("package deps...");
-          BuildUtils.packagePluginDependencies();
+          BuildUtils.packagePluginDependencies(opts);
           return { error: null };
         }
         case DevCommands.INSTALL_PLUGIN: {
@@ -339,7 +340,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     LernaUtils.publishVersion(opts.publishEndpoint);
 
     this.print("sync assets...");
-    await this.syncAssets();
+    await this.syncAssets(opts);
 
     this.print("prep repo...");
     await BuildUtils.prepPluginPkg();
@@ -348,7 +349,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     BuildUtils.installPluginDependencies();
 
     this.print("package deps...");
-    BuildUtils.packagePluginDependencies();
+    BuildUtils.packagePluginDependencies(opts);
 
     this.print("setRegRemote...");
     BuildUtils.setRegRemote();
@@ -363,9 +364,13 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     this.L.info("done");
   }
 
-  async syncAssets() {
-    this.print("build next server...");
-    BuildUtils.buildNextServer();
+  async syncAssets({ fast }: { fast?: boolean }) {
+    if (!fast) {
+      this.print("build next server for prod...");
+      BuildUtils.buildNextServer();
+      this.print("build plugin views for prod...");
+      BuildUtils.buildPluginViews();
+    }
     this.print("sync static...");
     const { staticPath } = await BuildUtils.syncStaticAssets();
     return { staticPath };

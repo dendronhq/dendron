@@ -4,7 +4,7 @@ import {
   CalendarViewMessageType,
   DendronTreeViewKey,
   DMessage,
-  DMessageType,
+  DMessageEnum,
   NoteProps,
   NoteUtils,
   OnDidChangeActiveTextEditorMsg,
@@ -154,7 +154,7 @@ export class CalendarView implements vscode.WebviewViewProvider {
         this._view.show?.(true);
       }
       this._view.webview.postMessage({
-        type: DMessageType.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR,
+        type: DMessageEnum.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR,
         data: {
           note,
           syncChangedNote: true,

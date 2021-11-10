@@ -4,7 +4,7 @@
   "displayName": "dendron",
   "description": "Dendron is a hierarchal note taking tool that grows as you do. ",
   "publisher": "dendron",
-  "version": "0.67.2",
+  "version": "0.68.0",
   "engines": {
     "vscode": "^1.54.0"
   },
@@ -101,6 +101,12 @@
         "command": "dendron.gotoNote",
         "title": "Dendron: Goto Note",
         "desc": "Go to a note"
+      },
+      {
+        "command": "dendron.createSchemaFromHierarchy",
+        "title": "Dendron: Create Schema From Note Hierarchy",
+        "desc": "Create Schema from existing note hierarchy",
+        "docLink": "dendron.topic.schema.create-from-hierarchy.md"
       },
       {
         "command": "dendron.createDailyJournalNote",
@@ -424,13 +430,13 @@
         "docPreview": "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/workbench.help.gif)"
       },
       {
-        "command": "dendron.showNoteGraphV2",
-        "title": "Dendron: Show Note Graph V2",
+        "command": "dendron.showNoteGraph",
+        "title": "Dendron: Show Note Graph",
         "desc": "Display the notes in this workspace as a graph"
       },
       {
-        "command": "dendron.showSchemaGraphV2",
-        "title": "Dendron: Show Schema Graph V2",
+        "command": "dendron.showSchemaGraph",
+        "title": "Dendron: Show Schema Graph",
         "desc": "Display the schemas in this workspace as a graph"
       },
       {
@@ -732,6 +738,10 @@
         "when": "editorFocus"
       },
       {
+        "command": "dendron.createSchemaFromHierarchy",
+        "when": "editorFocus && dendron:pluginActive"
+      },
+      {
         "command": "dendron.createDailyJournalNote",
         "key": "ctrl+shift+i",
         "mac": "cmd+shift+i",
@@ -845,17 +855,21 @@
     "webpack:prod": "webpack --config webpack.prod.js",
     "watch": "yarn compile --watch",
     "build": "yarn compile",
+    "build:dev": "yarn webpack",
     "build:prod": "yarn webpack:prod && ./scripts/varSub.sh",
     "compile": "tsc -p tsconfig.build.json",
     "test": "node ./out/src/test/runTestInteg.js",
     "format": "echo nop",
     "vscode:uninstall": "node ./out/src/scripts/uninstallHook.js",
     "deploy:vscode": "vsce publish --yarn",
-    "deploy:ovsx": "ovsx publish --yarn"
+    "deploy:ovsx": "ovsx publish --yarn",
+    "clean": "yarn rimraf out dist && yarn clean:assets",
+    "clean:assets": "yarn rimraf assets/{static}",
+    "rimraf": "npx rimraf"
   },
   "devDependencies": {
-    "@dendronhq/common-test-utils": "^0.67.2",
-    "@dendronhq/engine-test-utils": "^0.67.2",
+    "@dendronhq/common-test-utils": "^0.68.0",
+    "@dendronhq/engine-test-utils": "^0.68.0",
     "@sentry/webpack-plugin": "^1.17.1",
     "@types/execa": "^2.0.0",
     "@types/fs-extra": "^9.0.1",
@@ -875,6 +889,7 @@
     "mocha": "^7.1.2",
     "node-loader": "^2.0.0",
     "ovsx": "^0.2.1",
+    "rimraf": "^3.0.2",
     "source-map-loader": "^3.0.0",
     "terser-webpack-plugin": "^5.2.4",
     "ts-loader": "^8.0.0",
@@ -887,12 +902,12 @@
     "webpack-merge": "^5.8.0"
   },
   "dependencies": {
-    "@dendronhq/api-server": "^0.67.2",
-    "@dendronhq/common-all": "^0.67.2",
-    "@dendronhq/common-server": "^0.67.2",
-    "@dendronhq/dendron-cli": "^0.67.2",
-    "@dendronhq/engine-server": "^0.67.2",
-    "@dendronhq/pods-core": "^0.67.2",
+    "@dendronhq/api-server": "^0.68.0",
+    "@dendronhq/common-all": "^0.68.0",
+    "@dendronhq/common-server": "^0.68.0",
+    "@dendronhq/dendron-cli": "^0.68.0",
+    "@dendronhq/engine-server": "^0.68.0",
+    "@dendronhq/pods-core": "^0.68.0",
     "@sentry/integrations": "^6.13.1",
     "@sentry/node": "^6.13.1",
     "@types/vscode": "1.58",

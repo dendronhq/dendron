@@ -21,7 +21,7 @@ export class ShowSchemaGraphCommand extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
-  key = DENDRON_COMMANDS.SHOW_SCHEMA_GRAPH_V2.key;
+  key = DENDRON_COMMANDS.SHOW_SCHEMA_GRAPH.key;
   async gatherInputs(): Promise<any> {
     return {};
   }

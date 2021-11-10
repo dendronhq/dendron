@@ -2,7 +2,7 @@
 id: 73eb67ea-0291-45e7-8f2f-193fd6f00643
 title: Links
 desc: ""
-updated: 1634799440754
+updated: 1636412664590
 created: 1608518909864
 ---
 
@@ -11,6 +11,8 @@ created: 1608518909864
 ## Wiki Link
 
 - [[dendron.ref.figure]]
+- [[same note link to anchor|#unpublished-page]]
+- [[diff note link to anchor|dendron.ref.figure#block]]
 
 ## XVault Link
 

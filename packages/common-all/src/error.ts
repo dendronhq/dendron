@@ -233,6 +233,20 @@ export class ErrorFactory {
     });
   }
 
+  static createSchemaValidationError({
+    message,
+  }: {
+    message: string;
+  }): DendronError {
+    return new DendronError({
+      message,
+
+      // Setting severity as minor since Dendron could still be functional even
+      // if some particular schema is malformed.
+      severity: ERROR_SEVERITY.MINOR,
+    });
+  }
+
   /** Stringify that will not throw if it fails to stringify
    * (for example: due to circular references)  */
   private static safeStringify(obj: any) {

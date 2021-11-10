@@ -40,6 +40,34 @@ export type CreateSchemaOptsV4 = {
   modifier?: (schema: SchemaModuleProps) => SchemaModuleProps;
 };
 
+/**
+ * Class for simplifying creation of multiple notes for tests by being
+ * able to specify defaults upon construction. */
+export class TestNoteFactory {
+  private readonly _defaults: Omit<CreateNoteOptsV4, "fname">;
+
+  constructor(defaults: Omit<CreateNoteOptsV4, "fname">) {
+    this._defaults = {
+      ...defaults,
+    };
+  }
+
+  async createForFName(fname: string): Promise<NoteProps> {
+    return await NoteTestUtilsV4.createNote({
+      fname,
+      ...this._defaults,
+    });
+  }
+
+  async createForFNames(fnames: string[]): Promise<NoteProps[]> {
+    const noteProps: NoteProps[] = [];
+    for (let i = 0; i < fnames.length; i++) {
+      noteProps.push(await this.createForFName(fnames[i]));
+    }
+    return noteProps;
+  }
+}
+
 export class NoteTestUtilsV4 {
   static createSchema = async (opts: CreateSchemaOptsV4) => {
     const { fname, vault, noWrite, wsRoot } = _.defaults(opts, {

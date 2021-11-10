@@ -64,6 +64,7 @@ import { SeedRemoveCommand } from "./SeedRemoveCommand";
 import { RunMigrationCommand } from "./RunMigrationCommand";
 import { SeedBrowseCommand } from "./SeedBrowseCommand";
 import { CreateTaskCommand } from "./CreateTask";
+import { CreateSchemaFromHierarchyCommand } from "./CreateSchemaFromHierarchyCommand";
 import { VaultConvertCommand } from "./VaultConvert";
 
 const ALL_COMMANDS = [
@@ -80,6 +81,7 @@ const ALL_COMMANDS = [
   CopyNoteURLCommand,
   CreateDailyJournalCommand,
   CreateHookCommand,
+  CreateSchemaFromHierarchyCommand,
   DeleteHookCommand,
   DeleteNodeCommand,
   DiagnosticsReportCommand,

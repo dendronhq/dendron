@@ -52,9 +52,14 @@ export class SchemaParser {
         try {
           return await this.parseFile(fpath, vault);
         } catch (err) {
+          let message = "";
+          if (err instanceof Error) {
+            message = err.message;
+          }
+
           return new DendronError({
             message: ERROR_STATUS.BAD_PARSE_FOR_SCHEMA,
-            payload: { fpath, cause: err },
+            payload: { fpath, message, cause: err },
           });
         }
       })

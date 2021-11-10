@@ -1,6 +1,6 @@
 import {
   DendronWebViewKey,
-  DMessageType,
+  DMessageEnum,
   GraphViewMessage,
   GraphViewMessageType,
   NoteProps,
@@ -23,7 +23,7 @@ export class ShowNoteGraphCommand extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
-  key = DENDRON_COMMANDS.SHOW_NOTE_GRAPH_V2.key;
+  key = DENDRON_COMMANDS.SHOW_NOTE_GRAPH.key;
   async gatherInputs(): Promise<any> {
     return {};
   }
@@ -32,7 +32,7 @@ export class ShowNoteGraphCommand extends BasicCommand<
     if (panel) {
       // panel.title = `${title} ${note.fname}`;
       panel.webview.postMessage({
-        type: DMessageType.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR,
+        type: DMessageEnum.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR,
         data: {
           note,
           sync: true,

@@ -251,7 +251,8 @@
       "profile": "https://github.com/aleksey-rowan",
       "contributions": [
         "code",
-        "doc"
+        "doc",
+        "bug"
       ]
     },
     {
@@ -829,6 +830,24 @@
       "name": "Mo",
       "avatar_url": "https://avatars.githubusercontent.com/u/5711555?v=4",
       "profile": "https://github.com/mhijazi1",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "cconrad",
+      "name": "Claus Conrad",
+      "avatar_url": "https://avatars.githubusercontent.com/u/584491?v=4",
+      "profile": "https://github.com/cconrad",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "johndendron",
+      "name": "johndendron",
+      "avatar_url": "https://avatars.githubusercontent.com/u/89761127?v=4",
+      "profile": "https://github.com/johndendron",
       "contributions": [
         "bug"
       ]

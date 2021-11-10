@@ -87,7 +87,8 @@ type CommandEntry = {
     | "navigation"
     | "misc"
     | "publishing"
-    | "seeds";
+    | "seeds"
+    | "schemas";
   /**
    * Skip doc generation
    */
@@ -213,6 +214,16 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
       key: "ctrl+enter",
       when: "editorFocus",
     },
+  },
+  CREATE_SCHEMA_FROM_HIERARCHY: {
+    key: "dendron.createSchemaFromHierarchy",
+    title: `${CMD_PREFIX} Create Schema From Note Hierarchy`,
+    group: "schemas",
+    keybindings: {
+      when: `editorFocus && ${DendronContext.PLUGIN_ACTIVE}`,
+    },
+    desc: "Create Schema from existing note hierarchy",
+    docLink: "dendron.topic.schema.create-from-hierarchy.md",
   },
   CREATE_DAILY_JOURNAL_NOTE: {
     key: "dendron.createDailyJournalNote",
@@ -737,15 +748,15 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docLink: "dendron.topic.commands.md",
     docPreview: `![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/workbench.help.gif)`,
   },
-  SHOW_NOTE_GRAPH_V2: {
-    key: "dendron.showNoteGraphV2",
-    title: `${CMD_PREFIX} Show Note Graph V2`,
+  SHOW_NOTE_GRAPH: {
+    key: "dendron.showNoteGraph",
+    title: `${CMD_PREFIX} Show Note Graph`,
     group: "workspace",
     desc: "Display the notes in this workspace as a graph",
   },
-  SHOW_SCHEMA_GRAPH_V2: {
-    key: "dendron.showSchemaGraphV2",
-    title: `${CMD_PREFIX} Show Schema Graph V2`,
+  SHOW_SCHEMA_GRAPH: {
+    key: "dendron.showSchemaGraph",
+    title: `${CMD_PREFIX} Show Schema Graph`,
     group: "workspace",
     desc: "Display the schemas in this workspace as a graph",
   },

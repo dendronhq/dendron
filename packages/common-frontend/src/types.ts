@@ -11,7 +11,7 @@ export type EngineSliceState = {
   error: any;
   loading: LoadingStatus;
   currentRequestId: string | undefined;
-} & Partial<DEngineInitPayload>;
+} & Partial<DEngineInitPayload> & Pick<DEngineInitPayload, "notes"|"schemas"|"vaults">;
 
 export function verifyEngineSliceState(
   opts: Partial<EngineSliceState>

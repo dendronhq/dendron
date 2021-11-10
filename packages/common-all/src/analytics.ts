@@ -41,6 +41,11 @@ export enum ExtensionEvents {
   VimExtensionInstalled = "Vim_Extension_Installed",
 }
 
+export enum LookupEvents {
+  LookupModifierSetByController = "Lookup_Modifier_Set_By_Controller",
+  LookupModifierToggledByUser = "Lookup_Modifier_Toggled_By_User",
+}
+
 export enum SurveyEvents {
   InitialSurveyPrompted = "Initial_Survey_Prompted",
   InitialSurveyAccepted = "Initial_Survey_Accepted",

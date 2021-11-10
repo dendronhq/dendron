@@ -494,7 +494,7 @@ export class SurveyUtils {
   }
 
   static async showLapsedUserSurvey() {
-    AnalyticsUtils.track(SurveyEvents.InitialSurveyPrompted);
+    AnalyticsUtils.track(SurveyEvents.LapsedUserSurveyPrompted);
     await vscode.window
       .showInformationMessage(
         "Could you share some feedback to help us improve?",

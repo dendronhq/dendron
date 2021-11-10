@@ -7,8 +7,8 @@ export {
 const ROOT_PATH = "/doc/root";
 
 export enum ThemeType {
-  LIGHT = "LIGHT",
-  DARK = "DARK",
+  LIGHT = "light",
+  DARK = "dark",
 }
 
 export enum ThemeTarget {
@@ -59,6 +59,10 @@ export enum ERROR_STATUS {
   INVALID_CONFIG = "invalid_config",
   INVALID_STATE = "invalid_state",
   // --- 500
+  UNKNOWN = "unknown",
+}
+
+export enum USER_MESSAGES {
   UNKNOWN = "unknown",
 }
 

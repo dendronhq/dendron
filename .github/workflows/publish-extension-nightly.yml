@@ -75,14 +75,30 @@ jobs:
           DENDRON_CLI=./packages/dendron-cli/lib/bin/dendron-cli.js
           LOG_LEVEL=info $DENDRON_CLI dev prep_plugin --extensionTarget nightly
 
+      # yarn deploy:vscode (vsce publish) attempts to pull dependencies, so
+      # verdaccio must be running
       - name: Publish to VS Code Marketplace
         env:
           VSCE_PAT: ${{ secrets.VSCODE_PUBLISH_PWD }}
         working-directory: ./packages/plugin-core
-        run: yarn deploy:vscode
+        run: |
+          npx verdaccio > verdaccio.log  2>&1 &
+          sleep 15
+          echo "checking verdaccio log"
+          cat verdaccio.log
+          echo "Setting registry to local"
+          yarn config set registry http://localhost:4873
+          npm set registry http://localhost:4873/
+          echo "running deploy:vscode"
+          yarn deploy:vscode
 
       - name: Publish to Open VSX Marketplace
         env:
           OVSX_PAT: ${{ secrets.VSCODIUM_PUBLISH_PWD }}
         working-directory: ./packages/plugin-core
-        run: yarn deploy:ovsx
+        run: |
+          echo "Setting registry to local"
+          yarn config set registry http://localhost:4873
+          npm set registry http://localhost:4873/
+          echo "running deploy:ovsx"
+          yarn deploy:ovsx

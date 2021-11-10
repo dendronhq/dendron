@@ -302,10 +302,13 @@ export function setupBeforeAfter(
     beforeHook?: (ctx: ExtensionContext) => any;
     afterHook?: any;
     noSetInstallStatus?: boolean;
+    noSetTimeout?: boolean;
   }
 ) {
   // allows for
-  _this.timeout(TIMEOUT);
+  if (!opts?.noSetTimeout) {
+    _this.timeout(TIMEOUT);
+  }
   const ctx = VSCodeUtils.getOrCreateMockContext();
   beforeEach(async () => {
     // DendronWorkspace.getOrCreate(ctx);

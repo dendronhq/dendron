@@ -5,3 +5,4 @@ docs/*
 docs
 vault-generated/
 pods/*
+.history

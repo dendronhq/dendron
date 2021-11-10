@@ -1,6 +1,6 @@
 import {
   DMessageSource,
-  DMessageType,
+  DMessageEnum,
   OnDidChangeActiveTextEditorMsg,
   SeedBrowserMessageType,
   ThemeMessageType,
@@ -66,7 +66,7 @@ function AppVSCode({ Component, pageProps }: any) {
     setLogLevel("INFO");
     // get variables from vscode parent
     postVSCodeMessage({
-      type: DMessageType.INIT,
+      type: DMessageEnum.INIT,
       data: {},
       source: DMessageSource.webClient,
     });
@@ -88,7 +88,7 @@ function AppVSCode({ Component, pageProps }: any) {
     // NOTE: initial message, state might not be set
     const { port, ws } = getWorkspaceParamsFromQueryString();
 
-    if (msg.type === DMessageType.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR) {
+    if (msg.type === DMessageEnum.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR) {
       const cmsg = msg as OnDidChangeActiveTextEditorMsg;
       const { sync, note, syncChangedNote } = cmsg.data;
       if (sync) {

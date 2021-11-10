@@ -1213,6 +1213,10 @@ export class NoteUtils {
       if (note) yield note;
     }
   }
+
+  static isNote(uri: URI) {
+    return uri.fsPath.endsWith(".md");
+  }
 }
 
 type SchemaMatchResult = {
@@ -1520,6 +1524,20 @@ export class SchemaUtils {
       return true;
     });
     return out;
+  }
+
+  static getSchema({ engine, id }: { engine: DEngineClient; id: string }) {
+    return engine.schemas[id];
+  }
+
+  static doesSchemaExist({
+    id,
+    engine,
+  }: {
+    id: string;
+    engine: DEngineClient;
+  }) {
+    return !_.isUndefined(engine.schemas[id]);
   }
 
   static getSchemaFromNote({

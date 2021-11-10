@@ -256,7 +256,6 @@ export class SiteUtils {
         domain,
         notesForHiearchy,
       });
-      console.log("BOND");
       // TODO: add warning
       return;
     } else {

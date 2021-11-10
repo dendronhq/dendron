@@ -43,7 +43,7 @@ export abstract class DendronBaseWorkspace implements DWorkspaceV2 {
 
   get engine(): DEngineClient {
     if (!this._engine) {
-      throw new DendronError({ message: "no engiine set" });
+      throw new DendronError({ message: "no engine set" });
     }
     return this._engine;
   }

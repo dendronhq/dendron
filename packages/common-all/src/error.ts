@@ -91,6 +91,8 @@ export class DendronError extends Error implements IDendronError {
         msg: payload.message,
         stack: payload.stack,
       });
+    } else if (_.isString(payload)) {
+      this.payload = payload;
     } else {
       this.payload = JSON.stringify(payload || {});
     }

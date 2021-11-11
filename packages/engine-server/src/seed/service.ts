@@ -131,7 +131,8 @@ export class SeedService {
     ConfigUtils.setWorkspaceProp(config, "seeds", seeds);
 
     const updateWorkspace =
-      WorkspaceUtils.getWorkspaceTypeFromDir(wsRoot) === WorkspaceType.CODE;
+      (await WorkspaceUtils.getWorkspaceTypeFromDir(wsRoot)) ===
+      WorkspaceType.CODE;
     await ws.addVault({
       vault: SeedUtils.seed2Vault({ seed }),
       config,
@@ -278,7 +279,7 @@ export class SeedService {
     ws.setConfig(config);
 
     const updateWorkspace =
-      WorkspaceUtils.getWorkspaceTypeFromDir(this.wsRoot) ===
+      (await WorkspaceUtils.getWorkspaceTypeFromDir(this.wsRoot)) ===
       WorkspaceType.CODE;
     await ws.removeVault({
       vault: SeedUtils.seed2Vault({ seed }),

@@ -127,7 +127,7 @@ runTest("add", () => {
           },
           getSeedVaultPathForCheckFile(id)
         );
-        checkVaults(
+        await checkVaults(
           {
             wsRoot,
             vaults: [{ fsPath: "vault", seed: id, name: id } as DVault].concat(
@@ -197,7 +197,7 @@ runTest("add", () => {
           },
           getSeedVaultPathForCheckFile(id)
         );
-        checkVaults(
+        await checkVaults(
           {
             wsRoot,
             vaults: [{ fsPath: "vault", seed: id, name: id } as DVault].concat(

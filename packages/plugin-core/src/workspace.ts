@@ -1,6 +1,7 @@
 import {
   APIUtils,
   ConfigUtils,
+  CONSTANTS,
   DendronError,
   DendronTreeViewKey,
   DendronWebViewKey,
@@ -60,6 +61,7 @@ import { SampleView } from "./views/SampleView";
 import { WindowWatcher } from "./windowWatcher";
 import { WorkspaceWatcher } from "./WorkspaceWatcher";
 import { Uri } from "vscode";
+import * as Sentry from "@sentry/node";
 
 let _DendronWorkspace: DendronExtension | null;
 
@@ -141,6 +143,8 @@ export function getVaultFromUri(fileUri: Uri) {
   });
   return vault;
 }
+
+export const NO_WORKSPACE_IMPLEMENTATION = "no workspace implementation";
 
 // --- Main
 export class DendronExtension {
@@ -237,44 +241,66 @@ export class DendronExtension {
     return vscode.workspace.workspaceFolders;
   }
 
-  static workspaceRoot(): string | undefined {
+  static async workspaceRoots(): Promise<string[]> {
     try {
-      return path.dirname(this.workspaceFile().fsPath);
+      return [path.dirname(this.workspaceFile().fsPath)];
     } catch {
       const workspaceFolders = this.workspaceFolders();
       if (workspaceFolders)
-        return WorkspaceUtils.findWSRootInWorkspaceFolders(workspaceFolders)
-          ?.uri.fsPath;
+        return WorkspaceUtils.findWSRootsInWorkspaceFolders(workspaceFolders);
     }
-    return undefined;
+    return [];
   }
 
-  /**
-   * Currently, this is a check to see if rootDir is defined in settings
-   */
-  static isActive(context?: vscode.ExtensionContext) {
-    /**
-     * we do a try catch because `DendronWorkspace.workspaceFile` throws an error if workspace file doesn't exist
-     * the reason we don't use `vscode.*` method is because we need to stub this value during tests
-     */
+  /** Checks if the current workspace open in VSCode is a Dendron workspace or not. */
+  static async isDendronWorkspace(): Promise<boolean | undefined> {
+    // we do a try catch because `DendronWorkspace.workspaceFile` throws an error if workspace file doesn't exist
     try {
       // code workspace takes precedence, if code workspace, return
-      const hasCodeWorkspaceFiile =
+      if (
         vscode.workspace.workspaceFile &&
         path.basename(DendronExtension.workspaceFile().fsPath) ===
-          this.DENDRON_WORKSPACE_FILE;
-      if (hasCodeWorkspaceFiile) {
-        return hasCodeWorkspaceFiile;
-      }
+          this.DENDRON_WORKSPACE_FILE
+      )
+        return true;
 
       const workspaceFolders = DendronExtension.workspaceFolders();
-      if (context && workspaceFolders) {
-        return WorkspaceUtils.findWSRootInWorkspaceFolders(workspaceFolders);
+      if (workspaceFolders) {
+        return !_.isEmpty(
+          await WorkspaceUtils.findWSRootsInWorkspaceFolders(workspaceFolders)
+        );
       }
-      return hasCodeWorkspaceFiile;
+
+      return false;
     } catch (err) {
       return false;
     }
+  }
+
+  /**
+   * Checks if a Dendron workspace is currently active.
+   */
+  static isActive(_context?: vscode.ExtensionContext): boolean {
+    const ctx = "DendronExtension.isActive";
+    try {
+      //
+      const { wsRoot } = getDWorkspace();
+      if (fs.existsSync(path.join(wsRoot, CONSTANTS.DENDRON_CONFIG_FILE))) {
+        return true;
+      }
+    } catch (err: any) {
+      // If no workspace implementation is available, then workspace is not active
+      if (err?.payload === NO_WORKSPACE_IMPLEMENTATION) return false;
+      // Otherwise, that's an unexpected error and we should capture that
+      const error =
+        err instanceof DendronError
+          ? err
+          : new DendronError({ message: ctx, payload: err });
+      Sentry.captureException(error);
+      Logger.error({ ctx, msg: "Failed to check WS active", error });
+      return false;
+    }
+    return false;
   }
 
   static version(): string {
@@ -316,12 +342,16 @@ export class DendronExtension {
   private disposableStore: DisposableStore;
   public workspaceImpl?: DWorkspaceV2;
 
-  static getOrCreate(
+  static async getOrCreate(
     context: vscode.ExtensionContext,
     opts?: { skipSetup?: boolean }
   ) {
     if (!_DendronWorkspace) {
       _DendronWorkspace = new DendronExtension(context, opts);
+      _DendronWorkspace.type = await WorkspaceUtils.getWorkspaceType({
+        workspaceFile: vscode.workspace.workspaceFile,
+        workspaceFolders: vscode.workspace.workspaceFolders,
+      });
     }
     return _DendronWorkspace;
   }
@@ -345,10 +375,6 @@ export class DendronExtension {
     this.context = context;
     // set the default
     this.type = WorkspaceType.CODE;
-    this.type = WorkspaceUtils.getWorkspaceType({
-      workspaceFile: vscode.workspace.workspaceFile,
-      workspaceFolders: vscode.workspace.workspaceFolders,
-    });
     _DendronWorkspace = this;
     this.L = Logger;
     this.disposableStore = new DisposableStore();
@@ -363,7 +389,10 @@ export class DendronExtension {
 
   getWorkspaceImplOrThrow(): DWorkspaceV2 {
     if (_.isUndefined(this.workspaceImpl)) {
-      throw Error("no native workspace");
+      throw new DendronError({
+        message: "no native workspace",
+        payload: NO_WORKSPACE_IMPLEMENTATION,
+      });
     }
     return this.workspaceImpl;
   }

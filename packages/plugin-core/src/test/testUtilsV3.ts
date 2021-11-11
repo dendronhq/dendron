@@ -51,7 +51,6 @@ import { DendronExtension, getDWorkspace } from "../workspace";
 import { BlankInitializer } from "../workspace/blankInitializer";
 import { WorkspaceInitFactory } from "../workspace/workspaceInitializer";
 import { _activate } from "../_extension";
-import { onWSInit } from "./testUtils";
 import {
   setupCodeConfiguration,
   SetupCodeConfigurationV2,
@@ -263,11 +262,9 @@ export async function runLegacySingleWorkspaceTest(
   opts: SetupLegacyWorkspaceOpts & { onInit: OnInitHook }
 ) {
   const { wsRoot, vaults } = await setupLegacyWorkspace(opts);
-  onWSInit(async () => {
-    const engine = getDWorkspace().engine;
-    await opts.onInit({ wsRoot, vaults, engine });
-  });
   await _activate(opts.ctx);
+  const engine = getDWorkspace().engine;
+  await opts.onInit({ wsRoot, vaults, engine });
   return;
 }
 
@@ -278,11 +275,9 @@ export async function runLegacyMultiWorkspaceTest(
   opts: SetupLegacyWorkspaceMultiOpts & { onInit: OnInitHook }
 ) {
   const { wsRoot, vaults } = await setupLegacyWorkspaceMulti(opts);
-  onWSInit(async () => {
-    const engine = getDWorkspace().engine;
-    await opts.onInit({ wsRoot, vaults, engine });
-  });
   await _activate(opts.ctx);
+  const engine = getDWorkspace().engine;
+  await opts.onInit({ wsRoot, vaults, engine });
   return;
 }
 
@@ -450,13 +445,9 @@ export function describeMultiWS(
   fn: () => any
 ) {
   describe(title, () => {
-    before((done) => {
-      setupLegacyWorkspaceMulti(opts).then(() => {
-        _activate(opts.ctx);
-      });
-      onWSInit(() => {
-        done();
-      });
+    before(async () => {
+      await setupLegacyWorkspaceMulti(opts);
+      await _activate(opts.ctx);
     });
 
     fn();
@@ -470,13 +461,9 @@ export function describeSingleWS(
   fn: () => any
 ) {
   describe(title, () => {
-    before((done) => {
-      setupLegacyWorkspace(opts).then(() => {
-        _activate(opts.ctx);
-      });
-      onWSInit(() => {
-        done();
-      });
+    before(async () => {
+      await setupLegacyWorkspace(opts);
+      await _activate(opts.ctx);
     });
 
     fn();

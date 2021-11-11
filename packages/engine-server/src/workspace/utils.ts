@@ -13,8 +13,14 @@ import {
   WorkspaceOpts,
   WorkspaceType,
   ConfigUtils,
+  isNotUndefined,
 } from "@dendronhq/common-all";
-import { findUpTo, genHash } from "@dendronhq/common-server";
+import {
+  findDownTo,
+  findUpTo,
+  genHash,
+  uniqueOutermostFolders,
+} from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -22,13 +28,13 @@ import { URI } from "vscode-uri";
 
 export class WorkspaceUtils {
   /** Finds the workspace type using the VSCode plugin workspace variables. */
-  static getWorkspaceType({
+  static async getWorkspaceType({
     workspaceFolders,
     workspaceFile,
   }: {
     workspaceFolders?: readonly WorkspaceFolderCode[];
     workspaceFile?: URI;
-  }): WorkspaceType {
+  }): Promise<WorkspaceType> {
     if (
       !_.isUndefined(workspaceFile) &&
       path.basename(workspaceFile.fsPath) === CONSTANTS.DENDRON_WS_NAME
@@ -36,18 +42,26 @@ export class WorkspaceUtils {
       return WorkspaceType.CODE;
     }
     if (!_.isUndefined(workspaceFolders)) {
-      const rootFolder = this.findWSRootInWorkspaceFolders(workspaceFolders);
+      const rootFolder = await this.findWSRootsInWorkspaceFolders(
+        workspaceFolders
+      );
       if (rootFolder) return WorkspaceType.NATIVE;
     }
     return WorkspaceType.NONE;
   }
 
   /** Finds the workspace type by analyzing the given directory. Use if plugin is not available. */
-  static getWorkspaceTypeFromDir(dir: string) {
+  static async getWorkspaceTypeFromDir(dir: string) {
     if (fs.pathExistsSync(path.join(dir, CONSTANTS.DENDRON_WS_NAME))) {
       return WorkspaceType.CODE;
     }
-    if (fs.pathExistsSync(path.join(dir, CONSTANTS.DENDRON_CONFIG_FILE))) {
+    const wsRoot = await findDownTo({
+      base: dir,
+      fname: CONSTANTS.DENDRON_CONFIG_FILE,
+      returnDirPath: true,
+    });
+    if (!wsRoot) return;
+    if (fs.pathExistsSync(path.join(wsRoot, CONSTANTS.DENDRON_CONFIG_FILE))) {
       return WorkspaceType.NATIVE;
     }
     return WorkspaceType.NONE;
@@ -68,14 +82,22 @@ export class WorkspaceUtils {
     return configPath;
   }
 
-  static findWSRootInWorkspaceFolders(
+  static async findWSRootsInWorkspaceFolders(
     workspaceFolders: readonly WorkspaceFolderCode[]
-  ): WorkspaceFolderCode | undefined {
-    const dendronWorkspaceFolders =
-      workspaceFolders.filter((ent) => {
-        return fs.pathExistsSync(path.join(ent.uri.fsPath, "dendron.yml"));
-      }) || [];
-    return dendronWorkspaceFolders[0];
+  ): Promise<string[]> {
+    const folders = uniqueOutermostFolders(
+      workspaceFolders.map((folder) => folder.uri.fsPath)
+    );
+    const dendronWorkspaceFolders = await Promise.all(
+      folders.map((folder) =>
+        findDownTo({
+          base: folder,
+          fname: CONSTANTS.DENDRON_CONFIG_FILE,
+          returnDirPath: true,
+        })
+      )
+    );
+    return dendronWorkspaceFolders.filter(isNotUndefined);
   }
 
   static isNativeWorkspace(workspace: DWorkspaceV2) {

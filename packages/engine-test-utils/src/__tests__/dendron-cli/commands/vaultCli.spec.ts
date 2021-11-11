@@ -23,7 +23,7 @@ describe("VaultCLICommand", () => {
           engine,
           cmd,
         });
-        checkVaults(
+        await checkVaults(
           {
             wsRoot,
             vaults: [vault].concat(vaults),

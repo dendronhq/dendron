@@ -1,4 +1,5 @@
 import chokidar from "chokidar";
+import { COMMON_FOLDER_IGNORES } from "@dendronhq/common-server";
 import path from "path";
 
 /** Mimicks VSCode's disposable for cross-compatibility. */
@@ -16,12 +17,19 @@ export type FileWatcherAdapter = {
 
 export class EngineFileWatcher implements FileWatcherAdapter {
   private watcher: chokidar.FSWatcher;
-  constructor(base: string, pattern: string, onReady?: () => void) {
+  constructor(
+    base: string,
+    pattern: string,
+    chokidarOpts?: chokidar.WatchOptions,
+    onReady?: () => void
+  ) {
     // Chokidar requires paths with globs to use POSIX `/` separators, even on Windows
     const patternWithBase = `${path.posix.normalize(base)}/${pattern}`;
     this.watcher = chokidar.watch(patternWithBase, {
       disableGlobbing: false,
       ignoreInitial: true,
+      ignored: COMMON_FOLDER_IGNORES,
+      ...chokidarOpts,
     });
     if (onReady) this.watcher.on("ready", onReady);
   }

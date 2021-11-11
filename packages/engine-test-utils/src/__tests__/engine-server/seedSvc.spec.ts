@@ -76,7 +76,7 @@ runTest("remove", () => {
           fpath: path.join(wsRoot, "dendron.yml"),
           snapshot: true,
         });
-        checkVaults(
+        await checkVaults(
           {
             wsRoot,
             vaults,
@@ -114,7 +114,7 @@ runTest("remove", () => {
           fpath: path.join(wsRoot, "dendron.yml"),
           snapshot: true,
         });
-        checkVaults(
+        await checkVaults(
           {
             wsRoot,
             vaults,
@@ -186,7 +186,7 @@ runTest("add", () => {
           },
           getSeedVaultPathForCheckFile(id)
         );
-        checkVaults(
+        await checkVaults(
           {
             wsRoot,
             vaults: [{ fsPath: "vault", seed: id, name: id } as DVault].concat(
@@ -253,7 +253,7 @@ runTest("add", () => {
           },
           getSeedVaultPathForCheckFile(id)
         );
-        checkVaults(
+        await checkVaults(
           {
             wsRoot,
             vaults: [{ fsPath: "vault", seed: id, name: id } as DVault].concat(

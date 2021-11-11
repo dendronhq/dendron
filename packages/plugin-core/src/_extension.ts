@@ -15,6 +15,7 @@ import {
   WorkspaceType,
   MigrationEvents,
   ConfigUtils,
+  NativeWorkspaceEvents,
 } from "@dendronhq/common-all";
 import {
   getDurationMilliseconds,
@@ -29,6 +30,7 @@ import {
   WorkspaceService,
   WorkspaceUtils,
   MigrationChangeSetStatus,
+  FileAddWatcher,
 } from "@dendronhq/engine-server";
 import * as Sentry from "@sentry/node";
 import { ExecaChildProcess } from "execa";
@@ -87,6 +89,41 @@ export function activate(context: vscode.ExtensionContext) {
     });
   }
   return;
+}
+
+/** Prompts the user to pick a wsRoot if there are more than one. */
+async function getOrPromptWSRoot(workspaceFolders: string[]) {
+  if (!workspaceFolders) {
+    Logger.error({ msg: "No dendron.yml found in any workspace folder" });
+    return undefined;
+  }
+  if (workspaceFolders.length === 1) {
+    return workspaceFolders[0];
+  } else {
+    const selectedRoot = await VSCodeUtils.showQuickPick(
+      workspaceFolders.map((folder): vscode.QuickPickItem => {
+        return {
+          label: folder,
+        };
+      }),
+      {
+        ignoreFocusOut: true,
+        canPickMany: false,
+        title: "Select Dendron workspace to load",
+      }
+    );
+    if (!selectedRoot) {
+      await vscode.window.showInformationMessage(
+        "You skipped loading any Dendron workspace, Dendron is not active. You can run the 'Developer: Reload Window' command to reactivate Dendron."
+      );
+      Logger.info({
+        msg: "User skipped loading a Dendron workspace",
+        workspaceFolders,
+      });
+      return null;
+    }
+    return selectedRoot.label;
+  }
 }
 
 async function reloadWorkspace() {
@@ -261,15 +298,19 @@ export async function _activate(
     }
 
     //  needs to be initialized to setup commands
-    const ws = DendronExtension.getOrCreate(context, {
+    const ws = await DendronExtension.getOrCreate(context, {
       skipSetup: stage === "test",
     });
     // Need to recompute this for tests, because the instance of DendronExtension doesn't get re-created.
     // Probably also needed if the user switches from one workspace to the other.
-    ws.type = WorkspaceUtils.getWorkspaceType({
+    ws.type = await WorkspaceUtils.getWorkspaceType({
       workspaceFile: vscode.workspace.workspaceFile,
       workspaceFolders: vscode.workspace.workspaceFolders,
     });
+    // Also need to reset the implementation here for testing. Doing it in all
+    // cases because if the extension is activated, we'll recreate it while
+    // activating the workspace
+    ws.workspaceImpl = undefined;
 
     const currentVersion = DendronExtension.version();
     const previousWorkspaceVersion = stateService.getWorkspaceVersion();
@@ -290,17 +331,20 @@ export async function _activate(
       extensionInstallStatus,
     });
 
-    if (DendronExtension.isActive(context)) {
+    if (await DendronExtension.isDendronWorkspace()) {
       if (ws.type === WorkspaceType.NATIVE) {
-        const workspaceFolder = WorkspaceUtils.findWSRootInWorkspaceFolders(
-          DendronExtension.workspaceFolders()!
-        );
-        if (!workspaceFolder) {
-          Logger.error({ msg: "No dendron.yml found in any workspace folder" });
+        const workspaceFolders =
+          await WorkspaceUtils.findWSRootsInWorkspaceFolders(
+            DendronExtension.workspaceFolders()!
+          );
+        if (!workspaceFolders) {
           return false;
         }
+        const wsRoot = await getOrPromptWSRoot(workspaceFolders);
+        if (!wsRoot) return false;
+
         ws.workspaceImpl = new DendronNativeWorkspace({
-          wsRoot: workspaceFolder?.uri.fsPath,
+          wsRoot,
           logUri: context.logUri,
           assetUri,
         });
@@ -528,6 +572,7 @@ export async function _activate(
         noCaching: dendronConfig.noCaching || false,
         numNotes,
         numVaults: _.size(getEngine().vaults),
+        workspaceType: ws.type,
       });
       if (stage !== "test") {
         await ws.activateWatchers();
@@ -536,8 +581,37 @@ export async function _activate(
       Logger.info({ ctx, msg: "fin startClient", durationReloadWorkspace });
     } else {
       // ws not active
-      Logger.info({ ctx: "dendron not active" });
-      toggleViews(false);
+      Logger.info({ ctx, msg: "dendron not active" });
+
+      const watchForNativeWorkspace = vscode.workspace
+        .getConfiguration()
+        .get<boolean>(CONFIG.WATCH_FOR_NATIVE_WS.key);
+      if (watchForNativeWorkspace) {
+        Logger.info({
+          ctx,
+          msg: "watching for a native workspace to be created",
+        });
+
+        toggleViews(false);
+        const autoInit = new FileAddWatcher(
+          vscode.workspace.workspaceFolders?.map(
+            (vscodeFolder) => vscodeFolder.uri.fsPath
+          ) || [],
+          CONSTANTS.DENDRON_CONFIG_FILE,
+          async (filePath) => {
+            Logger.info({
+              ctx,
+              msg: "New `dendron.yml` file has been created, re-activating dendron",
+            });
+            AnalyticsUtils.track(NativeWorkspaceEvents.DetectedInNonDendronWS, {
+              filePath,
+            });
+            await ws.deactivate();
+            activate(context);
+          }
+        );
+        ws.addDisposable(autoInit);
+      }
     }
 
     const backupPaths: string[] = [];
@@ -610,21 +684,21 @@ export async function _activate(
       AnalyticsUtils.track(VSCodeEvents.UserOnOldVSCodeVerUnblocked);
     }
 
-    return showWelcomeOrWhatsNew({
+    await showWelcomeOrWhatsNew({
       extensionInstallStatus,
       version: DendronExtension.version(),
       previousExtensionVersion: previousWorkspaceVersion,
       start: startActivate,
       assetUri,
-    }).then(() => {
-      if (DendronExtension.isActive(context)) {
-        HistoryService.instance().add({
-          source: "extension",
-          action: "activate",
-        });
-      }
-      return false;
     });
+    if (DendronExtension.isActive(context)) {
+      HistoryService.instance().add({
+        source: "extension",
+        action: "activate",
+      });
+      return true;
+    }
+    return false;
   } catch (error) {
     Sentry.captureException(error);
     throw error;

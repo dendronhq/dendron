@@ -21,7 +21,7 @@ suite.skip("startup", function () {
   describe("basic", () => {
     beforeEach(async () => {
       ctx = VSCodeUtils.getOrCreateMockContext();
-      DendronExtension.getOrCreate(ctx);
+      await DendronExtension.getOrCreate(ctx);
       wsRoot = FileTestUtils.tmpDir().name;
       ({} = await setupCodeWorkspaceV2({
         ctx,

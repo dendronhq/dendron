@@ -1,16 +1,38 @@
-import { DVault, VaultUtils } from "@dendronhq/common-all";
+import {
+  DendronError,
+  DVault,
+  RespV2,
+  VaultUtils,
+} from "@dendronhq/common-all";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
-import { TestEngineUtils } from "@dendronhq/engine-test-utils";
+import { ENGINE_HOOKS, TestEngineUtils } from "@dendronhq/engine-test-utils";
 import { describe } from "mocha";
+import { HistoryService } from "@dendronhq/engine-server";
 import * as vscode from "vscode";
+import {
+  LookupControllerV3,
+  LookupControllerV3CreateOpts,
+} from "../../components/lookup/LookupControllerV3";
+import {
+  NoteLookupProvider,
+  OnAcceptHook,
+} from "../../components/lookup/LookupProviderV3";
 import {
   CONTEXT_DETAIL,
   FULL_MATCH_DETAIL,
   HIERARCHY_MATCH_DETAIL,
+  NoteLookupProviderUtils,
   PickerUtilsV2,
 } from "../../components/lookup/utils";
+import { Logger } from "../../logger";
 import { expect } from "../testUtilsv2";
-import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
+import {
+  describeMultiWS,
+  runLegacyMultiWorkspaceTest,
+  setupBeforeAfter,
+} from "../testUtilsV3";
+import sinon from "sinon";
+import _ from "lodash";
 
 function setupNotesForTest({
   wsRoot,
@@ -207,4 +229,168 @@ suite("Lookup Utils Test", function runSuite() {
       });
     });
   });
+});
+
+suite("NoteLookupProviderUtils", function () {
+  const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {});
+
+  describeMultiWS(
+    "GIVEN a subscription to provider id foo",
+    {
+      ctx,
+      preSetupHook: ENGINE_HOOKS.setupBasic,
+    },
+    () => {
+      let lookupCreateOpts: LookupControllerV3CreateOpts;
+      let provider: NoteLookupProvider;
+      let showOpts: any;
+      this.beforeEach(() => {
+        lookupCreateOpts = {
+          nodeType: "note",
+        };
+        provider = new NoteLookupProvider("foo", {
+          allowNewNote: true,
+        });
+        showOpts = {
+          title: "foo",
+          placeholder: "foo",
+          provider,
+          initialValue: "foo",
+        };
+        sinon.stub(PickerUtilsV2, "hasNextPicker").returns(false);
+      });
+
+      this.afterEach(() => {
+        sinon.restore();
+      });
+
+      describe("WHEN event.done", () => {
+        test("THEN returns bare event if onDone callback isn't specified", async () => {
+          const controller = LookupControllerV3.create(lookupCreateOpts);
+
+          controller.show({
+            ...showOpts,
+            nonInteractive: true,
+          });
+
+          const result = await NoteLookupProviderUtils.subscribe({
+            id: "foo",
+            controller,
+            logger: Logger,
+          });
+
+          expect(result.source).toEqual("lookupProvider");
+          expect(result.action).toEqual("done");
+        });
+
+        test("THEN returns onDone callback output if onDone is specificed", async () => {
+          const controller = LookupControllerV3.create(lookupCreateOpts);
+          controller.show({
+            ...showOpts,
+            nonInteractive: true,
+          });
+
+          const result = await NoteLookupProviderUtils.subscribe({
+            id: "foo",
+            controller,
+            logger: Logger,
+            onDone: () => {
+              return { foo: "custom onDone" };
+            },
+          });
+          expect(result.foo).toEqual("custom onDone");
+        });
+      });
+
+      describe("WHEN event.error", async () => {
+        const dummyHook: OnAcceptHook = async (): Promise<RespV2<any>> => {
+          return {
+            error: new DendronError({ message: "foo error" }),
+          };
+        };
+        test("THEN returns undefined in onError is not specified", async () => {
+          const controller = LookupControllerV3.create(lookupCreateOpts);
+          provider.registerOnAcceptHook(dummyHook);
+          controller.show({
+            ...showOpts,
+            nonInteractive: true,
+          });
+          const result = await NoteLookupProviderUtils.subscribe({
+            id: "foo",
+            controller,
+            logger: Logger,
+          });
+          expect(_.isUndefined(result)).toBeTruthy();
+        });
+
+        test("THEN returns onError callback output if onError is specified", async () => {
+          const controller = LookupControllerV3.create(lookupCreateOpts);
+          provider.registerOnAcceptHook(dummyHook);
+          controller.show({
+            ...showOpts,
+            nonInteractive: true,
+          });
+          const result = await NoteLookupProviderUtils.subscribe({
+            id: "foo",
+            controller,
+            logger: Logger,
+            onError: () => {
+              return { foo: "custom onError" };
+            },
+          });
+          expect(result.foo).toEqual("custom onError");
+        });
+      });
+
+      describe("WHEN event.changeState", () => {
+        test("THEN onChangeState callback output is returned if onChangeState is provided", (done) => {
+          const controller = LookupControllerV3.create(lookupCreateOpts);
+          controller.show({
+            ...showOpts,
+            nonInteractive: false,
+          });
+          const result = NoteLookupProviderUtils.subscribe({
+            id: "foo",
+            controller,
+            logger: Logger,
+            onChangeState: () => {
+              return { foo: "custom onChangeState" };
+            },
+          });
+          setTimeout(async () => {
+            HistoryService.instance().add({
+              source: "lookupProvider",
+              action: "changeState",
+              id: "foo",
+              data: { action: "hide" },
+            });
+            expect((await result).foo).toEqual("custom onChangeState");
+            done();
+          }, 1000);
+        });
+        describe("AND action.hide", () => {
+          test("THEN onHide callback output is returned if onHide is provided", (done) => {
+            const controller = LookupControllerV3.create(lookupCreateOpts);
+            controller.show({
+              ...showOpts,
+              nonInteractive: false,
+            });
+            const result = NoteLookupProviderUtils.subscribe({
+              id: "foo",
+              controller,
+              logger: Logger,
+              onHide: () => {
+                return { foo: "custom onHide" };
+              },
+            });
+            setTimeout(async () => {
+              controller.quickpick.hide();
+              expect((await result).foo).toEqual("custom onHide");
+              done();
+            }, 1000);
+          });
+        });
+      });
+    }
+  );
 });

@@ -17,7 +17,12 @@ import {
   SchemaUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
-import { getDurationMilliseconds, vault2Path } from "@dendronhq/common-server";
+import {
+  DLogger,
+  getDurationMilliseconds,
+  vault2Path,
+} from "@dendronhq/common-server";
+import { HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
 import { QuickPickItem, TextEditor, Uri, ViewColumn, window } from "vscode";
@@ -30,7 +35,12 @@ import {
   CREATE_NEW_LABEL,
   MORE_RESULTS_LABEL,
 } from "./constants";
-import { ILookupProviderV3, OnAcceptHook } from "./LookupProviderV3";
+import { LookupControllerV3 } from "./LookupControllerV3";
+import {
+  ILookupProviderV3,
+  NoteLookupProviderChangeStateResp,
+  OnAcceptHook,
+} from "./LookupProviderV3";
 import {
   DendronQuickPickerV2,
   DendronQuickPickState,
@@ -936,5 +946,84 @@ export class SchemaPickerUtils {
     const profile = getDurationMilliseconds(start);
     Logger.info({ ctx, msg: "engine.querySchema", profile });
     return updatedItems;
+  }
+}
+
+export class NoteLookupProviderUtils {
+  static cleanup(opts: { id: string; controller: LookupControllerV3 }) {
+    const { id, controller } = opts;
+    controller.onHide();
+    HistoryService.instance().remove(id, "lookupProvider");
+  }
+
+  static subscribe(opts: {
+    id: string;
+    controller: LookupControllerV3;
+    logger: DLogger;
+    onDone?: Function;
+    onError?: Function;
+    onChangeState?: Function;
+    onHide?: Function;
+  }): Promise<any | undefined> {
+    const { id, controller, logger, onDone, onError, onChangeState, onHide } =
+      opts;
+
+    return new Promise((resolve) => {
+      HistoryService.instance().subscribev2("lookupProvider", {
+        id,
+        listener: async (event) => {
+          if (event.action === "done") {
+            if (onDone) {
+              const out = await onDone(event);
+              NoteLookupProviderUtils.cleanup({ id, controller });
+              resolve(out);
+            } else {
+              resolve(event);
+            }
+          } else if (event.action === "error") {
+            if (onError) {
+              const out = await onError(event);
+              resolve(out);
+            } else {
+              const error = event.data.error as DendronError;
+              logger.error({ error });
+              resolve(undefined);
+            }
+          } else if (event.action === "changeState") {
+            if (onChangeState) {
+              const out = await onChangeState(event);
+              resolve(out);
+            } else {
+              const data = event.data as NoteLookupProviderChangeStateResp;
+              if (data.action === "hide") {
+                if (onHide) {
+                  const out = await onHide(event);
+                  resolve(out);
+                } else {
+                  logger.info({
+                    ctx: id,
+                    msg: "changeState.hide event received.",
+                  });
+                  resolve(undefined);
+                }
+              } else {
+                logger.error({
+                  ctx: id,
+                  msg: "invalid changeState action received.",
+                });
+                resolve(undefined);
+              }
+            }
+          } else {
+            logger.error({
+              ctx: id,
+              msg: `unexpected event: ${event.action}`,
+              event,
+            });
+            resolve(undefined);
+          }
+        },
+      });
+    });
   }
 }

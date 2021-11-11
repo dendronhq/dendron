@@ -1,9 +1,10 @@
-import { ConfigUtils, ErrorFactory, NoteQuickInput } from "@dendronhq/common-all";
-import { HistoryService } from "@dendronhq/engine-server";
+import { ConfigUtils, NoteQuickInput } from "@dendronhq/common-all";
+import { HistoryEvent } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { Selection, SnippetString } from "vscode";
 import { LookupControllerV3 } from "../components/lookup/LookupControllerV3";
 import { NoteLookupProvider } from "../components/lookup/LookupProviderV3";
+import { NoteLookupProviderUtils } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { Logger } from "../logger";
 import { VSCodeUtils } from "../utils";
@@ -48,20 +49,14 @@ export class InsertNoteCommand extends BasicCommand<
       provider,
       initialValue,
     });
-    return new Promise((resolve) => {
-      HistoryService.instance().subscribev2("lookupProvider", {
-        id: "insert",
-        listener: async (event) => {
-          if (event.action === "done") {
-            HistoryService.instance().remove("insert", "lookupProvider");
-            resolve({ picks: event.data.selectedItems });
-          } else if (event.action === "error") {
-            return;
-          } else {
-            throw ErrorFactory.createUnexpectedEventError({ event });
-          }
-        },
-      });
+
+    return NoteLookupProviderUtils.subscribe({
+      id: "insert",
+      controller: lc,
+      logger: this.L,
+      onDone: (event: HistoryEvent) => {
+        return { picks: event.data.selectedItems };
+      },
     });
   }
 

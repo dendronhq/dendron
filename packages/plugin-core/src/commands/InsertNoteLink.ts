@@ -4,7 +4,7 @@ import {
   NoteProps,
   NoteUtils,
 } from "@dendronhq/common-all";
-import { HistoryService } from "@dendronhq/engine-server";
+import { HistoryEvent } from "@dendronhq/engine-server";
 import _ from "lodash";
 import * as vscode from "vscode";
 import { MultiSelectBtn } from "../components/lookup/buttons";
@@ -13,6 +13,7 @@ import {
   NoteLookupProvider,
   NoteLookupProviderSuccessResp,
 } from "../components/lookup/LookupProviderV3";
+import { NoteLookupProviderUtils } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../utils";
 import { getDWorkspace } from "../workspace";
@@ -60,27 +61,14 @@ export class InsertNoteLinkCommand extends BasicCommand<
       provider,
     });
 
-    return new Promise((resolve) => {
-      HistoryService.instance().subscribev2("lookupProvider", {
-        id: this.key,
-        listener: async (event) => {
-          if (event.action === "done") {
-            HistoryService.instance().remove(this.key, "lookupProvider");
-            const cdata = event.data as NoteLookupProviderSuccessResp;
-            resolve({ notes: cdata.selectedItems, ...copts });
-            lc.onHide();
-          } else if (event.action === "error") {
-            this.L.error({ msg: `error: ${event.data}` });
-            resolve(undefined);
-          } else if (event.action === "changeState") {
-            this.L.info({ msg: "cancelled" });
-            resolve(undefined);
-          } else {
-            this.L.error({ msg: `unhandled error: ${event.data}` });
-            resolve(undefined);
-          }
-        },
-      });
+    return NoteLookupProviderUtils.subscribe({
+      id: this.key,
+      controller: lc,
+      logger: this.L,
+      onDone: (event: HistoryEvent) => {
+        const data = event.data as NoteLookupProviderSuccessResp;
+        return { notes: data.selectedItems, ...copts };
+      },
     });
   }
 

@@ -1,13 +1,12 @@
 import {
   DendronError,
   DEngineClient,
-  ErrorFactory,
   NoteChangeEntry,
   RenameNoteOpts,
   VaultUtils,
 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
-import { HistoryService } from "@dendronhq/engine-server";
+import { HistoryEvent } from "@dendronhq/engine-server";
 import _ from "lodash";
 import _md from "markdown-it";
 import path from "path";
@@ -22,6 +21,7 @@ import {
   NoteLookupProviderSuccessResp,
 } from "../components/lookup/LookupProviderV3";
 import {
+  NoteLookupProviderUtils,
   OldNewLocation,
   ProviderAcceptHooks,
 } from "../components/lookup/utils";
@@ -122,43 +122,27 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
       initialValue: opts?.initialValue || initialValue,
       nonInteractive: opts?.nonInteractive,
     });
-    return new Promise((resolve) => {
-      HistoryService.instance().subscribev2("lookupProvider", {
-        id: "move",
-        listener: async (event) => {
-          if (event.action === "done") {
-            HistoryService.instance().remove("move", "lookupProvider");
-            const data =
-              event.data as NoteLookupProviderSuccessResp<OldNewLocation>;
-            if (data.cancel) {
-              resolve(undefined);
-              return;
-            }
-            const opts: CommandOpts = {
-              moves: this.getDesiredMoves(data),
-            };
-            resolve(opts);
-            lc.onHide();
-          } else if (event.action === "error") {
-            const error = event.data.error as DendronError;
-            lc.onHide();
-            window.showErrorMessage(error.message);
-            resolve(undefined);
-          } else if (
-            event.data &&
-            event.action === "changeState" &&
-            event.data.action === "hide"
-          ) {
-            // This changeState/hide will be triggered after the user has picked a file.
-            this.L.info({
-              ctx: `MoveNoteCommand`,
-              msg: `changeState.hide event received.`,
-            });
-          } else {
-            throw ErrorFactory.createUnexpectedEventError({ event });
-          }
-        },
-      });
+
+    return NoteLookupProviderUtils.subscribe({
+      id: "move",
+      controller: lc,
+      logger: this.L,
+      onDone: (event: HistoryEvent) => {
+        const data =
+          event.data as NoteLookupProviderSuccessResp<OldNewLocation>;
+        if (data.cancel) {
+          return undefined;
+        }
+        const opts: CommandOpts = {
+          moves: this.getDesiredMoves(data),
+        };
+        return opts;
+      },
+      onError: (event: HistoryEvent) => {
+        const error = event.data.error as DendronError;
+        window.showErrorMessage(error.message);
+        return undefined;
+      },
     });
   }
 

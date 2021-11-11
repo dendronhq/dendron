@@ -91,6 +91,41 @@ export function activate(context: vscode.ExtensionContext) {
   return;
 }
 
+/** Prompts the user to pick a wsRoot if there are more than one. */
+async function getOrPromptWSRoot(workspaceFolders: string[]) {
+  if (!workspaceFolders) {
+    Logger.error({ msg: "No dendron.yml found in any workspace folder" });
+    return undefined;
+  }
+  if (workspaceFolders.length === 1) {
+    return workspaceFolders[0];
+  } else {
+    const selectedRoot = await VSCodeUtils.showQuickPick(
+      workspaceFolders.map((folder): vscode.QuickPickItem => {
+        return {
+          label: folder,
+        };
+      }),
+      {
+        ignoreFocusOut: true,
+        canPickMany: false,
+        title: "Select Dendron workspace to load",
+      }
+    );
+    if (!selectedRoot) {
+      await vscode.window.showInformationMessage(
+        "You skipped loading any Dendron workspace, Dendron is not active. You can run the 'Developer: Reload Window' command to reactivate Dendron."
+      );
+      Logger.info({
+        msg: "User skipped loading a Dendron workspace",
+        workspaceFolders,
+      });
+      return null;
+    }
+    return selectedRoot.label;
+  }
+}
+
 async function reloadWorkspace() {
   const ctx = "reloadWorkspace";
   const ws = getDWorkspace();
@@ -298,16 +333,18 @@ export async function _activate(
 
     if (await DendronExtension.isDendronWorkspace()) {
       if (ws.type === WorkspaceType.NATIVE) {
-        const workspaceFolder =
-          await WorkspaceUtils.findWSRootInWorkspaceFolders(
+        const workspaceFolders =
+          await WorkspaceUtils.findWSRootsInWorkspaceFolders(
             DendronExtension.workspaceFolders()!
           );
-        if (!workspaceFolder) {
-          Logger.error({ msg: "No dendron.yml found in any workspace folder" });
+        if (!workspaceFolders) {
           return false;
         }
+        const wsRoot = await getOrPromptWSRoot(workspaceFolders);
+        if (!wsRoot) return false;
+
         ws.workspaceImpl = new DendronNativeWorkspace({
-          wsRoot: workspaceFolder,
+          wsRoot,
           logUri: context.logUri,
           assetUri,
         });

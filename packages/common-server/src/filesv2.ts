@@ -23,6 +23,25 @@ import tmp, { DirResult, dirSync } from "tmp";
 import { resolvePath } from "./files";
 import { SchemaParserV2 } from "./parser";
 import SparkMD5 from "spark-md5";
+import anymatch from "anymatch";
+
+/** Dendron should ignore any of these folders when watching or searching folders.
+ *
+ * These folders are unlikely to contain anything Dendron would like to find, so we can ignore them.
+ *
+ * Example usage:
+ * ```ts
+ * if (!anymatch(COMMON_FOLDER_IGNORES, folder)) {
+ *   // Good folder!
+ * }
+ * ```
+ */
+export const COMMON_FOLDER_IGNORES: string[] = [
+  "**/.*/**", // Any folder starting with .
+  "**/node_modules/**", // nodejs
+  "**/.git/**", // git
+  "**/__pycache__/**", // python
+];
 
 type FileWatcherCb = {
   fpath: string;
@@ -318,7 +337,7 @@ export async function findDownTo(opts: {
           const subfolder = await fs.stat(path.join(base, folder));
           if (!subfolder.isDirectory()) return;
           // Exclude folders starting with . to skip stuff like `.git`
-          if (folder.startsWith(".")) return;
+          if (anymatch(COMMON_FOLDER_IGNORES, folder)) return;
           return findDownTo({
             ...opts,
             base: path.join(base, folder),

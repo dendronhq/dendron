@@ -42,7 +42,7 @@ export class WorkspaceUtils {
       return WorkspaceType.CODE;
     }
     if (!_.isUndefined(workspaceFolders)) {
-      const rootFolder = await this.findWSRootInWorkspaceFolders(
+      const rootFolder = await this.findWSRootsInWorkspaceFolders(
         workspaceFolders
       );
       if (rootFolder) return WorkspaceType.NATIVE;
@@ -82,9 +82,9 @@ export class WorkspaceUtils {
     return configPath;
   }
 
-  static async findWSRootInWorkspaceFolders(
+  static async findWSRootsInWorkspaceFolders(
     workspaceFolders: readonly WorkspaceFolderCode[]
-  ): Promise<string | undefined> {
+  ): Promise<string[]> {
     const folders = uniqueOutermostFolders(
       workspaceFolders.map((folder) => folder.uri.fsPath)
     );
@@ -97,7 +97,7 @@ export class WorkspaceUtils {
         })
       )
     );
-    return dendronWorkspaceFolders.filter(isNotUndefined)[0];
+    return dendronWorkspaceFolders.filter(isNotUndefined);
   }
 
   static isNativeWorkspace(workspace: DWorkspaceV2) {

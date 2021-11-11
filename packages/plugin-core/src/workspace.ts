@@ -241,15 +241,15 @@ export class DendronExtension {
     return vscode.workspace.workspaceFolders;
   }
 
-  static async workspaceRoot(): Promise<string | undefined> {
+  static async workspaceRoots(): Promise<string[]> {
     try {
-      return path.dirname(this.workspaceFile().fsPath);
+      return [path.dirname(this.workspaceFile().fsPath)];
     } catch {
       const workspaceFolders = this.workspaceFolders();
       if (workspaceFolders)
-        return WorkspaceUtils.findWSRootInWorkspaceFolders(workspaceFolders);
+        return WorkspaceUtils.findWSRootsInWorkspaceFolders(workspaceFolders);
     }
-    return undefined;
+    return [];
   }
 
   /** Checks if the current workspace open in VSCode is a Dendron workspace or not. */
@@ -267,7 +267,7 @@ export class DendronExtension {
       const workspaceFolders = DendronExtension.workspaceFolders();
       if (workspaceFolders) {
         return !_.isEmpty(
-          await WorkspaceUtils.findWSRootInWorkspaceFolders(workspaceFolders)
+          await WorkspaceUtils.findWSRootsInWorkspaceFolders(workspaceFolders)
         );
       }
 

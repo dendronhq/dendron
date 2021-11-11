@@ -1,9 +1,10 @@
-import { NoteProps, NoteUtils } from "@dendronhq/common-all";
 import {
   Conflict,
-  MergeConflictOptions,
-  PodItemV4,
-} from "@dendronhq/pods-core";
+  NoteProps,
+  NoteUtils,
+  PodConflictResolveOpts,
+} from "@dendronhq/common-all";
+import { PodItemV4 } from "@dendronhq/pods-core";
 import fs from "fs-extra";
 import _ from "lodash";
 import open from "open";
@@ -142,10 +143,13 @@ export const withProgressOpts = {
   showMessage: window.showInformationMessage,
 };
 
-export const handleConflict = async (conflict: Conflict) => {
-  const choices = [MergeConflictOptions.OVERWRITE, MergeConflictOptions.SKIP];
+export const handleConflict = async (
+  conflict: Conflict,
+  conflictResolveOpts: PodConflictResolveOpts
+) => {
+  const choices = conflictResolveOpts.options();
   return window.showQuickPick(choices, {
-    title: `We noticed different fields for user ${conflict.conflictNote.title}`,
+    title: conflictResolveOpts.message(conflict),
     placeHolder: "What would you like to do?",
     ignoreFocusOut: false,
     matchOnDescription: true,

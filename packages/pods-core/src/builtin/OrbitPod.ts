@@ -1,19 +1,17 @@
-import {
-  Conflict,
-  ImportPod,
-  ImportPodConfig,
-  ImportPodPlantOpts,
-} from "../basev3";
+import { ImportPod, ImportPodConfig, ImportPodPlantOpts } from "../basev3";
 import { JSONSchemaType } from "ajv";
 import { ConflictHandler, PodUtils } from "../utils";
 import {
+  Conflict,
   DendronError,
   DEngineClient,
   DVault,
   ERROR_SEVERITY,
   getSlugger,
+  MergeConflictOptions,
   NoteProps,
   NoteUtils,
+  PodConflictResolveOpts,
   stringifyError,
   Time,
 } from "@dendronhq/common-all";
@@ -32,11 +30,6 @@ type OrbitImportPodCustomOpts = {
    */
   token: string;
 };
-
-export enum MergeConflictOptions {
-  OVERWRITE = "Overwrite local value with remote value",
-  SKIP = "Skip (We will not merge, you'll resolve this manually)",
-}
 
 type OrbitImportPodConfig = ImportPodConfig & OrbitImportPodCustomOpts;
 
@@ -79,18 +72,21 @@ export class OrbitImportPod extends ImportPod<OrbitImportPodConfig> {
    * @returns members
    */
   getMembersFromOrbit = async (
-    opts: OrbitImportPodCustomOpts
-  ): Promise<MembersOpts[]> => {
+    opts: OrbitImportPodCustomOpts & { link: string }
+  ): Promise<any> => {
     const { token, workspaceSlug } = opts;
+    let { link } = opts;
+    link =
+      link.length > 0
+        ? link
+        : `https://app.orbit.love/api/v1/${workspaceSlug}/members?items=100`;
     const headers = {
       Authorization: `Bearer ${token}`,
     };
     const members: MembersOpts[] = [];
+    let next = null;
     try {
-      const response = await axios.get(
-        `https://app.orbit.love/api/v1/${workspaceSlug}/members`,
-        { headers }
-      );
+      const response = await axios.get(link, { headers });
       response.data.data.forEach((member: any) => {
         const attributes = member.attributes;
         const { id, name, github, discord, linkedin, twitter, hn, website } =
@@ -106,6 +102,7 @@ export class OrbitImportPod extends ImportPod<OrbitImportPodConfig> {
           website,
           orbitId: id,
         });
+        next = response.data.links.next;
       });
     } catch (error: any) {
       throw new DendronError({
@@ -113,7 +110,7 @@ export class OrbitImportPod extends ImportPod<OrbitImportPodConfig> {
         severity: ERROR_SEVERITY.MINOR,
       });
     }
-    return members;
+    return { members, next };
   };
 
   /**
@@ -226,16 +223,26 @@ export class OrbitImportPod extends ImportPod<OrbitImportPodConfig> {
   async onConflict(opts: {
     conflicts: Conflict[];
     index: number;
-    handleConflict: (conflict: Conflict) => Promise<string | undefined>;
+    handleConflict: (
+      conflict: Conflict,
+      conflictResolveOpts: PodConflictResolveOpts
+    ) => Promise<string | undefined>;
     engine: DEngineClient;
     conflictResolvedNotes: NoteProps[];
+    conflictResolveOpts: PodConflictResolveOpts;
   }): Promise<any> {
-    const { conflicts, index, handleConflict, engine, conflictResolvedNotes } =
-      opts;
+    const {
+      conflicts,
+      index,
+      handleConflict,
+      engine,
+      conflictResolvedNotes,
+      conflictResolveOpts,
+    } = opts;
     const conflict = conflicts[index];
-    const resp = await handleConflict(conflict);
+    const resp = await handleConflict(conflict, conflictResolveOpts);
     switch (resp) {
-      case MergeConflictOptions.OVERWRITE: {
+      case MergeConflictOptions.OVERWRITE_LOCAL: {
         conflict.conflictEntry.fname = conflict.conflictNote.fname;
         await engine.writeNote(conflict.conflictEntry, {
           updateExisting: true,
@@ -255,10 +262,33 @@ export class OrbitImportPod extends ImportPod<OrbitImportPodConfig> {
         index: index + 1,
         handleConflict,
         conflictResolvedNotes,
+        conflictResolveOpts,
       });
     } else {
       return conflictResolvedNotes;
     }
+  }
+
+  validateMergeConflictResponse(choice: number, options: string[]) {
+    if (options[choice]) {
+      return true;
+    } else {
+      return "Invalid Choice! Choose 0/1";
+    }
+  }
+
+  getMergeConflictOptions() {
+    return [MergeConflictOptions.OVERWRITE_LOCAL, MergeConflictOptions.SKIP];
+  }
+
+  getMergeConflictText(conflict: Conflict) {
+    let conflictentries = "";
+    conflict.conflictData.forEach((key) => {
+      conflictentries = conflictentries.concat(
+        `\n${key}: \nremote: ${conflict.conflictEntry.custom.social[key]}\nlocal: ${conflict.conflictNote.custom.social[key]}\n`
+      );
+    });
+    return `\nWe noticed different fields for user ${conflict.conflictNote.title}. ${conflictentries}\n`;
   }
 
   async plant(opts: OrbitImportPodPlantOpts) {
@@ -266,7 +296,17 @@ export class OrbitImportPod extends ImportPod<OrbitImportPodConfig> {
     this.L.info({ ctx, opts, msg: "enter" });
     const { vault, config, engine, wsRoot, utilityMethods } = opts;
     const { token, workspaceSlug } = config as OrbitImportPodConfig;
-    const members = await this.getMembersFromOrbit({ token, workspaceSlug });
+    let next = "";
+    let members: MembersOpts[] = [];
+    while (next !== null) {
+      const result = await this.getMembersFromOrbit({
+        token,
+        workspaceSlug,
+        link: next,
+      });
+      members = [...members, ...result.members];
+      next = result.next;
+    }
     const { create, conflicts } = await this.membersToNotes({
       members,
       vault,
@@ -280,6 +320,11 @@ export class OrbitImportPod extends ImportPod<OrbitImportPodConfig> {
 
     await engine.bulkAddNotes({ notes: create });
     const { handleConflict } = utilityMethods as ConflictHandler;
+    const conflictResolveOpts: PodConflictResolveOpts = {
+      options: this.getMergeConflictOptions,
+      message: this.getMergeConflictText,
+      validate: this.validateMergeConflictResponse,
+    };
     const conflictResolvedNotes =
       conflicts.length > 0
         ? await this.onConflict({
@@ -288,6 +333,7 @@ export class OrbitImportPod extends ImportPod<OrbitImportPodConfig> {
             engine,
             index: 0,
             conflictResolvedNotes: conflictNoteArray,
+            conflictResolveOpts,
           })
         : [];
     return { importedNotes: [...create, ...conflictResolvedNotes] };

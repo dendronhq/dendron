@@ -1,13 +1,15 @@
 import { runEngineTestV5 } from "../../engine";
 import axios from "axios";
-import { VaultUtils } from "@dendronhq/common-all";
-import { MergeConflictOptions, OrbitImportPod } from "@dendronhq/pods-core";
+import { VaultUtils, MergeConflictOptions } from "@dendronhq/common-all";
+import { OrbitImportPod } from "@dendronhq/pods-core";
 import { ENGINE_HOOKS } from "../../presets";
 
 jest.mock("axios");
 
 const utilityMethods = {
-  handleConflict: jest.fn().mockReturnValue(MergeConflictOptions.OVERWRITE),
+  handleConflict: jest
+    .fn()
+    .mockReturnValue(MergeConflictOptions.OVERWRITE_LOCAL),
 };
 
 describe("Given Orbit Import Pod", () => {
@@ -41,6 +43,9 @@ describe("Given Orbit Import Pod", () => {
             },
           },
         ],
+        links: {
+          next: null,
+        },
       },
     };
   });

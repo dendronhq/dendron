@@ -37,21 +37,6 @@ export type PodOpts<T> = {
     | ConflictHandler;
 } & WorkspaceOpts;
 
-export type Conflict = {
-  /**
-   * Existing note
-   */
-  conflictNote: NoteProps;
-  /**
-   * Newly written note
-   */
-  conflictEntry: NoteProps;
-  /**
-   * Conflicted Data
-   */
-  conflictData: string[];
-};
-
 // === Publish Pod
 
 export type PublishPodExecuteOpts<T extends PublishPodConfig = any> =

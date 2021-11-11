@@ -212,24 +212,20 @@ export enum PodSource {
   BUILTIN = "builtin",
 }
 
-export const handleConflict = async (conflict: Conflict) => {
-  let conflictentries = "";
-  conflict.conflictData.forEach((key) => {
-    conflictentries = conflictentries.concat(
-      `\n${key}: \nremote: ${conflict.conflictEntry.custom.social[key]}\nlocal: ${conflict.conflictNote.custom.social[key]}\n`
-    );
+export const handleConflict = async (
+  conflict: Conflict,
+  conflictResolveOpts: PodConflictResolveOpts
+) => {
+  const options = conflictResolveOpts.options();
+  let optionsMessage = "What would you like to do? Choose 0/1..";
+  options.map((option: string, index: number) => {
+    optionsMessage = optionsMessage.concat(`\n${index}: ${option}`);
   });
   const resp = await prompts({
     type: "text",
-    name: "conflict",
-    message: `We noticed different fields for user ${conflict.conflictNote.title}. ${conflictentries}\n
-     What would you like to do? Choose A/B \n\n A: ${MergeConflictOptions.OVERWRITE}\n B: ${MergeConflictOptions.SKIP}`,
-    validate: (conflict) =>
-      ["a", "b"].includes(conflict.toLowerCase())
-        ? true
-        : `Enter either A or B`,
+    name: "choice",
+    message: `${conflictResolveOpts.message(conflict)}\n${optionsMessage}`,
+    validate: (choice) => conflictResolveOpts.validate(choice, options),
   });
-  return resp.conflict.toLowerCase() === "a"
-    ? MergeConflictOptions.OVERWRITE
-    : MergeConflictOptions.SKIP;
+  return options[resp.choice];
 };

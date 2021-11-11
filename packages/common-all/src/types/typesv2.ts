@@ -632,6 +632,32 @@ export type BasePodExecuteOpts<TConfig> = {
   utilityMethods?: any;
 };
 
+export enum MergeConflictOptions {
+  OVERWRITE_LOCAL = "Overwrite local value with remote value",
+  OVERWRITE_REMOTE = "Overwrite remote value with local value",
+  SKIP = "Skip (We will not merge, you'll resolve this manually)",
+}
+
+export type Conflict = {
+  /**
+   * Existing note
+   */
+  conflictNote: NoteProps;
+  /**
+   * Newly written note
+   */
+  conflictEntry: NoteProps;
+  /**
+   * Conflicted Data
+   */
+  conflictData: string[];
+};
+
+export type PodConflictResolveOpts = {
+  options: () => string[];
+  message: (conflict: Conflict) => string;
+  validate: (choice: number, options: string[]) => any;
+};
 // --- Messages
 
 export type DMessage<TType = string, TData = any, TSource = DMessageSource> = {

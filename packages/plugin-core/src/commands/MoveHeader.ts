@@ -12,7 +12,6 @@ import {
   NoteQuickInput,
 } from "@dendronhq/common-all";
 import {
-  HistoryService,
   DendronASTDest,
   DendronASTTypes,
   AnchorUtils,

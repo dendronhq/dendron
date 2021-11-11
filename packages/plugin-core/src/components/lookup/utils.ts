@@ -1004,12 +1004,14 @@ export class NoteLookupProviderUtils {
                     ctx: id,
                     msg: "changeState.hide event received.",
                   });
+                  resolve(undefined);
                 }
               } else {
                 logger.error({
                   ctx: id,
                   msg: "invalid changeState action received.",
                 });
+                resolve(undefined);
               }
             }
           } else {

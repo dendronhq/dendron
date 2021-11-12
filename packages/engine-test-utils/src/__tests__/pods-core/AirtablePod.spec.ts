@@ -65,7 +65,6 @@ const createNotePresetsWithAllUpdate = async (opts: WorkspaceOpts) => {
   return Promise.all(
     noteprops.map((ent) => {
       ent = _.merge(ent, { custom: { airtableId: "airtableId" } });
-      debugger;
       return NoteTestUtilsV4.createNote(ent);
     })
   );

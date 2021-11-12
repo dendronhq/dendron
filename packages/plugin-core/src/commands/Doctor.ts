@@ -4,10 +4,10 @@ import {
   NoteProps,
 } from "@dendronhq/common-all";
 import {
-  BackfillV2Command,
+  DoctorService,
   DoctorActions,
-  DoctorCLICommand,
-} from "@dendronhq/dendron-cli";
+  BackfillService,
+} from "@dendronhq/engine-server";
 import _ from "lodash";
 import _md from "markdown-it";
 import { QuickPick, ViewColumn, window } from "vscode";
@@ -25,7 +25,6 @@ import { BasicCommand } from "./base";
 import { ReloadIndexCommand } from "./ReloadIndex";
 
 const md = _md();
-
 type Finding = {
   issue: string;
   fix?: string;
@@ -183,7 +182,7 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
 
     switch (opts.action) {
       case DoctorActions.FIX_FRONTMATTER: {
-        await new BackfillV2Command().execute({
+        await new BackfillService().updateNotes({
           engine,
           note,
           // fix notes with broken ids if necessary
@@ -192,7 +191,6 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
         break;
       }
       case DoctorActions.CREATE_MISSING_LINKED_NOTES: {
-        const cmd = new DoctorCLICommand();
         let notes;
         if (_.isUndefined(note)) {
           notes = _.values(engine.notes);
@@ -200,7 +198,8 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
         } else {
           notes = [note];
         }
-        const uniqueCandidates = cmd.getWildLinkDestinations(notes, engine);
+        const ds = new DoctorService();
+        const uniqueCandidates = ds.getWildLinkDestinations(notes, engine);
         if (uniqueCandidates.length > 0) {
           // show preview before creating
           await this.showMissingNotePreview(uniqueCandidates);
@@ -217,12 +216,10 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
           if (ext.fileWatcher) {
             ext.fileWatcher.pause = true;
           }
-          await cmd.execute({
+          await ds.executeDoctorActions({
             action: opts.action,
             candidates: notes,
             engine,
-            wsRoot,
-            server: {},
             exit: false,
           });
         } else {
@@ -234,16 +231,14 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
         break;
       }
       default: {
-        const cmd = new DoctorCLICommand();
         const candidates: NoteProps[] | undefined = _.isUndefined(note)
           ? undefined
           : [note];
-        await cmd.execute({
+        const ds = new DoctorService();
+        await ds.executeDoctorActions({
           action: opts.action,
           candidates,
           engine,
-          wsRoot,
-          server: {},
           exit: false,
         });
       }

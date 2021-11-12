@@ -1,5 +1,5 @@
 import { ContextualUIEvents } from "@dendronhq/common-all";
-import { DoctorActions } from "@dendronhq/dendron-cli";
+import { DoctorActions } from "@dendronhq/engine-server";
 import isUrl from "is-url";
 import _ from "lodash";
 import { FrontmatterContent } from "mdast";

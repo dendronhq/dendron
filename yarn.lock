@@ -3646,7 +3646,7 @@
   resolved "https://registry.npmjs.org/@istanbuljs/schema/-/schema-0.1.3.tgz#e45e384e4b8ec16bce2fd903af78450f6bf7ec98"
   integrity sha512-ZXRY4jNvVgSVQ8DL3LTcakaAtXwTVUxE81hslsyD2AtoXW/wVob10HkOJ1X/pAlcI7D+2YoZKg5do8G/w6RYgA==
 
-"@jcoreio/async-throttle@^1.3.2":
+"@jcoreio/async-throttle@^1.3.2", "@jcoreio/async-throttle@^1.4.3":
   version "1.4.3"
   resolved "https://registry.npmjs.org/@jcoreio/async-throttle/-/async-throttle-1.4.3.tgz#2e6b1dca73f49ae9dc36037b919bf6b7b051e29c"
   integrity sha512-LPV+lqOSJQ5QCR02OLzJH0TWmUnMJNwfO+64WDCmRHlJF6GcSPDmB1wrjhO5btBfrnW/KgNGDHA2xlKjspo/zA==

@@ -45,7 +45,7 @@ export class WorkspaceUtils {
       const rootFolder = await this.findWSRootsInWorkspaceFolders(
         workspaceFolders
       );
-      if (rootFolder) return WorkspaceType.NATIVE;
+      if (!_.isEmpty(rootFolder)) return WorkspaceType.NATIVE;
     }
     return WorkspaceType.NONE;
   }

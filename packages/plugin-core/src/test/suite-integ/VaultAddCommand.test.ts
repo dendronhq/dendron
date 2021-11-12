@@ -25,8 +25,10 @@ import path from "path";
 import sinon from "sinon";
 import * as vscode from "vscode";
 import { VaultAddCommand } from "../../commands/VaultAddCommand";
+import { getDWorkspace } from "../../workspace";
 import { expect, runSingleVaultTest } from "../testUtilsv2";
 import {
+  describeSingleWS,
   runLegacySingleWorkspaceTest,
   setupBeforeAfter,
   stubVaultInput,
@@ -223,6 +225,37 @@ suite("VaultAddCommand", function () {
           ).toBeTruthy();
           done();
         },
+      });
+    });
+
+    describeSingleWS("WHEN vault was already in .gitignore", { ctx }, () => {
+      describe("AND vaultAddCommand is run", () => {
+        test("THEN vault is not duplicated", async () => {
+          const vaultPath = "vaultRemote";
+          const { wsRoot } = getDWorkspace();
+          const gitIgnore = path.join(wsRoot, ".gitignore");
+          const remoteDir = tmpDir().name;
+
+          await GitTestUtils.createRepoForRemoteWorkspace(wsRoot, remoteDir);
+          await fs.writeFile(gitIgnore, vaultPath);
+
+          const cmd = new VaultAddCommand();
+          stubVaultInput({
+            cmd,
+            sourceType: "remote",
+            sourcePath: vaultPath,
+            sourcePathRemote: remoteDir,
+            sourceName: "dendron",
+          });
+          await cmd.run();
+
+          expect(
+            FileTestUtils.assertTimesInFile({
+              fpath: gitIgnore,
+              match: [[1, vaultPath]],
+            })
+          ).toBeTruthy();
+        });
       });
     });
   });

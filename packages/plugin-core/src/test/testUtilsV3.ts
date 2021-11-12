@@ -455,7 +455,6 @@ export function describeMultiWS(
 }
 
 export function describeSingleWS(
-  _this: any,
   title: string,
   opts: SetupLegacyWorkspaceOpts,
   fn: () => any

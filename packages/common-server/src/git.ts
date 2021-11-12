@@ -363,13 +363,16 @@ export class GitUtils {
    *
    * @param addPath The path to add to the gitignore
    * @param root The root folder containing the `.gitignore` file.
+   * @param noCreateIfMissing If true, `.gitignore` won't be created if it is missing
    */
   static async addToGitignore({
     addPath,
     root,
+    noCreateIfMissing,
   }: {
     addPath: string;
     root: string;
+    noCreateIfMissing?: boolean;
   }) {
     const gitignore = path.join(root, ".gitignore");
     let contents: string | undefined;
@@ -379,9 +382,15 @@ export class GitUtils {
       // if the .gitignore was missing, ignore it
       if (err?.code !== "ENOENT") throw err;
     }
-    if (!contents || !contents.match(new RegExp(`^${addPath}/?$`, "g"))) {
-      // Avoid duplicating the gitignore line if it was already there
-      await fs.appendFile(gitignore, `\n${addPath}\n`);
+    // Avoid duplicating the gitignore line if it was already there
+    if (
+      // gitignore is missing but we are allowed to create it
+      (contents === undefined && noCreateIfMissing !== true) ||
+      // gitignore exists, and the path is not in it yet
+      (contents !== undefined &&
+        !contents.match(new RegExp(`^${addPath}/?$`, "g")))
+    ) {
+      await fs.appendFile(gitignore, `\n${addPath}`);
     }
   }
 

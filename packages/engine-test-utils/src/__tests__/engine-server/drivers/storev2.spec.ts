@@ -16,7 +16,7 @@ describe(`FileStorage tests:`, () => {
 
       const response = FileStorage.createMalformedSchemaError(input);
       expect(response.message).toEqual(
-        `Schema 'dvd.schema.yml' is malformed. Reason: Schema id is missing from top level schema. Schema at fault: '{"id2":"dvd","children":[{"pattern":"hi"}],"title":"dvd","parent":"root"}'. Use 'Go to File...' command to resolve malformed schema.`
+        `Schema 'dvd.schema.yml' is malformed. Reason: Schema id is missing from top level schema. Schema at fault: '{"id2":"dvd","children":[{"pattern":"hi"}],"title":"dvd","parent":"root"}'`
       );
     });
   });

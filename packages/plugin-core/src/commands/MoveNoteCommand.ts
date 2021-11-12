@@ -115,34 +115,36 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
       VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath || "",
       ".md"
     );
-    lc.show({
-      title: "Move note",
-      placeholder: "foo",
-      provider,
-      initialValue: opts?.initialValue || initialValue,
-      nonInteractive: opts?.nonInteractive,
-    });
 
-    return NoteLookupProviderUtils.subscribe({
-      id: "move",
-      controller: lc,
-      logger: this.L,
-      onDone: (event: HistoryEvent) => {
-        const data =
-          event.data as NoteLookupProviderSuccessResp<OldNewLocation>;
-        if (data.cancel) {
-          return undefined;
-        }
-        const opts: CommandOpts = {
-          moves: this.getDesiredMoves(data),
-        };
-        return opts;
-      },
-      onError: (event: HistoryEvent) => {
-        const error = event.data.error as DendronError;
-        window.showErrorMessage(error.message);
-        return undefined;
-      },
+    return new Promise((resolve) => {
+      NoteLookupProviderUtils.subscribe({
+        id: "move",
+        controller: lc,
+        logger: this.L,
+        onDone: (event: HistoryEvent) => {
+          const data =
+            event.data as NoteLookupProviderSuccessResp<OldNewLocation>;
+          if (data.cancel) {
+            resolve(undefined);
+          }
+          const opts: CommandOpts = {
+            moves: this.getDesiredMoves(data),
+          };
+          resolve(opts);
+        },
+        onError: (event: HistoryEvent) => {
+          const error = event.data.error as DendronError;
+          window.showErrorMessage(error.message);
+          resolve(undefined);
+        },
+      });
+      lc.show({
+        title: "Move note",
+        placeholder: "foo",
+        provider,
+        initialValue: opts?.initialValue || initialValue,
+        nonInteractive: opts?.nonInteractive,
+      });
     });
   }
 

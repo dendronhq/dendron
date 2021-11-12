@@ -43,20 +43,22 @@ export class InsertNoteCommand extends BasicCommand<
     const config = getDWorkspace().config;
     const tempPrefix = ConfigUtils.getCommands(config).insertNote.initialValue;
     const initialValue = tempPrefix ? `${tempPrefix}.` : undefined;
-    lc.show({
-      title: "Insert note",
-      placeholder: "foo",
-      provider,
-      initialValue,
-    });
 
-    return NoteLookupProviderUtils.subscribe({
-      id: "insert",
-      controller: lc,
-      logger: this.L,
-      onDone: (event: HistoryEvent) => {
-        return { picks: event.data.selectedItems };
-      },
+    return new Promise((resolve) => {
+      NoteLookupProviderUtils.subscribe({
+        id: "insert",
+        controller: lc,
+        logger: this.L,
+        onDone: (event: HistoryEvent) => {
+          resolve({ picks: event.data.selectedItems });
+        },
+      });
+      lc.show({
+        title: "Insert note",
+        placeholder: "foo",
+        provider,
+        initialValue,
+      });
     });
   }
 

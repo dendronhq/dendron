@@ -148,13 +148,10 @@ export class MoveHeaderCommand extends BasicCommand<
    * @param opts
    * @returns
    */
-  private promptForDestination(opts: CommandInput) {
-    const lcOpts: LookupControllerV3CreateOpts = {
-      nodeType: "note",
-      disableVaultSelection: opts?.useSameVault,
-      vaultSelectCanToggle: false,
-    };
-    const lookupController = LookupControllerV3.create(lcOpts);
+  private promptForDestination(
+    lookupController: LookupControllerV3,
+    opts: CommandInput
+  ) {
     const lookupProvider = new NoteLookupProvider(this.key, {
       allowNewNote: true,
       noHidePickerOnAccept: false,
@@ -228,27 +225,35 @@ export class MoveHeaderCommand extends BasicCommand<
       throw this.noNodesToMoveError;
     }
 
-    const lc = this.promptForDestination(opts);
+    const lcOpts: LookupControllerV3CreateOpts = {
+      nodeType: "note",
+      disableVaultSelection: opts?.useSameVault,
+      vaultSelectCanToggle: false,
+    };
+    const lc = LookupControllerV3.create(lcOpts);
 
-    return NoteLookupProviderUtils.subscribe({
-      id: this.key,
-      controller: lc,
-      logger: this.L,
-      onDone: (event: HistoryEvent) => {
-        const data = event.data as NoteLookupProviderSuccessResp;
-        const quickpick: DendronQuickPickerV2 = lc.quickpick;
-        const dest = this.prepareDestination({
-          engine,
-          quickpick,
-          selectedItems: data.selectedItems,
-        });
-        return {
-          dest,
-          origin,
-          nodesToMove,
-          engine,
-        };
-      },
+    return new Promise((resolve) => {
+      NoteLookupProviderUtils.subscribe({
+        id: this.key,
+        controller: lc,
+        logger: this.L,
+        onDone: (event: HistoryEvent) => {
+          const data = event.data as NoteLookupProviderSuccessResp;
+          const quickpick: DendronQuickPickerV2 = lc.quickpick;
+          const dest = this.prepareDestination({
+            engine,
+            quickpick,
+            selectedItems: data.selectedItems,
+          });
+          resolve({
+            dest,
+            origin,
+            nodesToMove,
+            engine,
+          });
+        },
+      });
+      this.promptForDestination(lc, opts);
     });
   }
 

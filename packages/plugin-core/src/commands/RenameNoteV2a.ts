@@ -54,19 +54,21 @@ export class RenameNoteV2aCommand extends BaseCommand<
       VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath || "",
       ".md"
     );
-    lc.show({
-      title: "Rename note",
-      placeholder: "foo",
-      provider,
-      initialValue,
-    });
-    return NoteLookupProviderUtils.subscribe({
-      id: "rename",
-      controller: lc,
-      logger: this.L,
-      onDone: (event: HistoryEvent) => {
-        return { move: event.data.onAcceptHookResp };
-      },
+    return new Promise((resolve) => {
+      NoteLookupProviderUtils.subscribe({
+        id: "rename",
+        controller: lc,
+        logger: this.L,
+        onDone: (event: HistoryEvent) => {
+          resolve({ move: event.data.onAcceptHookResp });
+        },
+      });
+      lc.show({
+        title: "Rename note",
+        placeholder: "foo",
+        provider,
+        initialValue,
+      });
     });
   }
 

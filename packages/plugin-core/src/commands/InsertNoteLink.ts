@@ -55,20 +55,22 @@ export class InsertNoteLinkCommand extends BasicCommand<
       allowNewNote: false,
       noHidePickerOnAccept: false,
     });
-    lc.show({
-      title: "Select note to link to",
-      placeholder: "note",
-      provider,
-    });
 
-    return NoteLookupProviderUtils.subscribe({
-      id: this.key,
-      controller: lc,
-      logger: this.L,
-      onDone: (event: HistoryEvent) => {
-        const data = event.data as NoteLookupProviderSuccessResp;
-        return { notes: data.selectedItems, ...copts };
-      },
+    return new Promise((resolve) => {
+      NoteLookupProviderUtils.subscribe({
+        id: this.key,
+        controller: lc,
+        logger: this.L,
+        onDone: (event: HistoryEvent) => {
+          const data = event.data as NoteLookupProviderSuccessResp;
+          resolve({ notes: data.selectedItems, ...copts });
+        },
+      });
+      lc.show({
+        title: "Select note to link to",
+        placeholder: "note",
+        provider,
+      });
     });
   }
 

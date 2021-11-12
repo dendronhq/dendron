@@ -11,7 +11,8 @@ import {
   workspace,
 } from "vscode";
 import { CONFIG, DENDRON_CHANNEL_NAME } from "./constants";
-import { VSCodeUtils } from "./utils";
+import * as vscode from "vscode";
+import { FileItem } from "./external/fileutils/FileItem";
 
 export type TraceLevel = "debug" | "info" | "warn" | "error" | "fatal";
 const levels = ["debug", "info", "warn", "error", "fatal"];
@@ -22,6 +23,41 @@ export type LogPayload = Partial<{
 }>;
 
 export const UNKNOWN_ERROR_MSG = `You found a bug! We didn't think this could happen but you proved us wrong. Please file the bug here -->  https://github.com/dendronhq/dendron/issues/new?assignees=&labels=&template=bug_report.md&title= We will put our best bug exterminators on this right away!`;
+
+// TODO: this is extracted from ./src/utils.ts
+// The reason is because `logger` is used in `utils` and importing `VSCodeUtils` inside logger causes a circular dependency
+const openFileInEditor = async (
+  fileItemOrURI: FileItem | vscode.Uri,
+  opts?: Partial<{
+    column: vscode.ViewColumn;
+  }>
+): Promise<vscode.TextEditor | undefined> => {
+  let textDocument;
+  if (fileItemOrURI instanceof FileItem) {
+    if (fileItemOrURI.isDir) {
+      return;
+    }
+
+    textDocument = await vscode.workspace.openTextDocument(
+      fileItemOrURI.path
+    );
+  } else {
+    textDocument = await vscode.workspace.openTextDocument(fileItemOrURI);
+  }
+
+  if (!textDocument) {
+    throw new Error("Could not open file!");
+  }
+
+  const col = opts?.column || vscode.ViewColumn.Active;
+
+  const editor = await vscode.window.showTextDocument(textDocument, col);
+  if (!editor) {
+    throw new Error("Could not show document!");
+  }
+
+  return editor;
+}
 
 export class Logger {
   static output: OutputChannel | undefined;
@@ -153,7 +189,7 @@ export class Logger {
             const navigateMsg = "Go to file.";
             window.showErrorMessage(cleanMsg, {}, navigateMsg).then((value) => {
               if (value === navigateMsg) {
-                VSCodeUtils.openFileInEditor(Uri.file(fullPath));
+                openFileInEditor(Uri.file(fullPath));
               }
             });
           } else {

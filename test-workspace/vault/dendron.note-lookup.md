@@ -2,7 +2,7 @@
 id: bNkYI2WWK6Jhm2eeVwqrh
 title: Note Lookup
 desc: ''
-updated: 1634725877431
+updated: 1636555365403
 created: 1633501913732
 ---
 
@@ -33,6 +33,20 @@ Note look up `cmd+l`:
 1. Navigate to `dendron.blog.one`
 1. Activate `Note lookup`
 1. Make sure to be able to see siblings of `dendron.blog.one` such as ``dendron.blog.two`.
+
+### Lookup with dot at the end
+1. Look up `data.` 
+Should see results with roughly the following order:
+* `data.driven`     
+    * first show matches with `data.` exact matched and `data.` highest in hierarchy
+* `languages.python.data.string`
+    * then show matches that have `data.` exact matched but lower in hierarchy.
+* ...
+* `languages.with-data.make-sense` 
+    * later show matches that are not exact matched `with-data.`
+* `languages.python.data.string.memory` 
+    * lastly show matches that have not just children but grand children etc.
+All matches should have `data.` and some value after `data.`
 
 ### Look up with wiki links
 * [[with description with header with vault|dendron://vault/dendron.welcome#header1]]

@@ -73,8 +73,8 @@ suite("transformQueryString tests:", () => {
       });
     });
 
-    it(`THEN ^ prefix is added`, () => {
-      expect(transformed.queryString).toEqual("^some.string.value.");
+    it(`THEN do NOT split by dots`, () => {
+      expect(transformed.queryString).toEqual("some.string.value.");
     });
 
     it(`THEN split by dots is not populated`, () => {

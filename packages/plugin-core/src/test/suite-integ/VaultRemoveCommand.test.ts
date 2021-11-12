@@ -141,15 +141,6 @@ suite("VaultRemoveCommand", function () {
             DendronExtension.workspaceFile().fsPath
           ) as WorkspaceSettings;
           expect(settings.folders).toEqual([{ path: vaults[0].fsPath }]);
-
-          // Check that the gitignore was updated
-          const gitignore = path.join(wsRoot, ".gitignore");
-          expect(
-            FileTestUtils.assertInFile({
-              fpath: gitignore,
-              nomatch: [`${vaults[1].fsPath}/?`, `${vaults[1].name}/?`],
-            })
-          ).toBeTruthy();
           done();
         },
       });

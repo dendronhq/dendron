@@ -177,7 +177,7 @@ export class Logger {
       if (shouldShow || Logger.cmpLevels(lvl, "error")) {
         const cleanMsg =
           (payload.error ? payload.error.message : payload.msg) || stringMsg;
-        const fullPath = this.tryExtractFullPath(payload);
+        const fullPath = Logger.tryExtractFullPath(payload);
 
         if (Logger.cmpLevels(lvl, "error")) {
           if (fullPath) {

@@ -26,6 +26,7 @@ function wikiTransform(trimmedQuery: string): TransformedQueryString {
   }
 
   return {
+    originalQuery: trimmedQuery,
     queryString: transformed,
     wasMadeFromWikiLink: true,
     vaultName,
@@ -49,11 +50,10 @@ function regularTransform(
   let queryString = PickerUtilsV2.slashToDot(trimmedQuery);
   let splitByDots: string[] | undefined;
 
+  // When we are doing direct children lookup & when query ends with '.' we want exact
+  // matches of the query. Hence we would not be splitting by dots, more info
+  // on split by dots in {@link TransformedQueryString.splitByDots} documentation.
   if (!onlyDirectChildren && !queryString.endsWith(".")) {
-    // When we are doing direct children lookup we want exact matches of the hierarchy
-    // Hence we would not be splitting by dots, more info on split by dots in
-    // {@link TransformedQueryString.splitByDots} documentation.
-    //
     // https://regex101.com/r/vMwX9C/2
     const dotCandidateMatch = queryString.match(/(^[^\s]*?\.[^\s]*)/);
     if (dotCandidateMatch) {
@@ -65,15 +65,16 @@ function regularTransform(
     }
   }
 
-  // When querying for children of the note then the prefix should match exactly.
+  // When querying for direct children of the note then the prefix should match exactly.
   if (
-    (onlyDirectChildren || queryString.endsWith(".")) &&
+    onlyDirectChildren &&
     !queryString.startsWith(FuseExtendedSearchConstants.PrefixExactMatch)
   ) {
     queryString = FuseExtendedSearchConstants.PrefixExactMatch + queryString;
   }
 
   return {
+    originalQuery: trimmedQuery,
     queryString,
     wasMadeFromWikiLink: false,
     splitByDots,

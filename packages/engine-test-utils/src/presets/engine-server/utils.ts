@@ -1,5 +1,6 @@
 import { NoteProps, SchemaUtils } from "@dendronhq/common-all";
 import {
+  CreateNoteFactory,
   NOTE_PRESETS_V4,
   NoteTestUtilsV4,
   PreSetupHookFunction,
@@ -43,6 +44,58 @@ export const setupBasic: PreSetupHookFunction = async ({
     wsRoot,
   });
   await SCHEMA_PRESETS_V4.SCHEMA_SIMPLE.create({ vault, wsRoot });
+};
+
+/**
+ <pre>
+ /vault1
+ ├── bar.ch1.gch1.ggch1.md
+ ├── bar.ch1.gch1.md
+ ├── bar.ch1.md
+ ├── bar.md
+ ├── foo.ch1.gch1.ggch1.md
+ ├── foo.ch1.gch1.md
+ ├── foo.ch1.gch2.md
+ ├── foo.ch1.md
+ ├── foo.ch2.md
+ ├── foo.md
+ ├── root.md
+ └── root.schema.yml
+
+/vault2
+ ├── root.md
+ └── root.schema.yml
+
+ /vault3
+ ├── root.md
+ └── root.schema.yml
+</pre>
+ * */
+export const setupHierarchyForLookupTests: PreSetupHookFunction = async ({
+  vaults,
+  wsRoot,
+}) => {
+  const opts = {
+    vault: vaults[0],
+    wsRoot,
+  };
+  const fnames = [
+    "foo",
+    "foo.ch1",
+    "foo.ch1.gch1",
+    "foo.ch1.gch1.ggch1",
+    "foo.ch1.gch2",
+    "foo.ch2",
+    "bar",
+    "bar.ch1",
+    "bar.ch1.gch1",
+    "bar.ch1.gch1.ggch1",
+    "goo.ends-with-ch1.no-ch1-by-itself",
+  ];
+
+  for (const fname of fnames) {
+    await CreateNoteFactory({ fname, body: `${fname} body` }).create(opts);
+  }
 };
 
 export const setupJournals: PreSetupHookFunction = async ({
@@ -496,6 +549,7 @@ export const ENGINE_HOOKS_BASE = {
 
 export const ENGINE_HOOKS = {
   setupBasic,
+  setupHierarchyForLookupTests,
   setupSchemaPreseet,
   setupSchemaPresetWithNamespaceTemplate,
   setupInlineSchema,

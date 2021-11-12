@@ -23,12 +23,12 @@ import {
   vault2Path,
 } from "@dendronhq/common-server";
 import { HistoryService } from "@dendronhq/engine-server";
-import _ from "lodash";
+import _, { orderBy } from "lodash";
 import path from "path";
 import { QuickPickItem, TextEditor, Uri, ViewColumn, window } from "vscode";
 import { Logger } from "../../logger";
 import { VSCodeUtils } from "../../utils";
-import { getExtension, getDWorkspace } from "../../workspace";
+import { getDWorkspace, getExtension } from "../../workspace";
 import { DendronBtn, getButtonCategory } from "./buttons";
 import {
   CREATE_NEW_DETAIL,
@@ -859,6 +859,81 @@ export class NotePickerUtils {
   }
 }
 
+function countDots(subStr: string) {
+  return Array.from(subStr).filter((ch) => ch === ".").length;
+}
+
+function sortForQueryEndingWithDot(
+  transformedQuery: TransformedQueryString,
+  itemsToFilter: NoteProps[]
+) {
+  const lowercaseQuery = transformedQuery.originalQuery.toLowerCase();
+
+  // If the user enters the query 'data.' we want to keep items that have 'data.'
+  // and sort the results in the along the following order:
+  //
+  // ```
+  // data.driven                  (data. has clean-match, grandchild-free, 1st in hierarchy)
+  // level1.level2.data.integer   (data. has clean-match, grandchild-free, 3rd in hierarchy)
+  // l1.l2.l3.data.bool           (data. has clean-match, grandchild-free, 4th in hierarchy)
+  // l1.with-data.and-child       (data. has partial match 2nd level)
+  // l1.l2.with-data.and-child    (data. has partial match 3rd level)
+  // level1.level2.data.integer.has-grandchild
+  // l1.l2.with-data.and-child.has-grandchild
+  // ```
+
+  const itemsWithMetadata = itemsToFilter
+    .map((item) => {
+      // Firstly pre-process the items in attempt to find the match.
+      const lowercaseFName = item.fname.toLowerCase();
+      const matchIndex = lowercaseFName.indexOf(lowercaseQuery);
+      return { matchIndex, item };
+    })
+    // Filter out items without a match.
+    .filter((item) => item.matchIndex !== -1)
+    // Filter out items where the match is at the end (match does not have children)
+    .filter(
+      (item) =>
+        !(item.matchIndex + lowercaseQuery.length === item.item.fname.length)
+    )
+    .map((item) => {
+      // Meaning the match takes up entire level of the hierarchy.
+      // 'one.two-hi.three'->'two-hi.' is clean match while 'o-hi.' is a
+      // match but not a clean one.
+      const isCleanMatch =
+        item.matchIndex === 0 ||
+        item.item.fname.charAt(item.matchIndex - 1) === ".";
+
+      const dotsBeforeMatch = countDots(
+        item.item.fname.substring(0, item.matchIndex)
+      );
+      const dotsAfterMatch = countDots(
+        item.item.fname.substring(item.matchIndex + lowercaseQuery.length)
+      );
+      const zeroGrandchildren = dotsAfterMatch === 0;
+      return {
+        dotsBeforeMatch,
+        dotsAfterMatch,
+        zeroGrandchildren,
+        isCleanMatch,
+        ...item,
+      };
+    });
+
+  const sortOrder: { fieldName: string; order: "asc" | "desc" }[] = [
+    { fieldName: "zeroGrandchildren", order: "desc" },
+    { fieldName: "isCleanMatch", order: "desc" },
+    { fieldName: "dotsAfterMatch", order: "asc" },
+    { fieldName: "dotsBeforeMatch", order: "asc" },
+  ];
+
+  return orderBy(
+    itemsWithMetadata,
+    sortOrder.map((it) => it.fieldName),
+    sortOrder.map((it) => it.order)
+  ).map((item) => item.item);
+}
+
 export const filterPickerResults = ({
   itemsToFilter,
   transformedQuery,
@@ -872,6 +947,11 @@ export const filterPickerResults = ({
     itemsToFilter = itemsToFilter.filter(
       (item) => VaultUtils.getName(item.vault) === transformedQuery.vaultName
     );
+  }
+
+  // Ending the query with a dot adds special processing of showing matched descendents.
+  if (transformedQuery.originalQuery.endsWith(".")) {
+    itemsToFilter = sortForQueryEndingWithDot(transformedQuery, itemsToFilter);
   }
 
   if (transformedQuery.splitByDots && transformedQuery.splitByDots.length > 0) {

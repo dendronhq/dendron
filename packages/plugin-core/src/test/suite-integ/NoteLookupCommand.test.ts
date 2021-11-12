@@ -24,13 +24,14 @@ import {
 } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
 import _ from "lodash";
-import { describe } from "mocha";
+import { describe, Done } from "mocha";
 import path from "path";
 import sinon from "sinon";
 // // You can import and use all API from the 'vscode' module
 // // as well as import your extension to test it
 import * as vscode from "vscode";
 import {
+  DendronQuickPickerV2,
   LookupNoteTypeEnum,
   LookupSelectionTypeEnum,
   LookupSplitTypeEnum,
@@ -66,6 +67,7 @@ import {
   withConfig,
 } from "../testUtilsV3";
 import { CREATE_NEW_LABEL } from "../../components/lookup/constants";
+import assert from "assert";
 
 const stubVaultPick = (vaults: DVault[]) => {
   const vault = _.find(vaults, { fsPath: "vault1" });
@@ -73,6 +75,30 @@ const stubVaultPick = (vaults: DVault[]) => {
     .stub(PickerUtilsV2, "getOrPromptVaultForNewNote")
     .returns(Promise.resolve(vault));
 };
+
+export function expectQuickPick(quickPick: DendronQuickPickerV2) {
+  return {
+    toIncludeFname: (fname: string) => {
+      assert.ok(
+        quickPick.items.some((item) => item.fname === fname),
+        `Did not find item with fname='${fname}' in quick pick when expected to find it.`
+      );
+    },
+    toNotIncludeFname: (fname: string) => {
+      assert.ok(
+        !quickPick.items.some((item) => item.fname === fname),
+        `Found item with fname='${fname}' when expected NOT to find it.`
+      );
+    },
+    toBeEmpty() {
+      const errorMsg = `Expected quick pick to be empty but found ${
+        quickPick.items.length
+      }items: '${quickPick.items.map((item) => item.label)}'`;
+
+      assert.ok(quickPick.items.length === 0, errorMsg);
+    },
+  };
+}
 
 function expectCreateNew({
   item,
@@ -408,6 +434,140 @@ suite("NoteLookupCommand", function () {
           });
           done();
         },
+      });
+    });
+  });
+
+  /**
+   * Notes to choose from (root.md excluded):
+   *
+   <pre>
+   vault1/
+   ├── bar.ch1.gch1.ggch1.md
+   ├── bar.ch1.gch1.md
+   ├── bar.ch1.md
+   ├── bar.md
+   ├── foo.ch1.gch1.ggch1.md
+   ├── foo.ch1.gch1.md
+   ├── foo.ch1.gch2.md
+   ├── foo.ch1.md
+   ├── foo.ch2.md
+   ├── goo.ends-with-ch1.no-ch1-by-itself.md
+   └── foo.md
+   </pre>
+   * */
+  async function runLookupInHierarchyTestWorkspace(
+    initialValue: string,
+    assertions: (out: CommandOutput) => void,
+    done: Done
+  ) {
+    await runLegacyMultiWorkspaceTest({
+      ctx,
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        await ENGINE_HOOKS.setupHierarchyForLookupTests({ wsRoot, vaults });
+      },
+      onInit: async () => {
+        const cmd = new NoteLookupCommand();
+
+        const out: CommandOutput = (await cmd.run({
+          noConfirm: true,
+          initialValue,
+        }))!;
+
+        assertions(out);
+
+        done();
+      },
+    });
+  }
+
+  describe(`GIVEN default note look up settings:`, () => {
+    test("WHEN running simplest query THEN find the matching value", (done) => {
+      runLookupInHierarchyTestWorkspace(
+        "ends-with-ch1",
+        (out) => {
+          expectQuickPick(out.quickpick).toIncludeFname(
+            "goo.ends-with-ch1.no-ch1-by-itself"
+          );
+        },
+        done
+      );
+    });
+
+    describe(`Test: Queries ending with dot`, () => {
+      test("WHEN querying with 'with-ch1.' THEN find partial match within hierarchy and show its children..", (done) => {
+        runLookupInHierarchyTestWorkspace(
+          "with-ch1.",
+          (out) => {
+            expectQuickPick(out.quickpick).toIncludeFname(
+              "goo.ends-with-ch1.no-ch1-by-itself"
+            );
+            expectQuickPick(out.quickpick).toNotIncludeFname("foo.ch1.gch1");
+          },
+          done
+        );
+      });
+
+      test("WHEN querying with 'ch1.gch1.' THEN finds direct match within hierarchy.", (done) => {
+        runLookupInHierarchyTestWorkspace(
+          "ch1.gch1.",
+          (out) => {
+            // Showing direct children of matches in different hierarchies:
+            expectQuickPick(out.quickpick).toIncludeFname("bar.ch1.gch1.ggch1");
+            expectQuickPick(out.quickpick).toIncludeFname("foo.ch1.gch1.ggch1");
+            // Not showing our own match
+            expectQuickPick(out.quickpick).toNotIncludeFname("bar.ch1.gch1");
+          },
+          done
+        );
+      });
+
+      // Closest candidate is 'goo.ends-with-ch1.no-ch1-by-itself' which does contain 'ends-with-'
+      // however since we add the dot to the query we expect at least the postfix of the part
+      // of the hierarchy to match such as with 'with-ch1.' test. Here we deem it as not matching anything.
+      test("WHEN querying with 'ends-with-.' THEN empty quick pick", (done) => {
+        runLookupInHierarchyTestWorkspace(
+          "ends-with-.",
+          (out) => {
+            expectQuickPick(out.quickpick).toBeEmpty();
+          },
+          done
+        );
+      });
+    });
+
+    describe(`Test extended search`, () => {
+      test("WHEN running query with exclusion THEN exclude unwanted but keep others", (done) => {
+        runLookupInHierarchyTestWorkspace(
+          "!bar ch1",
+          (out) => {
+            expectQuickPick(out.quickpick).toIncludeFname("foo.ch1");
+            expectQuickPick(out.quickpick).toNotIncludeFname("bar.ch1");
+          },
+          done
+        );
+      });
+
+      test("WHEN running `ends with query` THEN filter to values that end with desired query.", (done) => {
+        runLookupInHierarchyTestWorkspace(
+          "foo$",
+          (out) => {
+            expectQuickPick(out.quickpick).toIncludeFname("foo");
+            expectQuickPick(out.quickpick).toNotIncludeFname("foo.ch1");
+          },
+          done
+        );
+      });
+
+      test("WHEN running query with (|) THEN match both values", (done) => {
+        runLookupInHierarchyTestWorkspace(
+          "foo | bar",
+          (out) => {
+            expectQuickPick(out.quickpick).toIncludeFname("foo.ch1");
+            expectQuickPick(out.quickpick).toIncludeFname("bar.ch1");
+          },
+          done
+        );
       });
     });
   });

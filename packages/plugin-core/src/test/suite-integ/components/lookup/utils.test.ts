@@ -4,6 +4,7 @@ import { filterPickerResults } from "../../../../components/lookup/utils";
 import { describe, it, beforeEach } from "mocha";
 import { expect } from "../../../testUtilsv2";
 import { transformQueryString } from "../../../../components/lookup/queryStringTransformer";
+import { TransformedQueryString } from "../../../../components/lookup/types";
 
 let pickerValue: string;
 describe(`filterPickerResults`, () => {
@@ -15,8 +16,9 @@ describe(`filterPickerResults`, () => {
     queryString?: string;
     vaultName?: string;
     wasMadeFromWikiLink?: boolean;
-  }) => {
+  }): TransformedQueryString => {
     return {
+      originalQuery: queryString || "f",
       wasMadeFromWikiLink: wasMadeFromWikiLink || false,
       queryString: queryString || "f",
       vaultName,
@@ -59,6 +61,55 @@ describe(`filterPickerResults`, () => {
       });
 
       expect(results.length).toEqual(3);
+    });
+  });
+
+  describe(`WHEN using dot at the end of the query. ['data.']`, () => {
+    it(`THEN filter to items with children AND sort accordingly`, async () => {
+      const inputs = [
+        // Pass in inputs in completely wrong order.
+        await inputItem({ fname: "i.completely.do-not.belong" }),
+        await inputItem({
+          fname: "i.have.no-data-children.hence-filter-me-out.data.",
+        }),
+        await inputItem({ fname: "level1.level2.data.integer.has-grandchild" }),
+        await inputItem({ fname: "l1.l2.with-data.and-child.has-grandchild" }),
+        await inputItem({ fname: "l1.l2.with-data.and-child" }),
+        await inputItem({ fname: "l1.with-data.and-child" }),
+        await inputItem({ fname: "l1.l2.l3.data.bool" }),
+        await inputItem({ fname: "level1.level2.data.integer" }),
+        await inputItem({ fname: "data.driven" }),
+      ];
+
+      const results = filterPickerResults({
+        itemsToFilter: inputs,
+        transformedQuery: transformedQuery({
+          queryString: "data.",
+        }),
+      });
+      const actual = results.map((item) => item.fname);
+
+      const expected = [
+        // 'data.' is at the highest level of hierarchy hence it comes up on top
+        "data.driven",
+
+        "level1.level2.data.integer",
+        // idx of match is closer to beginning then the previous element. But hierarchy
+        // of this element is more dug in hence sort order goes down.
+        "l1.l2.l3.data.bool",
+
+        // Non clean match of data we still keep it but lower it below all the clean
+        // matches regardless of hierarchy depth.
+        "l1.with-data.and-child",
+        "l1.l2.with-data.and-child",
+
+        // Now lastly come the nodes with grandchildren first with clean match, then
+        // with partial match.
+        "level1.level2.data.integer.has-grandchild",
+        "l1.l2.with-data.and-child.has-grandchild",
+      ];
+
+      expect(actual).toEqual(expected);
     });
   });
 

@@ -205,4 +205,7 @@ export type TransformedQueryString = {
   /**
    * Set to true when we only want to match direct children of the hierarchy. */
   onlyDirectChildren?: boolean;
+
+  /** Original query string value */
+  originalQuery: string;
 };

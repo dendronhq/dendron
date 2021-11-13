@@ -1,4 +1,5 @@
-import { DendronError } from "@dendronhq/common-all";
+/* eslint-disable import/no-dynamic-require */
+import { DendronError, RespV3 } from "@dendronhq/common-all";
 import { PodClassEntryV4, PodKind, PodUtils } from "@dendronhq/pods-core";
 import _ from "lodash";
 import path from "path";
@@ -48,6 +49,7 @@ export function fetchPodClassV4(
     if (!opts.podPkg || !opts.wsRoot) {
       throw Error("podPkg not defined");
     }
+    // eslint-disable-next-line global-require
     const podEntries = require(`${path.join(
       opts.wsRoot,
       "node_modules",
@@ -88,15 +90,13 @@ export function setupPodArgs(args: yargs.Argv) {
   });
 }
 
-export const enrichPodArgs = (opts: {
+export function enrichPodArgs<T extends PodCommandOpts = PodCommandOpts>(opts: {
   pods: PodClassEntryV4[];
   podType: PodKind;
-}) => {
+}) {
   const { pods, podType } = opts;
 
-  const enrichFunc = async (
-    args: PodCommandCLIOpts
-  ): Promise<PodCommandOpts> => {
+  const enrichFunc = async (args: PodCommandCLIOpts): Promise<RespV3<T>> => {
     const { podId, showConfig, podSource, podPkg, genConfig, config } = args;
 
     const engineArgs = await setupEngine(args);
@@ -110,7 +110,9 @@ export const enrichPodArgs = (opts: {
       wsRoot,
     });
     if (showConfig) {
+      // eslint-disable-next-line new-cap
       const config = new podClass().config;
+      // eslint-disable-next-line no-console
       console.log(config);
       process.exit(0);
     }
@@ -121,12 +123,23 @@ export const enrichPodArgs = (opts: {
         podClass,
         force: true,
       });
+      // eslint-disable-next-line no-console
       console.log(`config generated at ${configPath}`);
       process.exit(0);
     }
     const podsDir = path.join(wsRoot, "pods");
 
-    let cleanConfig = PodUtils.getConfig({ podsDir, podClass }) || {};
+    const { error, data: cleanConfig } = PodUtils.getConfig({
+      podsDir,
+      podClass,
+    });
+    if (error) {
+      return {
+        hasError: true,
+        error,
+      };
+    }
+
     // add additional config
     if (config) {
       config.split(",").map((ent) => {
@@ -141,23 +154,24 @@ export const enrichPodArgs = (opts: {
         message: `no config found. please create a config at ${podConfigPath}`,
       });
     }
-    return { ...args, ...engineArgs, podClass, config: cleanConfig };
+    return {
+      hasError: false,
+      data: { ...args, ...engineArgs, podClass, config: cleanConfig },
+    };
   };
   return enrichFunc;
-};
+}
 
 export const executePod = async (opts: PodCommandOpts) => {
   const { podClass: PodClass, config, wsRoot, engine, server } = opts;
   const vaults = engine.vaults;
   const pod = new PodClass();
-  console.log("running pod...");
   await pod.execute({ wsRoot, config, engine, vaults });
   server.close((err: any) => {
     if (err) {
       throw err;
     }
   });
-  console.log("done");
 };
 export enum PodSource {
   CUSTOM = "custom",

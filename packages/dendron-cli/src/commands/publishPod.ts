@@ -1,8 +1,8 @@
-import { DendronError } from "@dendronhq/common-all";
+import { DendronError, RespV3 } from "@dendronhq/common-all";
 import {
   getAllPublishPods,
-  PublishPodConfig,
   PublishPod,
+  PublishPodConfig,
 } from "@dendronhq/pods-core";
 import yargs from "yargs";
 import { CLICommand, CommandCommonProps } from "./base";
@@ -36,11 +36,12 @@ export class PublishPodCLICommand extends CLICommand<
     setupPodArgs(args);
   }
 
-  async enrichArgs(args: CommandCLIOpts): Promise<CommandOpts> {
+  async enrichArgs(args: CommandCLIOpts): Promise<RespV3<CommandOpts>> {
     this.addArgsToPayload({ podId: args.podId });
-    return enrichPodArgs({ pods: getAllPublishPods(), podType: "publish" })(
-      args
-    );
+    return enrichPodArgs<CommandOpts>({
+      pods: getAllPublishPods(),
+      podType: "publish",
+    })(args);
   }
 
   async execute(opts: CommandOpts): Promise<CommandOutput> {
@@ -49,6 +50,7 @@ export class PublishPodCLICommand extends CLICommand<
     const pod = new PodClass() as PublishPod;
     const resp = await pod.execute({ wsRoot, config, engine, vaults });
     if (config.dest === "stdout") {
+      // eslint-disable-next-line no-console
       console.log(resp);
     }
     return new Promise((resolve) => {

@@ -190,6 +190,19 @@ export interface RespV2<T> {
   error: IDendronError | null;
 }
 
+/**
+ * This lets us use a discriminate union to see if result has error or data
+ */
+export type RespV3<T> =
+  | {
+      hasError: true;
+      error: IDendronError;
+    }
+  | {
+      hasError: false;
+      data: T;
+    };
+
 export type BooleanResp =
   | { data: true; error: null }
   | { data: false; error: DendronError };
@@ -676,7 +689,7 @@ export type NoteViewMessage = DMessage<
   { id?: string; href?: string }
 >;
 
-export type NoteViewMessageType = DMessageEnum | NoteViewMessageEnum
+export type NoteViewMessageType = DMessageEnum | NoteViewMessageEnum;
 
 export type SeedBrowserMessage = DMessage<
   SeedBrowserMessageType | DMessageEnum,

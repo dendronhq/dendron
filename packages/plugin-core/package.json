@@ -863,7 +863,7 @@
     "vscode:uninstall": "node ./out/src/scripts/uninstallHook.js",
     "deploy:vscode": "vsce publish --yarn",
     "deploy:ovsx": "ovsx publish --yarn",
-    "clean": "yarn rimraf out dist && yarn clean:assets",
+    "clean": "yarn rimraf out dist node_modules && yarn clean:assets",
     "clean:assets": "yarn rimraf assets/{static}",
     "rimraf": "npx rimraf"
   },

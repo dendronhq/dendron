@@ -26,7 +26,7 @@
     "gen:theme": "gulp less",
     "build:js": "gulp js",
     "format": "echo nop",
-    "clean": "yarn rimraf public/*.css public/js  out",
+    "clean": "yarn rimraf public/*.css public/js  out node_modules",
     "rimraf": "npx rimraf"
   },
   "nohoist": [

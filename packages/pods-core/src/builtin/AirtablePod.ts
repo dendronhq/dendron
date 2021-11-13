@@ -109,7 +109,7 @@ export class AirtableUtils {
         const data = JSON.stringify({ records: record });
         try {
           const _records = await func(record);
-          total = total + _records.length;
+          total += _records.length;
           return _records;
         } catch (error) {
           let payload: any = { data };
@@ -151,7 +151,7 @@ export class AirtableUtils {
   }) {
     switch (fieldMapping.type) {
       case "string": {
-        let val = _.get(note, fieldMapping.to);
+        const val = _.get(note, fieldMapping.to, "");
         return val.toString();
       }
       case "date": {
@@ -212,7 +212,7 @@ export class AirtableUtils {
     };
     notes.map((note) => {
       // TODO: optimize, don't parse if no hashtags
-      let hashtags = LinkUtils.findHashTags({ links: note.links });
+      const hashtags = LinkUtils.findHashTags({ links: note.links });
       let fields = {};
       logger.debug({ ctx, note: NoteUtils.toLogObj(note), msg: "enter" });
       for (const [key, fieldMapping] of Object.entries<SrcFieldMapping>(
@@ -295,7 +295,7 @@ export class AirtableUtils {
 
 export class AirtablePublishPod extends PublishPod<AirtablePublishConfig> {
   static id: string = ID;
-  static description: string = "publish json";
+  static description: string = "publish to airtable";
 
   get config(): JSONSchemaType<AirtablePublishConfig> {
     return PodUtils.createPublishConfig({

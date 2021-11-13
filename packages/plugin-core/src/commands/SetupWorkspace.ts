@@ -33,8 +33,8 @@ type CommandOutput = DVault[];
 
 export { CommandOpts as SetupWorkspaceOpts };
 
-const CODE_WS_LABEL = "Code";
-const CODE_WS_DETAIL = "New workspace";
+const CODE_WS_LABEL = "Code Workspace";
+const CODE_WS_DETAIL = undefined;
 
 enum EXISTING_ROOT_ACTIONS {
   CONTINUE = "continue",
@@ -66,14 +66,14 @@ export class SetupWorkspaceCommand extends BasicCommand<
             picked: true,
             label: CODE_WS_LABEL,
             description: CODE_WS_DETAIL,
-            detail: "A Dendron Code workspace that's for notes only.",
+            detail: "A dedicated IDE workspace for just your notes",
           },
           ...workspaceFolders.map((folder) => {
             const folderName = folder.name || folder.uri.fsPath;
             return {
               label: folderName,
               description: folder.uri.fsPath,
-              detail: `Take notes in ${folderName} with a Dendron Native workspace.`,
+              detail: `Take notes in ${folderName} alongside your existing project`,
             };
           }),
         ],

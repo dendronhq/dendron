@@ -45,11 +45,13 @@ function footnoteDef2html(definition: FootnoteDefinition) {
   const backArrow = html(
     `<a class="${FOOTNOTE_DEF_CLASS}" href="#${FOOTNOTE_REF_ID_PREFIX}${definition.identifier}">${FOOTNOTE_RETURN_SYMBOL}</a>`
   );
-  let lastParent: Parent | undefined;
-  visit(definition, (node) => {
-    if (RemarkUtils.isParent(node)) lastParent = node;
-  });
-  if (lastParent) lastParent.children.push(backArrow);
+  const lastChild = _.last(definition.children);
+  if (lastChild && RemarkUtils.isParent(lastChild)) {
+    lastChild.children.push(backArrow as any);
+  } else {
+    // Fallback, not sure if this can actually happen because definition always seems to have a paragraph as a child
+    definition.children.push(backArrow as any);
+  }
   return paragraph([
     // Put the ID target first, so even if the footnote is multiple lines long, it jumps to the start
     html(

@@ -9,7 +9,7 @@ import _ from "lodash";
 import { Content, FootnoteDefinition, FootnoteReference, Root } from "mdast";
 import { heading, html, list, listItem, paragraph, text } from "mdast-builder";
 import Unified, { Plugin } from "unified";
-import { Node, Parent } from "unist";
+import { Node } from "unist";
 import u from "unist-builder";
 import { SiteUtils } from "../../topics/site";
 import { HierarchyUtils } from "../../utils";

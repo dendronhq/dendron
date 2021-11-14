@@ -2,7 +2,6 @@ import {
   BulkAddNoteOpts,
   Cache,
   ConfigWriteOpts,
-  CONSTANTS,
   DendronCompositeError,
   IntermediateDendronConfig,
   DendronError,
@@ -50,6 +49,7 @@ import {
   WorkspaceOpts,
   WriteNoteResp,
   ConfigUtils,
+  RefreshNotesOpts,
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -59,10 +59,11 @@ import {
   writeYAML,
 } from "@dendronhq/common-server";
 import _ from "lodash";
+import { EngineUtils } from ".";
 import { DConfig } from "./config";
 import { FileStorage } from "./drivers/file/storev2";
-import { LinkUtils, MDUtilsV5, ProcFlavor } from "./markdown";
-import { AnchorUtils, RemarkUtils } from "./markdown/remark/utils";
+import { MDUtilsV5, ProcFlavor } from "./markdown";
+import { RemarkUtils } from "./markdown/remark/utils";
 import { HookUtils } from "./topics/hooks";
 
 type CreateStoreFunc = (engine: DEngineClient) => DStore;
@@ -262,7 +263,7 @@ export class DendronEngineV2 implements DEngine {
       };
     } catch (error: any) {
       const { message, stack, status } = error;
-      let payload = { message, stack };
+      const payload = { message, stack };
       return {
         error: DendronError.createPlainError({
           payload,
@@ -448,12 +449,12 @@ export class DendronEngineV2 implements DEngine {
     const ctx = "Engine:queryNotes";
     const { qs, vault, createIfNew, onlyDirectChildren, originalQS } = opts;
 
-    let items = await this.fuseEngine.queryNote({
+    const items = await this.fuseEngine.queryNote({
       qs,
       onlyDirectChildren,
       originalQS,
     });
-    let item = this.notes[items[0].id];
+    const item = this.notes[items[0].id];
     if (createIfNew) {
       let noteNew: NoteProps;
       if (item?.fname === qs && item?.stub) {
@@ -573,6 +574,11 @@ export class DendronEngineV2 implements DEngine {
     throw Error("sync not implemented");
   }
 
+  async refreshNotes(opts: RefreshNotesOpts) {
+    await this.refreshNotesV2(opts.notes);
+    return;
+  }
+
   async refreshNotesV2(notes: NoteChangeEntry[]) {
     const notesMap = NoteUtils.createFnameNoteMap(_.values(this.notes), true);
     await Promise.all(
@@ -581,27 +587,12 @@ export class DendronEngineV2 implements DEngine {
         if (ent.status === "delete") {
           delete this.notes[id];
         } else {
-          const maxNoteLength = ConfigUtils.getWorkspace(
-            this.config
-          ).maxNoteLength;
-          if (
-            ent.note.body.length <
-            (maxNoteLength || CONSTANTS.DENDRON_DEFAULT_MAX_NOTE_LENGTH)
-          ) {
-            const links = LinkUtils.findLinks({ note: ent.note, engine: this });
-            const linkCandidates = LinkUtils.findLinkCandidates({
-              note: ent.note,
-              notesMap,
-              engine: this,
-            });
-            const anchors = await AnchorUtils.findAnchors({
-              note: ent.note,
-              wsRoot: this.wsRoot,
-            });
-            ent.note.links = links.concat(linkCandidates);
-            ent.note.anchors = anchors;
-          }
-          this.notes[id] = ent.note;
+          const note = await EngineUtils.refreshNoteLinksAndAnchors({
+            note: ent.note,
+            engine: this,
+            notesMap,
+          });
+          this.notes[id] = note;
         }
       })
     );

@@ -2,9 +2,9 @@ import {
   APIUtils,
   BulkAddNoteOpts,
   ConfigGetPayload,
+  ConfigUtils,
   ConfigWriteOpts,
   DendronAPI,
-  IntermediateDendronConfig,
   DendronError,
   DEngine,
   DEngineClient,
@@ -12,7 +12,6 @@ import {
   DEngineInitResp,
   DHookDict,
   DLink,
-  DNodeProps,
   DVault,
   EngineDeleteNoteResp,
   EngineDeleteOptsV2,
@@ -25,11 +24,13 @@ import {
   GetNoteBlocksPayload,
   GetNoteOptsV2,
   GetNotePayload,
+  IntermediateDendronConfig,
   NoteChangeEntry,
   NoteProps,
   NotePropsDict,
   NoteUtils,
   QueryNotesOpts,
+  RefreshNotesOpts,
   RenameNoteOpts,
   RenameNotePayload,
   RenderNoteOpts,
@@ -41,7 +42,6 @@ import {
   SchemaUtils,
   VaultUtils,
   WriteNoteResp,
-  ConfigUtils,
 } from "@dendronhq/common-all";
 import { createLogger, DLogger, readYAML } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -49,7 +49,7 @@ import _ from "lodash";
 import { DConfig } from "./config";
 import { FileStorage } from "./drivers/file/storev2";
 import { HistoryService } from "./history";
-import { getPortFilePath } from "./utils";
+import { EngineUtils, getPortFilePath } from "./utils";
 
 type DendronEngineClientOpts = {
   vaults: DVault[];
@@ -85,7 +85,7 @@ export class DendronEngineClient implements DEngineClient {
   } & DendronEngineClientOpts) {
     const api = new DendronAPI({
       endpoint: APIUtils.getLocalEndpoint(
-        _.isString(port) ? parseInt(port) : port
+        _.isString(port) ? parseInt(port, 10) : port
       ),
       apiPath: "api",
       logger,
@@ -172,7 +172,7 @@ export class DendronEngineClient implements DEngineClient {
 
   async bulkAddNotes(opts: BulkAddNoteOpts) {
     const resp = await this.api.engineBulkAdd({ opts, ws: this.ws });
-    let changed = resp.data;
+    const changed = resp.data;
     await this.refreshNotesV2(changed);
     return resp;
   }
@@ -263,8 +263,6 @@ export class DendronEngineClient implements DEngineClient {
     };
   }
 
-  async buildNotes() {}
-
   queryNotesSync({ qs, vault }: { qs: string; vault?: DVault }) {
     let items = this.fuseEngine.queryNote({ qs });
     if (vault) {
@@ -282,43 +280,54 @@ export class DendronEngineClient implements DEngineClient {
     return this.api.noteRender({ ...opts, ws: this.ws });
   }
 
-  async refreshNotes(notes: NoteProps[]) {
-    notes.forEach((node: DNodeProps) => {
-      const { id } = node;
-      this.notes[id] = node;
-    });
-    this.fuseEngine.updateNotesIndex(this.notes);
+  async refreshNotes(opts: RefreshNotesOpts) {
+    return this.refreshNotesV2(opts.notes);
   }
 
   async refreshNotesV2(notes: NoteChangeEntry[]) {
-    notes.forEach((ent: NoteChangeEntry) => {
-      const { id } = ent.note;
-      const uri = NoteUtils.getURI({ note: ent.note, wsRoot: this.wsRoot });
-      if (ent.status === "delete") {
-        delete this.notes[id];
-        this.history &&
-          this.history.add({ source: "engine", action: "delete", uri });
-      } else {
-        if (ent.status === "create") {
+    await Promise.all(
+      notes.map(async (ent: NoteChangeEntry) => {
+        const { id } = ent.note;
+        const uri = NoteUtils.getURI({ note: ent.note, wsRoot: this.wsRoot });
+        if (ent.status === "delete") {
+          delete this.notes[id];
+          // eslint-disable-next-line no-unused-expressions
           this.history &&
-            this.history.add({ source: "engine", action: "create", uri });
+            this.history.add({ source: "engine", action: "delete", uri });
+        } else {
+          if (ent.status === "create") {
+            // eslint-disable-next-line no-unused-expressions
+            this.history &&
+              this.history.add({ source: "engine", action: "create", uri });
+          }
+          if (ent.status === "update") {
+            const notesMap = NoteUtils.createFnameNoteMap(
+              _.values(this.notes),
+              true
+            );
+            const note = await EngineUtils.refreshNoteLinksAndAnchors({
+              note: ent.note,
+              engine: this,
+              notesMap,
+            });
+            // TODO: check if still needed, should be handled by tree views now
+            note.children = _.sortBy(
+              ent.note.children,
+              (id) =>
+                _.get(
+                  this.notes,
+                  id,
+                  _.find(notes, (ent) => ent.note.id === id)?.note || {
+                    title: "foo",
+                  }
+                ).title
+            );
+          }
+          this.notes[id] = ent.note;
         }
-        if (ent.status === "update") {
-          ent.note.children = _.sortBy(
-            ent.note.children,
-            (id) =>
-              _.get(
-                this.notes,
-                id,
-                _.find(notes, (ent) => ent.note.id === id)?.note || {
-                  title: "foo",
-                }
-              ).title
-          );
-        }
-        this.notes[id] = ent.note;
-      }
-    });
+        return;
+      })
+    );
     this.fuseEngine.updateNotesIndex(this.notes);
   }
 
@@ -372,7 +381,7 @@ export class DendronEngineClient implements DEngineClient {
     if (_.isUndefined(noteClean)) {
       throw new DendronError({ message: "error updating note", payload: resp });
     }
-    await this.refreshNotes([noteClean]);
+    await this.refreshNotesV2([{ note: noteClean, status: "update" }]);
     return noteClean;
   }
 

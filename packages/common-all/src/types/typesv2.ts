@@ -300,6 +300,10 @@ export type RenderNoteOpts = {
   id: string;
 };
 
+export type RefreshNotesOpts = {
+  notes: NoteChangeEntry[];
+};
+
 export type GetNoteBlocksOpts = {
   id: string;
   filterByAnchorType?: "header" | "block";
@@ -494,6 +498,12 @@ export type DEngine = DCommonProps &
     queryNotesSync({ qs }: { qs: string; vault?: DVault }): NoteQueryResp;
     renameNote: (opts: RenameNoteOpts) => Promise<RespV2<RenameNotePayload>>;
     renderNote: (opts: RenderNoteOpts) => Promise<RespV2<RenderNotePayload>>;
+    /**
+     * Update note metadata.
+     * Use cases:
+     * - update notes if they've been changed outside of Dendron
+     */
+    refreshNotes: (opts: RefreshNotesOpts) => Promise<void | IDendronError>;
     getNoteBlocks: (opts: GetNoteBlocksOpts) => Promise<GetNoteBlocksPayload>;
 
     // config

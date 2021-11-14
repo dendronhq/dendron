@@ -59,6 +59,11 @@ export abstract class PublishPod<
   T extends PublishPodConfig = PublishPodConfig
 > {
   static kind = "publish" as PodKind;
+  public L: DLogger;
+
+  constructor() {
+    this.L = createLogger("PublishPod");
+  }
 
   abstract get config(): JSONSchemaType<T>;
 
@@ -67,6 +72,7 @@ export abstract class PublishPod<
     const { fname, vaultName } = config;
 
     PodUtils.validate<T>(config, this.config);
+    this.L.info({ ctx: "execute:enter", fname, vaultName });
 
     const vault = VaultUtils.getVaultByNameOrThrow({
       vaults: engine.vaults,
@@ -132,7 +138,7 @@ export abstract class ImportPod<T extends ImportPodConfig = ImportPodConfig> {
     });
     const srcURL = URI.file(resolvePath(src, engine.wsRoot));
 
-    return await this.plant({ ...opts, src: srcURL, vault });
+    return this.plant({ ...opts, src: srcURL, vault });
   }
   abstract plant(
     opts: ImportPodPlantOpts<T>

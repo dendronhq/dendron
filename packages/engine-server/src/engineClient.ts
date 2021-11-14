@@ -2,9 +2,9 @@ import {
   APIUtils,
   BulkAddNoteOpts,
   ConfigGetPayload,
-  ConfigUtils,
   ConfigWriteOpts,
   DendronAPI,
+  IntermediateDendronConfig,
   DendronError,
   DEngine,
   DEngineClient,
@@ -12,6 +12,7 @@ import {
   DEngineInitResp,
   DHookDict,
   DLink,
+  DNodeProps,
   DVault,
   EngineDeleteNoteResp,
   EngineDeleteOptsV2,
@@ -24,13 +25,11 @@ import {
   GetNoteBlocksPayload,
   GetNoteOptsV2,
   GetNotePayload,
-  IntermediateDendronConfig,
   NoteChangeEntry,
   NoteProps,
   NotePropsDict,
   NoteUtils,
   QueryNotesOpts,
-  RefreshNotesOpts,
   RenameNoteOpts,
   RenameNotePayload,
   RenderNoteOpts,
@@ -42,6 +41,8 @@ import {
   SchemaUtils,
   VaultUtils,
   WriteNoteResp,
+  ConfigUtils,
+  RefreshNotesOpts,
 } from "@dendronhq/common-all";
 import { createLogger, DLogger, readYAML } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -49,7 +50,7 @@ import _ from "lodash";
 import { DConfig } from "./config";
 import { FileStorage } from "./drivers/file/storev2";
 import { HistoryService } from "./history";
-import { EngineUtils, getPortFilePath } from "./utils";
+import { getPortFilePath } from "./utils";
 
 type DendronEngineClientOpts = {
   vaults: DVault[];
@@ -285,49 +286,36 @@ export class DendronEngineClient implements DEngineClient {
   }
 
   async refreshNotesV2(notes: NoteChangeEntry[]) {
-    await Promise.all(
-      notes.map(async (ent: NoteChangeEntry) => {
-        const { id } = ent.note;
-        const uri = NoteUtils.getURI({ note: ent.note, wsRoot: this.wsRoot });
-        if (ent.status === "delete") {
-          delete this.notes[id];
+    notes.forEach((ent: NoteChangeEntry) => {
+      const { id } = ent.note;
+      const uri = NoteUtils.getURI({ note: ent.note, wsRoot: this.wsRoot });
+      if (ent.status === "delete") {
+        delete this.notes[id];
+        // eslint-disable-next-line no-unused-expressions
+        this.history &&
+          this.history.add({ source: "engine", action: "delete", uri });
+      } else {
+        if (ent.status === "create") {
           // eslint-disable-next-line no-unused-expressions
           this.history &&
-            this.history.add({ source: "engine", action: "delete", uri });
-        } else {
-          if (ent.status === "create") {
-            // eslint-disable-next-line no-unused-expressions
-            this.history &&
-              this.history.add({ source: "engine", action: "create", uri });
-          }
-          if (ent.status === "update") {
-            const notesMap = NoteUtils.createFnameNoteMap(
-              _.values(this.notes),
-              true
-            );
-            const note = await EngineUtils.refreshNoteLinksAndAnchors({
-              note: ent.note,
-              engine: this,
-              notesMap,
-            });
-            // TODO: check if still needed, should be handled by tree views now
-            note.children = _.sortBy(
-              ent.note.children,
-              (id) =>
-                _.get(
-                  this.notes,
-                  id,
-                  _.find(notes, (ent) => ent.note.id === id)?.note || {
-                    title: "foo",
-                  }
-                ).title
-            );
-          }
-          this.notes[id] = ent.note;
+            this.history.add({ source: "engine", action: "create", uri });
         }
-        return;
-      })
-    );
+        if (ent.status === "update") {
+          ent.note.children = _.sortBy(
+            ent.note.children,
+            (id) =>
+              _.get(
+                this.notes,
+                id,
+                _.find(notes, (ent) => ent.note.id === id)?.note || {
+                  title: "foo",
+                }
+              ).title
+          );
+        }
+        this.notes[id] = ent.note;
+      }
+    });
     this.fuseEngine.updateNotesIndex(this.notes);
   }
 

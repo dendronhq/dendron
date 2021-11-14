@@ -5,6 +5,7 @@ import {
   NoteUtils,
   SchemaModuleProps,
   SchemaUtils,
+  DNodePropsQuickInputV2,
 } from "@dendronhq/common-all";
 import {
   file2Note,
@@ -16,7 +17,6 @@ import {
 } from "@dendronhq/common-server";
 import _ from "lodash";
 import path from "path";
-import { DNodePropsQuickInputV2 } from "@dendronhq/common-all";
 
 export type CreateNoteOptsV4 = {
   vault: DVault;
@@ -54,7 +54,7 @@ export class TestNoteFactory {
   }
 
   async createForFName(fname: string): Promise<NoteProps> {
-    return await NoteTestUtilsV4.createNote({
+    return NoteTestUtilsV4.createNote({
       fname,
       ...this._defaults,
     });
@@ -62,7 +62,9 @@ export class TestNoteFactory {
 
   async createForFNames(fnames: string[]): Promise<NoteProps[]> {
     const noteProps: NoteProps[] = [];
+    // eslint-disable-next-line no-plusplus
     for (let i = 0; i < fnames.length; i++) {
+      // eslint-disable-next-line no-await-in-loop
       noteProps.push(await this.createForFName(fnames[i]));
     }
     return noteProps;
@@ -142,7 +144,7 @@ export class NoteTestUtilsV4 {
     const npath = path.join(vault2Path({ vault, wsRoot }), fname + ".md");
     const note = file2Note(npath, vault);
     const newNote = cb(note);
-    return await note2File({ note: newNote, vault, wsRoot });
+    return note2File({ note: newNote, vault, wsRoot });
   }
 
   static async modifySchemaByPath(
@@ -154,6 +156,6 @@ export class NoteTestUtilsV4 {
     const npath = path.join(vpath, fname + ".schema.yml");
     const schema = await file2Schema(npath, wsRoot);
     const newSchema = cb(schema);
-    return await schemaModuleProps2File(newSchema, vpath, fname);
+    return schemaModuleProps2File(newSchema, vpath, fname);
   }
 }

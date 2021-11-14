@@ -53,11 +53,11 @@ export class WorkspaceCLICommand extends CLICommand<
     });
   }
 
-  async enrichArgs(args: CommandCLIOpts): Promise<CommandOpts> {
+  async enrichArgs(args: CommandCLIOpts) {
     this.addArgsToPayload({ cmd: args.cmd });
     const engineOpts: SetupEngineCLIOpts = _.defaults(args, { init: false });
     const engineArgs = await setupEngine(engineOpts);
-    return { ...args, ...engineArgs };
+    return { data: { ...args, ...engineArgs } };
   }
 
   async execute(opts: CommandOpts): Promise<CommandOutput> {

@@ -217,6 +217,16 @@ export function assertInvalidState(msg: string): never {
 
 /** Utility class for helping to correctly construct common errors. */
 export class ErrorFactory {
+  /**
+   * Not found
+   */
+  static create404Error({ url }: { url: string }): DendronError {
+    return new DendronError({
+      message: `resource at ${url} did not exist`,
+      severity: ERROR_SEVERITY.FATAL,
+    });
+  }
+
   static createUnexpectedEventError({ event }: { event: any }): DendronError {
     return new DendronError({
       message: `unexpected event: '${this.safeStringify(event)}'`,

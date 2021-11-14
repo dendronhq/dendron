@@ -63,7 +63,7 @@ export class SeedCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     });
   }
 
-  async enrichArgs(args: CommandCLIOpts): Promise<CommandOpts> {
+  async enrichArgs(args: CommandCLIOpts) {
     this.addArgsToPayload({ cmd: args.cmd, id: args.id, mode: args.mode });
     const engineOpts: SetupEngineCLIOpts = { ...args, init: false };
     if (
@@ -73,7 +73,7 @@ export class SeedCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       engineOpts.wsRoot = process.cwd();
     }
     const engineArgs = await setupEngine(engineOpts);
-    return { ...args, ...engineArgs };
+    return { data: { ...args, ...engineArgs } };
   }
 
   async execute(opts: CommandOpts): Promise<CommandOutput> {

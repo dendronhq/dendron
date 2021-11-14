@@ -90,13 +90,15 @@ export function setupPodArgs(args: yargs.Argv) {
   });
 }
 
-export function enrichPodArgs<T extends PodCommandOpts = PodCommandOpts>(opts: {
+export function enrichPodArgs(opts: {
   pods: PodClassEntryV4[];
   podType: PodKind;
 }) {
   const { pods, podType } = opts;
 
-  const enrichFunc = async (args: PodCommandCLIOpts): Promise<RespV3<T>> => {
+  const enrichFunc = async (
+    args: PodCommandCLIOpts
+  ): Promise<RespV3<PodCommandOpts>> => {
     const { podId, showConfig, podSource, podPkg, genConfig, config } = args;
 
     const engineArgs = await setupEngine(args);
@@ -129,15 +131,18 @@ export function enrichPodArgs<T extends PodCommandOpts = PodCommandOpts>(opts: {
     }
     const podsDir = path.join(wsRoot, "pods");
 
-    const { error, data: cleanConfig } = PodUtils.getConfig({
+    let cleanConfig: any = {};
+    const resp = PodUtils.getConfig({
       podsDir,
       podClass,
     });
-    if (error) {
+    if (resp.error && !config) {
       return {
-        hasError: true,
-        error,
+        error: resp.error,
       };
+    }
+    if (resp.data) {
+      cleanConfig = resp.data;
     }
 
     // add additional config
@@ -155,8 +160,12 @@ export function enrichPodArgs<T extends PodCommandOpts = PodCommandOpts>(opts: {
       });
     }
     return {
-      hasError: false,
-      data: { ...args, ...engineArgs, podClass, config: cleanConfig },
+      data: {
+        ...args,
+        ...engineArgs,
+        podClass,
+        config: cleanConfig,
+      },
     };
   };
   return enrichFunc;

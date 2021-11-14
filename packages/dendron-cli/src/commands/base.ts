@@ -116,7 +116,7 @@ export abstract class CLICommand<
       this.opts.quiet = true;
     }
     const opts = await this.enrichArgs(args);
-    if (opts.hasError) {
+    if (opts.error) {
       this.L.error(opts.error);
       return { error: opts.error };
     }

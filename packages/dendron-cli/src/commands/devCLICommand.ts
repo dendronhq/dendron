@@ -131,9 +131,9 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     });
   }
 
-  async enrichArgs(args: CommandCLIOpts): Promise<CommandOpts> {
+  async enrichArgs(args: CommandCLIOpts) {
     this.addArgsToPayload({ cmd: args.cmd });
-    return { ...args };
+    return { data: { ...args } };
   }
 
   async generateJSONSchemaFromConfig() {

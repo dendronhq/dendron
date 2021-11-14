@@ -195,11 +195,11 @@ export interface RespV2<T> {
  */
 export type RespV3<T> =
   | {
-      hasError: true;
       error: IDendronError;
+      data?: never;
     }
   | {
-      hasError: false;
+      error?: never;
       data: T;
     };
 

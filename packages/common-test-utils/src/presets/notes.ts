@@ -76,10 +76,8 @@ export const NOTE_PRESETS_V4 = {
   }),
   NOTE_WITH_CUSTOM_ATT: CreateNoteFactory({
     fname: "foo",
-    props: {
-      custom: {
-        bond: 42,
-      },
+    custom: {
+      bond: 42,
     },
   }),
   NOTE_DOMAIN_NAMESPACE: CreateNoteFactory({ fname: "pro" }),

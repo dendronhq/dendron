@@ -126,7 +126,7 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     });
   }
 
-  async enrichArgs(args: CommandCLIOpts): Promise<CommandOpts> {
+  async enrichArgs(args: CommandCLIOpts) {
     this.addArgsToPayload({ cmd: args.cmd });
     let error: DendronError | undefined;
     const coverrides: BuildOverrides = {};
@@ -142,7 +142,12 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
         }
       });
     }
-    return { ..._.omit(args, "overrides"), overrides: coverrides, error };
+    if (error) {
+      return { error };
+    }
+    return {
+      data: { ..._.omit(args, "overrides"), overrides: coverrides },
+    };
   }
 
   async execute(opts: CommandOpts) {
@@ -228,13 +233,17 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     const podConfig: NextjsExportConfig = {
       dest: dest || getNextRoot(wsRoot),
     };
-    const opts = await cli.enrichArgs({
+    const resp = await cli.enrichArgs({
       podId: NextjsExportPod.id,
       podSource: PodSource.BUILTIN,
       wsRoot,
       config: CLIUtils.objectConfig2StringConfig(podConfig),
       attach,
     });
+    if (resp.error) {
+      return { error: resp.error };
+    }
+    const opts = resp.data;
     opts.config.overrides = overrides || {};
     // if no siteUrl set, override with localhost
     if (stage !== "prod") {
@@ -246,11 +255,11 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
         );
       }
     }
-    const { data, error } = SiteUtils.validateConfig(opts.engine.config.site);
-    if (!data) {
-      return { data, error };
+    const { error } = SiteUtils.validateConfig(opts.engine.config.site);
+    if (error) {
+      return { error };
     }
-    return { data: await cli.execute(opts), error: null };
+    return { data: await cli.execute(opts) };
   }
 
   async _handlePublishTarget(target: PublishTarget, opts: ExportCmdOpts) {

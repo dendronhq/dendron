@@ -59,7 +59,7 @@ export async function setupEngine(
   opts: SetupEngineCLIOpts
 ): Promise<SetupEngineResp> {
   const logger = createLogger();
-  let { wsRoot, enginePort, init, useLocalEngine } = _.defaults(opts, {
+  const { enginePort, init, useLocalEngine } = _.defaults(opts, {
     init: true,
     useLocalEngine: false,
   });
@@ -67,7 +67,7 @@ export async function setupEngine(
   let port: number;
   let server: Server;
   let serverSockets = new Set<Socket>();
-  wsRoot = resolvePath(wsRoot, process.cwd());
+  const wsRoot = resolvePath(opts.wsRoot, process.cwd());
   if (useLocalEngine) {
     const engine = DendronEngineV2.create({ wsRoot, logger });
     await engine.init();
@@ -109,8 +109,8 @@ export async function setupEngine(
     }
   } else {
     logger.info({ ctx: "setupEngine", msg: "initialize new engine" });
-    ({ engine, port, server, serverSockets } =
-      await new LaunchEngineServerCommand().enrichArgs(opts));
+    const resp = await new LaunchEngineServerCommand().enrichArgs(opts);
+    ({ engine, port, server, serverSockets } = resp.data);
     if (init) {
       await engine.init();
     }
@@ -134,4 +134,3 @@ export function setupEngineArgs(args: yargs.Argv) {
     describe: "If set, use in memory engine instead of connecting to a server",
   });
 }
-

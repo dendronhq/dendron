@@ -153,10 +153,10 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     return uniqueCandidates;
   }
 
-  async enrichArgs(args: CommandCLIOpts): Promise<CommandOpts> {
+  async enrichArgs(args: CommandCLIOpts) {
     this.addArgsToPayload({ action: args.action });
     const engineArgs = await setupEngine(args);
-    return { ...args, ...engineArgs };
+    return { data: { ...args, ...engineArgs } };
   }
 
   async execute(opts: CommandOpts): Promise<CommandOutput> {
@@ -179,19 +179,19 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     const engineWrite = dryRun
       ? () => {}
       : throttle(_.bind(engine.writeNote, engine), 300, {
-        // @ts-ignore
+          // @ts-ignore
           leading: true,
         });
     const engineDelete = dryRun
       ? () => {}
       : throttle(_.bind(engine.deleteNote, engine), 300, {
-        // @ts-ignore
+          // @ts-ignore
           leading: true,
         });
     const engineGetNoteByPath = dryRun
       ? () => {}
       : throttle(_.bind(engine.getNoteByPath, engine), 300, {
-        // @ts-ignore
+          // @ts-ignore
           leading: true,
         });
 
@@ -201,7 +201,7 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
         console.log(
           "the CLI currently doesn't support this action. please run this using the plugin"
         );
-        return { exit }
+        return { exit };
       }
       // eslint-disable-next-line no-fallthrough
       case DoctorActions.H1_TO_TITLE: {

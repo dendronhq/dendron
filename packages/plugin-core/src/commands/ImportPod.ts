@@ -57,18 +57,17 @@ export class ImportPodCommand extends BaseCommand<
     const podClass = podChoice.podClass;
     const podsDir = getExtension().podsDir;
     try {
-      const maybeConfig = PodUtils.getConfig({ podsDir, podClass });
-
+      const resp = PodUtils.getConfig({ podsDir, podClass });
+      if (resp.error) {
+        PodUtils.genConfigFile({ podsDir, podClass });
+      }
+      const maybeConfig = resp.data || {};
       // config defined and not just the default placeholder config
       if (
         maybeConfig &&
         (maybeConfig.src !== "TODO" || maybeConfig.vaultName !== "TODO")
       ) {
         return { podChoice, config: maybeConfig };
-      }
-
-      if (!maybeConfig) {
-        PodUtils.genConfigFile({ podsDir, podClass });
       }
 
       const configPath = PodUtils.getConfigPath({ podsDir, podClass });

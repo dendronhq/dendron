@@ -13,6 +13,8 @@ export type PodCLIOpts = {
   podSource: PodSource;
   podPkg?: string;
   config?: string;
+  configPath?: string;
+  query?: string;
 };
 
 export type PodCommandCLIOpts = {} & SetupEngineCLIOpts & PodCLIOpts;
@@ -111,6 +113,8 @@ export function enrichPodArgs(opts: {
       podPkg,
       wsRoot,
     });
+
+    // if show config, output configuration and exit
     if (showConfig) {
       // eslint-disable-next-line new-cap
       const config = new podClass().config;
@@ -118,6 +122,8 @@ export function enrichPodArgs(opts: {
       console.log(config);
       process.exit(0);
     }
+
+    // if genConfig, create the file and exit
     if (genConfig) {
       const podsDir = PodUtils.getPodDir({ wsRoot });
       const configPath = PodUtils.genConfigFile({
@@ -129,13 +135,16 @@ export function enrichPodArgs(opts: {
       console.log(`config generated at ${configPath}`);
       process.exit(0);
     }
-    const podsDir = path.join(wsRoot, "pods");
 
+    // read the config file
+    const podsDir = path.join(wsRoot, "pods");
     let cleanConfig: any = {};
-    const resp = PodUtils.getConfig({
-      podsDir,
-      podClass,
-    });
+    const resp = args.configPath
+      ? PodUtils.readPodConfigFromDisk(args.configPath)
+      : PodUtils.getConfig({
+          podsDir,
+          podClass,
+        });
     if (resp.error && !config) {
       return {
         error: resp.error,
@@ -145,6 +154,7 @@ export function enrichPodArgs(opts: {
       cleanConfig = resp.data;
     }
 
+    // if additional parameters are passed in, then add them to the config
     // add additional config
     if (config) {
       config.split(",").map((ent) => {
@@ -152,6 +162,20 @@ export function enrichPodArgs(opts: {
         cleanConfig[k] = v;
       });
     }
+
+    // if query is specified, then override config to pass in query
+    if (args.query) {
+      if (podType === "publish") {
+        cleanConfig["fname"] = args.query;
+      } else {
+        // eslint-disable-next-line no-console
+        console.log(
+          `WARN: --query parameter not implemented for podType ${podType}`
+        );
+      }
+    }
+
+    // error checking, config shouldn't be empty
     if (_.isEmpty(cleanConfig)) {
       const podConfigPath = PodUtils.getConfigPath({ podsDir, podClass });
       throw new DendronError({

@@ -85,7 +85,7 @@
             "**/.hg/store/**": true,
             "**/*.js": true
         },
-        "editor.formatOnSave": false,
+        "editor.formatOnSave": true,
         "workbench.editor.showTabs": true,
         "editor.snippetSuggestions": "none",
         "editor.defaultFormatter": "esbenp.prettier-vscode",
@@ -95,7 +95,7 @@
         },
         "editor.tabSize": 2,
         "dendron.rootDir": ".",
-        "files.autoSave": "onFocusChange",
+        "files.autoSave": "off",
         "pasteImage.path": "${currentFileDir}/assets/images",
         "pasteImage.prefix": "/",
         "editor.suggest.snippetsPreventQuickSuggestions": false,

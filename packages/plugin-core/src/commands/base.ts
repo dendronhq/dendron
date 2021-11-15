@@ -83,6 +83,7 @@ export abstract class BaseCommand<
     let resp: TOut | undefined;
 
     try {
+      // TODO: Add sanity check failure to analytics payload.
       const out = await this.sanityCheck();
       if (out === "cancel") {
         return;

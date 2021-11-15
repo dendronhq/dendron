@@ -1,8 +1,8 @@
-import { NoteProps } from "@dendronhq/common-all";
+import { ConfigUtils, NoteProps } from "@dendronhq/common-all";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { VSCodeUtils } from "../../utils";
 import { LocationTestUtils, runSingleVaultTest, expect } from "../testUtilsv2";
-import { setupBeforeAfter } from "../testUtilsV3";
+import { runLegacySingleWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 import * as vscode from "vscode";
 import { describe } from "mocha";
 import { getHeaderAt, isBrokenWikilink } from "../../utils/editor";
@@ -30,6 +30,56 @@ suite("Contextual UI Tests", function () {
           expect(isBrokenWikilink()).toBeTruthy();
           done();
         },
+      });
+    });
+
+    describe("AND selected link is a broken user tag", () => {
+      test("THEN code action for create new note is displayed", (done) => {
+        let noteWithLink: NoteProps;
+        runLegacySingleWorkspaceTest({
+          ctx,
+          postSetupHook: async ({ wsRoot, vaults }) => {
+            noteWithLink = await NoteTestUtilsV4.createNote({
+              fname: "test",
+              vault: vaults[0],
+              wsRoot,
+              body: "@foo.bar",
+            });
+          },
+          onInit: async () => {
+            const editor = await VSCodeUtils.openNote(noteWithLink);
+            editor.selection = LocationTestUtils.getPresetWikiLinkSelection();
+            expect(isBrokenWikilink()).toBeTruthy();
+            done();
+          },
+        });
+      });
+
+      describe("AND user tags are disabled", () => {
+        test("THEN code action for create new note is NOT displayed", (done) => {
+          let noteWithLink: NoteProps;
+          runLegacySingleWorkspaceTest({
+            ctx,
+            postSetupHook: async ({ wsRoot, vaults }) => {
+              noteWithLink = await NoteTestUtilsV4.createNote({
+                fname: "test",
+                vault: vaults[0],
+                wsRoot,
+                body: "@foo.bar",
+              });
+            },
+            modConfigCb: (config) => {
+              ConfigUtils.setWorkspaceProp(config, "enableUserTags", false);
+              return config;
+            },
+            onInit: async () => {
+              const editor = await VSCodeUtils.openNote(noteWithLink);
+              editor.selection = LocationTestUtils.getPresetWikiLinkSelection();
+              expect(isBrokenWikilink()).toBeFalsy();
+              done();
+            },
+          });
+        });
       });
     });
   });

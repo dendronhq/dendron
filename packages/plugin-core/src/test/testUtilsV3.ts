@@ -29,6 +29,7 @@ import {
   HistoryService,
 } from "@dendronhq/engine-server";
 import {
+  ModConfigCb,
   TestConfigUtils,
   TestSetupWorkspaceOpts,
 } from "@dendronhq/engine-test-utils";
@@ -88,6 +89,7 @@ export type SetupLegacyWorkspaceOpts = SetupCodeConfigurationV2 &
     preSetupHook?: PreSetupCmdHookFunction;
     postSetupHook?: PostSetupWorkspaceHook;
     setupWsOverride?: Omit<Partial<SetupWorkspaceOpts>, "workspaceType">;
+    modConfigCb?: ModConfigCb;
   };
 
 export type SetupLegacyWorkspaceMultiOpts = SetupCodeConfigurationV2 &
@@ -181,6 +183,13 @@ export async function setupLegacyWorkspace(
     workspaceType: copts.workspaceType,
   });
   stubWorkspaceFolders(wsRoot, vaults);
+
+  // update config
+  let config = DConfig.getOrCreate(wsRoot);
+  if (isNotUndefined(copts.modConfigCb)) {
+    config = TestConfigUtils.withConfig(copts.modConfigCb, { wsRoot });
+  }
+  DConfig.writeConfig({ wsRoot, config });
 
   await copts.postSetupHook({
     wsRoot,

@@ -23,6 +23,7 @@ import vscode, {
 } from "vscode";
 import { DECORATION_TYPE, linkedNoteType } from "../features/windowDecorations";
 import { VSCodeUtils } from "../utils";
+import { getDWorkspace } from "../workspace";
 
 export function isAnythingSelected(): boolean {
   return !vscode.window?.activeTextEditor?.selection?.isEmpty;
@@ -192,10 +193,18 @@ export async function getSelectionAnchors(opts: {
 export function isBrokenWikilink(): boolean {
   const { editor, selection } = VSCodeUtils.getSelection();
   if (!editor || !selection) return false;
+  const note = VSCodeUtils.getNoteFromDocument(editor.document);
+  const { engine } = getDWorkspace();
+  if (!note) return false;
   const line = editor.document.lineAt(selection.start.line).text;
-  const proc = MDUtilsV5.procRemarkParseNoData(
-    {},
-    { dest: DendronASTDest.MD_DENDRON }
+  const proc = MDUtilsV5.procRemarkParse(
+    { mode: ProcMode.FULL },
+    {
+      dest: DendronASTDest.MD_DENDRON,
+      engine,
+      vault: note.vault,
+      fname: note.fname,
+    }
   );
   const parsedLine = proc.parse(line);
   let link: WikiLinkNoteV4 | UserTag | HashTag | undefined;

@@ -152,6 +152,9 @@ export class AirtableUtils {
     switch (fieldMapping.type) {
       case "string": {
         const val = _.get(note, fieldMapping.to, "");
+        if (_.isNull(val)) {
+          return val;
+        }
         return val.toString();
       }
       case "date": {

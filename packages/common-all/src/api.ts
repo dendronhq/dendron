@@ -78,8 +78,8 @@ interface IAPIOpts {
   logger: any;
   statusHandlers: any;
   onAuth: (opts: IRequestArgs) => Promise<any>;
-  onBuildHeaders: ({}: IRequestArgs) => Promise<any>;
-  onError: ({}: {
+  onBuildHeaders: (opts: IRequestArgs) => Promise<any>;
+  onError: (opts: {
     err: DendronError;
     body: any;
     resp: any;
@@ -207,8 +207,6 @@ export class APIUtils {
 
 // === Base
 
-
-
 abstract class API {
   public opts: IAPIOpts;
 
@@ -278,7 +276,7 @@ abstract class API {
     args: IDoRequestArgs,
     payloadData?: T["data"]
   ): Promise<T> {
-    let payload = this._createPayload(payloadData) as T;
+    const payload = this._createPayload(payloadData) as T;
     try {
       const resp = await this._doRequest(args);
       payload.data = resp.data.data;
@@ -308,21 +306,22 @@ abstract class API {
 
 // === DendronAPI
 
-let _DendronAPI_INSTANCE: DendronAPI|undefined;
+// eslint-disable-next-line camelcase
+let _DendronAPI_INSTANCE: DendronAPI | undefined;
 
 export class DendronAPI extends API {
-
   static getOrCreate(opts: IAPIConstructor) {
     if (!_.isUndefined(_DendronAPI_INSTANCE)) {
       return this.instance();
     }
-    return new DendronAPI(opts)
+    return new DendronAPI(opts);
   }
 
   static instance(): DendronAPI {
     if (_.isUndefined(_DendronAPI_INSTANCE)) {
       throw Error("no dendron api");
     }
+    // eslint-disable-next-line camelcase
     return _DendronAPI_INSTANCE;
   }
 

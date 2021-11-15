@@ -1,5 +1,6 @@
 import {
   APIUtils,
+  ConfigUtils,
   CONSTANTS,
   DendronError,
   DEngineClient,
@@ -16,6 +17,7 @@ import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { DendronEngineClient } from "./engineClient";
+import { AnchorUtils, LinkUtils } from "./markdown";
 import { WSMeta } from "./types";
 
 function normalize(text: string) {
@@ -219,7 +221,7 @@ export function parseFileLink(ref: string): DNoteRefLink {
   if (clean.anchorStart && clean.anchorStart.indexOf(",") >= 0) {
     const [anchorStart, offset] = clean.anchorStart.split(",");
     clean.anchorStart = anchorStart;
-    clean.anchorStartOffset = parseInt(offset);
+    clean.anchorStartOffset = parseInt(offset, 10);
   }
   return { from: { fname }, data: clean, type: "ref" };
 }
@@ -325,5 +327,40 @@ export class EngineUtils {
 
   static getLocalEngineUrl({ port }: { port: number }) {
     return APIUtils.getLocalEndpoint(port);
+  }
+
+  /**
+   * @param param0
+   * @returns
+   */
+  static async refreshNoteLinksAndAnchors({
+    note,
+    engine,
+    notesMap,
+  }: {
+    note: NoteProps;
+    engine: DEngineClient;
+    notesMap: Map<string, NoteProps>;
+  }) {
+    const maxNoteLength = ConfigUtils.getWorkspace(engine.config).maxNoteLength;
+    if (
+      note.body.length <
+      (maxNoteLength || CONSTANTS.DENDRON_DEFAULT_MAX_NOTE_LENGTH)
+    ) {
+      const links = LinkUtils.findLinks({ note, engine });
+      const linkCandidates = LinkUtils.findLinkCandidates({
+        note,
+        notesMap,
+        engine,
+      });
+      const anchors = await AnchorUtils.findAnchors({
+        note,
+        wsRoot: engine.wsRoot,
+      });
+      note.links = links.concat(linkCandidates);
+      note.anchors = anchors;
+      return note;
+    }
+    return note;
   }
 }

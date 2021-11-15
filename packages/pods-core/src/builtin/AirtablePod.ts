@@ -101,7 +101,7 @@ export class AirtableUtils {
   ) {
     const chunks = _.chunk(allRecords, 10);
 
-    let total: number = 0;
+    // let total: number = 0;
     const out = await Promise.all(
       chunks.flatMap(async (record) => {
         // @ts-ignore
@@ -109,7 +109,7 @@ export class AirtableUtils {
         const data = JSON.stringify({ records: record });
         try {
           const _records = await func(record);
-          total += _records.length;
+          // total += _records.length;
           return _records;
         } catch (error) {
           let payload: any = { data };

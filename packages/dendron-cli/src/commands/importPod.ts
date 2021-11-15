@@ -47,7 +47,6 @@ export class ImportPodCLICommand extends CLICommand<
     const { podClass: PodClass, config, wsRoot, engine, server } = opts;
     const vaults = engine.vaults;
     const pod = new PodClass();
-    console.log("running pod...", config);
     await pod.execute({
       wsRoot,
       config,
@@ -65,7 +64,8 @@ export class ImportPodCLICommand extends CLICommand<
                     ? true
                     : `Enter either Yes or No`,
               })
-            : console.log("Note is already in sync with the google doc");
+            : // eslint-disable-next-line no-console
+              console.log("Note is already in sync with the google doc");
 
         return resp;
       },
@@ -81,7 +81,6 @@ export class ImportPodCLICommand extends CLICommand<
         }
         resolve({});
       });
-      console.log("done");
     });
   }
 }

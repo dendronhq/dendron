@@ -78,10 +78,10 @@ export class NoteCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     });
   }
 
-  async enrichArgs(args: CommandCLIOpts): Promise<CommandOpts> {
+  async enrichArgs(args: CommandCLIOpts) {
     this.addArgsToPayload({ cmd: args.cmd, output: args.output });
     const engineArgs = await setupEngine(args);
-    return { ...args, ...engineArgs };
+    return { data: { ...args, ...engineArgs } };
   }
 
   async execute(opts: CommandOpts) {

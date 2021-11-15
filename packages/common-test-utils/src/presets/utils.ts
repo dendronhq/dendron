@@ -15,7 +15,7 @@ export class NotePresetsUtils {
       rootName: fname,
     });
     await NodeTestUtilsV2.createSchemaModuleOpts({
-      vaultDir: vaultDir,
+      vaultDir,
       rootName: fname,
     });
   }

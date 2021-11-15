@@ -1,4 +1,9 @@
-import { DendronError, isDendronResp, CLIEvents } from "@dendronhq/common-all";
+import {
+  CLIEvents,
+  DendronError,
+  isDendronResp,
+  RespV3,
+} from "@dendronhq/common-all";
 import {
   createLogger,
   getDurationMilliseconds,
@@ -91,7 +96,7 @@ export abstract class CLICommand<
    * Converts CLI flags into {@link TOpts}
    * @param args
    */
-  abstract enrichArgs(args: any): Promise<TOpts>;
+  abstract enrichArgs(args: any): Promise<RespV3<TOpts>>;
 
   eval = async (args: any) => {
     const start = process.hrtime();
@@ -100,6 +105,7 @@ export abstract class CLICommand<
     if (!args.wsRoot) {
       const configPath = WorkspaceUtils.findWSRoot();
       if (_.isUndefined(configPath) && !this.wsRootOptional) {
+        // eslint-disable-next-line no-console
         console.log("no workspace detected. --wsRoot must be set");
         process.exit(1);
       } else {
@@ -115,7 +121,7 @@ export abstract class CLICommand<
       return { error: opts.error };
     }
 
-    const out = await this.execute(opts);
+    const out = await this.execute(opts.data);
     if (isDendronResp(out) && out.error) {
       this.L.error(out.error);
     }
@@ -139,6 +145,7 @@ export abstract class CLICommand<
 
   print(obj: any) {
     if (!this.opts.quiet) {
+      // eslint-disable-next-line no-console
       console.log(obj);
     }
   }

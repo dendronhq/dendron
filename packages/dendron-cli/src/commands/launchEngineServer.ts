@@ -59,11 +59,11 @@ export class LaunchEngineServerCommand extends CLICommand<
 
   async enrichArgs(args: CommandCLIOpts) {
     const ctx = "enrichArgs";
-    let { wsRoot, port, init, noWritePort } = _.defaults(args, {
+    const { port, init, noWritePort } = _.defaults(args, {
       init: false,
       noWritePort: false,
     });
-    wsRoot = resolvePath(wsRoot, process.cwd());
+    const wsRoot = resolvePath(args.wsRoot, process.cwd());
     const ws = new WorkspaceService({ wsRoot });
     const { dev } = ws.config;
     const vaults = ConfigUtils.getVaults(ws.config);
@@ -94,14 +94,16 @@ export class LaunchEngineServerCommand extends CLICommand<
       await engine.init();
     }
     return {
-      ...args,
-      engine,
-      wsRoot,
-      init,
-      vaults: vaultPaths,
-      port: _port,
-      server,
-      serverSockets,
+      data: {
+        ...args,
+        engine,
+        wsRoot,
+        init,
+        vaults: vaultPaths,
+        port: _port,
+        server,
+        serverSockets,
+      },
     };
   }
 

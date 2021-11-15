@@ -4,6 +4,8 @@ import {
   genUUIDInsecure,
   ERROR_SEVERITY,
   stringifyError,
+  RespV3,
+  ErrorFactory,
 } from "@dendronhq/common-all";
 import { readYAML } from "@dendronhq/common-server";
 import Ajv, { JSONSchemaType } from "ajv";
@@ -37,13 +39,9 @@ export class PodUtils {
   }: {
     podsDir: string;
     podClass: PodClassEntryV4;
-  }): false | any {
+  }) {
     const podConfigPath = PodUtils.getConfigPath({ podsDir, podClass });
-    if (!fs.existsSync(podConfigPath)) {
-      return false;
-    } else {
-      return readYAML(podConfigPath);
-    }
+    return PodUtils.readPodConfigFromDisk<any>(podConfigPath);
   }
 
   static getConfigPath({
@@ -266,6 +264,18 @@ export class PodUtils {
       configured: true,
       podId: opts.podChoice.id,
     };
+  }
+
+  static readPodConfigFromDisk<T>(podConfigPath: string): RespV3<T> {
+    if (!fs.existsSync(podConfigPath)) {
+      return {
+        error: ErrorFactory.create404Error({ url: podConfigPath }),
+      };
+    } else {
+      return {
+        data: readYAML(podConfigPath),
+      };
+    }
   }
 
   /**

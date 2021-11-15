@@ -65,7 +65,7 @@ export class BuildSiteV2CLICommand extends CLICommand<
     });
   }
 
-  async enrichArgs(args: CommandCLIOpts): Promise<CommandOpts> {
+  async enrichArgs(args: CommandCLIOpts) {
     const engineArgs = await setupEngine(args);
     this.L.info({ msg: `connecting to engine on port: ${engineArgs.port}` });
     // add site specific notes
@@ -77,7 +77,7 @@ export class BuildSiteV2CLICommand extends CLICommand<
         engineArgs.engine.notes[ent.id] = ent;
       });
     }
-    return { ...args, ...engineArgs };
+    return { data: { ...args, ...engineArgs } };
   }
 
   async execute(opts: CommandOpts) {

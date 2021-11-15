@@ -77,10 +77,8 @@ const NOTES = {
         return NoteTestUtilsV4.createNote({
           ...opts,
           fname: "fm",
-          props: {
-            custom: {
-              foo: "egg",
-            },
+          custom: {
+            foo: "egg",
           },
           vault: opts.vaults[0],
           body: "{{ fm.foo }}\n\ntitle: {{ fm.title }}",

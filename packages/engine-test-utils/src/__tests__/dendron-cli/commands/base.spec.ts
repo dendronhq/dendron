@@ -18,8 +18,10 @@ class DummyCLICommand extends CLICommand<any> {
     return opts;
   }
 
+  // @ts-ignore;
   async execute(opts: any) {
-    return opts;
+    // @ts-ignore;
+    return { data: opts };
   }
 }
 
@@ -27,6 +29,7 @@ describe("GIVEN any command, no telemetry set before", () => {
   let dummy: CLICommand;
   beforeEach(() => {
     TestEngineUtils.mockHomeDir();
+    // @ts-ignore;
     dummy = new DummyCLICommand();
   });
 
@@ -48,6 +51,8 @@ describe("GIVEN any command, no telemetry set before", () => {
 
   test("AND telemetry status is set", async () => {
     await dummy.eval({});
-    expect(SegmentClient.getStatus()).toEqual(TelemetryStatus.ENABLED_BY_CLI_DEFAULT);
+    expect(SegmentClient.getStatus()).toEqual(
+      TelemetryStatus.ENABLED_BY_CLI_DEFAULT
+    );
   });
 });

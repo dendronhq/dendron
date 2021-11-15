@@ -29,6 +29,7 @@ function isTextDecorated(
   return false;
 }
 
+// eslint-disable-next-line func-names
 suite("windowDecorations", function () {
   const ctx = setupBeforeAfter(this, {
     beforeHook: () => {},
@@ -184,37 +185,31 @@ suite("windowDecorations", function () {
             fname: "with.all",
             vault: vaults[0],
             wsRoot,
-            props: {
-              custom: {
-                status: "done",
-                owner: "grace",
-                priority: "H",
-                due: "2021.10.29",
-                tags: "foo",
-              },
+            custom: {
+              status: "done",
+              owner: "grace",
+              priority: "H",
+              due: "2021.10.29",
+              tags: "foo",
             },
           });
           await NoteTestUtilsV4.createNote({
             fname: "without.status",
             vault: vaults[0],
             wsRoot,
-            props: {
-              custom: {
-                owner: "grace",
-                priority: "high",
-                tags: ["foo", "bar"],
-              },
+            custom: {
+              owner: "grace",
+              priority: "high",
+              tags: ["foo", "bar"],
             },
           });
           await NoteTestUtilsV4.createNote({
             fname: "without.due",
             vault: vaults[0],
             wsRoot,
-            props: {
-              custom: {
-                status: "",
-                priority: "low",
-              },
+            custom: {
+              status: "",
+              priority: "low",
             },
           });
           await NoteTestUtilsV4.createNote({

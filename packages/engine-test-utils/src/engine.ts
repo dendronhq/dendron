@@ -37,8 +37,7 @@ import fs from "fs-extra";
 import _ from "lodash";
 import os from "os";
 import path from "path";
-import sinon from "sinon";
-import { SinonStub } from "sinon";
+import sinon, { SinonStub } from "sinon";
 import { ENGINE_HOOKS } from "./presets";
 import { GitTestUtils } from "./utils";
 
@@ -89,10 +88,12 @@ export { DEngineClient, DVault, WorkspaceOpts };
  * @returns
  */
 export async function createServer(opts: WorkspaceOpts & { port?: number }) {
-  return await new LaunchEngineServerCommand().enrichArgs({
-    wsRoot: opts.wsRoot,
-    port: opts.port,
-  });
+  return (
+    await new LaunchEngineServerCommand().enrichArgs({
+      wsRoot: opts.wsRoot,
+      port: opts.port,
+    })
+  ).data;
 }
 
 /**
@@ -120,7 +121,7 @@ export function createSiteConfig(
   opts: Partial<CleanDendronSiteConfig> &
     Required<Pick<CleanDendronSiteConfig, "siteRootDir" | "siteHierarchies">>
 ): CleanDendronSiteConfig {
-  let copts = {
+  const copts = {
     siteNotesDir: "docs",
     siteUrl: "https://localhost:8080",
     ...opts,
@@ -233,7 +234,7 @@ export class TestPresetEntryV5 {
       vaults?: DVault[];
     }
   ) {
-    let {
+    const {
       preSetupHook,
       postSetupHook,
       extraOpts,
@@ -243,15 +244,12 @@ export class TestPresetEntryV5 {
     } = _.defaults(opts, {
       workspaces: [],
     });
-    this.preSetupHook = preSetupHook ? preSetupHook : async () => {};
-    this.postSetupHook = postSetupHook ? postSetupHook : async () => {};
+    this.preSetupHook = preSetupHook || (async () => {});
+    this.postSetupHook = postSetupHook || (async () => {});
     this.testFunc = _.bind(func, this);
     this.extraOpts = extraOpts;
     this.setupTest = setupTest;
-    this.genTestResults = _.bind(
-      genTestResults ? genTestResults : async () => [],
-      this
-    );
+    this.genTestResults = _.bind(genTestResults || (async () => []), this);
     this.workspaces = workspaces;
     this.vaults = opts?.vaults || [
       { fsPath: "vault1" },
@@ -287,8 +285,8 @@ export async function runEngineTestV5(
     addVSWorkspace,
     git,
   } = _.defaults(opts, {
-    preSetupHook: async ({}) => {},
-    postSetupHook: async ({}) => {},
+    preSetupHook: async () => {},
+    postSetupHook: async () => {},
     createEngine: createEngineFromEngine,
     extra: {},
     // third vault has diff name

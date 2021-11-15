@@ -71,7 +71,7 @@ export const buildSite = async (opts: BuildSiteV2CLICommandCliOpts) => {
   const cmd = new BuildSiteV2CLICommand();
   const cOpts = await cmd.enrichArgs(opts);
   await cmd.execute({
-    ...cOpts,
+    ...cOpts.data,
     eleventy,
     cwd: eleventyPath,
   });

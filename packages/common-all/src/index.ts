@@ -18,6 +18,7 @@ export * from "./themes";
 export * from "./fuse";
 export * from "./util";
 export * from "./timing";
+export * from "./config";
 import axios, { AxiosError } from "axios";
 export { axios, AxiosError };
 import { DateTime } from "luxon";

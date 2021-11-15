@@ -503,7 +503,7 @@ export type DEngine = DCommonProps &
      * Use cases:
      * - update notes if they've been changed outside of Dendron
      */
-    refreshNotes: (opts: RefreshNotesOpts) => Promise<void | IDendronError>;
+    refreshNotes: (opts: RefreshNotesOpts) => Promise<RespV2<void>>;
     getNoteBlocks: (opts: GetNoteBlocksOpts) => Promise<GetNoteBlocksPayload>;
 
     // config

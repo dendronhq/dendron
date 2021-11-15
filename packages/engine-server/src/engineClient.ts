@@ -281,7 +281,8 @@ export class DendronEngineClient implements DEngineClient {
   }
 
   async refreshNotes(opts: RefreshNotesOpts) {
-    return this.refreshNotesV2(opts.notes);
+    await this.refreshNotesV2(opts.notes);
+    return { error: null };
   }
 
   async refreshNotesV2(notes: NoteChangeEntry[]) {

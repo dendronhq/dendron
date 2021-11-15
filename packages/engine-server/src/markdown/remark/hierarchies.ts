@@ -9,7 +9,7 @@ import _ from "lodash";
 import { Content, FootnoteDefinition, FootnoteReference, Root } from "mdast";
 import { heading, html, list, listItem, paragraph, text } from "mdast-builder";
 import Unified, { Plugin } from "unified";
-import { Node, Parent } from "unist";
+import { Node } from "unist";
 import u from "unist-builder";
 import { SiteUtils } from "../../topics/site";
 import { HierarchyUtils } from "../../utils";
@@ -45,11 +45,13 @@ function footnoteDef2html(definition: FootnoteDefinition) {
   const backArrow = html(
     `<a class="${FOOTNOTE_DEF_CLASS}" href="#${FOOTNOTE_REF_ID_PREFIX}${definition.identifier}">${FOOTNOTE_RETURN_SYMBOL}</a>`
   );
-  let lastParent: Parent | undefined;
-  visit(definition, (node) => {
-    if (RemarkUtils.isParent(node)) lastParent = node;
-  });
-  if (lastParent) lastParent.children.push(backArrow);
+  const lastChild = _.last(definition.children);
+  if (lastChild && RemarkUtils.isParent(lastChild)) {
+    lastChild.children.push(backArrow as any);
+  } else {
+    // Fallback, not sure if this can actually happen because definition always seems to have a paragraph as a child
+    definition.children.push(backArrow as any);
+  }
   return paragraph([
     // Put the ID target first, so even if the footnote is multiple lines long, it jumps to the start
     html(

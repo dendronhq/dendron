@@ -74,6 +74,7 @@ export abstract class CLICommand<
       type: "boolean",
       default: false,
     });
+    args.hide("devMode");
   }
 
   buildCmd(yargs: yargs.Argv): yargs.Argv {

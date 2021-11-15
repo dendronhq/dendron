@@ -476,6 +476,10 @@ export class MDUtilsV5 {
 
   /**
    * Equivalent to running {@link procRemarkParse({mode: ProcMode.NO_DATA})}
+   *
+   * Warning! When using a no-data parser, any user configuration will not be
+   * available. Avoid using it unless you are sure that the user configuration
+   * has no effect on what you are doing.
    */
   static procRemarkParseNoData(
     opts: Omit<ProcOptsV5, "mode" | "parseOnly">,

@@ -71,6 +71,8 @@ export abstract class CLICommand<
     });
     args.option("devMode", {
       describe: "set stage to dev",
+      type: "boolean",
+      default: false,
     });
   }
 
@@ -109,7 +111,7 @@ export abstract class CLICommand<
     const start = process.hrtime();
     this.L.info({ args });
     if (args.devMode) {
-      this.opts.dev = true;
+      this.opts.dev = args.devMode;
     }
     this.setUpSegmentClient();
     if (!args.wsRoot) {

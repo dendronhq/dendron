@@ -288,7 +288,8 @@ export class LookupControllerV3 {
 
     AnalyticsUtils.track(LookupEvents.LookupModifierToggledByUser, {
       command: this.provider.id,
-      button: btnsToRefresh,
+      type: (btn as IDendronQuickInputButton).type,
+      pressed: (btn as IDendronQuickInputButton).pressed,
     });
   };
 }

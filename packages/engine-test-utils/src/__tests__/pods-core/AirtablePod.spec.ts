@@ -9,14 +9,108 @@ import {
   WorkspaceOpts,
 } from "@dendronhq/common-all";
 import { tmpDir } from "@dendronhq/common-server";
-import { AirtableExportPod } from "@dendronhq/pods-core";
+import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
+import {
+  AirtableExportPod,
+  AirtableFieldsMap,
+  AirtableUtils,
+  SrcFieldMapping,
+} from "@dendronhq/pods-core";
 import fs from "fs-extra";
+import _ from "lodash";
 import path from "path";
 import sinon from "sinon";
 import { runEngineTestV5 } from "../../engine";
 import { ENGINE_HOOKS } from "../../presets";
 
-const runExport = (opts: WorkspaceOpts & { engine: DEngineClient }) => {
+// --- Helpers
+
+const createNotePresetsHelper = async (opts: WorkspaceOpts) => {
+  const { wsRoot } = opts;
+  const vault = opts.vaults[0];
+  const props = [
+    {
+      fname: "foo.lvl-1",
+      vault,
+      wsRoot,
+      props: { tags: ["lvl1", "source.one"] },
+    },
+    {
+      fname: "foo.lvl-2",
+      vault,
+      wsRoot,
+      props: { tags: ["lvl2", "source.two"] },
+    },
+    {
+      fname: "foo.no-level",
+      vault,
+      wsRoot,
+      props: { tags: ["source.three"] },
+    },
+  ];
+  return props;
+};
+
+const createNotePresetsWithAllCreate = async (opts: WorkspaceOpts) => {
+  const noteprops = await createNotePresetsHelper(opts);
+  return Promise.all(
+    noteprops.map((ent) => {
+      return NoteTestUtilsV4.createNote(ent);
+    })
+  );
+};
+
+const createNotePresetsWithAllUpdate = async (opts: WorkspaceOpts) => {
+  const noteprops = await createNotePresetsHelper(opts);
+  return Promise.all(
+    noteprops.map((ent) => {
+      ent = _.merge(ent, { custom: { airtableId: "airtableId" } });
+      return NoteTestUtilsV4.createNote(ent);
+    })
+  );
+};
+
+const stubAirtableCalls = () => {
+  const chunkFake = sinon.fake((allRecords: AirtableFieldsMap[]) => {
+    // add airtable id
+    return _.map(allRecords, (ent) => {
+      return {
+        ...ent,
+        id: "airtable-" + ent.fields["DendronId"],
+      };
+    });
+  });
+  sinon.replace(AirtableUtils, "chunkAndCall", chunkFake);
+};
+
+const runExport = (
+  opts: WorkspaceOpts & {
+    engine: DEngineClient;
+    podConfig: {
+      srcFieldMapping: { [key: string]: SrcFieldMapping };
+      srcHierarchy: string;
+    };
+  }
+) => {
+  const pod = new AirtableExportPod();
+  return pod.execute({
+    ...opts,
+    config: {
+      dest: "TODO",
+      apiKey: "fakeKey",
+      baseId: "fakeBase",
+      tableName: "fakeTable",
+      ...opts.podConfig,
+    },
+  }) as ReturnType<typeof pod.plant>;
+};
+
+const runExportPreset = (
+  opts: WorkspaceOpts & {
+    engine: DEngineClient;
+    srcFieldMapping?: { [key: string]: SrcFieldMapping };
+  }
+) => {
   const pod = new AirtableExportPod();
   const srcHierarchy = "foo";
   return pod.execute({
@@ -26,15 +120,19 @@ const runExport = (opts: WorkspaceOpts & { engine: DEngineClient }) => {
       apiKey: "fakeKey",
       baseId: "fakeBase",
       tableName: "fakeTable",
-      srcFieldMapping: {
-        Title: "title",
-        "Updated On": "updated",
-        Notes: "body",
-      },
+      srcFieldMapping: _.merge(
+        {
+          Title: "title",
+          "Updated On": "updated",
+          Notes: "body",
+        },
+        opts.srcFieldMapping
+      ),
       srcHierarchy,
     },
   });
 };
+
 const createAxiosError = ({
   response,
 }: {
@@ -54,7 +152,163 @@ const createAxiosError = ({
   return err;
 };
 
+// --- Main
+
 describe("GIVEN airtable export", () => {
+  afterEach(() => {
+    sinon.restore();
+  });
+
+  describe("WHEN create new notes", () => {
+    const preSetupHook = createNotePresetsWithAllCreate;
+    describe("AND WHEN export notes with one singleTag", () => {
+      test("THEN success", async () => {
+        await runEngineTestV5(
+          async (opts) => {
+            stubAirtableCalls();
+            const { data } = await runExport({
+              ...opts,
+              podConfig: {
+                srcFieldMapping: {
+                  Level: { type: "singleTag", filter: "tags.lvl*" },
+                },
+                srcHierarchy: "foo",
+              },
+            });
+            expect(data).toMatchSnapshot();
+            // only two entries with level created
+            expect(
+              _.filter(data.created, (ent) => ent.fields["Level"]).length
+            ).toEqual(2);
+            expect(data.updated.length).toEqual(0);
+          },
+          {
+            expect,
+            preSetupHook,
+          }
+        );
+      });
+    });
+
+    describe("AND WHEN export notes with multiple singleTag", () => {
+      test("THEN success", async () => {
+        await runEngineTestV5(
+          async (opts) => {
+            const chunkFake = sinon.fake((allRecords: AirtableFieldsMap[]) => {
+              // add airtable id
+              return _.map(allRecords, (ent) => {
+                return {
+                  ...ent,
+                  id: "airtable-" + ent.fields["DendronId"],
+                };
+              });
+            });
+            sinon.replace(AirtableUtils, "chunkAndCall", chunkFake);
+            const { data } = await runExport({
+              ...opts,
+              podConfig: {
+                srcFieldMapping: {
+                  Level: { type: "singleTag", filter: "tags.lvl*" },
+                  Source: { type: "singleTag", filter: "tags.source.*" },
+                },
+                srcHierarchy: "foo",
+              },
+            });
+            expect(data).toMatchSnapshot();
+            // only two entries with level created
+            expect(
+              _.filter(data.created, (ent) => ent.fields["Level"]).length
+            ).toEqual(2);
+            // three entries with source
+            expect(
+              _.filter(data.created, (ent) => ent.fields["Source"]).length
+            ).toEqual(3);
+            expect(data.updated.length).toEqual(0);
+          },
+          {
+            expect,
+            preSetupHook,
+          }
+        );
+      });
+    });
+  });
+
+  describe("WHEN update notes", () => {
+    const preSetupHook = createNotePresetsWithAllUpdate;
+    describe("AND WHEN export notes with one singleTag", () => {
+      test("THEN success", async () => {
+        await runEngineTestV5(
+          async (opts) => {
+            stubAirtableCalls();
+            const { data } = await runExport({
+              ...opts,
+              podConfig: {
+                srcFieldMapping: {
+                  Level: { type: "singleTag", filter: "tags.lvl*" },
+                },
+                srcHierarchy: "foo",
+              },
+            });
+            expect(data).toMatchSnapshot();
+            // only two entries with level created
+            expect(
+              _.filter(data.updated, (ent) => ent.fields["Level"]).length
+            ).toEqual(2);
+            expect(data.created.length).toEqual(0);
+          },
+          {
+            expect,
+            preSetupHook,
+          }
+        );
+      });
+    });
+
+    describe("AND WHEN export notes with multiple singleTag", () => {
+      test("THEN success", async () => {
+        await runEngineTestV5(
+          async (opts) => {
+            const chunkFake = sinon.fake((allRecords: AirtableFieldsMap[]) => {
+              // add airtable id
+              return _.map(allRecords, (ent) => {
+                return {
+                  ...ent,
+                  id: "airtable-" + ent.fields["DendronId"],
+                };
+              });
+            });
+            sinon.replace(AirtableUtils, "chunkAndCall", chunkFake);
+            const { data } = await runExport({
+              ...opts,
+              podConfig: {
+                srcFieldMapping: {
+                  Level: { type: "singleTag", filter: "tags.lvl*" },
+                  Source: { type: "singleTag", filter: "tags.source.*" },
+                },
+                srcHierarchy: "foo",
+              },
+            });
+            expect(data).toMatchSnapshot();
+            // only two entries with level created
+            expect(
+              _.filter(data.updated, (ent) => ent.fields["Level"]).length
+            ).toEqual(2);
+            // three entries with source
+            expect(
+              _.filter(data.updated, (ent) => ent.fields["Source"]).length
+            ).toEqual(3);
+            expect(data.created.length).toEqual(0);
+          },
+          {
+            expect,
+            preSetupHook,
+          }
+        );
+      });
+    });
+  });
+
   describe("WHEN error from post", () => {
     afterEach(() => {
       sinon.restore();
@@ -66,7 +320,7 @@ describe("GIVEN airtable export", () => {
             sinon
               .stub(axios, "post")
               .rejects(new DendronError({ message: "foo" }));
-            await runExport(opts);
+            await runExportPreset(opts);
           } catch (err) {
             expect(ErrorUtils.isDendronError(err)).toBeTruthy();
           }
@@ -102,7 +356,7 @@ describe("GIVEN airtable export", () => {
               },
             });
             sinon.stub(axios, "post").rejects(err);
-            await runExport(opts);
+            await runExportPreset(opts);
           } catch (err) {
             expect(ErrorUtils.isDendronError(err)).toBeTruthy();
             expect((err as DendronError).message).toEqual(

@@ -1,7 +1,9 @@
 import {
+  assertUnreachable,
   DateTime,
   DendronError,
   DEngineClient,
+  DLink,
   ErrorUtils,
   ERROR_SEVERITY,
   minimatch,
@@ -47,15 +49,19 @@ type AirtableExportPodCustomOpts = AirtablePodCustomOptsCommon & {
 };
 type AirtablePublishPodCustomOpts = AirtablePodCustomOptsCommon & {};
 
-type SrcFieldMapping =
-  | {
-      to: string;
-      type: "string" | "date" | "singleTag";
-      filter?: string;
-    }
-  | string;
+export type SrcFieldMapping = SrcFieldMappingV2 | string;
+export type SrcFieldMappingV2 = SimpleSrcField | TagSrcField;
 
-type AirtableFieldsMap = { fields: { [key: string]: string | number } };
+type SimpleSrcField = {
+  to: string;
+  type: "string" | "date";
+};
+type TagSrcField = {
+  type: "singleTag";
+  filter: string;
+};
+
+export type AirtableFieldsMap = { fields: { [key: string]: string | number } };
 
 export type AirtableExportConfig = ExportPodConfig &
   AirtableExportPodCustomOpts;
@@ -68,7 +74,13 @@ type AirtableExportPodProcessProps = AirtableExportPodCustomOpts & {
   checkpoint: string;
 };
 
-class AirtableUtils {
+export class AirtableUtils {
+  static addRequiredFields(mapping: { [key: string]: SrcFieldMapping }) {
+    const _map = { ...mapping };
+    _map["DendronId"] = { type: "string", to: "id" };
+    return _map;
+  }
+
   static checkNoteHasAirtableId(note: NoteProps): boolean {
     return !_.isUndefined(_.get(note.custom, "airtableId"));
   }
@@ -80,6 +92,9 @@ class AirtableUtils {
     return _.get(note.custom, "airtableId");
   }
 
+  /***
+   * Chunk all calls into records of 10 (Airtable API limit and call using limiter)
+   */
   static async chunkAndCall(
     allRecords: AirtableFieldsMap[],
     func: (record: any[]) => Promise<Records<FieldSet>>
@@ -94,7 +109,7 @@ class AirtableUtils {
         const data = JSON.stringify({ records: record });
         try {
           const _records = await func(record);
-          total = total + _records.length;
+          total += _records.length;
           return _records;
         } catch (error) {
           let payload: any = { data };
@@ -125,6 +140,58 @@ class AirtableUtils {
     return _.flatten(out);
   }
 
+  static handleSrcField({
+    fieldMapping,
+    note,
+    hashtags,
+  }: {
+    fieldMapping: SrcFieldMappingV2;
+    note: NoteProps;
+    hashtags: DLink[];
+  }) {
+    switch (fieldMapping.type) {
+      case "string": {
+        const val = _.get(note, fieldMapping.to, "");
+        return val.toString();
+      }
+      case "date": {
+        let val = _.get(note, fieldMapping.to);
+        if (_.isNumber(val)) {
+          val = DateTime.fromMillis(val).toLocaleString(DateTime.DATETIME_FULL);
+        }
+        return val.toString();
+      }
+      case "singleTag": {
+        let val: string;
+        hashtags = hashtags.filter((t) =>
+          minimatch(t.value, fieldMapping.filter!)
+        );
+        if (hashtags.length > 1) {
+          throw new DendronError({
+            message: `singleTag field has multiple values. note: ${JSON.stringify(
+              NoteUtils.toLogObj(note)
+            )}, tags: ${JSON.stringify(_.pick(hashtags, "value"))}`,
+          });
+        }
+        if (hashtags.length !== 0) {
+          val = hashtags[0].value.replace(/^tags./, "");
+        } else {
+          val = "";
+        }
+        return val;
+      }
+      default:
+        assertUnreachable(fieldMapping);
+    }
+  }
+
+  /**
+   * Maps note props to airtable calls.
+   * For existing notes, checks for `airtableId` prop to see if we need to run an update vs a create
+   *
+   * @param opts
+   * @returns
+   */
   static notesToSrcFieldMap(opts: {
     notes: NoteProps[];
     srcFieldMapping: { [key: string]: SrcFieldMapping };
@@ -145,7 +212,7 @@ class AirtableUtils {
     };
     notes.map((note) => {
       // TODO: optimize, don't parse if no hashtags
-      let hashtags = LinkUtils.findHashTags({ links: note.links });
+      const hashtags = LinkUtils.findHashTags({ links: note.links });
       let fields = {};
       logger.debug({ ctx, note: NoteUtils.toLogObj(note), msg: "enter" });
       for (const [key, fieldMapping] of Object.entries<SrcFieldMapping>(
@@ -161,37 +228,7 @@ class AirtableUtils {
             };
           }
         } else {
-          let val = _.get(note, fieldMapping.to);
-          if (fieldMapping.type === "date") {
-            if (_.isNumber(val)) {
-              val = DateTime.fromMillis(val).toLocaleString(
-                DateTime.DATETIME_FULL
-              );
-            }
-          }
-          if (fieldMapping.type === "singleTag") {
-            if (!_.isUndefined(fieldMapping.filter)) {
-              hashtags = hashtags.filter((t) =>
-                minimatch(t.value, fieldMapping.filter!)
-              );
-            }
-            if (hashtags.length > 1) {
-              throw new DendronError({
-                message: `singleTag field has multiple values: ${JSON.stringify(
-                  _.pick(hashtags, "value")
-                )}`,
-              });
-            }
-            if (hashtags.length !== 0) {
-              val = hashtags[0].value.replace(/^tags./, "");
-            }
-          } else {
-            // no value found
-            if (val) {
-              val = val.toString();
-            }
-          }
-
+          const val = this.handleSrcField({ fieldMapping, note, hashtags });
           if (val) {
             fields = {
               ...fields,
@@ -258,7 +295,7 @@ class AirtableUtils {
 
 export class AirtablePublishPod extends PublishPod<AirtablePublishConfig> {
   static id: string = ID;
-  static description: string = "publish json";
+  static description: string = "publish to airtable";
 
   get config(): JSONSchemaType<AirtablePublishConfig> {
     return PodUtils.createPublishConfig({
@@ -309,7 +346,10 @@ export class AirtablePublishPod extends PublishPod<AirtablePublishConfig> {
   }
 }
 
-export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
+export class AirtableExportPod extends ExportPod<
+  AirtableExportConfig,
+  { created: Records<FieldSet>; updated: Records<FieldSet> }
+> {
   static id: string = ID;
   static description: string = "export notes to airtable";
 
@@ -406,13 +446,14 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
       apiKey,
       baseId,
       tableName,
-      srcFieldMapping,
+      srcFieldMapping: srcFieldMappingRaw,
       srcHierarchy,
       noCheckpointing,
     } = config as AirtableExportConfig;
 
     const ctx = "plant";
     const checkpoint: string = this.verifyDir(dest);
+    const srcFieldMapping = AirtableUtils.addRequiredFields(srcFieldMappingRaw);
 
     let filteredNotes: NoteProps[] =
       srcHierarchy === "root"
@@ -453,13 +494,12 @@ export class AirtableExportPod extends ExportPod<AirtableExportConfig> {
         updated: updated.length,
         msg: "finish export",
       });
+      return { notes, data: { created, updated } };
     } else {
       throw new DendronError({
         message:
           "No new Records to sync in selected hierarchy. Create new file and then try",
       });
     }
-
-    return { notes };
   }
 }

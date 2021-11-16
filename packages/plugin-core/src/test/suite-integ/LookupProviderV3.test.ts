@@ -1,6 +1,10 @@
 import { beforeEach, describe, it, suite } from "mocha";
 import { expect } from "../testUtilsv2";
-import { shouldBubbleUpCreateNew } from "../../components/lookup/LookupProviderV3";
+import {
+  shouldBubbleUpCreateNew,
+  sortBySimilarity,
+} from "../../components/lookup/LookupProviderV3";
+import { TestNoteFactory } from "@dendronhq/common-test-utils";
 
 suite("LookupProviderV3 utility methods:", () => {
   describe(`shouldBubbleUpCreateNew`, () => {
@@ -60,6 +64,25 @@ suite("LookupProviderV3 utility methods:", () => {
         numberOfExactMatches: 1,
       });
       expect(actual).toBeFalsy();
+    });
+  });
+
+  describe(`sortBySimilarity`, () => {
+    it("WHEN notes out of order THEN sort by similarity", async () => {
+      const noteFactory = TestNoteFactory.defaultUnitTestFactory();
+
+      const notes = [
+        await noteFactory.createForFName("pkg.hi.components"),
+        await noteFactory.createForFName("pkg.hi.arch"),
+        await noteFactory.createForFName("pkg.hi.quickstart"),
+      ];
+
+      const sorted = sortBySimilarity(notes, "pkg.hi.arc");
+      expect(sorted.map((sorted) => sorted.fname)).toEqual([
+        "pkg.hi.arch",
+        "pkg.hi.quickstart",
+        "pkg.hi.components",
+      ]);
     });
   });
 });

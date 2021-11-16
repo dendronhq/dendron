@@ -43,9 +43,26 @@ export type CreateSchemaOptsV4 = {
 
 /**
  * Class for simplifying creation of multiple notes for tests by being
- * able to specify defaults upon construction. */
+ * able to specify defaults upon construction.
+ *
+ * Example usage:
+ * <pre>
+ *    const noteFactory = TestNoteFactory.defaultUnitTestFactory();
+ *
+ *    const note = await noteFactory.createForFName("your-fname");
+ * </pre>
+ *
+ * */
 export class TestNoteFactory {
   private readonly _defaults: Omit<CreateNoteOptsV4, "fname">;
+
+  public static defaultUnitTestFactory() {
+    return new TestNoteFactory({
+      vault: { fsPath: "/tmp/ws/v1" },
+      noWrite: true,
+      wsRoot: "/tmp/ws",
+    });
+  }
 
   constructor(defaults: Omit<CreateNoteOptsV4, "fname">) {
     this._defaults = {

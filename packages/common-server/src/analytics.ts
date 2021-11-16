@@ -225,7 +225,7 @@ export class SegmentClient {
   }
 
   constructor(_opts?: SegmentClientOpts) {
-    const key = env("SEGMENT_VSCODE_KEY");
+    const key = _opts?.key || env("SEGMENT_VSCODE_KEY");
     this.logger = createLogger("SegmentClient");
     this._segmentInstance = new Analytics(key);
     this._cachePath = _opts?.cachePath;

@@ -3,6 +3,7 @@ import {
   DendronError,
   isDendronResp,
   RespV3,
+  config,
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -15,7 +16,7 @@ import _ from "lodash";
 import yargs from "yargs";
 import { CLIAnalyticsUtils } from "../utils/analytics";
 
-type BaseCommandOpts = { quiet?: boolean };
+type BaseCommandOpts = { quiet?: boolean; dev?: boolean };
 
 export type CommandCommonProps = {
   error?: DendronError;
@@ -68,6 +69,12 @@ export abstract class CLICommand<
     args.option("quiet", {
       describe: "don't print output to stdout",
     });
+    args.option("devMode", {
+      describe: "set stage to dev",
+      type: "boolean",
+      default: false,
+    });
+    args.hide("devMode");
   }
 
   buildCmd(yargs: yargs.Argv): yargs.Argv {
@@ -83,8 +90,11 @@ export abstract class CLICommand<
       SegmentClient.enable(reason);
       CLIAnalyticsUtils.track(CLIEvents.CLITelemetryEnabled, { reason });
     }
-
-    const segment = SegmentClient.instance({ forceNew: true });
+    const stage = this.opts.dev ? config.dev : config.prod;
+    const segment = SegmentClient.instance({
+      forceNew: true,
+      key: stage.SEGMENT_VSCODE_KEY,
+    });
     this.L.info({ msg: `Telemetry is disabled? ${segment.hasOptedOut}` });
   }
 
@@ -101,6 +111,9 @@ export abstract class CLICommand<
   eval = async (args: any) => {
     const start = process.hrtime();
     this.L.info({ args });
+    if (args.devMode) {
+      this.opts.dev = args.devMode;
+    }
     this.setUpSegmentClient();
     if (!args.wsRoot) {
       const configPath = WorkspaceUtils.findWSRoot();

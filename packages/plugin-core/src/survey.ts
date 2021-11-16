@@ -269,6 +269,25 @@ export class PublishingUseCaseSurvey extends DendronQuickPickSurvey {
   }
 }
 
+export class NewsletterSubscriptionSurvey extends DendronQuickInputSurvey {
+  async onAnswer(result: string) {
+    AnalyticsUtils.track(SurveyEvents.NewsletterSubscriptionAnswered, {
+      result,
+    });
+    resolve();
+  }
+
+  onReject() {
+    AnalyticsUtils.track(SurveyEvents.NewsletterSubscriptionRejected);
+  }
+
+  static create() {
+    const title = "Would you like to subscribe to our newsletter?";
+    const placeHolder = "Enter your e-mail";
+    return new NewsletterSubscriptionSurvey({ title, placeHolder });
+  }
+}
+
 export class LapsedUserReasonSurvey extends DendronQuickPickSurvey {
   async onAnswer(result: vscode.QuickPickItem) {
     const label = result.label;
@@ -457,20 +476,25 @@ export class SurveyUtils {
           const useCaseSurvey = UseCaseSurvey.create();
           const publishingUseCaseSurvey = PublishingUseCaseSurvey.create();
           const priorToolSurvey = PriorToolsSurvey.create();
+          const newsletterSubscritionSurvey =
+            NewsletterSubscriptionSurvey.create();
 
-          const backgroundResults = await backgroundSurvey.show(1, 4);
-          const useCaseResults = await useCaseSurvey.show(2, 4);
+          const backgroundResults = await backgroundSurvey.show(1, 5);
+          const useCaseResults = await useCaseSurvey.show(2, 5);
           const publishingUseCaseResults = await publishingUseCaseSurvey.show(
             3,
-            4
+            5
           );
-          const priorToolsResults = await priorToolSurvey.show(4, 4);
+          const priorToolsResults = await priorToolSurvey.show(4, 5);
+          const newsletterSubscriptionResults =
+            await newsletterSubscritionSurvey.show(5, 5);
 
           const answerCount = [
             backgroundResults,
             useCaseResults,
             publishingUseCaseResults,
             priorToolsResults,
+            newsletterSubscriptionResults,
           ].filter((value) => !_.isUndefined(value)).length;
           AnalyticsUtils.track(SurveyEvents.InitialSurveyAccepted, {
             answerCount,

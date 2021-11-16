@@ -58,6 +58,8 @@ export enum SurveyEvents {
   PublishingUseCaseRejected = "Publishing_Use_Case_Rejected",
   PriorToolsAnswered = "Prior_Tools_Answered",
   PriorToolsRejected = "Prior_Tools_Rejected",
+  NewsletterSubscriptionAnswered = "Newsletter_Subscription_Answered",
+  NewsletterSubscriptionRejected = "Newsletter_Subscription_Rejected",
   LapsedUserSurveyPrompted = "Lapsed_User_Survey_Prompted",
   LapsedUserSurveyAccepted = "Lapsed_User_Survey_Accepted",
   LapsedUserSurveyRejected = "Lapsed_User_Survey_Rejected",

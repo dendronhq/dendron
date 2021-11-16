@@ -22,9 +22,17 @@ import { createLogger, DLogger } from "./logger";
 import Ajv from "ajv";
 import AjvErrors from "ajv-errors";
 
-const ajv = new Ajv({ allErrors: true });
-// Allows custom error messages to be specified within the ajv-schema definition.
-AjvErrors(ajv);
+class AJVProvider {
+  static ajv: Ajv;
+  static getAjv() {
+    if (this.ajv === undefined) {
+      this.ajv = new Ajv({ allErrors: true, allowUnionTypes: true });
+      // Allows custom error messages to be specified within the ajv-schema definition.
+      AjvErrors(this.ajv);
+    }
+    return this.ajv;
+  }
+}
 
 let _LOGGER: DLogger | undefined;
 
@@ -209,7 +217,7 @@ export class SchemaParserV2 extends ParserBaseV2 {
   private static validateSchemaOptsPreCreation(
     opts: (SchemaOpts | SchemaRaw) & { vault: DVault }
   ) {
-    const validator = ajv.compile(AJV_SCHEMAS.SCHEMA_OBJ);
+    const validator = AJVProvider.getAjv().compile(AJV_SCHEMAS.SCHEMA_OBJ);
     const isValid = validator(opts);
     if (!isValid) {
       let message = "";

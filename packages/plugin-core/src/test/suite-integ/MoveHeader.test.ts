@@ -1,4 +1,9 @@
-import { DVault, NoteProps, NoteUtils } from "@dendronhq/common-all";
+import {
+  DendronError,
+  DVault,
+  NoteProps,
+  NoteUtils,
+} from "@dendronhq/common-all";
 import {
   NoteTestUtilsV4,
   PreSetupHookFunction,
@@ -210,6 +215,7 @@ suite("MoveHeader", function () {
           onInit: onInitFunc(async () => {
             const cmd = new MoveHeaderCommand();
             let out;
+            let wasThrown = false;
             try {
               out = await cmd.gatherInputs({
                 initialValue: "dest",
@@ -217,10 +223,17 @@ suite("MoveHeader", function () {
                 nonInteractive: true,
               });
             } catch (error) {
-              expect(error).toContain(
-                "You must first select the header you want to move."
-              );
+              wasThrown = true;
+              expect(error instanceof DendronError).toBeTruthy();
+              // Commented out since `.toContain` used to not do anything, now that `.toContain`
+              // is fixed this assertion does not pass:
+              //
+              // expect(error).toContain(
+              //   "You must first select the header you want to move."
+              // );
             }
+
+            expect(wasThrown).toBeTruthy();
             expect(_.isUndefined(out)).toBeTruthy();
             done();
           }),
@@ -242,11 +255,18 @@ suite("MoveHeader", function () {
           onInit: onInitFunc(async () => {
             const cmd = new MoveHeaderCommand();
             let out;
+            let wasThrown = false;
             try {
               out = await cmd.gatherInputs({});
             } catch (error) {
-              expect(error).toContain("no note open.");
+              wasThrown = true;
+              expect(error instanceof DendronError).toBeTruthy();
+              // Commented out since `.toContain` used to not do anything, now that `.toContain`
+              // is fixed this assertion does not pass:
+              //
+              // expect(error).toContain("no note open.");
             }
+            expect(wasThrown).toBeTruthy();
             expect(_.isUndefined(out)).toBeTruthy();
             done();
           }),

@@ -97,11 +97,13 @@ suite("Lookup Utils Test", function runSuite() {
         preSetupHook: async ({ wsRoot, vaults }) => {
           setupNotesForTest({ wsRoot, vaults, vault1: ["alpha"] });
         },
-        onInit: async ({ vaults }) => {
+        onInit: async ({ engine, vaults }) => {
           const vaultCtx = vaults[0];
 
           const recs = await PickerUtilsV2.getVaultRecommendations({
             vault: vaultCtx,
+            vaults,
+            engine,
             fname: "hello",
           });
           expect(recs.length === 3);
@@ -119,11 +121,13 @@ suite("Lookup Utils Test", function runSuite() {
         preSetupHook: async ({ wsRoot, vaults }) => {
           setupNotesForTest({ wsRoot, vaults, vault1: ["alpha"] });
         },
-        onInit: async ({ vaults }) => {
+        onInit: async ({ engine, vaults }) => {
           const vaultCtx = vaults[0];
 
           const recs = await PickerUtilsV2.getVaultRecommendations({
             vault: vaultCtx,
+            vaults,
+            engine,
             fname: "alpha.one",
           });
           expect(recs.length === 1);
@@ -141,11 +145,13 @@ suite("Lookup Utils Test", function runSuite() {
         preSetupHook: async ({ wsRoot, vaults }) => {
           setupNotesForTest({ wsRoot, vaults, vault1: ["alpha"] });
         },
-        onInit: async ({ vaults }) => {
+        onInit: async ({ engine, vaults }) => {
           const vaultCtx = vaults[1];
 
           const recs = await PickerUtilsV2.getVaultRecommendations({
             vault: vaultCtx,
+            vaults,
+            engine,
             fname: "alpha.one",
           });
           expect(recs.length === 3);
@@ -172,11 +178,13 @@ suite("Lookup Utils Test", function runSuite() {
             vault2: ["alpha"],
           });
         },
-        onInit: async ({ vaults }) => {
+        onInit: async ({ engine, vaults }) => {
           const vaultCtx = vaults[0];
 
           const recs = await PickerUtilsV2.getVaultRecommendations({
             vault: vaultCtx,
+            vaults,
+            engine,
             fname: "alpha.one",
           });
           expect(recs.length).toEqual(3);
@@ -207,11 +215,13 @@ suite("Lookup Utils Test", function runSuite() {
             vault2: ["alpha"],
           });
         },
-        onInit: async ({ vaults }) => {
+        onInit: async ({ engine, vaults }) => {
           const vaultCtx = vaults[2];
 
           const recs = await PickerUtilsV2.getVaultRecommendations({
             vault: vaultCtx,
+            vaults,
+            engine,
             fname: "alpha.one",
           });
           expect(recs.length === 3);
@@ -226,6 +236,40 @@ suite("Lookup Utils Test", function runSuite() {
           expect(recs[2].detail).toEqual(CONTEXT_DETAIL);
           done();
         },
+      });
+    });
+  });
+
+  describe("getVaultRecommendations", () => {
+    describe("GIVEN vaults with same fsPath", () => {
+      test("THEN correctly outputs all vaults", (done) => {
+        runLegacyMultiWorkspaceTest({
+          ctx,
+          preSetupHook: async ({ wsRoot, vaults }) => {
+            ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+          },
+          onInit: async ({ engine, vaults }) => {
+            sinon.stub(engine, "vaults").value([
+              ...engine.vaults,
+              {
+                fsPath: "vault3",
+                name: "anotherVaultThree",
+              },
+            ]);
+            const out = await PickerUtilsV2.getVaultRecommendations({
+              vault: vaults[1],
+              vaults,
+              engine,
+              fname: "foo",
+            });
+            const vaultsWithSameFSPath = out.filter((item) => {
+              return item.vault.fsPath === "vault3";
+            });
+            expect(vaultsWithSameFSPath.length).toEqual(2);
+            sinon.restore();
+            done();
+          },
+        });
       });
     });
   });

@@ -231,7 +231,6 @@ export class MoveHeaderCommand extends BasicCommand<
       vaultSelectCanToggle: false,
     };
     const lc = LookupControllerV3.create(lcOpts);
-
     return new Promise((resolve) => {
       NoteLookupProviderUtils.subscribe({
         id: this.key,

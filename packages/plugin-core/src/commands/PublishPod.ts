@@ -43,6 +43,15 @@ export class PublishPodCommand extends BaseCommand<
     const podsDir = getExtension().podsDir;
     const podClass = podChoice.podClass;
     const maybeConfig = PodUtils.getConfig({ podsDir, podClass });
+    if (maybeConfig.error && PodUtils.hasRequiredOpts(podClass)) {
+      const configPath = PodUtils.genConfigFile({ podsDir, podClass });
+      await VSCodeUtils.openFileInEditor(Uri.file(configPath));
+      window.showInformationMessage(
+        "Looks like this is your first time running this pod. Please fill out the configuration and then run this command again. "
+      );
+      return;
+    }
+
     let noteByName = VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath;
     if (!noteByName) {
       window.showErrorMessage(
@@ -51,16 +60,7 @@ export class PublishPodCommand extends BaseCommand<
       return;
     }
     noteByName = DNodeUtils.fname(noteByName);
-
-    if (!maybeConfig && PodUtils.hasRequiredOpts(podClass)) {
-      const configPath = PodUtils.genConfigFile({ podsDir, podClass });
-      await VSCodeUtils.openFileInEditor(Uri.file(configPath));
-      window.showInformationMessage(
-        "Looks like this is your first time running this pod. Please fill out the configuration and then run this command again. "
-      );
-      return;
-    }
-    return { config: maybeConfig, noteByName, ...inputs };
+    return { config: maybeConfig.data, noteByName, ...inputs };
   }
 
   async execute(opts: CommandOpts) {

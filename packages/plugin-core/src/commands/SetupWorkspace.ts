@@ -71,9 +71,9 @@ export class SetupWorkspaceCommand extends BasicCommand<
           ...workspaceFolders.map((folder) => {
             const folderName = folder.name || folder.uri.fsPath;
             return {
-              label: folderName,
+              label: "Native Workspace",
               description: folder.uri.fsPath,
-              detail: `Take notes in ${folderName} alongside your existing project`,
+              detail: `Take notes in "${folderName}" alongside your existing project`,
             };
           }),
         ],

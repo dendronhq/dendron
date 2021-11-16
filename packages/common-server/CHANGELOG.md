@@ -3,6 +3,71 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.69.1](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.69.1) (2021-11-16)
+
+
+### Bug Fixes
+
+* **workspace:** vault add avoids adding duplicate lines & vault remove cleans up gitignore lines ([#1689](https://github.com/dendronhq/dendron/issues/1689)) ([2a79fdd](https://github.com/dendronhq/dendron/commit/2a79fdd6ebedb0c312dca5d0b2f465a22be0f953))
+* replace auto generated ids (coming from inline schemas) with patterns ([#1632](https://github.com/dendronhq/dendron/issues/1632)) ([af28cf6](https://github.com/dendronhq/dendron/commit/af28cf6ef1d085d22069695e9df128477c024d1b))
+
+
+### Features Dendron
+
+* Native workspace enhancements ([#1670](https://github.com/dendronhq/dendron/issues/1670)) ([7a392bb](https://github.com/dendronhq/dendron/commit/7a392bb47c69b562d54fa15479a184f1441e129e))
+* **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
+* **workspace:** convert vault command ([#1542](https://github.com/dendronhq/dendron/issues/1542)) ([c265e9d](https://github.com/dendronhq/dendron/commit/c265e9d2c238b5a6b3761f4c073140b1a0debe3a))
+
+
+
+## 0.62.3 (2021-10-09)
+
+
+
+# 0.61.0 (2021-09-28)
+
+
+### Bug Fixes
+
+* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
+
+
+
+## 0.60.2 (2021-09-25)
+
+
+
+## 0.60.2-alpha.0 (2021-09-24)
+
+
+
+## 0.60.1 (2021-09-24)
+
+
+
+# 0.60.0 (2021-09-21)
+
+
+### Bug Fixes
+
+* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
+
+
+
+## 0.55.2 (2021-08-21)
+
+
+
+## 0.55.1 (2021-08-17)
+
+
+
+## 0.54.1 (2021-08-13)
+
+
+
+
+
 # [0.69.0](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.69.0) (2021-11-16)
 
 

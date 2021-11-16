@@ -1,8 +1,8 @@
 ---
 id: M9rOflmkDfdDRoyyt9KHa
 title: Variables
-desc: ''
-updated: 1636093082718
+desc: 'This is a demo note on variable substitution'
+updated: 1637047858096
 created: 1636078412308
 alist: ["one", "two", "three"]
 stage: "🌱"
@@ -14,6 +14,7 @@ stage: "🌱"
 >
 > Updated: {{ fm.updated }}
 
+**{{ fm.desc }}**
 ## {{ fm.title }}
 
 - {{ fm.alist[0] }}

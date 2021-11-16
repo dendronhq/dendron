@@ -253,6 +253,7 @@ export class MDUtilsV5 {
       ...custom,
       id: note.id,
       title: note.title,
+      desc: note.desc,
       created: created.toLocaleString(formatOption),
       updated: updated.toLocaleString(formatOption),
     };

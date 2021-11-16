@@ -70,7 +70,6 @@ export abstract class PublishPod<
   async execute(opts: PublishPodExecuteOpts<T>) {
     const { config, engine } = opts;
     const { fname, vaultName } = config;
-
     PodUtils.validate<T>(config, this.config);
     this.L.info({ ctx: "execute:enter", fname, vaultName });
 

@@ -50,7 +50,7 @@ export class ExportPodCommand extends BaseCommand<
     const podsDir = getExtension().podsDir;
     const podClass = podChoice.podClass;
     const maybeConfig = PodUtils.getConfig({ podsDir, podClass });
-    if (!maybeConfig) {
+    if (maybeConfig.error) {
       const configPath = PodUtils.genConfigFile({ podsDir, podClass });
       await VSCodeUtils.openFileInEditor(Uri.file(configPath));
       window.showInformationMessage(
@@ -58,7 +58,7 @@ export class ExportPodCommand extends BaseCommand<
       );
       return;
     }
-    return { podChoice, config: maybeConfig };
+    return { podChoice, config: maybeConfig.data };
   }
 
   async execute(opts: CommandOpts) {

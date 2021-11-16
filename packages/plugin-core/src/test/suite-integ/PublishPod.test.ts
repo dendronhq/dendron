@@ -6,6 +6,7 @@ import {
 } from "@dendronhq/common-test-utils";
 import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import {
+  AirtablePublishPod,
   MarkdownPublishPod,
   podClassEntryToPodItemV4,
 } from "@dendronhq/pods-core";
@@ -16,7 +17,11 @@ import * as vscode from "vscode";
 import { PublishPodCommand } from "../../commands/PublishPod";
 import { VSCodeUtils } from "../../utils";
 import { expect } from "../testUtilsv2";
-import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
+import {
+  describeMultiWS,
+  runLegacyMultiWorkspaceTest,
+  setupBeforeAfter,
+} from "../testUtilsV3";
 
 suite("PublishV2", function () {
   const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {
@@ -51,6 +56,32 @@ suite("PublishV2", function () {
       },
     });
   });
+
+  describeMultiWS(
+    "WHEN publishing pod with required args",
+    {
+      preSetupHook: ENGINE_HOOKS.setupBasic,
+      ctx,
+    },
+    () => {
+      test("THEN show error when required arg not present", (done) => {
+        // You can access the workspace inside the test like this:
+        const cmd = new PublishPodCommand();
+        const podChoice = podClassEntryToPodItemV4(AirtablePublishPod);
+        cmd.gatherInputs = async () => {
+          return { podChoice };
+        };
+        cmd.run().then(() => {
+          expect(
+            VSCodeUtils.getActiveTextEditor()?.document.fileName.endsWith(
+              "config.publish.yml"
+            )
+          ).toBeTruthy();
+          done();
+        });
+      });
+    }
+  );
 
   // TODO
   test.skip("note ref", (done) => {

@@ -86,6 +86,7 @@ export class ImportPodCommand extends BaseCommand<
         window.showInformationMessage(
           "Looks like this is your first time running this pod. Please fill out the configuration and then run this command again."
         );
+        return;
       }
       return;
     } catch (e: any) {

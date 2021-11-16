@@ -27,6 +27,7 @@ import {
   SchemaPickerUtils,
 } from "./utils";
 import { transformQueryString } from "./queryStringTransformer";
+import stringSimilarity from "string-similarity";
 
 export type OnUpdatePickerItemsOpts = {
   picker: DendronQuickPickerV2;
@@ -101,6 +102,23 @@ export function shouldBubbleUpCreateNew({
     !FuseEngine.doesContainSpecialQueryChars(querystring);
 
   return noSpecialQueryChars && noExactMatches && !dontBubbleUpCreateNew;
+}
+
+/**
+ * Sorts the given candidates notes by similarity to the query string in
+ * descending order (the most similar come first) */
+export function sortBySimilarity(candidates: NoteProps[], query: string) {
+  return (
+    candidates
+      // To avoid duplicate similarity score calculation we will first map
+      // to have the similarity score cached and then sort using cached value.
+      .map((cand) => ({
+        cand,
+        similarityScore: stringSimilarity.compareTwoStrings(cand.fname, query),
+      }))
+      .sort((a, b) => b.similarityScore - a.similarityScore)
+      .map((v) => v.cand)
+  );
 }
 
 export class NoteLookupProvider implements ILookupProviderV3 {
@@ -353,12 +371,18 @@ export class NoteLookupProvider implements ILookupProviderV3 {
               return;
             })
             .filter(Boolean) as NoteProps[];
-          const candidatesToAdd = _.differenceBy(
+          let candidatesToAdd = _.differenceBy(
             candidates,
             updatedItems,
             (ent) => ent.fname
           );
           const { wsRoot, vaults } = getDWorkspace();
+
+          candidatesToAdd = sortBySimilarity(
+            candidatesToAdd,
+            transformedQuery.originalQuery
+          );
+
           updatedItems = updatedItems.concat(
             candidatesToAdd.map((ent) => {
               return DNodeUtils.enhancePropForQuickInputV3({

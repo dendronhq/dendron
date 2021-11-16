@@ -471,8 +471,11 @@ export class PickerUtilsV2 {
     fname: string;
     vaultSelectionMode?: VaultSelectionMode;
   }): Promise<DVault | undefined> {
+    const { engine } = getDWorkspace();
     const vaultSuggestions = await PickerUtilsV2.getVaultRecommendations({
       vault,
+      vaults: engine.vaults,
+      engine,
       fname,
     });
 
@@ -536,17 +539,21 @@ export class PickerUtilsV2 {
    */
   static async getVaultRecommendations({
     vault,
+    vaults,
+    engine,
     fname,
   }: {
     vault: DVault;
+    vaults: DVault[];
+    engine: DEngineClient;
     fname: string;
   }): Promise<VaultPickerItem[]> {
     let vaultSuggestions: VaultPickerItem[] = [];
 
-    const { engine } = getDWorkspace();
+    // const { engine } = getDWorkspace();
 
     // Only 1 vault, no other options to choose from:
-    if (engine.vaults.length <= 1) {
+    if (vaults.length <= 1) {
       return Array.of({ vault, label: VaultUtils.getName(vault) });
     }
 

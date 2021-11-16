@@ -441,14 +441,24 @@ export class VSCodeUtils {
     }
   }
 
+  /** Prompt the user for an absolute path to a folder. Supports `~`.
+   *
+   * @param opts.default The default path to suggest.
+   * @param opts.relativeTo If given, this should be an absolute folder prefix. Anything the user types will be prefixed with this.
+   * @param opts.override Use to override the prompts suggestions.
+   * @returns
+   */
   static async gatherFolderPath(opts?: {
     default: string;
+    relativeTo?: string;
+    override?: Partial<vscode.InputBoxOptions>;
   }): Promise<string | undefined> {
-    const folderPath = await vscode.window.showInputBox({
+    let folderPath = await vscode.window.showInputBox({
       prompt: "Select path to folder",
       ignoreFocusOut: true,
       value: opts?.default,
       validateInput: (input: string) => {
+        if (opts?.relativeTo) input = path.join(opts.relativeTo, input);
         if (!path.isAbsolute(input)) {
           if (input[0] !== "~") {
             return "must enter absolute path";
@@ -456,10 +466,12 @@ export class VSCodeUtils {
         }
         return undefined;
       },
+      ...opts?.override,
     });
     if (_.isUndefined(folderPath)) {
       return;
     }
+    if (opts?.relativeTo) folderPath = path.join(opts.relativeTo, folderPath);
     return resolvePath(folderPath);
   }
 
@@ -584,8 +596,8 @@ export class WSUtils {
   /**
    * In development, this is `packages/plugin-core/assets`
    * In production, this is `$HOME/$VSCODE_DIR/{path-to-app}/assets
-   * @param context 
-   * @returns 
+   * @param context
+   * @returns
    */
   static getAssetUri(context: vscode.ExtensionContext) {
     return VSCodeUtils.joinPath(context.extensionUri, "assets");

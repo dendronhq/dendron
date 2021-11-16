@@ -5,6 +5,7 @@ import {
   Time,
   VaultUtils,
   ConfigUtils,
+  WorkspaceType,
 } from "@dendronhq/common-all";
 import {
   readJSONWithCommentsSync,
@@ -151,7 +152,7 @@ suite("Extension", function () {
     noSetInstallStatus: true,
   });
 
-  describe("setup workspace", () => {
+  describe("setup CODE workspace", () => {
     it("not active", (done) => {
       _activate(ctx).then((resp) => {
         expect(resp).toBeFalsy();
@@ -430,6 +431,37 @@ suite("Extension", function () {
             shouldDisplayMessage: false,
           });
         });
+      });
+    });
+  });
+
+  describe("setup NATIVE workspace", () => {
+    it("not active, initial create ws", (done) => {
+      const wsRoot = tmpDir().name;
+
+      StateService.instance().setActivationContext(
+        WORKSPACE_ACTIVATION_CONTEXT.NORMAL
+      );
+
+      _activate(ctx).then(async () => {
+        stubSetupWorkspace({
+          wsRoot,
+        });
+        const cmd = new SetupWorkspaceCommand();
+        await cmd.execute({
+          workspaceType: WorkspaceType.NATIVE,
+          rootDirRaw: wsRoot,
+          skipOpenWs: true,
+          skipConfirmation: true,
+          workspaceInitializer: new BlankInitializer(),
+        });
+        expect(
+          fs.pathExistsSync(path.join(wsRoot, CONSTANTS.DENDRON_CONFIG_FILE))
+        ).toBeTruthy();
+        expect(
+          fs.pathExistsSync(path.join(wsRoot, CONSTANTS.DENDRON_WS_NAME))
+        ).toBeFalsy();
+        done();
       });
     });
   });

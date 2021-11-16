@@ -1,5 +1,5 @@
 import { CONSTANTS, DVault, WorkspaceType } from "@dendronhq/common-all";
-import { WorkspaceService } from "@dendronhq/engine-server";
+import { WorkspaceService, WorkspaceUtils } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -14,26 +14,33 @@ import { BasicCommand } from "./base";
 import { Logger } from "../logger";
 import { resolveTilde } from "@dendronhq/common-server";
 
-type CommandOpts = {
+type CommandInput = {
   rootDirRaw: string;
+  workspaceInitializer?: WorkspaceInitializer;
+  workspaceType?: WorkspaceType;
+};
+
+type CommandOpts = CommandInput & {
   vault?: DVault;
   skipOpenWs?: boolean;
   /**
    * override prompts
    */
   skipConfirmation?: boolean;
-  workspaceInitializer?: WorkspaceInitializer;
-  workspaceType?: WorkspaceType;
-};
-
-type CommandInput = {
-  rootDirRaw: string;
-  workspaceInitializer?: WorkspaceInitializer;
 };
 
 type CommandOutput = DVault[];
 
 export { CommandOpts as SetupWorkspaceOpts };
+
+const CODE_WS_LABEL = "Code Workspace";
+const CODE_WS_DETAIL = undefined;
+
+enum EXISTING_ROOT_ACTIONS {
+  CONTINUE = "continue",
+  DELETE = "delete",
+  ABORT = "abort",
+}
 
 export class SetupWorkspaceCommand extends BasicCommand<
   CommandOpts,
@@ -42,11 +49,69 @@ export class SetupWorkspaceCommand extends BasicCommand<
   key = DENDRON_COMMANDS.INIT_WS.key;
 
   async gatherInputs(): Promise<CommandInput | undefined> {
-    const rootDirRaw = await VSCodeUtils.gatherFolderPath({
-      default: path.join(resolveTilde("~"), "Dendron"),
-    });
-    if (_.isUndefined(rootDirRaw)) {
-      return;
+    let workspaceType = WorkspaceType.CODE;
+    let rootDirRaw: string | undefined;
+    const workspaceFolders = vscode.workspace.workspaceFolders;
+    if (
+      workspaceFolders !== undefined &&
+      workspaceFolders.length > 0 &&
+      (await WorkspaceUtils.getWorkspaceType({
+        workspaceFolders,
+      })) === WorkspaceType.NONE
+    ) {
+      // If there's a non-Dendron workspace already open, offer to convert that to a Dendron workspace first
+      const initNative = await VSCodeUtils.showQuickPick(
+        [
+          {
+            picked: true,
+            label: CODE_WS_LABEL,
+            description: CODE_WS_DETAIL,
+            detail: "A dedicated IDE workspace for just your notes",
+          },
+          ...workspaceFolders.map((folder) => {
+            const folderName = folder.name || folder.uri.fsPath;
+            return {
+              label: "Native Workspace",
+              description: folder.uri.fsPath,
+              detail: `Take notes in "${folderName}" alongside your existing project`,
+            };
+          }),
+        ],
+        {
+          ignoreFocusOut: true,
+          title: "Workspace type to initialize",
+        }
+      );
+      if (initNative === undefined) return;
+      if (
+        initNative.label !== CODE_WS_LABEL ||
+        initNative.description !== CODE_WS_DETAIL
+      ) {
+        // Not sure if there's a better way to check for this, but this is if a native workspace option was selected
+        workspaceType = WorkspaceType.NATIVE;
+        rootDirRaw = await VSCodeUtils.gatherFolderPath({
+          default: "docs",
+          relativeTo: initNative.description,
+          override: {
+            title: "Path for Dendron Native Workspace",
+            prompt: `Path to folder, relative to ${initNative.label}`,
+          },
+        });
+      }
+      // If the code workspace option is selected, then we continue with `rootDirRaw` unset and type still set to `CODE`
+    }
+
+    if (!rootDirRaw) {
+      // Otherwise, ask to create a Code Workspace anywhere
+      rootDirRaw = await VSCodeUtils.gatherFolderPath({
+        default: path.join(resolveTilde("~"), "Dendron"),
+        override: {
+          title: "Path for new Dendron Code Workspace",
+        },
+      });
+      if (_.isUndefined(rootDirRaw)) {
+        return;
+      }
     }
 
     const vaultType = await VSCodeUtils.showQuickPick([
@@ -67,13 +132,25 @@ export class SetupWorkspaceCommand extends BasicCommand<
     }
     switch (vaultType.label) {
       case "default":
-        return { rootDirRaw, workspaceInitializer: new TemplateInitializer() };
+        return {
+          rootDirRaw,
+          workspaceType,
+          workspaceInitializer: new TemplateInitializer(),
+        };
       case "blank":
-        return { rootDirRaw, workspaceInitializer: new BlankInitializer() };
+        return {
+          rootDirRaw,
+          workspaceType,
+          workspaceInitializer: new BlankInitializer(),
+        };
       case "tutorial":
-        return { rootDirRaw, workspaceInitializer: new TutorialInitializer() };
+        return {
+          rootDirRaw,
+          workspaceType,
+          workspaceInitializer: new TutorialInitializer(),
+        };
       default:
-        return { rootDirRaw };
+        return { rootDirRaw, workspaceType };
     }
   }
 
@@ -85,39 +162,35 @@ export class SetupWorkspaceCommand extends BasicCommand<
     skipConfirmation?: boolean;
   }): Promise<boolean> => {
     if (fs.existsSync(rootDir) && !skipConfirmation) {
-      const options = {
-        delete: { msg: "delete existing folder", alias: "d" },
-        abort: { msg: "abort current operation", alias: "a" },
-        continue: {
-          msg: "initialize workspace into current folder",
-          alias: "c",
-        },
-      };
-      const resp = await vscode.window.showInputBox({
-        prompt: `${rootDir} exists. Please specify the next action. Your options: ${_.map(
-          options,
-          (v, k) => {
-            return `(${k}: ${v.msg})`;
-          }
-        ).join(", ")}`,
-        ignoreFocusOut: true,
-        value: "continue",
-        validateInput: async (value: string) => {
-          if (!_.includes(_.keys(options), value.toLowerCase())) {
-            return `not valid input. valid inputs: ${_.keys(options).join(
-              ", "
-            )}`;
-          }
-          return null;
-        },
-      });
+      const resp = await VSCodeUtils.showQuickPick(
+        [
+          {
+            label: EXISTING_ROOT_ACTIONS.CONTINUE,
+            detail: `Continue creating a workspace, putting Dendron files into the existing folder.`,
+          },
+          {
+            label: EXISTING_ROOT_ACTIONS.DELETE,
+            detail: "Delete this folder and continue creating a workspace.",
+          },
+          {
+            label: EXISTING_ROOT_ACTIONS.ABORT,
+            detail: "Abort creating a workspace.",
+          },
+        ],
+        {
+          title: `${rootDir} already exists, how do you want to continue?`,
+          ignoreFocusOut: true,
+          canPickMany: false,
+        }
+      );
 
-      if (resp === "abort") {
+      if (resp === undefined || resp.label === EXISTING_ROOT_ACTIONS.ABORT) {
         vscode.window.showInformationMessage(
           "did not initialize dendron workspace"
         );
         return false;
-      } else if (resp === "delete") {
+      }
+      if (resp.label === EXISTING_ROOT_ACTIONS.DELETE) {
         try {
           fs.removeSync(rootDir);
           return true;
@@ -134,12 +207,22 @@ export class SetupWorkspaceCommand extends BasicCommand<
     return true;
   };
 
+  addAnalyticsPayload(opts?: CommandOpts) {
+    return {
+      workspaceType: opts?.workspaceType,
+    };
+  }
+
   async execute(opts: CommandOpts): Promise<DVault[]> {
     const ctx = "SetupWorkspaceCommand extends BaseCommand";
-    const { rootDirRaw: rootDir, skipOpenWs } = _.defaults(opts, {
-      skipOpenWs: false,
+    const {
+      rootDirRaw: rootDir,
+      skipOpenWs,
+      workspaceType,
+    } = _.defaults(opts, {
+      skipOpenWs: opts?.workspaceType === WorkspaceType.NATIVE,
     });
-    Logger.info({ ctx, rootDir, skipOpenWs });
+    Logger.info({ ctx, rootDir, skipOpenWs, workspaceType });
 
     if (
       !(await this.handleExistingRoot({
@@ -156,21 +239,19 @@ export class SetupWorkspaceCommand extends BasicCommand<
 
     // Default to CODE workspace, otherwise create a NATIVE one
     const createCodeWorkspace =
-      opts.workspaceType === WorkspaceType.CODE ||
-      opts.workspaceType === undefined;
-    await WorkspaceService.createWorkspace({
+      workspaceType === WorkspaceType.CODE || workspaceType === undefined;
+    const svc = await WorkspaceService.createWorkspace({
       vaults,
       wsRoot: rootDir,
       createCodeWorkspace,
-    }).then(async (svc) => {
-      if (opts?.workspaceInitializer?.onWorkspaceCreation) {
-        await opts.workspaceInitializer.onWorkspaceCreation({
-          vaults,
-          wsRoot: rootDir,
-          svc,
-        });
-      }
     });
+    if (opts?.workspaceInitializer?.onWorkspaceCreation) {
+      await opts.workspaceInitializer.onWorkspaceCreation({
+        vaults,
+        wsRoot: rootDir,
+        svc,
+      });
+    }
 
     if (!opts.skipOpenWs) {
       vscode.window.showInformationMessage("opening dendron workspace");

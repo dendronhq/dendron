@@ -17,7 +17,7 @@ suite("LookupProviderV3 utility methods:", () => {
         numberOfExactMatches = 0;
       });
 
-      it(`AND dont bubble up is omitted THEN bubble up`, () => {
+      it(`AND bubble up is omitted THEN bubble up`, () => {
         expect(
           shouldBubbleUpCreateNew({ querystring, numberOfExactMatches })
         ).toBeTruthy();
@@ -26,25 +26,25 @@ suite("LookupProviderV3 utility methods:", () => {
           shouldBubbleUpCreateNew({
             querystring,
             numberOfExactMatches,
-            dontBubbleUpCreateNew: undefined,
+            bubbleUpCreateNew: undefined,
           })
         ).toBeTruthy();
       });
 
-      it("AND dont bubble up is set to true THEN do NOT bubble up", () => {
+      it("AND bubble up is set to false THEN do NOT bubble up", () => {
         const actual = shouldBubbleUpCreateNew({
           querystring,
           numberOfExactMatches,
-          dontBubbleUpCreateNew: true,
+          bubbleUpCreateNew: false,
         });
         expect(actual).toBeFalsy();
       });
 
-      it("AND dont bubble up is set to false THEN bubble up", () => {
+      it("AND bubble up is set to true THEN bubble up", () => {
         const actual = shouldBubbleUpCreateNew({
           querystring,
           numberOfExactMatches,
-          dontBubbleUpCreateNew: false,
+          bubbleUpCreateNew: true,
         });
         expect(actual).toBeTruthy();
       });

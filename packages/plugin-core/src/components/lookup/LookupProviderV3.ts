@@ -1,4 +1,5 @@
 import {
+  ConfigUtils,
   DNodeUtils,
   FuseEngine,
   NoteLookupUtils,
@@ -82,11 +83,11 @@ export type SchemaLookupProviderSuccessResp<T = never> = {
 export function shouldBubbleUpCreateNew({
   numberOfExactMatches,
   querystring,
-  dontBubbleUpCreateNew,
+  bubbleUpCreateNew,
 }: {
   numberOfExactMatches: number;
   querystring: string;
-  dontBubbleUpCreateNew?: boolean;
+  bubbleUpCreateNew?: boolean;
 }) {
   // We don't want to bubble up create new if there is an exact match since
   // vast majority of times if there is an exact match user wants to navigate to it
@@ -101,7 +102,7 @@ export function shouldBubbleUpCreateNew({
   const noSpecialQueryChars =
     !FuseEngine.doesContainSpecialQueryChars(querystring);
 
-  return noSpecialQueryChars && noExactMatches && !dontBubbleUpCreateNew;
+  return noSpecialQueryChars && noExactMatches && bubbleUpCreateNew;
 }
 
 /**
@@ -427,11 +428,13 @@ export class NoteLookupProvider implements ILookupProviderV3 {
           fname: queryOrig,
         });
 
+        const bubbleUpCreateNew = ConfigUtils.getLookup(ws.config).note
+          .bubbleUpCreateNew;
         if (
           shouldBubbleUpCreateNew({
             numberOfExactMatches,
             querystring: queryOrig,
-            dontBubbleUpCreateNew: ws.config.lookupDontBubbleUpCreateNew,
+            bubbleUpCreateNew,
           })
         ) {
           updatedItems = [entryCreateNew, ...updatedItems];

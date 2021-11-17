@@ -55,8 +55,12 @@ const NOTE: DendronConfigEntryCollection<NoteLookupConfig> = {
   },
   leaveTrace: {
     label: "Leave Trace",
-    desc: "Leaves a reference of the destination note in the source note while using selectionExtract"
-  }
+    desc: "Leaves a reference of the destination note in the source note while using selectionExtract",
+  },
+  bubbleUpCreateNew: {
+    label: "Bubble Up Create New",
+    desc: "Put `Create New` at the top of the lookup result.",
+  },
 };
 
 /**

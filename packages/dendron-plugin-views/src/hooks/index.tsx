@@ -78,7 +78,7 @@ export const useMermaid = ({
   noteRenderedBody?: string;
 }) => {
   React.useEffect(() => {
-    if (config || ConfigUtils.getPreview(config).enableMermaid) {
+    if (config && ConfigUtils.getPreview(config).enableMermaid) {
       const logger = createLogger("useMermaid");
       mermaid.initialize({
         startOnLoad: true,

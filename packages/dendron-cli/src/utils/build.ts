@@ -374,6 +374,28 @@ export class BuildUtils {
     return { staticPath: pluginStaticPath };
   }
 
+  static async syncStaticAssetsToNextjsTemplate() {
+    // all assets are stored here
+    const commonAssetsRoot = path.join(
+      this.getLernaRoot(),
+      "packages",
+      "common-assets",
+      "build",
+      "assets"
+    );
+    // destination for assets
+    const templateAssetPath = path.join(
+      this.getLernaRoot(),
+      "packages",
+      "nextjs-template",
+      "public",
+      "assets-dendron"
+    );
+    fs.ensureDirSync(templateAssetPath);
+    fs.emptyDirSync(templateAssetPath);
+    fs.copySync(path.join(commonAssetsRoot), templateAssetPath);
+  }
+
   static removeDevDepsFromPkgJson({
     pkgPath,
     dependencies,

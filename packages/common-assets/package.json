@@ -1,0 +1,10 @@
+{
+  "name": "@dendronhq/common-assets",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "GPLv3",
+  "scripts": {
+    "watch": "ecno nop",
+    "build": "node scripts/buildStyles.js"
+  }
+}

@@ -260,13 +260,13 @@ suite("windowDecorations", function () {
             "[x]"
           );
           expect(taskDecorations[0].renderOptions?.after?.contentText).toEqual(
-            "due:2021.10.29 @grace prio:high #foo"
+            "due:2021.10.29 @grace priority:high #foo"
           );
           expect(
             taskDecorations[1].renderOptions?.before?.contentText
           ).toBeFalsy();
           expect(taskDecorations[1].renderOptions?.after?.contentText).toEqual(
-            "@grace prio:high #foo #bar"
+            "@grace priority:high #foo #bar"
           );
           expect(taskDecorations[2].renderOptions?.before?.contentText).toEqual(
             "[ ]"

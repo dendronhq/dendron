@@ -150,7 +150,7 @@ function DendronSearchComponent(
     <AutoComplete
       size="large"
       allowClear
-      style={{ width: "100%" }}
+      style={{ width: "100%", maxWidth: '1000px' }}
       value={searchQueryValue}
       onClick={results === SearchMode.SEARCH_MODE ? () => null : onClickLookup}
       onChange={

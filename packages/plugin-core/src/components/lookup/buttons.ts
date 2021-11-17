@@ -165,12 +165,14 @@ const selectionToNoteProps = async (opts: {
 
 export type IDendronQuickInputButton = QuickInputButton & {
   type: ButtonType;
+  description: string;
   pressed: boolean;
   onLookup: (payload: any) => Promise<void>;
 };
 
 type DendronBtnCons = {
   title: string;
+  description: string;
   iconOff: string;
   iconOn: string;
   type: ButtonType;
@@ -181,6 +183,7 @@ export class DendronBtn implements IDendronQuickInputButton {
   public iconPathNormal: ThemeIcon;
   public iconPathPressed: ThemeIcon;
   public type: ButtonType;
+  public description: string;
   public pressed: boolean;
   public canToggle: boolean;
   public title: string;
@@ -191,10 +194,11 @@ export class DendronBtn implements IDendronQuickInputButton {
   };
 
   constructor(opts: DendronBtnCons) {
-    const { iconOff, iconOn, type, title, pressed } = opts;
+    const { iconOff, iconOn, type, title, description, pressed } = opts;
     this.iconPathNormal = new vscode.ThemeIcon(iconOff);
     this.iconPathPressed = new vscode.ThemeIcon(iconOn);
     this.type = type;
+    this.description = description;
     this.pressed = pressed || false;
     this.title = title;
     this.canToggle = _.isUndefined(opts.canToggle) ? true : opts.canToggle;
@@ -220,7 +224,11 @@ export class DendronBtn implements IDendronQuickInputButton {
   }
 
   get tooltip(): string {
-    return `${this.title}, status: ${this.pressed ? "on" : "off"}`;
+    return this.description
+      ? `${this.title}, ${this.description}, status: ${
+          this.pressed ? "on" : "off"
+        }`
+      : `${this.title}, status: ${this.pressed ? "on" : "off"}`;
   }
 
   toggle() {
@@ -234,6 +242,8 @@ export class Selection2LinkBtn extends DendronBtn {
   static create(pressed?: boolean) {
     return new Selection2LinkBtn({
       title: "Selection to Link",
+      description:
+        "Highlighted text will be turned into a wikilink to the newly created note",
       iconOff: "link",
       iconOn: "menu-selection",
       type: "selection2link",
@@ -276,6 +286,8 @@ export class SelectionExtractBtn extends DendronBtn {
   static create(pressed?: boolean) {
     return new SelectionExtractBtn({
       title: "Selection Extract",
+      description:
+        "Highlighted text will be copied over to the new note and a note reference will be left in the original note",
       iconOff: "find-selection",
       iconOn: "menu-selection",
       type: "selectionExtract",
@@ -303,6 +315,7 @@ export class JournalBtn extends DendronBtn {
   static create(pressed?: boolean) {
     return new JournalBtn({
       title: "Create Journal Note",
+      description: "",
       iconOff: "calendar",
       iconOn: "menu-selection",
       type: LookupNoteTypeEnum.journal,
@@ -338,6 +351,7 @@ export class ScratchBtn extends DendronBtn {
   static create(pressed?: boolean) {
     return new ScratchBtn({
       title: "Create Scratch Note",
+      description: "",
       iconOff: "new-file",
       iconOn: "menu-selection",
       type: LookupNoteTypeEnum.scratch,
@@ -373,6 +387,7 @@ export class TaskBtn extends DendronBtn {
   static create(pressed?: boolean) {
     return new TaskBtn({
       title: "Create Task Note",
+      description: "",
       iconOff: "diff-added",
       iconOn: "menu-selection",
       type: LookupNoteTypeEnum.task,
@@ -424,6 +439,7 @@ export class HorizontalSplitBtn extends DendronBtn {
   static create(pressed?: boolean) {
     return new HorizontalSplitBtn({
       title: "Split Horizontal",
+      description: "Open lookup result to the side",
       iconOff: "split-horizontal",
       iconOn: "menu-selection",
       type: "horizontal",
@@ -449,6 +465,8 @@ export class DirectChildFilterBtn extends DendronBtn {
   static create(pressed?: boolean) {
     return new DirectChildFilterBtn({
       title: "Direct Child Filter",
+      description:
+        "Limits lookup depth to one level and filters out stub notes",
       iconOff: "git-branch",
       iconOn: "menu-selection",
       type: "directChildOnly" as LookupFilterType,
@@ -473,6 +491,7 @@ export class MultiSelectBtn extends DendronBtn {
   static create(pressed?: boolean) {
     return new MultiSelectBtn({
       title: "Multi-Select",
+      description: "Select multiple notes at once",
       iconOff: "chrome-maximize",
       iconOn: "menu-selection",
       type: "multiSelect" as LookupEffectType,
@@ -494,6 +513,7 @@ export class CopyNoteLinkBtn extends DendronBtn {
   static create(pressed?: boolean) {
     return new CopyNoteLinkBtn({
       title: "Copy Note Link",
+      description: "Add selected notes to the clipboard as wikilinks",
       iconOff: "clippy",
       iconOn: "menu-selection",
       type: "copyNoteLink" as LookupEffectType,
@@ -528,6 +548,7 @@ export class VaultSelectButton extends DendronBtn {
   static create(opts: { pressed?: boolean; canToggle?: boolean }) {
     return new VaultSelectButton({
       title: "Select Vault",
+      description: "",
       iconOff: "package",
       iconOn: "menu-selection",
       type: "other" as LookupEffectType,

@@ -1,8 +1,8 @@
 version: 1
-imports: []
+imports: [person]
 schemas:
   - id: book
-    children: 
+    children:
       - characters
     namespace: true
     title: book
@@ -11,6 +11,8 @@ schemas:
       id: templates.book
       type: note
   - id: characters
+    children:
+      - person.public_persona
     template:
       id: templates.book.characters
       type: note

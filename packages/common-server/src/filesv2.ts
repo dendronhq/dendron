@@ -15,7 +15,7 @@ import { assign, parse, stringify } from "comment-json";
 import { FSWatcher } from "fs";
 import fs from "fs-extra";
 import matter from "gray-matter";
-import YAML from "js-yaml";
+import YAML from "yamljs";
 import _ from "lodash";
 import path from "path";
 // @ts-ignore
@@ -115,11 +115,8 @@ export async function file2Schema(
 ): Promise<SchemaModuleProps> {
   const root = { fsPath: path.dirname(fpath) };
   const fname = path.basename(fpath, ".schema.yml");
-  const schemaOpts = YAML.safeLoad(
-    await fs.readFile(fpath, { encoding: "utf8" }),
-    {
-      schema: YAML.JSON_SCHEMA,
-    }
+  const schemaOpts = YAML.parse(
+    await fs.readFile(fpath, { encoding: "utf8" })
   ) as SchemaModuleOpts;
   return await SchemaParserV2.parseRaw(schemaOpts, { root, fname, wsRoot });
 }
@@ -139,9 +136,7 @@ export async function string2Schema({
   fname: string;
   wsRoot: string;
 }) {
-  const schemaOpts = YAML.safeLoad(content, {
-    schema: YAML.JSON_SCHEMA,
-  }) as SchemaModuleOpts;
+  const schemaOpts = YAML.parse(content) as SchemaModuleOpts;
   return await SchemaParserV2.parseRaw(schemaOpts, {
     root: vault,
     fname,
@@ -169,9 +164,8 @@ export function string2Note({
   const options: any = {
     engines: {
       yaml: {
-        parse: (s: string) => YAML.safeLoad(s, { schema: YAML.JSON_SCHEMA }),
-        stringify: (s: string) =>
-          YAML.safeDump(s, { schema: YAML.JSON_SCHEMA }),
+        parse: (s: string) => YAML.parse(s),
+        stringify: (s: string) => YAML.stringify(s),
       },
     },
   };

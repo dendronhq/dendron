@@ -268,6 +268,64 @@ export const setupSchemaPreseet: PreSetupHookFunction = async (opts) => {
   });
 };
 
+export const setupSchemaWithExpansion: PreSetupHookFunction = async (opts) => {
+  await setupBasic(opts);
+  const { wsRoot, vaults } = opts;
+  const vault1 = vaults[0];
+
+  const withExpansion = path.join(
+    resolvePath(vault1.fsPath, wsRoot),
+    "withExpansion.schema.yml"
+  );
+  fs.writeFileSync(
+    withExpansion,
+    `
+_anchors:
+  projects: &projects
+    title: projects
+    parent: root
+    template: templates.projects
+    
+version: 1
+imports: []
+
+schemas:
+  - <<: *projects
+    id: proj
+  - <<: *projects
+    id: op
+`
+  );
+
+  const inlineSchemaPath = path.join(
+    resolvePath(vault1.fsPath, wsRoot),
+    "includesExpansion.schema.yml"
+  );
+  fs.writeFileSync(
+    inlineSchemaPath,
+    `
+version: 1
+
+imports:
+  - withExpansion
+
+schemas:
+  - id: includer
+    parent: root
+    namespace: true
+    children:
+      - withExpansion.proj
+`
+  );
+
+  await NoteTestUtilsV4.createNote({
+    wsRoot,
+    body: "Template text",
+    fname: "templates.projects",
+    vault: vault1,
+  });
+};
+
 export const setupInlineSchema: PreSetupHookFunction = async (opts) => {
   await setupBasic(opts);
   const { wsRoot, vaults } = opts;
@@ -553,6 +611,7 @@ export const ENGINE_HOOKS = {
   setupSchemaPreseet,
   setupSchemaPresetWithNamespaceTemplate,
   setupInlineSchema,
+  setupSchemaWithExpansion,
   setupNoteRefRecursive,
   setupJournals,
   setupEmpty,

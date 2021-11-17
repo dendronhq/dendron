@@ -372,4 +372,43 @@ describe(`schemaParser tests:`, () => {
       });
     });
   });
+
+  describe(`WHEN parsing schema with expansion`, () => {
+    let payload: {
+      schemas: SchemaModuleProps[];
+      errors: DendronError[] | null;
+    };
+    let includesExpansion: SchemaModuleProps;
+
+    beforeAll(async () => {
+      payload = await parseSchemas(ENGINE_HOOKS.setupSchemaWithExpansion);
+      includesExpansion = payload.schemas.filter(
+        (sch) => sch.fname === "includesExpansion"
+      )[0];
+    });
+
+    it(`THEN payload does NOT have errors`, () => {
+      expect(payload.errors).toEqual(null);
+    });
+
+    describe(`AND parses schema that includes a schema that has expansion`, () => {
+      it(`THEN reference a schema element that has expansion from the other schema successfully`, () => {
+        expect(includesExpansion.schemas["includer"].children[0]).toEqual(
+          "withExpansion.proj"
+        );
+      });
+
+      it(`THEN expanded schema has template from expansion`, () => {
+        const schema = includesExpansion.schemas["withExpansion.proj"];
+
+        expect(schema.data!.template!.id).toEqual("templates.projects");
+        expect(schema.data!.template!.type).toEqual("note");
+      });
+
+      it("THEN expanded schema has title from expansion", () => {
+        const schema = includesExpansion.schemas["withExpansion.proj"];
+        expect(schema.title).toEqual("projects");
+      });
+    });
+  });
 });

@@ -1,7 +1,7 @@
 ![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/logo-256.png)
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-91-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-92-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 # Welcome to Dendron!
@@ -177,6 +177,9 @@ Dendron wouldn't be what it is today without help from these wonderful gardeners
     <td align="center"><a href="https://github.com/johndendron"><img src="https://avatars.githubusercontent.com/u/89761127?v=4?s=100" width="100px;" alt=""/><br /><sub><b>johndendron</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Ajohndendron" title="Bug reports">🐛</a></td>
     <td align="center"><a href="http://aaronmeese.com"><img src="https://avatars.githubusercontent.com/u/17814535?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Aaron Meese</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=ajmeese7" title="Documentation">📖</a></td>
     <td align="center"><a href="https://github.com/JeffTeter"><img src="https://avatars.githubusercontent.com/u/13050714?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Jeff Teter</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3AJeffTeter" title="Bug reports">🐛</a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/mrajaram"><img src="https://avatars.githubusercontent.com/u/615159?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Mari Rajaram</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=mrajaram" title="Documentation">📖</a></td>
   </tr>
 </table>
 

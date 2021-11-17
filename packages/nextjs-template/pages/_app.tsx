@@ -18,6 +18,7 @@ import { fetchConfig, fetchNotes } from "../utils/fetchers";
 import { useDendronRouter } from "../utils/hooks";
 import { getAssetUrl } from "../utils/links";
 import { NoteData } from "../utils/types";
+import Head from "next/head";
 
 const themes = {
   dark: getAssetUrl(`/assets-dendron/css/dark.css`),
@@ -63,6 +64,9 @@ function DendronApp({ Component, pageProps }: AppProps) {
 
   return (
     <DendronLayout {...noteData} dendronRouter={dendronRouter}>
+      <Head>
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
       <Component
         {...pageProps}
         notes={noteData}

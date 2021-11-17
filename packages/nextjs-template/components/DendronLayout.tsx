@@ -11,7 +11,11 @@ import { DendronSearch } from "./DendronSearch";
 import Script from "next/script";
 import { useEngineAppSelector } from "../features/engine/hooks";
 import DendronNotice from "./DendronNotice";
-import { getStage } from "@dendronhq/common-all";
+import {
+  ConfigUtils,
+  getStage,
+  IntermediateDendronConfig,
+} from "@dendronhq/common-all";
 
 const { Header, Content, Sider, Footer } = Layout;
 const { LAYOUT, HEADER, SIDER } = DENDRON_STYLE_CONSTANTS;
@@ -77,7 +81,8 @@ export default function DendronLayout(
   );
 
   const engine = useEngineAppSelector((state) => state.engine);
-  const enableMermaid = engine.config?.mermaid;
+  const config = engine.config as IntermediateDendronConfig;
+  const enableMermaid = ConfigUtils.getProp(config, "mermaid");
 
   return (
     <Layout

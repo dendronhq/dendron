@@ -9,6 +9,7 @@ import {
   FOOTNOTE_DEF_CLASS,
   NoteViewMessageType,
   NoteViewMessageEnum,
+  ConfigUtils,
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -139,7 +140,7 @@ const useMermaid = ({
   themeType: ThemeType;
 }) => {
   React.useEffect(() => {
-    if (config?.mermaid) {
+    if (config && ConfigUtils.getPreview(config).enableMermaid) {
       mermaidReady(() => {
         const mermaid = getMermaid(window);
         logger.info("init mermaid global:begin");
@@ -235,7 +236,7 @@ function Note({ engine, ide, ws, port }: DendronProps & WorkspaceProps) {
 
   // hook: apply mermaid
   React.useEffect(() => {
-    if (engine?.config?.mermaid) {
+    if (engine?.config && ConfigUtils.getPreview(engine.config).enableMermaid) {
       mermaidReady(
         () => {
           logger.info("init mermaid elements:begin");

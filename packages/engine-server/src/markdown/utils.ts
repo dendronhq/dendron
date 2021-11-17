@@ -44,7 +44,7 @@ import { Node, Parent } from "unist";
 import { hierarchies } from "./remark";
 import { backlinks } from "./remark/backlinks";
 import { dendronPub, DendronPubOpts } from "./remark/dendronPub";
-import { noteRefs, NoteRefsOpts } from "./remark/noteRefs";
+import { NoteRefsOpts } from "./remark/noteRefs";
 import { noteRefsV2 } from "./remark/noteRefsV2";
 import { publishSite } from "./remark/publishSite";
 import { transformLinks } from "./remark/transformLinks";
@@ -370,11 +370,15 @@ export class MDUtilsV4 {
     }
 
     let usePrettyRefs = opts.usePrettyRefs;
-    if (_.isUndefined(usePrettyRefs))
-      usePrettyRefs = ConfigUtils.usePrettyRef(config);
-    let noLegacyNoteRef = _.isBoolean(config.noLegacyNoteRef)
-      ? config.noLegacyNoteRef
-      : false;
+    if (_.isUndefined(usePrettyRefs)) {
+      usePrettyRefs = shouldApplyPublishRules
+        ? ConfigUtils.getSite(config).usePrettyRefs
+        : ConfigUtils.getPreview(config).enablePrettyRefs;
+    }
+
+    const insertTitle = shouldApplyPublishRules
+      ? ConfigUtils.getProp(config, "useFMTitle")
+      : ConfigUtils.getPreview(config).enableFMTitle;
 
     proc = proc
       .data("dendron", {
@@ -384,7 +388,6 @@ export class MDUtilsV4 {
         config,
         shouldApplyPublishRules,
       } as DendronASTData)
-      //.use(extract, { name: "fm" })
       .use(abbrPlugin)
       .use(variables)
       .use(footnotes)
@@ -402,25 +405,28 @@ export class MDUtilsV4 {
         ...opts.noteRefOpts,
         wikiLinkOpts: opts.wikiLinksOpts,
         prettyRefs: usePrettyRefs,
-        insertTitle: config.useFMTitle,
+        insertTitle,
       });
-    if (!noLegacyNoteRef) {
-      proc = proc.use(noteRefs, {
-        ...opts.noteRefOpts,
-        wikiLinkOpts: opts.wikiLinksOpts,
-      });
-    }
 
-    if (opts.mathOpts?.katex || opts.config?.useKatex) {
+    const enableKatex = shouldApplyPublishRules
+      ? ConfigUtils.getProp(config, "useKatex")
+      : ConfigUtils.getPreview(config).enableKatex;
+
+    if (opts.mathOpts?.katex || enableKatex) {
       proc = proc.use(math);
     }
-    if (opts.mermaid || opts.config?.mermaid) {
+
+    const enableMermaid = shouldApplyPublishRules
+      ? ConfigUtils.getProp(config, "mermaid")
+      : ConfigUtils.getPreview(config).enableMermaid;
+
+    if (opts.mermaid || enableMermaid) {
       proc = proc.use(mermaid, { simple: true });
     }
     // MD_DENDRON, convert back to itself, no need for transformations
     if (dest !== DendronASTDest.MD_DENDRON) {
       proc = proc.use(dendronPub, {
-        insertTitle: config.useFMTitle,
+        insertTitle,
         ...opts.publishOpts,
         wikiLinkOpts: opts.wikiLinksOpts,
         prettyRefs: usePrettyRefs,
@@ -531,11 +537,11 @@ export class MDUtilsV4 {
       publishOpts: {
         assetsPrefix:
           getStage() === "prod" ? config.site.assetsPrefix : undefined,
-        insertTitle: config.useFMTitle,
+        insertTitle: ConfigUtils.getProp(config, "useFMTitle"),
         transformNoPublish: true,
       },
       mathOpts: { katex: true },
-      mermaid: config.mermaid,
+      mermaid: ConfigUtils.getProp(config, "mermaid"),
       config,
     });
     proc = proc.use(publishSite, { noteIndex });

@@ -1,4 +1,5 @@
 import {
+  ConfigUtils,
   CONSTANTS,
   DendronError,
   NoteUtils,
@@ -228,9 +229,15 @@ function attachParser(proc: Unified.Processor) {
       out.value = _.trim(NoteUtils.normalizeFname(fname)); // recreate what value (and alias) would have been parsed
       if (!out.alias) out.alias = out.value;
     }
+    const shouldApplyPublishingRules =
+      MDUtilsV5.shouldApplyPublishingRules(proc);
+    const enableNoteTitleForLink = shouldApplyPublishingRules
+      ? ConfigUtils.getProp(config, "useNoteTitleForLink")
+      : ConfigUtils.getPreview(config).enableNoteTitleForLink;
+
     if (
       dest !== DendronASTDest.MD_DENDRON &&
-      config?.useNoteTitleForLink &&
+      enableNoteTitleForLink &&
       out.alias === out.value &&
       vault
     ) {
@@ -253,7 +260,8 @@ function attachParser(proc: Unified.Processor) {
     if (match) {
       const linkMatch = match[1].trim();
       try {
-        const { value, alias, anchorHeader, vaultName, sameFile } = parseLink(linkMatch);
+        const { value, alias, anchorHeader, vaultName, sameFile } =
+          parseLink(linkMatch);
         return eat(match[0])({
           type: DendronASTTypes.WIKI_LINK,
           // @ts-ignore

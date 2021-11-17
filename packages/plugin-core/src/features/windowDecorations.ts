@@ -40,6 +40,7 @@ import {
 import { Logger } from "../logger";
 import { CodeConfigKeys, DateTimeFormat } from "../types";
 import { VSCodeUtils } from "../utils";
+import { sentryReportingCallback } from "../utils/analytics";
 import { containsNonDendronUri } from "../utils/md";
 import { getFrontmatterTags, parseFrontmatter } from "../utils/yaml";
 import { getConfigValue, getDWorkspace } from "../workspace";
@@ -120,99 +121,104 @@ export function delayedUpdateDecorations(
   }, updateDelay);
 }
 
-export function updateDecorations(activeEditor: TextEditor) {
-  const ctx = "updateDecorations";
-  // Warn for missing or bad frontmatter and broken wikilinks
-  const allWarnings: Diagnostic[] = [];
-  const activeDecorations = new DefaultMap<
-    TextEditorDecorationType,
-    DecorationOptions[]
-  >(() => []);
-  // Only show decorations & warnings for notes
-  let note: NoteProps | undefined;
-  try {
-    note = VSCodeUtils.getNoteFromDocument(activeEditor.document);
-    if (_.isUndefined(note)) return {};
-  } catch (error) {
-    Logger.info({
-      ctx,
-      msg: "Unable to check if decorations should be updated",
-      error,
-    });
-    return {};
-  }
-  // Only decorate visible ranges, of which there could be multiple if the document is open in multiple tabs
-  const ranges = VSCodeUtils.mergeOverlappingRanges(activeEditor.visibleRanges);
-
-  for (const range of ranges) {
-    const decorateRange = VSCodeUtils.padRange({
-      range,
-      padding: VISIBLE_RANGE_MARGIN,
-    });
-    const text = activeEditor.document.getText(decorateRange);
-    const proc = MDUtilsV5.procRemarkParse(
-      {
-        mode: ProcMode.FULL,
-        parseOnly: true,
-      },
-      {
-        dest: DendronASTDest.MD_DENDRON,
-        engine: getDWorkspace().engine,
-        vault: note.vault,
-        fname: note.fname,
-      }
+export const updateDecorations = sentryReportingCallback(
+  (activeEditor: TextEditor) => {
+    const ctx = "updateDecorations";
+    // Warn for missing or bad frontmatter and broken wikilinks
+    const allWarnings: Diagnostic[] = [];
+    const activeDecorations = new DefaultMap<
+      TextEditorDecorationType,
+      DecorationOptions[]
+    >(() => []);
+    // Only show decorations & warnings for notes
+    let note: NoteProps | undefined;
+    try {
+      note = VSCodeUtils.getNoteFromDocument(activeEditor.document);
+      if (_.isUndefined(note)) return {};
+    } catch (error) {
+      Logger.info({
+        ctx,
+        msg: "Unable to check if decorations should be updated",
+        error,
+      });
+      return {};
+    }
+    // Only decorate visible ranges, of which there could be multiple if the document is open in multiple tabs
+    const ranges = VSCodeUtils.mergeOverlappingRanges(
+      activeEditor.visibleRanges
     );
-    const tree = proc.parse(text);
-    let frontmatter: FrontmatterContent | undefined;
 
-    visit(tree, (node) => {
-      const decorator = DECORATOR.get(node.type);
-      // Need to update node position with the added offset from the range
-      node.position!.start.line += decorateRange.start.line;
-      node.position!.end.line += decorateRange.start.line;
-      if (decorator) {
-        const decorations = decorator(node, activeEditor.document);
-        for (const { type, decoration } of decorations) {
-          activeDecorations.get(type).push(decoration);
+    for (const range of ranges) {
+      const decorateRange = VSCodeUtils.padRange({
+        range,
+        padding: VISIBLE_RANGE_MARGIN,
+        zeroCharacter: true,
+      });
+      const text = activeEditor.document.getText(decorateRange);
+      const proc = MDUtilsV5.procRemarkParse(
+        {
+          mode: ProcMode.FULL,
+          parseOnly: true,
+        },
+        {
+          dest: DendronASTDest.MD_DENDRON,
+          engine: getDWorkspace().engine,
+          vault: note.vault,
+          fname: note.fname,
+        }
+      );
+      const tree = proc.parse(text);
+      let frontmatter: FrontmatterContent | undefined;
+
+      visit(tree, (node) => {
+        const decorator = DECORATOR.get(node.type);
+        // Need to update node position with the added offset from the range
+        node.position!.start.line += decorateRange.start.line;
+        node.position!.end.line += decorateRange.start.line;
+        if (decorator) {
+          const decorations = decorator(node, activeEditor.document);
+          for (const { type, decoration } of decorations) {
+            activeDecorations.get(type).push(decoration);
+          }
+        }
+        if (node.type === DendronASTTypes.FRONTMATTER)
+          frontmatter = node as FrontmatterContent;
+      });
+
+      if (decorateRange.start.line === 0) {
+        // Can't check frontmatter if frontmatter is not visible
+        if (_.isUndefined(frontmatter)) {
+          allWarnings.push(warnMissingFrontmatter(activeEditor.document));
+        } else {
+          allWarnings.push(
+            ...warnBadFrontmatterContents(activeEditor.document, frontmatter)
+          );
         }
       }
-      if (node.type === DendronASTTypes.FRONTMATTER)
-        frontmatter = node as FrontmatterContent;
-    });
+    }
 
-    if (decorateRange.start.line === 0) {
-      // Can't check frontmatter if frontmatter is not visible
-      if (_.isUndefined(frontmatter)) {
-        allWarnings.push(warnMissingFrontmatter(activeEditor.document));
-      } else {
-        allWarnings.push(
-          ...warnBadFrontmatterContents(activeEditor.document, frontmatter)
-        );
+    // Activate the decorations
+    Logger.info({
+      ctx,
+      msg: `Displaying ${allWarnings.length} warnings and ${activeDecorations.size} decorations`,
+    });
+    for (const [type, decorations] of activeDecorations.entries()) {
+      activeEditor.setDecorations(type, decorations);
+    }
+
+    // Clear out any old decorations left over from last pass
+    for (const type of _.values(DECORATION_TYPE)) {
+      if (!activeDecorations.has(type)) {
+        activeEditor.setDecorations(type, []);
       }
     }
-  }
 
-  // Activate the decorations
-  Logger.info({
-    ctx,
-    msg: `Displaying ${allWarnings.length} warnings and ${activeDecorations.size} decorations`,
-  });
-  for (const [type, decorations] of activeDecorations.entries()) {
-    activeEditor.setDecorations(type, decorations);
+    return {
+      allDecorations: activeDecorations,
+      allWarnings,
+    };
   }
-
-  // Clear out any old decorations left over from last pass
-  for (const type of _.values(DECORATION_TYPE)) {
-    if (!activeDecorations.has(type)) {
-      activeEditor.setDecorations(type, []);
-    }
-  }
-
-  return {
-    allDecorations: activeDecorations,
-    allWarnings,
-  };
-}
+);
 
 function decorateFrontmatter(
   frontmatter: FrontmatterContent,

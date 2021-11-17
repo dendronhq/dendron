@@ -174,11 +174,16 @@ export class WorkspaceService {
     );
   }
 
-  getWorkspaceConfig() {
-    const wsConfig = readJSONWithCommentsSync(
-      path.join(this.wsRoot, CONSTANTS.DENDRON_WS_NAME)
-    );
-    return wsConfig;
+  getWorkspaceConfig(): WorkspaceSettings | undefined {
+    try {
+      const wsConfig = readJSONWithCommentsSync(
+        path.join(this.wsRoot, CONSTANTS.DENDRON_WS_NAME)
+      );
+      return wsConfig;
+    } catch (err) {
+      this.logger.error(err);
+      return undefined;
+    }
   }
 
   /**

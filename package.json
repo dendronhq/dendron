@@ -4,6 +4,7 @@
   "workspaces": {
     "packages": [
       "packages/common-all",
+      "packages/common-assets",
       "packages/common-server",
       "packages/common-test-utils",
       "packages/engine-server",

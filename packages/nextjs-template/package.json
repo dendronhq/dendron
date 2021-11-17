@@ -17,7 +17,9 @@
     "sync:theme": "cp ../dendron-next-server/public/*theme.css public/",
     "postbuild": "next-sitemap --config sitemap.js",
     "cypress:open": "cypress open",
-    "cypress:run": "cypress run"
+    "cypress:run": "cypress run",
+    "clean": "yarn rimraf public data out node_modules",
+    "rimraf": "npx rimraf"
   },
   "dependencies": {
     "@chakra-ui/react": "^1.6.7",

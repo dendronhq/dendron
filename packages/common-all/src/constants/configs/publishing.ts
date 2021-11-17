@@ -12,8 +12,6 @@ import {
   GithubEditViewModeEnum,
 } from "../../types/configs/publishing/github";
 import {
-  ENABLE_HIERARCHY_DISPLAY,
-  HIERARCHY_DISPLAY_TITLE,
   ENABLE_FM_TITLE,
   ENABLE_NOTE_TITLE_FOR_LINK,
   ENABLE_MERMAID,
@@ -94,8 +92,14 @@ const SEO: DendronConfigEntryCollection<SEOConfig> = {
 export const PUBLISHING: DendronConfigEntryCollection<DendronPublishingConfig> =
   {
     enableFMTitle: ENABLE_FM_TITLE("publishing"),
-    enableHierarchyDisplay: ENABLE_HIERARCHY_DISPLAY("publishing"),
-    hierarchyDisplayTitle: HIERARCHY_DISPLAY_TITLE("publishing"),
+    enableHierarchyDisplay: {
+      label: "Enable Hierarchy Display",
+      desc: "Enable rendering of children link block at the end of the note.",
+    },
+    hierarchyDisplayTitle: {
+      label: "Hierarchy Display Title",
+      desc: "Title to display for the children links block.",
+    },
     enableNoteTitleForLink: ENABLE_NOTE_TITLE_FOR_LINK("publishing"),
     enableMermaid: ENABLE_MERMAID("publishing"),
     enablePrettyRefs: ENABLE_PRETTY_REFS("publishing"),

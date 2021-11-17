@@ -41,24 +41,6 @@ export const ENABLE_FM_TITLE = (
   };
 };
 
-export const ENABLE_HIERARCHY_DISPLAY = (
-  namespace: TopLevelDendronConfig
-): DendronConfigEntry => {
-  return {
-    label: `Enable Hierarchy Display (${namespace})`,
-    desc: `Enable rendering of children link block at the end of the note. (${namespace})`,
-  };
-};
-
-export const HIERARCHY_DISPLAY_TITLE = (
-  namespace: TopLevelDendronConfig
-): DendronConfigEntry => {
-  return {
-    label: `Hierarhcy Display Title ${namespace}`,
-    desc: `Title to display for the children links block. ${namespace}`,
-  };
-};
-
 export const ENABLE_NOTE_TITLE_FOR_LINK = (
   namespace: TopLevelDendronConfig
 ): DendronConfigEntry => {
@@ -70,8 +52,6 @@ export const ENABLE_NOTE_TITLE_FOR_LINK = (
 
 export const GLOBAL: DendronConfigEntryCollection<DendronGlobalConfig> = {
   enableFMTitle: ENABLE_FM_TITLE("global"), // TODO: split implementation to respect non-global config
-  enableHierarchyDisplay: ENABLE_HIERARCHY_DISPLAY("global"), // TODO: split
-  hierarchyDisplayTitle: HIERARCHY_DISPLAY_TITLE("global"), //TODO: split
   enableNoteTitleForLink: ENABLE_NOTE_TITLE_FOR_LINK("global"), // TODO: split
   enableMermaid: ENABLE_MERMAID("global"),
   enablePrettyRefs: ENABLE_PRETTY_REFS("global"),

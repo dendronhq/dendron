@@ -68,8 +68,7 @@ export default function DendronLayout(
           />
           <Row gutter={1} style={{ margin: "0 auto", padding: "1rem" }}>
             <Text>
-              {" "}
-              🌱 with 💕 using{" "}
+              🌱 with{" "}
               <Link href="https://www.dendron.so/" target="_blank">
                 Dendron 🌲
               </Link>

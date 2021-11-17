@@ -328,9 +328,17 @@ export class BuildUtils {
 
   /**
    * Migrate assets from next-server, plugin-views, and api-server to plugin-core
-   * @returns 
+   * @returns
    */
   static async syncStaticAssets() {
+    // all assets are stored here
+    const commonAssetsRoot = path.join(
+      this.getLernaRoot(),
+      "packages",
+      "common-assets"
+    );
+
+    // destination for assets
     const pluginAssetPath = path.join(this.getPluginRootPath(), "assets");
     const pluginStaticPath = path.join(pluginAssetPath, "static");
     const apiRoot = path.join(this.getLernaRoot(), "packages", "api-server");
@@ -349,7 +357,9 @@ export class BuildUtils {
       path.join(this.getNextServerRootPath(), "assets", "js"),
       path.join(pluginStaticPath, "js")
     );
-    fs.copySync(path.join(apiRoot, "assets", "static"), pluginStaticPath);
+
+    // copy over common assets
+    fs.copySync(path.join(commonAssetsRoot, "assets", "css"), pluginStaticPath);
 
     // plugin view assets
     fs.copySync(

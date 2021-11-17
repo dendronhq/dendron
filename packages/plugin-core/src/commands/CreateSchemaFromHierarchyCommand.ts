@@ -21,13 +21,17 @@ import * as fs from "fs";
 import { PluginSchemaUtils } from "../pluginSchemaUtils";
 
 type CommandOpts = {
-  candidates: readonly SchemaCandidate[];
-  schemaName: string;
-  hierarchyLevel: HierarchyLevel;
-  uri: Uri;
+  candidates?: readonly SchemaCandidate[];
+  schemaName?: string;
+  hierarchyLevel?: HierarchyLevel;
+  uri?: Uri;
+  isHappy: boolean;
+  stopReason?: StopReason;
 };
 
-type CommandOutput = void;
+type CommandOutput = {
+  successfullyCreated: boolean;
+};
 
 /**
  * Represents the level of the file hierarchy that will have the '*' pattern.
@@ -144,6 +148,26 @@ function getSchemaUri(vault: DVault, schemaName: string) {
   return uri;
 }
 
+export enum StopReason {
+  SCHEMA_WITH_TOP_ID_ALREADY_EXISTS = "SCHEMA_WITH_TOP_ID_ALREADY_EXISTS",
+  NOTE_DID_NOT_HAVE_REQUIRED_DEPTH = "NOTE_DID_NOT_HAVE_REQUIRED_DEPTH",
+  DID_NOT_PICK_HIERARCHY_LEVEL = "DID_NOT_PICK_HIERARCHY_LEVEL",
+
+  CANCELLED_PATTERN_SELECTION = "CANCELLED_PATTERN_SELECTION",
+  UNSELECTED_ALL_PATTERNS = "UNSELECTED_ALL_PATTERNS",
+
+  DID_NOT_PICK_SCHEMA_FILE_NAME = "DID_NOT_PICK_SCHEMA_FILE_NAME",
+}
+
+type HierarchyLevelRes = {
+  hierarchyLevel?: HierarchyLevel;
+  stopReason?: StopReason;
+};
+type PatternsFromCandidateRes = {
+  pickedCandidates?: readonly SchemaCandidate[];
+  stopReason?: StopReason;
+};
+
 /**
  * Encapsulates methods that are responsible for user interaction when
  * asking user for input data.
@@ -178,7 +202,9 @@ export class UserQueries {
     return schemaName;
   }
 
-  static async promptUserToSelectHierarchyLevel(currDocFsPath: string) {
+  static async promptUserToSelectHierarchyLevel(
+    currDocFsPath: string
+  ): Promise<HierarchyLevelRes> {
     const hierarchy = new Hierarchy(path.basename(currDocFsPath, ".md"));
 
     if (hierarchy.depth() <= 1) {
@@ -188,7 +214,7 @@ export class UserQueries {
         `Pick a note with note depth greater than 1.`
       );
 
-      return undefined;
+      return { stopReason: StopReason.NOTE_DID_NOT_HAVE_REQUIRED_DEPTH };
     }
 
     if (PluginSchemaUtils.doesSchemaExist(hierarchy.topId())) {
@@ -207,19 +233,25 @@ export class UserQueries {
         await VSCodeUtils.openFileInEditor(getUriFromSchema(schema));
       }
 
-      return undefined;
+      return { stopReason: StopReason.SCHEMA_WITH_TOP_ID_ALREADY_EXISTS };
     }
 
     const hierarchyLevel: HierarchyLevel | undefined =
       await VSCodeUtils.showQuickPick(hierarchy.getSchemaebleLevels(), {
         title: "Select hierarchy level that will vary within note hierarchies.",
       });
-    return hierarchyLevel;
+
+    if (_.isUndefined(hierarchyLevel)) {
+      return { stopReason: StopReason.DID_NOT_PICK_HIERARCHY_LEVEL };
+    } else {
+      return { hierarchyLevel };
+    }
   }
 
   static promptUserToPickPatternsFromCandidates(
     labeledCandidates: SchemaCandidate[]
-  ): Promise<readonly SchemaCandidate[]> {
+  ): Promise<PatternsFromCandidateRes> {
+    let hasResolved = false;
     return new Promise((resolve) => {
       // There are limitations with .showQuickPick() for our use case (like checking/unchecking items)
       // hence we are using lower level createQuickPick().
@@ -250,9 +282,25 @@ export class UserQueries {
 
         prevSelected = quickPick.selectedItems;
       });
-      quickPick.onDidHide(() => quickPick.dispose());
+      quickPick.onDidHide(() => {
+        if (!hasResolved) {
+          resolve({ stopReason: StopReason.CANCELLED_PATTERN_SELECTION });
+          hasResolved = true;
+        }
+        quickPick.dispose();
+      });
       quickPick.onDidAccept(() => {
-        resolve(quickPick.selectedItems);
+        if (quickPick.selectedItems.length === 0) {
+          vscode.window.showErrorMessage(
+            `Must select at least one pattern for schema creation.`
+          );
+
+          resolve({ stopReason: StopReason.UNSELECTED_ALL_PATTERNS });
+        } else {
+          resolve({ pickedCandidates: quickPick.selectedItems });
+        }
+
+        hasResolved = true;
         quickPick.hide();
       });
       quickPick.show();
@@ -436,34 +484,42 @@ export class CreateSchemaFromHierarchyCommand extends BasicCommand<
     const vault = PluginVaultUtils.getVaultByNotePath({
       fsPath: currDocumentFSPath,
     });
-    const hierarchyLevel = await UserQueries.promptUserToSelectHierarchyLevel(
+    const hierLvlOpts = await UserQueries.promptUserToSelectHierarchyLevel(
       currDocumentFSPath
     );
-    if (hierarchyLevel === undefined) {
-      // User must have cancelled the command, get out.
-      return;
+    if (hierLvlOpts.hierarchyLevel === undefined) {
+      // User must have cancelled the command or the note was deemed not valid for
+      // schema from hierarchy creation.
+      return { isHappy: false, stopReason: hierLvlOpts.stopReason };
     }
 
-    const candidates = this.getHierarchyCandidates(hierarchyLevel);
-    const pickedCandidates =
+    const candidates = this.getHierarchyCandidates(hierLvlOpts.hierarchyLevel);
+    const patternsOpts =
       await UserQueries.promptUserToPickPatternsFromCandidates(candidates);
+    if (_.isUndefined(patternsOpts.pickedCandidates)) {
+      return { isHappy: false, stopReason: patternsOpts.stopReason };
+    }
 
     const schemaName = await UserQueries.promptUserForSchemaFileName(
-      hierarchyLevel,
+      hierLvlOpts.hierarchyLevel,
       vault
     );
     if (schemaName === undefined || schemaName.length === 0) {
       // User must have cancelled the command, get out.
-      return;
+      return {
+        isHappy: false,
+        stopReason: StopReason.DID_NOT_PICK_SCHEMA_FILE_NAME,
+      };
     }
 
     const uri = getSchemaUri(vault, schemaName);
 
     const commandOpts: CommandOpts = {
-      candidates: pickedCandidates,
+      candidates: patternsOpts.pickedCandidates,
       schemaName,
-      hierarchyLevel,
+      hierarchyLevel: hierLvlOpts.hierarchyLevel,
       uri,
+      isHappy: true,
     };
     return commandOpts;
   }
@@ -522,19 +578,42 @@ export class CreateSchemaFromHierarchyCommand extends BasicCommand<
       });
   }
 
-  async execute({ candidates, hierarchyLevel, uri }: CommandOpts) {
+  async execute({
+    candidates,
+    hierarchyLevel,
+    uri,
+    isHappy,
+  }: CommandOpts): Promise<CommandOutput> {
+    if (!isHappy) {
+      return { successfullyCreated: false };
+    }
+
     const schemaBody = SchemaCreator.makeSchemaBody({
-      candidates,
-      hierarchyLevel,
+      candidates: candidates!,
+      hierarchyLevel: hierarchyLevel!,
     });
 
-    fs.writeFileSync(uri.fsPath, schemaBody);
+    fs.writeFileSync(uri!.fsPath, schemaBody);
 
     await SchemaSyncService.instance().saveSchema({
-      uri,
+      uri: uri!,
       isBrandNewFile: true,
     });
 
-    await VSCodeUtils.openFileInEditor(uri);
+    await VSCodeUtils.openFileInEditor(uri!);
+    return { successfullyCreated: true };
+  }
+
+  addAnalyticsPayload(opts?: CommandOpts, out?: CommandOutput): any {
+    if (out && out.successfullyCreated) {
+      return { successfullyCreated: true };
+    } else if (opts && opts.stopReason) {
+      return {
+        stopReason: opts.stopReason,
+        successfullyCreated: false,
+      };
+    } else {
+      return { successfullyCreated: false };
+    }
   }
 }

@@ -4,7 +4,13 @@ import minimatch from "minimatch";
 import querystring from "querystring";
 import semver from "semver";
 import { COLORS_LIST } from "./colors";
-import { NoteProps, SEOProps, DVault, DHookDict } from "./types";
+import {
+  NoteProps,
+  SEOProps,
+  DVault,
+  DHookDict,
+  DendronSiteConfig,
+} from "./types";
 import { TaskConfig } from "./types/configs/workspace/task";
 import {
   DendronCommandConfig,
@@ -18,6 +24,7 @@ import {
   StrictConfigV4,
   NoteLookupConfig,
   genDefaultPreviewConfig,
+  DendronPreviewConfig,
 } from "./types/intermediateConfigs";
 
 /**
@@ -274,22 +281,10 @@ export type NonOptional<T, K extends keyof T> = Pick<Required<T>, K> &
   Omit<T, K>;
 
 export class ConfigUtils {
-  static usePrettyRef(config: IntermediateDendronConfig) {
-    let usePrettyRefs: boolean | undefined = _.find(
-      [config?.usePrettyRefs, config?.site?.usePrettyRefs],
-      (ent) => !_.isUndefined(ent)
-    );
-    if (_.isUndefined(usePrettyRefs)) {
-      usePrettyRefs = true;
-    }
-    return usePrettyRefs;
-  }
-
   static genDefaultConfig(): StrictConfigV4 {
     const common = {
       useFMTitle: true,
       useNoteTitleForLink: true,
-      noLegacyNoteRef: true,
       mermaid: true,
       useKatex: true,
       usePrettyRefs: true,
@@ -335,6 +330,14 @@ export class ConfigUtils {
     config: IntermediateDendronConfig
   ): DendronWorkspaceConfig {
     return ConfigUtils.getProp(config, "workspace");
+  }
+
+  static getPreview(config: IntermediateDendronConfig): DendronPreviewConfig {
+    return ConfigUtils.getProp(config, "preview");
+  }
+
+  static getSite(config: IntermediateDendronConfig): DendronSiteConfig {
+    return ConfigUtils.getProp(config, "site");
   }
 
   static getVaults(config: IntermediateDendronConfig): DVault[] {

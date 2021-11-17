@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "GPLv3",
   "scripts": {
-    "watch": "ecno nop",
+    "watch": "echo nop",
     "build": "node scripts/buildStyles.js"
   }
 }

@@ -7,7 +7,6 @@ export type DendronGlobalConfig = {
   hierarchyDisplayTitle?: string; // TODO: split
   enableNoteTitleForLink: boolean; // TODO: split
   enableMermaid: boolean; // TODO: split
-  enableNunjucks: boolean; // TODO: split
   enablePrettyRefs: boolean; // TODO: split
   enableKatex: boolean; // TODO: split
 };
@@ -24,7 +23,6 @@ export function genDefaultGlobalConfig(): DendronGlobalConfig {
     enableNoteTitleForLink: true, // TODO: split
     enableMermaid: true,
     enableKatex: true,
-    enableNunjucks: false,
     enablePrettyRefs: true,
   };
 }

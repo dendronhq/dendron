@@ -99,7 +99,6 @@ export const PUBLISHING: DendronConfigEntryCollection<DendronPublishingConfig> =
     hierarchyDisplayTitle: HIERARCHY_DISPLAY_TITLE("publishing"),
     enableNoteTitleForLink: ENABLE_NOTE_TITLE_FOR_LINK("publishing"),
     enableMermaid: ENABLE_MERMAID("publishing"),
-    enableNunjucks: ENABLE_NUNJUCKS("publishing"),
     enablePrettyRefs: ENABLE_PRETTY_REFS("publishing"),
     enableKatex: ENABLE_KATEX("publishing"),
     assetsPrefix: {

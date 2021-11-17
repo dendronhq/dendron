@@ -14,15 +14,6 @@ export const ENABLE_MERMAID = (
   };
 };
 
-export const ENABLE_NUNJUCKS = (
-  namespace: TopLevelDendronConfig
-): DendronConfigEntry => {
-  return {
-    label: `Enable Nunjucks (${namespace})`,
-    desc: `Enable the use of nunjucks templates in the note body. (${namespace})`,
-  };
-};
-
 export const ENABLE_PRETTY_REFS = (
   namespace: TopLevelDendronConfig
 ): DendronConfigEntry => {
@@ -83,7 +74,6 @@ export const GLOBAL: DendronConfigEntryCollection<DendronGlobalConfig> = {
   hierarchyDisplayTitle: HIERARCHY_DISPLAY_TITLE("global"), //TODO: split
   enableNoteTitleForLink: ENABLE_NOTE_TITLE_FOR_LINK("global"), // TODO: split
   enableMermaid: ENABLE_MERMAID("global"),
-  enableNunjucks: ENABLE_NUNJUCKS("global"),
   enablePrettyRefs: ENABLE_PRETTY_REFS("global"),
   enableKatex: ENABLE_KATEX("global"),
 };

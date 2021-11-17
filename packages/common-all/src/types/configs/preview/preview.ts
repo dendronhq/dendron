@@ -2,14 +2,13 @@
  * Namespace for all preview related configurations
  */
 export type DendronPreviewConfig = {
-  enableFMTitle?: boolean; // TODO: split
-  enableHierarchyDisplay?: boolean; // TODO: split
+  enableFMTitle: boolean; // TODO: split
+  enableHierarchyDisplay: boolean; // TODO: split
   hierarchyDisplayTitle?: string; // TODO: split
-  enableNoteTitleForLink?: boolean; // TODO: split
-  enableMermaid?: boolean;
-  enableNunjucks?: boolean;
-  enablePrettyRefs?: boolean;
-  enableKatex?: boolean;
+  enableNoteTitleForLink: boolean; // TODO: split
+  enableMermaid: boolean;
+  enablePrettyRefs: boolean;
+  enableKatex: boolean;
 };
 
 /**
@@ -17,5 +16,13 @@ export type DendronPreviewConfig = {
  * @returns DendronPreviewConfig
  */
 export function genDefaultPreviewConfig(): DendronPreviewConfig {
-  return {};
+  return {
+    enableFMTitle: true,
+    enableHierarchyDisplay: true,
+    hierarchyDisplayTitle: "Children",
+    enableNoteTitleForLink: true,
+    enableMermaid: true,
+    enablePrettyRefs: true,
+    enableKatex: true,
+  };
 }

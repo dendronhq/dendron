@@ -6,7 +6,6 @@ import {
   ENABLE_FM_TITLE,
   ENABLE_NOTE_TITLE_FOR_LINK,
   ENABLE_MERMAID,
-  ENABLE_NUNJUCKS,
   ENABLE_KATEX,
   ENABLE_PRETTY_REFS,
 } from "./global";
@@ -17,7 +16,6 @@ export const PREVIEW: DendronConfigEntryCollection<DendronPreviewConfig> = {
   hierarchyDisplayTitle: HIERARCHY_DISPLAY_TITLE("preview"), // TODO: split
   enableNoteTitleForLink: ENABLE_NOTE_TITLE_FOR_LINK("preview"), // TODO: split
   enableMermaid: ENABLE_MERMAID("preview"),
-  enableNunjucks: ENABLE_NUNJUCKS("preview"),
   enablePrettyRefs: ENABLE_PRETTY_REFS("preview"),
   enableKatex: ENABLE_KATEX("preview"),
 };

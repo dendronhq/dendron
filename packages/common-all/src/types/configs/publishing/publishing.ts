@@ -11,7 +11,6 @@ export type DendronPublishingConfig = {
   hierarchyDisplayTitle?: string; // TODO: split
   enableNoteTitleForLink?: boolean; // TODO: split
   enableMermaid?: boolean;
-  enableNunjucks?: boolean;
   enablePrettyRefs?: boolean;
   enableKatex?: boolean;
 

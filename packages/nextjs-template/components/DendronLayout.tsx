@@ -1,4 +1,4 @@
-import { Layout, Row, Col, Divider } from "antd";
+import { Layout, Row, Col, Divider, Typography } from "antd";
 import { MenuOutlined } from "@ant-design/icons";
 import * as React from "react";
 import { DENDRON_STYLE_CONSTANTS } from "../styles/constants";
@@ -14,6 +14,8 @@ import DendronNotice from "./DendronNotice";
 import { getStage } from "@dendronhq/common-all";
 
 const { Header, Content, Sider, Footer } = Layout;
+const { Text, Link } = Typography;
+
 const { LAYOUT, HEADER, SIDER } = DENDRON_STYLE_CONSTANTS;
 
 export default function DendronLayout(
@@ -36,43 +38,72 @@ export default function DendronLayout(
         setResponsive(broken);
       }}
       style={{
-        position: "fixed",
+        position: isResponsive ? "fixed" : "sticky",
+        top: `${HEADER.HEIGHT}px`,
         overflow: "auto",
         height: `calc(100vh - ${HEADER.HEIGHT}px)`,
+        isolation: "isolate",
+        zIndex: 1,
       }}
       trigger={null}
     >
-      {isResponsive && (
-        <div style={{ padding: 16 }}>
-          <DendronSearch {...props} />
-        </div>
-      )}
-      <DendronTreeMenu
-        {...props}
-        collapsed={isCollapsed && isResponsive}
-        setCollapsed={setCollapsed}
-      />
+      <div style={{ height: "100%" }}>
+        {isResponsive && (
+          <div style={{ padding: 16 }}>
+            <DendronSearch {...props} />
+          </div>
+        )}
+        <Col
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+            height: "100%",
+          }}
+        >
+          <DendronTreeMenu
+            {...props}
+            collapsed={isCollapsed && isResponsive}
+            setCollapsed={setCollapsed}
+          />
+          <Row gutter={1} style={{ margin: "0 auto", padding: "1rem" }}>
+            <Text>
+              🌱 with{" "}
+              <Link href="https://www.dendron.so/" target="_blank">
+                Dendron 🌲
+              </Link>
+            </Text>
+          </Row>
+        </Col>
+      </div>
     </Sider>
   );
 
   const content = (
     <>
-      <Content
-        className="main-content"
-        role="main"
-        style={{ padding: `0 ${LAYOUT.PADDING}px` }}
-      >
-        <DendronBreadCrumb {...props} />
-        {props.children}
+      <Content className="main-content" role="main">
+        <Layout>
+          <DendronNotice show={getStage() === "dev"}>
+            NOTE: Pages are{" "}
+            <a href="https://wiki.dendron.so/notes/yYMuhi2TmTC63MysmtwqH.html#navigating-pages-is-slow-for-local-preview">
+              dynamically compiled in local preview
+            </a>{" "}
+            and will take a second to load.
+          </DendronNotice>
+        </Layout>
+        <Layout
+          style={{ maxWidth: "1320px", margin: "0 auto", padding: "0 1.5rem" }}
+        >
+          <DendronBreadCrumb {...props} />
+          {props.children}
+        </Layout>
+        <Layout style={{ maxWidth: "1180px" }}>
+          <Divider type="horizontal" />
+          <Footer>
+            <FooterText />
+          </Footer>
+        </Layout>
       </Content>
-      <Divider />
-      <Footer
-        style={{
-          padding: `0 ${LAYOUT.PADDING}px ${LAYOUT.PADDING}px`,
-        }}
-      >
-        <FooterText />
-      </Footer>
     </>
   );
 
@@ -103,85 +134,37 @@ export default function DendronLayout(
           width: "100%",
           borderBottom: "1px solid #d4dadf",
           height: HEADER.HEIGHT,
-          padding: isResponsive ? 0 : `0 ${LAYOUT.PADDING}px 0 2px`,
         }}
       >
         <Row
-          justify="center"
           style={{
-            maxWidth: "992px",
-            justifyContent: "space-between",
             margin: "0 auto",
           }}
+          justify={isResponsive ? "space-between" : undefined}
         >
-          <Col>
+          <Col span={4}>
             <DendronLogoOrTitle />
           </Col>
-          <Col xs={0} sm={20} md={20} lg={19} className="gutter-row">
+          <Col xs={0} sm={0} md={18} lg={{ span: 16 }} className="gutter-row">
             <DendronSearch {...props} />
           </Col>
-          <Col
-            xs={4}
-            sm={4}
-            md={0}
-            lg={0}
-            style={{
-              marginLeft: "4px",
-              display: isResponsive ? "flex" : "none",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <MenuOutlined
-              style={{ fontSize: 24 }}
-              onClick={() => setCollapsed(!isCollapsed)}
-            />
-          </Col>
+          {isResponsive && (
+            <Col xs={4} sm={4} md={0} lg={0}>
+              <MenuOutlined
+                style={{ fontSize: 24 }}
+                onClick={() => setCollapsed(!isCollapsed)}
+              />
+            </Col>
+          )}
         </Row>
       </Header>
       <Layout
-        className="site-layout"
         style={{
           marginTop: 64,
         }}
       >
-        <DendronNotice show={getStage() === "dev"}>
-          NOTE: Pages are{" "}
-          <a href="https://wiki.dendron.so/notes/yYMuhi2TmTC63MysmtwqH.html#navigating-pages-is-slow-for-local-preview">
-            dynamically compiled in local preview
-          </a>{" "}
-          and will take a second to load.
-        </DendronNotice>
-        <Layout className="site-layout" style={{ flexDirection: "row" }}>
-          <Layout
-            className="site-layout-sidebar"
-            style={{
-              flex: "0 0 auto",
-              width: `calc((100% - ${LAYOUT.BREAKPOINTS.lg}) / 2 + ${
-                // eslint-disable-next-line no-nested-ternary
-                isResponsive
-                  ? isCollapsed
-                    ? SIDER.COLLAPSED_WIDTH
-                    : "100%"
-                  : SIDER.WIDTH
-              }px)`,
-              minWidth: isResponsive || isCollapsed ? 0 : SIDER.WIDTH,
-              paddingLeft: `calc((100% - ${LAYOUT.BREAKPOINTS.lg}) / 2)`,
-              // eslint-disable-next-line no-nested-ternary
-            }}
-          >
-            {sidebar}
-          </Layout>
-          <Layout
-            className="side-layout-main"
-            style={{
-              maxWidth: LAYOUT.CONTENT_MAX_WIDTH,
-              display: !isCollapsed && isResponsive ? "none" : "initial",
-            }}
-          >
-            {content}
-          </Layout>
-        </Layout>
+        {sidebar}
+        {content}
       </Layout>
     </Layout>
   );

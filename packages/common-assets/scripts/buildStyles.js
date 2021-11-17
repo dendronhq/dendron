@@ -38,6 +38,8 @@ const writeStyles = ({ themeMaps, dest, common }) => {
 
 const buildAll = async () => {
   const cssRoot = path.join("assets", "css");
+  // everything that belongs to the top of the directory
+  const topRoot = path.join("assets", "top");
   const dstRoots = [path.join("build", "assets", "css")];
 
   // --- Read
@@ -60,5 +62,8 @@ const buildAll = async () => {
       writeStyles({ themeMaps, common: [], dest: dstRoot });
     })
   );
+
+  // --- Other
+  fs.copySync(topRoot, path.join("build", "top"));
 };
 buildAll();

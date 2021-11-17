@@ -18,7 +18,7 @@
     "postbuild": "next-sitemap --config sitemap.js",
     "cypress:open": "cypress open",
     "cypress:run": "cypress run",
-    "clean": "yarn rimraf public data out node_modules",
+    "clean": "yarn rimraf public data out",
     "rimraf": "npx rimraf"
   },
   "dependencies": {

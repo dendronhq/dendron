@@ -376,24 +376,26 @@ export class BuildUtils {
 
   static async syncStaticAssetsToNextjsTemplate() {
     // all assets are stored here
-    const commonAssetsRoot = path.join(
+    const commonAssetsBuildRoot = path.join(
       this.getLernaRoot(),
       "packages",
       "common-assets",
-      "build",
-      "assets"
+      "build"
     );
     // destination for assets
-    const templateAssetPath = path.join(
+    const templatePublicPath = path.join(
       this.getLernaRoot(),
       "packages",
       "nextjs-template",
-      "public",
-      "assets-dendron"
+      "public"
     );
+    const templateAssetPath = path.join(templatePublicPath, "assets-dendron");
+
+    // copy files
     fs.ensureDirSync(templateAssetPath);
     fs.emptyDirSync(templateAssetPath);
-    fs.copySync(path.join(commonAssetsRoot), templateAssetPath);
+    fs.copySync(path.join(commonAssetsBuildRoot, "assets"), templateAssetPath);
+    fs.copySync(path.join(commonAssetsBuildRoot, "top"), templatePublicPath);
   }
 
   static removeDevDepsFromPkgJson({

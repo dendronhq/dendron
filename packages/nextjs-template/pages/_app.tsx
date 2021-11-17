@@ -20,8 +20,8 @@ import { getAssetUrl } from "../utils/links";
 import { NoteData } from "../utils/types";
 
 const themes = {
-  dark: getAssetUrl(`/dark-theme.css`),
-  light: getAssetUrl(`/light-theme.css`),
+  dark: getAssetUrl(`/assets-dendron/css/dark.css`),
+  light: getAssetUrl(`/assets-dendron/css/light.css`),
 };
 
 function AppContainer(appProps: AppProps) {

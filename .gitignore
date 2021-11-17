@@ -30,4 +30,4 @@ dendron.server.log.old
 test-workspace-*-profile
 dendron-main.code-workspace
 pkgjson.code-search
-**/assets-dendron
+packages/nextjs-template/public

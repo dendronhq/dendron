@@ -1,110 +1,110 @@
 {
-    "folders": [
-        {
-            "path": ".",
-            "name": "root"
-        },
-        {
-            "path": "packages/common-all"
-        },
-        {
-            "path": "packages/dendron-11ty"
-        },
-        {
-            "path": "packages/common-server"
-        },
-        {
-            "path": "packages/common-frontend"
-        },
-        {
-            "path": "packages/plugin-core"
-        },
-        {
-            "path": "packages/engine-server"
-        },
-        {
-            "path": "packages/dendron-cli"
-        },
-        {
-            "path": "packages/pods-core"
-        },
-        {
-            "path": "packages/dendron-cli"
-        },
-        {
-            "path": "packages/api-server"
-        },
-        {
-            "path": "packages/express-client"
-        },
-        {
-            "path": "packages/common-test-utils"
-        },
-        {
-            "path": "packages/engine-test-utils"
-        },
-        {
-            "path": "packages/dendron-next-server"
-        },
-        {
-            "path": "packages/nextjs-template"
-        },
-        {
-            "path": "packages/dendron-plugin-views"
-        },
-        {
-            "path": "bootstrap"
-        },
-        {
-            "path": "fixtures"
-        },
-        {
-            "path": "test-workspace"
-        },
-        {
-            "path": "docs"
-        },
-    ],
-    "settings": {
-        "files.exclude": {
-            "*.d.ts": true,
-            "profile": true
-        },
-        "editor.codeActionsOnSave": {
-          },
-        "search.exclude": {
-            "**/node_modules": true,
-            "**/bower_components": true,
-            "CHANGELOG.md": true,
-            "*.d.ts": true,
-        },
-        "files.watcherExclude": {
-            "**/.git/objects/**": true,
-            "**/.git/subtree-cache/**": true,
-            "**/node_modules/**": true,
-            "**/.hg/store/**": true,
-            "**/*.js": true
-        },
-        "editor.formatOnSave": true,
-        "workbench.editor.showTabs": true,
-        "editor.snippetSuggestions": "none",
-        "editor.defaultFormatter": "esbenp.prettier-vscode",
-        "liveFrame.url": "http://localhost:3000/proto",
-        "[typescript]": {
-            "editor.defaultFormatter": "esbenp.prettier-vscode"
-        },
-        "editor.tabSize": 2,
-        "dendron.rootDir": ".",
-        "files.autoSave": "off",
-        "pasteImage.path": "${currentFileDir}/assets/images",
-        "pasteImage.prefix": "/",
-        "editor.suggest.snippetsPreventQuickSuggestions": false,
-        "editor.suggest.showSnippets": true,
-        "editor.tabCompletion": "on",
+  "folders": [
+    {
+      "path": ".",
+      "name": "root"
     },
-    "extensions": {
-        "recommendations": [
-            "esbenp.prettier-vscode"
-        ]
+    {
+      "path": "packages/common-all"
+    },
+    {
+      "path": "packages/dendron-11ty"
+    },
+    {
+      "path": "packages/common-server"
+    },
+    {
+      "path": "packages/common-frontend"
+    },
+    {
+      "path": "packages/common-assets"
+    },
+    {
+      "path": "packages/plugin-core"
+    },
+    {
+      "path": "packages/engine-server"
+    },
+    {
+      "path": "packages/dendron-cli"
+    },
+    {
+      "path": "packages/pods-core"
+    },
+    {
+      "path": "packages/dendron-cli"
+    },
+    {
+      "path": "packages/api-server"
+    },
+    {
+      "path": "packages/express-client"
+    },
+    {
+      "path": "packages/common-test-utils"
+    },
+    {
+      "path": "packages/engine-test-utils"
+    },
+    {
+      "path": "packages/dendron-next-server"
+    },
+    {
+      "path": "packages/nextjs-template"
+    },
+    {
+      "path": "packages/dendron-plugin-views"
+    },
+    {
+      "path": "bootstrap"
+    },
+    {
+      "path": "fixtures"
+    },
+    {
+      "path": "test-workspace"
+    },
+    {
+      "path": "docs"
     }
+  ],
+  "settings": {
+    "files.exclude": {
+      "*.d.ts": true,
+      "profile": true
+    },
+    "editor.codeActionsOnSave": {},
+    "search.exclude": {
+      "**/node_modules": true,
+      "**/bower_components": true,
+      "CHANGELOG.md": true,
+      "*.d.ts": true
+    },
+    "files.watcherExclude": {
+      "**/.git/objects/**": true,
+      "**/.git/subtree-cache/**": true,
+      "**/node_modules/**": true,
+      "**/.hg/store/**": true,
+      "**/*.js": true
+    },
+    "editor.formatOnSave": true,
+    "workbench.editor.showTabs": true,
+    "editor.snippetSuggestions": "none",
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "liveFrame.url": "http://localhost:3000/proto",
+    "[typescript]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "editor.tabSize": 2,
+    "dendron.rootDir": ".",
+    "files.autoSave": "off",
+    "pasteImage.path": "${currentFileDir}/assets/images",
+    "pasteImage.prefix": "/",
+    "editor.suggest.snippetsPreventQuickSuggestions": false,
+    "editor.suggest.showSnippets": true,
+    "editor.tabCompletion": "on"
+  },
+  "extensions": {
+    "recommendations": ["esbenp.prettier-vscode"]
+  }
 }

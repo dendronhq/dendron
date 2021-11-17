@@ -15,8 +15,9 @@ import {
   JournalConfig,
   ScratchConfig,
   LookupConfig,
-  StrictConfigV3,
+  StrictConfigV4,
   NoteLookupConfig,
+  genDefaultPreviewConfig,
 } from "./types/intermediateConfigs";
 
 /**
@@ -272,7 +273,6 @@ export type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
 export type NonOptional<T, K extends keyof T> = Pick<Required<T>, K> &
   Omit<T, K>;
 
-
 export class ConfigUtils {
   static usePrettyRef(config: IntermediateDendronConfig) {
     let usePrettyRefs: boolean | undefined = _.find(
@@ -285,7 +285,7 @@ export class ConfigUtils {
     return usePrettyRefs;
   }
 
-  static genDefaultConfig(): StrictConfigV3 {
+  static genDefaultConfig(): StrictConfigV4 {
     const common = {
       useFMTitle: true,
       useNoteTitleForLink: true,
@@ -309,18 +309,19 @@ export class ConfigUtils {
     };
 
     return {
-      version: 3,
+      version: 4,
       ...common,
       commands: genDefaultCommandConfig(),
       workspace: genDefaultWorkspaceConfig(),
-    } as StrictConfigV3;
+      preview: genDefaultPreviewConfig(),
+    } as StrictConfigV4;
   }
 
   // get
-  static getProp<K extends keyof StrictConfigV3>(
+  static getProp<K extends keyof StrictConfigV4>(
     config: IntermediateDendronConfig,
     key: K
-  ): StrictConfigV3[K] {
+  ): StrictConfigV4[K] {
     const defaultConfig = ConfigUtils.genDefaultConfig();
     const configWithDefaults = _.defaultsDeep(config, defaultConfig);
     return configWithDefaults[key];
@@ -361,10 +362,10 @@ export class ConfigUtils {
   }
 
   // set
-  static setProp<K extends keyof StrictConfigV3>(
+  static setProp<K extends keyof StrictConfigV4>(
     config: IntermediateDendronConfig,
     key: K,
-    value: StrictConfigV3[K]
+    value: StrictConfigV4[K]
   ): void {
     _.set(config, key, value);
   }

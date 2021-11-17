@@ -471,8 +471,11 @@ export class PickerUtilsV2 {
     fname: string;
     vaultSelectionMode?: VaultSelectionMode;
   }): Promise<DVault | undefined> {
+    const { engine } = getDWorkspace();
     const vaultSuggestions = await PickerUtilsV2.getVaultRecommendations({
       vault,
+      vaults: engine.vaults,
+      engine,
       fname,
     });
 
@@ -536,17 +539,21 @@ export class PickerUtilsV2 {
    */
   static async getVaultRecommendations({
     vault,
+    vaults,
+    engine,
     fname,
   }: {
     vault: DVault;
+    vaults: DVault[];
+    engine: DEngineClient;
     fname: string;
   }): Promise<VaultPickerItem[]> {
     let vaultSuggestions: VaultPickerItem[] = [];
 
-    const { engine } = getDWorkspace();
+    // const { engine } = getDWorkspace();
 
     // Only 1 vault, no other options to choose from:
-    if (engine.vaults.length <= 1) {
+    if (vaults.length <= 1) {
       return Array.of({ vault, label: VaultUtils.getName(vault) });
     }
 
@@ -561,7 +568,7 @@ export class PickerUtilsV2 {
     const sortByPathNameFn = (a: DVault, b: DVault) => {
       return a.fsPath <= b.fsPath ? -1 : 1;
     };
-    const allVaults = engine.vaults.sort(sortByPathNameFn);
+    let allVaults = engine.vaults.sort(sortByPathNameFn);
 
     const vaultsWithMatchingHierarchy: VaultPickerItem[] | undefined =
       queryResponse.data
@@ -585,7 +592,7 @@ export class PickerUtilsV2 {
       });
 
       allVaults.forEach((cmpVault) => {
-        if (cmpVault.fsPath !== vault.fsPath) {
+        if (cmpVault !== vault) {
           vaultSuggestions.push({
             vault: cmpVault,
             label: VaultUtils.getName(vault),
@@ -606,6 +613,10 @@ export class PickerUtilsV2 {
         label: VaultUtils.getName(vault),
       });
 
+      // remove from allVaults the one we already pushed.
+      allVaults = _.filter(allVaults, (v) => {
+        return !_.isEqual(v, vault);
+      });
       vaultsWithMatchingHierarchy.forEach((ent) => {
         if (
           !vaultSuggestions.find(
@@ -617,20 +628,19 @@ export class PickerUtilsV2 {
             detail: HIERARCHY_MATCH_DETAIL,
             label: VaultUtils.getName(ent.vault),
           });
+          // remove from allVaults the one we already pushed.
+          allVaults = _.filter(allVaults, (v) => {
+            return !_.isEqual(v, ent.vault);
+          });
         }
       });
 
+      // push the rest of the vaults
       allVaults.forEach((wsVault) => {
-        if (
-          !vaultSuggestions.find(
-            (suggestion) => suggestion.vault.fsPath === wsVault.fsPath
-          )
-        ) {
-          vaultSuggestions.push({
-            vault: wsVault,
-            label: VaultUtils.getName(wsVault),
-          });
-        }
+        vaultSuggestions.push({
+          vault: wsVault,
+          label: VaultUtils.getName(wsVault),
+        });
       });
     } else {
       // Suggest vaults with matching hierarchy, THEN current note context, THEN any other vaults
@@ -641,17 +651,15 @@ export class PickerUtilsV2 {
         label: VaultUtils.getName(vault),
       });
 
+      allVaults = _.filter(allVaults, (v) => {
+        return !_.isEqual(v, vault);
+      });
+
       allVaults.forEach((wsVault) => {
-        if (
-          !vaultSuggestions.find(
-            (suggestion) => suggestion.vault.fsPath === wsVault.fsPath
-          )
-        ) {
-          vaultSuggestions.push({
-            vault: wsVault,
-            label: VaultUtils.getName(wsVault),
-          });
-        }
+        vaultSuggestions.push({
+          vault: wsVault,
+          label: VaultUtils.getName(wsVault),
+        });
       });
     }
 

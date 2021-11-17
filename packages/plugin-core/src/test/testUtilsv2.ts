@@ -464,10 +464,33 @@ export const stubWorkspace = ({ wsRoot, vaults }: WorkspaceOpts) => {
   stubWorkspaceFolders(wsRoot, vaults);
 };
 
+function safeStringify(obj: any) {
+  try {
+    return JSON.stringify(obj);
+  } catch (err) {
+    return `failed_to_stringify_obj`;
+  }
+}
+
 export function expect(value: any) {
   return {
+    /**
+     * NOTE: This method currently only works for checking object properties.
+     *
+     * Such as:
+     * var object = { 'user': 'fred', 'age': 40 };
+     * _.isMatch(object, { 'age': 40 });
+     * // => true
+     * _.isMatch(object, { 'age': 36 });
+     * // => false
+     * */
     toContain: (value2: any) => {
-      return _.isMatch(value, value2);
+      assert.ok(
+        _.isMatch(value, value2),
+        `Object:'${safeStringify(value)}' does NOT contain: '${safeStringify(
+          value2
+        )}'`
+      );
     },
     toEqual: (value2: any) => {
       assert.deepStrictEqual(value, value2);

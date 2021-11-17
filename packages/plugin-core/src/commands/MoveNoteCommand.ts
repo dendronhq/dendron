@@ -126,6 +126,7 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
             event.data as NoteLookupProviderSuccessResp<OldNewLocation>;
           if (data.cancel) {
             resolve(undefined);
+            return;
           }
           const opts: CommandOpts = {
             moves: this.getDesiredMoves(data),

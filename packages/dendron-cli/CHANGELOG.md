@@ -3,6 +3,188 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.69.1](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.69.1) (2021-11-16)
+
+
+### Bug Fixes
+
+* **publish:** make 11ty publishing compatible with config version 3 ([#1556](https://github.com/dendronhq/dendron/issues/1556)) ([bc76028](https://github.com/dendronhq/dendron/commit/bc760288b757375eef1c787541b31097e86842be))
+* **publish:** remove .next dir if it exists in publish init ([#1548](https://github.com/dendronhq/dendron/issues/1548)) ([3ffd87a](https://github.com/dendronhq/dendron/commit/3ffd87a606d2251991319e81ba7292989dac427f))
+
+
+### Features Dendron
+
+* **publish:** add `dendron publish dev` command ([4be800b](https://github.com/dendronhq/dendron/commit/4be800bdba6c11e1f69fc49212406f86d4d3bd1e))
+* **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
+* **workspace:** convert vault command ([#1542](https://github.com/dendronhq/dendron/issues/1542)) ([c265e9d](https://github.com/dendronhq/dendron/commit/c265e9d2c238b5a6b3761f4c073140b1a0debe3a))
+
+
+
+## 0.62.3 (2021-10-09)
+
+
+
+# 0.61.0 (2021-09-28)
+
+
+### Bug Fixes
+
+* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
+
+
+
+## 0.60.2 (2021-09-25)
+
+
+
+## 0.60.2-alpha.0 (2021-09-24)
+
+
+
+## 0.60.1 (2021-09-24)
+
+
+### Features Dendron
+
+* **cli:** initialize workspace from CLI ([31a734d](https://github.com/dendronhq/dendron/commit/31a734dbd48c2a75bdb85a1e2e299d4b77311d65))
+
+
+
+# 0.60.0 (2021-09-21)
+
+
+### Bug Fixes
+
+* **publish:** add force close timeout ([ebbe51f](https://github.com/dendronhq/dendron/commit/ebbe51f0aad37e5ecf4b319405e6c719f1e14dc5))
+* **publish:** dangling connection when publishing via 11ty using github action ([c08117d](https://github.com/dendronhq/dendron/commit/c08117dd41fe250b6aa9f29f1b61879a7f9b56ce))
+* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
+* issue with webpack devCLI ([a4ff4c9](https://github.com/dendronhq/dendron/commit/a4ff4c9ae28ff31ab6f9483c339ae78b5144e185))
+
+
+### Features Dendron
+
+* dendron publishing with nextjs commands ([#1266](https://github.com/dendronhq/dendron/issues/1266)) ([fb90e98](https://github.com/dendronhq/dendron/commit/fb90e98999c1073b58480eb7364f6a70e31a6903))
+* seed browser initial revision ([#1166](https://github.com/dendronhq/dendron/issues/1166)) ([588fba0](https://github.com/dendronhq/dendron/commit/588fba05bbd9e3dabadd5e02d9fde72d80ed8148))
+
+
+
+## 0.55.2 (2021-08-21)
+
+
+
+## 0.55.1 (2021-08-17)
+
+
+
+## 0.54.1 (2021-08-13)
+
+
+### Bug Fixes
+
+* add new vaults from CLI to code workspace ([#1094](https://github.com/dendronhq/dendron/issues/1094)) ([2cde108](https://github.com/dendronhq/dendron/commit/2cde108b4c88a5c9d13b8eb6370f69879d6c9a62))
+* Doctor `regenerateNoteId` action error ([#1097](https://github.com/dendronhq/dendron/issues/1097)) ([f0480c7](https://github.com/dendronhq/dendron/commit/f0480c7306eb07a2d40ea2b4278757d6c8dd26bb))
+
+
+### Features Dendron
+
+* generate json schema from config ([#1100](https://github.com/dendronhq/dendron/issues/1100)) ([53b189e](https://github.com/dendronhq/dendron/commit/53b189ec973a8d3d3ccf300a0e59908197f4efb1))
+* seed cmds in plugin ([#1080](https://github.com/dendronhq/dendron/issues/1080)) ([e07a092](https://github.com/dendronhq/dendron/commit/e07a092b1a75548574f2ea45f1b465490b2091f3))
+
+
+
+
+
+# [0.69.0](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.69.0) (2021-11-16)
+
+
+### Bug Fixes
+
+* **publish:** make 11ty publishing compatible with config version 3 ([#1556](https://github.com/dendronhq/dendron/issues/1556)) ([bc76028](https://github.com/dendronhq/dendron/commit/bc760288b757375eef1c787541b31097e86842be))
+* **publish:** remove .next dir if it exists in publish init ([#1548](https://github.com/dendronhq/dendron/issues/1548)) ([3ffd87a](https://github.com/dendronhq/dendron/commit/3ffd87a606d2251991319e81ba7292989dac427f))
+
+
+### Features Dendron
+
+* **publish:** add `dendron publish dev` command ([4be800b](https://github.com/dendronhq/dendron/commit/4be800bdba6c11e1f69fc49212406f86d4d3bd1e))
+* **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
+* **workspace:** convert vault command ([#1542](https://github.com/dendronhq/dendron/issues/1542)) ([c265e9d](https://github.com/dendronhq/dendron/commit/c265e9d2c238b5a6b3761f4c073140b1a0debe3a))
+
+
+
+## 0.62.3 (2021-10-09)
+
+
+
+# 0.61.0 (2021-09-28)
+
+
+### Bug Fixes
+
+* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
+
+
+
+## 0.60.2 (2021-09-25)
+
+
+
+## 0.60.2-alpha.0 (2021-09-24)
+
+
+
+## 0.60.1 (2021-09-24)
+
+
+### Features Dendron
+
+* **cli:** initialize workspace from CLI ([31a734d](https://github.com/dendronhq/dendron/commit/31a734dbd48c2a75bdb85a1e2e299d4b77311d65))
+
+
+
+# 0.60.0 (2021-09-21)
+
+
+### Bug Fixes
+
+* **publish:** add force close timeout ([ebbe51f](https://github.com/dendronhq/dendron/commit/ebbe51f0aad37e5ecf4b319405e6c719f1e14dc5))
+* **publish:** dangling connection when publishing via 11ty using github action ([c08117d](https://github.com/dendronhq/dendron/commit/c08117dd41fe250b6aa9f29f1b61879a7f9b56ce))
+* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
+* issue with webpack devCLI ([a4ff4c9](https://github.com/dendronhq/dendron/commit/a4ff4c9ae28ff31ab6f9483c339ae78b5144e185))
+
+
+### Features Dendron
+
+* dendron publishing with nextjs commands ([#1266](https://github.com/dendronhq/dendron/issues/1266)) ([fb90e98](https://github.com/dendronhq/dendron/commit/fb90e98999c1073b58480eb7364f6a70e31a6903))
+* seed browser initial revision ([#1166](https://github.com/dendronhq/dendron/issues/1166)) ([588fba0](https://github.com/dendronhq/dendron/commit/588fba05bbd9e3dabadd5e02d9fde72d80ed8148))
+
+
+
+## 0.55.2 (2021-08-21)
+
+
+
+## 0.55.1 (2021-08-17)
+
+
+
+## 0.54.1 (2021-08-13)
+
+
+### Bug Fixes
+
+* add new vaults from CLI to code workspace ([#1094](https://github.com/dendronhq/dendron/issues/1094)) ([2cde108](https://github.com/dendronhq/dendron/commit/2cde108b4c88a5c9d13b8eb6370f69879d6c9a62))
+* Doctor `regenerateNoteId` action error ([#1097](https://github.com/dendronhq/dendron/issues/1097)) ([f0480c7](https://github.com/dendronhq/dendron/commit/f0480c7306eb07a2d40ea2b4278757d6c8dd26bb))
+
+
+### Features Dendron
+
+* generate json schema from config ([#1100](https://github.com/dendronhq/dendron/issues/1100)) ([53b189e](https://github.com/dendronhq/dendron/commit/53b189ec973a8d3d3ccf300a0e59908197f4efb1))
+* seed cmds in plugin ([#1080](https://github.com/dendronhq/dendron/issues/1080)) ([e07a092](https://github.com/dendronhq/dendron/commit/e07a092b1a75548574f2ea45f1b465490b2091f3))
+
+
+
+
+
 ## [0.68.2](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.68.2) (2021-11-12)
 
 

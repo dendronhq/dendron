@@ -238,6 +238,32 @@ suite("CopyNoteLink", function () {
         },
       });
     });
+
+    test("tag note", (done) => {
+      let noteWithLink: NoteProps;
+      runSingleVaultTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          noteWithLink = await NoteTestUtilsV4.createNote({
+            fname: "tags.foo.bar",
+            vault: vaults[0],
+            wsRoot,
+            body: "## [[Foo Bar|foo.bar]]",
+          });
+        },
+        onInit: async () => {
+          // Open and select the header
+          const editor = await VSCodeUtils.openNote(noteWithLink);
+          const start = LocationTestUtils.getPresetWikiLinkPosition();
+          const end = LocationTestUtils.getPresetWikiLinkPosition({ char: 10 });
+          editor.selection = new vscode.Selection(start, end);
+          // generate a wikilink for it
+          const link = await new CopyNoteLinkCommand().run();
+          expect(link).toEqual(`#foo.bar`);
+          done();
+        },
+      });
+    });
   });
 
   function getAnchorFromLink(link: string): string {

@@ -52,7 +52,7 @@ suite(DENDRON_COMMANDS.SEED_ADD.key, function seedAddTests() {
         const resp = await cmd.execute({ seedId: id });
         expect(resp.error).toBeFalsy();
         expect(resp.data?.seed.name).toEqual("foo");
-        expect(resp.data?.seedPath).toContain("dendron.foo");
+        expect(resp.data?.seedPath?.includes("dendron.foo")).toBeTruthy();
 
         expect(fakedOnUpdating.callCount).toEqual(1);
         expect(fakedOnUpdated.callCount).toEqual(1);

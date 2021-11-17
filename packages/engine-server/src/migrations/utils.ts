@@ -12,6 +12,10 @@ type mappedConfigPath = {
    * if undefined, identity mapping is assumed (_.identity)
    */
   iteratee?: Function | "skip";
+  /**
+   * Set to true to mark that legacy path should be preserved.
+   */
+  preserve?: boolean;
 };
 
 /**
@@ -67,6 +71,10 @@ export const PATH_MAP = new Map<string, mappedConfigPath>([
     { target: "lookupConfirmVaultOnCreate" },
   ],
   ["commands.lookup.note.leaveTrace", { target: "lookup.note.leaveTrace" }],
+  [
+    "commands.lookup.note.bubbleUpCreateNew",
+    { target: "lookupDontBubbleUpCreateNew", iteratee: FLIP },
+  ],
 
   // insertNote namespace
   ["commands.insertNote.initialValue", { target: "defaultInsertHierarchy" }],
@@ -132,7 +140,32 @@ export const PATH_MAP = new Map<string, mappedConfigPath>([
   ["workspace.maxNoteLength", { target: "maxNoteLength" }],
   ["workspace.feedback", { target: "feedback" }],
   ["workspace.apiEndpoint", { target: "apiEndpoint" }],
+
+  // preview namespace
+  ["preview.enableFMTitle", { target: "useFMTitle", preserve: true }],
+  [
+    "preview.enableHierarchyDisplay",
+    { target: "hierarchyDisplay", preserve: true },
+  ],
+  [
+    "preview.hierarchyDisplayTitle",
+    { target: "hierarchyDisplayTitle", preserve: true },
+  ],
+  [
+    "preview.enableNoteTitleForLink",
+    { target: "useNoteTitleForLink", preserve: true },
+  ],
+  ["preview.enableMermaid", { target: "mermaid", preserve: true }],
+  ["preview.enablePrettyRefs", { target: "usePrettyRefs", preserve: true }],
+  ["preview.enableKatex", { target: "useKatex", preserve: true }],
 ]);
+
+/**
+ * List of config paths that are deprecated
+ * and should be checked for existence
+ * and deleted from `dendron.yml`
+ */
+export const DEPRECATED_PATHS = ["useNunjucks", "noLegacyNoteRef"];
 
 export class MigrationUtils {
   /**

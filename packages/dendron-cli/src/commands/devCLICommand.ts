@@ -364,6 +364,11 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     this.L.info("done");
   }
 
+  /**
+   * Takes assets from different monorepo packages and copies them over to the plugin
+   * @param param0
+   * @returns
+   */
   async syncAssets({ fast }: { fast?: boolean }) {
     if (!fast) {
       this.print("build next server for prod...");

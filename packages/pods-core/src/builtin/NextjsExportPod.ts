@@ -221,26 +221,33 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     fs.ensureDirSync(destPublicPath);
     const siteAssetsDir = path.join(destPublicPath, "assets");
     const siteConfig = config.site;
-    // copy site assets
+
+    // if copyAssets not set, skip it
     if (!config.site.copyAssets) {
       this.L.info({ ctx, msg: "skip copying" });
       return;
     }
+
+    // if we are copying assets, delete existing assets folder if it exists
+    if (fs.existsSync(siteAssetsDir)) {
+      fs.removeSync(siteAssetsDir);
+    }
+
     this.L.info({ ctx, msg: "copying", vaults });
-    let deleteSiteAssetsDir = true;
     await vaults.reduce(async (resp, vault) => {
       await resp;
       if (vault.visibility === "private") {
+        // eslint-disable-next-line no-console
         console.log(`skipping copy assets from private vault ${vault.fsPath}`);
         return Promise.resolve({});
       }
+      // copy assets from each vauulut to assets folder of destination
       await SiteUtils.copyAssets({
         wsRoot,
         vault,
         siteAssetsDir,
-        deleteSiteAssetsDir,
+        deleteSiteAssetsDir: false,
       });
-      deleteSiteAssetsDir = false;
       return Promise.resolve({});
     }, Promise.resolve({}));
 

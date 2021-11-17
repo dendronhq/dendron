@@ -341,7 +341,6 @@ export class BuildUtils {
     // destination for assets
     const pluginAssetPath = path.join(this.getPluginRootPath(), "assets");
     const pluginStaticPath = path.join(pluginAssetPath, "static");
-    const apiRoot = path.join(this.getLernaRoot(), "packages", "api-server");
     const nextServerRoot = this.getNextServerRootPath();
     const pluginViewsRoot = path.join(
       this.getLernaRoot(),
@@ -352,16 +351,18 @@ export class BuildUtils {
     fs.ensureDirSync(pluginStaticPath);
     fs.emptyDirSync(pluginStaticPath);
 
+    // copy over common assets
+    fs.copySync(path.join(commonAssetsRoot, "assets", "css"), pluginStaticPath);
+
+    // copy assets from next server
+    // DEPRECATED
     fs.copySync(path.join(nextServerRoot, "out"), pluginStaticPath);
     fs.copySync(
       path.join(this.getNextServerRootPath(), "assets", "js"),
       path.join(pluginStaticPath, "js")
     );
 
-    // copy over common assets
-    fs.copySync(path.join(commonAssetsRoot, "assets", "css"), pluginStaticPath);
-
-    // plugin view assets
+    // copy assets from plugin view
     fs.copySync(
       path.join(pluginViewsRoot, "build", "static", "css"),
       path.join(pluginStaticPath, "css")

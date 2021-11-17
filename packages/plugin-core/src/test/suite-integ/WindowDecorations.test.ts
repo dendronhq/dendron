@@ -272,7 +272,7 @@ suite("windowDecorations", function () {
             "[ ]"
           );
           expect(taskDecorations[2].renderOptions?.after?.contentText).toEqual(
-            "prio:low"
+            "priority:low"
           );
 
           done();

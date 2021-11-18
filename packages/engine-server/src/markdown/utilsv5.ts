@@ -339,35 +339,33 @@ export class MDUtilsV5 {
           }
           // add additional plugins
           const isNoteRef = !_.isUndefined((data as ProcDataFullV5).noteRefLvl);
-          let shouldInsertTitle;
+          let insertTitle;
           if (isNoteRef) {
-            shouldInsertTitle = false;
+            insertTitle = false;
           } else {
             const config = data.config as IntermediateDendronConfig;
-            shouldInsertTitle = ProcFlavor.PREVIEW
-              ? ConfigUtils.getPreview(config).enableFMTitle
-              : ConfigUtils.getProp(config, "useFMTitle");
+            const shouldApplyPublishRules =
+              MDUtilsV5.shouldApplyPublishingRules(proc);
+            insertTitle = ConfigUtils.getEnableFMTitle(
+              config,
+              shouldApplyPublishRules
+            );
           }
 
           proc = proc.use(dendronPub, {
-            insertTitle: shouldInsertTitle,
+            insertTitle,
             transformNoPublish: opts.flavor === ProcFlavor.PUBLISHING,
           });
 
           const config = data.config as IntermediateDendronConfig;
-          const enableKatex = MDUtilsV5.shouldApplyPublishingRules(proc)
-            ? ConfigUtils.getProp(config, "useKatex")
-            : ConfigUtils.getPreview(config).enableKatex;
+          const shouldApplyPublishRules =
+            MDUtilsV5.shouldApplyPublishingRules(proc);
 
-          if (enableKatex) {
+          if (ConfigUtils.getEnableKatex(config, shouldApplyPublishRules)) {
             proc = proc.use(math);
           }
 
-          const enableMermaid = MDUtilsV5.shouldApplyPublishingRules(proc)
-            ? ConfigUtils.getProp(config, "mermaid")
-            : ConfigUtils.getPreview(config).enableMermaid;
-
-          if (enableMermaid) {
+          if (ConfigUtils.getEnableMermaid(config, shouldApplyPublishRules)) {
             proc = proc.use(mermaid, { simple: true });
           }
           // Add remaining flavor specific plugins
@@ -408,19 +406,14 @@ export class MDUtilsV5 {
 
         // add additional plugins
         const config = data.config as IntermediateDendronConfig;
-        const enableKatex = MDUtilsV5.shouldApplyPublishingRules(proc)
-          ? ConfigUtils.getProp(config, "useKatex")
-          : ConfigUtils.getPreview(config).enableKatex;
+        const shouldApplyPublishRules =
+          MDUtilsV5.shouldApplyPublishingRules(proc);
 
-        if (enableKatex) {
+        if (ConfigUtils.getEnableKatex(config, shouldApplyPublishRules)) {
           proc = proc.use(math);
         }
 
-        const enableMermaid = MDUtilsV5.shouldApplyPublishingRules(proc)
-          ? ConfigUtils.getProp(config, "mermaid")
-          : ConfigUtils.getPreview(config).enableMermaid;
-
-        if (enableMermaid) {
+        if (ConfigUtils.getEnableMermaid(config, shouldApplyPublishRules)) {
           proc = proc.use(mermaid, { simple: true });
         }
         break;

@@ -475,9 +475,11 @@ export function convertNoteRefASTV2(
     shouldApplyPublishRules = MDUtilsV5.shouldApplyPublishingRules(proc);
   }
 
-  let prettyRefs = shouldApplyPublishRules
-    ? siteConfig.usePrettyRefs
-    : ConfigUtils.getPreview(config).enablePrettyRefs;
+  let prettyRefs = ConfigUtils.getEnablePrettyRefs(
+    config,
+    shouldApplyPublishRules
+  );
+
   if (
     prettyRefs &&
     _.includes([DendronASTDest.MD_DENDRON, DendronASTDest.MD_REGULAR], dest)
@@ -1055,9 +1057,10 @@ function getTitle(opts: {
 }) {
   const { config, note, loc, shouldApplyPublishRules } = opts;
   const { alias, fname } = loc;
-  const enableNoteTitleForLink = shouldApplyPublishRules
-    ? ConfigUtils.getProp(config, "useNoteTitleForLink")
-    : ConfigUtils.getPreview(config).enableNoteTitleForLink;
+  const enableNoteTitleForLink = ConfigUtils.getEnableNoteTitleForLink(
+    config,
+    shouldApplyPublishRules
+  );
 
   return enableNoteTitleForLink ? note.title : alias || fname || "no title";
 }

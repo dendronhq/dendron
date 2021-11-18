@@ -364,6 +364,51 @@ export class ConfigUtils {
     return ConfigUtils.getCommands(config).lookup;
   }
 
+  static getEnableFMTitle(
+    config: IntermediateDendronConfig,
+    shouldApplyPublishRules?: boolean
+  ): boolean | undefined {
+    return shouldApplyPublishRules
+      ? ConfigUtils.getProp(config, "useFMTitle")
+      : ConfigUtils.getPreview(config).enableFMTitle;
+  }
+
+  static getEnableNoteTitleForLink(
+    config: IntermediateDendronConfig,
+    shouldApplyPublishRules?: boolean
+  ): boolean | undefined {
+    return shouldApplyPublishRules
+      ? ConfigUtils.getProp(config, "useNoteTitleForLink")
+      : ConfigUtils.getPreview(config).enableNoteTitleForLink;
+  }
+
+  static getEnableMermaid(
+    config: IntermediateDendronConfig,
+    shouldApplyPublishRules?: boolean
+  ): boolean | undefined {
+    return shouldApplyPublishRules
+      ? ConfigUtils.getProp(config, "mermaid")
+      : ConfigUtils.getPreview(config).enableMermaid;
+  }
+
+  static getEnableKatex(
+    config: IntermediateDendronConfig,
+    shouldApplyPublishRules?: boolean
+  ): boolean | undefined {
+    return shouldApplyPublishRules
+      ? ConfigUtils.getProp(config, "useKatex")
+      : ConfigUtils.getPreview(config).enableKatex;
+  }
+
+  static getEnablePrettyRefs(
+    config: IntermediateDendronConfig,
+    shouldApplyPublishRules?: boolean
+  ): boolean | undefined {
+    return shouldApplyPublishRules
+      ? ConfigUtils.getSite(config).usePrettyRefs
+      : ConfigUtils.getPreview(config).enablePrettyRefs;
+  }
+
   // set
   static setProp<K extends keyof StrictConfigV4>(
     config: IntermediateDendronConfig,

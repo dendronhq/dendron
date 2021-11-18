@@ -231,9 +231,10 @@ function attachParser(proc: Unified.Processor) {
     }
     const shouldApplyPublishingRules =
       MDUtilsV5.shouldApplyPublishingRules(proc);
-    const enableNoteTitleForLink = shouldApplyPublishingRules
-      ? ConfigUtils.getProp(config, "useNoteTitleForLink")
-      : ConfigUtils.getPreview(config).enableNoteTitleForLink;
+    const enableNoteTitleForLink = ConfigUtils.getEnableNoteTitleForLink(
+      config,
+      shouldApplyPublishingRules
+    );
 
     if (
       dest !== DendronASTDest.MD_DENDRON &&

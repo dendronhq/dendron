@@ -371,14 +371,16 @@ export class MDUtilsV4 {
 
     let usePrettyRefs = opts.usePrettyRefs;
     if (_.isUndefined(usePrettyRefs)) {
-      usePrettyRefs = shouldApplyPublishRules
-        ? ConfigUtils.getSite(config).usePrettyRefs
-        : ConfigUtils.getPreview(config).enablePrettyRefs;
+      usePrettyRefs = ConfigUtils.getEnablePrettyRefs(
+        config,
+        shouldApplyPublishRules
+      );
     }
 
-    const insertTitle = shouldApplyPublishRules
-      ? ConfigUtils.getProp(config, "useFMTitle")
-      : ConfigUtils.getPreview(config).enableFMTitle;
+    const insertTitle = ConfigUtils.getEnableFMTitle(
+      config,
+      shouldApplyPublishRules
+    );
 
     proc = proc
       .data("dendron", {
@@ -408,19 +410,17 @@ export class MDUtilsV4 {
         insertTitle,
       });
 
-    const enableKatex = shouldApplyPublishRules
-      ? ConfigUtils.getProp(config, "useKatex")
-      : ConfigUtils.getPreview(config).enableKatex;
-
-    if (opts.mathOpts?.katex || enableKatex) {
+    if (
+      opts.mathOpts?.katex ||
+      ConfigUtils.getEnableKatex(config, shouldApplyPublishRules)
+    ) {
       proc = proc.use(math);
     }
 
-    const enableMermaid = shouldApplyPublishRules
-      ? ConfigUtils.getProp(config, "mermaid")
-      : ConfigUtils.getPreview(config).enableMermaid;
-
-    if (opts.mermaid || enableMermaid) {
+    if (
+      opts.mermaid ||
+      ConfigUtils.getEnableMermaid(config, shouldApplyPublishRules)
+    ) {
       proc = proc.use(mermaid, { simple: true });
     }
     // MD_DENDRON, convert back to itself, no need for transformations

@@ -183,10 +183,9 @@ suite("Extension", function () {
         });
         const resp = readYAML(path.join(wsRoot, "dendron.yml"));
         expect(resp).toEqual({
-          version: 3,
+          version: 4,
           useFMTitle: true,
           useNoteTitleForLink: true,
-          noLegacyNoteRef: true,
           mermaid: true,
           useKatex: true,
           usePrettyRefs: true,
@@ -213,6 +212,7 @@ suite("Extension", function () {
                 selectionMode: "extract",
                 confirmVaultOnCreate: false,
                 leaveTrace: false,
+                bubbleUpCreateNew: true,
               },
             },
             randomNote: {},
@@ -275,6 +275,13 @@ suite("Extension", function () {
             enableUserTags: true,
             maxPreviewsCached: 10,
             maxNoteLength: 204800,
+          },
+          preview: {
+            enableFMTitle: true,
+            enableNoteTitleForLink: true,
+            enableMermaid: true,
+            enablePrettyRefs: true,
+            enableKatex: true,
           },
         });
 

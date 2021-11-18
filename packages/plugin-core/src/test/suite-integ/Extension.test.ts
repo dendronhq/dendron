@@ -955,15 +955,15 @@ suite("per-init config migration logic", function () {
   });
 
   describeMultiWS(
-    "GIVEN: current version is less than 0.64.1 and config is legacy",
+    "GIVEN: current version is less than 0.69.1 and config is legacy",
     {
       ctx,
       modConfigCb: (config) => {
-        config.version = 2;
+        config.version = 3;
         return config;
       },
       preSetupHook: async ({ wsRoot, vaults }) => {
-        DendronExtension.version = () => "0.63.6";
+        DendronExtension.version = () => "0.69.0";
         ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
       },
     },
@@ -971,7 +971,7 @@ suite("per-init config migration logic", function () {
       test("THEN: config migration is not forced on init", (done) => {
         const ws = getDWorkspace();
         const config = ws.config;
-        expect(config.version).toEqual(2);
+        expect(config.version).toEqual(3);
 
         const allWSRootFiles = fs.readdirSync(ws.wsRoot, {
           withFileTypes: true,
@@ -986,15 +986,15 @@ suite("per-init config migration logic", function () {
   );
 
   describeMultiWS(
-    "GIVEN: current version is 0.64.1 and config is legacy",
+    "GIVEN: current version is 0.69.1 and config is legacy",
     {
       ctx,
       modConfigCb: (config) => {
-        config.version = 2;
+        config.version = 3;
         return config;
       },
       preSetupHook: async ({ wsRoot, vaults }) => {
-        DendronExtension.version = () => "0.64.1";
+        DendronExtension.version = () => "0.69.1";
         ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
       },
     },
@@ -1002,7 +1002,7 @@ suite("per-init config migration logic", function () {
       test("THEN: config migration is forced on init", (done) => {
         const ws = getDWorkspace();
         const config = ws.config;
-        expect(config.version).toEqual(3);
+        expect(config.version).toEqual(4);
 
         const allWSRootFiles = fs.readdirSync(ws.wsRoot, {
           withFileTypes: true,
@@ -1017,15 +1017,15 @@ suite("per-init config migration logic", function () {
   );
 
   describeMultiWS(
-    "GIVEN: current version is 0.64.1 and config is not legacy",
+    "GIVEN: current version is 0.69.1 and config is not legacy",
     {
       ctx,
       modConfigCb: (config) => {
-        config.version = 3;
+        config.version = 4;
         return config;
       },
       preSetupHook: async ({ wsRoot, vaults }) => {
-        DendronExtension.version = () => "0.64.1";
+        DendronExtension.version = () => "0.69.1";
         ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
       },
     },
@@ -1033,7 +1033,7 @@ suite("per-init config migration logic", function () {
       test("THEN: config migration is not forced on init", (done) => {
         const ws = getDWorkspace();
         const config = ws.config;
-        expect(config.version).toEqual(3);
+        expect(config.version).toEqual(4);
 
         const allWSRootFiles = fs.readdirSync(ws.wsRoot, {
           withFileTypes: true,
@@ -1049,15 +1049,15 @@ suite("per-init config migration logic", function () {
   );
 
   describeMultiWS(
-    "GIVEN: current version is larger than 0.64.1 and config is legacy",
+    "GIVEN: current version is larger than 0.69.1 and config is legacy",
     {
       ctx,
       modConfigCb: (config) => {
-        config.version = 2;
+        config.version = 3;
         return config;
       },
       preSetupHook: async ({ wsRoot, vaults }) => {
-        DendronExtension.version = () => "0.64.2";
+        DendronExtension.version = () => "0.69.2";
         ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
       },
     },
@@ -1065,7 +1065,7 @@ suite("per-init config migration logic", function () {
       test("THEN: config migration is forced on init", (done) => {
         const ws = getDWorkspace();
         const config = ws.config;
-        expect(config.version).toEqual(3);
+        expect(config.version).toEqual(4);
 
         const allWSRootFiles = fs.readdirSync(ws.wsRoot, {
           withFileTypes: true,
@@ -1080,15 +1080,15 @@ suite("per-init config migration logic", function () {
   );
 
   describeMultiWS(
-    "GIVEN: current version is larger than 0.64.1 and config is not legacy",
+    "GIVEN: current version is larger than 0.69.1 and config is not legacy",
     {
       ctx,
       modConfigCb: (config) => {
-        config.version = 3;
+        config.version = 4;
         return config;
       },
       preSetupHook: async ({ wsRoot, vaults }) => {
-        DendronExtension.version = () => "0.64.2";
+        DendronExtension.version = () => "0.69.2";
         ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
       },
     },
@@ -1096,7 +1096,7 @@ suite("per-init config migration logic", function () {
       test("THEN: config migration is not forced on init", (done) => {
         const ws = getDWorkspace();
         const config = ws.config;
-        expect(config.version).toEqual(3);
+        expect(config.version).toEqual(4);
 
         const allWSRootFiles = fs.readdirSync(ws.wsRoot, {
           withFileTypes: true,

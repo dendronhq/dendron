@@ -1,3 +1,4 @@
+import { ConfigUtils } from "@dendronhq/common-all";
 import { MDUtilsV4 } from "@dendronhq/engine-server";
 import { TestConfigUtils } from "../../../config";
 import { runEngineTestV5 } from "../../../engine";
@@ -19,8 +20,8 @@ describe("GIVEN procHTMLv4", () => {
               engine,
               vault,
               fname,
-              config: config,
-              mermaid: config.mermaid,
+              config,
+              mermaid: ConfigUtils.getProp(config, "mermaid"),
               noteIndex,
             }).process(`[[an alias|bar]]`);
             await checkString(

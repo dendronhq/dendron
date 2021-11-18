@@ -470,4 +470,13 @@ export class ConfigUtils {
   static setHooks(config: IntermediateDendronConfig, value: DHookDict) {
     ConfigUtils.setWorkspaceProp(config, "hooks", value);
   }
+
+  static setPreviewProps<K extends keyof DendronPreviewConfig>(
+    config: IntermediateDendronConfig,
+    key: K,
+    value: DendronPreviewConfig[K]
+  ) {
+    const path = `preview.${key}`;
+    _.set(config, path, value);
+  }
 }

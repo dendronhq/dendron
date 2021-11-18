@@ -222,7 +222,7 @@ export class ErrorFactory {
    */
   static create404Error({ url }: { url: string }): DendronError {
     return new DendronError({
-      message: `resource at ${url} did not exist`,
+      message: `resource at ${url} does not exist`,
       severity: ERROR_SEVERITY.FATAL,
     });
   }

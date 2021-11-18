@@ -330,6 +330,7 @@ export class EngineUtils {
   }
 
   /**
+   * NOTE: if the `note.body.length < maxNoteLength`, we will not add any links or anchors to the note
    * @param param0
    * @returns
    */

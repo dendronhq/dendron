@@ -576,7 +576,7 @@ export class DendronEngineV2 implements DEngine {
 
   async refreshNotes(opts: RefreshNotesOpts) {
     await this.refreshNotesV2(opts.notes);
-    return;
+    return { error: null };
   }
 
   async refreshNotesV2(notes: NoteChangeEntry[]) {

@@ -102,6 +102,8 @@ export function shouldBubbleUpCreateNew({
   const noSpecialQueryChars =
     !FuseEngine.doesContainSpecialQueryChars(querystring);
 
+  if (_.isUndefined(bubbleUpCreateNew)) bubbleUpCreateNew = true;
+
   return noSpecialQueryChars && noExactMatches && bubbleUpCreateNew;
 }
 

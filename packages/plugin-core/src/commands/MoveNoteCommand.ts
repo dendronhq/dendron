@@ -70,7 +70,7 @@ function isMultiMove(moves: RenameNoteOpts[]) {
 function isMoveNecessary(move: RenameNoteOpts) {
   return (
     move.oldLoc.vaultName !== move.newLoc.vaultName ||
-    move.oldLoc.fname !== move.newLoc.fname
+    move.oldLoc.fname.toLowerCase() !== move.newLoc.fname.toLowerCase()
   );
 }
 

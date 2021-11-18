@@ -59,7 +59,7 @@ export class TreeViewUtils {
     let icon;
     if (note.schema) {
       icon = <BookOutlined />;
-    } else if (note.fname === TAGS_HIERARCHY_BASE) {
+    } else if (note.fname.toLowerCase() === TAGS_HIERARCHY_BASE) {
       icon = <NumberOutlined />;
     } else if (note.stub) {
       icon = <PlusOutlined />;

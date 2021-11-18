@@ -20,7 +20,7 @@ function plugin(this: Unified.Processor, opts: PluginOpts): Transformer {
     visit(tree, (node, _idx, _parent) => {
       if (node.type === DendronASTTypes.WIKI_LINK) {
         let cnode = node as WikiLinkNoteV4;
-        if (cnode.value === opts.from.fname) {
+        if (cnode.value.toLowerCase() === opts.from.fname.toLowerCase()) {
           cnode.value = opts.to.fname;
           // if alias the same, change that to
           if (
@@ -32,7 +32,10 @@ function plugin(this: Unified.Processor, opts: PluginOpts): Transformer {
       }
       if (node.type === DendronASTTypes.REF_LINK_V2) {
         let cnode = node as NoteRefNoteV4;
-        if (cnode.data.link.from.fname === opts.from.fname) {
+        if (
+          cnode.data.link.from.fname.toLowerCase() ===
+          opts.from.fname.toLowerCase()
+        ) {
           cnode.data.link.from.fname = opts.to.fname;
         }
       }

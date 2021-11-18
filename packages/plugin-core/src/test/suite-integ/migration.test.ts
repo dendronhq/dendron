@@ -1,13 +1,7 @@
 import {
   InstallStatus,
-  LegacyLookupConfig,
   LegacyLookupSelectionType,
-  LegacyRandomNoteConfig,
-  LegacyInsertNoteLinkConfig,
-  LegacyInsertNoteIndexConfig,
   WorkspaceType,
-  DVaultSync,
-  LegacyNoteAddBehavior,
   ConfigUtils,
   LookupSelectionModeEnum,
   IntermediateDendronConfig,
@@ -344,65 +338,19 @@ suite("Migration", function () {
       });
     });
 
-    test("migrate to 0.64.1 (commands and workspace namespace migration)", (done) => {
-      DendronExtension.version = () => "0.64.1";
+    test("migrate to 0.69.1 (commands and workspace namespace migration)", (done) => {
+      DendronExtension.version = () => "0.69.1";
       runLegacyMultiWorkspaceTest({
         ctx,
         modConfigCb: (config) => {
-          config["randomNote"] = {
-            include: ["foo", "bar"],
-            exclude: ["lorem"],
-          } as LegacyRandomNoteConfig;
-          config["defaultInsertHierarchy"] = "user.foo";
-          config["insertNoteLink"] = {
-            aliasMode: "none",
-            multiSelect: true,
-          } as LegacyInsertNoteLinkConfig;
-          config["insertNoteIndex"] = {
-            marker: true,
-          } as LegacyInsertNoteIndexConfig;
-          config["lookup"] = {
-            note: {
-              selectionType: "none",
-              leaveTrace: true,
-            },
-          } as LegacyLookupConfig;
-          config["lookupConfirmVaultOnCreate"] = false;
+          config["useFMTitle"] = false;
+          config["useNoteTitleForLink"] = false;
+          config["mermaid"] = false;
+          config["usePrettyRefs"] = false;
+          config["useKatex"] = false;
+          config["lookupDontBubbleUpCreateNew"] = true;
 
-          config["dendronVersion"] = "0.64.0";
-          config["vaults"] = [
-            {
-              fsPath: "vault",
-              name: "foo",
-            },
-          ];
-          config["journal"] = {
-            dailyDomain: "foo",
-            name: "journal",
-            dateFormat: "y.MM.dd",
-            addBehavior: LegacyNoteAddBehavior.asOwnDomain,
-            firstDayOfWeek: 1,
-          };
-          config["scratch"] = {
-            name: "scratch",
-            dateFormat: "y.MM.dd",
-            addBehavior: LegacyNoteAddBehavior.asOwnDomain,
-          };
-          config["graph"] = {
-            zoomSpeed: 10,
-          };
-          config["noTelemetry"] = true;
-          config["noAutoCreateOnDefinition"] = true;
-          config["noXVaultWikiLink"] = true;
-          config["initializeRemoteVaults"] = true;
-          config["workspaceVaultSync"] = DVaultSync.SKIP;
-          config["autoFoldFrontmatter"] = true;
-          config["maxPreviewsCached"] = 100;
-          config["maxNoteLength"] = 3000000;
-          config["feedback"] = true;
-          config["apiEndpoint"] = "foobar.com";
-
-          delete config.commands;
+          delete config.preview;
 
           return config;
         },
@@ -413,43 +361,23 @@ suite("Migration", function () {
           const wsConfig = await getExtension().getWorkspaceSettings();
           const wsService = new WorkspaceService({ wsRoot });
 
-          const oldCommandKeys = [
-            "randomNote",
-            "defaultInsertHierarchy",
-            "insertNoteLink",
-            "insertNoteIndex",
-            "lookup",
-            "lookupConfirmVaultOnCreate",
-          ];
-          const oldWorkspaceKeys = [
-            "dendronVersion",
-            "vaults",
-            "journal",
-            "scratch",
-            "graph",
-            "noTelemetry",
-            "noAutoCreateOnDefinition",
-            "noXVaultWikiLink",
-            "initializeRemoteVaults",
-            "autoFoldFrontmatter",
-            "maxPreviewsCached",
-            "maxNoteLength",
-            "feedback",
-            "apiEndpoint",
+          const oldKeys = [
+            "useFMTitle",
+            "useNoteTitleForLink",
+            "mermaid",
+            "usePrettyRefs",
+            "useKatex",
+            "lookupDontBubbleUpCreateNew",
           ];
 
           // deleting here because it's populated during init.
-          delete dendronConfig["workspace"];
+          delete dendronConfig["preview"];
           const originalDeepCopy = _.cloneDeep(dendronConfig);
 
           // all old configs should exist prior to migration
           const preMigrationCheckItems = [
-            _.isUndefined(dendronConfig["workspace"]),
-            _.isUndefined(dendronConfig["commands"]),
-            oldCommandKeys.every(
-              (value) => !_.isUndefined(_.get(dendronConfig, value))
-            ),
-            oldWorkspaceKeys.every(
+            _.isUndefined(dendronConfig["preview"]),
+            oldKeys.every(
               (value) => !_.isUndefined(_.get(dendronConfig, value))
             ),
           ];
@@ -459,13 +387,13 @@ suite("Migration", function () {
           });
 
           await MigrationServce.applyMigrationRules({
-            currentVersion: "0.64.1",
-            previousVersion: "0.64.0",
+            currentVersion: "0.69.1",
+            previousVersion: "0.69.0",
             dendronConfig,
             wsConfig,
             wsService,
             logger: Logger,
-            migrations: getMigration({ from: "0.64.0", to: "0.64.1" }),
+            migrations: getMigration({ from: "0.69.0", to: "0.69.1" }),
           });
 
           // backup of the original should exist.
@@ -482,18 +410,14 @@ suite("Migration", function () {
           const backupContent = readYAML(
             path.join(wsRoot, maybeBackupFileName)
           ) as IntermediateDendronConfig;
-          delete backupContent["workspace"];
+          delete backupContent["preview"];
           expect(_.isEqual(backupContent, originalDeepCopy)).toBeTruthy();
 
           const postMigrationDendronConfig = (await engine.getConfig()).data!;
           const postMigrationKeys = Object.keys(postMigrationDendronConfig);
-          expect(postMigrationKeys.includes("commands")).toBeTruthy();
-          expect(postMigrationKeys.includes("workspace")).toBeTruthy();
+          expect(postMigrationKeys.includes("preview")).toBeTruthy();
           expect(
-            oldCommandKeys.every((value) => postMigrationKeys.includes(value))
-          ).toBeFalsy();
-          expect(
-            oldWorkspaceKeys.every((value) => postMigrationKeys.includes(value))
+            oldKeys.every((value) => postMigrationKeys.includes(value))
           ).toBeFalsy();
 
           done();

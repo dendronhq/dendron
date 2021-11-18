@@ -1,21 +1,24 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$ref": "#/definitions/StrictConfigV3",
+  "$ref": "#/definitions/StrictConfigV4",
   "definitions": {
-    "StrictConfigV3": {
+    "StrictConfigV4": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
         "version": {
           "type": "number",
           "description": "Dendron version. Setup by plugin",
-          "const": 3
+          "const": 4
         },
         "commands": {
           "$ref": "#/definitions/DendronCommandConfig"
         },
         "workspace": {
           "$ref": "#/definitions/DendronWorkspaceConfig"
+        },
+        "preview": {
+          "$ref": "#/definitions/DendronPreviewConfig"
         },
         "site": {
           "$ref": "#/definitions/DendronSiteConfig",
@@ -195,7 +198,7 @@
       "required": [
         "version"
       ],
-      "description": "Strict v3 intermediate config."
+      "description": "Strict v4 intermediate config."
     },
     "DendronCommandConfig": {
       "type": "object",
@@ -250,12 +253,16 @@
         },
         "leaveTrace": {
           "type": "boolean"
+        },
+        "bubbleUpCreateNew": {
+          "type": "boolean"
         }
       },
       "required": [
         "selectionMode",
         "confirmVaultOnCreate",
-        "leaveTrace"
+        "leaveTrace",
+        "bubbleUpCreateNew"
       ],
       "additionalProperties": false,
       "description": "Namespace for configuring  {@link  NoteLookupCommand }"
@@ -440,6 +447,8 @@
         "enableRemoteVaultInit",
         "workspaceVaultSyncMode",
         "enableAutoFoldFrontmatter",
+        "enableUserTags",
+        "enableHashTags",
         "maxPreviewsCached",
         "maxNoteLength"
       ],
@@ -712,11 +721,11 @@
       },
       "required": [
         "addBehavior",
+        "createTaskSelectionType",
         "dateFormat",
         "name",
         "prioritySymbols",
         "statusSymbols",
-        "createTaskSelectionType",
         "todoIntegration"
       ],
       "description": "Namespace for configuring scratch note behavior"
@@ -750,6 +759,35 @@
         "noCommit",
         "sync"
       ]
+    },
+    "DendronPreviewConfig": {
+      "type": "object",
+      "properties": {
+        "enableFMTitle": {
+          "type": "boolean"
+        },
+        "enableNoteTitleForLink": {
+          "type": "boolean"
+        },
+        "enableMermaid": {
+          "type": "boolean"
+        },
+        "enablePrettyRefs": {
+          "type": "boolean"
+        },
+        "enableKatex": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "enableFMTitle",
+        "enableNoteTitleForLink",
+        "enableMermaid",
+        "enablePrettyRefs",
+        "enableKatex"
+      ],
+      "additionalProperties": false,
+      "description": "Namespace for all preview related configurations"
     },
     "DendronSiteConfig": {
       "type": "object",

@@ -550,6 +550,7 @@ export class MDUtilsV5 {
     data: Omit<ProcDataFullOptsV5, "dest">,
     opts?: { flavor?: ProcFlavor }
   ) {
+    console.debug({ ctx: "procRehypeFull" });
     const proc = this._procRehype(
       { mode: ProcMode.FULL, parseOnly: false, flavor: opts?.flavor },
       data

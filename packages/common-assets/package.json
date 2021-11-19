@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/common-assets",
-  "version": "0.69.2-alpha.0",
+  "version": "0.69.2",
   "main": "index.js",
   "license": "GPLv3",
   "scripts": {

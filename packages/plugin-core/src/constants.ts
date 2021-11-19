@@ -31,6 +31,8 @@ export const DENDRON_VIEWS = [
     name: "Tree View",
     when: `${DendronContext.PLUGIN_ACTIVE} && !${DendronContext.WEB_UI_ENABLED}`,
     where: "explorer",
+    contextualTitle: "Tree View",
+    icon: "media/icons/dendron-vscode.svg",
   },
   {
     id: DendronTreeViewKey.TREE_VIEW_V2,
@@ -38,6 +40,8 @@ export const DENDRON_VIEWS = [
     when: DendronContext.WEB_UI_ENABLED,
     where: "explorer",
     type: "webview",
+    contextualTitle: "Tree View",
+    icon: "media/icons/dendron-vscode.svg",
   },
   {
     id: DendronTreeViewKey.BACKLINKS,
@@ -169,6 +173,14 @@ export const DENDRON_MENUS = {
       when: "resourceExtname == .md && dendron:pluginActive",
       command: "dendron.copyNoteLink",
       group: "2_workspace",
+    },
+  ],
+  "editor/title": [
+    {
+      command: "dendron.showPreview",
+      // when is the same as the built-in preview, plus pluginActive
+      when: "editorLangId == markdown && !notebookEditorFocused && dendron:pluginActive",
+      group: "navigation",
     },
   ],
 };
@@ -776,6 +788,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     key: "dendron.showPreview",
     title: `${CMD_PREFIX} Show Preview`,
     group: "notes",
+    icon: `$(open-preview)`,
     keybindings: {
       windows: "windows+ctrl+p",
       mac: "cmd+ctrl+p",

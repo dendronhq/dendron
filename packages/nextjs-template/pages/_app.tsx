@@ -12,16 +12,17 @@ import { useDendronGATracking } from "../components/DendronGATracking";
 import DendronLayout from "../components/DendronLayout";
 import { combinedStore, useCombinedDispatch } from "../features";
 import { browserEngineSlice } from "../features/engine";
-import "../public/light-theme.css";
+import "../public/assets-dendron/css/light.css";
 import "../styles/scss/main.scss";
 import { fetchConfig, fetchNotes } from "../utils/fetchers";
 import { useDendronRouter } from "../utils/hooks";
 import { getAssetUrl } from "../utils/links";
 import { NoteData } from "../utils/types";
+import Head from "next/head";
 
 const themes = {
-  dark: getAssetUrl(`/dark-theme.css`),
-  light: getAssetUrl(`/light-theme.css`),
+  dark: getAssetUrl(`/assets-dendron/css/dark.css`),
+  light: getAssetUrl(`/assets-dendron/css/light.css`),
 };
 
 function AppContainer(appProps: AppProps) {
@@ -63,6 +64,9 @@ function DendronApp({ Component, pageProps }: AppProps) {
 
   return (
     <DendronLayout {...noteData} dendronRouter={dendronRouter}>
+      <Head>
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
       <Component
         {...pageProps}
         notes={noteData}

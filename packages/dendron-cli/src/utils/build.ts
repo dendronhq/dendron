@@ -328,12 +328,19 @@ export class BuildUtils {
 
   /**
    * Migrate assets from next-server, plugin-views, and api-server to plugin-core
-   * @returns 
+   * @returns
    */
   static async syncStaticAssets() {
+    // all assets are stored here
+    const commonAssetsRoot = path.join(
+      this.getLernaRoot(),
+      "packages",
+      "common-assets"
+    );
+
+    // destination for assets
     const pluginAssetPath = path.join(this.getPluginRootPath(), "assets");
     const pluginStaticPath = path.join(pluginAssetPath, "static");
-    const apiRoot = path.join(this.getLernaRoot(), "packages", "api-server");
     const nextServerRoot = this.getNextServerRootPath();
     const pluginViewsRoot = path.join(
       this.getLernaRoot(),
@@ -344,14 +351,18 @@ export class BuildUtils {
     fs.ensureDirSync(pluginStaticPath);
     fs.emptyDirSync(pluginStaticPath);
 
+    // copy over common assets
+    fs.copySync(path.join(commonAssetsRoot, "assets", "css"), pluginStaticPath);
+
+    // copy assets from next server
+    // DEPRECATED
     fs.copySync(path.join(nextServerRoot, "out"), pluginStaticPath);
     fs.copySync(
       path.join(this.getNextServerRootPath(), "assets", "js"),
       path.join(pluginStaticPath, "js")
     );
-    fs.copySync(path.join(apiRoot, "assets", "static"), pluginStaticPath);
 
-    // plugin view assets
+    // copy assets from plugin view
     fs.copySync(
       path.join(pluginViewsRoot, "build", "static", "css"),
       path.join(pluginStaticPath, "css")
@@ -361,6 +372,30 @@ export class BuildUtils {
       path.join(pluginStaticPath, "js")
     );
     return { staticPath: pluginStaticPath };
+  }
+
+  static async syncStaticAssetsToNextjsTemplate() {
+    // all assets are stored here
+    const commonAssetsBuildRoot = path.join(
+      this.getLernaRoot(),
+      "packages",
+      "common-assets",
+      "build"
+    );
+    // destination for assets
+    const templatePublicPath = path.join(
+      this.getLernaRoot(),
+      "packages",
+      "nextjs-template",
+      "public"
+    );
+    const templateAssetPath = path.join(templatePublicPath, "assets-dendron");
+
+    // copy files
+    fs.ensureDirSync(templateAssetPath);
+    fs.emptyDirSync(templateAssetPath);
+    fs.copySync(path.join(commonAssetsBuildRoot, "assets"), templateAssetPath);
+    fs.copySync(path.join(commonAssetsBuildRoot, "top"), templatePublicPath);
   }
 
   static removeDevDepsFromPkgJson({

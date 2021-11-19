@@ -57,6 +57,10 @@ describe("build", () => {
           BuildUtils,
           "syncStaticAssets"
         ).returns(Promise.resolve({ staticPath: "" }));
+        const syncStaticAssetsToNextjsTemplateStub = stub(
+          BuildUtils,
+          "syncStaticAssetsToNextjsTemplate"
+        ).returns(Promise.resolve());
         const prepPluginPkgStub = stub(BuildUtils, "prepPluginPkg").returns(
           Promise.resolve()
         );
@@ -87,6 +91,7 @@ describe("build", () => {
           buildNextServerStub,
           buildPluginViewsStub,
           syncStaticAssetsStub,
+          syncStaticAssetsToNextjsTemplateStub,
           prepPluginPkgStub,
           installPluginDependenciesStub,
           packagePluginDependenciesStub,

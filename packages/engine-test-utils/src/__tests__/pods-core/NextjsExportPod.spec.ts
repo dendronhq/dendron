@@ -1,7 +1,10 @@
 import {
   ConfigUtils,
+  DendronSiteConfig,
   DEngineClient,
+  DVault,
   DVaultVisibility,
+  VaultUtils,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
 import { tmpDir } from "@dendronhq/common-server";
@@ -11,8 +14,14 @@ import path from "path";
 import { TestConfigUtils } from "../../config";
 import { runEngineTestV5 } from "../../engine";
 import { ENGINE_HOOKS, ENGINE_HOOKS_MULTI } from "../../presets";
-import { checkDir, checkFile, TestUnifiedUtils } from "../../utils";
+import {
+  checkDir,
+  checkFile,
+  checkNotInDir,
+  TestUnifiedUtils,
+} from "../../utils";
 import fs from "fs-extra";
+import _ from "lodash";
 
 async function setupExport(
   opts: WorkspaceOpts & {
@@ -46,10 +55,38 @@ async function verifyExport(dest: string) {
   );
 }
 
-const setupConfig = ({ wsRoot }: { wsRoot: string }) => {
+async function verifyExportedAssets(dest: string) {
+  await checkDir({ fpath: path.join(dest, "public", "assets") }, "foo.jpg");
+}
+
+async function verifyNoExportedAssets(dest: string) {
+  await checkNotInDir({ fpath: path.join(dest, "public") }, "assets");
+}
+
+async function createAssetsInVault({
+  wsRoot,
+  vault,
+}: {
+  wsRoot: string;
+  vault: DVault;
+}) {
+  const vaultDir = path.join(wsRoot, VaultUtils.getRelPath(vault));
+  const assetsDir = path.join(vaultDir, "assets");
+  await fs.ensureDir(assetsDir);
+  await fs.ensureFile(path.join(assetsDir, "foo.jpg"));
+}
+
+const setupConfig = ({
+  wsRoot,
+  siteConfig,
+}: {
+  wsRoot: string;
+  siteConfig?: Partial<DendronSiteConfig>;
+}) => {
   TestConfigUtils.withConfig(
     (config) => {
       config.site.siteUrl = "https://foo.com";
+      config.site = _.merge(config.site, siteConfig);
       return config;
     },
     { wsRoot }
@@ -57,6 +94,72 @@ const setupConfig = ({ wsRoot }: { wsRoot: string }) => {
 };
 
 describe("GIVEN NextExport pod", () => {
+  describe("WHEN copyAssets", () => {
+    describe("WHEN copy assets", () => {
+      test("THEN assets are copied", async () => {
+        await runEngineTestV5(
+          async ({ engine, vaults, wsRoot }) => {
+            const dest = await setupExport({ engine, wsRoot, vaults });
+            await verifyExport(dest);
+            await verifyExportedAssets(dest);
+            await checkDir(
+              { fpath: path.join(dest, "data", "notes") },
+              "foo.md",
+              "foo.html"
+            );
+          },
+          {
+            expect,
+            preSetupHook: async (opts) => {
+              await ENGINE_HOOKS.setupBasic(opts);
+              await createAssetsInVault({
+                wsRoot: opts.wsRoot,
+                vault: opts.vaults[0],
+              });
+              setupConfig({
+                ...opts,
+                siteConfig: {
+                  copyAssets: true,
+                },
+              });
+            },
+          }
+        );
+      });
+    });
+    describe("WHEN copy assets is skipped", () => {
+      test("THEN no assets are copied over", async () => {
+        await runEngineTestV5(
+          async ({ engine, vaults, wsRoot }) => {
+            const dest = await setupExport({ engine, wsRoot, vaults });
+            await verifyExport(dest);
+            await verifyNoExportedAssets(dest);
+            await checkDir(
+              { fpath: path.join(dest, "data", "notes") },
+              "foo.md",
+              "foo.html"
+            );
+          },
+          {
+            expect,
+            preSetupHook: async (opts) => {
+              await ENGINE_HOOKS.setupBasic(opts);
+              await createAssetsInVault({
+                wsRoot: opts.wsRoot,
+                vault: opts.vaults[0],
+              });
+              setupConfig({
+                ...opts,
+                siteConfig: {
+                  copyAssets: false,
+                },
+              });
+            },
+          }
+        );
+      });
+    });
+  });
   describe("WHEN execute", () => {
     test("THEN create expected data files", async () => {
       await runEngineTestV5(

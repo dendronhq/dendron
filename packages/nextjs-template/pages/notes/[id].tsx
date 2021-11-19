@@ -59,6 +59,7 @@ export const getStaticProps: GetStaticProps = async (
       props,
     };
   } catch (err) {
+    // eslint-disable-next-line no-console
     console.log(error2PlainObject(err as DendronError));
     throw err;
   }

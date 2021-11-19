@@ -40,25 +40,24 @@ import {
 import { Logger } from "../logger";
 import { CodeConfigKeys, DateTimeFormat } from "../types";
 import { VSCodeUtils } from "../utils";
+import { sentryReportingCallback } from "../utils/analytics";
 import { containsNonDendronUri } from "../utils/md";
 import { getFrontmatterTags, parseFrontmatter } from "../utils/yaml";
 import { getConfigValue, getDWorkspace } from "../workspace";
 import {
-  warnBadFrontmatterContents,
+  checkAndWarnBadFrontmatter,
   warnMissingFrontmatter,
 } from "./codeActionProvider";
 
 /** Wait this long in miliseconds before trying to update decorations. */
 const DECORATION_UPDATE_DELAY = 100;
-/** Some decorations are expensive. If a note is longer than this many characters, avoid the expensive decorations.
- *
- * This is just a workaround because `getNotesByFname` is too expensive right now, because it scans through all notes.
- * If you are reading this comment in the future and that's no longer the case, feel free to remove this workaround!
- */
-const DEFAULT_EXPENSIVE_DECORATIONS_LIMIT = 4096;
 
-/** Notes that we warned the user about expensive decorations being disabled. Tracked to avoid repeatedly warning. */
-const WARNED_LONG_NOTE = new Set<string>();
+/** Decorators only decorate what's visible on the screen. To avoid the user
+ * seeing undecorated text if they scroll too quickly, we decorate some of the
+ * text surrounding what's visible on the screen. This number determines how
+ * many lines (above top and below bottom) surrounding the visible text should
+ * be decorated. */
+const VISIBLE_RANGE_MARGIN = 20;
 
 export const DECORATION_TYPE = {
   timestamp: window.createTextEditorDecorationType({}),
@@ -88,11 +87,7 @@ export const DECORATION_TYPE = {
 
 export const DECORATOR = new Map<
   string,
-  (
-    node: any,
-    document: TextDocument,
-    doExpensiveDecorations: boolean
-  ) => DecorationAndType[]
+  (node: any, document: TextDocument) => DecorationAndType[]
 >([
   [DendronASTTypes.FRONTMATTER, decorateFrontmatter],
   [DendronASTTypes.BLOCK_ANCHOR, decorateBlockAnchor],
@@ -126,114 +121,109 @@ export function delayedUpdateDecorations(
   }, updateDelay);
 }
 
-/** Warn the user that this note is too long for some expensive decorations. */
-function warnExpensiveDecorationsDisabled(note: NoteProps) {
-  if (WARNED_LONG_NOTE.has(note.id)) return;
-  WARNED_LONG_NOTE.add(note.id);
-  return window.showWarningMessage(
-    "This note is too long for some editor decorations, like tag colors. " +
-      "These have been disabled in the editor only. " +
-      "They will continue to function everywhere else."
-  );
-}
-
-export function updateDecorations(activeEditor: TextEditor) {
-  const ctx = "updateDecorations";
-  const text = activeEditor.document.getText();
-  // Warn for missing or bad frontmatter and broken wikilinks
-  const allWarnings: Diagnostic[] = [];
-  // Only show decorations & warnings for notes
-  let note: NoteProps | undefined;
-  try {
-    note = VSCodeUtils.getNoteFromDocument(activeEditor.document);
-    if (_.isUndefined(note)) return {};
-  } catch (error) {
-    Logger.info({
-      ctx,
-      msg: "Unable to check if decorations should be updated",
-      error,
-    });
-    return {};
-  }
-  const proc = MDUtilsV5.procRemarkParse(
-    {
-      mode: ProcMode.FULL,
-      parseOnly: true,
-    },
-    {
-      dest: DendronASTDest.MD_DENDRON,
-      engine: getDWorkspace().engine,
-      vault: note.vault,
-      fname: note.fname,
+export const updateDecorations = sentryReportingCallback(
+  (activeEditor: TextEditor) => {
+    const ctx = "updateDecorations";
+    // Warn for missing or bad frontmatter and broken wikilinks
+    const allWarnings: Diagnostic[] = [];
+    const activeDecorations = new DefaultMap<
+      TextEditorDecorationType,
+      DecorationOptions[]
+    >(() => []);
+    // Only show decorations & warnings for notes
+    let note: NoteProps | undefined;
+    try {
+      note = VSCodeUtils.getNoteFromDocument(activeEditor.document);
+      if (_.isUndefined(note)) return {};
+    } catch (error) {
+      Logger.info({
+        ctx,
+        msg: "Unable to check if decorations should be updated",
+        error,
+      });
+      return {};
     }
-  );
-  const tree = proc.parse(text);
-  const activeDecorations = new DefaultMap<
-    TextEditorDecorationType,
-    DecorationOptions[]
-  >(() => []);
-  let frontmatter: FrontmatterContent | undefined;
-  const doExpensiveDecorations =
-    text.length <
-    (getDWorkspace().config.maxNoteDecoratedLength ||
-      DEFAULT_EXPENSIVE_DECORATIONS_LIMIT);
+    // Only decorate visible ranges, of which there could be multiple if the document is open in multiple tabs
+    const ranges = VSCodeUtils.mergeOverlappingRanges(
+      activeEditor.visibleRanges.map((range) =>
+        VSCodeUtils.padRange({
+          range,
+          padding: VISIBLE_RANGE_MARGIN,
+          zeroCharacter: true,
+        })
+      )
+    );
 
-  visit(tree, (node) => {
-    const decorator = DECORATOR.get(node.type);
-    if (decorator) {
-      const decorations = decorator(
-        node,
-        activeEditor.document,
-        doExpensiveDecorations
+    for (const range of ranges) {
+      const text = activeEditor.document.getText(range);
+      const proc = MDUtilsV5.procRemarkParse(
+        {
+          mode: ProcMode.FULL,
+          parseOnly: true,
+        },
+        {
+          dest: DendronASTDest.MD_DENDRON,
+          engine: getDWorkspace().engine,
+          vault: note.vault,
+          fname: note.fname,
+        }
       );
-      for (const { type, decoration } of decorations) {
-        activeDecorations.get(type).push(decoration);
+      const tree = proc.parse(text);
+      let frontmatter: FrontmatterContent | undefined;
+
+      visit(tree, (node) => {
+        const decorator = DECORATOR.get(node.type);
+        // Need to update node position with the added offset from the range
+        node.position!.start.line += range.start.line;
+        node.position!.end.line += range.start.line;
+        if (decorator) {
+          const decorations = decorator(node, activeEditor.document);
+          for (const { type, decoration } of decorations) {
+            activeDecorations.get(type).push(decoration);
+          }
+        }
+        if (node.type === DendronASTTypes.FRONTMATTER)
+          frontmatter = node as FrontmatterContent;
+      });
+
+      if (range.start.line === 0) {
+        // Can't check frontmatter if frontmatter is not visible
+        if (_.isUndefined(frontmatter)) {
+          allWarnings.push(warnMissingFrontmatter(activeEditor.document));
+        } else {
+          allWarnings.push(
+            ...checkAndWarnBadFrontmatter(activeEditor.document, frontmatter)
+          );
+        }
       }
     }
-    if (node.type === DendronASTTypes.FRONTMATTER)
-      frontmatter = node as FrontmatterContent;
-  });
 
-  if (_.isUndefined(frontmatter)) {
-    allWarnings.push(warnMissingFrontmatter(activeEditor.document));
-  } else {
-    allWarnings.push(
-      ...warnBadFrontmatterContents(activeEditor.document, frontmatter)
-    );
-  }
-
-  // Activate the decorations
-  Logger.info({
-    ctx,
-    msg: `Displaying ${allWarnings.length} warnings and ${activeDecorations.size} decorations`,
-  });
-  for (const [type, decorations] of activeDecorations.entries()) {
-    activeEditor.setDecorations(type, decorations);
-  }
-
-  // Clear out any old decorations left over from last pass
-  for (const type of _.values(DECORATION_TYPE)) {
-    if (!activeDecorations.has(type)) {
-      activeEditor.setDecorations(type, []);
+    // Activate the decorations
+    Logger.info({
+      ctx,
+      msg: `Displaying ${allWarnings.length} warnings and ${activeDecorations.size} decorations`,
+    });
+    for (const [type, decorations] of activeDecorations.entries()) {
+      activeEditor.setDecorations(type, decorations);
     }
-  }
 
-  let expensiveDecorationWarning: ReturnType<
-    typeof warnExpensiveDecorationsDisabled
-  >;
-  if (!doExpensiveDecorations)
-    expensiveDecorationWarning = warnExpensiveDecorationsDisabled(note);
-  return {
-    allDecorations: activeDecorations,
-    allWarnings,
-    expensiveDecorationWarning,
-  };
-}
+    // Clear out any old decorations left over from last pass
+    for (const type of _.values(DECORATION_TYPE)) {
+      if (!activeDecorations.has(type)) {
+        activeEditor.setDecorations(type, []);
+      }
+    }
+
+    return {
+      allDecorations: activeDecorations,
+      allWarnings,
+    };
+  }
+);
 
 function decorateFrontmatter(
   frontmatter: FrontmatterContent,
-  _document: TextDocument,
-  doExpensiveDecorations: boolean
+  _document: TextDocument
 ): DecorationAndType[] {
   const { value: contents, position } = frontmatter;
   if (_.isUndefined(position)) return []; // should never happen
@@ -280,7 +270,6 @@ function decorateFrontmatter(
       fname: `${TAGS_HIERARCHY}${tag.value}`,
       position: tag.position,
       lineOffset,
-      doExpensiveDecorations,
     })
   );
   return _.concat(timestampDecorations, fmTagDecorations);
@@ -296,18 +285,13 @@ function decorateBlockAnchor(blockAnchor: BlockAnchor) {
   return [{ type: DECORATION_TYPE.blockAnchor, decoration }];
 }
 
-function decorateHashTag(
-  hashtag: HashTag,
-  _document: TextDocument,
-  doExpensiveDecorations: boolean
-) {
+function decorateHashTag(hashtag: HashTag, _document: TextDocument) {
   const position = hashtag.position;
   if (_.isUndefined(position)) return []; // should never happen
 
   return decorateTag({
     fname: hashtag.fname,
     position,
-    doExpensiveDecorations,
   });
 }
 
@@ -315,37 +299,32 @@ function decorateTag({
   fname,
   position,
   lineOffset,
-  doExpensiveDecorations,
 }: {
   fname: string;
   position: Position;
   lineOffset?: number;
-  doExpensiveDecorations: boolean;
 }) {
   let before: ThemableDecorationAttachmentRenderOptions | undefined;
-  if (doExpensiveDecorations) {
-    // Getting the color requires a lot of lookups by fname, and can be very expensive
-    const { color: backgroundColor, type } = NoteUtils.color({
-      fname,
-      notes: getDWorkspace().engine.notes,
-    });
-    if (
-      type === "configured" ||
-      !getDWorkspace().config.noRandomlyColoredTags
-    ) {
-      before = {
-        contentText: " ",
-        width: "0.8rem",
-        height: "0.8rem",
-        margin: "auto 0.2rem",
-        border: "1px solid",
-        borderColor: new ThemeColor("foreground"),
-        backgroundColor,
-      };
-    }
+  const { color: backgroundColor, type: colorType } = NoteUtils.color({
+    fname,
+    notes: getDWorkspace().engine.notes,
+  });
+  if (
+    colorType === "configured" ||
+    !getDWorkspace().config.noRandomlyColoredTags
+  ) {
+    before = {
+      contentText: " ",
+      width: "0.8rem",
+      height: "0.8rem",
+      margin: "auto 0.2rem",
+      border: "1px solid",
+      borderColor: new ThemeColor("foreground"),
+      backgroundColor,
+    };
   }
 
-  const type = linkedNoteType({ fname, doExpensiveDecorations });
+  const type = linkedNoteType({ fname });
   const decoration: DecorationOptions = {
     range: VSCodeUtils.position2VSCodeRange(position, { line: lineOffset }),
     renderOptions: {
@@ -362,17 +341,13 @@ export function linkedNoteType({
   anchorEnd,
   vaultName,
   document,
-  doExpensiveDecorations,
 }: {
   fname?: string;
   anchorStart?: string;
   anchorEnd?: string;
   vaultName?: string;
   document?: TextDocument;
-  doExpensiveDecorations: boolean;
 }) {
-  // Doing lookups to check if a note exists is expensive
-  if (!doExpensiveDecorations) return DECORATION_TYPE.wikiLink;
   const ctx = "linkedNoteType";
   const { notes, vaults } = getDWorkspace().engine;
   const vault = vaultName
@@ -430,11 +405,7 @@ export function linkedNoteType({
 
 const RE_ALIAS = /(?<beforeAlias>\[\[)(?<alias>[^|]+)\|/;
 
-function decorateWikiLink(
-  wikiLink: WikiLinkNoteV4,
-  document: TextDocument,
-  doExpensiveDecorations: boolean
-) {
+function decorateWikiLink(wikiLink: WikiLinkNoteV4, document: TextDocument) {
   const position = wikiLink.position as Position | undefined;
   if (_.isUndefined(position)) return []; // should never happen
 
@@ -446,7 +417,6 @@ function decorateWikiLink(
     anchorStart: wikiLink.data.anchorHeader,
     vaultName,
     document,
-    doExpensiveDecorations,
   });
   const wikiLinkrange = VSCodeUtils.position2VSCodeRange(position);
   const options: DecorationOptions = {
@@ -476,32 +446,36 @@ function decorateWikiLink(
     });
   }
 
-  const taskDecoration = decorateTaskNote({
-    range: wikiLinkrange,
-    fname,
-    vaultName,
-    doExpensiveDecorations,
-  });
-  if (taskDecoration) decorations.push(taskDecoration);
+  // Wikilinks to a part of a task are not tasks themselves, so skip links like [[task.thing#part]]. Also skip broken wikilinks, they have no notes.
+  if (!wikiLink.data.anchorHeader && type !== DECORATION_TYPE.brokenWikilink) {
+    const taskDecoration = decorateTaskNote({
+      range: wikiLinkrange,
+      fname,
+      vaultName,
+    });
+    if (taskDecoration) decorations.push(taskDecoration);
+  }
 
   // Highlight the wikilink itself
   decorations.push({ type, decoration: options });
   return decorations;
 }
 
+const TASK_NOTE_DECORATION_COLOR = new ThemeColor(
+  "editorLink.activeForeground"
+);
+
 /** Decorates the note `fname` in vault `vaultName` if the note is a task note. */
 function decorateTaskNote({
   range,
   fname,
   vaultName,
-  doExpensiveDecorations,
 }: {
   range: Range;
   fname: string | undefined;
   vaultName?: string;
-  doExpensiveDecorations: boolean;
 }) {
-  if (!doExpensiveDecorations || !fname) return;
+  if (!fname) return;
   const { notes, vaults, config } = getDWorkspace().engine;
   const taskConfig = ConfigUtils.getTask(config);
   const vault = vaultName
@@ -526,7 +500,7 @@ function decorateTaskNote({
       note,
       taskConfig,
     });
-    if (prioritySymbol) decorationString.push(`prio:${prioritySymbol}`);
+    if (prioritySymbol) decorationString.push(`priority:${prioritySymbol}`);
   }
   if (note.tags) {
     const tags = _.isString(note.tags) ? [note.tags] : note.tags;
@@ -540,11 +514,13 @@ function decorateTaskNote({
       renderOptions: {
         before: {
           contentText: status,
+          color: TASK_NOTE_DECORATION_COLOR,
           fontWeight: "lighter",
           margin: "0 0.5rem 0 0.15rem",
         },
         after: {
           contentText: decorationString.join(" "),
+          color: TASK_NOTE_DECORATION_COLOR,
           fontWeight: "lighter",
           margin: "0 0.4rem 0 0.25rem",
         },
@@ -554,17 +530,12 @@ function decorateTaskNote({
   return decoration;
 }
 
-function decorateUserTag(
-  userTag: UserTag,
-  _document: TextDocument,
-  doExpensiveDecorations: boolean
-) {
+function decorateUserTag(userTag: UserTag, _document: TextDocument) {
   const position = userTag.position as Position;
   if (_.isUndefined(position)) return [];
 
   const type = linkedNoteType({
     fname: userTag.fname,
-    doExpensiveDecorations,
   });
 
   return [
@@ -572,11 +543,7 @@ function decorateUserTag(
   ];
 }
 
-function decorateReference(
-  reference: NoteRefNoteV4,
-  document: TextDocument,
-  doExpensiveDecorations: boolean
-) {
+function decorateReference(reference: NoteRefNoteV4, document: TextDocument) {
   const position = reference.position as Position;
   if (_.isUndefined(position)) return [];
 
@@ -586,7 +553,6 @@ function decorateReference(
     anchorEnd: reference.data.link.data.anchorEnd,
     vaultName: reference.data.link.data.vaultName,
     document,
-    doExpensiveDecorations,
   });
   const decoration: DecorationOptions = {
     range: VSCodeUtils.position2VSCodeRange(position),

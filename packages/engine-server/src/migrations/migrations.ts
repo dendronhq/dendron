@@ -109,7 +109,7 @@ export const CONFIG_MIGRATIONS: Migrations = {
 
         // add deprecated paths to legacyPaths
         // so they could be unset if they exist
-        legacyPaths.concat(DEPRECATED_PATHS);
+        legacyPaths.push(...DEPRECATED_PATHS);
 
         // remove legacy property from config after migration.
         legacyPaths.forEach((legacyPath) => {

@@ -14,6 +14,7 @@ suite("buttons tests", () => {
           iconOff: "icon-off-val",
           iconOn: "icon-on-val",
           type: "horizontal",
+          description: "test description",
           title: "title-val",
         });
       });
@@ -43,6 +44,7 @@ suite("buttons tests", () => {
           iconOff: "icon-off-val",
           iconOn: "icon-on-val",
           type: "horizontal",
+          description: "test description",
           title: "title-val",
         });
       });

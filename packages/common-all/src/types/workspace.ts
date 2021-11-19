@@ -356,9 +356,6 @@ export type DendronConfig = {
    */
   maxNoteLength?: number;
 
-  /** @deprecated No longer relevant, all decorations are now displayed for long notes. */
-  maxNoteDecoratedLength?: number;
-
   /**
    * Do not display the randomly generated colors for tags in the **editor**. Only
    * color tag links if it has been configured in the frontmatter. False by

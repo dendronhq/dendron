@@ -45,7 +45,7 @@ import { containsNonDendronUri } from "../utils/md";
 import { getFrontmatterTags, parseFrontmatter } from "../utils/yaml";
 import { getConfigValue, getDWorkspace } from "../workspace";
 import {
-  warnBadFrontmatterContents,
+  checkAndWarnBadFrontmatter,
   warnMissingFrontmatter,
 } from "./codeActionProvider";
 
@@ -145,16 +145,17 @@ export const updateDecorations = sentryReportingCallback(
     }
     // Only decorate visible ranges, of which there could be multiple if the document is open in multiple tabs
     const ranges = VSCodeUtils.mergeOverlappingRanges(
-      activeEditor.visibleRanges
+      activeEditor.visibleRanges.map((range) =>
+        VSCodeUtils.padRange({
+          range,
+          padding: VISIBLE_RANGE_MARGIN,
+          zeroCharacter: true,
+        })
+      )
     );
 
     for (const range of ranges) {
-      const decorateRange = VSCodeUtils.padRange({
-        range,
-        padding: VISIBLE_RANGE_MARGIN,
-        zeroCharacter: true,
-      });
-      const text = activeEditor.document.getText(decorateRange);
+      const text = activeEditor.document.getText(range);
       const proc = MDUtilsV5.procRemarkParse(
         {
           mode: ProcMode.FULL,
@@ -173,8 +174,8 @@ export const updateDecorations = sentryReportingCallback(
       visit(tree, (node) => {
         const decorator = DECORATOR.get(node.type);
         // Need to update node position with the added offset from the range
-        node.position!.start.line += decorateRange.start.line;
-        node.position!.end.line += decorateRange.start.line;
+        node.position!.start.line += range.start.line;
+        node.position!.end.line += range.start.line;
         if (decorator) {
           const decorations = decorator(node, activeEditor.document);
           for (const { type, decoration } of decorations) {
@@ -185,13 +186,13 @@ export const updateDecorations = sentryReportingCallback(
           frontmatter = node as FrontmatterContent;
       });
 
-      if (decorateRange.start.line === 0) {
+      if (range.start.line === 0) {
         // Can't check frontmatter if frontmatter is not visible
         if (_.isUndefined(frontmatter)) {
           allWarnings.push(warnMissingFrontmatter(activeEditor.document));
         } else {
           allWarnings.push(
-            ...warnBadFrontmatterContents(activeEditor.document, frontmatter)
+            ...checkAndWarnBadFrontmatter(activeEditor.document, frontmatter)
           );
         }
       }

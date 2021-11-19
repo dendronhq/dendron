@@ -10,7 +10,6 @@ useFMTitle: true
 useNoteTitleForLink: true
 mermaid: true
 useKatex: true
-usePrettyRefs: true
 dev:
     enablePreviewV2: true
 site:
@@ -142,7 +141,6 @@ useFMTitle: true
 useNoteTitleForLink: true
 mermaid: true
 useKatex: true
-usePrettyRefs: true
 dev:
     enablePreviewV2: true
 site:
@@ -275,7 +273,6 @@ useFMTitle: true
 useNoteTitleForLink: true
 mermaid: true
 useKatex: true
-usePrettyRefs: true
 dev:
     enablePreviewV2: true
 site:
@@ -362,7 +359,6 @@ useFMTitle: true
 useNoteTitleForLink: true
 mermaid: true
 useKatex: true
-usePrettyRefs: true
 dev:
     enablePreviewV2: true
 site:
@@ -468,7 +464,6 @@ useFMTitle: true
 useNoteTitleForLink: true
 mermaid: true
 useKatex: true
-usePrettyRefs: true
 dev:
     enablePreviewV2: true
 site:
@@ -576,7 +571,6 @@ useFMTitle: true
 useNoteTitleForLink: true
 mermaid: true
 useKatex: true
-usePrettyRefs: true
 dev:
     enablePreviewV2: true
 site:
@@ -676,7 +670,6 @@ useFMTitle: true
 useNoteTitleForLink: true
 mermaid: true
 useKatex: true
-usePrettyRefs: true
 dev:
     enablePreviewV2: true
 site:

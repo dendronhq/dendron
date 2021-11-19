@@ -1290,17 +1290,15 @@ export class RemarkUtils {
       }
     });
 
-    if (!headerFound) {
+    if (!headerFound || !RemarkUtils.isParent(tree)) {
       return [];
     }
     const nodesToExtract = nextHeaderIndex
-      ? // @ts-ignore
-        (tree.children as Node[]).splice(
+      ? tree.children.splice(
           foundHeaderIndex!,
           nextHeaderIndex! - foundHeaderIndex!
         )
-      : // @ts-ignore
-        (tree.children as Node[]).splice(foundHeaderIndex!);
+      : tree.children.splice(foundHeaderIndex!);
     return nodesToExtract;
   }
 

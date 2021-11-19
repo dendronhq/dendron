@@ -211,6 +211,13 @@
       margin-top: 0;
     }
   }
+
+  table,
+  td,
+  th {
+    border: 1px solid black;
+    padding: 10px;
+  }
 }
 
 /* blockquotes - from minimal mistakes */
@@ -232,14 +239,13 @@ blockquote {
   }
 }
 
-
 // Footnotes
 a.fnref {
-	vertical-align: super;
-	font-size: 0.7rem;
+  vertical-align: super;
+  font-size: 0.7rem;
 }
 
 a.fn {
-	text-decoration: none;
+  text-decoration: none;
   margin-left: 1rem;
 }

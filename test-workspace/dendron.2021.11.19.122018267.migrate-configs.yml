@@ -1,0 +1,91 @@
+version: 3
+useFMTitle: true
+useNoteTitleForLink: true
+mermaid: true
+useKatex: true
+site:
+    copyAssets: true
+    siteHierarchies:
+        - dendron
+        - bar
+        - tags
+    siteRootDir: docs
+    logo: vault/assets/images/logo.png
+    siteFaviconPath: vault/assets/images/favicon.ico
+    siteUrl: 'https://foo.dev.dendron.so'
+    usePrettyRefs: true
+    githubCname: 11ty.dendron.so
+    usePrettyLinks: true
+    siteLastModified: true
+    title: Dendron
+    description: >-
+        Dendron is a local-first, markdown based, hierarchical note taking tool.
+        It is meant to help you create, organize, and collaborate on knowledge
+        bases of any size.
+    author: Kevin
+    twitter: kevins8
+    customHeaderPath: header.html
+    gh_edit_link: true
+    gh_edit_link_text: Edit this page on Github
+    gh_edit_repository: 'https://github.com/kevinslin/dendron-11ty-test'
+    gh_edit_branch: main
+    gh_edit_view_mode: edit
+    gh_root: docs/
+    duplicateNoteBehavior:
+        action: useVault
+        payload:
+            - vault2
+            - vault
+            - vault2
+            - vaultThree
+            - vaultThree
+dev:
+    enableWebUI: true
+    enablePreviewV2: true
+    # nextServerUrl: 'http://localhost:3000'
+    # engineServerPort: 3005
+commands:
+    lookup:
+        note:
+            selectionMode: extract
+            confirmVaultOnCreate: true
+            leaveTrace: false
+    insertNote:
+        initialValue: templates
+    insertNoteLink:
+        aliasMode: none
+        enableMultiSelect: false
+    insertNoteIndex:
+        enableMarker: false
+    randomNote: {}
+workspace:
+    dendronVersion: 0.64.1
+    vaults:
+        -
+            fsPath: vault3
+            name: vaultThree
+        -
+            fsPath: vault2
+            visibility: private
+        -
+            fsPath: vault
+    journal:
+        dailyDomain: daily
+        name: journal
+        dateFormat: y.MM.dd
+        addBehavior: childOfCurrent
+    scratch:
+        name: scratch
+        dateFormat: y.MM.dd.HHmmss
+        addBehavior: asOwnDomain
+    graph:
+        zoomSpeed: 1
+    enableAutoCreateOnDefinition: false
+    enableXVaultWikiLink: false
+    enableRemoteVaultInit: true
+    workspaceVaultSyncMode: noCommit
+    enableAutoFoldFrontmatter: true
+    maxPreviewsCached: 10
+    maxNoteLength: 204800
+noLegacyNoteRef: true
+usePrettyRefs: true

@@ -3,6 +3,72 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.69.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.69.2-alpha.0) (2021-11-19)
+
+
+### Bug Fixes
+
+* **pods:** invalid configuration error ([398a599](https://github.com/dendronhq/dendron/commit/398a5995fc594566131eb283ff989a877ca9c995))
+* **publish:** make 11ty publishing compatible with config version 3 ([#1556](https://github.com/dendronhq/dendron/issues/1556)) ([bc76028](https://github.com/dendronhq/dendron/commit/bc760288b757375eef1c787541b31097e86842be))
+* **publish:** remove duplicate CSS ([#1707](https://github.com/dendronhq/dendron/issues/1707)) ([9574009](https://github.com/dendronhq/dendron/commit/9574009f03441abae6209920f4c076ed46af73ad))
+* lock ua-parser-js to 0.7.28 due to https://github.com/faisalman/ua-parser-js/issues/536 ([7b697d2](https://github.com/dendronhq/dendron/commit/7b697d26be6fe3912ed51c1ca0753b0cac8e8c70))
+
+
+### Features Dendron
+
+* **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
+
+
+
+## 0.62.3 (2021-10-09)
+
+
+
+# 0.61.0 (2021-09-28)
+
+
+### Bug Fixes
+
+* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
+
+
+
+## 0.60.2 (2021-09-25)
+
+
+
+## 0.60.2-alpha.0 (2021-09-24)
+
+
+
+## 0.60.1 (2021-09-24)
+
+
+
+# 0.60.0 (2021-09-21)
+
+
+### Bug Fixes
+
+* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
+* links at top/bottom of reference aren't clickable ([#1282](https://github.com/dendronhq/dendron/issues/1282)) ([b2a00cc](https://github.com/dendronhq/dendron/commit/b2a00cc564299cdb17ae6060154b7616c04e630c))
+
+
+
+## 0.55.2 (2021-08-21)
+
+
+
+## 0.55.1 (2021-08-17)
+
+
+
+## 0.54.1 (2021-08-13)
+
+
+
+
+
 ## [0.69.1](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.69.1) (2021-11-16)
 
 

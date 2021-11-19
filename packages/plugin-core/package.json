@@ -4,7 +4,7 @@
   "displayName": "dendron",
   "description": "Dendron is a hierarchal note taking tool that grows as you do. ",
   "publisher": "dendron",
-  "version": "0.69.1",
+  "version": "0.69.2-alpha.0",
   "engines": {
     "vscode": "^1.54.0"
   },
@@ -868,8 +868,8 @@
     "rimraf": "npx rimraf"
   },
   "devDependencies": {
-    "@dendronhq/common-test-utils": "^0.69.1",
-    "@dendronhq/engine-test-utils": "^0.69.1",
+    "@dendronhq/common-test-utils": "^0.69.2-alpha.0",
+    "@dendronhq/engine-test-utils": "^0.69.2-alpha.0",
     "@sentry/webpack-plugin": "^1.17.1",
     "@types/execa": "^2.0.0",
     "@types/fs-extra": "^9.0.1",
@@ -903,12 +903,12 @@
     "webpack-merge": "^5.8.0"
   },
   "dependencies": {
-    "@dendronhq/api-server": "^0.69.1",
-    "@dendronhq/common-all": "^0.69.1",
-    "@dendronhq/common-server": "^0.69.1",
-    "@dendronhq/dendron-cli": "^0.69.1",
-    "@dendronhq/engine-server": "^0.69.1",
-    "@dendronhq/pods-core": "^0.69.1",
+    "@dendronhq/api-server": "^0.69.2-alpha.0",
+    "@dendronhq/common-all": "^0.69.2-alpha.0",
+    "@dendronhq/common-server": "^0.69.2-alpha.0",
+    "@dendronhq/dendron-cli": "^0.69.2-alpha.0",
+    "@dendronhq/engine-server": "^0.69.2-alpha.0",
+    "@dendronhq/pods-core": "^0.69.2-alpha.0",
     "@sentry/integrations": "^6.13.1",
     "@sentry/node": "^6.13.1",
     "@types/vscode": "1.58",
@@ -917,13 +917,13 @@
     "fs-extra": "^9.0.1",
     "lodash": "^4.17.15",
     "luxon": "^1.25.0",
-    "string-similarity": "^4.0.4",
     "markdown-it": "^11.0.0",
     "open": "^8.2.1",
     "open-graph-scraper": "^4.7.1",
     "query-string": "^7.0.1",
     "replace-in-file": "^6.2.0",
     "semver": "^7.3.2",
+    "string-similarity": "^4.0.4",
     "unist-util-visit": "2.0.3",
     "vscode-languageclient": "^6.1.3",
     "yaml-unist-parser": "^1.3.1"

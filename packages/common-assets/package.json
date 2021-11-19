@@ -1,10 +1,12 @@
 {
   "name": "@dendronhq/common-assets",
+  "private": true,
   "version": "0.69.2",
   "main": "index.js",
   "license": "GPLv3",
   "scripts": {
     "watch": "echo nop",
     "build": "node scripts/buildStyles.js"
-  }
+  },
+  "gitHead": "4ba39ff9fcec3bd1f0ba4fbd663cb3b49449609b"
 }

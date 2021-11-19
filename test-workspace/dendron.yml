@@ -1,8 +1,4 @@
-version: 3
-useFMTitle: true
-useNoteTitleForLink: true
-mermaid: true
-useKatex: true
+version: 4
 site:
     copyAssets: true
     siteHierarchies:
@@ -108,8 +104,11 @@ workspace:
         createTaskSelectionType: selection2link
     enableUserTags: true
     enableHashTags: true
-noLegacyNoteRef: true
+useFMTitle: true
+useNoteTitleForLink: true
+mermaid: true
 usePrettyRefs: true
+useKatex: true
 preview:
     enableFMTitle: true
     enableNoteTitleForLink: true

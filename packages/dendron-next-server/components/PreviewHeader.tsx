@@ -2,6 +2,7 @@ import Head from "next/head";
 import * as React from "react";
 import { DendronProps } from "../lib/types";
 import { createLogger } from "@dendronhq/common-frontend";
+import { ConfigUtils, IntermediateDendronConfig } from "@dendronhq/common-all";
 
 export function MermaidHeaders() {
   return [<script key="mermaid-js" src="/js/mermaid.8-11.min.js" />];
@@ -19,13 +20,13 @@ export function MathJaxHeaders() {
     <script
       key="math-style-2"
       src="https://polyfill.io/v3/polyfill.min.js?features=es6"
-     />,
+    />,
     <script
       key="math-script"
       id="MathJax-script"
       async
       src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
-     />,
+    />,
   ];
 }
 
@@ -36,12 +37,15 @@ function PreviewHeader({ engine }: DendronProps) {
   const ctx = "PreviewHeader";
   const logger = createLogger("PreviewHeader");
   logger.info({ ctx, config: engine?.config });
+  const config = engine.config as IntermediateDendronConfig;
+  const enableKatex = ConfigUtils.getPreview(config).enableKatex;
+  const enableMermaid = ConfigUtils.getPreview(config).enableMermaid;
 
   return (
     <Head>
       <script key="jquery" src="/js/jquery.3-60.min.js" />
-      {engine?.config?.useKatex && MathJaxHeaders()}
-      {engine?.config?.mermaid && MermaidHeaders()}
+      {enableKatex && MathJaxHeaders()}
+      {enableMermaid && MermaidHeaders()}
     </Head>
   );
 }

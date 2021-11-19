@@ -15,9 +15,10 @@ import { DConfig } from "../config";
 import { removeCache } from "../utils";
 import { Migrations } from "./types";
 import { MigrationUtils, PATH_MAP } from "./utils";
+import { DEPRECATED_PATHS } from ".";
 
 export const CONFIG_MIGRATIONS: Migrations = {
-  version: "0.64.1",
+  version: "0.69.1",
   changes: [
     {
       name: "migrate config",
@@ -44,7 +45,7 @@ export const CONFIG_MIGRATIONS: Migrations = {
           };
         }
 
-        const defaultV3Config = ConfigUtils.genDefaultConfig();
+        const defaultV4Config = ConfigUtils.genDefaultConfig();
         const rawDendronConfig = DConfig.getRaw(wsService.wsRoot);
 
         // remove all null properties
@@ -61,11 +62,15 @@ export const CONFIG_MIGRATIONS: Migrations = {
           cleanDendronConfig.workspace = {};
         }
 
+        if (_.isUndefined(cleanDendronConfig.preview)) {
+          cleanDendronConfig.preview = {};
+        }
+
         // legacy paths to remove from config;
         const legacyPaths: string[] = [];
         // migrate each path mapped in current config version
         PATH_MAP.forEach((value, key) => {
-          const legacyPath = value.target;
+          const { target: legacyPath, preserve } = value;
           let iteratee = value.iteratee;
           let valueToFill;
           let alreadyFilled;
@@ -75,7 +80,7 @@ export const CONFIG_MIGRATIONS: Migrations = {
             const maybeLegacyConfig = _.get(cleanDendronConfig, legacyPath);
             if (_.isUndefined(maybeLegacyConfig)) {
               // legacy property doesn't have a value.
-              valueToFill = _.get(defaultV3Config, key);
+              valueToFill = _.get(defaultV4Config, key);
             } else {
               // there is a legacy value.
               // check if this mapping needs special treatment.
@@ -93,11 +98,18 @@ export const CONFIG_MIGRATIONS: Migrations = {
           }
 
           // these will later be used to delete.
-          legacyPaths.push(legacyPath);
+          // only push if we aren't preserving target.
+          if (!preserve) {
+            legacyPaths.push(legacyPath);
+          }
         });
 
         // set config version.
-        _.set(cleanDendronConfig, "version", 3);
+        _.set(cleanDendronConfig, "version", 4);
+
+        // add deprecated paths to legacyPaths
+        // so they could be unset if they exist
+        legacyPaths.concat(DEPRECATED_PATHS);
 
         // remove legacy property from config after migration.
         legacyPaths.forEach((legacyPath) => {
@@ -107,7 +119,7 @@ export const CONFIG_MIGRATIONS: Migrations = {
         // recursively populate missing defaults
         const migratedConfig = _.defaultsDeep(
           cleanDendronConfig,
-          defaultV3Config
+          defaultV4Config
         );
 
         return { data: { dendronConfig: migratedConfig, wsConfig } };

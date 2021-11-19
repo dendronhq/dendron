@@ -4,7 +4,13 @@ import minimatch from "minimatch";
 import querystring from "querystring";
 import semver from "semver";
 import { COLORS_LIST } from "./colors";
-import { NoteProps, SEOProps, DVault, DHookDict } from "./types";
+import {
+  NoteProps,
+  SEOProps,
+  DVault,
+  DHookDict,
+  DendronSiteConfig,
+} from "./types";
 import { TaskConfig } from "./types/configs/workspace/task";
 import {
   DendronCommandConfig,
@@ -15,8 +21,10 @@ import {
   JournalConfig,
   ScratchConfig,
   LookupConfig,
-  StrictConfigV3,
+  StrictConfigV4,
   NoteLookupConfig,
+  genDefaultPreviewConfig,
+  DendronPreviewConfig,
 } from "./types/intermediateConfigs";
 
 /**
@@ -272,24 +280,11 @@ export type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
 export type NonOptional<T, K extends keyof T> = Pick<Required<T>, K> &
   Omit<T, K>;
 
-
 export class ConfigUtils {
-  static usePrettyRef(config: IntermediateDendronConfig) {
-    let usePrettyRefs: boolean | undefined = _.find(
-      [config?.usePrettyRefs, config?.site?.usePrettyRefs],
-      (ent) => !_.isUndefined(ent)
-    );
-    if (_.isUndefined(usePrettyRefs)) {
-      usePrettyRefs = true;
-    }
-    return usePrettyRefs;
-  }
-
-  static genDefaultConfig(): StrictConfigV3 {
+  static genDefaultConfig(): StrictConfigV4 {
     const common = {
       useFMTitle: true,
       useNoteTitleForLink: true,
-      noLegacyNoteRef: true,
       mermaid: true,
       useKatex: true,
       usePrettyRefs: true,
@@ -309,18 +304,19 @@ export class ConfigUtils {
     };
 
     return {
-      version: 3,
+      version: 4,
       ...common,
       commands: genDefaultCommandConfig(),
       workspace: genDefaultWorkspaceConfig(),
-    } as StrictConfigV3;
+      preview: genDefaultPreviewConfig(),
+    } as StrictConfigV4;
   }
 
   // get
-  static getProp<K extends keyof StrictConfigV3>(
+  static getProp<K extends keyof StrictConfigV4>(
     config: IntermediateDendronConfig,
     key: K
-  ): StrictConfigV3[K] {
+  ): StrictConfigV4[K] {
     const defaultConfig = ConfigUtils.genDefaultConfig();
     const configWithDefaults = _.defaultsDeep(config, defaultConfig);
     return configWithDefaults[key];
@@ -334,6 +330,14 @@ export class ConfigUtils {
     config: IntermediateDendronConfig
   ): DendronWorkspaceConfig {
     return ConfigUtils.getProp(config, "workspace");
+  }
+
+  static getPreview(config: IntermediateDendronConfig): DendronPreviewConfig {
+    return ConfigUtils.getProp(config, "preview");
+  }
+
+  static getSite(config: IntermediateDendronConfig): DendronSiteConfig {
+    return ConfigUtils.getProp(config, "site");
   }
 
   static getVaults(config: IntermediateDendronConfig): DVault[] {
@@ -360,11 +364,56 @@ export class ConfigUtils {
     return ConfigUtils.getCommands(config).lookup;
   }
 
+  static getEnableFMTitle(
+    config: IntermediateDendronConfig,
+    shouldApplyPublishRules?: boolean
+  ): boolean | undefined {
+    return shouldApplyPublishRules
+      ? ConfigUtils.getProp(config, "useFMTitle")
+      : ConfigUtils.getPreview(config).enableFMTitle;
+  }
+
+  static getEnableNoteTitleForLink(
+    config: IntermediateDendronConfig,
+    shouldApplyPublishRules?: boolean
+  ): boolean | undefined {
+    return shouldApplyPublishRules
+      ? ConfigUtils.getProp(config, "useNoteTitleForLink")
+      : ConfigUtils.getPreview(config).enableNoteTitleForLink;
+  }
+
+  static getEnableMermaid(
+    config: IntermediateDendronConfig,
+    shouldApplyPublishRules?: boolean
+  ): boolean | undefined {
+    return shouldApplyPublishRules
+      ? ConfigUtils.getProp(config, "mermaid")
+      : ConfigUtils.getPreview(config).enableMermaid;
+  }
+
+  static getEnableKatex(
+    config: IntermediateDendronConfig,
+    shouldApplyPublishRules?: boolean
+  ): boolean | undefined {
+    return shouldApplyPublishRules
+      ? ConfigUtils.getProp(config, "useKatex")
+      : ConfigUtils.getPreview(config).enableKatex;
+  }
+
+  static getEnablePrettyRefs(
+    config: IntermediateDendronConfig,
+    shouldApplyPublishRules?: boolean
+  ): boolean | undefined {
+    return shouldApplyPublishRules
+      ? ConfigUtils.getSite(config).usePrettyRefs
+      : ConfigUtils.getPreview(config).enablePrettyRefs;
+  }
+
   // set
-  static setProp<K extends keyof StrictConfigV3>(
+  static setProp<K extends keyof StrictConfigV4>(
     config: IntermediateDendronConfig,
     key: K,
-    value: StrictConfigV3[K]
+    value: StrictConfigV4[K]
   ): void {
     _.set(config, key, value);
   }
@@ -420,5 +469,14 @@ export class ConfigUtils {
 
   static setHooks(config: IntermediateDendronConfig, value: DHookDict) {
     ConfigUtils.setWorkspaceProp(config, "hooks", value);
+  }
+
+  static setPreviewProps<K extends keyof DendronPreviewConfig>(
+    config: IntermediateDendronConfig,
+    key: K,
+    value: DendronPreviewConfig[K]
+  ) {
+    const path = `preview.${key}`;
+    _.set(config, path, value);
   }
 }

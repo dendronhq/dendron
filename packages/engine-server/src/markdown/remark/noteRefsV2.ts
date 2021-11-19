@@ -243,6 +243,8 @@ function convertNoteRef(opts: ConvertNoteRefOpts): {
   let data: string | undefined;
   let errors: DendronError[] = [];
   const { link, proc, compilerOpts } = opts;
+  const procOpts = MDUtilsV4.getProcOpts(proc);
+  const { shouldApplyPublishRules } = procOpts;
   const { error, engine } = MDUtilsV4.getEngineFromProc(proc);
   const refLvl = MDUtilsV4.getNoteRefLvl(proc());
   let { dest, vault, config } = MDUtilsV4.getDendronData(proc);
@@ -326,7 +328,12 @@ function convertNoteRef(opts: ConvertNoteRefOpts): {
           suffix = ".md";
         }
         const link = `"${wikiLinkOpts?.prefix || ""}${href}${suffix}"`;
-        let title = getTitle({ config, note, loc: ref });
+        const title = getTitle({
+          config,
+          note,
+          loc: ref,
+          shouldApplyPublishRules,
+        });
         return renderPretty({
           content: data,
           title,
@@ -389,7 +396,12 @@ export function convertNoteRefASTV2(
           useId = true;
         }
         let href = useId ? note.id : fname;
-        const title = getTitle({ config, note, loc: ref });
+        const title = getTitle({
+          config,
+          note,
+          loc: ref,
+          shouldApplyPublishRules,
+        });
         if (dest === DendronASTDest.HTML) {
           if (!MDUtilsV5.isV5Active(proc)) {
             suffix = ".html";
@@ -457,17 +469,17 @@ export function convertNoteRefASTV2(
   let { shouldApplyPublishRules } = dendronData;
 
   const { wikiLinkOpts } = compilerOpts;
-  const siteConfig = ConfigUtils.getProp(config, "site");
-  const sitePrettyRefConfig = siteConfig.usePrettyRefs;
-  const prettyRefConfig = ConfigUtils.getProp(config, "usePrettyRefs");
+  const siteConfig = ConfigUtils.getSite(config);
 
   if (MDUtilsV5.isV5Active(proc)) {
     shouldApplyPublishRules = MDUtilsV5.shouldApplyPublishingRules(proc);
   }
 
-  let prettyRefs = shouldApplyPublishRules
-    ? sitePrettyRefConfig
-    : prettyRefConfig;
+  let prettyRefs = ConfigUtils.getEnablePrettyRefs(
+    config,
+    shouldApplyPublishRules
+  );
+
   if (
     prettyRefs &&
     _.includes([DendronASTDest.MD_DENDRON, DendronASTDest.MD_REGULAR], dest)
@@ -1041,10 +1053,16 @@ function getTitle(opts: {
   config: IntermediateDendronConfig;
   note: NoteProps;
   loc: DNoteLoc;
+  shouldApplyPublishRules?: boolean;
 }) {
-  const { config, note, loc } = opts;
+  const { config, note, loc, shouldApplyPublishRules } = opts;
   const { alias, fname } = loc;
-  return config.useNoteTitleForLink ? note.title : alias || fname || "no title";
+  const enableNoteTitleForLink = ConfigUtils.getEnableNoteTitleForLink(
+    config,
+    shouldApplyPublishRules
+  );
+
+  return enableNoteTitleForLink ? note.title : alias || fname || "no title";
 }
 
 function renderPrettyAST(opts: {

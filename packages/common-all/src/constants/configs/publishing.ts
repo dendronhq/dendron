@@ -12,12 +12,9 @@ import {
   GithubEditViewModeEnum,
 } from "../../types/configs/publishing/github";
 import {
-  ENABLE_HIERARCHY_DISPLAY,
-  HIERARCHY_DISPLAY_TITLE,
   ENABLE_FM_TITLE,
   ENABLE_NOTE_TITLE_FOR_LINK,
   ENABLE_MERMAID,
-  ENABLE_NUNJUCKS,
   ENABLE_KATEX,
   ENABLE_PRETTY_REFS,
 } from "./global";
@@ -95,11 +92,16 @@ const SEO: DendronConfigEntryCollection<SEOConfig> = {
 export const PUBLISHING: DendronConfigEntryCollection<DendronPublishingConfig> =
   {
     enableFMTitle: ENABLE_FM_TITLE("publishing"),
-    enableHierarchyDisplay: ENABLE_HIERARCHY_DISPLAY("publishing"),
-    hierarchyDisplayTitle: HIERARCHY_DISPLAY_TITLE("publishing"),
+    enableHierarchyDisplay: {
+      label: "Enable Hierarchy Display",
+      desc: "Enable rendering of children link block at the end of the note.",
+    },
+    hierarchyDisplayTitle: {
+      label: "Hierarchy Display Title",
+      desc: "Title to display for the children links block.",
+    },
     enableNoteTitleForLink: ENABLE_NOTE_TITLE_FOR_LINK("publishing"),
     enableMermaid: ENABLE_MERMAID("publishing"),
-    enableNunjucks: ENABLE_NUNJUCKS("publishing"),
     enablePrettyRefs: ENABLE_PRETTY_REFS("publishing"),
     enableKatex: ENABLE_KATEX("publishing"),
     assetsPrefix: {

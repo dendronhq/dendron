@@ -756,7 +756,7 @@ describe("dendronPub", () => {
       "config.site.usePrettyRef: true",
       async ({ engine, vaults }) => {
         const config = ConfigUtils.genDefaultConfig();
-        config.usePrettyRefs = false;
+        ConfigUtils.setPreviewProps(config, "enablePrettyRefs", false);
         config.site = {
           siteHierarchies: ["foo"],
           siteRootDir: "foo",
@@ -786,7 +786,7 @@ describe("dendronPub", () => {
       "config.site.usePrettyRef: false",
       async ({ engine, vaults }) => {
         const config = ConfigUtils.genDefaultConfig();
-        config.usePrettyRefs = false;
+        ConfigUtils.setPreviewProps(config, "enablePrettyRefs", false);
         config.site = {
           siteHierarchies: ["foo"],
           siteRootDir: "foo",
@@ -816,7 +816,7 @@ describe("dendronPub", () => {
       "config.usePrettyRef: true",
       async ({ engine, vaults }) => {
         const config = ConfigUtils.genDefaultConfig();
-        config.usePrettyRefs = true;
+        ConfigUtils.setPreviewProps(config, "enablePrettyRefs", true);
         config.site = {
           siteHierarchies: ["foo"],
           siteRootDir: "foo",
@@ -846,7 +846,7 @@ describe("dendronPub", () => {
       "config.usePrettyRef: false",
       async ({ engine, vaults }) => {
         const config = ConfigUtils.genDefaultConfig();
-        config.usePrettyRefs = false;
+        ConfigUtils.setPreviewProps(config, "enablePrettyRefs", false);
         config.site = {
           siteHierarchies: ["foo"],
           siteRootDir: "foo",

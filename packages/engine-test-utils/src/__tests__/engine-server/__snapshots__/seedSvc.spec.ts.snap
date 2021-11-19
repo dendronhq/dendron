@@ -5,10 +5,9 @@ exports[`add ok: exists 1`] = `".git .gitignore dendron.code-workspace dendron.y
 exports[`add ok: exists 2`] = `"dendron.code-workspace dendron.yml hooks seeds vault1 vault2 vault3"`;
 
 exports[`add ok: exists 3`] = `
-"version: 3
+"version: 4
 useFMTitle: true
 useNoteTitleForLink: true
-noLegacyNoteRef: true
 mermaid: true
 useKatex: true
 usePrettyRefs: true
@@ -37,6 +36,7 @@ commands:
             selectionMode: extract
             confirmVaultOnCreate: false
             leaveTrace: false
+            bubbleUpCreateNew: true
     randomNote: {}
     insertNote:
         initialValue: templates
@@ -100,6 +100,12 @@ workspace:
     maxNoteLength: 204800
     seeds:
         dendron.foo: {}
+preview:
+    enableFMTitle: true
+    enableNoteTitleForLink: true
+    enableMermaid: true
+    enablePrettyRefs: true
+    enableKatex: true
 "
 `;
 
@@ -131,10 +137,9 @@ exports[`add ok: seed with site 1`] = `".git .gitignore dendron.code-workspace d
 exports[`add ok: seed with site 2`] = `"dendron.code-workspace dendron.yml hooks seeds vault1 vault2 vault3"`;
 
 exports[`add ok: seed with site 3`] = `
-"version: 3
+"version: 4
 useFMTitle: true
 useNoteTitleForLink: true
-noLegacyNoteRef: true
 mermaid: true
 useKatex: true
 usePrettyRefs: true
@@ -163,6 +168,7 @@ commands:
             selectionMode: extract
             confirmVaultOnCreate: false
             leaveTrace: false
+            bubbleUpCreateNew: true
     randomNote: {}
     insertNote:
         initialValue: templates
@@ -229,6 +235,12 @@ workspace:
             site:
                 url: 'https://foo.com'
                 index: foo
+preview:
+    enableFMTitle: true
+    enableNoteTitleForLink: true
+    enableMermaid: true
+    enablePrettyRefs: true
+    enableKatex: true
 "
 `;
 
@@ -258,10 +270,9 @@ exports[`add ok: seed with site 4`] = `
 exports[`init convert workspace error: no vaults 1`] = `"dendron.code-workspace dendron.yml hooks"`;
 
 exports[`init convert workspace error: no vaults 2`] = `
-"version: 3
+"version: 4
 useFMTitle: true
 useNoteTitleForLink: true
-noLegacyNoteRef: true
 mermaid: true
 useKatex: true
 usePrettyRefs: true
@@ -283,6 +294,7 @@ commands:
             selectionMode: extract
             confirmVaultOnCreate: false
             leaveTrace: false
+            bubbleUpCreateNew: true
     randomNote: {}
     insertNote:
         initialValue: templates
@@ -333,16 +345,21 @@ workspace:
     enableAutoFoldFrontmatter: false
     maxPreviewsCached: 10
     maxNoteLength: 204800
+preview:
+    enableFMTitle: true
+    enableNoteTitleForLink: true
+    enableMermaid: true
+    enablePrettyRefs: true
+    enableKatex: true
 "
 `;
 
 exports[`init convert workspace ok: diff root name 1`] = `"dendron.code-workspace dendron.yml fooVault hooks seed.yml"`;
 
 exports[`init convert workspace ok: diff root name 2`] = `
-"version: 3
+"version: 4
 useFMTitle: true
 useNoteTitleForLink: true
-noLegacyNoteRef: true
 mermaid: true
 useKatex: true
 usePrettyRefs: true
@@ -368,6 +385,7 @@ commands:
             selectionMode: extract
             confirmVaultOnCreate: false
             leaveTrace: false
+            bubbleUpCreateNew: true
     randomNote: {}
     insertNote:
         initialValue: templates
@@ -420,6 +438,12 @@ workspace:
     enableAutoFoldFrontmatter: false
     maxPreviewsCached: 10
     maxNoteLength: 204800
+preview:
+    enableFMTitle: true
+    enableNoteTitleForLink: true
+    enableMermaid: true
+    enablePrettyRefs: true
+    enableKatex: true
 "
 `;
 
@@ -439,10 +463,9 @@ repository:
 exports[`init create workspace basic 1`] = `".gitignore dendron.code-workspace dendron.yml hooks seed.yml vault"`;
 
 exports[`init create workspace basic 2`] = `
-"version: 3
+"version: 4
 useFMTitle: true
 useNoteTitleForLink: true
-noLegacyNoteRef: true
 mermaid: true
 useKatex: true
 usePrettyRefs: true
@@ -468,6 +491,7 @@ commands:
             selectionMode: extract
             confirmVaultOnCreate: false
             leaveTrace: false
+            bubbleUpCreateNew: true
     randomNote: {}
     insertNote:
         initialValue: templates
@@ -520,6 +544,12 @@ workspace:
     enableAutoFoldFrontmatter: false
     maxPreviewsCached: 10
     maxNoteLength: 204800
+preview:
+    enableFMTitle: true
+    enableNoteTitleForLink: true
+    enableMermaid: true
+    enablePrettyRefs: true
+    enableKatex: true
 "
 `;
 
@@ -541,10 +571,9 @@ exports[`remove ok: remove initialized seed 1`] = `""`;
 exports[`remove ok: remove initialized seed 2`] = `"dendron.foo"`;
 
 exports[`remove ok: remove initialized seed 3`] = `
-"version: 3
+"version: 4
 useFMTitle: true
 useNoteTitleForLink: true
-noLegacyNoteRef: true
 mermaid: true
 useKatex: true
 usePrettyRefs: true
@@ -573,6 +602,7 @@ commands:
             selectionMode: extract
             confirmVaultOnCreate: false
             leaveTrace: false
+            bubbleUpCreateNew: true
     randomNote: {}
     insertNote:
         initialValue: templates
@@ -631,14 +661,19 @@ workspace:
     maxPreviewsCached: 10
     maxNoteLength: 204800
     seeds: {}
+preview:
+    enableFMTitle: true
+    enableNoteTitleForLink: true
+    enableMermaid: true
+    enablePrettyRefs: true
+    enableKatex: true
 "
 `;
 
 exports[`remove ok: remove non-initialized seed 1`] = `
-"version: 3
+"version: 4
 useFMTitle: true
 useNoteTitleForLink: true
-noLegacyNoteRef: true
 mermaid: true
 useKatex: true
 usePrettyRefs: true
@@ -667,6 +702,7 @@ commands:
             selectionMode: extract
             confirmVaultOnCreate: false
             leaveTrace: false
+            bubbleUpCreateNew: true
     randomNote: {}
     insertNote:
         initialValue: templates
@@ -725,5 +761,11 @@ workspace:
     maxPreviewsCached: 10
     maxNoteLength: 204800
     seeds: {}
+preview:
+    enableFMTitle: true
+    enableNoteTitleForLink: true
+    enableMermaid: true
+    enablePrettyRefs: true
+    enableKatex: true
 "
 `;

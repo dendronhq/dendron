@@ -3,19 +3,19 @@ import {
   DVault,
   genDefaultJournalConfig,
   IntermediateDendronConfig,
-  StrictConfigV3,
+  StrictConfigV4,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 
 describe("ConfigUtils", () => {
   describe("getProps", () => {
-    describe("GIVEN v3 config", () => {
-      let config: Partial<StrictConfigV3>;
+    describe("GIVEN v4 config", () => {
+      let config: Partial<StrictConfigV4>;
       beforeEach(() => {
-        config = ConfigUtils.genDefaultConfig() as Partial<StrictConfigV3>;
+        config = ConfigUtils.genDefaultConfig() as Partial<StrictConfigV4>;
       });
 
-      test("WHEN given a v3 path AND value exists, THEN it returns the correct value", () => {
+      test("WHEN given a v4 path AND value exists, THEN it returns the correct value", () => {
         const expected = [{ fsPath: "foo" }, { fsPath: "bar" }] as DVault[];
         ConfigUtils.setVaults(config as IntermediateDendronConfig, expected);
 
@@ -27,7 +27,7 @@ describe("ConfigUtils", () => {
         expect(vaults).toEqual(expected);
       });
 
-      test("WHEN given v3 path AND value doesn't exists, THEN it returns v3 default", () => {
+      test("WHEN given v4 path AND value doesn't exists, THEN it returns v4 default", () => {
         const expected = genDefaultJournalConfig();
         // @ts-ignore
         delete config.workspace["journal"];

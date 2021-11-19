@@ -2,6 +2,7 @@ import { DendronASTDest, MDUtilsV4 } from "@dendronhq/engine-server";
 import { PublishPodPlantOpts, PublishPod, PublishPodConfig } from "../basev3";
 import { JSONSchemaType } from "ajv";
 import { PodUtils } from "../utils";
+import { ConfigUtils } from "@dendronhq/common-all";
 
 const ID = "dendron.html";
 
@@ -27,10 +28,10 @@ export class HTMLPublishPod extends PublishPod {
       fname,
       shouldApplyPublishRules: false,
       publishOpts: {
-        insertTitle: econfig!.useFMTitle!,
+        insertTitle: ConfigUtils.getProp(econfig!, "useFMTitle"),
       },
       config: econfig!,
-      mermaid: econfig!.mermaid,
+      mermaid: ConfigUtils.getProp(econfig!, "mermaid"),
     });
     const { contents } = await MDUtilsV4.procRehype({
       proc,

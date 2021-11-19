@@ -9,6 +9,7 @@ import {
   NoteUtils,
   NoteProps,
   DateTime,
+  ConfigUtils,
 } from "@dendronhq/common-all";
 // @ts-ignore
 import rehypePrism from "@mapbox/rehype-prism";
@@ -324,9 +325,6 @@ export class MDUtilsV5 {
           this.setProcData(proc, data as ProcDataFullV5);
           MDUtilsV4.setEngine(proc, data.engine!);
 
-          const isNoteRef = !_.isUndefined((data as ProcDataFullV5).noteRefLvl);
-
-          const shouldInsertTitle = isNoteRef ? false : data.config?.useFMTitle;
           // NOTE: order matters. this needs to appear before `dendronPub`
           if (data.dest === DendronASTDest.HTML) {
             proc = proc.use(backlinks).use(hierarchies);
@@ -340,15 +338,34 @@ export class MDUtilsV5 {
             proc = proc.use(dendronHoverPreview);
           }
           // add additional plugins
+          const isNoteRef = !_.isUndefined((data as ProcDataFullV5).noteRefLvl);
+          let insertTitle;
+          if (isNoteRef) {
+            insertTitle = false;
+          } else {
+            const config = data.config as IntermediateDendronConfig;
+            const shouldApplyPublishRules =
+              MDUtilsV5.shouldApplyPublishingRules(proc);
+            insertTitle = ConfigUtils.getEnableFMTitle(
+              config,
+              shouldApplyPublishRules
+            );
+          }
+
           proc = proc.use(dendronPub, {
-            insertTitle: shouldInsertTitle,
-            transformNoPublish:
-              opts.flavor === ProcFlavor.PUBLISHING ? true : false,
+            insertTitle,
+            transformNoPublish: opts.flavor === ProcFlavor.PUBLISHING,
           });
-          if (data.config?.useKatex) {
+
+          const config = data.config as IntermediateDendronConfig;
+          const shouldApplyPublishRules =
+            MDUtilsV5.shouldApplyPublishingRules(proc);
+
+          if (ConfigUtils.getEnableKatex(config, shouldApplyPublishRules)) {
             proc = proc.use(math);
           }
-          if (data.config?.mermaid) {
+
+          if (ConfigUtils.getEnableMermaid(config, shouldApplyPublishRules)) {
             proc = proc.use(mermaid, { simple: true });
           }
           // Add remaining flavor specific plugins
@@ -388,10 +405,15 @@ export class MDUtilsV5 {
         MDUtilsV4.setEngine(proc, data.engine!);
 
         // add additional plugins
-        if (data.config?.useKatex) {
+        const config = data.config as IntermediateDendronConfig;
+        const shouldApplyPublishRules =
+          MDUtilsV5.shouldApplyPublishingRules(proc);
+
+        if (ConfigUtils.getEnableKatex(config, shouldApplyPublishRules)) {
           proc = proc.use(math);
         }
-        if (data.config?.mermaid) {
+
+        if (ConfigUtils.getEnableMermaid(config, shouldApplyPublishRules)) {
           proc = proc.use(mermaid, { simple: true });
         }
         break;
@@ -419,7 +441,12 @@ export class MDUtilsV5 {
       .use(slug);
 
     // apply plugins enabled by config
-    if (data?.config?.useKatex) {
+    const config = data?.config as IntermediateDendronConfig;
+    const enableKatex = MDUtilsV5.shouldApplyPublishingRules(pRehype)
+      ? ConfigUtils.getProp(config, "useKatex")
+      : ConfigUtils.getPreview(config).enableKatex;
+
+    if (enableKatex) {
       pRehype = pRehype.use(katex);
     }
     // apply publishing specific things
@@ -516,6 +543,7 @@ export class MDUtilsV5 {
     data: Omit<ProcDataFullOptsV5, "dest">,
     opts?: { flavor?: ProcFlavor }
   ) {
+    console.debug({ ctx: "procRehypeFull" });
     const proc = this._procRehype(
       { mode: ProcMode.FULL, parseOnly: false, flavor: opts?.flavor },
       data

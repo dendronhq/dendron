@@ -26,6 +26,7 @@ export type NoteLookupConfig = {
   selectionMode: LookupSelectionMode;
   confirmVaultOnCreate: boolean;
   leaveTrace: boolean;
+  bubbleUpCreateNew: boolean;
 };
 
 /**
@@ -38,6 +39,7 @@ export function genDefaultLookupConfig(): LookupConfig {
       selectionMode: LookupSelectionModeEnum.extract,
       confirmVaultOnCreate: false,
       leaveTrace: false,
+      bubbleUpCreateNew: true,
     },
   };
 }

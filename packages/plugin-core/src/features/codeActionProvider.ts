@@ -1,5 +1,6 @@
 import { ContextualUIEvents } from "@dendronhq/common-all";
 import { DoctorActions } from "@dendronhq/dendron-cli";
+import isUrl from "is-url";
 import _ from "lodash";
 import { FrontmatterContent } from "mdast";
 import {
@@ -282,9 +283,7 @@ export const refactorProvider: CodeActionProvider = {
         return;
       } else {
         //regex for url
-        const regex =
-          "^(http://www.|https://www.|http://|https://)?[a-z0-9]+([-.]{1}[a-z0-9]+)*.[a-z]{2,5}(:[0-9]{1,5})?(/.[^s]*)?$";
-        if (!_.isUndefined(text) && text.match(regex)) {
+        if (!_.isUndefined(text) && isUrl(text)) {
           return [WrapAsMarkdownLink];
         }
         return !_.isUndefined(header)

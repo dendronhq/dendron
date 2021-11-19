@@ -27,7 +27,7 @@ describe("ConfigUtils", () => {
         expect(vaults).toEqual(expected);
       });
 
-      test("WHEN given v4 path AND value doesn't exists, THEN it returns v4 default", () => {
+      test("WHEN given v4 path AND journal value doesn't exists, THEN it returns v4 default", () => {
         const expected = genDefaultJournalConfig();
         // @ts-ignore
         delete config.workspace["journal"];
@@ -41,6 +41,18 @@ describe("ConfigUtils", () => {
         ).journal;
 
         expect(journalConfig).toEqual(expected);
+      });
+
+      test("WHEN given v4 path AND preview value doesn't exists, THEN it returns v4 default", () => {
+        delete config["preview"];
+
+        // testing for explicitly deleted key.
+        expect(config.preview).toBeUndefined();
+
+        const previewConfig = ConfigUtils.getPreview(
+          config as IntermediateDendronConfig
+        );
+        expect(previewConfig).toEqual(ConfigUtils.genDefaultConfig().preview);
       });
     });
   });

@@ -333,7 +333,12 @@ export class ConfigUtils {
   }
 
   static getPreview(config: IntermediateDendronConfig): DendronPreviewConfig {
-    return ConfigUtils.getProp(config, "preview");
+    const out = ConfigUtils.getProp(config, "preview");
+    // FIXME: for some reason, this can return undefined when run in context of chrome in `dendron-plugin-views`
+    if (_.isUndefined(out)) {
+      return ConfigUtils.genDefaultConfig().preview;
+    }
+    return out;
   }
 
   static getSite(config: IntermediateDendronConfig): DendronSiteConfig {

@@ -107,7 +107,6 @@ workspace:
 useFMTitle: true
 useNoteTitleForLink: true
 mermaid: true
-usePrettyRefs: true
 useKatex: true
 preview:
     enableFMTitle: true

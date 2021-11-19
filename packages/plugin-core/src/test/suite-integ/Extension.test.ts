@@ -188,7 +188,6 @@ suite("Extension", function () {
           useNoteTitleForLink: true,
           mermaid: true,
           useKatex: true,
-          usePrettyRefs: true,
           dev: {
             enablePreviewV2: true,
           },

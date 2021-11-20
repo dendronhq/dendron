@@ -29,7 +29,6 @@ const concatStyles = (themeMaps) => {
 
 const writeStyles = ({ themeMaps, dest, common }) => {
   _.map(themeMaps, (v, k) => {
-    // const themeContentString = v.join("\n");
     const themeContentString = v.concat(common).join("\n");
     // write to build
     fs.writeFileSync(path.join(dest, `${k}.css`), themeContentString);
@@ -40,6 +39,9 @@ const buildAll = async () => {
   const cssRoot = path.join("assets", "css");
   // everything that belongs to the top of the directory
   const topRoot = path.join("assets", "top");
+  const katexFontsRoot = path.join("assets", "katex-fonts");
+
+  const dstCssRoot = path.join("build", "assets", "css");
   const dstRoots = [path.join("build", "assets", "css")];
 
   // --- Read
@@ -59,11 +61,14 @@ const buildAll = async () => {
     dstRoots.map(async (dstRoot) => {
       fs.ensureDirSync(dstRoot);
       fs.emptyDirSync(dstRoot);
-      writeStyles({ themeMaps, common: [], dest: dstRoot });
+      writeStyles({ themeMaps, common: [katex], dest: dstRoot });
     })
   );
 
   // --- Other
+  // katex fonts need to be referenced in css
+  fs.copySync(katexFontsRoot, path.join(dstCssRoot, "fonts"));
+  // add favicon
   fs.copySync(topRoot, path.join("build", "top"));
 };
 buildAll();

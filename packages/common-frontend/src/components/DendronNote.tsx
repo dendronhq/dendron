@@ -34,6 +34,8 @@ export const useMermaid = ({
 
 export function DendronNote({ noteContent, config, ...rest }: Props) {
   useMermaid({ config, noteRenderedBody: noteContent });
+  const logger = createLogger("DendronNote");
+  logger.info({ ctx: "DendronNote", config });
   return (
     <>
       <div dangerouslySetInnerHTML={{ __html: noteContent }} {...rest} />

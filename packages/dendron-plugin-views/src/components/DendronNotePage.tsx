@@ -1,17 +1,17 @@
 import {
-  DMessageSource, FOOTNOTE_DEF_CLASS, FOOTNOTE_REF_CLASS, NoteViewMessageEnum, ThemeType
+  DMessageSource,
+  FOOTNOTE_DEF_CLASS,
+  FOOTNOTE_REF_CLASS,
+  NoteViewMessageEnum,
+  ThemeType,
 } from "@dendronhq/common-all";
-import {
-  createLogger,
-  DendronNote
-} from "@dendronhq/common-frontend";
+import { createLogger, DendronNote } from "@dendronhq/common-frontend";
 import _ from "lodash";
 import React from "react";
 import { useMermaid, useRenderedNoteBody } from "../hooks";
 import { DendronComponent } from "../types";
 import { postVSCodeMessage } from "../utils/vscode";
 import mermaid from "mermaid";
-
 
 function isHTMLAnchorElement(element: Element): element is HTMLAnchorElement {
   return element.nodeName === "A";
@@ -86,6 +86,7 @@ const DendronNotePage: DendronComponent = (props) => {
     ctx,
     msg: "enter",
     noteProps: noteProps ? noteProps.id : "no notes found",
+    config,
   });
 
   const [noteRenderedBody] = useRenderedNoteBody({ ...props, noteProps });
@@ -98,10 +99,10 @@ const DendronNotePage: DendronComponent = (props) => {
   // TODO: dynamiclally set
   useMermaid({ config, themeType: ThemeType.LIGHT, mermaid, noteRenderedBody });
 
-  if (!noteRenderedBody) {
+  if (!noteRenderedBody || !config) {
     return null;
   }
-  return <DendronNote noteContent={noteRenderedBody} />;
+  return <DendronNote noteContent={noteRenderedBody} config={config} />;
 };
 
 export default DendronNotePage;

@@ -127,7 +127,17 @@ export default function DendronLayout(
           id="initmermaid"
           src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"
           onLoad={() => {
-            (window as any).mermaid.init();
+            const mermaid = (window as any).mermaid;
+            // save for debugging
+            // when trying to access mermaid in DOM, <div id="mermaid"></div> gets returned
+            // we disambiguate by saving a copy of mermaid
+            (window as any)._mermaid = mermaid;
+
+            mermaid.initialize({
+              startOnLoad: false,
+            });
+            // initialize
+            mermaid.init();
           }}
         />
       )}

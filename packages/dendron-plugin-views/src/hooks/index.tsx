@@ -78,8 +78,8 @@ export const useMermaid = ({
   noteRenderedBody?: string;
 }) => {
   React.useEffect(() => {
-    if (config && ConfigUtils.getPreview(config).enableMermaid) {
-      const logger = createLogger("useMermaid");
+    const logger = createLogger("useMermaid");
+    if (config && ConfigUtils.getPreview(config)?.enableMermaid) {
       mermaid.initialize({
         startOnLoad: true,
         theme: themeType === ThemeType.LIGHT ? "forest" : "dark",
@@ -89,11 +89,12 @@ export const useMermaid = ({
       window._mermaid = mermaid;
       // @ts-ignore
       mermaid.init();
-      logger.info("init mermaid");
+      logger.info("init mermaid library");
+    } else {
+      logger.info("skip mermaid library");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [config, noteRenderedBody]);
-  // }, [config, noteRenderedBody, mermaid, themeType]);
 };
 
 /**

@@ -39,8 +39,9 @@ export default function Note({
 }: DendronNotePageProps) {
   const logger = createLogger("Note");
   const { getActiveNoteId } = useDendronRouter();
-  const [bodyFromState, setBody] =
-    React.useState<string | undefined>(undefined);
+  const [bodyFromState, setBody] = React.useState<string | undefined>(
+    undefined
+  );
   let id = getActiveNoteId();
   if (id === "root") {
     id = noteIndex.id;
@@ -100,7 +101,7 @@ export default function Note({
         <Col span={24}>
           <Row gutter={20}>
             <Col xs={24} md={20}>
-              <DendronNote noteContent={noteBody} />
+              <DendronNote noteContent={noteBody} config={config} />
               {maybeCollection}
             </Col>
             <Col xs={0} md={4}>

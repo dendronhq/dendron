@@ -1,15 +1,8 @@
-import { DendronNote } from "@dendronhq/common-frontend";
-import {
-  GetStaticProps,
-  GetStaticPropsContext,
-  InferGetStaticPropsType,
-} from "next";
-import React from "react";
+import { GetStaticProps, GetStaticPropsContext } from "next";
 import { prepChildrenForCollection } from "../components/DendronCollection";
 import DendronNotePage, {
   DendronNotePageProps,
 } from "../components/DendronNotePage";
-import DendronSEO from "../components/DendronSEO";
 import {
   getConfig,
   getCustomHead,

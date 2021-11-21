@@ -78,12 +78,9 @@ export class WorkspaceCLICommand extends CLICommand<
         }
         case WorkspaceCommands.INFO: {
           const resp = await engine?.info();
-          this.L.info({ info: resp });
-          await engine?.sync({ metaOnly: true });
-          const notes = engine?.notes;
-          this.L.info({ notes });
-          this.L.info({ msg: "exit" });
-          return {};
+          // eslint-disable-next-line no-console
+          console.log(resp);
+          break;
         }
         case WorkspaceCommands.ADD_AND_COMMIT: {
           const ws = new WorkspaceService({ wsRoot });

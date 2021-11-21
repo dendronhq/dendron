@@ -19,6 +19,7 @@ import { useDendronRouter } from "../utils/hooks";
 import { getAssetUrl } from "../utils/links";
 import { NoteData } from "../utils/types";
 import Head from "next/head";
+import { getLogLevel } from "../utils/etc";
 
 const themes = {
   dark: getAssetUrl(`/assets-dendron/css/dark.css`),
@@ -45,7 +46,8 @@ function DendronApp({ Component, pageProps }: AppProps) {
 
   useEffect(() => {
     (async () => {
-      setLogLevel("INFO");
+      const logLevel = getLogLevel();
+      setLogLevel(logLevel);
       logger.info({ ctx: "fetchNotes:pre" });
       const data = await fetchNotes();
       logger.info({ ctx: "fetchNotes:got-data" });

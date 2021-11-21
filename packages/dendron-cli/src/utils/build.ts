@@ -75,7 +75,7 @@ export class LernaUtils {
     return new Promise((resolve) => {
       setTimeout(() => {
         resolve(undefined);
-      }, 3000);
+      }, 10000);
     });
   }
 }

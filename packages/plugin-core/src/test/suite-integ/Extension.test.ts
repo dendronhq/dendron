@@ -344,7 +344,7 @@ suite("Extension", function () {
           ctx,
           onInit: async ({ wsRoot, vaults, engine }) => {
             // check for meta
-            const port = EngineUtils.getPortFilePath({ wsRoot });
+            const port = EngineUtils.getPortFilePathForWorkspace({ wsRoot });
             const fpath = getWSMetaFilePath({ wsRoot });
             const meta = openWSMetaFile({ fpath });
             expect(

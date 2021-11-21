@@ -7,11 +7,13 @@ import {
   DNoteRefData,
   DNoteRefLink,
   DVault,
+  ErrorFactory,
   getSlugger,
   NoteProps,
   NotePropsDict,
   NotesCache,
   NotesCacheEntry,
+  RespV3,
 } from "@dendronhq/common-all";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -314,19 +316,53 @@ export class HierarchyUtils {
 }
 
 export class EngineUtils {
-  static getPortFilePath({ wsRoot }: { wsRoot: string }) {
-    const portFile = path.join(wsRoot, CONSTANTS.DENDRON_SERVER_PORT);
+  /**
+   * Try to discover file for engine port. Will use following heuristic:
+   * - look for file for workspace
+   * - look for file for CLI
+   * @param param0
+   */
+  static getPortFilePath(opts: { wsRoot: string }): RespV3<string> {
+    let portFilePath = EngineUtils.getPortFilePathForWorkspace(opts);
+    if (fs.existsSync(portFilePath)) {
+      return { data: portFilePath };
+    }
+    portFilePath = EngineUtils.getPortFilePathForCLI(opts);
+    if (fs.existsSync(portFilePath)) {
+      return { data: portFilePath };
+    }
+
+    return { error: ErrorFactory.create404Error({ url: portFilePath }) };
+  }
+
+  static getPortFilePathForTarget({
+    wsRoot,
+    target,
+  }: {
+    wsRoot: string;
+    target: "workspace" | "cli";
+  }) {
+    const suffix = target === "cli" ? ".cli" : "";
+
+    const portFile = path.join(wsRoot, CONSTANTS.DENDRON_SERVER_PORT) + suffix;
     return portFile;
   }
 
-  static getPortFilePathForCLI({ wsRoot }: { wsRoot: string }) {
-    return EngineUtils.getPortFilePath({ wsRoot }) + ".cli";
+  static getPortFilePathForWorkspace({ wsRoot }: { wsRoot: string }) {
+    return this.getPortFilePathForTarget({ wsRoot, target: "workspace" });
   }
 
-  static getEnginePort(opts: { wsRoot: string }) {
-    let portFilePath = EngineUtils.getPortFilePath(opts);
-    const port = openPortFile({ fpath: portFilePath });
-    return port;
+  static getPortFilePathForCLI({ wsRoot }: { wsRoot: string }) {
+    return this.getPortFilePathForTarget({ wsRoot, target: "cli" });
+  }
+
+  static getEnginePort(opts: { wsRoot: string }): RespV3<number> {
+    const resp = EngineUtils.getPortFilePath(opts);
+    if (resp.error) {
+      return resp;
+    }
+    const port = openPortFile({ fpath: resp.data });
+    return { data: port };
   }
 
   static getEnginePortForCLI(opts: { wsRoot: string }) {

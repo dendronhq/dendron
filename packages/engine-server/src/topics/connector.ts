@@ -22,15 +22,24 @@ import {
   openWSMetaFile,
 } from "../utils";
 
-export type EngineConnectorInitOpts = {
-  onReady?: (opts: { ws: EngineConnector }) => Promise<void>;
-  numRetries?: number;
-  portOverride?: number;
+export type EngineConnectorTarget = "cli" | "workspace";
+
+export type EngineConnectorCommonOpts = {
   /**
    * Should initialize engine before sync?
    */
   init?: boolean;
+  /**
+   * Are we connecting to an engine initialized by a workspace or the CLI?
+   */
+  target?: EngineConnectorTarget;
 };
+
+export type EngineConnectorInitOpts = {
+  onReady?: (opts: { ws: EngineConnector }) => Promise<void>;
+  numRetries?: number;
+  portOverride?: number;
+} & EngineConnectorCommonOpts;
 
 export class EngineConnector {
   /**
@@ -108,7 +117,7 @@ export class EngineConnector {
     } else {
       return this.createServerWatcher({
         numRetries: opts?.numRetries,
-        init: opts?.init,
+        ...opts,
       });
     }
   }
@@ -163,10 +172,14 @@ export class EngineConnector {
   private async _connect(opts: {
     wsRoot: string;
   }): Promise<false | { engine: DendronEngineClient; port: number }> {
-    const portFilePath = EngineUtils.getPortFilePath(opts);
+    const resp = EngineUtils.getPortFilePath(opts);
     const metaFpath = getWSMetaFilePath(opts);
     const ctx = "EngineConnector:_connect";
+    if (resp.error) {
+      return false;
+    }
 
+    const portFilePath = resp.data;
     const wsMeta = openWSMetaFile({ fpath: metaFpath });
     const wsActivation = wsMeta.activationTime;
     // get time when port was created
@@ -200,10 +213,16 @@ export class EngineConnector {
     });
   }
 
-  async createServerWatcher(opts?: { numRetries?: number; init?: boolean }) {
+  async createServerWatcher(
+    opts?: { numRetries?: number } & EngineConnectorCommonOpts
+  ) {
     const ctx = "EngineConnector:createServerWatcher";
     const { wsRoot } = this;
-    const portFilePath = EngineUtils.getPortFilePath({ wsRoot });
+    const { target } = _.defaults(opts, { target: "workspace" });
+    const portFilePath = EngineUtils.getPortFilePathForTarget({
+      wsRoot,
+      target,
+    });
     this.logger.info({ ctx, msg: "enter", opts });
 
     // try to connect to file

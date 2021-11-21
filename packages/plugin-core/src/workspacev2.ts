@@ -81,7 +81,7 @@ export class DWorkspace {
 
   async createServerWatcher(opts?: { numRetries?: number }) {
     const { wsRoot } = this;
-    const fpath = EngineUtils.getPortFilePath({ wsRoot });
+    const fpath = EngineUtils.getPortFilePathForWorkspace({ wsRoot });
     const { watcher } = await createFileWatcher({
       fpath,
       numTries: opts?.numRetries,
@@ -103,7 +103,7 @@ export class DWorkspace {
           Time.DateTime.fromJSDate(fs.statSync(fpath).ctime).toMillis() <
           10e3
       ) {
-        const fpath = EngineUtils.getPortFilePath({ wsRoot });
+        const fpath = EngineUtils.getPortFilePathForWorkspace({ wsRoot });
         const port = openPortFile({ fpath });
         this.onChangePort({ port });
       }

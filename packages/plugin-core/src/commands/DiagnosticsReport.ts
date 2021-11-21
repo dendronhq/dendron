@@ -37,7 +37,7 @@ export class DiagnosticsReportCommand extends BasicCommand<
 
     const config = JSON.stringify(getDWorkspace().config);
     const wsRoot = getDWorkspace().wsRoot;
-    const port = EngineUtils.getPortFilePath({ wsRoot });
+    const port = EngineUtils.getPortFilePathForWorkspace({ wsRoot });
     const portFromFile = fs.readFileSync(port, { encoding: "utf8" });
 
     const workspaceFile = DendronExtension.workspaceFile().fsPath;

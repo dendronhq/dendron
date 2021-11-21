@@ -46,10 +46,10 @@ import {
 import { createLogger, DLogger, readYAML } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
-import { EngineUtils } from "../lib";
 import { DConfig } from "./config";
 import { FileStorage } from "./drivers/file/storev2";
 import { HistoryService } from "./history";
+import { EngineUtils } from "./utils";
 
 type DendronEngineClientOpts = {
   vaults: DVault[];
@@ -94,7 +94,7 @@ export class DendronEngineClient implements DEngineClient {
   }
 
   static getPort({ wsRoot }: { wsRoot: string }): number {
-    const portFile = EngineUtils.getPortFilePath({ wsRoot });
+    const portFile = EngineUtils.getPortFilePathForWorkspace({ wsRoot });
     if (!fs.pathExistsSync(portFile)) {
       throw new DendronError({ message: "no port file" });
     }

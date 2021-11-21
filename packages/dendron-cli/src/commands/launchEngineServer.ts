@@ -69,6 +69,8 @@ export class LaunchEngineServerCommand extends CLICommand<
     const { dev } = ws.config;
     const vaults = ConfigUtils.getVaults(ws.config);
     const vaultPaths = vaults.map((v) => resolvePath(v.fsPath, wsRoot));
+
+    // launches engine server in a separate process
     const {
       port: _port,
       server,

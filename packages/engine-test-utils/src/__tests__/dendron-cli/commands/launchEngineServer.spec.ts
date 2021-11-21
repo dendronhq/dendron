@@ -11,7 +11,9 @@ describe("GIVEN LaunchEngineServer cmd", () => {
           const cmd = new LaunchEngineServerCommand();
           await cmd.enrichArgs({ wsRoot });
           const cliPortFile = EngineUtils.getPortFilePathForCLI({ wsRoot });
-          const wsPortFile = EngineUtils.getPortFilePath({ wsRoot });
+          const wsPortFile = EngineUtils.getPortFilePathForWorkspace({
+            wsRoot,
+          });
           expect(fs.existsSync(cliPortFile)).toBeTruthy();
           expect(fs.existsSync(wsPortFile)).toBeFalsy();
         },

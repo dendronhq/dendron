@@ -37,10 +37,11 @@
       "command": "./scripts/testAll.sh",
       "options": {
         "env": {
-          "LOG_LEVEL": "error"
+          "LOG_LEVEL": "info",
+          "LOG_DST": "${workspaceFolder}/engine-test-utils.log"
         }
       },
-      "problemMatcher": [],
+      "problemMatcher": []
     },
     {
       "label": "changelog",

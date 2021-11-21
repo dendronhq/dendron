@@ -4,6 +4,7 @@ import {
   DendronEngineV2,
   DEngineClient,
   EngineConnector,
+  EngineConnectorTarget,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { Socket } from "net";
@@ -17,6 +18,7 @@ export type SetupEngineCLIOpts = {
   enginePort?: number;
   useLocalEngine?: boolean;
   attach?: boolean;
+  target?: EngineConnectorTarget;
 } & LaunchEngineServerCLIOpts;
 
 export type SetupEngineResp = {
@@ -52,6 +54,7 @@ const createDummyServer = (closeServer?: () => Promise<void>) =>
       }
     },
   } as Server);
+
 /**
  * Setup an engine based on CLI args
  */
@@ -68,6 +71,10 @@ export async function setupEngine(
   let server: Server;
   let serverSockets = new Set<Socket>();
   const wsRoot = resolvePath(opts.wsRoot, process.cwd());
+  const ctx = "setupEngine";
+
+  // instead of spwaning an engine in a separate process, create one
+  // in memory
   if (useLocalEngine) {
     const engine = DendronEngineV2.create({ wsRoot, logger });
     await engine.init();
@@ -79,25 +86,47 @@ export async function setupEngine(
       serverSockets: new Set(),
     };
   }
-  if (enginePort || opts.attach) {
+
+  // connect to a running engine at specified port
+  if (enginePort) {
     logger.info({
-      ctx: "setupEngine",
-      msg: "connecting to engine",
+      ctx,
+      msg: "connecting to engine at port",
       enginePort,
+      init,
+    });
+    const engineConnector = EngineConnector.getOrCreate({
+      wsRoot,
+    });
+    await engineConnector.init({
+      portOverride: enginePort,
+      init,
+    });
+    engine = engineConnector.engine;
+    port = enginePort;
+    // the server is running somewhere else
+    // we need a dummy server because the calling function
+    // will try to close the server
+    server = createDummyServer();
+    return { wsRoot, engine, port, server, serverSockets };
+  }
+
+  if (opts.attach) {
+    logger.info({
+      ctx,
+      msg: "connecting to running engine",
       attach: opts.attach,
       init,
     });
     const engineConnector = EngineConnector.getOrCreate({
       wsRoot,
     });
-    await engineConnector.init({ portOverride: enginePort, init });
+    await engineConnector.init({
+      init,
+      target: opts.target,
+    });
     engine = engineConnector.engine;
-    if (enginePort) {
-      port = enginePort;
-    } else {
-      // TODO: don't use type assertion
-      port = engineConnector.port!;
-    }
+    port = engineConnector.port!;
     if (engineConnector.serverPortWatcher) {
       // a file watcher is created when engine port is undefined
       // needs to be cleaned up on server closing
@@ -107,13 +136,15 @@ export async function setupEngine(
     } else {
       server = createDummyServer();
     }
-  } else {
-    logger.info({ ctx: "setupEngine", msg: "initialize new engine" });
-    const resp = await new LaunchEngineServerCommand().enrichArgs(opts);
-    ({ engine, port, server, serverSockets } = resp.data);
-    if (init) {
-      await engine.init();
-    }
+    return { wsRoot, engine, port, server, serverSockets };
+  }
+
+  // if not using current engine, initialize a new one
+  logger.info({ ctx, msg: "initialize new engine" });
+  const resp = await new LaunchEngineServerCommand().enrichArgs(opts);
+  ({ engine, port, server, serverSockets } = resp.data);
+  if (init) {
+    await engine.init();
   }
   return { wsRoot, engine, port, server, serverSockets };
 }

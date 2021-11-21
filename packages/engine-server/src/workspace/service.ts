@@ -1106,7 +1106,7 @@ export class WorkspaceService {
   writePort(port: number) {
     const wsRoot = this.wsRoot;
     // dendron-cli can overwrite port file. anything that needs the port should connect to `portFilePathExtension`
-    const portFilePath = EngineUtils.getPortFilePath({ wsRoot });
+    const portFilePath = EngineUtils.getPortFilePathForWorkspace({ wsRoot });
     fs.writeFileSync(portFilePath, _.toString(port), { encoding: "utf8" });
   }
 

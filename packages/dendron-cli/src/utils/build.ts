@@ -72,9 +72,9 @@ export class LernaUtils {
     console.log("---");
     $(`node bootstrap/scripts/genMeta.js`);
     // HACK: packages are not immediately available after publishing to local npm
-    return new Promise(() => {
-      setTimeout((resolve) => {
-        resolve();
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(undefined);
       }, 3000);
     });
   }

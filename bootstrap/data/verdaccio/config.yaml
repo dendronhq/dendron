@@ -14,9 +14,9 @@ web:
 packages:
   "@*/*":
     access: $all
-    publish: $authenticated
-    unpublish: $authenticated
-    proxy: npmjs
+    publish: $all
+    unpublish: $all
+    # proxy: npmjs
 
   "**":
     # allow all users (including non-authenticated users) to read and
@@ -28,8 +28,8 @@ packages:
 
     # allow all known users to publish/publish packages
     # (anyone can register by default, remember?)
-    publish: $authenticated
-    unpublish: $authenticated
+    publish: $all
+    unpublish: $all
 
     # if package is not available locally, proxy requests to 'npmjs' registry
-    proxy: npmjs
+    # proxy: npmjs

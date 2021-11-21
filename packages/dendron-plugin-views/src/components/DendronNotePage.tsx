@@ -3,15 +3,14 @@ import {
   FOOTNOTE_DEF_CLASS,
   FOOTNOTE_REF_CLASS,
   NoteViewMessageEnum,
-  ThemeType,
 } from "@dendronhq/common-all";
 import { createLogger, DendronNote } from "@dendronhq/common-frontend";
 import _ from "lodash";
+import mermaid from "mermaid";
 import React from "react";
-import { useMermaid, useRenderedNoteBody } from "../hooks";
+import { useCurrentTheme, useMermaid, useRenderedNoteBody } from "../hooks";
 import { DendronComponent } from "../types";
 import { postVSCodeMessage } from "../utils/vscode";
-import mermaid from "mermaid";
 
 function isHTMLAnchorElement(element: Element): element is HTMLAnchorElement {
   return element.nodeName === "A";
@@ -96,8 +95,8 @@ const DendronNotePage: DendronComponent = (props) => {
   });
 
   useClickHandler(noteProps?.id);
-  // TODO: dynamiclally set
-  useMermaid({ config, themeType: ThemeType.LIGHT, mermaid, noteRenderedBody });
+  const { currentTheme: themeType } = useCurrentTheme();
+  useMermaid({ config, themeType, mermaid, noteRenderedBody });
 
   if (!noteRenderedBody || !config) {
     return null;

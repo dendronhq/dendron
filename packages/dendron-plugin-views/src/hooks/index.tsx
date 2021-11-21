@@ -2,7 +2,6 @@ import {
   ConfigUtils,
   IntermediateDendronConfig,
   NoteProps,
-  ThemeType,
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -12,6 +11,17 @@ import {
 import { Mermaid } from "mermaid";
 import React from "react";
 import { DendronProps, WorkspaceProps } from "../types";
+
+export const useCurrentTheme = () => {
+  const [currentTheme, setCurrentTheme] = React.useState<"light" | "dark">(
+    "light"
+  );
+  React.useEffect(() => {
+    // @ts-ignore
+    setCurrentTheme(window.currentTheme);
+  }, [setCurrentTheme, currentTheme]);
+  return { currentTheme, setCurrentTheme };
+};
 
 export const useWorkspaceProps = (): [WorkspaceProps] => {
   const elem = window.document.getElementById("root")!;
@@ -73,7 +83,7 @@ export const useMermaid = ({
   noteRenderedBody,
 }: {
   config?: IntermediateDendronConfig;
-  themeType: ThemeType;
+  themeType: "light" | "dark";
   mermaid: Mermaid;
   noteRenderedBody?: string;
 }) => {
@@ -82,19 +92,19 @@ export const useMermaid = ({
     if (config && ConfigUtils.getPreview(config)?.enableMermaid) {
       mermaid.initialize({
         startOnLoad: true,
-        theme: themeType === ThemeType.LIGHT ? "forest" : "dark",
+        theme: themeType === "light" ? "forest" : "dark",
       });
       // use for debugging
       // @ts-ignore
       window._mermaid = mermaid;
       // @ts-ignore
       mermaid.init();
-      logger.info("init mermaid library");
+      logger.info({ msg: "init mermaid library", themeType });
     } else {
       logger.info("skip mermaid library");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [config, noteRenderedBody]);
+  }, [config, noteRenderedBody, themeType]);
 };
 
 /**

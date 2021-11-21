@@ -16,9 +16,9 @@ export class NodeJSUtils {
 
 export class WebViewCommonUtils {
   /**
-   * 
-   * @param param0 
-   * @returns 
+   *
+   * @param param0
+   * @returns
    */
   static genVSCodeHTMLIndex = ({
     jsSrc,
@@ -28,19 +28,19 @@ export class WebViewCommonUtils {
     browser,
     acquireVsCodeApi,
     themeMap,
-    initialTheme
+    initialTheme,
   }: {
     jsSrc: string;
     cssSrc: string;
     port: number;
     wsRoot: string;
     browser: boolean;
-    acquireVsCodeApi: string
+    acquireVsCodeApi: string;
     themeMap: {
-      light: string,
-      dark: string 
-    }
-    initialTheme?: string
+      light: string;
+      dark: string;
+    };
+    initialTheme?: string;
   }) => {
     return `<!DOCTYPE html>
   <html lang="en">
@@ -85,6 +85,8 @@ export class WebViewCommonUtils {
         if (newTheme === 'high-contrast') {
             newTheme = 'dark'; // the high-contrast theme seems to be an extreme case of the dark theme
         }
+        // be bale to get current theme using JS;
+        window.currentTheme = newTheme;
     
         if (theme === newTheme) return;
         theme = newTheme;

@@ -19,8 +19,8 @@ import { useWorkspaceProps } from "../hooks";
 import { DendronComponent } from "../types";
 import { postVSCodeMessage, useVSCodeMessage } from "../utils/vscode";
 import "../styles/scss/main.scss";
-import { Layout} from "antd";
-const {Content} = Layout;
+import { Layout } from "antd";
+const { Content } = Layout;
 
 const { useEngineAppSelector, useEngine } = engineHooks;
 
@@ -53,7 +53,7 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
       source: DMessageSource.webClient,
     });
     logger.info({ ctx, msg: "postVSCodeMessage" });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // register a listener for vscode messages
@@ -96,7 +96,7 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
 function DendronApp(props: { Component: DendronComponent }) {
   return (
     <Provider store={combinedStore}>
-      <Layout style={{padding: "33px"}}>
+      <Layout style={{ padding: "33px" }}>
         <Content>
           <DendronVSCodeApp {...props} />
         </Content>

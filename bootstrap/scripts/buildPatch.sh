@@ -1,16 +1,16 @@
 if [ $PUBLISH_ENDPOINT = "local" ] && [ -z $FAST ] ; then
 	echo "start verdaccio"
-	verdaccio -c ../data/verdaccio/config.yaml > verdaccio.log 2>&1 &
+	verdaccio > verdaccio.log 2>&1 &
 	FOO_PID=$!
 	echo "$FOO_PID"
 	sleep 3
 fi
 if [ $PUBLISH_ENDPOINT = "local" ] && [ $FAST ] ; then
 	echo "start verdaccio in fast mode"
-	verdaccio -c ../data/verdaccio/config.yaml > verdaccio.log 2>&1 &
+	verdaccio -c ./bootstrap/data/verdaccio/config.yaml > verdaccio.log 2>&1 &
 	FOO_PID=$!
 	echo "$FOO_PID"
-	sleep 3
+	sleep 1
 fi
 
 

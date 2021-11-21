@@ -11,6 +11,9 @@ store:
     limit: 5000
 web:
   title: Verdaccio
+uplinks:
+  npmjs:
+    url: https://registry.npmjs.org/
 packages:
   "@*/*":
     access: $all

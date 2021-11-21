@@ -25767,6 +25767,13 @@ verdaccio-audit@10.0.2:
     https-proxy-agent "5.0.0"
     node-fetch "2.6.1"
 
+verdaccio-auth-memory@^10.0.1:
+  version "10.0.1"
+  resolved "https://registry.npmjs.org/verdaccio-auth-memory/-/verdaccio-auth-memory-10.0.1.tgz#a4ace3767e954c9ade81bdbe5adb6db82a3417d1"
+  integrity sha512-Y3ZPTHCIW/jD5eACaswBIoJWe6VmOWcOnKZwggqoK/utl1M88KGDypLgQbzmBi+TkZuF3+LsqyDlNYjVd3NqGA==
+  dependencies:
+    "@verdaccio/commons-api" "10.0.1"
+
 verdaccio-htpasswd@10.0.0:
   version "10.0.0"
   resolved "https://registry.npmjs.org/verdaccio-htpasswd/-/verdaccio-htpasswd-10.0.0.tgz#7a7f44e8ed4db40c53deef0f5101f2a16dce4ff1"

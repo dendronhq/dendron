@@ -1,4 +1,10 @@
 max_body_size: 1000mb
+auth:
+  auth-memory:
+    users:
+      foo:
+        name: dendron
+        password: temporarydendronpassword
 logs: { type: stdout, format: pretty, level: http }
 store:
   memory:

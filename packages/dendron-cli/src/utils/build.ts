@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { DendronError, error2PlainObject } from "@dendronhq/common-all";
 import { createLogger, findUpTo } from "@dendronhq/common-server";
 import execa from "execa";
@@ -72,12 +71,6 @@ export class LernaUtils {
         : REMOTE_NPM_ENDPOINT;
     await $$(`lerna publish from-package --ignore-scripts --registry ${url}`);
     $(`node bootstrap/scripts/genMeta.js`);
-    // HACK: packages are not immediately available after publishing to local npm
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve(undefined);
-      }, 10000);
-    });
   }
 }
 
@@ -482,7 +475,7 @@ export class BuildUtils {
   }
 
   static async publish({ cwd, osvxKey }: { cwd: string; osvxKey: string }) {
-    return Promise.all([
+    return await Promise.all([
       $("vsce publish", { cwd }),
       $("ovsx publish", {
         cwd,

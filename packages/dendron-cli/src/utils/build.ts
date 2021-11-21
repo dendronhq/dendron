@@ -181,12 +181,37 @@ export class BuildUtils {
    * @param param0
    * @returns
    */
-  static packagePluginDependencies({ fast }: { fast?: boolean }) {
-    $(`yarn build:prod`, { cwd: this.getPluginRootPath() });
-    return $(`vsce package --yarn`, {
+  static async packagePluginDependencies({
+    fast,
+    quiet,
+  }: {
+    fast?: boolean;
+    quiet?: boolean;
+  }) {
+    const out = $$(`yarn build:prod`, {
       cwd: this.getPluginRootPath(),
       env: fast ? { SKIP_SENTRY: "true" } : {},
     });
+    if (!quiet) {
+      out.stdout?.pipe(process.stdout);
+    }
+    await out;
+    // TODO: not sure why this is generated but its not used by extension
+    const extensionBak = path.join(
+      this.getPluginRootPath(),
+      "dist",
+      "extension.jsbak"
+    );
+    if (fs.existsSync(extensionBak)) {
+      fs.removeSync(extensionBak);
+    }
+    const out2 = $$(`vsce package --yarn`, {
+      cwd: this.getPluginRootPath(),
+      env: fast ? { SKIP_SENTRY: "true" } : {},
+    });
+    if (!quiet) {
+      out2.stdout?.pipe(process.stdout);
+    }
   }
 
   static async prepPluginPkg(

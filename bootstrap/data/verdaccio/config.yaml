@@ -16,7 +16,7 @@ packages:
     access: $all
     publish: $all
     unpublish: $all
-    # proxy: npmjs
+    proxy: npmjs
 
   "**":
     # allow all users (including non-authenticated users) to read and
@@ -32,4 +32,4 @@ packages:
     unpublish: $all
 
     # if package is not available locally, proxy requests to 'npmjs' registry
-    # proxy: npmjs
+    proxy: npmjs

@@ -125,6 +125,7 @@
     "cross-env": "^7.0.3",
     "execa": "^5.0.0",
     "github-slugger": "^1.3.0",
-    "typescript": "^4.1.5"
+    "typescript": "^4.1.5",
+    "verdaccio-memory": "^10.0.1"
   }
 }

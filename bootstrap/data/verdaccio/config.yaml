@@ -1,0 +1,5 @@
+max_body_size: 1000mb
+logs: { type: stdout, format: pretty, level: http }
+store:
+  memory:
+    limit: 5000

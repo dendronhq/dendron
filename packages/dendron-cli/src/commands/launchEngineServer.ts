@@ -3,6 +3,7 @@ import { launchv2 } from "@dendronhq/api-server";
 import { LogLvl, resolvePath } from "@dendronhq/common-server";
 import {
   DendronEngineClient,
+  EngineUtils,
   WorkspaceService,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
@@ -82,7 +83,7 @@ export class LaunchEngineServerCommand extends CLICommand<
     ws.writeMeta({ version: "dendron-cli" });
 
     if (!noWritePort) {
-      ws.writePort(_port);
+      EngineUtils.writeEnginePortForCLI({ port: _port, wsRoot });
     }
     const engine = DendronEngineClient.create({
       port: _port,

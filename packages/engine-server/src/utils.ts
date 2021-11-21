@@ -136,11 +136,6 @@ export async function getEngine(opts: {
   });
 }
 
-export function getPortFilePath({ wsRoot }: { wsRoot: string }) {
-  const portFile = path.join(wsRoot, CONSTANTS.DENDRON_SERVER_PORT);
-  return portFile;
-}
-
 export function getWSMetaFilePath({ wsRoot }: { wsRoot: string }) {
   const fsPath = path.join(wsRoot, CONSTANTS.DENDRON_WS_META);
   return fsPath;
@@ -319,14 +314,34 @@ export class HierarchyUtils {
 }
 
 export class EngineUtils {
+  static getPortFilePath({ wsRoot }: { wsRoot: string }) {
+    const portFile = path.join(wsRoot, CONSTANTS.DENDRON_SERVER_PORT);
+    return portFile;
+  }
+
+  static getPortFilePathForCLI({ wsRoot }: { wsRoot: string }) {
+    return EngineUtils.getPortFilePath({ wsRoot }) + ".cli";
+  }
+
   static getEnginePort(opts: { wsRoot: string }) {
-    const portFilePath = getPortFilePath(opts);
+    let portFilePath = EngineUtils.getPortFilePath(opts);
+    const port = openPortFile({ fpath: portFilePath });
+    return port;
+  }
+
+  static getEnginePortForCLI(opts: { wsRoot: string }) {
+    const portFilePath = EngineUtils.getPortFilePathForCLI(opts);
     const port = openPortFile({ fpath: portFilePath });
     return port;
   }
 
   static getLocalEngineUrl({ port }: { port: number }) {
     return APIUtils.getLocalEndpoint(port);
+  }
+
+  static writeEnginePortForCLI(opts: { port: number; wsRoot: string }) {
+    const portFilePath = EngineUtils.getPortFilePathForCLI(opts);
+    fs.writeFileSync(portFilePath, _.toString(opts.port), { encoding: "utf8" });
   }
 
   /**

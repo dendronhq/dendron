@@ -3,7 +3,7 @@ import { createFileWatcher } from "@dendronhq/common-server";
 import {
   DendronEngineClient,
   DEngineClient,
-  getPortFilePath,
+  EngineUtils,
   openPortFile,
 } from "@dendronhq/engine-server";
 import fs, { FSWatcher } from "fs-extra";
@@ -81,7 +81,7 @@ export class DWorkspace {
 
   async createServerWatcher(opts?: { numRetries?: number }) {
     const { wsRoot } = this;
-    const fpath = getPortFilePath({ wsRoot });
+    const fpath = EngineUtils.getPortFilePath({ wsRoot });
     const { watcher } = await createFileWatcher({
       fpath,
       numTries: opts?.numRetries,
@@ -103,7 +103,7 @@ export class DWorkspace {
           Time.DateTime.fromJSDate(fs.statSync(fpath).ctime).toMillis() <
           10e3
       ) {
-        const fpath = getPortFilePath({ wsRoot });
+        const fpath = EngineUtils.getPortFilePath({ wsRoot });
         const port = openPortFile({ fpath });
         this.onChangePort({ port });
       }

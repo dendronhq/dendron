@@ -16,14 +16,14 @@ import _ from "lodash";
 import { DConfig } from "../config";
 import { DendronEngineClient } from "../engineClient";
 import {
-  getPortFilePath,
+  EngineUtils,
   getWSMetaFilePath,
   openPortFile,
   openWSMetaFile,
 } from "../utils";
 
 export type EngineConnectorInitOpts = {
-  onReady?: ({}: { ws: EngineConnector }) => Promise<void>;
+  onReady?: (opts: { ws: EngineConnector }) => Promise<void>;
   numRetries?: number;
   portOverride?: number;
   /**
@@ -163,7 +163,7 @@ export class EngineConnector {
   private async _connect(opts: {
     wsRoot: string;
   }): Promise<false | { engine: DendronEngineClient; port: number }> {
-    const portFilePath = getPortFilePath(opts);
+    const portFilePath = EngineUtils.getPortFilePath(opts);
     const metaFpath = getWSMetaFilePath(opts);
     const ctx = "EngineConnector:_connect";
 
@@ -203,11 +203,12 @@ export class EngineConnector {
   async createServerWatcher(opts?: { numRetries?: number; init?: boolean }) {
     const ctx = "EngineConnector:createServerWatcher";
     const { wsRoot } = this;
-    const portFilePath = getPortFilePath({ wsRoot });
+    const portFilePath = EngineUtils.getPortFilePath({ wsRoot });
     this.logger.info({ ctx, msg: "enter", opts });
 
     // try to connect to file
     while (!this.initialized) {
+      // eslint-disable-next-line no-await-in-loop
       await this.connectAndInit({ wsRoot, init: opts?.init });
     }
 

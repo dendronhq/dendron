@@ -19,7 +19,6 @@ import {
   TextDocumentSaveReason,
   TextDocumentWillSaveEvent,
   TextEdit,
-  window,
   workspace,
 } from "vscode";
 import { Logger } from "./logger";
@@ -69,19 +68,12 @@ export class WorkspaceWatcher {
   private _debouncedOnDidChangeTextDocument: DebouncedFunc<
     (event: TextDocumentChangeEvent) => Promise<void>
   >;
-  private _quickDebouncedOnDidChangeTextDocument: DebouncedFunc<
-    (event: TextDocumentChangeEvent) => Promise<void>
-  >;
 
   constructor() {
     this._openedDocuments = new Map();
     this._debouncedOnDidChangeTextDocument = _.debounce(
       this.onDidChangeTextDocument,
       200
-    );
-    this._quickDebouncedOnDidChangeTextDocument = _.debounce(
-      this.quickOnDidChangeTextDocument,
-      50
     );
   }
 
@@ -94,11 +86,6 @@ export class WorkspaceWatcher {
 
     workspace.onDidChangeTextDocument(
       this._debouncedOnDidChangeTextDocument,
-      this,
-      context.subscriptions
-    );
-    workspace.onDidChangeTextDocument(
-      this._quickDebouncedOnDidChangeTextDocument,
       this,
       context.subscriptions
     );
@@ -137,7 +124,6 @@ export class WorkspaceWatcher {
     }
   }
 
-  /** This version of `onDidChangeTextDocument` is debounced for a longer time, and is useful for engine changes that should happen more slowly. */
   async onDidChangeTextDocument(event: TextDocumentChangeEvent) {
     try {
       // `workspace.onDidChangeTextDocument` fires 2 events for every change
@@ -159,42 +145,10 @@ export class WorkspaceWatcher {
       }
       Logger.debug({ ...ctx, state: "trigger change handlers" });
       const contentChanges = event.contentChanges;
+      getExtension().windowWatcher?.triggerUpdateDecorations();
       NoteSyncService.instance().onDidChange(event.document, {
         contentChanges,
       });
-      Logger.debug({ ...ctx, state: "exit" });
-      return;
-    } catch (error) {
-      Sentry.captureException(error);
-      throw error;
-    }
-  }
-
-  /** This version of `onDidChangeTextDocument` is debounced for a shorter time, and is useful for UI updates that should happen quickly. */
-  async quickOnDidChangeTextDocument(event: TextDocumentChangeEvent) {
-    try {
-      // `workspace.onDidChangeTextDocument` fires 2 events for every change
-      // the second one changing the dirty state of the page from `true` to `false`
-      if (event.document.isDirty === false) {
-        return;
-      }
-
-      const ctx = {
-        ctx: "WorkspaceWatcher:quickOnDidChangeTextDocument",
-        uri: event.document.uri.fsPath,
-      };
-      Logger.debug({ ...ctx, state: "enter" });
-      this._quickDebouncedOnDidChangeTextDocument.cancel();
-      const uri = event.document.uri;
-      if (!getExtension().workspaceService?.isPathInWorkspace(uri.fsPath)) {
-        Logger.debug({ ...ctx, state: "uri not in workspace" });
-        return;
-      }
-      Logger.debug({ ...ctx, state: "trigger change handlers" });
-      const activeEditor = window.activeTextEditor;
-      if (activeEditor?.document.uri.fsPath === event.document.uri.fsPath) {
-        getExtension().windowWatcher?.triggerUpdateDecorations(activeEditor);
-      }
       Logger.debug({ ...ctx, state: "exit" });
       return;
     } catch (error) {

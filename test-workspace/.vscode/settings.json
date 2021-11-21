@@ -1,7 +1,0 @@
-{
-    "dendron.rootDir": ".",
-    "editor.snippetSuggestions": "inline",
-    "editor.suggest.snippetsPreventQuickSuggestions": false,
-    "editor.suggest.showSnippets": true,
-    "editor.tabCompletion": "on"
-}

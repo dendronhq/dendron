@@ -712,9 +712,7 @@ export class DendronExtension {
 
     const windowWatcher = new WindowWatcher();
     windowWatcher.activate(this.context);
-    for (const editor of vscode.window.visibleTextEditors) {
-      windowWatcher.triggerUpdateDecorations(editor);
-    }
+    windowWatcher.triggerUpdateDecorations();
     this.windowWatcher = windowWatcher;
     const workspaceWatcher = new WorkspaceWatcher();
     workspaceWatcher.activate(this.context);

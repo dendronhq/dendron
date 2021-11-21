@@ -72,11 +72,11 @@ export function warnMissingFrontmatter(document: TextDocument) {
   return diagnostic;
 }
 
-export function checkAndWarnBadFrontmatter(
+export function warnBadFrontmatterContents(
   document: TextDocument,
   frontmatter: FrontmatterContent
 ) {
-  const ctx = "checkAndWarnBadFrontmatter";
+  const ctx = "warnBadFrontmatterContents";
   const diagnostics: Diagnostic[] = [];
   const range = VSCodeUtils.position2VSCodeRange(frontmatter.position!);
   const note = VSCodeUtils.getNoteFromDocument(document);

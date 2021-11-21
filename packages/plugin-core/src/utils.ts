@@ -528,61 +528,6 @@ export class VSCodeUtils {
     );
   }
 
-  /** Given a `range`, extend the start and end lines of the range by `padding` many lines.
-   *
-   * @param opts.range The range to extend.
-   * @param opts.padding The number of lines to extend the range.
-   * @param zeroCharacter If true, the starting and ending characters of the range will be set to 0.
-   * @returns
-   */
-  static padRange(opts: {
-    range: vscode.Range;
-    padding: number;
-    zeroCharacter?: boolean;
-  }): vscode.Range {
-    const { range, padding, zeroCharacter } = opts;
-    return new vscode.Range(
-      new vscode.Position(
-        Math.max(range.start.line - padding, 0),
-        zeroCharacter ? 0 : range.start.character
-      ),
-      new vscode.Position(
-        range.end.line + padding,
-        zeroCharacter ? 0 : range.end.character
-      )
-    );
-  }
-
-  /** Given a list of ranges, return a set of ranges where any overlapping ranges have been merged together. No two returned range will overlap. */
-  static mergeOverlappingRanges(ranges: vscode.Range[]): vscode.Range[] {
-    const out: vscode.Range[] = [];
-    ranges = _.sortBy(
-      ranges,
-      (range) => range.start.line,
-      (range) => range.start.character
-    );
-    // Reverse them so `.pop()` gives us the earliest list element.
-    ranges.reverse();
-
-    while (ranges.length > 0) {
-      // Get the earliest range
-      let earliest = ranges.pop();
-      if (!earliest) break;
-      while (ranges.length > 0) {
-        // If the next range overlaps...
-        const next = ranges[ranges.length - 1]; // what pop would have returned
-        if (earliest.intersection(next) === undefined) break; // no overlap
-        // Then extend this range
-        earliest = earliest.union(next);
-        // And remove the next range because it's now part of the current one
-        ranges.pop();
-        // Continue until we get to a non-overlapping range
-      }
-      out.push(earliest);
-    }
-    return out;
-  }
-
   /** Fold the foldable region at the given line for the active editor.
    *
    * This is equivalent to selecting that point, and using the "Fold" command in the editor.

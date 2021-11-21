@@ -36,8 +36,8 @@ suite("WindowWatcher", function () {
           watcher = new WindowWatcher();
           const notePath = path.join(wsRoot, vaultPath, "bar.md");
           const uri = vscode.Uri.file(notePath);
-          const editor = await VSCodeUtils.openFileInEditor(uri);
-          await watcher.triggerUpdateDecorations(editor!);
+          await VSCodeUtils.openFileInEditor(uri);
+          await watcher.triggerUpdateDecorations();
           // TODO: check for decorations
           done();
         },

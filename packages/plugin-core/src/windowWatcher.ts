@@ -8,13 +8,7 @@ import {
 import { DendronASTDest, MDUtilsV5 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import visit from "unist-util-visit";
-import {
-  ExtensionContext,
-  Selection,
-  TextEditor,
-  TextEditorVisibleRangesChangeEvent,
-  window,
-} from "vscode";
+import { ExtensionContext, Selection, TextEditor, window } from "vscode";
 import { ShowPreviewCommand } from "./commands/ShowPreview";
 import { updateDecorations } from "./features/windowDecorations";
 import { Logger } from "./logger";
@@ -46,11 +40,6 @@ export class WindowWatcher {
       this,
       context.subscriptions
     );
-    window.onDidChangeTextEditorVisibleRanges(
-      this.onDidChangeTextEditorVisibleRanges,
-      this,
-      context.subscriptions
-    );
   }
 
   registerActiveTextEditorChangedHandler(
@@ -68,11 +57,12 @@ export class WindowWatcher {
           window.activeTextEditor?.document.uri.fsPath
       ) {
         const uri = editor.document.uri;
+        Logger.info({ ctx, editor: uri.fsPath });
         if (!getExtension().workspaceService?.isPathInWorkspace(uri.fsPath)) {
+          Logger.info({ ctx, uri: uri.fsPath, msg: "not in workspace" });
           return;
         }
-        Logger.info({ ctx, editor: uri.fsPath });
-        this.triggerUpdateDecorations(editor);
+        this.triggerUpdateDecorations();
         this.triggerNoteGraphViewUpdate();
         this.triggerSchemaGraphViewUpdate();
         this.triggerNotePreviewUpdate(editor);
@@ -94,32 +84,17 @@ export class WindowWatcher {
     }
   );
 
-  private onDidChangeTextEditorVisibleRanges = sentryReportingCallback(
-    (e: TextEditorVisibleRangesChangeEvent | undefined) => {
-      const editor = e?.textEditor;
-      const ctx = "WindowWatcher:onDidChangeTextEditorVisibleRanges";
-      if (!editor) {
-        Logger.info({ ctx, editor: "undefined" });
-        return;
-      }
-      const uri = editor.document.uri;
-      if (!getExtension().workspaceService?.isPathInWorkspace(uri.fsPath)) {
-        return;
-      }
-      Logger.info({ ctx, editor: uri.fsPath });
-      // Decorations only render the visible portions of the screen, so they
-      // need to be re-rendered when the user scrolls around
-      this.triggerUpdateDecorations(editor);
-    }
-  );
-
   /**
-   * Decorate wikilinks, user tags etc. as well as warning about some issues like missing frontmatter
+   * Add text decorator to frontmatter
+   * @returns
    */
-  async triggerUpdateDecorations(editor: TextEditor) {
-    if (!editor) return;
-    // This may be the active editor, but could be another editor that's open side by side without being selected
-    updateDecorations(editor);
+  async triggerUpdateDecorations() {
+    const activeEditor = window.activeTextEditor;
+    if (!activeEditor) {
+      return;
+    }
+
+    updateDecorations(activeEditor);
     return;
   }
 

@@ -12,6 +12,7 @@ import {
   engineSlice,
   ideHooks,
   ideSlice,
+  LOG_LEVEL,
   postVSCodeMessage,
   querystring,
   setLogLevel,
@@ -63,7 +64,7 @@ function AppVSCode({ Component, pageProps }: any) {
   // === Hooks
   // run once
   useEffect(() => {
-    setLogLevel("INFO");
+    setLogLevel(LOG_LEVEL.INFO);
     // get variables from vscode parent
     postVSCodeMessage({
       type: DMessageEnum.INIT,

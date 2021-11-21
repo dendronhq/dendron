@@ -70,7 +70,7 @@
     "format": "lerna exec --parallel --ignore @dendronhq/dendron-11ty-legacy -- yarn format",
     "format:pkg": "prettier --write",
     "lint": "eslint . --ext ts,tsx",
-    "lerna:typecheck": "lerna exec --parallel --ignore @dendronhq/dendron-next-server --ignore @dendronhq/nextjs-template --ignore @dendronhq/dendron-11ty-legacy --ignore @dendronhq/dendron-plugin-views -- tsc -p tsconfig.build.json --noEmit",
+    "lerna:typecheck": "lerna exec --parallel --ignore @dendronhq/dendron-next-server --ignore @dendronhq/common-assets --ignore @dendronhq/nextjs-template --ignore @dendronhq/dendron-11ty-legacy --ignore @dendronhq/dendron-plugin-views -- tsc -p tsconfig.build.json --noEmit",
     "bootstrap:bootstrap": "npx yarn --network-timeout 600000 && yarn gen:meta",
     "bootstrap:build": "node bootstrap/scripts/buildAll.js",
     "bootstrap:build:fast": "yarn bootstrap:build:common-all && yarn bootstrap:build:common-server && yarn bootstrap:build:common-test-utils && yarn bootstrap:build:engine-server &&  yarn bootstrap:build:api-server && yarn bootstrap:build:engine-test-utils && yarn bootstrap:build:dendron-cli && yarn bootstrap:build:plugin-core",

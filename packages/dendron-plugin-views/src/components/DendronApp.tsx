@@ -10,6 +10,7 @@ import {
   engineSlice,
   ideHooks,
   ideSlice,
+  LOG_LEVEL,
   Provider,
   setLogLevel,
 } from "@dendronhq/common-frontend";
@@ -45,7 +46,7 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
   // === Hooks
   // run once
   React.useEffect(() => {
-    setLogLevel("INFO");
+    setLogLevel(LOG_LEVEL.INFO);
     // tell vscode that the client is ready
     postVSCodeMessage({
       type: DMessageEnum.INIT,

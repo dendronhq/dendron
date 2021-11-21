@@ -9,3 +9,27 @@ logs: { type: stdout, format: pretty, level: http }
 store:
   memory:
     limit: 5000
+web:
+  title: Verdaccio
+packages:
+  "@*/*":
+    access: $all
+    publish: $authenticated
+    unpublish: $authenticated
+    proxy: npmjs
+
+  "**":
+    # allow all users (including non-authenticated users) to read and
+    # publish all packages
+    #
+    # you can specify usernames/groupnames (depending on your auth plugin)
+    # and three keywords: "$all", "$anonymous", "$authenticated"
+    access: $all
+
+    # allow all known users to publish/publish packages
+    # (anyone can register by default, remember?)
+    publish: $authenticated
+    unpublish: $authenticated
+
+    # if package is not available locally, proxy requests to 'npmjs' registry
+    proxy: npmjs

@@ -228,7 +228,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           }
           try {
             this.setEndpoint(opts.publishEndpoint);
-            LernaUtils.publishVersion(opts.publishEndpoint);
+            await LernaUtils.publishVersion(opts.publishEndpoint);
           } finally {
             if (opts.publishEndpoint === PublishEndpoint.LOCAL) {
               BuildUtils.setRegRemote();
@@ -339,7 +339,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     this.bumpVersion(opts);
 
     this.print("publish version...");
-    LernaUtils.publishVersion(opts.publishEndpoint);
+    await LernaUtils.publishVersion(opts.publishEndpoint);
 
     this.print("sync assets...");
     await this.syncAssets(opts);

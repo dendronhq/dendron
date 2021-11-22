@@ -1,0 +1,13 @@
+version: 1
+imports: []
+
+_anchors:
+  person_expansion: &person_expansion
+    title: Person-Title
+    template: templates.person
+
+schemas:
+  - <<: *person_expansion
+    id: public_persona
+    parent: root
+    children: []

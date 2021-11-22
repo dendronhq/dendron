@@ -2,7 +2,7 @@
 id: 1Aq9iO0apYmnUORkmX87e
 title: Note Create
 desc: ''
-updated: 1635139005752
+updated: 1637139491037
 created: 1634725641716
 ---
 
@@ -33,6 +33,13 @@ Navigate to `daily` note
 
 AFTER: delete the created note.
 ```
+
+### With matching expanded schema:
+1. Activate look up `cmd+l`
+2. Create new note `book.b1.characters.public_persona`
+3. Make sure that value from [[templates.person]] was added into above note.
+
+AFTER: Delete `book.b1.characters.public_persona`
 
 ## Further test cases 
 Refer to [[Main test cases|#main-test-cases]] for primary test cases to run regarding note creation. 

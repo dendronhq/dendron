@@ -86,48 +86,64 @@ export class WorkspaceWatcher {
   }
 
   activate(context: ExtensionContext) {
-    workspace.onWillSaveTextDocument(
-      this.onWillSaveTextDocument,
-      this,
-      context.subscriptions
+    const extension = getExtension();
+
+    extension.addDisposable(
+      workspace.onWillSaveTextDocument(
+        this.onWillSaveTextDocument,
+        this,
+        context.subscriptions
+      )
     );
 
-    workspace.onDidChangeTextDocument(
-      this._debouncedOnDidChangeTextDocument,
-      this,
-      context.subscriptions
+    extension.addDisposable(
+      workspace.onDidChangeTextDocument(
+        this._debouncedOnDidChangeTextDocument,
+        this,
+        context.subscriptions
+      )
     );
-    workspace.onDidChangeTextDocument(
-      this._quickDebouncedOnDidChangeTextDocument,
-      this,
-      context.subscriptions
+    extension.addDisposable(
+      workspace.onDidChangeTextDocument(
+        this._quickDebouncedOnDidChangeTextDocument,
+        this,
+        context.subscriptions
+      )
     );
 
-    workspace.onDidSaveTextDocument(
-      this.onDidSaveTextDocument,
-      this,
-      context.subscriptions
+    extension.addDisposable(
+      workspace.onDidSaveTextDocument(
+        this.onDidSaveTextDocument,
+        this,
+        context.subscriptions
+      )
     );
 
     // NOTE: currently, this is only used for logging purposes
     if (Logger.isDebug()) {
-      workspace.onDidOpenTextDocument(
-        this.onDidOpenTextDocument,
-        this,
-        context.subscriptions
+      extension.addDisposable(
+        workspace.onDidOpenTextDocument(
+          this.onDidOpenTextDocument,
+          this,
+          context.subscriptions
+        )
       );
     }
 
-    workspace.onWillRenameFiles(
-      this.onWillRenameFiles,
-      this,
-      context.subscriptions
+    extension.addDisposable(
+      workspace.onWillRenameFiles(
+        this.onWillRenameFiles,
+        this,
+        context.subscriptions
+      )
     );
 
-    workspace.onDidRenameFiles(
-      this.onDidRenameFiles,
-      this,
-      context.subscriptions
+    extension.addDisposable(
+      workspace.onDidRenameFiles(
+        this.onDidRenameFiles,
+        this,
+        context.subscriptions
+      )
     );
   }
 

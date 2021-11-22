@@ -32,24 +32,32 @@ export class WindowWatcher {
   ) => void)[] = [];
 
   activate(context: ExtensionContext) {
-    window.onDidChangeVisibleTextEditors(
-      sentryReportingCallback((editors: TextEditor[]) => {
-        const ctx = "WindowWatcher:onDidChangeVisibleTextEditors";
-        const editorPaths = editors.map((editor) => {
-          return editor.document.uri.fsPath;
-        });
-        Logger.info({ ctx, editorPaths });
-      })
+    const extension = getExtension();
+
+    extension.addDisposable(
+      window.onDidChangeVisibleTextEditors(
+        sentryReportingCallback((editors: TextEditor[]) => {
+          const ctx = "WindowWatcher:onDidChangeVisibleTextEditors";
+          const editorPaths = editors.map((editor) => {
+            return editor.document.uri.fsPath;
+          });
+          Logger.info({ ctx, editorPaths });
+        })
+      )
     );
-    window.onDidChangeActiveTextEditor(
-      this.onDidChangeActiveTextEditor,
-      this,
-      context.subscriptions
+    extension.addDisposable(
+      window.onDidChangeActiveTextEditor(
+        this.onDidChangeActiveTextEditor,
+        this,
+        context.subscriptions
+      )
     );
-    window.onDidChangeTextEditorVisibleRanges(
-      this.onDidChangeTextEditorVisibleRanges,
-      this,
-      context.subscriptions
+    extension.addDisposable(
+      window.onDidChangeTextEditorVisibleRanges(
+        this.onDidChangeTextEditorVisibleRanges,
+        this,
+        context.subscriptions
+      )
     );
   }
 
@@ -116,7 +124,7 @@ export class WindowWatcher {
   /**
    * Decorate wikilinks, user tags etc. as well as warning about some issues like missing frontmatter
    */
-  async triggerUpdateDecorations(editor: TextEditor) {
+  triggerUpdateDecorations(editor: TextEditor) {
     if (!editor) return;
     // This may be the active editor, but could be another editor that's open side by side without being selected
     updateDecorations(editor);

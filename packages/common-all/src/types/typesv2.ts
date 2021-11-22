@@ -635,7 +635,8 @@ export type BasePodExecuteOpts<TConfig> = {
 export enum MergeConflictOptions {
   OVERWRITE_LOCAL = "Overwrite local value with remote value",
   OVERWRITE_REMOTE = "Overwrite remote value with local value",
-  SKIP = "Skip (We will not merge, you'll resolve this manually)",
+  SKIP = "Skip this conflict(We will not merge, you'll resolve this manually)",
+  SKIP_ALL = "Skip All (you'll resolve all next conflicted entries manually) ",
 }
 
 export type Conflict = {

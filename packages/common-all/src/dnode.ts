@@ -335,6 +335,14 @@ export class DNodeUtils {
   static getLeafName(note: DNodeProps) {
     return _.split(note.fname, ".").pop();
   }
+
+  static cleanFname(fname: string) {
+    if (_.isUndefined(fname) || fname === "null") return;
+    if (fname.indexOf(" ") >= 0) {
+      fname = _.replace(fname, /\s/g, "-");
+    }
+    return _.trim(fname).toLowerCase();
+  }
 }
 
 export class NoteUtils {

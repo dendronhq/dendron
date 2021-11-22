@@ -5,6 +5,7 @@ import {
   Conflict,
   DendronError,
   DEngineClient,
+  DNodeUtils,
   DVault,
   ERROR_SEVERITY,
   getSlugger,
@@ -129,7 +130,7 @@ export class OrbitImportPod extends ImportPod<OrbitImportPodConfig> {
     const { vault, members, engine, wsRoot, config } = opts;
     const conflicts: Conflict[] = [];
     const create: NoteProps[] = [];
-    members.forEach((member: any) => {
+    members.forEach(async (member: any) => {
       const { orbitId, name, github, discord, linkedin, twitter, hn, website } =
         member;
       member = {
@@ -146,7 +147,8 @@ export class OrbitImportPod extends ImportPod<OrbitImportPodConfig> {
           },
         },
       };
-      const noteName = name || github || discord;
+      let noteName = name || github || discord;
+      noteName = DNodeUtils.cleanFname(noteName);
       let fname;
 
       const note = NoteUtils.getNoteByFnameV5({
@@ -169,7 +171,7 @@ export class OrbitImportPod extends ImportPod<OrbitImportPodConfig> {
               conflictData,
             });
           } else {
-            this.getUpdatedData({ note, member, engine });
+            await this.updateNoteData({ note, member, engine });
           }
         }
       } else {
@@ -186,7 +188,7 @@ export class OrbitImportPod extends ImportPod<OrbitImportPodConfig> {
    */
   getConflictedData = (opts: { note: NoteProps; member: any }) => {
     const { note, member } = opts;
-    const customKeys = Object.keys(note.custom?.social);
+    const customKeys = Object.keys(member.custom.social);
     return customKeys.filter((key: string) => {
       return (
         note.custom.social[key] !== null &&
@@ -198,13 +200,13 @@ export class OrbitImportPod extends ImportPod<OrbitImportPodConfig> {
   /**
    * updates the social fields of a note's FM
    */
-  getUpdatedData = (opts: {
+  updateNoteData = async (opts: {
     note: NoteProps;
     member: any;
     engine: DEngineClient;
   }) => {
     const { note, member, engine } = opts;
-    const customKeys = Object.keys(note.custom?.social);
+    const customKeys = Object.keys(member.custom?.social);
     let shouldUpdate = false;
     customKeys.forEach((key: string) => {
       if (
@@ -216,7 +218,7 @@ export class OrbitImportPod extends ImportPod<OrbitImportPodConfig> {
       }
     });
     if (shouldUpdate) {
-      engine.writeNote(note, { updateExisting: true });
+      await engine.writeNote(note, { updateExisting: true });
     }
   };
 
@@ -233,12 +235,12 @@ export class OrbitImportPod extends ImportPod<OrbitImportPodConfig> {
   }): Promise<any> {
     const {
       conflicts,
-      index,
       handleConflict,
       engine,
       conflictResolvedNotes,
       conflictResolveOpts,
     } = opts;
+    let { index } = opts;
     const conflict = conflicts[index];
     const resp = await handleConflict(conflict, conflictResolveOpts);
     switch (resp) {
@@ -250,6 +252,9 @@ export class OrbitImportPod extends ImportPod<OrbitImportPodConfig> {
         break;
       }
       case MergeConflictOptions.SKIP:
+        break;
+      case MergeConflictOptions.SKIP_ALL:
+        index = conflicts.length;
         break;
       default: {
         break;
@@ -278,7 +283,11 @@ export class OrbitImportPod extends ImportPod<OrbitImportPodConfig> {
   }
 
   getMergeConflictOptions() {
-    return [MergeConflictOptions.OVERWRITE_LOCAL, MergeConflictOptions.SKIP];
+    return [
+      MergeConflictOptions.OVERWRITE_LOCAL,
+      MergeConflictOptions.SKIP,
+      MergeConflictOptions.SKIP_ALL,
+    ];
   }
 
   getMergeConflictText(conflict: Conflict) {
@@ -288,7 +297,7 @@ export class OrbitImportPod extends ImportPod<OrbitImportPodConfig> {
         `\n${key}: \nremote: ${conflict.conflictEntry.custom.social[key]}\nlocal: ${conflict.conflictNote.custom.social[key]}\n`
       );
     });
-    return `\nWe noticed different fields for user ${conflict.conflictNote.title}. ${conflictentries}\n`;
+    return `\nWe noticed different fields for user ${conflict.conflictNote.title} in the note: ${conflict.conflictNote.fname}. ${conflictentries}\n`;
   }
 
   async plant(opts: OrbitImportPodPlantOpts) {

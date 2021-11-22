@@ -694,6 +694,21 @@ export class LinkUtils {
       return true;
     } else return false;
   }
+
+  /**
+   * Given a source string, extract all wikilinks within the source.
+   *
+   * @param source string to extract wikilinks from
+   */
+  static extractWikiLinks(source: string) {
+    // chop up the source.
+    const regExp = new RegExp("\\[\\[(.+?)?\\]\\]", "g");
+    const matched = [...source.matchAll(regExp)].map((match) => {
+      return LinkUtils.parseLinkV2(match[1]);
+    });
+
+    return matched;
+  }
 }
 
 export class AnchorUtils {

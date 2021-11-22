@@ -4,7 +4,14 @@ import {
   shouldBubbleUpCreateNew,
   sortBySimilarity,
 } from "../../components/lookup/LookupProviderV3";
-import { TestNoteFactory } from "@dendronhq/common-test-utils";
+import { NoteTestUtilsV4, TestNoteFactory } from "@dendronhq/common-test-utils";
+import { describeMultiWS, setupBeforeAfter } from "../testUtilsV3";
+import { ExtensionContext, Selection } from "vscode";
+import { TestEngineUtils, ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
+import { VSCodeUtils } from "../../utils";
+import { NoteProps } from "@dendronhq/common-all";
+import { NoteLookupCommand } from "../../commands/NoteLookupCommand";
+import _ from "lodash";
 
 suite("LookupProviderV3 utility methods:", () => {
   describe(`shouldBubbleUpCreateNew`, () => {
@@ -85,4 +92,106 @@ suite("LookupProviderV3 utility methods:", () => {
       ]);
     });
   });
+});
+
+suite("selection2Items", () => {
+  const ctx: ExtensionContext = setupBeforeAfter(this, {
+    noSetTimeout: true,
+  });
+  let active: NoteProps;
+  describeMultiWS(
+    "GIVEN an active note with selection that contains wikilinks",
+    {
+      ctx,
+      preSetupHook: async ({ vaults, wsRoot }) => {
+        await ENGINE_HOOKS.setupBasic({ vaults, wsRoot });
+        active = await NoteTestUtilsV4.createNote({
+          vault: TestEngineUtils.vault1(vaults),
+          wsRoot,
+          fname: "active",
+          body: "[[dendron.ginger]]\n[[dendron.dragonfruit]]\n[[dendron.clementine]]",
+        });
+        await NoteTestUtilsV4.createNote({
+          vault: TestEngineUtils.vault1(vaults),
+          wsRoot,
+          fname: "dendron.ginger",
+          body: "",
+        });
+        await NoteTestUtilsV4.createNote({
+          vault: TestEngineUtils.vault1(vaults),
+          wsRoot,
+          fname: "dendron.dragonfruit",
+          body: "",
+        });
+        await NoteTestUtilsV4.createNote({
+          vault: TestEngineUtils.vault1(vaults),
+          wsRoot,
+          fname: "dendron.clementine",
+          body: "",
+        });
+      },
+    },
+    () => {
+      test("quickpick is populated with notes that were selected.", async () => {
+        const editor = await VSCodeUtils.openNote(active);
+        editor.selection = new Selection(7, 0, 10, 0);
+
+        const cmd = new NoteLookupCommand();
+        const gatherOut = await cmd.gatherInputs({
+          selectionType: "selection2Items",
+          initialValue: "",
+          noConfirm: true,
+        });
+
+        const enrichOut = await cmd.enrichInputs(gatherOut);
+
+        expect(
+          !_.isUndefined(gatherOut.quickpick.itemsFromSelection)
+        ).toBeTruthy();
+        const expectedItemLabels = [
+          "dendron.ginger",
+          "dendron.dragonfruit",
+          "dendron.clementine",
+        ];
+
+        const actualItemLabels = enrichOut?.selectedItems.map(
+          (item) => item.label
+        );
+
+        expect(expectedItemLabels).toEqual(actualItemLabels);
+      });
+
+      test("quickpick is populated with normal query results.", async () => {
+        const editor = await VSCodeUtils.openNote(active);
+        editor.selection = new Selection(7, 0, 10, 0);
+
+        const cmd = new NoteLookupCommand();
+        const gatherOut = await cmd.gatherInputs({
+          noConfirm: true,
+          initialValue: "",
+        });
+
+        const enrichOut = await cmd.enrichInputs(gatherOut);
+        const expectedItemLabels = [
+          "root",
+          "root",
+          "root",
+          "active",
+          "bar",
+          "foo",
+          "dendron",
+        ];
+
+        expect(
+          _.isUndefined(gatherOut.quickpick.itemsFromSelection)
+        ).toBeTruthy();
+
+        const actualItemLabels = enrichOut?.selectedItems.map(
+          (item) => item.label
+        );
+
+        expect(expectedItemLabels).toEqual(actualItemLabels);
+      });
+    }
+  );
 });

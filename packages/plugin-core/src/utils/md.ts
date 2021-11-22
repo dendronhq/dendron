@@ -469,7 +469,9 @@ export const findReferences = async (
   );
 
   _.forEach(notesWithRefs, (note) => {
-    const linksMatch = note.links.filter((l) => l.to?.fname === fname);
+    const linksMatch = note.links.filter(
+      (l) => l.to?.fname?.toLowerCase() === fname.toLowerCase()
+    );
     const fsPath = NoteUtils.getFullPath({
       note,
       wsRoot: getDWorkspace().wsRoot,

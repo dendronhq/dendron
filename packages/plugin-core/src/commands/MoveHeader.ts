@@ -387,7 +387,7 @@ export class MoveHeaderCommand extends BasicCommand<
       engine,
     }).filter((link) => {
       return (
-        link.to?.fname === origin.fname &&
+        link.to?.fname?.toLowerCase() === origin.fname.toLowerCase() &&
         link.to?.anchorHeader &&
         anchorNamesToUpdate.includes(link.to.anchorHeader)
       );

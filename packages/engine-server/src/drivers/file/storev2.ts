@@ -676,7 +676,7 @@ export class FileStorage implements DStore {
           "desc"
         );
         if (
-          oldLoc.fname === newLoc.fname &&
+          oldLoc.fname.toLowerCase() === newLoc.fname.toLowerCase() &&
           oldLoc.vaultName === newLoc.vaultName &&
           oldLoc.anchorHeader &&
           newLoc.anchorHeader
@@ -820,7 +820,7 @@ export class FileStorage implements DStore {
     let changedFromDelete: EngineDeleteNotePayload = [];
     let changeFromWrite: NoteChangeEntry[];
     if (
-      oldNote.fname === newNote.fname &&
+      oldNote.fname.toLowerCase() === newNote.fname.toLowerCase() &&
       VaultUtils.isEqual(oldNote.vault, newNote.vault, wsRoot)
     ) {
       // The file is being renamed to itself. We do this to rename a header.

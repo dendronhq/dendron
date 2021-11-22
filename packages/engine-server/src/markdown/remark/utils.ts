@@ -256,7 +256,7 @@ const getLinks = ({
   if (filter?.loc) {
     // TODO: add additional filters besides fname
     return dlinks.filter((ent) => {
-      return ent.value === filter?.loc?.fname;
+      return ent.value.toLowerCase() === filter?.loc?.fname?.toLowerCase();
     });
   }
   createLogger("LinkUtils.getLinks").info({
@@ -982,7 +982,9 @@ export class RemarkUtils {
           const newValue = wikilinkPrefix.concat(wikilinkValue);
 
           linkNode.value =
-            siblingNotes.filter((note) => note.fname === newValue).length > 0
+            siblingNotes.filter(
+              (note) => note.fname.toLowerCase() === newValue.toLowerCase()
+            ).length > 0
               ? newValue
               : wikilinkValue;
           changes.push({
@@ -1288,17 +1290,15 @@ export class RemarkUtils {
       }
     });
 
-    if (!headerFound) {
+    if (!headerFound || !RemarkUtils.isParent(tree)) {
       return [];
     }
     const nodesToExtract = nextHeaderIndex
-      // @ts-ignore
-      ? (tree.children as Node[]).splice(
+      ? tree.children.splice(
           foundHeaderIndex!,
           nextHeaderIndex! - foundHeaderIndex!
         )
-      // @ts-ignore
-      : (tree.children as Node[]).splice(foundHeaderIndex!);
+      : tree.children.splice(foundHeaderIndex!);
     return nodesToExtract;
   }
 

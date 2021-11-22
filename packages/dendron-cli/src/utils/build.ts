@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { DendronError, error2PlainObject } from "@dendronhq/common-all";
 import { createLogger, findUpTo } from "@dendronhq/common-server";
 import execa from "execa";
@@ -474,7 +475,7 @@ export class BuildUtils {
   }
 
   static async publish({ cwd, osvxKey }: { cwd: string; osvxKey: string }) {
-    return await Promise.all([
+    return Promise.all([
       $("vsce publish", { cwd }),
       $("ovsx publish", {
         cwd,

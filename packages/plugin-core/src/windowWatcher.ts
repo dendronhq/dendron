@@ -121,13 +121,19 @@ export class WindowWatcher {
     }
   );
 
+  private debouncedTriggerUpdateDecorationFns = _.memoize(
+    (_editor: TextEditor) => _.debounce(updateDecorations, 100),
+    (editor: TextEditor) => editor.document.uri.fsPath
+  );
+
   /**
    * Decorate wikilinks, user tags etc. as well as warning about some issues like missing frontmatter
    */
   triggerUpdateDecorations(editor: TextEditor) {
     if (!editor) return;
-    // This may be the active editor, but could be another editor that's open side by side without being selected
-    updateDecorations(editor);
+    // This may be the active editor, but could be another editor that's open side by side without being selected.
+    // Also, debouncing this based on the editor URI so that decoration updates in different editors don't affect each other but updates don't trigger too often for the same editor
+    this.debouncedTriggerUpdateDecorationFns(editor)(editor);
     return;
   }
 

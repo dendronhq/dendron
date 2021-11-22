@@ -52,6 +52,20 @@ import {
 /** Wait this long in miliseconds before trying to update decorations. */
 const DECORATION_UPDATE_DELAY = 100;
 
+/** If calculating decorations takes longer than this in miliseconds, give up and warn the user. */
+const DECORATION_MAX_TIME = 100;
+
+let WARNED_USER = false;
+/** Warn the user once if we ever have trouble computing decorations quickly enough for their note. */
+function warnExpensiveDecorations() {
+  if (WARNED_USER) return;
+  WARNED_USER = true;
+  return window.showWarningMessage(
+    "Dendron is having trouble with link highlighting right now." +
+      " Some links may not be highlighted to keep your Dendron working smoothly."
+  );
+}
+
 /** Decorators only decorate what's visible on the screen. To avoid the user
  * seeing undecorated text if they scroll too quickly, we decorate some of the
  * text surrounding what's visible on the screen. This number determines how
@@ -124,6 +138,7 @@ export function delayedUpdateDecorations(
 export const updateDecorations = sentryReportingCallback(
   (activeEditor: TextEditor) => {
     const ctx = "updateDecorations";
+    const startTime = Date.now();
     // Warn for missing or bad frontmatter and broken wikilinks
     const allWarnings: Diagnostic[] = [];
     const activeDecorations = new DefaultMap<
@@ -184,6 +199,11 @@ export const updateDecorations = sentryReportingCallback(
         }
         if (node.type === DendronASTTypes.FRONTMATTER)
           frontmatter = node as FrontmatterContent;
+        if (Date.now() - startTime > DECORATION_MAX_TIME) {
+          warnExpensiveDecorations();
+          return false;
+        }
+        return undefined;
       });
 
       if (range.start.line === 0) {

@@ -1,11 +1,16 @@
 import {
   ConfigUtils,
+  DNodeProps,
+  DNodeUtils,
+  DVault,
   getSlugger,
   NoteProps,
   NoteQuickInput,
   NoteUtils,
   TaskNoteUtils,
+  VaultUtils,
 } from "@dendronhq/common-all";
+import { LinkUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
 import * as vscode from "vscode";
 import { QuickInputButton, ThemeIcon } from "vscode";
@@ -75,7 +80,10 @@ function isFilterButton(button: DendronBtn) {
 }
 
 function isSelectionBtn(button: DendronBtn) {
-  return _.includes(["selection2link", "selectionExtract"], button.type);
+  return _.includes(
+    ["selection2link", "selectionExtract", "selection2Items"],
+    button.type
+  );
 }
 
 function isNoteBtn(button: DendronBtn) {
@@ -307,6 +315,63 @@ export class SelectionExtractBtn extends DendronBtn {
 
   async onDisable({ quickPick }: ButtonHandleOpts) {
     quickPick.selectionProcessFunc = undefined;
+    return;
+  }
+}
+
+export class Selection2ItemsBtn extends DendronBtn {
+  static create(pressed?: boolean) {
+    return new Selection2ItemsBtn({
+      title: "Selection to Items",
+      description:
+        "Wikilinks in highlighted text will be used to create selectable items in lookup",
+      iconOff: "checklist",
+      iconOn: "menu-selection",
+      type: "selection2Items",
+      pressed,
+    });
+  }
+
+  async onEnable({ quickPick }: ButtonHandleOpts) {
+    const engine = getEngine();
+
+    // get selection
+    const { text } = VSCodeUtils.getSelection();
+    const out = LinkUtils.extractWikiLinks(text as string);
+    // make a list of picker items from wikilinks
+    const pickerItemsFromSelection = out
+      .filter((wikiLink) => wikiLink && wikiLink.value)
+      .map((wikiLink) => {
+        const fname = wikiLink!.value!;
+        const vault = wikiLink!.vaultName
+          ? (VaultUtils.getVaultByName({
+              vname: wikiLink!.vaultName,
+              vaults: engine.vaults,
+            }) as DVault)
+          : PickerUtilsV2.getVaultForOpenEditor();
+
+        const note = NoteUtils.getNoteByFnameV5({
+          fname,
+          notes: engine.notes,
+          vault,
+          wsRoot: engine.wsRoot,
+        }) as DNodeProps;
+        return DNodeUtils.enhancePropForQuickInputV3({
+          props: note,
+          schemas: engine.schemas,
+          vaults: engine.vaults,
+          wsRoot: engine.wsRoot,
+        });
+      });
+    quickPick.prevValue = quickPick.value;
+    quickPick.value = "";
+    quickPick.itemsFromSelection = pickerItemsFromSelection;
+    return;
+  }
+
+  async onDisable({ quickPick }: ButtonHandleOpts) {
+    quickPick.value = NotePickerUtils.getPickerValue(quickPick);
+    quickPick.itemsFromSelection = undefined;
     return;
   }
 }
@@ -604,6 +669,7 @@ export function createAllButtons(
     DirectChildFilterBtn.create(),
     SelectionExtractBtn.create(),
     Selection2LinkBtn.create(),
+    Selection2ItemsBtn.create(),
     JournalBtn.create(),
     ScratchBtn.create(),
     HorizontalSplitBtn.create(),

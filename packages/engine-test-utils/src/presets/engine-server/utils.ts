@@ -268,6 +268,8 @@ export const setupSchemaPreseet: PreSetupHookFunction = async (opts) => {
   });
 };
 
+/**
+ * Sets up workspace which has a schema that uses YAML expansion syntax ('<<' type of expansion). */
 export const setupSchemaWithExpansion: PreSetupHookFunction = async (opts) => {
   await setupBasic(opts);
   const { wsRoot, vaults } = opts;

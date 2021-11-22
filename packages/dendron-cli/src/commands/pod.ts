@@ -1,6 +1,11 @@
 /* eslint-disable import/no-dynamic-require */
-import { DendronError, RespV3 } from "@dendronhq/common-all";
-import { PodClassEntryV4, PodKind, PodUtils, Conflict, MergeConflictOptions } from "@dendronhq/pods-core";
+import {
+  Conflict,
+  DendronError,
+  PodConflictResolveOpts,
+  RespV3,
+} from "@dendronhq/common-all";
+import { PodClassEntryV4, PodKind, PodUtils } from "@dendronhq/pods-core";
 import _ from "lodash";
 import path from "path";
 import prompts from "prompts";

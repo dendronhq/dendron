@@ -1,7 +1,6 @@
 const path = require("path");
 const CopyPlugin = require("copy-webpack-plugin");
 const SentryWebpackPlugin = require("@sentry/webpack-plugin");
-const TerserPlugin = require("terser-webpack-plugin");
 const BundleAnalyzerPlugin =
   require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 
@@ -75,11 +74,15 @@ const config = {
             ignore: ["node_modules", "webpack.*.js"],
           }),
         ]),
-    new BundleAnalyzerPlugin({
-      analyzerMode: "static",
-      openAnalyzer: false,
-      generateStatsFile: true,
-    }),
+    ...(process.env.ANALYZE_BUNDLE
+      ? [
+          new BundleAnalyzerPlugin({
+            analyzerMode: "static",
+            openAnalyzer: false,
+            generateStatsFile: true,
+          }),
+        ]
+      : []),
   ],
   module: {
     rules: [

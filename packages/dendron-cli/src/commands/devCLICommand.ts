@@ -249,11 +249,13 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           return { error: null };
         }
         case DevCommands.PACKAGE_PLUGIN: {
-          this.print("install deps...");
-          BuildUtils.installPluginDependencies();
+          if (!opts.fast) {
+            this.print("install deps...");
+            BuildUtils.installPluginDependencies();
+          }
 
           this.print("package deps...");
-          BuildUtils.packagePluginDependencies(opts);
+          await BuildUtils.packagePluginDependencies(opts);
           return { error: null };
         }
         case DevCommands.INSTALL_PLUGIN: {
@@ -349,7 +351,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     BuildUtils.installPluginDependencies();
 
     this.print("package deps...");
-    BuildUtils.packagePluginDependencies(opts);
+    await BuildUtils.packagePluginDependencies(opts);
 
     this.print("setRegRemote...");
     BuildUtils.setRegRemote();

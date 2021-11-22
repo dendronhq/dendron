@@ -181,12 +181,28 @@ export class BuildUtils {
    * @param param0
    * @returns
    */
-  static packagePluginDependencies({ fast }: { fast?: boolean }) {
-    $(`yarn build:prod`, { cwd: this.getPluginRootPath() });
-    return $(`vsce package --yarn`, {
+  static async packagePluginDependencies({
+    fast,
+    quiet,
+  }: {
+    fast?: boolean;
+    quiet?: boolean;
+  }) {
+    const out = $$(`yarn build:prod`, {
       cwd: this.getPluginRootPath(),
       env: fast ? { SKIP_SENTRY: "true" } : {},
     });
+    if (!quiet) {
+      out.stdout?.pipe(process.stdout);
+    }
+    await out;
+    const out2 = $$(`vsce package --yarn`, {
+      cwd: this.getPluginRootPath(),
+      env: fast ? { SKIP_SENTRY: "true" } : {},
+    });
+    if (!quiet) {
+      out2.stdout?.pipe(process.stdout);
+    }
   }
 
   static async prepPluginPkg(

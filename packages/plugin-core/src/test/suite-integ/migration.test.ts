@@ -338,7 +338,7 @@ suite("Migration", function () {
       });
     });
 
-    test.only("migrate to 0.70.0 (preview namespace migration)", (done) => {
+    test("migrate to 0.70.0 (preview namespace migration)", (done) => {
       DendronExtension.version = () => "0.70.0";
       runLegacyMultiWorkspaceTest({
         ctx,

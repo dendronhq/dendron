@@ -13,3 +13,5 @@ build
 scripts/**
 fixtures/**
 dist/extension.jsbak
+tmp
+CHANGELOG.md

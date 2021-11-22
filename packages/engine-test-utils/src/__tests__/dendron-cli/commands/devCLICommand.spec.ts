@@ -44,7 +44,9 @@ describe("build", () => {
 
         const typecheckStub = stub(BuildUtils, "runTypeCheck").returns();
         const bumpVersionStub = stub(LernaUtils, "bumpVersion").returns();
-        const publishVersionStub = stub(LernaUtils, "publishVersion").returns();
+        const publishVersionStub = stub(LernaUtils, "publishVersion").returns(
+          Promise.resolve()
+        );
         const buildNextServerStub = stub(
           BuildUtils,
           "buildNextServer"

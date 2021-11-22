@@ -1,10 +1,18 @@
-if [ $PUBLISH_ENDPOINT = "local" ]; then
+if [ $PUBLISH_ENDPOINT = "local" ] && [ -z $FAST ] ; then
 	echo "start verdaccio"
 	verdaccio > verdaccio.log 2>&1 &
 	FOO_PID=$!
 	echo "$FOO_PID"
 	sleep 3
 fi
+if [ $PUBLISH_ENDPOINT = "local" ] && [ $FAST ] ; then
+	echo "starting verdaccio with in-memory cache to speed up build time"
+	verdaccio -c ./bootstrap/data/verdaccio/config.yaml > verdaccio.log 2>&1 &
+	FOO_PID=$!
+	echo "$FOO_PID"
+	sleep 1
+fi
+
 
 SCRIPT_BUILD_ENV=${BUILD_ENV:-local}
 echo "building... upgrade: $UPGRADE_TYPE, endpoint: $PUBLISH_ENDPOINT build environment: $SCRIPT_BUILD_ENV"

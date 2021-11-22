@@ -1,0 +1,38 @@
+max_body_size: 1000mb
+auth:
+  auth-memory:
+    users:
+      foo:
+        name: dendron
+        password: temporarydendronpassword
+logs: { type: stdout, format: pretty, level: http }
+store:
+  memory:
+    limit: 5000
+web:
+  title: Verdaccio
+uplinks:
+  npmjs:
+    url: https://registry.npmjs.org/
+packages:
+  "@*/*":
+    access: $all
+    publish: $all
+    unpublish: $all
+    proxy: npmjs
+
+  "**":
+    # allow all users (including non-authenticated users) to read and
+    # publish all packages
+    #
+    # you can specify usernames/groupnames (depending on your auth plugin)
+    # and three keywords: "$all", "$anonymous", "$authenticated"
+    access: $all
+
+    # allow all known users to publish/publish packages
+    # (anyone can register by default, remember?)
+    publish: $all
+    unpublish: $all
+
+    # if package is not available locally, proxy requests to 'npmjs' registry
+    proxy: npmjs

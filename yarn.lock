@@ -17660,18 +17660,18 @@ memoizee@0.4.15:
     next-tick "^1.1.0"
     timers-ext "^0.1.7"
 
-memory-fs@^0.4.1:
-  version "0.4.1"
-  resolved "https://registry.npmjs.org/memory-fs/-/memory-fs-0.4.1.tgz#3a9a20b8462523e447cfbc7e8bb80ed667bfc552"
-  integrity sha1-OpoguEYlI+RHz7x+i7gO1me/xVI=
+memory-fs@0.5.0, memory-fs@^0.5.0:
+  version "0.5.0"
+  resolved "https://registry.npmjs.org/memory-fs/-/memory-fs-0.5.0.tgz#324c01288b88652966d161db77838720845a8e3c"
+  integrity sha512-jA0rdU5KoQMC0e6ppoNRtpp6vjFq6+NY7r8hywnC7V+1Xj/MtHwGIbB1QaK/dunyjWteJzmkpd7ooeWg10T7GA==
   dependencies:
     errno "^0.1.3"
     readable-stream "^2.0.1"
 
-memory-fs@^0.5.0:
-  version "0.5.0"
-  resolved "https://registry.npmjs.org/memory-fs/-/memory-fs-0.5.0.tgz#324c01288b88652966d161db77838720845a8e3c"
-  integrity sha512-jA0rdU5KoQMC0e6ppoNRtpp6vjFq6+NY7r8hywnC7V+1Xj/MtHwGIbB1QaK/dunyjWteJzmkpd7ooeWg10T7GA==
+memory-fs@^0.4.1:
+  version "0.4.1"
+  resolved "https://registry.npmjs.org/memory-fs/-/memory-fs-0.4.1.tgz#3a9a20b8462523e447cfbc7e8bb80ed667bfc552"
+  integrity sha1-OpoguEYlI+RHz7x+i7gO1me/xVI=
   dependencies:
     errno "^0.1.3"
     readable-stream "^2.0.1"
@@ -25767,6 +25767,13 @@ verdaccio-audit@10.0.2:
     https-proxy-agent "5.0.0"
     node-fetch "2.6.1"
 
+verdaccio-auth-memory@^10.0.1:
+  version "10.0.1"
+  resolved "https://registry.npmjs.org/verdaccio-auth-memory/-/verdaccio-auth-memory-10.0.1.tgz#a4ace3767e954c9ade81bdbe5adb6db82a3417d1"
+  integrity sha512-Y3ZPTHCIW/jD5eACaswBIoJWe6VmOWcOnKZwggqoK/utl1M88KGDypLgQbzmBi+TkZuF3+LsqyDlNYjVd3NqGA==
+  dependencies:
+    "@verdaccio/commons-api" "10.0.1"
+
 verdaccio-htpasswd@10.0.0:
   version "10.0.0"
   resolved "https://registry.npmjs.org/verdaccio-htpasswd/-/verdaccio-htpasswd-10.0.0.tgz#7a7f44e8ed4db40c53deef0f5101f2a16dce4ff1"
@@ -25777,6 +25784,15 @@ verdaccio-htpasswd@10.0.0:
     bcryptjs "2.4.3"
     http-errors "1.8.0"
     unix-crypt-td-js "1.1.4"
+
+verdaccio-memory@^10.0.1:
+  version "10.0.1"
+  resolved "https://registry.npmjs.org/verdaccio-memory/-/verdaccio-memory-10.0.1.tgz#6ea1b6ed8bd434712a0469b942fdfce9a6fb453c"
+  integrity sha512-2jHB3H6XJk9HwMmoNfOXspMkik/MdRUT5sN80tyIgdT7a6FNpFl9wgKb43Ne69yMTb1lc4tRcvlGLezIummVyw==
+  dependencies:
+    "@verdaccio/commons-api" "10.0.1"
+    "@verdaccio/streams" "10.0.0"
+    memory-fs "0.5.0"
 
 verdaccio@^5.1.3:
   version "5.2.0"

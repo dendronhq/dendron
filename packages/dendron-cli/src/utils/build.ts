@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { DendronError, error2PlainObject } from "@dendronhq/common-all";
 import { createLogger, findUpTo } from "@dendronhq/common-server";
 import execa from "execa";
@@ -46,8 +47,15 @@ const REMOTE_NPM_ENDPOINT = "https://registry.npmjs.org";
 const $ = (cmd: string, opts?: execa.CommonOptions<any>) => {
   return execa.commandSync(cmd, { shell: true, ...opts });
 };
-const $$ = (cmd: string, opts?: any) => {
-  return execa.command(cmd, { shell: true, ...opts });
+const $$ = (
+  cmd: string,
+  opts?: execa.CommonOptions<any> & { quiet?: boolean }
+) => {
+  const out = execa.command(cmd, { shell: true, ...opts });
+  if (!opts?.quiet) {
+    out.stdout?.pipe(process.stdout);
+  }
+  return out;
 };
 
 export class LernaUtils {
@@ -57,18 +65,12 @@ export class LernaUtils {
     $(`git commit -m "chore: publish ${version}"`);
   }
 
-  static publishVersion(endpoint: PublishEndpoint) {
+  static async publishVersion(endpoint: PublishEndpoint) {
     const url =
       endpoint === PublishEndpoint.LOCAL
         ? LOCAL_NPM_ENDPOINT
         : REMOTE_NPM_ENDPOINT;
-    const cmd = $(
-      `lerna publish from-package --ignore-scripts --registry ${url}`
-    );
-    console.log("---");
-    console.log(cmd.stdout);
-    console.log(cmd.stderr);
-    console.log("---");
+    await $$(`lerna publish from-package --ignore-scripts --registry ${url}`);
     $(`node bootstrap/scripts/genMeta.js`);
   }
 }
@@ -474,7 +476,7 @@ export class BuildUtils {
   }
 
   static async publish({ cwd, osvxKey }: { cwd: string; osvxKey: string }) {
-    return await Promise.all([
+    return Promise.all([
       $("vsce publish", { cwd }),
       $("ovsx publish", {
         cwd,

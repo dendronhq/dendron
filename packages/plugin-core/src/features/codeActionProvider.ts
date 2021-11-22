@@ -1,5 +1,6 @@
 import { ContextualUIEvents } from "@dendronhq/common-all";
 import { DoctorActions } from "@dendronhq/dendron-cli";
+import isUrl from "is-url";
 import _ from "lodash";
 import { FrontmatterContent } from "mdast";
 import {
@@ -22,6 +23,7 @@ import { CopyNoteRefCommand } from "../commands/CopyNoteRef";
 import { DoctorCommand } from "../commands/Doctor";
 import { GotoNoteCommand } from "../commands/GotoNote";
 import { NoteLookupCommand } from "../commands/NoteLookupCommand";
+import { PasteLinkCommand } from "../commands/PasteLink";
 import { RenameHeaderCommand } from "../commands/RenameHeader";
 import { LookupSelectionTypeEnum } from "../components/lookup/types";
 import { Logger } from "../logger";
@@ -194,7 +196,7 @@ export const refactorProvider: CodeActionProvider = {
       if (!DendronExtension.isActive()) {
         return;
       }
-      const { editor, selection } = VSCodeUtils.getSelection();
+      const { editor, selection, text } = VSCodeUtils.getSelection();
       if (!editor || !selection) return;
 
       const header = getHeaderAt({
@@ -250,6 +252,23 @@ export const refactorProvider: CodeActionProvider = {
         },
       };
 
+      const WrapAsMarkdownLink = {
+        title: "Wrap as Markdown Link",
+        isPreferred: true,
+        kind: CodeActionKind.RefactorInline,
+        command: {
+          command: new PasteLinkCommand().key,
+          title: "Wrap as Markdown Link",
+          arguments: [
+            {
+              source: ContextualUIEvents.ContextualUICodeAction,
+              link: text,
+              selection,
+            },
+          ],
+        },
+      };
+
       if (_range.isEmpty) {
         //return a code action for create note if user clicked next to a broken wikilink
         if (isBrokenWikilink()) {
@@ -263,6 +282,10 @@ export const refactorProvider: CodeActionProvider = {
         // return if none
         return;
       } else {
+        //regex for url
+        if (!_.isUndefined(text) && isUrl(text)) {
+          return [WrapAsMarkdownLink];
+        }
         return !_.isUndefined(header)
           ? [createNewNoteAction, renameHeaderAction, copyHeaderRefAction]
           : [createNewNoteAction];

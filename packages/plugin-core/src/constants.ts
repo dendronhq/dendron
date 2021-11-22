@@ -629,6 +629,14 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docLink: "dendron.topic.pod.md",
     docPreview: `<a href="https://www.loom.com/share/d49e5f4155af485cadc9cd810b6cab28"> <img src="https://cdn.loom.com/sessions/thumbnails/d49e5f4155af485cadc9cd810b6cab28-with-play.gif"> </a>`,
   },
+  EXPORT_POD_V2: {
+    key: "dendron.exportPodv2",
+    title: `${CMD_PREFIX} Export Pod V2`,
+    group: "pods",
+    desc: "Experimental Feature",
+    docLink: "dendron.topic.pod.md",
+    docPreview: "",
+  },
   PUBLISH_POD: {
     key: "dendron.publishPod",
     title: `${CMD_PREFIX} Publish Pod`,

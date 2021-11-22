@@ -196,15 +196,6 @@ export class BuildUtils {
       out.stdout?.pipe(process.stdout);
     }
     await out;
-    // TODO: not sure why this is generated but its not used by extension
-    const extensionBak = path.join(
-      this.getPluginRootPath(),
-      "dist",
-      "extension.jsbak"
-    );
-    if (fs.existsSync(extensionBak)) {
-      fs.removeSync(extensionBak);
-    }
     const out2 = $$(`vsce package --yarn`, {
       cwd: this.getPluginRootPath(),
       env: fast ? { SKIP_SENTRY: "true" } : {},

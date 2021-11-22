@@ -156,7 +156,7 @@ export const PATH_MAP = new Map<string, mappedConfigPath>([
     { target: "useNoteTitleForLink", preserve: true },
   ],
   ["preview.enableMermaid", { target: "mermaid", preserve: true }],
-  ["preview.enablePrettyRefs", { target: "usePrettyRefs", preserve: true }],
+  ["preview.enablePrettyRefs", { target: "usePrettyRefs" }],
   ["preview.enableKatex", { target: "useKatex", preserve: true }],
 ]);
 

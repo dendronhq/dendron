@@ -338,8 +338,8 @@ suite("Migration", function () {
       });
     });
 
-    test("migrate to 0.69.1 (commands and workspace namespace migration)", (done) => {
-      DendronExtension.version = () => "0.69.1";
+    test("migrate to 0.70.0 (preview namespace migration)", (done) => {
+      DendronExtension.version = () => "0.70.0";
       runLegacyMultiWorkspaceTest({
         ctx,
         modConfigCb: (config) => {
@@ -358,6 +358,7 @@ suite("Migration", function () {
           const dendronConfig = DConfig.getRaw(
             wsRoot
           ) as IntermediateDendronConfig;
+
           const wsConfig = await getExtension().getWorkspaceSettings();
           const wsService = new WorkspaceService({ wsRoot });
 
@@ -370,9 +371,11 @@ suite("Migration", function () {
             "lookupDontBubbleUpCreateNew",
           ];
 
-          // deleting here because it's populated during init.
-          delete dendronConfig["preview"];
           const originalDeepCopy = _.cloneDeep(dendronConfig);
+
+          // deleting here because it's populated during init.
+          dendronConfig["version"] = 3;
+          delete dendronConfig["preview"];
 
           // all old configs should exist prior to migration
           const preMigrationCheckItems = [
@@ -385,15 +388,14 @@ suite("Migration", function () {
           preMigrationCheckItems.forEach((item) => {
             expect(item).toBeTruthy();
           });
-
           await MigrationServce.applyMigrationRules({
-            currentVersion: "0.69.1",
-            previousVersion: "0.69.0",
+            currentVersion: "0.70.0",
+            previousVersion: "0.70.0",
             dendronConfig,
             wsConfig,
             wsService,
             logger: Logger,
-            migrations: getMigration({ from: "0.69.0", to: "0.69.1" }),
+            migrations: getMigration({ from: "0.69.0", to: "0.70.0" }),
           });
 
           // backup of the original should exist.

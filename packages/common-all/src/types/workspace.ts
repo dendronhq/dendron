@@ -356,15 +356,6 @@ export type DendronConfig = {
    */
   maxNoteLength?: number;
 
-  /** Notes that are too large can cause slowdowns when editing them. For notes
-   * longer than this many characters, some editor decorations like tag colors
-   * and broken link highlighting will be disabled. Other decorations will
-   * continue to function.
-   *
-   * Defaults to 4096 characters, which is about 4 KiB.
-   */
-  maxNoteDecoratedLength?: number;
-
   /**
    * Do not display the randomly generated colors for tags in the **editor**. Only
    * color tag links if it has been configured in the frontmatter. False by

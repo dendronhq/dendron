@@ -245,8 +245,10 @@ export class MDUtilsV5 {
 
     const wsConfig = new WorkspaceService({ wsRoot }).getWorkspaceConfig();
     const timestampConfig: keyof typeof DateTime =
-      wsConfig.settings["dendron.defaultTimestampDecorationFormat"];
-    const formatOption = DateTime[timestampConfig] as DateTimeFormatOptions;
+      wsConfig?.settings["dendron.defaultTimestampDecorationFormat"];
+    const formatOption = DateTime[timestampConfig] as
+      | DateTimeFormatOptions
+      | undefined;
     const created = DateTime.fromMillis(_.toInteger(note.created));
     const updated = DateTime.fromMillis(_.toInteger(note.updated));
 

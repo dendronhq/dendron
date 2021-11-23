@@ -190,21 +190,16 @@ export class BuildUtils {
     fast?: boolean;
     quiet?: boolean;
   }) {
-    const out = $$(`yarn build:prod`, {
+    await $$(`yarn build:prod`, {
       cwd: this.getPluginRootPath(),
       env: fast ? { SKIP_SENTRY: "true" } : {},
+      quiet,
     });
-    if (!quiet) {
-      out.stdout?.pipe(process.stdout);
-    }
-    await out;
-    const out2 = $$(`vsce package --yarn`, {
+    await $$(`vsce package --yarn`, {
       cwd: this.getPluginRootPath(),
       env: fast ? { SKIP_SENTRY: "true" } : {},
+      quiet,
     });
-    if (!quiet) {
-      out2.stdout?.pipe(process.stdout);
-    }
   }
 
   static async prepPluginPkg(

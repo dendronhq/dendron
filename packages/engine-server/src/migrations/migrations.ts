@@ -18,7 +18,7 @@ import { MigrationUtils, PATH_MAP } from "./utils";
 import { DEPRECATED_PATHS } from ".";
 
 export const CONFIG_MIGRATIONS: Migrations = {
-  version: "0.69.1",
+  version: "0.70.0",
   changes: [
     {
       name: "migrate config",
@@ -109,7 +109,7 @@ export const CONFIG_MIGRATIONS: Migrations = {
 
         // add deprecated paths to legacyPaths
         // so they could be unset if they exist
-        legacyPaths.concat(DEPRECATED_PATHS);
+        legacyPaths.push(...DEPRECATED_PATHS);
 
         // remove legacy property from config after migration.
         legacyPaths.forEach((legacyPath) => {

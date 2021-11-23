@@ -1,11 +1,14 @@
 import _ from "lodash";
 import ogs from "open-graph-scraper";
-import { window } from "vscode";
+import { Selection, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { clipboard, getOpenGraphMetadata, VSCodeUtils } from "../utils";
 import { BasicCommand } from "./base";
 
-type CommandOpts = {};
+type CommandOpts = {
+  link?: string
+  selection? : Selection
+};
 type CommandOutput = string;
 
 // Command based on copying CopyNoteRef.ts
@@ -32,16 +35,16 @@ export class PasteLinkCommand extends BasicCommand<CommandOpts, CommandOutput> {
     return title ? `[${title}](${url})` : `<${url}>`;
   }
 
-  async execute(_opts: CommandOpts) {
+  async execute(opts: CommandOpts) {
     const maybeTextEditor = VSCodeUtils.getActiveTextEditor();
     if (maybeTextEditor === undefined) return "";
 
     const textEditor = maybeTextEditor;
-
+    const { link, selection } = opts;
     // First, get web address from clipboard
     let url = "";
     try {
-      url = await clipboard.readText().then((r) => r.trim());
+      url = link ? link.trim() : await clipboard.readText().then((r) => r.trim()) 
     } catch (err) {
       this.L.error({ err, url });
       throw err;
@@ -69,10 +72,16 @@ export class PasteLinkCommand extends BasicCommand<CommandOpts, CommandOutput> {
     // Get current Position: https://github.com/microsoft/vscode/issues/111
     // Write text to document with Edit Builder: https://github.com/Microsoft/vscode-extension-samples/tree/main/document-editing-sample
     const position = textEditor.selection.active;
-    textEditor.edit((eb) => {
-      eb.insert(position, formattedLink);
-    });
 
+    if(!_.isUndefined(selection)){
+       textEditor.edit((eb) => {
+          eb.replace(selection, formattedLink);
+      });
+    } else {
+      textEditor.edit((eb) => {
+        eb.insert(position, formattedLink);
+      });
+    }
     this.showFeedback(formattedLink);
 
     // The return is used for testing, but not by the main app.

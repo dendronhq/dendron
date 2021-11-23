@@ -982,7 +982,7 @@ export class WorkspaceService implements Disposable {
       // we are on a legacy config.
       changes = await MigrationServce.applyMigrationRules({
         currentVersion,
-        previousVersion: "0.69.1", // to force apply
+        previousVersion: "0.70.0", // to force apply
         dendronConfig,
         wsService: this,
         logger: this.logger,

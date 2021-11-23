@@ -2,11 +2,12 @@
 id: GzqTTx3jaIwjzU9alNGrT
 title: Selection to Items
 desc: ''
-updated: 1637595704065
+updated: 1637657491190
 created: 1637588464144
 ---
 
 [[foo|dendron.apples]]
-[[bar|dendron.blog]]
+[[blog|dendron.blog]]
+[[bar]]
 [[dendron.cat]]
 [[wow|dendron://vault/dendron.journal]]

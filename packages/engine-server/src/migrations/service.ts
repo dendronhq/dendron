@@ -5,11 +5,7 @@ import {
   WorkspaceSettings,
   ConfigUtils,
 } from "@dendronhq/common-all";
-import {
-  createDisposableLogger,
-  createLogger,
-  DLogger,
-} from "@dendronhq/common-server";
+import { createDisposableLogger, DLogger } from "@dendronhq/common-server";
 import _ from "lodash";
 import semver from "semver";
 import { WorkspaceService } from "../workspace";

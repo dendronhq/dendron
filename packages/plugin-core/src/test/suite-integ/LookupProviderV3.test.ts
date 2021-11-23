@@ -99,6 +99,7 @@ suite("selection2Items", () => {
     noSetTimeout: true,
   });
   let active: NoteProps;
+  let activeWithAmbiguousLink: NoteProps;
   describeMultiWS(
     "GIVEN an active note with selection that contains wikilinks",
     {
@@ -110,6 +111,26 @@ suite("selection2Items", () => {
           wsRoot,
           fname: "active",
           body: "[[dendron.ginger]]\n[[dendron.dragonfruit]]\n[[dendron.clementine]]",
+        });
+        activeWithAmbiguousLink = await NoteTestUtilsV4.createNote({
+          vault: TestEngineUtils.vault1(vaults),
+          wsRoot,
+          fname: "active-ambiguous",
+          body: "[[pican]]",
+        });
+        await NoteTestUtilsV4.createNote({
+          genRandomId: true,
+          vault: TestEngineUtils.vault2(vaults),
+          wsRoot,
+          fname: "pican",
+          body: "",
+        });
+        await NoteTestUtilsV4.createNote({
+          genRandomId: true,
+          vault: TestEngineUtils.vault3(vaults),
+          wsRoot,
+          fname: "pican",
+          body: "",
         });
         await NoteTestUtilsV4.createNote({
           vault: TestEngineUtils.vault1(vaults),
@@ -176,14 +197,41 @@ suite("selection2Items", () => {
           "root",
           "root",
           "root",
+          "active-ambiguous",
           "active",
           "bar",
           "foo",
+          "pican",
           "dendron",
+          "pican",
         ];
 
         expect(
           _.isUndefined(gatherOut.quickpick.itemsFromSelection)
+        ).toBeTruthy();
+
+        const actualItemLabels = enrichOut?.selectedItems.map(
+          (item) => item.label
+        );
+        expect(expectedItemLabels.sort()).toEqual(actualItemLabels?.sort());
+      });
+
+      test("if selected wikilink's vault is ambiguous, list all notes with same fname across all vaults.", async () => {
+        const editor = await VSCodeUtils.openNote(activeWithAmbiguousLink);
+        editor.selection = new Selection(7, 0, 8, 0);
+
+        const cmd = new NoteLookupCommand();
+        const gatherOut = await cmd.gatherInputs({
+          noConfirm: true,
+          selectionType: "selection2Items",
+          initialValue: "",
+        });
+
+        const enrichOut = await cmd.enrichInputs(gatherOut);
+        const expectedItemLabels = ["pican", "pican"];
+
+        expect(
+          !_.isUndefined(gatherOut.quickpick.itemsFromSelection)
         ).toBeTruthy();
 
         const actualItemLabels = enrichOut?.selectedItems.map(

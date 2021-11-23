@@ -1,16 +1,16 @@
-if [ $PUBLISH_ENDPOINT = "local" ] && [ -z $FAST ] ; then
+if [ $PUBLISH_ENDPOINT = "local" ] && [ -z $USE_IN_MEMORY_REGISTRY ] ; then
 	echo "start verdaccio"
 	verdaccio > verdaccio.log 2>&1 &
 	FOO_PID=$!
 	echo "$FOO_PID"
 	sleep 3
 fi
-if [ $PUBLISH_ENDPOINT = "local" ] && [ $FAST ] ; then
+if [ $PUBLISH_ENDPOINT = "local" ] && [ $USE_IN_MEMORY_REGISTRY ] ; then
 	echo "starting verdaccio with in-memory cache to speed up build time"
 	verdaccio -c ./bootstrap/data/verdaccio/config.yaml > verdaccio.log 2>&1 &
 	FOO_PID=$!
 	echo "$FOO_PID"
-	sleep 1
+	sleep 10
 fi
 
 
@@ -32,10 +32,10 @@ if [ $SCRIPT_BUILD_ENV = "ci" ]; then
 fi
 
 if [ -z $FAST ]; then
-	LOG_LEVEL=info $DENDRON_CLI dev build --upgradeType $UPGRADE_TYPE --publishEndpoint $PUBLISH_ENDPOINT --quiet
+	LOG_LEVEL=info $DENDRON_CLI dev build --upgradeType $UPGRADE_TYPE --publishEndpoint $PUBLISH_ENDPOINT
 else
 	echo "running fast mode..."
-	SKIP_SENTRY=1 LOG_LEVEL=info $DENDRON_CLI dev build --upgradeType $UPGRADE_TYPE --publishEndpoint $PUBLISH_ENDPOINT --fast --quiet
+	SKIP_SENTRY=1 LOG_LEVEL=info $DENDRON_CLI dev build --upgradeType $UPGRADE_TYPE --publishEndpoint $PUBLISH_ENDPOINT --fast
 fi
 
 if [ $PUBLISH_ENDPOINT = "local" ]; then

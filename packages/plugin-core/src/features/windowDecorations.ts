@@ -235,12 +235,6 @@ export const updateDecorations = sentryReportingCallback(
       }
     }
 
-    const fds = fs.readdirSync("/proc/self/fd");
-    Logger.info({
-      ctx,
-      filesLength: fds.length,
-    });
-
     return {
       allDecorations: activeDecorations,
       allWarnings,

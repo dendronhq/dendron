@@ -14,6 +14,7 @@ export {
   ALIAS_NAME,
   LINK_CONTENTS,
   visit,
+  ParseLinkV2Resp,
 } from "./utils";
 export { wikiLinks, WikiLinksOpts, matchWikiLink } from "./wikiLinks";
 export {

@@ -115,6 +115,22 @@ export type LinkFilter = {
   loc?: Partial<DNoteLoc>;
 };
 
+export type ParseLinkV2Resp =
+  | {
+      alias?: string;
+      value: string;
+      anchorHeader?: string;
+      vaultName?: string;
+      sameFile: false;
+    }
+  | {
+      alias?: string;
+      value?: string;
+      anchorHeader: string;
+      vaultName?: string;
+      sameFile: true;
+    };
+
 export function hashTag2WikiLinkNoteV4(hashtag: HashTag): WikiLinkNoteV4 {
   return {
     ...hashtag,
@@ -425,22 +441,7 @@ export class LinkUtils {
    *  return null. A missing value means that the file containing this link is
    *  the value.
    */
-  static parseLinkV2(linkString: string):
-    | {
-        alias?: string;
-        value: string;
-        anchorHeader?: string;
-        vaultName?: string;
-        sameFile: false;
-      }
-    | {
-        alias?: string;
-        value?: string;
-        anchorHeader: string;
-        vaultName?: string;
-        sameFile: true;
-      }
-    | null {
+  static parseLinkV2(linkString: string): ParseLinkV2Resp | null {
     const re = new RegExp(LINK_CONTENTS, "i");
     const out = linkString.match(re);
     if (out && out.groups) {
@@ -707,7 +708,7 @@ export class LinkUtils {
       return LinkUtils.parseLinkV2(match[1]);
     });
 
-    return matched;
+    return matched.filter((match) => !_.isNull(match)) as ParseLinkV2Resp[];
   }
 }
 

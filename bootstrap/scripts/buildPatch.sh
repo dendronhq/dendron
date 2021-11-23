@@ -10,7 +10,7 @@ if [ $PUBLISH_ENDPOINT = "local" ] && [ $USE_IN_MEMORY_REGISTRY ] ; then
 	verdaccio -c ./bootstrap/data/verdaccio/config.yaml > verdaccio.log 2>&1 &
 	FOO_PID=$!
 	echo "$FOO_PID"
-	sleep 3
+	sleep 10
 fi
 
 

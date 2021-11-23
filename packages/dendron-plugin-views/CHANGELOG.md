@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.70.0](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.70.0) (2021-11-23)
+
+
+### Bug Fixes
+
+* **pods:** invalid configuration error ([398a599](https://github.com/dendronhq/dendron/commit/398a5995fc594566131eb283ff989a877ca9c995))
+* **publish:** make mermaid work consistently on published sites ([2f648e0](https://github.com/dendronhq/dendron/commit/2f648e0a34c95095e86e8535a1fa8ec9ac4de39c))
+* **publish:** syntax highlighting for code blocks ([8ece4e2](https://github.com/dendronhq/dendron/commit/8ece4e28ae0c60d314498f6ed11a7974086f8f80))
+* **viwes:** `nav_order` property not respected in tree view ([fd328a1](https://github.com/dendronhq/dendron/commit/fd328a17478a063c2ea3d51e00fbc26c7e7e1b26))
+
+
+### Features Dendron
+
+* **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
+
+
+
+
+
 ## [0.69.3-alpha.0](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.69.3-alpha.0) (2021-11-22)
 
 

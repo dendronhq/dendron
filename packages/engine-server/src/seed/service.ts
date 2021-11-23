@@ -141,6 +141,7 @@ export class SeedService {
       onUpdatingWorkspace,
       onUpdatedWorkspace,
     });
+    ws.dispose();
 
     return { seed };
   }
@@ -185,6 +186,7 @@ export class SeedService {
           updateConfig: false,
         });
         await ws.setConfig(config);
+        ws.dispose();
         break;
       }
       case SeedInitMode.CONVERT_WORKSPACE: {
@@ -196,6 +198,7 @@ export class SeedService {
         }
         const ws = new WorkspaceService({ wsRoot });
         const vaults = ConfigUtils.getVaults(ws.config);
+        ws.dispose();
         const vaultPath = VaultUtils.getRelPath(vaults[0]);
         seed.root = vaultPath;
         writeYAML(cpath, seed);
@@ -228,6 +231,7 @@ export class SeedService {
   }): Promise<SeedSvcResp> {
     const ws = new WorkspaceService({ wsRoot: this.wsRoot });
     const config = ws.config;
+    ws.dispose();
 
     const seeds = ConfigUtils.getWorkspace(config).seeds;
     if (!_.has(seeds, id)) {
@@ -287,11 +291,13 @@ export class SeedService {
       onUpdatingWorkspace,
       onUpdatedWorkspace,
     });
+    ws.dispose();
   }
 
   isSeedInWorkspace(id: string): boolean {
     const ws = new WorkspaceService({ wsRoot: this.wsRoot });
     const config = ws.config;
+    ws.dispose();
     const vaults = ConfigUtils.getVaults(config);
     return undefined !== vaults.find((vault) => vault.seed === id);
   }
@@ -299,6 +305,7 @@ export class SeedService {
   getSeedsInWorkspace(): string[] {
     const ws = new WorkspaceService({ wsRoot: this.wsRoot });
     const config = ws.config;
+    ws.dispose();
     const vaults = ConfigUtils.getVaults(config);
     return vaults
       .filter((vault) => vault.seed !== undefined)

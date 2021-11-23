@@ -48,6 +48,7 @@ import {
   checkAndWarnBadFrontmatter,
   warnMissingFrontmatter,
 } from "./codeActionProvider";
+import fs from "fs";
 
 /** Wait this long in miliseconds before trying to update decorations. */
 const DECORATION_UPDATE_DELAY = 100;
@@ -233,6 +234,12 @@ export const updateDecorations = sentryReportingCallback(
         activeEditor.setDecorations(type, []);
       }
     }
+
+    const fds = fs.readdirSync("/proc/self/fd");
+    Logger.info({
+      ctx,
+      filesLength: fds.length,
+    });
 
     return {
       allDecorations: activeDecorations,

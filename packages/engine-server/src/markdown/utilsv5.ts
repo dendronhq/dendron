@@ -243,7 +243,9 @@ export class MDUtilsV5 {
 
     const custom = note.custom ? note.custom : undefined;
 
-    const wsConfig = new WorkspaceService({ wsRoot }).getWorkspaceConfig();
+    const ws = new WorkspaceService({ wsRoot });
+    const wsConfig = ws.getWorkspaceConfig();
+    ws.dispose();
     const timestampConfig: keyof typeof DateTime =
       wsConfig?.settings["dendron.defaultTimestampDecorationFormat"];
     const formatOption = DateTime[timestampConfig] as

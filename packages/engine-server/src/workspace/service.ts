@@ -18,10 +18,11 @@ import {
   WorkspaceSettings,
   ConfigUtils,
   CURRENT_CONFIG_VERSION,
+  Disposable,
 } from "@dendronhq/common-all";
 import {
   assignJSONWithComment,
-  createLogger,
+  createDisposableLogger,
   DLogger,
   GitUtils,
   note2File,
@@ -114,8 +115,10 @@ type AddRemoveCommonOpts = {
   onUpdatedWorkspace?: () => Promise<void>;
 };
 
-export class WorkspaceService {
+/** You **must** dispose workspace services you create, otherwise you risk leaking file descriptors which may lead to crashes. */
+export class WorkspaceService implements Disposable {
   public logger: DLogger;
+  private loggerDispose?: () => any;
   protected _seedService: SeedService;
 
   static isNewVersionGreater({
@@ -134,10 +137,17 @@ export class WorkspaceService {
 
   public wsRoot: string;
 
+  /** Reminder: you **must** dispose workspace services you create, otherwise you risk leaking file descriptors which may lead to crashes. */
   constructor({ wsRoot, seedService }: WorkspaceServiceOpts) {
     this.wsRoot = wsRoot;
-    this.logger = createLogger();
+    const { logger, dispose } = createDisposableLogger();
+    this.logger = logger;
+    this.loggerDispose = dispose;
     this._seedService = seedService || new SeedService({ wsRoot });
+  }
+
+  dispose() {
+    if (this.loggerDispose) this.loggerDispose();
   }
 
   get user(): DUser {
@@ -691,6 +701,7 @@ export class WorkspaceService {
         return ws.cloneVaultWithAccessToken({ vault });
       })
     );
+    ws.dispose();
     return;
   }
 

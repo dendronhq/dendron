@@ -31,7 +31,6 @@ import {
   USERS_HIERARCHY_BASE,
   TAGS_HIERARCHY_BASE,
 } from "@dendronhq/common-all";
-import { createLogger } from "@dendronhq/common-server";
 import _ from "lodash";
 import type {
   Heading,
@@ -48,6 +47,7 @@ import type {
   FootnoteDefinition,
 } from "mdast";
 import * as mdastBuilder from "mdast-builder";
+import { createDisposableLogger } from "@dendronhq/common-server";
 import { Processor } from "unified";
 import { Node, Parent } from "unist";
 import { selectAll } from "unist-util-select";
@@ -259,13 +259,15 @@ const getLinks = ({
       return ent.value === filter?.loc?.fname;
     });
   }
-  createLogger("LinkUtils.getLinks").info({
+  const { logger, dispose } = createDisposableLogger("LinkUtils.getLinks");
+  logger.info({
     ctx: "getLinks",
     dlinksLength: dlinks.length,
     noteRefsLength: noteRefs.length,
     wikiLinksLength: wikiLinks.length,
     filterLocFname: filter?.loc?.fname,
   });
+  if (dispose) dispose();
   return dlinks;
 };
 
@@ -812,7 +814,9 @@ export class AnchorUtils {
         payload: { note: NoteUtils.toLogObj(opts.note), wsRoot: opts.wsRoot },
         innerError: err as Error,
       });
-      createLogger("AnchorUtils").error(error);
+      const { logger, dispose } = createDisposableLogger("AnchorUtils");
+      logger.error(error);
+      if (dispose) dispose();
       return {};
     }
   }
@@ -1292,13 +1296,13 @@ export class RemarkUtils {
       return [];
     }
     const nodesToExtract = nextHeaderIndex
-      // @ts-ignore
-      ? (tree.children as Node[]).splice(
+      ? // @ts-ignore
+        (tree.children as Node[]).splice(
           foundHeaderIndex!,
           nextHeaderIndex! - foundHeaderIndex!
         )
-      // @ts-ignore
-      : (tree.children as Node[]).splice(foundHeaderIndex!);
+      : // @ts-ignore
+        (tree.children as Node[]).splice(foundHeaderIndex!);
     return nodesToExtract;
   }
 

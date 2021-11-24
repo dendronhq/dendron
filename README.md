@@ -1,7 +1,7 @@
 ![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/logo-256.png)
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-96-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-97-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 # Welcome to Dendron!
@@ -184,6 +184,7 @@ Dendron wouldn't be what it is today without help from these wonderful gardeners
     <td align="center"><a href="https://github.com/benhsm"><img src="https://avatars.githubusercontent.com/u/93843523?v=4?s=100" width="100px;" alt=""/><br /><sub><b>benhsm</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=benhsm" title="Documentation">📖</a></td>
     <td align="center"><a href="https://github.com/icedwater"><img src="https://avatars.githubusercontent.com/u/144799?v=4?s=100" width="100px;" alt=""/><br /><sub><b>icedwater</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Aicedwater" title="Bug reports">🐛</a></td>
     <td align="center"><a href="http://mstempl.netlify.app"><img src="https://avatars.githubusercontent.com/u/3171330?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Bassmann</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3ABassmann" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://quanta.money"><img src="https://avatars.githubusercontent.com/u/81030?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Im</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Aimmartian" title="Bug reports">🐛</a></td>
   </tr>
 </table>
 

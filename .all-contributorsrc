@@ -932,6 +932,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "d1rewolf",
+      "name": "John Wells",
+      "avatar_url": "https://avatars.githubusercontent.com/u/3717?v=4",
+      "profile": "http://www.greatworx.com",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,

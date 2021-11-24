@@ -118,7 +118,7 @@ type AddRemoveCommonOpts = {
 /** You **must** dispose workspace services you create, otherwise you risk leaking file descriptors which may lead to crashes. */
 export class WorkspaceService implements Disposable {
   public logger: DLogger;
-  private loggerDispose?: () => any;
+  private loggerDispose: () => any;
   protected _seedService: SeedService;
 
   static isNewVersionGreater({
@@ -147,7 +147,7 @@ export class WorkspaceService implements Disposable {
   }
 
   dispose() {
-    if (this.loggerDispose) this.loggerDispose();
+    this.loggerDispose();
   }
 
   get user(): DUser {

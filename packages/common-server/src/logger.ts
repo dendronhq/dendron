@@ -57,13 +57,13 @@ function createDisposableLogger(
   dest?: string,
   // TODO: not using pretty option
   opts?: { lvl?: LogLvl }
-): { logger: pino.Logger } & Partial<Disposable> {
+): { logger: pino.Logger } & Disposable {
   const level = opts?.lvl || env("LOG_LEVEL", { shouldThrow: false }) || "info";
   const nameClean = name || env("LOG_NAME", { shouldThrow: false }) || "logger";
   const logDst = dest || env("LOG_DST", { shouldThrow: false }) || "stdout";
   const pinoOpts = { name: nameClean, level };
   if (logDst === "stdout") {
-    return { logger: pino(pinoOpts) };
+    return { logger: pino(pinoOpts), dispose: () => {} };
   } else {
     const destination = pino.destination(logDst);
     return {

@@ -48,7 +48,7 @@ export class MigrationServce {
         m.changes.map((c) => c.name),
       ]),
     });
-    if (dispose) dispose();
+    dispose();
     await _.reduce(
       migrationsToRun,
       async (prev, migration) => {

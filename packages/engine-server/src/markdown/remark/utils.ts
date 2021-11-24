@@ -267,7 +267,7 @@ const getLinks = ({
     wikiLinksLength: wikiLinks.length,
     filterLocFname: filter?.loc?.fname,
   });
-  if (dispose) dispose();
+  dispose();
   return dlinks;
 };
 
@@ -816,7 +816,7 @@ export class AnchorUtils {
       });
       const { logger, dispose } = createDisposableLogger("AnchorUtils");
       logger.error(error);
-      if (dispose) dispose();
+      dispose();
       return {};
     }
   }

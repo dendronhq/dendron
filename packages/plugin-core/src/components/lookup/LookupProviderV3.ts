@@ -303,6 +303,12 @@ export class NoteLookupProvider implements ILookupProviderV3 {
           return;
         }
       }
+
+      if (picker.itemsFromSelection) {
+        picker.items = picker.itemsFromSelection;
+        return;
+      }
+
       // if empty string, show all 1st level results
       if (transformedQuery.queryString === "") {
         Logger.debug({ ctx, msg: "empty qs" });

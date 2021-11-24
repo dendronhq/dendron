@@ -115,6 +115,22 @@ export type LinkFilter = {
   loc?: Partial<DNoteLoc>;
 };
 
+export type ParseLinkV2Resp =
+  | {
+      alias?: string;
+      value: string;
+      anchorHeader?: string;
+      vaultName?: string;
+      sameFile: false;
+    }
+  | {
+      alias?: string;
+      value?: string;
+      anchorHeader: string;
+      vaultName?: string;
+      sameFile: true;
+    };
+
 export function hashTag2WikiLinkNoteV4(hashtag: HashTag): WikiLinkNoteV4 {
   return {
     ...hashtag,
@@ -425,22 +441,7 @@ export class LinkUtils {
    *  return null. A missing value means that the file containing this link is
    *  the value.
    */
-  static parseLinkV2(linkString: string):
-    | {
-        alias?: string;
-        value: string;
-        anchorHeader?: string;
-        vaultName?: string;
-        sameFile: false;
-      }
-    | {
-        alias?: string;
-        value?: string;
-        anchorHeader: string;
-        vaultName?: string;
-        sameFile: true;
-      }
-    | null {
+  static parseLinkV2(linkString: string): ParseLinkV2Resp | null {
     const re = new RegExp(LINK_CONTENTS, "i");
     const out = linkString.match(re);
     if (out && out.groups) {
@@ -693,6 +694,21 @@ export class LinkUtils {
     if (link.to?.vaultName) {
       return true;
     } else return false;
+  }
+
+  /**
+   * Given a source string, extract all wikilinks within the source.
+   *
+   * @param source string to extract wikilinks from
+   */
+  static extractWikiLinks(source: string) {
+    // chop up the source.
+    const regExp = new RegExp("\\[\\[(.+?)?\\]\\]", "g");
+    const matched = [...source.matchAll(regExp)].map((match) => {
+      return LinkUtils.parseLinkV2(match[1]);
+    });
+
+    return matched.filter((match) => !_.isNull(match)) as ParseLinkV2Resp[];
   }
 }
 

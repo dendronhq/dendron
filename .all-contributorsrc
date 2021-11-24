@@ -896,6 +896,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "icedwater",
+      "name": "icedwater",
+      "avatar_url": "https://avatars.githubusercontent.com/u/144799?v=4",
+      "profile": "https://github.com/icedwater",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

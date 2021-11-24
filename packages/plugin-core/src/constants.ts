@@ -705,7 +705,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     key: "dendron.publishDev",
     title: `${CMD_PREFIX} Publish Dev`,
     group: "publishing",
-    desc: "Preview your notes on localhost using publishing v2",
+    desc: "Preview your notes on localhost using publishing",
     docs: [
       "This command works by running `dendron-cli` in the background.",
     ].join("\n"),

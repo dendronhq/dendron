@@ -385,7 +385,7 @@
       {
         "command": "dendron.publishDev",
         "title": "Dendron: Publish Dev",
-        "desc": "Preview your notes on localhost using publishing v2",
+        "desc": "Preview your notes on localhost using publishing",
         "docs": "This command works by running `dendron-cli` in the background.",
         "docLink": "",
         "docPreview": ""

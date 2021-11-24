@@ -792,6 +792,18 @@ async function showWelcomeOrWhatsNew({
   if (shouldDisplayLapsedUserMsg()) {
     await showLapsedUserMessage(assetUri);
   }
+
+  // Show inactive users (users who were active on first week but have not used lookup in a month)
+  // a reminder prompt to re-engage them.
+  if (await shouldDisplayInactiveUserSurvey()) {
+    await showInactiveUserMessage();
+  }
+}
+
+export async function showInactiveUserMessage() {
+  AnalyticsUtils.track(VSCodeEvents.ShowInactiveUserMessage);
+  MetadataService.instance().setInactiveUserMsgSendTime();
+  await SurveyUtils.showInactiveUserSurvey();
 }
 
 export async function showLapsedUserMessage(assetUri: vscode.Uri) {
@@ -816,11 +828,68 @@ export async function showLapsedUserMessage(assetUri: vscode.Uri) {
             GLOBAL_STATE.LAPSED_USER_SURVEY_SUBMITTED
           );
         if (lapsedSurveySubmitted === undefined) {
-          SurveyUtils.showLapsedUserSurvey();
+          await SurveyUtils.showLapsedUserSurvey();
         }
         return;
       }
     });
+}
+
+export async function shouldDisplayInactiveUserSurvey(): Promise<boolean> {
+  const inactiveSurveySubmitted = await StateService.instance().getGlobalState(
+    GLOBAL_STATE.INACTIVE_USER_SURVEY_SUBMITTED
+  );
+
+  const ONE_WEEK = Duration.fromObject({ weeks: 1 });
+  const FOUR_WEEKS = Duration.fromObject({ weeks: 4 });
+  const CUR_TIME = Duration.fromObject({ seconds: Time.now().toSeconds() });
+  const metaData = MetadataService.instance().getMeta();
+
+  const FIRST_INSTALL =
+    metaData.firstInstall !== undefined
+      ? Duration.fromObject({ seconds: metaData.firstInstall })
+      : undefined;
+
+  const FIRST_LOOKUP_TIME =
+    metaData.firstLookupTime !== undefined
+      ? Duration.fromObject({ seconds: metaData.firstLookupTime })
+      : undefined;
+
+  const LAST_LOOKUP_TIME =
+    metaData.lastLookupTime !== undefined
+      ? Duration.fromObject({ seconds: metaData.lastLookupTime })
+      : undefined;
+
+  const INACTIVE_USER_MSG_SEND_TIME =
+    metaData.inactiveUserMsgSendTime !== undefined
+      ? Duration.fromObject({ seconds: metaData.inactiveUserMsgSendTime })
+      : undefined;
+
+  // is the user a first week active user?
+  const isFirstWeekActive =
+    FIRST_INSTALL !== undefined &&
+    FIRST_LOOKUP_TIME !== undefined &&
+    FIRST_LOOKUP_TIME.minus(FIRST_INSTALL) <= ONE_WEEK;
+
+  // was the user active on the first week but has been inactive for a month?
+  const isInactive =
+    isFirstWeekActive &&
+    LAST_LOOKUP_TIME !== undefined &&
+    CUR_TIME.minus(LAST_LOOKUP_TIME) >= FOUR_WEEKS;
+
+  if (!_.isUndefined(inactiveSurveySubmitted)) {
+    const shouldSendAgain =
+      INACTIVE_USER_MSG_SEND_TIME !== undefined &&
+      CUR_TIME.minus(INACTIVE_USER_MSG_SEND_TIME) >= FOUR_WEEKS;
+    return shouldSendAgain;
+  }
+
+  return (
+    // If the user has been active on first week, but been inactive for more than 4 weeks.
+    metaData.dendronWorkspaceActivated !== undefined &&
+    metaData.firstWsInitialize !== undefined &&
+    isInactive
+  );
 }
 
 /**

@@ -1,11 +1,7 @@
 import chokidar from "chokidar";
 import { COMMON_FOLDER_IGNORES } from "@dendronhq/common-server";
 import path from "path";
-
-/** Mimicks VSCode's disposable for cross-compatibility. */
-type Disposable = {
-  dispose: () => any;
-};
+import type { Disposable } from "@dendronhq/common-all";
 
 type SupportedEvents = "add" | "addDir" | "change" | "unlink" | "unlinkDir";
 

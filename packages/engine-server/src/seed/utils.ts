@@ -60,8 +60,7 @@ export class SeedUtils {
   }
 
   static validateWorkspaceSeedConversion({ wsRoot }: { wsRoot: string }) {
-    const ws = new WorkspaceService({ wsRoot });
-    const config = ws.config;
+    const config = WorkspaceService.getOrCreateConfig(wsRoot);
     const vaults = ConfigUtils.getVaults(config);
     if (vaults.length !== 1) {
       return {

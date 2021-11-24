@@ -5,7 +5,7 @@ import {
   WorkspaceSettings,
   ConfigUtils,
 } from "@dendronhq/common-all";
-import { createLogger, DLogger } from "@dendronhq/common-server";
+import { createDisposableLogger, DLogger } from "@dendronhq/common-server";
 import _ from "lodash";
 import semver from "semver";
 import { WorkspaceService } from "../workspace";
@@ -41,13 +41,14 @@ export class MigrationServce {
         return out;
       })
     );
-    const logger = createLogger("migration");
+    const { logger, dispose } = createDisposableLogger("migration");
     logger.info({
       migrations: migrationsToRun.map((m) => [
         m.version,
         m.changes.map((c) => c.name),
       ]),
     });
+    dispose();
     await _.reduce(
       migrationsToRun,
       async (prev, migration) => {

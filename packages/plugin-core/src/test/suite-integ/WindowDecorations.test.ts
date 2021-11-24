@@ -3,7 +3,6 @@ import { AssertUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { writeFile } from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import sinon from "sinon";
 import * as vscode from "vscode";
 import {
   DECORATION_TYPE,
@@ -11,6 +10,7 @@ import {
 } from "../../features/windowDecorations";
 import { VSCodeUtils } from "../../utils";
 import { expect } from "../testUtilsv2";
+import { describe } from "mocha";
 import {
   runLegacyMultiWorkspaceTest,
   runTestButSkipForWindows,
@@ -260,19 +260,19 @@ suite("windowDecorations", function () {
             "[x]"
           );
           expect(taskDecorations[0].renderOptions?.after?.contentText).toEqual(
-            "due:2021.10.29 @grace prio:high #foo"
+            "due:2021.10.29 @grace priority:high #foo"
           );
           expect(
             taskDecorations[1].renderOptions?.before?.contentText
           ).toBeFalsy();
           expect(taskDecorations[1].renderOptions?.after?.contentText).toEqual(
-            "@grace prio:high #foo #bar"
+            "@grace priority:high #foo #bar"
           );
           expect(taskDecorations[2].renderOptions?.before?.contentText).toEqual(
             "[ ]"
           );
           expect(taskDecorations[2].renderOptions?.after?.contentText).toEqual(
-            "prio:low"
+            "priority:low"
           );
 
           done();
@@ -399,7 +399,7 @@ suite("windowDecorations", function () {
       });
     });
 
-    test("for long notes, disables expensive decorations & warns the user", (done) => {
+    test("for long notes, only the visible range should be decorated", (done) => {
       const FNAME = "test.note";
       const repeat = 228;
       runLegacyMultiWorkspaceTest({
@@ -422,41 +422,27 @@ suite("windowDecorations", function () {
           const editor = await VSCodeUtils.openNote(note!);
           const document = editor.document;
 
-          const showInfo = sinon.stub(vscode.window, "showWarningMessage");
+          const { allDecorations } = updateDecorations(editor);
 
-          const { allDecorations, expensiveDecorationWarning } =
-            updateDecorations(editor);
-
-          // Checking if notes exist is expensive, so we shouldn't have done that
+          // This note is really long, so not all links in it will be decorated (there are repeat * 2 many links)
           const brokenWikilinkDecorations = allDecorations!.get(
             DECORATION_TYPE.brokenWikilink
           );
-          expect(brokenWikilinkDecorations.length).toEqual(0);
-          // Instead, all wikilinks will appear as existing even if they are missing
-          const wikilinkDecorations = allDecorations!.get(
-            DECORATION_TYPE.wikiLink
-          );
-          expect(wikilinkDecorations.length).toEqual(repeat * 2);
+          expect(brokenWikilinkDecorations.length < repeat * 2).toBeTruthy();
           expect(
             isTextDecorated(
               "[[does.not.exist]]",
-              wikilinkDecorations!,
+              brokenWikilinkDecorations!,
               document
             )
           ).toBeTruthy();
           expect(
-            isTextDecorated("#does.not.exist", wikilinkDecorations!, document)
+            isTextDecorated(
+              "#does.not.exist",
+              brokenWikilinkDecorations!,
+              document
+            )
           ).toBeTruthy();
-
-          // The user should only have been warned once
-          await expensiveDecorationWarning;
-          expect(showInfo.calledOnce).toBeTruthy();
-
-          // The user should not get warned a second time
-          const { expensiveDecorationWarning: expensiveDecorationWarning2 } =
-            updateDecorations(editor);
-          await expensiveDecorationWarning2;
-          expect(showInfo.calledOnce).toBeTruthy();
 
           done();
         },
@@ -577,6 +563,68 @@ suite("windowDecorations", function () {
           expect(allDecorations).toEqual(undefined);
           done();
         },
+      });
+    });
+  });
+});
+
+function checkRanges(
+  range: vscode.Range | undefined,
+  startLine: number,
+  startChar: number,
+  endLine: number,
+  endChar: number
+): boolean {
+  expect(range?.start.line).toEqual(startLine);
+  expect(range?.start.character).toEqual(startChar);
+  expect(range?.end.line).toEqual(endLine);
+  expect(range?.end.character).toEqual(endChar);
+  return true;
+}
+
+suite("mergeOverlappingRanges", () => {
+  describe("GIVEN a single range", () => {
+    test("THEN that range is returned", () => {
+      const ranges = VSCodeUtils.mergeOverlappingRanges([
+        new vscode.Range(0, 0, 5, 0),
+      ]);
+      expect(ranges.length).toEqual(1);
+      expect(checkRanges(ranges[0], 0, 0, 5, 0)).toBeTruthy();
+    });
+  });
+
+  describe("GIVEN two ranges", () => {
+    describe("AND ranges are NOT overlapping", () => {
+      test("THEN both ranges are returned", () => {
+        const ranges = VSCodeUtils.mergeOverlappingRanges([
+          new vscode.Range(0, 0, 5, 0),
+          new vscode.Range(8, 0, 12, 0),
+        ]);
+        expect(ranges.length).toEqual(2);
+        expect(checkRanges(ranges[0], 0, 0, 5, 0)).toBeTruthy();
+        expect(checkRanges(ranges[1], 8, 0, 12, 0)).toBeTruthy();
+      });
+    });
+
+    describe("AND ranges are overlapping", () => {
+      test("THEN ranges are merged", () => {
+        const ranges = VSCodeUtils.mergeOverlappingRanges([
+          new vscode.Range(0, 0, 5, 0),
+          new vscode.Range(4, 0, 12, 0),
+        ]);
+        expect(ranges.length).toEqual(1);
+        expect(checkRanges(ranges[0], 0, 0, 12, 0)).toBeTruthy();
+      });
+    });
+
+    describe("AND ranges are just touching", () => {
+      test("THEN both ranges are returned", () => {
+        const ranges = VSCodeUtils.mergeOverlappingRanges([
+          new vscode.Range(0, 0, 5, 0),
+          new vscode.Range(5, 0, 12, 0),
+        ]);
+        expect(ranges.length).toEqual(1);
+        expect(checkRanges(ranges[0], 0, 0, 12, 0)).toBeTruthy();
       });
     });
   });

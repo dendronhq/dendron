@@ -57,17 +57,17 @@
         {
           "id": "dendron.treeView",
           "name": "Tree View",
+          "when": "dendron:pluginActive && !dendron:webUIEnabled",
           "contextualTitle": "Tree View",
-          "icon": "media/icons/dendron-vscode.svg",
-          "when": "dendron:pluginActive && !dendron:webUIEnabled"
+          "icon": "media/icons/dendron-vscode.svg"
         },
         {
           "id": "dendron.tree-view",
           "name": "Tree View V2",
           "when": "dendron:webUIEnabled",
+          "type": "webview",
           "contextualTitle": "Tree View",
-          "icon": "media/icons/dendron-vscode.svg",
-          "type": "webview"
+          "icon": "media/icons/dendron-vscode.svg"
         },
         {
           "id": "dendron.backlinks",
@@ -377,7 +377,7 @@
       {
         "command": "dendron.publishExport",
         "title": "Dendron: Publish Export",
-        "desc": "Export your notes for NextJS publishing",
+        "desc": "Export your notes for publishing.",
         "docs": "This command works by running `dendron-cli` in the background.",
         "docLink": "",
         "docPreview": ""
@@ -385,7 +385,7 @@
       {
         "command": "dendron.publishDev",
         "title": "Dendron: Publish Dev",
-        "desc": "Preview your notes on localhost using NextJS publishing",
+        "desc": "Preview your notes on localhost using publishing",
         "docs": "This command works by running `dendron-cli` in the background.",
         "docLink": "",
         "docPreview": ""
@@ -444,16 +444,15 @@
         "title": "Dendron: Show Preview (legacy)",
         "desc": "Show Markdown Preview (legacy)",
         "docLink": "dendron.topic.commands.md",
-        "docPreview": "",
-        "enablement": "dendron:pluginActive && dendron:hasLegacyPreview && resourceExtname == .md"
+        "docPreview": ""
       },
       {
         "command": "dendron.showPreview",
         "title": "Dendron: Show Preview",
+        "icon": "$(open-preview)",
         "desc": "Show Markdown Preview",
         "docLink": "dendron.topic.commands.md",
-        "docPreview": "",
-        "enablement": "dendron:pluginActive && resourceExtname == .md"
+        "docPreview": ""
       },
       {
         "command": "dendron.pasteFile",
@@ -587,6 +586,13 @@
           "when": "resourceExtname == .md && dendron:pluginActive",
           "command": "dendron.copyNoteLink",
           "group": "2_workspace"
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "dendron.showPreview",
+          "when": "editorLangId == markdown && !notebookEditorFocused && dendron:pluginActive",
+          "group": "navigation"
         }
       ]
     },
@@ -827,14 +833,12 @@
       {
         "command": "dendron.showLegacyPreview",
         "windows": "windows+ctrl+p",
-        "mac": "cmd+ctrl+p",
-        "when": "dendron:pluginActive && dendron:hasLegacyPreview && resourceExtname == .md"
+        "mac": "cmd+ctrl+p"
       },
       {
         "command": "dendron.showPreview",
         "windows": "windows+ctrl+p",
-        "mac": "cmd+ctrl+p",
-        "when": "dendron:pluginActive && resourceExtname == .md"
+        "mac": "cmd+ctrl+p"
       }
     ],
     "markdown.previewStyles": [

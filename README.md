@@ -1,7 +1,7 @@
 ![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/logo-256.png)
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-98-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-99-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 # Welcome to Dendron!
@@ -186,6 +186,9 @@ Dendron wouldn't be what it is today without help from these wonderful gardeners
     <td align="center"><a href="http://mstempl.netlify.app"><img src="https://avatars.githubusercontent.com/u/3171330?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Bassmann</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3ABassmann" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://quanta.money"><img src="https://avatars.githubusercontent.com/u/81030?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Im</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Aimmartian" title="Bug reports">🐛</a></td>
     <td align="center"><a href="http://www.okam.ca"><img src="https://avatars.githubusercontent.com/u/30426?v=4?s=100" width="100px;" alt=""/><br /><sub><b>David Paquet Pitts</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Adavidpp" title="Bug reports">🐛</a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="http://www.greatworx.com"><img src="https://avatars.githubusercontent.com/u/3717?v=4?s=100" width="100px;" alt=""/><br /><sub><b>John Wells</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=d1rewolf" title="Documentation">📖</a></td>
   </tr>
 </table>
 

@@ -923,6 +923,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "davidpp",
+      "name": "David Paquet Pitts",
+      "avatar_url": "https://avatars.githubusercontent.com/u/30426?v=4",
+      "profile": "http://www.okam.ca",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

@@ -8,8 +8,7 @@ on: workflow_dispatch
 
 jobs:
   build:
-    environment: plugin-development
-    timeout-minutes: 10
+    environment: plugin-development timeout-minutes: 30
     runs-on: ubuntu-latest
 
     steps:
@@ -49,6 +48,9 @@ jobs:
           echo "GOOGLE_OAUTH_CLIENT_ID=${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}" >> $GITHUB_ENV
           echo "SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}" >> $GITHUB_ENV
           echo "NODE_OPTIONS=--max_old_space_size=4096" >> $GITHUB_ENV
+
+      -name: Next
+        run: |
           echo "VSIX_PATH=./packages/plugin-core/dendron-${{ env.DENDRON_RELEASE_VERSION }}.vsix" >> $GITHUB_ENV
 
       - name: Build the VSIX

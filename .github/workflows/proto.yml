@@ -49,7 +49,7 @@ jobs:
           echo "SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}" >> $GITHUB_ENV
           echo "NODE_OPTIONS=--max_old_space_size=4096" >> $GITHUB_ENV
 
-      -name: Next
+      - name: Next
         run: |
           echo "VSIX_PATH=./packages/plugin-core/dendron-${{ env.DENDRON_RELEASE_VERSION }}.vsix" >> $GITHUB_ENV
 

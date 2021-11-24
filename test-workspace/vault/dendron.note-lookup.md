@@ -2,7 +2,7 @@
 id: bNkYI2WWK6Jhm2eeVwqrh
 title: Note Lookup
 desc: ''
-updated: 1636555365403
+updated: 1637732673839
 created: 1633501913732
 ---
 
@@ -45,7 +45,9 @@ Should see results with roughly the following order:
 * `languages.with-data.make-sense` 
     * later show matches that are not exact matched `with-data.`
 * `languages.python.data.string.memory` 
-    * lastly show matches that have not just children but grand children etc.
+    * show matches that have not just children but grand children etc.
+* `data.stub` 
+    * show stubs at the end.
 All matches should have `data.` and some value after `data.`
 
 ### Look up with wiki links

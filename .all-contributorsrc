@@ -887,6 +887,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "benhsm",
+      "name": "benhsm",
+      "avatar_url": "https://avatars.githubusercontent.com/u/93843523?v=4",
+      "profile": "https://github.com/benhsm",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,

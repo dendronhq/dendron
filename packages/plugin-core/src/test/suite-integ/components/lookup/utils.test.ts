@@ -28,11 +28,13 @@ describe(`filterPickerResults`, () => {
   const inputItem = async ({
     fname,
     vaultName,
+    isStub,
   }: {
     fname: string;
     vaultName?: string;
+    isStub?: boolean;
   }): Promise<DNodePropsQuickInputV2> => {
-    return NoteTestUtilsV4.createNotePropsInput({
+    const promise = NoteTestUtilsV4.createNotePropsInput({
       noWrite: true,
       vault: {
         fsPath: "/tmp/vault1",
@@ -41,6 +43,9 @@ describe(`filterPickerResults`, () => {
       wsRoot: "/tmp/ws-root",
       fname,
     });
+    const val = await promise;
+    val.stub = isStub;
+    return val;
   };
 
   describe(`WHEN simplest query possible`, () => {
@@ -67,6 +72,7 @@ describe(`filterPickerResults`, () => {
   describe(`WHEN using dot at the end of the query. ['data.']`, () => {
     it(`THEN filter to items with children AND sort accordingly`, async () => {
       const inputs = [
+        await inputItem({ fname: "data.stub", isStub: true }),
         // Pass in inputs in completely wrong order.
         await inputItem({ fname: "i.completely.do-not.belong" }),
         await inputItem({
@@ -107,6 +113,9 @@ describe(`filterPickerResults`, () => {
         // with partial match.
         "level1.level2.data.integer.has-grandchild",
         "l1.l2.with-data.and-child.has-grandchild",
+
+        // And further down the stub note.
+        "data.stub",
       ];
 
       expect(actual).toEqual(expected);

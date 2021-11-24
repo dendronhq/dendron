@@ -1,6 +1,9 @@
 {
     "folders": [
         {
+            "path": "assets"
+        },
+        {
             "path": "vault3"
         },
         {

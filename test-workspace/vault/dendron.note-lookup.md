@@ -2,7 +2,7 @@
 id: bNkYI2WWK6Jhm2eeVwqrh
 title: Note Lookup
 desc: ''
-updated: 1636555365403
+updated: 1637755384684
 created: 1633501913732
 ---
 
@@ -33,7 +33,7 @@ Note look up `cmd+l`:
 1. Navigate to `dendron.blog.one`
 1. Activate `Note lookup`
 1. Make sure to be able to see siblings of `dendron.blog.one` such as ``dendron.blog.two`.
-
+            
 ### Lookup with dot at the end
 1. Look up `data.` 
 Should see results with roughly the following order:
@@ -59,3 +59,18 @@ All matches should have `data.` and some value after `data.`
 
 ![[dendron.note-create#with-matching-simple-schema,1]]
 
+## Autocomplete
+### With prefix
+1. Activate lookup 
+2. Enter `lang` 
+3. Press `Tab` multiple times to validate that look ups are auto completed one hierarchy level at time. Example:
+* language
+* language.python
+* language.python.data
+* language.python.string
+* language.python.string.memory
+
+### With part of the string that is not the beginning.
+1. Activate lookup
+2. Enter `pyth`
+3. Press `Tab` should auto complete to `languages.pyth` 

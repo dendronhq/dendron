@@ -10,6 +10,7 @@ export enum DendronContext {
   DEV_MODE = "dendron:devMode",
   HAS_LEGACY_PREVIEW = "dendron:hasLegacyPreview",
   HAS_CUSTOM_MARKDOWN_VIEW = "hasCustomMarkdownPreview",
+  NOTE_LOOK_UP_ACTIVE = "dendron:noteLookupActive",
 }
 
 export const DENDRON_VIEWS = [
@@ -357,6 +358,38 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docLink: "dendron.topic.lookup.md",
     docPreview: "",
     when: DendronContext.PLUGIN_ACTIVE,
+  },
+
+  // This command will only apply when the note look up quick pick is open
+  // which is taken care by the DendronContext.NOTE_LOOK_UP_ACTIVE
+  //
+  // It will also NOT activate when the focus is in editor using `!editorFocus`
+  //
+  // However, when it comes to user navigating to side panels its quite imperfect.
+  // We do have some protection against Tab interception by using the `!view`
+  // (most side panels set the view variable Eg. "view": "dendron.backlinks").
+  // But it is possible for user to tab into empty side panel which does not
+  // have a `view` context set, at that point if user still has look up open and
+  // presses tab, Tab will get intercepted by note auto complete.
+  //
+  // Ideally there would be a trigger event when quick pick goes in focus/focuses out
+  // but not able to find such hook.
+  LOOKUP_NOTE_AUTO_COMPLETE: {
+    key: "dendron.lookupNoteAutoComplete",
+
+    // TODO: Hide this command from command palette
+    // This currently shows up in the Command palette, having a 'hidden' title
+    // it is harmless if someone activates by command palette, however it does
+    // add some clutter to the overall user command.
+    title: `${CMD_PREFIX} hidden`,
+    group: "navigation",
+    keybindings: {
+      mac: "Tab",
+      key: "Tab",
+      when: `${DendronContext.PLUGIN_ACTIVE} && ${DendronContext.NOTE_LOOK_UP_ACTIVE} && !editorFocus && !view`,
+    },
+    desc: "Auto complete note lookup",
+    when: `${DendronContext.PLUGIN_ACTIVE} && ${DendronContext.NOTE_LOOK_UP_ACTIVE} && !editorFocus && !view`,
   },
   LOOKUP_JOURNAL: {
     key: "dendron.lookupNote",

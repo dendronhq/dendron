@@ -1,4 +1,5 @@
 import {
+  ConfigUtils,
   DendronError,
   DVault,
   ERROR_STATUS,
@@ -9,7 +10,6 @@ import {
   NoteUtils,
   SchemaUtils,
   VSCodeEvents,
-  ConfigUtils,
 } from "@dendronhq/common-all";
 import { getDurationMilliseconds } from "@dendronhq/common-server";
 import { HistoryService } from "@dendronhq/engine-server";
@@ -51,11 +51,14 @@ import {
   OldNewLocation,
   PickerUtilsV2,
 } from "../components/lookup/utils";
-import { DENDRON_COMMANDS } from "../constants";
+import { DENDRON_COMMANDS, DendronContext } from "../constants";
 import { Logger } from "../logger";
 import { AnalyticsUtils, getAnalyticsPayload } from "../utils/analytics";
 import { getDWorkspace, getEngine } from "../workspace";
 import { BaseCommand } from "./base";
+import { VSCodeUtils } from "../utils";
+import { CREATE_NEW_DETAIL } from "../components/lookup/constants";
+import { AutoCompleter } from "../utils/autoCompleter";
 
 export type CommandRunOpts = {
   initialValue?: string;
@@ -107,6 +110,12 @@ type OnDidAcceptReturn = {
 
 export { CommandOpts as LookupCommandOptsV3 };
 
+/**
+ * Note look up command instance that is used by the UI.
+ * */
+// eslint-disable-next-line import/no-mutable-exports
+export let UI_NOTE_LOOKUP_COMMAND: NoteLookupCommand;
+
 export class NoteLookupCommand extends BaseCommand<
   CommandOpts,
   CommandOutput,
@@ -116,9 +125,17 @@ export class NoteLookupCommand extends BaseCommand<
   key = DENDRON_COMMANDS.LOOKUP_NOTE.key;
   protected _controller: LookupControllerV3 | undefined;
   protected _provider: ILookupProviderV3 | undefined;
+  protected _quickPick: DendronQuickPickerV2 | undefined;
 
   constructor() {
     super("LookupCommandV3");
+
+    if (UI_NOTE_LOOKUP_COMMAND === undefined) {
+      // The first look up command that is created is expected to be created by the UI
+      // upon Dendron initialization hence we will register the instance as
+      // the UI command instance.
+      UI_NOTE_LOOKUP_COMMAND = this;
+    }
   }
 
   protected get controller(): LookupControllerV3 {
@@ -139,6 +156,24 @@ export class NoteLookupCommand extends BaseCommand<
       });
     }
     return this._provider;
+  }
+
+  async onAutoComplete() {
+    if (this._quickPick) {
+      const fnames = this._quickPick.items
+        .filter((item) => item.detail !== CREATE_NEW_DETAIL)
+        .map((item) => item.fname);
+
+      this._quickPick.value = AutoCompleter.autoCompleteNoteLookup(
+        this._quickPick.value,
+        fnames
+      );
+
+      this.provider.onUpdatePickerItems({
+        picker: this._quickPick,
+        token: this.controller.createCancelSource().token,
+      });
+    }
   }
 
   async gatherInputs(opts?: CommandRunOpts): Promise<CommandGatherOutput> {
@@ -209,6 +244,9 @@ export class NoteLookupCommand extends BaseCommand<
     if (copts.fuzzThreshold) {
       lc.fuzzThreshold = copts.fuzzThreshold;
     }
+
+    VSCodeUtils.setContext(DendronContext.NOTE_LOOK_UP_ACTIVE, true);
+
     const { quickpick } = await lc.prepareQuickPick({
       title: "Lookup",
       placeholder: "a seed",
@@ -216,7 +254,11 @@ export class NoteLookupCommand extends BaseCommand<
       initialValue: copts.initialValue,
       nonInteractive: copts.noConfirm,
       alwaysShow: true,
+      onDidHide: () => {
+        VSCodeUtils.setContext(DendronContext.NOTE_LOOK_UP_ACTIVE, false);
+      },
     });
+    this._quickPick = quickpick;
 
     const profile = getDurationMilliseconds(start);
     AnalyticsUtils.track(VSCodeEvents.NoteLookup_Gather, {
@@ -374,6 +416,7 @@ export class NoteLookupCommand extends BaseCommand<
     });
     return result;
   }
+
   async acceptExistingItem(
     item: NoteQuickInput
   ): Promise<OnDidAcceptReturn | undefined> {

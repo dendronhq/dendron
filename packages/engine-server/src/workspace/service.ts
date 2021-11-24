@@ -159,9 +159,13 @@ export class WorkspaceService implements Disposable {
     }
   }
 
+  static getOrCreateConfig(wsRoot: string) {
+    return DConfig.getOrCreate(wsRoot);
+  }
+
   get config(): IntermediateDendronConfig {
     // `createConfig` function relies on this creating a config. If revising the code, make sure to update that function as well.
-    return DConfig.getOrCreate(this.wsRoot);
+    return WorkspaceService.getOrCreateConfig(this.wsRoot);
   }
 
   get dendronRoot(): string {

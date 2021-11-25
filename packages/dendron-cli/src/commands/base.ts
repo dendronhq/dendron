@@ -82,10 +82,6 @@ export abstract class CLICommand<
   }
 
   setUpSegmentClient() {
-    if (process.env.SCRIPT_BUILD_ENV === "ci") {
-      // don't track anything if this is run by our pipeline
-      return;
-    }
     // if running CLI without ever having used dendron plugin,
     // show a notice about telemety and instructions on how to disable.
     if (_.isUndefined(SegmentClient.readConfig())) {

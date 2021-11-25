@@ -63,7 +63,7 @@ type CommandOutput = Partial<{ error: DendronError; data: any }>;
 
 type BuildCmdOpts = Omit<CommandCLIOpts, keyof CommandCLIOnlyOpts> & {
   /**
-   * Use existing engine instead of spwaning a new one
+   * Use existing engine instead of spawning a new one
    */
   attach?: boolean;
   /**

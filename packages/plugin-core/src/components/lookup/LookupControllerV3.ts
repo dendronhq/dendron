@@ -181,13 +181,6 @@ export class LookupControllerV3 {
       `- version: ${DendronExtension.version()}`,
     ].join(" ");
 
-    quickpick.buttons.forEach((button: DendronBtn) => {
-      AnalyticsUtils.track(LookupEvents.LookupModifierSetByController, {
-        command: opts.provider.id,
-        button,
-      });
-    });
-
     Logger.info({ ctx, msg: "exit" });
     return { quickpick };
   }

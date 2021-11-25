@@ -43,7 +43,6 @@ export enum ExtensionEvents {
 }
 
 export enum LookupEvents {
-  LookupModifierSetByController = "Lookup_Modifier_Set_By_Controller",
   LookupModifierToggledByUser = "Lookup_Modifier_Toggled_By_User",
 }
 

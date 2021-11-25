@@ -1,23 +1,23 @@
 /* eslint-disable import/no-dynamic-require */
 /* eslint-disable global-require */
 import {
-  NoteType,
+  NoteTrait,
   onCreateProps,
   onWillCreateProps,
 } from "@dendronhq/common-all";
 
 /**
- * A NoteType that will execute end-user defined javascript code. TODO: Support
+ * A NoteTrait that will execute end-user defined javascript code. TODO: Support
  * hot reload (user doesn't need to reload window in order for their changes to
  * take effect)
  */
-export class UserDefinedTypeV1 implements NoteType {
+export class UserDefinedTraitV1 implements NoteTrait {
   id: string;
   getTemplateType: any;
   scriptPath: string;
 
-  onCreate?: onCreateProps;
-  onWillCreate?: onWillCreateProps;
+  OnCreate?: onCreateProps;
+  OnWillCreate?: onWillCreateProps;
 
   /**
    *
@@ -28,17 +28,17 @@ export class UserDefinedTypeV1 implements NoteType {
     this.id = typeId;
     this.scriptPath = scriptPath;
 
-    this.onCreate = UserDefinedTypeV1.getOnCreateProps(scriptPath);
-    this.onWillCreate = UserDefinedTypeV1.getOnWillCreateProps(scriptPath);
+    this.OnCreate = UserDefinedTraitV1.getOnCreateProps(scriptPath);
+    this.OnWillCreate = UserDefinedTraitV1.getOnWillCreateProps(scriptPath);
   }
 
   private static getOnWillCreateProps(noteTypeScriptPath: string) {
-    const req: NoteType = require(noteTypeScriptPath);
-    return req.onWillCreate;
+    const req: NoteTrait = require(noteTypeScriptPath);
+    return req.OnWillCreate;
   }
 
   private static getOnCreateProps(noteTypeScriptPath: string) {
-    const req: NoteType = require(noteTypeScriptPath);
-    return req.onCreate;
+    const req: NoteTrait = require(noteTypeScriptPath);
+    return req.OnCreate;
   }
 }

@@ -735,16 +735,16 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     when: DendronContext.PLUGIN_ACTIVE,
   },
   REGISTER_NOTE_TYPE: {
-    key: "dendron.registerNoteType",
-    title: `${CMD_PREFIX} Register Note Type`,
+    key: "dendron.registerNoteTrait",
+    title: `${CMD_PREFIX} Register Note Trait`,
     group: "hooks",
-    desc: "Register a new Note Type in Dendron's Type System",
+    desc: "Register a new Note Trait in Dendron's Trait System",
   },
   CREATE_USER_DEFINED_NOTE: {
-    key: "dendron.createCustomTypedNote",
-    title: `${CMD_PREFIX} Create Note with Custom Type`,
+    key: "dendron.createNoteWithTraits",
+    title: `${CMD_PREFIX} Create Note with Custom Traits`,
     group: "hooks",
-    desc: "Create a New Note with a User-Defined Type Applied",
+    desc: "Create a New Note with a User-Defined Trait Applied",
   },
   // --- Publishing
   PUBLISH_EXPORT: {

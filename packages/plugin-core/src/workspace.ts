@@ -39,12 +39,12 @@ import BacklinksTreeDataProvider, {
 } from "./features/BacklinksTreeDataProvider";
 import { FileWatcher } from "./fileWatcher";
 import { Logger } from "./logger";
-import { UserDefinedTypeV1 } from "./noteTypes/userDefinedTypeV1";
+import { UserDefinedTraitV1 } from "./noteTypes/UserDefinedTraitV1";
 import { EngineAPIServiceV2 } from "./services/EngineAPIServiceV2";
 import {
-  TypedNoteManager,
-  TypedNoteService,
-} from "./services/TypedNoteService";
+  NoteTraitManager,
+  NoteTraitService,
+} from "./services/NoteTraitService";
 import { CodeConfigKeys } from "./types";
 import { DisposableStore, resolvePath } from "./utils";
 import { VSCodeUtils } from "./vsCodeUtils";
@@ -154,7 +154,7 @@ export class DendronExtension {
   public workspaceService?: WorkspaceService;
   protected treeViews: { [key: string]: vscode.WebviewViewProvider };
   protected webViews: { [key: string]: vscode.WebviewPanel | undefined };
-  private _typeRegistrar: TypedNoteManager;
+  private _typeRegistrar: NoteTraitManager;
 
   static context(): vscode.ExtensionContext {
     return getExtension().context;
@@ -184,7 +184,7 @@ export class DendronExtension {
     return vscode.workspace.getConfiguration(section);
   }
 
-  get typeRegistrar(): TypedNoteService {
+  get typeRegistrar(): NoteTraitService {
     return this._typeRegistrar;
   }
 
@@ -381,13 +381,13 @@ export class DendronExtension {
     this.treeViews = {};
     this.webViews = {};
     this.setupViews(context);
-    this._typeRegistrar = new TypedNoteManager(context);
+    this._typeRegistrar = new NoteTraitManager(context);
 
     // Register any User Defined Note Types
     const userTypesPath = vscode.workspace.workspaceFile
       ? path.join(
           path.dirname(vscode.workspace.workspaceFile?.fsPath),
-          CONSTANTS.DENDRON_USER_NOTE_TYPES_BASE
+          CONSTANTS.DENDRON_USER_NOTE_TRAITS_BASE
         )
       : undefined;
 
@@ -397,11 +397,11 @@ export class DendronExtension {
         if (file.endsWith(".js")) {
           const typeId = path.basename(file, ".js");
           this.L.info("Registering User Defined Note Type with ID " + typeId);
-          const newNoteType = new UserDefinedTypeV1(
+          const newNoteType = new UserDefinedTraitV1(
             typeId,
             path.join(userTypesPath, file)
           );
-          this._typeRegistrar.registerType(newNoteType);
+          this._typeRegistrar.registerTrait(newNoteType);
         }
       });
     }

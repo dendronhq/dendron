@@ -3,7 +3,7 @@ import fs from "fs-extra";
 import path from "path";
 import * as vscode from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
-import { UserDefinedTypeV1 } from "../noteTypes/userDefinedTypeV1";
+import { UserDefinedTraitV1 } from "../noteTypes/UserDefinedTraitV1";
 import { VSCodeUtils } from "../utils";
 import { getEngine, getExtension } from "../workspace";
 import { BasicCommand } from "./base";
@@ -12,7 +12,7 @@ type CommandOpts = { typeId: string };
 
 type CommandOutput = {} | undefined;
 
-const noteTypeTemplate = `
+const noteTraitTemplate = `
 module.exports = {
   onWillCreate: {
     setNameModifier(props) {
@@ -33,7 +33,7 @@ module.exports = {
 /**
  * Command for a user to register a new note type with custom functionality
  */
-export class RegisterNoteTypeCommand extends BasicCommand<
+export class RegisterNoteTraitCommand extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
@@ -57,7 +57,7 @@ export class RegisterNoteTypeCommand extends BasicCommand<
     const { wsRoot } = engine;
     const scriptPath = path.join(
       wsRoot,
-      CONSTANTS.DENDRON_USER_NOTE_TYPES_BASE,
+      CONSTANTS.DENDRON_USER_NOTE_TRAITS_BASE,
       opts.typeId + ".js"
     );
 
@@ -69,10 +69,10 @@ export class RegisterNoteTypeCommand extends BasicCommand<
       this.L.error({ error });
       return { error };
     }
-    fs.writeFileSync(scriptPath, noteTypeTemplate);
+    fs.writeFileSync(scriptPath, noteTraitTemplate);
 
-    const newNoteType = new UserDefinedTypeV1(opts.typeId, scriptPath);
-    getExtension().typeRegistrar.registerType(newNoteType);
+    const newNoteType = new UserDefinedTraitV1(opts.typeId, scriptPath);
+    getExtension().typeRegistrar.registerTrait(newNoteType);
 
     await VSCodeUtils.openFileInEditor(vscode.Uri.file(scriptPath));
     return;

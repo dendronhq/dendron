@@ -1,6 +1,6 @@
 import {
   ConfigUtils,
-  NoteType,
+  NoteTrait,
   OnCreateContext,
   RespV2,
 } from "@dendronhq/common-all";
@@ -29,15 +29,15 @@ export type CommandInput = {
   fname: string;
 };
 
-export class CreateTypedNoteCommand extends BaseCommand<
+export class CreateNoteWithTraitCommand extends BaseCommand<
   CommandOpts,
   any,
   CommandInput
 > {
   key: string;
-  type: NoteType;
+  type: NoteTrait;
 
-  constructor(commandId: string, type: NoteType) {
+  constructor(commandId: string, type: NoteTrait) {
     super();
     this.key = commandId;
     this.type = type;
@@ -45,7 +45,7 @@ export class CreateTypedNoteCommand extends BaseCommand<
 
   async gatherInputs(): Promise<CommandInput | undefined> {
     // If there's no modifier, provide a regular lookup UI.
-    if (!this.type.onWillCreate?.setNameModifier) {
+    if (!this.type.OnWillCreate?.setNameModifier) {
       const resp = await this.getNoteNameFromLookup();
 
       if (!resp) {
@@ -59,7 +59,7 @@ export class CreateTypedNoteCommand extends BaseCommand<
 
     try {
       const context = await this.getCreateContext();
-      const resp = this.type.onWillCreate.setNameModifier(context);
+      const resp = this.type.OnWillCreate.setNameModifier(context);
 
       let fname = resp.name;
 
@@ -99,11 +99,11 @@ export class CreateTypedNoteCommand extends BaseCommand<
 
     let title;
 
-    if (this.type.onCreate?.setTitle) {
+    if (this.type.OnCreate?.setTitle) {
       const context = await this.getCreateContext();
       context.currentNoteName = fname;
 
-      title = this.type.onCreate.setTitle(context);
+      title = this.type.OnCreate.setTitle(context);
     }
 
     const config = getDWorkspace().config;

@@ -30,7 +30,7 @@ export const CONSTANTS = {
   DENDRON_NO_TELEMETRY: ".dendron.no-telemetry",
   DENDRON_TELEMETRY: ".dendron.telemetry",
   DENDRON_HOOKS_BASE: "hooks",
-  DENDRON_USER_NOTE_TYPES_BASE: "noteTypes",
+  DENDRON_USER_NOTE_TRAITS_BASE: "noteTraits",
   DENDRON_LOCAL_SITE_PORT: 8080,
   /**
    * Initial version for first installaion

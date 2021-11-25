@@ -1,19 +1,19 @@
 /**
- * Note Type Interface TODO: this is a work in progress; more properties will be
+ * Note Trait Interface TODO: this is a work in progress; more properties will be
  * added as the note type system functionality expands
  */
-export type NoteType = {
+export type NoteTrait = {
   id: string;
 
   /**
    * Callback Props that occur prior to the creation of the note
    */
-  onWillCreate?: onWillCreateProps;
+  OnWillCreate?: onWillCreateProps;
 
   /**
    * Callback Props that occur during the creation of the note such as modifying frontmatter or contents
    */
-  onCreate?: onCreateProps;
+  OnCreate?: onCreateProps;
 };
 
 /**

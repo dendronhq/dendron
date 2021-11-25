@@ -16,7 +16,7 @@ import { CreateDailyJournalCommand } from "./CreateDailyJournal";
 import { CreateHookCommand } from "./CreateHookCommand";
 import { CreateSchemaFromHierarchyCommand } from "./CreateSchemaFromHierarchyCommand";
 import { CreateTaskCommand } from "./CreateTask";
-import { CreateUserDefinedTypedNote } from "./CreateUserDefinedTypedNote";
+import { CreateNoteWithUserDefinedTrait } from "./CreateNoteWithUserDefinedTrait";
 import { DeleteHookCommand } from "./DeleteHookCommand";
 import { DeleteNodeCommand } from "./DeleteNodeCommand";
 import { DiagnosticsReportCommand } from "./DiagnosticsReport";
@@ -47,7 +47,7 @@ import { PublishExportCommand } from "./PublishExportCommand";
 import { PublishPodCommand } from "./PublishPod";
 import { RandomNoteCommand } from "./RandomNote";
 import { RefactorHierarchyCommandV2 } from "./RefactorHierarchyV2";
-import { RegisterNoteTypeCommand } from "./RegisterNoteType";
+import { RegisterNoteTraitCommand } from "./RegisterNoteTrait";
 import { RenameHeaderCommand } from "./RenameHeader";
 import { ResetConfigCommand } from "./ResetConfig";
 import { RestoreVaultCommand } from "./RestoreVault";
@@ -141,8 +141,8 @@ const ALL_COMMANDS = [
   RunMigrationCommand,
   SeedBrowseCommand,
   CreateTaskCommand,
-  RegisterNoteTypeCommand,
-  CreateUserDefinedTypedNote,
+  RegisterNoteTraitCommand,
+  CreateNoteWithUserDefinedTrait,
 ] as CodeCommandConstructor[];
 
 // when("betaFeatures", ()=> {

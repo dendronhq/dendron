@@ -566,14 +566,14 @@
         "desc": "Launch the Tutorial"
       },
       {
-        "command": "dendron.registerNoteType",
-        "title": "Dendron: Register Note Type",
-        "desc": "Register a new Note Type"
+        "command": "dendron.registerNoteTrait",
+        "title": "Dendron: Register Note Trait",
+        "desc": "Register a new Note Trait"
       },
       {
-        "command": "dendron.createCustomTypedNote",
-        "title": "Dendron: Create Note with Custom Type",
-        "desc": "Create a New Note with a User-Defined Type Applied"
+        "command": "dendron.createNoteWithTraits",
+        "title": "Dendron: Create Note with Custom Traits",
+        "desc": "Create a New Note with a User-Defined Traits Applied"
       }
     ],
     "menus": {

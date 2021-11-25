@@ -1,7 +1,7 @@
 import {
   DendronError,
   ERROR_SEVERITY,
-  NoteType,
+  NoteTrait,
   ResponseUtil,
   RespV2,
 } from "@dendronhq/common-all";
@@ -9,47 +9,47 @@ import * as vscode from "vscode";
 import { CommandRegistrar } from "./CommandRegistrar";
 
 /**
- * Interface for a service that manages Note Types
+ * Interface for a service that manages Note Traits
  * TODO: Figure out how to split functionality here such that some can move to engine-server while plugin-specific func stays in plugin-core
  * TODO: Expand functionality to cover more advanced typed functionality such as note lifecycle events
  */
-export type TypedNoteService = {
+export type NoteTraitService = {
   /**
-   * Contains list of registered Note Types
+   * Contains list of registered Note Traits
    */
-  readonly registeredTypes: NoteType[];
+  readonly registeredTraits: NoteTrait[];
 
   /**
-   * Register a New Note Type
+   * Register a New Note Trait
    * @param type
    */
-  registerType(type: NoteType): RespV2<void>;
+  registerTrait(type: NoteTrait): RespV2<void>;
 
   /**
-   * Unregister an Existing Note Type
+   * Unregister an Existing Note Trait
    * @param type
    */
-  unregisterType(type: NoteType): RespV2<void>;
+  unregisterTrait(type: NoteTrait): RespV2<void>;
 
   /**
    * Returns the VS Code command that will create a note for the specified when
    * the command is run.
    * @param type
    */
-  getRegisteredCommandForType(type: NoteType): string | undefined;
+  getRegisteredCommandForTrait(type: NoteTrait): string | undefined;
 };
 
-export class TypedNoteManager implements TypedNoteService {
+export class NoteTraitManager implements NoteTraitService {
   private cmdRegistar: CommandRegistrar;
-  registeredTypes: NoteType[] = [];
+  registeredTraits: NoteTrait[] = [];
 
   constructor(context: vscode.ExtensionContext) {
     this.cmdRegistar = new CommandRegistrar(context);
   }
 
-  registerType(type: NoteType): RespV2<void> {
+  registerTrait(type: NoteTrait): RespV2<void> {
     if (
-      this.registeredTypes.find((registered) => registered.id === type.id) !==
+      this.registeredTraits.find((registered) => registered.id === type.id) !==
       undefined
     ) {
       return ResponseUtil.createUnhappyResponse({
@@ -60,20 +60,20 @@ export class TypedNoteManager implements TypedNoteService {
       });
     }
 
-    this.registeredTypes = this.registeredTypes.concat(type);
+    this.registeredTraits = this.registeredTraits.concat(type);
     this.cmdRegistar.registerCommandForType(type);
     return { error: null };
   }
 
-  unregisterType(_type: NoteType): RespV2<void> {
+  unregisterTrait(_type: NoteTrait): RespV2<void> {
     throw new Error("Method not implemented.");
   }
 
-  getTypesWithRegisteredCallback(_callbackType: callbackType): NoteType[] {
+  getTypesWithRegisteredCallback(_callbackType: callbackType): NoteTrait[] {
     throw new Error("Method not implemented.");
   }
 
-  getRegisteredCommandForType(type: NoteType): string | undefined {
+  getRegisteredCommandForTrait(type: NoteTrait): string | undefined {
     if (type.id in this.cmdRegistar.registeredCommands) {
       return this.cmdRegistar.registeredCommands[type.id];
     }

@@ -1,6 +1,6 @@
-import { NoteType } from "@dendronhq/common-all";
+import { NoteTrait } from "@dendronhq/common-all";
 import * as vscode from "vscode";
-import { CreateTypedNoteCommand } from "../commands/CreateTypedNoteCommand";
+import { CreateNoteWithTraitCommand } from "../commands/CreateNoteWithTraitCommand";
 
 /**
  * Manages registration of new VS Code commands. This service is intended for
@@ -21,9 +21,9 @@ export class CommandRegistrar {
     this.registeredCommands = {};
   }
 
-  registerCommandForType(type: NoteType): void {
+  registerCommandForType(type: NoteTrait): void {
     const commandId = type.id;
-    const cmd = new CreateTypedNoteCommand(commandId, type);
+    const cmd = new CreateNoteWithTraitCommand(commandId, type);
 
     const registeredCmdName = this.CUSTOM_COMMAND_PREFIX + commandId;
     this.registeredCommands[commandId] = registeredCmdName;
@@ -35,7 +35,7 @@ export class CommandRegistrar {
     this.context.subscriptions.push(disp);
   }
 
-  unregisterType(type: NoteType): void {
+  unregisterType(type: NoteTrait): void {
     if (type.id in this.registeredCommands) {
       delete this.registeredCommands[type.id];
     }

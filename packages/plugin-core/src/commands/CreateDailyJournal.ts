@@ -1,8 +1,8 @@
 import { DENDRON_COMMANDS } from "../constants";
 import { JournalNote } from "../noteTypes/Journal";
-import { CreateTypedNoteCommand } from "./CreateTypedNoteCommand";
+import { CreateNoteWithTraitCommand } from "./CreateNoteWithTraitCommand";
 
-export class CreateDailyJournalCommand extends CreateTypedNoteCommand {
+export class CreateDailyJournalCommand extends CreateNoteWithTraitCommand {
   constructor() {
     super("dendron.journal", new JournalNote());
 

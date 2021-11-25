@@ -1,7 +1,7 @@
 import {
   ConfigUtils,
   OnCreateContext,
-  NoteType,
+  NoteTrait,
   NoteUtils,
   onCreateProps,
   SetNameModifierResp,
@@ -9,11 +9,11 @@ import {
 import { DendronClientUtilsV2 } from "../utils";
 import { getDWorkspace } from "../workspace";
 
-export class JournalNote implements NoteType {
+export class JournalNote implements NoteTrait {
   id: string = "journalNote";
   getTemplateType: any;
 
-  onWillCreate = {
+  OnWillCreate = {
     setNameModifier(_opts: OnCreateContext): SetNameModifierResp {
       const config = getDWorkspace().config;
       const journalConfig = ConfigUtils.getJournal(config);
@@ -26,7 +26,7 @@ export class JournalNote implements NoteType {
     },
   };
 
-  onCreate: onCreateProps = {
+  OnCreate: onCreateProps = {
     setTitle(opts: OnCreateContext): string {
       const config = getDWorkspace().config;
       const journalConfig = ConfigUtils.getJournal(config);

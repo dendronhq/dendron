@@ -18,7 +18,6 @@
     "build:sitemap:ts": "tsc -p tsconfig.sitemap.json",
     "build:sitemap": "next-sitemap --config dist/scripts/sitemap.js",
     "postinstall": "yarn build:sitemap:ts",
-    "postbuild": "yarn build:sitemap",
     "cypress:open": "cypress open",
     "cypress:run": "cypress run",
     "clean": "yarn rimraf public data out",

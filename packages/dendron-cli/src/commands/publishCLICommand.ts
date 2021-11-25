@@ -31,6 +31,10 @@ type CommandCLIOpts = {
   wsRoot: string;
   dest?: string;
   error?: DendronError;
+  /**
+   * Should build sitemap
+   */
+  sitemap?: boolean;
 } & CommandCLIOnlyOpts &
   Pick<SetupEngineCLIOpts, "attach">;
 
@@ -409,7 +413,7 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     });
   }
 
-  async build({ wsRoot, dest, attach, overrides }: BuildCmdOpts) {
+  async build({ wsRoot, dest, attach, overrides, sitemap }: BuildCmdOpts) {
     this.print(`generating metadata for publishing...`);
     const { error } = await this._buildNextData({
       wsRoot,
@@ -421,6 +425,10 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     if (error) {
       this.print("ERROR: " + error.message);
       return { error };
+    }
+    if (sitemap) {
+      const nextPath = NextjsExportPodUtils.getNextRoot(wsRoot);
+      await NextjsExportPodUtils.buildSiteMap({ nextPath });
     }
     return { error: null };
   }

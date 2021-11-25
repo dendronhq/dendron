@@ -1,14 +1,7 @@
+import { SrcFieldMapping } from "../../builtin/AirtablePod";
 import { AirtableConnection } from "../external-services/AirtableConnection";
 import { ExternalTarget } from "../external-services/ExternalConnectionManager";
 import { ExportPodConfigurationV2 } from "./PodV2Types";
-
-export type SrcFieldMapping =
-  | {
-      to: string;
-      type: "string" | "date" | "singleTag";
-      filter?: string;
-    }
-  | string;
 
 /**
  * Complete Pod Config for Airtable V2

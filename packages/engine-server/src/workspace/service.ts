@@ -46,7 +46,7 @@ import {
 import { SeedService, SeedUtils } from "../seed";
 import { Git } from "../topics/git";
 import {
-  getPortFilePath,
+  EngineUtils,
   getWSMetaFilePath,
   removeCache,
   writeWSMetaFile,
@@ -789,7 +789,7 @@ export class WorkspaceService implements Disposable {
 
   async getVaultRepo(vault: DVault) {
     const vpath = vault2Path({ vault, wsRoot: this.wsRoot });
-    return await GitUtils.getGitRoot(vpath);
+    return GitUtils.getGitRoot(vpath);
   }
 
   async getAllReposVaults(): Promise<Map<string, DVault[]>> {
@@ -1121,7 +1121,7 @@ export class WorkspaceService implements Disposable {
   writePort(port: number) {
     const wsRoot = this.wsRoot;
     // dendron-cli can overwrite port file. anything that needs the port should connect to `portFilePathExtension`
-    const portFilePath = getPortFilePath({ wsRoot });
+    const portFilePath = EngineUtils.getPortFilePathForWorkspace({ wsRoot });
     fs.writeFileSync(portFilePath, _.toString(port), { encoding: "utf8" });
   }
 

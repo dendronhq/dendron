@@ -16,7 +16,7 @@ import {
 } from "@dendronhq/common-server";
 import { toPlainObject } from "@dendronhq/common-test-utils";
 import {
-  getPortFilePath,
+  EngineUtils,
   getWSMetaFilePath,
   MetadataService,
   openWSMetaFile,
@@ -343,7 +343,7 @@ suite("Extension", function () {
           ctx,
           onInit: async ({ wsRoot, vaults, engine }) => {
             // check for meta
-            const port = getPortFilePath({ wsRoot });
+            const port = EngineUtils.getPortFilePathForWorkspace({ wsRoot });
             const fpath = getWSMetaFilePath({ wsRoot });
             const meta = openWSMetaFile({ fpath });
             expect(

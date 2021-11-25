@@ -13,6 +13,7 @@ describe("GIVEN setupEngine", () => {
             wsRoot,
             noWritePort: true,
             attach: true,
+            target: "cli",
           });
           expect(resp.engine.notes).toEqual(engine.notes);
           expect(resp.port).toEqual(port);

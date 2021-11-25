@@ -54,13 +54,16 @@ export type CreateSchemaOptsV4 = {
  *
  * */
 export class TestNoteFactory {
+  static readonly DEFAULT_VAULT = { fsPath: "/tmp/ws/v1" };
+  static readonly DEFAULT_WS_ROOT = "/tmp/ws";
+
   private readonly _defaults: Omit<CreateNoteOptsV4, "fname">;
 
   public static defaultUnitTestFactory() {
     return new TestNoteFactory({
-      vault: { fsPath: "/tmp/ws/v1" },
+      vault: this.DEFAULT_VAULT,
       noWrite: true,
-      wsRoot: "/tmp/ws",
+      wsRoot: this.DEFAULT_WS_ROOT,
     });
   }
 

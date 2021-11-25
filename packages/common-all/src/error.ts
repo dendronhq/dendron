@@ -259,7 +259,7 @@ export class ErrorFactory {
 
   /** Stringify that will not throw if it fails to stringify
    * (for example: due to circular references)  */
-  private static safeStringify(obj: any) {
+  static safeStringify(obj: any) {
     try {
       return JSON.stringify(obj);
     } catch (exc: any) {

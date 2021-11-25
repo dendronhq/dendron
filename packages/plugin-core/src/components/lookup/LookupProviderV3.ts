@@ -2,6 +2,7 @@ import {
   ConfigUtils,
   DNodeUtils,
   FuseEngine,
+  LookupEvents,
   NoteLookupUtils,
   NoteProps,
   NoteQuickInput,
@@ -29,6 +30,7 @@ import {
 } from "./utils";
 import { transformQueryString } from "./queryStringTransformer";
 import stringSimilarity from "string-similarity";
+import { IDendronQuickInputButton } from "./buttons";
 
 export type OnUpdatePickerItemsOpts = {
   picker: DendronQuickPickerV2;
@@ -188,6 +190,15 @@ export class NoteLookupProvider implements ILookupProviderV3 {
     return async () => {
       const ctx = "NoteLookupProvider:onDidAccept";
       const { quickpick: picker, lc } = opts;
+
+      picker.buttons.forEach((button) => {
+        AnalyticsUtils.track(LookupEvents.LookupModifiersSetOnAccept, {
+          command: this.id,
+          type: (button as IDendronQuickInputButton).type,
+          pressed: (button as IDendronQuickInputButton).pressed,
+        });
+      });
+
       let selectedItems = NotePickerUtils.getSelection(picker);
       Logger.debug({
         ctx,

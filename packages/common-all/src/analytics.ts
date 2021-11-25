@@ -44,6 +44,7 @@ export enum ExtensionEvents {
 
 export enum LookupEvents {
   LookupModifierToggledByUser = "Lookup_Modifier_Toggled_By_User",
+  LookupModifiersSetOnAccept = "Lookup_Modifiers_Set_On_Accept",
 }
 
 export enum SurveyEvents {

@@ -26,6 +26,19 @@ export * from "./basev3";
 export * from "./builtin";
 export * from "./types";
 export * from "./utils";
+
+export * from "./v2/external-services/ExternalConnectionManager";
+export * from "./v2/external-services/AirtableConnection";
+export * from "./v2/PodConfigManager";
+export * from "./v2/podConfig/AirtablePodConfig";
+export * from "./v2/podConfig/PodV2Types";
+export * from "./v2/ExportPodBase";
+export * from "./v2/ConfigFileUtils";
+export * from "./v2/podConfig/MarkdownPodConfig";
+
+export * from "./v2/pods/export/AirtableExportPodV2";
+export * from "./v2/pods/export/MarkdownExportPodV2";
+
 export function getAllExportPods(): PodClassEntryV4[] {
   return [
     JSONExportPod,

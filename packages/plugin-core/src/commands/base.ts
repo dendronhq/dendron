@@ -34,9 +34,9 @@ export interface BaseCommand<
 /**
  * Generics:
  *   - TOpts: passed into {@link BaseCommand.execute}
- *   - TGatherOutput: returned by {@link Basecommand.gatherInput}
  *   - TOut: returned by {@link BaseCommand.execute}
- *   - TRunOpts: returned by command
+ *   - TGatherOutput: returned by {@link BaseCommand.gatherInputs}
+ *   - TRunOpts: passed into {@link BaseCommand.run}
  */
 // eslint-disable-next-line no-redeclare
 export abstract class BaseCommand<

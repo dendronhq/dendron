@@ -66,6 +66,7 @@ import { SeedBrowseCommand } from "./SeedBrowseCommand";
 import { CreateTaskCommand } from "./CreateTask";
 import { CreateSchemaFromHierarchyCommand } from "./CreateSchemaFromHierarchyCommand";
 import { VaultConvertCommand } from "./VaultConvert";
+import { ExportPodV2Command } from "./pods/ExportPodV2Command";
 
 const ALL_COMMANDS = [
   AddAndCommit,
@@ -90,6 +91,7 @@ const ALL_COMMANDS = [
   DoctorCommand,
   DumpStateCommand,
   ExportPodCommand,
+  ExportPodV2Command,
   GoDownCommand,
   GoUpCommand,
   GotoNoteCommand,

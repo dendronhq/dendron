@@ -1,0 +1,17 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`GIVEN a ConfigFileUtils class WHEN generating a config file with a basic schema AND optional properties to be present, but commented out 1`] = `
+"# description: foo
+# type: string
+# required: true
+foo: TODO
+
+# description: bar
+# type: number
+# required: true
+bar: TODO
+
+# description: optional
+# type: string
+# nonEssential: TODO"
+`;

@@ -67,4 +67,33 @@ export class ConfigFileUtils {
     }
     return fPath;
   }
+
+  static createExportConfig(opts: { required: string[]; properties: any }) {
+    return {
+      type: "object",
+      additionalProperties: false,
+      required: ["podId", "podType", ...opts.required],
+      properties: {
+        podId: {
+          description: "configuration ID",
+          type: "string",
+        },
+        description: {
+          description: "optional description for the pod",
+          type: "string",
+          nullable: true,
+        },
+        exportScope: {
+          description: "export scope of the pod",
+          type: "string",
+          nullable: true,
+        },
+        podType: {
+          description: "type of pod",
+          type: "string",
+        },
+        ...opts.properties,
+      },
+    };
+  }
 }

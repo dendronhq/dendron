@@ -9,6 +9,7 @@ import { createLogger } from "@dendronhq/common-server";
 import { JSONSchemaType } from "ajv";
 import {
   AirtableUtils,
+  ConfigFileUtils,
   ExportPodV2,
   PersistedAirtablePodConfig,
   RunnableAirtableV2PodConfig,
@@ -91,42 +92,15 @@ export class AirtableExportPodV2
   }
 
   static config(): JSONSchemaType<PersistedAirtablePodConfig> {
-    return {
-      required: [
-        "podId",
-        "connectionId",
-        "podType",
-        "baseId",
-        "tableName",
-        "sourceFieldMapping",
-      ],
-      type: "object",
-      additionalProperties: false,
+    return ConfigFileUtils.createExportConfig({
+      required: ["connectionId", "baseId", "tableName", "sourceFieldMapping"],
       properties: {
-        podId: {
-          description: "configuration ID",
-          type: "string",
-        },
         connectionId: {
           description: "ID of the Airtable Connected Service",
           type: "string",
         },
         baseId: {
           description: "airtable base id",
-          type: "string",
-        },
-        description: {
-          description: "optional description for the pod",
-          type: "string",
-          nullable: true,
-        },
-        exportScope: {
-          description: "export scope of the pod",
-          type: "string",
-          nullable: true,
-        },
-        podType: {
-          description: "type of pod",
           type: "string",
         },
         tableName: { type: "string", description: "Name of the airtable" },
@@ -137,6 +111,6 @@ export class AirtableExportPodV2
             "mapping of airtable fields with the note eg: {Created On: created, Notes: body}",
         },
       },
-    } as JSONSchemaType<PersistedAirtablePodConfig>;
+    }) as JSONSchemaType<PersistedAirtablePodConfig>;
   }
 }

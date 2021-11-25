@@ -138,6 +138,13 @@ export function delayedUpdateDecorations(
 export const updateDecorations = sentryReportingCallback(
   (editor: TextEditor) => {
     const ctx = "updateDecorations";
+    const { engine } = getDWorkspace();
+    if (
+      ConfigUtils.getWorkspace(engine.config).enableEditorDecorations === false
+    ) {
+      // Explicitly disabled, stop here.
+      return {};
+    }
     const startTime = Date.now();
     // Warn for missing or bad frontmatter and broken wikilinks
     const allWarnings: Diagnostic[] = [];
@@ -169,7 +176,6 @@ export const updateDecorations = sentryReportingCallback(
       )
     );
 
-    const { engine } = getDWorkspace();
     for (const range of ranges) {
       const text = editor.document.getText(range);
       if (text.length > ConfigUtils.getWorkspace(engine.config).maxNoteLength) {

@@ -448,6 +448,43 @@ suite("windowDecorations", function () {
         },
       });
     });
+
+    describe("WHEN disabled", () => {
+      test("THEN decorations are not displayed", (done) => {
+        const FNAME = "test.note";
+        runLegacyMultiWorkspaceTest({
+          ctx,
+          modConfigCb: (config) => {
+            config.workspace!.enableEditorDecorations = false;
+            return config;
+          },
+          preSetupHook: async ({ vaults, wsRoot }) => {
+            await NoteTestUtilsV4.createNote({
+              fname: FNAME,
+              body: "[[does.not.exist]] #does.not.exist\n",
+              vault: vaults[0],
+              wsRoot,
+            });
+          },
+          onInit: async ({ vaults, engine, wsRoot }) => {
+            const note = NoteUtils.getNoteByFnameV5({
+              fname: FNAME,
+              notes: engine.notes,
+              vault: vaults[0],
+              wsRoot,
+            });
+            const editor = await VSCodeUtils.openNote(note!);
+
+            const { allDecorations, allWarnings } = updateDecorations(editor);
+
+            expect(allDecorations).toBeFalsy();
+            expect(allWarnings).toBeFalsy();
+
+            done();
+          },
+        });
+      });
+    });
   });
 
   runTestExceptOnWindows("warnings", () => {

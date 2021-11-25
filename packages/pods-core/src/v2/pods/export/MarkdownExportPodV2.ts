@@ -27,15 +27,15 @@ export class MarkdownExportPodV2 implements ExportPodV2<string> {
   private _dendronConfig: IntermediateDendronConfig;
 
   constructor({
-    config,
+    podConfig,
     engine,
     dendronConfig,
   }: {
-    config: RunnableMarkdownV2PodConfig;
+    podConfig: RunnableMarkdownV2PodConfig;
     engine: DEngineClient;
     dendronConfig: IntermediateDendronConfig;
   }) {
-    this._config = config;
+    this._config = podConfig;
     this._engine = engine;
     this._dendronConfig = dendronConfig;
   }

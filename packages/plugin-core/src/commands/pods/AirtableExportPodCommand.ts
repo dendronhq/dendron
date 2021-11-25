@@ -1,4 +1,4 @@
-import { FieldSet, Records } from "@dendronhq/airtable";
+import Airtable, { FieldSet, Records } from "@dendronhq/airtable";
 import { NoteProps, ResponseUtil } from "@dendronhq/common-all";
 import {
   AirtableConnection,
@@ -21,6 +21,7 @@ import { PodUIControls } from "../../components/pods/PodControls";
 import { VSCodeUtils } from "../../utils";
 import { getEngine, getExtension } from "../../workspace";
 import { BaseExportPodCommand } from "./BaseExportPodCommand";
+import { RateLimiter } from "limiter";
 
 /**
  * VSCode command for running the Airtable Export Pod. It is not meant to be
@@ -36,7 +37,18 @@ export class AirtableExportPodCommand extends BaseExportPodCommand<
   public createPod(
     config: RunnableAirtableV2PodConfig
   ): ExportPodV2<AirtableExportReturnType> {
-    return new AirtableExportPodV2(config);
+    return new AirtableExportPodV2(
+      new Airtable({ apiKey: config.apiKey }),
+      config
+    );
+  }
+
+  /**
+   * Throttles Airtable API calls to 5 calls per second.
+   * @returns
+   */
+  public getLimiter(): RateLimiter {
+    return new RateLimiter({ tokensPerInterval: 5, interval: "second" });
   }
 
   async gatherInputs(
@@ -218,6 +230,7 @@ export class AirtableExportPodCommand extends BaseExportPodCommand<
       const inputBox = vscode.window.createInputBox();
       inputBox.title = "Enter the Airtable Base ID";
       inputBox.placeholder = "airtable-base-id";
+      inputBox.ignoreFocusOut = true;
 
       inputBox.onDidAccept(() => {
         resolve(inputBox.value);
@@ -238,6 +251,7 @@ export class AirtableExportPodCommand extends BaseExportPodCommand<
       const inputBox = vscode.window.createInputBox();
       inputBox.title = "Enter the Airtable Table ID";
       inputBox.placeholder = "airtable-table-id";
+      inputBox.ignoreFocusOut = true;
 
       inputBox.onDidAccept(() => {
         resolve(inputBox.value);

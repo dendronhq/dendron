@@ -1,4 +1,4 @@
-import Airtable, { FieldSet, Records } from "@dendronhq/airtable";
+import Airtable, { Base, FieldSet, Records } from "@dendronhq/airtable";
 import {
   DendronError,
   NoteProps,
@@ -37,27 +37,29 @@ export class AirtableExportPodV2
   implements ExportPodV2<AirtableExportReturnType>
 {
   private _config: RunnableAirtableV2PodConfig;
+  private _airtableBase: Base;
 
-  constructor(config: RunnableAirtableV2PodConfig) {
+  constructor(airtable: Airtable, config: RunnableAirtableV2PodConfig) {
+    this._airtableBase = airtable.base(config.baseId);
     this._config = config;
   }
 
   async exportNote(input: NoteProps): Promise<AirtableExportReturnType> {
-    const base = new Airtable({ apiKey: this._config.apiKey }).base(
-      this._config.baseId
-    );
-
     const payload = this.getPayloadFromNote(input);
 
     try {
       let updated;
       let created;
       if (payload.update && payload.update.length > 0) {
-        updated = await base(this._config.tableName).update(payload.update);
+        updated = await this._airtableBase(this._config.tableName).update(
+          payload.update
+        );
       }
 
       if (payload.create && payload.create.length > 0) {
-        created = await base(this._config.tableName).create(payload.create);
+        created = await this._airtableBase(this._config.tableName).create(
+          payload.create
+        );
       }
 
       return ResponseUtil.createHappyResponse({

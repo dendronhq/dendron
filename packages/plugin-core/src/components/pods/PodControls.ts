@@ -2,6 +2,7 @@ import {
   ExportPodConfigurationV2,
   ExternalConnectionManager,
   ExternalService,
+  ExternalTarget,
   PodExportScope,
   PodV2ConfigManager,
   PodV2Types,
@@ -98,6 +99,7 @@ export class PodUIControls {
     ];
     const picked = await vscode.window.showQuickPick(items, {
       title: "Would you like to save this configuration?",
+      ignoreFocusOut: true,
     });
 
     if (picked === undefined) {
@@ -151,6 +153,7 @@ export class PodUIControls {
       });
     const picked = await vscode.window.showQuickPick(newConnectionOptions, {
       title: "Pick the Pod Type",
+      ignoreFocusOut: true,
     });
 
     if (!picked) {
@@ -176,6 +179,7 @@ export class PodUIControls {
       });
     const picked = await vscode.window.showQuickPick(newConnectionOptions, {
       title: "Pick the Service Connection Type",
+      ignoreFocusOut: true,
     });
 
     if (!picked) {
@@ -188,9 +192,9 @@ export class PodUIControls {
    * Prompt user to pick an existing service connection, or to create a new one.
    * @returns
    */
-  public static async promptForExternalServiceConnectionOrNew<T>(
-    connectionType: ExternalService
-  ): Promise<undefined | T> {
+  public static async promptForExternalServiceConnectionOrNew<
+    T extends ExternalTarget
+  >(connectionType: ExternalService): Promise<undefined | T> {
     const mngr = new ExternalConnectionManager(getExtension().podsDir);
 
     const existingConnections = await mngr.getAllConfigsByType(connectionType);
@@ -206,7 +210,7 @@ export class PodUIControls {
 
     const selectedServiceOption = await vscode.window.showQuickPick(
       items.concat(newConnectionOption),
-      { title: "Pick the service connection for export" }
+      { title: "Pick the service connection for export", ignoreFocusOut: true }
     );
 
     if (!selectedServiceOption) {
@@ -236,11 +240,11 @@ export class PodUIControls {
   /**
    * Ask the user to pick an ID for a new service connection. The connection
    * file will be opened in the editor.
-   * @param connectionType
+   * @param serviceType
    * @returns
    */
   public static async promptToCreateNewServiceConfig(
-    connectionType: ExternalService
+    serviceType: ExternalService
   ) {
     const mngr = new ExternalConnectionManager(getExtension().podsDir);
 
@@ -250,7 +254,7 @@ export class PodUIControls {
       return;
     }
 
-    const newFile = await mngr.createNewConfig(connectionType, id);
+    const newFile = await mngr.createNewConfig({ serviceType, id });
     await VSCodeUtils.openFileInEditor(vscode.Uri.file(newFile));
   }
 
@@ -259,6 +263,7 @@ export class PodUIControls {
     qp.title = "Pick a Pod Configuration or Create a New One";
     qp.matchOnDetail = true;
     qp.matchOnDescription = true;
+    qp.ignoreFocusOut = true;
 
     const items: QuickPickItem[] = [];
 

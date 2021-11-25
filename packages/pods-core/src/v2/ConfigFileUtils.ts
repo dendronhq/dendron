@@ -59,8 +59,11 @@ export class ConfigFileUtils {
       })
       .join("\n\n");
 
-    if (!fs.existsSync(fPath) || force) {
+    const fileExists = fs.existsSync(fPath);
+    if (!fileExists || force) {
       writeFileSync(fPath, config);
+    } else if (fileExists && !force) {
+      throw new Error("Config already exists!");
     }
     return fPath;
   }

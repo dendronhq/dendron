@@ -57,10 +57,13 @@ export class ExternalConnectionManager {
    * @param id a unique ID to identify this connection
    * @returns full path to the newly created config file
    */
-  public async createNewConfig(
-    serviceType: ExternalService,
-    id: string
-  ): Promise<string> {
+  public async createNewConfig({
+    serviceType,
+    id,
+  }: {
+    serviceType: ExternalService;
+    id: string;
+  }): Promise<string> {
     if (this.getConfigById({ id })) {
       throw new Error("This ID is already in use");
     }
@@ -90,7 +93,11 @@ export class ExternalConnectionManager {
    * @param param0 connection ID of the config to retrieve
    * @returns the config if it exists, otherwise undefined
    */
-  public getConfigById<T>({ id }: { id: string }): T | undefined {
+  public getConfigById<T extends ExternalTarget>({
+    id,
+  }: {
+    id: string;
+  }): T | undefined {
     const files = this.getConfigFiles();
 
     for (const fileName of files) {

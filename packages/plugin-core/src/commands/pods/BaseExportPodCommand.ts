@@ -16,6 +16,7 @@ import * as vscode from "vscode";
 import { VSCodeUtils } from "../../utils";
 import { getDWorkspace } from "../../workspace";
 import { BaseCommand } from "../base";
+import { RateLimiter } from "limiter";
 
 /**
  * Abstract base class for export pod commands. This class will defer input
@@ -38,7 +39,19 @@ export abstract class BaseExportPodCommand<
   >
   implements ExportPodFactory<Config, R>
 {
+  /**
+   * Provide a pod factory method to instantiate the pod instance with the
+   * passed in configuration
+   * @param config
+   */
   public abstract createPod(config: Config): ExportPodV2<R>;
+
+  /**
+   * Optionally specify a level of throttling to reduce the rate of calling
+   * exportNote(). This may be required when invoking a network API in the
+   * export.
+   */
+  public getLimiter?(): RateLimiter;
 
   /**
    * Gather the appropriate input payload based on the specified export scope.
@@ -137,6 +150,10 @@ export abstract class BaseExportPodCommand<
           if (typeof noteProp === "string") {
             throw new Error("Invalid Payload Type in Pod Note Export");
           } else if (pod.exportNote) {
+            if (this.getLimiter) {
+              // eslint-disable-next-line no-await-in-loop
+              await this.getLimiter().removeTokens(1);
+            }
             promises.push(
               pod.exportNote(noteProp).then((result) => {
                 this.onExportComplete({

@@ -136,7 +136,7 @@ export function delayedUpdateDecorations(
 }
 
 export const updateDecorations = sentryReportingCallback(
-  (activeEditor: TextEditor) => {
+  (editor: TextEditor) => {
     const ctx = "updateDecorations";
     const startTime = Date.now();
     // Warn for missing or bad frontmatter and broken wikilinks
@@ -148,7 +148,7 @@ export const updateDecorations = sentryReportingCallback(
     // Only show decorations & warnings for notes
     let note: NoteProps | undefined;
     try {
-      note = VSCodeUtils.getNoteFromDocument(activeEditor.document);
+      note = VSCodeUtils.getNoteFromDocument(editor.document);
       if (_.isUndefined(note)) return {};
     } catch (error) {
       Logger.info({
@@ -160,7 +160,7 @@ export const updateDecorations = sentryReportingCallback(
     }
     // Only decorate visible ranges, of which there could be multiple if the document is open in multiple tabs
     const ranges = VSCodeUtils.mergeOverlappingRanges(
-      activeEditor.visibleRanges.map((range) =>
+      editor.visibleRanges.map((range) =>
         VSCodeUtils.padRange({
           range,
           padding: VISIBLE_RANGE_MARGIN,
@@ -169,8 +169,15 @@ export const updateDecorations = sentryReportingCallback(
       )
     );
 
+    const { engine } = getDWorkspace();
     for (const range of ranges) {
-      const text = activeEditor.document.getText(range);
+      const text = editor.document.getText(range);
+      if (text.length > ConfigUtils.getWorkspace(engine.config).maxNoteLength) {
+        // This should only happen if the user somehow has a massive number of lines visible,
+        // or otherwise our range algorithm is broken. In any case, give up because this will be too slow.
+        warnExpensiveDecorations();
+        return {};
+      }
       const proc = MDUtilsV5.procRemarkParse(
         {
           mode: ProcMode.FULL,
@@ -178,7 +185,7 @@ export const updateDecorations = sentryReportingCallback(
         },
         {
           dest: DendronASTDest.MD_DENDRON,
-          engine: getDWorkspace().engine,
+          engine,
           vault: note.vault,
           fname: note.fname,
         }
@@ -192,7 +199,7 @@ export const updateDecorations = sentryReportingCallback(
         node.position!.start.line += range.start.line;
         node.position!.end.line += range.start.line;
         if (decorator) {
-          const decorations = decorator(node, activeEditor.document);
+          const decorations = decorator(node, editor.document);
           for (const { type, decoration } of decorations) {
             activeDecorations.get(type).push(decoration);
           }
@@ -209,10 +216,10 @@ export const updateDecorations = sentryReportingCallback(
       if (range.start.line === 0) {
         // Can't check frontmatter if frontmatter is not visible
         if (_.isUndefined(frontmatter)) {
-          allWarnings.push(warnMissingFrontmatter(activeEditor.document));
+          allWarnings.push(warnMissingFrontmatter(editor.document));
         } else {
           allWarnings.push(
-            ...checkAndWarnBadFrontmatter(activeEditor.document, frontmatter)
+            ...checkAndWarnBadFrontmatter(editor.document, frontmatter)
           );
         }
       }
@@ -224,13 +231,13 @@ export const updateDecorations = sentryReportingCallback(
       msg: `Displaying ${allWarnings.length} warnings and ${activeDecorations.size} decorations`,
     });
     for (const [type, decorations] of activeDecorations.entries()) {
-      activeEditor.setDecorations(type, decorations);
+      editor.setDecorations(type, decorations);
     }
 
     // Clear out any old decorations left over from last pass
     for (const type of _.values(DECORATION_TYPE)) {
       if (!activeDecorations.has(type)) {
-        activeEditor.setDecorations(type, []);
+        editor.setDecorations(type, []);
       }
     }
 

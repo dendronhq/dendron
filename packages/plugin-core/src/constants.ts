@@ -703,9 +703,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX} Publish Export`,
     group: "publishing",
     desc: "Export your notes for publishing.",
-    docs: [
-      "This command works by running `dendron-cli` in the background.",
-    ].join("\n"),
+    docs: [""].join("\n"),
     docLink: "",
     docPreview: ``,
   },
@@ -714,9 +712,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX} Publish Dev`,
     group: "publishing",
     desc: "Preview your notes on localhost using publishing",
-    docs: [
-      "This command works by running `dendron-cli` in the background.",
-    ].join("\n"),
+    docs: [""].join("\n"),
     docLink: "",
     docPreview: ``,
   },

@@ -1,20 +1,41 @@
-import { DVault, NoteUtils } from "@dendronhq/common-all";
+import {
+  DNodeProps,
+  DNodeUtils,
+  DVault,
+  NoteQuickInput,
+  NoteUtils,
+} from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import _md from "markdown-it";
+import { HistoryEvent } from "@dendronhq/engine-server";
 import path from "path";
 import { ProgressLocation, Uri, ViewColumn, window } from "vscode";
+import {
+  LookupControllerV3,
+  LookupControllerV3CreateOpts,
+} from "../components/lookup/LookupControllerV3";
+import {
+  NoteLookupProvider,
+  NoteLookupProviderSuccessResp,
+} from "../components/lookup/LookupProviderV3";
+import { NoteLookupProviderUtils } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { FileWatcher } from "../fileWatcher";
 import { VSCodeUtils } from "../utils";
 import { getExtension, getDWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 import { RenameNoteOutputV2a, RenameNoteV2aCommand } from "./RenameNoteV2a";
+import {
+  MultiSelectBtn,
+  Selection2ItemsBtn,
+} from "../components/lookup/buttons";
 
 const md = _md();
 
 type CommandOpts = {
+  scope?: NoteLookupProviderSuccessResp;
   match: string;
   replace: string;
 };
@@ -32,6 +53,50 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
   CommandOutput
 > {
   key = DENDRON_COMMANDS.REFACTOR_HIERARCHY.key;
+
+  async promptScope(opts: {
+    initialValue: string;
+  }): Promise<NoteLookupProviderSuccessResp | undefined> {
+    const { initialValue } = opts;
+    const lcOpts: LookupControllerV3CreateOpts = {
+      nodeType: "note",
+      disableVaultSelection: true,
+      vaultSelectCanToggle: false,
+      extraButtons: [
+        Selection2ItemsBtn.create(false),
+        MultiSelectBtn.create(false),
+      ],
+    };
+    const controller = LookupControllerV3.create(lcOpts);
+    const provider = new NoteLookupProvider(this.key, {
+      allowNewNote: false,
+      noHidePickerOnAccept: false,
+    });
+    return new Promise((resolve) => {
+      NoteLookupProviderUtils.subscribe({
+        id: this.key,
+        controller,
+        logger: this.L,
+        onDone: (event: HistoryEvent) => {
+          const data = event.data as NoteLookupProviderSuccessResp;
+          if (data.cancel) {
+            resolve(undefined);
+          }
+          resolve(data);
+        },
+        onHide: () => {
+          resolve(undefined);
+        },
+      });
+      controller.show({
+        initialValue,
+        title: "Scope",
+        placeholder: "Query for scope. Press esc. to use all notes.",
+        provider,
+      });
+    });
+  }
+
   async gatherInputs(): Promise<CommandOpts | undefined> {
     let replace: string | undefined;
     let value: string = "";
@@ -39,20 +104,24 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
     if (editor) {
       value = NoteUtils.uri2Fname(editor.document.uri);
     }
+
+    const scope = await this.promptScope({ initialValue: value });
+
     const match = await VSCodeUtils.showInputBox({
-      prompt: "Enter match text",
-      value,
+      prompt: "Enter match text. Press esc. to use capture entire file name.",
     });
+
     if (match) {
       replace = await VSCodeUtils.showInputBox({
-        prompt: "Enter replace prefix",
-        value: match,
+        prompt: "Enter replace prefix.",
       });
     }
+
     if (_.isUndefined(replace) || !match) {
       return;
     }
     return {
+      scope,
       match,
       replace,
     };
@@ -116,42 +185,51 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
 
   async execute(opts: CommandOpts): Promise<any> {
     const ctx = "RefactorHierarchy:execute";
-    const { match, replace } = _.defaults(opts);
+    const { scope, match, replace } = opts;
+
     this.L.info({ ctx, opts, msg: "enter" });
     const ext = getExtension();
     const { engine } = getDWorkspace();
-    const notes = engine.notes;
-    const re = new RegExp(`(.*)(${match})(.*)`);
-    const candidates = _.filter(notes, (n) => {
-      if (n.stub) {
-        return false;
-      }
-      return !_.isNull(re.exec(n.fname));
-    });
-    const operations = candidates.map((note) => {
-      const matchObj = re.exec(note.fname);
-      // @ts-ignore
-      const [
-        src,
-        prefix,
-        // @ts-ignore
-        _replace,
-        suffix,
-        // @ts-ignore
-        ..._rest
-      ] = matchObj as RegExpExecArray;
-      const dst = [prefix, replace, suffix]
-        .filter((ent) => !_.isEmpty(ent))
-        .join("");
+    const { notes, schemas, vaults, wsRoot } = engine;
 
-      const wsRoot = getDWorkspace().wsRoot;
-      const vault = note.vault;
+    const re = new RegExp(_.isUndefined(match) ? "(.*)" : match);
+
+    const capturedEntries: { item: NoteQuickInput; result: RegExpExecArray }[] =
+      [];
+
+    const scopedItems = _.isUndefined(scope)
+      ? _.toArray(notes).map((note: DNodeProps) => {
+          return DNodeUtils.enhancePropForQuickInputV3({
+            props: note,
+            schemas,
+            vaults,
+            wsRoot,
+          });
+        })
+      : scope.selectedItems;
+
+    scopedItems.forEach((item) => {
+      const result = re.exec(item.fname);
+      if (result) {
+        capturedEntries.push({ item, result });
+      }
+    });
+
+    const operations = capturedEntries.map((entry) => {
+      const { item } = entry;
+      const vault = item.vault;
       const vpath = vault2Path({ wsRoot, vault });
       const rootUri = Uri.file(vpath);
-      const oldUri = VSCodeUtils.joinPath(rootUri, src + ".md");
-      const newUri = VSCodeUtils.joinPath(rootUri, dst + ".md");
-      return { oldUri, newUri, vault: note.vault };
+      const source = item.fname;
+      const matchRE = new RegExp(`${match}`);
+      const dest = item.fname.replace(matchRE, replace);
+      return {
+        oldUri: VSCodeUtils.joinPath(rootUri, source + ".md"),
+        newUri: VSCodeUtils.joinPath(rootUri, dest + ".md"),
+        vault,
+      };
     });
+
     // NOTE: async version doesn't work, not sure why
     const filesThatExist: RenameOperation[] = _.filter(operations, (op) => {
       return fs.pathExistsSync(op.newUri.fsPath);
@@ -229,7 +307,11 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
   }
 
   async showResponse(res: CommandOutput) {
-    window.showInformationMessage("done refactoring");
+    if (_.isUndefined(res)) {
+      window.showInformationMessage("No note refactored.");
+      return;
+    }
+    window.showInformationMessage("Done refactoring.");
     const { changed } = res;
     if (changed.length > 0) {
       window.showInformationMessage(`Dendron updated ${changed.length} files`);

@@ -111,8 +111,6 @@ type CreateFnameOpts = {
   overrides?: CreateFnameOverrides;
 };
 
-type PointOffset = { line?: number; column?: number };
-
 type AddBehavior =
   | "childOfDomain"
   | "childOfCurrent"

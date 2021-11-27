@@ -930,8 +930,7 @@
     "semver": "^7.3.2",
     "string-similarity": "^4.0.4",
     "unist-util-visit": "2.0.3",
-    "vscode-languageclient": "^6.1.3",
-    "yaml-unist-parser": "^1.3.1"
+    "vscode-languageclient": "^6.1.3"
   },
   "repository": {
     "type": "git",

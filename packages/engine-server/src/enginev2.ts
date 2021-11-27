@@ -50,6 +50,7 @@ import {
   WriteNoteResp,
   ConfigUtils,
   RefreshNotesOpts,
+  GetDecorationsOpts,
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -63,6 +64,7 @@ import { EngineUtils } from ".";
 import { DConfig } from "./config";
 import { FileStorage } from "./drivers/file/storev2";
 import { MDUtilsV5, ProcFlavor } from "./markdown";
+import { getDecorations } from "./markdown/decorations";
 import { RemarkUtils } from "./markdown/remark/utils";
 import { HookUtils } from "./topics/hooks";
 
@@ -709,6 +711,38 @@ export class DendronEngineV2 implements DEngine {
         );
       }
       return { data: blocks, error: null };
+    } catch (err: any) {
+      return {
+        error: err,
+        data: undefined,
+      };
+    }
+  }
+
+  async getDecorations(opts: GetDecorationsOpts) {
+    const note = this.notes[opts.id];
+    try {
+      if (_.isUndefined(note))
+        throw DendronError.createFromStatus({
+          status: ERROR_STATUS.INVALID_STATE,
+          message: `${opts.id} does not exist`,
+        });
+      const {
+        allDecorations: decorations,
+        allDiagnostics: diagnostics,
+        allErrors: errors,
+      } = getDecorations({ ...opts, note, engine: this });
+      let error: IDendronError | null = null;
+      if (errors && errors.length > 1)
+        error = new DendronCompositeError(errors);
+      else if (errors && errors.length === 1) error = errors[0];
+      return {
+        data: {
+          decorations,
+          diagnostics,
+        },
+        error,
+      };
     } catch (err: any) {
       return {
         error: err,

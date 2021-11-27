@@ -12,6 +12,7 @@ import {
 import {
   AnchorUtils,
   BlockAnchor,
+  DECORATION_TYPES,
   DendronASTDest,
   DendronASTTypes,
   HashTag,
@@ -42,7 +43,10 @@ import { CodeConfigKeys, DateTimeFormat } from "../types";
 import { VSCodeUtils } from "../utils";
 import { sentryReportingCallback } from "../utils/analytics";
 import { containsNonDendronUri } from "../utils/md";
-import { getFrontmatterTags, parseFrontmatter } from "../utils/yaml";
+import {
+  getFrontmatterTags,
+  parseFrontmatter,
+} from "@dendronhq/common-server/src/yaml";
 import { getConfigValue, getDWorkspace } from "../workspace";
 import {
   checkAndWarnBadFrontmatter,
@@ -73,7 +77,9 @@ function warnExpensiveDecorations() {
  * be decorated. */
 const VISIBLE_RANGE_MARGIN = 20;
 
-export const DECORATION_TYPE = {
+export const DECORATION_TYPE: {
+  [key in keyof typeof DECORATION_TYPE_KEYS]: TextEditorDecorationType;
+} = {
   timestamp: window.createTextEditorDecorationType({}),
   blockAnchor: window.createTextEditorDecorationType({
     opacity: "40%",
@@ -98,19 +104,6 @@ export const DECORATION_TYPE = {
     rangeBehavior: DecorationRangeBehavior.ClosedClosed,
   }),
 };
-
-export const DECORATOR = new Map<
-  string,
-  (node: any, document: TextDocument) => DecorationAndType[]
->([
-  [DendronASTTypes.FRONTMATTER, decorateFrontmatter],
-  [DendronASTTypes.BLOCK_ANCHOR, decorateBlockAnchor],
-  [DendronASTTypes.HASHTAG, decorateHashTag],
-  [DendronASTTypes.USERTAG, decorateUserTag],
-  [DendronASTTypes.WIKI_LINK, decorateWikiLink],
-  [DendronASTTypes.REF_LINK_V2, decorateReference],
-  [DendronASTTypes.REF_LINK, decorateReference],
-]);
 
 export type DecorationAndType = {
   type: TextEditorDecorationType;
@@ -145,9 +138,7 @@ export const updateDecorations = sentryReportingCallback(
       // Explicitly disabled, stop here.
       return {};
     }
-    const startTime = Date.now();
-    // Warn for missing or bad frontmatter and broken wikilinks
-    const allWarnings: Diagnostic[] = [];
+
     const activeDecorations = new DefaultMap<
       TextEditorDecorationType,
       DecorationOptions[]
@@ -176,61 +167,6 @@ export const updateDecorations = sentryReportingCallback(
       )
     );
 
-    for (const range of ranges) {
-      const text = editor.document.getText(range);
-      if (text.length > ConfigUtils.getWorkspace(engine.config).maxNoteLength) {
-        // This should only happen if the user somehow has a massive number of lines visible,
-        // or otherwise our range algorithm is broken. In any case, give up because this will be too slow.
-        warnExpensiveDecorations();
-        return {};
-      }
-      const proc = MDUtilsV5.procRemarkParse(
-        {
-          mode: ProcMode.FULL,
-          parseOnly: true,
-        },
-        {
-          dest: DendronASTDest.MD_DENDRON,
-          engine,
-          vault: note.vault,
-          fname: note.fname,
-        }
-      );
-      const tree = proc.parse(text);
-      let frontmatter: FrontmatterContent | undefined;
-
-      visit(tree, (node) => {
-        const decorator = DECORATOR.get(node.type);
-        // Need to update node position with the added offset from the range
-        node.position!.start.line += range.start.line;
-        node.position!.end.line += range.start.line;
-        if (decorator) {
-          const decorations = decorator(node, editor.document);
-          for (const { type, decoration } of decorations) {
-            activeDecorations.get(type).push(decoration);
-          }
-        }
-        if (node.type === DendronASTTypes.FRONTMATTER)
-          frontmatter = node as FrontmatterContent;
-        if (Date.now() - startTime > DECORATION_MAX_TIME) {
-          warnExpensiveDecorations();
-          return false;
-        }
-        return undefined;
-      });
-
-      if (range.start.line === 0) {
-        // Can't check frontmatter if frontmatter is not visible
-        if (_.isUndefined(frontmatter)) {
-          allWarnings.push(warnMissingFrontmatter(editor.document));
-        } else {
-          allWarnings.push(
-            ...checkAndWarnBadFrontmatter(editor.document, frontmatter)
-          );
-        }
-      }
-    }
-
     // Activate the decorations
     Logger.info({
       ctx,
@@ -254,60 +190,6 @@ export const updateDecorations = sentryReportingCallback(
   }
 );
 
-function decorateFrontmatter(
-  frontmatter: FrontmatterContent,
-  _document: TextDocument
-): DecorationAndType[] {
-  const { value: contents, position } = frontmatter;
-  if (_.isUndefined(position)) return []; // should never happen
-  // Decorate the timestamps
-  const tsConfig = getConfigValue(
-    CodeConfigKeys.DEFAULT_TIMESTAMP_DECORATION_FORMAT
-  ) as DateTimeFormat;
-  const formatOption = DateTime[tsConfig];
-
-  const entries = contents.split("\n");
-  const lineOffset =
-    VSCodeUtils.point2VSCodePosition(position.start).line +
-    1; /* `---` line of frontmatter */
-  const timestampDecorations = entries
-    .map((entry, line): undefined | DecorationAndType => {
-      const match = NoteUtils.RE_FM_UPDATED_OR_CREATED.exec(entry);
-      if (!_.isNull(match) && match.groups?.timestamp) {
-        const timestamp = DateTime.fromMillis(
-          _.toInteger(match.groups.timestamp)
-        );
-        const decoration: DecorationOptions = {
-          range: new Range(
-            line + lineOffset,
-            match.groups.beforeTimestamp.length,
-            line + lineOffset,
-            match.groups.beforeTimestamp.length + match.groups.timestamp.length
-          ),
-          renderOptions: {
-            after: {
-              contentText: `  (${timestamp.toLocaleString(formatOption)})`,
-            },
-          },
-        };
-        return { type: DECORATION_TYPE.timestamp, decoration };
-      }
-      return undefined;
-    })
-    .filter(isNotUndefined);
-
-  // Decorate the frontmatter tags
-  const tags = getFrontmatterTags(parseFrontmatter(contents));
-  const fmTagDecorations = _.flatMap(tags, (tag) =>
-    decorateTag({
-      fname: `${TAGS_HIERARCHY}${tag.value}`,
-      position: tag.position,
-      lineOffset,
-    })
-  );
-  return _.concat(timestampDecorations, fmTagDecorations);
-}
-
 function decorateBlockAnchor(blockAnchor: BlockAnchor) {
   const position = blockAnchor.position;
   if (_.isUndefined(position)) return []; // should never happen
@@ -316,124 +198,6 @@ function decorateBlockAnchor(blockAnchor: BlockAnchor) {
     range: VSCodeUtils.position2VSCodeRange(position),
   };
   return [{ type: DECORATION_TYPE.blockAnchor, decoration }];
-}
-
-function decorateHashTag(hashtag: HashTag, _document: TextDocument) {
-  const position = hashtag.position;
-  if (_.isUndefined(position)) return []; // should never happen
-
-  return decorateTag({
-    fname: hashtag.fname,
-    position,
-  });
-}
-
-function decorateTag({
-  fname,
-  position,
-  lineOffset,
-}: {
-  fname: string;
-  position: Position;
-  lineOffset?: number;
-}) {
-  let before: ThemableDecorationAttachmentRenderOptions | undefined;
-  const { color: backgroundColor, type: colorType } = NoteUtils.color({
-    fname,
-    notes: getDWorkspace().engine.notes,
-  });
-  if (
-    colorType === "configured" ||
-    !getDWorkspace().config.noRandomlyColoredTags
-  ) {
-    before = {
-      contentText: " ",
-      width: "0.8rem",
-      height: "0.8rem",
-      margin: "auto 0.2rem",
-      border: "1px solid",
-      borderColor: new ThemeColor("foreground"),
-      backgroundColor,
-    };
-  }
-
-  const type = linkedNoteType({ fname });
-  const decoration: DecorationOptions = {
-    range: VSCodeUtils.position2VSCodeRange(position, { line: lineOffset }),
-    renderOptions: {
-      before,
-    },
-  };
-
-  return [{ type, decoration }];
-}
-
-export function linkedNoteType({
-  fname,
-  anchorStart,
-  anchorEnd,
-  vaultName,
-  document,
-}: {
-  fname?: string;
-  anchorStart?: string;
-  anchorEnd?: string;
-  vaultName?: string;
-  document?: TextDocument;
-}) {
-  const ctx = "linkedNoteType";
-  const { notes, vaults } = getDWorkspace().engine;
-  const vault = vaultName
-    ? VaultUtils.getVaultByName({ vname: vaultName, vaults })
-    : undefined;
-  // Vault specified, but can't find it.
-  if (vaultName && !vault) return DECORATION_TYPE.brokenWikilink;
-
-  let matchingNotes: NoteProps[];
-  // Same-file links have `fname` undefined or empty string
-  if (!fname && document) {
-    const documentNote = VSCodeUtils.getNoteFromDocument(document);
-    matchingNotes = documentNote ? [documentNote] : [];
-  } else if (fname) {
-    try {
-      matchingNotes = NoteUtils.getNotesByFname({
-        fname,
-        vault,
-        notes,
-      });
-    } catch (err) {
-      Logger.info({
-        ctx,
-        msg: "error when looking for note",
-        fname,
-        vaultName,
-        err,
-      });
-      return DECORATION_TYPE.brokenWikilink;
-    }
-  } else {
-    matchingNotes = [VSCodeUtils.getNoteFromDocument(document!)!];
-  }
-
-  // Checking web URLs is not feasible, and checking wildcard references would be hard.
-  // Let's just highlight them as existing for now.
-  if (fname && (containsNonDendronUri(fname) || fname.endsWith("*")))
-    return DECORATION_TYPE.wikiLink;
-
-  if (anchorStart || anchorEnd) {
-    const allAnchors = _.flatMap(matchingNotes, (note) =>
-      Object.values(note.anchors)
-    )
-      .filter(isNotUndefined)
-      .map(AnchorUtils.anchor2string);
-    if (anchorStart && anchorStart !== "*" && !allAnchors.includes(anchorStart))
-      return DECORATION_TYPE.brokenWikilink;
-    if (anchorEnd && anchorEnd !== "*" && !allAnchors.includes(anchorEnd))
-      return DECORATION_TYPE.brokenWikilink;
-  }
-
-  if (matchingNotes.length > 0) return DECORATION_TYPE.wikiLink;
-  else return DECORATION_TYPE.brokenWikilink;
 }
 
 const RE_ALIAS = /(?<beforeAlias>\[\[)(?<alias>[^|]+)\|/;
@@ -497,99 +261,3 @@ function decorateWikiLink(wikiLink: WikiLinkNoteV4, document: TextDocument) {
 const TASK_NOTE_DECORATION_COLOR = new ThemeColor(
   "editorLink.activeForeground"
 );
-
-/** Decorates the note `fname` in vault `vaultName` if the note is a task note. */
-function decorateTaskNote({
-  range,
-  fname,
-  vaultName,
-}: {
-  range: Range;
-  fname: string | undefined;
-  vaultName?: string;
-}) {
-  if (!fname) return;
-  const { notes, vaults, config } = getDWorkspace().engine;
-  const taskConfig = ConfigUtils.getTask(config);
-  const vault = vaultName
-    ? VaultUtils.getVaultByName({ vname: vaultName, vaults })
-    : undefined;
-  const note: NoteProps | undefined = NoteUtils.getNotesByFname({
-    fname,
-    vault,
-    notes,
-  })[0];
-  if (!note || !TaskNoteUtils.isTaskNote(note)) return;
-
-  // Determines whether the task link is preceded by an empty or full checkbox
-  const status = TaskNoteUtils.getStatusSymbol({ note, taskConfig });
-
-  const { due, owner, priority } = note.custom;
-  const decorationString: string[] = [];
-  if (due) decorationString.push(`due:${due}`);
-  if (owner) decorationString.push(`@${owner}`);
-  if (priority) {
-    const prioritySymbol = TaskNoteUtils.getPrioritySymbol({
-      note,
-      taskConfig,
-    });
-    if (prioritySymbol) decorationString.push(`priority:${prioritySymbol}`);
-  }
-  if (note.tags) {
-    const tags = _.isString(note.tags) ? [note.tags] : note.tags;
-    decorationString.push(...tags.map((tag) => `#${tag}`));
-  }
-
-  const decoration: DecorationAndType = {
-    type: DECORATION_TYPE.taskNote,
-    decoration: {
-      range,
-      renderOptions: {
-        before: {
-          contentText: status,
-          color: TASK_NOTE_DECORATION_COLOR,
-          fontWeight: "lighter",
-          margin: "0 0.5rem 0 0.15rem",
-        },
-        after: {
-          contentText: decorationString.join(" "),
-          color: TASK_NOTE_DECORATION_COLOR,
-          fontWeight: "lighter",
-          margin: "0 0.4rem 0 0.25rem",
-        },
-      },
-    },
-  };
-  return decoration;
-}
-
-function decorateUserTag(userTag: UserTag, _document: TextDocument) {
-  const position = userTag.position as Position;
-  if (_.isUndefined(position)) return [];
-
-  const type = linkedNoteType({
-    fname: userTag.fname,
-  });
-
-  return [
-    { type, decoration: { range: VSCodeUtils.position2VSCodeRange(position) } },
-  ];
-}
-
-function decorateReference(reference: NoteRefNoteV4, document: TextDocument) {
-  const position = reference.position as Position;
-  if (_.isUndefined(position)) return [];
-
-  const type = linkedNoteType({
-    fname: reference.data.link.from.fname,
-    anchorStart: reference.data.link.data.anchorStart,
-    anchorEnd: reference.data.link.data.anchorEnd,
-    vaultName: reference.data.link.data.vaultName,
-    document,
-  });
-  const decoration: DecorationOptions = {
-    range: VSCodeUtils.position2VSCodeRange(position),
-  };
-
-  return [{ type, decoration }];
-}

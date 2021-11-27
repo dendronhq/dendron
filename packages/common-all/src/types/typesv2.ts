@@ -12,6 +12,8 @@ import {
 import { DHookDict } from "./hooks";
 import { DVault } from "./workspace";
 import { IntermediateDendronConfig } from "./intermediateConfigs";
+import { VSRange } from "./compat";
+import { Decoration, Diagnostic } from ".";
 
 export enum ResponseCode {
   OK = 200,
@@ -313,6 +315,11 @@ export type ConfigWriteOpts = {
   config: IntermediateDendronConfig;
 };
 
+export type GetDecorationsOpts = {
+  id: string;
+  ranges: VSRange[];
+};
+
 // === Engine and Store Main
 
 export type DCommonProps = {
@@ -445,6 +452,10 @@ export type StoreDeleteNoteResp = EngineDeleteNotePayload;
 export type RenameNotePayload = NoteChangeEntry[];
 export type RenderNotePayload = string | undefined;
 export type GetNoteBlocksPayload = RespV2<NoteBlock[]>;
+export type GetDecorationsPayload = RespV2<{
+  decorations?: Decoration[];
+  diagnostics?: Diagnostic[];
+}>;
 
 export type GetNotePayload = {
   note: NoteProps | undefined;
@@ -509,6 +520,11 @@ export type DEngine = DCommonProps &
     // config
     writeConfig: (opts: ConfigWriteOpts) => Promise<RespV2<void>>;
     getConfig: () => Promise<RespV2<ConfigGetPayload>>;
+
+    // ui offloading
+    getDecorations: (
+      opts: GetDecorationsOpts
+    ) => Promise<GetDecorationsPayload>;
   };
 
 /**
@@ -563,6 +579,9 @@ export type DEngineV4Methods = {
   // config
   writeConfig: (opts: ConfigWriteOpts) => Promise<RespV2<void>>;
   getConfig: () => Promise<RespV2<ConfigGetPayload>>;
+
+  // ui offloading
+  getDecorations: (opts: GetDecorationsOpts) => Promise<GetDecorationsPayload>;
 };
 
 // === Workspace

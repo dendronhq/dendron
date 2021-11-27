@@ -4,6 +4,7 @@ import {
   NoteProps,
   NoteUtils,
   VaultUtils,
+  containsNonDendronUri,
 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import {
@@ -21,7 +22,6 @@ import { PickerUtilsV2 } from "../components/lookup/utils";
 import { Logger } from "../logger";
 import {
   containsImageExt,
-  containsNonDendronUri,
   containsOtherKnownExts,
   getReferenceAtPosition,
   isUncPath,
@@ -71,9 +71,9 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
       : "";
 
     const config = getDWorkspace().config;
-    const autoCreateOnDefinition = ConfigUtils.getWorkspace(config).enableAutoCreateOnDefinition;
-    const ctrlClickToCreate =
-      autoCreateOnDefinition ? "Ctrl+Click or " : "";
+    const autoCreateOnDefinition =
+      ConfigUtils.getWorkspace(config).enableAutoCreateOnDefinition;
+    const ctrlClickToCreate = autoCreateOnDefinition ? "Ctrl+Click or " : "";
     return `Note ${refAtPos.ref}${vaultName} is missing, ${ctrlClickToCreate}use "Dendron: Goto Note" command to create it.`;
   }
 

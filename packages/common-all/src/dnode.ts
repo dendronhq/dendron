@@ -3,7 +3,8 @@ import YAML, { JSON_SCHEMA } from "js-yaml";
 import _ from "lodash";
 import minimatch from "minimatch";
 import path from "path";
-import title from "title";
+// @ts-ignore
+import title from "@dendronhq/title";
 import { URI } from "vscode-uri";
 import {
   CONSTANTS,

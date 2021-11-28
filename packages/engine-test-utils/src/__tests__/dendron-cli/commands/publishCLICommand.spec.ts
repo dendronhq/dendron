@@ -7,6 +7,7 @@ import {
 } from "@dendronhq/dendron-cli";
 import { NextjsExportPodUtils, PublishTarget } from "@dendronhq/pods-core";
 import fs from "fs-extra";
+import _ from "lodash";
 import path from "path";
 import prompts from "prompts";
 import sinon, { stub } from "sinon";
@@ -74,6 +75,40 @@ describe("WHEN run `dendron publish build`", () => {
         expect,
       }
     );
+  });
+
+  describe("AND WHEN sitemap is used", () => {
+    test("THEN sitemap is called", async () => {
+      await runEngineTestV5(
+        async ({ wsRoot }) => {
+          const cli = new PublishCLICommand();
+          const buildNext = stub(cli, "_buildNextData").resolves({
+            error: undefined,
+            data: {} as any,
+          });
+          const buildSiteMapstub = stub(
+            NextjsExportPodUtils,
+            "buildSiteMap"
+          ).resolves(0);
+          await runPublishCmd({
+            cli,
+            cmd,
+            wsRoot,
+            sitemap: true,
+          });
+          expect(
+            _.every(
+              [buildNext, buildSiteMapstub].map((ent) => {
+                return ent.calledOnce;
+              })
+            )
+          ).toBeTruthy();
+        },
+        {
+          expect,
+        }
+      );
+    });
   });
 
   describe("AND with invalid override key", () => {
@@ -182,6 +217,7 @@ describe("WHEN run `dendron publish export`", () => {
   afterEach(() => {
     sinon.restore();
   });
+
   describe("AND WHEN github target", () => {
     describe("AND docs folder exists", () => {
       test("THEN delete when confirm", async () => {

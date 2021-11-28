@@ -11,20 +11,12 @@ import {
   getNoteBody,
   getNoteMeta,
   getNotes,
+  getNotePaths,
 } from "../../utils/build";
 
 export default DendronNotePage;
 
-export const getStaticPaths: GetStaticPaths = async () => {
-  const { notes, noteIndex } = getNotes();
-  const ids = _.reject(_.keys(notes), (id) => id === noteIndex.id);
-  return {
-    paths: _.map(ids, (id) => {
-      return { params: { id } };
-    }),
-    fallback: false,
-  };
-};
+export const getStaticPaths: GetStaticPaths = getNotePaths;
 
 export const getStaticProps: GetStaticProps = async (
   context: GetStaticPropsContext

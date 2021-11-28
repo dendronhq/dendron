@@ -49,7 +49,7 @@ function handleImage({
     logger.error(resp.error);
     return;
   }
-  const port = resp.data;
+  const port: number = resp.data;
   const url = EngineUtils.getLocalEngineUrl({ port }) + "/api/assets";
   const params: AssetGetRequest = {
     fpath,

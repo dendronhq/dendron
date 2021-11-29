@@ -1,15 +1,45 @@
 import {
   APIUtils,
+  BulkAddNoteOpts,
+  ConfigWriteOpts,
   DendronAPI,
+  DEngineClient,
+  DEngineInitResp,
+  DEngineSyncOpts,
+  DHookDict,
+  DLink,
+  DVault,
+  EngineDeleteNotePayload,
+  EngineDeleteOpts,
+  EngineInfoResp,
+  EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
+  GetNoteBlocksOpts,
+  GetNoteBlocksPayload,
+  GetNoteOptsV2,
+  GetNotePayload,
+  IntermediateDendronConfig,
+  NoteChangeEntry,
   NoteProps,
-  WriteNoteResp,
+  NotePropsDict,
+  QueryNotesOpts,
+  RefreshNotesOpts,
+  RenameNoteOpts,
+  RenameNotePayload,
+  RenderNoteOpts,
+  RenderNotePayload,
+  RespRequired,
+  RespV2,
+  SchemaModuleDict,
+  SchemaModuleProps,
 } from "@dendronhq/common-all";
 import { DendronEngineClient, HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { getDWorkspace } from "../workspace";
 
-export class EngineAPIService extends DendronEngineClient {
+export class EngineAPIService implements DEngineClient {
+  private internalEngine: DEngineClient;
+
   private _trustedWorkspace: boolean = true;
 
   get trustedWorkspace(): boolean {
@@ -19,13 +49,24 @@ export class EngineAPIService extends DendronEngineClient {
     this._trustedWorkspace = value;
   }
 
+  public notes: NotePropsDict;
+  public wsRoot: string;
+  public schemas: SchemaModuleDict;
+  public links: DLink[];
+
+  public vaults: DVault[];
+  public configRoot: string;
+
+  public config: IntermediateDendronConfig;
+  public hooks: DHookDict;
+
   static createEngine({
     port,
     enableWorkspaceTrust,
   }: {
     port: number | string;
     enableWorkspaceTrust?: boolean | undefined;
-  }) {
+  }): EngineAPIService {
     const { vaults, wsRoot } = getDWorkspace();
     const history = HistoryService.instance();
 
@@ -36,25 +77,57 @@ export class EngineAPIService extends DendronEngineClient {
       apiPath: "api",
     });
 
-    const newSvc = new EngineAPIService({ api, vaults, ws: wsRoot, history });
+    const newClientBase = new DendronEngineClient({
+      api,
+      vaults,
+      ws: wsRoot,
+      history,
+    });
+
+    const newSvc = new EngineAPIService({ engineClient: newClientBase });
+
     if (enableWorkspaceTrust !== undefined) {
       newSvc._trustedWorkspace = enableWorkspaceTrust;
     }
     return newSvc;
   }
 
-  /**
-   * Override of write note for the VS Code Plugin Client - this client needs to
-   * observe workspace trust settings and prevent hook code execution if the
-   * workspace is not trusted.
-   * @param note
-   * @param opts
-   * @returns
-   */
-  async writeNote(
+  constructor({ engineClient }: { engineClient: DEngineClient }) {
+    this.internalEngine = engineClient;
+
+    this.notes = this.internalEngine.notes;
+    this.wsRoot = this.internalEngine.wsRoot;
+    this.schemas = this.internalEngine.schemas;
+    this.links = this.internalEngine.links;
+    this.vaults = this.internalEngine.vaults;
+    this.configRoot = this.internalEngine.configRoot;
+    this.config = this.internalEngine.config;
+    this.hooks = this.internalEngine.hooks;
+  }
+
+  async refreshNotes(opts: RefreshNotesOpts) {
+    return this.internalEngine.refreshNotes(opts);
+  }
+
+  async bulkAddNotes(opts: BulkAddNoteOpts) {
+    return this.internalEngine.bulkAddNotes(opts);
+  }
+
+  updateNote(
     note: NoteProps,
-    opts?: EngineWriteOptsV2
-  ): Promise<WriteNoteResp> {
+    opts?: EngineUpdateNodesOptsV2
+  ): Promise<NoteProps> {
+    return this.internalEngine.updateNote(note, opts);
+  }
+
+  updateSchema(schema: SchemaModuleProps): Promise<void> {
+    return this.internalEngine.updateSchema(schema);
+  }
+
+  writeNote(
+    note: NoteProps,
+    opts?: EngineWriteOptsV2 | undefined
+  ): Promise<Required<RespV2<NoteChangeEntry[]>>> {
     if (!this._trustedWorkspace) {
       if (!opts) {
         opts = { runHooks: false };
@@ -62,6 +135,79 @@ export class EngineAPIService extends DendronEngineClient {
         opts.runHooks = false;
       }
     }
-    return super.writeNote(note, opts);
+
+    return this.internalEngine.writeNote(note, opts);
+  }
+
+  writeSchema(schema: SchemaModuleProps): Promise<void> {
+    return this.internalEngine.writeSchema(schema);
+  }
+  init(): Promise<DEngineInitResp> {
+    return this.internalEngine.init();
+  }
+
+  deleteNote(
+    id: string,
+    opts?: EngineDeleteOpts | undefined
+  ): Promise<Required<RespV2<EngineDeleteNotePayload>>> {
+    return this.internalEngine.deleteNote(id, opts);
+  }
+
+  deleteSchema(
+    id: string,
+    opts?: EngineDeleteOpts | undefined
+  ): Promise<DEngineInitResp> {
+    return this.internalEngine.deleteSchema(id, opts);
+  }
+
+  info(): Promise<RespRequired<EngineInfoResp>> {
+    return this.internalEngine.info();
+  }
+
+  sync(opts?: DEngineSyncOpts | undefined): Promise<DEngineInitResp> {
+    return this.internalEngine.sync(opts);
+  }
+
+  getNoteByPath(opts: GetNoteOptsV2): Promise<RespV2<GetNotePayload>> {
+    // opts.npath = opts.overrides?.types
+    return this.internalEngine.getNoteByPath(opts);
+  }
+
+  getSchema(qs: string): Promise<RespV2<SchemaModuleProps>> {
+    return this.internalEngine.getSchema(qs);
+  }
+
+  querySchema(qs: string): Promise<Required<RespV2<SchemaModuleProps[]>>> {
+    return this.internalEngine.querySchema(qs);
+  }
+
+  queryNotes(opts: QueryNotesOpts): Promise<Required<RespV2<NoteProps[]>>> {
+    return this.internalEngine.queryNotes(opts);
+  }
+
+  queryNotesSync({
+    qs,
+    vault,
+  }: {
+    qs: string;
+    vault?: DVault | undefined;
+  }): Required<RespV2<NoteProps[]>> {
+    return this.internalEngine.queryNotesSync({ qs, vault });
+  }
+
+  renameNote(opts: RenameNoteOpts): Promise<RespV2<RenameNotePayload>> {
+    return this.internalEngine.renameNote(opts);
+  }
+  renderNote(opts: RenderNoteOpts): Promise<RespV2<RenderNotePayload>> {
+    return this.internalEngine.renderNote(opts);
+  }
+  getNoteBlocks(opts: GetNoteBlocksOpts): Promise<GetNoteBlocksPayload> {
+    return this.internalEngine.getNoteBlocks(opts);
+  }
+  writeConfig(opts: ConfigWriteOpts): Promise<RespV2<void>> {
+    return this.internalEngine.writeConfig(opts);
+  }
+  getConfig(): Promise<RespV2<IntermediateDendronConfig>> {
+    return this.internalEngine.getConfig();
   }
 }

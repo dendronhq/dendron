@@ -40,7 +40,7 @@ import BacklinksTreeDataProvider, {
 import { FileWatcher } from "./fileWatcher";
 import { Logger } from "./logger";
 import { UserDefinedTraitV1 } from "./noteTypes/UserDefinedTraitV1";
-import { EngineAPIServiceV2 } from "./services/EngineAPIServiceV2";
+import { EngineAPIService } from "./services/EngineAPIService";
 import {
   NoteTraitManager,
   NoteTraitService,
@@ -337,7 +337,7 @@ export class DendronExtension {
   public workspaceWatcher?: WorkspaceWatcher;
   public serverWatcher?: vscode.FileSystemWatcher;
   public L: typeof Logger;
-  public _enginev2?: EngineAPIServiceV2;
+  public _enginev2?: EngineAPIService;
   public type: WorkspaceType;
   private disposableStore: DisposableStore;
   public workspaceImpl?: DWorkspaceV2;
@@ -515,14 +515,14 @@ export class DendronExtension {
     this.webViews[key] = view;
   }
 
-  getEngine(): EngineAPIServiceV2 {
+  getEngine(): EngineAPIService {
     if (!this._enginev2) {
       throw Error("engine not set");
     }
     return this._enginev2;
   }
 
-  setEngine(engine: EngineAPIServiceV2) {
+  setEngine(engine: EngineAPIService) {
     this._enginev2 = engine;
     this.getWorkspaceImplOrThrow().engine = engine;
   }

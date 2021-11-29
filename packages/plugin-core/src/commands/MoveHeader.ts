@@ -45,9 +45,8 @@ import {
 import { DENDRON_COMMANDS } from "../constants";
 import { delayedUpdateDecorations } from "../features/windowDecorations";
 import { EngineAPIService } from "../services/EngineAPIService";
-import { EngineAPIServiceV2 } from "../services/EngineAPIServiceV2";
-import { findReferences, FoundRefT } from "../utils/md";
 import { VSCodeUtils } from "../vsCodeUtils";
+import { findReferences, FoundRefT } from "../utils/md";
 import { getEngine, getVaultFromUri } from "../workspace";
 import { WSUtils } from "../WSUtils";
 import { BasicCommand } from "./base";
@@ -63,9 +62,7 @@ type CommandOpts = {
   dest?: NoteProps;
   origin: NoteProps;
   nodesToMove: Node[];
-  modifiedOriginTree: Node;
-  originProc: Processor;
-  engine: EngineAPIServiceV2;
+  engine: EngineAPIService;
 } & CommandInput;
 type CommandOutput = {
   updated: NoteProps[];
@@ -98,7 +95,7 @@ export class MoveHeaderCommand extends BasicCommand<
     severity: ERROR_SEVERITY.MINOR,
   });
 
-  private getProc = (engine: EngineAPIServiceV2, note: NoteProps) => {
+  private getProc = (engine: EngineAPIService, note: NoteProps) => {
     return MDUtilsV5.procRemarkFull({
       engine,
       fname: note.fname,
@@ -113,7 +110,7 @@ export class MoveHeaderCommand extends BasicCommand<
    * @param engine
    * @returns {}
    */
-  private validateAndProcessInput(engine: EngineAPIServiceV2): {
+  private validateAndProcessInput(engine: EngineAPIService): {
     proc: Processor;
     origin: NoteProps;
     targetHeader: Heading;
@@ -268,7 +265,7 @@ export class MoveHeaderCommand extends BasicCommand<
    * @param nodesToMove
    */
   private async appendHeaderToDestination(
-    engine: EngineAPIServiceV2,
+    engine: EngineAPIService,
     dest: NoteProps,
     nodesToMove: Node[]
   ): Promise<void> {
@@ -321,7 +318,7 @@ export class MoveHeaderCommand extends BasicCommand<
    */
   private getNoteByLocation(
     location: Location,
-    engine: EngineAPIServiceV2
+    engine: EngineAPIService
   ): NoteProps | undefined {
     const { wsRoot, notes } = engine;
     const fsPath = location.uri.fsPath;
@@ -470,7 +467,7 @@ export class MoveHeaderCommand extends BasicCommand<
   async updateReferences(
     foundReferences: FoundRefT[],
     anchorNamesToUpdate: string[],
-    engine: EngineAPIServiceV2,
+    engine: EngineAPIService,
     origin: NoteProps,
     dest: NoteProps
   ): Promise<NoteProps[]> {

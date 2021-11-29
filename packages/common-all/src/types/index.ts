@@ -4,7 +4,7 @@ export * from "./compat";
 export * from "./foundation";
 export * from "./hooks";
 export * from "./intermediateConfigs";
-export * from "./noteType";
+export * from "./noteTrait";
 export * from "./seed";
 export * from "./typesv2";
 export * from "./workspace";

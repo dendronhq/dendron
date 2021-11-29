@@ -17,7 +17,7 @@ import {
 } from "../components/lookup/LookupProviderV3";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { VSCodeUtils } from "../utils";
-import { getDWorkspace } from "../workspace";
+import { getDWorkspace, getExtension } from "../workspace";
 import { BaseCommand } from "./base";
 import { GotoNoteCommand } from "./GotoNote";
 
@@ -58,6 +58,10 @@ export class CreateNoteWithTraitCommand extends BaseCommand<
     }
 
     try {
+      if (!this.checkWorkspaceTrustAndWarn()) {
+        return;
+      }
+
       const context = await this.getCreateContext();
       const resp = this.type.OnWillCreate.setNameModifier(context);
 
@@ -99,7 +103,7 @@ export class CreateNoteWithTraitCommand extends BaseCommand<
 
     let title;
 
-    if (this.type.OnCreate?.setTitle) {
+    if (this.type.OnCreate?.setTitle && this.checkWorkspaceTrustAndWarn()) {
       const context = await this.getCreateContext();
       context.currentNoteName = fname;
 
@@ -197,5 +201,17 @@ export class CreateNoteWithTraitCommand extends BaseCommand<
       clipboard,
       currentNoteName: openNoteName,
     };
+  }
+
+  private checkWorkspaceTrustAndWarn(): boolean {
+    const engine = getExtension().getEngine();
+
+    if (!engine.trustedWorkspace) {
+      vscode.window.showWarningMessage(
+        "Workspace Trust has been disabled for this workspace. Note Trait behavior will not be applied."
+      );
+    }
+
+    return engine.trustedWorkspace;
   }
 }

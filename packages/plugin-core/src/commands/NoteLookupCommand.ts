@@ -379,10 +379,8 @@ export class NoteLookupCommand extends BaseCommand<
     const metaData = MetadataService.instance().getMeta();
     if (_.isUndefined(metaData.firstLookupTime)) {
       MetadataService.instance().setFirstLookupTime();
-      MetadataService.instance().setLastLookupTime();
-    } else {
-      MetadataService.instance().setLastLookupTime();
     }
+    MetadataService.instance().setLastLookupTime();
     return result;
   }
   async acceptExistingItem(

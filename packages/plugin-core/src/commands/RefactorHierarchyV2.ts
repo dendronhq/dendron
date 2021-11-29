@@ -1,4 +1,5 @@
 import {
+  DEngineClient,
   DNodeProps,
   DNodeUtils,
   DVault,
@@ -38,6 +39,7 @@ type CommandOpts = {
   scope?: NoteLookupProviderSuccessResp;
   match: string;
   replace: string;
+  noConfirm?: boolean;
 };
 
 type CommandOutput = any;
@@ -97,8 +99,42 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
     });
   }
 
-  async gatherInputs(): Promise<CommandOpts | undefined> {
+  async promptMatchText() {
+    const match = await VSCodeUtils.showInputBox({
+      prompt: "Enter match text. Leave blank to capture entire file name.",
+    });
+
+    if (match === undefined) {
+      // immediately return if user cancels.
+      return;
+    } else if (match.trim() === "") {
+      return "(.*)";
+    }
+    return match;
+  }
+
+  async promptReplaceText() {
+    let done = false;
     let replace: string | undefined;
+    do {
+      // eslint-disable-next-line no-await-in-loop
+      replace = await VSCodeUtils.showInputBox({
+        prompt: "Enter replace text.",
+      });
+
+      if (replace === undefined) {
+        return;
+      } else if (replace.trim() === "") {
+        window.showWarningMessage("Please provide a replace text.");
+      } else {
+        done = true;
+      }
+    } while (!done);
+
+    return replace;
+  }
+
+  async gatherInputs(): Promise<CommandOpts | undefined> {
     let value: string = "";
     const editor = VSCodeUtils.getActiveTextEditor();
     if (editor) {
@@ -106,20 +142,30 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
     }
 
     const scope = await this.promptScope({ initialValue: value });
-
-    const match = await VSCodeUtils.showInputBox({
-      prompt: "Enter match text. Press esc. to use capture entire file name.",
-    });
-
-    if (match) {
-      replace = await VSCodeUtils.showInputBox({
-        prompt: "Enter replace prefix.",
-      });
+    if (_.isUndefined(scope)) {
+      window.showInformationMessage("Refactor scoped to all notes.");
+    } else {
+      window.showInformationMessage(
+        `Refactor scoped to ${scope.selectedItems.length} selected note(s).`
+      );
     }
 
-    if (_.isUndefined(replace) || !match) {
+    const match = await this.promptMatchText();
+    if (_.isUndefined(match)) {
+      window.showErrorMessage("No match text provided.");
       return;
+    } else {
+      window.showInformationMessage(`Matching: ${match}`);
     }
+
+    const replace = await this.promptReplaceText();
+    if (_.isUndefined(replace) || replace.trim() === "") {
+      window.showErrorMessage("No replace text provided.");
+      return;
+    } else {
+      window.showInformationMessage(`Replacing with: ${replace}`);
+    }
+
     return {
       scope,
       match,
@@ -183,19 +229,15 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
     panel.webview.html = md.render(content);
   }
 
-  async execute(opts: CommandOpts): Promise<any> {
-    const ctx = "RefactorHierarchy:execute";
-    const { scope, match, replace } = opts;
-
-    this.L.info({ ctx, opts, msg: "enter" });
-    const ext = getExtension();
-    const { engine } = getDWorkspace();
+  getCapturedEntries(opts: {
+    scope: NoteLookupProviderSuccessResp | undefined;
+    matchRE: RegExp;
+    engine: DEngineClient;
+  }) {
+    const { scope, matchRE, engine } = opts;
     const { notes, schemas, vaults, wsRoot } = engine;
 
-    const re = new RegExp(_.isUndefined(match) ? "(.*)" : match);
-
-    const capturedEntries: { item: NoteQuickInput; result: RegExpExecArray }[] =
-      [];
+    const capturedEntries: NoteQuickInput[] = [];
 
     const scopedItems = _.isUndefined(scope)
       ? _.toArray(notes).map((note: DNodeProps) => {
@@ -209,28 +251,39 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
       : scope.selectedItems;
 
     scopedItems.forEach((item) => {
-      const result = re.exec(item.fname);
-      if (result) {
-        capturedEntries.push({ item, result });
+      const result = matchRE.exec(item.fname);
+      // Shouldn't include root notes
+      if (result && !DNodeUtils.isRoot(item)) {
+        capturedEntries.push(item);
       }
     });
+    return capturedEntries;
+  }
 
+  getRenameOperations(opts: {
+    capturedEntries: NoteQuickInput[];
+    matchRE: RegExp;
+    replace: string;
+    wsRoot: string;
+  }) {
+    const { capturedEntries, matchRE, replace, wsRoot } = opts;
     const operations = capturedEntries.map((entry) => {
-      const { item } = entry;
-      const vault = item.vault;
+      const vault = entry.vault;
       const vpath = vault2Path({ wsRoot, vault });
       const rootUri = Uri.file(vpath);
-      const source = item.fname;
-      const matchRE = new RegExp(`${match}`);
-      const dest = item.fname.replace(matchRE, replace);
+      const source = entry.fname;
+      const dest = entry.fname.replace(matchRE, replace);
       return {
         oldUri: VSCodeUtils.joinPath(rootUri, source + ".md"),
         newUri: VSCodeUtils.joinPath(rootUri, dest + ".md"),
         vault,
       };
     });
+    return operations;
+  }
 
-    // NOTE: async version doesn't work, not sure why
+  async hasExistingFiles(opts: { operations: RenameOperation[] }) {
+    const { operations } = opts;
     const filesThatExist: RenameOperation[] = _.filter(operations, (op) => {
       return fs.pathExistsSync(op.newUri.fsPath);
     });
@@ -239,18 +292,88 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
       window.showErrorMessage(
         "refactored files would overwrite existing files"
       );
-      return;
+      return true;
     }
-    await this.showPreview(operations);
-    const options = ["proceed", "cancel"];
-    const shouldProceed = await VSCodeUtils.showQuickPick(options, {
-      placeHolder: "proceed",
+    return false;
+  }
+
+  async runOperations(opts: {
+    operations: RenameOperation[];
+    renameCmd: RenameNoteV2aCommand;
+  }) {
+    const { operations, renameCmd } = opts;
+    const ctx = "RefactorHierarchy:runOperations";
+    const out = await _.reduce<
+      typeof operations[0],
+      Promise<RenameNoteOutputV2a>
+    >(
+      operations,
+      async (resp, op) => {
+        const acc = await resp;
+        this.L.info({
+          ctx,
+          orig: op.oldUri.fsPath,
+          replace: op.newUri.fsPath,
+        });
+        const resp2 = await renameCmd.execute({
+          files: [op],
+          silent: true,
+          closeCurrentFile: false,
+          openNewFile: false,
+          noModifyWatcher: true,
+        });
+        acc.changed = resp2.changed.concat(acc.changed);
+        return acc;
+      },
+      Promise.resolve({
+        changed: [],
+      })
+    );
+    return out;
+  }
+
+  async promptConfirmation(noConfirm?: boolean) {
+    if (noConfirm) return true;
+    const options = ["Proceed", "Cancel"];
+    const resp = await VSCodeUtils.showQuickPick(options, {
+      placeHolder: "Proceed",
       ignoreFocusOut: true,
     });
-    if (shouldProceed !== "proceed") {
-      window.showInformationMessage("cancelled");
+    return resp === "Proceed";
+  }
+
+  async execute(opts: CommandOpts): Promise<any> {
+    const ctx = "RefactorHierarchy:execute";
+    const { scope, match, replace, noConfirm } = opts;
+    this.L.info({ ctx, opts, msg: "enter" });
+    const ext = getExtension();
+    const { engine } = getDWorkspace();
+    const matchRE = new RegExp(match);
+    const capturedEntries = this.getCapturedEntries({
+      scope,
+      matchRE,
+      engine,
+    });
+
+    const operations = this.getRenameOperations({
+      capturedEntries,
+      matchRE,
+      replace,
+      wsRoot: engine.wsRoot,
+    });
+
+    if (await this.hasExistingFiles({ operations })) {
       return;
     }
+
+    await this.showPreview(operations);
+
+    const shouldProceed = await this.promptConfirmation(noConfirm);
+    if (!shouldProceed) {
+      window.showInformationMessage("Cancelled");
+      return;
+    }
+
     try {
       if (ext.fileWatcher) {
         ext.fileWatcher.pause = true;
@@ -263,32 +386,7 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
           cancellable: false,
         },
         async () => {
-          const out = await _.reduce<
-            typeof operations[0],
-            Promise<RenameNoteOutputV2a>
-          >(
-            operations,
-            async (resp, op) => {
-              const acc = await resp;
-              this.L.info({
-                ctx,
-                orig: op.oldUri.fsPath,
-                replace: op.newUri.fsPath,
-              });
-              const resp2 = await renameCmd.execute({
-                files: [op],
-                silent: true,
-                closeCurrentFile: false,
-                openNewFile: false,
-                noModifyWatcher: true,
-              });
-              acc.changed = resp2.changed.concat(acc.changed);
-              return acc;
-            },
-            Promise.resolve({
-              changed: [],
-            })
-          );
+          const out = await this.runOperations({ operations, renameCmd });
           return out;
         }
       );

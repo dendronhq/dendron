@@ -136,6 +136,12 @@ export const DENDRON_REMOTE_VAULTS: Entry[] = [
 
 // TODO: fomarlize
 export const DENDRON_MENUS = {
+  commandPalette: [
+    {
+      command: "dendron.lookupNoteAutoComplete",
+      when: "false",
+    },
+  ],
   "view/title": [
     {
       command: "dendron.backlinks.expandAll",
@@ -377,14 +383,11 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   LOOKUP_NOTE_AUTO_COMPLETE: {
     key: "dendron.lookupNoteAutoComplete",
 
-    // TODO: Hide this command from command palette
-    // This currently shows up in the Command palette, having a 'hidden' title
-    // it is harmless if someone activates by command palette, however it does
-    // add some clutter to the overall user command.
+    /** This command will NOT show up within the command palette
+     *  since its disabled within package.json in contributes.menus.commandPalette */
     title: `${CMD_PREFIX} hidden`,
     group: "navigation",
     keybindings: {
-      mac: "Tab",
       key: "Tab",
       when: `${DendronContext.PLUGIN_ACTIVE} && ${DendronContext.NOTE_LOOK_UP_ACTIVE} && !editorFocus && !view`,
     },

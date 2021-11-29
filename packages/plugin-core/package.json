@@ -195,7 +195,7 @@
       },
       {
         "command": "dendron.lookupNoteAutoComplete",
-        "title": "Dendron:: hidden",
+        "title": "Dendron: hidden",
         "desc": "Auto complete note lookup",
         "when": "dendron:pluginActive && dendron:noteLookupActive && !editorFocus && !view"
       },
@@ -559,6 +559,12 @@
       }
     ],
     "menus": {
+      "commandPalette": [
+        {
+          "command": "dendron.lookupNoteAutoComplete",
+          "when": "false"
+        }
+      ],
       "view/title": [
         {
           "command": "dendron.backlinks.expandAll",

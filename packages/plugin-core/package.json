@@ -194,6 +194,12 @@
         "when": "dendron:pluginActive"
       },
       {
+        "command": "dendron.lookupNoteAutoComplete",
+        "title": "Dendron: hidden",
+        "desc": "Auto complete note lookup",
+        "when": "dendron:pluginActive && dendron:noteLookupActive && !editorFocus && !view"
+      },
+      {
         "command": "dendron.lookupSchema",
         "title": "Dendron: Lookup Schema",
         "desc": "Initiate schema lookup",
@@ -559,6 +565,12 @@
       }
     ],
     "menus": {
+      "commandPalette": [
+        {
+          "command": "dendron.lookupNoteAutoComplete",
+          "when": "false"
+        }
+      ],
       "view/title": [
         {
           "command": "dendron.backlinks.expandAll",
@@ -783,6 +795,12 @@
         "mac": "cmd+L",
         "key": "ctrl+l",
         "when": "dendron:pluginActive"
+      },
+      {
+        "command": "dendron.lookupNoteAutoComplete",
+        "mac": "Tab",
+        "key": "Tab",
+        "when": "dendron:pluginActive && dendron:noteLookupActive && !editorFocus && !view"
       },
       {
         "command": "dendron.lookupNote",

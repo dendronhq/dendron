@@ -160,6 +160,7 @@ export type CreateQuickPickOpts = {
 
 export type PrepareQuickPickOpts = CreateQuickPickOpts & {
   provider: ILookupProviderV3;
+  onDidHide?: () => void;
 };
 
 export type ShowQuickPickOpts = {

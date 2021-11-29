@@ -167,6 +167,10 @@ export class LookupControllerV3 {
     await PickerUtilsV2.refreshPickerBehavior({ quickpick, buttons });
     quickpick.onDidTriggerButton(this.onTriggerButton);
     quickpick.onDidHide(() => {
+      if (opts.onDidHide) {
+        opts.onDidHide();
+      }
+
       Logger.debug({ ctx: "quickpick", msg: "onHide" });
       quickpick.dispose();
       HistoryService.instance().add({

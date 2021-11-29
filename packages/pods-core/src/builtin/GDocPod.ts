@@ -17,7 +17,6 @@ import {
   DEngineClient,
   Time,
 } from "@dendronhq/common-all";
-import fs from "fs-extra";
 import path from "path";
 import { vault2Path } from "@dendronhq/common-server";
 
@@ -413,23 +412,10 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
 
     /** refreshes token if token has already expired */
     if (Time.now().toSeconds() > expirationTime) {
-      const port = fs.readFileSync(path.join(wsRoot, ".dendron.port"), {
-        encoding: "utf8",
-      });
-      try {
-        const result = await axios.get(
-          `http://localhost:${port}/api/oauth/refreshToken`,
-          {
-            params: {
-              refreshToken,
-              service: "google",
-            },
-          }
-        );
-        accessToken = result.data;
-      } catch (err: any) {
-        throw new DendronError({ message: stringifyError(err) });
-      }
+      accessToken = await PodUtils.refreshGoogleAccessToken(
+        wsRoot,
+        refreshToken
+      );
     }
 
     const hierarchyDestOptions = {

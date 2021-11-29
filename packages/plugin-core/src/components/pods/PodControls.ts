@@ -1,9 +1,12 @@
 import { assertUnreachable } from "@dendronhq/common-all";
 import {
+  AirtableConnection,
+  ConfigFileUtils,
   ExportPodConfigurationV2,
   ExternalConnectionManager,
   ExternalService,
   ExternalTarget,
+  GoogleDocsConnection,
   PodExportScope,
   PodV2ConfigManager,
   PodV2Types,
@@ -12,6 +15,8 @@ import path from "path";
 import * as vscode from "vscode";
 import { QuickPick, QuickPickItem } from "vscode";
 import { VSCodeUtils } from "../../vsCodeUtils";
+import { CodeCommandInstance } from "../../commands/base";
+import { launchGoogleOAuthFlow } from "../../utils/pods";
 import { getExtension } from "../../workspace";
 
 /**
@@ -224,10 +229,23 @@ export class PodUIControls {
     }
 
     if (selectedServiceOption.label === createNewOptionString) {
-      await this.promptToCreateNewServiceConfig(ExternalService.Airtable);
-      vscode.window.showInformationMessage(
-        `First setup a new ${connectionType} connection and then re-run the pod command.`
-      );
+      switch (connectionType) {
+        case ExternalService.Airtable: {
+          await this.promptToCreateNewServiceConfig(ExternalService.Airtable);
+          vscode.window.showInformationMessage(
+            `First setup a new ${connectionType} connection and then re-run the pod command.`
+          );
+          break;
+        }
+        case ExternalService.GoogleDocs: {
+          await this.promptToCreateNewServiceConfig(ExternalService.GoogleDocs);
+          vscode.window.showInformationMessage(
+            "Google OAuth is a beta feature. Please contact us at support@dendron.so or on Discord to first gain access. Then, try again and authenticate with Google on your browser to continue."
+          );
+          break;
+        }
+        default:
+      }
       return;
     } else {
       const config = mngr.getConfigById<T>({ id: selectedServiceOption.label });
@@ -260,7 +278,7 @@ export class PodUIControls {
       return;
     }
 
-    const newFile = await mngr.createNewConfig({ serviceType, id });
+    const newFile = await this.createNewConfig({ serviceType, id, mngr });
     await VSCodeUtils.openFileInEditor(vscode.Uri.file(newFile));
   }
 

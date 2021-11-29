@@ -1,7 +1,11 @@
 import { assertUnreachable } from "@dendronhq/common-all";
 import fs from "fs-extra";
 import path from "path";
-import { AirtableConnection, ConfigFileUtils } from "../..";
+import {
+  AirtableConnection,
+  ConfigFileUtils,
+  GoogleDocsConnection,
+} from "../..";
 
 /**
  * A connection to an external service
@@ -77,10 +81,15 @@ export class ExternalConnectionManager {
         });
       }
 
-      case ExternalService.GoogleDocs:
-        //TODO: migrate oauth flow logic here.
-        throw new Error("Google Docs Service Connection Not Implemented Yet");
-
+      case ExternalService.GoogleDocs: {
+        const file = ConfigFileUtils.genConfigFileV2<GoogleDocsConnection>({
+          fPath: path.join(this.configRootPath, `svcconfig.${id}.yml`),
+          configSchema: GoogleDocsConnection.getSchema(),
+          setProperties: { connectionId: id },
+        });
+        //launchGoogleOAuthFlow(id);
+        return file;
+      }
       default:
         assertUnreachable();
     }

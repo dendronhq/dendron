@@ -35,7 +35,7 @@ export const showPodQuickPickItemsV4 = (podItem: PodItemV4[]) => {
   });
 };
 
-export const launchGoogleOAuthFlow = async () => {
+export const launchGoogleOAuthFlow = async (id?: string) => {
   const port = fs.readFileSync(
     path.join(getDWorkspace().wsRoot, ".dendron.port"),
     {
@@ -45,7 +45,7 @@ export const launchGoogleOAuthFlow = async () => {
 
   const stringifiedParams = queryString.stringify({
     client_id: GOOGLE_OAUTH_ID,
-    redirect_uri: `http://localhost:${port}/api/oauth/getToken?service=google`,
+    redirect_uri: `http://localhost:${port}/api/oauth/getToken?service=google&connectionId=${id}`,
     scope: gdocRequiredScopes.join(" "), // space seperated string
     response_type: "code",
     access_type: "offline",

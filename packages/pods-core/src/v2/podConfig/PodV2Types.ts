@@ -4,6 +4,7 @@
 export enum PodV2Types {
   AirtableExportV2 = "AirtableExportV2",
   MarkdownExportV2 = "MarkdownExportV2",
+  GoogleDocsExportV2 = "GoogleDocsExportV2",
 }
 
 /**

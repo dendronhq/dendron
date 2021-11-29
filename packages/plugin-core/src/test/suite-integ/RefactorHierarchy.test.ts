@@ -12,11 +12,7 @@ import path from "path";
 import * as vscode from "vscode";
 import { RefactorHierarchyCommandV2 } from "../../commands/RefactorHierarchyV2";
 import { expect } from "../testUtilsv2";
-import {
-  describeMultiWS,
-  runLegacyMultiWorkspaceTest,
-  setupBeforeAfter,
-} from "../testUtilsV3";
+import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 import sinon from "sinon";
 import { getEngine } from "../../workspace";
 import {
@@ -69,7 +65,7 @@ suite("RefactorHiearchy", function () {
     });
 
     describe("WHEN scope is undefined", () => {
-      test("THEN scope is all existing notes, all notes and links refactored.", async () => {
+      test("THEN scope is all existing notes, all notes and links refactored.", (done) => {
         runLegacyMultiWorkspaceTest({
           ctx,
           preSetupHook,
@@ -110,13 +106,14 @@ suite("RefactorHiearchy", function () {
             expect(noteAfterRefactor?.body).toEqual(
               "- [[prefix.one]]\n- [[prefix.two]]\n"
             );
+            done();
           },
         });
       });
     });
 
     describe("WHEN scoped to one note", () => {
-      test("THEN only refactor that note and links to it.", async () => {
+      test("THEN only refactor that note and links to it.", (done) => {
         runLegacyMultiWorkspaceTest({
           ctx,
           preSetupHook,
@@ -170,13 +167,14 @@ suite("RefactorHiearchy", function () {
               wsRoot,
             });
             expect(noteOneAfterRefactor?.body).toEqual("- [[prefix.two]]\n");
+            done();
           },
         });
       });
     });
 
     describe("WHEN given simple regex match / replace text with capture group", () => {
-      test("THEN correctly refactors fname", async () => {
+      test("THEN correctly refactors fname", (done) => {
         runLegacyMultiWorkspaceTest({
           ctx,
           preSetupHook,
@@ -209,21 +207,22 @@ suite("RefactorHiearchy", function () {
               expect(newFname.endsWith(".suffix")).toBeTruthy();
               expect(newFname.includes(oldFname)).toBeTruthy();
             });
+            done();
           },
         });
       });
     });
   });
 
-  let refFooTest: DNodeProps;
-  let refBarTest: DNodeProps;
-  let refEggTest: DNodeProps;
+  describe("GIVEN a workspace with some notes with complex hierarchy", () => {
+    let refFooTest: DNodeProps;
+    let refBarTest: DNodeProps;
+    let refEggTest: DNodeProps;
+    let preSetupHook: PreSetupHookFunction;
 
-  describeMultiWS(
-    "GIVEN a workspace with some notes with complex hierarhcy",
-    {
-      ctx,
-      preSetupHook: async ({ wsRoot, vaults }) => {
+    beforeEach(() => {
+      preSetupHook = async (opts: { wsRoot: string; vaults: DVault[] }) => {
+        const { wsRoot, vaults } = opts;
         const vault = vaults[0];
 
         refFooTest = await NoteTestUtilsV4.createNote({
@@ -246,49 +245,55 @@ suite("RefactorHiearchy", function () {
           fname: "dendron.ref.egg.test",
           body: [""].join("\n"),
         });
-      },
-    },
-    () => {
-      afterEach(() => {
-        sinon.restore();
-      });
+      };
+    });
 
-      describe("GIVEN a complex regex match (lookaround) / replace with (named) capture/non-capture group", () => {
-        test("THEN correctly refactors fname", async () => {
-          const cmd = new RefactorHierarchyCommandV2();
+    afterEach(() => {
+      sinon.restore();
+    });
 
-          const engine = getEngine();
-          const { schemas, vaults, wsRoot } = engine;
+    describe("WHEN a complex regex match (lookaround) / replace text with (named) capture/non-capture group is given", () => {
+      test("THEN correctly refactors fname", (done) => {
+        runLegacyMultiWorkspaceTest({
+          ctx,
+          preSetupHook,
+          onInit: async () => {
+            const cmd = new RefactorHierarchyCommandV2();
 
-          const capturedEntries = [refFooTest, refBarTest, refEggTest].map(
-            (ent) => {
-              return DNodeUtils.enhancePropForQuickInputV3({
-                props: ent,
-                schemas,
-                vaults,
-                wsRoot,
-              });
-            }
-          );
+            const engine = getEngine();
+            const { schemas, vaults, wsRoot } = engine;
 
-          const operations = cmd.getRenameOperations({
-            capturedEntries,
-            // capture two depth of hierarchy if parent is "ref"
-            // discard whatever comes before "ref"
-            matchRE: new RegExp("(?:.*)(?<=ref)\\.(\\w*)\\.(?<rest>.*)"),
-            replace: "pkg.$<rest>.$1.ref",
-            wsRoot,
-          });
+            const capturedEntries = [refFooTest, refBarTest, refEggTest].map(
+              (ent) => {
+                return DNodeUtils.enhancePropForQuickInputV3({
+                  props: ent,
+                  schemas,
+                  vaults,
+                  wsRoot,
+                });
+              }
+            );
 
-          operations.forEach((op) => {
-            const newFname = path.basename(op.newUri.path, ".md");
-            const oldFname = path.basename(op.oldUri.path, ".md");
-            expect(newFname.startsWith("pkg.test.")).toBeTruthy();
-            expect(newFname.endsWith(".ref")).toBeTruthy();
-            expect(oldFname.split(".")[2]).toEqual(newFname.split(".")[2]);
-          });
+            const operations = cmd.getRenameOperations({
+              capturedEntries,
+              // capture two depth of hierarchy if parent is "ref"
+              // discard whatever comes before "ref"
+              matchRE: new RegExp("(?:.*)(?<=ref)\\.(\\w*)\\.(?<rest>.*)"),
+              replace: "pkg.$<rest>.$1.ref",
+              wsRoot,
+            });
+
+            operations.forEach((op) => {
+              const newFname = path.basename(op.newUri.path, ".md");
+              const oldFname = path.basename(op.oldUri.path, ".md");
+              expect(newFname.startsWith("pkg.test.")).toBeTruthy();
+              expect(newFname.endsWith(".ref")).toBeTruthy();
+              expect(oldFname.split(".")[2]).toEqual(newFname.split(".")[2]);
+            });
+            done();
+          },
         });
       });
-    }
-  );
+    });
+  });
 });

@@ -39,7 +39,7 @@ import BacklinksTreeDataProvider, {
 } from "./features/BacklinksTreeDataProvider";
 import { FileWatcher } from "./fileWatcher";
 import { Logger } from "./logger";
-import { UserDefinedTraitV1 } from "./noteTypes/UserDefinedTraitV1";
+import { UserDefinedTraitV1 } from "./traits/UserDefinedTraitV1";
 import { EngineAPIService } from "./services/EngineAPIService";
 import {
   NoteTraitManager,
@@ -57,6 +57,7 @@ import { WindowWatcher } from "./windowWatcher";
 import { WorkspaceWatcher } from "./WorkspaceWatcher";
 import { Uri } from "vscode";
 import * as Sentry from "@sentry/node";
+import { CommandRegistrar } from "./services/CommandRegistrar";
 
 let _DendronWorkspace: DendronExtension | null;
 
@@ -381,7 +382,7 @@ export class DendronExtension {
     this.treeViews = {};
     this.webViews = {};
     this.setupViews(context);
-    this._typeRegistrar = new NoteTraitManager(context);
+    this._typeRegistrar = new NoteTraitManager(new CommandRegistrar(context));
 
     // Register any User Defined Note Types
     const userTypesPath = vscode.workspace.workspaceFile
@@ -391,7 +392,7 @@ export class DendronExtension {
         )
       : undefined;
 
-    if (userTypesPath) {
+    if (userTypesPath && fs.pathExistsSync(userTypesPath)) {
       const files = fs.readdirSync(userTypesPath);
       files.forEach((file) => {
         if (file.endsWith(".js")) {

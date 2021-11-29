@@ -43,8 +43,8 @@ export class NoteTraitManager implements NoteTraitService {
   private cmdRegistar: CommandRegistrar;
   registeredTraits: NoteTrait[] = [];
 
-  constructor(context: vscode.ExtensionContext) {
-    this.cmdRegistar = new CommandRegistrar(context);
+  constructor(registrar: CommandRegistrar) {
+    this.cmdRegistar = registrar;
   }
 
   registerTrait(type: NoteTrait): RespV2<void> {
@@ -61,7 +61,7 @@ export class NoteTraitManager implements NoteTraitService {
     }
 
     this.registeredTraits = this.registeredTraits.concat(type);
-    this.cmdRegistar.registerCommandForType(type);
+    this.cmdRegistar.registerCommandForTrait(type);
     return { error: null };
   }
 

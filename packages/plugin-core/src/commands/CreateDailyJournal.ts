@@ -1,5 +1,5 @@
 import { DENDRON_COMMANDS } from "../constants";
-import { JournalNote } from "../noteTypes/Journal";
+import { JournalNote } from "../traits/Journal";
 import { CreateNoteWithTraitCommand } from "./CreateNoteWithTraitCommand";
 
 export class CreateDailyJournalCommand extends CreateNoteWithTraitCommand {

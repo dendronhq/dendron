@@ -10,7 +10,11 @@ import { CreateNoteWithTraitCommand } from "../commands/CreateNoteWithTraitComma
 export class CommandRegistrar {
   private context: vscode.ExtensionContext;
 
-  private CUSTOM_COMMAND_PREFIX = "dendron.customCommand.";
+  private disposables: {
+    [typeId: string]: vscode.Disposable;
+  };
+
+  public CUSTOM_COMMAND_PREFIX = "dendron.customCommand.";
 
   readonly registeredCommands: {
     [typeId: string]: string;
@@ -19,11 +23,12 @@ export class CommandRegistrar {
   constructor(context: vscode.ExtensionContext) {
     this.context = context;
     this.registeredCommands = {};
+    this.disposables = {};
   }
 
-  registerCommandForType(type: NoteTrait): void {
-    const commandId = type.id;
-    const cmd = new CreateNoteWithTraitCommand(commandId, type);
+  registerCommandForTrait(trait: NoteTrait): string {
+    const commandId = trait.id;
+    const cmd = new CreateNoteWithTraitCommand(commandId, trait);
 
     const registeredCmdName = this.CUSTOM_COMMAND_PREFIX + commandId;
     this.registeredCommands[commandId] = registeredCmdName;
@@ -33,11 +38,20 @@ export class CommandRegistrar {
       this
     );
     this.context.subscriptions.push(disp);
+
+    this.disposables[commandId] = disp;
+
+    return registeredCmdName;
   }
 
-  unregisterType(type: NoteTrait): void {
-    if (type.id in this.registeredCommands) {
-      delete this.registeredCommands[type.id];
+  unregisterTrait(trait: NoteTrait): void {
+    if (trait.id in this.registeredCommands) {
+      delete this.registeredCommands[trait.id];
+    }
+
+    if (trait.id in this.disposables) {
+      this.disposables[trait.id].dispose();
+      delete this.disposables[trait.id];
     }
   }
 }

@@ -3,7 +3,7 @@ import fs from "fs-extra";
 import path from "path";
 import * as vscode from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
-import { UserDefinedTraitV1 } from "../noteTypes/UserDefinedTraitV1";
+import { UserDefinedTraitV1 } from "../traits/UserDefinedTraitV1";
 import { VSCodeUtils } from "../utils";
 import { getEngine, getExtension } from "../workspace";
 import { BasicCommand } from "./base";

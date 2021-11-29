@@ -47,7 +47,7 @@ import { PublishExportCommand } from "./PublishExportCommand";
 import { PublishPodCommand } from "./PublishPod";
 import { RandomNoteCommand } from "./RandomNote";
 import { RefactorHierarchyCommandV2 } from "./RefactorHierarchyV2";
-import { RegisterNoteTraitCommand } from "./RegisterNoteTrait";
+import { RegisterNoteTraitCommand } from "./RegisterNoteTraitCommand";
 import { RenameHeaderCommand } from "./RenameHeader";
 import { ResetConfigCommand } from "./ResetConfig";
 import { RestoreVaultCommand } from "./RestoreVault";

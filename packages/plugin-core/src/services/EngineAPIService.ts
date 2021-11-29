@@ -21,7 +21,6 @@ import {
   IntermediateDendronConfig,
   NoteChangeEntry,
   NoteProps,
-  NotePropsDict,
   QueryNotesOpts,
   RefreshNotesOpts,
   RenameNoteOpts,
@@ -48,17 +47,6 @@ export class EngineAPIService implements DEngineClient {
   set trustedWorkspace(value: boolean) {
     this._trustedWorkspace = value;
   }
-
-  public notes: NotePropsDict;
-  public wsRoot: string;
-  public schemas: SchemaModuleDict;
-  public links: DLink[];
-
-  public vaults: DVault[];
-  public configRoot: string;
-
-  public config: IntermediateDendronConfig;
-  public hooks: DHookDict;
 
   static createEngine({
     port,
@@ -94,15 +82,38 @@ export class EngineAPIService implements DEngineClient {
 
   constructor({ engineClient }: { engineClient: DEngineClient }) {
     this.internalEngine = engineClient;
+  }
 
-    this.notes = this.internalEngine.notes;
-    this.wsRoot = this.internalEngine.wsRoot;
-    this.schemas = this.internalEngine.schemas;
-    this.links = this.internalEngine.links;
-    this.vaults = this.internalEngine.vaults;
-    this.configRoot = this.internalEngine.configRoot;
-    this.config = this.internalEngine.config;
-    this.hooks = this.internalEngine.hooks;
+  public get notes() {
+    return this.internalEngine.notes;
+  }
+
+  public get wsRoot(): string {
+    return this.internalEngine.wsRoot;
+  }
+
+  public get schemas(): SchemaModuleDict {
+    return this.internalEngine.schemas;
+  }
+
+  public get links(): DLink[] {
+    return this.internalEngine.links;
+  }
+
+  public get vaults(): DVault[] {
+    return this.internalEngine.vaults;
+  }
+
+  public get configRoot(): string {
+    return this.internalEngine.configRoot;
+  }
+
+  public get config(): IntermediateDendronConfig {
+    return this.internalEngine.config;
+  }
+
+  public get hooks(): DHookDict {
+    return this.internalEngine.hooks;
   }
 
   async refreshNotes(opts: RefreshNotesOpts) {

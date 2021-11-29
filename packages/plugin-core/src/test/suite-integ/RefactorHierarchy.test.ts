@@ -1,17 +1,16 @@
 import { vault2Path } from "@dendronhq/common-server";
 import {
   AssertUtils,
-  FileTestUtils,
   NoteTestUtilsV4,
+  PreSetupHookFunction,
 } from "@dendronhq/common-test-utils";
 import fs from "fs-extra";
-import { afterEach, describe } from "mocha";
+import { afterEach, beforeEach, describe } from "mocha";
 import path from "path";
 // // You can import and use all API from the 'vscode' module
 // // as well as import your extension to test it
 import * as vscode from "vscode";
 import { RefactorHierarchyCommandV2 } from "../../commands/RefactorHierarchyV2";
-import { VSCodeUtils } from "../../utils";
 import { expect } from "../testUtilsv2";
 import {
   describeMultiWS,
@@ -20,7 +19,12 @@ import {
 } from "../testUtilsV3";
 import sinon from "sinon";
 import { getEngine } from "../../workspace";
-import { DNodeProps, DNodeUtils, NoteUtils } from "@dendronhq/common-all";
+import {
+  DNodeProps,
+  DNodeUtils,
+  DVault,
+  NoteUtils,
+} from "@dendronhq/common-all";
 import { NoteLookupProviderSuccessResp } from "../../components/lookup/LookupProviderV3";
 
 suite("RefactorHiearchy", function () {
@@ -29,15 +33,15 @@ suite("RefactorHiearchy", function () {
     beforeHook: () => {},
   });
 
-  let note: DNodeProps;
-  let noteOne: DNodeProps;
-  let noteTwo: DNodeProps;
+  describe("GIVEN a workspace with some notes with simple hierarchy", () => {
+    let note: DNodeProps;
+    let noteOne: DNodeProps;
+    let noteTwo: DNodeProps;
+    let preSetupHook: PreSetupHookFunction;
 
-  describeMultiWS(
-    "GIVEN a workspace with some notes with simple hierarhcy",
-    {
-      ctx,
-      preSetupHook: async ({ wsRoot, vaults }) => {
+    beforeEach(() => {
+      preSetupHook = async (opts: { wsRoot: string; vaults: DVault[] }) => {
+        const { wsRoot, vaults } = opts;
         const vault = vaults[0];
         note = await NoteTestUtilsV4.createNote({
           vault,
@@ -57,147 +61,159 @@ suite("RefactorHiearchy", function () {
           fname: "refactor.two",
           body: [""].join("\n"),
         });
-        await NoteTestUtilsV4.createNote({
-          vault,
-          wsRoot,
-          fname: "dendron.ref.foo.test",
-          body: [""].join("\n"),
-        });
-      },
-    },
-    () => {
-      afterEach(() => {
-        sinon.restore();
-      });
-      describe("GIVEN scope is undefined", () => {
-        test("THEN scope is all existing notes, all notes and links refactored.", async () => {
-          const cmd = new RefactorHierarchyCommandV2();
-          await cmd.execute({
-            scope: undefined,
-            match: "refactor(.*)",
-            replace: "prefix$1",
-            noConfirm: true,
-          });
+      };
+    });
 
-          const engine = getEngine();
-          const { vaults, wsRoot } = engine;
-          const vault = vaults[0];
-          const vpath = vault2Path({ vault, wsRoot });
-          const notes = fs.readdirSync(vpath).join("");
-          const exist = ["prefix.md", "prefix.one.md", "prefix.two.md"];
-          const notExist = [
-            "refactor.md",
-            "refactor.one.md",
-            "refactor.two.md",
-          ];
-          expect(
-            await AssertUtils.assertInString({
-              body: notes,
-              match: exist,
-              nomatch: notExist,
-            })
-          ).toBeTruthy();
+    afterEach(() => {
+      sinon.restore();
+    });
 
-          const noteAfterRefactor = NoteUtils.getNoteByFnameV5({
-            fname: "prefix",
-            notes: engine.notes,
-            vault,
-            wsRoot,
-          });
-          expect(noteAfterRefactor?.body).toEqual(
-            "- [[prefix.one]]\n- [[prefix.two]]\n"
-          );
-        });
-      });
+    describe("WHEN scope is undefined", () => {
+      test("THEN scope is all existing notes, all notes and links refactored.", async () => {
+        runLegacyMultiWorkspaceTest({
+          ctx,
+          preSetupHook,
+          onInit: async () => {
+            const cmd = new RefactorHierarchyCommandV2();
+            await cmd.execute({
+              scope: undefined,
+              match: "refactor(.*)",
+              replace: "prefix$1",
+              noConfirm: true,
+            });
 
-      describe("GIVEN scoped to one note", () => {
-        test("THEN only refactor that note and links to it.", async () => {
-          const cmd = new RefactorHierarchyCommandV2();
-          const scope: NoteLookupProviderSuccessResp = {
-            selectedItems: [
-              {
-                ...noteTwo,
-                label: "refactor.two",
-              },
-            ],
-            onAcceptHookResp: [],
-          };
-          await cmd.execute({
-            scope,
-            match: "refactor(.*)",
-            replace: "prefix$1",
-            noConfirm: true,
-          });
+            const engine = getEngine();
+            const { vaults, wsRoot } = engine;
+            const vault = vaults[0];
+            const vpath = vault2Path({ vault, wsRoot });
+            const notes = fs.readdirSync(vpath).join("");
+            const exist = ["prefix.md", "prefix.one.md", "prefix.two.md"];
+            const notExist = [
+              "refactor.md",
+              "refactor.one.md",
+              "refactor.two.md",
+            ];
+            expect(
+              await AssertUtils.assertInString({
+                body: notes,
+                match: exist,
+                nomatch: notExist,
+              })
+            ).toBeTruthy();
 
-          const engine = getEngine();
-          const { vaults, wsRoot } = engine;
-          const vault = vaults[0];
-          const vpath = vault2Path({ vault, wsRoot });
-          const notes = fs.readdirSync(vpath).join("");
-          const exist = ["refactor.md", "refactor.one.md", "prefix.two.md"];
-          const notExist = ["prefix.md", "prefix.one.md", "refactor.two.md"];
-          expect(
-            await AssertUtils.assertInString({
-              body: notes,
-              match: exist,
-              nomatch: notExist,
-            })
-          ).toBeTruthy();
-
-          const noteAfterRefactor = NoteUtils.getNoteByFnameV5({
-            fname: "refactor",
-            notes: engine.notes,
-            vault,
-            wsRoot,
-          });
-          expect(noteAfterRefactor?.body).toEqual(
-            "- [[refactor.one]]\n- [[prefix.two]]"
-          );
-
-          const noteOneAfterRefactor = NoteUtils.getNoteByFnameV5({
-            fname: "refactor.one",
-            notes: engine.notes,
-            vault,
-            wsRoot,
-          });
-          expect(noteOneAfterRefactor?.body).toEqual("- [[prefix.two]]");
-        });
-      });
-
-      describe("GIVEN a simple regex match / replace with capture group", () => {
-        test("THEN correctly refactors fname", async () => {
-          const cmd = new RefactorHierarchyCommandV2();
-
-          const engine = getEngine();
-          const { schemas, vaults, wsRoot } = engine;
-
-          const capturedEntries = [note, noteOne, noteTwo].map((ent) => {
-            return DNodeUtils.enhancePropForQuickInputV3({
-              props: ent,
-              schemas,
-              vaults,
+            const noteAfterRefactor = NoteUtils.getNoteByFnameV5({
+              fname: "prefix",
+              notes: engine.notes,
+              vault,
               wsRoot,
             });
-          });
-
-          const operations = cmd.getRenameOperations({
-            capturedEntries,
-            matchRE: new RegExp("(.*)"),
-            replace: "prefix.$1.suffix",
-            wsRoot,
-          });
-
-          operations.forEach((op) => {
-            const newFname = path.basename(op.newUri.path, ".md");
-            const oldFname = path.basename(op.oldUri.path, ".md");
-            expect(newFname.startsWith("prefix.")).toBeTruthy();
-            expect(newFname.endsWith(".suffix")).toBeTruthy();
-            expect(newFname.includes(oldFname)).toBeTruthy();
-          });
+            expect(noteAfterRefactor?.body).toEqual(
+              "- [[prefix.one]]\n- [[prefix.two]]\n"
+            );
+          },
         });
       });
-    }
-  );
+    });
+
+    describe("WHEN scoped to one note", () => {
+      test("THEN only refactor that note and links to it.", async () => {
+        runLegacyMultiWorkspaceTest({
+          ctx,
+          preSetupHook,
+          onInit: async () => {
+            const cmd = new RefactorHierarchyCommandV2();
+            const scope: NoteLookupProviderSuccessResp = {
+              selectedItems: [
+                {
+                  ...noteTwo,
+                  label: "refactor.two",
+                },
+              ],
+              onAcceptHookResp: [],
+            };
+            await cmd.execute({
+              scope,
+              match: "refactor(.*)",
+              replace: "prefix$1",
+              noConfirm: true,
+            });
+
+            const engine = getEngine();
+            const { vaults, wsRoot } = engine;
+            const vault = vaults[0];
+            const vpath = vault2Path({ vault, wsRoot });
+            const notes = fs.readdirSync(vpath).join("");
+            const exist = ["refactor.md", "refactor.one.md", "prefix.two.md"];
+            const notExist = ["prefix.md", "prefix.one.md", "refactor.two.md"];
+            expect(
+              await AssertUtils.assertInString({
+                body: notes,
+                match: exist,
+                nomatch: notExist,
+              })
+            ).toBeTruthy();
+
+            const noteAfterRefactor = NoteUtils.getNoteByFnameV5({
+              fname: "refactor",
+              notes: engine.notes,
+              vault,
+              wsRoot,
+            });
+            expect(noteAfterRefactor?.body).toEqual(
+              "- [[refactor.one]]\n- [[prefix.two]]\n"
+            );
+
+            const noteOneAfterRefactor = NoteUtils.getNoteByFnameV5({
+              fname: "refactor.one",
+              notes: engine.notes,
+              vault,
+              wsRoot,
+            });
+            expect(noteOneAfterRefactor?.body).toEqual("- [[prefix.two]]\n");
+          },
+        });
+      });
+    });
+
+    describe("WHEN given simple regex match / replace text with capture group", () => {
+      test("THEN correctly refactors fname", async () => {
+        runLegacyMultiWorkspaceTest({
+          ctx,
+          preSetupHook,
+          onInit: async () => {
+            const cmd = new RefactorHierarchyCommandV2();
+
+            const engine = getEngine();
+            const { schemas, vaults, wsRoot } = engine;
+
+            const capturedEntries = [note, noteOne, noteTwo].map((ent) => {
+              return DNodeUtils.enhancePropForQuickInputV3({
+                props: ent,
+                schemas,
+                vaults,
+                wsRoot,
+              });
+            });
+
+            const operations = cmd.getRenameOperations({
+              capturedEntries,
+              matchRE: new RegExp("(.*)"),
+              replace: "prefix.$1.suffix",
+              wsRoot,
+            });
+
+            operations.forEach((op) => {
+              const newFname = path.basename(op.newUri.path, ".md");
+              const oldFname = path.basename(op.oldUri.path, ".md");
+              expect(newFname.startsWith("prefix.")).toBeTruthy();
+              expect(newFname.endsWith(".suffix")).toBeTruthy();
+              expect(newFname.includes(oldFname)).toBeTruthy();
+            });
+          },
+        });
+      });
+    });
+  });
 
   let refFooTest: DNodeProps;
   let refBarTest: DNodeProps;

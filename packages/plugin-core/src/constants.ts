@@ -32,6 +32,8 @@ export const DENDRON_VIEWS = [
     name: "Tree View",
     when: `${DendronContext.PLUGIN_ACTIVE} && !${DendronContext.WEB_UI_ENABLED}`,
     where: "explorer",
+    contextualTitle: "Tree View",
+    icon: "media/icons/dendron-vscode.svg",
   },
   {
     id: DendronTreeViewKey.TREE_VIEW_V2,
@@ -39,6 +41,8 @@ export const DENDRON_VIEWS = [
     when: DendronContext.WEB_UI_ENABLED,
     where: "explorer",
     type: "webview",
+    contextualTitle: "Tree View",
+    icon: "media/icons/dendron-vscode.svg",
   },
   {
     id: DendronTreeViewKey.BACKLINKS,
@@ -176,6 +180,14 @@ export const DENDRON_MENUS = {
       when: "resourceExtname == .md && dendron:pluginActive",
       command: "dendron.copyNoteLink",
       group: "2_workspace",
+    },
+  ],
+  "editor/title": [
+    {
+      command: "dendron.showPreview",
+      // when is the same as the built-in preview, plus pluginActive
+      when: "editorLangId == markdown && !notebookEditorFocused && dendron:pluginActive",
+      group: "navigation",
     },
   ],
 };
@@ -653,6 +665,14 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docLink: "dendron.topic.pod.md",
     docPreview: `<a href="https://www.loom.com/share/d49e5f4155af485cadc9cd810b6cab28"> <img src="https://cdn.loom.com/sessions/thumbnails/d49e5f4155af485cadc9cd810b6cab28-with-play.gif"> </a>`,
   },
+  EXPORT_POD_V2: {
+    key: "dendron.exportPodv2",
+    title: `${CMD_PREFIX} Export Pod V2`,
+    group: "pods",
+    desc: "Experimental Feature",
+    docLink: "dendron.topic.pod.md",
+    docPreview: "",
+  },
   PUBLISH_POD: {
     key: "dendron.publishPod",
     title: `${CMD_PREFIX} Publish Pod`,
@@ -719,9 +739,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX} Publish Export`,
     group: "publishing",
     desc: "Export your notes for publishing.",
-    docs: [
-      "This command works by running `dendron-cli` in the background.",
-    ].join("\n"),
+    docs: [""].join("\n"),
     docLink: "",
     docPreview: ``,
   },
@@ -729,10 +747,8 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     key: "dendron.publishDev",
     title: `${CMD_PREFIX} Publish Dev`,
     group: "publishing",
-    desc: "Preview your notes on localhost using publishing v2",
-    docs: [
-      "This command works by running `dendron-cli` in the background.",
-    ].join("\n"),
+    desc: "Preview your notes on localhost using publishing",
+    docs: [""].join("\n"),
     docLink: "",
     docPreview: ``,
   },
@@ -812,6 +828,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     key: "dendron.showPreview",
     title: `${CMD_PREFIX} Show Preview`,
     group: "notes",
+    icon: `$(open-preview)`,
     keybindings: {
       windows: "windows+ctrl+p",
       mac: "cmd+ctrl+p",

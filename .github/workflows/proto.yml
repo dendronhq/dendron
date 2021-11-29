@@ -8,8 +8,8 @@ on: workflow_dispatch
 
 jobs:
   build:
-    environment: plugin-production
-    timeout-minutes: 10
+    environment: plugin-development
+    timeout-minutes: 30
     runs-on: ubuntu-latest
 
     steps:
@@ -30,14 +30,42 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version:  14.x
+          node-version: 14.x
 
-      - name: Init workspace
-        run: yarn -W
+      - name: Yarn Setup
+        run: yarn setup
 
-      # - name: Yarn Setup
-      #   run: yarn setup
+      - name: Set Up Yarn Local Registry
+        run: yarn config set registry http://localhost:4873
 
-      - name: Login to NPM
+      - name: Set Up NPM Local Registry
         run: |
-          yarn setup:npmlogin:remote
+          npm set registry http://localhost:4873/
+
+      - name: Set Environment Variables
+        run: |
+          echo "DENDRON_RELEASE_VERSION=`cat meta.json | jq -r '.["@dendronhq/plugin-core"]' | awk -F. -v OFS=. 'NF==1{print ++$NF}; NF>1{$NF=sprintf("%0*d", length($NF), ($NF+1)); print}'`" >> $GITHUB_ENV
+          echo "GOOGLE_OAUTH_CLIENT_SECRET=${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}" >> $GITHUB_ENV
+          echo "GOOGLE_OAUTH_CLIENT_ID=${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}" >> $GITHUB_ENV
+          echo "SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}" >> $GITHUB_ENV
+          echo "NODE_OPTIONS=--max_old_space_size=4096" >> $GITHUB_ENV
+
+      - name: Next
+        run: |
+          echo "VSIX_PATH=./packages/plugin-core/dendron-${{ env.DENDRON_RELEASE_VERSION }}.vsix" >> $GITHUB_ENV
+
+      - name: Build the VSIX
+        run: |
+          echo ${{ env.DENDRON_RELEASE_VERSION }}
+          echo ${{ env.VSIX_PATH }}
+          yarn build:patch:local:ci
+
+      - name: Check Directory
+        run: |
+          ls -a ./packages/plugin-core
+
+      - name: Upload VSIX Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: vsix
+          path: ${{ env.VSIX_PATH }}

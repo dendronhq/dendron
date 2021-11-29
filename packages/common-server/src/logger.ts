@@ -1,6 +1,6 @@
 // import pino from "pino";
 
-import { env } from "@dendronhq/common-all";
+import { Disposable, env } from "@dendronhq/common-all";
 import _ from "lodash";
 import pino from "pino";
 
@@ -33,6 +33,7 @@ export class Logger {
   };
 }
 
+/** @deprecated Avoid using this function as it may leak file descriptors. Please see createDisposableLogger instead. */
 function createLogger(
   name?: string,
   dest?: string,
@@ -50,6 +51,28 @@ function createLogger(
   }
 }
 
+/** Create a logger. The logger **must** be disposed after being used if the function returned a dispose callback, otherwise it will leak file descriptors and may lead to crashes. */
+function createDisposableLogger(
+  name?: string,
+  dest?: string,
+  // TODO: not using pretty option
+  opts?: { lvl?: LogLvl }
+): { logger: pino.Logger } & Disposable {
+  const level = opts?.lvl || env("LOG_LEVEL", { shouldThrow: false }) || "info";
+  const nameClean = name || env("LOG_NAME", { shouldThrow: false }) || "logger";
+  const logDst = dest || env("LOG_DST", { shouldThrow: false }) || "stdout";
+  const pinoOpts = { name: nameClean, level };
+  if (logDst === "stdout") {
+    return { logger: pino(pinoOpts), dispose: () => {} };
+  } else {
+    const destination = pino.destination(logDst);
+    return {
+      logger: pino(destination).child(pinoOpts),
+      dispose: () => destination.destroy(),
+    };
+  }
+}
+
 export type DLogger = {
   name?: string;
   level: any;
@@ -59,7 +82,7 @@ export type DLogger = {
   //fatal: (msg: any) => void;
 };
 
-export { createLogger, pino };
+export { createLogger, createDisposableLogger, pino };
 
 export function logAndThrow(logger: Logger, msg: any): never {
   logger.error(msg);

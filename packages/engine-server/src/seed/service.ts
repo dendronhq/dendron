@@ -141,6 +141,7 @@ export class SeedService {
       onUpdatingWorkspace,
       onUpdatedWorkspace,
     });
+    ws.dispose();
 
     return { seed };
   }
@@ -185,6 +186,7 @@ export class SeedService {
           updateConfig: false,
         });
         await ws.setConfig(config);
+        ws.dispose();
         break;
       }
       case SeedInitMode.CONVERT_WORKSPACE: {
@@ -194,8 +196,8 @@ export class SeedService {
             error,
           };
         }
-        const ws = new WorkspaceService({ wsRoot });
-        const vaults = ConfigUtils.getVaults(ws.config);
+        const config = WorkspaceService.getOrCreateConfig(wsRoot);
+        const vaults = ConfigUtils.getVaults(config);
         const vaultPath = VaultUtils.getRelPath(vaults[0]);
         seed.root = vaultPath;
         writeYAML(cpath, seed);
@@ -226,8 +228,7 @@ export class SeedService {
     onUpdatingWorkspace?: () => Promise<void>;
     onUpdatedWorkspace?: () => Promise<void>;
   }): Promise<SeedSvcResp> {
-    const ws = new WorkspaceService({ wsRoot: this.wsRoot });
-    const config = ws.config;
+    const config = WorkspaceService.getOrCreateConfig(this.wsRoot);
 
     const seeds = ConfigUtils.getWorkspace(config).seeds;
     if (!_.has(seeds, id)) {
@@ -287,18 +288,17 @@ export class SeedService {
       onUpdatingWorkspace,
       onUpdatedWorkspace,
     });
+    ws.dispose();
   }
 
   isSeedInWorkspace(id: string): boolean {
-    const ws = new WorkspaceService({ wsRoot: this.wsRoot });
-    const config = ws.config;
+    const config = WorkspaceService.getOrCreateConfig(this.wsRoot);
     const vaults = ConfigUtils.getVaults(config);
     return undefined !== vaults.find((vault) => vault.seed === id);
   }
 
   getSeedsInWorkspace(): string[] {
-    const ws = new WorkspaceService({ wsRoot: this.wsRoot });
-    const config = ws.config;
+    const config = WorkspaceService.getOrCreateConfig(this.wsRoot);
     const vaults = ConfigUtils.getVaults(config);
     return vaults
       .filter((vault) => vault.seed !== undefined)

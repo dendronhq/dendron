@@ -1,0 +1,8 @@
+version: 1
+imports: []
+schemas:
+  - id: data
+    title: data
+    parent: root
+    children:
+      - pattern: stub

@@ -1,14 +1,20 @@
 import {
   ConfigUtils,
+  DNodeProps,
+  DNodeUtils,
+  DVault,
   getSlugger,
   NoteProps,
   NoteQuickInput,
   NoteUtils,
   TaskNoteUtils,
+  VaultUtils,
 } from "@dendronhq/common-all";
+import { LinkUtils, ParseLinkV2Resp } from "@dendronhq/engine-server";
 import _ from "lodash";
 import * as vscode from "vscode";
 import { QuickInputButton, ThemeIcon } from "vscode";
+import { EngineAPIService } from "../../services/EngineAPIService";
 import { NoteSyncService } from "../../services/NoteSyncService";
 import { clipboard, DendronClientUtilsV2, VSCodeUtils } from "../../utils";
 import { getDWorkspace, getEngine, getExtension } from "../../workspace";
@@ -75,7 +81,10 @@ function isFilterButton(button: DendronBtn) {
 }
 
 function isSelectionBtn(button: DendronBtn) {
-  return _.includes(["selection2link", "selectionExtract"], button.type);
+  return _.includes(
+    ["selection2link", "selectionExtract", "selection2Items"],
+    button.type
+  );
 }
 
 function isNoteBtn(button: DendronBtn) {
@@ -307,6 +316,94 @@ export class SelectionExtractBtn extends DendronBtn {
 
   async onDisable({ quickPick }: ButtonHandleOpts) {
     quickPick.selectionProcessFunc = undefined;
+    return;
+  }
+}
+
+export class Selection2ItemsBtn extends DendronBtn {
+  static create(pressed?: boolean) {
+    return new Selection2ItemsBtn({
+      title: "Selection to Items",
+      description:
+        "Wikilinks in highlighted text will be used to create selectable items in lookup",
+      iconOff: "checklist",
+      iconOn: "menu-selection",
+      type: "selection2Items",
+      pressed,
+    });
+  }
+
+  getNotesFromWikiLinks(opts: {
+    wikiLinks: ParseLinkV2Resp[];
+    engine: EngineAPIService;
+  }) {
+    const { wikiLinks, engine } = opts;
+    const { vaults, notes, wsRoot } = engine;
+
+    let out: DNodeProps[] = [];
+    wikiLinks.forEach((wikiLink) => {
+      const fname = wikiLink.sameFile
+        ? (PickerUtilsV2.getFnameForOpenEditor() as string)
+        : wikiLink.value;
+
+      const vault = wikiLink.vaultName
+        ? (VaultUtils.getVaultByName({
+            vname: wikiLink.vaultName,
+            vaults,
+          }) as DVault)
+        : undefined;
+
+      if (vault) {
+        const note = NoteUtils.getNoteByFnameV5({
+          fname,
+          notes,
+          vault,
+          wsRoot,
+        });
+        if (note) {
+          out.push(note);
+        }
+      } else {
+        const notesWithSameFname = NoteUtils.getNotesByFname({
+          fname,
+          notes,
+        });
+        out = out.concat(notesWithSameFname);
+      }
+    });
+    return out;
+  }
+
+  async onEnable({ quickPick }: ButtonHandleOpts) {
+    const engine = getEngine();
+    const { vaults, schemas, wsRoot } = engine;
+
+    // get selection
+    const { text } = VSCodeUtils.getSelection();
+    const wikiLinks = LinkUtils.extractWikiLinks(text as string);
+    // make a list of picker items from wikilinks
+    const notesFromWikiLinks = this.getNotesFromWikiLinks({
+      wikiLinks,
+      engine,
+    });
+    const pickerItemsFromSelection = notesFromWikiLinks.map(
+      (note: DNodeProps) =>
+        DNodeUtils.enhancePropForQuickInputV3({
+          props: note,
+          schemas,
+          vaults,
+          wsRoot,
+        })
+    );
+    quickPick.prevValue = quickPick.value;
+    quickPick.value = "";
+    quickPick.itemsFromSelection = pickerItemsFromSelection;
+    return;
+  }
+
+  async onDisable({ quickPick }: ButtonHandleOpts) {
+    quickPick.value = NotePickerUtils.getPickerValue(quickPick);
+    quickPick.itemsFromSelection = undefined;
     return;
   }
 }
@@ -604,6 +701,7 @@ export function createAllButtons(
     DirectChildFilterBtn.create(),
     SelectionExtractBtn.create(),
     Selection2LinkBtn.create(),
+    Selection2ItemsBtn.create(),
     JournalBtn.create(),
     ScratchBtn.create(),
     HorizontalSplitBtn.create(),

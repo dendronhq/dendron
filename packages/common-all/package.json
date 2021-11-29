@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/common-all",
-  "version": "0.70.0",
+  "version": "0.70.1",
   "description": "common-all",
   "license": "GPLv3",
   "repository": {
@@ -60,7 +60,7 @@
     "nanoid-dictionary": "^4.3.0",
     "qs": "^6.10.1",
     "semver": "^7.3.2",
-    "title": "^3.4.2",
+    "@dendronhq/title": "^3.4.3",
     "vscode-uri": "^2.1.2",
     "yamljs": "^0.3.0"
   },

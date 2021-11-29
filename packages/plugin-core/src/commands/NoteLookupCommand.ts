@@ -22,6 +22,7 @@ import {
   JournalBtn,
   MultiSelectBtn,
   ScratchBtn,
+  Selection2ItemsBtn,
   Selection2LinkBtn,
   SelectionExtractBtn,
   TaskBtn,
@@ -229,6 +230,9 @@ export class NoteLookupCommand extends BaseCommand<
         ),
         Selection2LinkBtn.create(
           copts.selectionType === LookupSelectionTypeEnum.selection2link
+        ),
+        Selection2ItemsBtn.create(
+          copts.selectionType === LookupSelectionTypeEnum.selection2Items
         ),
         JournalBtn.create(copts.noteType === LookupNoteTypeEnum.journal),
         ScratchBtn.create(copts.noteType === LookupNoteTypeEnum.scratch),

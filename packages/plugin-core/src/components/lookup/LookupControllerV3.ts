@@ -281,7 +281,10 @@ export class LookupControllerV3 {
       buttons: btnsToRefresh,
     });
 
-    if (btnTriggered.type === "directChildOnly") {
+    if (
+      btnTriggered.type === "directChildOnly" ||
+      btnTriggered.type === "selection2Items"
+    ) {
       await this.provider.onUpdatePickerItems({
         picker: quickpick,
         token: this.cancelToken.token,

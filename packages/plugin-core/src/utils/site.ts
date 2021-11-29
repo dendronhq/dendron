@@ -4,10 +4,6 @@ import {
   DendronSiteConfig,
   getStage,
 } from "@dendronhq/common-all";
-import {
-  BuildSiteV2CLICommand,
-  BuildSiteV2CLICommandCliOpts,
-} from "@dendronhq/dendron-cli";
 import { execa } from "@dendronhq/engine-server";
 import {
   NextjsExportConfig,
@@ -22,7 +18,6 @@ import _ from "lodash";
 import path from "path";
 import { ProgressLocation, window } from "vscode";
 import { ExportPodCommand } from "../commands/ExportPod";
-import { Logger } from "../logger";
 import { VSCodeUtils } from "../utils";
 import { getDWorkspace } from "../workspace";
 
@@ -50,30 +45,6 @@ const pkgUpgrade = async (pkg: string, version: string) => {
   const cmdInstall: string[] = `install --save ${pkg}@${version}`.split(" ");
   await execa("npm", cmdInstall, {
     cwd: getDWorkspace().wsRoot,
-  });
-};
-
-export const buildSite = async (opts: BuildSiteV2CLICommandCliOpts) => {
-  const eleventyPath = path.join(
-    getDWorkspace().wsRoot,
-    "node_modules",
-    "@dendronhq",
-    "dendron-11ty-legacy"
-  );
-  let importEleventy: any;
-  try {
-    importEleventy = require(`./webpack-require-hack.js`); // eslint-disable-line global-require
-  } catch (error) {
-    importEleventy = require;
-  }
-  const eleventy = importEleventy(eleventyPath);
-  Logger.info({ ctx: "buildSite", eleventyPath });
-  const cmd = new BuildSiteV2CLICommand();
-  const cOpts = await cmd.enrichArgs(opts);
-  await cmd.execute({
-    ...cOpts.data,
-    eleventy,
-    cwd: eleventyPath,
   });
 };
 

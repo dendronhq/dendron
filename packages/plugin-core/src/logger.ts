@@ -38,9 +38,7 @@ const openFileInEditor = async (
       return;
     }
 
-    textDocument = await vscode.workspace.openTextDocument(
-      fileItemOrURI.path
-    );
+    textDocument = await vscode.workspace.openTextDocument(fileItemOrURI.path);
   } else {
     textDocument = await vscode.workspace.openTextDocument(fileItemOrURI);
   }
@@ -57,7 +55,7 @@ const openFileInEditor = async (
   }
 
   return editor;
-}
+};
 
 export class Logger {
   static output: OutputChannel | undefined;

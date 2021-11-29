@@ -8,7 +8,13 @@ import {
 import { DendronASTDest, MDUtilsV5 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import visit from "unist-util-visit";
-import { ExtensionContext, Selection, TextEditor, window } from "vscode";
+import {
+  ExtensionContext,
+  Selection,
+  TextEditor,
+  TextEditorVisibleRangesChangeEvent,
+  window,
+} from "vscode";
 import { ShowPreviewCommand } from "./commands/ShowPreview";
 import { updateDecorations } from "./features/windowDecorations";
 import { Logger } from "./logger";
@@ -26,19 +32,32 @@ export class WindowWatcher {
   ) => void)[] = [];
 
   activate(context: ExtensionContext) {
-    window.onDidChangeVisibleTextEditors(
-      sentryReportingCallback((editors: TextEditor[]) => {
-        const ctx = "WindowWatcher:onDidChangeVisibleTextEditors";
-        const editorPaths = editors.map((editor) => {
-          return editor.document.uri.fsPath;
-        });
-        Logger.info({ ctx, editorPaths });
-      })
+    const extension = getExtension();
+
+    extension.addDisposable(
+      window.onDidChangeVisibleTextEditors(
+        sentryReportingCallback((editors: TextEditor[]) => {
+          const ctx = "WindowWatcher:onDidChangeVisibleTextEditors";
+          const editorPaths = editors.map((editor) => {
+            return editor.document.uri.fsPath;
+          });
+          Logger.info({ ctx, editorPaths });
+        })
+      )
     );
-    window.onDidChangeActiveTextEditor(
-      this.onDidChangeActiveTextEditor,
-      this,
-      context.subscriptions
+    extension.addDisposable(
+      window.onDidChangeActiveTextEditor(
+        this.onDidChangeActiveTextEditor,
+        this,
+        context.subscriptions
+      )
+    );
+    extension.addDisposable(
+      window.onDidChangeTextEditorVisibleRanges(
+        this.onDidChangeTextEditorVisibleRanges,
+        this,
+        context.subscriptions
+      )
     );
   }
 
@@ -57,12 +76,11 @@ export class WindowWatcher {
           window.activeTextEditor?.document.uri.fsPath
       ) {
         const uri = editor.document.uri;
-        Logger.info({ ctx, editor: uri.fsPath });
         if (!getExtension().workspaceService?.isPathInWorkspace(uri.fsPath)) {
-          Logger.info({ ctx, uri: uri.fsPath, msg: "not in workspace" });
           return;
         }
-        this.triggerUpdateDecorations();
+        Logger.info({ ctx, editor: uri.fsPath });
+        this.triggerUpdateDecorations(editor);
         this.triggerNoteGraphViewUpdate();
         this.triggerSchemaGraphViewUpdate();
         this.triggerNotePreviewUpdate(editor);
@@ -84,17 +102,38 @@ export class WindowWatcher {
     }
   );
 
-  /**
-   * Add text decorator to frontmatter
-   * @returns
-   */
-  async triggerUpdateDecorations() {
-    const activeEditor = window.activeTextEditor;
-    if (!activeEditor) {
-      return;
+  private onDidChangeTextEditorVisibleRanges = sentryReportingCallback(
+    (e: TextEditorVisibleRangesChangeEvent | undefined) => {
+      const editor = e?.textEditor;
+      const ctx = "WindowWatcher:onDidChangeTextEditorVisibleRanges";
+      if (!editor) {
+        Logger.info({ ctx, editor: "undefined" });
+        return;
+      }
+      const uri = editor.document.uri;
+      if (!getExtension().workspaceService?.isPathInWorkspace(uri.fsPath)) {
+        return;
+      }
+      Logger.info({ ctx, editor: uri.fsPath });
+      // Decorations only render the visible portions of the screen, so they
+      // need to be re-rendered when the user scrolls around
+      this.triggerUpdateDecorations(editor);
     }
+  );
 
-    updateDecorations(activeEditor);
+  private debouncedTriggerUpdateDecorationFns = _.memoize(
+    (_editor: TextEditor) => _.debounce(updateDecorations, 100),
+    (editor: TextEditor) => editor.document.uri.fsPath
+  );
+
+  /**
+   * Decorate wikilinks, user tags etc. as well as warning about some issues like missing frontmatter
+   */
+  async triggerUpdateDecorations(editor: TextEditor) {
+    if (!editor) return;
+    // This may be the active editor, but could be another editor that's open side by side without being selected.
+    // Also, debouncing this based on the editor URI so that decoration updates in different editors don't affect each other but updates don't trigger too often for the same editor
+    this.debouncedTriggerUpdateDecorationFns(editor)(editor);
     return;
   }
 

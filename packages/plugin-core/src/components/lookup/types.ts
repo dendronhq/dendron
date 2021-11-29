@@ -102,6 +102,10 @@ export type DendronQuickPickerV2 = DendronQuickPickItemV2 & {
    */
   selectionProcessFunc?: SelectionProcessFunc;
   /**
+   *
+   */
+  itemsFromSelection?: DNodePropsQuickInputV2[];
+  /**
    * Method to copy note link
    */
   copyNoteLinkFunc?: CopyNoteLinkFunc;
@@ -132,11 +136,13 @@ export enum LookupEffectTypeEnum {
 export enum LookupSelectionTypeEnum {
   "selection2link" = "selection2link",
   "selectionExtract" = "selectionExtract",
+  "selection2Items" = "selection2Items",
   "none" = "none",
 }
 export type LookupSelectionType =
   | "selection2link"
   | "selectionExtract"
+  | "selection2Items"
   | "none";
 
 export enum LookupSplitTypeEnum {

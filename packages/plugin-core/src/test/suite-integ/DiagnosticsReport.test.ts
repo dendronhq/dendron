@@ -3,15 +3,13 @@ import { AssertUtils } from "@dendronhq/common-test-utils";
 import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
 import path from "path";
-import * as vscode from "vscode";
 import { DiagnosticsReportCommand } from "../../commands/DiagnosticsReport";
 import { VSCodeUtils } from "../../utils";
 import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
 suite("DiagnosticsReport", function () {
-  let ctx: vscode.ExtensionContext;
-  ctx = setupBeforeAfter(this);
+  const ctx = setupBeforeAfter(this);
 
   test("basic", (done) => {
     runLegacyMultiWorkspaceTest({
@@ -19,12 +17,12 @@ suite("DiagnosticsReport", function () {
       preSetupHook: async ({ wsRoot, vaults }) => {
         ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
       },
-      onInit: async ({}) => {
-        const log_dst = path.join(
+      onInit: async () => {
+        const logDst = path.join(
           path.dirname(env("LOG_DST")),
           "dendron.server.log"
         );
-        fs.writeFileSync(log_dst, "foobar", { encoding: "utf8" });
+        fs.writeFileSync(logDst, "foobar", { encoding: "utf8" });
         const cmd = new DiagnosticsReportCommand();
         await cmd.execute();
 

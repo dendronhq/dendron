@@ -4,7 +4,7 @@
   "displayName": "dendron",
   "description": "Dendron is a hierarchal note taking tool that grows as you do. ",
   "publisher": "dendron",
-  "version": "0.70.0",
+  "version": "0.70.1",
   "engines": {
     "vscode": "^1.54.0"
   },
@@ -57,17 +57,17 @@
         {
           "id": "dendron.treeView",
           "name": "Tree View",
+          "when": "dendron:pluginActive && !dendron:webUIEnabled",
           "contextualTitle": "Tree View",
-          "icon": "media/icons/dendron-vscode.svg",
-          "when": "dendron:pluginActive && !dendron:webUIEnabled"
+          "icon": "media/icons/dendron-vscode.svg"
         },
         {
           "id": "dendron.tree-view",
           "name": "Tree View V2",
           "when": "dendron:webUIEnabled",
+          "type": "webview",
           "contextualTitle": "Tree View",
-          "icon": "media/icons/dendron-vscode.svg",
-          "type": "webview"
+          "icon": "media/icons/dendron-vscode.svg"
         },
         {
           "id": "dendron.backlinks",
@@ -338,6 +338,13 @@
         "docPreview": "<a href=\"https://www.loom.com/share/d49e5f4155af485cadc9cd810b6cab28\"> <img src=\"https://cdn.loom.com/sessions/thumbnails/d49e5f4155af485cadc9cd810b6cab28-with-play.gif\"> </a>"
       },
       {
+        "command": "dendron.exportPodv2",
+        "title": "Dendron: Export Pod V2",
+        "desc": "Experimental Feature",
+        "docLink": "dendron.topic.pod.md",
+        "docPreview": ""
+      },
+      {
         "command": "dendron.publishPod",
         "title": "Dendron: Publish Pod",
         "desc": "Publish your note to a different format/location",
@@ -383,7 +390,7 @@
       {
         "command": "dendron.publishExport",
         "title": "Dendron: Publish Export",
-        "desc": "Export your notes for NextJS publishing",
+        "desc": "Export your notes for publishing.",
         "docs": "This command works by running `dendron-cli` in the background.",
         "docLink": "",
         "docPreview": ""
@@ -391,7 +398,7 @@
       {
         "command": "dendron.publishDev",
         "title": "Dendron: Publish Dev",
-        "desc": "Preview your notes on localhost using NextJS publishing",
+        "desc": "Preview your notes on localhost using publishing",
         "docs": "This command works by running `dendron-cli` in the background.",
         "docLink": "",
         "docPreview": ""
@@ -450,16 +457,15 @@
         "title": "Dendron: Show Preview (legacy)",
         "desc": "Show Markdown Preview (legacy)",
         "docLink": "dendron.topic.commands.md",
-        "docPreview": "",
-        "enablement": "dendron:pluginActive && dendron:hasLegacyPreview && resourceExtname == .md"
+        "docPreview": ""
       },
       {
         "command": "dendron.showPreview",
         "title": "Dendron: Show Preview",
+        "icon": "$(open-preview)",
         "desc": "Show Markdown Preview",
         "docLink": "dendron.topic.commands.md",
-        "docPreview": "",
-        "enablement": "dendron:pluginActive && resourceExtname == .md"
+        "docPreview": ""
       },
       {
         "command": "dendron.pasteFile",
@@ -599,6 +605,13 @@
           "when": "resourceExtname == .md && dendron:pluginActive",
           "command": "dendron.copyNoteLink",
           "group": "2_workspace"
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "dendron.showPreview",
+          "when": "editorLangId == markdown && !notebookEditorFocused && dendron:pluginActive",
+          "group": "navigation"
         }
       ]
     },
@@ -845,14 +858,12 @@
       {
         "command": "dendron.showLegacyPreview",
         "windows": "windows+ctrl+p",
-        "mac": "cmd+ctrl+p",
-        "when": "dendron:pluginActive && dendron:hasLegacyPreview && resourceExtname == .md"
+        "mac": "cmd+ctrl+p"
       },
       {
         "command": "dendron.showPreview",
         "windows": "windows+ctrl+p",
-        "mac": "cmd+ctrl+p",
-        "when": "dendron:pluginActive && resourceExtname == .md"
+        "mac": "cmd+ctrl+p"
       }
     ],
     "markdown.previewStyles": [
@@ -880,14 +891,16 @@
     "format": "echo nop",
     "vscode:uninstall": "node ./out/src/scripts/uninstallHook.js",
     "deploy:vscode": "vsce publish --yarn",
+    "deploy:vscode:vsix": "vsce publish --packagePath",
     "deploy:ovsx": "ovsx publish --yarn",
+    "deploy:ovsx:vsix": "ovsx publish --packagePath",
     "clean": "yarn rimraf out dist node_modules && yarn clean:assets",
     "clean:assets": "yarn rimraf assets/{static}",
     "rimraf": "npx rimraf"
   },
   "devDependencies": {
-    "@dendronhq/common-test-utils": "^0.70.0",
-    "@dendronhq/engine-test-utils": "^0.70.0",
+    "@dendronhq/common-test-utils": "^0.70.1",
+    "@dendronhq/engine-test-utils": "^0.70.1",
     "@sentry/webpack-plugin": "^1.17.1",
     "@types/execa": "^2.0.0",
     "@types/fs-extra": "^9.0.1",
@@ -922,12 +935,11 @@
     "webpack-merge": "^5.8.0"
   },
   "dependencies": {
-    "@dendronhq/api-server": "^0.70.0",
-    "@dendronhq/common-all": "^0.70.0",
-    "@dendronhq/common-server": "^0.70.0",
-    "@dendronhq/dendron-cli": "^0.70.0",
-    "@dendronhq/engine-server": "^0.70.0",
-    "@dendronhq/pods-core": "^0.70.0",
+    "@dendronhq/api-server": "^0.70.1",
+    "@dendronhq/common-all": "^0.70.1",
+    "@dendronhq/common-server": "^0.70.1",
+    "@dendronhq/engine-server": "^0.70.1",
+    "@dendronhq/pods-core": "^0.70.1",
     "@sentry/integrations": "^6.13.1",
     "@sentry/node": "^6.13.1",
     "@types/vscode": "1.58",

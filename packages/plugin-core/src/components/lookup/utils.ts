@@ -889,6 +889,7 @@ function sortForQueryEndingWithDot(
   // l1.l2.with-data.and-child    (data. has partial match 3rd level)
   // level1.level2.data.integer.has-grandchild
   // l1.l2.with-data.and-child.has-grandchild
+  // data.stub (Stub notes come at the end).
   // ```
 
   const itemsWithMetadata = itemsToFilter
@@ -919,8 +920,10 @@ function sortForQueryEndingWithDot(
       const dotsAfterMatch = countDots(
         item.item.fname.substring(item.matchIndex + lowercaseQuery.length)
       );
+      const isStub = item.item.stub;
       const zeroGrandchildren = dotsAfterMatch === 0;
       return {
+        isStub,
         dotsBeforeMatch,
         dotsAfterMatch,
         zeroGrandchildren,
@@ -930,6 +933,7 @@ function sortForQueryEndingWithDot(
     });
 
   const sortOrder: { fieldName: string; order: "asc" | "desc" }[] = [
+    { fieldName: "isStub", order: "desc" },
     { fieldName: "zeroGrandchildren", order: "desc" },
     { fieldName: "isCleanMatch", order: "desc" },
     { fieldName: "dotsAfterMatch", order: "asc" },

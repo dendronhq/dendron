@@ -33,6 +33,7 @@ function launchv2(
   configureLogger({ logPath: LOG_DST });
 
   return new Promise((resolve) => {
+    // eslint-disable-next-line global-require
     const appModule = require("./Server").appModule;
     const app = appModule({
       logPath: LOG_DST,

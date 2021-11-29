@@ -18,10 +18,11 @@ import {
   WorkspaceSettings,
   ConfigUtils,
   CURRENT_CONFIG_VERSION,
+  Disposable,
 } from "@dendronhq/common-all";
 import {
   assignJSONWithComment,
-  createLogger,
+  createDisposableLogger,
   DLogger,
   GitUtils,
   note2File,
@@ -45,7 +46,7 @@ import {
 import { SeedService, SeedUtils } from "../seed";
 import { Git } from "../topics/git";
 import {
-  getPortFilePath,
+  EngineUtils,
   getWSMetaFilePath,
   removeCache,
   writeWSMetaFile,
@@ -114,8 +115,10 @@ type AddRemoveCommonOpts = {
   onUpdatedWorkspace?: () => Promise<void>;
 };
 
-export class WorkspaceService {
+/** You **must** dispose workspace services you create, otherwise you risk leaking file descriptors which may lead to crashes. */
+export class WorkspaceService implements Disposable {
   public logger: DLogger;
+  private loggerDispose: () => any;
   protected _seedService: SeedService;
 
   static isNewVersionGreater({
@@ -134,10 +137,17 @@ export class WorkspaceService {
 
   public wsRoot: string;
 
+  /** Reminder: you **must** dispose workspace services you create, otherwise you risk leaking file descriptors which may lead to crashes. */
   constructor({ wsRoot, seedService }: WorkspaceServiceOpts) {
     this.wsRoot = wsRoot;
-    this.logger = createLogger();
+    const { logger, dispose } = createDisposableLogger();
+    this.logger = logger;
+    this.loggerDispose = dispose;
     this._seedService = seedService || new SeedService({ wsRoot });
+  }
+
+  dispose() {
+    this.loggerDispose();
   }
 
   get user(): DUser {
@@ -149,9 +159,13 @@ export class WorkspaceService {
     }
   }
 
+  static getOrCreateConfig(wsRoot: string) {
+    return DConfig.getOrCreate(wsRoot);
+  }
+
   get config(): IntermediateDendronConfig {
     // `createConfig` function relies on this creating a config. If revising the code, make sure to update that function as well.
-    return DConfig.getOrCreate(this.wsRoot);
+    return WorkspaceService.getOrCreateConfig(this.wsRoot);
   }
 
   get dendronRoot(): string {
@@ -174,11 +188,16 @@ export class WorkspaceService {
     );
   }
 
-  getWorkspaceConfig() {
-    const wsConfig = readJSONWithCommentsSync(
-      path.join(this.wsRoot, CONSTANTS.DENDRON_WS_NAME)
-    );
-    return wsConfig;
+  getWorkspaceConfig(): WorkspaceSettings | undefined {
+    try {
+      const wsConfig = readJSONWithCommentsSync(
+        path.join(this.wsRoot, CONSTANTS.DENDRON_WS_NAME)
+      );
+      return wsConfig;
+    } catch (err) {
+      this.logger.error(err);
+      return undefined;
+    }
   }
 
   /**
@@ -686,6 +705,7 @@ export class WorkspaceService {
         return ws.cloneVaultWithAccessToken({ vault });
       })
     );
+    ws.dispose();
     return;
   }
 
@@ -769,7 +789,7 @@ export class WorkspaceService {
 
   async getVaultRepo(vault: DVault) {
     const vpath = vault2Path({ vault, wsRoot: this.wsRoot });
-    return await GitUtils.getGitRoot(vpath);
+    return GitUtils.getGitRoot(vpath);
   }
 
   async getAllReposVaults(): Promise<Map<string, DVault[]>> {
@@ -1101,7 +1121,7 @@ export class WorkspaceService {
   writePort(port: number) {
     const wsRoot = this.wsRoot;
     // dendron-cli can overwrite port file. anything that needs the port should connect to `portFilePathExtension`
-    const portFilePath = getPortFilePath({ wsRoot });
+    const portFilePath = EngineUtils.getPortFilePathForWorkspace({ wsRoot });
     fs.writeFileSync(portFilePath, _.toString(port), { encoding: "utf8" });
   }
 

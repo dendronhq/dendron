@@ -221,11 +221,7 @@ export function isBrokenWikilink(): boolean {
       link = linkvalue;
       if (!link) return false;
       fname = link.type === DendronASTTypes.WIKI_LINK ? link.value : link.fname;
-      /**
-       * doExpensiveDecorations is set to true here because even if the note is too big, this function is only
-       * called if the user selected a wikilink.
-       */
-      type = linkedNoteType({ fname, doExpensiveDecorations: true });
+      type = linkedNoteType({ fname });
       return false;
     }
   );

@@ -1,5 +1,5 @@
 import { ContextualUIEvents } from "@dendronhq/common-all";
-import { DoctorActions } from "@dendronhq/dendron-cli";
+import { DoctorActions } from "@dendronhq/engine-server";
 import isUrl from "is-url";
 import _ from "lodash";
 import { FrontmatterContent } from "mdast";
@@ -74,11 +74,11 @@ export function warnMissingFrontmatter(document: TextDocument) {
   return diagnostic;
 }
 
-export function warnBadFrontmatterContents(
+export function checkAndWarnBadFrontmatter(
   document: TextDocument,
   frontmatter: FrontmatterContent
 ) {
-  const ctx = "warnBadFrontmatterContents";
+  const ctx = "checkAndWarnBadFrontmatter";
   const diagnostics: Diagnostic[] = [];
   const range = VSCodeUtils.position2VSCodeRange(frontmatter.position!);
   const note = VSCodeUtils.getNoteFromDocument(document);

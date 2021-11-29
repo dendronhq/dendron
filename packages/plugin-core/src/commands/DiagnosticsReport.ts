@@ -1,4 +1,4 @@
-import { getPortFilePath } from "@dendronhq/engine-server";
+import { EngineUtils } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import path from "path";
 import { window, workspace } from "vscode";
@@ -37,7 +37,7 @@ export class DiagnosticsReportCommand extends BasicCommand<
 
     const config = JSON.stringify(getDWorkspace().config);
     const wsRoot = getDWorkspace().wsRoot;
-    const port = getPortFilePath({ wsRoot });
+    const port = EngineUtils.getPortFilePathForWorkspace({ wsRoot });
     const portFromFile = fs.readFileSync(port, { encoding: "utf8" });
 
     const workspaceFile = DendronExtension.workspaceFile().fsPath;

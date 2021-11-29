@@ -16,7 +16,7 @@ import {
   NOTE_PRESETS_V4,
   EngineTestUtilsV4,
 } from "@dendronhq/common-test-utils";
-import { HistoryService } from "@dendronhq/engine-server";
+import { HistoryService, MetadataService } from "@dendronhq/engine-server";
 import {
   ENGINE_HOOKS,
   ENGINE_HOOKS_MULTI,
@@ -26,7 +26,7 @@ import fs from "fs-extra";
 import _ from "lodash";
 import { describe, Done } from "mocha";
 import path from "path";
-import sinon from "sinon";
+import sinon, { SinonStub } from "sinon";
 // // You can import and use all API from the 'vscode' module
 // // as well as import your extension to test it
 import * as vscode from "vscode";
@@ -60,7 +60,7 @@ import { CONFIG } from "../../constants";
 import { clipboard, VSCodeUtils } from "../../utils";
 import { DendronExtension } from "../../workspace";
 import { createMockQuickPick, getActiveEditorBasename } from "../testUtils";
-import { expect } from "../testUtilsv2";
+import { expect, resetCodeWorkspace } from "../testUtilsv2";
 import {
   runLegacyMultiWorkspaceTest,
   setupBeforeAfter,
@@ -68,6 +68,7 @@ import {
 } from "../testUtilsV3";
 import { CREATE_NEW_LABEL } from "../../components/lookup/constants";
 import assert from "assert";
+import { StateService } from "../../services/stateService";
 
 const stubVaultPick = (vaults: DVault[]) => {
   const vault = _.find(vaults, { fsPath: "vault1" });
@@ -2339,6 +2340,81 @@ suite("NoteLookupCommand", function () {
               "[[Ipsum|ipsum]]",
             ].join("\n")
           );
+          done();
+        },
+      });
+    });
+  });
+});
+
+suite("stateService", function () {
+  let homeDirStub: SinonStub;
+  const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {
+    beforeHook: async (ctx) => {
+      new StateService(ctx);
+      await resetCodeWorkspace();
+      homeDirStub = TestEngineUtils.mockHomeDir();
+    },
+    afterHook: async () => {
+      homeDirStub.restore();
+    },
+    noSetInstallStatus: true,
+  });
+  describe("GIVEN user accepts lookup for the first time", () => {
+    test("THEN global states firstLookupTime and lastLookupTime are set correctly", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: ENGINE_HOOKS.setupBasic,
+        onInit: async ({ vaults }) => {
+          VSCodeUtils.closeAllEditors();
+
+          const cmd = new NoteLookupCommand();
+          stubVaultPick(vaults);
+
+          let metaData = MetadataService.instance().getMeta();
+          expect(_.isUndefined(metaData.firstLookupTime)).toBeTruthy();
+          expect(_.isUndefined(metaData.lastLookupTime)).toBeTruthy();
+          await cmd.run({
+            noConfirm: true,
+          });
+          metaData = MetadataService.instance().getMeta();
+          expect(_.isUndefined(metaData.firstLookupTime)).toBeFalsy();
+          expect(_.isUndefined(metaData.lastLookupTime)).toBeFalsy();
+
+          done();
+        },
+      });
+    });
+  });
+
+  describe("GIVEN user accepts subsequent lookup", () => {
+    test("THEN global state lastLookupTime is set correctly", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: ENGINE_HOOKS.setupBasic,
+        onInit: async ({ vaults }) => {
+          VSCodeUtils.closeAllEditors();
+
+          const cmd = new NoteLookupCommand();
+          stubVaultPick(vaults);
+
+          await cmd.run({
+            noConfirm: true,
+          });
+          let metaData = MetadataService.instance().getMeta();
+          const firstLookupTime = metaData.firstLookupTime;
+          const lastLookupTime = metaData.lastLookupTime;
+          expect(_.isUndefined(firstLookupTime)).toBeFalsy();
+          expect(_.isUndefined(lastLookupTime)).toBeFalsy();
+
+          await cmd.run({
+            noConfirm: true,
+          });
+
+          metaData = MetadataService.instance().getMeta();
+          expect(metaData.firstLookupTime).toEqual(firstLookupTime);
+          expect(metaData.lastLookupTime).toNotEqual(lastLookupTime);
+
           done();
         },
       });

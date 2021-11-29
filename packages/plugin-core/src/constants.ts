@@ -990,6 +990,10 @@ export enum GLOBAL_STATE {
    * Checks if lapsed user survey was submitted.
    */
   LAPSED_USER_SURVEY_SUBMITTED = "dendron.lapsed_user_survey_submitted",
+  /**
+   * Chekcs if inactive user survey was submitted.
+   */
+  INACTIVE_USER_SURVEY_SUBMITTED = "dendron.inactive_user_survey_submitted",
 }
 
 export enum WORKSPACE_ACTIVATION_CONTEXT {

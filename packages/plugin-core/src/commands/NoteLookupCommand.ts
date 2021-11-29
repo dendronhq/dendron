@@ -12,7 +12,7 @@ import {
   VSCodeEvents,
 } from "@dendronhq/common-all";
 import { getDurationMilliseconds } from "@dendronhq/common-server";
-import { HistoryService } from "@dendronhq/engine-server";
+import { HistoryService, MetadataService } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { Uri } from "vscode";
 import {
@@ -421,6 +421,11 @@ export class NoteLookupCommand extends BaseCommand<
       duration: profile,
       isNew,
     });
+    const metaData = MetadataService.instance().getMeta();
+    if (_.isUndefined(metaData.firstLookupTime)) {
+      MetadataService.instance().setFirstLookupTime();
+    }
+    MetadataService.instance().setLastLookupTime();
     return result;
   }
 

@@ -238,7 +238,7 @@ suite("RefactorHiearchy", function () {
       });
 
       describe("GIVEN a complex regex match (lookaround) / replace with (named) capture/non-capture group", () => {
-        test.only("THEN correctly refactors fname", async () => {
+        test("THEN correctly refactors fname", async () => {
           const cmd = new RefactorHierarchyCommandV2();
 
           const engine = getEngine();

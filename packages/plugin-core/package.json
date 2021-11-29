@@ -457,7 +457,8 @@
         "title": "Dendron: Show Preview (legacy)",
         "desc": "Show Markdown Preview (legacy)",
         "docLink": "dendron.topic.commands.md",
-        "docPreview": ""
+        "docPreview": "",
+        "enablement": "dendron:pluginActive && dendron:hasLegacyPreview"
       },
       {
         "command": "dendron.showPreview",
@@ -465,7 +466,8 @@
         "icon": "$(open-preview)",
         "desc": "Show Markdown Preview",
         "docLink": "dendron.topic.commands.md",
-        "docPreview": ""
+        "docPreview": "",
+        "enablement": "dendron:pluginActive"
       },
       {
         "command": "dendron.pasteFile",
@@ -858,12 +860,14 @@
       {
         "command": "dendron.showLegacyPreview",
         "windows": "windows+ctrl+p",
-        "mac": "cmd+ctrl+p"
+        "mac": "cmd+ctrl+p",
+        "when": "dendron:pluginActive && dendron:hasLegacyPreview"
       },
       {
         "command": "dendron.showPreview",
         "windows": "windows+ctrl+p",
-        "mac": "cmd+ctrl+p"
+        "mac": "cmd+ctrl+p",
+        "when": "dendron:pluginActive"
       }
     ],
     "markdown.previewStyles": [

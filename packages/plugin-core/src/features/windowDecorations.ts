@@ -141,9 +141,10 @@ export const updateDecorations = sentryReportingCallback(
       )
     );
 
+    const rangesPlain = ranges.map(VSCodeUtils.toPlainRange);
     const out = await engine.getDecorations({
       id: note.id,
-      ranges: ranges.map(VSCodeUtils.toPlainRange),
+      ranges: rangesPlain,
     });
     const { data, error } = out;
     Logger.info({

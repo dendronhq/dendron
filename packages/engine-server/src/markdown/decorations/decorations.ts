@@ -103,6 +103,9 @@ export function getDecorations(
     visit(tree, (nodeIn) => {
       // This was parsed, it must have a position
       const node = nodeIn as NonOptional<DendronASTNode, "position">;
+      // Need to update node position with the added offset from the range
+      node.position.start.line += range.start.line;
+      node.position.end.line += range.end.line;
 
       // Need to update node position with the added offset from the range
       const decoratorOut = runDecorator({

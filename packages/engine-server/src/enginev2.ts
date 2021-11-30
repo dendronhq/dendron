@@ -51,6 +51,7 @@ import {
   ConfigUtils,
   RefreshNotesOpts,
   GetDecorationsOpts,
+  newRange,
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -727,6 +728,16 @@ export class DendronEngineV2 implements DEngine {
           status: ERROR_STATUS.INVALID_STATE,
           message: `${opts.id} does not exist`,
         });
+      // Very weirdly, these somehow turn into strings when getting called in through the API.
+      // Not sure if I'm missing something.
+      opts.ranges = opts.ranges.map((range) =>
+        newRange(
+          _.toNumber(range.start.line),
+          _.toNumber(range.start.character),
+          _.toNumber(range.end.line),
+          _.toNumber(range.end.character)
+        )
+      );
       const {
         allDecorations: decorations,
         allDiagnostics: diagnostics,

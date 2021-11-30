@@ -4,7 +4,6 @@ import {
   AUTO_COMPLETABLE_COMMAND_ID,
   UIAutoCompletableCmds,
 } from "../utils/autoCompleter";
-// import { AUTO_COMPLETABLE_COMMAND_IDS, getUIAutoCompletableUICmd } from "../utils/autoCompleter";
 
 type CommandOpts = {};
 

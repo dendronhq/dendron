@@ -1,16 +1,6 @@
-/**
- * File has C_ prefix to move it down in the list of tests.
- * If C_ is removed it bubbles up to the top of the tests and for some reason
- * just using 'expect' starts to trigger the following error:
- * ```
- * Cmd is not a constructor: TypeError: Cmd is not a constructor
- *   at /usr/local/workplace/dendron/packages/plugin-core/out/src/workspace.js:476:25
- * ```
- * Moving the test down in the order of tests appears to resolve this error.
- * */
 import { AutoCompleter } from "../../utils/autoCompleter";
 import { describe, it } from "mocha";
-import { expect } from "../testUtilsv2";
+import { expect } from "../expect";
 
 describe(`Auto Completer tests.`, () => {
   describe(`GIVEN empty file name input`, () => {

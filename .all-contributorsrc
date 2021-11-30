@@ -959,6 +959,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "byronwall",
+      "name": "byron wall",
+      "avatar_url": "https://avatars.githubusercontent.com/u/495404?v=4",
+      "profile": "http://byroni.us",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,

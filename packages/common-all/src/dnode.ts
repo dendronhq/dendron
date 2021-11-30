@@ -1262,8 +1262,13 @@ export class SchemaUtils {
       }
       const tempNoteProps = _.pick(tempNote, this.TEMPLATE_COPY_PROPS);
       _.forEach(tempNoteProps, (v, k) => {
-        // @ts-ignore
-        note[k] = v;
+        // If note body exists, append template's body instead of overriding
+        if (k === "body" && note[k] !== "") {
+          note[k] += `\n${v}`;
+        } else {
+          // @ts-ignore
+          note[k] = v;
+        }
       });
       return true;
     }
